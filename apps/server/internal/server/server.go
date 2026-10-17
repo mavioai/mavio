@@ -101,6 +101,9 @@ type Config struct {
 	// ContainerEndpoint is the container engine plugins' container
 	// dependencies run on; empty finds one (containers.Candidates).
 	ContainerEndpoint string
+	// ContainerPrefix starts the names of the containers, volumes and
+	// network the server creates; empty is containers.DefaultPrefix.
+	ContainerPrefix string
 	// PluginFetch performs the WASM plugins' outbound HTTP requests, which
 	// their manifests allowed; nil uses a client with a 30-second timeout.
 	PluginFetch *http.Client
@@ -227,6 +230,21 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 			log.WarnContext(ctx, "seed plugins", "err", err)
 		}
 	}
+	// The plugins' managed container dependencies run while the plugins
+	// do; they stop after the plugins when the server stops.
+	deps := dependencies.New(dependencies.Config{
+		Store: db.PluginContainers(), Server: key.ID(), Names: containers.Names{Prefix: cfg.ContainerPrefix}, Logger: log,
+		Detect: func(ctx context.Context) (containers.Runtime, error) {
+			return containers.Detect(ctx, containers.Options{Endpoint: cfg.ContainerEndpoint})
+		},
+	})
+	defer func() {
+		closeCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 30*time.Second)
+		defer cancel()
+		if err := deps.Close(closeCtx); err != nil {
+			log.ErrorContext(ctx, "stop plugins' containers", "err", err)
+		}
+	}()
 	pluginCache := cfg.PluginCacheDir
 	if pluginCache == "" {
 		pluginCache = filepath.Join(cfg.CacheDir, "plugins")
@@ -234,7 +252,7 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 	plugs, err := plugins.Open(ctx, plugins.Config{
 		Dir: cfg.PluginDir, CacheDir: pluginCache, Store: db, Logger: log, HostAPI: hostAPI,
 		DataDir: cfg.PluginDataDir, Fetch: cfg.PluginFetch, Activity: activityLog, DevicesChanged: hub.SharedSessionsChanged,
-		Catalogs: func() []string { return set.Get().PluginCatalogs },
+		Catalogs: func() []string { return set.Get().PluginCatalogs }, Containers: deps,
 		Disabled: set.Get().DisabledPlugins,
 		SaveDisabled: func(ctx context.Context, ids []string) error {
 			_, err := set.Change(ctx, func(s *core.ServerSettings) error {
@@ -248,6 +266,12 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 		return err
 	}
 	started.Store(plugs)
+	deps.Bind(plugs)
+	go func() {
+		if err := deps.Reconcile(ctx); err != nil {
+			log.WarnContext(ctx, "reconcile plugins' containers", "err", err)
+		}
+	}()
 	defer func() {
 		closeCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 10*time.Second)
 		defer cancel()
@@ -255,13 +279,6 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 			log.ErrorContext(ctx, "stop plugins", "err", err)
 		}
 	}()
-	deps := dependencies.New(dependencies.Config{
-		Store: db.PluginContainers(), Plugins: plugs, Logger: log,
-		Detect: func(ctx context.Context) (containers.Runtime, error) {
-			return containers.Detect(ctx, containers.Options{Endpoint: cfg.ContainerEndpoint})
-		},
-	})
-	defer deps.Close()
 	quietGate := storage.NewQuietGate(0)
 	volumeLedger := storage.NewVolumeLedger()
 	devices := &storage.Detector{}

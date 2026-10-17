@@ -57,6 +57,9 @@ func (m *Manager) SetEnabled(ctx context.Context, id string, enabled bool) (Info
 			m.log.WarnContext(ctx, "stop plugin", "plugin", id, "err", err)
 		}
 	}
+	if m.cfg.Containers != nil {
+		m.cfg.Containers.PluginStopped(ctx, id)
+	}
 	m.log.InfoContext(ctx, "plugin disabled", "plugin", id)
 	return info, nil
 }

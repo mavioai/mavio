@@ -449,6 +449,9 @@ func (m *Manager) Uninstall(ctx context.Context, id string) error {
 	if e.plugin != nil {
 		errs = append(errs, e.plugin.Close(ctx))
 	}
+	if m.cfg.Containers != nil {
+		m.cfg.Containers.PluginRemoved(ctx, id)
+	}
 	errs = append(errs, os.RemoveAll(filepath.Join(m.cfg.Dir, e.folder)), m.store.PluginConfigs().Delete(ctx, id),
 		m.store.PluginContainers().Delete(ctx, id, ""), m.forgetDisabled(ctx, id))
 	if m.cfg.DataDir != "" {

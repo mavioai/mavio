@@ -115,3 +115,69 @@ func TestEngine(t *testing.T) {
 		t.Errorf("InspectContainer after removal = %v, want core.ErrNotFound", err)
 	}
 }
+
+// TestEngineSupervisor runs a dependency with a Supervisor on the engine
+// Detect finds, skipping when there is none.
+func TestEngineSupervisor(t *testing.T) {
+	ctx := t.Context()
+	rt, err := Detect(ctx, Options{})
+	if errors.Is(err, ErrUnavailable) {
+		t.Skipf("no container engine: %v", err)
+	}
+	if err != nil {
+		t.Fatal(err)
+	}
+	c := rt.Client
+	defer c.Close()
+	const image = "busybox:1.37"
+	if _, err := c.InspectImage(ctx, image); errors.Is(err, core.ErrNotFound) {
+		if err := c.PullImage(ctx, image, nil); err != nil {
+			t.Skipf("cannot pull %s: %v", image, err)
+		}
+	}
+
+	run := fmt.Sprintf("mavio-test-%d", time.Now().UnixNano())
+	s := NewSupervisor(SupervisorOptions{Engine: c, Names: Names{Prefix: run}, Server: run, Poll: 100 * time.Millisecond})
+	t.Cleanup(func() {
+		ctx := context.WithoutCancel(ctx)
+		_ = s.Remove(ctx, "dev.mavio.test", "", true)
+		_ = c.RemoveNetwork(ctx, run)
+	})
+	s.Start(Dependency{
+		Plugin: "dev.mavio.test", Name: "web", Image: image, Port: 8080, HealthPath: "/health",
+		Cmd:     []string{"sh", "-c", "echo $GREETING > /www/health && exec httpd -f -p 8080 -h /www"},
+		Env:     map[string]string{"GREETING": "ready"},
+		Volumes: map[string]string{"www": "/www"}, Memory: 64 << 20,
+	})
+	var st Status
+	for deadline := time.Now().Add(30 * time.Second); time.Now().Before(deadline); time.Sleep(100 * time.Millisecond) {
+		if st, _ = s.Status("dev.mavio.test", "web"); st.State == Ready {
+			break
+		}
+	}
+	if st.State != Ready {
+		t.Fatalf("Status = %+v, want ready", st)
+	}
+	resp, err := http.Get(st.Address + "/health")
+	if err != nil {
+		t.Fatal(err)
+	}
+	body, _ := io.ReadAll(resp.Body)
+	_ = resp.Body.Close()
+	if string(body) != "ready\n" {
+		t.Errorf("GET /health = %q, want ready", body)
+	}
+	if n, err := c.InspectNetwork(ctx, run); err != nil || n.Containers == nil {
+		t.Errorf("InspectNetwork = %+v, %v, want the container on it", n, err)
+	}
+
+	if err := s.Remove(ctx, "dev.mavio.test", "", true); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := c.InspectContainer(ctx, run+"-test-web"); !errors.Is(err, core.ErrNotFound) {
+		t.Errorf("InspectContainer after Remove = %v, want core.ErrNotFound", err)
+	}
+	if vs, err := c.ListVolumes(ctx, map[string]string{LabelServer: run}); err != nil || len(vs) != 0 {
+		t.Errorf("ListVolumes after Remove = %+v, %v, want none", vs, err)
+	}
+}

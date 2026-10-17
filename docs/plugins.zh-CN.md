@@ -235,7 +235,7 @@ DLNA 是第一方进程插件：它需要 UDP 组播（WASM 没有 socket）和�
 * `description`：用途，向管理员显示。
 * `image`：带 digest 的引用（`repository:tag@sha256:…`）；没有 digest 的镜像被拒绝。
 * `port`：服务在容器内监听的端口；`health_path`：服务就绪时返回 2xx 的 HTTP 路径，未设置时以端口可连接为准。
-* `command`、`env`：参数与环境变量。值 `${secret:<key>}` 是服务端为该依赖生成一次的随机密钥；`${address}` 是该依赖自己的地址。
+* `command`、`env`：参数与环境变量。值 `${secret:<key>}` 是服务端为该依赖生成一次的随机密钥；`${address}` 是其他容器访问该依赖自己时的地址 `http://mavio-<plugin>-<name>:<port>`。
 * `volumes`：按卷名给出的挂载路径，例如 `{"cache": "/root/.cache"}`。
 * `gpu`：不设置表示不用，或 `GPU_SUPPORT_OPTIONAL`、`GPU_SUPPORT_REQUIRED`（NVIDIA），以及 `gpu_image`：使用 GPU 时若为另一个镜像，则为该镜像，同样带 digest；`memory_mib` 与 `cpus`：托管容器的限制。
 * `required`：插件是否离不开它。可选依赖（例如与插件的 OpenAI 兼容识别器并列的 whisper-asr-webservice）在管理员选择之前保持 `unset`。

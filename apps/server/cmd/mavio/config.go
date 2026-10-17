@@ -19,6 +19,7 @@ import (
 	"github.com/mavioai/mavio/apps/server/internal/certs"
 	"github.com/mavioai/mavio/apps/server/internal/plugins"
 	"github.com/mavioai/mavio/apps/server/internal/server"
+	"github.com/mavioai/mavio/libs/containers"
 )
 
 // Everything Mavio keeps lives in its home, by default ~/.mavio:
@@ -83,6 +84,7 @@ var settings = []setting{
 	{key: "plugin-seed-dir", path: true, usage: "directory of plugin folders installed into plugin-dir once, such as those a container image ships; empty seeds none", def: constant("")},
 	{key: "plugin-data-dir", path: true, usage: "directory holding the plugins' data folders", def: under("plugin-data")},
 	{key: "container-endpoint", usage: "container engine the plugins' container dependencies run on: unix:///path, npipe:////./pipe/name or tcp:// on the loopback interface; empty uses DOCKER_HOST, else the first usual Docker or Podman socket that answers", def: constant("")},
+	{key: "container-prefix", usage: "prefix of the names of the containers, volumes and network the server creates, which a second server on the same engine changes: lowercase letters, digits and hyphens", def: constant(containers.DefaultPrefix)},
 	{key: "metadata-dir", path: true, usage: "directory for the artwork chosen for items of libraries not saving metadata next to their media", def: under("metadata")},
 	{key: "backup-dir", path: true, usage: "directory for backups; empty makes none", def: under("backups")},
 	{key: "discovery-addr", usage: "UDP address answering discovery requests from clients on the local network; empty answers none", def: constant(":7359")},
@@ -282,9 +284,14 @@ func assign(o *options, key, value string) error {
 		"rclone": &cfg.Rclone, "rclone-config": &cfg.RcloneConfig, "rclone-url": &cfg.RcloneURL,
 		"rclone-user": &cfg.RcloneUser, "rclone-pass": &cfg.RclonePass,
 		"cache-dir": &cfg.CacheDir, "transcode-dir": &cfg.TranscodeDir, "plugin-dir": &cfg.PluginDir,
-		"plugin-seed-dir": &cfg.PluginSeedDir, "plugin-data-dir": &cfg.PluginDataDir, "container-endpoint": &cfg.ContainerEndpoint,
+		"plugin-seed-dir": &cfg.PluginSeedDir, "plugin-data-dir": &cfg.PluginDataDir, "container-endpoint": &cfg.ContainerEndpoint, "container-prefix": &cfg.ContainerPrefix,
 		"metadata-dir": &cfg.MetadataDir, "backup-dir": &cfg.BackupDir, "discovery-addr": &cfg.DiscoveryAddr,
 		"plugin-catalog": &cfg.PluginCatalog, "mavio-dev-url": &cfg.MavioDevURL, "certificate-dir": &cfg.CertificateDir, "claim-token": &cfg.ClaimToken, "dev-library": &cfg.DevLibrary,
+	}
+	if key == "container-prefix" {
+		if err := (containers.Names{Prefix: value}).Validate(); err != nil {
+			return err
+		}
 	}
 	if key == "rclone-cache-size" {
 		n, err := parseSize(value)

@@ -89,9 +89,24 @@ type Config struct {
 	// DevicesChanged is told the sessions of the devices that plugins
 	// listed, changed or no longer list; nil tells nobody.
 	DevicesChanged func(sessions []core.ID)
+	// Containers runs the plugins' managed container dependencies while
+	// the plugins run; nil runs none.
+	Containers ContainerHooks
 	// Now is the clock of task schedules; nil means time.Now.
 	Now    func() time.Time
 	Logger *slog.Logger
+}
+
+// ContainerHooks are told when plugins start and stop, to run their
+// managed container dependencies meanwhile. They return without waiting
+// for the containers.
+type ContainerHooks interface {
+	// PluginStarted is told of a plugin started, upgraded or enabled.
+	PluginStarted(ctx context.Context, m *pluginv1.Manifest)
+	// PluginStopped is told of a plugin disabled.
+	PluginStopped(ctx context.Context, id string)
+	// PluginRemoved is told of a plugin uninstalled.
+	PluginRemoved(ctx context.Context, id string)
 }
 
 // Manager runs the plugins of a plugin folder, and installs, upgrades and
@@ -238,6 +253,9 @@ func (m *Manager) start(ctx context.Context, folder string, seen map[string]bool
 	}
 	if e.err == nil {
 		m.pruneContainers(ctx, e.manifest)
+		if m.cfg.Containers != nil {
+			m.cfg.Containers.PluginStarted(ctx, e.manifest)
+		}
 		e.state, e.err = m.configure(ctx, e)
 	}
 	if e.err != nil {

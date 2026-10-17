@@ -7,22 +7,28 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"path/filepath"
+	"slices"
+	"sync/atomic"
 	"testing"
 	"time"
 
 	"github.com/mavioai/mavio/apps/server/internal/dependencies"
 	"github.com/mavioai/mavio/libs/containers"
+	"github.com/mavioai/mavio/libs/containers/containerstest"
 	"github.com/mavioai/mavio/libs/core"
 	pluginv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1"
 	"github.com/mavioai/mavio/libs/store"
 )
 
-const pluginID = "dev.mavio.voice"
+const (
+	pluginID   = "dev.mavio.voice"
+	testDigest = "@sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+)
 
 // fakePlugins holds one plugin and counts its reconfigurations.
 type fakePlugins struct {
 	manifest     *pluginv1.Manifest
-	reconfigured int
+	reconfigured atomic.Int32
 }
 
 func (f *fakePlugins) Manifest(id string) (*pluginv1.Manifest, bool) {
@@ -30,33 +36,46 @@ func (f *fakePlugins) Manifest(id string) (*pluginv1.Manifest, bool) {
 }
 
 func (f *fakePlugins) Reconfigure(context.Context, string) error {
-	f.reconfigured++
+	f.reconfigured.Add(1)
 	return nil
 }
 
-func newService(t *testing.T, detect func(context.Context) (containers.Runtime, error)) (*dependencies.Service, *fakePlugins, *time.Time) {
+// onHost detects an engine with a client that reaches nothing, for a
+// server on the host.
+func onHost(context.Context) (containers.Runtime, error) {
+	return containers.Runtime{
+		Client:  containers.NewClient(containers.Endpoint{Network: containers.Unix, Address: "/run/none.sock"}),
+		Version: containers.Version{Engine: "docker", Version: "29.0.0"}, APIVersion: "1.47",
+	}, nil
+}
+
+func newService(t *testing.T, mut func(c *dependencies.Config)) (*dependencies.Service, *fakePlugins, *time.Time) {
 	t.Helper()
 	db, err := store.Open(t.Context(), "sqlite:"+filepath.Join(t.TempDir(), "mavio.db"))
 	if err != nil {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() { _ = db.Close() })
-	digest := "@sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
 	plugs := &fakePlugins{manifest: pluginv1.Manifest_builder{Id: new(pluginID), Containers: []*pluginv1.ContainerDependency{
 		pluginv1.ContainerDependency_builder{
-			Name: new("whisper"), Image: new("whisper:1" + digest), Port: new(uint32(9000)), HealthPath: new("/health"),
+			Name: new("whisper"), Image: new("whisper:1" + testDigest), Port: new(uint32(9000)), HealthPath: new("/health"),
 			Env: map[string]string{"API_KEY": "${secret:api-key}"}, Gpu: pluginv1.GpuSupport_GPU_SUPPORT_OPTIONAL.Enum(),
+			GpuImage: new("whisper:1-gpu" + testDigest), Volumes: map[string]string{"cache": "/root/.cache"},
 		}.Build(),
-		pluginv1.ContainerDependency_builder{Name: new("tts"), Image: new("tts:1" + digest), Port: new(uint32(5000))}.Build(),
+		pluginv1.ContainerDependency_builder{Name: new("tts"), Image: new("tts:1" + testDigest), Port: new(uint32(5000))}.Build(),
 	}}.Build()}
 	now := time.Date(2026, 10, 17, 12, 0, 0, 0, time.UTC)
-	if detect == nil {
-		detect = func(context.Context) (containers.Runtime, error) {
+	cfg := dependencies.Config{
+		Store: db.PluginContainers(), Plugins: plugs, Server: "server-1", Now: func() time.Time { return now },
+		Detect: func(context.Context) (containers.Runtime, error) {
 			return containers.Runtime{}, fmt.Errorf("%w: none", containers.ErrUnavailable)
-		}
+		},
 	}
-	s := dependencies.New(dependencies.Config{Store: db.PluginContainers(), Plugins: plugs, Detect: detect, Now: func() time.Time { return now }})
-	t.Cleanup(s.Close)
+	if mut != nil {
+		mut(&cfg)
+	}
+	s := dependencies.New(cfg)
+	t.Cleanup(func() { _ = s.Close(context.Background()) })
 	return s, plugs, &now
 }
 
@@ -101,8 +120,8 @@ func TestSetExternal(t *testing.T) {
 	if len(secret) < 20 || len(d.Kept.Secrets) != 1 || !d.Kept.UseGPU {
 		t.Errorf("kept = %+v, want an api-key secret and a GPU", d.Kept)
 	}
-	if plugs.reconfigured != 1 {
-		t.Errorf("reconfigured %d times, want 1", plugs.reconfigured)
+	if plugs.reconfigured.Load() != 1 {
+		t.Errorf("reconfigured %d times, want 1", plugs.reconfigured.Load())
 	}
 
 	// The same address keeps the secret and leaves the plugin alone.
@@ -110,8 +129,8 @@ func TestSetExternal(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if d.Kept.Secrets["api-key"] != secret || d.Kept.UseGPU || plugs.reconfigured != 1 {
-		t.Errorf("kept = %+v after %d reconfigurations, want the same secret, no GPU and 1", d.Kept, plugs.reconfigured)
+	if d.Kept.Secrets["api-key"] != secret || d.Kept.UseGPU || plugs.reconfigured.Load() != 1 {
+		t.Errorf("kept = %+v after %d reconfigurations, want the same secret, no GPU and 1", d.Kept, plugs.reconfigured.Load())
 	}
 
 	// Health is checked again once its result is old.
@@ -137,8 +156,8 @@ func TestSetExternal(t *testing.T) {
 	if err != nil || d.Status.GetState() != pluginv1.ContainerState_CONTAINER_STATE_UNAVAILABLE || d.Kept.Secrets["api-key"] != secret {
 		t.Errorf("Set to unset = %+v, %v, want unavailable with the secret kept", d, err)
 	}
-	if plugs.reconfigured != 3 {
-		t.Errorf("reconfigured %d times, want 3", plugs.reconfigured)
+	if plugs.reconfigured.Load() != 3 {
+		t.Errorf("reconfigured %d times, want 3", plugs.reconfigured.Load())
 	}
 }
 
@@ -170,12 +189,11 @@ func TestSetInvalid(t *testing.T) {
 
 func TestRuntime(t *testing.T) {
 	calls := 0
-	s, _, _ := newService(t, func(context.Context) (containers.Runtime, error) {
-		calls++
-		return containers.Runtime{
-			Client:  containers.NewClient(containers.Endpoint{Network: containers.Unix, Address: "/run/none.sock"}),
-			Version: containers.Version{Engine: "docker", Version: "29.0.0"}, APIVersion: "1.47",
-		}, nil
+	s, _, _ := newService(t, func(c *dependencies.Config) {
+		c.Detect = func(ctx context.Context) (containers.Runtime, error) {
+			calls++
+			return onHost(ctx)
+		}
 	})
 	ctx := t.Context()
 	for range 2 {
@@ -186,7 +204,132 @@ func TestRuntime(t *testing.T) {
 	if _, err := s.Runtime(ctx, true); err != nil || calls != 2 {
 		t.Errorf("Runtime detected %d times, %v, want 2", calls, err)
 	}
-	if _, err := s.Set(ctx, pluginID, "whisper", core.ContainerManaged, "", false); !errors.Is(err, errors.ErrUnsupported) {
-		t.Errorf("Set of managed = %v, want errors.ErrUnsupported until managed dependencies run", err)
+}
+
+func TestManagedInContainer(t *testing.T) {
+	s, _, _ := newService(t, func(c *dependencies.Config) {
+		c.Detect = func(ctx context.Context) (containers.Runtime, error) {
+			rt, err := onHost(ctx)
+			rt.InContainer = true
+			return rt, err
+		}
+	})
+	if _, err := s.Set(t.Context(), pluginID, "whisper", core.ContainerManaged, "", false); !errors.Is(err, errors.ErrUnsupported) {
+		t.Errorf("Set of managed = %v, want errors.ErrUnsupported for a server in a container", err)
+	}
+}
+
+// eventually waits for cond to hold.
+func eventually(t *testing.T, what string, cond func() bool) {
+	t.Helper()
+	for deadline := time.Now().Add(5 * time.Second); time.Now().Before(deadline); time.Sleep(5 * time.Millisecond) {
+		if cond() {
+			return
+		}
+	}
+	t.Fatalf("timed out waiting for %s", what)
+}
+
+func TestManaged(t *testing.T) {
+	engine := containerstest.New()
+	s, plugs, _ := newService(t, func(c *dependencies.Config) {
+		c.Detect = onHost
+		c.Engine = func(containers.Runtime) containers.Engine { return engine }
+		c.Poll = 5 * time.Millisecond
+		c.Probe = func(context.Context, string, string) error { return nil }
+	})
+	ctx := t.Context()
+	state := func(name string) *pluginv1.ContainerStatus {
+		deps, err := s.List(ctx, pluginID)
+		if err != nil {
+			t.Fatal(err)
+		}
+		for _, d := range deps {
+			if d.Spec.GetName() == name {
+				return d.Status
+			}
+		}
+		t.Fatalf("no dependency %s", name)
+		return nil
+	}
+
+	// Managed before the plugin runs, it waits for the plugin.
+	d, err := s.Set(ctx, pluginID, "whisper", core.ContainerManaged, "", true)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if st := d.Status; st.GetMode() != pluginv1.ContainerMode_CONTAINER_MODE_MANAGED || st.GetState() != pluginv1.ContainerState_CONTAINER_STATE_UNAVAILABLE {
+		t.Errorf("status before the plugin runs = %v, want managed and unavailable", st)
+	}
+	if got := engine.Took(); len(got) != 0 {
+		t.Errorf("calls before the plugin runs = %q, want none", got)
+	}
+	secret := d.Kept.Secrets["api-key"]
+
+	s.PluginStarted(ctx, plugs.manifest)
+	eventually(t, "whisper ready", func() bool {
+		return state("whisper").GetState() == pluginv1.ContainerState_CONTAINER_STATE_READY
+	})
+	if got := state("whisper").GetAddress(); got != "http://127.0.0.1:49001" {
+		t.Errorf("address = %q, want the published port", got)
+	}
+	spec, running, _ := engine.Spec("mavio-voice-whisper")
+	if !running || !slices.Equal(spec.Env, []string{"API_KEY=" + secret}) || !spec.GPU ||
+		spec.Image != "whisper:1-gpu"+testDigest || spec.Labels[containers.LabelServer] != "server-1" {
+		t.Errorf("container = %+v, running %v, want the GPU image with the secret", spec, running)
+	}
+	eventually(t, "the plugin reconfigured", func() bool { return plugs.reconfigured.Load() == 2 })
+
+	// Leaving managed removes the container and keeps its volume.
+	engine.Took()
+	if _, err := s.Set(ctx, pluginID, "whisper", core.ContainerUnset, "", false); err != nil {
+		t.Fatal(err)
+	}
+	if got, want := engine.Took(), []string{"remove mavio-voice-whisper"}; !slices.Equal(got, want) {
+		t.Errorf("calls of leaving managed = %q, want %q", got, want)
+	}
+	if !engine.HasVolume("mavio-voice-whisper-cache") {
+		t.Error("leaving managed removed the volume")
+	}
+
+	// Managed while the plugin runs starts at once; stopping the plugin stops it.
+	if _, err := s.Set(ctx, pluginID, "whisper", core.ContainerManaged, "", false); err != nil {
+		t.Fatal(err)
+	}
+	eventually(t, "whisper ready again", func() bool {
+		return state("whisper").GetState() == pluginv1.ContainerState_CONTAINER_STATE_READY
+	})
+	if spec, _, _ := engine.Spec("mavio-voice-whisper"); spec.GPU || spec.Image != "whisper:1"+testDigest {
+		t.Errorf("container = %+v, want the CPU image", spec)
+	}
+	s.PluginStopped(ctx, pluginID)
+	if _, running, _ := engine.Spec("mavio-voice-whisper"); running {
+		t.Error("the container runs after its plugin stopped")
+	}
+	if st := state("whisper"); st.GetState() != pluginv1.ContainerState_CONTAINER_STATE_UNAVAILABLE {
+		t.Errorf("status after the plugin stopped = %v, want unavailable", st)
+	}
+
+	// Reconcile removes containers of dependencies not managed.
+	s.PluginStarted(ctx, plugs.manifest)
+	eventually(t, "whisper running", func() bool { _, running, _ := engine.Spec("mavio-voice-whisper"); return running })
+	engine.AddImage("tts:1" + testDigest)
+	if _, err := engine.CreateContainer(ctx, containers.ContainerSpec{Name: "mavio-voice-tts", Image: "tts:1" + testDigest, Labels: map[string]string{
+		containers.LabelServer: "server-1", containers.LabelPlugin: pluginID, containers.LabelDependency: "tts",
+	}}); err != nil {
+		t.Fatal(err)
+	}
+	engine.Took()
+	if err := s.Reconcile(ctx); err != nil {
+		t.Fatal(err)
+	}
+	if got, want := engine.Took(), []string{"remove mavio-voice-tts"}; !slices.Equal(got, want) {
+		t.Errorf("calls of Reconcile = %q, want %q", got, want)
+	}
+
+	// Uninstalling removes containers and volumes.
+	s.PluginRemoved(ctx, pluginID)
+	if _, _, ok := engine.Spec("mavio-voice-whisper"); ok || engine.HasVolume("mavio-voice-whisper-cache") {
+		t.Error("the container or its volume is left after the plugin was removed")
 	}
 }

@@ -235,7 +235,7 @@ The manifest's `containers` lists the dependencies, each with:
 * `description`: what it is for, shown to administrators.
 * `image`: a reference with its digest (`repository:tag@sha256:…`); an image without a digest is refused.
 * `port`: the port the service listens on inside the container; `health_path`: an HTTP path answering 2xx when it is ready, else the port accepting connections counts.
-* `command`, `env`: its arguments and environment. A value `${secret:<key>}` is a random secret the server generates once for the dependency; `${address}` is the dependency's own address.
+* `command`, `env`: its arguments and environment. A value `${secret:<key>}` is a random secret the server generates once for the dependency; `${address}` is the dependency's own address as other containers reach it, `http://mavio-<plugin>-<name>:<port>`.
 * `volumes`: mount paths by volume name, such as `{"cache": "/root/.cache"}`.
 * `gpu`: unset for none, `GPU_SUPPORT_OPTIONAL` or `GPU_SUPPORT_REQUIRED` (NVIDIA), and `gpu_image`, by digest too, the image used with a GPU when it is another; `memory_mib` and `cpus`: the limits of a managed container.
 * `required`: whether the plugin cannot do without it. Optional dependencies, such as whisper-asr-webservice beside the plugin's OpenAI-compatible recognizer, stay `unset` until an administrator chooses.

@@ -6,9 +6,9 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
-	"net"
+	"maps"
 	"net/http"
-	"net/url"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -40,27 +40,51 @@ type Plugins interface {
 // Config configures a Service.
 type Config struct {
 	// Store keeps administrators' choices.
-	Store   core.PluginContainerRepository
+	Store core.PluginContainerRepository
+	// Plugins are the server's plugins; Bind sets them when they are
+	// opened after the Service.
 	Plugins Plugins
+	// Server is the server's ID, which labels the containers it runs, and
+	// Names names them.
+	Server string
+	Names  containers.Names
 	// Detect finds the container engine; containers.Detect with the
 	// server's options in production.
 	Detect func(ctx context.Context) (containers.Runtime, error)
-	// HTTP checks external dependencies' health; nil uses a client of its own.
-	HTTP *http.Client
+	// Engine returns the engine managed dependencies run on; nil uses
+	// the detected runtime's client.
+	Engine func(rt containers.Runtime) containers.Engine
+	// Probe checks a dependency's health; nil uses containers.Probe.
+	Probe func(ctx context.Context, address, path string) error
+	// Poll is the time between health checks of a starting managed
+	// dependency; 0 is the Supervisor's default.
+	Poll time.Duration
 	// Now returns the time; nil uses time.Now.
 	Now    func() time.Time
 	Logger *slog.Logger
 }
 
-// Service keeps plugins' container dependencies.
+// Service keeps plugins' container dependencies: it runs the managed ones
+// on the container engine while their plugins run, and checks the
+// external ones.
 type Service struct {
 	cfg Config
+	// ctx ends with Close; managed dependencies start in its background.
+	ctx    context.Context
+	cancel context.CancelFunc
 
 	mu       sync.Mutex
+	plugins  Plugins
 	detected bool
 	runtime  containers.Runtime
 	err      error
+	sup      *containers.Supervisor
 	health   map[string]health
+	// started are the plugins running, whose managed dependencies run.
+	started map[string]bool
+	// told are the addresses of managed dependencies their plugins were
+	// configured with, by key.
+	told map[string]string
 }
 
 // health is the result of a health check.
@@ -72,8 +96,14 @@ type health struct {
 
 // New returns a Service.
 func New(cfg Config) *Service {
-	if cfg.HTTP == nil {
-		cfg.HTTP = &http.Client{Timeout: healthTimeout}
+	if cfg.Probe == nil {
+		client := &http.Client{Timeout: healthTimeout}
+		cfg.Probe = func(ctx context.Context, address, path string) error {
+			return containers.Probe(ctx, client, address, path)
+		}
+	}
+	if cfg.Engine == nil {
+		cfg.Engine = func(rt containers.Runtime) containers.Engine { return rt.Client }
 	}
 	if cfg.Now == nil {
 		cfg.Now = time.Now
@@ -81,25 +111,51 @@ func New(cfg Config) *Service {
 	if cfg.Logger == nil {
 		cfg.Logger = slog.Default()
 	}
-	return &Service{cfg: cfg, health: map[string]health{}}
+	ctx, cancel := context.WithCancel(context.Background())
+	return &Service{
+		cfg: cfg, ctx: ctx, cancel: cancel, plugins: cfg.Plugins,
+		health: map[string]health{}, started: map[string]bool{}, told: map[string]string{},
+	}
 }
 
-// Close closes the engine's client.
-func (s *Service) Close() {
+// Bind sets the server's plugins.
+func (s *Service) Bind(p Plugins) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	if s.runtime.Client != nil {
-		s.runtime.Client.Close()
+	s.plugins = p
+}
+
+func (s *Service) boundPlugins() Plugins {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return s.plugins
+}
+
+// Close stops the managed dependencies and closes the engine's client.
+func (s *Service) Close(ctx context.Context) error {
+	s.cancel()
+	s.mu.Lock()
+	sup, client := s.sup, s.runtime.Client
+	s.sup = nil
+	s.mu.Unlock()
+	var err error
+	if sup != nil {
+		err = sup.Close(ctx)
 	}
+	if client != nil {
+		client.Close()
+	}
+	return err
 }
 
 // Runtime returns the container engine found, detecting it on first use
 // or when detect is set; the error, wrapping containers.ErrUnavailable,
-// tells why there is none.
+// tells why there is none. Once managed dependencies run on an engine,
+// detecting again keeps it.
 func (s *Service) Runtime(ctx context.Context, detect bool) (containers.Runtime, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	if s.detected && !detect {
+	if s.detected && (!detect || s.sup != nil) {
 		return s.runtime, s.err
 	}
 	rt, err := s.cfg.Detect(ctx)
@@ -114,9 +170,207 @@ func (s *Service) Runtime(ctx context.Context, detect bool) (containers.Runtime,
 		s.cfg.Logger.InfoContext(ctx, "no container engine", "err", err)
 	} else {
 		s.cfg.Logger.InfoContext(ctx, "container engine found", "endpoint", rt.Client.Endpoint().String(),
-			"engine", rt.Version.Engine, "version", rt.Version.Version, "api", rt.APIVersion, "rootless", rt.Rootless)
+			"engine", rt.Version.Engine, "version", rt.Version.Version, "api", rt.APIVersion, "rootless", rt.Rootless,
+			"on_host", rt.OnHost())
 	}
 	return rt, err
+}
+
+// supervisor returns the Supervisor of managed dependencies, detecting
+// the engine on first use: ErrNoEngine without one, errors.ErrUnsupported
+// for a server in a container, which does not run them yet.
+func (s *Service) supervisor(ctx context.Context) (*containers.Supervisor, error) {
+	rt, err := s.Runtime(ctx, false)
+	if err != nil {
+		return nil, fmt.Errorf("%w: %w", ErrNoEngine, err)
+	}
+	if !rt.OnHost() {
+		return nil, fmt.Errorf("managed container dependencies of a server in a container: %w", errors.ErrUnsupported)
+	}
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if s.sup == nil && s.ctx.Err() == nil {
+		s.sup = containers.NewSupervisor(containers.SupervisorOptions{
+			Engine: s.cfg.Engine(rt), Names: s.cfg.Names, Server: s.cfg.Server, OnChange: s.changed,
+			Probe: s.cfg.Probe, Poll: s.cfg.Poll, Logger: s.cfg.Logger,
+		})
+	}
+	if s.sup == nil {
+		return nil, fmt.Errorf("%w: the server is stopping", ErrNoEngine)
+	}
+	return s.sup, nil
+}
+
+// changed is told of a managed dependency's status and configures its
+// plugin again when the address it reports changed.
+func (s *Service) changed(plugin, name string, st containers.Status) {
+	addr := managedAddress(st)
+	k := key(plugin, name)
+	s.mu.Lock()
+	old, ok := s.told[k]
+	s.told[k] = addr
+	p := s.plugins
+	s.mu.Unlock()
+	if (ok || addr != "") && old != addr && p != nil {
+		if err := p.Reconfigure(s.ctx, plugin); err != nil {
+			s.cfg.Logger.WarnContext(s.ctx, "reconfigure plugin after its container's address changed", "plugin", plugin, "container", name, "err", err)
+		}
+	}
+}
+
+// managedAddress is the address a plugin is told of a managed dependency:
+// none until it is ready.
+func managedAddress(st containers.Status) string {
+	if st.State == containers.Ready || st.State == containers.Unhealthy {
+		return st.Address
+	}
+	return ""
+}
+
+// PluginStarted runs a started plugin's managed dependencies in the
+// background and stops the containers of those no longer managed.
+func (s *Service) PluginStarted(_ context.Context, m *pluginv1.Manifest) {
+	id := m.GetId()
+	s.mu.Lock()
+	s.started[id] = true
+	s.mu.Unlock()
+	if len(m.GetContainers()) == 0 {
+		return
+	}
+	go func() {
+		if err := s.runPlugin(s.ctx, m); err != nil && s.ctx.Err() == nil {
+			s.cfg.Logger.WarnContext(s.ctx, "run plugin's containers", "plugin", id, "err", err)
+		}
+	}()
+}
+
+// runPlugin starts a plugin's managed dependencies and removes the
+// containers of the others.
+func (s *Service) runPlugin(ctx context.Context, m *pluginv1.Manifest) error {
+	kept, err := s.cfg.Store.List(ctx, m.GetId())
+	if err != nil {
+		return err
+	}
+	managed := map[string]core.PluginContainer{}
+	for _, c := range kept {
+		if c.Mode == core.ContainerManaged {
+			managed[c.Name] = c
+		}
+	}
+	if len(managed) == 0 {
+		return nil
+	}
+	sup, err := s.supervisor(ctx)
+	if err != nil {
+		return err
+	}
+	for _, name := range sup.Running(m.GetId()) {
+		if _, ok := managed[name]; !ok {
+			if err := sup.Remove(ctx, m.GetId(), name, false); err != nil {
+				s.cfg.Logger.WarnContext(ctx, "remove container no longer managed", "plugin", m.GetId(), "container", name, "err", err)
+			}
+		}
+	}
+	for _, spec := range m.GetContainers() {
+		if c, ok := managed[spec.GetName()]; ok {
+			sup.Start(Resolve(s.cfg.Names, spec, c))
+		}
+	}
+	return nil
+}
+
+// PluginStopped stops a plugin's managed dependencies.
+func (s *Service) PluginStopped(ctx context.Context, id string) {
+	s.mu.Lock()
+	delete(s.started, id)
+	sup := s.sup
+	s.mu.Unlock()
+	if sup == nil {
+		return
+	}
+	if err := sup.Stop(ctx, id, ""); err != nil {
+		s.cfg.Logger.WarnContext(ctx, "stop plugin's containers", "plugin", id, "err", err)
+	}
+}
+
+// PluginRemoved removes an uninstalled plugin's containers and volumes.
+func (s *Service) PluginRemoved(ctx context.Context, id string) {
+	s.mu.Lock()
+	delete(s.started, id)
+	s.mu.Unlock()
+	sup, err := s.supervisor(ctx)
+	if err != nil {
+		return
+	}
+	if err := sup.Remove(ctx, id, "", true); err != nil {
+		s.cfg.Logger.WarnContext(ctx, "remove plugin's containers", "plugin", id, "err", err)
+	}
+}
+
+// Reconcile removes the containers the server runs for dependencies no
+// longer declared or no longer managed; their volumes stay. It does
+// nothing without an engine.
+func (s *Service) Reconcile(ctx context.Context) error {
+	sup, err := s.supervisor(ctx)
+	if err != nil {
+		return nil
+	}
+	p := s.boundPlugins()
+	managed := map[string]map[string]bool{}
+	var errs []error
+	keep := func(plugin, name string) bool {
+		if p == nil {
+			return true
+		}
+		m, ok := p.Manifest(plugin)
+		if !ok {
+			return false
+		}
+		if _, ok := manifest.Container(m, name); !ok {
+			return false
+		}
+		names, ok := managed[plugin]
+		if !ok {
+			kept, err := s.cfg.Store.List(ctx, plugin)
+			if err != nil {
+				errs = append(errs, err)
+				return true
+			}
+			names = map[string]bool{}
+			for _, c := range kept {
+				names[c.Name] = c.Mode == core.ContainerManaged
+			}
+			managed[plugin] = names
+		}
+		return names[name]
+	}
+	errs = append(errs, sup.Reconcile(ctx, keep))
+	return errors.Join(errs...)
+}
+
+// Resolve returns a managed dependency as it runs: its image, with a GPU
+// when it may use one, and its environment with its secrets and its own
+// address, http://<container>:<port> on the network it joins.
+func Resolve(names containers.Names, spec *pluginv1.ContainerDependency, c core.PluginContainer) containers.Dependency {
+	gpu := c.UseGPU && spec.GetGpu() != pluginv1.GpuSupport_GPU_SUPPORT_UNSPECIFIED
+	image := spec.GetImage()
+	if gpu && spec.GetGpuImage() != "" {
+		image = spec.GetGpuImage()
+	}
+	pairs := []string{"${address}", "http://" + names.Container(c.PluginID, c.Name) + ":" + strconv.Itoa(int(spec.GetPort()))}
+	for k, v := range c.Secrets {
+		pairs = append(pairs, "${secret:"+k+"}", v)
+	}
+	r := strings.NewReplacer(pairs...)
+	env := make(map[string]string, len(spec.GetEnv()))
+	for k, v := range spec.GetEnv() {
+		env[k] = r.Replace(v)
+	}
+	return containers.Dependency{
+		Plugin: c.PluginID, Name: c.Name, Image: image, Cmd: spec.GetCommand(), Env: env,
+		Port: int(spec.GetPort()), HealthPath: spec.GetHealthPath(), Volumes: maps.Clone(spec.GetVolumes()),
+		Memory: int64(spec.GetMemoryMib()) << 20, CPUs: spec.GetCpus(), GPU: gpu,
+	}
 }
 
 // Dependency is a container dependency a plugin's manifest declares, what
@@ -154,9 +408,11 @@ func (s *Service) List(ctx context.Context, pluginID string) ([]Dependency, erro
 }
 
 // Set sets how a dependency is reached and returns it, generating its
-// secrets the first time, and configures the plugin again when its
-// address changed. Managed dependencies need a container engine
-// (ErrNoEngine); running them is not supported yet (errors.ErrUnsupported).
+// secrets the first time, and configures the plugin again when its mode
+// or address changed. A managed dependency needs a container engine
+// (ErrNoEngine) and the server on the host (errors.ErrUnsupported); it
+// runs while its plugin runs. Leaving managed removes its container and
+// keeps its volumes.
 func (s *Service) Set(ctx context.Context, pluginID, name string, mode core.ContainerMode, address string, useGPU bool) (Dependency, error) {
 	m, err := s.manifest(pluginID)
 	if err != nil {
@@ -166,14 +422,17 @@ func (s *Service) Set(ctx context.Context, pluginID, name string, mode core.Cont
 	if !ok {
 		return Dependency{}, fmt.Errorf("container %s of plugin %s: %w", name, pluginID, core.ErrNotFound)
 	}
-	if mode == core.ContainerManaged {
-		if _, err := s.Runtime(ctx, false); err != nil {
-			return Dependency{}, fmt.Errorf("%w: %w", ErrNoEngine, err)
-		}
-		return Dependency{}, fmt.Errorf("managed container dependencies: %w", errors.ErrUnsupported)
-	}
-	if useGPU && spec.GetGpu() == pluginv1.GpuSupport_GPU_SUPPORT_UNSPECIFIED {
+	switch {
+	case useGPU && spec.GetGpu() == pluginv1.GpuSupport_GPU_SUPPORT_UNSPECIFIED:
 		return Dependency{}, fmt.Errorf("%w: container %s of plugin %s uses no GPU", core.ErrInvalid, name, pluginID)
+	case mode == core.ContainerManaged && !useGPU && spec.GetGpu() == pluginv1.GpuSupport_GPU_SUPPORT_REQUIRED:
+		return Dependency{}, fmt.Errorf("%w: container %s of plugin %s needs a GPU", core.ErrInvalid, name, pluginID)
+	}
+	var sup *containers.Supervisor
+	if mode == core.ContainerManaged {
+		if sup, err = s.supervisor(ctx); err != nil {
+			return Dependency{}, err
+		}
 	}
 	old, err := s.kept(ctx, pluginID, name)
 	if err != nil {
@@ -186,12 +445,27 @@ func (s *Service) Set(ctx context.Context, pluginID, name string, mode core.Cont
 	if err := s.cfg.Store.Put(ctx, &c); err != nil {
 		return Dependency{}, err
 	}
+	k := key(pluginID, name)
 	s.mu.Lock()
-	delete(s.health, key(pluginID, name))
+	delete(s.health, k)
+	delete(s.told, k)
+	started := s.started[pluginID]
 	s.mu.Unlock()
+	if old.Mode == core.ContainerManaged && mode != core.ContainerManaged {
+		if sup, err := s.supervisor(ctx); err == nil {
+			if err := sup.Remove(ctx, pluginID, name, false); err != nil {
+				s.cfg.Logger.WarnContext(ctx, "remove container no longer managed", "plugin", pluginID, "container", name, "err", err)
+			}
+		}
+	}
+	if sup != nil && started {
+		sup.Start(Resolve(s.cfg.Names, spec, c))
+	}
 	if old.Mode != c.Mode || old.Address != c.Address {
-		if err := s.cfg.Plugins.Reconfigure(ctx, pluginID); err != nil {
-			s.cfg.Logger.WarnContext(ctx, "reconfigure plugin after its container changed", "plugin", pluginID, "container", name, "err", err)
+		if p := s.boundPlugins(); p != nil {
+			if err := p.Reconfigure(ctx, pluginID); err != nil {
+				s.cfg.Logger.WarnContext(ctx, "reconfigure plugin after its container changed", "plugin", pluginID, "container", name, "err", err)
+			}
 		}
 	}
 	return Dependency{Spec: spec, Kept: c, Status: s.status(ctx, spec, c)}, nil
@@ -199,8 +473,10 @@ func (s *Service) Set(ctx context.Context, pluginID, name string, mode core.Cont
 
 // manifest returns a plugin's manifest.
 func (s *Service) manifest(pluginID string) (*pluginv1.Manifest, error) {
-	if m, ok := s.cfg.Plugins.Manifest(pluginID); ok {
-		return m, nil
+	if p := s.boundPlugins(); p != nil {
+		if m, ok := p.Manifest(pluginID); ok {
+			return m, nil
+		}
 	}
 	return nil, fmt.Errorf("plugin %s: %w", pluginID, core.ErrNotFound)
 }
@@ -239,9 +515,21 @@ func secrets(spec *pluginv1.ContainerDependency, old map[string]string) map[stri
 
 func key(pluginID, name string) string { return pluginID + "/" + name }
 
+var managedStates = map[containers.State]pluginv1.ContainerState{
+	containers.Unavailable: pluginv1.ContainerState_CONTAINER_STATE_UNAVAILABLE,
+	containers.Pulling:     pluginv1.ContainerState_CONTAINER_STATE_PULLING,
+	containers.Starting:    pluginv1.ContainerState_CONTAINER_STATE_STARTING,
+	containers.Ready:       pluginv1.ContainerState_CONTAINER_STATE_READY,
+	containers.Unhealthy:   pluginv1.ContainerState_CONTAINER_STATE_UNHEALTHY,
+}
+
 // status tells whether a dependency can be used.
 func (s *Service) status(ctx context.Context, spec *pluginv1.ContainerDependency, c core.PluginContainer) *pluginv1.ContainerStatus {
 	st := pluginv1.ContainerStatus_builder{Name: new(c.Name)}.Build()
+	unavailable := func(err string) {
+		st.SetState(pluginv1.ContainerState_CONTAINER_STATE_UNAVAILABLE)
+		st.SetError(err)
+	}
 	switch c.Mode {
 	case core.ContainerExternal:
 		st.SetMode(pluginv1.ContainerMode_CONTAINER_MODE_EXTERNAL)
@@ -253,12 +541,30 @@ func (s *Service) status(ctx context.Context, spec *pluginv1.ContainerDependency
 		}
 	case core.ContainerManaged:
 		st.SetMode(pluginv1.ContainerMode_CONTAINER_MODE_MANAGED)
-		st.SetState(pluginv1.ContainerState_CONTAINER_STATE_UNAVAILABLE)
-		st.SetError("managed container dependencies are not supported yet")
+		s.mu.Lock()
+		sup, started := s.sup, s.started[c.PluginID]
+		s.mu.Unlock()
+		if sup == nil {
+			_, err := s.supervisor(ctx)
+			unavailable(fmt.Sprint(err))
+			break
+		}
+		ms, ok := sup.Status(c.PluginID, c.Name)
+		switch {
+		case ok:
+			st.SetState(managedStates[ms.State])
+			st.SetAddress(managedAddress(ms))
+			if ms.Err != nil {
+				st.SetError(ms.Err.Error())
+			}
+		case !started:
+			unavailable("the plugin is not running")
+		default:
+			unavailable("not started")
+		}
 	default:
 		st.SetMode(pluginv1.ContainerMode_CONTAINER_MODE_UNSPECIFIED)
-		st.SetState(pluginv1.ContainerState_CONTAINER_STATE_UNAVAILABLE)
-		st.SetError("not set up")
+		unavailable("not set up")
 	}
 	return st
 }
@@ -275,49 +581,13 @@ func (s *Service) check(ctx context.Context, k, address, path string) health {
 		return h
 	}
 	h = health{at: now, state: pluginv1.ContainerState_CONTAINER_STATE_READY}
-	if err := s.probe(ctx, address, path); err != nil {
+	pctx, cancel := context.WithTimeout(ctx, healthTimeout)
+	defer cancel()
+	if err := s.cfg.Probe(pctx, address, path); err != nil {
 		h.state, h.err = pluginv1.ContainerState_CONTAINER_STATE_UNHEALTHY, err.Error()
 	}
 	s.mu.Lock()
 	s.health[k] = h
 	s.mu.Unlock()
 	return h
-}
-
-func (s *Service) probe(ctx context.Context, address, path string) error {
-	ctx, cancel := context.WithTimeout(ctx, healthTimeout)
-	defer cancel()
-	u, err := url.Parse(address)
-	if err != nil {
-		return err
-	}
-	if path == "" {
-		host := u.Host
-		if u.Port() == "" {
-			port := "80"
-			if u.Scheme == "https" {
-				port = "443"
-			}
-			host = net.JoinHostPort(u.Hostname(), port)
-		}
-		var d net.Dialer
-		conn, err := d.DialContext(ctx, "tcp", host)
-		if err != nil {
-			return err
-		}
-		return conn.Close()
-	}
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, address+path, nil)
-	if err != nil {
-		return err
-	}
-	resp, err := s.cfg.HTTP.Do(req)
-	if err != nil {
-		return err
-	}
-	_ = resp.Body.Close()
-	if resp.StatusCode < 200 || resp.StatusCode > 299 {
-		return fmt.Errorf("GET %s: %s", path, resp.Status)
-	}
-	return nil
 }

@@ -19,8 +19,10 @@ type ContainerSpec struct {
 	// Cmd replaces the image's command when not nil; Env is KEY=value.
 	Cmd []string
 	Env []string
-	// Labels label the container and the volumes it creates.
-	Labels map[string]string
+	// Labels label the container, and the volumes it creates unless
+	// VolumeLabels is set.
+	Labels       map[string]string
+	VolumeLabels map[string]string
 	// Port is the TCP port the service listens on in the container, 0
 	// for none.
 	Port int
@@ -153,10 +155,14 @@ func (c *Client) CreateContainer(ctx context.Context, s ContainerSpec) (string, 
 			body.HostConfig.PortBindings = map[string][]PortBinding{port: {{HostIP: "127.0.0.1"}}}
 		}
 	}
+	volumeLabels := s.VolumeLabels
+	if volumeLabels == nil {
+		volumeLabels = s.Labels
+	}
 	for name, target := range s.Volumes {
 		m := mount{Type: "volume", Source: name, Target: target}
-		if len(s.Labels) > 0 {
-			m.VolumeOptions = &volumeOptions{Labels: s.Labels}
+		if len(volumeLabels) > 0 {
+			m.VolumeOptions = &volumeOptions{Labels: volumeLabels}
 		}
 		body.HostConfig.Mounts = append(body.HostConfig.Mounts, m)
 	}
