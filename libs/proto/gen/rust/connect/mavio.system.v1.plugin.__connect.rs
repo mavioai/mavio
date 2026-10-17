@@ -106,6 +106,14 @@ pub type OwnedSetPluginContainerResponseView = ::buffa::view::OwnedView<
         'static,
     >,
 >;
+///Shorthand for `OwnedView<ListContainersRequestView<'static>>`.
+pub type OwnedListContainersRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::system::v1::__buffa::view::ListContainersRequestView<'static>,
+>;
+///Shorthand for `OwnedView<ListContainersResponseView<'static>>`.
+pub type OwnedListContainersResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::system::v1::__buffa::view::ListContainersResponseView<'static>,
+>;
 ///Shorthand for `OwnedView<SetPluginProxyRequestView<'static>>`.
 pub type OwnedSetPluginProxyRequestView = ::buffa::view::OwnedView<
     crate::proto::mavio::system::v1::__buffa::view::SetPluginProxyRequestView<'static>,
@@ -514,6 +522,40 @@ for ::buffa::view::OwnedView<
         )
     }
 }
+impl ::connectrpc::Encodable<crate::proto::mavio::system::v1::ListContainersResponse>
+for crate::proto::mavio::system::v1::__buffa::view::ListContainersResponseView<'_> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::system::v1::ListContainersResponse>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::system::v1::__buffa::view::ListContainersResponseView<'static>,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
 impl ::connectrpc::Encodable<crate::proto::mavio::system::v1::SetPluginProxyResponse>
 for crate::proto::mavio::system::v1::__buffa::view::SetPluginProxyResponseView<'_> {
     fn encode(
@@ -616,6 +658,12 @@ pub const PLUGIN_MANAGEMENT_SERVICE_SET_PLUGIN_CONTAINER_SPEC: ::connectrpc::Spe
         ::connectrpc::StreamType::Unary,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
+/// Static [`Spec`](::connectrpc::Spec) for the `ListContainers` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const PLUGIN_MANAGEMENT_SERVICE_LIST_CONTAINERS_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.system.v1.PluginManagementService/ListContainers",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::NoSideEffects);
 /// Static [`Spec`](::connectrpc::Spec) for the `SetPluginProxy` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
 pub const PLUGIN_MANAGEMENT_SERVICE_SET_PLUGIN_PROXY_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
         "/mavio.system.v1.PluginManagementService/SetPluginProxy",
@@ -943,8 +991,33 @@ pub trait PluginManagementService: Send + Sync + 'static {
             > + Send + use<'a, Self>,
         >,
     > + Send;
-    /// SetPluginProxy sets the proxy a WASM plugin's HTTP requests, which the
-    /// server performs, go through.
+    /// ListContainers lists the container dependencies of every plugin that
+    /// the server runs or that an administrator gave an address, by plugin.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn list_containers<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::system::v1::ListContainersRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::system::v1::ListContainersResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// SetPluginProxy sets the proxy a plugin reaches sites through: a WASM
+    /// plugin's HTTP requests, which the server performs, and a process
+    /// plugin's, sent to the server's proxy gateway.
     ///
     /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
     ///
@@ -1318,6 +1391,35 @@ impl<S: PluginManagementService> PluginManagementServiceExt for S {
                 },
             )
             .with_spec(PLUGIN_MANAGEMENT_SERVICE_SET_PLUGIN_CONTAINER_SPEC)
+            .route_view_idempotent(
+                PLUGIN_MANAGEMENT_SERVICE_SERVICE_NAME,
+                "ListContainers",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::system::v1::__buffa::view::ListContainersRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::system::v1::ListContainersRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.list_containers(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::system::v1::ListContainersResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(PLUGIN_MANAGEMENT_SERVICE_LIST_CONTAINERS_SPEC)
             .route_view(
                 PLUGIN_MANAGEMENT_SERVICE_SERVICE_NAME,
                 "SetPluginProxy",
@@ -1470,6 +1572,12 @@ for PluginManagementServiceServer<T> {
                 Some(
                     ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
                         .with_spec(PLUGIN_MANAGEMENT_SERVICE_SET_PLUGIN_CONTAINER_SPEC),
+                )
+            }
+            "ListContainers" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(true)
+                        .with_spec(PLUGIN_MANAGEMENT_SERVICE_LIST_CONTAINERS_SPEC),
                 )
             }
             "SetPluginProxy" => {
@@ -1733,6 +1841,28 @@ for PluginManagementServiceServer<T> {
                         .await?
                         .encode::<
                             crate::proto::mavio::system::v1::SetPluginContainerResponse,
+                        >(format)
+                })
+            }
+            "ListContainers" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::system::v1::ListContainersRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::system::v1::__buffa::view::ListContainersRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::system::v1::ListContainersRequest,
+                    >::from_parts(&req, &body);
+                    svc.list_containers(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::system::v1::ListContainersResponse,
                         >(format)
                 })
             }
@@ -2378,6 +2508,51 @@ where
                 &self.transport,
                 &self.config,
                 PLUGIN_MANAGEMENT_SERVICE_SET_PLUGIN_CONTAINER_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the ListContainers RPC. Sends a request to /mavio.system.v1.PluginManagementService/ListContainers.
+    pub async fn list_containers(
+        &self,
+        request: crate::proto::mavio::system::v1::ListContainersRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::system::v1::__buffa::view::ListContainersResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.list_containers_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the ListContainers RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn list_containers_with_options(
+        &self,
+        request: crate::proto::mavio::system::v1::ListContainersRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::system::v1::__buffa::view::ListContainersResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                PLUGIN_MANAGEMENT_SERVICE_LIST_CONTAINERS_SPEC
                     .with_origin(::connectrpc::SpecOrigin::Client),
                 request,
                 options,

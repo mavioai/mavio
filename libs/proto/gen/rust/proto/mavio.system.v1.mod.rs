@@ -176,6 +176,14 @@ pub use self::__buffa::view::ListPluginContainersResponseView;
 #[doc(inline)]
 pub use self::__buffa::view::ListPluginContainersResponseOwnedView;
 #[doc(inline)]
+pub use self::__buffa::view::ListContainersRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::ListContainersRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ListContainersResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::ListContainersResponseOwnedView;
+#[doc(inline)]
 pub use self::__buffa::view::SetPluginContainerRequestView;
 #[doc(inline)]
 pub use self::__buffa::view::SetPluginContainerRequestOwnedView;

@@ -60,9 +60,15 @@ service PluginManagementService {
   // SetPluginContainer sets how a container dependency is reached: run by
   // the server, which requires a container engine, or at an address.
   rpc SetPluginContainer(SetPluginContainerRequest) returns (SetPluginContainerResponse);
+  // ListContainers lists the container dependencies of every plugin that
+  // the server runs or that an administrator gave an address, by plugin.
+  rpc ListContainers(ListContainersRequest) returns (ListContainersResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
 
-  // SetPluginProxy sets the proxy a WASM plugin's HTTP requests, which the
-  // server performs, go through.
+  // SetPluginProxy sets the proxy a plugin reaches sites through: a WASM
+  // plugin's HTTP requests, which the server performs, and a process
+  // plugin's, sent to the server's proxy gateway.
   rpc SetPluginProxy(SetPluginProxyRequest) returns (SetPluginProxyResponse);
 }
 
@@ -88,9 +94,9 @@ message Plugin {
   PluginState state = 2;
   // Why the plugin failed, for PLUGIN_STATE_FAILED.
   string error = 3;
-  // For a WASM plugin, the proxy its HTTP requests go through: the ID of
-  // one of the server's proxies, "system" for the system proxy, or empty
-  // for none. The hosts of this machine and of the local network are
+  // For a WASM or process plugin, the proxy it reaches sites through: the
+  // ID of one of the server's proxies, "system" for the system proxy, or
+  // empty for none. The hosts of this machine and of the local network are
   // reached directly.
   string proxy = 4;
 }
@@ -247,6 +253,15 @@ message PluginContainer {
   ContainerCommands commands = 4;
   // How to run it with a GPU, for a dependency that can use one.
   ContainerCommands gpu_commands = 5;
+  // The plugin declaring it.
+  string plugin_id = 6;
+  // For a managed container, the proxy it reaches sites through: the ID of
+  // one of the server's proxies, "system" for the system proxy, or empty
+  // for none.
+  string proxy = 7;
+  // For a managed container, the docker run command equivalent to how the
+  // server runs it; empty without a container engine.
+  string command = 8;
 }
 
 // ContainerCommands run a container dependency outside the server, under
@@ -270,6 +285,13 @@ message ListPluginContainersResponse {
   repeated PluginContainer containers = 1;
 }
 
+message ListContainersRequest {}
+
+message ListContainersResponse {
+  // By plugin ID, then in manifest order.
+  repeated PluginContainer containers = 1;
+}
+
 message SetPluginContainerRequest {
   string plugin_id = 1 [(buf.validate.field).required = true];
   string name = 2 [(buf.validate.field).required = true];
@@ -279,6 +301,9 @@ message SetPluginContainerRequest {
   string address = 4 [(buf.validate.field).string.uri = true];
   // Whether a managed container may use a GPU.
   bool use_gpu = 5;
+  // The proxy a managed container reaches sites through, as
+  // PluginContainer.proxy; unset keeps it.
+  string proxy = 6;
 }
 
 message SetPluginContainerResponse {
