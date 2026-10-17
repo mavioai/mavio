@@ -662,6 +662,7 @@ Mavio 为电影与单集查找缺少的字幕，即 Bazarr 在 Sonarr 与 Radarr
 * **密码**：`ProxyService` 从不返回密码，只告知是否已设置；更新时不带密码即保留已保存的密码。
 * **测试**：`TestProxy` 经已保存的代理、系统代理或未保存的代理获取一个 URL，默认 `https://www.cloudflare.com/cdn-cgi/trace`，返回延迟，以及从 trace 读出的出口地址与其国家。
 * **插件**：schema 带 `"x-mavio-options": {"source": "proxies"}` 的配置属性取代理的 ID，从服务端的代理中选择，系统代理排在最前（§7.5）；不选即直连。带此类属性的插件通过 `HostService.ListProxies` 读取代理（含密码），代理变更或删除时会被再次配置。已不存在的代理使用它的请求失败，而不会退回直连。`libs/plugin/proxy` 由代理构建 `http.Transport`，直连代理自身列表与插件列表中的主机。
+* **服务端的请求**：服务端自身的 HTTP 请求经网络设置选择的代理（`OutboundProxies`）发出，按其访问的对象各选一个：插件目录与插件包、条目的远程图片、mavio.dev 的 API，以及 `mavio.site` 证书的证书颁发机构；每项为代理的 ID、系统代理（默认）或不使用代理。WASM 插件的 HTTP 请求由服务端代为发出，经为该插件选择的代理（`PluginProxies`，默认系统代理）；进程插件自行访问站点，经其配置中的代理。这些请求直连本机与局域网的地址（`proxy.Local`，同 Prowlarr 的 BypassLocalAddresses），代理变更后从下一个请求起生效，代理已不存在时请求失败而不会退回直连；指定服务端没有的代理的设置被拒绝，设置正在使用的代理不能删除。
 
 ### 17.2 质询求解器
 * **契约**：`CHALLENGE_SOLVER` 插件实现 `ChallengeSolverService.Solve`：给定 URL、方法（GET，或带表单正文的 POST）、代理与超时，返回通过质询的 cookie 及取得它们时的 user agent，之后对该站点的请求都须带上。

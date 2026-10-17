@@ -119,7 +119,9 @@ func (s *ProxyService) DeleteProxy(ctx context.Context, req *systemv1.DeleteProx
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
-	if err := svc.Delete(ctx, id); err != nil {
+	if err := svc.Delete(ctx, id); errors.Is(err, proxies.ErrInUse) {
+		return nil, connect.NewError(connect.CodeFailedPrecondition, err)
+	} else if err != nil {
 		return nil, connectError(ctx, err)
 	}
 	s.record(ctx, p, "proxy.deleted", "%s deleted proxy %s", &old)

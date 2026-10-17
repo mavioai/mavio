@@ -398,3 +398,111 @@ func TestRunReconfigures(t *testing.T) {
 		}
 	})
 }
+
+// fakeProxy is an HTTP proxy answering every request itself with its
+// name, recording the hosts asked for.
+func fakeProxy(t *testing.T, name string) (*httptest.Server, func() []string) {
+	t.Helper()
+	var mu sync.Mutex
+	var hosts []string
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		mu.Lock()
+		hosts = append(hosts, r.URL.Host)
+		mu.Unlock()
+		_, _ = io.WriteString(w, name)
+	}))
+	t.Cleanup(srv.Close)
+	return srv, func() []string {
+		mu.Lock()
+		defer mu.Unlock()
+		return slices.Clone(hosts)
+	}
+}
+
+func httpProxy(name string, srv *httptest.Server) core.Proxy {
+	host, port, _ := net.SplitHostPort(srv.Listener.Addr().String())
+	n, _ := strconv.Atoi(port)
+	return core.Proxy{Name: name, Kind: core.ProxyHTTP, Host: host, Port: n}
+}
+
+func TestThrough(t *testing.T) {
+	s := newService(t, nil)
+	setSystem := mutableSystem(t, s)
+	ctx := t.Context()
+	one, _ := fakeProxy(t, "one")
+	two, _ := fakeProxy(t, "two")
+	system, systemHosts := fakeProxy(t, "system")
+	direct := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, _ = io.WriteString(w, "direct")
+	}))
+	t.Cleanup(direct.Close)
+
+	p, err := s.Create(ctx, httpProxy("office", one))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var choice atomic.Value
+	choice.Store(p.ID.String())
+	client := &http.Client{Transport: s.Through(func(*http.Request) string { return choice.Load().(string) })}
+	get := func(u string) (string, error) {
+		t.Helper()
+		req, _ := http.NewRequestWithContext(ctx, http.MethodGet, u, nil)
+		resp, err := client.Do(req)
+		if err != nil {
+			return "", err
+		}
+		defer resp.Body.Close()
+		body, err := io.ReadAll(resp.Body)
+		return string(body), err
+	}
+	expect := func(step, u, want string) {
+		t.Helper()
+		if got, err := get(u); err != nil || got != want {
+			t.Errorf("%s: GET %s got = %q, %v; want = %q", step, u, got, err, want)
+		}
+	}
+
+	expect("stored proxy", "http://api.themoviedb.org/3", "one")
+	// This machine is reached directly whichever the proxy.
+	expect("local address", direct.URL, "direct")
+	// A changed proxy is used from the next request.
+	changed := httpProxy("office", two)
+	changed.ID = p.ID
+	if _, err := s.Update(ctx, changed, false); err != nil {
+		t.Fatal(err)
+	}
+	expect("changed proxy", "http://api.themoviedb.org/3", "two")
+
+	// The system proxy follows the system's settings.
+	choice.Store(SystemID)
+	setSystem(system.URL)
+	s.refresh(ctx)
+	expect("system proxy", "http://image.tmdb.org/t/p/w500", "system")
+	if got := systemHosts(); !slices.Equal(got, []string{"image.tmdb.org"}) {
+		t.Errorf("system proxy hosts got = %q, want = [image.tmdb.org]", got)
+	}
+	setSystem("")
+	s.refresh(ctx)
+	expect("system proxy setting none", direct.URL, "direct")
+
+	// A proxy the settings use is not deleted; one deleted fails requests.
+	choice.Store(p.ID.String())
+	s.SetUses(func(id string) []string {
+		if id == p.ID.String() {
+			return []string{"images"}
+		}
+		return nil
+	})
+	if err := s.Delete(ctx, p.ID); !errors.Is(err, ErrInUse) {
+		t.Errorf("Delete of a proxy in use got = %v, want = ErrInUse", err)
+	}
+	s.SetUses(nil)
+	if err := s.Delete(ctx, p.ID); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := get("http://api.themoviedb.org/3"); !errors.Is(err, core.ErrNotFound) {
+		t.Errorf("GET through a deleted proxy got = %v, want = ErrNotFound", err)
+	}
+	choice.Store("")
+	expect("no proxy", direct.URL, "direct")
+}

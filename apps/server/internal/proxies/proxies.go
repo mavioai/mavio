@@ -12,6 +12,7 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"sync"
 	"sync/atomic"
 	"time"
 
@@ -26,6 +27,9 @@ import (
 
 // ErrNoSolver is a challenge with no ready solver plugin to solve it.
 var ErrNoSolver = errors.New("no challenge solver is ready")
+
+// ErrInUse is a proxy the server's settings use, which is not deleted.
+var ErrInUse = fmt.Errorf("%w: proxy in use", core.ErrConflict)
 
 // DefaultTestURL is what TestProxy fetches when given no URL: Cloudflare's
 // trace tells the address requests leave from and its country.
@@ -68,12 +72,28 @@ type Service struct {
 	detect func(context.Context) (sysproxy.Setting, error)
 	// system is the system proxy last read, nil before the first.
 	system atomic.Pointer[pluginv1.Proxy]
+	// revision changes when a proxy changes or is deleted, for the
+	// transports through it.
+	revision atomic.Uint64
+	// uses tells where the server's settings use a proxy; nil when they
+	// cannot.
+	uses func(id string) []string
 }
 
-// New returns a Service keeping proxies in repo; plugins may be nil.
+// New returns a Service keeping proxies in repo; plugins may be nil, and
+// bound later.
 func New(repo core.ProxyRepository, plugins Plugins, log *slog.Logger) *Service {
 	return &Service{repo: repo, plugins: plugins, log: log, detect: sysproxy.Detect}
 }
+
+// Bind sets the plugins of a Service made before them, before it serves
+// any request or runs.
+func (s *Service) Bind(plugins Plugins) { s.plugins = plugins }
+
+// SetUses sets what tells where the server's settings use a proxy, such as
+// "images" or a plugin's ID, a proxy so used being refused deletion. Like
+// Bind, it is called before the Service serves.
+func (s *Service) SetUses(uses func(id string) []string) { s.uses = uses }
 
 // Run reads the system proxy every 30 seconds until ctx ends, configuring
 // the plugins taking proxies again when it changes.
@@ -160,16 +180,24 @@ func (s *Service) Update(ctx context.Context, p core.Proxy, clearPassword bool) 
 	if err := s.repo.Put(ctx, &p); err != nil {
 		return core.Proxy{}, err
 	}
+	s.revision.Add(1)
 	s.changed(ctx)
 	return p, nil
 }
 
 // Delete deletes a proxy and configures the plugins taking proxies again,
-// for them to fail what used it.
+// for them to fail what used it. A proxy the server's settings use is
+// refused, naming where.
 func (s *Service) Delete(ctx context.Context, id core.ID) error {
+	if s.uses != nil {
+		if where := s.uses(id.String()); len(where) > 0 {
+			return fmt.Errorf("%w: the server's settings use it for %s", ErrInUse, strings.Join(where, ", "))
+		}
+	}
 	if err := s.repo.Delete(ctx, id); err != nil {
 		return err
 	}
+	s.revision.Add(1)
 	s.changed(ctx)
 	return nil
 }
@@ -243,22 +271,12 @@ func ToPlugin(p *core.Proxy) *pluginv1.Proxy {
 // asking the ready solver plugins in turn by ID until one solves it.
 func (s *Service) Solve(ctx context.Context, c *pluginv1.Challenge, proxyID string) (*pluginv1.ChallengeSolution, error) {
 	req := pluginv1.SolveRequest_builder{Challenge: c}.Build()
-	switch proxyID {
-	case "":
-	case SystemID:
-		if p := s.System(ctx); proxy.URL(p) != nil {
-			req.SetProxy(p)
-		}
-	default:
-		id, err := core.ParseID(proxyID)
-		if err != nil {
-			return nil, err
-		}
-		p, err := s.repo.Get(ctx, id)
-		if err != nil {
-			return nil, fmt.Errorf("proxy %s: %w", proxyID, err)
-		}
-		req.SetProxy(ToPlugin(&p))
+	p, err := s.Resolve(ctx, proxyID)
+	if err != nil {
+		return nil, err
+	}
+	if proxy.URL(p) != nil {
+		req.SetProxy(p)
 	}
 	var solvers []Solver
 	if s.plugins != nil {
@@ -286,6 +304,108 @@ func (s *Service) Solve(ctx context.Context, c *pluginv1.Challenge, proxyID stri
 		errs = append(errs, fmt.Errorf("solver %s: %w", sv.ID, err))
 	}
 	return nil, errors.Join(errs...)
+}
+
+// Resolve returns the proxy of an ID: nil for "", the system proxy for
+// SystemID, and a stored proxy, with its credentials, for its ID.
+func (s *Service) Resolve(ctx context.Context, id string) (*pluginv1.Proxy, error) {
+	switch id {
+	case "":
+		return nil, nil
+	case SystemID:
+		return s.System(ctx), nil
+	}
+	pid, err := core.ParseID(id)
+	if err != nil {
+		return nil, fmt.Errorf("%w: proxy %q", core.ErrInvalid, id)
+	}
+	p, err := s.repo.Get(ctx, pid)
+	if err != nil {
+		return nil, fmt.Errorf("proxy %s: %w", id, err)
+	}
+	return ToPlugin(&p), nil
+}
+
+// Through returns a transport through the proxy whose ID choice returns
+// at each request ("" for none, SystemID for the system proxy), reaching
+// this machine and the local network directly. A proxy that no longer
+// exists fails the requests rather than letting them go directly.
+func (s *Service) Through(choice func(r *http.Request) string) *Transport {
+	return &Transport{s: s, choice: choice, through: map[string]*through{}}
+}
+
+// Transport sends requests through the proxy its choice names.
+type Transport struct {
+	s      *Service
+	choice func(r *http.Request) string
+
+	mu      sync.Mutex
+	through map[string]*through // by proxy ID
+}
+
+// through is a transport through a proxy as it was.
+type through struct {
+	proxy    *pluginv1.Proxy
+	revision uint64
+	t        *http.Transport
+}
+
+// RoundTrip implements http.RoundTripper.
+func (t *Transport) RoundTrip(r *http.Request) (*http.Response, error) {
+	tr, err := t.transport(r.Context(), t.choice(r))
+	if err != nil {
+		if r.Body != nil {
+			_ = r.Body.Close()
+		}
+		return nil, err
+	}
+	return tr.RoundTrip(r)
+}
+
+// transport returns the transport through the proxy of an ID, made again
+// when the proxy changed.
+func (t *Transport) transport(ctx context.Context, id string) (*http.Transport, error) {
+	revision := t.s.revision.Load()
+	var system *pluginv1.Proxy
+	if id == SystemID {
+		system = t.s.System(ctx)
+	}
+	t.mu.Lock()
+	cur := t.through[id]
+	t.mu.Unlock()
+	switch {
+	case cur == nil:
+	case id == "":
+		return cur.t, nil
+	case id == SystemID && proto.Equal(cur.proxy, system):
+		return cur.t, nil
+	case id != SystemID && cur.revision == revision:
+		return cur.t, nil
+	}
+	p := system
+	if id != SystemID {
+		var err error
+		if p, err = t.s.Resolve(ctx, id); err != nil {
+			return nil, err
+		}
+	}
+	next := &through{proxy: p, revision: revision, t: proxy.Transport(p, proxy.Local)}
+	t.mu.Lock()
+	if old := t.through[id]; old != nil {
+		old.t.CloseIdleConnections()
+	}
+	t.through[id] = next
+	t.mu.Unlock()
+	return next.t, nil
+}
+
+// CloseIdleConnections closes the idle connections of every proxy.
+func (t *Transport) CloseIdleConnections() {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	for _, th := range t.through {
+		th.t.CloseIdleConnections()
+	}
 }
 
 // TestResult is what fetching a URL through a proxy gave.

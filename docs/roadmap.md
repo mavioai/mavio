@@ -979,9 +979,8 @@ flowchart TD
 - [x] `plugins/indexers` and `plugins/subtitles` moved to the server's proxies and to `HostService.SolveChallenge`
 - [x] The web UI's proxies page: the system proxy, adding, editing, testing and deleting proxies; the proxy picker of plugins' settings
 - [ ] Solvers without published images, each needing an image of Mavio's own built in mavio-deps: Zendriver, Camoufox, invisible_playwright (Byparr's); with them the container declaration's shared memory and tmpfs, which browsers need
-- [ ] The system proxy of Linux desktops' settings (GNOME, KDE) and of proxy auto-configuration (PAC) files, which only the environment sets for now
-- [ ] The server's own requests (TMDB and the other services of acquisition, the plugin catalog) through a proxy chosen in the settings
-- [ ] WASM plugins' HTTP requests through a proxy, the host's HTTP client honoring one
+- [x] The server's own requests through proxies chosen in the settings, one for each of plugin catalogs, images, mavio.dev and ACME, the system proxy by default
+- [x] WASM plugins' HTTP requests through the proxy chosen for each plugin, the system proxy by default; this machine and the local network reached directly
 
 ---
 

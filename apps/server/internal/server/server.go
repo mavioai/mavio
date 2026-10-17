@@ -53,6 +53,7 @@ import (
 	"github.com/mavioai/mavio/libs/media/keyframes"
 	"github.com/mavioai/mavio/libs/media/probe"
 	"github.com/mavioai/mavio/libs/media/thumbnails"
+	"github.com/mavioai/mavio/libs/plugin/host/wasm"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1/pluginv1connect"
 	"github.com/mavioai/mavio/libs/store"
 )
@@ -250,9 +251,31 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 	if pluginCache == "" {
 		pluginCache = filepath.Join(cfg.CacheDir, "plugins")
 	}
+	// The server's own HTTP requests, and its WASM plugins', go through
+	// the proxies the settings choose.
+	proxyService := proxies.New(db.Proxies(), nil, log)
+	proxyService.SetUses(func(id string) []string { return proxyUses(set.Get(), id) })
+	outbound := func(timeout time.Duration, pick func(p *core.OutboundProxies) string) *http.Client {
+		return &http.Client{Timeout: timeout, Transport: proxyService.Through(func(*http.Request) string {
+			p := set.Get().Network.Proxies
+			return pick(&p)
+		})}
+	}
+	if err := set.Register(ctx, func(ctx context.Context, s core.ServerSettings) error {
+		return checkProxies(ctx, proxyService, s)
+	}); err != nil {
+		log.ErrorContext(ctx, "stored settings name proxies deleted since; change them", "err", err)
+	}
+	pluginFetch := cfg.PluginFetch
+	if pluginFetch == nil {
+		pluginFetch = &http.Client{Timeout: 30 * time.Second, Transport: proxyService.Through(func(r *http.Request) string {
+			return rpc.PluginProxy(set.Get(), wasm.FetchingPlugin(r.Context()))
+		})}
+	}
 	plugs, err := plugins.Open(ctx, plugins.Config{
 		Dir: cfg.PluginDir, CacheDir: pluginCache, Store: db, Logger: log, HostAPI: hostAPI,
-		DataDir: cfg.PluginDataDir, Fetch: cfg.PluginFetch, Activity: activityLog, DevicesChanged: hub.SharedSessionsChanged,
+		Client:  outbound(5*time.Minute, func(p *core.OutboundProxies) string { return p.PluginCatalogs }),
+		DataDir: cfg.PluginDataDir, Fetch: pluginFetch, Activity: activityLog, DevicesChanged: hub.SharedSessionsChanged,
 		Catalogs: func() []string { return set.Get().PluginCatalogs }, Containers: deps,
 		Disabled: set.Get().DisabledPlugins,
 		SaveDisabled: func(ctx context.Context, ids []string) error {
@@ -268,6 +291,7 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 	}
 	started.Store(plugs)
 	deps.Bind(plugs)
+	proxyService.Bind(plugs)
 	go func() {
 		if err := deps.Reconcile(ctx); err != nil {
 			log.WarnContext(ctx, "reconcile plugins' containers", "err", err)
@@ -316,6 +340,7 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 	}
 	imageServer := images.New(images.Config{
 		Store: db, Dir: filepath.Join(cfg.CacheDir, "images"), MetadataDir: metadataDir, Storages: storages, Logger: log,
+		Client: outbound(30*time.Second, func(p *core.OutboundProxies) string { return p.Images }),
 	})
 	lyrics := &library.Lyrics{Store: db, Source: plugs.LyricsProviders, Storages: storages, Logger: log}
 	refresher := &library.Refresher{
@@ -345,10 +370,11 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 	}
 	// In mavio.dev mode the server is claimed at mavio.dev and keeps a
 	// link to it, which waits while the server is unclaimed.
-	mavioDev := cloud.NewClient(cfg.MavioDevURL, key, nil)
+	mavioDevHTTP := outbound(30*time.Second, func(p *core.OutboundProxies) string { return p.MavioDev })
+	mavioDev := cloud.NewClient(cfg.MavioDevURL, key, mavioDevHTTP)
 	link := cloud.NewLink(db, mavioDev, log)
 	link.Apply = (&cloud.Applier{Requests: func() core.RequestSettings { return set.Get().Requests }}).Apply
-	assertions := cloud.NewVerifier(cfg.MavioDevURL, serverID, cloud.NewKeySet(cfg.MavioDevURL, nil))
+	assertions := cloud.NewVerifier(cfg.MavioDevURL, serverID, cloud.NewKeySet(cfg.MavioDevURL, mavioDevHTTP))
 	// A claimed server obtains its mavio.site certificate.
 	var certificates *certs.Manager
 	if cfg.CertificateDir != "" {
@@ -359,6 +385,7 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 		if len(cfg.ACMEDirectories) > 0 {
 			certificates.CAs = cfg.ACMEDirectories
 		}
+		certificates.HTTPClient = outbound(time.Minute, func(p *core.OutboundProxies) string { return p.ACME })
 	}
 	// With its certificate, a claimed server is reachable through the
 	// relay unless its settings turn that off.
@@ -439,7 +466,6 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 		Grammar: grammar, Agents: plugs.AgentSessions, Recognizers: plugs.Recognizers, Voices: plugs.VoicePlugins,
 		ServerName: serverName, Key: key.Derive("assistant-listen"), Activity: activityLog, Logger: log,
 	})
-	proxyService := proxies.New(db.Proxies(), plugs, log)
 	h, err := httpserver.Handler(httpserver.Options{
 		Assistant: helper,
 		Version:   cfg.Version, Store: db, Identity: key, Hub: hub, Database: raw.Dialect(), FFmpegVersion: ffmpegVersion, Playbacks: playbacks,

@@ -18,6 +18,7 @@ import (
 	"github.com/mavioai/mavio/apps/server/internal/events"
 	"github.com/mavioai/mavio/apps/server/internal/plugins"
 	"github.com/mavioai/mavio/apps/server/internal/proxies"
+	"github.com/mavioai/mavio/apps/server/internal/settings"
 	"github.com/mavioai/mavio/libs/containers"
 	"github.com/mavioai/mavio/libs/core"
 	"github.com/mavioai/mavio/libs/plugin/manifest"
@@ -47,6 +48,9 @@ type PluginManagementService struct {
 	// Proxies keeps the server's proxies, the options of
 	// manifest.OptionsProxies; nil keeps none.
 	Proxies *proxies.Service
+	// Settings keep the proxies of WASM plugins' HTTP requests; nil
+	// keeps none.
+	Settings *settings.Manager
 }
 
 // ContainerDependencies keeps plugins' container dependencies;
@@ -84,7 +88,7 @@ func (s *PluginManagementService) pluginChanged(ctx context.Context, info plugin
 	if s.Hub != nil {
 		// The event's readers read different languages: it carries the
 		// plugin's strings untranslated.
-		plugin := pluginToProto(info, nil)
+		plugin := s.toProto(info, nil)
 		s.Hub.ToAdmins(sessionv1.Event_builder{PluginChanged: sessionv1.PluginChanged_builder{Plugin: plugin}.Build()}.Build())
 	}
 	p, _ := principal(ctx)
@@ -93,7 +97,7 @@ func (s *PluginManagementService) pluginChanged(ctx context.Context, info plugin
 		Type: kind, UserID: p.User.ID, Title: fmt.Sprintf("%s %s plugin %s", p.User.Name, verb, id),
 		Attributes: map[string]string{"plugin": id, "version": version},
 	})
-	return pluginToProto(info, wantedLanguages(ctx))
+	return s.toProto(info, wantedLanguages(ctx))
 }
 
 // ListCatalogPlugins lists the catalogs' plugins.
@@ -161,6 +165,14 @@ func (s *PluginManagementService) UninstallPlugin(ctx context.Context, req *syst
 	if err := s.Plugins.Uninstall(ctx, req.GetPluginId()); err != nil {
 		return nil, connectError(ctx, err)
 	}
+	if s.Settings != nil {
+		if _, err := s.Settings.Change(ctx, func(cur *core.ServerSettings) error {
+			delete(cur.PluginProxies, req.GetPluginId())
+			return nil
+		}); err != nil {
+			slog.WarnContext(ctx, "forget an uninstalled plugin's proxy", "plugin", req.GetPluginId(), "err", err)
+		}
+	}
 	s.Activity.Record(ctx, core.Activity{
 		Type: "plugin.uninstalled", UserID: p.User.ID, Title: fmt.Sprintf("%s uninstalled plugin %s", p.User.Name, req.GetPluginId()),
 		Attributes: map[string]string{"plugin": req.GetPluginId()},
@@ -197,7 +209,7 @@ func (s *PluginManagementService) ListPlugins(ctx context.Context, _ *systemv1.L
 	if s.Plugins != nil {
 		wanted := wantedLanguages(ctx)
 		for _, p := range s.Plugins.Plugins() {
-			out = append(out, pluginToProto(p, wanted))
+			out = append(out, s.toProto(p, wanted))
 		}
 	}
 	return systemv1.ListPluginsResponse_builder{Plugins: out}.Build(), nil
@@ -333,6 +345,65 @@ var pluginStates = map[plugins.State]systemv1.PluginState{
 	plugins.Unconfigured: systemv1.PluginState_PLUGIN_STATE_UNCONFIGURED,
 	plugins.Failed:       systemv1.PluginState_PLUGIN_STATE_FAILED,
 	plugins.Disabled:     systemv1.PluginState_PLUGIN_STATE_DISABLED,
+}
+
+// toProto returns a plugin as clients see it, a WASM plugin with its
+// proxy.
+func (s *PluginManagementService) toProto(p plugins.Info, wanted []language.Tag) *systemv1.Plugin {
+	out := pluginToProto(p, wanted)
+	if s.Settings != nil && p.Manifest.GetRuntime() == pluginv1.Runtime_RUNTIME_WASM {
+		out.SetProxy(PluginProxy(s.Settings.Get(), p.Manifest.GetId()))
+	}
+	return out
+}
+
+// PluginProxy returns the ID of the proxy a WASM plugin's HTTP requests go
+// through, the system proxy unless set.
+func PluginProxy(set core.ServerSettings, pluginID string) string {
+	if id, ok := set.PluginProxies[pluginID]; ok {
+		return id
+	}
+	return core.SystemProxyID
+}
+
+// SetPluginProxy sets the proxy a WASM plugin's HTTP requests go through.
+func (s *PluginManagementService) SetPluginProxy(ctx context.Context, req *systemv1.SetPluginProxyRequest) (*systemv1.SetPluginProxyResponse, error) {
+	p, err := admin(ctx)
+	if err != nil {
+		return nil, err
+	}
+	id := req.GetPluginId()
+	var info plugins.Info
+	if s.Plugins != nil {
+		i := slices.IndexFunc(s.Plugins.Plugins(), func(p plugins.Info) bool { return p.Manifest.GetId() == id })
+		if i >= 0 {
+			info = s.Plugins.Plugins()[i]
+		}
+	}
+	switch {
+	case info.Manifest == nil || s.Settings == nil:
+		return nil, connectError(ctx, fmt.Errorf("plugin %s: %w", id, core.ErrNotFound))
+	case info.Manifest.GetRuntime() != pluginv1.Runtime_RUNTIME_WASM:
+		return nil, connectError(ctx, fmt.Errorf("%w: plugin %s reaches sites itself, through the proxy of its settings", core.ErrInvalid, id))
+	}
+	if _, err := s.Settings.Change(ctx, func(cur *core.ServerSettings) error {
+		if cur.PluginProxies == nil {
+			cur.PluginProxies = map[string]string{}
+		}
+		cur.PluginProxies[id] = req.GetProxy()
+		return nil
+	}); err != nil {
+		return nil, connectError(ctx, err)
+	}
+	s.Activity.Record(ctx, core.Activity{
+		Type: "plugin.proxy_changed", UserID: p.User.ID, Title: fmt.Sprintf("%s changed the proxy of plugin %s", p.User.Name, id),
+		Attributes: map[string]string{"plugin": id},
+	})
+	out := s.toProto(info, wantedLanguages(ctx))
+	if s.Hub != nil {
+		s.Hub.ToAdmins(sessionv1.Event_builder{PluginChanged: sessionv1.PluginChanged_builder{Plugin: s.toProto(info, nil)}.Build()}.Build())
+	}
+	return systemv1.SetPluginProxyResponse_builder{Plugin: out}.Build(), nil
 }
 
 func pluginToProto(p plugins.Info, wanted []language.Tag) *systemv1.Plugin {

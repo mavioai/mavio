@@ -39,6 +39,9 @@ func settingsToProto(s *core.ServerSettings) *systemv1.ServerSettings {
 		Network: systemv1.NetworkSettings_builder{
 			ServerName: &n.ServerName, BaseUrl: &n.BaseURL, HttpsPort: new(int32(n.HTTPSPort)), CertificatePath: &n.CertificatePath, Relay: &n.Relay,
 			KeyPath: &n.KeyPath, LocalDiscovery: &n.LocalDiscovery,
+			Proxies: systemv1.OutboundProxies_builder{
+				PluginCatalogs: &n.Proxies.PluginCatalogs, Images: &n.Proxies.Images, MavioDev: &n.Proxies.MavioDev, Acme: &n.Proxies.ACME,
+			}.Build(),
 		}.Build(),
 		PluginCatalogs: s.PluginCatalogs, PasswordResetPlugin: &s.PasswordResetPlugin,
 		SessionIdleDays: new(int32(s.SessionIdleDays)),
@@ -74,6 +77,11 @@ func settingsFromProto(p *systemv1.ServerSettings, current *core.ServerSettings)
 	if p.HasMetadata() {
 		meta = core.MetadataSettings{PreferredLanguage: p.GetMetadata().GetPreferredLanguage(), Country: p.GetMetadata().GetCountry()}
 	}
+	proxies := current.Network.Proxies
+	if n.HasProxies() {
+		o := n.GetProxies()
+		proxies = core.OutboundProxies{PluginCatalogs: o.GetPluginCatalogs(), Images: o.GetImages(), MavioDev: o.GetMavioDev(), ACME: o.GetAcme()}
+	}
 	idle := current.SessionIdleDays
 	if p.GetSessionIdleDays() != 0 {
 		idle = int(p.GetSessionIdleDays())
@@ -95,17 +103,20 @@ func settingsFromProto(p *systemv1.ServerSettings, current *core.ServerSettings)
 		Network: core.NetworkSettings{
 			ServerName: n.GetServerName(), BaseURL: n.GetBaseUrl(), HTTPSPort: int(n.GetHttpsPort()),
 			CertificatePath: n.GetCertificatePath(), KeyPath: n.GetKeyPath(), LocalDiscovery: n.GetLocalDiscovery(), Relay: n.GetRelay(),
+			Proxies: proxies,
 		},
 		PluginCatalogs: p.GetPluginCatalogs(), PasswordResetPlugin: p.GetPasswordResetPlugin(),
 		SessionIdleDays: idle,
 		Acquisition:     acquisition,
 		Requests:        requests,
 		Metadata:        meta,
-		// The subtitle settings are changed through SubtitleService, and
-		// the disabled plugins through SetPluginEnabled, the assistant
-		// settings through AssistantService.
+		// The subtitle settings are changed through SubtitleService, the
+		// disabled plugins through SetPluginEnabled, the plugins' proxies
+		// through SetPluginProxy and the assistant settings through
+		// AssistantService.
 		Subtitles:       current.Subtitles,
 		DisabledPlugins: current.DisabledPlugins,
+		PluginProxies:   current.PluginProxies,
 		Assistant:       current.Assistant,
 	}, nil
 }
