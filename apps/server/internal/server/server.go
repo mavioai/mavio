@@ -225,7 +225,8 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 		return err
 	}
 	// Plugins start before the handler tree exists; their host API calls
-	// wait for it.
+	// wait for it, so they are given their configurations, which they may
+	// read the host API for, once it is set.
 	hostAPI := newLateHandler()
 	if cfg.PluginDir != "" && cfg.PluginSeedDir != "" {
 		if err := plugins.Seed(ctx, cfg.PluginSeedDir, cfg.PluginDir, log); err != nil {
@@ -273,7 +274,7 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 		})}
 	}
 	plugs, err := plugins.Open(ctx, plugins.Config{
-		Dir: cfg.PluginDir, CacheDir: pluginCache, Store: db, Logger: log, HostAPI: hostAPI,
+		Dir: cfg.PluginDir, CacheDir: pluginCache, Store: db, Logger: log, HostAPI: hostAPI, ConfigureLater: true,
 		Client:  outbound(5*time.Minute, func(p *core.OutboundProxies) string { return p.PluginCatalogs }),
 		DataDir: cfg.PluginDataDir, Fetch: pluginFetch, Activity: activityLog, DevicesChanged: hub.SharedSessionsChanged,
 		Catalogs: func() []string { return set.Get().PluginCatalogs }, Containers: deps,
@@ -486,6 +487,7 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 		return err
 	}
 	hostAPI.set(h)
+	plugs.ConfigureStarted(ctx)
 
 	prefix := network.NewPrefix(h)
 	https.Handler = prefix

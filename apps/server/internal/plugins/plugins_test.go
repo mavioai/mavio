@@ -160,6 +160,22 @@ func TestManager(t *testing.T) {
 	if got := state(t, open(t, dir, s), "dev.mavio.smoke"); got.State != plugins.Ready {
 		t.Errorf("after a restart: state = %v, %v; want Ready", got.State, got.Err)
 	}
+	// Or once the host API serves, when Open leaves it for later.
+	later, err := plugins.Open(ctx, plugins.Config{Dir: dir, CacheDir: compiled, DataDir: t.TempDir(), Store: s, ConfigureLater: true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = later.Close(t.Context()) })
+	if got := state(t, later, "dev.mavio.smoke"); got.State != plugins.Starting {
+		t.Errorf("configured later: state = %v, want Starting", got.State)
+	}
+	later.ConfigureStarted(ctx)
+	if got := state(t, later, "dev.mavio.smoke"); got.State != plugins.Ready {
+		t.Errorf("ConfigureStarted: state = %v, %v; want Ready", got.State, got.Err)
+	}
+	if err := later.Close(ctx); err != nil {
+		t.Fatal(err)
+	}
 	// An upgrade whose schema the stored configuration no longer fits.
 	install(t, dir, "smoke", `{"type":"object","properties":{"token":{"type":"string"}},"required":["token"]}`)
 	if got := state(t, open(t, dir, s), "dev.mavio.smoke"); got.State != plugins.Failed || got.Err == nil {

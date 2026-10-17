@@ -44,6 +44,9 @@ const (
 	// Disabled plugins are installed but not started, as an administrator
 	// chose.
 	Disabled
+	// Starting plugins run but have not been given their stored
+	// configuration yet (Config.ConfigureLater).
+	Starting
 )
 
 // Info describes a plugin found in the plugin folder.
@@ -86,6 +89,11 @@ type Config struct {
 	// HostAPI serves the plugins' host API requests, which it sees with the
 	// plugin's grant (auth.PluginHandler); nil serves none.
 	HostAPI http.Handler
+	// ConfigureLater makes Open start the plugins without delivering their
+	// stored configurations, which ConfigureStarted delivers: plugins may
+	// call the host API while configured, and a HostAPI that serves only
+	// once Open returns would never answer them.
+	ConfigureLater bool
 	// Activity records plugin failures and task runs; nil records none.
 	Activity *activity.Log
 	// DevicesChanged is told the sessions of the devices that plugins
@@ -222,7 +230,10 @@ func Open(ctx context.Context, cfg Config) (*Manager, error) {
 		if _, err := os.Stat(filepath.Join(cfg.Dir, d.Name(), manifest.File)); err != nil {
 			continue
 		}
-		e := m.start(ctx, d.Name(), seen)
+		e := m.launch(ctx, d.Name(), seen)
+		if !cfg.ConfigureLater {
+			m.ready(ctx, e)
+		}
 		seen[e.manifest.GetId()] = true
 		m.plugins = append(m.plugins, e)
 	}
@@ -245,6 +256,30 @@ func (m *Manager) sort() {
 // its configuration, unless it is disabled; seen are the IDs other folders
 // hold.
 func (m *Manager) start(ctx context.Context, folder string, seen map[string]bool) *entry {
+	e := m.launch(ctx, folder, seen)
+	m.ready(ctx, e)
+	return e
+}
+
+// ConfigureStarted delivers the stored configurations of the plugins Open
+// started with Config.ConfigureLater, in turn.
+func (m *Manager) ConfigureStarted(ctx context.Context) {
+	m.mu.Lock()
+	var starting []*entry
+	for _, e := range m.plugins {
+		if e.state == Starting {
+			starting = append(starting, e)
+		}
+	}
+	m.mu.Unlock()
+	for _, e := range starting {
+		m.ready(ctx, e)
+	}
+}
+
+// launch starts the plugin in a folder of the plugin folder, unless it is
+// disabled, leaving it Starting; seen are the IDs other folders hold.
+func (m *Manager) launch(ctx context.Context, folder string, seen map[string]bool) *entry {
 	dir := filepath.Join(m.cfg.Dir, folder)
 	e := &entry{folder: folder, revision: m.revisions.Add(1)}
 	e.manifest, e.err = manifest.Load(dir)
@@ -268,26 +303,47 @@ func (m *Manager) start(ctx context.Context, folder string, seen map[string]bool
 		m.manifests.Store(e.manifest.GetId(), e.manifest)
 		e.plugin, e.err = host.Open(ctx, dir, m.opts)
 	}
-	if e.err == nil {
-		m.pruneContainers(ctx, e.manifest)
-		if m.cfg.Containers != nil {
-			m.cfg.Containers.PluginStarted(ctx, e.manifest)
-		}
-		e.state, e.err = m.configure(ctx, e)
-	}
 	if e.err != nil {
-		e.state = Failed
-		m.log.ErrorContext(ctx, "plugin failed", "plugin", e.manifest.GetId(), "err", e.err)
-		m.cfg.Activity.Record(ctx, core.Activity{
-			Type: "plugin.failed", Severity: core.SeverityError, Title: "Plugin " + e.manifest.GetId() + " failed to start",
-			Message: e.err.Error(), Attributes: map[string]string{"plugin": e.manifest.GetId()},
-		})
-	} else {
-		m.scheduleTasks(ctx, e.manifest)
-		m.log.InfoContext(ctx, "plugin started", "plugin", e.manifest.GetId(), "version", e.manifest.GetVersion(),
-			"configured", e.state == Ready)
+		m.fail(ctx, e, e.err)
+		return e
 	}
+	m.pruneContainers(ctx, e.manifest)
+	if m.cfg.Containers != nil {
+		m.cfg.Containers.PluginStarted(ctx, e.manifest)
+	}
+	e.state = Starting
 	return e
+}
+
+// ready delivers the stored configuration of a plugin launch started, and
+// schedules its tasks.
+func (m *Manager) ready(ctx context.Context, e *entry) {
+	if e.state != Starting {
+		return
+	}
+	state, err := m.configure(ctx, e)
+	if err != nil {
+		m.fail(ctx, e, err)
+		return
+	}
+	m.mu.Lock()
+	e.state = state
+	m.mu.Unlock()
+	m.scheduleTasks(ctx, e.manifest)
+	m.log.InfoContext(ctx, "plugin started", "plugin", e.manifest.GetId(), "version", e.manifest.GetVersion(),
+		"configured", state == Ready)
+}
+
+// fail records why a plugin failed to start.
+func (m *Manager) fail(ctx context.Context, e *entry, err error) {
+	m.mu.Lock()
+	e.state, e.err = Failed, err
+	m.mu.Unlock()
+	m.log.ErrorContext(ctx, "plugin failed", "plugin", e.manifest.GetId(), "err", err)
+	m.cfg.Activity.Record(ctx, core.Activity{
+		Type: "plugin.failed", Severity: core.SeverityError, Title: "Plugin " + e.manifest.GetId() + " failed to start",
+		Message: err.Error(), Attributes: map[string]string{"plugin": e.manifest.GetId()},
+	})
 }
 
 // configure delivers the stored configuration of a started plugin. A
