@@ -206,6 +206,7 @@ Conversations of the assistant ([Assistant §6](assistant.md#6-ai-path)) also ca
 | Resolvers | Yes | No |
 | Long tasks | Up to the task timeout | Unlimited |
 | Container dependencies | Yes; their addresses join `http_hosts` | Yes |
+| When the server ends | Ends with it | Stops at the end of its stdin (`MAVIO_PLUGIN_LIFELINE=stdin`), as the Go and TypeScript SDKs do |
 
 ## 10. DLNA (`plugins/dlna`)
 DLNA is a first-party process plugin: it needs UDP multicast, which WASM has no sockets for, and long-lived listeners. It is built for every platform the server is and bundled in the container image (§10.6).

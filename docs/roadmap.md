@@ -231,6 +231,8 @@ flowchart TD
 - [x] End-to-end test of the assembled server through its API with real ffmpeg and a WASM metadata plugin: an administrator configures the plugin, a library is scanned, its film scraped and played as an HLS direct stream
 - [x] `CGO_ENABLED=0` cross-compilation to Linux, macOS and Windows on amd64 and arm64 (`server:dist`), checked in CI
 - [x] Container images for linux/amd64 and linux/arm64 bundling jellyfin-ffmpeg's portable build, built and run in CI
+- [x] No leftover processes ([Architecture §11](architecture.md)): process plugins stop at the end of their stdin, which the server holds; the server records itself and its children (plugins, rclone, ffmpeg) under `<home>/run`, ends a server still running in its home before it listens and the children one left behind before it starts anything; reconciliation stops the containers of plugins not running
+- [ ] On Windows, the children in a Job Object with `JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE`, so that they end with the server even when they ignore their stdin, as `Pdeathsig` does on Linux
 
 ### P7 Browsing
 **Scope**: what a client lists and opens.

@@ -206,6 +206,7 @@ manifest 在 `external_id_kinds` 中声明外部 ID 类型：键、显示名称�
 | 解析器 | 可以 | 不可以 |
 | 长任务 | 至多任务超时 | 不限 |
 | 容器依赖 | 支持；其地址加入 `http_hosts` | 支持 |
+| 服务端结束时 | 随之结束 | 读到 stdin 结尾时停止（`MAVIO_PLUGIN_LIFELINE=stdin`），Go 与 TypeScript SDK 均如此 |
 
 ## 10. DLNA（`plugins/dlna`）
 DLNA 是第一方进程插件：它需要 UDP 组播（WASM 没有 socket）和长期运行的监听。它为服务端支持的每个平台构建，并打包进容器镜像（§10.6）。

@@ -231,6 +231,8 @@ flowchart TD
 - [x] 端到端测试：通过 API 测试装配好的服务端，使用真实 ffmpeg 与 WASM 元数据插件：管理员配置插件，扫描媒体库，刮削其中的影片并以 HLS 直接串流播放
 - [x] `CGO_ENABLED=0` 交叉编译到 Linux、macOS、Windows 的 amd64 与 arm64（`server:dist`），并在 CI 中检查
 - [x] 内置 jellyfin-ffmpeg 便携版的 linux/amd64 与 linux/arm64 容器镜像，在 CI 中构建并运行
+- [x] 杜绝残留进程（[架构 §11](architecture.zh-CN.md)）：进程插件在读到 stdin 结尾时停止，其写端由服务端持有；服务端把自己与其子进程（插件、rclone、ffmpeg）记录在 `<home>/run` 下，监听前结束同一主目录中仍在运行的服务端，启动任何东西前结束遗留的子进程；对账停止插件未在运行的容器
+- [ ] 在 Windows 上把子进程放入设置了 `JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE` 的 Job Object，使其即使不理会 stdin 也随服务端结束，如同 Linux 上的 `Pdeathsig`
 
 ### P7 浏览
 **范围**：客户端列出与打开的内容。

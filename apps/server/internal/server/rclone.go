@@ -79,7 +79,7 @@ func startRclone(ctx context.Context, log *slog.Logger, cfg Config, jobs core.St
 		}
 		d, err := rclone.StartDaemon(ctx, rclone.DaemonOptions{
 			Path: bin, Config: cfg.RcloneConfig, ConfigPass: pass,
-			CacheDir: filepath.Join(cfg.CacheDir, "rclone"), Logger: log,
+			CacheDir: filepath.Join(cfg.CacheDir, "rclone"), Track: cfg.track("rclone"), Logger: log,
 		})
 		if err != nil {
 			log.ErrorContext(ctx, "libraries on rclone remotes are unavailable", "err", err)

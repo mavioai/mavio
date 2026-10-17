@@ -36,6 +36,7 @@ import (
 	"github.com/mavioai/mavio/apps/server/internal/network"
 	"github.com/mavioai/mavio/apps/server/internal/playback"
 	"github.com/mavioai/mavio/apps/server/internal/plugins"
+	"github.com/mavioai/mavio/apps/server/internal/procs"
 	"github.com/mavioai/mavio/apps/server/internal/providers"
 	"github.com/mavioai/mavio/apps/server/internal/proxies"
 	"github.com/mavioai/mavio/apps/server/internal/relay"
@@ -142,7 +143,18 @@ type Config struct {
 	// DevLibrary adds the Movies and Shows folders of the sample library
 	// in this directory as libraries.
 	DevLibrary string
-	Logger     *slog.Logger
+	// Processes records the processes the server starts, and ends those
+	// a server before left running; nil records none.
+	Processes *procs.Registry
+	Logger    *slog.Logger
+}
+
+// track records the processes what starts, with nil for none.
+func (cfg Config) track(what string) func(pid int) (done func()) {
+	if cfg.Processes == nil {
+		return nil
+	}
+	return cfg.Processes.Track(what)
 }
 
 // Run serves on ln until ctx ends.
@@ -154,6 +166,10 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 	// Administrators read the recent records through the API.
 	ring := logs.NewRing(2000)
 	log = slog.New(ring.Handler(log.Handler(), slog.LevelInfo))
+	// What a server before left running goes before anything starts.
+	if cfg.Processes != nil {
+		cfg.Processes.Reap(ctx)
+	}
 	metadataDir, err := filepath.Abs(cfg.MetadataDir)
 	if err != nil {
 		return err
@@ -290,7 +306,7 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 		Dir: cfg.PluginDir, CacheDir: pluginCache, Store: db, Logger: log, HostAPI: hostAPI, ConfigureLater: true,
 		Client:  outbound(5*time.Minute, func(p *core.OutboundProxies) string { return p.PluginCatalogs }),
 		DataDir: cfg.PluginDataDir, Fetch: pluginFetch, Activity: activityLog, DevicesChanged: hub.SharedSessionsChanged,
-		Catalogs: func() []string { return set.Get().PluginCatalogs }, Containers: deps, Env: users.env,
+		Catalogs: func() []string { return set.Get().PluginCatalogs }, Containers: deps, Env: users.env, Track: cfg.track("plugin"),
 		Disabled: set.Get().DisabledPlugins,
 		SaveDisabled: func(ctx context.Context, ids []string) error {
 			_, err := set.Change(ctx, func(s *core.ServerSettings) error {
@@ -830,7 +846,7 @@ func newLibraryWorker(ctx context.Context, log *slog.Logger, db core.Store, ffpr
 func newPlaybacks(ctx context.Context, log *slog.Logger, db core.Store, hub *events.Hub, activityLog *activity.Log, plugs *plugins.Manager, cfg Config, quietGate *storage.QuietGate, keeper *storage.Keeper, classes *storage.PathClasses, storages *library.Storages) (*playback.Manager, string) {
 	pc := playback.Config{
 		Store: db, Dir: cfg.TranscodeDir, OnChange: hub.SessionsChanged, Record: activityLog.Record, Device: plugs.IsDevice,
-		QuietGate: quietGate, Keeper: keeper, Class: classes.Class, Storages: storages, Logger: log,
+		QuietGate: quietGate, Keeper: keeper, Class: classes.Class, Storages: storages, Track: cfg.track("ffmpeg"), Logger: log,
 	}
 	if dir, err := filepath.Abs(cfg.MetadataDir); err == nil && cfg.MetadataDir != "" {
 		pc.MetadataDir = dir

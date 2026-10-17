@@ -97,6 +97,9 @@ type Config struct {
 	// Env returns what a process plugin's environment adds to the
 	// server's when it starts; nil adds nothing.
 	Env func(m *pluginv1.Manifest) []string
+	// Track records each process plugin's process started until it exits;
+	// nil records none.
+	Track func(pid int) (done func())
 	// Activity records plugin failures and task runs; nil records none.
 	Activity *activity.Log
 	// DevicesChanged is told the sessions of the devices that plugins
@@ -198,7 +201,7 @@ func Open(ctx context.Context, cfg Config) (*Manager, error) {
 	m.ctx, m.cancel = context.WithCancel(context.WithoutCancel(ctx))
 	m.opts = host.Options{
 		WASM:    wasm.Options{CacheDir: cfg.CacheDir, FetchClient: cfg.Fetch, AllowHost: cfg.allowHost, Logger: m.log},
-		Process: process.Options{Logger: m.log},
+		Process: process.Options{Track: cfg.Track, Logger: m.log},
 		DataDir: cfg.DataDir,
 		Env:     cfg.Env,
 	}
