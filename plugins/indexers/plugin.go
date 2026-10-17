@@ -224,13 +224,17 @@ func (p *plugin) Configure(_ context.Context, req *pluginv1.ConfigureRequest) (*
 
 // validate checks the configuration's indexers and proxies.
 func (c *config) validate() error {
-	seen := map[string]bool{}
+	seen, names := map[string]bool{}, map[string]bool{}
 	for i, ic := range c.Indexers {
 		switch {
 		case strings.TrimSpace(ic.ID) == "":
 			return fmt.Errorf("indexers[%d]: id is required", i)
 		case seen[ic.ID]:
 			return fmt.Errorf("indexers[%d]: id %q is repeated", i, ic.ID)
+		case strings.TrimSpace(ic.Name) == "":
+			return fmt.Errorf("indexer %s: name is required", ic.ID)
+		case names[strings.ToLower(ic.Name)]:
+			return fmt.Errorf("indexer %s: name %q should be unique", ic.ID, ic.Name)
 		case strings.TrimSpace(ic.Definition) == "":
 			return fmt.Errorf("indexer %s: definition is required", ic.ID)
 		case ic.LimitsUnit != "" && ic.LimitsUnit != "day" && ic.LimitsUnit != "hour":
@@ -245,7 +249,7 @@ func (c *config) validate() error {
 				return fmt.Errorf("indexer %s: unknown required flag %q", ic.ID, f)
 			}
 		}
-		seen[ic.ID] = true
+		seen[ic.ID], names[strings.ToLower(ic.Name)] = true, true
 	}
 	for i := range c.Proxies {
 		if err := c.Proxies[i].Validate(); err != nil {
@@ -295,12 +299,8 @@ func (p *plugin) newIndexer(ic indexerConfig, proxies []indexer.Proxy) (*indexer
 	case "day":
 		limits.Per = 24 * time.Hour
 	}
-	name := ic.Name
-	if name == "" {
-		name = def.Name
-	}
 	return &indexer.Indexer{
-		ID: ic.ID, Name: name, Priority: ic.priority(),
+		ID: ic.ID, Name: ic.Name, Priority: ic.priority(),
 		Site: site, Session: p.client.Session(proxy, solver), Statuses: p.statuses,
 		Limits: limits, Now: p.now,
 	}, def, nil

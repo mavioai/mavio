@@ -29,7 +29,7 @@ const sceneTvdbID = 900003
 func (s *acquisitionServer) sabnzbd(indexer *fakeNewznab, sab *fakeSABnzbd) {
 	s.t.Helper()
 	s.plugins([]any{
-		map[string]any{"id": "nzb", "definition": "newznab", "settings": map[string]any{"base_url": indexer.URL, "api_key": "nzbkey"}},
+		map[string]any{"id": "nzb", "name": "Newznab", "definition": "newznab", "settings": map[string]any{"base_url": indexer.URL, "api_key": "nzbkey"}},
 	}, []any{
 		map[string]any{"id": "sab", "name": "SABnzbd", "definition": "sabnzbd", "settings": map[string]any{
 			"host": "127.0.0.1", "port": sab.Listener.Addr().(*net.TCPAddr).Port, "api_key": sabAPIKey, "movie_category": "movies", "tv_category": "tv",

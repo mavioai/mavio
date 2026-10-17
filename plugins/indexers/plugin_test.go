@@ -199,13 +199,13 @@ func TestTorznabIndexer(t *testing.T) {
 	configure(t, p, map[string]any{
 		"indexers": []any{
 			map[string]any{
-				"id": "tosho", "definition": "torznab", "settings": map[string]any{"base_url": srv.URL},
+				"id": "tosho", "name": "Tosho", "definition": "torznab", "settings": map[string]any{"base_url": srv.URL},
 				"tags": []any{"anime"}, "required_flags": []any{"freeleech"}, "minimum_seeders": 3, "multi_languages": []any{"French", "Original"},
 				"seed_ratio": 1.5, "seed_time": 60, "season_pack_seed_time": 120, "reject_blocklisted_torrent_hashes": true, "anime_standard_format_search": true,
 				"download_client_id": "download-clients/qbit",
 			},
-			map[string]any{"id": "off", "definition": "torznab", "enabled": false, "settings": map[string]any{"base_url": srv.URL}},
-			map[string]any{"id": "broken", "definition": "nosuchdefinition"},
+			map[string]any{"id": "off", "name": "Off", "definition": "torznab", "enabled": false, "settings": map[string]any{"base_url": srv.URL}},
+			map[string]any{"id": "broken", "name": "Broken", "definition": "nosuchdefinition"},
 		},
 		"definitions": map[string]any{"update": false},
 	})
@@ -224,7 +224,7 @@ func TestTorznabIndexer(t *testing.T) {
 		got, want any
 	}{
 		{"Id", tosho.GetId(), "tosho"},
-		{"Name", tosho.GetName(), "Generic Torznab"},
+		{"Name", tosho.GetName(), "Tosho"},
 		{"Protocol", tosho.GetProtocol(), pluginv1.DownloadProtocol_DOWNLOAD_PROTOCOL_TORRENT},
 		{"Priority", tosho.GetPriority(), int32(25)},
 		{"Enabled", tosho.GetEnabled(), true},
@@ -300,11 +300,13 @@ func TestConfigureInvalid(t *testing.T) {
 	p := newTestPlugin(t)
 	for _, c := range []string{
 		`{"indexers":[{"definition":"torznab"}]}`,
-		`{"indexers":[{"id":"a","definition":"torznab"},{"id":"a","definition":"torznab"}]}`,
-		`{"indexers":[{"id":"a","definition":"torznab","limits_unit":"week"}]}`,
-		`{"indexers":[{"id":"a","definition":"torznab","required_flags":["shiny"]}]}`,
-		`{"indexers":[{"id":"a","definition":"torznab","minimum_seeders":-1}]}`,
-		`{"indexers":[{"id":"a","definition":"torznab","seed_time":-1}]}`,
+		`{"indexers":[{"id":"a","name":"A","definition":"torznab"},{"id":"a","name":"B","definition":"torznab"}]}`,
+		`{"indexers":[{"id":"a","definition":"torznab"}]}`,
+		`{"indexers":[{"id":"a","name":"Tosho","definition":"torznab"},{"id":"b","name":"tosho","definition":"torznab"}]}`,
+		`{"indexers":[{"id":"a","name":"A","definition":"torznab","limits_unit":"week"}]}`,
+		`{"indexers":[{"id":"a","name":"A","definition":"torznab","required_flags":["shiny"]}]}`,
+		`{"indexers":[{"id":"a","name":"A","definition":"torznab","minimum_seeders":-1}]}`,
+		`{"indexers":[{"id":"a","name":"A","definition":"torznab","seed_time":-1}]}`,
 		`{"proxies":[{"kind":"gopher","host":"x"}]}`,
 	} {
 		if _, err := p.Configure(context.Background(), pluginv1.ConfigureRequest_builder{ConfigJson: proto.String(c)}.Build()); err == nil {
@@ -402,7 +404,7 @@ func TestCardigannDefinitions(t *testing.T) {
 
 	p := newTestPlugin(t)
 	configure(t, p, map[string]any{
-		"indexers":    []any{map[string]any{"id": "pub", "definition": "publicsite", "settings": map[string]any{"sort": "added"}}},
+		"indexers":    []any{map[string]any{"id": "pub", "name": "Public Site", "definition": "publicsite", "settings": map[string]any{"sort": "added"}}},
 		"definitions": map[string]any{"url": srv.URL + "/master/11"},
 	})
 	ctx := context.Background()
