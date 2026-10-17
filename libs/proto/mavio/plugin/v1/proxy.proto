@@ -1,0 +1,43 @@
+edition = "2023";
+
+package mavio.plugin.v1;
+
+// ProxyKind is the protocol of a proxy.
+enum ProxyKind {
+  // On the system proxy: the system sets none, and sites are reached
+  // directly.
+  PROXY_KIND_UNSPECIFIED = 0;
+  // HTTP, with CONNECT for HTTPS.
+  PROXY_KIND_HTTP = 1;
+  PROXY_KIND_SOCKS4 = 2;
+  PROXY_KIND_SOCKS5 = 3;
+}
+
+// Proxy is one of the server's proxies, as a plugin uses it.
+message Proxy {
+  // A UUID, or "system" for the system proxy: the one the server's
+  // environment or operating system sets, which every server has.
+  string id = 1;
+  string name = 2;
+  ProxyKind kind = 3;
+  // A name or an IP address, without brackets.
+  string host = 4;
+  int32 port = 5;
+  string username = 6;
+  string password = 7;
+  // Hosts reached directly, as NO_PROXY lists them, with CIDR blocks,
+  // "*" wildcards and "<local>" for names without a dot; only the system
+  // proxy has them.
+  repeated string bypass = 8;
+}
+
+message ListProxiesRequest {
+  // The proxies wanted, "system" among them; all when empty.
+  repeated string ids = 1;
+}
+
+message ListProxiesResponse {
+  // The proxies found, the system proxy first and the others ordered by
+  // name; IDs not found are left out.
+  repeated Proxy proxies = 1;
+}

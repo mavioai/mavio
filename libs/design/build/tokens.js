@@ -4,7 +4,7 @@ import StyleDictionary from 'style-dictionary';
 
 const BASE = ['palette', 'spacing', 'radius', 'elevation', 'motion'];
 export const THEMES = ['dark', 'light'];
-export const TYPE_SCALES = ['standard', 'tv'];
+export const TYPE_SCALES = ['standard', 'desktop', 'tv'];
 export const FORM_FACTORS = ['phone', 'tablet', 'desktop', 'tv'];
 
 // The smallest window widths of the layouts, in points (CSS px). Below tablet

@@ -818,6 +818,8 @@
     <string name="settings_logs">Logs</string>
     <!-- Settings section of a server's API keys. -->
     <string name="settings_api_keys">API Keys</string>
+    <!-- Settings section of a server's proxies. -->
+    <string name="settings_proxies">Proxies</string>
     <!-- Settings section of the monitored movies and episodes still to acquire. -->
     <string name="settings_wanted">Wanted</string>
     <!-- Settings section of the server's downloads: queue, history, blocklist and manual import. -->
@@ -924,6 +926,12 @@
     <string name="plugins_state">State</string>
     <!-- The hosts a plugin may reach. -->
     <string name="plugins_network_access">Network Access</string>
+    <!-- Heading of how a plugin reaches sites. -->
+    <string name="plugins_network">Network</string>
+    <!-- Label of the proxy a plugin's requests go through. -->
+    <string name="plugins_proxy">Proxy</string>
+    <!-- Explains a plugin's proxy; hosts is the list of hosts the plugin reaches. -->
+    <string name="plugins_proxy_detail">Requests to %s go through it</string>
     <!-- Group of the versions a catalog offers of a plugin. -->
     <string name="plugins_versions">Versions</string>
     <!-- Button installing an older or newer version of an installed plugin. -->
@@ -963,7 +971,35 @@
     <!-- Heading of the commands running a container dependency with a GPU. -->
     <string name="plugins_container_gpu_commands">With a GPU</string>
     <!-- Hint above the commands running a container dependency; address is where it will be. -->
-    <string name="plugins_container_commands_hint">Run one of these, then set the address to %s. They hold the dependency\'s secrets.</string>
+    <string name="plugins_container_commands_hint">Start the container with Docker on the server\'s machine in either way below, then set the address to %s. Both hold the dependency\'s secrets; keep them to yourself.</string>
+    <!-- Label of the docker run command starting a container dependency. -->
+    <string name="plugins_container_docker_run">Run this docker run command in a terminal:</string>
+    <!-- Label of the docker run command starting a container dependency beside a server in a container; network is the placeholder <network>. -->
+    <string name="plugins_container_docker_run_network">Run this docker run command in a terminal, %s replaced with the Docker network of the server\'s container:</string>
+    <!-- Label of the Compose service starting a container dependency. -->
+    <string name="plugins_container_compose">Or add this service to a compose.yaml and run docker compose up -d:</string>
+    <!-- Label of the Compose service starting a container dependency beside a server in a container. -->
+    <string name="plugins_container_compose_server">Or add this service to the server\'s own compose.yaml and run docker compose up -d:</string>
+    <!-- Explains a process plugin's proxy. -->
+    <string name="plugins_proxy_process_detail">The plugin\'s HTTP and HTTPS requests go through it, by the server; this machine and the local network are reached directly. A proxy the plugin\'s own settings choose comes first.</string>
+    <!-- Title asking to restart a plugin for its new proxy; name is the plugin's name. -->
+    <string name="plugins_proxy_restart_title">Restart %s\?</string>
+    <!-- Explains why changing a plugin's proxy restarts it. -->
+    <string name="plugins_proxy_restart_message">The plugin goes from reaching sites directly to through the server, or back, which takes effect when it starts again. It restarts now.</string>
+    <!-- Action restarting a plugin with its new proxy. -->
+    <string name="plugins_proxy_restart">Restart</string>
+    <!-- Explains a managed container's proxy. -->
+    <string name="plugins_container_proxy_detail">The container\'s HTTP and HTTPS requests go through it, by the server; the local network is reached directly.</string>
+    <!-- Title asking to recreate a container for its new proxy; name is the container's name. -->
+    <string name="plugins_container_proxy_title">Recreate %s\?</string>
+    <!-- Explains why changing a container's proxy recreates it. -->
+    <string name="plugins_container_proxy_message">The container goes from reaching sites directly to through the server, or back, which takes another container. It is created again now; its volumes stay.</string>
+    <!-- Action recreating a container with its new proxy. -->
+    <string name="plugins_container_recreate">Recreate</string>
+    <!-- Shows the docker run command equivalent to how the server runs a container. -->
+    <string name="plugins_show_command">Show Command</string>
+    <!-- Hides the docker run command of a container. -->
+    <string name="plugins_hide_command">Hide Command</string>
     <!-- State of a server of the account that does not answer at any of its addresses. -->
     <string name="auth_unreachable">Can\'t be reached</string>
     <!-- Under Sign In with Mavio on a server's own web UI, which only its administrator signs in to; host is app.mavio.dev's. -->
@@ -990,6 +1026,8 @@
     <string name="schema_add">Add</string>
     <!-- Button removing an entry from a list in a plugin's configuration. -->
     <string name="schema_remove">Remove</string>
+    <!-- Why a switch of a plugin's configuration is off and cannot be turned on; name is a container dependency's name. -->
+    <string name="schema_needs_container">Set up the container dependency %s below to turn this on.</string>
     <!-- Title of an unnamed entry of a list in a plugin's configuration; number is its place. -->
     <string name="schema_item">Item %s</string>
     <!-- Placeholder of a field taking a list, one value per line. -->
@@ -1002,6 +1040,29 @@
     <string name="schema_show">Show</string>
     <!-- Button hiding a secret revealed in a field. -->
     <string name="schema_hide">Hide</string>
+    <!-- Placeholder of a field choosing one of many options in a plugin's configuration, such as an indexer's kind; typing searches them. -->
+    <string name="schema_choose">Choose</string>
+    <!-- Shown when no option of a plugin's configuration matches what was typed. -->
+    <string name="schema_no_matches">No matches</string>
+    <!-- Tag of an option of a plugin's configuration downloaded as torrents, such as an indexer's kind. -->
+    <string name="schema_tag_torrent">Torrent</string>
+    <!-- Tag of an option of a plugin's configuration downloaded from Usenet. -->
+    <string name="schema_tag_usenet">Usenet</string>
+    <!-- Tag of an indexer anyone may use. -->
+    <string name="schema_tag_public">Public</string>
+    <!-- Tag of an indexer anyone who signs up may use. -->
+    <string name="schema_tag_semi_private">Semi-private</string>
+    <!-- Tag of an indexer for members only, by invitation. -->
+    <string name="schema_tag_private">Private</string>
+    <!-- Filter of the options of a plugin's configuration showing them all, such as indexers of every protocol. -->
+    <string name="schema_all">All</string>
+    <!-- How many options of a plugin's configuration match the search and filters. -->
+    <plurals name="schema_matches">
+        <item quantity="one">%d option</item>
+        <item quantity="other">%d options</item>
+    </plurals>
+    <!-- Shown when only some of the options matching the search are listed; typing more narrows them. -->
+    <string name="schema_matches_first">First %1$s of %2$s</string>
     <!-- Explanation under the Libraries settings section. -->
     <string name="libraries_message">The folders the server scans, each library of one kind of media.</string>
     <!-- Button and title of adding a library. -->
@@ -1363,6 +1424,12 @@
     <string name="overview_ffmpeg_missing">Not found</string>
     <!-- How long the server has been running. -->
     <string name="overview_uptime">Running for</string>
+    <!-- Label of the container engine the server runs plugins' containers on: its name and version. -->
+    <string name="overview_container_engine">Container Engine</string>
+    <!-- Marks a container engine running without root. -->
+    <string name="overview_container_engine_rootless">rootless</string>
+    <!-- The server found no container engine; reason tells why. -->
+    <string name="overview_container_engine_none">Unavailable: %s</string>
     <!-- The load of the server's computer. -->
     <string name="overview_load">Load</string>
     <!-- Footer of the load cards. -->
@@ -1409,6 +1476,14 @@
     <string name="overview_received">Received</string>
     <!-- Bytes sent since the computer started. -->
     <string name="overview_sent">Sent</string>
+    <!-- Heading of the plugins' containers on the overview. -->
+    <string name="overview_containers">Containers</string>
+    <!-- Shown when no plugin container is run or given an address. -->
+    <string name="overview_containers_none">No plugin uses containers.</string>
+    <!-- Tells which plugin a container is for; plugin is the plugin's name. -->
+    <string name="overview_container_of">For %s</string>
+    <!-- A container an administrator runs, reached at the address. -->
+    <string name="overview_container_external">At %s</string>
     <!-- Group of what devices are playing. -->
     <string name="activity_now_playing">Now Playing</string>
     <!-- Shown when no device plays anything. -->
@@ -2793,6 +2868,78 @@
     <string name="keys_revoke_title">Revoke %s\?</string>
     <!-- Explains revoking an API key. -->
     <string name="keys_revoke_message">What uses this key can no longer call the server.</string>
+    <!-- Description of the proxies settings. -->
+    <string name="proxies_message">The proxies the server and its plugins reach sites through: plugins choose one in their settings, the server\'s own requests below.</string>
+    <!-- Opens the form adding a proxy. -->
+    <string name="proxies_add">Add Proxy</string>
+    <!-- Heading of the server's own proxies. -->
+    <string name="proxies_list">Proxies</string>
+    <!-- Shown when the server has no proxies of its own. -->
+    <string name="proxies_empty">No proxies added.</string>
+    <!-- The proxy the server's environment or operating system sets. -->
+    <string name="proxies_system">System proxy</string>
+    <!-- Shown for the system proxy when the system sets none. -->
+    <string name="proxies_system_unset">Not set; sites are reached directly</string>
+    <!-- Explains where the system proxy comes from. -->
+    <string name="proxies_system_footer">The system proxy is read from the server\'s environment (HTTPS_PROXY, HTTP_PROXY, ALL_PROXY and NO_PROXY) or else its operating system\'s network settings, every 30 seconds. It cannot be changed here.</string>
+    <!-- The hosts a proxy does not carry; hosts is their list. -->
+    <string name="proxies_bypass">Reached directly: %s</string>
+    <!-- A plugin's choice of reaching sites without a proxy. -->
+    <string name="proxies_none">No proxy</string>
+    <!-- Explains choosing no proxy. -->
+    <string name="proxies_none_detail">Sites are reached directly</string>
+    <!-- Label of a proxy's name. -->
+    <string name="proxies_name">Name</string>
+    <!-- Label of a proxy's kind: HTTP, SOCKS4 or SOCKS5. -->
+    <string name="proxies_kind">Kind</string>
+    <!-- Label of a proxy's host name or address. -->
+    <string name="proxies_host">Host</string>
+    <!-- Label of a proxy's port. -->
+    <string name="proxies_port">Port</string>
+    <!-- Label of the username a proxy takes. -->
+    <string name="proxies_username">Username</string>
+    <!-- Label of the password a proxy takes. -->
+    <string name="proxies_password">Password</string>
+    <!-- Placeholder of a proxy's password while the stored one is kept. -->
+    <string name="proxies_password_kept">Unchanged</string>
+    <!-- Removes the stored password of a proxy. -->
+    <string name="proxies_clear_password">Remove the password</string>
+    <!-- Tests reaching a site through a proxy. -->
+    <string name="proxies_test">Test</string>
+    <!-- A proxy's test passed; ms is how long the site took to answer. -->
+    <string name="proxies_test_ok">Reached in %s ms</string>
+    <!-- The address sites see a proxy's requests come from. -->
+    <string name="proxies_exit">Exit address %s</string>
+    <!-- A proxy's test failed; error says why. -->
+    <string name="proxies_test_failed">Failed: %s</string>
+    <!-- Deletes a proxy. -->
+    <string name="proxies_remove">Delete</string>
+    <!-- Asks before deleting a proxy; name is its name. -->
+    <string name="proxies_remove_title">Delete %s\?</string>
+    <!-- Explains deleting a proxy. -->
+    <string name="proxies_remove_message">Plugins using this proxy fail until another one is chosen in their settings. A proxy the server\'s requests or a plugin\'s network settings use cannot be deleted.</string>
+    <!-- Heading of the proxies the server's own requests go through. -->
+    <string name="proxies_server_requests">The Server\'s Requests</string>
+    <!-- Explains the proxies of the server's own requests. -->
+    <string name="proxies_server_requests_footer">The proxies the server\'s own requests go through. Addresses of this machine and of the local network are reached directly.</string>
+    <!-- The server's requests for plugin catalogs. -->
+    <string name="proxies_for_catalogs">Plugin Catalogs</string>
+    <!-- Explains the requests for plugin catalogs. -->
+    <string name="proxies_for_catalogs_detail">Catalogs and plugin downloads</string>
+    <!-- The server's requests for items' remote images. -->
+    <string name="proxies_for_images">Images</string>
+    <!-- Explains the requests for images. -->
+    <string name="proxies_for_images_detail">Posters and other artwork of items</string>
+    <!-- The server's requests to mavio.dev. -->
+    <string name="proxies_for_mavio_dev">mavio.dev</string>
+    <!-- Explains the requests to mavio.dev. -->
+    <string name="proxies_for_mavio_dev_detail">Accounts, sign-in and the relay</string>
+    <!-- The server's requests to certificate authorities. -->
+    <string name="proxies_for_acme">Certificates</string>
+    <!-- Explains the requests to certificate authorities. -->
+    <string name="proxies_for_acme_detail">Obtaining the mavio.site certificate</string>
+    <!-- A proxy chosen that the server no longer has. -->
+    <string name="proxies_unknown">Unknown proxy</string>
     <!-- Title of the requests screen and the link to it from Discover. -->
     <string name="requests_title">Requests</string>
     <!-- Filter showing every request. -->
@@ -3676,4 +3823,91 @@
     <string name="assistant_no_speech">No speech plugin is ready: requests are typed, or recognized by the browser.</string>
     <!-- Notice after the assistant's settings are saved. -->
     <string name="assistant_saved">Saved.</string>
+    <!-- Group of the settings' advanced tools, which can be pinned to the sidebar. -->
+    <string name="settings_advanced_group">Advanced</string>
+    <!-- Shows an advanced tool in the sidebar's Features group. -->
+    <string name="settings_pin">Pin to Sidebar</string>
+    <!-- Removes an advanced tool from the sidebar's Features group. -->
+    <string name="settings_unpin">Unpin from Sidebar</string>
+    <!-- Group of the sidebar listing the advanced tools pinned to it. -->
+    <string name="nav_features">Features</string>
+    <!-- Advanced tool searching a server's indexers by text, as Prowlarr's search. -->
+    <string name="indexers_title">Indexer Search</string>
+    <!-- Line under the indexer search's title. -->
+    <string name="indexers_message">Search the indexers by text and send releases to a download client, which downloads them without adding them to a library.</string>
+    <!-- Server choice of the indexer search searching every server the user administers. -->
+    <string name="indexers_all_servers">All Servers</string>
+    <!-- Placeholder and label of the indexer search's text field. -->
+    <string name="indexers_query">Search the indexers</string>
+    <!-- Runs the indexer search. -->
+    <string name="indexers_search">Search</string>
+    <!-- Label of the indexer search's choice of what to search for. -->
+    <string name="indexers_type">Type</string>
+    <!-- Search type: any release. -->
+    <string name="indexers_type_any">Anything</string>
+    <!-- Search type: movies. -->
+    <string name="indexers_type_movie">Movies</string>
+    <!-- Search type: television. -->
+    <string name="indexers_type_tv">TV</string>
+    <!-- Label of the indexer search's category choice, and its column. -->
+    <string name="indexers_category">Category</string>
+    <!-- Category choice of the indexer search: every category. -->
+    <string name="indexers_all_categories">All Categories</string>
+    <!-- Newznab category 1000. -->
+    <string name="indexers_category_console">Console</string>
+    <!-- Newznab category 2000. -->
+    <string name="indexers_category_movies">Movies</string>
+    <!-- Newznab category 3000. -->
+    <string name="indexers_category_audio">Audio</string>
+    <!-- Newznab category 4000. -->
+    <string name="indexers_category_pc">PC</string>
+    <!-- Newznab category 5000. -->
+    <string name="indexers_category_tv">TV</string>
+    <!-- Newznab category 6000. -->
+    <string name="indexers_category_xxx">XXX</string>
+    <!-- Newznab category 7000. -->
+    <string name="indexers_category_books">Books</string>
+    <!-- Newznab category 8000. -->
+    <string name="indexers_category_other">Other</string>
+    <!-- Label of the indexer search's indexer choice, and its column. -->
+    <string name="indexers_indexer">Indexer</string>
+    <!-- Indexer choice of the indexer search: every enabled indexer. -->
+    <string name="indexers_all_indexers">All Indexers</string>
+    <!-- Column of a release's protocol. -->
+    <string name="indexers_protocol">Protocol</string>
+    <!-- A torrent release's protocol. -->
+    <string name="indexers_torrent">Torrent</string>
+    <!-- Column of how long ago a release was published. -->
+    <string name="indexers_age">Age</string>
+    <!-- Column of a release's title. -->
+    <string name="indexers_release_title">Title</string>
+    <!-- Column of a release's size. -->
+    <string name="indexers_size">Size</string>
+    <!-- Column of how often a release was grabbed. -->
+    <string name="indexers_grabs">Grabs</string>
+    <!-- Column of a torrent's seeders and peers. -->
+    <string name="indexers_peers">Peers</string>
+    <!-- Sends a release to a download client without a library item. -->
+    <string name="indexers_send">Send to Download Client</string>
+    <!-- A release was sent to the named download client. -->
+    <string name="indexers_sent">Sent to %s</string>
+    <!-- Copies a release's magnet link, for a torrent client of the user's own. -->
+    <string name="indexers_magnet">Copy Magnet Link</string>
+    <!-- Shown after copying a release's magnet link. -->
+    <string name="indexers_magnet_copied">Magnet Link Copied</string>
+    <!-- Opens a release's page on its indexer. -->
+    <string name="indexers_info">Open Release Page</string>
+    <!-- How many releases a server's search found. -->
+    <plurals name="indexers_results">
+        <item quantity="one">%d release</item>
+        <item quantity="other">%d releases</item>
+    </plurals>
+    <!-- Which page of a server's releases is shown. -->
+    <string name="indexers_page">Page %1$s of %2$s</string>
+    <!-- Shows a server's previous page of releases. -->
+    <string name="indexers_previous">Previous Page</string>
+    <!-- Shows a server's next page of releases. -->
+    <string name="indexers_next">Next Page</string>
+    <!-- Shown before the first indexer search. -->
+    <string name="indexers_prompt">Enter what to search for.</string>
 </resources>

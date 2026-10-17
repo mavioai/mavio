@@ -73,7 +73,7 @@ func TestStreamTranscodes(t *testing.T) {
 					j.Start = start
 					return p.HLSArgs(&j, out)
 				},
-				Start:  supervisor.Exec(ffmpeg),
+				Start:  supervisor.Exec(ffmpeg, nil),
 				MaxGap: 8 * time.Second,
 			})
 			if err != nil {

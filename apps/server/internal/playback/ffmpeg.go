@@ -33,6 +33,6 @@ func (cfg *Config) UseFFmpeg(ctx context.Context, ffmpeg, ffprobe string) (strin
 	}
 	cfg.Builder = &decision.Builder{Transcoder: caps, Logger: logger}
 	cfg.Planner = &planner.Planner{Options: opts, Caps: caps}
-	cfg.FFmpeg, cfg.FFmpegPath, cfg.PauseKey = supervisor.Exec(ffmpeg), ffmpeg, caps.PauseKey
+	cfg.FFmpeg, cfg.FFmpegPath, cfg.PauseKey = supervisor.Exec(ffmpeg, cfg.Track), ffmpeg, caps.PauseKey
 	return v.String(), nil
 }

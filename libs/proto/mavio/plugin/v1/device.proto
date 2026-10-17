@@ -3,7 +3,9 @@ edition = "2023";
 package mavio.plugin.v1;
 
 import "google/protobuf/duration.proto";
+import "mavio/plugin/v1/challenge.proto";
 import "mavio/plugin/v1/container.proto";
+import "mavio/plugin/v1/proxy.proto";
 
 // HostService is what the server offers plugins besides its public API,
 // through the host API. Every plugin may call it.
@@ -24,6 +26,17 @@ service HostService {
   rpc ListContainers(ListContainersRequest) returns (ListContainersResponse) {
     option idempotency_level = NO_SIDE_EFFECTS;
   }
+  // ListProxies returns the server's proxies with their credentials, for
+  // plugins whose configuration schema takes proxies ("x-mavio-options"
+  // {"source": "proxies"}); others are denied. The server configures such plugins
+  // again when a proxy changes or is deleted.
+  rpc ListProxies(ListProxiesRequest) returns (ListProxiesResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // SolveChallenge solves a site's challenge with the ready
+  // CHALLENGE_SOLVER plugins in turn, through the proxy proxy_id names; it
+  // is unavailable when there is none, and not found for an unknown proxy.
+  rpc SolveChallenge(SolveChallengeRequest) returns (SolveChallengeResponse);
 }
 
 // DeviceControllerService carries out the commands users send to a

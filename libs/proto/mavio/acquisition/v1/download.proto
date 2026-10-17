@@ -79,7 +79,8 @@ message ListDownloadClientsResponse {
 
 message GrabReleaseRequest {
   // The movie the release is for, or the wanted series, season or episode
-  // whose episodes it holds.
+  // whose episodes it holds; unset to send the release to the client
+  // alone, neither tracked nor imported, as Prowlarr's searches grab.
   string item_id = 1 [(buf.validate.field).string.uuid = true];
   // A release as SearchReleases returned it.
   Release release = 2 [(buf.validate.field).required = true];
@@ -90,7 +91,10 @@ message GrabReleaseRequest {
 }
 
 message GrabReleaseResponse {
+  // The tracked download; unset for a release sent without an item.
   QueueItem item = 1;
+  // The name of the client the release went to.
+  string client_name = 2;
 }
 
 // DownloadState is where a tracked download is.

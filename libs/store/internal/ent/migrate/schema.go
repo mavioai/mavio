@@ -1135,6 +1135,7 @@ var (
 		{Name: "address", Type: field.TypeString, Default: ""},
 		{Name: "secrets", Type: field.TypeJSON, Nullable: true},
 		{Name: "use_gpu", Type: field.TypeBool, Default: false},
+		{Name: "proxy", Type: field.TypeString, Default: "system"},
 		{Name: "updated_at", Type: field.TypeTime},
 	}
 	// PluginContainersTable holds the schema information for the "plugin_containers" table.
@@ -1149,6 +1150,24 @@ var (
 				Columns: []*schema.Column{PluginContainersColumns[1], PluginContainersColumns[2]},
 			},
 		},
+	}
+	// ProxiesColumns holds the columns for the "proxies" table.
+	ProxiesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "name", Type: field.TypeString},
+		{Name: "name_key", Type: field.TypeString, Unique: true},
+		{Name: "kind", Type: field.TypeString},
+		{Name: "host", Type: field.TypeString},
+		{Name: "port", Type: field.TypeInt},
+		{Name: "username", Type: field.TypeString, Default: ""},
+		{Name: "password", Type: field.TypeString, Default: ""},
+		{Name: "address_key", Type: field.TypeString, Unique: true},
+	}
+	// ProxiesTable holds the schema information for the "proxies" table.
+	ProxiesTable = &schema.Table{
+		Name:       "proxies",
+		Columns:    ProxiesColumns,
+		PrimaryKey: []*schema.Column{ProxiesColumns[0]},
 	}
 	// QualityDefinitionsColumns holds the columns for the "quality_definitions" table.
 	QualityDefinitionsColumns = []*schema.Column{
@@ -1711,6 +1730,7 @@ var (
 		PeopleTable,
 		PluginConfigsTable,
 		PluginContainersTable,
+		ProxiesTable,
 		QualityDefinitionsTable,
 		QualityProfilesTable,
 		ReleaseProfilesTable,
@@ -1851,6 +1871,9 @@ func init() {
 	}
 	PluginContainersTable.Annotation = &entsql.Annotation{
 		Table: "plugin_containers",
+	}
+	ProxiesTable.Annotation = &entsql.Annotation{
+		Table: "proxies",
 	}
 	QualityDefinitionsTable.Annotation = &entsql.Annotation{
 		Table: "quality_definitions",

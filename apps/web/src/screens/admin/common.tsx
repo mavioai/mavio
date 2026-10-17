@@ -3,14 +3,29 @@
 // confirmation of what cannot be undone, and times and their lengths.
 import { clone, type DescMessage, type MessageShape } from "@bufbuild/protobuf";
 import { Link, useNavigate, useParams, useSearch } from "@tanstack/react-router";
-import type { ReactNode } from "react";
+import { createContext, Fragment, type ReactNode, useContext } from "react";
 
-import { locale } from "../../i18n.ts";
+import { locale, t } from "../../i18n.ts";
 import { Icon, type IconName } from "../../icon.tsx";
 import { up } from "../../shell/up.ts";
+import { usePrefs, useWidthClass } from "../../prefs.ts";
 import type { SettingsSearch } from "../settings.tsx";
+import { type MenuId, menuOf } from "../settings-menus.ts";
 
-/** A page's title, the line under it, the buttons beside it, and its groups. */
+/**
+ * What a section's title line ends with where no sidebar shows the
+ * settings: the choice of the server whose settings are shown.
+ */
+export const TitleAccessory = createContext<ReactNode>(null);
+
+/** The trail of a section's page, where the page names none of its own. */
+export const SectionTrail = createContext<ReactNode>(null);
+
+/**
+ * A page's title, the line under it, the buttons beside it, and its
+ * groups; a section's page, without a link back, ends its title line with
+ * the TitleAccessory.
+ */
 export function Page({
   title,
   message,
@@ -24,12 +39,17 @@ export function Page({
   back?: ReactNode;
   children: ReactNode;
 }) {
+  const accessory = useContext(TitleAccessory);
+  const trail = useContext(SectionTrail);
   return (
     <div className="flex flex-col gap-7">
-      {back}
+      {back ?? trail}
       <header className="flex flex-wrap items-center gap-4">
         <div className="min-w-0 flex-1">
-          <h2 data-title className="type-title1">{title}</h2>
+          <div className="flex items-center gap-4">
+            <h2 data-title className="min-w-0 flex-1 type-title1">{title}</h2>
+            {!back && accessory}
+          </div>
           {message && <p className="mt-1 type-body text-text-secondary">{message}</p>}
         </div>
         {actions && <div className="flex flex-wrap items-center gap-3">{actions}</div>}
@@ -59,19 +79,78 @@ export function useChoice<T extends string | number>(key: "view" | "filter", val
 }
 
 /** A link back to a section's list, keeping the server chosen. */
-export function BackLink({ section, label }: { section: string; label: string }) {
+/**
+ * Where a page lies in the settings, each step above it a link, as a
+ * breadcrumb: the settings and the menu holding the page where no sidebar
+ * shows them, then the section of a page within one. A menu is a page
+ * only where no sidebar shows; in the sidebar it is named alone.
+ */
+export function Trail({ menu, section }: { menu?: MenuId; section?: { id: string; label: string; search?: SettingsSearch } }) {
   const cur = useSearch({ strict: false }) as SettingsSearch;
+  const width = useWidthClass();
+  const tv = usePrefs().tv;
+  const compact = width === "compact" || tv;
+  const steps: { label: string; to?: string; search?: SettingsSearch }[] = [];
+  if (compact) steps.push({ label: t("nav.settings"), to: "" });
+  if (menu && (compact || section)) steps.push({ label: menuTitles[menu](), to: compact ? menu : undefined });
+  if (section) steps.push({ label: section.label, to: section.id, search: section.search });
+  if (steps.length === 0) return null;
   return (
-    <Link
-      to="/settings/$section"
-      params={{ section }}
-      search={{ server: cur.server }}
-      {...up}
-      className="inline-flex items-center gap-1 self-start type-body text-accent-text"
-    >
-      <Icon name="back" size={18} />
+    <nav className="flex flex-wrap items-center gap-1 self-start type-callout">
+      {steps.map((s, i) => (
+        <Fragment key={i}>
+          {i > 0 && <Icon name="forward" size={12} className="text-text-tertiary" />}
+          {s.to === undefined ? (
+            <span className="text-text-secondary">{s.label}</span>
+          ) : s.to === "" ? (
+            <Link to="/settings" search={{ server: cur.server }} {...up} className="text-accent-text hover:underline">
+              {s.label}
+            </Link>
+          ) : (
+            <Link to="/settings/$section" params={{ section: s.to }} search={{ server: cur.server, ...s.search }} {...up} className="text-accent-text hover:underline">
+              {s.label}
+            </Link>
+          )}
+        </Fragment>
+      ))}
+    </nav>
+  );
+}
+
+const menuTitles: Record<MenuId, () => string> = {
+  media: () => t("settings.mediaMenu"),
+  acquiring: () => t("settings.acquisitionMenu"),
+  extensions: () => t("settings.extensionsMenu"),
+  maintenance: () => t("settings.maintenanceMenu"),
+};
+
+/** The trail of a page within a section, up to it. */
+export function BackLink({ section, label, search }: { section: string; label: string; search?: SettingsSearch }) {
+  return <Trail menu={menuOf(section)} section={{ id: section, label, search }} />;
+}
+
+/**
+ * The last row of a group, adding to what it lists: a link to the
+ * section's page of the new one, or a button.
+ */
+export function AddRow({ label, search, onClick }: { label: string; search?: SettingsSearch; onClick?: () => void }) {
+  const cur = useSearch({ strict: false }) as SettingsSearch;
+  const { section } = useParams({ strict: false });
+  const className = "flex min-h-13 w-full items-center gap-3 px-4 py-2.5 text-left type-body text-accent-text hover:tint";
+  const content = (
+    <>
+      <Icon name="add" size={20} />
       {label}
+    </>
+  );
+  return search ? (
+    <Link to="/settings/$section" params={{ section: section ?? "" }} search={{ server: cur.server, ...search }} className={className}>
+      {content}
     </Link>
+  ) : (
+    <button type="button" onClick={onClick} className={className}>
+      {content}
+    </button>
   );
 }
 

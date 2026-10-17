@@ -583,10 +583,10 @@ function Panel({
           <div className="flex flex-col gap-3 rounded-[14px] bg-background p-3">
             <p className="type-body">{state.confirmation.text}</p>
             <div className="flex gap-2">
-              <button type="button" onClick={() => onConfirm(true)} className="min-h-9 rounded-md bg-button px-4 type-headline text-on-button hover:opacity-85">
+              <button type="button" onClick={() => onConfirm(true)} className="min-h-9 rounded-md bg-button px-4 type-headline desk:min-h-7 desk:px-3 text-on-button hover:opacity-85">
                 {t("assistant.confirm")}
               </button>
-              <button type="button" onClick={() => onConfirm(false)} className="min-h-9 rounded-md bg-fill px-4 type-headline hover:bg-fill-selected">
+              <button type="button" onClick={() => onConfirm(false)} className="min-h-9 rounded-md bg-fill px-4 type-headline desk:min-h-7 desk:px-3 hover:bg-fill-selected">
                 {t("action.cancel")}
               </button>
             </div>

@@ -407,6 +407,7 @@ export type MessageKey =
   | 'settings.backups'
   | 'settings.logs'
   | 'settings.apiKeys'
+  | 'settings.proxies'
   | 'settings.wanted'
   | 'settings.downloads'
   | 'settings.issues'
@@ -460,6 +461,9 @@ export type MessageKey =
   | 'plugins.catalog'
   | 'plugins.state'
   | 'plugins.networkAccess'
+  | 'plugins.network'
+  | 'plugins.proxy'
+  | 'plugins.proxyDetail'
   | 'plugins.versions'
   | 'plugins.installThis'
   | 'plugins.configuration'
@@ -480,6 +484,20 @@ export type MessageKey =
   | 'plugins.containerCommands'
   | 'plugins.containerGpuCommands'
   | 'plugins.containerCommandsHint'
+  | 'plugins.containerDockerRun'
+  | 'plugins.containerDockerRunNetwork'
+  | 'plugins.containerCompose'
+  | 'plugins.containerComposeServer'
+  | 'plugins.proxyProcessDetail'
+  | 'plugins.proxyRestartTitle'
+  | 'plugins.proxyRestartMessage'
+  | 'plugins.proxyRestart'
+  | 'plugins.containerProxyDetail'
+  | 'plugins.containerProxyTitle'
+  | 'plugins.containerProxyMessage'
+  | 'plugins.containerRecreate'
+  | 'plugins.showCommand'
+  | 'plugins.hideCommand'
   | 'auth.unreachable'
   | 'auth.othersUseApp'
   | 'auth.setUpElsewhere'
@@ -493,12 +511,23 @@ export type MessageKey =
   | 'auth.createWithPasskey'
   | 'schema.add'
   | 'schema.remove'
+  | 'schema.needsContainer'
   | 'schema.item'
   | 'schema.onePerLine'
   | 'schema.invalidJson'
   | 'schema.default'
   | 'schema.show'
   | 'schema.hide'
+  | 'schema.choose'
+  | 'schema.noMatches'
+  | 'schema.tagTorrent'
+  | 'schema.tagUsenet'
+  | 'schema.tagPublic'
+  | 'schema.tagSemiPrivate'
+  | 'schema.tagPrivate'
+  | 'schema.all'
+  | 'schema.matches'
+  | 'schema.matchesFirst'
   | 'libraries.message'
   | 'libraries.add'
   | 'libraries.create'
@@ -678,6 +707,9 @@ export type MessageKey =
   | 'overview.ffmpeg'
   | 'overview.ffmpegMissing'
   | 'overview.uptime'
+  | 'overview.containerEngine'
+  | 'overview.containerEngineRootless'
+  | 'overview.containerEngineNone'
   | 'overview.load'
   | 'overview.loadFooter'
   | 'overview.loadUnknown'
@@ -701,6 +733,10 @@ export type MessageKey =
   | 'overview.upload'
   | 'overview.received'
   | 'overview.sent'
+  | 'overview.containers'
+  | 'overview.containersNone'
+  | 'overview.containerOf'
+  | 'overview.containerExternal'
   | 'activity.nowPlaying'
   | 'activity.nothingPlaying'
   | 'activity.directPlay'
@@ -1387,6 +1423,42 @@ export type MessageKey =
   | 'keys.revoke'
   | 'keys.revokeTitle'
   | 'keys.revokeMessage'
+  | 'proxies.message'
+  | 'proxies.add'
+  | 'proxies.list'
+  | 'proxies.empty'
+  | 'proxies.system'
+  | 'proxies.systemUnset'
+  | 'proxies.systemFooter'
+  | 'proxies.bypass'
+  | 'proxies.none'
+  | 'proxies.noneDetail'
+  | 'proxies.name'
+  | 'proxies.kind'
+  | 'proxies.host'
+  | 'proxies.port'
+  | 'proxies.username'
+  | 'proxies.password'
+  | 'proxies.passwordKept'
+  | 'proxies.clearPassword'
+  | 'proxies.test'
+  | 'proxies.testOk'
+  | 'proxies.exit'
+  | 'proxies.testFailed'
+  | 'proxies.remove'
+  | 'proxies.removeTitle'
+  | 'proxies.removeMessage'
+  | 'proxies.serverRequests'
+  | 'proxies.serverRequestsFooter'
+  | 'proxies.forCatalogs'
+  | 'proxies.forCatalogsDetail'
+  | 'proxies.forImages'
+  | 'proxies.forImagesDetail'
+  | 'proxies.forMavioDev'
+  | 'proxies.forMavioDevDetail'
+  | 'proxies.forAcme'
+  | 'proxies.forAcmeDetail'
+  | 'proxies.unknown'
   | 'requests.title'
   | 'requests.all'
   | 'requests.pending'
@@ -1817,7 +1889,49 @@ export type MessageKey =
   | 'assistant.language'
   | 'assistant.addVoice'
   | 'assistant.noSpeech'
-  | 'assistant.saved';
+  | 'assistant.saved'
+  | 'settings.advancedGroup'
+  | 'settings.pin'
+  | 'settings.unpin'
+  | 'nav.features'
+  | 'indexers.title'
+  | 'indexers.message'
+  | 'indexers.allServers'
+  | 'indexers.query'
+  | 'indexers.search'
+  | 'indexers.type'
+  | 'indexers.typeAny'
+  | 'indexers.typeMovie'
+  | 'indexers.typeTv'
+  | 'indexers.category'
+  | 'indexers.allCategories'
+  | 'indexers.categoryConsole'
+  | 'indexers.categoryMovies'
+  | 'indexers.categoryAudio'
+  | 'indexers.categoryPc'
+  | 'indexers.categoryTv'
+  | 'indexers.categoryXxx'
+  | 'indexers.categoryBooks'
+  | 'indexers.categoryOther'
+  | 'indexers.indexer'
+  | 'indexers.allIndexers'
+  | 'indexers.protocol'
+  | 'indexers.torrent'
+  | 'indexers.age'
+  | 'indexers.releaseTitle'
+  | 'indexers.size'
+  | 'indexers.grabs'
+  | 'indexers.peers'
+  | 'indexers.send'
+  | 'indexers.sent'
+  | 'indexers.magnet'
+  | 'indexers.magnetCopied'
+  | 'indexers.info'
+  | 'indexers.results'
+  | 'indexers.page'
+  | 'indexers.previous'
+  | 'indexers.next'
+  | 'indexers.prompt';
 
 /** The ICU MessageFormat strings of each locale. */
 export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: string } } = {
@@ -2217,6 +2331,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "settings.backups": "Backups",
     "settings.logs": "Logs",
     "settings.apiKeys": "API Keys",
+    "settings.proxies": "Proxies",
     "settings.wanted": "Wanted",
     "settings.downloads": "Downloads",
     "settings.issues": "Issues",
@@ -2270,6 +2385,9 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "plugins.catalog": "Catalog",
     "plugins.state": "State",
     "plugins.networkAccess": "Network Access",
+    "plugins.network": "Network",
+    "plugins.proxy": "Proxy",
+    "plugins.proxyDetail": "Requests to {hosts} go through it",
     "plugins.versions": "Versions",
     "plugins.installThis": "Install This Version",
     "plugins.configuration": "Configuration",
@@ -2289,7 +2407,21 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "plugins.containerUnavailable": "Unavailable",
     "plugins.containerCommands": "Run It Yourself",
     "plugins.containerGpuCommands": "With a GPU",
-    "plugins.containerCommandsHint": "Run one of these, then set the address to {address}. They hold the dependency's secrets.",
+    "plugins.containerCommandsHint": "Start the container with Docker on the server's machine in either way below, then set the address to {address}. Both hold the dependency's secrets; keep them to yourself.",
+    "plugins.containerDockerRun": "Run this docker run command in a terminal:",
+    "plugins.containerDockerRunNetwork": "Run this docker run command in a terminal, {network} replaced with the Docker network of the server's container:",
+    "plugins.containerCompose": "Or add this service to a compose.yaml and run docker compose up -d:",
+    "plugins.containerComposeServer": "Or add this service to the server's own compose.yaml and run docker compose up -d:",
+    "plugins.proxyProcessDetail": "The plugin's HTTP and HTTPS requests go through it, by the server; this machine and the local network are reached directly. A proxy the plugin's own settings choose comes first.",
+    "plugins.proxyRestartTitle": "Restart {name}?",
+    "plugins.proxyRestartMessage": "The plugin goes from reaching sites directly to through the server, or back, which takes effect when it starts again. It restarts now.",
+    "plugins.proxyRestart": "Restart",
+    "plugins.containerProxyDetail": "The container's HTTP and HTTPS requests go through it, by the server; the local network is reached directly.",
+    "plugins.containerProxyTitle": "Recreate {name}?",
+    "plugins.containerProxyMessage": "The container goes from reaching sites directly to through the server, or back, which takes another container. It is created again now; its volumes stay.",
+    "plugins.containerRecreate": "Recreate",
+    "plugins.showCommand": "Show Command",
+    "plugins.hideCommand": "Hide Command",
     "auth.unreachable": "Can't be reached",
     "auth.othersUseApp": "Only the administrator signs in here. Everyone else watches at {host}.",
     "auth.setUpElsewhere": "Set Up {server} on a Computer or Phone",
@@ -2303,12 +2435,23 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "auth.createWithPasskey": "Create with a Passkey",
     "schema.add": "Add",
     "schema.remove": "Remove",
+    "schema.needsContainer": "Set up the container dependency {name} below to turn this on.",
     "schema.item": "Item {number}",
     "schema.onePerLine": "One per line",
     "schema.invalidJson": "Not valid JSON",
     "schema.default": "Default ({value})",
     "schema.show": "Show",
     "schema.hide": "Hide",
+    "schema.choose": "Choose",
+    "schema.noMatches": "No matches",
+    "schema.tagTorrent": "Torrent",
+    "schema.tagUsenet": "Usenet",
+    "schema.tagPublic": "Public",
+    "schema.tagSemiPrivate": "Semi-private",
+    "schema.tagPrivate": "Private",
+    "schema.all": "All",
+    "schema.matches": "{count, plural, one {# option} other {# options}}",
+    "schema.matchesFirst": "First {shown} of {count}",
     "libraries.message": "The folders the server scans, each library of one kind of media.",
     "libraries.add": "Add Library",
     "libraries.create": "Add",
@@ -2488,6 +2631,9 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "overview.ffmpeg": "FFmpeg",
     "overview.ffmpegMissing": "Not found",
     "overview.uptime": "Running for",
+    "overview.containerEngine": "Container Engine",
+    "overview.containerEngineRootless": "rootless",
+    "overview.containerEngineNone": "Unavailable: {reason}",
     "overview.load": "Load",
     "overview.loadFooter": "Sampled every two seconds while this page is open. Totals are since the computer started.",
     "overview.loadUnknown": "Not told on this system",
@@ -2511,6 +2657,10 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "overview.upload": "Upload",
     "overview.received": "Received",
     "overview.sent": "Sent",
+    "overview.containers": "Containers",
+    "overview.containersNone": "No plugin uses containers.",
+    "overview.containerOf": "For {plugin}",
+    "overview.containerExternal": "At {address}",
     "activity.nowPlaying": "Now Playing",
     "activity.nothingPlaying": "Nothing is playing.",
     "activity.directPlay": "Direct Play",
@@ -3197,6 +3347,42 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "keys.revoke": "Revoke",
     "keys.revokeTitle": "Revoke {name}?",
     "keys.revokeMessage": "What uses this key can no longer call the server.",
+    "proxies.message": "The proxies the server and its plugins reach sites through: plugins choose one in their settings, the server's own requests below.",
+    "proxies.add": "Add Proxy",
+    "proxies.list": "Proxies",
+    "proxies.empty": "No proxies added.",
+    "proxies.system": "System proxy",
+    "proxies.systemUnset": "Not set; sites are reached directly",
+    "proxies.systemFooter": "The system proxy is read from the server's environment (HTTPS_PROXY, HTTP_PROXY, ALL_PROXY and NO_PROXY) or else its operating system's network settings, every 30 seconds. It cannot be changed here.",
+    "proxies.bypass": "Reached directly: {hosts}",
+    "proxies.none": "No proxy",
+    "proxies.noneDetail": "Sites are reached directly",
+    "proxies.name": "Name",
+    "proxies.kind": "Kind",
+    "proxies.host": "Host",
+    "proxies.port": "Port",
+    "proxies.username": "Username",
+    "proxies.password": "Password",
+    "proxies.passwordKept": "Unchanged",
+    "proxies.clearPassword": "Remove the password",
+    "proxies.test": "Test",
+    "proxies.testOk": "Reached in {ms} ms",
+    "proxies.exit": "Exit address {address}",
+    "proxies.testFailed": "Failed: {error}",
+    "proxies.remove": "Delete",
+    "proxies.removeTitle": "Delete {name}?",
+    "proxies.removeMessage": "Plugins using this proxy fail until another one is chosen in their settings. A proxy the server's requests or a plugin's network settings use cannot be deleted.",
+    "proxies.serverRequests": "The Server's Requests",
+    "proxies.serverRequestsFooter": "The proxies the server's own requests go through. Addresses of this machine and of the local network are reached directly.",
+    "proxies.forCatalogs": "Plugin Catalogs",
+    "proxies.forCatalogsDetail": "Catalogs and plugin downloads",
+    "proxies.forImages": "Images",
+    "proxies.forImagesDetail": "Posters and other artwork of items",
+    "proxies.forMavioDev": "mavio.dev",
+    "proxies.forMavioDevDetail": "Accounts, sign-in and the relay",
+    "proxies.forAcme": "Certificates",
+    "proxies.forAcmeDetail": "Obtaining the mavio.site certificate",
+    "proxies.unknown": "Unknown proxy",
     "requests.title": "Requests",
     "requests.all": "All",
     "requests.pending": "Pending",
@@ -3627,7 +3813,49 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "assistant.language": "Language",
     "assistant.addVoice": "Add Voice",
     "assistant.noSpeech": "No speech plugin is ready: requests are typed, or recognized by the browser.",
-    "assistant.saved": "Saved."
+    "assistant.saved": "Saved.",
+    "settings.advancedGroup": "Advanced",
+    "settings.pin": "Pin to Sidebar",
+    "settings.unpin": "Unpin from Sidebar",
+    "nav.features": "Features",
+    "indexers.title": "Indexer Search",
+    "indexers.message": "Search the indexers by text and send releases to a download client, which downloads them without adding them to a library.",
+    "indexers.allServers": "All Servers",
+    "indexers.query": "Search the indexers",
+    "indexers.search": "Search",
+    "indexers.type": "Type",
+    "indexers.typeAny": "Anything",
+    "indexers.typeMovie": "Movies",
+    "indexers.typeTv": "TV",
+    "indexers.category": "Category",
+    "indexers.allCategories": "All Categories",
+    "indexers.categoryConsole": "Console",
+    "indexers.categoryMovies": "Movies",
+    "indexers.categoryAudio": "Audio",
+    "indexers.categoryPc": "PC",
+    "indexers.categoryTv": "TV",
+    "indexers.categoryXxx": "XXX",
+    "indexers.categoryBooks": "Books",
+    "indexers.categoryOther": "Other",
+    "indexers.indexer": "Indexer",
+    "indexers.allIndexers": "All Indexers",
+    "indexers.protocol": "Protocol",
+    "indexers.torrent": "Torrent",
+    "indexers.age": "Age",
+    "indexers.releaseTitle": "Title",
+    "indexers.size": "Size",
+    "indexers.grabs": "Grabs",
+    "indexers.peers": "Peers",
+    "indexers.send": "Send to Download Client",
+    "indexers.sent": "Sent to {client}",
+    "indexers.magnet": "Copy Magnet Link",
+    "indexers.magnetCopied": "Magnet Link Copied",
+    "indexers.info": "Open Release Page",
+    "indexers.results": "{count, plural, one {# release} other {# releases}}",
+    "indexers.page": "Page {page} of {pages}",
+    "indexers.previous": "Previous Page",
+    "indexers.next": "Next Page",
+    "indexers.prompt": "Enter what to search for."
   },
   "zh-Hans": {
     "nav.home": "首页",
@@ -4025,6 +4253,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "settings.backups": "备份",
     "settings.logs": "日志",
     "settings.apiKeys": "API 密钥",
+    "settings.proxies": "代理",
     "settings.wanted": "想要",
     "settings.downloads": "下载",
     "settings.issues": "问题",
@@ -4078,6 +4307,9 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "plugins.catalog": "插件目录",
     "plugins.state": "状态",
     "plugins.networkAccess": "网络访问",
+    "plugins.network": "网络",
+    "plugins.proxy": "代理",
+    "plugins.proxyDetail": "访问 {hosts} 时经由它",
     "plugins.versions": "版本",
     "plugins.installThis": "安装此版本",
     "plugins.configuration": "配置",
@@ -4097,7 +4329,21 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "plugins.containerUnavailable": "不可用",
     "plugins.containerCommands": "自行运行",
     "plugins.containerGpuCommands": "使用 GPU",
-    "plugins.containerCommandsHint": "运行其中一条命令，然后把地址设为 {address}。命令中含有该依赖的密钥。",
+    "plugins.containerCommandsHint": "在服务器所在的机器上用 Docker 启动该容器，以下两种方式任选其一，启动后把地址设为 {address}。两者都含有该依赖的密钥，请勿外传。",
+    "plugins.containerDockerRun": "在终端执行这条 docker run 命令：",
+    "plugins.containerDockerRunNetwork": "在终端执行这条 docker run 命令，并把其中的 {network} 换成服务器容器所在的 Docker 网络：",
+    "plugins.containerCompose": "或者把这个服务加入一个 compose.yaml，再执行 docker compose up -d：",
+    "plugins.containerComposeServer": "或者把这个服务加入服务器自己的 compose.yaml，再执行 docker compose up -d：",
+    "plugins.proxyProcessDetail": "插件的 HTTP 和 HTTPS 请求经服务器发往此代理；本机和局域网直连。插件自身设置中选择的代理优先。",
+    "plugins.proxyRestartTitle": "重启 {name}？",
+    "plugins.proxyRestartMessage": "插件将从直连改为经服务器代理，或反过来，这要在插件重新启动后才生效。现在将重启插件。",
+    "plugins.proxyRestart": "重启",
+    "plugins.containerProxyDetail": "容器的 HTTP 和 HTTPS 请求经服务器发往此代理；局域网直连。",
+    "plugins.containerProxyTitle": "重建 {name}？",
+    "plugins.containerProxyMessage": "容器将从直连改为经服务器代理，或反过来，这需要重新创建容器。现在将重建容器，其数据卷保留。",
+    "plugins.containerRecreate": "重建",
+    "plugins.showCommand": "显示运行命令",
+    "plugins.hideCommand": "隐藏运行命令",
     "auth.unreachable": "无法连接",
     "auth.othersUseApp": "只有管理员可以登录，其他人请在 {host} 观看。",
     "auth.setUpElsewhere": "请在电脑或手机上设置 {server}",
@@ -4111,12 +4357,23 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "auth.createWithPasskey": "使用通行密钥创建",
     "schema.add": "添加",
     "schema.remove": "移除",
+    "schema.needsContainer": "需先在下方的容器依赖中设置 {name}，才能开启。",
     "schema.item": "第 {number} 项",
     "schema.onePerLine": "每行一项",
     "schema.invalidJson": "不是有效的 JSON",
     "schema.default": "默认（{value}）",
     "schema.show": "显示",
     "schema.hide": "隐藏",
+    "schema.choose": "选择",
+    "schema.noMatches": "没有匹配项",
+    "schema.tagTorrent": "种子",
+    "schema.tagUsenet": "Usenet",
+    "schema.tagPublic": "公开",
+    "schema.tagSemiPrivate": "半公开",
+    "schema.tagPrivate": "私有",
+    "schema.all": "全部",
+    "schema.matches": "{count, plural, other {# 项}}",
+    "schema.matchesFirst": "显示前 {shown} 项，共 {count} 项",
     "libraries.message": "服务器扫描的文件夹，每个媒体库存放一类媒体。",
     "libraries.add": "添加媒体库",
     "libraries.create": "添加",
@@ -4296,6 +4553,9 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "overview.ffmpeg": "FFmpeg",
     "overview.ffmpegMissing": "未找到",
     "overview.uptime": "已运行",
+    "overview.containerEngine": "容器引擎",
+    "overview.containerEngineRootless": "无 root",
+    "overview.containerEngineNone": "不可用：{reason}",
     "overview.load": "负载",
     "overview.loadFooter": "页面打开期间每两秒采样一次；累计值自电脑启动起计。",
     "overview.loadUnknown": "此系统不提供",
@@ -4319,6 +4579,10 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "overview.upload": "上传",
     "overview.received": "已接收",
     "overview.sent": "已发送",
+    "overview.containers": "容器",
+    "overview.containersNone": "没有插件使用容器。",
+    "overview.containerOf": "{plugin} 依赖",
+    "overview.containerExternal": "位于 {address}",
     "activity.nowPlaying": "正在播放",
     "activity.nothingPlaying": "当前没有播放。",
     "activity.directPlay": "直接播放",
@@ -5005,6 +5269,42 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "keys.revoke": "撤销",
     "keys.revokeTitle": "撤销 {name}？",
     "keys.revokeMessage": "使用此密钥的程序将无法再调用服务器。",
+    "proxies.message": "服务器与插件访问站点时使用的代理：插件在各自的设置中选择，服务器自身的请求在下方选择。",
+    "proxies.add": "添加代理",
+    "proxies.list": "代理",
+    "proxies.empty": "尚未添加代理。",
+    "proxies.system": "系统代理",
+    "proxies.systemUnset": "未设置；直接访问站点",
+    "proxies.systemFooter": "系统代理每 30 秒从服务器的环境变量（HTTPS_PROXY、HTTP_PROXY、ALL_PROXY 与 NO_PROXY）读取，未设置时读取操作系统的网络设置。它不能在此更改。",
+    "proxies.bypass": "直接访问：{hosts}",
+    "proxies.none": "不使用代理",
+    "proxies.noneDetail": "直接访问站点",
+    "proxies.name": "名称",
+    "proxies.kind": "类型",
+    "proxies.host": "主机",
+    "proxies.port": "端口",
+    "proxies.username": "用户名",
+    "proxies.password": "密码",
+    "proxies.passwordKept": "保持不变",
+    "proxies.clearPassword": "移除密码",
+    "proxies.test": "测试",
+    "proxies.testOk": "{ms} 毫秒内连通",
+    "proxies.exit": "出口地址 {address}",
+    "proxies.testFailed": "失败：{error}",
+    "proxies.remove": "删除",
+    "proxies.removeTitle": "删除 {name}？",
+    "proxies.removeMessage": "在设置中使用此代理的插件将无法工作，直到另选代理。服务器的请求或插件的网络设置正在使用的代理不能删除。",
+    "proxies.serverRequests": "服务器的请求",
+    "proxies.serverRequestsFooter": "服务器自身的请求所经由的代理。本机与局域网的地址直接访问。",
+    "proxies.forCatalogs": "插件目录",
+    "proxies.forCatalogsDetail": "插件目录与插件的下载",
+    "proxies.forImages": "图片",
+    "proxies.forImagesDetail": "条目的海报等图片",
+    "proxies.forMavioDev": "mavio.dev",
+    "proxies.forMavioDevDetail": "账号、登录与中继",
+    "proxies.forAcme": "证书",
+    "proxies.forAcmeDetail": "申请 mavio.site 证书",
+    "proxies.unknown": "未知代理",
     "requests.title": "请求",
     "requests.all": "全部",
     "requests.pending": "待审批",
@@ -5435,6 +5735,48 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "assistant.language": "语言",
     "assistant.addVoice": "添加语音",
     "assistant.noSpeech": "没有可用的语音插件：请求需要输入，或由浏览器识别。",
-    "assistant.saved": "已保存。"
+    "assistant.saved": "已保存。",
+    "settings.advancedGroup": "高级功能",
+    "settings.pin": "固定到侧边栏",
+    "settings.unpin": "从侧边栏取消固定",
+    "nav.features": "功能",
+    "indexers.title": "索引搜索",
+    "indexers.message": "按文字搜索索引器，并把发布发送到下载客户端；下载的内容不会加入媒体库。",
+    "indexers.allServers": "全部服务器",
+    "indexers.query": "搜索索引器",
+    "indexers.search": "搜索",
+    "indexers.type": "类型",
+    "indexers.typeAny": "全部",
+    "indexers.typeMovie": "电影",
+    "indexers.typeTv": "剧集",
+    "indexers.category": "分类",
+    "indexers.allCategories": "全部分类",
+    "indexers.categoryConsole": "游戏主机",
+    "indexers.categoryMovies": "电影",
+    "indexers.categoryAudio": "音频",
+    "indexers.categoryPc": "电脑",
+    "indexers.categoryTv": "电视",
+    "indexers.categoryXxx": "成人",
+    "indexers.categoryBooks": "图书",
+    "indexers.categoryOther": "其他",
+    "indexers.indexer": "索引器",
+    "indexers.allIndexers": "全部索引器",
+    "indexers.protocol": "协议",
+    "indexers.torrent": "Torrent",
+    "indexers.age": "发布时间",
+    "indexers.releaseTitle": "标题",
+    "indexers.size": "大小",
+    "indexers.grabs": "抓取数",
+    "indexers.peers": "做种 / 用户",
+    "indexers.send": "发送到下载客户端",
+    "indexers.sent": "已发送到 {client}",
+    "indexers.magnet": "复制磁力链接",
+    "indexers.magnetCopied": "已复制磁力链接",
+    "indexers.info": "打开发布页面",
+    "indexers.results": "{count, plural, other {# 个发布}}",
+    "indexers.page": "第 {page} / {pages} 页",
+    "indexers.previous": "上一页",
+    "indexers.next": "下一页",
+    "indexers.prompt": "输入要搜索的内容。"
   }
 };

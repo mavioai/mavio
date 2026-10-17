@@ -380,6 +380,18 @@ func TestRequestSettingsRoundTrip(t *testing.T) {
 	if got, err := settingsFromProto(p, &current); err != nil || got.Metadata != current.Metadata {
 		t.Errorf("settings without metadata = %+v, %v", got.Metadata, err)
 	}
+	// The server's proxies round trip; settings without them keep the
+	// current ones, and the plugins' proxies are kept.
+	current.Network.Proxies = core.OutboundProxies{PluginCatalogs: core.NewID().String(), Images: "", MavioDev: core.SystemProxyID, ACME: ""}
+	current.PluginProxies = map[string]string{"dev.mavio.scraper-tmdb": ""}
+	if got, err := settingsFromProto(settingsToProto(&current), &core.ServerSettings{}); err != nil || got.Network.Proxies != current.Network.Proxies {
+		t.Errorf("proxies = %+v, %v, want %+v", got.Network.Proxies, err, current.Network.Proxies)
+	}
+	p = settingsToProto(&current)
+	p.GetNetwork().ClearProxies()
+	if got, err := settingsFromProto(p, &current); err != nil || got.Network.Proxies != current.Network.Proxies || !reflect.DeepEqual(got.PluginProxies, current.PluginProxies) {
+		t.Errorf("settings without proxies = %+v, %q, %v", got.Network.Proxies, got.PluginProxies, err)
+	}
 }
 
 func TestPolicyRequestPermissions(t *testing.T) {

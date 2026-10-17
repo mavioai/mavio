@@ -5,6 +5,7 @@ include!("mavio.system.v1.plugin.rs");
 include!("mavio.system.v1.ai.rs");
 include!("mavio.system.v1.backup.rs");
 include!("mavio.system.v1.localization.rs");
+include!("mavio.system.v1.proxy.rs");
 include!("mavio.system.v1.system.rs");
 include!("mavio.system.v1.task.rs");
 #[allow(
@@ -29,18 +30,21 @@ pub mod __buffa {
         include!("mavio.system.v1.ai.__view.rs");
         include!("mavio.system.v1.backup.__view.rs");
         include!("mavio.system.v1.localization.__view.rs");
+        include!("mavio.system.v1.proxy.__view.rs");
         include!("mavio.system.v1.system.__view.rs");
         include!("mavio.system.v1.task.__view.rs");
         pub mod oneof {
             #[allow(unused_imports)]
             use super::*;
             include!("mavio.system.v1.ai.__view_oneof.rs");
+            include!("mavio.system.v1.proxy.__view_oneof.rs");
         }
     }
     pub mod oneof {
         #[allow(unused_imports)]
         use super::*;
         include!("mavio.system.v1.ai.__oneof.rs");
+        include!("mavio.system.v1.proxy.__oneof.rs");
     }
 }
 #[doc(inline)]
@@ -91,6 +95,18 @@ pub use self::__buffa::view::SetPluginConfigRequestOwnedView;
 pub use self::__buffa::view::SetPluginConfigResponseView;
 #[doc(inline)]
 pub use self::__buffa::view::SetPluginConfigResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ListPluginConfigOptionsRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::ListPluginConfigOptionsRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ListPluginConfigOptionsResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::ListPluginConfigOptionsResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::PluginConfigOptionView;
+#[doc(inline)]
+pub use self::__buffa::view::PluginConfigOptionOwnedView;
 #[doc(inline)]
 pub use self::__buffa::view::CatalogPluginView;
 #[doc(inline)]
@@ -160,6 +176,14 @@ pub use self::__buffa::view::ListPluginContainersResponseView;
 #[doc(inline)]
 pub use self::__buffa::view::ListPluginContainersResponseOwnedView;
 #[doc(inline)]
+pub use self::__buffa::view::ListContainersRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::ListContainersRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ListContainersResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::ListContainersResponseOwnedView;
+#[doc(inline)]
 pub use self::__buffa::view::SetPluginContainerRequestView;
 #[doc(inline)]
 pub use self::__buffa::view::SetPluginContainerRequestOwnedView;
@@ -167,6 +191,14 @@ pub use self::__buffa::view::SetPluginContainerRequestOwnedView;
 pub use self::__buffa::view::SetPluginContainerResponseView;
 #[doc(inline)]
 pub use self::__buffa::view::SetPluginContainerResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::SetPluginProxyRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::SetPluginProxyRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::SetPluginProxyResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::SetPluginProxyResponseOwnedView;
 #[doc(inline)]
 pub use self::__buffa::view::ListAiProvidersRequestView;
 #[doc(inline)]
@@ -344,6 +376,50 @@ pub use self::__buffa::view::ListRatingsResponseView;
 #[doc(inline)]
 pub use self::__buffa::view::ListRatingsResponseOwnedView;
 #[doc(inline)]
+pub use self::__buffa::view::ProxyView;
+#[doc(inline)]
+pub use self::__buffa::view::ProxyOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ListProxiesRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::ListProxiesRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ListProxiesResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::ListProxiesResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::CreateProxyRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::CreateProxyRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::CreateProxyResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::CreateProxyResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::UpdateProxyRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::UpdateProxyRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::UpdateProxyResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::UpdateProxyResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::DeleteProxyRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::DeleteProxyRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::DeleteProxyResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::DeleteProxyResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::TestProxyRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::TestProxyRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::TestProxyResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::TestProxyResponseOwnedView;
+#[doc(inline)]
 pub use self::__buffa::view::GetHealthRequestView;
 #[doc(inline)]
 pub use self::__buffa::view::GetHealthRequestOwnedView;
@@ -395,6 +471,10 @@ pub use self::__buffa::view::TranscodingSettingsOwnedView;
 pub use self::__buffa::view::NetworkSettingsView;
 #[doc(inline)]
 pub use self::__buffa::view::NetworkSettingsOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::OutboundProxiesView;
+#[doc(inline)]
+pub use self::__buffa::view::OutboundProxiesOwnedView;
 #[doc(inline)]
 pub use self::__buffa::view::ServerSettingsView;
 #[doc(inline)]

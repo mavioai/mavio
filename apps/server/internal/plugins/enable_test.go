@@ -106,3 +106,35 @@ func TestSetEnabled(t *testing.T) {
 		t.Errorf("after uninstalling: saved = %q, want none", saved)
 	}
 }
+
+func TestRestart(t *testing.T) {
+	ctx := t.Context()
+	s, err := store.Open(ctx, "sqlite:"+filepath.Join(t.TempDir(), "mavio.db"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = s.Close() })
+	dir := t.TempDir()
+	install(t, dir, "smoke", `{"type":"object"}`)
+	m, err := plugins.Open(ctx, plugins.Config{Dir: dir, CacheDir: compiled, DataDir: t.TempDir(), Store: s})
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = m.Close(ctx) })
+	const id = "dev.mavio.smoke"
+	if err := m.Restart(ctx, "org.example.missing"); !errors.Is(err, core.ErrNotFound) {
+		t.Errorf("Restart of an unknown plugin got = %v, want = ErrNotFound", err)
+	}
+	if err := m.Restart(ctx, id); err != nil {
+		t.Fatal(err)
+	}
+	if got := state(t, m, id); got.State != plugins.Ready {
+		t.Errorf("restarted: state got = %v, want = Ready", got.State)
+	}
+	if _, err := m.SetEnabled(ctx, id, false); err != nil {
+		t.Fatal(err)
+	}
+	if err := m.Restart(ctx, id); err != nil || state(t, m, id).State != plugins.Disabled {
+		t.Errorf("Restart of a disabled plugin got = %v, %v, want = nil and still disabled", err, state(t, m, id).State)
+	}
+}

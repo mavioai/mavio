@@ -491,7 +491,7 @@ func TestAcquisition(t *testing.T) {
 	}
 	for id, cfg := range map[string]any{
 		"dev.mavio.indexers": map[string]any{"indexers": []any{
-			map[string]any{"id": "nzb", "definition": "newznab", "settings": map[string]any{"base_url": indexer.URL, "api_key": "nzbkey"}},
+			map[string]any{"id": "nzb", "name": "Newznab", "definition": "newznab", "settings": map[string]any{"base_url": indexer.URL, "api_key": "nzbkey"}},
 		}},
 		"dev.mavio.download-clients": map[string]any{"clients": []any{
 			map[string]any{"id": "sab", "name": "SABnzbd", "definition": "sabnzbd", "settings": map[string]any{

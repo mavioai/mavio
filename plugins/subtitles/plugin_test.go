@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"log/slog"
+	"net/http"
 	"slices"
 	"sync"
 	"testing"
@@ -14,6 +15,7 @@ import (
 
 	pluginv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/provider"
+	"github.com/mavioai/mavio/plugins/subtitles/internal/web"
 )
 
 // fakeProvider answers searches with its subtitles or its failure.
@@ -309,6 +311,23 @@ func TestDefinitions(t *testing.T) {
 	}
 }
 
+// fakeHost is the server's host API, keeping the proxies of IDs.
+type fakeHost struct{ proxies []*pluginv1.Proxy }
+
+func (h *fakeHost) ListProxies(_ context.Context, req *pluginv1.ListProxiesRequest) (*pluginv1.ListProxiesResponse, error) {
+	var out []*pluginv1.Proxy
+	for _, p := range h.proxies {
+		if slices.Contains(req.GetIds(), p.GetId()) {
+			out = append(out, p)
+		}
+	}
+	return pluginv1.ListProxiesResponse_builder{Proxies: out}.Build(), nil
+}
+
+func (h *fakeHost) SolveChallenge(context.Context, *pluginv1.SolveChallengeRequest) (*pluginv1.SolveChallengeResponse, error) {
+	return nil, errors.New("not solved")
+}
+
 func TestConfigureNetwork(t *testing.T) {
 	h := newHarness(t)
 	var envs []provider.Env
@@ -317,21 +336,45 @@ func TestConfigureNetwork(t *testing.T) {
 		envs = append(envs, env)
 		return h.fakes["a"], nil
 	}
-	h.configure(t, `{"providers":[{"name":"a","enabled":true}],
-		"proxy":{"kind":"socks5","host":"proxy:1080"},
-		"flaresolverr":{"url":"http://flaresolverr:8191"},
+	h.p.api = &fakeHost{proxies: []*pluginv1.Proxy{
+		pluginv1.Proxy_builder{Id: proto.String("system")}.Build(),
+		pluginv1.Proxy_builder{Id: proto.String("p1"), Kind: pluginv1.ProxyKind_PROXY_KIND_SOCKS5.Enum(), Host: proto.String("proxy"), Port: proto.Int32(1080)}.Build(),
+	}}
+	var webs []web.Config
+	h.p.client = func(c web.Config) *http.Client {
+		webs = append(webs, c)
+		return web.NewClient(c, time.Second)
+	}
+	h.configure(t, `{"providers":[{"name":"a","enabled":true}],"proxy":"p1","exclude":["lan.test"],
 		"captcha":{"service":"anti-captcha","key":"k"}}`)
 	if len(envs) != 1 || envs[0].HTTP == nil || envs[0].Captcha == nil {
 		t.Fatalf("got env = %+v, want a client and a captcha solver", envs)
 	}
-	h.configure(t, `{"providers":[{"name":"a","enabled":true}]}`)
+	// The sites', the captcha service's and the translators' clients.
+	if len(webs) != 3 {
+		t.Fatalf("got %d clients, want = 3", len(webs))
+	}
+	for i, w := range webs {
+		if w.Proxy.GetId() != "p1" || !slices.Equal(w.Exclude, []string{"lan.test"}) || (w.Solver != nil) != (i == 0) {
+			t.Errorf("client %d got = %+v, want = through p1, solving challenges only for the sites", i, w)
+		}
+	}
+	for _, tt := range []struct{ cfg, proxy string }{
+		{`{"providers":[{"name":"a","enabled":true}]}`, "system"},
+		{`{"providers":[{"name":"a","enabled":true}],"proxy":""}`, ""},
+	} {
+		webs = nil
+		h.configure(t, tt.cfg)
+		if got := webs[0].Proxy.GetId(); got != tt.proxy || webs[0].Solver == nil || webs[0].Exclude != nil {
+			t.Errorf("Configure(%s) got = %+v, want = through %q", tt.cfg, webs[0], tt.proxy)
+		}
+	}
 	if envs[1].Captcha != nil {
 		t.Errorf("got captcha solver = %v, want none", envs[1].Captcha)
 	}
 	for _, cfg := range []string{
-		`{"proxy":{"kind":"ftp","host":"proxy:21"}}`,
-		`{"proxy":{"kind":"http","host":"proxy"}}`,
-		`{"flaresolverr":{"url":"flaresolverr:8191"}}`,
+		`{"proxy":"gone"}`,
+		`{"proxy":{"kind":"http","host":"proxy:8080"}}`,
 		`{"captcha":{"service":"2captcha","key":"k"}}`,
 	} {
 		if _, err := h.p.Configure(t.Context(), pluginv1.ConfigureRequest_builder{ConfigJson: proto.String(cfg)}.Build()); err == nil {

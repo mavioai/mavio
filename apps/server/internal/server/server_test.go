@@ -98,6 +98,18 @@ func TestEndToEnd(t *testing.T) {
 	if err != nil || len(plugins.GetPlugins()) != 1 || plugins.GetPlugins()[0].GetState() != systemv1.PluginState_PLUGIN_STATE_UNCONFIGURED {
 		t.Fatalf("ListPlugins = %v, %v; want the plugin unconfigured", plugins, err)
 	}
+	// In the caller's language, as the plugin's locales translate it.
+	chinese := connect.WithInterceptors(connect.UnaryInterceptorFunc(func(next connect.UnaryFunc) connect.UnaryFunc {
+		return func(ctx context.Context, req connect.AnyRequest) (connect.AnyResponse, error) {
+			req.Header().Set("Accept-Language", "zh-CN,en;q=0.8")
+			return next(ctx, req)
+		}
+	}))
+	plugins, err = systemv1connect.NewPluginManagementServiceClient(http.DefaultClient, url, token, chinese).ListPlugins(ctx, &systemv1.ListPluginsRequest{})
+	if m := plugins.GetPlugins()[0].GetManifest(); err != nil || m.GetName() != "冒烟测试" ||
+		m.GetConfigSchema() != `{"type":"object","properties":{"api_key":{"type":"string","minLength":1,"title":"API 密钥"}},"required":["api_key"]}` {
+		t.Errorf("ListPlugins in Chinese = %v, %v; want the name and schema translated", plugins, err)
+	}
 	if _, err := pluginAdmin.SetPluginConfig(ctx, systemv1.SetPluginConfigRequest_builder{
 		PluginId: new("dev.mavio.smoke"), ConfigJson: new(`{}`),
 	}.Build()); connect.CodeOf(err) != connect.CodeInvalidArgument {
@@ -106,8 +118,13 @@ func TestEndToEnd(t *testing.T) {
 	set, err := pluginAdmin.SetPluginConfig(ctx, systemv1.SetPluginConfigRequest_builder{
 		PluginId: new("dev.mavio.smoke"), ConfigJson: new(`{"api_key":"secret"}`),
 	}.Build())
-	if err != nil || set.GetPlugin().GetState() != systemv1.PluginState_PLUGIN_STATE_READY {
-		t.Fatalf("SetPluginConfig = %v, %v; want ready", set, err)
+	if err != nil || set.GetPlugin().GetState() != systemv1.PluginState_PLUGIN_STATE_READY || set.GetConfigJson() != `{"api_key":"secret"}` {
+		t.Fatalf("SetPluginConfig = %v, %v; want ready with the configuration stored", set, err)
+	}
+	if _, err := pluginAdmin.ListPluginConfigOptions(ctx, systemv1.ListPluginConfigOptionsRequest_builder{
+		PluginId: new("dev.mavio.smoke"), Source: new("indexer-definitions"),
+	}.Build()); connect.CodeOf(err) != connect.CodeInvalidArgument {
+		t.Errorf("ListPluginConfigOptions of a plugin providing no indexers: %v, want invalid_argument", err)
 	}
 
 	// Scan → scrape.
@@ -215,10 +232,16 @@ func installPlugin(t *testing.T, capabilities ...string) string {
 	if out, err := build.CombinedOutput(); err != nil {
 		t.Fatalf("build plugin: %v\n%s", err, out)
 	}
-	schema := `{"type":"object","properties":{"api_key":{"type":"string","minLength":1}},"required":["api_key"]}`
+	schema := `{"type":"object","properties":{"api_key":{"type":"string","minLength":1,"title":"API key"}},"required":["api_key"]}`
 	manifest := fmt.Sprintf(`{"id":"dev.mavio.smoke","name":"Smoke","version":"0.1.0","runtime":"RUNTIME_WASM",
 		"capabilities":["%s"],"configSchema":%q,"apiVersion":"1.0"}`, strings.Join(capabilities, `","`), schema)
 	if err := os.WriteFile(filepath.Join(dir, "manifest.json"), []byte(manifest), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.MkdirAll(filepath.Join(dir, "locales"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(dir, "locales", "zh-Hans.json"), []byte(`{"Smoke":"冒烟测试","API key":"API 密钥"}`), 0o644); err != nil {
 		t.Fatal(err)
 	}
 	return root

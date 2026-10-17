@@ -34,6 +34,7 @@ func settingsGroups(s *core.ServerSettings) []settingsGroup {
 		{"plugin_catalogs", &s.PluginCatalogs},
 		{"password_reset_plugin", &s.PasswordResetPlugin},
 		{"disabled_plugins", &s.DisabledPlugins},
+		{"plugin_proxies", &s.PluginProxies},
 		{"session_idle_days", &s.SessionIdleDays},
 		{"acquisition", &s.Acquisition},
 		{"requests", &s.Requests},

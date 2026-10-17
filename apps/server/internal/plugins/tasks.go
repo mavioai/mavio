@@ -28,6 +28,8 @@ type TaskPayload struct {
 type Task struct {
 	Plugin string
 	Task   *pluginv1.Task
+	// Locales are the translations of the plugin's strings.
+	Locales manifest.Locales
 }
 
 // TaskID returns the ID TaskService gives a plugin's task.
@@ -54,7 +56,7 @@ func (m *Manager) Tasks() []Task {
 			continue
 		}
 		for _, t := range e.manifest.GetTasks() {
-			out = append(out, Task{Plugin: e.manifest.GetId(), Task: t})
+			out = append(out, Task{Plugin: e.manifest.GetId(), Task: t, Locales: e.locales})
 		}
 	}
 	return out

@@ -43,6 +43,7 @@ erDiagram
 | `AccountSettings` | 服务端如何登录用户：安装时选择的模式，以及 mavio.dev 模式下的认领 |
 | `APIKey` | 集成调用 API 所用的令牌，以创建它的管理员身份行事 |
 | `Activity` | 服务端上发生的事情，记录在活动日志中 |
+| `Proxy` | 插件访问站点所经由的 HTTP、SOCKS4 或 SOCKS5 代理 |
 | `QualityDefinition`、`QualityProfile`、`CustomFormat`、`DelayProfile`、`ReleaseProfile` | 想要哪些发布及其排序（§13） |
 | `Wanted` | 被监控的电影或剧集如何获取：其质量档案、最低可用状态、新条目监控、季文件夹标志与标签 |
 | `EpisodeState` | 获取按季号与集号为剧集的单集保存的内容：其 scene 编号与上次搜索时间 |
@@ -267,6 +268,7 @@ erDiagram
 | `SettingsRepository` | `Get` 服务端设置（保存之前为默认值），经 `Validate` 后 `Put` 写入，只写与已保存内容不同的分组；`Accounts`（保存之前为零值）与 `PutAccounts` 读写账户设置 |
 | `APIKeyRepository` | `Create`、`GetByTokenHash`、`List`（最新的在前）、`Touch`、`Delete`；删除用户时一并删除其密钥 |
 | `ActivityRepository` | `Add`、`List`（分页，最新的在前，可按时间、用户、类型与最低严重程度筛选）、`Purge` 清除某时间之前的活动 |
+| `ProxyRepository` | `List`（按名称排序）、`Get`、`Put`（按 ID 插入或替换；名称或地址相同时返回 `ErrConflict` 并指出该代理）、`Delete` |
 | `TrickplayRepository` | `Put` 某条目在某宽度下的拼图（替换之前的）、`List` 某条目的拼图（最窄的在前）、`Delete` 删除 |
 | `MediaSegmentRepository` | `List` 某条目的片段（按开始时间）、`Replace` 替换 |
 | `QualityDefinitionRepository` | `List` 某类型的定义（保存之前为空）、`Replace` 替换 |
@@ -326,7 +328,7 @@ erDiagram
 * 按 `PluginID`（清单中的 ID）保存，而不是跟随已安装的文件，因此插件升级后配置仍在；卸载插件时删除。
 * `Validate` 要求有插件 ID 且 JSON 格式正确；是否符合 schema 由了解清单的服务端在保存配置之前检查。
 
-`PluginContainer` 是服务端为插件清单声明的某个容器依赖（[插件 §11](plugins.zh-CN.md#11-容器依赖)）保存的内容，按 `PluginID` 与 `Name` 保存：其 `Mode`（`unset`、`managed`、`external`）、管理员为外部依赖给出的 `Address`、按键为它生成的 `Secrets`、托管依赖是否可以使用 GPU（`UseGPU`），以及 `UpdatedAt`。
+`PluginContainer` 是服务端为插件清单声明的某个容器依赖（[插件 §11](plugins.zh-CN.md#11-容器依赖)）保存的内容，按 `PluginID` 与 `Name` 保存：其 `Mode`（`unset`、`managed`、`external`）、管理员为外部依赖给出的 `Address`、按键为它生成的 `Secrets`、托管依赖是否可以使用 GPU（`UseGPU`）、托管依赖访问站点所经的 `Proxy`（代理的 ID，默认 `system`，为空表示不使用代理），以及 `UpdatedAt`。
 
 * `Validate` 要求有插件 ID、名称、已知的模式，`external` 时还要求绝对的 `http` 或 `https` URL；托管或未设置的依赖没有地址。
 * 插件升级后保留；卸载插件时删除该插件的全部记录，清单不再声明的依赖在插件启动时删除。
@@ -345,13 +347,14 @@ erDiagram
 ## 12. 管理
 
 ### 12.1 服务端设置
-`ServerSettings` 是管理员在服务端运行时修改的设置；命令行参数只提供其中一些的初始值。只保存一组设置，其各分组——`Transcoding`、`Network`、`PluginCatalogs`、`PasswordResetPlugin`、`DisabledPlugins`、`SessionIdleDays`、`Acquisition`、`Requests`、`Metadata`、`Subtitles` 与 `Assistant`——分开保存，读取时以默认值（`DefaultServerSettings`）补全未保存的分组与后来新增的设置。各分组由其所属方修改：字幕设置由字幕服务修改，助手设置由助手服务修改，停用的插件由启用与停用插件修改，其余由服务端设置修改；修改作用于当前设置，而不是用先前读取的副本替换它。
+`ServerSettings` 是管理员在服务端运行时修改的设置；命令行参数只提供其中一些的初始值。只保存一组设置，其各分组——`Transcoding`、`Network`、`PluginCatalogs`、`PasswordResetPlugin`、`DisabledPlugins`、`PluginProxies`、`SessionIdleDays`、`Acquisition`、`Requests`、`Metadata`、`Subtitles` 与 `Assistant`——分开保存，读取时以默认值（`DefaultServerSettings`）补全未保存的分组与后来新增的设置。各分组由其所属方修改：字幕设置由字幕服务修改，助手设置由助手服务修改，停用的插件由启用与停用插件修改，插件的代理由设置插件的代理修改，其余由服务端设置修改；修改作用于当前设置，而不是用先前读取的副本替换它。
 
 * `Transcoding`：`HardwareAcceleration`（`auto` 使用服务端 ffmpeg 与硬件所支持的加速，`none`，或 `videotoolbox`）、是否允许硬件编码器、软件编码器的 `EncoderPreset`（为空时按片源选择）、`H264CRF` 与 `H265CRF`（0–51）、`Threads`、色调映射（`TonemapAlgorithm`、`TonemapRange`、`TonemapDesat`、`TonemapPeak`）、去隔行（`yadif` 或 `bwdif`，可选倍帧率）、立体声 `DownmixBoost`（0.5–3）、`CropBlackBorders`，以及 `TranscodeDir`（绝对路径；为空时沿用服务端启动时的目录）。
-* `Network`：向客户端显示的 `ServerName`（为空时为主机名）、反向代理下服务端所在的 `BaseURL`（规整的路径，如 `/mavio`）、`HTTPSPort`（默认 8920）及其 PEM 格式的 `CertificatePath` 与 `KeyPath`（两者都设置或都不设置；都不设置时，mavio.dev 模式的服务端使用其 `mavio.site` 证书）、`LocalDiscovery`，以及 `Relay`：客户端能否经 mavio.dev 的中转访问 mavio.dev 模式的服务端（默认开启）。
+* `Network`：向客户端显示的 `ServerName`（为空时为主机名）、反向代理下服务端所在的 `BaseURL`（规整的路径，如 `/mavio`）、`HTTPSPort`（默认 8920）及其 PEM 格式的 `CertificatePath` 与 `KeyPath`（两者都设置或都不设置；都不设置时，mavio.dev 模式的服务端使用其 `mavio.site` 证书）、`LocalDiscovery`，以及 `Relay`：客户端能否经 mavio.dev 的中转访问 mavio.dev 模式的服务端（默认开启），以及服务端自身 HTTP 请求按访问对象使用的代理 `Proxies`（`OutboundProxies`）——`PluginCatalogs`、`Images`、`MavioDev` 与 `ACME`——每项为代理的 ID、`SystemProxyID`（`system`，默认）或空（不使用代理）。
 * `PluginCatalogs`：安装插件所用插件目录的 http、https 或 file URL；新服务端以其配置中的官方插件目录开始。
 * `PasswordResetPlugin`：投递用于重置遗忘密码的 PIN 的插件 ID；为空时用户无法重置密码。
 * `DisabledPlugins`：管理员停用的已安装插件的 ID，服务端不启动它们；通过启用与停用插件更改，而不随其他设置更改。
+* `PluginProxies`：WASM 插件的 HTTP 请求所经由的代理，按插件 ID，取值同 `OutboundProxies`；未列出的插件使用系统代理。通过设置插件的代理更改，插件卸载时删除。
 * `SessionIdleDays`：会话闲置多少天后结束，1–3650，默认 90。
 * `Acquisition`：如何选择、下载与入库发布（§13.4）。
 * `Requests`：新用户获得的权限、默认配额，以及通过的请求去向（§13.6）。
@@ -366,7 +369,10 @@ erDiagram
 `APIKey` 让集成无需登录即可调用 API：它的令牌只显示一次，以创建它的管理员身份行事，前提是该用户仍是已启用的管理员。只保存令牌的 SHA-256 哈希（`TokenHash`），以及 `Name`、`CreatedAt` 与至多每分钟记录一次的 `LastUsedAt`。
 
 ### 12.3 活动日志
-`Activity` 是发生过的一件事：点分的 `Type`、`Severity`（`info`、`warning`、`error`）、`Title` 与 `Message`、相关的 `UserID` 与 `ItemID`，以及因类型而异的 `Attributes`。日志记录登录（`user.login`）与失败的登录（`user.login_failed`，警告）、API 密钥的创建与吊销（`apikey.created`、`apikey.revoked`）、请求与问题（§13.6、§13.7）、账户变更（`user.created`、`user.updated`、`user.deleted`、`user.password_changed`）、插件的安装、更新、配置、卸载与启动失败（`plugin.installed`、`plugin.updated`、`plugin.configured`、`plugin.uninstalled`、`plugin.failed`）、设置的修改（`settings.updated`）、AI 凭据的变更与登录的开始（`ai.credential_changed`、`ai.login_started`）、备份（`backup.created`）、播放的开始与停止（`playback.started`、`playback.stopped`），以及失败的任务运行与字幕下载（`task.failed`、`subtitle.download_failed`）。活动保留 90 天，用户可列出与自己相关的活动，即其通知；活动并作为事件发送给通知插件；消费事件的插件还会收到不进入日志的事件（见[插件平台 §4](plugins.zh-CN.md#4-事件)）。
+`Activity` 是发生过的一件事：点分的 `Type`、`Severity`（`info`、`warning`、`error`）、`Title` 与 `Message`、相关的 `UserID` 与 `ItemID`，以及因类型而异的 `Attributes`。日志记录登录（`user.login`）与失败的登录（`user.login_failed`，警告）、API 密钥的创建与吊销（`apikey.created`、`apikey.revoked`）、请求与问题（§13.6、§13.7）、账户变更（`user.created`、`user.updated`、`user.deleted`、`user.password_changed`）、插件的安装、更新、配置、卸载与启动失败（`plugin.installed`、`plugin.updated`、`plugin.configured`、`plugin.proxy_changed`、`plugin.uninstalled`、`plugin.failed`）、设置的修改（`settings.updated`）、AI 凭据的变更与登录的开始（`ai.credential_changed`、`ai.login_started`）、备份（`backup.created`）、播放的开始与停止（`playback.started`、`playback.stopped`），以及失败的任务运行与字幕下载（`task.failed`、`subtitle.download_failed`）。活动保留 90 天，用户可列出与自己相关的活动，即其通知；活动并作为事件发送给通知插件；消费事件的插件还会收到不进入日志的事件（见[插件平台 §4](plugins.zh-CN.md#4-事件)）。
+
+### 12.4 代理
+`Proxy` 是服务端的一个代理（[架构 §17.1](architecture.zh-CN.md#171-代理)）：其 `ID`、唯一的 `Name`、`Kind`（`http`、`socks4`、`socks5`）、`Host`（名称或 IP 地址，不带方括号）、`Port`（1–65535）以及可选的 `Username` 与 `Password`；SOCKS4 不接受密码。`Validate` 检查这些值。其 `Key`——不含种类，主机转为小写或 IP 地址规范化，加上端口与用户名——用于判断重复；`URL` 写作 `kind://user:password@host:port`。插件按 ID 引用代理；删除代理后，引用它的配置在修改之前会一直失败，服务端设置（§12.1）正在使用的代理不能删除。`SystemProxyID`（`system`）是系统代理的 ID，系统代理不保存。
 
 ---
 

@@ -52,7 +52,10 @@ type PluginContainer struct {
 	// Secrets are the secrets generated for the dependency, by key.
 	Secrets map[string]string
 	// UseGPU is whether a managed dependency may use a GPU.
-	UseGPU    bool
+	UseGPU bool
+	// Proxy is the ID of the proxy a managed dependency reaches sites
+	// through: SystemProxyID for the system proxy, empty for none.
+	Proxy     string
 	UpdatedAt time.Time
 }
 
@@ -64,6 +67,8 @@ func (c *PluginContainer) Validate() error {
 		return fmt.Errorf("%w: plugin container requires a plugin ID", ErrInvalid)
 	case c.Name == "":
 		return fmt.Errorf("%w: container of plugin %s requires a name", ErrInvalid, c.PluginID)
+	case !validProxyChoice(c.Proxy):
+		return fmt.Errorf("%w: proxy %q of container %s of plugin %s", ErrInvalid, c.Proxy, c.Name, c.PluginID)
 	}
 	switch c.Mode {
 	case ContainerUnset, ContainerManaged:

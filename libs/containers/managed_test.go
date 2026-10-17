@@ -252,6 +252,42 @@ func TestSupervisorInContainer(t *testing.T) {
 	})
 }
 
+func TestSupervisorReconcileStopsLeftRunning(t *testing.T) {
+	synctest.Test(t, func(t *testing.T) {
+		e, h, c := containerstest.New(), &health{}, &changes{}
+		// A server ended without stopping its container.
+		before := newTestSupervisor(e, h, c)
+		before.Start(whisper())
+		synctest.Wait()
+		e.Took()
+
+		s := newTestSupervisor(e, h, c)
+		keep := func(string, string) bool { return true }
+		ctx := context.Background()
+		// Its plugin runs: the container is left for it.
+		if err := s.Reconcile(ctx, keep, func(string) bool { return true }); err != nil {
+			t.Fatal(err)
+		}
+		if got := e.Took(); len(got) != 0 {
+			t.Errorf("calls of Reconcile for a plugin running = %q, want none", got)
+		}
+		// Its plugin does not run: the container stops, and stays.
+		if err := s.Reconcile(ctx, keep, func(string) bool { return false }); err != nil {
+			t.Fatal(err)
+		}
+		if got, want := e.Took(), []string{"stop mavio-voice-whisper"}; !slices.Equal(got, want) {
+			t.Errorf("calls of Reconcile for a plugin not running = %q, want %q", got, want)
+		}
+		if _, running, ok := e.Spec("mavio-voice-whisper"); !ok || running {
+			t.Errorf("container exists = %v, runs = %v; want it stopped and kept", ok, running)
+		}
+		// End the earlier server's run, whose container is stopped already.
+		if err := before.Close(ctx); err != nil {
+			t.Fatal(err)
+		}
+	})
+}
+
 func TestSupervisorRemoveAndReconcile(t *testing.T) {
 	synctest.Test(t, func(t *testing.T) {
 		e, h, c := containerstest.New(), &health{}, &changes{}
@@ -279,7 +315,7 @@ func TestSupervisorRemoveAndReconcile(t *testing.T) {
 		}
 
 		// Reconcile removes the containers keep rejects.
-		err := s.Reconcile(ctx, func(plugin, name string) bool { return plugin == "dev.mavio.voice" })
+		err := s.Reconcile(ctx, func(plugin, name string) bool { return plugin == "dev.mavio.voice" }, func(string) bool { return true })
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -367,4 +403,70 @@ func TestSupervisorPullProgress(t *testing.T) {
 			t.Errorf("Status after the pull = %+v, want ready", st)
 		}
 	})
+}
+
+func TestSupervisorHostGateway(t *testing.T) {
+	for _, tc := range []struct {
+		gateway, access, want bool
+	}{
+		{gateway: true, access: true, want: true},
+		{gateway: true, access: false, want: false},
+		{gateway: false, access: true, want: false},
+	} {
+		synctest.Test(t, func(t *testing.T) {
+			e, h := containerstest.New(), &health{}
+			h.set(true)
+			s := containers.NewSupervisor(containers.SupervisorOptions{
+				Engine: e, Server: "server-1", OnChange: (&changes{}).record, Probe: h.probe, HostGateway: tc.gateway,
+			})
+			defer s.Close(context.Background())
+			d := whisper()
+			d.HostAccess = tc.access
+			s.Start(d)
+			synctest.Wait()
+			spec, _, _ := e.Spec("mavio-voice-whisper")
+			if spec.HostGateway != tc.want {
+				t.Errorf("gateway %v, access %v: HostGateway = %v, want = %v", tc.gateway, tc.access, spec.HostGateway, tc.want)
+			}
+		})
+	}
+}
+
+func TestSupervisorProxy(t *testing.T) {
+	proxied := func() containers.Dependency {
+		d := whisper()
+		d.ProxyEnv = func(host string) map[string]string {
+			return map[string]string{"HTTPS_PROXY": "http://u:p@" + host + ":8686", "B": "from the proxy"}
+		}
+		return d
+	}
+	if containers.Hash(proxied()) == containers.Hash(whisper()) {
+		t.Error("Hash of a proxied dependency got = that of one not proxied, want = another")
+	}
+	for _, tc := range []struct {
+		name, self, want string
+	}{
+		{"server on the host", "", "HTTPS_PROXY=http://u:p@host.docker.internal:8686"},
+		{"server in a container", "self", "HTTPS_PROXY=http://u:p@172.18.0.2:8686"},
+	} {
+		synctest.Test(t, func(t *testing.T) {
+			e, h := containerstest.New(), &health{}
+			s := containers.NewSupervisor(containers.SupervisorOptions{
+				Engine: e, Server: "server-1", Self: tc.self, OnChange: (&changes{}).record, Probe: h.probe, HostGateway: true,
+			})
+			defer s.Close(context.Background())
+			s.Start(proxied())
+			synctest.Wait()
+			spec, _, _ := e.Spec("mavio-voice-whisper")
+			if !slices.Contains(spec.Env, tc.want) || !slices.Contains(spec.Env, "B=2") {
+				t.Errorf("%s: Env got = %v, want %s and the dependency's own B=2", tc.name, spec.Env, tc.want)
+			}
+			if spec.HostGateway != (tc.self == "") {
+				t.Errorf("%s: HostGateway got = %v, want = %v", tc.name, spec.HostGateway, tc.self == "")
+			}
+			if cmd := s.Command(proxied()); !strings.Contains(cmd, "-e "+tc.want) || !strings.HasPrefix(cmd, "docker run -d --name mavio-voice-whisper --network mavio") {
+				t.Errorf("%s: Command got = %q, want the docker run with %s", tc.name, cmd, tc.want)
+			}
+		})
+	}
 }

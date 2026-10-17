@@ -10,6 +10,6 @@
   "category": "CATEGORY_METADATA",
   "capabilities": ["CAPABILITY_METADATA_PROVIDER"],
   "permissions": { "httpHosts": ["webservice.fanart.tv", "assets.fanart.tv"] },
-  "configSchema": "{\"$schema\":\"https://json-schema.org/draft/2020-12/schema\",\"type\":\"object\",\"properties\":{\"api_key\":{\"type\":\"string\",\"minLength\":1,\"description\":\"fanart.tv project API key\"},\"client_key\":{\"type\":\"string\",\"description\":\"Personal API key, for newer images\"}},\"required\":[\"api_key\"],\"additionalProperties\":false}",
+  "configSchema": "{\"$schema\":\"https://json-schema.org/draft/2020-12/schema\",\"type\":\"object\",\"properties\":{\"api_key\":{\"title\":\"API key\",\"type\":\"string\",\"minLength\":1,\"description\":\"fanart.tv project API key\"},\"client_key\":{\"title\":\"Client key\",\"type\":\"string\",\"description\":\"Personal API key, for newer images\"}},\"required\":[\"api_key\"],\"additionalProperties\":false}",
   "apiVersion": "1.0"
 }

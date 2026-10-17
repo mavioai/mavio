@@ -105,7 +105,7 @@ func configure(t *testing.T, p *plugin, names ...string) {
 	t.Helper()
 	var c config
 	for _, n := range names {
-		c.Clients = append(c.Clients, clientConfig{ID: n, Definition: "fake", Settings: json.RawMessage(`{"name":"` + n + `"}`)})
+		c.Clients = append(c.Clients, clientConfig{ID: n, Name: "Client " + n, Definition: "fake", Settings: json.RawMessage(`{"name":"` + n + `"}`)})
 	}
 	data, _ := json.Marshal(c)
 	if _, err := p.Configure(context.Background(), pluginv1.ConfigureRequest_builder{ConfigJson: proto.String(string(data))}.Build()); err != nil {
@@ -174,7 +174,7 @@ func TestListDefinitionsAndClients(t *testing.T) {
 		t.Fatalf("clients = %v, want one", list.GetClients())
 	}
 	c := list.GetClients()[0]
-	if c.GetId() != "a" || c.GetName() != "Fake" || !c.GetEnabled() || c.GetPriority() != 1 || !c.GetPrefersTorrentFile() ||
+	if c.GetId() != "a" || c.GetName() != "Client a" || !c.GetEnabled() || c.GetPriority() != 1 || !c.GetPrefersTorrentFile() ||
 		c.GetHost() != "localhost" || !c.GetRemoveCompletedDownloads() || c.HasDisabledUntil() {
 		t.Errorf("client = %v, want a's defaults", c)
 	}
@@ -329,7 +329,7 @@ func TestAddDownloadInvalidNZB(t *testing.T) {
 	def := p.byID["fake"]
 	def.ID, def.Protocol = "fakenzb", client.Usenet
 	p.byID[def.ID] = def
-	data, _ := json.Marshal(config{Clients: []clientConfig{{ID: "a", Definition: "fakenzb", Settings: json.RawMessage(`{"name":"a"}`)}}})
+	data, _ := json.Marshal(config{Clients: []clientConfig{{ID: "a", Name: "A", Definition: "fakenzb", Settings: json.RawMessage(`{"name":"a"}`)}}})
 	if _, err := p.Configure(context.Background(), pluginv1.ConfigureRequest_builder{ConfigJson: proto.String(string(data))}.Build()); err != nil {
 		t.Fatal(err)
 	}
@@ -352,7 +352,7 @@ func TestTestDownloadClientWarning(t *testing.T) {
 func TestTagsAndHistoryLimit(t *testing.T) {
 	a := &fakeClient{}
 	p := newTestPlugin(t, map[string]*fakeClient{"a": a})
-	data := `{"history_limit":10,"clients":[{"id":"a","definition":"fake","tags":["anime"],"settings":{"name":"a"}}]}`
+	data := `{"history_limit":10,"clients":[{"id":"a","name":"A","definition":"fake","tags":["anime"],"settings":{"name":"a"}}]}`
 	if _, err := p.Configure(context.Background(), pluginv1.ConfigureRequest_builder{ConfigJson: proto.String(data)}.Build()); err != nil {
 		t.Fatal(err)
 	}
@@ -366,9 +366,14 @@ func TestTagsAndHistoryLimit(t *testing.T) {
 	if a.opts.Limit() != 10 {
 		t.Errorf("history limit = %d, want = 10", a.opts.Limit())
 	}
-	bad := `{"history_limit":-1}`
-	if _, err := p.Configure(context.Background(), pluginv1.ConfigureRequest_builder{ConfigJson: proto.String(bad)}.Build()); connect.CodeOf(err) != connect.CodeInvalidArgument {
-		t.Errorf("Configure(negative history limit) code = %v, want = %v", connect.CodeOf(err), connect.CodeInvalidArgument)
+	for _, bad := range []string{
+		`{"history_limit":-1}`,
+		`{"clients":[{"id":"a","definition":"fake"}]}`,
+		`{"clients":[{"id":"a","name":"Fake","definition":"fake"},{"id":"b","name":"fake","definition":"fake"}]}`,
+	} {
+		if _, err := p.Configure(context.Background(), pluginv1.ConfigureRequest_builder{ConfigJson: proto.String(bad)}.Build()); connect.CodeOf(err) != connect.CodeInvalidArgument {
+			t.Errorf("Configure(%s) code = %v, want = %v", bad, connect.CodeOf(err), connect.CodeInvalidArgument)
+		}
 	}
 }
 

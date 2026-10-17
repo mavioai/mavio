@@ -5,12 +5,14 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"io"
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"reflect"
 	"slices"
 	"strings"
 	"testing"
@@ -24,7 +26,7 @@ import (
 
 func newTestPlugin(t *testing.T) *plugin {
 	t.Helper()
-	p, err := newPlugin(slog.New(slog.DiscardHandler), "test", t.TempDir(), "macos 15.0")
+	p, err := newPlugin(slog.New(slog.DiscardHandler), "test", t.TempDir(), "macos 15.0", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -199,13 +201,13 @@ func TestTorznabIndexer(t *testing.T) {
 	configure(t, p, map[string]any{
 		"indexers": []any{
 			map[string]any{
-				"id": "tosho", "definition": "torznab", "settings": map[string]any{"base_url": srv.URL},
+				"id": "tosho", "name": "Tosho", "definition": "torznab", "settings": map[string]any{"base_url": srv.URL},
 				"tags": []any{"anime"}, "required_flags": []any{"freeleech"}, "minimum_seeders": 3, "multi_languages": []any{"French", "Original"},
 				"seed_ratio": 1.5, "seed_time": 60, "season_pack_seed_time": 120, "reject_blocklisted_torrent_hashes": true, "anime_standard_format_search": true,
 				"download_client_id": "download-clients/qbit",
 			},
-			map[string]any{"id": "off", "definition": "torznab", "enabled": false, "settings": map[string]any{"base_url": srv.URL}},
-			map[string]any{"id": "broken", "definition": "nosuchdefinition"},
+			map[string]any{"id": "off", "name": "Off", "definition": "torznab", "enabled": false, "settings": map[string]any{"base_url": srv.URL}},
+			map[string]any{"id": "broken", "name": "Broken", "definition": "nosuchdefinition"},
 		},
 		"definitions": map[string]any{"update": false},
 	})
@@ -224,7 +226,7 @@ func TestTorznabIndexer(t *testing.T) {
 		got, want any
 	}{
 		{"Id", tosho.GetId(), "tosho"},
-		{"Name", tosho.GetName(), "Generic Torznab"},
+		{"Name", tosho.GetName(), "Tosho"},
 		{"Protocol", tosho.GetProtocol(), pluginv1.DownloadProtocol_DOWNLOAD_PROTOCOL_TORRENT},
 		{"Priority", tosho.GetPriority(), int32(25)},
 		{"Enabled", tosho.GetEnabled(), true},
@@ -300,16 +302,63 @@ func TestConfigureInvalid(t *testing.T) {
 	p := newTestPlugin(t)
 	for _, c := range []string{
 		`{"indexers":[{"definition":"torznab"}]}`,
-		`{"indexers":[{"id":"a","definition":"torznab"},{"id":"a","definition":"torznab"}]}`,
-		`{"indexers":[{"id":"a","definition":"torznab","limits_unit":"week"}]}`,
-		`{"indexers":[{"id":"a","definition":"torznab","required_flags":["shiny"]}]}`,
-		`{"indexers":[{"id":"a","definition":"torznab","minimum_seeders":-1}]}`,
-		`{"indexers":[{"id":"a","definition":"torznab","seed_time":-1}]}`,
-		`{"proxies":[{"kind":"gopher","host":"x"}]}`,
+		`{"indexers":[{"id":"a","name":"A","definition":"torznab"},{"id":"a","name":"B","definition":"torznab"}]}`,
+		`{"indexers":[{"id":"a","definition":"torznab"}]}`,
+		`{"indexers":[{"id":"a","name":"Tosho","definition":"torznab"},{"id":"b","name":"tosho","definition":"torznab"}]}`,
+		`{"indexers":[{"id":"a","name":"A","definition":"torznab","limits_unit":"week"}]}`,
+		`{"indexers":[{"id":"a","name":"A","definition":"torznab","required_flags":["shiny"]}]}`,
+		`{"indexers":[{"id":"a","name":"A","definition":"torznab","minimum_seeders":-1}]}`,
+		`{"indexers":[{"id":"a","name":"A","definition":"torznab","seed_time":-1}]}`,
 	} {
 		if _, err := p.Configure(context.Background(), pluginv1.ConfigureRequest_builder{ConfigJson: proto.String(c)}.Build()); err == nil {
 			t.Errorf("Configure(%s) = nil, want = an error", c)
 		}
+	}
+}
+
+// fakeHost is the server's host API, keeping the proxies of IDs.
+type fakeHost struct {
+	proxies []*pluginv1.Proxy
+	asked   [][]string
+}
+
+func (h *fakeHost) ListProxies(_ context.Context, req *pluginv1.ListProxiesRequest) (*pluginv1.ListProxiesResponse, error) {
+	h.asked = append(h.asked, req.GetIds())
+	var out []*pluginv1.Proxy
+	for _, p := range h.proxies {
+		if slices.Contains(req.GetIds(), p.GetId()) {
+			out = append(out, p)
+		}
+	}
+	return pluginv1.ListProxiesResponse_builder{Proxies: out}.Build(), nil
+}
+
+func (h *fakeHost) SolveChallenge(context.Context, *pluginv1.SolveChallengeRequest) (*pluginv1.SolveChallengeResponse, error) {
+	return nil, errors.New("not solved")
+}
+
+func TestConfigureProxies(t *testing.T) {
+	host := &fakeHost{proxies: []*pluginv1.Proxy{
+		pluginv1.Proxy_builder{Id: proto.String("system")}.Build(),
+		pluginv1.Proxy_builder{Id: proto.String("p1"), Kind: pluginv1.ProxyKind_PROXY_KIND_SOCKS5.Enum(), Host: proto.String("proxy"), Port: proto.Int32(1080)}.Build(),
+	}}
+	p := newTestPlugin(t)
+	p.host = func() hostService { return host }
+	configure(t, p, map[string]any{"indexers": []map[string]any{
+		{"id": "a", "name": "System", "definition": "torznab", "settings": map[string]any{"base_url": "http://a"}},
+		{"id": "b", "name": "Proxied", "definition": "torznab", "proxy": "p1", "settings": map[string]any{"base_url": "http://b"}},
+		{"id": "c", "name": "Direct", "definition": "torznab", "proxy": "", "settings": map[string]any{"base_url": "http://c"}},
+		{"id": "d", "name": "Gone", "definition": "torznab", "proxy": "gone", "settings": map[string]any{"base_url": "http://d"}},
+	}})
+	if want := [][]string{{"gone", "p1", "system"}}; !reflect.DeepEqual(host.asked, want) {
+		t.Errorf("proxies asked got = %v, want = %v", host.asked, want)
+	}
+	var got []string
+	for _, c := range p.indexers {
+		got = append(got, c.cfg.ID)
+	}
+	if want := []string{"a", "b", "c"}; !slices.Equal(got, want) {
+		t.Errorf("indexers got = %v, want = %v", got, want)
 	}
 }
 
@@ -402,7 +451,7 @@ func TestCardigannDefinitions(t *testing.T) {
 
 	p := newTestPlugin(t)
 	configure(t, p, map[string]any{
-		"indexers":    []any{map[string]any{"id": "pub", "definition": "publicsite", "settings": map[string]any{"sort": "added"}}},
+		"indexers":    []any{map[string]any{"id": "pub", "name": "Public Site", "definition": "publicsite", "settings": map[string]any{"sort": "added"}}},
 		"definitions": map[string]any{"url": srv.URL + "/master/11"},
 	})
 	ctx := context.Background()

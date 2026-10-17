@@ -1,6 +1,9 @@
 // The menus of a server's settings: a second level holding the sections of
 // one concern, apart from the settings themselves, which load as they are
-// first opened, for the television's Back to find a section's menu.
+// first opened, for the television's Back to find a section's menu; and the
+// advanced tools, which the app's sidebar lists once pinned.
+import { t } from "../i18n.ts";
+import type { IconName } from "../icon.tsx";
 
 /** A menu of the server's settings. */
 export type MenuId = "media" | "acquiring" | "extensions" | "maintenance";
@@ -20,4 +23,22 @@ export function isMenu(s: string | undefined): s is MenuId {
 /** The menu holding a section, if any. */
 export function menuOf(section: string): MenuId | undefined {
   return (Object.keys(menuSections) as MenuId[]).find((m) => menuSections[m].includes(section));
+}
+
+/**
+ * An advanced tool: a section of the settings' Advanced group, which can be
+ * pinned to the sidebar's Features group to open in the app's own layout.
+ */
+export type ToolId = "indexer-search";
+
+/** The advanced tools, in their order. */
+export const tools: readonly ToolId[] = ["indexer-search"];
+
+/** How each tool shows, in the settings and in the sidebar. */
+export const toolLooks: Record<ToolId, { icon: IconName; color: string; title: () => string }> = {
+  "indexer-search": { icon: "search", color: "#0A84FF", title: () => t("indexers.title") },
+};
+
+export function isTool(s: string): s is ToolId {
+  return (tools as readonly string[]).includes(s);
 }

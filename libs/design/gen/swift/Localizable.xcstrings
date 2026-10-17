@@ -7291,6 +7291,24 @@
         }
       }
     },
+    "settings.proxies": {
+      "comment": "Settings section of a server's proxies.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Proxies"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "代理"
+          }
+        }
+      }
+    },
     "settings.wanted": {
       "comment": "Settings section of the monitored movies and episodes still to acquire.",
       "extractionState": "manual",
@@ -8245,6 +8263,60 @@
         }
       }
     },
+    "plugins.network": {
+      "comment": "Heading of how a plugin reaches sites.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Network"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "网络"
+          }
+        }
+      }
+    },
+    "plugins.proxy": {
+      "comment": "Label of the proxy a plugin's requests go through.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Proxy"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "代理"
+          }
+        }
+      }
+    },
+    "plugins.proxyDetail": {
+      "comment": "Explains a plugin's proxy; hosts is the list of hosts the plugin reaches.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Requests to %@ go through it"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "访问 %@ 时经由它"
+          }
+        }
+      }
+    },
     "plugins.versions": {
       "comment": "Group of the versions a catalog offers of a plugin.",
       "extractionState": "manual",
@@ -8594,13 +8666,265 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Run one of these, then set the address to %@. They hold the dependency's secrets."
+            "value": "Start the container with Docker on the server's machine in either way below, then set the address to %@. Both hold the dependency's secrets; keep them to yourself."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "运行其中一条命令，然后把地址设为 %@。命令中含有该依赖的密钥。"
+            "value": "在服务器所在的机器上用 Docker 启动该容器，以下两种方式任选其一，启动后把地址设为 %@。两者都含有该依赖的密钥，请勿外传。"
+          }
+        }
+      }
+    },
+    "plugins.containerDockerRun": {
+      "comment": "Label of the docker run command starting a container dependency.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Run this docker run command in a terminal:"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在终端执行这条 docker run 命令："
+          }
+        }
+      }
+    },
+    "plugins.containerDockerRunNetwork": {
+      "comment": "Label of the docker run command starting a container dependency beside a server in a container; network is the placeholder <network>.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Run this docker run command in a terminal, %@ replaced with the Docker network of the server's container:"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在终端执行这条 docker run 命令，并把其中的 %@ 换成服务器容器所在的 Docker 网络："
+          }
+        }
+      }
+    },
+    "plugins.containerCompose": {
+      "comment": "Label of the Compose service starting a container dependency.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Or add this service to a compose.yaml and run docker compose up -d:"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "或者把这个服务加入一个 compose.yaml，再执行 docker compose up -d："
+          }
+        }
+      }
+    },
+    "plugins.containerComposeServer": {
+      "comment": "Label of the Compose service starting a container dependency beside a server in a container.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Or add this service to the server's own compose.yaml and run docker compose up -d:"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "或者把这个服务加入服务器自己的 compose.yaml，再执行 docker compose up -d："
+          }
+        }
+      }
+    },
+    "plugins.proxyProcessDetail": {
+      "comment": "Explains a process plugin's proxy.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The plugin's HTTP and HTTPS requests go through it, by the server; this machine and the local network are reached directly. A proxy the plugin's own settings choose comes first."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "插件的 HTTP 和 HTTPS 请求经服务器发往此代理；本机和局域网直连。插件自身设置中选择的代理优先。"
+          }
+        }
+      }
+    },
+    "plugins.proxyRestartTitle": {
+      "comment": "Title asking to restart a plugin for its new proxy; name is the plugin's name.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restart %@?"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重启 %@？"
+          }
+        }
+      }
+    },
+    "plugins.proxyRestartMessage": {
+      "comment": "Explains why changing a plugin's proxy restarts it.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The plugin goes from reaching sites directly to through the server, or back, which takes effect when it starts again. It restarts now."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "插件将从直连改为经服务器代理，或反过来，这要在插件重新启动后才生效。现在将重启插件。"
+          }
+        }
+      }
+    },
+    "plugins.proxyRestart": {
+      "comment": "Action restarting a plugin with its new proxy.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restart"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重启"
+          }
+        }
+      }
+    },
+    "plugins.containerProxyDetail": {
+      "comment": "Explains a managed container's proxy.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The container's HTTP and HTTPS requests go through it, by the server; the local network is reached directly."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "容器的 HTTP 和 HTTPS 请求经服务器发往此代理；局域网直连。"
+          }
+        }
+      }
+    },
+    "plugins.containerProxyTitle": {
+      "comment": "Title asking to recreate a container for its new proxy; name is the container's name.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recreate %@?"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重建 %@？"
+          }
+        }
+      }
+    },
+    "plugins.containerProxyMessage": {
+      "comment": "Explains why changing a container's proxy recreates it.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The container goes from reaching sites directly to through the server, or back, which takes another container. It is created again now; its volumes stay."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "容器将从直连改为经服务器代理，或反过来，这需要重新创建容器。现在将重建容器，其数据卷保留。"
+          }
+        }
+      }
+    },
+    "plugins.containerRecreate": {
+      "comment": "Action recreating a container with its new proxy.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recreate"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重建"
+          }
+        }
+      }
+    },
+    "plugins.showCommand": {
+      "comment": "Shows the docker run command equivalent to how the server runs a container.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show Command"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "显示运行命令"
+          }
+        }
+      }
+    },
+    "plugins.hideCommand": {
+      "comment": "Hides the docker run command of a container.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hide Command"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "隐藏运行命令"
           }
         }
       }
@@ -8893,6 +9217,24 @@
         }
       }
     },
+    "schema.needsContainer": {
+      "comment": "Why a switch of a plugin's configuration is off and cannot be turned on; name is a container dependency's name.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Set up the container dependency %@ below to turn this on."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "需先在下方的容器依赖中设置 %@，才能开启。"
+          }
+        }
+      }
+    },
     "schema.item": {
       "comment": "Title of an unnamed entry of a list in a plugin's configuration; number is its place.",
       "extractionState": "manual",
@@ -8997,6 +9339,204 @@
           "stringUnit": {
             "state": "translated",
             "value": "隐藏"
+          }
+        }
+      }
+    },
+    "schema.choose": {
+      "comment": "Placeholder of a field choosing one of many options in a plugin's configuration, such as an indexer's kind; typing searches them.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "选择"
+          }
+        }
+      }
+    },
+    "schema.noMatches": {
+      "comment": "Shown when no option of a plugin's configuration matches what was typed.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No matches"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有匹配项"
+          }
+        }
+      }
+    },
+    "schema.tagTorrent": {
+      "comment": "Tag of an option of a plugin's configuration downloaded as torrents, such as an indexer's kind.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Torrent"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "种子"
+          }
+        }
+      }
+    },
+    "schema.tagUsenet": {
+      "comment": "Tag of an option of a plugin's configuration downloaded from Usenet.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usenet"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usenet"
+          }
+        }
+      }
+    },
+    "schema.tagPublic": {
+      "comment": "Tag of an indexer anyone may use.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Public"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "公开"
+          }
+        }
+      }
+    },
+    "schema.tagSemiPrivate": {
+      "comment": "Tag of an indexer anyone who signs up may use.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Semi-private"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "半公开"
+          }
+        }
+      }
+    },
+    "schema.tagPrivate": {
+      "comment": "Tag of an indexer for members only, by invitation.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Private"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "私有"
+          }
+        }
+      }
+    },
+    "schema.all": {
+      "comment": "Filter of the options of a plugin's configuration showing them all, such as indexers of every protocol.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "全部"
+          }
+        }
+      }
+    },
+    "schema.matches": {
+      "comment": "How many options of a plugin's configuration match the search and filters.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld option"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld options"
+                }
+              }
+            }
+          }
+        },
+        "zh-Hans": {
+          "variations": {
+            "plural": {
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld 项"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "schema.matchesFirst": {
+      "comment": "Shown when only some of the options matching the search are listed; typing more narrows them.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "First %1$@ of %2$@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "显示前 %1$@ 项，共 %2$@ 项"
           }
         }
       }
@@ -12241,6 +12781,60 @@
         }
       }
     },
+    "overview.containerEngine": {
+      "comment": "Label of the container engine the server runs plugins' containers on: its name and version.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Container Engine"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "容器引擎"
+          }
+        }
+      }
+    },
+    "overview.containerEngineRootless": {
+      "comment": "Marks a container engine running without root.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "rootless"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无 root"
+          }
+        }
+      }
+    },
+    "overview.containerEngineNone": {
+      "comment": "The server found no container engine; reason tells why.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unavailable: %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "不可用：%@"
+          }
+        }
+      }
+    },
     "overview.load": {
       "comment": "The load of the server's computer.",
       "extractionState": "manual",
@@ -12651,6 +13245,78 @@
           "stringUnit": {
             "state": "translated",
             "value": "已发送"
+          }
+        }
+      }
+    },
+    "overview.containers": {
+      "comment": "Heading of the plugins' containers on the overview.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Containers"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "容器"
+          }
+        }
+      }
+    },
+    "overview.containersNone": {
+      "comment": "Shown when no plugin container is run or given an address.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No plugin uses containers."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有插件使用容器。"
+          }
+        }
+      }
+    },
+    "overview.containerOf": {
+      "comment": "Tells which plugin a container is for; plugin is the plugin's name.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "For %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 依赖"
+          }
+        }
+      }
+    },
+    "overview.containerExternal": {
+      "comment": "A container an administrator runs, reached at the address.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "At %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "位于 %@"
           }
         }
       }
@@ -25075,6 +25741,654 @@
         }
       }
     },
+    "proxies.message": {
+      "comment": "Description of the proxies settings.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The proxies the server and its plugins reach sites through: plugins choose one in their settings, the server's own requests below."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "服务器与插件访问站点时使用的代理：插件在各自的设置中选择，服务器自身的请求在下方选择。"
+          }
+        }
+      }
+    },
+    "proxies.add": {
+      "comment": "Opens the form adding a proxy.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add Proxy"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "添加代理"
+          }
+        }
+      }
+    },
+    "proxies.list": {
+      "comment": "Heading of the server's own proxies.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Proxies"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "代理"
+          }
+        }
+      }
+    },
+    "proxies.empty": {
+      "comment": "Shown when the server has no proxies of its own.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No proxies added."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "尚未添加代理。"
+          }
+        }
+      }
+    },
+    "proxies.system": {
+      "comment": "The proxy the server's environment or operating system sets.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "System proxy"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "系统代理"
+          }
+        }
+      }
+    },
+    "proxies.systemUnset": {
+      "comment": "Shown for the system proxy when the system sets none.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not set; sites are reached directly"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未设置；直接访问站点"
+          }
+        }
+      }
+    },
+    "proxies.systemFooter": {
+      "comment": "Explains where the system proxy comes from.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The system proxy is read from the server's environment (HTTPS_PROXY, HTTP_PROXY, ALL_PROXY and NO_PROXY) or else its operating system's network settings, every 30 seconds. It cannot be changed here."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "系统代理每 30 秒从服务器的环境变量（HTTPS_PROXY、HTTP_PROXY、ALL_PROXY 与 NO_PROXY）读取，未设置时读取操作系统的网络设置。它不能在此更改。"
+          }
+        }
+      }
+    },
+    "proxies.bypass": {
+      "comment": "The hosts a proxy does not carry; hosts is their list.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reached directly: %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "直接访问：%@"
+          }
+        }
+      }
+    },
+    "proxies.none": {
+      "comment": "A plugin's choice of reaching sites without a proxy.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No proxy"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "不使用代理"
+          }
+        }
+      }
+    },
+    "proxies.noneDetail": {
+      "comment": "Explains choosing no proxy.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sites are reached directly"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "直接访问站点"
+          }
+        }
+      }
+    },
+    "proxies.name": {
+      "comment": "Label of a proxy's name.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Name"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "名称"
+          }
+        }
+      }
+    },
+    "proxies.kind": {
+      "comment": "Label of a proxy's kind: HTTP, SOCKS4 or SOCKS5.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kind"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "类型"
+          }
+        }
+      }
+    },
+    "proxies.host": {
+      "comment": "Label of a proxy's host name or address.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Host"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "主机"
+          }
+        }
+      }
+    },
+    "proxies.port": {
+      "comment": "Label of a proxy's port.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Port"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "端口"
+          }
+        }
+      }
+    },
+    "proxies.username": {
+      "comment": "Label of the username a proxy takes.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Username"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "用户名"
+          }
+        }
+      }
+    },
+    "proxies.password": {
+      "comment": "Label of the password a proxy takes.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Password"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "密码"
+          }
+        }
+      }
+    },
+    "proxies.passwordKept": {
+      "comment": "Placeholder of a proxy's password while the stored one is kept.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unchanged"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "保持不变"
+          }
+        }
+      }
+    },
+    "proxies.clearPassword": {
+      "comment": "Removes the stored password of a proxy.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove the password"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "移除密码"
+          }
+        }
+      }
+    },
+    "proxies.test": {
+      "comment": "Tests reaching a site through a proxy.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Test"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "测试"
+          }
+        }
+      }
+    },
+    "proxies.testOk": {
+      "comment": "A proxy's test passed; ms is how long the site took to answer.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reached in %@ ms"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 毫秒内连通"
+          }
+        }
+      }
+    },
+    "proxies.exit": {
+      "comment": "The address sites see a proxy's requests come from.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exit address %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "出口地址 %@"
+          }
+        }
+      }
+    },
+    "proxies.testFailed": {
+      "comment": "A proxy's test failed; error says why.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Failed: %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "失败：%@"
+          }
+        }
+      }
+    },
+    "proxies.remove": {
+      "comment": "Deletes a proxy.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "删除"
+          }
+        }
+      }
+    },
+    "proxies.removeTitle": {
+      "comment": "Asks before deleting a proxy; name is its name.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete %@?"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "删除 %@？"
+          }
+        }
+      }
+    },
+    "proxies.removeMessage": {
+      "comment": "Explains deleting a proxy.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plugins using this proxy fail until another one is chosen in their settings. A proxy the server's requests or a plugin's network settings use cannot be deleted."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在设置中使用此代理的插件将无法工作，直到另选代理。服务器的请求或插件的网络设置正在使用的代理不能删除。"
+          }
+        }
+      }
+    },
+    "proxies.serverRequests": {
+      "comment": "Heading of the proxies the server's own requests go through.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The Server's Requests"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "服务器的请求"
+          }
+        }
+      }
+    },
+    "proxies.serverRequestsFooter": {
+      "comment": "Explains the proxies of the server's own requests.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The proxies the server's own requests go through. Addresses of this machine and of the local network are reached directly."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "服务器自身的请求所经由的代理。本机与局域网的地址直接访问。"
+          }
+        }
+      }
+    },
+    "proxies.forCatalogs": {
+      "comment": "The server's requests for plugin catalogs.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plugin Catalogs"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "插件目录"
+          }
+        }
+      }
+    },
+    "proxies.forCatalogsDetail": {
+      "comment": "Explains the requests for plugin catalogs.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Catalogs and plugin downloads"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "插件目录与插件的下载"
+          }
+        }
+      }
+    },
+    "proxies.forImages": {
+      "comment": "The server's requests for items' remote images.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Images"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "图片"
+          }
+        }
+      }
+    },
+    "proxies.forImagesDetail": {
+      "comment": "Explains the requests for images.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Posters and other artwork of items"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "条目的海报等图片"
+          }
+        }
+      }
+    },
+    "proxies.forMavioDev": {
+      "comment": "The server's requests to mavio.dev.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "mavio.dev"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "mavio.dev"
+          }
+        }
+      }
+    },
+    "proxies.forMavioDevDetail": {
+      "comment": "Explains the requests to mavio.dev.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Accounts, sign-in and the relay"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "账号、登录与中继"
+          }
+        }
+      }
+    },
+    "proxies.forAcme": {
+      "comment": "The server's requests to certificate authorities.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Certificates"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "证书"
+          }
+        }
+      }
+    },
+    "proxies.forAcmeDetail": {
+      "comment": "Explains the requests to certificate authorities.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Obtaining the mavio.site certificate"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "申请 mavio.site 证书"
+          }
+        }
+      }
+    },
+    "proxies.unknown": {
+      "comment": "A proxy chosen that the server no longer has.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unknown proxy"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未知代理"
+          }
+        }
+      }
+    },
     "requests.title": {
       "comment": "Title of the requests screen and the link to it from Discover.",
       "extractionState": "manual",
@@ -32955,6 +34269,780 @@
           "stringUnit": {
             "state": "translated",
             "value": "已保存。"
+          }
+        }
+      }
+    },
+    "settings.advancedGroup": {
+      "comment": "Group of the settings' advanced tools, which can be pinned to the sidebar.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Advanced"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "高级功能"
+          }
+        }
+      }
+    },
+    "settings.pin": {
+      "comment": "Shows an advanced tool in the sidebar's Features group.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pin to Sidebar"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "固定到侧边栏"
+          }
+        }
+      }
+    },
+    "settings.unpin": {
+      "comment": "Removes an advanced tool from the sidebar's Features group.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unpin from Sidebar"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "从侧边栏取消固定"
+          }
+        }
+      }
+    },
+    "nav.features": {
+      "comment": "Group of the sidebar listing the advanced tools pinned to it.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Features"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "功能"
+          }
+        }
+      }
+    },
+    "indexers.title": {
+      "comment": "Advanced tool searching a server's indexers by text, as Prowlarr's search.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Indexer Search"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "索引搜索"
+          }
+        }
+      }
+    },
+    "indexers.message": {
+      "comment": "Line under the indexer search's title.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Search the indexers by text and send releases to a download client, which downloads them without adding them to a library."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "按文字搜索索引器，并把发布发送到下载客户端；下载的内容不会加入媒体库。"
+          }
+        }
+      }
+    },
+    "indexers.allServers": {
+      "comment": "Server choice of the indexer search searching every server the user administers.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All Servers"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "全部服务器"
+          }
+        }
+      }
+    },
+    "indexers.query": {
+      "comment": "Placeholder and label of the indexer search's text field.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Search the indexers"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "搜索索引器"
+          }
+        }
+      }
+    },
+    "indexers.search": {
+      "comment": "Runs the indexer search.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Search"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "搜索"
+          }
+        }
+      }
+    },
+    "indexers.type": {
+      "comment": "Label of the indexer search's choice of what to search for.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Type"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "类型"
+          }
+        }
+      }
+    },
+    "indexers.typeAny": {
+      "comment": "Search type: any release.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anything"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "全部"
+          }
+        }
+      }
+    },
+    "indexers.typeMovie": {
+      "comment": "Search type: movies.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Movies"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "电影"
+          }
+        }
+      }
+    },
+    "indexers.typeTv": {
+      "comment": "Search type: television.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TV"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "剧集"
+          }
+        }
+      }
+    },
+    "indexers.category": {
+      "comment": "Label of the indexer search's category choice, and its column.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Category"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "分类"
+          }
+        }
+      }
+    },
+    "indexers.allCategories": {
+      "comment": "Category choice of the indexer search: every category.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All Categories"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "全部分类"
+          }
+        }
+      }
+    },
+    "indexers.categoryConsole": {
+      "comment": "Newznab category 1000.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Console"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "游戏主机"
+          }
+        }
+      }
+    },
+    "indexers.categoryMovies": {
+      "comment": "Newznab category 2000.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Movies"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "电影"
+          }
+        }
+      }
+    },
+    "indexers.categoryAudio": {
+      "comment": "Newznab category 3000.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Audio"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "音频"
+          }
+        }
+      }
+    },
+    "indexers.categoryPc": {
+      "comment": "Newznab category 4000.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PC"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "电脑"
+          }
+        }
+      }
+    },
+    "indexers.categoryTv": {
+      "comment": "Newznab category 5000.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TV"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "电视"
+          }
+        }
+      }
+    },
+    "indexers.categoryXxx": {
+      "comment": "Newznab category 6000.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "XXX"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "成人"
+          }
+        }
+      }
+    },
+    "indexers.categoryBooks": {
+      "comment": "Newznab category 7000.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Books"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "图书"
+          }
+        }
+      }
+    },
+    "indexers.categoryOther": {
+      "comment": "Newznab category 8000.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Other"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "其他"
+          }
+        }
+      }
+    },
+    "indexers.indexer": {
+      "comment": "Label of the indexer search's indexer choice, and its column.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Indexer"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "索引器"
+          }
+        }
+      }
+    },
+    "indexers.allIndexers": {
+      "comment": "Indexer choice of the indexer search: every enabled indexer.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All Indexers"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "全部索引器"
+          }
+        }
+      }
+    },
+    "indexers.protocol": {
+      "comment": "Column of a release's protocol.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Protocol"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "协议"
+          }
+        }
+      }
+    },
+    "indexers.torrent": {
+      "comment": "A torrent release's protocol.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Torrent"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Torrent"
+          }
+        }
+      }
+    },
+    "indexers.age": {
+      "comment": "Column of how long ago a release was published.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Age"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "发布时间"
+          }
+        }
+      }
+    },
+    "indexers.releaseTitle": {
+      "comment": "Column of a release's title.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Title"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "标题"
+          }
+        }
+      }
+    },
+    "indexers.size": {
+      "comment": "Column of a release's size.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Size"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "大小"
+          }
+        }
+      }
+    },
+    "indexers.grabs": {
+      "comment": "Column of how often a release was grabbed.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Grabs"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "抓取数"
+          }
+        }
+      }
+    },
+    "indexers.peers": {
+      "comment": "Column of a torrent's seeders and peers.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Peers"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "做种 / 用户"
+          }
+        }
+      }
+    },
+    "indexers.send": {
+      "comment": "Sends a release to a download client without a library item.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Send to Download Client"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "发送到下载客户端"
+          }
+        }
+      }
+    },
+    "indexers.sent": {
+      "comment": "A release was sent to the named download client.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sent to %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已发送到 %@"
+          }
+        }
+      }
+    },
+    "indexers.magnet": {
+      "comment": "Copies a release's magnet link, for a torrent client of the user's own.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copy Magnet Link"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "复制磁力链接"
+          }
+        }
+      }
+    },
+    "indexers.magnetCopied": {
+      "comment": "Shown after copying a release's magnet link.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Magnet Link Copied"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已复制磁力链接"
+          }
+        }
+      }
+    },
+    "indexers.info": {
+      "comment": "Opens a release's page on its indexer.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open Release Page"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "打开发布页面"
+          }
+        }
+      }
+    },
+    "indexers.results": {
+      "comment": "How many releases a server's search found.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld release"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld releases"
+                }
+              }
+            }
+          }
+        },
+        "zh-Hans": {
+          "variations": {
+            "plural": {
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld 个发布"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "indexers.page": {
+      "comment": "Which page of a server's releases is shown.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Page %1$@ of %2$@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "第 %1$@ / %2$@ 页"
+          }
+        }
+      }
+    },
+    "indexers.previous": {
+      "comment": "Shows a server's previous page of releases.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Previous Page"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "上一页"
+          }
+        }
+      }
+    },
+    "indexers.next": {
+      "comment": "Shows a server's next page of releases.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Next Page"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "下一页"
+          }
+        }
+      }
+    },
+    "indexers.prompt": {
+      "comment": "Shown before the first indexer search.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enter what to search for."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "输入要搜索的内容。"
           }
         }
       }

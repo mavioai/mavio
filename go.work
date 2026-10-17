@@ -32,6 +32,7 @@ use (
 	./plugins/scraper-servarr
 	./plugins/scraper-theaudiodb
 	./plugins/scraper-tmdb
+	./plugins/solvers
 	./plugins/subtitles
 	./plugins/voice
 	./tools/fixtures

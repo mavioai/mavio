@@ -51,8 +51,9 @@ type Options struct {
 	// Instances is the pool size, i.e. the number of concurrent calls; zero
 	// means 2.
 	Instances int
-	// FetchClient performs the plugin's outbound HTTP requests; nil means a
-	// client with a 30 s timeout.
+	// FetchClient performs the plugin's outbound HTTP requests, whose
+	// contexts name the plugin (FetchingPlugin); nil means a client with a
+	// 30 s timeout.
 	FetchClient *http.Client
 	// HostAPI serves the plugin's requests to the host API (abi.HostName);
 	// nil denies them.
@@ -63,6 +64,16 @@ type Options struct {
 	// such as its container dependencies'; nil allows none.
 	AllowHost func(ctx context.Context, plugin, host string) bool
 	Logger    *slog.Logger
+}
+
+// fetchingKey is the context key of the plugin a fetch is for.
+type fetchingKey struct{}
+
+// FetchingPlugin returns the ID of the plugin whose outbound HTTP request
+// FetchClient performs with ctx, the request's context; "" for others.
+func FetchingPlugin(ctx context.Context) string {
+	id, _ := ctx.Value(fetchingKey{}).(string)
+	return id
 }
 
 // DataMount is where WASM plugins see their data folder.
@@ -416,7 +427,7 @@ func (p *Plugin) fetch(ctx context.Context, in []byte) abi.FetchResponse {
 		p.log.WarnContext(ctx, "plugin request denied", "host", u.Host)
 		return abi.FetchResponse{Error: "host " + u.Host + " is not in the plugin's permissions"}
 	}
-	hreq, err := http.NewRequestWithContext(ctx, method, u.String(), bytes.NewReader(req.Body))
+	hreq, err := http.NewRequestWithContext(context.WithValue(ctx, fetchingKey{}, p.manifest.GetId()), method, u.String(), bytes.NewReader(req.Body))
 	if err != nil {
 		return abi.FetchResponse{Error: err.Error()}
 	}

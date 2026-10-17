@@ -31,6 +31,8 @@ type PluginContainer struct {
 	Secrets map[string]string `json:"-"`
 	// UseGpu holds the value of the "use_gpu" field.
 	UseGpu bool `json:"use_gpu,omitempty"`
+	// Proxy holds the value of the "proxy" field.
+	Proxy string `json:"proxy,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
 	UpdatedAt    time.Time `json:"updated_at,omitempty"`
 	selectValues sql.SelectValues
@@ -47,7 +49,7 @@ func (*PluginContainer) scanValues(columns []string) ([]any, error) {
 			values[i] = new(core.ID)
 		case plugincontainer.FieldUseGpu:
 			values[i] = new(sql.NullBool)
-		case plugincontainer.FieldPluginID, plugincontainer.FieldName, plugincontainer.FieldMode, plugincontainer.FieldAddress:
+		case plugincontainer.FieldPluginID, plugincontainer.FieldName, plugincontainer.FieldMode, plugincontainer.FieldAddress, plugincontainer.FieldProxy:
 			values[i] = new(sql.NullString)
 		case plugincontainer.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -110,6 +112,12 @@ func (_m *PluginContainer) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.UseGpu = value.Bool
 			}
+		case plugincontainer.FieldProxy:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field proxy", values[i])
+			} else if value.Valid {
+				_m.Proxy = value.String
+			}
 		case plugincontainer.FieldUpdatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
@@ -168,6 +176,9 @@ func (_m *PluginContainer) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("use_gpu=")
 	builder.WriteString(fmt.Sprintf("%v", _m.UseGpu))
+	builder.WriteString(", ")
+	builder.WriteString("proxy=")
+	builder.WriteString(_m.Proxy)
 	builder.WriteString(", ")
 	builder.WriteString("updated_at=")
 	builder.WriteString(_m.UpdatedAt.Format(time.ANSIC))

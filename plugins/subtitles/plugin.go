@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
-	"net/url"
 	"path/filepath"
 	"sync"
 	"time"
@@ -15,7 +14,11 @@ import (
 	"connectrpc.com/connect"
 	"google.golang.org/protobuf/proto"
 
+	"github.com/mavioai/mavio/libs/plugin/challenge"
+	"github.com/mavioai/mavio/libs/plugin/guest"
+	"github.com/mavioai/mavio/libs/plugin/proxy"
 	pluginv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1"
+	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1/pluginv1connect"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/captcha"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/provider"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/throttle"
@@ -32,27 +35,23 @@ type config struct {
 	Providers []providerConfig `json:"providers"`
 	// Translators are the subtitle translators and their settings.
 	Translators []providerConfig `json:"translators"`
-	// Proxy is the proxy the sites are reached through; nil for none.
-	Proxy *web.Proxy `json:"proxy,omitempty"`
-	// FlareSolverr solves Cloudflare's challenges; nil for none.
-	FlareSolverr *web.FlareSolverr `json:"flaresolverr,omitempty"`
+	// Proxy is the ID of the server's proxy the sites are reached
+	// through: the system proxy when unset, none when empty.
+	Proxy *string `json:"proxy"`
+	// Exclude are the hosts reached directly, as Bazarr's proxy
+	// exclusions; web.DefaultExclude when unset.
+	Exclude []string `json:"exclude"`
 	// Captcha is the captcha solving service's account; nil for none.
 	Captcha *captcha.Config `json:"captcha,omitempty"`
 }
 
-// validate checks the settings other than the providers'.
-func (c *config) validate() error {
-	if c.Proxy != nil {
-		if err := c.Proxy.Validate(); err != nil {
-			return fmt.Errorf("proxy: %w", err)
-		}
+// proxyID returns the ID of the server's proxy the sites are reached
+// through, "" for none.
+func (c *config) proxyID() string {
+	if c.Proxy == nil {
+		return proxy.SystemID
 	}
-	if c.FlareSolverr != nil {
-		if u, err := url.Parse(c.FlareSolverr.URL); err != nil || (u.Scheme != "http" && u.Scheme != "https") || u.Host == "" {
-			return fmt.Errorf("flaresolverr: invalid URL %q", c.FlareSolverr.URL)
-		}
-	}
-	return nil
+	return *c.Proxy
 }
 
 // providerConfig is a provider's or translator's configuration.
@@ -88,7 +87,9 @@ type plugin struct {
 	client func(web.Config) *http.Client
 	// host returns the client reaching the server's host API, which the
 	// runtime sets once serving; nil for none.
-	host     func() *http.Client
+	host func() *http.Client
+	// api replaces the host API reached with host, for tests.
+	api      hostService
 	dataDir  string
 	throttle *throttle.Throttle
 	defs     []provider.Definition
@@ -156,6 +157,48 @@ func (p *plugin) hostClient() *http.Client {
 	return p.host()
 }
 
+// hostService is the server's host API the plugin calls: it lists the
+// server's proxies and solves challenges.
+type hostService interface {
+	proxy.Lister
+	challenge.Solver
+}
+
+// hostService returns the server's host API, nil when unreached.
+func (p *plugin) hostService() hostService {
+	if p.api != nil {
+		return p.api
+	}
+	if hc := p.hostClient(); hc != nil {
+		return pluginv1connect.NewHostServiceClient(hc, guest.HostURL)
+	}
+	return nil
+}
+
+// network returns how a configuration reaches the sites: through its
+// proxy, solving challenges through the server. Without the host API, the
+// sites are reached directly and challenges left unsolved.
+func (p *plugin) network(ctx context.Context, c config) (web.Config, error) {
+	w := web.Config{Exclude: c.Exclude}
+	h := p.hostService()
+	if h == nil {
+		return w, nil
+	}
+	w.Solver = h
+	id := c.proxyID()
+	if id == "" {
+		return w, nil
+	}
+	proxies, err := proxy.List(ctx, h, id)
+	if err != nil {
+		return w, connect.NewError(connect.CodeUnavailable, err)
+	}
+	if w.Proxy = proxies[id]; w.Proxy == nil {
+		return w, connect.NewError(connect.CodeFailedPrecondition, fmt.Errorf("proxy %s: %w", id, proxy.ErrNotFound))
+	}
+	return w, nil
+}
+
 // env is what a provider is made with.
 func (p *plugin) env(name string, hc *http.Client, solver provider.CaptchaSolver) provider.Env {
 	env := provider.Env{HTTP: hc, Now: p.clock, Log: p.log.With("provider", name), Captcha: solver, RetryWait: p.retryWait, Host: p.hostClient()}
@@ -172,27 +215,30 @@ func (p *plugin) Describe(context.Context, *pluginv1.DescribeRequest) (*pluginv1
 }
 
 // Configure takes a configuration, whose providers and translators
-// replace those enabled, reaching the sites through its proxy and
-// FlareSolverr and solving captchas with its service; translators are
-// reached through the proxy only. As Bazarr's, changing a provider's
+// replace those enabled, reaching the sites through its proxy, solving
+// challenges through the server and captchas with its service;
+// translators and the captcha service are reached through the proxy
+// only. The server configures the plugin again when its proxies change. As Bazarr's, changing a provider's
 // settings forgets its throttling for authentication and configuration
 // failures, and the throttling of providers no longer enabled is
 // forgotten.
-func (p *plugin) Configure(_ context.Context, req *pluginv1.ConfigureRequest) (*pluginv1.ConfigureResponse, error) {
+func (p *plugin) Configure(ctx context.Context, req *pluginv1.ConfigureRequest) (*pluginv1.ConfigureResponse, error) {
 	var c config
 	if err := json.Unmarshal([]byte(req.GetConfigJson()), &c); err != nil {
 		return nil, connect.NewError(connect.CodeInvalidArgument, err)
 	}
-	if err := c.validate(); err != nil {
-		return nil, connect.NewError(connect.CodeInvalidArgument, err)
+	w, err := p.network(ctx, c)
+	if err != nil {
+		return nil, err
 	}
-	hc := p.client(web.Config{Proxy: c.Proxy, FlareSolverr: c.FlareSolverr})
+	unsolved := web.Config{Proxy: w.Proxy, Exclude: w.Exclude}
+	hc := p.client(w)
 	var solver provider.CaptchaSolver
 	if c.Captcha != nil {
 		// The services are reached through the proxy, as Bazarr's
-		// pitchers, but never through FlareSolverr.
+		// pitchers, but never through a challenge solver.
 		var err error
-		if solver, err = captcha.New(*c.Captcha, p.client(web.Config{Proxy: c.Proxy}), p.log.With("captcha", c.Captcha.Service)); err != nil {
+		if solver, err = captcha.New(*c.Captcha, p.client(unsolved), p.log.With("captcha", c.Captcha.Service)); err != nil {
 			return nil, connect.NewError(connect.CodeInvalidArgument, fmt.Errorf("captcha: %w", err))
 		}
 	}
@@ -216,7 +262,7 @@ func (p *plugin) Configure(_ context.Context, req *pluginv1.ConfigureRequest) (*
 		}
 		enabled[pc.Name] = cp
 	}
-	translators, err := p.configureTranslators(c)
+	translators, err := p.configureTranslators(c, unsolved)
 	if err != nil {
 		return nil, err
 	}
@@ -236,8 +282,8 @@ func (p *plugin) Configure(_ context.Context, req *pluginv1.ConfigureRequest) (*
 // configureTranslators makes the enabled translators of a configuration.
 // Translations take minutes, bounded by the translators themselves
 // rather than the sites' timeout.
-func (p *plugin) configureTranslators(c config) (map[string]*configuredTranslator, error) {
-	hc := *p.client(web.Config{Proxy: c.Proxy})
+func (p *plugin) configureTranslators(c config, w web.Config) (map[string]*configuredTranslator, error) {
+	hc := *p.client(w)
 	hc.Timeout = 0
 	out, seen := map[string]*configuredTranslator{}, map[string]bool{}
 	for i, tc := range c.Translators {

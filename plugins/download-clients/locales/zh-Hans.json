@@ -1,0 +1,23 @@
+{
+  "Download Clients": "下载客户端",
+  "Sends releases to the download clients Radarr and Sonarr support, such as qBittorrent, Transmission, Deluge, rTorrent, SABnzbd and NZBGet, and follows their downloads.": "将发布资源发送到 Radarr 和 Sonarr 支持的下载客户端（例如 qBittorrent、Transmission、Deluge、rTorrent、SABnzbd 和 NZBGet），并跟踪下载进度。",
+  "Clients": "客户端",
+  "The configured download clients": "已配置的下载客户端",
+  "ID": "ID",
+  "Name": "名称",
+  "Definition": "定义",
+  "The kind of download client, such as qBittorrent": "下载客户端的类型，例如 qBittorrent",
+  "Enabled": "启用",
+  "Priority": "优先级",
+  "Clients of a protocol are used by priority, lower first, and in turn among equals": "同一协议的客户端按优先级使用，数值小的优先，相同优先级轮流使用",
+  "Tags": "标签",
+  "The client takes the media of these tags; a client without tags takes the media no tagged client does": "客户端接收带有这些标签的媒体；没有标签的客户端接收未被任何带标签客户端接收的媒体",
+  "Remove completed downloads": "移除已完成的下载",
+  "Remove imported downloads from the client once they are done seeding": "已导入的下载做种结束后从客户端中移除",
+  "Remove failed downloads": "移除失败的下载",
+  "Remove failed downloads from the client": "从客户端中移除失败的下载",
+  "Settings": "设置",
+  "The settings the definition takes": "该定义所需的设置",
+  "History limit": "历史记录上限",
+  "How many downloads of the clients' histories are read; 60 when 0": "读取客户端历史记录中的下载数量；为 0 时读取 60 条"
+}

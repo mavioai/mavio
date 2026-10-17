@@ -23,6 +23,13 @@ func TestServerSettingsValidate(t *testing.T) {
 		{"HTTPS", func(s *ServerSettings) {
 			s.Network.HTTPSPort, s.Network.CertificatePath, s.Network.KeyPath = 8920, "/c.pem", "/k.pem"
 		}, true},
+		{"no proxy for images", func(s *ServerSettings) { s.Network.Proxies.Images = "" }, true},
+		{"a proxy for mavio.dev", func(s *ServerSettings) { s.Network.Proxies.MavioDev = NewID().String() }, true},
+		{"an unknown proxy for ACME", func(s *ServerSettings) { s.Network.Proxies.ACME = "office" }, false},
+		{"a plugin's proxy", func(s *ServerSettings) {
+			s.PluginProxies = map[string]string{"dev.mavio.scraper-tmdb": NewID().String(), "dev.mavio.ratings": ""}
+		}, true},
+		{"a plugin's unknown proxy", func(s *ServerSettings) { s.PluginProxies = map[string]string{"dev.mavio.scraper-tmdb": "office"} }, false},
 		{"unknown acceleration", func(s *ServerSettings) { s.Transcoding.HardwareAcceleration = "qsv" }, false},
 		{"unknown preset", func(s *ServerSettings) { s.Transcoding.EncoderPreset = "warp" }, false},
 		{"CRF", func(s *ServerSettings) { s.Transcoding.H264CRF = 52 }, false},

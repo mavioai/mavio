@@ -162,7 +162,9 @@ manifest 在 `external_id_kinds` 中声明外部 ID 类型：键、显示名称�
 * `INDEXER_PROVIDER`：`IndexerProviderService` 搜索索引器。`ListDefinitions` 列出提供者实现的索引器种类（站点，或 Newznab 等协议）及每种所需的设置，并标明其中的机密；插件配置列出据此配置的索引器，`ListIndexers` 列出它们及其能力（Newznab 的搜索参数与分类）、是否因失败而暂被排除，以及服务器的决策与抓取所用的设置（标签、MULTi 发布的语言，torrent 索引器还有必需标志、最少做种数、分享率、做种时间、整季包做种时间，以及抓取时是否拒绝哈希已被拉黑的种子），以及总是接收该索引器 release 的下载客户端；`TestIndexer` 检查索引器的设置；`SearchReleases` 按 ID、标题、季与集在 Newznab 分类中、在时间与大小限制内搜索电影、剧集或文本，无任何搜索条件时读取最近的 release，返回 release（索引器提供时附带来源组、片源、容器、编码与分辨率）与失败的索引器；`GetReleaseFile` 获取 release 的种子文件或 NZB，或其下载链接指向的磁力链接，并拒绝无效的 NZB；`ReleaseService` 搜索每个就绪的索引器提供者，并保存其索引器一小时，直到插件重启或重新配置。`plugins/indexers` 把站点给出的内容（Cookie、Newznab 能力、API 令牌）与每个索引器的状态一起保存在其数据目录中，跨重启保留。由 `plugins/indexers` 提供。
 * `DOWNLOAD_CLIENT_PROVIDER`：`DownloadClientProviderService` 把 release 发送给下载客户端。`ListDownloadClientDefinitions` 如索引器定义那样列出提供者实现的客户端种类及每种所需的设置；插件配置列出据此配置的客户端，每个客户端有电影与剧集各自的分类，`ListDownloadClients` 列出它们的协议、优先级、标签、主机（用于远程路径映射）、是否偏好种子文件而非磁力链接，以及是否因失败而暂被排除；`TestDownloadClient` 检查客户端的设置，对不妨碍其工作的问题（缺少分类、开发版本）返回警告；`AddDownload` 把电影或剧集的种子文件、磁力链接或 NZB 发送给客户端，并标明是否为近期发行、附带其索引器要求的做种条件、是否为整季（Pneumatic 拒绝整季）、release 及其电影或剧集的信息（质量、语言、发布组、索引器、年份、合集、制片公司、标题 slug，Flood 将其添加为标签），以及为其拉黑的种子哈希（release 未给出哈希的种子，若其哈希在其中则被拒绝），返回下载的 ID；客户端不接受磁力链接时以 unimplemented 失败，由服务端改发种子文件，客户端拒绝该 release 时以 failed precondition 失败；`ListDownloads` 列出客户端分类中的下载及其状态、大小、分享率与输出路径，以及各客户端自身的信息（输出目录、是否自行删除已完成的下载、其整理方式）；`GetDownload` 在入库前重新读取下载；`RemoveDownload` 删除下载，按需连同其文件；`MarkDownloadImported` 把已入库的下载移到客户端的已入库分类。`DownloadService` 如同 Radarr 的 DownloadClientProvider，把每个 release 发送给其协议的客户端：与电影或剧集共享某个标签的客户端，否则为无标签的客户端；索引器指定了下载客户端时即用它；否则在其中未因失败而暂被排除者里（若全被排除，则为全部，除非该 release 因等待客户端恢复而处于待定），优先级最高的那些轮流使用。由 `plugins/download-clients` 提供；它把抓取给出的各种子的做种限制保存在数据目录中（`seeds.json`），使其在重启后保留，并按 `history_limit` 列出 Usenet 客户端的历史条数。
 
-两个面向网络的提供者都是进程插件：索引器与下载客户端的地址由管理员配置，WASM 清单的 `http_hosts` 无法列出它们，而且索引器需要代理与长期会话。
+配置的每个索引器与下载客户端都有一个由服务器生成的 ID（架构 §7.5）和一个由管理员给定的名称——默认取其定义的名称——在插件的索引器或下载客户端中唯一（不区分大小写）；与 Prowlarr 一样，同一定义可以配置多次。配置 schema 把定义、以及索引器的下载客户端作为选项提供。
+
+两个面向网络的提供者都是进程插件：索引器与下载客户端的地址由管理员配置，WASM 清单的 `http_hosts` 无法列出它们，而且索引器需要长期会话。
 
 ### 8.13 字幕提供者
 `SUBTITLE_PROVIDER` 为字幕获取（[架构 §14](architecture.zh-CN.md#14-字幕获取libsacquiresubtitles)）服务，如 Bazarr 的提供者为其服务。`SubtitleProviderService.ListSubtitleProviders` 列出插件实现的提供者及各自的设置（标出机密项）、是否启用、是否被限流及限流到何时；`SearchSubtitles` 接受视频的描述（名称、别名、ID、季、集与绝对集数、年份、release 名称及其来源、发布组、分辨率、编码、版本与流媒体服务、帧率、文件名、大小与 OpenSubtitles 哈希）与多种语言及其 forced 与听障要求，返回带提供者、release 名称、语言、标记以及提供者判定匹配的属性的候选，由服务端评分；`DownloadSubtitle` 返回其中之一，已从压缩包中取出。失败带有类型（请求过多、下载额度、服务不可用、认证、配置、应阻止的字幕），插件据此限流该提供者。`plugins/subtitles` 以进程插件提供它：其站点位于登录、cookie、Cloudflare 与验证码之后，有的自托管在管理员给出的地址，且它在数据目录中保存会话、限流状态与验证码服务的账号。
@@ -192,6 +194,9 @@ manifest 在 `external_id_kinds` 中声明外部 ID 类型：键、显示名称�
 
 `plugins/voice` 以 Go 子进程插件提供这两项能力：其设置启用并配置每个识别器与合成器，包括地址、key（机密项）与模型——识别有 whisper-asr-webservice 与 OpenAI 兼容的转写 API，合成有 OpenAI 兼容的语音 API——服务端以插件的 ID 加上它们自己的名称来命名它们。whisper-asr-webservice 是从 `plugins/subtitles` 移来的 Bazarr Whisper 提供者，连同其语言映射、两个超时设置与测试用例；每段话一次性交给服务。
 
+### 8.17 质询求解器
+`CHALLENGE_SOLVER` 解答位于 Cloudflare 或 DDoS-Guard 之后的站点的质询（[架构 §17.2](architecture.zh-CN.md#172-质询求解器)）。`ChallengeSolverService.Solve` 接受 URL、方法（GET，或带表单正文及其内容类型的 POST）、求解时经由的代理与超时，返回通过质询的 cookie（名称、值、域、路径）、取得它们时的 user agent 以及解答它的求解器。其他插件从不直接调用它：它们以代理的 ID 调用 `HostService.SolveChallenge`，由服务端解析代理后依次交给就绪的求解插件；没有时答复 unavailable。由 `plugins/solvers` 以 FlareSolverr 提供（§12）。
+
 ## 9. 运行时差异
 | | WASM | 进程 |
 | :--- | :--- | :--- |
@@ -201,6 +206,7 @@ manifest 在 `external_id_kinds` 中声明外部 ID 类型：键、显示名称�
 | 解析器 | 可以 | 不可以 |
 | 长任务 | 至多任务超时 | 不限 |
 | 容器依赖 | 支持；其地址加入 `http_hosts` | 支持 |
+| 服务端结束时 | 随之结束 | 读到 stdin 结尾时停止（`MAVIO_PLUGIN_LIFELINE=stdin`），Go 与 TypeScript SDK 均如此 |
 
 ## 10. DLNA（`plugins/dlna`）
 DLNA 是第一方进程插件：它需要 UDP 组播（WASM 没有 socket）和长期运行的监听。它为服务端支持的每个平台构建，并打包进容器镜像（§10.6）。
@@ -224,7 +230,7 @@ DLNA 是第一方进程插件：它需要 UDP 组播（WASM 没有 socket）和�
 提供其媒体库的 `user`（必填）、显示的 `server_name`、`media_server` 与 `play_to`（默认开启）、使用的 `interfaces`（默认为所有已启用、支持组播且有 IPv4 地址的接口）、`announce_interval_minutes`（默认 30）、`ssdp_port`（供测试）、`renderers`（额外的描述 URL）与 `profiles`。
 
 ### 10.6 打包
-`tools/plugindist` 与其他第一方插件一起，为 Linux、macOS 与 Windows 的 amd64 和 arm64 构建插件，并把每个平台打成包含 `manifest.json` 与可执行文件的目录 zip 包（[开发指南 §7](development.zh-CN.md#7-发布与版本)）。容器镜像在其插件种子目录中附带该插件（架构文档 §12）；SSDP 组播只能到达使用宿主网络的容器。
+`tools/plugindist` 与其他第一方插件一起，为 Linux、macOS 与 Windows 的 amd64 和 arm64 构建插件，并把每个平台打成包含 `manifest.json`、其译文与可执行文件的目录 zip 包（[开发指南 §7](development.zh-CN.md#7-发布与版本)）。容器镜像在其插件种子目录中附带该插件（架构文档 §12）；SSDP 组播只能到达使用宿主网络的容器。
 
 ## 11. 容器依赖
 插件可以依赖以容器镜像运行的服务，例如 whisper-asr-webservice。插件在清单中声明该服务；由服务端在容器引擎上运行它，或由管理员运行它并给出地址（[架构 §16](architecture.zh-CN.md#16-容器依赖libscontainers)）。插件只看到地址，因此两种方式下插件的行为相同；没有容器引擎的管理员也可以让插件指向以其他方式运行的服务。
@@ -238,6 +244,8 @@ DLNA 是第一方进程插件：它需要 UDP 组播（WASM 没有 socket）和�
 * `command`、`env`：参数与环境变量。值 `${secret:<key>}` 是服务端为该依赖生成一次的随机密钥；`${address}` 是其他容器访问该依赖自己时的地址 `http://mavio-<plugin>-<name>:<port>`。
 * `volumes`：按卷名给出的挂载路径，例如 `{"cache": "/root/.cache"}`。
 * `gpu`：不设置表示不用，或 `GPU_SUPPORT_OPTIONAL`、`GPU_SUPPORT_REQUIRED`（NVIDIA），以及 `gpu_image`：使用 GPU 时若为另一个镜像，则为该镜像，同样带 digest；`memory_mib` 与 `cpus`：托管容器的限制。
+* `host_access`：服务是否以名称 `host.docker.internal` 访问服务器宿主机上的服务：Docker 把它映射到宿主机（`host-gateway`），Docker Desktop 与 Podman 自行提供该名称。在 Linux 上，宿主机上的服务须监听回环接口之外的接口才能被访问。
+* `direct`：托管容器是否只直连访问站点，用于每个请求都带有代理的服务，例如 FlareSolverr：服务器不为它提供代理选择，也不给其容器设置代理（§12.1）。
 * `required`：插件是否离不开它。可选依赖（例如与插件的 OpenAI 兼容识别器并列的 whisper-asr-webservice）在管理员选择之前保持 `unset`。
 
 安装或升级插件时显示其依赖及镜像，管理员随插件一并批准；升级带来新的镜像 digest 时，插件启动时替换托管容器。
@@ -253,3 +261,14 @@ DLNA 是第一方进程插件：它需要 UDP 组播（WASM 没有 socket）和�
 
 ### 11.4 `plugins/voice`
 whisper-asr-webservice 是第一个被声明的依赖，名为 `whisper`：其 CPU 镜像，`GPU_SUPPORT_OPTIONAL` 并以其 GPU 镜像为 `gpu_image`，端口 9000 并以 `/docs` 作健康检查，faster-whisper 的 `small` 模型，模型缓存放在一个卷中。插件被配置时通过 `HostService.ListContainers` 读取其依赖的地址；`whisper` 有地址时，插件的 `whisper` 识别器用它代替其 `endpoint` 设置。
+
+## 12. 代理与 `plugins/solvers`
+
+### 12.1 代理
+服务端的代理（[架构 §17.1](architecture.zh-CN.md#171-代理)）通过配置交给插件：带 `"x-mavio-options": {"source": "proxies"}` 的字符串属性取代理的 ID，由 `ListPluginConfigOptions` 列出，选项名称为代理名称，描述为 `kind://host:port`，标签为其种类。系统代理（`system`，[架构 §17.1](architecture.zh-CN.md#171-代理)）排在最前，标签为 `system`，系统未设置代理时没有描述。`HostService.ListProxies` 按 ID 返回插件请求的代理（未指定时返回全部），含种类、主机、端口、用户名与密码，系统代理还带其直连的主机，未设置代理时种类为未指定；只有 schema 中带此类属性的插件才能调用。这些插件在代理变更或删除时会被再次配置，而使用已不存在的代理的请求会失败。`libs/plugin/proxy` 由代理构建 `http.Transport`，直连代理列表与插件列表中的主机，系统未设置代理时完全直连；`proxy.SystemID` 是系统代理的 ID，`proxy.Local` 判断本机与局域网的地址。WASM 插件的 HTTP 请求由宿主代为发出，经管理员为该插件选择的代理（`PluginManagementService.SetPluginProxy`，显示为 `Plugin.proxy`；默认系统代理），并直连本机与局域网；宿主的 `FetchClient` 以 `wasm.FetchingPlugin` 得知请求所属的插件。进程插件与托管的容器依赖以同样方式选择代理，其 HTTP 与 HTTPS 请求按环境中的 `HTTP_PROXY` 与 `HTTPS_PROXY` 经服务端的代理网关发出，直连时则完全不经网关（[架构 §17.1](architecture.zh-CN.md#171-代理)）。
+
+### 12.2 `plugins/solvers`
+以 FlareSolverr 提供 `CHALLENGE_SOLVER` 的第一方进程插件，FlareSolverr 声明为可选的容器依赖 `flaresolverr`（按摘要引用的镜像，端口 8191，`/health`，`direct`——只经每个请求的代理求解——`host_access`，以便经 `host.docker.internal` 访问宿主机回环接口上的代理）。其配置列出依次尝试的求解器，各带是否启用（其容器依赖设置后才能启用，由 `x-mavio-requires-container` 表示）、超时与 `disable_media`，以及插件的 `session_ttl_minutes` 与 `max_concurrent`。它为每个代理保持一个 FlareSolverr 会话，在 `session_ttl_minutes` 后轮换，闲置 10 分钟后销毁，每个会话同时只处理一个请求，并让同一主机与代理的并发请求共享一次解答（[架构 §17.3](architecture.zh-CN.md#173-pluginssolvers)）。
+
+### 12.3 索引器与字幕提供者
+`plugins/indexers` 的每个索引器有一个 `proxy`，取服务端的一个代理，默认为系统代理，为空则不用代理，本机与局域网的地址不经代理，与 Prowlarr 相同；代理已不存在的索引器会带着该错误被排除。`plugins/subtitles` 的所有提供者共用一个 `proxy`，默认为系统代理，并有直连的主机（`exclude`，默认 `localhost` 与 `127.0.0.1`）；代理已不存在时其配置失败。两者都以所用代理调用 `HostService.SolveChallenge` 解答质询，并按主机保留 cookie 与 user agent；没有求解插件时质询保持原样，索引器或提供者以被 Cloudflare 拦截而失败。

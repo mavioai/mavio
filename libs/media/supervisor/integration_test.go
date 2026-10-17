@@ -18,7 +18,7 @@ func TestExecFFmpeg(t *testing.T) {
 	in := fixtures.Require(t, "h264_aac.mp4")
 	t.Run("finishes", func(t *testing.T) {
 		out := filepath.Join(t.TempDir(), "out.mkv")
-		s, err := Start(t.Context(), Exec(ffmpeg), Config{Args: []string{"-v", "error", "-i", in, "-c", "copy", "-y", out}})
+		s, err := Start(t.Context(), Exec(ffmpeg, nil), Config{Args: []string{"-v", "error", "-i", in, "-c", "copy", "-y", out}})
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -36,7 +36,7 @@ func TestExecFFmpeg(t *testing.T) {
 	t.Run("stops gracefully", func(t *testing.T) {
 		out := filepath.Join(t.TempDir(), "out.mkv")
 		// -re reads at native speed, so the transcode is still running.
-		s, err := Start(t.Context(), Exec(ffmpeg), Config{
+		s, err := Start(t.Context(), Exec(ffmpeg, nil), Config{
 			Args:      []string{"-v", "error", "-re", "-stream_loop", "-1", "-i", in, "-c", "copy", "-y", out},
 			StopGrace: 5 * time.Second,
 		})
@@ -53,7 +53,7 @@ func TestExecFFmpeg(t *testing.T) {
 		}
 	})
 	t.Run("fails", func(t *testing.T) {
-		s, err := Start(t.Context(), Exec(ffmpeg), Config{Args: []string{"-v", "error", "-i", filepath.Join(t.TempDir(), "missing.mkv"), "-f", "null", "-"}})
+		s, err := Start(t.Context(), Exec(ffmpeg, nil), Config{Args: []string{"-v", "error", "-i", filepath.Join(t.TempDir(), "missing.mkv"), "-f", "null", "-"}})
 		if err != nil {
 			t.Fatal(err)
 		}

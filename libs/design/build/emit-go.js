@@ -51,7 +51,7 @@ type TypeStyle struct {
 
 ${structType('Typography', 'Typography is a type scale.', Object.keys(t.typography.standard), 'TypeStyle')}
 
-${vars('The type scales: standard for desktops, tv for television.', '', Object.fromEntries(Object.entries(t.typography).map(([k, v]) => [`${k}Typography`, v])), (s) => `Typography{\n${fields(s, typeStyle, '\t\t')}\n\t}`)}
+${vars('The type scales: standard for phones and tablets, desktop for desktops, tv for television.', '', Object.fromEntries(Object.entries(t.typography).map(([k, v]) => [`${k}Typography`, v])), (s) => `Typography{\n${fields(s, typeStyle, '\t\t')}\n\t}`)}
 
 ${consts('Spacing steps, in points.', 'Spacing', t.spacing, num)}
 

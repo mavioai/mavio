@@ -62,7 +62,7 @@ data class MavioTypeStyle(
     val tracking: TextUnit,
 )
 
-${dataClass('MavioTypography', 'A type scale: standard for phones and tablets, tv for Android TV.', Object.keys(t.typography.standard), 'MavioTypeStyle', mapValues(t.typography, (s) => mapValues(s, typeStyle)), (n) => `${n === 'tv' ? 'Tv' : pascal(n)}Typography`)}
+${dataClass('MavioTypography', 'A type scale: standard for phones and tablets, desktop for desktops, tv for Android TV.', Object.keys(t.typography.standard), 'MavioTypeStyle', mapValues(t.typography, (s) => mapValues(s, typeStyle)), (n) => `${n === 'tv' ? 'Tv' : pascal(n)}Typography`)}
 
 ${object('MavioSpacing', 'Spacing steps.', t.spacing, (v) => `${v}.dp`, (k) => `s${k}`)}
 

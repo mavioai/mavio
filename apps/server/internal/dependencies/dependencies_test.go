@@ -110,7 +110,7 @@ func TestSetExternal(t *testing.T) {
 	s, plugs, now := newService(t, nil)
 	ctx := t.Context()
 
-	d, err := s.Set(ctx, pluginID, "whisper", core.ContainerExternal, srv.URL+"/", true)
+	d, err := s.Set(ctx, pluginID, "whisper", core.ContainerExternal, srv.URL+"/", true, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -137,7 +137,7 @@ func TestSetExternal(t *testing.T) {
 	}
 
 	// The same address keeps the secret and leaves the plugin alone.
-	d, err = s.Set(ctx, pluginID, "whisper", core.ContainerExternal, srv.URL, false)
+	d, err = s.Set(ctx, pluginID, "whisper", core.ContainerExternal, srv.URL, false, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -158,13 +158,13 @@ func TestSetExternal(t *testing.T) {
 	}
 
 	// Without a health path, the port must accept connections.
-	d, err = s.Set(ctx, pluginID, "tts", core.ContainerExternal, srv.URL, false)
+	d, err = s.Set(ctx, pluginID, "tts", core.ContainerExternal, srv.URL, false, nil)
 	if err != nil || d.Status.GetState() != pluginv1.ContainerState_CONTAINER_STATE_READY || d.Kept.Secrets != nil {
 		t.Errorf("Set of tts = %+v, %v, want ready without secrets", d, err)
 	}
 
 	// Unsetting it changes how it is reached.
-	d, err = s.Set(ctx, pluginID, "whisper", core.ContainerUnset, "", false)
+	d, err = s.Set(ctx, pluginID, "whisper", core.ContainerUnset, "", false, nil)
 	if err != nil || d.Status.GetState() != pluginv1.ContainerState_CONTAINER_STATE_UNAVAILABLE || d.Kept.Secrets["api-key"] != secret {
 		t.Errorf("Set to unset = %+v, %v, want unavailable with the secret kept", d, err)
 	}
@@ -192,7 +192,7 @@ func TestSetInvalid(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if _, err := s.Set(ctx, tt.plugin, tt.container, tt.mode, tt.address, tt.gpu); !errors.Is(err, tt.want) {
+			if _, err := s.Set(ctx, tt.plugin, tt.container, tt.mode, tt.address, tt.gpu, nil); !errors.Is(err, tt.want) {
 				t.Errorf("Set = %v, want %v", err, tt.want)
 			}
 		})
@@ -228,7 +228,7 @@ func TestManagedInContainer(t *testing.T) {
 			}
 			c.Engine = func(containers.Runtime) containers.Engine { return containerstest.New() }
 		})
-		_, err := s.Set(t.Context(), pluginID, "whisper", core.ContainerManaged, "", false)
+		_, err := s.Set(t.Context(), pluginID, "whisper", core.ContainerManaged, "", false, nil)
 		if self == nil && !errors.Is(err, dependencies.ErrNoEngine) {
 			t.Errorf("Set of managed = %v, want ErrNoEngine without the server's container", err)
 		}
@@ -273,7 +273,7 @@ func TestManaged(t *testing.T) {
 	}
 
 	// Managed before the plugin runs, it waits for the plugin.
-	d, err := s.Set(ctx, pluginID, "whisper", core.ContainerManaged, "", true)
+	d, err := s.Set(ctx, pluginID, "whisper", core.ContainerManaged, "", true, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -301,7 +301,7 @@ func TestManaged(t *testing.T) {
 
 	// Leaving managed removes the container and keeps its volume.
 	engine.Took()
-	if _, err := s.Set(ctx, pluginID, "whisper", core.ContainerUnset, "", false); err != nil {
+	if _, err := s.Set(ctx, pluginID, "whisper", core.ContainerUnset, "", false, nil); err != nil {
 		t.Fatal(err)
 	}
 	if got, want := engine.Took(), []string{"remove mavio-voice-whisper"}; !slices.Equal(got, want) {
@@ -312,7 +312,7 @@ func TestManaged(t *testing.T) {
 	}
 
 	// Managed while the plugin runs starts at once; stopping the plugin stops it.
-	if _, err := s.Set(ctx, pluginID, "whisper", core.ContainerManaged, "", false); err != nil {
+	if _, err := s.Set(ctx, pluginID, "whisper", core.ContainerManaged, "", false, nil); err != nil {
 		t.Fatal(err)
 	}
 	eventually(t, "whisper ready again", func() bool {
@@ -376,7 +376,7 @@ func TestPullJob(t *testing.T) {
 		c.Probe = func(context.Context, string, string) error { return nil }
 	})
 	ctx := t.Context()
-	if _, err := s.Set(ctx, pluginID, "whisper", core.ContainerManaged, "", false); err != nil {
+	if _, err := s.Set(ctx, pluginID, "whisper", core.ContainerManaged, "", false, nil); err != nil {
 		t.Fatal(err)
 	}
 	s.PluginStarted(ctx, plugs.manifest)
@@ -406,4 +406,125 @@ func TestPullJob(t *testing.T) {
 		deps, _ := s.List(ctx, pluginID)
 		return deps[0].Status.GetState() == pluginv1.ContainerState_CONTAINER_STATE_READY
 	})
+}
+
+func TestManagedProxy(t *testing.T) {
+	engine := containerstest.New()
+	const office = "01a14422-45e1-730c-a64f-a7e1a6b5e6b7"
+	var systemSet atomic.Bool
+	changed := make(chan string, 4)
+	s, plugs, _ := newService(t, func(c *dependencies.Config) {
+		c.Detect = onHost
+		c.Engine = func(containers.Runtime) containers.Engine { return engine }
+		c.Poll = 5 * time.Millisecond
+		c.Probe = func(context.Context, string, string) error { return nil }
+		c.ProxyEnv = func(_ context.Context, _ *pluginv1.Manifest, pc core.PluginContainer) func(string) map[string]string {
+			if pc.Proxy == "" || pc.Proxy == core.SystemProxyID && !systemSet.Load() {
+				return nil
+			}
+			return func(host string) map[string]string {
+				return map[string]string{"HTTPS_PROXY": "http://" + host + ":8686"}
+			}
+		}
+		c.CheckProxy = func(_ context.Context, id string) error {
+			if id == "gone" {
+				return core.ErrInvalid
+			}
+			return nil
+		}
+		c.ProxyChanged = func(container string) { changed <- container }
+	})
+	ctx := t.Context()
+	proxied := func() bool {
+		spec, _, _ := engine.Spec("mavio-voice-whisper")
+		return slices.Contains(spec.Env, "HTTPS_PROXY=http://host.docker.internal:8686")
+	}
+	s.PluginStarted(ctx, plugs.manifest)
+
+	// Through the system proxy, set to none, it reaches sites directly.
+	d, err := s.Set(ctx, pluginID, "whisper", core.ContainerManaged, "", false, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if d.Kept.Proxy != core.SystemProxyID || !strings.HasPrefix(d.Command, "docker run -d --name mavio-voice-whisper") {
+		t.Errorf("new managed dependency got proxy %q, command %q; want the system proxy and its docker run", d.Kept.Proxy, d.Command)
+	}
+	eventually(t, "whisper running", func() bool { _, running, _ := engine.Spec("mavio-voice-whisper"); return running })
+	if proxied() {
+		t.Error("the container goes through the gateway with no system proxy set")
+	}
+	if got, ok := s.ProxyOf(ctx, "mavio-voice-whisper"); !ok || got != core.SystemProxyID {
+		t.Errorf("ProxyOf got = %q, %v, want = system", got, ok)
+	}
+
+	// The system proxy set, the container is created again through it.
+	systemSet.Store(true)
+	s.ProxiesChanged(ctx)
+	eventually(t, "whisper through the gateway", proxied)
+
+	// Another proxy keeps the container, its connections ended.
+	engine.Took()
+	p := office
+	if _, err := s.Set(ctx, pluginID, "whisper", core.ContainerManaged, "", false, &p); err != nil {
+		t.Fatal(err)
+	}
+	if got := <-changed; got != "mavio-voice-whisper" {
+		t.Errorf("ProxyChanged got = %q, want = mavio-voice-whisper", got)
+	}
+	if got := engine.Took(); slices.ContainsFunc(got, func(c string) bool { return strings.HasPrefix(c, "remove") }) {
+		t.Errorf("calls after another proxy got = %q, want no container removed", got)
+	}
+	p = "gone"
+	if _, err := s.Set(ctx, pluginID, "whisper", core.ContainerManaged, "", false, &p); !errors.Is(err, core.ErrInvalid) {
+		t.Errorf("Set of a missing proxy got = %v, want = ErrInvalid", err)
+	}
+	if got, _ := s.ProxyOf(ctx, "mavio-voice-whisper"); got != office {
+		t.Errorf("ProxyOf got = %q, want = %s", got, office)
+	}
+
+	// None reaches sites directly again.
+	p = ""
+	if _, err := s.Set(ctx, pluginID, "whisper", core.ContainerManaged, "", false, &p); err != nil {
+		t.Fatal(err)
+	}
+	eventually(t, "whisper direct", func() bool {
+		_, running, _ := engine.Spec("mavio-voice-whisper")
+		return running && !proxied()
+	})
+	if _, ok := s.ProxyOf(ctx, "mavio-voice-other"); ok {
+		t.Error("ProxyOf of no dependency got = ok, want = false")
+	}
+}
+
+func TestManagedDirect(t *testing.T) {
+	engine := containerstest.New()
+	s, plugs, _ := newService(t, func(c *dependencies.Config) {
+		c.Detect = onHost
+		c.Engine = func(containers.Runtime) containers.Engine { return engine }
+		c.Poll = 5 * time.Millisecond
+		c.Probe = func(context.Context, string, string) error { return nil }
+		c.ProxyEnv = func(context.Context, *pluginv1.Manifest, core.PluginContainer) func(string) map[string]string {
+			return func(host string) map[string]string {
+				return map[string]string{"HTTPS_PROXY": "http://" + host + ":8686"}
+			}
+		}
+	})
+	plugs.manifest.GetContainers()[0].SetDirect(true)
+	ctx := t.Context()
+	s.PluginStarted(ctx, plugs.manifest)
+
+	if _, err := s.Set(ctx, pluginID, "whisper", core.ContainerManaged, "", false, nil); err != nil {
+		t.Fatal(err)
+	}
+	eventually(t, "whisper running", func() bool { _, running, _ := engine.Spec("mavio-voice-whisper"); return running })
+	if spec, _, _ := engine.Spec("mavio-voice-whisper"); slices.ContainsFunc(spec.Env, func(e string) bool { return strings.HasPrefix(e, "HTTPS_PROXY=") }) {
+		t.Errorf("env of a direct container got = %q, want no proxy", spec.Env)
+	}
+	if got, ok := s.ProxyOf(ctx, "mavio-voice-whisper"); ok {
+		t.Errorf("ProxyOf of a direct container got = %q, true, want = false", got)
+	}
+	p := "01a14422-45e1-730c-a64f-a7e1a6b5e6b7"
+	if _, err := s.Set(ctx, pluginID, "whisper", core.ContainerManaged, "", false, &p); !errors.Is(err, core.ErrInvalid) {
+		t.Errorf("Set of a direct container's proxy got = %v, want = ErrInvalid", err)
+	}
 }

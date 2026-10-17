@@ -46,6 +46,8 @@
   --color-accent-text: var(--mavio-color-accent-text);
   --color-focus: var(--mavio-color-focus);
   --color-danger: var(--mavio-color-danger);
+  --color-success: var(--mavio-color-success);
+  --color-warning: var(--mavio-color-warning);
   --color-progress: var(--mavio-color-progress);
   --color-scrim: var(--mavio-color-scrim);
   --radius-xs: var(--mavio-radius-xs);
@@ -60,6 +62,25 @@
   --spacing-gutter: var(--mavio-layout-gutter);
   --spacing-poster: var(--mavio-layout-poster);
   --spacing-thumbnail: var(--mavio-layout-thumbnail);
+}
+
+/* The desktop's controls (docs/clients.md §6.4): from the width the
+   desktop type scale starts at, outside TV mode, controls take the sizes
+   of macOS's rather than the phone's. */
+@custom-variant desk {
+  @media (min-width: 1200px) {
+    &:where(:root:not([data-tv]) *) {
+      @slot;
+    }
+  }
+}
+
+/* The television's controls (docs/tv.md): in TV mode, controls keep the
+   size they take for the remote, above the phone's. */
+@custom-variant tv {
+  &:where(:root[data-tv] *) {
+    @slot;
+  }
 }
 
 /* The type scale of the design tokens. */

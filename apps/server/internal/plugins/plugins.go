@@ -44,6 +44,9 @@ const (
 	// Disabled plugins are installed but not started, as an administrator
 	// chose.
 	Disabled
+	// Starting plugins run but have not been given their stored
+	// configuration yet (Config.ConfigureLater).
+	Starting
 )
 
 // Info describes a plugin found in the plugin folder.
@@ -51,7 +54,9 @@ type Info struct {
 	// Manifest is the plugin's manifest; for a folder whose manifest
 	// cannot be read, only the ID is set, from the folder's name.
 	Manifest *pluginv1.Manifest
-	State    State
+	// Locales are the translations of the plugin's strings.
+	Locales manifest.Locales
+	State   State
 	// Err is why the plugin failed.
 	Err error
 }
@@ -84,6 +89,17 @@ type Config struct {
 	// HostAPI serves the plugins' host API requests, which it sees with the
 	// plugin's grant (auth.PluginHandler); nil serves none.
 	HostAPI http.Handler
+	// ConfigureLater makes Open start the plugins without delivering their
+	// stored configurations, which ConfigureStarted delivers: plugins may
+	// call the host API while configured, and a HostAPI that serves only
+	// once Open returns would never answer them.
+	ConfigureLater bool
+	// Env returns what a process plugin's environment adds to the
+	// server's when it starts; nil adds nothing.
+	Env func(m *pluginv1.Manifest) []string
+	// Track records each process plugin's process started until it exits;
+	// nil records none.
+	Track func(pid int) (done func())
 	// Activity records plugin failures and task runs; nil records none.
 	Activity *activity.Log
 	// DevicesChanged is told the sessions of the devices that plugins
@@ -161,6 +177,7 @@ type entry struct {
 	// folder is the plugin's folder in the plugin folder.
 	folder   string
 	manifest *pluginv1.Manifest
+	locales  manifest.Locales
 	plugin   host.Plugin // nil when it failed to start
 	state    State
 	err      error
@@ -184,8 +201,9 @@ func Open(ctx context.Context, cfg Config) (*Manager, error) {
 	m.ctx, m.cancel = context.WithCancel(context.WithoutCancel(ctx))
 	m.opts = host.Options{
 		WASM:    wasm.Options{CacheDir: cfg.CacheDir, FetchClient: cfg.Fetch, AllowHost: cfg.allowHost, Logger: m.log},
-		Process: process.Options{Logger: m.log},
+		Process: process.Options{Track: cfg.Track, Logger: m.log},
 		DataDir: cfg.DataDir,
+		Env:     cfg.Env,
 	}
 	if cfg.HostAPI != nil {
 		m.opts.HostAPI = func(man *pluginv1.Manifest) http.Handler {
@@ -219,7 +237,10 @@ func Open(ctx context.Context, cfg Config) (*Manager, error) {
 		if _, err := os.Stat(filepath.Join(cfg.Dir, d.Name(), manifest.File)); err != nil {
 			continue
 		}
-		e := m.start(ctx, d.Name(), seen)
+		e := m.launch(ctx, d.Name(), seen)
+		if !cfg.ConfigureLater {
+			m.ready(ctx, e)
+		}
 		seen[e.manifest.GetId()] = true
 		m.plugins = append(m.plugins, e)
 	}
@@ -242,9 +263,37 @@ func (m *Manager) sort() {
 // its configuration, unless it is disabled; seen are the IDs other folders
 // hold.
 func (m *Manager) start(ctx context.Context, folder string, seen map[string]bool) *entry {
+	e := m.launch(ctx, folder, seen)
+	m.ready(ctx, e)
+	return e
+}
+
+// ConfigureStarted delivers the stored configurations of the plugins Open
+// started with Config.ConfigureLater, in turn.
+func (m *Manager) ConfigureStarted(ctx context.Context) {
+	m.mu.Lock()
+	var starting []*entry
+	for _, e := range m.plugins {
+		if e.state == Starting {
+			starting = append(starting, e)
+		}
+	}
+	m.mu.Unlock()
+	for _, e := range starting {
+		m.ready(ctx, e)
+	}
+}
+
+// launch starts the plugin in a folder of the plugin folder, unless it is
+// disabled, leaving it Starting; seen are the IDs other folders hold.
+func (m *Manager) launch(ctx context.Context, folder string, seen map[string]bool) *entry {
 	dir := filepath.Join(m.cfg.Dir, folder)
 	e := &entry{folder: folder, revision: m.revisions.Add(1)}
 	e.manifest, e.err = manifest.Load(dir)
+	var localesErr error
+	if e.err == nil {
+		e.locales, localesErr = manifest.LoadLocales(dir)
+	}
 	switch {
 	case e.err != nil:
 		e.manifest = pluginv1.Manifest_builder{Id: new(folder)}.Build()
@@ -255,30 +304,53 @@ func (m *Manager) start(ctx context.Context, folder string, seen map[string]bool
 		e.state = Disabled
 		m.log.InfoContext(ctx, "plugin disabled", "plugin", e.manifest.GetId(), "version", e.manifest.GetVersion())
 		return e
+	case localesErr != nil:
+		e.err = localesErr
 	default:
 		m.manifests.Store(e.manifest.GetId(), e.manifest)
 		e.plugin, e.err = host.Open(ctx, dir, m.opts)
 	}
-	if e.err == nil {
-		m.pruneContainers(ctx, e.manifest)
-		if m.cfg.Containers != nil {
-			m.cfg.Containers.PluginStarted(ctx, e.manifest)
-		}
-		e.state, e.err = m.configure(ctx, e)
-	}
 	if e.err != nil {
-		e.state = Failed
-		m.log.ErrorContext(ctx, "plugin failed", "plugin", e.manifest.GetId(), "err", e.err)
-		m.cfg.Activity.Record(ctx, core.Activity{
-			Type: "plugin.failed", Severity: core.SeverityError, Title: "Plugin " + e.manifest.GetId() + " failed to start",
-			Message: e.err.Error(), Attributes: map[string]string{"plugin": e.manifest.GetId()},
-		})
-	} else {
-		m.scheduleTasks(ctx, e.manifest)
-		m.log.InfoContext(ctx, "plugin started", "plugin", e.manifest.GetId(), "version", e.manifest.GetVersion(),
-			"configured", e.state == Ready)
+		m.fail(ctx, e, e.err)
+		return e
 	}
+	m.pruneContainers(ctx, e.manifest)
+	if m.cfg.Containers != nil {
+		m.cfg.Containers.PluginStarted(ctx, e.manifest)
+	}
+	e.state = Starting
 	return e
+}
+
+// ready delivers the stored configuration of a plugin launch started, and
+// schedules its tasks.
+func (m *Manager) ready(ctx context.Context, e *entry) {
+	if e.state != Starting {
+		return
+	}
+	state, err := m.configure(ctx, e)
+	if err != nil {
+		m.fail(ctx, e, err)
+		return
+	}
+	m.mu.Lock()
+	e.state = state
+	m.mu.Unlock()
+	m.scheduleTasks(ctx, e.manifest)
+	m.log.InfoContext(ctx, "plugin started", "plugin", e.manifest.GetId(), "version", e.manifest.GetVersion(),
+		"configured", state == Ready)
+}
+
+// fail records why a plugin failed to start.
+func (m *Manager) fail(ctx context.Context, e *entry, err error) {
+	m.mu.Lock()
+	e.state, e.err = Failed, err
+	m.mu.Unlock()
+	m.log.ErrorContext(ctx, "plugin failed", "plugin", e.manifest.GetId(), "err", err)
+	m.cfg.Activity.Record(ctx, core.Activity{
+		Type: "plugin.failed", Severity: core.SeverityError, Title: "Plugin " + e.manifest.GetId() + " failed to start",
+		Message: err.Error(), Attributes: map[string]string{"plugin": e.manifest.GetId()},
+	})
 }
 
 // configure delivers the stored configuration of a started plugin. A
@@ -312,7 +384,9 @@ func (m *Manager) Plugins() []Info {
 	return out
 }
 
-func (e *entry) info() Info { return Info{Manifest: e.manifest, State: e.state, Err: e.err} }
+func (e *entry) info() Info {
+	return Info{Manifest: e.manifest, Locales: e.locales, State: e.state, Err: e.err}
+}
 
 func (m *Manager) find(id string) (*entry, error) {
 	i := slices.IndexFunc(m.plugins, func(e *entry) bool { return e.manifest.GetId() == id })
@@ -375,22 +449,24 @@ func (m *Manager) Config(ctx context.Context, id string) (core.PluginConfig, err
 }
 
 // SetConfig validates configJSON against the plugin's schema, delivers it
-// to the running plugin and stores it once the plugin accepts it. The
-// plugin is ready afterwards, even if its stored configuration had failed.
+// to the running plugin and stores it once the plugin accepts it,
+// returning the configuration stored: the properties the schema marks
+// generated are given new values where configJSON lacks them. The plugin
+// is ready afterwards, even if its stored configuration had failed.
 //
 // m.mu is not held while the configuration is stored: a store transaction
 // holding SQLite's one write connection may wait on m.mu (publishing an
 // event asks Wants), and waiting on that connection under m.mu would
 // deadlock with it.
-func (m *Manager) SetConfig(ctx context.Context, id, configJSON string) (Info, error) {
+func (m *Manager) SetConfig(ctx context.Context, id, configJSON string) (Info, string, error) {
 	m.setConfig.Lock()
 	defer m.setConfig.Unlock()
-	e, err := m.deliverConfig(ctx, id, configJSON)
+	e, configJSON, err := m.deliverConfig(ctx, id, configJSON)
 	if err != nil {
-		return Info{}, err
+		return Info{}, "", err
 	}
 	if err := m.store.PluginConfigs().Put(ctx, &core.PluginConfig{PluginID: id, JSON: configJSON}); err != nil {
-		return Info{}, err
+		return Info{}, "", err
 	}
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -400,7 +476,7 @@ func (m *Manager) SetConfig(ctx context.Context, id, configJSON string) (Info, e
 		e.state, e.err = Ready, nil
 	}
 	m.log.InfoContext(ctx, "plugin configured", "plugin", id)
-	return e.info(), nil
+	return e.info(), configJSON, nil
 }
 
 // Manifest returns the manifest of a plugin started or disabled, without
@@ -458,29 +534,35 @@ func (m *Manager) pruneContainers(ctx context.Context, mf *pluginv1.Manifest) {
 	}
 }
 
-// deliverConfig validates configJSON against a running plugin's schema and
-// delivers it to the plugin, returning the plugin's entry.
-func (m *Manager) deliverConfig(ctx context.Context, id, configJSON string) (*entry, error) {
+// deliverConfig gives the properties a running plugin's schema marks
+// generated new values where configJSON lacks them, validates it against
+// the schema and delivers it to the plugin, returning the plugin's entry
+// and the configuration delivered.
+func (m *Manager) deliverConfig(ctx context.Context, id, configJSON string) (*entry, string, error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	e, err := m.find(id)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 	if e.plugin == nil {
-		return nil, connect.NewError(connect.CodeFailedPrecondition, fmt.Errorf("plugin %s is not running: %w", id, e.err))
+		return nil, "", connect.NewError(connect.CodeFailedPrecondition, fmt.Errorf("plugin %s is not running: %w", id, e.err))
+	}
+	configJSON, err = manifest.GenerateIDs(e.manifest, configJSON)
+	if err != nil {
+		return nil, "", fmt.Errorf("%w: plugin %s: %w", core.ErrInvalid, id, err)
 	}
 	if err := manifest.ValidateConfig(e.manifest, configJSON); err != nil {
-		return nil, fmt.Errorf("%w: plugin %s: %w", core.ErrInvalid, id, err)
+		return nil, "", fmt.Errorf("%w: plugin %s: %w", core.ErrInvalid, id, err)
 	}
 	if err := host.Configure(ctx, e.plugin, configJSON); err != nil {
 		if connect.CodeOf(err) == connect.CodeInvalidArgument {
-			return nil, fmt.Errorf("%w: plugin %s rejected the configuration: %w", core.ErrInvalid, id, err)
+			return nil, "", fmt.Errorf("%w: plugin %s rejected the configuration: %w", core.ErrInvalid, id, err)
 		}
-		return nil, fmt.Errorf("configure plugin %s: %w", id, err)
+		return nil, "", fmt.Errorf("configure plugin %s: %w", id, err)
 	}
 	e.revision = m.revisions.Add(1)
-	return e, nil
+	return e, configJSON, nil
 }
 
 // Close stops the plugins, dropping the events they wait for.

@@ -71,15 +71,15 @@ export function QualityDefinitionsPage({ server }: { server: ServerEntry }) {
       title={t("acquisition.qualities")}
       message={t("acquisition.qualitiesMessage")}
       back={<BackLink section="acquisition" label={t("settings.acquisition")} />}
-      actions={
+    >
+      <div className="-mb-4 flex">
         <Select
           value={String(kind)}
           label={t("acquisition.kind")}
           options={mediaKinds.map((k) => ({ value: String(k.kind), label: k.title() }))}
           onChange={(v) => setKind(Number(v) as MediaKind)}
         />
-      }
-    >
+      </div>
       <Definitions key={kind} server={server} kind={kind} />
     </Page>
   );

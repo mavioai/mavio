@@ -22,9 +22,11 @@ export interface Session {
  * every call. Servers answer cross-origin requests, so the web UI calls each
  * of them directly. With a session, a rejected token is refreshed and a
  * unary call made again; without one, the server's token is sent as it is.
+ * With a language, calls ask for it in their Accept-Language header.
  */
-export function transport(server: Server, session?: Session): Transport {
+export function transport(server: Server, session?: Session, language?: string): Transport {
   const auth: Interceptor = (next) => async (req) => {
+    if (language) req.header.set("Accept-Language", language);
     const token = session ? await session.token() : server.token;
     if (token) req.header.set("Authorization", `Bearer ${token}`);
     try {

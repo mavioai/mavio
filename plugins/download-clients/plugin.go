@@ -73,12 +73,7 @@ func (c *configured) options() client.Options {
 	}
 }
 
-func (c *configured) name() string {
-	if c.cfg.Name != "" {
-		return c.cfg.Name
-	}
-	return c.def.Name
-}
+func (c *configured) name() string { return c.cfg.Name }
 
 // plugin implements the plugin's services.
 type plugin struct {
@@ -167,19 +162,23 @@ func (p *plugin) Configure(_ context.Context, req *pluginv1.ConfigureRequest) (*
 
 // validate checks the configuration's clients.
 func (c *config) validate() error {
-	seen := map[string]bool{}
+	seen, names := map[string]bool{}, map[string]bool{}
 	for i, cc := range c.Clients {
 		switch {
 		case strings.TrimSpace(cc.ID) == "":
 			return fmt.Errorf("clients[%d]: id is required", i)
 		case seen[cc.ID]:
 			return fmt.Errorf("clients[%d]: id %q is repeated", i, cc.ID)
+		case strings.TrimSpace(cc.Name) == "":
+			return fmt.Errorf("client %s: name is required", cc.ID)
+		case names[strings.ToLower(cc.Name)]:
+			return fmt.Errorf("client %s: name %q should be unique", cc.ID, cc.Name)
 		case strings.TrimSpace(cc.Definition) == "":
 			return fmt.Errorf("client %s: definition is required", cc.ID)
 		case cc.Priority < 0 || cc.Priority > 50:
 			return fmt.Errorf("client %s: priority must be from 1 to 50", cc.ID)
 		}
-		seen[cc.ID] = true
+		seen[cc.ID], names[strings.ToLower(cc.Name)] = true, true
 	}
 	if c.HistoryLimit < 0 {
 		return errors.New("history limit must not be negative")

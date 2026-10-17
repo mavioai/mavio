@@ -992,7 +992,8 @@ impl ::buffa::ExtensionSet for ListDownloadClientsResponse {
 #[derive(Clone, PartialEq, Default)]
 pub struct GrabReleaseRequest {
     /// The movie the release is for, or the wanted series, season or episode
-    /// whose episodes it holds.
+    /// whose episodes it holds; unset to send the release to the client
+    /// alone, neither tracked nor imported, as Prowlarr's searches grab.
     ///
     /// Field 1: `item_id`
     pub item_id: ::core::option::Option<::buffa::alloc::string::String>,
@@ -1207,14 +1208,23 @@ impl ::buffa::ExtensionSet for GrabReleaseRequest {
 }
 #[derive(Clone, PartialEq, Default)]
 pub struct GrabReleaseResponse {
+    /// The tracked download; unset for a release sent without an item.
+    ///
     /// Field 1: `item`
     pub item: ::buffa::MessageField<QueueItem, ::buffa::Inline<QueueItem>>,
+    /// The name of the client the release went to.
+    ///
+    /// Field 2: `client_name`
+    pub client_name: ::core::option::Option<::buffa::alloc::string::String>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
 impl ::core::fmt::Debug for GrabReleaseResponse {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-        f.debug_struct("GrabReleaseResponse").field("item", &self.item).finish()
+        f.debug_struct("GrabReleaseResponse")
+            .field("item", &self.item)
+            .field("client_name", &self.client_name)
+            .finish()
     }
 }
 impl GrabReleaseResponse {
@@ -1223,6 +1233,18 @@ impl GrabReleaseResponse {
     ///
     /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
     pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.acquisition.v1.GrabReleaseResponse";
+}
+impl GrabReleaseResponse {
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::client_name`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_client_name(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.client_name = Some(value.into());
+        self
+    }
 }
 ::buffa::impl_default_instance!(GrabReleaseResponse);
 impl ::buffa::MessageName for GrabReleaseResponse {
@@ -1252,6 +1274,9 @@ impl ::buffa::Message for GrabReleaseResponse {
                 += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
                     + inner_size as u64;
         }
+        if let Some(ref v) = self.client_name {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -1269,6 +1294,9 @@ impl ::buffa::Message for GrabReleaseResponse {
                 buf,
             );
             self.item.write_to(__cache, buf);
+        }
+        if let Some(ref v) = self.client_name {
+            ::buffa::types::put_string_field(2u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -1294,6 +1322,18 @@ impl ::buffa::Message for GrabReleaseResponse {
                     ctx,
                 )?;
             }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .client_name
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -1303,6 +1343,7 @@ impl ::buffa::Message for GrabReleaseResponse {
     }
     fn clear(&mut self) {
         self.item = ::buffa::MessageField::none();
+        self.client_name = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }

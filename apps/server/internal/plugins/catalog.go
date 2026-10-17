@@ -12,6 +12,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"maps"
 	"net/http"
 	"net/url"
 	"os"
@@ -24,6 +25,7 @@ import (
 	"time"
 
 	"connectrpc.com/connect"
+	"golang.org/x/text/language"
 
 	"github.com/mavioai/mavio/libs/core"
 	"github.com/mavioai/mavio/libs/plugin/host"
@@ -45,7 +47,9 @@ const OfficialCatalog = "https://github.com/mavioai/plugins/releases/latest/down
 // A catalog is a JSON document listing plugins and their versions:
 //
 //	{"plugins": [{"id": "dev.mavio.scraper-tmdb", "name": "TMDB", …,
-//	  "category": "CATEGORY_METADATA", "versions": [{"version": "0.2.0", "api_version": "1.0",
+//	  "category": "CATEGORY_METADATA",
+//	  "locales": {"zh-Hans": {"description": "…"}},
+//	  "versions": [{"version": "0.2.0", "api_version": "1.0",
 //	    "runtime": "RUNTIME_WASM", "url": "tmdb-0.2.0.zip",
 //	    "sha256": "…", "changelog": "…", "release_time": "…"}]}]}
 //
@@ -65,12 +69,22 @@ type CatalogPlugin struct {
 	Homepage    string `json:"homepage"`
 	// Category is a pluginv1.Category's name, such as "CATEGORY_METADATA".
 	Category string `json:"category"`
+	// Locales are the name and description in other languages, by BCP 47
+	// tag, as the newest version's locales translate them.
+	Locales map[string]CatalogStrings `json:"locales,omitempty"`
 	// Versions are newest first, once listed by Catalog.
 	Versions []CatalogVersion `json:"versions"`
 	// CatalogURL is the catalog listing it.
 	CatalogURL string `json:"-"`
 	// Installed is the version installed, empty when none is.
 	Installed string `json:"-"`
+}
+
+// CatalogStrings are a catalog plugin's name and description in a
+// language; either is empty when not translated.
+type CatalogStrings struct {
+	Name        string `json:"name,omitempty"`
+	Description string `json:"description,omitempty"`
 }
 
 // CatalogVersion is a version of a catalog plugin.
@@ -484,4 +498,12 @@ func readFile(u *url.URL, limit int64) ([]byte, error) {
 		return nil, fmt.Errorf("read %s: larger than %d bytes", u, limit)
 	}
 	return data, nil
+}
+
+// Localized returns the plugin's name and description in the language of
+// its locales best matching those wanted, most wanted first, else in
+// English.
+func (p CatalogPlugin) Localized(wanted []language.Tag) (name, description string) {
+	s := p.Locales[manifest.Match(slices.Collect(maps.Keys(p.Locales)), wanted)]
+	return cmp.Or(s.Name, p.Name), cmp.Or(s.Description, p.Description)
 }

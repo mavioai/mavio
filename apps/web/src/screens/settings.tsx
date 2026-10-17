@@ -1,4 +1,5 @@
-// The settings (docs/clients.md §6.3): those of this browser, its
+// The settings (docs/clients.md §6.3): the advanced tools, for
+// administrators, each pinned to the app's sidebar; those of this browser, its
 // appearance, TV mode, playback and the assistant; the account, on its own page under the
 // user's card, with its credentials and the servers in their order; and
 // those of a server, chosen above them with a Mavio account, the
@@ -32,7 +33,6 @@ import { Tip } from "../controls/tooltip.tsx";
 import { locale, t } from "../i18n.ts";
 import { Icon, type IconName } from "../icon.tsx";
 import { SidebarResizer, sidebarWidth } from "../shell/sidebar.tsx";
-import { up } from "../shell/up.ts";
 import { type Appearance, qualities, setPrefs, usePrefs, useWidthClass } from "../prefs.ts";
 import type { SettingsSearch } from "../search-params.ts";
 import { PinPad, useAccount, useMavioDevAccountUrl, useSwitchUsers } from "../shell/user-menu.tsx";
@@ -44,6 +44,7 @@ import { IssuesSection } from "./issues.tsx";
 import { LibrariesSection } from "./admin/libraries.tsx";
 import { ActivitySection } from "./admin/activity.tsx";
 import { OverviewSection } from "./admin/overview.tsx";
+import { Page, SectionTrail, TitleAccessory, Trail } from "./admin/common.tsx";
 import { TasksSection } from "./admin/tasks.tsx";
 import { AcquisitionSection } from "./admin/acquisition.tsx";
 import { StorageSection } from "./admin/storage.tsx";
@@ -54,18 +55,20 @@ import { ConversationsSection } from "./admin/conversations.tsx";
 import { DownloadsSection } from "./admin/downloads.tsx";
 import { WantedSection } from "./admin/wanted.tsx";
 import { ApiKeysSection, BackupsSection, LogsSection } from "./admin/backups.tsx";
+import { ProxiesSection } from "./admin/proxies.tsx";
 import { TranscodingSection } from "./admin/transcoding.tsx";
 import { UsersSection } from "./admin/users.tsx";
 import { PluginsSection } from "./plugins.tsx";
 import { RemoteDialog } from "./remote.tsx";
 import { Security, SwitchUser } from "./security.tsx";
 import { useUnsavedGuard } from "../controls/unsaved.tsx";
-import { isMenu, type MenuId, menuOf, menuSections } from "./settings-menus.ts";
+import { isMenu, isTool, type MenuId, menuOf, menuSections, toolLooks, tools } from "./settings-menus.ts";
+import { IndexerSearch, PinButton } from "./indexer-search.tsx";
 
 /** Where the settings are, which the pages of the sections read. */
 export type { SettingsSearch } from "../search-params.ts";
 
-type SectionId = "appearance" | "playback" | "subtitles-audio" | "assistant" | "account" | "overview" | "activity" | "general" | "devices" | "issues" | "libraries" | "users" | "transcoding" | "storage" | "acquisition" | "wanted" | "downloads" | "subtitles" | "ai" | "conversations" | "plugins" | "tasks" | "backups" | "logs" | "api-keys";
+type SectionId = "appearance" | "playback" | "subtitles-audio" | "assistant" | "account" | "overview" | "activity" | "general" | "devices" | "issues" | "libraries" | "users" | "transcoding" | "storage" | "acquisition" | "wanted" | "downloads" | "subtitles" | "ai" | "conversations" | "plugins" | "tasks" | "backups" | "logs" | "api-keys" | "proxies" | "indexer-search";
 
 const sections: Record<SectionId, { icon: IconName; color: string; title: () => string; admin?: boolean }> = {
   appearance: { icon: "appearance", color: "#5E5CE6", title: () => t("settings.appearance") },
@@ -91,8 +94,10 @@ const sections: Record<SectionId, { icon: IconName; color: string; title: () => 
   backups: { icon: "folder", color: "#5856D6", title: () => t("settings.backups"), admin: true },
   logs: { icon: "info", color: "#8E8E93", title: () => t("settings.logs"), admin: true },
   "api-keys": { icon: "lock", color: "#636366", title: () => t("settings.apiKeys"), admin: true },
+  proxies: { icon: "network", color: "#30B0C7", title: () => t("settings.proxies"), admin: true },
   plugins: { icon: "plugins", color: "#AF52DE", title: () => t("settings.plugins"), admin: true },
   tasks: { icon: "pending", color: "#5856D6", title: () => t("settings.tasks"), admin: true },
+  "indexer-search": toolLooks["indexer-search"],
 };
 
 const menus: Record<MenuId, { icon: IconName; color: string; title: () => string }> = {
@@ -109,15 +114,19 @@ function lookOf(e: Entry) {
   return isMenu(e) ? menus[e] : sections[e];
 }
 
+/** The sections not of the server chosen: this device's, and the tools, which choose their servers themselves. */
+const deviceSections: SectionId[] = ["appearance", "playback", "subtitles-audio", "assistant", "account", ...tools];
+
 /**
- * The groups: this device's sections, and the server's, in the order a
- * server is set up and kept: the server and who reaches it, then the menus
- * of its media, of acquiring media, of what extends it, and of watching
- * over and maintaining it.
+ * The groups: the advanced tools, for administrators; this device's
+ * sections; and the server's, in the order a server is set up and kept:
+ * the server and who reaches it, then the menus of its media, of acquiring
+ * media, of what extends it, and of watching over and maintaining it.
  */
-const allGroups: { title: () => string; entries: Entry[]; server?: boolean }[] = [
+const allGroups: { title: () => string; entries: Entry[]; server?: boolean; tools?: boolean }[] = [
+  { title: () => t("settings.advancedGroup"), entries: [...tools], tools: true },
   { title: () => t("settings.thisDevice"), entries: ["appearance", "playback", "subtitles-audio", "assistant"] },
-  { title: () => t("settings.serverGroup"), entries: ["overview", "general", "users", "devices", "api-keys", "media", "acquiring", "extensions", "maintenance"], server: true },
+  { title: () => t("settings.serverGroup"), entries: ["overview", "general", "users", "devices", "api-keys", "proxies", "media", "acquiring", "extensions", "maintenance"], server: true },
 ];
 
 /** The server whose settings are shown, whether the user administers it, and whether that is known yet. */
@@ -153,8 +162,9 @@ function useChosen(): Chosen | undefined {
  */
 function useGroups(chosen: Chosen | undefined) {
   const shown = (id: SectionId) => !sections[id].admin || !!chosen?.admin;
+  const administers = useAdminServers().length > 0;
   return allGroups
-    .filter((g) => !g.server || chosen)
+    .filter((g) => (!g.server || chosen) && (!g.tools || administers))
     .map((g) => ({
       ...g,
       entries: g.entries.flatMap((e): Entry[] => {
@@ -205,7 +215,7 @@ export function SettingsScreen() {
     // as does a menu left with one.
     if (!chosen?.known) return null;
     const ids = menuItems(section, chosen);
-    if (compact && ids.length > 1) return <MenuList menu={section} ids={ids} />;
+    if (compact && ids.length > 1) return <MenuList menu={section} ids={ids} chosen={chosen} />;
     return ids[0] ? (
       <Navigate to="/settings/$section" params={{ section: ids[0] }} search={{ server: search.server }} replace />
     ) : (
@@ -247,7 +257,7 @@ export function SettingsScreen() {
         <SidebarResizer />
       </aside>
       <main className="min-w-0 flex-1 px-14 py-10">
-        <div className="max-w-[900px]">
+        <div className="mx-auto max-w-[900px]">
           <SectionView id={id} chosen={chosen} />
         </div>
       </main>
@@ -258,10 +268,11 @@ export function SettingsScreen() {
 /**
  * The choice of the server whose settings are shown, with a Mavio account
  * alone: a standalone server's user is signed in to one server. The server
- * serving the web UI is marked. In a group, on a phone, it is padded as
- * the group's rows.
+ * serving the web UI is marked. In the sidebar; in a group, on a phone,
+ * padded as the group's rows; or at the end of a section's title line
+ * where no sidebar shows.
  */
-function ServerChoice({ chosen, section, inGroup = false }: { chosen: Chosen; section?: SectionId; inGroup?: boolean }) {
+function ServerChoice({ chosen, section, place = "sidebar" }: { chosen: Chosen; section?: SectionId; place?: "sidebar" | "group" | "title" }) {
   const servers = useServersStore();
   const signIn = useSignIn();
   const signedIn = useSignedIn();
@@ -269,8 +280,11 @@ function ServerChoice({ chosen, section, inGroup = false }: { chosen: Chosen; se
   if (signIn?.kind !== "mavioDev") return null;
   const home = servers.homeServer();
   return (
-    <div className={`flex flex-col [&>select]:min-h-10 [&>select]:w-full ${inGroup ? "px-4 py-2.5" : "px-2 pb-1.5"}`}>
+    <div className={place === "title" ? "flex max-w-[50%] shrink-0" : `flex flex-col ${place === "group" ? "px-4 py-2.5" : "pb-1.5"}`}>
       <Select
+        // In the sidebar as wide and tall as its rows.
+        className={place === "sidebar" ? "min-h-10 w-full rounded-[10px]!" : place === "group" ? "min-h-10 w-full" : undefined}
+        quiet={place === "title"}
         value={chosen.server.id}
         label={t("settings.serverChoice")}
         options={signedIn.map((s) => ({ value: s.id, label: s.id === home?.id ? t("settings.thisServer", { name: s.name }) : s.name }))}
@@ -287,10 +301,11 @@ function ServerChoice({ chosen, section, inGroup = false }: { chosen: Chosen; se
   );
 }
 
-/** A section's link in the sidebar. */
+/** A section's link in the sidebar; a tool's with its pin, shown while pinned or pointed at. */
 function SidebarLink({ id, current }: { id: SectionId; current: SectionId }) {
   const search = useSearch({ strict: false }) as SettingsSearch;
-  return (
+  const pinned = usePrefs().pinned.includes(id);
+  const link = (
     <Link
       to="/settings/$section"
       params={{ section: id }}
@@ -300,8 +315,15 @@ function SidebarLink({ id, current }: { id: SectionId; current: SectionId }) {
       className="flex min-h-10 items-center gap-3 rounded-[10px] px-2 type-body hover:bg-fill data-[status=active]:bg-fill-selected"
     >
       <Tile id={id} />
-      {sections[id].title()}
+      <span className="min-w-0 flex-1 truncate">{sections[id].title()}</span>
     </Link>
+  );
+  if (!isTool(id)) return link;
+  return (
+    <div className="group relative flex flex-col [&>a]:pe-8">
+      {link}
+      <PinButton id={id} className={`absolute end-2.5 top-1/2 -translate-y-1/2 ${pinned ? "" : "opacity-0 group-hover:opacity-100 focus-visible:opacity-100"}`} />
+    </div>
   );
 }
 
@@ -407,7 +429,7 @@ function ProfileList({ groups }: { groups: Groups }) {
       {shown?.kind === "standalone" && <Members server={shown.servers[0]} />}
       {groups.map((g) => (
         <Group key={g.title()} title={g.title()}>
-          {g.server && chosen && <ServerChoice chosen={chosen} inGroup />}
+          {g.server && chosen && <ServerChoice chosen={chosen} place="group" />}
           {g.entries.map((e) => (
             <EntryRow key={e} id={e} />
           ))}
@@ -467,12 +489,16 @@ function Members({ server }: { server: ServerEntry }) {
  * A menu on a phone and a television: its sections, below a link back to
  * the list on a phone; the television's Back returns to the list.
  */
-function MenuList({ menu, ids }: { menu: MenuId; ids: SectionId[] }) {
+function MenuList({ menu, ids, chosen }: { menu: MenuId; ids: SectionId[]; chosen: Chosen }) {
   const tv = usePrefs().tv;
   return (
     <div className={`mx-auto flex min-h-screen flex-col gap-6 px-margin pb-12 ${tv ? "max-w-3xl pt-16" : "max-w-xl pt-[calc(env(safe-area-inset-top)+12px)]"}`}>
-      {!tv && <UpLink />}
-      <h1 className="type-display">{menus[menu].title()}</h1>
+      {!tv && <Trail />}
+      {/* The menus are the server's: their title names the server chosen. */}
+      <div className="flex items-center gap-4">
+        <h1 className="min-w-0 flex-1 type-display">{menus[menu].title()}</h1>
+        <ServerChoice chosen={chosen} place="title" />
+      </div>
       <Group>
         {ids.map((s) => (
           <EntryRow key={s} id={s} />
@@ -482,33 +508,22 @@ function MenuList({ menu, ids }: { menu: MenuId; ids: SectionId[] }) {
   );
 }
 
-/** A phone's link up from a section to its menu, else from a section or a menu to the list. */
-function UpLink({ menu }: { menu?: MenuId }) {
-  const search = useSearch({ strict: false }) as SettingsSearch;
-  const className = "inline-flex items-center gap-1 self-start type-body text-accent-text";
-  return menu ? (
-    <Link to="/settings/$section" params={{ section: menu }} search={{ server: search.server }} {...up} className={className}>
-      <Icon name="back" size={18} />
-      {menus[menu].title()}
-    </Link>
-  ) : (
-    <Link to="/settings" search={{ server: search.server }} {...up} className={className}>
-      <Icon name="back" size={18} />
-      {t("nav.settings")}
-    </Link>
-  );
-}
-
 /**
  * A section on a phone, below a link back to its menu or the list; on a
  * television, whose Back returns there, alone.
  */
 function CompactSection({ id, menu, chosen }: { id: SectionId; menu: MenuId | undefined; chosen: Chosen | undefined }) {
   const tv = usePrefs().tv;
+  // A server's section names the server chosen, as the sidebar would.
+  const choice = chosen && !deviceSections.includes(id) && <ServerChoice chosen={chosen} section={id} place="title" />;
   return (
     <div className={`mx-auto flex flex-col gap-4 px-margin pb-12 ${tv ? "max-w-3xl pt-16" : "max-w-xl pt-[calc(env(safe-area-inset-top)+12px)]"}`}>
-      {!tv && <UpLink menu={menu} />}
-      <SectionView id={id} chosen={chosen} />
+      {/* The section's page shows the trail up, unless it names its own. */}
+      <SectionTrail value={!tv && <Trail menu={menu} />}>
+        <TitleAccessory value={choice}>
+          <SectionView id={id} chosen={chosen} />
+        </TitleAccessory>
+      </SectionTrail>
     </div>
   );
 }
@@ -553,6 +568,8 @@ function SectionView({ id, chosen }: { id: SectionId; chosen: Chosen | undefined
       return chosen?.admin && <LogsSection key={chosen.server.id} server={chosen.server} />;
     case "api-keys":
       return chosen?.admin && <ApiKeysSection key={chosen.server.id} server={chosen.server} />;
+    case "proxies":
+      return chosen?.admin && <ProxiesSection key={chosen.server.id} server={chosen.server} />;
     case "storage":
       return chosen?.admin && <StorageSection key={chosen.server.id} server={chosen.server} />;
     case "transcoding":
@@ -569,19 +586,17 @@ function SectionView({ id, chosen }: { id: SectionId; chosen: Chosen | undefined
       return chosen?.admin && <UsersSection key={chosen.server.id} server={chosen.server} />;
     case "plugins":
       return chosen?.admin && <PluginsSection key={chosen.server.id} server={chosen.server} />;
+    case "indexer-search":
+      return <IndexerSearch />;
   }
 }
 
 /** A section's title, the line under it and its groups. */
 function Section({ title, message, children }: { title: string; message?: ReactNode; children: ReactNode }) {
   return (
-    <div className="flex flex-col gap-7">
-      <header>
-        <h2 data-title className="type-title1">{title}</h2>
-        {message && <p className="mt-1 type-body text-text-secondary">{message}</p>}
-      </header>
+    <Page title={title} message={message}>
       {children}
-    </div>
+    </Page>
   );
 }
 

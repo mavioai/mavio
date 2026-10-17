@@ -1,0 +1,83 @@
+edition = "2023";
+
+package mavio.plugin.v1;
+
+import "buf/validate/validate.proto";
+import "mavio/plugin/v1/proxy.proto";
+
+// ChallengeSolverService solves the challenges of sites behind Cloudflare
+// or DDoS-Guard, which only a browser passes; implemented by
+// CHALLENGE_SOLVER plugins. Other plugins reach it through
+// HostService.SolveChallenge.
+service ChallengeSolverService {
+  // Solve opens the challenge's URL through the proxy and returns the
+  // cookies that pass it, with the user agent they were obtained with.
+  rpc Solve(SolveRequest) returns (SolveResponse);
+}
+
+// Challenge is a page met with a challenge.
+message Challenge {
+  // http or https.
+  string url = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.uri = true
+  ];
+  // GET or POST; unset means GET.
+  string method = 2 [(buf.validate.field).string = {
+    in: [
+      "",
+      "GET",
+      "POST"
+    ]
+  }];
+  // The body of a POST, form-encoded.
+  bytes body = 3;
+  // The body's content type; unset means
+  // application/x-www-form-urlencoded.
+  string content_type = 4;
+  // How long the solver may take; unset means the solver's own.
+  int32 timeout_seconds = 5 [(buf.validate.field).int32 = {
+    gte: 0
+    lte: 600
+  }];
+}
+
+// Cookie is a cookie a solver obtained.
+message Cookie {
+  string name = 1;
+  string value = 2;
+  string domain = 3;
+  string path = 4;
+}
+
+// ChallengeSolution is what passes a challenge.
+message ChallengeSolution {
+  // The cookies of the site, cf_clearance among them.
+  repeated Cookie cookies = 1;
+  // The user agent the cookies were obtained with, which later requests
+  // to the site must send.
+  string user_agent = 2;
+  // The solver that solved it, as "<plugin ID>/<solver>".
+  string solver = 3;
+}
+
+message SolveRequest {
+  Challenge challenge = 1 [(buf.validate.field).required = true];
+  // The proxy to solve through; unset for a direct connection.
+  Proxy proxy = 2;
+}
+
+message SolveResponse {
+  ChallengeSolution solution = 1;
+}
+
+message SolveChallengeRequest {
+  Challenge challenge = 1 [(buf.validate.field).required = true];
+  // The ID of the server's proxy to solve through; unset for a direct
+  // connection.
+  string proxy_id = 2;
+}
+
+message SolveChallengeResponse {
+  ChallengeSolution solution = 1;
+}

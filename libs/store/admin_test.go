@@ -36,11 +36,15 @@ func TestSettings(t *testing.T) {
 		}
 		set.DisabledPlugins = []string{"dev.mavio.dlna"}
 		set.Subtitles.MinimumScore = 70
+		set.PluginProxies = map[string]string{"dev.mavio.scraper-tmdb": ""}
 		if err := s.Settings().Put(ctx, &set); err != nil {
 			t.Fatal(err)
 		}
 		if got, _ = s.Settings().Get(ctx); len(got.DisabledPlugins) != 1 || got.Subtitles.MinimumScore != 70 || got.Network.BaseURL != "/mavio" {
 			t.Errorf("Get = %q, %d, %q; want = the groups changed and the others kept", got.DisabledPlugins, got.Subtitles.MinimumScore, got.Network.BaseURL)
+		}
+		if p, ok := got.PluginProxies["dev.mavio.scraper-tmdb"]; !ok || p != "" || got.Network.Proxies != core.DefaultOutboundProxies() {
+			t.Errorf("Get proxies = %q, %+v; want = no proxy for the plugin and the system proxy for the server", got.PluginProxies, got.Network.Proxies)
 		}
 		bad := set
 		bad.Transcoding.HardwareAcceleration = "magic"

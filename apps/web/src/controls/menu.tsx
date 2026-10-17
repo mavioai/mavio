@@ -69,7 +69,7 @@ const item =
 /** An item's class, larger on the television. */
 function useItem() {
   const { tv } = usePrefs();
-  return `${item} ${tv ? "min-h-12 type-headline" : "min-h-10 type-body"}`;
+  return `${item} ${tv ? "min-h-12 type-headline" : "min-h-10 type-body desk:min-h-7 desk:gap-2 desk:rounded-md desk:px-2 desk:py-1"}`;
 }
 
 /** The parts of an item: its icon, its text, and the keys of its shortcut. */

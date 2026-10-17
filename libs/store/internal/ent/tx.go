@@ -72,6 +72,8 @@ type Tx struct {
 	PluginConfig *PluginConfigClient
 	// PluginContainer is the client for interacting with the PluginContainer builders.
 	PluginContainer *PluginContainerClient
+	// Proxy is the client for interacting with the Proxy builders.
+	Proxy *ProxyClient
 	// QualityDefinition is the client for interacting with the QualityDefinition builders.
 	QualityDefinition *QualityDefinitionClient
 	// QualityProfile is the client for interacting with the QualityProfile builders.
@@ -267,6 +269,7 @@ func (tx *Tx) init() {
 	tx.Person = NewPersonClient(tx.config)
 	tx.PluginConfig = NewPluginConfigClient(tx.config)
 	tx.PluginContainer = NewPluginContainerClient(tx.config)
+	tx.Proxy = NewProxyClient(tx.config)
 	tx.QualityDefinition = NewQualityDefinitionClient(tx.config)
 	tx.QualityProfile = NewQualityProfileClient(tx.config)
 	tx.ReleaseProfile = NewReleaseProfileClient(tx.config)

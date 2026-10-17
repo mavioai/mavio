@@ -9,6 +9,7 @@ import (
 	"os"
 	"runtime"
 	"strings"
+	"sync/atomic"
 	"testing"
 
 	"google.golang.org/protobuf/proto"
@@ -122,5 +123,36 @@ func TestLoopbackAddressRequired(t *testing.T) {
 			_ = p.Close(context.WithoutCancel(t.Context()))
 			t.Errorf("Start with a plugin at %s: err = nil, want one", addr)
 		}
+	}
+}
+
+func TestTrack(t *testing.T) {
+	exe, err := os.Executable()
+	if err != nil {
+		t.Fatal(err)
+	}
+	var tracked, untracked atomic.Int64
+	m := pluginv1.Manifest_builder{Id: proto.String("dev.mavio.tcp"), Runtime: pluginv1.Runtime_RUNTIME_PROCESS.Enum()}.Build()
+	p, err := Start(t.Context(), exe, m, Options{
+		Env: []string{envTCPPlugin + "="},
+		Track: func(pid int) func() {
+			tracked.Store(int64(pid))
+			return func() { untracked.Store(int64(pid)) }
+		},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	p.mu.Lock()
+	pid := p.cmd.Process.Pid
+	p.mu.Unlock()
+	if got := tracked.Load(); got != int64(pid) {
+		t.Errorf("tracked = %d, want = %d", got, pid)
+	}
+	if err := p.Close(t.Context()); err != nil {
+		t.Fatal(err)
+	}
+	if got := untracked.Load(); got != int64(pid) {
+		t.Errorf("untracked after Close = %d, want = %d", got, pid)
 	}
 }

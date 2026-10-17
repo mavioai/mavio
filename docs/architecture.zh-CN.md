@@ -125,6 +125,7 @@ mavio/
 │   ├── download-clients/        # [Go → 子进程] 下载客户端：qBittorrent、Transmission、SABnzbd、NZBGet 等
 │   ├── agent/                   # [TS → 子进程，Bun] AI 网关（pi-ai）与智能体会话（pi-durable）
 │   ├── voice/                   # [Go → 子进程] 语音识别与合成服务：Whisper、OpenAI 兼容 API 等
+│   ├── solvers/                 # （P31）[Go → 子进程] 质询求解器：以容器依赖运行的 FlareSolverr
 │   ├── notifier-webhook/        # [Go → wasm] Webhook 通知
 │   └── auth-ldap/               # [Go → 子进程] LDAP 认证（需要原生 TCP 长连接）
 │
@@ -301,14 +302,14 @@ WAL 模式、`synchronous=NORMAL`、`busy_timeout`、外键开启。单连接的
 * **Loopback TCP**：在 Windows 上没有 Unix socket 的运行时（如 Node 与 Bun）改为在 loopback TCP 地址上提供服务，并在握手的 `address`（`127.0.0.1:port`）中给出，宿主检查它是 loopback 地址后连接；在 Windows 上宿主也在 loopback 地址 `MAVIO_HOST_ADDRESS` 上提供宿主 API。那里的请求与 socket 上一样携带 token。
 * **通信**：在 socket 上跑 Connect（HTTP/2 h2c），直接复用 `libs/proto` 生成的 handler / client。
 * **监督**：stdout 与 stderr 转发到宿主日志；定期调用 `Health` RPC（连续三次失败即结束进程）；进程退出后，监督者以指数退避（1 秒起翻倍，最长一分钟）重启插件，期间的调用会等待插件恢复。
-* **关闭**：`Close` 先发送 `Shutdown` RPC（插件侧 SDK 随后退出），然后 SIGTERM，最后 SIGKILL。在 Linux 上，宿主进程意外退出时内核也会结束插件（`Pdeathsig`）。
+* **关闭**：`Close` 先发送 `Shutdown` RPC（插件侧 SDK 随后退出），然后 SIGTERM，最后 SIGKILL。在 Linux 上，宿主进程意外退出时内核也会结束插件（`Pdeathsig`）。在所有系统上，插件的 stdin 都是一条生命线：宿主持有管道的写端，并传入 `MAVIO_PLUGIN_LIFELINE=stdin`；宿主无论以何种方式结束，内核都会关闭写端，插件读到文件结尾后如同收到 SIGTERM 一样停止。
 * **权限**：子进程插件拥有操作系统层面的网络与文件访问能力；`http_hosts` 与 `read_paths` 只由 WASM 运行时强制执行，因此不需要这些能力的插件应以 WASM 形式发布。
 * **热插拔**：安装、更新、卸载插件都不需要重启宿主。
 
 ### 7.4 插件 SDK 结构
 ```text
 libs/plugin/
-├── manifest/        # manifest.json 加载与校验、主机权限、配置 JSON Schema 校验
+├── manifest/        # manifest.json 加载与校验、主机权限、配置 JSON Schema 校验、翻译
 ├── host/            # 宿主侧：Open（任一运行时，并与 Describe 结果核对）、Configure、Plugin 接口
 │   ├── wasm/        # wazero 运行时、实例池、http_fetch / http_read 宿主函数
 │   └── process/     # 子进程、socket 握手、token、监督与重启
@@ -323,12 +324,13 @@ libs/plugin/
 
 ### 7.5 服务端中的插件
 * **插件目录**：服务端通过 `libs/plugin/host` 启动插件目录（`--plugin-dir`）中每个含有 `manifest.json` 的文件夹。无法读取的文件夹、重复的插件 ID 或启动失败的插件会被报告为失败并跳过，服务端照常运行。在此之前，种子目录（`--plugin-seed-dir`，例如容器镜像附带的插件）中的插件会被复制到插件目录，每个只复制一次：插件目录中的标记文件记录已播种的插件，因此被卸载或升级的插件保持原样，插件目录中已有的插件不会被复制。
-* **配置**：管理员设置的配置按插件 ID 保存（[领域模型](domain.zh-CN.md) §10），通过 `PluginManagementService.SetPluginConfig` 设置：先按清单的 `config_schema` 校验，再通过 `Configure` RPC 下发，插件接受后才保存，无需重启。启动时每个插件会重新收到已保存的配置。
+* **配置**：管理员设置的配置按插件 ID 保存（[领域模型](domain.zh-CN.md) §10），通过 `PluginManagementService.SetPluginConfig` 设置：先按清单的 `config_schema` 校验，再通过 `Configure` RPC 下发，插件接受后才保存，无需重启。启动时，主机 API 开始服务后，每个插件会重新收到已保存的配置，因为插件在配置时可能调用它。校验之前，服务器为 schema 标有 `"format": "uuid", "readOnly": true` 而配置中缺失或为空的属性生成 UUIDv7——插件无法改写自己的配置——并返回保存的配置。schema 带有 `x-mavio-options` 的属性从服务器通过 `ListPluginConfigOptions` 列出的来源取值：插件的索引器或下载客户端提供者的定义，服务器发送发布的全部下载客户端，或服务端的代理（§17.1）；每个选项带有名称、描述、标签（协议、隐私、语言）及其设置的 JSON Schema，由 schema 的 `settings` 同级属性保存，而 `name` 同级属性默认取选项的名称。schema 带有 `"x-mavio-requires-container": "<同级属性>"` 的开关需要该同级属性所指的容器依赖（§16）：该依赖未设置时，客户端将开关显示为关闭且不能开启，保存的值保持不变。
 * **状态**：插件以其配置运行、或其 schema 接受空配置时为就绪；在等待其 schema 所要求的配置时为未配置；无法启动或拒绝已保存的配置时为失败；被管理员停用时为已停用。`SystemService.ListPlugins` 连同清单一起报告这些状态。
+* **翻译**：插件的 `locales` 文件夹中每种语言一个 JSON 文件，以其 BCP 47 标签命名（`zh-Hans.json`），把清单中的每个英文字符串映射为其译文。服务端随清单读取它们；无法读取的文件使插件失败。`ListPlugins`、`InstallPlugin`、`SetPluginEnabled` 与 `SetPluginConfig` 返回的插件、`ListPluginContainers` 与 `SetPluginContainer` 返回的依赖，以及 `TaskService` 中插件的任务，使用请求的 `Accept-Language` 在插件的语言中匹配到的语言（`zh-CN` 读取 `zh-Hans`）：插件的名称与简介、任务的名称与说明、外部 ID 类型的名称、容器依赖的说明，以及配置 schema 的标题与说明，schema 的成员保持原有顺序。没有译文的字符串，以及插件没有的语言，保持英文；`PluginChanged` 事件由使用各种语言的管理员读取，携带未翻译的字符串。
 * **元数据提供者**：每个已启动的元数据插件都是媒体库刷新的提供者；未就绪时它不提供任何信息，因此之后才配置的插件会参与下一次刷新。只提供图片的提供者（如 fanart.tv）凭靠前的提供者找到的 ID 查找图片，靠后的提供者能看到这些 ID。
 * **热插拔**：`PluginManagementService.InstallPlugin` 从插件目录安装插件，或将其升级、降级；`UninstallPlugin` 卸载插件；期间服务端照常服务。安装时下载该版本的 zip 包，按插件目录核对其 SHA-256，解压到插件文件夹中的隐藏文件夹并检查清单；随后停止正在运行的版本，将其文件夹移到一旁，移入新版本并以已保存的配置启动；若新版本无法启动，则恢复之前的版本。卸载会停止插件并删除其文件夹与配置。各项能力在使用时查找，因此插件一旦就绪，刷新、搜索与通知即会用到它。
 * **启用与停用**：`PluginManagementService.SetPluginEnabled` 停用插件——停止它而保留其文件夹与配置——或重新启用它，以已保存的配置启动。停用的插件记录在服务端设置中（[领域模型](domain.zh-CN.md) §12.1），因此停用的插件在重启与升级后仍保持停止；卸载插件会清除其停用记录。通过 `UpdateServerSettings` 或 `UpdateSubtitleSettings` 保存的设置从不改变停用的插件（[领域模型](domain.zh-CN.md) §12.1），以免保存设置撤销插件的启用或停用；卸载会等待正在保存的配置，以免为已移除的插件存下配置。
-* **插件目录**：插件目录是服务端设置中某个 http、https 或 file URL 上的 JSON 文档，列出插件及其分类（[插件 §2](plugins.zh-CN.md#2-jellyfin-扩展点及其对应)）与版本：版本号、API 版本、运行时（进程插件还有 os 与 arch）、相对于目录的包 URL、SHA-256、更新说明与发布时间。`ListCatalogPlugins` 列出各目录中的每个插件，附带服务端能运行的版本（最新的在前，服务端一个版本都不能运行的插件则没有版本）以及已安装的版本；同一插件以最先列出它的目录为准，除非只有后面的目录有服务端能运行的版本；无法访问的目录被跳过。
+* **插件目录**：插件目录是服务端设置中某个 http、https 或 file URL 上的 JSON 文档，列出插件及其分类（[插件 §2](plugins.zh-CN.md#2-jellyfin-扩展点及其对应)）、按 BCP 47 标签给出的其他语言的名称与简介，以及版本：版本号、API 版本、运行时（进程插件还有 os 与 arch）、相对于目录的包 URL、SHA-256、更新说明与发布时间。`ListCatalogPlugins` 列出各目录中的每个插件，其名称与简介如翻译一样使用请求的语言，并附带服务端能运行的版本（最新的在前，服务端一个版本都不能运行的插件则没有版本）以及已安装的版本；同一插件以最先列出它的目录为准，除非只有后面的目录有服务端能运行的版本；无法访问的目录被跳过。
 * **官方插件目录**：第一方插件由 mavioai/plugins 仓库发布，其发布版本包含各插件的包与列出它们的 `catalog.json`，由 `tools/plugindist` 从 Mavio 某个发布版本的源码构建。设置从未保存过的新服务端以其 `plugin-catalog` 设置中的目录开始，默认是 GitHub 上 mavioai/plugins 最新发布版本的 `catalog.json`，因此没有服务端为插件依赖 mavio.dev；开发用服务端把它设为 `tools/plugindist` 在所在检出中构建的 `plugins/catalog.json` 的路径，其中的包是 file URL。
 * **宿主 API**：每个插件的宿主 API 请求带着该插件的授权（`auth.PluginHandler`）进入处理器树；认证拦截器按清单的 `permissions.api` 检查请求，并解析 `Mavio-User`（[插件平台 §3](plugins.zh-CN.md#3-宿主-api)）。
 * **认证与通知**：`AuthProvider` 指向某个插件的用户，在该插件的 `Authenticate` 接受其用户名与密码时登录。活动日志中的每项活动都作为 `Event` 发送给通知插件。消费事件的插件通过各自的队列，分批收到其清单列出的事件，无论是否进入日志（[插件平台 §4](plugins.zh-CN.md#4-事件)）。
@@ -445,7 +447,8 @@ Mavio 通过**全量对账扫描**发现媒体库变更，本地磁盘与网络�
 ## 11. API 与认证（apps/server）
 
 * **装配**：`apps/server/internal/server` 把存储、插件、播放、图片、媒体库后台任务与处理器树组装起来并运行到关闭；`cmd/mavio` 只负责解析出它的配置，端到端测试运行的也是同一套装配。
-* **主目录与设置**：服务端保存的一切都在其主目录中，默认为 `~/.mavio`，可由 `--home` 或 `MAVIO_HOME` 另行指定：`config.toml`（可选）、SQLite 数据库 `mavio.db`、服务端的身份密钥 `identity.key`（§11，会话）、`plugins/`、`plugin-data/`（插件的数据目录）、`metadata/`（选定的图片）、`backups/` 与 `cache/`（下载与缩放后的图片、编译后的插件，位于 `cache/transcodes/` 的进行中转码，以及位于 `cache/rclone/blocks/` 的 rclone 远端块缓存），缺失时自动创建。约定无需配置；确实存在的设置（`addr`、`database`、`identity-key`、`ffmpeg`、`ffprobe`、`cache-dir`、`transcode-dir`、`plugin-dir`、`plugin-seed-dir`、`plugin-data-dir`、`plugin-catalog`、`container-endpoint`、`container-prefix`、`metadata-dir`、`backup-dir`、`discovery-addr`、`rclone`、`rclone-config`、`rclone-url`、`rclone-user`、`rclone-pass`、`rclone-cache-size`、`mavio-dev-url`、`claim-token`、`dev`、`dev-library`）由 Viper 依次从命令的参数（`--cache-dir`）、环境变量（`MAVIO_CACHE_DIR`）与 `config.toml`（`cache-dir = "/srv/cache"`）读取，默认取上述布局；转码目录跟随缓存目录。`config.toml` 中的路径必须是绝对路径，填相对路径时服务端拒绝启动；参数与环境变量中的相对路径相对于工作目录；`plugin-dir`、`backup-dir` 或 `discovery-addr` 为空时分别关闭插件、备份或局域网发现，`rclone-cache-size` 为 0 时关闭块缓存。`config.toml` 中有未知的键时服务端拒绝启动。`mavio version` 打印版本，`mavio admin reset-password` 恢复独立模式服务端的管理员（[账户 §4.5](accounts.zh-CN.md#45-恢复)），`mavio admin unclaim` 取消 mavio.dev 模式服务端的认领（[账户 §3.2](accounts.zh-CN.md#32-服务端与认领)），`--restore <备份>` 在提供服务前把备份恢复到空数据库中。
+* **主目录与设置**：服务端保存的一切都在其主目录中，默认为 `~/.mavio`，可由 `--home` 或 `MAVIO_HOME` 另行指定：`config.toml`（可选）、SQLite 数据库 `mavio.db`、服务端的身份密钥 `identity.key`（§11，会话）、`plugins/`、`plugin-data/`（插件的数据目录）、`metadata/`（选定的图片）、`backups/`、`run/`（运行中进程的记录，见下文）与 `cache/`（下载与缩放后的图片、编译后的插件，位于 `cache/transcodes/` 的进行中转码，以及位于 `cache/rclone/blocks/` 的 rclone 远端块缓存），缺失时自动创建。约定无需配置；确实存在的设置（`addr`、`database`、`identity-key`、`ffmpeg`、`ffprobe`、`cache-dir`、`transcode-dir`、`plugin-dir`、`plugin-seed-dir`、`plugin-data-dir`、`plugin-catalog`、`container-endpoint`、`container-prefix`、`metadata-dir`、`backup-dir`、`discovery-addr`、`rclone`、`rclone-config`、`rclone-url`、`rclone-user`、`rclone-pass`、`rclone-cache-size`、`mavio-dev-url`、`claim-token`、`dev`、`dev-library`）由 Viper 依次从命令的参数（`--cache-dir`）、环境变量（`MAVIO_CACHE_DIR`）与 `config.toml`（`cache-dir = "/srv/cache"`）读取，默认取上述布局；转码目录跟随缓存目录。`config.toml` 中的路径必须是绝对路径，填相对路径时服务端拒绝启动；参数与环境变量中的相对路径相对于工作目录；`plugin-dir`、`backup-dir` 或 `discovery-addr` 为空时分别关闭插件、备份或局域网发现，`rclone-cache-size` 为 0 时关闭块缓存。`config.toml` 中有未知的键时服务端拒绝启动。`mavio version` 打印版本，`mavio admin reset-password` 恢复独立模式服务端的管理员（[账户 §4.5](accounts.zh-CN.md#45-恢复)），`mavio admin unclaim` 取消 mavio.dev 模式服务端的认领（[账户 §3.2](accounts.zh-CN.md#32-服务端与认领)），`--restore <备份>` 在提供服务前把备份恢复到空数据库中。
+* **残留进程**（`internal/procs`）：服务端把自己记录在 `<home>/run/server.json`，把它启动的每个子进程（进程插件、托管的 rclone 守护进程与 ffmpeg 转码）记录在 `<home>/run/children/<pid>.json`，按进程 ID、启动时间与可执行文件识别，因而不会把被复用的进程 ID 误认作它。服务端在监听之前结束同一主目录中仍在运行的服务端（SIGTERM，30 秒后 SIGKILL）；在启动任何东西之前，结束未经停止就结束的服务端遗留的子进程（5 秒后 SIGKILL），并删除已不存在的进程的记录。子进程退出时删除其记录。在 Linux 上，ffmpeg 与插件和 rclone 一样也设置 `Pdeathsig`。
 * **单一处理器树**：`apps/server/internal/httpserver` 把 Connect 服务（实现位于 `internal/rpc`）与普通 HTTP 媒体端点挂载在同一个 `http.ServeMux` 上。每个 Connect 请求在到达服务之前先按其 protovalidate 规则校验，违反规则返回 `invalid_argument`。
 * **跨域请求**（`httpserver.cors`）：每个路由都响应来自任何来源的请求（CORS，包括预检请求与私有网络请求），使一台服务器提供的 Web UI 能登录其他服务器（[客户端 §5.4](clients.zh-CN.md#54-多台服务器)）。它们的凭据是 Bearer 令牌与签名的媒体 URL，从不是 Cookie，因此其他来源得不到它自己发出请求所得不到的东西。
 * **账户**：密码以 argon2id（19 MiB、2 轮、1 条并行通道）散列为 PHC 字符串；使用其他参数的散列仍被接受，并在下一次成功登录时替换。以不存在的用户名登录与密码错误的耗时相同。通过插件认证的用户没有密码散列。密码、PIN、TOTP 秘密和通行密钥是独立的 `Credential`（[领域模型](domain.zh-CN.md) §7）。用户可以设置 TOTP（`UserService.StartTotp` 与 `ConfirmTotp`，需提供新秘密的一个验证码）；此后 `Login` 需要当前时段或相邻时段的验证码，每个验证码只能使用一次，密码正确但没有验证码时以 `failed_precondition` 失败。通行密钥由已登录的用户创建（`StartPasskeyRegistration`、`FinishPasskeyRegistration`），单独即可登录并指明其用户（`AuthService.StartPasskeySignIn`、`FinishPasskeySignIn`）；其仪式在内存中保留五分钟、只能使用一次，依赖方是请求 `Origin` 的主机（[账户 §8](accounts.zh-CN.md#8-服务端实现)）。托管用户两者都没有，认证插件的用户没有通行密钥。失败的登录在内存中按用户名和地址限速：前三次不受限，之后每次失败使该用户名与地址的锁定时间翻倍，从一秒起、至多 15 分钟，锁定期间的登录以 `resource_exhausted` 失败；成功登录清除该用户名的记录，用户名或地址在最后一次失败一小时后被遗忘。P28 阶段实现[账户](accounts.zh-CN.md)中的账户设计：服务端的两种模式、绑定设备的会话和媒体库访问记录。
@@ -531,7 +534,7 @@ Mavio 为用户查找、下载并入库他们想要的电影与剧集，即 Seer
 8. **通知**：请求变为可用，并通过活动日志通知请求者。
 
 ### 13.4 索引器（`plugins/indexers`）
-移植 Prowlarr 的第一方进程插件：Newznab 与 Torznab、在运行时从 `indexers.prowlarr.com` 拉取定义的 Cardigann 引擎，以及 Prowlarr 以代码实现的全部站点；能力与分类、限速与失败后的退避、索引器代理（HTTP、SOCKS、FlareSolverr）。其配置列出已配置的索引器；定义以及每个定义所需的字段由插件给出。`IndexerProviderService` 列出索引器及其能力，搜索它们（电影、剧集或文本，带 ID、季与集、分类），读取其 RSS，并获取 release 的种子文件、磁力链接或 NZB。
+移植 Prowlarr 的第一方进程插件：Newznab 与 Torznab、在运行时从 `indexers.prowlarr.com` 拉取定义的 Cardigann 引擎，以及 Prowlarr 以代码实现的全部站点；能力与分类、限速与失败后的退避；每个索引器可使用服务端的一个代理，质询由质询求解器解答（§17）。其配置列出已配置的索引器；定义以及每个定义所需的字段由插件给出。`IndexerProviderService` 列出索引器及其能力，搜索它们（电影、剧集或文本，带 ID、季与集、分类），读取其 RSS，并获取 release 的种子文件、磁力链接或 NZB。
 
 ### 13.5 下载客户端（`plugins/download-clients`）
 包含 Radarr 与 Sonarr 支持的全部下载客户端的第一方进程插件，如 qBittorrent、Transmission、Deluge、rTorrent、Aria2、SABnzbd、NZBGet 与监视目录。其配置列出已配置的客户端，每个客户端有电影与剧集各自的分类。`DownloadClientProviderService` 添加 release（种子文件、磁力链接或 NZB，使用其类型的分类与优先级，以及其索引器的做种限制），列出下载及其状态、进度与输出路径，将下载标记为已入库，并删除下载。远程路径映射属于服务端。云盘的离线下载是服务端内置的下载客户端（§9.2）。
@@ -592,7 +595,7 @@ Mavio 为电影与单集查找缺少的字幕，即 Bazarr 在 Sonarr 与 Radarr
 * 用于转写的音频（§14.5）只在本地和网络存储上提供，内嵌字幕也只在那里翻译；云存储上转写找不到字幕，只翻译字幕文件。
 
 ### 14.4 字幕提供者（`plugins/subtitles`）
-移植 Bazarr 各提供者的第一方进程插件：位于 cookie、登录与 Cloudflare 之后的字幕站点（经与索引器同类的代理与 FlareSolverr），用管理员的 Anti-Captcha、CaptchaAI 或 DeathByCaptcha 账号识别验证码，压缩包（zip、RAR、7z），以及 WASM 清单无法列出地址的自托管提供者。其配置启用各提供者并给出设置；`SubtitleProviderService` 列出它们，按多种语言为一个视频搜索，返回带 release 名称、标记与匹配属性的候选，并下载其中之一。失败的提供者按 Bazarr 按失败类型给出的时长限流（请求过多、下载额度、服务不可用、认证），有的直到其站点时区的午夜，计数类失败在两分钟内达到五次才限流；状态保存在插件的数据目录中。OpenSubtitles.com 是其提供者之一。
+移植 Bazarr 各提供者的第一方进程插件：位于 cookie、登录与 Cloudflare 之后的字幕站点（经服务端的代理与质询求解器，§17），用管理员的 Anti-Captcha、CaptchaAI 或 DeathByCaptcha 账号识别验证码，压缩包（zip、RAR、7z），以及 WASM 清单无法列出地址的自托管提供者。其配置启用各提供者并给出设置；`SubtitleProviderService` 列出它们，按多种语言为一个视频搜索，返回带 release 名称、标记与匹配属性的候选，并下载其中之一。失败的提供者按 Bazarr 按失败类型给出的时长限流（请求过多、下载额度、服务不可用、认证），有的直到其站点时区的午夜，计数类失败在两分钟内达到五次才限流；状态保存在插件的数据目录中。OpenSubtitles.com 是其提供者之一。
 
 ### 14.5 翻译与转写
 * **翻译**移植自 Lingarr。管理员把电影或剧集的一个外挂字幕文件，或本地与网络存储上的一条内嵌文字字幕流（取自播放的提取缓存），翻译成一种语言并带上其 forced 与听障标记，作为 `subtitles.translate` 任务运行。翻译器有两类：AI 模型 `ai/<提供商>/<模型>`，经由具有 `AI_GATEWAY` 能力的插件（[插件 §8.15](plugins.zh-CN.md#815-ai-网关与智能体会话)）补全，该插件保管全部凭据；以及 `SUBTITLE_TRANSLATOR` 插件的翻译器（[插件 §8.14](plugins.zh-CN.md#814-字幕翻译器)）`<插件>/<翻译器>`。翻译链为指定的翻译器，否则为设置中的翻译器，否则为第一个已启用的插件翻译器，其后是设置中的后备翻译器；链按各翻译器的语言与源语言和目标语言的匹配程度排序（完全、别名、文字、父语言如基础语言、变体；同一语言的其他地区从不匹配，pt-PT 不代替 pt-BR），某个翻译器失败的一组字幕条交给下一个。
@@ -633,7 +636,7 @@ Mavio 为电影与单集查找缺少的字幕，即 Bazarr 在 Sonarr 与 Radarr
 ### 16.3 托管依赖
 * **允许**：按 digest 指定的镜像；声明的命令、环境变量、端口与命名卷；内存与 CPU 限制；声明需要且管理员允许时，经设备请求使用 NVIDIA GPU。绝不使用特权模式、额外的 capability、宿主机的网络、PID 或 IPC 命名空间、设备，或宿主机路径的绑定挂载。
 * **生命周期**：托管依赖随其插件运行：插件启动时，服务端确保网络存在，镜像缺失时拉取（在独立工作者上运行的 `plugin.container_pull` 任务，其进度即各层已下载的比例，显示在 `TaskService.ListJobs` 与依赖的 `pulling` 状态中），`dev.mavio.spec` 不同时替换容器，启动它并等待其健康检查通过；插件停止、被禁用或服务端关闭时，容器被停止。容器不设重启策略：服务端每 30 秒检查一次健康状态，连续三次失败后重启，退避方式与进程运行时相同（§7.3）。
-* **对账**：启动时服务端列出带自己 ID 的对象，删除不再声明或不再托管的依赖的容器。卸载插件时删除其容器与卷，如同删除其数据目录；把依赖改为外部时删除其容器、保留其卷。
+* **对账**：启动时服务端列出带自己 ID 的对象，删除不再声明或不再托管的依赖的容器，并停止插件未在运行的运行中容器，即未经停止就结束的服务端遗留的容器。卸载插件时删除其容器与卷，如同删除其数据目录；把依赖改为外部时删除其容器、保留其卷。
 * **密钥**：声明要求服务端生成的值（`${secret:<key>}`，[插件 §11.1](plugins.zh-CN.md#111-声明)）随依赖保存，并传入容器的环境变量；它们从不写入日志。
 
 ### 16.4 外部依赖
@@ -646,5 +649,32 @@ Mavio 为电影与单集查找缺少的字幕，即 Bazarr 在 Sonarr 与 Radarr
 
 ### 16.5 状态与 API
 * 依赖的模式为 `unset`（管理员尚未选择）、`managed` 或 `external`（`PluginContainer`，[领域模型](domain.zh-CN.md) §10），状态为 `pulling`、`starting`、`ready`、`unhealthy` 或 `unavailable`（尚未选择、托管依赖没有引擎、外部依赖没有地址），并附最近的错误。外部依赖的健康状况在查询其状态时检查，30 秒内的结果直接复用。
-* `PluginManagementService.GetContainerRuntime` 报告并重新检测引擎；`ListPluginContainers` 列出插件的依赖及其声明、模式、地址、状态与命令；`SetPluginContainer` 设置依赖的模式，外部依赖还设置地址。选择托管要求有可用的引擎。
+* `PluginManagementService.GetContainerRuntime` 报告并重新检测引擎；`ListPluginContainers` 列出插件的依赖及其声明、模式、地址、状态与命令；`SetPluginContainer` 设置依赖的模式，外部依赖还设置地址，托管依赖还设置代理（§17.1）；`ListContainers` 为概览列出所有插件已设置的依赖及其插件，托管依赖还带有与服务端运行方式等价的 `docker run` 命令。选择托管要求有可用的引擎。
 * 插件通过 `HostService.ListContainers` 读取其依赖的地址与状态，地址变化时会被再次配置（`Configure`）。托管依赖在其健康检查首次通过后才有地址，因此插件被配置时拿到的是可用的地址。WASM 插件的 `http_hosts` 包含其依赖的地址。
+
+## 17. 代理与质询求解
+
+索引器与字幕提供者访问的站点可能需要代理，或位于 Cloudflare、DDoS-Guard 的质询之后，只有真实的浏览器才能通过。代理属于服务端，配置一次，插件按 ID 选用；质询由质询求解插件解答，其他插件经服务端调用它们，从不直接访问。
+
+### 17.1 代理
+* **种类**：HTTP（HTTPS 经 CONNECT）、SOCKS4 与 SOCKS5，各可带用户名与密码。管理员通过 `ProxyService`（`mavio.system.v1`）配置任意多个，同一种类也可有多个；它们保存为 `Proxy`（[领域模型 §12.4](domain.zh-CN.md#124-代理)）。
+* **系统代理**：每个服务器还有系统代理，ID 为 `system`，既不保存也不可修改：即服务器环境变量设置的代理（依次为 `HTTPS_PROXY`、`HTTP_PROXY` 或 `ALL_PROXY`，并带 `NO_PROXY`），否则为操作系统设置的代理（macOS 上为网络设置，以 `scutil --proxy` 读取；Windows 上为 Internet 选项），连同它们直连的主机（名称、域名、`*` 通配符、CIDR 网段，以及表示不含点的名称的 `<local>`）。两者都未设置时，它直接访问站点。服务端每 30 秒读取一次，变化时再次配置使用代理的插件。
+* **去重**：主机、端口与用户名相同的代理即同一个代理，与种类无关；主机按小写比较，IP 地址按其规范形式比较，从不解析域名。名称忽略大小写唯一。重复的代理被拒绝，并指出与之重复的代理。
+* **密码**：`ProxyService` 从不返回密码，只告知是否已设置；更新时不带密码即保留已保存的密码。
+* **测试**：`TestProxy` 经已保存的代理、系统代理或未保存的代理获取一个 URL，默认 `https://www.cloudflare.com/cdn-cgi/trace`，返回延迟，以及从 trace 读出的出口地址与其国家。
+* **插件**：schema 带 `"x-mavio-options": {"source": "proxies"}` 的配置属性取代理的 ID，从服务端的代理中选择，系统代理排在最前（§7.5）；不选即直连。带此类属性的插件通过 `HostService.ListProxies` 读取代理（含密码），代理变更或删除时会被再次配置。已不存在的代理使用它的请求失败，而不会退回直连。`libs/plugin/proxy` 由代理构建 `http.Transport`，直连代理自身列表与插件列表中的主机。
+* **服务端的请求**：服务端自身的 HTTP 请求经网络设置选择的代理（`OutboundProxies`）发出，按其访问的对象各选一个：插件目录与插件包、条目的远程图片、mavio.dev 的 API，以及 `mavio.site` 证书的证书颁发机构；每项为代理的 ID、系统代理（默认）或不使用代理。WASM 插件的 HTTP 请求由服务端代为发出，经为该插件选择的代理（`PluginProxies`，默认系统代理）；进程插件与托管的容器依赖经代理网关（见下）访问站点。这些请求直连本机与局域网的地址（`proxy.Local`，同 Prowlarr 的 BypassLocalAddresses），代理变更后从下一个请求起生效，代理已不存在时请求失败而不会退回直连；指定服务端没有的代理的设置被拒绝，设置正在使用的代理不能删除。
+* **代理网关**：服务端启动的程序经服务端在自身明文 HTTP 监听上提供的 HTTP 代理访问站点：来自本机或局域网、以 Basic `Proxy-Authorization` 登录的 CONNECT 或绝对形式请求，经为其用户选择的代理建立隧道或转发，逐连接决定；其他请求照旧服务。用户是进程插件的 ID 或托管容器的名称，其密码是以服务端密钥派生的密钥对它计算的 HMAC。进程插件启动时带有指向网关的 `HTTP_PROXY` 与 `HTTPS_PROXY`（及其小写形式）、列出本机与局域网的 `NO_PROXY`，以及为空的 `ALL_PROXY`；托管容器得到相同的变量，地址为它访问服务端所用的名称（`host.docker.internal`，或 `mavio` 网络上服务端的容器），同级容器直连。二者都像 WASM 插件一样选择代理（进程插件用 `SetPluginProxy`，容器用 `SetPluginContainer`），默认系统代理。选择不使用代理，或系统代理而系统未设置代理时，这些变量为空，直接访问站点，减轻网关的负担。选择在直连与经代理之间变化时，重启进程插件或重建容器，系统代理变化时也是如此；从一个代理换到另一个只结束网关上该用户的隧道，它们随后经新代理重新建立。插件自身设置选择的代理（如索引器的）直接访问并优先。忽略这些变量的程序，以及 HTTP 以外的流量，不经代理。
+
+### 17.2 质询求解器
+* **契约**：`CHALLENGE_SOLVER` 插件实现 `ChallengeSolverService.Solve`：给定 URL、方法（GET，或带表单正文的 POST）、代理与超时，返回通过质询的 cookie 及取得它们时的 user agent，之后对该站点的请求都须带上。
+* **经由服务端**：插件以其所用代理的 ID 调用 `HostService.SolveChallenge`；服务端填入代理，按 ID 顺序依次询问就绪的 `CHALLENGE_SOLVER` 插件，没有时答复 unavailable。因此插件既不需要求解器的地址，也不需要自己所用之外的代理。
+* **识别**：`libs/plugin/challenge` 按 Prowlarr 的方式识别质询（Cloudflare 或 DDoS-Guard 返回 403 或 503 及其质询页面）；其 transport 解答质询，按主机与代理复用 cookie 与 user agent，并重试一次请求。
+
+### 17.3 `plugins/solvers`
+第一方进程插件：一次质询可长达一分钟，会话在调用之间保持，而 WASM 实例受调用超时限制且不共享内存，无法做到。其求解方式参照 Byparr。
+* **求解器**：FlareSolverr，以容器依赖 `flaresolverr` 运行（§16），每种只有一个容器；它声明了 `direct`，因此其浏览器只经请求所带的代理（即发起者的代理）访问站点，没有代理时直连，从不经自己的代理。配置列出启用的求解器，按尝试的顺序，各带超时（60 秒）以及是否不加载图片、字体与样式（`disable_media`）。
+* **会话**：如同 Byparr 保持一个预热的浏览器，插件为每个代理保持一个 FlareSolverr 会话（`mavio-<代理的哈希>`，无代理时为 `mavio-direct`），创建时带上代理及其凭据——FlareSolverr 只在创建会话时接受凭据；会话在 `session_ttl_minutes`（30）后轮换。每次请求前插件都确认 FlareSolverr 仍有该会话，没有时带上代理重新创建，因为重新启动的 FlareSolverr 会不带代理地创建缺失的会话。闲置 10 分钟的会话会被销毁，此前遗留的同前缀会话亦然；插件被再次配置或停止时，销毁它创建的全部会话。
+* **并发**：每个会话同时只处理一个请求（一个会话即一个浏览器），全局至多 `max_concurrent`（2）个；同一主机与代理的并发请求共享一次解答，并在 30 秒内复用。
+* **请求**：`request.get`，或带表单正文的 `request.post`，并带 `returnOnlyCookies`；FlareSolverr 的错误答复（HTTP 500）给出其消息；没有 cookie 或 user agent 的解答视为失败。只提交表单正文；带用户名的 SOCKS 代理被拒绝，因为 Chrome 不支持登录 SOCKS 代理。
+* **回环地址**：托管的 FlareSolverr 运行在容器中，其回环接口并非宿主机的；`flaresolverr` 声明了 `host_access`（§16），回环地址上的代理（例如 `127.0.0.1` 上的系统代理）改经 `host.docker.internal` 访问。Docker Desktop 把该名称转发到宿主机的回环接口；在 Linux 上，代理须监听容器能访问的接口。

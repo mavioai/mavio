@@ -329,7 +329,7 @@ export function Button({
     <button
       type="button"
       {...props}
-      className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-md px-4 type-headline transition active:opacity-80 disabled:text-text-disabled disabled:opacity-60 ${styles} ${color} ${className ?? ""}`}
+      className={`inline-flex min-h-9 items-center justify-center gap-2 rounded-md px-4 type-headline tv:min-h-11 desk:min-h-7 desk:gap-1.5 desk:px-3 transition active:opacity-80 disabled:text-text-disabled disabled:opacity-60 ${styles} ${color} ${className ?? ""}`}
     />
   );
 }

@@ -26,7 +26,7 @@ import { Button, Group, libraryIcon, Row } from "../../ui.tsx";
 import { NumberField, Switch } from "../../controls/inputs.tsx";
 import { Select } from "../../controls/select.tsx";
 import type { SettingsSearch } from "../settings.tsx";
-import { BackLink, ColorTile, countryOptions, languageOptions, Page } from "./common.tsx";
+import { AddRow, BackLink, ColorTile, countryOptions, languageOptions, Page } from "./common.tsx";
 import { input } from "../../controls/styles.ts";
 import { Confirm } from "../../controls/dialog.tsx";
 import { useUnsavedGuard } from "../../controls/unsaved.tsx";
@@ -76,32 +76,21 @@ export function LibrariesSection({ server }: { server: ServerEntry }) {
 }
 
 function LibraryList({ server }: { server: ServerEntry }) {
-  const cur = useSearch({ strict: false }) as SettingsSearch;
   const libraries = useServerLibraries(server);
   const list = (libraries.data ?? []).filter(managed).sort((a, b) => a.name.localeCompare(b.name, locale));
   return (
     <Page
       title={t("settings.libraries")}
       message={t("libraries.message")}
-      actions={
-        <Link
-          to="/settings/$section"
-          params={{ section: "libraries" }}
-          search={{ server: cur.server, library: "new" }}
-          className="inline-flex min-h-11 items-center gap-2 rounded-md bg-button px-4 type-headline text-on-button hover:opacity-85"
-        >
-          <Icon name="add" size={18} />
-          {t("libraries.add")}
-        </Link>
-      }
     >
       {libraries.isError && <p className="type-callout text-danger">{errorMessage(libraries.error)}</p>}
-      {libraries.isSuccess && list.length === 0 && <p className="type-body text-text-secondary">{t("libraries.none")}</p>}
-      {list.length > 0 && (
+      {libraries.isSuccess && (
         <Group>
           {list.map((l) => (
             <LibraryRow key={l.id} server={server} library={l} />
           ))}
+          {list.length === 0 && <p className="px-4 py-3 type-callout text-text-secondary">{t("libraries.none")}</p>}
+          <AddRow label={t("libraries.add")} search={{ library: "new" }} />
         </Group>
       )}
     </Page>
@@ -274,22 +263,6 @@ function LibraryForm({ server, library }: { server: ServerEntry; library?: Libra
           {library ? library.name : t("libraries.add")}
         </span>
       }
-      actions={
-        library && (
-          <>
-            <Button
-              variant="secondary"
-              disabled={actions.scan.isPending}
-              onClick={() => actions.scan.mutate(library.id, { onSuccess: (r) => setNotice(r.enqueued ? t("libraries.scanQueued") : t("libraries.scanPending")) })}
-            >
-              {t("libraries.scan")}
-            </Button>
-            <Button variant="secondary" className="text-danger" onClick={() => setConfirming(true)}>
-              {t("action.delete")}
-            </Button>
-          </>
-        )
-      }
     >
       {confirming && library && (
         <Confirm
@@ -437,9 +410,25 @@ function LibraryForm({ server, library }: { server: ServerEntry; library?: Libra
         <Button disabled={!changed || !valid || saving} onClick={save}>
           {saving ? "…" : library ? t("action.save") : t("libraries.create")}
         </Button>
+        {library && (
+          <Button
+            variant="secondary"
+            disabled={actions.scan.isPending}
+            onClick={() => actions.scan.mutate(library.id, { onSuccess: (r) => setNotice(r.enqueued ? t("libraries.scanQueued") : t("libraries.scanPending")) })}
+          >
+            {t("libraries.scan")}
+          </Button>
+        )}
         {notice && !changed && <span className="type-callout text-text-secondary">{notice}</span>}
         {failure && <span className="type-callout text-danger">{errorMessage(failure)}</span>}
       </div>
+      {library && (
+        <div>
+          <Button variant="secondary" className="text-danger" onClick={() => setConfirming(true)}>
+            {t("action.delete")}
+          </Button>
+        </div>
+      )}
     </Page>
   );
 }

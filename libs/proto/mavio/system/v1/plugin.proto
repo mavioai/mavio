@@ -21,8 +21,16 @@ service PluginManagementService {
   }
   // SetPluginConfig validates a configuration against the plugin's schema,
   // delivers it to the running plugin and stores it once the plugin
-  // accepts it.
+  // accepts it. Properties the schema marks generated, strings of format
+  // uuid that are readOnly, are given new UUIDs where they are missing or
+  // empty.
   rpc SetPluginConfig(SetPluginConfigRequest) returns (SetPluginConfigResponse);
+  // ListPluginConfigOptions lists the values a property of a plugin's
+  // configuration takes, from the source its schema names with
+  // x-mavio-options, such as the definitions of an indexer provider.
+  rpc ListPluginConfigOptions(ListPluginConfigOptionsRequest) returns (ListPluginConfigOptionsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
   // ListCatalogPlugins lists the plugins of the configured plugin
   // catalogs, with the versions the server can run.
   rpc ListCatalogPlugins(ListCatalogPluginsRequest) returns (ListCatalogPluginsResponse) {
@@ -52,6 +60,16 @@ service PluginManagementService {
   // SetPluginContainer sets how a container dependency is reached: run by
   // the server, which requires a container engine, or at an address.
   rpc SetPluginContainer(SetPluginContainerRequest) returns (SetPluginContainerResponse);
+  // ListContainers lists the container dependencies of every plugin that
+  // the server runs or that an administrator gave an address, by plugin.
+  rpc ListContainers(ListContainersRequest) returns (ListContainersResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // SetPluginProxy sets the proxy a plugin reaches sites through: a WASM
+  // plugin's HTTP requests, which the server performs, and a process
+  // plugin's, sent to the server's proxy gateway.
+  rpc SetPluginProxy(SetPluginProxyRequest) returns (SetPluginProxyResponse);
 }
 
 // PluginState is whether a plugin is in use.
@@ -76,6 +94,11 @@ message Plugin {
   PluginState state = 2;
   // Why the plugin failed, for PLUGIN_STATE_FAILED.
   string error = 3;
+  // For a WASM or process plugin, the proxy it reaches sites through: the
+  // ID of one of the server's proxies, "system" for the system proxy, or
+  // empty for none. The hosts of this machine and of the local network are
+  // reached directly.
+  string proxy = 4;
 }
 
 message ListPluginsRequest {}
@@ -104,6 +127,35 @@ message SetPluginConfigRequest {
 
 message SetPluginConfigResponse {
   Plugin plugin = 1;
+  // The configuration stored, with the generated properties set.
+  string config_json = 2;
+}
+
+message ListPluginConfigOptionsRequest {
+  string plugin_id = 1 [(buf.validate.field).required = true];
+  // The source x-mavio-options names: "indexer-definitions" and
+  // "download-client-definitions", the definitions of the plugin's
+  // providers, or "download-clients", the clients of every download client
+  // provider.
+  string source = 2 [(buf.validate.field).required = true];
+}
+
+message ListPluginConfigOptionsResponse {
+  repeated PluginConfigOption options = 1;
+}
+
+// PluginConfigOption is a value a property of a configuration takes.
+message PluginConfigOption {
+  string value = 1;
+  string name = 2;
+  string description = 3;
+  // What sets the option apart, as keys clients show in their words:
+  // "torrent" or "usenet", "public", "semi-private" or "private", and a
+  // BCP 47 language tag such as "en-US".
+  repeated string tags = 4;
+  // The JSON Schema of the settings the option takes, which the property
+  // x-mavio-options names as its settings holds; empty for none.
+  string settings_schema = 5;
 }
 
 // CatalogPlugin is a plugin a catalog offers.
@@ -201,6 +253,15 @@ message PluginContainer {
   ContainerCommands commands = 4;
   // How to run it with a GPU, for a dependency that can use one.
   ContainerCommands gpu_commands = 5;
+  // The plugin declaring it.
+  string plugin_id = 6;
+  // For a managed container, the proxy it reaches sites through: the ID of
+  // one of the server's proxies, "system" for the system proxy, or empty
+  // for none.
+  string proxy = 7;
+  // For a managed container, the docker run command equivalent to how the
+  // server runs it; empty without a container engine.
+  string command = 8;
 }
 
 // ContainerCommands run a container dependency outside the server, under
@@ -224,6 +285,13 @@ message ListPluginContainersResponse {
   repeated PluginContainer containers = 1;
 }
 
+message ListContainersRequest {}
+
+message ListContainersResponse {
+  // By plugin ID, then in manifest order.
+  repeated PluginContainer containers = 1;
+}
+
 message SetPluginContainerRequest {
   string plugin_id = 1 [(buf.validate.field).required = true];
   string name = 2 [(buf.validate.field).required = true];
@@ -233,8 +301,22 @@ message SetPluginContainerRequest {
   string address = 4 [(buf.validate.field).string.uri = true];
   // Whether a managed container may use a GPU.
   bool use_gpu = 5;
+  // The proxy a managed container reaches sites through, as
+  // PluginContainer.proxy; unset keeps it.
+  string proxy = 6;
 }
 
 message SetPluginContainerResponse {
   PluginContainer container = 1;
+}
+
+message SetPluginProxyRequest {
+  string plugin_id = 1 [(buf.validate.field).required = true];
+  // The ID of one of the server's proxies, "system" for the system proxy,
+  // or empty for none.
+  string proxy = 2;
+}
+
+message SetPluginProxyResponse {
+  Plugin plugin = 1;
 }

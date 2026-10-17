@@ -85,6 +85,7 @@ type Plugin struct {
 	xxx_hidden_Manifest    *v1.Manifest           `protobuf:"bytes,1,opt,name=manifest"`
 	xxx_hidden_State       PluginState            `protobuf:"varint,2,opt,name=state,enum=mavio.system.v1.PluginState"`
 	xxx_hidden_Error       *string                `protobuf:"bytes,3,opt,name=error"`
+	xxx_hidden_Proxy       *string                `protobuf:"bytes,4,opt,name=proxy"`
 	XXX_raceDetectHookData protoimpl.RaceDetectHookData
 	XXX_presence           [1]uint32
 	unknownFields          protoimpl.UnknownFields
@@ -142,18 +143,33 @@ func (x *Plugin) GetError() string {
 	return ""
 }
 
+func (x *Plugin) GetProxy() string {
+	if x != nil {
+		if x.xxx_hidden_Proxy != nil {
+			return *x.xxx_hidden_Proxy
+		}
+		return ""
+	}
+	return ""
+}
+
 func (x *Plugin) SetManifest(v *v1.Manifest) {
 	x.xxx_hidden_Manifest = v
 }
 
 func (x *Plugin) SetState(v PluginState) {
 	x.xxx_hidden_State = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 3)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 4)
 }
 
 func (x *Plugin) SetError(v string) {
 	x.xxx_hidden_Error = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 3)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 4)
+}
+
+func (x *Plugin) SetProxy(v string) {
+	x.xxx_hidden_Proxy = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 4)
 }
 
 func (x *Plugin) HasManifest() bool {
@@ -177,6 +193,13 @@ func (x *Plugin) HasError() bool {
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 2)
 }
 
+func (x *Plugin) HasProxy() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 3)
+}
+
 func (x *Plugin) ClearManifest() {
 	x.xxx_hidden_Manifest = nil
 }
@@ -191,6 +214,11 @@ func (x *Plugin) ClearError() {
 	x.xxx_hidden_Error = nil
 }
 
+func (x *Plugin) ClearProxy() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 3)
+	x.xxx_hidden_Proxy = nil
+}
+
 type Plugin_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
@@ -200,6 +228,11 @@ type Plugin_builder struct {
 	State    *PluginState
 	// Why the plugin failed, for PLUGIN_STATE_FAILED.
 	Error *string
+	// For a WASM or process plugin, the proxy it reaches sites through: the
+	// ID of one of the server's proxies, "system" for the system proxy, or
+	// empty for none. The hosts of this machine and of the local network are
+	// reached directly.
+	Proxy *string
 }
 
 func (b0 Plugin_builder) Build() *Plugin {
@@ -208,12 +241,16 @@ func (b0 Plugin_builder) Build() *Plugin {
 	_, _ = b, x
 	x.xxx_hidden_Manifest = b.Manifest
 	if b.State != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 3)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 4)
 		x.xxx_hidden_State = *b.State
 	}
 	if b.Error != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 3)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 4)
 		x.xxx_hidden_Error = b.Error
+	}
+	if b.Proxy != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 4)
+		x.xxx_hidden_Proxy = b.Proxy
 	}
 	return m0
 }
@@ -617,10 +654,13 @@ func (b0 SetPluginConfigRequest_builder) Build() *SetPluginConfigRequest {
 }
 
 type SetPluginConfigResponse struct {
-	state             protoimpl.MessageState `protogen:"opaque.v1"`
-	xxx_hidden_Plugin *Plugin                `protobuf:"bytes,1,opt,name=plugin"`
-	unknownFields     protoimpl.UnknownFields
-	sizeCache         protoimpl.SizeCache
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Plugin      *Plugin                `protobuf:"bytes,1,opt,name=plugin"`
+	xxx_hidden_ConfigJson  *string                `protobuf:"bytes,2,opt,name=config_json,json=configJson"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
 }
 
 func (x *SetPluginConfigResponse) Reset() {
@@ -655,8 +695,23 @@ func (x *SetPluginConfigResponse) GetPlugin() *Plugin {
 	return nil
 }
 
+func (x *SetPluginConfigResponse) GetConfigJson() string {
+	if x != nil {
+		if x.xxx_hidden_ConfigJson != nil {
+			return *x.xxx_hidden_ConfigJson
+		}
+		return ""
+	}
+	return ""
+}
+
 func (x *SetPluginConfigResponse) SetPlugin(v *Plugin) {
 	x.xxx_hidden_Plugin = v
+}
+
+func (x *SetPluginConfigResponse) SetConfigJson(v string) {
+	x.xxx_hidden_ConfigJson = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 2)
 }
 
 func (x *SetPluginConfigResponse) HasPlugin() bool {
@@ -666,14 +721,28 @@ func (x *SetPluginConfigResponse) HasPlugin() bool {
 	return x.xxx_hidden_Plugin != nil
 }
 
+func (x *SetPluginConfigResponse) HasConfigJson() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
+}
+
 func (x *SetPluginConfigResponse) ClearPlugin() {
 	x.xxx_hidden_Plugin = nil
+}
+
+func (x *SetPluginConfigResponse) ClearConfigJson() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
+	x.xxx_hidden_ConfigJson = nil
 }
 
 type SetPluginConfigResponse_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
 	Plugin *Plugin
+	// The configuration stored, with the generated properties set.
+	ConfigJson *string
 }
 
 func (b0 SetPluginConfigResponse_builder) Build() *SetPluginConfigResponse {
@@ -681,6 +750,381 @@ func (b0 SetPluginConfigResponse_builder) Build() *SetPluginConfigResponse {
 	b, x := &b0, m0
 	_, _ = b, x
 	x.xxx_hidden_Plugin = b.Plugin
+	if b.ConfigJson != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 2)
+		x.xxx_hidden_ConfigJson = b.ConfigJson
+	}
+	return m0
+}
+
+type ListPluginConfigOptionsRequest struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_PluginId    *string                `protobuf:"bytes,1,opt,name=plugin_id,json=pluginId"`
+	xxx_hidden_Source      *string                `protobuf:"bytes,2,opt,name=source"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *ListPluginConfigOptionsRequest) Reset() {
+	*x = ListPluginConfigOptionsRequest{}
+	mi := &file_mavio_system_v1_plugin_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListPluginConfigOptionsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListPluginConfigOptionsRequest) ProtoMessage() {}
+
+func (x *ListPluginConfigOptionsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_system_v1_plugin_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *ListPluginConfigOptionsRequest) GetPluginId() string {
+	if x != nil {
+		if x.xxx_hidden_PluginId != nil {
+			return *x.xxx_hidden_PluginId
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *ListPluginConfigOptionsRequest) GetSource() string {
+	if x != nil {
+		if x.xxx_hidden_Source != nil {
+			return *x.xxx_hidden_Source
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *ListPluginConfigOptionsRequest) SetPluginId(v string) {
+	x.xxx_hidden_PluginId = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 2)
+}
+
+func (x *ListPluginConfigOptionsRequest) SetSource(v string) {
+	x.xxx_hidden_Source = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 2)
+}
+
+func (x *ListPluginConfigOptionsRequest) HasPluginId() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *ListPluginConfigOptionsRequest) HasSource() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
+}
+
+func (x *ListPluginConfigOptionsRequest) ClearPluginId() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_PluginId = nil
+}
+
+func (x *ListPluginConfigOptionsRequest) ClearSource() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
+	x.xxx_hidden_Source = nil
+}
+
+type ListPluginConfigOptionsRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	PluginId *string
+	// The source x-mavio-options names: "indexer-definitions" and
+	// "download-client-definitions", the definitions of the plugin's
+	// providers, or "download-clients", the clients of every download client
+	// provider.
+	Source *string
+}
+
+func (b0 ListPluginConfigOptionsRequest_builder) Build() *ListPluginConfigOptionsRequest {
+	m0 := &ListPluginConfigOptionsRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.PluginId != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 2)
+		x.xxx_hidden_PluginId = b.PluginId
+	}
+	if b.Source != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 2)
+		x.xxx_hidden_Source = b.Source
+	}
+	return m0
+}
+
+type ListPluginConfigOptionsResponse struct {
+	state              protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Options *[]*PluginConfigOption `protobuf:"bytes,1,rep,name=options"`
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
+}
+
+func (x *ListPluginConfigOptionsResponse) Reset() {
+	*x = ListPluginConfigOptionsResponse{}
+	mi := &file_mavio_system_v1_plugin_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListPluginConfigOptionsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListPluginConfigOptionsResponse) ProtoMessage() {}
+
+func (x *ListPluginConfigOptionsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_system_v1_plugin_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *ListPluginConfigOptionsResponse) GetOptions() []*PluginConfigOption {
+	if x != nil {
+		if x.xxx_hidden_Options != nil {
+			return *x.xxx_hidden_Options
+		}
+	}
+	return nil
+}
+
+func (x *ListPluginConfigOptionsResponse) SetOptions(v []*PluginConfigOption) {
+	x.xxx_hidden_Options = &v
+}
+
+type ListPluginConfigOptionsResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Options []*PluginConfigOption
+}
+
+func (b0 ListPluginConfigOptionsResponse_builder) Build() *ListPluginConfigOptionsResponse {
+	m0 := &ListPluginConfigOptionsResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_Options = &b.Options
+	return m0
+}
+
+// PluginConfigOption is a value a property of a configuration takes.
+type PluginConfigOption struct {
+	state                     protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Value          *string                `protobuf:"bytes,1,opt,name=value"`
+	xxx_hidden_Name           *string                `protobuf:"bytes,2,opt,name=name"`
+	xxx_hidden_Description    *string                `protobuf:"bytes,3,opt,name=description"`
+	xxx_hidden_Tags           []string               `protobuf:"bytes,4,rep,name=tags"`
+	xxx_hidden_SettingsSchema *string                `protobuf:"bytes,5,opt,name=settings_schema,json=settingsSchema"`
+	XXX_raceDetectHookData    protoimpl.RaceDetectHookData
+	XXX_presence              [1]uint32
+	unknownFields             protoimpl.UnknownFields
+	sizeCache                 protoimpl.SizeCache
+}
+
+func (x *PluginConfigOption) Reset() {
+	*x = PluginConfigOption{}
+	mi := &file_mavio_system_v1_plugin_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PluginConfigOption) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PluginConfigOption) ProtoMessage() {}
+
+func (x *PluginConfigOption) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_system_v1_plugin_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *PluginConfigOption) GetValue() string {
+	if x != nil {
+		if x.xxx_hidden_Value != nil {
+			return *x.xxx_hidden_Value
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *PluginConfigOption) GetName() string {
+	if x != nil {
+		if x.xxx_hidden_Name != nil {
+			return *x.xxx_hidden_Name
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *PluginConfigOption) GetDescription() string {
+	if x != nil {
+		if x.xxx_hidden_Description != nil {
+			return *x.xxx_hidden_Description
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *PluginConfigOption) GetTags() []string {
+	if x != nil {
+		return x.xxx_hidden_Tags
+	}
+	return nil
+}
+
+func (x *PluginConfigOption) GetSettingsSchema() string {
+	if x != nil {
+		if x.xxx_hidden_SettingsSchema != nil {
+			return *x.xxx_hidden_SettingsSchema
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *PluginConfigOption) SetValue(v string) {
+	x.xxx_hidden_Value = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 5)
+}
+
+func (x *PluginConfigOption) SetName(v string) {
+	x.xxx_hidden_Name = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 5)
+}
+
+func (x *PluginConfigOption) SetDescription(v string) {
+	x.xxx_hidden_Description = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 5)
+}
+
+func (x *PluginConfigOption) SetTags(v []string) {
+	x.xxx_hidden_Tags = v
+}
+
+func (x *PluginConfigOption) SetSettingsSchema(v string) {
+	x.xxx_hidden_SettingsSchema = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 5)
+}
+
+func (x *PluginConfigOption) HasValue() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *PluginConfigOption) HasName() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
+}
+
+func (x *PluginConfigOption) HasDescription() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 2)
+}
+
+func (x *PluginConfigOption) HasSettingsSchema() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 4)
+}
+
+func (x *PluginConfigOption) ClearValue() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_Value = nil
+}
+
+func (x *PluginConfigOption) ClearName() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
+	x.xxx_hidden_Name = nil
+}
+
+func (x *PluginConfigOption) ClearDescription() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 2)
+	x.xxx_hidden_Description = nil
+}
+
+func (x *PluginConfigOption) ClearSettingsSchema() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 4)
+	x.xxx_hidden_SettingsSchema = nil
+}
+
+type PluginConfigOption_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Value       *string
+	Name        *string
+	Description *string
+	// What sets the option apart, as keys clients show in their words:
+	// "torrent" or "usenet", "public", "semi-private" or "private", and a
+	// BCP 47 language tag such as "en-US".
+	Tags []string
+	// The JSON Schema of the settings the option takes, which the property
+	// x-mavio-options names as its settings holds; empty for none.
+	SettingsSchema *string
+}
+
+func (b0 PluginConfigOption_builder) Build() *PluginConfigOption {
+	m0 := &PluginConfigOption{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.Value != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 5)
+		x.xxx_hidden_Value = b.Value
+	}
+	if b.Name != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 5)
+		x.xxx_hidden_Name = b.Name
+	}
+	if b.Description != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 5)
+		x.xxx_hidden_Description = b.Description
+	}
+	x.xxx_hidden_Tags = b.Tags
+	if b.SettingsSchema != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 5)
+		x.xxx_hidden_SettingsSchema = b.SettingsSchema
+	}
 	return m0
 }
 
@@ -704,7 +1148,7 @@ type CatalogPlugin struct {
 
 func (x *CatalogPlugin) Reset() {
 	*x = CatalogPlugin{}
-	mi := &file_mavio_system_v1_plugin_proto_msgTypes[7]
+	mi := &file_mavio_system_v1_plugin_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -716,7 +1160,7 @@ func (x *CatalogPlugin) String() string {
 func (*CatalogPlugin) ProtoMessage() {}
 
 func (x *CatalogPlugin) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_system_v1_plugin_proto_msgTypes[7]
+	mi := &file_mavio_system_v1_plugin_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1027,7 +1471,7 @@ type CatalogVersion struct {
 
 func (x *CatalogVersion) Reset() {
 	*x = CatalogVersion{}
-	mi := &file_mavio_system_v1_plugin_proto_msgTypes[8]
+	mi := &file_mavio_system_v1_plugin_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1039,7 +1483,7 @@ func (x *CatalogVersion) String() string {
 func (*CatalogVersion) ProtoMessage() {}
 
 func (x *CatalogVersion) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_system_v1_plugin_proto_msgTypes[8]
+	mi := &file_mavio_system_v1_plugin_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1158,7 +1602,7 @@ type ListCatalogPluginsRequest struct {
 
 func (x *ListCatalogPluginsRequest) Reset() {
 	*x = ListCatalogPluginsRequest{}
-	mi := &file_mavio_system_v1_plugin_proto_msgTypes[9]
+	mi := &file_mavio_system_v1_plugin_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1170,7 +1614,7 @@ func (x *ListCatalogPluginsRequest) String() string {
 func (*ListCatalogPluginsRequest) ProtoMessage() {}
 
 func (x *ListCatalogPluginsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_system_v1_plugin_proto_msgTypes[9]
+	mi := &file_mavio_system_v1_plugin_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1202,7 +1646,7 @@ type ListCatalogPluginsResponse struct {
 
 func (x *ListCatalogPluginsResponse) Reset() {
 	*x = ListCatalogPluginsResponse{}
-	mi := &file_mavio_system_v1_plugin_proto_msgTypes[10]
+	mi := &file_mavio_system_v1_plugin_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1214,7 +1658,7 @@ func (x *ListCatalogPluginsResponse) String() string {
 func (*ListCatalogPluginsResponse) ProtoMessage() {}
 
 func (x *ListCatalogPluginsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_system_v1_plugin_proto_msgTypes[10]
+	mi := &file_mavio_system_v1_plugin_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1264,7 +1708,7 @@ type InstallPluginRequest struct {
 
 func (x *InstallPluginRequest) Reset() {
 	*x = InstallPluginRequest{}
-	mi := &file_mavio_system_v1_plugin_proto_msgTypes[11]
+	mi := &file_mavio_system_v1_plugin_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1276,7 +1720,7 @@ func (x *InstallPluginRequest) String() string {
 func (*InstallPluginRequest) ProtoMessage() {}
 
 func (x *InstallPluginRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_system_v1_plugin_proto_msgTypes[11]
+	mi := &file_mavio_system_v1_plugin_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1373,7 +1817,7 @@ type InstallPluginResponse struct {
 
 func (x *InstallPluginResponse) Reset() {
 	*x = InstallPluginResponse{}
-	mi := &file_mavio_system_v1_plugin_proto_msgTypes[12]
+	mi := &file_mavio_system_v1_plugin_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1385,7 +1829,7 @@ func (x *InstallPluginResponse) String() string {
 func (*InstallPluginResponse) ProtoMessage() {}
 
 func (x *InstallPluginResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_system_v1_plugin_proto_msgTypes[12]
+	mi := &file_mavio_system_v1_plugin_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1443,7 +1887,7 @@ type UninstallPluginRequest struct {
 
 func (x *UninstallPluginRequest) Reset() {
 	*x = UninstallPluginRequest{}
-	mi := &file_mavio_system_v1_plugin_proto_msgTypes[13]
+	mi := &file_mavio_system_v1_plugin_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1455,7 +1899,7 @@ func (x *UninstallPluginRequest) String() string {
 func (*UninstallPluginRequest) ProtoMessage() {}
 
 func (x *UninstallPluginRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_system_v1_plugin_proto_msgTypes[13]
+	mi := &file_mavio_system_v1_plugin_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1518,7 +1962,7 @@ type UninstallPluginResponse struct {
 
 func (x *UninstallPluginResponse) Reset() {
 	*x = UninstallPluginResponse{}
-	mi := &file_mavio_system_v1_plugin_proto_msgTypes[14]
+	mi := &file_mavio_system_v1_plugin_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1530,7 +1974,7 @@ func (x *UninstallPluginResponse) String() string {
 func (*UninstallPluginResponse) ProtoMessage() {}
 
 func (x *UninstallPluginResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_system_v1_plugin_proto_msgTypes[14]
+	mi := &file_mavio_system_v1_plugin_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1565,7 +2009,7 @@ type SetPluginEnabledRequest struct {
 
 func (x *SetPluginEnabledRequest) Reset() {
 	*x = SetPluginEnabledRequest{}
-	mi := &file_mavio_system_v1_plugin_proto_msgTypes[15]
+	mi := &file_mavio_system_v1_plugin_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1577,7 +2021,7 @@ func (x *SetPluginEnabledRequest) String() string {
 func (*SetPluginEnabledRequest) ProtoMessage() {}
 
 func (x *SetPluginEnabledRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_system_v1_plugin_proto_msgTypes[15]
+	mi := &file_mavio_system_v1_plugin_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1670,7 +2114,7 @@ type SetPluginEnabledResponse struct {
 
 func (x *SetPluginEnabledResponse) Reset() {
 	*x = SetPluginEnabledResponse{}
-	mi := &file_mavio_system_v1_plugin_proto_msgTypes[16]
+	mi := &file_mavio_system_v1_plugin_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1682,7 +2126,7 @@ func (x *SetPluginEnabledResponse) String() string {
 func (*SetPluginEnabledResponse) ProtoMessage() {}
 
 func (x *SetPluginEnabledResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_system_v1_plugin_proto_msgTypes[16]
+	mi := &file_mavio_system_v1_plugin_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1749,7 +2193,7 @@ type ContainerRuntime struct {
 
 func (x *ContainerRuntime) Reset() {
 	*x = ContainerRuntime{}
-	mi := &file_mavio_system_v1_plugin_proto_msgTypes[17]
+	mi := &file_mavio_system_v1_plugin_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1761,7 +2205,7 @@ func (x *ContainerRuntime) String() string {
 func (*ContainerRuntime) ProtoMessage() {}
 
 func (x *ContainerRuntime) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_system_v1_plugin_proto_msgTypes[17]
+	mi := &file_mavio_system_v1_plugin_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2077,7 +2521,7 @@ type GetContainerRuntimeRequest struct {
 
 func (x *GetContainerRuntimeRequest) Reset() {
 	*x = GetContainerRuntimeRequest{}
-	mi := &file_mavio_system_v1_plugin_proto_msgTypes[18]
+	mi := &file_mavio_system_v1_plugin_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2089,7 +2533,7 @@ func (x *GetContainerRuntimeRequest) String() string {
 func (*GetContainerRuntimeRequest) ProtoMessage() {}
 
 func (x *GetContainerRuntimeRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_system_v1_plugin_proto_msgTypes[18]
+	mi := &file_mavio_system_v1_plugin_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2151,7 +2595,7 @@ type GetContainerRuntimeResponse struct {
 
 func (x *GetContainerRuntimeResponse) Reset() {
 	*x = GetContainerRuntimeResponse{}
-	mi := &file_mavio_system_v1_plugin_proto_msgTypes[19]
+	mi := &file_mavio_system_v1_plugin_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2163,7 +2607,7 @@ func (x *GetContainerRuntimeResponse) String() string {
 func (*GetContainerRuntimeResponse) ProtoMessage() {}
 
 func (x *GetContainerRuntimeResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_system_v1_plugin_proto_msgTypes[19]
+	mi := &file_mavio_system_v1_plugin_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2218,6 +2662,9 @@ type PluginContainer struct {
 	xxx_hidden_UseGpu      bool                    `protobuf:"varint,3,opt,name=use_gpu,json=useGpu"`
 	xxx_hidden_Commands    *ContainerCommands      `protobuf:"bytes,4,opt,name=commands"`
 	xxx_hidden_GpuCommands *ContainerCommands      `protobuf:"bytes,5,opt,name=gpu_commands,json=gpuCommands"`
+	xxx_hidden_PluginId    *string                 `protobuf:"bytes,6,opt,name=plugin_id,json=pluginId"`
+	xxx_hidden_Proxy       *string                 `protobuf:"bytes,7,opt,name=proxy"`
+	xxx_hidden_Command     *string                 `protobuf:"bytes,8,opt,name=command"`
 	XXX_raceDetectHookData protoimpl.RaceDetectHookData
 	XXX_presence           [1]uint32
 	unknownFields          protoimpl.UnknownFields
@@ -2226,7 +2673,7 @@ type PluginContainer struct {
 
 func (x *PluginContainer) Reset() {
 	*x = PluginContainer{}
-	mi := &file_mavio_system_v1_plugin_proto_msgTypes[20]
+	mi := &file_mavio_system_v1_plugin_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2238,7 +2685,7 @@ func (x *PluginContainer) String() string {
 func (*PluginContainer) ProtoMessage() {}
 
 func (x *PluginContainer) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_system_v1_plugin_proto_msgTypes[20]
+	mi := &file_mavio_system_v1_plugin_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2284,6 +2731,36 @@ func (x *PluginContainer) GetGpuCommands() *ContainerCommands {
 	return nil
 }
 
+func (x *PluginContainer) GetPluginId() string {
+	if x != nil {
+		if x.xxx_hidden_PluginId != nil {
+			return *x.xxx_hidden_PluginId
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *PluginContainer) GetProxy() string {
+	if x != nil {
+		if x.xxx_hidden_Proxy != nil {
+			return *x.xxx_hidden_Proxy
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *PluginContainer) GetCommand() string {
+	if x != nil {
+		if x.xxx_hidden_Command != nil {
+			return *x.xxx_hidden_Command
+		}
+		return ""
+	}
+	return ""
+}
+
 func (x *PluginContainer) SetDependency(v *v1.ContainerDependency) {
 	x.xxx_hidden_Dependency = v
 }
@@ -2294,7 +2771,7 @@ func (x *PluginContainer) SetStatus(v *v1.ContainerStatus) {
 
 func (x *PluginContainer) SetUseGpu(v bool) {
 	x.xxx_hidden_UseGpu = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 5)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 8)
 }
 
 func (x *PluginContainer) SetCommands(v *ContainerCommands) {
@@ -2303,6 +2780,21 @@ func (x *PluginContainer) SetCommands(v *ContainerCommands) {
 
 func (x *PluginContainer) SetGpuCommands(v *ContainerCommands) {
 	x.xxx_hidden_GpuCommands = v
+}
+
+func (x *PluginContainer) SetPluginId(v string) {
+	x.xxx_hidden_PluginId = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 8)
+}
+
+func (x *PluginContainer) SetProxy(v string) {
+	x.xxx_hidden_Proxy = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 8)
+}
+
+func (x *PluginContainer) SetCommand(v string) {
+	x.xxx_hidden_Command = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 8)
 }
 
 func (x *PluginContainer) HasDependency() bool {
@@ -2340,6 +2832,27 @@ func (x *PluginContainer) HasGpuCommands() bool {
 	return x.xxx_hidden_GpuCommands != nil
 }
 
+func (x *PluginContainer) HasPluginId() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 5)
+}
+
+func (x *PluginContainer) HasProxy() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 6)
+}
+
+func (x *PluginContainer) HasCommand() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 7)
+}
+
 func (x *PluginContainer) ClearDependency() {
 	x.xxx_hidden_Dependency = nil
 }
@@ -2361,6 +2874,21 @@ func (x *PluginContainer) ClearGpuCommands() {
 	x.xxx_hidden_GpuCommands = nil
 }
 
+func (x *PluginContainer) ClearPluginId() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 5)
+	x.xxx_hidden_PluginId = nil
+}
+
+func (x *PluginContainer) ClearProxy() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 6)
+	x.xxx_hidden_Proxy = nil
+}
+
+func (x *PluginContainer) ClearCommand() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 7)
+	x.xxx_hidden_Command = nil
+}
+
 type PluginContainer_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
@@ -2374,6 +2902,15 @@ type PluginContainer_builder struct {
 	Commands *ContainerCommands
 	// How to run it with a GPU, for a dependency that can use one.
 	GpuCommands *ContainerCommands
+	// The plugin declaring it.
+	PluginId *string
+	// For a managed container, the proxy it reaches sites through: the ID of
+	// one of the server's proxies, "system" for the system proxy, or empty
+	// for none.
+	Proxy *string
+	// For a managed container, the docker run command equivalent to how the
+	// server runs it; empty without a container engine.
+	Command *string
 }
 
 func (b0 PluginContainer_builder) Build() *PluginContainer {
@@ -2383,11 +2920,23 @@ func (b0 PluginContainer_builder) Build() *PluginContainer {
 	x.xxx_hidden_Dependency = b.Dependency
 	x.xxx_hidden_Status = b.Status
 	if b.UseGpu != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 5)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 8)
 		x.xxx_hidden_UseGpu = *b.UseGpu
 	}
 	x.xxx_hidden_Commands = b.Commands
 	x.xxx_hidden_GpuCommands = b.GpuCommands
+	if b.PluginId != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 8)
+		x.xxx_hidden_PluginId = b.PluginId
+	}
+	if b.Proxy != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 8)
+		x.xxx_hidden_Proxy = b.Proxy
+	}
+	if b.Command != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 8)
+		x.xxx_hidden_Command = b.Command
+	}
 	return m0
 }
 
@@ -2406,7 +2955,7 @@ type ContainerCommands struct {
 
 func (x *ContainerCommands) Reset() {
 	*x = ContainerCommands{}
-	mi := &file_mavio_system_v1_plugin_proto_msgTypes[21]
+	mi := &file_mavio_system_v1_plugin_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2418,7 +2967,7 @@ func (x *ContainerCommands) String() string {
 func (*ContainerCommands) ProtoMessage() {}
 
 func (x *ContainerCommands) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_system_v1_plugin_proto_msgTypes[21]
+	mi := &file_mavio_system_v1_plugin_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2552,7 +3101,7 @@ type ListPluginContainersRequest struct {
 
 func (x *ListPluginContainersRequest) Reset() {
 	*x = ListPluginContainersRequest{}
-	mi := &file_mavio_system_v1_plugin_proto_msgTypes[22]
+	mi := &file_mavio_system_v1_plugin_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2564,7 +3113,7 @@ func (x *ListPluginContainersRequest) String() string {
 func (*ListPluginContainersRequest) ProtoMessage() {}
 
 func (x *ListPluginContainersRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_system_v1_plugin_proto_msgTypes[22]
+	mi := &file_mavio_system_v1_plugin_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2628,7 +3177,7 @@ type ListPluginContainersResponse struct {
 
 func (x *ListPluginContainersResponse) Reset() {
 	*x = ListPluginContainersResponse{}
-	mi := &file_mavio_system_v1_plugin_proto_msgTypes[23]
+	mi := &file_mavio_system_v1_plugin_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2640,7 +3189,7 @@ func (x *ListPluginContainersResponse) String() string {
 func (*ListPluginContainersResponse) ProtoMessage() {}
 
 func (x *ListPluginContainersResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_system_v1_plugin_proto_msgTypes[23]
+	mi := &file_mavio_system_v1_plugin_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2679,6 +3228,109 @@ func (b0 ListPluginContainersResponse_builder) Build() *ListPluginContainersResp
 	return m0
 }
 
+type ListContainersRequest struct {
+	state         protoimpl.MessageState `protogen:"opaque.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListContainersRequest) Reset() {
+	*x = ListContainersRequest{}
+	mi := &file_mavio_system_v1_plugin_proto_msgTypes[27]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListContainersRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListContainersRequest) ProtoMessage() {}
+
+func (x *ListContainersRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_system_v1_plugin_proto_msgTypes[27]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+type ListContainersRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+}
+
+func (b0 ListContainersRequest_builder) Build() *ListContainersRequest {
+	m0 := &ListContainersRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	return m0
+}
+
+type ListContainersResponse struct {
+	state                 protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Containers *[]*PluginContainer    `protobuf:"bytes,1,rep,name=containers"`
+	unknownFields         protoimpl.UnknownFields
+	sizeCache             protoimpl.SizeCache
+}
+
+func (x *ListContainersResponse) Reset() {
+	*x = ListContainersResponse{}
+	mi := &file_mavio_system_v1_plugin_proto_msgTypes[28]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListContainersResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListContainersResponse) ProtoMessage() {}
+
+func (x *ListContainersResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_system_v1_plugin_proto_msgTypes[28]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *ListContainersResponse) GetContainers() []*PluginContainer {
+	if x != nil {
+		if x.xxx_hidden_Containers != nil {
+			return *x.xxx_hidden_Containers
+		}
+	}
+	return nil
+}
+
+func (x *ListContainersResponse) SetContainers(v []*PluginContainer) {
+	x.xxx_hidden_Containers = &v
+}
+
+type ListContainersResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	// By plugin ID, then in manifest order.
+	Containers []*PluginContainer
+}
+
+func (b0 ListContainersResponse_builder) Build() *ListContainersResponse {
+	m0 := &ListContainersResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_Containers = &b.Containers
+	return m0
+}
+
 type SetPluginContainerRequest struct {
 	state                  protoimpl.MessageState `protogen:"opaque.v1"`
 	xxx_hidden_PluginId    *string                `protobuf:"bytes,1,opt,name=plugin_id,json=pluginId"`
@@ -2686,6 +3338,7 @@ type SetPluginContainerRequest struct {
 	xxx_hidden_Mode        v1.ContainerMode       `protobuf:"varint,3,opt,name=mode,enum=mavio.plugin.v1.ContainerMode"`
 	xxx_hidden_Address     *string                `protobuf:"bytes,4,opt,name=address"`
 	xxx_hidden_UseGpu      bool                   `protobuf:"varint,5,opt,name=use_gpu,json=useGpu"`
+	xxx_hidden_Proxy       *string                `protobuf:"bytes,6,opt,name=proxy"`
 	XXX_raceDetectHookData protoimpl.RaceDetectHookData
 	XXX_presence           [1]uint32
 	unknownFields          protoimpl.UnknownFields
@@ -2694,7 +3347,7 @@ type SetPluginContainerRequest struct {
 
 func (x *SetPluginContainerRequest) Reset() {
 	*x = SetPluginContainerRequest{}
-	mi := &file_mavio_system_v1_plugin_proto_msgTypes[24]
+	mi := &file_mavio_system_v1_plugin_proto_msgTypes[29]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2706,7 +3359,7 @@ func (x *SetPluginContainerRequest) String() string {
 func (*SetPluginContainerRequest) ProtoMessage() {}
 
 func (x *SetPluginContainerRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_system_v1_plugin_proto_msgTypes[24]
+	mi := &file_mavio_system_v1_plugin_proto_msgTypes[29]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2763,29 +3416,44 @@ func (x *SetPluginContainerRequest) GetUseGpu() bool {
 	return false
 }
 
+func (x *SetPluginContainerRequest) GetProxy() string {
+	if x != nil {
+		if x.xxx_hidden_Proxy != nil {
+			return *x.xxx_hidden_Proxy
+		}
+		return ""
+	}
+	return ""
+}
+
 func (x *SetPluginContainerRequest) SetPluginId(v string) {
 	x.xxx_hidden_PluginId = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 5)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 6)
 }
 
 func (x *SetPluginContainerRequest) SetName(v string) {
 	x.xxx_hidden_Name = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 5)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 6)
 }
 
 func (x *SetPluginContainerRequest) SetMode(v v1.ContainerMode) {
 	x.xxx_hidden_Mode = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 5)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 6)
 }
 
 func (x *SetPluginContainerRequest) SetAddress(v string) {
 	x.xxx_hidden_Address = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 5)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 6)
 }
 
 func (x *SetPluginContainerRequest) SetUseGpu(v bool) {
 	x.xxx_hidden_UseGpu = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 5)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 6)
+}
+
+func (x *SetPluginContainerRequest) SetProxy(v string) {
+	x.xxx_hidden_Proxy = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 6)
 }
 
 func (x *SetPluginContainerRequest) HasPluginId() bool {
@@ -2823,6 +3491,13 @@ func (x *SetPluginContainerRequest) HasUseGpu() bool {
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 4)
 }
 
+func (x *SetPluginContainerRequest) HasProxy() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 5)
+}
+
 func (x *SetPluginContainerRequest) ClearPluginId() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_PluginId = nil
@@ -2848,6 +3523,11 @@ func (x *SetPluginContainerRequest) ClearUseGpu() {
 	x.xxx_hidden_UseGpu = false
 }
 
+func (x *SetPluginContainerRequest) ClearProxy() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 5)
+	x.xxx_hidden_Proxy = nil
+}
+
 type SetPluginContainerRequest_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
@@ -2859,6 +3539,9 @@ type SetPluginContainerRequest_builder struct {
 	Address *string
 	// Whether a managed container may use a GPU.
 	UseGpu *bool
+	// The proxy a managed container reaches sites through, as
+	// PluginContainer.proxy; unset keeps it.
+	Proxy *string
 }
 
 func (b0 SetPluginContainerRequest_builder) Build() *SetPluginContainerRequest {
@@ -2866,24 +3549,28 @@ func (b0 SetPluginContainerRequest_builder) Build() *SetPluginContainerRequest {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.PluginId != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 5)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 6)
 		x.xxx_hidden_PluginId = b.PluginId
 	}
 	if b.Name != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 5)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 6)
 		x.xxx_hidden_Name = b.Name
 	}
 	if b.Mode != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 5)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 6)
 		x.xxx_hidden_Mode = *b.Mode
 	}
 	if b.Address != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 5)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 6)
 		x.xxx_hidden_Address = b.Address
 	}
 	if b.UseGpu != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 5)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 6)
 		x.xxx_hidden_UseGpu = *b.UseGpu
+	}
+	if b.Proxy != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 6)
+		x.xxx_hidden_Proxy = b.Proxy
 	}
 	return m0
 }
@@ -2897,7 +3584,7 @@ type SetPluginContainerResponse struct {
 
 func (x *SetPluginContainerResponse) Reset() {
 	*x = SetPluginContainerResponse{}
-	mi := &file_mavio_system_v1_plugin_proto_msgTypes[25]
+	mi := &file_mavio_system_v1_plugin_proto_msgTypes[30]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2909,7 +3596,7 @@ func (x *SetPluginContainerResponse) String() string {
 func (*SetPluginContainerResponse) ProtoMessage() {}
 
 func (x *SetPluginContainerResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_system_v1_plugin_proto_msgTypes[25]
+	mi := &file_mavio_system_v1_plugin_proto_msgTypes[30]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2956,15 +3643,197 @@ func (b0 SetPluginContainerResponse_builder) Build() *SetPluginContainerResponse
 	return m0
 }
 
+type SetPluginProxyRequest struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_PluginId    *string                `protobuf:"bytes,1,opt,name=plugin_id,json=pluginId"`
+	xxx_hidden_Proxy       *string                `protobuf:"bytes,2,opt,name=proxy"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *SetPluginProxyRequest) Reset() {
+	*x = SetPluginProxyRequest{}
+	mi := &file_mavio_system_v1_plugin_proto_msgTypes[31]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SetPluginProxyRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SetPluginProxyRequest) ProtoMessage() {}
+
+func (x *SetPluginProxyRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_system_v1_plugin_proto_msgTypes[31]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *SetPluginProxyRequest) GetPluginId() string {
+	if x != nil {
+		if x.xxx_hidden_PluginId != nil {
+			return *x.xxx_hidden_PluginId
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *SetPluginProxyRequest) GetProxy() string {
+	if x != nil {
+		if x.xxx_hidden_Proxy != nil {
+			return *x.xxx_hidden_Proxy
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *SetPluginProxyRequest) SetPluginId(v string) {
+	x.xxx_hidden_PluginId = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 2)
+}
+
+func (x *SetPluginProxyRequest) SetProxy(v string) {
+	x.xxx_hidden_Proxy = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 2)
+}
+
+func (x *SetPluginProxyRequest) HasPluginId() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *SetPluginProxyRequest) HasProxy() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
+}
+
+func (x *SetPluginProxyRequest) ClearPluginId() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_PluginId = nil
+}
+
+func (x *SetPluginProxyRequest) ClearProxy() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
+	x.xxx_hidden_Proxy = nil
+}
+
+type SetPluginProxyRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	PluginId *string
+	// The ID of one of the server's proxies, "system" for the system proxy,
+	// or empty for none.
+	Proxy *string
+}
+
+func (b0 SetPluginProxyRequest_builder) Build() *SetPluginProxyRequest {
+	m0 := &SetPluginProxyRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.PluginId != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 2)
+		x.xxx_hidden_PluginId = b.PluginId
+	}
+	if b.Proxy != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 2)
+		x.xxx_hidden_Proxy = b.Proxy
+	}
+	return m0
+}
+
+type SetPluginProxyResponse struct {
+	state             protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Plugin *Plugin                `protobuf:"bytes,1,opt,name=plugin"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
+}
+
+func (x *SetPluginProxyResponse) Reset() {
+	*x = SetPluginProxyResponse{}
+	mi := &file_mavio_system_v1_plugin_proto_msgTypes[32]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SetPluginProxyResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SetPluginProxyResponse) ProtoMessage() {}
+
+func (x *SetPluginProxyResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_system_v1_plugin_proto_msgTypes[32]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *SetPluginProxyResponse) GetPlugin() *Plugin {
+	if x != nil {
+		return x.xxx_hidden_Plugin
+	}
+	return nil
+}
+
+func (x *SetPluginProxyResponse) SetPlugin(v *Plugin) {
+	x.xxx_hidden_Plugin = v
+}
+
+func (x *SetPluginProxyResponse) HasPlugin() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_Plugin != nil
+}
+
+func (x *SetPluginProxyResponse) ClearPlugin() {
+	x.xxx_hidden_Plugin = nil
+}
+
+type SetPluginProxyResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Plugin *Plugin
+}
+
+func (b0 SetPluginProxyResponse_builder) Build() *SetPluginProxyResponse {
+	m0 := &SetPluginProxyResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_Plugin = b.Plugin
+	return m0
+}
+
 var File_mavio_system_v1_plugin_proto protoreflect.FileDescriptor
 
 const file_mavio_system_v1_plugin_proto_rawDesc = "" +
 	"\n" +
-	"\x1cmavio/system/v1/plugin.proto\x12\x0fmavio.system.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1fmavio/plugin/v1/container.proto\x1a\x1cmavio/plugin/v1/plugin.proto\"\x89\x01\n" +
+	"\x1cmavio/system/v1/plugin.proto\x12\x0fmavio.system.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1fmavio/plugin/v1/container.proto\x1a\x1cmavio/plugin/v1/plugin.proto\"\x9f\x01\n" +
 	"\x06Plugin\x125\n" +
 	"\bmanifest\x18\x01 \x01(\v2\x19.mavio.plugin.v1.ManifestR\bmanifest\x122\n" +
 	"\x05state\x18\x02 \x01(\x0e2\x1c.mavio.system.v1.PluginStateR\x05state\x12\x14\n" +
-	"\x05error\x18\x03 \x01(\tR\x05error\"\x14\n" +
+	"\x05error\x18\x03 \x01(\tR\x05error\x12\x14\n" +
+	"\x05proxy\x18\x04 \x01(\tR\x05proxy\"\x14\n" +
 	"\x12ListPluginsRequest\"H\n" +
 	"\x13ListPluginsResponse\x121\n" +
 	"\aplugins\x18\x01 \x03(\v2\x17.mavio.system.v1.PluginR\aplugins\"=\n" +
@@ -2978,9 +3847,22 @@ const file_mavio_system_v1_plugin_proto_rawDesc = "" +
 	"\x16SetPluginConfigRequest\x12#\n" +
 	"\tplugin_id\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\bpluginId\x12'\n" +
 	"\vconfig_json\x18\x02 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\n" +
-	"configJson\"J\n" +
+	"configJson\"k\n" +
 	"\x17SetPluginConfigResponse\x12/\n" +
-	"\x06plugin\x18\x01 \x01(\v2\x17.mavio.system.v1.PluginR\x06plugin\"\xcb\x02\n" +
+	"\x06plugin\x18\x01 \x01(\v2\x17.mavio.system.v1.PluginR\x06plugin\x12\x1f\n" +
+	"\vconfig_json\x18\x02 \x01(\tR\n" +
+	"configJson\"e\n" +
+	"\x1eListPluginConfigOptionsRequest\x12#\n" +
+	"\tplugin_id\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\bpluginId\x12\x1e\n" +
+	"\x06source\x18\x02 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\x06source\"`\n" +
+	"\x1fListPluginConfigOptionsResponse\x12=\n" +
+	"\aoptions\x18\x01 \x03(\v2#.mavio.system.v1.PluginConfigOptionR\aoptions\"\x9d\x01\n" +
+	"\x12PluginConfigOption\x12\x14\n" +
+	"\x05value\x18\x01 \x01(\tR\x05value\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12 \n" +
+	"\vdescription\x18\x03 \x01(\tR\vdescription\x12\x12\n" +
+	"\x04tags\x18\x04 \x03(\tR\x04tags\x12'\n" +
+	"\x0fsettings_schema\x18\x05 \x01(\tR\x0esettingsSchema\"\xcb\x02\n" +
 	"\rCatalogPlugin\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12 \n" +
@@ -3026,7 +3908,7 @@ const file_mavio_system_v1_plugin_proto_rawDesc = "" +
 	"\x1aGetContainerRuntimeRequest\x12\x16\n" +
 	"\x06detect\x18\x01 \x01(\bR\x06detect\"Z\n" +
 	"\x1bGetContainerRuntimeResponse\x12;\n" +
-	"\aruntime\x18\x01 \x01(\v2!.mavio.system.v1.ContainerRuntimeR\aruntime\"\xb1\x02\n" +
+	"\aruntime\x18\x01 \x01(\v2!.mavio.system.v1.ContainerRuntimeR\aruntime\"\xfe\x02\n" +
 	"\x0fPluginContainer\x12D\n" +
 	"\n" +
 	"dependency\x18\x01 \x01(\v2$.mavio.plugin.v1.ContainerDependencyR\n" +
@@ -3034,7 +3916,10 @@ const file_mavio_system_v1_plugin_proto_rawDesc = "" +
 	"\x06status\x18\x02 \x01(\v2 .mavio.plugin.v1.ContainerStatusR\x06status\x12\x17\n" +
 	"\ause_gpu\x18\x03 \x01(\bR\x06useGpu\x12>\n" +
 	"\bcommands\x18\x04 \x01(\v2\".mavio.system.v1.ContainerCommandsR\bcommands\x12E\n" +
-	"\fgpu_commands\x18\x05 \x01(\v2\".mavio.system.v1.ContainerCommandsR\vgpuCommands\"f\n" +
+	"\fgpu_commands\x18\x05 \x01(\v2\".mavio.system.v1.ContainerCommandsR\vgpuCommands\x12\x1b\n" +
+	"\tplugin_id\x18\x06 \x01(\tR\bpluginId\x12\x14\n" +
+	"\x05proxy\x18\a \x01(\tR\x05proxy\x12\x18\n" +
+	"\acommand\x18\b \x01(\tR\acommand\"f\n" +
 	"\x11ContainerCommands\x12\x1d\n" +
 	"\n" +
 	"docker_run\x18\x01 \x01(\tR\tdockerRun\x12\x18\n" +
@@ -3045,116 +3930,146 @@ const file_mavio_system_v1_plugin_proto_rawDesc = "" +
 	"\x1cListPluginContainersResponse\x12@\n" +
 	"\n" +
 	"containers\x18\x01 \x03(\v2 .mavio.system.v1.PluginContainerR\n" +
-	"containers\"\xcd\x01\n" +
+	"containers\"\x17\n" +
+	"\x15ListContainersRequest\"Z\n" +
+	"\x16ListContainersResponse\x12@\n" +
+	"\n" +
+	"containers\x18\x01 \x03(\v2 .mavio.system.v1.PluginContainerR\n" +
+	"containers\"\xe3\x01\n" +
 	"\x19SetPluginContainerRequest\x12#\n" +
 	"\tplugin_id\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\bpluginId\x12\x1a\n" +
 	"\x04name\x18\x02 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\x04name\x122\n" +
 	"\x04mode\x18\x03 \x01(\x0e2\x1e.mavio.plugin.v1.ContainerModeR\x04mode\x12\"\n" +
 	"\aaddress\x18\x04 \x01(\tB\b\xbaH\x05r\x03\x88\x01\x01R\aaddress\x12\x17\n" +
-	"\ause_gpu\x18\x05 \x01(\bR\x06useGpu\"\\\n" +
+	"\ause_gpu\x18\x05 \x01(\bR\x06useGpu\x12\x14\n" +
+	"\x05proxy\x18\x06 \x01(\tR\x05proxy\"\\\n" +
 	"\x1aSetPluginContainerResponse\x12>\n" +
-	"\tcontainer\x18\x01 \x01(\v2 .mavio.system.v1.PluginContainerR\tcontainer*\x96\x01\n" +
+	"\tcontainer\x18\x01 \x01(\v2 .mavio.system.v1.PluginContainerR\tcontainer\"R\n" +
+	"\x15SetPluginProxyRequest\x12#\n" +
+	"\tplugin_id\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\bpluginId\x12\x14\n" +
+	"\x05proxy\x18\x02 \x01(\tR\x05proxy\"I\n" +
+	"\x16SetPluginProxyResponse\x12/\n" +
+	"\x06plugin\x18\x01 \x01(\v2\x17.mavio.system.v1.PluginR\x06plugin*\x96\x01\n" +
 	"\vPluginState\x12\x1c\n" +
 	"\x18PLUGIN_STATE_UNSPECIFIED\x10\x00\x12\x16\n" +
 	"\x12PLUGIN_STATE_READY\x10\x01\x12\x1d\n" +
 	"\x19PLUGIN_STATE_UNCONFIGURED\x10\x02\x12\x17\n" +
 	"\x13PLUGIN_STATE_FAILED\x10\x03\x12\x19\n" +
-	"\x15PLUGIN_STATE_DISABLED\x10\x042\xcc\b\n" +
+	"\x15PLUGIN_STATE_DISABLED\x10\x042\x9b\v\n" +
 	"\x17PluginManagementService\x12]\n" +
 	"\vListPlugins\x12#.mavio.system.v1.ListPluginsRequest\x1a$.mavio.system.v1.ListPluginsResponse\"\x03\x90\x02\x01\x12i\n" +
 	"\x0fGetPluginConfig\x12'.mavio.system.v1.GetPluginConfigRequest\x1a(.mavio.system.v1.GetPluginConfigResponse\"\x03\x90\x02\x01\x12d\n" +
-	"\x0fSetPluginConfig\x12'.mavio.system.v1.SetPluginConfigRequest\x1a(.mavio.system.v1.SetPluginConfigResponse\x12r\n" +
+	"\x0fSetPluginConfig\x12'.mavio.system.v1.SetPluginConfigRequest\x1a(.mavio.system.v1.SetPluginConfigResponse\x12\x81\x01\n" +
+	"\x17ListPluginConfigOptions\x12/.mavio.system.v1.ListPluginConfigOptionsRequest\x1a0.mavio.system.v1.ListPluginConfigOptionsResponse\"\x03\x90\x02\x01\x12r\n" +
 	"\x12ListCatalogPlugins\x12*.mavio.system.v1.ListCatalogPluginsRequest\x1a+.mavio.system.v1.ListCatalogPluginsResponse\"\x03\x90\x02\x01\x12^\n" +
 	"\rInstallPlugin\x12%.mavio.system.v1.InstallPluginRequest\x1a&.mavio.system.v1.InstallPluginResponse\x12d\n" +
 	"\x0fUninstallPlugin\x12'.mavio.system.v1.UninstallPluginRequest\x1a(.mavio.system.v1.UninstallPluginResponse\x12g\n" +
 	"\x10SetPluginEnabled\x12(.mavio.system.v1.SetPluginEnabledRequest\x1a).mavio.system.v1.SetPluginEnabledResponse\x12u\n" +
 	"\x13GetContainerRuntime\x12+.mavio.system.v1.GetContainerRuntimeRequest\x1a,.mavio.system.v1.GetContainerRuntimeResponse\"\x03\x90\x02\x01\x12x\n" +
 	"\x14ListPluginContainers\x12,.mavio.system.v1.ListPluginContainersRequest\x1a-.mavio.system.v1.ListPluginContainersResponse\"\x03\x90\x02\x01\x12m\n" +
-	"\x12SetPluginContainer\x12*.mavio.system.v1.SetPluginContainerRequest\x1a+.mavio.system.v1.SetPluginContainerResponseB\xc5\x01\n" +
+	"\x12SetPluginContainer\x12*.mavio.system.v1.SetPluginContainerRequest\x1a+.mavio.system.v1.SetPluginContainerResponse\x12f\n" +
+	"\x0eListContainers\x12&.mavio.system.v1.ListContainersRequest\x1a'.mavio.system.v1.ListContainersResponse\"\x03\x90\x02\x01\x12a\n" +
+	"\x0eSetPluginProxy\x12&.mavio.system.v1.SetPluginProxyRequest\x1a'.mavio.system.v1.SetPluginProxyResponseB\xc5\x01\n" +
 	"\x13com.mavio.system.v1B\vPluginProtoP\x01ZCgithub.com/mavioai/mavio/libs/proto/gen/go/mavio/system/v1;systemv1\xa2\x02\x03MSX\xaa\x02\x0fMavio.System.V1\xca\x02\x0fMavio\\System\\V1\xe2\x02\x1bMavio\\System\\V1\\GPBMetadata\xea\x02\x11Mavio::System::V1b\beditionsp\xe8\a"
 
 var file_mavio_system_v1_plugin_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_mavio_system_v1_plugin_proto_msgTypes = make([]protoimpl.MessageInfo, 26)
+var file_mavio_system_v1_plugin_proto_msgTypes = make([]protoimpl.MessageInfo, 33)
 var file_mavio_system_v1_plugin_proto_goTypes = []any{
-	(PluginState)(0),                     // 0: mavio.system.v1.PluginState
-	(*Plugin)(nil),                       // 1: mavio.system.v1.Plugin
-	(*ListPluginsRequest)(nil),           // 2: mavio.system.v1.ListPluginsRequest
-	(*ListPluginsResponse)(nil),          // 3: mavio.system.v1.ListPluginsResponse
-	(*GetPluginConfigRequest)(nil),       // 4: mavio.system.v1.GetPluginConfigRequest
-	(*GetPluginConfigResponse)(nil),      // 5: mavio.system.v1.GetPluginConfigResponse
-	(*SetPluginConfigRequest)(nil),       // 6: mavio.system.v1.SetPluginConfigRequest
-	(*SetPluginConfigResponse)(nil),      // 7: mavio.system.v1.SetPluginConfigResponse
-	(*CatalogPlugin)(nil),                // 8: mavio.system.v1.CatalogPlugin
-	(*CatalogVersion)(nil),               // 9: mavio.system.v1.CatalogVersion
-	(*ListCatalogPluginsRequest)(nil),    // 10: mavio.system.v1.ListCatalogPluginsRequest
-	(*ListCatalogPluginsResponse)(nil),   // 11: mavio.system.v1.ListCatalogPluginsResponse
-	(*InstallPluginRequest)(nil),         // 12: mavio.system.v1.InstallPluginRequest
-	(*InstallPluginResponse)(nil),        // 13: mavio.system.v1.InstallPluginResponse
-	(*UninstallPluginRequest)(nil),       // 14: mavio.system.v1.UninstallPluginRequest
-	(*UninstallPluginResponse)(nil),      // 15: mavio.system.v1.UninstallPluginResponse
-	(*SetPluginEnabledRequest)(nil),      // 16: mavio.system.v1.SetPluginEnabledRequest
-	(*SetPluginEnabledResponse)(nil),     // 17: mavio.system.v1.SetPluginEnabledResponse
-	(*ContainerRuntime)(nil),             // 18: mavio.system.v1.ContainerRuntime
-	(*GetContainerRuntimeRequest)(nil),   // 19: mavio.system.v1.GetContainerRuntimeRequest
-	(*GetContainerRuntimeResponse)(nil),  // 20: mavio.system.v1.GetContainerRuntimeResponse
-	(*PluginContainer)(nil),              // 21: mavio.system.v1.PluginContainer
-	(*ContainerCommands)(nil),            // 22: mavio.system.v1.ContainerCommands
-	(*ListPluginContainersRequest)(nil),  // 23: mavio.system.v1.ListPluginContainersRequest
-	(*ListPluginContainersResponse)(nil), // 24: mavio.system.v1.ListPluginContainersResponse
-	(*SetPluginContainerRequest)(nil),    // 25: mavio.system.v1.SetPluginContainerRequest
-	(*SetPluginContainerResponse)(nil),   // 26: mavio.system.v1.SetPluginContainerResponse
-	(*v1.Manifest)(nil),                  // 27: mavio.plugin.v1.Manifest
-	(*timestamppb.Timestamp)(nil),        // 28: google.protobuf.Timestamp
-	(v1.Category)(0),                     // 29: mavio.plugin.v1.Category
-	(*v1.ContainerDependency)(nil),       // 30: mavio.plugin.v1.ContainerDependency
-	(*v1.ContainerStatus)(nil),           // 31: mavio.plugin.v1.ContainerStatus
-	(v1.ContainerMode)(0),                // 32: mavio.plugin.v1.ContainerMode
+	(PluginState)(0),                        // 0: mavio.system.v1.PluginState
+	(*Plugin)(nil),                          // 1: mavio.system.v1.Plugin
+	(*ListPluginsRequest)(nil),              // 2: mavio.system.v1.ListPluginsRequest
+	(*ListPluginsResponse)(nil),             // 3: mavio.system.v1.ListPluginsResponse
+	(*GetPluginConfigRequest)(nil),          // 4: mavio.system.v1.GetPluginConfigRequest
+	(*GetPluginConfigResponse)(nil),         // 5: mavio.system.v1.GetPluginConfigResponse
+	(*SetPluginConfigRequest)(nil),          // 6: mavio.system.v1.SetPluginConfigRequest
+	(*SetPluginConfigResponse)(nil),         // 7: mavio.system.v1.SetPluginConfigResponse
+	(*ListPluginConfigOptionsRequest)(nil),  // 8: mavio.system.v1.ListPluginConfigOptionsRequest
+	(*ListPluginConfigOptionsResponse)(nil), // 9: mavio.system.v1.ListPluginConfigOptionsResponse
+	(*PluginConfigOption)(nil),              // 10: mavio.system.v1.PluginConfigOption
+	(*CatalogPlugin)(nil),                   // 11: mavio.system.v1.CatalogPlugin
+	(*CatalogVersion)(nil),                  // 12: mavio.system.v1.CatalogVersion
+	(*ListCatalogPluginsRequest)(nil),       // 13: mavio.system.v1.ListCatalogPluginsRequest
+	(*ListCatalogPluginsResponse)(nil),      // 14: mavio.system.v1.ListCatalogPluginsResponse
+	(*InstallPluginRequest)(nil),            // 15: mavio.system.v1.InstallPluginRequest
+	(*InstallPluginResponse)(nil),           // 16: mavio.system.v1.InstallPluginResponse
+	(*UninstallPluginRequest)(nil),          // 17: mavio.system.v1.UninstallPluginRequest
+	(*UninstallPluginResponse)(nil),         // 18: mavio.system.v1.UninstallPluginResponse
+	(*SetPluginEnabledRequest)(nil),         // 19: mavio.system.v1.SetPluginEnabledRequest
+	(*SetPluginEnabledResponse)(nil),        // 20: mavio.system.v1.SetPluginEnabledResponse
+	(*ContainerRuntime)(nil),                // 21: mavio.system.v1.ContainerRuntime
+	(*GetContainerRuntimeRequest)(nil),      // 22: mavio.system.v1.GetContainerRuntimeRequest
+	(*GetContainerRuntimeResponse)(nil),     // 23: mavio.system.v1.GetContainerRuntimeResponse
+	(*PluginContainer)(nil),                 // 24: mavio.system.v1.PluginContainer
+	(*ContainerCommands)(nil),               // 25: mavio.system.v1.ContainerCommands
+	(*ListPluginContainersRequest)(nil),     // 26: mavio.system.v1.ListPluginContainersRequest
+	(*ListPluginContainersResponse)(nil),    // 27: mavio.system.v1.ListPluginContainersResponse
+	(*ListContainersRequest)(nil),           // 28: mavio.system.v1.ListContainersRequest
+	(*ListContainersResponse)(nil),          // 29: mavio.system.v1.ListContainersResponse
+	(*SetPluginContainerRequest)(nil),       // 30: mavio.system.v1.SetPluginContainerRequest
+	(*SetPluginContainerResponse)(nil),      // 31: mavio.system.v1.SetPluginContainerResponse
+	(*SetPluginProxyRequest)(nil),           // 32: mavio.system.v1.SetPluginProxyRequest
+	(*SetPluginProxyResponse)(nil),          // 33: mavio.system.v1.SetPluginProxyResponse
+	(*v1.Manifest)(nil),                     // 34: mavio.plugin.v1.Manifest
+	(*timestamppb.Timestamp)(nil),           // 35: google.protobuf.Timestamp
+	(v1.Category)(0),                        // 36: mavio.plugin.v1.Category
+	(*v1.ContainerDependency)(nil),          // 37: mavio.plugin.v1.ContainerDependency
+	(*v1.ContainerStatus)(nil),              // 38: mavio.plugin.v1.ContainerStatus
+	(v1.ContainerMode)(0),                   // 39: mavio.plugin.v1.ContainerMode
 }
 var file_mavio_system_v1_plugin_proto_depIdxs = []int32{
-	27, // 0: mavio.system.v1.Plugin.manifest:type_name -> mavio.plugin.v1.Manifest
+	34, // 0: mavio.system.v1.Plugin.manifest:type_name -> mavio.plugin.v1.Manifest
 	0,  // 1: mavio.system.v1.Plugin.state:type_name -> mavio.system.v1.PluginState
 	1,  // 2: mavio.system.v1.ListPluginsResponse.plugins:type_name -> mavio.system.v1.Plugin
-	28, // 3: mavio.system.v1.GetPluginConfigResponse.update_time:type_name -> google.protobuf.Timestamp
+	35, // 3: mavio.system.v1.GetPluginConfigResponse.update_time:type_name -> google.protobuf.Timestamp
 	1,  // 4: mavio.system.v1.SetPluginConfigResponse.plugin:type_name -> mavio.system.v1.Plugin
-	9,  // 5: mavio.system.v1.CatalogPlugin.versions:type_name -> mavio.system.v1.CatalogVersion
-	29, // 6: mavio.system.v1.CatalogPlugin.category:type_name -> mavio.plugin.v1.Category
-	28, // 7: mavio.system.v1.CatalogVersion.release_time:type_name -> google.protobuf.Timestamp
-	8,  // 8: mavio.system.v1.ListCatalogPluginsResponse.plugins:type_name -> mavio.system.v1.CatalogPlugin
-	1,  // 9: mavio.system.v1.InstallPluginResponse.plugin:type_name -> mavio.system.v1.Plugin
-	1,  // 10: mavio.system.v1.SetPluginEnabledResponse.plugin:type_name -> mavio.system.v1.Plugin
-	18, // 11: mavio.system.v1.GetContainerRuntimeResponse.runtime:type_name -> mavio.system.v1.ContainerRuntime
-	30, // 12: mavio.system.v1.PluginContainer.dependency:type_name -> mavio.plugin.v1.ContainerDependency
-	31, // 13: mavio.system.v1.PluginContainer.status:type_name -> mavio.plugin.v1.ContainerStatus
-	22, // 14: mavio.system.v1.PluginContainer.commands:type_name -> mavio.system.v1.ContainerCommands
-	22, // 15: mavio.system.v1.PluginContainer.gpu_commands:type_name -> mavio.system.v1.ContainerCommands
-	21, // 16: mavio.system.v1.ListPluginContainersResponse.containers:type_name -> mavio.system.v1.PluginContainer
-	32, // 17: mavio.system.v1.SetPluginContainerRequest.mode:type_name -> mavio.plugin.v1.ContainerMode
-	21, // 18: mavio.system.v1.SetPluginContainerResponse.container:type_name -> mavio.system.v1.PluginContainer
-	2,  // 19: mavio.system.v1.PluginManagementService.ListPlugins:input_type -> mavio.system.v1.ListPluginsRequest
-	4,  // 20: mavio.system.v1.PluginManagementService.GetPluginConfig:input_type -> mavio.system.v1.GetPluginConfigRequest
-	6,  // 21: mavio.system.v1.PluginManagementService.SetPluginConfig:input_type -> mavio.system.v1.SetPluginConfigRequest
-	10, // 22: mavio.system.v1.PluginManagementService.ListCatalogPlugins:input_type -> mavio.system.v1.ListCatalogPluginsRequest
-	12, // 23: mavio.system.v1.PluginManagementService.InstallPlugin:input_type -> mavio.system.v1.InstallPluginRequest
-	14, // 24: mavio.system.v1.PluginManagementService.UninstallPlugin:input_type -> mavio.system.v1.UninstallPluginRequest
-	16, // 25: mavio.system.v1.PluginManagementService.SetPluginEnabled:input_type -> mavio.system.v1.SetPluginEnabledRequest
-	19, // 26: mavio.system.v1.PluginManagementService.GetContainerRuntime:input_type -> mavio.system.v1.GetContainerRuntimeRequest
-	23, // 27: mavio.system.v1.PluginManagementService.ListPluginContainers:input_type -> mavio.system.v1.ListPluginContainersRequest
-	25, // 28: mavio.system.v1.PluginManagementService.SetPluginContainer:input_type -> mavio.system.v1.SetPluginContainerRequest
-	3,  // 29: mavio.system.v1.PluginManagementService.ListPlugins:output_type -> mavio.system.v1.ListPluginsResponse
-	5,  // 30: mavio.system.v1.PluginManagementService.GetPluginConfig:output_type -> mavio.system.v1.GetPluginConfigResponse
-	7,  // 31: mavio.system.v1.PluginManagementService.SetPluginConfig:output_type -> mavio.system.v1.SetPluginConfigResponse
-	11, // 32: mavio.system.v1.PluginManagementService.ListCatalogPlugins:output_type -> mavio.system.v1.ListCatalogPluginsResponse
-	13, // 33: mavio.system.v1.PluginManagementService.InstallPlugin:output_type -> mavio.system.v1.InstallPluginResponse
-	15, // 34: mavio.system.v1.PluginManagementService.UninstallPlugin:output_type -> mavio.system.v1.UninstallPluginResponse
-	17, // 35: mavio.system.v1.PluginManagementService.SetPluginEnabled:output_type -> mavio.system.v1.SetPluginEnabledResponse
-	20, // 36: mavio.system.v1.PluginManagementService.GetContainerRuntime:output_type -> mavio.system.v1.GetContainerRuntimeResponse
-	24, // 37: mavio.system.v1.PluginManagementService.ListPluginContainers:output_type -> mavio.system.v1.ListPluginContainersResponse
-	26, // 38: mavio.system.v1.PluginManagementService.SetPluginContainer:output_type -> mavio.system.v1.SetPluginContainerResponse
-	29, // [29:39] is the sub-list for method output_type
-	19, // [19:29] is the sub-list for method input_type
-	19, // [19:19] is the sub-list for extension type_name
-	19, // [19:19] is the sub-list for extension extendee
-	0,  // [0:19] is the sub-list for field type_name
+	10, // 5: mavio.system.v1.ListPluginConfigOptionsResponse.options:type_name -> mavio.system.v1.PluginConfigOption
+	12, // 6: mavio.system.v1.CatalogPlugin.versions:type_name -> mavio.system.v1.CatalogVersion
+	36, // 7: mavio.system.v1.CatalogPlugin.category:type_name -> mavio.plugin.v1.Category
+	35, // 8: mavio.system.v1.CatalogVersion.release_time:type_name -> google.protobuf.Timestamp
+	11, // 9: mavio.system.v1.ListCatalogPluginsResponse.plugins:type_name -> mavio.system.v1.CatalogPlugin
+	1,  // 10: mavio.system.v1.InstallPluginResponse.plugin:type_name -> mavio.system.v1.Plugin
+	1,  // 11: mavio.system.v1.SetPluginEnabledResponse.plugin:type_name -> mavio.system.v1.Plugin
+	21, // 12: mavio.system.v1.GetContainerRuntimeResponse.runtime:type_name -> mavio.system.v1.ContainerRuntime
+	37, // 13: mavio.system.v1.PluginContainer.dependency:type_name -> mavio.plugin.v1.ContainerDependency
+	38, // 14: mavio.system.v1.PluginContainer.status:type_name -> mavio.plugin.v1.ContainerStatus
+	25, // 15: mavio.system.v1.PluginContainer.commands:type_name -> mavio.system.v1.ContainerCommands
+	25, // 16: mavio.system.v1.PluginContainer.gpu_commands:type_name -> mavio.system.v1.ContainerCommands
+	24, // 17: mavio.system.v1.ListPluginContainersResponse.containers:type_name -> mavio.system.v1.PluginContainer
+	24, // 18: mavio.system.v1.ListContainersResponse.containers:type_name -> mavio.system.v1.PluginContainer
+	39, // 19: mavio.system.v1.SetPluginContainerRequest.mode:type_name -> mavio.plugin.v1.ContainerMode
+	24, // 20: mavio.system.v1.SetPluginContainerResponse.container:type_name -> mavio.system.v1.PluginContainer
+	1,  // 21: mavio.system.v1.SetPluginProxyResponse.plugin:type_name -> mavio.system.v1.Plugin
+	2,  // 22: mavio.system.v1.PluginManagementService.ListPlugins:input_type -> mavio.system.v1.ListPluginsRequest
+	4,  // 23: mavio.system.v1.PluginManagementService.GetPluginConfig:input_type -> mavio.system.v1.GetPluginConfigRequest
+	6,  // 24: mavio.system.v1.PluginManagementService.SetPluginConfig:input_type -> mavio.system.v1.SetPluginConfigRequest
+	8,  // 25: mavio.system.v1.PluginManagementService.ListPluginConfigOptions:input_type -> mavio.system.v1.ListPluginConfigOptionsRequest
+	13, // 26: mavio.system.v1.PluginManagementService.ListCatalogPlugins:input_type -> mavio.system.v1.ListCatalogPluginsRequest
+	15, // 27: mavio.system.v1.PluginManagementService.InstallPlugin:input_type -> mavio.system.v1.InstallPluginRequest
+	17, // 28: mavio.system.v1.PluginManagementService.UninstallPlugin:input_type -> mavio.system.v1.UninstallPluginRequest
+	19, // 29: mavio.system.v1.PluginManagementService.SetPluginEnabled:input_type -> mavio.system.v1.SetPluginEnabledRequest
+	22, // 30: mavio.system.v1.PluginManagementService.GetContainerRuntime:input_type -> mavio.system.v1.GetContainerRuntimeRequest
+	26, // 31: mavio.system.v1.PluginManagementService.ListPluginContainers:input_type -> mavio.system.v1.ListPluginContainersRequest
+	30, // 32: mavio.system.v1.PluginManagementService.SetPluginContainer:input_type -> mavio.system.v1.SetPluginContainerRequest
+	28, // 33: mavio.system.v1.PluginManagementService.ListContainers:input_type -> mavio.system.v1.ListContainersRequest
+	32, // 34: mavio.system.v1.PluginManagementService.SetPluginProxy:input_type -> mavio.system.v1.SetPluginProxyRequest
+	3,  // 35: mavio.system.v1.PluginManagementService.ListPlugins:output_type -> mavio.system.v1.ListPluginsResponse
+	5,  // 36: mavio.system.v1.PluginManagementService.GetPluginConfig:output_type -> mavio.system.v1.GetPluginConfigResponse
+	7,  // 37: mavio.system.v1.PluginManagementService.SetPluginConfig:output_type -> mavio.system.v1.SetPluginConfigResponse
+	9,  // 38: mavio.system.v1.PluginManagementService.ListPluginConfigOptions:output_type -> mavio.system.v1.ListPluginConfigOptionsResponse
+	14, // 39: mavio.system.v1.PluginManagementService.ListCatalogPlugins:output_type -> mavio.system.v1.ListCatalogPluginsResponse
+	16, // 40: mavio.system.v1.PluginManagementService.InstallPlugin:output_type -> mavio.system.v1.InstallPluginResponse
+	18, // 41: mavio.system.v1.PluginManagementService.UninstallPlugin:output_type -> mavio.system.v1.UninstallPluginResponse
+	20, // 42: mavio.system.v1.PluginManagementService.SetPluginEnabled:output_type -> mavio.system.v1.SetPluginEnabledResponse
+	23, // 43: mavio.system.v1.PluginManagementService.GetContainerRuntime:output_type -> mavio.system.v1.GetContainerRuntimeResponse
+	27, // 44: mavio.system.v1.PluginManagementService.ListPluginContainers:output_type -> mavio.system.v1.ListPluginContainersResponse
+	31, // 45: mavio.system.v1.PluginManagementService.SetPluginContainer:output_type -> mavio.system.v1.SetPluginContainerResponse
+	29, // 46: mavio.system.v1.PluginManagementService.ListContainers:output_type -> mavio.system.v1.ListContainersResponse
+	33, // 47: mavio.system.v1.PluginManagementService.SetPluginProxy:output_type -> mavio.system.v1.SetPluginProxyResponse
+	35, // [35:48] is the sub-list for method output_type
+	22, // [22:35] is the sub-list for method input_type
+	22, // [22:22] is the sub-list for extension type_name
+	22, // [22:22] is the sub-list for extension extendee
+	0,  // [0:22] is the sub-list for field type_name
 }
 
 func init() { file_mavio_system_v1_plugin_proto_init() }
@@ -3168,7 +4083,7 @@ func file_mavio_system_v1_plugin_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_mavio_system_v1_plugin_proto_rawDesc), len(file_mavio_system_v1_plugin_proto_rawDesc)),
 			NumEnums:      1,
-			NumMessages:   26,
+			NumMessages:   33,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

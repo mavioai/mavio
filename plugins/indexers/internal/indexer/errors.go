@@ -12,8 +12,8 @@ var (
 	// ErrUnsupportedFeed is returned for feeds the parser cannot read.
 	ErrUnsupportedFeed = errors.New("unsupported feed")
 	// ErrCloudflare is returned when Cloudflare or DDoS-Guard blocks the
-	// request; a FlareSolverr proxy gets past them.
-	ErrCloudflare = errors.New("blocked by Cloudflare protection, FlareSolverr may be required")
+	// request and no challenge solver plugin gets past them.
+	ErrCloudflare = errors.New("blocked by Cloudflare protection, a challenge solver plugin is required")
 	// ErrReleaseUnavailable is returned when a release's file is gone.
 	ErrReleaseUnavailable = errors.New("release no longer available")
 	// ErrDisabled is returned for indexers left out after failing.

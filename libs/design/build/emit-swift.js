@@ -45,7 +45,7 @@ public struct MavioTypeStyle: Sendable {
     public let tracking: CGFloat
 }
 
-${struct('MavioTypography', 'A type scale: standard for phones, tablets and the Mac, tv for Apple TV.', Object.keys(t.typography.standard), 'MavioTypeStyle', mapValues(t.typography, (s) => mapValues(s, typeStyle)))}
+${struct('MavioTypography', 'A type scale: standard for phones and tablets, desktop for the Mac, tv for Apple TV.', Object.keys(t.typography.standard), 'MavioTypeStyle', mapValues(t.typography, (s) => mapValues(s, typeStyle)))}
 
 ${constants('MavioSpacing', 'Spacing steps, in points.', t.spacing, 'CGFloat', num, (k) => `s${k}`)}
 

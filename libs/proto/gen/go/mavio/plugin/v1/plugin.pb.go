@@ -139,6 +139,8 @@ const (
 	Capability_CAPABILITY_SPEECH_TO_TEXT Capability = 29
 	// Implements TextToSpeechService.
 	Capability_CAPABILITY_TEXT_TO_SPEECH Capability = 30
+	// Implements ChallengeSolverService.
+	Capability_CAPABILITY_CHALLENGE_SOLVER Capability = 31
 )
 
 // Enum value maps for Capability.
@@ -175,6 +177,7 @@ var (
 		28: "CAPABILITY_RATINGS_PROVIDER",
 		29: "CAPABILITY_SPEECH_TO_TEXT",
 		30: "CAPABILITY_TEXT_TO_SPEECH",
+		31: "CAPABILITY_CHALLENGE_SOLVER",
 	}
 	Capability_value = map[string]int32{
 		"CAPABILITY_UNSPECIFIED":              0,
@@ -208,6 +211,7 @@ var (
 		"CAPABILITY_RATINGS_PROVIDER":         28,
 		"CAPABILITY_SPEECH_TO_TEXT":           29,
 		"CAPABILITY_TEXT_TO_SPEECH":           30,
+		"CAPABILITY_CHALLENGE_SOLVER":         31,
 	}
 )
 
@@ -1704,7 +1708,7 @@ const file_mavio_plugin_v1_plugin_proto_rawDesc = "" +
 	"\aRuntime\x12\x17\n" +
 	"\x13RUNTIME_UNSPECIFIED\x10\x00\x12\x10\n" +
 	"\fRUNTIME_WASM\x10\x01\x12\x13\n" +
-	"\x0fRUNTIME_PROCESS\x10\x02*\xf1\a\n" +
+	"\x0fRUNTIME_PROCESS\x10\x02*\x92\b\n" +
 	"\n" +
 	"Capability\x12\x1a\n" +
 	"\x16CAPABILITY_UNSPECIFIED\x10\x00\x12 \n" +
@@ -1738,7 +1742,8 @@ const file_mavio_plugin_v1_plugin_proto_rawDesc = "" +
 	"\x18CAPABILITY_AGENT_SESSION\x10\x1b\x12\x1f\n" +
 	"\x1bCAPABILITY_RATINGS_PROVIDER\x10\x1c\x12\x1d\n" +
 	"\x19CAPABILITY_SPEECH_TO_TEXT\x10\x1d\x12\x1d\n" +
-	"\x19CAPABILITY_TEXT_TO_SPEECH\x10\x1e*\xe0\x01\n" +
+	"\x19CAPABILITY_TEXT_TO_SPEECH\x10\x1e\x12\x1f\n" +
+	"\x1bCAPABILITY_CHALLENGE_SOLVER\x10\x1f*\xe0\x01\n" +
 	"\bCategory\x12\x18\n" +
 	"\x14CATEGORY_UNSPECIFIED\x10\x00\x12\x15\n" +
 	"\x11CATEGORY_METADATA\x10\x01\x12\x16\n" +

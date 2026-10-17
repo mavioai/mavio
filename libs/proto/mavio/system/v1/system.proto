@@ -187,7 +187,8 @@ message TranscodingSettings {
   string transcode_dir = 15;
 }
 
-// NetworkSettings decide how the server is reached.
+// NetworkSettings decide how the server is reached and how it reaches
+// other sites.
 message NetworkSettings {
   // Empty uses the host name.
   string server_name = 1 [(buf.validate.field).string.max_len = 100];
@@ -207,6 +208,24 @@ message NetworkSettings {
   // In mavio.dev mode, lets clients reach the server through mavio.dev's
   // relay when they cannot reach it directly.
   bool relay = 7;
+  // The proxies of the server's own HTTP requests; unset in an update
+  // keeps the current ones.
+  OutboundProxies proxies = 8;
+}
+
+// OutboundProxies are the proxies the server's own HTTP requests go
+// through, by what they reach: each the ID of one of the server's proxies
+// (ProxyService), "system" for the system proxy, or empty for none. The
+// hosts of this machine and of the local network are reached directly.
+message OutboundProxies {
+  // Plugin catalogs and plugin packages.
+  string plugin_catalogs = 1;
+  // Items' remote images, such as posters.
+  string images = 2;
+  // mavio.dev's API.
+  string mavio_dev = 3;
+  // The certificate authorities of mavio.site certificates.
+  string acme = 4;
 }
 
 // ServerSettings are what administrators change while the server runs.

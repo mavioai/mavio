@@ -92,12 +92,26 @@ type Dependency struct {
 	Memory  int64
 	CPUs    float64
 	GPU     bool
+	// HostAccess is whether the service reaches the host by the name
+	// HostName.
+	HostAccess bool
+	// ProxyEnv returns the environment sending the service's requests to
+	// the server's proxy gateway at host, its name or address from the
+	// container; nil sends them nowhere but where they go. Env wins over
+	// it.
+	ProxyEnv func(host string) map[string]string `json:"-"`
 }
+
+// HostName is the name a container reaches the host by.
+const HostName = "host.docker.internal"
 
 // Hash identifies what a container is created from: a container whose
 // LabelSpec differs is replaced.
 func Hash(d Dependency) string {
-	data, _ := json.Marshal(d)
+	data, _ := json.Marshal(struct {
+		Dependency
+		Proxied bool
+	}{d, d.ProxyEnv != nil})
 	sum := sha256.Sum256(data)
 	return hex.EncodeToString(sum[:16])
 }
@@ -170,6 +184,10 @@ type SupervisorOptions struct {
 	// Server is the server's ID, which labels what it creates; the
 	// Supervisor touches nothing labeled with another.
 	Server string
+	// HostGateway maps HostName to the host in the containers of
+	// dependencies with HostAccess, for Docker; Docker Desktop and Podman
+	// name it themselves.
+	HostGateway bool
 	// Self is the server's own container when the server runs in one off
 	// the host's network: it joins the network of Names.Network, and
 	// dependencies are reached there by name rather than through ports
@@ -222,6 +240,9 @@ type run struct {
 	cancel context.CancelFunc
 	done   chan struct{}
 	status Status
+	// gateway is the host the container reaches the proxy gateway at, of a
+	// dependency with ProxyEnv, once known.
+	gateway string
 }
 
 // stopTimeout is how long a container has to stop before it is killed.
@@ -292,6 +313,22 @@ func (s *Supervisor) Status(plugin, name string) (Status, bool) {
 		return Status{}, false
 	}
 	return r.status, true
+}
+
+// Command returns the docker run command equivalent to how the
+// Supervisor creates d's container, which reaches the proxy gateway where
+// it does when it runs, or where it would.
+func (s *Supervisor) Command(d Dependency) string {
+	r := &run{dep: d, hash: Hash(d), gateway: HostName}
+	if s.o.Self != "" {
+		r.gateway = "<server>"
+	}
+	s.mu.Lock()
+	if cur := s.runs[key(d.Plugin, d.Name)]; cur != nil && cur.gateway != "" {
+		r.gateway = cur.gateway
+	}
+	s.mu.Unlock()
+	return s.spec(r, s.o.Names.Container(d.Plugin, d.Name)).DockerRun()
 }
 
 // Running lists the names of a plugin's running dependencies.
@@ -392,8 +429,10 @@ func (s *Supervisor) each(ctx context.Context, plugin, name string, f func(Conta
 
 // Reconcile removes the containers the server created for dependencies
 // keep rejects, those no longer declared or no longer managed; their
-// volumes stay.
-func (s *Supervisor) Reconcile(ctx context.Context, keep func(plugin, name string) bool) error {
+// volumes stay. It stops those it keeps that run with nothing running
+// them, left by a server that ended without stopping them, whose plugin
+// started reports not running.
+func (s *Supervisor) Reconcile(ctx context.Context, keep func(plugin, name string) bool, started func(plugin string) bool) error {
 	cs, err := s.o.Engine.ListContainers(ctx, s.labels("", ""))
 	if err != nil {
 		return err
@@ -402,6 +441,17 @@ func (s *Supervisor) Reconcile(ctx context.Context, keep func(plugin, name strin
 	for _, c := range cs {
 		plugin, name := c.Labels[LabelPlugin], c.Labels[LabelDependency]
 		if keep(plugin, name) {
+			if c.State != "running" || started(plugin) {
+				continue
+			}
+			if _, runs := s.Status(plugin, name); runs {
+				continue
+			}
+			if err := s.o.Engine.StopContainer(ctx, c.ID, stopTimeout); err != nil && !errors.Is(err, core.ErrNotFound) {
+				errs = append(errs, fmt.Errorf("stop container %s: %w", c.ID, err))
+				continue
+			}
+			s.o.Logger.InfoContext(ctx, "stopped the container of a plugin not running", "plugin", plugin, "dependency", name)
 			continue
 		}
 		s.forget(plugin, name)
@@ -517,6 +567,15 @@ func (s *Supervisor) ensure(ctx context.Context, r *run, name string) (id, addr 
 			return "", "", err
 		}
 	}
+	if d.ProxyEnv != nil {
+		gateway, err := s.gatewayHost(ctx, network)
+		if err != nil {
+			return "", "", err
+		}
+		s.mu.Lock()
+		r.gateway = gateway
+		s.mu.Unlock()
+	}
 
 	ctr, err := e.InspectContainer(ctx, name)
 	switch {
@@ -594,14 +653,41 @@ func (s *Supervisor) join(ctx context.Context, network string) error {
 	return nil
 }
 
+// gatewayHost returns the host the containers reach the server's proxy
+// gateway at: HostName for a server on the host, else the address of the
+// server's container on the network.
+func (s *Supervisor) gatewayHost(ctx context.Context, network string) (string, error) {
+	if s.o.Self == "" {
+		return HostName, nil
+	}
+	n, err := s.o.Engine.InspectNetwork(ctx, network)
+	if err != nil {
+		return "", fmt.Errorf("inspect network %s: %w", network, err)
+	}
+	for id, c := range n.Containers {
+		if strings.HasPrefix(id, s.o.Self) || strings.TrimPrefix(c.Name, "/") == s.o.Self {
+			if addr, _, _ := strings.Cut(c.IPv4Address, "/"); addr != "" {
+				return addr, nil
+			}
+		}
+	}
+	return "", fmt.Errorf("the server's container has no address on network %s", network)
+}
+
 // specLabel is a run's LabelSpec: its Hash, marked when its port is not
 // published, so a container is replaced when the server moves between
-// the host and a container.
+// the host and a container, and with where it reaches the proxy gateway.
 func (s *Supervisor) specLabel(r *run) string {
+	label := r.hash
 	if s.o.Self != "" {
-		return r.hash + "-unpublished"
+		label += "-unpublished"
 	}
-	return r.hash
+	if r.dep.ProxyEnv != nil {
+		s.mu.Lock()
+		label += "-via-" + r.gateway
+		s.mu.Unlock()
+	}
+	return label
 }
 
 // spec returns what a run's container is created with.
@@ -610,9 +696,17 @@ func (s *Supervisor) spec(r *run, name string) ContainerSpec {
 	volumeLabels := s.labels(d.Plugin, d.Name)
 	labels := maps.Clone(volumeLabels)
 	labels[LabelSpec] = s.specLabel(r)
-	env := make([]string, 0, len(d.Env))
-	for _, k := range slices.Sorted(maps.Keys(d.Env)) {
-		env = append(env, k+"="+d.Env[k])
+	vars := map[string]string{}
+	if d.ProxyEnv != nil {
+		s.mu.Lock()
+		gateway := r.gateway
+		s.mu.Unlock()
+		vars = d.ProxyEnv(gateway)
+	}
+	maps.Copy(vars, d.Env)
+	env := make([]string, 0, len(vars))
+	for _, k := range slices.Sorted(maps.Keys(vars)) {
+		env = append(env, k+"="+vars[k])
 	}
 	volumes := make(map[string]string, len(d.Volumes))
 	for v, target := range d.Volumes {
@@ -621,7 +715,7 @@ func (s *Supervisor) spec(r *run, name string) ContainerSpec {
 	return ContainerSpec{
 		Name: name, Image: d.Image, Cmd: d.Cmd, Env: env, Labels: labels, VolumeLabels: volumeLabels,
 		Port: d.Port, PublishLoopback: s.o.Self == "", Network: s.o.Names.Network(), Aliases: []string{name},
-		Volumes: volumes, Memory: d.Memory, CPUs: d.CPUs, GPU: d.GPU,
+		Volumes: volumes, Memory: d.Memory, CPUs: d.CPUs, GPU: d.GPU, HostGateway: (d.HostAccess || d.ProxyEnv != nil && s.o.Self == "") && s.o.HostGateway,
 	}
 }
 

@@ -8,11 +8,13 @@ import (
 	"net"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"syscall"
 
 	"github.com/spf13/cobra"
 
 	"github.com/mavioai/mavio/apps/server/internal/buildinfo"
+	"github.com/mavioai/mavio/apps/server/internal/procs"
 	"github.com/mavioai/mavio/apps/server/internal/server"
 )
 
@@ -53,6 +55,16 @@ then variables, then config.toml. Paths in config.toml must be absolute.`,
 			}
 			cfg := o.Server
 			cfg.Version, cfg.Logger, cfg.Restore = buildinfo.Version(), slog.Default(), restore
+			// A server left running in this home ends before this one
+			// listens, and what it started is ended once this one runs.
+			if cfg.Processes, err = procs.Open(filepath.Join(o.Home, "run"), cfg.Logger); err != nil {
+				return err
+			}
+			release, err := cfg.Processes.Claim(cmd.Context())
+			if err != nil {
+				return err
+			}
+			defer release()
 			var lc net.ListenConfig
 			ln, err := lc.Listen(cmd.Context(), "tcp", o.Addr)
 			if err != nil {

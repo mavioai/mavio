@@ -37,7 +37,7 @@ import { Button, Group, Row } from "../../ui.tsx";
 import { NumberField, SuggestField, Switch } from "../../controls/inputs.tsx";
 import { Select } from "../../controls/select.tsx";
 import type { SettingsSearch } from "../settings.tsx";
-import { BackLink, capacityOf, ColorTile, Page } from "./common.tsx";
+import { AddRow, BackLink, capacityOf, ColorTile, Page } from "./common.tsx";
 import { input } from "../../controls/styles.ts";
 import { Confirm } from "../../controls/dialog.tsx";
 import { useUnsavedGuard } from "../../controls/unsaved.tsx";
@@ -51,7 +51,6 @@ export function StorageSection({ server }: { server: ServerEntry }) {
 }
 
 function StorageList({ server }: { server: ServerEntry }) {
-  const cur = useSearch({ strict: false }) as SettingsSearch;
   const status = useStorageStatus(server);
   const available = status.data?.available ?? false;
   const remotes = useRemotes(server, available);
@@ -62,19 +61,6 @@ function StorageList({ server }: { server: ServerEntry }) {
     <Page
       title={t("settings.storage")}
       message={t("storage.message")}
-      actions={
-        available && (
-          <Link
-            to="/settings/$section"
-            params={{ section: "storage" }}
-            search={{ server: cur.server, remote: "new" }}
-            className="inline-flex min-h-11 items-center gap-2 rounded-md bg-button px-4 type-headline text-on-button hover:opacity-85"
-          >
-            <Icon name="add" size={18} />
-            {t("storage.add")}
-          </Link>
-        )
-      }
     >
       <Group title={t("storage.disks")} footer={t("storage.disksFooter")}>
         {disks.data?.map((d) => <DiskRow key={d.path} disk={d} />)}
@@ -90,6 +76,7 @@ function StorageList({ server }: { server: ServerEntry }) {
             ))}
           {remotes.isSuccess && remotes.data.length === 0 && <p className="px-4 py-3 type-callout text-text-secondary">{t("storage.noRemotes")}</p>}
           {remotes.isError && <p className="px-4 py-3 type-callout text-danger">{errorMessage(remotes.error)}</p>}
+          <AddRow label={t("storage.add")} search={{ remote: "new" }} />
         </Group>
       )}
       <Group title={t("storage.rclone")}>

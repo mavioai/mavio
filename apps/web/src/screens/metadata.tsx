@@ -411,7 +411,7 @@ export function ImagesDialog({ server, item, onClose }: { server: ServerEntry; i
     <Modal title={t("metadata.imagesTitle", { name: item.name })} wide onClose={onClose}>
       <div className="flex flex-wrap items-center gap-2">
         <Select value={String(kind)} label={t("metadata.imageKind")} options={imageKinds.map(([k, l]) => ({ value: String(k), label: l() }))} onChange={(v) => setKind(Number(v))} />
-        <label className="inline-flex min-h-11 cursor-pointer items-center rounded-md bg-fill px-4 type-headline hover:bg-fill-selected has-focus-visible:outline-2 has-focus-visible:outline-focus">
+        <label className="inline-flex min-h-9 cursor-pointer items-center rounded-md bg-fill px-4 type-headline tv:min-h-11 desk:min-h-7 desk:px-3 hover:bg-fill-selected has-focus-visible:outline-2 has-focus-visible:outline-focus">
           {t("metadata.uploadImage")}
           <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" className="sr-only" onChange={(e) => void upload(e.target.files?.[0])} />
         </label>

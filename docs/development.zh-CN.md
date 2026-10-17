@@ -155,7 +155,7 @@ GOOS=wasip1 GOARCH=wasm go build -buildmode=c-shared -o plugin.wasm .   # WASM �
 go build -o plugin .                                                     # 子进程运行时
 ```
 
-插件目录包含 `manifest.json`，以及 `plugin.wasm` 或 `plugin`（Windows 上为 `plugin.exe`）。
+插件目录包含 `manifest.json`、`plugin.wasm` 或 `plugin`（Windows 上为 `plugin.exe`），以及可选的 `locales/<BCP 47 标签>.json`，即以英文为键的清单字符串译文（[架构 §7.5](architecture.zh-CN.md#75-服务端中的插件)）。
 
 ### 4.4 设计系统
 `pnpm nx run design:generate` 运行 `libs/design/build/build.js`，把设计系统（[客户端 §6](clients.zh-CN.md#6-设计系统)）的源文件编译到 `libs/design/gen`：
@@ -226,7 +226,7 @@ CI 中的工具链同样来自 `mise.toml`（`jdx/mise-action`）；**media** �
 
 服务端的发布二进制用 `VERSION=v0.1.0 pnpm nx run server:dist` 构建；镜像在仓库根目录用 `docker buildx build -f apps/server/Dockerfile --build-arg VERSION=v0.1.0 --platform linux/amd64,linux/arm64 .` 构建。Dockerfile 锁定与 `mise.toml` 相同的 jellyfin-ffmpeg 版本，并记录其两个 Linux 便携版的 SHA-256 摘要；升级 jellyfin-ffmpeg 时需同时修改这两个文件，两处锁定不一致时一个测试（`apps/server/internal/buildinfo`）会失败。镜像在 `/usr/local/bin/rclone` 内置 `mise.toml` 锁定的 mavioai/rclone 发布版本的 Linux 构建，并按相同的 SHA-256 摘要校验，同一测试比对两处锁定。fork 的发布版本是其 `mavio` 分支上的标签 `v<rclone 版本>-mavio`，该分支在 rclone 发布版本之上只有一个提交；推送标签会运行 fork 的 `mavio release` 工作流，它不启用 cgo，为 Linux、macOS 与 Windows 的 amd64 和 arm64 交叉编译 rclone，并把 zip 与 `SHA256SUMS.txt` 附加到该标签的发布中。升级时需同时修改两个文件中的版本与摘要。镜像还会构建 DLNA、索引器、下载客户端、字幕与智能体插件，并将它们放在插件种子目录 `/usr/lib/mavio/plugins` 中；智能体插件用 `mise.toml` 锁定的 Bun 版本编译，同一测试比较二者。
 
-第一方插件由 `tools/plugindist` 依据其清单打包：`plugins/` 中的每个插件按清单中的版本打成包含其 `manifest.json` 与可执行文件的目录 zip 包，进程插件每个服务端平台一个，WASM 插件所有平台共用一个；并生成列出它们及其名称、简介、作者、主页、分类与 SHA-256 摘要的 `catalog.json`；缺少分类的插件使其失败。`pnpm nx run plugindist:dist` 把全部插件构建到 `tools/plugindist/dist/`，URL 相对于目录，与发布的形式一致；`-platforms` 限定平台。
+第一方插件由 `tools/plugindist` 依据其清单打包：`plugins/` 中的每个插件按清单中的版本打成包含其 `manifest.json`、译文与可执行文件的目录 zip 包，进程插件每个服务端平台一个，WASM 插件所有平台共用一个；并生成列出它们及其名称、简介及其译文、作者、主页、分类与 SHA-256 摘要的 `catalog.json`；缺少分类的插件使其失败。第一方插件翻译为客户端字符串所用的语言：`tools/plugindist` 的测试检查其配置 schema 的每个属性都有标题，且其 `locales/zh-Hans.json` 翻译了清单中的每个字符串。`pnpm nx run plugindist:dist` 把全部插件构建到 `tools/plugindist/dist/`，URL 相对于目录，与发布的形式一致；`-platforms` 限定平台。
 
 官方插件目录是 mavioai/plugins 仓库最新发布版本的 `catalog.json`，也是服务端 `plugin-catalog` 设置的默认值；其发布版本包含 `plugindist:dist` 从 Mavio 某个发布版本的源码构建的包。开发用服务端则用 `pnpm nx run plugindist:catalog` 为本平台把插件构建到各插件的 `dist/`，并写入 `plugins/catalog.json`（Git 忽略），其中的包是 file URL；以 `--plugin-catalog ../../plugins/catalog.json` 启动的服务端从中安装插件。
 

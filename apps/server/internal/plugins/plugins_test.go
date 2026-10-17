@@ -1,6 +1,7 @@
 package plugins_test
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
@@ -9,10 +10,14 @@ import (
 	"strings"
 	"testing"
 	"time"
+	"uuid"
+
+	"google.golang.org/protobuf/proto"
 
 	"github.com/mavioai/mavio/apps/server/internal/plugins"
 	"github.com/mavioai/mavio/libs/core"
 	"github.com/mavioai/mavio/libs/library"
+	pluginv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1"
 	"github.com/mavioai/mavio/libs/store"
 )
 
@@ -130,13 +135,13 @@ func TestManager(t *testing.T) {
 		t.Errorf("unconfigured provider: Metadata = %v, %v; want = %v", res, err, library.ErrProviderUnavailable)
 	}
 
-	if _, err := m.SetConfig(ctx, "dev.mavio.smoke", `{"api_key":""}`); !errors.Is(err, core.ErrInvalid) {
+	if _, _, err := m.SetConfig(ctx, "dev.mavio.smoke", `{"api_key":""}`); !errors.Is(err, core.ErrInvalid) {
 		t.Errorf("SetConfig against the schema: %v, want ErrInvalid", err)
 	}
-	if _, err := m.SetConfig(ctx, "org.example.missing", `{}`); !errors.Is(err, core.ErrNotFound) {
+	if _, _, err := m.SetConfig(ctx, "org.example.missing", `{}`); !errors.Is(err, core.ErrNotFound) {
 		t.Errorf("SetConfig of an unknown plugin: %v, want ErrNotFound", err)
 	}
-	info, err := m.SetConfig(ctx, "dev.mavio.smoke", `{"api_key":"secret"}`)
+	info, _, err := m.SetConfig(ctx, "dev.mavio.smoke", `{"api_key":"secret"}`)
 	if err != nil || info.State != plugins.Ready {
 		t.Fatalf("SetConfig = %+v, %v; want Ready", info, err)
 	}
@@ -155,10 +160,58 @@ func TestManager(t *testing.T) {
 	if got := state(t, open(t, dir, s), "dev.mavio.smoke"); got.State != plugins.Ready {
 		t.Errorf("after a restart: state = %v, %v; want Ready", got.State, got.Err)
 	}
+	// Or once the host API serves, when Open leaves it for later.
+	later, err := plugins.Open(ctx, plugins.Config{Dir: dir, CacheDir: compiled, DataDir: t.TempDir(), Store: s, ConfigureLater: true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = later.Close(t.Context()) })
+	if got := state(t, later, "dev.mavio.smoke"); got.State != plugins.Starting {
+		t.Errorf("configured later: state = %v, want Starting", got.State)
+	}
+	later.ConfigureStarted(ctx)
+	if got := state(t, later, "dev.mavio.smoke"); got.State != plugins.Ready {
+		t.Errorf("ConfigureStarted: state = %v, %v; want Ready", got.State, got.Err)
+	}
+	if err := later.Close(ctx); err != nil {
+		t.Fatal(err)
+	}
 	// An upgrade whose schema the stored configuration no longer fits.
 	install(t, dir, "smoke", `{"type":"object","properties":{"token":{"type":"string"}},"required":["token"]}`)
 	if got := state(t, open(t, dir, s), "dev.mavio.smoke"); got.State != plugins.Failed || got.Err == nil {
 		t.Errorf("stale configuration: state = %v, %v; want Failed", got.State, got.Err)
+	}
+}
+
+func TestLocales(t *testing.T) {
+	s, err := store.Open(t.Context(), "sqlite:"+filepath.Join(t.TempDir(), "mavio.db"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = s.Close() })
+	dir := t.TempDir()
+	install(t, dir, "smoke", `{"type":"object"}`)
+	locales := filepath.Join(dir, "smoke", "locales")
+	if err := os.MkdirAll(locales, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(locales, "zh-Hans.json"), []byte(`{"Smoke":"冒烟"}`), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	m := open(t, dir, s)
+	if got := state(t, m, "dev.mavio.smoke"); got.State != plugins.Ready || got.Locales["zh-Hans"]["Smoke"] != "冒烟" {
+		t.Errorf("Plugins() = %+v, want the plugin ready with its translations", got)
+	}
+	if err := m.Close(t.Context()); err != nil {
+		t.Fatal(err)
+	}
+
+	// Translations that cannot be read fail the plugin.
+	if err := os.WriteFile(filepath.Join(locales, "zh-Hans.json"), []byte(`{"Smoke":1}`), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if got := state(t, open(t, dir, s), "dev.mavio.smoke"); got.State != plugins.Failed || got.Err == nil {
+		t.Errorf("broken translations: state = %v, %v; want Failed", got.State, got.Err)
 	}
 }
 
@@ -208,5 +261,57 @@ func TestAuthAndNotifiers(t *testing.T) {
 	}
 	if err := notifiers[0].Notify(ctx, core.Activity{ID: core.NewID(), Title: "x", Time: time.Now()}); err == nil {
 		t.Error("the plugin's rejection was lost")
+	}
+}
+
+func TestGeneratedIDs(t *testing.T) {
+	s, err := store.Open(t.Context(), "sqlite:"+filepath.Join(t.TempDir(), "mavio.db"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = s.Close() })
+	dir := t.TempDir()
+	install(t, dir, "smoke", `{"type":"object","properties":{"clients":{"type":"array","items":{"type":"object",`+
+		`"properties":{"id":{"type":"string","format":"uuid","readOnly":true},"name":{"type":"string"}},"required":["id"]}}}}`)
+	m := open(t, dir, s)
+	_, got, err := m.SetConfig(t.Context(), "dev.mavio.smoke", `{"clients":[{"name":"a"},{"id":"kept","name":"b"}]}`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var c struct{ Clients []struct{ ID string } }
+	if err := json.Unmarshal([]byte(got), &c); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := uuid.Parse(c.Clients[0].ID); err != nil || c.Clients[1].ID != "kept" {
+		t.Errorf("SetConfig() = %s, want the first client given a UUID and the second's ID kept", got)
+	}
+	if stored, err := m.Config(t.Context(), "dev.mavio.smoke"); err != nil || stored.JSON != got {
+		t.Errorf("Config() = %+v, %v, want = %s", stored, err, got)
+	}
+}
+
+func TestSettingsSchema(t *testing.T) {
+	text := pluginv1.SettingFieldType_SETTING_FIELD_TYPE_TEXT
+	fields := []*pluginv1.SettingField{
+		pluginv1.SettingField_builder{Name: proto.String("base_url"), Label: proto.String("URL"), Type: &text, DefaultJson: proto.String(`"https://a.b"`)}.Build(),
+		pluginv1.SettingField_builder{Name: proto.String("api_key"), Label: proto.String("API Key"), Type: &text, Secret: proto.Bool(true), HelpText: proto.String("<key> & more")}.Build(),
+		pluginv1.SettingField_builder{
+			Name: proto.String("sort"), Label: proto.String("Sort"), Type: pluginv1.SettingFieldType_SETTING_FIELD_TYPE_SELECT.Enum(),
+			Options: []*pluginv1.SettingFieldOption{pluginv1.SettingFieldOption_builder{ValueJson: proto.String("0"), Label: proto.String("Date")}.Build()},
+		}.Build(),
+		pluginv1.SettingField_builder{Name: proto.String("note"), Label: proto.String("Note"), Type: pluginv1.SettingFieldType_SETTING_FIELD_TYPE_INFO.Enum()}.Build(),
+		pluginv1.SettingField_builder{Name: proto.String("flags"), Label: proto.String("Flags"), Type: pluginv1.SettingFieldType_SETTING_FIELD_TYPE_TAG.Enum()}.Build(),
+	}
+	want := `{"type":"object","properties":{` +
+		`"base_url":{"title":"URL","type":"string","default":"https://a.b"},` +
+		`"api_key":{"title":"API Key","description":"<key> & more","type":"string","writeOnly":true},` +
+		`"sort":{"title":"Sort","oneOf":[{"const":0,"title":"Date"}]},` +
+		`"note":{"title":"Note","readOnly":true},` +
+		`"flags":{"title":"Flags","type":"array","items":{"type":"string"}}}}`
+	if got := plugins.SettingsSchema(fields); got != want {
+		t.Errorf("SettingsSchema() = %s, want = %s", got, want)
+	}
+	if got := plugins.SettingsSchema(nil); got != "" {
+		t.Errorf("SettingsSchema(nil) = %s, want = empty", got)
 	}
 }

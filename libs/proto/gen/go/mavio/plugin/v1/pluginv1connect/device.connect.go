@@ -43,6 +43,11 @@ const (
 	// HostServiceListContainersProcedure is the fully-qualified name of the HostService's
 	// ListContainers RPC.
 	HostServiceListContainersProcedure = "/mavio.plugin.v1.HostService/ListContainers"
+	// HostServiceListProxiesProcedure is the fully-qualified name of the HostService's ListProxies RPC.
+	HostServiceListProxiesProcedure = "/mavio.plugin.v1.HostService/ListProxies"
+	// HostServiceSolveChallengeProcedure is the fully-qualified name of the HostService's
+	// SolveChallenge RPC.
+	HostServiceSolveChallengeProcedure = "/mavio.plugin.v1.HostService/SolveChallenge"
 	// DeviceControllerServiceSendCommandProcedure is the fully-qualified name of the
 	// DeviceControllerService's SendCommand RPC.
 	DeviceControllerServiceSendCommandProcedure = "/mavio.plugin.v1.DeviceControllerService/SendCommand"
@@ -62,6 +67,15 @@ type HostServiceClient interface {
 	// dependencies are reached and whether they can be used. The server
 	// configures the plugin again when an address changes.
 	ListContainers(context.Context, *v1.ListContainersRequest) (*v1.ListContainersResponse, error)
+	// ListProxies returns the server's proxies with their credentials, for
+	// plugins whose configuration schema takes proxies ("x-mavio-options"
+	// {"source": "proxies"}); others are denied. The server configures such plugins
+	// again when a proxy changes or is deleted.
+	ListProxies(context.Context, *v1.ListProxiesRequest) (*v1.ListProxiesResponse, error)
+	// SolveChallenge solves a site's challenge with the ready
+	// CHALLENGE_SOLVER plugins in turn, through the proxy proxy_id names; it
+	// is unavailable when there is none, and not found for an unknown proxy.
+	SolveChallenge(context.Context, *v1.SolveChallengeRequest) (*v1.SolveChallengeResponse, error)
 }
 
 // NewHostServiceClient constructs a client for the mavio.plugin.v1.HostService service. By default,
@@ -95,6 +109,19 @@ func NewHostServiceClient(httpClient connect.HTTPClient, baseURL string, opts ..
 			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
 			connect.WithClientOptions(opts...),
 		),
+		listProxies: connect.NewClient[v1.ListProxiesRequest, v1.ListProxiesResponse](
+			httpClient,
+			baseURL+HostServiceListProxiesProcedure,
+			connect.WithSchema(hostServiceMethods.ByName("ListProxies")),
+			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+			connect.WithClientOptions(opts...),
+		),
+		solveChallenge: connect.NewClient[v1.SolveChallengeRequest, v1.SolveChallengeResponse](
+			httpClient,
+			baseURL+HostServiceSolveChallengeProcedure,
+			connect.WithSchema(hostServiceMethods.ByName("SolveChallenge")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
@@ -103,6 +130,8 @@ type hostServiceClient struct {
 	setDevices     *connect.Client[v1.SetDevicesRequest, v1.SetDevicesResponse]
 	getServerInfo  *connect.Client[v1.GetServerInfoRequest, v1.GetServerInfoResponse]
 	listContainers *connect.Client[v1.ListContainersRequest, v1.ListContainersResponse]
+	listProxies    *connect.Client[v1.ListProxiesRequest, v1.ListProxiesResponse]
+	solveChallenge *connect.Client[v1.SolveChallengeRequest, v1.SolveChallengeResponse]
 }
 
 // SetDevices calls mavio.plugin.v1.HostService.SetDevices.
@@ -132,6 +161,24 @@ func (c *hostServiceClient) ListContainers(ctx context.Context, req *v1.ListCont
 	return nil, err
 }
 
+// ListProxies calls mavio.plugin.v1.HostService.ListProxies.
+func (c *hostServiceClient) ListProxies(ctx context.Context, req *v1.ListProxiesRequest) (*v1.ListProxiesResponse, error) {
+	response, err := c.listProxies.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
+// SolveChallenge calls mavio.plugin.v1.HostService.SolveChallenge.
+func (c *hostServiceClient) SolveChallenge(ctx context.Context, req *v1.SolveChallengeRequest) (*v1.SolveChallengeResponse, error) {
+	response, err := c.solveChallenge.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
 // HostServiceHandler is an implementation of the mavio.plugin.v1.HostService service.
 type HostServiceHandler interface {
 	// SetDevices replaces the remote devices of the calling plugin, which
@@ -146,6 +193,15 @@ type HostServiceHandler interface {
 	// dependencies are reached and whether they can be used. The server
 	// configures the plugin again when an address changes.
 	ListContainers(context.Context, *v1.ListContainersRequest) (*v1.ListContainersResponse, error)
+	// ListProxies returns the server's proxies with their credentials, for
+	// plugins whose configuration schema takes proxies ("x-mavio-options"
+	// {"source": "proxies"}); others are denied. The server configures such plugins
+	// again when a proxy changes or is deleted.
+	ListProxies(context.Context, *v1.ListProxiesRequest) (*v1.ListProxiesResponse, error)
+	// SolveChallenge solves a site's challenge with the ready
+	// CHALLENGE_SOLVER plugins in turn, through the proxy proxy_id names; it
+	// is unavailable when there is none, and not found for an unknown proxy.
+	SolveChallenge(context.Context, *v1.SolveChallengeRequest) (*v1.SolveChallengeResponse, error)
 }
 
 // NewHostServiceHandler builds an HTTP handler from the service implementation. It returns the path
@@ -175,6 +231,19 @@ func NewHostServiceHandler(svc HostServiceHandler, opts ...connect.HandlerOption
 		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
 		connect.WithHandlerOptions(opts...),
 	)
+	hostServiceListProxiesHandler := connect.NewUnaryHandlerSimple(
+		HostServiceListProxiesProcedure,
+		svc.ListProxies,
+		connect.WithSchema(hostServiceMethods.ByName("ListProxies")),
+		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+		connect.WithHandlerOptions(opts...),
+	)
+	hostServiceSolveChallengeHandler := connect.NewUnaryHandlerSimple(
+		HostServiceSolveChallengeProcedure,
+		svc.SolveChallenge,
+		connect.WithSchema(hostServiceMethods.ByName("SolveChallenge")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/mavio.plugin.v1.HostService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case HostServiceSetDevicesProcedure:
@@ -183,6 +252,10 @@ func NewHostServiceHandler(svc HostServiceHandler, opts ...connect.HandlerOption
 			hostServiceGetServerInfoHandler.ServeHTTP(w, r)
 		case HostServiceListContainersProcedure:
 			hostServiceListContainersHandler.ServeHTTP(w, r)
+		case HostServiceListProxiesProcedure:
+			hostServiceListProxiesHandler.ServeHTTP(w, r)
+		case HostServiceSolveChallengeProcedure:
+			hostServiceSolveChallengeHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -202,6 +275,14 @@ func (UnimplementedHostServiceHandler) GetServerInfo(context.Context, *v1.GetSer
 
 func (UnimplementedHostServiceHandler) ListContainers(context.Context, *v1.ListContainersRequest) (*v1.ListContainersResponse, error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.plugin.v1.HostService.ListContainers is not implemented"))
+}
+
+func (UnimplementedHostServiceHandler) ListProxies(context.Context, *v1.ListProxiesRequest) (*v1.ListProxiesResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.plugin.v1.HostService.ListProxies is not implemented"))
+}
+
+func (UnimplementedHostServiceHandler) SolveChallenge(context.Context, *v1.SolveChallengeRequest) (*v1.SolveChallengeResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.plugin.v1.HostService.SolveChallenge is not implemented"))
 }
 
 // DeviceControllerServiceClient is a client for the mavio.plugin.v1.DeviceControllerService

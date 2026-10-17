@@ -39,6 +39,7 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/pluginconfig"
 	"github.com/mavioai/mavio/libs/store/internal/ent/plugincontainer"
 	"github.com/mavioai/mavio/libs/store/internal/ent/predicate"
+	"github.com/mavioai/mavio/libs/store/internal/ent/proxy"
 	"github.com/mavioai/mavio/libs/store/internal/ent/qualitydefinition"
 	"github.com/mavioai/mavio/libs/store/internal/ent/qualityprofile"
 	"github.com/mavioai/mavio/libs/store/internal/ent/releaseprofile"
@@ -924,6 +925,33 @@ func (f TraversePluginContainer) Traverse(ctx context.Context, q ent.Query) erro
 	return fmt.Errorf("unexpected query type %T. expect *ent.PluginContainerQuery", q)
 }
 
+// The ProxyFunc type is an adapter to allow the use of ordinary function as a Querier.
+type ProxyFunc func(context.Context, *ent.ProxyQuery) (ent.Value, error)
+
+// Query calls f(ctx, q).
+func (f ProxyFunc) Query(ctx context.Context, q ent.Query) (ent.Value, error) {
+	if q, ok := q.(*ent.ProxyQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *ent.ProxyQuery", q)
+}
+
+// The TraverseProxy type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseProxy func(context.Context, *ent.ProxyQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseProxy) Intercept(next ent.Querier) ent.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseProxy) Traverse(ctx context.Context, q ent.Query) error {
+	if q, ok := q.(*ent.ProxyQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *ent.ProxyQuery", q)
+}
+
 // The QualityDefinitionFunc type is an adapter to allow the use of ordinary function as a Querier.
 type QualityDefinitionFunc func(context.Context, *ent.QualityDefinitionQuery) (ent.Value, error)
 
@@ -1446,6 +1474,8 @@ func NewQuery(q ent.Query) (Query, error) {
 		return &query[*ent.PluginConfigQuery, predicate.PluginConfig, pluginconfig.OrderOption]{typ: ent.TypePluginConfig, tq: q}, nil
 	case *ent.PluginContainerQuery:
 		return &query[*ent.PluginContainerQuery, predicate.PluginContainer, plugincontainer.OrderOption]{typ: ent.TypePluginContainer, tq: q}, nil
+	case *ent.ProxyQuery:
+		return &query[*ent.ProxyQuery, predicate.Proxy, proxy.OrderOption]{typ: ent.TypeProxy, tq: q}, nil
 	case *ent.QualityDefinitionQuery:
 		return &query[*ent.QualityDefinitionQuery, predicate.QualityDefinition, qualitydefinition.OrderOption]{typ: ent.TypeQualityDefinition, tq: q}, nil
 	case *ent.QualityProfileQuery:

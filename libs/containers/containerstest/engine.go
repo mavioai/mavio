@@ -19,8 +19,8 @@ var _ containers.Engine = (*Engine)(nil)
 type Engine struct {
 	mu         sync.Mutex
 	images     map[string]bool
-	networks   map[string]map[string]struct{ Name string } // members by ID
-	containers map[string]*container                       // by name
+	networks   map[string]map[string]containers.NetworkMember // members by ID
+	containers map[string]*container                          // by name
 	volumes    map[string]map[string]string
 	nextPort   int
 	calls      []string
@@ -44,7 +44,7 @@ type container struct {
 // New returns an engine with nothing.
 func New() *Engine {
 	return &Engine{
-		images: map[string]bool{}, networks: map[string]map[string]struct{ Name string }{}, containers: map[string]*container{},
+		images: map[string]bool{}, networks: map[string]map[string]containers.NetworkMember{}, containers: map[string]*container{},
 		volumes: map[string]map[string]string{}, nextPort: 49000,
 	}
 }
@@ -115,7 +115,7 @@ func (e *Engine) ConnectNetwork(_ context.Context, network, container string, _ 
 		return core.ErrNotFound
 	}
 	e.call("connect %s %s", network, container)
-	members[container] = struct{ Name string }{container}
+	members[container] = containers.NetworkMember{Name: container, IPv4Address: fmt.Sprintf("172.18.0.%d/16", len(members)+2)}
 	return nil
 }
 
@@ -123,7 +123,7 @@ func (e *Engine) CreateNetwork(_ context.Context, name string, _ map[string]stri
 	e.mu.Lock()
 	defer e.mu.Unlock()
 	e.call("create network %s", name)
-	e.networks[name] = map[string]struct{ Name string }{}
+	e.networks[name] = map[string]containers.NetworkMember{}
 	return name, nil
 }
 
@@ -219,7 +219,11 @@ func (e *Engine) ListContainers(_ context.Context, labels map[string]string) ([]
 	for _, name := range slices.Sorted(maps.Keys(e.containers)) {
 		c := e.containers[name]
 		if matches(c.spec.Labels, labels) {
-			out = append(out, containers.ContainerSummary{ID: c.id, Names: []string{"/" + name}, Labels: c.spec.Labels})
+			state := "exited"
+			if c.running {
+				state = "running"
+			}
+			out = append(out, containers.ContainerSummary{ID: c.id, Names: []string{"/" + name}, Labels: c.spec.Labels, State: state})
 		}
 	}
 	return out, nil

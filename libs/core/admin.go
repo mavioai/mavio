@@ -23,6 +23,10 @@ type ServerSettings struct {
 	// DisabledPlugins are the IDs of the installed plugins administrators
 	// disabled, which the server does not start.
 	DisabledPlugins []string
+	// PluginProxies are the proxies WASM plugins' HTTP requests, which the
+	// server performs, go through, by plugin ID, as OutboundProxies name
+	// them; a plugin missing uses the system proxy.
+	PluginProxies map[string]string
 	// SessionIdleDays is how long a session lasts unused, 1–3650 days.
 	SessionIdleDays int
 	Acquisition     AcquisitionSettings
@@ -117,7 +121,8 @@ var (
 	DeinterlaceMethods = []string{"yadif", "bwdif"}
 )
 
-// NetworkSettings decide how the server is reached.
+// NetworkSettings decide how the server is reached and how it reaches
+// other sites.
 type NetworkSettings struct {
 	// ServerName names the server to clients; empty uses the host name.
 	ServerName string
@@ -135,6 +140,35 @@ type NetworkSettings struct {
 	// Relay, in mavio.dev mode, lets clients reach the server through
 	// mavio.dev's relay when they cannot reach it directly.
 	Relay bool
+	// Proxies are the proxies the server's own HTTP requests go through,
+	// by what they reach.
+	Proxies OutboundProxies
+}
+
+// OutboundProxies are the proxies the server's own HTTP requests go
+// through, each the ID of one of the server's proxies, SystemProxyID for
+// the system proxy or empty for none. The hosts of this machine and of
+// the local network are reached directly whichever the proxy.
+type OutboundProxies struct {
+	// PluginCatalogs downloads the plugin catalogs and plugins.
+	PluginCatalogs string
+	// Images downloads the remote images of items, such as posters.
+	Images string
+	// MavioDev reaches mavio.dev's API.
+	MavioDev string
+	// ACME reaches the certificate authorities of mavio.site
+	// certificates.
+	ACME string
+}
+
+// All returns the proxies' IDs by what they are for.
+func (o *OutboundProxies) All() map[string]*string {
+	return map[string]*string{"plugin_catalogs": &o.PluginCatalogs, "images": &o.Images, "mavio_dev": &o.MavioDev, "acme": &o.ACME}
+}
+
+// DefaultOutboundProxies use the system proxy for everything.
+func DefaultOutboundProxies() OutboundProxies {
+	return OutboundProxies{PluginCatalogs: SystemProxyID, Images: SystemProxyID, MavioDev: SystemProxyID, ACME: SystemProxyID}
 }
 
 // DefaultServerSettings are the settings of a new server.
@@ -152,7 +186,7 @@ func DefaultServerSettings() ServerSettings {
 			DownmixBoost:         2,
 			CropBlackBorders:     true,
 		},
-		Network:         NetworkSettings{HTTPSPort: 8920, LocalDiscovery: true, Relay: true},
+		Network:         NetworkSettings{HTTPSPort: 8920, LocalDiscovery: true, Relay: true, Proxies: DefaultOutboundProxies()},
 		SessionIdleDays: 90,
 		Acquisition:     DefaultAcquisitionSettings(),
 		Requests:        DefaultRequestSettings(),
@@ -209,6 +243,16 @@ func (s *ServerSettings) Validate() error {
 	}
 	if err := s.Assistant.Validate(); err != nil {
 		return err
+	}
+	for what, id := range n.Proxies.All() {
+		if !validProxyChoice(*id) {
+			return fmt.Errorf("%w: proxy %q of %s is not a proxy's ID", ErrInvalid, *id, what)
+		}
+	}
+	for plugin, id := range s.PluginProxies {
+		if !validProxyChoice(id) {
+			return fmt.Errorf("%w: proxy %q of plugin %s is not a proxy's ID", ErrInvalid, id, plugin)
+		}
 	}
 	for _, c := range s.PluginCatalogs {
 		if !validCatalog(c) {
@@ -431,4 +475,14 @@ func (a *AccountSettings) Validate() error {
 		return fmt.Errorf("%w: negative change cursor", ErrInvalid)
 	}
 	return nil
+}
+
+// validProxyChoice reports whether s names a proxy: SystemProxyID, a
+// proxy's ID, or empty for none.
+func validProxyChoice(s string) bool {
+	if s == "" || s == SystemProxyID {
+		return true
+	}
+	_, err := ParseID(s)
+	return err == nil
 }

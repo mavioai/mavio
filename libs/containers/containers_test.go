@@ -320,6 +320,7 @@ func TestCreateContainer(t *testing.T) {
 		Name: "mavio-voice-whisper", Image: "busybox@sha256:abc", Cmd: []string{"serve"}, Env: []string{"A=1"},
 		Labels: labels, Port: 9000, PublishLoopback: true, Network: "mavio", Aliases: []string{"whisper"},
 		Volumes: map[string]string{"mavio-voice-whisper-cache": "/root/.cache"}, Memory: 1 << 30, CPUs: 1.5, GPU: true,
+		HostGateway: true,
 	})
 	if err != nil || id != "c1" {
 		t.Fatalf("CreateContainer = %q, %v, want c1", id, err)
@@ -339,6 +340,7 @@ func TestCreateContainer(t *testing.T) {
 			"Mounts": [{"Type": "volume", "Source": "mavio-voice-whisper-cache", "Target": "/root/.cache", "VolumeOptions": {"Labels": {"dev.mavio.plugin": "voice"}}}],
 			"NetworkMode": "mavio", "Memory": 1073741824, "NanoCpus": 1500000000,
 			"DeviceRequests": [{"Count": -1, "Capabilities": [["gpu"]]}],
+			"ExtraHosts": ["host.docker.internal:host-gateway"],
 			"RestartPolicy": {"Name": "no"}
 		},
 		"NetworkingConfig": {"EndpointsConfig": {"mavio": {"Aliases": ["whisper"]}}}

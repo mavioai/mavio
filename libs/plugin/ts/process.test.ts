@@ -80,6 +80,21 @@ describe("serve", () => {
 		await done;
 	});
 
+	test("stops when its lifeline ends", async () => {
+		process.env[env.lifeline] = "stdin";
+		try {
+			const stdout = new PassThrough();
+			const stdin = new PassThrough();
+			const line = new Promise<string>((resolve) => stdout.once("data", (b: Buffer) => resolve(b.toString())));
+			const done = serve({ pluginId: "dev.mavio.test", stdout, stdin, routes() {} });
+			await line;
+			stdin.end();
+			await done;
+		} finally {
+			delete process.env[env.lifeline];
+		}
+	});
+
 	test("requires the host's environment", async () => {
 		delete process.env[env.token];
 		await expect(serve({ pluginId: "dev.mavio.test", routes() {} })).rejects.toThrow(env.token);

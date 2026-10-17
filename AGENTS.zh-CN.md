@@ -24,7 +24,7 @@
 
 Mavio 是以 Go 为服务端核心的自托管媒体服务器，借鉴 Jellyfin 的领域知识与测试资产，但不兼容 Jellyfin 生态。许可证为 **GPL-3.0**。
 
-当前阶段：**P6 服务端装配与分发**、**P16 资源获取数据源**（只差 Mavio 自己的 TMDB key）、**P21 客户端与生态**、**P27 AI 网关与字幕翻译**、**P28 账户**和 **P29 助手**（见 [docs/roadmap.zh-CN.md](docs/roadmap.zh-CN.md)）。[docs/clients.zh-CN.md](docs/clients.zh-CN.md) 中的客户端按路线图给出的顺序构建；客户端的目录（`apps/web`、`apps/ios`、`apps/tvos`、`apps/macos`、`apps/android`、`apps/android-tv`、`apps/desktop`、`libs/client-ts`、`libs/client-rust`、`libs/apple`、`libs/android`、`libs/design`）在其步骤开始时才创建。
+当前阶段：**P6 服务端装配与分发**、**P16 资源获取数据源**（只差 Mavio 自己的 TMDB key）、**P21 客户端与生态**、**P27 AI 网关与字幕翻译**、**P28 账户**、**P29 助手**和 **P31 代理与质询求解**（见 [docs/roadmap.zh-CN.md](docs/roadmap.zh-CN.md)）。[docs/clients.zh-CN.md](docs/clients.zh-CN.md) 中的客户端按路线图给出的顺序构建；客户端的目录（`apps/web`、`apps/ios`、`apps/tvos`、`apps/macos`、`apps/android`、`apps/android-tv`、`apps/desktop`、`libs/client-ts`、`libs/client-rust`、`libs/apple`、`libs/android`、`libs/design`）在其步骤开始时才创建。
 
 ## 目录结构
 
@@ -48,6 +48,7 @@ libs/containers/      容器引擎：检测、Engine API 客户端、插件的�
 plugins/<name>/       插件（默认编译为 wasip1 WASM）
 plugins/agent/        AI 网关与智能体会话：由 Bun 编译的 TypeScript 子进程插件（pi-ai、pi-durable）
 plugins/voice/        语音识别与合成服务（包括 Whisper）：Go 子进程插件（P29 起）
+plugins/solvers/      质询求解器，以容器依赖运行 FlareSolverr：Go 子进程插件（P31 起）
 libs/intent/          助手的 Rust 语法：由 libs/client-rust 链接，并构建为 WASM（intent:wasm）供 Web UI 与服务端使用（P29 起）
 apps/web/             Web UI（React + Vite），构建到 apps/server/internal/webui/dist，由服务端内嵌
 apps/website/         mavio.dev：账户、访问记录、Home、向服务端推送（Cloudflare Workers 上的 TanStack Start，自 P28 起）

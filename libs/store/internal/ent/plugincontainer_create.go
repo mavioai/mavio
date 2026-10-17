@@ -76,6 +76,20 @@ func (_c *PluginContainerCreate) SetNillableUseGpu(v *bool) *PluginContainerCrea
 	return _c
 }
 
+// SetProxy sets the "proxy" field.
+func (_c *PluginContainerCreate) SetProxy(v string) *PluginContainerCreate {
+	_c.mutation.SetProxy(v)
+	return _c
+}
+
+// SetNillableProxy sets the "proxy" field if the given value is not nil.
+func (_c *PluginContainerCreate) SetNillableProxy(v *string) *PluginContainerCreate {
+	if v != nil {
+		_c.SetProxy(*v)
+	}
+	return _c
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (_c *PluginContainerCreate) SetUpdatedAt(v time.Time) *PluginContainerCreate {
 	_c.mutation.SetUpdatedAt(v)
@@ -147,6 +161,10 @@ func (_c *PluginContainerCreate) defaults() {
 		v := plugincontainer.DefaultUseGpu
 		_c.mutation.SetUseGpu(v)
 	}
+	if _, ok := _c.mutation.Proxy(); !ok {
+		v := plugincontainer.DefaultProxy
+		_c.mutation.SetProxy(v)
+	}
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		v := plugincontainer.DefaultUpdatedAt()
 		_c.mutation.SetUpdatedAt(v)
@@ -173,6 +191,9 @@ func (_c *PluginContainerCreate) check() error {
 	}
 	if _, ok := _c.mutation.UseGpu(); !ok {
 		return &ValidationError{Name: "use_gpu", err: errors.New(`ent: missing required field "PluginContainer.use_gpu"`)}
+	}
+	if _, ok := _c.mutation.Proxy(); !ok {
+		return &ValidationError{Name: "proxy", err: errors.New(`ent: missing required field "PluginContainer.proxy"`)}
 	}
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "PluginContainer.updated_at"`)}
@@ -236,6 +257,10 @@ func (_c *PluginContainerCreate) createSpec() (*PluginContainer, *sqlgraph.Creat
 	if value, ok := _c.mutation.UseGpu(); ok {
 		_spec.SetField(plugincontainer.FieldUseGpu, field.TypeBool, value)
 		_node.UseGpu = value
+	}
+	if value, ok := _c.mutation.Proxy(); ok {
+		_spec.SetField(plugincontainer.FieldProxy, field.TypeString, value)
+		_node.Proxy = value
 	}
 	if value, ok := _c.mutation.UpdatedAt(); ok {
 		_spec.SetField(plugincontainer.FieldUpdatedAt, field.TypeTime, value)
@@ -344,6 +369,18 @@ func (u *PluginContainerUpsert) SetUseGpu(v bool) *PluginContainerUpsert {
 // UpdateUseGpu sets the "use_gpu" field to the value that was provided on create.
 func (u *PluginContainerUpsert) UpdateUseGpu() *PluginContainerUpsert {
 	u.SetExcluded(plugincontainer.FieldUseGpu)
+	return u
+}
+
+// SetProxy sets the "proxy" field.
+func (u *PluginContainerUpsert) SetProxy(v string) *PluginContainerUpsert {
+	u.Set(plugincontainer.FieldProxy, v)
+	return u
+}
+
+// UpdateProxy sets the "proxy" field to the value that was provided on create.
+func (u *PluginContainerUpsert) UpdateProxy() *PluginContainerUpsert {
+	u.SetExcluded(plugincontainer.FieldProxy)
 	return u
 }
 
@@ -473,6 +510,20 @@ func (u *PluginContainerUpsertOne) SetUseGpu(v bool) *PluginContainerUpsertOne {
 func (u *PluginContainerUpsertOne) UpdateUseGpu() *PluginContainerUpsertOne {
 	return u.Update(func(s *PluginContainerUpsert) {
 		s.UpdateUseGpu()
+	})
+}
+
+// SetProxy sets the "proxy" field.
+func (u *PluginContainerUpsertOne) SetProxy(v string) *PluginContainerUpsertOne {
+	return u.Update(func(s *PluginContainerUpsert) {
+		s.SetProxy(v)
+	})
+}
+
+// UpdateProxy sets the "proxy" field to the value that was provided on create.
+func (u *PluginContainerUpsertOne) UpdateProxy() *PluginContainerUpsertOne {
+	return u.Update(func(s *PluginContainerUpsert) {
+		s.UpdateProxy()
 	})
 }
 
@@ -771,6 +822,20 @@ func (u *PluginContainerUpsertBulk) SetUseGpu(v bool) *PluginContainerUpsertBulk
 func (u *PluginContainerUpsertBulk) UpdateUseGpu() *PluginContainerUpsertBulk {
 	return u.Update(func(s *PluginContainerUpsert) {
 		s.UpdateUseGpu()
+	})
+}
+
+// SetProxy sets the "proxy" field.
+func (u *PluginContainerUpsertBulk) SetProxy(v string) *PluginContainerUpsertBulk {
+	return u.Update(func(s *PluginContainerUpsert) {
+		s.SetProxy(v)
+	})
+}
+
+// UpdateProxy sets the "proxy" field to the value that was provided on create.
+func (u *PluginContainerUpsertBulk) UpdateProxy() *PluginContainerUpsertBulk {
+	return u.Update(func(s *PluginContainerUpsert) {
+		s.UpdateProxy()
 	})
 }
 

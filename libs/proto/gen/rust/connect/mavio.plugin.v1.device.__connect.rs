@@ -22,6 +22,22 @@ pub type OwnedListContainersRequestView = ::buffa::view::OwnedView<
 pub type OwnedListContainersResponseView = ::buffa::view::OwnedView<
     crate::proto::mavio::plugin::v1::__buffa::view::ListContainersResponseView<'static>,
 >;
+///Shorthand for `OwnedView<ListProxiesRequestView<'static>>`.
+pub type OwnedListProxiesRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::plugin::v1::__buffa::view::ListProxiesRequestView<'static>,
+>;
+///Shorthand for `OwnedView<ListProxiesResponseView<'static>>`.
+pub type OwnedListProxiesResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::plugin::v1::__buffa::view::ListProxiesResponseView<'static>,
+>;
+///Shorthand for `OwnedView<SolveChallengeRequestView<'static>>`.
+pub type OwnedSolveChallengeRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::plugin::v1::__buffa::view::SolveChallengeRequestView<'static>,
+>;
+///Shorthand for `OwnedView<SolveChallengeResponseView<'static>>`.
+pub type OwnedSolveChallengeResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::plugin::v1::__buffa::view::SolveChallengeResponseView<'static>,
+>;
 ///Shorthand for `OwnedView<SendCommandRequestView<'static>>`.
 pub type OwnedSendCommandRequestView = ::buffa::view::OwnedView<
     crate::proto::mavio::plugin::v1::__buffa::view::SendCommandRequestView<'static>,
@@ -132,6 +148,74 @@ for ::buffa::view::OwnedView<
         )
     }
 }
+impl ::connectrpc::Encodable<crate::proto::mavio::plugin::v1::ListProxiesResponse>
+for crate::proto::mavio::plugin::v1::__buffa::view::ListProxiesResponseView<'_> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::plugin::v1::ListProxiesResponse>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::plugin::v1::__buffa::view::ListProxiesResponseView<'static>,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::plugin::v1::SolveChallengeResponse>
+for crate::proto::mavio::plugin::v1::__buffa::view::SolveChallengeResponseView<'_> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::plugin::v1::SolveChallengeResponse>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::plugin::v1::__buffa::view::SolveChallengeResponseView<'static>,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
 impl ::connectrpc::Encodable<crate::proto::mavio::plugin::v1::SendCommandResponse>
 for crate::proto::mavio::plugin::v1::__buffa::view::SendCommandResponseView<'_> {
     fn encode(
@@ -186,6 +270,18 @@ pub const HOST_SERVICE_LIST_CONTAINERS_SPEC: ::connectrpc::Spec = ::connectrpc::
         ::connectrpc::StreamType::Unary,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::NoSideEffects);
+/// Static [`Spec`](::connectrpc::Spec) for the `ListProxies` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const HOST_SERVICE_LIST_PROXIES_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.plugin.v1.HostService/ListProxies",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::NoSideEffects);
+/// Static [`Spec`](::connectrpc::Spec) for the `SolveChallenge` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const HOST_SERVICE_SOLVE_CHALLENGE_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.plugin.v1.HostService/SolveChallenge",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
 /// HostService is what the server offers plugins besides its public API,
 /// through the host API. Every plugin may call it.
 ///
@@ -313,6 +409,57 @@ pub trait HostService: Send + Sync + 'static {
             > + Send + use<'a, Self>,
         >,
     > + Send;
+    /// ListProxies returns the server's proxies with their credentials, for
+    /// plugins whose configuration schema takes proxies ("x-mavio-options"
+    /// {"source": "proxies"}); others are denied. The server configures such plugins
+    /// again when a proxy changes or is deleted.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn list_proxies<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::plugin::v1::ListProxiesRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::plugin::v1::ListProxiesResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// SolveChallenge solves a site's challenge with the ready
+    /// CHALLENGE_SOLVER plugins in turn, through the proxy proxy_id names; it
+    /// is unavailable when there is none, and not found for an unknown proxy.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn solve_challenge<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::plugin::v1::SolveChallengeRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::plugin::v1::SolveChallengeResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
 }
 /// Extension trait for registering a service implementation with a Router.
 ///
@@ -432,6 +579,64 @@ impl<S: HostService> HostServiceExt for S {
                 },
             )
             .with_spec(HOST_SERVICE_LIST_CONTAINERS_SPEC)
+            .route_view_idempotent(
+                HOST_SERVICE_SERVICE_NAME,
+                "ListProxies",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::plugin::v1::__buffa::view::ListProxiesRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::plugin::v1::ListProxiesRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.list_proxies(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::plugin::v1::ListProxiesResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(HOST_SERVICE_LIST_PROXIES_SPEC)
+            .route_view(
+                HOST_SERVICE_SERVICE_NAME,
+                "SolveChallenge",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::plugin::v1::__buffa::view::SolveChallengeRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::plugin::v1::SolveChallengeRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.solve_challenge(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::plugin::v1::SolveChallengeResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(HOST_SERVICE_SOLVE_CHALLENGE_SPEC)
     }
 }
 /// Type-inference marker used by [`Router::add_service`](::connectrpc::Router::add_service).
@@ -502,6 +707,18 @@ impl<T: HostService> ::connectrpc::Dispatcher for HostServiceServer<T> {
                 Some(
                     ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(true)
                         .with_spec(HOST_SERVICE_LIST_CONTAINERS_SPEC),
+                )
+            }
+            "ListProxies" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(true)
+                        .with_spec(HOST_SERVICE_LIST_PROXIES_SPEC),
+                )
+            }
+            "SolveChallenge" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
+                        .with_spec(HOST_SERVICE_SOLVE_CHALLENGE_SPEC),
                 )
             }
             _ => None,
@@ -582,6 +799,50 @@ impl<T: HostService> ::connectrpc::Dispatcher for HostServiceServer<T> {
                         .await?
                         .encode::<
                             crate::proto::mavio::plugin::v1::ListContainersResponse,
+                        >(format)
+                })
+            }
+            "ListProxies" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::plugin::v1::ListProxiesRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::plugin::v1::__buffa::view::ListProxiesRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::plugin::v1::ListProxiesRequest,
+                    >::from_parts(&req, &body);
+                    svc.list_proxies(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::plugin::v1::ListProxiesResponse,
+                        >(format)
+                })
+            }
+            "SolveChallenge" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::plugin::v1::SolveChallengeRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::plugin::v1::__buffa::view::SolveChallengeRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::plugin::v1::SolveChallengeRequest,
+                    >::from_parts(&req, &body);
+                    svc.solve_challenge(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::plugin::v1::SolveChallengeResponse,
                         >(format)
                 })
             }
@@ -842,6 +1103,96 @@ where
                 &self.transport,
                 &self.config,
                 HOST_SERVICE_LIST_CONTAINERS_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the ListProxies RPC. Sends a request to /mavio.plugin.v1.HostService/ListProxies.
+    pub async fn list_proxies(
+        &self,
+        request: crate::proto::mavio::plugin::v1::ListProxiesRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::plugin::v1::__buffa::view::ListProxiesResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.list_proxies_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the ListProxies RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn list_proxies_with_options(
+        &self,
+        request: crate::proto::mavio::plugin::v1::ListProxiesRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::plugin::v1::__buffa::view::ListProxiesResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                HOST_SERVICE_LIST_PROXIES_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the SolveChallenge RPC. Sends a request to /mavio.plugin.v1.HostService/SolveChallenge.
+    pub async fn solve_challenge(
+        &self,
+        request: crate::proto::mavio::plugin::v1::SolveChallengeRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::plugin::v1::__buffa::view::SolveChallengeResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.solve_challenge_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the SolveChallenge RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn solve_challenge_with_options(
+        &self,
+        request: crate::proto::mavio::plugin::v1::SolveChallengeRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::plugin::v1::__buffa::view::SolveChallengeResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                HOST_SERVICE_SOLVE_CHALLENGE_SPEC
                     .with_origin(::connectrpc::SpecOrigin::Client),
                 request,
                 options,

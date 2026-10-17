@@ -219,7 +219,7 @@ func TestTorrentAcquisition(t *testing.T) {
 	}
 	s.plugins([]any{
 		map[string]any{
-			"id": "tz", "definition": "torznab", "settings": map[string]any{"base_url": indexer.URL, "api_key": "nzbkey"},
+			"id": "tz", "name": "Torznab", "definition": "torznab", "settings": map[string]any{"base_url": indexer.URL, "api_key": "nzbkey"},
 			"seed_ratio": 1.5, "seed_time": 90,
 		},
 	}, []any{

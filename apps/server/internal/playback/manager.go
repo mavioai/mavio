@@ -58,6 +58,9 @@ type Config struct {
 	// FFmpegPath runs ffmpeg for subtitle extraction; empty serves only
 	// external subtitle files.
 	FFmpegPath string
+	// Track records each transcoding ffmpeg started until it exits; nil
+	// records none.
+	Track func(pid int) (done func())
 	// MetadataDir keeps the embedded text subtitles extracted from media
 	// sources, see [library.ExtractedSubtitlesDir]; without it, embedded subtitles
 	// are streamed as on cloud storage.

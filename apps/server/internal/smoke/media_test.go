@@ -111,7 +111,7 @@ func TestPlayHDRMovie(t *testing.T) {
 	args := p.HLSArgs(job, planner.HLSOutput{
 		Playlist: filepath.Join(dir, "main.m3u8"), Segments: filepath.Join(dir, "seg%d.mp4"),
 	})
-	s, err := supervisor.Start(ctx, supervisor.Exec(ffmpeg), supervisor.Config{
+	s, err := supervisor.Start(ctx, supervisor.Exec(ffmpeg, nil), supervisor.Config{
 		Args: args, IdleTimeout: time.Minute, PauseKey: caps.PauseKey,
 	})
 	if err != nil {

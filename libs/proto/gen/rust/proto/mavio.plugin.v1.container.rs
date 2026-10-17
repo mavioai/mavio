@@ -313,6 +313,20 @@ pub struct ContainerDependency {
     ///
     /// Field 13: `required`
     pub required: ::core::option::Option<bool>,
+    /// Whether the service reaches services on the server's host, such as a
+    /// proxy on its loopback interface, by the name host.docker.internal:
+    /// Docker maps it to the host (host-gateway), Docker Desktop and Podman
+    /// name it themselves. On Linux, a service on the host must listen
+    /// beyond its loopback interface to be reached.
+    ///
+    /// Field 14: `host_access`
+    pub host_access: ::core::option::Option<bool>,
+    /// Whether a managed container reaches sites only directly, for a service
+    /// given the proxy of each request, such as a challenge solver: the server
+    /// offers no proxy choice for it and sends its requests through none.
+    ///
+    /// Field 15: `direct`
+    pub direct: ::core::option::Option<bool>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -332,6 +346,8 @@ impl ::core::fmt::Debug for ContainerDependency {
             .field("memory_mib", &self.memory_mib)
             .field("cpus", &self.cpus)
             .field("required", &self.required)
+            .field("host_access", &self.host_access)
+            .field("direct", &self.direct)
             .finish()
     }
 }
@@ -428,6 +444,20 @@ impl ContainerDependency {
         self.required = Some(value);
         self
     }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::host_access`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_host_access(mut self, value: bool) -> Self {
+        self.host_access = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::direct`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_direct(mut self, value: bool) -> Self {
+        self.direct = Some(value);
+        self
+    }
 }
 ::buffa::impl_default_instance!(ContainerDependency);
 impl ::buffa::MessageName for ContainerDependency {
@@ -494,6 +524,12 @@ impl ::buffa::Message for ContainerDependency {
         if self.required.is_some() {
             size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
         }
+        if self.host_access.is_some() {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
+        if self.direct.is_some() {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -546,6 +582,12 @@ impl ::buffa::Message for ContainerDependency {
         }
         if let Some(v) = self.required {
             ::buffa::types::put_bool_field(13u32, v, buf);
+        }
+        if let Some(v) = self.host_access {
+            ::buffa::types::put_bool_field(14u32, v, buf);
+        }
+        if let Some(v) = self.direct {
+            ::buffa::types::put_bool_field(15u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -694,6 +736,24 @@ impl ::buffa::Message for ContainerDependency {
                     ::buffa::types::decode_bool(buf)?,
                 );
             }
+            14u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.host_access = ::core::option::Option::Some(
+                    ::buffa::types::decode_bool(buf)?,
+                );
+            }
+            15u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.direct = ::core::option::Option::Some(
+                    ::buffa::types::decode_bool(buf)?,
+                );
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -715,6 +775,8 @@ impl ::buffa::Message for ContainerDependency {
         self.memory_mib = ::core::option::Option::None;
         self.cpus = ::core::option::Option::None;
         self.required = ::core::option::Option::None;
+        self.host_access = ::core::option::Option::None;
+        self.direct = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }

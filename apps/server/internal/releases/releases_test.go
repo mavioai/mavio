@@ -386,6 +386,20 @@ func TestSearch(t *testing.T) {
 	if len(res.Failures) != 1 || res.Failures[0].Indexer != "gone" {
 		t.Errorf("failures = %+v, want = gone unknown", res.Failures)
 	}
+
+	// Asked for alone, an indexer is the only one searched, though enabled
+	// indexers follow it.
+	byID.requests, byTitle.requests = nil, nil
+	res, err = s.Search(t.Context(), Search{
+		Query: "matrix", Indexers: []Ref{{"p1", "off"}},
+		Type: pluginv1.IndexerSearchType_INDEXER_SEARCH_TYPE_MOVIE,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if want := []string{`off MOVIE q="matrix" ids= cat=[]`}; !slices.Equal(byID.requests, want) || len(byTitle.requests) > 0 || len(res.Failures) > 0 {
+		t.Errorf("requests = %q and %q, failures = %+v, want = %q alone", byID.requests, byTitle.requests, res.Failures, want)
+	}
 }
 
 // TestAnimeSeasonSearch checks that a season of anime is searched episode

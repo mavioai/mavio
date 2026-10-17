@@ -42,6 +42,9 @@ const (
 	// PluginManagementServiceSetPluginConfigProcedure is the fully-qualified name of the
 	// PluginManagementService's SetPluginConfig RPC.
 	PluginManagementServiceSetPluginConfigProcedure = "/mavio.system.v1.PluginManagementService/SetPluginConfig"
+	// PluginManagementServiceListPluginConfigOptionsProcedure is the fully-qualified name of the
+	// PluginManagementService's ListPluginConfigOptions RPC.
+	PluginManagementServiceListPluginConfigOptionsProcedure = "/mavio.system.v1.PluginManagementService/ListPluginConfigOptions"
 	// PluginManagementServiceListCatalogPluginsProcedure is the fully-qualified name of the
 	// PluginManagementService's ListCatalogPlugins RPC.
 	PluginManagementServiceListCatalogPluginsProcedure = "/mavio.system.v1.PluginManagementService/ListCatalogPlugins"
@@ -63,6 +66,12 @@ const (
 	// PluginManagementServiceSetPluginContainerProcedure is the fully-qualified name of the
 	// PluginManagementService's SetPluginContainer RPC.
 	PluginManagementServiceSetPluginContainerProcedure = "/mavio.system.v1.PluginManagementService/SetPluginContainer"
+	// PluginManagementServiceListContainersProcedure is the fully-qualified name of the
+	// PluginManagementService's ListContainers RPC.
+	PluginManagementServiceListContainersProcedure = "/mavio.system.v1.PluginManagementService/ListContainers"
+	// PluginManagementServiceSetPluginProxyProcedure is the fully-qualified name of the
+	// PluginManagementService's SetPluginProxy RPC.
+	PluginManagementServiceSetPluginProxyProcedure = "/mavio.system.v1.PluginManagementService/SetPluginProxy"
 )
 
 // PluginManagementServiceClient is a client for the mavio.system.v1.PluginManagementService
@@ -75,8 +84,14 @@ type PluginManagementServiceClient interface {
 	GetPluginConfig(context.Context, *v1.GetPluginConfigRequest) (*v1.GetPluginConfigResponse, error)
 	// SetPluginConfig validates a configuration against the plugin's schema,
 	// delivers it to the running plugin and stores it once the plugin
-	// accepts it.
+	// accepts it. Properties the schema marks generated, strings of format
+	// uuid that are readOnly, are given new UUIDs where they are missing or
+	// empty.
 	SetPluginConfig(context.Context, *v1.SetPluginConfigRequest) (*v1.SetPluginConfigResponse, error)
+	// ListPluginConfigOptions lists the values a property of a plugin's
+	// configuration takes, from the source its schema names with
+	// x-mavio-options, such as the definitions of an indexer provider.
+	ListPluginConfigOptions(context.Context, *v1.ListPluginConfigOptionsRequest) (*v1.ListPluginConfigOptionsResponse, error)
 	// ListCatalogPlugins lists the plugins of the configured plugin
 	// catalogs, with the versions the server can run.
 	ListCatalogPlugins(context.Context, *v1.ListCatalogPluginsRequest) (*v1.ListCatalogPluginsResponse, error)
@@ -100,6 +115,13 @@ type PluginManagementServiceClient interface {
 	// SetPluginContainer sets how a container dependency is reached: run by
 	// the server, which requires a container engine, or at an address.
 	SetPluginContainer(context.Context, *v1.SetPluginContainerRequest) (*v1.SetPluginContainerResponse, error)
+	// ListContainers lists the container dependencies of every plugin that
+	// the server runs or that an administrator gave an address, by plugin.
+	ListContainers(context.Context, *v1.ListContainersRequest) (*v1.ListContainersResponse, error)
+	// SetPluginProxy sets the proxy a plugin reaches sites through: a WASM
+	// plugin's HTTP requests, which the server performs, and a process
+	// plugin's, sent to the server's proxy gateway.
+	SetPluginProxy(context.Context, *v1.SetPluginProxyRequest) (*v1.SetPluginProxyResponse, error)
 }
 
 // NewPluginManagementServiceClient constructs a client for the
@@ -131,6 +153,13 @@ func NewPluginManagementServiceClient(httpClient connect.HTTPClient, baseURL str
 			httpClient,
 			baseURL+PluginManagementServiceSetPluginConfigProcedure,
 			connect.WithSchema(pluginManagementServiceMethods.ByName("SetPluginConfig")),
+			connect.WithClientOptions(opts...),
+		),
+		listPluginConfigOptions: connect.NewClient[v1.ListPluginConfigOptionsRequest, v1.ListPluginConfigOptionsResponse](
+			httpClient,
+			baseURL+PluginManagementServiceListPluginConfigOptionsProcedure,
+			connect.WithSchema(pluginManagementServiceMethods.ByName("ListPluginConfigOptions")),
+			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
 			connect.WithClientOptions(opts...),
 		),
 		listCatalogPlugins: connect.NewClient[v1.ListCatalogPluginsRequest, v1.ListCatalogPluginsResponse](
@@ -178,21 +207,37 @@ func NewPluginManagementServiceClient(httpClient connect.HTTPClient, baseURL str
 			connect.WithSchema(pluginManagementServiceMethods.ByName("SetPluginContainer")),
 			connect.WithClientOptions(opts...),
 		),
+		listContainers: connect.NewClient[v1.ListContainersRequest, v1.ListContainersResponse](
+			httpClient,
+			baseURL+PluginManagementServiceListContainersProcedure,
+			connect.WithSchema(pluginManagementServiceMethods.ByName("ListContainers")),
+			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+			connect.WithClientOptions(opts...),
+		),
+		setPluginProxy: connect.NewClient[v1.SetPluginProxyRequest, v1.SetPluginProxyResponse](
+			httpClient,
+			baseURL+PluginManagementServiceSetPluginProxyProcedure,
+			connect.WithSchema(pluginManagementServiceMethods.ByName("SetPluginProxy")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
 // pluginManagementServiceClient implements PluginManagementServiceClient.
 type pluginManagementServiceClient struct {
-	listPlugins          *connect.Client[v1.ListPluginsRequest, v1.ListPluginsResponse]
-	getPluginConfig      *connect.Client[v1.GetPluginConfigRequest, v1.GetPluginConfigResponse]
-	setPluginConfig      *connect.Client[v1.SetPluginConfigRequest, v1.SetPluginConfigResponse]
-	listCatalogPlugins   *connect.Client[v1.ListCatalogPluginsRequest, v1.ListCatalogPluginsResponse]
-	installPlugin        *connect.Client[v1.InstallPluginRequest, v1.InstallPluginResponse]
-	uninstallPlugin      *connect.Client[v1.UninstallPluginRequest, v1.UninstallPluginResponse]
-	setPluginEnabled     *connect.Client[v1.SetPluginEnabledRequest, v1.SetPluginEnabledResponse]
-	getContainerRuntime  *connect.Client[v1.GetContainerRuntimeRequest, v1.GetContainerRuntimeResponse]
-	listPluginContainers *connect.Client[v1.ListPluginContainersRequest, v1.ListPluginContainersResponse]
-	setPluginContainer   *connect.Client[v1.SetPluginContainerRequest, v1.SetPluginContainerResponse]
+	listPlugins             *connect.Client[v1.ListPluginsRequest, v1.ListPluginsResponse]
+	getPluginConfig         *connect.Client[v1.GetPluginConfigRequest, v1.GetPluginConfigResponse]
+	setPluginConfig         *connect.Client[v1.SetPluginConfigRequest, v1.SetPluginConfigResponse]
+	listPluginConfigOptions *connect.Client[v1.ListPluginConfigOptionsRequest, v1.ListPluginConfigOptionsResponse]
+	listCatalogPlugins      *connect.Client[v1.ListCatalogPluginsRequest, v1.ListCatalogPluginsResponse]
+	installPlugin           *connect.Client[v1.InstallPluginRequest, v1.InstallPluginResponse]
+	uninstallPlugin         *connect.Client[v1.UninstallPluginRequest, v1.UninstallPluginResponse]
+	setPluginEnabled        *connect.Client[v1.SetPluginEnabledRequest, v1.SetPluginEnabledResponse]
+	getContainerRuntime     *connect.Client[v1.GetContainerRuntimeRequest, v1.GetContainerRuntimeResponse]
+	listPluginContainers    *connect.Client[v1.ListPluginContainersRequest, v1.ListPluginContainersResponse]
+	setPluginContainer      *connect.Client[v1.SetPluginContainerRequest, v1.SetPluginContainerResponse]
+	listContainers          *connect.Client[v1.ListContainersRequest, v1.ListContainersResponse]
+	setPluginProxy          *connect.Client[v1.SetPluginProxyRequest, v1.SetPluginProxyResponse]
 }
 
 // ListPlugins calls mavio.system.v1.PluginManagementService.ListPlugins.
@@ -216,6 +261,15 @@ func (c *pluginManagementServiceClient) GetPluginConfig(ctx context.Context, req
 // SetPluginConfig calls mavio.system.v1.PluginManagementService.SetPluginConfig.
 func (c *pluginManagementServiceClient) SetPluginConfig(ctx context.Context, req *v1.SetPluginConfigRequest) (*v1.SetPluginConfigResponse, error) {
 	response, err := c.setPluginConfig.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
+// ListPluginConfigOptions calls mavio.system.v1.PluginManagementService.ListPluginConfigOptions.
+func (c *pluginManagementServiceClient) ListPluginConfigOptions(ctx context.Context, req *v1.ListPluginConfigOptionsRequest) (*v1.ListPluginConfigOptionsResponse, error) {
+	response, err := c.listPluginConfigOptions.CallUnary(ctx, connect.NewRequest(req))
 	if response != nil {
 		return response.Msg, err
 	}
@@ -285,6 +339,24 @@ func (c *pluginManagementServiceClient) SetPluginContainer(ctx context.Context, 
 	return nil, err
 }
 
+// ListContainers calls mavio.system.v1.PluginManagementService.ListContainers.
+func (c *pluginManagementServiceClient) ListContainers(ctx context.Context, req *v1.ListContainersRequest) (*v1.ListContainersResponse, error) {
+	response, err := c.listContainers.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
+// SetPluginProxy calls mavio.system.v1.PluginManagementService.SetPluginProxy.
+func (c *pluginManagementServiceClient) SetPluginProxy(ctx context.Context, req *v1.SetPluginProxyRequest) (*v1.SetPluginProxyResponse, error) {
+	response, err := c.setPluginProxy.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
 // PluginManagementServiceHandler is an implementation of the
 // mavio.system.v1.PluginManagementService service.
 type PluginManagementServiceHandler interface {
@@ -295,8 +367,14 @@ type PluginManagementServiceHandler interface {
 	GetPluginConfig(context.Context, *v1.GetPluginConfigRequest) (*v1.GetPluginConfigResponse, error)
 	// SetPluginConfig validates a configuration against the plugin's schema,
 	// delivers it to the running plugin and stores it once the plugin
-	// accepts it.
+	// accepts it. Properties the schema marks generated, strings of format
+	// uuid that are readOnly, are given new UUIDs where they are missing or
+	// empty.
 	SetPluginConfig(context.Context, *v1.SetPluginConfigRequest) (*v1.SetPluginConfigResponse, error)
+	// ListPluginConfigOptions lists the values a property of a plugin's
+	// configuration takes, from the source its schema names with
+	// x-mavio-options, such as the definitions of an indexer provider.
+	ListPluginConfigOptions(context.Context, *v1.ListPluginConfigOptionsRequest) (*v1.ListPluginConfigOptionsResponse, error)
 	// ListCatalogPlugins lists the plugins of the configured plugin
 	// catalogs, with the versions the server can run.
 	ListCatalogPlugins(context.Context, *v1.ListCatalogPluginsRequest) (*v1.ListCatalogPluginsResponse, error)
@@ -320,6 +398,13 @@ type PluginManagementServiceHandler interface {
 	// SetPluginContainer sets how a container dependency is reached: run by
 	// the server, which requires a container engine, or at an address.
 	SetPluginContainer(context.Context, *v1.SetPluginContainerRequest) (*v1.SetPluginContainerResponse, error)
+	// ListContainers lists the container dependencies of every plugin that
+	// the server runs or that an administrator gave an address, by plugin.
+	ListContainers(context.Context, *v1.ListContainersRequest) (*v1.ListContainersResponse, error)
+	// SetPluginProxy sets the proxy a plugin reaches sites through: a WASM
+	// plugin's HTTP requests, which the server performs, and a process
+	// plugin's, sent to the server's proxy gateway.
+	SetPluginProxy(context.Context, *v1.SetPluginProxyRequest) (*v1.SetPluginProxyResponse, error)
 }
 
 // NewPluginManagementServiceHandler builds an HTTP handler from the service implementation. It
@@ -347,6 +432,13 @@ func NewPluginManagementServiceHandler(svc PluginManagementServiceHandler, opts 
 		PluginManagementServiceSetPluginConfigProcedure,
 		svc.SetPluginConfig,
 		connect.WithSchema(pluginManagementServiceMethods.ByName("SetPluginConfig")),
+		connect.WithHandlerOptions(opts...),
+	)
+	pluginManagementServiceListPluginConfigOptionsHandler := connect.NewUnaryHandlerSimple(
+		PluginManagementServiceListPluginConfigOptionsProcedure,
+		svc.ListPluginConfigOptions,
+		connect.WithSchema(pluginManagementServiceMethods.ByName("ListPluginConfigOptions")),
+		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
 		connect.WithHandlerOptions(opts...),
 	)
 	pluginManagementServiceListCatalogPluginsHandler := connect.NewUnaryHandlerSimple(
@@ -394,6 +486,19 @@ func NewPluginManagementServiceHandler(svc PluginManagementServiceHandler, opts 
 		connect.WithSchema(pluginManagementServiceMethods.ByName("SetPluginContainer")),
 		connect.WithHandlerOptions(opts...),
 	)
+	pluginManagementServiceListContainersHandler := connect.NewUnaryHandlerSimple(
+		PluginManagementServiceListContainersProcedure,
+		svc.ListContainers,
+		connect.WithSchema(pluginManagementServiceMethods.ByName("ListContainers")),
+		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+		connect.WithHandlerOptions(opts...),
+	)
+	pluginManagementServiceSetPluginProxyHandler := connect.NewUnaryHandlerSimple(
+		PluginManagementServiceSetPluginProxyProcedure,
+		svc.SetPluginProxy,
+		connect.WithSchema(pluginManagementServiceMethods.ByName("SetPluginProxy")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/mavio.system.v1.PluginManagementService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case PluginManagementServiceListPluginsProcedure:
@@ -402,6 +507,8 @@ func NewPluginManagementServiceHandler(svc PluginManagementServiceHandler, opts 
 			pluginManagementServiceGetPluginConfigHandler.ServeHTTP(w, r)
 		case PluginManagementServiceSetPluginConfigProcedure:
 			pluginManagementServiceSetPluginConfigHandler.ServeHTTP(w, r)
+		case PluginManagementServiceListPluginConfigOptionsProcedure:
+			pluginManagementServiceListPluginConfigOptionsHandler.ServeHTTP(w, r)
 		case PluginManagementServiceListCatalogPluginsProcedure:
 			pluginManagementServiceListCatalogPluginsHandler.ServeHTTP(w, r)
 		case PluginManagementServiceInstallPluginProcedure:
@@ -416,6 +523,10 @@ func NewPluginManagementServiceHandler(svc PluginManagementServiceHandler, opts 
 			pluginManagementServiceListPluginContainersHandler.ServeHTTP(w, r)
 		case PluginManagementServiceSetPluginContainerProcedure:
 			pluginManagementServiceSetPluginContainerHandler.ServeHTTP(w, r)
+		case PluginManagementServiceListContainersProcedure:
+			pluginManagementServiceListContainersHandler.ServeHTTP(w, r)
+		case PluginManagementServiceSetPluginProxyProcedure:
+			pluginManagementServiceSetPluginProxyHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -435,6 +546,10 @@ func (UnimplementedPluginManagementServiceHandler) GetPluginConfig(context.Conte
 
 func (UnimplementedPluginManagementServiceHandler) SetPluginConfig(context.Context, *v1.SetPluginConfigRequest) (*v1.SetPluginConfigResponse, error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.system.v1.PluginManagementService.SetPluginConfig is not implemented"))
+}
+
+func (UnimplementedPluginManagementServiceHandler) ListPluginConfigOptions(context.Context, *v1.ListPluginConfigOptionsRequest) (*v1.ListPluginConfigOptionsResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.system.v1.PluginManagementService.ListPluginConfigOptions is not implemented"))
 }
 
 func (UnimplementedPluginManagementServiceHandler) ListCatalogPlugins(context.Context, *v1.ListCatalogPluginsRequest) (*v1.ListCatalogPluginsResponse, error) {
@@ -463,4 +578,12 @@ func (UnimplementedPluginManagementServiceHandler) ListPluginContainers(context.
 
 func (UnimplementedPluginManagementServiceHandler) SetPluginContainer(context.Context, *v1.SetPluginContainerRequest) (*v1.SetPluginContainerResponse, error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.system.v1.PluginManagementService.SetPluginContainer is not implemented"))
+}
+
+func (UnimplementedPluginManagementServiceHandler) ListContainers(context.Context, *v1.ListContainersRequest) (*v1.ListContainersResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.system.v1.PluginManagementService.ListContainers is not implemented"))
+}
+
+func (UnimplementedPluginManagementServiceHandler) SetPluginProxy(context.Context, *v1.SetPluginProxyRequest) (*v1.SetPluginProxyResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.system.v1.PluginManagementService.SetPluginProxy is not implemented"))
 }

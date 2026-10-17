@@ -16,6 +16,7 @@ import (
 	"slices"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -201,6 +202,31 @@ func TestFetchPermissions(t *testing.T) {
 		t.Errorf("denied fetch error = %v", err)
 	}
 }
+
+func TestFetchingPlugin(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, _ = io.WriteString(w, "fetched")
+	}))
+	t.Cleanup(srv.Close)
+	u, _ := url.Parse(srv.URL)
+	var plugin atomic.Value
+	p := openWith(t, "wasm", func(o *host.Options) {
+		o.WASM.FetchClient = &http.Client{Transport: roundTripper(func(r *http.Request) (*http.Response, error) {
+			plugin.Store(wasm.FetchingPlugin(r.Context()))
+			return http.DefaultTransport.RoundTrip(r)
+		})}
+	}, u.Hostname())
+	if _, err := search(t.Context(), p, "fetch:"+srv.URL+"/a"); err != nil {
+		t.Fatalf("fetch: %v", err)
+	}
+	if got := plugin.Load(); got != "dev.mavio.testplugin" {
+		t.Errorf("FetchingPlugin() got = %v, want = dev.mavio.testplugin", got)
+	}
+}
+
+type roundTripper func(*http.Request) (*http.Response, error)
+
+func (f roundTripper) RoundTrip(r *http.Request) (*http.Response, error) { return f(r) }
 
 func TestHostAPI(t *testing.T) {
 	eachRuntime(t, func(t *testing.T, rt string) {
@@ -480,6 +506,20 @@ func TestHostOS(t *testing.T) {
 			t.Errorf("HostOS() = %q, %v, want = %q", got, err, want)
 		}
 	})
+}
+
+// TestEnv checks that a process plugin's environment gets what Env
+// returns for it, over Process.Env.
+func TestEnv(t *testing.T) {
+	p := openWith(t, "process", func(o *host.Options) {
+		o.Process.Env = []string{"HTTPS_PROXY=http://other", "MAVIO_TEST=kept"}
+		o.Env = func(m *pluginv1.Manifest) []string { return []string{"HTTPS_PROXY=http://" + m.GetId()} }
+	})
+	for name, want := range map[string]string{"HTTPS_PROXY": "http://dev.mavio.testplugin", "MAVIO_TEST": "kept"} {
+		if got, err := search(t.Context(), p, "env:"+name); err != nil || got != want {
+			t.Errorf("%s got = %q, %v, want = %q", name, got, err, want)
+		}
+	}
 }
 
 func TestResolver(t *testing.T) {

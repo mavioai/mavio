@@ -1,0 +1,4 @@
+{
+  "Servarr": "Servarr",
+  "Metadata for movies from Radarr's metadata service and for series and their episodes, in TheTVDB's order, from Sonarr's SkyHook; Radarr's lists of movies; the titles, air-dated series and numbering releases use, from Sonarr's services and XEM. Needs no keys.": "电影元数据来自 Radarr 的元数据服务，剧集及其各集元数据（按 TheTVDB 的顺序）来自 Sonarr 的 SkyHook；Radarr 的电影列表；发布资源所用的标题、按播出日期编号的剧集和编号来自 Sonarr 的服务和 XEM。无需密钥。"
+}

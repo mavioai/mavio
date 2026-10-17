@@ -1310,6 +1310,9 @@ public enum MavioStrings {
     /// Settings section of a server's API keys.
     public static var settingsApiKeys: String { NSLocalizedString("settings.apiKeys", bundle: .module, comment: "") }
 
+    /// Settings section of a server's proxies.
+    public static var settingsProxies: String { NSLocalizedString("settings.proxies", bundle: .module, comment: "") }
+
     /// Settings section of the monitored movies and episodes still to acquire.
     public static var settingsWanted: String { NSLocalizedString("settings.wanted", bundle: .module, comment: "") }
 
@@ -1477,6 +1480,17 @@ public enum MavioStrings {
     /// The hosts a plugin may reach.
     public static var pluginsNetworkAccess: String { NSLocalizedString("plugins.networkAccess", bundle: .module, comment: "") }
 
+    /// Heading of how a plugin reaches sites.
+    public static var pluginsNetwork: String { NSLocalizedString("plugins.network", bundle: .module, comment: "") }
+
+    /// Label of the proxy a plugin's requests go through.
+    public static var pluginsProxy: String { NSLocalizedString("plugins.proxy", bundle: .module, comment: "") }
+
+    /// Explains a plugin's proxy; hosts is the list of hosts the plugin reaches.
+    public static func pluginsProxyDetail(hosts: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("plugins.proxyDetail", bundle: .module, comment: ""), hosts)
+    }
+
     /// Group of the versions a catalog offers of a plugin.
     public static var pluginsVersions: String { NSLocalizedString("plugins.versions", bundle: .module, comment: "") }
 
@@ -1539,6 +1553,54 @@ public enum MavioStrings {
         String.localizedStringWithFormat(NSLocalizedString("plugins.containerCommandsHint", bundle: .module, comment: ""), address)
     }
 
+    /// Label of the docker run command starting a container dependency.
+    public static var pluginsContainerDockerRun: String { NSLocalizedString("plugins.containerDockerRun", bundle: .module, comment: "") }
+
+    /// Label of the docker run command starting a container dependency beside a server in a container; network is the placeholder <network>.
+    public static func pluginsContainerDockerRunNetwork(network: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("plugins.containerDockerRunNetwork", bundle: .module, comment: ""), network)
+    }
+
+    /// Label of the Compose service starting a container dependency.
+    public static var pluginsContainerCompose: String { NSLocalizedString("plugins.containerCompose", bundle: .module, comment: "") }
+
+    /// Label of the Compose service starting a container dependency beside a server in a container.
+    public static var pluginsContainerComposeServer: String { NSLocalizedString("plugins.containerComposeServer", bundle: .module, comment: "") }
+
+    /// Explains a process plugin's proxy.
+    public static var pluginsProxyProcessDetail: String { NSLocalizedString("plugins.proxyProcessDetail", bundle: .module, comment: "") }
+
+    /// Title asking to restart a plugin for its new proxy; name is the plugin's name.
+    public static func pluginsProxyRestartTitle(name: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("plugins.proxyRestartTitle", bundle: .module, comment: ""), name)
+    }
+
+    /// Explains why changing a plugin's proxy restarts it.
+    public static var pluginsProxyRestartMessage: String { NSLocalizedString("plugins.proxyRestartMessage", bundle: .module, comment: "") }
+
+    /// Action restarting a plugin with its new proxy.
+    public static var pluginsProxyRestart: String { NSLocalizedString("plugins.proxyRestart", bundle: .module, comment: "") }
+
+    /// Explains a managed container's proxy.
+    public static var pluginsContainerProxyDetail: String { NSLocalizedString("plugins.containerProxyDetail", bundle: .module, comment: "") }
+
+    /// Title asking to recreate a container for its new proxy; name is the container's name.
+    public static func pluginsContainerProxyTitle(name: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("plugins.containerProxyTitle", bundle: .module, comment: ""), name)
+    }
+
+    /// Explains why changing a container's proxy recreates it.
+    public static var pluginsContainerProxyMessage: String { NSLocalizedString("plugins.containerProxyMessage", bundle: .module, comment: "") }
+
+    /// Action recreating a container with its new proxy.
+    public static var pluginsContainerRecreate: String { NSLocalizedString("plugins.containerRecreate", bundle: .module, comment: "") }
+
+    /// Shows the docker run command equivalent to how the server runs a container.
+    public static var pluginsShowCommand: String { NSLocalizedString("plugins.showCommand", bundle: .module, comment: "") }
+
+    /// Hides the docker run command of a container.
+    public static var pluginsHideCommand: String { NSLocalizedString("plugins.hideCommand", bundle: .module, comment: "") }
+
     /// State of a server of the account that does not answer at any of its addresses.
     public static var authUnreachable: String { NSLocalizedString("auth.unreachable", bundle: .module, comment: "") }
 
@@ -1597,6 +1659,11 @@ public enum MavioStrings {
     /// Button removing an entry from a list in a plugin's configuration.
     public static var schemaRemove: String { NSLocalizedString("schema.remove", bundle: .module, comment: "") }
 
+    /// Why a switch of a plugin's configuration is off and cannot be turned on; name is a container dependency's name.
+    public static func schemaNeedsContainer(name: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("schema.needsContainer", bundle: .module, comment: ""), name)
+    }
+
     /// Title of an unnamed entry of a list in a plugin's configuration; number is its place.
     public static func schemaItem(number: String) -> String {
         String.localizedStringWithFormat(NSLocalizedString("schema.item", bundle: .module, comment: ""), number)
@@ -1618,6 +1685,40 @@ public enum MavioStrings {
 
     /// Button hiding a secret revealed in a field.
     public static var schemaHide: String { NSLocalizedString("schema.hide", bundle: .module, comment: "") }
+
+    /// Placeholder of a field choosing one of many options in a plugin's configuration, such as an indexer's kind; typing searches them.
+    public static var schemaChoose: String { NSLocalizedString("schema.choose", bundle: .module, comment: "") }
+
+    /// Shown when no option of a plugin's configuration matches what was typed.
+    public static var schemaNoMatches: String { NSLocalizedString("schema.noMatches", bundle: .module, comment: "") }
+
+    /// Tag of an option of a plugin's configuration downloaded as torrents, such as an indexer's kind.
+    public static var schemaTagTorrent: String { NSLocalizedString("schema.tagTorrent", bundle: .module, comment: "") }
+
+    /// Tag of an option of a plugin's configuration downloaded from Usenet.
+    public static var schemaTagUsenet: String { NSLocalizedString("schema.tagUsenet", bundle: .module, comment: "") }
+
+    /// Tag of an indexer anyone may use.
+    public static var schemaTagPublic: String { NSLocalizedString("schema.tagPublic", bundle: .module, comment: "") }
+
+    /// Tag of an indexer anyone who signs up may use.
+    public static var schemaTagSemiPrivate: String { NSLocalizedString("schema.tagSemiPrivate", bundle: .module, comment: "") }
+
+    /// Tag of an indexer for members only, by invitation.
+    public static var schemaTagPrivate: String { NSLocalizedString("schema.tagPrivate", bundle: .module, comment: "") }
+
+    /// Filter of the options of a plugin's configuration showing them all, such as indexers of every protocol.
+    public static var schemaAll: String { NSLocalizedString("schema.all", bundle: .module, comment: "") }
+
+    /// How many options of a plugin's configuration match the search and filters.
+    public static func schemaMatches(count: Int) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("schema.matches", bundle: .module, comment: ""), count)
+    }
+
+    /// Shown when only some of the options matching the search are listed; typing more narrows them.
+    public static func schemaMatchesFirst(shown: String, count: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("schema.matchesFirst", bundle: .module, comment: ""), shown, count)
+    }
 
     /// Explanation under the Libraries settings section.
     public static var librariesMessage: String { NSLocalizedString("libraries.message", bundle: .module, comment: "") }
@@ -2180,6 +2281,17 @@ public enum MavioStrings {
     /// How long the server has been running.
     public static var overviewUptime: String { NSLocalizedString("overview.uptime", bundle: .module, comment: "") }
 
+    /// Label of the container engine the server runs plugins' containers on: its name and version.
+    public static var overviewContainerEngine: String { NSLocalizedString("overview.containerEngine", bundle: .module, comment: "") }
+
+    /// Marks a container engine running without root.
+    public static var overviewContainerEngineRootless: String { NSLocalizedString("overview.containerEngineRootless", bundle: .module, comment: "") }
+
+    /// The server found no container engine; reason tells why.
+    public static func overviewContainerEngineNone(reason: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("overview.containerEngineNone", bundle: .module, comment: ""), reason)
+    }
+
     /// The load of the server's computer.
     public static var overviewLoad: String { NSLocalizedString("overview.load", bundle: .module, comment: "") }
 
@@ -2252,6 +2364,22 @@ public enum MavioStrings {
 
     /// Bytes sent since the computer started.
     public static var overviewSent: String { NSLocalizedString("overview.sent", bundle: .module, comment: "") }
+
+    /// Heading of the plugins' containers on the overview.
+    public static var overviewContainers: String { NSLocalizedString("overview.containers", bundle: .module, comment: "") }
+
+    /// Shown when no plugin container is run or given an address.
+    public static var overviewContainersNone: String { NSLocalizedString("overview.containersNone", bundle: .module, comment: "") }
+
+    /// Tells which plugin a container is for; plugin is the plugin's name.
+    public static func overviewContainerOf(plugin: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("overview.containerOf", bundle: .module, comment: ""), plugin)
+    }
+
+    /// A container an administrator runs, reached at the address.
+    public static func overviewContainerExternal(address: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("overview.containerExternal", bundle: .module, comment: ""), address)
+    }
 
     /// Group of what devices are playing.
     public static var activityNowPlaying: String { NSLocalizedString("activity.nowPlaying", bundle: .module, comment: "") }
@@ -4383,6 +4511,124 @@ public enum MavioStrings {
     /// Explains revoking an API key.
     public static var keysRevokeMessage: String { NSLocalizedString("keys.revokeMessage", bundle: .module, comment: "") }
 
+    /// Description of the proxies settings.
+    public static var proxiesMessage: String { NSLocalizedString("proxies.message", bundle: .module, comment: "") }
+
+    /// Opens the form adding a proxy.
+    public static var proxiesAdd: String { NSLocalizedString("proxies.add", bundle: .module, comment: "") }
+
+    /// Heading of the server's own proxies.
+    public static var proxiesList: String { NSLocalizedString("proxies.list", bundle: .module, comment: "") }
+
+    /// Shown when the server has no proxies of its own.
+    public static var proxiesEmpty: String { NSLocalizedString("proxies.empty", bundle: .module, comment: "") }
+
+    /// The proxy the server's environment or operating system sets.
+    public static var proxiesSystem: String { NSLocalizedString("proxies.system", bundle: .module, comment: "") }
+
+    /// Shown for the system proxy when the system sets none.
+    public static var proxiesSystemUnset: String { NSLocalizedString("proxies.systemUnset", bundle: .module, comment: "") }
+
+    /// Explains where the system proxy comes from.
+    public static var proxiesSystemFooter: String { NSLocalizedString("proxies.systemFooter", bundle: .module, comment: "") }
+
+    /// The hosts a proxy does not carry; hosts is their list.
+    public static func proxiesBypass(hosts: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("proxies.bypass", bundle: .module, comment: ""), hosts)
+    }
+
+    /// A plugin's choice of reaching sites without a proxy.
+    public static var proxiesNone: String { NSLocalizedString("proxies.none", bundle: .module, comment: "") }
+
+    /// Explains choosing no proxy.
+    public static var proxiesNoneDetail: String { NSLocalizedString("proxies.noneDetail", bundle: .module, comment: "") }
+
+    /// Label of a proxy's name.
+    public static var proxiesName: String { NSLocalizedString("proxies.name", bundle: .module, comment: "") }
+
+    /// Label of a proxy's kind: HTTP, SOCKS4 or SOCKS5.
+    public static var proxiesKind: String { NSLocalizedString("proxies.kind", bundle: .module, comment: "") }
+
+    /// Label of a proxy's host name or address.
+    public static var proxiesHost: String { NSLocalizedString("proxies.host", bundle: .module, comment: "") }
+
+    /// Label of a proxy's port.
+    public static var proxiesPort: String { NSLocalizedString("proxies.port", bundle: .module, comment: "") }
+
+    /// Label of the username a proxy takes.
+    public static var proxiesUsername: String { NSLocalizedString("proxies.username", bundle: .module, comment: "") }
+
+    /// Label of the password a proxy takes.
+    public static var proxiesPassword: String { NSLocalizedString("proxies.password", bundle: .module, comment: "") }
+
+    /// Placeholder of a proxy's password while the stored one is kept.
+    public static var proxiesPasswordKept: String { NSLocalizedString("proxies.passwordKept", bundle: .module, comment: "") }
+
+    /// Removes the stored password of a proxy.
+    public static var proxiesClearPassword: String { NSLocalizedString("proxies.clearPassword", bundle: .module, comment: "") }
+
+    /// Tests reaching a site through a proxy.
+    public static var proxiesTest: String { NSLocalizedString("proxies.test", bundle: .module, comment: "") }
+
+    /// A proxy's test passed; ms is how long the site took to answer.
+    public static func proxiesTestOk(ms: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("proxies.testOk", bundle: .module, comment: ""), ms)
+    }
+
+    /// The address sites see a proxy's requests come from.
+    public static func proxiesExit(address: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("proxies.exit", bundle: .module, comment: ""), address)
+    }
+
+    /// A proxy's test failed; error says why.
+    public static func proxiesTestFailed(error: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("proxies.testFailed", bundle: .module, comment: ""), error)
+    }
+
+    /// Deletes a proxy.
+    public static var proxiesRemove: String { NSLocalizedString("proxies.remove", bundle: .module, comment: "") }
+
+    /// Asks before deleting a proxy; name is its name.
+    public static func proxiesRemoveTitle(name: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("proxies.removeTitle", bundle: .module, comment: ""), name)
+    }
+
+    /// Explains deleting a proxy.
+    public static var proxiesRemoveMessage: String { NSLocalizedString("proxies.removeMessage", bundle: .module, comment: "") }
+
+    /// Heading of the proxies the server's own requests go through.
+    public static var proxiesServerRequests: String { NSLocalizedString("proxies.serverRequests", bundle: .module, comment: "") }
+
+    /// Explains the proxies of the server's own requests.
+    public static var proxiesServerRequestsFooter: String { NSLocalizedString("proxies.serverRequestsFooter", bundle: .module, comment: "") }
+
+    /// The server's requests for plugin catalogs.
+    public static var proxiesForCatalogs: String { NSLocalizedString("proxies.forCatalogs", bundle: .module, comment: "") }
+
+    /// Explains the requests for plugin catalogs.
+    public static var proxiesForCatalogsDetail: String { NSLocalizedString("proxies.forCatalogsDetail", bundle: .module, comment: "") }
+
+    /// The server's requests for items' remote images.
+    public static var proxiesForImages: String { NSLocalizedString("proxies.forImages", bundle: .module, comment: "") }
+
+    /// Explains the requests for images.
+    public static var proxiesForImagesDetail: String { NSLocalizedString("proxies.forImagesDetail", bundle: .module, comment: "") }
+
+    /// The server's requests to mavio.dev.
+    public static var proxiesForMavioDev: String { NSLocalizedString("proxies.forMavioDev", bundle: .module, comment: "") }
+
+    /// Explains the requests to mavio.dev.
+    public static var proxiesForMavioDevDetail: String { NSLocalizedString("proxies.forMavioDevDetail", bundle: .module, comment: "") }
+
+    /// The server's requests to certificate authorities.
+    public static var proxiesForAcme: String { NSLocalizedString("proxies.forAcme", bundle: .module, comment: "") }
+
+    /// Explains the requests to certificate authorities.
+    public static var proxiesForAcmeDetail: String { NSLocalizedString("proxies.forAcmeDetail", bundle: .module, comment: "") }
+
+    /// A proxy chosen that the server no longer has.
+    public static var proxiesUnknown: String { NSLocalizedString("proxies.unknown", bundle: .module, comment: "") }
+
     /// Title of the requests screen and the link to it from Discover.
     public static var requestsTitle: String { NSLocalizedString("requests.title", bundle: .module, comment: "") }
 
@@ -5783,4 +6029,136 @@ public enum MavioStrings {
 
     /// Notice after the assistant's settings are saved.
     public static var assistantSaved: String { NSLocalizedString("assistant.saved", bundle: .module, comment: "") }
+
+    /// Group of the settings' advanced tools, which can be pinned to the sidebar.
+    public static var settingsAdvancedGroup: String { NSLocalizedString("settings.advancedGroup", bundle: .module, comment: "") }
+
+    /// Shows an advanced tool in the sidebar's Features group.
+    public static var settingsPin: String { NSLocalizedString("settings.pin", bundle: .module, comment: "") }
+
+    /// Removes an advanced tool from the sidebar's Features group.
+    public static var settingsUnpin: String { NSLocalizedString("settings.unpin", bundle: .module, comment: "") }
+
+    /// Group of the sidebar listing the advanced tools pinned to it.
+    public static var navFeatures: String { NSLocalizedString("nav.features", bundle: .module, comment: "") }
+
+    /// Advanced tool searching a server's indexers by text, as Prowlarr's search.
+    public static var indexersTitle: String { NSLocalizedString("indexers.title", bundle: .module, comment: "") }
+
+    /// Line under the indexer search's title.
+    public static var indexersMessage: String { NSLocalizedString("indexers.message", bundle: .module, comment: "") }
+
+    /// Server choice of the indexer search searching every server the user administers.
+    public static var indexersAllServers: String { NSLocalizedString("indexers.allServers", bundle: .module, comment: "") }
+
+    /// Placeholder and label of the indexer search's text field.
+    public static var indexersQuery: String { NSLocalizedString("indexers.query", bundle: .module, comment: "") }
+
+    /// Runs the indexer search.
+    public static var indexersSearch: String { NSLocalizedString("indexers.search", bundle: .module, comment: "") }
+
+    /// Label of the indexer search's choice of what to search for.
+    public static var indexersType: String { NSLocalizedString("indexers.type", bundle: .module, comment: "") }
+
+    /// Search type: any release.
+    public static var indexersTypeAny: String { NSLocalizedString("indexers.typeAny", bundle: .module, comment: "") }
+
+    /// Search type: movies.
+    public static var indexersTypeMovie: String { NSLocalizedString("indexers.typeMovie", bundle: .module, comment: "") }
+
+    /// Search type: television.
+    public static var indexersTypeTv: String { NSLocalizedString("indexers.typeTv", bundle: .module, comment: "") }
+
+    /// Label of the indexer search's category choice, and its column.
+    public static var indexersCategory: String { NSLocalizedString("indexers.category", bundle: .module, comment: "") }
+
+    /// Category choice of the indexer search: every category.
+    public static var indexersAllCategories: String { NSLocalizedString("indexers.allCategories", bundle: .module, comment: "") }
+
+    /// Newznab category 1000.
+    public static var indexersCategoryConsole: String { NSLocalizedString("indexers.categoryConsole", bundle: .module, comment: "") }
+
+    /// Newznab category 2000.
+    public static var indexersCategoryMovies: String { NSLocalizedString("indexers.categoryMovies", bundle: .module, comment: "") }
+
+    /// Newznab category 3000.
+    public static var indexersCategoryAudio: String { NSLocalizedString("indexers.categoryAudio", bundle: .module, comment: "") }
+
+    /// Newznab category 4000.
+    public static var indexersCategoryPc: String { NSLocalizedString("indexers.categoryPc", bundle: .module, comment: "") }
+
+    /// Newznab category 5000.
+    public static var indexersCategoryTv: String { NSLocalizedString("indexers.categoryTv", bundle: .module, comment: "") }
+
+    /// Newznab category 6000.
+    public static var indexersCategoryXxx: String { NSLocalizedString("indexers.categoryXxx", bundle: .module, comment: "") }
+
+    /// Newznab category 7000.
+    public static var indexersCategoryBooks: String { NSLocalizedString("indexers.categoryBooks", bundle: .module, comment: "") }
+
+    /// Newznab category 8000.
+    public static var indexersCategoryOther: String { NSLocalizedString("indexers.categoryOther", bundle: .module, comment: "") }
+
+    /// Label of the indexer search's indexer choice, and its column.
+    public static var indexersIndexer: String { NSLocalizedString("indexers.indexer", bundle: .module, comment: "") }
+
+    /// Indexer choice of the indexer search: every enabled indexer.
+    public static var indexersAllIndexers: String { NSLocalizedString("indexers.allIndexers", bundle: .module, comment: "") }
+
+    /// Column of a release's protocol.
+    public static var indexersProtocol: String { NSLocalizedString("indexers.protocol", bundle: .module, comment: "") }
+
+    /// A torrent release's protocol.
+    public static var indexersTorrent: String { NSLocalizedString("indexers.torrent", bundle: .module, comment: "") }
+
+    /// Column of how long ago a release was published.
+    public static var indexersAge: String { NSLocalizedString("indexers.age", bundle: .module, comment: "") }
+
+    /// Column of a release's title.
+    public static var indexersReleaseTitle: String { NSLocalizedString("indexers.releaseTitle", bundle: .module, comment: "") }
+
+    /// Column of a release's size.
+    public static var indexersSize: String { NSLocalizedString("indexers.size", bundle: .module, comment: "") }
+
+    /// Column of how often a release was grabbed.
+    public static var indexersGrabs: String { NSLocalizedString("indexers.grabs", bundle: .module, comment: "") }
+
+    /// Column of a torrent's seeders and peers.
+    public static var indexersPeers: String { NSLocalizedString("indexers.peers", bundle: .module, comment: "") }
+
+    /// Sends a release to a download client without a library item.
+    public static var indexersSend: String { NSLocalizedString("indexers.send", bundle: .module, comment: "") }
+
+    /// A release was sent to the named download client.
+    public static func indexersSent(client: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("indexers.sent", bundle: .module, comment: ""), client)
+    }
+
+    /// Copies a release's magnet link, for a torrent client of the user's own.
+    public static var indexersMagnet: String { NSLocalizedString("indexers.magnet", bundle: .module, comment: "") }
+
+    /// Shown after copying a release's magnet link.
+    public static var indexersMagnetCopied: String { NSLocalizedString("indexers.magnetCopied", bundle: .module, comment: "") }
+
+    /// Opens a release's page on its indexer.
+    public static var indexersInfo: String { NSLocalizedString("indexers.info", bundle: .module, comment: "") }
+
+    /// How many releases a server's search found.
+    public static func indexersResults(count: Int) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("indexers.results", bundle: .module, comment: ""), count)
+    }
+
+    /// Which page of a server's releases is shown.
+    public static func indexersPage(page: String, pages: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("indexers.page", bundle: .module, comment: ""), page, pages)
+    }
+
+    /// Shows a server's previous page of releases.
+    public static var indexersPrevious: String { NSLocalizedString("indexers.previous", bundle: .module, comment: "") }
+
+    /// Shows a server's next page of releases.
+    public static var indexersNext: String { NSLocalizedString("indexers.next", bundle: .module, comment: "") }
+
+    /// Shown before the first indexer search.
+    public static var indexersPrompt: String { NSLocalizedString("indexers.prompt", bundle: .module, comment: "") }
 }

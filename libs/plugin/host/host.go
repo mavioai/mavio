@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"slices"
 	"time"
 
 	"github.com/mavioai/mavio/libs/plugin/host/process"
@@ -52,6 +53,7 @@ type Plugin interface {
 	Ratings() pluginv1connect.RatingsProviderServiceClient
 	Speech() pluginv1connect.SpeechToTextServiceClient
 	Voices() pluginv1connect.TextToSpeechServiceClient
+	ChallengeSolver() pluginv1connect.ChallengeSolverServiceClient
 	// HTTP returns the handler of the plugin's HTTP routes, or nil without
 	// CAPABILITY_HTTP_HANDLER; it expects paths relative to the routes' prefix.
 	HTTP() http.Handler
@@ -71,6 +73,9 @@ type Options struct {
 	// HostAPI returns the handler serving a plugin's host API requests; it
 	// is called once per plugin, and nil serves none.
 	HostAPI func(m *pluginv1.Manifest) http.Handler
+	// Env returns what a process plugin's environment adds to
+	// Process.Env, which it wins over; nil adds nothing.
+	Env func(m *pluginv1.Manifest) []string
 	// DataDir holds a writable data folder per plugin, named by its ID and
 	// created when the plugin starts; empty gives plugins none.
 	DataDir string
@@ -101,6 +106,9 @@ func Open(ctx context.Context, dir string, opts Options) (Plugin, error) {
 	if opts.HostAPI != nil {
 		h := opts.HostAPI(m)
 		opts.WASM.HostAPI, opts.Process.HostAPI = h, h
+	}
+	if opts.Env != nil && m.GetRuntime() == pluginv1.Runtime_RUNTIME_PROCESS {
+		opts.Process.Env = append(slices.Clip(opts.Process.Env), opts.Env(m)...)
 	}
 	if opts.DataDir != "" {
 		dir := DataDir(opts.DataDir, m.GetId())

@@ -369,6 +369,18 @@ func (f PluginContainerFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Va
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PluginContainerMutation", m)
 }
 
+// The ProxyFunc type is an adapter to allow the use of ordinary
+// function as Proxy mutator.
+type ProxyFunc func(context.Context, *ent.ProxyMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ProxyFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.ProxyMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ProxyMutation", m)
+}
+
 // The QualityDefinitionFunc type is an adapter to allow the use of ordinary
 // function as QualityDefinition mutator.
 type QualityDefinitionFunc func(context.Context, *ent.QualityDefinitionMutation) (ent.Value, error)

@@ -41,6 +41,9 @@ func RunCommands(n Names, d Dependency, onHost bool) Commands {
 	if d.GPU {
 		args = append(args, "--gpus", "all")
 	}
+	if d.HostAccess {
+		args = append(args, "--add-host", hostGateway)
+	}
 	if d.Memory > 0 {
 		args = append(args, "--memory", strconv.FormatInt(d.Memory>>20, 10)+"m")
 	}
@@ -68,6 +71,9 @@ func RunCommands(n Names, d Dependency, onHost bool) Commands {
 	}
 	if onHost {
 		fmt.Fprintf(&b, "    ports: [%q]\n", "127.0.0.1:"+port+":"+port)
+	}
+	if d.HostAccess {
+		fmt.Fprintf(&b, "    extra_hosts: [%q]\n", hostGateway)
 	}
 	if len(env) > 0 {
 		b.WriteString("    environment:\n")
@@ -105,6 +111,45 @@ func RunCommands(n Names, d Dependency, onHost bool) Commands {
 		addr = "http://127.0.0.1:" + port
 	}
 	return Commands{DockerRun: strings.Join(quoted, " "), Compose: b.String(), Address: addr}
+}
+
+// DockerRun returns the docker run command creating and starting a
+// container as CreateContainer and StartContainer do, without its labels.
+func (c ContainerSpec) DockerRun() string {
+	args := []string{"docker", "run", "-d", "--name", c.Name}
+	if c.Network != "" {
+		args = append(args, "--network", c.Network)
+		for _, a := range c.Aliases {
+			args = append(args, "--network-alias", a)
+		}
+	}
+	if c.Port > 0 && c.PublishLoopback {
+		args = append(args, "-p", "127.0.0.1::"+strconv.Itoa(c.Port))
+	}
+	if c.GPU {
+		args = append(args, "--gpus", "all")
+	}
+	if c.HostGateway {
+		args = append(args, "--add-host", hostGateway)
+	}
+	if c.Memory > 0 {
+		args = append(args, "--memory", strconv.FormatInt(c.Memory>>20, 10)+"m")
+	}
+	if c.CPUs > 0 {
+		args = append(args, "--cpus", strconv.FormatFloat(c.CPUs, 'f', -1, 64))
+	}
+	for _, v := range slices.Sorted(maps.Keys(c.Volumes)) {
+		args = append(args, "-v", v+":"+c.Volumes[v])
+	}
+	for _, e := range c.Env {
+		args = append(args, "-e", e)
+	}
+	args = append(append(args, c.Image), c.Cmd...)
+	quoted := make([]string, len(args))
+	for i, a := range args {
+		quoted[i] = shellQuote(a)
+	}
+	return strings.Join(quoted, " ")
 }
 
 func joinQuoted(ss []string) string {

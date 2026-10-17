@@ -109,6 +109,13 @@ pub struct Plugin {
     ///
     /// Field 3: `error`
     pub error: ::core::option::Option<::buffa::alloc::string::String>,
+    /// For a WASM or process plugin, the proxy it reaches sites through: the
+    /// ID of one of the server's proxies, "system" for the system proxy, or
+    /// empty for none. The hosts of this machine and of the local network are
+    /// reached directly.
+    ///
+    /// Field 4: `proxy`
+    pub proxy: ::core::option::Option<::buffa::alloc::string::String>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -118,6 +125,7 @@ impl ::core::fmt::Debug for Plugin {
             .field("manifest", &self.manifest)
             .field("state", &self.state)
             .field("error", &self.error)
+            .field("proxy", &self.proxy)
             .finish()
     }
 }
@@ -147,6 +155,16 @@ impl Plugin {
         value: impl Into<::buffa::alloc::string::String>,
     ) -> Self {
         self.error = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::proxy`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_proxy(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.proxy = Some(value.into());
         self
     }
 }
@@ -184,6 +202,9 @@ impl ::buffa::Message for Plugin {
         if let Some(ref v) = self.error {
             size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
+        if let Some(ref v) = self.proxy {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -207,6 +228,9 @@ impl ::buffa::Message for Plugin {
         }
         if let Some(ref v) = self.error {
             ::buffa::types::put_string_field(3u32, v, buf);
+        }
+        if let Some(ref v) = self.proxy {
+            ::buffa::types::put_string_field(4u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -251,6 +275,16 @@ impl ::buffa::Message for Plugin {
                     buf,
                 )?;
             }
+            4u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self.proxy.get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -262,6 +296,7 @@ impl ::buffa::Message for Plugin {
         self.manifest = ::buffa::MessageField::none();
         self.state = ::core::option::Option::None;
         self.error = ::core::option::Option::None;
+        self.proxy = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }
@@ -887,12 +922,19 @@ impl ::buffa::ExtensionSet for SetPluginConfigRequest {
 pub struct SetPluginConfigResponse {
     /// Field 1: `plugin`
     pub plugin: ::buffa::MessageField<Plugin, ::buffa::Inline<Plugin>>,
+    /// The configuration stored, with the generated properties set.
+    ///
+    /// Field 2: `config_json`
+    pub config_json: ::core::option::Option<::buffa::alloc::string::String>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
 impl ::core::fmt::Debug for SetPluginConfigResponse {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-        f.debug_struct("SetPluginConfigResponse").field("plugin", &self.plugin).finish()
+        f.debug_struct("SetPluginConfigResponse")
+            .field("plugin", &self.plugin)
+            .field("config_json", &self.config_json)
+            .finish()
     }
 }
 impl SetPluginConfigResponse {
@@ -901,6 +943,18 @@ impl SetPluginConfigResponse {
     ///
     /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
     pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.system.v1.SetPluginConfigResponse";
+}
+impl SetPluginConfigResponse {
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::config_json`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_config_json(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.config_json = Some(value.into());
+        self
+    }
 }
 ::buffa::impl_default_instance!(SetPluginConfigResponse);
 impl ::buffa::MessageName for SetPluginConfigResponse {
@@ -930,6 +984,9 @@ impl ::buffa::Message for SetPluginConfigResponse {
                 += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
                     + inner_size as u64;
         }
+        if let Some(ref v) = self.config_json {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -947,6 +1004,9 @@ impl ::buffa::Message for SetPluginConfigResponse {
                 buf,
             );
             self.plugin.write_to(__cache, buf);
+        }
+        if let Some(ref v) = self.config_json {
+            ::buffa::types::put_string_field(2u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -972,6 +1032,18 @@ impl ::buffa::Message for SetPluginConfigResponse {
                     ctx,
                 )?;
             }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .config_json
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -981,11 +1053,511 @@ impl ::buffa::Message for SetPluginConfigResponse {
     }
     fn clear(&mut self) {
         self.plugin = ::buffa::MessageField::none();
+        self.config_json = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }
 impl ::buffa::ExtensionSet for SetPluginConfigResponse {
     const PROTO_FQN: &'static str = "mavio.system.v1.SetPluginConfigResponse";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+#[derive(Clone, PartialEq, Default)]
+pub struct ListPluginConfigOptionsRequest {
+    /// Field 1: `plugin_id`
+    pub plugin_id: ::core::option::Option<::buffa::alloc::string::String>,
+    /// The source x-mavio-options names: "indexer-definitions" and
+    /// "download-client-definitions", the definitions of the plugin's
+    /// providers, or "download-clients", the clients of every download client
+    /// provider.
+    ///
+    /// Field 2: `source`
+    pub source: ::core::option::Option<::buffa::alloc::string::String>,
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for ListPluginConfigOptionsRequest {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("ListPluginConfigOptionsRequest")
+            .field("plugin_id", &self.plugin_id)
+            .field("source", &self.source)
+            .finish()
+    }
+}
+impl ListPluginConfigOptionsRequest {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.system.v1.ListPluginConfigOptionsRequest";
+}
+impl ListPluginConfigOptionsRequest {
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::plugin_id`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_plugin_id(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.plugin_id = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::source`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_source(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.source = Some(value.into());
+        self
+    }
+}
+::buffa::impl_default_instance!(ListPluginConfigOptionsRequest);
+impl ::buffa::MessageName for ListPluginConfigOptionsRequest {
+    const PACKAGE: &'static str = "mavio.system.v1";
+    const NAME: &'static str = "ListPluginConfigOptionsRequest";
+    const FULL_NAME: &'static str = "mavio.system.v1.ListPluginConfigOptionsRequest";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.system.v1.ListPluginConfigOptionsRequest";
+}
+impl ::buffa::Message for ListPluginConfigOptionsRequest {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if let Some(ref v) = self.plugin_id {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.source {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if let Some(ref v) = self.plugin_id {
+            ::buffa::types::put_string_field(1u32, v, buf);
+        }
+        if let Some(ref v) = self.source {
+            ::buffa::types::put_string_field(2u32, v, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .plugin_id
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self.source.get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.plugin_id = ::core::option::Option::None;
+        self.source = ::core::option::Option::None;
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for ListPluginConfigOptionsRequest {
+    const PROTO_FQN: &'static str = "mavio.system.v1.ListPluginConfigOptionsRequest";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+#[derive(Clone, PartialEq, Default)]
+pub struct ListPluginConfigOptionsResponse {
+    /// Field 1: `options`
+    pub options: ::buffa::alloc::vec::Vec<PluginConfigOption>,
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for ListPluginConfigOptionsResponse {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("ListPluginConfigOptionsResponse")
+            .field("options", &self.options)
+            .finish()
+    }
+}
+impl ListPluginConfigOptionsResponse {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.system.v1.ListPluginConfigOptionsResponse";
+}
+::buffa::impl_default_instance!(ListPluginConfigOptionsResponse);
+impl ::buffa::MessageName for ListPluginConfigOptionsResponse {
+    const PACKAGE: &'static str = "mavio.system.v1";
+    const NAME: &'static str = "ListPluginConfigOptionsResponse";
+    const FULL_NAME: &'static str = "mavio.system.v1.ListPluginConfigOptionsResponse";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.system.v1.ListPluginConfigOptionsResponse";
+}
+impl ::buffa::Message for ListPluginConfigOptionsResponse {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        for v in &self.options {
+            let __slot = __cache.reserve();
+            let inner_size = v.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        __cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        for v in &self.options {
+            ::buffa::types::put_len_delimited_header(
+                1u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            v.write_to(__cache, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let mut elem = ::core::default::Default::default();
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&elem),
+                )?;
+                ::buffa::Message::merge_length_delimited(&mut elem, buf, ctx)?;
+                self.options.push(elem);
+            }
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.options.clear();
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for ListPluginConfigOptionsResponse {
+    const PROTO_FQN: &'static str = "mavio.system.v1.ListPluginConfigOptionsResponse";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+/// PluginConfigOption is a value a property of a configuration takes.
+#[derive(Clone, PartialEq, Default)]
+pub struct PluginConfigOption {
+    /// Field 1: `value`
+    pub value: ::core::option::Option<::buffa::alloc::string::String>,
+    /// Field 2: `name`
+    pub name: ::core::option::Option<::buffa::alloc::string::String>,
+    /// Field 3: `description`
+    pub description: ::core::option::Option<::buffa::alloc::string::String>,
+    /// What sets the option apart, as keys clients show in their words:
+    /// "torrent" or "usenet", "public", "semi-private" or "private", and a
+    /// BCP 47 language tag such as "en-US".
+    ///
+    /// Field 4: `tags`
+    pub tags: ::buffa::alloc::vec::Vec<::buffa::alloc::string::String>,
+    /// The JSON Schema of the settings the option takes, which the property
+    /// x-mavio-options names as its settings holds; empty for none.
+    ///
+    /// Field 5: `settings_schema`
+    pub settings_schema: ::core::option::Option<::buffa::alloc::string::String>,
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for PluginConfigOption {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("PluginConfigOption")
+            .field("value", &self.value)
+            .field("name", &self.name)
+            .field("description", &self.description)
+            .field("tags", &self.tags)
+            .field("settings_schema", &self.settings_schema)
+            .finish()
+    }
+}
+impl PluginConfigOption {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.system.v1.PluginConfigOption";
+}
+impl PluginConfigOption {
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::value`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_value(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.value = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::name`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_name(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.name = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::description`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_description(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.description = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::settings_schema`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_settings_schema(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.settings_schema = Some(value.into());
+        self
+    }
+}
+::buffa::impl_default_instance!(PluginConfigOption);
+impl ::buffa::MessageName for PluginConfigOption {
+    const PACKAGE: &'static str = "mavio.system.v1";
+    const NAME: &'static str = "PluginConfigOption";
+    const FULL_NAME: &'static str = "mavio.system.v1.PluginConfigOption";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.system.v1.PluginConfigOption";
+}
+impl ::buffa::Message for PluginConfigOption {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if let Some(ref v) = self.value {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.name {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.description {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        for v in &self.tags {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.settings_schema {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if let Some(ref v) = self.value {
+            ::buffa::types::put_string_field(1u32, v, buf);
+        }
+        if let Some(ref v) = self.name {
+            ::buffa::types::put_string_field(2u32, v, buf);
+        }
+        if let Some(ref v) = self.description {
+            ::buffa::types::put_string_field(3u32, v, buf);
+        }
+        for v in &self.tags {
+            ::buffa::types::put_string_field(4u32, v, buf);
+        }
+        if let Some(ref v) = self.settings_schema {
+            ::buffa::types::put_string_field(5u32, v, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self.value.get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self.name.get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            3u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .description
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            4u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __elem = ::buffa::types::decode_string(buf)?;
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&__elem),
+                )?;
+                self.tags.push(__elem);
+            }
+            5u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .settings_schema
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.value = ::core::option::Option::None;
+        self.name = ::core::option::Option::None;
+        self.description = ::core::option::Option::None;
+        self.tags.clear();
+        self.settings_schema = ::core::option::Option::None;
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for PluginConfigOption {
+    const PROTO_FQN: &'static str = "mavio.system.v1.PluginConfigOption";
     fn unknown_fields(&self) -> &::buffa::UnknownFields {
         &self.__buffa_unknown_fields
     }
@@ -3051,6 +3623,21 @@ pub struct PluginContainer {
         ContainerCommands,
         ::buffa::Inline<ContainerCommands>,
     >,
+    /// The plugin declaring it.
+    ///
+    /// Field 6: `plugin_id`
+    pub plugin_id: ::core::option::Option<::buffa::alloc::string::String>,
+    /// For a managed container, the proxy it reaches sites through: the ID of
+    /// one of the server's proxies, "system" for the system proxy, or empty
+    /// for none.
+    ///
+    /// Field 7: `proxy`
+    pub proxy: ::core::option::Option<::buffa::alloc::string::String>,
+    /// For a managed container, the docker run command equivalent to how the
+    /// server runs it; empty without a container engine.
+    ///
+    /// Field 8: `command`
+    pub command: ::core::option::Option<::buffa::alloc::string::String>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -3062,6 +3649,9 @@ impl ::core::fmt::Debug for PluginContainer {
             .field("use_gpu", &self.use_gpu)
             .field("commands", &self.commands)
             .field("gpu_commands", &self.gpu_commands)
+            .field("plugin_id", &self.plugin_id)
+            .field("proxy", &self.proxy)
+            .field("command", &self.command)
             .finish()
     }
 }
@@ -3078,6 +3668,36 @@ impl PluginContainer {
     ///Sets [`Self::use_gpu`] to `Some(value)`, consuming and returning `self`.
     pub fn with_use_gpu(mut self, value: bool) -> Self {
         self.use_gpu = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::plugin_id`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_plugin_id(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.plugin_id = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::proxy`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_proxy(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.proxy = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::command`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_command(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.command = Some(value.into());
         self
     }
 }
@@ -3136,6 +3756,15 @@ impl ::buffa::Message for PluginContainer {
                 += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
                     + inner_size as u64;
         }
+        if let Some(ref v) = self.plugin_id {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.proxy {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.command {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -3180,6 +3809,15 @@ impl ::buffa::Message for PluginContainer {
                 buf,
             );
             self.gpu_commands.write_to(__cache, buf);
+        }
+        if let Some(ref v) = self.plugin_id {
+            ::buffa::types::put_string_field(6u32, v, buf);
+        }
+        if let Some(ref v) = self.proxy {
+            ::buffa::types::put_string_field(7u32, v, buf);
+        }
+        if let Some(ref v) = self.command {
+            ::buffa::types::put_string_field(8u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -3247,6 +3885,38 @@ impl ::buffa::Message for PluginContainer {
                     ctx,
                 )?;
             }
+            6u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .plugin_id
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            7u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self.proxy.get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            8u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self.command.get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -3260,6 +3930,9 @@ impl ::buffa::Message for PluginContainer {
         self.use_gpu = ::core::option::Option::None;
         self.commands = ::buffa::MessageField::none();
         self.gpu_commands = ::buffa::MessageField::none();
+        self.plugin_id = ::core::option::Option::None;
+        self.proxy = ::core::option::Option::None;
+        self.command = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }
@@ -3687,6 +4360,201 @@ impl ::buffa::ExtensionSet for ListPluginContainersResponse {
     }
 }
 #[derive(Clone, PartialEq, Default)]
+pub struct ListContainersRequest {
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for ListContainersRequest {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("ListContainersRequest").finish()
+    }
+}
+impl ListContainersRequest {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.system.v1.ListContainersRequest";
+}
+::buffa::impl_default_instance!(ListContainersRequest);
+impl ::buffa::MessageName for ListContainersRequest {
+    const PACKAGE: &'static str = "mavio.system.v1";
+    const NAME: &'static str = "ListContainersRequest";
+    const FULL_NAME: &'static str = "mavio.system.v1.ListContainersRequest";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.system.v1.ListContainersRequest";
+}
+impl ::buffa::Message for ListContainersRequest {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for ListContainersRequest {
+    const PROTO_FQN: &'static str = "mavio.system.v1.ListContainersRequest";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+#[derive(Clone, PartialEq, Default)]
+pub struct ListContainersResponse {
+    /// By plugin ID, then in manifest order.
+    ///
+    /// Field 1: `containers`
+    pub containers: ::buffa::alloc::vec::Vec<PluginContainer>,
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for ListContainersResponse {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("ListContainersResponse")
+            .field("containers", &self.containers)
+            .finish()
+    }
+}
+impl ListContainersResponse {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.system.v1.ListContainersResponse";
+}
+::buffa::impl_default_instance!(ListContainersResponse);
+impl ::buffa::MessageName for ListContainersResponse {
+    const PACKAGE: &'static str = "mavio.system.v1";
+    const NAME: &'static str = "ListContainersResponse";
+    const FULL_NAME: &'static str = "mavio.system.v1.ListContainersResponse";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.system.v1.ListContainersResponse";
+}
+impl ::buffa::Message for ListContainersResponse {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        for v in &self.containers {
+            let __slot = __cache.reserve();
+            let inner_size = v.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        __cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        for v in &self.containers {
+            ::buffa::types::put_len_delimited_header(
+                1u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            v.write_to(__cache, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let mut elem = ::core::default::Default::default();
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&elem),
+                )?;
+                ::buffa::Message::merge_length_delimited(&mut elem, buf, ctx)?;
+                self.containers.push(elem);
+            }
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.containers.clear();
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for ListContainersResponse {
+    const PROTO_FQN: &'static str = "mavio.system.v1.ListContainersResponse";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+#[derive(Clone, PartialEq, Default)]
 pub struct SetPluginContainerRequest {
     /// Field 1: `plugin_id`
     pub plugin_id: ::core::option::Option<::buffa::alloc::string::String>,
@@ -3705,6 +4573,11 @@ pub struct SetPluginContainerRequest {
     ///
     /// Field 5: `use_gpu`
     pub use_gpu: ::core::option::Option<bool>,
+    /// The proxy a managed container reaches sites through, as
+    /// PluginContainer.proxy; unset keeps it.
+    ///
+    /// Field 6: `proxy`
+    pub proxy: ::core::option::Option<::buffa::alloc::string::String>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -3716,6 +4589,7 @@ impl ::core::fmt::Debug for SetPluginContainerRequest {
             .field("mode", &self.mode)
             .field("address", &self.address)
             .field("use_gpu", &self.use_gpu)
+            .field("proxy", &self.proxy)
             .finish()
     }
 }
@@ -3774,6 +4648,16 @@ impl SetPluginContainerRequest {
         self.use_gpu = Some(value);
         self
     }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::proxy`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_proxy(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.proxy = Some(value.into());
+        self
+    }
 }
 ::buffa::impl_default_instance!(SetPluginContainerRequest);
 impl ::buffa::MessageName for SetPluginContainerRequest {
@@ -3810,6 +4694,9 @@ impl ::buffa::Message for SetPluginContainerRequest {
         if self.use_gpu.is_some() {
             size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
         }
+        if let Some(ref v) = self.proxy {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -3834,6 +4721,9 @@ impl ::buffa::Message for SetPluginContainerRequest {
         }
         if let Some(v) = self.use_gpu {
             ::buffa::types::put_bool_field(5u32, v, buf);
+        }
+        if let Some(ref v) = self.proxy {
+            ::buffa::types::put_string_field(6u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -3898,6 +4788,16 @@ impl ::buffa::Message for SetPluginContainerRequest {
                     ::buffa::types::decode_bool(buf)?,
                 );
             }
+            6u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self.proxy.get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -3911,6 +4811,7 @@ impl ::buffa::Message for SetPluginContainerRequest {
         self.mode = ::core::option::Option::None;
         self.address = ::core::option::Option::None;
         self.use_gpu = ::core::option::Option::None;
+        self.proxy = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }
@@ -4031,6 +4932,264 @@ impl ::buffa::Message for SetPluginContainerResponse {
 }
 impl ::buffa::ExtensionSet for SetPluginContainerResponse {
     const PROTO_FQN: &'static str = "mavio.system.v1.SetPluginContainerResponse";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+#[derive(Clone, PartialEq, Default)]
+pub struct SetPluginProxyRequest {
+    /// Field 1: `plugin_id`
+    pub plugin_id: ::core::option::Option<::buffa::alloc::string::String>,
+    /// The ID of one of the server's proxies, "system" for the system proxy,
+    /// or empty for none.
+    ///
+    /// Field 2: `proxy`
+    pub proxy: ::core::option::Option<::buffa::alloc::string::String>,
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for SetPluginProxyRequest {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("SetPluginProxyRequest")
+            .field("plugin_id", &self.plugin_id)
+            .field("proxy", &self.proxy)
+            .finish()
+    }
+}
+impl SetPluginProxyRequest {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.system.v1.SetPluginProxyRequest";
+}
+impl SetPluginProxyRequest {
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::plugin_id`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_plugin_id(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.plugin_id = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::proxy`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_proxy(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.proxy = Some(value.into());
+        self
+    }
+}
+::buffa::impl_default_instance!(SetPluginProxyRequest);
+impl ::buffa::MessageName for SetPluginProxyRequest {
+    const PACKAGE: &'static str = "mavio.system.v1";
+    const NAME: &'static str = "SetPluginProxyRequest";
+    const FULL_NAME: &'static str = "mavio.system.v1.SetPluginProxyRequest";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.system.v1.SetPluginProxyRequest";
+}
+impl ::buffa::Message for SetPluginProxyRequest {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if let Some(ref v) = self.plugin_id {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.proxy {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if let Some(ref v) = self.plugin_id {
+            ::buffa::types::put_string_field(1u32, v, buf);
+        }
+        if let Some(ref v) = self.proxy {
+            ::buffa::types::put_string_field(2u32, v, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .plugin_id
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self.proxy.get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.plugin_id = ::core::option::Option::None;
+        self.proxy = ::core::option::Option::None;
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for SetPluginProxyRequest {
+    const PROTO_FQN: &'static str = "mavio.system.v1.SetPluginProxyRequest";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+#[derive(Clone, PartialEq, Default)]
+pub struct SetPluginProxyResponse {
+    /// Field 1: `plugin`
+    pub plugin: ::buffa::MessageField<Plugin, ::buffa::Inline<Plugin>>,
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for SetPluginProxyResponse {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("SetPluginProxyResponse").field("plugin", &self.plugin).finish()
+    }
+}
+impl SetPluginProxyResponse {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.system.v1.SetPluginProxyResponse";
+}
+::buffa::impl_default_instance!(SetPluginProxyResponse);
+impl ::buffa::MessageName for SetPluginProxyResponse {
+    const PACKAGE: &'static str = "mavio.system.v1";
+    const NAME: &'static str = "SetPluginProxyResponse";
+    const FULL_NAME: &'static str = "mavio.system.v1.SetPluginProxyResponse";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.system.v1.SetPluginProxyResponse";
+}
+impl ::buffa::Message for SetPluginProxyResponse {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if self.plugin.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.plugin.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        __cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if self.plugin.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                1u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.plugin.write_to(__cache, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::Message::merge_length_delimited(
+                    self.plugin.get_or_insert_default(),
+                    buf,
+                    ctx,
+                )?;
+            }
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.plugin = ::buffa::MessageField::none();
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for SetPluginProxyResponse {
+    const PROTO_FQN: &'static str = "mavio.system.v1.SetPluginProxyResponse";
     fn unknown_fields(&self) -> &::buffa::UnknownFields {
         &self.__buffa_unknown_fields
     }

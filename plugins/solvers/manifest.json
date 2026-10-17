@@ -1,0 +1,31 @@
+{
+  "id": "dev.mavio.solvers",
+  "name": "Challenge Solvers",
+  "version": "0.1.0",
+  "description": "Solves the challenges of sites behind Cloudflare or DDoS-Guard with FlareSolverr, for indexers and subtitle providers, through the proxy each of them uses.",
+  "author": "Mavio",
+  "homepage": "https://github.com/mavioai/mavio",
+  "license": "GPL-3.0-only",
+  "runtime": "RUNTIME_PROCESS",
+  "category": "CATEGORY_DOWNLOADS",
+  "capabilities": [
+    "CAPABILITY_CHALLENGE_SOLVER"
+  ],
+  "configSchema": "{\"$schema\":\"https://json-schema.org/draft/2020-12/schema\",\"type\":\"object\",\"properties\":{\"solvers\":{\"title\":\"Solvers\",\"type\":\"array\",\"description\":\"The solvers tried in turn\",\"default\":[{\"name\":\"flaresolverr\",\"enabled\":true}],\"items\":{\"type\":\"object\",\"required\":[\"name\"],\"properties\":{\"name\":{\"title\":\"Name\",\"type\":\"string\",\"enum\":[\"flaresolverr\"]},\"enabled\":{\"title\":\"Enabled\",\"type\":\"boolean\",\"default\":true,\"x-mavio-requires-container\":\"name\"},\"timeout_seconds\":{\"title\":\"Timeout\",\"type\":\"integer\",\"description\":\"Seconds a challenge may take\",\"default\":60,\"minimum\":10,\"maximum\":600},\"disable_media\":{\"title\":\"Skip media\",\"type\":\"boolean\",\"description\":\"Leave images, fonts and styles unloaded, which solves faster\",\"default\":true}},\"additionalProperties\":false}},\"session_ttl_minutes\":{\"title\":\"Session lifetime\",\"type\":\"integer\",\"description\":\"Minutes before a proxy's browser session is replaced by a fresh one; 0 keeps it\",\"default\":30,\"minimum\":0,\"maximum\":1440},\"max_concurrent\":{\"title\":\"Concurrent challenges\",\"type\":\"integer\",\"description\":\"Challenges solved at once, each in a browser\",\"default\":2,\"minimum\":1,\"maximum\":8}},\"additionalProperties\":false}",
+  "containers": [
+    {
+      "name": "flaresolverr",
+      "description": "FlareSolverr, passing challenges in a headless Chrome",
+      "image": "ghcr.io/flaresolverr/flaresolverr:v3.5.2@sha256:c80ae007ce2ccdcd217a12426e4f039ef763ff90738c808d38810c3e59323767",
+      "port": 8191,
+      "healthPath": "/health",
+      "env": {
+        "LOG_LEVEL": "info"
+      },
+      "memoryMib": 2048,
+      "hostAccess": true,
+      "direct": true
+    }
+  ],
+  "apiVersion": "1.0"
+}

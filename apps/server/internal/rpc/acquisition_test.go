@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"slices"
+	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -53,6 +54,7 @@ type stubClient struct {
 	pluginv1connect.DownloadClientProviderServiceClient
 	mu      sync.Mutex
 	added   []string
+	kinds   []pluginv1.DownloadKind
 	removed []string
 }
 
@@ -66,6 +68,7 @@ func (s *stubClient) AddDownload(_ context.Context, req *pluginv1.AddDownloadReq
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.added = append(s.added, req.GetTitle())
+	s.kinds = append(s.kinds, req.GetKind())
 	return pluginv1.AddDownloadResponse_builder{DownloadId: new(req.GetInfoHash())}.Build(), nil
 }
 
@@ -330,6 +333,27 @@ func TestDownloadService(t *testing.T) {
 	queue, err := admin.ListQueue(ctx, &acquisitionv1.ListQueueRequest{})
 	if err != nil || queue.GetTotal() != 1 || queue.GetItems()[0].GetId() != item.GetId() {
 		t.Fatalf("ListQueue = %v, %v, want = the grab", queue, err)
+	}
+
+	// A release sent without an item goes to the client untracked, in its
+	// category for series when the release is of television.
+	show := acquisitionv1.Release_builder{
+		PluginId: new("idx"), IndexerId: new("ix"), Guid: new("show"), Title: new("Show.S01.1080p.WEB-DL"),
+		MagnetUrl: new("magnet:?xt=urn:btih:" + strings.Repeat("c", 40)), InfoHash: new(strings.Repeat("c", 40)),
+		Protocol: new(acquisitionv1.DownloadProtocol_DOWNLOAD_PROTOCOL_TORRENT), Categories: []int32{5040},
+	}.Build()
+	sent, err := admin.GrabRelease(ctx, acquisitionv1.GrabReleaseRequest_builder{Release: show}.Build())
+	if err != nil || sent.HasItem() || sent.GetClientName() != "qBittorrent" {
+		t.Fatalf("GrabRelease without an item = %v, %v, want = sent to qBittorrent", sent, err)
+	}
+	f.client.mu.Lock()
+	gotKind := f.client.kinds[len(f.client.kinds)-1]
+	f.client.mu.Unlock()
+	if gotKind != pluginv1.DownloadKind_DOWNLOAD_KIND_SERIES {
+		t.Errorf("kind = %v, want = series", gotKind)
+	}
+	if queue, err := admin.ListQueue(ctx, &acquisitionv1.ListQueueRequest{}); err != nil || queue.GetTotal() != 1 {
+		t.Errorf("ListQueue after sending = %v, %v, want = the grab alone", queue, err)
 	}
 
 	history, err := admin.ListHistory(ctx, acquisitionv1.ListHistoryRequest_builder{

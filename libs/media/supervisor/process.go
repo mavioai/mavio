@@ -25,8 +25,10 @@ type Process interface {
 type Starter func(ctx context.Context, args []string) (Process, error)
 
 // Exec returns a Starter running the ffmpeg binary at path, reporting
-// progress on standard output.
-func Exec(path string) Starter {
+// progress on standard output. track records each process started, by
+// its process ID, until it exits and the returned function is called;
+// nil records none.
+func Exec(path string, track func(pid int) (done func())) Starter {
 	return func(ctx context.Context, args []string) (Process, error) {
 		full := append([]string{"-progress", "pipe:1", "-nostats"}, args...)
 		// The supervisor ends the process itself, gracefully first; ctx
@@ -42,10 +44,15 @@ func Exec(path string) Starter {
 		}
 		var stderr limitedBuffer
 		cmd.Stderr = &stderr
+		configure(cmd)
 		if err := cmd.Start(); err != nil {
 			return nil, fmt.Errorf("start ffmpeg: %w", err)
 		}
-		return &execProcess{cmd: cmd, stdin: stdin, stdout: stdout, stderr: &stderr}, nil
+		untrack := func() {}
+		if track != nil {
+			untrack = track(cmd.Process.Pid)
+		}
+		return &execProcess{cmd: cmd, stdin: stdin, stdout: stdout, stderr: &stderr, untrack: untrack}, nil
 	}
 }
 
@@ -54,6 +61,8 @@ type execProcess struct {
 	stdin  io.WriteCloser
 	stdout io.Reader
 	stderr *limitedBuffer
+	// untrack ends the record of the process once it exited.
+	untrack func()
 }
 
 func (p *execProcess) Stdin() io.Writer    { return p.stdin }
@@ -62,6 +71,7 @@ func (p *execProcess) Kill() error         { return p.cmd.Process.Kill() }
 
 func (p *execProcess) Wait() error {
 	err := p.cmd.Wait()
+	p.untrack()
 	if err != nil && p.stderr.Len() > 0 {
 		return fmt.Errorf("%w: %s", err, p.stderr.String())
 	}

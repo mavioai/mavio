@@ -71,9 +71,12 @@ export {
 export {
   useAdminServers,
   useCatalogPlugins,
+  useContainerRuntime,
+  useContainers,
   usePluginActions,
   usePluginCatalogs,
   usePluginConfig,
+  usePluginConfigOptions,
   usePluginContainers,
   usePlugins,
 } from "./plugins.ts";
@@ -174,6 +177,7 @@ export {
   useAiSend,
 } from "./ai.ts";
 export { useApiKeys, useBackupDownload, useBackups, useLogs } from "./backups.ts";
+export { systemProxyId, useProxies, useTestProxy } from "./proxies.ts";
 export { useQuota, useRequestActions, useRequests } from "./requests.ts";
 export { usePerson, usePersonItems } from "./people.ts";
 export { useRevokeSession, useSendCommand, useSessions } from "./remote.ts";
@@ -186,7 +190,10 @@ export {
   useHistory,
   useManualImport,
   useQueue,
+  type ReleaseSearch,
+  useReleaseSearch,
   useReleases,
+  useSendRelease,
   useWanted,
   useWantedActions,
   useWantedList,

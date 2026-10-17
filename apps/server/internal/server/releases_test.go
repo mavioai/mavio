@@ -319,10 +319,10 @@ func TestReleases(t *testing.T) {
 
 	cfg, err := json.Marshal(map[string]any{
 		"indexers": []any{
-			map[string]any{"id": "nzbsu", "definition": "newznab", "priority": 10, "settings": map[string]any{"base_url": newznab.URL, "api_key": "key"}},
-			map[string]any{"id": "mtv", "definition": "torznab", "settings": map[string]any{"base_url": torznab.URL, "api_key": "key"}},
-			map[string]any{"id": "nzbindex", "definition": "nzbindex", "settings": map[string]any{"base_url": nzbindex.URL, "api_key": "key"}},
-			map[string]any{"id": "e2e", "definition": "mavioe2e"},
+			map[string]any{"id": "nzbsu", "name": "Newznab", "definition": "newznab", "priority": 10, "settings": map[string]any{"base_url": newznab.URL, "api_key": "key"}},
+			map[string]any{"id": "mtv", "name": "Torznab", "definition": "torznab", "settings": map[string]any{"base_url": torznab.URL, "api_key": "key"}},
+			map[string]any{"id": "nzbindex", "name": "NZBIndex", "definition": "nzbindex", "settings": map[string]any{"base_url": nzbindex.URL, "api_key": "key"}},
+			map[string]any{"id": "e2e", "name": "Mavio E2E", "definition": "mavioe2e"},
 		},
 		"definitions": map[string]any{"url": definitions.URL + "/master/11"},
 	})

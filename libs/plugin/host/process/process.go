@@ -4,6 +4,8 @@
 // The host creates a private directory (mode 0700) holding the socket and
 // passes its path and a one-time token in the environment; the plugin listens,
 // prints a handshake line on stdout and requires the token on every request.
+// The plugin's stdin is a pipe the host holds open, whose end tells the
+// plugin to exit however the host ended.
 // The supervisor forwards the plugin's output to the logger, checks its
 // health, restarts it with exponential backoff when it exits or stops
 // responding, and shuts it down gracefully on Close.
@@ -56,7 +58,10 @@ type Options struct {
 	// DataDir is the plugin's writable data folder, passed in
 	// MAVIO_PLUGIN_DATA; empty passes none.
 	DataDir string
-	Logger  *slog.Logger
+	// Track records each process started, by its process ID, until it
+	// exits and the returned function is called; nil records none.
+	Track  func(pid int) (done func())
+	Logger *slog.Logger
 }
 
 // Plugin is a supervised plugin process. It implements host.Plugin.
@@ -274,7 +279,8 @@ func (p *Plugin) launch(ctx context.Context) error {
 	_ = os.Remove(p.socket)
 	cmd := exec.Command(p.path)
 	cmd.Env = append(os.Environ(), p.opts.Env...)
-	cmd.Env = append(cmd.Env, proc.EnvSocket+"="+p.socket, proc.EnvToken+"="+p.token, proc.EnvHostOS+"="+osinfo.String())
+	cmd.Env = append(cmd.Env, proc.EnvSocket+"="+p.socket, proc.EnvToken+"="+p.token, proc.EnvHostOS+"="+osinfo.String(),
+		proc.EnvLifeline+"="+proc.LifelineStdin)
 	if p.host != nil {
 		cmd.Env = append(cmd.Env, proc.EnvHostSocket+"="+filepath.Join(p.dir, "host.sock"))
 		if p.hostAddr != "" {
@@ -294,8 +300,22 @@ func (p *Plugin) launch(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
+	// The plugin's stdin is a pipe whose other end only this process
+	// holds: the plugin reads its end when this process ends, however.
+	lifeline, held, err := os.Pipe()
+	if err != nil {
+		return err
+	}
+	cmd.Stdin = lifeline
 	if err := cmd.Start(); err != nil {
+		_ = lifeline.Close()
+		_ = held.Close()
 		return fmt.Errorf("start %s: %w", p.manifest.GetId(), err)
+	}
+	_ = lifeline.Close()
+	untrack := func() {}
+	if p.opts.Track != nil {
+		untrack = p.opts.Track(cmd.Process.Pid)
 	}
 	exited := make(chan struct{})
 	go p.forward(stderr, slog.LevelInfo)
@@ -328,6 +348,8 @@ func (p *Plugin) launch(ctx context.Context) error {
 	}()
 	go func() {
 		_ = cmd.Wait()
+		_ = held.Close()
+		untrack()
 		close(exited)
 	}()
 

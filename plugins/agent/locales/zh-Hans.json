@@ -1,0 +1,18 @@
+{
+  "Agent": "智能体",
+  "An AI gateway to the providers pi-ai supports, with their API keys and OAuth logins (subscriptions included) and OpenAI-compatible servers the administrator adds, and agent sessions kept by pi-durable.": "AI 网关：接入 pi-ai 支持的提供者（使用 API 密钥或 OAuth 登录，包括订阅）以及管理员添加的 OpenAI 兼容服务器；智能体会话由 pi-durable 保存。",
+  "Providers": "提供者",
+  "AI providers served by OpenAI-compatible APIs, such as Ollama, LocalAI, LM Studio or vLLM": "通过 OpenAI 兼容 API 提供服务的 AI 提供者，例如 Ollama、LocalAI、LM Studio 或 vLLM",
+  "ID": "ID",
+  "Name": "名称",
+  "Base URL": "基础 URL",
+  "The API's base URL, such as http://localhost:11434/v1": "API 的基础 URL，例如 http://localhost:11434/v1",
+  "API key": "API 密钥",
+  "The key the API takes; keyless servers need none": "API 所需的密钥；无需密钥的服务器可留空",
+  "Headers": "请求头",
+  "Models": "模型",
+  "Context window": "上下文窗口",
+  "Max output tokens": "最大输出 token 数",
+  "Reasoning": "推理",
+  "Images": "图像"
+}

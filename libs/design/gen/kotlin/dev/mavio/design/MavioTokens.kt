@@ -108,7 +108,7 @@ data class MavioTypeStyle(
     val tracking: TextUnit,
 )
 
-/** A type scale: standard for phones and tablets, tv for Android TV. */
+/** A type scale: standard for phones and tablets, desktop for desktops, tv for Android TV. */
 @Immutable
 data class MavioTypography(
     val display: MavioTypeStyle,
@@ -132,6 +132,18 @@ val StandardTypography = MavioTypography(
     callout = MavioTypeStyle(size = 15.sp, lineHeight = 20.sp, weight = FontWeight.W400, tracking = 0.sp),
     footnote = MavioTypeStyle(size = 13.sp, lineHeight = 18.sp, weight = FontWeight.W400, tracking = 0.sp),
     caption = MavioTypeStyle(size = 12.sp, lineHeight = 16.sp, weight = FontWeight.W500, tracking = 0.sp),
+)
+
+val DesktopTypography = MavioTypography(
+    display = MavioTypeStyle(size = 26.sp, lineHeight = 32.sp, weight = FontWeight.W700, tracking = 0.sp),
+    title1 = MavioTypeStyle(size = 22.sp, lineHeight = 28.sp, weight = FontWeight.W700, tracking = 0.sp),
+    title2 = MavioTypeStyle(size = 17.sp, lineHeight = 22.sp, weight = FontWeight.W600, tracking = 0.sp),
+    title3 = MavioTypeStyle(size = 15.sp, lineHeight = 20.sp, weight = FontWeight.W600, tracking = 0.sp),
+    headline = MavioTypeStyle(size = 13.sp, lineHeight = 18.sp, weight = FontWeight.W600, tracking = 0.sp),
+    body = MavioTypeStyle(size = 13.sp, lineHeight = 18.sp, weight = FontWeight.W400, tracking = 0.sp),
+    callout = MavioTypeStyle(size = 13.sp, lineHeight = 18.sp, weight = FontWeight.W400, tracking = 0.sp),
+    footnote = MavioTypeStyle(size = 11.sp, lineHeight = 14.sp, weight = FontWeight.W400, tracking = 0.sp),
+    caption = MavioTypeStyle(size = 10.sp, lineHeight = 13.sp, weight = FontWeight.W500, tracking = 0.sp),
 )
 
 val TvTypography = MavioTypography(
