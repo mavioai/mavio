@@ -76,7 +76,7 @@ func (c *call) resolveTitle(text string, ks []libraryv1.ItemKind) ([]*libraryv1.
 		return nil, nil
 	}
 	resp, err := c.s.cfg.Services.Items.ListItems(c.ctx, libraryv1.ListItemsRequest_builder{
-		Search: &text, Recursive: new(true), Kinds: ks, Limit: new(int32(20)),
+		Search: &text, Kinds: ks, Limit: new(int32(20)),
 	}.Build())
 	if err != nil {
 		return nil, err
@@ -96,7 +96,7 @@ func (c *call) resolveTitle(text string, ks []libraryv1.ItemKind) ([]*libraryv1.
 // it.
 func (c *call) soundsLike(text string, ks []libraryv1.ItemKind) ([]*libraryv1.Item, error) {
 	resp, err := c.s.cfg.Services.Items.ListItems(c.ctx, libraryv1.ListItemsRequest_builder{
-		Recursive: new(true), Kinds: ks, Limit: new(int32(1000)),
+		Kinds: ks, Limit: new(int32(1000)),
 	}.Build())
 	if err != nil {
 		return nil, err

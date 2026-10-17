@@ -8,6 +8,8 @@ import (
 	"testing"
 	"time"
 
+	"connectrpc.com/connect"
+
 	"github.com/mavioai/mavio/apps/server/internal/assistant/intent"
 	"github.com/mavioai/mavio/apps/server/internal/auth"
 	"github.com/mavioai/mavio/libs/core"
@@ -25,6 +27,10 @@ type fakeItems struct {
 }
 
 func (f *fakeItems) ListItems(_ context.Context, req *libraryv1.ListItemsRequest) (*libraryv1.ListItemsResponse, error) {
+	// As the item service, which takes no recursive query without a parent.
+	if req.GetRecursive() && req.GetParentId() == "" {
+		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("recursive query without a parent"))
+	}
 	var out []*libraryv1.Item
 	for _, it := range f.items {
 		if ks := req.GetKinds(); len(ks) > 0 && !slices.Contains(ks, it.GetKind()) {

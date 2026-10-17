@@ -367,7 +367,6 @@ type itemsResult struct {
 func (c *call) searchLibrary(a searchArgs) (any, error) {
 	req := &libraryv1.ListItemsRequest{}
 	req.SetSearch(strings.TrimSpace(a.Query))
-	req.SetRecursive(true)
 	var ks []libraryv1.ItemKind
 	for _, k := range a.Kinds {
 		if v, ok := kinds[k]; ok {
@@ -528,7 +527,7 @@ func (c *call) listNextUp(a listArgs) (any, error) {
 func (c *call) listResume(a listArgs) (any, error) {
 	field, desc := libraryv1.SortField_SORT_FIELD_LAST_PLAYED, true
 	resp, err := c.s.cfg.Services.Items.ListItems(c.ctx, libraryv1.ListItemsRequest_builder{
-		Recursive: new(true), Resumable: new(true), Limit: new(limit(a.Limit, 10)),
+		Resumable: new(true), Limit: new(limit(a.Limit, 10)),
 		Sort: []*libraryv1.SortSpec{libraryv1.SortSpec_builder{Field: &field, Descending: &desc}.Build()},
 	}.Build())
 	if err != nil {
