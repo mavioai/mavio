@@ -108,17 +108,24 @@ func TestTransportUnsolved(t *testing.T) {
 		_, _ = io.WriteString(w, "<title>Just a moment...</title>")
 	}))
 	defer site.Close()
-	s := &solver{err: connect.NewError(connect.CodeUnavailable, nil)}
+	s := &solver{err: connect.NewError(connect.CodeDeadlineExceeded, nil)}
 	_, err := (&http.Client{Transport: &Transport{Next: http.DefaultTransport, Solver: s}}).Get(site.URL)
 	if err == nil || !strings.Contains(err.Error(), ErrUnsolved.Error()) {
 		t.Errorf("got = %v, want = ErrUnsolved", err)
 	}
-	// Without a solver, the challenge is returned.
-	resp, err := (&http.Client{Transport: &Transport{Next: http.DefaultTransport}}).Get(site.URL)
-	if err != nil || resp.StatusCode != http.StatusServiceUnavailable {
-		t.Errorf("without a solver got = %v, %v; want = 503", resp, err)
+	// Without a solver, or without a solver plugin, the challenge is
+	// returned.
+	for _, s := range []Solver{nil, &solver{err: connect.NewError(connect.CodeUnavailable, nil)}} {
+		resp, err := (&http.Client{Transport: &Transport{Next: http.DefaultTransport, Solver: s}}).Get(site.URL)
+		if err != nil {
+			t.Fatalf("solver %v: got = %v, want = 503", s, err)
+		}
+		page, _ := io.ReadAll(resp.Body)
+		_ = resp.Body.Close()
+		if resp.StatusCode != http.StatusServiceUnavailable || !strings.Contains(string(page), "Just a moment") {
+			t.Errorf("solver %v: got = %d %q, want = 503 and the challenge", s, resp.StatusCode, page)
+		}
 	}
-	_ = resp.Body.Close()
 }
 
 func TestApply(t *testing.T) {

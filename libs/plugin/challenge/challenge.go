@@ -15,6 +15,8 @@ import (
 	"sync"
 	"time"
 
+	"connectrpc.com/connect"
+
 	pluginv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1/pluginv1connect"
 )
@@ -118,7 +120,8 @@ func Apply(r *http.Request, s *pluginv1.ChallengeSolution) {
 
 // Transport solves the challenges answering its requests, sending a
 // host's later requests with the solution and retrying the challenged
-// request once.
+// request once. Without a solver plugin (the server answering
+// Unavailable), the challenge is returned as it is.
 type Transport struct {
 	// Next sends requests, through the proxy of ProxyID.
 	Next http.RoundTripper
@@ -157,6 +160,9 @@ func (t *Transport) RoundTrip(r *http.Request) (*http.Response, error) {
 		return resp, nil
 	}
 	s, err := Solve(r.Context(), t.Solver, r, body, t.ProxyID, t.Timeout)
+	if connect.CodeOf(err) == connect.CodeUnavailable {
+		return resp, nil
+	}
 	if err != nil {
 		return nil, err
 	}
