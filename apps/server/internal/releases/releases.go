@@ -177,21 +177,27 @@ func (s *Searcher) Search(ctx context.Context, q Search) (*Result, error) {
 			clients[p.ID] = p.Client
 		}
 	}
+	// The indexers asked for, true once found.
 	wanted := map[Ref]bool{}
 	for _, r := range q.Indexers {
-		wanted[r] = true
+		wanted[r] = false
 	}
 	var targets []Indexer
 	for _, ix := range indexers {
 		ref := Ref{ix.Provider, ix.GetId()}
-		if len(wanted) > 0 && !wanted[ref] || len(wanted) == 0 && !ix.GetEnabled() || clients[ix.Provider] == nil {
+		_, asked := wanted[ref]
+		if len(wanted) > 0 && !asked || len(wanted) == 0 && !ix.GetEnabled() || clients[ix.Provider] == nil {
 			continue
 		}
 		targets = append(targets, ix)
-		delete(wanted, ref)
+		if asked {
+			wanted[ref] = true
+		}
 	}
-	for ref := range wanted {
-		failures = append(failures, Failure{Provider: ref.Provider, Indexer: ref.Indexer, Message: "unknown indexer"})
+	for ref, found := range wanted {
+		if !found {
+			failures = append(failures, Failure{Provider: ref.Provider, Indexer: ref.Indexer, Message: "unknown indexer"})
+		}
 	}
 
 	found := make([][]Release, len(targets))
