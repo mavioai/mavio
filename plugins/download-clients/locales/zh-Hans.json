@@ -6,7 +6,7 @@
   "ID": "ID",
   "Name": "名称",
   "Definition": "定义",
-  "The ID of the client's definition": "客户端定义的 ID",
+  "The kind of download client, such as qBittorrent": "下载客户端的类型，例如 qBittorrent",
   "Enabled": "启用",
   "Priority": "优先级",
   "Clients of a protocol are used by priority, lower first, and in turn among equals": "同一协议的客户端按优先级使用，数值小的优先，相同优先级轮流使用",
