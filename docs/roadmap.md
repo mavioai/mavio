@@ -954,7 +954,7 @@ flowchart TD
 - [x] Contracts, domain and storage: the manifest's `containers` and their validation, `PluginContainer` in `libs/core` and `libs/store`, `GetContainerRuntime`, `ListPluginContainers`, `SetPluginContainer` and `HostService.ListContainers`, the `container-endpoint` setting; external dependencies are kept and health-checked, and choosing managed answers `UNIMPLEMENTED` until the next step
 - [x] Managed dependencies, the server on the host: `containers.Supervisor` creates the `mavio` network, pulls missing images, replaces a container whose `dev.mavio.spec` differs, publishes its port on loopback, waits for its health check and restarts it with backoff after three failed checks; managed dependencies start and stop with their plugins, are removed with their volumes on uninstall and reconciled at startup; the `container-prefix` setting; tested against an in-memory engine (`containerstest`) and on Docker 29 through OrbStack (`TestEngineSupervisor`)
   - [ ] Pulls as `plugin.container_pull` jobs with their progress in `TaskService`; pulls run inside the supervisor for now, reported only as `pulling`
-- [ ] Managed dependencies, the server in a container
+- [x] Managed dependencies, the server in a container: the server's container joins the `mavio` network and dependencies are reached by name without published ports; tested against the in-memory engine
 - [ ] External dependencies and commands, and dependencies' addresses in WASM plugins' `http_hosts`
 - [ ] `plugins/voice` and the web UI
 - [ ] The end-to-end test of **Done when**

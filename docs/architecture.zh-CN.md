@@ -626,9 +626,9 @@ Mavio 为电影与单集查找缺少的字幕，即 Bazarr 在 Sonarr 与 Radarr
 
 ### 16.2 命名、标签与网络
 * **名称**带 Mavio 的前缀 `--container-prefix`（`MAVIO_CONTAINER_PREFIX`，默认 `mavio`），同一引擎上的第二个服务端需修改它：插件 `<plugin>` 的依赖 `<name>` 的容器为 `mavio-<plugin>-<name>`，其卷 `<v>` 为 `mavio-<plugin>-<name>-<v>`，网络为 `mavio`。外部命令使用同样的名称。
-* **标签**：服务端创建的每个容器、卷与网络都带 `dev.mavio.server`（服务端的 ID）、`dev.mavio.plugin`、`dev.mavio.dependency` 与 `dev.mavio.spec`（解析后的声明的哈希）。服务端只操作带自己服务端 ID 的对象；名称被其他对象占用时报错并指出它。
+* **标签**：服务端创建的每个容器、卷与网络都带 `dev.mavio.server`（服务端的 ID）、`dev.mavio.plugin`、`dev.mavio.dependency` 与 `dev.mavio.spec`（解析后的声明的哈希，端口不发布时另加标记）。服务端只操作带自己服务端 ID 的对象；名称被其他对象占用时报错并指出它。
 * **服务端在宿主机上**：依赖的端口发布在 `127.0.0.1` 上由引擎选定的端口，地址为 `http://127.0.0.1:<port>`。其容器也以自己的名称加入 `mavio` 网络，其他容器经 `http://mavio-<plugin>-<name>:<port>` 访问它。
-* **服务端在容器中**：服务端创建 `mavio` 桥接网络，把自己的容器连入，并在其中运行依赖而不发布端口；地址为 `http://mavio-<plugin>-<name>:<port>`。
+* **服务端在容器中**：服务端创建 `mavio` 桥接网络，把自己的容器连入，并在其中运行依赖而不发布端口；地址为 `http://mavio-<plugin>-<name>:<port>`。引擎找不到其自身容器的服务端（主机名不是其容器的 ID）不能托管依赖。
 
 ### 16.3 托管依赖
 * **允许**：按 digest 指定的镜像；声明的命令、环境变量、端口与命名卷；内存与 CPU 限制；声明需要且管理员允许时，经设备请求使用 NVIDIA GPU。绝不使用特权模式、额外的 capability、宿主机的网络、PID 或 IPC 命名空间、设备，或宿主机路径的绑定挂载。

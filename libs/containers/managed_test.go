@@ -229,6 +229,29 @@ func TestSupervisorConflict(t *testing.T) {
 	})
 }
 
+func TestSupervisorInContainer(t *testing.T) {
+	synctest.Test(t, func(t *testing.T) {
+		e, h, c := containerstest.New(), &health{}, &changes{}
+		s := containers.NewSupervisor(containers.SupervisorOptions{
+			Engine: e, Server: "server-1", Self: "self", OnChange: c.record, Probe: h.probe,
+		})
+		defer s.Close(context.Background())
+		s.Start(whisper())
+		synctest.Wait()
+		st, _ := s.Status("dev.mavio.voice", "whisper")
+		if want := "http://mavio-voice-whisper:9000"; st.State != containers.Ready || st.Address != want {
+			t.Errorf("Status = %+v, want ready at %s", st, want)
+		}
+		if !slices.Contains(e.Took(), "connect mavio self") {
+			t.Error("the server's container did not join the network")
+		}
+		spec, _, _ := e.Spec("mavio-voice-whisper")
+		if spec.PublishLoopback || spec.Labels[containers.LabelSpec] == containers.Hash(whisper()) {
+			t.Errorf("spec publishes %v with label %q, want an unpublished port and its own label", spec.PublishLoopback, spec.Labels[containers.LabelSpec])
+		}
+	})
+}
+
 func TestSupervisorRemoveAndReconcile(t *testing.T) {
 	synctest.Test(t, func(t *testing.T) {
 		e, h, c := containerstest.New(), &health{}, &changes{}

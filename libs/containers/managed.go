@@ -148,6 +148,7 @@ type Engine interface {
 	PullImage(ctx context.Context, ref string, progress func(PullProgress)) error
 	InspectNetwork(ctx context.Context, id string) (Network, error)
 	CreateNetwork(ctx context.Context, name string, labels map[string]string) (string, error)
+	ConnectNetwork(ctx context.Context, network, container string, aliases []string) error
 	CreateContainer(ctx context.Context, s ContainerSpec) (string, error)
 	StartContainer(ctx context.Context, id string) error
 	StopContainer(ctx context.Context, id string, timeout time.Duration) error
@@ -167,6 +168,11 @@ type SupervisorOptions struct {
 	// Server is the server's ID, which labels what it creates; the
 	// Supervisor touches nothing labeled with another.
 	Server string
+	// Self is the server's own container when the server runs in one off
+	// the host's network: it joins the network of Names.Network, and
+	// dependencies are reached there by name rather than through ports
+	// published on the loopback interface. Empty for a server on the host.
+	Self string
 	// OnChange is called with a dependency's status whenever it changes,
 	// never concurrently for one dependency; nil calls nothing.
 	OnChange func(plugin, name string, st Status)
@@ -185,9 +191,12 @@ type SupervisorOptions struct {
 	Logger     *slog.Logger
 }
 
-// Supervisor runs managed dependencies on a container engine for a server
-// on the host: each container publishes its port on 127.0.0.1, which is
-// its address, and joins the network of Names.Network under its name. It
+// Supervisor runs managed dependencies on a container engine. Each
+// container joins the network of Names.Network under its name; for a
+// server on the host it publishes its port on 127.0.0.1, which is its
+// address, and for a server in a container (SupervisorOptions.Self) its
+// address is http://<name>:<port> on that network, which the server's
+// container joins. It
 // replaces a container created from another Hash, waits for the health
 // check, checks it every Interval and restarts the container after
 // Failures failures in a row, backing off up to MaxBackoff.
@@ -494,6 +503,12 @@ func (s *Supervisor) ensure(ctx context.Context, r *run, name string) (id, addr 
 		return "", "", fmt.Errorf("inspect network %s: %w", network, err)
 	}
 
+	if s.o.Self != "" {
+		if err := s.join(ctx, network); err != nil {
+			return "", "", err
+		}
+	}
+
 	ctr, err := e.InspectContainer(ctx, name)
 	switch {
 	case errors.Is(err, core.ErrNotFound):
@@ -501,7 +516,7 @@ func (s *Supervisor) ensure(ctx context.Context, r *run, name string) (id, addr 
 		return "", "", fmt.Errorf("inspect container %s: %w", name, err)
 	case ctr.Config.Labels[LabelServer] != s.o.Server:
 		return "", "", fmt.Errorf("%w: container %s is not this server's", core.ErrConflict, name)
-	case ctr.Config.Labels[LabelSpec] != r.hash:
+	case ctr.Config.Labels[LabelSpec] != s.specLabel(r):
 		s.o.Logger.InfoContext(ctx, "replacing a dependency's container", "container", name)
 		if err := e.RemoveContainer(ctx, ctr.ID); err != nil && !errors.Is(err, core.ErrNotFound) {
 			return "", "", fmt.Errorf("remove container %s: %w", name, err)
@@ -527,6 +542,9 @@ func (s *Supervisor) ensure(ctx context.Context, r *run, name string) (id, addr 
 	if err := e.StartContainer(ctx, id); err != nil {
 		return id, "", fmt.Errorf("start container %s: %w", name, err)
 	}
+	if s.o.Self != "" {
+		return id, fmt.Sprintf("http://%s:%d", name, d.Port), nil
+	}
 	if ctr, err = e.InspectContainer(ctx, id); err != nil {
 		return id, "", fmt.Errorf("inspect container %s: %w", name, err)
 	}
@@ -537,12 +555,40 @@ func (s *Supervisor) ensure(ctx context.Context, r *run, name string) (id, addr 
 	return id, fmt.Sprintf("http://127.0.0.1:%d", port), nil
 }
 
+// join connects the server's own container to the network unless it is
+// connected.
+func (s *Supervisor) join(ctx context.Context, network string) error {
+	n, err := s.o.Engine.InspectNetwork(ctx, network)
+	if err != nil {
+		return fmt.Errorf("inspect network %s: %w", network, err)
+	}
+	for id, c := range n.Containers {
+		if strings.HasPrefix(id, s.o.Self) || strings.TrimPrefix(c.Name, "/") == s.o.Self {
+			return nil
+		}
+	}
+	if err := s.o.Engine.ConnectNetwork(ctx, network, s.o.Self, nil); err != nil {
+		return fmt.Errorf("connect the server's container to network %s: %w", network, err)
+	}
+	return nil
+}
+
+// specLabel is a run's LabelSpec: its Hash, marked when its port is not
+// published, so a container is replaced when the server moves between
+// the host and a container.
+func (s *Supervisor) specLabel(r *run) string {
+	if s.o.Self != "" {
+		return r.hash + "-unpublished"
+	}
+	return r.hash
+}
+
 // spec returns what a run's container is created with.
 func (s *Supervisor) spec(r *run, name string) ContainerSpec {
 	d := r.dep
 	volumeLabels := s.labels(d.Plugin, d.Name)
 	labels := maps.Clone(volumeLabels)
-	labels[LabelSpec] = r.hash
+	labels[LabelSpec] = s.specLabel(r)
 	env := make([]string, 0, len(d.Env))
 	for _, k := range slices.Sorted(maps.Keys(d.Env)) {
 		env = append(env, k+"="+d.Env[k])
@@ -553,7 +599,7 @@ func (s *Supervisor) spec(r *run, name string) ContainerSpec {
 	}
 	return ContainerSpec{
 		Name: name, Image: d.Image, Cmd: d.Cmd, Env: env, Labels: labels, VolumeLabels: volumeLabels,
-		Port: d.Port, PublishLoopback: true, Network: s.o.Names.Network(), Aliases: []string{name},
+		Port: d.Port, PublishLoopback: s.o.Self == "", Network: s.o.Names.Network(), Aliases: []string{name},
 		Volumes: volumes, Memory: d.Memory, CPUs: d.CPUs, GPU: d.GPU,
 	}
 }

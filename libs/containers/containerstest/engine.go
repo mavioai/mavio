@@ -19,8 +19,8 @@ var _ containers.Engine = (*Engine)(nil)
 type Engine struct {
 	mu         sync.Mutex
 	images     map[string]bool
-	networks   map[string]bool
-	containers map[string]*container // by name
+	networks   map[string]map[string]struct{ Name string } // members by ID
+	containers map[string]*container                       // by name
 	volumes    map[string]map[string]string
 	nextPort   int
 	calls      []string
@@ -36,7 +36,7 @@ type container struct {
 // New returns an engine with nothing.
 func New() *Engine {
 	return &Engine{
-		images: map[string]bool{}, networks: map[string]bool{}, containers: map[string]*container{},
+		images: map[string]bool{}, networks: map[string]map[string]struct{ Name string }{}, containers: map[string]*container{},
 		volumes: map[string]map[string]string{}, nextPort: 49000,
 	}
 }
@@ -86,17 +86,30 @@ func (e *Engine) PullImage(_ context.Context, ref string, _ func(containers.Pull
 func (e *Engine) InspectNetwork(_ context.Context, id string) (containers.Network, error) {
 	e.mu.Lock()
 	defer e.mu.Unlock()
-	if !e.networks[id] {
+	members, ok := e.networks[id]
+	if !ok {
 		return containers.Network{}, core.ErrNotFound
 	}
-	return containers.Network{Name: id}, nil
+	return containers.Network{Name: id, Containers: maps.Clone(members)}, nil
+}
+
+func (e *Engine) ConnectNetwork(_ context.Context, network, container string, _ []string) error {
+	e.mu.Lock()
+	defer e.mu.Unlock()
+	members, ok := e.networks[network]
+	if !ok {
+		return core.ErrNotFound
+	}
+	e.call("connect %s %s", network, container)
+	members[container] = struct{ Name string }{container}
+	return nil
 }
 
 func (e *Engine) CreateNetwork(_ context.Context, name string, _ map[string]string) (string, error) {
 	e.mu.Lock()
 	defer e.mu.Unlock()
 	e.call("create network %s", name)
-	e.networks[name] = true
+	e.networks[name] = map[string]struct{ Name string }{}
 	return name, nil
 }
 

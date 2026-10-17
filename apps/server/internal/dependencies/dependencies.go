@@ -177,21 +177,25 @@ func (s *Service) Runtime(ctx context.Context, detect bool) (containers.Runtime,
 }
 
 // supervisor returns the Supervisor of managed dependencies, detecting
-// the engine on first use: ErrNoEngine without one, errors.ErrUnsupported
-// for a server in a container, which does not run them yet.
+// the engine on first use: ErrNoEngine without one, or for a server in a
+// container whose own container the engine does not know.
 func (s *Service) supervisor(ctx context.Context) (*containers.Supervisor, error) {
 	rt, err := s.Runtime(ctx, false)
 	if err != nil {
 		return nil, fmt.Errorf("%w: %w", ErrNoEngine, err)
 	}
+	var self string
 	if !rt.OnHost() {
-		return nil, fmt.Errorf("managed container dependencies of a server in a container: %w", errors.ErrUnsupported)
+		if rt.Self == nil {
+			return nil, fmt.Errorf("%w: the server runs in a container the engine does not know; give the container its own ID as host name", ErrNoEngine)
+		}
+		self = rt.Self.ID
 	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	if s.sup == nil && s.ctx.Err() == nil {
 		s.sup = containers.NewSupervisor(containers.SupervisorOptions{
-			Engine: s.cfg.Engine(rt), Names: s.cfg.Names, Server: s.cfg.Server, OnChange: s.changed,
+			Engine: s.cfg.Engine(rt), Names: s.cfg.Names, Server: s.cfg.Server, Self: self, OnChange: s.changed,
 			Probe: s.cfg.Probe, Poll: s.cfg.Poll, Logger: s.cfg.Logger,
 		})
 	}
@@ -410,8 +414,7 @@ func (s *Service) List(ctx context.Context, pluginID string) ([]Dependency, erro
 // Set sets how a dependency is reached and returns it, generating its
 // secrets the first time, and configures the plugin again when its mode
 // or address changed. A managed dependency needs a container engine
-// (ErrNoEngine) and the server on the host (errors.ErrUnsupported); it
-// runs while its plugin runs. Leaving managed removes its container and
+// (ErrNoEngine); it runs while its plugin runs. Leaving managed removes its container and
 // keeps its volumes.
 func (s *Service) Set(ctx context.Context, pluginID, name string, mode core.ContainerMode, address string, useGPU bool) (Dependency, error) {
 	m, err := s.manifest(pluginID)

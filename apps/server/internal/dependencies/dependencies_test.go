@@ -207,15 +207,22 @@ func TestRuntime(t *testing.T) {
 }
 
 func TestManagedInContainer(t *testing.T) {
-	s, _, _ := newService(t, func(c *dependencies.Config) {
-		c.Detect = func(ctx context.Context) (containers.Runtime, error) {
-			rt, err := onHost(ctx)
-			rt.InContainer = true
-			return rt, err
+	for _, self := range []*containers.Container{nil, {ID: "self"}} {
+		s, _, _ := newService(t, func(c *dependencies.Config) {
+			c.Detect = func(ctx context.Context) (containers.Runtime, error) {
+				rt, err := onHost(ctx)
+				rt.InContainer, rt.Self = true, self
+				return rt, err
+			}
+			c.Engine = func(containers.Runtime) containers.Engine { return containerstest.New() }
+		})
+		_, err := s.Set(t.Context(), pluginID, "whisper", core.ContainerManaged, "", false)
+		if self == nil && !errors.Is(err, dependencies.ErrNoEngine) {
+			t.Errorf("Set of managed = %v, want ErrNoEngine without the server's container", err)
 		}
-	})
-	if _, err := s.Set(t.Context(), pluginID, "whisper", core.ContainerManaged, "", false); !errors.Is(err, errors.ErrUnsupported) {
-		t.Errorf("Set of managed = %v, want errors.ErrUnsupported for a server in a container", err)
+		if self != nil && err != nil {
+			t.Errorf("Set of managed = %v, want nil", err)
+		}
 	}
 }
 
