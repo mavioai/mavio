@@ -328,7 +328,7 @@ erDiagram
 * 按 `PluginID`（清单中的 ID）保存，而不是跟随已安装的文件，因此插件升级后配置仍在；卸载插件时删除。
 * `Validate` 要求有插件 ID 且 JSON 格式正确；是否符合 schema 由了解清单的服务端在保存配置之前检查。
 
-`PluginContainer` 是服务端为插件清单声明的某个容器依赖（[插件 §11](plugins.zh-CN.md#11-容器依赖)）保存的内容，按 `PluginID` 与 `Name` 保存：其 `Mode`（`unset`、`managed`、`external`）、管理员为外部依赖给出的 `Address`、按键为它生成的 `Secrets`、托管依赖是否可以使用 GPU（`UseGPU`），以及 `UpdatedAt`。
+`PluginContainer` 是服务端为插件清单声明的某个容器依赖（[插件 §11](plugins.zh-CN.md#11-容器依赖)）保存的内容，按 `PluginID` 与 `Name` 保存：其 `Mode`（`unset`、`managed`、`external`）、管理员为外部依赖给出的 `Address`、按键为它生成的 `Secrets`、托管依赖是否可以使用 GPU（`UseGPU`）、托管依赖访问站点所经的 `Proxy`（代理的 ID，默认 `system`，为空表示不使用代理），以及 `UpdatedAt`。
 
 * `Validate` 要求有插件 ID、名称、已知的模式，`external` 时还要求绝对的 `http` 或 `https` URL；托管或未设置的依赖没有地址。
 * 插件升级后保留；卸载插件时删除该插件的全部记录，清单不再声明的依赖在插件启动时删除。
