@@ -1,0 +1,326 @@
+package app
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"image"
+	"image/color"
+	"image/png"
+	"math"
+	"net/http"
+	"net/http/httptest"
+	"os"
+	"path/filepath"
+	"strings"
+	"sync"
+	"testing"
+	"time"
+
+	"github.com/egoist/mygo/ui"
+
+	"github.com/mavioai/mavio/libs/client-rust/capi"
+	capiv1 "github.com/mavioai/mavio/libs/client-rust/capi/gen/mavio/capi/v1"
+
+	"github.com/mavioai/mavio/apps/desktop/internal/images"
+)
+
+// screens is the fixed data of the snapshot tests, libs/design/snapshots/screens.json.
+type screens struct {
+	Now    time.Time `json:"now"`
+	Server struct {
+		ID, Name, Version, UserID, UserName string
+	} `json:"server"`
+	Libraries []struct{ ID, Name, Kind string } `json:"libraries"`
+	Items     map[string]struct {
+		Kind, Name, Series, Library string
+		Year, RuntimeMinutes        int
+		Season, Episode             int
+	} `json:"items"`
+	Home []struct {
+		Kind, Library string
+		Items         []struct {
+			ID              string
+			ProgressMinutes int
+			Played          bool
+		}
+	} `json:"home"`
+}
+
+func readScreens(t testing.TB) *screens {
+	b, err := os.ReadFile(filepath.Join("..", "..", "..", "..", "libs", "design", "snapshots", "screens.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var s screens
+	if err := json.Unmarshal(b, &s); err != nil {
+		t.Fatal(err)
+	}
+	return &s
+}
+
+// fakeCore answers as a server of the fixed data would.
+type fakeCore struct {
+	s       *screens
+	images  string // the artwork server's URL
+	servers []*capiv1.ServerRecord
+
+	mu    sync.Mutex
+	calls []string
+}
+
+func newFakeCore(s *screens, images string, signedIn bool) *fakeCore {
+	f := &fakeCore{s: s, images: images}
+	if signedIn {
+		f.servers = []*capiv1.ServerRecord{f.record()}
+	}
+	return f
+}
+
+func (f *fakeCore) record() *capiv1.ServerRecord {
+	return capiv1.ServerRecord_builder{
+		Id: f.s.Server.ID, Address: "http://mavio.test", Name: f.s.Server.Name, Version: f.s.Server.Version,
+		UserId: f.s.Server.UserID, UserName: f.s.Server.UserName,
+	}.Build()
+}
+
+func (f *fakeCore) artwork(id string) *capiv1.Artwork {
+	return capiv1.Artwork_builder{Url: f.images + "/images/" + id}.Build()
+}
+
+func (f *fakeCore) card(id string, progressMinutes int, played bool) *capiv1.Card {
+	it := f.s.Items[id]
+	kind := map[string]capiv1.CardKind{
+		"movie": capiv1.CardKind_CARD_KIND_MOVIE, "series": capiv1.CardKind_CARD_KIND_SERIES, "episode": capiv1.CardKind_CARD_KIND_EPISODE,
+	}[it.Kind]
+	b := capiv1.Card_builder{
+		ServerId: f.s.Server.ID, ItemId: id, Kind: kind, Title: it.Name, Year: int32(it.Year),
+		Poster: f.artwork(id + "-poster"), Thumb: f.artwork(id + "-thumb"),
+		RuntimeMs: int64(it.RuntimeMinutes) * 60000, Played: played,
+	}
+	if it.Kind == "episode" {
+		b.Subtitle = fmt.Sprintf("%s · S%d:E%d", f.s.Items[it.Series].Name, it.Season, it.Episode)
+	}
+	if progressMinutes > 0 && it.RuntimeMinutes > 0 {
+		b.Progress = new(float32(progressMinutes) / float32(it.RuntimeMinutes))
+	}
+	return b.Build()
+}
+
+func (f *fakeCore) rows() []*capiv1.Row {
+	var rows []*capiv1.Row
+	for i, h := range f.s.Home {
+		r := capiv1.Row_builder{Id: fmt.Sprint("row-", i), ServerId: f.s.Server.ID, ServerName: f.s.Server.Name}
+		switch h.Kind {
+		case "continueWatching":
+			r.Kind = capiv1.RowKind_ROW_KIND_CONTINUE_WATCHING
+		case "recentlyAdded":
+			r.Kind = capiv1.RowKind_ROW_KIND_RECENTLY_ADDED
+		}
+		for _, l := range f.s.Libraries {
+			if l.ID == h.Library {
+				r.LibraryName = l.Name
+			}
+		}
+		var cards []*capiv1.Card
+		for _, it := range h.Items {
+			cards = append(cards, f.card(it.ID, it.ProgressMinutes, it.Played))
+		}
+		r.Items = capiv1.Cards_builder{Cards: cards}.Build()
+		rows = append(rows, r.Build())
+	}
+	return rows
+}
+
+func (f *fakeCore) Call(ctx context.Context, req *capiv1.Request) (*capiv1.Message, error) {
+	return f.Stream(ctx, req, nil)
+}
+
+func (f *fakeCore) Stream(ctx context.Context, req *capiv1.Request, part func(*capiv1.Message)) (*capiv1.Message, error) {
+	f.mu.Lock()
+	f.calls = append(f.calls, req.WhichKind().String())
+	f.mu.Unlock()
+	m := capiv1.Message_builder{}
+	switch {
+	case req.HasListServers():
+		m.Servers = capiv1.Servers_builder{Servers: f.servers}.Build()
+	case req.HasStart(), req.HasCancelQuickConnect(), req.HasSetPlayed(), req.HasSetFavorite():
+		m.Done = &capiv1.Done{}
+	case req.HasDiscover():
+		m.FoundServers = &capiv1.FoundServers{}
+	case req.HasProbe():
+		m.ServerInfo = capiv1.ServerInfo_builder{Id: f.s.Server.ID, Name: f.s.Server.Name, Address: req.GetProbe().GetAddress()}.Build()
+	case req.HasSignIn():
+		if req.GetSignIn().GetPassword() != "secret" {
+			return nil, &capi.Error{Code: capiv1.Error_CODE_UNAUTHENTICATED}
+		}
+		f.servers = []*capiv1.ServerRecord{f.record()}
+		m.Server = f.record()
+	case req.HasListLibraries():
+		var libs []*capiv1.Library
+		for _, l := range f.s.Libraries {
+			kind := map[string]capiv1.LibraryType{"movies": capiv1.LibraryType_LIBRARY_TYPE_MOVIES, "shows": capiv1.LibraryType_LIBRARY_TYPE_SHOWS}[l.Kind]
+			libs = append(libs, capiv1.Library_builder{ServerId: f.s.Server.ID, Id: l.ID, Name: l.Name, Kind: kind}.Build())
+		}
+		m.Libraries = capiv1.Libraries_builder{Libraries: libs}.Build()
+	case req.HasLoadHome():
+		if part != nil {
+			part(capiv1.Message_builder{Rows: capiv1.Rows_builder{Rows: f.rows()}.Build(), More: true}.Build())
+		}
+		m.Done = &capiv1.Done{}
+	case req.HasGetRecommended():
+		m.Rows = capiv1.Rows_builder{Rows: f.rows()[1:]}.Build()
+	case req.HasListLibraryItems():
+		var cards []*capiv1.Card
+		for id, it := range f.s.Items {
+			if it.Library == req.GetListLibraryItems().GetLibraryId() && it.Kind != "episode" {
+				cards = append(cards, f.card(id, 0, false))
+			}
+		}
+		sortCards(cards)
+		m.Page = capiv1.Page_builder{Cards: cards, Total: new(uint32(len(cards)))}.Build()
+	case req.HasGetDetails():
+		id := req.GetGetDetails().GetItemId()
+		if _, ok := f.s.Items[id]; !ok {
+			return nil, &capi.Error{Code: capiv1.Error_CODE_NOT_FOUND}
+		}
+		m.Details = capiv1.Details_builder{
+			Card: f.card(id, 0, false), ServerName: f.s.Server.Name,
+			Overview: "A made-up title of the snapshot tests, whose overview runs long enough to wrap over a few lines of the details.",
+			Genres:   []string{"Drama", "Science Fiction"}, OfficialRating: "PG-13", CommunityRating: new(float32(7.8)),
+			Backdrop: f.artwork(id + "-thumb"),
+		}.Build()
+	case req.HasSearch():
+		var cards []*capiv1.Card
+		q := strings.ToLower(req.GetSearch().GetQuery())
+		for id, it := range f.s.Items {
+			if strings.Contains(strings.ToLower(it.Name), q) {
+				cards = append(cards, f.card(id, 0, false))
+			}
+		}
+		sortCards(cards)
+		m.SearchResults = capiv1.SearchResults_builder{Servers: []*capiv1.ServerResults{
+			capiv1.ServerResults_builder{ServerId: f.s.Server.ID, ServerName: f.s.Server.Name, Cards: cards}.Build(),
+		}}.Build()
+	default:
+		return nil, &capi.Error{Code: capiv1.Error_CODE_INVALID, Reason: "the fake core does not answer " + req.WhichKind().String()}
+	}
+	return m.Build(), nil
+}
+
+func sortCards(cards []*capiv1.Card) {
+	for i := range cards {
+		for j := i + 1; j < len(cards); j++ {
+			if cards[j].GetTitle() < cards[i].GetTitle() {
+				cards[i], cards[j] = cards[j], cards[i]
+			}
+		}
+	}
+}
+
+// artworkServer serves an image of each ID: a gradient whose hues follow
+// from the ID, as the web UI's snapshot tests draw it.
+func artworkServer(t testing.TB) *httptest.Server {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		id := strings.TrimPrefix(r.URL.Path, "/images/")
+		h := 0
+		for _, c := range id {
+			h = (h*31 + int(c)) % 360
+		}
+		width, height := 200, 300
+		if strings.HasSuffix(id, "-thumb") {
+			width, height = 320, 180
+		}
+		img := image.NewRGBA(image.Rect(0, 0, width, height))
+		from, to := hslRGB(float64(h), 0.55, 0.45), hslRGB(float64((h+60)%360), 0.55, 0.25)
+		for y := range height {
+			for x := range width {
+				t := (float64(x)/float64(width) + float64(y)/float64(height)) / 2
+				img.Set(x, y, mix(from, to, t))
+			}
+		}
+		w.Header().Set("Content-Type", "image/png")
+		if err := png.Encode(w, img); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+	}))
+	t.Cleanup(srv.Close)
+	return srv
+}
+
+func hslRGB(h, s, l float64) color.RGBA {
+	c := hsl(h, s, l)
+	return color.RGBA{c.R, c.G, c.B, 255}
+}
+
+func mix(a, b color.RGBA, t float64) color.RGBA {
+	m := func(x, y uint8) uint8 { return uint8(math.Round(float64(x)*(1-t) + float64(y)*t)) }
+	return color.RGBA{m(a.R, b.R), m(a.G, b.G), m(a.B, b.B), 255}
+}
+
+// harness runs an App of the fake core in a tester.
+type harness struct {
+	t       testing.TB
+	app     *App
+	core    *fakeCore
+	tt      *ui.Tester
+	updates chan func()
+}
+
+func newHarness(t testing.TB, signedIn bool, width, height int) *harness {
+	s := readScreens(t)
+	srv := artworkServer(t)
+	h := &harness{t: t, core: newFakeCore(s, srv.URL, signedIn), updates: make(chan func(), 256)}
+	update := func(fn func()) { h.updates <- fn }
+	ctx, cancel := context.WithCancel(context.Background())
+	t.Cleanup(cancel)
+	h.app = New(ctx, Options{
+		Core:   h.core,
+		Images: images.New(ctx, srv.Client(), t.TempDir(), 200, update),
+		Update: update,
+	})
+	h.tt = ui.NewTester(h.app.View, width, height)
+	h.app.Start()
+	h.settle()
+	return h
+}
+
+// settle runs what the goroutines sent the main thread until they send no
+// more for a while, drawing frames between.
+func (h *harness) settle() {
+	h.t.Helper()
+	for {
+		select {
+		case fn := <-h.updates:
+			fn()
+			h.tt.Frame()
+		case <-time.After(150 * time.Millisecond):
+			h.tt.Frame()
+			select {
+			case fn := <-h.updates:
+				fn()
+				h.tt.Frame()
+				continue
+			default:
+			}
+			// Let the animations end.
+			h.tt.Advance(time.Second)
+			return
+		}
+	}
+}
+
+// save writes the last frame to dir/name.png when dir is set.
+func (h *harness) save(dir, name string) {
+	if dir == "" {
+		return
+	}
+	f, err := os.Create(filepath.Join(dir, name+".png"))
+	if err != nil {
+		h.t.Fatal(err)
+	}
+	defer f.Close()
+	if err := png.Encode(f, h.tt.Image()); err != nil {
+		h.t.Fatal(err)
+	}
+}

@@ -1,0 +1,30 @@
+{
+  "name": "desktop",
+  "implicitDependencies": ["client-rust"],
+  "targets": {
+    "resources": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "sh scripts/resources.sh",
+        "cwd": "{projectRoot}"
+      },
+      "dependsOn": [{ "projects": ["client-rust"], "target": "build" }],
+      "inputs": [
+        "{projectRoot}/scripts/resources.sh",
+        "{workspaceRoot}/tools/deps/deps.txt",
+        "^rust"
+      ],
+      "outputs": ["{projectRoot}/resources", "{projectRoot}/build"],
+      "cache": false
+    },
+    "app": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "go run .",
+        "cwd": "{projectRoot}"
+      },
+      "dependsOn": ["resources"],
+      "cache": false
+    }
+  }
+}

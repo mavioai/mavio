@@ -1,0 +1,6 @@
+# libmpv and the core, which the resources target copies in.
+/build/
+/resources/*/lib/
+/dist/
+/desktop
+/desktop.exe
