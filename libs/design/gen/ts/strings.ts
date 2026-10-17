@@ -483,6 +483,10 @@ export type MessageKey =
   | 'plugins.containerCommands'
   | 'plugins.containerGpuCommands'
   | 'plugins.containerCommandsHint'
+  | 'plugins.containerDockerRun'
+  | 'plugins.containerDockerRunNetwork'
+  | 'plugins.containerCompose'
+  | 'plugins.containerComposeServer'
   | 'plugins.proxyProcessDetail'
   | 'plugins.proxyRestartTitle'
   | 'plugins.proxyRestartMessage'
@@ -2358,7 +2362,11 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "plugins.containerUnavailable": "Unavailable",
     "plugins.containerCommands": "Run It Yourself",
     "plugins.containerGpuCommands": "With a GPU",
-    "plugins.containerCommandsHint": "Run one of these, then set the address to {address}. They hold the dependency's secrets.",
+    "plugins.containerCommandsHint": "Start the container with Docker on the server's machine in either way below, then set the address to {address}. Both hold the dependency's secrets; keep them to yourself.",
+    "plugins.containerDockerRun": "Run this docker run command in a terminal:",
+    "plugins.containerDockerRunNetwork": "Run this docker run command in a terminal, {network} replaced with the Docker network of the server's container:",
+    "plugins.containerCompose": "Or add this service to a compose.yaml and run docker compose up -d:",
+    "plugins.containerComposeServer": "Or add this service to the server's own compose.yaml and run docker compose up -d:",
     "plugins.proxyProcessDetail": "The plugin's HTTP and HTTPS requests go through it, by the server; this machine and the local network are reached directly. A proxy the plugin's own settings choose comes first.",
     "plugins.proxyRestartTitle": "Restart {name}?",
     "plugins.proxyRestartMessage": "The plugin goes from reaching sites directly to through the server, or back, which takes effect when it starts again. It restarts now.",
@@ -4232,7 +4240,11 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "plugins.containerUnavailable": "不可用",
     "plugins.containerCommands": "自行运行",
     "plugins.containerGpuCommands": "使用 GPU",
-    "plugins.containerCommandsHint": "运行其中一条命令，然后把地址设为 {address}。命令中含有该依赖的密钥。",
+    "plugins.containerCommandsHint": "在服务器所在的机器上用 Docker 启动该容器，以下两种方式任选其一，启动后把地址设为 {address}。两者都含有该依赖的密钥，请勿外传。",
+    "plugins.containerDockerRun": "在终端执行这条 docker run 命令：",
+    "plugins.containerDockerRunNetwork": "在终端执行这条 docker run 命令，并把其中的 {network} 换成服务器容器所在的 Docker 网络：",
+    "plugins.containerCompose": "或者把这个服务加入一个 compose.yaml，再执行 docker compose up -d：",
+    "plugins.containerComposeServer": "或者把这个服务加入服务器自己的 compose.yaml，再执行 docker compose up -d：",
     "plugins.proxyProcessDetail": "插件的 HTTP 和 HTTPS 请求经服务器发往此代理；本机和局域网直连。插件自身设置中选择的代理优先。",
     "plugins.proxyRestartTitle": "重启 {name}？",
     "plugins.proxyRestartMessage": "插件将从直连改为经服务器代理，或反过来，这要在插件重新启动后才生效。现在将重启插件。",

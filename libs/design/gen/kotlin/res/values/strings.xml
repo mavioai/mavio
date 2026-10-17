@@ -969,7 +969,15 @@
     <!-- Heading of the commands running a container dependency with a GPU. -->
     <string name="plugins_container_gpu_commands">With a GPU</string>
     <!-- Hint above the commands running a container dependency; address is where it will be. -->
-    <string name="plugins_container_commands_hint">Run one of these, then set the address to %s. They hold the dependency\'s secrets.</string>
+    <string name="plugins_container_commands_hint">Start the container with Docker on the server\'s machine in either way below, then set the address to %s. Both hold the dependency\'s secrets; keep them to yourself.</string>
+    <!-- Label of the docker run command starting a container dependency. -->
+    <string name="plugins_container_docker_run">Run this docker run command in a terminal:</string>
+    <!-- Label of the docker run command starting a container dependency beside a server in a container; network is the placeholder <network>. -->
+    <string name="plugins_container_docker_run_network">Run this docker run command in a terminal, %s replaced with the Docker network of the server\'s container:</string>
+    <!-- Label of the Compose service starting a container dependency. -->
+    <string name="plugins_container_compose">Or add this service to a compose.yaml and run docker compose up -d:</string>
+    <!-- Label of the Compose service starting a container dependency beside a server in a container. -->
+    <string name="plugins_container_compose_server">Or add this service to the server\'s own compose.yaml and run docker compose up -d:</string>
     <!-- Explains a process plugin's proxy. -->
     <string name="plugins_proxy_process_detail">The plugin\'s HTTP and HTTPS requests go through it, by the server; this machine and the local network are reached directly. A proxy the plugin\'s own settings choose comes first.</string>
     <!-- Title asking to restart a plugin for its new proxy; name is the plugin's name. -->

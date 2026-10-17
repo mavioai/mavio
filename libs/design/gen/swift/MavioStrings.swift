@@ -1550,6 +1550,20 @@ public enum MavioStrings {
         String.localizedStringWithFormat(NSLocalizedString("plugins.containerCommandsHint", bundle: .module, comment: ""), address)
     }
 
+    /// Label of the docker run command starting a container dependency.
+    public static var pluginsContainerDockerRun: String { NSLocalizedString("plugins.containerDockerRun", bundle: .module, comment: "") }
+
+    /// Label of the docker run command starting a container dependency beside a server in a container; network is the placeholder <network>.
+    public static func pluginsContainerDockerRunNetwork(network: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("plugins.containerDockerRunNetwork", bundle: .module, comment: ""), network)
+    }
+
+    /// Label of the Compose service starting a container dependency.
+    public static var pluginsContainerCompose: String { NSLocalizedString("plugins.containerCompose", bundle: .module, comment: "") }
+
+    /// Label of the Compose service starting a container dependency beside a server in a container.
+    public static var pluginsContainerComposeServer: String { NSLocalizedString("plugins.containerComposeServer", bundle: .module, comment: "") }
+
     /// Explains a process plugin's proxy.
     public static var pluginsProxyProcessDetail: String { NSLocalizedString("plugins.proxyProcessDetail", bundle: .module, comment: "") }
 

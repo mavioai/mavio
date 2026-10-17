@@ -597,7 +597,14 @@ function ContainerDependency({ server, id, c }: { server: ServerEntry; id: strin
     cmds && (
       <div className="flex flex-col gap-1.5 px-4 py-2.5">
         <span className="type-callout text-text-secondary">{title}</span>
+        {/* A server in a container is joined on its network, which the administrator names. */}
+        <span className="type-footnote text-text-secondary">
+          {cmds.dockerRun.includes("<network>") ? t("plugins.containerDockerRunNetwork", { network: "<network>" }) : t("plugins.containerDockerRun")}
+        </span>
         <pre className="overflow-x-auto rounded-md bg-fill p-2.5 type-footnote whitespace-pre-wrap break-all select-all">{cmds.dockerRun}</pre>
+        <span className="type-footnote text-text-secondary">
+          {t(cmds.dockerRun.includes("<network>") ? "plugins.containerComposeServer" : "plugins.containerCompose")}
+        </span>
         <pre className="overflow-x-auto rounded-md bg-fill p-2.5 type-footnote select-all">{cmds.compose}</pre>
       </div>
     );

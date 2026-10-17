@@ -8648,13 +8648,85 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Run one of these, then set the address to %@. They hold the dependency's secrets."
+            "value": "Start the container with Docker on the server's machine in either way below, then set the address to %@. Both hold the dependency's secrets; keep them to yourself."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "运行其中一条命令，然后把地址设为 %@。命令中含有该依赖的密钥。"
+            "value": "在服务器所在的机器上用 Docker 启动该容器，以下两种方式任选其一，启动后把地址设为 %@。两者都含有该依赖的密钥，请勿外传。"
+          }
+        }
+      }
+    },
+    "plugins.containerDockerRun": {
+      "comment": "Label of the docker run command starting a container dependency.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Run this docker run command in a terminal:"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在终端执行这条 docker run 命令："
+          }
+        }
+      }
+    },
+    "plugins.containerDockerRunNetwork": {
+      "comment": "Label of the docker run command starting a container dependency beside a server in a container; network is the placeholder <network>.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Run this docker run command in a terminal, %@ replaced with the Docker network of the server's container:"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在终端执行这条 docker run 命令，并把其中的 %@ 换成服务器容器所在的 Docker 网络："
+          }
+        }
+      }
+    },
+    "plugins.containerCompose": {
+      "comment": "Label of the Compose service starting a container dependency.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Or add this service to a compose.yaml and run docker compose up -d:"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "或者把这个服务加入一个 compose.yaml，再执行 docker compose up -d："
+          }
+        }
+      }
+    },
+    "plugins.containerComposeServer": {
+      "comment": "Label of the Compose service starting a container dependency beside a server in a container.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Or add this service to the server's own compose.yaml and run docker compose up -d:"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "或者把这个服务加入服务器自己的 compose.yaml，再执行 docker compose up -d："
           }
         }
       }
