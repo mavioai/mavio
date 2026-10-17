@@ -950,7 +950,7 @@ flowchart TD
 **完成标准**：在装有 Docker 的 Linux 上的端到端测试（没有 Docker 时跳过）：声明一个小型 HTTP 镜像的测试插件，在其 `ListContainers` 返回的地址上得到一个就绪的托管依赖，服务端分别运行在宿主机上与挂载了 socket 的容器中；声明的 digest 改变时容器被替换，被杀死后被重启，插件卸载时连同其卷被删除；没有引擎时，同一依赖设为外部、地址指向由生成的 `docker run` 命令启动的容器，随后变为就绪。
 
 **进度**：
-- [ ] `libs/containers`
+- [x] `libs/containers`：端点、检测、API 版本协商、经 Unix socket、命名管道与回环 TCP 的客户端；针对假引擎测试，找到真实引擎时也针对它测试（`TestEngine`，在 macOS 上经 OrbStack 于 Docker 29 运行）
 - [ ] 契约、领域与存储
 - [ ] 托管依赖，服务端在宿主机上
 - [ ] 托管依赖，服务端在容器中

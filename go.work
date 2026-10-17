@@ -6,6 +6,7 @@ use (
 	./apps/server
 	./libs/acquire
 	./libs/client-rust/capi
+	./libs/containers
 	./libs/core
 	./libs/design
 	./libs/imaging

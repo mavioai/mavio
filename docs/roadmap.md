@@ -950,7 +950,7 @@ flowchart TD
 **Done when**: an end-to-end test on Linux with Docker (skipped without it): a test plugin declaring a small HTTP image gets a managed dependency ready at the address its `ListContainers` returns, from a server on the host and from a server in a container with the socket mounted; the container is replaced when the declared digest changes, restarted after it is killed, and removed with its volume when the plugin is uninstalled; with no engine, the same dependency made external at the address of a container started by its generated `docker run` command becomes ready.
 
 **Progress**:
-- [ ] `libs/containers`
+- [x] `libs/containers`: endpoints, detection, API version negotiation, the client over Unix sockets, named pipes and loopback TCP; tested against a fake engine and, when one is found, a real one (`TestEngine`, run on Docker 29 through OrbStack on macOS)
 - [ ] Contracts, domain and storage
 - [ ] Managed dependencies, the server on the host
 - [ ] Managed dependencies, the server in a container

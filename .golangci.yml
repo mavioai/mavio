@@ -73,6 +73,13 @@ linters:
             - pkg: github.com/mavioai/mavio/libs
               desc: "rclone depends only on libs/core"
           allow: ["$gostd", github.com/mavioai/mavio/libs/rclone, github.com/mavioai/mavio/libs/core]
+        containers:
+          list-mode: lax
+          files: ["**/libs/containers/**"]
+          deny:
+            - pkg: github.com/mavioai/mavio/libs
+              desc: "containers depends only on libs/core"
+          allow: ["$gostd", github.com/mavioai/mavio/libs/containers, github.com/mavioai/mavio/libs/core]
         plugin-sdk:
           list-mode: lax
           files: ["**/libs/plugin/**"]

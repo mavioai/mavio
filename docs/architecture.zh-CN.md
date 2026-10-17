@@ -620,9 +620,9 @@ Mavio 为电影与单集查找缺少的字幕，即 Bazarr 在 Sonarr 与 Radarr
 
 ### 16.1 引擎检测
 * **端点**：`--container-endpoint`（`MAVIO_CONTAINER_ENDPOINT`），否则 `DOCKER_HOST`，否则以下第一个有应答的：`/var/run/docker.sock`、`$XDG_RUNTIME_DIR/docker.sock`（rootless Docker）、`~/.docker/run/docker.sock`（macOS 上的 Docker Desktop）、`$XDG_RUNTIME_DIR/podman/podman.sock`、`/run/podman/podman.sock`，Windows 上为命名管道 `//./pipe/docker_engine`。接受 `unix://`、`npipe://` 与 `tcp://` 端点；`tcp://` 端点必须是回环地址。
-* **检查**：`GET /_ping` 与 `GET /version`；Engine API 低于 1.41（Docker 20.10、Podman 3）的引擎被拒绝。服务端在启动时以及管理员要求时检测；结果（`ContainerRuntime`：是否可用或不可用的原因、端点、引擎名称与版本、是否 rootless、服务端运行在何处）由 `PluginManagementService.GetContainerRuntime` 报告。
+* **检查**：`GET /_ping` 与 `GET /version`；Engine API 低于 1.41（Docker 20.10、Podman 3）的引擎被拒绝；请求使用引擎最新的 API 版本，至多 1.47，但不低于引擎接受的最旧版本。服务端在启动时以及管理员要求时检测；结果（`ContainerRuntime`：是否可用或不可用的原因、端点、引擎名称与版本、是否 rootless、服务端运行在何处）由 `PluginManagementService.GetContainerRuntime` 报告。
 * **服务端运行在何处**：存在 `/.dockerenv` 或 `/run/.containerenv` 时视为运行在容器中。有引擎时，服务端检查自己的容器（按其主机名，即容器 ID）以获知网络模式；使用宿主机网络的服务端视为运行在宿主机上。
-* **客户端**：`libs/containers` 用 `net/http` 经 socket 调用它需要的十几个端点（ping、version、镜像拉取与检查、网络创建、连接与检查、容器创建、启动、停止、检查、列出与删除、卷列出与删除），Windows 上把命名管道作为文件打开。Podman 兼容 Docker 的 API 就是同一套 API。
+* **客户端**：`libs/containers` 用 `net/http` 经 socket 调用它需要的端点（ping、version、info、镜像拉取与检查、网络创建、检查、连接与删除、容器创建、启动、停止、检查、列出与删除、卷列出与删除；卷由挂载它的容器带标签创建），Windows 上把命名管道作为文件打开。Podman 兼容 Docker 的 API 就是同一套 API。
 
 ### 16.2 命名、标签与网络
 * **名称**带 Mavio 的前缀 `--container-prefix`（`MAVIO_CONTAINER_PREFIX`，默认 `mavio`），同一引擎上的第二个服务端需修改它：插件 `<plugin>` 的依赖 `<name>` 的容器为 `mavio-<plugin>-<name>`，其卷 `<v>` 为 `mavio-<plugin>-<name>-<v>`，网络为 `mavio`。外部命令使用同样的名称。
