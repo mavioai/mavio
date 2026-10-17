@@ -85,6 +85,18 @@ export function proxyChoices(list: ProxyMessage[] | undefined, current: string):
   return out;
 }
 
+/**
+ * Whether a proxy choice reaches sites directly: none, or the system proxy
+ * while the system sets none. Programs the server starts go from one to
+ * the other only by starting again; unknown before the list is read.
+ */
+export function proxyDirect(list: ProxyMessage[] | undefined, id: string): boolean | undefined {
+  if (id === "") return true;
+  if (id !== systemProxyId) return false;
+  const system = list?.find((p) => p.system);
+  return system && system.kind === ProxyKind.UNSPECIFIED;
+}
+
 /** What the server's own requests reach, as OutboundProxies names it. */
 type RequestKey = "pluginCatalogs" | "images" | "mavioDev" | "acme";
 

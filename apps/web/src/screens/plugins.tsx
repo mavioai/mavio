@@ -36,7 +36,8 @@ import { Button, Group, Row } from "../ui.tsx";
 import { Switch } from "../controls/inputs.tsx";
 import { Select } from "../controls/select.tsx";
 import type { SettingsSearch } from "./settings.tsx";
-import { proxyChoices } from "./admin/proxies.tsx";
+import { proxyChoices, proxyDirect } from "./admin/proxies.tsx";
+import { Confirm } from "../controls/dialog.tsx";
 import { useUnsavedGuard } from "../controls/unsaved.tsx";
 
 const states: Record<PluginState, () => string> = {
@@ -392,7 +393,9 @@ function PluginPage({ server, id }: { server: ServerEntry; id: string }) {
         <Configuration server={server} id={id} schema={m.configSchema} page={m.configPage} />
       )}
       {e.installed && m && m.containers.length > 0 && <Containers server={server} id={id} />}
-      {e.installed && m?.runtime === Runtime.WASM && hosts.length > 0 && <PluginProxy server={server} id={id} hosts={hosts} proxy={e.installed.proxy} />}
+      {e.installed && m && ((m.runtime === Runtime.WASM && hosts.length > 0) || m.runtime === Runtime.PROCESS) && (
+        <PluginProxy server={server} id={id} name={m.name} hosts={m.runtime === Runtime.WASM ? hosts : undefined} proxy={e.installed.proxy} />
+      )}
       <Group title={t("plugins.information")}>
         {info.map(([label, value]) => (
           <div key={label} className="flex min-h-11 flex-wrap items-baseline gap-x-6 gap-y-1 px-4 py-2.5">
@@ -427,23 +430,45 @@ function PluginPage({ server, id }: { server: ServerEntry; id: string }) {
 }
 
 /** The schema of a manifest, undefined when it has none the form can draw. */
-/** The proxy a WASM plugin's requests, which the server performs, go through, saved as it is chosen. */
-function PluginProxy({ server, id, hosts, proxy }: { server: ServerEntry; id: string; hosts: string[]; proxy: string }) {
+/**
+ * The proxy a plugin reaches sites through, saved as it is chosen: a WASM
+ * plugin's requests to hosts, which the server performs, or a process
+ * plugin's, which go to the server's proxy gateway; a process plugin going
+ * from direct to proxied or back restarts, once confirmed.
+ */
+function PluginProxy({ server, id, name, hosts, proxy }: { server: ServerEntry; id: string; name: string; hosts?: string[]; proxy: string }) {
   const { list } = useProxies(server);
   const { setProxy } = usePluginActions(server);
+  const [restarting, setRestarting] = useState<string>();
   const value = setProxy.isPending && setProxy.variables ? setProxy.variables.proxy : proxy;
+  const save = (p: string) => setProxy.mutate({ id, proxy: p }, { onSettled: () => setRestarting(undefined) });
   return (
     <Group title={t("plugins.network")}>
-      <Row label={t("plugins.proxy")} detail={t("plugins.proxyDetail", { hosts: hosts.join(", ") })}>
+      <Row label={t("plugins.proxy")} detail={hosts ? t("plugins.proxyDetail", { hosts: hosts.join(", ") }) : t("plugins.proxyProcessDetail")} wrap={!hosts}>
         <Select
           value={value}
           label={t("plugins.proxy")}
           className="w-48"
           disabled={setProxy.isPending}
           options={proxyChoices(list.data, value)}
-          onChange={(p) => setProxy.mutate({ id, proxy: p })}
+          onChange={(p) => {
+            const was = proxyDirect(list.data, proxy);
+            const next = proxyDirect(list.data, p);
+            if (!hosts && was !== undefined && next !== undefined && was !== next) setRestarting(p);
+            else save(p);
+          }}
         />
       </Row>
+      {restarting !== undefined && (
+        <Confirm
+          title={t("plugins.proxyRestartTitle", { name })}
+          message={t("plugins.proxyRestartMessage")}
+          action={t("plugins.proxyRestart")}
+          busy={setProxy.isPending}
+          onCancel={() => setRestarting(undefined)}
+          onConfirm={() => save(restarting)}
+        />
+      )}
       {setProxy.isError && <p className="px-4 py-3 type-callout break-words text-danger">{errorMessage(setProxy.error)}</p>}
     </Group>
   );
@@ -512,7 +537,7 @@ function ConfigForm({ server, id, schema, saved }: { server: ServerEntry; id: st
   );
 }
 
-const containerStates: Record<ContainerState, () => string> = {
+export const containerStates: Record<ContainerState, () => string> = {
   [ContainerState.UNSPECIFIED]: () => t("plugins.containerUnavailable"),
   [ContainerState.PULLING]: () => t("plugins.containerPulling"),
   [ContainerState.STARTING]: () => t("plugins.containerStarting"),
@@ -520,6 +545,27 @@ const containerStates: Record<ContainerState, () => string> = {
   [ContainerState.UNHEALTHY]: () => t("plugins.containerUnhealthy"),
   [ContainerState.UNAVAILABLE]: () => t("plugins.containerUnavailable"),
 };
+
+/** The docker run command a container runs as, shown when asked for. */
+export function ContainerCommand({ command }: { command: string }) {
+  const [shown, setShown] = useState(false);
+  return (
+    <div className="flex flex-col items-start gap-1.5 px-4 pb-2.5">
+      <button
+        type="button"
+        className="flex items-center gap-1 type-callout text-text-secondary hover:text-on-background"
+        aria-expanded={shown}
+        onClick={() => setShown(!shown)}
+      >
+        <Icon name="expand" size={14} className={`shrink-0 transition-transform ${shown ? "" : "-rotate-90"}`} />
+        {t(shown ? "plugins.hideCommand" : "plugins.showCommand")}
+      </button>
+      {shown && (
+        <pre className="w-full overflow-x-auto rounded-md bg-fill p-2.5 type-footnote whitespace-pre-wrap break-all select-all">{command}</pre>
+      )}
+    </div>
+  );
+}
 
 /** An installed plugin's container dependencies: how each runs, its state, and the commands running it elsewhere. */
 function Containers({ server, id }: { server: ServerEntry; id: string }) {
@@ -535,13 +581,18 @@ function Containers({ server, id }: { server: ServerEntry; id: string }) {
 
 function ContainerDependency({ server, id, c }: { server: ServerEntry; id: string; c: PluginContainer }) {
   const actions = usePluginActions(server);
+  const proxies = useProxies(server);
+  const [recreating, setRecreating] = useState<string>();
   const d = c.dependency!;
   const st = c.status;
   const mode = st?.mode ?? ContainerMode.UNSPECIFIED;
   const [address, setAddress] = useState(mode === ContainerMode.EXTERNAL ? (st?.address ?? "") : "");
   const [chosen, setChosen] = useState(mode);
-  const set = (m: ContainerMode, extra: { address?: string; useGpu?: boolean } = {}) =>
-    actions.setContainer.mutate({ pluginId: id, name: d.name, mode: m, useGpu: c.useGpu, ...extra });
+  const set = (m: ContainerMode, extra: { address?: string; useGpu?: boolean; proxy?: string } = {}, onSettled?: () => void) =>
+    actions.setContainer.mutate({ pluginId: id, name: d.name, mode: m, useGpu: c.useGpu, ...extra }, { onSettled });
+  const proxy =
+    actions.setContainer.isPending && actions.setContainer.variables?.proxy !== undefined ? actions.setContainer.variables.proxy : c.proxy;
+  const setProxy = (p: string) => set(ContainerMode.MANAGED, { proxy: p }, () => setRecreating(undefined));
   const state =
     st &&
     (st.state === ContainerState.PULLING && st.progress > 0
@@ -583,6 +634,36 @@ function ContainerDependency({ server, id, c }: { server: ServerEntry; id: strin
             onChange={(on) => set(ContainerMode.MANAGED, { useGpu: on })}
           />
         </Row>
+      )}
+      {chosen === ContainerMode.MANAGED && mode === ContainerMode.MANAGED && (
+        <>
+          <Row label={t("plugins.proxy")} detail={t("plugins.containerProxyDetail")} wrap>
+            <Select
+              value={proxy}
+              label={t("plugins.proxy")}
+              className="w-48"
+              disabled={actions.setContainer.isPending}
+              options={proxyChoices(proxies.list.data, proxy)}
+              onChange={(p) => {
+                const was = proxyDirect(proxies.list.data, c.proxy);
+                const next = proxyDirect(proxies.list.data, p);
+                if (was !== undefined && next !== undefined && was !== next) setRecreating(p);
+                else setProxy(p);
+              }}
+            />
+          </Row>
+          {c.command && <ContainerCommand command={c.command} />}
+        </>
+      )}
+      {recreating !== undefined && (
+        <Confirm
+          title={t("plugins.containerProxyTitle", { name: d.name })}
+          message={t("plugins.containerProxyMessage")}
+          action={t("plugins.containerRecreate")}
+          busy={actions.setContainer.isPending}
+          onCancel={() => setRecreating(undefined)}
+          onConfirm={() => setProxy(recreating)}
+        />
       )}
       {chosen === ContainerMode.EXTERNAL && (
         <>
