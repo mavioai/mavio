@@ -320,9 +320,9 @@ function SidebarLink({ id, current }: { id: SectionId; current: SectionId }) {
   );
   if (!isTool(id)) return link;
   return (
-    <div className="group relative flex flex-col [&>a]:pe-10">
+    <div className="group relative flex flex-col [&>a]:pe-8">
       {link}
-      <PinButton id={id} className={`absolute end-1 top-1/2 -translate-y-1/2 ${pinned ? "" : "opacity-0 group-hover:opacity-100 focus-visible:opacity-100"}`} />
+      <PinButton id={id} className={`absolute end-2.5 top-1/2 -translate-y-1/2 ${pinned ? "" : "opacity-0 group-hover:opacity-100 focus-visible:opacity-100"}`} />
     </div>
   );
 }

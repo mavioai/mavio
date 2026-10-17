@@ -60,7 +60,7 @@ export function usePinned(id: ToolId): [boolean, () => void] {
   return [on, () => setPrefs({ pinned: on ? pinned.filter((p) => p !== id) : [...pinned, id] })];
 }
 
-/** The button pinning a tool to the sidebar, or unpinning it. */
+/** The pin of a tool's row: an icon pinning it to the sidebar, or unpinning it. */
 export function PinButton({ id, className }: { id: ToolId; className?: string }) {
   const [on, toggle] = usePinned(id);
   const label = on ? t("settings.unpin") : t("settings.pin");
@@ -74,9 +74,9 @@ export function PinButton({ id, className }: { id: ToolId; className?: string })
           e.preventDefault();
           toggle();
         }}
-        className={`flex size-8 items-center justify-center rounded-md hover:bg-fill ${on ? "text-accent-text" : "text-text-secondary"} ${className ?? ""}`}
+        className={`flex ${on ? "text-accent-text" : "text-text-tertiary hover:text-on-background"} ${className ?? ""}`}
       >
-        <Icon name="pin" fill={on} size={18} />
+        <Icon name="pin" fill={on} size={16} />
       </button>
     </Tip>
   );
@@ -127,19 +127,6 @@ export function IndexerSearch() {
     <Page
       title={t("indexers.title")}
       message={t("indexers.message")}
-      actions={
-        <>
-          {mavioDev && admins.length > 0 && (
-            <Select
-              value={serverId}
-              label={t("settings.serverChoice")}
-              options={[{ value: "", label: t("indexers.allServers") }, ...admins.map((s) => ({ value: s.id, label: s.name }))]}
-              onChange={(v) => (setServerId(v), setIndexer("all"))}
-            />
-          )}
-          <PinButton id="indexer-search" />
-        </>
-      }
     >
       <form role="search" onSubmit={submit} className="flex flex-wrap items-center gap-3">
         <input
@@ -149,8 +136,16 @@ export function IndexerSearch() {
           placeholder={t("indexers.query")}
           aria-label={t("indexers.query")}
           enterKeyHint="search"
-          className="min-h-9 min-w-0 flex-1 basis-64 rounded-md border border-border bg-surface px-3 type-body text-on-background placeholder:text-text-tertiary focus:border-focus focus:outline-none desk:min-h-7 desk:type-callout"
+          className="min-h-9 min-w-0 flex-1 basis-56 rounded-md border border-border bg-surface px-3 type-body text-on-background placeholder:text-text-tertiary focus:border-focus focus:outline-none desk:min-h-7 desk:type-callout"
         />
+        {mavioDev && admins.length > 0 && (
+          <Select
+            value={serverId}
+            label={t("settings.serverChoice")}
+            options={[{ value: "", label: t("indexers.allServers") }, ...admins.map((s) => ({ value: s.id, label: s.name }))]}
+            onChange={(v) => (setServerId(v), setIndexer("all"))}
+          />
+        )}
         <Select value={type} label={t("indexers.type")} options={types.map((x) => ({ value: x.value, label: x.label() }))} onChange={setType} />
         <Select
           value={category}
@@ -281,7 +276,7 @@ function PageButton({ icon, label, disabled, onClick }: { icon: "back" | "forwar
 const columns: { label: () => string; key?: SortKey; className?: string }[] = [
   { label: () => t("indexers.protocol") },
   { label: () => t("indexers.age"), key: "age" },
-  { label: () => t("indexers.releaseTitle"), key: "title", className: "w-full" },
+  { label: () => t("indexers.releaseTitle"), key: "title", className: "w-full min-w-80" },
   { label: () => t("indexers.indexer"), key: "indexer" },
   { label: () => t("indexers.size"), key: "size", className: "text-end" },
   { label: () => t("indexers.grabs"), key: "grabs", className: "text-end" },
@@ -337,7 +332,7 @@ function ReleaseLine({ server, release: r }: { server: ServerEntry; release: Rel
         </span>
       </td>
       <td className={`${cell} text-text-secondary`}>{ageOf(r)}</td>
-      <td className="px-2 py-2 align-middle break-all">{r.title}</td>
+      <td className="min-w-80 px-2 py-2 align-middle break-all">{r.title}</td>
       <td className={`${cell} text-text-secondary`}>{r.indexerName}</td>
       <td className={`${cell} text-end`}>{r.size > 0n ? sizeOf(r.size) : ""}</td>
       <td className={`${cell} text-end text-text-secondary`}>{r.grabs || ""}</td>
@@ -372,25 +367,51 @@ function ReleaseItem({ server, release: r }: { server: ServerEntry; release: Rel
   );
 }
 
-/** Sending a release to a download client, its magnet link and its page on the indexer. */
+/**
+ * Sending a release to a download client, copying its magnet link, and its
+ * page on the indexer, in a window of its own.
+ */
 function ReleaseActions({ server, release: r }: { server: ServerEntry; release: Release }) {
   const send = useSendRelease(server);
+  const [copied, setCopied] = useState(false);
+  const copyLabel = copied ? t("indexers.magnetCopied") : t("indexers.magnet");
   const label = send.isSuccess ? t("indexers.sent", { client: send.data }) : send.isError ? errorMessage(send.error) : t("indexers.send");
   const action = "flex size-7 items-center justify-center rounded-md hover:bg-fill";
   return (
     <div className="flex items-center justify-end gap-0.5">
       {r.infoUrl && (
         <Tip label={t("indexers.info")}>
-          <a href={r.infoUrl} target="_blank" rel="noreferrer" aria-label={t("indexers.info")} className={`${action} text-text-secondary`}>
+          <a
+            href={r.infoUrl}
+            target="_blank"
+            rel="noreferrer"
+            aria-label={t("indexers.info")}
+            // Never in the page's own place, wherever a new tab is not the default.
+            onClick={(e) => {
+              e.preventDefault();
+              window.open(r.infoUrl, "_blank", "noopener,noreferrer");
+            }}
+            className={`${action} text-text-secondary`}
+          >
             <Icon name="external" size={16} />
           </a>
         </Tip>
       )}
       {r.magnetUrl && (
-        <Tip label={t("indexers.magnet")}>
-          <a href={r.magnetUrl} aria-label={t("indexers.magnet")} className={`${action} text-text-secondary`}>
-            <Icon name="magnet" size={16} />
-          </a>
+        <Tip label={copyLabel}>
+          <button
+            type="button"
+            aria-label={copyLabel}
+            onClick={() =>
+              void navigator.clipboard.writeText(r.magnetUrl).then(
+                () => setCopied(true),
+                () => {},
+              )
+            }
+            className={`${action} ${copied ? "text-success" : "text-text-secondary"}`}
+          >
+            <Icon name={copied ? "check" : "magnet"} size={16} />
+          </button>
         </Tip>
       )}
       <Tip label={label}>
