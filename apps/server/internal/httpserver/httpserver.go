@@ -29,6 +29,7 @@ import (
 	"github.com/mavioai/mavio/apps/server/internal/logs"
 	"github.com/mavioai/mavio/apps/server/internal/playback"
 	"github.com/mavioai/mavio/apps/server/internal/plugins"
+	"github.com/mavioai/mavio/apps/server/internal/proxies"
 	"github.com/mavioai/mavio/apps/server/internal/releases"
 	"github.com/mavioai/mavio/apps/server/internal/requests"
 	"github.com/mavioai/mavio/apps/server/internal/rpc"
@@ -76,6 +77,8 @@ type Options struct {
 	Devices rpc.DeviceController
 	// Containers keeps the plugins' container dependencies; nil means none.
 	Containers rpc.ContainerDependencies
+	// Proxies keeps the server's proxies; nil keeps none.
+	Proxies *proxies.Service
 	// Storage classifies the paths of libraries; nil classifies with a
 	// device detector of its own.
 	Storage *storage.Classifier
@@ -182,6 +185,7 @@ func Handler(opts Options) (http.Handler, error) {
 	}, interceptors))
 	mux.Handle(systemv1connect.NewPluginManagementServiceHandler(&rpc.PluginManagementService{
 		Plugins: opts.Plugins, Hub: opts.Hub, Activity: opts.Activity, Containers: opts.Containers, DownloadClients: opts.Downloads,
+		Proxies: opts.Proxies,
 	}, interceptors))
 	passkeys := auth.NewPasskeys()
 	totp := auth.NewTOTP(opts.Identity.Derive(auth.SecretKeyPurpose))
@@ -264,7 +268,10 @@ func Handler(opts Options) (http.Handler, error) {
 	mux.Handle(sessionv1connect.NewSessionServiceHandler(sessions, interceptors))
 	// Plugins reach the host service through the host API; others are
 	// turned away.
-	mux.Handle(pluginv1connect.NewHostServiceHandler(rpc.NewHostService(opts.Devices, opts.ServerInfo, opts.Containers), interceptors))
+	hostService := rpc.NewHostService(opts.Devices, opts.ServerInfo, opts.Containers)
+	hostService.Proxies = opts.Proxies
+	mux.Handle(pluginv1connect.NewHostServiceHandler(hostService, interceptors))
+	mux.Handle(systemv1connect.NewProxyServiceHandler(&rpc.ProxyService{Proxies: opts.Proxies, Activity: opts.Activity}, interceptors))
 	mux.Handle(sessionv1connect.NewSyncPlayServiceHandler(rpc.NewSyncPlayService(opts.Store, opts.Hub), interceptors))
 	acq := opts.Acquisition
 	if acq == nil {
@@ -369,7 +376,7 @@ var services = []string{
 	playbackv1connect.PlaybackServiceName,
 	sessionv1connect.EventServiceName, sessionv1connect.SessionServiceName, sessionv1connect.SyncPlayServiceName,
 	storagev1connect.StorageServiceName,
-	systemv1connect.SystemServiceName, systemv1connect.PluginManagementServiceName, systemv1connect.TaskServiceName, systemv1connect.ActivityServiceName,
+	systemv1connect.SystemServiceName, systemv1connect.PluginManagementServiceName, systemv1connect.ProxyServiceName, systemv1connect.TaskServiceName, systemv1connect.ActivityServiceName,
 	systemv1connect.BackupServiceName, systemv1connect.LocalizationServiceName, systemv1connect.AiProviderServiceName, systemv1connect.AiConversationServiceName,
 	userv1connect.UserServiceName, userv1connect.UserDataServiceName, userv1connect.DisplayPreferencesServiceName,
 }

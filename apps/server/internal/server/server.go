@@ -37,6 +37,7 @@ import (
 	"github.com/mavioai/mavio/apps/server/internal/playback"
 	"github.com/mavioai/mavio/apps/server/internal/plugins"
 	"github.com/mavioai/mavio/apps/server/internal/providers"
+	"github.com/mavioai/mavio/apps/server/internal/proxies"
 	"github.com/mavioai/mavio/apps/server/internal/relay"
 	"github.com/mavioai/mavio/apps/server/internal/requests"
 	"github.com/mavioai/mavio/apps/server/internal/rpc"
@@ -441,7 +442,7 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 	h, err := httpserver.Handler(httpserver.Options{
 		Assistant: helper,
 		Version:   cfg.Version, Store: db, Identity: key, Hub: hub, Database: raw.Dialect(), FFmpegVersion: ffmpegVersion, Playbacks: playbacks,
-		Images: imageServer, Plugins: plugs, Devices: plugs, Containers: deps, Refresher: refresher, Storage: classifier, Storages: storages, Remotes: rc.Service(offline, rcDown),
+		Images: imageServer, Plugins: plugs, Devices: plugs, Containers: deps, Proxies: proxies.New(db.Proxies(), plugs, log), Refresher: refresher, Storage: classifier, Storages: storages, Remotes: rc.Service(offline, rcDown),
 		Subtitles: subFiles, SubtitleRuntime: subs,
 		Lyrics:   lyrics,
 		Intros:   &library.Intros{Store: db, Source: plugs.IntroProviders, Logger: log},

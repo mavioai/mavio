@@ -6,6 +6,7 @@ import (
 
 	"connectrpc.com/connect"
 
+	"github.com/mavioai/mavio/apps/server/internal/proxies"
 	pluginv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1/pluginv1connect"
 )
@@ -16,6 +17,9 @@ type HostService struct {
 	devices    DeviceController
 	info       func() ServerInfo
 	containers ContainerDependencies
+	// Proxies gives plugins the server's proxies and solves challenges;
+	// nil keeps none.
+	Proxies *proxies.Service
 }
 
 // ServerInfo is how the server is reached.
@@ -94,12 +98,42 @@ func (s *HostService) ListContainers(ctx context.Context, _ *pluginv1.ListContai
 	return pluginv1.ListContainersResponse_builder{Containers: out}.Build(), nil
 }
 
-// ListProxies returns the server's proxies to the calling plugin.
-func (s *HostService) ListProxies(context.Context, *pluginv1.ListProxiesRequest) (*pluginv1.ListProxiesResponse, error) {
-	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("the server keeps no proxies"))
+// ListProxies returns the server's proxies to the calling plugin, whose
+// configuration must take them.
+func (s *HostService) ListProxies(ctx context.Context, req *pluginv1.ListProxiesRequest) (*pluginv1.ListProxiesResponse, error) {
+	p, err := principal(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if p.Plugin == "" || s.Proxies == nil || !s.Proxies.UsesProxies(p.Plugin) {
+		return nil, connect.NewError(connect.CodePermissionDenied, errors.New("only plugins whose configuration takes proxies list them"))
+	}
+	out, err := s.Proxies.ForPlugin(ctx, req.GetIds())
+	if err != nil {
+		return nil, connectError(ctx, err)
+	}
+	return pluginv1.ListProxiesResponse_builder{Proxies: out}.Build(), nil
 }
 
-// SolveChallenge solves a site's challenge with the challenge solvers.
-func (s *HostService) SolveChallenge(context.Context, *pluginv1.SolveChallengeRequest) (*pluginv1.SolveChallengeResponse, error) {
-	return nil, connect.NewError(connect.CodeUnavailable, errors.New("no challenge solver is ready"))
+// SolveChallenge solves a site's challenge with the challenge solver
+// plugins, through the server's proxy the request names.
+func (s *HostService) SolveChallenge(ctx context.Context, req *pluginv1.SolveChallengeRequest) (*pluginv1.SolveChallengeResponse, error) {
+	p, err := principal(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if p.Plugin == "" {
+		return nil, connect.NewError(connect.CodePermissionDenied, errors.New("only plugins solve challenges"))
+	}
+	if s.Proxies == nil {
+		return nil, connect.NewError(connect.CodeUnavailable, proxies.ErrNoSolver)
+	}
+	sol, err := s.Proxies.Solve(ctx, req.GetChallenge(), req.GetProxyId())
+	if errors.Is(err, proxies.ErrNoSolver) {
+		return nil, connect.NewError(connect.CodeUnavailable, err)
+	}
+	if err != nil {
+		return nil, connectError(ctx, err)
+	}
+	return pluginv1.SolveChallengeResponse_builder{Solution: sol}.Build(), nil
 }

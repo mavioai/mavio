@@ -17,6 +17,7 @@ import (
 	"github.com/mavioai/mavio/apps/server/internal/downloads"
 	"github.com/mavioai/mavio/apps/server/internal/events"
 	"github.com/mavioai/mavio/apps/server/internal/plugins"
+	"github.com/mavioai/mavio/apps/server/internal/proxies"
 	"github.com/mavioai/mavio/libs/containers"
 	"github.com/mavioai/mavio/libs/core"
 	"github.com/mavioai/mavio/libs/plugin/manifest"
@@ -42,6 +43,9 @@ type PluginManagementService struct {
 	DownloadClients func() []downloads.Provider
 	// Containers keeps plugins' container dependencies; nil means none.
 	Containers ContainerDependencies
+	// Proxies keeps the server's proxies, the options of
+	// manifest.OptionsProxies; nil keeps none.
+	Proxies *proxies.Service
 }
 
 // ContainerDependencies keeps plugins' container dependencies;
@@ -243,12 +247,20 @@ func (s *PluginManagementService) ListPluginConfigOptions(ctx context.Context, r
 		return nil, connectError(ctx, fmt.Errorf("plugin %s: %w", req.GetPluginId(), core.ErrNotFound))
 	}
 	var options []plugins.ConfigOption
-	if req.GetSource() == manifest.OptionsDownloadClients {
+	switch req.GetSource() {
+	case manifest.OptionsDownloadClients, manifest.OptionsProxies:
 		if !slices.ContainsFunc(s.Plugins.Plugins(), func(p plugins.Info) bool { return p.Manifest.GetId() == req.GetPluginId() }) {
 			return nil, connectError(ctx, fmt.Errorf("plugin %s: %w", req.GetPluginId(), core.ErrNotFound))
 		}
-		options = s.downloadClients(ctx)
-	} else {
+		if req.GetSource() == manifest.OptionsDownloadClients {
+			options = s.downloadClients(ctx)
+		} else {
+			var err error
+			if options, err = s.proxyOptions(ctx); err != nil {
+				return nil, connectError(ctx, err)
+			}
+		}
+	default:
 		var err error
 		if options, err = s.Plugins.Definitions(ctx, req.GetPluginId(), req.GetSource()); err != nil {
 			return nil, connectError(ctx, err)
@@ -261,6 +273,25 @@ func (s *PluginManagementService) ListPluginConfigOptions(ctx context.Context, r
 		}.Build())
 	}
 	return systemv1.ListPluginConfigOptionsResponse_builder{Options: out}.Build(), nil
+}
+
+// proxyOptions returns the server's proxies as options: their IDs, named
+// and described by their kinds and addresses.
+func (s *PluginManagementService) proxyOptions(ctx context.Context) ([]plugins.ConfigOption, error) {
+	if s.Proxies == nil {
+		return nil, nil
+	}
+	list, err := s.Proxies.List(ctx)
+	if err != nil {
+		return nil, err
+	}
+	out := make([]plugins.ConfigOption, len(list))
+	for i, p := range list {
+		out[i] = plugins.ConfigOption{
+			Value: p.ID.String(), Name: p.Name, Description: string(p.Kind) + "://" + p.Address(), Tags: []string{string(p.Kind)},
+		}
+	}
+	return out, nil
 }
 
 // downloadClients returns the clients of every download client provider

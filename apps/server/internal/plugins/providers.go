@@ -12,6 +12,7 @@ import (
 	"github.com/mavioai/mavio/apps/server/internal/activity"
 	"github.com/mavioai/mavio/apps/server/internal/downloads"
 	"github.com/mavioai/mavio/apps/server/internal/providers"
+	"github.com/mavioai/mavio/apps/server/internal/proxies"
 	"github.com/mavioai/mavio/apps/server/internal/releases"
 	"github.com/mavioai/mavio/apps/server/internal/requests"
 	"github.com/mavioai/mavio/apps/server/internal/speech"
@@ -544,5 +545,40 @@ func (m *Manager) VoicePlugins() []speech.VoicePlugin {
 			out = append(out, speech.VoicePlugin{ID: id, Client: pl.Voices()})
 		}
 	}
+	return out
+}
+
+// ChallengeSolvers returns the ready CHALLENGE_SOLVER plugins, by ID.
+func (m *Manager) ChallengeSolvers() []proxies.Solver {
+	ids := m.withCapability(pluginv1.Capability_CAPABILITY_CHALLENGE_SOLVER)
+	slices.Sort(ids)
+	var out []proxies.Solver
+	for _, id := range ids {
+		if pl, ok := m.running(id); ok && pl.ChallengeSolver() != nil {
+			out = append(out, proxies.Solver{ID: id, Client: pl.ChallengeSolver()})
+		}
+	}
+	return out
+}
+
+// UsesProxies reports whether an installed plugin's configuration takes
+// the server's proxies (manifest.OptionsProxies).
+func (m *Manager) UsesProxies(id string) bool {
+	man, ok := m.Manifest(id)
+	return ok && manifest.UsesOptions(man, manifest.OptionsProxies)
+}
+
+// ProxyUsers lists the started plugins whose configuration takes the
+// server's proxies, by ID.
+func (m *Manager) ProxyUsers() []string {
+	m.mu.Lock()
+	var out []string
+	for _, e := range m.plugins {
+		if e.plugin != nil && manifest.UsesOptions(e.manifest, manifest.OptionsProxies) {
+			out = append(out, e.manifest.GetId())
+		}
+	}
+	m.mu.Unlock()
+	slices.Sort(out)
 	return out
 }
