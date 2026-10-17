@@ -48,9 +48,12 @@ type PluginManagementService struct {
 	// Proxies keeps the server's proxies, the options of
 	// manifest.OptionsProxies; nil keeps none.
 	Proxies *proxies.Service
-	// Settings keep the proxies of WASM plugins' HTTP requests; nil
-	// keeps none.
+	// Settings keep the proxies plugins reach sites through; nil keeps
+	// none.
 	Settings *settings.Manager
+	// ProxyChanged is told of a plugin whose proxy changed; nil tells
+	// nobody.
+	ProxyChanged func(ctx context.Context, pluginID string)
 }
 
 // ContainerDependencies keeps plugins' container dependencies;
@@ -58,7 +61,7 @@ type PluginManagementService struct {
 type ContainerDependencies interface {
 	Runtime(ctx context.Context, detect bool) (containers.Runtime, error)
 	List(ctx context.Context, pluginID string) ([]dependencies.Dependency, error)
-	Set(ctx context.Context, pluginID, name string, mode core.ContainerMode, address string, useGPU bool) (dependencies.Dependency, error)
+	Set(ctx context.Context, pluginID, name string, mode core.ContainerMode, address string, useGPU bool, proxy *string) (dependencies.Dependency, error)
 	// JobProgress returns the fraction done of a running image pull job.
 	JobProgress(id core.ID) (float64, bool)
 }
@@ -347,18 +350,25 @@ var pluginStates = map[plugins.State]systemv1.PluginState{
 	plugins.Disabled:     systemv1.PluginState_PLUGIN_STATE_DISABLED,
 }
 
-// toProto returns a plugin as clients see it, a WASM plugin with its
-// proxy.
+// toProto returns a plugin as clients see it, with its proxy.
 func (s *PluginManagementService) toProto(p plugins.Info, wanted []language.Tag) *systemv1.Plugin {
 	out := pluginToProto(p, wanted)
-	if s.Settings != nil && p.Manifest.GetRuntime() == pluginv1.Runtime_RUNTIME_WASM {
+	if s.Settings != nil && proxied(p.Manifest) {
 		out.SetProxy(PluginProxy(s.Settings.Get(), p.Manifest.GetId()))
 	}
 	return out
 }
 
-// PluginProxy returns the ID of the proxy a WASM plugin's HTTP requests go
-// through, the system proxy unless set.
+// proxied reports whether a plugin's runtime lets the server choose its
+// proxy: WASM plugins' requests the server performs, and process
+// plugins' go to its proxy gateway.
+func proxied(m *pluginv1.Manifest) bool {
+	rt := m.GetRuntime()
+	return rt == pluginv1.Runtime_RUNTIME_WASM || rt == pluginv1.Runtime_RUNTIME_PROCESS
+}
+
+// PluginProxy returns the ID of the proxy a plugin reaches sites through,
+// the system proxy unless set.
 func PluginProxy(set core.ServerSettings, pluginID string) string {
 	if id, ok := set.PluginProxies[pluginID]; ok {
 		return id
@@ -366,7 +376,7 @@ func PluginProxy(set core.ServerSettings, pluginID string) string {
 	return core.SystemProxyID
 }
 
-// SetPluginProxy sets the proxy a WASM plugin's HTTP requests go through.
+// SetPluginProxy sets the proxy a plugin reaches sites through.
 func (s *PluginManagementService) SetPluginProxy(ctx context.Context, req *systemv1.SetPluginProxyRequest) (*systemv1.SetPluginProxyResponse, error) {
 	p, err := admin(ctx)
 	if err != nil {
@@ -383,8 +393,8 @@ func (s *PluginManagementService) SetPluginProxy(ctx context.Context, req *syste
 	switch {
 	case info.Manifest == nil || s.Settings == nil:
 		return nil, connectError(ctx, fmt.Errorf("plugin %s: %w", id, core.ErrNotFound))
-	case info.Manifest.GetRuntime() != pluginv1.Runtime_RUNTIME_WASM:
-		return nil, connectError(ctx, fmt.Errorf("%w: plugin %s reaches sites itself, through the proxy of its settings", core.ErrInvalid, id))
+	case !proxied(info.Manifest):
+		return nil, connectError(ctx, fmt.Errorf("%w: plugin %s has no runtime", core.ErrInvalid, id))
 	}
 	if _, err := s.Settings.Change(ctx, func(cur *core.ServerSettings) error {
 		if cur.PluginProxies == nil {
@@ -399,6 +409,9 @@ func (s *PluginManagementService) SetPluginProxy(ctx context.Context, req *syste
 		Type: "plugin.proxy_changed", UserID: p.User.ID, Title: fmt.Sprintf("%s changed the proxy of plugin %s", p.User.Name, id),
 		Attributes: map[string]string{"plugin": id},
 	})
+	if s.ProxyChanged != nil {
+		s.ProxyChanged(ctx, id)
+	}
 	out := s.toProto(info, wantedLanguages(ctx))
 	if s.Hub != nil {
 		s.Hub.ToAdmins(sessionv1.Event_builder{PluginChanged: sessionv1.PluginChanged_builder{Plugin: s.toProto(info, nil)}.Build()}.Build())
@@ -467,6 +480,38 @@ func (s *PluginManagementService) ListPluginContainers(ctx context.Context, req 
 	return systemv1.ListPluginContainersResponse_builder{Containers: out}.Build(), nil
 }
 
+// ListContainers lists every plugin's container dependencies the server
+// runs or was given an address of.
+func (s *PluginManagementService) ListContainers(ctx context.Context, _ *systemv1.ListContainersRequest) (*systemv1.ListContainersResponse, error) {
+	if _, err := admin(ctx); err != nil {
+		return nil, err
+	}
+	var out []*systemv1.PluginContainer
+	if s.Containers == nil || s.Plugins == nil {
+		return systemv1.ListContainersResponse_builder{}.Build(), nil
+	}
+	for _, p := range s.Plugins.Plugins() {
+		id := p.Manifest.GetId()
+		if len(p.Manifest.GetContainers()) == 0 {
+			continue
+		}
+		deps, err := s.Containers.List(ctx, id)
+		if errors.Is(err, core.ErrNotFound) {
+			continue
+		}
+		if err != nil {
+			return nil, connectError(ctx, err)
+		}
+		tr := s.translator(ctx, id)
+		for _, d := range deps {
+			if d.Kept.Mode != core.ContainerUnset {
+				out = append(out, pluginContainerToProto(d, tr))
+			}
+		}
+	}
+	return systemv1.ListContainersResponse_builder{Containers: out}.Build(), nil
+}
+
 var containerModes = map[pluginv1.ContainerMode]core.ContainerMode{
 	pluginv1.ContainerMode_CONTAINER_MODE_UNSPECIFIED: core.ContainerUnset,
 	pluginv1.ContainerMode_CONTAINER_MODE_MANAGED:     core.ContainerManaged,
@@ -485,7 +530,11 @@ func (s *PluginManagementService) SetPluginContainer(ctx context.Context, req *s
 	if !ok {
 		return nil, connect.NewError(connect.CodeInvalidArgument, fmt.Errorf("unknown container mode %v", req.GetMode()))
 	}
-	d, err := s.Containers.Set(ctx, req.GetPluginId(), req.GetName(), mode, req.GetAddress(), req.GetUseGpu())
+	var proxy *string
+	if req.HasProxy() {
+		proxy = new(req.GetProxy())
+	}
+	d, err := s.Containers.Set(ctx, req.GetPluginId(), req.GetName(), mode, req.GetAddress(), req.GetUseGpu(), proxy)
 	switch {
 	case errors.Is(err, dependencies.ErrNoEngine):
 		return nil, connect.NewError(connect.CodeFailedPrecondition, err)
@@ -529,6 +578,7 @@ func pluginContainerToProto(d dependencies.Dependency, tr func(string) string) *
 	return systemv1.PluginContainer_builder{
 		Dependency: spec, Status: d.Status, UseGpu: new(d.Kept.UseGPU),
 		Commands: containerCommandsToProto(d.Commands), GpuCommands: containerCommandsToProto(d.GPUCommands),
+		PluginId: new(d.Kept.PluginID), Proxy: new(d.Kept.Proxy), Command: new(d.Command),
 	}.Build()
 }
 

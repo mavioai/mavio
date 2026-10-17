@@ -487,11 +487,11 @@ func TestThrough(t *testing.T) {
 
 	// A proxy the settings use is not deleted; one deleted fails requests.
 	choice.Store(p.ID.String())
-	s.SetUses(func(id string) []string {
+	s.SetUses(func(_ context.Context, id string) ([]string, error) {
 		if id == p.ID.String() {
-			return []string{"images"}
+			return []string{"images"}, nil
 		}
-		return nil
+		return nil, nil
 	})
 	if err := s.Delete(ctx, p.ID); !errors.Is(err, ErrInUse) {
 		t.Errorf("Delete of a proxy in use got = %v, want = ErrInUse", err)

@@ -64,6 +64,31 @@ func (m *Manager) SetEnabled(ctx context.Context, id string, enabled bool) (Info
 	return info, nil
 }
 
+// Restart stops a running plugin and starts it again, as after an
+// upgrade, for it to start with what Config.Env returns now; it does
+// nothing for a plugin that does not run.
+func (m *Manager) Restart(ctx context.Context, id string) error {
+	m.install.Lock()
+	defer m.install.Unlock()
+	m.mu.Lock()
+	e, err := m.find(id)
+	if err != nil || e.plugin == nil {
+		m.mu.Unlock()
+		return err
+	}
+	p := e.plugin
+	e.plugin = nil
+	m.mu.Unlock()
+	m.dropDevices(ctx, id)
+	if err := p.Close(ctx); err != nil {
+		m.log.WarnContext(ctx, "stop plugin", "plugin", id, "err", err)
+	}
+	n := m.start(ctx, e.folder, m.otherIDs(id))
+	m.put(n)
+	m.log.InfoContext(ctx, "plugin restarted", "plugin", id)
+	return n.err
+}
+
 // forgetDisabled drops an uninstalled plugin from the disabled ones, so
 // that installing it again starts it.
 func (m *Manager) forgetDisabled(ctx context.Context, id string) error {

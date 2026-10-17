@@ -235,12 +235,28 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 	}
 	// The plugins' managed container dependencies run while the plugins
 	// do; they stop after the plugins when the server stops.
+	// The server's own HTTP requests, and its WASM plugins', go through
+	// the proxies the settings choose; its process plugins and managed
+	// containers go through the proxy gateway on its listener when their
+	// proxy is one.
+	proxyService := proxies.New(db.Proxies(), nil, log)
+	names := containers.Names{Prefix: cfg.ContainerPrefix}
+	gatewayAddr, gatewayPort := gatewayAddress(ln.Addr())
+	users := &gatewayUsers{proxies: proxyService, settings: set, names: names, addr: gatewayAddr, port: gatewayPort, log: log, proxied: map[string]bool{}}
+	users.gateway = proxies.NewGateway(proxyService, key.Derive("proxy-gateway"), users.choose, log)
+	defer users.gateway.Close()
 	deps := dependencies.New(dependencies.Config{
-		Store: db.PluginContainers(), Jobs: db.Jobs(), Server: key.ID(), Names: containers.Names{Prefix: cfg.ContainerPrefix}, Logger: log,
+		Store: db.PluginContainers(), Jobs: db.Jobs(), Server: key.ID(), Names: names, Logger: log,
 		Detect: func(ctx context.Context) (containers.Runtime, error) {
 			return containers.Detect(ctx, containers.Options{Endpoint: cfg.ContainerEndpoint})
 		},
+		ProxyEnv: users.containerEnv,
+		CheckProxy: func(ctx context.Context, id string) error {
+			return checkProxy(ctx, proxyService, "the container", id)
+		},
+		ProxyChanged: func(container string) { users.gateway.Reset(container) },
 	})
+	users.deps = deps
 	defer func() {
 		closeCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 30*time.Second)
 		defer cancel()
@@ -252,10 +268,7 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 	if pluginCache == "" {
 		pluginCache = filepath.Join(cfg.CacheDir, "plugins")
 	}
-	// The server's own HTTP requests, and its WASM plugins', go through
-	// the proxies the settings choose.
-	proxyService := proxies.New(db.Proxies(), nil, log)
-	proxyService.SetUses(func(id string) []string { return proxyUses(set.Get(), id) })
+
 	outbound := func(timeout time.Duration, pick func(p *core.OutboundProxies) string) *http.Client {
 		return &http.Client{Timeout: timeout, Transport: proxyService.Through(func(*http.Request) string {
 			p := set.Get().Network.Proxies
@@ -277,7 +290,7 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 		Dir: cfg.PluginDir, CacheDir: pluginCache, Store: db, Logger: log, HostAPI: hostAPI, ConfigureLater: true,
 		Client:  outbound(5*time.Minute, func(p *core.OutboundProxies) string { return p.PluginCatalogs }),
 		DataDir: cfg.PluginDataDir, Fetch: pluginFetch, Activity: activityLog, DevicesChanged: hub.SharedSessionsChanged,
-		Catalogs: func() []string { return set.Get().PluginCatalogs }, Containers: deps,
+		Catalogs: func() []string { return set.Get().PluginCatalogs }, Containers: deps, Env: users.env,
 		Disabled: set.Get().DisabledPlugins,
 		SaveDisabled: func(ctx context.Context, ids []string) error {
 			_, err := set.Change(ctx, func(s *core.ServerSettings) error {
@@ -293,6 +306,13 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 	started.Store(plugs)
 	deps.Bind(plugs)
 	proxyService.Bind(plugs)
+	users.plugs = plugs
+	proxyService.SetUses(func(ctx context.Context, id string) ([]string, error) {
+		return proxyUses(ctx, set.Get(), plugs, db.PluginContainers(), id)
+	})
+	proxyService.OnChange(func() {
+		go users.proxiesChanged(ctx)
+	})
 	go func() {
 		if err := deps.Reconcile(ctx); err != nil {
 			log.WarnContext(ctx, "reconcile plugins' containers", "err", err)
@@ -470,7 +490,7 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 	h, err := httpserver.Handler(httpserver.Options{
 		Assistant: helper,
 		Version:   cfg.Version, Store: db, Identity: key, Hub: hub, Database: raw.Dialect(), FFmpegVersion: ffmpegVersion, Playbacks: playbacks,
-		Images: imageServer, Plugins: plugs, Devices: plugs, Containers: deps, Proxies: proxyService, Refresher: refresher, Storage: classifier, Storages: storages, Remotes: rc.Service(offline, rcDown),
+		Images: imageServer, Plugins: plugs, Devices: plugs, Containers: deps, Proxies: proxyService, PluginProxyChanged: users.pluginChanged, Refresher: refresher, Storage: classifier, Storages: storages, Remotes: rc.Service(offline, rcDown),
 		Subtitles: subFiles, SubtitleRuntime: subs,
 		Lyrics:   lyrics,
 		Intros:   &library.Intros{Store: db, Source: plugs.IntroProviders, Logger: log},
@@ -539,7 +559,7 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 		}
 		return nil
 	})
-	g.Go(func() error { return httpserver.Serve(ctx, ln, prefix) })
+	g.Go(func() error { return httpserver.Serve(ctx, ln, users.gateway.Wrap(prefix)) })
 	g.Go(func() error {
 		link.Run(ctx)
 		return nil

@@ -9,6 +9,7 @@ import (
 	"maps"
 	"net/http"
 	"net/url"
+	"slices"
 	"strconv"
 	"strings"
 	"sync"
@@ -63,6 +64,17 @@ type Config struct {
 	// Poll is the time between health checks of a starting managed
 	// dependency; 0 is the Supervisor's default.
 	Poll time.Duration
+	// ProxyEnv returns the environment a managed dependency's container
+	// reaches sites with through the proxy its choice names, nil when it
+	// reaches them directly, choosing none or a system proxy setting none;
+	// nil Config.ProxyEnv proxies nothing.
+	ProxyEnv func(ctx context.Context, m *pluginv1.Manifest, c core.PluginContainer) func(host string) map[string]string
+	// CheckProxy rejects a proxy choice naming no proxy; nil accepts any.
+	CheckProxy func(ctx context.Context, id string) error
+	// ProxyChanged is told the container of a dependency whose proxy
+	// changed, for its connections to go through the new one; nil tells
+	// nobody.
+	ProxyChanged func(container string)
 	// Now returns the time; nil uses time.Now.
 	Now    func() time.Time
 	Logger *slog.Logger
@@ -287,10 +299,68 @@ func (s *Service) runPlugin(ctx context.Context, m *pluginv1.Manifest) error {
 	}
 	for _, spec := range m.GetContainers() {
 		if c, ok := managed[spec.GetName()]; ok {
-			sup.Start(Resolve(s.cfg.Names, spec, c))
+			sup.Start(s.resolve(ctx, m, spec, c))
 		}
 	}
 	return nil
+}
+
+// resolve is Resolve, with the environment of the dependency's proxy.
+func (s *Service) resolve(ctx context.Context, m *pluginv1.Manifest, spec *pluginv1.ContainerDependency, c core.PluginContainer) containers.Dependency {
+	d := Resolve(s.cfg.Names, spec, c)
+	if s.cfg.ProxyEnv != nil {
+		d.ProxyEnv = s.cfg.ProxyEnv(ctx, m, c)
+	}
+	return d
+}
+
+// ProxiesChanged starts again the managed dependencies whose containers
+// go from reaching sites directly to through a proxy, or back, as the
+// system proxy is set or not.
+func (s *Service) ProxiesChanged(ctx context.Context) {
+	p := s.boundPlugins()
+	if p == nil {
+		return
+	}
+	s.mu.Lock()
+	ids := slices.Collect(maps.Keys(s.started))
+	s.mu.Unlock()
+	for _, id := range ids {
+		if m, ok := p.Manifest(id); ok && len(m.GetContainers()) > 0 {
+			if err := s.runPlugin(ctx, m); err != nil {
+				s.cfg.Logger.WarnContext(ctx, "run plugin's containers after proxies changed", "plugin", id, "err", err)
+			}
+		}
+	}
+}
+
+// ProxyOf returns the proxy choice of the managed dependency whose
+// container is named so, of a running plugin; false for none.
+func (s *Service) ProxyOf(ctx context.Context, container string) (string, bool) {
+	p := s.boundPlugins()
+	if p == nil {
+		return "", false
+	}
+	s.mu.Lock()
+	ids := slices.Collect(maps.Keys(s.started))
+	s.mu.Unlock()
+	for _, id := range ids {
+		m, ok := p.Manifest(id)
+		if !ok {
+			continue
+		}
+		for _, spec := range m.GetContainers() {
+			if s.cfg.Names.Container(id, spec.GetName()) != container {
+				continue
+			}
+			c, err := s.kept(ctx, id, spec.GetName())
+			if err != nil || c.Mode != core.ContainerManaged {
+				return "", false
+			}
+			return c.Proxy, true
+		}
+	}
+	return "", false
 }
 
 // PluginStopped stops a plugin's managed dependencies.
@@ -396,6 +466,9 @@ type Dependency struct {
 	// Commands run it without a GPU, nil when it needs one; GPUCommands
 	// with one, nil when it cannot use one.
 	Commands, GPUCommands *containers.Commands
+	// Command is the docker run command equivalent to how a managed
+	// dependency runs, empty without a container engine.
+	Command string
 }
 
 // List returns a plugin's container dependencies in manifest order;
@@ -418,12 +491,32 @@ func (s *Service) List(ctx context.Context, pluginID string) ([]Dependency, erro
 	for i, spec := range m.GetContainers() {
 		c, ok := byName[spec.GetName()]
 		if !ok {
-			c = core.PluginContainer{PluginID: pluginID, Name: spec.GetName(), Mode: core.ContainerUnset}
+			c = unset(pluginID, spec.GetName())
 		}
 		out[i] = Dependency{Spec: spec, Kept: c, Status: s.status(ctx, spec, c)}
 		out[i].Commands, out[i].GPUCommands = s.commands(spec, c, rt.OnHost())
+		out[i].Command = s.command(ctx, m, spec, c)
 	}
 	return out, nil
+}
+
+// command returns the docker run command of a managed dependency, empty
+// for another or without a container engine.
+func (s *Service) command(ctx context.Context, m *pluginv1.Manifest, spec *pluginv1.ContainerDependency, c core.PluginContainer) string {
+	if c.Mode != core.ContainerManaged {
+		return ""
+	}
+	sup, err := s.supervisor(ctx)
+	if err != nil {
+		return ""
+	}
+	return sup.Command(s.resolve(ctx, m, spec, c))
+}
+
+// unset is a dependency nothing is kept of: unset, through the system
+// proxy once managed.
+func unset(pluginID, name string) core.PluginContainer {
+	return core.PluginContainer{PluginID: pluginID, Name: name, Mode: core.ContainerUnset, Proxy: core.SystemProxyID}
 }
 
 // commands returns the commands running a dependency without and with a
@@ -468,9 +561,10 @@ func (s *Service) AllowsHost(ctx context.Context, pluginID, host string) bool {
 // Set sets how a dependency is reached and returns it, generating its
 // secrets the first time, and configures the plugin again when its mode
 // or address changed. A managed dependency needs a container engine
-// (ErrNoEngine); it runs while its plugin runs. Leaving managed removes its container and
-// keeps its volumes.
-func (s *Service) Set(ctx context.Context, pluginID, name string, mode core.ContainerMode, address string, useGPU bool) (Dependency, error) {
+// (ErrNoEngine); it runs while its plugin runs, reaching sites through
+// the proxy of ID proxy, which nil keeps. Leaving managed removes its
+// container and keeps its volumes.
+func (s *Service) Set(ctx context.Context, pluginID, name string, mode core.ContainerMode, address string, useGPU bool, proxy *string) (Dependency, error) {
 	m, err := s.manifest(pluginID)
 	if err != nil {
 		return Dependency{}, err
@@ -497,7 +591,15 @@ func (s *Service) Set(ctx context.Context, pluginID, name string, mode core.Cont
 	}
 	c := core.PluginContainer{
 		PluginID: pluginID, Name: name, Mode: mode, Address: strings.TrimSuffix(address, "/"),
-		Secrets: secrets(spec, old.Secrets), UseGPU: useGPU,
+		Secrets: secrets(spec, old.Secrets), UseGPU: useGPU, Proxy: old.Proxy,
+	}
+	if proxy != nil && *proxy != old.Proxy {
+		if s.cfg.CheckProxy != nil {
+			if err := s.cfg.CheckProxy(ctx, *proxy); err != nil {
+				return Dependency{}, err
+			}
+		}
+		c.Proxy = *proxy
 	}
 	if err := s.cfg.Store.Put(ctx, &c); err != nil {
 		return Dependency{}, err
@@ -516,7 +618,10 @@ func (s *Service) Set(ctx context.Context, pluginID, name string, mode core.Cont
 		}
 	}
 	if sup != nil && started {
-		sup.Start(Resolve(s.cfg.Names, spec, c))
+		sup.Start(s.resolve(ctx, m, spec, c))
+	}
+	if c.Proxy != old.Proxy && s.cfg.ProxyChanged != nil {
+		s.cfg.ProxyChanged(s.cfg.Names.Container(pluginID, name))
 	}
 	if old.Mode != c.Mode || old.Address != c.Address {
 		if p := s.boundPlugins(); p != nil {
@@ -525,7 +630,7 @@ func (s *Service) Set(ctx context.Context, pluginID, name string, mode core.Cont
 			}
 		}
 	}
-	return Dependency{Spec: spec, Kept: c, Status: s.status(ctx, spec, c)}, nil
+	return Dependency{Spec: spec, Kept: c, Status: s.status(ctx, spec, c), Command: s.command(ctx, m, spec, c)}, nil
 }
 
 // manifest returns a plugin's manifest.
@@ -549,7 +654,7 @@ func (s *Service) kept(ctx context.Context, pluginID, name string) (core.PluginC
 			return c, nil
 		}
 	}
-	return core.PluginContainer{PluginID: pluginID, Name: name, Mode: core.ContainerUnset}, nil
+	return unset(pluginID, name), nil
 }
 
 // secrets returns the secrets a dependency's environment names: those

@@ -94,6 +94,9 @@ type Config struct {
 	// call the host API while configured, and a HostAPI that serves only
 	// once Open returns would never answer them.
 	ConfigureLater bool
+	// Env returns what a process plugin's environment adds to the
+	// server's when it starts; nil adds nothing.
+	Env func(m *pluginv1.Manifest) []string
 	// Activity records plugin failures and task runs; nil records none.
 	Activity *activity.Log
 	// DevicesChanged is told the sessions of the devices that plugins
@@ -197,6 +200,7 @@ func Open(ctx context.Context, cfg Config) (*Manager, error) {
 		WASM:    wasm.Options{CacheDir: cfg.CacheDir, FetchClient: cfg.Fetch, AllowHost: cfg.allowHost, Logger: m.log},
 		Process: process.Options{Logger: m.log},
 		DataDir: cfg.DataDir,
+		Env:     cfg.Env,
 	}
 	if cfg.HostAPI != nil {
 		m.opts.HostAPI = func(man *pluginv1.Manifest) http.Handler {

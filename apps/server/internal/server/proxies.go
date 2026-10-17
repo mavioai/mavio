@@ -6,13 +6,14 @@ import (
 	"fmt"
 	"slices"
 
+	"github.com/mavioai/mavio/apps/server/internal/plugins"
 	"github.com/mavioai/mavio/apps/server/internal/proxies"
 	"github.com/mavioai/mavio/libs/core"
 )
 
-// proxyUses returns what the settings use a proxy for: what the server's
-// own requests reach, and the WASM plugins, by ID.
-func proxyUses(s core.ServerSettings, id string) []string {
+// proxyUses returns what uses a proxy: what the server's own requests
+// reach, the plugins by ID, and the managed containers.
+func proxyUses(ctx context.Context, s core.ServerSettings, plugs *plugins.Manager, kept core.PluginContainerRepository, id string) ([]string, error) {
 	var out []string
 	for what, p := range s.Network.Proxies.All() {
 		if *p == id {
@@ -24,31 +25,49 @@ func proxyUses(s core.ServerSettings, id string) []string {
 			out = append(out, plugin)
 		}
 	}
+	if plugs != nil {
+		for _, p := range plugs.Plugins() {
+			if len(p.Manifest.GetContainers()) == 0 {
+				continue
+			}
+			list, err := kept.List(ctx, p.Manifest.GetId())
+			if err != nil {
+				return nil, err
+			}
+			for _, c := range list {
+				if c.Mode == core.ContainerManaged && c.Proxy == id {
+					out = append(out, "container "+c.Name+" of "+c.PluginID)
+				}
+			}
+		}
+	}
 	slices.Sort(out)
-	return out
+	return out, nil
+}
+
+// checkProxy rejects a choice naming a proxy the server does not have.
+func checkProxy(ctx context.Context, p *proxies.Service, what, id string) error {
+	if id == "" || id == proxies.SystemID {
+		return nil
+	}
+	if _, err := p.Resolve(ctx, id); err != nil {
+		if errors.Is(err, core.ErrNotFound) {
+			return fmt.Errorf("%w: the proxy of %s does not exist", core.ErrInvalid, what)
+		}
+		return err
+	}
+	return nil
 }
 
 // checkProxies rejects settings naming proxies the server does not have.
 func checkProxies(ctx context.Context, p *proxies.Service, s core.ServerSettings) error {
-	check := func(what, id string) error {
-		if id == "" || id == proxies.SystemID {
-			return nil
-		}
-		if _, err := p.Resolve(ctx, id); err != nil {
-			if errors.Is(err, core.ErrNotFound) {
-				return fmt.Errorf("%w: the proxy of %s does not exist", core.ErrInvalid, what)
-			}
-			return err
-		}
-		return nil
-	}
 	for what, id := range s.Network.Proxies.All() {
-		if err := check(what, *id); err != nil {
+		if err := checkProxy(ctx, p, what, *id); err != nil {
 			return err
 		}
 	}
 	for plugin, id := range s.PluginProxies {
-		if err := check("plugin "+plugin, id); err != nil {
+		if err := checkProxy(ctx, p, "plugin "+plugin, id); err != nil {
 			return err
 		}
 	}

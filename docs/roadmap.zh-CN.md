@@ -981,6 +981,9 @@ flowchart TD
 - [ ] 没有发布镜像的求解器，各需在 mavio-deps 中构建 Mavio 自己的镜像：Zendriver、Camoufox、invisible_playwright（Byparr 所用）；同时为容器声明加入浏览器所需的共享内存与 tmpfs
 - [x] 服务端自身的请求经设置中选择的代理，插件目录、图片、mavio.dev 与 ACME 各选一个，默认系统代理
 - [x] WASM 插件的 HTTP 请求经为各插件选择的代理，默认系统代理；本机与局域网直连
+- [x] 代理网关：进程插件与托管容器经各自选择的代理，借助 `HTTP_PROXY` 与 `HTTPS_PROXY`；直连的选择绕过网关，在直连与经代理之间变化时，Web UI 请求确认后重启插件或重建容器
+- [x] 概览中的容器：所有插件的容器依赖及其插件、状态与 `docker run` 命令
+- [ ] 环境变量覆盖不到的流量的代理：HTTP 客户端忽略 `HTTP_PROXY` 的进程插件，以及 HTTP 以外的流量（BitTorrent、Usenet），后者需要 SOCKS5 网关
 
 ---
 

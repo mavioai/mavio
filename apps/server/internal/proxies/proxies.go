@@ -77,7 +77,39 @@ type Service struct {
 	revision atomic.Uint64
 	// uses tells where the server's settings use a proxy; nil when they
 	// cannot.
-	uses func(id string) []string
+	uses func(ctx context.Context, id string) ([]string, error)
+
+	hooksMu sync.Mutex
+	hooks   []func()
+}
+
+// OnChange adds what is told when a proxy, the system proxy among them,
+// changes or is deleted; f does not block.
+func (s *Service) OnChange(f func()) { s.onChange(f) }
+
+// Direct reports whether the choice of a proxy ID reaches sites directly:
+// none, or the system proxy setting none.
+func (s *Service) Direct(ctx context.Context, id string) bool {
+	return id == "" || id == SystemID && proxy.URL(s.System(ctx)) == nil
+}
+
+// onChange adds what is told when a proxy, the system proxy among them,
+// changes or is deleted.
+func (s *Service) onChange(f func()) {
+	s.hooksMu.Lock()
+	defer s.hooksMu.Unlock()
+	s.hooks = append(s.hooks, f)
+}
+
+// bump marks the proxies changed.
+func (s *Service) bump() {
+	s.revision.Add(1)
+	s.hooksMu.Lock()
+	hooks := slices.Clone(s.hooks)
+	s.hooksMu.Unlock()
+	for _, f := range hooks {
+		f()
+	}
 }
 
 // New returns a Service keeping proxies in repo; plugins may be nil, and
@@ -91,9 +123,9 @@ func New(repo core.ProxyRepository, plugins Plugins, log *slog.Logger) *Service 
 func (s *Service) Bind(plugins Plugins) { s.plugins = plugins }
 
 // SetUses sets what tells where the server's settings use a proxy, such as
-// "images" or a plugin's ID, a proxy so used being refused deletion. Like
-// Bind, it is called before the Service serves.
-func (s *Service) SetUses(uses func(id string) []string) { s.uses = uses }
+// "images", a plugin's ID or a container, a proxy so used being refused
+// deletion. Like Bind, it is called before the Service serves.
+func (s *Service) SetUses(uses func(ctx context.Context, id string) ([]string, error)) { s.uses = uses }
 
 // Run reads the system proxy every 30 seconds until ctx ends, configuring
 // the plugins taking proxies again when it changes.
@@ -102,6 +134,7 @@ func (s *Service) Run(ctx context.Context) error {
 	defer t.Stop()
 	for {
 		if s.refresh(ctx) {
+			s.bump()
 			s.changed(ctx)
 		}
 		select {
@@ -180,7 +213,7 @@ func (s *Service) Update(ctx context.Context, p core.Proxy, clearPassword bool) 
 	if err := s.repo.Put(ctx, &p); err != nil {
 		return core.Proxy{}, err
 	}
-	s.revision.Add(1)
+	s.bump()
 	s.changed(ctx)
 	return p, nil
 }
@@ -190,14 +223,18 @@ func (s *Service) Update(ctx context.Context, p core.Proxy, clearPassword bool) 
 // refused, naming where.
 func (s *Service) Delete(ctx context.Context, id core.ID) error {
 	if s.uses != nil {
-		if where := s.uses(id.String()); len(where) > 0 {
-			return fmt.Errorf("%w: the server's settings use it for %s", ErrInUse, strings.Join(where, ", "))
+		where, err := s.uses(ctx, id.String())
+		if err != nil {
+			return err
+		}
+		if len(where) > 0 {
+			return fmt.Errorf("%w: it is used for %s", ErrInUse, strings.Join(where, ", "))
 		}
 	}
 	if err := s.repo.Delete(ctx, id); err != nil {
 		return err
 	}
-	s.revision.Add(1)
+	s.bump()
 	s.changed(ctx)
 	return nil
 }

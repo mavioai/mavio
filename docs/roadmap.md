@@ -981,6 +981,9 @@ flowchart TD
 - [ ] Solvers without published images, each needing an image of Mavio's own built in mavio-deps: Zendriver, Camoufox, invisible_playwright (Byparr's); with them the container declaration's shared memory and tmpfs, which browsers need
 - [x] The server's own requests through proxies chosen in the settings, one for each of plugin catalogs, images, mavio.dev and ACME, the system proxy by default
 - [x] WASM plugins' HTTP requests through the proxy chosen for each plugin, the system proxy by default; this machine and the local network reached directly
+- [x] The proxy gateway: process plugins and managed containers through the proxy chosen for each, by `HTTP_PROXY` and `HTTPS_PROXY`; direct choices bypass it, and a change between direct and proxied restarts the plugin or recreates the container after the web UI asks
+- [x] The overview's containers: every plugin's container dependencies with their plugins, states and `docker run` commands
+- [ ] Proxying what the environment's variables do not reach: process plugins whose HTTP clients ignore `HTTP_PROXY`, and traffic other than HTTP (BitTorrent, Usenet), which would need a SOCKS5 gateway
 
 ---
 

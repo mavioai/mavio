@@ -79,6 +79,9 @@ type Options struct {
 	Containers rpc.ContainerDependencies
 	// Proxies keeps the server's proxies; nil keeps none.
 	Proxies *proxies.Service
+	// PluginProxyChanged is told of a plugin whose proxy changed; nil
+	// tells nobody.
+	PluginProxyChanged func(ctx context.Context, pluginID string)
 	// Storage classifies the paths of libraries; nil classifies with a
 	// device detector of its own.
 	Storage *storage.Classifier
@@ -185,7 +188,7 @@ func Handler(opts Options) (http.Handler, error) {
 	}, interceptors))
 	mux.Handle(systemv1connect.NewPluginManagementServiceHandler(&rpc.PluginManagementService{
 		Plugins: opts.Plugins, Hub: opts.Hub, Activity: opts.Activity, Containers: opts.Containers, DownloadClients: opts.Downloads,
-		Proxies: opts.Proxies, Settings: opts.Settings,
+		Proxies: opts.Proxies, Settings: opts.Settings, ProxyChanged: opts.PluginProxyChanged,
 	}, interceptors))
 	passkeys := auth.NewPasskeys()
 	totp := auth.NewTOTP(opts.Identity.Derive(auth.SecretKeyPurpose))

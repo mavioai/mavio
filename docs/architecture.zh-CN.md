@@ -648,7 +648,7 @@ Mavio 为电影与单集查找缺少的字幕，即 Bazarr 在 Sonarr 与 Radarr
 
 ### 16.5 状态与 API
 * 依赖的模式为 `unset`（管理员尚未选择）、`managed` 或 `external`（`PluginContainer`，[领域模型](domain.zh-CN.md) §10），状态为 `pulling`、`starting`、`ready`、`unhealthy` 或 `unavailable`（尚未选择、托管依赖没有引擎、外部依赖没有地址），并附最近的错误。外部依赖的健康状况在查询其状态时检查，30 秒内的结果直接复用。
-* `PluginManagementService.GetContainerRuntime` 报告并重新检测引擎；`ListPluginContainers` 列出插件的依赖及其声明、模式、地址、状态与命令；`SetPluginContainer` 设置依赖的模式，外部依赖还设置地址。选择托管要求有可用的引擎。
+* `PluginManagementService.GetContainerRuntime` 报告并重新检测引擎；`ListPluginContainers` 列出插件的依赖及其声明、模式、地址、状态与命令；`SetPluginContainer` 设置依赖的模式，外部依赖还设置地址，托管依赖还设置代理（§17.1）；`ListContainers` 为概览列出所有插件已设置的依赖及其插件，托管依赖还带有与服务端运行方式等价的 `docker run` 命令。选择托管要求有可用的引擎。
 * 插件通过 `HostService.ListContainers` 读取其依赖的地址与状态，地址变化时会被再次配置（`Configure`）。托管依赖在其健康检查首次通过后才有地址，因此插件被配置时拿到的是可用的地址。WASM 插件的 `http_hosts` 包含其依赖的地址。
 
 ## 17. 代理与质询求解
@@ -662,7 +662,8 @@ Mavio 为电影与单集查找缺少的字幕，即 Bazarr 在 Sonarr 与 Radarr
 * **密码**：`ProxyService` 从不返回密码，只告知是否已设置；更新时不带密码即保留已保存的密码。
 * **测试**：`TestProxy` 经已保存的代理、系统代理或未保存的代理获取一个 URL，默认 `https://www.cloudflare.com/cdn-cgi/trace`，返回延迟，以及从 trace 读出的出口地址与其国家。
 * **插件**：schema 带 `"x-mavio-options": {"source": "proxies"}` 的配置属性取代理的 ID，从服务端的代理中选择，系统代理排在最前（§7.5）；不选即直连。带此类属性的插件通过 `HostService.ListProxies` 读取代理（含密码），代理变更或删除时会被再次配置。已不存在的代理使用它的请求失败，而不会退回直连。`libs/plugin/proxy` 由代理构建 `http.Transport`，直连代理自身列表与插件列表中的主机。
-* **服务端的请求**：服务端自身的 HTTP 请求经网络设置选择的代理（`OutboundProxies`）发出，按其访问的对象各选一个：插件目录与插件包、条目的远程图片、mavio.dev 的 API，以及 `mavio.site` 证书的证书颁发机构；每项为代理的 ID、系统代理（默认）或不使用代理。WASM 插件的 HTTP 请求由服务端代为发出，经为该插件选择的代理（`PluginProxies`，默认系统代理）；进程插件自行访问站点，经其配置中的代理。这些请求直连本机与局域网的地址（`proxy.Local`，同 Prowlarr 的 BypassLocalAddresses），代理变更后从下一个请求起生效，代理已不存在时请求失败而不会退回直连；指定服务端没有的代理的设置被拒绝，设置正在使用的代理不能删除。
+* **服务端的请求**：服务端自身的 HTTP 请求经网络设置选择的代理（`OutboundProxies`）发出，按其访问的对象各选一个：插件目录与插件包、条目的远程图片、mavio.dev 的 API，以及 `mavio.site` 证书的证书颁发机构；每项为代理的 ID、系统代理（默认）或不使用代理。WASM 插件的 HTTP 请求由服务端代为发出，经为该插件选择的代理（`PluginProxies`，默认系统代理）；进程插件与托管的容器依赖经代理网关（见下）访问站点。这些请求直连本机与局域网的地址（`proxy.Local`，同 Prowlarr 的 BypassLocalAddresses），代理变更后从下一个请求起生效，代理已不存在时请求失败而不会退回直连；指定服务端没有的代理的设置被拒绝，设置正在使用的代理不能删除。
+* **代理网关**：服务端启动的程序经服务端在自身明文 HTTP 监听上提供的 HTTP 代理访问站点：来自本机或局域网、以 Basic `Proxy-Authorization` 登录的 CONNECT 或绝对形式请求，经为其用户选择的代理建立隧道或转发，逐连接决定；其他请求照旧服务。用户是进程插件的 ID 或托管容器的名称，其密码是以服务端密钥派生的密钥对它计算的 HMAC。进程插件启动时带有指向网关的 `HTTP_PROXY` 与 `HTTPS_PROXY`（及其小写形式）、列出本机与局域网的 `NO_PROXY`，以及为空的 `ALL_PROXY`；托管容器得到相同的变量，地址为它访问服务端所用的名称（`host.docker.internal`，或 `mavio` 网络上服务端的容器），同级容器直连。二者都像 WASM 插件一样选择代理（进程插件用 `SetPluginProxy`，容器用 `SetPluginContainer`），默认系统代理。选择不使用代理，或系统代理而系统未设置代理时，这些变量为空，直接访问站点，减轻网关的负担。选择在直连与经代理之间变化时，重启进程插件或重建容器，系统代理变化时也是如此；从一个代理换到另一个只结束网关上该用户的隧道，它们随后经新代理重新建立。插件自身设置选择的代理（如索引器的）直接访问并优先。忽略这些变量的程序，以及 HTTP 以外的流量，不经代理。
 
 ### 17.2 质询求解器
 * **契约**：`CHALLENGE_SOLVER` 插件实现 `ChallengeSolverService.Solve`：给定 URL、方法（GET，或带表单正文的 POST）、代理与超时，返回通过质询的 cookie 及取得它们时的 user agent，之后对该站点的请求都须带上。
