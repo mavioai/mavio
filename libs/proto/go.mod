@@ -1,6 +1,6 @@
 module github.com/mavioai/mavio/libs/proto
 
-go 1.27.0
+go 1.27.1
 
 tool (
 	connectrpc.com/connect/cmd/protoc-gen-connect-go

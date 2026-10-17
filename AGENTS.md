@@ -94,13 +94,13 @@ Every Go project has these inferred Nx targets: `build` (`CGO_ENABLED=0`), `test
 ## Go Conventions
 
 ### Modules and Dependencies
-- Every Go project in `apps/*`, `libs/*` and `plugins/*` is an independent Go module with module path `github.com/mavioai/mavio/<dir>`; the `go` directive is `1.27.0` everywhere.
+- Every Go project in `apps/*`, `libs/*` and `plugins/*` is an independent Go module with module path `github.com/mavioai/mavio/<dir>`; the `go` directive is `1.27.1` everywhere.
 - Dependencies between in-repo modules are declared **both** in `go.work` and in each `go.mod` as `require` + relative-path `replace` (see `apps/server/go.mod`). This keeps `go mod tidy` and builds working with `GOWORK=off`. To add an internal dependency:
   ```bash
   go mod edit -require=github.com/mavioai/mavio/libs/core@v0.0.0 -replace=github.com/mavioai/mavio/libs/core=../core
   GOWORK=off go mod tidy
   ```
-- New module: create the directory → `go mod init github.com/mavioai/mavio/<dir>` → change the `go` directive to `1.27.0` → add it to `use` in `go.work`. Nx picks it up automatically with no `project.json`; add one only to override default targets (see `plugins/scraper-tmdb/project.json`).
+- New module: create the directory → `go mod init github.com/mavioai/mavio/<dir>` → change the `go` directive to `1.27.1` → add it to `use` in `go.work`. Nx picks it up automatically with no `project.json`; add one only to override default targets (see `plugins/scraper-tmdb/project.json`).
 - `libs/proto` and `libs/plugin` are imported by third-party plugins and are tagged independently (e.g. `libs/proto/v0.1.0`); before releasing `libs/plugin`, release the `libs/proto` version it depends on and update its `require`. Other modules promise no stable external API.
 - The dependency direction is enforced by the depguard rules in `.golangci.yml` (architecture document §3.2): `core` depends only on the standard library; `naming`, `subtitle`, `release`, `rclone` and `containers` depend only on `core`; `media`, `imaging`, `metadata` and `store` do not depend on `library`, `streaming` or `plugin`; `library`, `streaming` and `acquire` access storage only through ports in `core`; `plugin` depends only on `proto`; no lib depends on `apps/*` or `plugins/*`. **Only `apps/server` does wiring.** To change the dependency direction, update the architecture document first.
 

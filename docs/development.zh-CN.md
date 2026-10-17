@@ -101,14 +101,14 @@ pnpm nx graph                                      # 查看项目依赖图
 ## 3. Go 模块
 
 ### 3.1 约定
-* 每个 Go 库、应用、插件各有自己的 `go.mod`；模块路径为 `github.com/mavioai/mavio/<dir>`，例如 `github.com/mavioai/mavio/libs/media`。`go` 指令统一为 `1.27.0`。
+* 每个 Go 库、应用、插件各有自己的 `go.mod`；模块路径为 `github.com/mavioai/mavio/<dir>`，例如 `github.com/mavioai/mavio/libs/media`。`go` 指令统一为 `1.27.1`。
 * 仓库内模块之间的依赖同时写在 `go.work` 和各自 `go.mod` 的 `require` + 相对路径 `replace` 中：`go.work` 服务于 gopls 和跨模块开发，`replace` 保证 `GOWORK=off` 时 `go mod tidy` 和构建也能工作（`go mod tidy` 不读取 `go.work`）。`tidy-check` 目标据此校验每个模块的 `go.mod`。
 * 二进制工具由 mise 锁定版本；代码生成插件（`protoc-gen-go`、`protoc-gen-connect-go`，以及后续的 `sqlc`、`ent`）通过所在模块 go.mod 的 `tool` 指令锁定版本。
 * 若后续发现某些模块总是同步修改，应合并模块，避免过度拆分。
 
 ### 3.2 新增模块
 1. 创建目录，运行 `go mod init github.com/mavioai/mavio/<dir>`。
-2. 把 `go` 指令改为 `1.27.0`。
+2. 把 `go` 指令改为 `1.27.1`。
 3. 把目录加入 `go.work` 的 `use`。
 4. 添加带包注释的 `doc.go`。
 

@@ -1,3 +1,3 @@
 module github.com/mavioai/mavio/libs/core
 
-go 1.27.0
+go 1.27.1

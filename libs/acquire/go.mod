@@ -1,6 +1,6 @@
 module github.com/mavioai/mavio/libs/acquire
 
-go 1.27.0
+go 1.27.1
 
 require (
 	github.com/dlclark/regexp2 v1.12.0

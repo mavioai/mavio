@@ -101,14 +101,14 @@ pnpm nx graph                                      # Show the project graph
 ## 3. Go Modules
 
 ### 3.1 Conventions
-* Every Go library, application and plugin has its own `go.mod`; the module path is `github.com/mavioai/mavio/<dir>`, e.g. `github.com/mavioai/mavio/libs/media`. The `go` directive is `1.27.0` everywhere.
+* Every Go library, application and plugin has its own `go.mod`; the module path is `github.com/mavioai/mavio/<dir>`, e.g. `github.com/mavioai/mavio/libs/media`. The `go` directive is `1.27.1` everywhere.
 * Dependencies between in-repo modules are declared both in `go.work` and in each `go.mod` as `require` + relative-path `replace`: `go.work` serves gopls and cross-module development, while `replace` keeps `go mod tidy` and builds working with `GOWORK=off` (`go mod tidy` does not read `go.work`). The `tidy-check` target validates every module's `go.mod` this way.
 * Binary tools are pinned by mise; code generation plugins (`protoc-gen-go`, `protoc-gen-connect-go`, and later `sqlc`, `ent`) are pinned through the `tool` directive in the owning module's go.mod.
 * If some modules turn out to always change together, merge them to avoid over-splitting.
 
 ### 3.2 Adding a Module
 1. Create the directory and run `go mod init github.com/mavioai/mavio/<dir>`.
-2. Change the `go` directive to `1.27.0`.
+2. Change the `go` directive to `1.27.1`.
 3. Add the directory to `use` in `go.work`.
 4. Add a `doc.go` with the package comment.
 

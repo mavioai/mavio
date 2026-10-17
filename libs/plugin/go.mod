@@ -1,6 +1,6 @@
 module github.com/mavioai/mavio/libs/plugin
 
-go 1.27.0
+go 1.27.1
 
 require (
 	connectrpc.com/connect v1.21.0

@@ -1,6 +1,6 @@
 module github.com/mavioai/mavio/libs/imaging
 
-go 1.27.0
+go 1.27.1
 
 require (
 	github.com/bbrks/go-blurhash v1.2.0

@@ -1,6 +1,6 @@
 module github.com/mavioai/mavio/apps/dns
 
-go 1.27.0
+go 1.27.1
 
 require github.com/miekg/dns v1.1.72
 

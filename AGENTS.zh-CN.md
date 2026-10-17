@@ -94,13 +94,13 @@ pnpm nx show projects                              # 列出项目（名称 = 目
 ## Go 约定
 
 ### 模块与依赖
-- `apps/*`、`libs/*`、`plugins/*` 中的每个 Go 项目都是一个独立 Go 模块，模块路径为 `github.com/mavioai/mavio/<dir>`；`go` 指令统一为 `1.27.0`。
+- `apps/*`、`libs/*`、`plugins/*` 中的每个 Go 项目都是一个独立 Go 模块，模块路径为 `github.com/mavioai/mavio/<dir>`；`go` 指令统一为 `1.27.1`。
 - 仓库内模块之间的依赖**同时**写进 `go.work` 和各自 `go.mod` 的 `require` + 相对路径 `replace`（例如 `apps/server/go.mod`）。这样 `GOWORK=off` 时 `go mod tidy` 和构建也能工作。新增内部依赖的命令：
   ```bash
   go mod edit -require=github.com/mavioai/mavio/libs/core@v0.0.0 -replace=github.com/mavioai/mavio/libs/core=../core
   GOWORK=off go mod tidy
   ```
-- 新增模块：创建目录 → `go mod init github.com/mavioai/mavio/<dir>` → 把 `go` 指令改为 `1.27.0` → 加入 `go.work` 的 `use`。Nx 会自动识别，无需 `project.json`；只有需要覆盖默认目标时才添加（参考 `plugins/scraper-tmdb/project.json`）。
+- 新增模块：创建目录 → `go mod init github.com/mavioai/mavio/<dir>` → 把 `go` 指令改为 `1.27.1` → 加入 `go.work` 的 `use`。Nx 会自动识别，无需 `project.json`；只有需要覆盖默认目标时才添加（参考 `plugins/scraper-tmdb/project.json`）。
 - `libs/proto` 和 `libs/plugin` 会被第三方插件引用，需要独立打 tag（如 `libs/proto/v0.1.0`）；发布 `libs/plugin` 前先发布它依赖的 `libs/proto` 版本，并更新 `require`。其余模块不承诺对外 API 稳定。
 - 依赖方向由 `.golangci.yml` 中的 depguard 规则强制（架构文档 §3.2）：`core` 只依赖标准库；`naming`、`subtitle`、`release`、`rclone`、`containers` 只依赖 `core`；`media`、`imaging`、`metadata`、`store` 不依赖 `library`、`streaming`、`plugin`；`library`、`streaming`、`acquire` 只通过 `core` 中的端口访问存储；`plugin` 只依赖 `proto`；任何 lib 都不依赖 `apps/*` 或 `plugins/*`。**只有 `apps/server` 负责装配。** 需要调整依赖方向时，先修改架构文档。
 

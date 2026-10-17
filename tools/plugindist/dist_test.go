@@ -34,7 +34,7 @@ func plugin(t *testing.T, dir, name, runtime, category string) {
 	t.Helper()
 	p := filepath.Join(dir, name)
 	files := map[string]string{
-		"go.mod":  "module example.com/" + name + "\n\ngo 1.27.0\n",
+		"go.mod":  "module example.com/" + name + "\n\ngo 1.27.1\n",
 		"main.go": "package main\n\nvar Version = \"\"\n\nfunc main() {}\n",
 		"manifest.json": `{"id": "org.example.` + name + `", "name": "` + name + `", "version": "1.2.0", "description": "A test plugin.",
 			"author": "Tests", "homepage": "https://example.com", "runtime": "` + runtime + `", "category": "` + category + `",

@@ -1,6 +1,6 @@
 module github.com/mavioai/mavio/libs/client-rust/capi
 
-go 1.27.0
+go 1.27.1
 
 tool google.golang.org/protobuf/cmd/protoc-gen-go
 
