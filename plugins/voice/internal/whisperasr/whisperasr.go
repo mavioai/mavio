@@ -17,7 +17,11 @@ import (
 )
 
 // Name is the recognizer's name.
-const Name = "whisper-asr"
+const Name = "whisper"
+
+// Container is the name of the plugin's whisper-asr-webservice container
+// dependency, whose address replaces the endpoint setting when it has one.
+const Container = "whisper"
 
 const (
 	defaultEndpoint = "http://127.0.0.1:9000"
@@ -35,9 +39,9 @@ func caps() service.Caps {
 // Definition returns the recognizer's definition.
 func Definition() service.RecognizerDef {
 	return service.RecognizerDef{
-		Name: Name, DisplayName: "whisper-asr-webservice",
+		Name: Name, DisplayName: "Whisper",
 		Settings: []service.Setting{
-			{Name: "endpoint", Label: "Endpoint", Help: "The whisper-asr-webservice server.", Type: service.Text, Default: defaultEndpoint},
+			{Name: "endpoint", Label: "Endpoint", Help: "The whisper-asr-webservice server, when the plugin's whisper container dependency is not set.", Type: service.Text, Default: defaultEndpoint},
 			{Name: "response", Label: "Connection timeout in seconds", Type: service.Number, Default: defaultResponse, Advanced: true},
 			{Name: "timeout", Label: "Recognition timeout in seconds", Type: service.Number, Default: defaultTimeout, Advanced: true},
 			{Name: "pass_name", Label: "Pass the video's file name (for the server's logs)", Type: service.Checkbox, Default: false, Advanced: true},
@@ -55,10 +59,13 @@ type settings struct {
 }
 
 // New makes the recognizer from its settings.
-func New(_ service.Env, raw json.RawMessage) (service.Recognizer, error) {
+func New(env service.Env, raw json.RawMessage) (service.Recognizer, error) {
 	var s settings
 	if err := service.Decode(raw, &s); err != nil {
 		return nil, err
+	}
+	if addr, ok := env.Containers[Container]; ok {
+		s.Endpoint = addr
 	}
 	if s.Endpoint = strings.TrimSuffix(strings.TrimSpace(s.Endpoint), "/"); s.Endpoint == "" {
 		s.Endpoint = defaultEndpoint

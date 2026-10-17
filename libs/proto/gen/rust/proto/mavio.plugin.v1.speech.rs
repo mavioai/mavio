@@ -262,7 +262,7 @@ impl ::buffa::ExtensionSet for ListRecognizersResponse {
 /// RecognizerInfo is a recognizer a plugin implements.
 #[derive(Clone, PartialEq, Default)]
 pub struct RecognizerInfo {
-    /// Stable within the plugin, such as "whisper-asr".
+    /// Stable within the plugin, such as "whisper".
     ///
     /// Field 1: `name`
     pub name: ::core::option::Option<::buffa::alloc::string::String>,

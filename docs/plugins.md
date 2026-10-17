@@ -252,4 +252,4 @@ Installing or upgrading a plugin shows its dependencies with their images, so an
 * Clients offer managed when an engine is available and otherwise the commands, `docker run` and a Compose service, with the address they lead to filled in ([Architecture §16.4](architecture.md#164-external-dependencies)).
 
 ### 11.4 `plugins/voice`
-whisper-asr-webservice is the first dependency declared: its CPU image, with `GPU_SUPPORT_OPTIONAL` and its GPU image as `gpu_image`, port 9000, its model cache in a volume. When it is not `unset`, the plugin's `whisper-asr` recognizer uses the dependency's address in place of its `url` setting.
+whisper-asr-webservice is the first dependency declared, named `whisper`: its CPU image, with `GPU_SUPPORT_OPTIONAL` and its GPU image as `gpu_image`, port 9000 with `/docs` as its health check, faster-whisper's `small` model, its model cache in a volume. The plugin reads its dependencies' addresses with `HostService.ListContainers` when configured; while `whisper` has one, the plugin's `whisper` recognizer uses it in place of its `endpoint` setting.

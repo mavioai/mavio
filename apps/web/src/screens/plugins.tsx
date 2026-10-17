@@ -11,10 +11,18 @@ import {
   usePluginActions,
   usePluginCatalogs,
   usePluginConfig,
+  usePluginContainers,
   usePlugins,
 } from "@mavio/client-ts";
+import { ContainerMode, ContainerState, GpuSupport } from "@mavio/proto/mavio/plugin/v1/container_pb";
 import { Category } from "@mavio/proto/mavio/plugin/v1/plugin_pb";
-import { type CatalogPlugin, type Plugin, PluginState } from "@mavio/proto/mavio/system/v1/plugin_pb";
+import {
+  type CatalogPlugin,
+  type ContainerCommands,
+  type Plugin,
+  type PluginContainer,
+  PluginState,
+} from "@mavio/proto/mavio/system/v1/plugin_pb";
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { type FormEvent, type ReactNode, useState } from "react";
 
@@ -380,6 +388,7 @@ function PluginPage({ server, id }: { server: ServerEntry; id: string }) {
       {e.installed && m && (m.configSchema || m.configPage) && (
         <Configuration server={server} id={id} schema={m.configSchema} page={m.configPage} />
       )}
+      {e.installed && m && m.containers.length > 0 && <Containers server={server} id={id} />}
       <Group title={t("plugins.information")}>
         {info.map(([label, value]) => (
           <div key={label} className="flex min-h-11 flex-wrap items-baseline gap-x-6 gap-y-1 px-4 py-2.5">
@@ -472,6 +481,107 @@ function ConfigForm({ server, id, schema, saved }: { server: ServerEntry; id: st
         {actions.configure.isError && <span className="type-callout text-danger">{errorMessage(actions.configure.error)}</span>}
       </div>
     </form>
+  );
+}
+
+const containerStates: Record<ContainerState, () => string> = {
+  [ContainerState.UNSPECIFIED]: () => t("plugins.containerUnavailable"),
+  [ContainerState.PULLING]: () => t("plugins.containerPulling"),
+  [ContainerState.STARTING]: () => t("plugins.containerStarting"),
+  [ContainerState.READY]: () => t("plugins.containerReady"),
+  [ContainerState.UNHEALTHY]: () => t("plugins.containerUnhealthy"),
+  [ContainerState.UNAVAILABLE]: () => t("plugins.containerUnavailable"),
+};
+
+/** An installed plugin's container dependencies: how each runs, its state, and the commands running it elsewhere. */
+function Containers({ server, id }: { server: ServerEntry; id: string }) {
+  const list = usePluginContainers(server, id);
+  return (
+    <section className="flex flex-col gap-2">
+      <h2 className="px-1 type-headline">{t("plugins.containers")}</h2>
+      {list.data?.map((c) => <ContainerDependency key={c.dependency?.name} server={server} id={id} c={c} />)}
+      {list.isError && <p className="type-callout text-danger">{errorMessage(list.error)}</p>}
+    </section>
+  );
+}
+
+function ContainerDependency({ server, id, c }: { server: ServerEntry; id: string; c: PluginContainer }) {
+  const actions = usePluginActions(server);
+  const d = c.dependency!;
+  const st = c.status;
+  const mode = st?.mode ?? ContainerMode.UNSPECIFIED;
+  const [address, setAddress] = useState(mode === ContainerMode.EXTERNAL ? (st?.address ?? "") : "");
+  const [chosen, setChosen] = useState(mode);
+  const set = (m: ContainerMode, extra: { address?: string; useGpu?: boolean } = {}) =>
+    actions.setContainer.mutate({ pluginId: id, name: d.name, mode: m, useGpu: c.useGpu, ...extra });
+  const state = st && containerStates[st.state]();
+  const commands = (title: string, cmds: ContainerCommands | undefined) =>
+    cmds && (
+      <div className="flex flex-col gap-1.5 px-4 py-2.5">
+        <span className="type-callout text-text-secondary">{title}</span>
+        <pre className="overflow-x-auto rounded-md bg-fill p-2.5 type-footnote whitespace-pre-wrap break-all select-all">{cmds.dockerRun}</pre>
+        <pre className="overflow-x-auto rounded-md bg-fill p-2.5 type-footnote select-all">{cmds.compose}</pre>
+      </div>
+    );
+  return (
+    <Group>
+      <Row label={d.name} detail={[d.description, st?.error ? `${state}: ${st.error}` : state].filter(Boolean).join(" · ")}>
+        <Select
+          value={String(chosen)}
+          label={t("plugins.containerMode")}
+          disabled={actions.setContainer.isPending}
+          options={[
+            { value: String(ContainerMode.UNSPECIFIED), label: t("plugins.containerUnset") },
+            { value: String(ContainerMode.MANAGED), label: t("plugins.containerManaged") },
+            { value: String(ContainerMode.EXTERNAL), label: t("plugins.containerExternal") },
+          ]}
+          onChange={(v) => {
+            const m = Number(v) as ContainerMode;
+            setChosen(m);
+            if (m !== ContainerMode.EXTERNAL) set(m, { useGpu: m === ContainerMode.MANAGED && (c.useGpu || d.gpu === GpuSupport.REQUIRED) });
+          }}
+        />
+      </Row>
+      {chosen === ContainerMode.MANAGED && d.gpu !== GpuSupport.UNSPECIFIED && (
+        <Row label={t("plugins.containerUseGpu")}>
+          <Switch
+            on={c.useGpu}
+            label={t("plugins.containerUseGpu")}
+            disabled={actions.setContainer.isPending || d.gpu === GpuSupport.REQUIRED}
+            onChange={(on) => set(ContainerMode.MANAGED, { useGpu: on })}
+          />
+        </Row>
+      )}
+      {chosen === ContainerMode.EXTERNAL && (
+        <>
+          <form
+            className="flex min-h-13 items-center gap-3 px-4 py-2.5"
+            onSubmit={(ev) => {
+              ev.preventDefault();
+              set(ContainerMode.EXTERNAL, { address: address.trim(), useGpu: false });
+            }}
+          >
+            <input
+              type="url"
+              value={address}
+              onChange={(ev) => setAddress(ev.target.value)}
+              placeholder={c.commands?.address ?? c.gpuCommands?.address ?? t("plugins.containerAddress")}
+              aria-label={t("plugins.containerAddress")}
+              className="min-w-0 flex-1 bg-transparent type-body outline-none placeholder:text-text-tertiary"
+            />
+            <Button type="submit" variant="secondary" disabled={!address.trim() || actions.setContainer.isPending}>
+              {t("action.save")}
+            </Button>
+          </form>
+          <p className="px-4 pt-1 type-footnote text-text-secondary">
+            {t("plugins.containerCommandsHint", { address: c.commands?.address ?? c.gpuCommands?.address ?? "" })}
+          </p>
+          {commands(t("plugins.containerCommands"), c.commands)}
+          {commands(t("plugins.containerGpuCommands"), c.gpuCommands)}
+        </>
+      )}
+      {actions.setContainer.isError && <p className="px-4 py-2.5 type-callout text-danger">{errorMessage(actions.setContainer.error)}</p>}
+    </Group>
   );
 }
 

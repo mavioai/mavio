@@ -47,10 +47,10 @@ func (f *fakeRecognizer) DetectSpeechLanguage(_ context.Context, req *pluginv1.D
 	return pluginv1.DetectSpeechLanguageResponse_builder{Language: proto.String(f.lang)}.Build(), nil
 }
 
-// whisperInfo describes a recognizer like whisper-asr's.
+// whisperInfo describes a recognizer like whisper's.
 func whisperInfo(subtitles bool) *pluginv1.RecognizerInfo {
 	return pluginv1.RecognizerInfo_builder{
-		Name: proto.String("whisper-asr"), DisplayName: proto.String("Whisper"), Enabled: proto.Bool(true),
+		Name: proto.String("whisper"), DisplayName: proto.String("Whisper"), Enabled: proto.Bool(true),
 		Languages: []string{"en", "fr", "de", "jv", "gsw"}, Timestamps: proto.Bool(true), DetectsLanguage: proto.Bool(true),
 		Translates: proto.Bool(true), Subtitles: proto.Bool(subtitles),
 	}.Build()
@@ -147,8 +147,8 @@ func TestTranscriptionSearch(t *testing.T) {
 			var got []string
 			for _, s := range resp.GetSubtitles() {
 				got = append(got, s.GetReleaseNames()...)
-				if s.GetProvider() != "dev.mavio.voice/whisper-asr" || !slices.Equal(s.GetMatches(), []string{"series", "season", "episode"}) || s.GetFormat() != "srt" {
-					t.Errorf("subtitle = %v, want whisper-asr's with an episode's matches", s)
+				if s.GetProvider() != "dev.mavio.voice/whisper" || !slices.Equal(s.GetMatches(), []string{"series", "season", "episode"}) || s.GetFormat() != "srt" {
+					t.Errorf("subtitle = %v, want whisper's with an episode's matches", s)
 				}
 			}
 			if !slices.Equal(got, c.want) || len(f.detections) != c.detects {
@@ -186,8 +186,8 @@ func TestTranscriptionDownload(t *testing.T) {
 		}
 	}
 	want := []string{
-		"whisper-asr http://mavio.host/subtitles/audio/tok?stream=1 fr  Amélie (2001).mkv",
-		"whisper-asr http://mavio.host/subtitles/audio/tok?stream=0 en  Amélie (2001).mkv",
+		"whisper http://mavio.host/subtitles/audio/tok?stream=1 fr  Amélie (2001).mkv",
+		"whisper http://mavio.host/subtitles/audio/tok?stream=0 en  Amélie (2001).mkv",
 	}
 	if !slices.Equal(f.recognized, want) {
 		t.Errorf("recognized = %q, want = %q", f.recognized, want)

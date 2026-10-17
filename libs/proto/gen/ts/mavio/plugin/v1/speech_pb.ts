@@ -54,7 +54,7 @@ export const ListRecognizersResponseSchema: GenMessage<ListRecognizersResponse> 
  */
 export type RecognizerInfo = Message<"mavio.plugin.v1.RecognizerInfo"> & {
   /**
-   * Stable within the plugin, such as "whisper-asr".
+   * Stable within the plugin, such as "whisper".
    *
    * @generated from field: string name = 1;
    */

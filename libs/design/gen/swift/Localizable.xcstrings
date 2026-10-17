@@ -8317,6 +8317,276 @@
         }
       }
     },
+    "plugins.containers": {
+      "comment": "Heading of the services a plugin runs as containers.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Container Dependencies"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "容器依赖"
+          }
+        }
+      }
+    },
+    "plugins.containerMode": {
+      "comment": "Label of the choice of how a container dependency runs.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How it runs"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "运行方式"
+          }
+        }
+      }
+    },
+    "plugins.containerUnset": {
+      "comment": "A container dependency nobody has chosen how to run.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not Set"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未设置"
+          }
+        }
+      }
+    },
+    "plugins.containerManaged": {
+      "comment": "A container dependency the server runs on its container engine.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Run by the Server"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "由服务端运行"
+          }
+        }
+      }
+    },
+    "plugins.containerExternal": {
+      "comment": "A container dependency run elsewhere, reached at an address.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "At an Address"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "使用地址"
+          }
+        }
+      }
+    },
+    "plugins.containerUseGpu": {
+      "comment": "Switch letting a container dependency the server runs use an NVIDIA GPU.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Use GPU"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "使用 GPU"
+          }
+        }
+      }
+    },
+    "plugins.containerAddress": {
+      "comment": "Field of the address of a container dependency run elsewhere.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Address"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "地址"
+          }
+        }
+      }
+    },
+    "plugins.containerPulling": {
+      "comment": "State of a container dependency whose image is being downloaded.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Downloading"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在下载"
+          }
+        }
+      }
+    },
+    "plugins.containerStarting": {
+      "comment": "State of a container dependency starting.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Starting"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在启动"
+          }
+        }
+      }
+    },
+    "plugins.containerReady": {
+      "comment": "State of a container dependency that can be used.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ready"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "就绪"
+          }
+        }
+      }
+    },
+    "plugins.containerUnhealthy": {
+      "comment": "State of a container dependency whose health check fails.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not Responding"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无响应"
+          }
+        }
+      }
+    },
+    "plugins.containerUnavailable": {
+      "comment": "State of a container dependency that cannot be used.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unavailable"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "不可用"
+          }
+        }
+      }
+    },
+    "plugins.containerCommands": {
+      "comment": "Heading of the commands running a container dependency elsewhere.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Run It Yourself"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "自行运行"
+          }
+        }
+      }
+    },
+    "plugins.containerGpuCommands": {
+      "comment": "Heading of the commands running a container dependency with a GPU.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "With a GPU"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "使用 GPU"
+          }
+        }
+      }
+    },
+    "plugins.containerCommandsHint": {
+      "comment": "Hint above the commands running a container dependency; address is where it will be.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Run one of these, then set the address to %@. They hold the dependency's secrets."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "运行其中一条命令，然后把地址设为 %@。命令中含有该依赖的密钥。"
+          }
+        }
+      }
+    },
     "auth.unreachable": {
       "comment": "State of a server of the account that does not answer at any of its addresses.",
       "extractionState": "manual",

@@ -462,7 +462,7 @@ func (x *RecognizerInfo) ClearSubtitles() {
 type RecognizerInfo_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
-	// Stable within the plugin, such as "whisper-asr".
+	// Stable within the plugin, such as "whisper".
 	Name        *string
 	DisplayName *string
 	// The recognizer's settings, under its name in the plugin's settings.

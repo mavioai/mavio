@@ -464,7 +464,7 @@ impl ::buffa::HasMessageView for super::super::ListRecognizersResponse {
 /// RecognizerInfo is a recognizer a plugin implements.
 #[derive(Clone, Debug, Default)]
 pub struct RecognizerInfoView<'a> {
-    /// Stable within the plugin, such as "whisper-asr".
+    /// Stable within the plugin, such as "whisper".
     ///
     /// Field 1: `name`
     pub name: ::core::option::Option<&'a str>,
@@ -896,7 +896,7 @@ impl RecognizerInfoOwnedView {
     pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
         self.0.into_bytes()
     }
-    /// Stable within the plugin, such as "whisper-asr".
+    /// Stable within the plugin, such as "whisper".
     ///
     /// Field 1: `name`
     #[must_use]

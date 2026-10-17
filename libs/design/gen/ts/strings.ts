@@ -464,6 +464,21 @@ export type MessageKey =
   | 'plugins.configuration'
   | 'plugins.configurationSaved'
   | 'plugins.openSettingsPage'
+  | 'plugins.containers'
+  | 'plugins.containerMode'
+  | 'plugins.containerUnset'
+  | 'plugins.containerManaged'
+  | 'plugins.containerExternal'
+  | 'plugins.containerUseGpu'
+  | 'plugins.containerAddress'
+  | 'plugins.containerPulling'
+  | 'plugins.containerStarting'
+  | 'plugins.containerReady'
+  | 'plugins.containerUnhealthy'
+  | 'plugins.containerUnavailable'
+  | 'plugins.containerCommands'
+  | 'plugins.containerGpuCommands'
+  | 'plugins.containerCommandsHint'
   | 'auth.unreachable'
   | 'auth.othersUseApp'
   | 'auth.setUpElsewhere'
@@ -2258,6 +2273,21 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "plugins.configuration": "Configuration",
     "plugins.configurationSaved": "Saved. The plugin uses the new configuration.",
     "plugins.openSettingsPage": "Open Settings Page",
+    "plugins.containers": "Container Dependencies",
+    "plugins.containerMode": "How it runs",
+    "plugins.containerUnset": "Not Set",
+    "plugins.containerManaged": "Run by the Server",
+    "plugins.containerExternal": "At an Address",
+    "plugins.containerUseGpu": "Use GPU",
+    "plugins.containerAddress": "Address",
+    "plugins.containerPulling": "Downloading",
+    "plugins.containerStarting": "Starting",
+    "plugins.containerReady": "Ready",
+    "plugins.containerUnhealthy": "Not Responding",
+    "plugins.containerUnavailable": "Unavailable",
+    "plugins.containerCommands": "Run It Yourself",
+    "plugins.containerGpuCommands": "With a GPU",
+    "plugins.containerCommandsHint": "Run one of these, then set the address to {address}. They hold the dependency's secrets.",
     "auth.unreachable": "Can't be reached",
     "auth.othersUseApp": "Only the administrator signs in here. Everyone else watches at {host}.",
     "auth.setUpElsewhere": "Set Up {server} on a Computer or Phone",
@@ -4050,6 +4080,21 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "plugins.configuration": "配置",
     "plugins.configurationSaved": "已保存，插件已使用新配置。",
     "plugins.openSettingsPage": "打开设置页面",
+    "plugins.containers": "容器依赖",
+    "plugins.containerMode": "运行方式",
+    "plugins.containerUnset": "未设置",
+    "plugins.containerManaged": "由服务端运行",
+    "plugins.containerExternal": "使用地址",
+    "plugins.containerUseGpu": "使用 GPU",
+    "plugins.containerAddress": "地址",
+    "plugins.containerPulling": "正在下载",
+    "plugins.containerStarting": "正在启动",
+    "plugins.containerReady": "就绪",
+    "plugins.containerUnhealthy": "无响应",
+    "plugins.containerUnavailable": "不可用",
+    "plugins.containerCommands": "自行运行",
+    "plugins.containerGpuCommands": "使用 GPU",
+    "plugins.containerCommandsHint": "运行其中一条命令，然后把地址设为 {address}。命令中含有该依赖的密钥。",
     "auth.unreachable": "无法连接",
     "auth.othersUseApp": "只有管理员可以登录，其他人请在 {host} 观看。",
     "auth.setUpElsewhere": "请在电脑或手机上设置 {server}",

@@ -1489,6 +1489,53 @@ public enum MavioStrings {
     /// Link opening a plugin's own settings page in a new tab.
     public static var pluginsOpenSettingsPage: String { NSLocalizedString("plugins.openSettingsPage", bundle: .module, comment: "") }
 
+    /// Heading of the services a plugin runs as containers.
+    public static var pluginsContainers: String { NSLocalizedString("plugins.containers", bundle: .module, comment: "") }
+
+    /// Label of the choice of how a container dependency runs.
+    public static var pluginsContainerMode: String { NSLocalizedString("plugins.containerMode", bundle: .module, comment: "") }
+
+    /// A container dependency nobody has chosen how to run.
+    public static var pluginsContainerUnset: String { NSLocalizedString("plugins.containerUnset", bundle: .module, comment: "") }
+
+    /// A container dependency the server runs on its container engine.
+    public static var pluginsContainerManaged: String { NSLocalizedString("plugins.containerManaged", bundle: .module, comment: "") }
+
+    /// A container dependency run elsewhere, reached at an address.
+    public static var pluginsContainerExternal: String { NSLocalizedString("plugins.containerExternal", bundle: .module, comment: "") }
+
+    /// Switch letting a container dependency the server runs use an NVIDIA GPU.
+    public static var pluginsContainerUseGpu: String { NSLocalizedString("plugins.containerUseGpu", bundle: .module, comment: "") }
+
+    /// Field of the address of a container dependency run elsewhere.
+    public static var pluginsContainerAddress: String { NSLocalizedString("plugins.containerAddress", bundle: .module, comment: "") }
+
+    /// State of a container dependency whose image is being downloaded.
+    public static var pluginsContainerPulling: String { NSLocalizedString("plugins.containerPulling", bundle: .module, comment: "") }
+
+    /// State of a container dependency starting.
+    public static var pluginsContainerStarting: String { NSLocalizedString("plugins.containerStarting", bundle: .module, comment: "") }
+
+    /// State of a container dependency that can be used.
+    public static var pluginsContainerReady: String { NSLocalizedString("plugins.containerReady", bundle: .module, comment: "") }
+
+    /// State of a container dependency whose health check fails.
+    public static var pluginsContainerUnhealthy: String { NSLocalizedString("plugins.containerUnhealthy", bundle: .module, comment: "") }
+
+    /// State of a container dependency that cannot be used.
+    public static var pluginsContainerUnavailable: String { NSLocalizedString("plugins.containerUnavailable", bundle: .module, comment: "") }
+
+    /// Heading of the commands running a container dependency elsewhere.
+    public static var pluginsContainerCommands: String { NSLocalizedString("plugins.containerCommands", bundle: .module, comment: "") }
+
+    /// Heading of the commands running a container dependency with a GPU.
+    public static var pluginsContainerGpuCommands: String { NSLocalizedString("plugins.containerGpuCommands", bundle: .module, comment: "") }
+
+    /// Hint above the commands running a container dependency; address is where it will be.
+    public static func pluginsContainerCommandsHint(address: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("plugins.containerCommandsHint", bundle: .module, comment: ""), address)
+    }
+
     /// State of a server of the account that does not answer at any of its addresses.
     public static var authUnreachable: String { NSLocalizedString("auth.unreachable", bundle: .module, comment: "") }
 

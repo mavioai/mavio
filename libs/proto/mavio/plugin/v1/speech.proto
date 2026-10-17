@@ -30,7 +30,7 @@ message ListRecognizersResponse {
 
 // RecognizerInfo is a recognizer a plugin implements.
 message RecognizerInfo {
-  // Stable within the plugin, such as "whisper-asr".
+  // Stable within the plugin, such as "whisper".
   string name = 1;
   string display_name = 2;
   // The recognizer's settings, under its name in the plugin's settings.

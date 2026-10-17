@@ -183,8 +183,8 @@ func speechCues(s subsync.Speech, shift time.Duration) []subtitle.Cue {
 // with the film's speech and synchronized against its audio; an imported
 // episode gets French subtitles at once, which the upgrade task replaces
 // with better ones once a provider has them.
-// transcriptionID is whisper-asr's provider of transcribed subtitles.
-const transcriptionID = "transcription/dev.mavio.voice/whisper-asr"
+// transcriptionID is whisper's provider of transcribed subtitles.
+const transcriptionID = "transcription/dev.mavio.voice/whisper"
 
 func TestSubtitleFlows(t *testing.T) {
 	t.Parallel()
@@ -218,7 +218,7 @@ func TestSubtitleFlows(t *testing.T) {
 	}
 	episode := s.video("1280x720", 120)
 
-	// Subsarr is enabled in the subtitles plugin, and whisper-asr, which
+	// Subsarr is enabled in the subtitles plugin, and whisper, which
 	// transcribes subtitles, in the voice plugin; subtitles are downloaded whatever
 	// their scores, those of movies synchronized whatever theirs, those of
 	// episodes never.
@@ -232,11 +232,11 @@ func TestSubtitleFlows(t *testing.T) {
 	}
 	if _, err := s.pluginAdmin.SetPluginConfig(ctx, systemv1.SetPluginConfigRequest_builder{
 		PluginId:   new("dev.mavio.voice"),
-		ConfigJson: new(`{"recognizers": [{"name": "whisper-asr", "enabled": true, "settings": {"endpoint": "` + whisper.URL + `", "subtitles": true}}]}`),
+		ConfigJson: new(`{"recognizers": [{"name": "whisper", "enabled": true, "settings": {"endpoint": "` + whisper.URL + `", "subtitles": true}}]}`),
 	}.Build()); err != nil {
 		t.Fatalf("SetPluginConfig: %v", err)
 	}
-	waitFor(t, "Subsarr and whisper-asr enabled", func() bool {
+	waitFor(t, "Subsarr and whisper enabled", func() bool {
 		resp, err := subs.ListSubtitleProviders(ctx, &acquisitionv1.ListSubtitleProvidersRequest{})
 		if err != nil {
 			return false
@@ -480,7 +480,7 @@ func TestSubtitleFlows(t *testing.T) {
 		t.Errorf("texts sent to LibreTranslate = %q", got)
 	}
 
-	// 5. whisper-asr detected the audio of the film and of the episode is
+	// 5. whisper detected the audio of the film and of the episode is
 	// French when they were searched, from their first 30 seconds the voice
 	// plugin gets through the host API; it translates all of the film's to
 	// English.

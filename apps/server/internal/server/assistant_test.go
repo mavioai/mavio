@@ -281,15 +281,15 @@ func TestAssistant(t *testing.T) {
 	showLib := s.library("Shows", libraryv1.LibraryKind_LIBRARY_KIND_SHOWS, shows)
 	movie := s.movie(movieLib)
 
-	// whisper-asr is the server's recognizer, and transcribes subtitles.
+	// whisper is the server's recognizer, and transcribes subtitles.
 	asr := newFakeASR(t)
 	if _, err := s.pluginAdmin.SetPluginConfig(ctx, systemv1.SetPluginConfigRequest_builder{
 		PluginId:   new("dev.mavio.voice"),
-		ConfigJson: new(`{"recognizers": [{"name": "whisper-asr", "enabled": true, "settings": {"endpoint": "` + asr.URL + `", "subtitles": true}}]}`),
+		ConfigJson: new(`{"recognizers": [{"name": "whisper", "enabled": true, "settings": {"endpoint": "` + asr.URL + `", "subtitles": true}}]}`),
 	}.Build()); err != nil {
 		t.Fatalf("SetPluginConfig: %v", err)
 	}
-	waitFor(t, "whisper-asr recognizing", func() bool {
+	waitFor(t, "whisper recognizing", func() bool {
 		got, err := a.GetAssistant(ctx, &assistantv1.GetAssistantRequest{})
 		return err == nil && len(got.GetRecognizers()) > 0
 	})
@@ -379,7 +379,7 @@ func TestAssistant(t *testing.T) {
 		}
 		return episode != nil
 	})
-	waitFor(t, "whisper-asr transcribing subtitles", func() bool {
+	waitFor(t, "whisper transcribing subtitles", func() bool {
 		resp, err := s.subtitles.ListSubtitleProviders(ctx, &acquisitionv1.ListSubtitleProvidersRequest{})
 		if err != nil {
 			return false
@@ -398,7 +398,7 @@ func TestAssistant(t *testing.T) {
 	}
 	i := slices.IndexFunc(found.GetSubtitles(), func(sub *acquisitionv1.ScoredSubtitle) bool { return sub.GetProvider() == transcriptionID })
 	if i < 0 {
-		t.Fatalf("subtitles found = %v, want = whisper-asr's transcription", found.GetSubtitles())
+		t.Fatalf("subtitles found = %v, want = whisper's transcription", found.GetSubtitles())
 	}
 	transcribed := found.GetSubtitles()[i]
 	saved, err := s.subtitles.DownloadItemSubtitle(ctx, acquisitionv1.DownloadItemSubtitleRequest_builder{
@@ -409,11 +409,11 @@ func TestAssistant(t *testing.T) {
 		t.Fatalf("DownloadItemSubtitle: %v", err)
 	}
 	if data, err := os.ReadFile(saved.GetPath()); err != nil || !strings.Contains(string(data), "Say my name.") {
-		t.Errorf("transcription = %q, %v; want = whisper-asr's", data, err)
+		t.Errorf("transcription = %q, %v; want = whisper's", data, err)
 	}
 	asr.mu.Lock()
 	if !slices.Equal(asr.tasks, []string{"transcribe", "transcribe"}) {
-		t.Errorf("whisper-asr was asked to %q, want = transcribe the recording, then the episode", asr.tasks)
+		t.Errorf("whisper was asked to %q, want = transcribe the recording, then the episode", asr.tasks)
 	}
 	asr.mu.Unlock()
 }

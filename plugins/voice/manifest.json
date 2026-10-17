@@ -12,6 +12,24 @@
     "CAPABILITY_SPEECH_TO_TEXT",
     "CAPABILITY_TEXT_TO_SPEECH"
   ],
-  "configSchema": "{\"$schema\":\"https://json-schema.org/draft/2020-12/schema\",\"type\":\"object\",\"properties\":{\"recognizers\":{\"type\":\"array\",\"description\":\"The recognition services and their settings\",\"items\":{\"type\":\"object\",\"required\":[\"name\"],\"properties\":{\"name\":{\"type\":\"string\",\"enum\":[\"whisper-asr\",\"openai\"]},\"enabled\":{\"type\":\"boolean\",\"default\":false},\"settings\":{\"type\":\"object\",\"description\":\"The settings the recognizer takes\"}},\"additionalProperties\":false}},\"synthesizers\":{\"type\":\"array\",\"description\":\"The synthesis services and their settings\",\"items\":{\"type\":\"object\",\"required\":[\"name\"],\"properties\":{\"name\":{\"type\":\"string\",\"enum\":[\"openai\"]},\"enabled\":{\"type\":\"boolean\",\"default\":false},\"settings\":{\"type\":\"object\",\"description\":\"The settings the synthesizer takes\"}},\"additionalProperties\":false}}},\"additionalProperties\":false}",
+  "configSchema": "{\"$schema\":\"https://json-schema.org/draft/2020-12/schema\",\"type\":\"object\",\"properties\":{\"recognizers\":{\"type\":\"array\",\"description\":\"The recognition services and their settings\",\"items\":{\"type\":\"object\",\"required\":[\"name\"],\"properties\":{\"name\":{\"type\":\"string\",\"enum\":[\"whisper\",\"openai\"]},\"enabled\":{\"type\":\"boolean\",\"default\":false},\"settings\":{\"type\":\"object\",\"description\":\"The settings the recognizer takes\"}},\"additionalProperties\":false}},\"synthesizers\":{\"type\":\"array\",\"description\":\"The synthesis services and their settings\",\"items\":{\"type\":\"object\",\"required\":[\"name\"],\"properties\":{\"name\":{\"type\":\"string\",\"enum\":[\"openai\"]},\"enabled\":{\"type\":\"boolean\",\"default\":false},\"settings\":{\"type\":\"object\",\"description\":\"The settings the synthesizer takes\"}},\"additionalProperties\":false}}},\"additionalProperties\":false}",
+  "containers": [
+    {
+      "name": "whisper",
+      "description": "whisper-asr-webservice, recognizing speech with faster-whisper",
+      "image": "onerahmet/openai-whisper-asr-webservice:v1.10.0@sha256:0616c3d5fc6924e9d59aa8a7a3a944fbe8f3a5d701e5fc1fa2ce5b933dfecb73",
+      "port": 9000,
+      "healthPath": "/docs",
+      "env": {
+        "ASR_ENGINE": "faster_whisper",
+        "ASR_MODEL": "small"
+      },
+      "volumes": {
+        "cache": "/root/.cache"
+      },
+      "gpu": "GPU_SUPPORT_OPTIONAL",
+      "gpuImage": "onerahmet/openai-whisper-asr-webservice:v1.10.0-gpu@sha256:3deb30cfd3d5614fd3885e6dfbef7dfcf95fe897300ecc703f7f3b3682b717ae"
+    }
+  ],
   "apiVersion": "1.0"
 }

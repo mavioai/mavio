@@ -35,6 +35,9 @@ type Env struct {
 	// HTTP reaches the services.
 	HTTP *http.Client
 	Log  *slog.Logger
+	// Containers are the addresses of the plugin's container
+	// dependencies that have one, by name.
+	Containers map[string]string
 }
 
 // Audio is audio to recognize: 16 kHz mono 16-bit little-endian PCM.

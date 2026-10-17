@@ -1,6 +1,7 @@
 // Plugin management (docs/clients.md §6.3.3): the servers the user
 // administers, their plugins and those of their catalogs, installing,
 // updating, uninstalling, enabling and disabling them, and the catalogs.
+import type { ContainerMode } from "@mavio/proto/mavio/plugin/v1/container_pb";
 import { UserService } from "@mavio/proto/mavio/user/v1/user_pb";
 import { PluginManagementService } from "@mavio/proto/mavio/system/v1/plugin_pb";
 import { SystemService } from "@mavio/proto/mavio/system/v1/system_pb";
@@ -65,6 +66,18 @@ export function usePluginConfig(server: ServerEntry, id: string, enabled = true)
   });
 }
 
+/** A plugin's container dependencies, with their states and the commands running them. */
+export function usePluginContainers(server: ServerEntry, id: string, enabled = true) {
+  const servers = useServersStore();
+  return useQuery({
+    queryKey: serverKey(server.id, "plugins", "containers", id),
+    queryFn: async () => (await servers.client(PluginManagementService, server).listPluginContainers({ pluginId: id })).containers,
+    enabled,
+    // Managed dependencies pull and start in the background.
+    refetchInterval: 5000,
+  });
+}
+
 /** What can be done to a server's plugins, each refreshing them when done. */
 export function usePluginActions(server: ServerEntry) {
   const servers = useServersStore();
@@ -83,6 +96,11 @@ export function usePluginActions(server: ServerEntry) {
     /** Sets a plugin's configuration, JSON its schema accepts. */
     configure: useMutation({
       mutationFn: ({ id, config }: { id: string; config: string }) => client().setPluginConfig({ pluginId: id, configJson: config }),
+      onSettled,
+    }),
+    /** Sets how a container dependency is reached. */
+    setContainer: useMutation({
+      mutationFn: (req: { pluginId: string; name: string; mode: ContainerMode; address?: string; useGpu?: boolean }) => client().setPluginContainer(req),
       onSettled,
     }),
     /** Replaces the catalogs' URLs, keeping the other settings. */

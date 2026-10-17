@@ -20,9 +20,19 @@ import (
 // services is a whisper-asr-webservice and an OpenAI speech server, and
 // the host API serving ten seconds of audio.
 func services(t *testing.T) (*httptest.Server, *[]int) {
-	var sizes []int
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	var (
+		sizes []int
+		srv   *httptest.Server
+	)
+	srv = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
+		case "/mavio.plugin.v1.HostService/ListContainers":
+			// The whisper container dependency is this server.
+			out, _ := proto.Marshal(pluginv1.ListContainersResponse_builder{Containers: []*pluginv1.ContainerStatus{
+				pluginv1.ContainerStatus_builder{Name: proto.String("whisper"), Address: proto.String(srv.URL)}.Build(),
+			}}.Build())
+			w.Header().Set("Content-Type", "application/proto")
+			_, _ = w.Write(out)
 		case "/subtitles/audio/tok":
 			_, _ = w.Write(make([]byte, 10*service.BytesPerSecond))
 		case "/asr", "/detect-language":
@@ -49,13 +59,19 @@ func services(t *testing.T) (*httptest.Server, *[]int) {
 
 func TestPlugin(t *testing.T) {
 	srv, sizes := services(t)
-	p := newPlugin(slog.New(slog.DiscardHandler), "0.1.0", srv.Client(), srv.Client)
+	// The host API is the test server too.
+	host := &http.Client{Transport: roundTrip(func(r *http.Request) (*http.Response, error) {
+		r = r.Clone(r.Context())
+		r.URL.Host = srv.Listener.Addr().String()
+		return http.DefaultTransport.RoundTrip(r)
+	})}
+	p := newPlugin(slog.New(slog.DiscardHandler), "0.1.0", srv.Client(), func() *http.Client { return host })
 	ctx := t.Context()
 	configure := func(c string) error {
 		_, err := p.Configure(ctx, pluginv1.ConfigureRequest_builder{ConfigJson: proto.String(c)}.Build())
 		return err
 	}
-	if err := configure(`{"recognizers":[{"name":"whisper-asr","enabled":true,"settings":{"endpoint":"` + srv.URL + `","subtitles":true}},
+	if err := configure(`{"recognizers":[{"name":"whisper","enabled":true,"settings":{"endpoint":"http://127.0.0.1:1","subtitles":true}},
 		{"name":"openai","enabled":false}],
 		"synthesizers":[{"name":"openai","enabled":true,"settings":{"base_url":"` + srv.URL + `/v1","voices":"nova"}}]}`); err != nil {
 		t.Fatal(err)
@@ -72,20 +88,20 @@ func TestPlugin(t *testing.T) {
 			names = append(names, s.GetName())
 		}
 		got = append(got, r.GetName())
-		if r.GetName() == "whisper-asr" && (!r.GetEnabled() || !r.GetSubtitles() || !r.GetTimestamps() || !strings.Contains(strings.Join(names, ","), "subtitles")) {
-			t.Errorf("whisper-asr = %v, want enabled for subtitles", r)
+		if r.GetName() == "whisper" && (!r.GetEnabled() || !r.GetSubtitles() || !r.GetTimestamps() || !strings.Contains(strings.Join(names, ","), "subtitles")) {
+			t.Errorf("whisper = %v, want enabled for subtitles", r)
 		}
 		if r.GetName() == "openai" && (r.GetEnabled() || r.GetSubtitles()) {
 			t.Errorf("openai = %v, want disabled", r)
 		}
 	}
-	if strings.Join(got, ",") != "whisper-asr,openai" {
+	if strings.Join(got, ",") != "whisper,openai" {
 		t.Errorf("recognizers = %q", got)
 	}
 
 	// The host API's audio is fetched, its first four seconds only.
 	resp, err := p.RecognizeSpeech(ctx, pluginv1.RecognizeSpeechRequest_builder{
-		Recognizer: proto.String("whisper-asr"), Timestamps: proto.Bool(true),
+		Recognizer: proto.String("whisper"), Timestamps: proto.Bool(true),
 		Audio: pluginv1.SpeechAudio_builder{Url: proto.String(srv.URL + "/subtitles/audio/tok"), Limit: durationpb.New(4 * time.Second)}.Build(),
 	}.Build())
 	if err != nil {
@@ -95,7 +111,7 @@ func TestPlugin(t *testing.T) {
 		t.Errorf("RecognizeSpeech = %v", resp)
 	}
 	detected, err := p.DetectSpeechLanguage(ctx, pluginv1.DetectSpeechLanguageRequest_builder{
-		Recognizer: proto.String("whisper-asr"), Audio: pluginv1.SpeechAudio_builder{Pcm: make([]byte, 100)}.Build(),
+		Recognizer: proto.String("whisper"), Audio: pluginv1.SpeechAudio_builder{Pcm: make([]byte, 100)}.Build(),
 	}.Build())
 	if err != nil || detected.GetLanguage() != "fr" {
 		t.Errorf("DetectSpeechLanguage = %v, %v; want fr", detected, err)
@@ -125,3 +141,7 @@ func TestPlugin(t *testing.T) {
 		}
 	}
 }
+
+type roundTrip func(*http.Request) (*http.Response, error)
+
+func (f roundTrip) RoundTrip(r *http.Request) (*http.Response, error) { return f(r) }

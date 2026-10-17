@@ -932,6 +932,36 @@
     <string name="plugins_configuration_saved">Saved. The plugin uses the new configuration.</string>
     <!-- Link opening a plugin's own settings page in a new tab. -->
     <string name="plugins_open_settings_page">Open Settings Page</string>
+    <!-- Heading of the services a plugin runs as containers. -->
+    <string name="plugins_containers">Container Dependencies</string>
+    <!-- Label of the choice of how a container dependency runs. -->
+    <string name="plugins_container_mode">How it runs</string>
+    <!-- A container dependency nobody has chosen how to run. -->
+    <string name="plugins_container_unset">Not Set</string>
+    <!-- A container dependency the server runs on its container engine. -->
+    <string name="plugins_container_managed">Run by the Server</string>
+    <!-- A container dependency run elsewhere, reached at an address. -->
+    <string name="plugins_container_external">At an Address</string>
+    <!-- Switch letting a container dependency the server runs use an NVIDIA GPU. -->
+    <string name="plugins_container_use_gpu">Use GPU</string>
+    <!-- Field of the address of a container dependency run elsewhere. -->
+    <string name="plugins_container_address">Address</string>
+    <!-- State of a container dependency whose image is being downloaded. -->
+    <string name="plugins_container_pulling">Downloading</string>
+    <!-- State of a container dependency starting. -->
+    <string name="plugins_container_starting">Starting</string>
+    <!-- State of a container dependency that can be used. -->
+    <string name="plugins_container_ready">Ready</string>
+    <!-- State of a container dependency whose health check fails. -->
+    <string name="plugins_container_unhealthy">Not Responding</string>
+    <!-- State of a container dependency that cannot be used. -->
+    <string name="plugins_container_unavailable">Unavailable</string>
+    <!-- Heading of the commands running a container dependency elsewhere. -->
+    <string name="plugins_container_commands">Run It Yourself</string>
+    <!-- Heading of the commands running a container dependency with a GPU. -->
+    <string name="plugins_container_gpu_commands">With a GPU</string>
+    <!-- Hint above the commands running a container dependency; address is where it will be. -->
+    <string name="plugins_container_commands_hint">Run one of these, then set the address to %s. They hold the dependency\'s secrets.</string>
     <!-- State of a server of the account that does not answer at any of its addresses. -->
     <string name="auth_unreachable">Can\'t be reached</string>
     <!-- Under Sign In with Mavio on a server's own web UI, which only its administrator signs in to; host is app.mavio.dev's. -->

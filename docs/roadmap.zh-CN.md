@@ -956,7 +956,7 @@ flowchart TD
   - [ ] 以 `plugin.container_pull` 任务拉取镜像，并在 `TaskService` 中显示进度；目前拉取在监管器内进行，只报告为 `pulling`
 - [x] 托管依赖，服务端在容器中：服务端的容器加入 `mavio` 网络，依赖按名称访问而不发布端口；针对内存中的引擎测试
 - [x] 外部依赖与命令，以及 WASM 插件 `http_hosts` 中依赖的地址：`containers.RunCommands` 生成带与不带 GPU 的 `docker run` 命令与 Compose 文件，作为 `PluginContainer.commands` 与 `gpu_commands` 返回；WASM 插件可以访问其依赖地址的主机
-- [ ] `plugins/voice` 与 Web UI
+- [x] `plugins/voice` 与 Web UI：语音插件把 whisper-asr-webservice 声明为 `whisper`，其识别器改名为 `whisper` 并使用该依赖的地址；Web UI 的插件页面设置每个依赖的运行方式，并显示其状态与命令
 - [ ] **完成标准**中的端到端测试
 - [ ] macOS 与 Windows 上的 Docker Desktop，以及 Podman，手工检查
 

@@ -11,12 +11,15 @@ import (
 	"net/http"
 	"strings"
 	"sync"
+	"time"
 
 	"connectrpc.com/connect"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/durationpb"
 
+	"github.com/mavioai/mavio/libs/plugin/guest"
 	pluginv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1"
+	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1/pluginv1connect"
 	"github.com/mavioai/mavio/plugins/voice/internal/openai"
 	"github.com/mavioai/mavio/plugins/voice/internal/service"
 	"github.com/mavioai/mavio/plugins/voice/internal/whisperasr"
@@ -100,13 +103,14 @@ func (p *plugin) Shutdown(context.Context, *pluginv1.ShutdownRequest) (*pluginv1
 
 // Configure implements PluginService: the recognizers and synthesizers
 // it enables replace those enabled.
-func (p *plugin) Configure(_ context.Context, req *pluginv1.ConfigureRequest) (*pluginv1.ConfigureResponse, error) {
+func (p *plugin) Configure(ctx context.Context, req *pluginv1.ConfigureRequest) (*pluginv1.ConfigureResponse, error) {
 	var c config
 	if err := json.Unmarshal([]byte(req.GetConfigJson()), &c); err != nil {
 		return nil, connect.NewError(connect.CodeInvalidArgument, err)
 	}
+	deps := p.containers(ctx)
 	env := func(kind, name string) service.Env {
-		return service.Env{HTTP: p.http, Log: p.log.With(kind, name)}
+		return service.Env{HTTP: p.http, Log: p.log.With(kind, name), Containers: deps}
 	}
 	recognizing, seen := map[string]*recognizer{}, map[string]bool{}
 	for i, e := range c.Recognizers {
@@ -151,6 +155,29 @@ func (p *plugin) Configure(_ context.Context, req *pluginv1.ConfigureRequest) (*
 	p.recognizing, p.speaking = recognizing, speaking
 	p.mu.Unlock()
 	return &pluginv1.ConfigureResponse{}, nil
+}
+
+// containers returns the addresses of the plugin's container
+// dependencies, by name; none when the host cannot tell. The server
+// configures the plugin again when one changes.
+func (p *plugin) containers(ctx context.Context) map[string]string {
+	if p.host == nil || p.host() == nil {
+		return nil
+	}
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+	resp, err := pluginv1connect.NewHostServiceClient(p.host(), guest.HostURL).ListContainers(ctx, &pluginv1.ListContainersRequest{})
+	if err != nil {
+		p.log.Warn("list container dependencies", "err", err)
+		return nil
+	}
+	out := map[string]string{}
+	for _, c := range resp.GetContainers() {
+		if c.GetAddress() != "" {
+			out[c.GetName()] = c.GetAddress()
+		}
+	}
+	return out
 }
 
 func find[T any](defs []T, name func(T) string, n string) *T {
