@@ -248,6 +248,11 @@ export interface Options {
    */
   mavioDevUrl?: string;
   key?: DeviceKey;
+  /**
+   * The language of the UI as a BCP 47 tag, which servers translate what
+   * plugins say into; unset leaves it to the browser.
+   */
+  language?: string;
 }
 
 /**
@@ -266,6 +271,7 @@ export class Servers {
   private syncing: Promise<void> | undefined;
   private finishing: { key: string; done: Promise<string> } | undefined;
   private key: DeviceKey;
+  private language: string | undefined;
   /** The base URL of the server serving the web UI; unset on app.mavio.dev. */
   readonly home: string | undefined;
   /** The base URL of mavio.dev's API on app.mavio.dev. */
@@ -278,6 +284,7 @@ export class Servers {
     options: Options = {},
   ) {
     this.key = options.key ?? browserDeviceKey();
+    this.language = options.language;
     this.appApi = options.mavioDevUrl;
     this.home = options.mavioDevUrl ? undefined : base;
     this.list = read<ServerEntry[]>(storage, serversKey) ?? [];
@@ -360,7 +367,7 @@ export class Servers {
       t = {
         sessionId: server.sessionId,
         url: server.url,
-        transport: transport(server, { token: () => this.token(id), refresh: () => this.refresh(id) }),
+        transport: transport(server, { token: () => this.token(id), refresh: () => this.refresh(id) }, this.language),
       };
       this.transports.set(id, t);
     }

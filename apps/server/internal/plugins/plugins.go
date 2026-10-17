@@ -51,7 +51,9 @@ type Info struct {
 	// Manifest is the plugin's manifest; for a folder whose manifest
 	// cannot be read, only the ID is set, from the folder's name.
 	Manifest *pluginv1.Manifest
-	State    State
+	// Locales are the translations of the plugin's strings.
+	Locales manifest.Locales
+	State   State
 	// Err is why the plugin failed.
 	Err error
 }
@@ -161,6 +163,7 @@ type entry struct {
 	// folder is the plugin's folder in the plugin folder.
 	folder   string
 	manifest *pluginv1.Manifest
+	locales  manifest.Locales
 	plugin   host.Plugin // nil when it failed to start
 	state    State
 	err      error
@@ -245,6 +248,10 @@ func (m *Manager) start(ctx context.Context, folder string, seen map[string]bool
 	dir := filepath.Join(m.cfg.Dir, folder)
 	e := &entry{folder: folder, revision: m.revisions.Add(1)}
 	e.manifest, e.err = manifest.Load(dir)
+	var localesErr error
+	if e.err == nil {
+		e.locales, localesErr = manifest.LoadLocales(dir)
+	}
 	switch {
 	case e.err != nil:
 		e.manifest = pluginv1.Manifest_builder{Id: new(folder)}.Build()
@@ -255,6 +262,8 @@ func (m *Manager) start(ctx context.Context, folder string, seen map[string]bool
 		e.state = Disabled
 		m.log.InfoContext(ctx, "plugin disabled", "plugin", e.manifest.GetId(), "version", e.manifest.GetVersion())
 		return e
+	case localesErr != nil:
+		e.err = localesErr
 	default:
 		m.manifests.Store(e.manifest.GetId(), e.manifest)
 		e.plugin, e.err = host.Open(ctx, dir, m.opts)
@@ -312,7 +321,9 @@ func (m *Manager) Plugins() []Info {
 	return out
 }
 
-func (e *entry) info() Info { return Info{Manifest: e.manifest, State: e.state, Err: e.err} }
+func (e *entry) info() Info {
+	return Info{Manifest: e.manifest, Locales: e.locales, State: e.state, Err: e.err}
+}
 
 func (m *Manager) find(id string) (*entry, error) {
 	i := slices.IndexFunc(m.plugins, func(e *entry) bool { return e.manifest.GetId() == id })

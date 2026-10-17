@@ -308,7 +308,7 @@ WAL 模式、`synchronous=NORMAL`、`busy_timeout`、外键开启。单连接的
 ### 7.4 插件 SDK 结构
 ```text
 libs/plugin/
-├── manifest/        # manifest.json 加载与校验、主机权限、配置 JSON Schema 校验
+├── manifest/        # manifest.json 加载与校验、主机权限、配置 JSON Schema 校验、翻译
 ├── host/            # 宿主侧：Open（任一运行时，并与 Describe 结果核对）、Configure、Plugin 接口
 │   ├── wasm/        # wazero 运行时、实例池、http_fetch / http_read 宿主函数
 │   └── process/     # 子进程、socket 握手、token、监督与重启
@@ -325,10 +325,11 @@ libs/plugin/
 * **插件目录**：服务端通过 `libs/plugin/host` 启动插件目录（`--plugin-dir`）中每个含有 `manifest.json` 的文件夹。无法读取的文件夹、重复的插件 ID 或启动失败的插件会被报告为失败并跳过，服务端照常运行。在此之前，种子目录（`--plugin-seed-dir`，例如容器镜像附带的插件）中的插件会被复制到插件目录，每个只复制一次：插件目录中的标记文件记录已播种的插件，因此被卸载或升级的插件保持原样，插件目录中已有的插件不会被复制。
 * **配置**：管理员设置的配置按插件 ID 保存（[领域模型](domain.zh-CN.md) §10），通过 `PluginManagementService.SetPluginConfig` 设置：先按清单的 `config_schema` 校验，再通过 `Configure` RPC 下发，插件接受后才保存，无需重启。启动时每个插件会重新收到已保存的配置。
 * **状态**：插件以其配置运行、或其 schema 接受空配置时为就绪；在等待其 schema 所要求的配置时为未配置；无法启动或拒绝已保存的配置时为失败；被管理员停用时为已停用。`SystemService.ListPlugins` 连同清单一起报告这些状态。
+* **翻译**：插件的 `locales` 文件夹中每种语言一个 JSON 文件，以其 BCP 47 标签命名（`zh-Hans.json`），把清单中的每个英文字符串映射为其译文。服务端随清单读取它们；无法读取的文件使插件失败。`ListPlugins`、`InstallPlugin`、`SetPluginEnabled` 与 `SetPluginConfig` 返回的插件，以及 `TaskService` 中插件的任务，使用请求的 `Accept-Language` 在插件的语言中匹配到的语言（`zh-CN` 读取 `zh-Hans`）：插件的名称与简介、任务的名称与说明、外部 ID 类型的名称，以及配置 schema 的标题与说明，schema 的成员保持原有顺序。没有译文的字符串，以及插件没有的语言，保持英文；`PluginChanged` 事件由使用各种语言的管理员读取，携带未翻译的字符串。
 * **元数据提供者**：每个已启动的元数据插件都是媒体库刷新的提供者；未就绪时它不提供任何信息，因此之后才配置的插件会参与下一次刷新。只提供图片的提供者（如 fanart.tv）凭靠前的提供者找到的 ID 查找图片，靠后的提供者能看到这些 ID。
 * **热插拔**：`PluginManagementService.InstallPlugin` 从插件目录安装插件，或将其升级、降级；`UninstallPlugin` 卸载插件；期间服务端照常服务。安装时下载该版本的 zip 包，按插件目录核对其 SHA-256，解压到插件文件夹中的隐藏文件夹并检查清单；随后停止正在运行的版本，将其文件夹移到一旁，移入新版本并以已保存的配置启动；若新版本无法启动，则恢复之前的版本。卸载会停止插件并删除其文件夹与配置。各项能力在使用时查找，因此插件一旦就绪，刷新、搜索与通知即会用到它。
 * **启用与停用**：`PluginManagementService.SetPluginEnabled` 停用插件——停止它而保留其文件夹与配置——或重新启用它，以已保存的配置启动。停用的插件记录在服务端设置中（[领域模型](domain.zh-CN.md) §12.1），因此停用的插件在重启与升级后仍保持停止；卸载插件会清除其停用记录。通过 `UpdateServerSettings` 或 `UpdateSubtitleSettings` 保存的设置从不改变停用的插件（[领域模型](domain.zh-CN.md) §12.1），以免保存设置撤销插件的启用或停用；卸载会等待正在保存的配置，以免为已移除的插件存下配置。
-* **插件目录**：插件目录是服务端设置中某个 http、https 或 file URL 上的 JSON 文档，列出插件及其分类（[插件 §2](plugins.zh-CN.md#2-jellyfin-扩展点及其对应)）与版本：版本号、API 版本、运行时（进程插件还有 os 与 arch）、相对于目录的包 URL、SHA-256、更新说明与发布时间。`ListCatalogPlugins` 列出各目录中的每个插件，附带服务端能运行的版本（最新的在前，服务端一个版本都不能运行的插件则没有版本）以及已安装的版本；同一插件以最先列出它的目录为准，除非只有后面的目录有服务端能运行的版本；无法访问的目录被跳过。
+* **插件目录**：插件目录是服务端设置中某个 http、https 或 file URL 上的 JSON 文档，列出插件及其分类（[插件 §2](plugins.zh-CN.md#2-jellyfin-扩展点及其对应)）、按 BCP 47 标签给出的其他语言的名称与简介，以及版本：版本号、API 版本、运行时（进程插件还有 os 与 arch）、相对于目录的包 URL、SHA-256、更新说明与发布时间。`ListCatalogPlugins` 列出各目录中的每个插件，其名称与简介如翻译一样使用请求的语言，并附带服务端能运行的版本（最新的在前，服务端一个版本都不能运行的插件则没有版本）以及已安装的版本；同一插件以最先列出它的目录为准，除非只有后面的目录有服务端能运行的版本；无法访问的目录被跳过。
 * **官方插件目录**：第一方插件由 mavioai/plugins 仓库发布，其发布版本包含各插件的包与列出它们的 `catalog.json`，由 `tools/plugindist` 从 Mavio 某个发布版本的源码构建。设置从未保存过的新服务端以其 `plugin-catalog` 设置中的目录开始，默认是 GitHub 上 mavioai/plugins 最新发布版本的 `catalog.json`，因此没有服务端为插件依赖 mavio.dev；开发用服务端把它设为 `tools/plugindist` 在所在检出中构建的 `plugins/catalog.json` 的路径，其中的包是 file URL。
 * **宿主 API**：每个插件的宿主 API 请求带着该插件的授权（`auth.PluginHandler`）进入处理器树；认证拦截器按清单的 `permissions.api` 检查请求，并解析 `Mavio-User`（[插件平台 §3](plugins.zh-CN.md#3-宿主-api)）。
 * **认证与通知**：`AuthProvider` 指向某个插件的用户，在该插件的 `Authenticate` 接受其用户名与密码时登录。活动日志中的每项活动都作为 `Event` 发送给通知插件。消费事件的插件通过各自的队列，分批收到其清单列出的事件，无论是否进入日志（[插件平台 §4](plugins.zh-CN.md#4-事件)）。

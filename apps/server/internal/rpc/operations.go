@@ -117,10 +117,12 @@ func (s *TaskService) tasks(ctx context.Context) ([]task, error) {
 		}
 	}
 	if s.Plugins != nil {
+		wanted := wantedLanguages(ctx)
 		for _, pt := range s.Plugins() {
+			tr := pt.Locales.Translator(wanted)
 			t := systemv1.Task_builder{
-				Id: new(plugins.TaskID(pt.Plugin, pt.Task.GetId())), Name: new(pt.Task.GetName()), Kind: new(plugins.JobTask),
-				Description: new(pt.Task.GetDescription()), PluginId: new(pt.Plugin),
+				Id: new(plugins.TaskID(pt.Plugin, pt.Task.GetId())), Name: new(tr(pt.Task.GetName())), Kind: new(plugins.JobTask),
+				Description: new(tr(pt.Task.GetDescription())), PluginId: new(pt.Plugin),
 			}.Build()
 			if pt.Task.HasInterval() {
 				t.SetInterval(pt.Task.GetInterval())

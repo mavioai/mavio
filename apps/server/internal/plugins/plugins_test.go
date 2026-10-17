@@ -162,6 +162,38 @@ func TestManager(t *testing.T) {
 	}
 }
 
+func TestLocales(t *testing.T) {
+	s, err := store.Open(t.Context(), "sqlite:"+filepath.Join(t.TempDir(), "mavio.db"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = s.Close() })
+	dir := t.TempDir()
+	install(t, dir, "smoke", `{"type":"object"}`)
+	locales := filepath.Join(dir, "smoke", "locales")
+	if err := os.MkdirAll(locales, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(locales, "zh-Hans.json"), []byte(`{"Smoke":"冒烟"}`), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	m := open(t, dir, s)
+	if got := state(t, m, "dev.mavio.smoke"); got.State != plugins.Ready || got.Locales["zh-Hans"]["Smoke"] != "冒烟" {
+		t.Errorf("Plugins() = %+v, want the plugin ready with its translations", got)
+	}
+	if err := m.Close(t.Context()); err != nil {
+		t.Fatal(err)
+	}
+
+	// Translations that cannot be read fail the plugin.
+	if err := os.WriteFile(filepath.Join(locales, "zh-Hans.json"), []byte(`{"Smoke":1}`), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if got := state(t, open(t, dir, s), "dev.mavio.smoke"); got.State != plugins.Failed || got.Err == nil {
+		t.Errorf("broken translations: state = %v, %v; want Failed", got.State, got.Err)
+	}
+}
+
 func TestManagerWithoutPlugins(t *testing.T) {
 	m, err := plugins.Open(t.Context(), plugins.Config{})
 	if err != nil || len(m.Plugins()) != 0 || len(m.MetadataProviders()) != 0 {

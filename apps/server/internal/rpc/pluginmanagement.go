@@ -7,6 +7,7 @@ import (
 	"slices"
 
 	"connectrpc.com/connect"
+	"golang.org/x/text/language"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"github.com/mavioai/mavio/apps/server/internal/activity"
@@ -15,6 +16,7 @@ import (
 	"github.com/mavioai/mavio/apps/server/internal/plugins"
 	"github.com/mavioai/mavio/libs/containers"
 	"github.com/mavioai/mavio/libs/core"
+	"github.com/mavioai/mavio/libs/plugin/manifest"
 	pluginv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1/pluginv1connect"
 	sessionv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/session/v1"
@@ -63,10 +65,13 @@ type PluginManager interface {
 
 var _ systemv1connect.PluginManagementServiceHandler = (*PluginManagementService)(nil)
 
-// pluginChanged tells administrators of a plugin change and records it.
+// pluginChanged tells administrators of a plugin change and records it,
+// and returns the plugin in the caller's language.
 func (s *PluginManagementService) pluginChanged(ctx context.Context, info plugins.Info, kind, verb string) *systemv1.Plugin {
-	plugin := pluginToProto(info)
 	if s.Hub != nil {
+		// The event's readers read different languages: it carries the
+		// plugin's strings untranslated.
+		plugin := pluginToProto(info, nil)
 		s.Hub.ToAdmins(sessionv1.Event_builder{PluginChanged: sessionv1.PluginChanged_builder{Plugin: plugin}.Build()}.Build())
 	}
 	p, _ := principal(ctx)
@@ -75,7 +80,7 @@ func (s *PluginManagementService) pluginChanged(ctx context.Context, info plugin
 		Type: kind, UserID: p.User.ID, Title: fmt.Sprintf("%s %s plugin %s", p.User.Name, verb, id),
 		Attributes: map[string]string{"plugin": id, "version": version},
 	})
-	return plugin
+	return pluginToProto(info, wantedLanguages(ctx))
 }
 
 // ListCatalogPlugins lists the catalogs' plugins.
@@ -90,8 +95,10 @@ func (s *PluginManagementService) ListCatalogPlugins(ctx context.Context, _ *sys
 	if err != nil {
 		return nil, connect.NewError(connect.CodeUnavailable, err)
 	}
+	wanted := wantedLanguages(ctx)
 	out := make([]*systemv1.CatalogPlugin, len(list))
 	for i, p := range list {
+		name, description := p.Localized(wanted)
 		versions := make([]*systemv1.CatalogVersion, len(p.Versions))
 		for j, v := range p.Versions {
 			versions[j] = systemv1.CatalogVersion_builder{Version: &v.Version, Changelog: &v.Changelog}.Build()
@@ -100,7 +107,7 @@ func (s *PluginManagementService) ListCatalogPlugins(ctx context.Context, _ *sys
 			}
 		}
 		out[i] = systemv1.CatalogPlugin_builder{
-			Id: &p.ID, Name: &p.Name, Description: &p.Description, Author: &p.Author, Homepage: &p.Homepage,
+			Id: &p.ID, Name: &name, Description: &description, Author: &p.Author, Homepage: &p.Homepage,
 			CatalogUrl: &p.CatalogURL, Versions: versions, InstalledVersion: &p.Installed,
 			Category: pluginv1.Category(pluginv1.Category_value[p.Category]).Enum(),
 		}.Build()
@@ -175,8 +182,9 @@ func (s *PluginManagementService) ListPlugins(ctx context.Context, _ *systemv1.L
 	}
 	var out []*systemv1.Plugin
 	if s.Plugins != nil {
+		wanted := wantedLanguages(ctx)
 		for _, p := range s.Plugins.Plugins() {
-			out = append(out, pluginToProto(p))
+			out = append(out, pluginToProto(p, wanted))
 		}
 	}
 	return systemv1.ListPluginsResponse_builder{Plugins: out}.Build(), nil
@@ -224,8 +232,12 @@ var pluginStates = map[plugins.State]systemv1.PluginState{
 	plugins.Disabled:     systemv1.PluginState_PLUGIN_STATE_DISABLED,
 }
 
-func pluginToProto(p plugins.Info) *systemv1.Plugin {
-	out := systemv1.Plugin_builder{Manifest: p.Manifest, State: new(pluginStates[p.State])}.Build()
+func pluginToProto(p plugins.Info, wanted []language.Tag) *systemv1.Plugin {
+	man := p.Manifest
+	if len(wanted) > 0 && len(p.Locales) > 0 {
+		man = manifest.Localize(man, p.Locales.Translator(wanted))
+	}
+	out := systemv1.Plugin_builder{Manifest: man, State: new(pluginStates[p.State])}.Build()
 	if p.Err != nil {
 		out.SetError(p.Err.Error())
 	}
