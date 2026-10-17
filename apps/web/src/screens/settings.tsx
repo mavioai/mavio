@@ -32,7 +32,6 @@ import { Tip } from "../controls/tooltip.tsx";
 import { locale, t } from "../i18n.ts";
 import { Icon, type IconName } from "../icon.tsx";
 import { SidebarResizer, sidebarWidth } from "../shell/sidebar.tsx";
-import { up } from "../shell/up.ts";
 import { type Appearance, qualities, setPrefs, usePrefs, useWidthClass } from "../prefs.ts";
 import type { SettingsSearch } from "../search-params.ts";
 import { PinPad, useAccount, useMavioDevAccountUrl, useSwitchUsers } from "../shell/user-menu.tsx";
@@ -44,7 +43,7 @@ import { IssuesSection } from "./issues.tsx";
 import { LibrariesSection } from "./admin/libraries.tsx";
 import { ActivitySection } from "./admin/activity.tsx";
 import { OverviewSection } from "./admin/overview.tsx";
-import { Page, TitleAccessory } from "./admin/common.tsx";
+import { Page, SectionTrail, TitleAccessory, Trail } from "./admin/common.tsx";
 import { TasksSection } from "./admin/tasks.tsx";
 import { AcquisitionSection } from "./admin/acquisition.tsx";
 import { StorageSection } from "./admin/storage.tsx";
@@ -279,6 +278,7 @@ function ServerChoice({ chosen, section, place = "sidebar" }: { chosen: Chosen; 
       <Select
         // In the sidebar as wide and tall as its rows.
         className={place === "sidebar" ? "min-h-10 w-full rounded-[10px]!" : place === "group" ? "min-h-10 w-full" : undefined}
+        quiet={place === "title"}
         value={chosen.server.id}
         label={t("settings.serverChoice")}
         options={signedIn.map((s) => ({ value: s.id, label: s.id === home?.id ? t("settings.thisServer", { name: s.name }) : s.name }))}
@@ -479,7 +479,7 @@ function MenuList({ menu, ids, chosen }: { menu: MenuId; ids: SectionId[]; chose
   const tv = usePrefs().tv;
   return (
     <div className={`mx-auto flex min-h-screen flex-col gap-6 px-margin pb-12 ${tv ? "max-w-3xl pt-16" : "max-w-xl pt-[calc(env(safe-area-inset-top)+12px)]"}`}>
-      {!tv && <UpLink />}
+      {!tv && <Trail />}
       {/* The menus are the server's: their title names the server chosen. */}
       <div className="flex items-center gap-4">
         <h1 className="min-w-0 flex-1 type-display">{menus[menu].title()}</h1>
@@ -494,23 +494,6 @@ function MenuList({ menu, ids, chosen }: { menu: MenuId; ids: SectionId[]; chose
   );
 }
 
-/** A phone's link up from a section to its menu, else from a section or a menu to the list. */
-function UpLink({ menu }: { menu?: MenuId }) {
-  const search = useSearch({ strict: false }) as SettingsSearch;
-  const className = "inline-flex items-center gap-1 self-start type-body text-accent-text";
-  return menu ? (
-    <Link to="/settings/$section" params={{ section: menu }} search={{ server: search.server }} {...up} className={className}>
-      <Icon name="back" size={18} />
-      {menus[menu].title()}
-    </Link>
-  ) : (
-    <Link to="/settings" search={{ server: search.server }} {...up} className={className}>
-      <Icon name="back" size={18} />
-      {t("nav.settings")}
-    </Link>
-  );
-}
-
 /**
  * A section on a phone, below a link back to its menu or the list; on a
  * television, whose Back returns there, alone.
@@ -521,10 +504,12 @@ function CompactSection({ id, menu, chosen }: { id: SectionId; menu: MenuId | un
   const choice = chosen && !deviceSections.includes(id) && <ServerChoice chosen={chosen} section={id} place="title" />;
   return (
     <div className={`mx-auto flex flex-col gap-4 px-margin pb-12 ${tv ? "max-w-3xl pt-16" : "max-w-xl pt-[calc(env(safe-area-inset-top)+12px)]"}`}>
-      {!tv && <UpLink menu={menu} />}
-      <TitleAccessory value={choice}>
-        <SectionView id={id} chosen={chosen} />
-      </TitleAccessory>
+      {/* The section's page shows the trail up, unless it names its own. */}
+      <SectionTrail value={!tv && <Trail menu={menu} />}>
+        <TitleAccessory value={choice}>
+          <SectionView id={id} chosen={chosen} />
+        </TitleAccessory>
+      </SectionTrail>
     </div>
   );
 }

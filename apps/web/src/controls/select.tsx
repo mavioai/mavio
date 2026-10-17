@@ -8,13 +8,17 @@ import { useState } from "react";
 import { Icon } from "../icon.tsx";
 import { input, popup, popupItem } from "./styles.ts";
 
-/** A choice among options, labelled for assistive technology by label. */
+/**
+ * A choice among options, labelled for assistive technology by label; quiet,
+ * small and without a fill until pointed at, beside a title.
+ */
 export function Select<T extends string>({
   value,
   options,
   onChange,
   label,
   disabled,
+  quiet = false,
   className,
 }: {
   value: T;
@@ -22,13 +26,17 @@ export function Select<T extends string>({
   onChange: (v: T) => void;
   label: string;
   disabled?: boolean;
+  quiet?: boolean;
   className?: string;
 }) {
+  const look = quiet
+    ? "min-h-7 gap-1 ps-2 pe-1.5 type-footnote text-text-secondary hover:bg-fill data-popup-open:bg-fill"
+    : "min-h-9 gap-2 bg-fill ps-2.5 pe-2.5 type-callout text-on-background hover:bg-fill-selected data-popup-open:bg-fill-selected";
   return (
     <Base.Root items={options} value={value} disabled={disabled} onValueChange={(v) => v !== null && onChange(v)}>
       <Base.Trigger
         aria-label={label}
-        className={`flex min-h-9 max-w-full min-w-0 items-center justify-between gap-2 rounded-md bg-fill ps-2.5 pe-2.5 text-start type-callout text-on-background hover:bg-fill-selected data-disabled:opacity-50 data-popup-open:bg-fill-selected ${className ?? ""}`}
+        className={`flex max-w-full min-w-0 items-center justify-between rounded-md text-start data-disabled:opacity-50 ${look} ${className ?? ""}`}
       >
         <Base.Value className="min-w-0 truncate" />
         <Base.Icon className="flex shrink-0 text-text-secondary">

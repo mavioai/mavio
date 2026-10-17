@@ -30,14 +30,13 @@ import { type FormEvent, type ReactNode, useContext, useState } from "react";
 
 import { locale, t } from "../i18n.ts";
 import { Icon, type IconName } from "../icon.tsx";
-import { up } from "../shell/up.ts";
 import { optionSources, type Schema, SchemaForm } from "../schema-form.tsx";
 import { Button, Group, Row } from "../ui.tsx";
 import { Switch } from "../controls/inputs.tsx";
 import { Select } from "../controls/select.tsx";
 import type { SettingsSearch } from "./settings.tsx";
 import { proxyChoices, proxyDirect } from "./admin/proxies.tsx";
-import { TitleAccessory } from "./admin/common.tsx";
+import { BackLink, SectionTrail, TitleAccessory } from "./admin/common.tsx";
 import { Confirm } from "../controls/dialog.tsx";
 import { useUnsavedGuard } from "../controls/unsaved.tsx";
 
@@ -121,6 +120,7 @@ const segment =
 function PluginList({ server, search }: { server: ServerEntry; search: SettingsSearch }) {
   const cur = search;
   const accessory = useContext(TitleAccessory);
+  const trail = useContext(SectionTrail);
   const { installed, catalog, available, installedEntries } = useEntries(server);
   const tabInstalled = search.tab === "installed";
   const shown = tabInstalled ? installedEntries : available;
@@ -132,6 +132,7 @@ function PluginList({ server, search }: { server: ServerEntry; search: SettingsS
   const loaded = tabInstalled ? installed.isSuccess : catalog.isSuccess;
   return (
     <div className="flex flex-col gap-7">
+      {trail}
       <header>
         <div className="flex items-center gap-4">
           <h2 className="min-w-0 flex-1 type-title1">{t("settings.plugins")}</h2>
@@ -277,21 +278,10 @@ function PluginCard({ entry: e }: { entry: Entry }) {
   );
 }
 
-/** A link back to the list of plugins, as it was left. */
+/** The trail back to the list of plugins, as it was left. */
 function BackToList() {
   const cur = useSearch({ strict: false }) as SettingsSearch;
-  return (
-    <Link
-      to="/settings/$section"
-      params={{ section: "plugins" }}
-      search={{ server: cur.server, tab: cur.tab, category: cur.category }}
-      {...up}
-      className="inline-flex items-center gap-1 self-start type-body text-accent-text"
-    >
-      <Icon name="back" size={18} />
-      {t("settings.plugins")}
-    </Link>
-  );
+  return <BackLink section="plugins" label={t("settings.plugins")} search={{ tab: cur.tab, category: cur.category }} />;
 }
 
 const day = new Intl.DateTimeFormat(locale, { dateStyle: "medium" });
