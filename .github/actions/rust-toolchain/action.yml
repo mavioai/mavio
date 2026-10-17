@@ -1,0 +1,12 @@
+name: Rust toolchain
+description: >
+  Installs the Rust toolchain of libs/intent/rust-toolchain.toml, with its WASM target,
+  before Nx runs Cargo: otherwise each Cargo task installs it on first use, and
+  tasks run in parallel install it over each other. libs/client-rust pins the
+  same release.
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      working-directory: libs/intent
+      run: rustup toolchain install

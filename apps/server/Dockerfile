@@ -12,13 +12,25 @@
 ARG GO_VERSION=1.27.2
 ARG NODE_VERSION=26.11.1
 ARG BUN_VERSION=1.4.3
+ARG RUST_VERSION=1.99.0
 ARG JELLYFIN_FFMPEG_VERSION=8.1.3-1
 ARG RCLONE_VERSION=1.75.2-mavio
+
+# The assistant's grammar as WASM, which the web UI bundles and the server embeds;
+# rustup installs the toolchain libs/intent/rust-toolchain.toml pins.
+FROM --platform=$BUILDPLATFORM rust:${RUST_VERSION}-trixie AS intent
+WORKDIR /src
+COPY . .
+RUN --mount=type=cache,target=/usr/local/cargo/registry \
+	cd libs/intent && rustup toolchain install \
+	&& cargo build --locked --release --lib --target wasm32-unknown-unknown \
+	&& mkdir -p /out && cp target/wasm32-unknown-unknown/release/mavio_intent.wasm /out/intent.wasm
 
 # The web UI, which the server embeds.
 FROM --platform=$BUILDPLATFORM node:${NODE_VERSION}-trixie-slim AS web
 WORKDIR /src
 COPY . .
+COPY --from=intent /out/intent.wasm libs/intent/dist/intent.wasm
 RUN --mount=type=cache,target=/root/.local/share/pnpm/store \
 	npm install -g "$(node -p 'require("./package.json").packageManager')" \
 	&& pnpm install --frozen-lockfile --filter @mavio/web... \
@@ -40,6 +52,7 @@ ARG TARGETOS TARGETARCH VERSION
 WORKDIR /src
 COPY . .
 COPY --from=web /src/apps/server/internal/webui/dist/ apps/server/internal/webui/dist/
+COPY --from=intent /out/intent.wasm apps/server/internal/assistant/intent/dist/intent.wasm
 RUN --mount=type=cache,target=/go/pkg/mod --mount=type=cache,target=/root/.cache/go-build \
 	cd apps/server && CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH go build -trimpath \
 	-ldflags "-s -w ${VERSION:+-X github.com/mavioai/mavio/apps/server/internal/buildinfo.version=$VERSION}" \

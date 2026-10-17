@@ -68,7 +68,7 @@ jobs:
         with:
           fetch-depth: 0
       - uses: jdx/mise-action@v2
-      # Rust comes from libs/client-rust/rust-toolchain.toml through rustup.
+      - uses: ./.github/actions/rust-toolchain
       - uses: Swatinem/rust-cache@v2
         with:
           workspaces: |
@@ -111,6 +111,7 @@ jobs:
         with:
           fetch-depth: ${{ github.event_name == 'pull_request' && '0' || '1' }}
       - uses: jdx/mise-action@v2
+      - uses: ./.github/actions/rust-toolchain
       - uses: Swatinem/rust-cache@v2
         with:
           workspaces: |
@@ -156,6 +157,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: jdx/mise-action@v2
+      - uses: ./.github/actions/rust-toolchain
       - uses: Swatinem/rust-cache@v2
         with:
           workspaces: |
@@ -209,6 +211,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: jdx/mise-action@v2
+      - uses: ./.github/actions/rust-toolchain
       - uses: Swatinem/rust-cache@v2
         with:
           workspaces: |
@@ -252,6 +255,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: jdx/mise-action@v2
+      - uses: ./.github/actions/rust-toolchain
       - run: pnpm install --frozen-lockfile
       - run: ffmpeg -version | head -1
       - run: rclone version | head -1
@@ -275,6 +279,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: jdx/mise-action@v2
+      - uses: ./.github/actions/rust-toolchain
       - run: pnpm install --frozen-lockfile
       - uses: ./.github/actions/go-cache
         with:
