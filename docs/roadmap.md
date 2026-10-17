@@ -975,7 +975,7 @@ flowchart TD
 - [x] Plugin SDK: `libs/plugin/proxy`, `libs/plugin/challenge`, the `proxies` options source, the `CHALLENGE_SOLVER` client
 - [x] Server: proxies and their tests, the options source, plugins configured again when proxies change, challenges routed to solver plugins
 - [x] The system proxy: from the environment, macOS's network settings or Windows's Internet Options, with the hosts it reaches directly, read every 30 seconds; container dependencies reaching the host (`host_access`)
-- [ ] `plugins/solvers`: FlareSolverr as a container dependency, sessions per proxy, coalescing, concurrency, POST
+- [x] `plugins/solvers`: FlareSolverr as a container dependency, sessions per proxy, coalescing, concurrency, POST
 - [ ] `plugins/indexers` and `plugins/subtitles` moved to the server's proxies and to `HostService.SolveChallenge`
 - [ ] The web UI's proxies page
 - [ ] Solvers without published images, each needing an image of Mavio's own built in mavio-deps: Zendriver, Camoufox, invisible_playwright (Byparr's); with them the container declaration's shared memory and tmpfs, which browsers need

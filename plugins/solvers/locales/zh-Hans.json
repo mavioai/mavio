@@ -1,0 +1,17 @@
+{
+  "Challenge Solvers": "质询求解器",
+  "Solves the challenges of sites behind Cloudflare or DDoS-Guard with FlareSolverr, for indexers and subtitle providers, through the proxy each of them uses.": "使用 FlareSolverr 解答 Cloudflare 或 DDoS-Guard 保护的站点的质询，供索引器与字幕提供者使用，并经由它们各自所用的代理。",
+  "Solvers": "求解器",
+  "The solvers tried in turn": "依次尝试的求解器",
+  "Name": "名称",
+  "Enabled": "启用",
+  "Timeout": "超时",
+  "Seconds a challenge may take": "一次质询最多可用的秒数",
+  "Skip media": "不加载媒体",
+  "Leave images, fonts and styles unloaded, which solves faster": "不加载图片、字体与样式，求解更快",
+  "Session lifetime": "会话寿命",
+  "Minutes before a proxy's browser session is replaced by a fresh one; 0 keeps it": "代理的浏览器会话在多少分钟后换成新的；0 表示一直保留",
+  "Concurrent challenges": "并发质询数",
+  "Challenges solved at once, each in a browser": "同时求解的质询数，每个占用一个浏览器",
+  "FlareSolverr, passing challenges in a headless Chrome": "FlareSolverr，在无头 Chrome 中通过质询"
+}

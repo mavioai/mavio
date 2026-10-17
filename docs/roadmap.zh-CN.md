@@ -975,7 +975,7 @@ flowchart TD
 - [x] 插件 SDK：`libs/plugin/proxy`、`libs/plugin/challenge`、`proxies` 选项来源、`CHALLENGE_SOLVER` 客户端
 - [x] 服务端：代理及其测试、选项来源、代理变更时再次配置插件、把质询转交求解插件
 - [x] 系统代理：来自环境变量、macOS 的网络设置或 Windows 的 Internet 选项，连同其直连的主机，每 30 秒读取一次；可访问宿主机的容器依赖（`host_access`）
-- [ ] `plugins/solvers`：以容器依赖运行的 FlareSolverr、按代理的会话、合并请求、并发、POST
+- [x] `plugins/solvers`：以容器依赖运行的 FlareSolverr、按代理的会话、合并请求、并发、POST
 - [ ] `plugins/indexers` 与 `plugins/subtitles` 改用服务端的代理与 `HostService.SolveChallenge`
 - [ ] Web UI 的代理页面
 - [ ] 没有发布镜像的求解器，各需在 mavio-deps 中构建 Mavio 自己的镜像：Zendriver、Camoufox、invisible_playwright（Byparr 所用）；同时为容器声明加入浏览器所需的共享内存与 tmpfs

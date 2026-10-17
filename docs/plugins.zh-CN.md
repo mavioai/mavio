@@ -266,7 +266,7 @@ whisper-asr-webservice 是第一个被声明的依赖，名为 `whisper`：其 C
 服务端的代理（[架构 §17.1](architecture.zh-CN.md#171-代理)）通过配置交给插件：带 `"x-mavio-options": {"source": "proxies"}` 的字符串属性取代理的 ID，由 `ListPluginConfigOptions` 列出，选项名称为代理名称，描述为 `kind://host:port`，标签为其种类。系统代理（`system`，[架构 §17.1](architecture.zh-CN.md#171-代理)）排在最前，标签为 `system`，系统未设置代理时没有描述。`HostService.ListProxies` 按 ID 返回插件请求的代理（未指定时返回全部），含种类、主机、端口、用户名与密码，系统代理还带其直连的主机，未设置代理时种类为未指定；只有 schema 中带此类属性的插件才能调用。这些插件在代理变更或删除时会被再次配置，而使用已不存在的代理的请求会失败。`libs/plugin/proxy` 由代理构建 `http.Transport`，直连代理列表与插件列表中的主机，系统未设置代理时完全直连；`proxy.SystemID` 是系统代理的 ID。
 
 ### 12.2 `plugins/solvers`
-以 FlareSolverr 提供 `CHALLENGE_SOLVER` 的第一方进程插件，FlareSolverr 声明为可选的容器依赖 `flaresolverr`（按摘要引用的镜像，端口 8191，`/health`，`host_access`，以便经 `host.docker.internal` 访问宿主机回环接口上的代理）。其配置列出依次尝试的求解器，各带是否启用、超时与 `disable_media`，以及插件的 `session_ttl_minutes` 与 `max_concurrent`。它为每个代理保持一个 FlareSolverr 会话，每个会话同时只处理一个请求，并让同一主机与代理的并发请求共享一次解答（[架构 §17.3](architecture.zh-CN.md#173-pluginssolvers)）。
+以 FlareSolverr 提供 `CHALLENGE_SOLVER` 的第一方进程插件，FlareSolverr 声明为可选的容器依赖 `flaresolverr`（按摘要引用的镜像，端口 8191，`/health`，`host_access`，以便经 `host.docker.internal` 访问宿主机回环接口上的代理）。其配置列出依次尝试的求解器，各带是否启用、超时与 `disable_media`，以及插件的 `session_ttl_minutes` 与 `max_concurrent`。它为每个代理保持一个 FlareSolverr 会话，在 `session_ttl_minutes` 后轮换，闲置 10 分钟后销毁，每个会话同时只处理一个请求，并让同一主机与代理的并发请求共享一次解答（[架构 §17.3](architecture.zh-CN.md#173-pluginssolvers)）。
 
 ### 12.3 索引器与字幕提供者
 `plugins/indexers` 的每个索引器有一个 `proxy`，取服务端的一个代理，默认为系统代理；代理已不存在的索引器会带着该错误被排除。`plugins/subtitles` 的所有提供者共用一个 `proxy`，默认为系统代理，并有直连的主机（`exclude`，默认 `localhost` 与 `127.0.0.1`）。两者都以所用代理调用 `HostService.SolveChallenge` 解答质询，并按主机保留 cookie 与 user agent。
