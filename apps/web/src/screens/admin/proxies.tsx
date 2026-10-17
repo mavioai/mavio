@@ -197,10 +197,11 @@ function ProxyLine({
     </>
   );
   return (
-    <div className="flex flex-col">
+    // The whole entry, its test and result with it, shows it is pressable.
+    <div className={`flex flex-col ${onEdit && !disabled ? "hover:tint" : ""}`}>
       <div className="flex min-h-13 items-center gap-3 px-4 py-2.5">
         {onEdit ? (
-          <button type="button" disabled={disabled} onClick={onEdit} className="-my-2.5 -ml-4 flex min-w-0 flex-1 items-center gap-3 py-2.5 pl-4 text-left enabled:hover:tint">
+          <button type="button" disabled={disabled} onClick={onEdit} className="-my-2.5 -ml-4 flex min-w-0 flex-1 items-center gap-3 py-2.5 pl-4 text-left">
             {body}
           </button>
         ) : (
