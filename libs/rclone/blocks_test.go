@@ -74,17 +74,20 @@ func newOrigin(t *testing.T, size int, dir string, max int64) (*origin, *BlockCa
 	return o, newTestCache(t, srv.URL, dir, max), srv.URL + "/obj"
 }
 
+// noDiskSpace leaves the space of the test's disk unknown, so that a full
+// disk does not trim the cache.
+func noDiskSpace(string) (free, total int64, ok bool) { return 0, 0, false }
+
 func newTestCache(t *testing.T, base, dir string, max int64) *BlockCache {
 	t.Helper()
 	c, err := NewClient(Endpoint{URL: base}, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
-	bc, err := NewBlockCache(c, BlockCacheOptions{Dir: dir, MaxSize: max})
+	bc, err := newBlockCache(c, BlockCacheOptions{Dir: dir, MaxSize: max}, noDiskSpace)
 	if err != nil {
 		t.Fatalf("NewBlockCache() error = %v", err)
 	}
-	bc.diskSpace = func(string) (int64, int64, bool) { return 0, 0, false }
 	bc.backoff = func(error, int) time.Duration { return time.Millisecond }
 	t.Cleanup(func() { _ = bc.Close() })
 	return bc

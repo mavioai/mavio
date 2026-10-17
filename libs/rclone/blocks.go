@@ -116,6 +116,12 @@ type BlockCacheOptions struct {
 // NewBlockCache opens the block cache in opts.Dir, reading the items it
 // kept, for the rcd c serves.
 func NewBlockCache(c *Client, opts BlockCacheOptions) (*BlockCache, error) {
+	return newBlockCache(c, opts, diskSpace)
+}
+
+// newBlockCache is NewBlockCache reading the space of the cache's disk
+// with space, which the first trim already uses.
+func newBlockCache(c *Client, opts BlockCacheOptions, space func(dir string) (free, total int64, ok bool)) (*BlockCache, error) {
 	if opts.MaxAge <= 0 {
 		opts.MaxAge = DefaultBlockCacheAge
 	}
@@ -127,7 +133,7 @@ func NewBlockCache(c *Client, opts BlockCacheOptions) (*BlockCache, error) {
 	}
 	bc := &BlockCache{
 		c: c, dir: opts.Dir, max: opts.MaxSize, maxAge: opts.MaxAge, log: opts.Logger,
-		now: time.Now, diskSpace: diskSpace, backoff: backoff, items: map[string]*blockItem{},
+		now: time.Now, diskSpace: space, backoff: backoff, items: map[string]*blockItem{},
 	}
 	if err := bc.load(); err != nil {
 		return nil, err

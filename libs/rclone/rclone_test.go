@@ -397,7 +397,7 @@ func TestStorageBlockCache(t *testing.T) {
 	if err := os.WriteFile(name, data, 0o644); err != nil {
 		t.Fatal(err)
 	}
-	bc, err := NewBlockCache(d.Client(), BlockCacheOptions{Dir: t.TempDir(), MaxSize: 1 << 30})
+	bc, err := newBlockCache(d.Client(), BlockCacheOptions{Dir: t.TempDir(), MaxSize: 1 << 30}, noDiskSpace)
 	if err != nil {
 		t.Fatal(err)
 	}
