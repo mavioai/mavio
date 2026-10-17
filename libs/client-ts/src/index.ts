@@ -71,6 +71,8 @@ export {
 export {
   useAdminServers,
   useCatalogPlugins,
+  useContainerRuntime,
+  useContainers,
   usePluginActions,
   usePluginCatalogs,
   usePluginConfig,

@@ -66,6 +66,25 @@ export function usePluginConfig(server: ServerEntry, id: string, enabled = true)
   });
 }
 
+/** Every plugin's containers the server runs or was given an address of, by plugin. */
+export function useContainers(server: ServerEntry) {
+  const servers = useServersStore();
+  return useQuery({
+    queryKey: serverKey(server.id, "plugins", "containers"),
+    queryFn: async () => (await servers.client(PluginManagementService, server).listContainers({})).containers,
+    refetchInterval: 5000,
+  });
+}
+
+/** The container engine the server found, or why it found none. */
+export function useContainerRuntime(server: ServerEntry) {
+  const servers = useServersStore();
+  return useQuery({
+    queryKey: serverKey(server.id, "plugins", "runtime"),
+    queryFn: async () => (await servers.client(PluginManagementService, server).getContainerRuntime({})).runtime,
+  });
+}
+
 /** A plugin's container dependencies, with their states and the commands running them. */
 export function usePluginContainers(server: ServerEntry, id: string, enabled = true) {
   const servers = useServersStore();
@@ -118,10 +137,11 @@ export function usePluginActions(server: ServerEntry) {
     }),
     /** Sets how a container dependency is reached. */
     setContainer: useMutation({
-      mutationFn: (req: { pluginId: string; name: string; mode: ContainerMode; address?: string; useGpu?: boolean }) => client().setPluginContainer(req),
+      mutationFn: (req: { pluginId: string; name: string; mode: ContainerMode; address?: string; useGpu?: boolean; proxy?: string }) =>
+        client().setPluginContainer(req),
       onSettled,
     }),
-    /** Sets the proxy a WASM plugin's HTTP requests go through: a proxy's ID, "system", or "" for none. */
+    /** Sets the proxy a plugin reaches sites through: a proxy's ID, "system", or "" for none. */
     setProxy: useMutation({
       mutationFn: ({ id, proxy }: { id: string; proxy: string }) => client().setPluginProxy({ pluginId: id, proxy }),
       onSettled,
