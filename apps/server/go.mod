@@ -9,6 +9,7 @@ require (
 	github.com/fxamacker/cbor/v2 v2.9.3
 	github.com/go-webauthn/webauthn v0.18.0
 	github.com/mavioai/mavio/libs/acquire v0.0.0
+	github.com/mavioai/mavio/libs/containers v0.0.0
 	github.com/mavioai/mavio/libs/core v0.0.0
 	github.com/mavioai/mavio/libs/imaging v0.0.0
 	github.com/mavioai/mavio/libs/library v0.0.0
@@ -166,3 +167,5 @@ replace github.com/mavioai/mavio/libs/release => ../../libs/release
 replace github.com/mavioai/mavio/libs/acquire => ../../libs/acquire
 
 replace github.com/mavioai/mavio/libs/rclone => ../../libs/rclone
+
+replace github.com/mavioai/mavio/libs/containers => ../../libs/containers

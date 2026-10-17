@@ -1680,7 +1680,7 @@ var File_mavio_plugin_v1_device_proto protoreflect.FileDescriptor
 
 const file_mavio_plugin_v1_device_proto_rawDesc = "" +
 	"\n" +
-	"\x1cmavio/plugin/v1/device.proto\x12\x0fmavio.plugin.v1\x1a\x1egoogle/protobuf/duration.proto\"\x80\x01\n" +
+	"\x1cmavio/plugin/v1/device.proto\x12\x0fmavio.plugin.v1\x1a\x1egoogle/protobuf/duration.proto\x1a\x1fmavio/plugin/v1/container.proto\"\x80\x01\n" +
 	"\x06Device\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x18\n" +
@@ -1742,11 +1742,12 @@ const file_mavio_plugin_v1_device_proto_rawDesc = "" +
 	"\x1aPLAY_STATE_COMMAND_UNPAUSE\x10\x02\x12\x1b\n" +
 	"\x17PLAY_STATE_COMMAND_STOP\x10\x03\x12\x1b\n" +
 	"\x17PLAY_STATE_COMMAND_NEXT\x10\x04\x12\x1f\n" +
-	"\x1bPLAY_STATE_COMMAND_PREVIOUS\x10\x052\xc9\x01\n" +
+	"\x1bPLAY_STATE_COMMAND_PREVIOUS\x10\x052\xb1\x02\n" +
 	"\vHostService\x12U\n" +
 	"\n" +
 	"SetDevices\x12\".mavio.plugin.v1.SetDevicesRequest\x1a#.mavio.plugin.v1.SetDevicesResponse\x12c\n" +
-	"\rGetServerInfo\x12%.mavio.plugin.v1.GetServerInfoRequest\x1a&.mavio.plugin.v1.GetServerInfoResponse\"\x03\x90\x02\x012s\n" +
+	"\rGetServerInfo\x12%.mavio.plugin.v1.GetServerInfoRequest\x1a&.mavio.plugin.v1.GetServerInfoResponse\"\x03\x90\x02\x01\x12f\n" +
+	"\x0eListContainers\x12&.mavio.plugin.v1.ListContainersRequest\x1a'.mavio.plugin.v1.ListContainersResponse\"\x03\x90\x02\x012s\n" +
 	"\x17DeviceControllerService\x12X\n" +
 	"\vSendCommand\x12#.mavio.plugin.v1.SendCommandRequest\x1a$.mavio.plugin.v1.SendCommandResponseB\xc5\x01\n" +
 	"\x13com.mavio.plugin.v1B\vDeviceProtoP\x01ZCgithub.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1;pluginv1\xa2\x02\x03MPX\xaa\x02\x0fMavio.Plugin.V1\xca\x02\x0fMavio\\Plugin\\V1\xe2\x02\x1bMavio\\Plugin\\V1\\GPBMetadata\xea\x02\x11Mavio::Plugin::V1b\beditionsp\xe8\a"
@@ -1754,22 +1755,24 @@ const file_mavio_plugin_v1_device_proto_rawDesc = "" +
 var file_mavio_plugin_v1_device_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
 var file_mavio_plugin_v1_device_proto_msgTypes = make([]protoimpl.MessageInfo, 13)
 var file_mavio_plugin_v1_device_proto_goTypes = []any{
-	(CommandKind)(0),              // 0: mavio.plugin.v1.CommandKind
-	(PlayStateCommand)(0),         // 1: mavio.plugin.v1.PlayStateCommand
-	(*Device)(nil),                // 2: mavio.plugin.v1.Device
-	(*Command)(nil),               // 3: mavio.plugin.v1.Command
-	(*Play)(nil),                  // 4: mavio.plugin.v1.Play
-	(*PlayState)(nil),             // 5: mavio.plugin.v1.PlayState
-	(*Seek)(nil),                  // 6: mavio.plugin.v1.Seek
-	(*ShowMessage)(nil),           // 7: mavio.plugin.v1.ShowMessage
-	(*Volume)(nil),                // 8: mavio.plugin.v1.Volume
-	(*SetDevicesRequest)(nil),     // 9: mavio.plugin.v1.SetDevicesRequest
-	(*SetDevicesResponse)(nil),    // 10: mavio.plugin.v1.SetDevicesResponse
-	(*SendCommandRequest)(nil),    // 11: mavio.plugin.v1.SendCommandRequest
-	(*SendCommandResponse)(nil),   // 12: mavio.plugin.v1.SendCommandResponse
-	(*GetServerInfoRequest)(nil),  // 13: mavio.plugin.v1.GetServerInfoRequest
-	(*GetServerInfoResponse)(nil), // 14: mavio.plugin.v1.GetServerInfoResponse
-	(*durationpb.Duration)(nil),   // 15: google.protobuf.Duration
+	(CommandKind)(0),               // 0: mavio.plugin.v1.CommandKind
+	(PlayStateCommand)(0),          // 1: mavio.plugin.v1.PlayStateCommand
+	(*Device)(nil),                 // 2: mavio.plugin.v1.Device
+	(*Command)(nil),                // 3: mavio.plugin.v1.Command
+	(*Play)(nil),                   // 4: mavio.plugin.v1.Play
+	(*PlayState)(nil),              // 5: mavio.plugin.v1.PlayState
+	(*Seek)(nil),                   // 6: mavio.plugin.v1.Seek
+	(*ShowMessage)(nil),            // 7: mavio.plugin.v1.ShowMessage
+	(*Volume)(nil),                 // 8: mavio.plugin.v1.Volume
+	(*SetDevicesRequest)(nil),      // 9: mavio.plugin.v1.SetDevicesRequest
+	(*SetDevicesResponse)(nil),     // 10: mavio.plugin.v1.SetDevicesResponse
+	(*SendCommandRequest)(nil),     // 11: mavio.plugin.v1.SendCommandRequest
+	(*SendCommandResponse)(nil),    // 12: mavio.plugin.v1.SendCommandResponse
+	(*GetServerInfoRequest)(nil),   // 13: mavio.plugin.v1.GetServerInfoRequest
+	(*GetServerInfoResponse)(nil),  // 14: mavio.plugin.v1.GetServerInfoResponse
+	(*durationpb.Duration)(nil),    // 15: google.protobuf.Duration
+	(*ListContainersRequest)(nil),  // 16: mavio.plugin.v1.ListContainersRequest
+	(*ListContainersResponse)(nil), // 17: mavio.plugin.v1.ListContainersResponse
 }
 var file_mavio_plugin_v1_device_proto_depIdxs = []int32{
 	0,  // 0: mavio.plugin.v1.Device.commands:type_name -> mavio.plugin.v1.CommandKind
@@ -1786,12 +1789,14 @@ var file_mavio_plugin_v1_device_proto_depIdxs = []int32{
 	3,  // 11: mavio.plugin.v1.SendCommandRequest.command:type_name -> mavio.plugin.v1.Command
 	9,  // 12: mavio.plugin.v1.HostService.SetDevices:input_type -> mavio.plugin.v1.SetDevicesRequest
 	13, // 13: mavio.plugin.v1.HostService.GetServerInfo:input_type -> mavio.plugin.v1.GetServerInfoRequest
-	11, // 14: mavio.plugin.v1.DeviceControllerService.SendCommand:input_type -> mavio.plugin.v1.SendCommandRequest
-	10, // 15: mavio.plugin.v1.HostService.SetDevices:output_type -> mavio.plugin.v1.SetDevicesResponse
-	14, // 16: mavio.plugin.v1.HostService.GetServerInfo:output_type -> mavio.plugin.v1.GetServerInfoResponse
-	12, // 17: mavio.plugin.v1.DeviceControllerService.SendCommand:output_type -> mavio.plugin.v1.SendCommandResponse
-	15, // [15:18] is the sub-list for method output_type
-	12, // [12:15] is the sub-list for method input_type
+	16, // 14: mavio.plugin.v1.HostService.ListContainers:input_type -> mavio.plugin.v1.ListContainersRequest
+	11, // 15: mavio.plugin.v1.DeviceControllerService.SendCommand:input_type -> mavio.plugin.v1.SendCommandRequest
+	10, // 16: mavio.plugin.v1.HostService.SetDevices:output_type -> mavio.plugin.v1.SetDevicesResponse
+	14, // 17: mavio.plugin.v1.HostService.GetServerInfo:output_type -> mavio.plugin.v1.GetServerInfoResponse
+	17, // 18: mavio.plugin.v1.HostService.ListContainers:output_type -> mavio.plugin.v1.ListContainersResponse
+	12, // 19: mavio.plugin.v1.DeviceControllerService.SendCommand:output_type -> mavio.plugin.v1.SendCommandResponse
+	16, // [16:20] is the sub-list for method output_type
+	12, // [12:16] is the sub-list for method input_type
 	12, // [12:12] is the sub-list for extension type_name
 	12, // [12:12] is the sub-list for extension extendee
 	0,  // [0:12] is the sub-list for field type_name
@@ -1802,6 +1807,7 @@ func file_mavio_plugin_v1_device_proto_init() {
 	if File_mavio_plugin_v1_device_proto != nil {
 		return
 	}
+	file_mavio_plugin_v1_container_proto_init()
 	file_mavio_plugin_v1_device_proto_msgTypes[1].OneofWrappers = []any{
 		(*command_Play)(nil),
 		(*command_PlayState)(nil),

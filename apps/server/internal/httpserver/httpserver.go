@@ -74,6 +74,8 @@ type Options struct {
 	Plugins rpc.PluginManager
 	// Devices keeps the plugins' remote devices; nil means none.
 	Devices rpc.DeviceController
+	// Containers keeps the plugins' container dependencies; nil means none.
+	Containers rpc.ContainerDependencies
 	// Storage classifies the paths of libraries; nil classifies with a
 	// device detector of its own.
 	Storage *storage.Classifier
@@ -179,7 +181,7 @@ func Handler(opts Options) (http.Handler, error) {
 		Load: load.New(),
 	}, interceptors))
 	mux.Handle(systemv1connect.NewPluginManagementServiceHandler(&rpc.PluginManagementService{
-		Plugins: opts.Plugins, Hub: opts.Hub, Activity: opts.Activity,
+		Plugins: opts.Plugins, Hub: opts.Hub, Activity: opts.Activity, Containers: opts.Containers,
 	}, interceptors))
 	passkeys := auth.NewPasskeys()
 	totp := auth.NewTOTP(opts.Identity.Derive(auth.SecretKeyPurpose))
@@ -259,7 +261,7 @@ func Handler(opts Options) (http.Handler, error) {
 	mux.Handle(sessionv1connect.NewSessionServiceHandler(sessions, interceptors))
 	// Plugins reach the host service through the host API; others are
 	// turned away.
-	mux.Handle(pluginv1connect.NewHostServiceHandler(rpc.NewHostService(opts.Devices, opts.ServerInfo), interceptors))
+	mux.Handle(pluginv1connect.NewHostServiceHandler(rpc.NewHostService(opts.Devices, opts.ServerInfo, opts.Containers), interceptors))
 	mux.Handle(sessionv1connect.NewSyncPlayServiceHandler(rpc.NewSyncPlayService(opts.Store, opts.Hub), interceptors))
 	acq := opts.Acquisition
 	if acq == nil {

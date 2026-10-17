@@ -438,6 +438,7 @@ func (m *Manager) Uninstall(ctx context.Context, id string) error {
 	if err == nil {
 		m.plugins = slices.DeleteFunc(m.plugins, func(o *entry) bool { return o == e })
 		m.dropQueue(id)
+		m.manifests.Delete(id)
 	}
 	m.mu.Unlock()
 	if err != nil {
@@ -448,7 +449,8 @@ func (m *Manager) Uninstall(ctx context.Context, id string) error {
 	if e.plugin != nil {
 		errs = append(errs, e.plugin.Close(ctx))
 	}
-	errs = append(errs, os.RemoveAll(filepath.Join(m.cfg.Dir, e.folder)), m.store.PluginConfigs().Delete(ctx, id), m.forgetDisabled(ctx, id))
+	errs = append(errs, os.RemoveAll(filepath.Join(m.cfg.Dir, e.folder)), m.store.PluginConfigs().Delete(ctx, id),
+		m.store.PluginContainers().Delete(ctx, id, ""), m.forgetDisabled(ctx, id))
 	if m.cfg.DataDir != "" {
 		errs = append(errs, os.RemoveAll(host.DataDir(m.cfg.DataDir, id)))
 	}

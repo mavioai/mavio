@@ -3,6 +3,7 @@ edition = "2023";
 package mavio.plugin.v1;
 
 import "google/protobuf/duration.proto";
+import "mavio/plugin/v1/container.proto";
 
 // HostService is what the server offers plugins besides its public API,
 // through the host API. Every plugin may call it.
@@ -15,6 +16,12 @@ service HostService {
   // GetServerInfo tells how the server is reached, such as for URLs given
   // to devices on the local network.
   rpc GetServerInfo(GetServerInfoRequest) returns (GetServerInfoResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // ListContainers tells the calling plugin how its container
+  // dependencies are reached and whether they can be used. The server
+  // configures the plugin again when an address changes.
+  rpc ListContainers(ListContainersRequest) returns (ListContainersResponse) {
     option idempotency_level = NO_SIDE_EFFECTS;
   }
 }

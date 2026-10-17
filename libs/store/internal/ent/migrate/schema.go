@@ -1126,6 +1126,30 @@ var (
 		Columns:    PluginConfigsColumns,
 		PrimaryKey: []*schema.Column{PluginConfigsColumns[0]},
 	}
+	// PluginContainersColumns holds the columns for the "plugin_containers" table.
+	PluginContainersColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "plugin_id", Type: field.TypeString},
+		{Name: "name", Type: field.TypeString},
+		{Name: "mode", Type: field.TypeString},
+		{Name: "address", Type: field.TypeString, Default: ""},
+		{Name: "secrets", Type: field.TypeJSON, Nullable: true},
+		{Name: "use_gpu", Type: field.TypeBool, Default: false},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// PluginContainersTable holds the schema information for the "plugin_containers" table.
+	PluginContainersTable = &schema.Table{
+		Name:       "plugin_containers",
+		Columns:    PluginContainersColumns,
+		PrimaryKey: []*schema.Column{PluginContainersColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "plugincontainer_plugin_id_name",
+				Unique:  true,
+				Columns: []*schema.Column{PluginContainersColumns[1], PluginContainersColumns[2]},
+			},
+		},
+	}
 	// QualityDefinitionsColumns holds the columns for the "quality_definitions" table.
 	QualityDefinitionsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -1686,6 +1710,7 @@ var (
 		PendingReleasesTable,
 		PeopleTable,
 		PluginConfigsTable,
+		PluginContainersTable,
 		QualityDefinitionsTable,
 		QualityProfilesTable,
 		ReleaseProfilesTable,
@@ -1823,6 +1848,9 @@ func init() {
 	}
 	PluginConfigsTable.Annotation = &entsql.Annotation{
 		Table: "plugin_configs",
+	}
+	PluginContainersTable.Annotation = &entsql.Annotation{
+		Table: "plugin_containers",
 	}
 	QualityDefinitionsTable.Annotation = &entsql.Annotation{
 		Table: "quality_definitions",

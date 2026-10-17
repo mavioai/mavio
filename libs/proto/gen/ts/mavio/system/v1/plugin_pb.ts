@@ -7,6 +7,8 @@ import { enumDesc, fileDesc, messageDesc, serviceDesc } from "@bufbuild/protobuf
 import { file_buf_validate_validate } from "../../../buf/validate/validate_pb";
 import type { Timestamp } from "@bufbuild/protobuf/wkt";
 import { file_google_protobuf_timestamp } from "@bufbuild/protobuf/wkt";
+import type { ContainerDependency, ContainerMode, ContainerStatus } from "../../plugin/v1/container_pb";
+import { file_mavio_plugin_v1_container } from "../../plugin/v1/container_pb";
 import type { Category, Manifest } from "../../plugin/v1/plugin_pb";
 import { file_mavio_plugin_v1_plugin } from "../../plugin/v1/plugin_pb";
 import type { Message } from "@bufbuild/protobuf";
@@ -15,7 +17,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file mavio/system/v1/plugin.proto.
  */
 export const file_mavio_system_v1_plugin: GenFile = /*@__PURE__*/
-  fileDesc("ChxtYXZpby9zeXN0ZW0vdjEvcGx1Z2luLnByb3RvEg9tYXZpby5zeXN0ZW0udjEicQoGUGx1Z2luEisKCG1hbmlmZXN0GAEgASgLMhkubWF2aW8ucGx1Z2luLnYxLk1hbmlmZXN0EisKBXN0YXRlGAIgASgOMhwubWF2aW8uc3lzdGVtLnYxLlBsdWdpblN0YXRlEg0KBWVycm9yGAMgASgJIhQKEkxpc3RQbHVnaW5zUmVxdWVzdCI/ChNMaXN0UGx1Z2luc1Jlc3BvbnNlEigKB3BsdWdpbnMYASADKAsyFy5tYXZpby5zeXN0ZW0udjEuUGx1Z2luIjMKFkdldFBsdWdpbkNvbmZpZ1JlcXVlc3QSGQoJcGx1Z2luX2lkGAEgASgJQga6SAPIAQEiXwoXR2V0UGx1Z2luQ29uZmlnUmVzcG9uc2USEwoLY29uZmlnX2pzb24YASABKAkSLwoLdXBkYXRlX3RpbWUYAiABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wIlAKFlNldFBsdWdpbkNvbmZpZ1JlcXVlc3QSGQoJcGx1Z2luX2lkGAEgASgJQga6SAPIAQESGwoLY29uZmlnX2pzb24YAiABKAlCBrpIA8gBASJCChdTZXRQbHVnaW5Db25maWdSZXNwb25zZRInCgZwbHVnaW4YASABKAsyFy5tYXZpby5zeXN0ZW0udjEuUGx1Z2luIvABCg1DYXRhbG9nUGx1Z2luEgoKAmlkGAEgASgJEgwKBG5hbWUYAiABKAkSEwoLZGVzY3JpcHRpb24YAyABKAkSDgoGYXV0aG9yGAQgASgJEhAKCGhvbWVwYWdlGAUgASgJEhMKC2NhdGFsb2dfdXJsGAYgASgJEjEKCHZlcnNpb25zGAcgAygLMh8ubWF2aW8uc3lzdGVtLnYxLkNhdGFsb2dWZXJzaW9uEhkKEWluc3RhbGxlZF92ZXJzaW9uGAggASgJEisKCGNhdGVnb3J5GAkgASgOMhkubWF2aW8ucGx1Z2luLnYxLkNhdGVnb3J5ImYKDkNhdGFsb2dWZXJzaW9uEg8KB3ZlcnNpb24YASABKAkSEQoJY2hhbmdlbG9nGAIgASgJEjAKDHJlbGVhc2VfdGltZRgDIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXAiGwoZTGlzdENhdGFsb2dQbHVnaW5zUmVxdWVzdCJNChpMaXN0Q2F0YWxvZ1BsdWdpbnNSZXNwb25zZRIvCgdwbHVnaW5zGAEgAygLMh4ubWF2aW8uc3lzdGVtLnYxLkNhdGFsb2dQbHVnaW4iQgoUSW5zdGFsbFBsdWdpblJlcXVlc3QSGQoJcGx1Z2luX2lkGAEgASgJQga6SAPIAQESDwoHdmVyc2lvbhgCIAEoCSJAChVJbnN0YWxsUGx1Z2luUmVzcG9uc2USJwoGcGx1Z2luGAEgASgLMhcubWF2aW8uc3lzdGVtLnYxLlBsdWdpbiIzChZVbmluc3RhbGxQbHVnaW5SZXF1ZXN0EhkKCXBsdWdpbl9pZBgBIAEoCUIGukgDyAEBIhkKF1VuaW5zdGFsbFBsdWdpblJlc3BvbnNlIkUKF1NldFBsdWdpbkVuYWJsZWRSZXF1ZXN0EhkKCXBsdWdpbl9pZBgBIAEoCUIGukgDyAEBEg8KB2VuYWJsZWQYAiABKAgiQwoYU2V0UGx1Z2luRW5hYmxlZFJlc3BvbnNlEicKBnBsdWdpbhgBIAEoCzIXLm1hdmlvLnN5c3RlbS52MS5QbHVnaW4qlgEKC1BsdWdpblN0YXRlEhwKGFBMVUdJTl9TVEFURV9VTlNQRUNJRklFRBAAEhYKElBMVUdJTl9TVEFURV9SRUFEWRABEh0KGVBMVUdJTl9TVEFURV9VTkNPTkZJR1VSRUQQAhIXChNQTFVHSU5fU1RBVEVfRkFJTEVEEAMSGQoVUExVR0lOX1NUQVRFX0RJU0FCTEVEEAQy7AUKF1BsdWdpbk1hbmFnZW1lbnRTZXJ2aWNlEl0KC0xpc3RQbHVnaW5zEiMubWF2aW8uc3lzdGVtLnYxLkxpc3RQbHVnaW5zUmVxdWVzdBokLm1hdmlvLnN5c3RlbS52MS5MaXN0UGx1Z2luc1Jlc3BvbnNlIgOQAgESaQoPR2V0UGx1Z2luQ29uZmlnEicubWF2aW8uc3lzdGVtLnYxLkdldFBsdWdpbkNvbmZpZ1JlcXVlc3QaKC5tYXZpby5zeXN0ZW0udjEuR2V0UGx1Z2luQ29uZmlnUmVzcG9uc2UiA5ACARJkCg9TZXRQbHVnaW5Db25maWcSJy5tYXZpby5zeXN0ZW0udjEuU2V0UGx1Z2luQ29uZmlnUmVxdWVzdBooLm1hdmlvLnN5c3RlbS52MS5TZXRQbHVnaW5Db25maWdSZXNwb25zZRJyChJMaXN0Q2F0YWxvZ1BsdWdpbnMSKi5tYXZpby5zeXN0ZW0udjEuTGlzdENhdGFsb2dQbHVnaW5zUmVxdWVzdBorLm1hdmlvLnN5c3RlbS52MS5MaXN0Q2F0YWxvZ1BsdWdpbnNSZXNwb25zZSIDkAIBEl4KDUluc3RhbGxQbHVnaW4SJS5tYXZpby5zeXN0ZW0udjEuSW5zdGFsbFBsdWdpblJlcXVlc3QaJi5tYXZpby5zeXN0ZW0udjEuSW5zdGFsbFBsdWdpblJlc3BvbnNlEmQKD1VuaW5zdGFsbFBsdWdpbhInLm1hdmlvLnN5c3RlbS52MS5Vbmluc3RhbGxQbHVnaW5SZXF1ZXN0GigubWF2aW8uc3lzdGVtLnYxLlVuaW5zdGFsbFBsdWdpblJlc3BvbnNlEmcKEFNldFBsdWdpbkVuYWJsZWQSKC5tYXZpby5zeXN0ZW0udjEuU2V0UGx1Z2luRW5hYmxlZFJlcXVlc3QaKS5tYXZpby5zeXN0ZW0udjEuU2V0UGx1Z2luRW5hYmxlZFJlc3BvbnNlQsUBChNjb20ubWF2aW8uc3lzdGVtLnYxQgtQbHVnaW5Qcm90b1ABWkNnaXRodWIuY29tL21hdmlvYWkvbWF2aW8vbGlicy9wcm90by9nZW4vZ28vbWF2aW8vc3lzdGVtL3YxO3N5c3RlbXYxogIDTVNYqgIPTWF2aW8uU3lzdGVtLlYxygIPTWF2aW9cU3lzdGVtXFYx4gIbTWF2aW9cU3lzdGVtXFYxXEdQQk1ldGFkYXRh6gIRTWF2aW86OlN5c3RlbTo6VjFiCGVkaXRpb25zcOgH", [file_buf_validate_validate, file_google_protobuf_timestamp, file_mavio_plugin_v1_plugin]);
+  fileDesc("ChxtYXZpby9zeXN0ZW0vdjEvcGx1Z2luLnByb3RvEg9tYXZpby5zeXN0ZW0udjEicQoGUGx1Z2luEisKCG1hbmlmZXN0GAEgASgLMhkubWF2aW8ucGx1Z2luLnYxLk1hbmlmZXN0EisKBXN0YXRlGAIgASgOMhwubWF2aW8uc3lzdGVtLnYxLlBsdWdpblN0YXRlEg0KBWVycm9yGAMgASgJIhQKEkxpc3RQbHVnaW5zUmVxdWVzdCI/ChNMaXN0UGx1Z2luc1Jlc3BvbnNlEigKB3BsdWdpbnMYASADKAsyFy5tYXZpby5zeXN0ZW0udjEuUGx1Z2luIjMKFkdldFBsdWdpbkNvbmZpZ1JlcXVlc3QSGQoJcGx1Z2luX2lkGAEgASgJQga6SAPIAQEiXwoXR2V0UGx1Z2luQ29uZmlnUmVzcG9uc2USEwoLY29uZmlnX2pzb24YASABKAkSLwoLdXBkYXRlX3RpbWUYAiABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wIlAKFlNldFBsdWdpbkNvbmZpZ1JlcXVlc3QSGQoJcGx1Z2luX2lkGAEgASgJQga6SAPIAQESGwoLY29uZmlnX2pzb24YAiABKAlCBrpIA8gBASJCChdTZXRQbHVnaW5Db25maWdSZXNwb25zZRInCgZwbHVnaW4YASABKAsyFy5tYXZpby5zeXN0ZW0udjEuUGx1Z2luIvABCg1DYXRhbG9nUGx1Z2luEgoKAmlkGAEgASgJEgwKBG5hbWUYAiABKAkSEwoLZGVzY3JpcHRpb24YAyABKAkSDgoGYXV0aG9yGAQgASgJEhAKCGhvbWVwYWdlGAUgASgJEhMKC2NhdGFsb2dfdXJsGAYgASgJEjEKCHZlcnNpb25zGAcgAygLMh8ubWF2aW8uc3lzdGVtLnYxLkNhdGFsb2dWZXJzaW9uEhkKEWluc3RhbGxlZF92ZXJzaW9uGAggASgJEisKCGNhdGVnb3J5GAkgASgOMhkubWF2aW8ucGx1Z2luLnYxLkNhdGVnb3J5ImYKDkNhdGFsb2dWZXJzaW9uEg8KB3ZlcnNpb24YASABKAkSEQoJY2hhbmdlbG9nGAIgASgJEjAKDHJlbGVhc2VfdGltZRgDIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXAiGwoZTGlzdENhdGFsb2dQbHVnaW5zUmVxdWVzdCJNChpMaXN0Q2F0YWxvZ1BsdWdpbnNSZXNwb25zZRIvCgdwbHVnaW5zGAEgAygLMh4ubWF2aW8uc3lzdGVtLnYxLkNhdGFsb2dQbHVnaW4iQgoUSW5zdGFsbFBsdWdpblJlcXVlc3QSGQoJcGx1Z2luX2lkGAEgASgJQga6SAPIAQESDwoHdmVyc2lvbhgCIAEoCSJAChVJbnN0YWxsUGx1Z2luUmVzcG9uc2USJwoGcGx1Z2luGAEgASgLMhcubWF2aW8uc3lzdGVtLnYxLlBsdWdpbiIzChZVbmluc3RhbGxQbHVnaW5SZXF1ZXN0EhkKCXBsdWdpbl9pZBgBIAEoCUIGukgDyAEBIhkKF1VuaW5zdGFsbFBsdWdpblJlc3BvbnNlIkUKF1NldFBsdWdpbkVuYWJsZWRSZXF1ZXN0EhkKCXBsdWdpbl9pZBgBIAEoCUIGukgDyAEBEg8KB2VuYWJsZWQYAiABKAgiQwoYU2V0UGx1Z2luRW5hYmxlZFJlc3BvbnNlEicKBnBsdWdpbhgBIAEoCzIXLm1hdmlvLnN5c3RlbS52MS5QbHVnaW4itgEKEENvbnRhaW5lclJ1bnRpbWUSEQoJYXZhaWxhYmxlGAEgASgIEg4KBnJlYXNvbhgCIAEoCRIQCghlbmRwb2ludBgDIAEoCRIOCgZlbmdpbmUYBCABKAkSDwoHdmVyc2lvbhgFIAEoCRITCgthcGlfdmVyc2lvbhgGIAEoCRIQCghyb290bGVzcxgHIAEoCBIUCgxpbl9jb250YWluZXIYCCABKAgSDwoHb25faG9zdBgJIAEoCCIsChpHZXRDb250YWluZXJSdW50aW1lUmVxdWVzdBIOCgZkZXRlY3QYASABKAgiUQobR2V0Q29udGFpbmVyUnVudGltZVJlc3BvbnNlEjIKB3J1bnRpbWUYASABKAsyIS5tYXZpby5zeXN0ZW0udjEuQ29udGFpbmVyUnVudGltZSKOAQoPUGx1Z2luQ29udGFpbmVyEjgKCmRlcGVuZGVuY3kYASABKAsyJC5tYXZpby5wbHVnaW4udjEuQ29udGFpbmVyRGVwZW5kZW5jeRIwCgZzdGF0dXMYAiABKAsyIC5tYXZpby5wbHVnaW4udjEuQ29udGFpbmVyU3RhdHVzEg8KB3VzZV9ncHUYAyABKAgiOAobTGlzdFBsdWdpbkNvbnRhaW5lcnNSZXF1ZXN0EhkKCXBsdWdpbl9pZBgBIAEoCUIGukgDyAEBIlQKHExpc3RQbHVnaW5Db250YWluZXJzUmVzcG9uc2USNAoKY29udGFpbmVycxgBIAMoCzIgLm1hdmlvLnN5c3RlbS52MS5QbHVnaW5Db250YWluZXIipgEKGVNldFBsdWdpbkNvbnRhaW5lclJlcXVlc3QSGQoJcGx1Z2luX2lkGAEgASgJQga6SAPIAQESFAoEbmFtZRgCIAEoCUIGukgDyAEBEiwKBG1vZGUYAyABKA4yHi5tYXZpby5wbHVnaW4udjEuQ29udGFpbmVyTW9kZRIZCgdhZGRyZXNzGAQgASgJQgi6SAVyA4gBARIPCgd1c2VfZ3B1GAUgASgIIlEKGlNldFBsdWdpbkNvbnRhaW5lclJlc3BvbnNlEjMKCWNvbnRhaW5lchgBIAEoCzIgLm1hdmlvLnN5c3RlbS52MS5QbHVnaW5Db250YWluZXIqlgEKC1BsdWdpblN0YXRlEhwKGFBMVUdJTl9TVEFURV9VTlNQRUNJRklFRBAAEhYKElBMVUdJTl9TVEFURV9SRUFEWRABEh0KGVBMVUdJTl9TVEFURV9VTkNPTkZJR1VSRUQQAhIXChNQTFVHSU5fU1RBVEVfRkFJTEVEEAMSGQoVUExVR0lOX1NUQVRFX0RJU0FCTEVEEAQyzAgKF1BsdWdpbk1hbmFnZW1lbnRTZXJ2aWNlEl0KC0xpc3RQbHVnaW5zEiMubWF2aW8uc3lzdGVtLnYxLkxpc3RQbHVnaW5zUmVxdWVzdBokLm1hdmlvLnN5c3RlbS52MS5MaXN0UGx1Z2luc1Jlc3BvbnNlIgOQAgESaQoPR2V0UGx1Z2luQ29uZmlnEicubWF2aW8uc3lzdGVtLnYxLkdldFBsdWdpbkNvbmZpZ1JlcXVlc3QaKC5tYXZpby5zeXN0ZW0udjEuR2V0UGx1Z2luQ29uZmlnUmVzcG9uc2UiA5ACARJkCg9TZXRQbHVnaW5Db25maWcSJy5tYXZpby5zeXN0ZW0udjEuU2V0UGx1Z2luQ29uZmlnUmVxdWVzdBooLm1hdmlvLnN5c3RlbS52MS5TZXRQbHVnaW5Db25maWdSZXNwb25zZRJyChJMaXN0Q2F0YWxvZ1BsdWdpbnMSKi5tYXZpby5zeXN0ZW0udjEuTGlzdENhdGFsb2dQbHVnaW5zUmVxdWVzdBorLm1hdmlvLnN5c3RlbS52MS5MaXN0Q2F0YWxvZ1BsdWdpbnNSZXNwb25zZSIDkAIBEl4KDUluc3RhbGxQbHVnaW4SJS5tYXZpby5zeXN0ZW0udjEuSW5zdGFsbFBsdWdpblJlcXVlc3QaJi5tYXZpby5zeXN0ZW0udjEuSW5zdGFsbFBsdWdpblJlc3BvbnNlEmQKD1VuaW5zdGFsbFBsdWdpbhInLm1hdmlvLnN5c3RlbS52MS5Vbmluc3RhbGxQbHVnaW5SZXF1ZXN0GigubWF2aW8uc3lzdGVtLnYxLlVuaW5zdGFsbFBsdWdpblJlc3BvbnNlEmcKEFNldFBsdWdpbkVuYWJsZWQSKC5tYXZpby5zeXN0ZW0udjEuU2V0UGx1Z2luRW5hYmxlZFJlcXVlc3QaKS5tYXZpby5zeXN0ZW0udjEuU2V0UGx1Z2luRW5hYmxlZFJlc3BvbnNlEnUKE0dldENvbnRhaW5lclJ1bnRpbWUSKy5tYXZpby5zeXN0ZW0udjEuR2V0Q29udGFpbmVyUnVudGltZVJlcXVlc3QaLC5tYXZpby5zeXN0ZW0udjEuR2V0Q29udGFpbmVyUnVudGltZVJlc3BvbnNlIgOQAgESeAoUTGlzdFBsdWdpbkNvbnRhaW5lcnMSLC5tYXZpby5zeXN0ZW0udjEuTGlzdFBsdWdpbkNvbnRhaW5lcnNSZXF1ZXN0Gi0ubWF2aW8uc3lzdGVtLnYxLkxpc3RQbHVnaW5Db250YWluZXJzUmVzcG9uc2UiA5ACARJtChJTZXRQbHVnaW5Db250YWluZXISKi5tYXZpby5zeXN0ZW0udjEuU2V0UGx1Z2luQ29udGFpbmVyUmVxdWVzdBorLm1hdmlvLnN5c3RlbS52MS5TZXRQbHVnaW5Db250YWluZXJSZXNwb25zZULFAQoTY29tLm1hdmlvLnN5c3RlbS52MUILUGx1Z2luUHJvdG9QAVpDZ2l0aHViLmNvbS9tYXZpb2FpL21hdmlvL2xpYnMvcHJvdG8vZ2VuL2dvL21hdmlvL3N5c3RlbS92MTtzeXN0ZW12MaICA01TWKoCD01hdmlvLlN5c3RlbS5WMcoCD01hdmlvXFN5c3RlbVxWMeICG01hdmlvXFN5c3RlbVxWMVxHUEJNZXRhZGF0YeoCEU1hdmlvOjpTeXN0ZW06OlYxYghlZGl0aW9uc3DoBw", [file_buf_validate_validate, file_google_protobuf_timestamp, file_mavio_plugin_v1_container, file_mavio_plugin_v1_plugin]);
 
 /**
  * Plugin is a plugin found in the server's plugin folder.
@@ -402,6 +404,240 @@ export const SetPluginEnabledResponseSchema: GenMessage<SetPluginEnabledResponse
   messageDesc(file_mavio_system_v1_plugin, 16);
 
 /**
+ * ContainerRuntime is the container engine the server found.
+ *
+ * @generated from message mavio.system.v1.ContainerRuntime
+ */
+export type ContainerRuntime = Message<"mavio.system.v1.ContainerRuntime"> & {
+  /**
+   * Whether an engine answered; reason tells why not.
+   *
+   * @generated from field: bool available = 1;
+   */
+  available: boolean;
+
+  /**
+   * @generated from field: string reason = 2;
+   */
+  reason: string;
+
+  /**
+   * The engine's endpoint, e.g. "unix:///var/run/docker.sock".
+   *
+   * @generated from field: string endpoint = 3;
+   */
+  endpoint: string;
+
+  /**
+   * "docker" or "podman", its release and the API version used.
+   *
+   * @generated from field: string engine = 4;
+   */
+  engine: string;
+
+  /**
+   * @generated from field: string version = 5;
+   */
+  version: string;
+
+  /**
+   * @generated from field: string api_version = 6;
+   */
+  apiVersion: string;
+
+  /**
+   * @generated from field: bool rootless = 7;
+   */
+  rootless: boolean;
+
+  /**
+   * Whether the server runs in a container.
+   *
+   * @generated from field: bool in_container = 8;
+   */
+  inContainer: boolean;
+
+  /**
+   * Whether the server reaches what it runs through ports on the
+   * loopback interface rather than a network its container joins.
+   *
+   * @generated from field: bool on_host = 9;
+   */
+  onHost: boolean;
+};
+
+/**
+ * Describes the message mavio.system.v1.ContainerRuntime.
+ * Use `create(ContainerRuntimeSchema)` to create a new message.
+ */
+export const ContainerRuntimeSchema: GenMessage<ContainerRuntime> = /*@__PURE__*/
+  messageDesc(file_mavio_system_v1_plugin, 17);
+
+/**
+ * @generated from message mavio.system.v1.GetContainerRuntimeRequest
+ */
+export type GetContainerRuntimeRequest = Message<"mavio.system.v1.GetContainerRuntimeRequest"> & {
+  /**
+   * Detect the engine again rather than tell what was found last.
+   *
+   * @generated from field: bool detect = 1;
+   */
+  detect: boolean;
+};
+
+/**
+ * Describes the message mavio.system.v1.GetContainerRuntimeRequest.
+ * Use `create(GetContainerRuntimeRequestSchema)` to create a new message.
+ */
+export const GetContainerRuntimeRequestSchema: GenMessage<GetContainerRuntimeRequest> = /*@__PURE__*/
+  messageDesc(file_mavio_system_v1_plugin, 18);
+
+/**
+ * @generated from message mavio.system.v1.GetContainerRuntimeResponse
+ */
+export type GetContainerRuntimeResponse = Message<"mavio.system.v1.GetContainerRuntimeResponse"> & {
+  /**
+   * @generated from field: mavio.system.v1.ContainerRuntime runtime = 1;
+   */
+  runtime?: ContainerRuntime | undefined;
+};
+
+/**
+ * Describes the message mavio.system.v1.GetContainerRuntimeResponse.
+ * Use `create(GetContainerRuntimeResponseSchema)` to create a new message.
+ */
+export const GetContainerRuntimeResponseSchema: GenMessage<GetContainerRuntimeResponse> = /*@__PURE__*/
+  messageDesc(file_mavio_system_v1_plugin, 19);
+
+/**
+ * PluginContainer is a container dependency of a plugin.
+ *
+ * @generated from message mavio.system.v1.PluginContainer
+ */
+export type PluginContainer = Message<"mavio.system.v1.PluginContainer"> & {
+  /**
+   * As the plugin's manifest declares it.
+   *
+   * @generated from field: mavio.plugin.v1.ContainerDependency dependency = 1;
+   */
+  dependency?: ContainerDependency | undefined;
+
+  /**
+   * @generated from field: mavio.plugin.v1.ContainerStatus status = 2;
+   */
+  status?: ContainerStatus | undefined;
+
+  /**
+   * Whether a managed container may use a GPU.
+   *
+   * @generated from field: bool use_gpu = 3;
+   */
+  useGpu: boolean;
+};
+
+/**
+ * Describes the message mavio.system.v1.PluginContainer.
+ * Use `create(PluginContainerSchema)` to create a new message.
+ */
+export const PluginContainerSchema: GenMessage<PluginContainer> = /*@__PURE__*/
+  messageDesc(file_mavio_system_v1_plugin, 20);
+
+/**
+ * @generated from message mavio.system.v1.ListPluginContainersRequest
+ */
+export type ListPluginContainersRequest = Message<"mavio.system.v1.ListPluginContainersRequest"> & {
+  /**
+   * @generated from field: string plugin_id = 1;
+   */
+  pluginId: string;
+};
+
+/**
+ * Describes the message mavio.system.v1.ListPluginContainersRequest.
+ * Use `create(ListPluginContainersRequestSchema)` to create a new message.
+ */
+export const ListPluginContainersRequestSchema: GenMessage<ListPluginContainersRequest> = /*@__PURE__*/
+  messageDesc(file_mavio_system_v1_plugin, 21);
+
+/**
+ * @generated from message mavio.system.v1.ListPluginContainersResponse
+ */
+export type ListPluginContainersResponse = Message<"mavio.system.v1.ListPluginContainersResponse"> & {
+  /**
+   * In manifest order.
+   *
+   * @generated from field: repeated mavio.system.v1.PluginContainer containers = 1;
+   */
+  containers: PluginContainer[];
+};
+
+/**
+ * Describes the message mavio.system.v1.ListPluginContainersResponse.
+ * Use `create(ListPluginContainersResponseSchema)` to create a new message.
+ */
+export const ListPluginContainersResponseSchema: GenMessage<ListPluginContainersResponse> = /*@__PURE__*/
+  messageDesc(file_mavio_system_v1_plugin, 22);
+
+/**
+ * @generated from message mavio.system.v1.SetPluginContainerRequest
+ */
+export type SetPluginContainerRequest = Message<"mavio.system.v1.SetPluginContainerRequest"> & {
+  /**
+   * @generated from field: string plugin_id = 1;
+   */
+  pluginId: string;
+
+  /**
+   * @generated from field: string name = 2;
+   */
+  name: string;
+
+  /**
+   * @generated from field: mavio.plugin.v1.ContainerMode mode = 3;
+   */
+  mode: ContainerMode;
+
+  /**
+   * Base URL of an external dependency, http or https; required for
+   * CONTAINER_MODE_EXTERNAL and empty otherwise.
+   *
+   * @generated from field: string address = 4;
+   */
+  address: string;
+
+  /**
+   * Whether a managed container may use a GPU.
+   *
+   * @generated from field: bool use_gpu = 5;
+   */
+  useGpu: boolean;
+};
+
+/**
+ * Describes the message mavio.system.v1.SetPluginContainerRequest.
+ * Use `create(SetPluginContainerRequestSchema)` to create a new message.
+ */
+export const SetPluginContainerRequestSchema: GenMessage<SetPluginContainerRequest> = /*@__PURE__*/
+  messageDesc(file_mavio_system_v1_plugin, 23);
+
+/**
+ * @generated from message mavio.system.v1.SetPluginContainerResponse
+ */
+export type SetPluginContainerResponse = Message<"mavio.system.v1.SetPluginContainerResponse"> & {
+  /**
+   * @generated from field: mavio.system.v1.PluginContainer container = 1;
+   */
+  container?: PluginContainer | undefined;
+};
+
+/**
+ * Describes the message mavio.system.v1.SetPluginContainerResponse.
+ * Use `create(SetPluginContainerResponseSchema)` to create a new message.
+ */
+export const SetPluginContainerResponseSchema: GenMessage<SetPluginContainerResponse> = /*@__PURE__*/
+  messageDesc(file_mavio_system_v1_plugin, 24);
+
+/**
  * PluginState is whether a plugin is in use.
  *
  * @generated from enum mavio.system.v1.PluginState
@@ -533,6 +769,39 @@ export const PluginManagementService: GenService<{
     methodKind: "unary";
     input: typeof SetPluginEnabledRequestSchema;
     output: typeof SetPluginEnabledResponseSchema;
+  },
+  /**
+   * GetContainerRuntime tells whether a container engine is available to
+   * run plugins' container dependencies, detecting it again when asked.
+   *
+   * @generated from rpc mavio.system.v1.PluginManagementService.GetContainerRuntime
+   */
+  getContainerRuntime: {
+    methodKind: "unary";
+    input: typeof GetContainerRuntimeRequestSchema;
+    output: typeof GetContainerRuntimeResponseSchema;
+  },
+  /**
+   * ListPluginContainers lists a plugin's container dependencies with how
+   * they are reached and whether they can be used.
+   *
+   * @generated from rpc mavio.system.v1.PluginManagementService.ListPluginContainers
+   */
+  listPluginContainers: {
+    methodKind: "unary";
+    input: typeof ListPluginContainersRequestSchema;
+    output: typeof ListPluginContainersResponseSchema;
+  },
+  /**
+   * SetPluginContainer sets how a container dependency is reached: run by
+   * the server, which requires a container engine, or at an address.
+   *
+   * @generated from rpc mavio.system.v1.PluginManagementService.SetPluginContainer
+   */
+  setPluginContainer: {
+    methodKind: "unary";
+    input: typeof SetPluginContainerRequestSchema;
+    output: typeof SetPluginContainerResponseSchema;
   },
 }> = /*@__PURE__*/
   serviceDesc(file_mavio_system_v1_plugin, 0);

@@ -236,8 +236,8 @@ DLNA 是第一方进程插件：它需要 UDP 组播（WASM 没有 socket）和�
 * `image`：带 digest 的引用（`repository:tag@sha256:…`）；没有 digest 的镜像被拒绝。
 * `port`：服务在容器内监听的端口；`health_path`：服务就绪时返回 2xx 的 HTTP 路径，未设置时以端口可连接为准。
 * `command`、`env`：参数与环境变量。值 `${secret:<key>}` 是服务端为该依赖生成一次的随机密钥；`${address}` 是该依赖自己的地址。
-* `volumes`：按挂载路径给出的命名卷，例如 `{"cache": "/root/.cache"}`。
-* `gpu`：`none`、`optional` 或 `required`（NVIDIA），以及 `gpu_image`：使用 GPU 时若为另一个镜像，则为该镜像；`memory` 与 `cpus`：托管容器的限制。
+* `volumes`：按卷名给出的挂载路径，例如 `{"cache": "/root/.cache"}`。
+* `gpu`：不设置表示不用，或 `GPU_SUPPORT_OPTIONAL`、`GPU_SUPPORT_REQUIRED`（NVIDIA），以及 `gpu_image`：使用 GPU 时若为另一个镜像，则为该镜像，同样带 digest；`memory_mib` 与 `cpus`：托管容器的限制。
 * `required`：插件是否离不开它。可选依赖（例如与插件的 OpenAI 兼容识别器并列的 whisper-asr-webservice）在管理员选择之前保持 `unset`。
 
 安装或升级插件时显示其依赖及镜像，管理员随插件一并批准；升级带来新的镜像 digest 时，插件启动时替换托管容器。
@@ -252,4 +252,4 @@ DLNA 是第一方进程插件：它需要 UDP 组播（WASM 没有 socket）和�
 * 有引擎时客户端提供托管；否则提供命令（`docker run` 与一个 Compose 服务），并预填它们对应的地址（[架构 §16.4](architecture.zh-CN.md#164-外部依赖)）。
 
 ### 11.4 `plugins/voice`
-whisper-asr-webservice 是第一个被声明的依赖：其 CPU 镜像，`gpu: optional` 并以其 GPU 镜像为 `gpu_image`，端口 9000，模型缓存放在一个卷中。它不为 `unset` 时，插件的 `whisper-asr` 识别器使用该依赖的地址，代替其 `url` 设置。
+whisper-asr-webservice 是第一个被声明的依赖：其 CPU 镜像，`GPU_SUPPORT_OPTIONAL` 并以其 GPU 镜像为 `gpu_image`，端口 9000，模型缓存放在一个卷中。它不为 `unset` 时，插件的 `whisper-asr` 识别器使用该依赖的地址，代替其 `url` 设置。

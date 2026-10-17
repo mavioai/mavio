@@ -121,6 +121,11 @@ type Manager struct {
 	// queues hold the events waiting for each event consumer.
 	queues map[string]*eventQueue
 
+	// manifests holds the manifests of the plugins started, by ID, apart
+	// from mu: plugins ask for what their manifests declare while mu is
+	// held to configure them.
+	manifests sync.Map
+
 	// devMu guards devices, the devices of each device controller.
 	devMu   sync.Mutex
 	devices map[string][]Device
@@ -223,13 +228,16 @@ func (m *Manager) start(ctx context.Context, folder string, seen map[string]bool
 	case seen[e.manifest.GetId()]:
 		e.err = fmt.Errorf("another folder holds plugin %s", e.manifest.GetId())
 	case m.isDisabled(e.manifest.GetId()):
+		m.manifests.Store(e.manifest.GetId(), e.manifest)
 		e.state = Disabled
 		m.log.InfoContext(ctx, "plugin disabled", "plugin", e.manifest.GetId(), "version", e.manifest.GetVersion())
 		return e
 	default:
+		m.manifests.Store(e.manifest.GetId(), e.manifest)
 		e.plugin, e.err = host.Open(ctx, dir, m.opts)
 	}
 	if e.err == nil {
+		m.pruneContainers(ctx, e.manifest)
 		e.state, e.err = m.configure(ctx, e)
 	}
 	if e.err != nil {
@@ -367,6 +375,61 @@ func (m *Manager) SetConfig(ctx context.Context, id, configJSON string) (Info, e
 	}
 	m.log.InfoContext(ctx, "plugin configured", "plugin", id)
 	return e.info(), nil
+}
+
+// Manifest returns the manifest of a plugin started or disabled, without
+// waiting for the plugins being started or configured.
+func (m *Manager) Manifest(id string) (*pluginv1.Manifest, bool) {
+	v, ok := m.manifests.Load(id)
+	if !ok {
+		return nil, false
+	}
+	return v.(*pluginv1.Manifest), true
+}
+
+// Reconfigure delivers a ready plugin's stored configuration again,
+// telling it that what it reads from the host, such as the addresses of
+// its container dependencies, changed. A plugin not ready is left alone.
+func (m *Manager) Reconfigure(ctx context.Context, id string) error {
+	m.setConfig.Lock()
+	defer m.setConfig.Unlock()
+	c, err := m.Config(ctx, id)
+	if err != nil {
+		return err
+	}
+	configJSON := c.JSON
+	if configJSON == "" {
+		configJSON = "{}"
+	}
+	m.mu.Lock()
+	e, err := m.find(id)
+	ready := err == nil && e.plugin != nil && e.state == Ready
+	m.mu.Unlock()
+	if err != nil || !ready {
+		return err
+	}
+	if err := host.Configure(ctx, e.plugin, configJSON); err != nil {
+		return fmt.Errorf("reconfigure plugin %s: %w", id, err)
+	}
+	return nil
+}
+
+// pruneContainers deletes what is kept of container dependencies a
+// plugin's manifest no longer declares.
+func (m *Manager) pruneContainers(ctx context.Context, mf *pluginv1.Manifest) {
+	kept, err := m.store.PluginContainers().List(ctx, mf.GetId())
+	if err != nil {
+		m.log.WarnContext(ctx, "list plugin containers", "plugin", mf.GetId(), "err", err)
+		return
+	}
+	for _, c := range kept {
+		if _, ok := manifest.Container(mf, c.Name); ok {
+			continue
+		}
+		if err := m.store.PluginContainers().Delete(ctx, mf.GetId(), c.Name); err != nil {
+			m.log.WarnContext(ctx, "delete plugin container", "plugin", mf.GetId(), "container", c.Name, "err", err)
+		}
+	}
 }
 
 // deliverConfig validates configJSON against a running plugin's schema and

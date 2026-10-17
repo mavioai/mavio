@@ -3,6 +3,7 @@ package manifest
 import (
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -24,6 +25,23 @@ func valid() *pluginv1.Manifest {
 		Permissions:  pluginv1.Permissions_builder{HttpHosts: []string{"api.themoviedb.org", "*.tmdb.org"}}.Build(),
 		ConfigSchema: proto.String(`{"type":"object","properties":{"api_key":{"type":"string"}},"required":["api_key"]}`),
 	}.Build()
+}
+
+const digest = "@sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+
+// container returns a valid container dependency changed by mut.
+func container(name string, mut func(c *pluginv1.ContainerDependency)) *pluginv1.ContainerDependency {
+	c := pluginv1.ContainerDependency_builder{
+		Name: proto.String(name), Image: proto.String("onerahmet/openai-whisper-asr-webservice:v1.9.1" + digest),
+		Port: proto.Uint32(9000), HealthPath: proto.String("/docs"),
+		Env:     map[string]string{"ASR_MODEL": "base", "API_KEY": "${secret:api-key}", "SELF": "${address}/x"},
+		Volumes: map[string]string{"cache": "/root/.cache"},
+		Gpu:     pluginv1.GpuSupport_GPU_SUPPORT_OPTIONAL.Enum(), GpuImage: proto.String("onerahmet/openai-whisper-asr-webservice:v1.9.1-gpu" + digest),
+	}.Build()
+	if mut != nil {
+		mut(c)
+	}
+	return c
 }
 
 func task(id string, interval, timeout time.Duration) *pluginv1.Task {
@@ -70,6 +88,14 @@ func TestValidate(t *testing.T) {
 	m.SetExternalIdKinds([]*pluginv1.ExternalIdKind{idKind("trakt", "https://trakt.tv/movies/{id}"), idKind("simkl", "")})
 	if err := Validate(m); err != nil {
 		t.Fatalf("manifest with external ID kinds: %v", err)
+	}
+	m = valid()
+	m.SetContainers([]*pluginv1.ContainerDependency{container("whisper", nil), container("whisper-gpu", nil)})
+	if err := Validate(m); err != nil {
+		t.Fatalf("manifest with containers: %v", err)
+	}
+	withContainer := func(mut func(c *pluginv1.ContainerDependency)) func(m *pluginv1.Manifest) {
+		return func(m *pluginv1.Manifest) { m.SetContainers([]*pluginv1.ContainerDependency{container("whisper", mut)}) }
 	}
 	tests := []struct {
 		name string
@@ -144,6 +170,24 @@ func TestValidate(t *testing.T) {
 			m.SetCapabilities(append(m.GetCapabilities(), pluginv1.Capability_CAPABILITY_RESOLVER))
 		}, "requires RUNTIME_WASM"},
 		{"bad schema", func(m *pluginv1.Manifest) { m.SetConfigSchema(`{"type":"nope"}`) }, "config_schema"},
+		{"bad container name", withContainer(func(c *pluginv1.ContainerDependency) { c.SetName("Whisper") }), "container name"},
+		{"duplicate container", func(m *pluginv1.Manifest) {
+			m.SetContainers([]*pluginv1.ContainerDependency{container("whisper", nil), container("whisper", nil)})
+		}, "not unique"},
+		{"image without digest", withContainer(func(c *pluginv1.ContainerDependency) { c.SetImage("busybox:1.37") }), "digest"},
+		{"short digest", withContainer(func(c *pluginv1.ContainerDependency) { c.SetImage("busybox@sha256:abc") }), "digest"},
+		{"GPU image without digest", withContainer(func(c *pluginv1.ContainerDependency) { c.SetGpuImage("busybox:gpu") }), "gpu_image"},
+		{"GPU image without GPU", withContainer(func(c *pluginv1.ContainerDependency) { c.ClearGpu() }), "gpu_image requires gpu"},
+		{"no port", withContainer(func(c *pluginv1.ContainerDependency) { c.ClearPort() }), "port"},
+		{"port too large", withContainer(func(c *pluginv1.ContainerDependency) { c.SetPort(70000) }), "port"},
+		{"relative health path", withContainer(func(c *pluginv1.ContainerDependency) { c.SetHealthPath("health") }), "health_path"},
+		{"bad environment variable", withContainer(func(c *pluginv1.ContainerDependency) { c.GetEnv()["A-B"] = "x" }), "environment variable"},
+		{"unknown placeholder", withContainer(func(c *pluginv1.ContainerDependency) { c.GetEnv()["HOME"] = "${home}" }), "only ${secret"},
+		{"bad secret key", withContainer(func(c *pluginv1.ContainerDependency) { c.GetEnv()["K"] = "${secret:Key}" }), "only ${secret"},
+		{"bad volume name", withContainer(func(c *pluginv1.ContainerDependency) { c.GetVolumes()["Cache"] = "/c" }), "volume name"},
+		{"relative mount", withContainer(func(c *pluginv1.ContainerDependency) { c.GetVolumes()["cache"] = "cache" }), "mount path"},
+		{"root mount", withContainer(func(c *pluginv1.ContainerDependency) { c.GetVolumes()["cache"] = "/" }), "mount path"},
+		{"negative CPUs", withContainer(func(c *pluginv1.ContainerDependency) { c.SetCpus(-1) }), "cpus"},
 	}
 	for _, tt := range tests {
 		m := valid()
@@ -264,5 +308,22 @@ func TestValidateConfig(t *testing.T) {
 	}
 	if err := ValidateConfig(m, `[1]`); err == nil {
 		t.Error("schemaless non-object accepted")
+	}
+}
+
+func TestContainerSecrets(t *testing.T) {
+	c := container("whisper", func(c *pluginv1.ContainerDependency) {
+		c.GetEnv()["TOKEN"] = "${secret:token}:${secret:api-key}"
+	})
+	if got, want := ContainerSecrets(c), []string{"api-key", "token"}; !slices.Equal(got, want) {
+		t.Errorf("ContainerSecrets = %q, want %q", got, want)
+	}
+	m := valid()
+	m.SetContainers([]*pluginv1.ContainerDependency{c})
+	if got, ok := Container(m, "whisper"); !ok || got != c {
+		t.Errorf("Container(whisper) = %v, %v, want the dependency", got, ok)
+	}
+	if _, ok := Container(m, "other"); ok {
+		t.Error("Container(other) found a dependency")
 	}
 }

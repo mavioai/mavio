@@ -236,8 +236,8 @@ The manifest's `containers` lists the dependencies, each with:
 * `image`: a reference with its digest (`repository:tag@sha256:…`); an image without a digest is refused.
 * `port`: the port the service listens on inside the container; `health_path`: an HTTP path answering 2xx when it is ready, else the port accepting connections counts.
 * `command`, `env`: its arguments and environment. A value `${secret:<key>}` is a random secret the server generates once for the dependency; `${address}` is the dependency's own address.
-* `volumes`: named volumes by mount path, such as `{"cache": "/root/.cache"}`.
-* `gpu`: `none`, `optional` or `required` (NVIDIA), and `gpu_image`, the image used with a GPU when it is another; `memory` and `cpus`: the limits of a managed container.
+* `volumes`: mount paths by volume name, such as `{"cache": "/root/.cache"}`.
+* `gpu`: unset for none, `GPU_SUPPORT_OPTIONAL` or `GPU_SUPPORT_REQUIRED` (NVIDIA), and `gpu_image`, by digest too, the image used with a GPU when it is another; `memory_mib` and `cpus`: the limits of a managed container.
 * `required`: whether the plugin cannot do without it. Optional dependencies, such as whisper-asr-webservice beside the plugin's OpenAI-compatible recognizer, stay `unset` until an administrator chooses.
 
 Installing or upgrading a plugin shows its dependencies with their images, so an administrator approves them with the plugin; a new image digest in an upgrade replaces a managed container when the plugin starts.
@@ -252,4 +252,4 @@ Installing or upgrading a plugin shows its dependencies with their images, so an
 * Clients offer managed when an engine is available and otherwise the commands, `docker run` and a Compose service, with the address they lead to filled in ([Architecture §16.4](architecture.md#164-external-dependencies)).
 
 ### 11.4 `plugins/voice`
-whisper-asr-webservice is the first dependency declared: its CPU image, with `gpu: optional` and its GPU image as `gpu_image`, port 9000, its model cache in a volume. When it is not `unset`, the plugin's `whisper-asr` recognizer uses the dependency's address in place of its `url` setting.
+whisper-asr-webservice is the first dependency declared: its CPU image, with `GPU_SUPPORT_OPTIONAL` and its GPU image as `gpu_image`, port 9000, its model cache in a volume. When it is not `unset`, the plugin's `whisper-asr` recognizer uses the dependency's address in place of its `url` setting.

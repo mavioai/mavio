@@ -93,6 +93,9 @@ type Person func(*sql.Selector)
 // PluginConfig is the predicate function for pluginconfig builders.
 type PluginConfig func(*sql.Selector)
 
+// PluginContainer is the predicate function for plugincontainer builders.
+type PluginContainer func(*sql.Selector)
+
 // QualityDefinition is the predicate function for qualitydefinition builders.
 type QualityDefinition func(*sql.Selector)
 

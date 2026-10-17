@@ -12,6 +12,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"maps"
 	"net/url"
 	"os"
 	"path"
@@ -43,6 +44,12 @@ var (
 	scopePattern   = regexp.MustCompile(`^mavio\.[a-z0-9]+\.v[0-9]+\.[A-Z][A-Za-z0-9]*Service(:read)?$`)
 	eventPattern   = regexp.MustCompile(`^(\*|[a-z]+(_[a-z]+)*\.(\*|[a-z]+(_[a-z]+)*))$`)
 	keyPattern     = regexp.MustCompile(`^[a-z][a-z0-9_]*$`)
+	digestPattern  = regexp.MustCompile(`^[^@\s]+@sha256:[0-9a-f]{64}$`)
+	envPattern     = regexp.MustCompile(`^[A-Za-z_][A-Za-z0-9_]*$`)
+	// placeholderPattern matches what may follow "${" in a container
+	// dependency's environment.
+	placeholderPattern = regexp.MustCompile(`^(secret:[a-z0-9]+(-[a-z0-9]+)*|address)\}`)
+	secretPattern      = regexp.MustCompile(`\$\{secret:([a-z0-9]+(?:-[a-z0-9]+)*)\}`)
 )
 
 // Task limits.
@@ -207,6 +214,19 @@ func Validate(m *pluginv1.Manifest) error {
 			add("local metadata file %q must be a file name pattern without /", f)
 		}
 	}
+	names := map[string]bool{}
+	for _, c := range m.GetContainers() {
+		switch {
+		case !taskPattern.MatchString(c.GetName()):
+			add("container name %q must be lowercase letters, digits and dashes", c.GetName())
+		case names[c.GetName()]:
+			add("container name %q is not unique", c.GetName())
+		}
+		names[c.GetName()] = true
+		for _, problem := range containerProblems(c) {
+			add("container %q: %s", c.GetName(), problem)
+		}
+	}
 	if s := m.GetConfigSchema(); s != "" {
 		if _, err := CompileSchema(s); err != nil {
 			add("config_schema: %v", err)
@@ -216,6 +236,82 @@ func Validate(m *pluginv1.Manifest) error {
 		return fmt.Errorf("invalid manifest %s: %s", m.GetId(), strings.Join(problems, "; "))
 	}
 	return nil
+}
+
+// containerProblems lists what is wrong with a container dependency's
+// declaration, apart from its name.
+func containerProblems(c *pluginv1.ContainerDependency) []string {
+	var problems []string
+	add := func(format string, args ...any) { problems = append(problems, fmt.Sprintf(format, args...)) }
+	if !digestPattern.MatchString(c.GetImage()) {
+		add("image %q must name its digest, as repository:tag@sha256:…", c.GetImage())
+	}
+	switch c.GetGpu() {
+	case pluginv1.GpuSupport_GPU_SUPPORT_UNSPECIFIED:
+		if c.GetGpuImage() != "" {
+			add("gpu_image requires gpu")
+		}
+	case pluginv1.GpuSupport_GPU_SUPPORT_OPTIONAL, pluginv1.GpuSupport_GPU_SUPPORT_REQUIRED:
+		if c.GetGpuImage() != "" && !digestPattern.MatchString(c.GetGpuImage()) {
+			add("gpu_image %q must name its digest, as repository:tag@sha256:…", c.GetGpuImage())
+		}
+	default:
+		add("unknown gpu %v", c.GetGpu())
+	}
+	if c.GetPort() == 0 || c.GetPort() > 65535 {
+		add("port must be 1 to 65535")
+	}
+	if p := c.GetHealthPath(); p != "" && !strings.HasPrefix(p, "/") {
+		add("health_path %q must start with /", p)
+	}
+	for _, k := range slices.Sorted(maps.Keys(c.GetEnv())) {
+		if !envPattern.MatchString(k) {
+			add("environment variable %q must be letters, digits and underscores", k)
+		}
+		v := c.GetEnv()[k]
+		for i := strings.Index(v, "${"); i >= 0; i = strings.Index(v, "${") {
+			v = v[i+2:]
+			if !placeholderPattern.MatchString(v) {
+				add("environment variable %q: only ${secret:<key>} and ${address} may follow $", k)
+				break
+			}
+		}
+	}
+	for _, name := range slices.Sorted(maps.Keys(c.GetVolumes())) {
+		target := c.GetVolumes()[name]
+		if !taskPattern.MatchString(name) {
+			add("volume name %q must be lowercase letters, digits and dashes", name)
+		}
+		if !path.IsAbs(target) || path.Clean(target) == "/" {
+			add("volume %q: mount path %q must be absolute and not /", name, target)
+		}
+	}
+	if c.GetCpus() < 0 {
+		add("cpus must not be negative")
+	}
+	return problems
+}
+
+// ContainerSecrets returns the keys of the secrets a container
+// dependency's environment asks for with ${secret:<key>}, sorted.
+func ContainerSecrets(c *pluginv1.ContainerDependency) []string {
+	var keys []string
+	for _, v := range c.GetEnv() {
+		for _, m := range secretPattern.FindAllStringSubmatch(v, -1) {
+			keys = append(keys, m[1])
+		}
+	}
+	slices.Sort(keys)
+	return slices.Compact(keys)
+}
+
+// Container returns the plugin's container dependency of a name.
+func Container(m *pluginv1.Manifest, name string) (*pluginv1.ContainerDependency, bool) {
+	i := slices.IndexFunc(m.GetContainers(), func(c *pluginv1.ContainerDependency) bool { return c.GetName() == name })
+	if i < 0 {
+		return nil, false
+	}
+	return m.GetContainers()[i], true
 }
 
 // HasCapability reports whether the manifest declares c.

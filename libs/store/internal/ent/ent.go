@@ -41,6 +41,7 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/pendingrelease"
 	"github.com/mavioai/mavio/libs/store/internal/ent/person"
 	"github.com/mavioai/mavio/libs/store/internal/ent/pluginconfig"
+	"github.com/mavioai/mavio/libs/store/internal/ent/plugincontainer"
 	"github.com/mavioai/mavio/libs/store/internal/ent/qualitydefinition"
 	"github.com/mavioai/mavio/libs/store/internal/ent/qualityprofile"
 	"github.com/mavioai/mavio/libs/store/internal/ent/releaseprofile"
@@ -147,6 +148,7 @@ func checkColumn(t, c string) error {
 			pendingrelease.Table:            pendingrelease.ValidColumn,
 			person.Table:                    person.ValidColumn,
 			pluginconfig.Table:              pluginconfig.ValidColumn,
+			plugincontainer.Table:           plugincontainer.ValidColumn,
 			qualitydefinition.Table:         qualitydefinition.ValidColumn,
 			qualityprofile.Table:            qualityprofile.ValidColumn,
 			releaseprofile.Table:            releaseprofile.ValidColumn,

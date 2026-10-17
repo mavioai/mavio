@@ -1,0 +1,100 @@
+edition = "2023";
+
+package mavio.plugin.v1;
+
+// ContainerDependency is a service a plugin depends on that runs as a
+// container image, such as whisper-asr-webservice. The server runs it on a
+// container engine (managed) or reaches it at an address an administrator
+// gives (external); the plugin sees only its address.
+message ContainerDependency {
+  // Identifier within the plugin: lowercase letters, digits and dashes.
+  // The container is named mavio-<plugin>-<name>, <plugin> being the last
+  // part of the plugin's ID.
+  string name = 1;
+  // What it is for, shown to administrators.
+  string description = 2;
+  // Image reference with its digest, e.g.
+  // "onerahmet/openai-whisper-asr-webservice:v1.9.1@sha256:…".
+  string image = 3;
+  // TCP port the service listens on in the container.
+  uint32 port = 4;
+  // HTTP path answering 2xx when the service is ready, e.g. "/health";
+  // empty when the port accepting connections is enough.
+  string health_path = 5;
+  // Arguments replacing the image's command; empty keeps it.
+  repeated string command = 6;
+  // Environment variables. A value may hold "${secret:<key>}", a random
+  // secret the server generates once for the dependency, and
+  // "${address}", the dependency's own address.
+  map<string, string> env = 7;
+  // Named volumes by name, each mounted at the path given, e.g.
+  // {"cache": "/root/.cache"}. The volume is mavio-<plugin>-<name>-<volume>.
+  map<string, string> volumes = 8;
+  // Whether the service can use an NVIDIA GPU.
+  GpuSupport gpu = 9;
+  // Image used with a GPU, by digest, when it is another than image.
+  string gpu_image = 10;
+  // Memory limit of a managed container in MiB; 0 for none.
+  uint32 memory_mib = 11;
+  // CPU limit of a managed container in CPUs; 0 for none.
+  double cpus = 12;
+  // Whether the plugin cannot work without it. Optional dependencies stay
+  // unset until an administrator chooses.
+  bool required = 13;
+}
+
+// GpuSupport is whether a container dependency uses a GPU.
+enum GpuSupport {
+  // It uses none.
+  GPU_SUPPORT_UNSPECIFIED = 0;
+  // It runs with or without one.
+  GPU_SUPPORT_OPTIONAL = 1;
+  // It needs one.
+  GPU_SUPPORT_REQUIRED = 2;
+}
+
+// ContainerMode is how a container dependency is reached.
+enum ContainerMode {
+  // An administrator has not chosen.
+  CONTAINER_MODE_UNSPECIFIED = 0;
+  // The server runs it on a container engine.
+  CONTAINER_MODE_MANAGED = 1;
+  // It runs elsewhere, at an address an administrator gave.
+  CONTAINER_MODE_EXTERNAL = 2;
+}
+
+// ContainerState is whether a container dependency can be used.
+enum ContainerState {
+  CONTAINER_STATE_UNSPECIFIED = 0;
+  // Its image is being pulled.
+  CONTAINER_STATE_PULLING = 1;
+  // It started and its health check has not passed yet.
+  CONTAINER_STATE_STARTING = 2;
+  // Its health check passes.
+  CONTAINER_STATE_READY = 3;
+  // Its health check fails.
+  CONTAINER_STATE_UNHEALTHY = 4;
+  // It cannot be reached: unset, managed without a container engine, or
+  // external without an address.
+  CONTAINER_STATE_UNAVAILABLE = 5;
+}
+
+// ContainerStatus is how a container dependency is reached and whether it
+// can be used.
+message ContainerStatus {
+  string name = 1;
+  ContainerMode mode = 2;
+  // Base URL of the service, e.g. "http://127.0.0.1:49153"; empty when it
+  // has none.
+  string address = 3;
+  ContainerState state = 4;
+  // Why it is unhealthy or unavailable.
+  string error = 5;
+}
+
+message ListContainersRequest {}
+
+message ListContainersResponse {
+  // The calling plugin's container dependencies, in manifest order.
+  repeated ContainerStatus containers = 1;
+}

@@ -307,24 +307,25 @@ func (x Category) Number() protoreflect.EnumNumber {
 // Manifest describes a plugin. It is shipped alongside the plugin
 // (manifest.json) and returned by Describe.
 type Manifest struct {
-	state                         protoimpl.MessageState `protogen:"opaque.v1"`
-	xxx_hidden_Id                 *string                `protobuf:"bytes,1,opt,name=id"`
-	xxx_hidden_Name               *string                `protobuf:"bytes,2,opt,name=name"`
-	xxx_hidden_Version            *string                `protobuf:"bytes,3,opt,name=version"`
-	xxx_hidden_Description        *string                `protobuf:"bytes,4,opt,name=description"`
-	xxx_hidden_Author             *string                `protobuf:"bytes,5,opt,name=author"`
-	xxx_hidden_Homepage           *string                `protobuf:"bytes,6,opt,name=homepage"`
-	xxx_hidden_License            *string                `protobuf:"bytes,7,opt,name=license"`
-	xxx_hidden_Runtime            Runtime                `protobuf:"varint,8,opt,name=runtime,enum=mavio.plugin.v1.Runtime"`
-	xxx_hidden_Capabilities       []Capability           `protobuf:"varint,9,rep,packed,name=capabilities,enum=mavio.plugin.v1.Capability"`
-	xxx_hidden_Permissions        *Permissions           `protobuf:"bytes,10,opt,name=permissions"`
-	xxx_hidden_ConfigSchema       *string                `protobuf:"bytes,11,opt,name=config_schema,json=configSchema"`
-	xxx_hidden_ApiVersion         *string                `protobuf:"bytes,12,opt,name=api_version,json=apiVersion"`
-	xxx_hidden_Tasks              *[]*Task               `protobuf:"bytes,13,rep,name=tasks"`
-	xxx_hidden_ConfigPage         *string                `protobuf:"bytes,14,opt,name=config_page,json=configPage"`
-	xxx_hidden_ExternalIdKinds    *[]*ExternalIdKind     `protobuf:"bytes,15,rep,name=external_id_kinds,json=externalIdKinds"`
-	xxx_hidden_LocalMetadataFiles []string               `protobuf:"bytes,16,rep,name=local_metadata_files,json=localMetadataFiles"`
-	xxx_hidden_Category           Category               `protobuf:"varint,17,opt,name=category,enum=mavio.plugin.v1.Category"`
+	state                         protoimpl.MessageState  `protogen:"opaque.v1"`
+	xxx_hidden_Id                 *string                 `protobuf:"bytes,1,opt,name=id"`
+	xxx_hidden_Name               *string                 `protobuf:"bytes,2,opt,name=name"`
+	xxx_hidden_Version            *string                 `protobuf:"bytes,3,opt,name=version"`
+	xxx_hidden_Description        *string                 `protobuf:"bytes,4,opt,name=description"`
+	xxx_hidden_Author             *string                 `protobuf:"bytes,5,opt,name=author"`
+	xxx_hidden_Homepage           *string                 `protobuf:"bytes,6,opt,name=homepage"`
+	xxx_hidden_License            *string                 `protobuf:"bytes,7,opt,name=license"`
+	xxx_hidden_Runtime            Runtime                 `protobuf:"varint,8,opt,name=runtime,enum=mavio.plugin.v1.Runtime"`
+	xxx_hidden_Capabilities       []Capability            `protobuf:"varint,9,rep,packed,name=capabilities,enum=mavio.plugin.v1.Capability"`
+	xxx_hidden_Permissions        *Permissions            `protobuf:"bytes,10,opt,name=permissions"`
+	xxx_hidden_ConfigSchema       *string                 `protobuf:"bytes,11,opt,name=config_schema,json=configSchema"`
+	xxx_hidden_ApiVersion         *string                 `protobuf:"bytes,12,opt,name=api_version,json=apiVersion"`
+	xxx_hidden_Tasks              *[]*Task                `protobuf:"bytes,13,rep,name=tasks"`
+	xxx_hidden_ConfigPage         *string                 `protobuf:"bytes,14,opt,name=config_page,json=configPage"`
+	xxx_hidden_ExternalIdKinds    *[]*ExternalIdKind      `protobuf:"bytes,15,rep,name=external_id_kinds,json=externalIdKinds"`
+	xxx_hidden_LocalMetadataFiles []string                `protobuf:"bytes,16,rep,name=local_metadata_files,json=localMetadataFiles"`
+	xxx_hidden_Category           Category                `protobuf:"varint,17,opt,name=category,enum=mavio.plugin.v1.Category"`
+	xxx_hidden_Containers         *[]*ContainerDependency `protobuf:"bytes,18,rep,name=containers"`
 	XXX_raceDetectHookData        protoimpl.RaceDetectHookData
 	XXX_presence                  [1]uint32
 	unknownFields                 protoimpl.UnknownFields
@@ -513,44 +514,53 @@ func (x *Manifest) GetCategory() Category {
 	return Category_CATEGORY_UNSPECIFIED
 }
 
+func (x *Manifest) GetContainers() []*ContainerDependency {
+	if x != nil {
+		if x.xxx_hidden_Containers != nil {
+			return *x.xxx_hidden_Containers
+		}
+	}
+	return nil
+}
+
 func (x *Manifest) SetId(v string) {
 	x.xxx_hidden_Id = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 17)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 18)
 }
 
 func (x *Manifest) SetName(v string) {
 	x.xxx_hidden_Name = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 17)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 18)
 }
 
 func (x *Manifest) SetVersion(v string) {
 	x.xxx_hidden_Version = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 17)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 18)
 }
 
 func (x *Manifest) SetDescription(v string) {
 	x.xxx_hidden_Description = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 17)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 18)
 }
 
 func (x *Manifest) SetAuthor(v string) {
 	x.xxx_hidden_Author = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 17)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 18)
 }
 
 func (x *Manifest) SetHomepage(v string) {
 	x.xxx_hidden_Homepage = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 17)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 18)
 }
 
 func (x *Manifest) SetLicense(v string) {
 	x.xxx_hidden_License = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 17)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 18)
 }
 
 func (x *Manifest) SetRuntime(v Runtime) {
 	x.xxx_hidden_Runtime = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 17)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 18)
 }
 
 func (x *Manifest) SetCapabilities(v []Capability) {
@@ -563,12 +573,12 @@ func (x *Manifest) SetPermissions(v *Permissions) {
 
 func (x *Manifest) SetConfigSchema(v string) {
 	x.xxx_hidden_ConfigSchema = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 17)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 18)
 }
 
 func (x *Manifest) SetApiVersion(v string) {
 	x.xxx_hidden_ApiVersion = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 11, 17)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 11, 18)
 }
 
 func (x *Manifest) SetTasks(v []*Task) {
@@ -577,7 +587,7 @@ func (x *Manifest) SetTasks(v []*Task) {
 
 func (x *Manifest) SetConfigPage(v string) {
 	x.xxx_hidden_ConfigPage = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 13, 17)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 13, 18)
 }
 
 func (x *Manifest) SetExternalIdKinds(v []*ExternalIdKind) {
@@ -590,7 +600,11 @@ func (x *Manifest) SetLocalMetadataFiles(v []string) {
 
 func (x *Manifest) SetCategory(v Category) {
 	x.xxx_hidden_Category = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 16, 17)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 16, 18)
+}
+
+func (x *Manifest) SetContainers(v []*ContainerDependency) {
+	x.xxx_hidden_Containers = &v
 }
 
 func (x *Manifest) HasId() bool {
@@ -782,6 +796,8 @@ type Manifest_builder struct {
 	LocalMetadataFiles []string
 	// What the plugin is for.
 	Category *Category
+	// Services the plugin depends on that run as container images.
+	Containers []*ContainerDependency
 }
 
 func (b0 Manifest_builder) Build() *Manifest {
@@ -789,58 +805,59 @@ func (b0 Manifest_builder) Build() *Manifest {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Id != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 17)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 18)
 		x.xxx_hidden_Id = b.Id
 	}
 	if b.Name != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 17)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 18)
 		x.xxx_hidden_Name = b.Name
 	}
 	if b.Version != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 17)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 18)
 		x.xxx_hidden_Version = b.Version
 	}
 	if b.Description != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 17)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 18)
 		x.xxx_hidden_Description = b.Description
 	}
 	if b.Author != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 17)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 18)
 		x.xxx_hidden_Author = b.Author
 	}
 	if b.Homepage != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 17)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 18)
 		x.xxx_hidden_Homepage = b.Homepage
 	}
 	if b.License != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 17)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 18)
 		x.xxx_hidden_License = b.License
 	}
 	if b.Runtime != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 17)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 18)
 		x.xxx_hidden_Runtime = *b.Runtime
 	}
 	x.xxx_hidden_Capabilities = b.Capabilities
 	x.xxx_hidden_Permissions = b.Permissions
 	if b.ConfigSchema != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 17)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 18)
 		x.xxx_hidden_ConfigSchema = b.ConfigSchema
 	}
 	if b.ApiVersion != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 11, 17)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 11, 18)
 		x.xxx_hidden_ApiVersion = b.ApiVersion
 	}
 	x.xxx_hidden_Tasks = &b.Tasks
 	if b.ConfigPage != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 13, 17)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 13, 18)
 		x.xxx_hidden_ConfigPage = b.ConfigPage
 	}
 	x.xxx_hidden_ExternalIdKinds = &b.ExternalIdKinds
 	x.xxx_hidden_LocalMetadataFiles = b.LocalMetadataFiles
 	if b.Category != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 16, 17)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 16, 18)
 		x.xxx_hidden_Category = *b.Category
 	}
+	x.xxx_hidden_Containers = &b.Containers
 	return m0
 }
 
@@ -1631,7 +1648,7 @@ var File_mavio_plugin_v1_plugin_proto protoreflect.FileDescriptor
 
 const file_mavio_plugin_v1_plugin_proto_rawDesc = "" +
 	"\n" +
-	"\x1cmavio/plugin/v1/plugin.proto\x12\x0fmavio.plugin.v1\x1a\x1emavio/plugin/v1/metadata.proto\x1a\x1amavio/plugin/v1/task.proto\"\xb7\x05\n" +
+	"\x1cmavio/plugin/v1/plugin.proto\x12\x0fmavio.plugin.v1\x1a\x1fmavio/plugin/v1/container.proto\x1a\x1emavio/plugin/v1/metadata.proto\x1a\x1amavio/plugin/v1/task.proto\"\xfd\x05\n" +
 	"\bManifest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x18\n" +
@@ -1652,7 +1669,10 @@ const file_mavio_plugin_v1_plugin_proto_rawDesc = "" +
 	"configPage\x12K\n" +
 	"\x11external_id_kinds\x18\x0f \x03(\v2\x1f.mavio.plugin.v1.ExternalIdKindR\x0fexternalIdKinds\x120\n" +
 	"\x14local_metadata_files\x18\x10 \x03(\tR\x12localMetadataFiles\x125\n" +
-	"\bcategory\x18\x11 \x01(\x0e2\x19.mavio.plugin.v1.CategoryR\bcategory\"\x96\x01\n" +
+	"\bcategory\x18\x11 \x01(\x0e2\x19.mavio.plugin.v1.CategoryR\bcategory\x12D\n" +
+	"\n" +
+	"containers\x18\x12 \x03(\v2$.mavio.plugin.v1.ContainerDependencyR\n" +
+	"containers\"\x96\x01\n" +
 	"\x0eExternalIdKind\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12;\n" +
@@ -1739,22 +1759,23 @@ const file_mavio_plugin_v1_plugin_proto_rawDesc = "" +
 var file_mavio_plugin_v1_plugin_proto_enumTypes = make([]protoimpl.EnumInfo, 3)
 var file_mavio_plugin_v1_plugin_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
 var file_mavio_plugin_v1_plugin_proto_goTypes = []any{
-	(Runtime)(0),              // 0: mavio.plugin.v1.Runtime
-	(Capability)(0),           // 1: mavio.plugin.v1.Capability
-	(Category)(0),             // 2: mavio.plugin.v1.Category
-	(*Manifest)(nil),          // 3: mavio.plugin.v1.Manifest
-	(*ExternalIdKind)(nil),    // 4: mavio.plugin.v1.ExternalIdKind
-	(*Permissions)(nil),       // 5: mavio.plugin.v1.Permissions
-	(*DescribeRequest)(nil),   // 6: mavio.plugin.v1.DescribeRequest
-	(*DescribeResponse)(nil),  // 7: mavio.plugin.v1.DescribeResponse
-	(*ConfigureRequest)(nil),  // 8: mavio.plugin.v1.ConfigureRequest
-	(*ConfigureResponse)(nil), // 9: mavio.plugin.v1.ConfigureResponse
-	(*HealthRequest)(nil),     // 10: mavio.plugin.v1.HealthRequest
-	(*HealthResponse)(nil),    // 11: mavio.plugin.v1.HealthResponse
-	(*ShutdownRequest)(nil),   // 12: mavio.plugin.v1.ShutdownRequest
-	(*ShutdownResponse)(nil),  // 13: mavio.plugin.v1.ShutdownResponse
-	(*Task)(nil),              // 14: mavio.plugin.v1.Task
-	(MediaKind)(0),            // 15: mavio.plugin.v1.MediaKind
+	(Runtime)(0),                // 0: mavio.plugin.v1.Runtime
+	(Capability)(0),             // 1: mavio.plugin.v1.Capability
+	(Category)(0),               // 2: mavio.plugin.v1.Category
+	(*Manifest)(nil),            // 3: mavio.plugin.v1.Manifest
+	(*ExternalIdKind)(nil),      // 4: mavio.plugin.v1.ExternalIdKind
+	(*Permissions)(nil),         // 5: mavio.plugin.v1.Permissions
+	(*DescribeRequest)(nil),     // 6: mavio.plugin.v1.DescribeRequest
+	(*DescribeResponse)(nil),    // 7: mavio.plugin.v1.DescribeResponse
+	(*ConfigureRequest)(nil),    // 8: mavio.plugin.v1.ConfigureRequest
+	(*ConfigureResponse)(nil),   // 9: mavio.plugin.v1.ConfigureResponse
+	(*HealthRequest)(nil),       // 10: mavio.plugin.v1.HealthRequest
+	(*HealthResponse)(nil),      // 11: mavio.plugin.v1.HealthResponse
+	(*ShutdownRequest)(nil),     // 12: mavio.plugin.v1.ShutdownRequest
+	(*ShutdownResponse)(nil),    // 13: mavio.plugin.v1.ShutdownResponse
+	(*Task)(nil),                // 14: mavio.plugin.v1.Task
+	(*ContainerDependency)(nil), // 15: mavio.plugin.v1.ContainerDependency
+	(MediaKind)(0),              // 16: mavio.plugin.v1.MediaKind
 }
 var file_mavio_plugin_v1_plugin_proto_depIdxs = []int32{
 	0,  // 0: mavio.plugin.v1.Manifest.runtime:type_name -> mavio.plugin.v1.Runtime
@@ -1763,21 +1784,22 @@ var file_mavio_plugin_v1_plugin_proto_depIdxs = []int32{
 	14, // 3: mavio.plugin.v1.Manifest.tasks:type_name -> mavio.plugin.v1.Task
 	4,  // 4: mavio.plugin.v1.Manifest.external_id_kinds:type_name -> mavio.plugin.v1.ExternalIdKind
 	2,  // 5: mavio.plugin.v1.Manifest.category:type_name -> mavio.plugin.v1.Category
-	15, // 6: mavio.plugin.v1.ExternalIdKind.media_kinds:type_name -> mavio.plugin.v1.MediaKind
-	3,  // 7: mavio.plugin.v1.DescribeResponse.manifest:type_name -> mavio.plugin.v1.Manifest
-	6,  // 8: mavio.plugin.v1.PluginService.Describe:input_type -> mavio.plugin.v1.DescribeRequest
-	8,  // 9: mavio.plugin.v1.PluginService.Configure:input_type -> mavio.plugin.v1.ConfigureRequest
-	10, // 10: mavio.plugin.v1.PluginService.Health:input_type -> mavio.plugin.v1.HealthRequest
-	12, // 11: mavio.plugin.v1.PluginService.Shutdown:input_type -> mavio.plugin.v1.ShutdownRequest
-	7,  // 12: mavio.plugin.v1.PluginService.Describe:output_type -> mavio.plugin.v1.DescribeResponse
-	9,  // 13: mavio.plugin.v1.PluginService.Configure:output_type -> mavio.plugin.v1.ConfigureResponse
-	11, // 14: mavio.plugin.v1.PluginService.Health:output_type -> mavio.plugin.v1.HealthResponse
-	13, // 15: mavio.plugin.v1.PluginService.Shutdown:output_type -> mavio.plugin.v1.ShutdownResponse
-	12, // [12:16] is the sub-list for method output_type
-	8,  // [8:12] is the sub-list for method input_type
-	8,  // [8:8] is the sub-list for extension type_name
-	8,  // [8:8] is the sub-list for extension extendee
-	0,  // [0:8] is the sub-list for field type_name
+	15, // 6: mavio.plugin.v1.Manifest.containers:type_name -> mavio.plugin.v1.ContainerDependency
+	16, // 7: mavio.plugin.v1.ExternalIdKind.media_kinds:type_name -> mavio.plugin.v1.MediaKind
+	3,  // 8: mavio.plugin.v1.DescribeResponse.manifest:type_name -> mavio.plugin.v1.Manifest
+	6,  // 9: mavio.plugin.v1.PluginService.Describe:input_type -> mavio.plugin.v1.DescribeRequest
+	8,  // 10: mavio.plugin.v1.PluginService.Configure:input_type -> mavio.plugin.v1.ConfigureRequest
+	10, // 11: mavio.plugin.v1.PluginService.Health:input_type -> mavio.plugin.v1.HealthRequest
+	12, // 12: mavio.plugin.v1.PluginService.Shutdown:input_type -> mavio.plugin.v1.ShutdownRequest
+	7,  // 13: mavio.plugin.v1.PluginService.Describe:output_type -> mavio.plugin.v1.DescribeResponse
+	9,  // 14: mavio.plugin.v1.PluginService.Configure:output_type -> mavio.plugin.v1.ConfigureResponse
+	11, // 15: mavio.plugin.v1.PluginService.Health:output_type -> mavio.plugin.v1.HealthResponse
+	13, // 16: mavio.plugin.v1.PluginService.Shutdown:output_type -> mavio.plugin.v1.ShutdownResponse
+	13, // [13:17] is the sub-list for method output_type
+	9,  // [9:13] is the sub-list for method input_type
+	9,  // [9:9] is the sub-list for extension type_name
+	9,  // [9:9] is the sub-list for extension extendee
+	0,  // [0:9] is the sub-list for field type_name
 }
 
 func init() { file_mavio_plugin_v1_plugin_proto_init() }
@@ -1785,6 +1807,7 @@ func file_mavio_plugin_v1_plugin_proto_init() {
 	if File_mavio_plugin_v1_plugin_proto != nil {
 		return
 	}
+	file_mavio_plugin_v1_container_proto_init()
 	file_mavio_plugin_v1_metadata_proto_init()
 	file_mavio_plugin_v1_task_proto_init()
 	type x struct{}

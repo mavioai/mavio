@@ -132,6 +132,38 @@ pub use self::__buffa::view::SetPluginEnabledResponseView;
 #[doc(inline)]
 pub use self::__buffa::view::SetPluginEnabledResponseOwnedView;
 #[doc(inline)]
+pub use self::__buffa::view::ContainerRuntimeView;
+#[doc(inline)]
+pub use self::__buffa::view::ContainerRuntimeOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::GetContainerRuntimeRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::GetContainerRuntimeRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::GetContainerRuntimeResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::GetContainerRuntimeResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::PluginContainerView;
+#[doc(inline)]
+pub use self::__buffa::view::PluginContainerOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ListPluginContainersRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::ListPluginContainersRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ListPluginContainersResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::ListPluginContainersResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::SetPluginContainerRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::SetPluginContainerRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::SetPluginContainerResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::SetPluginContainerResponseOwnedView;
+#[doc(inline)]
 pub use self::__buffa::view::ListAiProvidersRequestView;
 #[doc(inline)]
 pub use self::__buffa::view::ListAiProvidersRequestOwnedView;

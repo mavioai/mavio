@@ -13,8 +13,9 @@ import (
 // HostService implements mavio.plugin.v1.HostService for plugins' host
 // API requests.
 type HostService struct {
-	devices DeviceController
-	info    func() ServerInfo
+	devices    DeviceController
+	info       func() ServerInfo
+	containers ContainerDependencies
 }
 
 // ServerInfo is how the server is reached.
@@ -25,10 +26,11 @@ type ServerInfo struct {
 
 var _ pluginv1connect.HostServiceHandler = (*HostService)(nil)
 
-// NewHostService returns a HostService keeping devices in d, which may be
-// nil, and telling plugins how the server is reached with info.
-func NewHostService(d DeviceController, info func() ServerInfo) *HostService {
-	return &HostService{devices: d, info: info}
+// NewHostService returns a HostService keeping devices in d, telling
+// plugins how the server is reached with info and how their container
+// dependencies are reached with c; d and c may be nil.
+func NewHostService(d DeviceController, info func() ServerInfo, c ContainerDependencies) *HostService {
+	return &HostService{devices: d, info: info, containers: c}
 }
 
 // GetServerInfo tells how the server is reached.
@@ -66,4 +68,28 @@ func (s *HostService) SetDevices(ctx context.Context, req *pluginv1.SetDevicesRe
 		return nil, err
 	}
 	return &pluginv1.SetDevicesResponse{}, nil
+}
+
+// ListContainers tells the calling plugin how its container dependencies
+// are reached.
+func (s *HostService) ListContainers(ctx context.Context, _ *pluginv1.ListContainersRequest) (*pluginv1.ListContainersResponse, error) {
+	p, err := principal(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if p.Plugin == "" {
+		return nil, connect.NewError(connect.CodePermissionDenied, errors.New("only plugins have container dependencies"))
+	}
+	if s.containers == nil {
+		return &pluginv1.ListContainersResponse{}, nil
+	}
+	deps, err := s.containers.List(ctx, p.Plugin)
+	if err != nil {
+		return nil, connectError(ctx, err)
+	}
+	out := make([]*pluginv1.ContainerStatus, len(deps))
+	for i, d := range deps {
+		out[i] = d.Status
+	}
+	return pluginv1.ListContainersResponse_builder{Containers: out}.Build(), nil
 }

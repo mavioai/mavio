@@ -6,6 +6,7 @@ edition = "2023";
 // the capability services it declares in its manifest.
 package mavio.plugin.v1;
 
+import "mavio/plugin/v1/container.proto";
 import "mavio/plugin/v1/metadata.proto";
 import "mavio/plugin/v1/task.proto";
 
@@ -159,6 +160,8 @@ message Manifest {
   repeated string local_metadata_files = 16;
   // What the plugin is for.
   Category category = 17;
+  // Services the plugin depends on that run as container images.
+  repeated ContainerDependency containers = 18;
 }
 
 // ExternalIdKind is a kind of external ID, e.g. the ID of a movie on a

@@ -40,6 +40,9 @@ const (
 	// HostServiceGetServerInfoProcedure is the fully-qualified name of the HostService's GetServerInfo
 	// RPC.
 	HostServiceGetServerInfoProcedure = "/mavio.plugin.v1.HostService/GetServerInfo"
+	// HostServiceListContainersProcedure is the fully-qualified name of the HostService's
+	// ListContainers RPC.
+	HostServiceListContainersProcedure = "/mavio.plugin.v1.HostService/ListContainers"
 	// DeviceControllerServiceSendCommandProcedure is the fully-qualified name of the
 	// DeviceControllerService's SendCommand RPC.
 	DeviceControllerServiceSendCommandProcedure = "/mavio.plugin.v1.DeviceControllerService/SendCommand"
@@ -55,6 +58,10 @@ type HostServiceClient interface {
 	// GetServerInfo tells how the server is reached, such as for URLs given
 	// to devices on the local network.
 	GetServerInfo(context.Context, *v1.GetServerInfoRequest) (*v1.GetServerInfoResponse, error)
+	// ListContainers tells the calling plugin how its container
+	// dependencies are reached and whether they can be used. The server
+	// configures the plugin again when an address changes.
+	ListContainers(context.Context, *v1.ListContainersRequest) (*v1.ListContainersResponse, error)
 }
 
 // NewHostServiceClient constructs a client for the mavio.plugin.v1.HostService service. By default,
@@ -81,13 +88,21 @@ func NewHostServiceClient(httpClient connect.HTTPClient, baseURL string, opts ..
 			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
 			connect.WithClientOptions(opts...),
 		),
+		listContainers: connect.NewClient[v1.ListContainersRequest, v1.ListContainersResponse](
+			httpClient,
+			baseURL+HostServiceListContainersProcedure,
+			connect.WithSchema(hostServiceMethods.ByName("ListContainers")),
+			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
 // hostServiceClient implements HostServiceClient.
 type hostServiceClient struct {
-	setDevices    *connect.Client[v1.SetDevicesRequest, v1.SetDevicesResponse]
-	getServerInfo *connect.Client[v1.GetServerInfoRequest, v1.GetServerInfoResponse]
+	setDevices     *connect.Client[v1.SetDevicesRequest, v1.SetDevicesResponse]
+	getServerInfo  *connect.Client[v1.GetServerInfoRequest, v1.GetServerInfoResponse]
+	listContainers *connect.Client[v1.ListContainersRequest, v1.ListContainersResponse]
 }
 
 // SetDevices calls mavio.plugin.v1.HostService.SetDevices.
@@ -108,6 +123,15 @@ func (c *hostServiceClient) GetServerInfo(ctx context.Context, req *v1.GetServer
 	return nil, err
 }
 
+// ListContainers calls mavio.plugin.v1.HostService.ListContainers.
+func (c *hostServiceClient) ListContainers(ctx context.Context, req *v1.ListContainersRequest) (*v1.ListContainersResponse, error) {
+	response, err := c.listContainers.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
 // HostServiceHandler is an implementation of the mavio.plugin.v1.HostService service.
 type HostServiceHandler interface {
 	// SetDevices replaces the remote devices of the calling plugin, which
@@ -118,6 +142,10 @@ type HostServiceHandler interface {
 	// GetServerInfo tells how the server is reached, such as for URLs given
 	// to devices on the local network.
 	GetServerInfo(context.Context, *v1.GetServerInfoRequest) (*v1.GetServerInfoResponse, error)
+	// ListContainers tells the calling plugin how its container
+	// dependencies are reached and whether they can be used. The server
+	// configures the plugin again when an address changes.
+	ListContainers(context.Context, *v1.ListContainersRequest) (*v1.ListContainersResponse, error)
 }
 
 // NewHostServiceHandler builds an HTTP handler from the service implementation. It returns the path
@@ -140,12 +168,21 @@ func NewHostServiceHandler(svc HostServiceHandler, opts ...connect.HandlerOption
 		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
 		connect.WithHandlerOptions(opts...),
 	)
+	hostServiceListContainersHandler := connect.NewUnaryHandlerSimple(
+		HostServiceListContainersProcedure,
+		svc.ListContainers,
+		connect.WithSchema(hostServiceMethods.ByName("ListContainers")),
+		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/mavio.plugin.v1.HostService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case HostServiceSetDevicesProcedure:
 			hostServiceSetDevicesHandler.ServeHTTP(w, r)
 		case HostServiceGetServerInfoProcedure:
 			hostServiceGetServerInfoHandler.ServeHTTP(w, r)
+		case HostServiceListContainersProcedure:
+			hostServiceListContainersHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -161,6 +198,10 @@ func (UnimplementedHostServiceHandler) SetDevices(context.Context, *v1.SetDevice
 
 func (UnimplementedHostServiceHandler) GetServerInfo(context.Context, *v1.GetServerInfoRequest) (*v1.GetServerInfoResponse, error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.plugin.v1.HostService.GetServerInfo is not implemented"))
+}
+
+func (UnimplementedHostServiceHandler) ListContainers(context.Context, *v1.ListContainersRequest) (*v1.ListContainersResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.plugin.v1.HostService.ListContainers is not implemented"))
 }
 
 // DeviceControllerServiceClient is a client for the mavio.plugin.v1.DeviceControllerService

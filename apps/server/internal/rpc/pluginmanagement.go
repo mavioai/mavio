@@ -10,8 +10,10 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"github.com/mavioai/mavio/apps/server/internal/activity"
+	"github.com/mavioai/mavio/apps/server/internal/dependencies"
 	"github.com/mavioai/mavio/apps/server/internal/events"
 	"github.com/mavioai/mavio/apps/server/internal/plugins"
+	"github.com/mavioai/mavio/libs/containers"
 	"github.com/mavioai/mavio/libs/core"
 	pluginv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1/pluginv1connect"
@@ -29,6 +31,16 @@ type PluginManagementService struct {
 	Hub *events.Hub
 	// Activity records administrators' changes; nil records none.
 	Activity *activity.Log
+	// Containers keeps plugins' container dependencies; nil means none.
+	Containers ContainerDependencies
+}
+
+// ContainerDependencies keeps plugins' container dependencies;
+// *dependencies.Service implements it.
+type ContainerDependencies interface {
+	Runtime(ctx context.Context, detect bool) (containers.Runtime, error)
+	List(ctx context.Context, pluginID string) ([]dependencies.Dependency, error)
+	Set(ctx context.Context, pluginID, name string, mode core.ContainerMode, address string, useGPU bool) (dependencies.Dependency, error)
 }
 
 // PluginManager runs the server's plugins; *plugins.Manager implements it.
@@ -216,4 +228,92 @@ func pluginToProto(p plugins.Info) *systemv1.Plugin {
 		out.SetError(p.Err.Error())
 	}
 	return out
+}
+
+// GetContainerRuntime tells whether a container engine is available.
+func (s *PluginManagementService) GetContainerRuntime(ctx context.Context, req *systemv1.GetContainerRuntimeRequest) (*systemv1.GetContainerRuntimeResponse, error) {
+	if _, err := admin(ctx); err != nil {
+		return nil, err
+	}
+	out := &systemv1.ContainerRuntime{}
+	if s.Containers == nil {
+		out.SetReason("the server runs no container dependencies")
+		return systemv1.GetContainerRuntimeResponse_builder{Runtime: out}.Build(), nil
+	}
+	rt, err := s.Containers.Runtime(ctx, req.GetDetect())
+	out.SetInContainer(rt.InContainer)
+	if err != nil {
+		if ctx.Err() != nil {
+			return nil, connectError(ctx, err)
+		}
+		out.SetReason(err.Error())
+		return systemv1.GetContainerRuntimeResponse_builder{Runtime: out}.Build(), nil
+	}
+	out.SetAvailable(true)
+	out.SetEndpoint(rt.Client.Endpoint().String())
+	out.SetEngine(rt.Version.Engine)
+	out.SetVersion(rt.Version.Version)
+	out.SetApiVersion(rt.APIVersion)
+	out.SetRootless(rt.Rootless)
+	out.SetOnHost(rt.OnHost())
+	return systemv1.GetContainerRuntimeResponse_builder{Runtime: out}.Build(), nil
+}
+
+// ListPluginContainers lists a plugin's container dependencies.
+func (s *PluginManagementService) ListPluginContainers(ctx context.Context, req *systemv1.ListPluginContainersRequest) (*systemv1.ListPluginContainersResponse, error) {
+	if _, err := admin(ctx); err != nil {
+		return nil, err
+	}
+	if s.Containers == nil {
+		return nil, connectError(ctx, fmt.Errorf("plugin %s: %w", req.GetPluginId(), core.ErrNotFound))
+	}
+	deps, err := s.Containers.List(ctx, req.GetPluginId())
+	if err != nil {
+		return nil, connectError(ctx, err)
+	}
+	out := make([]*systemv1.PluginContainer, len(deps))
+	for i, d := range deps {
+		out[i] = pluginContainerToProto(d)
+	}
+	return systemv1.ListPluginContainersResponse_builder{Containers: out}.Build(), nil
+}
+
+var containerModes = map[pluginv1.ContainerMode]core.ContainerMode{
+	pluginv1.ContainerMode_CONTAINER_MODE_UNSPECIFIED: core.ContainerUnset,
+	pluginv1.ContainerMode_CONTAINER_MODE_MANAGED:     core.ContainerManaged,
+	pluginv1.ContainerMode_CONTAINER_MODE_EXTERNAL:    core.ContainerExternal,
+}
+
+// SetPluginContainer sets how a container dependency is reached.
+func (s *PluginManagementService) SetPluginContainer(ctx context.Context, req *systemv1.SetPluginContainerRequest) (*systemv1.SetPluginContainerResponse, error) {
+	if _, err := admin(ctx); err != nil {
+		return nil, err
+	}
+	if s.Containers == nil {
+		return nil, connectError(ctx, fmt.Errorf("plugin %s: %w", req.GetPluginId(), core.ErrNotFound))
+	}
+	mode, ok := containerModes[req.GetMode()]
+	if !ok {
+		return nil, connect.NewError(connect.CodeInvalidArgument, fmt.Errorf("unknown container mode %v", req.GetMode()))
+	}
+	d, err := s.Containers.Set(ctx, req.GetPluginId(), req.GetName(), mode, req.GetAddress(), req.GetUseGpu())
+	switch {
+	case errors.Is(err, dependencies.ErrNoEngine):
+		return nil, connect.NewError(connect.CodeFailedPrecondition, err)
+	case errors.Is(err, errors.ErrUnsupported):
+		return nil, connect.NewError(connect.CodeUnimplemented, err)
+	case err != nil:
+		return nil, connectError(ctx, err)
+	}
+	p, _ := principal(ctx)
+	s.Activity.Record(ctx, core.Activity{
+		Type: "plugin.container", UserID: p.User.ID,
+		Title:      fmt.Sprintf("%s set container %s of plugin %s to %s", p.User.Name, req.GetName(), req.GetPluginId(), mode),
+		Attributes: map[string]string{"plugin": req.GetPluginId(), "container": req.GetName(), "mode": string(mode)},
+	})
+	return systemv1.SetPluginContainerResponse_builder{Container: pluginContainerToProto(d)}.Build(), nil
+}
+
+func pluginContainerToProto(d dependencies.Dependency) *systemv1.PluginContainer {
+	return systemv1.PluginContainer_builder{Dependency: d.Spec, Status: d.Status, UseGpu: new(d.Kept.UseGPU)}.Build()
 }

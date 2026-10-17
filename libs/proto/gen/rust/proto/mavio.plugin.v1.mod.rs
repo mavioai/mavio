@@ -4,6 +4,7 @@ include!("mavio.plugin.v1.metadata.rs");
 include!("mavio.plugin.v1.discovery.rs");
 include!("mavio.plugin.v1.ratings.rs");
 include!("mavio.plugin.v1.ai.rs");
+include!("mavio.plugin.v1.container.rs");
 include!("mavio.plugin.v1.device.rs");
 include!("mavio.plugin.v1.settings.rs");
 include!("mavio.plugin.v1.indexer.rs");
@@ -47,6 +48,7 @@ pub mod __buffa {
         include!("mavio.plugin.v1.discovery.__view.rs");
         include!("mavio.plugin.v1.ratings.__view.rs");
         include!("mavio.plugin.v1.ai.__view.rs");
+        include!("mavio.plugin.v1.container.__view.rs");
         include!("mavio.plugin.v1.device.__view.rs");
         include!("mavio.plugin.v1.settings.__view.rs");
         include!("mavio.plugin.v1.indexer.__view.rs");
@@ -473,6 +475,22 @@ pub use self::__buffa::view::DeleteAgentMemoriesRequestOwnedView;
 pub use self::__buffa::view::DeleteAgentMemoriesResponseView;
 #[doc(inline)]
 pub use self::__buffa::view::DeleteAgentMemoriesResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ContainerDependencyView;
+#[doc(inline)]
+pub use self::__buffa::view::ContainerDependencyOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ContainerStatusView;
+#[doc(inline)]
+pub use self::__buffa::view::ContainerStatusOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ListContainersRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::ListContainersRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ListContainersResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::ListContainersResponseOwnedView;
 #[doc(inline)]
 pub use self::__buffa::view::DeviceView;
 #[doc(inline)]

@@ -16622,6 +16622,156 @@
         ],
         "description": "Category is what a plugin is for, by which clients group plugins."
       },
+      "mavio.plugin.v1.ContainerDependency": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "name",
+            "description": "Identifier within the plugin: lowercase letters, digits and dashes.\n The container is named mavio-\u003cplugin\u003e-\u003cname\u003e, \u003cplugin\u003e being the last\n part of the plugin's ID."
+          },
+          "description": {
+            "type": "string",
+            "title": "description",
+            "description": "What it is for, shown to administrators."
+          },
+          "image": {
+            "type": "string",
+            "title": "image",
+            "description": "Image reference with its digest, e.g.\n \"onerahmet/openai-whisper-asr-webservice:v1.9.1@sha256:…\"."
+          },
+          "port": {
+            "type": "integer",
+            "title": "port",
+            "description": "TCP port the service listens on in the container."
+          },
+          "healthPath": {
+            "type": "string",
+            "title": "health_path",
+            "description": "HTTP path answering 2xx when the service is ready, e.g. \"/health\";\n empty when the port accepting connections is enough."
+          },
+          "command": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "command",
+            "description": "Arguments replacing the image's command; empty keeps it."
+          },
+          "env": {
+            "type": "object",
+            "title": "env",
+            "additionalProperties": {
+              "type": "string",
+              "title": "value"
+            },
+            "description": "Environment variables. A value may hold \"${secret:\u003ckey\u003e}\", a random\n secret the server generates once for the dependency, and\n \"${address}\", the dependency's own address."
+          },
+          "volumes": {
+            "type": "object",
+            "title": "volumes",
+            "additionalProperties": {
+              "type": "string",
+              "title": "value"
+            },
+            "description": "Named volumes by name, each mounted at the path given, e.g.\n {\"cache\": \"/root/.cache\"}. The volume is mavio-\u003cplugin\u003e-\u003cname\u003e-\u003cvolume\u003e."
+          },
+          "gpu": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.plugin.v1.GpuSupport"
+              }
+            ],
+            "title": "gpu",
+            "description": "Whether the service can use an NVIDIA GPU."
+          },
+          "gpuImage": {
+            "type": "string",
+            "title": "gpu_image",
+            "description": "Image used with a GPU, by digest, when it is another than image."
+          },
+          "memoryMib": {
+            "type": "integer",
+            "title": "memory_mib",
+            "description": "Memory limit of a managed container in MiB; 0 for none."
+          },
+          "cpus": {
+            "type": "number",
+            "title": "cpus",
+            "format": "double",
+            "description": "CPU limit of a managed container in CPUs; 0 for none."
+          },
+          "required": {
+            "type": "boolean",
+            "title": "required",
+            "description": "Whether the plugin cannot work without it. Optional dependencies stay\n unset until an administrator chooses."
+          }
+        },
+        "title": "ContainerDependency",
+        "additionalProperties": false,
+        "description": "ContainerDependency is a service a plugin depends on that runs as a\n container image, such as whisper-asr-webservice. The server runs it on a\n container engine (managed) or reaches it at an address an administrator\n gives (external); the plugin sees only its address."
+      },
+      "mavio.plugin.v1.ContainerMode": {
+        "type": "string",
+        "title": "ContainerMode",
+        "enum": [
+          "CONTAINER_MODE_UNSPECIFIED",
+          "CONTAINER_MODE_MANAGED",
+          "CONTAINER_MODE_EXTERNAL"
+        ],
+        "description": "ContainerMode is how a container dependency is reached."
+      },
+      "mavio.plugin.v1.ContainerState": {
+        "type": "string",
+        "title": "ContainerState",
+        "enum": [
+          "CONTAINER_STATE_UNSPECIFIED",
+          "CONTAINER_STATE_PULLING",
+          "CONTAINER_STATE_STARTING",
+          "CONTAINER_STATE_READY",
+          "CONTAINER_STATE_UNHEALTHY",
+          "CONTAINER_STATE_UNAVAILABLE"
+        ],
+        "description": "ContainerState is whether a container dependency can be used."
+      },
+      "mavio.plugin.v1.ContainerStatus": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "name"
+          },
+          "mode": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.plugin.v1.ContainerMode"
+              }
+            ],
+            "title": "mode"
+          },
+          "address": {
+            "type": "string",
+            "title": "address",
+            "description": "Base URL of the service, e.g. \"http://127.0.0.1:49153\"; empty when it\n has none."
+          },
+          "state": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.plugin.v1.ContainerState"
+              }
+            ],
+            "title": "state"
+          },
+          "error": {
+            "type": "string",
+            "title": "error",
+            "description": "Why it is unhealthy or unavailable."
+          }
+        },
+        "title": "ContainerStatus",
+        "additionalProperties": false,
+        "description": "ContainerStatus is how a container dependency is reached and whether it\n can be used."
+      },
       "mavio.plugin.v1.DiscoverFilter": {
         "type": "string",
         "title": "DiscoverFilter",
@@ -16705,6 +16855,16 @@
         "title": "FilterValue",
         "additionalProperties": false,
         "description": "FilterValue is a value of a discovery filter."
+      },
+      "mavio.plugin.v1.GpuSupport": {
+        "type": "string",
+        "title": "GpuSupport",
+        "enum": [
+          "GPU_SUPPORT_UNSPECIFIED",
+          "GPU_SUPPORT_OPTIONAL",
+          "GPU_SUPPORT_REQUIRED"
+        ],
+        "description": "GpuSupport is whether a container dependency uses a GPU."
       },
       "mavio.plugin.v1.Manifest": {
         "type": "object",
@@ -16810,6 +16970,14 @@
             ],
             "title": "category",
             "description": "What the plugin is for."
+          },
+          "containers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/mavio.plugin.v1.ContainerDependency"
+            },
+            "title": "containers",
+            "description": "Services the plugin depends on that run as container images."
           }
         },
         "title": "Manifest",
@@ -19603,6 +19771,55 @@
         ],
         "description": "ColonReplacement is what replaces colons in file names."
       },
+      "mavio.system.v1.ContainerRuntime": {
+        "type": "object",
+        "properties": {
+          "available": {
+            "type": "boolean",
+            "title": "available",
+            "description": "Whether an engine answered; reason tells why not."
+          },
+          "reason": {
+            "type": "string",
+            "title": "reason"
+          },
+          "endpoint": {
+            "type": "string",
+            "title": "endpoint",
+            "description": "The engine's endpoint, e.g. \"unix:///var/run/docker.sock\"."
+          },
+          "engine": {
+            "type": "string",
+            "title": "engine",
+            "description": "\"docker\" or \"podman\", its release and the API version used."
+          },
+          "version": {
+            "type": "string",
+            "title": "version"
+          },
+          "apiVersion": {
+            "type": "string",
+            "title": "api_version"
+          },
+          "rootless": {
+            "type": "boolean",
+            "title": "rootless"
+          },
+          "inContainer": {
+            "type": "boolean",
+            "title": "in_container",
+            "description": "Whether the server runs in a container."
+          },
+          "onHost": {
+            "type": "boolean",
+            "title": "on_host",
+            "description": "Whether the server reaches what it runs through ports on the\n loopback interface rather than a network its container joins."
+          }
+        },
+        "title": "ContainerRuntime",
+        "additionalProperties": false,
+        "description": "ContainerRuntime is the container engine the server found."
+      },
       "mavio.system.v1.Country": {
         "type": "object",
         "properties": {
@@ -19913,6 +20130,33 @@
           }
         },
         "title": "GetAiLoginResponse",
+        "additionalProperties": false
+      },
+      "mavio.system.v1.GetContainerRuntimeRequest": {
+        "type": "object",
+        "properties": {
+          "detect": {
+            "type": "boolean",
+            "title": "detect",
+            "description": "Detect the engine again rather than tell what was found last."
+          }
+        },
+        "title": "GetContainerRuntimeRequest",
+        "additionalProperties": false
+      },
+      "mavio.system.v1.GetContainerRuntimeResponse": {
+        "type": "object",
+        "properties": {
+          "runtime": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.system.v1.ContainerRuntime"
+              }
+            ],
+            "title": "runtime"
+          }
+        },
+        "title": "GetContainerRuntimeResponse",
         "additionalProperties": false
       },
       "mavio.system.v1.GetHealthRequest": {
@@ -20642,6 +20886,35 @@
         "title": "ListMyActivitiesResponse",
         "additionalProperties": false
       },
+      "mavio.system.v1.ListPluginContainersRequest": {
+        "type": "object",
+        "properties": {
+          "pluginId": {
+            "type": "string",
+            "title": "plugin_id"
+          }
+        },
+        "title": "ListPluginContainersRequest",
+        "required": [
+          "pluginId"
+        ],
+        "additionalProperties": false
+      },
+      "mavio.system.v1.ListPluginContainersResponse": {
+        "type": "object",
+        "properties": {
+          "containers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/mavio.system.v1.PluginContainer"
+            },
+            "title": "containers",
+            "description": "In manifest order."
+          }
+        },
+        "title": "ListPluginContainersResponse",
+        "additionalProperties": false
+      },
       "mavio.system.v1.ListPluginsRequest": {
         "type": "object",
         "title": "ListPluginsRequest",
@@ -20994,6 +21267,36 @@
         "title": "Plugin",
         "additionalProperties": false,
         "description": "Plugin is a plugin found in the server's plugin folder."
+      },
+      "mavio.system.v1.PluginContainer": {
+        "type": "object",
+        "properties": {
+          "dependency": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.plugin.v1.ContainerDependency"
+              }
+            ],
+            "title": "dependency",
+            "description": "As the plugin's manifest declares it."
+          },
+          "status": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.plugin.v1.ContainerStatus"
+              }
+            ],
+            "title": "status"
+          },
+          "useGpu": {
+            "type": "boolean",
+            "title": "use_gpu",
+            "description": "Whether a managed container may use a GPU."
+          }
+        },
+        "title": "PluginContainer",
+        "additionalProperties": false,
+        "description": "PluginContainer is a container dependency of a plugin."
       },
       "mavio.system.v1.PluginState": {
         "type": "string",
@@ -21427,6 +21730,59 @@
           }
         },
         "title": "SetPluginConfigResponse",
+        "additionalProperties": false
+      },
+      "mavio.system.v1.SetPluginContainerRequest": {
+        "type": "object",
+        "properties": {
+          "pluginId": {
+            "type": "string",
+            "title": "plugin_id"
+          },
+          "name": {
+            "type": "string",
+            "title": "name"
+          },
+          "mode": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.plugin.v1.ContainerMode"
+              }
+            ],
+            "title": "mode"
+          },
+          "address": {
+            "type": "string",
+            "title": "address",
+            "format": "uri",
+            "description": "Base URL of an external dependency, http or https; required for\n CONTAINER_MODE_EXTERNAL and empty otherwise."
+          },
+          "useGpu": {
+            "type": "boolean",
+            "title": "use_gpu",
+            "description": "Whether a managed container may use a GPU."
+          }
+        },
+        "title": "SetPluginContainerRequest",
+        "required": [
+          "pluginId",
+          "name"
+        ],
+        "additionalProperties": false
+      },
+      "mavio.system.v1.SetPluginContainerResponse": {
+        "type": "object",
+        "properties": {
+          "container": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.system.v1.PluginContainer"
+              }
+            ],
+            "title": "container"
+          }
+        },
+        "title": "SetPluginContainerResponse",
         "additionalProperties": false
       },
       "mavio.system.v1.SetPluginEnabledRequest": {
@@ -23489,14 +23845,14 @@
         }
       }
     },
-    "/mavio.auth.v1.AuthService/StartRefresh": {
+    "/mavio.auth.v1.AuthService/SwitchUser": {
       "post": {
         "tags": [
           "AuthService"
         ],
-        "summary": "StartRefresh",
-        "description": "StartRefresh gives a session's device a nonce to sign for\n RefreshSession, valid for two minutes. Unknown sessions are\n UNAUTHENTICATED.",
-        "operationId": "mavio.auth.v1.AuthService.StartRefresh",
+        "summary": "SwitchUser",
+        "description": "SwitchUser makes the calling session the given user's: its access\n token and refreshes then act as that user, and the session can still\n switch. A user with a PIN needs it: without one the call is\n FAILED_PRECONDITION, a wrong one PERMISSION_DENIED, and after three\n wrong PINs for a user each locks it out twice as long as the one\n before, as Login does, with RESOURCE_EXHAUSTED meanwhile. Streams the\n session opened before switching keep their user, so the client opens\n them again.",
+        "operationId": "mavio.auth.v1.AuthService.SwitchUser",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -23521,7 +23877,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.auth.v1.StartRefreshRequest"
+                "$ref": "#/components/schemas/mavio.auth.v1.SwitchUserRequest"
               }
             }
           },
@@ -23543,7 +23899,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.auth.v1.StartRefreshResponse"
+                  "$ref": "#/components/schemas/mavio.auth.v1.SwitchUserResponse"
                 }
               }
             }
@@ -23551,14 +23907,14 @@
         }
       }
     },
-    "/mavio.acquisition.v1.SubtitleService/GetSubtitleTranslationStatistics": {
+    "/mavio.acquisition.v1.ProfileService/DeleteDelayProfile": {
       "post": {
         "tags": [
-          "SubtitleService"
+          "ProfileService"
         ],
-        "summary": "GetSubtitleTranslationStatistics",
-        "description": "GetSubtitleTranslationStatistics sums up the translations of the\n subtitle history, as Lingarr's statistics.",
-        "operationId": "mavio.acquisition.v1.SubtitleService.GetSubtitleTranslationStatistics",
+        "summary": "DeleteDelayProfile",
+        "description": "DeleteDelayProfile fails with FAILED_PRECONDITION for the default\n profile.",
+        "operationId": "mavio.acquisition.v1.ProfileService.DeleteDelayProfile",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -23583,7 +23939,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.acquisition.v1.GetSubtitleTranslationStatisticsRequest"
+                "$ref": "#/components/schemas/mavio.acquisition.v1.DeleteDelayProfileRequest"
               }
             }
           },
@@ -23605,7 +23961,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.acquisition.v1.GetSubtitleTranslationStatisticsResponse"
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.DeleteDelayProfileResponse"
                 }
               }
             }
@@ -24912,14 +25268,14 @@
         }
       }
     },
-    "/mavio.acquisition.v1.IssueService/ReopenIssue": {
+    "/mavio.hub.v1.HubService/UpdateHomeLayout": {
       "post": {
         "tags": [
-          "IssueService"
+          "HubService"
         ],
-        "summary": "ReopenIssue",
-        "description": "ReopenIssue reopens an issue: its reporter or an administrator.",
-        "operationId": "mavio.acquisition.v1.IssueService.ReopenIssue",
+        "summary": "UpdateHomeLayout",
+        "description": "UpdateHomeLayout replaces the calling user's choice of Home's\n libraries and hidden hubs. Libraries the user may not access fail\n with INVALID_ARGUMENT.",
+        "operationId": "mavio.hub.v1.HubService.UpdateHomeLayout",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -24944,7 +25300,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.acquisition.v1.ReopenIssueRequest"
+                "$ref": "#/components/schemas/mavio.hub.v1.UpdateHomeLayoutRequest"
               }
             }
           },
@@ -24966,7 +25322,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.acquisition.v1.ReopenIssueResponse"
+                  "$ref": "#/components/schemas/mavio.hub.v1.UpdateHomeLayoutResponse"
                 }
               }
             }
@@ -25404,14 +25760,14 @@
         }
       }
     },
-    "/mavio.acquisition.v1.ProfileService/DeleteDelayProfile": {
+    "/mavio.library.v1.CollectionService/AddToCollection": {
       "post": {
         "tags": [
-          "ProfileService"
+          "CollectionService"
         ],
-        "summary": "DeleteDelayProfile",
-        "description": "DeleteDelayProfile fails with FAILED_PRECONDITION for the default\n profile.",
-        "operationId": "mavio.acquisition.v1.ProfileService.DeleteDelayProfile",
+        "summary": "AddToCollection",
+        "description": "AddToCollection appends items not yet in the collection.",
+        "operationId": "mavio.library.v1.CollectionService.AddToCollection",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -25436,7 +25792,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.acquisition.v1.DeleteDelayProfileRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.AddToCollectionRequest"
               }
             }
           },
@@ -25458,7 +25814,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.acquisition.v1.DeleteDelayProfileResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.AddToCollectionResponse"
                 }
               }
             }
@@ -27626,14 +27982,14 @@
         }
       }
     },
-    "/mavio.hub.v1.HubService/GetHub": {
+    "/mavio.acquisition.v1.SubtitleService/DeleteSubtitleBlocklist": {
       "post": {
         "tags": [
-          "HubService"
+          "SubtitleService"
         ],
-        "summary": "GetHub",
-        "description": "GetHub lists a page of a hub's items.",
-        "operationId": "mavio.hub.v1.HubService.GetHub",
+        "summary": "DeleteSubtitleBlocklist",
+        "description": "DeleteSubtitleBlocklist deletes entries, or every entry when ids is\n empty and all is set.",
+        "operationId": "mavio.acquisition.v1.SubtitleService.DeleteSubtitleBlocklist",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -27658,7 +28014,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.hub.v1.GetHubRequest"
+                "$ref": "#/components/schemas/mavio.acquisition.v1.DeleteSubtitleBlocklistRequest"
               }
             }
           },
@@ -27680,7 +28036,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.hub.v1.GetHubResponse"
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.DeleteSubtitleBlocklistResponse"
                 }
               }
             }
@@ -27997,14 +28353,14 @@
         }
       }
     },
-    "/mavio.hub.v1.HubService/ListHubs": {
+    "/mavio.acquisition.v1.SubtitleService/GetSubtitleTranslationStatistics": {
       "post": {
         "tags": [
-          "HubService"
+          "SubtitleService"
         ],
-        "summary": "ListHubs",
-        "description": "ListHubs lists the hubs of Home, or of a library's Recommended tab,\n with their first items.",
-        "operationId": "mavio.hub.v1.HubService.ListHubs",
+        "summary": "GetSubtitleTranslationStatistics",
+        "description": "GetSubtitleTranslationStatistics sums up the translations of the\n subtitle history, as Lingarr's statistics.",
+        "operationId": "mavio.acquisition.v1.SubtitleService.GetSubtitleTranslationStatistics",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -28029,7 +28385,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.hub.v1.ListHubsRequest"
+                "$ref": "#/components/schemas/mavio.acquisition.v1.GetSubtitleTranslationStatisticsRequest"
               }
             }
           },
@@ -28051,7 +28407,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.hub.v1.ListHubsResponse"
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.GetSubtitleTranslationStatisticsResponse"
                 }
               }
             }
@@ -31591,14 +31947,14 @@
         }
       }
     },
-    "/mavio.acquisition.v1.DiscoverService/GetCollection": {
+    "/mavio.auth.v1.AuthService/StartRefresh": {
       "post": {
         "tags": [
-          "DiscoverService"
+          "AuthService"
         ],
-        "summary": "GetCollection",
-        "description": "GetCollection tells of a collection of movies by its TMDB ID with its\n parts marked as Discover's titles, as Seerr's collection page. It\n fails with NOT_FOUND when no discovery provider knows it.",
-        "operationId": "mavio.acquisition.v1.DiscoverService.GetCollection",
+        "summary": "StartRefresh",
+        "description": "StartRefresh gives a session's device a nonce to sign for\n RefreshSession, valid for two minutes. Unknown sessions are\n UNAUTHENTICATED.",
+        "operationId": "mavio.auth.v1.AuthService.StartRefresh",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -31623,7 +31979,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.acquisition.v1.GetCollectionRequest"
+                "$ref": "#/components/schemas/mavio.auth.v1.StartRefreshRequest"
               }
             }
           },
@@ -31645,7 +32001,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.acquisition.v1.GetCollectionResponse"
+                  "$ref": "#/components/schemas/mavio.auth.v1.StartRefreshResponse"
                 }
               }
             }
@@ -31715,14 +32071,14 @@
         }
       }
     },
-    "/mavio.auth.v1.AuthService/SwitchUser": {
+    "/mavio.acquisition.v1.DiscoverService/GetCollection": {
       "post": {
         "tags": [
-          "AuthService"
+          "DiscoverService"
         ],
-        "summary": "SwitchUser",
-        "description": "SwitchUser makes the calling session the given user's: its access\n token and refreshes then act as that user, and the session can still\n switch. A user with a PIN needs it: without one the call is\n FAILED_PRECONDITION, a wrong one PERMISSION_DENIED, and after three\n wrong PINs for a user each locks it out twice as long as the one\n before, as Login does, with RESOURCE_EXHAUSTED meanwhile. Streams the\n session opened before switching keep their user, so the client opens\n them again.",
-        "operationId": "mavio.auth.v1.AuthService.SwitchUser",
+        "summary": "GetCollection",
+        "description": "GetCollection tells of a collection of movies by its TMDB ID with its\n parts marked as Discover's titles, as Seerr's collection page. It\n fails with NOT_FOUND when no discovery provider knows it.",
+        "operationId": "mavio.acquisition.v1.DiscoverService.GetCollection",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -31747,7 +32103,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.auth.v1.SwitchUserRequest"
+                "$ref": "#/components/schemas/mavio.acquisition.v1.GetCollectionRequest"
               }
             }
           },
@@ -31769,7 +32125,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.auth.v1.SwitchUserResponse"
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.GetCollectionResponse"
                 }
               }
             }
@@ -31839,14 +32195,14 @@
         }
       }
     },
-    "/mavio.acquisition.v1.SubtitleService/DeleteSubtitleBlocklist": {
+    "/mavio.hub.v1.HubService/GetHub": {
       "post": {
         "tags": [
-          "SubtitleService"
+          "HubService"
         ],
-        "summary": "DeleteSubtitleBlocklist",
-        "description": "DeleteSubtitleBlocklist deletes entries, or every entry when ids is\n empty and all is set.",
-        "operationId": "mavio.acquisition.v1.SubtitleService.DeleteSubtitleBlocklist",
+        "summary": "GetHub",
+        "description": "GetHub lists a page of a hub's items.",
+        "operationId": "mavio.hub.v1.HubService.GetHub",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -31871,7 +32227,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.acquisition.v1.DeleteSubtitleBlocklistRequest"
+                "$ref": "#/components/schemas/mavio.hub.v1.GetHubRequest"
               }
             }
           },
@@ -31893,7 +32249,131 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.acquisition.v1.DeleteSubtitleBlocklistResponse"
+                  "$ref": "#/components/schemas/mavio.hub.v1.GetHubResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.hub.v1.HubService/ListHubs": {
+      "post": {
+        "tags": [
+          "HubService"
+        ],
+        "summary": "ListHubs",
+        "description": "ListHubs lists the hubs of Home, or of a library's Recommended tab,\n with their first items.",
+        "operationId": "mavio.hub.v1.HubService.ListHubs",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.hub.v1.ListHubsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.hub.v1.ListHubsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.acquisition.v1.IssueService/ReopenIssue": {
+      "post": {
+        "tags": [
+          "IssueService"
+        ],
+        "summary": "ReopenIssue",
+        "description": "ReopenIssue reopens an issue: its reporter or an administrator.",
+        "operationId": "mavio.acquisition.v1.IssueService.ReopenIssue",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.ReopenIssueRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.ReopenIssueResponse"
                 }
               }
             }
@@ -31963,13 +32443,13 @@
         }
       }
     },
-    "/mavio.library.v1.LibraryService/GetLibrary": {
+    "/mavio.library.v1.ItemService/ListItems": {
       "post": {
         "tags": [
-          "LibraryService"
+          "ItemService"
         ],
-        "summary": "GetLibrary",
-        "operationId": "mavio.library.v1.LibraryService.GetLibrary",
+        "summary": "ListItems",
+        "operationId": "mavio.library.v1.ItemService.ListItems",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -31994,7 +32474,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.GetLibraryRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.ListItemsRequest"
               }
             }
           },
@@ -32016,130 +32496,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.GetLibraryResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/mavio.library.v1.CollectionService/AddToCollection": {
-      "post": {
-        "tags": [
-          "CollectionService"
-        ],
-        "summary": "AddToCollection",
-        "description": "AddToCollection appends items not yet in the collection.",
-        "operationId": "mavio.library.v1.CollectionService.AddToCollection",
-        "parameters": [
-          {
-            "name": "Connect-Protocol-Version",
-            "in": "header",
-            "description": "Define the version of the Connect protocol",
-            "schema": {
-              "$ref": "#/components/schemas/connect-protocol-version"
-            },
-            "example": 1
-          },
-          {
-            "name": "Connect-Timeout-Ms",
-            "in": "header",
-            "description": "Define the timeout, in ms",
-            "schema": {
-              "$ref": "#/components/schemas/connect-timeout-header"
-            },
-            "example": 1000
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.AddToCollectionRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "default": {
-            "description": "Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/connect.error"
-                }
-              }
-            }
-          },
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.AddToCollectionResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/mavio.library.v1.CollectionService/CreateCollection": {
-      "post": {
-        "tags": [
-          "CollectionService"
-        ],
-        "summary": "CreateCollection",
-        "operationId": "mavio.library.v1.CollectionService.CreateCollection",
-        "parameters": [
-          {
-            "name": "Connect-Protocol-Version",
-            "in": "header",
-            "description": "Define the version of the Connect protocol",
-            "schema": {
-              "$ref": "#/components/schemas/connect-protocol-version"
-            },
-            "example": 1
-          },
-          {
-            "name": "Connect-Timeout-Ms",
-            "in": "header",
-            "description": "Define the timeout, in ms",
-            "schema": {
-              "$ref": "#/components/schemas/connect-timeout-header"
-            },
-            "example": 1000
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.CreateCollectionRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "default": {
-            "description": "Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/connect.error"
-                }
-              }
-            }
-          },
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.CreateCollectionResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.ListItemsResponse"
                 }
               }
             }
@@ -32514,13 +32871,13 @@
         }
       }
     },
-    "/mavio.library.v1.ItemService/ListItems": {
+    "/mavio.library.v1.CollectionService/CreateCollection": {
       "post": {
         "tags": [
-          "ItemService"
+          "CollectionService"
         ],
-        "summary": "ListItems",
-        "operationId": "mavio.library.v1.ItemService.ListItems",
+        "summary": "CreateCollection",
+        "operationId": "mavio.library.v1.CollectionService.CreateCollection",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -32545,7 +32902,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.ListItemsRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.CreateCollectionRequest"
               }
             }
           },
@@ -32567,7 +32924,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.ListItemsResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.CreateCollectionResponse"
                 }
               }
             }
@@ -33008,14 +33365,13 @@
         }
       }
     },
-    "/mavio.hub.v1.HubService/UpdateHomeLayout": {
+    "/mavio.library.v1.LibraryService/GetLibrary": {
       "post": {
         "tags": [
-          "HubService"
+          "LibraryService"
         ],
-        "summary": "UpdateHomeLayout",
-        "description": "UpdateHomeLayout replaces the calling user's choice of Home's\n libraries and hidden hubs. Libraries the user may not access fail\n with INVALID_ARGUMENT.",
-        "operationId": "mavio.hub.v1.HubService.UpdateHomeLayout",
+        "summary": "GetLibrary",
+        "operationId": "mavio.library.v1.LibraryService.GetLibrary",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -33040,7 +33396,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.hub.v1.UpdateHomeLayoutRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.GetLibraryRequest"
               }
             }
           },
@@ -33062,7 +33418,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.hub.v1.UpdateHomeLayoutResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.GetLibraryResponse"
                 }
               }
             }
@@ -37703,6 +38059,68 @@
         }
       }
     },
+    "/mavio.system.v1.PluginManagementService/GetContainerRuntime": {
+      "post": {
+        "tags": [
+          "PluginManagementService"
+        ],
+        "summary": "GetContainerRuntime",
+        "description": "GetContainerRuntime tells whether a container engine is available to\n run plugins' container dependencies, detecting it again when asked.",
+        "operationId": "mavio.system.v1.PluginManagementService.GetContainerRuntime",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.system.v1.GetContainerRuntimeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.system.v1.GetContainerRuntimeResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/mavio.system.v1.PluginManagementService/GetPluginConfig": {
       "post": {
         "tags": [
@@ -37889,6 +38307,68 @@
         }
       }
     },
+    "/mavio.system.v1.PluginManagementService/ListPluginContainers": {
+      "post": {
+        "tags": [
+          "PluginManagementService"
+        ],
+        "summary": "ListPluginContainers",
+        "description": "ListPluginContainers lists a plugin's container dependencies with how\n they are reached and whether they can be used.",
+        "operationId": "mavio.system.v1.PluginManagementService.ListPluginContainers",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.system.v1.ListPluginContainersRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.system.v1.ListPluginContainersResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/mavio.system.v1.PluginManagementService/ListPlugins": {
       "post": {
         "tags": [
@@ -38006,6 +38486,68 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/mavio.system.v1.SetPluginConfigResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.system.v1.PluginManagementService/SetPluginContainer": {
+      "post": {
+        "tags": [
+          "PluginManagementService"
+        ],
+        "summary": "SetPluginContainer",
+        "description": "SetPluginContainer sets how a container dependency is reached: run by\n the server, which requires a container engine, or at an address.",
+        "operationId": "mavio.system.v1.PluginManagementService.SetPluginContainer",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.system.v1.SetPluginContainerRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.system.v1.SetPluginContainerResponse"
                 }
               }
             }

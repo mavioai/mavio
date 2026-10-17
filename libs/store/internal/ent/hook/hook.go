@@ -357,6 +357,18 @@ func (f PluginConfigFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PluginConfigMutation", m)
 }
 
+// The PluginContainerFunc type is an adapter to allow the use of ordinary
+// function as PluginContainer mutator.
+type PluginContainerFunc func(context.Context, *ent.PluginContainerMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f PluginContainerFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.PluginContainerMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PluginContainerMutation", m)
+}
+
 // The QualityDefinitionFunc type is an adapter to allow the use of ordinary
 // function as QualityDefinition mutator.
 type QualityDefinitionFunc func(context.Context, *ent.QualityDefinitionMutation) (ent.Value, error)

@@ -4,6 +4,7 @@ package mavio.system.v1;
 
 import "buf/validate/validate.proto";
 import "google/protobuf/timestamp.proto";
+import "mavio/plugin/v1/container.proto";
 import "mavio/plugin/v1/plugin.proto";
 
 // PluginManagementService installs, configures, starts and stops the
@@ -38,6 +39,19 @@ service PluginManagementService {
   // configuration, or starts it again; the server remembers it across
   // restarts and upgrades.
   rpc SetPluginEnabled(SetPluginEnabledRequest) returns (SetPluginEnabledResponse);
+  // GetContainerRuntime tells whether a container engine is available to
+  // run plugins' container dependencies, detecting it again when asked.
+  rpc GetContainerRuntime(GetContainerRuntimeRequest) returns (GetContainerRuntimeResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // ListPluginContainers lists a plugin's container dependencies with how
+  // they are reached and whether they can be used.
+  rpc ListPluginContainers(ListPluginContainersRequest) returns (ListPluginContainersResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // SetPluginContainer sets how a container dependency is reached: run by
+  // the server, which requires a container engine, or at an address.
+  rpc SetPluginContainer(SetPluginContainerRequest) returns (SetPluginContainerResponse);
 }
 
 // PluginState is whether a plugin is in use.
@@ -145,4 +159,65 @@ message SetPluginEnabledRequest {
 
 message SetPluginEnabledResponse {
   Plugin plugin = 1;
+}
+
+// ContainerRuntime is the container engine the server found.
+message ContainerRuntime {
+  // Whether an engine answered; reason tells why not.
+  bool available = 1;
+  string reason = 2;
+  // The engine's endpoint, e.g. "unix:///var/run/docker.sock".
+  string endpoint = 3;
+  // "docker" or "podman", its release and the API version used.
+  string engine = 4;
+  string version = 5;
+  string api_version = 6;
+  bool rootless = 7;
+  // Whether the server runs in a container.
+  bool in_container = 8;
+  // Whether the server reaches what it runs through ports on the
+  // loopback interface rather than a network its container joins.
+  bool on_host = 9;
+}
+
+message GetContainerRuntimeRequest {
+  // Detect the engine again rather than tell what was found last.
+  bool detect = 1;
+}
+
+message GetContainerRuntimeResponse {
+  ContainerRuntime runtime = 1;
+}
+
+// PluginContainer is a container dependency of a plugin.
+message PluginContainer {
+  // As the plugin's manifest declares it.
+  mavio.plugin.v1.ContainerDependency dependency = 1;
+  mavio.plugin.v1.ContainerStatus status = 2;
+  // Whether a managed container may use a GPU.
+  bool use_gpu = 3;
+}
+
+message ListPluginContainersRequest {
+  string plugin_id = 1 [(buf.validate.field).required = true];
+}
+
+message ListPluginContainersResponse {
+  // In manifest order.
+  repeated PluginContainer containers = 1;
+}
+
+message SetPluginContainerRequest {
+  string plugin_id = 1 [(buf.validate.field).required = true];
+  string name = 2 [(buf.validate.field).required = true];
+  mavio.plugin.v1.ContainerMode mode = 3;
+  // Base URL of an external dependency, http or https; required for
+  // CONTAINER_MODE_EXTERNAL and empty otherwise.
+  string address = 4 [(buf.validate.field).string.uri = true];
+  // Whether a managed container may use a GPU.
+  bool use_gpu = 5;
+}
+
+message SetPluginContainerResponse {
+  PluginContainer container = 1;
 }

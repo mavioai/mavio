@@ -45,6 +45,7 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/pendingrelease"
 	"github.com/mavioai/mavio/libs/store/internal/ent/person"
 	"github.com/mavioai/mavio/libs/store/internal/ent/pluginconfig"
+	"github.com/mavioai/mavio/libs/store/internal/ent/plugincontainer"
 	"github.com/mavioai/mavio/libs/store/internal/ent/qualitydefinition"
 	"github.com/mavioai/mavio/libs/store/internal/ent/qualityprofile"
 	"github.com/mavioai/mavio/libs/store/internal/ent/releaseprofile"
@@ -127,6 +128,8 @@ type Client struct {
 	Person *PersonClient
 	// PluginConfig is the client for interacting with the PluginConfig builders.
 	PluginConfig *PluginConfigClient
+	// PluginContainer is the client for interacting with the PluginContainer builders.
+	PluginContainer *PluginContainerClient
 	// QualityDefinition is the client for interacting with the QualityDefinition builders.
 	QualityDefinition *QualityDefinitionClient
 	// QualityProfile is the client for interacting with the QualityProfile builders.
@@ -201,6 +204,7 @@ func (c *Client) init() {
 	c.PendingRelease = NewPendingReleaseClient(c.config)
 	c.Person = NewPersonClient(c.config)
 	c.PluginConfig = NewPluginConfigClient(c.config)
+	c.PluginContainer = NewPluginContainerClient(c.config)
 	c.QualityDefinition = NewQualityDefinitionClient(c.config)
 	c.QualityProfile = NewQualityProfileClient(c.config)
 	c.ReleaseProfile = NewReleaseProfileClient(c.config)
@@ -339,6 +343,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		PendingRelease:            NewPendingReleaseClient(cfg),
 		Person:                    NewPersonClient(cfg),
 		PluginConfig:              NewPluginConfigClient(cfg),
+		PluginContainer:           NewPluginContainerClient(cfg),
 		QualityDefinition:         NewQualityDefinitionClient(cfg),
 		QualityProfile:            NewQualityProfileClient(cfg),
 		ReleaseProfile:            NewReleaseProfileClient(cfg),
@@ -404,6 +409,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		PendingRelease:            NewPendingReleaseClient(cfg),
 		Person:                    NewPersonClient(cfg),
 		PluginConfig:              NewPluginConfigClient(cfg),
+		PluginContainer:           NewPluginContainerClient(cfg),
 		QualityDefinition:         NewQualityDefinitionClient(cfg),
 		QualityProfile:            NewQualityProfileClient(cfg),
 		ReleaseProfile:            NewReleaseProfileClient(cfg),
@@ -455,11 +461,11 @@ func (c *Client) Use(hooks ...Hook) {
 		c.Download, c.EpisodeState, c.ExtraFile, c.FolderState, c.HistoryEvent,
 		c.Image, c.Invitation, c.Issue, c.IssueComment, c.Item, c.ItemLink,
 		c.ItemValue, c.Job, c.Library, c.MediaSegment, c.MediaSource, c.PendingRelease,
-		c.Person, c.PluginConfig, c.QualityDefinition, c.QualityProfile,
-		c.ReleaseProfile, c.RemotePathMapping, c.Request, c.Setting, c.StorageJob,
-		c.SubtitleBlocklistEntry, c.SubtitleHistoryEvent, c.SubtitleProfile,
-		c.SubtitleProfileAssignment, c.SubtitleSearchAttempt, c.SubtitleWanted,
-		c.Trickplay, c.User, c.UserData, c.Wanted,
+		c.Person, c.PluginConfig, c.PluginContainer, c.QualityDefinition,
+		c.QualityProfile, c.ReleaseProfile, c.RemotePathMapping, c.Request, c.Setting,
+		c.StorageJob, c.SubtitleBlocklistEntry, c.SubtitleHistoryEvent,
+		c.SubtitleProfile, c.SubtitleProfileAssignment, c.SubtitleSearchAttempt,
+		c.SubtitleWanted, c.Trickplay, c.User, c.UserData, c.Wanted,
 	} {
 		n.Use(hooks...)
 	}
@@ -474,11 +480,11 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 		c.Download, c.EpisodeState, c.ExtraFile, c.FolderState, c.HistoryEvent,
 		c.Image, c.Invitation, c.Issue, c.IssueComment, c.Item, c.ItemLink,
 		c.ItemValue, c.Job, c.Library, c.MediaSegment, c.MediaSource, c.PendingRelease,
-		c.Person, c.PluginConfig, c.QualityDefinition, c.QualityProfile,
-		c.ReleaseProfile, c.RemotePathMapping, c.Request, c.Setting, c.StorageJob,
-		c.SubtitleBlocklistEntry, c.SubtitleHistoryEvent, c.SubtitleProfile,
-		c.SubtitleProfileAssignment, c.SubtitleSearchAttempt, c.SubtitleWanted,
-		c.Trickplay, c.User, c.UserData, c.Wanted,
+		c.Person, c.PluginConfig, c.PluginContainer, c.QualityDefinition,
+		c.QualityProfile, c.ReleaseProfile, c.RemotePathMapping, c.Request, c.Setting,
+		c.StorageJob, c.SubtitleBlocklistEntry, c.SubtitleHistoryEvent,
+		c.SubtitleProfile, c.SubtitleProfileAssignment, c.SubtitleSearchAttempt,
+		c.SubtitleWanted, c.Trickplay, c.User, c.UserData, c.Wanted,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -545,6 +551,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Person.mutate(ctx, m)
 	case *PluginConfigMutation:
 		return c.PluginConfig.mutate(ctx, m)
+	case *PluginContainerMutation:
+		return c.PluginContainer.mutate(ctx, m)
 	case *QualityDefinitionMutation:
 		return c.QualityDefinition.mutate(ctx, m)
 	case *QualityProfileMutation:
@@ -5401,6 +5409,139 @@ func (c *PluginConfigClient) mutate(ctx context.Context, m *PluginConfigMutation
 	}
 }
 
+// PluginContainerClient is a client for the PluginContainer schema.
+type PluginContainerClient struct {
+	config
+}
+
+// NewPluginContainerClient returns a client for the PluginContainer from the given config.
+func NewPluginContainerClient(c config) *PluginContainerClient {
+	return &PluginContainerClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `plugincontainer.Hooks(f(g(h())))`.
+func (c *PluginContainerClient) Use(hooks ...Hook) {
+	c.hooks.PluginContainer = append(c.hooks.PluginContainer, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `plugincontainer.Intercept(f(g(h())))`.
+func (c *PluginContainerClient) Intercept(interceptors ...Interceptor) {
+	c.inters.PluginContainer = append(c.inters.PluginContainer, interceptors...)
+}
+
+// Create returns a builder for creating a PluginContainer entity.
+func (c *PluginContainerClient) Create() *PluginContainerCreate {
+	mutation := newPluginContainerMutation(c.config, OpCreate)
+	return &PluginContainerCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of PluginContainer entities.
+func (c *PluginContainerClient) CreateBulk(builders ...*PluginContainerCreate) *PluginContainerCreateBulk {
+	return &PluginContainerCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *PluginContainerClient) MapCreateBulk(slice any, setFunc func(*PluginContainerCreate, int)) *PluginContainerCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &PluginContainerCreateBulk{err: fmt.Errorf("calling to PluginContainerClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*PluginContainerCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &PluginContainerCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for PluginContainer.
+func (c *PluginContainerClient) Update() *PluginContainerUpdate {
+	mutation := newPluginContainerMutation(c.config, OpUpdate)
+	return &PluginContainerUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *PluginContainerClient) UpdateOne(_m *PluginContainer) *PluginContainerUpdateOne {
+	mutation := newPluginContainerMutation(c.config, OpUpdateOne, withPluginContainer(_m))
+	return &PluginContainerUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *PluginContainerClient) UpdateOneID(id core.ID) *PluginContainerUpdateOne {
+	mutation := newPluginContainerMutation(c.config, OpUpdateOne, withPluginContainerID(id))
+	return &PluginContainerUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for PluginContainer.
+func (c *PluginContainerClient) Delete() *PluginContainerDelete {
+	mutation := newPluginContainerMutation(c.config, OpDelete)
+	return &PluginContainerDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *PluginContainerClient) DeleteOne(_m *PluginContainer) *PluginContainerDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *PluginContainerClient) DeleteOneID(id core.ID) *PluginContainerDeleteOne {
+	builder := c.Delete().Where(plugincontainer.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &PluginContainerDeleteOne{builder}
+}
+
+// Query returns a query builder for PluginContainer.
+func (c *PluginContainerClient) Query() *PluginContainerQuery {
+	return &PluginContainerQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypePluginContainer},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a PluginContainer entity by its id.
+func (c *PluginContainerClient) Get(ctx context.Context, id core.ID) (*PluginContainer, error) {
+	return c.Query().Where(plugincontainer.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *PluginContainerClient) GetX(ctx context.Context, id core.ID) *PluginContainer {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *PluginContainerClient) Hooks() []Hook {
+	return c.hooks.PluginContainer
+}
+
+// Interceptors returns the client interceptors.
+func (c *PluginContainerClient) Interceptors() []Interceptor {
+	return c.inters.PluginContainer
+}
+
+func (c *PluginContainerClient) mutate(ctx context.Context, m *PluginContainerMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&PluginContainerCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&PluginContainerUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&PluginContainerUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&PluginContainerDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown PluginContainer mutation op: %q", m.Op())
+	}
+}
+
 // QualityDefinitionClient is a client for the QualityDefinition schema.
 type QualityDefinitionClient struct {
 	config
@@ -8085,9 +8226,9 @@ type (
 		CustomFormat, DelayProfile, DisplayPreferences, Download, EpisodeState,
 		ExtraFile, FolderState, HistoryEvent, Image, Invitation, Issue, IssueComment,
 		Item, ItemLink, ItemValue, Job, Library, MediaSegment, MediaSource,
-		PendingRelease, Person, PluginConfig, QualityDefinition, QualityProfile,
-		ReleaseProfile, RemotePathMapping, Request, Setting, StorageJob,
-		SubtitleBlocklistEntry, SubtitleHistoryEvent, SubtitleProfile,
+		PendingRelease, Person, PluginConfig, PluginContainer, QualityDefinition,
+		QualityProfile, ReleaseProfile, RemotePathMapping, Request, Setting,
+		StorageJob, SubtitleBlocklistEntry, SubtitleHistoryEvent, SubtitleProfile,
 		SubtitleProfileAssignment, SubtitleSearchAttempt, SubtitleWanted, Trickplay,
 		User, UserData, Wanted []ent.Hook
 	}
@@ -8096,9 +8237,9 @@ type (
 		CustomFormat, DelayProfile, DisplayPreferences, Download, EpisodeState,
 		ExtraFile, FolderState, HistoryEvent, Image, Invitation, Issue, IssueComment,
 		Item, ItemLink, ItemValue, Job, Library, MediaSegment, MediaSource,
-		PendingRelease, Person, PluginConfig, QualityDefinition, QualityProfile,
-		ReleaseProfile, RemotePathMapping, Request, Setting, StorageJob,
-		SubtitleBlocklistEntry, SubtitleHistoryEvent, SubtitleProfile,
+		PendingRelease, Person, PluginConfig, PluginContainer, QualityDefinition,
+		QualityProfile, ReleaseProfile, RemotePathMapping, Request, Setting,
+		StorageJob, SubtitleBlocklistEntry, SubtitleHistoryEvent, SubtitleProfile,
 		SubtitleProfileAssignment, SubtitleSearchAttempt, SubtitleWanted, Trickplay,
 		User, UserData, Wanted []ent.Interceptor
 	}

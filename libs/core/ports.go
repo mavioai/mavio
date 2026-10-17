@@ -24,6 +24,7 @@ type Store interface {
 	Jobs() JobQueue
 	Scans() ScanRepository
 	PluginConfigs() PluginConfigRepository
+	PluginContainers() PluginContainerRepository
 	DisplayPreferences() DisplayPreferencesRepository
 	Settings() SettingsRepository
 	APIKeys() APIKeyRepository
@@ -323,6 +324,18 @@ type PluginConfigRepository interface {
 	Put(ctx context.Context, c *PluginConfig) error
 	// Delete removes a plugin's configuration; none is no error.
 	Delete(ctx context.Context, pluginID string) error
+}
+
+// PluginContainerRepository stores what the server keeps of plugins'
+// container dependencies.
+type PluginContainerRepository interface {
+	// List returns a plugin's dependencies ordered by name.
+	List(ctx context.Context, pluginID string) ([]PluginContainer, error)
+	// Put stores a dependency, replacing the earlier one of its name.
+	Put(ctx context.Context, c *PluginContainer) error
+	// Delete removes a plugin's dependency of the name, or all of the
+	// plugin's when the name is empty; none is no error.
+	Delete(ctx context.Context, pluginID, name string) error
 }
 
 // DisplayPreferencesRepository stores display preferences.

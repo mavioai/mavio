@@ -35,6 +35,7 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/pendingrelease"
 	"github.com/mavioai/mavio/libs/store/internal/ent/person"
 	"github.com/mavioai/mavio/libs/store/internal/ent/pluginconfig"
+	"github.com/mavioai/mavio/libs/store/internal/ent/plugincontainer"
 	"github.com/mavioai/mavio/libs/store/internal/ent/qualitydefinition"
 	"github.com/mavioai/mavio/libs/store/internal/ent/qualityprofile"
 	"github.com/mavioai/mavio/libs/store/internal/ent/releaseprofile"
@@ -703,6 +704,24 @@ func init() {
 	pluginconfigDescID := pluginconfigFields[0].Descriptor()
 	// pluginconfig.DefaultID holds the default value on creation for the id field.
 	pluginconfig.DefaultID = pluginconfigDescID.Default.(func() core.ID)
+	plugincontainerFields := schema.PluginContainer{}.Fields()
+	_ = plugincontainerFields
+	// plugincontainerDescAddress is the schema descriptor for address field.
+	plugincontainerDescAddress := plugincontainerFields[4].Descriptor()
+	// plugincontainer.DefaultAddress holds the default value on creation for the address field.
+	plugincontainer.DefaultAddress = plugincontainerDescAddress.Default.(string)
+	// plugincontainerDescUseGpu is the schema descriptor for use_gpu field.
+	plugincontainerDescUseGpu := plugincontainerFields[6].Descriptor()
+	// plugincontainer.DefaultUseGpu holds the default value on creation for the use_gpu field.
+	plugincontainer.DefaultUseGpu = plugincontainerDescUseGpu.Default.(bool)
+	// plugincontainerDescUpdatedAt is the schema descriptor for updated_at field.
+	plugincontainerDescUpdatedAt := plugincontainerFields[7].Descriptor()
+	// plugincontainer.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	plugincontainer.DefaultUpdatedAt = plugincontainerDescUpdatedAt.Default.(func() time.Time)
+	// plugincontainerDescID is the schema descriptor for id field.
+	plugincontainerDescID := plugincontainerFields[0].Descriptor()
+	// plugincontainer.DefaultID holds the default value on creation for the id field.
+	plugincontainer.DefaultID = plugincontainerDescID.Default.(func() core.ID)
 	qualitydefinitionFields := schema.QualityDefinition{}.Fields()
 	_ = qualitydefinitionFields
 	// qualitydefinitionDescMinSize is the schema descriptor for min_size field.

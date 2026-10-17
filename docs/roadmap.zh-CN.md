@@ -951,10 +951,10 @@ flowchart TD
 
 **进度**：
 - [x] `libs/containers`：端点、检测、API 版本协商、经 Unix socket、命名管道与回环 TCP 的客户端；针对假引擎测试，找到真实引擎时也针对它测试（`TestEngine`，在 macOS 上经 OrbStack 于 Docker 29 运行）
-- [ ] 契约、领域与存储
+- [x] 契约、领域与存储：清单的 `containers` 及其校验，`libs/core` 与 `libs/store` 中的 `PluginContainer`，`GetContainerRuntime`、`ListPluginContainers`、`SetPluginContainer` 与 `HostService.ListContainers`，`container-endpoint` 设置；外部依赖被保存并检查健康状况，选择托管在下一步之前返回 `UNIMPLEMENTED`
 - [ ] 托管依赖，服务端在宿主机上
 - [ ] 托管依赖，服务端在容器中
-- [ ] 外部依赖与命令
+- [ ] 外部依赖与命令，以及 WASM 插件 `http_hosts` 中依赖的地址
 - [ ] `plugins/voice` 与 Web UI
 - [ ] **完成标准**中的端到端测试
 - [ ] macOS 与 Windows 上的 Docker Desktop，以及 Podman，手工检查

@@ -88,6 +88,7 @@ func (m *memStore) Jobs() core.JobQueue                                   { retu
 func (m *memStore) Scans() core.ScanRepository                            { return memScans{m} }
 func (m *memStore) AuthSessions() core.AuthSessionRepository              { return memSessions{} }
 func (m *memStore) PluginConfigs() core.PluginConfigRepository            { panic("unused") }
+func (m *memStore) PluginContainers() core.PluginContainerRepository      { panic("unused") }
 func (m *memStore) DisplayPreferences() core.DisplayPreferencesRepository { panic("unused") }
 func (m *memStore) Settings() core.SettingsRepository                     { return memSettings{} }
 func (m *memStore) APIKeys() core.APIKeyRepository                        { panic("unused") }

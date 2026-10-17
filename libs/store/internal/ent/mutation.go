@@ -41,6 +41,7 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/pendingrelease"
 	"github.com/mavioai/mavio/libs/store/internal/ent/person"
 	"github.com/mavioai/mavio/libs/store/internal/ent/pluginconfig"
+	"github.com/mavioai/mavio/libs/store/internal/ent/plugincontainer"
 	"github.com/mavioai/mavio/libs/store/internal/ent/predicate"
 	"github.com/mavioai/mavio/libs/store/internal/ent/qualitydefinition"
 	"github.com/mavioai/mavio/libs/store/internal/ent/qualityprofile"
@@ -99,6 +100,7 @@ const (
 	TypePendingRelease            = "PendingRelease"
 	TypePerson                    = "Person"
 	TypePluginConfig              = "PluginConfig"
+	TypePluginContainer           = "PluginContainer"
 	TypeQualityDefinition         = "QualityDefinition"
 	TypeQualityProfile            = "QualityProfile"
 	TypeReleaseProfile            = "ReleaseProfile"
@@ -31717,6 +31719,684 @@ func (m *PluginConfigMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *PluginConfigMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown PluginConfig edge %s", name)
+}
+
+// PluginContainerMutation represents an operation that mutates the PluginContainer nodes in the graph.
+type PluginContainerMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *core.ID
+	plugin_id     *string
+	name          *string
+	mode          *string
+	address       *string
+	secrets       *map[string]string
+	use_gpu       *bool
+	updated_at    *time.Time
+	clearedFields map[string]struct{}
+	done          bool
+	oldValue      func(context.Context) (*PluginContainer, error)
+	predicates    []predicate.PluginContainer
+}
+
+var _ ent.Mutation = (*PluginContainerMutation)(nil)
+
+// plugincontainerOption allows management of the mutation configuration using functional options.
+type plugincontainerOption func(*PluginContainerMutation)
+
+// newPluginContainerMutation creates new mutation for the PluginContainer entity.
+func newPluginContainerMutation(c config, op Op, opts ...plugincontainerOption) *PluginContainerMutation {
+	m := &PluginContainerMutation{
+		config:        c,
+		op:            op,
+		typ:           TypePluginContainer,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withPluginContainerID sets the ID field of the mutation.
+func withPluginContainerID(id core.ID) plugincontainerOption {
+	return func(m *PluginContainerMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *PluginContainer
+		)
+		m.oldValue = func(ctx context.Context) (*PluginContainer, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().PluginContainer.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withPluginContainer sets the old PluginContainer of the mutation.
+func withPluginContainer(node *PluginContainer) plugincontainerOption {
+	return func(m *PluginContainerMutation) {
+		m.oldValue = func(context.Context) (*PluginContainer, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m PluginContainerMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m PluginContainerMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of PluginContainer entities.
+func (m *PluginContainerMutation) SetID(id core.ID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *PluginContainerMutation) ID() (id core.ID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *PluginContainerMutation) IDs(ctx context.Context) ([]core.ID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []core.ID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().PluginContainer.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetPluginID sets the "plugin_id" field.
+func (m *PluginContainerMutation) SetPluginID(s string) {
+	m.plugin_id = &s
+}
+
+// PluginID returns the value of the "plugin_id" field in the mutation.
+func (m *PluginContainerMutation) PluginID() (r string, exists bool) {
+	v := m.plugin_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPluginID returns the old "plugin_id" field's value of the PluginContainer entity.
+// If the PluginContainer object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PluginContainerMutation) OldPluginID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPluginID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPluginID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPluginID: %w", err)
+	}
+	return oldValue.PluginID, nil
+}
+
+// ResetPluginID resets all changes to the "plugin_id" field.
+func (m *PluginContainerMutation) ResetPluginID() {
+	m.plugin_id = nil
+}
+
+// SetName sets the "name" field.
+func (m *PluginContainerMutation) SetName(s string) {
+	m.name = &s
+}
+
+// Name returns the value of the "name" field in the mutation.
+func (m *PluginContainerMutation) Name() (r string, exists bool) {
+	v := m.name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldName returns the old "name" field's value of the PluginContainer entity.
+// If the PluginContainer object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PluginContainerMutation) OldName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldName: %w", err)
+	}
+	return oldValue.Name, nil
+}
+
+// ResetName resets all changes to the "name" field.
+func (m *PluginContainerMutation) ResetName() {
+	m.name = nil
+}
+
+// SetMode sets the "mode" field.
+func (m *PluginContainerMutation) SetMode(s string) {
+	m.mode = &s
+}
+
+// Mode returns the value of the "mode" field in the mutation.
+func (m *PluginContainerMutation) Mode() (r string, exists bool) {
+	v := m.mode
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMode returns the old "mode" field's value of the PluginContainer entity.
+// If the PluginContainer object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PluginContainerMutation) OldMode(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMode is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMode requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMode: %w", err)
+	}
+	return oldValue.Mode, nil
+}
+
+// ResetMode resets all changes to the "mode" field.
+func (m *PluginContainerMutation) ResetMode() {
+	m.mode = nil
+}
+
+// SetAddress sets the "address" field.
+func (m *PluginContainerMutation) SetAddress(s string) {
+	m.address = &s
+}
+
+// Address returns the value of the "address" field in the mutation.
+func (m *PluginContainerMutation) Address() (r string, exists bool) {
+	v := m.address
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAddress returns the old "address" field's value of the PluginContainer entity.
+// If the PluginContainer object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PluginContainerMutation) OldAddress(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAddress is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAddress requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAddress: %w", err)
+	}
+	return oldValue.Address, nil
+}
+
+// ResetAddress resets all changes to the "address" field.
+func (m *PluginContainerMutation) ResetAddress() {
+	m.address = nil
+}
+
+// SetSecrets sets the "secrets" field.
+func (m *PluginContainerMutation) SetSecrets(value map[string]string) {
+	m.secrets = &value
+}
+
+// Secrets returns the value of the "secrets" field in the mutation.
+func (m *PluginContainerMutation) Secrets() (r map[string]string, exists bool) {
+	v := m.secrets
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSecrets returns the old "secrets" field's value of the PluginContainer entity.
+// If the PluginContainer object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PluginContainerMutation) OldSecrets(ctx context.Context) (v map[string]string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSecrets is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSecrets requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSecrets: %w", err)
+	}
+	return oldValue.Secrets, nil
+}
+
+// ClearSecrets clears the value of the "secrets" field.
+func (m *PluginContainerMutation) ClearSecrets() {
+	m.secrets = nil
+	m.clearedFields[plugincontainer.FieldSecrets] = struct{}{}
+}
+
+// SecretsCleared returns if the "secrets" field was cleared in this mutation.
+func (m *PluginContainerMutation) SecretsCleared() bool {
+	_, ok := m.clearedFields[plugincontainer.FieldSecrets]
+	return ok
+}
+
+// ResetSecrets resets all changes to the "secrets" field.
+func (m *PluginContainerMutation) ResetSecrets() {
+	m.secrets = nil
+	delete(m.clearedFields, plugincontainer.FieldSecrets)
+}
+
+// SetUseGpu sets the "use_gpu" field.
+func (m *PluginContainerMutation) SetUseGpu(b bool) {
+	m.use_gpu = &b
+}
+
+// UseGpu returns the value of the "use_gpu" field in the mutation.
+func (m *PluginContainerMutation) UseGpu() (r bool, exists bool) {
+	v := m.use_gpu
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUseGpu returns the old "use_gpu" field's value of the PluginContainer entity.
+// If the PluginContainer object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PluginContainerMutation) OldUseGpu(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUseGpu is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUseGpu requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUseGpu: %w", err)
+	}
+	return oldValue.UseGpu, nil
+}
+
+// ResetUseGpu resets all changes to the "use_gpu" field.
+func (m *PluginContainerMutation) ResetUseGpu() {
+	m.use_gpu = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *PluginContainerMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *PluginContainerMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the PluginContainer entity.
+// If the PluginContainer object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PluginContainerMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *PluginContainerMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// Where appends a list predicates to the PluginContainerMutation builder.
+func (m *PluginContainerMutation) Where(ps ...predicate.PluginContainer) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the PluginContainerMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *PluginContainerMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.PluginContainer, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *PluginContainerMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *PluginContainerMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (PluginContainer).
+func (m *PluginContainerMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *PluginContainerMutation) Fields() []string {
+	fields := make([]string, 0, 7)
+	if m.plugin_id != nil {
+		fields = append(fields, plugincontainer.FieldPluginID)
+	}
+	if m.name != nil {
+		fields = append(fields, plugincontainer.FieldName)
+	}
+	if m.mode != nil {
+		fields = append(fields, plugincontainer.FieldMode)
+	}
+	if m.address != nil {
+		fields = append(fields, plugincontainer.FieldAddress)
+	}
+	if m.secrets != nil {
+		fields = append(fields, plugincontainer.FieldSecrets)
+	}
+	if m.use_gpu != nil {
+		fields = append(fields, plugincontainer.FieldUseGpu)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, plugincontainer.FieldUpdatedAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *PluginContainerMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case plugincontainer.FieldPluginID:
+		return m.PluginID()
+	case plugincontainer.FieldName:
+		return m.Name()
+	case plugincontainer.FieldMode:
+		return m.Mode()
+	case plugincontainer.FieldAddress:
+		return m.Address()
+	case plugincontainer.FieldSecrets:
+		return m.Secrets()
+	case plugincontainer.FieldUseGpu:
+		return m.UseGpu()
+	case plugincontainer.FieldUpdatedAt:
+		return m.UpdatedAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *PluginContainerMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case plugincontainer.FieldPluginID:
+		return m.OldPluginID(ctx)
+	case plugincontainer.FieldName:
+		return m.OldName(ctx)
+	case plugincontainer.FieldMode:
+		return m.OldMode(ctx)
+	case plugincontainer.FieldAddress:
+		return m.OldAddress(ctx)
+	case plugincontainer.FieldSecrets:
+		return m.OldSecrets(ctx)
+	case plugincontainer.FieldUseGpu:
+		return m.OldUseGpu(ctx)
+	case plugincontainer.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown PluginContainer field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *PluginContainerMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case plugincontainer.FieldPluginID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPluginID(v)
+		return nil
+	case plugincontainer.FieldName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetName(v)
+		return nil
+	case plugincontainer.FieldMode:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMode(v)
+		return nil
+	case plugincontainer.FieldAddress:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAddress(v)
+		return nil
+	case plugincontainer.FieldSecrets:
+		v, ok := value.(map[string]string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSecrets(v)
+		return nil
+	case plugincontainer.FieldUseGpu:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUseGpu(v)
+		return nil
+	case plugincontainer.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown PluginContainer field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *PluginContainerMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *PluginContainerMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *PluginContainerMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown PluginContainer numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *PluginContainerMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(plugincontainer.FieldSecrets) {
+		fields = append(fields, plugincontainer.FieldSecrets)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *PluginContainerMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *PluginContainerMutation) ClearField(name string) error {
+	switch name {
+	case plugincontainer.FieldSecrets:
+		m.ClearSecrets()
+		return nil
+	}
+	return fmt.Errorf("unknown PluginContainer nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *PluginContainerMutation) ResetField(name string) error {
+	switch name {
+	case plugincontainer.FieldPluginID:
+		m.ResetPluginID()
+		return nil
+	case plugincontainer.FieldName:
+		m.ResetName()
+		return nil
+	case plugincontainer.FieldMode:
+		m.ResetMode()
+		return nil
+	case plugincontainer.FieldAddress:
+		m.ResetAddress()
+		return nil
+	case plugincontainer.FieldSecrets:
+		m.ResetSecrets()
+		return nil
+	case plugincontainer.FieldUseGpu:
+		m.ResetUseGpu()
+		return nil
+	case plugincontainer.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown PluginContainer field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *PluginContainerMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *PluginContainerMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *PluginContainerMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *PluginContainerMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *PluginContainerMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *PluginContainerMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *PluginContainerMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown PluginContainer unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *PluginContainerMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown PluginContainer edge %s", name)
 }
 
 // QualityDefinitionMutation represents an operation that mutates the QualityDefinition nodes in the graph.

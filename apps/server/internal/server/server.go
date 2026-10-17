@@ -26,6 +26,7 @@ import (
 	"github.com/mavioai/mavio/apps/server/internal/backup"
 	"github.com/mavioai/mavio/apps/server/internal/certs"
 	"github.com/mavioai/mavio/apps/server/internal/cloud"
+	"github.com/mavioai/mavio/apps/server/internal/dependencies"
 	"github.com/mavioai/mavio/apps/server/internal/downloads"
 	"github.com/mavioai/mavio/apps/server/internal/events"
 	"github.com/mavioai/mavio/apps/server/internal/httpserver"
@@ -43,6 +44,7 @@ import (
 	"github.com/mavioai/mavio/apps/server/internal/speech"
 	"github.com/mavioai/mavio/apps/server/internal/subtitles"
 	"github.com/mavioai/mavio/apps/server/internal/warming"
+	"github.com/mavioai/mavio/libs/containers"
 	"github.com/mavioai/mavio/libs/core"
 	"github.com/mavioai/mavio/libs/library"
 	"github.com/mavioai/mavio/libs/library/storage"
@@ -96,6 +98,9 @@ type Config struct {
 	// PluginDataDir holds the plugins' data folders; empty gives plugins
 	// none.
 	PluginDataDir string
+	// ContainerEndpoint is the container engine plugins' container
+	// dependencies run on; empty finds one (containers.Candidates).
+	ContainerEndpoint string
 	// PluginFetch performs the WASM plugins' outbound HTTP requests, which
 	// their manifests allowed; nil uses a client with a 30-second timeout.
 	PluginFetch *http.Client
@@ -250,6 +255,13 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 			log.ErrorContext(ctx, "stop plugins", "err", err)
 		}
 	}()
+	deps := dependencies.New(dependencies.Config{
+		Store: db.PluginContainers(), Plugins: plugs, Logger: log,
+		Detect: func(ctx context.Context) (containers.Runtime, error) {
+			return containers.Detect(ctx, containers.Options{Endpoint: cfg.ContainerEndpoint})
+		},
+	})
+	defer deps.Close()
 	quietGate := storage.NewQuietGate(0)
 	volumeLedger := storage.NewVolumeLedger()
 	devices := &storage.Detector{}
@@ -412,7 +424,7 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 	h, err := httpserver.Handler(httpserver.Options{
 		Assistant: helper,
 		Version:   cfg.Version, Store: db, Identity: key, Hub: hub, Database: raw.Dialect(), FFmpegVersion: ffmpegVersion, Playbacks: playbacks,
-		Images: imageServer, Plugins: plugs, Devices: plugs, Refresher: refresher, Storage: classifier, Storages: storages, Remotes: rc.Service(offline, rcDown),
+		Images: imageServer, Plugins: plugs, Devices: plugs, Containers: deps, Refresher: refresher, Storage: classifier, Storages: storages, Remotes: rc.Service(offline, rcDown),
 		Subtitles: subFiles, SubtitleRuntime: subs,
 		Lyrics:   lyrics,
 		Intros:   &library.Intros{Store: db, Source: plugs.IntroProviders, Logger: log},
