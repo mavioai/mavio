@@ -6,7 +6,8 @@
 //! the process and a context of its own, sends each request with a call
 //! number of its choosing, and receives the answer, a `Message` with that
 //! number, through the callback, which also carries the servers' events
-//! under call number zero. The callback runs on the core's threads; the
+//! under call number zero. A call answered in parts sends messages marked
+//! `more` before its last. The callback runs on the core's threads; the
 //! buffer it receives is valid only during the call.
 #![allow(unsafe_code)]
 
@@ -17,14 +18,18 @@
 #[path = "gen/mod.rs"]
 mod proto;
 
+mod convert;
+
 use std::collections::HashMap;
 use std::future::Future;
+use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::{Arc, Mutex, OnceLock};
 
 use buffa::Message as _;
+use mavio_api::proto::mavio::playback::v1::ClientCapabilities;
 use mavio_api::proto::mavio::session::v1::__buffa::oneof::event::Kind as EventKind;
 use mavio_api::proto::mavio::session::v1::Event;
-use mavio_core::{Core, DeviceInfo, Store, StreamState};
+use mavio_core::{Core, DeviceInfo, HomeObserver, QuickConnect, Session, Store, StreamState};
 use proto::mavio::capi::v1 as pb;
 use proto::mavio::capi::v1::__buffa::oneof::{message::Kind as Answer, request::Kind as Call};
 use tokio::runtime::Runtime;
@@ -55,9 +60,19 @@ struct Sender {
 
 impl Sender {
     fn send(self, call: u64, kind: Answer) {
+        self.message(call, kind, false);
+    }
+
+    /// Sends a part of an answer, which more parts follow.
+    fn part(self, call: u64, kind: Answer) {
+        self.message(call, kind, true);
+    }
+
+    fn message(self, call: u64, kind: Answer, more: bool) {
         let bytes = pb::Message {
             call,
             kind: Some(kind),
+            more,
             ..Default::default()
         }
         .encode_to_vec();
@@ -152,10 +167,27 @@ impl mavio_core::Listener for Listener {
     }
 }
 
+/// Sends Home's rows as parts of the answer to a call.
+struct Home {
+    sender: Sender,
+    call: u64,
+}
+
+impl HomeObserver for Home {
+    fn rows(&self, rows: Vec<mavio_core::Row>) {
+        self.sender
+            .part(self.call, Answer::Rows(Box::new(convert::rows(rows))));
+    }
+}
+
 /// A client of the core, which the app opens with `mavio_open`.
 pub struct Client {
     sender: Sender,
     core: OnceLock<Arc<Core>>,
+    /// The number of the last Quick Connect request or playback session.
+    handles: AtomicU64,
+    quick_connects: Mutex<HashMap<u64, QuickConnect>>,
+    sessions: Mutex<HashMap<u64, Arc<Session>>>,
 }
 
 fn error(code: pb::error::Code, reason: impl Into<String>) -> Answer {
@@ -186,6 +218,21 @@ impl From<mavio_core::Error> for Answer {
 
 fn answer<T>(result: mavio_core::Result<T>, f: impl FnOnce(T) -> Answer) -> Answer {
     result.map_or_else(Answer::from, f)
+}
+
+fn done() -> Answer {
+    pb::Done::default().into()
+}
+
+fn server_info(s: mavio_core::ServerInfo) -> pb::ServerInfo {
+    pb::ServerInfo {
+        id: s.id,
+        name: s.name,
+        version: s.version,
+        address: s.address,
+        setup_required: s.setup_required,
+        ..Default::default()
+    }
 }
 
 fn record(s: mavio_core::ServerRecord) -> pb::ServerRecord {
@@ -238,10 +285,65 @@ impl Client {
                 "the core is open",
             );
         }
-        pb::Done::default().into()
+        done()
     }
 
-    async fn handle(self: Arc<Self>, call: Call) -> Answer {
+    fn handle_number(&self) -> u64 {
+        self.handles.fetch_add(1, Ordering::Relaxed) + 1
+    }
+
+    fn quick_connect(&self, request: u64) -> Result<QuickConnect, Answer> {
+        let requests = self
+            .quick_connects
+            .lock()
+            .unwrap_or_else(|e| e.into_inner());
+        requests.get(&request).cloned().ok_or_else(|| {
+            error(
+                pb::error::Code::CODE_NOT_FOUND,
+                "no such Quick Connect request",
+            )
+        })
+    }
+
+    fn session(&self, session: u64) -> Result<Arc<Session>, Answer> {
+        let sessions = self.sessions.lock().unwrap_or_else(|e| e.into_inner());
+        sessions
+            .get(&session)
+            .cloned()
+            .ok_or_else(|| error(pb::error::Code::CODE_NOT_FOUND, "no such playback session"))
+    }
+
+    async fn play(&self, core: &Core, p: pb::Play) -> Answer {
+        let capabilities = match ClientCapabilities::decode_from_slice(&p.capabilities) {
+            Ok(c) => c,
+            Err(e) => {
+                return error(
+                    pb::error::Code::CODE_INVALID,
+                    format!("the capabilities are not a message: {e}"),
+                );
+            }
+        };
+        let options = convert::playback_options(p.options.as_option());
+        let session = match core
+            .reporter()
+            .start(&p.server_id, &p.item_id, capabilities, options)
+            .await
+        {
+            Ok(s) => s,
+            Err(e) => return e.into(),
+        };
+        let conn = match core.servers().connection(&session.playback().server_id) {
+            Ok(c) => c,
+            Err(e) => return e.into(),
+        };
+        let number = self.handle_number();
+        let playback = convert::playback(number, &conn, session.playback());
+        let mut sessions = self.sessions.lock().unwrap_or_else(|e| e.into_inner());
+        sessions.insert(number, Arc::new(session));
+        Answer::Playback(Box::new(playback))
+    }
+
+    async fn handle(self: Arc<Self>, number: u64, call: Call) -> Answer {
         if let Call::Open(open) = call {
             return self.open(*open);
         }
@@ -253,23 +355,15 @@ impl Client {
             Call::Open(_) => unreachable!("handled above"),
             Call::GetVersion(_) => Answer::Version(mavio_core::VERSION.to_owned()),
             Call::Probe(p) => answer(core.servers().probe(&p.address).await, |s| {
-                pb::ServerInfo {
-                    id: s.id,
-                    name: s.name,
-                    version: s.version,
-                    address: s.address,
-                    setup_required: s.setup_required,
-                    ..Default::default()
-                }
-                .into()
+                server_info(s).into()
             }),
             Call::SignIn(s) => answer(core.sign_in(&s.address, &s.name, &s.password).await, |s| {
                 Answer::Server(Box::new(record(s)))
             }),
-            Call::Start(_) => answer(core.start(), |()| pb::Done::default().into()),
+            Call::Start(_) => answer(core.start(), |()| done()),
             Call::Stop(_) => {
                 core.stop();
-                pb::Done::default().into()
+                done()
             }
             Call::ListServers(_) => answer(core.servers().list(), |list| {
                 pb::Servers {
@@ -278,6 +372,153 @@ impl Client {
                 }
                 .into()
             }),
+            Call::CreateFirstUser(c) => answer(
+                core.create_first_user(&c.address, &c.name, &c.password)
+                    .await,
+                |s| Answer::Server(Box::new(record(s))),
+            ),
+            Call::Discover(d) => {
+                let wait = std::time::Duration::from_millis(d.wait_ms.into());
+                answer(mavio_core::discover(wait).await, |found| {
+                    pb::FoundServers {
+                        servers: found
+                            .into_iter()
+                            .map(|f| pb::FoundServer {
+                                id: f.id,
+                                name: f.name,
+                                address: f.address,
+                                version: f.version,
+                                ..Default::default()
+                            })
+                            .collect(),
+                        ..Default::default()
+                    }
+                    .into()
+                })
+            }
+            Call::RemoveServer(r) => answer(core.remove(&r.server_id).await, |()| done()),
+            Call::OrderServers(o) => answer(core.servers().order(&o.server_ids), |()| done()),
+            Call::StartQuickConnect(s) => {
+                let qc = match core.servers().start_quick_connect(&s.address).await {
+                    Ok(qc) => qc,
+                    Err(e) => return e.into(),
+                };
+                let request = self.handle_number();
+                let answer = pb::QuickConnect {
+                    request,
+                    code: qc.code.clone(),
+                    expires_ms: convert::time(qc.expires),
+                    server: server_info(qc.server.clone()).into(),
+                    ..Default::default()
+                };
+                let mut requests = self
+                    .quick_connects
+                    .lock()
+                    .unwrap_or_else(|e| e.into_inner());
+                requests.insert(request, qc);
+                answer.into()
+            }
+            Call::PollQuickConnect(p) => {
+                let qc = match self.quick_connect(p.request) {
+                    Ok(qc) => qc,
+                    Err(answer) => return answer,
+                };
+                match core.poll_quick_connect(&qc).await {
+                    Ok(Some(server)) => {
+                        let mut requests = self
+                            .quick_connects
+                            .lock()
+                            .unwrap_or_else(|e| e.into_inner());
+                        requests.remove(&p.request);
+                        Answer::Server(Box::new(record(server)))
+                    }
+                    Ok(None) => done(),
+                    Err(e) => e.into(),
+                }
+            }
+            Call::CancelQuickConnect(c) => {
+                let mut requests = self
+                    .quick_connects
+                    .lock()
+                    .unwrap_or_else(|e| e.into_inner());
+                requests.remove(&c.request);
+                done()
+            }
+            Call::AuthorizeQuickConnect(a) => answer(
+                core.servers()
+                    .authorize_quick_connect(&a.server_id, &a.code)
+                    .await,
+                |()| done(),
+            ),
+            Call::LoadHome(_) => {
+                let home = Home {
+                    sender: self.sender,
+                    call: number,
+                };
+                answer(core.home(&home).await, |()| done())
+            }
+            Call::GetHub(h) => answer(
+                core.hub(&h.server_id, &h.hub_id, h.offset, h.limit).await,
+                |p| convert::page(p).into(),
+            ),
+            Call::GetRecommended(r) => answer(
+                core.recommended(&r.server_id, &r.library_id).await,
+                |rows| convert::rows(rows).into(),
+            ),
+            Call::ListLibraries(l) => answer(core.libraries(&l.server_id).await, |l| {
+                convert::libraries(l).into()
+            }),
+            Call::ListLibraryItems(l) => {
+                let sort = convert::sort(l.sort.as_known());
+                let filter = convert::filter(l.filter.as_option());
+                answer(
+                    core.library_items(
+                        &l.server_id,
+                        &l.library_id,
+                        sort,
+                        &filter,
+                        l.offset,
+                        l.limit,
+                    )
+                    .await,
+                    |p| convert::page(p).into(),
+                )
+            }
+            Call::GetDetails(d) => answer(core.details(&d.server_id, &d.item_id).await, |d| {
+                convert::details(d).into()
+            }),
+            Call::SetPlayed(s) => answer(
+                core.set_played(&s.server_id, &s.item_id, s.played).await,
+                |()| done(),
+            ),
+            Call::SetFavorite(s) => answer(
+                core.set_favorite(&s.server_id, &s.item_id, s.favorite)
+                    .await,
+                |()| done(),
+            ),
+            Call::Search(s) => answer(core.search(&s.query).await, |r| {
+                convert::search_results(r).into()
+            }),
+            Call::Play(p) => self.play(&core, *p).await,
+            Call::UpdatePlayback(u) => {
+                let session = match self.session(u.session) {
+                    Ok(s) => s,
+                    Err(answer) => return answer,
+                };
+                let position = convert::duration(u.position_ms);
+                answer(session.update(position, u.paused).await, |()| done())
+            }
+            Call::StopPlayback(s) => {
+                let session = {
+                    let mut sessions = self.sessions.lock().unwrap_or_else(|e| e.into_inner());
+                    sessions.remove(&s.session)
+                };
+                let Some(session) = session else {
+                    return error(pb::error::Code::CODE_NOT_FOUND, "no such playback session");
+                };
+                let position = s.position_ms.map(convert::duration);
+                answer(session.stop(position).await, |()| done())
+            }
         }
     }
 }
@@ -305,6 +546,9 @@ pub extern "C" fn mavio_open(callback: Callback, context: usize) -> *mut Client 
     let client = Arc::new(Client {
         sender: Sender { callback, context },
         core: OnceLock::new(),
+        handles: AtomicU64::new(0),
+        quick_connects: Mutex::new(HashMap::new()),
+        sessions: Mutex::new(HashMap::new()),
     });
     Arc::into_raw(client).cast_mut()
 }
@@ -338,7 +582,7 @@ pub unsafe extern "C" fn mavio_call(
     match pb::Request::decode_from_slice(bytes) {
         Ok(pb::Request {
             kind: Some(kind), ..
-        }) => spawn(sender, call, client.handle(kind)),
+        }) => spawn(sender, call, client.handle(call, kind)),
         Ok(_) => spawn(sender, call, async {
             error(pb::error::Code::CODE_INVALID, "the request is empty")
         }),

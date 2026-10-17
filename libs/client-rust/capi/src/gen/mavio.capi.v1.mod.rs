@@ -68,6 +68,94 @@ pub use self::__buffa::view::ListServersView;
 #[doc(inline)]
 pub use self::__buffa::view::ListServersOwnedView;
 #[doc(inline)]
+pub use self::__buffa::view::CreateFirstUserView;
+#[doc(inline)]
+pub use self::__buffa::view::CreateFirstUserOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::DiscoverView;
+#[doc(inline)]
+pub use self::__buffa::view::DiscoverOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::RemoveServerView;
+#[doc(inline)]
+pub use self::__buffa::view::RemoveServerOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::OrderServersView;
+#[doc(inline)]
+pub use self::__buffa::view::OrderServersOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::StartQuickConnectView;
+#[doc(inline)]
+pub use self::__buffa::view::StartQuickConnectOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::PollQuickConnectView;
+#[doc(inline)]
+pub use self::__buffa::view::PollQuickConnectOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::CancelQuickConnectView;
+#[doc(inline)]
+pub use self::__buffa::view::CancelQuickConnectOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::AuthorizeQuickConnectView;
+#[doc(inline)]
+pub use self::__buffa::view::AuthorizeQuickConnectOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::LoadHomeView;
+#[doc(inline)]
+pub use self::__buffa::view::LoadHomeOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::GetHubView;
+#[doc(inline)]
+pub use self::__buffa::view::GetHubOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::GetRecommendedView;
+#[doc(inline)]
+pub use self::__buffa::view::GetRecommendedOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ListLibrariesView;
+#[doc(inline)]
+pub use self::__buffa::view::ListLibrariesOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ListLibraryItemsView;
+#[doc(inline)]
+pub use self::__buffa::view::ListLibraryItemsOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::FilterView;
+#[doc(inline)]
+pub use self::__buffa::view::FilterOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::GetDetailsView;
+#[doc(inline)]
+pub use self::__buffa::view::GetDetailsOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::SetPlayedView;
+#[doc(inline)]
+pub use self::__buffa::view::SetPlayedOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::SetFavoriteView;
+#[doc(inline)]
+pub use self::__buffa::view::SetFavoriteOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::SearchView;
+#[doc(inline)]
+pub use self::__buffa::view::SearchOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::PlayView;
+#[doc(inline)]
+pub use self::__buffa::view::PlayOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::PlaybackOptionsView;
+#[doc(inline)]
+pub use self::__buffa::view::PlaybackOptionsOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::UpdatePlaybackView;
+#[doc(inline)]
+pub use self::__buffa::view::UpdatePlaybackOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::StopPlaybackView;
+#[doc(inline)]
+pub use self::__buffa::view::StopPlaybackOwnedView;
+#[doc(inline)]
 pub use self::__buffa::view::MessageView;
 #[doc(inline)]
 pub use self::__buffa::view::MessageOwnedView;
@@ -91,6 +179,98 @@ pub use self::__buffa::view::ServerRecordOwnedView;
 pub use self::__buffa::view::ServersView;
 #[doc(inline)]
 pub use self::__buffa::view::ServersOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::FoundServersView;
+#[doc(inline)]
+pub use self::__buffa::view::FoundServersOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::FoundServerView;
+#[doc(inline)]
+pub use self::__buffa::view::FoundServerOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::QuickConnectView;
+#[doc(inline)]
+pub use self::__buffa::view::QuickConnectOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ArtworkView;
+#[doc(inline)]
+pub use self::__buffa::view::ArtworkOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::VersionView;
+#[doc(inline)]
+pub use self::__buffa::view::VersionOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::CardView;
+#[doc(inline)]
+pub use self::__buffa::view::CardOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::TitleCardView;
+#[doc(inline)]
+pub use self::__buffa::view::TitleCardOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::RowView;
+#[doc(inline)]
+pub use self::__buffa::view::RowOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::CardsView;
+#[doc(inline)]
+pub use self::__buffa::view::CardsOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::TitleCardsView;
+#[doc(inline)]
+pub use self::__buffa::view::TitleCardsOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::LoadingView;
+#[doc(inline)]
+pub use self::__buffa::view::LoadingOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::RowsView;
+#[doc(inline)]
+pub use self::__buffa::view::RowsOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::PageView;
+#[doc(inline)]
+pub use self::__buffa::view::PageOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::LibraryView;
+#[doc(inline)]
+pub use self::__buffa::view::LibraryOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::LibrariesView;
+#[doc(inline)]
+pub use self::__buffa::view::LibrariesOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::CreditView;
+#[doc(inline)]
+pub use self::__buffa::view::CreditOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::SourceView;
+#[doc(inline)]
+pub use self::__buffa::view::SourceOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::AudioStreamView;
+#[doc(inline)]
+pub use self::__buffa::view::AudioStreamOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::DetailsView;
+#[doc(inline)]
+pub use self::__buffa::view::DetailsOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::SearchResultsView;
+#[doc(inline)]
+pub use self::__buffa::view::SearchResultsOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ServerResultsView;
+#[doc(inline)]
+pub use self::__buffa::view::ServerResultsOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::PlaybackView;
+#[doc(inline)]
+pub use self::__buffa::view::PlaybackOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::SubtitleTrackView;
+#[doc(inline)]
+pub use self::__buffa::view::SubtitleTrackOwnedView;
 #[doc(inline)]
 pub use self::__buffa::view::EventView;
 #[doc(inline)]

@@ -13,6 +13,38 @@ pub mod request {
         Start(::buffa::alloc::boxed::Box<super::super::super::Start>),
         Stop(::buffa::alloc::boxed::Box<super::super::super::Stop>),
         ListServers(::buffa::alloc::boxed::Box<super::super::super::ListServers>),
+        CreateFirstUser(
+            ::buffa::alloc::boxed::Box<super::super::super::CreateFirstUser>,
+        ),
+        Discover(::buffa::alloc::boxed::Box<super::super::super::Discover>),
+        RemoveServer(::buffa::alloc::boxed::Box<super::super::super::RemoveServer>),
+        OrderServers(::buffa::alloc::boxed::Box<super::super::super::OrderServers>),
+        StartQuickConnect(
+            ::buffa::alloc::boxed::Box<super::super::super::StartQuickConnect>,
+        ),
+        PollQuickConnect(
+            ::buffa::alloc::boxed::Box<super::super::super::PollQuickConnect>,
+        ),
+        CancelQuickConnect(
+            ::buffa::alloc::boxed::Box<super::super::super::CancelQuickConnect>,
+        ),
+        AuthorizeQuickConnect(
+            ::buffa::alloc::boxed::Box<super::super::super::AuthorizeQuickConnect>,
+        ),
+        LoadHome(::buffa::alloc::boxed::Box<super::super::super::LoadHome>),
+        GetHub(::buffa::alloc::boxed::Box<super::super::super::GetHub>),
+        GetRecommended(::buffa::alloc::boxed::Box<super::super::super::GetRecommended>),
+        ListLibraries(::buffa::alloc::boxed::Box<super::super::super::ListLibraries>),
+        ListLibraryItems(
+            ::buffa::alloc::boxed::Box<super::super::super::ListLibraryItems>,
+        ),
+        GetDetails(::buffa::alloc::boxed::Box<super::super::super::GetDetails>),
+        SetPlayed(::buffa::alloc::boxed::Box<super::super::super::SetPlayed>),
+        SetFavorite(::buffa::alloc::boxed::Box<super::super::super::SetFavorite>),
+        Search(::buffa::alloc::boxed::Box<super::super::super::Search>),
+        Play(::buffa::alloc::boxed::Box<super::super::super::Play>),
+        UpdatePlayback(::buffa::alloc::boxed::Box<super::super::super::UpdatePlayback>),
+        StopPlayback(::buffa::alloc::boxed::Box<super::super::super::StopPlayback>),
     }
     impl ::buffa::Oneof for Kind {}
     impl From<super::super::super::Open> for Kind {
@@ -85,6 +117,207 @@ pub mod request {
             Self::Some(Kind::from(v))
         }
     }
+    impl From<super::super::super::CreateFirstUser> for Kind {
+        fn from(v: super::super::super::CreateFirstUser) -> Self {
+            Self::CreateFirstUser(::buffa::alloc::boxed::Box::new(v))
+        }
+    }
+    impl From<super::super::super::CreateFirstUser> for ::core::option::Option<Kind> {
+        fn from(v: super::super::super::CreateFirstUser) -> Self {
+            Self::Some(Kind::from(v))
+        }
+    }
+    impl From<super::super::super::Discover> for Kind {
+        fn from(v: super::super::super::Discover) -> Self {
+            Self::Discover(::buffa::alloc::boxed::Box::new(v))
+        }
+    }
+    impl From<super::super::super::Discover> for ::core::option::Option<Kind> {
+        fn from(v: super::super::super::Discover) -> Self {
+            Self::Some(Kind::from(v))
+        }
+    }
+    impl From<super::super::super::RemoveServer> for Kind {
+        fn from(v: super::super::super::RemoveServer) -> Self {
+            Self::RemoveServer(::buffa::alloc::boxed::Box::new(v))
+        }
+    }
+    impl From<super::super::super::RemoveServer> for ::core::option::Option<Kind> {
+        fn from(v: super::super::super::RemoveServer) -> Self {
+            Self::Some(Kind::from(v))
+        }
+    }
+    impl From<super::super::super::OrderServers> for Kind {
+        fn from(v: super::super::super::OrderServers) -> Self {
+            Self::OrderServers(::buffa::alloc::boxed::Box::new(v))
+        }
+    }
+    impl From<super::super::super::OrderServers> for ::core::option::Option<Kind> {
+        fn from(v: super::super::super::OrderServers) -> Self {
+            Self::Some(Kind::from(v))
+        }
+    }
+    impl From<super::super::super::StartQuickConnect> for Kind {
+        fn from(v: super::super::super::StartQuickConnect) -> Self {
+            Self::StartQuickConnect(::buffa::alloc::boxed::Box::new(v))
+        }
+    }
+    impl From<super::super::super::StartQuickConnect> for ::core::option::Option<Kind> {
+        fn from(v: super::super::super::StartQuickConnect) -> Self {
+            Self::Some(Kind::from(v))
+        }
+    }
+    impl From<super::super::super::PollQuickConnect> for Kind {
+        fn from(v: super::super::super::PollQuickConnect) -> Self {
+            Self::PollQuickConnect(::buffa::alloc::boxed::Box::new(v))
+        }
+    }
+    impl From<super::super::super::PollQuickConnect> for ::core::option::Option<Kind> {
+        fn from(v: super::super::super::PollQuickConnect) -> Self {
+            Self::Some(Kind::from(v))
+        }
+    }
+    impl From<super::super::super::CancelQuickConnect> for Kind {
+        fn from(v: super::super::super::CancelQuickConnect) -> Self {
+            Self::CancelQuickConnect(::buffa::alloc::boxed::Box::new(v))
+        }
+    }
+    impl From<super::super::super::CancelQuickConnect> for ::core::option::Option<Kind> {
+        fn from(v: super::super::super::CancelQuickConnect) -> Self {
+            Self::Some(Kind::from(v))
+        }
+    }
+    impl From<super::super::super::AuthorizeQuickConnect> for Kind {
+        fn from(v: super::super::super::AuthorizeQuickConnect) -> Self {
+            Self::AuthorizeQuickConnect(::buffa::alloc::boxed::Box::new(v))
+        }
+    }
+    impl From<super::super::super::AuthorizeQuickConnect>
+    for ::core::option::Option<Kind> {
+        fn from(v: super::super::super::AuthorizeQuickConnect) -> Self {
+            Self::Some(Kind::from(v))
+        }
+    }
+    impl From<super::super::super::LoadHome> for Kind {
+        fn from(v: super::super::super::LoadHome) -> Self {
+            Self::LoadHome(::buffa::alloc::boxed::Box::new(v))
+        }
+    }
+    impl From<super::super::super::LoadHome> for ::core::option::Option<Kind> {
+        fn from(v: super::super::super::LoadHome) -> Self {
+            Self::Some(Kind::from(v))
+        }
+    }
+    impl From<super::super::super::GetHub> for Kind {
+        fn from(v: super::super::super::GetHub) -> Self {
+            Self::GetHub(::buffa::alloc::boxed::Box::new(v))
+        }
+    }
+    impl From<super::super::super::GetHub> for ::core::option::Option<Kind> {
+        fn from(v: super::super::super::GetHub) -> Self {
+            Self::Some(Kind::from(v))
+        }
+    }
+    impl From<super::super::super::GetRecommended> for Kind {
+        fn from(v: super::super::super::GetRecommended) -> Self {
+            Self::GetRecommended(::buffa::alloc::boxed::Box::new(v))
+        }
+    }
+    impl From<super::super::super::GetRecommended> for ::core::option::Option<Kind> {
+        fn from(v: super::super::super::GetRecommended) -> Self {
+            Self::Some(Kind::from(v))
+        }
+    }
+    impl From<super::super::super::ListLibraries> for Kind {
+        fn from(v: super::super::super::ListLibraries) -> Self {
+            Self::ListLibraries(::buffa::alloc::boxed::Box::new(v))
+        }
+    }
+    impl From<super::super::super::ListLibraries> for ::core::option::Option<Kind> {
+        fn from(v: super::super::super::ListLibraries) -> Self {
+            Self::Some(Kind::from(v))
+        }
+    }
+    impl From<super::super::super::ListLibraryItems> for Kind {
+        fn from(v: super::super::super::ListLibraryItems) -> Self {
+            Self::ListLibraryItems(::buffa::alloc::boxed::Box::new(v))
+        }
+    }
+    impl From<super::super::super::ListLibraryItems> for ::core::option::Option<Kind> {
+        fn from(v: super::super::super::ListLibraryItems) -> Self {
+            Self::Some(Kind::from(v))
+        }
+    }
+    impl From<super::super::super::GetDetails> for Kind {
+        fn from(v: super::super::super::GetDetails) -> Self {
+            Self::GetDetails(::buffa::alloc::boxed::Box::new(v))
+        }
+    }
+    impl From<super::super::super::GetDetails> for ::core::option::Option<Kind> {
+        fn from(v: super::super::super::GetDetails) -> Self {
+            Self::Some(Kind::from(v))
+        }
+    }
+    impl From<super::super::super::SetPlayed> for Kind {
+        fn from(v: super::super::super::SetPlayed) -> Self {
+            Self::SetPlayed(::buffa::alloc::boxed::Box::new(v))
+        }
+    }
+    impl From<super::super::super::SetPlayed> for ::core::option::Option<Kind> {
+        fn from(v: super::super::super::SetPlayed) -> Self {
+            Self::Some(Kind::from(v))
+        }
+    }
+    impl From<super::super::super::SetFavorite> for Kind {
+        fn from(v: super::super::super::SetFavorite) -> Self {
+            Self::SetFavorite(::buffa::alloc::boxed::Box::new(v))
+        }
+    }
+    impl From<super::super::super::SetFavorite> for ::core::option::Option<Kind> {
+        fn from(v: super::super::super::SetFavorite) -> Self {
+            Self::Some(Kind::from(v))
+        }
+    }
+    impl From<super::super::super::Search> for Kind {
+        fn from(v: super::super::super::Search) -> Self {
+            Self::Search(::buffa::alloc::boxed::Box::new(v))
+        }
+    }
+    impl From<super::super::super::Search> for ::core::option::Option<Kind> {
+        fn from(v: super::super::super::Search) -> Self {
+            Self::Some(Kind::from(v))
+        }
+    }
+    impl From<super::super::super::Play> for Kind {
+        fn from(v: super::super::super::Play) -> Self {
+            Self::Play(::buffa::alloc::boxed::Box::new(v))
+        }
+    }
+    impl From<super::super::super::Play> for ::core::option::Option<Kind> {
+        fn from(v: super::super::super::Play) -> Self {
+            Self::Some(Kind::from(v))
+        }
+    }
+    impl From<super::super::super::UpdatePlayback> for Kind {
+        fn from(v: super::super::super::UpdatePlayback) -> Self {
+            Self::UpdatePlayback(::buffa::alloc::boxed::Box::new(v))
+        }
+    }
+    impl From<super::super::super::UpdatePlayback> for ::core::option::Option<Kind> {
+        fn from(v: super::super::super::UpdatePlayback) -> Self {
+            Self::Some(Kind::from(v))
+        }
+    }
+    impl From<super::super::super::StopPlayback> for Kind {
+        fn from(v: super::super::super::StopPlayback) -> Self {
+            Self::StopPlayback(::buffa::alloc::boxed::Box::new(v))
+        }
+    }
+    impl From<super::super::super::StopPlayback> for ::core::option::Option<Kind> {
+        fn from(v: super::super::super::StopPlayback) -> Self {
+            Self::Some(Kind::from(v))
+        }
+    }
 }
 pub mod message {
     #[allow(unused_imports)]
@@ -98,6 +331,14 @@ pub mod message {
         Server(::buffa::alloc::boxed::Box<super::super::super::ServerRecord>),
         Servers(::buffa::alloc::boxed::Box<super::super::super::Servers>),
         Event(::buffa::alloc::boxed::Box<super::super::super::Event>),
+        FoundServers(::buffa::alloc::boxed::Box<super::super::super::FoundServers>),
+        QuickConnect(::buffa::alloc::boxed::Box<super::super::super::QuickConnect>),
+        Rows(::buffa::alloc::boxed::Box<super::super::super::Rows>),
+        Page(::buffa::alloc::boxed::Box<super::super::super::Page>),
+        Libraries(::buffa::alloc::boxed::Box<super::super::super::Libraries>),
+        Details(::buffa::alloc::boxed::Box<super::super::super::Details>),
+        SearchResults(::buffa::alloc::boxed::Box<super::super::super::SearchResults>),
+        Playback(::buffa::alloc::boxed::Box<super::super::super::Playback>),
     }
     impl ::buffa::Oneof for Kind {}
     impl From<super::super::super::Error> for Kind {
@@ -158,6 +399,128 @@ pub mod message {
     impl From<super::super::super::Event> for ::core::option::Option<Kind> {
         fn from(v: super::super::super::Event) -> Self {
             Self::Some(Kind::from(v))
+        }
+    }
+    impl From<super::super::super::FoundServers> for Kind {
+        fn from(v: super::super::super::FoundServers) -> Self {
+            Self::FoundServers(::buffa::alloc::boxed::Box::new(v))
+        }
+    }
+    impl From<super::super::super::FoundServers> for ::core::option::Option<Kind> {
+        fn from(v: super::super::super::FoundServers) -> Self {
+            Self::Some(Kind::from(v))
+        }
+    }
+    impl From<super::super::super::QuickConnect> for Kind {
+        fn from(v: super::super::super::QuickConnect) -> Self {
+            Self::QuickConnect(::buffa::alloc::boxed::Box::new(v))
+        }
+    }
+    impl From<super::super::super::QuickConnect> for ::core::option::Option<Kind> {
+        fn from(v: super::super::super::QuickConnect) -> Self {
+            Self::Some(Kind::from(v))
+        }
+    }
+    impl From<super::super::super::Rows> for Kind {
+        fn from(v: super::super::super::Rows) -> Self {
+            Self::Rows(::buffa::alloc::boxed::Box::new(v))
+        }
+    }
+    impl From<super::super::super::Rows> for ::core::option::Option<Kind> {
+        fn from(v: super::super::super::Rows) -> Self {
+            Self::Some(Kind::from(v))
+        }
+    }
+    impl From<super::super::super::Page> for Kind {
+        fn from(v: super::super::super::Page) -> Self {
+            Self::Page(::buffa::alloc::boxed::Box::new(v))
+        }
+    }
+    impl From<super::super::super::Page> for ::core::option::Option<Kind> {
+        fn from(v: super::super::super::Page) -> Self {
+            Self::Some(Kind::from(v))
+        }
+    }
+    impl From<super::super::super::Libraries> for Kind {
+        fn from(v: super::super::super::Libraries) -> Self {
+            Self::Libraries(::buffa::alloc::boxed::Box::new(v))
+        }
+    }
+    impl From<super::super::super::Libraries> for ::core::option::Option<Kind> {
+        fn from(v: super::super::super::Libraries) -> Self {
+            Self::Some(Kind::from(v))
+        }
+    }
+    impl From<super::super::super::Details> for Kind {
+        fn from(v: super::super::super::Details) -> Self {
+            Self::Details(::buffa::alloc::boxed::Box::new(v))
+        }
+    }
+    impl From<super::super::super::Details> for ::core::option::Option<Kind> {
+        fn from(v: super::super::super::Details) -> Self {
+            Self::Some(Kind::from(v))
+        }
+    }
+    impl From<super::super::super::SearchResults> for Kind {
+        fn from(v: super::super::super::SearchResults) -> Self {
+            Self::SearchResults(::buffa::alloc::boxed::Box::new(v))
+        }
+    }
+    impl From<super::super::super::SearchResults> for ::core::option::Option<Kind> {
+        fn from(v: super::super::super::SearchResults) -> Self {
+            Self::Some(Kind::from(v))
+        }
+    }
+    impl From<super::super::super::Playback> for Kind {
+        fn from(v: super::super::super::Playback) -> Self {
+            Self::Playback(::buffa::alloc::boxed::Box::new(v))
+        }
+    }
+    impl From<super::super::super::Playback> for ::core::option::Option<Kind> {
+        fn from(v: super::super::super::Playback) -> Self {
+            Self::Some(Kind::from(v))
+        }
+    }
+}
+pub mod row {
+    #[allow(unused_imports)]
+    use super::*;
+    #[derive(Clone, PartialEq, Debug)]
+    pub enum Content {
+        Items(::buffa::alloc::boxed::Box<super::super::super::Cards>),
+        Titles(::buffa::alloc::boxed::Box<super::super::super::TitleCards>),
+        Loading(::buffa::alloc::boxed::Box<super::super::super::Loading>),
+        Unavailable(::buffa::alloc::string::String),
+    }
+    impl ::buffa::Oneof for Content {}
+    impl From<super::super::super::Cards> for Content {
+        fn from(v: super::super::super::Cards) -> Self {
+            Self::Items(::buffa::alloc::boxed::Box::new(v))
+        }
+    }
+    impl From<super::super::super::Cards> for ::core::option::Option<Content> {
+        fn from(v: super::super::super::Cards) -> Self {
+            Self::Some(Content::from(v))
+        }
+    }
+    impl From<super::super::super::TitleCards> for Content {
+        fn from(v: super::super::super::TitleCards) -> Self {
+            Self::Titles(::buffa::alloc::boxed::Box::new(v))
+        }
+    }
+    impl From<super::super::super::TitleCards> for ::core::option::Option<Content> {
+        fn from(v: super::super::super::TitleCards) -> Self {
+            Self::Some(Content::from(v))
+        }
+    }
+    impl From<super::super::super::Loading> for Content {
+        fn from(v: super::super::super::Loading) -> Self {
+            Self::Loading(::buffa::alloc::boxed::Box::new(v))
+        }
+    }
+    impl From<super::super::super::Loading> for ::core::option::Option<Content> {
+        fn from(v: super::super::super::Loading) -> Self {
+            Self::Some(Content::from(v))
         }
     }
 }

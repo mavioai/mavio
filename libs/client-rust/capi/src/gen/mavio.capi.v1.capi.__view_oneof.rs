@@ -41,6 +41,106 @@ pub mod request {
                 super::super::super::super::__buffa::view::ListServersView<'a>,
             >,
         ),
+        CreateFirstUser(
+            ::buffa::alloc::boxed::Box<
+                super::super::super::super::__buffa::view::CreateFirstUserView<'a>,
+            >,
+        ),
+        Discover(
+            ::buffa::alloc::boxed::Box<
+                super::super::super::super::__buffa::view::DiscoverView<'a>,
+            >,
+        ),
+        RemoveServer(
+            ::buffa::alloc::boxed::Box<
+                super::super::super::super::__buffa::view::RemoveServerView<'a>,
+            >,
+        ),
+        OrderServers(
+            ::buffa::alloc::boxed::Box<
+                super::super::super::super::__buffa::view::OrderServersView<'a>,
+            >,
+        ),
+        StartQuickConnect(
+            ::buffa::alloc::boxed::Box<
+                super::super::super::super::__buffa::view::StartQuickConnectView<'a>,
+            >,
+        ),
+        PollQuickConnect(
+            ::buffa::alloc::boxed::Box<
+                super::super::super::super::__buffa::view::PollQuickConnectView<'a>,
+            >,
+        ),
+        CancelQuickConnect(
+            ::buffa::alloc::boxed::Box<
+                super::super::super::super::__buffa::view::CancelQuickConnectView<'a>,
+            >,
+        ),
+        AuthorizeQuickConnect(
+            ::buffa::alloc::boxed::Box<
+                super::super::super::super::__buffa::view::AuthorizeQuickConnectView<'a>,
+            >,
+        ),
+        LoadHome(
+            ::buffa::alloc::boxed::Box<
+                super::super::super::super::__buffa::view::LoadHomeView<'a>,
+            >,
+        ),
+        GetHub(
+            ::buffa::alloc::boxed::Box<
+                super::super::super::super::__buffa::view::GetHubView<'a>,
+            >,
+        ),
+        GetRecommended(
+            ::buffa::alloc::boxed::Box<
+                super::super::super::super::__buffa::view::GetRecommendedView<'a>,
+            >,
+        ),
+        ListLibraries(
+            ::buffa::alloc::boxed::Box<
+                super::super::super::super::__buffa::view::ListLibrariesView<'a>,
+            >,
+        ),
+        ListLibraryItems(
+            ::buffa::alloc::boxed::Box<
+                super::super::super::super::__buffa::view::ListLibraryItemsView<'a>,
+            >,
+        ),
+        GetDetails(
+            ::buffa::alloc::boxed::Box<
+                super::super::super::super::__buffa::view::GetDetailsView<'a>,
+            >,
+        ),
+        SetPlayed(
+            ::buffa::alloc::boxed::Box<
+                super::super::super::super::__buffa::view::SetPlayedView<'a>,
+            >,
+        ),
+        SetFavorite(
+            ::buffa::alloc::boxed::Box<
+                super::super::super::super::__buffa::view::SetFavoriteView<'a>,
+            >,
+        ),
+        Search(
+            ::buffa::alloc::boxed::Box<
+                super::super::super::super::__buffa::view::SearchView<'a>,
+            >,
+        ),
+        Play(
+            ::buffa::alloc::boxed::Box<
+                super::super::super::super::__buffa::view::PlayView<'a>,
+            >,
+        ),
+        UpdatePlayback(
+            ::buffa::alloc::boxed::Box<
+                super::super::super::super::__buffa::view::UpdatePlaybackView<'a>,
+            >,
+        ),
+        StopPlayback(
+            ::buffa::alloc::boxed::Box<
+                super::super::super::super::__buffa::view::StopPlaybackView<'a>,
+            >,
+        ),
     }
 }
 pub mod message {
@@ -79,6 +179,69 @@ pub mod message {
                 super::super::super::super::__buffa::view::EventView<'a>,
             >,
         ),
+        FoundServers(
+            ::buffa::alloc::boxed::Box<
+                super::super::super::super::__buffa::view::FoundServersView<'a>,
+            >,
+        ),
+        QuickConnect(
+            ::buffa::alloc::boxed::Box<
+                super::super::super::super::__buffa::view::QuickConnectView<'a>,
+            >,
+        ),
+        Rows(
+            ::buffa::alloc::boxed::Box<
+                super::super::super::super::__buffa::view::RowsView<'a>,
+            >,
+        ),
+        Page(
+            ::buffa::alloc::boxed::Box<
+                super::super::super::super::__buffa::view::PageView<'a>,
+            >,
+        ),
+        Libraries(
+            ::buffa::alloc::boxed::Box<
+                super::super::super::super::__buffa::view::LibrariesView<'a>,
+            >,
+        ),
+        Details(
+            ::buffa::alloc::boxed::Box<
+                super::super::super::super::__buffa::view::DetailsView<'a>,
+            >,
+        ),
+        SearchResults(
+            ::buffa::alloc::boxed::Box<
+                super::super::super::super::__buffa::view::SearchResultsView<'a>,
+            >,
+        ),
+        Playback(
+            ::buffa::alloc::boxed::Box<
+                super::super::super::super::__buffa::view::PlaybackView<'a>,
+            >,
+        ),
+    }
+}
+pub mod row {
+    #[allow(unused_imports)]
+    use super::*;
+    #[derive(Clone, Debug)]
+    pub enum Content<'a> {
+        Items(
+            ::buffa::alloc::boxed::Box<
+                super::super::super::super::__buffa::view::CardsView<'a>,
+            >,
+        ),
+        Titles(
+            ::buffa::alloc::boxed::Box<
+                super::super::super::super::__buffa::view::TitleCardsView<'a>,
+            >,
+        ),
+        Loading(
+            ::buffa::alloc::boxed::Box<
+                super::super::super::super::__buffa::view::LoadingView<'a>,
+            >,
+        ),
+        Unavailable(&'a str),
     }
 }
 pub mod event {

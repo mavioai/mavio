@@ -68,8 +68,15 @@ type Client struct {
 
 	calls   atomic.Uint64
 	mu      sync.Mutex
-	pending map[uint64]chan *capiv1.Message
+	pending map[uint64]*waiter
 	closed  bool
+}
+
+// waiter waits for the messages answering a call; gone is closed when the
+// caller stops waiting.
+type waiter struct {
+	messages chan *capiv1.Message
+	gone     chan struct{}
 }
 
 // Open opens a client of the core with open's store, device and tokens;
@@ -78,7 +85,7 @@ type Client struct {
 func (l *Library) Open(ctx context.Context, open *capiv1.Open, events func(*capiv1.Event)) (*Client, error) {
 	l.mu.Lock()
 	l.next++
-	c := &Client{lib: l, context: l.next, events: events, pending: map[uint64]chan *capiv1.Message{}}
+	c := &Client{lib: l, context: l.next, events: events, pending: map[uint64]*waiter{}}
 	l.clients[c.context] = c
 	l.mu.Unlock()
 	c.handle = l.open(l.callback, c.context)
@@ -97,11 +104,16 @@ func (c *Client) receive(m *capiv1.Message) {
 		return
 	}
 	c.mu.Lock()
-	ch := c.pending[m.GetCall()]
-	delete(c.pending, m.GetCall())
+	w := c.pending[m.GetCall()]
+	if !m.GetMore() {
+		delete(c.pending, m.GetCall())
+	}
 	c.mu.Unlock()
-	if ch != nil {
-		ch <- m
+	if w != nil {
+		select {
+		case w.messages <- m:
+		case <-w.gone:
+		}
 	}
 }
 
@@ -122,18 +134,25 @@ func (e *Error) Error() string {
 // is returned as an *Error. A call whose ctx ends is abandoned, and its
 // answer dropped.
 func (c *Client) Call(ctx context.Context, request *capiv1.Request) (*capiv1.Message, error) {
+	return c.Stream(ctx, request, nil)
+}
+
+// Stream is Call for a request answered in parts: it gives part each
+// message marked more, in order on the calling goroutine, and returns the
+// last.
+func (c *Client) Stream(ctx context.Context, request *capiv1.Request, part func(*capiv1.Message)) (*capiv1.Message, error) {
 	b, err := proto.Marshal(request)
 	if err != nil {
 		return nil, fmt.Errorf("capi: marshal the request: %w", err)
 	}
 	call := c.calls.Add(1)
-	ch := make(chan *capiv1.Message, 1)
+	w := &waiter{messages: make(chan *capiv1.Message, 1), gone: make(chan struct{})}
 	c.mu.Lock()
 	if c.closed {
 		c.mu.Unlock()
 		return nil, ErrClosed
 	}
-	c.pending[call] = ch
+	c.pending[call] = w
 	var p *byte
 	if len(b) > 0 {
 		p = &b[0]
@@ -142,17 +161,26 @@ func (c *Client) Call(ctx context.Context, request *capiv1.Request) (*capiv1.Mes
 	c.lib.call(c.handle, call, p, uintptr(len(b)))
 	runtime.KeepAlive(b)
 	c.mu.Unlock()
-	select {
-	case m := <-ch:
-		if e := m.GetError(); e != nil {
-			return nil, &Error{Code: e.GetCode(), Reason: e.GetReason()}
+	for {
+		select {
+		case m := <-w.messages:
+			if m.GetMore() {
+				if part != nil {
+					part(m)
+				}
+				continue
+			}
+			if e := m.GetError(); e != nil {
+				return nil, &Error{Code: e.GetCode(), Reason: e.GetReason()}
+			}
+			return m, nil
+		case <-ctx.Done():
+			c.mu.Lock()
+			delete(c.pending, call)
+			c.mu.Unlock()
+			close(w.gone)
+			return nil, ctx.Err()
 		}
-		return m, nil
-	case <-ctx.Done():
-		c.mu.Lock()
-		delete(c.pending, call)
-		c.mu.Unlock()
-		return nil, ctx.Err()
 	}
 }
 

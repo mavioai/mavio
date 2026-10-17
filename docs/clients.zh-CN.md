@@ -165,7 +165,7 @@ flowchart LR
 * **UniFFI API**（`mavio-uniffi`）：对象 `Client`，其异步函数运行在进程唯一的 Tokio 运行时上，应用丢弃其 future 时即被取消；应用实现的接口：保存设备密钥与会话的 `SecureTokens`、接收流状态与事件的 `CoreListener`、接收首页的 `HomeListener`；客户端能力以类型化记录表示，转换为 `ClientCapabilities`。
 * **Swift**：UniFFI 生成 Swift API，与共享库一起打包为 `MavioKit` 所依赖的、由动态 framework 组成的 XCFramework。
 * **Kotlin**：UniFFI 生成 Kotlin API，与共享库一起打包在 `libs/android` 的 `core` 模块中。
-* **Go**：一个由三个函数组成的 C ABI（`mavio-capi`，库名 `maviocore`）：`mavio_open` 以进程唯一的回调和应用自己的上下文打开一个客户端，`mavio_call` 以应用自选的调用编号向它发送请求，`mavio_close` 关闭它。请求与应答是 `mavio.capi.v1` 的 protobuf 消息（定义在 `libs/client-rust/proto`），放在字节缓冲区中；每个应答，以及调用编号为零的各服务器事件，都在核心的线程上经回调返回，因此 purego 在整个进程中只需创建一个回调。核心自己不保存机密：应用打开核心时交给它保存在系统安全存储中的设备密钥与会话，并按事件告知保存新的、删除被遗忘的。Go 绑定是 `libs/client-rust/capi` 中与 C ABI 并列的 Go 模块：`capi` 包不经 cgo 加载该库——Linux 与 macOS 上用 purego，Windows 上用 `syscall` 包——并把每次调用变为返回其应答的函数；其消息的 Go 代码生成到 `capi/gen`。
+* **Go**：一个由三个函数组成的 C ABI（`mavio-capi`，库名 `maviocore`）：`mavio_open` 以进程唯一的回调和应用自己的上下文打开一个客户端，`mavio_call` 以应用自选的调用编号向它发送请求，`mavio_close` 关闭它。请求与应答是 `mavio.capi.v1` 的 protobuf 消息（定义在 `libs/client-rust/proto`），放在字节缓冲区中；每个应答，以及调用编号为零的各服务器事件，都在核心的线程上经回调返回，因此 purego 在整个进程中只需创建一个回调。分多次应答的调用（如每当一台服务器应答就送来全部行的主页）在最后一条之前发送标记 `more` 的消息；Quick Connect 请求与播放会话留在核心中，以编号交给应用，应用再以编号传回。核心自己不保存机密：应用打开核心时交给它保存在系统安全存储中的设备密钥与会话，并按事件告知保存新的、删除被遗忘的。Go 绑定是 `libs/client-rust/capi` 中与 C ABI 并列的 Go 模块：`capi` 包不经 cgo 加载该库——Linux 与 macOS 上用 purego，Windows 上用 `syscall` 包——并把每次调用变为返回其应答的函数，`Stream` 把分多次应答的各部分交给一个回调；其消息的 Go 代码生成到 `capi/gen`。
 
 ### 5.4 多台服务器
 客户端同时登录其登录身份（[账户 §7](accounts.zh-CN.md#7-客户端)）中的每台服务器——Mavio 账户的服务器，包括用户自己的以及亲友的，或一台独立服务器——每台都有各自的用户与会话。服务器彼此不知道对方；只有客户端按用户的服务器顺序把它们组合起来。

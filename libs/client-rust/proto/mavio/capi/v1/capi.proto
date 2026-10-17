@@ -2,7 +2,8 @@
 // the desktop app calls the core: the app sends a Request with a
 // call number, and the core answers each with a Message of that number
 // through the one callback the app gave it, which also carries the events
-// of the servers under call number zero.
+// of the servers under call number zero. A call answered in parts, such as
+// LoadHome, sends Messages marked more before its last one.
 edition = "2023";
 
 package mavio.capi.v1;
@@ -19,6 +20,26 @@ message Request {
     Start start = 5;
     Stop stop = 6;
     ListServers list_servers = 7;
+    CreateFirstUser create_first_user = 8;
+    Discover discover = 9;
+    RemoveServer remove_server = 10;
+    OrderServers order_servers = 11;
+    StartQuickConnect start_quick_connect = 12;
+    PollQuickConnect poll_quick_connect = 13;
+    CancelQuickConnect cancel_quick_connect = 14;
+    AuthorizeQuickConnect authorize_quick_connect = 15;
+    LoadHome load_home = 16;
+    GetHub get_hub = 17;
+    GetRecommended get_recommended = 18;
+    ListLibraries list_libraries = 19;
+    ListLibraryItems list_library_items = 20;
+    GetDetails get_details = 21;
+    SetPlayed set_played = 22;
+    SetFavorite set_favorite = 23;
+    Search search = 24;
+    Play play = 25;
+    UpdatePlayback update_playback = 26;
+    StopPlayback stop_playback = 27;
   }
 }
 
@@ -68,6 +89,178 @@ message Stop {}
 // Answered with the servers, in the user's order.
 message ListServers {}
 
+// Creates the first user of a new server and signs in as them; answered
+// with its ServerRecord.
+message CreateFirstUser {
+  string address = 1;
+  string name = 2;
+  string password = 3;
+}
+
+// Finds the servers on the local network that answer within wait_ms;
+// answered with FoundServers.
+message Discover {
+  uint32 wait_ms = 1;
+}
+
+// Signs out of a server and forgets it.
+message RemoveServer {
+  string server_id = 1;
+}
+
+// Orders the servers as the user arranged them.
+message OrderServers {
+  repeated string server_ids = 1;
+}
+
+// Starts signing in to the server at an address with Quick Connect;
+// answered with a QuickConnect.
+message StartQuickConnect {
+  string address = 1;
+}
+
+// Asks whether a Quick Connect request was authorized: answered with the
+// ServerRecord signed in to once it was, which ends the request, or with
+// Done while it waits.
+message PollQuickConnect {
+  uint64 request = 1;
+}
+
+// Gives up a Quick Connect request.
+message CancelQuickConnect {
+  uint64 request = 1;
+}
+
+// Authorizes another device's Quick Connect code on a server this device
+// is signed in to.
+message AuthorizeQuickConnect {
+  string server_id = 1;
+  string code = 2;
+}
+
+// Loads Home from every server at once: answered with Rows, all of them,
+// each time a server answers, marked more, then with Done.
+message LoadHome {}
+
+// More items of a row; answered with a Page.
+message GetHub {
+  string server_id = 1;
+  string hub_id = 2;
+  uint32 offset = 3;
+  uint32 limit = 4;
+}
+
+// A library's Recommended tab; answered with Rows.
+message GetRecommended {
+  string server_id = 1;
+  string library_id = 2;
+}
+
+// A server's libraries; answered with Libraries.
+message ListLibraries {
+  string server_id = 1;
+}
+
+// A page of a library's grid; answered with a Page.
+message ListLibraryItems {
+  string server_id = 1;
+  string library_id = 2;
+  Sort sort = 3;
+  Filter filter = 4;
+  uint32 offset = 5;
+  uint32 limit = 6;
+}
+
+// How a library's grid is sorted.
+enum Sort {
+  // By name.
+  SORT_UNSPECIFIED = 0;
+  // Last added first.
+  SORT_DATE_ADDED = 1;
+  // Last released first.
+  SORT_RELEASED = 2;
+  // Best rated first.
+  SORT_RATING = 3;
+  // Last played first.
+  SORT_LAST_PLAYED = 4;
+  SORT_RANDOM = 5;
+}
+
+// A library's grid filter.
+message Filter {
+  // Only played (true) or unplayed (false) items.
+  bool played = 1 [features.field_presence = EXPLICIT];
+  // Only favorites.
+  bool favorite = 2;
+  // Only items of this genre.
+  string genre = 3;
+}
+
+// An item's details; answered with Details.
+message GetDetails {
+  string server_id = 1;
+  string item_id = 2;
+}
+
+// Marks an item played or unplayed.
+message SetPlayed {
+  string server_id = 1;
+  string item_id = 2;
+  bool played = 3;
+}
+
+// Marks an item a favorite or not.
+message SetFavorite {
+  string server_id = 1;
+  string item_id = 2;
+  bool favorite = 3;
+}
+
+// Searches every server at once; answered with SearchResults.
+message Search {
+  string query = 1;
+}
+
+// Starts playing an item; answered with a Playback, whose session the app
+// updates and stops.
+message Play {
+  string server_id = 1;
+  string item_id = 2;
+  // What the player plays: an encoded mavio.playback.v1.ClientCapabilities.
+  bytes capabilities = 3;
+  PlaybackOptions options = 4;
+}
+
+// What to play of an item.
+message PlaybackOptions {
+  // The media source; empty picks the best one for the client.
+  string media_source_id = 1;
+  // The audio stream; unset plays the user's or the source's default.
+  int32 audio_stream_index = 2 [features.field_presence = EXPLICIT];
+  // The subtitle stream, -1 for none; unset plays the user's or the
+  // source's default.
+  int32 subtitle_stream_index = 3 [features.field_presence = EXPLICIT];
+  // Caps the bitrate, in bits per second; zero for none.
+  int64 max_bitrate = 4;
+  // Where to begin, usually the resume position.
+  int64 start_position_ms = 5 [features.field_presence = EXPLICIT];
+}
+
+// The player's position and whether it is paused; sent on every tick, it
+// reports every ten seconds and on pause and seek.
+message UpdatePlayback {
+  uint64 session = 1;
+  int64 position_ms = 2;
+  bool paused = 3;
+}
+
+// Playback stopped, which ends the session.
+message StopPlayback {
+  uint64 session = 1;
+  // Where it stopped; unset when played to the end.
+  int64 position_ms = 2 [features.field_presence = EXPLICIT];
+}
+
 // What the core sends the app: the answer to a call, or an event.
 message Message {
   // The call answered; zero for an event.
@@ -80,7 +273,17 @@ message Message {
     ServerRecord server = 6;
     Servers servers = 7;
     Event event = 8;
+    FoundServers found_servers = 10;
+    QuickConnect quick_connect = 11;
+    Rows rows = 12;
+    Page page = 13;
+    Libraries libraries = 14;
+    Details details = 15;
+    SearchResults search_results = 16;
+    Playback playback = 17;
   }
+  // More Messages answer the call after this one.
+  bool more = 9;
 }
 
 // Why a call failed.
@@ -134,6 +337,368 @@ message ServerRecord {
 // The servers, in the user's order.
 message Servers {
   repeated ServerRecord servers = 1;
+}
+
+// Servers found on the local network.
+message FoundServers {
+  repeated FoundServer servers = 1;
+}
+
+// A server that answered discovery.
+message FoundServer {
+  // The server's own ID, the same at every address.
+  string id = 1;
+  string name = 2;
+  // Where it answers, such as "http://192.168.1.5:8686".
+  string address = 3;
+  string version = 4;
+}
+
+// A Quick Connect request: the app shows the code, the user enters it on
+// a device signed in to the server, and the app polls the request.
+message QuickConnect {
+  // The request, to poll or cancel.
+  uint64 request = 1;
+  // Six digits to show.
+  string code = 2;
+  // When the request expires, in milliseconds since the Unix epoch.
+  int64 expires_ms = 3;
+  ServerInfo server = 4;
+}
+
+// An image of an item.
+message Artwork {
+  // The image, to which the app adds "?maxWidth=" and "maxHeight=" for
+  // the size it draws.
+  string url = 1;
+  // Width over height; zero when unknown.
+  float aspect = 2;
+  // A BlurHash to draw while it loads.
+  string blurhash = 3;
+}
+
+// What a card stands for.
+enum CardKind {
+  // Unknown to this version of the core.
+  CARD_KIND_UNSPECIFIED = 0;
+  CARD_KIND_MOVIE = 1;
+  CARD_KIND_SERIES = 2;
+  CARD_KIND_SEASON = 3;
+  CARD_KIND_EPISODE = 4;
+  // A video that is none of the others.
+  CARD_KIND_VIDEO = 5;
+  CARD_KIND_ARTIST = 6;
+  CARD_KIND_ALBUM = 7;
+  CARD_KIND_TRACK = 8;
+  CARD_KIND_MUSIC_VIDEO = 9;
+  CARD_KIND_AUDIOBOOK = 10;
+  CARD_KIND_BOOK = 11;
+  CARD_KIND_PHOTO_ALBUM = 12;
+  CARD_KIND_PHOTO = 13;
+  CARD_KIND_FOLDER = 14;
+  CARD_KIND_COLLECTION = 15;
+  CARD_KIND_PLAYLIST = 16;
+}
+
+// The same title on another of the user's servers.
+message Version {
+  string server_id = 1;
+  string item_id = 2;
+}
+
+// An item as a card in a row or grid.
+message Card {
+  string server_id = 1;
+  string item_id = 2;
+  CardKind kind = 3;
+  // Its name; an episode's own name.
+  string title = 4;
+  // What tells it apart: an episode's series with its numbers, an album's
+  // artists.
+  string subtitle = 5;
+  // Zero when unknown.
+  int32 year = 6;
+  // The poster, or a square cover.
+  Artwork poster = 7;
+  // A wide image: the thumbnail, else the first backdrop.
+  Artwork thumb = 8;
+  // How far the user watched it, from 0 to 1.
+  float progress = 9 [features.field_presence = EXPLICIT];
+  bool played = 10;
+  bool favorite = 11;
+  // Its length; zero when unknown.
+  int64 runtime_ms = 12;
+  // The same title on the user's other servers.
+  repeated Version versions = 13;
+}
+
+// A title discovery offers, which no server or only some have.
+message TitleCard {
+  // Whether it is a movie; else a series.
+  bool movie = 1;
+  string title = 2;
+  // Zero when unknown.
+  int32 year = 3;
+  string overview = 4;
+  // The poster, from the metadata provider.
+  string poster_url = 5;
+  // A backdrop, from the metadata provider.
+  string backdrop_url = 6;
+  // Its external IDs, which name it to requests.
+  map<string, string> external_ids = 7;
+  // Whether the user may request it from the row's server.
+  bool requestable = 8;
+  // Whether the row's server has requested it.
+  bool requested = 9;
+  // The servers that have it, whose items play instead.
+  repeated Version available = 10;
+}
+
+// The kind of a row, which names it.
+enum RowKind {
+  // A server's place while it loads or is unreachable.
+  ROW_KIND_UNSPECIFIED = 0;
+  // Items being watched and next episodes.
+  ROW_KIND_CONTINUE_WATCHING = 1;
+  // Requests that became available.
+  ROW_KIND_AVAILABLE_REQUESTS = 2;
+  ROW_KIND_RECENTLY_ADDED = 3;
+  ROW_KIND_RECENTLY_RELEASED = 4;
+  ROW_KIND_RECENTLY_AIRED = 5;
+  ROW_KIND_TOP_RATED = 6;
+  ROW_KIND_TOP_UNPLAYED = 7;
+  // Series not begun.
+  ROW_KIND_START_WATCHING = 8;
+  // Played long ago.
+  ROW_KIND_REDISCOVER = 9;
+  // Like an item the user played; the seed names it.
+  ROW_KIND_BECAUSE_YOU_WATCHED = 10;
+  // Like an item the user favored; the seed names it.
+  ROW_KIND_BECAUSE_YOU_LIKE = 11;
+  // More in a genre; the seed names it.
+  ROW_KIND_MORE_IN_GENRE = 12;
+  // Starring a person; the seed names them.
+  ROW_KIND_STARRING = 13;
+  // Directed by a person; the seed names them.
+  ROW_KIND_DIRECTED_BY = 14;
+  // Titles discovery offers.
+  ROW_KIND_TRENDING = 15;
+}
+
+// A row of Home or of a library's Recommended tab.
+message Row {
+  // Stable across updates, to keep the row's scroll position.
+  string id = 1;
+  RowKind kind = 2;
+  // Its server; empty for Continue Watching across servers.
+  string server_id = 3;
+  // That server's name, shown when several servers are signed in.
+  string server_name = 4;
+  // The hub on its server, which GetHub pages.
+  string hub_id = 5;
+  string library_name = 6;
+  // What a seeded row is drawn from: an item, a genre, a person.
+  string seed_name = 7;
+  // Whether it has more than shown.
+  bool more = 8;
+  // Whether it comes from the offline store.
+  bool offline = 9;
+  oneof content {
+    Cards items = 10;
+    TitleCards titles = 11;
+    // Its server has not answered yet.
+    Loading loading = 12;
+    // Its server is unreachable, with why.
+    string unavailable = 13;
+  }
+}
+
+// The items of a row.
+message Cards {
+  repeated Card cards = 1;
+}
+
+// The titles of a row.
+message TitleCards {
+  repeated TitleCard titles = 1;
+}
+
+// A row waiting for its server.
+message Loading {}
+
+// Rows of Home or of a Recommended tab.
+message Rows {
+  repeated Row rows = 1;
+}
+
+// A page of items.
+message Page {
+  repeated Card cards = 1;
+  // The number of items across the pages, when the server counts them.
+  uint32 total = 2 [features.field_presence = EXPLICIT];
+  // Whether there are items after these.
+  bool more = 3;
+}
+
+// What a library holds.
+enum LibraryType {
+  // Anything else.
+  LIBRARY_TYPE_UNSPECIFIED = 0;
+  LIBRARY_TYPE_MOVIES = 1;
+  LIBRARY_TYPE_SHOWS = 2;
+  LIBRARY_TYPE_MUSIC = 3;
+  LIBRARY_TYPE_MUSIC_VIDEOS = 4;
+  LIBRARY_TYPE_HOME_VIDEOS = 5;
+  LIBRARY_TYPE_BOOKS = 6;
+  LIBRARY_TYPE_PHOTOS = 7;
+  LIBRARY_TYPE_COLLECTIONS = 8;
+  LIBRARY_TYPE_PLAYLISTS = 9;
+}
+
+// A library of a server.
+message Library {
+  string server_id = 1;
+  string id = 2;
+  string name = 3;
+  LibraryType kind = 4;
+  // Its collage.
+  string image_url = 5;
+}
+
+// The libraries of a server.
+message Libraries {
+  repeated Library libraries = 1;
+  // Whether they come from the offline store.
+  bool offline = 2;
+}
+
+// A person credited on an item.
+message Credit {
+  string person_id = 1;
+  string name = 2;
+  // The character, or their job.
+  string role = 3;
+  // Whether they act in it; else crew.
+  bool cast = 4;
+  Artwork photo = 5;
+}
+
+// One version of a title: on this server, a file such as "4K HDR"; on
+// another server, its copy.
+message Source {
+  string server_id = 1;
+  string server_name = 2;
+  string item_id = 3;
+  // The media source, for a file of this server.
+  string media_source_id = 4;
+  // What tells it apart, such as "4K HDR".
+  string name = 5;
+  // The file's size in bytes; zero when unknown.
+  uint64 size = 6;
+  // The file's container, such as "mkv", for a file of this server.
+  string container = 7;
+  // The file's audio streams, for a file of this server.
+  repeated AudioStream audio = 8;
+}
+
+// An audio stream of a file, to choose it.
+message AudioStream {
+  // The stream's index in the file.
+  int32 index = 1;
+  string language = 2;
+  string title = 3;
+  // Its codec, such as "aac".
+  string codec = 4;
+  int32 channels = 5;
+  bool default = 6;
+}
+
+// An item's details.
+message Details {
+  // The item, as its card.
+  Card card = 1;
+  string server_name = 2;
+  string overview = 3;
+  string tagline = 4;
+  repeated string genres = 5;
+  // Its content rating, such as "PG-13".
+  string official_rating = 6;
+  // Its community rating, from 0 to 10.
+  float community_rating = 7 [features.field_presence = EXPLICIT];
+  // When it was first released or aired, in milliseconds since the Unix
+  // epoch.
+  int64 premiere_ms = 8 [features.field_presence = EXPLICIT];
+  Artwork backdrop = 9;
+  Artwork logo = 10;
+  // Where it resumes; zero for the beginning.
+  int64 position_ms = 11;
+  // The people credited, cast first.
+  repeated Credit credits = 12;
+  // Its files on this server, then its copies on the other servers.
+  repeated Source sources = 13;
+  // Its seasons, episodes or tracks.
+  repeated Card children = 14;
+  // Items like it.
+  repeated Card similar = 15;
+  // Whether it comes from the offline store.
+  bool offline = 16;
+}
+
+// What every server found, in the user's order of servers.
+message SearchResults {
+  repeated ServerResults servers = 1;
+}
+
+// What one server found.
+message ServerResults {
+  string server_id = 1;
+  string server_name = 2;
+  repeated Card cards = 3;
+  // Why it could not search.
+  string error = 4;
+}
+
+// How the server plays an item.
+enum PlayKind {
+  // The file as it is.
+  PLAY_KIND_UNSPECIFIED = 0;
+  // The streams copied into a container the client plays.
+  PLAY_KIND_DIRECT_STREAM = 1;
+  // Re-encoded.
+  PLAY_KIND_TRANSCODE = 2;
+}
+
+// A playback the server started.
+message Playback {
+  // The session, to update and stop.
+  uint64 session = 1;
+  // The media to play: the file, an HLS playlist or a progressive stream.
+  string url = 2;
+  PlayKind kind = 3;
+  // The media source played.
+  string media_source_id = 4;
+  // Where the media begins; the player starts there.
+  int64 start_position_ms = 5 [features.field_presence = EXPLICIT];
+  // The audio stream selected.
+  int32 audio_stream_index = 6 [features.field_presence = EXPLICIT];
+  // The subtitle stream selected, -1 for none.
+  int32 subtitle_stream_index = 7 [features.field_presence = EXPLICIT];
+  repeated SubtitleTrack subtitles = 8;
+}
+
+// A subtitle stream of a playback.
+message SubtitleTrack {
+  // The stream's index in the media source, to select it.
+  int32 stream_index = 1;
+  string language = 2;
+  string title = 3;
+  bool default = 4;
+  bool forced = 5;
+  // The delivered format, such as "vtt".
+  string format = 6;
+  // The file of a subtitle delivered on its own; empty when it is in the
+  // media.
+  string url = 7;
 }
 
 // What happened on a server.

@@ -120,6 +120,24 @@ func TestCalls(t *testing.T) {
 			Probe: capiv1.Probe_builder{Address: "http://127.0.0.1:1"}.Build(),
 		}.Build(), nil, capiv1.Error_CODE_UNREACHABLE},
 		{"empty request", &capiv1.Request{}, nil, capiv1.Error_CODE_INVALID},
+		{"discover", capiv1.Request_builder{
+			Discover: capiv1.Discover_builder{WaitMs: 100}.Build(),
+		}.Build(), func(m *capiv1.Message) bool { return m.HasFoundServers() }, 0},
+		{"poll an unknown Quick Connect", capiv1.Request_builder{
+			PollQuickConnect: capiv1.PollQuickConnect_builder{Request: 7}.Build(),
+		}.Build(), nil, capiv1.Error_CODE_NOT_FOUND},
+		{"cancel an unknown Quick Connect", capiv1.Request_builder{
+			CancelQuickConnect: capiv1.CancelQuickConnect_builder{Request: 7}.Build(),
+		}.Build(), func(m *capiv1.Message) bool { return m.HasDone() }, 0},
+		{"update an unknown playback", capiv1.Request_builder{
+			UpdatePlayback: capiv1.UpdatePlayback_builder{Session: 7, PositionMs: 1000}.Build(),
+		}.Build(), nil, capiv1.Error_CODE_NOT_FOUND},
+		{"stop an unknown playback", capiv1.Request_builder{
+			StopPlayback: capiv1.StopPlayback_builder{Session: 7}.Build(),
+		}.Build(), nil, capiv1.Error_CODE_NOT_FOUND},
+		{"play with invalid capabilities", capiv1.Request_builder{
+			Play: capiv1.Play_builder{ServerId: "s", ItemId: "i", Capabilities: []byte{0xff}}.Build(),
+		}.Build(), nil, capiv1.Error_CODE_INVALID},
 		{"opened twice", capiv1.Request_builder{Open: capiv1.Open_builder{
 			DatabasePath: filepath.Join(t.TempDir(), "core.db"),
 		}.Build()}.Build(), nil, capiv1.Error_CODE_FAILED_PRECONDITION},
@@ -162,6 +180,24 @@ func TestConcurrentCalls(t *testing.T) {
 	for err := range errs {
 		t.Errorf("Call() error = %v", err)
 	}
+}
+
+// Home is answered in parts, the rows each time a server answers, then
+// Done.
+func TestStream(t *testing.T) {
+	c := open(t, nil, &events{})
+	parts := 0
+	m, err := c.Stream(t.Context(), capiv1.Request_builder{LoadHome: &capiv1.LoadHome{}}.Build(),
+		func(m *capiv1.Message) {
+			if !m.HasRows() {
+				t.Errorf("part = %v, want rows", m)
+			}
+			parts++
+		})
+	if err != nil || !m.HasDone() {
+		t.Fatalf("Stream() = %v, %v, want Done", m, err)
+	}
+	t.Logf("%d parts", parts)
 }
 
 func TestClosed(t *testing.T) {
@@ -207,5 +243,17 @@ func TestServer(t *testing.T) {
 	m, err = c.Call(t.Context(), capiv1.Request_builder{ListServers: &capiv1.ListServers{}}.Build())
 	if err != nil || len(m.GetServers().GetServers()) != 1 {
 		t.Fatalf("ListServers = %v, %v, want the server", m, err)
+	}
+	var rows *capiv1.Rows
+	_, err = c.Stream(t.Context(), capiv1.Request_builder{LoadHome: &capiv1.LoadHome{}}.Build(),
+		func(m *capiv1.Message) { rows = m.GetRows() })
+	if err != nil || len(rows.GetRows()) == 0 {
+		t.Fatalf("LoadHome = %v, %v, want rows", rows, err)
+	}
+	m, err = c.Call(t.Context(), capiv1.Request_builder{
+		ListLibraries: capiv1.ListLibraries_builder{ServerId: server.GetId()}.Build(),
+	}.Build())
+	if err != nil || !m.HasLibraries() {
+		t.Fatalf("ListLibraries = %v, %v", m, err)
 	}
 }
