@@ -98,7 +98,7 @@ export function SyncPlayDialog({ server, item, onClose }: { server: ServerEntry;
               params={{ serverId: at.id, itemId: entry.itemId }}
               search={() => ({ start: Math.round(groupPositionAt(group, sp.serverNow())) || undefined })}
               onClick={onClose}
-              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-fill px-4 type-headline desk:min-h-7 desk:gap-1.5 desk:px-3 text-on-background transition hover:bg-fill-selected active:opacity-80"
+              className="inline-flex min-h-9 items-center justify-center gap-2 rounded-md bg-fill px-4 type-headline tv:min-h-11 desk:min-h-7 desk:gap-1.5 desk:px-3 text-on-background transition hover:bg-fill-selected active:opacity-80"
             >
               {t("syncplay.watch")}
             </Link>

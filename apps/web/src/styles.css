@@ -75,6 +75,14 @@
   }
 }
 
+/* The television's controls (docs/tv.md): in TV mode, controls keep the
+   size they take for the remote, above the phone's. */
+@custom-variant tv {
+  &:where(:root[data-tv] *) {
+    @slot;
+  }
+}
+
 /* The type scale of the design tokens. */
 @utility type-display {
   font-size: var(--mavio-type-display-size);
