@@ -44,6 +44,7 @@ import {
   deleteExpiredCodes,
   hasAccess,
   newAuthorizationCode,
+  loopback,
   redirectURI,
   sha256Hex,
   signAssertion,
@@ -51,7 +52,7 @@ import {
 import { AccountRevoked_Reason, accessJson, accountOf, accountRevoked, addChange, managed } from "./changes.ts";
 import { claimCodeHash, claimCodeLifetime, newClaimCode } from "./claim-codes.ts";
 import { type Database, schema, type Tx } from "./db/index.ts";
-import { appClientID, signedIn as sessionAccount } from "./device-sessions.ts";
+import { appClient, appClientID, signedIn as sessionAccount } from "./device-sessions.ts";
 import { between, effectivePass, homeOf, ownPass } from "./home.ts";
 import { userCodeKey } from "./link-codes.ts";
 import { relayHost, relayTicket, ticketLifetime } from "./relay.ts";
@@ -74,7 +75,7 @@ async function administeredBy(db: Database | Tx, me: User, serverId: string) {
 async function authorizationCode(
   db: Database | Tx,
   me: User,
-  c: { serverId: string | null; redirectUri: string; codeChallenge: string; deviceKey: Uint8Array },
+  c: { serverId: string | null; clientId?: string; redirectUri: string; codeChallenge: string; deviceKey: Uint8Array },
   at: Date,
 ): Promise<string> {
   await deleteExpiredCodes(db, me.id, at);
@@ -83,6 +84,7 @@ async function authorizationCode(
     codeHash: await sha256Hex(code),
     accountId: me.id,
     serverId: c.serverId,
+    clientId: c.clientId && c.clientId !== appClient ? c.clientId : null,
     redirectUri: c.redirectUri,
     codeChallenge: c.codeChallenge,
     deviceKey: c.deviceKey,
@@ -259,8 +261,13 @@ export function accountService({ db, apiURL, auth, relays, now = () => new Date(
 
     async createAuthorizationCode(req, ctx) {
       const me = await signedIn(ctx);
-      if (!redirectURI(req.redirectUri)) {
+      const app = !req.clientId || req.clientId === appClient;
+      const to = redirectURI(req.redirectUri);
+      if (!to) {
         throw new ConnectError("the redirect URI is not an HTTP or HTTPS URL", Code.InvalidArgument);
+      }
+      if (!app && !loopback(to)) {
+        throw new ConnectError("an app's redirect URI is not a loopback address", Code.InvalidArgument);
       }
       const code = await authorizationCode(db, me, { ...req, serverId: null }, now());
       return create(CreateAuthorizationCodeResponseSchema, { code });

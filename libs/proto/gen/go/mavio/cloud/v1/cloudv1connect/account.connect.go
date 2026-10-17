@@ -114,11 +114,12 @@ type AccountServiceClient interface {
 	// server the account neither administers nor has access to is
 	// PERMISSION_DENIED.
 	CreateAssertion(context.Context, *v1.CreateAssertionRequest) (*v1.CreateAssertionResponse, error)
-	// CreateAuthorizationCode approves app.mavio.dev signing the account in
-	// (docs/accounts.md §6): the code it gives, sent back to the redirect
-	// URI, is exchanged within a minute at /api/oauth/token with the PKCE
-	// verifier for a session of the device key. A server's web UI signs in
-	// with an authorization request the server pushed instead.
+	// CreateAuthorizationCode approves app.mavio.dev or one of Mavio's apps
+	// signing the account in (docs/accounts.md §6): the code it gives, sent
+	// back to the redirect URI, is exchanged within a minute at
+	// /api/oauth/token with the PKCE verifier for a session of the device
+	// key. A server's web UI signs in with an authorization request the
+	// server pushed instead.
 	CreateAuthorizationCode(context.Context, *v1.CreateAuthorizationCodeRequest) (*v1.CreateAuthorizationCodeResponse, error)
 	// GetAuthorizationRequest gives the server and the web UI of an
 	// authorization request a server pushed (ServerService.CreateAuthorizationRequest)
@@ -517,11 +518,12 @@ type AccountServiceHandler interface {
 	// server the account neither administers nor has access to is
 	// PERMISSION_DENIED.
 	CreateAssertion(context.Context, *v1.CreateAssertionRequest) (*v1.CreateAssertionResponse, error)
-	// CreateAuthorizationCode approves app.mavio.dev signing the account in
-	// (docs/accounts.md §6): the code it gives, sent back to the redirect
-	// URI, is exchanged within a minute at /api/oauth/token with the PKCE
-	// verifier for a session of the device key. A server's web UI signs in
-	// with an authorization request the server pushed instead.
+	// CreateAuthorizationCode approves app.mavio.dev or one of Mavio's apps
+	// signing the account in (docs/accounts.md §6): the code it gives, sent
+	// back to the redirect URI, is exchanged within a minute at
+	// /api/oauth/token with the PKCE verifier for a session of the device
+	// key. A server's web UI signs in with an authorization request the
+	// server pushed instead.
 	CreateAuthorizationCode(context.Context, *v1.CreateAuthorizationCodeRequest) (*v1.CreateAuthorizationCodeResponse, error)
 	// GetAuthorizationRequest gives the server and the web UI of an
 	// authorization request a server pushed (ServerService.CreateAuthorizationRequest)

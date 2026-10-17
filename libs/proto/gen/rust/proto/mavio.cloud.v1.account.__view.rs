@@ -4275,7 +4275,9 @@ impl ::buffa::HasMessageView for super::super::CreateAssertionResponse {
 }
 #[derive(Clone, Debug, Default)]
 pub struct CreateAuthorizationCodeRequestView<'a> {
-    /// Where the web interface receives the code: an HTTP or HTTPS URL.
+    /// Where the client receives the code: an HTTP or HTTPS URL for
+    /// app.mavio.dev, and for an app a loopback address, <http://127.0.0.1> or
+    /// <http://[::1]> with any port (RFC 8252 §7.3).
     ///
     /// Field 2: `redirect_uri`
     pub redirect_uri: ::core::option::Option<&'a str>,
@@ -4287,6 +4289,12 @@ pub struct CreateAuthorizationCodeRequestView<'a> {
     ///
     /// Field 4: `device_key`
     pub device_key: ::core::option::Option<&'a [u8]>,
+    /// The client signing in: app.mavio.dev's "app" when unset, or one of
+    /// Mavio's apps by its reverse-DNS ID, such as "dev.mavio.desktop". The
+    /// code is exchanged with the same client ID.
+    ///
+    /// Field 5: `client_id`
+    pub client_id: ::core::option::Option<&'a str>,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for CreateAuthorizationCodeRequestView<'a> {
@@ -4340,6 +4348,13 @@ impl<'a> ::buffa::MessageView<'a> for CreateAuthorizationCodeRequestView<'a> {
                 )?;
                 view.device_key = Some(::buffa::types::borrow_bytes(&mut cur)?);
             }
+            5u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.client_id = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
             _ => {
                 ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
                 let span_len = before_tag.len() - cur.len();
@@ -4371,6 +4386,7 @@ impl<'a> ::buffa::MessageView<'a> for CreateAuthorizationCodeRequestView<'a> {
             redirect_uri: self.redirect_uri.map(|s| s.to_string()),
             code_challenge: self.code_challenge.map(|s| s.to_string()),
             device_key: self.device_key.map(|b| (b).to_vec()),
+            client_id: self.client_id.map(|s| s.to_string()),
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -4391,6 +4407,9 @@ impl<'a> ::buffa::ViewEncode<'a> for CreateAuthorizationCodeRequestView<'a> {
         if let Some(ref v) = self.device_key {
             size += 1u64 + ::buffa::types::bytes_encoded_len(v) as u64;
         }
+        if let Some(ref v) = self.client_id {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -4410,6 +4429,9 @@ impl<'a> ::buffa::ViewEncode<'a> for CreateAuthorizationCodeRequestView<'a> {
         }
         if let Some(ref v) = self.device_key {
             ::buffa::types::put_shared_bytes_field(4u32, v, buf);
+        }
+        if let Some(ref v) = self.client_id {
+            ::buffa::types::put_string_field(5u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -4506,7 +4528,9 @@ impl CreateAuthorizationCodeRequestOwnedView {
     pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
         self.0.into_bytes()
     }
-    /// Where the web interface receives the code: an HTTP or HTTPS URL.
+    /// Where the client receives the code: an HTTP or HTTPS URL for
+    /// app.mavio.dev, and for an app a loopback address, <http://127.0.0.1> or
+    /// <http://[::1]> with any port (RFC 8252 §7.3).
     ///
     /// Field 2: `redirect_uri`
     #[must_use]
@@ -4526,6 +4550,15 @@ impl CreateAuthorizationCodeRequestOwnedView {
     #[must_use]
     pub fn device_key(&self) -> ::core::option::Option<&'_ [u8]> {
         self.0.reborrow().device_key
+    }
+    /// The client signing in: app.mavio.dev's "app" when unset, or one of
+    /// Mavio's apps by its reverse-DNS ID, such as "dev.mavio.desktop". The
+    /// code is exchanged with the same client ID.
+    ///
+    /// Field 5: `client_id`
+    #[must_use]
+    pub fn client_id(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().client_id
     }
 }
 impl ::core::convert::From<

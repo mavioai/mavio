@@ -1587,6 +1587,7 @@ type CreateAuthorizationCodeRequest struct {
 	xxx_hidden_RedirectUri   *string                `protobuf:"bytes,2,opt,name=redirect_uri,json=redirectUri"`
 	xxx_hidden_CodeChallenge *string                `protobuf:"bytes,3,opt,name=code_challenge,json=codeChallenge"`
 	xxx_hidden_DeviceKey     []byte                 `protobuf:"bytes,4,opt,name=device_key,json=deviceKey"`
+	xxx_hidden_ClientId      *string                `protobuf:"bytes,5,opt,name=client_id,json=clientId"`
 	XXX_raceDetectHookData   protoimpl.RaceDetectHookData
 	XXX_presence             [1]uint32
 	unknownFields            protoimpl.UnknownFields
@@ -1645,14 +1646,24 @@ func (x *CreateAuthorizationCodeRequest) GetDeviceKey() []byte {
 	return nil
 }
 
+func (x *CreateAuthorizationCodeRequest) GetClientId() string {
+	if x != nil {
+		if x.xxx_hidden_ClientId != nil {
+			return *x.xxx_hidden_ClientId
+		}
+		return ""
+	}
+	return ""
+}
+
 func (x *CreateAuthorizationCodeRequest) SetRedirectUri(v string) {
 	x.xxx_hidden_RedirectUri = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 3)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 4)
 }
 
 func (x *CreateAuthorizationCodeRequest) SetCodeChallenge(v string) {
 	x.xxx_hidden_CodeChallenge = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 3)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 4)
 }
 
 func (x *CreateAuthorizationCodeRequest) SetDeviceKey(v []byte) {
@@ -1660,7 +1671,12 @@ func (x *CreateAuthorizationCodeRequest) SetDeviceKey(v []byte) {
 		v = []byte{}
 	}
 	x.xxx_hidden_DeviceKey = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 3)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 4)
+}
+
+func (x *CreateAuthorizationCodeRequest) SetClientId(v string) {
+	x.xxx_hidden_ClientId = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 4)
 }
 
 func (x *CreateAuthorizationCodeRequest) HasRedirectUri() bool {
@@ -1684,6 +1700,13 @@ func (x *CreateAuthorizationCodeRequest) HasDeviceKey() bool {
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 2)
 }
 
+func (x *CreateAuthorizationCodeRequest) HasClientId() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 3)
+}
+
 func (x *CreateAuthorizationCodeRequest) ClearRedirectUri() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_RedirectUri = nil
@@ -1699,15 +1722,26 @@ func (x *CreateAuthorizationCodeRequest) ClearDeviceKey() {
 	x.xxx_hidden_DeviceKey = nil
 }
 
+func (x *CreateAuthorizationCodeRequest) ClearClientId() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 3)
+	x.xxx_hidden_ClientId = nil
+}
+
 type CreateAuthorizationCodeRequest_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
-	// Where the web interface receives the code: an HTTP or HTTPS URL.
+	// Where the client receives the code: an HTTP or HTTPS URL for
+	// app.mavio.dev, and for an app a loopback address, http://127.0.0.1 or
+	// http://[::1] with any port (RFC 8252 §7.3).
 	RedirectUri *string
 	// The S256 PKCE challenge: the base64url SHA-256 of the verifier.
 	CodeChallenge *string
 	// The Ed25519 public key of the device that signs in.
 	DeviceKey []byte
+	// The client signing in: app.mavio.dev's "app" when unset, or one of
+	// Mavio's apps by its reverse-DNS ID, such as "dev.mavio.desktop". The
+	// code is exchanged with the same client ID.
+	ClientId *string
 }
 
 func (b0 CreateAuthorizationCodeRequest_builder) Build() *CreateAuthorizationCodeRequest {
@@ -1715,16 +1749,20 @@ func (b0 CreateAuthorizationCodeRequest_builder) Build() *CreateAuthorizationCod
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.RedirectUri != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 3)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 4)
 		x.xxx_hidden_RedirectUri = b.RedirectUri
 	}
 	if b.CodeChallenge != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 3)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 4)
 		x.xxx_hidden_CodeChallenge = b.CodeChallenge
 	}
 	if b.DeviceKey != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 3)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 4)
 		x.xxx_hidden_DeviceKey = b.DeviceKey
+	}
+	if b.ClientId != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 4)
+		x.xxx_hidden_ClientId = b.ClientId
 	}
 	return m0
 }
@@ -3922,13 +3960,14 @@ const file_mavio_cloud_v1_account_proto_rawDesc = "" +
 	"\x17CreateAssertionResponse\x12\x1c\n" +
 	"\tassertion\x18\x01 \x01(\tR\tassertion\x12;\n" +
 	"\vexpire_time\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\n" +
-	"expireTime\"\xc3\x01\n" +
+	"expireTime\"\x88\x02\n" +
 	"\x1eCreateAuthorizationCodeRequest\x121\n" +
 	"\fredirect_uri\x18\x02 \x01(\tB\x0e\xbaH\v\xc8\x01\x01r\x06\x18\x80\x10\x88\x01\x01R\vredirectUri\x122\n" +
 	"\x0ecode_challenge\x18\x03 \x01(\tB\v\xbaH\b\xc8\x01\x01r\x03\x98\x01+R\rcodeChallenge\x12)\n" +
 	"\n" +
 	"device_key\x18\x04 \x01(\fB\n" +
-	"\xbaH\a\xc8\x01\x01z\x02h R\tdeviceKeyJ\x04\b\x01\x10\x02R\tserver_id\"5\n" +
+	"\xbaH\a\xc8\x01\x01z\x02h R\tdeviceKey\x12C\n" +
+	"\tclient_id\x18\x05 \x01(\tB&\xbaH#r!2\x1f^(app|dev\\.mavio\\.[a-z0-9.-]+)$R\bclientIdJ\x04\b\x01\x10\x02R\tserver_id\"5\n" +
 	"\x1fCreateAuthorizationCodeResponse\x12\x12\n" +
 	"\x04code\x18\x01 \x01(\tR\x04code\"]\n" +
 	"\x1eGetAuthorizationRequestRequest\x12;\n" +

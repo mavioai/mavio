@@ -80,7 +80,7 @@ export const authorizationRequests = pgTable(
 /**
  * authorizationCodes are the codes that sign accounts in to web UIs
  * (docs/accounts.md §6), by their SHA-256, exchanged once: a server's, or
- * app.mavio.dev's without a server.
+ * without a server app.mavio.dev's or an app's, by its client ID.
  */
 export const authorizationCodes = pgTable("authorization_codes", {
   codeHash: text("code_hash").primaryKey(),
@@ -88,6 +88,8 @@ export const authorizationCodes = pgTable("authorization_codes", {
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
   serverId: text("server_id").references(() => servers.id, { onDelete: "cascade" }),
+  /** The client ID of a code without a server: app.mavio.dev's "app" when null, or an app's. */
+  clientId: text("client_id"),
   redirectUri: text("redirect_uri").notNull(),
   codeChallenge: text("code_challenge").notNull(),
   deviceKey: bytea("device_key").notNull(),

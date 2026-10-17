@@ -137,6 +137,32 @@ describe("authorization codes", () => {
     const config = await site.fetch(new Request(`${apiURL}/config`));
     expect(await config.json()).toEqual({ appURL: "https://app.mavio.dev" });
   });
+
+  test("sign an account in to an app on its loopback address", async () => {
+    const site = await newSite();
+    const bob = await site.signUp("bob");
+    const accounts = site.client(AccountService, bob.headers);
+    const loop = "http://127.0.0.1:49152/callback";
+    const req = { clientId: "dev.mavio.desktop", codeChallenge: await s256(verifier), deviceKey: new Uint8Array(32).fill(2) };
+    // An app's code goes back only to a loopback address.
+    for (const redirectUri of ["https://example.com/callback", "http://localhost:49152/callback"]) {
+      expect(await code(accounts.createAuthorizationCode({ ...req, redirectUri }))).toBe(Code.InvalidArgument);
+    }
+    expect(await code(accounts.createAuthorizationCode({ ...req, clientId: "example", redirectUri: loop }))).toBe(Code.InvalidArgument);
+    const exchange = async (fields: Record<string, string>) => {
+      const { code: c } = await accounts.createAuthorizationCode({ ...req, redirectUri: loop });
+      // An app sends no Origin.
+      return post(site, "token", { grant_type: "authorization_code", code: c, client_id: "dev.mavio.desktop", redirect_uri: loop, code_verifier: verifier, ...fields }, "");
+    };
+    // The code is the app's alone.
+    expect((await exchange({ client_id: "app" })).status).toBe(400);
+    expect((await exchange({ client_id: "dev.mavio.tvos" })).status).toBe(400);
+    const res = await exchange({});
+    expect(res.status).toBe(200);
+    expect((await res.json()).account.id).toBe(bob.id);
+    const ipv6 = "http://[::1]:8080/callback";
+    expect(await code(accounts.createAuthorizationCode({ ...req, redirectUri: ipv6 }))).toBeUndefined();
+  });
 });
 
 describe("device sessions", () => {

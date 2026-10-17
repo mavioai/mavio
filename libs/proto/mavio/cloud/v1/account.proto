@@ -37,11 +37,12 @@ service AccountService {
   // server the account neither administers nor has access to is
   // PERMISSION_DENIED.
   rpc CreateAssertion(CreateAssertionRequest) returns (CreateAssertionResponse);
-  // CreateAuthorizationCode approves app.mavio.dev signing the account in
-  // (docs/accounts.md §6): the code it gives, sent back to the redirect
-  // URI, is exchanged within a minute at /api/oauth/token with the PKCE
-  // verifier for a session of the device key. A server's web UI signs in
-  // with an authorization request the server pushed instead.
+  // CreateAuthorizationCode approves app.mavio.dev or one of Mavio's apps
+  // signing the account in (docs/accounts.md §6): the code it gives, sent
+  // back to the redirect URI, is exchanged within a minute at
+  // /api/oauth/token with the PKCE verifier for a session of the device
+  // key. A server's web UI signs in with an authorization request the
+  // server pushed instead.
   rpc CreateAuthorizationCode(CreateAuthorizationCodeRequest) returns (CreateAuthorizationCodeResponse);
   // GetAuthorizationRequest gives the server and the web UI of an
   // authorization request a server pushed (ServerService.CreateAuthorizationRequest)
@@ -192,7 +193,9 @@ message CreateAssertionResponse {
 message CreateAuthorizationCodeRequest {
   reserved 1;
   reserved server_id;
-  // Where the web interface receives the code: an HTTP or HTTPS URL.
+  // Where the client receives the code: an HTTP or HTTPS URL for
+  // app.mavio.dev, and for an app a loopback address, http://127.0.0.1 or
+  // http://[::1] with any port (RFC 8252 §7.3).
   string redirect_uri = 2 [
     (buf.validate.field).required = true,
     (buf.validate.field).string = {
@@ -210,6 +213,10 @@ message CreateAuthorizationCodeRequest {
     (buf.validate.field).required = true,
     (buf.validate.field).bytes.len = 32
   ];
+  // The client signing in: app.mavio.dev's "app" when unset, or one of
+  // Mavio's apps by its reverse-DNS ID, such as "dev.mavio.desktop". The
+  // code is exchanged with the same client ID.
+  string client_id = 5 [(buf.validate.field).string.pattern = "^(app|dev\\.mavio\\.[a-z0-9.-]+)$"];
 }
 
 message CreateAuthorizationCodeResponse {

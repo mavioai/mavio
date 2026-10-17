@@ -15,7 +15,9 @@ import { Button, ErrorText, Muted } from "../ui.tsx";
 // key, and the page names it by request_uri; approving it signs in only
 // the server's administrator, or claims a server that is not claimed
 // yet (docs/accounts.md §3.2). app.mavio.dev sends its request here
-// itself, with the client_id app, and signs in at once.
+// itself, with the client_id app, and signs in at once. One of Mavio's
+// apps opens the page in the browser with its reverse-DNS client ID and
+// a loopback redirect URI (RFC 8252), and the account approves it.
 type Search = {
   request_uri?: string;
   client_id?: string;
@@ -62,6 +64,7 @@ function Authorize() {
   const q = Route.useSearch();
   if (!me) return null;
   if (q.request_uri) return <ServerRequest request={q.request_uri} me={me} />;
+  if (q.client_id && q.client_id !== "app") return <NativeRequest q={q} me={me} />;
   return <AppRequest q={q} />;
 }
 
@@ -112,6 +115,72 @@ function AppRequest({ q }: { q: Search }) {
   );
 }
 
+/** The names of Mavio's apps by their client IDs. */
+const appNames: Record<string, string> = {
+  "dev.mavio.desktop": "Mavio for Desktop",
+  "dev.mavio.app": "Mavio for Android",
+  "dev.mavio.ios": "Mavio for iPhone and iPad",
+  "dev.mavio.macos": "Mavio for Mac",
+};
+
+/** Whether a redirect URI is an app's on this device: http://127.0.0.1 or http://[::1] with any port (RFC 8252 §7.3). */
+function loopback(uri: string | undefined): boolean {
+  if (!uri || !URL.canParse(uri)) return false;
+  const u = new URL(uri);
+  return u.protocol === "http:" && (u.hostname === "127.0.0.1" || u.hostname === "[::1]");
+}
+
+/**
+ * One of Mavio's apps signing the account in, from the browser it opened:
+ * the account approves it, and the code goes back to the app on its
+ * loopback address.
+ */
+function NativeRequest({ q, me }: { q: Search; me: Me }) {
+  const answer = useMutation({
+    mutationFn: async (approve: boolean) => {
+      if (!approve) return redirectTo(q.redirect_uri ?? "", { error: "access_denied", state: q.state });
+      const { code } = await accounts.createAuthorizationCode({
+        clientId: q.client_id,
+        redirectUri: q.redirect_uri ?? "",
+        codeChallenge: q.code_challenge ?? "",
+        deviceKey: fromBase64url(q.device_key ?? ""),
+      });
+      redirectTo(q.redirect_uri ?? "", { code, state: q.state });
+    },
+  });
+  const key = fromBase64url(q.device_key ?? "");
+  const app = appNames[q.client_id ?? ""] ?? q.client_id;
+  const complete =
+    /^dev\.mavio\.[a-z0-9.-]+$/.test(q.client_id ?? "") &&
+    q.code_challenge_method === "S256" &&
+    !!q.code_challenge &&
+    key?.length === 32 &&
+    loopback(q.redirect_uri);
+  if (!complete) {
+    return (
+      <Frame title="Sign in to Mavio">
+        <ErrorText error="This sign-in request is incomplete. Start signing in again." />
+      </Frame>
+    );
+  }
+  return (
+    <Frame title={`${app} would like to sign in to your Mavio account`}>
+      <Muted>The app on this computer reaches every server of your account. Continue only if you started signing in from it.</Muted>
+      <SignedInAs me={me} />
+      <div className="flex w-full flex-col gap-3">
+        <Button onClick={() => answer.mutate(true)} disabled={answer.isPending}>
+          Sign in
+        </Button>
+        <Button kind="secondary" onClick={() => answer.mutate(false)} disabled={answer.isPending}>
+          Cancel
+        </Button>
+      </div>
+      <DifferentAccount />
+      <ErrorText error={answer.error ? message(answer.error) : undefined} />
+    </Frame>
+  );
+}
+
 /** The account's avatar, colored from its name as in every client (libs/design/components.md, Avatar). */
 function Avatar({ name }: { name: string }) {
   let hue = 0;
@@ -124,6 +193,40 @@ function Avatar({ name }: { name: string }) {
     >
       {[...name][0]?.toUpperCase()}
     </span>
+  );
+}
+
+/** The account signing in, as a card. */
+function SignedInAs({ me }: { me: Me }) {
+  // A managed account's e-mail address is a placeholder, never shown.
+  const email = me.email.startsWith("managed:") ? undefined : me.email;
+  const detail = me.username && me.username !== me.name ? `@${me.username}` : email;
+  return (
+    <div className="flex w-full items-center gap-3 rounded-lg border border-border bg-surface px-4 py-3 text-left">
+      <Avatar name={me.name || me.username || "?"} />
+      <span className="flex min-w-0 flex-col">
+        <span className="type-callout truncate font-semibold">{me.name || me.username}</span>
+        {detail && <span className="type-footnote truncate text-text-secondary">{detail}</span>}
+      </span>
+    </div>
+  );
+}
+
+/** A link signing another account in on mavio.dev, which comes back here. */
+function DifferentAccount() {
+  const switchAccount = async () => {
+    const back = window.location.pathname + window.location.search;
+    await authClient.signOut();
+    window.location.href = `/sign-in?${new URLSearchParams({ next: back })}`;
+  };
+  return (
+    <p className="type-footnote text-text-secondary">
+      Or{" "}
+      <button type="button" className="text-accent hover:underline" onClick={() => void switchAccount()}>
+        use a different account
+      </button>
+      .
+    </p>
   );
 }
 
@@ -141,12 +244,6 @@ function ServerRequest({ request, me }: { request: string; me: Me }) {
       window.location.href = redirectUrl;
     },
   });
-  // Another account signs in on mavio.dev and comes back here.
-  const switchAccount = async () => {
-    const back = window.location.pathname + window.location.search;
-    await authClient.signOut();
-    window.location.href = `/sign-in?${new URLSearchParams({ next: back })}`;
-  };
   const c = r.data;
   const server = <span className="font-mono font-semibold text-on-background">{c?.serverName || "this server"}</span>;
   const origin = c && URL.canParse(c.redirectUri) ? new URL(c.redirectUri).origin : undefined;
@@ -155,27 +252,8 @@ function ServerRequest({ request, me }: { request: string; me: Me }) {
   const elsewhere = c && !expectedOrigin(c.redirectUri, c.serverId) && (
     <ErrorText error="This address is neither one of the server's mavio.site names nor on your local network. Continue only if you reach the server there." />
   );
-  // A managed account's e-mail address is a placeholder, never shown.
-  const email = me.email.startsWith("managed:") ? undefined : me.email;
-  const detail = me.username && me.username !== me.name ? `@${me.username}` : email;
-  const signedInAs = (
-    <div className="flex w-full items-center gap-3 rounded-lg border border-border bg-surface px-4 py-3 text-left">
-      <Avatar name={me.name || me.username || "?"} />
-      <span className="flex min-w-0 flex-col">
-        <span className="type-callout truncate font-semibold">{me.name || me.username}</span>
-        {detail && <span className="type-footnote truncate text-text-secondary">{detail}</span>}
-      </span>
-    </div>
-  );
-  const differentAccount = (
-    <p className="type-footnote text-text-secondary">
-      Or{" "}
-      <button type="button" className="text-accent hover:underline" onClick={() => void switchAccount()}>
-        use a different account
-      </button>
-      .
-    </p>
-  );
+  const signedInAs = <SignedInAs me={me} />;
+  const differentAccount = <DifferentAccount />;
   const buttons = (
     <div className="flex w-full flex-col gap-3">
       <Button onClick={() => answer.mutate(true)} disabled={answer.isPending}>

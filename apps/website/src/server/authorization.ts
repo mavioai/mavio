@@ -95,6 +95,14 @@ export function redirectURI(s: string): URL | undefined {
   return u;
 }
 
+/**
+ * loopback reports whether a redirect URI is an app's on this device: an
+ * HTTP URL at 127.0.0.1 or [::1], with any port (RFC 8252 §7.3).
+ */
+export function loopback(u: URL): boolean {
+  return u.protocol === "http:" && (u.hostname === "127.0.0.1" || u.hostname === "[::1]");
+}
+
 /** deleteExpiredCodes removes an account's codes that expired. */
 export async function deleteExpiredCodes(db: Database, accountId: string, at: Date) {
   await db
@@ -218,7 +226,7 @@ async function token(call: Call, deps: OAuthDeps): Promise<Response> {
       if (
         !row ||
         row.expiresAt < at ||
-        (row.serverId ?? appClient) !== field("client_id") ||
+        (row.serverId ?? row.clientId ?? appClient) !== field("client_id") ||
         row.redirectUri !== field("redirect_uri") ||
         row.codeChallenge !== (await s256(field("code_verifier")))
       ) {

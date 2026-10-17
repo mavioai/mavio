@@ -1150,11 +1150,12 @@ pub trait AccountService: Send + Sync + 'static {
             > + Send + use<'a, Self>,
         >,
     > + Send;
-    /// CreateAuthorizationCode approves app.mavio.dev signing the account in
-    /// (docs/accounts.md §6): the code it gives, sent back to the redirect
-    /// URI, is exchanged within a minute at /api/oauth/token with the PKCE
-    /// verifier for a session of the device key. A server's web UI signs in
-    /// with an authorization request the server pushed instead.
+    /// CreateAuthorizationCode approves app.mavio.dev or one of Mavio's apps
+    /// signing the account in (docs/accounts.md §6): the code it gives, sent
+    /// back to the redirect URI, is exchanged within a minute at
+    /// /api/oauth/token with the PKCE verifier for a session of the device
+    /// key. A server's web UI signs in with an authorization request the
+    /// server pushed instead.
     ///
     /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
     ///

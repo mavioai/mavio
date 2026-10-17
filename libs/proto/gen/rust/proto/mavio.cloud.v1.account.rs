@@ -2242,7 +2242,9 @@ impl ::buffa::ExtensionSet for CreateAssertionResponse {
 }
 #[derive(Clone, PartialEq, Default)]
 pub struct CreateAuthorizationCodeRequest {
-    /// Where the web interface receives the code: an HTTP or HTTPS URL.
+    /// Where the client receives the code: an HTTP or HTTPS URL for
+    /// app.mavio.dev, and for an app a loopback address, <http://127.0.0.1> or
+    /// <http://[::1]> with any port (RFC 8252 §7.3).
     ///
     /// Field 2: `redirect_uri`
     pub redirect_uri: ::core::option::Option<::buffa::alloc::string::String>,
@@ -2254,6 +2256,12 @@ pub struct CreateAuthorizationCodeRequest {
     ///
     /// Field 4: `device_key`
     pub device_key: ::core::option::Option<::buffa::alloc::vec::Vec<u8>>,
+    /// The client signing in: app.mavio.dev's "app" when unset, or one of
+    /// Mavio's apps by its reverse-DNS ID, such as "dev.mavio.desktop". The
+    /// code is exchanged with the same client ID.
+    ///
+    /// Field 5: `client_id`
+    pub client_id: ::core::option::Option<::buffa::alloc::string::String>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -2263,6 +2271,7 @@ impl ::core::fmt::Debug for CreateAuthorizationCodeRequest {
             .field("redirect_uri", &self.redirect_uri)
             .field("code_challenge", &self.code_challenge)
             .field("device_key", &self.device_key)
+            .field("client_id", &self.client_id)
             .finish()
     }
 }
@@ -2304,6 +2313,16 @@ impl CreateAuthorizationCodeRequest {
         self.device_key = Some(value.into());
         self
     }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::client_id`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_client_id(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.client_id = Some(value.into());
+        self
+    }
 }
 ::buffa::impl_default_instance!(CreateAuthorizationCodeRequest);
 impl ::buffa::MessageName for CreateAuthorizationCodeRequest {
@@ -2334,6 +2353,9 @@ impl ::buffa::Message for CreateAuthorizationCodeRequest {
         if let Some(ref v) = self.device_key {
             size += 1u64 + ::buffa::types::bytes_encoded_len(v) as u64;
         }
+        if let Some(ref v) = self.client_id {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -2352,6 +2374,9 @@ impl ::buffa::Message for CreateAuthorizationCodeRequest {
         }
         if let Some(ref v) = self.device_key {
             ::buffa::types::put_shared_bytes_field(4u32, v, buf);
+        }
+        if let Some(ref v) = self.client_id {
+            ::buffa::types::put_string_field(5u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -2400,6 +2425,18 @@ impl ::buffa::Message for CreateAuthorizationCodeRequest {
                     buf,
                 )?;
             }
+            5u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .client_id
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -2411,6 +2448,7 @@ impl ::buffa::Message for CreateAuthorizationCodeRequest {
         self.redirect_uri = ::core::option::Option::None;
         self.code_challenge = ::core::option::Option::None;
         self.device_key = ::core::option::Option::None;
+        self.client_id = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }
