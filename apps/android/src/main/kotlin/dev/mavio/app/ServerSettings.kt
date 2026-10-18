@@ -95,6 +95,8 @@ enum class ServerSection(@StringRes val title: Int, @DrawableRes val icon: Int, 
     General(R.string.settings_general, R.drawable.ic_settings_fill, Color(0xFF8E8E93)),
     Devices(R.string.settings_devices, R.drawable.ic_devices_fill, Color(0xFF32ADE6), forAnyone = true),
     ApiKeys(R.string.settings_api_keys, R.drawable.ic_lock_fill, Color(0xFF636366)),
+    Libraries(R.string.settings_libraries, R.drawable.ic_folder_fill, Color(0xFF007AFF)),
+    Storage(R.string.settings_storage, R.drawable.ic_server_fill, Color(0xFF30B0C7)),
     Transcoding(R.string.settings_transcoding, R.drawable.ic_quality_fill, Color(0xFFFF2D55)),
     Activity(R.string.settings_activity, R.drawable.ic_activity_fill, Color(0xFFFF2D55)),
     Issues(R.string.settings_issues, R.drawable.ic_error_fill, Color(0xFFFF9500), forAnyone = true),
@@ -105,7 +107,7 @@ enum class ServerSection(@StringRes val title: Int, @DrawableRes val icon: Int, 
 
 /** A menu of the Server group's second level, with its sections. */
 enum class ServerMenu(@StringRes val title: Int, @DrawableRes val icon: Int, val color: Color, val sections: List<ServerSection>) {
-    Media(R.string.settings_media_menu, R.drawable.ic_movies_fill, Color(0xFFFF9F0A), listOf(ServerSection.Transcoding)),
+    Media(R.string.settings_media_menu, R.drawable.ic_movies_fill, Color(0xFFFF9F0A), listOf(ServerSection.Libraries, ServerSection.Storage, ServerSection.Transcoding)),
     Maintenance(
         R.string.settings_maintenance_menu,
         R.drawable.ic_admin_fill,
@@ -182,6 +184,8 @@ fun ServerSettingScreen(model: AppModel, route: Route.ServerSetting) {
         ServerSection.General -> GeneralPage(model, route.serverId)
         ServerSection.Devices -> DevicesPage(model, route.serverId)
         ServerSection.ApiKeys -> ApiKeysPage(model, route.serverId)
+        ServerSection.Libraries -> LibrariesPage(model, route.serverId)
+        ServerSection.Storage -> StoragePage(model, route.serverId)
         ServerSection.Transcoding -> TranscodingPage(model, route.serverId)
         ServerSection.Activity -> ActivityPage(model, route.serverId)
         ServerSection.Issues -> IssuesPage(model, route.serverId)

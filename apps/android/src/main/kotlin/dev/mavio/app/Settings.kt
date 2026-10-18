@@ -61,6 +61,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
@@ -820,20 +822,22 @@ internal fun <T> ChoiceRow(label: String, choices: List<Pair<T, String>>, chosen
 internal fun SettingsField(
     value: String,
     onChange: (String) -> Unit,
-    label: String,
+    label: String?,
     modifier: Modifier = Modifier.fillMaxWidth(),
     placeholder: String? = null,
     keyboard: KeyboardType = KeyboardType.Text,
     error: Boolean = false,
+    secret: Boolean = false,
 ) {
     OutlinedTextField(
         value,
         onChange,
         modifier,
-        label = { Text(label) },
+        label = label?.let { { Text(it) } },
         placeholder = placeholder?.let { { Text(it) } },
         singleLine = true,
         isError = error,
+        visualTransformation = if (secret) PasswordVisualTransformation() else VisualTransformation.None,
         keyboardOptions = KeyboardOptions(keyboardType = keyboard, autoCorrectEnabled = false),
         shape = RoundedCornerShape(10.dp),
         colors = OutlinedTextFieldDefaults.colors(

@@ -131,7 +131,7 @@ import java.util.Date
 // (docs/clients.md §6.3.6–§6.3.7, §6.3.14, §6.3.25).
 
 /** Calls a procedure, keeping its answer or why it failed; a cancellation passes through. */
-private suspend fun <T> attempt(onFailure: (String) -> Unit, block: suspend () -> T): T? = try {
+internal suspend fun <T> attempt(onFailure: (String) -> Unit, block: suspend () -> T): T? = try {
     block()
 } catch (e: CancellationException) {
     throw e
@@ -142,7 +142,7 @@ private suspend fun <T> attempt(onFailure: (String) -> Unit, block: suspend () -
 
 /** A line saying a list is empty, or why it could not be read. */
 @Composable
-private fun Note(text: String, failed: Boolean = false) {
+internal fun Note(text: String, failed: Boolean = false) {
     Text(
         text,
         Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
@@ -198,7 +198,7 @@ internal fun <T> HeaderChoice(choices: List<Pair<T, String>>, chosen: T, onChoos
 
 /** A row's first line, with its details below. */
 @Composable
-private fun Lines(title: String, detail: String?, modifier: Modifier = Modifier, maxLines: Int = Int.MAX_VALUE) {
+internal fun Lines(title: String, detail: String?, modifier: Modifier = Modifier, maxLines: Int = Int.MAX_VALUE) {
     Column(modifier, verticalArrangement = Arrangement.spacedBy(2.dp)) {
         Text(title, style = theme.type.body.text, maxLines = maxLines)
         if (!detail.isNullOrEmpty()) {
@@ -1145,7 +1145,7 @@ fun IssueScreen(model: AppModel, route: Route.IssuePage) {
 
 /** An action of a group, in its color. */
 @Composable
-private fun ActionRow(label: String, color: Color, enabled: Boolean, onClick: () -> Unit) {
+internal fun ActionRow(label: String, color: Color, enabled: Boolean, onClick: () -> Unit) {
     Text(
         label,
         Modifier.fillMaxWidth().clickable(enabled = enabled, onClick = onClick).heightIn(min = 48.dp).padding(horizontal = 16.dp, vertical = 13.dp),
