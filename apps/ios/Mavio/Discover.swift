@@ -119,8 +119,37 @@ struct CatalogQuery: Hashable {
     var studios: [NamedValue] = []
     var networks: [NamedValue] = []
     var originalLanguage = ""
+    /// The order; unspecified for the catalog's own.
+    var sort: Mavio_Plugin_V1_DiscoverSort = .unspecified
+    var ascending = false
+    /// Streaming services in a country, by ISO 3166-1.
+    var watchProviders: [String] = []
+    var watchRegion = ""
+    /// Years of release, inclusive; 0 for any.
+    var yearFrom = 0
+    var yearTo = 0
+    /// Minutes; 0 for any.
+    var runtimeMin = 0
+    var runtimeMax = 0
+    /// 0–10; 0 for any.
+    var ratingMin = 0
+    var votesMin = 0
     /// The page's title.
     var title = ""
+
+    /// How many filters are set, the sort aside.
+    var filterCount: Int {
+        [
+            !genres.isEmpty, !studios.isEmpty, !networks.isEmpty, !keywords.isEmpty, !watchProviders.isEmpty,
+            !originalLanguage.isEmpty, yearFrom > 0 || yearTo > 0, runtimeMin > 0 || runtimeMax > 0, ratingMin > 0,
+            votesMin > 0,
+        ].filter(\.self).count
+    }
+
+    /// The same catalog without filters or sort.
+    var unfiltered: CatalogQuery {
+        CatalogQuery(serverId: serverId, catalog: catalog, kind: kind, tmdbId: tmdbId, title: title)
+    }
 
     func request(page: Int32) -> Mavio_Acquisition_V1_DiscoverRequest {
         var r = Mavio_Acquisition_V1_DiscoverRequest()
@@ -132,6 +161,16 @@ struct CatalogQuery: Hashable {
         r.studios = studios.map(\.id)
         r.networks = networks.map(\.id)
         r.originalLanguage = originalLanguage
+        r.sort = sort
+        r.ascending = sort != .unspecified && ascending
+        r.watchProviders = watchProviders
+        r.watchRegion = watchProviders.isEmpty ? "" : watchRegion
+        r.releasedFrom = yearFrom > 0 ? String(format: "%04d-01-01", yearFrom) : ""
+        r.releasedTo = yearTo > 0 ? String(format: "%04d-12-31", yearTo) : ""
+        r.runtimeMin = Int32(runtimeMin)
+        r.runtimeMax = Int32(runtimeMax)
+        r.ratingMin = Double(ratingMin)
+        r.votesMin = Int32(votesMin)
         r.language = discoverLanguage
         r.page = page
         return r
@@ -246,11 +285,29 @@ struct CatalogShelf: View {
 struct CatalogView: View {
     let query: CatalogQuery
     @Environment(AppModel.self) private var model
+    @Environment(Discovery.self) private var discovery
     @Environment(\.theme) private var theme
+    /// The query with the filters applied, once some are.
+    @State private var filtered: CatalogQuery?
+    @State private var filtering = false
     @State private var titles: [DiscoveredTitle] = []
     @State private var next: Int32? = 1
     @State private var loading = false
     @State private var failed = false
+    /// The query the pages are of.
+    @State private var shown: CatalogQuery?
+
+    private var current: CatalogQuery { filtered ?? query }
+
+    /// The catalog, when it takes filters or sorts; recommendations and
+    /// similar titles take none.
+    private var filterable: Catalog? {
+        guard query.tmdbId == 0,
+            let catalog = discovery.catalogs.first(where: { $0.id == query.catalog }),
+            !catalog.filters.isEmpty || !catalog.sorts.isEmpty
+        else { return nil }
+        return catalog
+    }
 
     var body: some View {
         ScrollView {
@@ -267,27 +324,65 @@ struct CatalogView: View {
                 StatusView(
                     icon: "error", title: MavioStrings.stateError,
                     action: (MavioStrings.actionRetry, { Task { await load() } }))
+            } else if titles.isEmpty, current.filterCount > 0 || current.sort != .unspecified {
+                StatusView(
+                    icon: "search", title: MavioStrings.discoverNoMatches,
+                    action: (MavioStrings.discoverReset, { filtered = query.unfiltered }))
             } else if titles.isEmpty {
                 StatusView(icon: "search", title: MavioStrings.discoverNoMatches)
             }
         }
         .navigationTitle(query.title)
-        .task { if titles.isEmpty { await load() } }
+        .toolbar {
+            if filterable != nil {
+                ToolbarItem(placement: .topBarTrailing) {
+                    let n = current.filterCount
+                    Button {
+                        filtering = true
+                    } label: {
+                        HStack(spacing: 4) {
+                            Icon(n > 0 || current.sort != .unspecified ? "filterFill" : "filter", size: 20)
+                            if n > 0 { Text(String(n)).type(theme.type.callout).fontWeight(.semibold) }
+                        }
+                    }
+                    .accessibilityLabel(n > 0 ? "\(MavioStrings.discoverFilters) (\(n))" : MavioStrings.discoverFilters)
+                }
+            }
+        }
+        .sheet(isPresented: $filtering) {
+            if let catalog = filterable {
+                CatalogFiltersSheet(catalog: catalog, value: current) { filtered = $0 }
+            }
+        }
+        .task(id: current) {
+            // Coming back from a title keeps the pages; other filters start again.
+            if shown != current {
+                shown = current
+                titles = []
+                next = 1
+                failed = false
+                loading = false
+            }
+            if titles.isEmpty { await load() }
+        }
     }
 
     private func load() async {
         guard let page = next, !loading else { return }
+        let query = current
         loading = true
         failed = false
+        defer { if query == current { loading = false } }
         do {
             let response = try await model.discover(query, page: page)
+            // Filters applied meanwhile start the grid again.
+            guard query == current else { return }
             var seen = Set(titles.map(\.key))
             titles += response.titles.filter { seen.insert($0.key).inserted }
             next = response.page < response.totalPages ? response.page + 1 : nil
         } catch {
-            failed = !(error is CancellationError)
+            if query == current { failed = !(error is CancellationError) }
         }
-        loading = false
     }
 }
 
