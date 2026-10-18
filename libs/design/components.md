@@ -95,8 +95,8 @@ A cast or crew member.
 
 A user's or an account's picture in menus, lists of users and Homes.
 
-* **Anatomy**: a circle (`radius.full`) holding the first character of the name, upper-cased, in white and semibold, 0.42 of the circle's size.
-* **Color**: one quiet gray for everyone, `#8E8E93` in both themes, on which the white initial stays legible; the initial tells people apart.
+* **Anatomy**: a circle (`radius.full`) holding the first character of the name, upper-cased and semibold, 0.42 of the circle's size.
+* **Color**: the same for everyone and quiet against the background: the circle is `color.fillSelected`, the initial `color.textSecondary`, in each theme; the initial tells people apart.
 
 ## Track Picker
 
