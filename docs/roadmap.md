@@ -748,7 +748,8 @@ flowchart TD
   - [x] The screens the core does not model call the server's API through the core (`CallServer`) with `libs/proto`'s Connect clients: person pages, the whole cast and crew and the crew alone, and on the details the cast and crew by job, the extras, the collection's banner, and the details' facts, ratings, keywords, links and media
   - [ ] The details' recommendations and what the discovery providers tell of a title (budget, takings, next episode, the services streaming it), its acquisition, subtitles and issues for administrators, and genres, studios and keywords opening their items in the library
   - [x] The settings in a layout of their own, as the web UI's, and the user menu: appearance, language and TV mode; the maximum quality and playing the next episode; the user's languages and when subtitles show, saved to every server; the account, its servers in order and Quick Connect; and the devices signed in, signed out
-  - [ ] The server's administration in the settings, the devices' remote control, the account's security and the assistant's settings
+  - [x] The server's administration in the settings, for administrators: the overview of its state, the users, the libraries scanned, the activity with who is playing, the tasks run and the jobs, and the logs filtered
+  - [ ] The rest of the server's administration: the overview's load and containers, adding and editing users and libraries, general settings, API keys, proxies, storage, transcoding, the acquisition's menus, plugins, backups and issues; the devices' remote control, the account's security and the assistant's settings
   - [ ] Downloads, Discover and requests, the assistant, and switching users with PINs
   - [ ] Tried on Windows and Linux; signed and notarized on macOS; the app's icon
 - [ ] The decision on a Jellyfin API compatibility shim

@@ -37,9 +37,17 @@ type settingsSection struct {
 	id, icon string
 	color    ui.Color
 	title    string // its string's key
+	// admin marks a section of the server's administrators.
+	admin bool
 }
 
 var settingsSections = []settingsSection{
+	{id: "overview", icon: "server", color: ui.RGB(0x8E, 0x8E, 0x93), title: "settings.overview", admin: true},
+	{id: "users", icon: "users", color: ui.RGB(0xFF, 0x95, 0x00), title: "settings.users", admin: true},
+	{id: "libraries", icon: "folder", color: ui.RGB(0x00, 0x7A, 0xFF), title: "settings.libraries", admin: true},
+	{id: "activity", icon: "activity", color: ui.RGB(0xFF, 0x2D, 0x55), title: "settings.activity", admin: true},
+	{id: "tasks", icon: "pending", color: ui.RGB(0x58, 0x56, 0xD6), title: "settings.tasks", admin: true},
+	{id: "logs", icon: "info", color: ui.RGB(0x8E, 0x8E, 0x93), title: "settings.logs", admin: true},
 	{id: "appearance", icon: "appearance", color: ui.RGB(0x5E, 0x5C, 0xE6), title: "settings.appearance"},
 	{id: "playback", icon: "play", color: ui.RGB(0xFF, 0x3B, 0x30), title: "settings.playback"},
 	{id: "subtitles-audio", icon: "subtitles", color: ui.RGB(0x34, 0xC7, 0x59), title: "settings.subtitlesAudio"},
@@ -55,22 +63,60 @@ func sectionOf(id string) (settingsSection, bool) {
 	return settingsSections[i], true
 }
 
-// settingsGroups are the sidebar's groups: this device's sections, then
-// the server's.
-var settingsGroups = []struct {
+// settingsMenu is a menu of the server's settings: a second level holding
+// the sections of one concern.
+type settingsMenu struct {
+	id, icon string
+	color    ui.Color
 	title    string
 	sections []string
-	server   bool
+}
+
+var settingsMenus = []settingsMenu{
+	{id: "media", icon: "movies", color: ui.RGB(0xFF, 0x9F, 0x0A), title: "settings.mediaMenu", sections: []string{"libraries"}},
+	{id: "maintenance", icon: "admin", color: ui.RGB(0x8E, 0x8E, 0x93), title: "settings.maintenanceMenu", sections: []string{"activity", "tasks", "logs"}},
+}
+
+// settingsGroups are the sidebar's groups: this device's sections, then
+// the server's, in the order a server is set up and kept, with its menus.
+var settingsGroups = []struct {
+	title   string
+	entries []string
+	server  bool
 }{
 	{"settings.thisDevice", []string{"appearance", "playback", "subtitles-audio"}, false},
-	{"settings.serverGroup", []string{"devices"}, true},
+	{"settings.serverGroup", []string{"overview", "users", "devices", "media", "maintenance"}, true},
+}
+
+func menuOf(id string) (settingsMenu, bool) {
+	i := slices.IndexFunc(settingsMenus, func(m settingsMenu) bool { return m.id == id })
+	if i < 0 {
+		return settingsMenu{}, false
+	}
+	return settingsMenus[i], true
+}
+
+// admin reports whether the user administers the server chosen; known
+// tells whether that is known yet.
+func (a *App) admin() (admin, known bool) {
+	s := a.chosenServer()
+	if s == nil {
+		return false, true
+	}
+	t := a.currentUser(s.GetId())
+	return t.value.GetAdmin(), t.loaded
 }
 
 // settingsState is the state of the settings.
 type settingsState struct {
 	// server is the ID of the server whose settings are shown.
 	server string
-	me     task[*userv1.User]
+	// users are the user signed in to each server.
+	users map[string]*task[*userv1.User]
+	// open tells which menus of the sidebar are open, when not the one
+	// holding the section shown.
+	open  map[string]bool
+	admin adminState
 
 	languages languagesForm
 	sessions  task[[]*sessionv1.Session]
@@ -119,8 +165,16 @@ func (a *App) settings(c *ui.Context, r *ui.Route) {
 	if r.Match("/settings/{section}") {
 		id = r.Param("section")
 	}
-	if _, ok := sectionOf(id); !ok {
+	if m, ok := menuOf(id); ok {
+		id = m.sections[0]
+	}
+	sec, ok := sectionOf(id)
+	if !ok {
 		id = "appearance"
+	}
+	// A server the user does not administer has no administration.
+	if admin, known := a.admin(); sec.admin && known && !admin {
+		id = "devices"
 	}
 	r.Title(style.T(c, "nav.settings"))
 	colors := style.Colors(c)
@@ -176,8 +230,23 @@ func (a *App) settingsSidebar(c *ui.Context, current string) {
 					if g.server && a.account != nil && len(a.servers) > 1 {
 						a.serverChoice(c)
 					}
-					for _, id := range g.sections {
+					admin, _ := a.admin()
+					for _, id := range g.entries {
+						if m, ok := menuOf(id); ok {
+							if !admin {
+								continue
+							}
+							if len(m.sections) == 1 {
+								id = m.sections[0]
+							} else {
+								a.sidebarMenu(c, m, current)
+								continue
+							}
+						}
 						s, _ := sectionOf(id)
+						if s.admin && !admin {
+							continue
+						}
 						a.sidebarLink(c, s, s.id == current)
 					}
 				})
@@ -218,6 +287,50 @@ func (a *App) sidebarLink(c *ui.Context, s settingsSection, selected bool) {
 	if b.Clicked() && !selected {
 		a.router.Replace("/settings/" + s.id)
 	}
+}
+
+// sidebarMenu builds a menu in the sidebar, opening in place to its
+// sections: open while it holds the section shown, until closed, and
+// marked while closed over it.
+func (a *App) sidebarMenu(c *ui.Context, m settingsMenu, current string) {
+	colors := style.Colors(c)
+	st := &a.settingsState
+	within := slices.Contains(m.sections, current)
+	open, set := st.open[m.id]
+	if !set {
+		open = within
+	}
+	ui.Column(c.Key(m.id)).Gap(2).Children(func() {
+		b := ui.ButtonBase(c).Height(40).Padding(0, 8).Gap(12).Radius(10).AlignItems(ui.Center).Label(style.T(c, m.title))
+		switch {
+		case within && !open:
+			b.Background(style.Color(colors.FillSelected))
+		case b.Hovered():
+			b.Background(style.Color(colors.Fill))
+		}
+		b.Children(func() {
+			sectionTile(c, m.icon, m.color)
+			style.Text(ui.Text(c, style.T(c, m.title)), style.Type.Body).TextColor(style.Color(colors.TextPrimary)).SingleLine().Grow(1)
+			chevron := ui.Icon(c, style.Icon("expand", false)).Size(16, 16).TextColor(style.Color(colors.TextTertiary))
+			if !open {
+				chevron.Rotate(-90)
+			}
+		})
+		if b.Clicked() {
+			if st.open == nil {
+				st.open = map[string]bool{}
+			}
+			st.open[m.id] = !open
+		}
+		if open {
+			ui.Column(c).Gap(2).Padding(0, 0, 0, 24).Children(func() {
+				for _, id := range m.sections {
+					s, _ := sectionOf(id)
+					a.sidebarLink(c, s, s.id == current)
+				}
+			})
+		}
+	})
 }
 
 // sectionTile builds a section's icon on its colored tile.
@@ -280,6 +393,18 @@ func (a *App) settingsSection(c *ui.Context, id string) {
 		a.accountSection(c)
 	case "devices":
 		a.devicesSection(c)
+	case "overview":
+		a.overviewSection(c)
+	case "users":
+		a.usersSection(c)
+	case "libraries":
+		a.librariesSection(c)
+	case "activity":
+		a.activitySection(c)
+	case "tasks":
+		a.tasksSection(c)
+	case "logs":
+		a.logsSection(c)
 	}
 }
 
@@ -303,10 +428,21 @@ type settingsGroup struct {
 // group builds a group, with a title over it and a footer under it, of
 // the rows fn adds.
 func group(c *ui.Context, key, title, footer string, fn func(g *settingsGroup)) {
+	groupWith(c, key, title, nil, footer, fn)
+}
+
+// groupWith is group with a control at the end of its title, such as a
+// filter of its rows.
+func groupWith(c *ui.Context, key, title string, control func(), footer string, fn func(g *settingsGroup)) {
 	colors := style.Colors(c)
 	ui.Column(c.Key(key)).Gap(8).Children(func() {
-		if title != "" {
-			style.Text(ui.Text(c, title), style.Type.Headline).TextColor(style.Color(colors.TextPrimary)).Padding(0, 4)
+		if title != "" || control != nil {
+			ui.Row(c).Gap(12).AlignItems(ui.Center).Padding(0, 4).Children(func() {
+				style.Text(ui.Text(c, title), style.Type.Headline).TextColor(style.Color(colors.TextPrimary)).Grow(1)
+				if control != nil {
+					control()
+				}
+			})
 		}
 		ui.Column(c).Radius(14).Clip().Background(style.Color(colors.Surface)).Children(func() {
 			fn(&settingsGroup{c: c})
@@ -539,11 +675,19 @@ func languageCodes(s string) ([]string, bool) {
 	return list, true
 }
 
-// currentUser loads the user signed in to the first server, whose
-// preferences the section of languages shows.
+// currentUser loads the user signed in to a server: whose preferences
+// the section of languages shows, and whether they administer it.
 func (a *App) currentUser(server string) *task[*userv1.User] {
 	st := &a.settingsState
-	return load(a, &st.me, key("me", server, a.generation), func(ctx context.Context) (*userv1.User, error) {
+	if st.users == nil {
+		st.users = map[string]*task[*userv1.User]{}
+	}
+	t := st.users[server]
+	if t == nil {
+		t = &task[*userv1.User]{}
+		st.users[server] = t
+	}
+	return load(a, t, key("me", server, a.generation), func(ctx context.Context) (*userv1.User, error) {
 		res, err := a.userService(server).GetCurrentUser(ctx, &userv1.GetCurrentUserRequest{})
 		return res.GetUser(), err
 	})
@@ -557,7 +701,7 @@ func (a *App) languagesSection(c *ui.Context) {
 		return
 	}
 	t := a.currentUser(a.servers[0].GetId())
-	if taskStatus(c, t, func() { a.settingsState.me.key = "" }, nil) {
+	if taskStatus(c, t, func() { t.key = "" }, nil) {
 		return
 	}
 	f := &a.settingsState.languages

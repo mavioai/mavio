@@ -1,0 +1,71 @@
+package app
+
+import (
+	"testing"
+
+	"github.com/egoist/mygo/ui"
+)
+
+func TestAdmin(t *testing.T) {
+	h := newHarness(t, true, 1280, 900)
+	h.tt.Key(ui.Cmd, ui.KeyComma)
+	h.settle()
+	open := func(label string) {
+		t.Helper()
+		if err := h.tt.Click(label); err != nil {
+			t.Fatalf("click %q: %v; texts = %q", label, err, h.tt.Texts())
+		}
+		h.settle()
+	}
+	want := func(texts ...string) {
+		t.Helper()
+		for _, w := range texts {
+			if !h.tt.HasText(w) {
+				t.Errorf("no %q; texts = %q", w, h.tt.Texts())
+			}
+		}
+	}
+
+	open("Overview")
+	want("Running", "0.9.0", "linux/amd64", "SQLite", "7.1.2-Jellyfin", "1 day 2 hr")
+	h.save(shots, "settings-overview")
+
+	open("Users")
+	want("Anna", "Guest", "Kids", "Admin", "Managed", "Disabled", "Never signed in")
+	h.save(shots, "settings-users")
+
+	open("Libraries")
+	want("Movies", "Movies · 2 folders", "TV Shows · 1 folder")
+	open("Scan")
+	if h.core.scans != 1 {
+		t.Errorf("scans = %d, want = 1", h.core.scans)
+	}
+	want("Scan started")
+	h.save(shots, "settings-libraries")
+
+	open("Monitoring & Maintenance")
+	open("Activity")
+	want("Now Playing", "The Long Orbit", "Anna · Living Room TV · Mavio for Android TV", "Direct Play", "47:12 / 2:04:00",
+		"Metadata could not be fetched", "40 minutes ago", "Show More")
+	h.save(shots, "settings-activity")
+
+	open("Tasks")
+	want("Scan Media Libraries", "every 12 hr", "ffmpeg exited with status 1", "on demand", "Search for Missing Subtitles", "library.scan", "42%")
+	open("Run")
+	if h.core.taskRuns != 1 {
+		t.Errorf("task runs = %d, want = 1", h.core.taskRuns)
+	}
+	h.save(shots, "settings-tasks")
+
+	open("Logs")
+	want("scan finished", "probe slow", "4 records")
+	h.app.settingsState.admin.logFilter = "tmdb"
+	h.tt.Frame()
+	want("fetch metadata", "1 record")
+	if h.tt.HasText("scan finished") {
+		t.Errorf("the filter kept %q", "scan finished")
+	}
+	h.app.settingsState.admin.logFilter = ""
+	h.tt.Frame()
+	h.save(shots, "settings-logs")
+}

@@ -71,6 +71,8 @@ type fakeCore struct {
 	// prefs and sessions are the user's on the server's API.
 	prefs    *userv1.PlaybackPreferences
 	sessions []*sessionv1.Session
+	taskRuns int // the tasks run
+	scans    int // the libraries scanned
 
 	mu       sync.Mutex
 	calls    []string

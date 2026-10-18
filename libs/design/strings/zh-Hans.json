@@ -1939,5 +1939,16 @@
   "indexers.page": "第 {page} / {pages} 页",
   "indexers.previous": "上一页",
   "indexers.next": "下一页",
-  "indexers.prompt": "输入要搜索的内容。"
+  "indexers.prompt": "输入要搜索的内容。",
+  "time.justNow": "刚刚",
+  "time.minutesAgo": "{count, plural, other {# 分钟前}}",
+  "time.hoursAgo": "{count, plural, other {# 小时前}}",
+  "time.daysAgo": "{count, plural, other {# 天前}}",
+  "time.inMinutes": "{count, plural, other {# 分钟后}}",
+  "time.inHours": "{count, plural, other {# 小时后}}",
+  "time.inDays": "{count, plural, other {# 天后}}",
+  "time.seconds": "{count, plural, other {# 秒}}",
+  "time.minutes": "{count, plural, other {# 分钟}}",
+  "time.hours": "{count, plural, other {# 小时}}",
+  "time.days": "{count, plural, other {# 天}}"
 }

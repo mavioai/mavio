@@ -17,6 +17,7 @@ import (
 	capiv1 "github.com/mavioai/mavio/libs/client-rust/capi/gen/mavio/capi/v1"
 	libraryv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/library/v1"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/library/v1/libraryv1connect"
+	playbackv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/playback/v1"
 	sessionv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/session/v1"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/session/v1/sessionv1connect"
 	userv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/user/v1"
@@ -51,6 +52,7 @@ func (f *fakeCore) apiHandler() http.Handler {
 	mux.Handle(libraryv1connect.NewItemServiceHandler(api))
 	mux.Handle(userv1connect.NewUserServiceHandler(&fakeUsers{f: f}))
 	mux.Handle(sessionv1connect.NewSessionServiceHandler(&fakeSessions{f: f}))
+	f.handleAdmin(mux)
 	f.prefs = userv1.PlaybackPreferences_builder{
 		AudioLanguages: []string{"jpn", "eng"}, SubtitleLanguages: []string{"eng"},
 		SubtitleMode: new(userv1.SubtitleMode_SUBTITLE_MODE_FOREIGN), PlayDefaultAudioTrack: new(true),
@@ -62,7 +64,11 @@ func (f *fakeCore) apiHandler() http.Handler {
 		}.Build(),
 		sessionv1.Session_builder{
 			Id: new("6f1c1d1e-0000-4000-8000-000000000002"), DeviceName: new("Living Room TV"), Client: new("Mavio for Android TV"),
-			Online: new(true), NowPlaying: sessionv1.NowPlaying_builder{Item: libraryv1.Item_builder{Name: new("The Long Orbit")}.Build()}.Build(),
+			Online: new(true), UserName: new("Anna"),
+			NowPlaying: sessionv1.NowPlaying_builder{
+				Item:     libraryv1.Item_builder{Name: new("The Long Orbit"), Runtime: durationpb.New(2*time.Hour + 4*time.Minute)}.Build(),
+				Position: durationpb.New(47*time.Minute + 12*time.Second), Method: new(playbackv1.PlayMethod_PLAY_METHOD_DIRECT_PLAY),
+			}.Build(),
 		}.Build(),
 	}
 	return mux
