@@ -5,10 +5,10 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -39,8 +39,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -117,18 +115,11 @@ fun HomeScreen(model: AppModel) {
             StatusView(stringResource(R.string.state_loading))
             return@PullToRefreshBox
         }
-        // The hero reaches under the header to the top of the screen.
-        val padding = PaddingValues(top = if (hero.isEmpty()) top else 0.dp, bottom = LocalBottomInset.current)
-        LazyColumn(Modifier.fillMaxSize(), contentPadding = padding) {
+        LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(top = top, bottom = LocalBottomInset.current)) {
             if (hero.isNotEmpty()) {
                 item(key = "hero") {
                     Hero(hero)
-                    Box(
-                        Modifier
-                            .fillMaxWidth()
-                            .height(MavioSpacing.s24)
-                            .background(Brush.verticalGradient(listOf(Color.Black, theme.colors.background))),
-                    )
+                    Spacer(Modifier.height(MavioSpacing.s24))
                 }
             }
             items(rows, key = { it.id }) { row ->
@@ -167,34 +158,29 @@ private fun Hero(entries: List<HeroEntry>) {
             pager.animateScrollToPage((pager.currentPage + 1) % entries.size)
         }
     }
-    val screen = with(LocalDensity.current) { LocalWindowInfo.current.containerSize.height.toDp() }
-    // The backdrop as it is, 16:9 from the top of the screen under the
-    // translucent header, then the title on black below it.
-    BoxWithConstraints(Modifier.fillMaxWidth().background(Color.Black)) {
-        val art = minOf(maxWidth * 9f / 16f, screen * 0.6f)
-        HorizontalPager(pager, Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) { page ->
+    // A 4:5 frame as wide as the screen, right below the header, its
+    // backdrop cropped to it and its colors spreading up into the header.
+    Box(Modifier.fillMaxWidth().aspectRatio(4f / 5f)) {
+        HeroBleed(entries[pager.currentPage].card.backdrop?.url)
+        HorizontalPager(pager, Modifier.fillMaxSize()) { page ->
             val (card, eyebrow) = entries[page]
-            Box(Modifier.fillMaxWidth()) {
-                Artwork(card.backdrop?.url, Modifier.fillMaxWidth().height(art), contentDescription = null)
+            Box(Modifier.fillMaxSize().background(theme.colors.surface)) {
+                Artwork(card.backdrop?.url, Modifier.fillMaxSize(), contentDescription = null)
                 Box(
                     Modifier
-                        .fillMaxWidth()
-                        .height(art)
+                        .fillMaxSize()
                         .background(
                             Brush.verticalGradient(
-                                0.4f to Color.Transparent,
-                                0.8f to Color.Black.copy(alpha = 0.75f),
-                                1f to Color.Black,
+                                0f to Color.Transparent,
+                                0.5f to Color.Black.copy(alpha = 0.4f),
+                                1f to Color.Black.copy(alpha = 0.9f),
                             ),
                         ),
                 )
                 Column(
-                    Modifier.padding(
-                        start = theme.layout.margin,
-                        end = theme.layout.margin,
-                        top = art - HERO_OVERLAP,
-                        bottom = MavioSpacing.s8,
-                    ),
+                    Modifier
+                        .align(Alignment.BottomStart)
+                        .padding(start = theme.layout.margin, end = theme.layout.margin, bottom = MavioSpacing.s32),
                     verticalArrangement = Arrangement.spacedBy(MavioSpacing.s12),
                 ) {
                     Text(
@@ -204,19 +190,16 @@ private fun Hero(entries: List<HeroEntry>) {
                         letterSpacing = 0.5.sp,
                         color = Color.White.copy(alpha = 0.75f),
                     )
-                    // As tall for every title, so that the pager keeps its height.
-                    Box(Modifier.fillMaxWidth().height(HERO_LOGO_HEIGHT), contentAlignment = Alignment.BottomStart) {
-                        Logo(card.logo?.url, card.title, Modifier.heightIn(max = HERO_LOGO_HEIGHT).fillMaxWidth(0.8f)) {
-                            Text(
-                                card.title,
-                                fontSize = 30.sp,
-                                lineHeight = 34.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = Color.White,
-                                maxLines = 2,
-                                overflow = TextOverflow.Ellipsis,
-                            )
-                        }
+                    Logo(card.logo?.url, card.title, Modifier.heightIn(max = HERO_LOGO_HEIGHT).fillMaxWidth(0.8f)) {
+                        Text(
+                            card.title,
+                            fontSize = 34.sp,
+                            lineHeight = 36.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
+                        )
                     }
                     HeroFacts(card)
                     Row(
@@ -241,16 +224,15 @@ private fun Hero(entries: List<HeroEntry>) {
             Row(
                 Modifier
                     .align(Alignment.TopEnd)
-                    // Just under the header, clear of the title's lines.
-                    .padding(top = LocalTopInset.current + MavioSpacing.s12, end = theme.layout.margin),
+                    .padding(top = MavioSpacing.s16, end = theme.layout.margin),
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
             ) {
                 repeat(entries.size) {
                     Box(
                         Modifier
-                            .size(width = if (it == pager.currentPage) 16.dp else 6.dp, height = 6.dp)
+                            .size(width = if (it == pager.currentPage) 20.dp else 6.dp, height = 6.dp)
                             .clip(CircleShape)
-                            .background(Color.White.copy(alpha = if (it == pager.currentPage) 1f else 0.4f)),
+                            .background(Color.White.copy(alpha = if (it == pager.currentPage) 1f else 0.45f)),
                     )
                 }
             }
@@ -258,11 +240,8 @@ private fun Hero(entries: List<HeroEntry>) {
     }
 }
 
-/** How far the hero's title reaches up into its backdrop. */
-private val HERO_OVERLAP = 56.dp
-
 /** The height of the hero's logo, or its title where there is none. */
-private val HERO_LOGO_HEIGHT = 80.dp
+private val HERO_LOGO_HEIGHT = 96.dp
 
 /** The year, the runtime and two genres, then the rating in a frame, as the web UI's. */
 @Composable

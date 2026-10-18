@@ -214,7 +214,7 @@ private fun DetailsContent(model: AppModel, details: Details) {
             navigator.play(card.serverId, n.itemId, n.name, null, start)
         }
     }
-    LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = LocalBottomInset.current + MavioSpacing.s40)) {
+    LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(top = LocalTopInset.current, bottom = LocalBottomInset.current + MavioSpacing.s40)) {
         item(key = "header") { Header(details, source, several = signedIn.size > 1) }
         item(key = "actions") {
             Column(
@@ -274,7 +274,8 @@ private fun DetailsContent(model: AppModel, details: Details) {
 // Header
 
 /**
- * The artwork in a square from the top of the screen, and over its lower
+ * The artwork in a square as wide as the screen right below the header,
+ * its colors spreading up into the header, and over its lower
  * left the series an episode or season belongs to, the logo or title, the
  * facts and the badges.
  */
@@ -282,46 +283,48 @@ private fun DetailsContent(model: AppModel, details: Details) {
 private fun Header(details: Details, source: Source?, several: Boolean) {
     val card = details.card
     val image = details.backdrop ?: if (card.kind == CardKind.EPISODE) card.thumb else null
-    Box(
-        Modifier
-            .fillMaxWidth()
-            .aspectRatio(1f)
-            .clipToBounds()
-            .background(theme.colors.surface),
-    ) {
-        when {
-            image != null -> Artwork(image.url, Modifier.fillMaxSize(), icon = itemIcon(card.kind))
-            card.poster != null -> Artwork(
-                card.poster?.url,
-                Modifier
-                    .fillMaxSize()
-                    .graphicsLayer {
-                        scaleX = 1.25f
-                        scaleY = 1.25f
-                    }
-                    .then(if (blurAvailable) Modifier.blur(48.dp) else Modifier)
-                    .alpha(0.7f),
-            )
-        }
+    Box(Modifier.fillMaxWidth().aspectRatio(1f)) {
+        HeroBleed((image ?: card.poster)?.url)
         Box(
             Modifier
-                .fillMaxSize()
-                .background(
-                    Brush.verticalGradient(
-                        0f to Color.Transparent,
-                        0.5f to Color.Black.copy(alpha = 0.5f),
-                        1f to Color.Black,
+                .matchParentSize()
+                .clipToBounds()
+                .background(theme.colors.surface),
+        ) {
+            when {
+                image != null -> Artwork(image.url, Modifier.fillMaxSize(), icon = itemIcon(card.kind))
+                card.poster != null -> Artwork(
+                    card.poster?.url,
+                    Modifier
+                        .fillMaxSize()
+                        .graphicsLayer {
+                            scaleX = 1.25f
+                            scaleY = 1.25f
+                        }
+                        .then(if (blurAvailable) Modifier.blur(48.dp) else Modifier)
+                        .alpha(0.7f),
+                )
+            }
+            Box(
+                Modifier
+                    .fillMaxSize()
+                    .background(
+                        Brush.verticalGradient(
+                            0f to Color.Transparent,
+                            0.5f to Color.Black.copy(alpha = 0.5f),
+                            1f to Color.Black,
+                        ),
                     ),
-                ),
-        )
-        HeaderText(
-            details,
-            source,
-            several,
-            Modifier
-                .align(Alignment.BottomStart)
-                .padding(start = theme.layout.margin, end = theme.layout.margin, bottom = MavioSpacing.s24),
-        )
+            )
+            HeaderText(
+                details,
+                source,
+                several,
+                Modifier
+                    .align(Alignment.BottomStart)
+                    .padding(start = theme.layout.margin, end = theme.layout.margin, bottom = MavioSpacing.s24),
+            )
+        }
     }
 }
 

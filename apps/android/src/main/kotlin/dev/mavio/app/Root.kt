@@ -45,6 +45,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.graphics.luminance
+import dev.mavio.ui.Artwork
+import androidx.compose.foundation.layout.requiredHeight
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.draw.BlurredEdgeTreatment
+import androidx.compose.ui.draw.blur
+import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
@@ -222,8 +229,8 @@ private fun Header(model: AppModel, back: Boolean, modifier: Modifier, haze: Haz
     Row(
         modifier
             .fillMaxWidth()
-            // Half see-through, so that Home's hero shows under it.
-            .glass(haze, colors.background.copy(alpha = 0.5f), radius = 24.dp)
+            // The tab bar's glass, without its border.
+            .glass(haze, glassTint(), radius = 12.dp, saturation = 1.8f)
             .statusBarsPadding()
             .height(HEADER_HEIGHT)
             .padding(horizontal = theme.layout.margin),
@@ -289,7 +296,7 @@ private fun TabBar(current: Tab, haze: HazeState, modifier: Modifier = Modifier,
             .fillMaxWidth()
             .shadow(if (dark) 16.dp else 8.dp, pill)
             .clip(pill)
-            .glass(haze, if (dark) Color(0x61252528) else Color(0x59FFFFFF), radius = 12.dp, saturation = 1.8f)
+            .glass(haze, glassTint(), radius = 12.dp, saturation = 1.8f)
             .border(1.dp, if (dark) Color.White.copy(alpha = 0.12f) else Color.White.copy(alpha = 0.55f), pill)
             .padding(4.dp),
         horizontalArrangement = Arrangement.spacedBy(4.dp),
@@ -316,6 +323,46 @@ private fun TabBar(current: Tab, haze: HazeState, modifier: Modifier = Modifier,
                 )
             }
         }
+    }
+}
+
+/** The tint of the header's and the tab bar's glass. */
+@Composable
+private fun glassTint(): Color = if (theme.colors.background.luminance() < 0.5f) Color(0x61252528) else Color(0x59FFFFFF)
+
+/**
+ * A phone's hero's artwork, enlarged and blurred, above the hero behind
+ * the header and the status bar, so that the header takes the hero's
+ * colors and meets its artwork at a sharp edge, as the web UI's
+ * (HeroBleed). Placed first in the hero's box, which must not clip it.
+ */
+@Composable
+fun HeroBleed(url: String?) {
+    if (url == null) return
+    val top = LocalTopInset.current
+    Box(
+        Modifier
+            .fillMaxWidth()
+            .layout { measurable, constraints ->
+                val height = top.roundToPx()
+                val placeable = measurable.measure(constraints.copy(minHeight = height, maxHeight = height))
+                // Above the hero, taking none of its room.
+                layout(constraints.minWidth, 0) { placeable.place(0, -height) }
+            }
+            .clipToBounds(),
+    ) {
+        Artwork(
+            url,
+            Modifier
+                .fillMaxWidth()
+                .requiredHeight(top * 3)
+                .graphicsLayer {
+                    scaleX = 1.25f
+                    scaleY = 1.25f
+                }
+                .then(if (blurAvailable) Modifier.blur(40.dp, BlurredEdgeTreatment.Unbounded) else Modifier),
+            contentDescription = null,
+        )
     }
 }
 
