@@ -256,6 +256,15 @@ public final class AppModel {
         refreshHome()
     }
 
+    /// Switches a standalone server's session to another of its users, with
+    /// their PIN when they have one; everything shown of the server was the
+    /// previous user's, so it reloads.
+    public func switchUser(_ serverId: String, to userId: String, pin: String? = nil) async throws {
+        _ = try await client.switchUser(serverId: serverId, userId: userId, pin: pin)
+        reloadServers()
+        bump(serverId)
+    }
+
     /// Marks an item played or unplayed.
     public func setPlayed(_ card: Card, _ played: Bool) async throws {
         try await client.setPlayed(serverId: card.serverId, itemId: card.itemId, played: played)
@@ -280,5 +289,15 @@ extension CoreError {
     public var isUnauthenticated: Bool {
         if case .Unauthenticated = self { return true }
         return false
+    }
+
+    /// What happened, as the server or the core told it.
+    public var reason: String {
+        switch self {
+        case .Unreachable(let reason), .Unauthenticated(let reason), .PermissionDenied(let reason),
+            .NotFound(let reason), .Invalid(let reason), .FailedPrecondition(let reason),
+            .Server(let reason), .Store(let reason):
+            reason
+        }
     }
 }

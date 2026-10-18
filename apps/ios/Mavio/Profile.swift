@@ -29,6 +29,13 @@ struct ProfileView: View {
                 } label: {
                     EntryLabel(MavioStrings.settingsPlayback, icon: "play", color: Color(hex: 0xFF3B30))
                 }
+                if !model.signedInServers.isEmpty {
+                    NavigationLink {
+                        SubtitlesAudioView()
+                    } label: {
+                        EntryLabel(MavioStrings.settingsSubtitlesAudio, icon: "subtitles", color: Color(hex: 0x34C759))
+                    }
+                }
             }
             Section {
                 LabeledContent(
@@ -109,6 +116,7 @@ private struct AccountView: View {
                 } footer: {
                     Text(MavioStrings.settingsStandaloneAccountMessage(name: server.userName, server: server.name))
                 }
+                SwitchUserSection(server: server)
             }
             Section {
                 ForEach(model.servers, id: \.id) { server in
