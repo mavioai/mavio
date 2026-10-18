@@ -752,6 +752,12 @@ flowchart TD
   - [ ] Apple 与 Android 应用，其横向列表也采用[横向列表](../libs/design/components.zh-CN.md#横向列表)的间距，Mac 上还有标题栏末端的箭头
 - [ ] 切片：Android 手机与平板应用、Apple TV 与 Android TV 应用、Mac 应用
 - [ ] Android 手机与平板应用（`apps/android`、`libs/android`）
+  - [x] 与 Web UI 一致的登录，背景是海报墙：在 Custom Tab 中用 Mavio 登录、到期时自动续期的链接码、服务器地址与附近发现的服务器、用户名与密码、快速连接与新服务器的首个用户；启动时请求 `ACCESS_LOCAL_NETWORK`。Debug 构建从 Gradle 属性 `mavio.devApi` 取 mavio.dev 的 API，并信任放在应用文件中的开发 CA（`dev-ca.pem`，经 `MAVIO_EXTRA_CA_CERTS`）
+  - [x] 与 Web UI 手机布局一致的首页：带搜索与头像的页头、悬浮的标签栏，二者都是覆盖在页面上的毛玻璃（Haze），带背景图、Logo、信息与分级的 Hero，各货架，下拉刷新；包含账户、服务器与退出登录的设置；每个标签各有一个页面栈（Navigation 3）
+  - [ ] 详情、播放器（libmpv 与 Media3，上报进度并可继续播放）、媒体库、搜索、其余设置、平板的侧边栏与发现标签
+  - [ ] 应用图标（仍是 Android 默认图标）
+  - [ ] 模拟器上的模糊：其 GPU 绘制一帧模糊需要数秒，因此在模拟器上毛玻璃只有色调，海报墙也不模糊
+  - [ ] 重新录制 `android-lib:snapshot` 的参考图（Wordmark 与货架标题有改动）
 - [ ] Apple TV 与 Android TV 应用
 - [ ] Mac 应用
 - [ ] 桌面应用（macOS、Windows 与 Linux）
