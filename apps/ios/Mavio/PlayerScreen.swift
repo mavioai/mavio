@@ -34,6 +34,15 @@ struct PlayerScreen: View {
     @Environment(\.openURL) private var openURL
     @State private var scrubbing: TimeInterval?
     @State private var closing = false
+    /// The press held for double speed, and the speed it plays at after.
+    @GestureState private var holding = false
+    @State private var heldRate: Float?
+    @State private var heldEnded = Date.distantPast
+    /// The vertical swipe for brightness or volume, and the level it shows.
+    @State private var swipe: SwipeStart?
+    @State private var swipeIgnored = false
+    @State private var level: LevelShown?
+    @State private var volume = SystemVolume()
 
     init(request: PlayRequest) {
         _request = State(initialValue: request)
@@ -54,6 +63,8 @@ struct PlayerScreen: View {
                             }
                             .exclusively(
                                 before: TapGesture().onEnded {
+                                    // The release of a held press is no tap.
+                                    guard heldRate == nil, Date.now.timeIntervalSince(heldEnded) > 0.3 else { return }
                                     // A tap closes the panel before it hides the controls.
                                     withAnimation(.easeOut(duration: MavioDuration.fast)) {
                                         if panel != nil { panel = nil } else { controls.toggle() }
@@ -61,12 +72,36 @@ struct PlayerScreen: View {
                                     poke()
                                 })
                     )
+                    .simultaneousGesture(
+                        LongPressGesture(minimumDuration: 0.5)
+                            .sequenced(before: DragGesture(minimumDistance: 0))
+                            .updating($holding) { value, state, _ in
+                                if case .second(true, _) = value { state = true }
+                            }
+                    )
+                    .simultaneousGesture(
+                        DragGesture(minimumDistance: 16)
+                            .onChanged { swiped($0, in: geo.size) }
+                            .onEnded { _ in endSwipe() }
+                    )
+                VolumeView(volume: volume).frame(width: 1, height: 1).allowsHitTesting(false)
                 if player.isBuffering, failure == nil {
                     ProgressView().controlSize(.large).tint(.white)
                 }
                 if controls || failure != nil {
                     overlay.transition(.opacity)
                 }
+                Group {
+                    if holding {
+                        HeldSpeedIndicator()
+                    } else if let level {
+                        LevelIndicator(level: level)
+                    }
+                }
+                .transition(.opacity)
+                .frame(maxHeight: .infinity, alignment: .top)
+                .padding(.top, 72)
+                .allowsHitTesting(false)
                 if let panel, controls {
                     PanelView(
                         tab: Binding(get: { panel }, set: { self.panel = $0 }), tabs: panelTabs,
@@ -80,6 +115,8 @@ struct PlayerScreen: View {
                 }
             }
             .animation(.easeOut(duration: MavioDuration.fast), value: panel)
+            .animation(.easeOut(duration: MavioDuration.fast), value: holding)
+            .animation(.easeOut(duration: MavioDuration.fast), value: level == nil)
         }
         .background(.black)
         .preferredColorScheme(.dark)
@@ -104,6 +141,16 @@ struct PlayerScreen: View {
                 self.failure = failure
             }
         }
+        .onChange(of: holding) { _, held in
+            if held {
+                heldRate = player.rate
+                player.setRate(2)
+            } else {
+                player.setRate(heldRate ?? 1)
+                heldRate = nil
+                heldEnded = .now
+            }
+        }
         .onChange(of: player.ended) { _, ended in
             guard ended else { return }
             if let next { play(next) } else { close() }
@@ -118,6 +165,42 @@ struct PlayerScreen: View {
 
     private func poke() {
         interactions += 1
+    }
+
+    // MARK: Gestures
+
+    /// Follows a vertical swipe, which sets the brightness on the left half
+    /// and the volume on the right; one that starts sideways, or at the
+    /// edges the system keeps, sets nothing.
+    private func swiped(_ drag: DragGesture.Value, in size: CGSize) {
+        guard !holding, panel == nil, !swipeIgnored else { return }
+        if swipe == nil {
+            let (dx, dy) = (drag.translation.width, drag.translation.height)
+            let start = drag.startLocation
+            guard abs(dy) > abs(dx) * 1.5, start.y > 60, start.y < size.height - 60 else {
+                swipeIgnored = true
+                return
+            }
+            let kind: SwipeLevel = start.x < size.width / 2 ? .brightness : .volume
+            swipe = SwipeStart(kind: kind, value: kind == .brightness ? Brightness.value : volume.value)
+        }
+        guard let swipe else { return }
+        let value = min(max(swipe.value - drag.translation.height / (size.height * 0.6), 0), 1)
+        switch swipe.kind {
+        case .brightness: Brightness.value = value
+        case .volume: volume.value = value
+        }
+        level = LevelShown(kind: swipe.kind, value: value)
+    }
+
+    private func endSwipe() {
+        let ended = swipe != nil
+        (swipe, swipeIgnored) = (nil, false)
+        guard ended else { return }
+        Task {
+            try? await Task.sleep(for: .milliseconds(700))
+            if swipe == nil { level = nil }
+        }
     }
 
     // MARK: Playback
