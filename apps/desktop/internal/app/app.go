@@ -109,7 +109,9 @@ type App struct {
 	player *player
 	// account is the Mavio account signed in, if any.
 	account *capiv1.Account
-	servers []*capiv1.ServerRecord
+	// userMenuOpen tells whether the user menu is open.
+	userMenuOpen bool
+	servers      []*capiv1.ServerRecord
 	// state is the state of each server's stream.
 	state map[string]capiv1.StreamState_State
 	// generation counts the changes of the servers' content, so that what
@@ -258,7 +260,7 @@ func (a *App) signOut() {
 			a.account = nil
 			clear(a.libraries)
 			a.setServers(nil)
-			a.router.Replace("/home")
+			a.replace("/home")
 		})
 	}()
 }
