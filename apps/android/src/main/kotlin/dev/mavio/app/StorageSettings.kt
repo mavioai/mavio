@@ -23,8 +23,6 @@ import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -424,17 +422,7 @@ private fun OptionControl(option: Option, value: String, onChange: (String) -> U
     val current = value.ifEmpty { option.defaultValue }
     var open by remember { mutableStateOf(false) }
     when {
-        option.type == "bool" -> Switch(
-            current == "true",
-            { onChange(if (it) "true" else "false") },
-            colors = SwitchDefaults.colors(
-                checkedTrackColor = theme.colors.success,
-                checkedThumbColor = Color.White,
-                uncheckedTrackColor = theme.colors.fill,
-                uncheckedThumbColor = Color.White,
-                uncheckedBorderColor = Color.Transparent,
-            ),
-        )
+        option.type == "bool" -> MavioSwitch(current == "true") { onChange(if (it) "true" else "false") }
         examples.isNotEmpty() && option.exclusive -> Box {
             Row(
                 Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp)).background(theme.colors.fill).clickable { open = true }

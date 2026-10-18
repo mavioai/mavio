@@ -768,18 +768,24 @@ internal fun SwitchRow(label: String, checked: Boolean, detail: String? = null, 
         verticalAlignment = Alignment.CenterVertically,
     ) {
         RowLabel(label, detail, Modifier.weight(1f))
-        Switch(
-            checked,
-            onChange,
-            colors = SwitchDefaults.colors(
-                checkedTrackColor = theme.colors.success,
-                checkedThumbColor = Color.White,
-                uncheckedTrackColor = theme.colors.fill,
-                uncheckedThumbColor = Color.White,
-                uncheckedBorderColor = Color.Transparent,
-            ),
-        )
+        MavioSwitch(checked, onChange)
     }
+}
+
+/** A switch in the design system's colors. */
+@Composable
+internal fun MavioSwitch(checked: Boolean, onChange: (Boolean) -> Unit) {
+    Switch(
+        checked,
+        onChange,
+        colors = SwitchDefaults.colors(
+            checkedTrackColor = theme.colors.success,
+            checkedThumbColor = Color.White,
+            uncheckedTrackColor = theme.colors.fill,
+            uncheckedThumbColor = Color.White,
+            uncheckedBorderColor = Color.Transparent,
+        ),
+    )
 }
 
 /** A setting chosen from a menu, showing its choice. */

@@ -22,7 +22,6 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -524,7 +523,7 @@ private fun RefreshSheet(model: AppModel, card: Card, onDismiss: () -> Unit) {
     Sheet(stringResource(R.string.metadata_refresh_title, card.title), onDismiss) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(stringResource(R.string.metadata_replace), Modifier.weight(1f), style = theme.type.callout.text)
-            Switch(replace, { replace = it })
+            MavioSwitch(replace) { replace = it }
         }
         Text(
             stringResource(if (replace) R.string.metadata_replace_footer else R.string.metadata_refresh_footer),
