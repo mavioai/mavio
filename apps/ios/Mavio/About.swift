@@ -6,17 +6,29 @@ import SwiftUI
 /// on an iPad the tagline and overview, the leading crew, the tags and
 /// links, then the ratings, the facts and the chosen version's media.
 /// Genres, keywords and studios open their items in the library, and the
-/// crew their pages.
+/// crew their pages. A movie or series adds what the metadata providers
+/// tell of it beyond what the library keeps, as Seerr shows: its ratings,
+/// budget and takings, its next episode, the services streaming it and the
+/// logos linking it elsewhere.
 struct AboutSection: View {
     let details: Details
     let source: Source?
     /// Whether to show the overview, which a phone shows under the actions.
     let overview: Bool
+    @Environment(AppModel.self) private var model
     @Environment(\.theme) private var theme
     @Environment(\.horizontalSizeClass) private var sizeClass
     @State private var allStudios = false
+    /// The movie or series as the server discovers it.
+    @State private var title: TitleInfo?
+    /// Its ratings elsewhere; nil until asked.
+    @State private var titleRatings: [Rating]?
 
     private var card: Card { details.card }
+    private var mediaKind: MediaKind? { card.kind == .movie ? .movie : card.kind == .series ? .series : nil }
+    /// A movie's or series' TMDB ID, which discovery knows it by; 0 otherwise.
+    private var tmdbId: Int32 { mediaKind == nil ? 0 : Int32(details.externalIds["tmdb"] ?? "") ?? 0 }
+    private var titled: Bool { tmdbId > 0 }
     private var inSeries: Bool { card.kind == .series || card.kind == .season || card.kind == .episode }
 
     /// Up to six of the crew, the creators, directors and writers first.
@@ -55,17 +67,25 @@ struct AboutSection: View {
 
     private var facts: [(String, String)] {
         let day = { (d: Date?) in d?.formatted(date: .abbreviated, time: .omitted) }
+        let unbroken = { (s: String) in s.replacingOccurrences(of: " ", with: "\u{00A0}") }
         var rows: [(String, String?)] = []
-        if card.kind == .movie {
-            let releases = [
-                day(details.premiere).map { "\(MavioStrings.discoverTheatricalRelease)  \($0)" },
-                day(details.digitalRelease).map { "\(MavioStrings.itemDigitalRelease)  \($0)" },
-                day(details.physicalRelease).map { "\(MavioStrings.itemPhysicalRelease)  \($0)" },
-            ].compactMap(\.self)
+        // A movie's releases on one row, as on its discovered title, what
+        // the library keeps first.
+        let releases =
+            card.kind == .movie
+            ? [
+                (MavioStrings.discoverTheatricalRelease, details.premiere, title?.theatricalReleaseDate),
+                (MavioStrings.itemDigitalRelease, details.digitalRelease, title?.digitalReleaseDate),
+                (MavioStrings.itemPhysicalRelease, details.physicalRelease, title?.physicalReleaseDate),
+            ].compactMap { label, kept, told in
+                (day(kept) ?? dayText(told ?? "")).map { "\(label)  \(unbroken($0))" }
+            }
+            : []
+        if !releases.isEmpty {
             rows.append(
                 (
                     releases.count > 1 ? MavioStrings.discoverReleaseDates : MavioStrings.discoverReleaseDate,
-                    releases.count > 1 ? releases.joined(separator: "\n") : day(details.premiere)
+                    releases.joined(separator: "\n")
                 ))
         } else {
             rows.append(
@@ -76,30 +96,47 @@ struct AboutSection: View {
                     day(details.premiere)
                 ))
         }
+        rows.append(
+            (
+                MavioStrings.itemStatus,
+                card.kind == .series && details.seriesStatus == .continuing
+                    ? MavioStrings.itemContinuing
+                    : card.kind == .series && details.seriesStatus == .ended
+                        ? MavioStrings.itemEnded : title?.productionStatus.text
+            ))
         if card.kind == .series {
-            rows.append(
-                (
-                    MavioStrings.itemStatus,
-                    details.seriesStatus == .continuing
-                        ? MavioStrings.itemContinuing : details.seriesStatus == .ended ? MavioStrings.itemEnded : nil
-                ))
             rows.append((MavioStrings.itemLastAired, details.seriesStatus == .ended ? day(details.endDate) : nil))
+            rows.append((MavioStrings.itemNextAirDate, dayText(title?.nextAirDate ?? "")))
         }
         rows.append((MavioStrings.itemRuntime, card.kind == .series ? nil : card.runtime.map(minutesText)))
         rows.append((MavioStrings.itemRated, details.officialRating))
         rows.append((MavioStrings.itemGenres, details.genres.isEmpty ? nil : details.genres.joined(separator: ", ")))
         rows.append((inSeries ? MavioStrings.itemNetworks : MavioStrings.itemStudio, studios))
-        rows.append(
-            (MavioStrings.itemCountry, details.countries.isEmpty ? nil : details.countries.joined(separator: "\n")))
+        rows.append((MavioStrings.itemCountry, countries.isEmpty ? nil : countries.joined(separator: "\n")))
         rows.append(
             (
                 MavioStrings.itemOriginalLanguage,
-                details.originalLanguage.map { Locale.current.localizedString(forLanguageCode: $0) ?? $0 }
+                (details.originalLanguage ?? title?.originalLanguage.nonEmpty).map(languageText)
             ))
         rows.append(
             (MavioStrings.itemOriginalTitle, details.originalTitle.flatMap { $0 == card.title ? nil : $0 }))
+        rows.append((MavioStrings.itemBudget, title.flatMap { moneyText($0.budget) }))
+        rows.append((MavioStrings.itemRevenue, title.flatMap { moneyText($0.revenue) }))
         rows.append((MavioStrings.itemDateAdded, day(details.dateAdded)))
         return rows.compactMap { k, v in v.map { (k, $0) } }
+    }
+
+    /// The countries with their flags when the library keeps those the
+    /// metadata providers tell, else as the library keeps them.
+    private var countries: [String] {
+        let stored = details.countries
+        let told = title?.productionLocations ?? []
+        if let title, !title.productionCountries.isEmpty,
+            stored.isEmpty || (stored.count == told.count && stored.allSatisfy(told.contains))
+        {
+            return title.productionCountries.map(countryText)
+        }
+        return stored.isEmpty ? told : stored
     }
 
     private static let minStudios = 3
@@ -137,11 +174,21 @@ struct AboutSection: View {
 
     private var ratings: Bool { (details.communityRating ?? 0) > 0 || (details.criticRating ?? 0) > 0 }
 
+    /// The pages about it as the library tells, for what is not titled.
+    private var pages: [MavioCore.ExternalLink] { titled ? [] : details.links }
+
     var body: some View {
         let empty =
-            text == nil && !ratings && crew.isEmpty && tags.isEmpty && facts.isEmpty && media.isEmpty
-            && details.links.isEmpty
-        if !empty {
+            text == nil && !ratings && !titled && crew.isEmpty && tags.isEmpty && facts.isEmpty && media.isEmpty
+            && pages.isEmpty
+        VStack(spacing: 0) {
+            if !empty { content }
+        }
+        .task(id: "\(card.serverId)/\(tmdbId)") { await loadTitle() }
+    }
+
+    private var content: some View {
+        Group {
             VStack(alignment: .leading, spacing: MavioSpacing.s16) {
                 Text(MavioStrings.itemDetails).type(theme.type.title3)
                 let layout =
@@ -149,11 +196,11 @@ struct AboutSection: View {
                     ? AnyLayout(HStackLayout(alignment: .top, spacing: 64))
                     : AnyLayout(VStackLayout(alignment: .leading, spacing: 32))
                 layout {
-                    if text != nil || !crew.isEmpty || !tags.isEmpty || !details.links.isEmpty {
+                    if text != nil || !crew.isEmpty || !tags.isEmpty || !pages.isEmpty || titled {
                         leading.frame(maxWidth: sizeClass == .regular ? 440 : .infinity, alignment: .leading)
                     }
                     VStack(alignment: .leading, spacing: 32) {
-                        if ratings { ratingCards }
+                        ratingsView
                         FactList(rows: facts, links: links) { key in
                             if key == (inSeries ? MavioStrings.itemNetworks : MavioStrings.itemStudio),
                                 details.studios.count > Self.minStudios
@@ -171,6 +218,7 @@ struct AboutSection: View {
                                 .buttonStyle(.plain)
                             }
                         }
+                        WatchProviders(providers: title?.watchProviders ?? [])
                         FactList(rows: media, links: [:]) { _ in EmptyView() }
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -180,6 +228,37 @@ struct AboutSection: View {
             .padding(.top, MavioSpacing.s32)
             .padding(.bottom, MavioSpacing.s16)
         }
+    }
+
+    /// A movie's or series' ratings elsewhere once known, else the
+    /// library's.
+    @ViewBuilder private var ratingsView: some View {
+        if let kind = mediaKind, titled {
+            let score = title.flatMap { $0.voteCount > 0 ? $0.communityRating : nil }
+            if let loaded = titleRatings {
+                if !TitleRatings.shown(loaded).isEmpty || score != nil {
+                    TitleRatings(kind: kind, tmdbId: tmdbId, ratings: loaded, score: score, alignment: .leading)
+                } else if ratings {
+                    ratingCards
+                }
+            }
+        } else if ratings {
+            ratingCards
+        }
+    }
+
+    /// Asks the server for the movie or series as it discovers it, and its
+    /// ratings elsewhere; a server that does not discover tells nothing.
+    private func loadTitle() async {
+        guard let kind = mediaKind, tmdbId > 0, !details.offline else { return }
+        var r = Mavio_Acquisition_V1_GetRatingsRequest()
+        r.mediaKind = kind
+        r.tmdbID = tmdbId
+        async let told = try? model.title(card.serverId, kind, tmdbId)
+        async let rated = try? model.client.call(
+            card.serverId, Procedure.discover("GetRatings"), r, as: Mavio_Acquisition_V1_GetRatingsResponse.self)
+        title = await told
+        titleRatings = await rated?.ratings ?? []
     }
 
     private var leading: some View {
@@ -241,9 +320,18 @@ struct AboutSection: View {
                     }
                 }
             }
-            if !details.links.isEmpty {
+            if let kind = mediaKind, titled {
+                ExternalLinks(
+                    links: titleLinks(
+                        kind: kind, tmdbId: tmdbId, imdb: details.externalIds["imdb"] ?? "",
+                        tvdb: details.externalIds["tvdb"] ?? "", ratings: titleRatings ?? []),
+                    alignment: .leading
+                )
+                .padding(.top, MavioSpacing.s8)
+            }
+            if !pages.isEmpty {
                 Flow(spacing: MavioSpacing.s8, lineSpacing: MavioSpacing.s8) {
-                    ForEach(details.links, id: \.url) { link in
+                    ForEach(pages, id: \.url) { link in
                         if let url = URL(string: link.url) {
                             Link(destination: url) {
                                 HStack(spacing: 6) {

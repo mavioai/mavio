@@ -94,7 +94,7 @@ func dayText(_ iso: String) -> String? {
 }
 
 /// An amount of US dollars; nil when 0, which stands for unknown.
-private func moneyText(_ dollars: Int64) -> String? {
+func moneyText(_ dollars: Int64) -> String? {
     dollars > 0 ? dollars.formatted(.currency(code: "USD").precision(.fractionLength(0))) : nil
 }
 
@@ -104,7 +104,7 @@ func languageText(_ code: String) -> String {
 }
 
 /// The name of an ISO 3166-1 country in the app's language, after its flag.
-private func countryText(_ code: String) -> String {
+func countryText(_ code: String) -> String {
     let flag = code.unicodeScalars.compactMap { Unicode.Scalar(0x1F1A5 + $0.value) }.map(String.init).joined()
     return "\(flag) \(Locale.current.localizedString(forRegionCode: code) ?? code)"
 }
@@ -591,7 +591,7 @@ private struct TitleFacts: View {
         if !title.originalTitle.isEmpty, title.originalLanguage != discoverLanguage {
             rows.append((MavioStrings.itemOriginalTitle, plain(title.originalTitle)))
         }
-        rows.append((MavioStrings.itemStatus, plain(statusName(title.productionStatus))))
+        rows.append((MavioStrings.itemStatus, plain(title.productionStatus.text)))
         let releases =
             series
             ? []
@@ -707,25 +707,10 @@ private struct TitleFacts: View {
             }
             if !title.watchProviders.isEmpty {
                 Divider().overlay(theme.colors.border)
-                VStack(alignment: .leading, spacing: MavioSpacing.s8) {
-                    Text(MavioStrings.itemStreaming).type(theme.type.callout).fontWeight(.semibold)
-                    Flow(spacing: MavioSpacing.s12, lineSpacing: MavioSpacing.s12) {
-                        ForEach(title.watchProviders, id: \.name) { p in
-                            if let logo = p.logoURL.isEmpty ? nil : p.logoURL {
-                                ArtworkView(logo, title: p.name)
-                                    .frame(width: 32, height: 32)
-                                    .clipShape(.rect(cornerRadius: 6))
-                                    .opacity(0.7)
-                                    .accessibilityLabel(p.name)
-                            } else {
-                                Text(p.name).type(theme.type.footnote)
-                            }
-                        }
-                    }
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal, MavioSpacing.s16)
-                .padding(.vertical, 10)
+                WatchProviders(providers: title.watchProviders)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, MavioSpacing.s16)
+                    .padding(.vertical, 10)
             }
             Divider().overlay(theme.colors.border)
             ExternalLinks(
@@ -742,9 +727,12 @@ private struct TitleFacts: View {
     private func unbroken(_ s: String) -> String {
         s.replacingOccurrences(of: " ", with: "\u{00A0}")
     }
+}
 
-    private func statusName(_ s: Mavio_Plugin_V1_ProductionStatus) -> String? {
-        switch s {
+extension Mavio_Plugin_V1_ProductionStatus {
+    /// The status's name; nil when unknown.
+    var text: String? {
+        switch self {
         case .rumored: MavioStrings.discoverStatusRumored
         case .planned: MavioStrings.discoverStatusPlanned
         case .inProduction: MavioStrings.discoverStatusInProduction
@@ -759,21 +747,54 @@ private struct TitleFacts: View {
     }
 }
 
+/// The services streaming a title, by their logos.
+struct WatchProviders: View {
+    let providers: [Mavio_Plugin_V1_WatchProvider]
+    @Environment(\.theme) private var theme
+
+    var body: some View {
+        if !providers.isEmpty {
+            VStack(alignment: .leading, spacing: MavioSpacing.s8) {
+                Text(MavioStrings.itemStreaming).type(theme.type.callout).fontWeight(.semibold)
+                Flow(spacing: MavioSpacing.s12, lineSpacing: MavioSpacing.s12) {
+                    ForEach(providers, id: \.name) { p in
+                        if let logo = p.logoURL.isEmpty ? nil : p.logoURL {
+                            ArtworkView(logo, title: p.name)
+                                .frame(width: 32, height: 32)
+                                .clipShape(.rect(cornerRadius: 6))
+                                .opacity(0.7)
+                                .accessibilityLabel(p.name)
+                        } else {
+                            Text(p.name).type(theme.type.footnote)
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
 /// Rotten Tomatoes' least fresh score, and least upright audience score.
 private let freshScore = 60.0
 
 /// A title's ratings as Seerr's: Rotten Tomatoes' and IMDb's, then TMDB's
 /// score when given, each opening its page.
-private struct TitleRatings: View {
+struct TitleRatings: View {
     let kind: MediaKind
     let tmdbId: Int32
     let ratings: [Rating]
     let score: Double?
+    var alignment: Alignment = .center
     @Environment(\.theme) private var theme
 
-    var body: some View {
+    /// The ratings shown, in Seerr's order.
+    static func shown(_ ratings: [Rating]) -> [Rating] {
         let order: [Mavio_Plugin_V1_RatingSource] = [.rottenTomatoesCritics, .rottenTomatoesAudience, .imdb]
-        let shown = order.compactMap { source in ratings.first { $0.source == source } }
+        return order.compactMap { source in ratings.first { $0.source == source } }
+    }
+
+    var body: some View {
+        let shown = Self.shown(ratings)
         Flow(spacing: MavioSpacing.s16, lineSpacing: MavioSpacing.s4) {
             ForEach(shown, id: \.source) { r in
                 let fresh = r.score >= freshScore
@@ -807,7 +828,7 @@ private struct TitleRatings: View {
                     URL(string: tmdbURL(kind, tmdbId)), height: 16)
             }
         }
-        .frame(maxWidth: .infinity)
+        .frame(maxWidth: .infinity, alignment: alignment)
     }
 
     @ViewBuilder private func rating(_ logo: String, _ label: String, _ value: String, _ url: URL?, height: CGFloat)
@@ -845,12 +866,17 @@ struct ExternalLink: Hashable {
 /// The logos linking a title elsewhere, as Seerr's, Rotten Tomatoes' once
 /// its ratings tell its page.
 private func titleLinks(_ title: TitleInfo, _ ratings: [Rating]) -> [ExternalLink] {
-    let series = title.mediaKind == .series
-    let imdb = title.externalIds["imdb"] ?? ""
-    let tvdb = title.externalIds["tvdb"] ?? (title.tvdbID > 0 ? String(title.tvdbID) : "")
+    titleLinks(
+        kind: title.mediaKind, tmdbId: title.tmdbID, imdb: title.externalIds["imdb"] ?? "",
+        tvdb: title.externalIds["tvdb"] ?? (title.tvdbID > 0 ? String(title.tvdbID) : ""), ratings: ratings)
+}
+
+/// The logos linking a title elsewhere by its IDs.
+func titleLinks(kind: MediaKind, tmdbId: Int32, imdb: String, tvdb: String, ratings: [Rating]) -> [ExternalLink] {
+    let series = kind == .series
     let rt = ratings.first { $0.source != .imdb && !$0.url.isEmpty }?.url
     let links: [(String, String?, String, CGFloat)] = [
-        ("TMDB", tmdbURL(title.mediaKind, title.tmdbID), "tmdb", 32),
+        ("TMDB", tmdbURL(kind, tmdbId), "tmdb", 32),
         ("TVDB", series && !tvdb.isEmpty ? "https://www.thetvdb.com/dereferrer/series/\(tvdb)" : nil, "tvdb", 36),
         ("IMDb", imdb.isEmpty ? nil : "https://www.imdb.com/title/\(imdb)", "imdb", 32),
         ("Rotten Tomatoes", rt, "rt", 56),
@@ -862,7 +888,7 @@ private func titleLinks(_ title: TitleInfo, _ ratings: [Rating]) -> [ExternalLin
                 : "https://api.simkl.com/redirect?to=Simkl&imdb=\(imdb.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? imdb)",
             "simkl", 32
         ),
-        ("Letterboxd", series ? nil : "https://letterboxd.com/tmdb/\(title.tmdbID)", "letterboxd", 32),
+        ("Letterboxd", series ? nil : "https://letterboxd.com/tmdb/\(tmdbId)", "letterboxd", 32),
     ]
     return links.compactMap { name, url, logo, width in
         url.flatMap(URL.init(string:)).map { ExternalLink(name: name, url: $0, logo: logo, width: width) }
