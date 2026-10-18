@@ -81,7 +81,7 @@ export function RequestsScreen() {
   const admin = useAdminServers().some((s) => s.id === serverId);
   if (!server?.token) return <StatusView icon="error" title={t("auth.unreachable")} />;
   return (
-    <div className="pt-2 pb-8">
+    <div className="pt-2 pb-10">
       <ScreenTitle>{t("requests.title")}</ScreenTitle>
       <Tabs
         value={status ?? "all"}

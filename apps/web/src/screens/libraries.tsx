@@ -10,7 +10,7 @@ export function LibrariesScreen() {
   const all = useLibraries();
   const several = useSignedIn().length > 1;
   return (
-    <div>
+    <div className="pb-7">
       <ScreenTitle>{t("nav.libraries")}</ScreenTitle>
       {all.map(({ server, libraries, pending, error }) => (
         <section key={server.id} className="py-3">

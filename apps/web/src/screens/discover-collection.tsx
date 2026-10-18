@@ -67,7 +67,7 @@ function CollectionPage({ server, tmdbId, collection: c }: { server: ServerEntry
     tv ? "h-16 px-10" : phone ? "h-12 flex-1 px-5" : "h-11 px-6"
   }`;
   return (
-    <div className="pb-8">
+    <div className="pb-10">
       <header
         data-hero
         className={`relative overflow-hidden bg-surface ${

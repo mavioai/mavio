@@ -36,7 +36,7 @@ function Hub({ server, hubId, several }: { server: ServerEntry; hubId: string; s
       })
     : "";
   return (
-    <div>
+    <div className="pb-4">
       <ScreenTitle>
         {title}
         {several && hub?.kind !== HubKind.CONTINUE_WATCHING && (

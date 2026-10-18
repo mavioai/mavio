@@ -37,7 +37,7 @@ export function TvShell() {
   const behind = pathname === "/";
   const scrolled = useScrolled();
   return (
-    <div className="min-h-screen">
+    <div className="flex min-h-screen flex-col">
       {!search && !details && !library && (
         <header className="pointer-events-none fixed inset-x-0 top-0 z-30 flex items-center justify-center px-margin pt-8 pb-6">
           {/* Scrolled content passes under the tabs, never through them. */}
@@ -67,7 +67,8 @@ export function TvShell() {
           </div>
         </header>
       )}
-      <main className={behind || details ? "pb-16" : search || library ? "pt-12 pb-16" : "pt-32 pb-16"}>
+      {/* Pages keep their own spacing below, to which the television adds its overscan's; a page loading centers its indicator on the screen. */}
+      <main className={`flex flex-1 flex-col pb-6 has-[>[data-loading]]:p-0 ${behind || details ? "" : search || library ? "pt-12" : "pt-32"}`}>
         <Outlet />
       </main>
     </div>

@@ -32,7 +32,7 @@ function StandardSearch() {
   const field = !(useWidthClass() === "expanded" && sidebar);
   const results = useSearch(q);
   return (
-    <div className="pt-4">
+    <div className="pt-4 pb-6">
       {field && (
         <form
           role="search"

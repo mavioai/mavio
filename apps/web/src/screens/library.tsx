@@ -69,7 +69,7 @@ function Library({ server, libraryId }: { server: ServerEntry; libraryId: string
     ? "tv-pill rounded-full px-6 py-2 type-headline text-text-secondary data-[active=true]:bg-fill-selected data-[active=true]:text-on-background"
     : "rounded-[7px] px-4 py-1 type-callout font-semibold text-text-secondary hover:text-on-background data-[active=true]:bg-surface-overlay data-[active=true]:text-on-background data-[active=true]:shadow-level1";
   return (
-    <div>
+    <div className="pb-6">
       <div className={`flex flex-wrap gap-x-6 gap-y-3 px-margin pt-6 pb-3 ${tv ? "items-center" : "items-end"}`}>
         <h1 className="type-title1">{library.data?.name ?? " "}</h1>
         <div
@@ -143,7 +143,7 @@ function AllItems({ server, libraryId }: { server: ServerEntry; libraryId: strin
   const { tv } = usePrefs();
   const filterTo = (k: Filter) => (k === "all" ? undefined : k);
   return (
-    <div>
+    <div className="pb-4">
       <div className={`flex flex-wrap items-center px-margin pt-1 pb-5 ${tv ? "gap-4" : "gap-2"}`}>
         {value && (
           <Link

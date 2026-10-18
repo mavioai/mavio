@@ -62,7 +62,7 @@ export function HomeScreen() {
   // Nothing yet from any server: the activity indicator alone.
   if (sections.length > 0 && sections.every((s) => s.content.type === "loading")) return <Loading />;
   return (
-    <div className={hero.length ? "" : tv ? "pt-32" : "pt-4"}>
+    <div className={hero.length ? "pb-6" : tv ? "pt-32 pb-6" : "pt-4 pb-6"}>
       <Hero entries={hero} />
       {hero.length > 0 && <div className="h-4" />}
       {sections.map((s) => (

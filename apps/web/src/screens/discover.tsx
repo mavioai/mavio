@@ -149,7 +149,7 @@ export function DiscoverScreen() {
   if (pending) return <Loading />;
   if (!server) return <StatusView icon="discover" title={t("discover.notSetUp")} message={t("discover.notSetUpMessage")} />;
   return (
-    <div className={tv ? "" : "pt-2"}>
+    <div className={tv ? "pb-6" : "pt-2 pb-6"}>
       <div className="flex items-end justify-between gap-3 pr-margin">
         {!tv && <ScreenTitle>{t("nav.discover")}</ScreenTitle>}
         <Link
@@ -244,7 +244,7 @@ export function CatalogScreen() {
   const n = filterCount(f);
   const titles = q.isSuccess ? titlesOf(q.data.pages) : [];
   return (
-    <div>
+    <div className="pb-10">
       <div className="flex items-end justify-between gap-3 pe-margin">
         <ScreenTitle>{title || " "}</ScreenTitle>
         {filterable && (
@@ -344,7 +344,7 @@ function TitleDetails({ server, title }: { server: ServerEntry; title: Title }) 
     tv ? "h-16 px-10" : phone ? "h-12 px-5" : "h-11 px-6"
   }`;
   return (
-    <div className="pb-8">
+    <div className="pb-6">
       <header
         data-hero
         className={`relative overflow-hidden bg-surface ${
