@@ -646,7 +646,7 @@ private struct DetailsContent: View {
 
 /// The header's size: on a phone a square as wide as the screen, else 70%
 /// of the window's height, from 520 to 700 pt.
-private struct HeaderSize: ViewModifier {
+struct HeaderSize: ViewModifier {
     let phone: Bool
 
     func body(content: Content) -> some View {

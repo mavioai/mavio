@@ -94,7 +94,7 @@ struct RowView: View {
                 accessory
             } content: {
                 ForEach(titles, id: \.self) { title in
-                    TitleCardView(title: title)
+                    TitleCardView(title: title, serverId: row.serverId)
                 }
             }
         }
@@ -128,9 +128,11 @@ struct RowView: View {
     }
 }
 
-/// A title discovery offers, opening the copy a server has.
+/// A title discovery offers, opening the copy a server has, else the
+/// title as the row's server discovers it.
 struct TitleCardView: View {
     let title: TitleCard
+    let serverId: String?
     @Environment(\.theme) private var theme
 
     var body: some View {
@@ -146,6 +148,12 @@ struct TitleCardView: View {
         if let copy = title.available.first {
             NavigationLink(value: Route.item(serverId: copy.serverId, itemId: copy.itemId)) { poster }
                 .buttonStyle(.plain)
+        } else if let serverId, let tmdbId = title.externalIds["tmdb"].flatMap({ Int32($0) }) {
+            NavigationLink(value: Route.title(serverId: serverId, kind: title.movie ? .movie : .series, tmdbId: tmdbId))
+            {
+                poster
+            }
+            .buttonStyle(.plain)
         } else {
             poster
         }

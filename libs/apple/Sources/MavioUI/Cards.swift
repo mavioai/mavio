@@ -262,6 +262,13 @@ public struct PersonCard: View {
         self.role = role
     }
 
+    /// The card of a person by their name, photo and role.
+    public init(name: String, photo: String?, role: String?) {
+        self.name = name
+        self.photo = photo
+        self.role = role
+    }
+
     /// The photo with the name and role.
     public var body: some View {
         VStack(spacing: MavioSpacing.s8) {

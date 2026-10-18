@@ -18,6 +18,16 @@ enum Route: Hashable {
     case settings
     /// The items downloaded.
     case downloads
+    /// A catalog of Discover, or the popular titles alike a title.
+    case catalog(CatalogQuery)
+    /// A discovered movie or series.
+    case title(serverId: String, kind: MediaKind, tmdbId: Int32)
+    /// A discovered title's cast and crew, or its crew alone.
+    case titleCredits(serverId: String, kind: MediaKind, tmdbId: Int32, crew: Bool)
+    /// A person of a discovered title.
+    case discoveredPerson(serverId: String, tmdbId: Int32)
+    /// A discovered collection of movies.
+    case discoveredCollection(serverId: String, tmdbId: Int32)
 }
 
 /// An item to play, which the root presents the player for.
@@ -53,7 +63,7 @@ final class Router {
 
 /// The top-level destinations.
 enum Tab: Hashable {
-    case home, libraries, search, downloads, settings
+    case home, libraries, discover, search, downloads, settings
 }
 
 /// The sign-in screen until a server is added, then the destinations in a
@@ -64,6 +74,7 @@ struct RootView: View {
     @Environment(\.colorScheme) private var scheme
     @Environment(\.horizontalSizeClass) private var sizeClass
     @State private var router = Router()
+    @State private var discovery = Discovery()
     @State private var tab: Tab = .home
 
     private var theme: Theme {
@@ -79,6 +90,7 @@ struct RootView: View {
             }
         }
         .environment(router)
+        .environment(discovery)
         .environment(\.theme, theme)
         // The accent marks only progress, selection, links and switches;
         // buttons take the label color or `color.button`.
@@ -90,6 +102,7 @@ struct RootView: View {
         .sheet(isPresented: $router.addingServer) {
             SignInView(adding: true)
         }
+        .task(id: model.signedIn) { await discovery.load(model) }
         .onChange(of: phase, initial: true) { _, phase in
             switch phase {
             case .active: model.start()
@@ -110,6 +123,14 @@ struct RootView: View {
                 Stack { LibrariesView() }
             } label: {
                 tabLabel(MavioStrings.navLibraries, "movies")
+            }
+            // Discover is a destination only where a server discovers.
+            if discovery.server != nil {
+                SwiftUI.Tab(value: Tab.discover) {
+                    Stack { DiscoverView() }
+                } label: {
+                    tabLabel(MavioStrings.navDiscover, "discover")
+                }
             }
             // A phone has search and the settings in its top bar, and the
             // downloads in the settings; an iPad's sidebar has them all.
@@ -164,6 +185,15 @@ struct Stack<Content: View>: View {
                         case .search: SearchView()
                         case .settings: SettingsView()
                         case .downloads: DownloadsView()
+                        case let .catalog(query): CatalogView(query: query)
+                        case let .title(serverId, kind, tmdbId):
+                            TitleView(serverId: serverId, kind: kind, tmdbId: tmdbId)
+                        case let .titleCredits(serverId, kind, tmdbId, crew):
+                            TitleCreditsView(serverId: serverId, kind: kind, tmdbId: tmdbId, crew: crew)
+                        case let .discoveredPerson(serverId, tmdbId):
+                            DiscoveredPersonView(serverId: serverId, tmdbId: tmdbId)
+                        case let .discoveredCollection(serverId, tmdbId):
+                            DiscoveredCollectionView(serverId: serverId, tmdbId: tmdbId)
                         }
                     }
                     .background(theme.colors.background)
