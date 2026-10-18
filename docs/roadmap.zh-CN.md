@@ -677,7 +677,8 @@ flowchart TD
   - [x] 一集结束时播放下一集
   - [x] 手势：长按时以两倍速播放并显示 2× 标记，左半边纵向滑动调节亮度、右半边调节音量（通过隐藏的 `MPVolumeView`，同时避开系统的音量提示），顶部显示当前值
   - [x] 服务端发送 HLS 时的外挂字幕文件：这样的播放交给 AetherEngine，由它播放 HLS 并绘制该文件，ASS 保留样式
-  - [ ] AetherEngine 暂停时跳转后重绘画面，以及拖动缩略图
+  - [x] AetherEngine 暂停时跳转后重绘画面，以及拖动缩略图：软件路径在新位置的静帧盖在画面上直到播放，拖动条在时间上方显示画面，AetherEngine 的取自已读到的数据，AVPlayer 直接播放的文件由 AVAssetImageGenerator 生成
+  - [ ] 用服务器的 trickplay 拼图作拖动缩略图，用于 AVPlayer 播放的 HLS、AetherEngine 原生路径上的 HLS 以及尚未读到的位置：共享核心尚未把拼图交给应用
   - [ ] 多播权限（entitlement），使真机而不只是模拟器能发现网络中的服务器
   - [ ] 首页以外页面的快照测试
 - [ ] 在每个客户端实现[客户端 §6.3](clients.zh-CN.md) 的导航，Web UI 优先：按窗口宽度选择的三种布局、桌面布局的侧边栏及其用户菜单、电视布局的顶部导航与遥控器焦点，以及两种模式的登录页面；Apple 与 Android 应用还要把主按钮改为以 `color.button` 填充，强调色只用于进度、选中、链接与开关

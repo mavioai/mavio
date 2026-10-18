@@ -20,6 +20,16 @@ public struct PlayerSurface: View {
                 AVPlayerSurface(player: avPlayer) { player.pictureInPicture = $0 }
             } else if let engine = player.aether {
                 AetherPlayerSurface(engine: engine)
+                if let still = player.still {
+                    GeometryReader { geo in
+                        let picture = SubtitleOverlay.fit(player.videoSize, in: geo.size)
+                        Image(decorative: still, scale: 1)
+                            .resizable()
+                            .frame(width: picture.width, height: picture.height)
+                            .position(x: picture.midX, y: picture.midY)
+                    }
+                    .allowsHitTesting(false)
+                }
                 if let renderer = player.styledSubtitles {
                     StyledSubtitleOverlay(renderer: renderer, engine: engine, videoSize: player.videoSize)
                 } else {

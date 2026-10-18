@@ -33,6 +33,8 @@ struct PlayerScreen: View {
     @AppStorage("player.quality") private var quality = PlaybackQuality.auto
     @Environment(\.openURL) private var openURL
     @State private var scrubbing: TimeInterval?
+    /// The picture where the scrubber is, while it is dragged.
+    @State private var scrubImage: CGImage?
     @State private var closing = false
     /// The press held for double speed, and the speed it plays at after.
     @GestureState private var holding = false
@@ -451,6 +453,29 @@ struct PlayerScreen: View {
                 }
             }
             .tint(MavioColors.dark.progress)
+            .overlay {
+                if let scrubbing {
+                    GeometryReader { geo in
+                        let x = geo.size.width * min(scrubbing / duration, 1)
+                        let half = ScrubPreview.width / 2 + 4
+                        ScrubPreview(image: scrubImage, time: clock(scrubbing))
+                            .fixedSize()
+                            .position(x: min(max(x, half), geo.size.width - half), y: 0)
+                            .alignmentGuide(VerticalAlignment.center) { $0[.bottom] }
+                            .offset(y: scrubImage == nil ? -28 : -76)
+                    }
+                }
+            }
+            // A picture for every two seconds the thumb crosses.
+            .task(id: scrubbing.map { Int($0 / 2) }) {
+                guard let scrubbing else {
+                    scrubImage = nil
+                    return
+                }
+                try? await Task.sleep(for: .milliseconds(60))
+                guard !Task.isCancelled, let image = await player.thumbnail(at: scrubbing) else { return }
+                if !Task.isCancelled { scrubImage = image }
+            }
             HStack {
                 Text(clock(position))
                 Spacer()

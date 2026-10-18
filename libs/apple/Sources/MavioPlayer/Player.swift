@@ -36,6 +36,9 @@ public final class Player {
     /// its styles with the cues' event lines added; nil for other tracks,
     /// whose cues the overlay draws itself.
     public private(set) var styledSubtitles: ASSRenderer?
+    /// The picture at the position AetherEngine moved to while paused, which
+    /// its display shows only once it plays again; nil otherwise.
+    public private(set) var still: CGImage?
     /// AetherEngine's picture size, in square pixels; zero until known.
     public private(set) var videoSize: CGSize = .zero
     /// Picture in Picture of AVPlayer's layer, once the surface made it.
@@ -49,6 +52,10 @@ public final class Player {
         @ObservationIgnored private var aetherPictureInPicture: AetherPictureInPicture?
     #endif
     @ObservationIgnored private var endObserver: NSObjectProtocol?
+    /// The file AVPlayer plays directly, whose pictures the scrubber shows.
+    @ObservationIgnored private var thumbnails: Thumbnails?
+    /// The still being fetched after a paused seek.
+    @ObservationIgnored private var stillTask: Task<Void, Never>?
     /// The script header the styled renderer was made for.
     @ObservationIgnored private var styledHeader: String?
     /// The cues the styled renderer has, by their ID and start.
@@ -83,6 +90,7 @@ public final class Player {
         player.defaultRate = rate
         avPlayer = player
         engine = .avPlayer
+        if media.url.pathExtension.lowercased() != "m3u8" { thumbnails = Thumbnails(asset: item.asset) }
         endObserver = NotificationCenter.default.addObserver(
             forName: AVPlayerItem.didPlayToEndTimeNotification, object: item, queue: .main
         ) { [weak self] _ in
@@ -202,6 +210,7 @@ public final class Player {
 
     /// Plays.
     public func play() {
+        clearStill()
         avPlayer?.play()
         aether?.play()
         isPlaying = true
@@ -237,9 +246,40 @@ public final class Player {
             await player.seek(to: CMTime(seconds: target, preferredTimescale: 600))
         }
         if let engine = aether {
+            clearStill()
             await engine.seek(to: target)
+            if !isPlaying { showStill(of: engine, at: target) }
         }
         nowPlaying.sync(force: true)
+    }
+
+    /// A small picture of a position, for the scrubber: AetherEngine's from
+    /// what it has read, or a file's that AVPlayer plays directly; nil for
+    /// HLS on AVPlayer and while none is at hand.
+    public func thumbnail(at seconds: TimeInterval) async -> CGImage? {
+        if let engine = aether {
+            return await engine.scrubThumbnail(atSeconds: seconds, maxWidth: 320)
+        }
+        return await thumbnails?.image(at: seconds)
+    }
+
+    /// Shows the frame at a position AetherEngine moved to while paused, which
+    /// its software path draws only once it plays.
+    private func showStill(of engine: AetherEngine, at seconds: TimeInterval) {
+        let width = max(Int(videoSize.width), 640)
+        stillTask = Task { [weak self] in
+            let frame = await engine.scrubPreviewFrame(atSeconds: seconds, refined: true, maxWidth: width) {
+                false
+            }
+            guard !Task.isCancelled, let self, !self.isPlaying, let frame else { return }
+            self.still = frame.image
+        }
+    }
+
+    private func clearStill() {
+        stillTask?.cancel()
+        stillTask = nil
+        still = nil
     }
 
     /// Moves by an offset, in seconds.
@@ -320,6 +360,8 @@ public final class Player {
         aether = nil
         engine = nil
         cues = []
+        clearStill()
+        thumbnails = nil
         (styledSubtitles, styledHeader, styledCues) = (nil, nil, [])
         videoSize = .zero
         isPlaying = false
@@ -331,4 +373,23 @@ public final class Player {
 private struct StyledCue: Hashable {
     let id: Int
     let start: TimeInterval
+}
+
+/// The pictures of a file AVPlayer plays directly, for the scrubber, within
+/// two seconds of where they are asked for. The generator answers on a
+/// queue of its own, so one is shared across requests.
+private final class Thumbnails: @unchecked Sendable {
+    private let generator: AVAssetImageGenerator
+
+    init(asset: AVAsset) {
+        generator = AVAssetImageGenerator(asset: asset)
+        generator.appliesPreferredTrackTransform = true
+        generator.maximumSize = CGSize(width: 320, height: 320)
+        let tolerance = CMTime(seconds: 2, preferredTimescale: 600)
+        (generator.requestedTimeToleranceBefore, generator.requestedTimeToleranceAfter) = (tolerance, tolerance)
+    }
+
+    func image(at seconds: TimeInterval) async -> CGImage? {
+        try? await generator.image(at: CMTime(seconds: seconds, preferredTimescale: 600)).image
+    }
 }

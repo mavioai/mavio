@@ -677,7 +677,8 @@ flowchart TD
   - [x] Playing the next episode at the end of one
   - [x] Gestures: a press held plays at double speed with a 2× pill while held, and vertical swipes set the brightness on the left half and the volume on the right (through a hidden `MPVolumeView`, which also keeps the system's volume HUD away), with the level shown at the top
   - [x] External subtitle files while the server sends HLS: such a playback goes to AetherEngine, which plays the HLS and draws the file, ASS in its styles
-  - [ ] A redrawn frame when AetherEngine seeks while paused, and scrub thumbnails
+  - [x] A redrawn frame when AetherEngine seeks while paused, and scrub thumbnails: the software path's still of the new position is drawn over the picture until it plays, and the scrubber shows a picture over its time, AetherEngine's from what it has read and AVAssetImageGenerator's for a file AVPlayer plays directly
+  - [ ] Scrub thumbnails from the server's trickplay sheets, for HLS on AVPlayer, HLS on AetherEngine's native path and positions not yet read: the shared core does not hand the sheets to the apps yet
   - [ ] The multicast entitlement, so that servers on the network are found on a device and not only in the simulator
   - [ ] Snapshot tests of the screens beyond Home
 - [ ] The navigation of [Clients §6.3](clients.md) in every client, the web UI first: the three layouts chosen by window width, the desktop layout's sidebar with its user menu, the television layout's top navigation and remote focus, and the sign-in screens of the two modes; the Apple and Android apps also take the primary button filled with `color.button` and the accent only on progress, selection, links and switches
