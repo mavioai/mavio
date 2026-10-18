@@ -106,6 +106,16 @@ pub struct Card {
     pub poster: Option<Artwork>,
     /// A wide image: the thumbnail, else the first backdrop.
     pub thumb: Option<Artwork>,
+    /// The first backdrop, which Home's hero shows.
+    pub backdrop: Option<Artwork>,
+    /// The logo, the title drawn.
+    pub logo: Option<Artwork>,
+    /// What it is about.
+    pub overview: Option<String>,
+    /// Its genres.
+    pub genres: Vec<String>,
+    /// Its parental rating, as "PG-13".
+    pub official_rating: Option<String>,
     /// How far the user watched it, from 0 to 1.
     pub progress: Option<f32>,
     /// Whether the user played it.
@@ -195,6 +205,11 @@ impl Card {
             poster: artwork(conn, item, ImageKind::IMAGE_KIND_PRIMARY),
             thumb: artwork(conn, item, ImageKind::IMAGE_KIND_THUMB)
                 .or_else(|| artwork(conn, item, ImageKind::IMAGE_KIND_BACKDROP)),
+            backdrop: artwork(conn, item, ImageKind::IMAGE_KIND_BACKDROP),
+            logo: artwork(conn, item, ImageKind::IMAGE_KIND_LOGO),
+            overview: non_empty(&item.overview),
+            genres: item.genres.clone(),
+            official_rating: non_empty(&item.official_rating),
             progress,
             played: user.and_then(|u| u.played).unwrap_or_default(),
             favorite: user.and_then(|u| u.favorite).unwrap_or_default(),
