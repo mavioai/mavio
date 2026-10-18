@@ -37,11 +37,6 @@ type fakeIndexers struct {
 	acquisitionv1connect.UnimplementedReleaseServiceHandler
 }
 
-// fakeDownloads serves the download clients of a fake server's plugins.
-type fakeDownloads struct {
-	acquisitionv1connect.UnimplementedDownloadServiceHandler
-}
-
 // handleAcquisition adds the handlers of acquisition's settings to mux.
 func (f *fakeCore) handleAcquisition(mux *http.ServeMux) {
 	q := func(quality int32, title string, lo, hi float64) *acquisitionv1.QualityDefinition {
@@ -75,7 +70,8 @@ func (f *fakeCore) handleAcquisition(mux *http.ServeMux) {
 	}
 	mux.Handle(acquisitionv1connect.NewProfileServiceHandler(f.acq))
 	mux.Handle(acquisitionv1connect.NewReleaseServiceHandler(fakeIndexers{}))
-	mux.Handle(acquisitionv1connect.NewDownloadServiceHandler(fakeDownloads{}))
+	f.downloads = newFakeDownloads()
+	mux.Handle(acquisitionv1connect.NewDownloadServiceHandler(f.downloads))
 	f.wanted = newFakeWanted()
 	mux.Handle(acquisitionv1connect.NewWantedServiceHandler(f.wanted))
 }
@@ -95,15 +91,6 @@ func (fakeIndexers) ListIndexers(context.Context, *acquisitionv1.ListIndexersReq
 		},
 		Failures: []*acquisitionv1.IndexerFailure{acquisitionv1.IndexerFailure_builder{PluginId: new("dev.mavio.prowlarr"), Message: new("not reached")}.Build()},
 	}.Build(), nil
-}
-
-func (fakeDownloads) ListDownloadClients(context.Context, *acquisitionv1.ListDownloadClientsRequest) (*acquisitionv1.ListDownloadClientsResponse, error) {
-	return acquisitionv1.ListDownloadClientsResponse_builder{Clients: []*acquisitionv1.DownloadClient{
-		acquisitionv1.DownloadClient_builder{
-			PluginId: new("dev.mavio.mail"), Id: new("q"), Name: new("qBittorrent"), Enabled: new(false), Priority: new(int32(1)),
-			Protocol: new(acquisitionv1.DownloadProtocol_DOWNLOAD_PROTOCOL_TORRENT),
-		}.Build(),
-	}}.Build(), nil
 }
 
 func (s *fakeAcquisition) nextID(prefix string) string {

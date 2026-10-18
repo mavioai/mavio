@@ -181,16 +181,7 @@ func (a *App) wantedRow(g *settingsGroup, id string, movie bool, label, detail s
 	g.divider()
 	ui.Row(c.Key(id)).MinHeight(52).Padding(10, 16).Gap(12).AlignItems(ui.Center).Children(func() {
 		ui.Column(c).Grow(1).MinWidth(0).Children(func() {
-			b := ui.ButtonBase(c).AlignSelf(ui.Start).Label(label)
-			b.Children(func() {
-				t := style.Text(ui.Text(c, label), style.Type.Body).TextColor(style.Color(colors.TextPrimary))
-				if b.Hovered() {
-					t.Underline()
-				}
-			})
-			if b.Clicked() {
-				a.router.Push("/item/" + server + "/" + id)
-			}
+			a.itemLink(c, id, label, style.Type.Body)
 			if detail != "" {
 				style.Text(ui.Text(c, detail), style.Type.Footnote).TextColor(style.Color(colors.TextSecondary))
 			}
