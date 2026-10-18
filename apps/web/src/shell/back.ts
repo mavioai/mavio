@@ -8,7 +8,7 @@ import { useEffect } from "react";
 
 import { menuOf } from "../screens/settings-menus.ts";
 import { focusState, type Point, pointOf } from "./focus.ts";
-import { focusable, popups } from "./spatial.ts";
+import { focusable, openPopup } from "./spatial.ts";
 
 /** The pages of the tabs, which Back leaves for the tabs. */
 const tabPages = ["/", "/libraries", "/discover"];
@@ -131,7 +131,7 @@ export function useTvBack(on = true) {
       const typing = document.activeElement?.matches("input, textarea, select") ?? false;
       if (e.key !== "Escape" && (e.key !== "Backspace" || typing)) return;
       // An open popup closes on Escape by itself; Back is its Escape too.
-      if (document.querySelector(popups)) {
+      if (openPopup()) {
         if (e.key === "Backspace") {
           e.preventDefault();
           (document.activeElement ?? document.body).dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true }));

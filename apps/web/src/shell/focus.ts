@@ -5,7 +5,7 @@
 import { useRouter } from "@tanstack/react-router";
 import { useEffect } from "react";
 
-import { chosenIn, focusable, popups, visible } from "./spatial.ts";
+import { chosenIn, focusable, openPopup, visible } from "./spatial.ts";
 
 /** A point in the page's coordinates, which scrolling leaves in place. */
 export type Point = { x: number; y: number };
@@ -50,7 +50,7 @@ function nearestTo(p: Point, els: HTMLElement[]): HTMLElement | undefined {
 
 /** Where focus goes when nothing has it, if anywhere yet. */
 function target(): HTMLElement | undefined {
-  const scope = document.querySelector<HTMLElement>(popups);
+  const scope = openPopup();
   const all = [...(scope ?? document).querySelectorAll<HTMLElement>(focusable)].filter(visible);
   const waited = performance.now() - focusState.navigated;
   if (!scope && !focusState.last) {

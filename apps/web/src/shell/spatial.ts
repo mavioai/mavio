@@ -24,6 +24,14 @@ export const focusable = [
  */
 export const popups = "[aria-modal=true], [role=alertdialog], [role=menu], [role=listbox], [data-tv-popup]";
 
+/**
+ * The first popup of those matching selector that is open: a select's
+ * options stay in the page, hidden, while it is closed.
+ */
+export function openPopup(selector = popups): HTMLElement | undefined {
+  return [...document.querySelectorAll<HTMLElement>(selector)].find(visible);
+}
+
 /** Whether an element shows, so that focus may go to it. */
 export function visible(el: HTMLElement): boolean {
   const r = el.getBoundingClientRect();
@@ -327,8 +335,7 @@ export function useSpatialNavigation(on = true) {
       if ((!active || active === document.body) && document.querySelector("[data-tv-player]")) return;
       // An open dialog, menu or list of options keeps focus within itself;
       // the keys a menu or list moves through its items with never reach here.
-      const scope =
-        document.querySelector<HTMLElement>("[aria-modal], [data-tv-popup]") ?? document.querySelector<HTMLElement>("[role=menu], [role=listbox]");
+      const scope = openPopup("[aria-modal], [data-tv-popup]") ?? openPopup("[role=menu], [role=listbox]");
       const all = [...(scope ?? document).querySelectorAll<HTMLElement>(focusable)].filter(visible);
       e.preventDefault();
       if (!active || active === document.body || !all.includes(active)) {

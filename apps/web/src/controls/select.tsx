@@ -6,11 +6,14 @@ import { Select as Base } from "@base-ui/react/select";
 import { useState } from "react";
 
 import { Icon } from "../icon.tsx";
+import { usePrefs } from "../prefs.ts";
 import { input, popup, popupItem } from "./styles.ts";
 
 /**
  * A choice among options, labelled for assistive technology by label; quiet,
- * small and without a fill until pointed at, beside a title.
+ * small and without a fill until pointed at, beside a title. On the
+ * television its options open as a menu's do (menu.tsx): below it, on the
+ * chosen one, as frosted glass with larger items, and only as it is pressed.
  */
 export function Select<T extends string>({
   value,
@@ -29,6 +32,7 @@ export function Select<T extends string>({
   quiet?: boolean;
   className?: string;
 }) {
+  const { tv } = usePrefs();
   const look = quiet
     ? "min-h-7 gap-1 ps-2 pe-1.5 type-footnote desk:min-h-6 text-text-secondary hover:bg-fill data-popup-open:bg-fill"
     : "min-h-9 gap-2 bg-fill ps-2.5 pe-2.5 type-callout desk:min-h-7 desk:gap-1.5 desk:ps-2 desk:pe-1.5 text-on-background hover:bg-fill-selected data-popup-open:bg-fill-selected";
@@ -36,6 +40,7 @@ export function Select<T extends string>({
     <Base.Root items={options} value={value} disabled={disabled} onValueChange={(v) => v !== null && onChange(v)}>
       <Base.Trigger
         aria-label={label}
+        onKeyDown={tv ? (e) => (e.key === "ArrowDown" || e.key === "ArrowUp") && e.preventBaseUIHandler() : undefined}
         className={`flex max-w-full min-w-0 items-center justify-between rounded-md text-start data-disabled:opacity-50 ${look} ${className ?? ""}`}
       >
         <Base.Value className="min-w-0 truncate" />
@@ -44,11 +49,14 @@ export function Select<T extends string>({
         </Base.Icon>
       </Base.Trigger>
       <Base.Portal>
-        <Base.Positioner sideOffset={4} className="z-50 outline-none">
-          <Base.Popup className={`${popup} min-w-[var(--anchor-width)]`}>
+        <Base.Positioner alignItemWithTrigger={!tv} sideOffset={tv ? 8 : 4} className="z-50 outline-none">
+          <Base.Popup
+            data-tv-menu={tv || undefined}
+            className={`${popup} ${tv ? "bg-surface-overlay/45 backdrop-blur-3xl backdrop-saturate-150" : ""} min-w-[var(--anchor-width)]`}
+          >
             <Base.List className="max-h-[min(var(--available-height),24rem)] overflow-y-auto">
               {options.map((o) => (
-                <Base.Item key={o.value} value={o.value} className={`${popupItem} grid grid-cols-[1rem_1fr] gap-2 ps-2`}>
+                <Base.Item key={o.value} value={o.value} className={`${popupItem} grid grid-cols-[1rem_1fr] gap-2 ps-2 ${tv ? "min-h-12 type-headline" : ""}`}>
                   <Base.ItemIndicator className="col-start-1 flex text-accent">
                     <Icon name="check" size={16} />
                   </Base.ItemIndicator>

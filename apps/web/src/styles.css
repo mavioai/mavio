@@ -337,6 +337,13 @@ input[type="search"]::-webkit-search-cancel-button {
       0 0 0 6px #fff,
       0 8px 24px var(--mavio-color-tv-focus-shadow);
   }
+  /* A row of a group, as the settings' are, already fills its row: it
+     takes no padding over its neighbours, the group's corners rounding it. */
+  & .divide-y > :is(a[href], summary, [tabindex]:not([tabindex="-1"])):not([data-card]):focus,
+  & .divide-y > * > :is(a[href], summary):not([data-card]):focus {
+    border-radius: 0;
+    box-shadow: 0 8px 24px var(--mavio-color-tv-focus-shadow);
+  }
   /* A button whose menu is open, focus in the menu, keeps a highlight;
      the user menu's dots, a pill as the assistant's button, look as
      without focus. */
