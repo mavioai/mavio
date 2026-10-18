@@ -136,6 +136,15 @@ sealed interface Route {
     /** An issue reported on a server. */
     data class IssuePage(val serverId: String, val id: String) : Route
 
+    /** An item's metadata edited. */
+    data class EditMetadata(val serverId: String, val itemId: String) : Route
+
+    /** An item identified from the providers' search results. */
+    data class Identify(val serverId: String, val itemId: String) : Route
+
+    /** An item's images chosen. */
+    data class ItemImages(val serverId: String, val itemId: String) : Route
+
     /** A library of a server's settings, or a new one's when id is null. */
     data class ManagedLibrary(val serverId: String, val id: String?) : Route
 
@@ -370,6 +379,9 @@ private fun Screen(model: AppModel, route: Route) {
                 is Route.ServerSetting -> ServerSettingScreen(model, route)
                 is Route.ServerMenuPage -> ServerMenuScreen(route)
                 is Route.IssuePage -> IssueScreen(model, route)
+                is Route.EditMetadata -> EditMetadataScreen(model, route)
+                is Route.Identify -> IdentifyScreen(model, route)
+                is Route.ItemImages -> ItemImagesScreen(model, route)
                 is Route.ManagedLibrary -> ManagedLibraryScreen(model, route)
                 is Route.ManagedUser -> ManagedUserScreen(model, route)
                 is Route.NewRemote -> NewRemoteScreen(model, route)

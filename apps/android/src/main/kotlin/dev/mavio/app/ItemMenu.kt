@@ -97,6 +97,11 @@ private val playable = setOf(CardKind.MOVIE, CardKind.EPISODE, CardKind.VIDEO, C
 /** Kinds problems are reported with. */
 private val reportable = setOf(CardKind.MOVIE, CardKind.SERIES, CardKind.SEASON, CardKind.EPISODE)
 
+/** Kinds the providers identify. */
+private val identifiable = setOf(
+    CardKind.MOVIE, CardKind.SERIES, CardKind.ARTIST, CardKind.ALBUM, CardKind.MUSIC_VIDEO, CardKind.BOOK, CardKind.AUDIOBOOK,
+)
+
 /** Whether the item can go into a playlist or collection. */
 private fun listable(kind: CardKind) = kind != CardKind.PLAYLIST && kind != CardKind.COLLECTION && kind != CardKind.FOLDER
 
@@ -107,6 +112,9 @@ private enum class ItemDialog(@StringRes val label: Int) {
     Report(R.string.issues_report),
     Collection(R.string.lists_add_to_collection),
     Refresh(R.string.metadata_refresh),
+    Edit(R.string.metadata_edit),
+    Identify(R.string.metadata_identify),
+    Images(R.string.metadata_images),
     Rename(R.string.lists_rename),
     Delete(R.string.lists_delete),
 }
@@ -114,8 +122,8 @@ private enum class ItemDialog(@StringRes val label: Int) {
 /**
  * The More menu of an item's actions, as the web UI's, and the dialogs it
  * opens: playing it on another device, adding it to a playlist, reporting a
- * problem, and for administrators adding it to a collection and refreshing
- * its metadata; a playlist, or a collection for administrators, renamed or
+ * problem, and for administrators adding it to a collection, editing and
+ * refreshing its metadata, identifying it and choosing its images; a playlist, or a collection for administrators, renamed or
  * deleted.
  */
 @Composable
@@ -139,13 +147,19 @@ internal fun MoreMenu(model: AppModel, details: Details) {
         if (listable(card.kind)) add(ItemDialog.Playlist)
         if (card.kind in reportable && mayReport) add(ItemDialog.Report)
         if (listable(card.kind) && admin) add(ItemDialog.Collection)
-        if (admin && card.kind != CardKind.PLAYLIST && card.kind != CardKind.COLLECTION) add(ItemDialog.Refresh)
+        if (admin && card.kind != CardKind.PLAYLIST) {
+            add(ItemDialog.Edit)
+            if (card.kind in identifiable) add(ItemDialog.Identify)
+            if (card.kind != CardKind.COLLECTION) add(ItemDialog.Refresh)
+            add(ItemDialog.Images)
+        }
         if (own) {
             add(ItemDialog.Rename)
             add(ItemDialog.Delete)
         }
     }
     if (entries.isEmpty()) return
+    val navigator = LocalNavigator.current
     var open by remember { mutableStateOf(false) }
     var dialog by remember { mutableStateOf<ItemDialog?>(null) }
     // Outlives the dialogs, which close as their work starts.
@@ -164,7 +178,12 @@ internal fun MoreMenu(model: AppModel, details: Details) {
                     },
                     onClick = {
                         open = false
-                        dialog = e
+                        when (e) {
+                            ItemDialog.Edit -> navigator.open(Route.EditMetadata(card.serverId, card.itemId))
+                            ItemDialog.Identify -> navigator.open(Route.Identify(card.serverId, card.itemId))
+                            ItemDialog.Images -> navigator.open(Route.ItemImages(card.serverId, card.itemId))
+                            else -> dialog = e
+                        }
                     },
                 )
             }
@@ -179,7 +198,7 @@ internal fun MoreMenu(model: AppModel, details: Details) {
         ItemDialog.Refresh -> RefreshSheet(model, card, close)
         ItemDialog.Rename -> RenameSheet(model, card, close)
         ItemDialog.Delete -> DeleteDialog(model, card, scope, close)
-        null -> {}
+        ItemDialog.Edit, ItemDialog.Identify, ItemDialog.Images, null -> {}
     }
 }
 
