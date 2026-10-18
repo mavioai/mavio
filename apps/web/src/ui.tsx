@@ -390,10 +390,10 @@ export function ScreenTitle({ children }: { children: ReactNode }) {
 }
 
 /** The loading state of a screen. */
-/** A page's content on its way: the activity indicator, centered. */
+/** A page's content on its way: the activity indicator, centered in the space the page is given. */
 export function Loading() {
   return (
-    <div className="flex justify-center px-margin py-16">
+    <div data-loading className="flex flex-1 items-center justify-center px-margin py-16">
       <Spinner />
     </div>
   );

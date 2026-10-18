@@ -111,9 +111,10 @@ function useShortcuts(tv: boolean) {
 function NormalShell({ width }: { width: ReturnType<typeof useWidthClass> }) {
   const compact = width === "compact";
   return (
-    <div className={compact ? "min-h-screen pb-[calc(88px+env(safe-area-inset-bottom))]" : "flex min-h-screen"}>
+    <div className={compact ? "flex min-h-screen flex-col pb-[calc(88px+env(safe-area-inset-bottom))]" : "flex min-h-screen"}>
       {compact ? <CompactHeader /> : <Sidebar overlay={width === "medium"} />}
-      <main className={compact ? undefined : "min-w-0 flex-1 pb-8"}>
+      {/* A column filling the window's height, which a page loading centers its indicator in. */}
+      <main className={compact ? "flex flex-1 flex-col" : "flex min-w-0 flex-1 flex-col pb-8 has-[>[data-loading]]:pb-0"}>
         {!compact && <BackButton />}
         <Outlet />
       </main>
