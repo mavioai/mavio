@@ -232,12 +232,12 @@ private fun Screen(model: AppModel, route: Route) {
     when (route) {
         Route.Home -> HomeScreen(model)
         Route.Libraries -> LibrariesScreen(model)
+        Route.Search -> SearchScreen(model)
         is Route.Library -> LibraryScreen(model, route)
         is Route.Item -> DetailsScreen(model, route.serverId, route.itemId)
         is Route.Player -> PlayerScreen(model, route)
         else -> Box(Modifier.fillMaxSize().padding(top = LocalTopInset.current)) {
             when (route) {
-                Route.Search -> StatusView(stringResource(R.string.nav_search), icon = R.drawable.ic_search)
                 Route.Settings -> SettingsScreen(model)
                 else -> StatusView(stringResource(R.string.state_loading))
             }
