@@ -347,7 +347,7 @@ func (a *App) View(c *ui.Context) {
 			return
 		}
 		if c.Shortcut(ui.Cmd, ui.KeyComma) && !strings.HasPrefix(a.router.Path(), "/settings") {
-			a.router.Push("/settings")
+			a.router.Push("/settings/appearance")
 		}
 		// The settings have a layout of their own, as in the web UI.
 		if strings.HasPrefix(a.router.Path(), "/settings") {

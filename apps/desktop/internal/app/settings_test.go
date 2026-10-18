@@ -13,7 +13,7 @@ func TestSettings(t *testing.T) {
 	h := newHarness(t, true, 1280, 900)
 	h.tt.Key(ui.Cmd, ui.KeyComma)
 	h.settle()
-	if got, want := h.app.router.Path(), "/settings"; got != want {
+	if got, want := h.app.router.Path(), "/settings/appearance"; got != want {
 		t.Fatalf("path = %q, want = %q", got, want)
 	}
 	for _, want := range []string{"Settings", "Appearance", "Playback", "Subtitles and Audio", "Devices", "TV Mode", "System Language"} {

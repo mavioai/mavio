@@ -350,7 +350,7 @@ func (a *App) userMenu(c *ui.Context, m *ui.Menu) {
 	})
 	m.Separator()
 	if m.Item(style.T(c, "nav.settings")).Shortcut(ui.Cmd, ui.KeyComma).Chosen() {
-		a.router.Push("/settings")
+		a.router.Push("/settings/appearance")
 	}
 	if m.Item(style.T(c, "menu.tvMode")).Chosen() {
 		a.setTV(true)

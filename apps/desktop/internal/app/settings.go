@@ -164,9 +164,15 @@ func (a *App) chosenServer() *capiv1.ServerRecord {
 // settings builds the settings, in a window of their own layout: the
 // sidebar of the sections beside the section shown.
 func (a *App) settings(c *ui.Context, r *ui.Route) {
-	id := "appearance"
-	if r.Match("/settings/{section}") {
-		id = r.Param("section")
+	// The settings are a layout: the sidebar stays as the section beside
+	// it changes, which alone fades in.
+	r.Match("/settings/{section...}")
+	id := strings.SplitN(r.Param("section"), "/", 2)[0]
+	if id == "" {
+		// A section, so that going to another fades it in rather than
+		// sliding in as a page deeper.
+		a.router.Replace("/settings/appearance")
+		id = "appearance"
 	}
 	if m, ok := menuOf(id); ok {
 		id = m.sections[0]
@@ -191,10 +197,13 @@ func (a *App) settings(c *ui.Context, r *ui.Route) {
 		}
 		bar.Children(func() { a.settingsSidebar(c, id) })
 		ui.Column(c).Grow(1).MinWidth(0).Background(style.Color(colors.Background)).Children(func() {
-			ui.Scroll(c.Key(id + r.Query("user"))).Fill().Children(func() {
-				top := max(c.TitleBar().Height, 12)
-				ui.Column(c).Padding(top+28, 56, 48).AlignItems(ui.Center).Children(func() {
-					ui.Column(c).FillWidth().MaxWidth(900).Gap(28).Children(func() { a.settingsSection(c, r, id) })
+			r.View(c, func(r *ui.Route) {
+				r.Page().Background(style.Color(colors.Background))
+				ui.Scroll(c.Key(id + r.Query("user") + r.Query("library"))).Fill().Children(func() {
+					top := max(c.TitleBar().Height, 12)
+					ui.Column(c).Padding(top+28, 56, 48).AlignItems(ui.Center).Children(func() {
+						ui.Column(c).FillWidth().MaxWidth(900).Gap(28).Children(func() { a.settingsSection(c, r, id) })
+					})
 				})
 			})
 		})
