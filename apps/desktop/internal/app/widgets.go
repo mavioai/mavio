@@ -2,6 +2,7 @@ package app
 
 import (
 	"fmt"
+	"math"
 	"strings"
 	"time"
 
@@ -80,14 +81,61 @@ func statusView(c *ui.Context, icon, title, message string, retry func()) {
 	})
 }
 
+// loading builds a page's content on its way, loading since since: the
+// activity indicator, centered in the room the page is given.
+func loading(c *ui.Context, since time.Time) {
+	ui.Column(c).Grow(1).Padding(48).AlignItems(ui.Center).Justify(ui.Center).Children(func() {
+		activityIndicator(c, 28, since)
+	})
+}
+
+// activityIndicator builds the activity indicator size wide, for what
+// started loading at since: eight spokes in the tertiary text's color,
+// fading around the circle and turning a spoke a step, once in 0.9 s. It
+// fades in from 0.4 s after since, so that what comes quickly shows
+// nothing first.
+func activityIndicator(c *ui.Context, size float32, since time.Time) {
+	color := style.Color(style.Colors(c).TextTertiary)
+	ui.Box(c).Size(size, size).Shrink(0).Role(ui.RoleProgress).Label(style.T(c, "state.loading")).Draw(func(p *ui.Painter, r ui.Rect) {
+		const spokes, turn, delay, fade = 8, 900 * time.Millisecond, 400 * time.Millisecond, 300 * time.Millisecond
+		now := p.Now()
+		shown := now.Sub(since) - delay
+		if shown < 0 {
+			p.After(-shown)
+			return
+		}
+		alpha := float32(1)
+		if shown < fade {
+			alpha = float32(shown) / float32(fade)
+			p.AnimationFrame()
+		}
+		step := int(now.UnixMilli()%turn.Milliseconds()) * spokes / int(turn.Milliseconds())
+		p.After(turn / spokes)
+		// In a box of 24: spokes from 4 to 10 from the center, 2 wide.
+		u := r.W / 24
+		cx, cy := r.X+r.W/2, r.Y+r.H/2
+		for i := range spokes {
+			// The spoke i ahead of the one leading is i steps behind it.
+			a := float64(i+step) * 2 * math.Pi / spokes
+			sin, cos := float32(math.Sin(a)), float32(math.Cos(a))
+			var path ui.Path
+			path.MoveTo(cx+sin*5*u, cy-cos*5*u).LineTo(cx+sin*9*u, cy-cos*9*u)
+			p.StrokePath(&path, 2*u, color.Alpha(alpha*(0.2+0.8*float32(i)/(spokes-1))))
+		}
+	})
+}
+
 // taskStatus builds the state of a task that has no value to show: its
-// placeholder while it loads, else its error; it reports whether it built
+// placeholder while it loads, or the activity indicator without one, else
+// its error; it reports whether it built
 // one.
 func taskStatus[T any](c *ui.Context, t *task[T], retry func(), placeholder func()) bool {
 	switch {
 	case !t.loaded:
 		if placeholder != nil {
 			placeholder()
+		} else {
+			loading(c, t.started)
 		}
 		return true
 	case t.err != nil:
@@ -102,8 +150,9 @@ func taskStatus[T any](c *ui.Context, t *task[T], retry func(), placeholder func
 }
 
 // artwork builds a card's artwork width × height: the image, else the
-// title on the raised surface, with the card's overlays.
-func (a *App) artwork(c *ui.Context, art *capiv1.Artwork, title string, card *capiv1.Card, width, height float32, hovered bool) {
+// placeholder of missing artwork with icon, or with the icon of card's
+// kind when icon is empty, and the card's overlays.
+func (a *App) artwork(c *ui.Context, art *capiv1.Artwork, icon string, card *capiv1.Card, width, height float32, hovered bool) {
 	colors := style.Colors(c)
 	box := ui.Box(c).Size(width, height).Shrink(0).Radius(design.RadiusMd).Background(style.Color(colors.SurfaceRaised))
 	if hovered {
@@ -117,10 +166,11 @@ func (a *App) artwork(c *ui.Context, art *capiv1.Artwork, title string, card *ca
 		inner.Children(func() {
 			if bitmap := a.opts.Images.Get(art.GetUrl(), width, scale); bitmap != nil {
 				ui.Image(c, bitmap).Fill().Fit(ui.Cover)
-			} else if title != "" && (art.GetUrl() == "" || a.imageFailed(art.GetUrl(), width)) {
-				ui.Box(c).Fill().Padding(12).Center().Children(func() {
-					style.Text(ui.Text(c, title), style.Type.Title3).TextColor(style.Color(colors.TextSecondary)).TextAlign(ui.Center).MaxLines(4)
-				})
+			} else if art.GetUrl() == "" || a.imageFailed(art.GetUrl(), width) {
+				if icon == "" {
+					icon = cardIcon(card.GetKind())
+				}
+				noArtwork(c, icon, width)
 			}
 			if card == nil {
 				return
@@ -144,6 +194,39 @@ func (a *App) artwork(c *ui.Context, art *capiv1.Artwork, title string, card *ca
 	})
 }
 
+// noArtwork builds the placeholder of missing artwork, width wide: a quiet
+// wash of gray from its top left, gone by 70% of the way, and icon.
+func noArtwork(c *ui.Context, icon string, width float32) {
+	colors := style.Colors(c)
+	fill := style.Color(colors.Fill)
+	size := min(width*0.26, 56)
+	ui.Box(c).Fill().LinearGradient(ui.LinearGradient{From: fill, To: fill.Alpha(0), Angle: 160, End: 0.7}).Center().Children(func() {
+		ui.Icon(c, style.Icon(icon, false)).Size(size, size).TextColor(style.Color(colors.TextTertiary)).Opacity(0.6)
+	})
+}
+
+// cardIcon returns the icon of a card of kind, on its artwork's
+// placeholder.
+func cardIcon(kind capiv1.CardKind) string {
+	switch kind {
+	case capiv1.CardKind_CARD_KIND_SERIES, capiv1.CardKind_CARD_KIND_SEASON, capiv1.CardKind_CARD_KIND_EPISODE:
+		return "shows"
+	case capiv1.CardKind_CARD_KIND_ARTIST, capiv1.CardKind_CARD_KIND_ALBUM, capiv1.CardKind_CARD_KIND_TRACK, capiv1.CardKind_CARD_KIND_MUSIC_VIDEO:
+		return "music"
+	case capiv1.CardKind_CARD_KIND_AUDIOBOOK, capiv1.CardKind_CARD_KIND_BOOK:
+		return "books"
+	case capiv1.CardKind_CARD_KIND_PHOTO_ALBUM, capiv1.CardKind_CARD_KIND_PHOTO:
+		return "photos"
+	case capiv1.CardKind_CARD_KIND_VIDEO:
+		return "homeVideos"
+	case capiv1.CardKind_CARD_KIND_FOLDER:
+		return "folder"
+	case capiv1.CardKind_CARD_KIND_COLLECTION:
+		return "collections"
+	}
+	return "movies"
+}
+
 // imageFailed reports whether the image of url shown width wide is not
 // coming: it failed to load.
 func (a *App) imageFailed(url string, width float32) bool {
@@ -153,7 +236,7 @@ func (a *App) imageFailed(url string, width float32) bool {
 // posterCard builds a 2:3 card of width.
 func (a *App) posterCard(c *ui.Context, card *capiv1.Card, width float32) {
 	colors := style.Colors(c)
-	b := ui.ButtonBase(c.Key(key(card.GetServerId(), card.GetItemId()))).Column().Width(width).Gap(6).AlignItems(ui.Start).Label(card.GetTitle())
+	b := ui.ButtonBase(c.Key(key(card.GetServerId(), card.GetItemId()))).Cursor(ui.CursorPointer).Column().Width(width).Gap(6).AlignItems(ui.Start).Label(card.GetTitle())
 	hovered := b.Hovered()
 	if b.Pressed() {
 		b.Opacity(0.8)
@@ -163,7 +246,7 @@ func (a *App) posterCard(c *ui.Context, card *capiv1.Card, width float32) {
 		art = card.GetThumb()
 	}
 	b.Children(func() {
-		a.artwork(c, art, card.GetTitle(), card, width, width*1.5, hovered)
+		a.artwork(c, art, "", card, width, width*1.5, hovered)
 		style.Text(ui.Text(c, card.GetTitle()), style.Type.Headline).TextColor(style.Color(colors.TextPrimary)).SingleLine().Width(width)
 		if sub := cardSubtitle(card); sub != "" {
 			style.Text(ui.Text(c, sub), style.Type.Footnote).TextColor(style.Color(colors.TextSecondary)).SingleLine().Width(width)
@@ -177,13 +260,13 @@ func (a *App) posterCard(c *ui.Context, card *capiv1.Card, width float32) {
 // thumbCard builds a 16:9 card of width.
 func (a *App) thumbCard(c *ui.Context, card *capiv1.Card, width float32) {
 	colors := style.Colors(c)
-	b := ui.ButtonBase(c.Key(key(card.GetServerId(), card.GetItemId()))).Column().Width(width).Gap(6).AlignItems(ui.Start).Label(card.GetTitle())
+	b := ui.ButtonBase(c.Key(key(card.GetServerId(), card.GetItemId()))).Cursor(ui.CursorPointer).Column().Width(width).Gap(6).AlignItems(ui.Start).Label(card.GetTitle())
 	hovered := b.Hovered()
 	if b.Pressed() {
 		b.Opacity(0.8)
 	}
 	b.Children(func() {
-		a.artwork(c, card.GetThumb(), card.GetTitle(), card, width, width*9/16, hovered)
+		a.artwork(c, card.GetThumb(), "", card, width, width*9/16, hovered)
 		style.Text(ui.Text(c, card.GetTitle()), style.Type.Headline).TextColor(style.Color(colors.TextPrimary)).SingleLine().Width(width)
 		if sub := card.GetSubtitle(); sub != "" {
 			style.Text(ui.Text(c, sub), style.Type.Footnote).TextColor(style.Color(colors.TextSecondary)).SingleLine().Width(width)

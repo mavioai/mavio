@@ -318,14 +318,14 @@ func (a *App) catalogShelf(c *ui.Context, server string, row catalogRow, title s
 func (a *App) discoveredCard(c *ui.Context, server string, t *acquisitionv1.DiscoveredTitle, width float32, role string) {
 	colors := style.Colors(c)
 	tmdb := tmdbOf(t)
-	b := ui.ButtonBase(c.Key(key(t.GetMediaKind(), tmdb, t.GetName()))).Column().Width(width).Gap(6).AlignItems(ui.Start).Label(t.GetName())
+	b := ui.ButtonBase(c.Key(key(t.GetMediaKind(), tmdb, t.GetName()))).Cursor(ui.CursorPointer).Column().Width(width).Gap(6).AlignItems(ui.Start).Label(t.GetName())
 	hovered := b.Hovered()
 	if b.Pressed() {
 		b.Opacity(0.8)
 	}
-	kind := style.T(c, "discover.movie")
+	kind, icon := style.T(c, "discover.movie"), "movies"
 	if t.GetMediaKind() == acquisitionv1.MediaKind_MEDIA_KIND_SERIES {
-		kind = style.T(c, "discover.series")
+		kind, icon = style.T(c, "discover.series"), "shows"
 	}
 	var facts []string
 	if t.GetYear() > 0 {
@@ -334,7 +334,7 @@ func (a *App) discoveredCard(c *ui.Context, server string, t *acquisitionv1.Disc
 	facts = append(facts, kind)
 	b.Children(func() {
 		ui.Box(c).Children(func() {
-			a.artwork(c, artworkOf(sized(t.GetPosterUrl(), 342)), t.GetName(), nil, width, width*1.5, hovered)
+			a.artwork(c, artworkOf(sized(t.GetPosterUrl(), 342)), icon, nil, width, width*1.5, hovered)
 			statusMark(c, t.GetStatus())
 		})
 		style.Text(ui.Text(c, t.GetName()), style.Type.Headline).TextColor(style.Color(colors.TextPrimary)).SingleLine().Width(width)
@@ -532,7 +532,7 @@ func (a *App) titlePage(c *ui.Context, r *ui.Route) {
 	r.Title(title.GetName())
 	_, catalogs, _ := a.discovery(c)
 	ui.Scroll(c).Fill().Children(func() {
-		ui.Column(c).Gap(32).Padding(0, 0, 48).Children(func() {
+		ui.Column(c).Gap(32).Padding(0, 0, 40).Children(func() {
 			a.titleHeader(c, server, title)
 			a.titleOverview(c, server, title)
 			if title.GetMediaKind() == acquisitionv1.MediaKind_MEDIA_KIND_SERIES && len(title.GetSeasons()) > 0 {
@@ -598,7 +598,7 @@ func (a *App) titleHeader(c *ui.Context, server string, title *acquisitionv1.Tit
 	some := slices.ContainsFunc(title.GetSeasons(), func(s *acquisitionv1.SeasonStatus) bool {
 		return s.GetStatus() != acquisitionv1.MediaStatus_MEDIA_STATUS_UNSPECIFIED && s.GetStatus() != acquisitionv1.MediaStatus_MEDIA_STATUS_DELETED
 	})
-	ui.Box(c).Margin(12).Height(height).Radius(18).Clip().Background(style.Color(design.DarkColors.SurfaceRaised)).DragWindow().Children(func() {
+	ui.Box(c).Height(height).Clip().Background(style.Color(design.DarkColors.SurfaceRaised)).DragWindow().Children(func() {
 		if bitmap := a.opts.Images.Get(backdrop, a.contentWidth, scale); bitmap != nil {
 			img := ui.Image(c, bitmap).Absolute().Top(0).Left(0).Right(0).Bottom(0).Fit(ui.Cover)
 			if blurred {
@@ -915,7 +915,7 @@ func (a *App) seasonEpisodes(c *ui.Context, server string, tmdb, number int32) {
 	}
 	switch {
 	case !t.loaded:
-		note(style.T(c, "state.loading"))
+		ui.Box(c).Padding(0, 16, 16).Children(func() { activityIndicator(c, 20, t.started) })
 		return
 	case t.err != nil:
 		note(style.T(c, "state.error"))
@@ -941,7 +941,7 @@ func (a *App) seasonEpisodes(c *ui.Context, server string, tmdb, number int32) {
 					}
 				})
 				if still := sized(e.GetStillUrl(), 300); still != "" {
-					a.artwork(c, artworkOf(still), "", nil, 224, 126, false)
+					a.artwork(c, artworkOf(still), "shows", nil, 224, 126, false)
 				}
 			})
 		}
@@ -1051,7 +1051,7 @@ func (a *App) requestsPage(c *ui.Context, r *ui.Route) {
 		}
 	}
 	ui.Scroll(c).Fill().Children(func() {
-		ui.Column(c).Padding(0, 0, 48).Gap(16).Children(func() {
+		ui.Column(c).Padding(0, 0, 40).Gap(16).Children(func() {
 			pageHeader(c, style.T(c, "requests.title"), func() {
 				labels := make([]string, len(requestFilters))
 				for i, f := range requestFilters {
@@ -1178,7 +1178,7 @@ func (a *App) requestRow(c *ui.Context, server string, r *acquisitionv1.Request,
 		name = fmt.Sprint(r.GetTmdbId())
 	}
 	ui.Row(c.Key(r.GetId())).Padding(12, 16).Gap(12).AlignItems(ui.Start).Children(func() {
-		poster := ui.ButtonBase(c).Label(name)
+		poster := ui.ButtonBase(c).Cursor(ui.CursorPointer).Label(name)
 		poster.Children(func() {
 			a.artwork(c, artworkOf(sized(title.value.GetPosterUrl(), 154)), "", nil, 64, 96, poster.Hovered())
 		})
@@ -1187,7 +1187,7 @@ func (a *App) requestRow(c *ui.Context, server string, r *acquisitionv1.Request,
 		}
 		ui.Column(c).Grow(1).MinWidth(0).Gap(4).Children(func() {
 			ui.Row(c).Gap(8).AlignItems(ui.Center).Wrap().Children(func() {
-				link := ui.ButtonBase(c).Label(name)
+				link := ui.ButtonBase(c).Cursor(ui.CursorPointer).Label(name)
 				link.Children(func() {
 					t := style.Text(ui.Text(c, name), style.Type.Headline).TextColor(style.Color(colors.TextPrimary))
 					if link.Hovered() {

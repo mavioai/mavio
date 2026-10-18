@@ -221,7 +221,7 @@ func (a *App) filterValues(c *ui.Context, server, catalog string, filter pluginv
 // toggleChip builds a chip turned on or off, reporting a click.
 func (a *App) toggleChip(c *ui.Context, label, image string, on bool) bool {
 	colors := style.Colors(c)
-	b := ui.ButtonBase(c).MinHeight(32).Padding(0, 12).Gap(6).Radius(design.RadiusFull).AlignItems(ui.Center).Label(label)
+	b := ui.ButtonBase(c).Cursor(ui.CursorPointer).MinHeight(32).Padding(0, 12).Gap(6).Radius(design.RadiusFull).AlignItems(ui.Center).Label(label)
 	switch {
 	case on:
 		b.Background(style.Color(colors.Accent))

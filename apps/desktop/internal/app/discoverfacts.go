@@ -188,7 +188,7 @@ func (a *App) leadingCrew(c *ui.Context, server string, credits []creditEntry, m
 				}
 				ui.Column(c.Key(i)).Width(180).AlignItems(ui.Start).Children(func() {
 					style.Text(ui.Text(c, job), style.Type.Headline).TextColor(style.Color(colors.TextPrimary)).SingleLine()
-					b := ui.ButtonBase(c).Label(e.name)
+					b := ui.ButtonBase(c).Cursor(ui.CursorPointer).Label(e.name)
 					b.Children(func() {
 						name := style.Text(ui.Text(c, e.name), style.Type.Callout).TextColor(style.Color(colors.TextSecondary)).SingleLine()
 						if b.Hovered() && (e.personID != "" || e.tmdb != "") {
@@ -465,7 +465,7 @@ func (a *App) titleFactBox(c *ui.Context, server string, title *acquisitionv1.Ti
 			value(text)
 			return
 		}
-		b := ui.ButtonBase(c.Key(text)).Label(text)
+		b := ui.ButtonBase(c.Key(text)).Cursor(ui.CursorPointer).Label(text)
 		b.Children(func() {
 			t := style.Text(ui.Text(c, text), style.Type.Callout).TextColor(style.Color(colors.TextSecondary)).TextAlign(ui.End)
 			if b.Hovered() {
@@ -652,7 +652,7 @@ func (a *App) titleCrewPage(c *ui.Context, r *ui.Route) {
 	credits := slices.DeleteFunc(titleCredits(t.value), creditEntry.cast)
 	colors := style.Colors(c)
 	ui.Scroll(c).Fill().Children(func() {
-		ui.Column(c).Gap(24).Padding(0, 0, 48).Children(func() {
+		ui.Column(c).Gap(24).Padding(0, 0, 40).Children(func() {
 			pageHeader(c, title, func() {
 				style.Text(ui.Text(c, t.value.GetName()), style.Type.Callout).TextColor(style.Color(colors.TextSecondary))
 			})

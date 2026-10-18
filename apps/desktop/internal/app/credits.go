@@ -137,28 +137,34 @@ func (a *App) castShelf(c *ui.Context, server, id string, credits []creditEntry)
 	})
 }
 
-// personTile builds a credited person width wide: their photo, else their
-// initials, their name, and under it a label, such as the character they
+// personTile builds a credited person width wide: their photo, else the
+// placeholder of missing artwork, their name, and under it a label, such as the character they
 // play or their job; it opens their page.
 func (a *App) personTile(c *ui.Context, server string, e creditEntry, label string, width float32) {
 	colors := style.Colors(c)
-	b := ui.ButtonBase(c).Column().Width(width).Gap(4).AlignItems(ui.Center).Label(e.name)
+	b := ui.ButtonBase(c).Cursor(ui.CursorPointer).Column().Width(width).Gap(4).AlignItems(ui.Center).Label(e.name)
 	hovered := b.Hovered()
 	if b.Pressed() {
 		b.Opacity(0.8)
 	}
 	photo := width - 24
 	b.Children(func() {
-		circle := ui.Box(c).Size(photo, photo).Radius(photo / 2).Clip().Background(style.Color(colors.Fill)).Center()
+		circle := ui.Box(c).Size(photo, photo).Radius(photo / 2).Background(style.Color(colors.Fill))
 		if hovered {
 			circle.Shadow(0, 0, 0, 3, style.Color(colors.Accent))
 		}
 		circle.Children(func() {
-			if bitmap := a.opts.Images.Get(e.photo, photo, scale); bitmap != nil {
-				ui.Image(c, bitmap).Fill().Fit(ui.Cover)
-			} else {
-				style.Text(ui.Text(c, initials(e.name)), style.Type.Title3).TextColor(style.Color(colors.TextSecondary))
+			inner := ui.Box(c).Fill().Radius(photo / 2).Clip()
+			if hovered {
+				inner.Border(1, style.Color(colors.Background))
 			}
+			inner.Children(func() {
+				if bitmap := a.opts.Images.Get(e.photo, photo, scale); bitmap != nil {
+					ui.Image(c, bitmap).Fill().Fit(ui.Cover)
+				} else {
+					noArtwork(c, "profile", photo)
+				}
+			})
 		})
 		name := style.Text(ui.Text(c, e.name), style.Type.Callout).TextColor(style.Color(colors.TextPrimary)).TextAlign(ui.Center).MaxLines(2).Margin(4, 0, 0)
 		if hovered {
@@ -222,7 +228,7 @@ func (a *App) creditsPage(c *ui.Context, r *ui.Route, server, id string, crew bo
 		return out
 	}
 	ui.Scroll(c).Fill().Children(func() {
-		ui.Column(c).Gap(24).Padding(0, 0, 48).Children(func() {
+		ui.Column(c).Gap(24).Padding(0, 0, 40).Children(func() {
 			pageHeader(c, title, func() {
 				style.Text(ui.Text(c, t.value.GetItem().GetName()), style.Type.Callout).TextColor(style.Color(colors.TextSecondary))
 			})
@@ -278,7 +284,7 @@ func (a *App) crewList(c *ui.Context, server, id string, credits []creditEntry) 
 				}
 				ui.Column(c.Key(i)).Width(160).AlignItems(ui.Start).Children(func() {
 					style.Text(ui.Text(c, job), style.Type.Headline).TextColor(style.Color(colors.TextPrimary)).SingleLine()
-					b := ui.ButtonBase(c).Label(e.name)
+					b := ui.ButtonBase(c).Cursor(ui.CursorPointer).Label(e.name)
 					b.Children(func() {
 						name := style.Text(ui.Text(c, e.name), style.Type.Callout).TextColor(style.Color(colors.TextSecondary)).SingleLine()
 						if b.Hovered() {

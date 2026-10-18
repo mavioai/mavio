@@ -48,9 +48,7 @@ func (a *App) search(c *ui.Context) {
 			return
 		}
 		t := &s.results
-		if taskStatus(c, t, func() { t.key = "" }, func() {
-			ui.Row(c).Justify(ui.Center).Padding(48).Children(func() { ui.Spinner(c) })
-		}) {
+		if taskStatus(c, t, func() { t.key = "" }, nil) {
 			return
 		}
 		found := false

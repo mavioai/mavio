@@ -410,7 +410,7 @@ func errorLine(c *ui.Context, err error) {
 
 func waiting(c *ui.Context, l look) {
 	ui.Row(c).Gap(8).Justify(ui.Center).AlignItems(ui.Center).Children(func() {
-		ui.Spinner(c)
+		activityIndicator(c, 28, time.Time{})
 		body(c, l, style.T(c, "auth.waiting"))
 	})
 }

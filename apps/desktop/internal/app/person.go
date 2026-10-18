@@ -56,7 +56,7 @@ func (a *App) person(c *ui.Context, r *ui.Route, server, id string) {
 	r.Title(p.GetName())
 	colors := style.Colors(c)
 	ui.Scroll(c).Fill().Children(func() {
-		ui.Column(c).Gap(32).Padding(0, 0, 48).Children(func() {
+		ui.Column(c).Gap(32).Padding(0, 0, 40).Children(func() {
 			a.personHeader(c, st, server, p)
 			of := func(kind capiv1.CardKind) []*capiv1.Card {
 				var out []*capiv1.Card
@@ -98,7 +98,7 @@ func (a *App) personHeader(c *ui.Context, st *personState, server string, p *lib
 			if bitmap := a.opts.Images.Get(a.imageOf(server, p.GetImages(), libraryv1.ImageKind_IMAGE_KIND_PRIMARY).GetUrl(), w, scale); bitmap != nil {
 				ui.Image(c, bitmap).Fill().Fit(ui.Cover)
 			} else {
-				style.Text(ui.Text(c, initials(p.GetName())), style.Type.Display).TextColor(style.Color(colors.TextSecondary))
+				noArtwork(c, "profile", w)
 			}
 		})
 		ui.Column(c).Basis(320).Grow(1).MaxWidth(768).Gap(12).Children(func() {

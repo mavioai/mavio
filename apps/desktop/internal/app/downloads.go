@@ -411,7 +411,7 @@ func (a *App) importFiles(c *ui.Context, target importTarget) {
 		})
 		switch {
 		case !t.loaded:
-			secondaryText(c, style.T(c, "state.loading"))
+			activityIndicator(c, 20, t.started)
 		case t.err != nil:
 			footnote(c, errorMessage(c, t.err), true)
 		case len(t.value.GetFiles()) == 0:

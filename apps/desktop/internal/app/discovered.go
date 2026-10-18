@@ -92,7 +92,7 @@ func (a *App) discoveredPersonPage(c *ui.Context, r *ui.Route) {
 		return out
 	}
 	ui.Scroll(c).Fill().Children(func() {
-		ui.Column(c).Gap(32).Padding(0, 0, 48).Children(func() {
+		ui.Column(c).Gap(32).Padding(0, 0, 40).Children(func() {
 			a.discoveredPersonHeader(c, p)
 			cast := func() { a.personTitleGrid(c, server, style.T(c, "person.appearances"), of(p.GetCast())) }
 			crew := func() { a.personTitleGrid(c, server, style.T(c, "person.crew"), of(p.GetCrew())) }
@@ -117,7 +117,7 @@ func (a *App) discoveredPersonHeader(c *ui.Context, p *acquisitionv1.Person) {
 			if bitmap := a.opts.Images.Get(sized(p.GetImageUrl(), 342), w, scale); bitmap != nil {
 				ui.Image(c, bitmap).Fill().Fit(ui.Cover)
 			} else {
-				style.Text(ui.Text(c, initials(p.GetName())), style.Type.Display).TextColor(style.Color(colors.TextSecondary))
+				noArtwork(c, "profile", w)
 			}
 		})
 		ui.Column(c).Grow(1).MinWidth(0).MaxWidth(768).Gap(12).AlignItems(ui.Start).Children(func() {
@@ -286,7 +286,7 @@ func (a *App) collectionPage(c *ui.Context, r *ui.Route) {
 	colors := style.Colors(c)
 	width, _ := a.gridColumns(c)
 	ui.Scroll(c).Fill().Children(func() {
-		ui.Column(c).Gap(32).Padding(0, 0, 48).Children(func() {
+		ui.Column(c).Gap(32).Padding(0, 0, 40).Children(func() {
 			a.collectionHeader(c, server, tmdb, col)
 			ui.Column(c).Gap(12).Children(func() {
 				style.Text(ui.Text(c, style.T(c, "collection.movies")), style.Type.Title3).TextColor(style.Color(colors.TextPrimary)).Margin(0, style.Layout.Margin)
@@ -312,7 +312,7 @@ func (a *App) collectionHeader(c *ui.Context, server string, tmdb int32, col *ac
 	for _, p := range col.GetParts() {
 		requestable = requestable || p.GetRequestable()
 	}
-	ui.Box(c).Margin(12).Height(height).Radius(18).Clip().Background(style.Color(design.DarkColors.SurfaceRaised)).DragWindow().Children(func() {
+	ui.Box(c).Height(height).Clip().Background(style.Color(design.DarkColors.SurfaceRaised)).DragWindow().Children(func() {
 		if bitmap := a.opts.Images.Get(sized(col.GetBackdropUrl(), 1280), a.contentWidth, scale); bitmap != nil {
 			ui.Image(c, bitmap).Absolute().Top(0).Left(0).Right(0).Bottom(0).Fit(ui.Cover)
 		}

@@ -38,12 +38,7 @@ func (a *App) details(c *ui.Context, r *ui.Route, server, id string) {
 	t := load(a, &st.details, key("details", server, id, a.generation), func(ctx context.Context) (*capiv1.Details, error) {
 		return a.getDetails(ctx, server, id)
 	})
-	if taskStatus(c, t, func() { st.details.key = "" }, func() {
-		ui.Column(c).Fill().Children(func() {
-			_, wh := c.Size()
-			ui.Box(c).Margin(12).Height(min(max(wh*0.7, 520), 700)).Radius(18).Background(style.Color(style.Colors(c).SurfaceRaised)).DragWindow()
-		})
-	}) {
+	if taskStatus(c, t, func() { st.details.key = "" }, nil) {
 		return
 	}
 	d := t.value
@@ -56,7 +51,7 @@ func (a *App) details(c *ui.Context, r *ui.Route, server, id string) {
 		credits = a.libraryCredits(server, info.value.item.GetCredits())
 	}
 	ui.Scroll(c).Fill().Children(func() {
-		ui.Column(c).Gap(32).Padding(0, 0, 48).Children(func() {
+		ui.Column(c).Gap(32).Padding(0, 0, 40).Children(func() {
 			a.detailsHeader(c, st, d)
 			a.episodes(c, st, d)
 			a.castShelf(c, server, id, credits)
@@ -161,7 +156,7 @@ func (a *App) detailsHeader(c *ui.Context, st *detailsState, d *capiv1.Details) 
 	if blurred {
 		backdrop = card.GetPoster()
 	}
-	ui.Box(c).Margin(12).Height(height).Radius(18).Clip().Background(style.Color(design.DarkColors.SurfaceRaised)).DragWindow().Children(func() {
+	ui.Box(c).Height(height).Clip().Background(style.Color(design.DarkColors.SurfaceRaised)).DragWindow().Children(func() {
 		if bitmap := a.opts.Images.Get(backdrop.GetUrl(), a.contentWidth, scale); bitmap != nil {
 			img := ui.Image(c, bitmap).Absolute().Top(0).Left(0).Right(0).Bottom(0).Fit(ui.Cover)
 			if blurred {
@@ -413,7 +408,7 @@ func (a *App) episodes(c *ui.Context, st *detailsState, d *capiv1.Details) {
 			ui.ScrollHorizontal(c).Children(func() {
 				ui.Row(c).Padding(0, style.Layout.Margin).Gap(8).Children(func() {
 					for i, s := range seasons {
-						pill := ui.ButtonBase(c.Key(s.GetItemId())).Height(32).Padding(0, 14).Radius(16).Center().Label(s.GetTitle())
+						pill := ui.ButtonBase(c.Key(s.GetItemId())).Cursor(ui.CursorPointer).Height(32).Padding(0, 14).Radius(16).Center().Label(s.GetTitle())
 						fg := colors.TextPrimary
 						switch {
 						case i == st.season:
@@ -459,10 +454,10 @@ func (a *App) episodes(c *ui.Context, st *detailsState, d *capiv1.Details) {
 func (a *App) episodeCard(c *ui.Context, e *capiv1.Card, next bool) {
 	colors := style.Colors(c)
 	w := style.Layout.Thumbnail * 0.85
-	b := ui.ButtonBase(c.Key(e.GetItemId())).Column().Width(w).Gap(4).AlignItems(ui.Start).Label(e.GetTitle())
+	b := ui.ButtonBase(c.Key(e.GetItemId())).Cursor(ui.CursorPointer).Column().Width(w).Gap(4).AlignItems(ui.Start).Label(e.GetTitle())
 	hovered := b.Hovered()
 	b.Children(func() {
-		a.artwork(c, e.GetThumb(), e.GetTitle(), e, w, w*9/16, hovered)
+		a.artwork(c, e.GetThumb(), "", e, w, w*9/16, hovered)
 		number := episodeName(c, e)
 		if e.GetRuntimeMs() > 0 {
 			number += " · " + runtime(time.Duration(e.GetRuntimeMs())*time.Millisecond)
@@ -482,13 +477,13 @@ func (a *App) episodeCard(c *ui.Context, e *capiv1.Card, next bool) {
 func (a *App) episodeRow(c *ui.Context, e *capiv1.Card, next bool) {
 	colors := style.Colors(c)
 	w := min(max(a.contentWidth/3, 140), style.Layout.Thumbnail)
-	b := ui.ButtonBase(c.Key(e.GetItemId())).Gap(16).Padding(8).Radius(design.RadiusLg).AlignItems(ui.Start).Label(e.GetTitle())
+	b := ui.ButtonBase(c.Key(e.GetItemId())).Cursor(ui.CursorPointer).Gap(16).Padding(8).Radius(design.RadiusLg).AlignItems(ui.Start).Label(e.GetTitle())
 	hovered := b.Hovered()
 	if hovered {
 		b.Background(style.Color(colors.Fill))
 	}
 	b.Children(func() {
-		a.artwork(c, e.GetThumb(), e.GetTitle(), e, w, w*9/16, false)
+		a.artwork(c, e.GetThumb(), "", e, w, w*9/16, false)
 		ui.Column(c).Grow(1).MinWidth(0).Gap(4).Children(func() {
 			n := style.Text(ui.Text(c, episodeName(c, e)), style.Type.Footnote).FontWeight(600).TextColor(style.Color(colors.TextSecondary))
 			if next {

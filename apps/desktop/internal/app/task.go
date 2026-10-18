@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"log/slog"
+	"time"
 )
 
 // task is a value loaded in the background for a key, which names what it
@@ -13,6 +14,7 @@ type task[T any] struct {
 	err     error
 	loaded  bool // a value or an error arrived
 	loading bool
+	started time.Time // when it started loading for key
 }
 
 // load starts loading t for key with fn, unless t is for key already, and
@@ -22,7 +24,7 @@ func load[T any](a *App, t *task[T], key string, fn func(ctx context.Context) (T
 	if t.key == key {
 		return t
 	}
-	t.key, t.loading = key, true
+	t.key, t.loading, t.started = key, true, time.Now()
 	go func() {
 		v, err := fn(a.ctx)
 		if err != nil {

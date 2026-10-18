@@ -95,14 +95,14 @@ func (a *App) extrasShelf(c *ui.Context, server string, d *capiv1.Details, extra
 			if card.GetThumb() == nil {
 				card.SetThumb(d.GetBackdrop())
 			}
-			b := ui.ButtonBase(c.Key(e.GetId())).Column().Width(width).Gap(6).AlignItems(ui.Start).Label(e.GetName())
+			b := ui.ButtonBase(c.Key(e.GetId())).Cursor(ui.CursorPointer).Column().Width(width).Gap(6).AlignItems(ui.Start).Label(e.GetName())
 			hovered := b.Hovered()
 			if b.Pressed() {
 				b.Opacity(0.8)
 			}
 			b.Children(func() {
 				ui.Box(c).Children(func() {
-					a.artwork(c, card.GetThumb(), e.GetName(), nil, width, width*9/16, hovered)
+					a.artwork(c, card.GetThumb(), "shows", nil, width, width*9/16, hovered)
 					ui.Box(c).Absolute().Left(8).Bottom(8).Size(26, 26).Radius(13).Background(style.Color(colors.Scrim)).Center().Children(func() {
 						ui.Icon(c, style.Icon("play", true)).Size(14, 14).TextColor(white)
 					})

@@ -211,7 +211,7 @@ func (a *App) settings(c *ui.Context, r *ui.Route) {
 				r.Page().Background(style.Color(colors.Background))
 				ui.Scroll(c.Key(id + r.Query("user") + r.Query("library") + r.Query("remote") + r.Query("acquisition") + r.Query("subtitles") + r.Query("id"))).Fill().Children(func() {
 					top := max(c.TitleBar().Height, 12)
-					ui.Column(c).Padding(top+28, 56, 48).AlignItems(ui.Center).Children(func() {
+					ui.Column(c).Padding(top+28, 56, 40).AlignItems(ui.Center).Children(func() {
 						ui.Column(c).FillWidth().MaxWidth(900).Gap(28).Children(func() { a.settingsSection(c, r, id) })
 					})
 				})

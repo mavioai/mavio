@@ -2,11 +2,11 @@ package app
 
 import (
 	"context"
+	"time"
 
 	"github.com/egoist/mygo/ui"
 
 	capiv1 "github.com/mavioai/mavio/libs/client-rust/capi/gen/mavio/capi/v1"
-	design "github.com/mavioai/mavio/libs/design/gen/go"
 
 	"github.com/mavioai/mavio/apps/desktop/internal/style"
 )
@@ -23,6 +23,7 @@ type grid struct {
 	loading bool
 	err     error
 	state   ui.GridState
+	started time.Time // when it started loading for key
 }
 
 // libraryState is a library page's state.
@@ -59,9 +60,7 @@ func (a *App) library(c *ui.Context, r *ui.Route) {
 		})
 		ui.Column(c).Fill().Children(func() {
 			pageHeader(c, name, tabs)
-			if taskStatus(c, t, func() { st.recommended.key = "" }, func() {
-				ui.Column(c).Gap(32).Children(func() { placeholderShelf(c, 8); placeholderShelf(c, 8) })
-			}) {
+			if taskStatus(c, t, func() { st.recommended.key = "" }, nil) {
 				return
 			}
 			if len(t.value) == 0 {
@@ -154,7 +153,7 @@ func (a *App) cardGrid(c *ui.Context, id, title string, controls func(), fetch f
 	}
 	k := key(id, a.generation)
 	if g.key != k {
-		*g = grid{key: k, total: -1, more: true, state: g.state}
+		*g = grid{key: k, total: -1, more: true, state: g.state, started: time.Now()}
 	}
 	next := func() {
 		if g.loading || !g.more || g.err != nil {
@@ -201,11 +200,7 @@ func (a *App) cardGrid(c *ui.Context, id, title string, controls func(), fetch f
 			statusView(c, "", style.T(c, "state.empty"), "", nil)
 			return
 		case len(g.cards) == 0:
-			ui.Row(c).Padding(0, style.Layout.Margin).Gap(style.Layout.Gutter).Wrap().ClipY().Grow(1).Children(func() {
-				for range 12 {
-					ui.Box(c).Size(style.Layout.Poster, style.Layout.Poster*1.5).Radius(design.RadiusMd).Background(style.Color(colors.SurfaceRaised))
-				}
-			})
+			loading(c, g.started)
 			return
 		}
 		width, _ := a.gridColumns(c)
@@ -215,7 +210,7 @@ func (a *App) cardGrid(c *ui.Context, id, title string, controls func(), fetch f
 				next()
 			}
 			a.posterCard(c, g.cards[i], width)
-		}).Grow(1).Padding(0, style.Layout.Margin, 24).Gap(style.Layout.Gutter)
+		}).Grow(1).Padding(0, style.Layout.Margin, 40).Gap(style.Layout.Gutter)
 	})
 }
 

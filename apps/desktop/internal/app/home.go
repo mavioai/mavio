@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/url"
+	"slices"
 	"strconv"
 	"time"
 
@@ -29,6 +30,7 @@ type homeState struct {
 	rows    []*capiv1.Row
 	err     error
 	loading bool
+	started time.Time // when it started loading
 	// heroStart is when the hero began, heroPick the title the user chose.
 	heroStart time.Time
 	heroPick  int
@@ -41,7 +43,7 @@ func (a *App) loadHome() {
 	if h.key == k {
 		return
 	}
-	h.key, h.loading = k, true
+	h.key, h.loading, h.started = k, true, time.Now()
 	go func() {
 		_, err := a.opts.Core.Stream(a.ctx, capiv1.Request_builder{LoadHome: &capiv1.LoadHome{}}.Build(), func(m *capiv1.Message) {
 			rows := m.GetRows().GetRows()
@@ -63,16 +65,15 @@ func (a *App) loadHome() {
 func (a *App) home(c *ui.Context) {
 	a.loadHome()
 	h := &a.homeState
+	// Nothing yet from any server: the activity indicator alone.
+	if len(h.rows) > 0 && !slices.ContainsFunc(h.rows, func(r *capiv1.Row) bool { return !r.HasLoading() }) {
+		loading(c, h.started)
+		return
+	}
 	if len(h.rows) == 0 {
 		switch {
 		case h.loading:
-			ui.Column(c).Fill().Children(func() {
-				header(c, style.T(c, "nav.home"))
-				ui.Column(c).Gap(32).Children(func() {
-					placeholderShelf(c, 8)
-					placeholderShelf(c, 8)
-				})
-			})
+			loading(c, h.started)
 		case h.err != nil:
 			statusView(c, "error", style.T(c, "state.error"), errorMessage(c, h.err), func() { h.key = "" })
 		default:
@@ -320,13 +321,13 @@ func allWide(cards []*capiv1.Card) bool {
 func (a *App) titleCard(c *ui.Context, server string, t *capiv1.TitleCard) {
 	colors := style.Colors(c)
 	w := style.Layout.Poster
-	b := ui.ButtonBase(c.Key(t.GetTitle() + fmt.Sprint(t.GetYear()))).Column().Width(w).Gap(6).AlignItems(ui.Start).Label(t.GetTitle())
+	b := ui.ButtonBase(c.Key(t.GetTitle() + fmt.Sprint(t.GetYear()))).Cursor(ui.CursorPointer).Column().Width(w).Gap(6).AlignItems(ui.Start).Label(t.GetTitle())
 	hovered := b.Hovered()
 	if b.Pressed() {
 		b.Opacity(0.8)
 	}
 	b.Children(func() {
-		a.artwork(c, capiv1.Artwork_builder{Url: t.GetPosterUrl()}.Build(), t.GetTitle(), nil, w, w*1.5, hovered)
+		a.artwork(c, capiv1.Artwork_builder{Url: t.GetPosterUrl()}.Build(), "", nil, w, w*1.5, hovered)
 		style.Text(ui.Text(c, t.GetTitle()), style.Type.Headline).TextColor(style.Color(colors.TextPrimary)).SingleLine().Width(w)
 		if t.GetYear() > 0 {
 			style.Text(ui.Text(c, fmt.Sprint(t.GetYear())), style.Type.Footnote).TextColor(style.Color(colors.TextSecondary)).SingleLine()
