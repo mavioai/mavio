@@ -55,7 +55,7 @@ func (a *App) person(c *ui.Context, r *ui.Route, server, id string) {
 	p := t.value
 	r.Title(p.GetName())
 	colors := style.Colors(c)
-	ui.Scroll(c).Fill().Children(func() {
+	ui.Scroll(c).TrackScroll(a.pageScroll(a.pagePath)).Fill().Children(func() {
 		ui.Column(c).Gap(32).Padding(0, 0, 40).Children(func() {
 			a.personHeader(c, st, server, p)
 			of := func(kind capiv1.CardKind) []*capiv1.Card {
@@ -91,9 +91,8 @@ func yearsBetween(from, to time.Time) int {
 
 func (a *App) personHeader(c *ui.Context, st *personState, server string, p *libraryv1.Person) {
 	colors := style.Colors(c)
-	bar := c.TitleBar()
 	const w = 208
-	ui.Row(c).Padding(max(bar.Height, 12)+20, style.Layout.Margin, 0).Gap(24).AlignItems(ui.Start).Wrap().Children(func() {
+	ui.Row(c).Padding(a.pageTop(c), style.Layout.Margin, 0).Gap(24).AlignItems(ui.Start).Wrap().Children(func() {
 		ui.Box(c).Size(w, w*1.5).Shrink(0).Radius(14).Clip().Background(style.Color(colors.Fill)).Center().Children(func() {
 			if bitmap := a.opts.Images.Get(a.imageOf(server, p.GetImages(), libraryv1.ImageKind_IMAGE_KIND_PRIMARY).GetUrl(), w, scale); bitmap != nil {
 				ui.Image(c, bitmap).Fill().Fit(ui.Cover)

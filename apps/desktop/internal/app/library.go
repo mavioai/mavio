@@ -59,7 +59,7 @@ func (a *App) library(c *ui.Context, r *ui.Route) {
 			return m.GetRows().GetRows(), err
 		})
 		ui.Column(c).Fill().Children(func() {
-			pageHeader(c, name, tabs)
+			a.pageHeader(c, name, tabs)
 			if taskStatus(c, t, func() { st.recommended.key = "" }, nil) {
 				return
 			}
@@ -67,7 +67,7 @@ func (a *App) library(c *ui.Context, r *ui.Route) {
 				statusView(c, "", style.T(c, "state.empty"), "", nil)
 				return
 			}
-			ui.Scroll(c).Grow(1).Children(func() {
+			ui.Scroll(c).TrackScroll(a.pageScroll(a.pagePath)).Grow(1).Children(func() {
 				ui.Column(c).Gap(32).Padding(0, 0, 40).Children(func() {
 					for _, row := range t.value {
 						a.row(c, row)
@@ -132,10 +132,9 @@ func (a *App) library(c *ui.Context, r *ui.Route) {
 }
 
 // pageHeader builds the top of a page with a title and controls beside it.
-func pageHeader(c *ui.Context, title string, controls func()) {
+func (a *App) pageHeader(c *ui.Context, title string, controls func()) {
 	colors := style.Colors(c)
-	bar := c.TitleBar()
-	ui.Column(c).Padding(max(bar.Height, 12), style.Layout.Margin, 16).Gap(12).DragWindow().Children(func() {
+	ui.Column(c).Padding(a.pageTop(c), style.Layout.Margin, 16).Gap(12).DragWindow().Children(func() {
 		style.Text(ui.Text(c, title), style.Type.Title1).TextColor(style.Color(colors.TextPrimary)).SingleLine()
 		if controls != nil {
 			ui.Row(c).Gap(8).AlignItems(ui.Center).Children(controls)
@@ -184,7 +183,7 @@ func (a *App) cardGrid(c *ui.Context, id, title string, controls func(), fetch f
 	}
 	colors := style.Colors(c)
 	ui.Column(c).Fill().Children(func() {
-		pageHeader(c, title, func() {
+		a.pageHeader(c, title, func() {
 			if controls != nil {
 				controls()
 			}

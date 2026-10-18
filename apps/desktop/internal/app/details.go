@@ -50,7 +50,7 @@ func (a *App) details(c *ui.Context, r *ui.Route, server, id string) {
 	if info.value != nil {
 		credits = a.libraryCredits(server, info.value.item.GetCredits())
 	}
-	ui.Scroll(c).Fill().Children(func() {
+	ui.Scroll(c).TrackScroll(a.pageScroll(a.pagePath)).Fill().Children(func() {
 		ui.Column(c).Gap(32).Padding(0, 0, 40).Children(func() {
 			a.detailsHeader(c, st, d)
 			a.episodes(c, st, d)

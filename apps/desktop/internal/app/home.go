@@ -81,7 +81,7 @@ func (a *App) home(c *ui.Context) {
 		}
 		return
 	}
-	ui.Scroll(c).Fill().Children(func() {
+	ui.Scroll(c).TrackScroll(a.pageScroll(a.pagePath)).Fill().Children(func() {
 		ui.Column(c).Gap(32).Padding(0, 0, 40).Children(func() {
 			if hero := heroCards(h.rows); len(hero) > 0 {
 				a.hero(c, hero)

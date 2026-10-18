@@ -3,7 +3,6 @@ package app
 import (
 	"context"
 	"math"
-	"strings"
 	"unicode"
 	"unicode/utf8"
 
@@ -32,6 +31,7 @@ func (a *App) shell(c *ui.Context) {
 	if c.Vibrancy() {
 		c.Root().Background(ui.Transparent)
 	}
+	a.visitPlaces()
 	path := a.router.Path()
 	ui.Row(c).Fill().AlignItems(ui.Stretch).Children(func() {
 		bar := ui.Column(c).Shrink(0)
@@ -51,6 +51,7 @@ func (a *App) shell(c *ui.Context) {
 		})
 		ui.Column(c).Grow(1).MinWidth(0).Background(style.Color(colors.Background)).Children(func() {
 			a.router.View(c, func(r *ui.Route) { a.page(c, r) })
+			a.backButton(c)
 		})
 	})
 	if a.sidebarOpen {
@@ -119,6 +120,7 @@ func (a *App) sidebarResizer(c *ui.Context) {
 
 // page builds the page at the router's path.
 func (a *App) page(c *ui.Context, r *ui.Route) {
+	a.pagePath = r.Path()
 	switch {
 	case r.Match("/home"):
 		r.Title(style.T(c, "nav.home"))
@@ -230,11 +232,6 @@ func libraryIcon(k capiv1.LibraryType) string {
 	return "folder"
 }
 
-// active reports whether the page at path is that of item, or below it.
-func active(path, item string) bool {
-	return path == item || strings.HasPrefix(path, item+"/")
-}
-
 // titleBar builds the band under the window controls, which drags the
 // window, with the button that collapses or expands the sidebar.
 func (a *App) titleBar(c *ui.Context, medium, expanded bool) {
@@ -259,20 +256,19 @@ func (a *App) titleBar(c *ui.Context, medium, expanded bool) {
 
 // sidebar builds the expanded sidebar.
 func (a *App) sidebar(c *ui.Context, medium bool) {
-	path := a.router.Path()
 	top, sections := a.navItems(c)
 	ui.Column(c).Width(a.sidebarWidth()).Fill().Label(style.T(c, "nav.navigation")).Children(func() {
 		a.titleBar(c, medium, true)
 		ui.Scroll(c).Grow(1).Children(func() {
 			ui.Column(c).Padding(0, 12, 12).Gap(2).Children(func() {
 				for _, it := range top {
-					a.sidebarRow(c, it, active(path, it.path))
+					a.sidebarRow(c, it, a.places.current == it.path)
 				}
 				for _, sec := range sections {
 					style.Text(ui.Text(c, sec.title), style.Type.Footnote).FontWeight(600).
 						TextColor(style.Color(style.Colors(c).TextTertiary)).SingleLine().Padding(16, 8, 6)
 					for _, it := range sec.items {
-						a.sidebarRow(c.Key(it.path), it, active(path, it.path))
+						a.sidebarRow(c.Key(it.path), it, a.places.current == it.path)
 					}
 				}
 			})
@@ -298,13 +294,12 @@ func (a *App) sidebarRow(c *ui.Context, it navItem, selected bool) {
 		style.Text(ui.Text(c, it.label), style.Type.Callout).TextColor(style.Color(colors.TextPrimary)).SingleLine().Grow(1)
 	})
 	if row.Clicked() {
-		a.router.Push(it.path)
+		a.openPlace(it.path)
 	}
 }
 
 // rail builds the sidebar collapsed to a rail of icons.
 func (a *App) rail(c *ui.Context, medium bool) {
-	path := a.router.Path()
 	top, sections := a.navItems(c)
 	colors := style.Colors(c)
 	ui.Column(c).Width(style.Layout.Rail).Fill().Label(style.T(c, "nav.navigation")).Children(func() {
@@ -329,7 +324,7 @@ func (a *App) rail(c *ui.Context, medium bool) {
 					if i == len(top) {
 						ui.Box(c).Height(1).Margin(4, 12).Background(style.Color(colors.Border))
 					}
-					selected := active(path, it.path)
+					selected := a.places.current == it.path
 					cell := ui.ButtonBase(c.Key(it.path)).Padding(8, 4).Gap(4).Radius(design.RadiusMd).Column().AlignItems(ui.Center).Label(it.label).Tooltip(it.label)
 					switch {
 					case selected:
@@ -342,7 +337,7 @@ func (a *App) rail(c *ui.Context, medium bool) {
 						style.Text(ui.Text(c, it.label), style.Type.Caption).TextColor(style.Color(colors.TextPrimary)).SingleLine().MaxWidth(style.Layout.Rail - 24)
 					})
 					if cell.Clicked() {
-						a.router.Push(it.path)
+						a.openPlace(it.path)
 					}
 				}
 			})

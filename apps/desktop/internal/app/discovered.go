@@ -91,7 +91,7 @@ func (a *App) discoveredPersonPage(c *ui.Context, r *ui.Route) {
 		}
 		return out
 	}
-	ui.Scroll(c).Fill().Children(func() {
+	ui.Scroll(c).TrackScroll(a.pageScroll(a.pagePath)).Fill().Children(func() {
 		ui.Column(c).Gap(32).Padding(0, 0, 40).Children(func() {
 			a.discoveredPersonHeader(c, p)
 			cast := func() { a.personTitleGrid(c, server, style.T(c, "person.appearances"), of(p.GetCast())) }
@@ -110,9 +110,8 @@ func (a *App) discoveredPersonPage(c *ui.Context, r *ui.Route) {
 func (a *App) discoveredPersonHeader(c *ui.Context, p *acquisitionv1.Person) {
 	colors := style.Colors(c)
 	st := &a.discoveredState
-	bar := c.TitleBar()
 	const w = 176
-	ui.Row(c).Padding(max(bar.Height, 12)+20, style.Layout.Margin, 0).Gap(24).AlignItems(ui.Start).Children(func() {
+	ui.Row(c).Padding(a.pageTop(c), style.Layout.Margin, 0).Gap(24).AlignItems(ui.Start).Children(func() {
 		ui.Box(c).Size(w, w).Shrink(0).Radius(w / 2).Clip().Background(style.Color(colors.Fill)).Center().Children(func() {
 			if bitmap := a.opts.Images.Get(sized(p.GetImageUrl(), 342), w, scale); bitmap != nil {
 				ui.Image(c, bitmap).Fill().Fit(ui.Cover)
@@ -285,7 +284,7 @@ func (a *App) collectionPage(c *ui.Context, r *ui.Route) {
 	r.Title(col.GetName())
 	colors := style.Colors(c)
 	width, _ := a.gridColumns(c)
-	ui.Scroll(c).Fill().Children(func() {
+	ui.Scroll(c).TrackScroll(a.pageScroll(a.pagePath)).Fill().Children(func() {
 		ui.Column(c).Gap(32).Padding(0, 0, 40).Children(func() {
 			a.collectionHeader(c, server, tmdb, col)
 			ui.Column(c).Gap(12).Children(func() {

@@ -117,6 +117,9 @@ type App struct {
 	generation int
 	libraries  map[string]*task[*capiv1.Libraries]
 
+	places places
+	// pagePath is the path of the page being built.
+	pagePath    string
 	sidebarOpen bool // the sidebar shown over the content in medium width
 	// sidebarResizing tells that the sidebar's edge is being dragged, to
 	// keep the width it ends at.

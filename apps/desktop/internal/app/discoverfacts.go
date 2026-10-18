@@ -651,9 +651,9 @@ func (a *App) titleCrewPage(c *ui.Context, r *ui.Route) {
 	r.Title(title)
 	credits := slices.DeleteFunc(titleCredits(t.value), creditEntry.cast)
 	colors := style.Colors(c)
-	ui.Scroll(c).Fill().Children(func() {
+	ui.Scroll(c).TrackScroll(a.pageScroll(a.pagePath)).Fill().Children(func() {
 		ui.Column(c).Gap(24).Padding(0, 0, 40).Children(func() {
-			pageHeader(c, title, func() {
+			a.pageHeader(c, title, func() {
 				style.Text(ui.Text(c, t.value.GetName()), style.Type.Callout).TextColor(style.Color(colors.TextSecondary))
 			})
 			if len(credits) == 0 {

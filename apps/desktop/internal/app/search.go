@@ -41,7 +41,7 @@ func (a *App) search(c *ui.Context) {
 		})
 	}
 	ui.Column(c).Fill().Children(func() {
-		pageHeader(c, style.T(c, "nav.search"), func() {
+		a.pageHeader(c, style.T(c, "nav.search"), func() {
 			ui.SearchField(c, &s.query).Placeholder(style.T(c, "search.placeholder")).AutoFocus().Grow(1).MaxWidth(560).Height(36)
 		})
 		if query == "" {
@@ -60,7 +60,7 @@ func (a *App) search(c *ui.Context) {
 			return
 		}
 		width, _ := a.gridColumns(c)
-		ui.Scroll(c).Grow(1).Children(func() {
+		ui.Scroll(c).TrackScroll(a.pageScroll(a.pagePath)).Grow(1).Children(func() {
 			ui.Column(c).Padding(0, style.Layout.Margin, 40).Gap(24).Children(func() {
 				for _, r := range t.value.GetServers() {
 					if len(r.GetCards()) == 0 && r.GetError() == "" {

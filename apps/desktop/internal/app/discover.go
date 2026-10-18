@@ -242,7 +242,7 @@ func (a *App) discoverPage(c *ui.Context, r *ui.Route) {
 	r.Title(style.T(c, "nav.discover"))
 	server, catalogs, pending := a.discovery(c)
 	ui.Column(c).Fill().Children(func() {
-		pageHeader(c, style.T(c, "nav.discover"), func() {
+		a.pageHeader(c, style.T(c, "nav.discover"), func() {
 			if server != "" && secondaryButton(c, "pending", style.T(c, "requests.title")).Clicked() {
 				a.router.Push("/requests/" + server)
 			}
@@ -255,7 +255,7 @@ func (a *App) discoverPage(c *ui.Context, r *ui.Route) {
 			statusView(c, "discover", style.T(c, "discover.notSetUp"), style.T(c, "discover.notSetUpMessage"), nil)
 			return
 		}
-		ui.Scroll(c).Grow(1).Children(func() {
+		ui.Scroll(c).TrackScroll(a.pageScroll(a.pagePath)).Grow(1).Children(func() {
 			ui.Column(c).Gap(32).Padding(0, 0, 40).Children(func() {
 				for _, row := range rowsOf(catalogs) {
 					a.catalogShelf(c, server, row, catalogRowTitle(c, row), 0)
@@ -456,7 +456,7 @@ func (a *App) catalogPage(c *ui.Context, r *ui.Route) {
 				}
 			}
 		}
-		pageHeader(c, title, controls)
+		a.pageHeader(c, title, controls)
 		switch {
 		case len(g.titles) == 0 && g.err != nil:
 			statusView(c, "error", style.T(c, "state.error"), errorMessage(c, g.err), func() { g.err = nil; next() })
@@ -485,7 +485,7 @@ func (a *App) catalogPage(c *ui.Context, r *ui.Route) {
 	})
 	if found != nil {
 		a.filtersDialog(c, server, found, kind, func(f catalogFilter) {
-			a.router.Replace(catalogLocation(server, id, title, kind, tmdb, f))
+			a.replace(catalogLocation(server, id, title, kind, tmdb, f))
 		})
 	}
 }
@@ -531,7 +531,7 @@ func (a *App) titlePage(c *ui.Context, r *ui.Route) {
 	}
 	r.Title(title.GetName())
 	_, catalogs, _ := a.discovery(c)
-	ui.Scroll(c).Fill().Children(func() {
+	ui.Scroll(c).TrackScroll(a.pageScroll(a.pagePath)).Fill().Children(func() {
 		ui.Column(c).Gap(32).Padding(0, 0, 40).Children(func() {
 			a.titleHeader(c, server, title)
 			a.titleOverview(c, server, title)
@@ -1050,9 +1050,9 @@ func (a *App) requestsPage(c *ui.Context, r *ui.Route) {
 			names[x.GetId()] = x.GetName()
 		}
 	}
-	ui.Scroll(c).Fill().Children(func() {
+	ui.Scroll(c).TrackScroll(a.pageScroll(a.pagePath)).Fill().Children(func() {
 		ui.Column(c).Padding(0, 0, 40).Gap(16).Children(func() {
-			pageHeader(c, style.T(c, "requests.title"), func() {
+			a.pageHeader(c, style.T(c, "requests.title"), func() {
 				labels := make([]string, len(requestFilters))
 				for i, f := range requestFilters {
 					labels[i] = style.T(c, f.label)
