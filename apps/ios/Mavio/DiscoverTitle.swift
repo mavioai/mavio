@@ -596,9 +596,11 @@ private struct TitleFacts: View {
             series
             ? []
             : [
-                dayText(title.theatricalReleaseDate).map { "\(MavioStrings.discoverTheatricalRelease)  \($0)" },
-                dayText(title.digitalReleaseDate).map { "\(MavioStrings.itemDigitalRelease)  \($0)" },
-                dayText(title.physicalReleaseDate).map { "\(MavioStrings.itemPhysicalRelease)  \($0)" },
+                dayText(title.theatricalReleaseDate).map {
+                    "\(MavioStrings.discoverTheatricalRelease)  \(unbroken($0))"
+                },
+                dayText(title.digitalReleaseDate).map { "\(MavioStrings.itemDigitalRelease)  \(unbroken($0))" },
+                dayText(title.physicalReleaseDate).map { "\(MavioStrings.itemPhysicalRelease)  \(unbroken($0))" },
             ].compactMap(\.self)
         if !releases.isEmpty {
             rows.append(
@@ -734,6 +736,11 @@ private struct TitleFacts: View {
             .padding(.vertical, MavioSpacing.s12)
         }
         .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(theme.colors.border))
+    }
+
+    /// A date kept on one line.
+    private func unbroken(_ s: String) -> String {
+        s.replacingOccurrences(of: " ", with: "\u{00A0}")
     }
 
     private func statusName(_ s: Mavio_Plugin_V1_ProductionStatus) -> String? {

@@ -72,7 +72,7 @@ struct DiscoveredPersonView: View {
             ArtworkView(sized(p.imageURL, 342), title: p.name, icon: "profile")
                 .frame(width: phone ? 144 : 176, height: phone ? 144 : 176)
                 .clipShape(.circle)
-            VStack(alignment: .leading, spacing: MavioSpacing.s12) {
+            VStack(alignment: phone ? .center : .leading, spacing: MavioSpacing.s12) {
                 Text(p.name).type(theme.type.title1)
                 if !facts.isEmpty {
                     Text(facts.joined(separator: " | ")).type(theme.type.callout)
@@ -86,6 +86,7 @@ struct DiscoveredPersonView: View {
                 if !p.biography.isEmpty {
                     VStack(alignment: .leading, spacing: MavioSpacing.s4) {
                         Text(p.biography).type(theme.type.body).lineLimit(more ? nil : 6)
+                            .multilineTextAlignment(.leading)
                         Button(more ? MavioStrings.personLess : MavioStrings.personMore) {
                             withAnimation { more.toggle() }
                         }
@@ -93,6 +94,7 @@ struct DiscoveredPersonView: View {
                         .foregroundStyle(theme.colors.accentText)
                         .buttonStyle(.plain)
                     }
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 }
                 Picker(MavioStrings.personKinds, selection: $kinds) {
                     Text(MavioStrings.personAllKinds).tag(Kinds.all)
@@ -102,6 +104,7 @@ struct DiscoveredPersonView: View {
                 .pickerStyle(.segmented)
                 .fixedSize()
             }
+            .multilineTextAlignment(phone ? .center : .leading)
             .frame(maxWidth: 768, alignment: .leading)
         }
         .frame(maxWidth: .infinity, alignment: phone ? .center : .leading)
