@@ -40,8 +40,8 @@ pub use reporting::{Playback, PlaybackOptions, REPORT_INTERVAL, Reporter, Sessio
 pub use servers::{AccountMode, DeviceInfo, QuickConnect, ServerInfo, Servers, TokenStore};
 pub use session::Transport;
 pub use settings::{
-    AccountSecurity, DeviceSession, Passkey, PlaybackPreferences, SubtitleMode, SwitchableUser,
-    TotpSetup,
+    AccountSecurity, DeviceSession, Passkey, PlaybackPreferences, RemoteCommand, RemotePlayback,
+    SubtitleMode, SwitchableUser, TotpSetup,
 };
 pub use store::{DownloadRecord, DownloadState, PendingProgress, ServerRecord, Store};
 pub use view::{Artwork, Card, CardKind, Row, RowContent, RowKind, TitleCard};

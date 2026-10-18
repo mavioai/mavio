@@ -3,11 +3,13 @@
 //! switches between (`docs/accounts.md` §4.4), how the user signs in to a
 //! standalone server, and the user's devices signed in.
 
-use std::time::SystemTime;
+use std::time::{Duration, SystemTime};
 
 use mavio_api::proto::mavio::auth::v1::SwitchableUser as SwitchableUserProto;
+use mavio_api::proto::mavio::session::v1::__buffa::oneof::command::Kind as CommandKind;
 use mavio_api::proto::mavio::session::v1::{
-    ListSessionsRequest, RevokeSessionRequest, Session as SessionProto,
+    Command, ListSessionsRequest, Message, Play, PlayState, PlayStateCommand, RevokeSessionRequest,
+    Seek, SendCommandRequest, Session as SessionProto, Volume,
 };
 use mavio_api::proto::mavio::user::v1::{
     ConfirmTotpRequest, DeletePasskeyRequest, DeleteTotpRequest, GetCurrentUserRequest,
@@ -15,8 +17,10 @@ use mavio_api::proto::mavio::user::v1::{
     StartTotpRequest, SubtitleMode as SubtitleModeProto, User,
 };
 
+use crate::connection::Connection;
 use crate::error::Result;
 use crate::servers::Servers;
+use crate::view::Card;
 
 /// When subtitles show.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -168,7 +172,7 @@ pub struct TotpSetup {
 }
 
 /// A device signed in to a server as the user.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct DeviceSession {
     /// The session's ID.
     pub id: String,
@@ -182,8 +186,105 @@ pub struct DeviceSession {
     pub current: bool,
     /// When it was last seen.
     pub last_seen: Option<SystemTime>,
-    /// The name of what it plays, if anything.
-    pub playing: Option<String>,
+    /// What it plays, if anything.
+    pub playing: Option<RemotePlayback>,
+}
+
+/// What another device plays.
+#[derive(Debug, Clone, PartialEq)]
+pub struct RemotePlayback {
+    /// The item, with its runtime.
+    pub card: Card,
+    /// Where it is in the item.
+    pub position: Duration,
+    /// Whether it is paused.
+    pub paused: bool,
+}
+
+/// What a device is asked to do.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum RemoteCommand {
+    /// Plays items as a queue, from one of them at a position.
+    Play {
+        /// The items' IDs.
+        item_ids: Vec<String>,
+        /// The item of the queue to start with.
+        start_index: u32,
+        /// Where to start in it.
+        start_position: Option<Duration>,
+    },
+    /// Pauses.
+    Pause,
+    /// Goes on playing.
+    Unpause,
+    /// Stops playing.
+    Stop,
+    /// Plays the next item of the queue.
+    Next,
+    /// Plays the previous item of the queue.
+    Previous,
+    /// Goes to a position in the item.
+    Seek {
+        /// The position.
+        position: Duration,
+    },
+    /// Sets the volume, from 0 to 100, or mutes it.
+    Volume {
+        /// The level, from 0 to 100.
+        level: Option<u32>,
+        /// Whether it is muted.
+        muted: Option<bool>,
+    },
+    /// Shows a message over any screen.
+    Message {
+        /// The message.
+        text: String,
+    },
+}
+
+impl RemoteCommand {
+    fn to_proto(&self) -> Command {
+        let state = |c: PlayStateCommand| {
+            CommandKind::PlayState(Box::new(PlayState {
+                command: Some(c.into()),
+                ..Default::default()
+            }))
+        };
+        let kind = match self {
+            RemoteCommand::Play {
+                item_ids,
+                start_index,
+                start_position,
+            } => CommandKind::Play(Box::new(Play {
+                item_ids: item_ids.clone(),
+                start_index: Some(i32::try_from(*start_index).unwrap_or(0)),
+                start_position: start_position.map(Into::into).into(),
+                ..Default::default()
+            })),
+            RemoteCommand::Pause => state(PlayStateCommand::PLAY_STATE_COMMAND_PAUSE),
+            RemoteCommand::Unpause => state(PlayStateCommand::PLAY_STATE_COMMAND_UNPAUSE),
+            RemoteCommand::Stop => state(PlayStateCommand::PLAY_STATE_COMMAND_STOP),
+            RemoteCommand::Next => state(PlayStateCommand::PLAY_STATE_COMMAND_NEXT),
+            RemoteCommand::Previous => state(PlayStateCommand::PLAY_STATE_COMMAND_PREVIOUS),
+            RemoteCommand::Seek { position } => CommandKind::Seek(Box::new(Seek {
+                position: Some((*position).into()).into(),
+                ..Default::default()
+            })),
+            RemoteCommand::Volume { level, muted } => CommandKind::Volume(Box::new(Volume {
+                level: level.map(|l| i32::try_from(l.min(100)).unwrap_or(100)),
+                muted: *muted,
+                ..Default::default()
+            })),
+            RemoteCommand::Message { text } => CommandKind::Message(Box::new(Message {
+                text: Some(text.clone()),
+                ..Default::default()
+            })),
+        };
+        Command {
+            kind: Some(kind),
+            ..Default::default()
+        }
+    }
 }
 
 impl AccountSecurity {
@@ -221,8 +322,19 @@ impl AccountSecurity {
 }
 
 impl DeviceSession {
-    fn from_proto(s: &SessionProto) -> Self {
-        let playing = s.now_playing.as_option().and_then(|p| p.item.as_option());
+    fn from_proto(conn: &Connection, server_id: &str, s: &SessionProto) -> Self {
+        let playing = s.now_playing.as_option().and_then(|p| {
+            let item = p.item.as_option()?;
+            Some(RemotePlayback {
+                card: Card::new(conn, server_id, item),
+                position: p
+                    .position
+                    .as_option()
+                    .and_then(|d| Duration::try_from(d.clone()).ok())
+                    .unwrap_or_default(),
+                paused: p.paused.unwrap_or_default(),
+            })
+        });
         DeviceSession {
             id: s.id.clone().unwrap_or_default(),
             device_name: s.device_name.clone().unwrap_or_default(),
@@ -234,9 +346,7 @@ impl DeviceSession {
                 .clone()
                 .into_option()
                 .and_then(|t| t.try_into().ok()),
-            playing: playing
-                .and_then(|i| i.name.clone())
-                .filter(|n| !n.is_empty()),
+            playing,
         }
     }
 }
@@ -340,13 +450,35 @@ impl Servers {
 
     /// The user's devices signed in to a server.
     pub async fn devices(&self, id: &str) -> Result<Vec<DeviceSession>> {
-        let r = self
-            .connection(id)?
+        let conn = self.connection(id)?;
+        let r = conn
             .sessions()
             .list_sessions(ListSessionsRequest::default())
             .await?
             .into_owned();
-        Ok(r.sessions.iter().map(DeviceSession::from_proto).collect())
+        Ok(r.sessions
+            .iter()
+            .map(|s| DeviceSession::from_proto(&conn, id, s))
+            .collect())
+    }
+
+    /// Asks another of the user's devices signed in to a server to do
+    /// something, such as pause.
+    pub async fn send_command(
+        &self,
+        id: &str,
+        session_id: &str,
+        command: &RemoteCommand,
+    ) -> Result<()> {
+        self.connection(id)?
+            .sessions()
+            .send_command(SendCommandRequest {
+                session_id: Some(session_id.to_owned()),
+                command: command.to_proto().into(),
+                ..Default::default()
+            })
+            .await?;
+        Ok(())
     }
 
     /// Signs one of the user's other devices out of a server.
@@ -480,6 +612,26 @@ mod tests {
                 Ok(RevokeSessionResponse::default())
             },
         );
+        let c = calls.clone();
+        fake.unary(
+            "/mavio.session.v1.SessionService/SendCommand",
+            move |_, req: SendCommandRequest| {
+                let kind = match req.command.into_option().and_then(|c| c.kind) {
+                    Some(CommandKind::PlayState(p)) => format!("{:?}", p.command),
+                    Some(CommandKind::Seek(s)) => format!(
+                        "seek {:?}",
+                        s.position
+                            .into_option()
+                            .map(|d| Duration::try_from(d).unwrap())
+                    ),
+                    other => format!("{other:?}"),
+                };
+                c.lock()
+                    .unwrap()
+                    .push(format!("{} {kind}", req.session_id.unwrap_or_default()));
+                Ok(mavio_api::proto::mavio::session::v1::SendCommandResponse::default())
+            },
+        );
         let address = fake.serve().await;
         let (s, _) = servers();
         s.sign_in(&address, "me", "secret").await.unwrap();
@@ -493,12 +645,36 @@ mod tests {
         let got = s.devices("sa").await.unwrap();
         let got: Vec<_> = got
             .iter()
-            .map(|d| (d.device_name.as_str(), d.current, d.playing.as_deref()))
+            .map(|d| {
+                let playing = d.playing.as_ref().map(|p| p.card.title.as_str());
+                (d.device_name.as_str(), d.current, playing)
+            })
             .collect();
         assert_eq!(got, [("Phone", true, None), ("TV", false, Some("Brazil"))]);
 
         s.set_pin("sa", "1234").await.unwrap();
         s.sign_out_device("sa", "s2").await.unwrap();
-        assert_eq!(*calls.lock().unwrap(), ["pin u 1234", "revoke s2"]);
+        s.send_command("sa", "s2", &RemoteCommand::Pause)
+            .await
+            .unwrap();
+        s.send_command(
+            "sa",
+            "s2",
+            &RemoteCommand::Seek {
+                position: Duration::from_secs(90),
+            },
+        )
+        .await
+        .unwrap();
+        let got = calls.lock().unwrap().clone();
+        assert_eq!(
+            got,
+            [
+                "pin u 1234",
+                "revoke s2",
+                "s2 Some(PLAY_STATE_COMMAND_PAUSE)",
+                "s2 seek Some(90s)",
+            ]
+        );
     }
 }

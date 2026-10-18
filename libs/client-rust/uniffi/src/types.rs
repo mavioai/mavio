@@ -10,8 +10,8 @@ use mavio_core::{
     SignInState, Sort, Source, StreamState, TitleCard, Transfer, Version,
 };
 use mavio_core::{
-    AccountSecurity, DeviceSession, Passkey, PlaybackPreferences, SubtitleMode, SwitchableUser,
-    TotpSetup,
+    AccountSecurity, DeviceSession, Passkey, PlaybackPreferences, RemoteCommand, RemotePlayback,
+    SubtitleMode, SwitchableUser, TotpSetup,
 };
 use mavio_core::{
     CollectionLink, CreditJob, Episode, ExternalLink, Extra, ExtraKind, SeriesLink, SeriesStatus,
@@ -532,5 +532,36 @@ pub struct DeviceSession {
     pub online: bool,
     pub current: bool,
     pub last_seen: Option<SystemTime>,
-    pub playing: Option<String>,
+    pub playing: Option<RemotePlayback>,
+}
+
+#[uniffi::remote(Record)]
+pub struct RemotePlayback {
+    pub card: Card,
+    pub position: Duration,
+    pub paused: bool,
+}
+
+#[uniffi::remote(Enum)]
+pub enum RemoteCommand {
+    Play {
+        item_ids: Vec<String>,
+        start_index: u32,
+        start_position: Option<Duration>,
+    },
+    Pause,
+    Unpause,
+    Stop,
+    Next,
+    Previous,
+    Seek {
+        position: Duration,
+    },
+    Volume {
+        level: Option<u32>,
+        muted: Option<bool>,
+    },
+    Message {
+        text: String,
+    },
 }

@@ -18,9 +18,9 @@ use mavio_api::proto::mavio::session::v1::__buffa::oneof::event::Kind;
 use mavio_api::proto::mavio::session::v1::Event;
 use mavio_core::{
     Account, AccountSecurity, Core, Details, DeviceInfo, DeviceSession, DownloadEntry, Filter,
-    FoundServer, Libraries, Page, PlaybackOptions, PlaybackPreferences, Row, SearchResults,
-    ServerInfo, ServerRecord, SignInState, Sort, Store, StreamState, SwitchableUser, TotpSetup,
-    Transfer,
+    FoundServer, Libraries, Page, PlaybackOptions, PlaybackPreferences, RemoteCommand, Row,
+    SearchResults, ServerInfo, ServerRecord, SignInState, Sort, Store, StreamState, SwitchableUser,
+    TotpSetup, Transfer,
 };
 use tokio::runtime::Runtime;
 
@@ -660,6 +660,22 @@ impl Client {
     pub async fn devices(&self, server_id: String) -> Result<Vec<DeviceSession>> {
         self.call(|c| async move { c.servers().devices(&server_id).await })
             .await
+    }
+
+    /// Asks another of the user's devices signed in to a server to do
+    /// something, such as pause.
+    pub async fn send_command(
+        &self,
+        server_id: String,
+        session_id: String,
+        command: RemoteCommand,
+    ) -> Result<()> {
+        self.call(|c| async move {
+            c.servers()
+                .send_command(&server_id, &session_id, &command)
+                .await
+        })
+        .await
     }
 
     /// Signs one of the user's other devices out of a server.
