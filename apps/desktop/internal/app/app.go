@@ -83,6 +83,9 @@ const (
 type preferences struct {
 	Appearance       Appearance `json:"appearance,omitempty"`
 	SidebarCollapsed bool       `json:"sidebarCollapsed,omitempty"`
+	// SidebarWidth is the width the sidebar's edge was dragged to, shared
+	// by the app's sidebar and the settings'; the layout's when zero.
+	SidebarWidth float32 `json:"sidebarWidth,omitempty"`
 	// TV is the TV mode (docs/tv.md).
 	TV bool `json:"tv,omitempty"`
 	// Quality is the key of the quality played, of qualities.
@@ -115,6 +118,9 @@ type App struct {
 	libraries  map[string]*task[*capiv1.Libraries]
 
 	sidebarOpen bool // the sidebar shown over the content in medium width
+	// sidebarResizing tells that the sidebar's edge is being dragged, to
+	// keep the width it ends at.
+	sidebarResizing bool
 	// contentWidth is the width of the page beside the sidebar.
 	contentWidth    float32
 	signIn          signIn

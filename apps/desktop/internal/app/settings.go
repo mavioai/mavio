@@ -198,11 +198,14 @@ func (a *App) settings(c *ui.Context, r *ui.Route) {
 		c.Root().Background(ui.Transparent)
 	}
 	ui.Row(c).Fill().AlignItems(ui.Stretch).Children(func() {
-		bar := ui.Column(c).Shrink(0).Width(style.Layout.Sidebar)
+		bar := ui.Column(c).Shrink(0).Width(a.sidebarWidth())
 		if !c.Vibrancy() {
 			bar.Background(style.Color(colors.Sidebar))
 		}
-		bar.Children(func() { a.settingsSidebar(c, id) })
+		bar.Children(func() {
+			a.settingsSidebar(c, id)
+			a.sidebarResizer(c)
+		})
 		ui.Column(c).Grow(1).MinWidth(0).Background(style.Color(colors.Background)).Children(func() {
 			r.View(c, func(r *ui.Route) {
 				r.Page().Background(style.Color(colors.Background))

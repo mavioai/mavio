@@ -5,6 +5,10 @@ import (
 	"os"
 	"strings"
 	"testing"
+
+	"github.com/egoist/mygo/ui"
+
+	"github.com/mavioai/mavio/apps/desktop/internal/style"
 )
 
 // shots is where the screens tests write their frames, when set.
@@ -116,5 +120,52 @@ func TestScreens(t *testing.T) {
 			h.settle()
 			h.save(shots, tc.name)
 		})
+	}
+}
+
+func TestSidebarResize(t *testing.T) {
+	h := newHarness(t, true, 1280, 900)
+	edge := func() float32 { return h.app.sidebarWidth() - 3 }
+	drag := func(dx float32) {
+		x := edge()
+		h.tt.Move(x, 400)
+		h.tt.Press(x, 400)
+		h.tt.Frame()
+		h.tt.Move(x+dx/2, 400)
+		h.tt.Frame()
+		h.tt.Move(x+dx, 400)
+		h.tt.Frame()
+		h.tt.Release(x+dx, 400)
+		h.settle()
+	}
+	want := style.Layout.Sidebar + 60
+	drag(60)
+	if got := h.app.sidebarWidth(); got != want {
+		t.Fatalf("dragged 60 to the right: width = %v, want = %v", got, want)
+	}
+	if got := h.app.prefs.SidebarWidth; got != want {
+		t.Errorf("kept width = %v, want = %v", got, want)
+	}
+	drag(500)
+	if got := h.app.sidebarWidth(); got != sidebarWidths.max {
+		t.Errorf("dragged past the widest: width = %v, want = %v", got, sidebarWidths.max)
+	}
+	// The settings' sidebar is as wide, and its edge resizes both.
+	h.app.router.Push("/settings/appearance")
+	h.settle()
+	drag(-300)
+	if got := h.app.sidebarWidth(); got != sidebarWidths.min {
+		t.Errorf("dragged past the narrowest in the settings: width = %v, want = %v", got, sidebarWidths.min)
+	}
+	h.tt.Key(0, ui.KeyRight)
+	h.settle()
+	if got := h.app.sidebarWidth(); got != sidebarWidths.min+10 {
+		t.Errorf("after the right arrow: width = %v, want = %v", got, sidebarWidths.min+10)
+	}
+	h.tt.ClickAt(edge(), 400)
+	h.tt.ClickAt(edge(), 400)
+	h.settle()
+	if got := h.app.sidebarWidth(); got != style.Layout.Sidebar {
+		t.Errorf("double-clicked: width = %v, want = %v", got, style.Layout.Sidebar)
 	}
 }

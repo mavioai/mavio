@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"math"
 	"strings"
 	"unicode"
 	"unicode/utf8"
@@ -25,7 +26,7 @@ func (a *App) shell(c *ui.Context) {
 	}
 	a.contentWidth = w - style.Layout.Rail
 	if expanded {
-		a.contentWidth = w - style.Layout.Sidebar
+		a.contentWidth = w - a.sidebarWidth()
 	}
 	colors := style.Colors(c)
 	if c.Vibrancy() {
@@ -34,12 +35,16 @@ func (a *App) shell(c *ui.Context) {
 	path := a.router.Path()
 	ui.Row(c).Fill().AlignItems(ui.Stretch).Children(func() {
 		bar := ui.Column(c).Shrink(0)
+		if expanded {
+			bar.Width(a.sidebarWidth())
+		}
 		if !c.Vibrancy() {
 			bar.Background(style.Color(colors.Sidebar))
 		}
 		bar.Children(func() {
 			if expanded {
 				a.sidebar(c, medium)
+				a.sidebarResizer(c)
 			} else {
 				a.rail(c, medium)
 			}
@@ -59,6 +64,56 @@ func (a *App) shell(c *ui.Context) {
 	}
 	if a.router.Path() != path {
 		a.sidebarOpen = false
+	}
+}
+
+// sidebarWidths are the widths the sidebar's edge is dragged between.
+var sidebarWidths = struct{ min, max float32 }{200, 400}
+
+// sidebarWidth returns the width of the expanded sidebar: the one chosen
+// by dragging its edge, else the layout's.
+func (a *App) sidebarWidth() float32 {
+	if w := a.prefs.SidebarWidth; w > 0 {
+		return min(max(w, sidebarWidths.min), sidebarWidths.max)
+	}
+	return style.Layout.Sidebar
+}
+
+// sidebarResizer builds the right edge of an expanded sidebar, dragged or
+// moved with the arrow keys to widen or narrow it within sidebarWidths,
+// and double-clicked to return it to the layout's width. The width is
+// kept, and shared by the app's sidebar and the settings'.
+func (a *App) sidebarResizer(c *ui.Context) {
+	colors := style.Colors(c)
+	edge := ui.Box(c.Key("sidebar-resizer")).Absolute().Top(0).Bottom(0).Right(0).Width(6).
+		Cursor(ui.CursorResizeEW).Focusable().FocusRing(false).Role(ui.RoleSplitter).
+		Label(style.T(c, "nav.resizeSidebar"))
+	resize := func(w float32) {
+		a.prefs.SidebarWidth = float32(math.Round(float64(min(max(w, sidebarWidths.min), sidebarWidths.max))))
+	}
+	if dx, _, ok := edge.Dragged(); ok {
+		a.sidebarResizing = true
+		if dx != 0 {
+			resize(a.sidebarWidth() + dx)
+		}
+	} else if a.sidebarResizing && !edge.Dragging() {
+		a.sidebarResizing = false
+		a.savePreferences()
+	}
+	if edge.DoubleClicked() {
+		a.prefs.SidebarWidth = 0
+		a.savePreferences()
+	}
+	for key, step := range map[ui.Key]float32{ui.KeyLeft: -10, ui.KeyRight: 10} {
+		if edge.Shortcut(0, key) {
+			resize(a.sidebarWidth() + step)
+			a.savePreferences()
+		}
+	}
+	if edge.Hovered() || edge.Dragging() || edge.Focused() {
+		edge.Children(func() {
+			ui.Box(c).Absolute().Top(0).Bottom(0).Right(2).Width(2).Background(style.Color(colors.Accent))
+		})
 	}
 }
 
@@ -206,7 +261,7 @@ func (a *App) titleBar(c *ui.Context, medium, expanded bool) {
 func (a *App) sidebar(c *ui.Context, medium bool) {
 	path := a.router.Path()
 	top, sections := a.navItems(c)
-	ui.Column(c).Width(style.Layout.Sidebar).Fill().Label(style.T(c, "nav.navigation")).Children(func() {
+	ui.Column(c).Width(a.sidebarWidth()).Fill().Label(style.T(c, "nav.navigation")).Children(func() {
 		a.titleBar(c, medium, true)
 		ui.Scroll(c).Grow(1).Children(func() {
 			ui.Column(c).Padding(0, 12, 12).Gap(2).Children(func() {
