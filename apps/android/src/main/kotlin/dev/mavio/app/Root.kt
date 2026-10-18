@@ -42,6 +42,8 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.saveable.rememberSaveableStateHolder
+import androidx.compose.runtime.key
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.staticCompositionLocalOf
@@ -70,6 +72,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.NavEntry
+import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import dev.chrisbanes.haze.HazeInput
 import dev.chrisbanes.haze.HazeState
@@ -202,28 +205,45 @@ private fun Shell(model: AppModel) {
     val navigator = remember { Navigator { stacks.getValue(tab) } }
     val stack = stacks.getValue(tab)
     val haze = rememberHazeState()
+    // Each tab keeps its screens' state while another shows.
+    val saved = rememberSaveableStateHolder()
+    val bars = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+    // The tab bar shows on the tabs' first screens alone.
+    val tabBar = stack.size == 1
     CompositionLocalProvider(
         LocalNavigator provides navigator,
         // The pages scroll under the header and the floating tab bar, which blur them.
         LocalTopInset provides HEADER_HEIGHT + WindowInsets.statusBars.asPaddingValues().calculateTopPadding(),
-        LocalBottomInset provides TAB_BAR_HEIGHT + 24.dp + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding(),
     ) {
         Box(Modifier.fillMaxSize().background(theme.colors.background)) {
-            NavDisplay(
-                backStack = stack,
-                modifier = Modifier.fillMaxSize().hazeSource(haze),
-                onBack = { stack.removeLastOrNull() },
-                entryProvider = { route -> NavEntry(route) { Screen(model, it) } },
-                transitionSpec = { pushTransition() },
-                popTransitionSpec = { popTransition() },
-                predictivePopTransitionSpec = { popTransition() },
-            )
+            // Switching tabs shows the other tab's stack at once, without sliding.
+            saved.SaveableStateProvider(tab) {
+                key(tab) {
+                    NavDisplay(
+                        backStack = stack,
+                        modifier = Modifier.fillMaxSize().hazeSource(haze),
+                        onBack = { stack.removeLastOrNull() },
+                        // A screen keeps its state, as where it was scrolled, under those opened over it.
+                        entryDecorators = listOf(rememberSaveableStateHolderNavEntryDecorator()),
+                        entryProvider = { route ->
+                            NavEntry(route) {
+                                val root = Tab.entries.any { t -> t.root == it }
+                                CompositionLocalProvider(LocalBottomInset provides if (root) TAB_BAR_HEIGHT + 24.dp + bars else bars) {
+                                    Screen(model, it)
+                                }
+                            }
+                        },
+                        transitionSpec = { pushTransition() },
+                        popTransitionSpec = { popTransition() },
+                        predictivePopTransitionSpec = { popTransition() },
+                    )
+                }
+            }
             // The player and the sign-in take the whole screen.
             if (stack.lastOrNull().let { it !is Route.Player && it != Route.AddServer }) {
                 Header(model, back = stack.size > 1, Modifier.align(Alignment.TopCenter), haze)
-                // The settings, opened from the header, leave the tabs out.
                 AnimatedVisibility(
-                    stack.lastOrNull().let { it != Route.Settings && it !is Route.Setting && it !is Route.ServerSetting },
+                    tabBar,
                     Modifier.align(Alignment.BottomCenter),
                     enter = slideInVertically(tween(PAGE_MILLIS)) { it },
                     exit = slideOutVertically(tween(PAGE_MILLIS)) { it },
