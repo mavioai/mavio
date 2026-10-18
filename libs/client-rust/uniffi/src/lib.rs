@@ -679,6 +679,32 @@ impl Client {
         .await
     }
 
+    /// Starts signing a Mavio account in in the browser, at the mavio.dev
+    /// whose API is api, as client_id, for the app to receive the browser at
+    /// redirect_uri itself, such as a URI of its own scheme.
+    pub fn start_app_sign_in(
+        &self,
+        api: String,
+        client_id: String,
+        redirect_uri: String,
+    ) -> Arc<BrowserSignIn> {
+        Arc::new(BrowserSignIn {
+            sign_in: self.0.start_app_sign_in(&api, &client_id, &redirect_uri),
+            cancelled: tokio::sync::Notify::new(),
+        })
+    }
+
+    /// Signs the account in from the URL the browser came back to, and
+    /// follows its servers. One the account declined is `PermissionDenied`.
+    pub async fn finish_app_sign_in(
+        &self,
+        sign_in: Arc<BrowserSignIn>,
+        callback: String,
+    ) -> Result<Account> {
+        self.call(|c| async move { c.finish_app_sign_in(&sign_in.sign_in, &callback).await })
+            .await
+    }
+
     /// Follows the Mavio account's servers now: signs in to those it
     /// newly reaches and forgets those it no longer does.
     pub async fn sync_account(&self) -> Result<()> {

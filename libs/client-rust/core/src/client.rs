@@ -733,6 +733,29 @@ impl Core {
         Ok(a)
     }
 
+    /// Starts signing a Mavio account in in the browser, for the app to
+    /// receive the browser at redirect_uri itself.
+    pub fn start_app_sign_in(
+        &self,
+        api: &str,
+        client_id: &str,
+        redirect_uri: &str,
+    ) -> BrowserSignIn {
+        self.servers.start_app_sign_in(api, client_id, redirect_uri)
+    }
+
+    /// Signs the account in from the URL the browser came back to and
+    /// follows its servers.
+    pub async fn finish_app_sign_in(
+        &self,
+        sign_in: &BrowserSignIn,
+        callback: &str,
+    ) -> Result<Account> {
+        let a = self.servers.finish_app_sign_in(sign_in, callback).await?;
+        self.sync_account().await?;
+        Ok(a)
+    }
+
     /// Calls a unary procedure of a server signed in to as its session,
     /// with a request encoded as protobuf, answering with the response
     /// encoded the same way and the base URL it reached the server at.

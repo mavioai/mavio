@@ -92,11 +92,13 @@ pub struct LinkCode {
 
 /// A sign-in in the browser: the app opens url, mavio.dev sends the
 /// browser back to a loopback address of this device (RFC 8252), and
-/// [`Servers::finish_browser_sign_in`] completes it.
+/// [`Servers::finish_browser_sign_in`] completes it; or, started with
+/// [`Servers::start_app_sign_in`], to a redirect URI the app receives
+/// itself, which [`Servers::finish_app_sign_in`] completes.
 pub struct BrowserSignIn {
     /// The page of mavio.dev to open.
     pub url: String,
-    listener: Mutex<TcpListener>,
+    listener: Option<Mutex<TcpListener>>,
     redirect_uri: String,
     state: String,
     verifier: String,
@@ -461,6 +463,29 @@ impl Servers {
             .map_err(|e| Error::Unreachable(e.to_string()))?
             .port();
         let redirect_uri = format!("http://127.0.0.1:{port}/callback");
+        Ok(self.browser_sign_in(api, client_id, redirect_uri, Some(listener)))
+    }
+
+    /// Starts signing a Mavio account in in the browser as
+    /// [`Servers::start_browser_sign_in`] does, but for the app to receive
+    /// the browser at redirect_uri itself, such as a URI of its own scheme
+    /// (RFC 8252 §7.1), and finish with [`Servers::finish_app_sign_in`].
+    pub fn start_app_sign_in(
+        &self,
+        api: &str,
+        client_id: &str,
+        redirect_uri: &str,
+    ) -> BrowserSignIn {
+        self.browser_sign_in(api, client_id, redirect_uri.to_owned(), None)
+    }
+
+    fn browser_sign_in(
+        &self,
+        api: &str,
+        client_id: &str,
+        redirect_uri: String,
+        listener: Option<TcpListener>,
+    ) -> BrowserSignIn {
         let state = random_string();
         let verifier = random_string();
         let challenge = base64url(digest(&SHA256, verifier.as_bytes()).as_ref());
@@ -477,23 +502,28 @@ impl Servers {
                 ("device_key", &key),
             ])
         );
-        Ok(BrowserSignIn {
+        BrowserSignIn {
             url,
-            listener: Mutex::new(listener),
+            listener: listener.map(Mutex::new),
             redirect_uri,
             state,
             verifier,
             api: api.to_owned(),
             client_id: client_id.to_owned(),
-        })
+        }
     }
 
     /// Waits for the browser to come back from a sign-in and signs the
     /// account in; the app cancels it by dropping the future. A sign-in the
     /// account declined is `PermissionDenied`.
     pub async fn finish_browser_sign_in(&self, sign_in: &BrowserSignIn) -> Result<Account> {
+        let Some(listener) = &sign_in.listener else {
+            return Err(Error::Invalid(
+                "the sign-in does not listen on a loopback address".into(),
+            ));
+        };
         let params = {
-            let listener = sign_in.listener.lock().await;
+            let listener = listener.lock().await;
             loop {
                 let (mut stream, _) = listener
                     .accept()
@@ -521,6 +551,34 @@ impl Servers {
                 break params;
             }
         };
+        self.exchange(sign_in, params).await
+    }
+
+    /// Signs the account in from the URL the browser came back to, at the
+    /// redirect URI of a sign-in [`Servers::start_app_sign_in`] started. A
+    /// sign-in the account declined is `PermissionDenied`.
+    pub async fn finish_app_sign_in(
+        &self,
+        sign_in: &BrowserSignIn,
+        callback: &str,
+    ) -> Result<Account> {
+        let (target, query) = callback.split_once('?').unwrap_or((callback, ""));
+        let query = query.split_once('#').map_or(query, |(q, _)| q);
+        let params = parse_query(query);
+        if target != sign_in.redirect_uri || params.get("state") != Some(&sign_in.state) {
+            return Err(Error::Invalid(
+                "the browser came back from another sign-in".into(),
+            ));
+        }
+        self.exchange(sign_in, params).await
+    }
+
+    /// Exchanges the code the browser came back with for the account's session.
+    async fn exchange(
+        &self,
+        sign_in: &BrowserSignIn,
+        params: HashMap<String, String>,
+    ) -> Result<Account> {
         if let Some(error) = params.get("error") {
             let description = params.get("error_description").unwrap_or(error);
             return Err(OAuthError::Code(error.clone(), description.clone()).into());
@@ -1211,6 +1269,41 @@ mod tests {
             servers.finish_browser_sign_in(&sign_in),
             visit(&q["redirect_uri"], &target)
         );
+        assert!(
+            matches!(got, Err(Error::PermissionDenied(_))),
+            "got = {got:?}"
+        );
+    }
+
+    #[tokio::test]
+    async fn apps_receive_the_browser_themselves() {
+        let st = state(&[]);
+        let api = mavio_dev(st.clone()).await;
+        let (servers, _) = servers();
+        let own = "dev.mavio.test:/callback";
+
+        let sign_in = servers.start_app_sign_in(&api, "dev.mavio.test", own);
+        let q = parse_query(sign_in.url.split_once('?').unwrap().1);
+        assert_eq!(q["redirect_uri"], own);
+        let state = &q["state"];
+        // A sign-in that listens nowhere is not finished by a listener.
+        let got = servers.finish_browser_sign_in(&sign_in).await;
+        assert!(matches!(got, Err(Error::Invalid(_))), "got = {got:?}");
+        for forged in [
+            format!("{own}?code=c1&state=forged"),
+            format!("dev.mavio.other:/callback?code=c1&state={state}"),
+        ] {
+            let got = servers.finish_app_sign_in(&sign_in, &forged).await;
+            assert!(matches!(got, Err(Error::Invalid(_))), "got = {got:?}");
+        }
+        let callback = format!("{own}?code=c1&state={state}");
+        let got = servers.finish_app_sign_in(&sign_in, &callback).await;
+        assert_eq!(got.unwrap().name, "Ann");
+
+        let sign_in = servers.start_app_sign_in(&api, "dev.mavio.test", own);
+        let q = parse_query(sign_in.url.split_once('?').unwrap().1);
+        let callback = format!("{own}?error=access_denied&state={}", q["state"]);
+        let got = servers.finish_app_sign_in(&sign_in, &callback).await;
         assert!(
             matches!(got, Err(Error::PermissionDenied(_))),
             "got = {got:?}"
