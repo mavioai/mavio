@@ -187,7 +187,7 @@
 
 /* Artwork with no image: a quiet wash of the accent from its top. */
 @utility art-placeholder {
-  background: linear-gradient(160deg, color-mix(in srgb, var(--mavio-color-accent) 14%, transparent), transparent 70%);
+  background: linear-gradient(160deg, var(--mavio-color-fill), transparent 70%);
 }
 
 body {

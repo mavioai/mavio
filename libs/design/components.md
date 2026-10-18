@@ -16,7 +16,7 @@ Every interactive component has these states; television adds focused to every c
 | Pressed | Content dimmed to 80% opacity |
 | Loading | A `color.surfaceRaised` placeholder of the component's final size, so that nothing moves when content arrives |
 | Disabled | Content in `color.textDisabled` |
-| No artwork | The placeholder stays, with a wash of `color.accent` at 14% from its top left, gone by 70% of the way, and the icon of what it shows (a movie, a series, music…) in `color.textTertiary` at 60%, a quarter of its width and at most 56 pt; never the title written on it |
+| No artwork | The placeholder stays, with a wash of `color.fill`, a quiet gray, from its top left, gone by 70% of the way, and the icon of what it shows (a movie, a series, music…) in `color.textTertiary` at 60%, a quarter of its width and at most 56 pt; never the title written on it |
 
 ## Poster Card
 
