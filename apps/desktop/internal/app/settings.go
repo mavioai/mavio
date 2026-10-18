@@ -386,15 +386,17 @@ func (a *App) accountCard(c *ui.Context, active bool) {
 	// from the sidebar by a shade; over the sidebar of the desktop's own
 	// material, where an opaque surface would stand apart, it is clear.
 	// Hovered, the fill tints it.
-	rest := style.Color(colors.Surface)
+	// Over keeps the alpha of what is under it, so over the clear card
+	// the fill shows by itself.
+	rest, hovered := style.Color(colors.Surface), style.Color(colors.Fill).Over(style.Color(colors.Surface))
 	if c.Vibrancy() {
-		rest = ui.Transparent
+		rest, hovered = ui.Transparent, style.Color(colors.Fill)
 	}
 	switch {
 	case active:
 		b.Background(style.Color(colors.FillSelected))
 	case b.Hovered():
-		b.Background(style.Color(colors.Fill).Over(rest))
+		b.Background(hovered)
 	default:
 		b.Background(rest)
 	}
