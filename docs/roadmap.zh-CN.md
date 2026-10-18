@@ -683,6 +683,7 @@ flowchart TD
   - [x] Web UI：三种布局、带用户菜单的侧边栏与图标栏、方向键移动焦点的电视模式、分部分的设置、分步登录、首页头图、媒体库页头、按 `libs/design/components.zh-CN.md` 规定的详情页（接下来要看的一集、各季与各集、版本菜单、演职人员、信息与媒体），以及带画质与下一集的播放器侧面板
   - [ ] Mac 应用（`MavioTypography.desktop`）使用桌面字号层级（正文 13，[客户端 §6.1](clients.zh-CN.md)）；Web UI 已在桌面布局下使用，桌面应用（`design.DesktopTypography`）也已使用，并采用 macOS 的控件尺寸，窗口最小 1024 × 680，因为它只有桌面布局
   - [ ] 桌面应用的电视模式：[电视](tv.zh-CN.md)的电视布局——顶部导航栏、按键移动焦点与电视字号层级（`design.TvTypography`）；该模式的设置、快捷键与登录页的链接码已有
+  - [ ] 桌面应用的分段选项与标签悬停时显示手形，与 Web UI 相同：MyGo 的 `Segmented` 自行构建分段，没有为它们设置光标
   - [ ] Web UI 的导航：窗口在手机布局与更宽布局之间切换时，设置保持所显示的部分不重新开始；地址中“获取”与“字幕”的页面只接受存在的页面
   - [ ] Web UI 的管理功能：设置中用户管理的服务器，及其媒体库、用户与任务
     - [x] 插件（`apps/web/src/screens/plugins.tsx`、`libs/client-ts/src/plugins.ts`）：已安装的插件及其状态，可启用、停用（`PluginManagementService.SetPluginEnabled`）、更新与卸载；插件目录提供的插件，可安装；以卡片展示于“可用”与“已安装”选项卡，可按分类筛选，点击进入其详情与版本页；以及增删插件目录的插件目录页；位于设置的“服务器”分组，mavio.dev 模式下可选择服务器
