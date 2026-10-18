@@ -6949,6 +6949,42 @@
         }
       }
     },
+    "settings.mediaMenu": {
+      "comment": "Menu of a server's settings of its media: libraries, storage and transcoding.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Media"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "媒体"
+          }
+        }
+      }
+    },
+    "settings.maintenanceMenu": {
+      "comment": "Menu of a server's settings of watching over and keeping it: activity, issues, tasks, logs and backups.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Monitoring & Maintenance"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "监控与维护"
+          }
+        }
+      }
+    },
     "settings.serverChoice": {
       "comment": "Label of the choice of the server whose settings are shown.",
       "extractionState": "manual",

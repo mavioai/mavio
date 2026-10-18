@@ -1251,6 +1251,12 @@ public enum MavioStrings {
     /// Group of the settings of the server chosen above them.
     public static var settingsServerGroup: String { NSLocalizedString("settings.serverGroup", bundle: .module, comment: "") }
 
+    /// Menu of a server's settings of its media: libraries, storage and transcoding.
+    public static var settingsMediaMenu: String { NSLocalizedString("settings.mediaMenu", bundle: .module, comment: "") }
+
+    /// Menu of a server's settings of watching over and keeping it: activity, issues, tasks, logs and backups.
+    public static var settingsMaintenanceMenu: String { NSLocalizedString("settings.maintenanceMenu", bundle: .module, comment: "") }
+
     /// Label of the choice of the server whose settings are shown.
     public static var settingsServerChoice: String { NSLocalizedString("settings.serverChoice", bundle: .module, comment: "") }
 

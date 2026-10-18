@@ -7,6 +7,12 @@ enum Procedure {
     static func system(_ method: String) -> String { "/mavio.system.v1.SystemService/\(method)" }
     static func plugins(_ method: String) -> String { "/mavio.system.v1.PluginManagementService/\(method)" }
     static func users(_ method: String) -> String { "/mavio.user.v1.UserService/\(method)" }
+    static func activity(_ method: String) -> String { "/mavio.system.v1.ActivityService/\(method)" }
+    static func tasks(_ method: String) -> String { "/mavio.system.v1.TaskService/\(method)" }
+    static func backups(_ method: String) -> String { "/mavio.system.v1.BackupService/\(method)" }
+    static func sessions(_ method: String) -> String { "/mavio.session.v1.SessionService/\(method)" }
+    static func issues(_ method: String) -> String { "/mavio.acquisition.v1.IssueService/\(method)" }
+    static func items(_ method: String) -> String { "/mavio.library.v1.ItemService/\(method)" }
 }
 
 /// The settings' Server group, as the web UI's on a phone (docs/clients.md
@@ -24,7 +30,6 @@ struct ServerGroup: View {
     @State private var admin: [String: Bool] = [:]
 
     var body: some View {
-        let isAdmin = admin[server.id] == true
         Section {
             if model.signedInServers.count > 1 {
                 Picker(MavioStrings.authServer, selection: Binding(get: { server.id }, set: { serverId = $0 })) {
@@ -32,22 +37,17 @@ struct ServerGroup: View {
                 }
                 .tint(theme.colors.textSecondary)
             }
-            if isAdmin {
-                entry(.overview)
+            ForEach(ServerEntry.shown(admin: admin[server.id] == true), id: \.self) { entry in
+                NavigationLink {
+                    entry.view(server)
+                } label: {
+                    EntryLabel(entry.title, icon: entry.icon, color: entry.color)
+                }
             }
-            entry(.devices)
         } header: {
             Text(MavioStrings.settingsServerGroup)
         }
         .task(id: server.id) { await loadAdmin() }
-    }
-
-    private func entry(_ section: ServerSection) -> some View {
-        NavigationLink {
-            section.view(server)
-        } label: {
-            EntryLabel(section.title, icon: section.icon, color: section.color)
-        }
     }
 
     private func loadAdmin() async {
@@ -58,14 +58,125 @@ struct ServerGroup: View {
     }
 }
 
+/// An entry of the Server group: a section, or a menu of them.
+enum ServerEntry: Hashable {
+    case section(ServerSection)
+    case menu(ServerMenu)
+
+    /// The entries the user sees: an administrator's all, others' the
+    /// sections any user has; a menu left with one section is that section.
+    static func shown(admin: Bool) -> [ServerEntry] {
+        let top: [ServerEntry] = [.section(.overview), .section(.devices), .menu(.maintenance)]
+        return top.compactMap { entry in
+            switch entry {
+            case .section(let s): return s.forAnyone || admin ? entry : nil
+            case .menu(let m):
+                let sections = m.sections(admin: admin)
+                return sections.count > 1 ? entry : sections.first.map(ServerEntry.section)
+            }
+        }
+    }
+
+    var title: String {
+        switch self {
+        case .section(let s): s.title
+        case .menu(let m): m.title
+        }
+    }
+
+    var icon: String {
+        switch self {
+        case .section(let s): s.icon
+        case .menu(let m): m.icon
+        }
+    }
+
+    var color: Color {
+        switch self {
+        case .section(let s): s.color
+        case .menu(let m): m.color
+        }
+    }
+
+    @MainActor @ViewBuilder func view(_ server: ServerRecord) -> some View {
+        switch self {
+        case .section(let s): s.view(server)
+        case .menu(let m): ServerMenuView(menu: m, server: server)
+        }
+    }
+}
+
+/// A menu of the Server group's second level.
+enum ServerMenu: Hashable {
+    case maintenance
+
+    func sections(admin: Bool) -> [ServerSection] {
+        let all: [ServerSection] =
+            switch self {
+            case .maintenance: [.activity, .issues, .tasks, .logs, .backups]
+            }
+        return all.filter { admin || $0.forAnyone }
+    }
+
+    var title: String {
+        switch self {
+        case .maintenance: MavioStrings.settingsMaintenanceMenu
+        }
+    }
+
+    var icon: String {
+        switch self {
+        case .maintenance: "admin"
+        }
+    }
+
+    var color: Color {
+        switch self {
+        case .maintenance: Color(hex: 0x8E8E93)
+        }
+    }
+}
+
+/// A menu's page: its sections, as the Server group lists its own.
+private struct ServerMenuView: View {
+    let menu: ServerMenu
+    let server: ServerRecord
+    @Environment(\.theme) private var theme
+
+    var body: some View {
+        List {
+            // Only an administrator sees a menu: one section is shown alone.
+            ForEach(menu.sections(admin: true), id: \.self) { section in
+                NavigationLink {
+                    section.view(server)
+                } label: {
+                    EntryLabel(section.title, icon: section.icon, color: section.color)
+                }
+            }
+        }
+        .scrollContentBackground(.hidden)
+        .background(theme.colors.background)
+        .navigationTitle(menu.title)
+        .navigationBarTitleDisplayMode(.inline)
+    }
+}
+
 /// A section of the Server group.
-enum ServerSection {
-    case overview, devices
+enum ServerSection: Hashable {
+    case overview, devices, activity, issues, tasks, logs, backups
+
+    /// Whether users who do not administer the server see it.
+    var forAnyone: Bool { self == .devices || self == .issues }
 
     var title: String {
         switch self {
         case .overview: MavioStrings.settingsOverview
         case .devices: MavioStrings.settingsDevices
+        case .activity: MavioStrings.settingsActivity
+        case .issues: MavioStrings.settingsIssues
+        case .tasks: MavioStrings.settingsTasks
+        case .logs: MavioStrings.settingsLogs
+        case .backups: MavioStrings.settingsBackups
         }
     }
 
@@ -73,13 +184,21 @@ enum ServerSection {
         switch self {
         case .overview: "server"
         case .devices: "devices"
+        case .activity: "activity"
+        case .issues: "error"
+        case .tasks: "pending"
+        case .logs: "info"
+        case .backups: "folder"
         }
     }
 
     var color: Color {
         switch self {
-        case .overview: Color(hex: 0x8E8E93)
+        case .overview, .logs: Color(hex: 0x8E8E93)
         case .devices: Color(hex: 0x32ADE6)
+        case .activity: Color(hex: 0xFF2D55)
+        case .issues: Color(hex: 0xFF9500)
+        case .tasks, .backups: Color(hex: 0x5856D6)
         }
     }
 
@@ -87,8 +206,34 @@ enum ServerSection {
         switch self {
         case .overview: OverviewView(server: server)
         case .devices: DevicesView(server: server)
+        case .activity: ActivityView(server: server)
+        case .issues: IssuesView(server: server)
+        case .tasks: TasksView(server: server)
+        case .logs: LogsView(server: server)
+        case .backups: BackupsView(server: server)
         }
     }
+}
+
+extension AppModel {
+    /// Calls a procedure of a server as its session.
+    func call<Response: SwiftProtobuf.Message>(
+        _ server: ServerRecord, _ procedure: String, _ request: some SwiftProtobuf.Message,
+        as _: Response.Type = Response.self
+    ) async throws -> Response {
+        try await client.call(server.id, procedure, request, as: Response.self)
+    }
+}
+
+/// When something happened or will, relative to now, as "5 minutes ago".
+func fromNow(_ date: Date) -> String {
+    date.formatted(.relative(presentation: .named))
+}
+
+/// A length of time, as "1 hr, 30 min".
+func lengthOf(_ seconds: TimeInterval) -> String {
+    Duration.seconds(seconds).formatted(
+        .units(allowed: [.days, .hours, .minutes, .seconds], width: .abbreviated, maximumUnitCount: 2))
 }
 
 // MARK: Overview
