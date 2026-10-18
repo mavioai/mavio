@@ -134,9 +134,9 @@ class AppModel(context: Context, clientName: String) {
     /** Asks whether a link code was approved, signing the account in when it was. */
     suspend fun pollLink(link: LinkCode): Account? = client.pollLink(link).also { if (it != null) added() }
 
-    /** Waits for the browser to come back from a Mavio account's sign-in. */
-    suspend fun finishBrowserSignIn(signIn: BrowserSignIn): Account =
-        client.finishBrowserSignIn(signIn).also { added() }
+    /** Signs a Mavio account in from where mavio.dev sent the browser back to. */
+    suspend fun finishAppSignIn(signIn: BrowserSignIn, callback: String): Account =
+        client.finishAppSignIn(signIn, callback).also { added() }
 
     /** Signs out of the Mavio account and its servers, or of every server. */
     suspend fun signOut() {

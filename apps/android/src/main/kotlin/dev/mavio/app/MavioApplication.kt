@@ -4,12 +4,19 @@ import android.app.Application
 import android.content.pm.ApplicationInfo
 import android.system.Os
 import dev.mavio.core.AppModel
+import kotlinx.coroutines.flow.MutableStateFlow
 
 /** The app, which owns the core for as long as its process lives. */
 class MavioApplication : Application() {
     /** The app's state over the core. */
     lateinit var model: AppModel
         private set
+
+    /**
+     * Where mavio.dev sent the browser back to from a Mavio account's
+     * sign-in, until the sign-in takes it.
+     */
+    val signInRedirect = MutableStateFlow<String?>(null)
 
     override fun onCreate() {
         super.onCreate()

@@ -1,5 +1,6 @@
 package dev.mavio.app
 
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -11,7 +12,8 @@ import dev.mavio.ui.MavioTheme
 
 /** The app's only activity; the player is its own. */
 class MainActivity : ComponentActivity() {
-    private val model get() = (application as MavioApplication).model
+    private val app get() = application as MavioApplication
+    private val model get() = app.model
 
     // Servers at home are on the local network, which Android 17 opens
     // only to apps the user allows; once allowed, the streams start again.
@@ -25,6 +27,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        redirected(intent)
         if (Build.VERSION.SDK_INT >= 37 && checkSelfPermission(LOCAL_NETWORK) != PackageManager.PERMISSION_GRANTED) {
             localNetwork.launch(LOCAL_NETWORK)
         }
@@ -33,6 +36,17 @@ class MainActivity : ComponentActivity() {
                 Root(model)
             }
         }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        redirected(intent)
+    }
+
+    /** Hands a sign-in the browser coming back from mavio.dev in a Custom Tab. */
+    private fun redirected(intent: Intent) {
+        val uri = intent.data ?: return
+        if (intent.action == Intent.ACTION_VIEW && uri.scheme == CLIENT_ID) app.signInRedirect.value = uri.toString()
     }
 
     override fun onStart() {

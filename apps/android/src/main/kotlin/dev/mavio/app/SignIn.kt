@@ -4,6 +4,9 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.ManagedActivityResultLauncher
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.browser.auth.AuthTabIntent
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -77,10 +80,14 @@ import java.time.Duration
 import java.time.Instant
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 /** The client ID of the Android apps at mavio.dev. */
 const val CLIENT_ID = "dev.mavio.app"
+
+/** Where mavio.dev sends the browser back to, in the app's own scheme (RFC 8252 §7.1). */
+private const val REDIRECT_URI = "$CLIENT_ID:/callback"
 
 /** The mavio.dev the app signs a Mavio account in at, unless a server names its own. */
 private const val MAVIO_DEV_API = BuildConfig.MAVIO_DEV_API
@@ -128,6 +135,12 @@ fun SignInScreen(model: AppModel, adding: Boolean = false, onDone: () -> Unit = 
     val notMavio = stringResource(R.string.auth_not_mavio)
     val wrongPassword = stringResource(R.string.auth_wrong_password)
     val unreachable = stringResource(R.string.auth_unreachable)
+    val redirects = (context.applicationContext as MavioApplication).signInRedirect
+    // The Auth Tab hands back where mavio.dev sent it; closed, it leaves the
+    // sign-in waiting, to open it again or go back.
+    val authTab = rememberLauncherForActivityResult(AuthTabIntent.AuthenticateUserResultContract()) { result ->
+        if (result.resultCode == AuthTabIntent.RESULT_OK) redirects.value = result.resultUri?.toString()
+    }
 
     fun api() = server?.mavioDevUrl?.takeIf { it.isNotEmpty() } ?: MAVIO_DEV_API
 
@@ -138,7 +151,6 @@ fun SignInScreen(model: AppModel, adding: Boolean = false, onDone: () -> Unit = 
     }
 
     fun back() {
-        (step as? Step.Browser)?.signIn?.cancel()
         step = history.removeLastOrNull() ?: return
         if (step == Step.Welcome || step == Step.Address) server = null
         error = null
@@ -167,9 +179,10 @@ fun SignInScreen(model: AppModel, adding: Boolean = false, onDone: () -> Unit = 
     }
 
     fun signInInBrowser() = run {
-        val signIn = model.client.startBrowserSignIn(api(), CLIENT_ID)
+        val signIn = model.client.startAppSignIn(api(), CLIENT_ID, REDIRECT_URI)
+        redirects.value = null
         goTo(Step.Browser(signIn))
-        openInBrowser(context, signIn.url())
+        openAuthTab(context, authTab, signIn.url())
     }
 
     fun probe(address: String) = run {
@@ -212,10 +225,9 @@ fun SignInScreen(model: AppModel, adding: Boolean = false, onDone: () -> Unit = 
                         onLink = { goTo(Step.Link) },
                         onServer = { goTo(Step.Address) },
                     )
-                    is Step.Browser -> BrowserStep(model, s.signIn, onAgain = { openInBrowser(context, s.signIn.url()) }) {
+                    is Step.Browser -> BrowserStep(model, s.signIn, onAgain = { openAuthTab(context, authTab, s.signIn.url()) }) {
                         if (it == null) {
                             onDone()
-                            bringToFront(context)
                         } else {
                             back()
                             error = it
@@ -254,12 +266,15 @@ private fun openInBrowser(context: Context, url: String) {
         .onFailure { context.startActivity(Intent(Intent.ACTION_VIEW, url.toUri())) }
 }
 
-/** Brings the app back over the Custom Tab, which mavio.dev left at the core's loopback page. */
-private fun bringToFront(context: Context) {
-    context.startActivity(
-        Intent(context, MainActivity::class.java)
-            .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP),
-    )
+/**
+ * Opens a page of mavio.dev in an Auth Tab, which comes back with the URI
+ * of the app's scheme mavio.dev sends it to; a browser without Auth Tabs
+ * opens a Custom Tab, whose redirect reaches the app as a link; the browser
+ * itself where there are none.
+ */
+private fun openAuthTab(context: Context, launcher: ManagedActivityResultLauncher<Intent, AuthTabIntent.AuthResult>, url: String) {
+    runCatching { AuthTabIntent.Builder().build().launch(launcher, url.toUri(), CLIENT_ID) }
+        .onFailure { openInBrowser(context, url) }
 }
 
 @Composable
@@ -384,9 +399,13 @@ private fun Welcome(
 /** Waits for the browser to come back from mavio.dev; done with null, or with the error. */
 @Composable
 private fun BrowserStep(model: AppModel, signIn: BrowserSignIn, onAgain: () -> Unit, onDone: (String?) -> Unit) {
+    val context = LocalContext.current
+    val redirects = (context.applicationContext as MavioApplication).signInRedirect
     LaunchedEffect(signIn) {
         try {
-            model.finishBrowserSignIn(signIn)
+            val callback = redirects.first { it != null }!!
+            redirects.value = null
+            model.finishAppSignIn(signIn, callback)
             onDone(null)
         } catch (e: CancellationException) {
             throw e

@@ -185,6 +185,7 @@ sequenceDiagram
 * **app.mavio.dev** 是不由服务端提供的 Web 界面，以同样的方式、用 `client_id` `app` 让任意 Mavio 账户登录，没有确认页面，并回到发起登录的页面。
 * **桌面应用**像计算机上的应用那样，通过系统浏览器让任意 Mavio 账户登录（RFC 8252）：它在回环地址上监听，并以其反向 DNS ID 为 `client_id`、以该地址上的重定向 URI、PKCE 质询和设备密钥打开 `/authorize`；页面写明该应用并请账户批准，应用再用收到的授权码换取自己的会话。它也像电视一样提供链接码。
 * **iPhone 与 iPad 应用**以同样方式登录，在 `ASWebAuthenticationSession` 中以其 `client_id` `dev.mavio.ios` 打开 `/authorize`，也提供链接码。
+* **Android 手机与平板应用**在 Auth Tab 中以其 `client_id` `dev.mavio.app` 打开 `/authorize`，重定向 URI 用它自己的私有 scheme `dev.mavio.app:/callback`（RFC 8252 §7.1）；即使应用在后台被 Android 冻结，浏览器也会把它交回应用。它也提供链接码。
 * **电视**用链接码登录（RFC 8628）：`/api/oauth/device` 给它一个代码，电视显示代码并轮询令牌端点，用户在 mavio.dev/link 输入该代码，页面会写明被登录的设备；或扫描该代码的二维码，打开已填好代码的该页面。
 * mavio.dev 不可达时，已打开的会话按服务端同步来的访问记录照常续期；新的登录要等 mavio.dev 恢复。
 * 独立服务端用自己的凭据和 Quick Connect（§4.3）登录，从不联系 mavio.dev。
