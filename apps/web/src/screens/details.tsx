@@ -1176,7 +1176,7 @@ function About({
               serverId={server.id}
               credits={crew}
               more={
-                <Link to="/s/$serverId/item/$itemId/crew" params={{ serverId: server.id, itemId: item.id }} data-focus-beside data-focus-end className={crewMoreClass}>
+                <Link to="/s/$serverId/item/$itemId/crew" params={{ serverId: server.id, itemId: item.id }} data-focus-beside data-focus-end data-focus-block="crew" className={crewMoreClass}>
                   {t("discover.fullCrew")}
                   <Icon name="forward" size={16} />
                 </Link>
@@ -1185,7 +1185,7 @@ function About({
             {tags.length > 0 && (
               <div className="flex flex-col gap-2">
                 <h3 className="type-footnote font-semibold text-text-secondary">{t("item.tags")}</h3>
-                <div className="flex flex-wrap gap-2">
+                <div data-focus-block="tags" className="flex flex-wrap gap-2">
                   {tags.map((tag) => (
                     <Link
                       key={tag}

@@ -136,6 +136,7 @@ function OverviewLeft({ server, title }: { server: ServerEntry; title: Title }) 
             params={{ serverId: server.id, kind: kindParam(title.mediaKind), tmdbId: String(title.tmdbId) }}
             data-focus-beside
             data-focus-end
+            data-focus-block="crew"
             className={crewMoreClass}
           >
             {t("discover.fullCrew")}
@@ -144,7 +145,7 @@ function OverviewLeft({ server, title }: { server: ServerEntry; title: Title }) 
         }
       />
       {keywords.length > 0 && (
-        <ul className="flex flex-wrap gap-2 pt-2">
+        <ul data-focus-block="keywords" className="flex flex-wrap gap-2 pt-2">
           {keywords.map((k) => (
             <li key={k.id || k.name}>
               {k.id ? (
@@ -179,7 +180,7 @@ export function CrewList({ serverId, credits, more }: { serverId: string; credit
   const name = "truncate type-callout text-text-secondary";
   return (
     <>
-      <ul data-focus-beside className="grid grid-cols-2 gap-x-6 gap-y-4 pt-2 sm:grid-cols-3">
+      <ul data-focus-beside data-focus-block="crew" className="grid grid-cols-2 gap-x-6 gap-y-4 pt-2 sm:grid-cols-3">
         {crew.map((c, i) => (
           <li key={`${c.personId ?? c.name}-${i}`} className="flex min-w-0 flex-col">
             <span className="type-headline">{c.kind === CreditKind.OTHER && c.role ? c.role : t(crewLabels.find(([k]) => k === c.kind)![1])}</span>

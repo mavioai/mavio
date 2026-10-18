@@ -163,9 +163,17 @@ function after(a: Element, b: Element): boolean {
 }
 
 /**
+ * Blocks of a column (data-focus-block, named), as the leading crew and the
+ * keywords under them: up and down between two land on the first element
+ * of the row they reach, as across regions of the flow.
+ */
+const blockOf = (el: HTMLElement) => el.closest("[data-focus-block]")?.getAttribute("data-focus-block") ?? undefined;
+
+/**
  * Across a region in the page's flow: from row, the first element in view
- * of what follows it in the page, or the nearest across of the last row of
- * what precedes it; undefined where neither side is such a region.
+ * of what follows it in the page, or of the last row of what precedes it,
+ * in its first column where a region of the flow; the nearest across of
+ * that row where not; undefined where neither side is such a region.
  */
 function acrossFlow(row: Box[], down: boolean, x: number, all: HTMLElement[], tabs?: Element): HTMLElement | undefined {
   const region = regionOf(row[0].el);
@@ -179,8 +187,10 @@ function acrossFlow(row: Box[], down: boolean, x: number, all: HTMLElement[], ta
   const to = regionOf(next);
   if (to === region || !(next.closest(flow) || row[0].el.closest(flow))) return undefined;
   if (down) return endOf(rowsOf(page.filter((el) => columnOf(el) === columnOf(next)))[0], false);
-  const rows = rowsOf(page.filter((el) => regionOf(el) === to));
-  return closestTo(rows[rows.length - 1], x);
+  const into = page.filter((el) => regionOf(el) === to);
+  if (!next.closest(flow)) return closestTo(rowsOf(into).at(-1)!, x);
+  const first = columnOf(into[0]);
+  return endOf(rowsOf(into.filter((el) => columnOf(el) === first)).at(-1)!, false);
 }
 
 /** The chosen element of a choice that focus chooses (data-focus-choice). */
@@ -220,13 +230,17 @@ function step(active: HTMLElement, dir: Direction, all: HTMLElement[], tabs?: El
   const here = row[i].r;
   const x = (here.left + here.right) / 2;
   const inTabs = tabs !== undefined && region === tabs;
-  // The row above or below, past what only a row's last element reaches.
+  // The row above or below, past what only the last element of a row of
+  // its block reaches.
+  const block = blockOf(active);
   const rowAt = (d: 1 | -1) => {
     for (let j = ri + d; rows[j]; j += d) {
-      const r = rows[j].filter((b) => i === row.length - 1 || !b.el.matches(end));
+      const r = rows[j].filter((b) => !b.el.matches(end) || (i === row.length - 1 && blockOf(b.el) === block));
       if (r.length) return r;
     }
   };
+  // Into another block, focus lands on the row's first element.
+  const to = (r: Box[]) => (blockOf(r[0].el) !== block ? endOf(r, false) : closestTo(r, x));
   const previous = rowAt(-1);
   // Below the tabs is the page.
   const below = inTabs ? rowsOf(all.filter((el) => !tabs.contains(el)))[0] : rowAt(1);
@@ -240,11 +254,11 @@ function step(active: HTMLElement, dir: Direction, all: HTMLElement[], tabs?: El
     case "ArrowUp": {
       // A row of the page goes first to a region of the flow between it and the row above.
       const across = inTabs || (inFlow && previous) ? undefined : acrossFlow(row, false, x, all, tabs);
-      return across ?? (previous ? closestTo(previous, x) : above());
+      return across ?? (previous ? to(previous) : above());
     }
     case "ArrowDown": {
       const across = inTabs || (inFlow && below) ? undefined : acrossFlow(row, true, x, all, tabs);
-      return across ?? (below && closestTo(below, x));
+      return across ?? (below && (inTabs ? closestTo(below, x) : to(below)));
     }
     case "ArrowLeft":
     case "ArrowRight": {
