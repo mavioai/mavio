@@ -6,6 +6,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.animation.ContentTransform
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -81,6 +86,22 @@ import dev.mavio.ui.StatusView
 import dev.mavio.ui.Wordmark
 import dev.mavio.ui.text
 import dev.mavio.ui.theme
+
+/** A screen pushed: it slides in from the end over the one before, which moves aside a little. */
+private fun pushTransition(): ContentTransform =
+    slideInHorizontally(tween(PAGE_MILLIS)) { it } togetherWith
+        slideOutHorizontally(tween(PAGE_MILLIS)) { -it / 4 }
+
+/**
+ * Going back: the screen slides out to the end, uncovering the one before,
+ * and follows the finger while the back gesture is under way.
+ */
+private fun popTransition(): ContentTransform =
+    (slideInHorizontally(tween(PAGE_MILLIS)) { -it / 4 } togetherWith
+        slideOutHorizontally(tween(PAGE_MILLIS)) { it }).apply { targetContentZIndex = -1f }
+
+/** How long a screen takes to slide in or out. */
+private const val PAGE_MILLIS = 300
 
 /** A screen of a tab's stack. */
 sealed interface Route {
@@ -172,6 +193,9 @@ private fun Shell(model: AppModel) {
                 modifier = Modifier.fillMaxSize().hazeSource(haze),
                 onBack = { stack.removeLastOrNull() },
                 entryProvider = { route -> NavEntry(route) { Screen(model, it) } },
+                transitionSpec = { pushTransition() },
+                popTransitionSpec = { popTransition() },
+                predictivePopTransitionSpec = { popTransition() },
             )
             // The player takes the whole screen.
             if (stack.lastOrNull() !is Route.Player) {
