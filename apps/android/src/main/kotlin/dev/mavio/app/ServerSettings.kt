@@ -28,6 +28,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -536,6 +537,8 @@ private fun DevicesPage(model: AppModel, serverId: String) {
     var devices by remember { mutableStateOf<List<DeviceSession>?>(null) }
     var failure by remember { mutableStateOf<String?>(null) }
     var busy by remember { mutableStateOf(false) }
+    var controlling by remember { mutableStateOf<String?>(null) }
+    var reload by remember { mutableIntStateOf(0) }
     val scope = rememberCoroutineScope()
     suspend fun load() {
         try {
@@ -547,8 +550,14 @@ private fun DevicesPage(model: AppModel, serverId: String) {
             failure = e.reason
         }
     }
-    LaunchedEffect(serverId) { load() }
+    LaunchedEffect(serverId, reload) { load() }
     val context = LocalContext.current
+    controlling?.let {
+        RemoteSheet(model, serverId, it) {
+            controlling = null
+            reload++
+        }
+    }
     SettingsList(stringResource(R.string.settings_devices), stringResource(R.string.settings_devices_message)) {
         val list = devices
         when {
@@ -577,6 +586,14 @@ private fun DevicesPage(model: AppModel, serverId: String) {
                             if (device.current) {
                                 Text(stringResource(R.string.settings_this_device), style = theme.type.callout.text, color = theme.colors.textSecondary)
                             } else {
+                                if (device.online) {
+                                    Text(
+                                        stringResource(R.string.remote_control),
+                                        Modifier.clickable { controlling = device.id }.padding(vertical = 6.dp),
+                                        style = theme.type.callout.text,
+                                        color = theme.colors.accentText,
+                                    )
+                                }
                                 Text(
                                     stringResource(R.string.auth_sign_out),
                                     Modifier
@@ -609,7 +626,7 @@ private fun DevicesPage(model: AppModel, serverId: String) {
 }
 
 /** A device's name, or its client's when it has none. */
-private fun deviceName(d: DeviceSession): String = d.deviceName.ifEmpty { d.client.ifEmpty { "—" } }
+internal fun deviceName(d: DeviceSession): String = d.deviceName.ifEmpty { d.client.ifEmpty { "—" } }
 
 /** A device's client and what it does: what it plays, online, or when it was last seen. */
 private fun deviceDetail(context: Context, d: DeviceSession): String {
