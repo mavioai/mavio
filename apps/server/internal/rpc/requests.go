@@ -567,15 +567,36 @@ func (s *DiscoverService) Discover(ctx context.Context, req *acquisitionv1.Disco
 	if err != nil {
 		return nil, err
 	}
+	page, err := s.requests.Discover(ctx, p.User, req.GetCatalog(), discoverToPlugin(req))
+	if err != nil {
+		return nil, requestError(ctx, err)
+	}
+	return acquisitionv1.DiscoverResponse_builder{
+		Titles: discoveredToProto(page.Titles), Page: new(int32(page.Page)), TotalPages: new(int32(page.TotalPages)),
+		TotalResults: new(int32(page.TotalResults)), HiddenResults: new(int32(page.Hidden)),
+	}.Build(), nil
+}
+
+// discoverToPlugin converts a Discover request into the plugin's, passing
+// on only the filters the client set: a provider filters by every field
+// present, so a zero maximum would keep only unrated titles.
+func discoverToPlugin(req *acquisitionv1.DiscoverRequest) *pluginv1.DiscoverRequest {
 	pr := pluginv1.DiscoverRequest_builder{
 		MediaKind: new(pluginKinds[req.GetMediaKind()]), Genres: req.GetGenres(), Studios: req.GetStudios(),
 		Networks: req.GetNetworks(), Keywords: req.GetKeywords(), ExcludedKeywords: req.GetExcludedKeywords(),
-		WatchProviders: req.GetWatchProviders(), WatchRegion: new(req.GetWatchRegion()),
-		OriginalLanguage: new(req.GetOriginalLanguage()), ReleasedFrom: new(req.GetReleasedFrom()),
-		ReleasedTo: new(req.GetReleasedTo()), RuntimeMin: new(req.GetRuntimeMin()), RuntimeMax: new(req.GetRuntimeMax()),
-		RatingMin: new(req.GetRatingMin()), RatingMax: new(req.GetRatingMax()), VotesMin: new(req.GetVotesMin()),
-		Certifications: req.GetCertifications(), Sort: new(req.GetSort()), Ascending: new(req.GetAscending()),
-		Language: new(req.GetLanguage()),
+		WatchProviders: req.GetWatchProviders(), Certifications: req.GetCertifications(),
+		WatchRegion:      ifSet(req.HasWatchRegion(), req.GetWatchRegion()),
+		OriginalLanguage: ifSet(req.HasOriginalLanguage(), req.GetOriginalLanguage()),
+		ReleasedFrom:     ifSet(req.HasReleasedFrom(), req.GetReleasedFrom()),
+		ReleasedTo:       ifSet(req.HasReleasedTo(), req.GetReleasedTo()),
+		RuntimeMin:       ifSet(req.HasRuntimeMin(), req.GetRuntimeMin()),
+		RuntimeMax:       ifSet(req.HasRuntimeMax(), req.GetRuntimeMax()),
+		RatingMin:        ifSet(req.HasRatingMin(), req.GetRatingMin()),
+		RatingMax:        ifSet(req.HasRatingMax(), req.GetRatingMax()),
+		VotesMin:         ifSet(req.HasVotesMin(), req.GetVotesMin()),
+		Sort:             ifSet(req.HasSort(), req.GetSort()),
+		Ascending:        ifSet(req.HasAscending(), req.GetAscending()),
+		Language:         ifSet(req.HasLanguage(), req.GetLanguage()),
 	}
 	if req.GetTmdbId() > 0 {
 		pr.ExternalIds = map[string]string{string(core.ProviderTMDB): strconv.Itoa(int(req.GetTmdbId()))}
@@ -589,14 +610,15 @@ func (s *DiscoverService) Discover(ctx context.Context, req *acquisitionv1.Disco
 	if req.GetPage() > 0 {
 		pr.Page = new(req.GetPage())
 	}
-	page, err := s.requests.Discover(ctx, p.User, req.GetCatalog(), pr.Build())
-	if err != nil {
-		return nil, requestError(ctx, err)
+	return pr.Build()
+}
+
+// ifSet is v when a field is set, else nil.
+func ifSet[T any](set bool, v T) *T {
+	if !set {
+		return nil
 	}
-	return acquisitionv1.DiscoverResponse_builder{
-		Titles: discoveredToProto(page.Titles), Page: new(int32(page.Page)), TotalPages: new(int32(page.TotalPages)),
-		TotalResults: new(int32(page.TotalResults)), HiddenResults: new(int32(page.Hidden)),
-	}.Build(), nil
+	return &v
 }
 
 // discoveredToProto converts discovered titles.

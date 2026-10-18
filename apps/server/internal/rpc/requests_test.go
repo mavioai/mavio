@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"connectrpc.com/connect"
+	"google.golang.org/protobuf/proto"
 
 	"github.com/mavioai/mavio/apps/server/internal/activity"
 	"github.com/mavioai/mavio/apps/server/internal/auth"
@@ -411,5 +412,55 @@ func TestPolicyRequestPermissions(t *testing.T) {
 	back := userToProto(&u, nil).GetPolicy()
 	if !back.GetRequestMovies() || back.GetRequestSeries() || back.GetMovieQuota().GetLimit() != 2 || back.HasSeriesQuota() {
 		t.Errorf("userToProto() policy = %v", back)
+	}
+}
+
+func TestDiscoverToPlugin(t *testing.T) {
+	tests := []struct {
+		name string
+		req  *acquisitionv1.DiscoverRequest
+		want *pluginv1.DiscoverRequest
+	}{
+		{
+			name: "no filters",
+			req:  acquisitionv1.DiscoverRequest_builder{Catalog: new("popular")}.Build(),
+			want: pluginv1.DiscoverRequest_builder{MediaKind: new(pluginv1.MediaKind_MEDIA_KIND_UNSPECIFIED)}.Build(),
+		},
+		{
+			name: "zero values set",
+			req: acquisitionv1.DiscoverRequest_builder{
+				Catalog: new("popular"), RatingMin: new(0.0), RuntimeMax: new(int32(0)), Ascending: new(false),
+			}.Build(),
+			want: pluginv1.DiscoverRequest_builder{
+				MediaKind: new(pluginv1.MediaKind_MEDIA_KIND_UNSPECIFIED), RatingMin: new(0.0), RuntimeMax: new(int32(0)),
+				Ascending: new(false),
+			}.Build(),
+		},
+		{
+			name: "filters",
+			req: acquisitionv1.DiscoverRequest_builder{
+				Catalog: new("popular"), MediaKind: new(acquisitionv1.MediaKind_MEDIA_KIND_MOVIE), Genres: []string{"18"},
+				WatchRegion: new("US"), OriginalLanguage: new("ja"), ReleasedFrom: new("2020-01-01"),
+				ReleasedTo: new("2020-12-31"), RuntimeMin: new(int32(60)), RuntimeMax: new(int32(120)),
+				RatingMin: new(7.0), RatingMax: new(9.5), VotesMin: new(int32(100)), Certifications: []string{"PG"},
+				Sort: new(pluginv1.DiscoverSort_DISCOVER_SORT_RATING), Ascending: new(true), Language: new("en"),
+				Page: new(int32(2)), TmdbId: new(int32(11)), TmdbCollectionId: new(int32(10)),
+			}.Build(),
+			want: pluginv1.DiscoverRequest_builder{
+				MediaKind: new(pluginv1.MediaKind_MEDIA_KIND_MOVIE), Genres: []string{"18"},
+				WatchRegion: new("US"), OriginalLanguage: new("ja"), ReleasedFrom: new("2020-01-01"),
+				ReleasedTo: new("2020-12-31"), RuntimeMin: new(int32(60)), RuntimeMax: new(int32(120)),
+				RatingMin: new(7.0), RatingMax: new(9.5), VotesMin: new(int32(100)), Certifications: []string{"PG"},
+				Sort: new(pluginv1.DiscoverSort_DISCOVER_SORT_RATING), Ascending: new(true), Language: new("en"),
+				Page: new(int32(2)), ExternalIds: map[string]string{"tmdb": "11", "tmdb_collection": "10"},
+			}.Build(),
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := discoverToPlugin(tt.req); !proto.Equal(got, tt.want) {
+				t.Errorf("discoverToPlugin() = %v, want = %v", got, tt.want)
+			}
+		})
 	}
 }
