@@ -105,12 +105,14 @@ fun SettingsScreen(model: AppModel) {
     val navigator = LocalNavigator.current
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
+    val standalone = servers.firstOrNull()?.takeIf { signedInAccount(model) == null }
     SettingsList(stringResource(R.string.nav_settings), large = true) {
         item {
             Group {
                 AccountCard(model, Modifier.clickable { navigator.open(Route.Setting(SettingsPage.Account)) })
             }
         }
+        standalone?.let { server -> item { SwitchUserGroup(model, server) } }
         item {
             Group(stringResource(R.string.settings_this_device)) {
                 EntryRow(stringResource(R.string.settings_appearance), R.drawable.ic_appearance_fill, Color(0xFF5E5CE6)) {
@@ -219,6 +221,8 @@ private fun AccountPage(model: AppModel) {
                     NameRow(server.userName)
                 }
             }
+            item { SwitchUserGroup(model, server) }
+            item { SecurityGroups(model, server) }
         }
         item {
             Group(

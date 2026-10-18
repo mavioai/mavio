@@ -119,6 +119,13 @@ class AppModel(context: Context, clientName: String) {
         refreshHome()
     }
 
+    /** Switches a server's session to another of its users, with its PIN when it has one. */
+    suspend fun switchUser(serverId: String, userId: String, pin: String?) {
+        client.switchUser(serverId, userId, pin)
+        reloadServers()
+        bump(serverId)
+    }
+
     /** Signs in to the server at address with a name and password. */
     suspend fun signIn(address: String, name: String, password: String): ServerRecord =
         client.signIn(address, name, password).also { added() }
