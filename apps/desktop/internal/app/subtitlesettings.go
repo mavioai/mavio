@@ -173,9 +173,9 @@ func textBlock(g *settingsGroup, label, detail string, value string, height floa
 	colors := style.Colors(c)
 	g.divider()
 	ui.Column(c.Key(label)).Padding(10, 16).Gap(6).Children(func() {
-		style.Text(ui.Text(c, label), style.Type.Body).TextColor(style.Color(colors.TextPrimary))
+		style.Text(ui.Text(c, label), style.Type(c).Body).TextColor(style.Color(colors.TextPrimary))
 		if detail != "" {
-			style.Text(ui.Text(c, detail), style.Type.Footnote).TextColor(style.Color(colors.TextSecondary)).Selectable()
+			style.Text(ui.Text(c, detail), style.Type(c).Footnote).TextColor(style.Color(colors.TextSecondary)).Selectable()
 		}
 		if ui.TextArea(c, &value).FillWidth().Height(height).Font("SF Mono, Menlo, monospace").Label(label).Changed() {
 			set(value)

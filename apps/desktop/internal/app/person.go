@@ -72,9 +72,9 @@ func (a *App) person(c *ui.Context, r *ui.Route, server, id string) {
 			a.personTitles(c, style.T(c, "person.episodes"), of(capiv1.CardKind_CARD_KIND_EPISODE), true)
 			switch {
 			case cards.err != nil:
-				style.Text(ui.Text(c, errorMessage(c, cards.err)), style.Type.Body).TextColor(style.Color(colors.Danger)).Margin(0, style.Layout.Margin)
+				style.Text(ui.Text(c, errorMessage(c, cards.err)), style.Type(c).Body).TextColor(style.Color(colors.Danger)).Margin(0, style.Layout(c).Margin)
 			case cards.loaded && len(cards.value) == 0:
-				style.Text(ui.Text(c, style.T(c, "person.none")), style.Type.Body).TextColor(style.Color(colors.TextSecondary)).Margin(0, style.Layout.Margin)
+				style.Text(ui.Text(c, style.T(c, "person.none")), style.Type(c).Body).TextColor(style.Color(colors.TextSecondary)).Margin(0, style.Layout(c).Margin)
 			}
 		})
 	})
@@ -92,7 +92,7 @@ func yearsBetween(from, to time.Time) int {
 func (a *App) personHeader(c *ui.Context, st *personState, server string, p *libraryv1.Person) {
 	colors := style.Colors(c)
 	const w = 208
-	ui.Row(c).Padding(a.pageTop(c), style.Layout.Margin, 0).Gap(24).AlignItems(ui.Start).Wrap().Children(func() {
+	ui.Row(c).Padding(a.pageTop(c), style.Layout(c).Margin, 0).Gap(24).AlignItems(ui.Start).Wrap().Children(func() {
 		ui.Box(c).Size(w, w*1.5).Shrink(0).Radius(14).Clip().Background(style.Color(colors.Fill)).Center().Children(func() {
 			if bitmap := a.opts.Images.Get(a.imageOf(server, p.GetImages(), libraryv1.ImageKind_IMAGE_KIND_PRIMARY).GetUrl(), w, scale); bitmap != nil {
 				ui.Image(c, bitmap).Fill().Fit(ui.Cover)
@@ -101,7 +101,7 @@ func (a *App) personHeader(c *ui.Context, st *personState, server string, p *lib
 			}
 		})
 		ui.Column(c).Basis(320).Grow(1).MaxWidth(768).Gap(12).Children(func() {
-			style.Text(ui.Text(c, p.GetName()), style.Type.Title1).TextColor(style.Color(colors.TextPrimary)).Selectable()
+			style.Text(ui.Text(c, p.GetName()), style.Type(c).Title1).TextColor(style.Color(colors.TextPrimary)).Selectable()
 			var facts []string
 			if p.HasBirthDate() {
 				born := p.GetBirthDate().AsTime()
@@ -118,11 +118,11 @@ func (a *App) personHeader(c *ui.Context, st *personState, server string, p *lib
 				facts = append(facts, style.T(c, "person.died", "date", longDate(p.GetDeathDate().AsTime())))
 			}
 			for _, f := range facts {
-				style.Text(ui.Text(c, f), style.Type.Callout).TextColor(style.Color(colors.TextSecondary))
+				style.Text(ui.Text(c, f), style.Type(c).Callout).TextColor(style.Color(colors.TextSecondary))
 			}
 			if bio := p.GetOverview(); bio != "" {
 				ui.Column(c).Gap(4).AlignItems(ui.Start).Children(func() {
-					text := style.Text(ui.Text(c, bio), style.Type.Body).TextColor(style.Color(colors.TextPrimary)).Selectable()
+					text := style.Text(ui.Text(c, bio), style.Type(c).Body).TextColor(style.Color(colors.TextPrimary)).Selectable()
 					if !st.more {
 						text.MaxLines(5)
 					}
@@ -144,7 +144,7 @@ func (a *App) personHeader(c *ui.Context, st *personState, server string, p *lib
 							b.Background(style.Color(colors.FillSelected))
 						}
 						b.Children(func() {
-							style.Text(ui.Text(c, l.GetName()), style.Type.Footnote).FontWeight(600).TextColor(style.Color(colors.TextPrimary))
+							style.Text(ui.Text(c, l.GetName()), style.Type(c).Footnote).FontWeight(600).TextColor(style.Color(colors.TextPrimary))
 							ui.Icon(c, style.Icon("external", false)).Size(14, 14).TextColor(style.Color(colors.TextSecondary))
 						})
 						if b.Clicked() {
@@ -162,7 +162,7 @@ func linkButton(c *ui.Context, label string) ui.Element {
 	colors := style.Colors(c)
 	b := ui.ButtonBase(c).Label(label)
 	b.Children(func() {
-		t := style.Text(ui.Text(c, label), style.Type.Callout).FontWeight(600).TextColor(style.Color(colors.AccentText))
+		t := style.Text(ui.Text(c, label), style.Type(c).Callout).FontWeight(600).TextColor(style.Color(colors.AccentText))
 		if b.Hovered() {
 			t.Underline()
 		}
@@ -182,11 +182,11 @@ func (a *App) personTitles(c *ui.Context, title string, cards []*capiv1.Card, th
 		width, _ = a.thumbColumns(c)
 	}
 	ui.Column(c).Gap(12).Children(func() {
-		ui.Row(c).Padding(0, style.Layout.Margin).Gap(8).AlignItems(ui.End).Children(func() {
-			style.Text(ui.Text(c, title), style.Type.Title3).TextColor(style.Color(colors.TextPrimary))
-			style.Text(ui.Text(c, fmt.Sprint(len(cards))), style.Type.Callout).TextColor(style.Color(colors.TextSecondary))
+		ui.Row(c).Padding(0, style.Layout(c).Margin).Gap(8).AlignItems(ui.End).Children(func() {
+			style.Text(ui.Text(c, title), style.Type(c).Title3).TextColor(style.Color(colors.TextPrimary))
+			style.Text(ui.Text(c, fmt.Sprint(len(cards))), style.Type(c).Callout).TextColor(style.Color(colors.TextSecondary))
 		})
-		ui.Row(c).Padding(0, style.Layout.Margin).Gap(style.Layout.Gutter).Wrap().Children(func() {
+		ui.Row(c).Padding(0, style.Layout(c).Margin).Gap(style.Layout(c).Gutter).Wrap().Children(func() {
 			for _, card := range cards {
 				if thumb {
 					a.thumbCard(c, card, width)
@@ -201,9 +201,9 @@ func (a *App) personTitles(c *ui.Context, title string, cards []*capiv1.Card, th
 // thumbColumns returns the width of the thumbnail cards of a grid filling
 // the page, and how many there are.
 func (a *App) thumbColumns(c *ui.Context) (float32, int) {
-	avail := a.contentWidth - 2*style.Layout.Margin
-	gap := style.Layout.Gutter
-	cols := max(int((avail+gap)/(style.Layout.Thumbnail+gap)), 1)
+	avail := a.contentWidth - 2*style.Layout(c).Margin
+	gap := style.Layout(c).Gutter
+	cols := max(int((avail+gap)/(style.Layout(c).Thumbnail+gap)), 1)
 	return (avail - gap*float32(cols-1)) / float32(cols), cols
 }
 

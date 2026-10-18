@@ -181,12 +181,12 @@ func (a *App) wantedRow(g *settingsGroup, id string, movie bool, label, detail s
 	g.divider()
 	ui.Row(c.Key(id)).MinHeight(52).Padding(10, 16).Gap(12).AlignItems(ui.Center).Children(func() {
 		ui.Column(c).Grow(1).MinWidth(0).Children(func() {
-			a.itemLink(c, id, label, style.Type.Body)
+			a.itemLink(c, id, label, style.Type(c).Body)
 			if detail != "" {
-				style.Text(ui.Text(c, detail), style.Type.Footnote).TextColor(style.Color(colors.TextSecondary))
+				style.Text(ui.Text(c, detail), style.Type(c).Footnote).TextColor(style.Color(colors.TextSecondary))
 			}
 			if err := st.errs[id]; err != nil {
-				style.Text(ui.Text(c, errorMessage(c, err)), style.Type.Footnote).TextColor(style.Color(colors.Danger))
+				style.Text(ui.Text(c, errorMessage(c, err)), style.Type(c).Footnote).TextColor(style.Color(colors.Danger))
 			}
 		})
 		act := func(what string, fn func(ctx context.Context, w acquisitionv1connect.WantedServiceClient) error) {

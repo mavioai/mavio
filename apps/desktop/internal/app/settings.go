@@ -232,7 +232,7 @@ func (a *App) settingsSidebar(c *ui.Context, current string) {
 			home := ui.ButtonBase(c).AlignSelf(ui.Start).Gap(4).AlignItems(ui.Center).Label(style.T(c, "nav.home"))
 			home.Children(func() {
 				ui.Icon(c, style.Icon("back", false)).Size(18, 18).TextColor(style.Color(colors.AccentText))
-				t := style.Text(ui.Text(c, style.T(c, "nav.home")), style.Type.Body).TextColor(style.Color(colors.AccentText))
+				t := style.Text(ui.Text(c, style.T(c, "nav.home")), style.Type(c).Body).TextColor(style.Color(colors.AccentText))
 				if home.Hovered() {
 					t.Underline()
 				}
@@ -240,7 +240,7 @@ func (a *App) settingsSidebar(c *ui.Context, current string) {
 			if home.Clicked() {
 				a.router.Push("/home")
 			}
-			style.Text(ui.Text(c, style.T(c, "nav.settings")), style.Type.Title1).TextColor(style.Color(colors.TextPrimary)).Padding(0, 4)
+			style.Text(ui.Text(c, style.T(c, "nav.settings")), style.Type(c).Title1).TextColor(style.Color(colors.TextPrimary)).Padding(0, 4)
 			a.accountCard(c, current == "account")
 			server := a.chosenServer()
 			for _, g := range settingsGroups {
@@ -248,7 +248,7 @@ func (a *App) settingsSidebar(c *ui.Context, current string) {
 					continue
 				}
 				ui.Column(c.Key(g.title)).Gap(2).Children(func() {
-					style.Text(ui.Text(c, style.T(c, g.title)), style.Type.Caption).FontWeight(600).TextColor(style.Color(colors.TextTertiary)).Padding(0, 8, 4)
+					style.Text(ui.Text(c, style.T(c, g.title)), style.Type(c).Caption).FontWeight(600).TextColor(style.Color(colors.TextTertiary)).Padding(0, 8, 4)
 					if g.server && a.account != nil && len(a.servers) > 1 {
 						a.serverChoice(c)
 					}
@@ -304,7 +304,7 @@ func (a *App) sidebarLink(c *ui.Context, s settingsSection, selected bool) {
 	}
 	b.Children(func() {
 		sectionTile(c, s.icon, s.color)
-		style.Text(ui.Text(c, style.T(c, s.title)), style.Type.Body).TextColor(style.Color(colors.TextPrimary)).SingleLine().Grow(1)
+		style.Text(ui.Text(c, style.T(c, s.title)), style.Type(c).Body).TextColor(style.Color(colors.TextPrimary)).SingleLine().Grow(1)
 	})
 	if b.Clicked() && !selected {
 		a.replace("/settings/" + s.id)
@@ -332,7 +332,7 @@ func (a *App) sidebarMenu(c *ui.Context, m settingsMenu, current string) {
 		}
 		b.Children(func() {
 			sectionTile(c, m.icon, m.color)
-			style.Text(ui.Text(c, style.T(c, m.title)), style.Type.Body).TextColor(style.Color(colors.TextPrimary)).SingleLine().Grow(1)
+			style.Text(ui.Text(c, style.T(c, m.title)), style.Type(c).Body).TextColor(style.Color(colors.TextPrimary)).SingleLine().Grow(1)
 			chevron := ui.Icon(c, style.Icon("expand", false)).Size(16, 16).TextColor(style.Color(colors.TextTertiary))
 			if !open {
 				chevron.Rotate(-90)
@@ -403,8 +403,8 @@ func (a *App) accountCard(c *ui.Context, active bool) {
 	b.Children(func() {
 		avatar(c, name, 44)
 		ui.Column(c).MinWidth(0).Grow(1).Children(func() {
-			style.Text(ui.Text(c, name), style.Type.Headline).TextColor(style.Color(colors.TextPrimary)).SingleLine()
-			style.Text(ui.Text(c, line), style.Type.Footnote).TextColor(style.Color(colors.TextSecondary)).SingleLine()
+			style.Text(ui.Text(c, name), style.Type(c).Headline).TextColor(style.Color(colors.TextPrimary)).SingleLine()
+			style.Text(ui.Text(c, line), style.Type(c).Footnote).TextColor(style.Color(colors.TextSecondary)).SingleLine()
 		})
 	})
 	if b.Clicked() && !active {
@@ -462,9 +462,9 @@ func (a *App) settingsSection(c *ui.Context, r *ui.Route, id string) {
 func sectionHeader(c *ui.Context, title, message string) {
 	colors := style.Colors(c)
 	ui.Column(c).Gap(4).Children(func() {
-		style.Text(ui.Text(c, title), style.Type.Title1).TextColor(style.Color(colors.TextPrimary))
+		style.Text(ui.Text(c, title), style.Type(c).Title1).TextColor(style.Color(colors.TextPrimary))
 		if message != "" {
-			style.Text(ui.Text(c, message), style.Type.Body).TextColor(style.Color(colors.TextSecondary))
+			style.Text(ui.Text(c, message), style.Type(c).Body).TextColor(style.Color(colors.TextSecondary))
 		}
 	})
 }
@@ -488,7 +488,7 @@ func groupWith(c *ui.Context, key, title string, control func(), footer string, 
 	ui.Column(c.Key(key)).Gap(8).Children(func() {
 		if title != "" || control != nil {
 			ui.Row(c).Gap(12).AlignItems(ui.Center).Padding(0, 4).Children(func() {
-				style.Text(ui.Text(c, title), style.Type.Headline).TextColor(style.Color(colors.TextPrimary)).Grow(1)
+				style.Text(ui.Text(c, title), style.Type(c).Headline).TextColor(style.Color(colors.TextPrimary)).Grow(1)
 				if control != nil {
 					control()
 				}
@@ -498,7 +498,7 @@ func groupWith(c *ui.Context, key, title string, control func(), footer string, 
 			fn(&settingsGroup{c: c})
 		})
 		if footer != "" {
-			style.Text(ui.Text(c, footer), style.Type.Footnote).TextColor(style.Color(colors.TextSecondary)).Padding(0, 4)
+			style.Text(ui.Text(c, footer), style.Type(c).Footnote).TextColor(style.Color(colors.TextSecondary)).Padding(0, 4)
 		}
 	})
 }
@@ -522,9 +522,9 @@ func (g *settingsGroup) row(label, detail string, leading, control func()) {
 			leading()
 		}
 		ui.Column(c).Grow(1).MinWidth(0).Children(func() {
-			style.Text(ui.Text(c, label), style.Type.Body).TextColor(style.Color(colors.TextPrimary))
+			style.Text(ui.Text(c, label), style.Type(c).Body).TextColor(style.Color(colors.TextPrimary))
 			if detail != "" {
-				style.Text(ui.Text(c, detail), style.Type.Footnote).TextColor(style.Color(colors.TextSecondary)).Selectable()
+				style.Text(ui.Text(c, detail), style.Type(c).Footnote).TextColor(style.Color(colors.TextSecondary)).Selectable()
 			}
 		})
 		if control != nil {
@@ -543,9 +543,9 @@ func (g *settingsGroup) switchRow(label, detail string, on *bool) bool {
 	b := ui.ButtonBase(c.Key(g.rows)).MinHeight(52).Padding(10, 16).Gap(12).AlignItems(ui.Center).Label(label)
 	b.Children(func() {
 		ui.Column(c).Grow(1).MinWidth(0).Children(func() {
-			style.Text(ui.Text(c, label), style.Type.Body).TextColor(style.Color(colors.TextPrimary))
+			style.Text(ui.Text(c, label), style.Type(c).Body).TextColor(style.Color(colors.TextPrimary))
 			if detail != "" {
-				style.Text(ui.Text(c, detail), style.Type.Footnote).TextColor(style.Color(colors.TextSecondary))
+				style.Text(ui.Text(c, detail), style.Type(c).Footnote).TextColor(style.Color(colors.TextSecondary))
 			}
 		})
 		changed = ui.Switch(c, on).Label(label).Changed()
@@ -572,9 +572,9 @@ func (g *settingsGroup) link(key, icon string, color ui.Color, label, detail str
 			sectionTile(c, icon, color)
 		}
 		ui.Column(c).Grow(1).MinWidth(0).Children(func() {
-			style.Text(ui.Text(c, label), style.Type.Body).TextColor(style.Color(colors.TextPrimary)).MaxLines(1)
+			style.Text(ui.Text(c, label), style.Type(c).Body).TextColor(style.Color(colors.TextPrimary)).MaxLines(1)
 			if detail != "" {
-				style.Text(ui.Text(c, detail), style.Type.Footnote).TextColor(style.Color(colors.TextSecondary))
+				style.Text(ui.Text(c, detail), style.Type(c).Footnote).TextColor(style.Color(colors.TextSecondary))
 			}
 		})
 		if opens {
@@ -620,7 +620,7 @@ func (a *App) appearanceSection(c *ui.Context) {
 			b := ui.ButtonBase(c.Key(th.key)).Basis(0).Grow(1).Column().Gap(8).AlignItems(ui.Center).Label(style.T(c, th.key))
 			b.Children(func() {
 				themePreview(c, th.appearance, on || b.Hovered())
-				t := style.Text(ui.Text(c, style.T(c, th.key)), style.Type.Callout)
+				t := style.Text(ui.Text(c, style.T(c, th.key)), style.Type(c).Callout)
 				if on {
 					t.FontWeight(600).TextColor(style.Color(colors.TextPrimary))
 				} else {
@@ -799,7 +799,7 @@ func (a *App) languagesSection(c *ui.Context) {
 	colors := style.Colors(c)
 	field := func(label string, value *string) {
 		ui.Column(c.Key(label)).Gap(6).Children(func() {
-			style.Text(ui.Text(c, label), style.Type.Callout).TextColor(style.Color(colors.TextSecondary))
+			style.Text(ui.Text(c, label), style.Type(c).Callout).TextColor(style.Color(colors.TextSecondary))
 			ui.TextInput(c, value).Placeholder("chi, eng").Label(label)
 		})
 	}
@@ -855,7 +855,7 @@ func (a *App) languagesSection(c *ui.Context) {
 			}()
 		}
 		if f.err != nil {
-			style.Text(ui.Text(c, errorMessage(c, f.err)), style.Type.Callout).TextColor(style.Color(colors.Danger))
+			style.Text(ui.Text(c, errorMessage(c, f.err)), style.Type(c).Callout).TextColor(style.Color(colors.Danger))
 		}
 	})
 }
@@ -880,7 +880,7 @@ func (a *App) accountSection(c *ui.Context) {
 				}
 				b := ui.ButtonBase(c).Gap(6).AlignItems(ui.Center).Label(style.T(c, "settings.manageAtMavio"))
 				b.Children(func() {
-					t := style.Text(ui.Text(c, style.T(c, "settings.manageAtMavio")), style.Type.Body).TextColor(style.Color(colors.AccentText))
+					t := style.Text(ui.Text(c, style.T(c, "settings.manageAtMavio")), style.Type(c).Body).TextColor(style.Color(colors.AccentText))
 					if b.Hovered() {
 						t.Underline()
 					}
@@ -908,7 +908,7 @@ func (a *App) authorizeDevice(c *ui.Context, server string) {
 		g.block(func() {
 			ui.Row(c).Gap(12).AlignItems(ui.End).Wrap().Children(func() {
 				ui.Column(c).Width(160).Gap(6).Children(func() {
-					style.Text(ui.Text(c, style.T(c, "auth.quickConnect")), style.Type.Callout).TextColor(style.Color(colors.TextSecondary))
+					style.Text(ui.Text(c, style.T(c, "auth.quickConnect")), style.Type(c).Callout).TextColor(style.Color(colors.TextSecondary))
 					in := ui.TextInput(c, &st.code).Placeholder("000000").Label(style.T(c, "auth.quickConnect"))
 					if in.Changed() {
 						digits := strings.Map(func(r rune) rune {
@@ -940,9 +940,9 @@ func (a *App) authorizeDevice(c *ui.Context, server string) {
 			})
 			switch {
 			case st.authorize.done:
-				style.Text(ui.Text(c, style.T(c, "auth.authorized")), style.Type.Callout).TextColor(style.Color(colors.TextSecondary))
+				style.Text(ui.Text(c, style.T(c, "auth.authorized")), style.Type(c).Callout).TextColor(style.Color(colors.TextSecondary))
 			case st.authorize.err != nil:
-				style.Text(ui.Text(c, errorMessage(c, st.authorize.err)), style.Type.Callout).TextColor(style.Color(colors.Danger))
+				style.Text(ui.Text(c, errorMessage(c, st.authorize.err)), style.Type(c).Callout).TextColor(style.Color(colors.Danger))
 			}
 		})
 	})
@@ -978,7 +978,7 @@ func (a *App) serversGroup(c *ui.Context) {
 			detail := style.T(c, "auth.signedInAs", "name", s.GetUserName()) + " · " + s.GetAddress()
 			leading := func() {
 				ui.Box(c).Size(36, 36).Shrink(0).Radius(9).Background(style.Color(colors.Fill)).Center().Children(func() {
-					style.Text(ui.Text(c, initials(s.GetName())[:min(len(initials(s.GetName())), 1)]), style.Type.Headline).TextColor(style.Color(colors.TextPrimary))
+					style.Text(ui.Text(c, initials(s.GetName())[:min(len(initials(s.GetName())), 1)]), style.Type(c).Headline).TextColor(style.Color(colors.TextPrimary))
 				})
 			}
 			g.row(s.GetName(), detail, leading, func() {
@@ -1006,7 +1006,7 @@ func (a *App) serversGroup(c *ui.Context) {
 		}
 	})
 	if st.err != nil {
-		style.Text(ui.Text(c, errorMessage(c, st.err)), style.Type.Callout).TextColor(style.Color(colors.Danger))
+		style.Text(ui.Text(c, errorMessage(c, st.err)), style.Type(c).Callout).TextColor(style.Color(colors.Danger))
 	}
 }
 
@@ -1050,7 +1050,7 @@ func (a *App) devicesSection(c *ui.Context) {
 			}
 			g.row(name, strings.Join(detail, " · "), leading, func() {
 				if s.GetCurrent() {
-					style.Text(ui.Text(c, style.T(c, "settings.thisDevice")), style.Type.Callout).TextColor(style.Color(colors.TextSecondary))
+					style.Text(ui.Text(c, style.T(c, "settings.thisDevice")), style.Type(c).Callout).TextColor(style.Color(colors.TextSecondary))
 					return
 				}
 				if s.GetPluginId() != "" {
@@ -1061,7 +1061,7 @@ func (a *App) devicesSection(c *ui.Context) {
 					b.Background(style.Color(colors.Fill))
 				}
 				b.Children(func() {
-					style.Text(ui.Text(c, style.T(c, "auth.signOut")), style.Type.Body).TextColor(style.Color(colors.Danger))
+					style.Text(ui.Text(c, style.T(c, "auth.signOut")), style.Type(c).Body).TextColor(style.Color(colors.Danger))
 				})
 				if b.Clicked() && st.revoking == "" {
 					st.revoking, st.err = s.GetId(), nil
@@ -1078,7 +1078,7 @@ func (a *App) devicesSection(c *ui.Context) {
 		}
 	})
 	if st.err != nil {
-		style.Text(ui.Text(c, errorMessage(c, st.err)), style.Type.Callout).TextColor(style.Color(colors.Danger))
+		style.Text(ui.Text(c, errorMessage(c, st.err)), style.Type(c).Callout).TextColor(style.Color(colors.Danger))
 	}
 }
 

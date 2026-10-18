@@ -238,7 +238,7 @@ func (a *App) toggleChip(c *ui.Context, label, image string, on bool) bool {
 		if on {
 			tc = style.Color(colors.OnAccent)
 		}
-		style.Text(ui.Text(c, label), style.Type.Footnote).FontWeight(600).TextColor(tc)
+		style.Text(ui.Text(c, label), style.Type(c).Footnote).FontWeight(600).TextColor(tc)
 		if on && image == "" {
 			ui.Icon(c, style.Icon("close", false)).Size(14, 14).TextColor(tc)
 		}
@@ -250,7 +250,7 @@ func (a *App) toggleChip(c *ui.Context, label, image string, on bool) bool {
 func filterSection(c *ui.Context, title string, fn func()) {
 	colors := style.Colors(c)
 	ui.Column(c.Key(title)).Gap(8).Children(func() {
-		style.Text(ui.Text(c, title), style.Type.Headline).TextColor(style.Color(colors.TextPrimary))
+		style.Text(ui.Text(c, title), style.Type(c).Headline).TextColor(style.Color(colors.TextPrimary))
 		fn()
 	})
 }
@@ -271,7 +271,7 @@ func (a *App) filtersDialog(c *ui.Context, server string, cat *acquisitionv1.Cat
 	colors := style.Colors(c)
 	ui.Modal(c, &st.open, func() {
 		ui.Column(c).Width(640).MaxHeight(720).Gap(16).Children(func() {
-			style.Text(ui.Text(c, style.T(c, "discover.filters")), style.Type.Title3).TextColor(style.Color(colors.TextPrimary))
+			style.Text(ui.Text(c, style.T(c, "discover.filters")), style.Type(c).Title3).TextColor(style.Color(colors.TextPrimary))
 			ui.Scroll(c).Grow(1).Shrink(1).Children(func() {
 				ui.Column(c).Gap(20).Padding(0, 4, 0, 0).Children(func() {
 					if sorts := cat.GetSorts(); len(sorts) > 0 {
@@ -420,7 +420,7 @@ func (a *App) numberRange(c *ui.Context, fromName, toName string, from, to *int3
 	colors := style.Colors(c)
 	ui.Row(c).Gap(8).AlignItems(ui.Center).Children(func() {
 		a.numberField(c, fromName, style.T(c, "discover.from"), from, most)
-		style.Text(ui.Text(c, "–"), style.Type.Body).TextColor(style.Color(colors.TextSecondary))
+		style.Text(ui.Text(c, "–"), style.Type(c).Body).TextColor(style.Color(colors.TextSecondary))
 		a.numberField(c, toName, style.T(c, "discover.to"), to, most)
 	})
 }

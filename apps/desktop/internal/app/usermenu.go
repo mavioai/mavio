@@ -35,8 +35,8 @@ func (a *App) userButton(c *ui.Context, withName bool) {
 		}
 		avatar(c, name, 32)
 		ui.Column(c).Grow(1).MinWidth(0).Children(func() {
-			style.Text(ui.Text(c, name), style.Type.Callout).FontWeight(600).TextColor(style.Color(colors.TextPrimary)).SingleLine()
-			style.Text(ui.Text(c, line), style.Type.Caption).TextColor(style.Color(colors.TextSecondary)).SingleLine()
+			style.Text(ui.Text(c, name), style.Type(c).Callout).FontWeight(600).TextColor(style.Color(colors.TextPrimary)).SingleLine()
+			style.Text(ui.Text(c, line), style.Type(c).Caption).TextColor(style.Color(colors.TextSecondary)).SingleLine()
 		})
 		ui.Icon(c, style.Icon("selector", false)).Size(16, 16).Shrink(0).TextColor(style.Color(colors.TextTertiary))
 	})
@@ -68,8 +68,8 @@ func (a *App) userMenu(c *ui.Context, panel ui.Element) {
 		ui.Row(c).Padding(8, 10).Gap(12).AlignItems(ui.Center).Children(func() {
 			avatar(c, name, 36)
 			ui.Column(c).Grow(1).MinWidth(0).Children(func() {
-				style.Text(ui.Text(c, name), style.Type.Headline).TextColor(style.Color(colors.TextPrimary)).SingleLine()
-				style.Text(ui.Text(c, kind), style.Type.Footnote).TextColor(style.Color(colors.TextSecondary)).SingleLine()
+				style.Text(ui.Text(c, name), style.Type(c).Headline).TextColor(style.Color(colors.TextPrimary)).SingleLine()
+				style.Text(ui.Text(c, kind), style.Type(c).Footnote).TextColor(style.Color(colors.TextSecondary)).SingleLine()
 			})
 			a.themeSwitch(c)
 		})
@@ -149,9 +149,9 @@ func menuItem(c *ui.Context, icon, text, shortcut string) bool {
 	}
 	b.Children(func() {
 		ui.Icon(c, style.Icon(icon, false)).Size(18, 18).Shrink(0).TextColor(style.Color(colors.TextSecondary))
-		style.Text(ui.Text(c, text), style.Type.Body).TextColor(style.Color(colors.TextPrimary)).SingleLine().Grow(1)
+		style.Text(ui.Text(c, text), style.Type(c).Body).TextColor(style.Color(colors.TextPrimary)).SingleLine().Grow(1)
 		if shortcut != "" {
-			style.Text(ui.Text(c, shortcut), style.Type.Footnote).TextColor(style.Color(colors.TextTertiary))
+			style.Text(ui.Text(c, shortcut), style.Type(c).Footnote).TextColor(style.Color(colors.TextTertiary))
 		}
 	})
 	return b.Clicked()

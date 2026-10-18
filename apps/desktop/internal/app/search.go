@@ -61,19 +61,19 @@ func (a *App) search(c *ui.Context) {
 		}
 		width, _ := a.gridColumns(c)
 		ui.Scroll(c).TrackScroll(a.pageScroll(a.pagePath)).Grow(1).Children(func() {
-			ui.Column(c).Padding(0, style.Layout.Margin, 40).Gap(24).Children(func() {
+			ui.Column(c).Padding(0, style.Layout(c).Margin, 40).Gap(24).Children(func() {
 				for _, r := range t.value.GetServers() {
 					if len(r.GetCards()) == 0 && r.GetError() == "" {
 						continue
 					}
 					ui.Column(c.Key(r.GetServerId())).Gap(12).Children(func() {
 						if len(t.value.GetServers()) > 1 {
-							style.Text(ui.Text(c, r.GetServerName()), style.Type.Title3).TextColor(style.Color(colors.TextPrimary))
+							style.Text(ui.Text(c, r.GetServerName()), style.Type(c).Title3).TextColor(style.Color(colors.TextPrimary))
 						}
 						if r.GetError() != "" {
-							style.Text(ui.Text(c, style.T(c, "home.serverUnreachable", "server", r.GetServerName())), style.Type.Callout).TextColor(style.Color(colors.TextSecondary))
+							style.Text(ui.Text(c, style.T(c, "home.serverUnreachable", "server", r.GetServerName())), style.Type(c).Callout).TextColor(style.Color(colors.TextSecondary))
 						}
-						ui.Row(c).Wrap().Gap(style.Layout.Gutter).Children(func() {
+						ui.Row(c).Wrap().Gap(style.Layout(c).Gutter).Children(func() {
 							for _, card := range r.GetCards() {
 								a.posterCard(c, card, width)
 							}

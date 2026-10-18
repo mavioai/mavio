@@ -8,7 +8,7 @@ import (
 
 	"github.com/egoist/mygo/ui"
 
-	"github.com/mavioai/mavio/apps/desktop/internal/style"
+	design "github.com/mavioai/mavio/libs/design/gen/go"
 )
 
 // shots is where the screens tests write their frames, when set.
@@ -138,7 +138,7 @@ func TestSidebarResize(t *testing.T) {
 		h.tt.Release(x+dx, 400)
 		h.settle()
 	}
-	want := style.Layout.Sidebar + 60
+	want := design.DesktopLayout.Sidebar + 60
 	drag(60)
 	if got := h.app.sidebarWidth(); got != want {
 		t.Fatalf("dragged 60 to the right: width = %v, want = %v", got, want)
@@ -165,7 +165,7 @@ func TestSidebarResize(t *testing.T) {
 	h.tt.ClickAt(edge(), 400)
 	h.tt.ClickAt(edge(), 400)
 	h.settle()
-	if got := h.app.sidebarWidth(); got != style.Layout.Sidebar {
-		t.Errorf("double-clicked: width = %v, want = %v", got, style.Layout.Sidebar)
+	if got := h.app.sidebarWidth(); got != design.DesktopLayout.Sidebar {
+		t.Errorf("double-clicked: width = %v, want = %v", got, design.DesktopLayout.Sidebar)
 	}
 }

@@ -23,7 +23,7 @@ func (a *App) shell(c *ui.Context) {
 	if !medium {
 		a.sidebarOpen = false
 	}
-	a.contentWidth = w - style.Layout.Rail
+	a.contentWidth = w - style.Layout(c).Rail
 	if expanded {
 		a.contentWidth = w - a.sidebarWidth()
 	}
@@ -77,7 +77,7 @@ func (a *App) sidebarWidth() float32 {
 	if w := a.prefs.SidebarWidth; w > 0 {
 		return min(max(w, sidebarWidths.min), sidebarWidths.max)
 	}
-	return style.Layout.Sidebar
+	return design.DesktopLayout.Sidebar
 }
 
 // sidebarResizer builds the right edge of an expanded sidebar, dragged or
@@ -237,7 +237,7 @@ func libraryIcon(k capiv1.LibraryType) string {
 func (a *App) titleBar(c *ui.Context, medium, expanded bool) {
 	bar := c.TitleBar()
 	h := max(bar.Height, 28)
-	ui.Row(c).Height(h + style.Layout.Gutter/2).PaddingStart(bar.Left).PaddingEnd(8).AlignItems(ui.Center).DragWindow().Children(func() {
+	ui.Row(c).Height(h + style.Layout(c).Gutter/2).PaddingStart(bar.Left).PaddingEnd(8).AlignItems(ui.Center).DragWindow().Children(func() {
 		if !expanded {
 			return
 		}
@@ -265,7 +265,7 @@ func (a *App) sidebar(c *ui.Context, medium bool) {
 					a.sidebarRow(c, it, a.places.current == it.path)
 				}
 				for _, sec := range sections {
-					style.Text(ui.Text(c, sec.title), style.Type.Footnote).FontWeight(600).
+					style.Text(ui.Text(c, sec.title), style.Type(c).Footnote).FontWeight(600).
 						TextColor(style.Color(style.Colors(c).TextTertiary)).SingleLine().Padding(16, 8, 6)
 					for _, it := range sec.items {
 						a.sidebarRow(c.Key(it.path), it, a.places.current == it.path)
@@ -291,7 +291,7 @@ func (a *App) sidebarRow(c *ui.Context, it navItem, selected bool) {
 	}
 	row.Children(func() {
 		ui.Icon(c, style.Icon(it.icon, selected)).Size(18, 18).TextColor(style.Color(colors.Accent))
-		style.Text(ui.Text(c, it.label), style.Type.Callout).TextColor(style.Color(colors.TextPrimary)).SingleLine().Grow(1)
+		style.Text(ui.Text(c, it.label), style.Type(c).Callout).TextColor(style.Color(colors.TextPrimary)).SingleLine().Grow(1)
 	})
 	if row.Clicked() {
 		a.openPlace(it.path)
@@ -302,7 +302,7 @@ func (a *App) sidebarRow(c *ui.Context, it navItem, selected bool) {
 func (a *App) rail(c *ui.Context, medium bool) {
 	top, sections := a.navItems(c)
 	colors := style.Colors(c)
-	ui.Column(c).Width(style.Layout.Rail).Fill().Label(style.T(c, "nav.navigation")).Children(func() {
+	ui.Column(c).Width(style.Layout(c).Rail).Fill().Label(style.T(c, "nav.navigation")).Children(func() {
 		a.titleBar(c, medium, false)
 		ui.Row(c).Justify(ui.Center).Padding(0, 0, 8).Children(func() {
 			if iconButton(c, "sidebar", style.T(c, "nav.expandSidebar")).Clicked() {
@@ -334,7 +334,7 @@ func (a *App) rail(c *ui.Context, medium bool) {
 					}
 					cell.Children(func() {
 						ui.Icon(c, style.Icon(it.icon, selected)).Size(22, 22).TextColor(style.Color(colors.Accent))
-						style.Text(ui.Text(c, it.label), style.Type.Caption).TextColor(style.Color(colors.TextPrimary)).SingleLine().MaxWidth(style.Layout.Rail - 24)
+						style.Text(ui.Text(c, it.label), style.Type(c).Caption).TextColor(style.Color(colors.TextPrimary)).SingleLine().MaxWidth(style.Layout(c).Rail - 24)
 					})
 					if cell.Clicked() {
 						a.openPlace(it.path)

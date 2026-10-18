@@ -371,7 +371,7 @@ func (a *App) savePreferences() {
 
 // View builds the window.
 func (a *App) View(c *ui.Context) {
-	c.SetTheme(style.Theme(c.Theme().Dark))
+	c.SetTheme(style.Theme(c.Theme().Dark, a.prefs.TV && a.phase == phaseReady))
 	a.windowKeys(c)
 	if tvShortcut(c) {
 		a.setTV(!a.prefs.TV)

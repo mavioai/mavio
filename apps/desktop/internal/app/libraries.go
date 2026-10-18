@@ -215,11 +215,11 @@ func (a *App) libraryList(c *ui.Context) {
 				b.Children(func() {
 					sectionTile(c, k.icon, k.color)
 					ui.Column(c).Grow(1).MinWidth(0).Children(func() {
-						t := style.Text(ui.Text(c, l.GetName()), style.Type.Body).TextColor(style.Color(colors.TextPrimary))
+						t := style.Text(ui.Text(c, l.GetName()), style.Type(c).Body).TextColor(style.Color(colors.TextPrimary))
 						if b.Hovered() {
 							t.Underline()
 						}
-						style.Text(ui.Text(c, detail), style.Type.Footnote).TextColor(style.Color(colors.TextSecondary))
+						style.Text(ui.Text(c, detail), style.Type(c).Footnote).TextColor(style.Color(colors.TextSecondary))
 					})
 				})
 				if b.Clicked() {
@@ -296,7 +296,7 @@ func (a *App) libraryForm(c *ui.Context, id string, library *libraryv1.Library) 
 		ui.Box(c).Size(40, 40).Shrink(0).Radius(10).Background(k.color).Center().Children(func() {
 			ui.Icon(c, style.Icon(k.icon, true)).Size(24, 24).TextColor(ui.RGB(0xFF, 0xFF, 0xFF))
 		})
-		style.Text(ui.Text(c, title), style.Type.Title1).TextColor(style.Color(colors.TextPrimary))
+		style.Text(ui.Text(c, title), style.Type(c).Title1).TextColor(style.Color(colors.TextPrimary))
 	})
 	group(c, "library", "", "", func(g *settingsGroup) {
 		g.row(style.T(c, "libraries.name"), "", nil, func() {
@@ -507,7 +507,7 @@ func (a *App) foldersGroup(c *ui.Context, server string, library *libraryv1.Libr
 		for _, p := range d.paths {
 			g.divider()
 			ui.Row(c.Key(p)).MinHeight(52).Padding(10, 16).Gap(12).AlignItems(ui.Center).Children(func() {
-				style.Text(ui.Text(c, p), style.Type.Body).TextColor(style.Color(colors.TextPrimary)).Grow(1).MinWidth(0).Selectable()
+				style.Text(ui.Text(c, p), style.Type(c).Body).TextColor(style.Color(colors.TextPrimary)).Grow(1).MinWidth(0).Selectable()
 				auto := style.T(c, "libraries.storageAuto")
 				for _, s := range storageClasses {
 					if s.class == library.GetEffectiveStorageClasses()[p] {
@@ -543,7 +543,7 @@ func (a *App) foldersGroup(c *ui.Context, server string, library *libraryv1.Libr
 			}
 			b.Children(func() {
 				ui.Icon(c, style.Icon("folder", false)).Size(18, 18).TextColor(style.Color(colors.AccentText))
-				style.Text(ui.Text(c, style.T(c, "libraries.browse")), style.Type.Callout).FontWeight(600).TextColor(style.Color(colors.AccentText))
+				style.Text(ui.Text(c, style.T(c, "libraries.browse")), style.Type(c).Callout).FontWeight(600).TextColor(style.Color(colors.AccentText))
 			})
 			if b.Clicked() {
 				f.picking = !f.picking
@@ -623,7 +623,7 @@ func (a *App) folderPicker(c *ui.Context, server string, chosen []string, choose
 	}
 	ui.Column(c.Key("picker")).Background(style.Color(colors.Background)).Children(func() {
 		ui.Row(c).MinHeight(52).Padding(10, 16).Gap(12).AlignItems(ui.Center).Children(func() {
-			style.Text(ui.Text(c, cmpOr(here, style.T(c, "libraries.roots"))), style.Type.Callout).
+			style.Text(ui.Text(c, cmpOr(here, style.T(c, "libraries.roots"))), style.Type(c).Callout).
 				TextColor(style.Color(colors.TextSecondary)).Grow(1).MinWidth(0).Selectable()
 			if smallButton(c, style.T(c, "libraries.chooseFolder"), here == "" || slices.Contains(chosen, here)) {
 				choose(here)
@@ -639,7 +639,7 @@ func (a *App) folderPicker(c *ui.Context, server string, chosen []string, choose
 					}
 					b.Children(func() {
 						ui.Icon(c, style.Icon(icon, false)).Size(18, 18).Shrink(0).TextColor(style.Color(colors.TextSecondary))
-						style.Text(ui.Text(c, label), style.Type.Body).TextColor(style.Color(colors.TextPrimary)).MaxLines(1).Grow(1).MinWidth(0)
+						style.Text(ui.Text(c, label), style.Type(c).Body).TextColor(style.Color(colors.TextPrimary)).MaxLines(1).Grow(1).MinWidth(0)
 					})
 					if b.Clicked() {
 						f.path = to
@@ -653,9 +653,9 @@ func (a *App) folderPicker(c *ui.Context, server string, chosen []string, choose
 				}
 				switch {
 				case err != nil:
-					style.Text(ui.Text(c, errorMessage(c, err)), style.Type.Callout).TextColor(style.Color(colors.Danger)).Padding(12, 16)
+					style.Text(ui.Text(c, errorMessage(c, err)), style.Type(c).Callout).TextColor(style.Color(colors.Danger)).Padding(12, 16)
 				case loaded && len(folders) == 0:
-					style.Text(ui.Text(c, style.T(c, "libraries.noFolders")), style.Type.Callout).TextColor(style.Color(colors.TextSecondary)).Padding(12, 16)
+					style.Text(ui.Text(c, style.T(c, "libraries.noFolders")), style.Type(c).Callout).TextColor(style.Color(colors.TextSecondary)).Padding(12, 16)
 				}
 			})
 		})

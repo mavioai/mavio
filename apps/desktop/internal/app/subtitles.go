@@ -537,7 +537,7 @@ func (a *App) subtitleProfileForm(c *ui.Context) {
 			g.divider()
 			ui.Column(c.Key(f.label)).Padding(10, 16).Gap(6).Children(func() {
 				label := style.T(c, f.label)
-				style.Text(ui.Text(c, label), style.Type.Body).TextColor(style.Color(style.Colors(c).TextPrimary))
+				style.Text(ui.Text(c, label), style.Type(c).Body).TextColor(style.Color(style.Colors(c).TextPrimary))
 				if ui.TextArea(c, f.value).FillWidth().Height(56).Font("SF Mono, Menlo, monospace").Label(label).Changed() {
 					edited()
 				}

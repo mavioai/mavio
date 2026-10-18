@@ -308,7 +308,7 @@ func (a *App) catalogShelf(c *ui.Context, server string, row catalogRow, title s
 	}
 	a.shelf(c, key(server, id, kind, tmdb), title, more, func() {
 		for _, title := range titles {
-			a.discoveredCard(c, server, title, style.Layout.Poster, "")
+			a.discoveredCard(c, server, title, style.Layout(c).Poster, "")
 		}
 	})
 }
@@ -337,10 +337,10 @@ func (a *App) discoveredCard(c *ui.Context, server string, t *acquisitionv1.Disc
 			a.artwork(c, artworkOf(sized(t.GetPosterUrl(), 342)), icon, nil, width, width*1.5, hovered)
 			statusMark(c, t.GetStatus())
 		})
-		style.Text(ui.Text(c, t.GetName()), style.Type.Headline).TextColor(style.Color(colors.TextPrimary)).SingleLine().Width(width)
-		style.Text(ui.Text(c, strings.Join(facts, " · ")), style.Type.Footnote).TextColor(style.Color(colors.TextSecondary)).SingleLine().Width(width)
+		style.Text(ui.Text(c, t.GetName()), style.Type(c).Headline).TextColor(style.Color(colors.TextPrimary)).SingleLine().Width(width)
+		style.Text(ui.Text(c, strings.Join(facts, " · ")), style.Type(c).Footnote).TextColor(style.Color(colors.TextSecondary)).SingleLine().Width(width)
 		if role != "" {
-			style.Text(ui.Text(c, role), style.Type.Footnote).TextColor(style.Color(colors.TextSecondary)).SingleLine().Width(width)
+			style.Text(ui.Text(c, role), style.Type(c).Footnote).TextColor(style.Color(colors.TextSecondary)).SingleLine().Width(width)
 		}
 	})
 	if b.Clicked() && tmdb > 0 {
@@ -468,9 +468,9 @@ func (a *App) catalogPage(c *ui.Context, r *ui.Route) {
 			statusView(c, "", style.T(c, "state.empty"), "", nil)
 			return
 		case len(g.titles) == 0:
-			ui.Row(c).Padding(0, style.Layout.Margin).Gap(style.Layout.Gutter).Wrap().ClipY().Grow(1).Children(func() {
+			ui.Row(c).Padding(0, style.Layout(c).Margin).Gap(style.Layout(c).Gutter).Wrap().ClipY().Grow(1).Children(func() {
 				for range 12 {
-					ui.Box(c).Size(style.Layout.Poster, style.Layout.Poster*1.5).Radius(design.RadiusMd).Background(style.Color(colors.SurfaceRaised))
+					ui.Box(c).Size(style.Layout(c).Poster, style.Layout(c).Poster*1.5).Radius(design.RadiusMd).Background(style.Color(colors.SurfaceRaised))
 				}
 			})
 			return
@@ -481,7 +481,7 @@ func (a *App) catalogPage(c *ui.Context, r *ui.Route) {
 				next()
 			}
 			a.discoveredCard(c, server, g.titles[i], width, "")
-		}).Grow(1).Padding(0, style.Layout.Margin, 24).Gap(style.Layout.Gutter)
+		}).Grow(1).Padding(0, style.Layout(c).Margin, 24).Gap(style.Layout(c).Gutter)
 	})
 	if found != nil {
 		a.filtersDialog(c, server, found, kind, func(f catalogFilter) {
@@ -616,11 +616,11 @@ func (a *App) titleHeader(c *ui.Context, server string, title *acquisitionv1.Tit
 				})
 			}
 			ui.Column(c).MaxWidth(640).MinWidth(0).Gap(12).Children(func() {
-				style.Text(ui.Text(c, title.GetName()), style.Type.Display).TextColor(white).MaxLines(3).Selectable()
+				style.Text(ui.Text(c, title.GetName()), style.Type(c).Display).TextColor(white).MaxLines(3).Selectable()
 				ui.Row(c).Gap(12).AlignItems(ui.Center).Wrap().Children(func() {
-					style.Text(ui.Text(c, titleFacts(c, title)), style.Type.Callout).TextColor(white.Alpha(0.8))
+					style.Text(ui.Text(c, titleFacts(c, title)), style.Type(c).Callout).TextColor(white.Alpha(0.8))
 					if s := statusLabel(c, title.GetStatus()); s != "" {
-						style.Text(ui.Text(c, s), style.Type.Caption).FontWeight(600).TextColor(white).Padding(1, 6).Radius(4).Background(white.Alpha(0.2))
+						style.Text(ui.Text(c, s), style.Type(c).Caption).FontWeight(600).TextColor(white).Padding(1, 6).Radius(4).Background(white.Alpha(0.2))
 					}
 				})
 				ui.Row(c).Gap(12).Wrap().Padding(8, 0, 0).Children(func() {
@@ -663,7 +663,7 @@ func (a *App) titleHeader(c *ui.Context, server string, title *acquisitionv1.Tit
 					}
 				})
 				if st.err != nil {
-					style.Text(ui.Text(c, style.T(c, "discover.requestFailed", "reason", errorMessage(c, st.err))), style.Type.Callout).TextColor(white).Selectable()
+					style.Text(ui.Text(c, style.T(c, "discover.requestFailed", "reason", errorMessage(c, st.err))), style.Type(c).Callout).TextColor(white).Selectable()
 				}
 			})
 		})
@@ -789,7 +789,7 @@ func (a *App) requestDialog(c *ui.Context, server string) {
 			if editing != nil {
 				heading = style.T(c, "requests.editTitle", "name", title.GetName())
 			}
-			style.Text(ui.Text(c, heading), style.Type.Title3).TextColor(style.Color(colors.TextPrimary))
+			style.Text(ui.Text(c, heading), style.Type(c).Title3).TextColor(style.Color(colors.TextPrimary))
 			ui.Scroll(c).Grow(1).Shrink(1).Children(func() {
 				ui.Column(c).Gap(2).Children(func() {
 					on := all
@@ -807,10 +807,10 @@ func (a *App) requestDialog(c *ui.Context, server string) {
 								st.chosen[n] = on
 							}
 							if s.GetEpisodeCount() > 0 {
-								style.Text(ui.Text(c, style.T(c, "item.episodeCount", "count", int(s.GetEpisodeCount()))), style.Type.Callout).TextColor(style.Color(colors.TextSecondary))
+								style.Text(ui.Text(c, style.T(c, "item.episodeCount", "count", int(s.GetEpisodeCount()))), style.Type(c).Callout).TextColor(style.Color(colors.TextSecondary))
 							}
 							if l := statusLabel(c, s.GetStatus()); l != "" {
-								style.Text(ui.Text(c, l), style.Type.Footnote).TextColor(style.Color(colors.TextSecondary))
+								style.Text(ui.Text(c, l), style.Type(c).Footnote).TextColor(style.Color(colors.TextSecondary))
 							}
 						})
 					}
@@ -859,8 +859,8 @@ func (a *App) titleSeasons(c *ui.Context, server string, title *acquisitionv1.Ti
 		}
 		return int(y.GetSeasonNumber() - x.GetSeasonNumber())
 	})
-	ui.Column(c).Padding(0, style.Layout.Margin).Gap(8).Children(func() {
-		style.Text(ui.Text(c, style.T(c, "item.seasons")), style.Type.Title3).TextColor(style.Color(colors.TextPrimary))
+	ui.Column(c).Padding(0, style.Layout(c).Margin).Gap(8).Children(func() {
+		style.Text(ui.Text(c, style.T(c, "item.seasons")), style.Type(c).Title3).TextColor(style.Color(colors.TextPrimary))
 		for _, s := range seasons {
 			n := s.GetSeasonNumber()
 			ok := key(server, title.GetTmdbId(), n)
@@ -868,12 +868,12 @@ func (a *App) titleSeasons(c *ui.Context, server string, title *acquisitionv1.Ti
 			ui.Column(c.Key(n)).Radius(10).Clip().Border(1, style.Color(colors.Border)).Background(style.Color(colors.SurfaceRaised)).Children(func() {
 				b := ui.ButtonBase(c).MinHeight(48).Padding(8, 16).Gap(12).AlignItems(ui.Center).Label(seasonName(c, n))
 				b.Children(func() {
-					style.Text(ui.Text(c, seasonName(c, n)), style.Type.Headline).TextColor(style.Color(colors.TextPrimary)).Grow(1).SingleLine()
+					style.Text(ui.Text(c, seasonName(c, n)), style.Type(c).Headline).TextColor(style.Color(colors.TextPrimary)).Grow(1).SingleLine()
 					if s.GetEpisodeCount() > 0 {
-						style.Text(ui.Text(c, style.T(c, "item.episodeCount", "count", int(s.GetEpisodeCount()))), style.Type.Callout).TextColor(style.Color(colors.TextSecondary))
+						style.Text(ui.Text(c, style.T(c, "item.episodeCount", "count", int(s.GetEpisodeCount()))), style.Type(c).Callout).TextColor(style.Color(colors.TextSecondary))
 					}
 					if l := statusLabel(c, s.GetStatus()); l != "" {
-						style.Text(ui.Text(c, l), style.Type.Footnote).FontWeight(600).TextColor(style.Color(colors.TextPrimary)).Padding(2, 10).Radius(design.RadiusFull).Background(style.Color(colors.Fill))
+						style.Text(ui.Text(c, l), style.Type(c).Footnote).FontWeight(600).TextColor(style.Color(colors.TextPrimary)).Padding(2, 10).Radius(design.RadiusFull).Background(style.Color(colors.Fill))
 					}
 					chevron := ui.Icon(c, style.Icon("expand", false)).Size(16, 16).TextColor(style.Color(colors.TextSecondary))
 					if open {
@@ -911,7 +911,7 @@ func (a *App) seasonEpisodes(c *ui.Context, server string, tmdb, number int32) {
 		return res.GetEpisodes(), err
 	})
 	note := func(text string) {
-		style.Text(ui.Text(c, text), style.Type.Callout).TextColor(style.Color(colors.TextSecondary)).Padding(0, 16, 16)
+		style.Text(ui.Text(c, text), style.Type(c).Callout).TextColor(style.Color(colors.TextSecondary)).Padding(0, 16, 16)
 	}
 	switch {
 	case !t.loaded:
@@ -931,13 +931,13 @@ func (a *App) seasonEpisodes(c *ui.Context, server string, tmdb, number int32) {
 			ui.Row(c.Key(e.GetEpisodeNumber())).Padding(16, 0).Gap(16).AlignItems(ui.Start).Children(func() {
 				ui.Column(c).Grow(1).MinWidth(0).Gap(4).Children(func() {
 					ui.Row(c).Gap(8).AlignItems(ui.Center).Wrap().Children(func() {
-						style.Text(ui.Text(c, style.T(c, "discover.episodeTitle", "number", e.GetEpisodeNumber(), "name", e.GetName())), style.Type.Headline).TextColor(style.Color(colors.TextPrimary))
+						style.Text(ui.Text(c, style.T(c, "discover.episodeTitle", "number", e.GetEpisodeNumber(), "name", e.GetName())), style.Type(c).Headline).TextColor(style.Color(colors.TextPrimary))
 						if d := e.GetAirDate(); d != "" {
-							style.Text(ui.Text(c, dayText(d)), style.Type.Footnote).TextColor(style.Color(colors.TextPrimary)).Padding(2, 10).Radius(design.RadiusFull).Background(style.Color(colors.Fill))
+							style.Text(ui.Text(c, dayText(d)), style.Type(c).Footnote).TextColor(style.Color(colors.TextPrimary)).Padding(2, 10).Radius(design.RadiusFull).Background(style.Color(colors.Fill))
 						}
 					})
 					if o := e.GetOverview(); o != "" {
-						style.Text(ui.Text(c, o), style.Type.Callout).TextColor(style.Color(colors.TextSecondary)).Selectable()
+						style.Text(ui.Text(c, o), style.Type(c).Callout).TextColor(style.Color(colors.TextSecondary)).Selectable()
 					}
 				})
 				if still := sized(e.GetStillUrl(), 300); still != "" {
@@ -1062,9 +1062,9 @@ func (a *App) requestsPage(c *ui.Context, r *ui.Route) {
 			if !admin {
 				a.quotas(c, server)
 			}
-			ui.Column(c).Padding(0, style.Layout.Margin).Gap(8).Children(func() {
+			ui.Column(c).Padding(0, style.Layout(c).Margin).Gap(8).Children(func() {
 				if st.err != nil {
-					style.Text(ui.Text(c, errorMessage(c, st.err)), style.Type.Callout).TextColor(style.Color(colors.Danger)).Selectable()
+					style.Text(ui.Text(c, errorMessage(c, st.err)), style.Type(c).Callout).TextColor(style.Color(colors.Danger)).Selectable()
 				}
 				if taskStatus(c, t, func() { l.list.key = "" }, nil) {
 					return
@@ -1130,7 +1130,7 @@ func (a *App) quotas(c *ui.Context, server string) {
 		}
 	}
 	if len(lines) > 0 {
-		style.Text(ui.Text(c, strings.Join(lines, " · ")), style.Type.Callout).TextColor(style.Color(style.Colors(c).TextSecondary)).Padding(0, style.Layout.Margin)
+		style.Text(ui.Text(c, strings.Join(lines, " · ")), style.Type(c).Callout).TextColor(style.Color(style.Colors(c).TextSecondary)).Padding(0, style.Layout(c).Margin)
 	}
 }
 
@@ -1189,7 +1189,7 @@ func (a *App) requestRow(c *ui.Context, server string, r *acquisitionv1.Request,
 			ui.Row(c).Gap(8).AlignItems(ui.Center).Wrap().Children(func() {
 				link := ui.ButtonBase(c).Cursor(ui.CursorPointer).Label(name)
 				link.Children(func() {
-					t := style.Text(ui.Text(c, name), style.Type.Headline).TextColor(style.Color(colors.TextPrimary))
+					t := style.Text(ui.Text(c, name), style.Type(c).Headline).TextColor(style.Color(colors.TextPrimary))
 					if link.Hovered() {
 						t.Underline()
 					}
@@ -1198,21 +1198,21 @@ func (a *App) requestRow(c *ui.Context, server string, r *acquisitionv1.Request,
 					open()
 				}
 				if r.GetYear() > 0 {
-					style.Text(ui.Text(c, fmt.Sprint(r.GetYear())), style.Type.Callout).TextColor(style.Color(colors.TextSecondary))
+					style.Text(ui.Text(c, fmt.Sprint(r.GetYear())), style.Type(c).Callout).TextColor(style.Color(colors.TextSecondary))
 				}
 				if s, ok := requestStatuses[r.GetStatus()]; ok {
 					bg, fg := s.color(colors)
-					style.Text(ui.Text(c, style.T(c, s.label)), style.Type.Caption).FontWeight(600).TextColor(fg).Padding(2, 8).Radius(design.RadiusFull).Background(bg)
+					style.Text(ui.Text(c, style.T(c, s.label)), style.Type(c).Caption).FontWeight(600).TextColor(fg).Padding(2, 8).Radius(design.RadiusFull).Background(bg)
 				}
 			})
-			style.Text(ui.Text(c, strings.Join(detail, " · ")), style.Type.Footnote).TextColor(style.Color(colors.TextSecondary))
+			style.Text(ui.Text(c, strings.Join(detail, " · ")), style.Type(c).Footnote).TextColor(style.Color(colors.TextSecondary))
 			if r.GetStatus() == acquisitionv1.RequestStatus_REQUEST_STATUS_FAILED && r.GetMessage() != "" {
-				style.Text(ui.Text(c, r.GetMessage()), style.Type.Footnote).TextColor(style.Color(colors.Danger)).Selectable()
+				style.Text(ui.Text(c, r.GetMessage()), style.Type(c).Footnote).TextColor(style.Color(colors.Danger)).Selectable()
 			}
 			ui.Row(c).Gap(8).Wrap().Padding(4, 0, 0).AlignItems(ui.Center).Children(func() {
 				id := r.GetId()
 				if st.removing == id {
-					style.Text(ui.Text(c, style.T(c, "requests.removeTitle")), style.Type.Callout).TextColor(style.Color(colors.TextPrimary))
+					style.Text(ui.Text(c, style.T(c, "requests.removeTitle")), style.Type(c).Callout).TextColor(style.Color(colors.TextPrimary))
 					if smallButton(c.Key("cancel"), style.T(c, "action.cancel"), false) {
 						st.removing = ""
 					}
@@ -1243,7 +1243,7 @@ func (a *App) requestRow(c *ui.Context, server string, r *acquisitionv1.Request,
 					label := style.T(c, "requests.remove")
 					b := ui.ButtonBase(c.Key("removeLink")).Label(label)
 					b.Children(func() {
-						t := style.Text(ui.Text(c, label), style.Type.Callout).FontWeight(600).TextColor(style.Color(colors.Danger))
+						t := style.Text(ui.Text(c, label), style.Type(c).Callout).FontWeight(600).TextColor(style.Color(colors.Danger))
 						if b.Hovered() {
 							t.Underline()
 						}

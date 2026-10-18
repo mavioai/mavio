@@ -88,7 +88,7 @@ func (a *App) extrasShelf(c *ui.Context, server string, d *capiv1.Details, extra
 	}
 	colors := style.Colors(c)
 	white := ui.RGB(255, 255, 255)
-	width := style.Layout.Thumbnail
+	width := style.Layout(c).Thumbnail
 	a.shelf(c, key("extras", server, d.GetCard().GetItemId()), style.T(c, "item.extras"), nil, func() {
 		for _, e := range extras {
 			card := a.cardOf(server, e)
@@ -107,7 +107,7 @@ func (a *App) extrasShelf(c *ui.Context, server string, d *capiv1.Details, extra
 						ui.Icon(c, style.Icon("play", true)).Size(14, 14).TextColor(white)
 					})
 				})
-				style.Text(ui.Text(c, e.GetName()), style.Type.Headline).TextColor(style.Color(colors.TextPrimary)).SingleLine().Width(width)
+				style.Text(ui.Text(c, e.GetName()), style.Type(c).Headline).TextColor(style.Color(colors.TextPrimary)).SingleLine().Width(width)
 				label := extraLabels[e.GetExtra()]
 				if label == "" {
 					label = "extra.other"
@@ -116,7 +116,7 @@ func (a *App) extrasShelf(c *ui.Context, server string, d *capiv1.Details, extra
 				if e.HasRuntime() {
 					sub = append(sub, runtime(e.GetRuntime().AsDuration()))
 				}
-				style.Text(ui.Text(c, joinFacts(sub)), style.Type.Footnote).TextColor(style.Color(colors.TextSecondary)).SingleLine().Width(width)
+				style.Text(ui.Text(c, joinFacts(sub)), style.Type(c).Footnote).TextColor(style.Color(colors.TextSecondary)).SingleLine().Width(width)
 			})
 			if b.Clicked() {
 				a.play(server, e.GetId(), nil)
@@ -136,7 +136,7 @@ func (a *App) collectionBanner(c *ui.Context, server string, d *capiv1.Details, 
 	if image == "" {
 		image = d.GetBackdrop().GetUrl()
 	}
-	b := ui.ButtonBase(c).Margin(0, style.Layout.Margin).Height(112).Radius(14).Clip().
+	b := ui.ButtonBase(c).Margin(0, style.Layout(c).Margin).Height(112).Radius(14).Clip().
 		Background(style.Color(style.Colors(c).SurfaceRaised)).Label(col.GetName())
 	hovered := b.Hovered()
 	b.Children(func() {
@@ -153,15 +153,15 @@ func (a *App) collectionBanner(c *ui.Context, server string, d *capiv1.Details, 
 		// Over the artwork, which is positioned as well.
 		ui.Row(c).Absolute().Top(0).Left(0).Right(0).Bottom(0).Padding(20, 24).Gap(16).AlignItems(ui.Center).Children(func() {
 			ui.Column(c).Grow(1).MinWidth(0).Children(func() {
-				style.Text(ui.Text(c, style.T(c, "item.collection")), style.Type.Footnote).FontWeight(600).TextColor(white.Alpha(0.7))
-				style.Text(ui.Text(c, col.GetName()), style.Type.Title3).TextColor(white).SingleLine()
+				style.Text(ui.Text(c, style.T(c, "item.collection")), style.Type(c).Footnote).FontWeight(600).TextColor(white.Alpha(0.7))
+				style.Text(ui.Text(c, col.GetName()), style.Type(c).Title3).TextColor(white).SingleLine()
 			})
 			pill := ui.Row(c).Height(36).Padding(0, 16).Gap(4).Radius(18).AlignItems(ui.Center).Background(white.Alpha(0.2))
 			if hovered {
 				pill.Background(white.Alpha(0.3))
 			}
 			pill.Children(func() {
-				style.Text(ui.Text(c, style.T(c, "item.viewCollection")), style.Type.Callout).FontWeight(600).TextColor(white)
+				style.Text(ui.Text(c, style.T(c, "item.viewCollection")), style.Type(c).Callout).FontWeight(600).TextColor(white)
 				ui.Icon(c, style.Icon("forward", false)).Size(14, 14).TextColor(white)
 			})
 		})
@@ -247,26 +247,26 @@ func (a *App) about(c *ui.Context, st *detailsState, d *capiv1.Details, info *it
 	if text == "" && !ratings && !leading && len(tags) == 0 && len(facts) == 0 && len(media) == 0 && len(links) == 0 {
 		return
 	}
-	ui.Column(c).Padding(0, style.Layout.Margin).Gap(16).Children(func() {
-		style.Text(ui.Text(c, style.T(c, "item.details")), style.Type.Title3).TextColor(style.Color(colors.TextPrimary))
+	ui.Column(c).Padding(0, style.Layout(c).Margin).Gap(16).Children(func() {
+		style.Text(ui.Text(c, style.T(c, "item.details")), style.Type(c).Title3).TextColor(style.Color(colors.TextPrimary))
 		ui.Row(c).GapX(64).GapY(32).AlignItems(ui.Start).Wrap().Children(func() {
 			if text != "" || leading || len(tags) > 0 || len(links) > 0 {
 				ui.Column(c).Basis(360).Grow(1).MaxWidth(640).Gap(20).Children(func() {
 					if text != "" {
 						ui.Column(c).Gap(8).Children(func() {
 							if d.GetTagline() != "" {
-								style.Text(ui.Text(c, d.GetTagline()), style.Type.Headline).TextColor(style.Color(colors.TextPrimary))
+								style.Text(ui.Text(c, d.GetTagline()), style.Type(c).Headline).TextColor(style.Color(colors.TextPrimary))
 							}
-							style.Text(ui.Text(c, text), style.Type.Body).TextColor(style.Color(colors.TextSecondary)).Selectable()
+							style.Text(ui.Text(c, text), style.Type(c).Body).TextColor(style.Color(colors.TextSecondary)).Selectable()
 						})
 					}
 					a.crewList(c, server, card.GetItemId(), credits)
 					if len(tags) > 0 {
 						ui.Column(c).Gap(8).Children(func() {
-							style.Text(ui.Text(c, style.T(c, "item.tags")), style.Type.Footnote).FontWeight(600).TextColor(style.Color(colors.TextSecondary))
+							style.Text(ui.Text(c, style.T(c, "item.tags")), style.Type(c).Footnote).FontWeight(600).TextColor(style.Color(colors.TextSecondary))
 							ui.Row(c).Gap(8).Wrap().Children(func() {
 								for _, tag := range tags {
-									style.Text(ui.Text(c.Key(tag), tag), style.Type.Footnote).TextColor(style.Color(colors.TextPrimary)).
+									style.Text(ui.Text(c.Key(tag), tag), style.Type(c).Footnote).TextColor(style.Color(colors.TextPrimary)).
 										Padding(4, 12).Radius(design.RadiusFull).Border(1, style.Color(colors.Border))
 								}
 							})
@@ -303,7 +303,7 @@ func linkChip(c *ui.Context, label string) ui.Element {
 		b.Background(style.Color(colors.FillSelected))
 	}
 	b.Children(func() {
-		style.Text(ui.Text(c, label), style.Type.Footnote).FontWeight(600).TextColor(style.Color(colors.TextPrimary))
+		style.Text(ui.Text(c, label), style.Type(c).Footnote).FontWeight(600).TextColor(style.Color(colors.TextPrimary))
 		ui.Icon(c, style.Icon("external", false)).Size(14, 14).TextColor(style.Color(colors.TextSecondary))
 	})
 	return b
@@ -318,8 +318,8 @@ func factGrid(c *ui.Context, facts []fact) {
 	ui.Row(c).GapX(32).GapY(20).Wrap().Children(func() {
 		for _, f := range facts {
 			ui.Column(c.Key(f.caption)).Basis(200).Grow(1).MinWidth(0).Gap(4).Children(func() {
-				style.Text(ui.Text(c, f.caption), style.Type.Footnote).FontWeight(600).TextColor(style.Color(colors.TextSecondary))
-				style.Text(ui.Text(c, f.value), style.Type.Callout).TextColor(style.Color(colors.TextPrimary)).Selectable()
+				style.Text(ui.Text(c, f.caption), style.Type(c).Footnote).FontWeight(600).TextColor(style.Color(colors.TextSecondary))
+				style.Text(ui.Text(c, f.value), style.Type(c).Callout).TextColor(style.Color(colors.TextPrimary)).Selectable()
 			})
 		}
 	})
@@ -331,11 +331,11 @@ func ratingTiles(c *ui.Context, it *libraryv1.Item) {
 	colors := style.Colors(c)
 	tile := func(label string, value func(), scale string) {
 		ui.Column(c.Key(label)).MinWidth(144).Gap(4).Padding(12, 16).Radius(12).Background(style.Color(colors.Fill)).Children(func() {
-			style.Text(ui.Text(c, label), style.Type.Footnote).FontWeight(600).TextColor(style.Color(colors.TextSecondary))
+			style.Text(ui.Text(c, label), style.Type(c).Footnote).FontWeight(600).TextColor(style.Color(colors.TextSecondary))
 			ui.Row(c).Gap(6).AlignItems(ui.Center).Children(func() {
 				value()
 				if scale != "" {
-					style.Text(ui.Text(c, scale), style.Type.Callout).TextColor(style.Color(colors.TextTertiary))
+					style.Text(ui.Text(c, scale), style.Type(c).Callout).TextColor(style.Color(colors.TextTertiary))
 				}
 			})
 		})
@@ -344,12 +344,12 @@ func ratingTiles(c *ui.Context, it *libraryv1.Item) {
 		if r := it.GetCommunityRating(); r > 0 {
 			tile(style.T(c, "item.communityRating"), func() {
 				ui.Icon(c, style.Icon("rating", true)).Size(22, 22).TextColor(ui.RGB(0xFF, 0xD6, 0x0A))
-				style.Text(ui.Text(c, fmt.Sprintf("%.1f", r)), style.Type.Title2).FontWeight(700).TextColor(style.Color(colors.TextPrimary))
+				style.Text(ui.Text(c, fmt.Sprintf("%.1f", r)), style.Type(c).Title2).FontWeight(700).TextColor(style.Color(colors.TextPrimary))
 			}, "/ 10")
 		}
 		if r := it.GetCriticRating(); r > 0 {
 			tile(style.T(c, "item.criticRating"), func() {
-				style.Text(ui.Text(c, fmt.Sprintf("%.0f%%", r)), style.Type.Title2).FontWeight(700).TextColor(style.Color(colors.TextPrimary))
+				style.Text(ui.Text(c, fmt.Sprintf("%.0f%%", r)), style.Type(c).Title2).FontWeight(700).TextColor(style.Color(colors.TextPrimary))
 			}, "")
 		}
 	})

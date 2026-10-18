@@ -57,7 +57,7 @@ func secondaryButton(c *ui.Context, icon, label string) ui.Element {
 		if icon != "" {
 			ui.Icon(c, style.Icon(icon, false)).Size(18, 18).TextColor(style.Color(colors.TextPrimary))
 		}
-		style.Text(ui.Text(c, label), style.Type.Headline).TextColor(style.Color(colors.TextPrimary)).SingleLine()
+		style.Text(ui.Text(c, label), style.Type(c).Headline).TextColor(style.Color(colors.TextPrimary)).SingleLine()
 	})
 	return b
 }
@@ -71,9 +71,9 @@ func statusView(c *ui.Context, icon, title, message string, retry func()) {
 		if icon != "" {
 			ui.Icon(c, style.Icon(icon, false)).Size(48, 48).TextColor(style.Color(colors.TextTertiary))
 		}
-		style.Text(ui.Text(c, title), style.Type.Title3).TextColor(style.Color(colors.TextPrimary)).TextAlign(ui.Center)
+		style.Text(ui.Text(c, title), style.Type(c).Title3).TextColor(style.Color(colors.TextPrimary)).TextAlign(ui.Center)
 		if message != "" {
-			style.Text(ui.Text(c, message), style.Type.Body).TextColor(style.Color(colors.TextSecondary)).TextAlign(ui.Center).MaxWidth(420)
+			style.Text(ui.Text(c, message), style.Type(c).Body).TextColor(style.Color(colors.TextSecondary)).TextAlign(ui.Center).MaxWidth(420)
 		}
 		if retry != nil && secondaryButton(c, "retry", style.T(c, "action.retry")).Margin(8, 0, 0).Clicked() {
 			retry()
@@ -180,8 +180,8 @@ func (a *App) artwork(c *ui.Context, art *capiv1.Artwork, icon string, card *cap
 				ui.Box(c).Absolute().Left(0).Right(0).Bottom(0).Height(3).Background(style.Color(colors.Scrim)).Children(func() {
 					ui.Box(c).Height(3).WidthPercent(min(card.GetProgress(), 1) * 100).Background(style.Color(colors.Progress))
 				})
-				if left := time.Duration(float64(card.GetRuntimeMs())*(1-float64(card.GetProgress()))) * time.Millisecond; left > time.Minute && width >= style.Layout.Thumbnail/2 && height < width {
-					style.Text(ui.Text(c, style.T(c, "item.minutesLeft", "count", int(left.Minutes()))), style.Type.Caption).
+				if left := time.Duration(float64(card.GetRuntimeMs())*(1-float64(card.GetProgress()))) * time.Millisecond; left > time.Minute && width >= style.Layout(c).Thumbnail/2 && height < width {
+					style.Text(ui.Text(c, style.T(c, "item.minutesLeft", "count", int(left.Minutes()))), style.Type(c).Caption).
 						TextColor(white).Absolute().Left(8).Bottom(10).Padding(2, 6).Radius(design.RadiusSm).Background(style.Color(colors.Scrim))
 				}
 			}
@@ -247,9 +247,9 @@ func (a *App) posterCard(c *ui.Context, card *capiv1.Card, width float32) {
 	}
 	b.Children(func() {
 		a.artwork(c, art, "", card, width, width*1.5, hovered)
-		style.Text(ui.Text(c, card.GetTitle()), style.Type.Headline).TextColor(style.Color(colors.TextPrimary)).SingleLine().Width(width)
+		style.Text(ui.Text(c, card.GetTitle()), style.Type(c).Headline).TextColor(style.Color(colors.TextPrimary)).SingleLine().Width(width)
 		if sub := cardSubtitle(card); sub != "" {
-			style.Text(ui.Text(c, sub), style.Type.Footnote).TextColor(style.Color(colors.TextSecondary)).SingleLine().Width(width)
+			style.Text(ui.Text(c, sub), style.Type(c).Footnote).TextColor(style.Color(colors.TextSecondary)).SingleLine().Width(width)
 		}
 	})
 	if b.Clicked() {
@@ -267,9 +267,9 @@ func (a *App) thumbCard(c *ui.Context, card *capiv1.Card, width float32) {
 	}
 	b.Children(func() {
 		a.artwork(c, card.GetThumb(), "", card, width, width*9/16, hovered)
-		style.Text(ui.Text(c, card.GetTitle()), style.Type.Headline).TextColor(style.Color(colors.TextPrimary)).SingleLine().Width(width)
+		style.Text(ui.Text(c, card.GetTitle()), style.Type(c).Headline).TextColor(style.Color(colors.TextPrimary)).SingleLine().Width(width)
 		if sub := card.GetSubtitle(); sub != "" {
-			style.Text(ui.Text(c, sub), style.Type.Footnote).TextColor(style.Color(colors.TextSecondary)).SingleLine().Width(width)
+			style.Text(ui.Text(c, sub), style.Type(c).Footnote).TextColor(style.Color(colors.TextSecondary)).SingleLine().Width(width)
 		}
 	})
 	if b.Clicked() {
@@ -314,10 +314,10 @@ func (a *App) labeledShelf(c *ui.Context, id, title string, more func(), label s
 	colors := style.Colors(c)
 	scroll := a.shelfScroll(id)
 	ui.Column(c.Key(id)).Gap(6).Children(func() {
-		head := ui.Row(c).Padding(0, style.Layout.Margin).Gap(8).AlignItems(ui.Center)
+		head := ui.Row(c).Padding(0, style.Layout(c).Margin).Gap(8).AlignItems(ui.Center)
 		hovered := head.Hovered()
 		head.Children(func() {
-			t := style.Text(ui.Text(c, title), style.Type.Title3).TextColor(style.Color(colors.TextPrimary)).SingleLine()
+			t := style.Text(ui.Text(c, title), style.Type(c).Title3).TextColor(style.Color(colors.TextPrimary)).SingleLine()
 			if more != nil {
 				t.Cursor(ui.CursorPointer)
 				if t.Clicked() {
@@ -345,7 +345,7 @@ func (a *App) labeledShelf(c *ui.Context, id, title string, more func(), label s
 		// The padding leaves room for a hovered card's ring, which the
 		// scroll would clip; the column's gap is the less for it.
 		ui.ScrollHorizontal(c).TrackScroll(scroll).Children(func() {
-			ui.Row(c).Padding(4, style.Layout.Margin).Gap(style.Layout.Gutter * 1.5).AlignItems(ui.Start).Children(cards)
+			ui.Row(c).Padding(4, style.Layout(c).Margin).Gap(style.Layout(c).Gutter * 1.5).AlignItems(ui.Start).Children(cards)
 		})
 	})
 }
@@ -374,10 +374,10 @@ func (a *App) shelfScroll(id string) *ui.ScrollState {
 func placeholderShelf(c *ui.Context, n int) {
 	colors := style.Colors(c)
 	ui.Column(c).Gap(10).Children(func() {
-		ui.Box(c).Margin(0, style.Layout.Margin).Size(180, 22).Radius(design.RadiusSm).Background(style.Color(colors.SurfaceRaised))
-		ui.Row(c).Padding(0, style.Layout.Margin).Gap(style.Layout.Gutter * 1.5).ClipX().Children(func() {
+		ui.Box(c).Margin(0, style.Layout(c).Margin).Size(180, 22).Radius(design.RadiusSm).Background(style.Color(colors.SurfaceRaised))
+		ui.Row(c).Padding(0, style.Layout(c).Margin).Gap(style.Layout(c).Gutter * 1.5).ClipX().Children(func() {
 			for range n {
-				ui.Box(c).Size(style.Layout.Poster, style.Layout.Poster*1.5).Shrink(0).Radius(design.RadiusMd).Background(style.Color(colors.SurfaceRaised))
+				ui.Box(c).Size(style.Layout(c).Poster, style.Layout(c).Poster*1.5).Shrink(0).Radius(design.RadiusMd).Background(style.Color(colors.SurfaceRaised))
 			}
 		})
 	})
@@ -388,7 +388,7 @@ func placeholderShelf(c *ui.Context, n int) {
 func header(c *ui.Context, title string) {
 	colors := style.Colors(c)
 	bar := c.TitleBar()
-	ui.Row(c).MinHeight(max(bar.Height, 28)+24).Padding(max(bar.Height, 12), style.Layout.Margin, 12).AlignItems(ui.End).DragWindow().Children(func() {
-		style.Text(ui.Text(c, title), style.Type.Title1).TextColor(style.Color(colors.TextPrimary)).SingleLine()
+	ui.Row(c).MinHeight(max(bar.Height, 28)+24).Padding(max(bar.Height, 12), style.Layout(c).Margin, 12).AlignItems(ui.End).DragWindow().Children(func() {
+		style.Text(ui.Text(c, title), style.Type(c).Title1).TextColor(style.Color(colors.TextPrimary)).SingleLine()
 	})
 }

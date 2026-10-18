@@ -140,7 +140,7 @@ func (g *settingsGroup) note(text string, danger bool) {
 	if danger {
 		color = colors.Danger
 	}
-	style.Text(ui.Text(c.Key(g.rows), text), style.Type.Callout).TextColor(style.Color(color)).Padding(12, 16).Selectable()
+	style.Text(ui.Text(c.Key(g.rows), text), style.Type(c).Callout).TextColor(style.Color(color)).Padding(12, 16).Selectable()
 }
 
 // more adds a row showing more of a list.
@@ -153,7 +153,7 @@ func (g *settingsGroup) more(label string) bool {
 		b.Background(style.Color(colors.Fill))
 	}
 	b.Children(func() {
-		style.Text(ui.Text(c, label), style.Type.Body).TextColor(style.Color(colors.AccentText))
+		style.Text(ui.Text(c, label), style.Type(c).Body).TextColor(style.Color(colors.AccentText))
 	})
 	return b.Clicked()
 }
@@ -170,7 +170,7 @@ func smallButton(c *ui.Context, label string, disabled bool) bool {
 		b.Opacity(0.5)
 	}
 	b.Children(func() {
-		style.Text(ui.Text(c, label), style.Type.Callout).FontWeight(600).TextColor(style.Color(colors.TextPrimary))
+		style.Text(ui.Text(c, label), style.Type(c).Callout).FontWeight(600).TextColor(style.Color(colors.TextPrimary))
 	})
 	return b.Clicked() && !disabled
 }
@@ -222,7 +222,7 @@ func (a *App) overviewSection(c *ui.Context) {
 			}
 			ui.Row(c).Gap(8).AlignItems(ui.Center).Children(func() {
 				dot(c, color)
-				style.Text(ui.Text(c, text), style.Type.Callout).TextColor(style.Color(colors.TextSecondary))
+				style.Text(ui.Text(c, text), style.Type(c).Callout).TextColor(style.Color(colors.TextSecondary))
 			})
 		})
 		if !info.loaded {
@@ -249,7 +249,7 @@ func (a *App) overviewSection(c *ui.Context) {
 				continue
 			}
 			g.row(f[0], "", nil, func() {
-				style.Text(ui.Text(c, f[1]), style.Type.Callout).TextColor(style.Color(colors.TextSecondary)).TextAlign(ui.End).MaxWidth(480).Selectable()
+				style.Text(ui.Text(c, f[1]), style.Type(c).Callout).TextColor(style.Color(colors.TextSecondary)).TextAlign(ui.End).MaxWidth(480).Selectable()
 			})
 		}
 	})
@@ -349,17 +349,17 @@ func (a *App) activitySection(c *ui.Context) {
 						if sub := a.cardOf(a.chosenServer().GetId(), item).GetSubtitle(); sub != "" {
 							title += " · " + sub
 						}
-						style.Text(ui.Text(c, title), style.Type.Body).TextColor(style.Color(colors.TextPrimary)).SingleLine()
+						style.Text(ui.Text(c, title), style.Type(c).Body).TextColor(style.Color(colors.TextPrimary)).SingleLine()
 						var who []string
 						for _, w := range []string{cmp.Or(s.GetUserName(), s.GetPluginId()), s.GetDeviceName(), s.GetClient()} {
 							if w != "" {
 								who = append(who, w)
 							}
 						}
-						style.Text(ui.Text(c, strings.Join(who, " · ")), style.Type.Footnote).TextColor(style.Color(colors.TextSecondary)).SingleLine()
+						style.Text(ui.Text(c, strings.Join(who, " · ")), style.Type(c).Footnote).TextColor(style.Color(colors.TextSecondary)).SingleLine()
 					})
 					if m, ok := playMethods[np.GetMethod()]; ok {
-						style.Text(ui.Text(c, style.T(c, m)), style.Type.Footnote).TextColor(style.Color(colors.TextSecondary))
+						style.Text(ui.Text(c, style.T(c, m)), style.Type(c).Footnote).TextColor(style.Color(colors.TextSecondary))
 					}
 				})
 				runtime, position := item.GetRuntime().AsDuration(), np.GetPosition().AsDuration()
@@ -369,7 +369,7 @@ func (a *App) activitySection(c *ui.Context) {
 							ui.Box(c).Height(4).Width(0).Basis(0).Grow(float32(min(1, position.Seconds()/runtime.Seconds()))).Radius(2).Background(style.Color(colors.Accent))
 							ui.Box(c).Basis(0).Grow(float32(max(0, 1-position.Seconds()/runtime.Seconds())))
 						}).Row()
-						style.Text(ui.Text(c, clock(position)+" / "+clock(runtime)), style.Type.Caption).TextColor(style.Color(colors.TextSecondary))
+						style.Text(ui.Text(c, clock(position)+" / "+clock(runtime)), style.Type(c).Caption).TextColor(style.Color(colors.TextSecondary))
 					})
 				}
 			})
@@ -403,13 +403,13 @@ func (a *App) activitySection(c *ui.Context) {
 			ui.Row(c.Key(act.GetId())).Padding(10, 16).Gap(12).AlignItems(ui.Start).Children(func() {
 				ui.Box(c).Padding(6, 0, 0).Children(func() { dot(c, severityColor(c, act.GetSeverity())) })
 				ui.Column(c).Grow(1).MinWidth(0).Children(func() {
-					style.Text(ui.Text(c, act.GetTitle()), style.Type.Body).TextColor(style.Color(colors.TextPrimary))
+					style.Text(ui.Text(c, act.GetTitle()), style.Type(c).Body).TextColor(style.Color(colors.TextPrimary))
 					if act.GetMessage() != "" {
-						style.Text(ui.Text(c, act.GetMessage()), style.Type.Footnote).TextColor(style.Color(colors.TextSecondary)).Selectable()
+						style.Text(ui.Text(c, act.GetMessage()), style.Type(c).Footnote).TextColor(style.Color(colors.TextSecondary)).Selectable()
 					}
 				})
 				if act.HasTime() {
-					style.Text(ui.Text(c, fromNow(c, act.GetTime().AsTime())), style.Type.Footnote).TextColor(style.Color(colors.TextSecondary)).
+					style.Text(ui.Text(c, fromNow(c, act.GetTime().AsTime())), style.Type(c).Footnote).TextColor(style.Color(colors.TextSecondary)).
 						Tooltip(mediumDateTime(act.GetTime().AsTime()))
 				}
 			})
@@ -457,7 +457,7 @@ func (a *App) tasksSection(c *ui.Context) {
 		return res.GetTasks(), err
 	})
 	if t.err != nil {
-		style.Text(ui.Text(c, errorMessage(c, t.err)), style.Type.Callout).TextColor(style.Color(style.Colors(c).Danger))
+		style.Text(ui.Text(c, errorMessage(c, t.err)), style.Type(c).Callout).TextColor(style.Color(style.Colors(c).Danger))
 	}
 	var own, plugins []*systemv1.Task
 	for _, task := range t.value {
@@ -510,16 +510,16 @@ func (a *App) taskGroup(c *ui.Context, k, title string, tasks []*systemv1.Task) 
 			g.divider()
 			ui.Row(c.Key(task.GetId())).MinHeight(52).Padding(10, 16).Gap(12).AlignItems(ui.Center).Children(func() {
 				ui.Column(c).Grow(1).MinWidth(0).Gap(2).Children(func() {
-					style.Text(ui.Text(c, task.GetName()), style.Type.Body).TextColor(style.Color(colors.TextPrimary))
+					style.Text(ui.Text(c, task.GetName()), style.Type(c).Body).TextColor(style.Color(colors.TextPrimary))
 					if d := task.GetDescription(); d != "" {
-						style.Text(ui.Text(c, d), style.Type.Footnote).TextColor(style.Color(colors.TextSecondary))
+						style.Text(ui.Text(c, d), style.Type(c).Footnote).TextColor(style.Color(colors.TextSecondary))
 					}
 					ui.Row(c).Gap(6).AlignItems(ui.Center).Children(func() {
 						dot(c, color)
-						style.Text(ui.Text(c, line), style.Type.Footnote).TextColor(style.Color(colors.TextSecondary))
+						style.Text(ui.Text(c, line), style.Type(c).Footnote).TextColor(style.Color(colors.TextSecondary))
 					})
 					if last.GetState() == systemv1.JobState_JOB_STATE_FAILED && last.GetLastError() != "" && !task.GetRunning() {
-						style.Text(ui.Text(c, last.GetLastError()), style.Type.Footnote).TextColor(style.Color(colors.Danger)).Selectable()
+						style.Text(ui.Text(c, last.GetLastError()), style.Type(c).Footnote).TextColor(style.Color(colors.Danger)).Selectable()
 					}
 				})
 				id := task.GetId()
@@ -592,13 +592,13 @@ func (a *App) jobs(c *ui.Context) {
 			}
 			g.divider()
 			ui.Column(c.Key(j.GetId())).Padding(10, 16).Gap(2).Children(func() {
-				style.Text(ui.Text(c, j.GetKind()), style.Type.Body).TextColor(style.Color(colors.TextPrimary))
+				style.Text(ui.Text(c, j.GetKind()), style.Type(c).Body).TextColor(style.Color(colors.TextPrimary))
 				ui.Row(c).Gap(6).AlignItems(ui.Center).Children(func() {
 					dot(c, s.color)
-					style.Text(ui.Text(c, strings.Join(parts, " · ")), style.Type.Footnote).TextColor(style.Color(colors.TextSecondary))
+					style.Text(ui.Text(c, strings.Join(parts, " · ")), style.Type(c).Footnote).TextColor(style.Color(colors.TextSecondary))
 				})
 				if j.GetLastError() != "" {
-					style.Text(ui.Text(c, j.GetLastError()), style.Type.Footnote).TextColor(style.Color(colors.Danger)).Selectable()
+					style.Text(ui.Text(c, j.GetLastError()), style.Type(c).Footnote).TextColor(style.Color(colors.Danger)).Selectable()
 				}
 			})
 		}
@@ -706,7 +706,7 @@ func (a *App) logsSection(c *ui.Context) {
 			ui.Column(c.Key(i)).Padding(8, 16).Gap(2).Children(func() {
 				ui.Row(c).Gap(8).AlignItems(ui.End).Children(func() {
 					if r.HasTime() {
-						style.Text(ui.Text(c, r.GetTime().AsTime().Local().Format("1/2/06, 3:04:05 PM")), style.Type.Footnote).TextColor(style.Color(colors.TextSecondary))
+						style.Text(ui.Text(c, r.GetTime().AsTime().Local().Format("1/2/06, 3:04:05 PM")), style.Type(c).Footnote).TextColor(style.Color(colors.TextSecondary))
 					}
 					name := ""
 					for _, l := range logLevels {
@@ -714,15 +714,15 @@ func (a *App) logsSection(c *ui.Context) {
 							name = style.T(c, l.label)
 						}
 					}
-					style.Text(ui.Text(c, name), style.Type.Footnote).FontWeight(600).TextColor(logColor(c, r.GetLevel()))
+					style.Text(ui.Text(c, name), style.Type(c).Footnote).FontWeight(600).TextColor(logColor(c, r.GetLevel()))
 				})
-				style.Text(ui.Text(c, r.GetMessage()), style.Type.Callout).TextColor(style.Color(colors.TextPrimary)).Selectable()
+				style.Text(ui.Text(c, r.GetMessage()), style.Type(c).Callout).TextColor(style.Color(colors.TextPrimary)).Selectable()
 				if attrs := r.GetAttributes(); len(attrs) > 0 {
 					var parts []string
 					for _, k := range slices.Sorted(maps.Keys(attrs)) {
 						parts = append(parts, k+"="+attrs[k])
 					}
-					style.Text(ui.Text(c, strings.Join(parts, "   ")), style.Type.Caption).Font("SF Mono, Menlo, monospace").TextColor(style.Color(colors.TextSecondary)).Selectable()
+					style.Text(ui.Text(c, strings.Join(parts, "   ")), style.Type(c).Caption).Font("SF Mono, Menlo, monospace").TextColor(style.Color(colors.TextSecondary)).Selectable()
 				}
 			})
 		}

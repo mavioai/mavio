@@ -135,17 +135,17 @@ func moneyText(dollars int64) string {
 func (a *App) titleOverview(c *ui.Context, server string, title *acquisitionv1.Title) {
 	colors := style.Colors(c)
 	credits := titleCredits(title)
-	ui.Row(c).Padding(0, style.Layout.Margin).GapX(32).GapY(32).AlignItems(ui.Start).Wrap().Children(func() {
+	ui.Row(c).Padding(0, style.Layout(c).Margin).GapX(32).GapY(32).AlignItems(ui.Start).Wrap().Children(func() {
 		ui.Column(c).Basis(480).Grow(1).MinWidth(0).Gap(16).Children(func() {
 			if t := title.GetTagline(); t != "" {
-				style.Text(ui.Text(c, t), style.Type.Title3).FontWeight(400).Italic().TextColor(style.Color(colors.TextSecondary))
+				style.Text(ui.Text(c, t), style.Type(c).Title3).FontWeight(400).Italic().TextColor(style.Color(colors.TextSecondary))
 			}
-			style.Text(ui.Text(c, style.T(c, "discover.overview")), style.Type.Title3).TextColor(style.Color(colors.TextPrimary))
+			style.Text(ui.Text(c, style.T(c, "discover.overview")), style.Type(c).Title3).TextColor(style.Color(colors.TextPrimary))
 			overview := title.GetOverview()
 			if overview == "" {
 				overview = style.T(c, "discover.noOverview")
 			}
-			style.Text(ui.Text(c, overview), style.Type.Body).TextColor(style.Color(colors.TextPrimary)).Selectable()
+			style.Text(ui.Text(c, overview), style.Type(c).Body).TextColor(style.Color(colors.TextPrimary)).Selectable()
 			a.leadingCrew(c, server, credits, func() {
 				a.router.Push(titlePath(server, title.GetMediaKind(), title.GetTmdbId()) + "/crew")
 			})
@@ -187,10 +187,10 @@ func (a *App) leadingCrew(c *ui.Context, server string, credits []creditEntry, m
 					job = e.role
 				}
 				ui.Column(c.Key(i)).Width(180).AlignItems(ui.Start).Children(func() {
-					style.Text(ui.Text(c, job), style.Type.Headline).TextColor(style.Color(colors.TextPrimary)).SingleLine()
+					style.Text(ui.Text(c, job), style.Type(c).Headline).TextColor(style.Color(colors.TextPrimary)).SingleLine()
 					b := ui.ButtonBase(c).Cursor(ui.CursorPointer).Label(e.name)
 					b.Children(func() {
-						name := style.Text(ui.Text(c, e.name), style.Type.Callout).TextColor(style.Color(colors.TextSecondary)).SingleLine()
+						name := style.Text(ui.Text(c, e.name), style.Type(c).Callout).TextColor(style.Color(colors.TextSecondary)).SingleLine()
 						if b.Hovered() && (e.personID != "" || e.tmdb != "") {
 							name.TextColor(style.Color(colors.TextPrimary)).Underline()
 						}
@@ -208,7 +208,7 @@ func (a *App) leadingCrew(c *ui.Context, server string, credits []creditEntry, m
 				if b.Hovered() {
 					tc = style.Color(colors.TextPrimary)
 				}
-				style.Text(ui.Text(c, style.T(c, "discover.fullCrew")), style.Type.Callout).TextColor(tc)
+				style.Text(ui.Text(c, style.T(c, "discover.fullCrew")), style.Type(c).Callout).TextColor(tc)
 				ui.Icon(c, style.Icon("forward", false)).Size(16, 16).TextColor(tc)
 			})
 			if b.Clicked() {
@@ -239,7 +239,7 @@ func (a *App) keywords(c *ui.Context, server string, title *acquisitionv1.Title)
 				b.Background(style.Color(colors.FillSelected))
 			}
 			b.Children(func() {
-				style.Text(ui.Text(c, k.GetName()), style.Type.Footnote).TextColor(style.Color(colors.TextPrimary))
+				style.Text(ui.Text(c, k.GetName()), style.Type(c).Footnote).TextColor(style.Color(colors.TextPrimary))
 			})
 			if b.Clicked() && linked {
 				a.router.Push(a.alikePath(c, server, title.GetMediaKind(), catalogFilter{Keywords: namedOf([]*pluginv1.Reference{k})}))
@@ -285,8 +285,8 @@ func (a *App) collectionCard(c *ui.Context, server string, title *acquisitionv1.
 		})
 		// Above the backdrop and its gradient, which are drawn after the flow.
 		ui.Row(c).Absolute().Top(0).Left(16).Right(16).Bottom(0).Gap(12).AlignItems(ui.Center).Children(func() {
-			style.Text(ui.Text(c, name), style.Type.Headline).TextColor(white).SingleLine().Grow(1).MinWidth(0)
-			style.Text(ui.Text(c, style.T(c, "collection.view")), style.Type.Footnote).FontWeight(600).TextColor(white).
+			style.Text(ui.Text(c, name), style.Type(c).Headline).TextColor(white).SingleLine().Grow(1).MinWidth(0)
+			style.Text(ui.Text(c, style.T(c, "collection.view")), style.Type(c).Footnote).FontWeight(600).TextColor(white).
 				Padding(4, 12).Radius(design.RadiusFull).Background(white.Alpha(0.2)).Shrink(0)
 		})
 	})
@@ -357,8 +357,8 @@ func (a *App) titleRatings(c *ui.Context, server string, title *acquisitionv1.Ti
 		for i, s := range all {
 			b := ui.ButtonBase(c.Key(i)).Gap(6).AlignItems(ui.Center).Label(s.tip).Tooltip(s.tip)
 			b.Children(func() {
-				style.Text(ui.Text(c, s.mark), style.Type.Footnote).FontWeight(800).TextColor(style.Color(colors.TextSecondary))
-				t := style.Text(ui.Text(c, s.score), style.Type.Callout).FontWeight(600).TextColor(style.Color(colors.TextPrimary))
+				style.Text(ui.Text(c, s.mark), style.Type(c).Footnote).FontWeight(800).TextColor(style.Color(colors.TextSecondary))
+				t := style.Text(ui.Text(c, s.score), style.Type(c).Callout).FontWeight(600).TextColor(style.Color(colors.TextPrimary))
 				if b.Hovered() {
 					t.Underline()
 				}
@@ -452,12 +452,12 @@ func (a *App) titleFactBox(c *ui.Context, server string, title *acquisitionv1.Ti
 		divider(n)
 		n++
 		ui.Row(c.Key(label)).Padding(10, 16).Gap(16).AlignItems(ui.Start).Justify(ui.SpaceBetween).Children(func() {
-			style.Text(ui.Text(c, label), style.Type.Callout).FontWeight(600).TextColor(style.Color(colors.TextPrimary)).Shrink(0)
+			style.Text(ui.Text(c, label), style.Type(c).Callout).FontWeight(600).TextColor(style.Color(colors.TextPrimary)).Shrink(0)
 			ui.Column(c).MinWidth(0).AlignItems(ui.End).Children(values)
 		})
 	}
 	value := func(text string) {
-		style.Text(ui.Text(c.Key(text), text), style.Type.Callout).TextColor(style.Color(colors.TextSecondary)).TextAlign(ui.End).Selectable()
+		style.Text(ui.Text(c.Key(text), text), style.Type(c).Callout).TextColor(style.Color(colors.TextSecondary)).TextAlign(ui.End).Selectable()
 	}
 	linked := func(text string, f catalogFilter) {
 		path := a.alikePath(c, server, kind, f)
@@ -467,7 +467,7 @@ func (a *App) titleFactBox(c *ui.Context, server string, title *acquisitionv1.Ti
 		}
 		b := ui.ButtonBase(c.Key(text)).Cursor(ui.CursorPointer).Label(text)
 		b.Children(func() {
-			t := style.Text(ui.Text(c, text), style.Type.Callout).TextColor(style.Color(colors.TextSecondary)).TextAlign(ui.End)
+			t := style.Text(ui.Text(c, text), style.Type(c).Callout).TextColor(style.Color(colors.TextSecondary)).TextAlign(ui.End)
 			if b.Hovered() {
 				t.Underline()
 			}
@@ -510,7 +510,7 @@ func (a *App) titleFactBox(c *ui.Context, server string, title *acquisitionv1.Ti
 			}
 			row(label, func() {
 				for _, r := range releases {
-					style.Text(ui.Text(c.Key(r.label), dayText(r.date)), style.Type.Callout).TextColor(style.Color(colors.TextSecondary)).Tooltip(r.label)
+					style.Text(ui.Text(c.Key(r.label), dayText(r.date)), style.Type(c).Callout).TextColor(style.Color(colors.TextSecondary)).Tooltip(r.label)
 				}
 			})
 		case title.GetPremiereDate() != "":
@@ -590,7 +590,7 @@ func (a *App) titleFactBox(c *ui.Context, server string, title *acquisitionv1.Ti
 					}
 					b := ui.ButtonBase(c).Gap(4).AlignItems(ui.Center).Label(label)
 					b.Children(func() {
-						style.Text(ui.Text(c, label), style.Type.Callout).TextColor(style.Color(colors.TextSecondary))
+						style.Text(ui.Text(c, label), style.Type(c).Callout).TextColor(style.Color(colors.TextSecondary))
 						chevron := ui.Icon(c, style.Icon("expand", false)).Size(14, 14).TextColor(style.Color(colors.TextSecondary))
 						if st.allStudios {
 							chevron.Rotate(180)
@@ -606,7 +606,7 @@ func (a *App) titleFactBox(c *ui.Context, server string, title *acquisitionv1.Ti
 			divider(n)
 			n++
 			ui.Column(c).Padding(10, 16).Gap(8).Children(func() {
-				style.Text(ui.Text(c, style.T(c, "item.streaming")), style.Type.Callout).FontWeight(600).TextColor(style.Color(colors.TextPrimary))
+				style.Text(ui.Text(c, style.T(c, "item.streaming")), style.Type(c).Callout).FontWeight(600).TextColor(style.Color(colors.TextPrimary))
 				ui.Row(c).Gap(12).Wrap().Children(func() {
 					for i, p := range ps {
 						if bitmap := a.opts.Images.Get(p.GetLogoUrl(), 32, scale); bitmap != nil {
@@ -614,7 +614,7 @@ func (a *App) titleFactBox(c *ui.Context, server string, title *acquisitionv1.Ti
 								ui.Image(c, bitmap).Fill().Fit(ui.Cover)
 							})
 						} else {
-							style.Text(ui.Text(c.Key(i), p.GetName()), style.Type.Footnote).TextColor(style.Color(colors.TextSecondary))
+							style.Text(ui.Text(c.Key(i), p.GetName()), style.Type(c).Footnote).TextColor(style.Color(colors.TextSecondary))
 						}
 					}
 				})
@@ -654,10 +654,10 @@ func (a *App) titleCrewPage(c *ui.Context, r *ui.Route) {
 	ui.Scroll(c).TrackScroll(a.pageScroll(a.pagePath)).Fill().Children(func() {
 		ui.Column(c).Gap(24).Padding(0, 0, 40).Children(func() {
 			a.pageHeader(c, title, func() {
-				style.Text(ui.Text(c, t.value.GetName()), style.Type.Callout).TextColor(style.Color(colors.TextSecondary))
+				style.Text(ui.Text(c, t.value.GetName()), style.Type(c).Callout).TextColor(style.Color(colors.TextSecondary))
 			})
 			if len(credits) == 0 {
-				style.Text(ui.Text(c, style.T(c, "credits.none")), style.Type.Body).TextColor(style.Color(colors.TextSecondary)).Margin(0, style.Layout.Margin)
+				style.Text(ui.Text(c, style.T(c, "credits.none")), style.Type(c).Body).TextColor(style.Color(colors.TextSecondary)).Margin(0, style.Layout(c).Margin)
 			}
 			for _, l := range crewLabels {
 				var of []creditEntry

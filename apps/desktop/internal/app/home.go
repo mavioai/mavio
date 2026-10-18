@@ -137,10 +137,10 @@ func (a *App) hero(c *ui.Context, cards []*capiv1.Card) {
 			Angle: 50,
 			Stops: []ui.GradientStop{{At: 0, Color: ui.RGBA(0, 0, 0, 0.85)}, {At: 0.55, Color: ui.RGBA(0, 0, 0, 0.25)}, {At: 1, Color: ui.RGBA(0, 0, 0, 0)}},
 		})
-		ui.Column(c).Absolute().Left(style.Layout.Margin).Bottom(56).MaxWidth(560).Gap(10).Children(func() {
-			style.Text(ui.Text(c, card.GetTitle()), style.Type.Display).TextColor(white).MaxLines(2)
+		ui.Column(c).Absolute().Left(style.Layout(c).Margin).Bottom(56).MaxWidth(560).Gap(10).Children(func() {
+			style.Text(ui.Text(c, card.GetTitle()), style.Type(c).Display).TextColor(white).MaxLines(2)
 			if facts := cardFacts(c, card); facts != "" {
-				style.Text(ui.Text(c, facts), style.Type.Callout).TextColor(white.Alpha(0.85)).SingleLine()
+				style.Text(ui.Text(c, facts), style.Type(c).Callout).TextColor(white.Alpha(0.85)).SingleLine()
 			}
 			ui.Row(c).Gap(12).Margin(8, 0, 0).Children(func() {
 				if card.GetKind() == capiv1.CardKind_CARD_KIND_MOVIE {
@@ -157,7 +157,7 @@ func (a *App) hero(c *ui.Context, cards []*capiv1.Card) {
 				}
 			})
 		})
-		ui.Row(c).Absolute().Right(style.Layout.Margin).Bottom(24).Gap(8).Children(func() {
+		ui.Row(c).Absolute().Right(style.Layout(c).Margin).Bottom(24).Gap(8).Children(func() {
 			for j := range cards {
 				dot := ui.ButtonBase(c.Key(j)).Size(8, 8).Radius(4).Background(white.Alpha(0.4)).Label(cards[j].GetTitle())
 				if j == i {
@@ -184,7 +184,7 @@ func heroButton(c *ui.Context, icon, label string, primary bool) ui.Element {
 	}
 	b.Children(func() {
 		ui.Icon(c, style.Icon(icon, true)).Size(18, 18).TextColor(fg)
-		style.Text(ui.Text(c, label), style.Type.Headline).TextColor(fg).SingleLine()
+		style.Text(ui.Text(c, label), style.Type(c).Headline).TextColor(fg).SingleLine()
 	})
 	return b
 }
@@ -267,9 +267,9 @@ func (a *App) row(c *ui.Context, r *capiv1.Row) {
 		placeholderShelf(c.Key(r.GetId()), 8)
 		return
 	case r.HasUnavailable():
-		ui.Row(c.Key(r.GetId())).Padding(0, style.Layout.Margin).Gap(8).AlignItems(ui.Center).Children(func() {
+		ui.Row(c.Key(r.GetId())).Padding(0, style.Layout(c).Margin).Gap(8).AlignItems(ui.Center).Children(func() {
 			ui.Icon(c, style.Icon("offline", false)).Size(18, 18).TextColor(style.Color(colors.TextTertiary))
-			style.Text(ui.Text(c, style.T(c, "home.serverUnreachable", "server", r.GetServerName())), style.Type.Callout).TextColor(style.Color(colors.TextSecondary))
+			style.Text(ui.Text(c, style.T(c, "home.serverUnreachable", "server", r.GetServerName())), style.Type(c).Callout).TextColor(style.Color(colors.TextSecondary))
 		})
 		return
 	}
@@ -299,9 +299,9 @@ func (a *App) row(c *ui.Context, r *capiv1.Row) {
 	a.shelf(c, r.GetId(), title, more, func() {
 		for _, card := range cards {
 			if thumbs {
-				a.thumbCard(c, card, style.Layout.Thumbnail*0.85)
+				a.thumbCard(c, card, style.Layout(c).Thumbnail*0.85)
 			} else {
-				a.posterCard(c, card, style.Layout.Poster)
+				a.posterCard(c, card, style.Layout(c).Poster)
 			}
 		}
 	})
@@ -320,7 +320,7 @@ func allWide(cards []*capiv1.Card) bool {
 // as the server discovers it.
 func (a *App) titleCard(c *ui.Context, server string, t *capiv1.TitleCard) {
 	colors := style.Colors(c)
-	w := style.Layout.Poster
+	w := style.Layout(c).Poster
 	b := ui.ButtonBase(c.Key(t.GetTitle() + fmt.Sprint(t.GetYear()))).Cursor(ui.CursorPointer).Column().Width(w).Gap(6).AlignItems(ui.Start).Label(t.GetTitle())
 	hovered := b.Hovered()
 	if b.Pressed() {
@@ -328,9 +328,9 @@ func (a *App) titleCard(c *ui.Context, server string, t *capiv1.TitleCard) {
 	}
 	b.Children(func() {
 		a.artwork(c, capiv1.Artwork_builder{Url: t.GetPosterUrl()}.Build(), "", nil, w, w*1.5, hovered)
-		style.Text(ui.Text(c, t.GetTitle()), style.Type.Headline).TextColor(style.Color(colors.TextPrimary)).SingleLine().Width(w)
+		style.Text(ui.Text(c, t.GetTitle()), style.Type(c).Headline).TextColor(style.Color(colors.TextPrimary)).SingleLine().Width(w)
 		if t.GetYear() > 0 {
-			style.Text(ui.Text(c, fmt.Sprint(t.GetYear())), style.Type.Footnote).TextColor(style.Color(colors.TextSecondary)).SingleLine()
+			style.Text(ui.Text(c, fmt.Sprint(t.GetYear())), style.Type(c).Footnote).TextColor(style.Color(colors.TextSecondary)).SingleLine()
 		}
 	})
 	tmdb, _ := strconv.Atoi(t.GetExternalIds()["tmdb"])

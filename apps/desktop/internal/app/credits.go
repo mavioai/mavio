@@ -166,11 +166,11 @@ func (a *App) personTile(c *ui.Context, server string, e creditEntry, label stri
 				}
 			})
 		})
-		name := style.Text(ui.Text(c, e.name), style.Type.Callout).TextColor(style.Color(colors.TextPrimary)).TextAlign(ui.Center).MaxLines(2).Margin(4, 0, 0)
+		name := style.Text(ui.Text(c, e.name), style.Type(c).Callout).TextColor(style.Color(colors.TextPrimary)).TextAlign(ui.Center).MaxLines(2).Margin(4, 0, 0)
 		if hovered {
 			name.Underline()
 		}
-		style.Text(ui.Text(c, label), style.Type.Footnote).TextColor(style.Color(colors.TextSecondary)).TextAlign(ui.Center).MaxLines(2)
+		style.Text(ui.Text(c, label), style.Type(c).Footnote).TextColor(style.Color(colors.TextSecondary)).TextAlign(ui.Center).MaxLines(2)
 	})
 	if b.Clicked() {
 		a.openPerson(server, e)
@@ -230,10 +230,10 @@ func (a *App) creditsPage(c *ui.Context, r *ui.Route, server, id string, crew bo
 	ui.Scroll(c).TrackScroll(a.pageScroll(a.pagePath)).Fill().Children(func() {
 		ui.Column(c).Gap(24).Padding(0, 0, 40).Children(func() {
 			a.pageHeader(c, title, func() {
-				style.Text(ui.Text(c, t.value.GetItem().GetName()), style.Type.Callout).TextColor(style.Color(colors.TextSecondary))
+				style.Text(ui.Text(c, t.value.GetItem().GetName()), style.Type(c).Callout).TextColor(style.Color(colors.TextSecondary))
 			})
 			if len(credits) == 0 {
-				style.Text(ui.Text(c, style.T(c, "credits.none")), style.Type.Body).TextColor(style.Color(colors.TextSecondary)).Margin(0, style.Layout.Margin)
+				style.Text(ui.Text(c, style.T(c, "credits.none")), style.Type(c).Body).TextColor(style.Color(colors.TextSecondary)).Margin(0, style.Layout(c).Margin)
 			}
 			a.people(c, server, style.T(c, "credits.cast"), of(libraryv1.CreditKind_CREDIT_KIND_ACTOR))
 			a.people(c, server, style.T(c, "credits.guestStars"), of(libraryv1.CreditKind_CREDIT_KIND_GUEST_STAR))
@@ -251,8 +251,8 @@ func (a *App) people(c *ui.Context, server, title string, credits []creditEntry)
 	}
 	colors := style.Colors(c)
 	ui.Column(c.Key(title)).Gap(12).Children(func() {
-		style.Text(ui.Text(c, title), style.Type.Title3).TextColor(style.Color(colors.TextPrimary)).Margin(0, style.Layout.Margin)
-		ui.Row(c).Padding(0, style.Layout.Margin).GapX(style.Layout.Gutter).GapY(24).Wrap().Children(func() {
+		style.Text(ui.Text(c, title), style.Type(c).Title3).TextColor(style.Color(colors.TextPrimary)).Margin(0, style.Layout(c).Margin)
+		ui.Row(c).Padding(0, style.Layout(c).Margin).GapX(style.Layout(c).Gutter).GapY(24).Wrap().Children(func() {
 			for i, e := range credits {
 				a.personTile(c.Key(i), server, e, e.role, 120)
 			}
@@ -283,10 +283,10 @@ func (a *App) crewList(c *ui.Context, server, id string, credits []creditEntry) 
 					job = e.role
 				}
 				ui.Column(c.Key(i)).Width(160).AlignItems(ui.Start).Children(func() {
-					style.Text(ui.Text(c, job), style.Type.Headline).TextColor(style.Color(colors.TextPrimary)).SingleLine()
+					style.Text(ui.Text(c, job), style.Type(c).Headline).TextColor(style.Color(colors.TextPrimary)).SingleLine()
 					b := ui.ButtonBase(c).Cursor(ui.CursorPointer).Label(e.name)
 					b.Children(func() {
-						name := style.Text(ui.Text(c, e.name), style.Type.Callout).TextColor(style.Color(colors.TextSecondary)).SingleLine()
+						name := style.Text(ui.Text(c, e.name), style.Type(c).Callout).TextColor(style.Color(colors.TextSecondary)).SingleLine()
 						if b.Hovered() {
 							name.TextColor(style.Color(colors.TextPrimary)).Underline()
 						}

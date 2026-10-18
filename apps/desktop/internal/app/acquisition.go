@@ -434,7 +434,7 @@ func (a *App) qualityDefinitionsPage(c *ui.Context) {
 		g.divider()
 		ui.Row(c.Key("head")).MinHeight(44).Padding(0, 16).Gap(12).AlignItems(ui.Center).Children(func() {
 			head := func(key string, width float32) {
-				t := style.Text(ui.Text(c, style.T(c, key)), style.Type.Footnote).TextColor(style.Color(colors.TextSecondary))
+				t := style.Text(ui.Text(c, style.T(c, key)), style.Type(c).Footnote).TextColor(style.Color(colors.TextSecondary))
 				if width > 0 {
 					t.Width(width)
 				} else {
@@ -463,7 +463,7 @@ func (a *App) qualityDefinitionsPage(c *ui.Context) {
 			title := d.GetTitle()
 			g.divider()
 			ui.Row(c.Key(q)).MinHeight(52).Padding(8, 16).Gap(12).AlignItems(ui.Center).Children(func() {
-				style.Text(ui.Text(c, title), style.Type.Body).TextColor(style.Color(colors.TextPrimary)).Grow(1).MinWidth(0)
+				style.Text(ui.Text(c, title), style.Type(c).Body).TextColor(style.Color(colors.TextPrimary)).Grow(1).MinWidth(0)
 				numberField(c.Key("min"), title+" "+style.T(c, "acquisition.minSize"), d.GetMinSize(), 0, most, 0.1,
 					func(v float64) { set(func(d *acquisitionv1.QualityDefinition) { d.SetMinSize(v) }) })
 				numberField(c.Key("preferred"), title+" "+style.T(c, "acquisition.preferredSize"), d.GetPreferredSize(), 0, most, 0.1,
@@ -665,13 +665,13 @@ func (a *App) profileForm(c *ui.Context, defs []*acquisitionv1.QualityDefinition
 					if !on {
 						color = colors.TextSecondary
 					}
-					style.Text(ui.Text(c, name), style.Type.Body).TextColor(style.Color(color))
+					style.Text(ui.Text(c, name), style.Type(c).Body).TextColor(style.Color(color))
 					if it.GetId() > 0 {
 						var names []string
 						for _, q := range it.GetItems() {
 							names = append(names, nameOf(q))
 						}
-						style.Text(ui.Text(c, strings.Join(names, ", ")), style.Type.Footnote).TextColor(style.Color(colors.TextSecondary))
+						style.Text(ui.Text(c, strings.Join(names, ", ")), style.Type(c).Footnote).TextColor(style.Color(colors.TextSecondary))
 					}
 				})
 				move := func(by int) {

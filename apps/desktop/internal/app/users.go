@@ -229,17 +229,17 @@ func (g *settingsGroup) addRow(label string) bool {
 	}
 	b.Children(func() {
 		ui.Icon(c, style.Icon("add", false)).Size(20, 20).TextColor(style.Color(colors.AccentText))
-		style.Text(ui.Text(c, label), style.Type.Body).TextColor(style.Color(colors.AccentText))
+		style.Text(ui.Text(c, label), style.Type(c).Body).TextColor(style.Color(colors.AccentText))
 	})
 	return b.Clicked()
 }
 
 func secondaryText(c *ui.Context, text string) {
-	style.Text(ui.Text(c, text), style.Type.Callout).TextColor(style.Color(style.Colors(c).TextSecondary))
+	style.Text(ui.Text(c, text), style.Type(c).Callout).TextColor(style.Color(style.Colors(c).TextSecondary))
 }
 
 func dangerText(c *ui.Context, text string) {
-	style.Text(ui.Text(c, text), style.Type.Callout).TextColor(style.Color(style.Colors(c).Danger)).Selectable()
+	style.Text(ui.Text(c, text), style.Type(c).Callout).TextColor(style.Color(style.Colors(c).Danger)).Selectable()
 }
 
 // dangerButton builds a small button of the secondary look whose label
@@ -255,7 +255,7 @@ func dangerButton(c *ui.Context, label string, disabled bool) bool {
 		b.Opacity(0.5)
 	}
 	b.Children(func() {
-		style.Text(ui.Text(c, label), style.Type.Callout).FontWeight(600).TextColor(style.Color(colors.Danger))
+		style.Text(ui.Text(c, label), style.Type(c).Callout).FontWeight(600).TextColor(style.Color(colors.Danger))
 	})
 	return b.Clicked() && !disabled
 }
@@ -266,7 +266,7 @@ func (a *App) backTo(c *ui.Context, label, path string) {
 	b := ui.ButtonBase(c).AlignSelf(ui.Start).Gap(4).AlignItems(ui.Center).Label(label)
 	b.Children(func() {
 		ui.Icon(c, style.Icon("back", false)).Size(16, 16).TextColor(style.Color(colors.AccentText))
-		t := style.Text(ui.Text(c, label), style.Type.Callout).FontWeight(600).TextColor(style.Color(colors.AccentText))
+		t := style.Text(ui.Text(c, label), style.Type(c).Callout).FontWeight(600).TextColor(style.Color(colors.AccentText))
 		if b.Hovered() {
 			t.Underline()
 		}
@@ -290,7 +290,7 @@ func badges(c *ui.Context, u *userv1.User) {
 	}
 	ui.Row(c.Key(u.GetId())).Gap(6).AlignItems(ui.Center).Children(func() {
 		for _, b := range list {
-			style.Text(ui.Text(c.Key(b), b), style.Type.Caption).TextColor(style.Color(colors.TextSecondary)).
+			style.Text(ui.Text(c.Key(b), b), style.Type(c).Caption).TextColor(style.Color(colors.TextSecondary)).
 				Padding(1, 6).Radius(4).Background(style.Color(colors.Fill))
 		}
 	})
@@ -375,14 +375,14 @@ func (a *App) userList(c *ui.Context) {
 				avatar(c, u.GetName(), 32)
 				ui.Column(c).Grow(1).MinWidth(0).Children(func() {
 					ui.Row(c).Gap(8).AlignItems(ui.Center).Children(func() {
-						style.Text(ui.Text(c, u.GetName()), style.Type.Body).TextColor(style.Color(colors.TextPrimary))
+						style.Text(ui.Text(c, u.GetName()), style.Type(c).Body).TextColor(style.Color(colors.TextPrimary))
 						badges(c, u)
 					})
 					detail := style.T(c, "users.neverSignedIn")
 					if u.HasLastLoginTime() {
 						detail = style.T(c, "users.lastSignIn", "date", mediumDate(u.GetLastLoginTime().AsTime()))
 					}
-					style.Text(ui.Text(c, detail), style.Type.Footnote).TextColor(style.Color(colors.TextSecondary))
+					style.Text(ui.Text(c, detail), style.Type(c).Footnote).TextColor(style.Color(colors.TextSecondary))
 				})
 				ui.Icon(c, style.Icon("forward", false)).Size(16, 16).TextColor(style.Color(colors.TextTertiary))
 			})
@@ -525,11 +525,11 @@ func (a *App) userForm(c *ui.Context, user *userv1.User) {
 	ui.Column(c).Gap(4).Children(func() {
 		ui.Row(c).Gap(12).AlignItems(ui.Center).Children(func() {
 			avatar(c, user.GetName(), 40)
-			style.Text(ui.Text(c, user.GetName()), style.Type.Title1).TextColor(style.Color(colors.TextPrimary))
+			style.Text(ui.Text(c, user.GetName()), style.Type(c).Title1).TextColor(style.Color(colors.TextPrimary))
 			badges(c, user)
 		})
 		if !standalone {
-			style.Text(ui.Text(c, style.T(c, "users.mavioDevNote")), style.Type.Body).TextColor(style.Color(colors.TextSecondary))
+			style.Text(ui.Text(c, style.T(c, "users.mavioDevNote")), style.Type(c).Body).TextColor(style.Color(colors.TextSecondary))
 		}
 	})
 	group(c, "user", "", "", func(g *settingsGroup) {
@@ -959,7 +959,7 @@ func (a *App) invitationsGroup(c *ui.Context, users []*userv1.User) {
 		colors := style.Colors(c)
 		b.Children(func() {
 			ui.Icon(c, style.Icon("add", false)).Size(18, 18).TextColor(style.Color(colors.AccentText))
-			style.Text(ui.Text(c, style.T(c, "users.invite")), style.Type.Callout).FontWeight(600).TextColor(style.Color(colors.AccentText))
+			style.Text(ui.Text(c, style.T(c, "users.invite")), style.Type(c).Callout).FontWeight(600).TextColor(style.Color(colors.AccentText))
 		})
 		if b.Clicked() {
 			*f = invitesForm{making: true, uses: 1, days: 7, all: true, download: true}

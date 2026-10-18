@@ -9,11 +9,31 @@ import (
 	design "github.com/mavioai/mavio/libs/design/gen/go"
 )
 
-// Layout is the desktop form factor's layout.
-var Layout = design.DesktopLayout
+// Layout returns the layout of the frame's form factor: television's in
+// TV mode (TV), else the desktop's.
+func Layout(c *ui.Context) *design.Layout {
+	if TV(c) {
+		return &design.TvLayout
+	}
+	return &design.DesktopLayout
+}
 
-// Type is the desktop type scale, with a body of 13 as on the Mac.
-var Type = design.DesktopTypography
+// Type returns the type scale of the frame's form factor: television's in
+// TV mode, else the desktop's, with a body of 13 as on the Mac.
+func Type(c *ui.Context) *design.Typography {
+	if TV(c) {
+		return &design.TvTypography
+	}
+	return &design.DesktopTypography
+}
+
+// TV reports whether the frame is in TV mode (docs/tv.md): built with a
+// theme of Theme's for television.
+func TV(c *ui.Context) bool {
+	t := c.Theme()
+	tv := tvThemes()
+	return t == tv[0] || t == tv[1]
+}
 
 // Color returns c as MyGo's color.
 func Color(c design.Color) ui.Color {
@@ -28,20 +48,26 @@ func Colors(c *ui.Context) *design.Colors {
 	return &design.LightColors
 }
 
-var themes = sync.OnceValues(func() (*ui.Theme, *ui.Theme) {
-	return theme(true), theme(false)
-})
+var (
+	themes   = sync.OnceValue(func() [2]*ui.Theme { return [2]*ui.Theme{theme(true, false), theme(false, false)} })
+	tvThemes = sync.OnceValue(func() [2]*ui.Theme { return [2]*ui.Theme{theme(true, true), theme(false, true)} })
+)
 
-// Theme returns MyGo's theme of the dark or the light colors.
-func Theme(dark bool) *ui.Theme {
-	d, l := themes()
-	if dark {
-		return d
+// Theme returns MyGo's theme of the dark or the light colors, for
+// television in TV mode, whose type and layout Type and Layout then
+// return.
+func Theme(dark, tv bool) *ui.Theme {
+	t := themes()
+	if tv {
+		t = tvThemes()
 	}
-	return l
+	if dark {
+		return t[0]
+	}
+	return t[1]
 }
 
-func theme(dark bool) *ui.Theme {
+func theme(dark, tv bool) *ui.Theme {
 	t, p := ui.LightTheme(), &design.LightColors
 	if dark {
 		t, p = ui.DarkTheme(), &design.DarkColors
@@ -63,7 +89,11 @@ func theme(dark bool) *ui.Theme {
 	t.Focus = Color(p.Focus)
 	t.Selection = Color(p.Accent).Alpha(0.35)
 	t.Radius = design.RadiusMd
-	t.FontSize = Type.Body.Size
+	t.FontSize = design.DesktopTypography.Body.Size
+	if tv {
+		t.Background = Color(p.TvBackground)
+		t.FontSize = design.TvTypography.Body.Size
+	}
 	return t
 }
 

@@ -188,11 +188,11 @@ func (a *App) proxyLine(g *settingsGroup, p *systemv1.Proxy, color ui.Color, nam
 			b.Children(func() {
 				sectionTile(c, "network", color)
 				ui.Column(c).Grow(1).MinWidth(0).Children(func() {
-					t := style.Text(ui.Text(c, name), style.Type.Body).TextColor(style.Color(colors.TextPrimary))
+					t := style.Text(ui.Text(c, name), style.Type(c).Body).TextColor(style.Color(colors.TextPrimary))
 					if editable && b.Hovered() {
 						t.Underline()
 					}
-					style.Text(ui.Text(c, detail), style.Type.Footnote).TextColor(style.Color(colors.TextSecondary)).Selectable()
+					style.Text(ui.Text(c, detail), style.Type(c).Footnote).TextColor(style.Color(colors.TextSecondary)).Selectable()
 				})
 			})
 			clicked = editable && b.Clicked()
@@ -236,7 +236,7 @@ var countryCode = regexp.MustCompile(`^[A-Z]{2}$`)
 func proxyTestResult(c *ui.Context, t proxyTest) {
 	colors := style.Colors(c)
 	failed := func(err string) {
-		style.Text(ui.Text(c, style.T(c, "proxies.testFailed", "error", err)), style.Type.Footnote).
+		style.Text(ui.Text(c, style.T(c, "proxies.testFailed", "error", err)), style.Type(c).Footnote).
 			TextColor(style.Color(colors.Danger)).Padding(0, 16, 10).Selectable()
 	}
 	switch {
@@ -255,7 +255,7 @@ func proxyTestResult(c *ui.Context, t proxyTest) {
 		} else if country != "" {
 			parts = append(parts, country)
 		}
-		style.Text(ui.Text(c, strings.Join(parts, " · ")), style.Type.Footnote).TextColor(style.Color(colors.Success)).Padding(0, 16, 10)
+		style.Text(ui.Text(c, strings.Join(parts, " · ")), style.Type(c).Footnote).TextColor(style.Color(colors.Success)).Padding(0, 16, 10)
 	}
 }
 

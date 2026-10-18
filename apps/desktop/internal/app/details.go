@@ -62,7 +62,7 @@ func (a *App) details(c *ui.Context, r *ui.Route, server, id string) {
 			if similar := d.GetSimilar(); len(similar) > 0 {
 				a.shelf(c, key("similar", server, id), style.T(c, "item.similar"), nil, func() {
 					for _, card := range similar {
-						a.posterCard(c, card, style.Layout.Poster)
+						a.posterCard(c, card, style.Layout(c).Poster)
 					}
 				})
 			}
@@ -167,34 +167,34 @@ func (a *App) detailsHeader(c *ui.Context, st *detailsState, d *capiv1.Details) 
 			Angle: 55,
 			Stops: []ui.GradientStop{{At: 0, Color: ui.RGBA(0, 0, 0, 0.9)}, {At: 0.5, Color: ui.RGBA(0, 0, 0, 0.45)}, {At: 1, Color: ui.RGBA(0, 0, 0, 0)}},
 		})
-		ui.Column(c).Absolute().Left(style.Layout.Margin).Bottom(32).MaxWidth(min(640, a.contentWidth*0.6)).Gap(10).Children(func() {
+		ui.Column(c).Absolute().Left(style.Layout(c).Margin).Bottom(32).MaxWidth(min(640, a.contentWidth*0.6)).Gap(10).Children(func() {
 			if card.GetKind() == capiv1.CardKind_CARD_KIND_EPISODE && card.GetSubtitle() != "" {
-				style.Text(ui.Text(c, card.GetSubtitle()), style.Type.Headline).TextColor(white.Alpha(0.85)).SingleLine()
+				style.Text(ui.Text(c, card.GetSubtitle()), style.Type(c).Headline).TextColor(white.Alpha(0.85)).SingleLine()
 			}
 			if logo := a.opts.Images.Get(d.GetLogo().GetUrl(), 400, scale); logo != nil {
 				ui.Image(c, logo).MaxWidth(400).MaxHeight(120).Fit(ui.Contain).AlignSelf(ui.Start)
 			} else {
-				style.Text(ui.Text(c, card.GetTitle()), style.Type.Display).TextColor(white).MaxLines(2)
+				style.Text(ui.Text(c, card.GetTitle()), style.Type(c).Display).TextColor(white).MaxLines(2)
 			}
 			if facts := detailFacts(c, d); facts != "" {
-				style.Text(ui.Text(c, facts), style.Type.Callout).TextColor(white.Alpha(0.85))
+				style.Text(ui.Text(c, facts), style.Type(c).Callout).TextColor(white.Alpha(0.85))
 			}
 			ui.Row(c).Gap(10).AlignItems(ui.Center).Children(func() {
 				if d.HasCommunityRating() {
 					ui.Row(c).Gap(4).AlignItems(ui.Center).Children(func() {
 						ui.Icon(c, style.Icon("rating", true)).Size(14, 14).TextColor(style.Color(design.DarkColors.Warning))
-						style.Text(ui.Text(c, fmt.Sprintf("%.1f", d.GetCommunityRating())), style.Type.Callout).TextColor(white)
+						style.Text(ui.Text(c, fmt.Sprintf("%.1f", d.GetCommunityRating())), style.Type(c).Callout).TextColor(white)
 					})
 				}
 				if r := d.GetOfficialRating(); r != "" {
-					style.Text(ui.Text(c, r), style.Type.Caption).TextColor(white).Padding(1, 6).Radius(design.RadiusSm).Border(1, white.Alpha(0.8))
+					style.Text(ui.Text(c, r), style.Type(c).Caption).TextColor(white).Padding(1, 6).Radius(design.RadiusSm).Border(1, white.Alpha(0.8))
 				}
 			})
 			if d.GetTagline() != "" {
-				style.Text(ui.Text(c, d.GetTagline()), style.Type.Headline).TextColor(white)
+				style.Text(ui.Text(c, d.GetTagline()), style.Type(c).Headline).TextColor(white)
 			}
 			if d.GetOverview() != "" {
-				o := style.Text(ui.Text(c, d.GetOverview()), style.Type.Body).TextColor(white.Alpha(0.9))
+				o := style.Text(ui.Text(c, d.GetOverview()), style.Type(c).Body).TextColor(white.Alpha(0.9))
 				if !st.overviewOpen {
 					o.MaxLines(3).Cursor(ui.CursorPointer).Tooltip(style.T(c, "item.more"))
 				}
@@ -311,7 +311,7 @@ func (a *App) actions(c *ui.Context, st *detailsState, d *capiv1.Details) {
 			ui.Box(c).Width(120).Height(4).Radius(2).Background(white.Alpha(0.3)).Children(func() {
 				ui.Box(c).Height(4).Radius(2).WidthPercent(float32(position) / float32(card.GetRuntimeMs()) * 100).Background(style.Color(design.DarkColors.Progress))
 			})
-			style.Text(ui.Text(c, style.T(c, "item.timeLeft", "time", runtime(left))+" · "+style.T(c, "item.endsAt", "time", c.Now().Add(left).Format("15:04"))), style.Type.Footnote).TextColor(white.Alpha(0.85))
+			style.Text(ui.Text(c, style.T(c, "item.timeLeft", "time", runtime(left))+" · "+style.T(c, "item.endsAt", "time", c.Now().Add(left).Format("15:04"))), style.Type(c).Footnote).TextColor(white.Alpha(0.85))
 		})
 	}
 }
@@ -361,7 +361,7 @@ func (a *App) versionMenu(c *ui.Context, st *detailsState, d *capiv1.Details) {
 	st.source = min(st.source, len(sources)-1)
 	b := ui.ButtonBase(c).Height(40).Padding(0, 16).Gap(6).Radius(20).AlignItems(ui.Center).Background(white.Alpha(0.22)).Label(style.T(c, "item.versions"))
 	b.Children(func() {
-		style.Text(ui.Text(c, style.T(c, "item.version")+" "+sources[st.source].GetName()), style.Type.Callout).TextColor(white).SingleLine().MaxWidth(200)
+		style.Text(ui.Text(c, style.T(c, "item.version")+" "+sources[st.source].GetName()), style.Type(c).Callout).TextColor(white).SingleLine().MaxWidth(200)
 		ui.Icon(c, style.Icon("selector", false)).Size(14, 14).TextColor(white)
 	})
 	b.Menu(func(m *ui.Menu) {
@@ -406,7 +406,7 @@ func (a *App) episodes(c *ui.Context, st *detailsState, d *capiv1.Details) {
 		next := nextEpisode(episodes)
 		ui.Column(c).Gap(12).Children(func() {
 			ui.ScrollHorizontal(c).Children(func() {
-				ui.Row(c).Padding(0, style.Layout.Margin).Gap(8).Children(func() {
+				ui.Row(c).Padding(0, style.Layout(c).Margin).Gap(8).Children(func() {
 					for i, s := range seasons {
 						pill := ui.ButtonBase(c.Key(s.GetItemId())).Cursor(ui.CursorPointer).Height(32).Padding(0, 14).Radius(16).Center().Label(s.GetTitle())
 						fg := colors.TextPrimary
@@ -420,7 +420,7 @@ func (a *App) episodes(c *ui.Context, st *detailsState, d *capiv1.Details) {
 							pill.Background(style.Color(colors.Fill))
 						}
 						pill.Children(func() {
-							style.Text(ui.Text(c, s.GetTitle()), style.Type.Callout).FontWeight(600).TextColor(style.Color(fg)).SingleLine()
+							style.Text(ui.Text(c, s.GetTitle()), style.Type(c).Callout).FontWeight(600).TextColor(style.Color(fg)).SingleLine()
 						})
 						if pill.Clicked() {
 							st.season = i
@@ -441,8 +441,8 @@ func (a *App) episodes(c *ui.Context, st *detailsState, d *capiv1.Details) {
 	case capiv1.CardKind_CARD_KIND_SEASON:
 		episodes := d.GetChildren()
 		next := nextEpisode(episodes)
-		ui.Column(c).Padding(0, style.Layout.Margin).Gap(16).Children(func() {
-			style.Text(ui.Text(c, style.T(c, "item.episodes")), style.Type.Title3).TextColor(style.Color(colors.TextPrimary))
+		ui.Column(c).Padding(0, style.Layout(c).Margin).Gap(16).Children(func() {
+			style.Text(ui.Text(c, style.T(c, "item.episodes")), style.Type(c).Title3).TextColor(style.Color(colors.TextPrimary))
 			for _, e := range episodes {
 				a.episodeRow(c, e, e == next)
 			}
@@ -453,7 +453,7 @@ func (a *App) episodes(c *ui.Context, st *detailsState, d *capiv1.Details) {
 // episodeCard builds an episode in a series' row.
 func (a *App) episodeCard(c *ui.Context, e *capiv1.Card, next bool) {
 	colors := style.Colors(c)
-	w := style.Layout.Thumbnail * 0.85
+	w := style.Layout(c).Thumbnail * 0.85
 	b := ui.ButtonBase(c.Key(e.GetItemId())).Cursor(ui.CursorPointer).Column().Width(w).Gap(4).AlignItems(ui.Start).Label(e.GetTitle())
 	hovered := b.Hovered()
 	b.Children(func() {
@@ -462,11 +462,11 @@ func (a *App) episodeCard(c *ui.Context, e *capiv1.Card, next bool) {
 		if e.GetRuntimeMs() > 0 {
 			number += " · " + runtime(time.Duration(e.GetRuntimeMs())*time.Millisecond)
 		}
-		n := style.Text(ui.Text(c, number), style.Type.Footnote).TextColor(style.Color(colors.TextSecondary)).Margin(4, 0, 0)
+		n := style.Text(ui.Text(c, number), style.Type(c).Footnote).TextColor(style.Color(colors.TextSecondary)).Margin(4, 0, 0)
 		if next {
 			n.TextColor(style.Color(colors.AccentText))
 		}
-		style.Text(ui.Text(c, e.GetTitle()), style.Type.Headline).TextColor(style.Color(colors.TextPrimary)).SingleLine().Width(w)
+		style.Text(ui.Text(c, e.GetTitle()), style.Type(c).Headline).TextColor(style.Color(colors.TextPrimary)).SingleLine().Width(w)
 	})
 	if b.Clicked() {
 		a.open(e)
@@ -476,7 +476,7 @@ func (a *App) episodeCard(c *ui.Context, e *capiv1.Card, next bool) {
 // episodeRow builds an episode in a season's list.
 func (a *App) episodeRow(c *ui.Context, e *capiv1.Card, next bool) {
 	colors := style.Colors(c)
-	w := min(max(a.contentWidth/3, 140), style.Layout.Thumbnail)
+	w := min(max(a.contentWidth/3, 140), style.Layout(c).Thumbnail)
 	b := ui.ButtonBase(c.Key(e.GetItemId())).Cursor(ui.CursorPointer).Gap(16).Padding(8).Radius(design.RadiusLg).AlignItems(ui.Start).Label(e.GetTitle())
 	hovered := b.Hovered()
 	if hovered {
@@ -485,13 +485,13 @@ func (a *App) episodeRow(c *ui.Context, e *capiv1.Card, next bool) {
 	b.Children(func() {
 		a.artwork(c, e.GetThumb(), "", e, w, w*9/16, false)
 		ui.Column(c).Grow(1).MinWidth(0).Gap(4).Children(func() {
-			n := style.Text(ui.Text(c, episodeName(c, e)), style.Type.Footnote).FontWeight(600).TextColor(style.Color(colors.TextSecondary))
+			n := style.Text(ui.Text(c, episodeName(c, e)), style.Type(c).Footnote).FontWeight(600).TextColor(style.Color(colors.TextSecondary))
 			if next {
 				n.TextColor(style.Color(colors.AccentText))
 			}
-			style.Text(ui.Text(c, e.GetTitle()), style.Type.Headline).TextColor(style.Color(colors.TextPrimary))
+			style.Text(ui.Text(c, e.GetTitle()), style.Type(c).Headline).TextColor(style.Color(colors.TextPrimary))
 			if e.GetRuntimeMs() > 0 {
-				style.Text(ui.Text(c, runtime(time.Duration(e.GetRuntimeMs())*time.Millisecond)), style.Type.Footnote).TextColor(style.Color(colors.TextSecondary))
+				style.Text(ui.Text(c, runtime(time.Duration(e.GetRuntimeMs())*time.Millisecond)), style.Type(c).Footnote).TextColor(style.Color(colors.TextSecondary))
 			}
 		})
 	})
@@ -562,22 +562,22 @@ func (a *App) facts(c *ui.Context, st *detailsState, d *capiv1.Details) {
 	if len(facts) == 0 && d.GetOverview() == "" {
 		return
 	}
-	ui.Column(c).Padding(0, style.Layout.Margin).Gap(16).Children(func() {
-		style.Text(ui.Text(c, style.T(c, "item.details")), style.Type.Title3).TextColor(style.Color(colors.TextPrimary))
+	ui.Column(c).Padding(0, style.Layout(c).Margin).Gap(16).Children(func() {
+		style.Text(ui.Text(c, style.T(c, "item.details")), style.Type(c).Title3).TextColor(style.Color(colors.TextPrimary))
 		ui.Row(c).Gap(48).AlignItems(ui.Start).Wrap().Children(func() {
 			if d.GetOverview() != "" {
 				ui.Column(c).Basis(320).Grow(1).MaxWidth(640).Gap(8).Children(func() {
 					if d.GetTagline() != "" {
-						style.Text(ui.Text(c, d.GetTagline()), style.Type.Headline).TextColor(style.Color(colors.TextPrimary))
+						style.Text(ui.Text(c, d.GetTagline()), style.Type(c).Headline).TextColor(style.Color(colors.TextPrimary))
 					}
-					style.Text(ui.Text(c, d.GetOverview()), style.Type.Body).TextColor(style.Color(colors.TextSecondary)).Selectable()
+					style.Text(ui.Text(c, d.GetOverview()), style.Type(c).Body).TextColor(style.Color(colors.TextSecondary)).Selectable()
 				})
 			}
 			ui.Column(c).Basis(240).Grow(1).Gap(12).Children(func() {
 				for _, f := range facts {
 					ui.Column(c).Gap(2).Children(func() {
-						style.Text(ui.Text(c, f.caption), style.Type.Caption).TextColor(style.Color(colors.TextSecondary))
-						style.Text(ui.Text(c, f.value), style.Type.Callout).TextColor(style.Color(colors.TextPrimary)).Selectable()
+						style.Text(ui.Text(c, f.caption), style.Type(c).Caption).TextColor(style.Color(colors.TextSecondary))
+						style.Text(ui.Text(c, f.value), style.Type(c).Callout).TextColor(style.Color(colors.TextPrimary)).Selectable()
 					})
 				}
 			})

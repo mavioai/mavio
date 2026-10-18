@@ -561,7 +561,7 @@ func (a *App) isFullScreen(p *player) bool {
 // playerWindowView builds a window of the player's: the player showing in
 // it, titled after what it plays.
 func (a *App) playerWindowView(c *ui.Context, win Window) {
-	c.SetTheme(style.Theme(true))
+	c.SetTheme(style.Theme(true, false))
 	a.windowKeys(c)
 	p := a.playerOf(win)
 	if win == nil || p == nil {
@@ -578,7 +578,7 @@ func (a *App) playerWindowView(c *ui.Context, win Window) {
 // playerView builds player p: the video under the on-screen controller
 // (docs/clients.md §6.5).
 func (a *App) playerView(c *ui.Context, p *player) {
-	c.SetTheme(style.Theme(true))
+	c.SetTheme(style.Theme(true, style.TV(c)))
 	a.playerKeys(c, p)
 	if !a.playing(p) {
 		return
@@ -677,9 +677,9 @@ func (a *App) playerTopBar(c *ui.Context, p *player) {
 		}
 		ui.Column(c).MinWidth(0).Grow(1).Children(func() {
 			if card.GetKind() == capiv1.CardKind_CARD_KIND_EPISODE && card.GetSubtitle() != "" {
-				style.Text(ui.Text(c, card.GetSubtitle()), style.Type.Footnote).TextColor(white.Alpha(0.7)).SingleLine()
+				style.Text(ui.Text(c, card.GetSubtitle()), style.Type(c).Footnote).TextColor(white.Alpha(0.7)).SingleLine()
 			}
-			style.Text(ui.Text(c, card.GetTitle()), style.Type.Title3).FontWeight(600).TextColor(white).SingleLine()
+			style.Text(ui.Text(c, card.GetTitle()), style.Type(c).Title3).FontWeight(600).TextColor(white).SingleLine()
 		})
 	})
 }
@@ -718,7 +718,7 @@ func (a *App) playerBottomBar(c *ui.Context, p *player) {
 				if playerButton(c, icon, label, false, false, 44).Clicked() {
 					a.setVideo(p, "mute", yesNo(!p.state.Muted))
 				}
-				style.Text(ui.Text(c, clock(p.state.Position)+" / "+clock(total)), style.Type.Footnote).
+				style.Text(ui.Text(c, clock(p.state.Position)+" / "+clock(total)), style.Type(c).Footnote).
 					TextColor(white.Alpha(0.85)).FontFeatures("tnum").Margin(0, 0, 0, 8).SingleLine()
 				ui.Spacer(c)
 				if len(p.next) > 0 {
@@ -763,7 +763,7 @@ func (a *App) nextEpisodeButton(c *ui.Context, p *player) {
 	}
 	b.Children(func() {
 		ui.Icon(c, style.Icon("next", true)).Size(16, 16).TextColor(white)
-		style.Text(ui.Text(c, label), style.Type.Footnote).FontWeight(600).TextColor(white).SingleLine()
+		style.Text(ui.Text(c, label), style.Type(c).Footnote).FontWeight(600).TextColor(white).SingleLine()
 	})
 	if b.Clicked() {
 		a.playNext(p)
@@ -887,7 +887,7 @@ func (a *App) audioTab(c *ui.Context, p *player) {
 				b.Background(white.Alpha(0.2))
 			}
 			b.Children(func() {
-				style.Text(ui.Text(c, label), style.Type.Footnote).FontWeight(600).FontFeatures("tnum").TextColor(color)
+				style.Text(ui.Text(c, label), style.Type(c).Footnote).FontWeight(600).FontFeatures("tnum").TextColor(color)
 			})
 			if b.Clicked() {
 				a.setVideo(p, "speed", strconv.FormatFloat(r, 'f', -1, 64))
@@ -929,13 +929,13 @@ func (a *App) subtitlesTab(c *ui.Context, p *player) {
 			if b.Hovered() {
 				b.Background(white.Alpha(0.2))
 			}
-			b.Children(func() { style.Text(ui.Text(c, label), style.Type.Headline).TextColor(white) })
+			b.Children(func() { style.Text(ui.Text(c, label), style.Type(c).Headline).TextColor(white) })
 			if b.Clicked() {
 				a.setVideo(p, "sub-delay", strconv.FormatFloat((delay+d).Seconds(), 'f', 3, 64))
 			}
 		}
 		step("−", -100*time.Millisecond)
-		style.Text(ui.Text(c, fmt.Sprintf("%+.1f s", delay.Seconds())), style.Type.Callout).FontFeatures("tnum").TextColor(white).
+		style.Text(ui.Text(c, fmt.Sprintf("%+.1f s", delay.Seconds())), style.Type(c).Callout).FontFeatures("tnum").TextColor(white).
 			MinWidth(64).TextAlign(ui.Center)
 		step("+", 100*time.Millisecond)
 	})
@@ -945,8 +945,8 @@ func (a *App) infoTab(c *ui.Context, p *player) {
 	white := ui.RGB(255, 255, 255)
 	fact := func(label, value string) {
 		ui.Column(c.Key(key("fact", label))).Padding(4, 10).Gap(2).Children(func() {
-			style.Text(ui.Text(c, label), style.Type.Footnote).FontWeight(600).TextColor(white.Alpha(0.6))
-			style.Text(ui.Text(c, value), style.Type.Callout).TextColor(white)
+			style.Text(ui.Text(c, label), style.Type(c).Footnote).FontWeight(600).TextColor(white.Alpha(0.6))
+			style.Text(ui.Text(c, value), style.Type(c).Callout).TextColor(white)
 		})
 	}
 	if p.playback == nil {
@@ -973,7 +973,7 @@ func (a *App) infoTab(c *ui.Context, p *player) {
 }
 
 func panelHeading(c *ui.Context, title string) {
-	style.Text(ui.Text(c, title), style.Type.Footnote).FontWeight(600).TextColor(ui.RGB(255, 255, 255).Alpha(0.6)).Padding(16, 10, 8)
+	style.Text(ui.Text(c, title), style.Type(c).Footnote).FontWeight(600).TextColor(ui.RGB(255, 255, 255).Alpha(0.6)).Padding(16, 10, 8)
 }
 
 // choice builds a choice of a list in the panel, checked or not.
@@ -990,9 +990,9 @@ func choice(c *ui.Context, name, details string, checked bool) ui.Element {
 			}
 		})
 		ui.Column(c).Grow(1).MinWidth(0).Children(func() {
-			style.Text(ui.Text(c, name), style.Type.Callout).TextColor(white).SingleLine()
+			style.Text(ui.Text(c, name), style.Type(c).Callout).TextColor(white).SingleLine()
 			if details != "" {
-				style.Text(ui.Text(c, details), style.Type.Caption).TextColor(white.Alpha(0.6)).SingleLine()
+				style.Text(ui.Text(c, details), style.Type(c).Caption).TextColor(white.Alpha(0.6)).SingleLine()
 			}
 		})
 	})
@@ -1005,13 +1005,13 @@ func (a *App) playerError(c *ui.Context, p *player) {
 	ui.Column(c).Absolute().Top(0).Left(0).Right(0).Bottom(0).Background(ui.RGBA(0, 0, 0, 0.7)).
 		AlignItems(ui.Center).Justify(ui.Center).Gap(12).Padding(24).Children(func() {
 		ui.Icon(c, style.Icon("error", false)).Size(48, 48).TextColor(white.Alpha(0.7))
-		style.Text(ui.Text(c, errorMessage(c, p.err)), style.Type.Body).TextColor(white).TextAlign(ui.Center).MaxWidth(420)
+		style.Text(ui.Text(c, errorMessage(c, p.err)), style.Type(c).Body).TextColor(white).TextAlign(ui.Center).MaxWidth(420)
 		b := ui.ButtonBase(c).Height(36).Padding(0, 16).Radius(10).Center().Background(white.Alpha(0.15)).Label(style.T(c, "player.back"))
 		if b.Hovered() {
 			b.Background(white.Alpha(0.25))
 		}
 		b.Children(func() {
-			style.Text(ui.Text(c, style.T(c, "player.back")), style.Type.Headline).TextColor(white)
+			style.Text(ui.Text(c, style.T(c, "player.back")), style.Type(c).Headline).TextColor(white)
 		})
 		if b.Clicked() {
 			a.closePlayer(p, true)

@@ -134,8 +134,8 @@ func (a *App) library(c *ui.Context, r *ui.Route) {
 // pageHeader builds the top of a page with a title and controls beside it.
 func (a *App) pageHeader(c *ui.Context, title string, controls func()) {
 	colors := style.Colors(c)
-	ui.Column(c).Padding(a.pageTop(c), style.Layout.Margin, 16).Gap(12).DragWindow().Children(func() {
-		style.Text(ui.Text(c, title), style.Type.Title1).TextColor(style.Color(colors.TextPrimary)).SingleLine()
+	ui.Column(c).Padding(a.pageTop(c), style.Layout(c).Margin, 16).Gap(12).DragWindow().Children(func() {
+		style.Text(ui.Text(c, title), style.Type(c).Title1).TextColor(style.Color(colors.TextPrimary)).SingleLine()
 		if controls != nil {
 			ui.Row(c).Gap(8).AlignItems(ui.Center).Children(controls)
 		}
@@ -188,7 +188,7 @@ func (a *App) cardGrid(c *ui.Context, id, title string, controls func(), fetch f
 				controls()
 			}
 			if g.total >= 0 {
-				style.Text(ui.Text(c, style.T(c, "library.itemCount", "count", g.total)), style.Type.Footnote).TextColor(style.Color(colors.TextSecondary))
+				style.Text(ui.Text(c, style.T(c, "library.itemCount", "count", g.total)), style.Type(c).Footnote).TextColor(style.Color(colors.TextSecondary))
 			}
 		})
 		switch {
@@ -209,15 +209,15 @@ func (a *App) cardGrid(c *ui.Context, id, title string, controls func(), fetch f
 				next()
 			}
 			a.posterCard(c, g.cards[i], width)
-		}).Grow(1).Padding(0, style.Layout.Margin, 40).Gap(style.Layout.Gutter)
+		}).Grow(1).Padding(0, style.Layout(c).Margin, 40).Gap(style.Layout(c).Gutter)
 	})
 }
 
 // gridColumns returns the width of the cards of a grid filling the page,
 // as many as fit at least the poster's width, and how many there are.
 func (a *App) gridColumns(c *ui.Context) (float32, int) {
-	avail := a.contentWidth - 2*style.Layout.Margin
-	gap := style.Layout.Gutter
-	cols := max(int((avail+gap)/(style.Layout.Poster+gap)), 1)
+	avail := a.contentWidth - 2*style.Layout(c).Margin
+	gap := style.Layout(c).Gutter
+	cols := max(int((avail+gap)/(style.Layout(c).Poster+gap)), 1)
 	return (avail - gap*float32(cols-1)) / float32(cols), cols
 }

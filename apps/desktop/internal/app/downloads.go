@@ -208,7 +208,7 @@ func pill(c *ui.Context, label string, danger bool) {
 		bg, fg = style.Color(colors.Danger), ui.RGB(0xFF, 0xFF, 0xFF)
 	}
 	ui.Box(c).Padding(2, 8).Radius(999).Background(bg).Children(func() {
-		style.Text(ui.Text(c, label), style.Type.Caption).FontWeight(600).TextColor(fg)
+		style.Text(ui.Text(c, label), style.Type(c).Caption).FontWeight(600).TextColor(fg)
 	})
 }
 
@@ -218,7 +218,7 @@ func footnote(c *ui.Context, text string, danger bool) {
 	if danger {
 		color = colors.Danger
 	}
-	style.Text(ui.Text(c, text), style.Type.Footnote).TextColor(style.Color(color)).Selectable()
+	style.Text(ui.Text(c, text), style.Type(c).Footnote).TextColor(style.Color(color)).Selectable()
 }
 
 func (a *App) downloadQueue(c *ui.Context) {
@@ -260,14 +260,14 @@ func (a *App) queueRow(c *ui.Context, i *acquisitionv1.QueueItem) {
 	downloading := state == acquisitionv1.DownloadState_DOWNLOAD_STATE_DOWNLOADING
 	size := i.GetSize()
 	ui.Row(c).Gap(8).AlignItems(ui.Center).Wrap().Children(func() {
-		a.itemLink(c, i.GetItemId(), i.GetItemName(), style.Type.Headline)
+		a.itemLink(c, i.GetItemId(), i.GetItemName(), style.Type(c).Headline)
 		pill(c, downloadStateName(c, state), state == acquisitionv1.DownloadState_DOWNLOAD_STATE_IMPORT_BLOCKED ||
 			state == acquisitionv1.DownloadState_DOWNLOAD_STATE_FAILED || state == acquisitionv1.DownloadState_DOWNLOAD_STATE_FAILED_PENDING)
 		if s := downloadStatusName(c, i.GetStatus()); s != "" {
 			footnote(c, s, false)
 		}
 	})
-	style.Text(ui.Text(c, i.GetTitle()), style.Type.Footnote).TextColor(style.Color(colors.TextPrimary)).Selectable()
+	style.Text(ui.Text(c, i.GetTitle()), style.Type(c).Footnote).TextColor(style.Color(colors.TextPrimary)).Selectable()
 	detail := []string{i.GetQuality(), strings.Join(i.GetLanguages(), ", ")}
 	if size > 0 {
 		detail = append(detail, sizeOf(size))
@@ -287,7 +287,7 @@ func (a *App) queueRow(c *ui.Context, i *acquisitionv1.QueueItem) {
 		})
 	}
 	for k, m := range i.GetMessages() {
-		style.Text(ui.Text(c.Key(k), m), style.Type.Footnote).TextColor(style.Color(colors.Danger)).Selectable()
+		style.Text(ui.Text(c.Key(k), m), style.Type(c).Footnote).TextColor(style.Color(colors.Danger)).Selectable()
 	}
 	finished := state == acquisitionv1.DownloadState_DOWNLOAD_STATE_IMPORTED || state == acquisitionv1.DownloadState_DOWNLOAD_STATE_FAILED ||
 		state == acquisitionv1.DownloadState_DOWNLOAD_STATE_IGNORED
@@ -310,7 +310,7 @@ func (a *App) queueRow(c *ui.Context, i *acquisitionv1.QueueItem) {
 			toggle("import")
 		}
 		if ui.ButtonBase(c).Height(28).Padding(0, 8).AlignItems(ui.Center).Label(style.T(c, "downloads.remove")).Children(func() {
-			style.Text(ui.Text(c, style.T(c, "downloads.remove")), style.Type.Callout).FontWeight(600).TextColor(style.Color(colors.Danger))
+			style.Text(ui.Text(c, style.T(c, "downloads.remove")), style.Type(c).Callout).FontWeight(600).TextColor(style.Color(colors.Danger))
 		}).Clicked() {
 			toggle("remove")
 		}
@@ -334,7 +334,7 @@ func switchLine(c *ui.Context, label string, on *bool) bool {
 	changed := false
 	b := ui.ButtonBase(c.Key(label)).MinHeight(44).Gap(12).AlignItems(ui.Center).Label(label)
 	b.Children(func() {
-		style.Text(ui.Text(c, label), style.Type.Callout).TextColor(style.Color(style.Colors(c).TextPrimary)).Grow(1)
+		style.Text(ui.Text(c, label), style.Type(c).Callout).TextColor(style.Color(style.Colors(c).TextPrimary)).Grow(1)
 		changed = ui.Switch(c, on).Label(label).Changed()
 	})
 	if b.Clicked() && !changed {
@@ -404,7 +404,7 @@ func (a *App) importFiles(c *ui.Context, target importTarget) {
 	}, k)
 	panel(c, func() {
 		ui.Row(c).Gap(8).AlignItems(ui.Center).Wrap().Children(func() {
-			style.Text(ui.Text(c, style.T(c, "downloads.files")), style.Type.Callout).FontWeight(600).TextColor(style.Color(style.Colors(c).TextPrimary)).Grow(1)
+			style.Text(ui.Text(c, style.T(c, "downloads.files")), style.Type(c).Callout).FontWeight(600).TextColor(style.Color(style.Colors(c).TextPrimary)).Grow(1)
 			if choose(c, style.T(c, "downloads.mode"), &mode, []string{style.T(c, "downloads.modeAuto"), style.T(c, "downloads.modeMove"), style.T(c, "downloads.modeCopy")}) {
 				st.modes[k] = mode
 			}
@@ -434,10 +434,10 @@ func (a *App) importFile(c *ui.Context, target importTarget, f *acquisitionv1.Ma
 			if name == "" {
 				name = f.GetPath()
 			}
-			style.Text(ui.Text(c, name), style.Type.Footnote).TextColor(style.Color(colors.TextPrimary)).Selectable()
+			style.Text(ui.Text(c, name), style.Type(c).Footnote).TextColor(style.Color(colors.TextPrimary)).Selectable()
 			footnote(c, joinDetail(sizeOf(f.GetSize()), f.GetQuality(), strings.Join(f.GetLanguages(), ", "), f.GetReleaseGroup()), false)
 			for k, r := range f.GetRejections() {
-				style.Text(ui.Text(c.Key(k), r), style.Type.Footnote).TextColor(style.Color(colors.Danger)).Selectable()
+				style.Text(ui.Text(c.Key(k), r), style.Type(c).Footnote).TextColor(style.Color(colors.Danger)).Selectable()
 			}
 			if err := st.errs[key]; err != nil {
 				footnote(c, errorMessage(c, err), true)
@@ -519,23 +519,23 @@ func (a *App) historyRow(c *ui.Context, e *acquisitionv1.HistoryEvent) {
 		}
 		footnote(c, joinDetail(e.GetQuality(), strings.Join(e.GetLanguages(), ", "), when), false)
 	})
-	style.Text(ui.Text(c, e.GetSourceTitle()), style.Type.Footnote).TextColor(style.Color(colors.TextPrimary)).Selectable()
+	style.Text(ui.Text(c, e.GetSourceTitle()), style.Type(c).Footnote).TextColor(style.Color(colors.TextPrimary)).Selectable()
 	if e.GetItemId() != "" {
-		a.itemLink(c, e.GetItemId(), style.T(c, "downloads.item"), style.Type.Footnote)
+		a.itemLink(c, e.GetItemId(), style.T(c, "downloads.item"), style.Type(c).Footnote)
 	}
 	if data := e.GetData(); len(data) > 0 {
 		var parts []string
 		for _, k := range slices.Sorted(maps.Keys(data)) {
 			parts = append(parts, k+"="+data[k])
 		}
-		style.Text(ui.Text(c, strings.Join(parts, "   ")), style.Type.Caption).Font("SF Mono, Menlo, monospace").TextColor(style.Color(colors.TextSecondary)).Selectable()
+		style.Text(ui.Text(c, strings.Join(parts, "   ")), style.Type(c).Caption).Font("SF Mono, Menlo, monospace").TextColor(style.Color(colors.TextSecondary)).Selectable()
 	}
 	if e.GetType() != acquisitionv1.HistoryEventType_HISTORY_EVENT_TYPE_GRABBED {
 		return
 	}
 	ui.Row(c).Gap(8).AlignItems(ui.Center).Wrap().Padding(4, 0, 0, 0).Children(func() {
 		if st.confirm == id {
-			style.Text(ui.Text(c, style.T(c, "downloads.markFailedTitle")), style.Type.Callout).TextColor(style.Color(colors.TextPrimary))
+			style.Text(ui.Text(c, style.T(c, "downloads.markFailedTitle")), style.Type(c).Callout).TextColor(style.Color(colors.TextPrimary))
 			if linkButton(c, style.T(c, "action.cancel")).Clicked() {
 				st.confirm = ""
 			}
@@ -546,7 +546,7 @@ func (a *App) historyRow(c *ui.Context, e *acquisitionv1.HistoryEvent) {
 				}, func() { st.confirm = "" })
 			}
 		} else if ui.ButtonBase(c).Height(28).AlignItems(ui.Center).Label(style.T(c, "downloads.markFailed")).Children(func() {
-			style.Text(ui.Text(c, style.T(c, "downloads.markFailed")), style.Type.Callout).FontWeight(600).TextColor(style.Color(colors.Danger))
+			style.Text(ui.Text(c, style.T(c, "downloads.markFailed")), style.Type(c).Callout).FontWeight(600).TextColor(style.Color(colors.Danger))
 		}).Clicked() {
 			st.confirm = id
 		}
@@ -585,7 +585,7 @@ func (a *App) blocklistRow(c *ui.Context, e *acquisitionv1.BlocklistEntry) {
 	id := e.GetId()
 	ui.Row(c.Key(id)).Padding(12, 16).Gap(12).AlignItems(ui.Center).Children(func() {
 		ui.Column(c).Grow(1).MinWidth(0).Gap(2).Children(func() {
-			style.Text(ui.Text(c, e.GetSourceTitle()), style.Type.Footnote).TextColor(style.Color(colors.TextPrimary)).Selectable()
+			style.Text(ui.Text(c, e.GetSourceTitle()), style.Type(c).Footnote).TextColor(style.Color(colors.TextPrimary)).Selectable()
 			detail := []string{e.GetQuality(), strings.Join(e.GetLanguages(), ", ")}
 			if e.GetSize() > 0 {
 				detail = append(detail, sizeOf(e.GetSize()))
@@ -599,7 +599,7 @@ func (a *App) blocklistRow(c *ui.Context, e *acquisitionv1.BlocklistEntry) {
 				footnote(c, e.GetMessage(), false)
 			}
 			if e.GetItemId() != "" {
-				a.itemLink(c, e.GetItemId(), style.T(c, "downloads.item"), style.Type.Footnote)
+				a.itemLink(c, e.GetItemId(), style.T(c, "downloads.item"), style.Type(c).Footnote)
 			}
 			if err := st.errs[id]; err != nil {
 				footnote(c, errorMessage(c, err), true)

@@ -290,7 +290,7 @@ func specForm(c *ui.Context, s *acquisitionv1.CustomFormatSpec) (removed bool) {
 			}
 			ui.Row(c).Gap(8).AlignItems(ui.Center).Children(func() {
 				numberField(c.Key("min"), style.T(c, "formats.min"), s.GetMin(), 0, 1_000_000, step, s.SetMin)
-				style.Text(ui.Text(c, "–"), style.Type.Callout).TextColor(style.Color(colors.TextSecondary))
+				style.Text(ui.Text(c, "–"), style.Type(c).Callout).TextColor(style.Color(colors.TextSecondary))
 				numberField(c.Key("max"), style.T(c, "formats.max"), s.GetMax(), 0, 1_000_000, step, s.SetMax)
 				if step < 1 {
 					secondaryText(c, style.T(c, "formats.gigabytes"))
@@ -343,9 +343,9 @@ func entryRow(g *settingsGroup, key, label, detail string, disabled bool, traili
 		}
 		b.Children(func() {
 			ui.Column(c).Grow(1).MinWidth(0).Children(func() {
-				style.Text(ui.Text(c, label), style.Type.Body).TextColor(style.Color(colors.TextPrimary)).MaxLines(1)
+				style.Text(ui.Text(c, label), style.Type(c).Body).TextColor(style.Color(colors.TextPrimary)).MaxLines(1)
 				if detail != "" {
-					style.Text(ui.Text(c, detail), style.Type.Footnote).TextColor(style.Color(colors.TextSecondary))
+					style.Text(ui.Text(c, detail), style.Type(c).Footnote).TextColor(style.Color(colors.TextSecondary))
 				}
 			})
 		})
@@ -685,8 +685,8 @@ func (a *App) releaseForm(g *settingsGroup, id string, indexers []*acquisitionv1
 		g.block(func() {
 			colors := style.Colors(c)
 			ui.Column(c).Gap(6).Children(func() {
-				style.Text(ui.Text(c, label), style.Type.Body).TextColor(style.Color(colors.TextPrimary))
-				style.Text(ui.Text(c, detail), style.Type.Footnote).TextColor(style.Color(colors.TextSecondary))
+				style.Text(ui.Text(c, label), style.Type(c).Body).TextColor(style.Color(colors.TextPrimary))
+				style.Text(ui.Text(c, detail), style.Type(c).Footnote).TextColor(style.Color(colors.TextSecondary))
 				ui.TextArea(c, value).FillWidth().Height(76).Label(label)
 			})
 		})

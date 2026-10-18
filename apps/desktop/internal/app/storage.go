@@ -218,21 +218,21 @@ func diskRow(g *settingsGroup, d *storagev1.Disk) {
 		sectionTile(c, k.icon, k.color)
 		ui.Column(c).Grow(1).MinWidth(0).Children(func() {
 			ui.Row(c).Gap(12).AlignItems(ui.Center).Children(func() {
-				style.Text(ui.Text(c, cmpOr(d.GetName(), d.GetPath())), style.Type.Body).TextColor(style.Color(colors.TextPrimary)).
+				style.Text(ui.Text(c, cmpOr(d.GetName(), d.GetPath())), style.Type(c).Body).TextColor(style.Color(colors.TextPrimary)).
 					MaxLines(1).Grow(1).MinWidth(0)
 				facts := style.T(c, k.label)
 				if d.GetFileSystem() != "" {
 					facts += " · " + d.GetFileSystem()
 				}
-				style.Text(ui.Text(c, facts), style.Type.Footnote).TextColor(style.Color(colors.TextSecondary)).Shrink(0)
+				style.Text(ui.Text(c, facts), style.Type(c).Footnote).TextColor(style.Color(colors.TextSecondary)).Shrink(0)
 			})
 			if d.GetName() != "" {
-				style.Text(ui.Text(c, d.GetPath()), style.Type.Footnote).TextColor(style.Color(colors.TextSecondary)).MaxLines(1).Selectable()
+				style.Text(ui.Text(c, d.GetPath()), style.Type(c).Footnote).TextColor(style.Color(colors.TextSecondary)).MaxLines(1).Selectable()
 			}
 			if d.HasTotalBytes() {
 				usageBar(c, d.GetUsedBytes(), d.GetTotalBytes())
 			} else {
-				style.Text(ui.Text(c, style.T(c, "storage.noAnswer")), style.Type.Footnote).TextColor(style.Color(colors.TextTertiary))
+				style.Text(ui.Text(c, style.T(c, "storage.noAnswer")), style.Type(c).Footnote).TextColor(style.Color(colors.TextTertiary))
 			}
 		})
 	})
@@ -263,7 +263,7 @@ func usageBar(c *ui.Context, used, total int64) {
 				ui.Box(c).Height(6).Grow(float32(1 - share))
 			}
 		})
-		style.Text(ui.Text(c, text), style.Type.Footnote).TextColor(style.Color(colors.TextSecondary))
+		style.Text(ui.Text(c, text), style.Type(c).Footnote).TextColor(style.Color(colors.TextSecondary))
 	})
 }
 
@@ -318,18 +318,18 @@ func (a *App) remoteRow(g *settingsGroup, r *storagev1.Remote, kind string) {
 		sectionTile(c, "cloud", ui.RGB(0x30, 0xB0, 0xC7))
 		ui.Column(c).Grow(1).MinWidth(0).Children(func() {
 			ui.Row(c).Gap(8).AlignItems(ui.Center).Children(func() {
-				style.Text(ui.Text(c, name), style.Type.Body).TextColor(style.Color(colors.TextPrimary)).MaxLines(1).Shrink(1).MinWidth(0)
+				style.Text(ui.Text(c, name), style.Type(c).Body).TextColor(style.Color(colors.TextPrimary)).MaxLines(1).Shrink(1).MinWidth(0)
 				ui.Box(c).Size(6, 6).Shrink(0).Radius(3).Background(mark).Label(state)
 			})
-			style.Text(ui.Text(c, kind), style.Type.Footnote).TextColor(style.Color(colors.TextSecondary)).MaxLines(1)
+			style.Text(ui.Text(c, kind), style.Type(c).Footnote).TextColor(style.Color(colors.TextSecondary)).MaxLines(1)
 			switch {
 			case root.err != nil:
-				style.Text(ui.Text(c, errorMessage(c, root.err)), style.Type.Footnote).TextColor(style.Color(colors.Danger)).MaxLines(2)
+				style.Text(ui.Text(c, errorMessage(c, root.err)), style.Type(c).Footnote).TextColor(style.Color(colors.Danger)).MaxLines(2)
 			case !hasUsed:
 			case u.GetTotalBytes() > 0:
 				usageBar(c, used, u.GetTotalBytes())
 			default:
-				style.Text(ui.Text(c, style.T(c, "storage.used", "used", capacityOf(used))), style.Type.Footnote).
+				style.Text(ui.Text(c, style.T(c, "storage.used", "used", capacityOf(used))), style.Type(c).Footnote).
 					TextColor(style.Color(colors.TextSecondary))
 			}
 		})
@@ -497,13 +497,13 @@ func optionsGroup(c *ui.Context, options []*storagev1.Option, values map[string]
 			ui.Row(c.Key(o.GetName())).MinHeight(52).Padding(10, 16).Gap(12).AlignItems(ui.Center).Wrap().Children(func() {
 				ui.Column(c).Grow(1).MinWidth(240).Gap(2).Children(func() {
 					ui.Row(c).Children(func() {
-						style.Text(ui.Text(c, o.GetName()), style.Type.Body).Font("SF Mono, Menlo, monospace").TextColor(style.Color(colors.TextPrimary))
+						style.Text(ui.Text(c, o.GetName()), style.Type(c).Body).Font("SF Mono, Menlo, monospace").TextColor(style.Color(colors.TextPrimary))
 						if o.GetRequired() {
-							style.Text(ui.Text(c, " *"), style.Type.Body).TextColor(style.Color(colors.Danger))
+							style.Text(ui.Text(c, " *"), style.Type(c).Body).TextColor(style.Color(colors.Danger))
 						}
 					})
 					if help := strings.TrimSpace(o.GetHelp()); help != "" {
-						style.Text(ui.Text(c, help), style.Type.Caption).FontWeight(400).TextColor(style.Color(colors.TextSecondary)).Selectable()
+						style.Text(ui.Text(c, help), style.Type(c).Caption).FontWeight(400).TextColor(style.Color(colors.TextSecondary)).Selectable()
 					}
 				})
 				p := ""
@@ -830,7 +830,7 @@ func (a *App) questionStep(c *ui.Context, name string, isNew bool) {
 				secondaryText(c, style.T(c, "storage.questionNone"))
 			case qr != nil:
 				if qr.before != "" {
-					style.Text(ui.Text(c, qr.before), style.Type.Body).TextColor(style.Color(colors.TextPrimary)).Selectable()
+					style.Text(ui.Text(c, qr.before), style.Type(c).Body).TextColor(style.Color(colors.TextPrimary)).Selectable()
 				}
 				if svg := ss.qrSVG(qr); svg != nil {
 					ui.Box(c).AlignSelf(ui.Start).Padding(8).Radius(8).Background(ui.RGB(255, 255, 255)).Children(func() {
@@ -842,10 +842,10 @@ func (a *App) questionStep(c *ui.Context, name string, isNew bool) {
 					if waiting {
 						text = style.T(c, "storage.waitingScan")
 					}
-					style.Text(ui.Text(c, text), style.Type.Footnote).TextColor(style.Color(colors.TextSecondary))
+					style.Text(ui.Text(c, text), style.Type(c).Footnote).TextColor(style.Color(colors.TextSecondary))
 				}
 			case help != "":
-				style.Text(ui.Text(c, help), style.Type.Body).TextColor(style.Color(colors.TextPrimary)).Selectable()
+				style.Text(ui.Text(c, help), style.Type(c).Body).TextColor(style.Color(colors.TextPrimary)).Selectable()
 			}
 			if o != nil && !confirm {
 				if v, ok := optionControl(c, o, f.answer, true, "", ""); ok {
@@ -1020,7 +1020,7 @@ func (a *App) remoteFolders(c *ui.Context, name string) {
 	}
 	group(c, "folders", style.T(c, "storage.folders"), style.T(c, "storage.foldersFooter"), func(g *settingsGroup) {
 		g.divider()
-		style.Text(ui.Text(c, path), style.Type.Callout).TextColor(style.Color(colors.TextSecondary)).Padding(10, 16).Selectable()
+		style.Text(ui.Text(c, path), style.Type(c).Callout).TextColor(style.Color(colors.TextSecondary)).Padding(10, 16).Selectable()
 		g.divider()
 		ui.Scroll(c.Key(path)).MaxHeight(320).Children(func() {
 			ui.Column(c).Children(func() {
@@ -1031,7 +1031,7 @@ func (a *App) remoteFolders(c *ui.Context, name string) {
 					}
 					b.Children(func() {
 						ui.Icon(c, style.Icon(icon, false)).Size(18, 18).Shrink(0).TextColor(style.Color(colors.TextSecondary))
-						style.Text(ui.Text(c, label), style.Type.Body).TextColor(style.Color(colors.TextPrimary)).MaxLines(1).Grow(1).MinWidth(0)
+						style.Text(ui.Text(c, label), style.Type(c).Body).TextColor(style.Color(colors.TextPrimary)).MaxLines(1).Grow(1).MinWidth(0)
 					})
 					if b.Clicked() {
 						f.path = to
@@ -1048,7 +1048,7 @@ func (a *App) remoteFolders(c *ui.Context, name string) {
 					row(p, p[strings.LastIndex(p, sep)+1:], "folder", p)
 				}
 				note := func(text string, color ui.Color) {
-					style.Text(ui.Text(c, text), style.Type.Callout).TextColor(color).Padding(12, 16).Selectable()
+					style.Text(ui.Text(c, text), style.Type(c).Callout).TextColor(color).Padding(12, 16).Selectable()
 				}
 				switch {
 				case t.err != nil:
@@ -1144,8 +1144,8 @@ func (a *App) offlineClients(c *ui.Context, remotes []*storagev1.Remote) {
 			b.Children(func() {
 				sectionTile(c, "downloads", color)
 				ui.Column(c).Grow(1).MinWidth(0).Children(func() {
-					style.Text(ui.Text(c, o.GetName()), style.Type.Body).TextColor(style.Color(colors.TextPrimary)).MaxLines(1)
-					style.Text(ui.Text(c, strings.Join(parts, " · ")), style.Type.Footnote).TextColor(style.Color(colors.TextSecondary)).MaxLines(1)
+					style.Text(ui.Text(c, o.GetName()), style.Type(c).Body).TextColor(style.Color(colors.TextPrimary)).MaxLines(1)
+					style.Text(ui.Text(c, strings.Join(parts, " · ")), style.Type(c).Footnote).TextColor(style.Color(colors.TextSecondary)).MaxLines(1)
 				})
 			})
 			if b.Clicked() && off.editing == nil {

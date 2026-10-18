@@ -501,7 +501,7 @@ func (a *App) apiKeysSection(c *ui.Context) {
 		group(c, "made", style.T(c, "keys.madeTitle", "name", f.madeName), style.T(c, "keys.madeFooter"), func(g *settingsGroup) {
 			g.block(func() {
 				ui.Row(c).Gap(12).AlignItems(ui.Center).Children(func() {
-					style.Text(ui.Text(c, f.made), style.Type.Callout).Font("SF Mono, Menlo, monospace").Grow(1).Shrink(1).Selectable().
+					style.Text(ui.Text(c, f.made), style.Type(c).Callout).Font("SF Mono, Menlo, monospace").Grow(1).Shrink(1).Selectable().
 						TextColor(style.Color(style.Colors(c).TextPrimary))
 					label := style.T(c, "keys.copy")
 					if f.copied {
