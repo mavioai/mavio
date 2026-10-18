@@ -398,7 +398,7 @@ func (a *App) settingsSection(c *ui.Context, r *ui.Route, id string) {
 	case "users":
 		a.usersSection(c, r)
 	case "libraries":
-		a.librariesSection(c)
+		a.librariesSection(c, r)
 	case "activity":
 		a.activitySection(c)
 	case "tasks":

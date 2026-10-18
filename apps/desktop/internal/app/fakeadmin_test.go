@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"net/http"
+	"slices"
 	"time"
 
 	"google.golang.org/protobuf/types/known/durationpb"
@@ -10,6 +11,7 @@ import (
 
 	libraryv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/library/v1"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/library/v1/libraryv1connect"
+	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/storage/v1/storagev1connect"
 	systemv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/system/v1"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/system/v1/systemv1connect"
 )
@@ -44,6 +46,8 @@ func (f *fakeCore) handleAdmin(mux *http.ServeMux) {
 	mux.Handle(systemv1connect.NewTaskServiceHandler(&fakeTasks{f: f}))
 	mux.Handle(systemv1connect.NewActivityServiceHandler(&fakeActivity{f: f}))
 	mux.Handle(libraryv1connect.NewLibraryServiceHandler(&fakeLibraries{f: f}))
+	mux.Handle(storagev1connect.NewStorageServiceHandler(&fakeStorage{f: f}))
+	f.libraries = fakeLibraryList()
 }
 
 // tsAgo returns a time a length of time before now, as a timestamp.
@@ -124,14 +128,9 @@ func (a *fakeActivity) ListActivities(context.Context, *systemv1.ListActivitiesR
 }
 
 func (l *fakeLibraries) ListLibraries(context.Context, *libraryv1.ListLibrariesRequest) (*libraryv1.ListLibrariesResponse, error) {
-	lib := func(id, name string, kind libraryv1.LibraryKind, paths ...string) *libraryv1.Library {
-		return libraryv1.Library_builder{Id: &id, Name: &name, Kind: &kind, Paths: paths}.Build()
-	}
-	return libraryv1.ListLibrariesResponse_builder{Libraries: []*libraryv1.Library{
-		lib("movies", "Movies", libraryv1.LibraryKind_LIBRARY_KIND_MOVIES, "/media/movies", "/media/4k"),
-		lib("shows", "Shows", libraryv1.LibraryKind_LIBRARY_KIND_SHOWS, "/media/shows"),
-		lib("music", "Music", libraryv1.LibraryKind_LIBRARY_KIND_MUSIC, "/media/music"),
-	}}.Build(), nil
+	l.f.mu.Lock()
+	defer l.f.mu.Unlock()
+	return libraryv1.ListLibrariesResponse_builder{Libraries: slices.Clone(l.f.libraries)}.Build(), nil
 }
 
 func (l *fakeLibraries) ScanLibrary(context.Context, *libraryv1.ScanLibraryRequest) (*libraryv1.ScanLibraryResponse, error) {

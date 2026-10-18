@@ -28,12 +28,13 @@ import (
 type adminState struct {
 	reload int // counts the changes the sections made
 
-	info     task[*systemv1.GetSystemInfoResponse]
-	health   task[*systemv1.GetHealthResponse]
-	users    task[[]*userv1.User]
-	people   usersState
-	libs     task[[]*libraryv1.Library]
-	sessions task[[]*sessionv1.Session]
+	info      task[*systemv1.GetSystemInfoResponse]
+	health    task[*systemv1.GetHealthResponse]
+	users     task[[]*userv1.User]
+	people    usersState
+	libraries librariesState
+	libs      task[[]*libraryv1.Library]
+	sessions  task[[]*sessionv1.Session]
 
 	activities    task[*systemv1.ListActivitiesResponse]
 	severity      int // the index of the severities shown
@@ -260,56 +261,6 @@ var libraryKinds = map[libraryv1.LibraryKind]struct {
 	libraryv1.LibraryKind_LIBRARY_KIND_BOOKS:        {"libraries.kindBooks", "books", ui.RGB(0xA2, 0x84, 0x5E)},
 	libraryv1.LibraryKind_LIBRARY_KIND_PHOTOS:       {"libraries.kindPhotos", "photos", ui.RGB(0x32, 0xAD, 0xE6)},
 	libraryv1.LibraryKind_LIBRARY_KIND_MIXED:        {"libraries.kindMixed", "folder", ui.RGB(0x8E, 0x8E, 0x93)},
-}
-
-func (a *App) librariesSection(c *ui.Context) {
-	st := &a.settingsState.admin
-	sectionHeader(c, style.T(c, "settings.libraries"), style.T(c, "libraries.message"))
-	t := adminTask(a, &st.libs, "libraries", func(ctx context.Context, s string) ([]*libraryv1.Library, error) {
-		res, err := a.libraryService(s).ListLibraries(ctx, &libraryv1.ListLibrariesRequest{})
-		return res.GetLibraries(), err
-	})
-	if taskStatus(c, t, func() { st.libs.key = "" }, nil) {
-		return
-	}
-	var libs []*libraryv1.Library
-	for _, l := range t.value {
-		if _, ok := libraryKinds[l.GetKind()]; ok {
-			libs = append(libs, l)
-		}
-	}
-	slices.SortFunc(libs, func(x, y *libraryv1.Library) int {
-		return strings.Compare(strings.ToLower(x.GetName()), strings.ToLower(y.GetName()))
-	})
-	server := a.chosenServer().GetId()
-	group(c, "libraries", "", "", func(g *settingsGroup) {
-		if len(libs) == 0 {
-			g.note(style.T(c, "libraries.none"), false)
-		}
-		for _, l := range libs {
-			k := libraryKinds[l.GetKind()]
-			detail := style.T(c, k.title) + " · " + style.T(c, "libraries.folderCount", "count", len(l.GetPaths()))
-			if n, ok := st.notices[l.GetId()]; ok {
-				detail = n
-			}
-			g.row(l.GetName(), detail, func() { sectionTile(c, k.icon, k.color) }, func() {
-				id := l.GetId()
-				label := style.T(c, "libraries.scan")
-				if st.running == id {
-					label = "…"
-				}
-				if smallButton(c.Key(id), label, st.running != "") {
-					a.startAction(id, func(ctx context.Context) (string, error) {
-						res, err := a.libraryService(server).ScanLibrary(ctx, libraryv1.ScanLibraryRequest_builder{Id: &id}.Build())
-						if res.GetEnqueued() {
-							return "libraries.scanQueued", err
-						}
-						return "libraries.scanPending", err
-					}, func(notice string, err error) { a.notice(c, id, notice, err) })
-				}
-			})
-		}
-	})
 }
 
 // notice keeps the notice of an action on what is keyed id: the string

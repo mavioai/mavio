@@ -22,6 +22,7 @@ import (
 	"github.com/mavioai/mavio/libs/client-rust/capi"
 	capiv1 "github.com/mavioai/mavio/libs/client-rust/capi/gen/mavio/capi/v1"
 	acquisitionv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/acquisition/v1"
+	libraryv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/library/v1"
 	sessionv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/session/v1"
 	userv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/user/v1"
 
@@ -78,6 +79,7 @@ type fakeCore struct {
 	discovers     []*acquisitionv1.DiscoverRequest
 	blocked       []int32 // the collections blocklisted
 	users         []*userv1.User
+	libraries     []*libraryv1.Library
 	invitations   []*userv1.Invitation
 	passwords     map[string]string // set by user
 

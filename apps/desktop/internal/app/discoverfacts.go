@@ -83,9 +83,8 @@ func titleCredits(title *acquisitionv1.Title) []creditEntry {
 	return out
 }
 
-// countryName names an ISO 3166-1 country in the app's language, after
-// its flag.
-func countryName(c *ui.Context, code string) string {
+// regionName names an ISO 3166-1 country in the app's language.
+func regionName(c *ui.Context, code string) string {
 	region, err := language.ParseRegion(code)
 	if err != nil {
 		return code
@@ -98,7 +97,14 @@ func countryName(c *ui.Context, code string) string {
 	} else if n := display.Regions(language.English).Name(region); n != "" {
 		name = n
 	}
-	if len(code) == 2 {
+	return name
+}
+
+// countryName names an ISO 3166-1 country in the app's language, after
+// its flag.
+func countryName(c *ui.Context, code string) string {
+	name := regionName(c, code)
+	if _, err := language.ParseRegion(code); err == nil && len(code) == 2 {
 		var flag strings.Builder
 		for _, r := range strings.ToUpper(code) {
 			flag.WriteRune(0x1F1A5 + r)
