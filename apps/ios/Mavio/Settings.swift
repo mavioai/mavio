@@ -2,10 +2,11 @@ import MavioKit
 import MavioUI
 import SwiftUI
 
-/// The settings, as the web UI's on a phone: the account's card, opening
-/// the account with its servers; this device's sections; the version; and
-/// signing out.
-struct ProfileView: View {
+/// The settings, as the web UI's on a phone, opened from the avatar at the
+/// top right: the account's card, opening the account with its servers;
+/// this device's sections, with the downloads; the version; and signing
+/// out.
+struct SettingsView: View {
     @Environment(AppModel.self) private var model
     @Environment(\.theme) private var theme
     @State private var serverId = ""
@@ -28,6 +29,9 @@ struct ProfileView: View {
                 SwitchUserSection(server: server)
             }
             Section(MavioStrings.settingsThisDevice) {
+                NavigationLink(value: Route.downloads) {
+                    EntryLabel(MavioStrings.navDownloads, icon: "downloads", color: Color(hex: 0x0A84FF))
+                }
                 NavigationLink {
                     AppearanceView()
                 } label: {
@@ -64,7 +68,7 @@ struct ProfileView: View {
             }
         }
         .scrollContentBackground(.hidden)
-        .navigationTitle(MavioStrings.navProfile)
+        .navigationTitle(MavioStrings.navSettings)
     }
 }
 

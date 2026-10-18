@@ -12,6 +12,12 @@ enum Route: Hashable {
     case hub(serverId: String, hubId: String, title: String)
     /// An item's cast and crew, or its crew alone.
     case credits(serverId: String, itemId: String, crew: Bool)
+    /// Search across the servers.
+    case search
+    /// The settings.
+    case settings
+    /// The items downloaded.
+    case downloads
 }
 
 /// An item to play, which the root presents the player for.
@@ -47,7 +53,7 @@ final class Router {
 
 /// The top-level destinations.
 enum Tab: Hashable {
-    case home, libraries, search, downloads, profile
+    case home, libraries, search, downloads, settings
 }
 
 /// The sign-in screen until a server is added, then the destinations in a
@@ -103,22 +109,26 @@ struct RootView: View {
             SwiftUI.Tab(value: Tab.libraries) {
                 Stack { LibrariesView() }
             } label: {
-                tabLabel(MavioStrings.navLibraries, "books")
+                tabLabel(MavioStrings.navLibraries, "movies")
             }
-            SwiftUI.Tab(value: Tab.search, role: .search) {
-                Stack { SearchView() }
-            } label: {
-                tabLabel(MavioStrings.navSearch, "search")
-            }
-            SwiftUI.Tab(value: Tab.downloads) {
-                Stack { DownloadsView() }
-            } label: {
-                tabLabel(MavioStrings.navDownloads, "downloads")
-            }
-            SwiftUI.Tab(value: Tab.profile) {
-                Stack { ProfileView() }
-            } label: {
-                tabLabel(MavioStrings.navProfile, "profile")
+            // A phone has search and the settings in its top bar, and the
+            // downloads in the settings; an iPad's sidebar has them all.
+            if sizeClass == .regular {
+                SwiftUI.Tab(value: Tab.search, role: .search) {
+                    Stack { SearchView() }
+                } label: {
+                    tabLabel(MavioStrings.navSearch, "search")
+                }
+                SwiftUI.Tab(value: Tab.downloads) {
+                    Stack { DownloadsView() }
+                } label: {
+                    tabLabel(MavioStrings.navDownloads, "downloads")
+                }
+                SwiftUI.Tab(value: Tab.settings) {
+                    Stack { SettingsView() }
+                } label: {
+                    tabLabel(MavioStrings.navSettings, "settings")
+                }
             }
         }
         .tabViewStyle(.sidebarAdaptable)
@@ -142,6 +152,7 @@ struct Stack<Content: View>: View {
         NavigationStack {
             content
                 .background(theme.colors.background)
+                .modifier(TopBar())
                 .navigationDestination(for: Route.self) { route in
                     Group {
                         switch route {
@@ -150,13 +161,79 @@ struct Stack<Content: View>: View {
                         case let .hub(serverId, hubId, title): HubView(serverId: serverId, hubId: hubId, title: title)
                         case let .credits(serverId, itemId, crew):
                             CreditsView(serverId: serverId, itemId: itemId, crew: crew)
+                        case .search: SearchView()
+                        case .settings: SettingsView()
+                        case .downloads: DownloadsView()
                         }
                     }
                     .background(theme.colors.background)
+                    .modifier(HiddenTabBar())
                 }
         }
         // Toolbar buttons and rows take the label's color, as in the web UI;
         // the tab bar keeps the accent.
         .tint(theme.colors.textPrimary)
+    }
+}
+
+/// The top of a tab's first screen on a phone, as the web UI's: the
+/// wordmark, and at the right search and the user's avatar opening the
+/// settings.
+private struct TopBar: ViewModifier {
+    @Environment(AppModel.self) private var model
+    @Environment(\.horizontalSizeClass) private var sizeClass
+
+    func body(content: Content) -> some View {
+        if sizeClass == .regular {
+            content
+        } else {
+            bar(content)
+        }
+    }
+
+    private func bar(_ content: Content) -> some View {
+        let name = model.account?.name ?? model.signedInServers.first?.userName ?? ""
+        return content.toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Wordmark(height: 20).accessibilityLabel("Mavio")
+            }
+            .hiddenSharedBackground()
+            ToolbarItem(placement: .topBarTrailing) {
+                NavigationLink(value: Route.search) {
+                    Icon("search", size: 22)
+                }
+                .accessibilityLabel(MavioStrings.navSearch)
+            }
+            .hiddenSharedBackground()
+            ToolbarItem(placement: .topBarTrailing) {
+                NavigationLink(value: Route.settings) {
+                    Avatar(name: name, size: 32)
+                }
+                .accessibilityLabel(MavioStrings.navSettings)
+            }
+            .hiddenSharedBackground()
+        }
+    }
+}
+
+/// A phone's tab bar shows on the tabs' first screens alone, as the web UI's,
+/// and hides on a page opened from one; the iPad's sidebar stays.
+private struct HiddenTabBar: ViewModifier {
+    @Environment(\.horizontalSizeClass) private var sizeClass
+
+    func body(content: Content) -> some View {
+        content.toolbar(sizeClass == .regular ? .automatic : .hidden, for: .tabBar)
+    }
+}
+
+extension ToolbarContent {
+    /// Without the glass iOS draws behind toolbar items, for what has its own
+    /// shape, as the wordmark and the avatar.
+    @ToolbarContentBuilder func hiddenSharedBackground() -> some ToolbarContent {
+        if #available(iOS 26, *) {
+            sharedBackgroundVisibility(.hidden)
+        } else {
+            self
+        }
     }
 }

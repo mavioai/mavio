@@ -8,6 +8,7 @@ struct SearchView: View {
     @Environment(\.theme) private var theme
     @State private var query = ""
     @State private var results: [SearchResults]?
+    @FocusState private var focused: Bool
 
     var body: some View {
         ScrollView {
@@ -40,6 +41,9 @@ struct SearchView: View {
         .searchable(
             text: $query, placement: .navigationBarDrawer(displayMode: .always), prompt: MavioStrings.searchPlaceholder
         )
+        // Opened from the top bar's button, it is ready to type into.
+        .searchFocused($focused)
+        .onAppear { focused = true }
         .task(id: query) {
             let q = query.trimmingCharacters(in: .whitespaces)
             guard !q.isEmpty else {
