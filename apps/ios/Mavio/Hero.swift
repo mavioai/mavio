@@ -162,7 +162,7 @@ private struct HeroPage: View {
                     .padding(.bottom, phone ? MavioSpacing.s20 : MavioSpacing.s40)
             }
             .clipped()
-            .heroBleed(card.backdrop?.url, phone: phone)
+            .heroBleed(phone: phone, aspect: 4 / 5) { ArtworkView(card.backdrop?.url, icon: card.kind.icon) }
     }
 
     private var text: some View {
@@ -248,26 +248,34 @@ private func both<A, B>(_ a: A?, _ b: B?) -> (A, B)? {
 /// the status bar, more than they take on any phone.
 private let bleedHeight: CGFloat = 400
 
+/// How much of the artwork's top the bleed stretches up.
+private let bleedBand: CGFloat = 6
+
 extension View {
-    /// On a phone, the hero's artwork, enlarged and blurred, above it behind
-    /// the navigation bar, so that its colors spread up into the bar's glass
-    /// and meet the hero at a sharp edge, as the web UI's.
-    @ViewBuilder func heroBleed(_ url: String?, phone: Bool) -> some View {
-        if phone, let url {
+    /// On a phone, what lies behind the navigation bar above the hero, as
+    /// the web UI's and the Android app's: the hero's artwork (art), cropped
+    /// as the hero crops it (aspect, its width to its height), its top band
+    /// softened and stretched up, so that each column's color goes straight
+    /// on under the bar's glass, meeting the hero at a sharp edge.
+    @ViewBuilder func heroBleed<Art: View>(phone: Bool, aspect: CGFloat, @ViewBuilder art: () -> Art) -> some View {
+        if phone {
+            let art = art()
             background(alignment: .top) {
-                // The artwork fills the bleed's frame rather than sizing it.
-                Color.clear
-                    .frame(maxWidth: .infinity)
-                    .frame(height: bleedHeight)
-                    .overlay {
-                        ArtworkView(url)
-                            .scaleEffect(1.25)
-                            .blur(radius: 40, opaque: true)
-                    }
-                    .clipped()
-                    .offset(y: -bleedHeight)
-                    .allowsHitTesting(false)
-                    .accessibilityHidden(true)
+                GeometryReader { geo in
+                    let width = geo.size.width
+                    art
+                        .frame(width: width, height: width / aspect)
+                        .frame(width: width, height: bleedBand, alignment: .top)
+                        .clipped()
+                        // Softened before it is stretched, so that it doesn't streak.
+                        .blur(radius: 12, opaque: true)
+                        .scaleEffect(x: 1, y: bleedHeight / bleedBand, anchor: .top)
+                }
+                .frame(height: bleedHeight)
+                .clipped()
+                .offset(y: -bleedHeight)
+                .allowsHitTesting(false)
+                .accessibilityHidden(true)
             }
         } else {
             self
@@ -305,9 +313,9 @@ struct HeroChrome: ViewModifier {
     }
 }
 
-/// The navigation bar's glass: on a phone always, with a hard edge, where
-/// iOS draws its scroll edge effect, else the bar's material; on an iPad
-/// none over the hero.
+/// The navigation bar's glass: on a phone always, a thin material through
+/// which the hero's colors show, as the web UI's header of the tab bar's
+/// glass; on an iPad none over the hero.
 private struct HeroBarGlass: ViewModifier {
     let phone: Bool
     let past: Bool
@@ -316,8 +324,9 @@ private struct HeroBarGlass: ViewModifier {
         if #available(iOS 26, *) {
             if phone {
                 content
-                    .toolbarBackground(.hidden, for: .navigationBar)
-                    .scrollEdgeEffectStyle(.hard, for: .top)
+                    .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
+                    .toolbarBackground(.visible, for: .navigationBar)
+                    .scrollEdgeEffectHidden(true, for: .top)
             } else {
                 content
                     .toolbarBackground(past ? .visible : .hidden, for: .navigationBar)

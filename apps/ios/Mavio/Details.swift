@@ -186,7 +186,7 @@ private struct DetailsContent: View {
                 .padding(.bottom, phone ? MavioSpacing.s24 : MavioSpacing.s40)
             }
             .clipped()
-            .heroBleed((image ?? card.poster)?.url, phone: phone)
+            .heroBleed(phone: phone, aspect: 1) { artwork }
             .environment(\.colorScheme, .dark)
     }
 
