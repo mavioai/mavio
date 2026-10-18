@@ -38,13 +38,23 @@ export function Menu({
 }) {
   const { tv } = usePrefs();
   const ref = useRef<HTMLDivElement>(null);
+  // On the television the menu opens on its start: focus first entering
+  // it, on whichever item Base UI chose, moves there before it is drawn.
+  const started = useRef(false);
+  const toStart = () => {
+    if (!tv || started.current) return;
+    started.current = true;
+    const el = ref.current?.querySelector<HTMLElement>(start);
+    if (el && document.activeElement !== el) el.focus();
+  };
   return (
     <Base.Root
       open={open}
-      onOpenChange={(o) => onOpenChange?.(o)}
-      onOpenChangeComplete={(o) => {
-        if (o && tv) ref.current?.querySelector<HTMLElement>(start)?.focus();
+      onOpenChange={(o) => {
+        started.current = false;
+        onOpenChange?.(o);
       }}
+      onOpenChangeComplete={(o) => o && toStart()}
     >
       {/* On the television a menu opens as its button is pressed alone:
           the arrows move focus on, as they do from any button. */}
@@ -56,6 +66,7 @@ export function Menu({
         <Base.Positioner side={side} align={align} sideOffset={8} className="z-50 outline-none">
           <Base.Popup
             ref={ref}
+            onFocus={toStart}
             aria-label={label}
             data-tv-menu={tv || undefined}
             className={`${popup} ${tv ? "bg-surface-overlay/45 backdrop-blur-3xl backdrop-saturate-150" : ""} ${width} max-h-[var(--available-height)] overflow-y-auto`}
