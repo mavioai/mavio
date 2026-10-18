@@ -611,7 +611,8 @@ function seasonName(s: SeasonStatus): string {
 function Seasons({ server, tmdbId, seasons }: { server: ServerEntry; tmdbId: number; seasons: SeasonStatus[] }) {
   const ordered = seasons.toSorted((a, b) => Number(a.seasonNumber === 0) - Number(b.seasonNumber === 0) || b.seasonNumber - a.seasonNumber);
   return (
-    <section className="px-margin py-3">
+    // A block of its own: down from it, focus lands on the cast's first.
+    <section data-focus-block="seasons" className="px-margin py-3">
       <h2 className="mb-2 type-title3">{t("item.seasons")}</h2>
       <div className="flex flex-col gap-2">
         {ordered.map((s) => (
