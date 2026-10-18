@@ -8,7 +8,7 @@ extension Procedure {
 }
 
 /// A row of a settings form: its label and what it means, then its control.
-private struct FormRow<Control: View>: View {
+struct FormRow<Control: View>: View {
     let label: String
     var detail: String?
     @ViewBuilder let control: Control
@@ -24,7 +24,7 @@ private struct FormRow<Control: View>: View {
 }
 
 /// A row's label, with what it means below it.
-private struct RowLabel: View {
+struct RowLabel: View {
     let label: String
     var detail: String?
     @Environment(\.theme) private var theme
@@ -40,7 +40,7 @@ private struct RowLabel: View {
 }
 
 /// A field of a number, red while it is outside its range.
-private struct NumberRow: View {
+struct NumberRow: View {
     let label: String
     var detail: String?
     @Binding var value: Double
@@ -63,7 +63,7 @@ private struct NumberRow: View {
 }
 
 /// A text field's row, its value right of its label.
-private struct TextRow: View {
+struct TextRow: View {
     let label: String
     var detail: String?
     @Binding var text: String
@@ -84,6 +84,44 @@ extension Binding where Value == Int32 {
     /// The number as a Double, for NumberRow.
     var double: Binding<Double> {
         Binding<Double>(get: { Double(wrappedValue) }, set: { wrappedValue = Int32($0.rounded()) })
+    }
+}
+
+/// A choice of a picker: a code and its name.
+typealias Choice = (code: String, name: String)
+
+/// The choices of a list, with the value chosen though the list lacks it.
+func choices(_ list: [Choice], _ chosen: String) -> [Choice] {
+    chosen.isEmpty || list.contains { $0.code == chosen } ? list : list + [(chosen, chosen)]
+}
+
+extension AppModel {
+    /// The languages and countries of a server's metadata, named in the
+    /// user's language where it can, by name, without repeats.
+    func localization(_ server: ServerRecord) async -> (languages: [Choice], countries: [Choice]) {
+        async let langs = try? call(
+            server, Procedure.localization("ListLanguages"), Mavio_System_V1_ListLanguagesRequest(),
+            as: Mavio_System_V1_ListLanguagesResponse.self)
+        async let ctrs = try? call(
+            server, Procedure.localization("ListCountries"), Mavio_System_V1_ListCountriesRequest(),
+            as: Mavio_System_V1_ListCountriesResponse.self)
+        let locale = Locale.current
+        let languages = Self.named((await langs)?.languages.map { ($0.code, $0.name) } ?? []) {
+            locale.localizedString(forLanguageCode: $0)
+        }
+        let countries = Self.named((await ctrs)?.countries.map { ($0.code, $0.name) } ?? []) {
+            locale.localizedString(forRegionCode: $0)
+        }
+        return (languages, countries)
+    }
+
+    private static func named(_ list: [(String, String)], _ of: (String) -> String?) -> [Choice] {
+        var seen = Set<String>()
+        return
+            list
+            .filter { !$0.0.isEmpty && seen.insert($0.0).inserted }
+            .map { (code: $0.0, name: of($0.0) ?? $0.1) }
+            .sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
     }
 }
 
@@ -152,8 +190,8 @@ struct GeneralView: View {
     @Environment(\.theme) private var theme
     @State private var editor: SettingsEditor?
     @State private var draft = Draft()
-    @State private var languages: [(code: String, name: String)] = []
-    @State private var countries: [(code: String, name: String)] = []
+    @State private var languages: [Choice] = []
+    @State private var countries: [Choice] = []
     @State private var resetters: [(id: String, name: String)] = []
     @State private var mavioDev = false
 
@@ -299,11 +337,6 @@ struct GeneralView: View {
         }
     }
 
-    /// The choices of a list, with the value chosen though the list lacks it.
-    private func choices(_ list: [(code: String, name: String)], _ chosen: String) -> [(code: String, name: String)] {
-        chosen.isEmpty || list.contains { $0.code == chosen } ? list : list + [(chosen, chosen)]
-    }
-
     private func load() async {
         if editor == nil {
             let e = SettingsEditor(server: server, model: model)
@@ -314,36 +347,14 @@ struct GeneralView: View {
         async let info = try? model.call(
             server, Procedure.auth("GetAuthInfo"), Mavio_Auth_V1_GetAuthInfoRequest(),
             as: Mavio_Auth_V1_GetAuthInfoResponse.self)
-        async let langs = try? model.call(
-            server, Procedure.localization("ListLanguages"), Mavio_System_V1_ListLanguagesRequest(),
-            as: Mavio_System_V1_ListLanguagesResponse.self)
-        async let ctrs = try? model.call(
-            server, Procedure.localization("ListCountries"), Mavio_System_V1_ListCountriesRequest(),
-            as: Mavio_System_V1_ListCountriesResponse.self)
         async let plugins = try? model.call(
             server, Procedure.plugins("ListPlugins"), Mavio_System_V1_ListPluginsRequest(),
             as: Mavio_System_V1_ListPluginsResponse.self)
+        (languages, countries) = await model.localization(server)
         mavioDev = await info?.mode == .mavioDev
-        let locale = Locale.current
-        languages = Self.named((await langs)?.languages.map { ($0.code, $0.name) } ?? []) {
-            locale.localizedString(forLanguageCode: $0)
-        }
-        countries = Self.named((await ctrs)?.countries.map { ($0.code, $0.name) } ?? []) {
-            locale.localizedString(forRegionCode: $0)
-        }
         resetters = ((await plugins)?.plugins ?? [])
             .filter { $0.manifest.capabilities.contains(.passwordReset) }
             .map { ($0.manifest.id, $0.manifest.name.isEmpty ? $0.manifest.id : $0.manifest.name) }
-    }
-
-    /// A list of codes named in the user's language where it can, in order, without repeats.
-    private static func named(_ list: [(String, String)], _ of: (String) -> String?) -> [(code: String, name: String)] {
-        var seen = Set<String>()
-        return
-            list
-            .filter { !$0.0.isEmpty && seen.insert($0.0).inserted }
-            .map { (code: $0.0, name: of($0.0) ?? $0.1) }
-            .sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
     }
 
     private func save() {
