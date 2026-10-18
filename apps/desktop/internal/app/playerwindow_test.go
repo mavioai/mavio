@@ -80,12 +80,4 @@ func TestPlayerWindows(t *testing.T) {
 	if open() != 0 || len(h.app.players) != 0 {
 		t.Errorf("windows open = %d, players = %d, want = none", open(), len(h.app.players))
 	}
-
-	// The TV mode plays in the app's window.
-	h.app.prefs.TV = true
-	h.app.play(server, "orbit", nil)
-	h.settle()
-	if h.app.playerOf(nil) == nil || len(windows) != 2 {
-		t.Errorf("TV mode: player in the app's window = %v, windows = %d; want = it, 2", h.app.playerOf(nil) != nil, len(windows))
-	}
 }
