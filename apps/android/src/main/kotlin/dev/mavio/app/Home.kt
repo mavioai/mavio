@@ -294,7 +294,7 @@ private fun HeroButton(label: String, modifier: Modifier, white: Boolean, onClic
 
 /** A row of Home as a shelf: its cards, titles not on the servers, placeholders while it loads, or why it can't. */
 @Composable
-private fun HomeShelf(row: HomeRow, title: String, several: Boolean) {
+internal fun HomeShelf(row: HomeRow, title: String, several: Boolean) {
     val navigator = LocalNavigator.current
     val badge: @Composable () -> Unit = {
         val server = row.serverName

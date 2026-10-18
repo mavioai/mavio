@@ -117,6 +117,9 @@ sealed interface Route {
     /** The account, the servers and the settings. */
     data object Settings : Route
 
+    /** A library, opened on the items of a genre when one is given. */
+    data class Library(val serverId: String, val libraryId: String, val name: String, val genre: String? = null) : Route
+
     /** An item's details. */
     data class Item(val serverId: String, val itemId: String) : Route
 
@@ -228,11 +231,12 @@ val LocalBottomInset = staticCompositionLocalOf { 0.dp }
 private fun Screen(model: AppModel, route: Route) {
     when (route) {
         Route.Home -> HomeScreen(model)
+        Route.Libraries -> LibrariesScreen(model)
+        is Route.Library -> LibraryScreen(model, route)
         is Route.Item -> DetailsScreen(model, route.serverId, route.itemId)
         is Route.Player -> PlayerScreen(model, route)
         else -> Box(Modifier.fillMaxSize().padding(top = LocalTopInset.current)) {
             when (route) {
-                Route.Libraries -> StatusView(stringResource(R.string.nav_libraries), icon = R.drawable.ic_movies)
                 Route.Search -> StatusView(stringResource(R.string.nav_search), icon = R.drawable.ic_search)
                 Route.Settings -> SettingsScreen(model)
                 else -> StatusView(stringResource(R.string.state_loading))
