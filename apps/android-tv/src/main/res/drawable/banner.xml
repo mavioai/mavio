@@ -1,6 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- The launcher banner, 320 × 180 dp; the brand artwork replaces it. -->
-<shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <size android:width="320dp" android:height="180dp" />
-    <solid android:color="#FF0E0F12" />
-</shape>
+<!-- The launcher banner, 320 × 180 dp: the mark and the wordmark
+     (libs/design/brand) on black. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="320dp"
+    android:height="180dp"
+    android:viewportWidth="320"
+    android:viewportHeight="180">
+    <path
+        android:fillColor="#FF000000"
+        android:pathData="M0,0H320V180H0Z" />
+    <group
+        android:scaleX="1.125"
+        android:scaleY="1.125"
+        android:translateX="34.75"
+        android:translateY="33.75">
+        <path android:pathData="M18,18H34V82H18ZM66,18H82V82H66Z">
+            <aapt:attr name="android:fillColor">
+                <gradient android:type="linear" android:startX="18" android:startY="14" android:endX="82" android:endY="86">
+                    <item android:offset="0" android:color="#FFFFD34E" />
+                    <item android:offset="0.45" android:color="#FFFF9A2E" />
+                    <item android:offset="1" android:color="#FFF0412F" />
+                </gradient>
+            </aapt:attr>
+        </path>
+        <path android:pathData="M18,18H34V82H18ZM66,18H82V82H66Z">
+            <aapt:attr name="android:fillColor">
+                <gradient android:type="linear" android:startX="0" android:startY="18" android:endX="0" android:endY="58">
+                    <item android:offset="0" android:color="#8C5A0E06" />
+                    <item android:offset="1" android:color="#005A0E06" />
+                </gradient>
+            </aapt:attr>
+        </path>
+        <path android:pathData="M18,18H34L58,66H42ZM66,18H82L58,66H42Z">
+            <aapt:attr name="android:fillColor">
+                <gradient android:type="linear" android:startX="18" android:startY="14" android:endX="82" android:endY="86">
+                    <item android:offset="0" android:color="#FFFFD34E" />
+                    <item android:offset="0.45" android:color="#FFFF9A2E" />
+                    <item android:offset="1" android:color="#FFF0412F" />
+                </gradient>
+            </aapt:attr>
+        </path>
+    </group>
+    <group
+        android:scaleX="0.5"
+        android:scaleY="0.5"
+        android:translateX="143"
+        android:translateY="74">
+        <path
+            android:fillColor="#FFFFFFFF"
+            android:fillType="evenOdd"
+            android:pathData="M0,64V0H14L30,30L46,0H60V64H48V24L34,50H26L12,24V64ZM80,20H114V64H80L70,54V30ZM86,32L82,36V48L86,52H102V32ZM124,20H137L146,44.7L155,20H168L152,64H140ZM178,20H190V64H178ZM178,2H190V14H178ZM210,20H234L244,30V54L234,64H210L200,54V30ZM216,32L212,36V48L216,52H228L232,48V36L228,32Z" />
+    </group>
+</vector>

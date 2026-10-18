@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The mark in one color, for the launcher's themed icons. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <group
+        android:scaleX="0.5625"
+        android:scaleY="0.5625"
+        android:translateX="25.875"
+        android:translateY="25.875">
+        <path
+            android:fillColor="#FFFFFFFF"
+            android:pathData="M18,18H34V82H18ZM66,18H82V82H66ZM18,18H34L58,66H42ZM66,18H82L58,66H42Z" />
+    </group>
+</vector>

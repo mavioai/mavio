@@ -8,6 +8,8 @@
 
     <!-- Servers on the local network serve their media over plain HTTP. -->
     <application
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher"
         android:banner="@drawable/banner"
         android:label="Mavio"
         android:supportsRtl="true"
