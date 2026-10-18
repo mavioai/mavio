@@ -1927,7 +1927,7 @@
     <string name="settings_pin">固定到侧边栏</string>
     <string name="settings_unpin">从侧边栏取消固定</string>
     <string name="nav_features">功能</string>
-    <string name="indexers_title">索引搜索</string>
+    <string name="indexers_title">索引</string>
     <string name="indexers_message">按文字搜索索引器，并把发布发送到下载客户端；下载的内容不会加入媒体库。</string>
     <string name="indexers_all_servers">全部服务器</string>
     <string name="indexers_query">搜索索引器</string>

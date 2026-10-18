@@ -1902,7 +1902,7 @@
   "settings.pin": "固定到侧边栏",
   "settings.unpin": "从侧边栏取消固定",
   "nav.features": "功能",
-  "indexers.title": "索引搜索",
+  "indexers.title": "索引",
   "indexers.message": "按文字搜索索引器，并把发布发送到下载客户端；下载的内容不会加入媒体库。",
   "indexers.allServers": "全部服务器",
   "indexers.query": "搜索索引器",

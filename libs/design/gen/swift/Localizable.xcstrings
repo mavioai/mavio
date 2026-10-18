@@ -34352,13 +34352,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Indexer Search"
+            "value": "Indexers"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "索引搜索"
+            "value": "索引"
           }
         }
       }

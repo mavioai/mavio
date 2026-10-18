@@ -41,6 +41,7 @@
   "sort": "sort-ascending",
   "pin": "push-pin",
   "magnet": "magnet",
+  "indexers": "binoculars",
   "retry": "arrow-clockwise",
   "rating": "star",
   "info": "info",

@@ -3832,7 +3832,7 @@
     <!-- Group of the sidebar listing the advanced tools pinned to it. -->
     <string name="nav_features">Features</string>
     <!-- Advanced tool searching a server's indexers by text, as Prowlarr's search. -->
-    <string name="indexers_title">Indexer Search</string>
+    <string name="indexers_title">Indexers</string>
     <!-- Line under the indexer search's title. -->
     <string name="indexers_message">Search the indexers by text and send releases to a download client, which downloads them without adding them to a library.</string>
     <!-- Server choice of the indexer search searching every server the user administers. -->

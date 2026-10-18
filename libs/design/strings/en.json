@@ -1903,7 +1903,7 @@
   "settings.pin": { "message": "Pin to Sidebar", "description": "Shows an advanced tool in the sidebar's Features group." },
   "settings.unpin": { "message": "Unpin from Sidebar", "description": "Removes an advanced tool from the sidebar's Features group." },
   "nav.features": { "message": "Features", "description": "Group of the sidebar listing the advanced tools pinned to it." },
-  "indexers.title": { "message": "Indexer Search", "description": "Advanced tool searching a server's indexers by text, as Prowlarr's search." },
+  "indexers.title": { "message": "Indexers", "description": "Advanced tool searching a server's indexers by text, as Prowlarr's search." },
   "indexers.message": { "message": "Search the indexers by text and send releases to a download client, which downloads them without adding them to a library.", "description": "Line under the indexer search's title." },
   "indexers.allServers": { "message": "All Servers", "description": "Server choice of the indexer search searching every server the user administers." },
   "indexers.query": { "message": "Search the indexers", "description": "Placeholder and label of the indexer search's text field." },
