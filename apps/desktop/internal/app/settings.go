@@ -48,6 +48,7 @@ var settingsSections = []settingsSection{
 	{id: "api-keys", icon: "lock", color: ui.RGB(0x63, 0x63, 0x66), title: "settings.apiKeys", admin: true},
 	{id: "proxies", icon: "network", color: ui.RGB(0x30, 0xB0, 0xC7), title: "settings.proxies", admin: true},
 	{id: "libraries", icon: "folder", color: ui.RGB(0x00, 0x7A, 0xFF), title: "settings.libraries", admin: true},
+	{id: "storage", icon: "server", color: ui.RGB(0x30, 0xB0, 0xC7), title: "settings.storage", admin: true},
 	{id: "transcoding", icon: "quality", color: ui.RGB(0xFF, 0x2D, 0x55), title: "settings.transcoding", admin: true},
 	{id: "activity", icon: "activity", color: ui.RGB(0xFF, 0x2D, 0x55), title: "settings.activity", admin: true},
 	{id: "tasks", icon: "pending", color: ui.RGB(0x58, 0x56, 0xD6), title: "settings.tasks", admin: true},
@@ -77,7 +78,7 @@ type settingsMenu struct {
 }
 
 var settingsMenus = []settingsMenu{
-	{id: "media", icon: "movies", color: ui.RGB(0xFF, 0x9F, 0x0A), title: "settings.mediaMenu", sections: []string{"libraries", "transcoding"}},
+	{id: "media", icon: "movies", color: ui.RGB(0xFF, 0x9F, 0x0A), title: "settings.mediaMenu", sections: []string{"libraries", "storage", "transcoding"}},
 	{id: "maintenance", icon: "admin", color: ui.RGB(0x8E, 0x8E, 0x93), title: "settings.maintenanceMenu", sections: []string{"activity", "tasks", "logs"}},
 }
 
@@ -200,7 +201,7 @@ func (a *App) settings(c *ui.Context, r *ui.Route) {
 		ui.Column(c).Grow(1).MinWidth(0).Background(style.Color(colors.Background)).Children(func() {
 			r.View(c, func(r *ui.Route) {
 				r.Page().Background(style.Color(colors.Background))
-				ui.Scroll(c.Key(id + r.Query("user") + r.Query("library"))).Fill().Children(func() {
+				ui.Scroll(c.Key(id + r.Query("user") + r.Query("library") + r.Query("remote"))).Fill().Children(func() {
 					top := max(c.TitleBar().Height, 12)
 					ui.Column(c).Padding(top+28, 56, 48).AlignItems(ui.Center).Children(func() {
 						ui.Column(c).FillWidth().MaxWidth(900).Gap(28).Children(func() { a.settingsSection(c, r, id) })
@@ -420,6 +421,8 @@ func (a *App) settingsSection(c *ui.Context, r *ui.Route, id string) {
 		a.proxiesSection(c)
 	case "libraries":
 		a.librariesSection(c, r)
+	case "storage":
+		a.storageSection(c, r)
 	case "activity":
 		a.activitySection(c)
 	case "tasks":

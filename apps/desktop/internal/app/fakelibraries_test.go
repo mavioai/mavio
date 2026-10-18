@@ -94,9 +94,9 @@ func (s *fakeStorage) GetStatus(context.Context, *storagev1.GetStatusRequest) (*
 }
 
 func (s *fakeStorage) ListRemotes(context.Context, *storagev1.ListRemotesRequest) (*storagev1.ListRemotesResponse, error) {
-	return storagev1.ListRemotesResponse_builder{Remotes: []*storagev1.Remote{
-		storagev1.Remote_builder{Name: new("drive"), Type: new("drive")}.Build(),
-	}}.Build(), nil
+	s.f.mu.Lock()
+	defer s.f.mu.Unlock()
+	return storagev1.ListRemotesResponse_builder{Remotes: slices.Clone(s.f.remotes)}.Build(), nil
 }
 
 func (s *fakeStorage) ListFolders(_ context.Context, r *storagev1.ListFoldersRequest) (*storagev1.ListFoldersResponse, error) {

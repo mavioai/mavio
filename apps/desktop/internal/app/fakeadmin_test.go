@@ -12,6 +12,7 @@ import (
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/auth/v1/authv1connect"
 	libraryv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/library/v1"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/library/v1/libraryv1connect"
+	storagev1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/storage/v1"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/storage/v1/storagev1connect"
 	systemv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/system/v1"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/system/v1/systemv1connect"
@@ -55,6 +56,7 @@ func (f *fakeCore) handleAdmin(mux *http.ServeMux) {
 	f.serverSettings = fakeServerSettings()
 	f.apiKeys = fakeApiKeyList()
 	f.proxies = fakeProxyList()
+	f.remotes = []*storagev1.Remote{storagev1.Remote_builder{Name: new("drive"), Type: new("drive")}.Build()}
 }
 
 // tsAgo returns a time a length of time before now, as a timestamp.

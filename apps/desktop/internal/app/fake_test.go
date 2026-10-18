@@ -25,6 +25,7 @@ import (
 	authv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/auth/v1"
 	libraryv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/library/v1"
 	sessionv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/session/v1"
+	storagev1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/storage/v1"
 	systemv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/system/v1"
 	userv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/user/v1"
 
@@ -87,6 +88,9 @@ type fakeCore struct {
 	serverSettings *systemv1.ServerSettings
 	apiKeys        []*authv1.ApiKey
 	proxies        []*systemv1.Proxy
+	remotes        []*storagev1.Remote
+	offline        []*storagev1.OfflineClient
+	answers        []string
 
 	mu       sync.Mutex
 	calls    []string
