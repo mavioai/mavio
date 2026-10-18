@@ -93,6 +93,7 @@ object Procedure {
 enum class ServerSection(@StringRes val title: Int, @DrawableRes val icon: Int, val color: Color, val forAnyone: Boolean = false) {
     Overview(R.string.settings_overview, R.drawable.ic_server_fill, Color(0xFF8E8E93)),
     General(R.string.settings_general, R.drawable.ic_settings_fill, Color(0xFF8E8E93)),
+    Users(R.string.settings_users, R.drawable.ic_users_fill, Color(0xFF007AFF)),
     Devices(R.string.settings_devices, R.drawable.ic_devices_fill, Color(0xFF32ADE6), forAnyone = true),
     ApiKeys(R.string.settings_api_keys, R.drawable.ic_lock_fill, Color(0xFF636366)),
     Libraries(R.string.settings_libraries, R.drawable.ic_folder_fill, Color(0xFF007AFF)),
@@ -120,6 +121,7 @@ enum class ServerMenu(@StringRes val title: Int, @DrawableRes val icon: Int, val
 private val TOP: List<Any> = listOf(
     ServerSection.Overview,
     ServerSection.General,
+    ServerSection.Users,
     ServerSection.Devices,
     ServerSection.ApiKeys,
     ServerMenu.Media,
@@ -184,6 +186,7 @@ fun ServerSettingScreen(model: AppModel, route: Route.ServerSetting) {
         ServerSection.General -> GeneralPage(model, route.serverId)
         ServerSection.Devices -> DevicesPage(model, route.serverId)
         ServerSection.ApiKeys -> ApiKeysPage(model, route.serverId)
+        ServerSection.Users -> UsersPage(model, route.serverId)
         ServerSection.Libraries -> LibrariesPage(model, route.serverId)
         ServerSection.Storage -> StoragePage(model, route.serverId)
         ServerSection.Transcoding -> TranscodingPage(model, route.serverId)

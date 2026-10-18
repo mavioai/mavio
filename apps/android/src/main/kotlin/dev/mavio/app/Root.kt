@@ -139,6 +139,9 @@ sealed interface Route {
     /** A library of a server's settings, or a new one's when id is null. */
     data class ManagedLibrary(val serverId: String, val id: String?) : Route
 
+    /** A user of a server, or a new one's page when id is null; standalone when the server keeps its own accounts. */
+    data class ManagedUser(val serverId: String, val id: String?, val standalone: Boolean) : Route
+
     /** Adding an rclone remote to a server. */
     data class NewRemote(val serverId: String) : Route
 
@@ -350,6 +353,7 @@ private fun Screen(model: AppModel, route: Route) {
                 is Route.ServerMenuPage -> ServerMenuScreen(route)
                 is Route.IssuePage -> IssueScreen(model, route)
                 is Route.ManagedLibrary -> ManagedLibraryScreen(model, route)
+                is Route.ManagedUser -> ManagedUserScreen(model, route)
                 is Route.NewRemote -> NewRemoteScreen(model, route)
                 is Route.StorageRemote -> StorageRemoteScreen(model, route)
                 else -> StatusView(stringResource(R.string.state_loading))
