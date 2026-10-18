@@ -340,6 +340,23 @@ input[type="search"]::-webkit-search-cancel-button {
     border-radius: 14px;
     box-shadow: 0 8px 24px var(--mavio-color-tv-focus-shadow);
   }
+  /* A box of a row and what it expands to, as a discovered series'
+     seasons: gray, and white, raised, when its row has focus; while it is
+     expanded only the row turns white, and the box keeps its size. */
+  & [data-tv-box] {
+    background: var(--mavio-color-fill);
+    border-color: transparent;
+    transition:
+      transform 160ms ease-out,
+      box-shadow 160ms ease-out;
+  }
+  & [data-tv-box]:has(> button:focus) {
+    box-shadow: 0 8px 24px var(--mavio-color-tv-focus-shadow);
+  }
+  & [data-tv-box]:has(> button[aria-expanded="false"]:focus) {
+    background: #fff;
+    transform: scale(1.02);
+  }
   /* A button whose menu is open, focus in the menu, keeps a highlight;
      the user menu's dots, a pill as the assistant's button, look as
      without focus. */

@@ -626,7 +626,7 @@ function Season({ server, tmdbId, season: s }: { server: ServerEntry; tmdbId: nu
   const [open, setOpen] = useState(false);
   const status = statusLabel(s.status);
   return (
-    <div className="overflow-hidden rounded-[10px] border border-border bg-surface-raised">
+    <div data-tv-box className="overflow-hidden rounded-[10px] border border-border bg-surface-raised">
       <button type="button" aria-expanded={open} onClick={() => setOpen(!open)} className="flex min-h-12 w-full items-center gap-3 px-4 py-2 text-left">
         <span className="min-w-0 flex-1 truncate type-headline">{seasonName(s)}</span>
         {s.episodeCount > 0 && <span className="type-callout text-text-secondary">{t("item.episodeCount", { count: s.episodeCount })}</span>}
