@@ -4,12 +4,14 @@ import (
 	"context"
 	"fmt"
 	"net/url"
+	"strconv"
 	"time"
 
 	"github.com/egoist/mygo/ui"
 
 	capiv1 "github.com/mavioai/mavio/libs/client-rust/capi/gen/mavio/capi/v1"
 	design "github.com/mavioai/mavio/libs/design/gen/go"
+	acquisitionv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/acquisition/v1"
 
 	"github.com/mavioai/mavio/apps/desktop/internal/style"
 )
@@ -283,7 +285,7 @@ func (a *App) row(c *ui.Context, r *capiv1.Row) {
 	if titles := r.GetTitles().GetTitles(); len(titles) > 0 {
 		a.shelf(c, r.GetId(), title, nil, func() {
 			for _, t := range titles {
-				a.titleCard(c, t)
+				a.titleCard(c, r.GetServerId(), t)
 			}
 		})
 		return
@@ -313,17 +315,31 @@ func allWide(cards []*capiv1.Card) bool {
 	return true
 }
 
-// titleCard builds a poster of a title discovery offers.
-func (a *App) titleCard(c *ui.Context, t *capiv1.TitleCard) {
+// titleCard builds a poster of a title discovery offers, which opens it
+// as the server discovers it.
+func (a *App) titleCard(c *ui.Context, server string, t *capiv1.TitleCard) {
 	colors := style.Colors(c)
 	w := style.Layout.Poster
-	ui.Column(c.Key(t.GetTitle() + fmt.Sprint(t.GetYear()))).Width(w).Gap(6).Children(func() {
-		a.artwork(c, capiv1.Artwork_builder{Url: t.GetPosterUrl()}.Build(), t.GetTitle(), nil, w, w*1.5, false)
+	b := ui.ButtonBase(c.Key(t.GetTitle() + fmt.Sprint(t.GetYear()))).Column().Width(w).Gap(6).AlignItems(ui.Start).Label(t.GetTitle())
+	hovered := b.Hovered()
+	if b.Pressed() {
+		b.Opacity(0.8)
+	}
+	b.Children(func() {
+		a.artwork(c, capiv1.Artwork_builder{Url: t.GetPosterUrl()}.Build(), t.GetTitle(), nil, w, w*1.5, hovered)
 		style.Text(ui.Text(c, t.GetTitle()), style.Type.Headline).TextColor(style.Color(colors.TextPrimary)).SingleLine().Width(w)
 		if t.GetYear() > 0 {
 			style.Text(ui.Text(c, fmt.Sprint(t.GetYear())), style.Type.Footnote).TextColor(style.Color(colors.TextSecondary)).SingleLine()
 		}
 	})
+	tmdb, _ := strconv.Atoi(t.GetExternalIds()["tmdb"])
+	if b.Clicked() && tmdb > 0 && server != "" {
+		kind := acquisitionv1.MediaKind_MEDIA_KIND_SERIES
+		if t.GetMovie() {
+			kind = acquisitionv1.MediaKind_MEDIA_KIND_MOVIE
+		}
+		a.router.Push(titlePath(server, kind, int32(tmdb)))
+	}
 }
 
 // hubPage builds the page of a hub's items, from a row's "more".

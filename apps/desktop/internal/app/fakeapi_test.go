@@ -53,6 +53,7 @@ func (f *fakeCore) apiHandler() http.Handler {
 	mux.Handle(userv1connect.NewUserServiceHandler(&fakeUsers{f: f}))
 	mux.Handle(sessionv1connect.NewSessionServiceHandler(&fakeSessions{f: f}))
 	f.handleAdmin(mux)
+	f.handleDiscover(mux)
 	f.prefs = userv1.PlaybackPreferences_builder{
 		AudioLanguages: []string{"jpn", "eng"}, SubtitleLanguages: []string{"eng"},
 		SubtitleMode: new(userv1.SubtitleMode_SUBTITLE_MODE_FOREIGN), PlayDefaultAudioTrack: new(true),

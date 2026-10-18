@@ -84,6 +84,14 @@ func (a *App) page(c *ui.Context, r *ui.Route) {
 		a.creditsPage(c, r, r.Param("server"), r.Param("id"), true)
 	case r.Match("/person/{server}/{id}"):
 		a.person(c, r, r.Param("server"), r.Param("id"))
+	case r.Match("/discover"):
+		a.discoverPage(c, r)
+	case r.Match("/catalog/{server}/{catalog}"):
+		a.catalogPage(c, r)
+	case r.Match("/title/{server}/{kind}/{tmdb}"):
+		a.titlePage(c, r)
+	case r.Match("/requests/{server}"):
+		a.requestsPage(c, r)
 	default:
 		a.home(c)
 	}
@@ -100,6 +108,9 @@ func (a *App) navItems(c *ui.Context) (top []navItem, sections []navSection) {
 	top = []navItem{
 		{"/search", "search", style.T(c, "nav.search")},
 		{"/home", "home", style.T(c, "nav.home")},
+	}
+	if server, _, _ := a.discovery(c); server != "" {
+		top = append(top, navItem{"/discover", "discover", style.T(c, "nav.discover")})
 	}
 	for _, s := range a.servers {
 		libs := a.serverLibraries(s.GetId())

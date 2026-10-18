@@ -127,6 +127,7 @@ type App struct {
 	personStates  map[string]*personState
 	creditStates  map[string]*creditsState
 	settingsState settingsState
+	discoverState discoverState
 	// bases are the servers' base URLs, for the Connect clients' responses.
 	bases bases
 }

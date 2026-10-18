@@ -21,6 +21,7 @@ import (
 
 	"github.com/mavioai/mavio/libs/client-rust/capi"
 	capiv1 "github.com/mavioai/mavio/libs/client-rust/capi/gen/mavio/capi/v1"
+	acquisitionv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/acquisition/v1"
 	sessionv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/session/v1"
 	userv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/user/v1"
 
@@ -69,10 +70,11 @@ type fakeCore struct {
 	servers []*capiv1.ServerRecord
 	api     http.Handler // the server's API, which CallServer calls
 	// prefs and sessions are the user's on the server's API.
-	prefs    *userv1.PlaybackPreferences
-	sessions []*sessionv1.Session
-	taskRuns int // the tasks run
-	scans    int // the libraries scanned
+	prefs         *userv1.PlaybackPreferences
+	sessions      []*sessionv1.Session
+	taskRuns      int                      // the tasks run
+	scans         int                      // the libraries scanned
+	titleRequests []*acquisitionv1.Request // the requests of titles
 
 	mu       sync.Mutex
 	calls    []string
