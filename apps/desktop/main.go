@@ -24,6 +24,7 @@ import (
 
 	"github.com/mavioai/mavio/libs/client-rust/capi"
 	capiv1 "github.com/mavioai/mavio/libs/client-rust/capi/gen/mavio/capi/v1"
+	design "github.com/mavioai/mavio/libs/design/gen/go"
 
 	"github.com/mavioai/mavio/apps/desktop/internal/app"
 	"github.com/mavioai/mavio/apps/desktop/internal/images"
@@ -126,6 +127,9 @@ func run() error {
 		return mpv.Load(library(resources, mpvName[runtime.GOOS]), deps...)
 	})
 	loader := images.New(ctx, &http.Client{Timeout: 30 * time.Second}, filepath.Join(cacheDir, "images"), 600, update)
+	// The app is written in the design system's languages, which the
+	// language it shows is chosen among.
+	mygo.App.SetLanguages(design.Locales...)
 	a = app.New(ctx, app.Options{
 		Core:          client,
 		Images:        loader,
