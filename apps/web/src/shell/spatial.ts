@@ -246,6 +246,9 @@ export function useSpatialNavigation(on = true) {
       }
       next.focus({ preventScroll: true });
       next.scrollIntoView({ block: "nearest", inline: "nearest", behavior: "smooth" });
+      // Within the page's first screen, as a hero's buttons are, the page
+      // returns to its top, showing all of what is above them.
+      if (!scope && next.getBoundingClientRect().bottom + scrollY <= innerHeight) scrollTo({ top: 0, behavior: "smooth" });
     };
     document.addEventListener("keydown", key);
     return () => document.removeEventListener("keydown", key);
