@@ -68,14 +68,10 @@ export function SidebarPanel({ rail, onToggle }: { rail: boolean; onToggle: () =
         {pinned.map((id) => (
           <Tip key={id} label={toolLooks[id].title()} side="right" disabled={!rail}>
             <Link to="/tools/$tool" params={{ tool: id }} aria-label={rail ? toolLooks[id].title() : undefined} className={itemClass(rail)}>
-              {({ isActive }) => (
-                <>
-                  <span className="flex shrink-0" style={{ color: toolLooks[id].color }}>
-                    <Icon name={toolLooks[id].icon} fill={isActive} size={20} />
-                  </span>
-                  {!rail && <span className="truncate">{toolLooks[id].title()}</span>}
-                </>
-              )}
+              <span className="flex size-6 shrink-0 items-center justify-center rounded-md text-white" style={{ background: toolLooks[id].color }}>
+                <Icon name={toolLooks[id].icon} fill size={15} />
+              </span>
+              {!rail && <span className="truncate">{toolLooks[id].title()}</span>}
             </Link>
           </Tip>
         ))}
