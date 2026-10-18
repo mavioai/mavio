@@ -53,7 +53,7 @@ struct CreditsView: View {
                     spacing: MavioSpacing.s24
                 ) {
                     ForEach(Array(shown.enumerated()), id: \.offset) { _, c in
-                        PersonCard(c, role: c.job == .other || c.job.isCast ? c.role : nil)
+                        PersonLink(serverId: serverId, credit: c, role: c.job == .other || c.job.isCast ? c.role : nil)
                     }
                 }
             }

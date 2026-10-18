@@ -5,6 +5,8 @@ import SwiftUI
 /// An item's Details section (libs/design/components.md, Details Screen):
 /// on an iPad the tagline and overview, the leading crew, the tags and
 /// links, then the ratings, the facts and the chosen version's media.
+/// Genres, keywords and studios open their items in the library, and the
+/// crew their pages.
 struct AboutSection: View {
     let details: Details
     let source: Source?
@@ -29,6 +31,27 @@ struct AboutSection: View {
 
     private var tags: [String] { card.kind == .episode || card.kind == .season ? [] : details.tags }
     private var text: String? { overview ? details.overview : nil }
+
+    /// A genre, keyword or studio opening the library's items of it, when
+    /// the server is reachable.
+    private func narrowed(_ filter: Filter) -> Route? {
+        guard let libraryId = details.libraryId, !details.offline else { return nil }
+        return .filteredLibrary(serverId: card.serverId, libraryId: libraryId, filter: filter)
+    }
+
+    private static func filter(genre: String? = nil, tag: String? = nil, studio: String? = nil) -> Filter {
+        Filter(played: nil, favorite: false, genre: genre, tag: tag, studio: studio)
+    }
+
+    /// The values of a fact that open the library, by the fact's caption.
+    private var links: [String: [(String, Route?)]] {
+        var links: [String: [(String, Route?)]] = [:]
+        links[MavioStrings.itemGenres] = details.genres.map { ($0, narrowed(Self.filter(genre: $0))) }
+        links[inSeries ? MavioStrings.itemNetworks : MavioStrings.itemStudio] = shownStudios.map {
+            ($0, narrowed(Self.filter(studio: $0)))
+        }
+        return links
+    }
 
     private var facts: [(String, String)] {
         let day = { (d: Date?) in d?.formatted(date: .abbreviated, time: .omitted) }
@@ -81,10 +104,12 @@ struct AboutSection: View {
 
     private static let minStudios = 3
 
+    private var shownStudios: [String] {
+        allStudios ? details.studios : Array(details.studios.prefix(Self.minStudios))
+    }
+
     private var studios: String? {
-        guard !details.studios.isEmpty else { return nil }
-        let shown = allStudios ? details.studios : Array(details.studios.prefix(Self.minStudios))
-        return shown.joined(separator: ", ")
+        shownStudios.isEmpty ? nil : shownStudios.joined(separator: ", ")
     }
 
     private var media: [(String, String)] {
@@ -129,7 +154,7 @@ struct AboutSection: View {
                     }
                     VStack(alignment: .leading, spacing: 32) {
                         if ratings { ratingCards }
-                        FactList(rows: facts) { key in
+                        FactList(rows: facts, links: links) { key in
                             if key == (inSeries ? MavioStrings.itemNetworks : MavioStrings.itemStudio),
                                 details.studios.count > Self.minStudios
                             {
@@ -146,7 +171,7 @@ struct AboutSection: View {
                                 .buttonStyle(.plain)
                             }
                         }
-                        FactList(rows: media) { _ in EmptyView() }
+                        FactList(rows: media, links: [:]) { _ in EmptyView() }
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                 }
@@ -174,8 +199,16 @@ struct AboutSection: View {
                     ForEach(Array(crew.enumerated()), id: \.offset) { _, c in
                         VStack(alignment: .leading, spacing: 0) {
                             Text(c.job == .other ? c.role ?? c.job.label : c.job.label).type(theme.type.headline)
-                            Text(c.name).type(theme.type.callout).foregroundStyle(theme.colors.textSecondary).lineLimit(
-                                1)
+                            let name = Text(c.name).type(theme.type.callout)
+                                .foregroundStyle(theme.colors.textSecondary).lineLimit(1)
+                            if c.personId.isEmpty {
+                                name
+                            } else {
+                                NavigationLink(value: Route.person(serverId: card.serverId, personId: c.personId)) {
+                                    name
+                                }
+                                .buttonStyle(.plain)
+                            }
                         }
                     }
                 }
@@ -195,10 +228,15 @@ struct AboutSection: View {
                         .foregroundStyle(theme.colors.textSecondary)
                     Flow(spacing: MavioSpacing.s8, lineSpacing: MavioSpacing.s8) {
                         ForEach(tags, id: \.self) { tag in
-                            Text(tag).type(theme.type.footnote)
+                            let pill = Text(tag).type(theme.type.footnote)
                                 .padding(.horizontal, MavioSpacing.s12)
                                 .padding(.vertical, MavioSpacing.s4)
                                 .overlay(Capsule().strokeBorder(theme.colors.border))
+                            if let route = narrowed(Self.filter(tag: tag)) {
+                                NavigationLink(value: route) { pill }.buttonStyle(.plain)
+                            } else {
+                                pill
+                            }
                         }
                     }
                 }
@@ -291,9 +329,11 @@ private struct RatingCard<Value: View>: View {
     }
 }
 
-/// Facts, each a caption over its value, in as many columns as fit.
+/// Facts, each a caption over its value, in as many columns as fit; a
+/// fact with links shows them in place of its value.
 private struct FactList<Extra: View>: View {
     let rows: [(String, String)]
+    let links: [String: [(String, Route?)]]
     @ViewBuilder let extra: (String) -> Extra
     @Environment(\.theme) private var theme
 
@@ -307,8 +347,22 @@ private struct FactList<Extra: View>: View {
                     VStack(alignment: .leading, spacing: MavioSpacing.s4) {
                         Text(key).type(theme.type.footnote).fontWeight(.semibold)
                             .foregroundStyle(theme.colors.textSecondary)
-                        Text(value).type(theme.type.callout).foregroundStyle(theme.colors.textPrimary)
-                            .fixedSize(horizontal: false, vertical: true)
+                        if let values = links[key], values.contains(where: { $0.1 != nil }) {
+                            Flow(spacing: 4, lineSpacing: 2) {
+                                ForEach(Array(values.enumerated()), id: \.offset) { i, v in
+                                    let text = Text(i < values.count - 1 ? "\(v.0)," : v.0)
+                                    if let route = v.1 {
+                                        NavigationLink(value: route) { text }.buttonStyle(.plain)
+                                    } else {
+                                        text
+                                    }
+                                }
+                            }
+                            .type(theme.type.callout).foregroundStyle(theme.colors.textPrimary)
+                        } else {
+                            Text(value).type(theme.type.callout).foregroundStyle(theme.colors.textPrimary)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
                         extra(key)
                     }
                 }

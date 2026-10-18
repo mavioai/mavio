@@ -94,13 +94,21 @@ struct LibraryView: View {
     let library: LibraryEntry
     @Environment(AppModel.self) private var model
     @Environment(\.theme) private var theme
-    @State private var tab = Tab.recommended
+    @State private var tab: Tab
     @State private var rows: [Row]?
     @State private var page = Paged()
     @State private var sort: Sort = .name
-    @State private var filter = Filter(played: nil, favorite: false, genre: nil)
+    @State private var filter: Filter
 
     private enum Tab { case recommended, all }
+
+    /// A library on its Recommended tab, or on its grid narrowed by a
+    /// filter, as an item's genres, keywords and studios open it.
+    init(library: LibraryEntry, filter: Filter? = nil) {
+        self.library = library
+        _filter = State(initialValue: filter ?? Filter(played: nil, favorite: false, genre: nil))
+        _tab = State(initialValue: filter == nil ? .recommended : .all)
+    }
 
     var body: some View {
         ScrollView {
@@ -146,7 +154,43 @@ struct LibraryView: View {
     }
 }
 
-/// Over a library's grid: the genre it is narrowed to, which clears it, the
+/// A library of a server by its ID, its grid narrowed by a filter.
+struct FilteredLibraryView: View {
+    let serverId: String
+    let libraryId: String
+    let filter: Filter
+    @Environment(AppModel.self) private var model
+    @State private var library: LibraryEntry?
+    @State private var failure: String?
+
+    var body: some View {
+        Group {
+            if let library {
+                LibraryView(library: library, filter: filter)
+            } else if let failure {
+                StatusView(
+                    icon: "error", title: MavioStrings.stateError, message: failure,
+                    action: (MavioStrings.actionRetry, { Task { await load() } }))
+            } else {
+                ProgressView().frame(maxWidth: .infinity, maxHeight: .infinity)
+            }
+        }
+        .task { await load() }
+    }
+
+    private func load() async {
+        do {
+            let all = try await model.client.libraries(serverId: serverId).libraries
+            library = all.first { $0.id == libraryId }
+            failure = library == nil ? MavioStrings.librariesNotFound : nil
+        } catch is CancellationError {
+        } catch {
+            failure = error.localizedDescription
+        }
+    }
+}
+
+/// Over a library's grid: the genre, keyword or studio it is narrowed to, which clears it, the
 /// filters as pills, the order's menu and the count, wrapping as the width
 /// ends.
 private struct LibraryFilters: View {
@@ -168,13 +212,12 @@ private struct LibraryFilters: View {
             }
         }
 
-        func filter(genre: String?) -> Filter {
-            switch self {
-            case .all: Filter(played: nil, favorite: false, genre: genre)
-            case .unplayed: Filter(played: false, favorite: false, genre: genre)
-            case .played: Filter(played: true, favorite: false, genre: genre)
-            case .favorites: Filter(played: nil, favorite: true, genre: genre)
-            }
+        /// The filter with this choice, keeping the value it is narrowed to.
+        func applied(to filter: Filter) -> Filter {
+            var f = filter
+            f.played = self == .unplayed ? false : self == .played ? true : nil
+            f.favorite = self == .favorites
+            return f
         }
     }
 
@@ -184,14 +227,24 @@ private struct LibraryFilters: View {
         (.lastPlayed, MavioStrings.librarySortLastPlayed), (.random, MavioStrings.librarySortRandom),
     ]
 
+    /// The genre, keyword or studio the grid is narrowed to, named.
+    private var value: String? {
+        if let genre = filter.genre { return MavioStrings.libraryGenreValue(value: genre) }
+        if let tag = filter.tag { return MavioStrings.libraryTagValue(value: tag) }
+        if let studio = filter.studio { return MavioStrings.libraryStudioValue(value: studio) }
+        return nil
+    }
+
     var body: some View {
         Flow(spacing: MavioSpacing.s8, lineSpacing: MavioSpacing.s8) {
-            if let genre = filter.genre {
+            if let value {
                 Button {
                     filter.genre = nil
+                    filter.tag = nil
+                    filter.studio = nil
                 } label: {
                     HStack(spacing: 6) {
-                        Text(MavioStrings.libraryGenreValue(value: genre))
+                        Text(value)
                         Icon("close", size: 14)
                     }
                     .type(theme.type.callout).fontWeight(.semibold)
@@ -201,13 +254,12 @@ private struct LibraryFilters: View {
                     .background(theme.colors.accent, in: .capsule)
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel(
-                    "\(MavioStrings.libraryGenreValue(value: genre)), \(MavioStrings.libraryClearValue)")
+                .accessibilityLabel("\(value), \(MavioStrings.libraryClearValue)")
             }
             ForEach(Choice.allCases, id: \.self) { choice in
-                let on = choice.filter(genre: filter.genre) == filter
+                let on = choice.applied(to: filter) == filter
                 Button {
-                    filter = choice.filter(genre: filter.genre)
+                    filter = choice.applied(to: filter)
                 } label: {
                     Text(choice.label)
                         .type(theme.type.callout).fontWeight(.medium)

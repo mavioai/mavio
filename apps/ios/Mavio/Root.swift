@@ -12,6 +12,10 @@ enum Route: Hashable {
     case hub(serverId: String, hubId: String, title: String)
     /// An item's cast and crew, or its crew alone.
     case credits(serverId: String, itemId: String, crew: Bool)
+    /// A person of a server's library.
+    case person(serverId: String, personId: String)
+    /// A library's grid narrowed to a genre, keyword or studio.
+    case filteredLibrary(serverId: String, libraryId: String, filter: Filter)
     /// Search across the servers.
     case search
     /// The settings.
@@ -182,6 +186,9 @@ struct Stack<Content: View>: View {
                         case let .hub(serverId, hubId, title): HubView(serverId: serverId, hubId: hubId, title: title)
                         case let .credits(serverId, itemId, crew):
                             CreditsView(serverId: serverId, itemId: itemId, crew: crew)
+                        case let .person(serverId, personId): PersonView(serverId: serverId, personId: personId)
+                        case let .filteredLibrary(serverId, libraryId, filter):
+                            FilteredLibraryView(serverId: serverId, libraryId: libraryId, filter: filter)
                         case .search: SearchView()
                         case .settings: SettingsView()
                         case .downloads: DownloadsView()

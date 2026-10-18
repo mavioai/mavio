@@ -590,7 +590,7 @@ private struct DetailsContent: View {
                 .foregroundStyle(theme.colors.accentText)
             } content: {
                 ForEach(Array(shown.enumerated()), id: \.offset) { _, credit in
-                    PersonCard(credit, role: credit.shownRole)
+                    PersonLink(serverId: card.serverId, credit: credit, role: credit.shownRole)
                 }
             }
         }
