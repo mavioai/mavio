@@ -563,6 +563,7 @@ func (a *App) isFullScreen(p *player) bool {
 // it, titled after what it plays.
 func (a *App) playerWindowView(c *ui.Context, win Window) {
 	c.SetTheme(style.Theme(true))
+	a.windowKeys(c)
 	p := a.playerOf(win)
 	if win == nil || p == nil {
 		ui.Box(c).Fill().Background(ui.RGB(0, 0, 0)).DragWindow()
@@ -663,24 +664,25 @@ func playerButton(c *ui.Context, icon, label string, fill, active bool, size flo
 	return b
 }
 
-// playerTopBar builds the title and the way back.
+// playerTopBar builds the title and, in the app's window, the way back;
+// a window of the player's closes as windows do. It drags the window.
 func (a *App) playerTopBar(c *ui.Context, p *player) {
 	white := ui.RGB(255, 255, 255)
 	card := p.details.value.GetCard()
-	ui.Row(c).Absolute().Top(0).Left(0).Right(0).Padding(28, 20, 48).Gap(12).AlignItems(ui.Center).
-		LinearGradient(ui.LinearGradient{Angle: 180, From: ui.RGBA(0, 0, 0, 0.75), To: ui.RGBA(0, 0, 0, 0)}).
-		Children(func() {
-			if playerButton(c, "back", style.T(c, "player.back"), false, false, 44).Clicked() {
-				a.closePlayer(p, true)
-				return
+	bar := ui.Row(c).Absolute().Top(0).Left(0).Right(0).Padding(28, 20, 48).Gap(12).AlignItems(ui.Center).DragWindow().
+		LinearGradient(ui.LinearGradient{Angle: 180, From: ui.RGBA(0, 0, 0, 0.75), To: ui.RGBA(0, 0, 0, 0)})
+	bar.Children(func() {
+		if p.win == nil && playerButton(c, "back", style.T(c, "player.back"), false, false, 44).Clicked() {
+			a.closePlayer(p, true)
+			return
+		}
+		ui.Column(c).MinWidth(0).Grow(1).Children(func() {
+			if card.GetKind() == capiv1.CardKind_CARD_KIND_EPISODE && card.GetSubtitle() != "" {
+				style.Text(ui.Text(c, card.GetSubtitle()), style.Type.Footnote).TextColor(white.Alpha(0.7)).SingleLine()
 			}
-			ui.Column(c).MinWidth(0).Grow(1).Children(func() {
-				if card.GetKind() == capiv1.CardKind_CARD_KIND_EPISODE && card.GetSubtitle() != "" {
-					style.Text(ui.Text(c, card.GetSubtitle()), style.Type.Footnote).TextColor(white.Alpha(0.7)).SingleLine()
-				}
-				style.Text(ui.Text(c, card.GetTitle()), style.Type.Title3).FontWeight(600).TextColor(white).SingleLine()
-			})
+			style.Text(ui.Text(c, card.GetTitle()), style.Type.Title3).FontWeight(600).TextColor(white).SingleLine()
 		})
+	})
 }
 
 // playerBottomBar builds the scrubber and the controls under it.

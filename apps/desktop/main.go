@@ -14,6 +14,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"slices"
 	"strconv"
 	"strings"
 	"sync"
@@ -115,6 +116,9 @@ func run() error {
 	// players are the player's windows open, which draw again with the
 	// app's: both on the main thread alone.
 	players := map[*mygo.Window]bool{}
+	// order is the app's windows in the order they opened, which ⌘` goes
+	// through.
+	var order []*mygo.Window
 	update := func(fn func()) {
 		if win != nil {
 			win.Update(func() {
@@ -164,8 +168,10 @@ func run() error {
 			}
 			w := mygo.NewWindow(opts)
 			players[w] = true
+			order = append(order, w)
 			w.OnClosed(func() {
 				delete(players, w)
+				order = slices.DeleteFunc(order, func(o *mygo.Window) bool { return o == w })
 				update(closed)
 			})
 			return w
@@ -184,6 +190,18 @@ func run() error {
 			}
 		},
 		IsFullScreen: func() bool { return win != nil && win.IsFullScreen() },
+		NextWindow: func(back bool) {
+			all := append([]*mygo.Window{win}, order...)
+			if len(all) < 2 {
+				return
+			}
+			i := max(slices.Index(all, mygo.FocusedWindow()), 0)
+			step := 1
+			if back {
+				step = len(all) - 1
+			}
+			all[(i+step)%len(all)].Focus()
+		},
 	})
 	setAppearance(a.Appearance())
 

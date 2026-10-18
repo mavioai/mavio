@@ -72,6 +72,9 @@ type Options struct {
 	// which.
 	ToggleFullScreen func()
 	IsFullScreen     func() bool
+	// NextWindow brings the app's next window to the front, the one
+	// before when back.
+	NextWindow func(back bool)
 }
 
 // phase is where the app is: starting, signing in, or showing the
@@ -277,6 +280,19 @@ func (a *App) signOut() {
 	}()
 }
 
+// windowKeys moves between the app's windows with ⌘` and ⇧⌘` on the Mac.
+func (a *App) windowKeys(c *ui.Context) {
+	if goruntime.GOOS != "darwin" || a.opts.NextWindow == nil {
+		return
+	}
+	switch {
+	case c.Shortcut(ui.Cmd, ui.KeyBackquote):
+		a.opts.NextWindow(false)
+	case c.Shortcut(ui.Cmd|ui.Shift, ui.KeyBackquote):
+		a.opts.NextWindow(true)
+	}
+}
+
 // tvShortcut reports whether the TV mode's shortcut was pressed: ⌃⌘T on
 // the Mac, Shift+F11 elsewhere.
 func tvShortcut(c *ui.Context) bool {
@@ -356,6 +372,7 @@ func (a *App) savePreferences() {
 // View builds the window.
 func (a *App) View(c *ui.Context) {
 	c.SetTheme(style.Theme(c.Theme().Dark))
+	a.windowKeys(c)
 	if tvShortcut(c) {
 		a.setTV(!a.prefs.TV)
 	}
