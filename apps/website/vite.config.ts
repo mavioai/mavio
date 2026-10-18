@@ -11,8 +11,9 @@ import { defineConfig } from "vite";
 const cert = process.env.DEV_TLS_CERT;
 const key = process.env.DEV_TLS_KEY;
 
-// mavio.dev on Cloudflare Workers (docs/mavio-dev.md §2).
+// mavio.dev on Cloudflare Workers (docs/mavio-dev.md §2). The Worker
+// answers CORS itself, as in production: Vite's own answers only localhost.
 export default defineConfig({
   plugins: [cloudflare({ viteEnvironment: { name: "ssr" } }), tanstackStart(), react(), tailwindcss()],
-  server: cert && key ? { host: true, https: { cert: readFileSync(cert), key: readFileSync(key) } } : undefined,
+  server: { cors: false, ...(cert && key ? { host: true, https: { cert: readFileSync(cert), key: readFileSync(key) } } : {}) },
 });
