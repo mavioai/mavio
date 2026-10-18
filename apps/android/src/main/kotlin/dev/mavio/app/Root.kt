@@ -88,6 +88,15 @@ sealed interface Route {
 
     /** An item's details. */
     data class Item(val serverId: String, val itemId: String) : Route
+
+    /** An item playing, from start or else where it was left. */
+    data class Player(
+        val serverId: String,
+        val itemId: String,
+        val title: String,
+        val mediaSourceId: String?,
+        val start: java.time.Duration?,
+    ) : Route
 }
 
 /** The tabs of the phone's tab bar, as the web UI's. */
@@ -105,6 +114,10 @@ class Navigator(private val stack: () -> SnapshotStateList<Route>) {
 
     /** Opens an item's details. */
     fun open(card: Card) = open(Route.Item(card.serverId, card.itemId))
+
+    /** Plays an item, a version of it when mediaSourceId is set, from start when it is set. */
+    fun play(serverId: String, itemId: String, title: String, mediaSourceId: String?, start: java.time.Duration?) =
+        open(Route.Player(serverId, itemId, title, mediaSourceId, start))
 
     /** Goes back a screen. */
     fun back() {
@@ -178,11 +191,14 @@ val LocalBottomInset = staticCompositionLocalOf { 0.dp }
 private fun Screen(model: AppModel, route: Route) {
     when (route) {
         Route.Home -> HomeScreen(model)
+        is Route.Item -> DetailsScreen(model, route.serverId, route.itemId)
         else -> Box(Modifier.fillMaxSize().padding(top = LocalTopInset.current)) {
             when (route) {
                 Route.Libraries -> StatusView(stringResource(R.string.nav_libraries), icon = R.drawable.ic_movies)
                 Route.Search -> StatusView(stringResource(R.string.nav_search), icon = R.drawable.ic_search)
                 Route.Settings -> SettingsScreen(model)
+                // The player comes in its own step.
+                is Route.Player -> StatusView(route.title, icon = R.drawable.ic_play)
                 else -> StatusView(stringResource(R.string.state_loading))
             }
         }
