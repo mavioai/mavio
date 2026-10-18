@@ -6,9 +6,12 @@ import SwiftUI
 
 /// The player of an item: starts the playback on the server, plays it on
 /// the engine that suits it, reports progress and draws the on-screen
-/// controller (docs/clients.md §6.5).
+/// controller (docs/clients.md §6.5); a side panel picks the audio,
+/// subtitles and quality and tells how the item plays, and an episode's end
+/// starts the next.
 struct PlayerScreen: View {
-    let request: PlayRequest
+    /// What plays: the item opened, then the episodes after it.
+    @State private var request: PlayRequest
     @Environment(AppModel.self) private var model
     @Environment(\.dismiss) private var dismiss
     @State private var player = Player()
@@ -22,12 +25,18 @@ struct PlayerScreen: View {
     @State private var triedAether = false
     @State private var controls = true
     @State private var interactions = 0
-    @State private var picker: TrackPicker?
+    @State private var panel: PlayerPanel?
+    /// The episode after an episode, which its end plays.
+    @State private var next: Episode?
+    /// An episode's series and number, over its title.
+    @State private var series: String?
+    @AppStorage("player.quality") private var quality = PlaybackQuality.auto
+    @Environment(\.openURL) private var openURL
     @State private var scrubbing: TimeInterval?
     @State private var closing = false
 
     init(request: PlayRequest) {
-        self.request = request
+        _request = State(initialValue: request)
         _title = State(initialValue: request.title)
     }
 
@@ -45,7 +54,10 @@ struct PlayerScreen: View {
                             }
                             .exclusively(
                                 before: TapGesture().onEnded {
-                                    withAnimation(.easeOut(duration: MavioDuration.fast)) { controls.toggle() }
+                                    // A tap closes the panel before it hides the controls.
+                                    withAnimation(.easeOut(duration: MavioDuration.fast)) {
+                                        if panel != nil { panel = nil } else { controls.toggle() }
+                                    }
                                     poke()
                                 })
                     )
@@ -55,19 +67,28 @@ struct PlayerScreen: View {
                 if controls || failure != nil {
                     overlay.transition(.opacity)
                 }
+                if let panel, controls {
+                    PanelView(
+                        tab: Binding(get: { panel }, set: { self.panel = $0 }), tabs: panelTabs,
+                        width: min(360, geo.size.width - 32)
+                    ) { panelContent($0) }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
+                    .padding(.trailing, MavioSpacing.s16)
+                    .padding(.bottom, 120)
+                    .padding(.top, 64)
+                    .transition(.opacity.combined(with: .scale(scale: 0.96, anchor: .bottomTrailing)))
+                }
             }
+            .animation(.easeOut(duration: MavioDuration.fast), value: panel)
         }
         .background(.black)
         .preferredColorScheme(.dark)
         .statusBarHidden(!controls)
         .persistentSystemOverlays(.hidden)
-        .sheet(item: $picker) { kind in
-            pickerSheet(kind).presentationDetents([.medium, .large])
-        }
         .task { await start(at: request.start) }
         .task(id: ObjectIdentifier(session ?? Self.none)) { await report() }
         .task(id: hideKey) {
-            guard controls, player.isPlaying, picker == nil, scrubbing == nil else { return }
+            guard controls, player.isPlaying, panel == nil, scrubbing == nil else { return }
             try? await Task.sleep(for: .seconds(MavioDuration.controlsHide))
             guard !Task.isCancelled else { return }
             withAnimation(.easeOut(duration: MavioDuration.normal)) { controls = false }
@@ -84,14 +105,15 @@ struct PlayerScreen: View {
             }
         }
         .onChange(of: player.ended) { _, ended in
-            if ended { close() }
+            guard ended else { return }
+            if let next { play(next) } else { close() }
         }
     }
 
     private static let none = NSObject()
 
     private var hideKey: String {
-        "\(controls) \(player.isPlaying) \(picker != nil) \(scrubbing != nil) \(interactions)"
+        "\(controls) \(player.isPlaying) \(panel != nil) \(scrubbing != nil) \(interactions)"
     }
 
     private func poke() {
@@ -131,6 +153,13 @@ struct PlayerScreen: View {
             let details = try? await model.client.details(serverId: request.serverId, itemId: request.itemId)
         {
             title = details.card.title
+            if details.card.kind == .episode {
+                next = details.next
+                let number = details.episodeNumber.map {
+                    MavioStrings.itemEpisodeShort(season: String(details.seasonNumber ?? 0), episode: String($0))
+                }
+                series = [details.series?.name, number].compactMap(\.self).joined(separator: " · ")
+            }
             cachedSources = sources(details)
             source = cachedSources.first { $0.mediaSourceId == request.mediaSourceId } ?? cachedSources.first
         }
@@ -140,7 +169,8 @@ struct PlayerScreen: View {
                 capabilities: DeviceProfile.capabilities(airPlay: airPlay),
                 options: PlaybackOptions(
                     mediaSourceId: source?.mediaSourceId ?? request.mediaSourceId, audioStreamIndex: audio,
-                    subtitleStreamIndex: subtitle, maxBitrate: nil, startPosition: position, download: false))
+                    subtitleStreamIndex: subtitle, maxBitrate: quality.bitrate, startPosition: position, download: false
+                ))
             let info = session.info()
             self.session = session
             self.info = info
@@ -203,6 +233,25 @@ struct PlayerScreen: View {
         }
     }
 
+    /// Plays the episode after this one in the player's place, the
+    /// playback of this one ending first.
+    private func play(_ episode: Episode) {
+        let position = player.ended ? nil : player.currentTime
+        if let old = session {
+            session = nil
+            let serverId = request.serverId
+            Task {
+                try? await old.stop(position: position)
+                model.bump(serverId)
+            }
+        }
+        request = PlayRequest(serverId: request.serverId, itemId: episode.card.itemId, title: episode.card.title)
+        title = episode.card.title
+        (info, source, cachedSources, audio, subtitle, next, series) = (nil, nil, [], nil, nil, nil, nil)
+        (failure, triedAether, panel) = (nil, false, nil)
+        Task { await start(at: episode.position) }
+    }
+
     private func close() {
         guard !closing else { return }
         closing = true
@@ -259,7 +308,13 @@ struct PlayerScreen: View {
                 Icon("close", size: 24).frame(width: 44, height: 44).contentShape(.rect)
             }
             .accessibilityLabel(MavioStrings.playerBack)
-            Text(title).type(MavioTypography.standard.headline).lineLimit(1)
+            VStack(alignment: .leading, spacing: 0) {
+                if let series, !series.isEmpty {
+                    Text(series).type(MavioTypography.standard.footnote).foregroundStyle(.white.opacity(0.7))
+                }
+                Text(title).type(MavioTypography.standard.headline)
+            }
+            .lineLimit(1)
             Spacer()
             RoutePicker().frame(width: 44, height: 44)
         }
@@ -316,16 +371,32 @@ struct PlayerScreen: View {
             .monospacedDigit()
             .foregroundStyle(.white.opacity(0.8))
             HStack(spacing: MavioSpacing.s8) {
-                if let source, !source.audio.isEmpty, request.file == nil {
-                    barButton("audio", label: MavioStrings.playerAudio) { picker = .audio }
+                if let next {
+                    Button {
+                        play(next)
+                    } label: {
+                        Label {
+                            Text(MavioStrings.playerNextEpisode)
+                        } icon: {
+                            Icon("next", fill: true, size: 16)
+                        }
+                        .type(MavioTypography.standard.footnote).fontWeight(.semibold)
+                        .padding(.horizontal, 14)
+                        .frame(height: 36)
+                        .glass(in: .capsule)
+                    }
+                    .buttonStyle(.plain)
                 }
+                Spacer()
                 if let info, !info.subtitles.isEmpty {
                     barButton(
-                        "subtitles", fill: (info.subtitleStreamIndex ?? -1) >= 0, label: MavioStrings.playerSubtitles
-                    ) { picker = .subtitles }
+                        "subtitles", fill: (info.subtitleStreamIndex ?? -1) >= 0, active: panel == .subtitles,
+                        label: MavioStrings.playerSubtitles
+                    ) { toggle(.subtitles) }
                 }
-                barButton("speed", label: MavioStrings.playerSpeed) { picker = .speed }
-                Spacer()
+                barButton(
+                    "settings", active: panel != nil && panel != .subtitles, label: MavioStrings.playerOptions
+                ) { toggle(.audio) }
                 if player.canPictureInPicture {
                     barButton("pictureInPicture", label: MavioStrings.playerPictureInPicture) {
                         player.togglePictureInPicture()
@@ -335,16 +406,26 @@ struct PlayerScreen: View {
         }
     }
 
-    private func barButton(_ icon: String, fill: Bool = false, label: String, action: @escaping () -> Void)
-        -> some View
-    {
+    /// Opens the panel on tab, or closes it when it shows a tab of that button.
+    private func toggle(_ tab: PlayerPanel) {
+        let open = tab == .subtitles ? panel == .subtitles : panel != nil && panel != .subtitles
+        panel = open ? nil : tab
+    }
+
+    private func barButton(
+        _ icon: String, fill: Bool = false, active: Bool = false, label: String, action: @escaping () -> Void
+    ) -> some View {
         Button {
             action()
             poke()
         } label: {
-            Icon(icon, fill: fill, size: 24).frame(width: 44, height: 44).contentShape(.rect)
+            Icon(icon, fill: fill, size: 24)
+                .frame(width: 44, height: 44)
+                .background(active ? .white.opacity(0.2) : .clear, in: .circle)
+                .contentShape(.circle)
         }
         .accessibilityLabel(label)
+        .accessibilityAddTraits(active ? .isSelected : [])
     }
 
     private func clock(_ seconds: TimeInterval) -> String {
@@ -354,76 +435,103 @@ struct PlayerScreen: View {
             ? String(format: "%d:%02d:%02d", s / 3600, s / 60 % 60, s % 60) : String(format: "%d:%02d", s / 60, s % 60)
     }
 
-    // MARK: Pickers
+    // MARK: Panel
 
-    @ViewBuilder private func pickerSheet(_ kind: TrackPicker) -> some View {
-        NavigationStack {
-            List {
-                switch kind {
-                case .audio:
-                    ForEach(source?.audio ?? [], id: \.index) { stream in
-                        option(
-                            audioLabel(stream), detail: audioDetail(stream),
-                            selected: stream.index == info?.audioStreamIndex
-                        ) {
-                            audio = stream.index
-                            restart()
-                        }
-                    }
-                case .subtitles:
-                    option(MavioStrings.playerSubtitlesOff, selected: (info?.subtitleStreamIndex ?? -1) < 0) {
-                        subtitle = -1
+    /// The panel's tabs: a downloaded file has only its speed to choose.
+    private var panelTabs: [PlayerPanel] {
+        request.file != nil
+            ? [.audio] : (info?.subtitles.isEmpty ?? true) ? [.audio, .quality, .info] : PlayerPanel.allCases
+    }
+
+    @ViewBuilder private func panelContent(_ tab: PlayerPanel) -> some View {
+        switch tab {
+        case .audio:
+            if request.file == nil {
+                ForEach(source?.audio ?? [], id: \.index) { stream in
+                    PanelChoice(
+                        label: audioLabel(stream), detail: audioDetail(stream),
+                        checked: stream.index == info?.audioStreamIndex
+                    ) {
+                        audio = stream.index
                         restart()
-                    }
-                    ForEach(info?.subtitles ?? [], id: \.streamIndex) { track in
-                        option(
-                            language(track.language) ?? track.title ?? "#\(track.streamIndex)",
-                            detail: [track.title, track.format.uppercased(), track.forced ? "Forced" : nil]
-                                .compactMap { $0 }.joined(separator: " · "),
-                            selected: track.streamIndex == info?.subtitleStreamIndex
-                        ) {
-                            subtitle = track.streamIndex
-                            restart()
-                        }
-                    }
-                case .speed:
-                    ForEach([0.5, 0.75, 1, 1.25, 1.5, 2] as [Float], id: \.self) { rate in
-                        option(rate == 1 ? "1×" : "\(rate.formatted())×", selected: player.rate == rate) {
-                            player.setRate(rate)
-                        }
                     }
                 }
             }
-            .navigationTitle(kind.title)
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button(MavioStrings.actionDone) { picker = nil }
+            PanelHeading(MavioStrings.playerSpeed)
+            Flow(spacing: 6, lineSpacing: 6) {
+                ForEach([0.5, 0.75, 1, 1.25, 1.5, 2] as [Float], id: \.self) { rate in
+                    let on = player.rate == rate
+                    Button {
+                        player.setRate(rate)
+                        poke()
+                    } label: {
+                        Text("\(rate.formatted())×")
+                            .type(MavioTypography.standard.footnote).fontWeight(.semibold).monospacedDigit()
+                            .foregroundStyle(on ? .black : .white)
+                            .padding(.horizontal, MavioSpacing.s12)
+                            .frame(height: 32)
+                            .background(on ? .white : .white.opacity(0.1), in: .capsule)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityAddTraits(on ? .isSelected : [])
                 }
+            }
+            .padding(.horizontal, 10)
+        case .subtitles:
+            PanelChoice(label: MavioStrings.playerSubtitlesOff, checked: (info?.subtitleStreamIndex ?? -1) < 0) {
+                subtitle = -1
+                restart()
+            }
+            ForEach(info?.subtitles ?? [], id: \.streamIndex) { track in
+                PanelChoice(
+                    label: language(track.language) ?? track.title ?? "#\(track.streamIndex)",
+                    detail: [track.title, track.format.uppercased(), track.forced ? "Forced" : nil]
+                        .compactMap { $0 }.joined(separator: " · "),
+                    checked: track.streamIndex == info?.subtitleStreamIndex
+                ) {
+                    subtitle = track.streamIndex
+                    restart()
+                }
+            }
+        case .quality:
+            ForEach(PlaybackQuality.allCases, id: \.self) { q in
+                PanelChoice(label: q.label, checked: q == quality) {
+                    guard q != quality else { return }
+                    quality = q
+                    restart()
+                }
+            }
+        case .info:
+            if let info {
+                VStack(alignment: .leading, spacing: MavioSpacing.s16) {
+                    PanelFact(MavioStrings.playerMethod, method(info.kind))
+                    if let source {
+                        PanelFact(
+                            MavioStrings.playerSource,
+                            [source.name, source.container?.split(separator: ",").first.map { $0.uppercased() }]
+                                .compactMap(\.self).joined(separator: " · "))
+                    }
+                    VStack(alignment: .leading, spacing: 2) {
+                        if let url = URL(string: info.url) {
+                            PanelAction(MavioStrings.playerOpenExternal, icon: "external") { openURL(url) }
+                        }
+                        PanelAction(MavioStrings.playerCopyLink, icon: "copy") {
+                            UIPasteboard.general.string = info.url
+                        }
+                    }
+                }
+                .padding(.horizontal, 10)
+                .padding(.top, MavioSpacing.s4)
             }
         }
     }
 
-    private func option(_ label: String, detail: String? = nil, selected: Bool, action: @escaping () -> Void)
-        -> some View
-    {
-        Button {
-            picker = nil
-            action()
-        } label: {
-            HStack {
-                VStack(alignment: .leading) {
-                    Text(label)
-                    if let detail, !detail.isEmpty {
-                        Text(detail).font(.footnote).foregroundStyle(.secondary)
-                    }
-                }
-                Spacer()
-                if selected { Image(systemName: "checkmark").foregroundStyle(.tint) }
-            }
-            .contentShape(.rect)
+    private func method(_ kind: PlayKind) -> String {
+        switch kind {
+        case .directPlay: MavioStrings.playerDirectPlay
+        case .directStream: MavioStrings.playerDirectStream
+        case .transcode: MavioStrings.playerTranscode
         }
-        .buttonStyle(.plain)
     }
 
     private func restart() {
@@ -460,18 +568,187 @@ struct PlayerScreen: View {
     }
 }
 
-/// The pickers of the player.
-enum TrackPicker: String, Identifiable {
-    case audio, subtitles, speed
+/// The tabs of the player's panel.
+enum PlayerPanel: CaseIterable, Identifiable {
+    case audio, subtitles, quality, info
 
-    var id: String { rawValue }
+    var id: Self { self }
 
     var title: String {
         switch self {
         case .audio: MavioStrings.playerAudio
         case .subtitles: MavioStrings.playerSubtitles
-        case .speed: MavioStrings.playerSpeed
+        case .quality: MavioStrings.playerQuality
+        case .info: MavioStrings.playerInfo
         }
+    }
+}
+
+/// The most the server sends this device, as the web UI's qualities.
+enum PlaybackQuality: String, CaseIterable {
+    case original, auto
+    case p1080 = "1080p"
+    case p720 = "720p"
+    case p480 = "480p"
+
+    /// The bitrate it limits the stream to.
+    var bitrate: Int64 {
+        switch self {
+        case .original: 200_000_000
+        case .auto: 40_000_000
+        case .p1080: 10_000_000
+        case .p720: 4_000_000
+        case .p480: 1_500_000
+        }
+    }
+
+    var label: String {
+        switch self {
+        case .original: MavioStrings.playerQualityOriginal
+        case .auto: MavioStrings.playerQualityAuto
+        default: rawValue
+        }
+    }
+}
+
+/// The panel over the player's lower right: its tabs over the choices of
+/// the one shown, in glass.
+private struct PanelView<Content: View>: View {
+    @Binding var tab: PlayerPanel
+    let tabs: [PlayerPanel]
+    let width: CGFloat
+    @ViewBuilder let content: (PlayerPanel) -> Content
+
+    var body: some View {
+        VStack(spacing: 0) {
+            if tabs.count > 1 {
+                HStack(spacing: 2) {
+                    ForEach(tabs) { t in
+                        Button {
+                            tab = t
+                        } label: {
+                            Text(t.title)
+                                .type(MavioTypography.standard.footnote).fontWeight(.semibold)
+                                .foregroundStyle(.white.opacity(t == tab ? 1 : 0.7))
+                                .frame(maxWidth: .infinity, minHeight: 32)
+                                .background(t == tab ? .white.opacity(0.16) : .clear, in: .capsule)
+                                .contentShape(.capsule)
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityAddTraits(t == tab ? .isSelected : [])
+                    }
+                }
+                .padding(3)
+                .background(.white.opacity(0.06), in: .capsule)
+                .padding(MavioSpacing.s12)
+            }
+            ViewThatFits(in: .vertical) {
+                list
+                ScrollView { list }.scrollIndicators(.hidden)
+            }
+        }
+        .frame(width: width)
+        .glass(in: RoundedRectangle(cornerRadius: 18))
+        .overlay(RoundedRectangle(cornerRadius: 18).strokeBorder(.white.opacity(0.1)))
+        .environment(\.colorScheme, .dark)
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel(MavioStrings.playerOptions)
+    }
+
+    private var list: some View {
+        VStack(alignment: .leading, spacing: 2) { content(tab) }
+            .padding(.horizontal, MavioSpacing.s8)
+            .padding(.top, tabs.count > 1 ? 0 : MavioSpacing.s8)
+            .padding(.bottom, MavioSpacing.s12)
+            .frame(maxWidth: .infinity, alignment: .leading)
+    }
+}
+
+/// A choice of the panel, checked when it is the current one.
+private struct PanelChoice: View {
+    let label: String
+    var detail: String? = nil
+    let checked: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: MavioSpacing.s12) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(label).type(MavioTypography.standard.callout)
+                    if let detail, !detail.isEmpty {
+                        Text(detail).type(MavioTypography.standard.footnote).foregroundStyle(.white.opacity(0.6))
+                    }
+                }
+                Spacer(minLength: 0)
+                if checked { Icon("check", size: 18) }
+            }
+            .foregroundStyle(.white)
+            .padding(.horizontal, 10)
+            .padding(.vertical, MavioSpacing.s8)
+            .frame(minHeight: 44)
+            .background(checked ? .white.opacity(0.1) : .clear, in: .rect(cornerRadius: 10))
+            .contentShape(.rect)
+        }
+        .buttonStyle(.plain)
+        .accessibilityAddTraits(checked ? .isSelected : [])
+    }
+}
+
+/// A heading between the panel's choices.
+private struct PanelHeading: View {
+    let text: String
+    init(_ text: String) { self.text = text }
+
+    var body: some View {
+        Text(text.uppercased())
+            .type(MavioTypography.standard.caption).fontWeight(.semibold)
+            .foregroundStyle(.white.opacity(0.6))
+            .padding(.horizontal, 10)
+            .padding(.top, MavioSpacing.s12)
+            .padding(.bottom, MavioSpacing.s4)
+            .accessibilityAddTraits(.isHeader)
+    }
+}
+
+/// A fact of the panel's Info: its label over its value.
+private struct PanelFact: View {
+    let label: String
+    let value: String
+    init(_ label: String, _ value: String) { (self.label, self.value) = (label, value) }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(label).type(MavioTypography.standard.footnote).foregroundStyle(.white.opacity(0.6))
+            Text(value).type(MavioTypography.standard.callout).foregroundStyle(.white)
+        }
+    }
+}
+
+/// An action of the panel's Info.
+private struct PanelAction: View {
+    let label: String
+    let icon: String
+    let action: () -> Void
+    init(_ label: String, icon: String, action: @escaping () -> Void) {
+        (self.label, self.icon, self.action) = (label, icon, action)
+    }
+
+    var body: some View {
+        Button(action: action) {
+            Label {
+                Text(label)
+            } icon: {
+                Icon(icon, size: 18)
+            }
+            .type(MavioTypography.standard.callout)
+            .foregroundStyle(.white)
+            .frame(maxWidth: .infinity, minHeight: 40, alignment: .leading)
+            .padding(.horizontal, 10)
+            .background(.white.opacity(0.08), in: .rect(cornerRadius: 10))
+            .contentShape(.rect)
+        }
+        .buttonStyle(.plain)
     }
 }
 

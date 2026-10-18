@@ -673,7 +673,7 @@ flowchart TD
   - [ ] Picture in Picture while AetherEngine plays
   - [ ] Styled ASS subtitles with libass
   - [ ] Now Playing and the remote commands (`MPNowPlayingInfoCenter`, `MPRemoteCommandCenter`)
-  - [ ] Playing the next episode at the end of one
+  - [x] Playing the next episode at the end of one
   - [ ] Gestures: hold for double speed, swipe for brightness and volume
   - [ ] External subtitle files while the server sends HLS
   - [ ] A redrawn frame when AetherEngine seeks while paused, and scrub thumbnails
@@ -686,6 +686,7 @@ flowchart TD
   - [ ] The iPhone and iPad app's details: what the server that discovers tells (recommendations, Request More, the ratings' logos, budget and revenue, the next air date and the streaming services), the administrators' acquisition, subtitles and issues, the person page from the cast's cards, and genres, tags and studios opening the library filtered by them
   - [x] The iPhone and iPad app's Home hero, as the web UI's: up to five films and shows with backdrops from Home's rows other than Continue Watching, the row's title above the logo or title, the year, runtime, two genres and the rating, the overview on the iPad, Play and Details, swiped through in pages with dots and advancing every 9 seconds; on the iPhone about half the screen, under a clear navigation bar whose title appears past it
   - [x] The iPhone and iPad app's library header, as the web UI's: the Recommended and Library tabs under the name, and over the grid the genre it is narrowed to with its clear, the filters as pills (All, Unplayed, Played, Favorites), the order's menu named by the order, and the count
+  - [x] The iPhone and iPad app's player as the web UI's: the series, season and episode over the title, the side panel over the lower right in glass with its tabs of audio and speed, subtitles, quality (kept, restarting playback at the bitrate chosen) and the playback's method and source with opening it externally and copying its link, closed by a tap; and Next Episode, also played at the end of one, across seasons
   - [ ] The desktop type scale (body 13, [Clients §6.1](clients.md)) in the Mac app (`MavioTypography.desktop`); the web UI takes it with the desktop layout, and the desktop app (`design.DesktopTypography`) has it, with macOS's control sizes and a window of at least 1024 × 680, since it has the desktop layout alone
   - [x] The desktop app's television mode: the TV layout of [Television](tv.md) — the navigation bar at the top with its tabs, Libraries and the user menu's dots, the menu in frosted glass, focus moved by the arrow keys by rows with back going up a level, the television's background, type scale and focused cards, Home's hero, the details on a backdrop of 86% of the screen with the logo and focus on Play, focus through the seasons, episodes, cast, crew, extras and the collection, a library's pill of Recommended and Library and its filters, a row's See All card, and videos playing in the app's window rather than the player's
   - [ ] The rest of the desktop app's television mode ([Television](tv.md)): the details' regions of the overview and the facts (§6.2), a library's sort menu with focus (§6.3), Search's keyboard (§6.4), the settings as a list (§6.6), the player's focus (§7), the assistant's button, and an element shaking where focus cannot move
