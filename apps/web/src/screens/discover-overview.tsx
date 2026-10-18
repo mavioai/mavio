@@ -111,7 +111,7 @@ export function TitleOverview({ server, title }: { server: ServerEntry; title: T
   return (
     <div data-focus-region data-focus-flow className="grid gap-8 px-margin pt-6 pb-3 lg:grid-cols-[minmax(0,1fr)_minmax(320px,380px)]">
       <OverviewLeft server={server} title={title} />
-      <div className="flex min-w-0 flex-col gap-6">
+      <div data-focus-column data-focus-beside className="flex min-w-0 flex-col gap-6">
         <CollectionCard server={server} title={title} />
         <Facts server={server} title={title} />
       </div>
@@ -123,7 +123,7 @@ function OverviewLeft({ server, title }: { server: ServerEntry; title: Title }) 
   const alike = useAlike(server, title.mediaKind);
   const keywords = title.keywordRefs.length > 0 ? title.keywordRefs : title.keywords.map((name) => ({ id: "", name }));
   return (
-    <div className="flex min-w-0 flex-col gap-4">
+    <div data-focus-column className="flex min-w-0 flex-col gap-4">
       {title.tagline && <p className="type-title3 font-normal text-text-secondary italic">{title.tagline}</p>}
       <h2 className="type-title3">{t("discover.overview")}</h2>
       <p className="type-body whitespace-pre-line">{title.overview || t("discover.noOverview")}</p>
@@ -134,6 +134,8 @@ function OverviewLeft({ server, title }: { server: ServerEntry; title: Title }) 
           <Link
             to="/s/$serverId/title/$kind/$tmdbId/crew"
             params={{ serverId: server.id, kind: kindParam(title.mediaKind), tmdbId: String(title.tmdbId) }}
+            data-focus-beside
+            data-focus-end
             className={crewMoreClass}
           >
             {t("discover.fullCrew")}
@@ -177,7 +179,7 @@ export function CrewList({ serverId, credits, more }: { serverId: string; credit
   const name = "truncate type-callout text-text-secondary";
   return (
     <>
-      <ul className="grid grid-cols-2 gap-x-6 gap-y-4 pt-2 sm:grid-cols-3">
+      <ul data-focus-beside className="grid grid-cols-2 gap-x-6 gap-y-4 pt-2 sm:grid-cols-3">
         {crew.map((c, i) => (
           <li key={`${c.personId ?? c.name}-${i}`} className="flex min-w-0 flex-col">
             <span className="type-headline">{c.kind === CreditKind.OTHER && c.role ? c.role : t(crewLabels.find(([k]) => k === c.kind)![1])}</span>

@@ -1162,9 +1162,10 @@ function About({
   return (
     <section className="px-margin pt-8 pb-4">
       <h2 className="mb-4 type-title3">{t("item.details")}</h2>
-      <div className="flex flex-col gap-x-16 gap-y-8 lg:flex-row">
+      {/* On the television, a region in the page's flow, its overview and its facts in columns (docs/tv.md §6.2). */}
+      <div data-focus-region data-focus-flow className="flex flex-col gap-x-16 gap-y-8 lg:flex-row">
         {(text || leading || tags.length > 0 || links.length > 0 || titled) && (
-          <div className="flex min-w-0 flex-col gap-5 lg:w-[44%] lg:shrink-0">
+          <div data-focus-column className="flex min-w-0 flex-col gap-5 lg:w-[44%] lg:shrink-0">
             {text && (
               <div className="flex flex-col gap-2">
                 {item.tagline && <p className="type-headline">{item.tagline}</p>}
@@ -1175,7 +1176,7 @@ function About({
               serverId={server.id}
               credits={crew}
               more={
-                <Link to="/s/$serverId/item/$itemId/crew" params={{ serverId: server.id, itemId: item.id }} className={crewMoreClass}>
+                <Link to="/s/$serverId/item/$itemId/crew" params={{ serverId: server.id, itemId: item.id }} data-focus-beside data-focus-end className={crewMoreClass}>
                   {t("discover.fullCrew")}
                   <Icon name="forward" size={16} />
                 </Link>
@@ -1218,7 +1219,7 @@ function About({
             {titled && <ExternalLinks links={logos} className="justify-start pt-2" />}
           </div>
         )}
-        <div className="flex min-w-0 flex-1 flex-col gap-8">
+        <div data-focus-column data-focus-beside className="flex min-w-0 flex-1 flex-col gap-8">
           {titled ? (
             <TitleRatings
               server={server}

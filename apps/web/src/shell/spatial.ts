@@ -129,6 +129,34 @@ function regionOf(el: HTMLElement): Element {
  */
 const flow = "[data-focus-flow]";
 
+/**
+ * Columns side by side within a region of the flow (data-focus-column),
+ * as an overview beside its facts: each has rows of its own, and left and
+ * right cross between them only from and to what is marked to
+ * (data-focus-beside), as the leading crew and the box of facts.
+ */
+const crosses = "[data-focus-beside]";
+
+/** The column of a region el is in, while beside another, else the region. */
+function columnOf(el: HTMLElement): Element {
+  const region = regionOf(el);
+  const column = el.closest("[data-focus-column]");
+  if (!column || !region.contains(column)) return region;
+  const r = column.getBoundingClientRect();
+  const besides = [...region.querySelectorAll("[data-focus-column]")].some((c) => {
+    const o = c.getBoundingClientRect();
+    return c !== column && (o.left >= r.right || o.right <= r.left);
+  });
+  return besides ? column : region;
+}
+
+/**
+ * An element at the end of what is above it (data-focus-end), as the link
+ * under the leading crew to the whole crew: up and down reach it only from
+ * the last element of a row, and pass it from the others.
+ */
+const end = "[data-focus-end]";
+
 /** Whether b comes after a in the document. */
 function after(a: Element, b: Element): boolean {
   return !!(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING) && !a.contains(b);
@@ -141,13 +169,18 @@ function after(a: Element, b: Element): boolean {
  */
 function acrossFlow(row: Box[], down: boolean, x: number, all: HTMLElement[], tabs?: Element): HTMLElement | undefined {
   const region = regionOf(row[0].el);
-  const page = all.filter((el) => !tabs?.contains(el) && row.every((b) => (down ? after(b.el, el) : after(el, b.el))));
+  // A region of the flow is left whole, past its other columns.
+  const leaving = !!row[0].el.closest(flow);
+  const page = all.filter(
+    (el) => !tabs?.contains(el) && !(leaving && regionOf(el) === region) && row.every((b) => (down ? after(b.el, el) : after(el, b.el))),
+  );
   const next = down ? page[0] : page[page.length - 1];
   if (!next) return undefined;
   const to = regionOf(next);
   if (to === region || !(next.closest(flow) || row[0].el.closest(flow))) return undefined;
+  if (down) return endOf(rowsOf(page.filter((el) => columnOf(el) === columnOf(next)))[0], false);
   const rows = rowsOf(page.filter((el) => regionOf(el) === to));
-  return down ? endOf(rows[0], false) : closestTo(rows[rows.length - 1], x);
+  return closestTo(rows[rows.length - 1], x);
 }
 
 /** The chosen element of a choice that focus chooses (data-focus-choice). */
@@ -179,15 +212,24 @@ export function moveFrom(active: HTMLElement, dir: Direction, all: HTMLElement[]
 
 function step(active: HTMLElement, dir: Direction, all: HTMLElement[], tabs?: Element): HTMLElement | undefined {
   const region = regionOf(active);
-  const rows = rowsOf(all.filter((el) => regionOf(el) === region));
+  const column = columnOf(active);
+  const rows = rowsOf(all.filter((el) => columnOf(el) === column));
   const ri = rows.findIndex((row) => row.some((b) => b.el === active));
   const row = rows[ri];
   const i = row.findIndex((b) => b.el === active);
   const here = row[i].r;
   const x = (here.left + here.right) / 2;
   const inTabs = tabs !== undefined && region === tabs;
+  // The row above or below, past what only a row's last element reaches.
+  const rowAt = (d: 1 | -1) => {
+    for (let j = ri + d; rows[j]; j += d) {
+      const r = rows[j].filter((b) => i === row.length - 1 || !b.el.matches(end));
+      if (r.length) return r;
+    }
+  };
+  const previous = rowAt(-1);
   // Below the tabs is the page.
-  const below = inTabs ? rowsOf(all.filter((el) => !tabs.contains(el)))[0] : rows[ri + 1];
+  const below = inTabs ? rowsOf(all.filter((el) => !tabs.contains(el)))[0] : rowAt(1);
   const above = () => {
     if (!tabs || inTabs) return undefined;
     const items = all.filter((el) => tabs.contains(el));
@@ -197,8 +239,8 @@ function step(active: HTMLElement, dir: Direction, all: HTMLElement[], tabs?: El
   switch (dir) {
     case "ArrowUp": {
       // A row of the page goes first to a region of the flow between it and the row above.
-      const across = inTabs || (inFlow && rows[ri - 1]) ? undefined : acrossFlow(row, false, x, all, tabs);
-      return across ?? (rows[ri - 1] ? closestTo(rows[ri - 1], x) : above());
+      const across = inTabs || (inFlow && previous) ? undefined : acrossFlow(row, false, x, all, tabs);
+      return across ?? (previous ? closestTo(previous, x) : above());
     }
     case "ArrowDown": {
       const across = inTabs || (inFlow && below) ? undefined : acrossFlow(row, true, x, all, tabs);
@@ -209,11 +251,16 @@ function step(active: HTMLElement, dir: Direction, all: HTMLElement[], tabs?: El
       const right = dir === "ArrowRight";
       const along = row[i + (right ? 1 : -1)];
       if (along) return along.el;
-      if (inFlow) return right ? below && endOf(below, false) : rows[ri - 1] && endOf(rows[ri - 1], true);
+      if (inFlow) {
+        const other = active.closest(crosses) && all.filter((el) => regionOf(el) === region && columnOf(el) !== column && el.closest(crosses));
+        const across = other && nearest(here, dir, other);
+        if (across) return across;
+        return right ? below && endOf(below, false) : previous && endOf(previous, true);
+      }
       const beside = !inTabs && nearest(here, dir, all.filter((el) => regionOf(el) !== region && !tabs?.contains(el)));
       if (beside) return beside;
       if (right) return below && endOf(below, false);
-      return rows[ri - 1] ? endOf(rows[ri - 1], true) : above();
+      return previous ? endOf(previous, true) : above();
     }
   }
 }
