@@ -163,13 +163,16 @@ private fun Shell(model: AppModel) {
                 onBack = { stack.removeLastOrNull() },
                 entryProvider = { route -> NavEntry(route) { Screen(model, it) } },
             )
-            Header(model, back = stack.size > 1, Modifier.align(Alignment.TopCenter), haze)
-            TabBar(tab, haze, Modifier.align(Alignment.BottomCenter)) {
-                if (it == tab) {
-                    // Tapping the current tab goes back to its first screen.
-                    while (stack.size > 1) stack.removeAt(stack.lastIndex)
+            // The player takes the whole screen.
+            if (stack.lastOrNull() !is Route.Player) {
+                Header(model, back = stack.size > 1, Modifier.align(Alignment.TopCenter), haze)
+                TabBar(tab, haze, Modifier.align(Alignment.BottomCenter)) {
+                    if (it == tab) {
+                        // Tapping the current tab goes back to its first screen.
+                        while (stack.size > 1) stack.removeAt(stack.lastIndex)
+                    }
+                    tab = it
                 }
-                tab = it
             }
         }
     }
@@ -192,13 +195,12 @@ private fun Screen(model: AppModel, route: Route) {
     when (route) {
         Route.Home -> HomeScreen(model)
         is Route.Item -> DetailsScreen(model, route.serverId, route.itemId)
+        is Route.Player -> PlayerScreen(model, route)
         else -> Box(Modifier.fillMaxSize().padding(top = LocalTopInset.current)) {
             when (route) {
                 Route.Libraries -> StatusView(stringResource(R.string.nav_libraries), icon = R.drawable.ic_movies)
                 Route.Search -> StatusView(stringResource(R.string.nav_search), icon = R.drawable.ic_search)
                 Route.Settings -> SettingsScreen(model)
-                // The player comes in its own step.
-                is Route.Player -> StatusView(route.title, icon = R.drawable.ic_play)
                 else -> StatusView(stringResource(R.string.state_loading))
             }
         }

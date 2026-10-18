@@ -33,4 +33,5 @@ dependencies {
     implementation(libs.browser)
     implementation(libs.haze.blur)
     implementation(libs.navigation3.ui)
+    implementation(libs.media3.ui.compose)
 }

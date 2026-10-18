@@ -228,7 +228,7 @@ private fun Hero(entries: List<HeroEntry>) {
                                 stringResource(R.string.item_play),
                                 Modifier.weight(1f),
                                 white = true,
-                            ) { navigator.open(card) }
+                            ) { navigator.play(card.serverId, card.itemId, card.title, null, null) }
                         }
                         HeroButton(stringResource(R.string.item_details), Modifier.weight(1f), white = false) {
                             navigator.open(card)
