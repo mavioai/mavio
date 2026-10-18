@@ -28,16 +28,17 @@ import (
 type adminState struct {
 	reload int // counts the changes the sections made
 
-	info      task[*systemv1.GetSystemInfoResponse]
-	health    task[*systemv1.GetHealthResponse]
-	users     task[[]*userv1.User]
-	people    usersState
-	server    serverSettingsState
-	proxies   proxiesState
-	storage   storageState
-	libraries librariesState
-	libs      task[[]*libraryv1.Library]
-	sessions  task[[]*sessionv1.Session]
+	info        task[*systemv1.GetSystemInfoResponse]
+	health      task[*systemv1.GetHealthResponse]
+	users       task[[]*userv1.User]
+	people      usersState
+	server      serverSettingsState
+	proxies     proxiesState
+	storage     storageState
+	acquisition acquisitionState
+	libraries   librariesState
+	libs        task[[]*libraryv1.Library]
+	sessions    task[[]*sessionv1.Session]
 
 	activities    task[*systemv1.ListActivitiesResponse]
 	severity      int // the index of the severities shown

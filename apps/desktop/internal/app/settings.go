@@ -49,6 +49,7 @@ var settingsSections = []settingsSection{
 	{id: "proxies", icon: "network", color: ui.RGB(0x30, 0xB0, 0xC7), title: "settings.proxies", admin: true},
 	{id: "libraries", icon: "folder", color: ui.RGB(0x00, 0x7A, 0xFF), title: "settings.libraries", admin: true},
 	{id: "storage", icon: "server", color: ui.RGB(0x30, 0xB0, 0xC7), title: "settings.storage", admin: true},
+	{id: "acquisition", icon: "downloads", color: ui.RGB(0x34, 0xC7, 0x59), title: "settings.acquisition", admin: true},
 	{id: "transcoding", icon: "quality", color: ui.RGB(0xFF, 0x2D, 0x55), title: "settings.transcoding", admin: true},
 	{id: "activity", icon: "activity", color: ui.RGB(0xFF, 0x2D, 0x55), title: "settings.activity", admin: true},
 	{id: "tasks", icon: "pending", color: ui.RGB(0x58, 0x56, 0xD6), title: "settings.tasks", admin: true},
@@ -79,6 +80,7 @@ type settingsMenu struct {
 
 var settingsMenus = []settingsMenu{
 	{id: "media", icon: "movies", color: ui.RGB(0xFF, 0x9F, 0x0A), title: "settings.mediaMenu", sections: []string{"libraries", "storage", "transcoding"}},
+	{id: "acquiring", icon: "cloud", color: ui.RGB(0x30, 0xD1, 0x58), title: "settings.acquisitionMenu", sections: []string{"acquisition"}},
 	{id: "maintenance", icon: "admin", color: ui.RGB(0x8E, 0x8E, 0x93), title: "settings.maintenanceMenu", sections: []string{"activity", "tasks", "logs"}},
 }
 
@@ -90,7 +92,7 @@ var settingsGroups = []struct {
 	server  bool
 }{
 	{"settings.thisDevice", []string{"appearance", "playback", "subtitles-audio"}, false},
-	{"settings.serverGroup", []string{"overview", "general", "users", "devices", "api-keys", "proxies", "media", "maintenance"}, true},
+	{"settings.serverGroup", []string{"overview", "general", "users", "devices", "api-keys", "proxies", "media", "acquiring", "maintenance"}, true},
 }
 
 func menuOf(id string) (settingsMenu, bool) {
@@ -201,7 +203,7 @@ func (a *App) settings(c *ui.Context, r *ui.Route) {
 		ui.Column(c).Grow(1).MinWidth(0).Background(style.Color(colors.Background)).Children(func() {
 			r.View(c, func(r *ui.Route) {
 				r.Page().Background(style.Color(colors.Background))
-				ui.Scroll(c.Key(id + r.Query("user") + r.Query("library") + r.Query("remote"))).Fill().Children(func() {
+				ui.Scroll(c.Key(id + r.Query("user") + r.Query("library") + r.Query("remote") + r.Query("acquisition") + r.Query("id"))).Fill().Children(func() {
 					top := max(c.TitleBar().Height, 12)
 					ui.Column(c).Padding(top+28, 56, 48).AlignItems(ui.Center).Children(func() {
 						ui.Column(c).FillWidth().MaxWidth(900).Gap(28).Children(func() { a.settingsSection(c, r, id) })
@@ -423,6 +425,8 @@ func (a *App) settingsSection(c *ui.Context, r *ui.Route, id string) {
 		a.librariesSection(c, r)
 	case "storage":
 		a.storageSection(c, r)
+	case "acquisition":
+		a.acquisitionSection(c, r)
 	case "activity":
 		a.activitySection(c)
 	case "tasks":
@@ -528,6 +532,34 @@ func (g *settingsGroup) switchRow(label, detail string, on *bool) bool {
 		*on, changed = !*on, true
 	}
 	return changed
+}
+
+// link adds a row of a page's link, or of what is listed when it opens
+// nothing: its tile when icon is set, its label and the line under it. It
+// reports a click.
+func (g *settingsGroup) link(key, icon string, color ui.Color, label, detail string, opens bool) bool {
+	c := g.c
+	g.divider()
+	colors := style.Colors(c)
+	b := ui.ButtonBase(c.Key(key)).MinHeight(52).Padding(10, 16).Gap(12).AlignItems(ui.Center).Justify(ui.Start).Label(label).Disabled(!opens)
+	if opens && b.Hovered() {
+		b.Background(style.Color(colors.Fill))
+	}
+	b.Children(func() {
+		if icon != "" {
+			sectionTile(c, icon, color)
+		}
+		ui.Column(c).Grow(1).MinWidth(0).Children(func() {
+			style.Text(ui.Text(c, label), style.Type.Body).TextColor(style.Color(colors.TextPrimary)).MaxLines(1)
+			if detail != "" {
+				style.Text(ui.Text(c, detail), style.Type.Footnote).TextColor(style.Color(colors.TextSecondary))
+			}
+		})
+		if opens {
+			ui.Icon(c, style.Icon("forward", false)).Size(16, 16).Shrink(0).TextColor(style.Color(colors.TextTertiary))
+		}
+	})
+	return opens && b.Clicked()
 }
 
 // block adds a row of its own content.
