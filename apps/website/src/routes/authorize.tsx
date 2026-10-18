@@ -181,12 +181,12 @@ function NativeRequest({ q, me }: { q: Search; me: Me }) {
   );
 }
 
-/** The account's avatar, in the gray of every client (libs/design/components.md, Avatar). */
+/** The account's avatar, on the quiet fill of every client (libs/design/components.md, Avatar). */
 function Avatar({ name }: { name: string }) {
   return (
     <span
       aria-hidden
-      className="flex size-9 shrink-0 items-center justify-center rounded-full bg-[#8E8E93] font-semibold text-white"
+      className="flex size-9 shrink-0 items-center justify-center rounded-full bg-[var(--mavio-color-fill-selected)] font-semibold text-text-secondary"
       style={{ fontSize: 36 * 0.42 }}
     >
       {[...name][0]?.toUpperCase()}
