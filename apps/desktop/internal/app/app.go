@@ -159,6 +159,17 @@ func (a *App) Start() {
 	}()
 }
 
+// Resume follows the servers again as the app comes to the front: their
+// event streams, and the Mavio account's servers, among them those it could
+// not reach before.
+func (a *App) Resume() {
+	go func() {
+		if _, err := a.opts.Core.Call(a.ctx, capiv1.Request_builder{Start: &capiv1.Start{}}.Build()); err != nil {
+			slog.ErrorContext(a.ctx, "follow the servers", "error", err)
+		}
+	}()
+}
+
 // setServers shows servers, or the sign-in when there are none and no
 // Mavio account brings any.
 func (a *App) setServers(servers []*capiv1.ServerRecord) {

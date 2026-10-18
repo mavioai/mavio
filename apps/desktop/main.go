@@ -160,6 +160,7 @@ func run() error {
 			Content:       ui.View(a.View),
 		})
 		a.Start()
+		mygo.App.OnDidBecomeActive(a.Resume)
 	})
 	mygo.App.OnBeforeQuit(func(*mygo.QuitEvent) {
 		cancel()
