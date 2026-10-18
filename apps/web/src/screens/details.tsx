@@ -828,7 +828,7 @@ function EpisodeCard({ server, episode: e, current }: { server: ServerEntry; epi
       className="group block w-thumbnail shrink-0 snap-start"
     >
       <div className="relative">
-        <Artwork src={thumb?.url} alt={e.name} className="aspect-video rounded-md" />
+        <Artwork src={thumb?.url} alt={e.name} icon="shows" className="aspect-video rounded-md" />
         {progress !== undefined && (
           <div className="absolute inset-x-2.5 bottom-2.5 h-1 overflow-hidden rounded-full bg-white/35 shadow-level1">
             <div className="h-full rounded-full bg-white" style={{ width: `${progress * 100}%` }} />
@@ -873,7 +873,7 @@ function EpisodeList({ server, items, current }: { server: ServerEntry; items: I
               className="group flex gap-5 px-margin py-3 hover:bg-surface"
             >
               <div className="relative w-[clamp(140px,32%,var(--mavio-layout-thumbnail))] shrink-0">
-                <Artwork src={thumb?.url} alt={e.name} className="aspect-video rounded-md" />
+                <Artwork src={thumb?.url} alt={e.name} icon="shows" className="aspect-video rounded-md" />
                 {progress !== undefined && (
                   <div className="absolute inset-x-2 bottom-2 h-1 overflow-hidden rounded-full bg-white/35">
                     <div className="h-full rounded-full bg-white" style={{ width: `${progress * 100}%` }} />
@@ -963,7 +963,7 @@ function Extras({ server, items, fallback }: { server: ServerEntry; items: Item[
           className="group block w-thumbnail shrink-0 snap-start"
         >
           <div className="relative">
-            <Artwork src={thumbOf(server, e, 640)?.url ?? fallback} alt={e.name} className="aspect-video rounded-md" />
+            <Artwork src={thumbOf(server, e, 640)?.url ?? fallback} alt={e.name} icon="shows" className="aspect-video rounded-md" />
             <span className="absolute bottom-2 left-2 rounded-full bg-scrim p-1.5 text-white">
               <Icon name="play" fill size={14} />
             </span>

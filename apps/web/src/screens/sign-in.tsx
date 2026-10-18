@@ -30,6 +30,7 @@ import { t } from "../i18n.ts";
 import { Wordmark } from "../logo.tsx";
 import { usePrefs, useWidthClass } from "../prefs.ts";
 import { useSpatialNavigation } from "../shell/spatial.ts";
+import { Spinner } from "../ui.tsx";
 
 const signInRoute = getRouteApi("/sign-in");
 const setupRoute = getRouteApi("/setup");
@@ -285,7 +286,7 @@ function Pending({ error, onRetry }: { error: unknown; onRetry: () => void }) {
           </Action>
         </>
       ) : (
-        <p className={look.body}>{t("state.loading")}</p>
+        <Spinner />
       )}
     </div>
   );

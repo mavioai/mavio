@@ -7,7 +7,7 @@ import { Link } from "@tanstack/react-router";
 import { t } from "../i18n.ts";
 import { Icon } from "../icon.tsx";
 import { usePrefs } from "../prefs.ts";
-import { Artwork, CardPlaceholder, ItemCard, Shelf, StatusView } from "../ui.tsx";
+import { Artwork, CardPlaceholder, ItemCard, Loading, Shelf, StatusView } from "../ui.tsx";
 import { kindParam } from "./discover.tsx";
 import { Hero, heroEntries } from "./hero.tsx";
 
@@ -59,6 +59,8 @@ export function HomeScreen() {
   const unreachable = servers.filter((s) => !s.token);
   const hero = heroEntries(sections, servers);
   const { tv } = usePrefs();
+  // Nothing yet from any server: the activity indicator alone.
+  if (sections.length > 0 && sections.every((s) => s.content.type === "loading")) return <Loading />;
   return (
     <div className={hero.length ? "" : tv ? "pt-32" : "pt-4"}>
       <Hero entries={hero} />
@@ -106,7 +108,7 @@ export function SectionView({ section: s, several }: { section: Section; several
   );
   if (c.type === "loading") {
     return (
-      <Shelf title={<span className="text-text-tertiary">{s.serverName}</span>}>
+      <Shelf title={<span aria-hidden className="block h-5 w-36 rounded-xs bg-surface-raised" />}>
         {Array.from({ length: 8 }, (_, i) => (
           <CardPlaceholder key={i} />
         ))}

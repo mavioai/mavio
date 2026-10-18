@@ -18,7 +18,7 @@ import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 
 import { t } from "../../i18n.ts";
-import { Button, Group, LoadMore } from "../../ui.tsx";
+import { Button, Group, LoadMore, Spinner } from "../../ui.tsx";
 import { Progress, Switch, Tabs } from "../../controls/inputs.tsx";
 import { Select } from "../../controls/select.tsx";
 import { fromNow, lengthOf, Page, sizeOf, useChoice } from "./common.tsx";
@@ -226,7 +226,7 @@ function ImportFiles({ server, target }: { server: ServerEntry; target: { id?: s
           onChange={(v) => setMode(Number(v) as ImportMode)}
         />
       </div>
-      {files.isPending && <p className="type-callout text-text-secondary">{t("state.loading")}</p>}
+      {files.isPending && <Spinner size={20} />}
       {files.isError && <p className="type-footnote break-words text-danger">{errorMessage(files.error)}</p>}
       {files.isSuccess && files.data.length === 0 && <p className="type-callout text-text-secondary">{t("downloads.noFiles")}</p>}
       {files.data?.map((f) => (

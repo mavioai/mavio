@@ -91,8 +91,12 @@ export function yearOf(item: Item): number | undefined {
   return item.productionYear || (item.premiereDate ? timestampDate(item.premiereDate).getFullYear() : undefined);
 }
 
-/** An image that fades in, over a placeholder of its final size. */
-export function Artwork({ src, alt, className }: { src?: string; alt: string; className?: string }) {
+/**
+ * An image that fades in, over a placeholder of its final size; with none,
+ * the placeholder stays, a quiet wash of the accent with the icon of what
+ * it shows.
+ */
+export function Artwork({ src, alt, icon = "movies", className }: { src?: string; alt: string; icon?: IconName; className?: string }) {
   const [loaded, setLoaded] = useState(false);
   const [failed, setFailed] = useState(false);
   return (
@@ -108,12 +112,41 @@ export function Artwork({ src, alt, className }: { src?: string; alt: string; cl
           className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-300 ${loaded ? "opacity-100" : "opacity-0"}`}
         />
       ) : (
-        <div className="absolute inset-0 flex items-center justify-center p-3 text-center type-title3 text-text-secondary">
-          {alt}
+        <div role={alt ? "img" : undefined} aria-label={alt || undefined} className="art-placeholder absolute inset-0 flex items-center justify-center text-text-tertiary">
+          <Icon name={icon} className="h-auto w-[26%] max-w-14 opacity-60" />
         </div>
       )}
     </div>
   );
+}
+
+/** The icon of an item's kind, on its artwork's placeholder. */
+export function itemIcon(kind: ItemKind): IconName {
+  switch (kind) {
+    case ItemKind.SERIES:
+    case ItemKind.SEASON:
+    case ItemKind.EPISODE:
+      return "shows";
+    case ItemKind.MUSIC_ARTIST:
+    case ItemKind.MUSIC_ALBUM:
+    case ItemKind.TRACK:
+    case ItemKind.MUSIC_VIDEO:
+      return "music";
+    case ItemKind.AUDIOBOOK:
+    case ItemKind.BOOK:
+      return "books";
+    case ItemKind.PHOTO_ALBUM:
+    case ItemKind.PHOTO:
+      return "photos";
+    case ItemKind.VIDEO:
+      return "homeVideos";
+    case ItemKind.FOLDER:
+      return "folder";
+    case ItemKind.COLLECTION:
+      return "collections";
+    default:
+      return "movies";
+  }
 }
 
 /** The card of an item: poster, thumbnail or square, with watched progress and the played check. */
@@ -150,6 +183,7 @@ export function ItemCard({
         <Artwork
           src={image?.url}
           alt={item.name}
+          icon={itemIcon(item.kind)}
           className={`${aspects[s]} rounded-md transition group-active:opacity-80`}
         />
         {progress !== undefined && (
@@ -356,8 +390,34 @@ export function ScreenTitle({ children }: { children: ReactNode }) {
 }
 
 /** The loading state of a screen. */
+/** A page's content on its way: the activity indicator, centered. */
 export function Loading() {
-  return <div className="px-margin py-16 text-center type-body text-text-secondary">{t("state.loading")}</div>;
+  return (
+    <div className="flex justify-center px-margin py-16">
+      <Spinner />
+    </div>
+  );
+}
+
+/**
+ * The activity indicator: eight spokes turning, in the tertiary text's
+ * color. It shows only after a moment, so that what comes quickly shows
+ * nothing first, and stands still for reduced motion.
+ */
+export function Spinner({ size = 28, className }: { size?: number; className?: string }) {
+  return (
+    <span
+      role="status"
+      aria-label={t("state.loading")}
+      className={`inline-flex animate-[fade_300ms_ease-out_400ms_backwards] text-text-tertiary ${className ?? ""}`}
+    >
+      <svg viewBox="0 0 24 24" width={size} height={size} aria-hidden className="animate-[spinner_0.9s_steps(8)_infinite] motion-reduce:animate-none">
+        {Array.from({ length: 8 }, (_, i) => (
+          <rect key={i} x="11" y="2" width="2" height="6" rx="1" fill="currentColor" opacity={0.2 + (0.8 * i) / 7} transform={`rotate(${i * 45} 12 12)`} />
+        ))}
+      </svg>
+    </span>
+  );
 }
 
 /** The icon of a library of a kind. */

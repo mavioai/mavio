@@ -16,6 +16,7 @@ Every interactive component has these states; television adds focused to every c
 | Pressed | Content dimmed to 80% opacity |
 | Loading | A `color.surfaceRaised` placeholder of the component's final size, so that nothing moves when content arrives |
 | Disabled | Content in `color.textDisabled` |
+| No artwork | The placeholder stays, with a wash of `color.accent` at 14% from its top left, gone by 70% of the way, and the icon of what it shows (a movie, a series, music…) in `color.textTertiary` at 60%, a quarter of its width and at most 56 pt; never the title written on it |
 
 ## Poster Card
 
@@ -110,5 +111,5 @@ The audio and subtitle pickers of the player and of the details screen.
 The empty, error, offline and loading states of a screen or list.
 
 * **Anatomy**: an icon (48 pt, `color.textTertiary`: `error`, `offline`), a title (`typography.title3`: `state.empty`, `state.error`, `state.offline`), an optional message (`typography.body`, `color.textSecondary`) and an optional action (`action.retry`).
-* **Loading**: placeholders of the content (see States) rather than a spinner, except for the first screen, which shows the app's logo.
+* **Loading**: placeholders of the content (see States) where its shape is known, as a shelf's cards; else, as a page on its way, the activity indicator: eight spokes in a circle of 28 pt, `color.textTertiary`, fading from 20% to full opacity around it and turning a spoke a step, once in 0.9 s, still for reduced motion. It appears 0.4 s after loading starts, so that what comes quickly shows nothing first. No server's name or address stands for content still loading. The first screen shows the app's logo.
 * **Offline**: downloaded items stay listed under the view.

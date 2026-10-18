@@ -36,7 +36,7 @@ import { discoverLanguage, t } from "../i18n.ts";
 import { Icon } from "../icon.tsx";
 import { usePrefs, useWidthClass } from "../prefs.ts";
 import { FiltersDialog, parseFilters } from "./discover-filters.tsx";
-import { Artwork, Button, CardPlaceholder, Grid, Group, Loading, LoadMore, minutesText, NotFoundView, ScreenTitle, Shelf, StatusView } from "../ui.tsx";
+import { Artwork, Button, CardPlaceholder, Grid, Group, Loading, LoadMore, minutesText, NotFoundView, ScreenTitle, Shelf, Spinner, StatusView } from "../ui.tsx";
 import { CastShelf, isCast, titleCredits } from "./credits.tsx";
 import { GenreLinks, TitleOverview } from "./discover-overview.tsx";
 import { dayText } from "./facts.tsx";
@@ -132,7 +132,7 @@ export function TitleCard({ serverId, title, fluid = false, role }: { serverId: 
       className={`group block shrink-0 snap-start ${fluid ? "w-full" : "w-poster"}`}
     >
       <div className="relative">
-        <Artwork src={sized(title.posterUrl, 342)} alt={title.name} className="aspect-[2/3] rounded-md transition group-active:opacity-80" />
+        <Artwork src={sized(title.posterUrl, 342)} alt={title.name} icon={title.mediaKind === MediaKind.SERIES ? "shows" : "movies"} className="aspect-[2/3] rounded-md transition group-active:opacity-80" />
         <StatusMark status={title.status} />
       </div>
       <div className="mt-2 truncate type-headline">{title.name}</div>
@@ -636,7 +636,7 @@ function Season({ server, tmdbId, season: s }: { server: ServerEntry; tmdbId: nu
 /** The episodes of an expanded season, the latest first, as Seerr's. */
 function SeasonEpisodes({ server, tmdbId, seasonNumber }: { server: ServerEntry; tmdbId: number; seasonNumber: number }) {
   const q = useSeason(server, tmdbId, seasonNumber, discoverLanguage);
-  if (q.isPending) return <div className="px-4 pb-4 type-callout text-text-secondary">{t("state.loading")}</div>;
+  if (q.isPending) return <div className="px-4 pb-4"><Spinner size={20} /></div>;
   if (q.isError || q.data.length === 0) {
     return <p className="px-4 pb-4 type-callout text-text-secondary">{q.isError ? t("state.error") : t("discover.noEpisodes")}</p>;
   }

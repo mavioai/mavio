@@ -178,6 +178,18 @@
   }
 }
 
+/* The activity indicator's turn (ui.tsx), a spoke a step. */
+@keyframes spinner {
+  to {
+    rotate: 360deg;
+  }
+}
+
+/* Artwork with no image: a quiet wash of the accent from its top. */
+@utility art-placeholder {
+  background: linear-gradient(160deg, color-mix(in srgb, var(--mavio-color-accent) 14%, transparent), transparent 70%);
+}
+
 body {
   /* Dialogs' backdrops cover the page however far it scrolls. */
   position: relative;
