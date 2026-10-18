@@ -126,6 +126,7 @@ func run() error {
 		Update:        update,
 		Preferences:   filepath.Join(data, "preferences.json"),
 		SetAppearance: setAppearance,
+		SetLocale:     mygo.App.SetLocale,
 		OpenURL:       mygo.Shell.OpenExternal,
 		MavioDev:      cmp.Or(os.Getenv("MAVIO_DEV_URL"), "https://mavio.dev/api"),
 		NewVideo: func(changed func(mpv.State)) (app.Video, error) {

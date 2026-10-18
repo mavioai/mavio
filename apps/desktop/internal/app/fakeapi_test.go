@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"slices"
 	"time"
 
 	"connectrpc.com/connect"
@@ -16,6 +17,10 @@ import (
 	capiv1 "github.com/mavioai/mavio/libs/client-rust/capi/gen/mavio/capi/v1"
 	libraryv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/library/v1"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/library/v1/libraryv1connect"
+	sessionv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/session/v1"
+	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/session/v1/sessionv1connect"
+	userv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/user/v1"
+	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/user/v1/userv1connect"
 )
 
 // fakeAPI serves the server's API that the screens call through the core,
@@ -25,12 +30,71 @@ type fakeAPI struct {
 	f *fakeCore
 }
 
+// fakeUsers serves the user signed in, whose playback preferences it
+// keeps.
+type fakeUsers struct {
+	userv1connect.UnimplementedUserServiceHandler
+	f *fakeCore
+}
+
+// fakeSessions serves the user's devices: this one, and a television
+// playing, which signing out removes.
+type fakeSessions struct {
+	sessionv1connect.UnimplementedSessionServiceHandler
+	f *fakeCore
+}
+
 // apiHandler returns the fake server's Connect handlers.
 func (f *fakeCore) apiHandler() http.Handler {
 	mux := http.NewServeMux()
 	api := &fakeAPI{f: f}
 	mux.Handle(libraryv1connect.NewItemServiceHandler(api))
+	mux.Handle(userv1connect.NewUserServiceHandler(&fakeUsers{f: f}))
+	mux.Handle(sessionv1connect.NewSessionServiceHandler(&fakeSessions{f: f}))
+	f.prefs = userv1.PlaybackPreferences_builder{
+		AudioLanguages: []string{"jpn", "eng"}, SubtitleLanguages: []string{"eng"},
+		SubtitleMode: new(userv1.SubtitleMode_SUBTITLE_MODE_FOREIGN), PlayDefaultAudioTrack: new(true),
+	}.Build()
+	f.sessions = []*sessionv1.Session{
+		sessionv1.Session_builder{
+			Id: new("6f1c1d1e-0000-4000-8000-000000000001"), DeviceName: new("MacBook Pro"), Client: new("Mavio for Mac"),
+			Online: new(true), Current: new(true),
+		}.Build(),
+		sessionv1.Session_builder{
+			Id: new("6f1c1d1e-0000-4000-8000-000000000002"), DeviceName: new("Living Room TV"), Client: new("Mavio for Android TV"),
+			Online: new(true), NowPlaying: sessionv1.NowPlaying_builder{Item: libraryv1.Item_builder{Name: new("The Long Orbit")}.Build()}.Build(),
+		}.Build(),
+	}
 	return mux
+}
+
+func (u *fakeUsers) GetCurrentUser(context.Context, *userv1.GetCurrentUserRequest) (*userv1.GetCurrentUserResponse, error) {
+	u.f.mu.Lock()
+	defer u.f.mu.Unlock()
+	r := u.f.record()
+	return userv1.GetCurrentUserResponse_builder{User: userv1.User_builder{
+		Id: new(r.GetUserId()), Name: new(r.GetUserName()), Admin: new(true), PlaybackPreferences: u.f.prefs,
+	}.Build()}.Build(), nil
+}
+
+func (u *fakeUsers) UpdatePlaybackPreferences(_ context.Context, r *userv1.UpdatePlaybackPreferencesRequest) (*userv1.UpdatePlaybackPreferencesResponse, error) {
+	u.f.mu.Lock()
+	defer u.f.mu.Unlock()
+	u.f.prefs = r.GetPlaybackPreferences()
+	return userv1.UpdatePlaybackPreferencesResponse_builder{PlaybackPreferences: u.f.prefs}.Build(), nil
+}
+
+func (s *fakeSessions) ListSessions(context.Context, *sessionv1.ListSessionsRequest) (*sessionv1.ListSessionsResponse, error) {
+	s.f.mu.Lock()
+	defer s.f.mu.Unlock()
+	return sessionv1.ListSessionsResponse_builder{Sessions: slices.Clone(s.f.sessions)}.Build(), nil
+}
+
+func (s *fakeSessions) RevokeSession(_ context.Context, r *sessionv1.RevokeSessionRequest) (*sessionv1.RevokeSessionResponse, error) {
+	s.f.mu.Lock()
+	defer s.f.mu.Unlock()
+	s.f.sessions = slices.DeleteFunc(s.f.sessions, func(x *sessionv1.Session) bool { return x.GetId() == r.GetId() })
+	return &sessionv1.RevokeSessionResponse{}, nil
 }
 
 // callServer answers a CallServer as the core does: with the fake

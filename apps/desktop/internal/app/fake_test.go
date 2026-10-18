@@ -21,6 +21,8 @@ import (
 
 	"github.com/mavioai/mavio/libs/client-rust/capi"
 	capiv1 "github.com/mavioai/mavio/libs/client-rust/capi/gen/mavio/capi/v1"
+	sessionv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/session/v1"
+	userv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/user/v1"
 
 	"github.com/mavioai/mavio/apps/desktop/internal/images"
 	"github.com/mavioai/mavio/apps/desktop/internal/mpv"
@@ -66,6 +68,9 @@ type fakeCore struct {
 	images  string // the artwork server's URL
 	servers []*capiv1.ServerRecord
 	api     http.Handler // the server's API, which CallServer calls
+	// prefs and sessions are the user's on the server's API.
+	prefs    *userv1.PlaybackPreferences
+	sessions []*sessionv1.Session
 
 	mu       sync.Mutex
 	calls    []string
@@ -149,7 +154,7 @@ func (f *fakeCore) Stream(ctx context.Context, req *capiv1.Request, part func(*c
 	switch {
 	case req.HasListServers():
 		m.Servers = capiv1.Servers_builder{Servers: f.servers}.Build()
-	case req.HasStart(), req.HasCancelQuickConnect(), req.HasSetPlayed(), req.HasSetFavorite(),
+	case req.HasStart(), req.HasCancelQuickConnect(), req.HasAuthorizeQuickConnect(), req.HasOrderServers(), req.HasSetPlayed(), req.HasSetFavorite(),
 		req.HasPollLink(), req.HasCancelLink(), req.HasCancelAccountSignIn():
 		m.Done = &capiv1.Done{}
 	case req.HasGetAccount():
@@ -342,6 +347,7 @@ func newHarness(t testing.TB, signedIn bool, width, height int) *harness {
 		},
 	})
 	h.tt = ui.NewTester(h.app.View, width, height)
+	h.app.opts.SetLocale = h.tt.SetLocale
 	h.app.Start()
 	h.settle()
 	return h

@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	goruntime "runtime"
+	"strings"
 
 	"github.com/egoist/mygo/ui"
 
@@ -49,6 +50,9 @@ type Options struct {
 	Preferences string
 	// SetAppearance applies the appearance to the windows.
 	SetAppearance func(Appearance)
+	// SetLocale shows the app in a language, a BCP 47 tag, or in the
+	// system's when empty.
+	SetLocale func(string)
 	// OpenURL opens a URL in the browser.
 	OpenURL func(string) error
 	// MavioDev is the API of the mavio.dev Mavio accounts sign in at.
@@ -83,6 +87,11 @@ type preferences struct {
 	TV bool `json:"tv,omitempty"`
 	// Quality is the key of the quality played, of qualities.
 	Quality string `json:"quality,omitempty"`
+	// NoAutoplayNext stops playing the next episode as one ends.
+	NoAutoplayNext bool `json:"noAutoplayNext,omitempty"`
+	// Language is the language the app shows, a tag of design.Locales; the
+	// system's when empty.
+	Language string `json:"language,omitempty"`
 }
 
 // App is the app's state, owned by the main thread.
@@ -117,6 +126,7 @@ type App struct {
 	detailStates  map[string]*detailsState
 	personStates  map[string]*personState
 	creditStates  map[string]*creditsState
+	settingsState settingsState
 	// bases are the servers' base URLs, for the Connect clients' responses.
 	bases bases
 }
@@ -266,6 +276,18 @@ func (a *App) setAppearance(appearance Appearance) {
 	a.savePreferences()
 }
 
+// setLanguage shows the app in a language and keeps it.
+func (a *App) setLanguage(tag string) {
+	a.prefs.Language = tag
+	if a.opts.SetLocale != nil {
+		a.opts.SetLocale(tag)
+	}
+	a.savePreferences()
+}
+
+// autoplayNext reports whether the next episode plays as one ends.
+func (a *App) autoplayNext() bool { return !a.prefs.NoAutoplayNext }
+
 // Appearance returns the appearance the user chose.
 func (a *App) Appearance() Appearance {
 	if a.prefs.Appearance == "" {
@@ -320,6 +342,14 @@ func (a *App) View(c *ui.Context) {
 	default:
 		if a.player != nil {
 			a.playerView(c)
+			return
+		}
+		if c.Shortcut(ui.Cmd, ui.KeyComma) && !strings.HasPrefix(a.router.Path(), "/settings") {
+			a.router.Push("/settings")
+		}
+		// The settings have a layout of their own, as in the web UI.
+		if strings.HasPrefix(a.router.Path(), "/settings") {
+			a.router.View(c, func(r *ui.Route) { a.settings(c, r) })
 			return
 		}
 		a.shell(c)

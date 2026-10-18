@@ -307,8 +307,16 @@ func (a *App) userButton(c *ui.Context, withName bool) {
 	b.Menu(func(m *ui.Menu) { a.userMenu(c, m) })
 }
 
-// userMenu fills the user menu.
+// userMenu fills the user menu, as the web UI's: who is signed in, the
+// appearance, the settings, the TV mode, managing the account or the
+// servers, and signing out.
 func (a *App) userMenu(c *ui.Context, m *ui.Menu) {
+	name, line := a.accountName(c)
+	kind := style.T(c, "auth.standaloneUser", "server", line)
+	if a.account != nil {
+		kind = style.T(c, "auth.mavioAccount")
+	}
+	m.Item(name + " · " + kind).Disabled(true)
 	m.Submenu(style.T(c, "settings.appearance"), func(m *ui.Menu) {
 		for _, it := range []struct {
 			appearance Appearance
@@ -323,8 +331,19 @@ func (a *App) userMenu(c *ui.Context, m *ui.Menu) {
 			}
 		}
 	})
+	m.Separator()
+	if m.Item(style.T(c, "nav.settings")).Shortcut(ui.Cmd, ui.KeyComma).Chosen() {
+		a.router.Push("/settings")
+	}
 	if m.Item(style.T(c, "menu.tvMode")).Chosen() {
 		a.setTV(true)
+	}
+	if a.account != nil {
+		if a.opts.OpenURL != nil && m.Item(style.T(c, "menu.manageAccount")).Chosen() {
+			_ = a.opts.OpenURL(a.mavioDevSite() + "/account")
+		}
+	} else if m.Item(style.T(c, "menu.manageServers")).Chosen() {
+		a.router.Push("/settings/account")
 	}
 	m.Separator()
 	if m.Item(style.T(c, "auth.signOut")).Chosen() {

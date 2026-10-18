@@ -747,7 +747,9 @@ flowchart TD
   - [ ] Television mode beyond sign-in: the top navigation, remote focus and the television's screens ([Television](tv.md))
   - [x] The screens the core does not model call the server's API through the core (`CallServer`) with `libs/proto`'s Connect clients: person pages, the whole cast and crew and the crew alone, and on the details the cast and crew by job, the extras, the collection's banner, and the details' facts, ratings, keywords, links and media
   - [ ] The details' recommendations and what the discovery providers tell of a title (budget, takings, next episode, the services streaming it), its acquisition, subtitles and issues for administrators, and genres, studios and keywords opening their items in the library
-  - [ ] Downloads, Discover and requests, the assistant, settings, and switching users with PINs
+  - [x] The settings in a layout of their own, as the web UI's, and the user menu: appearance, language and TV mode; the maximum quality and playing the next episode; the user's languages and when subtitles show, saved to every server; the account, its servers in order and Quick Connect; and the devices signed in, signed out
+  - [ ] The server's administration in the settings, the devices' remote control, the account's security and the assistant's settings
+  - [ ] Downloads, Discover and requests, the assistant, and switching users with PINs
   - [ ] Tried on Windows and Linux; signed and notarized on macOS; the app's icon
 - [ ] The decision on a Jellyfin API compatibility shim
 

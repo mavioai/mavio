@@ -247,7 +247,7 @@ func (a *App) playerStateChanged(p *player, prev mpv.State) {
 	}
 	if s.Ended && !prev.Ended {
 		a.closePlayer(false)
-		if len(p.next) > 0 {
+		if len(p.next) > 0 && a.autoplayNext() {
 			a.play(p.next[0].GetServerId(), p.next[0].GetItemId(), nil, p.next[1:]...)
 		}
 	}
@@ -720,11 +720,7 @@ func (a *App) playerPanel(c *ui.Context, p *player) {
 						a.subtitlesTab(c, p)
 					case tabQuality:
 						for _, q := range qualities {
-							name := q.key
-							if q.key == "original" || q.key == "auto" {
-								name = style.T(c, "player.quality"+strings.ToUpper(q.key[:1])+q.key[1:])
-							}
-							if choice(c.Key(q.key), name, "", q.key == a.quality().key).Clicked() && q.key != a.quality().key {
+							if choice(c.Key(q.key), qualityName(c, q), "", q.key == a.quality().key).Clicked() && q.key != a.quality().key {
 								a.prefs.Quality = q.key
 								a.savePreferences()
 								a.restart(p, func(*capiv1.PlaybackOptions) {})
