@@ -5,6 +5,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -116,11 +117,18 @@ fun HomeScreen(model: AppModel) {
             StatusView(stringResource(R.string.state_loading))
             return@PullToRefreshBox
         }
-        LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(top = top, bottom = LocalBottomInset.current)) {
+        // The hero reaches under the header to the top of the screen.
+        val padding = PaddingValues(top = if (hero.isEmpty()) top else 0.dp, bottom = LocalBottomInset.current)
+        LazyColumn(Modifier.fillMaxSize(), contentPadding = padding) {
             if (hero.isNotEmpty()) {
                 item(key = "hero") {
                     Hero(hero)
-                    Box(Modifier.height(MavioSpacing.s16))
+                    Box(
+                        Modifier
+                            .fillMaxWidth()
+                            .height(MavioSpacing.s24)
+                            .background(Brush.verticalGradient(listOf(Color.Black, theme.colors.background))),
+                    )
                 }
             }
             items(rows, key = { it.id }) { row ->
@@ -159,88 +167,102 @@ private fun Hero(entries: List<HeroEntry>) {
             pager.animateScrollToPage((pager.currentPage + 1) % entries.size)
         }
     }
-    run {
-        val screen = with(LocalDensity.current) { LocalWindowInfo.current.containerSize.height.toDp() }
-        val height = minOf(screen * 0.72f, 540.dp)
-        Box(Modifier.fillMaxWidth().height(height).background(theme.colors.surface)) {
-            HorizontalPager(pager, Modifier.fillMaxSize()) { page ->
-                val (card, eyebrow) = entries[page]
-                Box(Modifier.fillMaxSize()) {
-                    Artwork(card.backdrop?.url, Modifier.fillMaxSize(), contentDescription = null)
-                    Box(
-                        Modifier
-                            .fillMaxSize()
-                            .background(
-                                Brush.verticalGradient(
-                                    0f to Color.Transparent,
-                                    0.5f to Color.Black.copy(alpha = 0.4f),
-                                    1f to Color.Black.copy(alpha = 0.9f),
-                                ),
+    val screen = with(LocalDensity.current) { LocalWindowInfo.current.containerSize.height.toDp() }
+    // The backdrop as it is, 16:9 from the top of the screen under the
+    // translucent header, then the title on black below it.
+    BoxWithConstraints(Modifier.fillMaxWidth().background(Color.Black)) {
+        val art = minOf(maxWidth * 9f / 16f, screen * 0.6f)
+        HorizontalPager(pager, Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) { page ->
+            val (card, eyebrow) = entries[page]
+            Box(Modifier.fillMaxWidth()) {
+                Artwork(card.backdrop?.url, Modifier.fillMaxWidth().height(art), contentDescription = null)
+                Box(
+                    Modifier
+                        .fillMaxWidth()
+                        .height(art)
+                        .background(
+                            Brush.verticalGradient(
+                                0.4f to Color.Transparent,
+                                0.8f to Color.Black.copy(alpha = 0.75f),
+                                1f to Color.Black,
                             ),
+                        ),
+                )
+                Column(
+                    Modifier.padding(
+                        start = theme.layout.margin,
+                        end = theme.layout.margin,
+                        top = art - HERO_OVERLAP,
+                        bottom = MavioSpacing.s8,
+                    ),
+                    verticalArrangement = Arrangement.spacedBy(MavioSpacing.s12),
+                ) {
+                    Text(
+                        eyebrow.uppercase(),
+                        style = theme.type.footnote.text,
+                        fontWeight = FontWeight.SemiBold,
+                        letterSpacing = 0.5.sp,
+                        color = Color.White.copy(alpha = 0.75f),
                     )
-                    Column(
-                        Modifier
-                            .align(Alignment.BottomStart)
-                            .padding(start = theme.layout.margin, end = theme.layout.margin, bottom = 32.dp),
-                        verticalArrangement = Arrangement.spacedBy(MavioSpacing.s12),
-                    ) {
-                        Text(
-                            eyebrow.uppercase(),
-                            style = theme.type.footnote.text,
-                            fontWeight = FontWeight.SemiBold,
-                            letterSpacing = 0.5.sp,
-                            color = Color.White.copy(alpha = 0.75f),
-                        )
-                        Logo(card.logo?.url, card.title, Modifier.heightIn(max = 96.dp).fillMaxWidth(0.8f)) {
+                    // As tall for every title, so that the pager keeps its height.
+                    Box(Modifier.fillMaxWidth().height(HERO_LOGO_HEIGHT), contentAlignment = Alignment.BottomStart) {
+                        Logo(card.logo?.url, card.title, Modifier.heightIn(max = HERO_LOGO_HEIGHT).fillMaxWidth(0.8f)) {
                             Text(
                                 card.title,
-                                fontSize = 34.sp,
-                                lineHeight = 36.sp,
+                                fontSize = 30.sp,
+                                lineHeight = 34.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = Color.White,
                                 maxLines = 2,
                                 overflow = TextOverflow.Ellipsis,
                             )
                         }
-                        HeroFacts(card)
-                        Row(
-                            Modifier.padding(top = MavioSpacing.s8),
-                            horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s12),
-                        ) {
-                            if (card.kind != CardKind.SERIES) {
-                                HeroButton(
-                                    stringResource(R.string.item_play),
-                                    Modifier.weight(1f),
-                                    white = true,
-                                ) { navigator.open(card) }
-                            }
-                            HeroButton(stringResource(R.string.item_details), Modifier.weight(1f), white = false) {
-                                navigator.open(card)
-                            }
+                    }
+                    HeroFacts(card)
+                    Row(
+                        Modifier.padding(top = MavioSpacing.s4),
+                        horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s12),
+                    ) {
+                        if (card.kind != CardKind.SERIES) {
+                            HeroButton(
+                                stringResource(R.string.item_play),
+                                Modifier.weight(1f),
+                                white = true,
+                            ) { navigator.open(card) }
+                        }
+                        HeroButton(stringResource(R.string.item_details), Modifier.weight(1f), white = false) {
+                            navigator.open(card)
                         }
                     }
                 }
             }
-            if (entries.size > 1) {
-                Row(
-                    Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(top = MavioSpacing.s16, end = theme.layout.margin),
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                ) {
-                    repeat(entries.size) {
-                        Box(
-                            Modifier
-                                .size(width = if (it == pager.currentPage) 16.dp else 6.dp, height = 6.dp)
-                                .clip(CircleShape)
-                                .background(Color.White.copy(alpha = if (it == pager.currentPage) 1f else 0.4f)),
-                        )
-                    }
+        }
+        if (entries.size > 1) {
+            Row(
+                Modifier
+                    .align(Alignment.TopEnd)
+                    // Just under the header, clear of the title's lines.
+                    .padding(top = LocalTopInset.current + MavioSpacing.s12, end = theme.layout.margin),
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+                repeat(entries.size) {
+                    Box(
+                        Modifier
+                            .size(width = if (it == pager.currentPage) 16.dp else 6.dp, height = 6.dp)
+                            .clip(CircleShape)
+                            .background(Color.White.copy(alpha = if (it == pager.currentPage) 1f else 0.4f)),
+                    )
                 }
             }
         }
     }
 }
+
+/** How far the hero's title reaches up into its backdrop. */
+private val HERO_OVERLAP = 56.dp
+
+/** The height of the hero's logo, or its title where there is none. */
+private val HERO_LOGO_HEIGHT = 80.dp
 
 /** The year, the runtime and two genres, then the rating in a frame, as the web UI's. */
 @Composable

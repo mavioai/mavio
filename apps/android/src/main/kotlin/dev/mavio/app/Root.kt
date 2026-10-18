@@ -204,7 +204,8 @@ private fun Header(model: AppModel, back: Boolean, modifier: Modifier, haze: Haz
     Row(
         modifier
             .fillMaxWidth()
-            .glass(haze, colors.background.copy(alpha = 0.8f), radius = 24.dp)
+            // Half see-through, so that Home's hero shows under it.
+            .glass(haze, colors.background.copy(alpha = 0.5f), radius = 24.dp)
             .statusBarsPadding()
             .height(HEADER_HEIGHT)
             .padding(horizontal = theme.layout.margin),
