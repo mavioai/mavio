@@ -584,6 +584,20 @@ impl Core {
         Ok(a)
     }
 
+    /// Calls a unary procedure of a server signed in to as its session,
+    /// with a request encoded as protobuf, answering with the response
+    /// encoded the same way and the base URL it reached the server at.
+    pub async fn call(
+        &self,
+        server_id: &str,
+        procedure: &str,
+        request: Vec<u8>,
+    ) -> Result<(Vec<u8>, String)> {
+        let conn = self.servers.connection(server_id)?;
+        let body = conn.call(procedure, request).await?;
+        Ok((body, conn.url("")))
+    }
+
     /// Follows the Mavio account's servers now.
     pub async fn sync_account(&self) -> Result<()> {
         sync_account(&self.streams, &self.servers, &self.relay).await

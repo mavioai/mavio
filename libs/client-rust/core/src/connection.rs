@@ -4,8 +4,12 @@
 use std::sync::Arc;
 use std::time::Duration;
 
-use connectrpc::client::{ClientConfig, HttpClient};
-use http::Uri;
+use bytes::Bytes;
+use connectrpc::client::{ClientConfig, ClientTransport, HttpClient};
+use connectrpc::{ConnectError, ErrorCode};
+use http::header::CONTENT_TYPE;
+use http::{Request, StatusCode, Uri};
+use http_body_util::{BodyExt, Full};
 use mavio_api::connect::mavio::auth::v1::AuthServiceClient;
 use mavio_api::connect::mavio::hub::v1::HubServiceClient;
 use mavio_api::connect::mavio::library::v1::{ItemServiceClient, LibraryServiceClient};
@@ -155,6 +159,47 @@ impl Connection {
         )
     }
 
+    /// Calls a unary procedure with a request encoded as protobuf, such as
+    /// `/mavio.library.v1.ItemService/GetItem`, answering with the
+    /// response encoded the same way: the calls of the screens the core
+    /// does not model.
+    pub async fn call(&self, procedure: &str, request: Vec<u8>) -> Result<Vec<u8>> {
+        if !procedure.starts_with("/mavio.") || procedure.matches('/').count() != 2 {
+            return Err(Error::Invalid(format!("procedure {procedure:?}")));
+        }
+        let uri: Uri = self
+            .url(procedure)
+            .parse()
+            .map_err(|e| Error::Invalid(format!("procedure {procedure:?}: {e}")))?;
+        let req = Request::post(uri)
+            .header(CONTENT_TYPE, "application/proto")
+            .header("connect-protocol-version", "1")
+            .header("connect-timeout-ms", CALL_TIMEOUT.as_millis().to_string())
+            .body(
+                Full::new(Bytes::from(request))
+                    .map_err(|e| match e {})
+                    .boxed(),
+            )
+            .map_err(|e| Error::Invalid(e.to_string()))?;
+        let call = async {
+            let resp = self.transport().send(req).await?;
+            let status = resp.status();
+            let body = resp
+                .into_body()
+                .collect()
+                .await
+                .map_err(|e| Error::Unreachable(e.to_string()))?
+                .to_bytes();
+            if status.is_success() {
+                return Ok(body.to_vec());
+            }
+            Err(call_error(status, &body))
+        };
+        tokio::time::timeout(CALL_TIMEOUT, call)
+            .await
+            .map_err(|_| Error::Unreachable(format!("{procedure} timed out")))?
+    }
+
     fn config(&self, timeout: Option<Duration>) -> ClientConfig {
         let mut config = ClientConfig::new(self.base.clone());
         if let Some(timeout) = timeout {
@@ -206,6 +251,33 @@ impl Connection {
     pub fn events(&self) -> EventServiceClient<Transport> {
         EventServiceClient::new(self.transport(), self.config(None))
     }
+}
+
+/// The error of a unary call that failed: Connect's JSON error, or the
+/// HTTP status's code without one.
+fn call_error(status: StatusCode, body: &[u8]) -> Error {
+    #[derive(serde::Deserialize)]
+    struct Body {
+        code: String,
+        #[serde(default)]
+        message: String,
+    }
+    let (code, message) = match serde_json::from_slice::<Body>(body) {
+        Ok(b) => (b.code.parse().unwrap_or(ErrorCode::Unknown), b.message),
+        Err(_) => (
+            match status {
+                StatusCode::UNAUTHORIZED => ErrorCode::Unauthenticated,
+                StatusCode::FORBIDDEN => ErrorCode::PermissionDenied,
+                StatusCode::NOT_FOUND => ErrorCode::Unimplemented,
+                StatusCode::BAD_GATEWAY
+                | StatusCode::SERVICE_UNAVAILABLE
+                | StatusCode::GATEWAY_TIMEOUT => ErrorCode::Unavailable,
+                _ => ErrorCode::Unknown,
+            },
+            status.to_string(),
+        ),
+    };
+    ConnectError::new(code, message).into()
 }
 
 #[cfg(test)]

@@ -564,6 +564,17 @@ impl Client {
                 done()
             }
             Call::GetAccount(_) => account(core.account()),
+            Call::CallServer(c) => answer(
+                core.call(&c.server_id, &c.procedure, c.request.clone())
+                    .await,
+                |(body, base_url)| {
+                    Answer::Response(Box::new(pb::ServerResponse {
+                        body,
+                        base_url,
+                        ..Default::default()
+                    }))
+                },
+            ),
             Call::SyncAccount(_) => answer(core.sync_account().await, |()| done()),
             Call::SignOut(_) => answer(core.sign_out().await, |()| done()),
             Call::LoadHome(_) => {

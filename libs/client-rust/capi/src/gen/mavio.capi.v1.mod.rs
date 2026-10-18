@@ -36,6 +36,14 @@ pub use self::__buffa::view::RequestView;
 #[doc(inline)]
 pub use self::__buffa::view::RequestOwnedView;
 #[doc(inline)]
+pub use self::__buffa::view::CallServerView;
+#[doc(inline)]
+pub use self::__buffa::view::CallServerOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ServerResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::ServerResponseOwnedView;
+#[doc(inline)]
 pub use self::__buffa::view::OpenView;
 #[doc(inline)]
 pub use self::__buffa::view::OpenOwnedView;

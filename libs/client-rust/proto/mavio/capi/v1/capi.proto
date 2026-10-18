@@ -49,7 +49,28 @@ message Request {
     GetAccount get_account = 34;
     SyncAccount sync_account = 35;
     SignOut sign_out = 36;
+    CallServer call_server = 37;
   }
+}
+
+// Calls a unary procedure of a server signed in to, for the screens the
+// core does not model, such as a person or the settings: the core sends
+// it as the session and answers with its response, encoded as protobuf.
+message CallServer {
+  string server_id = 1;
+  // The procedure's path, such as "/mavio.library.v1.ItemService/GetItem".
+  string procedure = 2;
+  // The request, encoded as protobuf.
+  bytes request = 3;
+}
+
+// A CallServer's response.
+message ServerResponse {
+  // The response, encoded as protobuf.
+  bytes body = 1;
+  // The server's base URL the core reached it at, which the paths the
+  // response holds, such as the signed URLs of images, are relative to.
+  string base_url = 2;
 }
 
 // Opens the core, before any other call.
@@ -344,6 +365,7 @@ message Message {
     Account account = 18;
     AccountSignIn account_sign_in = 19;
     LinkCode link_code = 20;
+    ServerResponse response = 21;
   }
   // More Messages answer the call after this one.
   bool more = 9;

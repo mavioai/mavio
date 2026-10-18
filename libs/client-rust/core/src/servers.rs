@@ -450,6 +450,7 @@ pub(crate) async fn probe(conn: &Connection) -> Result<ServerInfo> {
 pub(crate) mod tests {
     use std::sync::Mutex;
 
+    use buffa::Message;
     use buffa_types::google::protobuf::Timestamp;
     use mavio_api::proto::mavio::auth::v1::{
         AuthorizeQuickConnectResponse, GetAuthInfoResponse, GetQuickConnectStateResponse,
@@ -565,6 +566,57 @@ pub(crate) mod tests {
             },
         );
         fake
+    }
+
+    #[tokio::test]
+    async fn calls_procedures_as_the_session() {
+        let (servers, _) = servers();
+        let fake = fake_server("sa", "Home");
+        fake.unary(
+            "/mavio.user.v1.UserService/GetCurrentUser",
+            |head, _: GetCurrentUserRequest| {
+                assert_eq!(head.headers().get("authorization").unwrap(), "Bearer t-sa");
+                Ok(GetCurrentUserResponse {
+                    user: User {
+                        id: Some("u".into()),
+                        name: Some("me".into()),
+                        ..Default::default()
+                    }
+                    .into(),
+                    ..Default::default()
+                })
+            },
+        )
+        .unary(
+            "/mavio.user.v1.UserService/GetUser",
+            |_, _: GetCurrentUserRequest| -> std::result::Result<GetCurrentUserResponse, _> {
+                Err(error("not_found"))
+            },
+        );
+        let address = fake.serve().await;
+        servers.sign_in(&address, "me", "secret").await.unwrap();
+        let conn = servers.connection("sa").unwrap();
+
+        let request = GetCurrentUserRequest::default().encode_to_vec();
+        let got = conn
+            .call("/mavio.user.v1.UserService/GetCurrentUser", request.clone())
+            .await
+            .unwrap();
+        let got = GetCurrentUserResponse::decode_from_slice(&got).unwrap();
+        assert_eq!(got.user.name.as_deref(), Some("me"));
+
+        let missing = conn
+            .call("/mavio.user.v1.UserService/GetUser", request.clone())
+            .await;
+        assert!(
+            matches!(missing, Err(Error::NotFound(_))),
+            "got = {missing:?}"
+        );
+        let invalid = conn.call("/elsewhere", request).await;
+        assert!(
+            matches!(invalid, Err(Error::Invalid(_))),
+            "got = {invalid:?}"
+        );
     }
 
     #[tokio::test]

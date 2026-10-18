@@ -60,6 +60,7 @@ pub mod request {
         GetAccount(::buffa::alloc::boxed::Box<super::super::super::GetAccount>),
         SyncAccount(::buffa::alloc::boxed::Box<super::super::super::SyncAccount>),
         SignOut(::buffa::alloc::boxed::Box<super::super::super::SignOut>),
+        CallServer(::buffa::alloc::boxed::Box<super::super::super::CallServer>),
     }
     impl ::buffa::Oneof for Kind {}
     impl From<super::super::super::Open> for Kind {
@@ -425,6 +426,16 @@ pub mod request {
             Self::Some(Kind::from(v))
         }
     }
+    impl From<super::super::super::CallServer> for Kind {
+        fn from(v: super::super::super::CallServer) -> Self {
+            Self::CallServer(::buffa::alloc::boxed::Box::new(v))
+        }
+    }
+    impl From<super::super::super::CallServer> for ::core::option::Option<Kind> {
+        fn from(v: super::super::super::CallServer) -> Self {
+            Self::Some(Kind::from(v))
+        }
+    }
 }
 pub mod message {
     #[allow(unused_imports)]
@@ -449,6 +460,7 @@ pub mod message {
         Account(::buffa::alloc::boxed::Box<super::super::super::Account>),
         AccountSignIn(::buffa::alloc::boxed::Box<super::super::super::AccountSignIn>),
         LinkCode(::buffa::alloc::boxed::Box<super::super::super::LinkCode>),
+        Response(::buffa::alloc::boxed::Box<super::super::super::ServerResponse>),
     }
     impl ::buffa::Oneof for Kind {}
     impl From<super::super::super::Error> for Kind {
@@ -618,6 +630,16 @@ pub mod message {
     }
     impl From<super::super::super::LinkCode> for ::core::option::Option<Kind> {
         fn from(v: super::super::super::LinkCode) -> Self {
+            Self::Some(Kind::from(v))
+        }
+    }
+    impl From<super::super::super::ServerResponse> for Kind {
+        fn from(v: super::super::super::ServerResponse) -> Self {
+            Self::Response(::buffa::alloc::boxed::Box::new(v))
+        }
+    }
+    impl From<super::super::super::ServerResponse> for ::core::option::Option<Kind> {
+        fn from(v: super::super::super::ServerResponse) -> Self {
             Self::Some(Kind::from(v))
         }
     }

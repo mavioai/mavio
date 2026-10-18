@@ -186,6 +186,11 @@ pub mod request {
                 super::super::super::super::__buffa::view::SignOutView<'a>,
             >,
         ),
+        CallServer(
+            ::buffa::alloc::boxed::Box<
+                super::super::super::super::__buffa::view::CallServerView<'a>,
+            >,
+        ),
     }
 }
 pub mod message {
@@ -277,6 +282,11 @@ pub mod message {
         LinkCode(
             ::buffa::alloc::boxed::Box<
                 super::super::super::super::__buffa::view::LinkCodeView<'a>,
+            >,
+        ),
+        Response(
+            ::buffa::alloc::boxed::Box<
+                super::super::super::super::__buffa::view::ServerResponseView<'a>,
             >,
         ),
     }
