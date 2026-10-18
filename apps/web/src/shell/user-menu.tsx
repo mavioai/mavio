@@ -94,11 +94,11 @@ export function UserButton({
       aria-label={t("nav.userMenu", { name: account.name })}
       className={
         dots
-          ? "flex size-16 items-center justify-center rounded-full text-text-secondary"
+          ? "tv-pill flex size-12 items-center justify-center rounded-full bg-surface-raised/60 text-text-secondary backdrop-blur-xl"
           : `flex items-center gap-2.5 rounded-[10px] text-left hover:bg-fill data-popup-open:bg-fill ${compact ? "size-9 justify-center" : "w-full p-2"}`
       }
     >
-      {dots ? <Icon name="moreVertical" size={32} /> : <Avatar name={account.name} size={compact ? 28 : 32} />}
+      {dots ? <Icon name="moreVertical" size={26} /> : <Avatar name={account.name} size={compact ? 28 : 32} />}
       {!compact && !dots && (
         <>
           <span className="min-w-0 flex-1">
@@ -207,6 +207,7 @@ function ThemeSwitch() {
       value={appearance}
       onChange={(v) => setPrefs({ appearance: v })}
       label={t("settings.appearance")}
+      horizontal
       className="flex shrink-0 rounded-full bg-fill p-0.5"
     >
       {themes.map((th) => (

@@ -19,7 +19,7 @@
 ## 3. Navigation Bar
 
 * **Tabs**: Home, Libraries, Discover (where a server discovers) and Search in a pill centered at the top, on `color.surfaceRaised` at 60 %; the current tab is filled with `color.fillSelected`.
-* **Menu button**: three vertical dots in a round button as tall as the tabs, at the screen's right and centered on the tabs vertically, open the user menu (§5); the user's avatar and name head the menu rather than sit beside the tabs.
+* **Menu button**: three vertical dots in a round button of the tabs' glass, as large as the assistant's beside it, at the screen's right and centered on the tabs vertically, open the user menu (§5) as the button is pressed, never as focus moves from it; with focus, and while its menu is open, it is white as the assistant's; the user's avatar and name head the menu rather than sit beside the tabs.
 * **Assistant button**: a microphone in a round button like the menu button, to its left, opens the assistant's panel ([Assistant §9](assistant.md#9-clients)); where the remote has a search or assistant key the app receives, that key opens it from any page.
 * **Band**: once the page scrolls, a solid band of the background lies under the bar, so that content scrolled up passes under it rather than through it. It is not blurred, since a blurred edge looks poor on a large screen.
 * **Behind the bar**: Home's hero reaches the top of the screen, behind the bar; other pages start below it. A title's details, a discovered title, a library, a catalog and Search hide the bar (§6.2, §6.3, §6.4).

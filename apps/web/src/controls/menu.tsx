@@ -4,7 +4,7 @@
 // items, opening on the item chosen.
 import { Menu as Base } from "@base-ui/react/menu";
 import { Link, type LinkProps } from "@tanstack/react-router";
-import { type ReactElement, type ReactNode, useRef } from "react";
+import { type KeyboardEvent, type ReactElement, type ReactNode, useRef } from "react";
 
 import { Icon, type IconName } from "../icon.tsx";
 import { usePrefs } from "../prefs.ts";
@@ -46,7 +46,12 @@ export function Menu({
         if (o && tv) ref.current?.querySelector<HTMLElement>(start)?.focus();
       }}
     >
-      <Base.Trigger render={trigger} />
+      {/* On the television a menu opens as its button is pressed alone:
+          the arrows move focus on, as they do from any button. */}
+      <Base.Trigger
+        render={trigger}
+        onKeyDown={tv ? (e) => (e.key === "ArrowDown" || e.key === "ArrowUp") && e.preventBaseUIHandler() : undefined}
+      />
       <Base.Portal>
         <Base.Positioner side={side} align={align} sideOffset={8} className="z-50 outline-none">
           <Base.Popup
@@ -146,22 +151,45 @@ export function MenuExternal({ icon, href, children }: { icon?: IconName; href: 
   );
 }
 
-/** Items of which one is chosen, each checked when it is. */
+/**
+ * Items of which one is chosen, each checked when it is. Items side by
+ * side (horizontal), as MenuIconOption's, are moved through with Left and
+ * Right, which the menu's own keys, Up and Down, leave alone.
+ */
 export function MenuChoice<T extends string>({
   value,
   onChange,
   label,
+  horizontal = false,
   className,
   children,
 }: {
   value: T;
   onChange: (v: T) => void;
   label?: string;
+  horizontal?: boolean;
   className?: string;
   children: ReactNode;
 }) {
+  const sideways = (e: KeyboardEvent<HTMLDivElement>) => {
+    if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+    const items = [...e.currentTarget.querySelectorAll<HTMLElement>("[role=menuitemradio]")];
+    const i = items.indexOf(document.activeElement as HTMLElement);
+    if (i < 0) return;
+    const rtl = getComputedStyle(e.currentTarget).direction === "rtl";
+    const next = items[i + ((e.key === "ArrowRight") !== rtl ? 1 : -1)];
+    e.preventDefault();
+    e.stopPropagation();
+    next?.focus();
+  };
   return (
-    <Base.RadioGroup value={value} onValueChange={(v: T) => onChange(v)} aria-label={label} className={className}>
+    <Base.RadioGroup
+      value={value}
+      onValueChange={(v: T) => onChange(v)}
+      aria-label={label}
+      onKeyDown={horizontal ? sideways : undefined}
+      className={className}
+    >
       {children}
     </Base.RadioGroup>
   );

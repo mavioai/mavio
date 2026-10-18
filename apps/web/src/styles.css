@@ -331,20 +331,21 @@ input[type="search"]::-webkit-search-cancel-button {
     z-index: 1;
     background: #fff;
     color: #000;
-    border-radius: 10px;
-    box-shadow: 0 8px 24px var(--mavio-color-tv-focus-shadow);
+    border-radius: 6px;
+    /* The white reaches 6 px past the element, a padding that moves nothing. */
+    box-shadow:
+      0 0 0 6px #fff,
+      0 8px 24px var(--mavio-color-tv-focus-shadow);
   }
   /* A button whose menu is open, focus in the menu, keeps a highlight. */
   & [aria-haspopup][aria-expanded="true"]:not(:focus) {
     background: var(--mavio-color-fill);
   }
-  /* The user menu's dots are bare, and in the tabs' glass with focus or
-     while their menu is open. */
-  & [data-tv-dots]:focus,
+  /* The user menu's dots, a pill as the assistant's button, stay as with
+     focus while their menu is open. */
   & [data-tv-dots][aria-expanded="true"]:not(:focus) {
-    background: color-mix(in oklab, var(--mavio-color-surface-raised) 60%, transparent);
-    backdrop-filter: blur(24px);
-    color: var(--mavio-color-on-background);
+    background: #fff;
+    color: #000;
   }
 }
 
