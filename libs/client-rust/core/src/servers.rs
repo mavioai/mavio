@@ -425,6 +425,17 @@ impl Servers {
             .remove(id);
     }
 
+    /// Asks a server its name and version again, as after an administrator
+    /// renames or updates it, and keeps them.
+    pub async fn refresh_info(&self, id: &str) -> Result<ServerRecord> {
+        let info = probe(&self.connection(id)?).await?;
+        let mut record = self.get(id)?;
+        record.name = info.name;
+        record.version = info.version;
+        self.store.put_server(&record)?;
+        Ok(record)
+    }
+
     /// Puts the servers in the user's order.
     pub fn order(&self, ids: &[String]) -> Result<()> {
         self.store.order_servers(ids)
@@ -714,6 +725,29 @@ pub(crate) mod tests {
         let list = servers.list().unwrap();
         assert_eq!(list.len(), 1);
         assert_eq!(list[0].address, second);
+    }
+
+    #[tokio::test]
+    async fn a_renamed_server_is_named_anew() {
+        let (servers, _) = servers();
+        let fake = fake_server("sa", "Home");
+        let addr = fake.serve().await;
+        servers.sign_in(&addr, "me", "secret").await.unwrap();
+        fake.unary(
+            "/mavio.auth.v1.AuthService/GetAuthInfo",
+            |_, _: GetAuthInfoRequest| {
+                Ok(GetAuthInfoResponse {
+                    server_id: Some("sa".into()),
+                    server_name: Some("Den".into()),
+                    version: Some("v2".into()),
+                    ..Default::default()
+                })
+            },
+        );
+        let got = servers.refresh_info("sa").await.unwrap();
+        assert_eq!((got.name.as_str(), got.version.as_str()), ("Den", "v2"));
+        assert_eq!(servers.get("sa").unwrap().name, "Den");
+        assert_eq!(servers.get("sa").unwrap().user_name, "me", "the user stays");
     }
 
     #[tokio::test]

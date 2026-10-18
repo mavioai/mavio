@@ -840,6 +840,13 @@ impl Client {
         self.call(|c| async move { c.sign_out().await }).await
     }
 
+    /// Asks a server its name and version again, as after an administrator
+    /// renames it, and keeps them.
+    pub async fn refresh_server_info(&self, server_id: String) -> Result<ServerRecord> {
+        self.call(|c| async move { c.servers().refresh_info(&server_id).await })
+            .await
+    }
+
     /// Signs out of a server and forgets it.
     pub async fn remove_server(&self, server_id: String) -> Result<()> {
         self.call(|c| async move { c.remove(&server_id).await })
