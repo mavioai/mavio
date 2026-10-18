@@ -70,7 +70,9 @@ export function SidebarPanel({ rail, onToggle }: { rail: boolean; onToggle: () =
             <Link to="/tools/$tool" params={{ tool: id }} aria-label={rail ? toolLooks[id].title() : undefined} className={itemClass(rail)}>
               {({ isActive }) => (
                 <>
-                  <Icon name={toolLooks[id].icon} fill={isActive} size={20} className="shrink-0" />
+                  <span className="flex shrink-0" style={{ color: toolLooks[id].color }}>
+                    <Icon name={toolLooks[id].icon} fill={isActive} size={20} />
+                  </span>
                   {!rail && <span className="truncate">{toolLooks[id].title()}</span>}
                 </>
               )}
