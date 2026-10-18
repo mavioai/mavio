@@ -99,13 +99,19 @@ public final class NowPlaying {
         if let subtitle = item.subtitle, !subtitle.isEmpty { info[MPMediaItemPropertyArtist] = subtitle }
         if player.duration > 0 { info[MPMediaItemPropertyPlaybackDuration] = player.duration }
         if let image {
-            info[MPMediaItemPropertyArtwork] = MPMediaItemArtwork(boundsSize: image.size) { _ in image }
+            info[MPMediaItemPropertyArtwork] = Self.artwork(image)
         }
         MPNowPlayingInfoCenter.default().nowPlayingInfo = info
         #if os(macOS)
             MPNowPlayingInfoCenter.default().playbackState = player.isPlaying ? .playing : .paused
         #endif
         published = (player.isPlaying, player.rate, player.duration)
+    }
+
+    /// The artwork of an image, made off the main actor: MediaPlayer asks
+    /// for it on a queue of its own.
+    nonisolated private static func artwork(_ image: PlatformImage) -> MPMediaItemArtwork {
+        MPMediaItemArtwork(boundsSize: image.size) { _ in image }
     }
 
     private func register() {
