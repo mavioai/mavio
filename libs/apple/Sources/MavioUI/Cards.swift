@@ -1,17 +1,22 @@
 import MavioDesign
 import MavioKit
+import NukeUI
 import SwiftUI
 
-/// An image loaded from a server, over a placeholder of its final size.
+/// An image loaded from a server, over a placeholder of its final size: the
+/// icon of what it shows while it loads or when there is none.
 public struct ArtworkView: View {
     private let url: String?
     private let title: String?
+    private let icon: String
     @Environment(\.theme) private var theme
 
-    /// The image at url; without one, title on the placeholder.
-    public init(_ url: String?, title: String? = nil) {
+    /// The image at url, which shows title; without one, icon on the
+    /// placeholder.
+    public init(_ url: String?, title: String? = nil, icon: String = "movies") {
         self.url = url
         self.title = title
+        self.icon = icon
     }
 
     /// The image, or its placeholder.
@@ -19,27 +24,83 @@ public struct ArtworkView: View {
         ZStack {
             theme.colors.surfaceRaised
             if let url, let parsed = URL(string: url) {
-                AsyncImage(url: parsed, transaction: Transaction(animation: .easeOut(duration: MavioDuration.fast))) {
-                    phase in
-                    if let image = phase.image {
+                LazyImage(url: parsed, transaction: Transaction(animation: .easeOut(duration: MavioDuration.slow))) {
+                    state in
+                    if let image = state.image {
                         image.resizable().scaledToFill()
-                    } else if phase.error != nil, let title {
-                        fallback(title)
+                    } else {
+                        placeholder
                     }
                 }
-            } else if let title {
-                fallback(title)
+            } else {
+                placeholder
             }
         }
         .clipped()
+        .accessibilityElement()
+        .accessibilityLabel(title ?? "")
     }
 
-    private func fallback(_ title: String) -> some View {
-        Text(title)
-            .type(theme.type.title3)
-            .foregroundStyle(theme.colors.textSecondary)
-            .multilineTextAlignment(.center)
-            .padding(MavioSpacing.s8)
+    /// The icon over a fill fading from the top leading corner, as the web
+    /// UI's `art-placeholder`.
+    private var placeholder: some View {
+        GeometryReader { geo in
+            Icon(icon, size: min(geo.size.width * 0.26, 56))
+                .foregroundStyle(theme.colors.textTertiary)
+                .opacity(0.6)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(
+                    LinearGradient(
+                        stops: [.init(color: theme.colors.fill, location: 0), .init(color: .clear, location: 0.7)],
+                        startPoint: UnitPoint(x: 0.33, y: 0), endPoint: UnitPoint(x: 0.67, y: 1)))
+        }
+    }
+}
+
+/// An image shown whole at its own proportions, such as a logo; fallback
+/// while it loads and when it cannot.
+public struct FittedImage<Fallback: View>: View {
+    private let url: String
+    private let alignment: Alignment
+    private let fallback: Fallback
+
+    /// The image at url, at alignment in the space it is given, else fallback.
+    public init(_ url: String, alignment: Alignment = .center, @ViewBuilder fallback: () -> Fallback) {
+        self.url = url
+        self.alignment = alignment
+        self.fallback = fallback()
+    }
+
+    /// The image.
+    public var body: some View {
+        LazyImage(url: URL(string: url), transaction: Transaction(animation: .easeOut(duration: MavioDuration.slow))) {
+            state in
+            if let image = state.image {
+                image.resizable().scaledToFit()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: alignment)
+            } else if state.error != nil {
+                fallback.frame(maxWidth: .infinity, maxHeight: .infinity, alignment: alignment)
+            } else {
+                Color.clear
+            }
+        }
+    }
+}
+
+extension CardKind {
+    /// The icon on the placeholder of this kind's artwork.
+    public var icon: String {
+        switch self {
+        case .series, .season, .episode: "shows"
+        case .artist, .album, .track, .musicVideo: "music"
+        case .audiobook, .book: "books"
+        case .photoAlbum, .photo: "photos"
+        case .video: "homeVideos"
+        case .folder: "folder"
+        case .collection: "collections"
+        case .playlist: "playlists"
+        default: "movies"
+        }
     }
 }
 
@@ -106,7 +167,7 @@ public struct PosterCard: View {
     /// The artwork with the title and subtitle below it.
     public var body: some View {
         VStack(alignment: .leading, spacing: MavioSpacing.s4) {
-            ArtworkView(card.poster?.url ?? card.thumb?.url, title: card.title)
+            ArtworkView(card.poster?.url ?? card.thumb?.url, title: card.title, icon: card.kind.icon)
                 .aspectRatio(2 / 3, contentMode: .fit)
                 .overlay { CardOverlays(card: card, timeLeft: false) }
                 .clipShape(.rect(cornerRadius: MavioRadius.md))
@@ -135,7 +196,7 @@ public struct ThumbCard: View {
     /// The artwork with the title and subtitle below it.
     public var body: some View {
         VStack(alignment: .leading, spacing: MavioSpacing.s4) {
-            ArtworkView(card.thumb?.url ?? card.poster?.url, title: card.title)
+            ArtworkView(card.thumb?.url ?? card.poster?.url, title: card.title, icon: card.kind.icon)
                 .aspectRatio(16 / 9, contentMode: .fit)
                 .overlay { CardOverlays(card: card, timeLeft: true) }
                 .clipShape(.rect(cornerRadius: MavioRadius.md))
@@ -186,37 +247,37 @@ public struct CardPlaceholder: View {
     }
 }
 
-/// A cast or crew member.
+/// A cast or crew member: the photo in a circle, the name and the role
+/// (libs/design/components.md, Person Card).
 public struct PersonCard: View {
-    private let credit: CreditEntry
+    private let name: String
+    private let photo: String?
+    private let role: String?
     @Environment(\.theme) private var theme
 
-    /// The card of a credit.
-    public init(_ credit: CreditEntry) {
-        self.credit = credit
+    /// The card of a credit, with its role: the character played or the job.
+    public init(_ credit: CreditEntry, role: String?) {
+        name = credit.name
+        photo = credit.photo?.url
+        self.role = role
     }
 
     /// The photo with the name and role.
     public var body: some View {
-        VStack(spacing: MavioSpacing.s4) {
-            ZStack {
-                theme.colors.surfaceRaised
-                Text(initials(credit.name)).type(theme.type.title3).foregroundStyle(theme.colors.textSecondary)
-                if let photo = credit.photo { ArtworkView(photo.url) }
+        VStack(spacing: MavioSpacing.s8) {
+            ArtworkView(photo, title: name, icon: "profile")
+                .frame(width: 96, height: 96)
+                .clipShape(Circle())
+            VStack(spacing: 0) {
+                Text(name).type(theme.type.callout).lineLimit(2)
+                    .foregroundStyle(theme.colors.textPrimary)
+                if let role {
+                    Text(role).type(theme.type.footnote).lineLimit(2)
+                        .foregroundStyle(theme.colors.textSecondary)
+                }
             }
-            .frame(width: 88, height: 88)
-            .clipShape(Circle())
-            Text(credit.name).type(theme.type.callout).lineLimit(2).multilineTextAlignment(.center)
-                .foregroundStyle(theme.colors.textPrimary)
-            if let role = credit.role {
-                Text(role).type(theme.type.footnote).lineLimit(2).multilineTextAlignment(.center)
-                    .foregroundStyle(theme.colors.textSecondary)
-            }
+            .multilineTextAlignment(.center)
         }
-        .frame(width: 100, alignment: .top)
-    }
-
-    private func initials(_ name: String) -> String {
-        name.split(separator: " ").prefix(2).compactMap(\.first).map(String.init).joined()
+        .frame(width: 112, alignment: .top)
     }
 }

@@ -10,6 +10,8 @@ enum Route: Hashable {
     case library(LibraryEntry)
     /// Every item of a hub.
     case hub(serverId: String, hubId: String, title: String)
+    /// An item's cast and crew, or its crew alone.
+    case credits(serverId: String, itemId: String, crew: Bool)
 }
 
 /// An item to play, which the root presents the player for.
@@ -146,6 +148,8 @@ struct Stack<Content: View>: View {
                         case let .item(serverId, itemId): DetailsView(serverId: serverId, itemId: itemId)
                         case let .library(library): LibraryView(library: library)
                         case let .hub(serverId, hubId, title): HubView(serverId: serverId, hubId: hubId, title: title)
+                        case let .credits(serverId, itemId, crew):
+                            CreditsView(serverId: serverId, itemId: itemId, crew: crew)
                         }
                     }
                     .background(theme.colors.background)

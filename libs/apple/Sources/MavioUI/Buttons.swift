@@ -12,6 +12,10 @@ public struct MavioButtonStyle: ButtonStyle {
         case secondary
         /// An icon in a circle filled with `color.fill`.
         case circle
+        /// The main action over artwork: white with black content.
+        case artworkPrimary
+        /// An icon in a circle of glass over artwork.
+        case artworkCircle
     }
 
     private let kind: Kind
@@ -40,16 +44,16 @@ public struct MavioButtonStyle: ButtonStyle {
                 .type(theme.type.headline)
                 .fontWeight(.semibold)
                 .foregroundStyle(foreground)
-                .background(background, in: shape)
+                .modifier(Fill(kind: kind, color: background, shape: shape))
                 .contentShape(shape)
                 .opacity(enabled ? (configuration.isPressed ? 0.8 : 1) : 0.6)
         }
 
         @ViewBuilder private var label: some View {
             switch kind {
-            case .circle:
+            case .circle, .artworkCircle:
                 configuration.label.frame(width: 44, height: 44)
-            case .primary, .secondary:
+            case .primary, .secondary, .artworkPrimary:
                 configuration.label
                     .padding(.horizontal, large ? MavioSpacing.s20 : MavioSpacing.s16)
                     .frame(minHeight: large ? 48 : 36)
@@ -57,19 +61,57 @@ public struct MavioButtonStyle: ButtonStyle {
         }
 
         private var foreground: Color {
-            guard enabled else { return theme.colors.textDisabled }
-            return kind == .primary ? theme.colors.onButton : theme.colors.textPrimary
+            switch kind {
+            case .artworkPrimary: .black
+            case .artworkCircle: .white
+            case _ where !enabled: theme.colors.textDisabled
+            case .primary: theme.colors.onButton
+            default: theme.colors.textPrimary
+            }
         }
 
         private var background: Color {
-            kind == .primary ? theme.colors.button : theme.colors.fill
+            switch kind {
+            case .primary: theme.colors.button
+            case .artworkPrimary: .white
+            case .artworkCircle: .white.opacity(0.2)
+            default: theme.colors.fill
+            }
         }
 
         private var shape: AnyShape {
             switch kind {
-            case .circle: AnyShape(Circle())
-            case .primary, .secondary: AnyShape(RoundedRectangle(cornerRadius: large ? 10 : MavioRadius.md))
+            case .circle, .artworkCircle: AnyShape(Circle())
+            case .primary, .secondary, .artworkPrimary:
+                AnyShape(RoundedRectangle(cornerRadius: large ? 10 : MavioRadius.md))
             }
+        }
+    }
+}
+
+/// A button's fill: glass over artwork, else its color.
+private struct Fill: ViewModifier {
+    let kind: MavioButtonStyle.Kind
+    let color: Color
+    let shape: AnyShape
+
+    func body(content: Content) -> some View {
+        if kind == .artworkCircle {
+            content.glass(in: shape)
+        } else {
+            content.background(color, in: shape)
+        }
+    }
+}
+
+extension View {
+    /// Glass in shape over what is behind: Liquid Glass where the system
+    /// has it, else a thin material.
+    @ViewBuilder public func glass(in shape: some Shape) -> some View {
+        if #available(iOS 26, tvOS 26, macOS 26, *) {
+            glassEffect(.regular.interactive(), in: shape)
+        } else {
+            background(.ultraThinMaterial, in: shape)
         }
     }
 }
@@ -81,4 +123,6 @@ extension ButtonStyle where Self == MavioButtonStyle {
     public static var secondary: MavioButtonStyle { MavioButtonStyle(.secondary) }
     /// An icon in a circle filled with `color.fill`.
     public static var circle: MavioButtonStyle { MavioButtonStyle(.circle) }
+    /// An icon in a circle of glass over artwork.
+    public static var artworkCircle: MavioButtonStyle { MavioButtonStyle(.artworkCircle) }
 }

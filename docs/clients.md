@@ -107,7 +107,7 @@ The server owns every decision that depends on the library, the user or other de
 * **`libs/apple`**, Swift packages shared by the three apps:
   * `MavioKit`: the core's Swift API with the app services above it — accounts, capability probing, downloads with a background `URLSession`, Now Playing (`MPNowPlayingInfoCenter`, `MPRemoteCommandCenter`);
   * `MavioPlayer`: one player interface with two engines, and Picture in Picture;
-  * `MavioUI`: SwiftUI components each app composes in its own way (artwork, posters, rows), and the design tokens.
+  * `MavioUI`: SwiftUI components each app composes in its own way (artwork, posters, rows), and the design tokens; artwork is loaded and cached by [Nuke](https://github.com/kean/Nuke)'s `LazyImage` (MIT).
 * **Player engines**, in order of preference: AVPlayer, then AetherEngine, then the server's processing.
   * **Capabilities**: the app declares in `direct_play` the profiles AVPlayer plays and those AetherEngine plays. The server therefore plays a source directly whenever either engine can, and remuxes or transcodes it only when neither can.
   * **Choice**: a source played directly goes to AVPlayer when AVPlayer plays it as it is, else to AetherEngine; what the server remuxes or transcodes is HLS, which goes to AVPlayer.

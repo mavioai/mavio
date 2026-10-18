@@ -17,6 +17,7 @@ let package = Package(
     dependencies: [
         .package(path: "../design"),
         .package(url: "https://github.com/mavioai/AetherEngine", branch: "v7.39.0-mavio"),
+        .package(url: "https://github.com/kean/Nuke", exact: "13.2.0"),
         .package(url: "https://github.com/pointfreeco/swift-snapshot-testing", exact: "1.19.6"),
     ],
     targets: [
@@ -37,7 +38,13 @@ let package = Package(
                 "Libass", "MavioCoreFFI", .product(name: "AetherEngine", package: "AetherEngine"),
             ]
         ),
-        .target(name: "MavioUI", dependencies: ["MavioKit", .product(name: "MavioDesign", package: "design")]),
+        .target(
+            name: "MavioUI",
+            dependencies: [
+                "MavioKit", .product(name: "MavioDesign", package: "design"),
+                .product(name: "NukeUI", package: "Nuke"),
+            ]
+        ),
         .testTarget(name: "MavioKitTests", dependencies: ["MavioKit"]),
         .testTarget(name: "MavioPlayerTests", dependencies: ["MavioPlayer"]),
         // The snapshot tests (docs/clients.md §6.8), which draw on the iOS

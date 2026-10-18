@@ -107,7 +107,7 @@ flowchart LR
 * **`libs/apple`**，三个应用共享的 Swift 包：
   * `MavioKit`：核心的 Swift API 及其上的应用服务——账户、能力探测、以后台 `URLSession` 下载、正在播放（`MPNowPlayingInfoCenter`、`MPRemoteCommandCenter`）；
   * `MavioPlayer`：一个播放器接口、两个引擎，以及画中画；
-  * `MavioUI`：各应用以各自方式组合的 SwiftUI 组件（图片、海报、行），以及设计 tokens。
+  * `MavioUI`：各应用以各自方式组合的 SwiftUI 组件（图片、海报、行），以及设计 tokens；图片由 [Nuke](https://github.com/kean/Nuke) 的 `LazyImage`（MIT）加载与缓存。
 * **播放引擎**，优先顺序为：AVPlayer，其次 AetherEngine，最后由服务端处理。
   * **能力**：应用在 `direct_play` 中声明 AVPlayer 能播放的配置与 AetherEngine 能播放的配置。因此只要任一引擎能播放，服务端就直接播放该源；两者都不能播放时才重封装或转码。
   * **选择**：直接播放的源，AVPlayer 能原样播放时交给 AVPlayer，否则交给 AetherEngine；服务端重封装或转码的结果是 HLS，交给 AVPlayer。
