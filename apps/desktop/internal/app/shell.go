@@ -2,7 +2,6 @@ package app
 
 import (
 	"context"
-	"math"
 	"strings"
 	"unicode"
 	"unicode/utf8"
@@ -381,47 +380,15 @@ func iconButton(c *ui.Context, icon, label string) ui.Element {
 	return b
 }
 
-// avatar builds a user's avatar, size DIPs wide, colored by the name.
+// avatar builds a user's avatar, size DIPs wide: the name's initial in
+// white on one gray for everyone.
 func avatar(c *ui.Context, name string, size float32) {
 	r, _ := utf8.DecodeRuneInString(name)
 	initial := ""
 	if r != utf8.RuneError {
 		initial = string(unicode.ToUpper(r))
 	}
-	ui.Box(c).Size(size, size).Shrink(0).Radius(size / 2).Background(avatarColor(name)).Center().Children(func() {
+	ui.Box(c).Size(size, size).Shrink(0).Radius(size / 2).Background(ui.RGB(0x8E, 0x8E, 0x93)).Center().Children(func() {
 		ui.Text(c, initial).FontSize(size * 0.42).FontWeight(600).TextColor(ui.RGB(255, 255, 255))
 	})
-}
-
-// avatarColor returns the color of a name's avatar: a hue drawn from the
-// name, at 42% saturation and 44% lightness.
-func avatarColor(name string) ui.Color {
-	hue := 0
-	for _, r := range name {
-		hue = (hue*31 + int(r)) % 360
-	}
-	return hsl(float64(hue), 0.42, 0.44)
-}
-
-func hsl(h, s, l float64) ui.Color {
-	c := (1 - math.Abs(2*l-1)) * s
-	x := c * (1 - math.Abs(math.Mod(h/60, 2)-1))
-	m := l - c/2
-	var r, g, b float64
-	switch {
-	case h < 60:
-		r, g = c, x
-	case h < 120:
-		r, g = x, c
-	case h < 180:
-		g, b = c, x
-	case h < 240:
-		g, b = x, c
-	case h < 300:
-		r, b = x, c
-	default:
-		r, b = c, x
-	}
-	to := func(v float64) uint8 { return uint8(math.Round((v + m) * 255)) }
-	return ui.RGB(to(r), to(g), to(b))
 }

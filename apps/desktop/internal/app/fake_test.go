@@ -327,6 +327,30 @@ func artworkServer(t testing.TB) *httptest.Server {
 	return srv
 }
 
+// hsl returns the color of hue h, saturation s and lightness l.
+func hsl(h, s, l float64) ui.Color {
+	c := (1 - math.Abs(2*l-1)) * s
+	x := c * (1 - math.Abs(math.Mod(h/60, 2)-1))
+	m := l - c/2
+	var r, g, b float64
+	switch {
+	case h < 60:
+		r, g = c, x
+	case h < 120:
+		r, g = x, c
+	case h < 180:
+		g, b = c, x
+	case h < 240:
+		g, b = x, c
+	case h < 300:
+		r, b = x, c
+	default:
+		r, b = c, x
+	}
+	to := func(v float64) uint8 { return uint8(math.Round((v + m) * 255)) }
+	return ui.RGB(to(r), to(g), to(b))
+}
+
 func hslRGB(h, s, l float64) color.RGBA {
 	c := hsl(h, s, l)
 	return color.RGBA{c.R, c.G, c.B, 255}
