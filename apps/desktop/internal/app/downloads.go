@@ -309,7 +309,7 @@ func (a *App) queueRow(c *ui.Context, i *acquisitionv1.QueueItem) {
 		if importable && smallButton(c, style.T(c, "downloads.manualImport"), false) {
 			toggle("import")
 		}
-		if ui.ButtonBase(c).Height(32).Padding(0, 8).AlignItems(ui.Center).Label(style.T(c, "downloads.remove")).Children(func() {
+		if ui.ButtonBase(c).Height(28).Padding(0, 8).AlignItems(ui.Center).Label(style.T(c, "downloads.remove")).Children(func() {
 			style.Text(ui.Text(c, style.T(c, "downloads.remove")), style.Type.Callout).FontWeight(600).TextColor(style.Color(colors.Danger))
 		}).Clicked() {
 			toggle("remove")
@@ -545,7 +545,7 @@ func (a *App) historyRow(c *ui.Context, e *acquisitionv1.HistoryEvent) {
 					return err
 				}, func() { st.confirm = "" })
 			}
-		} else if ui.ButtonBase(c).Height(32).AlignItems(ui.Center).Label(style.T(c, "downloads.markFailed")).Children(func() {
+		} else if ui.ButtonBase(c).Height(28).AlignItems(ui.Center).Label(style.T(c, "downloads.markFailed")).Children(func() {
 			style.Text(ui.Text(c, style.T(c, "downloads.markFailed")), style.Type.Callout).FontWeight(600).TextColor(style.Color(colors.Danger))
 		}).Clicked() {
 			st.confirm = id

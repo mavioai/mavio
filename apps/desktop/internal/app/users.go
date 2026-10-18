@@ -246,7 +246,7 @@ func dangerText(c *ui.Context, text string) {
 // is of the danger color.
 func dangerButton(c *ui.Context, label string, disabled bool) bool {
 	colors := style.Colors(c)
-	b := ui.ButtonBase(c).Height(32).Padding(0, 14).Radius(8).AlignItems(ui.Center).Label(label).Disabled(disabled).
+	b := ui.ButtonBase(c).Height(28).Padding(0, 12).Radius(8).AlignItems(ui.Center).Label(label).Disabled(disabled).
 		Background(style.Color(colors.Fill))
 	if b.Hovered() && !disabled {
 		b.Background(style.Color(colors.FillSelected))

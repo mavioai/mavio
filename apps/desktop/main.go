@@ -156,11 +156,13 @@ func run() error {
 			{Role: mygo.RoleWindowMenu},
 		}))
 		win = mygo.NewWindow(mygo.WindowOptions{
-			Title:         "Mavio",
-			Width:         1280,
-			Height:        800,
-			MinWidth:      600,
-			MinHeight:     480,
+			Title:  "Mavio",
+			Width:  1280,
+			Height: 800,
+			// The app has the desktop layout alone: the settings' sidebar
+			// beside a section still wide enough for its rows.
+			MinWidth:      1024,
+			MinHeight:     680,
 			TitleBarStyle: mygo.TitleBarHidden,
 			StateKey:      "main",
 			Vibrancy:      mygo.VibrancySidebar,

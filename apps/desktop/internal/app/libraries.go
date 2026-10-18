@@ -537,7 +537,7 @@ func (a *App) foldersGroup(c *ui.Context, server string, library *libraryv1.Libr
 				addPath(f.typed)
 				f.typed = ""
 			}
-			b := ui.ButtonBase(c).Height(32).Padding(0, 10).Radius(8).Gap(6).AlignItems(ui.Center).Label(style.T(c, "libraries.browse"))
+			b := ui.ButtonBase(c).Height(28).Padding(0, 10).Radius(8).Gap(6).AlignItems(ui.Center).Label(style.T(c, "libraries.browse"))
 			if f.picking || b.Hovered() {
 				b.Background(style.Color(colors.Fill))
 			}

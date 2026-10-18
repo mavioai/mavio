@@ -12,8 +12,8 @@ import (
 // Layout is the desktop form factor's layout.
 var Layout = design.DesktopLayout
 
-// Type is the type scale.
-var Type = design.StandardTypography
+// Type is the desktop type scale, with a body of 13 as on the Mac.
+var Type = design.DesktopTypography
 
 // Color returns c as MyGo's color.
 func Color(c design.Color) ui.Color {
