@@ -173,6 +173,21 @@ class AppModel(context: Context, clientName: String) {
         bump(card.serverId)
     }
 
+    /** Starts playing an item with what the device plays. */
+    suspend fun play(serverId: String, itemId: String, options: PlaybackOptions): PlaybackSession =
+        client.play(serverId, itemId, DeviceProfile.capabilities(), options)
+
+    /**
+     * Stops a playback at position, unset when played to the end, even as
+     * the player goes, and loads the server's items again.
+     */
+    fun finish(serverId: String, session: PlaybackSession, position: java.time.Duration?) {
+        scope.launch {
+            runCatching { session.stop(position) }
+            bump(serverId)
+        }
+    }
+
     private fun added() {
         reloadServers()
         start()

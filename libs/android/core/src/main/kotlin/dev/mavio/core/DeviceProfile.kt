@@ -40,6 +40,19 @@ object DeviceProfile {
         return codecs + "h264"
     }
 
+    /**
+     * Whether Media3 plays a source as it is: its container, its video with
+     * the device's decoders and every audio stream; libmpv plays the rest.
+     */
+    fun media3Plays(source: Source): Boolean {
+        val containers = source.container?.split(',').orEmpty().map { it.trim().lowercase() }
+        val ext = source.fileName?.substringAfterLast('.', "")?.lowercase()
+        if (containers.none { it in media3Containers } && ext !in media3Containers) return false
+        val video = source.video
+        if (video != null && video.codec.lowercase() !in videoCodecs()) return false
+        return source.audio.all { it.codec.lowercase() in media3AudioCodecs }
+    }
+
     /** The capabilities of this device. */
     fun capabilities(maxBitrate: Long = 0): Capabilities {
         val video = videoCodecs()
