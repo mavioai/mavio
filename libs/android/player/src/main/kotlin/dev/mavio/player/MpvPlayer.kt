@@ -54,6 +54,8 @@ class MpvPlayer(
     private var holder: SurfaceHolder? = null
     private var surfaceReady = false
     private var released = false
+    private var aid = "auto"
+    private var sid = "auto"
 
     init {
         MPVLib.create(context.applicationContext)
@@ -75,6 +77,21 @@ class MpvPlayer(
         MPVLib.setOptionString("force-window", "no")
         MPVLib.addObserver(this)
         for ((name, format) in OBSERVED) MPVLib.observeProperty(name, format)
+    }
+
+    /**
+     * The audio and subtitle tracks the next file plays, as libmpv numbers
+     * each type's tracks from 1: null leaves libmpv to choose, and a
+     * subtitle of 0 turns them off. A subtitle file among the media item's
+     * subtitle configurations, flagged default, is added and shown instead.
+     */
+    fun selectTracks(audio: Int?, subtitle: Int?) {
+        aid = audio?.toString() ?: "auto"
+        sid = when (subtitle) {
+            null -> "auto"
+            0 -> "no"
+            else -> subtitle.toString()
+        }
     }
 
     override fun getState(): State {
@@ -204,6 +221,8 @@ class MpvPlayer(
         if (!surfaceReady) MPVLib.setPropertyString("vo", "null")
         MPVLib.setPropertyString("start", if (startMs > 0) (startMs / 1000.0).toString() else "none")
         MPVLib.setPropertyBoolean("pause", !playWhenReady)
+        MPVLib.setPropertyString("aid", aid)
+        MPVLib.setPropertyString("sid", sid)
         MPVLib.command(arrayOf("loadfile", uri.toString(), "replace"))
     }
 
@@ -284,6 +303,20 @@ class MpvPlayer(
                 MpvEvent.MPV_EVENT_FILE_LOADED -> {
                     loaded = true
                     MPVLib.setPropertyString("start", "none")
+                    // The subtitle files beside the media, the default one shown.
+                    val subtitles = items.getOrNull(index)?.localConfiguration?.subtitleConfigurations.orEmpty()
+                    for (config in subtitles) {
+                        val shown = config.selectionFlags and C.SELECTION_FLAG_DEFAULT != 0
+                        MPVLib.command(
+                            arrayOf(
+                                "sub-add",
+                                config.uri.toString(),
+                                if (shown) "select" else "auto",
+                                config.label?.toString().orEmpty(),
+                                config.language.orEmpty(),
+                            ),
+                        )
+                    }
                 }
                 MpvEvent.MPV_EVENT_END_FILE -> if (!loaded && prepared) {
                     // keep-open keeps a played file loaded, so it ends
