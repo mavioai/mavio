@@ -8,8 +8,8 @@ use std::time::SystemTime;
 
 use mavio_api::proto::mavio::auth::v1::{
     AuthorizeQuickConnectRequest, CreateFirstUserRequest, Device, GetAuthInfoRequest,
-    GetQuickConnectStateRequest, LoginRequest, LoginWithQuickConnectRequest, LogoutRequest,
-    StartQuickConnectRequest,
+    GetQuickConnectStateRequest, ListSwitchableUsersRequest, LoginRequest,
+    LoginWithQuickConnectRequest, LogoutRequest, StartQuickConnectRequest, SwitchUserRequest,
 };
 use mavio_api::proto::mavio::user::v1::User;
 
@@ -19,6 +19,7 @@ use crate::account::MavioDev;
 use crate::connection::Connection;
 use crate::error::{Error, Result};
 use crate::session::{Credential, DeviceKey, Session, expiry};
+use crate::settings::SwitchableUser;
 use crate::store::{ServerRecord, Store};
 
 /// Keeps secrets in the platform's secure storage: the Keychain, the
@@ -359,6 +360,47 @@ impl Servers {
             })
             .await?;
         Ok(())
+    }
+
+    /// The users of a standalone server whom its session can switch to;
+    /// a server of mavio.dev accounts has none.
+    pub async fn switchable_users(&self, id: &str) -> Result<Vec<SwitchableUser>> {
+        let r = self
+            .connection(id)?
+            .auth()
+            .list_switchable_users(ListSwitchableUsersRequest::default())
+            .await?
+            .into_owned();
+        Ok(r.users.iter().map(SwitchableUser::from_proto).collect())
+    }
+
+    /// Switches a standalone server's session to another of its users,
+    /// with the user's PIN when they have one, and forgets what was kept of
+    /// the previous user's answers. A wrong PIN is
+    /// [`Error::PermissionDenied`].
+    pub async fn switch_user(
+        &self,
+        id: &str,
+        user_id: &str,
+        pin: Option<&str>,
+    ) -> Result<ServerRecord> {
+        let r = self
+            .connection(id)?
+            .auth()
+            .switch_user(SwitchUserRequest {
+                user_id: Some(user_id.to_owned()),
+                pin: pin.map(str::to_owned),
+                ..Default::default()
+            })
+            .await?
+            .into_owned();
+        let user = r.user.into_option().unwrap_or_default();
+        let mut record = self.get(id)?;
+        record.user_id = user.id.unwrap_or_else(|| user_id.to_owned());
+        record.user_name = user.name.unwrap_or_default();
+        self.store.put_server(&record)?;
+        self.store.clear_cached(id)?;
+        Ok(record)
     }
 
     /// Signs out of a server and removes it with everything kept of it.

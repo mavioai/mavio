@@ -18,8 +18,8 @@ use mavio_api::proto::mavio::session::v1::__buffa::oneof::event::Kind;
 use mavio_api::proto::mavio::session::v1::Event;
 use mavio_core::{
     Account, Core, Details, DeviceInfo, DownloadEntry, Filter, FoundServer, Libraries, Page,
-    PlaybackOptions, Row, SearchResults, ServerInfo, ServerRecord, SignInState, Sort, Store,
-    StreamState, Transfer,
+    PlaybackOptions, PlaybackPreferences, Row, SearchResults, ServerInfo, ServerRecord,
+    SignInState, Sort, Store, StreamState, SwitchableUser, Transfer,
 };
 use tokio::runtime::Runtime;
 
@@ -586,6 +586,37 @@ impl Client {
     /// device is signed in to.
     pub async fn authorize_quick_connect(&self, server_id: String, code: String) -> Result<()> {
         self.call(|c| async move { c.servers().authorize_quick_connect(&server_id, &code).await })
+            .await
+    }
+
+    /// The users of a standalone server whom its session can switch to.
+    pub async fn switchable_users(&self, server_id: String) -> Result<Vec<SwitchableUser>> {
+        self.call(|c| async move { c.switchable_users(&server_id).await })
+            .await
+    }
+
+    /// Switches a standalone server's session to another of its users, with
+    /// their PIN when they have one; a wrong PIN is PermissionDenied.
+    pub async fn switch_user(
+        &self,
+        server_id: String,
+        user_id: String,
+        pin: Option<String>,
+    ) -> Result<ServerRecord> {
+        self.call(|c| async move { c.switch_user(&server_id, &user_id, pin.as_deref()).await })
+            .await
+    }
+
+    /// The user's playback preferences, as the first server signed in to
+    /// keeps them.
+    pub async fn playback_preferences(&self) -> Result<PlaybackPreferences> {
+        self.call(|c| async move { c.playback_preferences().await })
+            .await
+    }
+
+    /// Saves the user's playback preferences to every server signed in to.
+    pub async fn set_playback_preferences(&self, preferences: PlaybackPreferences) -> Result<()> {
+        self.call(|c| async move { c.set_playback_preferences(&preferences).await })
             .await
     }
 

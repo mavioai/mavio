@@ -14,7 +14,9 @@ use mavio_api::proto::mavio::library::v1::{
 };
 use mavio_api::proto::mavio::session::v1::__buffa::oneof::event::Kind;
 use mavio_api::proto::mavio::session::v1::Event;
-use mavio_api::proto::mavio::user::v1::UpdateUserDataRequest;
+use mavio_api::proto::mavio::user::v1::{
+    GetCurrentUserRequest, UpdatePlaybackPreferencesRequest, UpdateUserDataRequest,
+};
 use tokio::task::{JoinHandle, JoinSet};
 
 use crate::account::{Account, BrowserSignIn, LinkCode, SignInState};
@@ -29,6 +31,7 @@ use crate::events::{self, EventSink, StreamState};
 use crate::home::{self, Hubs, ServerHubs, Version};
 use crate::reporting::Reporter;
 use crate::servers::{DeviceInfo, QuickConnect, Servers, TokenStore};
+use crate::settings::{PlaybackPreferences, SwitchableUser};
 use crate::store::{DownloadState, ServerRecord, Store};
 use crate::view::{self, Artwork, Card, Row};
 
@@ -613,6 +616,82 @@ impl Core {
             task.abort();
         }
         self.servers.remove(server_id).await
+    }
+
+    /// The users of a standalone server whom its session can switch to.
+    pub async fn switchable_users(&self, server_id: &str) -> Result<Vec<SwitchableUser>> {
+        self.servers.switchable_users(server_id).await
+    }
+
+    /// Switches a standalone server's session to another of its users, with
+    /// their PIN when they have one, and follows its event stream again,
+    /// since a stream keeps the user it was opened by.
+    pub async fn switch_user(
+        &self,
+        server_id: &str,
+        user_id: &str,
+        pin: Option<&str>,
+    ) -> Result<ServerRecord> {
+        let s = self.servers.switch_user(server_id, user_id, pin).await?;
+        if let Some(task) = self
+            .streams
+            .lock()
+            .unwrap_or_else(|e| e.into_inner())
+            .remove(server_id)
+        {
+            task.abort();
+            self.follow(server_id);
+        }
+        Ok(s)
+    }
+
+    /// The user's playback preferences, as the first server signed in to
+    /// keeps them.
+    pub async fn playback_preferences(&self) -> Result<PlaybackPreferences> {
+        let id = self.signed_in_ids()?.into_iter().next();
+        let id = id.ok_or_else(|| Error::NotFound("a server signed in to".into()))?;
+        let r = self
+            .servers
+            .connection(&id)?
+            .users()
+            .get_current_user(GetCurrentUserRequest::default())
+            .await?
+            .into_owned();
+        let user = r.user.into_option().unwrap_or_default();
+        Ok(PlaybackPreferences::from_proto(
+            &user.playback_preferences.into_option().unwrap_or_default(),
+        ))
+    }
+
+    /// Saves the user's playback preferences to every server signed in to,
+    /// failing with the first server that refuses them.
+    pub async fn set_playback_preferences(&self, prefs: &PlaybackPreferences) -> Result<()> {
+        let mut calls = JoinSet::new();
+        for id in self.signed_in_ids()? {
+            let conn = self.servers.connection(&id)?;
+            let req = UpdatePlaybackPreferencesRequest {
+                playback_preferences: prefs.to_proto().into(),
+                ..Default::default()
+            };
+            calls.spawn(async move { conn.users().update_playback_preferences(req).await });
+        }
+        while let Some(done) = calls.join_next().await {
+            if let Ok(r) = done {
+                r?;
+            }
+        }
+        Ok(())
+    }
+
+    /// The servers signed in to, in the user's order.
+    fn signed_in_ids(&self) -> Result<Vec<String>> {
+        Ok(self
+            .servers
+            .list()?
+            .into_iter()
+            .filter(|s| self.servers.signed_in(&s.id))
+            .map(|s| s.id)
+            .collect())
     }
 
     /// The Mavio account signed in, if any.
@@ -1857,5 +1936,147 @@ mod tests {
         let d = core.details("sa", "a-brazil").await.unwrap();
         assert!(d.offline);
         assert_eq!(d.card.title, "a-brazil");
+    }
+
+    #[tokio::test]
+    async fn switching_users_keeps_the_new_user_and_forgets_the_old_ones_answers() {
+        use mavio_api::proto::mavio::auth::v1::{
+            ListSwitchableUsersRequest, ListSwitchableUsersResponse, SwitchUserRequest,
+            SwitchUserResponse, SwitchableUser as SwitchableUserProto,
+        };
+        use mavio_api::proto::mavio::user::v1::User;
+
+        let (core, store) = core();
+        let a = fake_server("sa", "Home");
+        a.unary(
+            "/mavio.auth.v1.AuthService/ListSwitchableUsers",
+            |_, _: ListSwitchableUsersRequest| {
+                Ok(ListSwitchableUsersResponse {
+                    users: vec![
+                        SwitchableUserProto {
+                            id: Some("u".into()),
+                            name: Some("me".into()),
+                            current: Some(true),
+                            ..Default::default()
+                        },
+                        SwitchableUserProto {
+                            id: Some("kid".into()),
+                            name: Some("Kid".into()),
+                            managed: Some(true),
+                            has_pin: Some(true),
+                            ..Default::default()
+                        },
+                    ],
+                    ..Default::default()
+                })
+            },
+        )
+        .unary(
+            "/mavio.auth.v1.AuthService/SwitchUser",
+            |_, req: SwitchUserRequest| {
+                if req.pin.as_deref() != Some("1234") {
+                    return Err(crate::fake::error("permission_denied"));
+                }
+                Ok(SwitchUserResponse {
+                    user: User {
+                        id: req.user_id.clone(),
+                        name: Some("Kid".into()),
+                        ..Default::default()
+                    }
+                    .into(),
+                    ..Default::default()
+                })
+            },
+        );
+        let a = a.serve().await;
+        core.servers.sign_in(&a, "me", "secret").await.unwrap();
+        store.put_cached("sa", "home", &hubs(vec![])).unwrap();
+
+        let users = core.switchable_users("sa").await.unwrap();
+        let got: Vec<_> = users
+            .iter()
+            .map(|u| (u.name.as_str(), u.has_pin, u.current))
+            .collect();
+        assert_eq!(got, [("me", false, true), ("Kid", true, false)]);
+
+        let wrong = core.switch_user("sa", "kid", Some("0000")).await;
+        assert!(
+            matches!(wrong, Err(Error::PermissionDenied(_))),
+            "got = {wrong:?}, want = PermissionDenied"
+        );
+        let s = core.switch_user("sa", "kid", Some("1234")).await.unwrap();
+        assert_eq!((s.user_id.as_str(), s.user_name.as_str()), ("kid", "Kid"));
+        let kept = core.servers.get("sa").unwrap();
+        assert_eq!(
+            kept.user_name, "Kid",
+            "got = {}, want = Kid",
+            kept.user_name
+        );
+        let cached = store.cached::<ListHubsResponse>("sa", "home").unwrap();
+        assert!(cached.is_none(), "got = {cached:?}, want = None");
+    }
+
+    #[tokio::test]
+    async fn playback_preferences_come_from_the_first_server_and_go_to_every_one() {
+        use mavio_api::proto::mavio::user::v1::{
+            GetCurrentUserResponse, PlaybackPreferences as PlaybackPreferencesProto,
+            UpdatePlaybackPreferencesResponse, User,
+        };
+
+        use crate::settings::SubtitleMode;
+
+        let (core, _) = core();
+        let saved = Arc::new(Mutex::new(Vec::new()));
+        let mut addresses = Vec::new();
+        for (id, lang) in [("sa", "jpn"), ("sb", "fre")] {
+            let f = fake_server(id, id);
+            f.unary(
+                "/mavio.user.v1.UserService/GetCurrentUser",
+                move |_, _: GetCurrentUserRequest| {
+                    Ok(GetCurrentUserResponse {
+                        user: User {
+                            playback_preferences: PlaybackPreferencesProto {
+                                audio_languages: vec![lang.into()],
+                                ..Default::default()
+                            }
+                            .into(),
+                            ..Default::default()
+                        }
+                        .into(),
+                        ..Default::default()
+                    })
+                },
+            );
+            let saved = saved.clone();
+            f.unary(
+                "/mavio.user.v1.UserService/UpdatePlaybackPreferences",
+                move |_, req: UpdatePlaybackPreferencesRequest| {
+                    let p = req.playback_preferences.into_option().unwrap_or_default();
+                    saved
+                        .lock()
+                        .unwrap()
+                        .push((id, PlaybackPreferences::from_proto(&p)));
+                    Ok(UpdatePlaybackPreferencesResponse::default())
+                },
+            );
+            addresses.push(f.serve().await);
+        }
+        for a in &addresses {
+            core.servers.sign_in(a, "me", "secret").await.unwrap();
+        }
+
+        let mut p = core.playback_preferences().await.unwrap();
+        assert_eq!(
+            p.audio_languages,
+            ["jpn"],
+            "got = {:?}, want = [jpn]",
+            p.audio_languages
+        );
+        p.subtitle_languages = vec!["chi".into()];
+        p.subtitle_mode = SubtitleMode::Smart;
+        core.set_playback_preferences(&p).await.unwrap();
+        let mut got = saved.lock().unwrap().clone();
+        got.sort_by_key(|(id, _)| *id);
+        assert_eq!(got, [("sa", p.clone()), ("sb", p)]);
     }
 }

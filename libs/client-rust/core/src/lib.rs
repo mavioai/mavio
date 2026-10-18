@@ -17,6 +17,7 @@ mod home;
 mod reporting;
 mod servers;
 mod session;
+mod settings;
 mod store;
 mod view;
 
@@ -38,6 +39,7 @@ pub use home::{Content, Entry, Hubs, Section, ServerHubs, Trending, Version, mer
 pub use reporting::{Playback, PlaybackOptions, REPORT_INTERVAL, Reporter, Session};
 pub use servers::{AccountMode, DeviceInfo, QuickConnect, ServerInfo, Servers, TokenStore};
 pub use session::Transport;
+pub use settings::{PlaybackPreferences, SubtitleMode, SwitchableUser};
 pub use store::{DownloadRecord, DownloadState, PendingProgress, ServerRecord, Store};
 pub use view::{Artwork, Card, CardKind, Row, RowContent, RowKind, TitleCard};
 

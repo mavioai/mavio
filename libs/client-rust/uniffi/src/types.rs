@@ -13,6 +13,7 @@ use mavio_core::{
     CollectionLink, CreditJob, Episode, ExternalLink, Extra, ExtraKind, SeriesLink, SeriesStatus,
     SubtitleStream, VideoRange, VideoStream,
 };
+use mavio_core::{PlaybackPreferences, SubtitleMode, SwitchableUser};
 
 #[uniffi::remote(Record)]
 pub struct DeviceInfo {
@@ -467,4 +468,32 @@ pub struct PlaybackOptions {
     pub max_bitrate: Option<i64>,
     pub start_position: Option<Duration>,
     pub download: bool,
+}
+
+#[uniffi::remote(Enum)]
+pub enum SubtitleMode {
+    Default,
+    Always,
+    Foreign,
+    Forced,
+    Never,
+    Smart,
+}
+
+#[uniffi::remote(Record)]
+pub struct PlaybackPreferences {
+    pub audio_languages: Vec<String>,
+    pub subtitle_languages: Vec<String>,
+    pub subtitle_mode: SubtitleMode,
+    pub play_default_audio_track: bool,
+}
+
+#[uniffi::remote(Record)]
+pub struct SwitchableUser {
+    pub id: String,
+    pub name: String,
+    pub admin: bool,
+    pub managed: bool,
+    pub has_pin: bool,
+    pub current: bool,
 }

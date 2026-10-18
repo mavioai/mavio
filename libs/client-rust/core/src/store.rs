@@ -282,6 +282,14 @@ impl Store {
         Ok(())
     }
 
+    /// Forgets what is kept of a server's answers, such as once its session
+    /// acts as another user.
+    pub fn clear_cached(&self, server_id: &str) -> Result<()> {
+        self.conn()
+            .execute("DELETE FROM cache WHERE server_id = ?1", [server_id])?;
+        Ok(())
+    }
+
     /// Returns the message kept under key, and when it was kept.
     pub fn cached<M: Message>(
         &self,
