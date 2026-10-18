@@ -365,6 +365,8 @@ struct GeneralView: View {
                 let s = editor.saved?.settings
             {
                 self.draft = Draft(s)
+                // The app names the server as it now calls itself.
+                await model.refreshServerInfo(server.id)
             }
         }
     }

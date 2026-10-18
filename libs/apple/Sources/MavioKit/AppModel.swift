@@ -164,6 +164,14 @@ public final class AppModel {
         servers.first { $0.id == id }
     }
 
+    /// Asks a server its name and version again, as after an administrator
+    /// renames it.
+    public func refreshServerInfo(_ serverId: String) async {
+        if (try? await client.refreshServerInfo(serverId: serverId)) != nil {
+            reloadServers()
+        }
+    }
+
     /// Reads the servers again from the core.
     public func reloadServers() {
         signInState = (try? client.signInState()) ?? .signedOut
