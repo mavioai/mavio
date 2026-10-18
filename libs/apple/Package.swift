@@ -19,6 +19,7 @@ let package = Package(
         .package(url: "https://github.com/mavioai/AetherEngine", branch: "v7.39.0-mavio"),
         .package(url: "https://github.com/kean/Nuke", exact: "13.2.0"),
         .package(url: "https://github.com/pointfreeco/swift-snapshot-testing", exact: "1.19.6"),
+        .package(url: "https://github.com/apple/swift-protobuf", exact: "1.38.1"),
     ],
     targets: [
         .binaryTarget(name: "MavioCoreFFI", path: "build/MavioCoreFFI.xcframework"),
@@ -30,7 +31,14 @@ let package = Package(
             // UniFFI generates Swift 5 code.
             swiftSettings: [.swiftLanguageMode(.v5)]
         ),
-        .target(name: "MavioKit", dependencies: ["MavioCore"]),
+        // The messages of the server's API, which scripts/gen-proto.sh
+        // generates.
+        .target(
+            name: "MavioProto",
+            dependencies: [.product(name: "SwiftProtobuf", package: "swift-protobuf")],
+            path: "gen/MavioProto"
+        ),
+        .target(name: "MavioKit", dependencies: ["MavioCore", "MavioProto"]),
         .target(
             name: "MavioPlayer",
             dependencies: [

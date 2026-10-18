@@ -105,7 +105,7 @@ flowchart LR
 ### 4.2 Apple（`apps/ios`、`apps/tvos`、`apps/macos`、`libs/apple`）
 * **每种交互模型一个应用。** iPhone 与 iPad 按 App Store 的惯例是一个通用应用，iPad 上有自己的布局：侧边栏与多栏、多窗口、台前调度、指针与硬件键盘。Apple TV 是独立应用，围绕焦点引擎与十英尺距离的遥控器构建，并提供 Top Shelf。Mac 是以 AppKit 编写的独立应用，AppKit 让播放器能完全掌控窗口、菜单栏、全屏、触控板以及同时打开多个播放器。
 * **`libs/apple`**，三个应用共享的 Swift 包：
-  * `MavioKit`：核心的 Swift API 及其上的应用服务——账户、能力探测、以后台 `URLSession` 下载、正在播放（`MPNowPlayingInfoCenter`、`MPRemoteCommandCenter`）；
+  * `MavioKit`：核心的 Swift API 及其上的应用服务——账户、能力探测、以后台 `URLSession` 下载、正在播放（`MPNowPlayingInfoCenter`、`MPRemoteCommandCenter`）——以及服务器 API 的消息 `MavioProto`，由 [swift-protobuf](https://github.com/apple/swift-protobuf)（Apache-2.0）生成：核心不建模的界面，即设置，用它们经由核心（`callServer`）调用服务器的 API，与桌面应用一致（§4.4）；
   * `MavioPlayer`：一个播放器接口、两个引擎，以及画中画；
   * `MavioUI`：各应用以各自方式组合的 SwiftUI 组件（图片、海报、行），以及设计 tokens；图片由 [Nuke](https://github.com/kean/Nuke) 的 `LazyImage`（MIT）加载与缓存。
 * **播放引擎**，优先顺序为：AVPlayer，其次 AetherEngine，最后由服务端处理。
