@@ -352,7 +352,8 @@ func (a *App) labeledShelf(c *ui.Context, id, title string, more func(), label s
 				}
 			}
 			ui.Spacer(c)
-			if label != "" && linkButton(c, label).Clicked() {
+			// On the television, See All is the row's last card instead.
+			if label != "" && !style.TV(c) && linkButton(c, label).Clicked() {
 				more()
 			}
 			// A remote has no arrows to scroll a row with.
@@ -383,11 +384,36 @@ func (a *App) labeledShelf(c *ui.Context, id, title string, more func(), label s
 			was := f.rowFocused
 			f.rowFocused = style.TV(c) && row.FocusWithin()
 			a.inScrollRow(row.Bounds(), scroll, func() {
-				ui.Row(c).Padding(pad, style.Layout(c).Margin).Gap(gap).AlignItems(ui.Start).Children(cards)
+				ui.Row(c).Padding(pad, style.Layout(c).Margin).Gap(gap).AlignItems(ui.Start).Children(func() {
+					cards()
+					if label != "" && more != nil && style.TV(c) {
+						a.seeAllCard(c, label, more)
+					}
+				})
 			})
 			f.rowFocused = was
 		})
 	})
+}
+
+// seeAllCard builds the card ending a row on the television, which opens
+// all of what the row shows (docs/tv.md §6.2, §6.3).
+func (a *App) seeAllCard(c *ui.Context, label string, more func()) {
+	colors := style.Colors(c)
+	b := ui.ButtonBase(c.Key("see-all")).Cursor(ui.CursorPointer).Column().Width(120).Gap(8).AlignItems(ui.Center).Label(label)
+	if a.tvFocusLit(c, b, false) {
+		b.Padding(8).Margin(-8).Radius(design.RadiusLg)
+		colors = &design.LightColors
+	}
+	b.Children(func() {
+		ui.Box(c).Size(96, 96).Radius(48).Background(style.Color(colors.Fill)).Center().Children(func() {
+			ui.Icon(c, style.Icon("forward", false)).Size(32, 32).TextColor(style.Color(colors.TextPrimary))
+		})
+		style.Text(ui.Text(c, label), style.Type(c).Callout).FontWeight(600).TextColor(style.Color(colors.TextPrimary)).TextAlign(ui.Center).MaxLines(2)
+	})
+	if b.Clicked() {
+		more()
+	}
 }
 
 func arrowOpacity(hovered, atEnd bool) float32 {

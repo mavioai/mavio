@@ -147,6 +147,14 @@ func (a *App) detailsHeader(c *ui.Context, st *detailsState, d *capiv1.Details) 
 	card := d.GetCard()
 	_, wh := c.Size()
 	height := min(max(wh*0.7, 520), 700)
+	// On the television, the backdrop fills 86 % of the screen, under the
+	// name at 72 points, two lines of overview and no tagline, the text at
+	// most 960 wide (docs/tv.md §6.2).
+	tv := style.TV(c)
+	textWidth, logoW, logoH := min(640, a.contentWidth*0.6), float32(400), float32(120)
+	if tv {
+		height, textWidth, logoW, logoH = wh*0.86, min(960, a.contentWidth*0.6), 600, 180
+	}
 	white := ui.RGB(255, 255, 255)
 	backdrop := d.GetBackdrop()
 	if backdrop.GetUrl() == "" {
@@ -167,14 +175,17 @@ func (a *App) detailsHeader(c *ui.Context, st *detailsState, d *capiv1.Details) 
 			Angle: 55,
 			Stops: []ui.GradientStop{{At: 0, Color: ui.RGBA(0, 0, 0, 0.9)}, {At: 0.5, Color: ui.RGBA(0, 0, 0, 0.45)}, {At: 1, Color: ui.RGBA(0, 0, 0, 0)}},
 		})
-		ui.Column(c).Absolute().Left(style.Layout(c).Margin).Bottom(32).MaxWidth(min(640, a.contentWidth*0.6)).Gap(10).Children(func() {
+		ui.Column(c).Absolute().Left(style.Layout(c).Margin).Bottom(32).MaxWidth(textWidth).Gap(10).Children(func() {
 			if card.GetKind() == capiv1.CardKind_CARD_KIND_EPISODE && card.GetSubtitle() != "" {
 				style.Text(ui.Text(c, card.GetSubtitle()), style.Type(c).Headline).TextColor(white.Alpha(0.85)).SingleLine()
 			}
-			if logo := a.opts.Images.Get(d.GetLogo().GetUrl(), 400, scale); logo != nil {
-				ui.Image(c, logo).MaxWidth(400).MaxHeight(120).Fit(ui.Contain).AlignSelf(ui.Start)
+			if logo := a.opts.Images.Get(d.GetLogo().GetUrl(), logoW, scale); logo != nil {
+				ui.Image(c, logo).MaxWidth(logoW).MaxHeight(logoH).Fit(ui.Contain).AlignSelf(ui.Start)
 			} else {
-				style.Text(ui.Text(c, card.GetTitle()), style.Type(c).Display).TextColor(white).MaxLines(2)
+				title := style.Text(ui.Text(c, card.GetTitle()), style.Type(c).Display).TextColor(white).MaxLines(2)
+				if tv {
+					title.FontSize(72).LineHeight(1.1)
+				}
 			}
 			if facts := detailFacts(c, d); facts != "" {
 				style.Text(ui.Text(c, facts), style.Type(c).Callout).TextColor(white.Alpha(0.85))
@@ -190,12 +201,14 @@ func (a *App) detailsHeader(c *ui.Context, st *detailsState, d *capiv1.Details) 
 					style.Text(ui.Text(c, r), style.Type(c).Caption).TextColor(white).Padding(1, 6).Radius(design.RadiusSm).Border(1, white.Alpha(0.8))
 				}
 			})
-			if d.GetTagline() != "" {
+			if d.GetTagline() != "" && !tv {
 				style.Text(ui.Text(c, d.GetTagline()), style.Type(c).Headline).TextColor(white)
 			}
 			if d.GetOverview() != "" {
 				o := style.Text(ui.Text(c, d.GetOverview()), style.Type(c).Body).TextColor(white.Alpha(0.9))
-				if !st.overviewOpen {
+				if tv {
+					o.MaxLines(2)
+				} else if !st.overviewOpen {
 					o.MaxLines(3).Cursor(ui.CursorPointer).Tooltip(style.T(c, "item.more"))
 				}
 				if o.Clicked() {
@@ -285,11 +298,11 @@ func (a *App) actions(c *ui.Context, st *detailsState, d *capiv1.Details) {
 				}
 				a.play(target.GetServerId(), target.GetItemId(), opts.Build(), following...)
 			}
-			if position > 0 && target == card && overButton(c, "retry", style.T(c, "item.fromStart"), false).Clicked() {
+			if position > 0 && target == card && a.overButton(c, "retry", style.T(c, "item.fromStart"), false).Clicked() {
 				a.play(card.GetServerId(), card.GetItemId(), capiv1.PlaybackOptions_builder{MediaSourceId: source, StartPositionMs: new(int64(0))}.Build())
 			}
 		}
-		if overButton(c, "favorite", style.T(c, "item.favorite"), card.GetFavorite()).Clicked() {
+		if a.overButton(c, "favorite", style.T(c, "item.favorite"), card.GetFavorite()).Clicked() {
 			card.SetFavorite(!card.GetFavorite())
 			a.setUserData(card, capiv1.Request_builder{SetFavorite: capiv1.SetFavorite_builder{ServerId: card.GetServerId(), ItemId: card.GetItemId(), Favorite: card.GetFavorite()}.Build()})
 		}
@@ -297,7 +310,7 @@ func (a *App) actions(c *ui.Context, st *detailsState, d *capiv1.Details) {
 		if card.GetPlayed() {
 			playedLabel = style.T(c, "item.markUnplayed")
 		}
-		if overButton(c, "played", playedLabel, card.GetPlayed()).Clicked() {
+		if a.overButton(c, "played", playedLabel, card.GetPlayed()).Clicked() {
 			card.SetPlayed(!card.GetPlayed())
 			a.setUserData(card, capiv1.Request_builder{SetPlayed: capiv1.SetPlayed_builder{ServerId: card.GetServerId(), ItemId: card.GetItemId(), Played: card.GetPlayed()}.Build()})
 		}
@@ -325,18 +338,27 @@ func (a *App) setUserData(card *capiv1.Card, req capiv1.Request_builder) {
 	}()
 }
 
-// overButton builds a round button over artwork.
-func overButton(c *ui.Context, icon, label string, on bool) ui.Element {
+// overButton builds a round button over artwork; on the television 64
+// points wide, white with black content with focus.
+func (a *App) overButton(c *ui.Context, icon, label string, on bool) ui.Element {
 	white := ui.RGB(255, 255, 255)
-	b := ui.ButtonBase(c).Size(40, 40).Radius(20).Center().Background(white.Alpha(0.22)).Label(label).Tooltip(label)
-	if b.Hovered() {
+	b := ui.ButtonBase(c.Key(icon)).Size(40, 40).Radius(20).Center().Background(white.Alpha(0.22)).Label(label).Tooltip(label)
+	fg, size := white, float32(20)
+	if style.TV(c) {
+		b.Size(64, 64).Radius(32)
+		size = 28
+		if a.tvFocus(c, b, false) {
+			b.Background(white)
+			fg = ui.RGB(0, 0, 0)
+		}
+	} else if b.Hovered() {
 		b.Background(white.Alpha(0.32))
 	}
 	if b.Pressed() {
 		b.Opacity(0.8)
 	}
 	b.Children(func() {
-		ui.Icon(c, style.Icon(icon, on)).Size(20, 20).TextColor(white)
+		ui.Icon(c, style.Icon(icon, on)).Size(size, size).TextColor(fg)
 	})
 	return b
 }
@@ -406,26 +428,39 @@ func (a *App) episodes(c *ui.Context, st *detailsState, d *capiv1.Details) {
 		next := nextEpisode(episodes)
 		ui.Column(c).Gap(12).Children(func() {
 			ui.ScrollHorizontal(c).Children(func() {
-				ui.Row(c).Padding(0, style.Layout(c).Margin).Gap(8).Children(func() {
-					for i, s := range seasons {
-						pill := ui.ButtonBase(c.Key(s.GetItemId())).Cursor(ui.CursorPointer).Height(32).Padding(0, 14).Radius(16).Center().Label(s.GetTitle())
-						fg := colors.TextPrimary
-						switch {
-						case i == st.season:
-							pill.Background(style.Color(colors.Button))
-							fg = colors.OnButton
-						case pill.Hovered():
-							pill.Background(style.Color(colors.FillSelected))
-						default:
-							pill.Background(style.Color(colors.Fill))
+				a.inChoice(func() {
+					ui.Row(c).Padding(0, style.Layout(c).Margin).Gap(8).Children(func() {
+						for i, s := range seasons {
+							pill := ui.ButtonBase(c.Key(s.GetItemId())).Cursor(ui.CursorPointer).Label(s.GetTitle())
+							// On the television, focus on a season's pill
+							// chooses it (docs/tv.md §6.2).
+							if style.TV(c) {
+								focused := a.tvFocus(c, pill, i == st.season)
+								pillLook(c, pill, s.GetTitle(), focused, i == st.season)
+								if pill.Clicked() || focused {
+									st.season = i
+								}
+								continue
+							}
+							pill.Height(32).Padding(0, 14).Radius(16).Center()
+							fg := colors.TextPrimary
+							switch {
+							case i == st.season:
+								pill.Background(style.Color(colors.Button))
+								fg = colors.OnButton
+							case pill.Hovered():
+								pill.Background(style.Color(colors.FillSelected))
+							default:
+								pill.Background(style.Color(colors.Fill))
+							}
+							pill.Children(func() {
+								style.Text(ui.Text(c, s.GetTitle()), style.Type(c).Callout).FontWeight(600).TextColor(style.Color(fg)).SingleLine()
+							})
+							if pill.Clicked() {
+								st.season = i
+							}
 						}
-						pill.Children(func() {
-							style.Text(ui.Text(c, s.GetTitle()), style.Type(c).Callout).FontWeight(600).TextColor(style.Color(fg)).SingleLine()
-						})
-						if pill.Clicked() {
-							st.season = i
-						}
-					}
+					})
 				})
 			})
 			if len(episodes) == 0 {
@@ -455,7 +490,7 @@ func (a *App) episodeCard(c *ui.Context, e *capiv1.Card, next bool) {
 	colors := style.Colors(c)
 	w := style.Layout(c).Thumbnail * 0.85
 	b := ui.ButtonBase(c.Key(e.GetItemId())).Cursor(ui.CursorPointer).Column().Width(w).Gap(4).AlignItems(ui.Start).Label(e.GetTitle())
-	hovered := b.Hovered()
+	hovered := a.cardFocus(c, b) || b.Hovered()
 	b.Children(func() {
 		a.artwork(c, e.GetThumb(), "", e, w, w*9/16, hovered)
 		number := episodeName(c, e)
@@ -478,8 +513,9 @@ func (a *App) episodeRow(c *ui.Context, e *capiv1.Card, next bool) {
 	colors := style.Colors(c)
 	w := min(max(a.contentWidth/3, 140), style.Layout(c).Thumbnail)
 	b := ui.ButtonBase(c.Key(e.GetItemId())).Cursor(ui.CursorPointer).Gap(16).Padding(8).Radius(design.RadiusLg).AlignItems(ui.Start).Label(e.GetTitle())
-	hovered := b.Hovered()
-	if hovered {
+	if a.tvFocusLit(c, b, false) {
+		colors = &design.LightColors
+	} else if b.Hovered() {
 		b.Background(style.Color(colors.Fill))
 	}
 	b.Children(func() {

@@ -126,6 +126,10 @@ func (a *App) sidebarResizer(c *ui.Context) {
 // page builds the page at the router's path.
 func (a *App) page(c *ui.Context, r *ui.Route) {
 	a.pagePath = r.Path()
+	// A page going away keeps no focus.
+	leaving := a.focus.leaving
+	a.focus.leaving = r.Path() != a.router.Path()
+	defer func() { a.focus.leaving = leaving }()
 	switch {
 	case r.Match("/home"):
 		r.Title(style.T(c, "nav.home"))

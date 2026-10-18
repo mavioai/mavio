@@ -121,24 +121,10 @@ func (a *App) scrolledHome() bool {
 // tab's own page, focus on another tab opens it in its place; deeper pages
 // open a tab only when it is selected, and Search opens only so.
 func (a *App) tvTabButton(c *ui.Context, t tvTab, path string, onTab bool) {
-	colors := style.Colors(c)
 	current := a.places.current == t.path
-	b := ui.ButtonBase(c.Key(t.path)).Padding(10, 28).Radius(design.RadiusFull).Label(t.label).Selected(current)
+	b := ui.ButtonBase(c.Key(t.path)).Label(t.label).Selected(current)
 	focused := a.tvFocus(c, b, current)
-	fg := colors.TextSecondary
-	switch {
-	case focused:
-		b.Background(ui.RGB(255, 255, 255))
-	case current:
-		b.Background(style.Color(colors.FillSelected))
-		fg = colors.TextPrimary
-	}
-	b.Children(func() {
-		text := style.Text(ui.Text(c, t.label), style.Type(c).Headline).TextColor(style.Color(fg)).SingleLine()
-		if focused {
-			text.TextColor(ui.RGB(0, 0, 0))
-		}
-	})
+	pillLook(c, b, t.label, focused, current)
 	switch {
 	case b.Clicked():
 		a.openPlace(t.path)
@@ -148,6 +134,45 @@ func (a *App) tvTabButton(c *ui.Context, t tvTab, path string, onTab bool) {
 		// Focus stays on the tab rather than going to the page.
 		a.focus.location = a.router.Location()
 	}
+}
+
+// pillLook dresses b as an element of a pill like the tabs: filled while
+// current, white with black text with focus.
+func pillLook(c *ui.Context, b ui.Element, label string, focused, current bool) {
+	colors := style.Colors(c)
+	b.Padding(10, 28).Radius(design.RadiusFull)
+	fg := style.Color(colors.TextSecondary)
+	switch {
+	case focused:
+		b.Background(ui.RGB(255, 255, 255))
+		fg = ui.RGB(0, 0, 0)
+	case current:
+		b.Background(style.Color(colors.FillSelected))
+		fg = style.Color(colors.TextPrimary)
+	}
+	b.Children(func() {
+		style.Text(ui.Text(c, label), style.Type(c).Headline).TextColor(fg).SingleLine()
+	})
+}
+
+// tvPill builds a choice in a pill that looks like the tabs, as a
+// library's Recommended and All: focus chooses without selecting, and
+// focus entering it lands on the current one (docs/tv.md §6.3).
+func (a *App) tvPill(c *ui.Context, labels []string, current *int) {
+	colors := style.Colors(c)
+	a.inChoice(func() {
+		ui.Row(c).Shrink(0).Gap(4).Padding(6).Radius(design.RadiusFull).Background(style.Color(colors.SurfaceRaised).Alpha(0.6)).
+			Role(ui.RoleTabList).Children(func() {
+			for i, l := range labels {
+				b := ui.ButtonBase(c.Key(i)).Label(l).Selected(i == *current)
+				focused := a.tvFocus(c, b, i == *current)
+				pillLook(c, b, l, focused, i == *current)
+				if b.Clicked() || focused && i != *current {
+					*current = i
+				}
+			}
+		})
+	})
 }
 
 // tvDots builds the user menu's button: three vertical dots, bare, and in

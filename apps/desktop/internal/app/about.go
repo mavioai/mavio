@@ -96,7 +96,7 @@ func (a *App) extrasShelf(c *ui.Context, server string, d *capiv1.Details, extra
 				card.SetThumb(d.GetBackdrop())
 			}
 			b := ui.ButtonBase(c.Key(e.GetId())).Cursor(ui.CursorPointer).Column().Width(width).Gap(6).AlignItems(ui.Start).Label(e.GetName())
-			hovered := b.Hovered()
+			hovered := a.cardFocus(c, b) || b.Hovered()
 			if b.Pressed() {
 				b.Opacity(0.8)
 			}
@@ -139,6 +139,11 @@ func (a *App) collectionBanner(c *ui.Context, server string, d *capiv1.Details, 
 	b := ui.ButtonBase(c).Margin(0, style.Layout(c).Margin).Height(112).Radius(14).Clip().
 		Background(style.Color(style.Colors(c).SurfaceRaised)).Label(col.GetName())
 	hovered := b.Hovered()
+	if a.tvFocus(c, b, false) {
+		colors := style.Colors(c)
+		b.Shadow(0, 12, 32, 0, style.Color(colors.TvFocusShadow)).Shadow(0, 0, 0, 4.5, style.Color(colors.Accent)).Shadow(0, 0, 0, 1.5, style.Color(colors.Background))
+		hovered = true
+	}
 	b.Children(func() {
 		if bitmap := a.opts.Images.Get(image, a.contentWidth, scale); bitmap != nil {
 			img := ui.Image(c, bitmap).Absolute().Top(0).Left(0).Right(0).Bottom(0).Fit(ui.Cover)
@@ -238,7 +243,8 @@ func (a *App) about(c *ui.Context, st *detailsState, d *capiv1.Details, info *it
 		tags = it.GetTags()
 	}
 	links := it.GetExternalUrls()
-	if a.opts.OpenURL == nil {
+	// A television opens no web pages (docs/tv.md §1).
+	if a.opts.OpenURL == nil || style.TV(c) {
 		links = nil
 	}
 	ratings := it.GetCommunityRating() > 0 || it.GetCriticRating() > 0

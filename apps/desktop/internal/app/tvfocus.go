@@ -32,6 +32,8 @@ type focusItem struct {
 	scroll *ui.ScrollState
 	// current tells the current tab, or the chosen element of a choice.
 	current bool
+	// choice is the choice the item is an element of, 0 for none.
+	choice  int
 	focused bool
 }
 
@@ -46,6 +48,11 @@ type focusEngine struct {
 	region string
 	view   ui.Rect
 	scroll *ui.ScrollState
+	// choice is the choice being built, choices how many the frame has.
+	choice, choices int
+	// reveal tells the item focused next to scroll itself into view, as
+	// one of a grid does, which the page's scroll does not hold.
+	reveal bool
 	// want is the item the frame focuses: its place in the order, or
 	// focusFirst for the page's first; -1 for none.
 	want int
@@ -57,6 +64,16 @@ type focusEngine struct {
 	saved    map[string]int
 	// rowFocused tells that the row being built has focus.
 	rowFocused bool
+	// last is where the item last focused was, while it is on the page
+	// shown, so that focus whose element goes goes to the item nearest it.
+	last    ui.Rect
+	hasLast bool
+	// leaving tells that the page being built goes away, whose elements
+	// focus moves to none of.
+	leaving bool
+	// waited is how many frames focus that went waited for the items to
+	// be laid out.
+	waited int
 	// dots is the user menu's button, to which focus returns as the menu
 	// closes.
 	dots int
@@ -66,6 +83,19 @@ type focusEngine struct {
 func (a *App) beginFocus() {
 	f := &a.focus
 	f.items, f.region, f.view, f.scroll = f.items[:0], regionPage, ui.Rect{}, nil
+	f.choice, f.choices = 0, 0
+}
+
+// inChoice builds what fn builds as one choice that focus makes, as a
+// library's Recommended and All: focus entering it lands on its current
+// element (docs/tv.md §4).
+func (a *App) inChoice(fn func()) {
+	f := &a.focus
+	was := f.choice
+	f.choices++
+	f.choice = f.choices
+	fn()
+	f.choice = was
 }
 
 // inRegion builds what fn builds in the focus region name.
@@ -92,23 +122,39 @@ func (a *App) inScrollRow(view ui.Rect, scroll *ui.ScrollState, fn func()) {
 // whether it has focus; outside the TV mode it does nothing and reports
 // false.
 func (a *App) tvFocus(c *ui.Context, el ui.Element, current bool) bool {
-	if !style.TV(c) {
+	f := &a.focus
+	if !style.TV(c) || f.leaving {
 		return false
 	}
-	f := &a.focus
 	i := len(f.items)
 	el.Focusable().FocusRing(false)
 	if f.want == i || f.want == focusFirst && f.region == regionPage {
 		el.Focus()
-		f.want = -1
+		if f.reveal {
+			el.ScrollIntoView()
+		}
+		f.want, f.reveal = -1, false
 	}
 	// While the user menu is open, focus is in it.
 	focused := el.Focused() && (!a.userMenuOpen || f.region == regionMenu)
 	if focused {
 		f.at = i
 	}
-	f.items = append(f.items, focusItem{rect: el.Bounds(), region: f.region, view: f.view, scroll: f.scroll, current: current, focused: focused})
+	f.items = append(f.items, focusItem{rect: el.Bounds(), region: f.region, view: f.view, scroll: f.scroll, current: current, choice: f.choice, focused: focused})
 	return focused
+}
+
+// tvFocusLit makes el an element focus moves to that turns white with
+// focus, its content to be black, its corners rounded over a shadow, as a
+// row of the settings or a person of the cast (docs/tv.md §4); it reports
+// whether it has focus.
+func (a *App) tvFocusLit(c *ui.Context, el ui.Element, current bool) bool {
+	if !a.tvFocus(c, el, current) {
+		return false
+	}
+	shadow := style.Color(style.Colors(c).TvFocusShadow)
+	el.Background(ui.RGB(255, 255, 255)).Shadow(0, 8, 24, 0, shadow)
+	return true
 }
 
 // focusPage starts focus on the page shown when it changes: where it was
@@ -125,7 +171,7 @@ func (a *App) focusPage() {
 	if f.location != "" {
 		f.saved[f.location] = f.at
 	}
-	f.location, f.want = loc, focusFirst
+	f.location, f.want, f.hasLast = loc, focusFirst, false
 	if i, ok := f.saved[loc]; ok {
 		f.want = i
 	}
@@ -151,6 +197,22 @@ func (a *App) focusKeys(c *ui.Context, menuOpen bool) {
 		}
 	}
 	at := f.focused()
+	if at >= 0 && f.items[at].rect.W > 0 {
+		f.last, f.hasLast = f.items[at].rect, true
+	}
+	if at < 0 && f.want == -1 && !menuOpen && f.hasLast {
+		// The element with focus went, as a page's part replaced: focus
+		// goes to the item nearest where it was, once the items are laid
+		// out, the frame after they appear.
+		unlaid := slices.ContainsFunc(f.items, func(it focusItem) bool { return it.rect.W == 0 })
+		if f.waited < 2 && unlaid {
+			f.waited++
+		} else if i := f.nearestTo(f.last); i >= 0 {
+			f.want, f.waited = i, 0
+		}
+		c.After(0)
+		return
+	}
 	if at < 0 {
 		if f.want == -1 && !menuOpen && len(f.items) > 0 {
 			f.want = focusFirst
@@ -164,7 +226,7 @@ func (a *App) focusKeys(c *ui.Context, menuOpen bool) {
 	if dir == 0 {
 		return
 	}
-	to := f.step(at, dir)
+	to := f.enter(at, f.step(at, dir))
 	if to < 0 {
 		return
 	}
@@ -193,6 +255,7 @@ func (a *App) revealItem(c *ui.Context, it focusItem) {
 	}
 	page, ok := a.scrolls["page:"+a.pagePath]
 	if !ok {
+		a.focus.reveal = true
 		return
 	}
 	_, h := c.Size()
@@ -205,6 +268,33 @@ func (a *App) revealItem(c *ui.Context, it focusItem) {
 	case r.Y+r.H > bottom:
 		page.ScrollTo(0, min(page.Y+(r.Y+r.H-bottom), page.MaxY), ui.Smooth)
 	}
+}
+
+// enter returns where focus entering the item to from at lands: on its
+// choice's current element, unless it comes from within the choice.
+func (f *focusEngine) enter(at, to int) int {
+	if to < 0 || f.items[to].choice == 0 || f.items[to].choice == f.items[at].choice {
+		return to
+	}
+	if i := slices.IndexFunc(f.items, func(it focusItem) bool { return it.choice == f.items[to].choice && it.current }); i >= 0 {
+		return i
+	}
+	return to
+}
+
+// nearestTo returns the item laid out nearest r, -1 for none.
+func (f *focusEngine) nearestTo(r ui.Rect) int {
+	best, d := -1, float32(math.MaxFloat32)
+	for i, it := range f.items {
+		if it.rect.W == 0 || it.region == regionMenu {
+			continue
+		}
+		dx, dy := it.rect.X+it.rect.W/2-(r.X+r.W/2), it.rect.Y+it.rect.H/2-(r.Y+r.H/2)
+		if e := dx*dx + dy*dy; e < d {
+			best, d = i, e
+		}
+	}
+	return best
 }
 
 // focusTo gives focus to the item at i in the next frame.

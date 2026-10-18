@@ -82,3 +82,59 @@ func TestTVMode(t *testing.T) {
 		t.Errorf("the TV mode played in a window of the player's")
 	}
 }
+
+func TestTVDetailsAndLibrary(t *testing.T) {
+	h := newHarness(t, true, 1920, 1080)
+	h.app.setTV(true)
+	h.settle()
+	key := func(k ui.Key) {
+		t.Helper()
+		h.tt.Key(0, k)
+		h.settle()
+	}
+	server := h.core.s.Server.ID
+
+	// A title's details hide the bar, and open with focus on Play.
+	h.app.router.Push("/item/" + server + "/orbit")
+	h.settle()
+	if _, ok := h.tt.Find("Libraries"); ok {
+		t.Errorf("the details show the tabs")
+	}
+	if !h.tt.Focused("Play") && !h.tt.Focused("Resume") {
+		t.Fatalf("the details opened without focus on their primary action")
+	}
+	h.save(shots, "tv-details")
+	for range 3 {
+		key(ui.KeyDown)
+	}
+	h.save(shots, "tv-details-down")
+	key(ui.KeyEscape)
+	if got := h.app.router.Path(); got != "/home" {
+		t.Fatalf("back from the details: path = %q, want = /home", got)
+	}
+
+	// A library opens with focus on Recommended; focus on Library shows
+	// the grid of all its items.
+	h.app.openPlace("/libraries")
+	h.settle()
+	key(ui.KeyDown)
+	key(ui.KeyEnter)
+	if !h.tt.Focused("Recommended") {
+		t.Fatalf("the library opened without focus on Recommended; texts = %q", h.tt.Texts())
+	}
+	h.save(shots, "tv-library")
+	key(ui.KeyRight)
+	if !h.tt.Focused("Library") {
+		t.Fatalf("right from Recommended: Library has no focus; texts = %q", h.tt.Texts())
+	}
+	for k, st := range h.app.libraryStates {
+		if st.tab != 1 {
+			t.Errorf("%s: focus on Library left Recommended shown", k)
+		}
+	}
+	h.save(shots, "tv-library-all")
+	key(ui.KeyEscape)
+	if got := h.app.router.Path(); got != "/libraries" {
+		t.Fatalf("back from a library: path = %q, want = /libraries", got)
+	}
+}

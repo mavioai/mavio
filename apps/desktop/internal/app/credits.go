@@ -7,6 +7,7 @@ import (
 	"github.com/egoist/mygo/ui"
 
 	capiv1 "github.com/mavioai/mavio/libs/client-rust/capi/gen/mavio/capi/v1"
+	design "github.com/mavioai/mavio/libs/design/gen/go"
 	libraryv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/library/v1"
 
 	"github.com/mavioai/mavio/apps/desktop/internal/style"
@@ -143,6 +144,12 @@ func (a *App) castShelf(c *ui.Context, server, id string, credits []creditEntry)
 func (a *App) personTile(c *ui.Context, server string, e creditEntry, label string, width float32) {
 	colors := style.Colors(c)
 	b := ui.ButtonBase(c).Cursor(ui.CursorPointer).Column().Width(width).Gap(4).AlignItems(ui.Center).Label(e.name)
+	// On the television, a person with focus turns white with black
+	// content (docs/tv.md §4).
+	if a.tvFocusLit(c, b, false) {
+		b.Padding(8).Margin(-8).Radius(design.RadiusLg)
+		colors = &design.LightColors
+	}
 	hovered := b.Hovered()
 	if b.Pressed() {
 		b.Opacity(0.8)
@@ -285,8 +292,15 @@ func (a *App) crewList(c *ui.Context, server, id string, credits []creditEntry) 
 				ui.Column(c.Key(i)).Width(160).AlignItems(ui.Start).Children(func() {
 					style.Text(ui.Text(c, job), style.Type(c).Headline).TextColor(style.Color(colors.TextPrimary)).SingleLine()
 					b := ui.ButtonBase(c).Cursor(ui.CursorPointer).Label(e.name)
+					lit := a.tvFocusLit(c, b, false)
+					if lit {
+						b.Padding(2, 8).Margin(-2, -8).Radius(design.RadiusSm)
+					}
 					b.Children(func() {
 						name := style.Text(ui.Text(c, e.name), style.Type(c).Callout).TextColor(style.Color(colors.TextSecondary)).SingleLine()
+						if lit {
+							name.TextColor(ui.RGB(0, 0, 0))
+						}
 						if b.Hovered() {
 							name.TextColor(style.Color(colors.TextPrimary)).Underline()
 						}
@@ -297,7 +311,11 @@ func (a *App) crewList(c *ui.Context, server, id string, credits []creditEntry) 
 				})
 			}
 		})
-		if linkButton(c, style.T(c, "discover.fullCrew")).Clicked() {
+		full := linkButton(c, style.T(c, "discover.fullCrew"))
+		if a.tvFocusLit(c, full, false) {
+			full.Padding(2, 8).Margin(-2, -8).Radius(design.RadiusSm)
+		}
+		if full.Clicked() {
 			a.router.Push("/crew/" + server + "/" + id)
 		}
 	})

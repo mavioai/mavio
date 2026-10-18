@@ -51,6 +51,10 @@ func (a *App) library(c *ui.Context, r *ui.Route) {
 		a.libraryStates[key(server, id)] = st
 	}
 	tabs := func() {
+		if style.TV(c) {
+			a.tvPill(c, []string{style.T(c, "library.recommended"), style.T(c, "library.all")}, &st.tab)
+			return
+		}
 		ui.Segmented(c, &st.tab, style.T(c, "library.recommended"), style.T(c, "library.all")).Width(240)
 	}
 	if st.tab == 0 {
@@ -97,6 +101,15 @@ func (a *App) library(c *ui.Context, r *ui.Route) {
 	}
 	controls := func() {
 		tabs()
+		// On the television, the filters are a pill alike, which focus
+		// applies (docs/tv.md §6.3).
+		if style.TV(c) {
+			labels := make([]string, len(filters))
+			for i, f := range filters {
+				labels[i] = style.T(c, f)
+			}
+			a.tvPill(c, labels, &st.filter)
+		}
 		ui.Spacer(c)
 		ui.MenuButton(c, style.T(c, "library.sortBy", "sort", sortName), func(m *ui.Menu) {
 			for _, s := range sorts {
@@ -105,6 +118,9 @@ func (a *App) library(c *ui.Context, r *ui.Route) {
 				}
 			}
 		})
+		if style.TV(c) {
+			return
+		}
 		ui.MenuButton(c, style.T(c, filters[st.filter]), func(m *ui.Menu) {
 			for i, f := range filters {
 				if m.Item(style.T(c, f)).Checked(i == st.filter).Chosen() {
@@ -134,6 +150,17 @@ func (a *App) library(c *ui.Context, r *ui.Route) {
 // pageHeader builds the top of a page with a title and controls beside it.
 func (a *App) pageHeader(c *ui.Context, title string, controls func()) {
 	colors := style.Colors(c)
+	// On the television, the name heads the page at the top left, beside
+	// the controls (docs/tv.md §6.3).
+	if style.TV(c) {
+		ui.Row(c).Padding(48, style.Layout(c).Margin, 24).Gap(32).AlignItems(ui.Center).DragWindow().Children(func() {
+			style.Text(ui.Text(c, title), style.Type(c).Title1).TextColor(style.Color(colors.TextPrimary)).SingleLine().Shrink(1)
+			if controls != nil {
+				ui.Row(c).Grow(1).Gap(16).AlignItems(ui.Center).Children(controls)
+			}
+		})
+		return
+	}
 	ui.Column(c).Padding(a.pageTop(c), style.Layout(c).Margin, 16).Gap(12).DragWindow().Children(func() {
 		style.Text(ui.Text(c, title), style.Type(c).Title1).TextColor(style.Color(colors.TextPrimary)).SingleLine()
 		if controls != nil {
