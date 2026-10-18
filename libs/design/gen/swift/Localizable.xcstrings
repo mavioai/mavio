@@ -8906,7 +8906,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "显示运行命令"
+            "value": "显示启动命令"
           }
         }
       }
@@ -8924,7 +8924,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "隐藏运行命令"
+            "value": "隐藏启动命令"
           }
         }
       }
