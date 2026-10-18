@@ -132,6 +132,7 @@ flowchart LR
   * **杜比视界与 HDR**：libmpv 的配置排除杜比视界视频，在有 HDR 输出的设备上还排除 HDR 视频——Media3 能把它们输出到显示器，libmpv 只能做色调映射。
   * **Media3** ExoPlayer 是首选引擎，播放 Matroska 与 MP4 中设备能解码的格式，借助其 FFmpeg 解码扩展（以 FFmpeg 的音频解码器按 LGPL 从源码构建，在 mavio-deps 中）播放平台缺少的音频格式（DTS、TrueHD 等），并支持 PGS 字幕与不带样式的 SSA。它渲染到 `SurfaceView` 以支持 HDR 并降低功耗，电视支持时使用隧道播放，并以 `Surface.setFrameRate` 匹配帧率。
   * **libmpv** 是第二引擎，按 mpv-android 的方式构建，直接播放 Media3 不能播放的内容，如带样式的 ASS 字幕与没有硬件解码器的编码；以 OpenGL ES 渲染到它自己的 `SurfaceView`，能用 MediaCodec 时以其解码。它由一个 Media3 `SimpleBasePlayer` 适配（`MpvPlayer`），使媒体会话与控制器同等对待两个引擎。它以 mpv-android 的构建脚本及其 JNI 层（`is.xyz.mpv.MPVLib`）在 mavio-deps 中按锁定的版本从源码构建，FFmpeg 与 mpv 按 GPL-3.0 构建；文件未内嵌字体时，libass 以系统字体绘制。
+* **手机与平板应用不包含的功能**，即 Google Play 不接受或可能不接受的，与 iPhone 与 iPad 应用相同（§4.2）：取得——索引器与下载客户端、画质配置、自定义格式与规则、想要清单、下载客户端的队列、条目的取得以及索引器搜索（§6.3.11、§6.3.16–§6.3.18、§6.3.31）——字幕提供者及为条目搜索它们（§6.3.12、§6.3.21）、代理与挑战求解（§6.3.30）、探索的请求、插件（§6.3.3）、AI 提供者的登录以及用户的 AI 对话（§6.3.13、§6.3.26）。它也不在浏览器中打开其中任何一项；其余设置与 Web UI 一致。
 
 ### 4.4 桌面（`apps/desktop`）
 * **结构**：基于 MyGo 的 Go 应用，面向 macOS、Windows 与 Linux，所有窗口都是 MyGo 在 GPU 上绘制的原生 UI（macOS 上为 Metal，Windows 上为 Direct3D 11，Linux 上为 OpenGL）；不使用 Web 视图。它与服务端一样以 `CGO_ENABLED=0` 构建，随附两个共享库：libmpv 与核心。
