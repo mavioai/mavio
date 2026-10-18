@@ -16,13 +16,13 @@ export function BackButton() {
   const { pathname } = useLocation();
   if (isPlace(pathname)) return null;
   return (
-    <div className="sticky top-0 z-30 h-12 [main:has([data-hero])_&]:h-0">
+    <div className="sticky top-0 z-30 h-14 [main:has([data-hero])_&]:h-0">
       <Tip label={t("action.back")} side="right">
         <button
           type="button"
           aria-label={t("action.back")}
           onClick={() => goBack(router)}
-          className="absolute top-3 left-margin [main:has([data-hero])_&]:top-6 flex size-9 items-center justify-center rounded-full bg-[var(--tabbar-glass)] text-on-background shadow-[var(--tabbar-shadow)] backdrop-blur-md backdrop-saturate-[1.8] hover:bg-[image:linear-gradient(rgb(128_128_128/0.1),rgb(128_128_128/0.1))]"
+          className="absolute top-4 left-margin flex size-9 items-center justify-center rounded-full bg-[var(--tabbar-glass)] text-on-background shadow-[var(--tabbar-shadow)] backdrop-blur-md backdrop-saturate-[1.8] hover:bg-[image:linear-gradient(rgb(128_128_128/0.1),rgb(128_128_128/0.1))]"
         >
           <Icon name="back" size={18} />
         </button>
