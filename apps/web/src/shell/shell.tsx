@@ -182,7 +182,7 @@ function TabBar() {
   return (
     <nav
       aria-label={t("nav.navigation")}
-      className="fixed inset-x-margin bottom-[max(12px,env(safe-area-inset-bottom))] z-20 mx-auto flex max-w-md gap-1 rounded-full border border-[var(--tabbar-edge)] bg-[var(--tabbar-glass)] p-1 shadow-[var(--tabbar-shadow)] backdrop-blur-2xl backdrop-saturate-[1.8]"
+      className="fixed inset-x-margin bottom-[max(12px,env(safe-area-inset-bottom))] z-20 mx-auto flex max-w-md gap-1 rounded-full border border-[var(--tabbar-edge)] bg-[var(--tabbar-glass)] p-1 shadow-[var(--tabbar-shadow)] backdrop-blur-md backdrop-saturate-[1.8]"
     >
       {tabs.map((d) => (
         <Link
