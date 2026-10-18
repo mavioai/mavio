@@ -30,7 +30,8 @@ struct PlayerScreen: View {
     @State private var next: Episode?
     /// An episode's series and number, over its title.
     @State private var series: String?
-    @AppStorage("player.quality") private var quality = PlaybackQuality.auto
+    @AppStorage(PlaybackQuality.key) private var quality = PlaybackQuality.auto
+    @AppStorage(DeviceSetting.autoplayNext) private var autoplayNext = true
     @Environment(\.openURL) private var openURL
     @State private var scrubbing: TimeInterval?
     /// The picture where the scrubber is, while it is dragged.
@@ -155,7 +156,7 @@ struct PlayerScreen: View {
         }
         .onChange(of: player.ended) { _, ended in
             guard ended else { return }
-            if let next { play(next) } else { close() }
+            if let next, autoplayNext { play(next) } else { close() }
         }
     }
 
@@ -704,6 +705,9 @@ enum PlaybackQuality: String, CaseIterable {
     case p1080 = "1080p"
     case p720 = "720p"
     case p480 = "480p"
+
+    /// Where this device keeps it.
+    static let key = "player.quality"
 
     /// The bitrate it limits the stream to.
     var bitrate: Int64 {

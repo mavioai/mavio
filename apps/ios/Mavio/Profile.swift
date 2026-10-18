@@ -2,32 +2,115 @@ import MavioKit
 import MavioUI
 import SwiftUI
 
-/// The profile: the Mavio account, the servers in the user's order, which
-/// orders Home, signing out, adding a server and authorizing a device with
-/// Quick Connect.
+/// The settings, as the web UI's on a phone: the account's card, opening
+/// the account with its servers; this device's sections; the version; and
+/// signing out.
 struct ProfileView: View {
+    @Environment(AppModel.self) private var model
+    @Environment(\.theme) private var theme
+
+    var body: some View {
+        List {
+            Section {
+                NavigationLink {
+                    AccountView()
+                } label: {
+                    AccountCard()
+                }
+            }
+            Section(MavioStrings.settingsThisDevice) {
+                NavigationLink {
+                    AppearanceView()
+                } label: {
+                    EntryLabel(MavioStrings.settingsAppearance, icon: "appearance", color: Color(hex: 0x5E5CE6))
+                }
+                NavigationLink {
+                    PlaybackSettingsView()
+                } label: {
+                    EntryLabel(MavioStrings.settingsPlayback, icon: "play", color: Color(hex: 0xFF3B30))
+                }
+            }
+            Section {
+                LabeledContent(
+                    "Mavio",
+                    value: Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "")
+                LabeledContent("Core", value: MavioKit.coreVersion)
+            }
+            Section {
+                // Signing the account out forgets its servers too.
+                Button(MavioStrings.authSignOut, role: .destructive) {
+                    Task { try? await model.signOut() }
+                }
+                .frame(maxWidth: .infinity)
+            }
+        }
+        .scrollContentBackground(.hidden)
+        .navigationTitle(MavioStrings.navProfile)
+    }
+}
+
+/// The user's card: the Mavio account, or the user of the server signed in
+/// to.
+private struct AccountCard: View {
+    @Environment(AppModel.self) private var model
+    @Environment(\.theme) private var theme
+
+    var body: some View {
+        let server = model.signedInServers.first
+        let name = model.account?.name ?? server?.userName ?? ""
+        HStack(spacing: MavioSpacing.s12) {
+            Avatar(name: name, size: 44)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(name).type(theme.type.headline).lineLimit(1)
+                Text(model.account != nil ? MavioStrings.authMavioAccount : server?.name ?? "")
+                    .type(theme.type.footnote)
+                    .foregroundStyle(theme.colors.textSecondary)
+                    .lineLimit(1)
+            }
+        }
+        .padding(.vertical, 2)
+    }
+}
+
+/// The account: the Mavio account with its page at mavio.dev, or the user
+/// of the server; the servers in the user's order, which orders Home;
+/// and authorizing a device with Quick Connect.
+private struct AccountView: View {
     @Environment(AppModel.self) private var model
     @Environment(Router.self) private var router
     @Environment(\.theme) private var theme
-    @State private var authorizing = false
 
     var body: some View {
         List {
             if let account = model.account {
                 Section {
-                    VStack(alignment: .leading, spacing: 2) {
+                    HStack(spacing: MavioSpacing.s12) {
+                        Avatar(name: account.name, size: 44)
                         Text(account.name).type(theme.type.headline)
-                        Text(MavioStrings.authMavioAccount)
-                            .type(theme.type.footnote)
-                            .foregroundStyle(theme.colors.textSecondary)
                     }
-                    // Signing the account out forgets its servers too.
-                    Button(MavioStrings.authSignOut, role: .destructive) {
-                        Task { try? await model.signOut() }
+                    if let manage = Self.manage(account) {
+                        Link(destination: manage) {
+                            Label {
+                                Text(MavioStrings.settingsManageAtMavio)
+                            } icon: {
+                                Icon("external", size: 18)
+                            }
+                        }
                     }
+                } footer: {
+                    Text(MavioStrings.settingsMavioAccountMessage)
+                }
+            } else if let server = model.signedInServers.first {
+                Section {
+                    HStack(spacing: MavioSpacing.s12) {
+                        Avatar(name: server.userName, size: 44)
+                        Text(server.userName).type(theme.type.headline)
+                    }
+                } footer: {
+                    Text(MavioStrings.settingsStandaloneAccountMessage(name: server.userName, server: server.name))
                 }
             }
-            Section(MavioStrings.authServers) {
+            Section {
                 ForEach(model.servers, id: \.id) { server in
                     ServerRow(server: server)
                         .swipeActions {
@@ -50,22 +133,29 @@ struct ProfileView: View {
                     model.order(ids)
                 }
                 Button(MavioStrings.authAddServer) { router.addingServer = true }
+            } header: {
+                Text(MavioStrings.authServers)
+            } footer: {
+                Text(
+                    model.account != nil
+                        ? MavioStrings.settingsServersMavioMessage : MavioStrings.settingsServersMessage)
             }
-            Section {
-                Button(MavioStrings.authAuthorizeDevice) { authorizing = true }
-                    .disabled(model.signedIn.isEmpty)
-            }
-            Section {
-                LabeledContent(
-                    "Mavio",
-                    value: Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "")
-                LabeledContent("Core", value: MavioKit.coreVersion)
+            if !model.signedInServers.isEmpty {
+                AuthorizeDevice()
             }
         }
         .scrollContentBackground(.hidden)
-        .navigationTitle(MavioStrings.navProfile)
+        .background(theme.colors.background)
+        .navigationTitle(MavioStrings.settingsAccount)
+        .navigationBarTitleDisplayMode(.inline)
         .toolbar { EditButton() }
-        .sheet(isPresented: $authorizing) { AuthorizeDeviceView() }
+    }
+
+    /// The account's page at the mavio.dev whose API it signed in with.
+    private static func manage(_ account: Account) -> URL? {
+        guard var site = URL(string: account.api) else { return nil }
+        if site.lastPathComponent == "api" { site.deleteLastPathComponent() }
+        return site.appending(path: "account")
     }
 }
 
@@ -97,10 +187,10 @@ private struct ServerRow: View {
     }
 }
 
-/// Approves the Quick Connect code another device shows.
-private struct AuthorizeDeviceView: View {
+/// Approves the Quick Connect code another device shows, on the server
+/// chosen when there are several.
+private struct AuthorizeDevice: View {
     @Environment(AppModel.self) private var model
-    @Environment(\.dismiss) private var dismiss
     @Environment(\.theme) private var theme
     @State private var serverId = ""
     @State private var code = ""
@@ -108,17 +198,20 @@ private struct AuthorizeDeviceView: View {
     @State private var done = false
 
     var body: some View {
-        NavigationStack {
-            Form {
-                if model.signedInServers.count > 1 {
-                    Picker(MavioStrings.authServer, selection: $serverId) {
-                        ForEach(model.signedInServers, id: \.id) { Text($0.name).tag($0.id) }
-                    }
+        Section(MavioStrings.authAuthorizeDevice) {
+            if model.signedInServers.count > 1 {
+                Picker(MavioStrings.authServer, selection: $serverId) {
+                    ForEach(model.signedInServers, id: \.id) { Text($0.name).tag($0.id) }
                 }
-                TextField("000000", text: $code)
+            }
+            HStack {
+                TextField(MavioStrings.authQuickConnect, text: $code, prompt: Text("000000"))
                     .keyboardType(.numberPad)
-                    .font(.system(.title, design: .monospaced))
-                if let message { Text(message).foregroundStyle(done ? .green : .red) }
+                    .font(.system(.body, design: .monospaced))
+                    .onChange(of: code) { _, new in
+                        let digits = String(new.filter(\.isNumber).prefix(6))
+                        if digits != new { code = digits }
+                    }
                 Button(MavioStrings.authAuthorize) {
                     Task {
                         do {
@@ -134,15 +227,59 @@ private struct AuthorizeDeviceView: View {
                 }
                 .disabled(code.count < 6 || serverId.isEmpty)
             }
-            .tint(theme.colors.textPrimary)
-            .navigationTitle(MavioStrings.authAuthorizeDevice)
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button(MavioStrings.actionDone) { dismiss() }
-                }
+            if let message {
+                Text(message)
+                    .type(theme.type.callout)
+                    .foregroundStyle(done ? theme.colors.textSecondary : theme.colors.danger)
             }
         }
-        .onAppear { serverId = model.signedInServers.first?.id ?? "" }
+        .onAppear { if serverId.isEmpty { serverId = model.signedInServers.first?.id ?? "" } }
+    }
+}
+
+/// A section's row: its icon on a colored tile, and its title.
+struct EntryLabel: View {
+    let title: String
+    let icon: String
+    let color: Color
+    @Environment(\.theme) private var theme
+
+    init(_ title: String, icon: String, color: Color) {
+        (self.title, self.icon, self.color) = (title, icon, color)
+    }
+
+    var body: some View {
+        Label {
+            Text(title)
+        } icon: {
+            Icon(icon, fill: true, size: 17)
+                .foregroundStyle(.white)
+                .frame(width: 28, height: 28)
+                .background(color, in: .rect(cornerRadius: 7))
+        }
+    }
+}
+
+/// A person's initial in a circle.
+struct Avatar: View {
+    let name: String
+    let size: CGFloat
+    @Environment(\.theme) private var theme
+
+    var body: some View {
+        Text(name.first.map { String($0).uppercased() } ?? "")
+            .font(.system(size: size * 0.42, weight: .semibold))
+            .foregroundStyle(theme.colors.textPrimary)
+            .frame(width: size, height: size)
+            .background(theme.colors.fill, in: .circle)
+    }
+}
+
+extension Color {
+    /// A color of its sRGB hex value, as the web UI writes the tiles'.
+    init(hex: UInt32) {
+        self.init(
+            .sRGB, red: Double(hex >> 16 & 0xFF) / 255, green: Double(hex >> 8 & 0xFF) / 255,
+            blue: Double(hex & 0xFF) / 255)
     }
 }

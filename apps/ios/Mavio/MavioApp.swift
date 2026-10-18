@@ -6,11 +6,12 @@ import SwiftUI
 @main
 struct MavioApp: App {
     @UIApplicationDelegateAdaptor private var delegate: AppDelegate
+    @AppStorage(DeviceSetting.appearance) private var appearance = Appearance.system
 
     var body: some Scene {
         WindowGroup {
             if let model = delegate.model {
-                RootView().environment(model)
+                RootView().environment(model).preferredColorScheme(appearance.scheme)
             } else {
                 StatusView(icon: "error", title: MavioStrings.stateError, message: delegate.failure)
             }
