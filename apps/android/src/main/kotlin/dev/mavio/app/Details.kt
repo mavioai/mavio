@@ -279,6 +279,7 @@ private fun DetailsContent(model: AppModel, details: Details) {
             }
         }
         item(key = "about") { AboutSection(details, source) }
+        if (!details.offline) item(key = "issues") { ItemIssues(model, card.serverId, card.itemId) }
     }
 }
 

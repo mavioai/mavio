@@ -134,7 +134,11 @@ internal fun SaveRow(enabled: Boolean, busy: Boolean, notice: String?, failure: 
 
 /** When something happened or will, relative to now, as "5 minutes ago". */
 internal fun fromNow(t: Timestamp): String =
-    t.instant?.let { DateUtils.getRelativeTimeSpanString(it.toEpochMilli(), System.currentTimeMillis(), DateUtils.MINUTE_IN_MILLIS).toString() }.orEmpty()
+    t.instant?.let {
+        // A server's clock a little ahead of the device's still reads as the past.
+        val now = System.currentTimeMillis()
+        DateUtils.getRelativeTimeSpanString(minOf(it.toEpochMilli(), now), now, DateUtils.MINUTE_IN_MILLIS).toString()
+    }.orEmpty()
 
 /**
  * The server's settings as a page edits them: read, changed and saved, each

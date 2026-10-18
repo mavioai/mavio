@@ -32,6 +32,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
@@ -933,7 +934,6 @@ internal fun IssuesPage(model: AppModel, serverId: String) {
     val names = remember { IssueNames() }
     val server = model.servers.collectAsState().value.firstOrNull { it.id == serverId }
     val scope = rememberCoroutineScope()
-    val context = LocalContext.current
     val navigator = LocalNavigator.current
     suspend fun load(offset: Int) {
         attempt({ failure = it }) {
@@ -969,25 +969,7 @@ internal fun IssuesPage(model: AppModel, serverId: String) {
             Group(footer = if (!list.isNullOrEmpty()) pluralStringResource(R.plurals.issues_count, total, total) else null) {
                 list.orEmpty().forEachIndexed { i, issue ->
                     if (i > 0) RowDivider()
-                    Row(
-                        Modifier.fillMaxWidth().clickable { navigator.open(Route.IssuePage(serverId, issue.id)) }.padding(horizontal = 16.dp, vertical = 10.dp),
-                        horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s12),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Lines(
-                            listOfNotNull(names.items[issue.itemId], issue.type.title()?.let { stringResource(it) }, issue.numbers())
-                                .filter { it.isNotEmpty() }.joinToString(" · "),
-                            listOfNotNull(
-                                issue.commentsList.firstOrNull()?.message,
-                                names.user(context, issue.createdBy, server),
-                                if (issue.hasUpdateTime()) fromNow(issue.updateTime) else null,
-                            ).filter { it.isNotEmpty() }.joinToString(" · "),
-                            Modifier.weight(1f),
-                            maxLines = 1,
-                        )
-                        IssueBadge(issue.status)
-                        Chevron()
-                    }
+                    IssueRow(issue, names, server, showItem = true) { navigator.open(Route.IssuePage(serverId, issue.id)) }
                 }
                 if (list != null && list.size < total) {
                     RowDivider()
@@ -998,6 +980,75 @@ internal fun IssuesPage(model: AppModel, serverId: String) {
                     list == null -> Note(stringResource(R.string.state_loading))
                     list.isEmpty() -> Note(stringResource(R.string.issues_none))
                 }
+            }
+        }
+    }
+}
+
+/**
+ * An issue as a row: its item when [showItem], kind and numbers, then its
+ * first comment, who reported it and when it last changed, and its status.
+ */
+@Composable
+private fun IssueRow(issue: Issue, names: IssueNames, server: ServerRecord?, showItem: Boolean, onClick: () -> Unit) {
+    val context = LocalContext.current
+    Row(
+        Modifier.fillMaxWidth().clickable(onClick = onClick).padding(horizontal = 16.dp, vertical = 10.dp),
+        horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s12),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Lines(
+            listOfNotNull(if (showItem) names.items[issue.itemId] else null, issue.type.title()?.let { stringResource(it) }, issue.numbers())
+                .filter { it.isNotEmpty() }.joinToString(" · "),
+            listOfNotNull(
+                issue.commentsList.firstOrNull()?.message,
+                names.user(context, issue.createdBy, server),
+                if (issue.hasUpdateTime()) fromNow(issue.updateTime) else null,
+            ).filter { it.isNotEmpty() }.joinToString(" · "),
+            Modifier.weight(1f),
+            maxLines = 1,
+        )
+        IssueBadge(issue.status)
+        Chevron()
+    }
+}
+
+/**
+ * An item's open issues in its details, as the web UI's, each opening its
+ * page; with none, nothing is shown.
+ */
+@Composable
+internal fun ItemIssues(model: AppModel, serverId: String, itemId: String) {
+    val revisions by model.revisions.collectAsStateWithLifecycle()
+    var issues by remember(serverId, itemId) { mutableStateOf<List<Issue>>(emptyList()) }
+    val names = remember(serverId) { IssueNames() }
+    val server = model.servers.collectAsState().value.firstOrNull { it.id == serverId }
+    val navigator = LocalNavigator.current
+    LaunchedEffect(serverId, itemId, revisions[serverId]) {
+        runCatching {
+            model.client.call(
+                serverId,
+                Procedure.issues("ListIssues"),
+                listIssuesRequest {
+                    statuses += IssueStatus.ISSUE_STATUS_OPEN
+                    this.itemId = itemId
+                    sort = IssueSort.ISSUE_SORT_MODIFIED
+                },
+                ListIssuesResponse::parseFrom,
+            ).issuesList
+        }.onSuccess { issues = it }
+        names.loadUsers(model, serverId)
+    }
+    if (issues.isEmpty()) return
+    Column(
+        Modifier.padding(start = theme.layout.margin, end = theme.layout.margin, top = MavioSpacing.s32),
+        verticalArrangement = Arrangement.spacedBy(MavioSpacing.s16),
+    ) {
+        Text(stringResource(R.string.issues_item_title), style = theme.type.title3.text)
+        Group {
+            issues.forEachIndexed { i, issue ->
+                if (i > 0) RowDivider()
+                IssueRow(issue, names, server, showItem = false) { navigator.open(Route.IssuePage(serverId, issue.id)) }
             }
         }
     }

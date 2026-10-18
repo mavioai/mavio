@@ -776,7 +776,8 @@ flowchart TD
   - [x] The details' whole cast and crew, a person's page with the server's items crediting them, and the genres, keywords and studios opening their items in the library
   - [x] The details' More menu: playing on another device, adding to a playlist or collection, reporting a problem, refreshing metadata, and renaming or deleting a playlist or collection
   - [x] A playlist's entries in the details, each played, moved up or down, or removed, and a collection's members, which administrators remove after tapping Edit
-  - [ ] Checking Users' adding, invitations and sign-ins on a server keeping its own accounts, and the remote's playback controls with another device playing, switching users and sign-in security; the tablet's sidebar; in the details, the More menu's Watch Together, metadata editing, identifying and images, and the acquisition, subtitles and issues sections; checking the More menu's reporting a problem and refreshing metadata; in the player, ASS subtitles' full styling in Media3
+  - [x] An item's open issues at the end of its details, each opening its page
+  - [ ] Checking Users' adding, invitations and sign-ins on a server keeping its own accounts, and the remote's playback controls with another device playing, switching users and sign-in security; the tablet's sidebar; in the details, the More menu's Watch Together, metadata editing, identifying and images, and the acquisition and subtitles sections; checking the More menu's refreshing metadata; in the player, ASS subtitles' full styling in Media3
   - [ ] The app's icon (still Android's default)
   - [ ] Blur on the emulator: its GPU takes seconds to draw a blurred frame, so the glass there is its tint alone and the wall of posters is sharp
   - [ ] The references of `android-lib:snapshot` recorded again (the wordmark and the shelf's title changed)
