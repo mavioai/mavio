@@ -35,6 +35,8 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.mavio.core.AppModel
+import mavio.acquisition.v1.Discover.SearchTitlesResponse
+import mavio.acquisition.v1.searchTitlesRequest
 import dev.mavio.core.SearchResults
 import dev.mavio.design.MavioRadius
 import dev.mavio.design.MavioSpacing
@@ -65,6 +67,23 @@ fun SearchScreen(model: AppModel) {
         results = null
         if (query.isNotEmpty()) results = runCatching { model.client.search(query) }
     }
+    // The titles the server that discovers finds, from Discover.
+    val discovery = LocalDiscover.current.discovery
+    val found = if (discovery == null || query.isEmpty()) null else {
+        discovered(
+            discovery.serverId,
+            "SearchTitles",
+            remember(query) {
+                searchTitlesRequest {
+                    this.query = query
+                    language = discoverLanguage
+                    page = 1
+                }
+            },
+            SearchTitlesResponse::parseFrom,
+        ).value
+    }
+    val titles = found?.getOrNull()?.titlesList.orEmpty().distinctBy(::titleKey)
     val focus = remember { FocusRequester() }
     val keyboard = LocalSoftwareKeyboardController.current
     LaunchedEffect(Unit) { if (query.isEmpty()) focus.requestFocus() }
@@ -137,7 +156,7 @@ fun SearchScreen(model: AppModel) {
             list == null -> item {
                 StatusView(stringResource(R.string.state_error), Modifier.padding(top = MavioSpacing.s48), icon = R.drawable.ic_error)
             }
-            list.all { it.cards.isEmpty() && it.error == null } -> item {
+            list.all { it.cards.isEmpty() && it.error == null } && titles.isEmpty() && (discovery == null || found != null) -> item {
                 StatusView(stringResource(R.string.search_no_results), Modifier.padding(top = MavioSpacing.s48), icon = R.drawable.ic_search)
             }
             else -> items(list, key = { it.serverId }) { found ->
@@ -159,6 +178,13 @@ fun SearchScreen(model: AppModel) {
                             ItemCard(card, Modifier.clickable { navigator.open(card) })
                         }
                     }
+                }
+            }
+        }
+        if (discovery != null && titles.isNotEmpty()) {
+            item(key = "discover") {
+                Shelf(stringResource(R.string.search_discover)) {
+                    items(titles, key = ::titleKey) { TitleCard(discovery.serverId, it) }
                 }
             }
         }

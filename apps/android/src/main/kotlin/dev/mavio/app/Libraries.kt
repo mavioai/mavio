@@ -172,7 +172,7 @@ private fun LibraryRow(libraries: List<LibraryEntry?>, onOpen: (LibraryEntry) ->
 
 /** A screen's large title, as the web UI's. */
 @Composable
-private fun ScreenTitle(title: String) {
+internal fun ScreenTitle(title: String) {
     Text(
         title,
         Modifier.padding(top = MavioSpacing.s24, bottom = MavioSpacing.s8),
@@ -182,7 +182,7 @@ private fun ScreenTitle(title: String) {
 }
 
 /** An item of a grid across its whole width. */
-private fun LazyGridScope.line(key: String, content: @Composable () -> Unit) =
+internal fun LazyGridScope.line(key: String, content: @Composable () -> Unit) =
     item(key = key, span = { GridItemSpan(maxLineSpan) }) { content() }
 
 /** What a library's grid shows of its items. */
@@ -231,7 +231,7 @@ fun LibraryScreen(model: AppModel, route: Route.Library) {
 
 /** A choice of a few, side by side in a well, the chosen one raised, as the web UI's. */
 @Composable
-private fun Segmented(labels: List<String>, chosen: Int, onChoose: (Int) -> Unit) {
+internal fun Segmented(labels: List<String>, chosen: Int, onChoose: (Int) -> Unit) {
     val colors = theme.colors
     Row(
         Modifier

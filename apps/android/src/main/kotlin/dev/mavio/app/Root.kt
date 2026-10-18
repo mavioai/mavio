@@ -37,6 +37,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -135,6 +136,30 @@ sealed interface Route {
     /** Signing in to one more server. */
     data object AddServer : Route
 
+    /** Discover's catalogs. */
+    data object Discover : Route
+
+    /** The titles of a catalog, of a kind of title, those like a title when tmdbId is set, filtered alike when filters are set. */
+    data class Catalog(
+        val serverId: String,
+        val catalogId: String,
+        val mediaKind: Int,
+        val tmdbId: Int = 0,
+        val filters: CatalogFilters = CatalogFilters(),
+    ) : Route
+
+    /** A discovered movie or series. */
+    data class Title(val serverId: String, val mediaKind: Int, val tmdbId: Int) : Route
+
+    /** The cast and crew of a discovered title, or its crew alone. */
+    data class TitleCredits(val serverId: String, val mediaKind: Int, val tmdbId: Int, val crew: Boolean) : Route
+
+    /** A discovered person. */
+    data class DiscoveredPerson(val serverId: String, val tmdbId: Int) : Route
+
+    /** A discovered collection of movies. */
+    data class DiscoveredCollection(val serverId: String, val tmdbId: Int) : Route
+
     /** A library, opened on the items of a genre when one is given. */
     data class Library(val serverId: String, val libraryId: String, val name: String, val genre: String? = null) : Route
 
@@ -155,6 +180,9 @@ sealed interface Route {
 enum class Tab(val root: Route, @StringRes val label: Int, @DrawableRes val icon: Int, @DrawableRes val filled: Int) {
     Home(Route.Home, R.string.nav_home, R.drawable.ic_home, R.drawable.ic_home_fill),
     Libraries(Route.Libraries, R.string.nav_libraries, R.drawable.ic_movies, R.drawable.ic_movies_fill),
+
+    /** Shown while a server discovers. */
+    Discover(Route.Discover, R.string.nav_discover, R.drawable.ic_discover, R.drawable.ic_discover_fill),
 }
 
 /** Opens screens on the current tab's stack. */
@@ -204,6 +232,12 @@ fun Root(model: AppModel) {
 @Composable
 private fun Shell(model: AppModel) {
     var tab by rememberSaveable { mutableStateOf(Tab.Home) }
+    val signedIn by model.signedIn.collectAsStateWithLifecycle()
+    val discover = remember { DiscoverState(model) }
+    LaunchedEffect(signedIn) { discover.load(model.signedInServers.map { it.id }) }
+    // Discover's tab shows while a server discovers.
+    val tabs = Tab.entries.filter { it != Tab.Discover || discover.discovery != null }
+    LaunchedEffect(tabs) { if (tab !in tabs) tab = Tab.Home }
     val stacks = remember { Tab.entries.associateWith { mutableStateListOf(it.root) } }
     val navigator = remember { Navigator { stacks.getValue(tab) } }
     val stack = stacks.getValue(tab)
@@ -215,6 +249,7 @@ private fun Shell(model: AppModel) {
     val tabBar = stack.size == 1
     CompositionLocalProvider(
         LocalNavigator provides navigator,
+        LocalDiscover provides discover,
         // The pages scroll under the header and the floating tab bar, which blur them.
         LocalTopInset provides HEADER_HEIGHT + WindowInsets.statusBars.asPaddingValues().calculateTopPadding(),
     ) {
@@ -251,7 +286,7 @@ private fun Shell(model: AppModel) {
                     enter = slideInVertically(tween(PAGE_MILLIS)) { it },
                     exit = slideOutVertically(tween(PAGE_MILLIS)) { it },
                 ) {
-                    TabBar(tab, haze) {
+                    TabBar(tabs, tab, haze) {
                         if (it == tab) {
                             // Tapping the current tab goes back to its first screen.
                             while (stack.size > 1) stack.removeAt(stack.lastIndex)
@@ -285,6 +320,12 @@ private fun Screen(model: AppModel, route: Route) {
         is Route.Library -> LibraryScreen(model, route)
         is Route.Item -> DetailsScreen(model, route.serverId, route.itemId)
         is Route.Player -> PlayerScreen(model, route)
+        Route.Discover -> DiscoverScreen()
+        is Route.Catalog -> CatalogScreen(model, route)
+        is Route.Title -> TitleScreen(route)
+        is Route.TitleCredits -> TitleCreditsScreen(route)
+        is Route.DiscoveredPerson -> DiscoveredPersonScreen(route)
+        is Route.DiscoveredCollection -> DiscoveredCollectionScreen(route)
         Route.AddServer -> {
             val navigator = LocalNavigator.current
             SignInScreen(model, adding = true) { navigator.back() }
@@ -371,7 +412,7 @@ fun Avatar(name: String, modifier: Modifier = Modifier, size: Dp = 32.dp) {
 
 /** The phone's tabs, as the web UI's: a pill of glass floating over the page. */
 @Composable
-private fun TabBar(current: Tab, haze: HazeState, modifier: Modifier = Modifier, onSelect: (Tab) -> Unit) {
+private fun TabBar(tabs: List<Tab>, current: Tab, haze: HazeState, modifier: Modifier = Modifier, onSelect: (Tab) -> Unit) {
     val colors = theme.colors
     val dark = colors.background.luminance() < 0.5f
     val pill = RoundedCornerShape(50)
@@ -388,7 +429,7 @@ private fun TabBar(current: Tab, haze: HazeState, modifier: Modifier = Modifier,
             .padding(4.dp),
         horizontalArrangement = Arrangement.spacedBy(4.dp),
     ) {
-        Tab.entries.forEach { t ->
+        tabs.forEach { t ->
             val selected = t == current
             val tint = if (selected) colors.accentText else colors.textPrimary
             Column(
