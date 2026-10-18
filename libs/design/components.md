@@ -90,7 +90,7 @@ An episode in a season's list.
 A cast or crew member.
 
 * **Anatomy**: a circular photo (`radius.full`), the name (`typography.callout`) and the role (`typography.footnote`, `color.textSecondary`), each on at most two lines.
-* **Without a photo**: the initials on `color.fill`.
+* **Without a photo**: the No artwork placeholder of the cards (States), with the icon `profile`.
 
 ## Avatar
 

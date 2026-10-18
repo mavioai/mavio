@@ -90,7 +90,7 @@
 演员或职员。
 
 * **结构**：圆形照片（`radius.full`）、姓名（`typography.callout`）与角色（`typography.footnote`，`color.textSecondary`），各至多两行。
-* **无照片时**：在 `color.fill` 上显示姓名首字母。
+* **无照片时**：与卡片的“无图片”占位相同（状态），图标为 `profile`。
 
 ## 头像
 

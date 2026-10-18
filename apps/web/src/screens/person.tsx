@@ -10,7 +10,7 @@ import { useState } from "react";
 import { locale, t } from "../i18n.ts";
 import { Icon } from "../icon.tsx";
 import { usePrefs } from "../prefs.ts";
-import { Grid, ItemCard, Loading, NotFoundView, StatusView } from "../ui.tsx";
+import { Artwork, Grid, ItemCard, Loading, NotFoundView, StatusView } from "../ui.tsx";
 import { useEntryState } from "../shell/entry-state.ts";
 
 const route = getRouteApi("/s/$serverId/person/$personId");
@@ -22,15 +22,6 @@ export function PersonScreen() {
   const server = useServer(serverId);
   if (!server?.token) return <StatusView icon="error" title={t("auth.unreachable")} />;
   return <PersonPage key={personId} server={server} personId={personId} />;
-}
-
-/** The person's initials, shown without a photo. */
-export function initialsOf(name: string): string {
-  return name
-    .split(/\s+/)
-    .map((w) => w[0])
-    .slice(0, 2)
-    .join("");
 }
 
 /** Whole years between two dates. */
@@ -75,13 +66,7 @@ function Header({ server, person: p }: { server: ServerEntry; person: Person }) 
   ].filter(Boolean);
   return (
     <header className="flex flex-col gap-6 px-margin pt-8 sm:flex-row sm:items-start">
-      <div className="relative aspect-[2/3] w-40 shrink-0 overflow-hidden rounded-[14px] bg-fill sm:w-52">
-        {photo ? (
-          <img src={photo.url} alt="" className="h-full w-full object-cover" />
-        ) : (
-          <span className="absolute inset-0 flex items-center justify-center type-display text-text-secondary">{initialsOf(p.name)}</span>
-        )}
-      </div>
+      <Artwork src={photo?.url} alt="" icon="profile" className="aspect-[2/3] w-40 shrink-0 rounded-[14px] sm:w-52" />
       <div className="flex min-w-0 max-w-3xl flex-col gap-3">
         <h1 className="type-title1">{p.name}</h1>
         {facts.map((f) => (

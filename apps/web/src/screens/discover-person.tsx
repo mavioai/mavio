@@ -12,11 +12,10 @@ import { useState } from "react";
 import imdbLogo from "../assets/services/imdb.svg";
 import tmdbLogo from "../assets/services/tmdb.svg";
 import { discoverLanguage, locale, t } from "../i18n.ts";
-import { Grid, Loading, NotFoundView, StatusView } from "../ui.tsx";
+import { Artwork, Grid, Loading, NotFoundView, StatusView } from "../ui.tsx";
 import { Segmented } from "../controls/inputs.tsx";
 import { sized, TitleCard } from "./discover.tsx";
 import { type ExternalLink, ExternalLinks } from "./discover-overview.tsx";
-import { initialsOf } from "./person.tsx";
 import { useEntryState } from "../shell/entry-state.ts";
 
 const route = getRouteApi("/s/$serverId/discover/person/$tmdbId");
@@ -73,13 +72,7 @@ function PersonPage({ server, person: p }: { server: ServerEntry; person: Person
   return (
     <div className="pb-10">
       <header className="flex flex-col items-center gap-6 px-margin pt-8 sm:flex-row sm:items-start">
-        <div className="relative aspect-square w-36 shrink-0 overflow-hidden rounded-full bg-fill sm:w-44">
-          {p.imageUrl ? (
-            <img src={sized(p.imageUrl, 342)} alt="" className="h-full w-full object-cover" />
-          ) : (
-            <span className="absolute inset-0 flex items-center justify-center type-display text-text-secondary">{initialsOf(p.name)}</span>
-          )}
-        </div>
+        <Artwork src={p.imageUrl ? sized(p.imageUrl, 342) : undefined} alt="" icon="profile" className="aspect-square w-36 shrink-0 rounded-full sm:w-44" />
         <div className="flex w-full min-w-0 max-w-3xl flex-col gap-3">
           <h1 className="type-title1">{p.name}</h1>
           {facts.length > 0 && <p className="type-callout text-text-secondary">{facts.join(" | ")}</p>}
