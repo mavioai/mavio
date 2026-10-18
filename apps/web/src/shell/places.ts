@@ -16,6 +16,11 @@ const tabPlaces = /^\/(?:|libraries|discover|search|profile|tools\/[^/]+)$/;
 /** The places of the layout shown. */
 let places = sidebarPlaces;
 
+/** Whether a path is one of the phone's places, where its tab bar shows. */
+export function isTabPlace(pathname: string): boolean {
+  return tabPlaces.test(pathname);
+}
+
 /** Whether a path is a place's. */
 export function isPlace(pathname: string): boolean {
   return places.test(pathname);

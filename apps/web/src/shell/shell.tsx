@@ -24,7 +24,7 @@ import { SidebarPanel, SidebarResizer, sidebarWidth } from "./sidebar.tsx";
 import { useTvBack } from "./back.ts";
 import { useTvFocus } from "./focus.ts";
 import { PageTitle } from "./page-title.tsx";
-import { usePlace, usePlaceLink, usePlaces } from "./places.ts";
+import { isTabPlace, usePlace, usePlaceLink, usePlaces } from "./places.ts";
 import { useUpScroll } from "./up.ts";
 import { useSpatialNavigation } from "./spatial.ts";
 import { TvShell } from "./tv.tsx";
@@ -112,15 +112,25 @@ function useShortcuts(tv: boolean) {
  */
 function NormalShell({ width }: { width: ReturnType<typeof useWidthClass> }) {
   const compact = width === "compact";
+  // The tab bar shows on the places alone; a page opened from one has Back.
+  const tabs = compact && isTabPlace(useLocation().pathname);
   return (
-    <div className={compact ? "flex min-h-screen flex-col pb-[calc(88px+env(safe-area-inset-bottom))]" : "flex min-h-screen"}>
+    <div
+      className={
+        tabs
+          ? "flex min-h-screen flex-col pb-[calc(88px+env(safe-area-inset-bottom))]"
+          : compact
+            ? "flex min-h-screen flex-col pb-[env(safe-area-inset-bottom)]"
+            : "flex min-h-screen"
+      }
+    >
       {compact ? <CompactHeader /> : <Sidebar overlay={width === "medium"} />}
       {/* A column filling the window's height, which a page loading centers its indicator in. */}
       <main className={compact ? "flex flex-1 flex-col" : "flex min-w-0 flex-1 flex-col"}>
         {!compact && <BackButton />}
         <Outlet />
       </main>
-      {compact && <TabBar />}
+      {tabs && <TabBar />}
     </div>
   );
 }
