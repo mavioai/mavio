@@ -15,6 +15,7 @@ import (
 
 	acquisitionv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/acquisition/v1"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/acquisition/v1/acquisitionv1connect"
+	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/system/v1/systemv1connect"
 )
 
 // fakeAcquisition serves what decides which releases a fake server grabs:
@@ -72,6 +73,9 @@ func (f *fakeCore) handleAcquisition(mux *http.ServeMux) {
 	mux.Handle(acquisitionv1connect.NewReleaseServiceHandler(fakeIndexers{}))
 	f.downloads = newFakeDownloads()
 	mux.Handle(acquisitionv1connect.NewDownloadServiceHandler(f.downloads))
+	f.subtitles = newFakeSubtitles()
+	mux.Handle(acquisitionv1connect.NewSubtitleServiceHandler(f.subtitles))
+	mux.Handle(systemv1connect.NewAiProviderServiceHandler(fakeAI{}))
 	f.wanted = newFakeWanted()
 	mux.Handle(acquisitionv1connect.NewWantedServiceHandler(f.wanted))
 }

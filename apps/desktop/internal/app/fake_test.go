@@ -94,6 +94,7 @@ type fakeCore struct {
 	acq            *fakeAcquisition
 	wanted         *fakeWanted
 	downloads      *fakeDownloads
+	subtitles      *fakeSubtitles
 
 	mu       sync.Mutex
 	calls    []string

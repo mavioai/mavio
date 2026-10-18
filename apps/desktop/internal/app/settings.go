@@ -52,6 +52,7 @@ var settingsSections = []settingsSection{
 	{id: "acquisition", icon: "downloads", color: ui.RGB(0x34, 0xC7, 0x59), title: "settings.acquisition", admin: true},
 	{id: "wanted", icon: "pending", color: ui.RGB(0xFF, 0x3B, 0x30), title: "settings.wanted", admin: true},
 	{id: "downloads", icon: "downloads", color: ui.RGB(0x34, 0xC7, 0x59), title: "settings.downloads", admin: true},
+	{id: "subtitles", icon: "subtitles", color: ui.RGB(0xFF, 0x95, 0x00), title: "settings.subtitles", admin: true},
 	{id: "transcoding", icon: "quality", color: ui.RGB(0xFF, 0x2D, 0x55), title: "settings.transcoding", admin: true},
 	{id: "activity", icon: "activity", color: ui.RGB(0xFF, 0x2D, 0x55), title: "settings.activity", admin: true},
 	{id: "tasks", icon: "pending", color: ui.RGB(0x58, 0x56, 0xD6), title: "settings.tasks", admin: true},
@@ -82,7 +83,7 @@ type settingsMenu struct {
 
 var settingsMenus = []settingsMenu{
 	{id: "media", icon: "movies", color: ui.RGB(0xFF, 0x9F, 0x0A), title: "settings.mediaMenu", sections: []string{"libraries", "storage", "transcoding"}},
-	{id: "acquiring", icon: "cloud", color: ui.RGB(0x30, 0xD1, 0x58), title: "settings.acquisitionMenu", sections: []string{"acquisition", "wanted", "downloads"}},
+	{id: "acquiring", icon: "cloud", color: ui.RGB(0x30, 0xD1, 0x58), title: "settings.acquisitionMenu", sections: []string{"acquisition", "wanted", "downloads", "subtitles"}},
 	{id: "maintenance", icon: "admin", color: ui.RGB(0x8E, 0x8E, 0x93), title: "settings.maintenanceMenu", sections: []string{"activity", "tasks", "logs"}},
 }
 
@@ -205,7 +206,7 @@ func (a *App) settings(c *ui.Context, r *ui.Route) {
 		ui.Column(c).Grow(1).MinWidth(0).Background(style.Color(colors.Background)).Children(func() {
 			r.View(c, func(r *ui.Route) {
 				r.Page().Background(style.Color(colors.Background))
-				ui.Scroll(c.Key(id + r.Query("user") + r.Query("library") + r.Query("remote") + r.Query("acquisition") + r.Query("id"))).Fill().Children(func() {
+				ui.Scroll(c.Key(id + r.Query("user") + r.Query("library") + r.Query("remote") + r.Query("acquisition") + r.Query("subtitles") + r.Query("id"))).Fill().Children(func() {
 					top := max(c.TitleBar().Height, 12)
 					ui.Column(c).Padding(top+28, 56, 48).AlignItems(ui.Center).Children(func() {
 						ui.Column(c).FillWidth().MaxWidth(900).Gap(28).Children(func() { a.settingsSection(c, r, id) })
@@ -433,6 +434,8 @@ func (a *App) settingsSection(c *ui.Context, r *ui.Route, id string) {
 		a.wantedSection(c)
 	case "downloads":
 		a.downloadsSection(c)
+	case "subtitles":
+		a.subtitlesSection(c, r)
 	case "activity":
 		a.activitySection(c)
 	case "tasks":
