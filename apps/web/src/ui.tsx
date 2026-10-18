@@ -385,12 +385,12 @@ export function libraryIcon(kind: LibraryKind): IconName {
   }
 }
 
-/** A person's initial on the avatars' gray (libs/design/components.md, Avatar). */
+/** A person's initial on a quiet fill (libs/design/components.md, Avatar). */
 export function Avatar({ name, size = 32, className }: { name: string; size?: number; className?: string }) {
   return (
     <span
       aria-hidden
-      className={`inline-flex shrink-0 items-center justify-center rounded-full bg-[#8E8E93] font-semibold text-white ${className ?? ""}`}
+      className={`inline-flex shrink-0 items-center justify-center rounded-full bg-fill-selected font-semibold text-text-secondary ${className ?? ""}`}
       style={{ width: size, height: size, fontSize: size * 0.42 }}
     >
       {[...name][0]?.toUpperCase()}
