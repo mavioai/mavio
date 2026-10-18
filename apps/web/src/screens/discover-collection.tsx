@@ -60,10 +60,10 @@ function CollectionPage({ server, tmdbId, collection: c }: { server: ServerEntry
   const blocked = status === MediaStatus.BLOCKLISTED;
   const block = blocked ? actions.unblockCollection : actions.blockCollection;
   const failed = actions.blockCollection.error ?? actions.unblockCollection.error;
-  const primary = `inline-flex items-center justify-center gap-2 rounded-[10px] font-semibold type-headline ${
+  const primary = `inline-flex cursor-default items-center justify-center gap-2 rounded-[10px] font-semibold type-headline ${
     tv ? "h-16 bg-white/20 px-10 text-white backdrop-blur-xl" : phone ? "h-12 flex-1 bg-white px-5 text-black" : "h-11 bg-white px-6 text-black hover:bg-white/90"
   }`;
-  const secondary = `inline-flex items-center justify-center gap-2 rounded-[10px] bg-white/20 font-semibold text-white backdrop-blur-xl type-headline hover:bg-white/30 ${
+  const secondary = `inline-flex cursor-default items-center justify-center gap-2 rounded-[10px] bg-white/20 font-semibold text-white backdrop-blur-xl type-headline hover:bg-white/30 ${
     tv ? "h-16 px-10" : phone ? "h-12 flex-1 px-5" : "h-11 px-6"
   }`;
   return (

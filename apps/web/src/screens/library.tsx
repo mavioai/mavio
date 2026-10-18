@@ -151,7 +151,7 @@ function AllItems({ server, libraryId }: { server: ServerEntry; libraryId: strin
             search={(s) => ({ ...s, genre: undefined, tag: undefined, studio: undefined })}
             replace
             aria-label={`${t(valueLabels[value.kind], { value: value.value })}, ${t("library.clearValue")}`}
-            className={`inline-flex items-center gap-1.5 rounded-full bg-accent font-semibold text-on-accent hover:opacity-90 ${
+            className={`inline-flex cursor-default items-center gap-1.5 rounded-full bg-accent font-semibold text-on-accent hover:opacity-90 ${
               tv ? "h-12 px-5 type-headline" : "h-8 pr-2.5 pl-3.5 type-callout"
             }`}
           >

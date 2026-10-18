@@ -125,7 +125,7 @@ export function Hero({ entries }: { entries: HeroEntry[] }) {
               params={{ serverId: server.id, itemId: item.id }}
               data-tv-button
               // On a television white is focus's, so Play is glass until it has focus.
-              className={`inline-flex items-center justify-center gap-2 rounded-[10px] font-semibold type-headline ${
+              className={`inline-flex cursor-default items-center justify-center gap-2 rounded-[10px] font-semibold type-headline ${
                 tv ? "h-16 bg-white/20 px-10 text-white backdrop-blur-xl" : "h-11 bg-white px-6 text-black hover:bg-white/90"
               }`}
             >
@@ -137,7 +137,7 @@ export function Hero({ entries }: { entries: HeroEntry[] }) {
             to="/s/$serverId/item/$itemId"
             params={{ serverId: server.id, itemId: item.id }}
             data-tv-button
-            className={`inline-flex items-center justify-center gap-2 rounded-[10px] bg-white/20 font-semibold text-white backdrop-blur-xl hover:bg-white/30 ${tv ? "h-16 px-10 type-headline" : "h-11 px-6 type-headline"}`}
+            className={`inline-flex cursor-default items-center justify-center gap-2 rounded-[10px] bg-white/20 font-semibold text-white backdrop-blur-xl hover:bg-white/30 ${tv ? "h-16 px-10 type-headline" : "h-11 px-6 type-headline"}`}
           >
             <Icon name="info" size={tv ? 28 : 20} />
             {t("item.details")}

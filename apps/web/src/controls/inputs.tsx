@@ -423,7 +423,7 @@ export function Progress({ value, label, className }: { value: number; label: st
 export function FileField({ label, accept, file, onChange }: { label: string; accept: string; file?: File; onChange: (file?: File) => void }) {
   return (
     <div className="flex min-w-0 items-center gap-3">
-      <label className="inline-flex min-h-9 shrink-0 cursor-pointer items-center rounded-[8px] bg-fill px-3 type-callout font-semibold desk:min-h-7 desk:rounded-md desk:px-2.5 hover:bg-fill-selected has-focus-visible:outline-2 has-focus-visible:outline-focus">
+      <label className="inline-flex min-h-9 shrink-0 cursor-default items-center rounded-[8px] bg-fill px-3 type-callout font-semibold desk:min-h-7 desk:rounded-md desk:px-2.5 hover:bg-fill-selected has-focus-visible:outline-2 has-focus-visible:outline-focus">
         {label}
         <input type="file" accept={accept} className="sr-only" onChange={(e) => onChange(e.target.files?.[0])} />
       </label>

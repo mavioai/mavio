@@ -156,7 +156,7 @@ export function DiscoverScreen() {
           to="/s/$serverId/requests"
           params={{ serverId: server.id }}
           search={{}}
-          className={`inline-flex min-h-9 shrink-0 items-center gap-1.5 rounded-full bg-fill px-4 type-callout font-semibold hover:bg-fill-selected ${tv ? "mt-4 ml-margin" : "mb-2"}`}
+          className={`inline-flex min-h-9 shrink-0 cursor-default items-center gap-1.5 rounded-full bg-fill px-4 type-callout font-semibold hover:bg-fill-selected ${tv ? "mt-4 ml-margin" : "mb-2"}`}
         >
           <Icon name="pending" size={16} />
           {t("requests.title")}
@@ -337,10 +337,10 @@ function TitleDetails({ server, title }: { server: ServerEntry; title: Title }) 
   if (title.genres.length > 0) facts.push(<GenreLinks key="genres" server={server} title={title} />);
   const status = statusLabel(title.status);
   const onRequest = () => (series ? setAsking(true) : request.mutate({ mediaKind: title.mediaKind, tmdbId: title.tmdbId }));
-  const primary = `inline-flex items-center justify-center gap-2 rounded-[10px] font-semibold type-headline ${
+  const primary = `inline-flex cursor-default items-center justify-center gap-2 rounded-[10px] font-semibold type-headline ${
     tv ? "h-16 bg-white/20 px-10 text-white backdrop-blur-xl" : phone ? "h-12 bg-white px-5 text-black" : "h-11 bg-white px-6 text-black hover:bg-white/90"
   }`;
-  const secondary = `inline-flex items-center justify-center gap-2 rounded-[10px] bg-white/20 font-semibold text-white backdrop-blur-xl type-headline hover:bg-white/30 ${
+  const secondary = `inline-flex cursor-default items-center justify-center gap-2 rounded-[10px] bg-white/20 font-semibold text-white backdrop-blur-xl type-headline hover:bg-white/30 ${
     tv ? "h-16 px-10" : phone ? "h-12 px-5" : "h-11 px-6"
   }`;
   return (

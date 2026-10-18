@@ -548,10 +548,10 @@ function Actions({
 
   const icon = tv ? 28 : 20;
   // Over the artwork the buttons are white; on a phone they are below it, on the page.
-  const circle = `inline-flex shrink-0 items-center justify-center rounded-full ${tv ? "size-16" : "size-11"} ${
+  const circle = `inline-flex shrink-0 cursor-default items-center justify-center rounded-full ${tv ? "size-16" : "size-11"} ${
     phone ? "bg-fill text-on-background hover:bg-fill-selected" : "bg-white/20 text-white backdrop-blur-xl hover:bg-white/30"
   }`;
-  const primary = `inline-flex items-center justify-center gap-2 rounded-[10px] font-semibold type-headline ${
+  const primary = `inline-flex cursor-default items-center justify-center gap-2 rounded-[10px] font-semibold type-headline ${
     tv ? "h-16 px-10" : phone ? "h-12 flex-1 px-5" : "h-11 px-6"
   } ${
     // On a television white is focus's, so the first button is glass like
