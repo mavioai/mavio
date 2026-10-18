@@ -172,7 +172,7 @@ function CompactHeader() {
   const account = useAccount();
   const link = usePlaceLink();
   return (
-    <header className="sticky top-0 z-20 flex h-13 items-center justify-between border-b border-[var(--tabbar-edge)] bg-[var(--tabbar-glass)] px-margin pt-[env(safe-area-inset-top)] backdrop-blur-md backdrop-saturate-[1.8]">
+    <header className="sticky top-0 z-20 flex h-13 items-center justify-between bg-[var(--tabbar-glass)] px-margin pt-[env(safe-area-inset-top)] backdrop-blur-md backdrop-saturate-[1.8]">
       <PhoneBack fallback={<Wordmark height={20} />} />
       <div className="flex items-center gap-2">
         <Link to="/search" {...link("/search")} aria-label={t("nav.search")} className="flex size-9 items-center justify-center rounded-full hover:bg-fill data-[status=active]:text-accent-text data-place:text-accent-text">
