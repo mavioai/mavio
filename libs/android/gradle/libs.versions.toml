@@ -13,6 +13,11 @@ media3 = "1.11.1"
 checkerframework = "3.13.0"
 tv-material = "1.1.0"
 jna = "5.19.1"
+coil = "3.6.3"
+navigation3 = "1.2.0"
+lifecycle = "2.11.0"
+browser = "1.10.0"
+haze = "2.0.1"
 coroutines = "1.11.0"
 junit = "4.13.2"
 androidx-test-runner = "1.6.2"
@@ -36,6 +41,12 @@ media3-exoplayer-hls = { module = "androidx.media3:media3-exoplayer-hls", versio
 media3-session = { module = "androidx.media3:media3-session", version.ref = "media3" }
 checkerframework-qual = { module = "org.checkerframework:checker-qual", version.ref = "checkerframework" }
 tv-material = { module = "androidx.tv:tv-material", version.ref = "tv-material" }
+coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
+coil-network-okhttp = { module = "io.coil-kt.coil3:coil-network-okhttp", version.ref = "coil" }
+navigation3-ui = { module = "androidx.navigation3:navigation3-ui", version.ref = "navigation3" }
+lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycle" }
+browser = { module = "androidx.browser:browser", version.ref = "browser" }
+haze-blur = { module = "dev.chrisbanes.haze:haze-blur", version.ref = "haze" }
 jna = { module = "net.java.dev.jna:jna", version.ref = "jna" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
 junit = { module = "junit:junit", version.ref = "junit" }
