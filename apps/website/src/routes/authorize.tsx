@@ -181,15 +181,13 @@ function NativeRequest({ q, me }: { q: Search; me: Me }) {
   );
 }
 
-/** The account's avatar, colored from its name as in every client (libs/design/components.md, Avatar). */
+/** The account's avatar, in the gray of every client (libs/design/components.md, Avatar). */
 function Avatar({ name }: { name: string }) {
-  let hue = 0;
-  for (const c of name) hue = (hue * 31 + c.codePointAt(0)!) % 360;
   return (
     <span
       aria-hidden
-      className="flex size-9 shrink-0 items-center justify-center rounded-full font-semibold text-white"
-      style={{ fontSize: 36 * 0.42, background: `hsl(${hue} 42% 44%)` }}
+      className="flex size-9 shrink-0 items-center justify-center rounded-full bg-[#8E8E93] font-semibold text-white"
+      style={{ fontSize: 36 * 0.42 }}
     >
       {[...name][0]?.toUpperCase()}
     </span>
