@@ -32,6 +32,7 @@ type adminState struct {
 	health    task[*systemv1.GetHealthResponse]
 	users     task[[]*userv1.User]
 	people    usersState
+	server    serverSettingsState
 	libraries librariesState
 	libs      task[[]*libraryv1.Library]
 	sessions  task[[]*sessionv1.Session]

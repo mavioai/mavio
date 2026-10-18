@@ -34,6 +34,7 @@ func TestAdmin(t *testing.T) {
 	want("Anna", "Guest", "Kids", "Admin", "Managed", "Disabled", "Never signed in")
 	h.save(shots, "settings-users")
 
+	open("Media")
 	open("Libraries")
 	want("Movies", "Movies · 2 folders", "TV Shows · 1 folder")
 	open("Scan")

@@ -22,8 +22,10 @@ import (
 	"github.com/mavioai/mavio/libs/client-rust/capi"
 	capiv1 "github.com/mavioai/mavio/libs/client-rust/capi/gen/mavio/capi/v1"
 	acquisitionv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/acquisition/v1"
+	authv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/auth/v1"
 	libraryv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/library/v1"
 	sessionv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/session/v1"
+	systemv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/system/v1"
 	userv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/user/v1"
 
 	"github.com/mavioai/mavio/apps/desktop/internal/images"
@@ -71,17 +73,19 @@ type fakeCore struct {
 	servers []*capiv1.ServerRecord
 	api     http.Handler // the server's API, which CallServer calls
 	// prefs and sessions are the user's on the server's API.
-	prefs         *userv1.PlaybackPreferences
-	sessions      []*sessionv1.Session
-	taskRuns      int                      // the tasks run
-	scans         int                      // the libraries scanned
-	titleRequests []*acquisitionv1.Request // the requests of titles
-	discovers     []*acquisitionv1.DiscoverRequest
-	blocked       []int32 // the collections blocklisted
-	users         []*userv1.User
-	libraries     []*libraryv1.Library
-	invitations   []*userv1.Invitation
-	passwords     map[string]string // set by user
+	prefs          *userv1.PlaybackPreferences
+	sessions       []*sessionv1.Session
+	taskRuns       int                      // the tasks run
+	scans          int                      // the libraries scanned
+	titleRequests  []*acquisitionv1.Request // the requests of titles
+	discovers      []*acquisitionv1.DiscoverRequest
+	blocked        []int32 // the collections blocklisted
+	users          []*userv1.User
+	libraries      []*libraryv1.Library
+	invitations    []*userv1.Invitation
+	passwords      map[string]string // set by user
+	serverSettings *systemv1.ServerSettings
+	apiKeys        []*authv1.ApiKey
 
 	mu       sync.Mutex
 	calls    []string

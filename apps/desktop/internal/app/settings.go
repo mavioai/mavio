@@ -43,8 +43,11 @@ type settingsSection struct {
 
 var settingsSections = []settingsSection{
 	{id: "overview", icon: "server", color: ui.RGB(0x8E, 0x8E, 0x93), title: "settings.overview", admin: true},
+	{id: "general", icon: "settings", color: ui.RGB(0x8E, 0x8E, 0x93), title: "settings.general", admin: true},
 	{id: "users", icon: "users", color: ui.RGB(0xFF, 0x95, 0x00), title: "settings.users", admin: true},
+	{id: "api-keys", icon: "lock", color: ui.RGB(0x63, 0x63, 0x66), title: "settings.apiKeys", admin: true},
 	{id: "libraries", icon: "folder", color: ui.RGB(0x00, 0x7A, 0xFF), title: "settings.libraries", admin: true},
+	{id: "transcoding", icon: "quality", color: ui.RGB(0xFF, 0x2D, 0x55), title: "settings.transcoding", admin: true},
 	{id: "activity", icon: "activity", color: ui.RGB(0xFF, 0x2D, 0x55), title: "settings.activity", admin: true},
 	{id: "tasks", icon: "pending", color: ui.RGB(0x58, 0x56, 0xD6), title: "settings.tasks", admin: true},
 	{id: "logs", icon: "info", color: ui.RGB(0x8E, 0x8E, 0x93), title: "settings.logs", admin: true},
@@ -73,7 +76,7 @@ type settingsMenu struct {
 }
 
 var settingsMenus = []settingsMenu{
-	{id: "media", icon: "movies", color: ui.RGB(0xFF, 0x9F, 0x0A), title: "settings.mediaMenu", sections: []string{"libraries"}},
+	{id: "media", icon: "movies", color: ui.RGB(0xFF, 0x9F, 0x0A), title: "settings.mediaMenu", sections: []string{"libraries", "transcoding"}},
 	{id: "maintenance", icon: "admin", color: ui.RGB(0x8E, 0x8E, 0x93), title: "settings.maintenanceMenu", sections: []string{"activity", "tasks", "logs"}},
 }
 
@@ -85,7 +88,7 @@ var settingsGroups = []struct {
 	server  bool
 }{
 	{"settings.thisDevice", []string{"appearance", "playback", "subtitles-audio"}, false},
-	{"settings.serverGroup", []string{"overview", "users", "devices", "media", "maintenance"}, true},
+	{"settings.serverGroup", []string{"overview", "general", "users", "devices", "api-keys", "media", "maintenance"}, true},
 }
 
 func menuOf(id string) (settingsMenu, bool) {
@@ -395,8 +398,14 @@ func (a *App) settingsSection(c *ui.Context, r *ui.Route, id string) {
 		a.devicesSection(c)
 	case "overview":
 		a.overviewSection(c)
+	case "general":
+		a.generalSection(c)
 	case "users":
 		a.usersSection(c, r)
+	case "api-keys":
+		a.apiKeysSection(c)
+	case "transcoding":
+		a.transcodingSection(c)
 	case "libraries":
 		a.librariesSection(c, r)
 	case "activity":

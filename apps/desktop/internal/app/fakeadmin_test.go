@@ -9,6 +9,7 @@ import (
 	"google.golang.org/protobuf/types/known/durationpb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
+	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/auth/v1/authv1connect"
 	libraryv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/library/v1"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/library/v1/libraryv1connect"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/storage/v1/storagev1connect"
@@ -47,7 +48,11 @@ func (f *fakeCore) handleAdmin(mux *http.ServeMux) {
 	mux.Handle(systemv1connect.NewActivityServiceHandler(&fakeActivity{f: f}))
 	mux.Handle(libraryv1connect.NewLibraryServiceHandler(&fakeLibraries{f: f}))
 	mux.Handle(storagev1connect.NewStorageServiceHandler(&fakeStorage{f: f}))
+	mux.Handle(systemv1connect.NewPluginManagementServiceHandler(fakePlugins{}))
+	mux.Handle(authv1connect.NewAuthServiceHandler(&fakeAuth{f: f}))
 	f.libraries = fakeLibraryList()
+	f.serverSettings = fakeServerSettings()
+	f.apiKeys = fakeApiKeyList()
 }
 
 // tsAgo returns a time a length of time before now, as a timestamp.
