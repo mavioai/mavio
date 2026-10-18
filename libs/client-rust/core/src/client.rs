@@ -8,9 +8,9 @@ use std::time::{Duration, SystemTime};
 
 use mavio_api::proto::mavio::hub::v1::{GetHubRequest, ListHubsRequest, ListHubsResponse};
 use mavio_api::proto::mavio::library::v1::{
-    GetItemRequest, GetItemResponse, ImageKind, Item, ItemKind, LibraryKind, ListItemsRequest,
-    ListLibrariesRequest, ListLibrariesResponse, ListSimilarItemsRequest, SortField, SortSpec,
-    StreamKind,
+    GetItemRequest, GetItemResponse, GetPersonRequest, ImageKind, Item, ItemKind, LibraryKind,
+    ListItemsRequest, ListLibrariesRequest, ListLibrariesResponse, ListSimilarItemsRequest,
+    SortField, SortSpec, StreamKind,
 };
 use mavio_api::proto::mavio::session::v1::__buffa::oneof::event::Kind;
 use mavio_api::proto::mavio::session::v1::Event;
@@ -176,6 +176,10 @@ pub struct Filter {
     pub favorite: bool,
     /// Only items of this genre.
     pub genre: Option<String>,
+    /// Only items with this keyword.
+    pub tag: Option<String>,
+    /// Only items of this studio or network.
+    pub studio: Option<String>,
 }
 
 /// A person credited on an item.
@@ -240,11 +244,34 @@ pub struct AudioStream {
     pub default: bool,
 }
 
+/// A person of a server's library, with what the library credits them in.
+#[derive(Debug, Clone, PartialEq)]
+pub struct PersonDetails {
+    /// Their name.
+    pub name: String,
+    /// Their biography.
+    pub overview: Option<String>,
+    /// When they were born.
+    pub born: Option<SystemTime>,
+    /// When they died.
+    pub died: Option<SystemTime>,
+    /// Where they were born.
+    pub birth_place: Option<String>,
+    /// Their photo.
+    pub photo: Option<Artwork>,
+    /// Pages about them on other sites.
+    pub links: Vec<ExternalLink>,
+    /// The movies, series and episodes crediting them, last released first.
+    pub items: Vec<Card>,
+}
+
 /// An item's details.
 #[derive(Debug, Clone, PartialEq)]
 pub struct Details {
     /// The item, as its card.
     pub card: Card,
+    /// The library holding it.
+    pub library_id: Option<String>,
     /// The name of its server.
     pub server_name: String,
     /// What it is about.
@@ -1057,6 +1084,8 @@ impl Core {
                 played: filter.played,
                 favorite: filter.favorite.then_some(true),
                 genres: filter.genre.iter().cloned().collect(),
+                tags: filter.tag.iter().cloned().collect(),
+                studios: filter.studio.iter().cloned().collect(),
                 offset: Some(offset as i32),
                 limit: Some(limit as i32),
                 ..Default::default()
@@ -1072,6 +1101,74 @@ impl Core {
                 .map(|i| Card::new(&conn, server_id, i))
                 .collect(),
             total: Some(total),
+        })
+    }
+
+    /// A person of a server's library and the movies, series and episodes
+    /// crediting them.
+    pub async fn person(&self, server_id: &str, person_id: &str) -> Result<PersonDetails> {
+        let server = self.servers.get(server_id)?;
+        let conn = self.servers.connection(server_id)?;
+        let base = self
+            .base(&server)
+            .ok_or_else(|| Error::Invalid(format!("address of {}", server.name)))?;
+        let items = conn.items();
+        let (person, credited) = tokio::join!(
+            items.get_person(GetPersonRequest {
+                id: Some(person_id.to_owned()),
+                ..Default::default()
+            }),
+            items.list_items(ListItemsRequest {
+                person_id: Some(person_id.to_owned()),
+                kinds: [
+                    ItemKind::ITEM_KIND_MOVIE,
+                    ItemKind::ITEM_KIND_SERIES,
+                    ItemKind::ITEM_KIND_EPISODE
+                ]
+                .into_iter()
+                .map(Into::into)
+                .collect(),
+                sort: vec![SortSpec {
+                    field: Some(SortField::SORT_FIELD_PREMIERE_DATE.into()),
+                    descending: Some(true),
+                    ..Default::default()
+                }],
+                ..Default::default()
+            }),
+        );
+        let p = person?
+            .into_owned()
+            .person
+            .as_option()
+            .cloned()
+            .unwrap_or_default();
+        let photo = Item {
+            images: p.images.clone(),
+            ..Default::default()
+        };
+        Ok(PersonDetails {
+            name: p.name.clone().unwrap_or_default(),
+            overview: details::non_empty(&p.overview),
+            born: details::time(p.birth_date.as_option()),
+            died: details::time(p.death_date.as_option()),
+            birth_place: details::non_empty(&p.birth_place),
+            photo: view::artwork(&base, &photo, ImageKind::IMAGE_KIND_PRIMARY),
+            links: p
+                .external_urls
+                .iter()
+                .filter_map(|l| {
+                    Some(ExternalLink {
+                        name: details::non_empty(&l.name)?,
+                        url: details::non_empty(&l.url)?,
+                    })
+                })
+                .collect(),
+            items: credited?
+                .into_owned()
+                .items
+                .iter()
+                .map(|i| Card::new(&conn, server_id, i))
+                .collect(),
         })
     }
 
@@ -1254,6 +1351,7 @@ impl Core {
         };
 
         Ok(Details {
+            library_id: details::non_empty(&item.library_id),
             server_name: server.name.clone(),
             overview: item.overview.clone().filter(|s| !s.is_empty()),
             tagline: item.tagline.clone().filter(|s| !s.is_empty()),
@@ -1514,8 +1612,8 @@ impl Core {
 mod tests {
     use mavio_api::proto::mavio::hub::v1::Hub;
     use mavio_api::proto::mavio::library::v1::{
-        Credit, CreditKind, ExtraKind, HubKind, ItemKind, ListItemsResponse,
-        ListSimilarItemsResponse, MediaSource, MediaStream, Person,
+        Credit, CreditKind, ExternalUrl, ExtraKind, GetPersonResponse, HubKind, ItemKind,
+        ListItemsResponse, ListSimilarItemsResponse, MediaSource, MediaStream, Person,
     };
 
     use super::*;
@@ -1640,6 +1738,81 @@ mod tests {
         let a = fake_server("sa", "Home").serve().await;
         core.servers.sign_in(&a, "me", "secret").await.unwrap();
         assert_eq!(core.sign_in_state().unwrap(), SignInState::Standalone);
+    }
+
+    #[tokio::test]
+    async fn a_person_carries_the_items_crediting_them() {
+        let (core, _) = core();
+        let a = fake_server("sa", "Home");
+        a.unary(
+            "/mavio.library.v1.ItemService/GetPerson",
+            |_, req: GetPersonRequest| {
+                assert_eq!(req.id.as_deref(), Some("p1"));
+                Ok(GetPersonResponse {
+                    person: Person {
+                        id: Some("p1".into()),
+                        name: Some("Ada".into()),
+                        overview: Some(String::new()),
+                        birth_place: Some("London".into()),
+                        external_urls: vec![ExternalUrl {
+                            name: Some("IMDb".into()),
+                            url: Some("https://www.imdb.com/name/nm1".into()),
+                            ..Default::default()
+                        }],
+                        ..Default::default()
+                    }
+                    .into(),
+                    ..Default::default()
+                })
+            },
+        );
+        a.unary(
+            "/mavio.library.v1.ItemService/ListItems",
+            |_, req: ListItemsRequest| {
+                assert_eq!(req.person_id.as_deref(), Some("p1"));
+                assert_eq!(req.kinds.len(), 3, "got = {:?}", req.kinds);
+                Ok(ListItemsResponse {
+                    items: vec![movie("m1", "1")],
+                    ..Default::default()
+                })
+            },
+        );
+        let a = a.serve().await;
+        core.servers.sign_in(&a, "me", "secret").await.unwrap();
+
+        let got = core.person("sa", "p1").await.unwrap();
+        assert_eq!(got.name, "Ada");
+        assert_eq!(got.overview, None, "got = {:?}, want = None", got.overview);
+        assert_eq!(got.birth_place.as_deref(), Some("London"));
+        assert_eq!(got.links.len(), 1, "got = {:?}", got.links);
+        assert_eq!(got.items.len(), 1, "got = {:?}", got.items);
+        assert_eq!(got.items[0].item_id, "m1");
+    }
+
+    #[tokio::test]
+    async fn a_library_is_narrowed_to_a_keyword_or_studio() {
+        let (core, _) = core();
+        let a = fake_server("sa", "Home");
+        a.unary(
+            "/mavio.library.v1.ItemService/ListItems",
+            |_, req: ListItemsRequest| {
+                assert_eq!(req.tags, vec!["heist".to_string()]);
+                assert_eq!(req.studios, vec!["A24".to_string()]);
+                assert!(req.genres.is_empty(), "got = {:?}, want = []", req.genres);
+                Ok(ListItemsResponse::default())
+            },
+        );
+        let a = a.serve().await;
+        core.servers.sign_in(&a, "me", "secret").await.unwrap();
+
+        let filter = Filter {
+            tag: Some("heist".into()),
+            studio: Some("A24".into()),
+            ..Default::default()
+        };
+        core.library_items("sa", "lib", Sort::Name, &filter, 0, 50)
+            .await
+            .unwrap();
     }
 
     #[tokio::test]

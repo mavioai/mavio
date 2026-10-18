@@ -6,8 +6,8 @@ use std::time::{Duration, SystemTime};
 use mavio_core::{
     Account, AccountMode, Artwork, AudioStream, Card, CardKind, CreditEntry, Details, DeviceInfo,
     DownloadEntry, DownloadState, Filter, FoundServer, Libraries, LibraryEntry, LibraryType, Page,
-    PlaybackOptions, Row, RowContent, RowKind, SearchResults, ServerInfo, ServerRecord,
-    SignInState, Sort, Source, StreamState, TitleCard, Transfer, Version,
+    PersonDetails, PlaybackOptions, Row, RowContent, RowKind, SearchResults, ServerInfo,
+    ServerRecord, SignInState, Sort, Source, StreamState, TitleCard, Transfer, Version,
 };
 use mavio_core::{
     AccountSecurity, DeviceSession, Passkey, PlaybackPreferences, RemoteCommand, RemotePlayback,
@@ -246,6 +246,10 @@ pub struct Filter {
     pub played: Option<bool>,
     pub favorite: bool,
     pub genre: Option<String>,
+    #[uniffi(default = None)]
+    pub tag: Option<String>,
+    #[uniffi(default = None)]
+    pub studio: Option<String>,
 }
 
 #[uniffi::remote(Record)]
@@ -331,6 +335,7 @@ pub struct AudioStream {
 #[uniffi::remote(Record)]
 pub struct Details {
     pub card: Card,
+    pub library_id: Option<String>,
     pub server_name: String,
     pub overview: Option<String>,
     pub tagline: Option<String>,
@@ -367,6 +372,18 @@ pub struct Details {
     pub next: Option<Episode>,
     pub extras: Vec<Extra>,
     pub collection: Option<CollectionLink>,
+}
+
+#[uniffi::remote(Record)]
+pub struct PersonDetails {
+    pub name: String,
+    pub overview: Option<String>,
+    pub born: Option<SystemTime>,
+    pub died: Option<SystemTime>,
+    pub birth_place: Option<String>,
+    pub photo: Option<Artwork>,
+    pub links: Vec<ExternalLink>,
+    pub items: Vec<Card>,
 }
 
 #[uniffi::remote(Enum)]

@@ -18,9 +18,9 @@ use mavio_api::proto::mavio::session::v1::__buffa::oneof::event::Kind;
 use mavio_api::proto::mavio::session::v1::Event;
 use mavio_core::{
     Account, AccountSecurity, Core, Details, DeviceInfo, DeviceSession, DownloadEntry, Filter,
-    FoundServer, Libraries, Page, PlaybackOptions, PlaybackPreferences, RemoteCommand, Row,
-    SearchResults, ServerInfo, ServerRecord, SignInState, Sort, Store, StreamState, SwitchableUser,
-    TotpSetup, Transfer,
+    FoundServer, Libraries, Page, PersonDetails, PlaybackOptions, PlaybackPreferences,
+    RemoteCommand, Row, SearchResults, ServerInfo, ServerRecord, SignInState, Sort, Store,
+    StreamState, SwitchableUser, TotpSetup, Transfer,
 };
 use tokio::runtime::Runtime;
 
@@ -903,6 +903,12 @@ impl Client {
     /// An item's details.
     pub async fn details(&self, server_id: String, item_id: String) -> Result<Details> {
         self.call(|c| async move { c.details(&server_id, &item_id).await })
+            .await
+    }
+
+    /// A person of a server's library and what it credits them in.
+    pub async fn person(&self, server_id: String, person_id: String) -> Result<PersonDetails> {
+        self.call(|c| async move { c.person(&server_id, &person_id).await })
             .await
     }
 

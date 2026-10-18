@@ -24,7 +24,7 @@ mod view;
 pub use account::{Account, BrowserSignIn, LinkCode, MAVIO_DEV_API, SignInState};
 pub use client::{
     AudioStream, Core, CreditEntry, Details, DownloadEntry, Filter, HomeObserver, Libraries,
-    LibraryEntry, LibraryType, Listener, Page, SearchResults, Sort, Source,
+    LibraryEntry, LibraryType, Listener, Page, PersonDetails, SearchResults, Sort, Source,
 };
 pub use connection::{Connection, DEFAULT_PORT, parse_address};
 pub use details::{
