@@ -66,7 +66,10 @@ enum ServerEntry: Hashable {
     /// The entries the user sees: an administrator's all, others' the
     /// sections any user has; a menu left with one section is that section.
     static func shown(admin: Bool) -> [ServerEntry] {
-        let top: [ServerEntry] = [.section(.overview), .section(.devices), .menu(.maintenance)]
+        let top: [ServerEntry] = [
+            .section(.overview), .section(.general), .section(.devices), .section(.apiKeys), .menu(.media),
+            .menu(.maintenance),
+        ]
         return top.compactMap { entry in
             switch entry {
             case .section(let s): return s.forAnyone || admin ? entry : nil
@@ -108,11 +111,12 @@ enum ServerEntry: Hashable {
 
 /// A menu of the Server group's second level.
 enum ServerMenu: Hashable {
-    case maintenance
+    case media, maintenance
 
     func sections(admin: Bool) -> [ServerSection] {
         let all: [ServerSection] =
             switch self {
+            case .media: [.transcoding]
             case .maintenance: [.activity, .issues, .tasks, .logs, .backups]
             }
         return all.filter { admin || $0.forAnyone }
@@ -120,18 +124,21 @@ enum ServerMenu: Hashable {
 
     var title: String {
         switch self {
+        case .media: MavioStrings.settingsMediaMenu
         case .maintenance: MavioStrings.settingsMaintenanceMenu
         }
     }
 
     var icon: String {
         switch self {
+        case .media: "movies"
         case .maintenance: "admin"
         }
     }
 
     var color: Color {
         switch self {
+        case .media: Color(hex: 0xFF9F0A)
         case .maintenance: Color(hex: 0x8E8E93)
         }
     }
@@ -163,7 +170,7 @@ private struct ServerMenuView: View {
 
 /// A section of the Server group.
 enum ServerSection: Hashable {
-    case overview, devices, activity, issues, tasks, logs, backups
+    case overview, general, devices, apiKeys, transcoding, activity, issues, tasks, logs, backups
 
     /// Whether users who do not administer the server see it.
     var forAnyone: Bool { self == .devices || self == .issues }
@@ -171,6 +178,9 @@ enum ServerSection: Hashable {
     var title: String {
         switch self {
         case .overview: MavioStrings.settingsOverview
+        case .general: MavioStrings.settingsGeneral
+        case .apiKeys: MavioStrings.settingsApiKeys
+        case .transcoding: MavioStrings.settingsTranscoding
         case .devices: MavioStrings.settingsDevices
         case .activity: MavioStrings.settingsActivity
         case .issues: MavioStrings.settingsIssues
@@ -183,6 +193,9 @@ enum ServerSection: Hashable {
     var icon: String {
         switch self {
         case .overview: "server"
+        case .general: "settings"
+        case .apiKeys: "lock"
+        case .transcoding: "quality"
         case .devices: "devices"
         case .activity: "activity"
         case .issues: "error"
@@ -194,7 +207,9 @@ enum ServerSection: Hashable {
 
     var color: Color {
         switch self {
-        case .overview, .logs: Color(hex: 0x8E8E93)
+        case .overview, .general, .logs: Color(hex: 0x8E8E93)
+        case .apiKeys: Color(hex: 0x636366)
+        case .transcoding: Color(hex: 0xFF2D55)
         case .devices: Color(hex: 0x32ADE6)
         case .activity: Color(hex: 0xFF2D55)
         case .issues: Color(hex: 0xFF9500)
@@ -205,6 +220,9 @@ enum ServerSection: Hashable {
     @MainActor @ViewBuilder func view(_ server: ServerRecord) -> some View {
         switch self {
         case .overview: OverviewView(server: server)
+        case .general: GeneralView(server: server)
+        case .apiKeys: ApiKeysView(server: server)
+        case .transcoding: TranscodingView(server: server)
         case .devices: DevicesView(server: server)
         case .activity: ActivityView(server: server)
         case .issues: IssuesView(server: server)
