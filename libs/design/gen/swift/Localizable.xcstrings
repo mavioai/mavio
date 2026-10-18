@@ -9037,6 +9037,42 @@
         }
       }
     },
+    "auth.connectToServer": {
+      "comment": "Opens signing in to a server by its address, and titles that step.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connect to a Server"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "连接到服务器"
+          }
+        }
+      }
+    },
+    "auth.serverAddressMessage": {
+      "comment": "Line above the field of a server's address.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enter the address of your Mavio server."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "输入你的 Mavio 服务器地址。"
+          }
+        }
+      }
+    },
     "auth.useLinkCode": {
       "comment": "Signs a Mavio account in with a code approved on another device.",
       "extractionState": "manual",
@@ -9051,6 +9087,24 @@
           "stringUnit": {
             "state": "translated",
             "value": "使用连接码"
+          }
+        }
+      }
+    },
+    "auth.openInBrowser": {
+      "comment": "Opens the server's address in the browser to set it up.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open in Browser"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在浏览器中打开"
           }
         }
       }
