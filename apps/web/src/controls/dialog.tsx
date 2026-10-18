@@ -8,7 +8,7 @@ import { useBlocker } from "@tanstack/react-router";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 
 import { t } from "../i18n.ts";
-import { prefs } from "../prefs.ts";
+import { prefs, usePrefs } from "../prefs.ts";
 import { Icon } from "../icon.tsx";
 import { Button } from "../ui.tsx";
 import { backdrop, dialogFrame } from "./styles.ts";
@@ -34,6 +34,18 @@ function useOpener() {
     opener.current = (menu?.id && document.querySelector<HTMLElement>(`[aria-controls="${CSS.escape(menu.id)}"]`)) || active;
   }
   return opener;
+}
+
+/**
+ * On the television the arrows move focus within a dialog (shell/spatial.ts),
+ * which Base UI's popup would keep from reaching the page.
+ */
+export function useDialogKeys() {
+  const { tv } = usePrefs();
+  if (!tv) return undefined;
+  return (e: { key: string; preventBaseUIHandler: () => void }) => {
+    if (e.key.startsWith("Arrow")) e.preventBaseUIHandler();
+  };
 }
 
 /** The ways the dialogs open close, the last opened last. */
@@ -87,6 +99,7 @@ export function Modal({
 }) {
   const opener = useOpener();
   const [asking, setAsking] = useState(false);
+  const keys = useDialogKeys();
   const close = () => (changed ? setAsking(true) : onClose());
   useBackCloses(close);
   return (
@@ -103,7 +116,7 @@ export function Modal({
       )}
       <Dialog.Portal>
         <Dialog.Backdrop className={backdrop} />
-        <Dialog.Popup aria-modal finalFocus={opener} className={`${dialogFrame} ${widths[width ?? (wide ? "wide" : "narrow")]}`}>
+        <Dialog.Popup aria-modal finalFocus={opener} onKeyDown={keys} className={`${dialogFrame} ${widths[width ?? (wide ? "wide" : "narrow")]}`}>
           <div className="flex max-h-[85vh] min-h-0 flex-col gap-3 p-6">
             <Dialog.Title className="type-title2">{title}</Dialog.Title>
             {children}
@@ -120,12 +133,13 @@ export function Modal({
  */
 export function Sheet({ label, width = "narrow", className, onClose, children }: { label: string; width?: keyof typeof widths; className?: string; onClose: () => void; children: ReactNode }) {
   const opener = useOpener();
+  const keys = useDialogKeys();
   useBackCloses(onClose);
   return (
     <Dialog.Root open onOpenChange={(open) => !open && onClose()}>
       <Dialog.Portal>
         <Dialog.Backdrop className={backdrop} />
-        <Dialog.Popup aria-modal aria-label={label} finalFocus={opener} className={`${dialogFrame} ${widths[width]} ${className ?? ""}`}>
+        <Dialog.Popup aria-modal aria-label={label} finalFocus={opener} onKeyDown={keys} className={`${dialogFrame} ${widths[width]} ${className ?? ""}`}>
           {children}
         </Dialog.Popup>
       </Dialog.Portal>
@@ -165,12 +179,13 @@ export function Confirm({
   onConfirm: () => void;
 }) {
   const opener = useOpener();
+  const keys = useDialogKeys();
   useBackCloses(onCancel);
   return (
     <AlertDialog.Root open onOpenChange={(open) => !open && onCancel()}>
       <AlertDialog.Portal>
         <AlertDialog.Backdrop className={backdrop} />
-        <AlertDialog.Popup aria-modal finalFocus={opener} className={`${dialogFrame} ${widths.narrow} gap-3 p-6`}>
+        <AlertDialog.Popup aria-modal finalFocus={opener} onKeyDown={keys} className={`${dialogFrame} ${widths.narrow} gap-3 p-6`}>
           <AlertDialog.Title className="type-title3">{title}</AlertDialog.Title>
           {message && <AlertDialog.Description className="type-callout break-words text-text-secondary">{message}</AlertDialog.Description>}
           <div className="mt-2 flex justify-end gap-2">

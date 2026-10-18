@@ -132,6 +132,8 @@ export function Picker({
   labels: { placeholder: string; empty: string; all: string; count: (n: number) => string; first: (shown: number, n: number) => string };
   className?: string;
 }) {
+  const { tv } = usePrefs();
+  const [open, setOpen] = useState(false);
   const selected = options.find((o) => o.value === value) ?? null;
   // What is typed while the popup is open; closed, the field shows the option chosen.
   const [query, setQuery] = useState<string | null>(null);
@@ -149,7 +151,11 @@ export function Picker({
       onValueChange={(o: PickerOption | null) => onChange(o?.value)}
       inputValue={query ?? selected?.label ?? ""}
       onInputValueChange={(q, { reason }) => setQuery(["input-change", "input-clear", "input-paste"].includes(reason) ? q : null)}
-      onOpenChange={(open) => !open && setQuery(null)}
+      open={open}
+      onOpenChange={(o) => {
+        setOpen(o);
+        if (!o) setQuery(null);
+      }}
       itemToStringLabel={(o: PickerOption) => o.label}
       isItemEqualToValue={(a: PickerOption, b: PickerOption) => a.value === b.value}
       filter={(o: PickerOption) => pickerMatch(o, searched)}
@@ -157,7 +163,26 @@ export function Picker({
       autoHighlight
     >
       <div className={`relative ${className ?? ""}`}>
-        <Combobox.Input aria-label={label} placeholder={labels.placeholder} className={`${input} pe-9`} />
+        {/* On the television OK opens its options, as a select's, and up
+            and down move focus on while they are closed. */}
+        <Combobox.Input
+          aria-label={label}
+          placeholder={labels.placeholder}
+          data-tv-list={tv || undefined}
+          onKeyDown={
+            tv
+              ? (e) => {
+                  if (open) return;
+                  if (e.key === "ArrowDown" || e.key === "ArrowUp") e.preventBaseUIHandler();
+                  else if (e.key === "Enter") {
+                    e.preventDefault();
+                    setOpen(true);
+                  }
+                }
+              : undefined
+          }
+          className={`${input} pe-9`}
+        />
         <Combobox.Trigger aria-label={label} className="absolute inset-y-0 end-0 flex w-9 items-center justify-center text-text-secondary">
           <Icon name="expand" size={14} />
         </Combobox.Trigger>

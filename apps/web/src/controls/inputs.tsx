@@ -100,6 +100,8 @@ export function Slider({
   light?: boolean;
   className?: string;
 }) {
+  const { tv } = usePrefs();
+  // On the television up and down move focus on, as they do past a field.
   return (
     <BaseSlider.Root
       value={value}
@@ -115,6 +117,11 @@ export function Slider({
           <BaseSlider.Indicator className={`rounded-full ${light ? "bg-white" : "bg-accent"}`} />
           <BaseSlider.Thumb
             aria-label={label}
+            onKeyDown={
+              tv
+                ? (e) => (e.key === "ArrowDown" || e.key === "ArrowUp") && (e as typeof e & { preventBaseUIHandler: () => void }).preventBaseUIHandler()
+                : undefined
+            }
             getAriaValueText={valueText ? (_, v) => valueText(v) : undefined}
             className={`rounded-full bg-white shadow-level1 outline-none focus-visible:ring-2 focus-visible:ring-focus ${
               light ? "size-3.5 opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100 data-dragging:opacity-100" : "size-5"
@@ -153,8 +160,11 @@ export function NumberField({
   disabled?: boolean;
   className?: string;
 }) {
+  const { tv } = usePrefs();
   const button =
     "flex w-8 shrink-0 items-center justify-center text-text-secondary hover:bg-fill hover:text-on-background data-disabled:opacity-40 data-disabled:hover:bg-transparent";
+  // On the television up and down move focus on rather than stepping the
+  // value, which the keyboard of fields types (shell/tv-keyboard.tsx).
   return (
     <BaseNumberField.Root
       value={value ?? null}
@@ -173,6 +183,7 @@ export function NumberField({
         </BaseNumberField.Decrement>
         <BaseNumberField.Input
           aria-label={label}
+          onKeyDown={tv ? (e) => (e.key === "ArrowDown" || e.key === "ArrowUp") && e.preventBaseUIHandler() : undefined}
           placeholder={placeholder}
           className="w-full min-w-0 bg-transparent px-1 text-center type-body text-on-background tabular-nums outline-none placeholder:text-text-tertiary"
         />
@@ -203,9 +214,22 @@ export function SuggestField({
   placeholder?: string;
   className: string;
 }) {
+  const { tv } = usePrefs();
+  // On the television up and down move focus on while no suggestions show;
+  // OK opens the keyboard of fields (shell/tv-keyboard.tsx).
   return (
     <Autocomplete.Root items={suggestions} value={value} onValueChange={onChange} itemToStringValue={(s) => s.value}>
-      <Autocomplete.Input aria-label={label} placeholder={placeholder} className={className} />
+      <Autocomplete.Input
+        aria-label={label}
+        placeholder={placeholder}
+        onKeyDown={
+          tv
+            ? (e) =>
+                (e.key === "ArrowDown" || e.key === "ArrowUp") && e.currentTarget.getAttribute("aria-expanded") !== "true" && e.preventBaseUIHandler()
+            : undefined
+        }
+        className={className}
+      />
       <Autocomplete.Portal>
         <Autocomplete.Positioner sideOffset={4} align="start" className="z-50 outline-none">
           <Autocomplete.Popup className={`${popup} max-h-[min(var(--available-height),20rem)] w-[var(--anchor-width)] overflow-y-auto data-empty:hidden`}>

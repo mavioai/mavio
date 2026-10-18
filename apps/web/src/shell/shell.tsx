@@ -28,6 +28,7 @@ import { usePlace, usePlaceLink, usePlaces } from "./places.ts";
 import { useUpScroll } from "./up.ts";
 import { useSpatialNavigation } from "./spatial.ts";
 import { TvShell } from "./tv.tsx";
+import { TvKeyboard } from "./tv-keyboard.tsx";
 import { useAccount } from "./user-menu.tsx";
 
 export function Shell() {
@@ -40,6 +41,7 @@ export function Shell() {
         <Content />
         <RemoteCommands />
         <GroupIndicator />
+        {tv && <TvKeyboard />}
       </AssistantProvider>
     </SyncPlayProvider>
   );
