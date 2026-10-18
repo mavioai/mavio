@@ -26,6 +26,14 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
     let failure: String?
 
     override init() {
+        #if DEBUG
+            // A debug build trusts the certificate authority of a development
+            // mavio.dev, put in the app's Documents.
+            let ca = URL.documentsDirectory.appending(path: "dev-ca.pem")
+            if FileManager.default.fileExists(atPath: ca.path(percentEncoded: false)) {
+                setenv("MAVIO_EXTRA_CA_CERTS", ca.path(percentEncoded: false), 1)
+            }
+        #endif
         do {
             model = try MainActor.assumeIsolated { try AppModel() }
             failure = nil
