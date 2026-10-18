@@ -129,6 +129,9 @@ sealed interface Route {
     /** A section of a server's settings. */
     data class ServerSetting(val serverId: String, val section: ServerSection) : Route
 
+    /** A menu of a server's settings. */
+    data class ServerMenuPage(val serverId: String, val menu: ServerMenu) : Route
+
     /** Signing in to one more server. */
     data object AddServer : Route
 
@@ -291,6 +294,7 @@ private fun Screen(model: AppModel, route: Route) {
                 Route.Settings -> SettingsScreen(model)
                 is Route.Setting -> SettingsPageScreen(model, route.page)
                 is Route.ServerSetting -> ServerSettingScreen(model, route)
+                is Route.ServerMenuPage -> ServerMenuScreen(route)
                 else -> StatusView(stringResource(R.string.state_loading))
             }
         }

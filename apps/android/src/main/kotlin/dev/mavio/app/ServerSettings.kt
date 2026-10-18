@@ -77,13 +77,40 @@ object Procedure {
     fun system(method: String) = "/mavio.system.v1.SystemService/$method"
     fun plugins(method: String) = "/mavio.system.v1.PluginManagementService/$method"
     fun users(method: String) = "/mavio.user.v1.UserService/$method"
+    fun localization(method: String) = "/mavio.system.v1.LocalizationService/$method"
+    fun auth(method: String) = "/mavio.auth.v1.AuthService/$method"
+    fun activity(method: String) = "/mavio.system.v1.ActivityService/$method"
+    fun tasks(method: String) = "/mavio.system.v1.TaskService/$method"
+    fun backups(method: String) = "/mavio.system.v1.BackupService/$method"
+    fun sessions(method: String) = "/mavio.session.v1.SessionService/$method"
+    fun issues(method: String) = "/mavio.acquisition.v1.IssueService/$method"
+    fun items(method: String) = "/mavio.library.v1.ItemService/$method"
+    fun libraries(method: String) = "/mavio.library.v1.LibraryService/$method"
+    fun storage(method: String) = "/mavio.storage.v1.StorageService/$method"
 }
 
 /** A section of the Server group, as the web UI's. */
 enum class ServerSection(@StringRes val title: Int, @DrawableRes val icon: Int, val color: Color, val forAnyone: Boolean = false) {
     Overview(R.string.settings_overview, R.drawable.ic_server_fill, Color(0xFF8E8E93)),
+    General(R.string.settings_general, R.drawable.ic_settings_fill, Color(0xFF8E8E93)),
     Devices(R.string.settings_devices, R.drawable.ic_devices_fill, Color(0xFF32ADE6), forAnyone = true),
+    ApiKeys(R.string.settings_api_keys, R.drawable.ic_lock_fill, Color(0xFF636366)),
+    Transcoding(R.string.settings_transcoding, R.drawable.ic_quality_fill, Color(0xFFFF2D55)),
 }
+
+/** A menu of the Server group's second level, with its sections. */
+enum class ServerMenu(@StringRes val title: Int, @DrawableRes val icon: Int, val color: Color, val sections: List<ServerSection>) {
+    Media(R.string.settings_media_menu, R.drawable.ic_movies_fill, Color(0xFFFF9F0A), listOf(ServerSection.Transcoding)),
+}
+
+/** The Server group's first level: its sections and menus, in the order a server is set up and kept. */
+private val TOP: List<Any> = listOf(
+    ServerSection.Overview,
+    ServerSection.General,
+    ServerSection.Devices,
+    ServerSection.ApiKeys,
+    ServerMenu.Media,
+)
 
 /**
  * The settings' Server group, as the web UI's on a phone (docs/clients.md
@@ -96,12 +123,14 @@ internal fun LazyListScope.serverGroup(model: AppModel, servers: List<ServerReco
     item(key = "server-group") {
         var serverId by rememberSaveable { mutableStateOf(servers.first().id) }
         val server = servers.firstOrNull { it.id == serverId } ?: servers.first()
-        // Whether the user administers each server, once known.
-        val admin = remember { mutableStateMapOf<String, Boolean>() }
+        // Whether the user administers each server, once known; kept while
+        // pages open over the settings, so that coming back finds the
+        // group as long as it was, and where it was scrolled.
+        var admin by rememberSaveable { mutableStateOf(HashMap<String, Boolean>()) }
         LaunchedEffect(server.id) {
             runCatching {
                 model.client.call(server.id, Procedure.users("GetCurrentUser"), getCurrentUserRequest {}, GetCurrentUserResponse::parseFrom)
-            }.onSuccess { admin[server.id] = it.user.admin }
+            }.onSuccess { admin = HashMap(admin).apply { put(server.id, it.user.admin) } }
         }
         val navigator = LocalNavigator.current
         Group(stringResource(R.string.settings_server_group)) {
@@ -109,11 +138,24 @@ internal fun LazyListScope.serverGroup(model: AppModel, servers: List<ServerReco
                 ChoiceRow(stringResource(R.string.auth_server), servers.map { it.id to it.name }, server.id) { serverId = it }
                 RowDivider()
             }
-            val shown = ServerSection.entries.filter { it.forAnyone || admin[server.id] == true }
-            shown.forEachIndexed { i, section ->
+            // Others see the sections any user has; a menu left with one section is that section.
+            val shown = TOP.mapNotNull { entry ->
+                when (entry) {
+                    is ServerSection -> entry.takeIf { it.forAnyone || admin[server.id] == true }
+                    is ServerMenu -> entry.sections.filter { it.forAnyone || admin[server.id] == true }
+                        .let { if (it.size > 1) entry else it.firstOrNull() }
+                    else -> null
+                }
+            }
+            shown.forEachIndexed { i, entry ->
                 if (i > 0) RowDivider(tiled = true)
-                EntryRow(stringResource(section.title), section.icon, section.color) {
-                    navigator.open(Route.ServerSetting(server.id, section))
+                when (entry) {
+                    is ServerSection -> EntryRow(stringResource(entry.title), entry.icon, entry.color) {
+                        navigator.open(Route.ServerSetting(server.id, entry))
+                    }
+                    is ServerMenu -> EntryRow(stringResource(entry.title), entry.icon, entry.color) {
+                        navigator.open(Route.ServerMenuPage(server.id, entry))
+                    }
                 }
             }
         }
@@ -125,7 +167,28 @@ internal fun LazyListScope.serverGroup(model: AppModel, servers: List<ServerReco
 fun ServerSettingScreen(model: AppModel, route: Route.ServerSetting) {
     when (route.section) {
         ServerSection.Overview -> OverviewPage(model, route.serverId)
+        ServerSection.General -> GeneralPage(model, route.serverId)
         ServerSection.Devices -> DevicesPage(model, route.serverId)
+        ServerSection.ApiKeys -> ApiKeysPage(model, route.serverId)
+        ServerSection.Transcoding -> TranscodingPage(model, route.serverId)
+    }
+}
+
+/** A menu's page: its sections, as the Server group lists its own; only an administrator sees one. */
+@Composable
+fun ServerMenuScreen(route: Route.ServerMenuPage) {
+    val navigator = LocalNavigator.current
+    SettingsList(stringResource(route.menu.title)) {
+        item {
+            Group {
+                route.menu.sections.forEachIndexed { i, section ->
+                    if (i > 0) RowDivider(tiled = true)
+                    EntryRow(stringResource(section.title), section.icon, section.color) {
+                        navigator.open(Route.ServerSetting(route.serverId, section))
+                    }
+                }
+            }
+        }
     }
 }
 

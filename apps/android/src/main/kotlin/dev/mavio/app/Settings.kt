@@ -736,15 +736,24 @@ internal fun LinkRow(label: String, @DrawableRes icon: Int, onClick: () -> Unit)
     }
 }
 
+/** A row's label, with what it means below it. */
+@Composable
+internal fun RowLabel(label: String, detail: String? = null, modifier: Modifier = Modifier) {
+    Column(modifier, verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        Text(label, style = theme.type.body.text)
+        if (detail != null) Text(detail, style = theme.type.footnote.text, color = theme.colors.textSecondary)
+    }
+}
+
 /** A setting turned on and off. */
 @Composable
-internal fun SwitchRow(label: String, checked: Boolean, onChange: (Boolean) -> Unit) {
+internal fun SwitchRow(label: String, checked: Boolean, detail: String? = null, onChange: (Boolean) -> Unit) {
     Row(
-        Modifier.fillMaxWidth().clickable { onChange(!checked) }.heightIn(min = 52.dp).padding(horizontal = 16.dp),
+        Modifier.fillMaxWidth().clickable { onChange(!checked) }.heightIn(min = 52.dp).padding(horizontal = 16.dp, vertical = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s12),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(label, Modifier.weight(1f), style = theme.type.body.text)
+        RowLabel(label, detail, Modifier.weight(1f))
         Switch(
             checked,
             onChange,
@@ -761,20 +770,20 @@ internal fun SwitchRow(label: String, checked: Boolean, onChange: (Boolean) -> U
 
 /** A setting chosen from a menu, showing its choice. */
 @Composable
-internal fun <T> ChoiceRow(label: String, choices: List<Pair<T, String>>, chosen: T, onChoose: (T) -> Unit) {
+internal fun <T> ChoiceRow(label: String, choices: List<Pair<T, String>>, chosen: T, detail: String? = null, onChoose: (T) -> Unit) {
     var open by remember { mutableStateOf(false) }
     Row(
-        Modifier.fillMaxWidth().clickable { open = true }.heightIn(min = 52.dp).padding(horizontal = 16.dp),
+        Modifier.fillMaxWidth().clickable { open = true }.heightIn(min = 52.dp).padding(horizontal = 16.dp, vertical = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s8),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(label, Modifier.weight(1f), style = theme.type.body.text)
+        RowLabel(label, detail, Modifier.weight(1f))
         // The menu opens at the choice.
         Box {
             Row(horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s8), verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     choices.firstOrNull { it.first == chosen }?.second.orEmpty(),
-                    Modifier.widthIn(max = 200.dp),
+                    Modifier.widthIn(max = if (detail == null) 200.dp else 150.dp),
                     style = theme.type.body.text,
                     color = theme.colors.textSecondary,
                     maxLines = 1,
