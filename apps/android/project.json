@@ -4,7 +4,8 @@
     "platform:android"
   ],
   "implicitDependencies": [
-    "android-lib"
+    "android-lib",
+    "proto"
   ],
   "targets": {
     "build": {
@@ -36,6 +37,7 @@
       "inputs": [
         "gradle",
         "^gradle",
+        "{workspaceRoot}/libs/proto/mavio/**/*.proto",
         {
           "dependentTasksOutputFiles": "**/*",
           "transitive": true
@@ -73,6 +75,7 @@
       "inputs": [
         "gradle",
         "^gradle",
+        "{workspaceRoot}/libs/proto/mavio/**/*.proto",
         {
           "dependentTasksOutputFiles": "**/*",
           "transitive": true

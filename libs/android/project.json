@@ -5,7 +5,8 @@
   ],
   "implicitDependencies": [
     "client-rust",
-    "design"
+    "design",
+    "proto"
   ],
   "targets": {
     "core": {
@@ -72,6 +73,7 @@
       "inputs": [
         "gradle",
         "^gradle",
+        "{workspaceRoot}/libs/proto/mavio/**/*.proto",
         {
           "dependentTasksOutputFiles": "**/*"
         }
@@ -93,6 +95,7 @@
       "inputs": [
         "gradle",
         "^gradle",
+        "{workspaceRoot}/libs/proto/mavio/**/*.proto",
         {
           "dependentTasksOutputFiles": "**/*"
         }
@@ -142,6 +145,7 @@
       "inputs": [
         "gradle",
         "^gradle",
+        "{workspaceRoot}/libs/proto/mavio/**/*.proto",
         {
           "dependentTasksOutputFiles": "**/*"
         }
