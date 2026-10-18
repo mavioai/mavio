@@ -223,6 +223,14 @@ input[type="search"]::-webkit-search-cancel-button {
   }
 }
 
+/* Tabs and the choices of segmented controls and pills show the hand, as
+   links do, whatever element draws them. */
+@layer base {
+  :is([role="tab"], [role="radio"]):not(:disabled, [aria-disabled="true"], [data-disabled]) {
+    cursor: pointer;
+  }
+}
+
 /* A card's artwork (libs/design/components.md, States): an accent border
    a little apart from it, on hover with a pointer; TV mode borders the
    card with focus instead. */
