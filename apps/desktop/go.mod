@@ -3,6 +3,7 @@ module github.com/mavioai/mavio/apps/desktop
 go 1.27.1
 
 require (
+	connectrpc.com/connect v1.21.0
 	github.com/ebitengine/purego v0.11.1
 	github.com/egoist/mygo v0.5.5
 	github.com/mavioai/mavio/libs/client-rust/capi v0.0.0-00010101000000-000000000000

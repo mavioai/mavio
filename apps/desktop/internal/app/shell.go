@@ -78,6 +78,12 @@ func (a *App) page(c *ui.Context, r *ui.Route) {
 		a.hubPage(c, r)
 	case r.Match("/item/{server}/{id}"):
 		a.details(c, r, r.Param("server"), r.Param("id"))
+	case r.Match("/credits/{server}/{id}"):
+		a.creditsPage(c, r, r.Param("server"), r.Param("id"), false)
+	case r.Match("/crew/{server}/{id}"):
+		a.creditsPage(c, r, r.Param("server"), r.Param("id"), true)
+	case r.Match("/person/{server}/{id}"):
+		a.person(c, r, r.Param("server"), r.Param("id"))
 	default:
 		a.home(c)
 	}

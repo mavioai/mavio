@@ -25,6 +25,7 @@ type detailsState struct {
 	seasonDetail task[*capiv1.Details]
 	source       int
 	overviewOpen bool
+	info         task[*itemInfo]
 }
 
 // details builds an item's details.
@@ -47,11 +48,22 @@ func (a *App) details(c *ui.Context, r *ui.Route, server, id string) {
 	}
 	d := t.value
 	r.Title(d.GetCard().GetTitle())
+	// Offline, or before the server answers, the core's details tell what
+	// they can.
+	info := a.loadInfo(st, server, id)
+	credits := coreCredits(d)
+	if info.value != nil {
+		credits = a.libraryCredits(server, info.value.item.GetCredits())
+	}
 	ui.Scroll(c).Fill().Children(func() {
 		ui.Column(c).Gap(32).Padding(0, 0, 48).Children(func() {
 			a.detailsHeader(c, st, d)
 			a.episodes(c, st, d)
-			a.credits(c, d)
+			a.castShelf(c, server, id, credits)
+			if info.value != nil {
+				a.extrasShelf(c, server, d, info.value.extras)
+				a.collectionBanner(c, server, d, info.value.collection)
+			}
 			if similar := d.GetSimilar(); len(similar) > 0 {
 				a.shelf(c, key("similar", server, id), style.T(c, "item.similar"), nil, func() {
 					for _, card := range similar {
@@ -59,7 +71,11 @@ func (a *App) details(c *ui.Context, r *ui.Route, server, id string) {
 					}
 				})
 			}
-			a.facts(c, st, d)
+			if info.value != nil {
+				a.about(c, st, d, info.value, credits)
+			} else {
+				a.facts(c, st, d)
+			}
 		})
 	})
 }
@@ -487,31 +503,6 @@ func (a *App) episodeRow(c *ui.Context, e *capiv1.Card, next bool) {
 	if b.Clicked() {
 		a.open(e)
 	}
-}
-
-// credits builds the shelf of the cast and crew.
-func (a *App) credits(c *ui.Context, d *capiv1.Details) {
-	credits := d.GetCredits()
-	if len(credits) == 0 {
-		return
-	}
-	colors := style.Colors(c)
-	a.shelf(c, key("cast", d.GetCard().GetItemId()), style.T(c, "item.cast"), nil, func() {
-		for i, p := range credits {
-			const w = 120
-			ui.Column(c.Key(i)).Width(w).Gap(4).AlignItems(ui.Center).Children(func() {
-				ui.Box(c).Size(w, w).Radius(w / 2).Clip().Background(style.Color(colors.Fill)).Center().Children(func() {
-					if bitmap := a.opts.Images.Get(p.GetPhoto().GetUrl(), w, scale); bitmap != nil {
-						ui.Image(c, bitmap).Fill().Fit(ui.Cover)
-					} else {
-						style.Text(ui.Text(c, initials(p.GetName())), style.Type.Title2).TextColor(style.Color(colors.TextSecondary))
-					}
-				})
-				style.Text(ui.Text(c, p.GetName()), style.Type.Callout).TextColor(style.Color(colors.TextPrimary)).TextAlign(ui.Center).MaxLines(2).Margin(4, 0, 0)
-				style.Text(ui.Text(c, p.GetRole()), style.Type.Footnote).TextColor(style.Color(colors.TextSecondary)).TextAlign(ui.Center).MaxLines(2)
-			})
-		}
-	})
 }
 
 func initials(name string) string {

@@ -65,6 +65,7 @@ type fakeCore struct {
 	s       *screens
 	images  string // the artwork server's URL
 	servers []*capiv1.ServerRecord
+	api     http.Handler // the server's API, which CallServer calls
 
 	mu       sync.Mutex
 	calls    []string
@@ -73,6 +74,7 @@ type fakeCore struct {
 
 func newFakeCore(s *screens, images string, signedIn bool) *fakeCore {
 	f := &fakeCore{s: s, images: images}
+	f.api = f.apiHandler()
 	if signedIn {
 		f.servers = []*capiv1.ServerRecord{f.record()}
 	}
@@ -236,6 +238,8 @@ func (f *fakeCore) Stream(ctx context.Context, req *capiv1.Request, part func(*c
 		m.Playback = pb.Build()
 	case req.HasUpdatePlayback(), req.HasStopPlayback():
 		m.Done = &capiv1.Done{}
+	case req.HasCallServer():
+		return f.callServer(ctx, req.GetCallServer())
 	case req.HasSearch():
 		var cards []*capiv1.Card
 		q := strings.ToLower(req.GetSearch().GetQuery())
@@ -313,6 +317,8 @@ type harness struct {
 	updates chan func()
 	// video is the player's latest video.
 	video *fakeVideo
+	// opened are the URLs opened in the browser.
+	opened []string
 }
 
 func newHarness(t testing.TB, signedIn bool, width, height int) *harness {
@@ -326,6 +332,10 @@ func newHarness(t testing.TB, signedIn bool, width, height int) *harness {
 		Core:   h.core,
 		Images: images.New(ctx, srv.Client(), t.TempDir(), 200, update),
 		Update: update,
+		OpenURL: func(url string) error {
+			h.opened = append(h.opened, url)
+			return nil
+		},
 		NewVideo: func(changed func(mpv.State)) (Video, error) {
 			h.video = &fakeVideo{changed: changed}
 			return h.video, nil

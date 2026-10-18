@@ -1,14 +1,12 @@
 package app
 
 import (
-	"errors"
 	"fmt"
 	"strings"
 	"time"
 
 	"github.com/egoist/mygo/ui"
 
-	"github.com/mavioai/mavio/libs/client-rust/capi"
 	capiv1 "github.com/mavioai/mavio/libs/client-rust/capi/gen/mavio/capi/v1"
 	design "github.com/mavioai/mavio/libs/design/gen/go"
 
@@ -29,8 +27,7 @@ func key(parts ...any) string {
 
 // errorMessage returns what to tell the user of err.
 func errorMessage(c *ui.Context, err error) string {
-	var e *capi.Error
-	if errors.As(err, &e) {
+	if e := coreError(err); e != nil {
 		switch e.Code {
 		case capiv1.Error_CODE_UNAUTHENTICATED:
 			return style.T(c, "auth.wrongPassword")
@@ -94,8 +91,7 @@ func taskStatus[T any](c *ui.Context, t *task[T], retry func(), placeholder func
 		}
 		return true
 	case t.err != nil:
-		var e *capi.Error
-		if errors.As(t.err, &e) && e.Code == capiv1.Error_CODE_UNREACHABLE {
+		if e := coreError(t.err); e != nil && e.Code == capiv1.Error_CODE_UNREACHABLE {
 			statusView(c, "offline", style.T(c, "state.offline"), "", retry)
 		} else {
 			statusView(c, "error", style.T(c, "state.error"), errorMessage(c, t.err), retry)
@@ -226,6 +222,12 @@ func wide(card *capiv1.Card) bool {
 // shelf builds a titled horizontal row of cards; more, when not nil, is
 // its "more" action.
 func (a *App) shelf(c *ui.Context, id, title string, more func(), cards func()) {
+	a.labeledShelf(c, id, title, more, "", cards)
+}
+
+// labeledShelf builds a shelf whose "more" action also shows as a link
+// of label at its end, when label is not empty.
+func (a *App) labeledShelf(c *ui.Context, id, title string, more func(), label string, cards func()) {
 	colors := style.Colors(c)
 	scroll := a.shelfScroll(id)
 	ui.Column(c.Key(id)).Gap(10).Children(func() {
@@ -240,6 +242,9 @@ func (a *App) shelf(c *ui.Context, id, title string, more func(), cards func()) 
 				}
 			}
 			ui.Spacer(c)
+			if label != "" && linkButton(c, label).Clicked() {
+				more()
+			}
 			if scroll.MaxX <= 0 {
 				return
 			}

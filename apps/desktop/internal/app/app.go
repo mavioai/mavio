@@ -115,6 +115,10 @@ type App struct {
 	grids         map[string]*grid
 	libraryStates map[string]*libraryState
 	detailStates  map[string]*detailsState
+	personStates  map[string]*personState
+	creditStates  map[string]*creditsState
+	// bases are the servers' base URLs, for the Connect clients' responses.
+	bases bases
 }
 
 // New returns the App of opts, which runs until ctx ends.
@@ -129,6 +133,8 @@ func New(ctx context.Context, opts Options) *App {
 		grids:         map[string]*grid{},
 		libraryStates: map[string]*libraryState{},
 		detailStates:  map[string]*detailsState{},
+		personStates:  map[string]*personState{},
+		creditStates:  map[string]*creditsState{},
 	}
 	a.loadPreferences()
 	return a
