@@ -218,7 +218,7 @@ export function MenuIconOption({ value, icon, label }: { value: string; icon: Ic
       value={value}
       closeOnClick={false}
       aria-label={label}
-      className={`flex items-center justify-center rounded-full text-text-secondary outline-none data-checked:bg-surface-raised data-checked:text-on-background data-checked:shadow-level1 data-highlighted:text-on-background data-highlighted:ring-2 data-highlighted:ring-focus ${tv ? "size-9" : "size-7"}`}
+      className={`flex items-center justify-center rounded-full text-text-secondary outline-none data-checked:bg-surface-raised data-checked:text-on-background data-checked:shadow-level1 data-highlighted:text-on-background data-highlighted:ring-2 data-highlighted:ring-focus data-highlighted:ring-inset ${tv ? "size-9" : "size-7"}`}
     >
       <Icon name={icon} size={tv ? 18 : 16} />
     </Base.RadioItem>

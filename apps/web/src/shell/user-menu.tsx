@@ -208,7 +208,7 @@ function ThemeSwitch() {
       onChange={(v) => setPrefs({ appearance: v })}
       label={t("settings.appearance")}
       horizontal
-      className="flex shrink-0 rounded-full bg-fill p-0.5"
+      className="flex shrink-0 gap-0.5 rounded-full bg-fill p-0.5"
     >
       {themes.map((th) => (
         <MenuIconOption key={th.value} value={th.value} icon={th.icon} label={th.label()} />
