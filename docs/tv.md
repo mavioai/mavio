@@ -65,7 +65,7 @@ A catalog of Discover is a grid alike, under its name, with focus starting on it
 A television signs a Mavio account in with a code to enter at mavio.dev/link; a new server's setup shows the server's address to open on a computer or phone ([Accounts §6](accounts.md#6-signing-in)).
 
 ### 6.6 Settings
-The settings show the list of their sections — the account, the users to switch to, the sections and menus by group — and, when one is selected, a section in its place, or the list of a menu's sections, with no sidebar. Back returns from a section to its menu or the list and from a menu to the list, with focus on the entry that opened it, and from the list to the page the settings were opened from.
+The settings show the list of their sections — the account, the users to switch to, the sections and menus by group — and, when one is selected, a section in its place, or the list of a menu's sections, with no sidebar. Back returns from a section to its menu or the list and from a menu to the list, with focus on the entry that opened it, and from the list to the page the settings were opened from. A page within a section, as a plugin, a profile or a library, returns to the section, and a page within that, as a custom format, to the page it lies in, each as it was shown, as the plugins on their tab; back goes up past pages beside the one it leaves, as a plugin's tabs or a link of its trail opened, never back through them, and a page opened directly returns to the one it lies in.
 
 ## 7. Player
 

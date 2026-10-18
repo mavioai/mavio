@@ -4,9 +4,9 @@
 // moves to the tab, the page at its top; any deeper page returns to where
 // it was opened from, focus and position as they were.
 import { type ParsedLocation, useRouter } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
-import { menuOf } from "../screens/settings-menus.ts";
+import { isMenu, menuOf } from "../screens/settings-menus.ts";
 import { focusState, type Point, pointOf } from "./focus.ts";
 import { focusable, openPopup } from "./spatial.ts";
 import { typedInto } from "./tv-keyboard.tsx";
@@ -28,6 +28,44 @@ export function parentOf(pathname: string): string {
   if (pathname.includes("/library/")) return "/libraries";
   if (pathname.includes("/title/") || pathname.includes("/discover/")) return "/discover";
   return "/";
+}
+
+/** The settings' parameters naming a page within a section, as a plugin or a profile. */
+const subpages = ["plugin", "catalogs", "library", "user", "remote", "acquisition", "subtitles", "id"];
+
+/** The pages within a page within a section, by the page they lie in. */
+const nested: Record<string, Record<string, string>> = { acquisition: { format: "formats" } };
+
+/**
+ * How deep a page lies in the settings: their list 0, a menu 1, a section
+ * 2, a page within one 3 and a page within that 4; any other page -1.
+ */
+function depthOf(pathname: string, search: Record<string, unknown>): number {
+  if (pathname === "/settings") return 0;
+  if (!pathname.startsWith("/settings/")) return -1;
+  if (isMenu(pathname.slice("/settings/".length))) return 1;
+  if (Object.entries(nested).some(([k, pages]) => typeof search[k] === "string" && Object.hasOwn(pages, search[k]))) return 4;
+  return subpages.some((k) => search[k] !== undefined) ? 3 : 2;
+}
+
+/**
+ * The parameters of the page a page within a section lies in: the page
+ * within it a nested page lies in, else the section as it was shown, as
+ * the plugins with their tab.
+ */
+function upOf(search: Record<string, unknown>): Record<string, unknown> {
+  for (const [k, pages] of Object.entries(nested)) {
+    const page = typeof search[k] === "string" && Object.hasOwn(pages, search[k]) ? pages[search[k]] : undefined;
+    if (page) return { server: search.server, [k]: page };
+  }
+  return Object.fromEntries(Object.entries(search).filter(([k]) => !subpages.includes(k) && k !== "view" && k !== "filter"));
+}
+
+/** The pages of the history by their place in it, as the router saw them. */
+type Entry = { href: string; depth: number };
+
+function indexOf(l: ParsedLocation): number {
+  return (l.state as { __TSR_index?: number }).__TSR_index ?? 0;
 }
 
 /**
@@ -90,11 +128,14 @@ const spots = new Map<string, Spot>();
  */
 export function useTvBack(on = true) {
   const router = useRouter();
+  const [entries] = useState(() => new Map<number, Entry>());
 
   // Each page keeps where focus was when it was left, and gets it back on
   // return; the router restores its scroll.
   useEffect(() => {
     if (!on) return;
+    const first = router.state.location;
+    entries.set(indexOf(first), { href: first.href, depth: depthOf(first.pathname, first.search) });
     const offBefore = router.subscribe("onBeforeNavigate", ({ fromLocation, toLocation }) => {
       const spot = fromLocation && spotOf(document.activeElement);
       if (fromLocation && spot) spots.set(keyOf(fromLocation), spot);
@@ -102,6 +143,7 @@ export function useTvBack(on = true) {
       focusState.restoring = spots.has(keyOf(toLocation));
     });
     const offRendered = router.subscribe("onRendered", ({ toLocation }) => {
+      entries.set(indexOf(toLocation), { href: toLocation.href, depth: depthOf(toLocation.pathname, toLocation.search) });
       const spot = spots.get(keyOf(toLocation));
       if (!spot) {
         focusState.restoring = false;
@@ -161,6 +203,21 @@ export function useTvBack(on = true) {
           tabs.querySelector<HTMLElement>('a[href="/"]')?.focus();
         }
         return;
+      }
+      // Within the settings back goes up a level: to the last page before
+      // in the history lying above this one, past those beside it, as a
+      // plugin's tabs or a link of the trail opened; failing one, to its
+      // parent.
+      const location = router.state.location;
+      const depth = depthOf(pathname, location.search);
+      if (depth >= 0) {
+        const here = indexOf(location);
+        for (let i = here - 1; i >= 0; i--) {
+          const e = entries.get(i);
+          if (e && e.depth < depth) return void router.history.go(i - here);
+        }
+        if (depth >= 3) return void router.navigate({ to: pathname, search: upOf(location.search), replace: true } as never);
+        return void router.navigate({ to: parentOf(pathname), replace: true });
       }
       if (router.history.canGoBack()) router.history.back();
       else void router.navigate({ to: parentOf(pathname), replace: true });
