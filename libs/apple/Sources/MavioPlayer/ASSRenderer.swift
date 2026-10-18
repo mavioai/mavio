@@ -12,6 +12,8 @@ public final class ASSRenderer {
     private let renderer: OpaquePointer
     private let track: UnsafeMutablePointer<ASS_Track>
     private var frameSize = CGSize.zero
+    /// The last picture drawn.
+    private var last: CGImage?
 
     /// A renderer of the track the script header describes, with fonts,
     /// font file contents by name, available to it.
@@ -83,18 +85,23 @@ public final class ASSRenderer {
 
     /// The subtitles shown at a time, drawn over a transparent picture of a
     /// size, with whether they differ from the last ones drawn; nil when
-    /// nothing is shown.
+    /// nothing is shown. Unchanged subtitles are the last picture again.
     public func render(at time: TimeInterval, size: CGSize) -> (image: CGImage?, changed: Bool) {
         let width = Int(size.width), height = Int(size.height)
         guard width > 0, height > 0 else { return (nil, false) }
-        if size != frameSize {
+        let resized = size != frameSize
+        if resized {
             frameSize = size
             ass_set_frame_size(renderer, Int32(width), Int32(height))
             ass_set_storage_size(renderer, Int32(width), Int32(height))
         }
         var change: Int32 = 0
         var image = ass_render_frame(renderer, track, Int64(time * 1000), &change)
-        guard image != nil else { return (nil, change != 0) }
+        guard change != 0 || resized else { return (last, false) }
+        guard image != nil else {
+            last = nil
+            return (nil, true)
+        }
         // Premultiplied RGBA, each image's alpha bitmap blended in its color.
         var pixels = [UInt8](repeating: 0, count: width * height * 4)
         while let current = image {
@@ -102,12 +109,12 @@ public final class ASSRenderer {
             image = current.pointee.next
         }
         let data = CFDataCreate(nil, pixels, pixels.count)!
-        let picture = CGImage(
+        last = CGImage(
             width: width, height: height, bitsPerComponent: 8, bitsPerPixel: 32, bytesPerRow: width * 4,
             space: CGColorSpace(name: CGColorSpace.sRGB)!,
             bitmapInfo: CGBitmapInfo(rawValue: CGImageAlphaInfo.premultipliedLast.rawValue),
             provider: CGDataProvider(data: data)!, decode: nil, shouldInterpolate: false, intent: .defaultIntent)
-        return (picture, change != 0)
+        return (last, true)
     }
 
     private static func blend(_ image: ASS_Image, into pixels: inout [UInt8], width: Int, height: Int) {

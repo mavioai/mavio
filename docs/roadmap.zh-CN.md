@@ -672,7 +672,7 @@ flowchart TD
   - [ ] 发现与请求页面，随 P20
   - [x] AetherEngine 播放时的画中画：围绕原生路径的 `AVPlayerLayer`，或软件路径的 `AVSampleBufferDisplayLayer` 及其 `SoftwarePiPSource` 给出的播放控制；窗口打开期间告知引擎，使其管线在后台保持运行，并把字幕绘入窗口
   - [ ] 在设备上试用画中画与正在播放：模拟器既不支持画中画，也不在锁屏显示正在播放
-  - [ ] 借助 libass 保留样式的 ASS 字幕
+  - [x] 借助 libass 保留样式的 ASS 字幕：AetherEngine 保留 ASS 轨道（内嵌或外挂）的事件行，`ASSRenderer` 按脚本的样式、用文件附带的字体，在显示的每一帧把它们绘制在画面上；其他轨道仍用普通字幕层
   - [x] 两种引擎的正在播放与远程命令（`MPNowPlayingInfoCenter`、`MPRemoteCommandCenter`）：标题、剧集与集数、封面、位置与速度；播放、暂停、10 秒快进快退、跳转位置，以及下一集
   - [x] 一集结束时播放下一集
   - [x] 手势：长按时以两倍速播放并显示 2× 标记，左半边纵向滑动调节亮度、右半边调节音量（通过隐藏的 `MPVolumeView`，同时避开系统的音量提示），顶部显示当前值

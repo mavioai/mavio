@@ -45,7 +45,9 @@ func opaque(_ image: CGImage) -> (all: Int, red: Int) {
     let pixels = opaque(image)
     #expect(pixels.all > 1000, "got = \(pixels.all) opaque pixels, want > 1000")
     #expect(pixels.red == pixels.all, "got = \(pixels.red) red of \(pixels.all), want all")
-    #expect(!renderer.render(at: 1.6, size: size).changed)
+    let again = renderer.render(at: 1.6, size: size)
+    #expect(!again.changed)
+    #expect(again.image === image, "got = a new picture of unchanged subtitles, want the last one")
     #expect(renderer.render(at: 3.5, size: size).image == nil)
 
     renderer.flush()

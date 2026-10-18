@@ -672,7 +672,7 @@ flowchart TD
   - [ ] Discovery and request screens, with P20
   - [x] Picture in Picture while AetherEngine plays: around the native path's `AVPlayerLayer`, or the software path's `AVSampleBufferDisplayLayer` with the transport its `SoftwarePiPSource` answers; the engine is told while the window is open, which keeps its pipeline alive in the background and draws the subtitles into the window
   - [ ] Picture in Picture and Now Playing tried on a device: the simulator supports neither Picture in Picture nor Now Playing on its Lock Screen
-  - [ ] Styled ASS subtitles with libass
+  - [x] Styled ASS subtitles with libass: AetherEngine keeps the event lines of ASS tracks, embedded or external, which `ASSRenderer` draws over the picture at each frame the display shows, in the script's styles and with the fonts the file attaches; other tracks keep the plain overlay
   - [x] Now Playing and the remote commands (`MPNowPlayingInfoCenter`, `MPRemoteCommandCenter`) for both engines: the title, the series and episode, the artwork, the position and speed; play, pause, skips of 10 seconds, a new position, and the next episode
   - [x] Playing the next episode at the end of one
   - [x] Gestures: a press held plays at double speed with a 2× pill while held, and vertical swipes set the brightness on the left half and the volume on the right (through a hidden `MPVolumeView`, which also keeps the system's volume HUD away), with the level shown at the top

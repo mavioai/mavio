@@ -20,7 +20,11 @@ public struct PlayerSurface: View {
                 AVPlayerSurface(player: avPlayer) { player.pictureInPicture = $0 }
             } else if let engine = player.aether {
                 AetherPlayerSurface(engine: engine)
-                SubtitleOverlay(cues: player.cues, time: player.cueTime, videoSize: player.videoSize)
+                if let renderer = player.styledSubtitles {
+                    StyledSubtitleOverlay(renderer: renderer, engine: engine, videoSize: player.videoSize)
+                } else {
+                    SubtitleOverlay(cues: player.cues, time: player.cueTime, videoSize: player.videoSize)
+                }
             }
         }
         .ignoresSafeArea()
@@ -149,5 +153,29 @@ struct SubtitleOverlay: View {
                 x: area.minX + image.position.midX * scale,
                 y: area.minY + image.position.midY * scale
             )
+    }
+}
+
+/// Draws an ASS track in its styles with libass, over the picture, at the
+/// source time of each frame the display shows.
+struct StyledSubtitleOverlay: View {
+    let renderer: ASSRenderer
+    let engine: AetherEngine
+    let videoSize: CGSize
+    @Environment(\.displayScale) private var scale
+
+    var body: some View {
+        GeometryReader { geo in
+            let picture = SubtitleOverlay.fit(videoSize, in: geo.size)
+            TimelineView(.animation(minimumInterval: 1.0 / 30)) { _ in
+                let size = CGSize(width: (picture.width * scale).rounded(), height: (picture.height * scale).rounded())
+                if let image = renderer.render(at: engine.clock.sourceTime, size: size).image {
+                    Image(decorative: image, scale: scale)
+                        .frame(width: picture.width, height: picture.height)
+                        .position(x: picture.midX, y: picture.midY)
+                }
+            }
+        }
+        .allowsHitTesting(false)
     }
 }

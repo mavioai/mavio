@@ -32,6 +32,10 @@ public final class Player {
     public private(set) var cues: [SubtitleCue] = []
     /// The source time the cues are drawn against.
     public private(set) var cueTime: TimeInterval = 0
+    /// The renderer of the ASS track AetherEngine shows, which draws it in
+    /// its styles with the cues' event lines added; nil for other tracks,
+    /// whose cues the overlay draws itself.
+    public private(set) var styledSubtitles: ASSRenderer?
     /// AetherEngine's picture size, in square pixels; zero until known.
     public private(set) var videoSize: CGSize = .zero
     /// Picture in Picture of AVPlayer's layer, once the surface made it.
@@ -45,6 +49,10 @@ public final class Player {
         @ObservationIgnored private var aetherPictureInPicture: AetherPictureInPicture?
     #endif
     @ObservationIgnored private var endObserver: NSObjectProtocol?
+    /// The script header the styled renderer was made for.
+    @ObservationIgnored private var styledHeader: String?
+    /// The cues the styled renderer has, by their ID and start.
+    @ObservationIgnored private var styledCues: Set<StyledCue> = []
 
     /// A player with nothing loaded.
     public init() {}
@@ -117,6 +125,8 @@ public final class Player {
             _ = try await engine.load(
                 url: media.url,
                 startPosition: media.start > 0 ? media.start : nil,
+                // ASS tracks keep their event lines, which libass draws.
+                options: LoadOptions(preserveASSMarkup: true),
                 audioSourceStreamIndex: media.audioStream.map(Int32.init)
             )
             if let file = media.subtitleFile {
@@ -161,6 +171,7 @@ public final class Player {
             duration = engine.duration
             cues = engine.subtitleCues
             cueTime = engine.clock.sourceTime
+            updateStyledSubtitles(engine)
             let size = CGSize(
                 width: Double(engine.sourceVideoWidth) * engine.sourceVideoPixelAspectRatio,
                 height: Double(engine.sourceVideoHeight))
@@ -268,6 +279,31 @@ public final class Player {
         nowPlaying.end()
     }
 
+    /// Makes the styled renderer of the track AetherEngine shows when it is
+    /// ASS, with the fonts the file attaches, and adds the cues it lacks.
+    private func updateStyledSubtitles(_ engine: AetherEngine) {
+        // An embedded track carries its header; an external one's is the
+        // sidecar's, which the engine may keep after another track is chosen.
+        let track = engine.activeSubtitleTrackIndex.flatMap { index in
+            engine.subtitleTracks.first { $0.id == index }
+        }
+        let header =
+            !engine.isSubtitleActive
+            ? nil
+            : track.map { $0.isExternal ? engine.sidecarASSHeader : $0.assHeader } ?? engine.sidecarASSHeader
+        if header != styledHeader {
+            styledHeader = header
+            styledCues = []
+            let fonts = Dictionary(
+                engine.fontAttachments.map { ($0.filename, $0.data) }, uniquingKeysWith: { first, _ in first })
+            styledSubtitles = header.flatMap { ASSRenderer(header: $0, fonts: fonts) }
+        }
+        guard let styledSubtitles else { return }
+        for cue in cues where styledCues.insert(StyledCue(id: cue.id, start: cue.startTime)).inserted {
+            styledSubtitles.add(cue: cue)
+        }
+    }
+
     private func teardown() {
         poll?.cancel()
         poll = nil
@@ -284,7 +320,15 @@ public final class Player {
         aether = nil
         engine = nil
         cues = []
+        (styledSubtitles, styledHeader, styledCues) = (nil, nil, [])
         videoSize = .zero
         isPlaying = false
     }
+}
+
+/// A cue the styled renderer has: its ID, which a new decoder may give
+/// again, with its start.
+private struct StyledCue: Hashable {
+    let id: Int
+    let start: TimeInterval
 }
