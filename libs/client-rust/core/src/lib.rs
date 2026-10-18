@@ -6,6 +6,7 @@
 mod account;
 mod client;
 mod connection;
+mod details;
 mod discovery;
 mod downloads;
 mod error;
@@ -25,6 +26,10 @@ pub use client::{
     LibraryEntry, LibraryType, Listener, Page, SearchResults, Sort, Source,
 };
 pub use connection::{Connection, DEFAULT_PORT, parse_address};
+pub use details::{
+    CollectionLink, CreditJob, Episode, ExternalLink, Extra, ExtraKind, SeriesLink, SeriesStatus,
+    SubtitleStream, VideoRange, VideoStream,
+};
 pub use discovery::{DISCOVERY_PORT, FoundServer, discover};
 pub use downloads::{Downloads, Transfer};
 pub use error::{Error, Result};

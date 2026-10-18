@@ -8,9 +8,9 @@ use std::time::{Duration, SystemTime};
 
 use mavio_api::proto::mavio::hub::v1::{GetHubRequest, ListHubsRequest, ListHubsResponse};
 use mavio_api::proto::mavio::library::v1::{
-    CreditKind, GetItemRequest, GetItemResponse, ImageKind, Item, ItemKind, LibraryKind,
-    ListItemsRequest, ListLibrariesRequest, ListLibrariesResponse, ListSimilarItemsRequest,
-    SortField, SortSpec, StreamKind,
+    GetItemRequest, GetItemResponse, ImageKind, Item, ItemKind, LibraryKind, ListItemsRequest,
+    ListLibrariesRequest, ListLibrariesResponse, ListSimilarItemsRequest, SortField, SortSpec,
+    StreamKind,
 };
 use mavio_api::proto::mavio::session::v1::__buffa::oneof::event::Kind;
 use mavio_api::proto::mavio::session::v1::Event;
@@ -19,6 +19,10 @@ use tokio::task::{JoinHandle, JoinSet};
 
 use crate::account::{Account, BrowserSignIn, LinkCode, SignInState};
 use crate::connection::Connection;
+use crate::details::{
+    self, CollectionLink, CreditJob, Episode, ExternalLink, Extra, SeriesLink, SeriesStatus,
+    SubtitleStream, VideoStream,
+};
 use crate::downloads::Downloads;
 use crate::error::{Error, Result};
 use crate::events::{self, EventSink, StreamState};
@@ -182,6 +186,8 @@ pub struct CreditEntry {
     pub role: Option<String>,
     /// Whether they act in it; else crew.
     pub cast: bool,
+    /// What they did.
+    pub job: CreditJob,
     /// Their photo.
     pub photo: Option<Artwork>,
 }
@@ -206,6 +212,12 @@ pub struct Source {
     pub container: Option<String>,
     /// The file's audio streams, for a file of this server.
     pub audio: Vec<AudioStream>,
+    /// The file's name, for a file of this server.
+    pub file_name: Option<String>,
+    /// The file's video, for a file of this server.
+    pub video: Option<VideoStream>,
+    /// The file's subtitles, in it and beside it, for a file of this server.
+    pub subtitles: Vec<SubtitleStream>,
 }
 
 /// An audio stream of a file, to choose it.
@@ -260,6 +272,57 @@ pub struct Details {
     pub similar: Vec<Card>,
     /// Whether it comes from the offline store.
     pub offline: bool,
+    /// An episode's season number.
+    pub season_number: Option<i32>,
+    /// An episode's number.
+    pub episode_number: Option<i32>,
+    /// An episode's season's name.
+    pub season_name: Option<String>,
+    /// The series an episode or season belongs to.
+    pub series: Option<SeriesLink>,
+    /// Whether a series still airs.
+    pub series_status: Option<SeriesStatus>,
+    /// When a series ended.
+    pub end_date: Option<SystemTime>,
+    /// The critics' score, from 0 to 100.
+    pub critic_rating: Option<f32>,
+    /// Its keywords.
+    pub tags: Vec<String>,
+    /// Its studios or networks; an episode's or season's are its series'.
+    pub studios: Vec<String>,
+    /// The countries it was made in.
+    pub countries: Vec<String>,
+    /// Its title in its original language, when that differs.
+    pub original_title: Option<String>,
+    /// Its original language, as a language code.
+    pub original_language: Option<String>,
+    /// When a movie was released digitally.
+    pub digital_release: Option<SystemTime>,
+    /// When a movie was released on discs.
+    pub physical_release: Option<SystemTime>,
+    /// When the library added it.
+    pub date_added: Option<SystemTime>,
+    /// Pages about it on other sites.
+    pub links: Vec<ExternalLink>,
+    /// A trailer on the web, for when it has none among its extras.
+    pub remote_trailer: Option<String>,
+    /// A series' episodes, a season's, or an episode's season's, in order.
+    pub episodes: Vec<Episode>,
+    /// The episode a series or season plays next.
+    pub next: Option<Episode>,
+    /// Its trailers, featurettes and other extras.
+    pub extras: Vec<Extra>,
+    /// The collection a movie belongs to.
+    pub collection: Option<CollectionLink>,
+}
+
+/// What the details fetch beyond the item.
+#[derive(Default)]
+struct More {
+    series: Option<Item>,
+    episodes: Vec<Item>,
+    extras: Vec<Item>,
+    collections: Vec<Item>,
 }
 
 /// The results of a search on one server.
@@ -932,13 +995,25 @@ impl Core {
             .ok_or_else(|| Error::Invalid(format!("address of {}", server.name)))?;
         let item = r.item.as_option().cloned().unwrap_or_default();
 
-        let (children, similar, others) = match (&conn, offline) {
+        let kind = item.kind.as_ref().and_then(|k| k.as_known());
+        let in_series = matches!(
+            kind,
+            Some(ItemKind::ITEM_KIND_EPISODE | ItemKind::ITEM_KIND_SEASON)
+        );
+        let series_id = match kind {
+            Some(ItemKind::ITEM_KIND_SERIES) => item.id.clone(),
+            _ if in_series => details::non_empty(&item.series_id),
+            _ => None,
+        };
+
+        let (children, similar, others, more) = match (&conn, offline) {
             (Ok(conn), false) => tokio::join!(
                 self.children(conn, server_id, &item),
                 self.similar(conn, server_id, item_id),
                 self.other_copies(server_id, &item),
+                self.more(conn, &item, series_id.as_deref(), in_series),
             ),
-            _ => (Vec::new(), Vec::new(), Vec::new()),
+            _ => (Vec::new(), Vec::new(), Vec::new(), More::default()),
         };
 
         let mut card = Card::new(&base, server_id, &item);
@@ -976,19 +1051,31 @@ impl Core {
                         default: s.default.unwrap_or_default(),
                     })
                     .collect(),
+                file_name: m
+                    .path
+                    .as_deref()
+                    .and_then(|p| p.rsplit(['/', '\\']).next())
+                    .filter(|n| !n.is_empty())
+                    .map(str::to_owned),
+                video: details::video(&m.streams),
+                subtitles: details::subtitles(&m.streams),
             })
             .collect();
         sources.extend(others);
 
+        // The cast in billing order, each actor once, then the crew.
+        let mut seen = std::collections::HashSet::new();
         let mut credits: Vec<(bool, i32, CreditEntry)> = r
             .credits
             .iter()
             .filter_map(|c| {
                 let person = c.person.as_option()?;
-                let cast = matches!(
-                    c.kind.as_ref().and_then(|k| k.as_known()),
-                    Some(CreditKind::CREDIT_KIND_ACTOR | CreditKind::CREDIT_KIND_GUEST_STAR)
-                );
+                let job = CreditJob::from(c.kind.as_ref().and_then(|k| k.as_known()));
+                let cast = matches!(job, CreditJob::Actor | CreditJob::GuestStar);
+                let person_id = person.id.clone().unwrap_or_default();
+                if cast && !seen.insert(person_id.clone()) {
+                    return None;
+                }
                 let photo = Item {
                     images: person.images.clone(),
                     ..Default::default()
@@ -997,10 +1084,11 @@ impl Core {
                     !cast,
                     c.order.unwrap_or_default(),
                     CreditEntry {
-                        person_id: person.id.clone().unwrap_or_default(),
+                        person_id,
                         name: person.name.clone().unwrap_or_default(),
                         role: c.role.clone().filter(|r| !r.is_empty()),
                         cast,
+                        job,
                         photo: view::artwork(&base, &photo, ImageKind::IMAGE_KIND_PRIMARY),
                     },
                 ))
@@ -1008,31 +1096,164 @@ impl Core {
             .collect();
         credits.sort_by_key(|(crew, order, _)| (*crew, *order));
 
+        // A series' episodes, a season's, or an episode's season's; a
+        // series or season plays the one to watch next.
+        let own_season = match kind {
+            Some(ItemKind::ITEM_KIND_SEASON) => item.id.clone(),
+            Some(ItemKind::ITEM_KIND_EPISODE) => details::non_empty(&item.season_id),
+            _ => None,
+        };
+        let shown: Vec<&Item> = more
+            .episodes
+            .iter()
+            .filter(|e| own_season.is_none() || e.season_id == own_season)
+            .collect();
+        let next = match kind {
+            Some(ItemKind::ITEM_KIND_SERIES | ItemKind::ITEM_KIND_SEASON) => {
+                let list: Vec<Item> = shown.iter().map(|e| (*e).clone()).collect();
+                details::next_up(&list).map(|e| Episode::new(&base, server_id, e))
+            }
+            _ => None,
+        };
+        let episodes = shown
+            .into_iter()
+            .map(|e| Episode::new(&base, server_id, e))
+            .collect();
+        let series = more.series.as_ref();
+        let from_series = |own: &Vec<String>, theirs: fn(&Item) -> &Vec<String>| {
+            if own.is_empty() {
+                series.map(theirs).cloned().unwrap_or_default()
+            } else {
+                own.clone()
+            }
+        };
+
         Ok(Details {
             server_name: server.name.clone(),
             overview: item.overview.clone().filter(|s| !s.is_empty()),
             tagline: item.tagline.clone().filter(|s| !s.is_empty()),
-            genres: item.genres.clone(),
+            genres: from_series(&item.genres, |s| &s.genres),
             official_rating: item.official_rating.clone().filter(|s| !s.is_empty()),
             community_rating: item.community_rating.filter(|r| *r > 0.0).map(|r| r as f32),
-            premiere: item
-                .premiere_date
-                .as_option()
-                .and_then(|t| SystemTime::try_from(t.clone()).ok()),
-            backdrop: view::artwork(&base, &item, ImageKind::IMAGE_KIND_BACKDROP),
+            premiere: details::time(item.premiere_date.as_option()),
+            backdrop: view::artwork(&base, &item, ImageKind::IMAGE_KIND_BACKDROP).or_else(|| {
+                series.and_then(|s| view::artwork(&base, s, ImageKind::IMAGE_KIND_BACKDROP))
+            }),
             logo: view::artwork(&base, &item, ImageKind::IMAGE_KIND_LOGO),
-            position: item
-                .user_data
-                .as_option()
-                .and_then(|u| u.position.as_option())
-                .and_then(|d| Duration::try_from(d.clone()).ok()),
+            position: details::position(&item),
             credits: credits.into_iter().map(|(_, _, c)| c).collect(),
             sources,
             children,
             similar,
             offline,
+            season_number: item
+                .parent_index_number
+                .filter(|_| kind == Some(ItemKind::ITEM_KIND_EPISODE)),
+            episode_number: item
+                .index_number
+                .filter(|n| *n > 0 && kind == Some(ItemKind::ITEM_KIND_EPISODE)),
+            season_name: details::non_empty(&item.season_name)
+                .filter(|_| kind == Some(ItemKind::ITEM_KIND_EPISODE)),
+            series: series.map(|s| details::series_link(&base, s)),
+            series_status: details::series_status(&item),
+            end_date: details::time(item.end_date.as_option()),
+            critic_rating: item.critic_rating.filter(|r| *r > 0.0).map(|r| r as f32),
+            tags: if in_series {
+                Vec::new()
+            } else {
+                item.tags.clone()
+            },
+            studios: from_series(&item.studios, |s| &s.studios),
+            countries: item.production_locations.clone(),
+            original_title: details::non_empty(&item.original_title)
+                .filter(|t| item.name.as_ref() != Some(t)),
+            original_language: details::non_empty(&item.original_language),
+            digital_release: details::time(item.digital_release_date.as_option()),
+            physical_release: details::time(item.physical_release_date.as_option()),
+            date_added: details::time(item.date_added.as_option())
+                .filter(|_| !item.r#virtual.unwrap_or_default()),
+            links: details::links(&item),
+            remote_trailer: item.remote_trailers.iter().find(|t| !t.is_empty()).cloned(),
+            episodes,
+            next,
+            extras: more
+                .extras
+                .iter()
+                .filter_map(|e| details::extra(&base, server_id, e))
+                .collect(),
+            collection: details::collection_link(&base, &item, &more.collections),
             card,
         })
+    }
+
+    /// What the details show beyond the item: its series, the series'
+    /// episodes, its extras and the collections it may belong to.
+    async fn more(
+        &self,
+        conn: &Connection,
+        item: &Item,
+        series_id: Option<&str>,
+        in_series: bool,
+    ) -> More {
+        let list = |req: ListItemsRequest| async move {
+            conn.items()
+                .list_items(req)
+                .await
+                .map(|r| r.into_owned().items)
+                .unwrap_or_default()
+        };
+        let series = async {
+            let id = series_id.filter(|_| in_series)?;
+            let r = conn
+                .items()
+                .get_item(GetItemRequest {
+                    id: Some(id.to_owned()),
+                    ..Default::default()
+                })
+                .await
+                .ok()?;
+            r.into_owned().item.into_option()
+        };
+        let episodes = async {
+            let Some(id) = series_id else {
+                return Vec::new();
+            };
+            let mut items = list(ListItemsRequest {
+                parent_id: Some(id.to_owned()),
+                recursive: Some(true),
+                kinds: vec![ItemKind::ITEM_KIND_EPISODE.into()],
+                ..Default::default()
+            })
+            .await;
+            details::sort_episodes(&mut items);
+            items
+        };
+        let extras = list(ListItemsRequest {
+            owner_id: item.id.clone(),
+            sort: vec![SortSpec {
+                field: Some(SortField::SORT_FIELD_NAME.into()),
+                ..Default::default()
+            }],
+            ..Default::default()
+        });
+        let collections = async {
+            if item.collection_name.as_deref().is_none_or(str::is_empty) {
+                return Vec::new();
+            }
+            list(ListItemsRequest {
+                kinds: vec![ItemKind::ITEM_KIND_COLLECTION.into()],
+                ..Default::default()
+            })
+            .await
+        };
+        let (series, episodes, extras, collections) =
+            tokio::join!(series, episodes, extras, collections);
+        More {
+            series,
+            episodes,
+            extras,
+            collections,
+        }
     }
 
     async fn children(&self, conn: &Connection, server_id: &str, item: &Item) -> Vec<Card> {
@@ -1118,6 +1339,9 @@ impl Core {
                         size: None,
                         container: None,
                         audio: Vec::new(),
+                        file_name: None,
+                        video: None,
+                        subtitles: Vec::new(),
                     },
                 ))
             });
@@ -1165,7 +1389,8 @@ impl Core {
 mod tests {
     use mavio_api::proto::mavio::hub::v1::Hub;
     use mavio_api::proto::mavio::library::v1::{
-        HubKind, ItemKind, ListItemsResponse, ListSimilarItemsResponse, MediaSource, MediaStream,
+        Credit, CreditKind, ExtraKind, HubKind, ItemKind, ListItemsResponse,
+        ListSimilarItemsResponse, MediaSource, MediaStream, Person,
     };
 
     use super::*;
@@ -1322,6 +1547,145 @@ mod tests {
         assert_eq!(got.len(), 2);
         assert_eq!(got[0].cards[0].item_id, "a1", "got = {got:?}");
         assert!(got[1].error.is_some(), "got = {:?}", got[1]);
+    }
+
+    #[tokio::test]
+    async fn series_details_carry_episodes_the_next_one_and_extras() {
+        let (core, _) = core();
+        let a = fake_server("sa", "Home");
+        let ep = |id: &str, season: &str, s: i32, e: i32, played: bool| Item {
+            id: Some(id.into()),
+            name: Some(id.into()),
+            kind: Some(ItemKind::ITEM_KIND_EPISODE.into()),
+            season_id: Some(season.into()),
+            parent_index_number: Some(s),
+            index_number: Some(e),
+            user_data: mavio_api::proto::mavio::user::v1::UserData {
+                played: Some(played),
+                ..Default::default()
+            }
+            .into(),
+            ..Default::default()
+        };
+        a.unary(
+            "/mavio.library.v1.ItemService/GetItem",
+            |_, req: GetItemRequest| {
+                Ok(GetItemResponse {
+                    item: Item {
+                        id: req.id.clone(),
+                        name: Some("Show".into()),
+                        kind: Some(ItemKind::ITEM_KIND_SERIES.into()),
+                        collection_name: Some("Saga".into()),
+                        ..Default::default()
+                    }
+                    .into(),
+                    credits: vec![
+                        Credit {
+                            person: Person {
+                                id: Some("p".into()),
+                                name: Some("Pat".into()),
+                                ..Default::default()
+                            }
+                            .into(),
+                            kind: Some(CreditKind::CREDIT_KIND_ACTOR.into()),
+                            role: Some("A".into()),
+                            ..Default::default()
+                        },
+                        Credit {
+                            person: Person {
+                                id: Some("p".into()),
+                                name: Some("Pat".into()),
+                                ..Default::default()
+                            }
+                            .into(),
+                            kind: Some(CreditKind::CREDIT_KIND_ACTOR.into()),
+                            role: Some("B".into()),
+                            ..Default::default()
+                        },
+                        Credit {
+                            person: Person {
+                                id: Some("d".into()),
+                                name: Some("Dee".into()),
+                                ..Default::default()
+                            }
+                            .into(),
+                            kind: Some(CreditKind::CREDIT_KIND_DIRECTOR.into()),
+                            ..Default::default()
+                        },
+                    ],
+                    ..Default::default()
+                })
+            },
+        )
+        .unary(
+            "/mavio.library.v1.ItemService/ListItems",
+            move |_, req: ListItemsRequest| {
+                let items = if req.owner_id.is_some() {
+                    vec![
+                        Item {
+                            id: Some("t".into()),
+                            extra: Some(ExtraKind::EXTRA_KIND_TRAILER.into()),
+                            ..Default::default()
+                        },
+                        Item {
+                            id: Some("theme".into()),
+                            extra: Some(ExtraKind::EXTRA_KIND_THEME_SONG.into()),
+                            ..Default::default()
+                        },
+                    ]
+                } else if req.recursive == Some(true) {
+                    vec![
+                        ep("e3", "s2", 2, 1, false),
+                        ep("e2", "s1", 1, 2, false),
+                        ep("e1", "s1", 1, 1, true),
+                    ]
+                } else if req
+                    .kinds
+                    .iter()
+                    .any(|k| k.as_known() == Some(ItemKind::ITEM_KIND_COLLECTION))
+                {
+                    vec![Item {
+                        id: Some("c".into()),
+                        name: Some("saga".into()),
+                        ..Default::default()
+                    }]
+                } else {
+                    Vec::new()
+                };
+                Ok(ListItemsResponse {
+                    items,
+                    ..Default::default()
+                })
+            },
+        )
+        .unary(
+            "/mavio.library.v1.ItemService/ListSimilarItems",
+            |_, _: ListSimilarItemsRequest| Ok(ListSimilarItemsResponse::default()),
+        );
+        let addr = a.serve().await;
+        core.servers.sign_in(&addr, "me", "secret").await.unwrap();
+
+        let d = core.details("sa", "show").await.unwrap();
+        let ids: Vec<&str> = d.episodes.iter().map(|e| e.card.item_id.as_str()).collect();
+        assert_eq!(
+            ids,
+            ["e1", "e2", "e3"],
+            "got = {ids:?}, want = the episodes in order"
+        );
+        assert_eq!(d.next.as_ref().map(|e| e.card.item_id.as_str()), Some("e2"));
+        assert_eq!(d.episodes[1].number, Some(2));
+        let extras: Vec<_> = d
+            .extras
+            .iter()
+            .map(|e| (e.card.item_id.as_str(), e.kind))
+            .collect();
+        assert_eq!(extras, [("t", crate::details::ExtraKind::Trailer)]);
+        assert_eq!(d.collection.as_ref().map(|c| c.item_id.as_str()), Some("c"));
+        let credits: Vec<_> = d.credits.iter().map(|c| (c.name.as_str(), c.job)).collect();
+        assert_eq!(
+            credits,
+            [("Pat", CreditJob::Actor), ("Dee", CreditJob::Director)]
+        );
     }
 
     #[tokio::test]

@@ -9,6 +9,10 @@ use mavio_core::{
     PlaybackOptions, Row, RowContent, RowKind, SearchResults, ServerInfo, ServerRecord,
     SignInState, Sort, Source, StreamState, TitleCard, Transfer, Version,
 };
+use mavio_core::{
+    CollectionLink, CreditJob, Episode, ExternalLink, Extra, ExtraKind, SeriesLink, SeriesStatus,
+    SubtitleStream, VideoRange, VideoStream,
+};
 
 #[uniffi::remote(Record)]
 pub struct DeviceInfo {
@@ -241,7 +245,25 @@ pub struct CreditEntry {
     pub name: String,
     pub role: Option<String>,
     pub cast: bool,
+    pub job: CreditJob,
     pub photo: Option<Artwork>,
+}
+
+#[uniffi::remote(Enum)]
+pub enum CreditJob {
+    Actor,
+    GuestStar,
+    Creator,
+    Director,
+    Writer,
+    Author,
+    Producer,
+    Composer,
+    Conductor,
+    Lyricist,
+    Artist,
+    Narrator,
+    Other,
 }
 
 #[uniffi::remote(Record)]
@@ -254,6 +276,37 @@ pub struct Source {
     pub size: Option<u64>,
     pub container: Option<String>,
     pub audio: Vec<AudioStream>,
+    pub file_name: Option<String>,
+    pub video: Option<VideoStream>,
+    pub subtitles: Vec<SubtitleStream>,
+}
+
+#[uniffi::remote(Enum)]
+pub enum VideoRange {
+    Sdr,
+    Hdr10,
+    Hdr10Plus,
+    Hlg,
+    DolbyVision,
+}
+
+#[uniffi::remote(Record)]
+pub struct VideoStream {
+    pub width: i32,
+    pub height: i32,
+    pub codec: String,
+    pub range: VideoRange,
+}
+
+#[uniffi::remote(Record)]
+pub struct SubtitleStream {
+    pub index: i32,
+    pub language: Option<String>,
+    pub title: Option<String>,
+    pub codec: String,
+    pub forced: bool,
+    pub hearing_impaired: bool,
+    pub external: bool,
 }
 
 #[uniffi::remote(Record)]
@@ -284,6 +337,85 @@ pub struct Details {
     pub children: Vec<Card>,
     pub similar: Vec<Card>,
     pub offline: bool,
+    pub season_number: Option<i32>,
+    pub episode_number: Option<i32>,
+    pub season_name: Option<String>,
+    pub series: Option<SeriesLink>,
+    pub series_status: Option<SeriesStatus>,
+    pub end_date: Option<SystemTime>,
+    pub critic_rating: Option<f32>,
+    pub tags: Vec<String>,
+    pub studios: Vec<String>,
+    pub countries: Vec<String>,
+    pub original_title: Option<String>,
+    pub original_language: Option<String>,
+    pub digital_release: Option<SystemTime>,
+    pub physical_release: Option<SystemTime>,
+    pub date_added: Option<SystemTime>,
+    pub links: Vec<ExternalLink>,
+    pub remote_trailer: Option<String>,
+    pub episodes: Vec<Episode>,
+    pub next: Option<Episode>,
+    pub extras: Vec<Extra>,
+    pub collection: Option<CollectionLink>,
+}
+
+#[uniffi::remote(Enum)]
+pub enum SeriesStatus {
+    Continuing,
+    Ended,
+    Unreleased,
+}
+
+#[uniffi::remote(Record)]
+pub struct SeriesLink {
+    pub item_id: String,
+    pub name: String,
+    pub logo: Option<Artwork>,
+}
+
+#[uniffi::remote(Record)]
+pub struct CollectionLink {
+    pub item_id: String,
+    pub name: String,
+    pub backdrop: Option<Artwork>,
+}
+
+#[uniffi::remote(Record)]
+pub struct ExternalLink {
+    pub name: String,
+    pub url: String,
+}
+
+#[uniffi::remote(Enum)]
+pub enum ExtraKind {
+    Trailer,
+    Clip,
+    BehindTheScenes,
+    DeletedScene,
+    Interview,
+    Scene,
+    Sample,
+    Featurette,
+    Short,
+    Other,
+}
+
+#[uniffi::remote(Record)]
+pub struct Extra {
+    pub card: Card,
+    pub kind: ExtraKind,
+}
+
+#[uniffi::remote(Record)]
+pub struct Episode {
+    pub card: Card,
+    pub season_id: Option<String>,
+    pub season: Option<i32>,
+    pub number: Option<i32>,
+    pub overview: Option<String>,
+    pub premiere: Option<SystemTime>,
+    pub position: Option<Duration>,
 }
 
 #[uniffi::remote(Record)]
