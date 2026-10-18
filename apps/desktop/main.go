@@ -59,7 +59,13 @@ func run() error {
 	if err != nil {
 		return err
 	}
-	store := secrets.New(mygo.Secrets, filepath.Join(data, "secrets.json"), mygo.ErrSecretNotFound)
+	// A development build is signed anew each time, which the credential
+	// store would ask about each launch: it keeps its secrets in a file.
+	var backend secrets.Backend = mygo.Secrets
+	if mygo.IsDev() {
+		backend = secrets.NewFile(filepath.Join(data, "dev-secrets.json"), mygo.Secrets, mygo.ErrSecretNotFound)
+	}
+	store := secrets.New(backend, filepath.Join(data, "secrets.json"), mygo.ErrSecretNotFound)
 	tokens, err := store.Load()
 	if err != nil {
 		return err

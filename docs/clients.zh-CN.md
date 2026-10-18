@@ -149,7 +149,7 @@ flowchart LR
 ## 5. 共享核心（`libs/client-rust`）
 
 ### 5.1 职责
-* **服务器与登录**：同时登录多台服务器（§5.4），支持发现、以密码或 Quick Connect 登录，以及会话（[账户 §5.2–§5.3](accounts.zh-CN.md#5-密钥与令牌)）：设备密钥与每个服务端的会话（其 ID、访问令牌与过期时间）由应用通过它实现的接口保存在平台的安全存储中（Keychain、Android Keystore、Windows 凭据管理器、Secret Service），核心的传输层在访问令牌过期前或被服务端拒绝后，以签名服务端的随机数为其续期。
+* **服务器与登录**：同时登录多台服务器（§5.4），支持发现、以密码或 Quick Connect 登录，以及会话（[账户 §5.2–§5.3](accounts.zh-CN.md#5-密钥与令牌)）：设备密钥与每个服务端的会话（其 ID、访问令牌与过期时间）由应用通过它实现的接口保存在平台的安全存储中（Keychain、Android Keystore、Windows 凭据管理器、Secret Service）——桌面应用的开发构建每次都重新签名，因而改存于其数据目录中的一个文件，并一次性从安全存储迁移过去——核心的传输层在访问令牌过期前或被服务端拒绝后，以签名服务端的随机数为其续期。
 * **Connect 客户端**：[connect-rust](https://github.com/connectrpc/connect-rust)，基于 HTTP/1.1 与 HTTP/2，消息与客户端从 `libs/proto` 生成到 `libs/proto/gen/rust`，由 crate `mavio-api` 包含。
 * **事件流**：每台服务器一条 `EventService` 流，以退避重连，事件分发给应用。
 * **离线存储**：SQLite（`rusqlite`，内置 SQLite），保存最近浏览的条目以便应用以缓存内容启动、已下载的条目，以及离线时产生的进度上报，待服务器可达后发送。

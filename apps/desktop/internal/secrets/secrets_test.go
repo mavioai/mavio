@@ -66,3 +66,32 @@ func TestLoadEmpty(t *testing.T) {
 		t.Errorf("Load() = %v, %v, want = empty", got, err)
 	}
 }
+
+func TestFile(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "dev-secrets.json")
+	from := memory{"core.device-key": []byte("k")}
+	f := NewFile(path, from, errNotFound)
+	// A secret the file lacks is moved over from the credential store.
+	if got, err := f.Get("core.device-key"); err != nil || string(got) != "k" {
+		t.Fatalf("Get(device-key) = %q, %v, want = %q", got, err, "k")
+	}
+	delete(from, "core.device-key")
+	if err := f.Set("core.server-a", []byte("a")); err != nil {
+		t.Fatal(err)
+	}
+	again := NewFile(path, nil, errNotFound)
+	for key, want := range map[string]string{"core.device-key": "k", "core.server-a": "a"} {
+		if got, err := again.Get(key); err != nil || string(got) != want {
+			t.Errorf("Get(%s) = %q, %v, want = %q", key, got, err, want)
+		}
+	}
+	if err := again.Delete("core.server-a"); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := again.Get("core.server-a"); !errors.Is(err, errNotFound) {
+		t.Errorf("Get(server-a) after Delete: err = %v, want = %v", err, errNotFound)
+	}
+	if err := again.Delete("core.server-a"); !errors.Is(err, errNotFound) {
+		t.Errorf("Delete(server-a) again = %v, want = %v", err, errNotFound)
+	}
+}
