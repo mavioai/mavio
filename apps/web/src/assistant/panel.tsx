@@ -37,6 +37,7 @@ import { Tip } from "../controls/tooltip.tsx";
 import { Icon } from "../icon.tsx";
 import { usePrefs } from "../prefs.ts";
 import { useShortcutsShown } from "../keys.ts";
+import { isTabPlace } from "../shell/places.ts";
 import { Artwork, subtitleOf } from "../ui.tsx";
 import { grammar, runLocal } from "./fast.ts";
 import { browserRecognizes, denied, isDenied, type Listening, listenInBrowser, listenOnServer, microphoneAllowed } from "./listen.ts";
@@ -524,6 +525,8 @@ function Panel({
   const keyboard = useShortcutsShown();
   const fresh = !state.heard && !state.answer && !state.listening && !state.working && !state.error && state.items.length === 0;
   const status = state.listening ? t("assistant.listening") : state.working && !state.answer ? t("assistant.working") : undefined;
+  // Above the phone's tab bar where it shows.
+  const tabs = isTabPlace(useLocation().pathname);
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
     addEventListener("keydown", onKey);
@@ -535,7 +538,7 @@ function Panel({
       aria-label={t("assistant.title")}
       data-assistant
       onPointerDown={onTouch}
-      className="fixed inset-x-3 bottom-[calc(72px+env(safe-area-inset-bottom))] z-50 mx-auto flex max-h-[70vh] max-w-xl flex-col overflow-hidden rounded-[20px] border border-border bg-surface text-on-background shadow-level3 sm:bottom-6"
+      className={`fixed inset-x-3 ${tabs ? "bottom-[calc(72px+env(safe-area-inset-bottom))]" : "bottom-[calc(12px+env(safe-area-inset-bottom))]"} z-50 mx-auto flex max-h-[70vh] max-w-xl flex-col overflow-hidden rounded-[20px] border border-border bg-surface text-on-background shadow-level3 sm:bottom-6`}
     >
       <header className="flex items-center gap-2 px-4 pt-3">
         <Icon name="microphone" fill size={18} className="text-accent-text" />

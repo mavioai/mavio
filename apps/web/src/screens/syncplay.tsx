@@ -10,6 +10,7 @@ import { useState } from "react";
 import { t } from "../i18n.ts";
 import { Icon } from "../icon.tsx";
 import { useWidthClass } from "../prefs.ts";
+import { isTabPlace } from "../shell/places.ts";
 import { useSyncPlay } from "../syncplay.tsx";
 import { Button } from "../ui.tsx";
 import { field } from "../controls/styles.ts";
@@ -194,7 +195,8 @@ export function GroupChip({ server, group }: { server: ServerEntry; group: SyncP
 export function GroupIndicator() {
   const sp = useSyncPlay();
   const { pathname } = useLocation();
-  const compact = useWidthClass() === "compact";
+  // Above the phone's tab bar where it shows.
+  const tabs = useWidthClass() === "compact" && isTabPlace(pathname);
   const [open, setOpen] = useState(false);
   const joined = sp?.joined;
   if (!joined || pathname.includes("/play/")) return null;
@@ -203,7 +205,7 @@ export function GroupIndicator() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className={`fixed right-4 z-30 flex h-10 max-w-[calc(100vw-32px)] items-center gap-2 rounded-full border border-border bg-surface-overlay/90 px-4 type-footnote font-semibold text-on-background shadow-level2 backdrop-blur-xl hover:tint ${compact ? "bottom-[calc(68px+env(safe-area-inset-bottom))]" : "bottom-4"}`}
+        className={`fixed right-4 z-30 flex h-10 max-w-[calc(100vw-32px)] items-center gap-2 rounded-full border border-border bg-surface-overlay/90 px-4 type-footnote font-semibold text-on-background shadow-level2 backdrop-blur-xl hover:tint ${tabs ? "bottom-[calc(68px+env(safe-area-inset-bottom))]" : "bottom-[calc(16px+env(safe-area-inset-bottom))]"}`}
       >
         <Icon name="users" fill size={18} className="text-accent-text" />
         <span className="truncate">{t("syncplay.chip", { name: joined.group.name, count: joined.group.members.length })}</span>
