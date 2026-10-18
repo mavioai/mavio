@@ -131,7 +131,9 @@ private struct HeroPage: View {
     var body: some View {
         Color.clear
             .background {
-                ArtworkView(card.backdrop?.url, icon: card.kind.icon)
+                // Filled, it overflows the page, which clips its drawing
+                // alone: it would take the taps on the page beside it.
+                ArtworkView(card.backdrop?.url, icon: card.kind.icon).allowsHitTesting(false)
             }
             .overlay {
                 if phone {
