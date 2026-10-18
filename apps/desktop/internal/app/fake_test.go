@@ -297,21 +297,22 @@ func sortCards(cards []*capiv1.Card) {
 	}
 }
 
-// artworkServer serves an image of each ID: a gradient whose hues follow
-// from the ID, as the web UI's snapshot tests draw it.
+// artworkServer serves an image of each ID: a gradient whose colors follow
+// from the ID.
 func artworkServer(t testing.TB) *httptest.Server {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		id := strings.TrimPrefix(r.URL.Path, "/images/")
 		h := 0
 		for _, c := range id {
-			h = (h*31 + int(c)) % 360
+			h = (h*31 + int(c)) % len(artworkColors)
 		}
 		width, height := 200, 300
 		if strings.HasSuffix(id, "-thumb") {
 			width, height = 320, 180
 		}
 		img := image.NewRGBA(image.Rect(0, 0, width, height))
-		from, to := hslRGB(float64(h), 0.55, 0.45), hslRGB(float64((h+60)%360), 0.55, 0.25)
+		black := color.RGBA{A: 255}
+		from, to := artworkColors[h], mix(artworkColors[(h+1)%len(artworkColors)], black, 0.45)
 		for y := range height {
 			for x := range width {
 				t := (float64(x)/float64(width) + float64(y)/float64(height)) / 2
@@ -327,33 +328,16 @@ func artworkServer(t testing.TB) *httptest.Server {
 	return srv
 }
 
-// hsl returns the color of hue h, saturation s and lightness l.
-func hsl(h, s, l float64) ui.Color {
-	c := (1 - math.Abs(2*l-1)) * s
-	x := c * (1 - math.Abs(math.Mod(h/60, 2)-1))
-	m := l - c/2
-	var r, g, b float64
-	switch {
-	case h < 60:
-		r, g = c, x
-	case h < 120:
-		r, g = x, c
-	case h < 180:
-		g, b = c, x
-	case h < 240:
-		g, b = x, c
-	case h < 300:
-		r, b = x, c
-	default:
-		r, b = c, x
-	}
-	to := func(v float64) uint8 { return uint8(math.Round((v + m) * 255)) }
-	return ui.RGB(to(r), to(g), to(b))
-}
-
-func hslRGB(h, s, l float64) color.RGBA {
-	c := hsl(h, s, l)
-	return color.RGBA{c.R, c.G, c.B, 255}
+// artworkColors are the colors the artwork's gradients start from.
+var artworkColors = []color.RGBA{
+	{0xC2, 0x4E, 0x3B, 255},
+	{0xD0, 0x8A, 0x2E, 255},
+	{0x8F, 0xA8, 0x3A, 255},
+	{0x3A, 0xA0, 0x6E, 255},
+	{0x2E, 0x8C, 0xB0, 255},
+	{0x46, 0x5C, 0xC2, 255},
+	{0x82, 0x4C, 0xBE, 255},
+	{0xB8, 0x48, 0x8E, 255},
 }
 
 func mix(a, b color.RGBA, t float64) color.RGBA {

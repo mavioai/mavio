@@ -380,15 +380,16 @@ func iconButton(c *ui.Context, icon, label string) ui.Element {
 	return b
 }
 
-// avatar builds a user's avatar, size DIPs wide: the name's initial in
-// white on one gray for everyone.
+// avatar builds a user's avatar, size DIPs wide: the name's initial, quiet
+// and the same for everyone.
 func avatar(c *ui.Context, name string, size float32) {
 	r, _ := utf8.DecodeRuneInString(name)
 	initial := ""
 	if r != utf8.RuneError {
 		initial = string(unicode.ToUpper(r))
 	}
-	ui.Box(c).Size(size, size).Shrink(0).Radius(size / 2).Background(ui.RGB(0x8E, 0x8E, 0x93)).Center().Children(func() {
-		ui.Text(c, initial).FontSize(size * 0.42).FontWeight(600).TextColor(ui.RGB(255, 255, 255))
+	colors := style.Colors(c)
+	ui.Box(c).Size(size, size).Shrink(0).Radius(size / 2).Background(style.Color(colors.FillSelected)).Center().Children(func() {
+		ui.Text(c, initial).FontSize(size * 0.42).FontWeight(600).TextColor(style.Color(colors.TextSecondary))
 	})
 }
