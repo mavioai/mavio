@@ -76,6 +76,8 @@ func (f *fakeCore) handleAcquisition(mux *http.ServeMux) {
 	mux.Handle(acquisitionv1connect.NewProfileServiceHandler(f.acq))
 	mux.Handle(acquisitionv1connect.NewReleaseServiceHandler(fakeIndexers{}))
 	mux.Handle(acquisitionv1connect.NewDownloadServiceHandler(fakeDownloads{}))
+	f.wanted = newFakeWanted()
+	mux.Handle(acquisitionv1connect.NewWantedServiceHandler(f.wanted))
 }
 
 func (fakeIndexers) ListIndexers(context.Context, *acquisitionv1.ListIndexersRequest) (*acquisitionv1.ListIndexersResponse, error) {
@@ -298,4 +300,90 @@ func replaceByID[T any](list []T, v T, id func(T) string) bool {
 // deleteByID returns list without the entry with the ID.
 func deleteByID[T any](list []T, want string, id func(T) string) []T {
 	return slices.DeleteFunc(list, func(x T) bool { return id(x) == want })
+}
+
+// fakeWanted serves a fake server's wanted movies and episodes, whose
+// searches it counts.
+type fakeWanted struct {
+	acquisitionv1connect.UnimplementedWantedServiceHandler
+
+	mu        sync.Mutex
+	movies    []*acquisitionv1.WantedMovie
+	episodes  []*acquisitionv1.WantedEpisode
+	searched  []string // the items searched for, "all" for all
+	rssSynced bool
+}
+
+func newFakeWanted() *fakeWanted {
+	wanted := func(id string) *acquisitionv1.Wanted {
+		return acquisitionv1.Wanted_builder{ItemId: &id, Monitored: new(true)}.Build()
+	}
+	return &fakeWanted{
+		movies: []*acquisitionv1.WantedMovie{
+			acquisitionv1.WantedMovie_builder{ItemId: new("dune"), Name: new("Dune"), Year: new(int32(2021)), Available: new(true), Wanted: wanted("dune")}.Build(),
+			acquisitionv1.WantedMovie_builder{ItemId: new("arrival"), Name: new("Arrival"), Year: new(int32(2016)), Wanted: wanted("arrival")}.Build(),
+		},
+		episodes: []*acquisitionv1.WantedEpisode{acquisitionv1.WantedEpisode_builder{
+			ItemId: new("e1"), SeriesName: new("Severance"), SeasonNumber: new(int32(2)), EpisodeNumber: new(int32(3)), Name: new("Who Is Alive?"),
+			Quality: new("WEBDL-720p"),
+		}.Build()},
+	}
+}
+
+func (s *fakeWanted) ListWanted(_ context.Context, r *acquisitionv1.ListWantedRequest) (*acquisitionv1.ListWantedResponse, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if r.GetKind() == acquisitionv1.WantedKind_WANTED_KIND_EPISODE {
+		return acquisitionv1.ListWantedResponse_builder{Episodes: slices.Clone(s.episodes), Total: new(int32(len(s.episodes)))}.Build(), nil
+	}
+	return acquisitionv1.ListWantedResponse_builder{Movies: slices.Clone(s.movies), Total: new(int32(len(s.movies)))}.Build(), nil
+}
+
+func (s *fakeWanted) SearchWanted(_ context.Context, r *acquisitionv1.SearchWantedRequest) (*acquisitionv1.SearchWantedResponse, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if len(r.GetItemIds()) == 0 {
+		s.searched = append(s.searched, "all")
+		return acquisitionv1.SearchWantedResponse_builder{Queued: new(int32(len(s.movies)))}.Build(), nil
+	}
+	s.searched = append(s.searched, r.GetItemIds()...)
+	return acquisitionv1.SearchWantedResponse_builder{Queued: new(int32(len(r.GetItemIds())))}.Build(), nil
+}
+
+func (s *fakeWanted) SyncRSS(context.Context, *acquisitionv1.SyncRSSRequest) (*acquisitionv1.SyncRSSResponse, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.rssSynced = true
+	return &acquisitionv1.SyncRSSResponse{}, nil
+}
+
+func (s *fakeWanted) SetMonitored(_ context.Context, r *acquisitionv1.SetMonitoredRequest) (*acquisitionv1.SetMonitoredResponse, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if !r.GetItems().GetMonitored() {
+		s.episodes = slices.DeleteFunc(s.episodes, func(e *acquisitionv1.WantedEpisode) bool {
+			return slices.Contains(r.GetItems().GetItemIds(), e.GetItemId())
+		})
+	}
+	return &acquisitionv1.SetMonitoredResponse{}, nil
+}
+
+func (s *fakeWanted) GetWanted(_ context.Context, r *acquisitionv1.GetWantedRequest) (*acquisitionv1.GetWantedResponse, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	for _, m := range s.movies {
+		if m.GetItemId() == r.GetItemId() {
+			return acquisitionv1.GetWantedResponse_builder{Wanted: m.GetWanted()}.Build(), nil
+		}
+	}
+	return nil, connect.NewError(connect.CodeNotFound, fmt.Errorf("%q is not wanted", r.GetItemId()))
+}
+
+func (s *fakeWanted) UpdateWanted(_ context.Context, r *acquisitionv1.UpdateWantedRequest) (*acquisitionv1.UpdateWantedResponse, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if !r.GetWanted().GetMonitored() {
+		s.movies = slices.DeleteFunc(s.movies, func(m *acquisitionv1.WantedMovie) bool { return m.GetItemId() == r.GetWanted().GetItemId() })
+	}
+	return acquisitionv1.UpdateWantedResponse_builder{Wanted: r.GetWanted()}.Build(), nil
 }

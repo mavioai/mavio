@@ -36,6 +36,7 @@ type adminState struct {
 	proxies     proxiesState
 	storage     storageState
 	acquisition acquisitionState
+	wanted      wantedState
 	libraries   librariesState
 	libs        task[[]*libraryv1.Library]
 	sessions    task[[]*sessionv1.Session]

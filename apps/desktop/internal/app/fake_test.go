@@ -92,6 +92,7 @@ type fakeCore struct {
 	offline        []*storagev1.OfflineClient
 	answers        []string
 	acq            *fakeAcquisition
+	wanted         *fakeWanted
 
 	mu       sync.Mutex
 	calls    []string

@@ -50,6 +50,7 @@ var settingsSections = []settingsSection{
 	{id: "libraries", icon: "folder", color: ui.RGB(0x00, 0x7A, 0xFF), title: "settings.libraries", admin: true},
 	{id: "storage", icon: "server", color: ui.RGB(0x30, 0xB0, 0xC7), title: "settings.storage", admin: true},
 	{id: "acquisition", icon: "downloads", color: ui.RGB(0x34, 0xC7, 0x59), title: "settings.acquisition", admin: true},
+	{id: "wanted", icon: "pending", color: ui.RGB(0xFF, 0x3B, 0x30), title: "settings.wanted", admin: true},
 	{id: "transcoding", icon: "quality", color: ui.RGB(0xFF, 0x2D, 0x55), title: "settings.transcoding", admin: true},
 	{id: "activity", icon: "activity", color: ui.RGB(0xFF, 0x2D, 0x55), title: "settings.activity", admin: true},
 	{id: "tasks", icon: "pending", color: ui.RGB(0x58, 0x56, 0xD6), title: "settings.tasks", admin: true},
@@ -80,7 +81,7 @@ type settingsMenu struct {
 
 var settingsMenus = []settingsMenu{
 	{id: "media", icon: "movies", color: ui.RGB(0xFF, 0x9F, 0x0A), title: "settings.mediaMenu", sections: []string{"libraries", "storage", "transcoding"}},
-	{id: "acquiring", icon: "cloud", color: ui.RGB(0x30, 0xD1, 0x58), title: "settings.acquisitionMenu", sections: []string{"acquisition"}},
+	{id: "acquiring", icon: "cloud", color: ui.RGB(0x30, 0xD1, 0x58), title: "settings.acquisitionMenu", sections: []string{"acquisition", "wanted"}},
 	{id: "maintenance", icon: "admin", color: ui.RGB(0x8E, 0x8E, 0x93), title: "settings.maintenanceMenu", sections: []string{"activity", "tasks", "logs"}},
 }
 
@@ -427,6 +428,8 @@ func (a *App) settingsSection(c *ui.Context, r *ui.Route, id string) {
 		a.storageSection(c, r)
 	case "acquisition":
 		a.acquisitionSection(c, r)
+	case "wanted":
+		a.wantedSection(c)
 	case "activity":
 		a.activitySection(c)
 	case "tasks":
