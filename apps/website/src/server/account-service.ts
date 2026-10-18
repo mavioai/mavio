@@ -40,11 +40,11 @@ import { and, eq, gt, inArray, isNull } from "drizzle-orm";
 
 import type { Auth } from "./auth.ts";
 import {
+  appRedirect,
   authorizationCodeLifetime,
   deleteExpiredCodes,
   hasAccess,
   newAuthorizationCode,
-  loopback,
   redirectURI,
   sha256Hex,
   signAssertion,
@@ -262,12 +262,11 @@ export function accountService({ db, apiURL, auth, relays, now = () => new Date(
     async createAuthorizationCode(req, ctx) {
       const me = await signedIn(ctx);
       const app = !req.clientId || req.clientId === appClient;
-      const to = redirectURI(req.redirectUri);
-      if (!to) {
+      if (app && !redirectURI(req.redirectUri)) {
         throw new ConnectError("the redirect URI is not an HTTP or HTTPS URL", Code.InvalidArgument);
       }
-      if (!app && !loopback(to)) {
-        throw new ConnectError("an app's redirect URI is not a loopback address", Code.InvalidArgument);
+      if (!app && !appRedirect(req.redirectUri, req.clientId)) {
+        throw new ConnectError("an app's redirect URI is neither a loopback address nor its own URI scheme", Code.InvalidArgument);
       }
       const code = await authorizationCode(db, me, { ...req, serverId: null }, now());
       return create(CreateAuthorizationCodeResponseSchema, { code });

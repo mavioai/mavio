@@ -163,6 +163,22 @@ describe("authorization codes", () => {
     const ipv6 = "http://[::1]:8080/callback";
     expect(await code(accounts.createAuthorizationCode({ ...req, redirectUri: ipv6 }))).toBeUndefined();
   });
+
+  test("sign an account in to an app through its own URI scheme", async () => {
+    const site = await newSite();
+    const bob = await site.signUp("bob");
+    const accounts = site.client(AccountService, bob.headers);
+    const own = "dev.mavio.app:/callback";
+    const req = { clientId: "dev.mavio.app", codeChallenge: await s256(verifier), deviceKey: new Uint8Array(32).fill(2) };
+    // Only the scheme named after the app, with no host.
+    for (const redirectUri of ["dev.mavio.ios:/callback", "dev.mavio.app://evil.example/callback", "dev.mavio.app:/callback#x"]) {
+      expect(await code(accounts.createAuthorizationCode({ ...req, redirectUri }))).toBe(Code.InvalidArgument);
+    }
+    const { code: c } = await accounts.createAuthorizationCode({ ...req, redirectUri: own });
+    const res = await post(site, "token", { grant_type: "authorization_code", code: c, client_id: "dev.mavio.app", redirect_uri: own, code_verifier: verifier }, "");
+    expect(res.status).toBe(200);
+    expect((await res.json()).account.id).toBe(bob.id);
+  });
 });
 
 describe("device sessions", () => {

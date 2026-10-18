@@ -103,6 +103,21 @@ export function loopback(u: URL): boolean {
   return u.protocol === "http:" && (u.hostname === "127.0.0.1" || u.hostname === "[::1]");
 }
 
+/**
+ * appRedirect reports whether a redirect URI is one an app receives on this
+ * device: a loopback address, or a URI of the private-use scheme named after
+ * the app's client ID, such as dev.mavio.app:/callback (RFC 8252 §7.1). An
+ * app that claims another's scheme has no use for the code without its PKCE
+ * verifier.
+ */
+export function appRedirect(s: string, clientId: string): boolean {
+  if (!URL.canParse(s)) return false;
+  const u = new URL(s);
+  if (u.protocol === `${clientId}:`) return u.hash === "" && u.username === "" && u.password === "" && u.host === "";
+  const to = redirectURI(s);
+  return !!to && loopback(to);
+}
+
 /** deleteExpiredCodes removes an account's codes that expired. */
 export async function deleteExpiredCodes(db: Database, accountId: string, at: Date) {
   await db

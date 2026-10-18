@@ -17,7 +17,8 @@ import { Button, ErrorText, Muted } from "../ui.tsx";
 // yet (docs/accounts.md §3.2). app.mavio.dev sends its request here
 // itself, with the client_id app, and signs in at once. One of Mavio's
 // apps opens the page in the browser with its reverse-DNS client ID and
-// a loopback redirect URI (RFC 8252), and the account approves it.
+// a loopback redirect URI or one of its own URI scheme (RFC 8252), and
+// the account approves it.
 type Search = {
   request_uri?: string;
   client_id?: string;
@@ -123,17 +124,21 @@ const appNames: Record<string, string> = {
   "dev.mavio.macos": "Mavio for Mac",
 };
 
-/** Whether a redirect URI is an app's on this device: http://127.0.0.1 or http://[::1] with any port (RFC 8252 §7.3). */
-function loopback(uri: string | undefined): boolean {
-  if (!uri || !URL.canParse(uri)) return false;
+/**
+ * Whether a redirect URI is an app's on this device: http://127.0.0.1 or http://[::1] with any port (RFC 8252 §7.3),
+ * or a URI of the scheme named after the app's client ID, such as dev.mavio.app:/callback (RFC 8252 §7.1).
+ */
+function appRedirect(uri: string | undefined, clientId: string | undefined): boolean {
+  if (!uri || !clientId || !URL.canParse(uri)) return false;
   const u = new URL(uri);
+  if (u.protocol === `${clientId}:`) return u.host === "";
   return u.protocol === "http:" && (u.hostname === "127.0.0.1" || u.hostname === "[::1]");
 }
 
 /**
  * One of Mavio's apps signing the account in, from the browser it opened:
  * the account approves it, and the code goes back to the app on its
- * loopback address.
+ * loopback address or through its own URI scheme.
  */
 function NativeRequest({ q, me }: { q: Search; me: Me }) {
   const answer = useMutation({
@@ -155,7 +160,7 @@ function NativeRequest({ q, me }: { q: Search; me: Me }) {
     q.code_challenge_method === "S256" &&
     !!q.code_challenge &&
     key?.length === 32 &&
-    loopback(q.redirect_uri);
+    appRedirect(q.redirect_uri, q.client_id);
   if (!complete) {
     return (
       <Frame title="Sign in to Mavio">
@@ -165,7 +170,7 @@ function NativeRequest({ q, me }: { q: Search; me: Me }) {
   }
   return (
     <Frame title={`${app} would like to sign in to your Mavio account`}>
-      <Muted>The app on this computer reaches every server of your account. Continue only if you started signing in from it.</Muted>
+      <Muted>The app on this device reaches every server of your account. Continue only if you started signing in from it.</Muted>
       <SignedInAs me={me} />
       <div className="flex w-full flex-col gap-3">
         <Button onClick={() => answer.mutate(true)} disabled={answer.isPending}>
