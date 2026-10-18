@@ -74,7 +74,7 @@ fun itemIcon(kind: CardKind): Int = when (kind) {
 /**
  * An image loaded from a server, fading in over a placeholder of its final
  * size; with none, the placeholder stays, a quiet wash with the icon of
- * what it shows.
+ * what it shows. Cropped to its space at [alignment].
  */
 @Composable
 fun Artwork(
@@ -82,6 +82,7 @@ fun Artwork(
     modifier: Modifier = Modifier,
     @DrawableRes icon: Int = R.drawable.ic_movies,
     contentDescription: String? = null,
+    alignment: Alignment = Alignment.Center,
 ) {
     var failed by remember(url) { mutableStateOf(false) }
     val colors = theme.colors
@@ -106,6 +107,7 @@ fun Artwork(
                 contentDescription = contentDescription,
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop,
+                alignment = alignment,
                 onError = { failed = true },
             )
         }

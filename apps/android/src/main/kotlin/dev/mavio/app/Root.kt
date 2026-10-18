@@ -331,10 +331,13 @@ private fun TabBar(current: Tab, haze: HazeState, modifier: Modifier = Modifier,
 private fun glassTint(): Color = if (theme.colors.background.luminance() < 0.5f) Color(0x61252528) else Color(0x59FFFFFF)
 
 /**
- * A phone's hero's artwork, enlarged and blurred, above the hero behind
- * the header and the status bar, so that the header takes the hero's
- * colors and meets its artwork at a sharp edge, as the web UI's
- * (HeroBleed). Placed first in the hero's box, which must not clip it.
+ * A phone's hero's artwork, enlarged and blurred, in a strip of the
+ * header's height above the hero, behind the header (whose glass reaches up
+ * under the status bar), so that the header takes the hero's colors and
+ * meets its artwork at a sharp edge, as the web UI's (HeroBleed): the image
+ * three times the strip's height from a strip above it, kept to its top,
+ * scaled by 1.25 and blurred. Placed first in the hero's box, which must
+ * not clip it.
  */
 @Composable
 fun HeroBleed(url: String?) {
@@ -362,6 +365,7 @@ fun HeroBleed(url: String?) {
                 }
                 .then(if (blurAvailable) Modifier.blur(40.dp, BlurredEdgeTreatment.Unbounded) else Modifier),
             contentDescription = null,
+            alignment = Alignment.TopCenter,
         )
     }
 }
