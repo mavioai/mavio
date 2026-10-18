@@ -406,6 +406,16 @@ pub struct ServerResponse {
     pub base_url: String,
 }
 
+/// A request of a server's plain HTTP path, such as a backup's file, for
+/// the app to send itself.
+#[derive(Debug, Clone, uniffi::Record)]
+pub struct ServerRequest {
+    /// The path resolved against the base URL the core reaches the server at.
+    pub url: String,
+    /// The session's access token, sent as a bearer token.
+    pub token: String,
+}
+
 /// A playing item, which reports its progress.
 #[derive(uniffi::Object)]
 pub struct PlaybackSession {
@@ -708,6 +718,16 @@ impl Client {
             .call(|c| async move { c.call(&server_id, &procedure, request).await })
             .await?;
         Ok(ServerResponse { body, base_url })
+    }
+
+    /// A request of a server's plain HTTP path signed in to as its session,
+    /// such as "system/backups/<name>": its URL and an access token that is
+    /// fresh for a while.
+    pub async fn server_request(&self, server_id: String, path: String) -> Result<ServerRequest> {
+        let (url, token) = self
+            .call(|c| async move { c.authorize(&server_id, &path).await })
+            .await?;
+        Ok(ServerRequest { url, token })
     }
 
     /// The user's playback preferences, as the first server signed in to

@@ -773,6 +773,17 @@ impl Core {
         Ok((body, conn.url("")))
     }
 
+    /// Resolves a plain HTTP path of a server signed in to, answering its
+    /// URL and the session's access token to send it with.
+    pub async fn authorize(&self, server_id: &str, path: &str) -> Result<(String, String)> {
+        let conn = self.servers.connection(server_id)?;
+        let token = conn
+            .token()
+            .await?
+            .ok_or_else(|| Error::Unauthenticated("signed out".into()))?;
+        Ok((conn.url(path), token))
+    }
+
     /// Follows the Mavio account's servers now.
     pub async fn sync_account(&self) -> Result<()> {
         sync_account(&self.streams, &self.servers, &self.relay).await
