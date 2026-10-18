@@ -77,6 +77,7 @@ export function Hero({ entries }: { entries: HeroEntry[] }) {
       : "h-[470px]";
   return (
     <section
+      data-hero
       aria-roledescription="carousel"
       aria-label={eyebrow}
       onPointerEnter={() => setPaused(true)}
@@ -145,7 +146,7 @@ export function Hero({ entries }: { entries: HeroEntry[] }) {
         </div>
       </div>
       {entries.length > 1 && (
-        <div className={`absolute flex gap-1.5 ${tv ? "right-margin bottom-[14vh]" : phone ? "top-4 right-margin" : "right-8 bottom-8"}`}>
+        <div className={`absolute flex gap-1.5 ${tv ? "right-margin bottom-[14vh]" : phone ? "top-17 right-margin" : "right-8 bottom-8"}`}>
           {entries.map((e, i) => (
             <button
               key={`${e.server.id}/${e.item.id}`}
