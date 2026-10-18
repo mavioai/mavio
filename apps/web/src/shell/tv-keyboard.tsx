@@ -51,13 +51,21 @@ const letters = [..."abcdefghijklmnopqrstuvwxyz"];
 const digits = [..."1234567890"];
 const symbols = [..."-_.@/:;,?!#$%&*+=()[]{}<>'\"~|\\"];
 
+/**
+ * The fields a keyboard has typed into since they were focused, whose Enter
+ * and Backspace are the field's own (back.ts), as sending what was typed.
+ */
+const typedIn = new WeakSet<EventTarget>();
+
+/** Whether a keyboard has typed into el since it was focused. */
+export function typedInto(el: Element | null): boolean {
+  return !!el && typedIn.has(el);
+}
+
 /** Opens the keyboard with OK on a field while on. */
 export function TvKeyboard() {
   const [field, setField] = useState<Field>();
   useEffect(() => {
-    // The fields a keyboard has typed into since they were focused, whose
-    // Enter is the field's own, as sending what was typed.
-    const typedIn = new WeakSet<EventTarget>();
     const focus = (e: FocusEvent) => e.target && typedIn.delete(e.target);
     const input = (e: Event) => e.isTrusted && e.target && typedIn.add(e.target);
     // Ahead of the field's own keys, as a form's submitting.

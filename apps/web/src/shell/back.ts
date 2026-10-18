@@ -9,6 +9,7 @@ import { useEffect } from "react";
 import { menuOf } from "../screens/settings-menus.ts";
 import { focusState, type Point, pointOf } from "./focus.ts";
 import { focusable, openPopup } from "./spatial.ts";
+import { typedInto } from "./tv-keyboard.tsx";
 
 /** The pages of the tabs, which Back leaves for the tabs. */
 const tabPages = ["/", "/libraries", "/discover"];
@@ -83,7 +84,8 @@ function refocus(el: HTMLElement, spot: Spot) {
 const spots = new Map<string, Spot>();
 
 /**
- * Goes up a level on Escape, and on Backspace outside a field, while on;
+ * Goes up a level on Escape, and on Backspace but in a field a keyboard
+ * types into, while on;
  * the player goes back by itself (docs/tv.md §7).
  */
 export function useTvBack(on = true) {
@@ -128,7 +130,9 @@ export function useTvBack(on = true) {
     const key = (e: KeyboardEvent) => {
       if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.altKey) return;
       if (router.state.location.pathname.includes("/play/")) return;
-      const typing = document.activeElement?.matches("input, textarea, select") ?? false;
+      // Backspace is a field's own only once a keyboard types into it; the
+      // remote's Back goes back from it (tv-keyboard.tsx types for it).
+      const typing = typedInto(document.activeElement);
       if (e.key !== "Escape" && (e.key !== "Backspace" || typing)) return;
       // An open popup closes on Escape by itself; Back is its Escape too.
       if (openPopup()) {
