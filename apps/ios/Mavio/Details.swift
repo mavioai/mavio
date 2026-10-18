@@ -124,6 +124,7 @@ private struct DetailsContent: View {
                             ForEach(details.similar, id: \.self) { CardLink(card: $0, width: theme.layout.poster) }
                         }
                     }
+                    Recommendations(details: details)
                     AboutSection(details: details, source: source, overview: !phone)
                 }
                 .padding(.top, MavioSpacing.s24)
@@ -1036,5 +1037,26 @@ private struct CollectionBanner: View {
         .buttonStyle(.plain)
         .padding(.horizontal, theme.layout.margin)
         .padding(.vertical, MavioSpacing.s12)
+    }
+}
+
+/// The titles the discovery providers recommend to those who liked a movie
+/// or series, those in a library opening their details there.
+private struct Recommendations: View {
+    let details: Details
+    @Environment(Discovery.self) private var discovery
+
+    var body: some View {
+        let kind: MediaKind? =
+            details.card.kind == .movie ? .movie : details.card.kind == .series ? .series : nil
+        let tmdbId = Int32(details.externalIds["tmdb"] ?? "") ?? 0
+        if let kind, tmdbId > 0, let server = discovery.server,
+            let catalog = discovery.related(kind).first(where: { $0.kind == .recommendations })
+        {
+            CatalogShelf(
+                query: CatalogQuery(
+                    serverId: server.id, catalog: catalog.id, kind: kind, tmdbId: tmdbId,
+                    title: MavioStrings.discoverRecommendations))
+        }
     }
 }
