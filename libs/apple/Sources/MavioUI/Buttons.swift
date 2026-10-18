@@ -14,6 +14,8 @@ public struct MavioButtonStyle: ButtonStyle {
         case circle
         /// The main action over artwork: white with black content.
         case artworkPrimary
+        /// Another action over artwork: white over glass.
+        case artworkSecondary
         /// An icon in a circle of glass over artwork.
         case artworkCircle
     }
@@ -53,7 +55,7 @@ public struct MavioButtonStyle: ButtonStyle {
             switch kind {
             case .circle, .artworkCircle:
                 configuration.label.frame(width: 44, height: 44)
-            case .primary, .secondary, .artworkPrimary:
+            case .primary, .secondary, .artworkPrimary, .artworkSecondary:
                 configuration.label
                     .padding(.horizontal, large ? MavioSpacing.s20 : MavioSpacing.s16)
                     .frame(minHeight: large ? 48 : 36)
@@ -63,7 +65,7 @@ public struct MavioButtonStyle: ButtonStyle {
         private var foreground: Color {
             switch kind {
             case .artworkPrimary: .black
-            case .artworkCircle: .white
+            case .artworkCircle, .artworkSecondary: .white
             case _ where !enabled: theme.colors.textDisabled
             case .primary: theme.colors.onButton
             default: theme.colors.textPrimary
@@ -74,7 +76,7 @@ public struct MavioButtonStyle: ButtonStyle {
             switch kind {
             case .primary: theme.colors.button
             case .artworkPrimary: .white
-            case .artworkCircle: .white.opacity(0.2)
+            case .artworkCircle, .artworkSecondary: .white.opacity(0.2)
             default: theme.colors.fill
             }
         }
@@ -82,7 +84,7 @@ public struct MavioButtonStyle: ButtonStyle {
         private var shape: AnyShape {
             switch kind {
             case .circle, .artworkCircle: AnyShape(Circle())
-            case .primary, .secondary, .artworkPrimary:
+            case .primary, .secondary, .artworkPrimary, .artworkSecondary:
                 AnyShape(RoundedRectangle(cornerRadius: large ? 10 : MavioRadius.md))
             }
         }
@@ -96,7 +98,7 @@ private struct Fill: ViewModifier {
     let shape: AnyShape
 
     func body(content: Content) -> some View {
-        if kind == .artworkCircle {
+        if kind == .artworkCircle || kind == .artworkSecondary {
             content.glass(in: shape)
         } else {
             content.background(color, in: shape)

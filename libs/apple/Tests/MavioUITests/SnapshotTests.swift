@@ -76,7 +76,9 @@
             return Card(
                 serverId: server.id, itemId: entry.id,
                 kind: item.kind == "episode" ? .episode : item.kind == "series" ? .series : .movie,
-                title: item.name, subtitle: subtitle, year: item.year, poster: nil, thumb: nil,
+                title: item.name, subtitle: subtitle, year: item.year, poster: nil, thumb: nil, backdrop: nil,
+                logo: nil,
+                overview: nil, genres: [], officialRating: nil,
                 progress: entry.progressMinutes.flatMap { p in runtime.map { Float(p * 60 / $0) } },
                 played: entry.played ?? false, favorite: false, runtime: runtime, versions: [])
         }
