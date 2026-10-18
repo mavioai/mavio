@@ -385,15 +385,13 @@ export function libraryIcon(kind: LibraryKind): IconName {
   }
 }
 
-/** A person's initial on a color their name picks (libs/design/components.md, Avatar). */
+/** A person's initial on the avatars' gray (libs/design/components.md, Avatar). */
 export function Avatar({ name, size = 32, className }: { name: string; size?: number; className?: string }) {
-  let hue = 0;
-  for (const c of name) hue = (hue * 31 + c.codePointAt(0)!) % 360;
   return (
     <span
       aria-hidden
-      className={`inline-flex shrink-0 items-center justify-center rounded-full font-semibold text-white ${className ?? ""}`}
-      style={{ width: size, height: size, fontSize: size * 0.42, background: `hsl(${hue} 42% 44%)` }}
+      className={`inline-flex shrink-0 items-center justify-center rounded-full bg-[#8E8E93] font-semibold text-white ${className ?? ""}`}
+      style={{ width: size, height: size, fontSize: size * 0.42 }}
     >
       {[...name][0]?.toUpperCase()}
     </span>
