@@ -99,6 +99,7 @@ enum class SettingsPage {
 @Composable
 fun SettingsScreen(model: AppModel) {
     val signedIn by model.signedIn.collectAsStateWithLifecycle()
+    val servers = signedInServers(model)
     val navigator = LocalNavigator.current
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -125,6 +126,7 @@ fun SettingsScreen(model: AppModel) {
                 }
             }
         }
+        serverGroup(model, servers)
         item {
             Group {
                 val app = remember { context.packageManager.getPackageInfo(context.packageName, 0).versionName.orEmpty() }
@@ -242,7 +244,7 @@ private fun signedInAccount(model: AppModel): Account? {
 
 /** The servers signed in to, in the user's order, followed. */
 @Composable
-private fun signedInServers(model: AppModel): List<ServerRecord> {
+internal fun signedInServers(model: AppModel): List<ServerRecord> {
     val servers by model.servers.collectAsStateWithLifecycle()
     val signedIn by model.signedIn.collectAsStateWithLifecycle()
     return servers.filter { it.id in signedIn }
@@ -629,7 +631,7 @@ private fun SubtitlesAudioPage(model: AppModel) {
 
 /** A page of settings: its title, an optional message, then its groups. */
 @Composable
-private fun SettingsList(title: String, message: String? = null, large: Boolean = false, content: LazyListScope.() -> Unit) {
+internal fun SettingsList(title: String, message: String? = null, large: Boolean = false, content: LazyListScope.() -> Unit) {
     LazyColumn(
         Modifier.fillMaxSize(),
         contentPadding = PaddingValues(
@@ -653,7 +655,7 @@ private fun SettingsList(title: String, message: String? = null, large: Boolean 
 
 /** A group of rows on a card, with an optional title above and footer below. */
 @Composable
-private fun Group(title: String? = null, footer: String? = null, content: @Composable ColumnScope.() -> Unit) {
+internal fun Group(title: String? = null, footer: String? = null, content: @Composable ColumnScope.() -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(MavioSpacing.s8)) {
         if (title != null) {
             Text(title, Modifier.padding(horizontal = 4.dp), style = theme.type.headline.text)
@@ -670,13 +672,13 @@ private fun Group(title: String? = null, footer: String? = null, content: @Compo
 
 /** The line between rows, after the tiles when tiled. */
 @Composable
-private fun RowDivider(tiled: Boolean = false) {
+internal fun RowDivider(tiled: Boolean = false) {
     HorizontalDivider(Modifier.padding(start = if (tiled) 60.dp else 16.dp), color = theme.colors.border)
 }
 
 /** A row opening a section: its icon on a colored tile, and its title. */
 @Composable
-private fun EntryRow(title: String, @DrawableRes icon: Int, color: Color, onClick: () -> Unit) {
+internal fun EntryRow(title: String, @DrawableRes icon: Int, color: Color, onClick: () -> Unit) {
     Row(
         Modifier.fillMaxWidth().clickable(onClick = onClick).heightIn(min = 52.dp).padding(horizontal = 16.dp),
         horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s16),
@@ -692,13 +694,13 @@ private fun EntryRow(title: String, @DrawableRes icon: Int, color: Color, onClic
 
 /** The arrow of a row opening a page. */
 @Composable
-private fun Chevron() {
+internal fun Chevron() {
     MavioIcon(R.drawable.ic_forward, size = 18.dp, tint = theme.colors.textTertiary)
 }
 
 /** A label and its value. */
 @Composable
-private fun ValueRow(label: String, value: String) {
+internal fun ValueRow(label: String, value: String) {
     Row(
         Modifier.fillMaxWidth().heightIn(min = 48.dp).padding(horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -723,7 +725,7 @@ private fun NameRow(name: String) {
 
 /** An action in the accent's color, with its icon. */
 @Composable
-private fun LinkRow(label: String, @DrawableRes icon: Int, onClick: () -> Unit) {
+internal fun LinkRow(label: String, @DrawableRes icon: Int, onClick: () -> Unit) {
     Row(
         Modifier.fillMaxWidth().clickable(onClick = onClick).heightIn(min = 48.dp).padding(horizontal = 16.dp),
         horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s12),
@@ -736,7 +738,7 @@ private fun LinkRow(label: String, @DrawableRes icon: Int, onClick: () -> Unit) 
 
 /** A setting turned on and off. */
 @Composable
-private fun SwitchRow(label: String, checked: Boolean, onChange: (Boolean) -> Unit) {
+internal fun SwitchRow(label: String, checked: Boolean, onChange: (Boolean) -> Unit) {
     Row(
         Modifier.fillMaxWidth().clickable { onChange(!checked) }.heightIn(min = 52.dp).padding(horizontal = 16.dp),
         horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s12),
@@ -759,7 +761,7 @@ private fun SwitchRow(label: String, checked: Boolean, onChange: (Boolean) -> Un
 
 /** A setting chosen from a menu, showing its choice. */
 @Composable
-private fun <T> ChoiceRow(label: String, choices: List<Pair<T, String>>, chosen: T, onChoose: (T) -> Unit) {
+internal fun <T> ChoiceRow(label: String, choices: List<Pair<T, String>>, chosen: T, onChoose: (T) -> Unit) {
     var open by remember { mutableStateOf(false) }
     Row(
         Modifier.fillMaxWidth().clickable { open = true }.heightIn(min = 52.dp).padding(horizontal = 16.dp),
@@ -798,7 +800,7 @@ private fun <T> ChoiceRow(label: String, choices: List<Pair<T, String>>, chosen:
 
 /** A text field of the settings. */
 @Composable
-private fun SettingsField(
+internal fun SettingsField(
     value: String,
     onChange: (String) -> Unit,
     label: String,

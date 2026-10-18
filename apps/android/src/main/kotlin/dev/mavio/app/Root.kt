@@ -123,6 +123,9 @@ sealed interface Route {
     /** A page of the settings. */
     data class Setting(val page: SettingsPage) : Route
 
+    /** A section of a server's settings. */
+    data class ServerSetting(val serverId: String, val section: ServerSection) : Route
+
     /** Signing in to one more server. */
     data object AddServer : Route
 
@@ -220,7 +223,7 @@ private fun Shell(model: AppModel) {
                 Header(model, back = stack.size > 1, Modifier.align(Alignment.TopCenter), haze)
                 // The settings, opened from the header, leave the tabs out.
                 AnimatedVisibility(
-                    stack.lastOrNull().let { it != Route.Settings && it !is Route.Setting },
+                    stack.lastOrNull().let { it != Route.Settings && it !is Route.Setting && it !is Route.ServerSetting },
                     Modifier.align(Alignment.BottomCenter),
                     enter = slideInVertically(tween(PAGE_MILLIS)) { it },
                     exit = slideOutVertically(tween(PAGE_MILLIS)) { it },
@@ -267,6 +270,7 @@ private fun Screen(model: AppModel, route: Route) {
             when (route) {
                 Route.Settings -> SettingsScreen(model)
                 is Route.Setting -> SettingsPageScreen(model, route.page)
+                is Route.ServerSetting -> ServerSettingScreen(model, route)
                 else -> StatusView(stringResource(R.string.state_loading))
             }
         }
