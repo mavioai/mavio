@@ -19,6 +19,7 @@ import { Avatar } from "../ui.tsx";
 import { RemoteCommands } from "../screens/remote.tsx";
 import { GroupIndicator } from "../screens/syncplay.tsx";
 import { SyncPlayProvider } from "../syncplay.tsx";
+import { BackButton } from "./back-button.tsx";
 import { SidebarPanel, SidebarResizer, sidebarWidth } from "./sidebar.tsx";
 import { useTvBack } from "./back.ts";
 import { useTvFocus } from "./focus.ts";
@@ -111,6 +112,7 @@ function NormalShell({ width }: { width: ReturnType<typeof useWidthClass> }) {
     <div className={compact ? "min-h-screen pb-[calc(88px+env(safe-area-inset-bottom))]" : "flex min-h-screen"}>
       {compact ? <CompactHeader /> : <Sidebar overlay={width === "medium"} />}
       <main className={compact ? undefined : "min-w-0 flex-1 pb-8"}>
+        {!compact && <BackButton />}
         <Outlet />
       </main>
       {compact && <TabBar />}

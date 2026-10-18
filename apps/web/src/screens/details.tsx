@@ -370,6 +370,7 @@ function Header({
   const title = `font-bold leading-[1.05] text-balance ${tv ? "text-[72px]" : phone ? "text-[34px]" : "text-[52px]"}`;
   return (
     <header
+      data-hero
       className={`relative overflow-hidden bg-surface ${
         tv ? "h-[86vh]" : phone ? "h-[64vh] min-h-96" : "mx-2.5 mt-2.5 h-[clamp(520px,70vh,700px)] rounded-[18px]"
       }`}
