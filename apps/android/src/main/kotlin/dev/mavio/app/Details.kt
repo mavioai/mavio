@@ -260,7 +260,12 @@ private fun DetailsContent(model: AppModel, details: Details) {
             }
             else -> {}
         }
-        if (details.children.isNotEmpty() && card.kind !in setOf(CardKind.SERIES, CardKind.SEASON, CardKind.EPISODE)) {
+        when (card.kind) {
+            CardKind.PLAYLIST -> item(key = "entries") { PlaylistEntries(model, details) }
+            CardKind.COLLECTION -> item(key = "members") { CollectionMembers(model, details) }
+            else -> {}
+        }
+        if (details.children.isNotEmpty() && card.kind !in setOf(CardKind.SERIES, CardKind.SEASON, CardKind.EPISODE, CardKind.PLAYLIST, CardKind.COLLECTION)) {
             item(key = "children") { Children(card.kind, details.children) }
         }
         item(key = "cast") { Cast(details) }
@@ -832,13 +837,13 @@ private fun EpisodeStill(card: Card, modifier: Modifier) {
 
 // Sections
 
-/** An album's tracks, a playlist's entries, or a folder's items as a grid. */
+/** An album's tracks, or a folder's items as a grid. */
 @Composable
 private fun Children(kind: CardKind, children: List<Card>) {
     val navigator = LocalNavigator.current
     val colors = theme.colors
     when (kind) {
-        CardKind.ALBUM, CardKind.PLAYLIST, CardKind.AUDIOBOOK -> Column(
+        CardKind.ALBUM, CardKind.AUDIOBOOK -> Column(
             Modifier.padding(horizontal = theme.layout.margin),
             verticalArrangement = Arrangement.spacedBy(MavioSpacing.s12),
         ) {
