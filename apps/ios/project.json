@@ -10,7 +10,7 @@
     "build": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "xcodebuild -project Mavio.xcodeproj -scheme Mavio -destination 'generic/platform=iOS Simulator' -derivedDataPath ../../dist/xcode/ios ARCHS=arm64 CODE_SIGNING_ALLOWED=NO -quiet build",
+        "command": "xcodebuild -project Mavio.xcodeproj -scheme Mavio -destination 'generic/platform=iOS Simulator' -derivedDataPath ../../dist/xcode/ios ARCHS=arm64 CODE_SIGN_IDENTITY=- CODE_SIGN_STYLE=Manual DEVELOPMENT_TEAM= -quiet build",
         "cwd": "{projectRoot}"
       },
       "dependsOn": [

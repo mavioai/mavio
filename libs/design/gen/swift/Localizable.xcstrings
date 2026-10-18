@@ -9001,6 +9001,24 @@
         }
       }
     },
+    "auth.useLinkCode": {
+      "comment": "Signs a Mavio account in with a code approved on another device.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Use a Link Code"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "使用连接码"
+          }
+        }
+      }
+    },
     "auth.othersUseApp": {
       "comment": "Under Sign In with Mavio on a server's own web UI, which only its administrator signs in to; host is app.mavio.dev's.",
       "extractionState": "manual",

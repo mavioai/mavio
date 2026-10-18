@@ -504,7 +504,7 @@
   "auth.notMavio": { "message": "This address is not a Mavio server.", "description": "Error when the address entered answers but is not a Mavio server.", "platforms": ["apple", "desktop"] },
   "auth.connectToServer": { "message": "Connect to a Server", "description": "Opens signing in to a server by its address, and titles that step.", "platforms": ["desktop"] },
   "auth.serverAddressMessage": { "message": "Enter the address of your Mavio server.", "description": "Line above the field of a server's address.", "platforms": ["desktop"] },
-  "auth.useLinkCode": { "message": "Use a Link Code", "description": "Signs a Mavio account in with a code approved on another device.", "platforms": ["desktop"] },
+  "auth.useLinkCode": { "message": "Use a Link Code", "description": "Signs a Mavio account in with a code approved on another device.", "platforms": ["apple", "desktop"] },
   "auth.scanLinkCode": { "message": "Or scan this code with your phone's camera.", "description": "Under the QR code of the link page with the code filled in.", "platforms": ["desktop"] },
   "auth.continueInBrowser": { "message": "Continue in Your Browser", "description": "Title while a Mavio account signs in in the browser the app opened.", "platforms": ["desktop"] },
   "auth.continueInBrowserMessage": { "message": "Sign in at {host} in the browser that opened, then come back here.", "description": "Line while a Mavio account signs in in the browser; host is mavio.dev's.", "platforms": ["desktop"] },

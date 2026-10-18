@@ -2,8 +2,9 @@ import MavioKit
 import MavioUI
 import SwiftUI
 
-/// The profile: the servers in the user's order, which orders Home, signing
-/// out, adding a server and authorizing a device with Quick Connect.
+/// The profile: the Mavio account, the servers in the user's order, which
+/// orders Home, signing out, adding a server and authorizing a device with
+/// Quick Connect.
 struct ProfileView: View {
     @Environment(AppModel.self) private var model
     @Environment(Router.self) private var router
@@ -12,6 +13,20 @@ struct ProfileView: View {
 
     var body: some View {
         List {
+            if let account = model.account {
+                Section {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(account.name).type(theme.type.headline)
+                        Text(MavioStrings.authMavioAccount)
+                            .type(theme.type.footnote)
+                            .foregroundStyle(theme.colors.textSecondary)
+                    }
+                    // Signing the account out forgets its servers too.
+                    Button(MavioStrings.authSignOut, role: .destructive) {
+                        Task { try? await model.signOut() }
+                    }
+                }
+            }
             Section(MavioStrings.authServers) {
                 ForEach(model.servers, id: \.id) { server in
                     ServerRow(server: server)

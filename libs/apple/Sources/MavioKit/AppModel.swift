@@ -44,6 +44,8 @@ public final class AppModel {
     public let client: Client
     /// The servers, in the user's order.
     public private(set) var servers: [ServerRecord] = []
+    /// The Mavio account signed in, whose servers the core follows.
+    public private(set) var account: Account?
     /// The servers the device holds a token of.
     public private(set) var signedIn: Set<String> = []
     /// The state of each server's stream.
@@ -151,13 +153,23 @@ public final class AppModel {
 
     /// Reads the servers again from the core.
     public func reloadServers() {
+        account = client.account()
         servers = (try? client.servers()) ?? []
         signedIn = Set(servers.filter { client.signedIn(serverId: $0.id) }.map(\.id))
     }
 
-    /// Follows the servers' event streams, when the app comes to the foreground.
+    /// Follows the servers' event streams, when the app comes to the
+    /// foreground, and the Mavio account's servers, among them those it could
+    /// not reach before.
     public func start() {
         try? client.start()
+        guard account != nil else { return }
+        Task {
+            // An unreachable mavio.dev leaves the servers as they were.
+            try? await client.syncAccount()
+            reloadServers()
+            refreshHome()
+        }
     }
 
     /// Stops the event streams, when the app goes to the background.
@@ -196,6 +208,31 @@ public final class AppModel {
         let server = try await client.pollQuickConnect(request: request)
         if server != nil { added() }
         return server
+    }
+
+    /// Asks whether a link code was approved, signing the Mavio account in
+    /// with its servers when it was.
+    public func pollLink(_ link: LinkCode) async throws -> Account? {
+        let account = try await client.pollLink(link: link)
+        if account != nil { added() }
+        return account
+    }
+
+    /// Waits for the browser to come back from a Mavio account's sign-in,
+    /// and signs the account in with its servers.
+    @discardableResult
+    public func finishBrowserSignIn(_ signIn: BrowserSignIn) async throws -> Account {
+        let account = try await client.finishBrowserSignIn(signIn: signIn)
+        added()
+        return account
+    }
+
+    /// Signs out of the Mavio account and its servers, or of every server.
+    public func signOut() async throws {
+        try await client.signOut()
+        states = [:]
+        reloadServers()
+        refreshHome()
     }
 
     /// Signs out of a server and forgets it.

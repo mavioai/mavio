@@ -1,7 +1,7 @@
 //! The Connect clients of one server, over HTTP/1.1 and HTTP/2, with TLS
 //! for `https` addresses.
 
-use std::sync::Arc;
+use std::sync::{Arc, OnceLock};
 use std::time::Duration;
 
 use bytes::Bytes;
@@ -16,6 +16,8 @@ use mavio_api::connect::mavio::library::v1::{ItemServiceClient, LibraryServiceCl
 use mavio_api::connect::mavio::playback::v1::PlaybackServiceClient;
 use mavio_api::connect::mavio::session::v1::EventServiceClient;
 use mavio_api::connect::mavio::user::v1::{UserDataServiceClient, UserServiceClient};
+use rustls::pki_types::CertificateDer;
+use rustls::pki_types::pem::PemObject as _;
 
 use crate::error::{Error, Result};
 use crate::session::{Session, Transport};
@@ -61,19 +63,45 @@ pub fn parse_address(input: &str) -> Result<Uri> {
         .map_err(|e| Error::Invalid(format!("address {input:?}: {e}")))
 }
 
+/// The environment variable naming a file of PEM certificates trusted as
+/// roots besides Mozilla's, as `NODE_EXTRA_CA_CERTS` does for Node.js: in
+/// development, a local authority's, such as mkcert's, whose certificates
+/// serve mavio.dev or a server on the network.
+pub const EXTRA_CA_CERTS: &str = "MAVIO_EXTRA_CA_CERTS";
+
 /// The TLS configuration of `https` servers: the Mozilla root
-/// certificates, the same on every platform.
+/// certificates, the same on every platform, and those of
+/// [`EXTRA_CA_CERTS`].
 pub(crate) fn tls_config() -> Arc<rustls::ClientConfig> {
-    let roots = rustls::RootCertStore {
-        roots: webpki_roots::TLS_SERVER_ROOTS.to_vec(),
-    };
-    let provider = Arc::new(rustls::crypto::aws_lc_rs::default_provider());
-    let config = rustls::ClientConfig::builder_with_provider(provider)
-        .with_safe_default_protocol_versions()
-        .expect("the provider supports the default protocol versions")
-        .with_root_certificates(roots)
-        .with_no_client_auth();
-    Arc::new(config)
+    static CONFIG: OnceLock<Arc<rustls::ClientConfig>> = OnceLock::new();
+    CONFIG
+        .get_or_init(|| {
+            let mut roots = rustls::RootCertStore {
+                roots: webpki_roots::TLS_SERVER_ROOTS.to_vec(),
+            };
+            if let Some(path) = std::env::var_os(EXTRA_CA_CERTS) {
+                match CertificateDer::pem_file_iter(&path) {
+                    Ok(certs) => {
+                        let (added, ignored) =
+                            roots.add_parsable_certificates(certs.filter_map(|c| c.ok()));
+                        if added == 0 || ignored > 0 {
+                            eprintln!(
+                                "mavio-core: {EXTRA_CA_CERTS}: {added} certificates added, {ignored} ignored"
+                            );
+                        }
+                    }
+                    Err(e) => eprintln!("mavio-core: {EXTRA_CA_CERTS}: {e}"),
+                }
+            }
+            let provider = Arc::new(rustls::crypto::aws_lc_rs::default_provider());
+            let config = rustls::ClientConfig::builder_with_provider(provider)
+                .with_safe_default_protocol_versions()
+                .expect("the provider supports the default protocol versions")
+                .with_root_certificates(roots)
+                .with_no_client_auth();
+            Arc::new(config)
+        })
+        .clone()
 }
 
 /// The clients of one server, signed in when it has a session. Cloning is

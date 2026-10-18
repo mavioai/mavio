@@ -17,7 +17,7 @@ use mavio_api::proto::mavio::playback::v1::{PlayMethod, SubtitleMethod};
 use mavio_api::proto::mavio::session::v1::__buffa::oneof::event::Kind;
 use mavio_api::proto::mavio::session::v1::Event;
 use mavio_core::{
-    Core, Details, DeviceInfo, DownloadEntry, Filter, FoundServer, Libraries, Page,
+    Account, Core, Details, DeviceInfo, DownloadEntry, Filter, FoundServer, Libraries, Page,
     PlaybackOptions, Row, SearchResults, ServerInfo, ServerRecord, Sort, Store, StreamState,
     Transfer,
 };
@@ -283,6 +283,61 @@ impl QuickConnectRequest {
     }
 }
 
+/// A link code of a Mavio account's sign-in: the device shows it and the
+/// account approves it at mavio.dev/link.
+#[derive(uniffi::Object)]
+pub struct LinkCode(mavio_core::LinkCode);
+
+#[uniffi::export]
+impl LinkCode {
+    /// The code to show, such as `WDJB-MJHT`.
+    pub fn user_code(&self) -> String {
+        self.0.user_code.clone()
+    }
+
+    /// Where to enter it.
+    pub fn verification_uri(&self) -> String {
+        self.0.verification_uri.clone()
+    }
+
+    /// The same with the code filled in, for a QR code.
+    pub fn verification_uri_complete(&self) -> String {
+        self.0.verification_uri_complete.clone()
+    }
+
+    /// When the code expires.
+    pub fn expires(&self) -> SystemTime {
+        self.0.expires
+    }
+
+    /// How often to ask whether it was approved.
+    pub fn interval(&self) -> Duration {
+        self.0.interval
+    }
+}
+
+/// A Mavio account's sign-in in the browser: the app opens url, and
+/// mavio.dev sends the browser back to a loopback address of the device.
+#[derive(uniffi::Object)]
+pub struct BrowserSignIn {
+    sign_in: mavio_core::BrowserSignIn,
+    cancelled: tokio::sync::Notify,
+}
+
+#[uniffi::export]
+impl BrowserSignIn {
+    /// The page of mavio.dev to open.
+    pub fn url(&self) -> String {
+        self.sign_in.url.clone()
+    }
+
+    /// Cancels the sign-in, as when the person closes the browser: the
+    /// call finishing it fails with `NotFound`.
+    pub fn cancel(&self) {
+        self.cancelled.notify_one();
+    }
+}
+
 /// How the server plays an item.
 #[derive(Debug, Clone, Copy, uniffi::Enum)]
 pub enum PlayKind {
@@ -526,6 +581,71 @@ impl Client {
     pub async fn authorize_quick_connect(&self, server_id: String, code: String) -> Result<()> {
         self.call(|c| async move { c.servers().authorize_quick_connect(&server_id, &code).await })
             .await
+    }
+
+    /// The Mavio account signed in, if any.
+    pub fn account(&self) -> Option<Account> {
+        self.0.account()
+    }
+
+    /// Starts signing a Mavio account in with a link code, at the
+    /// mavio.dev whose API is api, as client_id, such as `dev.mavio.ios`.
+    pub async fn start_link(&self, api: String, client_id: String) -> Result<Arc<LinkCode>> {
+        let link = self
+            .call(|c| async move { c.start_link(&api, &client_id).await })
+            .await?;
+        Ok(Arc::new(LinkCode(link)))
+    }
+
+    /// Asks once whether a link code was approved; once it was, signs the
+    /// account in and follows its servers. An expired code is `NotFound`,
+    /// a denied one `PermissionDenied`.
+    pub async fn poll_link(&self, link: Arc<LinkCode>) -> Result<Option<Account>> {
+        self.call(|c| async move { c.poll_link(&link.0).await })
+            .await
+    }
+
+    /// Starts signing a Mavio account in in the browser, at the mavio.dev
+    /// whose API is api, as client_id.
+    pub async fn start_browser_sign_in(
+        &self,
+        api: String,
+        client_id: String,
+    ) -> Result<Arc<BrowserSignIn>> {
+        let sign_in = self
+            .call(|c| async move { c.start_browser_sign_in(&api, &client_id).await })
+            .await?;
+        Ok(Arc::new(BrowserSignIn {
+            sign_in,
+            cancelled: tokio::sync::Notify::new(),
+        }))
+    }
+
+    /// Waits for the browser to come back from a sign-in, signs the
+    /// account in and follows its servers. One the account declined is
+    /// `PermissionDenied`, one cancelled `NotFound`.
+    pub async fn finish_browser_sign_in(&self, sign_in: Arc<BrowserSignIn>) -> Result<Account> {
+        self.call(|c| async move {
+            tokio::select! {
+                r = c.finish_browser_sign_in(&sign_in.sign_in) => r,
+                () = sign_in.cancelled.notified() => {
+                    Err(mavio_core::Error::NotFound("the sign-in was cancelled".into()))
+                }
+            }
+        })
+        .await
+    }
+
+    /// Follows the Mavio account's servers now: signs in to those it
+    /// newly reaches and forgets those it no longer does.
+    pub async fn sync_account(&self) -> Result<()> {
+        self.call(|c| async move { c.sync_account().await }).await
+    }
+
+    /// Signs out: of the Mavio account and its servers, or of every server
+    /// signed in to without one.
+    pub async fn sign_out(&self) -> Result<()> {
+        self.call(|c| async move { c.sign_out().await }).await
     }
 
     /// Signs out of a server and forgets it.

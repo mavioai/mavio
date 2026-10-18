@@ -1,21 +1,26 @@
+import AuthenticationServices
 import MavioKit
 import MavioUI
 import SwiftUI
 
 /// Sign-in to a server: its address, typed or found on the network, then a
-/// password, the first user of a new server, or Quick Connect.
+/// password, the first user of a new server, or Quick Connect; or, for a
+/// server in mavio.dev mode, a Mavio account, in the browser or with a link
+/// code (docs/accounts.md §6).
 struct SignInView: View {
     /// Whether a server is added to those signed in to, in a sheet.
     var adding = false
     @Environment(AppModel.self) private var model
     @Environment(\.dismiss) private var dismiss
     @Environment(\.theme) private var theme
+    @Environment(\.webAuthenticationSession) private var webAuthenticationSession
     @State private var address = ""
     @State private var info: ServerInfo?
     @State private var found: [FoundServer] = []
     @State private var name = ""
     @State private var password = ""
     @State private var quickConnect: QuickConnectRequest?
+    @State private var link: LinkCode?
     @State private var error: String?
     @State private var busy = false
 
@@ -42,6 +47,7 @@ struct SignInView: View {
                         Button {
                             info = nil
                             quickConnect = nil
+                            link = nil
                             error = nil
                         } label: {
                             Image(systemName: "chevron.backward")
@@ -55,6 +61,7 @@ struct SignInView: View {
             found = (try? await model.client.discover(wait: 2)) ?? []
         }
         .task(id: quickConnect.map(ObjectIdentifier.init)) { await pollQuickConnect() }
+        .task(id: link.map(ObjectIdentifier.init)) { await pollLink() }
     }
 
     private var title: String {
@@ -94,7 +101,9 @@ struct SignInView: View {
     }
 
     @ViewBuilder private func credentials(_ info: ServerInfo) -> some View {
-        if let quickConnect {
+        if info.mode == .mavioDev {
+            mavioSignIn(info)
+        } else if let quickConnect {
             Section {
                 Text(MavioStrings.authQuickConnectCode(code: quickConnect.code()))
                 Text(quickConnect.code())
@@ -126,6 +135,37 @@ struct SignInView: View {
                 Section {
                     Button(MavioStrings.authQuickConnect) { Task { await startQuickConnect(info) } }
                 }
+            }
+        }
+    }
+
+    /// A Mavio account's sign-in: in the browser, or with a link code
+    /// approved on another device.
+    @ViewBuilder private func mavioSignIn(_ info: ServerInfo) -> some View {
+        if let link {
+            Section {
+                Text(MavioStrings.authLinkMessage(url: link.verificationUri().replacing(/^https?:\/\//, with: "")))
+                Text(link.userCode())
+                    .font(.system(size: 36, weight: .semibold, design: .monospaced))
+                    .tracking(4)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, MavioSpacing.s8)
+                HStack(spacing: MavioSpacing.s8) {
+                    ProgressView()
+                    Text(MavioStrings.authWaiting).foregroundStyle(.secondary)
+                }
+                if let error { errorText(error) }
+                Button(MavioStrings.actionCancel) { self.link = nil }
+            }
+        } else {
+            Section {
+                if let error { errorText(error) }
+                Button(MavioStrings.authSignInWithMavio) { Task { await browserSignIn(info) } }
+            } footer: {
+                Text(info.address)
+            }
+            Section {
+                Button(MavioStrings.authUseLinkCode) { Task { await startLink(info) } }
             }
         }
     }
@@ -193,6 +233,67 @@ struct SignInView: View {
             }
         }
         quickConnect = nil
+    }
+
+    /// The client ID of this app at mavio.dev.
+    private static let clientId = "dev.mavio.ios"
+
+    /// The API of the mavio.dev the server belongs to.
+    private func api(_ info: ServerInfo) -> String {
+        info.mavioDevUrl.isEmpty ? "https://mavio.dev/api" : info.mavioDevUrl
+    }
+
+    /// Signs the account in in a web authentication session. mavio.dev sends
+    /// the browser back to the core's loopback address (RFC 8252), which the
+    /// session cannot catch, so the session is closed once the core has the
+    /// code; closing it first cancels the sign-in.
+    private func browserSignIn(_ info: ServerInfo) async {
+        await run {
+            let signIn = try await model.client.startBrowserSignIn(api: api(info), clientId: Self.clientId)
+            guard let url = URL(string: signIn.url()) else { return }
+            let browser = webAuthenticationSession
+            let browsing = Task {
+                _ = try? await browser.authenticate(using: url, callbackURLScheme: "mavio")
+                // The browser closed before the core had the code: the
+                // person cancelled.
+                signIn.cancel()
+            }
+            defer { browsing.cancel() }
+            do {
+                try await model.finishBrowserSignIn(signIn)
+            } catch CoreError.NotFound {
+                return
+            }
+            finish()
+        }
+    }
+
+    private func startLink(_ info: ServerInfo) async {
+        await run { link = try await model.client.startLink(api: api(info), clientId: Self.clientId) }
+    }
+
+    /// Asks every interval whether the link code was approved, and asks for
+    /// a new code when it expires.
+    private func pollLink() async {
+        guard let link else { return }
+        while !Task.isCancelled {
+            try? await Task.sleep(for: .seconds(link.interval()))
+            guard !Task.isCancelled else { return }
+            if Date() >= link.expires(), let info {
+                await startLink(info)
+                return
+            }
+            do {
+                if try await model.pollLink(link) != nil {
+                    finish()
+                    return
+                }
+            } catch {
+                self.error = error.localizedDescription
+                self.link = nil
+                return
+            }
+        }
     }
 
     private func finish() {

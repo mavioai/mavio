@@ -4,7 +4,7 @@ use std::collections::HashMap;
 use std::time::{Duration, SystemTime};
 
 use mavio_core::{
-    AccountMode, Artwork, AudioStream, Card, CardKind, CreditEntry, Details, DeviceInfo,
+    Account, AccountMode, Artwork, AudioStream, Card, CardKind, CreditEntry, Details, DeviceInfo,
     DownloadEntry, DownloadState, Filter, FoundServer, Libraries, LibraryEntry, LibraryType, Page,
     PlaybackOptions, Row, RowContent, RowKind, SearchResults, ServerInfo, ServerRecord, Sort,
     Source, StreamState, TitleCard, Transfer, Version,
@@ -27,6 +27,13 @@ pub struct ServerInfo {
     pub setup_required: bool,
     pub mode: AccountMode,
     pub mavio_dev_url: String,
+}
+
+#[uniffi::remote(Record)]
+pub struct Account {
+    pub id: String,
+    pub name: String,
+    pub api: String,
 }
 
 #[uniffi::remote(Enum)]

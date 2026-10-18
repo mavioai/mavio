@@ -24,7 +24,7 @@ dovi = ["dep:dolby_vision"]
 dolby_vision = { version = "=3.4.0", features = ["capi"], optional = true }
 mavio-api = { path = "../api" }
 mavio-core = { path = "../core" }
-tokio = { version = "1", features = ["rt-multi-thread"] }
+tokio = { version = "1", features = ["macros", "rt-multi-thread", "sync"] }
 uniffi.workspace = true
 
 [lints]
