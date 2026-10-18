@@ -48,7 +48,7 @@ export function SidebarPanel({ rail, onToggle }: { rail: boolean; onToggle: () =
           </Tip>
         </div>
       </div>
-      <div className={`flex min-h-0 flex-1 flex-col gap-0.5 overflow-y-auto pb-2 ${rail ? "items-center px-2" : "px-2.5"}`}>
+      <div className={`flex min-h-0 flex-1 flex-col gap-0.5 overflow-y-auto pb-2 *:shrink-0 ${rail ? "items-center px-2" : "px-2.5"}`}>
         {rail ? (
           <>
             <NavItem rail to="/search" icon="search" label={t("nav.search")} />
