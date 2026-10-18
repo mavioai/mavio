@@ -86,27 +86,36 @@ struct LibraryCard: View {
     }
 }
 
-/// A library: its Recommended tab, its hubs, beside the grid of all its items.
+/// A library: its Recommended tab of hubs beside the grid of all its items,
+/// sorted and filtered, as the web UI's: the tabs under the name, and over
+/// the grid the genre it is narrowed to, the filters, the order and the
+/// count.
 struct LibraryView: View {
     let library: LibraryEntry
     @Environment(AppModel.self) private var model
     @Environment(\.theme) private var theme
-    @State private var tab = 0
+    @State private var tab = Tab.recommended
     @State private var rows: [Row]?
     @State private var page = Paged()
     @State private var sort: Sort = .name
     @State private var filter = Filter(played: nil, favorite: false, genre: nil)
 
+    private enum Tab { case recommended, all }
+
     var body: some View {
         ScrollView {
-            Picker("", selection: $tab) {
-                Text(MavioStrings.libraryRecommended).tag(0)
-                Text(MavioStrings.libraryAll).tag(1)
+            Picker(MavioStrings.libraryRecommended, selection: $tab) {
+                Text(MavioStrings.libraryRecommended).tag(Tab.recommended)
+                Text(MavioStrings.libraryAll).tag(Tab.all)
             }
             .pickerStyle(.segmented)
+            .labelsHidden()
+            .fixedSize()
+            .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, theme.layout.margin)
-            .padding(.bottom, MavioSpacing.s8)
-            if tab == 0 {
+            .padding(.bottom, MavioSpacing.s12)
+            switch tab {
+            case .recommended:
                 LazyVStack(alignment: .leading, spacing: 0) {
                     if let rows {
                         ForEach(rows, id: \.id) { RowView(row: $0, several: false) }
@@ -115,14 +124,10 @@ struct LibraryView: View {
                         ProgressView().padding(MavioSpacing.s40)
                     }
                 }
-            } else {
-                if let total = page.total {
-                    Text(MavioStrings.libraryItemCount(count: Int(total)))
-                        .type(theme.type.footnote)
-                        .foregroundStyle(theme.colors.textSecondary)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.horizontal, theme.layout.margin)
-                }
+            case .all:
+                LibraryFilters(sort: $sort, filter: $filter, total: page.total)
+                    .padding(.horizontal, theme.layout.margin)
+                    .padding(.bottom, MavioSpacing.s16)
                 PagedGrid(page: $page) { offset, limit in
                     try await model.client.libraryItems(
                         serverId: library.serverId, libraryId: library.id, sort: sort, filter: filter, offset: offset,
@@ -131,57 +136,113 @@ struct LibraryView: View {
             }
         }
         .navigationTitle(library.name)
-        .toolbar {
-            if tab == 1 {
-                ToolbarItemGroup {
-                    sortMenu
-                    filterMenu
-                }
-            }
-        }
         .task(id: model.revision(library.serverId)) {
             rows = try? await model.client.recommended(serverId: library.serverId, libraryId: library.id)
-            if rows?.isEmpty == true { tab = 1 }
+            if rows?.isEmpty == true { tab = .all }
         }
         .onChange(of: model.revision(library.serverId)) { page.reset() }
         .onChange(of: sort) { page.reset() }
         .onChange(of: filter) { page.reset() }
     }
+}
 
-    private var sortMenu: some View {
-        Menu {
-            Picker(MavioStrings.librarySort, selection: $sort) {
-                Text(MavioStrings.librarySortName).tag(Sort.name)
-                Text(MavioStrings.librarySortDateAdded).tag(Sort.dateAdded)
-                Text(MavioStrings.librarySortReleased).tag(Sort.released)
-                Text(MavioStrings.librarySortRating).tag(Sort.rating)
-                Text(MavioStrings.librarySortLastPlayed).tag(Sort.lastPlayed)
-                Text(MavioStrings.librarySortRandom).tag(Sort.random)
+/// Over a library's grid: the genre it is narrowed to, which clears it, the
+/// filters as pills, the order's menu and the count, wrapping as the width
+/// ends.
+private struct LibraryFilters: View {
+    @Binding var sort: Sort
+    @Binding var filter: Filter
+    let total: UInt32?
+    @Environment(\.theme) private var theme
+
+    /// The filters, as the pills name them.
+    private enum Choice: CaseIterable {
+        case all, unplayed, played, favorites
+
+        var label: String {
+            switch self {
+            case .all: MavioStrings.libraryFilterAll
+            case .unplayed: MavioStrings.libraryFilterUnplayed
+            case .played: MavioStrings.libraryFilterPlayed
+            case .favorites: MavioStrings.libraryFilterFavorites
             }
-        } label: {
-            Label {
-                Text(MavioStrings.librarySort)
-            } icon: {
-                Icon("sort")
+        }
+
+        func filter(genre: String?) -> Filter {
+            switch self {
+            case .all: Filter(played: nil, favorite: false, genre: genre)
+            case .unplayed: Filter(played: false, favorite: false, genre: genre)
+            case .played: Filter(played: true, favorite: false, genre: genre)
+            case .favorites: Filter(played: nil, favorite: true, genre: genre)
             }
         }
     }
 
-    private var filterMenu: some View {
-        Menu {
-            Picker(MavioStrings.libraryFilter, selection: $filter) {
-                Text(MavioStrings.libraryFilterAll).tag(Filter(played: nil, favorite: false, genre: nil))
-                Text(MavioStrings.libraryFilterUnplayed).tag(Filter(played: false, favorite: false, genre: nil))
-                Text(MavioStrings.libraryFilterPlayed).tag(Filter(played: true, favorite: false, genre: nil))
-                Text(MavioStrings.libraryFilterFavorites).tag(Filter(played: nil, favorite: true, genre: nil))
+    private static let sorts: [(Sort, String)] = [
+        (.name, MavioStrings.librarySortName), (.dateAdded, MavioStrings.librarySortDateAdded),
+        (.released, MavioStrings.librarySortReleased), (.rating, MavioStrings.librarySortRating),
+        (.lastPlayed, MavioStrings.librarySortLastPlayed), (.random, MavioStrings.librarySortRandom),
+    ]
+
+    var body: some View {
+        Flow(spacing: MavioSpacing.s8, lineSpacing: MavioSpacing.s8) {
+            if let genre = filter.genre {
+                Button {
+                    filter.genre = nil
+                } label: {
+                    HStack(spacing: 6) {
+                        Text(MavioStrings.libraryGenreValue(value: genre))
+                        Icon("close", size: 14)
+                    }
+                    .type(theme.type.callout).fontWeight(.semibold)
+                    .foregroundStyle(theme.colors.onAccent)
+                    .padding(.leading, 14).padding(.trailing, 10)
+                    .frame(height: 32)
+                    .background(theme.colors.accent, in: .capsule)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(
+                    "\(MavioStrings.libraryGenreValue(value: genre)), \(MavioStrings.libraryClearValue)")
             }
-        } label: {
-            Label {
-                Text(MavioStrings.libraryFilter)
-            } icon: {
-                Icon("filter", fill: filter != Filter(played: nil, favorite: false, genre: nil))
+            ForEach(Choice.allCases, id: \.self) { choice in
+                let on = choice.filter(genre: filter.genre) == filter
+                Button {
+                    filter = choice.filter(genre: filter.genre)
+                } label: {
+                    Text(choice.label)
+                        .type(theme.type.callout).fontWeight(.medium)
+                        .foregroundStyle(on ? theme.colors.onButton : theme.colors.textPrimary)
+                        .padding(.horizontal, 14)
+                        .frame(height: 32)
+                        .background(on ? theme.colors.button : theme.colors.fill, in: .capsule)
+                }
+                .buttonStyle(.plain)
+                .accessibilityAddTraits(on ? .isSelected : [])
+            }
+            Menu {
+                Picker(MavioStrings.librarySort, selection: $sort) {
+                    ForEach(Self.sorts, id: \.0) { Text($0.1).tag($0.0) }
+                }
+            } label: {
+                HStack(spacing: 6) {
+                    Icon("sort", size: 16)
+                    Text(MavioStrings.librarySortBy(sort: Self.sorts.first { $0.0 == sort }?.1 ?? ""))
+                }
+                .type(theme.type.callout)
+                .foregroundStyle(theme.colors.textSecondary)
+                .padding(.leading, MavioSpacing.s4).padding(.trailing, MavioSpacing.s12)
+                .frame(height: 32)
+                .contentShape(.capsule)
+            }
+            if let total {
+                Text(MavioStrings.libraryItemCount(count: Int(total)))
+                    .type(theme.type.callout)
+                    .foregroundStyle(theme.colors.textTertiary)
+                    .frame(height: 32)
             }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .animation(.easeOut(duration: MavioDuration.fast), value: filter)
     }
 }
 
