@@ -3,8 +3,8 @@
 // the shown sign-in and the user at its foot. Collapsed, it is a rail of
 // icons.
 import { useAdminServers, useDiscovery, useLibraries } from "@mavio/client-ts";
-import { Link, useLocation, useNavigate, useRouter } from "@tanstack/react-router";
-import { type MouseEvent, type ReactNode, useEffect, useRef, useState } from "react";
+import { Link, useLocation, useNavigate } from "@tanstack/react-router";
+import { type ReactNode, useEffect, useRef, useState } from "react";
 
 import { AssistantButton } from "../assistant/panel.tsx";
 import { Tip } from "../controls/tooltip.tsx";
@@ -15,7 +15,7 @@ import { prefs, setPrefs, sidebarWidths, usePrefs } from "../prefs.ts";
 import { isTool, toolLooks } from "../screens/settings-menus.ts";
 import { Wordmark } from "../logo.tsx";
 import { libraryIcon } from "../ui.tsx";
-import { openPlace, usePlace } from "./places.ts";
+import { usePlaceLink } from "./places.ts";
 import { UserButton } from "./user-menu.tsx";
 
 /** The sidebar's panel, expanded or as a rail; onToggle expands or collapses it. */
@@ -28,10 +28,8 @@ export function SidebarPanel({ rail, onToggle }: { rail: boolean; onToggle: () =
   const administers = useAdminServers().length > 0;
   const tools = usePrefs().pinned.filter(isTool);
   const pinned = administers ? tools : [];
-  const router = useRouter();
   // The place a page was opened from is chosen as its own.
-  const place = usePlace();
-  const link = (to: string) => ({ "data-place": place === to || undefined, onClick: (e: MouseEvent) => openPlace(e, router, to) });
+  const link = usePlaceLink();
   return (
     <nav
       aria-label={t("nav.navigation")}
@@ -167,7 +165,7 @@ function NavItem({
   icon: IconName;
   label: string;
   exact?: boolean;
-  link: (to: string) => { "data-place"?: boolean; onClick: (e: MouseEvent) => void };
+  link: ReturnType<typeof usePlaceLink>;
 }): ReactNode {
   const props = link(to);
   return (

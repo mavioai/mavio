@@ -24,7 +24,7 @@ import { SidebarPanel, SidebarResizer, sidebarWidth } from "./sidebar.tsx";
 import { useTvBack } from "./back.ts";
 import { useTvFocus } from "./focus.ts";
 import { PageTitle } from "./page-title.tsx";
-import { usePlaces } from "./places.ts";
+import { usePlace, usePlaceLink, usePlaces } from "./places.ts";
 import { useUpScroll } from "./up.ts";
 import { useSpatialNavigation } from "./spatial.ts";
 import { TvShell } from "./tv.tsx";
@@ -60,7 +60,7 @@ function Content() {
   useSpatialNavigation(prefs.tv);
   useTvFocus(prefs.tv);
   useUpScroll();
-  usePlaces();
+  usePlaces(width === "compact");
   useTvBack(prefs.tv && !bare);
 
   // A Mavio account follows the servers it reaches, as it opens.
@@ -162,12 +162,13 @@ const allTabs: { to: "/" | "/libraries" | "/discover"; icon: IconName; label: ()
 /** The phone's top: the wordmark, search, the assistant, and the user's avatar opening the settings. */
 function CompactHeader() {
   const account = useAccount();
+  const link = usePlaceLink();
   return (
     <header className="sticky top-0 z-20 flex h-13 items-center justify-between bg-background/80 px-margin pt-[env(safe-area-inset-top)] backdrop-blur-xl">
       <Wordmark height={20} />
       <div className="flex items-center gap-2">
-        <Link to="/search" aria-label={t("nav.search")} className="flex size-9 items-center justify-center rounded-full hover:bg-fill data-[status=active]:text-accent-text">
-          {({ isActive }) => <Icon name="search" fill={isActive} size={22} />}
+        <Link to="/search" {...link("/search")} aria-label={t("nav.search")} className="flex size-9 items-center justify-center rounded-full hover:bg-fill data-[status=active]:text-accent-text data-place:text-accent-text">
+          {({ isActive }) => <Icon name="search" fill={isActive || link("/search")["data-place"]} size={22} />}
         </Link>
         <AssistantButton className="flex size-9 items-center justify-center rounded-full hover:bg-fill" />
         <Link to="/settings" aria-label={t("nav.settings")} className="rounded-full">
@@ -183,6 +184,9 @@ function TabBar() {
   // Discover is a tab where a server discovers.
   const discovers = !!useDiscovery(discoverLanguage).server;
   const tabs = allTabs.filter((d) => d.to !== "/discover" || discovers);
+  // Each tab keeps the pages opened from it.
+  const link = usePlaceLink();
+  const place = usePlace();
   return (
     <nav
       aria-label={t("nav.navigation")}
@@ -193,11 +197,12 @@ function TabBar() {
           key={d.to}
           to={d.to}
           activeOptions={{ exact: d.to === "/" }}
-          className="flex min-h-13 flex-1 flex-col items-center justify-center gap-0.5 rounded-full type-caption text-on-background transition-colors data-[status=active]:bg-fill-selected data-[status=active]:font-semibold data-[status=active]:text-accent-text"
+          {...link(d.to)}
+          className="flex min-h-13 flex-1 flex-col items-center justify-center gap-0.5 rounded-full type-caption text-on-background transition-colors data-[status=active]:bg-fill-selected data-[status=active]:font-semibold data-[status=active]:text-accent-text data-place:bg-fill-selected data-place:font-semibold data-place:text-accent-text"
         >
           {({ isActive }) => (
             <>
-              <Icon name={d.icon} fill={isActive} size={22} />
+              <Icon name={d.icon} fill={isActive || place === d.to} size={22} />
               {d.label()}
             </>
           )}

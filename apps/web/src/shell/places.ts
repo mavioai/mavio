@@ -1,20 +1,24 @@
-// The sidebar's places (docs/clients.md §4.1), each keeping the pages
-// opened from it, as the Apple TV app's do: moving to another place and
-// back returns to the page last shown there, scrolled where it was left;
-// choosing the place shown returns to its top. The wider layouts' Back
-// steps back through the place's pages alone.
+// The places of the sidebar and of the phone's tabs (docs/clients.md §4.1),
+// each keeping the pages opened from it, as the Apple TV app's do: moving
+// to another place and back returns to the page last shown there,
+// scrolled where it was left; choosing the place shown returns to its top.
+// The wider layouts' Back steps back through the place's pages alone.
 import { type AnyRouter, useRouter } from "@tanstack/react-router";
 import { type MouseEvent, useEffect, useSyncExternalStore } from "react";
 
 import { parentOf } from "./back.ts";
 import { returnToScroll } from "./up.ts";
 
-/** The pages the sidebar opens, and the user menu's. */
-const placePaths = /^\/(?:|libraries|discover|search|profile|tools\/[^/]+|s\/[^/]+\/library\/[^/]+)$/;
+/** The wider layouts' places: the pages the sidebar opens, and the user menu's. */
+const sidebarPlaces = /^\/(?:|libraries|discover|search|profile|tools\/[^/]+|s\/[^/]+\/library\/[^/]+)$/;
+/** The phone's: its tabs, search and the user's page; a library is a page of Libraries. */
+const tabPlaces = /^\/(?:|libraries|discover|search|profile|tools\/[^/]+)$/;
+/** The places of the layout shown. */
+let places = sidebarPlaces;
 
 /** Whether a path is a place's. */
 export function isPlace(pathname: string): boolean {
-  return placePaths.test(pathname);
+  return places.test(pathname);
 }
 
 /** A page of a place: its address, and its entry's index in the history. */
@@ -80,13 +84,18 @@ function visit({ href, state }: Location, replace: boolean) {
   for (const l of listeners) l();
 }
 
-/** Keeps each place's pages as the history moves. */
-export function usePlaces() {
+/** Keeps each place's pages as the history moves, the phone's places where compact. */
+export function usePlaces(compact: boolean) {
   const router = useRouter();
   useEffect(() => {
+    // The places change with the layout: each starts again from the page shown.
+    places = compact ? tabPlaces : sidebarPlaces;
+    stacks.clear();
+    entries.clear();
+    current = undefined;
     visit(router.history.location, false);
     return router.history.subscribe(({ location, action }) => visit(location, action.type === "REPLACE"));
-  }, [router]);
+  }, [router, compact]);
 }
 
 /** The place shown. */
@@ -100,8 +109,15 @@ export function usePlace(): string | undefined {
   );
 }
 
+/** The props of a place's link: marked while its place is shown, and opening the place as openPlace does. */
+export function usePlaceLink(): (to: string) => { "data-place"?: true; onClick: (e: MouseEvent) => void } {
+  const router = useRouter();
+  const place = usePlace();
+  return (to) => ({ "data-place": place === to || undefined, onClick: (e: MouseEvent) => openPlace(e, router, to) });
+}
+
 /**
- * A sidebar link's click: another place opens at the page last shown there,
+ * A place's link's click: another place opens at the page last shown there,
  * and the place shown at its top, each scrolled where it was left.
  */
 export function openPlace(e: MouseEvent, router: AnyRouter, place: string) {
