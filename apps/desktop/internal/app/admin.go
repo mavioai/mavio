@@ -31,6 +31,7 @@ type adminState struct {
 	info     task[*systemv1.GetSystemInfoResponse]
 	health   task[*systemv1.GetHealthResponse]
 	users    task[[]*userv1.User]
+	people   usersState
 	libs     task[[]*libraryv1.Library]
 	sessions task[[]*sessionv1.Session]
 
@@ -241,59 +242,6 @@ func (a *App) overviewSection(c *ui.Context) {
 			}
 			g.row(f[0], "", nil, func() {
 				style.Text(ui.Text(c, f[1]), style.Type.Callout).TextColor(style.Color(colors.TextSecondary)).TextAlign(ui.End).MaxWidth(480).Selectable()
-			})
-		}
-	})
-}
-
-func (a *App) usersSection(c *ui.Context) {
-	colors := style.Colors(c)
-	st := &a.settingsState.admin
-	message := style.T(c, "users.message")
-	if a.account != nil {
-		message = style.T(c, "users.messageMavioDev")
-	}
-	sectionHeader(c, style.T(c, "settings.users"), message)
-	t := adminTask(a, &st.users, "users", func(ctx context.Context, s string) ([]*userv1.User, error) {
-		res, err := a.userService(s).ListUsers(ctx, &userv1.ListUsersRequest{})
-		return res.GetUsers(), err
-	})
-	if taskStatus(c, t, func() { st.users.key = "" }, nil) {
-		return
-	}
-	users := slices.Clone(t.value)
-	slices.SortFunc(users, func(x, y *userv1.User) int {
-		if x.GetAdmin() != y.GetAdmin() {
-			if x.GetAdmin() {
-				return -1
-			}
-			return 1
-		}
-		return strings.Compare(strings.ToLower(x.GetName()), strings.ToLower(y.GetName()))
-	})
-	group(c, "users", "", "", func(g *settingsGroup) {
-		for _, u := range users {
-			detail := style.T(c, "users.neverSignedIn")
-			if u.HasLastLoginTime() {
-				detail = style.T(c, "users.lastSignIn", "date", longDate(u.GetLastLoginTime().AsTime()))
-			}
-			var badges []string
-			if u.GetAdmin() {
-				badges = append(badges, style.T(c, "users.admin"))
-			}
-			if u.GetManaged() {
-				badges = append(badges, style.T(c, "users.managed"))
-			}
-			if u.GetDisabled() {
-				badges = append(badges, style.T(c, "users.disabled"))
-			}
-			g.row(u.GetName(), detail, func() { avatar(c, u.GetName(), 32) }, func() {
-				ui.Row(c.Key(u.GetId())).Gap(6).Children(func() {
-					for _, b := range badges {
-						style.Text(ui.Text(c.Key(b), b), style.Type.Caption).TextColor(style.Color(colors.TextSecondary)).
-							Padding(1, 6).Radius(4).Background(style.Color(colors.Fill))
-					}
-				})
 			})
 		}
 	})

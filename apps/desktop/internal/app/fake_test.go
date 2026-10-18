@@ -77,6 +77,9 @@ type fakeCore struct {
 	titleRequests []*acquisitionv1.Request // the requests of titles
 	discovers     []*acquisitionv1.DiscoverRequest
 	blocked       []int32 // the collections blocklisted
+	users         []*userv1.User
+	invitations   []*userv1.Invitation
+	passwords     map[string]string // set by user
 
 	mu       sync.Mutex
 	calls    []string

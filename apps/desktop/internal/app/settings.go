@@ -188,10 +188,10 @@ func (a *App) settings(c *ui.Context, r *ui.Route) {
 		}
 		bar.Children(func() { a.settingsSidebar(c, id) })
 		ui.Column(c).Grow(1).MinWidth(0).Background(style.Color(colors.Background)).Children(func() {
-			ui.Scroll(c.Key(id)).Fill().Children(func() {
+			ui.Scroll(c.Key(id + r.Query("user"))).Fill().Children(func() {
 				top := max(c.TitleBar().Height, 12)
 				ui.Column(c).Padding(top+28, 56, 48).AlignItems(ui.Center).Children(func() {
-					ui.Column(c).FillWidth().MaxWidth(900).Gap(28).Children(func() { a.settingsSection(c, id) })
+					ui.Column(c).FillWidth().MaxWidth(900).Gap(28).Children(func() { a.settingsSection(c, r, id) })
 				})
 			})
 		})
@@ -381,7 +381,7 @@ func (a *App) accountCard(c *ui.Context, active bool) {
 }
 
 // settingsSection builds the section with id.
-func (a *App) settingsSection(c *ui.Context, id string) {
+func (a *App) settingsSection(c *ui.Context, r *ui.Route, id string) {
 	switch id {
 	case "appearance":
 		a.appearanceSection(c)
@@ -396,7 +396,7 @@ func (a *App) settingsSection(c *ui.Context, id string) {
 	case "overview":
 		a.overviewSection(c)
 	case "users":
-		a.usersSection(c)
+		a.usersSection(c, r)
 	case "libraries":
 		a.librariesSection(c)
 	case "activity":

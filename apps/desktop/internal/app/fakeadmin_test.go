@@ -12,7 +12,6 @@ import (
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/library/v1/libraryv1connect"
 	systemv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/system/v1"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/system/v1/systemv1connect"
-	userv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/user/v1"
 )
 
 // fakeSystem serves the server's system information, health and logs.
@@ -140,19 +139,4 @@ func (l *fakeLibraries) ScanLibrary(context.Context, *libraryv1.ScanLibraryReque
 	defer l.f.mu.Unlock()
 	l.f.scans++
 	return libraryv1.ScanLibraryResponse_builder{JobId: new("j-scan"), Enqueued: new(true)}.Build(), nil
-}
-
-func (u *fakeUsers) ListUsers(context.Context, *userv1.ListUsersRequest) (*userv1.ListUsersResponse, error) {
-	user := func(id, name string, admin, managed, disabled bool, last time.Duration) *userv1.User {
-		b := userv1.User_builder{Id: &id, Name: &name, Admin: &admin, Managed: &managed, Disabled: &disabled}
-		if last > 0 {
-			b.LastLoginTime = tsAgo(last)
-		}
-		return b.Build()
-	}
-	return userv1.ListUsersResponse_builder{Users: []*userv1.User{
-		user("u3", "Kids", false, true, false, 0),
-		user("u2", "Guest", false, false, true, 30*24*time.Hour),
-		user("u1", "Anna", true, false, false, time.Hour),
-	}}.Build(), nil
 }
