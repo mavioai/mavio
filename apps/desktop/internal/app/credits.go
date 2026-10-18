@@ -15,6 +15,7 @@ import (
 // creditEntry is a person credited on an item.
 type creditEntry struct {
 	personID, name, role string
+	tmdb                 string // of a discovered title's credit, whose page is Discover's
 	kind                 libraryv1.CreditKind
 	order                int32
 	photo                string
@@ -165,8 +166,19 @@ func (a *App) personTile(c *ui.Context, server string, e creditEntry, label stri
 		}
 		style.Text(ui.Text(c, label), style.Type.Footnote).TextColor(style.Color(colors.TextSecondary)).TextAlign(ui.Center).MaxLines(2)
 	})
-	if b.Clicked() && e.personID != "" {
+	if b.Clicked() {
+		a.openPerson(server, e)
+	}
+}
+
+// openPerson opens a credited person's page: the server's when it has
+// them, else Discover's.
+func (a *App) openPerson(server string, e creditEntry) {
+	switch {
+	case e.personID != "":
 		a.router.Push("/person/" + server + "/" + e.personID)
+	case e.tmdb != "":
+		a.router.Push(discoveredPersonPath(server, e.tmdb))
 	}
 }
 

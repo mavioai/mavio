@@ -43,6 +43,8 @@ type discoverState struct {
 	editing  *acquisitionv1.Request // the request whose seasons the dialog changes
 	chosen   map[int32]bool
 	removing string // the request whose removal is being confirmed
+
+	filters filtersState
 }
 
 // titleGrid is a catalog's titles loaded page by page.
@@ -374,13 +376,14 @@ func (a *App) catalogPage(c *ui.Context, r *ui.Route) {
 	kind := mediaKindOf(r.Query("kind"))
 	tmdb64, _ := strconv.ParseInt(r.Query("tmdb"), 10, 32)
 	tmdb := int32(tmdb64)
+	filter := parseFilter(r.Query("f"))
 	language := discoverLanguage(c)
 	r.Title(title)
 	st := &a.discoverState
 	if st.grids == nil {
 		st.grids = map[string]*titleGrid{}
 	}
-	gk := key(server, id, kind, tmdb)
+	gk := key(server, id, kind, tmdb, filter.param())
 	g := st.grids[gk]
 	if g == nil {
 		g = &titleGrid{}
@@ -397,9 +400,9 @@ func (a *App) catalogPage(c *ui.Context, r *ui.Route) {
 		g.loading = true
 		page := g.page + 1
 		go func() {
-			res, err := a.discoverService(server).Discover(a.ctx, acquisitionv1.DiscoverRequest_builder{
-				Catalog: &id, MediaKind: &kind, TmdbId: &tmdb, Language: &language, Page: &page,
-			}.Build())
+			b := acquisitionv1.DiscoverRequest_builder{Catalog: &id, MediaKind: &kind, TmdbId: &tmdb, Language: &language, Page: &page}
+			filter.request(&b)
+			res, err := a.discoverService(server).Discover(a.ctx, b.Build())
 			a.opts.Update(func() {
 				if g.key != k {
 					return
@@ -424,11 +427,42 @@ func (a *App) catalogPage(c *ui.Context, r *ui.Route) {
 		next()
 	}
 	colors := style.Colors(c)
+	_, catalogs, _ := a.discovery(c)
+	var found *acquisitionv1.Catalog
+	for _, cat := range catalogs {
+		if cat.GetId() == id {
+			found = cat
+		}
+	}
+	// Recommendations and similar titles take no filters.
+	filterable := found != nil && tmdb == 0 && (len(found.GetFilters()) > 0 || len(found.GetSorts()) > 0)
+	filtered := filter.count() > 0 || filter.Sort != pluginv1.DiscoverSort_DISCOVER_SORT_UNSPECIFIED
 	ui.Column(c).Fill().Children(func() {
-		pageHeader(c, title, nil)
+		var controls func()
+		if filterable {
+			controls = func() {
+				label := style.T(c, "discover.filters")
+				if n := filter.count(); n > 0 {
+					label = fmt.Sprintf("%s (%d)", label, n)
+				}
+				var b ui.Element
+				if filtered {
+					b = ui.PrimaryButton(c, label)
+				} else {
+					b = secondaryButton(c, "filter", label)
+				}
+				if b.Clicked() {
+					a.openFilters(filter)
+				}
+			}
+		}
+		pageHeader(c, title, controls)
 		switch {
 		case len(g.titles) == 0 && g.err != nil:
 			statusView(c, "error", style.T(c, "state.error"), errorMessage(c, g.err), func() { g.err = nil; next() })
+			return
+		case len(g.titles) == 0 && !g.more && filtered:
+			statusView(c, "search", style.T(c, "discover.noMatches"), "", nil)
 			return
 		case len(g.titles) == 0 && !g.more:
 			statusView(c, "", style.T(c, "state.empty"), "", nil)
@@ -449,6 +483,11 @@ func (a *App) catalogPage(c *ui.Context, r *ui.Route) {
 			a.discoveredCard(c, server, g.titles[i], width, "")
 		}).Grow(1).Padding(0, style.Layout.Margin, 24).Gap(style.Layout.Gutter)
 	})
+	if found != nil {
+		a.filtersDialog(c, server, found, kind, func(f catalogFilter) {
+			a.router.Replace(catalogLocation(server, id, title, kind, tmdb, f))
+		})
+	}
 }
 
 // discoveredTitle loads a title of a server, with what the server has of
@@ -495,7 +534,7 @@ func (a *App) titlePage(c *ui.Context, r *ui.Route) {
 	ui.Scroll(c).Fill().Children(func() {
 		ui.Column(c).Gap(32).Padding(0, 0, 48).Children(func() {
 			a.titleHeader(c, server, title)
-			a.titleOverview(c, title)
+			a.titleOverview(c, server, title)
 			if title.GetMediaKind() == acquisitionv1.MediaKind_MEDIA_KIND_SERIES && len(title.GetSeasons()) > 0 {
 				a.titleSeasons(c, server, title)
 			}
@@ -800,21 +839,6 @@ func (a *App) requestDialog(c *ui.Context, server string) {
 	})
 }
 
-func (a *App) titleOverview(c *ui.Context, title *acquisitionv1.Title) {
-	colors := style.Colors(c)
-	ui.Column(c).Padding(0, style.Layout.Margin).MaxWidth(900).Gap(12).Children(func() {
-		if t := title.GetTagline(); t != "" {
-			style.Text(ui.Text(c, t), style.Type.Title3).FontWeight(400).TextColor(style.Color(colors.TextSecondary))
-		}
-		style.Text(ui.Text(c, style.T(c, "discover.overview")), style.Type.Title3).TextColor(style.Color(colors.TextPrimary))
-		overview := title.GetOverview()
-		if overview == "" {
-			overview = style.T(c, "discover.noOverview")
-		}
-		style.Text(ui.Text(c, overview), style.Type.Body).TextColor(style.Color(colors.TextPrimary)).Selectable()
-	})
-}
-
 // titleSeasons builds a series' seasons with what the server has of each,
 // as Seerr lists them: the latest first, specials last, each expanding to
 // its episodes.
@@ -935,8 +959,7 @@ func dayText(d string) string {
 // titleCast builds a title's cast in billing order.
 func (a *App) titleCast(c *ui.Context, server string, title *acquisitionv1.Title) {
 	var cast []creditEntry
-	for _, cr := range title.GetCredits() {
-		e := creditEntry{name: cr.GetName(), role: cr.GetRole(), kind: cr.GetKind(), order: cr.GetOrder(), photo: sized(cr.GetImageUrl(), 185)}
+	for _, e := range titleCredits(title) {
 		if e.cast() {
 			cast = append(cast, e)
 		}

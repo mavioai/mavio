@@ -75,6 +75,8 @@ type fakeCore struct {
 	taskRuns      int                      // the tasks run
 	scans         int                      // the libraries scanned
 	titleRequests []*acquisitionv1.Request // the requests of titles
+	discovers     []*acquisitionv1.DiscoverRequest
+	blocked       []int32 // the collections blocklisted
 
 	mu       sync.Mutex
 	calls    []string
@@ -395,4 +397,28 @@ func (h *harness) save(dir, name string) {
 	if err := png.Encode(f, h.tt.Image()); err != nil {
 		h.t.Fatal(err)
 	}
+}
+
+// click scrolls the page until the element showing text or labeled label
+// is in view, then clicks it.
+func (h *harness) click(label string) {
+	h.t.Helper()
+	_, height := h.tt.Image().Bounds().Dx(), h.tt.Image().Bounds().Dy()
+	for range 30 {
+		r, ok := h.tt.Find(label)
+		if !ok {
+			h.t.Fatalf("click %q: not shown; texts = %q", label, h.tt.Texts())
+		}
+		mid := r.Y + r.H/2
+		if mid > 60 && mid < float32(height)-40 {
+			break
+		}
+		h.tt.Scroll(float32(h.tt.Image().Bounds().Dx())/2+100, float32(height)/2, 0, mid-float32(height)/2)
+		h.tt.Frame()
+		h.tt.Advance(time.Second)
+	}
+	if err := h.tt.Click(label); err != nil {
+		h.t.Fatalf("click %q: %v", label, err)
+	}
+	h.settle()
 }

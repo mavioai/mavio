@@ -10,13 +10,7 @@ import (
 func TestDiscover(t *testing.T) {
 	h := newHarness(t, true, 1280, 900)
 	h.settle()
-	click := func(label string) {
-		t.Helper()
-		if err := h.tt.Click(label); err != nil {
-			t.Fatalf("click %q: %v; texts = %q", label, err, h.tt.Texts())
-		}
-		h.settle()
-	}
+	click := h.click
 	want := func(texts ...string) {
 		t.Helper()
 		for _, w := range texts {

@@ -116,18 +116,19 @@ type App struct {
 
 	sidebarOpen bool // the sidebar shown over the content in medium width
 	// contentWidth is the width of the page beside the sidebar.
-	contentWidth  float32
-	signIn        signIn
-	homeState     homeState
-	searchState   searchState
-	scrolls       map[string]*ui.ScrollState
-	grids         map[string]*grid
-	libraryStates map[string]*libraryState
-	detailStates  map[string]*detailsState
-	personStates  map[string]*personState
-	creditStates  map[string]*creditsState
-	settingsState settingsState
-	discoverState discoverState
+	contentWidth    float32
+	signIn          signIn
+	homeState       homeState
+	searchState     searchState
+	scrolls         map[string]*ui.ScrollState
+	grids           map[string]*grid
+	libraryStates   map[string]*libraryState
+	detailStates    map[string]*detailsState
+	personStates    map[string]*personState
+	creditStates    map[string]*creditsState
+	settingsState   settingsState
+	discoverState   discoverState
+	discoveredState discoveredState
 	// bases are the servers' base URLs, for the Connect clients' responses.
 	bases bases
 }

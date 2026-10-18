@@ -88,8 +88,14 @@ func (a *App) page(c *ui.Context, r *ui.Route) {
 		a.discoverPage(c, r)
 	case r.Match("/catalog/{server}/{catalog}"):
 		a.catalogPage(c, r)
+	case r.Match("/title/{server}/{kind}/{tmdb}/crew"):
+		a.titleCrewPage(c, r)
 	case r.Match("/title/{server}/{kind}/{tmdb}"):
 		a.titlePage(c, r)
+	case r.Match("/discover/person/{server}/{tmdb}"):
+		a.discoveredPersonPage(c, r)
+	case r.Match("/discover/collection/{server}/{tmdb}"):
+		a.collectionPage(c, r)
 	case r.Match("/requests/{server}"):
 		a.requestsPage(c, r)
 	default:

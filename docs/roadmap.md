@@ -751,7 +751,8 @@ flowchart TD
   - [x] The server's administration in the settings, for administrators: the overview of its state, the users, the libraries scanned, the activity with who is playing, the tasks run and the jobs, and the logs filtered
   - [ ] The rest of the server's administration: the overview's load and containers, adding and editing users and libraries, general settings, API keys, proxies, storage, transcoding, the acquisition's menus, plugins, backups and issues; the devices' remote control, the account's security and the assistant's settings
   - [x] Discover and requests, as the web UI's: the catalogs' rows and pages, a title with its seasons and episodes, cast, recommendations and similar titles, requesting a movie or seasons of a series, and the requests by status, approved, declined, retried, changed and removed
-  - [ ] Discover's filters, discovered people and collections, managing a title (its downloads, issues and the blocklist) and reporting issues; downloads, the assistant, and switching users with PINs
+  - [x] Discover's filters and sorts, discovered people and collections (requested and blocklisted), and on a title its leading crew and whole crew, keywords, collection, ratings, facts and links, its keywords, studios and language opening the popular titles alike
+  - [ ] Managing a title (its downloads, issues and the blocklist) and reporting issues; the services' logos beside the ratings and links; downloads, the assistant, and switching users with PINs
   - [ ] Tried on Windows and Linux; signed and notarized on macOS; the app's icon
 - [ ] The decision on a Jellyfin API compatibility shim
 

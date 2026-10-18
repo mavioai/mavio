@@ -10,6 +10,8 @@ import (
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/acquisition/v1/acquisitionv1connect"
 	libraryv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/library/v1"
 	pluginv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1"
+	systemv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/system/v1"
+	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/system/v1/systemv1connect"
 )
 
 // fakeDiscover serves the server's catalogs and the titles in them.
@@ -27,6 +29,7 @@ type fakeRequests struct {
 func (f *fakeCore) handleDiscover(mux *http.ServeMux) {
 	mux.Handle(acquisitionv1connect.NewDiscoverServiceHandler(&fakeDiscover{f: f}))
 	mux.Handle(acquisitionv1connect.NewRequestServiceHandler(&fakeRequests{f: f}))
+	mux.Handle(systemv1connect.NewLocalizationServiceHandler(fakeLocalization{}))
 }
 
 var (
@@ -64,7 +67,14 @@ func (d *fakeDiscover) ListCatalogs(context.Context, *acquisitionv1.ListCatalogs
 	}
 	return acquisitionv1.ListCatalogsResponse_builder{Catalogs: []*acquisitionv1.Catalog{
 		cat("trending", "Trending", pluginv1.CatalogKind_CATALOG_KIND_TRENDING, true),
-		cat("popular", "Popular", pluginv1.CatalogKind_CATALOG_KIND_POPULAR, false),
+		acquisitionv1.Catalog_builder{
+			Id: new("popular"), Name: new("Popular"), Kind: new(pluginv1.CatalogKind_CATALOG_KIND_POPULAR), MediaKinds: []acquisitionv1.MediaKind{movieKind, seriesKind},
+			Filters: []pluginv1.DiscoverFilter{
+				pluginv1.DiscoverFilter_DISCOVER_FILTER_GENRE, pluginv1.DiscoverFilter_DISCOVER_FILTER_KEYWORD, pluginv1.DiscoverFilter_DISCOVER_FILTER_STUDIO,
+				pluginv1.DiscoverFilter_DISCOVER_FILTER_ORIGINAL_LANGUAGE, pluginv1.DiscoverFilter_DISCOVER_FILTER_RELEASE_DATE, pluginv1.DiscoverFilter_DISCOVER_FILTER_RATING,
+			},
+			Sorts: []pluginv1.DiscoverSort{pluginv1.DiscoverSort_DISCOVER_SORT_POPULARITY, pluginv1.DiscoverSort_DISCOVER_SORT_RELEASE_DATE},
+		}.Build(),
 		cat("similar", "Similar", pluginv1.CatalogKind_CATALOG_KIND_SIMILAR, false),
 	}}.Build(), nil
 }
@@ -72,6 +82,7 @@ func (d *fakeDiscover) ListCatalogs(context.Context, *acquisitionv1.ListCatalogs
 func (d *fakeDiscover) Discover(_ context.Context, r *acquisitionv1.DiscoverRequest) (*acquisitionv1.DiscoverResponse, error) {
 	d.f.mu.Lock()
 	defer d.f.mu.Unlock()
+	d.f.discovers = append(d.f.discovers, r)
 	var titles []*acquisitionv1.DiscoveredTitle
 	for _, t := range fakeTitles {
 		if r.GetMediaKind() != acquisitionv1.MediaKind_MEDIA_KIND_UNSPECIFIED && r.GetMediaKind() != t.kind || r.GetTmdbId() == t.tmdb {
@@ -98,10 +109,20 @@ func (d *fakeDiscover) GetTitle(_ context.Context, r *acquisitionv1.GetTitleRequ
 			Status: new(status), Requestable: new(t.itemID == "" && status == acquisitionv1.MediaStatus_MEDIA_STATUS_UNSPECIFIED),
 			Overview: new("A crew far from home finds the way back."), Tagline: new("Every orbit ends."), Genres: []string{"Science Fiction", "Drama"},
 			OfficialRating: new("PG-13"), RuntimeMinutes: new(int32(124)),
+			OriginalLanguage: new("en"), ProductionCountries: []string{"US", "NZ"}, Budget: new(int64(90_000_000)), VoteCount: new(int32(1200)),
+			CommunityRating: new(7.6), PremiereDate: new("2024-03-08"), ProductionStatus: new(pluginv1.ProductionStatus_PRODUCTION_STATUS_RELEASED),
+			KeywordRefs: []*pluginv1.Reference{pluginv1.Reference_builder{Id: new("k1"), Name: new("space")}.Build(), pluginv1.Reference_builder{Id: new("k2"), Name: new("homecoming")}.Build()},
+			StudioRefs:  []*pluginv1.Reference{pluginv1.Reference_builder{Id: new("s1"), Name: new("Meridian Pictures")}.Build()},
 			Credits: []*acquisitionv1.TitleCredit{
-				acquisitionv1.TitleCredit_builder{Name: new("Mara Quinn"), Kind: new(libraryv1.CreditKind_CREDIT_KIND_ACTOR), Role: new("Commander Vale"), Order: new(int32(0))}.Build(),
+				acquisitionv1.TitleCredit_builder{Name: new("Mara Quinn"), Kind: new(libraryv1.CreditKind_CREDIT_KIND_ACTOR), Role: new("Commander Vale"), Order: new(int32(0)), ExternalIds: map[string]string{"tmdb": "301"}}.Build(),
+				acquisitionv1.TitleCredit_builder{Name: new("Iris Okafor"), Kind: new(libraryv1.CreditKind_CREDIT_KIND_DIRECTOR), ExternalIds: map[string]string{"tmdb": "302"}}.Build(),
+				acquisitionv1.TitleCredit_builder{Name: new("Jonah Reyes"), Kind: new(libraryv1.CreditKind_CREDIT_KIND_WRITER), Role: new("Screenplay")}.Build(),
 				acquisitionv1.TitleCredit_builder{Name: new("Theo Park"), Kind: new(libraryv1.CreditKind_CREDIT_KIND_ACTOR), Role: new("Ito"), Order: new(int32(1))}.Build(),
 			},
+		}
+		if t.kind == movieKind {
+			b.ExternalIds = map[string]string{"tmdb": fmt.Sprint(t.tmdb), "imdb": fmt.Sprintf("tt%07d", t.tmdb), "tmdb_collection": "500"}
+			b.CollectionName = new("The Orbit Collection")
 		}
 		for _, req := range d.f.titleRequests {
 			if req.GetMediaKind() == t.kind && req.GetTmdbId() == t.tmdb {
@@ -204,4 +225,98 @@ func (q *fakeRequests) DeleteRequest(_ context.Context, r *acquisitionv1.DeleteR
 
 func (q *fakeRequests) GetQuota(context.Context, *acquisitionv1.GetQuotaRequest) (*acquisitionv1.GetQuotaResponse, error) {
 	return &acquisitionv1.GetQuotaResponse{}, nil
+}
+
+func (d *fakeDiscover) discovered(i int) *acquisitionv1.DiscoveredTitle {
+	t := fakeTitles[i]
+	status := d.status(t.kind, t.tmdb, t.itemID)
+	if t.kind == movieKind && slices.Contains(d.f.blocked, 500) {
+		status = acquisitionv1.MediaStatus_MEDIA_STATUS_BLOCKLISTED
+	}
+	return acquisitionv1.DiscoveredTitle_builder{
+		MediaKind: new(t.kind), Name: new(t.name), Year: new(t.year), ExternalIds: map[string]string{"tmdb": fmt.Sprint(t.tmdb)},
+		Status: new(status), ItemId: new(t.itemID), Requestable: new(t.itemID == "" && status == acquisitionv1.MediaStatus_MEDIA_STATUS_UNSPECIFIED),
+	}.Build()
+}
+
+func (d *fakeDiscover) GetPerson(_ context.Context, r *acquisitionv1.GetPersonRequest) (*acquisitionv1.GetPersonResponse, error) {
+	d.f.mu.Lock()
+	defer d.f.mu.Unlock()
+	if r.GetTmdbId() != 301 {
+		return &acquisitionv1.GetPersonResponse{}, nil
+	}
+	return acquisitionv1.GetPersonResponse_builder{Person: acquisitionv1.Person_builder{
+		Name: new("Mara Quinn"), Biography: new("Mara Quinn is an actor known for quiet, exacting roles."), Birthday: new("1984-05-02"),
+		PlaceOfBirth: new("Wellington, New Zealand"), AlsoKnownAs: []string{"M. Quinn"}, KnownForDepartment: new("Acting"),
+		ExternalIds: map[string]string{"tmdb": "301", "imdb": "nm0000301"},
+		Cast: []*acquisitionv1.PersonTitle{
+			acquisitionv1.PersonTitle_builder{Title: d.discovered(0), Role: new("Commander Vale")}.Build(),
+			acquisitionv1.PersonTitle_builder{Title: d.discovered(2), Role: new("Signe")}.Build(),
+		},
+		Crew: []*acquisitionv1.PersonTitle{acquisitionv1.PersonTitle_builder{Title: d.discovered(1), Role: new("Producer")}.Build()},
+	}.Build()}.Build(), nil
+}
+
+func (d *fakeDiscover) GetCollection(_ context.Context, r *acquisitionv1.GetCollectionRequest) (*acquisitionv1.GetCollectionResponse, error) {
+	d.f.mu.Lock()
+	defer d.f.mu.Unlock()
+	if r.GetTmdbCollectionId() != 500 {
+		return &acquisitionv1.GetCollectionResponse{}, nil
+	}
+	return acquisitionv1.GetCollectionResponse_builder{Collection: acquisitionv1.Collection_builder{
+		Name: new("The Orbit Collection"), Overview: new("Two journeys to the edge and back."),
+		Parts: []*acquisitionv1.DiscoveredTitle{d.discovered(0), d.discovered(1)},
+	}.Build()}.Build(), nil
+}
+
+func (d *fakeDiscover) GetRatings(context.Context, *acquisitionv1.GetRatingsRequest) (*acquisitionv1.GetRatingsResponse, error) {
+	return acquisitionv1.GetRatingsResponse_builder{Ratings: []*pluginv1.Rating{
+		pluginv1.Rating_builder{Source: new(pluginv1.RatingSource_RATING_SOURCE_ROTTEN_TOMATOES_CRITICS), Score: new(91.0), Url: new("https://www.rottentomatoes.com/m/the_long_orbit")}.Build(),
+		pluginv1.Rating_builder{Source: new(pluginv1.RatingSource_RATING_SOURCE_IMDB), Score: new(7.8), Votes: new(int64(125_000))}.Build(),
+	}}.Build(), nil
+}
+
+func (d *fakeDiscover) ListFilterValues(_ context.Context, r *acquisitionv1.ListFilterValuesRequest) (*acquisitionv1.ListFilterValuesResponse, error) {
+	v := func(id, name string) *pluginv1.FilterValue {
+		return pluginv1.FilterValue_builder{Id: &id, Name: &name}.Build()
+	}
+	switch r.GetFilter() {
+	case pluginv1.DiscoverFilter_DISCOVER_FILTER_GENRE:
+		return acquisitionv1.ListFilterValuesResponse_builder{Values: []*pluginv1.FilterValue{v("878", "Science Fiction"), v("18", "Drama"), v("35", "Comedy")}}.Build(), nil
+	case pluginv1.DiscoverFilter_DISCOVER_FILTER_KEYWORD:
+		return acquisitionv1.ListFilterValuesResponse_builder{Values: []*pluginv1.FilterValue{v("k1", "space"), v("k3", "space station")}}.Build(), nil
+	}
+	return &acquisitionv1.ListFilterValuesResponse{}, nil
+}
+
+func (q *fakeRequests) BlockCollection(_ context.Context, r *acquisitionv1.BlockCollectionRequest) (*acquisitionv1.BlockCollectionResponse, error) {
+	q.f.mu.Lock()
+	defer q.f.mu.Unlock()
+	q.f.blocked = append(q.f.blocked, r.GetTmdbCollectionId())
+	return &acquisitionv1.BlockCollectionResponse{}, nil
+}
+
+func (q *fakeRequests) UnblockCollection(_ context.Context, r *acquisitionv1.UnblockCollectionRequest) (*acquisitionv1.UnblockCollectionResponse, error) {
+	q.f.mu.Lock()
+	defer q.f.mu.Unlock()
+	q.f.blocked = slices.DeleteFunc(q.f.blocked, func(id int32) bool { return id == r.GetTmdbCollectionId() })
+	return &acquisitionv1.UnblockCollectionResponse{}, nil
+}
+
+// fakeLocalization serves the languages and countries a server knows.
+type fakeLocalization struct {
+	systemv1connect.UnimplementedLocalizationServiceHandler
+}
+
+func (fakeLocalization) ListLanguages(context.Context, *systemv1.ListLanguagesRequest) (*systemv1.ListLanguagesResponse, error) {
+	return systemv1.ListLanguagesResponse_builder{Languages: []*systemv1.Language{
+		systemv1.Language_builder{Code: new("en"), Name: new("English")}.Build(),
+		systemv1.Language_builder{Code: new("ja"), Name: new("Japanese")}.Build(),
+	}}.Build(), nil
+}
+
+func (fakeLocalization) ListCountries(context.Context, *systemv1.ListCountriesRequest) (*systemv1.ListCountriesResponse, error) {
+	return systemv1.ListCountriesResponse_builder{Countries: []*systemv1.Country{
+		systemv1.Country_builder{Code: new("US"), Name: new("United States")}.Build(),
+	}}.Build(), nil
 }
