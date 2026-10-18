@@ -172,13 +172,11 @@ private struct DetailsContent: View {
                 playButton.frame(maxWidth: .infinity)
                 HStack(spacing: MavioSpacing.s12) { otherActions }
             }
-            .tint(theme.colors.accent)
         } else {
             HStack(spacing: MavioSpacing.s12) {
                 playButton.frame(minWidth: 120)
                 otherActions
             }
-            .tint(theme.colors.accent)
         }
     }
 
@@ -195,8 +193,7 @@ private struct DetailsContent: View {
                 }
                 .frame(maxWidth: sizeClass == .compact ? .infinity : nil)
             }
-            .buttonStyle(.borderedProminent)
-            .controlSize(.large)
+            .buttonStyle(MavioButtonStyle(.primary, large: true))
         }
     }
 
@@ -209,25 +206,23 @@ private struct DetailsContent: View {
             } label: {
                 Icon("retry", size: 20).accessibilityLabel(MavioStrings.itemPlay)
             }
-            .buttonStyle(.bordered)
-            .controlSize(.large)
+            .buttonStyle(.circle)
         }
         Button {
             Task { try? await model.setFavorite(card, !card.favorite) }
         } label: {
             Icon("favorite", fill: card.favorite, size: 20)
+                .foregroundStyle(card.favorite ? theme.colors.danger : theme.colors.textPrimary)
                 .accessibilityLabel(MavioStrings.itemFavorite)
         }
-        .buttonStyle(.bordered)
-        .controlSize(.large)
+        .buttonStyle(.circle)
         Button {
             Task { try? await model.setPlayed(card, !card.played) }
         } label: {
             Icon("played", fill: card.played, size: 20)
                 .accessibilityLabel(card.played ? MavioStrings.itemMarkUnplayed : MavioStrings.itemMarkPlayed)
         }
-        .buttonStyle(.bordered)
-        .controlSize(.large)
+        .buttonStyle(.circle)
         if source != nil, !details.offline {
             downloadButton
         }
@@ -257,8 +252,8 @@ private struct DetailsContent: View {
             }
             .accessibilityLabel(MavioStrings.itemDownload)
         }
-        .buttonStyle(.bordered)
-        .controlSize(.large)
+        .menuStyle(.button)
+        .buttonStyle(.circle)
     }
 
     private func fraction(_ entry: DownloadEntry?) -> Double {
@@ -334,7 +329,7 @@ struct EpisodeRow: View {
                 }
                 Spacer(minLength: 0)
                 if card.played {
-                    Icon("played", fill: true, size: 18).foregroundStyle(theme.colors.accent)
+                    Icon("played", fill: true, size: 18).foregroundStyle(theme.colors.textSecondary)
                 }
             }
             .contentShape(.rect)

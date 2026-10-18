@@ -35,6 +35,7 @@ struct SignInView: View {
             }
             .scrollContentBackground(.hidden)
             .background(theme.colors.background)
+            .tint(theme.colors.textPrimary)
             .navigationTitle(title)
             .toolbar {
                 if adding {
@@ -78,7 +79,9 @@ struct SignInView: View {
                 .autocorrectionDisabled()
                 .onSubmit { Task { await probe(address) } }
             if let error { errorText(error) }
-            Button(MavioStrings.authSignIn) { Task { await probe(address) } }
+        }
+        Section {
+            action(MavioStrings.authSignIn, .primary) { Task { await probe(address) } }
                 .disabled(address.trimmingCharacters(in: .whitespaces).isEmpty)
         }
         let known = Set(model.servers.map(\.id))
@@ -111,7 +114,9 @@ struct SignInView: View {
                     .tracking(8)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, MavioSpacing.s8)
-                Button(MavioStrings.actionCancel) { self.quickConnect = nil }
+            }
+            Section {
+                action(MavioStrings.actionCancel, .secondary) { self.quickConnect = nil }
             }
         } else {
             Section {
@@ -124,16 +129,18 @@ struct SignInView: View {
                     .textContentType(info.setupRequired ? .newPassword : .password)
                     .onSubmit { Task { await signIn(info) } }
                 if let error { errorText(error) }
-                Button(info.setupRequired ? MavioStrings.authCreateAccount : MavioStrings.authSignIn) {
-                    Task { await signIn(info) }
-                }
-                .disabled(name.isEmpty)
             } footer: {
                 Text(info.address)
             }
+            Section {
+                action(info.setupRequired ? MavioStrings.authCreateAccount : MavioStrings.authSignIn, .primary) {
+                    Task { await signIn(info) }
+                }
+                .disabled(name.isEmpty)
+            }
             if !info.setupRequired {
                 Section {
-                    Button(MavioStrings.authQuickConnect) { Task { await startQuickConnect(info) } }
+                    action(MavioStrings.authQuickConnect, .secondary) { Task { await startQuickConnect(info) } }
                 }
             }
         }
@@ -155,19 +162,31 @@ struct SignInView: View {
                     Text(MavioStrings.authWaiting).foregroundStyle(.secondary)
                 }
                 if let error { errorText(error) }
-                Button(MavioStrings.actionCancel) { self.link = nil }
+            }
+            Section {
+                action(MavioStrings.actionCancel, .secondary) { self.link = nil }
             }
         } else {
+            if let error {
+                Section { errorText(error) }
+            }
             Section {
-                if let error { errorText(error) }
-                Button(MavioStrings.authSignInWithMavio) { Task { await browserSignIn(info) } }
+                action(MavioStrings.authSignInWithMavio, .primary) { Task { await browserSignIn(info) } }
             } footer: {
                 Text(info.address)
             }
             Section {
-                Button(MavioStrings.authUseLinkCode) { Task { await startLink(info) } }
+                action(MavioStrings.authUseLinkCode, .secondary) { Task { await startLink(info) } }
             }
         }
+    }
+
+    /// A button as wide as the form, outside its grouped rows.
+    private func action(_ title: String, _ kind: MavioButtonStyle.Kind, run: @escaping () -> Void) -> some View {
+        Button(action: run) { Text(title).frame(maxWidth: .infinity) }
+            .buttonStyle(MavioButtonStyle(kind, large: true))
+            .listRowInsets(EdgeInsets())
+            .listRowBackground(Color.clear)
     }
 
     private func errorText(_ message: String) -> some View {

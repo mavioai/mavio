@@ -53,9 +53,10 @@ struct CardOverlays: View {
     var body: some View {
         ZStack {
             if card.played {
-                Icon("played", fill: true, size: 22)
-                    .foregroundStyle(theme.colors.accent)
-                    .background(Circle().fill(theme.colors.onAccent).padding(3))
+                Icon("played", fill: true, size: 18)
+                    .foregroundStyle(.white)
+                    .padding(MavioSpacing.s2)
+                    .background(Circle().fill(theme.colors.scrim))
                     .padding(MavioSpacing.s8)
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
             }

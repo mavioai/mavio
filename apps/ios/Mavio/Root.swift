@@ -58,6 +58,10 @@ struct RootView: View {
     @State private var router = Router()
     @State private var tab: Tab = .home
 
+    private var theme: Theme {
+        Theme(colors: scheme == .light ? .light : .dark, layout: sizeClass == .regular ? .tablet : .phone)
+    }
+
     var body: some View {
         Group {
             if case .signedOut = model.signInState {
@@ -67,10 +71,9 @@ struct RootView: View {
             }
         }
         .environment(router)
-        .environment(
-            \.theme,
-            Theme(colors: scheme == .light ? .light : .dark, layout: sizeClass == .regular ? .tablet : .phone)
-        )
+        .environment(\.theme, theme)
+        // The accent marks only progress, selection, links and switches;
+        // buttons take the label color or `color.button`.
         .tint(MavioColors.dark.accent)
         .fullScreenCover(item: $router.playing) { request in
             PlayerScreen(request: request)
@@ -148,5 +151,8 @@ struct Stack<Content: View>: View {
                     .background(theme.colors.background)
                 }
         }
+        // Toolbar buttons and rows take the label's color, as in the web UI;
+        // the tab bar keeps the accent.
+        .tint(theme.colors.textPrimary)
     }
 }

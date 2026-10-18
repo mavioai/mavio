@@ -101,6 +101,7 @@ private struct ServerRow: View {
 private struct AuthorizeDeviceView: View {
     @Environment(AppModel.self) private var model
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.theme) private var theme
     @State private var serverId = ""
     @State private var code = ""
     @State private var message: String?
@@ -133,6 +134,7 @@ private struct AuthorizeDeviceView: View {
                 }
                 .disabled(code.count < 6 || serverId.isEmpty)
             }
+            .tint(theme.colors.textPrimary)
             .navigationTitle(MavioStrings.authAuthorizeDevice)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

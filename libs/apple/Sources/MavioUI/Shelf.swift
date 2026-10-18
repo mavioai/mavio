@@ -75,7 +75,7 @@ public struct StatusView: View {
                     .multilineTextAlignment(.center)
             }
             if let action {
-                Button(action.label, action: action.run).buttonStyle(.bordered)
+                Button(action.label, action: action.run).buttonStyle(.secondary)
             }
         }
         .padding(theme.layout.margin)
