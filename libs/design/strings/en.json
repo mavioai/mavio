@@ -357,6 +357,8 @@
   "settings.playback": { "message": "Playback", "description": "Settings section of playback." },
   "settings.maxQuality": { "message": "Maximum Quality", "description": "Setting of the highest quality streamed to this device." },
   "settings.autoplayNext": { "message": "Play the Next Episode Automatically", "description": "Setting that starts the next episode when one ends." },
+  "settings.playerWindows": { "message": "Play Each Video in a Window of Its Own", "description": "Setting that opens a new player window for each video played, so that several play at once.", "platforms": ["desktop"] },
+  "settings.playerWindowsMessage": { "message": "When off, videos play one at a time in the player's window.", "description": "Line under the setting of a window for each video.", "platforms": ["desktop"] },
   "settings.subtitlesAudio": { "message": "Subtitles and Audio", "description": "Settings section of the preferred audio and subtitles." },
   "settings.subtitlesAudioMessage": { "message": "Saved with your user on each server, for all your devices.", "description": "Explanation under the Subtitles and Audio title." },
   "settings.audioLanguages": { "message": "Preferred Audio Languages", "description": "Setting of the audio languages in order of preference." },

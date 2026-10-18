@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	goruntime "runtime"
+	"slices"
 	"strings"
 
 	"github.com/egoist/mygo/ui"
@@ -57,9 +58,13 @@ type Options struct {
 	OpenURL func(string) error
 	// MavioDev is the API of the mavio.dev Mavio accounts sign in at.
 	MavioDev string
-	// NewVideo makes a video to play in, which tells of its changes from
-	// its own goroutine; nil plays nothing.
-	NewVideo func(changed func(mpv.State)) (Video, error)
+	// NewWindow opens a window of the player's, which view builds, and
+	// calls closed once it closes; nil plays in the app's window.
+	NewWindow func(view func(*ui.Context), closed func()) Window
+	// NewVideo makes a video to play in, in win, the app's window when
+	// nil, which tells of its changes from its own goroutine; nil plays
+	// nothing.
+	NewVideo func(win Window, changed func(mpv.State)) (Video, error)
 	// KeepAwake keeps the display awake, for a reason the system shows,
 	// until release is called.
 	KeepAwake func(reason string) (release func())
@@ -92,6 +97,9 @@ type preferences struct {
 	Quality string `json:"quality,omitempty"`
 	// NoAutoplayNext stops playing the next episode as one ends.
 	NoAutoplayNext bool `json:"noAutoplayNext,omitempty"`
+	// PlayerWindows opens a player's window for each video played, else
+	// they play one at a time in one.
+	PlayerWindows bool `json:"playerWindows,omitempty"`
 	// Language is the language the app shows, a tag of design.Locales; the
 	// system's when empty.
 	Language string `json:"language,omitempty"`
@@ -105,8 +113,9 @@ type App struct {
 	router *ui.Router
 
 	phase phase
-	// player is what plays, if anything.
-	player *player
+	// players are what play: in windows of their own, or one in the
+	// app's window.
+	players []*player
 	// account is the Mavio account signed in, if any.
 	account *capiv1.Account
 	// userMenuOpen tells whether the user menu is open.
@@ -258,6 +267,9 @@ func (a *App) signOut() {
 		}
 		a.opts.Update(func() {
 			a.account = nil
+			for _, p := range slices.Clone(a.players) {
+				a.closePlayer(p, true)
+			}
 			clear(a.libraries)
 			a.setServers(nil)
 			a.replace("/home")
@@ -353,8 +365,8 @@ func (a *App) View(c *ui.Context) {
 	case phaseSignIn:
 		a.signInView(c)
 	default:
-		if a.player != nil {
-			a.playerView(c)
+		if p := a.playerOf(nil); p != nil {
+			a.playerView(c, p)
 			return
 		}
 		if c.Shortcut(ui.Cmd, ui.KeyComma) && !strings.HasPrefix(a.router.Path(), "/settings") {

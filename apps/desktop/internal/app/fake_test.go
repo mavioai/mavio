@@ -373,7 +373,7 @@ func newHarness(t testing.TB, signedIn bool, width, height int) *harness {
 			h.opened = append(h.opened, url)
 			return nil
 		},
-		NewVideo: func(changed func(mpv.State)) (Video, error) {
+		NewVideo: func(_ Window, changed func(mpv.State)) (Video, error) {
 			h.video = &fakeVideo{changed: changed}
 			return h.video, nil
 		},

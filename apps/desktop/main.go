@@ -112,9 +112,17 @@ func run() error {
 	}
 
 	var win *mygo.Window
+	// players are the player's windows open, which draw again with the
+	// app's: both on the main thread alone.
+	players := map[*mygo.Window]bool{}
 	update := func(fn func()) {
 		if win != nil {
-			win.Update(fn)
+			win.Update(func() {
+				fn()
+				for w := range players {
+					w.Update(func() {})
+				}
+			})
 		}
 	}
 	// libmpv loads as the first video plays: on macOS after MoltenVK,
@@ -139,8 +147,35 @@ func run() error {
 		SetLocale:     mygo.App.SetLocale,
 		OpenURL:       mygo.Shell.OpenExternal,
 		MavioDev:      cmp.Or(os.Getenv("MAVIO_DEV_URL"), "https://mavio.dev/api"),
-		NewVideo: func(changed func(mpv.State)) (app.Video, error) {
-			return newVideo(win, mpvLibrary, changed)
+		NewWindow: func(view func(*ui.Context), closed func()) app.Window {
+			opts := mygo.WindowOptions{
+				Title:           "Mavio",
+				Width:           1280,
+				Height:          720,
+				MinWidth:        480,
+				MinHeight:       270,
+				TitleBarStyle:   mygo.TitleBarHidden,
+				BackgroundColor: "#000000",
+				Content:         ui.View(view),
+			}
+			// The first keeps where it was left; the others open beside it.
+			if len(players) == 0 {
+				opts.StateKey = "player"
+			}
+			w := mygo.NewWindow(opts)
+			players[w] = true
+			w.OnClosed(func() {
+				delete(players, w)
+				update(closed)
+			})
+			return w
+		},
+		NewVideo: func(w app.Window, changed func(mpv.State)) (app.Video, error) {
+			in := win
+			if pw, ok := w.(*mygo.Window); ok {
+				in = pw
+			}
+			return newVideo(in, mpvLibrary, changed)
 		},
 		KeepAwake: func(reason string) func() { return mygo.Power.KeepAwake(reason, true) },
 		ToggleFullScreen: func() {

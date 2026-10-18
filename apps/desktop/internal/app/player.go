@@ -37,6 +37,15 @@ type Video interface {
 	Close()
 }
 
+// Window is a window of the player's, made by Options.NewWindow.
+type Window interface {
+	Close()
+	Focus()
+	SetTitle(title string)
+	ToggleFullScreen()
+	IsFullScreen() bool
+}
+
 // panelTab is a tab of the player's side panel.
 type panelTab int
 
@@ -96,21 +105,62 @@ type player struct {
 	// reported is when the position was last sent to the core.
 	reported time.Time
 	release  func()
+	// win is the window the player shows in, nil for the app's, and title
+	// the title it was given.
+	win   Window
+	title string
 }
 
-// play plays an item of server, with options when not nil, followed by
-// the episodes of next.
-func (a *App) play(server, item string, options *capiv1.PlaybackOptions, next ...*capiv1.Card) {
-	if a.player != nil {
-		a.closePlayer(true)
+// playerOf returns the player showing in win, nil for the app's window.
+func (a *App) playerOf(win Window) *player {
+	for _, p := range a.players {
+		if p.win == win {
+			return p
+		}
 	}
+	return nil
+}
+
+// playing reports whether p still plays.
+func (a *App) playing(p *player) bool { return slices.Contains(a.players, p) }
+
+// play plays an item of server, with options when not nil, followed by
+// the episodes of next: in a window of the player's, a new one for each
+// video when the preferences ask, else in place of what plays; in the TV
+// mode, in the app's window.
+func (a *App) play(server, item string, options *capiv1.PlaybackOptions, next ...*capiv1.Card) {
+	windows := a.opts.NewWindow != nil && !a.prefs.TV
+	var win Window
+	if !windows || !a.prefs.PlayerWindows {
+		for _, p := range slices.Clone(a.players) {
+			if windows && p.win != nil && win == nil {
+				win = p.win
+				a.endPlayer(p, true)
+				continue
+			}
+			a.closePlayer(p, true)
+		}
+	}
+	if windows && win == nil {
+		var w Window
+		w = a.opts.NewWindow(func(c *ui.Context) { a.playerWindowView(c, w) }, func() { a.windowClosed(w) })
+		win = w
+	}
+	a.playIn(win, server, item, options, next...)
+}
+
+// playIn plays an item of server in win, the app's window when nil.
+func (a *App) playIn(win Window, server, item string, options *capiv1.PlaybackOptions, next ...*capiv1.Card) {
 	if options == nil {
 		options = &capiv1.PlaybackOptions{}
 	}
-	p := &player{server: server, item: item, next: next, options: options, input: time.Now()}
-	a.player = p
+	p := &player{server: server, item: item, next: next, options: options, input: time.Now(), win: win}
+	a.players = append(a.players, p)
+	if win != nil {
+		win.Focus()
+	}
 	if a.opts.NewVideo != nil {
-		p.video, p.err = a.opts.NewVideo(func(s mpv.State) { a.videoChanged(p, s) })
+		p.video, p.err = a.opts.NewVideo(win, func(s mpv.State) { a.videoChanged(p, s) })
 	}
 	if a.opts.KeepAwake != nil {
 		p.release = a.opts.KeepAwake("Playing")
@@ -135,13 +185,13 @@ func (a *App) startPlayback(p *player) {
 		}.Build()}.Build())
 		a.opts.Update(func() {
 			if err != nil {
-				if a.player == p && p.starting == n {
+				if a.playing(p) && p.starting == n {
 					p.err = err
 				}
 				return
 			}
 			pb := m.GetPlayback()
-			if a.player != p || p.starting != n {
+			if !a.playing(p) || p.starting != n {
 				a.stopSession(pb, true, p.state.Position)
 				return
 			}
@@ -189,11 +239,28 @@ func (a *App) stopSession(pb *capiv1.Playback, stopped bool, at time.Duration) {
 	}()
 }
 
-// closePlayer leaves the player, ending its session where it is when
-// stopped, else as played to the end.
-func (a *App) closePlayer(stopped bool) {
-	p := a.player
-	a.player = nil
+// closePlayer leaves player p, ending its session where it is when
+// stopped, else as played to the end, and closes its window.
+func (a *App) closePlayer(p *player, stopped bool) {
+	a.endPlayer(p, stopped)
+	if p.win != nil {
+		p.win.Close()
+	}
+}
+
+// windowClosed ends the player of win, which closed.
+func (a *App) windowClosed(win Window) {
+	if p := a.playerOf(win); p != nil && win != nil {
+		a.endPlayer(p, true)
+	}
+}
+
+// endPlayer ends player p, as closePlayer does, but leaves its window.
+func (a *App) endPlayer(p *player, stopped bool) {
+	if !a.playing(p) {
+		return
+	}
+	a.players = slices.DeleteFunc(a.players, func(q *player) bool { return q == p })
 	if p.playback != nil {
 		a.stopSession(p.playback, stopped, p.state.Position)
 	}
@@ -209,7 +276,7 @@ func (a *App) closePlayer(stopped bool) {
 // alone redraws four times a second.
 func (a *App) videoChanged(p *player, s mpv.State) {
 	a.opts.Update(func() {
-		if a.player != p {
+		if !a.playing(p) {
 			return
 		}
 		prev := p.state
@@ -246,11 +313,19 @@ func (a *App) playerStateChanged(p *player, prev mpv.State) {
 		p.input = time.Now()
 	}
 	if s.Ended && !prev.Ended {
-		a.closePlayer(false)
 		if len(p.next) > 0 && a.autoplayNext() {
-			a.play(p.next[0].GetServerId(), p.next[0].GetItemId(), nil, p.next[1:]...)
+			a.playNext(p)
+		} else {
+			a.closePlayer(p, false)
 		}
 	}
+}
+
+// playNext plays the episode after p's in its place, in its window.
+func (a *App) playNext(p *player) {
+	stopped := !p.state.Ended
+	a.endPlayer(p, stopped)
+	a.playIn(p.win, p.next[0].GetServerId(), p.next[0].GetItemId(), nil, p.next[1:]...)
 }
 
 // addSubtitles adds the playback's subtitles delivered as files of their
@@ -407,10 +482,10 @@ func (a *App) playerKeys(c *ui.Context, p *player) {
 		switch {
 		case p.panel != tabNone:
 			p.panel = tabNone
-		case a.opts.IsFullScreen != nil && a.opts.IsFullScreen():
-			a.opts.ToggleFullScreen()
+		case a.isFullScreen(p):
+			a.toggleFullScreen(p)
 		default:
-			a.closePlayer(true)
+			a.closePlayer(p, true)
 		}
 	case pressed(ui.KeySpace, ui.KeyK):
 		a.togglePause(p)
@@ -419,7 +494,7 @@ func (a *App) playerKeys(c *ui.Context, p *player) {
 	case pressed(ui.KeyRight, ui.KeyL):
 		a.seekBy(p, 10*time.Second)
 	case pressed(ui.KeyF):
-		a.toggleFullScreen()
+		a.toggleFullScreen(p)
 	case pressed(ui.KeyM):
 		a.setVideo(p, "mute", yesNo(!p.state.Muted))
 	}
@@ -466,19 +541,46 @@ func (a *App) seekTo(p *player, at time.Duration, exact bool) {
 	}
 }
 
-func (a *App) toggleFullScreen() {
-	if a.opts.ToggleFullScreen != nil {
+// toggleFullScreen enters or leaves full screen in p's window.
+func (a *App) toggleFullScreen(p *player) {
+	switch {
+	case p.win != nil:
+		p.win.ToggleFullScreen()
+	case a.opts.ToggleFullScreen != nil:
 		a.opts.ToggleFullScreen()
 	}
 }
 
-// playerView builds the player: the video under the on-screen controller
+// isFullScreen reports whether p's window is in full screen.
+func (a *App) isFullScreen(p *player) bool {
+	if p.win != nil {
+		return p.win.IsFullScreen()
+	}
+	return a.opts.IsFullScreen != nil && a.opts.IsFullScreen()
+}
+
+// playerWindowView builds a window of the player's: the player showing in
+// it, titled after what it plays.
+func (a *App) playerWindowView(c *ui.Context, win Window) {
+	c.SetTheme(style.Theme(true))
+	p := a.playerOf(win)
+	if win == nil || p == nil {
+		ui.Box(c).Fill().Background(ui.RGB(0, 0, 0)).DragWindow()
+		return
+	}
+	if title := p.details.value.GetCard().GetTitle(); title != "" && title != p.title {
+		p.title = title
+		win.SetTitle(title)
+	}
+	a.playerView(c, p)
+}
+
+// playerView builds player p: the video under the on-screen controller
 // (docs/clients.md §6.5).
-func (a *App) playerView(c *ui.Context) {
-	p := a.player
+func (a *App) playerView(c *ui.Context, p *player) {
 	c.SetTheme(style.Theme(true))
 	a.playerKeys(c, p)
-	if a.player != p {
+	if !a.playing(p) {
 		return
 	}
 	load(a, &p.details, key("details", p.server, p.item), func(ctx context.Context) (*capiv1.Details, error) {
@@ -503,7 +605,7 @@ func (a *App) playerView(c *ui.Context) {
 		}
 		surface := ui.Box(c).Absolute().Top(0).Left(0).Right(0).Bottom(0).DragWindow()
 		if surface.DoubleClicked() {
-			a.toggleFullScreen()
+			a.toggleFullScreen(p)
 		} else if surface.Clicked() {
 			if p.panel != tabNone {
 				p.panel = tabNone
@@ -569,7 +671,7 @@ func (a *App) playerTopBar(c *ui.Context, p *player) {
 		LinearGradient(ui.LinearGradient{Angle: 180, From: ui.RGBA(0, 0, 0, 0.75), To: ui.RGBA(0, 0, 0, 0)}).
 		Children(func() {
 			if playerButton(c, "back", style.T(c, "player.back"), false, false, 44).Clicked() {
-				a.closePlayer(true)
+				a.closePlayer(p, true)
 				return
 			}
 			ui.Column(c).MinWidth(0).Grow(1).Children(func() {
@@ -632,11 +734,11 @@ func (a *App) playerBottomBar(c *ui.Context, p *player) {
 					p.panel = togglePanel(p.panel, tabAudio)
 				}
 				icon = "fullScreen"
-				if a.opts.IsFullScreen != nil && a.opts.IsFullScreen() {
+				if a.isFullScreen(p) {
 					icon = "exitFullScreen"
 				}
 				if playerButton(c, icon, style.T(c, "player.fullScreen"), false, false, 44).Clicked() {
-					a.toggleFullScreen()
+					a.toggleFullScreen(p)
 				}
 			})
 		})
@@ -663,7 +765,7 @@ func (a *App) nextEpisodeButton(c *ui.Context, p *player) {
 		style.Text(ui.Text(c, label), style.Type.Footnote).FontWeight(600).TextColor(white).SingleLine()
 	})
 	if b.Clicked() {
-		a.play(p.next[0].GetServerId(), p.next[0].GetItemId(), nil, p.next[1:]...)
+		a.playNext(p)
 	}
 }
 
@@ -911,7 +1013,7 @@ func (a *App) playerError(c *ui.Context, p *player) {
 			style.Text(ui.Text(c, style.T(c, "player.back")), style.Type.Headline).TextColor(white)
 		})
 		if b.Clicked() {
-			a.closePlayer(true)
+			a.closePlayer(p, true)
 		}
 	})
 }

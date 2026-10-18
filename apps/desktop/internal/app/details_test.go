@@ -26,10 +26,10 @@ func TestDetailsFromServer(t *testing.T) {
 		t.Fatal(err)
 	}
 	h.settle()
-	if got := h.app.player; got == nil || got.item != "orbit-trailer" {
+	if got := h.app.playerOf(nil); got == nil || got.item != "orbit-trailer" {
 		t.Errorf("player = %+v, want = the trailer playing", got)
 	}
-	h.app.closePlayer(true)
+	h.app.closePlayer(h.app.playerOf(nil), true)
 	h.settle()
 
 	if err := h.tt.Click("View Full Crew"); err != nil {

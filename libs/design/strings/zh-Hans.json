@@ -356,6 +356,8 @@
   "settings.playback": "播放",
   "settings.maxQuality": "最高画质",
   "settings.autoplayNext": "自动播放下一集",
+  "settings.playerWindows": "每个视频在单独的窗口中播放",
+  "settings.playerWindowsMessage": "关闭时，视频依次在同一个播放窗口中播放。",
   "settings.subtitlesAudio": "字幕与音频",
   "settings.subtitlesAudioMessage": "随你的用户保存在每台服务器上，在你所有的设备上生效。",
   "settings.audioLanguages": "首选音频语言",

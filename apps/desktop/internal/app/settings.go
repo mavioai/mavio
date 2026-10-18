@@ -723,6 +723,11 @@ func (a *App) playbackSection(c *ui.Context) {
 			a.prefs.NoAutoplayNext = !on
 			a.savePreferences()
 		}
+		windows := a.prefs.PlayerWindows
+		if g.switchRow(style.T(c, "settings.playerWindows"), style.T(c, "settings.playerWindowsMessage"), &windows) {
+			a.prefs.PlayerWindows = windows
+			a.savePreferences()
+		}
 	})
 }
 

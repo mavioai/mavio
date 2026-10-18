@@ -132,7 +132,7 @@ func TestPlayer(t *testing.T) {
 		{tabSubtitles, "player-subtitles", "Off"},
 		{tabQuality, "player-quality", "720p"},
 	} {
-		h.app.player.panel = tab.tab
+		h.app.playerOf(nil).panel = tab.tab
 		h.settle()
 		if !h.tt.HasText(tab.text) {
 			t.Errorf("%s texts = %q, want %q", tab.name, h.tt.Texts(), tab.text)
@@ -171,10 +171,10 @@ func TestPlayer(t *testing.T) {
 	}
 
 	// Escape leaves the player.
-	h.app.player.panel = tabNone
+	h.app.playerOf(nil).panel = tabNone
 	h.tt.Key(0, ui.KeyEscape)
 	h.settle()
-	if h.app.player != nil {
+	if h.app.playerOf(nil) != nil {
 		t.Error("Escape did not close the player")
 	}
 }
