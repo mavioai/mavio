@@ -36,6 +36,8 @@ public final class Player {
     public private(set) var videoSize: CGSize = .zero
     /// Picture in Picture of AVPlayer's layer, once the surface made it.
     public var pictureInPicture: AVPictureInPictureController?
+    /// Now Playing and the remote commands, which the app gives the item.
+    @ObservationIgnored public private(set) lazy var nowPlaying = NowPlaying(player: self)
 
     @ObservationIgnored private var poll: Task<Void, Never>?
     @ObservationIgnored private var endObserver: NSObjectProtocol?
@@ -51,6 +53,10 @@ public final class Player {
         currentTime = media.start
         duration = 0
         isBuffering = true
+        #if os(iOS) || os(tvOS)
+            try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .moviePlayback)
+            try? AVAudioSession.sharedInstance().setActive(true)
+        #endif
         switch media.engine {
         case .avPlayer: await loadAVPlayer(media)
         case .aether: await loadAether(media)
@@ -59,10 +65,6 @@ public final class Player {
     }
 
     private func loadAVPlayer(_ media: Media) async {
-        #if os(iOS) || os(tvOS)
-            try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .moviePlayback)
-            try? AVAudioSession.sharedInstance().setActive(true)
-        #endif
         let item = AVPlayerItem(url: media.url)
         let player = AVPlayer(playerItem: item)
         player.allowsExternalPlayback = true
@@ -133,6 +135,7 @@ public final class Player {
         poll = Task { [weak self] in
             while !Task.isCancelled {
                 self?.tick()
+                self?.nowPlaying.sync()
                 try? await Task.sleep(for: .milliseconds(200))
             }
         }
@@ -179,6 +182,7 @@ public final class Player {
         avPlayer?.play()
         aether?.play()
         isPlaying = true
+        nowPlaying.sync()
     }
 
     /// Pauses.
@@ -186,6 +190,7 @@ public final class Player {
         avPlayer?.pause()
         aether?.pause()
         isPlaying = false
+        nowPlaying.sync()
     }
 
     /// Plays or pauses.
@@ -205,6 +210,7 @@ public final class Player {
         if let engine = aether {
             await engine.seek(to: target)
         }
+        nowPlaying.sync(force: true)
     }
 
     /// Moves by an offset, in seconds.
@@ -220,6 +226,7 @@ public final class Player {
             if isPlaying { player.rate = rate }
         }
         aether?.setRate(rate)
+        nowPlaying.sync()
     }
 
     /// Whether Picture in Picture can start.
@@ -240,6 +247,7 @@ public final class Player {
     /// Stops playing and lets the engine go.
     public func stop() {
         teardown()
+        nowPlaying.end()
     }
 
     private func teardown() {

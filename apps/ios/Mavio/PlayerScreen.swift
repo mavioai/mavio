@@ -143,6 +143,7 @@ struct PlayerScreen: View {
                         avPlayerContainers: DeviceProfile.avPlayerContainers,
                         avPlayerAudioCodecs: DeviceProfile.avPlayerAudioCodecs),
                     start: position ?? 0))
+            player.nowPlaying.show(NowPlaying.Item(title: title))
             return
         }
         if let old = session {
@@ -162,6 +163,8 @@ struct PlayerScreen: View {
             }
             cachedSources = sources(details)
             source = cachedSources.first { $0.mediaSourceId == request.mediaSourceId } ?? cachedSources.first
+            artwork = (details.card.thumb ?? details.card.poster).flatMap { URL(string: $0.url) }
+            player.nowPlaying.next = next.map { episode in { play(episode) } }
         }
         do {
             let session = try await model.client.play(
@@ -176,6 +179,7 @@ struct PlayerScreen: View {
             self.info = info
             if let match = cachedSources.first(where: { $0.mediaSourceId == info.mediaSourceId }) { source = match }
             await load(info, start: info.startPosition ?? position ?? 0, aether: false)
+            player.nowPlaying.show(NowPlaying.Item(title: title, subtitle: series, artwork: artwork))
         } catch is CancellationError {
         } catch {
             failure = error.localizedDescription
@@ -183,6 +187,8 @@ struct PlayerScreen: View {
     }
 
     @State private var cachedSources: [Source] = []
+    /// The item's picture, which Now Playing shows.
+    @State private var artwork: URL?
 
     /// The sources of this item on this server.
     private func sources(_ details: Details) -> [Source] {

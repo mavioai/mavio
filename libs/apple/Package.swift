@@ -36,6 +36,7 @@ let package = Package(
             dependencies: [
                 // MavioCoreFFI exports libdovi, which AetherEngine calls.
                 "Libass", "MavioCoreFFI", .product(name: "AetherEngine", package: "AetherEngine"),
+                .product(name: "Nuke", package: "Nuke"),
             ]
         ),
         .target(

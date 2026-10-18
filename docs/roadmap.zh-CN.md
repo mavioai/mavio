@@ -672,7 +672,7 @@ flowchart TD
   - [ ] 发现与请求页面，随 P20
   - [ ] AetherEngine 播放时的画中画
   - [ ] 借助 libass 保留样式的 ASS 字幕
-  - [ ] 正在播放与远程命令（`MPNowPlayingInfoCenter`、`MPRemoteCommandCenter`）
+  - [x] 两种引擎的正在播放与远程命令（`MPNowPlayingInfoCenter`、`MPRemoteCommandCenter`）：标题、剧集与集数、封面、位置与速度；播放、暂停、10 秒快进快退、跳转位置，以及下一集
   - [x] 一集结束时播放下一集
   - [ ] 手势：长按倍速、滑动调节亮度与音量
   - [ ] 服务端发送 HLS 时的外挂字幕文件

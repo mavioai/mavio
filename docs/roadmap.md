@@ -672,7 +672,7 @@ flowchart TD
   - [ ] Discovery and request screens, with P20
   - [ ] Picture in Picture while AetherEngine plays
   - [ ] Styled ASS subtitles with libass
-  - [ ] Now Playing and the remote commands (`MPNowPlayingInfoCenter`, `MPRemoteCommandCenter`)
+  - [x] Now Playing and the remote commands (`MPNowPlayingInfoCenter`, `MPRemoteCommandCenter`) for both engines: the title, the series and episode, the artwork, the position and speed; play, pause, skips of 10 seconds, a new position, and the next episode
   - [x] Playing the next episode at the end of one
   - [ ] Gestures: hold for double speed, swipe for brightness and volume
   - [ ] External subtitle files while the server sends HLS
