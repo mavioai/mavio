@@ -653,12 +653,20 @@ internal fun SettingsList(title: String, message: String? = null, large: Boolean
     }
 }
 
-/** A group of rows on a card, with an optional title above and footer below. */
+/** A group of rows on a card, with an optional title above, an action beside it, and a footer below. */
 @Composable
-internal fun Group(title: String? = null, footer: String? = null, content: @Composable ColumnScope.() -> Unit) {
+internal fun Group(
+    title: String? = null,
+    footer: String? = null,
+    action: (@Composable () -> Unit)? = null,
+    content: @Composable ColumnScope.() -> Unit,
+) {
     Column(verticalArrangement = Arrangement.spacedBy(MavioSpacing.s8)) {
-        if (title != null) {
-            Text(title, Modifier.padding(horizontal = 4.dp), style = theme.type.headline.text)
+        if (title != null || action != null) {
+            Row(Modifier.padding(horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+                Text(title.orEmpty(), Modifier.weight(1f), style = theme.type.headline.text)
+                action?.invoke()
+            }
         }
         Column(
             Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(theme.colors.surface),
