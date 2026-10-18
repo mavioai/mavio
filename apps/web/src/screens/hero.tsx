@@ -5,7 +5,7 @@ import { artwork, type Section, type ServerEntry } from "@mavio/client-ts";
 import { ImageKind, type Item, ItemKind } from "@mavio/proto/mavio/library/v1/item_pb";
 import { HubKind } from "@mavio/proto/mavio/library/v1/library_pb";
 import { Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { t } from "../i18n.ts";
 import { Icon } from "../icon.tsx";
@@ -44,6 +44,9 @@ export function heroEntries(sections: Section[], servers: ServerEntry[]): HeroEn
 /** How long each title shows before the next. */
 const interval = 9000;
 
+/** How far a finger moves sideways to swipe to the next title or back. */
+const swipe = 40;
+
 /**
  * The title shown last, which the hero shows again when its page returns,
  * so that Back finds the title it left for.
@@ -58,11 +61,16 @@ export function Hero({ entries }: { entries: HeroEntry[] }) {
   const [paused, setPaused] = useState(false);
   const width = useWidthClass();
   const { tv } = usePrefs();
+  // Each title gets its full time, however it came to be shown.
   useEffect(() => {
     if (paused || entries.length < 2) return;
     const h = setInterval(() => setAt((i) => (i + 1) % entries.length), interval);
     return () => clearInterval(h);
-  }, [paused, entries.length]);
+  }, [paused, entries.length, at]);
+  // Where a finger went down, and whether it then swiped, so that lifting
+  // it over a button doesn't also press it.
+  const touch = useRef<{ x: number; y: number } | null>(null);
+  const swiped = useRef(false);
   if (entries.length === 0) return null;
   const { server, item, eyebrow } = entries[at % entries.length];
   const backdrop = artwork(server, item, ImageKind.BACKDROP, tv ? 1920 : 1600);
@@ -84,7 +92,29 @@ export function Hero({ entries }: { entries: HeroEntry[] }) {
       onPointerLeave={() => setPaused(false)}
       onFocus={() => setPaused(true)}
       onBlur={() => setPaused(false)}
-      className={`relative bg-surface ${phone ? heroClip : "overflow-hidden"} ${frame}`}
+      onPointerDown={(e) => {
+        swiped.current = false;
+        touch.current = e.pointerType === "mouse" ? null : { x: e.clientX, y: e.clientY };
+      }}
+      onPointerUp={(e) => {
+        const from = touch.current;
+        touch.current = null;
+        if (!from || entries.length < 2) return;
+        const dx = e.clientX - from.x;
+        if (Math.abs(dx) < swipe || Math.abs(dx) < Math.abs(e.clientY - from.y)) return;
+        swiped.current = true;
+        setAt((i) => (i + (dx < 0 ? 1 : entries.length - 1)) % entries.length);
+      }}
+      onPointerCancel={() => {
+        touch.current = null;
+      }}
+      onClickCapture={(e) => {
+        if (!swiped.current) return;
+        swiped.current = false;
+        e.preventDefault();
+        e.stopPropagation();
+      }}
+      className={`relative touch-pan-y bg-surface ${phone ? heroClip : "overflow-hidden"} ${frame}`}
     >
       {phone && <HeroBleed key={backdrop?.url} src={backdrop?.url} aspect="aspect-[4/5]" />}
       {backdrop && (
