@@ -40,6 +40,11 @@ export function useUpScroll() {
   }, [router]);
 }
 
+/** Has the navigation about to start return to where its page was scrolled when it was left. */
+export function returnToScroll() {
+  goingUp = true;
+}
+
 /** The props of a link up, which returns to where the page above was scrolled. */
 export const up = {
   resetScroll: false,

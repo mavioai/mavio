@@ -3,8 +3,8 @@
 // the shown sign-in and the user at its foot. Collapsed, it is a rail of
 // icons.
 import { useAdminServers, useDiscovery, useLibraries } from "@mavio/client-ts";
-import { Link, useLocation, useNavigate } from "@tanstack/react-router";
-import { type ReactNode, useEffect, useRef, useState } from "react";
+import { Link, useLocation, useNavigate, useRouter } from "@tanstack/react-router";
+import { type MouseEvent, type ReactNode, useEffect, useRef, useState } from "react";
 
 import { AssistantButton } from "../assistant/panel.tsx";
 import { Tip } from "../controls/tooltip.tsx";
@@ -15,6 +15,7 @@ import { prefs, setPrefs, sidebarWidths, usePrefs } from "../prefs.ts";
 import { isTool, toolLooks } from "../screens/settings-menus.ts";
 import { Wordmark } from "../logo.tsx";
 import { libraryIcon } from "../ui.tsx";
+import { openPlace, usePlace } from "./places.ts";
 import { UserButton } from "./user-menu.tsx";
 
 /** The sidebar's panel, expanded or as a rail; onToggle expands or collapses it. */
@@ -27,6 +28,10 @@ export function SidebarPanel({ rail, onToggle }: { rail: boolean; onToggle: () =
   const administers = useAdminServers().length > 0;
   const tools = usePrefs().pinned.filter(isTool);
   const pinned = administers ? tools : [];
+  const router = useRouter();
+  // The place a page was opened from is chosen as its own.
+  const place = usePlace();
+  const link = (to: string) => ({ "data-place": place === to || undefined, onClick: (e: MouseEvent) => openPlace(e, router, to) });
   return (
     <nav
       aria-label={t("nav.navigation")}
@@ -51,14 +56,14 @@ export function SidebarPanel({ rail, onToggle }: { rail: boolean; onToggle: () =
       <div className={`flex min-h-0 flex-1 flex-col overflow-y-auto pb-2 *:shrink-0 ${rail ? "items-center gap-2 px-2" : "gap-0.5 px-2.5"}`}>
         {rail ? (
           <>
-            <NavItem rail to="/search" icon="search" label={t("nav.search")} />
+            <NavItem rail to="/search" icon="search" label={t("nav.search")} link={link} />
             <AssistantButton size={20} tip="right" className={itemClass(true)} />
           </>
         ) : (
           <SearchBox shortcut={shortcuts ? shortcutLabel("search") : undefined} />
         )}
-        <NavItem rail={rail} to="/" icon="home" label={t("nav.home")} exact />
-        {discovers && <NavItem rail={rail} to="/discover" icon="discover" label={t("nav.discover")} />}
+        <NavItem rail={rail} to="/" icon="home" label={t("nav.home")} exact link={link} />
+        {discovers && <NavItem rail={rail} to="/discover" icon="discover" label={t("nav.discover")} link={link} />}
         {pinned.length > 0 &&
           (rail ? (
             <div className="my-1 h-px w-8 bg-border" />
@@ -67,7 +72,7 @@ export function SidebarPanel({ rail, onToggle }: { rail: boolean; onToggle: () =
           ))}
         {pinned.map((id) => (
           <Tip key={id} label={toolLooks[id].title()} side="right" disabled={!rail}>
-            <Link to="/tools/$tool" params={{ tool: id }} aria-label={rail ? toolLooks[id].title() : undefined} className={itemClass(rail)}>
+            <Link to="/tools/$tool" params={{ tool: id }} {...link(`/tools/${id}`)} aria-label={rail ? toolLooks[id].title() : undefined} className={itemClass(rail)}>
               <span className="flex size-6 shrink-0 items-center justify-center rounded-md text-white" style={{ background: toolLooks[id].color }}>
                 <Icon name={toolLooks[id].icon} fill size={15} />
               </span>
@@ -90,6 +95,7 @@ export function SidebarPanel({ rail, onToggle }: { rail: boolean; onToggle: () =
                 <Link
                   to="/s/$serverId/library/$libraryId"
                   params={{ serverId: server.id, libraryId: l.id }}
+                  {...link(`/s/${server.id}/library/${l.id}`)}
                   aria-label={rail ? l.name : undefined}
                   className={itemClass(rail)}
                 >
@@ -143,7 +149,7 @@ function SearchBox({ shortcut }: { shortcut?: string }) {
 const headerButton = "flex h-9 w-9 items-center justify-center rounded-[10px] text-text-secondary hover:bg-fill hover:text-on-background";
 
 function itemClass(rail: boolean) {
-  return `flex items-center gap-2.5 rounded-[10px] type-callout text-on-background hover:bg-fill data-[status=active]:bg-fill-selected data-[status=active]:font-semibold ${
+  return `flex items-center gap-2.5 rounded-[10px] type-callout text-on-background hover:bg-fill data-[status=active]:bg-fill-selected data-[status=active]:font-semibold data-place:bg-fill-selected data-place:font-semibold ${
     rail ? "h-9 w-9 justify-center" : "min-h-9 px-2.5"
   }`;
 }
@@ -154,19 +160,22 @@ function NavItem({
   icon,
   label,
   exact = false,
+  link,
 }: {
   rail: boolean;
   to: "/" | "/discover" | "/search";
   icon: IconName;
   label: string;
   exact?: boolean;
+  link: (to: string) => { "data-place"?: boolean; onClick: (e: MouseEvent) => void };
 }): ReactNode {
+  const props = link(to);
   return (
     <Tip label={label} side="right" disabled={!rail}>
-      <Link to={to} activeOptions={{ exact }} aria-label={rail ? label : undefined} className={itemClass(rail)}>
+      <Link to={to} activeOptions={{ exact }} {...props} aria-label={rail ? label : undefined} className={itemClass(rail)}>
         {({ isActive }) => (
           <>
-            <Icon name={icon} fill={isActive} size={20} className="shrink-0" />
+            <Icon name={icon} fill={isActive || !!props["data-place"]} size={20} className="shrink-0" />
             {!rail && label}
           </>
         )}

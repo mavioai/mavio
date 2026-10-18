@@ -24,6 +24,7 @@ import { SidebarPanel, SidebarResizer, sidebarWidth } from "./sidebar.tsx";
 import { useTvBack } from "./back.ts";
 import { useTvFocus } from "./focus.ts";
 import { PageTitle } from "./page-title.tsx";
+import { usePlaces } from "./places.ts";
 import { useUpScroll } from "./up.ts";
 import { useSpatialNavigation } from "./spatial.ts";
 import { TvShell } from "./tv.tsx";
@@ -59,6 +60,7 @@ function Content() {
   useSpatialNavigation(prefs.tv);
   useTvFocus(prefs.tv);
   useUpScroll();
+  usePlaces();
   useTvBack(prefs.tv && !bare);
 
   // A Mavio account follows the servers it reaches, as it opens.
