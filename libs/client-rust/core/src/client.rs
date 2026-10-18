@@ -632,6 +632,9 @@ impl Core {
         user_id: &str,
         pin: Option<&str>,
     ) -> Result<ServerRecord> {
+        // Progress kept offline is the present user's, so it goes first;
+        // a server that cannot take it cannot switch either.
+        let _ = self.reporter.replay(server_id).await;
         let s = self.servers.switch_user(server_id, user_id, pin).await?;
         if let Some(task) = self
             .streams

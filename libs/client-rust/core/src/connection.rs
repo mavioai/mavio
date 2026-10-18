@@ -14,7 +14,7 @@ use mavio_api::connect::mavio::auth::v1::AuthServiceClient;
 use mavio_api::connect::mavio::hub::v1::HubServiceClient;
 use mavio_api::connect::mavio::library::v1::{ItemServiceClient, LibraryServiceClient};
 use mavio_api::connect::mavio::playback::v1::PlaybackServiceClient;
-use mavio_api::connect::mavio::session::v1::EventServiceClient;
+use mavio_api::connect::mavio::session::v1::{EventServiceClient, SessionServiceClient};
 use mavio_api::connect::mavio::user::v1::{UserDataServiceClient, UserServiceClient};
 use rustls::pki_types::CertificateDer;
 use rustls::pki_types::pem::PemObject as _;
@@ -273,6 +273,11 @@ impl Connection {
     /// `PlaybackService`.
     pub fn playback(&self) -> PlaybackServiceClient<Transport> {
         PlaybackServiceClient::new(self.transport(), self.unary())
+    }
+
+    /// `SessionService`: the user's devices signed in.
+    pub fn sessions(&self) -> SessionServiceClient<Transport> {
+        SessionServiceClient::new(self.transport(), self.unary())
     }
 
     /// `EventService`, whose stream lasts as long as the device listens.

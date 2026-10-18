@@ -17,9 +17,10 @@ use mavio_api::proto::mavio::playback::v1::{PlayMethod, SubtitleMethod};
 use mavio_api::proto::mavio::session::v1::__buffa::oneof::event::Kind;
 use mavio_api::proto::mavio::session::v1::Event;
 use mavio_core::{
-    Account, Core, Details, DeviceInfo, DownloadEntry, Filter, FoundServer, Libraries, Page,
-    PlaybackOptions, PlaybackPreferences, Row, SearchResults, ServerInfo, ServerRecord,
-    SignInState, Sort, Store, StreamState, SwitchableUser, Transfer,
+    Account, AccountSecurity, Core, Details, DeviceInfo, DeviceSession, DownloadEntry, Filter,
+    FoundServer, Libraries, Page, PlaybackOptions, PlaybackPreferences, Row, SearchResults,
+    ServerInfo, ServerRecord, SignInState, Sort, Store, StreamState, SwitchableUser, TotpSetup,
+    Transfer,
 };
 use tokio::runtime::Runtime;
 
@@ -604,6 +605,66 @@ impl Client {
         pin: Option<String>,
     ) -> Result<ServerRecord> {
         self.call(|c| async move { c.switch_user(&server_id, &user_id, pin.as_deref()).await })
+            .await
+    }
+
+    /// How the user signs in to a server.
+    pub async fn security(&self, server_id: String) -> Result<AccountSecurity> {
+        self.call(|c| async move { c.servers().security(&server_id).await })
+            .await
+    }
+
+    /// Changes the user's own password on a server, with the current one.
+    pub async fn set_password(
+        &self,
+        server_id: String,
+        current: String,
+        new: String,
+    ) -> Result<()> {
+        self.call(|c| async move { c.servers().set_password(&server_id, &current, &new).await })
+            .await
+    }
+
+    /// Sets the user's four-digit PIN on a server, or removes it when pin
+    /// is empty.
+    pub async fn set_pin(&self, server_id: String, pin: String) -> Result<()> {
+        self.call(|c| async move { c.servers().set_pin(&server_id, &pin).await })
+            .await
+    }
+
+    /// Begins setting up an authenticator app on a server.
+    pub async fn start_totp(&self, server_id: String) -> Result<TotpSetup> {
+        self.call(|c| async move { c.servers().start_totp(&server_id).await })
+            .await
+    }
+
+    /// Finishes setting up an authenticator app with a code from it.
+    pub async fn confirm_totp(&self, server_id: String, code: String) -> Result<()> {
+        self.call(|c| async move { c.servers().confirm_totp(&server_id, &code).await })
+            .await
+    }
+
+    /// Turns the user's authenticator app off on a server.
+    pub async fn delete_totp(&self, server_id: String) -> Result<()> {
+        self.call(|c| async move { c.servers().delete_totp(&server_id).await })
+            .await
+    }
+
+    /// Deletes one of the user's passkeys on a server.
+    pub async fn delete_passkey(&self, server_id: String, passkey_id: String) -> Result<()> {
+        self.call(|c| async move { c.servers().delete_passkey(&server_id, &passkey_id).await })
+            .await
+    }
+
+    /// The user's devices signed in to a server.
+    pub async fn devices(&self, server_id: String) -> Result<Vec<DeviceSession>> {
+        self.call(|c| async move { c.servers().devices(&server_id).await })
+            .await
+    }
+
+    /// Signs one of the user's other devices out of a server.
+    pub async fn sign_out_device(&self, server_id: String, session_id: String) -> Result<()> {
+        self.call(|c| async move { c.servers().sign_out_device(&server_id, &session_id).await })
             .await
     }
 

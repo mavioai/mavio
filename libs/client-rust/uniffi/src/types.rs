@@ -10,10 +10,13 @@ use mavio_core::{
     SignInState, Sort, Source, StreamState, TitleCard, Transfer, Version,
 };
 use mavio_core::{
+    AccountSecurity, DeviceSession, Passkey, PlaybackPreferences, SubtitleMode, SwitchableUser,
+    TotpSetup,
+};
+use mavio_core::{
     CollectionLink, CreditJob, Episode, ExternalLink, Extra, ExtraKind, SeriesLink, SeriesStatus,
     SubtitleStream, VideoRange, VideoStream,
 };
-use mavio_core::{PlaybackPreferences, SubtitleMode, SwitchableUser};
 
 #[uniffi::remote(Record)]
 pub struct DeviceInfo {
@@ -496,4 +499,38 @@ pub struct SwitchableUser {
     pub managed: bool,
     pub has_pin: bool,
     pub current: bool,
+}
+
+#[uniffi::remote(Record)]
+pub struct AccountSecurity {
+    pub managed: bool,
+    pub has_password: bool,
+    pub passkeys: Vec<Passkey>,
+    pub has_totp: bool,
+    pub has_pin: bool,
+}
+
+#[uniffi::remote(Record)]
+pub struct Passkey {
+    pub id: String,
+    pub name: String,
+    pub host: String,
+    pub created: Option<SystemTime>,
+}
+
+#[uniffi::remote(Record)]
+pub struct TotpSetup {
+    pub secret: String,
+    pub uri: String,
+}
+
+#[uniffi::remote(Record)]
+pub struct DeviceSession {
+    pub id: String,
+    pub device_name: String,
+    pub client: String,
+    pub online: bool,
+    pub current: bool,
+    pub last_seen: Option<SystemTime>,
+    pub playing: Option<String>,
 }
