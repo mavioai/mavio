@@ -8,6 +8,12 @@ import SwiftUI
 struct ProfileView: View {
     @Environment(AppModel.self) private var model
     @Environment(\.theme) private var theme
+    @State private var serverId = ""
+
+    /// The server whose settings the Server group shows.
+    private var chosen: ServerRecord? {
+        model.signedInServers.first { $0.id == serverId } ?? model.signedInServers.first
+    }
 
     var body: some View {
         List {
@@ -17,6 +23,9 @@ struct ProfileView: View {
                 } label: {
                     AccountCard()
                 }
+            }
+            if model.account == nil, let server = model.signedInServers.first {
+                SwitchUserSection(server: server)
             }
             Section(MavioStrings.settingsThisDevice) {
                 NavigationLink {
@@ -35,6 +44,24 @@ struct ProfileView: View {
                     } label: {
                         EntryLabel(MavioStrings.settingsSubtitlesAudio, icon: "subtitles", color: Color(hex: 0x34C759))
                     }
+                }
+            }
+            if let server = chosen {
+                Section {
+                    if model.signedInServers.count > 1 {
+                        Picker(MavioStrings.authServer, selection: Binding(get: { server.id }, set: { serverId = $0 }))
+                        {
+                            ForEach(model.signedInServers, id: \.id) { Text($0.name).tag($0.id) }
+                        }
+                        .tint(theme.colors.textSecondary)
+                    }
+                    NavigationLink {
+                        DevicesView(server: server)
+                    } label: {
+                        EntryLabel(MavioStrings.settingsDevices, icon: "devices", color: Color(hex: 0x32ADE6))
+                    }
+                } header: {
+                    Text(MavioStrings.settingsServerGroup)
                 }
             }
             Section {
@@ -117,6 +144,7 @@ private struct AccountView: View {
                     Text(MavioStrings.settingsStandaloneAccountMessage(name: server.userName, server: server.name))
                 }
                 SwitchUserSection(server: server)
+                SecuritySections(server: server)
             }
             Section {
                 ForEach(model.servers, id: \.id) { server in

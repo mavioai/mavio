@@ -303,3 +303,327 @@ private struct PinPad: View {
         }
     }
 }
+
+/// Sign-In and Security on a standalone server, as the web UI's: the
+/// password, the passkeys, the authenticator app and the PIN; a managed
+/// user has none of them.
+struct SecuritySections: View {
+    let server: ServerRecord
+    @Environment(AppModel.self) private var model
+    @Environment(\.theme) private var theme
+    @State private var security: AccountSecurity?
+    @State private var busy = false
+    @State private var failure: String?
+    @State private var editing: Editing?
+    @State private var current = ""
+    @State private var new = ""
+    @State private var pin = ""
+    @State private var code = ""
+    @State private var totp: TotpSetup?
+    @State private var passwordChanged = false
+
+    private enum Editing { case password, pin }
+
+    var body: some View {
+        Group {
+            if let security, !security.managed {
+                Section {
+                    if security.hasPassword { password }
+                    totpRows(on: security.hasTotp)
+                    pinRows(on: security.hasPin)
+                } header: {
+                    Text(MavioStrings.authSecurity)
+                } footer: {
+                    if let failure { Text(failure).foregroundStyle(theme.colors.danger) }
+                }
+                Section(MavioStrings.authPasskeys) {
+                    if security.passkeys.isEmpty {
+                        Text(MavioStrings.authNoPasskeys).foregroundStyle(theme.colors.textSecondary)
+                    }
+                    ForEach(security.passkeys, id: \.id) { passkey in
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(passkey.name)
+                            Text(
+                                [MavioStrings.authPasskeyHost(host: passkey.host)]
+                                    .appending(passkey.created.map { $0.formatted(date: .abbreviated, time: .omitted) })
+                                    .joined(separator: " · ")
+                            )
+                            .type(theme.type.footnote)
+                            .foregroundStyle(theme.colors.textSecondary)
+                        }
+                        .swipeActions {
+                            Button(MavioStrings.actionDelete, role: .destructive) {
+                                change {
+                                    try await model.client.deletePasskey(serverId: server.id, passkeyId: passkey.id)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        .task(id: server.userId) { await load() }
+    }
+
+    private var password: some View {
+        VStack(alignment: .leading, spacing: MavioSpacing.s8) {
+            row(
+                MavioStrings.authPassword,
+                detail: passwordChanged ? MavioStrings.authPasswordChanged : MavioStrings.authPasswordMessage
+            ) {
+                if editing != .password {
+                    Button(MavioStrings.authChangePassword) {
+                        passwordChanged = false
+                        editing = .password
+                    }
+                }
+            }
+            if editing == .password {
+                SecureField(MavioStrings.authCurrentPassword, text: $current)
+                    .textContentType(.password)
+                SecureField(MavioStrings.authNewPassword, text: $new)
+                    .textContentType(.newPassword)
+                actions(save: current.isEmpty || new.isEmpty) {
+                    try await model.client.setPassword(serverId: server.id, current: current, new: new)
+                    passwordChanged = true
+                }
+            }
+        }
+    }
+
+    @ViewBuilder private func totpRows(on: Bool) -> some View {
+        VStack(alignment: .leading, spacing: MavioSpacing.s8) {
+            row(MavioStrings.authTotp, detail: on ? MavioStrings.authTotpOn : MavioStrings.authTotpOff) {
+                if on {
+                    Button(MavioStrings.authTurnOff, role: .destructive) {
+                        change { try await model.client.deleteTotp(serverId: server.id) }
+                    }
+                } else if totp == nil {
+                    Button(MavioStrings.authSetUpTotp) {
+                        change { totp = try await model.client.startTotp(serverId: server.id) }
+                    }
+                }
+            }
+            if let totp, !on {
+                Text(MavioStrings.authTotpSecret(secret: totp.secret))
+                    .type(theme.type.callout)
+                    .foregroundStyle(theme.colors.textSecondary)
+                    .textSelection(.enabled)
+                if let uri = URL(string: totp.uri) {
+                    Link(MavioStrings.authOpenAuthenticator, destination: uri)
+                }
+                TextField(MavioStrings.authTotpCode, text: $code, prompt: Text("000000"))
+                    .keyboardType(.numberPad)
+                    .textContentType(.oneTimeCode)
+                    .font(.system(.body, design: .monospaced))
+                    .onChange(of: code) { _, new in
+                        let digits = String(new.filter(\.isNumber).prefix(6))
+                        if digits != new { code = digits }
+                    }
+                HStack {
+                    Button(MavioStrings.actionSave) {
+                        change {
+                            try await model.client.confirmTotp(serverId: server.id, code: code)
+                            self.totp = nil
+                            code = ""
+                        }
+                    }
+                    .disabled(busy || code.count != 6)
+                    Button(MavioStrings.actionCancel) {
+                        self.totp = nil
+                        code = ""
+                    }
+                    .tint(theme.colors.textSecondary)
+                }
+                .buttonStyle(.borderless)
+            }
+        }
+    }
+
+    @ViewBuilder private func pinRows(on: Bool) -> some View {
+        VStack(alignment: .leading, spacing: MavioSpacing.s8) {
+            row(
+                MavioStrings.authPin,
+                detail: "\(on ? MavioStrings.authPinOn : MavioStrings.authTotpOff) · \(MavioStrings.authPinMessage)"
+            ) {
+                if on {
+                    Button(MavioStrings.authRemovePin, role: .destructive) {
+                        change { try await model.client.setPin(serverId: server.id, pin: "") }
+                    }
+                }
+                if editing != .pin {
+                    Button(MavioStrings.authSetPin) { editing = .pin }
+                }
+            }
+            if editing == .pin {
+                SecureField(MavioStrings.authPin, text: $pin)
+                    .keyboardType(.numberPad)
+                    .textContentType(.newPassword)
+                    .onChange(of: pin) { _, new in
+                        let digits = String(new.filter(\.isNumber).prefix(4))
+                        if digits != new { pin = digits }
+                    }
+                actions(save: pin.count != 4) {
+                    try await model.client.setPin(serverId: server.id, pin: pin)
+                }
+            }
+        }
+    }
+
+    /// A setting's title and state, with its buttons.
+    private func row(_ title: String, detail: String, @ViewBuilder buttons: () -> some View) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: MavioSpacing.s12) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                Text(detail).type(theme.type.footnote).foregroundStyle(theme.colors.textSecondary)
+            }
+            Spacer(minLength: 0)
+            buttons().buttonStyle(.borderless).disabled(busy)
+        }
+    }
+
+    /// Save, which runs f and closes the form when it succeeds, and Cancel.
+    private func actions(save disabled: Bool, _ f: @escaping () async throws -> Void) -> some View {
+        HStack(spacing: MavioSpacing.s20) {
+            Button(MavioStrings.actionSave) {
+                change {
+                    try await f()
+                    close()
+                }
+            }
+            .disabled(busy || disabled)
+            Button(MavioStrings.actionCancel, action: close)
+                .tint(theme.colors.textSecondary)
+        }
+        .buttonStyle(.borderless)
+    }
+
+    private func close() {
+        editing = nil
+        (current, new, pin) = ("", "", "")
+    }
+
+    private func load() async {
+        do {
+            security = try await model.client.security(serverId: server.id)
+        } catch is CancellationError {
+        } catch {
+            failure = (error as? CoreError)?.reason ?? error.localizedDescription
+        }
+    }
+
+    /// Runs a change, then reads the user's security again.
+    private func change(_ f: @escaping () async throws -> Void) {
+        busy = true
+        failure = nil
+        Task {
+            defer { busy = false }
+            do {
+                try await f()
+            } catch {
+                failure = (error as? CoreError)?.reason ?? error.localizedDescription
+            }
+            await load()
+        }
+    }
+}
+
+/// Devices, as the web UI's: the user's devices signed in to the server,
+/// to sign the others out.
+struct DevicesView: View {
+    let server: ServerRecord
+    @Environment(AppModel.self) private var model
+    @Environment(\.theme) private var theme
+    @State private var devices: [DeviceSession]?
+    @State private var failure: String?
+    @State private var busy = false
+
+    var body: some View {
+        List {
+            Section {
+                ForEach(devices ?? [], id: \.id) { device in
+                    HStack(spacing: MavioSpacing.s12) {
+                        Icon("devices", size: 20)
+                            .frame(width: 36, height: 36)
+                            .background(theme.colors.fill, in: .rect(cornerRadius: 9))
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(
+                                device.deviceName.isEmpty
+                                    ? (device.client.isEmpty ? "—" : device.client) : device.deviceName
+                            )
+                            .lineLimit(1)
+                            Text(detail(device))
+                                .type(theme.type.footnote)
+                                .foregroundStyle(theme.colors.textSecondary)
+                                .lineLimit(1)
+                        }
+                        Spacer(minLength: 0)
+                        if device.current {
+                            Text(MavioStrings.settingsThisDevice)
+                                .type(theme.type.callout)
+                                .foregroundStyle(theme.colors.textSecondary)
+                        } else {
+                            Button(MavioStrings.authSignOut, role: .destructive) { signOut(device) }
+                                .buttonStyle(.borderless)
+                                .disabled(busy)
+                        }
+                    }
+                }
+            } header: {
+                Text(MavioStrings.settingsDevicesMessage)
+            } footer: {
+                if let failure { Text(failure).foregroundStyle(theme.colors.danger) }
+            }
+        }
+        .overlay { if devices == nil && failure == nil { ProgressView() } }
+        .scrollContentBackground(.hidden)
+        .background(theme.colors.background)
+        .navigationTitle(MavioStrings.settingsDevices)
+        .navigationBarTitleDisplayMode(.inline)
+        .refreshable { await load() }
+        .task { await load() }
+    }
+
+    private func detail(_ d: DeviceSession) -> String {
+        let state: String? =
+            if let playing = d.playing {
+                MavioStrings.remotePlaying(name: playing)
+            } else if d.online {
+                MavioStrings.remoteOnline
+            } else {
+                d.lastSeen.map { $0.formatted(date: .abbreviated, time: .shortened) }
+            }
+        return [d.client].appending(state).filter { !$0.isEmpty }.joined(separator: " · ")
+    }
+
+    private func load() async {
+        do {
+            devices = try await model.client.devices(serverId: server.id)
+            failure = nil
+        } catch is CancellationError {
+        } catch {
+            failure = (error as? CoreError)?.reason ?? error.localizedDescription
+        }
+    }
+
+    private func signOut(_ device: DeviceSession) {
+        busy = true
+        Task {
+            defer { busy = false }
+            do {
+                try await model.client.signOutDevice(serverId: server.id, sessionId: device.id)
+            } catch {
+                failure = (error as? CoreError)?.reason ?? error.localizedDescription
+            }
+            await load()
+        }
+    }
+}
+
+extension Array {
+    /// The array with element after it, when there is one.
+    fileprivate func appending(_ element: Element?) -> [Element] {
+        guard let element else { return self }
+        return self + [element]
+    }
+}
