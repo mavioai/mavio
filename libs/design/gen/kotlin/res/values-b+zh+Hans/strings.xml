@@ -395,6 +395,8 @@
     <string name="settings_manage_at_mavio">在 mavio.dev 管理</string>
     <string name="settings_admin">管理员</string>
     <string name="settings_server_group">服务器</string>
+    <string name="settings_media_menu">媒体</string>
+    <string name="settings_maintenance_menu">监控与维护</string>
     <string name="settings_server_choice">服务器</string>
     <string name="settings_this_server">%s（本服务器）</string>
     <string name="settings_plugins">插件</string>

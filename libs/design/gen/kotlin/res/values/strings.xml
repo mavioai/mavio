@@ -780,6 +780,10 @@
     <string name="settings_admin">Administrator</string>
     <!-- Group of the settings of the server chosen above them. -->
     <string name="settings_server_group">Server</string>
+    <!-- Menu of a server's settings of its media: libraries, storage and transcoding. -->
+    <string name="settings_media_menu">Media</string>
+    <!-- Menu of a server's settings of watching over and keeping it: activity, issues, tasks, logs and backups. -->
+    <string name="settings_maintenance_menu">Monitoring &amp; Maintenance</string>
     <!-- Label of the choice of the server whose settings are shown. -->
     <string name="settings_server_choice">Server</string>
     <!-- The server serving the web UI among the servers to choose; name is its name. -->
