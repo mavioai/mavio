@@ -18,8 +18,8 @@ use mavio_api::proto::mavio::session::v1::__buffa::oneof::event::Kind;
 use mavio_api::proto::mavio::session::v1::Event;
 use mavio_core::{
     Account, Core, Details, DeviceInfo, DownloadEntry, Filter, FoundServer, Libraries, Page,
-    PlaybackOptions, Row, SearchResults, ServerInfo, ServerRecord, Sort, Store, StreamState,
-    Transfer,
+    PlaybackOptions, Row, SearchResults, ServerInfo, ServerRecord, SignInState, Sort, Store,
+    StreamState, Transfer,
 };
 use tokio::runtime::Runtime;
 
@@ -230,6 +230,9 @@ pub trait CoreListener: Send + Sync {
     fn server_state(&self, server_id: String, state: StreamState);
     /// A server sent an event.
     fn event(&self, server_id: String, event: ServerEvent);
+    /// The servers changed as the Mavio account's servers were followed;
+    /// the app reloads them.
+    fn servers_changed(&self);
 }
 
 struct Listener(Arc<dyn CoreListener>);
@@ -242,6 +245,9 @@ impl mavio_core::Listener for Listener {
         if let Some(event) = ServerEvent::from_event(event) {
             self.0.event(server_id.to_owned(), event);
         }
+    }
+    fn servers_changed(&self) {
+        self.0.servers_changed();
     }
 }
 
@@ -588,6 +594,12 @@ impl Client {
         self.0.account()
     }
 
+    /// What the device is signed in with, which decides whether the app
+    /// shows its sign-in.
+    pub fn sign_in_state(&self) -> Result<SignInState> {
+        Ok(self.0.sign_in_state()?)
+    }
+
     /// Starts signing a Mavio account in with a link code, at the
     /// mavio.dev whose API is api, as client_id, such as `dev.mavio.ios`.
     pub async fn start_link(&self, api: String, client_id: String) -> Result<Arc<LinkCode>> {
@@ -876,6 +888,7 @@ mod tests {
     impl CoreListener for Quiet {
         fn server_state(&self, _: String, _: StreamState) {}
         fn event(&self, _: String, _: ServerEvent) {}
+        fn servers_changed(&self) {}
     }
 
     #[test]

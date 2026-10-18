@@ -60,8 +60,7 @@ struct RootView: View {
 
     var body: some View {
         Group {
-            // A Mavio account stays signed in while none of its servers answers.
-            if model.servers.isEmpty && model.account == nil {
+            if case .signedOut = model.signInState {
                 SignInView()
             } else {
                 tabs

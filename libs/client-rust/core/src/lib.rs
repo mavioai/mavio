@@ -19,7 +19,7 @@ mod session;
 mod store;
 mod view;
 
-pub use account::{Account, BrowserSignIn, LinkCode, MAVIO_DEV_API};
+pub use account::{Account, BrowserSignIn, LinkCode, MAVIO_DEV_API, SignInState};
 pub use client::{
     AudioStream, Core, CreditEntry, Details, DownloadEntry, Filter, HomeObserver, Libraries,
     LibraryEntry, LibraryType, Listener, Page, SearchResults, Sort, Source,

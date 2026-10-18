@@ -6,8 +6,8 @@ use std::time::{Duration, SystemTime};
 use mavio_core::{
     Account, AccountMode, Artwork, AudioStream, Card, CardKind, CreditEntry, Details, DeviceInfo,
     DownloadEntry, DownloadState, Filter, FoundServer, Libraries, LibraryEntry, LibraryType, Page,
-    PlaybackOptions, Row, RowContent, RowKind, SearchResults, ServerInfo, ServerRecord, Sort,
-    Source, StreamState, TitleCard, Transfer, Version,
+    PlaybackOptions, Row, RowContent, RowKind, SearchResults, ServerInfo, ServerRecord,
+    SignInState, Sort, Source, StreamState, TitleCard, Transfer, Version,
 };
 
 #[uniffi::remote(Record)]
@@ -59,6 +59,13 @@ pub struct ServerRecord {
     pub version: String,
     pub user_id: String,
     pub user_name: String,
+}
+
+#[uniffi::remote(Enum)]
+pub enum SignInState {
+    SignedOut,
+    Account(Account),
+    Standalone,
 }
 
 #[uniffi::remote(Enum)]

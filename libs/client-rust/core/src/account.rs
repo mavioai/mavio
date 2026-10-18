@@ -57,6 +57,19 @@ pub struct Account {
     pub api: String,
 }
 
+/// What the device is signed in with, which decides whether an app shows
+/// its sign-in.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum SignInState {
+    /// Nothing: the app shows its sign-in.
+    SignedOut,
+    /// A Mavio account, signed in while none of its servers answers.
+    Account(Account),
+    /// A standalone server's user, or the users of servers added by their
+    /// addresses.
+    Standalone,
+}
+
 /// A link code: the device shows it, with the address to enter it at and
 /// a QR code of the address with the code filled in, and the account
 /// approves it there.
@@ -370,6 +383,18 @@ impl Servers {
     /// The Mavio account signed in, if any.
     pub fn account(&self) -> Option<Account> {
         AccountSession::load(self.tokens().as_ref()).map(|s| s.account())
+    }
+
+    /// What the device is signed in with.
+    pub fn sign_in_state(&self) -> Result<SignInState> {
+        if let Some(a) = self.account() {
+            return Ok(SignInState::Account(a));
+        }
+        Ok(if self.list()?.is_empty() {
+            SignInState::SignedOut
+        } else {
+            SignInState::Standalone
+        })
     }
 
     /// Starts signing a Mavio account in with a link code, at the mavio.dev
@@ -1016,6 +1041,7 @@ mod tests {
         );
         assert_eq!(servers.poll_link(&link).await.unwrap(), None);
         assert!(servers.account().is_none());
+        assert_eq!(servers.sign_in_state().unwrap(), SignInState::SignedOut);
 
         st.lock().unwrap().approved = true;
         let got = servers.poll_link(&link).await.unwrap().unwrap();
@@ -1027,7 +1053,12 @@ mod tests {
                 api: api.clone()
             }
         );
-        assert_eq!(servers.account(), Some(got));
+        assert_eq!(servers.account(), Some(got.clone()));
+        assert_eq!(
+            servers.sign_in_state().unwrap(),
+            SignInState::Account(got.clone()),
+            "signed in before any of its servers answers"
+        );
 
         assert!(servers.sync_account().await.unwrap(), "the servers changed");
         assert_eq!(ids(&servers), ["sa"], "the unreachable server waits");
@@ -1049,6 +1080,11 @@ mod tests {
         st.lock().unwrap().servers.clear();
         assert!(servers.sync_account().await.unwrap());
         assert!(ids(&servers).is_empty());
+        assert_eq!(
+            servers.sign_in_state().unwrap(),
+            SignInState::Account(got),
+            "the account stays signed in without servers"
+        );
     }
 
     #[tokio::test]

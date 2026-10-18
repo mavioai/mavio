@@ -11,6 +11,7 @@ private enum Push: Sendable {
     case state(String, StreamState)
     case event(String, ServerEvent)
     case home([Row])
+    case serversChanged
 }
 
 /// Receives the core's callbacks on its threads and queues them.
@@ -29,6 +30,10 @@ private final class Relay: CoreListener, HomeListener {
         continuation.yield(.event(serverId, event))
     }
 
+    func serversChanged() {
+        continuation.yield(.serversChanged)
+    }
+
     func rows(rows: [Row]) {
         continuation.yield(.home(rows))
     }
@@ -44,8 +49,13 @@ public final class AppModel {
     public let client: Client
     /// The servers, in the user's order.
     public private(set) var servers: [ServerRecord] = []
+    /// What the device is signed in with; signed out, the app shows its
+    /// sign-in.
+    public private(set) var signInState: SignInState = .signedOut
     /// The Mavio account signed in, whose servers the core follows.
-    public private(set) var account: Account?
+    public var account: Account? {
+        if case let .account(account) = signInState { account } else { nil }
+    }
     /// The servers the device holds a token of.
     public private(set) var signedIn: Set<String> = []
     /// The state of each server's stream.
@@ -127,6 +137,9 @@ public final class AppModel {
             }
         case let .home(rows):
             home = rows
+        case .serversChanged:
+            reloadServers()
+            refreshHome()
         }
     }
 
@@ -153,7 +166,7 @@ public final class AppModel {
 
     /// Reads the servers again from the core.
     public func reloadServers() {
-        account = client.account()
+        signInState = (try? client.signInState()) ?? .signedOut
         servers = (try? client.servers()) ?? []
         signedIn = Set(servers.filter { client.signedIn(serverId: $0.id) }.map(\.id))
     }
@@ -163,13 +176,6 @@ public final class AppModel {
     /// not reach before.
     public func start() {
         try? client.start()
-        guard account != nil else { return }
-        Task {
-            // An unreachable mavio.dev leaves the servers as they were.
-            try? await client.syncAccount()
-            reloadServers()
-            refreshHome()
-        }
     }
 
     /// Stops the event streams, when the app goes to the background.

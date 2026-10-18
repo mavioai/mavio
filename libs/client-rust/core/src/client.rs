@@ -17,7 +17,7 @@ use mavio_api::proto::mavio::session::v1::Event;
 use mavio_api::proto::mavio::user::v1::UpdateUserDataRequest;
 use tokio::task::{JoinHandle, JoinSet};
 
-use crate::account::{Account, BrowserSignIn, LinkCode};
+use crate::account::{Account, BrowserSignIn, LinkCode, SignInState};
 use crate::connection::Connection;
 use crate::downloads::Downloads;
 use crate::error::{Error, Result};
@@ -554,6 +554,12 @@ impl Core {
     /// The Mavio account signed in, if any.
     pub fn account(&self) -> Option<Account> {
         self.servers.account()
+    }
+
+    /// What the device is signed in with, which decides whether the app
+    /// shows its sign-in.
+    pub fn sign_in_state(&self) -> Result<SignInState> {
+        self.servers.sign_in_state()
     }
 
     /// Starts signing a Mavio account in with a link code.
@@ -1275,6 +1281,15 @@ mod tests {
                 .unwrap()
                 .is_some()
         );
+    }
+
+    #[tokio::test]
+    async fn servers_added_by_address_are_a_standalone_sign_in() {
+        let (core, _) = core();
+        assert_eq!(core.sign_in_state().unwrap(), SignInState::SignedOut);
+        let a = fake_server("sa", "Home").serve().await;
+        core.servers.sign_in(&a, "me", "secret").await.unwrap();
+        assert_eq!(core.sign_in_state().unwrap(), SignInState::Standalone);
     }
 
     #[tokio::test]

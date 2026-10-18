@@ -48,6 +48,8 @@ class ClientTest {
             events.value += 1
         }
 
+        override fun serversChanged() {}
+
         override fun rows(rows: List<Row>) {
             this.rows.value = rows
         }
