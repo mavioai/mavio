@@ -18,7 +18,9 @@ export default defineConfig(({ mode }) => ({
     compatibilityFlags: ["nodejs_compat"],
     domains: ["mavio.dev"],
     env: {
-      BASE_URL: bindings.text(mode === "development" ? "http://localhost:5173" : "https://mavio.dev"),
+      // In development, DEV_ORIGIN serves it at another address, such as
+      // the HTTPS one other devices on the network reach (vite.config.ts).
+      BASE_URL: bindings.text(mode === "development" ? (process.env.DEV_ORIGIN ?? "http://localhost:5173") : "https://mavio.dev"),
       APP_URL: bindings.text("https://app.mavio.dev"),
       ACME_DOMAIN: bindings.text("acme.mavio.dev"),
       HYPERDRIVE: bindings.hyperdrive({
