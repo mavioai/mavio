@@ -12,10 +12,11 @@ import { Slider as BaseSlider } from "@base-ui/react/slider";
 import { Switch as BaseSwitch } from "@base-ui/react/switch";
 import { Tabs as BaseTabs } from "@base-ui/react/tabs";
 import { Toggle } from "@base-ui/react/toggle";
-import type { HTMLAttributes, ReactNode, Ref } from "react";
+import type { HTMLAttributes, KeyboardEvent, ReactNode, Ref } from "react";
 
 import { Icon, type IconName } from "../icon.tsx";
 import { locale } from "../i18n.ts";
+import { usePrefs } from "../prefs.ts";
 import { popup, popupItem } from "./styles.ts";
 
 /** A switch, green when on as Apple's are. */
@@ -224,6 +225,23 @@ export function SuggestField({
 }
 
 /**
+ * The keys a choice of radios leaves to the television's focus (docs/tv.md
+ * §4): up and down, and left and right past its ends, where Base UI would
+ * cycle through its options.
+ */
+function useChoiceKeys() {
+  const { tv } = usePrefs();
+  if (!tv) return undefined;
+  return (e: KeyboardEvent<HTMLDivElement> & { preventBaseUIHandler: () => void }) => {
+    const radios = [...e.currentTarget.querySelectorAll("[role=radio]")];
+    const i = radios.indexOf(e.target as Element);
+    const out =
+      e.key === "ArrowUp" || e.key === "ArrowDown" || (e.key === "ArrowLeft" && i === 0) || (e.key === "ArrowRight" && i === radios.length - 1);
+    if (out) e.preventBaseUIHandler();
+  };
+}
+
+/**
  * One of a few options in a row of segments, as iOS draws them; an option
  * with an icon and no text is labelled by its label.
  */
@@ -242,10 +260,12 @@ export function Segmented<T extends string>({
   size?: "small" | "medium";
   className?: string;
 }) {
+  const keys = useChoiceKeys();
   return (
     <RadioGroup
       value={value}
       onValueChange={(v) => onChange(v as T)}
+      onKeyDown={keys}
       aria-label={label}
       data-focus-choice
       className={`flex shrink-0 rounded-full bg-fill p-0.5 ${className ?? ""}`}
@@ -281,8 +301,16 @@ export function Chips<T extends string>({
   label: string;
   className?: string;
 }) {
+  const keys = useChoiceKeys();
   return (
-    <RadioGroup value={value} onValueChange={(v) => onChange(v as T)} aria-label={label} data-focus-choice className={`flex flex-wrap gap-2 ${className ?? ""}`}>
+    <RadioGroup
+      value={value}
+      onValueChange={(v) => onChange(v as T)}
+      onKeyDown={keys}
+      aria-label={label}
+      data-focus-choice
+      className={`flex flex-wrap gap-2 ${className ?? ""}`}
+    >
       {options.map((o) => (
         <Radio.Root key={o.value} value={o.value} className={pill}>
           {o.label}
@@ -308,8 +336,9 @@ export function Pictures<T extends string>({
   draw: (option: T, on: boolean) => ReactNode;
   className?: string;
 }) {
+  const keys = useChoiceKeys();
   return (
-    <RadioGroup value={value} onValueChange={(v) => onChange(v as T)} aria-label={label} data-focus-choice className={className}>
+    <RadioGroup value={value} onValueChange={(v) => onChange(v as T)} onKeyDown={keys} aria-label={label} data-focus-choice className={className}>
       {options.map((o) => (
         <Radio.Root key={o} value={o} className="flex flex-col items-center gap-2 rounded-[12px] outline-none focus-visible:ring-2 focus-visible:ring-focus">
           {draw(o, o === value)}
