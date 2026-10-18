@@ -382,13 +382,21 @@ func (a *App) accountCard(c *ui.Context, active bool) {
 		line = style.T(c, "auth.mavioAccount")
 	}
 	b := ui.ButtonBase(c).Padding(12).Gap(12).Radius(14).AlignItems(ui.Center).Label(name).Selected(active)
+	// At rest the card is the surface, as the web UI's, which differs
+	// from the sidebar by a shade; over the sidebar of the desktop's own
+	// material, where an opaque surface would stand apart, it is clear.
+	// Hovered, the fill tints it.
+	rest := style.Color(colors.Surface)
+	if c.Vibrancy() {
+		rest = ui.Transparent
+	}
 	switch {
 	case active:
 		b.Background(style.Color(colors.FillSelected))
 	case b.Hovered():
-		b.Background(style.Color(colors.FillSelected))
+		b.Background(style.Color(colors.Fill).Over(rest))
 	default:
-		b.Background(style.Color(colors.Surface))
+		b.Background(rest)
 	}
 	b.Children(func() {
 		avatar(c, name, 44)
