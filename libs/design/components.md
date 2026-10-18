@@ -96,7 +96,7 @@ A cast or crew member.
 A user's or an account's picture in menus, lists of users and Homes.
 
 * **Anatomy**: a circle (`radius.full`) holding the first character of the name, upper-cased, in white and semibold, 0.42 of the circle's size.
-* **Color**: drawn from the name, so that a person has the same color everywhere and people side by side differ: the hue is 0, and for each character of the name, in code points, the hue times 31 plus the code point, modulo 360; the fill is that hue at 42% saturation and 44% lightness, on which white text stays legible.
+* **Color**: one quiet gray for everyone, `#8E8E93` in both themes, on which the white initial stays legible; the initial tells people apart.
 
 ## Track Picker
 
