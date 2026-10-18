@@ -112,7 +112,7 @@ func (a *App) sidebarResizer(c *ui.Context) {
 	}
 	if edge.Hovered() || edge.Dragging() || edge.Focused() {
 		edge.Children(func() {
-			ui.Box(c).Absolute().Top(0).Bottom(0).Right(2).Width(2).Background(style.Color(colors.Accent))
+			ui.Box(c).Absolute().Top(0).Bottom(0).Right(0).Width(2).Background(style.Color(colors.Accent))
 		})
 	}
 }

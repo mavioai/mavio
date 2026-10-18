@@ -230,7 +230,7 @@ func (a *App) shelf(c *ui.Context, id, title string, more func(), cards func()) 
 func (a *App) labeledShelf(c *ui.Context, id, title string, more func(), label string, cards func()) {
 	colors := style.Colors(c)
 	scroll := a.shelfScroll(id)
-	ui.Column(c.Key(id)).Gap(10).Children(func() {
+	ui.Column(c.Key(id)).Gap(6).Children(func() {
 		head := ui.Row(c).Padding(0, style.Layout.Margin).Gap(8).AlignItems(ui.Center)
 		hovered := head.Hovered()
 		head.Children(func() {
@@ -259,8 +259,10 @@ func (a *App) labeledShelf(c *ui.Context, id, title string, more func(), label s
 				scroll.ScrollTo(min(scroll.X+step, scroll.MaxX), 0, ui.Smooth)
 			}
 		})
+		// The padding leaves room for a hovered card's ring, which the
+		// scroll would clip; the column's gap is the less for it.
 		ui.ScrollHorizontal(c).TrackScroll(scroll).Children(func() {
-			ui.Row(c).Padding(0, style.Layout.Margin, 4).Gap(style.Layout.Gutter * 1.5).AlignItems(ui.Start).Children(cards)
+			ui.Row(c).Padding(4, style.Layout.Margin).Gap(style.Layout.Gutter * 1.5).AlignItems(ui.Start).Children(cards)
 		})
 	})
 }
