@@ -537,6 +537,7 @@ struct DevicesView: View {
     @State private var devices: [DeviceSession]?
     @State private var failure: String?
     @State private var busy = false
+    @State private var controlling: String?
 
     var body: some View {
         List {
@@ -547,11 +548,7 @@ struct DevicesView: View {
                             .frame(width: 36, height: 36)
                             .background(theme.colors.fill, in: .rect(cornerRadius: 9))
                         VStack(alignment: .leading, spacing: 2) {
-                            Text(
-                                device.deviceName.isEmpty
-                                    ? (device.client.isEmpty ? "—" : device.client) : device.deviceName
-                            )
-                            .lineLimit(1)
+                            Text(RemoteView.name(device)).lineLimit(1)
                             Text(detail(device))
                                 .type(theme.type.footnote)
                                 .foregroundStyle(theme.colors.textSecondary)
@@ -563,6 +560,10 @@ struct DevicesView: View {
                                 .type(theme.type.callout)
                                 .foregroundStyle(theme.colors.textSecondary)
                         } else {
+                            if device.online {
+                                Button(MavioStrings.remoteControl) { controlling = device.id }
+                                    .buttonStyle(.borderless)
+                            }
                             Button(MavioStrings.authSignOut, role: .destructive) { signOut(device) }
                                 .buttonStyle(.borderless)
                                 .disabled(busy)
@@ -581,13 +582,22 @@ struct DevicesView: View {
         .navigationTitle(MavioStrings.settingsDevices)
         .navigationBarTitleDisplayMode(.inline)
         .refreshable { await load() }
+        .sheet(
+            isPresented: Binding(get: { controlling != nil }, set: { if !$0 { controlling = nil } }),
+            onDismiss: { Task { await load() } }
+        ) {
+            if let controlling {
+                RemoteView(server: server, sessionId: controlling)
+                    .presentationDetents([.medium, .large])
+            }
+        }
         .task { await load() }
     }
 
     private func detail(_ d: DeviceSession) -> String {
         let state: String? =
             if let playing = d.playing {
-                MavioStrings.remotePlaying(name: playing)
+                MavioStrings.remotePlaying(name: playing.card.title)
             } else if d.online {
                 MavioStrings.remoteOnline
             } else {
