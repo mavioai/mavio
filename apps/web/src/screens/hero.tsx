@@ -10,7 +10,7 @@ import { useEffect, useState } from "react";
 import { t } from "../i18n.ts";
 import { Icon } from "../icon.tsx";
 import { usePrefs, useWidthClass } from "../prefs.ts";
-import { runtimeOf, yearOf } from "../ui.tsx";
+import { heroClip, heroFade, HeroBleed, runtimeOf, yearOf } from "../ui.tsx";
 import { sectionTitle } from "./home.tsx";
 
 /** A title the hero shows, and the line above it. */
@@ -84,10 +84,11 @@ export function Hero({ entries }: { entries: HeroEntry[] }) {
       onPointerLeave={() => setPaused(false)}
       onFocus={() => setPaused(true)}
       onBlur={() => setPaused(false)}
-      className={`relative overflow-hidden bg-surface ${frame}`}
+      className={`relative bg-surface ${phone ? heroClip : "overflow-hidden"} ${frame}`}
     >
+      {phone && <HeroBleed key={backdrop?.url} src={backdrop?.url} />}
       {backdrop && (
-        <img key={backdrop.url} src={backdrop.url} alt="" className="absolute inset-0 h-full w-full animate-[fade_600ms_ease-out] object-cover" />
+        <img key={backdrop.url} src={backdrop.url} alt="" className={`absolute inset-0 h-full w-full animate-[fade_600ms_ease-out] object-cover ${phone ? heroFade : ""}`} />
       )}
       <div
         className={`absolute inset-0 ${
@@ -146,7 +147,7 @@ export function Hero({ entries }: { entries: HeroEntry[] }) {
         </div>
       </div>
       {entries.length > 1 && (
-        <div className={`absolute flex gap-1.5 ${tv ? "right-margin bottom-[14vh]" : phone ? "top-17 right-margin" : "right-8 bottom-8"}`}>
+        <div className={`absolute flex gap-1.5 ${tv ? "right-margin bottom-[14vh]" : phone ? "top-4 right-margin" : "right-8 bottom-8"}`}>
           {entries.map((e, i) => (
             <button
               key={`${e.server.id}/${e.item.id}`}

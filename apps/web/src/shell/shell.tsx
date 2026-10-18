@@ -116,8 +116,7 @@ function NormalShell({ width }: { width: ReturnType<typeof useWidthClass> }) {
     <div className={compact ? "flex min-h-screen flex-col pb-[calc(88px+env(safe-area-inset-bottom))]" : "flex min-h-screen"}>
       {compact ? <CompactHeader /> : <Sidebar overlay={width === "medium"} />}
       {/* A column filling the window's height, which a page loading centers its indicator in. */}
-      {/* A page's hero reaches the phone's top, under its header of glass. */}
-      <main className={compact ? "flex flex-1 flex-col has-[[data-hero]]:-mt-13" : "flex min-w-0 flex-1 flex-col"}>
+      <main className={compact ? "flex flex-1 flex-col" : "flex min-w-0 flex-1 flex-col"}>
         {!compact && <BackButton />}
         <Outlet />
       </main>
@@ -164,7 +163,8 @@ const allTabs: { to: "/" | "/libraries" | "/discover"; icon: IconName; label: ()
 ];
 
 /**
- * The phone's top, of the tab bar's glass: the wordmark, or Back on a page
+ * The phone's top, of the tab bar's glass fading out at its foot, so that a
+ * hero's colors spread up into it (HeroBleed): the wordmark, or Back on a page
  * opened from another, search, the assistant, and the user's avatar opening
  * the settings.
  */
@@ -172,7 +172,7 @@ function CompactHeader() {
   const account = useAccount();
   const link = usePlaceLink();
   return (
-    <header className="sticky top-0 z-20 flex h-13 items-center justify-between bg-[var(--tabbar-glass)] px-margin pt-[env(safe-area-inset-top)] backdrop-blur-md backdrop-saturate-[1.8]">
+    <header className="sticky top-0 isolate z-20 flex h-13 items-center justify-between px-margin pt-[env(safe-area-inset-top)] before:absolute before:inset-0 before:-z-10 before:bg-[var(--tabbar-glass)] before:backdrop-blur-md before:backdrop-saturate-[1.8] before:[mask-image:linear-gradient(to_bottom,black_calc(100%-14px),transparent)]">
       <PhoneBack fallback={<Wordmark height={20} />} />
       <div className="flex items-center gap-2">
         <Link to="/search" {...link("/search")} aria-label={t("nav.search")} className="flex size-9 items-center justify-center rounded-full hover:bg-fill data-[status=active]:text-accent-text data-place:text-accent-text">

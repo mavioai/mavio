@@ -12,7 +12,7 @@ import { useState } from "react";
 import { discoverLanguage, t } from "../i18n.ts";
 import { Icon } from "../icon.tsx";
 import { usePrefs, useWidthClass } from "../prefs.ts";
-import { Button, Grid, Loading, NotFoundView, StatusView } from "../ui.tsx";
+import { Button, Grid, heroClip, heroFade, HeroBleed, Loading, NotFoundView, StatusView } from "../ui.tsx";
 import { Modal } from "../controls/dialog.tsx";
 import { Checkbox } from "../controls/inputs.tsx";
 import { sized, statusLabel, TitleCard, tmdbOf } from "./discover.tsx";
@@ -70,11 +70,12 @@ function CollectionPage({ server, tmdbId, collection: c }: { server: ServerEntry
     <div className="pb-10">
       <header
         data-hero
-        className={`relative overflow-hidden bg-surface ${
+        className={`relative bg-surface ${phone ? heroClip : "overflow-hidden"} ${
           tv ? "h-[70vh]" : phone ? "aspect-square" : "h-[clamp(440px,60vh,600px)]"
         }`}
       >
-        {c.backdropUrl && <img src={sized(c.backdropUrl, 1280)} alt="" className="absolute inset-0 h-full w-full animate-[fade_600ms_ease-out] object-cover" />}
+        {phone && <HeroBleed src={c.backdropUrl && sized(c.backdropUrl, 1280)} />}
+        {c.backdropUrl && <img src={sized(c.backdropUrl, 1280)} alt="" className={`absolute inset-0 h-full w-full animate-[fade_600ms_ease-out] object-cover ${phone ? heroFade : ""}`} />}
         <div
           className={`absolute inset-0 ${
             phone
