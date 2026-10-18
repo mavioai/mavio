@@ -588,7 +588,6 @@ private struct DetailsContent: View {
                     value: Route.credits(serverId: card.serverId, itemId: card.itemId, crew: false)
                 )
                 .type(theme.type.callout)
-                .foregroundStyle(theme.colors.accentText)
             } content: {
                 ForEach(Array(shown.enumerated()), id: \.offset) { _, credit in
                     PersonLink(serverId: card.serverId, credit: credit, role: credit.shownRole)
