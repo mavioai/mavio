@@ -35,7 +35,7 @@ export function SidebarPanel({ rail, onToggle }: { rail: boolean; onToggle: () =
       <div className={`flex h-14 shrink-0 items-center ${rail ? "justify-center" : "justify-between pr-2.5 pl-4"}`}>
         {!rail && <Wordmark height={22} />}
         <div className="flex items-center">
-          {!rail && <AssistantButton size={20} className={headerButton} />}
+          {!rail && <AssistantButton size={20} tip="bottom" className={headerButton} />}
           <Tip label={rail ? t("nav.expandSidebar") : t("nav.collapseSidebar")} side={rail ? "right" : "bottom"}>
             <button
               type="button"
@@ -43,16 +43,16 @@ export function SidebarPanel({ rail, onToggle }: { rail: boolean; onToggle: () =
               aria-label={rail ? t("nav.expandSidebar") : t("nav.collapseSidebar")}
               className={headerButton}
             >
-              <Icon name="sidebar" size={20} />
+              <Icon name="sidebar" size={18} />
             </button>
           </Tip>
         </div>
       </div>
-      <div className={`flex min-h-0 flex-1 flex-col gap-0.5 overflow-y-auto pb-2 *:shrink-0 ${rail ? "items-center px-2" : "px-2.5"}`}>
+      <div className={`flex min-h-0 flex-1 flex-col overflow-y-auto pb-2 *:shrink-0 ${rail ? "items-center gap-2 px-2" : "gap-0.5 px-2.5"}`}>
         {rail ? (
           <>
             <NavItem rail to="/search" icon="search" label={t("nav.search")} />
-            <AssistantButton size={20} className={itemClass(true)} />
+            <AssistantButton size={20} tip="right" className={itemClass(true)} />
           </>
         ) : (
           <SearchBox shortcut={shortcuts ? shortcutLabel("search") : undefined} />
@@ -61,7 +61,7 @@ export function SidebarPanel({ rail, onToggle }: { rail: boolean; onToggle: () =
         {discovers && <NavItem rail={rail} to="/discover" icon="discover" label={t("nav.discover")} />}
         {pinned.length > 0 &&
           (rail ? (
-            <div className="my-2 h-px w-8 bg-border" />
+            <div className="my-1 h-px w-8 bg-border" />
           ) : (
             <div className="px-2.5 pt-4 pb-1 type-caption font-semibold text-text-tertiary">{t("nav.features")}</div>
           ))}
@@ -78,12 +78,12 @@ export function SidebarPanel({ rail, onToggle }: { rail: boolean; onToggle: () =
           </Tip>
         ))}
         {rail ? (
-          <div className="my-2 h-px w-8 bg-border" />
+          <div className="my-1 h-px w-8 bg-border" />
         ) : (
           <div className="px-2.5 pt-4 pb-1 type-caption font-semibold text-text-tertiary">{t("nav.libraries")}</div>
         )}
         {libraries.map(({ server, libraries: list }) => (
-          <div key={server.id} className={`flex flex-col gap-0.5 ${rail ? "items-center" : ""}`}>
+          <div key={server.id} className={`flex flex-col ${rail ? "items-center gap-2" : "gap-0.5"}`}>
             {several && list.length > 0 && !rail && (
               <div className="truncate px-2.5 pt-2 pb-0.5 type-caption text-text-tertiary">{server.name}</div>
             )}
@@ -103,7 +103,7 @@ export function SidebarPanel({ rail, onToggle }: { rail: boolean; onToggle: () =
           </div>
         ))}
       </div>
-      <div className={`shrink-0 border-t border-border ${rail ? "p-2" : "p-1.5"}`}>
+      <div className={`shrink-0 border-t border-border ${rail ? "flex justify-center py-2" : "p-1.5"}`}>
         <UserButton compact={rail} />
       </div>
     </nav>
@@ -142,11 +142,11 @@ function SearchBox({ shortcut }: { shortcut?: string }) {
   );
 }
 
-const headerButton = "flex h-9 w-9 items-center justify-center rounded-lg text-text-secondary hover:bg-fill hover:text-on-background";
+const headerButton = "flex h-9 w-9 items-center justify-center rounded-[10px] text-text-secondary hover:bg-fill hover:text-on-background";
 
 function itemClass(rail: boolean) {
   return `flex items-center gap-2.5 rounded-[10px] type-callout text-on-background hover:bg-fill data-[status=active]:bg-fill-selected data-[status=active]:font-semibold ${
-    rail ? "h-11 w-11 justify-center" : "min-h-9 px-2.5"
+    rail ? "h-9 w-9 justify-center" : "min-h-9 px-2.5"
   }`;
 }
 

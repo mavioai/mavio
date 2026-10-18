@@ -36,7 +36,7 @@ export const tools: readonly ToolId[] = ["indexer-search"];
 
 /** How each tool shows, in the settings and in the sidebar. */
 export const toolLooks: Record<ToolId, { icon: IconName; color: string; title: () => string }> = {
-  "indexer-search": { icon: "search", color: "#0A84FF", title: () => t("indexers.title") },
+  "indexer-search": { icon: "indexers", color: "#0A84FF", title: () => t("indexers.title") },
 };
 
 export function isTool(s: string): s is ToolId {

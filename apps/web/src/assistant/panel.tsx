@@ -33,6 +33,7 @@ import { useLocation, useParams, useRouter } from "@tanstack/react-router";
 import { createContext, type ReactNode, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 
 import { locale, t } from "../i18n.ts";
+import { Tip } from "../controls/tooltip.tsx";
 import { Icon } from "../icon.tsx";
 import { usePrefs } from "../prefs.ts";
 import { useShortcutsShown } from "../keys.ts";
@@ -667,14 +668,23 @@ function TalkButton({ listening, onPress, onRelease }: { listening: boolean; onP
  * The assistant button of the page's chrome, shown when the server's
  * assistant is on: it opens the panel and listens, held or tapped.
  */
-export function AssistantButton({ className, size = 22 }: { className?: string; size?: number }) {
+export function AssistantButton({
+  className,
+  size = 22,
+  tip,
+}: {
+  className?: string;
+  size?: number;
+  /** The side of a tooltip naming it, in place of the browser's title. */
+  tip?: "top" | "bottom" | "left" | "right";
+}) {
   const a = useAssistantPanel();
   if (!a?.server) return null;
-  return (
+  const button = (
     <button
       type="button"
       aria-label={t("assistant.title")}
-      title={t("assistant.title")}
+      title={tip ? undefined : t("assistant.title")}
       onPointerDown={(e) => {
         if (e.button !== 0) return;
         e.preventDefault();
@@ -690,5 +700,12 @@ export function AssistantButton({ className, size = 22 }: { className?: string; 
     >
       <Icon name="microphone" fill={a.state.listening} size={size} />
     </button>
+  );
+  return tip ? (
+    <Tip label={t("assistant.title")} side={tip}>
+      {button}
+    </Tip>
+  ) : (
+    button
   );
 }

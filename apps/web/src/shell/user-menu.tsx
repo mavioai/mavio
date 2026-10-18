@@ -95,10 +95,10 @@ export function UserButton({
       className={
         dots
           ? "flex size-16 items-center justify-center rounded-full text-text-secondary"
-          : `flex w-full items-center gap-2.5 rounded-[10px] text-left hover:bg-fill data-popup-open:bg-fill ${compact ? "justify-center p-1.5" : "p-2"}`
+          : `flex items-center gap-2.5 rounded-[10px] text-left hover:bg-fill data-popup-open:bg-fill ${compact ? "size-9 justify-center" : "w-full p-2"}`
       }
     >
-      {dots ? <Icon name="moreVertical" size={32} /> : <Avatar name={account.name} size={compact ? 36 : 32} />}
+      {dots ? <Icon name="moreVertical" size={32} /> : <Avatar name={account.name} size={compact ? 28 : 32} />}
       {!compact && !dots && (
         <>
           <span className="min-w-0 flex-1">
@@ -113,7 +113,7 @@ export function UserButton({
   return (
     <>
       <Menu
-        trigger={compact || dots ? <Tip label={account.name}>{trigger}</Tip> : trigger}
+        trigger={compact || dots ? <Tip label={account.name} side={compact ? "right" : "top"}>{trigger}</Tip> : trigger}
         side={placement === "above" ? "top" : "bottom"}
         align={placement === "above" ? "start" : "end"}
         width={tv ? "w-[400px]" : "w-[300px]"}
