@@ -337,15 +337,11 @@ input[type="search"]::-webkit-search-cancel-button {
       0 0 0 6px #fff,
       0 8px 24px var(--mavio-color-tv-focus-shadow);
   }
-  /* A button whose menu is open, focus in the menu, keeps a highlight. */
-  & [aria-haspopup][aria-expanded="true"]:not(:focus) {
+  /* A button whose menu is open, focus in the menu, keeps a highlight;
+     the user menu's dots, a pill as the assistant's button, look as
+     without focus. */
+  & [aria-haspopup][aria-expanded="true"]:not(:focus, [data-tv-dots]) {
     background: var(--mavio-color-fill);
-  }
-  /* The user menu's dots, a pill as the assistant's button, stay as with
-     focus while their menu is open. */
-  & [data-tv-dots][aria-expanded="true"]:not(:focus) {
-    background: #fff;
-    color: #000;
   }
 }
 
