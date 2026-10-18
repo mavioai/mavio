@@ -351,7 +351,7 @@ function TitleDetails({ server, title }: { server: ServerEntry; title: Title }) 
           tv ? "h-[86vh]" : phone ? "aspect-square" : "h-[clamp(520px,70vh,700px)]"
         }`}
       >
-        {phone && <HeroBleed src={sized(title.backdropUrl || title.posterUrl, title.backdropUrl ? 1280 : 342)} />}
+        {phone && <HeroBleed src={sized(title.backdropUrl || title.posterUrl, title.backdropUrl ? 1280 : 342)} aspect="aspect-square" image={title.backdropUrl ? "" : "scale-125 opacity-70 blur-3xl"} />}
         {title.backdropUrl ? (
           <img src={sized(title.backdropUrl, 1280)} alt="" className="absolute inset-0 h-full w-full animate-[fade_600ms_ease-out] object-cover" />
         ) : (

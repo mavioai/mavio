@@ -375,7 +375,7 @@ function Header({
         tv ? "h-[86vh]" : phone ? "aspect-square" : "h-[clamp(520px,70vh,700px)]"
       }`}
     >
-      {phone && <HeroBleed src={image || poster} />}
+      {phone && <HeroBleed src={image || poster} aspect="aspect-square" image={image ? "" : "scale-125 opacity-70 blur-3xl"} />}
       {image ? (
         <img src={image} alt="" className="absolute inset-0 h-full w-full animate-[fade_600ms_ease-out] object-cover" />
       ) : (

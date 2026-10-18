@@ -86,7 +86,7 @@ export function Hero({ entries }: { entries: HeroEntry[] }) {
       onBlur={() => setPaused(false)}
       className={`relative bg-surface ${phone ? heroClip : "overflow-hidden"} ${frame}`}
     >
-      {phone && <HeroBleed key={backdrop?.url} src={backdrop?.url} />}
+      {phone && <HeroBleed key={backdrop?.url} src={backdrop?.url} aspect="aspect-[4/5]" />}
       {backdrop && (
         <img key={backdrop.url} src={backdrop.url} alt="" className="absolute inset-0 h-full w-full animate-[fade_600ms_ease-out] object-cover" />
       )}
