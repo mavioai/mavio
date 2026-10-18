@@ -11,8 +11,7 @@ import { getRouteApi, Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 
 import { discoverLanguage, t } from "../i18n.ts";
-import { Loading, NotFoundView, Shelf, StatusView } from "../ui.tsx";
-import { initialsOf } from "./person.tsx";
+import { Artwork, Loading, NotFoundView, Shelf, StatusView } from "../ui.tsx";
 
 const itemRoute = getRouteApi("/s/$serverId/item/$itemId/credits");
 const itemCrewRoute = getRouteApi("/s/$serverId/item/$itemId/crew");
@@ -181,8 +180,8 @@ function CreditsPage({ serverId, title, credits }: { serverId: string; title?: s
   const of = (kind: CreditKind) => credits.filter((c) => c.kind === kind).toSorted((a, b) => a.order - b.order);
   return (
     <div className="pb-10">
-      <div className="px-margin pt-6 pb-2">
-        <h1 className="mt-1 type-title1">{title ?? t("item.cast")}</h1>
+      <div className="px-margin pt-6 pb-2 [main:has([data-back-row])_&]:pt-0">
+        <h1 className="type-title1">{title ?? t("item.cast")}</h1>
       </div>
       {credits.length === 0 && <p className="px-margin pt-6 type-body text-text-secondary">{t("credits.none")}</p>}
       <People serverId={serverId} title={t("credits.cast")} credits={of(CreditKind.ACTOR)} />
@@ -217,16 +216,7 @@ function People({ serverId, title, credits }: { serverId: string; title: string;
 function PersonTile({ serverId, credit: c, label, className = "" }: { serverId: string; credit: CreditEntry; label: string; className?: string }) {
   const body = (
     <>
-      <div
-        data-art
-        className="relative mx-auto aspect-square w-24 overflow-hidden rounded-full bg-fill group-focus-visible:outline-2 group-focus-visible:outline-offset-1 group-focus-visible:outline-focus [[data-tv]_&]:w-36"
-      >
-        {c.photo ? (
-          <img src={c.photo} alt="" loading="lazy" className="h-full w-full object-cover" />
-        ) : (
-          <span className="absolute inset-0 flex items-center justify-center type-title3 text-text-secondary">{initialsOf(c.name)}</span>
-        )}
-      </div>
+      <Artwork src={c.photo || undefined} alt="" icon="profile" className="mx-auto aspect-square w-24 rounded-full group-focus-visible:outline-2 group-focus-visible:outline-offset-1 group-focus-visible:outline-focus [[data-tv]_&]:w-36" />
       <div className="mt-2 line-clamp-2 type-callout group-hover:underline">{c.name}</div>
       <div className="line-clamp-2 type-footnote text-text-secondary">{label}</div>
     </>

@@ -384,12 +384,11 @@ export function Field({
   );
 }
 
-/** The screen's title, with the margin of the layout. */
+/** The screen's title, with the margin of the layout; under the row of Back it needs no space above. */
 export function ScreenTitle({ children }: { children: ReactNode }) {
-  return <h1 className="px-margin pt-6 pb-2 type-title1">{children}</h1>;
+  return <h1 className="px-margin pt-6 pb-2 type-title1 [main:has([data-back-row])_&]:pt-0">{children}</h1>;
 }
 
-/** The loading state of a screen. */
 /** A page's content on its way: the activity indicator, centered in the space the page is given. */
 export function Loading() {
   return (

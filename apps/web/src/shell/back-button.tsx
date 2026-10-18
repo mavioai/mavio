@@ -19,7 +19,7 @@ export function BackButton() {
   const { pathname } = useLocation();
   if (isPlace(pathname)) return null;
   return (
-    <div className="sticky top-0 z-30 h-15 [main:has([data-hero],>[data-loading])_&]:h-0">
+    <div data-back-row className="sticky top-0 z-30 h-15 [main:has([data-hero],>[data-loading])_&]:h-0">
       <Tip label={t("action.back")} side="right">
         <button
           type="button"
