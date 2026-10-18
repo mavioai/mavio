@@ -703,35 +703,39 @@ func (a *App) playerPanel(c *ui.Context, p *player) {
 	_, h := c.Size()
 	tabs := []panelTab{tabAudio, tabSubtitles, tabQuality, tabInfo}
 	selected := slices.Index(tabs, p.panel)
+	// The glass's tint goes on a column of its own over the blur, as an
+	// element's background takes the place of its material.
 	ui.Column(c).Absolute().Right(16).Bottom(96).Width(360).MaxHeight(max(h-120, 200)).Radius(18).Clip().
-		Material(glass.Blur{Radius: 40}).Background(ui.RGBA(23, 23, 23, 0.75)).Border(1, white.Alpha(0.1)).
-		Children(func() {
-			seg := ui.Segmented(c, &selected, style.T(c, "player.audio"), style.T(c, "player.subtitles"), style.T(c, "player.quality"), style.T(c, "player.info")).
-				Label(style.T(c, "player.options")).Margin(12)
-			if seg.Changed() {
-				p.panel = tabs[selected]
-			}
-			ui.Scroll(c).Grow(1).MinHeight(0).Children(func() {
-				ui.Column(c).Padding(0, 8, 12).Children(func() {
-					switch p.panel {
-					case tabAudio:
-						a.audioTab(c, p)
-					case tabSubtitles:
-						a.subtitlesTab(c, p)
-					case tabQuality:
-						for _, q := range qualities {
-							if choice(c.Key(q.key), qualityName(c, q), "", q.key == a.quality().key).Clicked() && q.key != a.quality().key {
-								a.prefs.Quality = q.key
-								a.savePreferences()
-								a.restart(p, func(*capiv1.PlaybackOptions) {})
+		Material(glass.Blur{Radius: 40}).AlignItems(ui.Stretch).Children(func() {
+		ui.Column(c).Grow(1).MinHeight(0).Radius(18).Background(ui.RGBA(23, 23, 23, 0.75)).Border(1, white.Alpha(0.1)).
+			Children(func() {
+				seg := ui.Segmented(c, &selected, style.T(c, "player.audio"), style.T(c, "player.subtitles"), style.T(c, "player.quality"), style.T(c, "player.info")).
+					Label(style.T(c, "player.options")).Margin(12)
+				if seg.Changed() {
+					p.panel = tabs[selected]
+				}
+				ui.Scroll(c).Grow(1).MinHeight(0).Children(func() {
+					ui.Column(c).Padding(0, 8, 12).Children(func() {
+						switch p.panel {
+						case tabAudio:
+							a.audioTab(c, p)
+						case tabSubtitles:
+							a.subtitlesTab(c, p)
+						case tabQuality:
+							for _, q := range qualities {
+								if choice(c.Key(q.key), qualityName(c, q), "", q.key == a.quality().key).Clicked() && q.key != a.quality().key {
+									a.prefs.Quality = q.key
+									a.savePreferences()
+									a.restart(p, func(*capiv1.PlaybackOptions) {})
+								}
 							}
+						case tabInfo:
+							a.infoTab(c, p)
 						}
-					case tabInfo:
-						a.infoTab(c, p)
-					}
+					})
 				})
 			})
-		})
+	})
 }
 
 // source returns the source p plays, of its details.

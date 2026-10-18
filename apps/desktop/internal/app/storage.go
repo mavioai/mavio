@@ -597,7 +597,7 @@ func (a *App) newRemote(c *ui.Context) {
 					a.askQuestion(q)
 					return
 				}
-				a.router.Replace(storagePath(name))
+				a.replace(storagePath(name))
 			})
 		}
 		if f.err != nil {
@@ -678,7 +678,7 @@ func (a *App) remotePage(c *ui.Context, name string) {
 		a.remoteAction("delete", func(ctx context.Context, s string) (*storagev1.ConfigQuestion, error) {
 			_, err := a.storageService(s).DeleteRemote(ctx, storagev1.DeleteRemoteRequest_builder{Name: &name}.Build())
 			return nil, err
-		}, func(*storagev1.ConfigQuestion) { a.router.Replace(storagePath("")) })
+		}, func(*storagev1.ConfigQuestion) { a.replace(storagePath("")) })
 	}
 }
 
@@ -788,7 +788,7 @@ func (a *App) questionStep(c *ui.Context, name string, isNew bool) {
 				case res.GetQuestion() == nil:
 					a.settingsState.admin.reload++
 					if isNew {
-						a.router.Replace(storagePath(name))
+						a.replace(storagePath(name))
 						return
 					}
 					f.question, f.values, f.notice = nil, nil, "storage.saved"
@@ -916,7 +916,7 @@ func (a *App) cancelQuestion(name string, isNew bool) {
 		a.opts.Update(func() {
 			a.settingsState.admin.reload++
 			f.remote = ""
-			a.router.Replace(storagePath(""))
+			a.replace(storagePath(""))
 		})
 	}()
 }

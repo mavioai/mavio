@@ -35,4 +35,19 @@ func TestPlaces(t *testing.T) {
 	h.settle()
 	h.click("Back")
 	path("/home", "Back")
+
+	// Back from pages two deep goes back through the history, where the
+	// router keeps the pages, rather than opening Home anew.
+	crew := "/credits/" + h.core.s.Server.ID + "/orbit"
+	h.app.router.Push(item)
+	h.settle()
+	h.app.router.Push(crew)
+	h.settle()
+	h.click("Back")
+	path(item, "Back from the credits")
+	h.click("Back")
+	path("/home", "Back from the item")
+	if !h.app.router.CanGoForward() {
+		t.Errorf("Back opened Home anew; want it back through the history")
+	}
 }

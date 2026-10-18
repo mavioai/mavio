@@ -461,7 +461,7 @@ func (a *App) newUser(c *ui.Context) {
 			}, func(err error) {
 				f.err = err
 				if err == nil {
-					a.router.Replace(usersPath(created))
+					a.replace(usersPath(created))
 				}
 			})
 		}
@@ -643,7 +643,7 @@ func (a *App) userForm(c *ui.Context, user *userv1.User) {
 		}, func(err error) {
 			f.err = err
 			if err == nil {
-				a.router.Replace(usersPath(""))
+				a.replace(usersPath(""))
 			}
 		})
 	}

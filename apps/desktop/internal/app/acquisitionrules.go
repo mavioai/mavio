@@ -216,7 +216,7 @@ func (a *App) customFormatPage(c *ui.Context, id string) {
 			return err
 		}, func() {
 			if isNew {
-				a.router.Replace(back)
+				a.replace(back)
 				return
 			}
 			st.format0, st.format, st.notice = f, proto.CloneOf(f), "acquisition.saved"

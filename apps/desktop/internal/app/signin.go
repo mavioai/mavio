@@ -165,7 +165,7 @@ func (a *App) signedIn(account *capiv1.Account) {
 			}
 			a.signIn = signIn{}
 			a.setServers(m.GetServers().GetServers())
-			a.router.Replace("/home")
+			a.replace("/home")
 		})
 	}()
 }

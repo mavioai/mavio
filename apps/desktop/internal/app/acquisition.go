@@ -749,7 +749,7 @@ func (a *App) profileForm(c *ui.Context, defs []*acquisitionv1.QualityDefinition
 			return err
 		}, func() {
 			if isNew {
-				a.router.Replace(acquisitionPath("profile", created))
+				a.replace(acquisitionPath("profile", created))
 				return
 			}
 			st.profile0, st.notice = p, "acquisition.saved"
@@ -780,6 +780,6 @@ func (a *App) removeButton(c *ui.Context, label, confirm, detail, name string, r
 	})
 	if ui.AlertDialog(c, &st.confirming, style.T(c, confirm, "name", name), style.T(c, detail),
 		style.T(c, "action.cancel"), style.T(c, label)) == 1 {
-		a.acquisitionAction("delete", remove, func() { a.router.Replace(back) })
+		a.acquisitionAction("delete", remove, func() { a.replace(back) })
 	}
 }

@@ -568,7 +568,7 @@ func (a *App) subtitleProfileForm(c *ui.Context) {
 				return err
 			}, func() {
 				if isNew {
-					a.router.Replace(subtitlesPath("profile", created))
+					a.replace(subtitlesPath("profile", created))
 					return
 				}
 				st.profile0, st.profile = result, proto.CloneOf(result)
@@ -587,7 +587,7 @@ func (a *App) subtitleProfileForm(c *ui.Context) {
 		a.subtitleAction("delete", func(ctx context.Context, s acquisitionv1connect.SubtitleServiceClient) error {
 			_, err := s.DeleteSubtitleProfile(ctx, acquisitionv1.DeleteSubtitleProfileRequest_builder{Id: &id}.Build())
 			return err
-		}, func() { a.router.Replace(subtitlesPath("", "")) })
+		}, func() { a.replace(subtitlesPath("", "")) })
 	}
 }
 

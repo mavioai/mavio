@@ -433,7 +433,7 @@ func (a *App) libraryForm(c *ui.Context, id string, library *libraryv1.Library) 
 		}, func(err error) {
 			f.err = err
 			if err == nil {
-				a.router.Replace(librariesPath(""))
+				a.replace(librariesPath(""))
 			}
 		})
 	}
@@ -457,7 +457,7 @@ func (a *App) saveLibrary(library *libraryv1.Library) {
 			if err == nil {
 				f.id = created
 				f.saved = draft
-				a.router.Replace(librariesPath(created))
+				a.replace(librariesPath(created))
 			}
 		})
 		return

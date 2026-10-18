@@ -21,11 +21,43 @@ type places struct {
 	// stacks are each place's pages, from the place to the page last
 	// shown, by the place's path.
 	stacks map[string][]string
-	// current is the place shown, shown the page seen last, and previous
-	// the page before it in the router's history, if it is known.
-	current, shown, previous string
-	// replacing tells that the next page takes the place of the one shown.
+	// current is the place shown, and shown the page seen last.
+	current, shown string
+	// history follows the router's: the locations of its entries, at
+	// being the one shown, so that Back goes back through the history to
+	// a page the router keeps rather than opening it anew.
+	history []string
+	at      int
+	// replacing tells that the next location takes the place of the one
+	// shown.
 	replacing bool
+}
+
+// maxHistory is how many entries the router's history holds.
+const maxHistory = 100
+
+// follow follows the router to location loc: in place of the entry shown
+// when replacing, one entry back or forward when it is that entry's, else
+// a new entry after the one shown.
+func (p *places) follow(loc string, replacing bool) {
+	h := p.history
+	switch {
+	case len(h) == 0:
+		h, p.at = []string{loc}, 0
+	case replacing:
+		h[p.at] = loc
+	case p.at > 0 && h[p.at-1] == loc:
+		p.at--
+	case p.at+1 < len(h) && h[p.at+1] == loc:
+		p.at++
+	default:
+		h = append(h[:p.at+1], loc)
+		p.at++
+		if n := len(h) - maxHistory; n > 0 {
+			h, p.at = h[n:], p.at-n
+		}
+	}
+	p.history = h
 }
 
 // isPlace reports whether path is a place's: a page the sidebar opens.
@@ -42,16 +74,18 @@ func isPlace(path string) bool {
 // place's pages.
 func (a *App) visitPlaces() {
 	p := &a.places
-	path := a.router.Path()
-	if path == p.shown {
+	loc := a.router.Location()
+	if len(p.history) > 0 && p.history[p.at] == loc {
 		return
 	}
 	replacing := p.replacing
 	p.replacing = false
-	p.previous, p.shown = p.shown, path
-	if replacing {
-		p.previous = ""
+	p.follow(loc, replacing)
+	path := a.router.Path()
+	if path == p.shown {
+		return
 	}
+	p.shown = path
 	defer a.prunePageScrolls()
 	if p.stacks == nil {
 		p.stacks = map[string][]string{}
@@ -103,20 +137,27 @@ func (a *App) openPlace(path string) {
 // replace shows path in place of the page shown, in the router's history
 // and in its place's pages.
 func (a *App) replace(path string) {
-	a.places.replacing = true
+	before := a.router.Location()
 	a.router.Replace(path)
+	a.places.replacing = a.router.Location() != before
 }
 
 // goBack goes back from a page of a place to the page it was opened from,
-// else to the place.
+// else to the place: back through the history to its latest entry, where
+// the router keeps the page as it was left, else to it anew.
 func (a *App) goBack() {
 	p := &a.places
 	stack := p.stacks[p.current]
 	i := slices.Index(stack, a.router.Path())
+	if i > 0 {
+		for k := p.at - 1; k >= 0; k-- {
+			if path, _, _ := strings.Cut(p.history[k], "?"); path == stack[i-1] {
+				a.router.Go(k - p.at)
+				return
+			}
+		}
+	}
 	switch {
-	case i > 0 && stack[i-1] == p.previous && a.router.CanGoBack():
-		// The entry before this one in the history is the page's own.
-		a.router.Back()
 	case i > 0:
 		a.router.Push(stack[i-1])
 	case p.current != "":
@@ -174,13 +215,18 @@ func (a *App) backButton(c *ui.Context) {
 		glassColor, shadow = ui.RGBA(37, 37, 40, 0.38), ui.RGBA(0, 0, 0, 0.45)
 	}
 	label := style.T(c, "action.back")
-	b := ui.ButtonBase(c).Absolute().Top(12).Left(12).Size(36, 36).Radius(design.RadiusFull).Center().
-		Material(glass.Blur{Radius: 12}).Background(glassColor).Shadow(0, 10, 30, 0, shadow).Label(label).Tooltip(label)
+	// An element's background takes the place of its material, so the
+	// glass's tint goes on a box of its own over the blur.
+	b := ui.ButtonBase(c).Absolute().Top(12).Left(12).Size(36, 36).Radius(design.RadiusFull).
+		Material(glass.Blur{Radius: 12}).Shadow(0, 10, 30, 0, shadow).Label(label).Tooltip(label)
+	tint := glassColor
 	if b.Hovered() {
-		b.Background(ui.RGBA(128, 128, 128, 0.1).Over(glassColor))
+		tint = ui.RGBA(128, 128, 128, 0.1).Over(glassColor)
 	}
 	b.Children(func() {
-		ui.Icon(c, style.Icon("back", false)).Size(18, 18).TextColor(style.Color(colors.TextPrimary))
+		ui.Box(c).Size(36, 36).Radius(design.RadiusFull).Background(tint).Center().Children(func() {
+			ui.Icon(c, style.Icon("back", false)).Size(18, 18).TextColor(style.Color(colors.TextPrimary))
+		})
 	})
 	if b.Clicked() {
 		a.goBack()

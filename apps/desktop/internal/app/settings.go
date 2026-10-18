@@ -178,7 +178,7 @@ func (a *App) settings(c *ui.Context, r *ui.Route) {
 	if id == "" {
 		// A section, so that going to another fades it in rather than
 		// sliding in as a page deeper.
-		a.router.Replace("/settings/appearance")
+		a.replace("/settings/appearance")
 		id = "appearance"
 	}
 	if m, ok := menuOf(id); ok {
@@ -307,7 +307,7 @@ func (a *App) sidebarLink(c *ui.Context, s settingsSection, selected bool) {
 		style.Text(ui.Text(c, style.T(c, s.title)), style.Type.Body).TextColor(style.Color(colors.TextPrimary)).SingleLine().Grow(1)
 	})
 	if b.Clicked() && !selected {
-		a.router.Replace("/settings/" + s.id)
+		a.replace("/settings/" + s.id)
 	}
 }
 
@@ -398,7 +398,7 @@ func (a *App) accountCard(c *ui.Context, active bool) {
 		})
 	})
 	if b.Clicked() && !active {
-		a.router.Replace("/settings/account")
+		a.replace("/settings/account")
 	}
 }
 
