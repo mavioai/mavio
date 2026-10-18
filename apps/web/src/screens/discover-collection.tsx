@@ -12,7 +12,7 @@ import { useState } from "react";
 import { discoverLanguage, t } from "../i18n.ts";
 import { Icon } from "../icon.tsx";
 import { usePrefs, useWidthClass } from "../prefs.ts";
-import { Button, Grid, heroClip, heroFade, HeroBleed, Loading, NotFoundView, StatusView } from "../ui.tsx";
+import { Button, Grid, heroClip, HeroBleed, Loading, NotFoundView, StatusView } from "../ui.tsx";
 import { Modal } from "../controls/dialog.tsx";
 import { Checkbox } from "../controls/inputs.tsx";
 import { sized, statusLabel, TitleCard, tmdbOf } from "./discover.tsx";
@@ -75,7 +75,7 @@ function CollectionPage({ server, tmdbId, collection: c }: { server: ServerEntry
         }`}
       >
         {phone && <HeroBleed src={c.backdropUrl && sized(c.backdropUrl, 1280)} />}
-        {c.backdropUrl && <img src={sized(c.backdropUrl, 1280)} alt="" className={`absolute inset-0 h-full w-full animate-[fade_600ms_ease-out] object-cover ${phone ? heroFade : ""}`} />}
+        {c.backdropUrl && <img src={sized(c.backdropUrl, 1280)} alt="" className="absolute inset-0 h-full w-full animate-[fade_600ms_ease-out] object-cover" />}
         <div
           className={`absolute inset-0 ${
             phone

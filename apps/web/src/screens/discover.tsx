@@ -36,7 +36,7 @@ import { discoverLanguage, t } from "../i18n.ts";
 import { Icon } from "../icon.tsx";
 import { usePrefs, useWidthClass } from "../prefs.ts";
 import { FiltersDialog, parseFilters } from "./discover-filters.tsx";
-import { Artwork, Button, CardPlaceholder, Grid, Group, heroClip, heroFade, HeroBleed, Loading, LoadMore, minutesText, NotFoundView, ScreenTitle, Shelf, Spinner, StatusView } from "../ui.tsx";
+import { Artwork, Button, CardPlaceholder, Grid, Group, heroClip, HeroBleed, Loading, LoadMore, minutesText, NotFoundView, ScreenTitle, Shelf, Spinner, StatusView } from "../ui.tsx";
 import { CastShelf, isCast, titleCredits } from "./credits.tsx";
 import { GenreLinks, TitleOverview } from "./discover-overview.tsx";
 import { dayText } from "./facts.tsx";
@@ -353,7 +353,7 @@ function TitleDetails({ server, title }: { server: ServerEntry; title: Title }) 
       >
         {phone && <HeroBleed src={sized(title.backdropUrl || title.posterUrl, title.backdropUrl ? 1280 : 342)} />}
         {title.backdropUrl ? (
-          <img src={sized(title.backdropUrl, 1280)} alt="" className={`absolute inset-0 h-full w-full animate-[fade_600ms_ease-out] object-cover ${phone ? heroFade : ""}`} />
+          <img src={sized(title.backdropUrl, 1280)} alt="" className="absolute inset-0 h-full w-full animate-[fade_600ms_ease-out] object-cover" />
         ) : (
           title.posterUrl && (
             <img src={sized(title.posterUrl, 342)} alt="" className="absolute inset-0 h-full w-full scale-125 object-cover opacity-70 blur-3xl" />

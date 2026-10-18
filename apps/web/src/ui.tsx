@@ -93,14 +93,13 @@ export function yearOf(item: Item): number | undefined {
 
 /**
  * A phone's hero (data-hero) spreads its colors up under the header: its
- * artwork, blurred, behind the header and the hero's top, which the hero's
- * own artwork fades into (heroFade). The hero clips all but this
- * (heroClip).
+ * artwork, blurred, behind the header, which the hero's own artwork meets
+ * at a sharp edge. The hero clips all but this (heroClip).
  */
 export function HeroBleed({ src }: { src?: string }) {
   if (!src) return null;
   return (
-    <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-[calc(100%-32px)] h-[calc(52px+32px)] overflow-hidden">
+    <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-full h-13 overflow-hidden">
       <img src={src} alt="" className="absolute inset-x-0 -top-full h-[300%] w-full scale-125 object-cover object-top blur-2xl" />
     </div>
   );
@@ -108,9 +107,6 @@ export function HeroBleed({ src }: { src?: string }) {
 
 /** Clips a phone's hero but the bleed above it (HeroBleed). */
 export const heroClip = "[clip-path:inset(-52px_0_0_0)]";
-
-/** Fades a phone's hero artwork in at its top, over its bleed (HeroBleed). */
-export const heroFade = "[mask-image:linear-gradient(to_bottom,transparent,black_32px)]";
 
 /**
  * An image that fades in, over a placeholder of its final size; with none,

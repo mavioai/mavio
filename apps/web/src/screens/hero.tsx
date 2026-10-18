@@ -10,7 +10,7 @@ import { useEffect, useState } from "react";
 import { t } from "../i18n.ts";
 import { Icon } from "../icon.tsx";
 import { usePrefs, useWidthClass } from "../prefs.ts";
-import { heroClip, heroFade, HeroBleed, runtimeOf, yearOf } from "../ui.tsx";
+import { heroClip, HeroBleed, runtimeOf, yearOf } from "../ui.tsx";
 import { sectionTitle } from "./home.tsx";
 
 /** A title the hero shows, and the line above it. */
@@ -88,7 +88,7 @@ export function Hero({ entries }: { entries: HeroEntry[] }) {
     >
       {phone && <HeroBleed key={backdrop?.url} src={backdrop?.url} />}
       {backdrop && (
-        <img key={backdrop.url} src={backdrop.url} alt="" className={`absolute inset-0 h-full w-full animate-[fade_600ms_ease-out] object-cover ${phone ? heroFade : ""}`} />
+        <img key={backdrop.url} src={backdrop.url} alt="" className="absolute inset-0 h-full w-full animate-[fade_600ms_ease-out] object-cover" />
       )}
       <div
         className={`absolute inset-0 ${
