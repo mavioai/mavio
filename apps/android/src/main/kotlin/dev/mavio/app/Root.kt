@@ -44,6 +44,9 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
+import androidx.compose.ui.graphics.TransformOrigin
+import kotlin.math.roundToInt
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.graphics.luminance
 import dev.mavio.ui.Artwork
 import androidx.compose.foundation.layout.requiredHeight
@@ -331,17 +334,14 @@ private fun TabBar(current: Tab, haze: HazeState, modifier: Modifier = Modifier,
 private fun glassTint(): Color = if (theme.colors.background.luminance() < 0.5f) Color(0x61252528) else Color(0x59FFFFFF)
 
 /**
- * A phone's hero's artwork, enlarged and blurred, in a strip of the
- * header's height above the hero, behind the header (whose glass reaches up
- * under the status bar), so that the header takes the hero's colors and
- * meets its artwork at a sharp edge, as the web UI's (HeroBleed): the image
- * three times the strip's height from a strip above it, kept to its top,
- * scaled by 1.25 and blurred. Placed first in the hero's box, which must
- * not clip it.
+ * What lies behind the header above a phone's hero: the hero's artwork, as
+ * the hero crops it ([aspectRatio] of the screen's width, drawn by [art]),
+ * its top rows stretched up to the top of the screen and softened, so that
+ * the artwork's top seems to go on under the header's glass, meeting it at
+ * a sharp edge. Placed first in the hero's box, which must not clip it.
  */
 @Composable
-fun HeroBleed(url: String?) {
-    if (url == null) return
+fun HeroBleed(aspectRatio: Float, art: @Composable () -> Unit) {
     val top = LocalTopInset.current
     Box(
         Modifier
@@ -354,21 +354,26 @@ fun HeroBleed(url: String?) {
             }
             .clipToBounds(),
     ) {
-        Artwork(
-            url,
+        Box(
             Modifier
-                .fillMaxWidth()
-                .requiredHeight(top * 3)
-                .graphicsLayer {
-                    scaleX = 1.25f
-                    scaleY = 1.25f
+                // As tall as the hero, overflowing the strip from its top.
+                .layout { measurable, constraints ->
+                    val width = constraints.maxWidth
+                    val placeable = measurable.measure(Constraints.fixed(width, (width / aspectRatio).roundToInt()))
+                    layout(width, constraints.maxHeight) { placeable.place(0, 0) }
                 }
-                .then(if (blurAvailable) Modifier.blur(40.dp, BlurredEdgeTreatment.Unbounded) else Modifier),
-            contentDescription = null,
-            alignment = Alignment.TopCenter,
-        )
+                // The band at the artwork's top, stretched over the strip.
+                .graphicsLayer {
+                    transformOrigin = TransformOrigin(0.5f, 0f)
+                    scaleY = top.toPx() / BLEED_BAND.toPx()
+                }
+                .then(if (blurAvailable) Modifier.blur(BLEED_BAND * 2, BlurredEdgeTreatment.Rectangle) else Modifier),
+        ) { art() }
     }
 }
+
+/** How much of the hero's top [HeroBleed] stretches behind the header. */
+private val BLEED_BAND = 6.dp
 
 /**
  * Frosted glass over the pages, as the web UI's backdrop filter: what

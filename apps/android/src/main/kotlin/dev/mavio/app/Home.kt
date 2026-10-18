@@ -161,7 +161,9 @@ private fun Hero(entries: List<HeroEntry>) {
     // A 4:5 frame as wide as the screen, right below the header, its
     // backdrop cropped to it and its colors spreading up into the header.
     Box(Modifier.fillMaxWidth().aspectRatio(4f / 5f)) {
-        HeroBleed(entries[pager.currentPage].card.backdrop?.url)
+        HeroBleed(4f / 5f) {
+            Artwork(entries[pager.currentPage].card.backdrop?.url, Modifier.fillMaxSize(), contentDescription = null)
+        }
         HorizontalPager(pager, Modifier.fillMaxSize()) { page ->
             val (card, eyebrow) = entries[page]
             Box(Modifier.fillMaxSize().background(theme.colors.surface)) {

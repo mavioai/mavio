@@ -284,27 +284,14 @@ private fun Header(details: Details, source: Source?, several: Boolean) {
     val card = details.card
     val image = details.backdrop ?: if (card.kind == CardKind.EPISODE) card.thumb else null
     Box(Modifier.fillMaxWidth().aspectRatio(1f)) {
-        HeroBleed((image ?: card.poster)?.url)
+        HeroBleed(1f) { HeaderArt(image?.url, card.poster?.url, card.kind) }
         Box(
             Modifier
                 .matchParentSize()
                 .clipToBounds()
                 .background(theme.colors.surface),
         ) {
-            when {
-                image != null -> Artwork(image.url, Modifier.fillMaxSize(), icon = itemIcon(card.kind))
-                card.poster != null -> Artwork(
-                    card.poster?.url,
-                    Modifier
-                        .fillMaxSize()
-                        .graphicsLayer {
-                            scaleX = 1.25f
-                            scaleY = 1.25f
-                        }
-                        .then(if (blurAvailable) Modifier.blur(48.dp) else Modifier)
-                        .alpha(0.7f),
-                )
-            }
+            HeaderArt(image?.url, card.poster?.url, card.kind)
             Box(
                 Modifier
                     .fillMaxSize()
@@ -1210,5 +1197,24 @@ private fun FactList(rows: List<Pair<String, String>>, extra: @Composable (Strin
                 extra(key)
             }
         }
+    }
+}
+
+/** A details hero's artwork: the backdrop or still, else the poster blurred. */
+@Composable
+private fun HeaderArt(image: String?, poster: String?, kind: CardKind) {
+    when {
+        image != null -> Artwork(image, Modifier.fillMaxSize(), icon = itemIcon(kind))
+        poster != null -> Artwork(
+            poster,
+            Modifier
+                .fillMaxSize()
+                .graphicsLayer {
+                    scaleX = 1.25f
+                    scaleY = 1.25f
+                }
+                .then(if (blurAvailable) Modifier.blur(48.dp) else Modifier)
+                .alpha(0.7f),
+        )
     }
 }
