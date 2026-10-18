@@ -348,7 +348,7 @@ function TitleDetails({ server, title }: { server: ServerEntry; title: Title }) 
       <header
         data-hero
         className={`relative overflow-hidden bg-surface ${
-          tv ? "h-[86vh]" : phone ? "h-[64vh] min-h-96" : "h-[clamp(520px,70vh,700px)]"
+          tv ? "h-[86vh]" : phone ? "aspect-square" : "h-[clamp(520px,70vh,700px)]"
         }`}
       >
         {title.backdropUrl ? (

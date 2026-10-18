@@ -73,7 +73,7 @@ export function Hero({ entries }: { entries: HeroEntry[] }) {
   const frame = tv
     ? "h-[78vh]"
     : phone
-      ? "h-[min(72vh,540px)]"
+      ? "aspect-[4/5]"
       : "h-[470px]";
   return (
     <section

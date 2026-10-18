@@ -71,7 +71,7 @@ function CollectionPage({ server, tmdbId, collection: c }: { server: ServerEntry
       <header
         data-hero
         className={`relative overflow-hidden bg-surface ${
-          tv ? "h-[70vh]" : phone ? "h-[56vh] min-h-96" : "h-[clamp(440px,60vh,600px)]"
+          tv ? "h-[70vh]" : phone ? "aspect-square" : "h-[clamp(440px,60vh,600px)]"
         }`}
       >
         {c.backdropUrl && <img src={sized(c.backdropUrl, 1280)} alt="" className="absolute inset-0 h-full w-full animate-[fade_600ms_ease-out] object-cover" />}
