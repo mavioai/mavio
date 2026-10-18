@@ -306,11 +306,11 @@ function ItemDetails({ server, item, sources, credits }: { server: ServerEntry; 
         <CastShelf
           serverId={server.id}
           credits={libraryCredits(server, credits)}
-          all={
-            <Link to="/s/$serverId/item/$itemId/credits" params={{ serverId: server.id, itemId: item.id }}>
-              {t("credits.all")}
+          all={(className, children, card) => (
+            <Link to="/s/$serverId/item/$itemId/credits" params={{ serverId: server.id, itemId: item.id }} data-card={card || undefined} className={className}>
+              {children}
             </Link>
-          }
+          )}
         />
         <Extras server={server} items={extras} fallback={artwork(server, item, ImageKind.BACKDROP, 640)?.url} />
         {item.collectionName && <CollectionBanner server={server} item={item} fallback={backdrop?.url} />}

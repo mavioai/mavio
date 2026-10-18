@@ -11,6 +11,8 @@ import { getRouteApi, Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 
 import { discoverLanguage, t } from "../i18n.ts";
+import { Icon } from "../icon.tsx";
+import { usePrefs } from "../prefs.ts";
 import { Artwork, Loading, NotFoundView, Shelf, StatusView } from "../ui.tsx";
 
 const itemRoute = getRouteApi("/s/$serverId/item/$itemId/credits");
@@ -99,14 +101,28 @@ export const crewLabels: [CreditKind, MessageKey][] = [
 
 const shelfCrew = new Set([CreditKind.CREATOR, CreditKind.DIRECTOR, CreditKind.WRITER]);
 
-/** The cast in billing order, then the creators, directors and writers, with See All opening the whole cast and crew. */
-export function CastShelf({ serverId, credits, all }: { serverId: string; credits: CreditEntry[]; all: ReactNode }) {
+/**
+ * The cast in billing order, then the creators, directors and writers,
+ * with See All opening the whole cast and crew: all draws its link around
+ * what it is given, beside the title, or on the television as the row's
+ * last card, as the other rows' See All.
+ */
+export function CastShelf({
+  serverId,
+  credits,
+  all,
+}: {
+  serverId: string;
+  credits: CreditEntry[];
+  all: (className: string | undefined, children: ReactNode, card?: boolean) => ReactNode;
+}) {
+  const { tv } = usePrefs();
   const shown = credits.filter((c) => isCast(c) || shelfCrew.has(c.kind));
   if (shown.length === 0) return null;
   const sorted = shown.toSorted((a, b) => Number(!isCast(a)) - Number(!isCast(b)) || a.order - b.order);
   const label = (c: CreditEntry) => (isCast(c) ? c.role : t(crewLabels.find(([k]) => k === c.kind)![1]));
   return (
-    <Shelf title={t("item.cast")} more={all}>
+    <Shelf title={t("item.cast")} more={tv ? undefined : all(undefined, t("credits.all"))}>
       {sorted.map((c, i) => (
         <PersonTile
           key={`${c.personId ?? c.name}-${i}`}
@@ -116,6 +132,17 @@ export function CastShelf({ serverId, credits, all }: { serverId: string; credit
           className="w-28 shrink-0 snap-start [[data-tv]_&]:w-40"
         />
       ))}
+      {tv &&
+        all(
+          "group w-40 shrink-0 snap-start rounded-lg text-center",
+          <>
+            <div data-art className="mx-auto flex aspect-square w-36 items-center justify-center rounded-full bg-surface-raised">
+              <Icon name="forward" size={40} />
+            </div>
+            <div className="mt-2 type-callout">{t("credits.all")}</div>
+          </>,
+          true,
+        )}
     </Shelf>
   );
 }

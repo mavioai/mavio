@@ -371,7 +371,9 @@ function TitleDetails({ server, title }: { server: ServerEntry; title: Title }) 
           )}
           <div className={`flex min-w-0 flex-col gap-3 text-white ${tv ? "max-w-[960px]" : "max-w-[640px]"}`}>
             <h1 className={`font-bold leading-[1.05] text-balance break-words ${tv ? "text-[72px]" : phone ? "text-[34px]" : "text-[52px]"}`}>{title.name}</h1>
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 type-callout text-white/80">
+            {/* On the television the genres, the actions and the overview below
+                are each a region of their own, one above the other (docs/tv.md §4). */}
+            <div data-focus-region data-focus-flow className="flex flex-wrap items-center gap-x-3 gap-y-1.5 type-callout text-white/80">
               {facts.length > 0 && (
                 <span>
                   {facts.map((f, i) => (
@@ -389,7 +391,7 @@ function TitleDetails({ server, title }: { server: ServerEntry; title: Title }) 
             {tv && title.overview && <p className="line-clamp-2 type-body text-white/85">{title.overview}</p>}
             {/* On a phone the actions fill their rows, as many on each as their names fit; on the
                 television focus starts on the first, as on an item's details. */}
-            <div data-tv-initial className={`mt-2 flex flex-wrap gap-3 [&>*]:whitespace-nowrap ${phone ? "[&>*]:grow" : ""}`}>
+            <div data-tv-initial data-focus-region data-focus-flow className={`mt-2 flex flex-wrap gap-3 [&>*]:whitespace-nowrap ${phone ? "[&>*]:grow" : ""}`}>
               {title.itemId && (
                 <Link to="/s/$serverId/item/$itemId" params={{ serverId: server.id, itemId: title.itemId }} data-tv-button className={primary}>
                   <Icon name="play" fill size={tv ? 28 : 20} />
@@ -464,14 +466,16 @@ function TitleDetails({ server, title }: { server: ServerEntry; title: Title }) 
           .filter(isCast)
           .toSorted((a, b) => a.order - b.order)
           .slice(0, 20)}
-        all={
+        all={(className, children, card) => (
           <Link
             to="/s/$serverId/title/$kind/$tmdbId/credits"
             params={{ serverId: server.id, kind: kindParam(title.mediaKind), tmdbId: String(title.tmdbId) }}
+            data-card={card || undefined}
+            className={className}
           >
-            {t("credits.all")}
+            {children}
           </Link>
-        }
+        )}
       />
       {catalogs
         .filter((c) => (c.kind === CatalogKind.RECOMMENDATIONS || c.kind === CatalogKind.SIMILAR) && c.mediaKinds.includes(title.mediaKind))

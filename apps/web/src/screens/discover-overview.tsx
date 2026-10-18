@@ -109,7 +109,7 @@ export function GenreLinks({ server, title }: { server: ServerEntry; title: Titl
 /** The overview and facts of a discovered title, in two columns where they fit. */
 export function TitleOverview({ server, title }: { server: ServerEntry; title: Title }) {
   return (
-    <div className="grid gap-8 px-margin pt-6 pb-3 lg:grid-cols-[minmax(0,1fr)_minmax(320px,380px)]">
+    <div data-focus-region data-focus-flow className="grid gap-8 px-margin pt-6 pb-3 lg:grid-cols-[minmax(0,1fr)_minmax(320px,380px)]">
       <OverviewLeft server={server} title={title} />
       <div className="flex min-w-0 flex-col gap-6">
         <CollectionCard server={server} title={title} />
