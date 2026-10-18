@@ -308,7 +308,8 @@ pub struct Details {
     pub remote_trailer: Option<String>,
     /// A series' episodes, a season's, or an episode's season's, in order.
     pub episodes: Vec<Episode>,
-    /// The episode a series or season plays next.
+    /// The episode a series or season plays next; after an episode, the
+    /// one that follows it in the series.
     pub next: Option<Episode>,
     /// Its trailers, featurettes and other extras.
     pub extras: Vec<Extra>,
@@ -1113,6 +1114,14 @@ impl Core {
                 let list: Vec<Item> = shown.iter().map(|e| (*e).clone()).collect();
                 details::next_up(&list).map(|e| Episode::new(&base, server_id, e))
             }
+            // An episode, the one after it in the series, which the
+            // player plays at its end.
+            Some(ItemKind::ITEM_KIND_EPISODE) => more
+                .episodes
+                .iter()
+                .skip_while(|e| e.id != item.id)
+                .nth(1)
+                .map(|e| Episode::new(&base, server_id, e)),
             _ => None,
         };
         let episodes = shown
@@ -1685,6 +1694,78 @@ mod tests {
         assert_eq!(
             credits,
             [("Pat", CreditJob::Actor), ("Dee", CreditJob::Director)]
+        );
+    }
+
+    #[tokio::test]
+    async fn an_episodes_details_carry_the_one_after_it_across_seasons() {
+        let (core, _) = core();
+        let a = fake_server("sa", "Home");
+        let ep = |id: &str, season: &str, s: i32, e: i32| Item {
+            id: Some(id.into()),
+            name: Some(id.into()),
+            kind: Some(ItemKind::ITEM_KIND_EPISODE.into()),
+            series_id: Some("show".into()),
+            season_id: Some(season.into()),
+            parent_index_number: Some(s),
+            index_number: Some(e),
+            ..Default::default()
+        };
+        a.unary(
+            "/mavio.library.v1.ItemService/GetItem",
+            move |_, req: GetItemRequest| {
+                let item = match req.id.as_deref() {
+                    Some("show") => Item {
+                        id: Some("show".into()),
+                        kind: Some(ItemKind::ITEM_KIND_SERIES.into()),
+                        ..Default::default()
+                    },
+                    Some(id) => ep(id, "s1", 1, 2),
+                    None => Item::default(),
+                };
+                Ok(GetItemResponse {
+                    item: item.into(),
+                    ..Default::default()
+                })
+            },
+        )
+        .unary(
+            "/mavio.library.v1.ItemService/ListItems",
+            move |_, req: ListItemsRequest| {
+                let items = if req.recursive == Some(true) {
+                    vec![
+                        ep("e3", "s2", 2, 1),
+                        ep("e2", "s1", 1, 2),
+                        ep("e1", "s1", 1, 1),
+                    ]
+                } else {
+                    Vec::new()
+                };
+                Ok(ListItemsResponse {
+                    items,
+                    ..Default::default()
+                })
+            },
+        )
+        .unary(
+            "/mavio.library.v1.ItemService/ListSimilarItems",
+            |_, _: ListSimilarItemsRequest| Ok(ListSimilarItemsResponse::default()),
+        );
+        let addr = a.serve().await;
+        core.servers.sign_in(&addr, "me", "secret").await.unwrap();
+
+        let tests = [("e2", Some("e3")), ("e3", None)];
+        for (id, want) in tests {
+            let d = core.details("sa", id).await.unwrap();
+            let got = d.next.as_ref().map(|e| e.card.item_id.as_str());
+            assert_eq!(got, want, "{id}: got = {got:?}, want = {want:?}");
+        }
+        let d = core.details("sa", "e2").await.unwrap();
+        let ids: Vec<&str> = d.episodes.iter().map(|e| e.card.item_id.as_str()).collect();
+        assert_eq!(
+            ids,
+            ["e1", "e2"],
+            "got = {ids:?}, want = the season's episodes"
         );
     }
 
