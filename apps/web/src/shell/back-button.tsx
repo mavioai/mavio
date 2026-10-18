@@ -2,7 +2,8 @@
 // the top left of a page opened from another, as the Apple TV app's. The
 // sidebar's places have none: Back steps back through a place's pages
 // (places.ts) and does not move between places. It floats over a page's
-// hero (data-hero), and has a row of its own above a page without one.
+// hero (data-hero), and has a row of its own above a page without one,
+// as far from the top as from the left.
 import { useLocation, useRouter } from "@tanstack/react-router";
 
 import { Tip } from "../controls/tooltip.tsx";
@@ -16,13 +17,13 @@ export function BackButton() {
   const { pathname } = useLocation();
   if (isPlace(pathname)) return null;
   return (
-    <div className="sticky top-0 z-30 h-14 [main:has([data-hero],>[data-loading])_&]:h-0">
+    <div className="sticky top-0 z-30 h-[calc(var(--spacing-margin)+40px)] [main:has([data-hero],>[data-loading])_&]:h-0">
       <Tip label={t("action.back")} side="right">
         <button
           type="button"
           aria-label={t("action.back")}
           onClick={() => goBack(router)}
-          className="absolute top-4 left-margin flex size-9 items-center justify-center rounded-full bg-[var(--tabbar-glass)] text-on-background shadow-[var(--tabbar-shadow)] backdrop-blur-md backdrop-saturate-[1.8] hover:bg-[image:linear-gradient(rgb(128_128_128/0.1),rgb(128_128_128/0.1))]"
+          className="absolute top-margin left-margin flex size-9 items-center justify-center rounded-full bg-[var(--tabbar-glass)] text-on-background shadow-[var(--tabbar-shadow)] backdrop-blur-md backdrop-saturate-[1.8] hover:bg-[image:linear-gradient(rgb(128_128_128/0.1),rgb(128_128_128/0.1))]"
         >
           <Icon name="back" size={18} />
         </button>

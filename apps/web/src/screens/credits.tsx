@@ -239,7 +239,10 @@ function People({ serverId, title, credits }: { serverId: string; title: string;
 function PersonTile({ serverId, credit: c, label, className = "" }: { serverId: string; credit: CreditEntry; label: string; className?: string }) {
   const body = (
     <>
-      <div className="relative mx-auto aspect-square w-24 overflow-hidden rounded-full bg-fill [[data-tv]_&]:w-36">
+      <div
+        data-art
+        className="relative mx-auto aspect-square w-24 overflow-hidden rounded-full bg-fill group-focus-visible:outline-2 group-focus-visible:outline-offset-1 group-focus-visible:outline-focus [[data-tv]_&]:w-36"
+      >
         {c.photo ? (
           <img src={c.photo} alt="" loading="lazy" className="h-full w-full object-cover" />
         ) : (
@@ -252,14 +255,14 @@ function PersonTile({ serverId, credit: c, label, className = "" }: { serverId: 
   );
   if (!c.personId && c.tmdbId) {
     return (
-      <Link to="/s/$serverId/discover/person/$tmdbId" params={{ serverId, tmdbId: c.tmdbId }} className={`group rounded-lg text-center ${className}`}>
+      <Link to="/s/$serverId/discover/person/$tmdbId" params={{ serverId, tmdbId: c.tmdbId }} data-card className={`group rounded-lg text-center focus-visible:outline-none ${className}`}>
         {body}
       </Link>
     );
   }
   if (!c.personId) return <div className={`text-center ${className}`}>{body}</div>;
   return (
-    <Link to="/s/$serverId/person/$personId" params={{ serverId, personId: c.personId }} className={`group rounded-lg text-center ${className}`}>
+    <Link to="/s/$serverId/person/$personId" params={{ serverId, personId: c.personId }} data-card className={`group rounded-lg text-center focus-visible:outline-none ${className}`}>
       {body}
     </Link>
   );
