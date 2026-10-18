@@ -18,6 +18,9 @@ class MavioApplication : Application() {
      */
     val signInRedirect = MutableStateFlow<String?>(null)
 
+    /** This device's settings. */
+    val prefs by lazy { Prefs(this) }
+
     override fun onCreate() {
         super.onCreate()
         // A debug build trusts the certificate authority of a development

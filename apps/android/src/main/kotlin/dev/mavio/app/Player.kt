@@ -163,7 +163,7 @@ fun PlayerScreen(model: AppModel, route: Route.Player) {
     val navigator = LocalNavigator.current
     var playback by remember(route) { mutableStateOf<Playback?>(null) }
     var failure by remember(route) { mutableStateOf<String?>(null) }
-    val prefs = remember { Prefs(context) }
+    val prefs = LocalPrefs.current
     var selection by remember(route) { mutableStateOf(Selection(quality = prefs.quality)) }
     // Where the next start begins: the resume position, then where the streams changed.
     var resume by remember(route) { mutableStateOf(route.start) }

@@ -2,12 +2,17 @@ package dev.mavio.app
 
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.SystemBarStyle
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import dev.mavio.ui.MavioTheme
 
 /** The app's only activity; the player is its own. */
@@ -32,8 +37,21 @@ class MainActivity : ComponentActivity() {
             localNetwork.launch(LOCAL_NETWORK)
         }
         setContent {
-            MavioTheme {
-                Root(model)
+            val dark = when (app.prefs.appearance) {
+                Appearance.SYSTEM -> isSystemInDarkTheme()
+                Appearance.LIGHT -> false
+                Appearance.DARK -> true
+            }
+            // The status and navigation bars' icons follow the theme chosen.
+            DisposableEffect(dark) {
+                val style = SystemBarStyle.auto(Color.TRANSPARENT, Color.TRANSPARENT) { dark }
+                enableEdgeToEdge(style, style)
+                onDispose {}
+            }
+            CompositionLocalProvider(LocalPrefs provides app.prefs) {
+                MavioTheme(dark) {
+                    Root(model)
+                }
             }
         }
     }

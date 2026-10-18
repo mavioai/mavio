@@ -6,7 +6,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ContentTransform
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
@@ -117,6 +120,12 @@ sealed interface Route {
     /** The account, the servers and the settings. */
     data object Settings : Route
 
+    /** A page of the settings. */
+    data class Setting(val page: SettingsPage) : Route
+
+    /** Signing in to one more server. */
+    data object AddServer : Route
+
     /** A library, opened on the items of a genre when one is given. */
     data class Library(val serverId: String, val libraryId: String, val name: String, val genre: String? = null) : Route
 
@@ -206,15 +215,23 @@ private fun Shell(model: AppModel) {
                 popTransitionSpec = { popTransition() },
                 predictivePopTransitionSpec = { popTransition() },
             )
-            // The player takes the whole screen.
-            if (stack.lastOrNull() !is Route.Player) {
+            // The player and the sign-in take the whole screen.
+            if (stack.lastOrNull().let { it !is Route.Player && it != Route.AddServer }) {
                 Header(model, back = stack.size > 1, Modifier.align(Alignment.TopCenter), haze)
-                TabBar(tab, haze, Modifier.align(Alignment.BottomCenter)) {
-                    if (it == tab) {
-                        // Tapping the current tab goes back to its first screen.
-                        while (stack.size > 1) stack.removeAt(stack.lastIndex)
+                // The settings, opened from the header, leave the tabs out.
+                AnimatedVisibility(
+                    stack.lastOrNull().let { it != Route.Settings && it !is Route.Setting },
+                    Modifier.align(Alignment.BottomCenter),
+                    enter = slideInVertically(tween(PAGE_MILLIS)) { it },
+                    exit = slideOutVertically(tween(PAGE_MILLIS)) { it },
+                ) {
+                    TabBar(tab, haze) {
+                        if (it == tab) {
+                            // Tapping the current tab goes back to its first screen.
+                            while (stack.size > 1) stack.removeAt(stack.lastIndex)
+                        }
+                        tab = it
                     }
-                    tab = it
                 }
             }
         }
@@ -242,9 +259,14 @@ private fun Screen(model: AppModel, route: Route) {
         is Route.Library -> LibraryScreen(model, route)
         is Route.Item -> DetailsScreen(model, route.serverId, route.itemId)
         is Route.Player -> PlayerScreen(model, route)
+        Route.AddServer -> {
+            val navigator = LocalNavigator.current
+            SignInScreen(model, adding = true) { navigator.back() }
+        }
         else -> Box(Modifier.fillMaxSize().padding(top = LocalTopInset.current)) {
             when (route) {
                 Route.Settings -> SettingsScreen(model)
+                is Route.Setting -> SettingsPageScreen(model, route.page)
                 else -> StatusView(stringResource(R.string.state_loading))
             }
         }

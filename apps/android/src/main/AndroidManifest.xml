@@ -9,6 +9,7 @@
     <application
         android:name=".MavioApplication"
         android:label="Mavio"
+        android:localeConfig="@xml/locales_config"
         android:supportsRtl="true"
         android:usesCleartextTraffic="true"
         android:theme="@style/Theme.Mavio">

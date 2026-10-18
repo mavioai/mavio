@@ -215,7 +215,8 @@ fun SignInScreen(model: AppModel, adding: Boolean = false, onDone: () -> Unit = 
                 Modifier.widthIn(max = 420.dp).fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(MavioSpacing.s16),
             ) {
-                if (history.isNotEmpty()) BackLink(::back)
+                // Adding a server goes back to where it was opened.
+                if (history.isNotEmpty()) BackLink(::back) else if (adding) BackLink(onDone)
                 when (val s = step) {
                     Step.Welcome -> Welcome(
                         server = server,
