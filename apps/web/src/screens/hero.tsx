@@ -74,7 +74,7 @@ export function Hero({ entries }: { entries: HeroEntry[] }) {
     ? "h-[78vh]"
     : phone
       ? "h-[min(72vh,540px)]"
-      : "mx-2.5 mt-2.5 h-[470px] rounded-[18px]";
+      : "h-[470px]";
   return (
     <section
       aria-roledescription="carousel"
