@@ -396,6 +396,16 @@ pub struct PlaybackInfo {
     pub subtitles: Vec<SubtitleTrack>,
 }
 
+/// A server's response to a procedure called through the core.
+#[derive(Debug, Clone, uniffi::Record)]
+pub struct ServerResponse {
+    /// The response, encoded as protobuf.
+    pub body: Vec<u8>,
+    /// The server's base URL the core reached it at, which the paths the
+    /// response holds, such as the signed URLs of images, are relative to.
+    pub base_url: String,
+}
+
 /// A playing item, which reports its progress.
 #[derive(uniffi::Object)]
 pub struct PlaybackSession {
@@ -682,6 +692,22 @@ impl Client {
     pub async fn sign_out_device(&self, server_id: String, session_id: String) -> Result<()> {
         self.call(|c| async move { c.servers().sign_out_device(&server_id, &session_id).await })
             .await
+    }
+
+    /// Calls a unary procedure of a server signed in to as its session, for
+    /// the screens the core does not model, such as the settings; the
+    /// procedure is its path, such as "/mavio.system.v1.SystemService/GetSystemInfo",
+    /// and the request and response are encoded as protobuf.
+    pub async fn call_server(
+        &self,
+        server_id: String,
+        procedure: String,
+        request: Vec<u8>,
+    ) -> Result<ServerResponse> {
+        let (body, base_url) = self
+            .call(|c| async move { c.call(&server_id, &procedure, request).await })
+            .await?;
+        Ok(ServerResponse { body, base_url })
     }
 
     /// The user's playback preferences, as the first server signed in to
