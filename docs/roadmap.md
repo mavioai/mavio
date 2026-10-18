@@ -676,7 +676,7 @@ flowchart TD
   - [x] Now Playing and the remote commands (`MPNowPlayingInfoCenter`, `MPRemoteCommandCenter`) for both engines: the title, the series and episode, the artwork, the position and speed; play, pause, skips of 10 seconds, a new position, and the next episode
   - [x] Playing the next episode at the end of one
   - [x] Gestures: a press held plays at double speed with a 2× pill while held, and vertical swipes set the brightness on the left half and the volume on the right (through a hidden `MPVolumeView`, which also keeps the system's volume HUD away), with the level shown at the top
-  - [ ] External subtitle files while the server sends HLS
+  - [x] External subtitle files while the server sends HLS: such a playback goes to AetherEngine, which plays the HLS and draws the file, ASS in its styles
   - [ ] A redrawn frame when AetherEngine seeks while paused, and scrub thumbnails
   - [ ] The multicast entitlement, so that servers on the network are found on a device and not only in the simulator
   - [ ] Snapshot tests of the screens beyond Home

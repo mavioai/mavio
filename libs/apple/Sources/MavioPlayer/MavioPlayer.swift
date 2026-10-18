@@ -11,20 +11,22 @@ public enum PlayerEngine: Sendable {
     /// AetherEngine, for what AVFoundation does not play.
     case aether
 
-    /// The engine of a playback (docs/clients.md §4.2): HLS goes to AVPlayer;
+    /// The engine of a playback (docs/clients.md §4.2): HLS goes to AVPlayer,
+    /// unless a subtitle file comes with it, which AetherEngine draws;
     /// a file played directly goes to AVPlayer when AVFoundation plays it as
     /// it is, else to AetherEngine, which also draws the subtitles a file
     /// carries or comes with and plays an audio stream other than its
     /// default: selectsTracks.
     public static func choose(
         hls: Bool,
+        subtitleFile: Bool = false,
         container: String?,
         audioCodec: String?,
         selectsTracks: Bool,
         avPlayerContainers: Set<String>,
         avPlayerAudioCodecs: Set<String>
     ) -> PlayerEngine {
-        if hls { return .avPlayer }
+        if hls { return subtitleFile ? .aether : .avPlayer }
         if selectsTracks { return .aether }
         guard let container,
             container.split(separator: ",").contains(where: { avPlayerContainers.contains(String($0)) })

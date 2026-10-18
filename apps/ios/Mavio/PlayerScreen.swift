@@ -291,7 +291,7 @@ struct PlayerScreen: View {
             aether
             ? PlayerEngine.aether
             : PlayerEngine.choose(
-                hls: hls, container: source?.container,
+                hls: hls, subtitleFile: track?.url != nil, container: source?.container,
                 audioCodec: audioStreams.first { $0.index == selectedAudio ?? defaultAudio ?? -1 }?.codec,
                 selectsTracks: sub >= 0 || (selectedAudio != nil && selectedAudio != defaultAudio),
                 avPlayerContainers: DeviceProfile.avPlayerContainers,
@@ -308,7 +308,7 @@ struct PlayerScreen: View {
                     ? track?.url.flatMap(URL.init(string:)).map {
                         ExternalSubtitle(url: $0, language: track?.language, title: track?.title)
                     } : nil,
-                subtitleRendition: hls && sub >= 0 ? (track?.language ?? "und") : nil
+                subtitleRendition: hls && sub >= 0 && track?.url == nil ? (track?.language ?? "und") : nil
             ))
     }
 
