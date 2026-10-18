@@ -367,6 +367,7 @@ pub struct Details {
     pub physical_release: Option<SystemTime>,
     pub date_added: Option<SystemTime>,
     pub links: Vec<ExternalLink>,
+    pub external_ids: HashMap<String, String>,
     pub remote_trailer: Option<String>,
     pub episodes: Vec<Episode>,
     pub next: Option<Episode>,

@@ -334,6 +334,8 @@ pub struct Details {
     pub date_added: Option<SystemTime>,
     /// Pages about it on other sites.
     pub links: Vec<ExternalLink>,
+    /// Its IDs on other sites, by provider, such as "tmdb" and "imdb".
+    pub external_ids: HashMap<String, String>,
     /// A trailer on the web, for when it has none among its extras.
     pub remote_trailer: Option<String>,
     /// A series' episodes, a season's, or an episode's season's, in order.
@@ -1396,6 +1398,12 @@ impl Core {
             date_added: details::time(item.date_added.as_option())
                 .filter(|_| !item.r#virtual.unwrap_or_default()),
             links: details::links(&item),
+            external_ids: item
+                .external_ids
+                .iter()
+                .filter(|(_, v)| !v.is_empty())
+                .map(|(k, v)| (k.clone(), v.clone()))
+                .collect(),
             remote_trailer: item.remote_trailers.iter().find(|t| !t.is_empty()).cloned(),
             episodes,
             next,
@@ -2117,6 +2125,7 @@ mod tests {
 
         let d = core.details("sa", "a-brazil").await.unwrap();
         assert!(!d.offline);
+        assert_eq!(d.external_ids.get("tmdb").map(String::as_str), Some("68"));
         assert_eq!(
             d.card.versions,
             [Version {
