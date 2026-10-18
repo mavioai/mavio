@@ -172,7 +172,7 @@ function CompactHeader() {
   const account = useAccount();
   const link = usePlaceLink();
   return (
-    <header className="sticky top-0 z-20 flex h-13 items-center justify-between bg-[var(--tabbar-glass)] px-margin pt-[env(safe-area-inset-top)] backdrop-blur-md backdrop-saturate-[1.8]">
+    <header className="sticky top-0 z-20 flex h-13 items-center justify-between bg-[var(--tabbar-glass)] px-margin pt-[env(safe-area-inset-top)] backdrop-blur-[var(--tabbar-blur)] backdrop-saturate-[1.8]">
       <PhoneBack fallback={<Wordmark height={20} />} />
       <div className="flex items-center gap-2">
         <Link to="/search" {...link("/search")} aria-label={t("nav.search")} className="flex size-9 items-center justify-center rounded-full hover:bg-fill data-[status=active]:text-accent-text data-place:text-accent-text">
@@ -198,7 +198,7 @@ function TabBar() {
   return (
     <nav
       aria-label={t("nav.navigation")}
-      className="fixed inset-x-margin bottom-[max(12px,env(safe-area-inset-bottom))] z-20 mx-auto flex max-w-md gap-1 rounded-full border border-[var(--tabbar-edge)] bg-[var(--tabbar-glass)] p-1 shadow-[var(--tabbar-shadow)] backdrop-blur-md backdrop-saturate-[1.8]"
+      className="fixed inset-x-margin bottom-[max(12px,env(safe-area-inset-bottom))] z-20 mx-auto flex max-w-md gap-1 rounded-full border border-[var(--tabbar-edge)] bg-[var(--tabbar-glass)] p-1 shadow-[var(--tabbar-shadow)] backdrop-blur-[var(--tabbar-blur)] backdrop-saturate-[1.8]"
     >
       {tabs.map((d) => (
         <Link

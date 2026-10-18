@@ -397,8 +397,10 @@ input[type="search"]::-webkit-search-cancel-button {
   --signin-shadow: 0 30px 80px rgb(0 0 0 / 0.14);
 }
 
-/* The phone's tab bar: a pill of glass floating over the page, in each theme. */
+/* The phone's tab bar: a pill of glass floating over the page, in each theme.
+   Its blur is the Android app's, whose radius of 12 is a deviation of 7.4. */
 :root {
+  --tabbar-blur: 7.4px;
   --tabbar-glass: rgb(37 37 40 / 0.38);
   --tabbar-edge: rgb(255 255 255 / 0.12);
   --tabbar-shadow: 0 10px 30px rgb(0 0 0 / 0.45);
