@@ -108,7 +108,7 @@ function useShortcuts(tv: boolean) {
 function NormalShell({ width }: { width: ReturnType<typeof useWidthClass> }) {
   const compact = width === "compact";
   return (
-    <div className={compact ? "min-h-screen pb-[calc(56px+env(safe-area-inset-bottom))]" : "flex min-h-screen"}>
+    <div className={compact ? "min-h-screen pb-[calc(88px+env(safe-area-inset-bottom))]" : "flex min-h-screen"}>
       {compact ? <CompactHeader /> : <Sidebar overlay={width === "medium"} />}
       <main className={compact ? undefined : "min-w-0 flex-1 pb-8"}>
         <Outlet />
@@ -172,7 +172,7 @@ function CompactHeader() {
   );
 }
 
-/** The phone's tabs, below. */
+/** The phone's tabs, below: a pill of glass floating over the page. */
 function TabBar() {
   // Discover is a tab where a server discovers.
   const discovers = !!useDiscovery(discoverLanguage).server;
@@ -180,18 +180,18 @@ function TabBar() {
   return (
     <nav
       aria-label={t("nav.navigation")}
-      className="fixed inset-x-0 bottom-0 z-20 flex border-t border-border bg-surface/85 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl"
+      className="fixed inset-x-margin bottom-[max(12px,env(safe-area-inset-bottom))] z-20 mx-auto flex max-w-md gap-1 rounded-full border border-[var(--tabbar-edge)] bg-[var(--tabbar-glass)] p-1 shadow-[var(--tabbar-shadow)] backdrop-blur-2xl backdrop-saturate-[1.8]"
     >
       {tabs.map((d) => (
         <Link
           key={d.to}
           to={d.to}
           activeOptions={{ exact: d.to === "/" }}
-          className="flex min-h-14 flex-1 flex-col items-center justify-center gap-0.5 type-caption text-text-secondary data-[status=active]:text-accent-text"
+          className="flex min-h-13 flex-1 flex-col items-center justify-center gap-0.5 rounded-full type-caption text-on-background transition-colors data-[status=active]:bg-fill-selected data-[status=active]:font-semibold data-[status=active]:text-accent-text"
         >
           {({ isActive }) => (
             <>
-              <Icon name={d.icon} fill={isActive} />
+              <Icon name={d.icon} fill={isActive} size={22} />
               {d.label()}
             </>
           )}
