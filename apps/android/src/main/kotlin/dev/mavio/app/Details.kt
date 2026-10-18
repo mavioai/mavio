@@ -1,5 +1,11 @@
 package dev.mavio.app
 
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextLinkStyles
+import androidx.compose.ui.text.withLink
+import androidx.compose.ui.text.LinkAnnotation
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.foundation.layout.offset
 import android.text.format.DateFormat
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -867,10 +873,15 @@ private fun Cast(details: Details) {
         it.job.isCast || it.job == CreditJob.CREATOR || it.job == CreditJob.DIRECTOR || it.job == CreditJob.WRITER
     }
     if (shown.isEmpty()) return
-    Shelf(stringResource(R.string.credits_cast)) {
+    val navigator = LocalNavigator.current
+    val card = details.card
+    Shelf(
+        stringResource(R.string.credits_cast),
+        more = { MoreLink(stringResource(R.string.credits_all)) { navigator.open(Route.Credits(card.serverId, card.itemId, crew = false)) } },
+    ) {
         items(shown.size) { i ->
             val credit = shown[i]
-            PersonCard(credit.copy(role = credit.shownRole(context)), Modifier.width(112.dp))
+            PersonLink(card.serverId, credit.copy(role = credit.shownRole(context)), Modifier.width(112.dp))
         }
     }
 }
@@ -992,6 +1003,7 @@ private fun CollectionBanner(collection: CollectionLink, details: Details) {
 @Composable
 private fun AboutSection(details: Details, source: Source?) {
     val context = LocalContext.current
+    val navigator = LocalNavigator.current
     val card = details.card
     val colors = theme.colors
     val uri = LocalUriHandler.current
@@ -1022,9 +1034,23 @@ private fun AboutSection(details: Details, source: Source?) {
                             if (c.job == CreditJob.OTHER) c.role ?: stringResource(c.job.label) else stringResource(c.job.label),
                             style = theme.type.headline.text,
                         )
-                        Text(c.name, style = theme.type.callout.text, color = colors.textSecondary, maxLines = 1)
+                        Text(
+                            c.name,
+                            if (c.personId.isEmpty()) Modifier else Modifier.clickable { navigator.open(Route.Person(card.serverId, c.personId)) },
+                            style = theme.type.callout.text,
+                            color = colors.textSecondary,
+                            maxLines = 1,
+                        )
                     }
                 }
+            }
+            Row(
+                Modifier.offset(y = -MavioSpacing.s12).clickable { navigator.open(Route.Credits(card.serverId, card.itemId, crew = true)) },
+                horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s4),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(stringResource(R.string.discover_full_crew), style = theme.type.callout.text, fontWeight = FontWeight.SemiBold)
+                MavioIcon(R.drawable.ic_forward, size = 16.dp)
             }
         }
         if (tags.isNotEmpty()) {
@@ -1035,6 +1061,8 @@ private fun AboutSection(details: Details, source: Source?) {
                         Text(
                             it,
                             Modifier
+                                .clip(CircleShape)
+                                .then(narrowed(details) { tag = it }?.let { open -> Modifier.clickable(onClick = open) } ?: Modifier)
                                 .border(1.dp, colors.border, CircleShape)
                                 .padding(horizontal = MavioSpacing.s12, vertical = MavioSpacing.s4),
                             style = theme.type.footnote.text,
@@ -1076,7 +1104,11 @@ private fun AboutSection(details: Details, source: Source?) {
                 }
             }
         }
-        FactList(facts) { key ->
+        val links = mapOf(
+            stringResource(R.string.item_genres) to details.genres.map { g -> g to narrowed(details) { genre = g } },
+            studiosKey to (if (allStudios) details.studios else details.studios.take(MIN_STUDIOS)).map { st -> st to narrowed(details) { studio = st } },
+        )
+        FactList(facts, links) { key ->
             if (key == studiosKey && details.studios.size > MIN_STUDIOS) {
                 Text(
                     stringResource(if (allStudios) R.string.action_show_less else R.string.discover_show_more),
@@ -1086,8 +1118,28 @@ private fun AboutSection(details: Details, source: Source?) {
                 )
             }
         }
-        FactList(media) {}
+        FactList(media, emptyMap()) {}
     }
+}
+
+/**
+ * Opens the items of the item's library with a genre, keyword or studio,
+ * when the server is reachable.
+ */
+@Composable
+private fun narrowed(details: Details, narrow: LibraryNarrowing.() -> Unit): (() -> Unit)? {
+    val navigator = LocalNavigator.current
+    val libraryId = details.libraryId ?: return null
+    if (details.offline) return null
+    val n = LibraryNarrowing().apply(narrow)
+    return { navigator.open(Route.Library(details.card.serverId, libraryId, null, genre = n.genre, tag = n.tag, studio = n.studio)) }
+}
+
+/** What a library opened from the details narrows its items to. */
+private class LibraryNarrowing {
+    var genre: String? = null
+    var tag: String? = null
+    var studio: String? = null
 }
 
 /** How many studios show until Show More. */
@@ -1186,14 +1238,37 @@ private fun RatingCard(label: String, scale: String?, value: @Composable () -> U
 
 /** Facts, each a caption over its value, two to a line. */
 @Composable
-private fun FactList(rows: List<Pair<String, String>>, extra: @Composable (String) -> Unit) {
+private fun FactList(
+    rows: List<Pair<String, String>>,
+    links: Map<String, List<Pair<String, (() -> Unit)?>>>,
+    extra: @Composable (String) -> Unit,
+) {
     if (rows.isEmpty()) return
     val colors = theme.colors
     FlowRow(maxItemsInEachRow = 2, verticalArrangement = Arrangement.spacedBy(MavioSpacing.s20)) {
         rows.forEach { (key, value) ->
             Column(Modifier.weight(1f).padding(end = MavioSpacing.s32), verticalArrangement = Arrangement.spacedBy(MavioSpacing.s4)) {
                 Text(key, style = theme.type.footnote.text, fontWeight = FontWeight.SemiBold, color = colors.textSecondary)
-                Text(value, style = theme.type.callout.text)
+                val values = links[key]
+                if (values != null && values.any { it.second != null }) {
+                    // Each value opening what it links to.
+                    Text(
+                        buildAnnotatedString {
+                            values.forEachIndexed { i, (text, open) ->
+                                if (i > 0) append(", ")
+                                if (open == null) {
+                                    append(text)
+                                } else {
+                                    withLink(LinkAnnotation.Clickable(text, TextLinkStyles(SpanStyle(color = colors.textPrimary))) { open() }) { append(text) }
+                                }
+                            }
+                        },
+                        style = theme.type.callout.text,
+                        color = colors.textPrimary,
+                    )
+                } else {
+                    Text(value, style = theme.type.callout.text)
+                }
                 extra(key)
             }
         }

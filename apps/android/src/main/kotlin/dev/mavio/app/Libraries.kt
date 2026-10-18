@@ -207,11 +207,19 @@ private val Sort.label: Int
 /**
  * A library, as the web UI's (docs/clients.md §6.3.1): its name and the
  * choice of its Recommended tab of shelves or the grid of all its items,
- * filtered and sorted; opened on a genre, the grid of that genre's items.
+ * filtered and sorted; opened on a genre, keyword or studio, the grid of
+ * its items.
  */
 @Composable
 fun LibraryScreen(model: AppModel, route: Route.Library) {
-    var all by rememberSaveable { mutableStateOf(route.genre != null) }
+    var all by rememberSaveable { mutableStateOf(route.genre != null || route.tag != null || route.studio != null) }
+    // The name, looked up when the library was opened from an item's details.
+    var name by remember(route) { mutableStateOf(route.name) }
+    LaunchedEffect(route) {
+        if (name == null) {
+            name = runCatching { model.client.libraries(route.serverId).libraries.firstOrNull { it.id == route.libraryId }?.name }.getOrNull()
+        }
+    }
     val header: @Composable () -> Unit = {
         FlowRow(
             Modifier.padding(top = MavioSpacing.s24, bottom = MavioSpacing.s12),
@@ -219,7 +227,7 @@ fun LibraryScreen(model: AppModel, route: Route.Library) {
             verticalArrangement = Arrangement.spacedBy(MavioSpacing.s12),
             itemVerticalAlignment = Alignment.Bottom,
         ) {
-            Text(route.name, style = theme.type.title1.text, fontWeight = FontWeight.Bold)
+            Text(name.orEmpty(), style = theme.type.title1.text, fontWeight = FontWeight.Bold)
             Segmented(
                 listOf(stringResource(R.string.library_recommended), stringResource(R.string.library_all)),
                 if (all) 1 else 0,
@@ -305,6 +313,8 @@ private fun AllItems(model: AppModel, route: Route.Library, header: @Composable 
     var shown by rememberSaveable { mutableStateOf(Shown.ALL) }
     var sort by rememberSaveable { mutableStateOf(Sort.NAME) }
     var genre by rememberSaveable { mutableStateOf(route.genre) }
+    var tag by rememberSaveable { mutableStateOf(route.tag) }
+    var studio by rememberSaveable { mutableStateOf(route.studio) }
     var attempt by remember { mutableIntStateOf(0) }
     val filter = Filter(
         played = when (shown) {
@@ -314,6 +324,8 @@ private fun AllItems(model: AppModel, route: Route.Library, header: @Composable 
         },
         favorite = shown == Shown.FAVORITES,
         genre = genre,
+        tag = tag,
+        studio = studio,
     )
     val pages = remember(filter, sort, revisions[route.serverId], attempt) { Pages() }
     suspend fun next() {
@@ -360,19 +372,26 @@ private fun AllItems(model: AppModel, route: Route.Library, header: @Composable 
                 verticalArrangement = Arrangement.spacedBy(MavioSpacing.s8),
                 itemVerticalAlignment = Alignment.CenterVertically,
             ) {
-                genre?.let { value ->
+                val narrowed = genre?.let { R.string.library_genre_value to it }
+                    ?: tag?.let { R.string.library_tag_value to it }
+                    ?: studio?.let { R.string.library_studio_value to it }
+                narrowed?.let { (label, value) ->
                     Row(
                         Modifier
                             .height(32.dp)
                             .clip(CircleShape)
                             .background(colors.accent)
-                            .clickable { genre = null }
+                            .clickable {
+                                genre = null
+                                tag = null
+                                studio = null
+                            }
                             .padding(start = 14.dp, end = 10.dp),
                         horizontalArrangement = Arrangement.spacedBy(6.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Text(
-                            stringResource(R.string.library_genre_value, value),
+                            stringResource(label, value),
                             style = theme.type.callout.text,
                             fontWeight = FontWeight.SemiBold,
                             color = colors.onAccent,

@@ -175,8 +175,24 @@ sealed interface Route {
     /** A discovered collection of movies. */
     data class DiscoveredCollection(val serverId: String, val tmdbId: Int) : Route
 
-    /** A library, opened on the items of a genre when one is given. */
-    data class Library(val serverId: String, val libraryId: String, val name: String, val genre: String? = null) : Route
+    /**
+     * A library, opened on the items of a genre, keyword or studio when one
+     * is given; its name looked up when not known.
+     */
+    data class Library(
+        val serverId: String,
+        val libraryId: String,
+        val name: String?,
+        val genre: String? = null,
+        val tag: String? = null,
+        val studio: String? = null,
+    ) : Route
+
+    /** An item's whole cast and crew, or its crew alone. */
+    data class Credits(val serverId: String, val itemId: String, val crew: Boolean) : Route
+
+    /** A person's page and the server's items crediting them. */
+    data class Person(val serverId: String, val personId: String) : Route
 
     /** An item's details. */
     data class Item(val serverId: String, val itemId: String) : Route
@@ -339,6 +355,8 @@ private fun Screen(model: AppModel, route: Route) {
         is Route.Catalog -> CatalogScreen(model, route)
         is Route.Title -> TitleScreen(route)
         is Route.TitleCredits -> TitleCreditsScreen(route)
+        is Route.Credits -> CreditsScreen(model, route)
+        is Route.Person -> PersonScreen(model, route)
         is Route.DiscoveredPerson -> DiscoveredPersonScreen(route)
         is Route.DiscoveredCollection -> DiscoveredCollectionScreen(route)
         Route.AddServer -> {
