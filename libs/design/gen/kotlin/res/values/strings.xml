@@ -1002,6 +1002,28 @@
     <string name="plugins_hide_command">Hide Command</string>
     <!-- State of a server of the account that does not answer at any of its addresses. -->
     <string name="auth_unreachable">Can\'t be reached</string>
+    <!-- Adds another server to sign in to. -->
+    <string name="auth_add_server">Add Server</string>
+    <!-- State of a server whose session ended; the user signs in again. -->
+    <string name="auth_signed_out">Signed out</string>
+    <!-- Error when the address entered answers but is not a Mavio server. -->
+    <string name="auth_not_mavio">This address is not a Mavio server.</string>
+    <!-- Opens signing in to a server by its address, and titles that step. -->
+    <string name="auth_connect_to_server">Connect to a Server</string>
+    <!-- Line above the field of a server's address. -->
+    <string name="auth_server_address_message">Enter the address of your Mavio server.</string>
+    <!-- Signs a Mavio account in with a code approved on another device. -->
+    <string name="auth_use_link_code">Use a Link Code</string>
+    <!-- Under the QR code of the link page with the code filled in. -->
+    <string name="auth_scan_link_code">Or scan this code with your phone\'s camera.</string>
+    <!-- Title while a Mavio account signs in in the browser the app opened. -->
+    <string name="auth_continue_in_browser">Continue in Your Browser</string>
+    <!-- Line while a Mavio account signs in in the browser; host is mavio.dev's. -->
+    <string name="auth_continue_in_browser_message">Sign in at %s in the browser that opened, then come back here.</string>
+    <!-- Opens mavio.dev's sign-in page again. -->
+    <string name="auth_open_browser_again">Open the Browser Again</string>
+    <!-- Opens the server's address in the browser to set it up. -->
+    <string name="auth_open_in_browser">Open in Browser</string>
     <!-- Under Sign In with Mavio on a server's own web UI, which only its administrator signs in to; host is app.mavio.dev's. -->
     <string name="auth_others_use_app">Only the administrator signs in here. Everyone else watches at %s.</string>
     <!-- Title on a television of a server not set up yet; server is its name. -->

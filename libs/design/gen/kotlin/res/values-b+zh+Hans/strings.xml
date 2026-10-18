@@ -506,6 +506,17 @@
     <string name="plugins_show_command">显示启动命令</string>
     <string name="plugins_hide_command">隐藏启动命令</string>
     <string name="auth_unreachable">无法连接</string>
+    <string name="auth_add_server">添加服务器</string>
+    <string name="auth_signed_out">已退出登录</string>
+    <string name="auth_not_mavio">此地址不是 Mavio 服务器。</string>
+    <string name="auth_connect_to_server">连接到服务器</string>
+    <string name="auth_server_address_message">输入你的 Mavio 服务器地址。</string>
+    <string name="auth_use_link_code">使用连接码</string>
+    <string name="auth_scan_link_code">或用手机相机扫描这个二维码。</string>
+    <string name="auth_continue_in_browser">在浏览器中继续</string>
+    <string name="auth_continue_in_browser_message">在打开的浏览器中登录 %s，然后回到这里。</string>
+    <string name="auth_open_browser_again">再次打开浏览器</string>
+    <string name="auth_open_in_browser">在浏览器中打开</string>
     <string name="auth_others_use_app">只有管理员可以登录，其他人请在 %s 观看。</string>
     <string name="auth_set_up_elsewhere">请在电脑或手机上设置 %s</string>
     <string name="auth_set_up_elsewhere_message">在浏览器中打开这个地址：</string>
