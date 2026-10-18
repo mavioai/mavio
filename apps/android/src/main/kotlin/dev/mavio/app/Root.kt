@@ -367,13 +367,16 @@ fun HeroBleed(aspectRatio: Float, art: @Composable () -> Unit) {
                     transformOrigin = TransformOrigin(0.5f, 0f)
                     scaleY = top.toPx() / BLEED_BAND.toPx()
                 }
-                .then(if (blurAvailable) Modifier.blur(BLEED_BAND * 2, BlurredEdgeTreatment.Rectangle) else Modifier),
+                .then(if (blurAvailable) Modifier.blur(BLEED_BLUR, BlurredEdgeTreatment.Rectangle) else Modifier),
         ) { art() }
     }
 }
 
 /** How much of the hero's top [HeroBleed] stretches behind the header. */
 private val BLEED_BAND = 6.dp
+
+/** How far [HeroBleed] softens the band, so that its pixels stretched up don't streak. */
+private val BLEED_BLUR = 24.dp
 
 /**
  * Frosted glass over the pages, as the web UI's backdrop filter: what
