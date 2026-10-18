@@ -21,7 +21,9 @@ export default defineConfig(({ mode }) => ({
       // In development, DEV_ORIGIN serves it at another address, such as
       // the HTTPS one other devices on the network reach (vite.config.ts).
       BASE_URL: bindings.text(mode === "development" ? (process.env.DEV_ORIGIN ?? "http://localhost:5173") : "https://mavio.dev"),
-      APP_URL: bindings.text("https://app.mavio.dev"),
+      // In development, DEV_APP_URL is the web UI's address, such as the
+      // development server's, whose sign-ins it takes as app.mavio.dev's.
+      APP_URL: bindings.text((mode === "development" && process.env.DEV_APP_URL) || "https://app.mavio.dev"),
       ACME_DOMAIN: bindings.text("acme.mavio.dev"),
       HYPERDRIVE: bindings.hyperdrive({
         id: "mavio-website",
