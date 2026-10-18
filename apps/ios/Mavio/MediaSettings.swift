@@ -51,7 +51,7 @@ private struct LibraryKindStyle {
 }
 
 /// A tile of a color with an icon, as the settings' entries have.
-private struct ColorTile: View {
+struct ColorTile: View {
     let icon: String
     let color: Color
     var size: CGFloat = 28

@@ -116,7 +116,7 @@ enum ServerMenu: Hashable {
     func sections(admin: Bool) -> [ServerSection] {
         let all: [ServerSection] =
             switch self {
-            case .media: [.libraries, .transcoding]
+            case .media: [.libraries, .storage, .transcoding]
             case .maintenance: [.activity, .issues, .tasks, .logs, .backups]
             }
         return all.filter { admin || $0.forAnyone }
@@ -170,7 +170,7 @@ private struct ServerMenuView: View {
 
 /// A section of the Server group.
 enum ServerSection: Hashable {
-    case overview, general, devices, apiKeys, libraries, transcoding, activity, issues, tasks, logs, backups
+    case overview, general, devices, apiKeys, libraries, storage, transcoding, activity, issues, tasks, logs, backups
 
     /// Whether users who do not administer the server see it.
     var forAnyone: Bool { self == .devices || self == .issues }
@@ -181,6 +181,7 @@ enum ServerSection: Hashable {
         case .general: MavioStrings.settingsGeneral
         case .apiKeys: MavioStrings.settingsApiKeys
         case .libraries: MavioStrings.settingsLibraries
+        case .storage: MavioStrings.settingsStorage
         case .transcoding: MavioStrings.settingsTranscoding
         case .devices: MavioStrings.settingsDevices
         case .activity: MavioStrings.settingsActivity
@@ -197,6 +198,7 @@ enum ServerSection: Hashable {
         case .general: "settings"
         case .apiKeys: "lock"
         case .libraries: "folder"
+        case .storage: "server"
         case .transcoding: "quality"
         case .devices: "devices"
         case .activity: "activity"
@@ -212,6 +214,7 @@ enum ServerSection: Hashable {
         case .overview, .general, .logs: Color(hex: 0x8E8E93)
         case .apiKeys: Color(hex: 0x636366)
         case .libraries: Color(hex: 0x007AFF)
+        case .storage: Color(hex: 0x30B0C7)
         case .transcoding: Color(hex: 0xFF2D55)
         case .devices: Color(hex: 0x32ADE6)
         case .activity: Color(hex: 0xFF2D55)
@@ -226,6 +229,7 @@ enum ServerSection: Hashable {
         case .general: GeneralView(server: server)
         case .apiKeys: ApiKeysView(server: server)
         case .libraries: ManagedLibrariesView(server: server)
+        case .storage: StorageView(server: server)
         case .transcoding: TranscodingView(server: server)
         case .devices: DevicesView(server: server)
         case .activity: ActivityView(server: server)
