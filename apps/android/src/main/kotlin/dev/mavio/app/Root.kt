@@ -153,6 +153,12 @@ class Navigator(private val stack: () -> SnapshotStateList<Route>) {
     fun play(serverId: String, itemId: String, title: String, mediaSourceId: String?, start: java.time.Duration?) =
         open(Route.Player(serverId, itemId, title, mediaSourceId, start))
 
+    /** Opens a route in the current screen's place. */
+    fun replace(route: Route) {
+        stack().removeLastOrNull()
+        stack().add(route)
+    }
+
     /** Goes back a screen. */
     fun back() {
         stack().removeLastOrNull()

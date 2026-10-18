@@ -1,9 +1,17 @@
 package dev.mavio.app
 
+import android.app.PictureInPictureParams
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Context
+import android.content.Intent
 import android.content.pm.ActivityInfo
+import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
+import android.util.Rational
 import android.view.WindowManager
+import androidx.activity.ComponentActivity
 import androidx.activity.compose.LocalActivity
 import androidx.annotation.DrawableRes
 import androidx.annotation.OptIn
@@ -62,6 +70,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.app.PictureInPictureModeChangedInfo
+import androidx.core.util.Consumer
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
@@ -74,15 +84,18 @@ import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.common.TrackSelectionOverride
 import androidx.media3.common.Tracks
+import androidx.media3.common.VideoSize
 import androidx.media3.common.text.CueGroup
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.session.MediaSession
 import androidx.media3.ui.SubtitleView
 import androidx.media3.ui.compose.ContentFrame
 import androidx.media3.ui.compose.PlayerSurface
 import androidx.media3.ui.compose.state.rememberPlayPauseButtonState
 import androidx.media3.ui.compose.state.rememberProgressStateWithTickInterval
+import dev.mavio.app.R as AppR
 import dev.mavio.core.AppModel
 import dev.mavio.core.AudioStream
 import dev.mavio.core.Details
@@ -101,6 +114,7 @@ import dev.mavio.ui.languageName
 import dev.mavio.ui.text
 import dev.mavio.ui.theme
 import java.time.Duration
+import java.util.UUID
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 
@@ -124,8 +138,11 @@ private class Position {
     var ended = false
 }
 
-/** The audio and subtitle streams the user picked, by the server's indexes; -1 turns the subtitles off. */
-private data class Selection(val audio: Int? = null, val subtitle: Int? = null)
+/**
+ * The audio and subtitle streams the user picked, by the server's indexes
+ * (-1 turns the subtitles off), and the quality.
+ */
+private data class Selection(val audio: Int? = null, val subtitle: Int? = null, val quality: Quality = Quality.AUTO)
 
 /**
  * The player, as the web UI's (apps/web player): the video across the
@@ -146,7 +163,8 @@ fun PlayerScreen(model: AppModel, route: Route.Player) {
     val navigator = LocalNavigator.current
     var playback by remember(route) { mutableStateOf<Playback?>(null) }
     var failure by remember(route) { mutableStateOf<String?>(null) }
-    var selection by remember(route) { mutableStateOf(Selection()) }
+    val prefs = remember { Prefs(context) }
+    var selection by remember(route) { mutableStateOf(Selection(quality = prefs.quality)) }
     // Where the next start begins: the resume position, then where the streams changed.
     var resume by remember(route) { mutableStateOf(route.start) }
     var sourceId by remember(route) { mutableStateOf(route.mediaSourceId) }
@@ -161,7 +179,7 @@ fun PlayerScreen(model: AppModel, route: Route.Player) {
             session = model.play(
                 route.serverId,
                 route.itemId,
-                PlaybackOptions(sourceId, selection.audio, selection.subtitle, null, resume, false),
+                PlaybackOptions(sourceId, selection.audio, selection.subtitle, selection.quality.bitrate, resume, false),
             )
             val info = session.info()
             sourceId = info.mediaSourceId
@@ -180,6 +198,9 @@ fun PlayerScreen(model: AppModel, route: Route.Player) {
         }
     }
     val p = playback
+    // The episode after this one, which its end plays when the device says so.
+    val next = p?.details?.next
+    val playNext = next?.let { e -> { navigator.replace(Route.Player(route.serverId, e.card.itemId, e.card.title, null, e.position)) } }
     var engine by remember(p) { mutableStateOf(p?.engine) }
     var startMs by remember(p) { mutableLongStateOf(p?.info?.startPosition?.toMillis() ?: 0) }
     val position = remember(p) { Position().also { it.ms = startMs } }
@@ -195,7 +216,7 @@ fun PlayerScreen(model: AppModel, route: Route.Player) {
                 if (state == Player.STATE_ENDED && p != null && !position.ended) {
                     position.ended = true
                     model.finish(route.serverId, p.session, null)
-                    navigator.back()
+                    if (playNext != null && prefs.autoplayNext) playNext() else navigator.back()
                 }
             }
 
@@ -232,6 +253,14 @@ fun PlayerScreen(model: AppModel, route: Route.Player) {
         }
     }
     LifecycleEventEffect(Lifecycle.Event.ON_STOP) { player?.pause() }
+    // The system's media controls, headsets' keys and picture in picture's
+    // buttons drive the player through its session; the next episode's
+    // starts while this one's player goes, so each has an ID of its own.
+    DisposableEffect(player) {
+        val session = player?.let { MediaSession.Builder(context, it).setId(UUID.randomUUID().toString()).build() }
+        onDispose { session?.release() }
+    }
+    val pip = PictureInPicture(player)
 
     Box(Modifier.fillMaxSize().background(Color.Black)) {
         when {
@@ -245,9 +274,14 @@ fun PlayerScreen(model: AppModel, route: Route.Player) {
         if (error != null) {
             Failure(error)
         } else if (player != null && p != null) {
-            Controls(player, route.title, p) { picked ->
-                resume = Duration.ofMillis(player.currentPosition)
-                selection = picked
+            // Picture in picture shows the video alone.
+            if (!pip.active) {
+                Controls(player, route.title, p, selection.quality, playNext, pip.enter) { picked ->
+                    resume = Duration.ofMillis(player.currentPosition)
+                    // The quality stays this device's, as the web UI's.
+                    prefs.quality = picked.quality
+                    selection = picked
+                }
             }
         } else {
             CircularProgressIndicator(Modifier.align(Alignment.Center), color = Color.White)
@@ -395,22 +429,37 @@ private fun heading(context: Context, details: Details): String? {
     return listOfNotNull(series, numbers).joinToString(" · ")
 }
 
-/** Landscape across the whole screen without the system's bars, the screen kept on. */
+/** The players open in a window, and its orientation before the first. */
+private class ImmersiveCount(val orientation: Int) {
+    var players = 0
+}
+
+/**
+ * Landscape across the whole screen without the system's bars, the screen
+ * kept on. The next episode's player opens before this one's goes, so the
+ * window comes back only once the last player has gone.
+ */
 @Composable
 private fun Immersive() {
     val activity = LocalActivity.current ?: return
     DisposableEffect(activity) {
         val window = activity.window
-        val controller = WindowCompat.getInsetsController(window, window.decorView)
-        val orientation = activity.requestedOrientation
+        val decor = window.decorView
+        val controller = WindowCompat.getInsetsController(window, decor)
+        val count = decor.getTag(AppR.id.immersive) as? ImmersiveCount
+            ?: ImmersiveCount(activity.requestedOrientation).also { decor.setTag(AppR.id.immersive, it) }
+        count.players++
         activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
         controller.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
         controller.hide(WindowInsetsCompat.Type.systemBars())
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         onDispose {
-            window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-            controller.show(WindowInsetsCompat.Type.systemBars())
-            activity.requestedOrientation = orientation
+            if (--count.players == 0) {
+                decor.setTag(AppR.id.immersive, null)
+                window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                controller.show(WindowInsetsCompat.Type.systemBars())
+                activity.requestedOrientation = count.orientation
+            }
         }
     }
 }
@@ -425,7 +474,15 @@ private const val CONTROLS_TIMEOUT_MS = 3000L
 @OptIn(UnstableApi::class)
 @kotlin.OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun Controls(player: Player, title: String, playback: Playback, onPick: (Selection) -> Unit) {
+private fun Controls(
+    player: Player,
+    title: String,
+    playback: Playback,
+    quality: Quality,
+    playNext: (() -> Unit)?,
+    pictureInPicture: (() -> Unit)?,
+    onPick: (Selection) -> Unit,
+) {
     val navigator = LocalNavigator.current
     val heading = playback.heading
     var panel by remember { mutableStateOf<Panel?>(null) }
@@ -549,6 +606,27 @@ private fun Controls(player: Player, title: String, playback: Playback, onPick: 
                             style = theme.type.footnote.text,
                             color = Color.White.copy(alpha = 0.85f),
                         )
+                        playNext?.let { onClick ->
+                            Row(
+                                Modifier
+                                    .padding(end = 4.dp)
+                                    .height(36.dp)
+                                    .clip(CircleShape)
+                                    .background(Color.White.copy(alpha = 0.15f))
+                                    .clickable(onClick = onClick)
+                                    .padding(horizontal = 14.dp),
+                                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                MavioIcon(R.drawable.ic_next_fill, size = 16.dp, tint = Color.White)
+                                Text(
+                                    stringResource(R.string.player_next_episode),
+                                    style = theme.type.footnote.text,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = Color.White,
+                                )
+                            }
+                        }
                         if (playback.info.subtitles.isNotEmpty()) {
                             val on = (playback.info.subtitleStreamIndex ?: -1) >= 0
                             PlayerButton(
@@ -563,10 +641,16 @@ private fun Controls(player: Player, title: String, playback: Playback, onPick: 
                         PlayerButton(
                             R.drawable.ic_settings,
                             stringResource(R.string.player_options),
-                            active = panel == Panel.AUDIO,
+                            active = panel != null && panel != Panel.SUBTITLES,
                         ) {
                             panel = if (panel == Panel.AUDIO) null else Panel.AUDIO
                             touch()
+                        }
+                        pictureInPicture?.let { enter ->
+                            PlayerButton(R.drawable.ic_picture_in_picture, stringResource(R.string.player_picture_in_picture)) {
+                                panel = null
+                                enter()
+                            }
                         }
                     }
                 }
@@ -577,6 +661,7 @@ private fun Controls(player: Player, title: String, playback: Playback, onPick: 
                 open,
                 player,
                 playback,
+                quality,
                 Modifier
                     .align(Alignment.BottomEnd)
                     .windowInsetsPadding(WindowInsets.safeDrawing)
@@ -594,6 +679,8 @@ private fun Controls(player: Player, title: String, playback: Playback, onPick: 
 private enum class Panel(val label: Int) {
     AUDIO(R.string.player_audio),
     SUBTITLES(R.string.player_subtitles),
+    QUALITY(R.string.player_quality),
+    INFO(R.string.player_info),
 }
 
 /** The speeds the player offers. */
@@ -609,13 +696,17 @@ private fun OptionsPanel(
     panel: Panel,
     player: Player,
     playback: Playback,
+    quality: Quality,
     modifier: Modifier,
     onTab: (Panel) -> Unit,
     onPick: (Selection) -> Unit,
 ) {
     val info = playback.info
     val source = playback.source
-    val current = Selection(info.audioStreamIndex, info.subtitleStreamIndex ?: -1)
+    val current = Selection(info.audioStreamIndex, info.subtitleStreamIndex ?: -1, quality)
+    val context = LocalContext.current
+    // Without subtitles there is no tab for them, as the web UI's.
+    val tabs = Panel.entries.filter { it != Panel.SUBTITLES || info.subtitles.isNotEmpty() }
     Column(
         modifier
             .width(360.dp)
@@ -634,7 +725,7 @@ private fun OptionsPanel(
                 .background(Color.White.copy(alpha = 0.1f))
                 .padding(2.dp),
         ) {
-            Panel.entries.forEach { tab ->
+            tabs.forEach { tab ->
                 val active = tab == panel
                 Text(
                     stringResource(tab.label),
@@ -703,9 +794,124 @@ private fun OptionsPanel(
                         Choice(t.streamIndex == chosen, label) { onPick(current.copy(subtitle = t.streamIndex)) }
                     }
                 }
+                Panel.QUALITY -> Quality.entries.forEach { q ->
+                    Choice(q == quality, (q.label?.let { stringResource(it) } ?: q.key) to "") {
+                        if (q != quality) onPick(current.copy(quality = q))
+                    }
+                }
+                Panel.INFO -> Column(
+                    Modifier.padding(horizontal = 10.dp).padding(top = 4.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                ) {
+                    Fact(
+                        stringResource(R.string.player_method),
+                        stringResource(
+                            when (info.kind) {
+                                PlayKind.DIRECT_PLAY -> R.string.player_direct_play
+                                PlayKind.DIRECT_STREAM -> R.string.player_direct_stream
+                                PlayKind.TRANSCODE -> R.string.player_transcode
+                            },
+                        ),
+                    )
+                    source?.let { s ->
+                        Fact(
+                            stringResource(R.string.player_source),
+                            listOfNotNull(s.name, s.container?.split(',')?.first()?.uppercase()).joinToString(" · "),
+                        )
+                    }
+                    Column {
+                        PanelAction(R.drawable.ic_external, stringResource(R.string.player_open_external)) {
+                            val intent = Intent(Intent.ACTION_VIEW).setDataAndType(Uri.parse(info.url), "video/*")
+                            runCatching { context.startActivity(Intent.createChooser(intent, null)) }
+                        }
+                        PanelAction(R.drawable.ic_copy, stringResource(R.string.player_copy_link)) {
+                            context.getSystemService(ClipboardManager::class.java)
+                                ?.setPrimaryClip(ClipData.newPlainText(null, info.url))
+                        }
+                    }
+                }
             }
         }
     }
+}
+
+/** A fact of the playback in the panel: its label over its value. */
+@Composable
+private fun Fact(label: String, value: String) {
+    Column {
+        Text(label, style = theme.type.footnote.text, fontWeight = FontWeight.SemiBold, color = Color.White.copy(alpha = 0.6f))
+        Text(value, Modifier.padding(top = 2.dp), style = theme.type.callout.text, color = Color.White)
+    }
+}
+
+/** An action in the panel's information: its icon and its name. */
+@Composable
+private fun PanelAction(icon: Int, label: String, onClick: () -> Unit) {
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(10.dp))
+            .clickable(onClick = onClick)
+            .padding(vertical = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        MavioIcon(icon, size = 18.dp, tint = Color.White.copy(alpha = 0.7f))
+        Text(label, style = theme.type.callout.text, color = Color.White)
+    }
+}
+
+/** Picture in picture: whether the player is in it, and how to go in, where the device has it. */
+private class Pip(val active: Boolean, val enter: (() -> Unit)?)
+
+/**
+ * Picture in picture for the player, as the web UI's: its button, and on
+ * Android 12 and later, going in by itself when the user leaves the app
+ * while a video plays.
+ */
+@Composable
+private fun PictureInPicture(player: Player?): Pip {
+    val activity = LocalActivity.current as? ComponentActivity
+    var active by remember { mutableStateOf(activity?.isInPictureInPictureMode == true) }
+    val supported = activity?.packageManager?.hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE) == true
+    if (activity == null || !supported || player == null) return Pip(active, null)
+    DisposableEffect(activity) {
+        val listener = Consumer<PictureInPictureModeChangedInfo> { active = it.isInPictureInPictureMode }
+        activity.addOnPictureInPictureModeChangedListener(listener)
+        onDispose { activity.removeOnPictureInPictureModeChangedListener(listener) }
+    }
+    var size by remember(player) { mutableStateOf(player.videoSize) }
+    var playing by remember(player) { mutableStateOf(player.isPlaying) }
+    DisposableEffect(player) {
+        val listener = object : Player.Listener {
+            override fun onVideoSizeChanged(videoSize: VideoSize) {
+                size = videoSize
+            }
+
+            override fun onIsPlayingChanged(isPlaying: Boolean) {
+                playing = isPlaying
+            }
+        }
+        player.addListener(listener)
+        onDispose { player.removeListener(listener) }
+    }
+    val params = remember(size, playing) { pipParams(size, playing) }
+    DisposableEffect(params) {
+        activity.setPictureInPictureParams(params)
+        onDispose { activity.setPictureInPictureParams(pipParams(VideoSize.UNKNOWN, false)) }
+    }
+    return Pip(active) { activity.enterPictureInPictureMode(params) }
+}
+
+/** The window of picture in picture: the video's shape, within what Android takes, and going in by itself while it plays. */
+private fun pipParams(size: VideoSize, playing: Boolean): PictureInPictureParams {
+    val builder = PictureInPictureParams.Builder()
+    if (size.width > 0 && size.height > 0) {
+        val ratio = (size.width * size.pixelWidthHeightRatio / size.height).coerceIn(1f / 2.39f, 2.39f)
+        builder.setAspectRatio(Rational((ratio * 1000).toInt(), 1000))
+    }
+    if (Build.VERSION.SDK_INT >= 31) builder.setAutoEnterEnabled(playing)
+    return builder.build()
 }
 
 /** A stream to pick in the panel: its name, its details below, and a check when it plays. */

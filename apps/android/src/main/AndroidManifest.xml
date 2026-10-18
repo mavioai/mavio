@@ -13,12 +13,14 @@
         android:usesCleartextTraffic="true"
         android:theme="@style/Theme.Mavio">
         <!-- Compose follows rotation itself, so the player and the screens
-             keep their state as the player turns to landscape. -->
+             keep their state as the player turns to landscape and goes
+             into picture in picture. -->
         <activity
             android:name=".MainActivity"
             android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize|keyboardHidden|density|uiMode"
             android:exported="true"
             android:launchMode="singleTask"
+            android:supportsPictureInPicture="true"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
