@@ -312,7 +312,7 @@ function SidebarLink({ id, current }: { id: SectionId; current: SectionId }) {
       search={{ server: search.server }}
       data-status={id === current ? "active" : undefined}
       aria-current={id === current ? "page" : undefined}
-      className="flex min-h-10 items-center gap-3 rounded-[10px] px-2 type-body hover:bg-fill data-[status=active]:bg-fill-selected"
+      className="flex min-h-10 cursor-default items-center gap-3 rounded-[10px] px-2 type-body hover:bg-fill data-[status=active]:bg-fill-selected"
     >
       <Tile id={id} />
       <span className="min-w-0 flex-1 truncate">{sections[id].title()}</span>
@@ -395,7 +395,7 @@ function AccountCard({ active = false }: { active?: boolean }) {
       to="/settings/$section"
       params={{ section: "account" }}
       aria-current={active ? "page" : undefined}
-      className={`flex items-center gap-3 rounded-[14px] p-3 hover:tint ${active ? "bg-fill-selected" : "bg-surface"}`}
+      className={`flex cursor-default items-center gap-3 rounded-[14px] p-3 hover:tint ${active ? "bg-fill-selected" : "bg-surface"}`}
     >
       <Avatar name={account.name} size={44} />
       <div className="min-w-0">

@@ -147,7 +147,7 @@ function SearchBox({ shortcut }: { shortcut?: string }) {
 const headerButton = "flex h-9 w-9 items-center justify-center rounded-[10px] text-text-secondary hover:bg-fill hover:text-on-background";
 
 function itemClass(rail: boolean) {
-  return `flex items-center gap-2.5 rounded-[10px] type-callout text-on-background hover:bg-fill data-[status=active]:bg-fill-selected data-[status=active]:font-semibold data-place:bg-fill-selected data-place:font-semibold ${
+  return `flex cursor-default items-center gap-2.5 rounded-[10px] type-callout text-on-background hover:bg-fill data-[status=active]:bg-fill-selected data-[status=active]:font-semibold data-place:bg-fill-selected data-place:font-semibold ${
     rail ? "h-9 w-9 justify-center" : "min-h-9 px-2.5"
   }`;
 }
