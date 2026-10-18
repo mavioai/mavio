@@ -44,6 +44,7 @@ func TestAdmin(t *testing.T) {
 	want("Scan started")
 	h.save(shots, "settings-libraries")
 
+	open("Media") // closes it, so that the sidebar fits Logs
 	open("Monitoring & Maintenance")
 	open("Activity")
 	want("Now Playing", "The Long Orbit", "Anna · Living Room TV · Mavio for Android TV", "Direct Play", "47:12 / 2:04:00",

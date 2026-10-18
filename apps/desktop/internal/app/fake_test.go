@@ -86,6 +86,7 @@ type fakeCore struct {
 	passwords      map[string]string // set by user
 	serverSettings *systemv1.ServerSettings
 	apiKeys        []*authv1.ApiKey
+	proxies        []*systemv1.Proxy
 
 	mu       sync.Mutex
 	calls    []string

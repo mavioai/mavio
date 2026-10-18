@@ -33,6 +33,7 @@ type adminState struct {
 	users     task[[]*userv1.User]
 	people    usersState
 	server    serverSettingsState
+	proxies   proxiesState
 	libraries librariesState
 	libs      task[[]*libraryv1.Library]
 	sessions  task[[]*sessionv1.Session]

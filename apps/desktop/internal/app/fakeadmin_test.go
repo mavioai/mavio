@@ -50,9 +50,11 @@ func (f *fakeCore) handleAdmin(mux *http.ServeMux) {
 	mux.Handle(storagev1connect.NewStorageServiceHandler(&fakeStorage{f: f}))
 	mux.Handle(systemv1connect.NewPluginManagementServiceHandler(fakePlugins{}))
 	mux.Handle(authv1connect.NewAuthServiceHandler(&fakeAuth{f: f}))
+	mux.Handle(systemv1connect.NewProxyServiceHandler(&fakeProxies{f: f}))
 	f.libraries = fakeLibraryList()
 	f.serverSettings = fakeServerSettings()
 	f.apiKeys = fakeApiKeyList()
+	f.proxies = fakeProxyList()
 }
 
 // tsAgo returns a time a length of time before now, as a timestamp.
