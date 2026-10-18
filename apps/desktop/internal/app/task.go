@@ -1,6 +1,9 @@
 package app
 
-import "context"
+import (
+	"context"
+	"log/slog"
+)
 
 // task is a value loaded in the background for a key, which names what it
 // loads; it keeps the value it had while it loads again for another key.
@@ -22,6 +25,9 @@ func load[T any](a *App, t *task[T], key string, fn func(ctx context.Context) (T
 	t.key, t.loading = key, true
 	go func() {
 		v, err := fn(a.ctx)
+		if err != nil {
+			slog.WarnContext(a.ctx, "load failed", "key", key, "err", err)
+		}
 		a.opts.Update(func() {
 			if t.key != key {
 				return
