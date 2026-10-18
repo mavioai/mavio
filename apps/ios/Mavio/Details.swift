@@ -73,7 +73,6 @@ private struct DetailsContent: View {
     @Environment(\.openURL) private var openURL
     @State private var sourceIndex = 0
     @State private var overviewOpen = false
-    @State private var pastHeader = false
     @State private var copy: Source?
 
     private var card: Card { details.card }
@@ -132,22 +131,8 @@ private struct DetailsContent: View {
             .padding(.bottom, MavioSpacing.s40)
         }
         .background(theme.colors.background)
-        .ignoresSafeArea(edges: .top)
-        .onScrollGeometryChange(for: Bool.self) { geo in
-            geo.contentOffset.y + geo.contentInsets.top > geo.containerSize.height * 0.5
-        } action: { _, past in
-            withAnimation(.easeOut(duration: MavioDuration.fast)) { pastHeader = past }
-        }
         .navigationTitle(card.title)
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .principal) {
-                Text(card.title).type(theme.type.headline).lineLimit(1).opacity(pastHeader ? 1 : 0)
-            }
-        }
-        .toolbarBackground(pastHeader ? .visible : .hidden, for: .navigationBar)
-        .modifier(HeaderEdge(hidden: !pastHeader))
-        .toolbarColorScheme(pastHeader ? nil : .dark, for: .navigationBar)
+        .modifier(HeroChrome(title: card.title, phone: phone))
         .navigationDestination(item: $copy) { copy in
             DetailsView(serverId: copy.serverId, itemId: copy.itemId)
         }
@@ -163,9 +148,7 @@ private struct DetailsContent: View {
         // The artwork fills the header's frame rather than sizing it.
         Color.clear
             .frame(maxWidth: .infinity)
-            .containerRelativeFrame(.vertical) { height, _ in
-                phone ? max(384, height * 0.64) : min(max(520, height * 0.7), 700)
-            }
+            .modifier(HeaderSize(phone: phone))
             .background { artwork }
             .overlay {
                 if phone {
@@ -203,6 +186,7 @@ private struct DetailsContent: View {
                 .padding(.bottom, phone ? MavioSpacing.s24 : MavioSpacing.s40)
             }
             .clipped()
+            .heroBleed((image ?? card.poster)?.url, phone: phone)
             .environment(\.colorScheme, .dark)
     }
 
@@ -660,16 +644,16 @@ private struct DetailsContent: View {
     }
 }
 
-/// Over the header, no scroll edge effect, which would wash its artwork
-/// out under the bar.
-private struct HeaderEdge: ViewModifier {
-    let hidden: Bool
+/// The header's size: on a phone a square as wide as the screen, else 70%
+/// of the window's height, from 520 to 700 pt.
+private struct HeaderSize: ViewModifier {
+    let phone: Bool
 
     func body(content: Content) -> some View {
-        if #available(iOS 26, *) {
-            content.scrollEdgeEffectHidden(hidden, for: .top)
+        if phone {
+            content.aspectRatio(1, contentMode: .fit)
         } else {
-            content
+            content.containerRelativeFrame(.vertical) { height, _ in min(max(520, height * 0.7), 700) }
         }
     }
 }

@@ -31,7 +31,7 @@ struct HomeView: View {
             }
             .padding(.bottom, MavioSpacing.s8)
         }
-        .modifier(HeroEdge(hero: !entries.isEmpty))
+        .modifier(HomeChrome(hero: !entries.isEmpty))
         .overlay {
             if model.home.isEmpty { ProgressView() }
         }
@@ -41,44 +41,14 @@ struct HomeView: View {
     }
 }
 
-/// Home under the status bar when the hero leads it, the bar clear over
-/// the hero with its title appearing past it, as details are.
-private struct HeroEdge: ViewModifier {
+/// Home's bar as a hero's when the hero leads it (HeroChrome).
+private struct HomeChrome: ViewModifier {
     let hero: Bool
-    @Environment(\.theme) private var theme
-    @State private var past = false
+    @Environment(\.horizontalSizeClass) private var sizeClass
 
     func body(content: Content) -> some View {
         if hero {
-            content
-                .ignoresSafeArea(edges: .top)
-                .onScrollGeometryChange(for: Bool.self) { geo in
-                    geo.contentOffset.y + geo.contentInsets.top > geo.containerSize.height * 0.5
-                } action: { _, now in
-                    withAnimation(.easeOut(duration: MavioDuration.fast)) { past = now }
-                }
-                .navigationBarTitleDisplayMode(.inline)
-                .toolbar {
-                    ToolbarItem(placement: .principal) {
-                        Text(MavioStrings.navHome).type(theme.type.headline).opacity(past ? 1 : 0)
-                    }
-                }
-                .toolbarBackground(past ? .visible : .hidden, for: .navigationBar)
-                .modifier(EdgeEffect(hidden: !past))
-                .toolbarColorScheme(past ? nil : .dark, for: .navigationBar)
-        } else {
-            content
-        }
-    }
-}
-
-/// The scroll edge's effect, hidden over the hero.
-private struct EdgeEffect: ViewModifier {
-    let hidden: Bool
-
-    func body(content: Content) -> some View {
-        if #available(iOS 26, *) {
-            content.scrollEdgeEffectHidden(hidden, for: .top)
+            content.modifier(HeroChrome(title: MavioStrings.navHome, phone: sizeClass != .regular))
         } else {
             content
         }

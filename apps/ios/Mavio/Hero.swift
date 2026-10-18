@@ -59,8 +59,10 @@ struct HeroView: View {
         .scrollTargetBehavior(.paging)
         .scrollIndicators(.hidden)
         .scrollPosition(id: $shown)
+        // A phone's pages draw their colors above the hero, behind the bar.
+        .scrollClipDisabled(phone)
         .onScrollPhaseChange { _, phase in dragging = phase == .interacting }
-        .containerRelativeFrame(.vertical) { height, _ in phone ? min(height * 0.52, 460) : 470 }
+        .modifier(HeroSize(phone: phone))
         .overlay(alignment: phone ? .topTrailing : .bottomTrailing) {
             if entries.count > 1 { dots }
         }
@@ -97,9 +99,23 @@ struct HeroView: View {
         }
         .animation(.easeOut(duration: MavioDuration.fast), value: index)
         .padding(.horizontal, phone ? theme.layout.margin : MavioSpacing.s32)
-        // On a phone the dots sit at the top, below the navigation bar.
-        .padding(.top, phone ? 108 : 0)
+        // On a phone the dots sit at the top.
+        .padding(.top, phone ? MavioSpacing.s16 : 0)
         .padding(.bottom, phone ? 0 : MavioSpacing.s24)
+    }
+}
+
+/// The hero's size: on a phone 4:5, by the screen's width, else 470 pt
+/// high.
+private struct HeroSize: ViewModifier {
+    let phone: Bool
+
+    func body(content: Content) -> some View {
+        if phone {
+            content.frame(maxWidth: .infinity).aspectRatio(4 / 5, contentMode: .fit)
+        } else {
+            content.frame(height: 470)
+        }
     }
 }
 
@@ -146,6 +162,7 @@ private struct HeroPage: View {
                     .padding(.bottom, phone ? MavioSpacing.s20 : MavioSpacing.s40)
             }
             .clipped()
+            .heroBleed(card.backdrop?.url, phone: phone)
     }
 
     private var text: some View {
@@ -225,4 +242,89 @@ private struct HeroPage: View {
 private func both<A, B>(_ a: A?, _ b: B?) -> (A, B)? {
     guard let a, let b else { return nil }
     return (a, b)
+}
+
+/// How far a phone's hero's colors reach up behind the navigation bar and
+/// the status bar, more than they take on any phone.
+private let bleedHeight: CGFloat = 400
+
+extension View {
+    /// On a phone, the hero's artwork, enlarged and blurred, above it behind
+    /// the navigation bar, so that its colors spread up into the bar's glass
+    /// and meet the hero at a sharp edge, as the web UI's.
+    @ViewBuilder func heroBleed(_ url: String?, phone: Bool) -> some View {
+        if phone, let url {
+            background(alignment: .top) {
+                // The artwork fills the bleed's frame rather than sizing it.
+                Color.clear
+                    .frame(maxWidth: .infinity)
+                    .frame(height: bleedHeight)
+                    .overlay {
+                        ArtworkView(url)
+                            .scaleEffect(1.25)
+                            .blur(radius: 40, opaque: true)
+                    }
+                    .clipped()
+                    .offset(y: -bleedHeight)
+                    .allowsHitTesting(false)
+                    .accessibilityHidden(true)
+            }
+        } else {
+            self
+        }
+    }
+}
+
+/// A screen led by a hero. On a phone the hero sits below the navigation
+/// bar, which is of the tab bar's glass over the hero's colors and what
+/// scrolls under it, meeting them at a sharp edge; on an iPad the hero
+/// reaches the top under a clear bar. The bar's title appears once the hero
+/// is scrolled past.
+struct HeroChrome: ViewModifier {
+    let title: String
+    let phone: Bool
+    @Environment(\.theme) private var theme
+    @State private var past = false
+
+    func body(content: Content) -> some View {
+        content
+            .ignoresSafeArea(edges: phone ? [] : .top)
+            .onScrollGeometryChange(for: Bool.self) { geo in
+                geo.contentOffset.y + geo.contentInsets.top > geo.containerSize.height * 0.5
+            } action: { _, now in
+                withAnimation(.easeOut(duration: MavioDuration.fast)) { past = now }
+            }
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .principal) {
+                    Text(title).type(theme.type.headline).lineLimit(1).opacity(past ? 1 : 0)
+                }
+            }
+            .modifier(HeroBarGlass(phone: phone, past: past))
+            .toolbarColorScheme(past ? nil : .dark, for: .navigationBar)
+    }
+}
+
+/// The navigation bar's glass: on a phone always, with a hard edge, where
+/// iOS draws its scroll edge effect, else the bar's material; on an iPad
+/// none over the hero.
+private struct HeroBarGlass: ViewModifier {
+    let phone: Bool
+    let past: Bool
+
+    func body(content: Content) -> some View {
+        if #available(iOS 26, *) {
+            if phone {
+                content
+                    .toolbarBackground(.hidden, for: .navigationBar)
+                    .scrollEdgeEffectStyle(.hard, for: .top)
+            } else {
+                content
+                    .toolbarBackground(past ? .visible : .hidden, for: .navigationBar)
+                    .scrollEdgeEffectHidden(!past, for: .top)
+            }
+        } else {
+            content.toolbarBackground(phone || past ? .visible : .hidden, for: .navigationBar)
+        }
+    }
 }
