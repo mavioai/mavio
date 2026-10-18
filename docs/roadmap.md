@@ -670,7 +670,8 @@ flowchart TD
   - [ ] Popular searches: the queries each server records and ranks, which the television's search shows while nothing is typed, where it shows Home's rows now
 - [x] iPhone and iPad app (`apps/ios`, `libs/apple`): sign-in (password, first user, Quick Connect, servers found nearby, a Mavio account in the browser or with a link code, signed out from the profile), several servers with tokens in the Keychain, the merged Home, libraries with their Recommended and Library tabs, sorting and filters, hubs, search across servers, details with versions and copies on other servers, the player (AVPlayer and AetherEngine chosen by the capabilities the app declares, HLS from the server, audio and subtitle tracks, playback speed, AirPlay, Picture in Picture on AVPlayer), downloads with a background `URLSession` and offline playback with replayed progress, authorizing devices; a tab bar on the iPhone and a sidebar on the iPad
   - [ ] Discovery and request screens, with P20
-  - [ ] Picture in Picture while AetherEngine plays
+  - [x] Picture in Picture while AetherEngine plays: around the native path's `AVPlayerLayer`, or the software path's `AVSampleBufferDisplayLayer` with the transport its `SoftwarePiPSource` answers; the engine is told while the window is open, which keeps its pipeline alive in the background and draws the subtitles into the window
+  - [ ] Picture in Picture and Now Playing tried on a device: the simulator supports neither Picture in Picture nor Now Playing on its Lock Screen
   - [ ] Styled ASS subtitles with libass
   - [x] Now Playing and the remote commands (`MPNowPlayingInfoCenter`, `MPRemoteCommandCenter`) for both engines: the title, the series and episode, the artwork, the position and speed; play, pause, skips of 10 seconds, a new position, and the next episode
   - [x] Playing the next episode at the end of one

@@ -40,6 +40,10 @@ public final class Player {
     @ObservationIgnored public private(set) lazy var nowPlaying = NowPlaying(player: self)
 
     @ObservationIgnored private var poll: Task<Void, Never>?
+    #if os(iOS)
+        /// Picture in Picture while AetherEngine plays.
+        @ObservationIgnored private var aetherPictureInPicture: AetherPictureInPicture?
+    #endif
     @ObservationIgnored private var endObserver: NSObjectProtocol?
 
     /// A player with nothing loaded.
@@ -172,6 +176,14 @@ public final class Player {
             default: isPlaying = false
             }
             isBuffering = engine.isBuffering || engine.state == .loading
+            #if os(iOS)
+                // A session's layer, once it has one, takes Picture in Picture.
+                let layer = AetherPictureInPicture.layer(of: engine)
+                if layer !== aetherPictureInPicture?.layer {
+                    aetherPictureInPicture = layer == nil ? nil : AetherPictureInPicture(engine: engine)
+                    pictureInPicture = aetherPictureInPicture?.controller
+                }
+            #endif
         }
     }
 
@@ -182,6 +194,9 @@ public final class Player {
         avPlayer?.play()
         aether?.play()
         isPlaying = true
+        #if os(iOS)
+            aetherPictureInPicture?.invalidate()
+        #endif
         nowPlaying.sync()
     }
 
@@ -190,6 +205,9 @@ public final class Player {
         avPlayer?.pause()
         aether?.pause()
         isPlaying = false
+        #if os(iOS)
+            aetherPictureInPicture?.invalidate()
+        #endif
         nowPlaying.sync()
     }
 
@@ -259,6 +277,9 @@ public final class Player {
         avPlayer?.replaceCurrentItem(with: nil)
         avPlayer = nil
         pictureInPicture = nil
+        #if os(iOS)
+            aetherPictureInPicture = nil
+        #endif
         aether?.stop()
         aether = nil
         engine = nil

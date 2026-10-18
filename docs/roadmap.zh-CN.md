@@ -670,7 +670,8 @@ flowchart TD
   - [ ] 热门搜索：各服务器记录并排名的搜索词，电视的搜索在未输入时显示它们，目前那里显示首页的各行
 - [x] iPhone 与 iPad 应用（`apps/ios`、`libs/apple`）：登录（密码、首个用户、Quick Connect、附近发现的服务器、在浏览器中或以链接码登录 Mavio 账户并在个人资料页退出）、多台服务器且令牌保存在钥匙串、合并的首页、带推荐与媒体库标签的媒体库、排序与筛选、推荐栏、跨服务器搜索、带版本与其他服务器副本的详情、播放器（按应用声明的能力选用 AVPlayer 或 AetherEngine、服务端的 HLS、音轨与字幕轨、播放速度、AirPlay、AVPlayer 的画中画）、以后台 `URLSession` 下载并离线播放且补报进度、授权设备；iPhone 上为标签栏，iPad 上为侧边栏
   - [ ] 发现与请求页面，随 P20
-  - [ ] AetherEngine 播放时的画中画
+  - [x] AetherEngine 播放时的画中画：围绕原生路径的 `AVPlayerLayer`，或软件路径的 `AVSampleBufferDisplayLayer` 及其 `SoftwarePiPSource` 给出的播放控制；窗口打开期间告知引擎，使其管线在后台保持运行，并把字幕绘入窗口
+  - [ ] 在设备上试用画中画与正在播放：模拟器既不支持画中画，也不在锁屏显示正在播放
   - [ ] 借助 libass 保留样式的 ASS 字幕
   - [x] 两种引擎的正在播放与远程命令（`MPNowPlayingInfoCenter`、`MPRemoteCommandCenter`）：标题、剧集与集数、封面、位置与速度；播放、暂停、10 秒快进快退、跳转位置，以及下一集
   - [x] 一集结束时播放下一集
