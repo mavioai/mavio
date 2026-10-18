@@ -221,3 +221,48 @@ func (a *App) gridColumns(c *ui.Context) (float32, int) {
 	cols := max(int((avail+gap)/(style.Layout(c).Poster+gap)), 1)
 	return (avail - gap*float32(cols-1)) / float32(cols), cols
 }
+
+// librariesPage builds the TV mode's Libraries: each server's libraries,
+// under the server's name when there are several, as a grid of their
+// artwork at least a thumbnail wide (docs/tv.md §3).
+func (a *App) librariesPage(c *ui.Context) {
+	colors := style.Colors(c)
+	layout := style.Layout(c)
+	avail := a.contentWidth - 2*layout.Margin
+	cols := max(int((avail+layout.Gutter)/(layout.Thumbnail*0.75+layout.Gutter)), 1)
+	width := (avail - layout.Gutter*float32(cols-1)) / float32(cols)
+	ui.Scroll(c).TrackScroll(a.pageScroll(a.pagePath)).Fill().Children(func() {
+		ui.Column(c).Padding(8, layout.Margin, 40).Gap(32).Children(func() {
+			for _, s := range a.servers {
+				libs := a.serverLibraries(s.GetId()).value.GetLibraries()
+				if len(libs) == 0 {
+					continue
+				}
+				ui.Column(c.Key(s.GetId())).Gap(16).Children(func() {
+					if len(a.servers) > 1 {
+						style.Text(ui.Text(c, s.GetName()), style.Type(c).Title3).TextColor(style.Color(colors.TextPrimary))
+					}
+					ui.Row(c).Wrap().Gap(layout.Gutter).Children(func() {
+						for _, l := range libs {
+							a.libraryCard(c, s.GetId(), l, width)
+						}
+					})
+				})
+			}
+		})
+	})
+}
+
+// libraryCard builds a library's card on Libraries: its collage and name.
+func (a *App) libraryCard(c *ui.Context, server string, l *capiv1.Library, width float32) {
+	colors := style.Colors(c)
+	b := ui.ButtonBase(c.Key(l.GetId())).Cursor(ui.CursorPointer).Column().Width(width).Gap(10).AlignItems(ui.Start).Label(l.GetName())
+	focused := a.cardFocus(c, b)
+	b.Children(func() {
+		a.artwork(c, capiv1.Artwork_builder{Url: l.GetImageUrl()}.Build(), libraryIcon(l.GetKind()), nil, width, width*9/16, b.Hovered() || focused)
+		style.Text(ui.Text(c, l.GetName()), style.Type(c).Headline).TextColor(style.Color(colors.TextPrimary)).SingleLine().Width(width)
+	})
+	if b.Clicked() {
+		a.router.Push("/library/" + server + "/" + l.GetId())
+	}
+}

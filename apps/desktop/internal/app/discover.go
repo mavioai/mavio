@@ -626,13 +626,13 @@ func (a *App) titleHeader(c *ui.Context, server string, title *acquisitionv1.Tit
 				ui.Row(c).Gap(12).Wrap().Padding(8, 0, 0).Children(func() {
 					primary := true
 					if title.GetItemId() != "" {
-						if heroButton(c, "play", style.T(c, "discover.watch"), true).Clicked() {
+						if a.heroButton(c, "play", style.T(c, "discover.watch"), true).Clicked() {
 							a.router.Push("/item/" + server + "/" + title.GetItemId())
 						}
 						primary = false
 					}
 					if urls := title.GetTrailerUrls(); len(urls) > 0 && a.opts.OpenURL != nil {
-						if heroButton(c, "movies", style.T(c, "item.trailer"), false).Clicked() {
+						if a.heroButton(c, "movies", style.T(c, "item.trailer"), false).Clicked() {
 							_ = a.opts.OpenURL(urls[0])
 						}
 					}
@@ -641,7 +641,7 @@ func (a *App) titleHeader(c *ui.Context, server string, title *acquisitionv1.Tit
 						if series && some {
 							label = style.T(c, "discover.requestMore")
 						}
-						b := heroButton(c, "add", label, primary)
+						b := a.heroButton(c, "add", label, primary)
 						if st.busy {
 							b.Opacity(0.5)
 						}
@@ -654,10 +654,10 @@ func (a *App) titleHeader(c *ui.Context, server string, title *acquisitionv1.Tit
 						}
 					}
 					if admin && len(pending) > 0 {
-						if heroButton(c, "check", style.T(c, "requests.approve"), false).Clicked() && !st.busy {
+						if a.heroButton(c, "check", style.T(c, "requests.approve"), false).Clicked() && !st.busy {
 							a.requestAction(server, pending, "approve")
 						}
-						if heroButton(c, "close", style.T(c, "requests.decline"), false).Clicked() && !st.busy {
+						if a.heroButton(c, "close", style.T(c, "requests.decline"), false).Clicked() && !st.busy {
 							a.requestAction(server, pending, "decline")
 						}
 					}

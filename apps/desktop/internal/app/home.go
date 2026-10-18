@@ -127,6 +127,11 @@ func (a *App) hero(c *ui.Context, cards []*capiv1.Card) {
 	card := cards[i]
 	_, wh := c.Size()
 	height := min(max(wh*0.62, 360), 620)
+	tv := style.TV(c)
+	if tv {
+		// On the television, 78 % of the screen, behind the bar (docs/tv.md §6.1).
+		height = wh * 0.78
+	}
 	white := ui.RGB(255, 255, 255)
 	ui.Box(c).FillWidth().Height(height).Clip().Background(style.Color(design.DarkColors.SurfaceRaised)).DragWindow().Children(func() {
 		w, _ := c.Size()
@@ -137,8 +142,15 @@ func (a *App) hero(c *ui.Context, cards []*capiv1.Card) {
 			Angle: 50,
 			Stops: []ui.GradientStop{{At: 0, Color: ui.RGBA(0, 0, 0, 0.85)}, {At: 0.55, Color: ui.RGBA(0, 0, 0, 0.25)}, {At: 1, Color: ui.RGBA(0, 0, 0, 0)}},
 		})
-		ui.Column(c).Absolute().Left(style.Layout(c).Margin).Bottom(56).MaxWidth(560).Gap(10).Children(func() {
-			style.Text(ui.Text(c, card.GetTitle()), style.Type(c).Display).TextColor(white).MaxLines(2)
+		maxWidth := float32(560)
+		if tv {
+			maxWidth = 960
+		}
+		ui.Column(c).Absolute().Left(style.Layout(c).Margin).Bottom(56).MaxWidth(maxWidth).Gap(10).Children(func() {
+			title := style.Text(ui.Text(c, card.GetTitle()), style.Type(c).Display).TextColor(white).MaxLines(2)
+			if tv {
+				title.FontSize(72).LineHeight(1.1)
+			}
 			if facts := cardFacts(c, card); facts != "" {
 				style.Text(ui.Text(c, facts), style.Type(c).Callout).TextColor(white.Alpha(0.85)).SingleLine()
 			}
@@ -148,11 +160,11 @@ func (a *App) hero(c *ui.Context, cards []*capiv1.Card) {
 					if card.HasProgress() && card.GetProgress() > 0 {
 						label = style.T(c, "item.resume")
 					}
-					if heroButton(c, "play", label, true).Clicked() {
+					if a.heroButton(c, "play", label, true).Clicked() {
 						a.play(card.GetServerId(), card.GetItemId(), nil)
 					}
 				}
-				if heroButton(c, "info", style.T(c, "item.details"), false).Clicked() {
+				if a.heroButton(c, "info", style.T(c, "item.details"), false).Clicked() {
 					a.open(card)
 				}
 			})
@@ -172,13 +184,19 @@ func (a *App) hero(c *ui.Context, cards []*capiv1.Card) {
 }
 
 // heroButton builds a button over artwork: white with black content when
-// primary, else translucent.
-func heroButton(c *ui.Context, icon, label string, primary bool) ui.Element {
+// primary, else translucent. On the television it is 64 points high, and
+// white belongs to focus alone (docs/tv.md §4).
+func (a *App) heroButton(c *ui.Context, icon, label string, primary bool) ui.Element {
+	b := ui.ButtonBase(c.Key(icon)).Height(40).Padding(0, 20).Gap(8).Radius(20).AlignItems(ui.Center).Label(label)
+	if style.TV(c) {
+		b.Height(64).Padding(0, 32).Gap(12).Radius(32)
+		primary = a.tvFocus(c, b, false)
+	}
 	fg, bg := ui.RGB(0, 0, 0), ui.RGB(255, 255, 255)
 	if !primary {
 		fg, bg = ui.RGB(255, 255, 255), ui.RGBA(255, 255, 255, 0.22)
 	}
-	b := ui.ButtonBase(c).Height(40).Padding(0, 20).Gap(8).Radius(20).AlignItems(ui.Center).Background(bg).Label(label)
+	b.Background(bg)
 	if b.Pressed() {
 		b.Opacity(0.8)
 	}
@@ -322,7 +340,7 @@ func (a *App) titleCard(c *ui.Context, server string, t *capiv1.TitleCard) {
 	colors := style.Colors(c)
 	w := style.Layout(c).Poster
 	b := ui.ButtonBase(c.Key(t.GetTitle() + fmt.Sprint(t.GetYear()))).Cursor(ui.CursorPointer).Column().Width(w).Gap(6).AlignItems(ui.Start).Label(t.GetTitle())
-	hovered := b.Hovered()
+	hovered := a.cardFocus(c, b) || b.Hovered()
 	if b.Pressed() {
 		b.Opacity(0.8)
 	}

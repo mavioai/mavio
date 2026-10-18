@@ -155,12 +155,19 @@ func taskStatus[T any](c *ui.Context, t *task[T], retry func(), placeholder func
 func (a *App) artwork(c *ui.Context, art *capiv1.Artwork, icon string, card *capiv1.Card, width, height float32, hovered bool) {
 	colors := style.Colors(c)
 	box := ui.Box(c).Size(width, height).Shrink(0).Radius(design.RadiusMd).Background(style.Color(colors.SurfaceRaised))
-	if hovered {
+	tv := style.TV(c)
+	switch {
+	case hovered && tv:
+		// Focused on the television: a ring of the accent 1.5 points apart,
+		// over a shadow (docs/tv.md §4).
+		box.Shadow(0, 12, 32, 0, style.Color(colors.TvFocusShadow)).Shadow(0, 0, 0, 4.5, style.Color(colors.Accent)).
+			Shadow(0, 0, 0, 1.5, style.Color(colors.Background))
+	case hovered:
 		box.Shadow(0, 0, 0, 3, style.Color(colors.Accent))
 	}
 	box.Children(func() {
 		inner := ui.Box(c).Fill().Radius(design.RadiusMd).Clip()
-		if hovered {
+		if hovered && !tv {
 			inner.Border(1, style.Color(colors.Background))
 		}
 		inner.Children(func() {
@@ -237,7 +244,7 @@ func (a *App) imageFailed(url string, width float32) bool {
 func (a *App) posterCard(c *ui.Context, card *capiv1.Card, width float32) {
 	colors := style.Colors(c)
 	b := ui.ButtonBase(c.Key(key(card.GetServerId(), card.GetItemId()))).Cursor(ui.CursorPointer).Column().Width(width).Gap(6).AlignItems(ui.Start).Label(card.GetTitle())
-	hovered := b.Hovered()
+	hovered := a.cardFocus(c, b) || b.Hovered()
 	if b.Pressed() {
 		b.Opacity(0.8)
 	}
@@ -261,7 +268,7 @@ func (a *App) posterCard(c *ui.Context, card *capiv1.Card, width float32) {
 func (a *App) thumbCard(c *ui.Context, card *capiv1.Card, width float32) {
 	colors := style.Colors(c)
 	b := ui.ButtonBase(c.Key(key(card.GetServerId(), card.GetItemId()))).Cursor(ui.CursorPointer).Column().Width(width).Gap(6).AlignItems(ui.Start).Label(card.GetTitle())
-	hovered := b.Hovered()
+	hovered := a.cardFocus(c, b) || b.Hovered()
 	if b.Pressed() {
 		b.Opacity(0.8)
 	}
@@ -275,6 +282,26 @@ func (a *App) thumbCard(c *ui.Context, card *capiv1.Card, width float32) {
 	if b.Clicked() {
 		a.open(card)
 	}
+}
+
+// cardFocus makes a card one focus moves to in the TV mode, which grows
+// by the layout's focus scale with focus while the other cards of its row
+// fade to 75 % (docs/tv.md §4), and reports whether it has focus.
+func (a *App) cardFocus(c *ui.Context, b ui.Element) bool {
+	if !style.TV(c) {
+		return false
+	}
+	focused := a.tvFocus(c, b, false)
+	scale := float32(1)
+	if focused {
+		scale = style.Layout(c).FocusScale
+	}
+	s := b.Animate("focus", scale, design.DurationFast)
+	b.TransformOrigin(0.5, 0.5).Scale(s, s)
+	if a.focus.rowFocused && !focused {
+		b.Opacity(0.75)
+	}
+	return focused
 }
 
 // cardSubtitle returns what a poster card shows under its title.
@@ -328,7 +355,8 @@ func (a *App) labeledShelf(c *ui.Context, id, title string, more func(), label s
 			if label != "" && linkButton(c, label).Clicked() {
 				more()
 			}
-			if scroll.MaxX <= 0 {
+			// A remote has no arrows to scroll a row with.
+			if scroll.MaxX <= 0 || style.TV(c) {
 				return
 			}
 			w, _ := c.Size()
@@ -344,8 +372,20 @@ func (a *App) labeledShelf(c *ui.Context, id, title string, more func(), label s
 		})
 		// The padding leaves room for a hovered card's ring, which the
 		// scroll would clip; the column's gap is the less for it.
-		ui.ScrollHorizontal(c).TrackScroll(scroll).Children(func() {
-			ui.Row(c).Padding(4, style.Layout(c).Margin).Gap(style.Layout(c).Gutter * 1.5).AlignItems(ui.Start).Children(cards)
+		row := ui.ScrollHorizontal(c).TrackScroll(scroll)
+		gap, pad := style.Layout(c).Gutter*1.5, float32(4)
+		if style.TV(c) {
+			// Room above and below for a focused card to grow.
+			gap, pad = style.Layout(c).Gutter, 20
+		}
+		row.Children(func() {
+			f := &a.focus
+			was := f.rowFocused
+			f.rowFocused = style.TV(c) && row.FocusWithin()
+			a.inScrollRow(row.Bounds(), scroll, func() {
+				ui.Row(c).Padding(pad, style.Layout(c).Margin).Gap(gap).AlignItems(ui.Start).Children(cards)
+			})
+			f.rowFocused = was
 		})
 	})
 }

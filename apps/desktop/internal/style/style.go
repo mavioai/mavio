@@ -42,10 +42,29 @@ func Color(c design.Color) ui.Color {
 
 // Colors returns the design system's colors of the frame's theme.
 func Colors(c *ui.Context) *design.Colors {
-	if c.Theme().Dark {
+	dark := c.Theme().Dark
+	if TV(c) {
+		return tvColors()[b2i(dark)]
+	}
+	if dark {
 		return &design.DarkColors
 	}
 	return &design.LightColors
+}
+
+// tvColors are the light and the dark colors of the TV mode, whose
+// background is the television's (docs/tv.md §2).
+var tvColors = sync.OnceValue(func() [2]*design.Colors {
+	light, dark := design.LightColors, design.DarkColors
+	light.Background, dark.Background = light.TvBackground, dark.TvBackground
+	return [2]*design.Colors{&light, &dark}
+})
+
+func b2i(b bool) int {
+	if b {
+		return 1
+	}
+	return 0
 }
 
 var (

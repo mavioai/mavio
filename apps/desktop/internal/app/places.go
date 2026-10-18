@@ -31,6 +31,9 @@ type places struct {
 	// replacing tells that the next location takes the place of the one
 	// shown.
 	replacing bool
+	// tv tells that the places are the TV mode's tabs (docs/tv.md §3),
+	// among which a library is not.
+	tv bool
 }
 
 // maxHistory is how many entries the router's history holds.
@@ -60,11 +63,17 @@ func (p *places) follow(loc string, replacing bool) {
 	p.history = h
 }
 
-// isPlace reports whether path is a place's: a page the sidebar opens.
-func isPlace(path string) bool {
+// isPlace reports whether path is a place's: a page the sidebar, or the
+// TV mode's tabs, open.
+func (p *places) isPlace(path string) bool {
 	switch path {
 	case "/home", "/search", "/discover":
 		return true
+	case "/libraries":
+		return p.tv
+	}
+	if p.tv {
+		return false
 	}
 	parts := strings.Split(strings.Trim(path, "/"), "/")
 	return len(parts) == 3 && parts[0] == "library"
@@ -90,7 +99,7 @@ func (a *App) visitPlaces() {
 	if p.stacks == nil {
 		p.stacks = map[string][]string{}
 	}
-	if isPlace(path) {
+	if p.isPlace(path) {
 		p.current = path
 		p.stacks[path] = []string{path}
 		return
@@ -197,7 +206,7 @@ const backRow = 60
 // pageTop returns the room a page leaves at its top: Back's row on a
 // page opened from another, else the window's controls'.
 func (a *App) pageTop(c *ui.Context) float32 {
-	if !isPlace(a.router.Path()) {
+	if !a.places.isPlace(a.router.Path()) {
 		return backRow
 	}
 	return max(c.TitleBar().Height, 12)
@@ -206,7 +215,7 @@ func (a *App) pageTop(c *ui.Context) float32 {
 // backButton builds Back over a page opened from another: a round button
 // of glass 12 points from the content's top and left edges.
 func (a *App) backButton(c *ui.Context) {
-	if isPlace(a.router.Path()) {
+	if a.places.isPlace(a.router.Path()) {
 		return
 	}
 	colors := style.Colors(c)

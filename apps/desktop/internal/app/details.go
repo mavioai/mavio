@@ -278,7 +278,7 @@ func (a *App) actions(c *ui.Context, st *detailsState, d *capiv1.Details) {
 	}
 	ui.Row(c).Gap(12).Margin(8, 0, 0).AlignItems(ui.Center).Children(func() {
 		if target != nil {
-			if heroButton(c, "play", label, true).Clicked() {
+			if a.heroButton(c, "play", label, true).Clicked() {
 				opts := capiv1.PlaybackOptions_builder{MediaSourceId: source}
 				if target == card {
 					opts.StartPositionMs = new(position)

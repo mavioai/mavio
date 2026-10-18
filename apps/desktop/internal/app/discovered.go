@@ -337,7 +337,7 @@ func (a *App) collectionHeader(c *ui.Context, server string, tmdb int32, col *ac
 					style.Text(ui.Text(c, o), style.Type(c).Body).TextColor(white.Alpha(0.85)).MaxLines(4)
 				}
 				ui.Row(c).Gap(12).Wrap().Padding(8, 0, 0).Children(func() {
-					if requestable && heroButton(c, "add", style.T(c, "collection.request"), true).Clicked() {
+					if requestable && a.heroButton(c, "add", style.T(c, "collection.request"), true).Clicked() {
 						st.asking, st.err, st.chosen = true, nil, map[int32]bool{}
 						for _, p := range col.GetParts() {
 							if p.GetRequestable() {
@@ -350,7 +350,7 @@ func (a *App) collectionHeader(c *ui.Context, server string, tmdb int32, col *ac
 						if blocked {
 							icon, label = "check", style.T(c, "collection.unblock")
 						}
-						b := heroButton(c, icon, label, false)
+						b := a.heroButton(c, icon, label, false)
 						if st.blocking {
 							b.Opacity(0.5)
 						}

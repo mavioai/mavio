@@ -132,6 +132,8 @@ type App struct {
 	libraries  map[string]*task[*capiv1.Libraries]
 
 	places places
+	// focus moves focus with the arrow keys in the TV mode.
+	focus focusEngine
 	// pagePath is the path of the page being built.
 	pagePath    string
 	sidebarOpen bool // the sidebar shown over the content in medium width

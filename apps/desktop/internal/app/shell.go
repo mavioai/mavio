@@ -17,6 +17,11 @@ import (
 // shell builds the desktop layout: the sidebar, or its rail, beside the
 // page shown.
 func (a *App) shell(c *ui.Context) {
+	a.places.tv = style.TV(c)
+	if a.places.tv {
+		a.tvShell(c)
+		return
+	}
 	w, _ := c.Size()
 	medium := w < design.BreakpointExpanded
 	expanded := !medium && !a.prefs.SidebarCollapsed
@@ -125,6 +130,9 @@ func (a *App) page(c *ui.Context, r *ui.Route) {
 	case r.Match("/home"):
 		r.Title(style.T(c, "nav.home"))
 		a.home(c)
+	case r.Match("/libraries"):
+		r.Title(style.T(c, "nav.libraries"))
+		a.librariesPage(c)
 	case r.Match("/search"):
 		r.Title(style.T(c, "nav.search"))
 		a.search(c)

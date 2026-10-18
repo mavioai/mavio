@@ -126,9 +126,10 @@ func (a *App) playing(p *player) bool { return slices.Contains(a.players, p) }
 
 // play plays an item of server, with options when not nil, followed by
 // the episodes of next: in a window of the player's, a new one for each
-// video when the preferences ask, else in place of what plays.
+// video when the preferences ask, else in place of what plays. In the TV
+// mode it plays in the app's window, which a remote stays in.
 func (a *App) play(server, item string, options *capiv1.PlaybackOptions, next ...*capiv1.Card) {
-	windows := a.opts.NewWindow != nil
+	windows := a.opts.NewWindow != nil && !a.prefs.TV
 	var win Window
 	if !windows || !a.prefs.PlayerWindows {
 		for _, p := range slices.Clone(a.players) {
