@@ -86,6 +86,9 @@ object Procedure {
     fun sessions(method: String) = "/mavio.session.v1.SessionService/$method"
     fun issues(method: String) = "/mavio.acquisition.v1.IssueService/$method"
     fun items(method: String) = "/mavio.library.v1.ItemService/$method"
+    fun playlists(method: String) = "/mavio.library.v1.PlaylistService/$method"
+    fun collections(method: String) = "/mavio.library.v1.CollectionService/$method"
+    fun metadata(method: String) = "/mavio.library.v1.MetadataService/$method"
     fun libraries(method: String) = "/mavio.library.v1.LibraryService/$method"
     fun storage(method: String) = "/mavio.storage.v1.StorageService/$method"
 }

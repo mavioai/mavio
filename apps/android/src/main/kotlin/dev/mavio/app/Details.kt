@@ -524,6 +524,7 @@ private fun Actions(
                 },
             )
             if (own.size > 1 || copies.isNotEmpty()) VersionMenu(details, own, copies, source, onSource)
+            MoreMenu(model, details)
         }
         if (next != null) Status(next)
     }
