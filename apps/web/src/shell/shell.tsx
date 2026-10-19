@@ -15,7 +15,6 @@ import { Icon, type IconName } from "../icon.tsx";
 import { shortcutOf } from "../keys.ts";
 import { Wordmark } from "../logo.tsx";
 import { setPrefs, usePrefs, useWidthClass } from "../prefs.ts";
-import { Avatar } from "../ui.tsx";
 import { RemoteCommands } from "../screens/remote.tsx";
 import { GroupIndicator } from "../screens/syncplay.tsx";
 import { SyncPlayProvider } from "../syncplay.tsx";
@@ -174,28 +173,65 @@ const allTabs: { to: "/" | "/libraries" | "/discover"; icon: IconName; label: ()
 ];
 
 /**
- * The phone's top, of the tab bar's glass, which a hero's colors spread up
- * into (HeroBleed): the wordmark, or Back on a page
- * opened from another, search, the assistant, and the user's avatar opening
- * the settings.
+ * The phone's top, clear as iOS's: the wordmark, or Back on a page opened
+ * from another, search and the assistant bare, and the user's avatar on a
+ * circle of the tab bar's glass, opening the settings. Over a hero reaching
+ * up under it they are white; once the page scrolls under it, glass that
+ * fades out downward keeps them readable.
  */
 function CompactHeader() {
   const account = useAccount();
   const link = usePlaceLink();
+  const { scrolled, overHero } = useHeaderBackdrop();
   return (
-    <header className="sticky top-0 z-20 flex h-13 items-center justify-between bg-[var(--tabbar-glass)] px-margin pt-[env(safe-area-inset-top)] backdrop-blur-[var(--tabbar-blur)] backdrop-saturate-[1.8]">
+    <header className={`sticky top-0 z-20 flex h-13 items-center justify-between px-margin pt-[env(safe-area-inset-top)] ${overHero ? "text-white" : ""}`}>
+      <div
+        aria-hidden
+        className={`pointer-events-none absolute inset-x-0 top-0 -bottom-5 -z-10 bg-gradient-to-b from-background/90 via-background/70 to-transparent backdrop-blur-md backdrop-saturate-[1.8] transition-opacity duration-200 [mask-image:linear-gradient(to_bottom,black_60%,transparent)] ${scrolled && !overHero ? "opacity-100" : "opacity-0"}`}
+      />
       <PhoneBack fallback={<Wordmark height={20} />} />
-      <div className="flex items-center gap-2">
-        <Link to="/search" {...link("/search")} aria-label={t("nav.search")} className="flex size-9 items-center justify-center rounded-full hover:bg-fill data-[status=active]:text-accent-text data-place:text-accent-text">
+      <div className="flex items-center gap-1">
+        <Link to="/search" {...link("/search")} aria-label={t("nav.search")} className={`flex size-9 items-center justify-center rounded-full hover:bg-fill ${overHero ? "" : "data-[status=active]:text-accent-text data-place:text-accent-text"}`}>
           {({ isActive }) => <Icon name="search" fill={isActive || link("/search")["data-place"]} size={22} />}
         </Link>
         <AssistantButton className="flex size-9 items-center justify-center rounded-full hover:bg-fill" />
-        <Link to="/settings" aria-label={t("nav.settings")} className="rounded-full">
-          <Avatar name={account.name} size={32} />
+        <Link
+          to="/settings"
+          aria-label={t("nav.settings")}
+          className="ml-1 flex size-9 items-center justify-center rounded-full bg-[var(--tabbar-glass)] type-headline text-on-background shadow-[var(--tabbar-shadow)] backdrop-blur-[var(--tabbar-blur)] backdrop-saturate-[1.8]"
+        >
+          {[...account.name][0]?.toUpperCase()}
         </Link>
       </div>
     </header>
   );
+}
+
+/**
+ * What lies under the phone's header: whether the page is scrolled from its
+ * top, and whether a hero reaching up under it still shows there.
+ */
+function useHeaderBackdrop() {
+  const [state, setState] = useState({ scrolled: false, overHero: false });
+  const { pathname } = useLocation();
+  useEffect(() => {
+    const on = () => {
+      const hero = document.querySelector("[data-hero]");
+      const overHero = !!hero && hero.getBoundingClientRect().bottom > 52;
+      const scrolled = scrollY > 0;
+      setState((s) => (s.scrolled === scrolled && s.overHero === overHero ? s : { scrolled, overHero }));
+    };
+    on();
+    // The hero comes once Home's sections do.
+    const seen = new MutationObserver(on);
+    seen.observe(document.body, { childList: true, subtree: true });
+    addEventListener("scroll", on, { passive: true });
+    return () => {
+      seen.disconnect();
+      removeEventListener("scroll", on);
+    };
+  }, [pathname]);
+  return state;
 }
 
 /** The phone's tabs, below: a pill of glass floating over the page. */

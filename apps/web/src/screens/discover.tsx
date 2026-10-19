@@ -36,7 +36,7 @@ import { discoverLanguage, t } from "../i18n.ts";
 import { Icon } from "../icon.tsx";
 import { usePrefs, useWidthClass } from "../prefs.ts";
 import { FiltersDialog, parseFilters } from "./discover-filters.tsx";
-import { Artwork, Button, CardPlaceholder, Grid, Group, heroClip, HeroBleed, Loading, LoadMore, minutesText, NotFoundView, ScreenTitle, Shelf, Spinner, StatusView } from "../ui.tsx";
+import { Artwork, Button, CardPlaceholder, Grid, Group, Loading, LoadMore, minutesText, NotFoundView, ScreenTitle, Shelf, Spinner, StatusView } from "../ui.tsx";
 import { CastShelf, isCast, titleCredits } from "./credits.tsx";
 import { GenreLinks, TitleOverview } from "./discover-overview.tsx";
 import { dayText } from "./facts.tsx";
@@ -349,11 +349,10 @@ function TitleDetails({ server, title }: { server: ServerEntry; title: Title }) 
     <div className="pb-6">
       <header
         data-hero
-        className={`relative bg-surface ${phone ? heroClip : "overflow-hidden"} ${
-          tv ? "h-[86vh]" : phone ? "aspect-square" : "h-[clamp(520px,70vh,700px)]"
+        className={`relative overflow-hidden bg-surface ${
+          tv ? "h-[86vh]" : phone ? "-mt-[calc(3.25rem+env(safe-area-inset-top))] h-[calc(100vw+3.25rem+env(safe-area-inset-top))]" : "h-[clamp(520px,70vh,700px)]"
         }`}
       >
-        {phone && <HeroBleed src={sized(title.backdropUrl || title.posterUrl, title.backdropUrl ? 1280 : 342)} aspect="aspect-square" image={title.backdropUrl ? "" : "scale-125 opacity-70 blur-3xl"} />}
         {title.backdropUrl ? (
           <img src={sized(title.backdropUrl, 1280)} alt="" className="absolute inset-0 h-full w-full animate-[fade_600ms_ease-out] object-cover" />
         ) : (

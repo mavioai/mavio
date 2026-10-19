@@ -10,7 +10,7 @@ import { useEffect, useRef, useState } from "react";
 import { t } from "../i18n.ts";
 import { Icon } from "../icon.tsx";
 import { usePrefs, useWidthClass } from "../prefs.ts";
-import { heroClip, HeroBleed, runtimeOf, yearOf } from "../ui.tsx";
+import { runtimeOf, yearOf } from "../ui.tsx";
 import { sectionTitle } from "./home.tsx";
 
 /** A title the hero shows, and the line above it. */
@@ -81,7 +81,8 @@ export function Hero({ entries }: { entries: HeroEntry[] }) {
   const frame = tv
     ? "h-[78vh]"
     : phone
-      ? "aspect-[4/5]"
+      ? // Up under the phone's clear header, as iOS's hero reaches.
+        "-mt-[calc(3.25rem+env(safe-area-inset-top))] h-[calc(125vw+3.25rem+env(safe-area-inset-top))]"
       : "h-[470px]";
   return (
     <section
@@ -114,9 +115,8 @@ export function Hero({ entries }: { entries: HeroEntry[] }) {
         e.preventDefault();
         e.stopPropagation();
       }}
-      className={`relative touch-pan-y bg-surface ${phone ? heroClip : "overflow-hidden"} ${frame}`}
+      className={`relative touch-pan-y overflow-hidden bg-surface ${frame}`}
     >
-      {phone && <HeroBleed key={`bleed ${backdrop?.url}`} src={backdrop?.url} aspect="aspect-[4/5]" />}
       {backdrop && (
         <img key={backdrop.url} src={backdrop.url} alt="" className="absolute inset-0 h-full w-full animate-[fade_600ms_ease-out] object-cover" />
       )}
@@ -177,7 +177,7 @@ export function Hero({ entries }: { entries: HeroEntry[] }) {
         </div>
       </div>
       {entries.length > 1 && (
-        <div className={`absolute flex gap-1.5 ${tv ? "right-margin bottom-[14vh]" : phone ? "top-4 right-margin" : "right-8 bottom-8"}`}>
+        <div className={`absolute flex gap-1.5 ${tv ? "right-margin bottom-[14vh]" : phone ? "top-[calc(3.25rem+env(safe-area-inset-top)+16px)] right-margin" : "right-8 bottom-8"}`}>
           {entries.map((e, i) => (
             <button
               key={`${e.server.id}/${e.item.id}`}

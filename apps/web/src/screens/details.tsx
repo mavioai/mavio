@@ -54,7 +54,7 @@ import { ItemSubtitles } from "./item-subtitles.tsx";
 import { CollectionMembers, MoreMenu, PlaylistEntries } from "./lists.tsx";
 import { Icon } from "../icon.tsx";
 import { usePrefs, useWidthClass } from "../prefs.ts";
-import { Artwork, Grid, ItemCard, Loading, minutesLeft, heroClip, HeroBleed, minutesText, NotFoundView, progressOf, runtimeOf, Shelf, StatusView, yearOf } from "../ui.tsx";
+import { Artwork, Grid, ItemCard, Loading, minutesLeft, minutesText, NotFoundView, progressOf, runtimeOf, Shelf, StatusView, yearOf } from "../ui.tsx";
 import { Dismiss, Sheet } from "../controls/dialog.tsx";
 import { useEntryState } from "../shell/entry-state.ts";
 import { Tabs, ToggleButton } from "../controls/inputs.tsx";
@@ -371,11 +371,10 @@ function Header({
   return (
     <header
       data-hero
-      className={`relative bg-surface ${phone ? heroClip : "overflow-hidden"} ${
-        tv ? "h-[86vh]" : phone ? "aspect-square" : "h-[clamp(520px,70vh,700px)]"
+      className={`relative overflow-hidden bg-surface ${
+        tv ? "h-[86vh]" : phone ? "-mt-[calc(3.25rem+env(safe-area-inset-top))] h-[calc(100vw+3.25rem+env(safe-area-inset-top))]" : "h-[clamp(520px,70vh,700px)]"
       }`}
     >
-      {phone && <HeroBleed src={image || poster} aspect="aspect-square" image={image ? "" : "scale-125 opacity-70 blur-3xl"} />}
       {image ? (
         <img src={image} alt="" className="absolute inset-0 h-full w-full animate-[fade_600ms_ease-out] object-cover" />
       ) : (

@@ -92,34 +92,6 @@ export function yearOf(item: Item): number | undefined {
 }
 
 /**
- * A phone's hero (data-hero) carries its colors up under the header: the
- * top edge of its artwork, as the hero crops it (aspect, and the image's
- * classes beyond its fill), stretched up through the header's height and
- * softened, so each column's color goes straight on, meeting the hero at
- * a sharp edge. The hero clips all but this (heroClip).
- */
-export function HeroBleed({ src, aspect, image = "" }: { src?: string; aspect: string; image?: string }) {
-  if (!src) return null;
-  return (
-    <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-full h-13 overflow-hidden [filter:url(#hero-bleed)]">
-      {/* A blur that holds to the strip's edges rather than fading at them. */}
-      <svg className="absolute size-0">
-        <filter id="hero-bleed" x="0" y="0" width="1" height="1">
-          <feGaussianBlur stdDeviation="12" edgeMode="duplicate" />
-        </filter>
-      </svg>
-      {/* The artwork's top 6 px, stretched to the strip's 52. */}
-      <div className="absolute inset-x-0 top-0 h-1.5 origin-top scale-y-[8.667] overflow-hidden">
-        <img src={src} alt="" className={`absolute inset-x-0 top-0 w-full object-cover ${aspect} ${image}`} />
-      </div>
-    </div>
-  );
-}
-
-/** Clips a phone's hero but the bleed above it (HeroBleed). */
-export const heroClip = "[clip-path:inset(-52px_0_0_0)]";
-
-/**
  * An image that fades in, over a placeholder of its final size; with none,
  * the placeholder stays, a quiet wash of fill with the icon of what
  * it shows.

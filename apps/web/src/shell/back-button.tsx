@@ -44,7 +44,7 @@ export function PhoneBack({ fallback }: { fallback: ReactNode }) {
       type="button"
       aria-label={t("action.back")}
       onClick={() => goBack(router)}
-      className="-ml-2 flex size-9 items-center justify-center rounded-full text-on-background hover:bg-fill"
+      className="-ml-2 flex size-9 items-center justify-center rounded-full hover:bg-fill"
     >
       <Icon name="back" size={22} />
     </button>
