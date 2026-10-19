@@ -20,6 +20,9 @@ type tvKeyboard struct {
 	original, text string
 	// upper types capitals, more the symbols.
 	upper, more bool
+	// typed is what a computer's keyboard typed into it since the last
+	// frame (tvTyping).
+	typed string
 }
 
 const (
@@ -39,6 +42,18 @@ func (a *App) tvKeyboardKeys(c *ui.Context) {
 			return
 		}
 		*k = tvKeyboard{open: true, field: f, original: f.Text, text: f.Text}
+	}
+	if t := k.typed; t != "" {
+		k.typed = ""
+		if k.field.Number {
+			t = strings.Map(func(r rune) rune {
+				if r >= '0' && r <= '9' || r == '-' && k.field.Signed || r == '.' && k.field.Decimal {
+					return r
+				}
+				return -1
+			}, t)
+		}
+		a.tvType(c, func(s string) string { return s + t })
 	}
 	open := true
 	ui.DialogBase(c, &open, func(back, panel ui.Element) {
@@ -109,7 +124,7 @@ func (a *App) tvKeyboardPanel(c *ui.Context, panel ui.Element) {
 						if k.upper {
 							ch = strings.ToUpper(ch)
 						}
-						if tvKey(c, "k"+chars[j], ch, false, j == 0).Grow(1).Basis(0).Clicked() {
+						if a.tvTyping(tvKey(c, "k"+chars[j], ch, false, j == 0)).Grow(1).Basis(0).Clicked() {
 							a.tvType(c, func(s string) string { return s + ch })
 						}
 					}
@@ -122,33 +137,51 @@ func (a *App) tvKeyboardPanel(c *ui.Context, panel ui.Element) {
 				if k.upper {
 					label = "abc"
 				}
-				if b := tvKey(c, "upper", label, false, false).Width(96).Disabled(k.more); b.Clicked() {
+				if b := a.tvTyping(tvKey(c, "upper", label, false, false)).Width(96).Disabled(k.more); b.Clicked() {
 					k.upper = !k.upper
 				}
 				label = "#+="
 				if k.more {
 					label = "abc"
 				}
-				if tvKey(c, "more", label, false, false).Width(96).Clicked() {
+				if a.tvTyping(tvKey(c, "more", label, false, false)).Width(96).Clicked() {
 					k.more = !k.more
 				}
-				if tvKey(c, "space", style.T(c, "search.space"), false, false).Grow(1).Basis(0).Clicked() {
+				if a.tvTyping(tvKey(c, "space", style.T(c, "search.space"), false, false)).Grow(1).Basis(0).Clicked() {
 					a.tvType(c, func(s string) string { return s + " " })
 				}
-				if k.field.Multiline && tvKey(c, "newline", "↵", false, false).Width(80).Clicked() {
+				if k.field.Multiline && a.tvTyping(tvKey(c, "newline", "↵", false, false)).Width(80).Clicked() {
 					a.tvType(c, func(s string) string { return s + "\n" })
 				}
 			}
-			if tvKey(c, "delete", style.T(c, "search.backspace"), false, false).Grow(1).Basis(0).Clicked() {
+			if a.tvTyping(tvKey(c, "delete", style.T(c, "search.backspace"), false, false)).Grow(1).Basis(0).Clicked() {
 				a.tvType(c, dropLast)
 			}
-			if tvKey(c, "clear", style.T(c, "search.clear"), false, false).Grow(1).Basis(0).Clicked() {
+			if a.tvTyping(tvKey(c, "clear", style.T(c, "search.clear"), false, false)).Grow(1).Basis(0).Clicked() {
 				a.tvType(c, func(string) string { return "" })
 			}
-			if tvKey(c, "done", style.T(c, "action.done"), true, false).Grow(1).Basis(0).Clicked() {
+			if a.tvTyping(tvKey(c, "done", style.T(c, "action.done"), true, false)).Grow(1).Basis(0).Clicked() {
 				a.tvKeyboardClose(c)
 			}
 		})
+	})
+}
+
+// tvTyping has key b take what a computer's keyboard types into the
+// keyboard while it has focus (docs/tv.md §4), the characters of the
+// keyboard's layout, Space typing a space rather than pressing the key;
+// Return still presses it, and Backspace is Back.
+func (a *App) tvTyping(b ui.Element) ui.Element {
+	k := &a.tvKeys
+	return b.TextCaret(ui.Rect{W: 1, H: 1}).InputMethod(false).HandleInput(func(ev ui.InputEvent) bool {
+		switch ev.Kind {
+		case ui.InputKeyDown:
+			return ev.Key == ui.KeySpace && ev.Mods == 0
+		case ui.InputText:
+			k.typed += ev.Text
+			return true
+		}
+		return false
 	})
 }
 

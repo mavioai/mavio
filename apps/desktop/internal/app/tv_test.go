@@ -334,6 +334,17 @@ func TestTVKeyboard(t *testing.T) {
 	if got, want := k.text, original+"1"; got != want {
 		t.Fatalf("after a key: text = %q, want = %q", got, want)
 	}
+	// A computer's keyboard types into it as well, Space a space rather
+	// than pressing the key with focus.
+	h.tt.Type("Ab")
+	h.tt.TypeKey(0, ui.KeySpace, " ")
+	h.settle()
+	if got, want := k.text, original+"1Ab "; got != want {
+		t.Fatalf("after typing: text = %q, want = %q", got, want)
+	}
+	for range 3 {
+		key(ui.KeyBackspace)
+	}
 	// Back deletes a character, and closes the keyboard once there is
 	// none, putting back what the field held.
 	key(ui.KeyBackspace)
