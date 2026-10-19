@@ -17,6 +17,9 @@ PLATFORMS = {
         "products": ["MavioKit", "MavioPlayer", "MavioUI"],
         "target": {
             "TARGETED_DEVICE_FAMILY": '"1,2"',
+            # The mark on white, black, or gray for a tinted home screen
+            # (libs/design/brand).
+            "ASSETCATALOG_COMPILER_APPICON_NAME": "AppIcon",
             "SUPPORTED_PLATFORMS": '"iphoneos iphonesimulator"',
             "INFOPLIST_KEY_UIApplicationSceneManifest_Generation": "YES",
             "INFOPLIST_KEY_UILaunchScreen_Generation": "YES",
