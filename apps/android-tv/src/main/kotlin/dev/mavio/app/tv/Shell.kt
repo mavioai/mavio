@@ -49,6 +49,17 @@ import kotlinx.coroutines.launch
 /** The tabs of the navigation bar (docs/tv.md §3). */
 enum class Tab(val title: Int) {
     Home(R.string.nav_home),
+    Libraries(R.string.nav_libraries),
+}
+
+/** What a tab's page keeps while another shows: its scroll, its rows' and the element that had focus. */
+private class TabState {
+    val list = LazyListState()
+    val rows = RowStates()
+    val focus = FocusMemory()
+
+    /** Its first element, which down from the tabs reaches. */
+    val entry = FocusRequester()
 }
 
 /** The app: its sign-in until a Mavio account signs in, then its tabs. */
@@ -74,21 +85,23 @@ private fun Shell(model: AppModel) {
     var tab by rememberSaveable { mutableStateOf(Tab.Home) }
     val tabs = remember { Tab.entries.associateWith { FocusRequester() } }
     var inPage by remember { mutableStateOf(false) }
-    val list = rememberLazyListState()
-    val rows = remember { RowStates() }
-    val focus = remember { FocusMemory() }
-    val entry = remember { FocusRequester() }
+    val states = remember { Tab.entries.associateWith { TabState() } }
+    val state = states.getValue(tab)
+    // Whether the tab's page takes focus as it shows: as the app starts and
+    // as a page over it closes, not as focus on the tabs opens it.
+    var claim by remember { mutableStateOf(true) }
     val scope = rememberCoroutineScope()
     val pages = remember { Pages() }
     val actions = remember(pages) { HomeActions(open = pages::open, play = { pages.play(it.serverId, it.itemId, it.title) }) }
     val top = pages.top
+    if (top != null) claim = true
     BackHandler(top == null && (inPage || tab != Tab.Home)) {
         if (inPage) {
-            focus.last = null
+            state.focus.last = null
             tabs.getValue(tab).requestFocus()
             scope.launch {
-                list.scrollToItem(0)
-                rows.reset()
+                state.list.scrollToItem(0)
+                state.rows.reset()
             }
         } else {
             tabs.getValue(Tab.Home).requestFocus()
@@ -101,14 +114,21 @@ private fun Shell(model: AppModel) {
             // A page covers the tabs, which keep where they were for its return.
             when (top) {
                 is Page.Details -> key(top) { DetailsPage(model, top) }
+                is Page.Library -> key(top) { LibraryPage(model, top) }
                 is Page.Player -> key(top) { PlayerPage(model, top) }
                 null -> {
                     Box(Modifier.fillMaxSize().onFocusChanged { inPage = it.hasFocus }) {
-                        when (tab) {
-                            Tab.Home -> HomePage(model, list, rows, focus, entry, actions)
+                        key(tab) {
+                            when (tab) {
+                                Tab.Home -> HomePage(model, state.list, state.rows, state.focus, state.entry, claim, actions)
+                                Tab.Libraries -> LibrariesPage(model, state.list, state.focus, state.entry, claim)
+                            }
                         }
                     }
-                    NavBar(tab, tabs, scrolled(list), entry) { tab = it }
+                    NavBar(tab, tabs, scrolled(state.list), state.entry) {
+                        claim = false
+                        tab = it
+                    }
                 }
             }
         }
@@ -156,29 +176,7 @@ private fun NavBar(current: Tab, tabs: Map<Tab, FocusRequester>, scrolled: Boole
 }
 
 /** A tab: filled while current, white with focus, which opens it. */
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun TabPill(tab: Tab, current: Boolean, modifier: Modifier, onOpen: () -> Unit) {
-    val state = remember { Focusable() }
-    val focused = state.focused()
-    val fill = when {
-        focused -> Color.White
-        current -> theme.colors.fillSelected
-        else -> Color.Transparent
-    }
-    Text(
-        stringResource(tab.title),
-        modifier
-            .clip(CircleShape)
-            .background(fill)
-            .onFocusChanged { if (it.isFocused && !current) onOpen() }
-            .selectable(state, onOpen)
-            .padding(horizontal = 28.dp, vertical = 10.dp),
-        style = theme.type.headline.text,
-        color = when {
-            focused -> Color.Black
-            current -> theme.colors.textPrimary
-            else -> theme.colors.textSecondary
-        },
-    )
+    TvChoice(stringResource(tab.title), current, modifier, onChoose = onOpen)
 }

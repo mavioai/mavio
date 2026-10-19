@@ -1,6 +1,10 @@
 package dev.mavio.app.tv
 
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.grid.LazyGridState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.withFrameNanos
@@ -10,11 +14,13 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import dev.mavio.core.Card
+import dev.mavio.core.Row
+import dev.mavio.core.Sort
 import java.time.Duration
 
 /**
  * A page over the tabs, which hides the navigation bar (docs/tv.md §6.2,
- * §7): an item's details, or its playback. Each keeps where it was, so
+ * §6.3, §7): an item's details, a library, or an item's playback. Each keeps where it was, so
  * that back returns to it as it was left.
  */
 sealed class Page {
@@ -25,6 +31,39 @@ sealed class Page {
 
         /** Its rows' scrolls. */
         val rows = RowStates()
+
+        /** The element that had focus. */
+        val focus = FocusMemory()
+    }
+
+    /**
+     * A library (docs/tv.md §6.3): its Recommended or All, All's filter
+     * and order, and where each was.
+     */
+    class Library(val serverId: String, val libraryId: String, val name: String) : Page() {
+        /** Whether All shows rather than Recommended. */
+        var all by mutableStateOf(false)
+
+        /** The items All shows. */
+        var shown by mutableStateOf(Shown.ALL)
+
+        /** The order of All's items. */
+        var sort by mutableStateOf(Sort.NAME)
+
+        /** Recommended's rows. */
+        var recommended by mutableStateOf<Result<List<Row>>?>(null)
+
+        /** Recommended's scroll. */
+        val list = LazyListState()
+
+        /** Recommended's rows' scrolls. */
+        val rows = RowStates()
+
+        /** All's scroll. */
+        val grid = LazyGridState()
+
+        /** All's items. */
+        internal var items: LibraryItems? = null
 
         /** The element that had focus. */
         val focus = FocusMemory()
@@ -47,6 +86,11 @@ class Pages {
     /** Opens [card]'s details. */
     fun open(card: Card) {
         stack += Page.Details(card.serverId, card.itemId)
+    }
+
+    /** Opens the library [libraryId] of [serverId], named [name]. */
+    fun openLibrary(serverId: String, libraryId: String, name: String) {
+        stack += Page.Library(serverId, libraryId, name)
     }
 
     /** Plays an item, from [start] when set. */

@@ -98,11 +98,12 @@ class HomeActions(val open: (Card) -> Unit, val play: (Card) -> Unit)
  * Home on a television (docs/tv.md §6.1): a hero 78 % of the screen's
  * height behind the navigation bar, then a row for each the servers
  * return. Focus starts on the hero's first button, else the first card;
- * [entry] takes it there.
+ * [entry] takes it there. While [claim], as when the app starts or a page
+ * closes, the page takes focus back to where it was.
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun HomePage(model: AppModel, list: LazyListState, rows: RowStates, focus: FocusMemory, entry: FocusRequester, actions: HomeActions) {
+fun HomePage(model: AppModel, list: LazyListState, rows: RowStates, focus: FocusMemory, entry: FocusRequester, claim: Boolean, actions: HomeActions) {
     val home by model.home.collectAsStateWithLifecycle()
     val signedIn by model.signedIn.collectAsStateWithLifecycle()
     val titles = home.associate { it.id to rowTitle(it) }
@@ -117,7 +118,7 @@ fun HomePage(model: AppModel, list: LazyListState, rows: RowStates, focus: Focus
     // The first focusable: the hero's first button, else the first row's first card.
     val firstRow = home.indexOfFirst { (it.content as? RowContent.Items)?.v1?.isNotEmpty() == true || (it.content as? RowContent.Titles)?.v1?.isNotEmpty() == true }
     // Back from a page returns focus to what opened it.
-    LaunchedEffect(hero.isNotEmpty(), firstRow) { focus.restore(entry) }
+    LaunchedEffect(hero.isNotEmpty(), firstRow) { if (claim) focus.restore(entry) }
     CompositionLocalProvider(LocalBringIntoViewSpec provides scrolling) {
         LazyColumn(Modifier.fillMaxSize(), state = list, contentPadding = PaddingValues(top = if (hero.isEmpty()) 128.dp else 0.dp, bottom = MavioSpacing.s24)) {
             if (hero.isNotEmpty()) {
@@ -297,7 +298,7 @@ private fun HeroFacts(card: Card) {
  * card.
  */
 @Composable
-private fun HomeShelf(row: HomeRow, title: String, several: Boolean, state: LazyListState, entry: FocusRequester?, focus: FocusMemory, actions: HomeActions) {
+internal fun HomeShelf(row: HomeRow, title: String, several: Boolean, state: LazyListState, entry: FocusRequester?, focus: FocusMemory, actions: HomeActions) {
     val badge: @Composable () -> Unit = {
         val server = row.serverName
         if (several && server != null && row.kind != RowKind.SERVER) ServerBadge(server)
@@ -375,14 +376,15 @@ fun TvShelf(title: String, state: LazyListState = rememberLazyListState(), badge
 /**
  * The card of an item on a television: its artwork with watched progress
  * and the played check, its title and subtitle; with focus it grows and
- * its artwork is framed (docs/tv.md §4).
+ * its artwork is framed (docs/tv.md §4). It is a poster or thumbnail
+ * wide, or fills its cell when [fill], as in a grid.
  */
 @Composable
-fun TvItemCard(card: Card, modifier: Modifier = Modifier, shape: CardShape = shapeOf(card.kind), onClick: () -> Unit) {
+fun TvItemCard(card: Card, modifier: Modifier = Modifier, shape: CardShape = shapeOf(card.kind), fill: Boolean = false, onClick: () -> Unit) {
     val state = remember { Focusable() }
     val focused = state.focused()
     val width = if (shape == CardShape.Thumb) theme.layout.thumbnail else theme.layout.poster
-    Column(modifier.width(width).focusCard(focused).selectable(state, onClick)) {
+    Column(modifier.then(if (fill) Modifier.fillMaxWidth() else Modifier.width(width)).focusCard(focused).selectable(state, onClick)) {
         Box(Modifier.focusArtwork(focused, MavioRadius.md)) {
             val art = if (shape == CardShape.Thumb) card.thumb ?: card.poster else card.poster ?: card.thumb
             Artwork(
