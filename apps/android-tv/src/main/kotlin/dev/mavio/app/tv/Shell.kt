@@ -16,8 +16,10 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -74,11 +76,15 @@ private fun Shell(model: AppModel) {
     var inPage by remember { mutableStateOf(false) }
     val list = rememberLazyListState()
     val rows = remember { RowStates() }
+    val focus = remember { FocusMemory() }
     val entry = remember { FocusRequester() }
     val scope = rememberCoroutineScope()
-    val actions = remember { HomeActions(open = {}, play = {}) }
-    BackHandler(inPage || tab != Tab.Home) {
+    val pages = remember { Pages() }
+    val actions = remember(pages) { HomeActions(open = pages::open, play = { pages.play(it.serverId, it.itemId, it.title) }) }
+    val top = pages.top
+    BackHandler(top == null && (inPage || tab != Tab.Home)) {
         if (inPage) {
+            focus.last = null
             tabs.getValue(tab).requestFocus()
             scope.launch {
                 list.scrollToItem(0)
@@ -88,13 +94,24 @@ private fun Shell(model: AppModel) {
             tabs.getValue(Tab.Home).requestFocus()
         }
     }
-    Box(Modifier.fillMaxSize().background(theme.colors.tvBackground)) {
-        Box(Modifier.fillMaxSize().onFocusChanged { inPage = it.hasFocus }) {
-            when (tab) {
-                Tab.Home -> HomePage(model, list, rows, entry, actions)
+    // Back from a page returns to what opened it.
+    BackHandler(top != null) { pages.back() }
+    CompositionLocalProvider(LocalPages provides pages) {
+        Box(Modifier.fillMaxSize().background(theme.colors.tvBackground)) {
+            // A page covers the tabs, which keep where they were for its return.
+            when (top) {
+                is Page.Details -> key(top) { DetailsPage(model, top) }
+                is Page.Player -> key(top) { PlayerPage(model, top) }
+                null -> {
+                    Box(Modifier.fillMaxSize().onFocusChanged { inPage = it.hasFocus }) {
+                        when (tab) {
+                            Tab.Home -> HomePage(model, list, rows, focus, entry, actions)
+                        }
+                    }
+                    NavBar(tab, tabs, scrolled(list), entry) { tab = it }
+                }
             }
         }
-        NavBar(tab, tabs, scrolled(list), entry) { tab = it }
     }
 }
 

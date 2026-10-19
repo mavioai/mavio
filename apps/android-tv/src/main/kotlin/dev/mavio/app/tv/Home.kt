@@ -102,7 +102,7 @@ class HomeActions(val open: (Card) -> Unit, val play: (Card) -> Unit)
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun HomePage(model: AppModel, list: LazyListState, rows: RowStates, entry: FocusRequester, actions: HomeActions) {
+fun HomePage(model: AppModel, list: LazyListState, rows: RowStates, focus: FocusMemory, entry: FocusRequester, actions: HomeActions) {
     val home by model.home.collectAsStateWithLifecycle()
     val signedIn by model.signedIn.collectAsStateWithLifecycle()
     val titles = home.associate { it.id to rowTitle(it) }
@@ -116,7 +116,8 @@ fun HomePage(model: AppModel, list: LazyListState, rows: RowStates, entry: Focus
     val scope = rememberCoroutineScope()
     // The first focusable: the hero's first button, else the first row's first card.
     val firstRow = home.indexOfFirst { (it.content as? RowContent.Items)?.v1?.isNotEmpty() == true || (it.content as? RowContent.Titles)?.v1?.isNotEmpty() == true }
-    LaunchedEffect(hero.isNotEmpty(), firstRow) { runCatching { entry.requestFocus() } }
+    // Back from a page returns focus to what opened it.
+    LaunchedEffect(hero.isNotEmpty(), firstRow) { focus.restore(entry) }
     CompositionLocalProvider(LocalBringIntoViewSpec provides scrolling) {
         LazyColumn(Modifier.fillMaxSize(), state = list, contentPadding = PaddingValues(top = if (hero.isEmpty()) 128.dp else 0.dp, bottom = MavioSpacing.s24)) {
             if (hero.isNotEmpty()) {
@@ -126,13 +127,14 @@ fun HomePage(model: AppModel, list: LazyListState, rows: RowStates, entry: Focus
                         hero,
                         Modifier.onFocusChanged { if (it.hasFocus) scope.launch { list.animateScrollToItem(0) } },
                         entry,
+                        focus,
                         actions,
                     )
                     Spacer(Modifier.height(MavioSpacing.s16))
                 }
             }
             itemsIndexed(home, key = { _, row -> row.id }) { i, row ->
-                HomeShelf(row, titles.getValue(row.id), signedIn.size > 1, rows.of(row.id), if (hero.isEmpty() && i == firstRow) entry else null, actions)
+                HomeShelf(row, titles.getValue(row.id), signedIn.size > 1, rows.of(row.id), if (hero.isEmpty() && i == firstRow) entry else null, focus, actions)
             }
         }
     }
@@ -175,7 +177,7 @@ private fun heroEntries(rows: List<HomeRow>, titles: Map<String, String>): List<
  * details, the first of which [entry] focuses.
  */
 @Composable
-private fun Hero(entries: List<HeroEntry>, modifier: Modifier, entry: FocusRequester, actions: HomeActions) {
+private fun Hero(entries: List<HeroEntry>, modifier: Modifier, entry: FocusRequester, focus: FocusMemory, actions: HomeActions) {
     var at by remember { mutableIntStateOf(0) }
     var paused by remember { mutableStateOf(false) }
     LaunchedEffect(paused, entries.size, at) {
@@ -233,12 +235,12 @@ private fun Hero(entries: List<HeroEntry>, modifier: Modifier, entry: FocusReque
             Row(Modifier.padding(top = MavioSpacing.s8), horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s12)) {
                 val playable = card.kind != CardKind.SERIES
                 if (playable) {
-                    TvButton(stringResource(R.string.item_play), { actions.play(card) }, Modifier.focusRequester(entry), icon = R.drawable.ic_play_fill)
+                    TvButton(stringResource(R.string.item_play), { actions.play(card) }, Modifier.focusRequester(entry).focusKey(focus, "hero/play"), icon = R.drawable.ic_play_fill)
                 }
                 TvButton(
                     stringResource(R.string.item_details),
                     { actions.open(card) },
-                    if (playable) Modifier else Modifier.focusRequester(entry),
+                    (if (playable) Modifier else Modifier.focusRequester(entry)).focusKey(focus, "hero/details"),
                     icon = R.drawable.ic_info,
                 )
             }
@@ -295,7 +297,7 @@ private fun HeroFacts(card: Card) {
  * card.
  */
 @Composable
-private fun HomeShelf(row: HomeRow, title: String, several: Boolean, state: LazyListState, entry: FocusRequester?, actions: HomeActions) {
+private fun HomeShelf(row: HomeRow, title: String, several: Boolean, state: LazyListState, entry: FocusRequester?, focus: FocusMemory, actions: HomeActions) {
     val badge: @Composable () -> Unit = {
         val server = row.serverName
         if (several && server != null && row.kind != RowKind.SERVER) ServerBadge(server)
@@ -308,7 +310,7 @@ private fun HomeShelf(row: HomeRow, title: String, several: Boolean, state: Lazy
                 itemsIndexed(content.v1, key = { _, c -> "${c.serverId}/${c.itemId}" }) { i, card ->
                     TvItemCard(
                         card,
-                        if (i == 0 && entry != null) Modifier.focusRequester(entry) else Modifier,
+                        (if (i == 0 && entry != null) Modifier.focusRequester(entry) else Modifier).focusKey(focus, "${row.id}/${card.serverId}/${card.itemId}"),
                         shape = shape ?: shapeOf(card.kind),
                     ) { actions.open(card) }
                 }

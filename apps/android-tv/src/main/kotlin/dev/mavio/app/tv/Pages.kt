@@ -1,0 +1,102 @@
+package dev.mavio.app.tv
+
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.withFrameNanos
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
+import dev.mavio.core.Card
+import java.time.Duration
+
+/**
+ * A page over the tabs, which hides the navigation bar (docs/tv.md §6.2,
+ * §7): an item's details, or its playback. Each keeps where it was, so
+ * that back returns to it as it was left.
+ */
+sealed class Page {
+    /** An item's details. */
+    class Details(val serverId: String, val itemId: String) : Page() {
+        /** The page's scroll. */
+        val list = LazyListState()
+
+        /** Its rows' scrolls. */
+        val rows = RowStates()
+
+        /** The element that had focus. */
+        val focus = FocusMemory()
+    }
+
+    /** An item's playback, from [start] when set. */
+    class Player(val serverId: String, val itemId: String, val title: String, val mediaSourceId: String?, val start: Duration?) : Page()
+}
+
+/** The pages opened over the tabs, the last on top. */
+class Pages {
+    private val stack = mutableStateListOf<Page>()
+
+    /** The page on top, if any. */
+    val top: Page? get() = stack.lastOrNull()
+
+    /** The pages, the last on top. */
+    val all: List<Page> get() = stack
+
+    /** Opens [card]'s details. */
+    fun open(card: Card) {
+        stack += Page.Details(card.serverId, card.itemId)
+    }
+
+    /** Plays an item, from [start] when set. */
+    fun play(serverId: String, itemId: String, title: String, mediaSourceId: String? = null, start: Duration? = null) {
+        stack += Page.Player(serverId, itemId, title, mediaSourceId, start)
+    }
+
+    /** Replaces the page on top with [page], as the next episode does its player. */
+    fun replace(page: Page) {
+        if (stack.isNotEmpty()) stack.removeAt(stack.lastIndex)
+        stack += page
+    }
+
+    /** Closes the page on top. */
+    fun back() {
+        if (stack.isNotEmpty()) stack.removeAt(stack.lastIndex)
+    }
+}
+
+/** The pages of the app, which its screens open. */
+val LocalPages = staticCompositionLocalOf<Pages> { error("no pages") }
+
+/**
+ * The element of a page that had focus, for back to return to it: each
+ * focusable registers under a key with [focusKey].
+ */
+class FocusMemory {
+    private val requesters = mutableMapOf<String, FocusRequester>()
+
+    /** The key of the element that had focus last. */
+    var last: String? = null
+
+    /** The requester of the element [key]. */
+    fun of(key: String): FocusRequester = requesters.getOrPut(key) { FocusRequester() }
+
+    /**
+     * Focuses the element that had focus last, once it is laid out, else
+     * [fallback]; returns whether either took focus.
+     */
+    suspend fun restore(fallback: FocusRequester? = null): Boolean {
+        val target = last?.let { of(it) } ?: fallback ?: return false
+        // Rows lay their cards out a frame or two after the page.
+        repeat(5) {
+            if (runCatching { target.requestFocus(FocusDirection.Enter) }.getOrDefault(false)) return true
+            withFrameNanos {}
+        }
+        return fallback != null && target != fallback && runCatching { fallback.requestFocus(FocusDirection.Enter) }.getOrDefault(false)
+    }
+}
+
+/** Registers the focusable this modifies, put before it, under [key] in [memory]. */
+fun Modifier.focusKey(memory: FocusMemory, key: String): Modifier =
+    focusRequester(memory.of(key)).onFocusChanged { if (it.isFocused) memory.last = key }

@@ -69,9 +69,10 @@ The settings show the list of their sections — the account, the users to switc
 
 ## 7. Player
 
-The on-screen controller follows the platform's focus and stays up while it has focus. The track and subtitle pickers open as a side panel.
+The on-screen controller shows the title, the timeline, and a row of buttons for the next episode, the subtitles and the audio; it has no buttons to play, pause or seek, which the remote's keys do. The track and subtitle pickers open as a side panel.
 
-* **Focus**: while the controller is hidden nothing has focus, and left and right seek by 10 seconds; up, down and select show it with focus on Play. Left and right then move focus among the controls, and the controller hides as usual once nothing is pressed for 3 seconds during playback, taking focus with it. The side panel opens with focus on its current choice, and closing it returns focus to the button that opened it.
+* **Keys**: down shows the controller; left and right always seek by 10 seconds and show it; select pauses, showing the controller for as long as it is paused, and plays on, hiding it. During playback the controller hides once nothing is pressed for 3 seconds.
+* **Focus**: outside the controller's row nothing shows focus. Down while the controller shows moves focus into its row, where left and right move among the buttons and up leaves it. The side panel opens with focus on its current choice, and closing it returns focus to the button that opened it.
 * **Back**: back closes the side panel, then hides the controller, then leaves the player for where it was opened from, else the item's details.
 
 ## 8. Platforms
