@@ -639,7 +639,8 @@ function ContainerDependency({ server, id, c }: { server: ServerEntry; id: strin
             </span>
           </span>
         }
-        detail={[d.description, st?.error ? `${state}: ${st.error}` : state].filter(Boolean).join(" · ")}
+        detail={[d.description, state].filter(Boolean).join(" · ")}
+        wrap
       >
         <Select
           value={String(chosen)}
@@ -694,6 +695,11 @@ function ContainerDependency({ server, id, c }: { server: ServerEntry; id: strin
             </div>
           )}
         </>
+      )}
+      {st?.error && (
+        <div className="pt-2.5">
+          <ContainerDisclosure label={t("plugins.containerError")} text={st.error} danger />
+        </div>
       )}
       {recreating !== undefined && (
         <Confirm
