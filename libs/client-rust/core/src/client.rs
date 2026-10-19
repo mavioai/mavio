@@ -665,12 +665,13 @@ impl Core {
         // a server that cannot take it cannot switch either.
         let _ = self.reporter.replay(server_id).await;
         let s = self.servers.switch_user(server_id, user_id, pin).await?;
-        if let Some(task) = self
+        // The lock is let go before following, which takes it again.
+        let task = self
             .streams
             .lock()
             .unwrap_or_else(|e| e.into_inner())
-            .remove(server_id)
-        {
+            .remove(server_id);
+        if let Some(task) = task {
             task.abort();
             self.follow(server_id);
         }
@@ -2208,7 +2209,9 @@ mod tests {
             },
         );
         let a = a.serve().await;
-        core.servers.sign_in(&a, "me", "secret").await.unwrap();
+        // Signed in as the app does, following the server's events, which
+        // switching follows again.
+        core.sign_in(&a, "me", "secret").await.unwrap();
         store.put_cached("sa", "home", &hubs(vec![])).unwrap();
 
         let users = core.switchable_users("sa").await.unwrap();
