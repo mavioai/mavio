@@ -24506,31 +24506,67 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "A provider can be used once it has a credential: an API key, an account signed in here, or one the plugin found in its environment."
+            "value": "A provider is added once it has a credential: an API key, an account signed in here, or one the plugin found in its environment."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "提供商有凭据后即可使用：API 密钥、在此登录的账号，或插件在环境中找到的凭据。"
+            "value": "提供商有了凭据即为已添加：API 密钥、在此登录的账号，或插件在环境中找到的凭据。"
           }
         }
       }
     },
     "ai.noProviders": {
-      "comment": "Shown when the AI gateway lists no providers.",
+      "comment": "Shown when no AI provider has a credential yet.",
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "The AI gateway plugin has no providers."
+            "value": "No providers added."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "AI 网关插件没有提供商。"
+            "value": "还没有添加提供商。"
+          }
+        }
+      }
+    },
+    "ai.addProvider": {
+      "comment": "Row adding an AI provider, by choosing one to give an API key or sign in with an account.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add Provider"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "添加提供商"
+          }
+        }
+      }
+    },
+    "ai.chooseProvider": {
+      "comment": "Placeholder of the searchable choice of AI providers to add.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose a provider"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "选择提供商"
           }
         }
       }

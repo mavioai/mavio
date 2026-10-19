@@ -1351,6 +1351,8 @@ export type MessageKey =
   | 'ai.providers'
   | 'ai.providersFooter'
   | 'ai.noProviders'
+  | 'ai.addProvider'
+  | 'ai.chooseProvider'
   | 'ai.notSignedIn'
   | 'ai.signedIn'
   | 'ai.apiKeyStored'
@@ -3280,8 +3282,10 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "ai.noGatewayDetail": "Install or enable one in Plugins",
     "ai.noGatewayFooter": "AI features such as subtitle translation use the providers of an AI gateway plugin.",
     "ai.providers": "Providers",
-    "ai.providersFooter": "A provider can be used once it has a credential: an API key, an account signed in here, or one the plugin found in its environment.",
-    "ai.noProviders": "The AI gateway plugin has no providers.",
+    "ai.providersFooter": "A provider is added once it has a credential: an API key, an account signed in here, or one the plugin found in its environment.",
+    "ai.noProviders": "No providers added.",
+    "ai.addProvider": "Add Provider",
+    "ai.chooseProvider": "Choose a provider",
     "ai.notSignedIn": "No credential",
     "ai.signedIn": "Signed in with {label}",
     "ai.apiKeyStored": "API key stored",
@@ -5209,8 +5213,10 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "ai.noGatewayDetail": "请在插件中安装或启用",
     "ai.noGatewayFooter": "字幕翻译等 AI 功能使用 AI 网关插件提供的提供商。",
     "ai.providers": "提供商",
-    "ai.providersFooter": "提供商有凭据后即可使用：API 密钥、在此登录的账号，或插件在环境中找到的凭据。",
-    "ai.noProviders": "AI 网关插件没有提供商。",
+    "ai.providersFooter": "提供商有了凭据即为已添加：API 密钥、在此登录的账号，或插件在环境中找到的凭据。",
+    "ai.noProviders": "还没有添加提供商。",
+    "ai.addProvider": "添加提供商",
+    "ai.chooseProvider": "选择提供商",
     "ai.notSignedIn": "无凭据",
     "ai.signedIn": "已用 {label} 登录",
     "ai.apiKeyStored": "已保存 API 密钥",

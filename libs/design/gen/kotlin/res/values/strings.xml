@@ -2743,9 +2743,13 @@
     <!-- Title of the list of AI providers. -->
     <string name="ai_providers">Providers</string>
     <!-- Footer of the list of AI providers. -->
-    <string name="ai_providers_footer">A provider can be used once it has a credential: an API key, an account signed in here, or one the plugin found in its environment.</string>
-    <!-- Shown when the AI gateway lists no providers. -->
-    <string name="ai_no_providers">The AI gateway plugin has no providers.</string>
+    <string name="ai_providers_footer">A provider is added once it has a credential: an API key, an account signed in here, or one the plugin found in its environment.</string>
+    <!-- Shown when no AI provider has a credential yet. -->
+    <string name="ai_no_providers">No providers added.</string>
+    <!-- Row adding an AI provider, by choosing one to give an API key or sign in with an account. -->
+    <string name="ai_add_provider">Add Provider</string>
+    <!-- Placeholder of the searchable choice of AI providers to add. -->
+    <string name="ai_choose_provider">Choose a provider</string>
     <!-- Status of an AI provider without a credential. -->
     <string name="ai_not_signed_in">No credential</string>
     <!-- Status of an AI provider signed in with OAuth; label is the account kind. -->

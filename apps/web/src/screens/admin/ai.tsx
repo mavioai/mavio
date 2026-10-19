@@ -1,7 +1,8 @@
-// The settings' AI (docs/clients.md §6.3.13): the providers of the AI
-// gateway plugin, each with where its credential comes from; a provider's
-// API key, its OAuth login followed step by step, signing out, and its
-// models; and the assistant's settings (docs/assistant.md §10).
+// The settings' AI (docs/clients.md §6.3.13): the assistant's settings
+// (docs/assistant.md §10); the providers of the AI gateway plugin added,
+// each with where its credential comes from, and the others to add; a
+// provider's API key, its OAuth login followed step by step, signing out,
+// and its models.
 import {
   errorMessage,
   isNoAiGateway,
@@ -12,12 +13,12 @@ import {
   useAiProviders,
 } from "@mavio/client-ts";
 import { AiCredential, AiLoginPromptKind, type AiLoginEvent, AiLoginState, type AiModel, type AiProvider } from "@mavio/proto/mavio/plugin/v1/ai_pb";
-import { useSearch } from "@tanstack/react-router";
+import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useState } from "react";
 
 import { locale, t } from "../../i18n.ts";
 import { Button, Group, Row } from "../../ui.tsx";
-import { Select } from "../../controls/select.tsx";
+import { Picker, Select } from "../../controls/select.tsx";
 import type { SettingsSearch } from "../settings.tsx";
 import { AssistantServerSettings } from "../assistant-settings.tsx";
 import { BackLink, Page, PageLink } from "./common.tsx";
@@ -41,34 +42,62 @@ function credentialOf(p: AiProvider) {
 function ProvidersList({ server }: { server: ServerEntry }) {
   const providers = useAiProviders(server);
   const models = useAiModels(server, true);
-  const sorted = (providers.data ?? []).toSorted((a, b) => Number(b.available) - Number(a.available) || a.name.localeCompare(b.name, locale));
+  const { server: chosen } = useSearch({ strict: false }) as SettingsSearch;
+  const navigate = useNavigate();
+  const byName = (a: AiProvider, b: AiProvider) => a.name.localeCompare(b.name, locale);
+  // A provider is added once it has a credential; the others are offered to add.
+  const added = (providers.data ?? []).filter((p) => p.available).toSorted(byName);
+  const others = (providers.data ?? []).filter((p) => !p.available).toSorted(byName);
   const count = (p: AiProvider) => (models.data ?? []).filter((m) => m.provider === p.id).length;
   if (providers.isError && isNoAiGateway(providers.error))
     return (
       <Page title={t("settings.ai")} message={t("ai.message")}>
+        <AssistantServerSettings server={server} />
         <Group footer={t("ai.noGatewayFooter")}>
           <PageLink search={{}} section="plugins" icon="plugins" color="#AF52DE" label={t("ai.noGateway")} detail={t("ai.noGatewayDetail")} />
         </Group>
-        <AssistantServerSettings server={server} />
       </Page>
     );
   return (
     <Page title={t("settings.ai")} message={t("ai.message")}>
+      <AssistantServerSettings server={server} />
       <Group title={t("ai.providers")} footer={t("ai.providersFooter")}>
-        {sorted.map((p) => (
+        {added.map((p) => (
           <PageLink
             key={p.id}
             search={{ id: p.id }}
             icon="key"
-            color={p.available ? "#34C759" : "#8E8E93"}
+            color="#34C759"
             label={p.name}
-            detail={[credentialOf(p), p.available && t("ai.modelCount", { count: count(p) }), p.custom && t("ai.custom")].filter(Boolean).join(" · ")}
+            detail={[credentialOf(p), t("ai.modelCount", { count: count(p) }), p.custom && t("ai.custom")].filter(Boolean).join(" · ")}
           />
         ))}
-        {providers.isSuccess && sorted.length === 0 && <p className="px-4 py-3 type-callout text-text-secondary">{t("ai.noProviders")}</p>}
+        {providers.isSuccess && added.length === 0 && <p className="px-4 py-3 type-callout text-text-secondary">{t("ai.noProviders")}</p>}
         {providers.isError && <p className="px-4 py-3 type-callout text-danger">{errorMessage(providers.error)}</p>}
+        {others.length > 0 && (
+          <Row label={t("ai.addProvider")} wrap>
+            <Picker
+              className="w-full sm:w-64"
+              label={t("ai.addProvider")}
+              value={undefined}
+              options={others.map((p) => ({
+                value: p.id,
+                label: p.name,
+                meta: [p.apiKey && t("ai.apiKey"), p.oauth && t("ai.oauth")].filter(Boolean).join(" · "),
+                badges: p.custom ? [{ label: t("ai.custom") }] : undefined,
+              }))}
+              labels={{
+                placeholder: t("ai.chooseProvider"),
+                empty: t("schema.noMatches"),
+                all: t("schema.all"),
+                count: (count) => t("schema.matches", { count }),
+                first: (shown, count) => t("schema.matchesFirst", { shown, count }),
+              }}
+              onChange={(id) => id && void navigate({ to: "/settings/$section", params: { section: "ai" }, search: { server: chosen, id } })}
+            />
+          </Row>
+        )}
       </Group>
-      <AssistantServerSettings server={server} />
     </Page>
   );
 }

@@ -1378,8 +1378,10 @@
     <string name="ai_no_gateway_detail">请在插件中安装或启用</string>
     <string name="ai_no_gateway_footer">字幕翻译等 AI 功能使用 AI 网关插件提供的提供商。</string>
     <string name="ai_providers">提供商</string>
-    <string name="ai_providers_footer">提供商有凭据后即可使用：API 密钥、在此登录的账号，或插件在环境中找到的凭据。</string>
-    <string name="ai_no_providers">AI 网关插件没有提供商。</string>
+    <string name="ai_providers_footer">提供商有了凭据即为已添加：API 密钥、在此登录的账号，或插件在环境中找到的凭据。</string>
+    <string name="ai_no_providers">还没有添加提供商。</string>
+    <string name="ai_add_provider">添加提供商</string>
+    <string name="ai_choose_provider">选择提供商</string>
     <string name="ai_not_signed_in">无凭据</string>
     <string name="ai_signed_in">已用 %s 登录</string>
     <string name="ai_api_key_stored">已保存 API 密钥</string>

@@ -4289,8 +4289,14 @@ public enum MavioStrings {
     /// Footer of the list of AI providers.
     public static var aiProvidersFooter: String { NSLocalizedString("ai.providersFooter", bundle: .module, comment: "") }
 
-    /// Shown when the AI gateway lists no providers.
+    /// Shown when no AI provider has a credential yet.
     public static var aiNoProviders: String { NSLocalizedString("ai.noProviders", bundle: .module, comment: "") }
+
+    /// Row adding an AI provider, by choosing one to give an API key or sign in with an account.
+    public static var aiAddProvider: String { NSLocalizedString("ai.addProvider", bundle: .module, comment: "") }
+
+    /// Placeholder of the searchable choice of AI providers to add.
+    public static var aiChooseProvider: String { NSLocalizedString("ai.chooseProvider", bundle: .module, comment: "") }
 
     /// Status of an AI provider without a credential.
     public static var aiNotSignedIn: String { NSLocalizedString("ai.notSignedIn", bundle: .module, comment: "") }
