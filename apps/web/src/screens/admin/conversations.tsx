@@ -21,12 +21,15 @@ import { type KeyboardEvent, useEffect, useLayoutEffect, useRef, useState } from
 
 import { locale, t } from "../../i18n.ts";
 import { modelDetail } from "../../ai-model.ts";
-import { Button, Group, Row } from "../../ui.tsx";
+import { Button, Group, Row, Spinner } from "../../ui.tsx";
 import { ModelLabel, type ModelOption, ModelPicker } from "../../controls/model-picker.tsx";
 import type { SettingsSearch } from "../settings.tsx";
 import { BackLink, fromNow, Page, PageLink } from "./common.tsx";
 import { input } from "../../controls/styles.ts";
 import { Confirm } from "../../controls/dialog.tsx";
+import { Tip } from "../../controls/tooltip.tsx";
+import { Icon } from "../../icon.tsx";
+import { useDictation } from "../../assistant/dictation.ts";
 
 /** A message to send once its new conversation shows. */
 interface First {
@@ -121,12 +124,21 @@ function modelOf(options: ModelOption[], c: AgentSession): ModelOption {
 /** A model's name and its provider's, on one line. */
 const modelName = (m: ModelOption) => `${m.label} (${m.providerName})`;
 
+/** Text said joined to what was typed, a space between words of scripts that space them. */
+function joined(typed: string, said: string): string {
+  if (!typed) return said;
+  return /[\p{L}\p{N}]$/u.test(typed) && /^[\p{Script=Latin}\p{Script=Cyrillic}\p{Script=Greek}\p{N}]/u.test(said) ? `${typed} ${said}` : typed + said;
+}
+
 /**
- * A field for a message, its button sending it in a column of its own at its
- * end, at the bottom: the field grows and shrinks with its text, and from its
- * highest scrolls, the scroll bar at the edge beyond the button.
+ * A field for a message, its buttons in a column of their own at its end, at
+ * the bottom: dictation over sending. The field grows and shrinks with its
+ * text, and from its highest scrolls, the scroll bar at the edge beyond the
+ * buttons; while it is dictated to, it is not typed in, and what is heard
+ * shows in it as it is said.
  */
 function Composer({
+  server,
   value,
   onChange,
   onSend,
@@ -135,6 +147,7 @@ function Composer({
   busy,
   disabled,
 }: {
+  server: ServerEntry;
   value: string;
   onChange: (text: string) => void;
   onSend: () => void;
@@ -144,37 +157,73 @@ function Composer({
   disabled?: boolean;
 }) {
   const field = useRef<HTMLTextAreaElement>(null);
+  const typed = useRef(value);
+  typed.current = value;
+  const dictation = useDictation(server, (said) => onChange(joined(typed.current, said)));
+  const shown = dictation.listening ? joined(value, dictation.heard) : value;
   // As tall as its text, which the box around it scrolls.
   useLayoutEffect(() => {
     const el = field.current;
     if (!el) return;
     el.style.height = "auto";
     el.style.height = `${el.scrollHeight}px`;
-  }, [value]);
+  }, [shown]);
   return (
-    <div className="overflow-hidden rounded-md border border-border bg-surface focus-within:border-focus">
-      <div className="flex max-h-60 items-end gap-2 overflow-y-auto p-1.5 ps-0">
-      <textarea
-        ref={field}
-        className="min-h-16 min-w-0 flex-1 resize-none overflow-hidden bg-transparent ps-3 pt-0.5 type-callout text-on-background placeholder:text-text-tertiary focus:outline-none"
-        rows={2}
-        aria-label={label}
-        placeholder={label}
-        maxLength={100000}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        onKeyDown={sendOnEnter(onSend)}
-      />
-      <button
-        type="button"
-        disabled={disabled || !value.trim() || busy}
-        onClick={onSend}
-        className="sticky bottom-0 min-h-8 shrink-0 rounded-full bg-button px-3.5 type-footnote font-semibold text-on-button hover:opacity-85 disabled:opacity-40 desk:min-h-7"
-      >
-        {busy ? "…" : action}
-      </button>
+    <div className="flex flex-col gap-1.5">
+      <div className="max-h-60 overflow-y-auto rounded-md border border-border bg-surface focus-within:border-focus">
+        <div className="flex items-end gap-2 p-1.5 ps-0">
+          <textarea
+            ref={field}
+            className="min-h-16 min-w-0 flex-1 resize-none overflow-hidden bg-transparent ps-3 pt-0.5 type-callout text-on-background placeholder:text-text-tertiary read-only:cursor-default focus:outline-none"
+            rows={2}
+            aria-label={label}
+            placeholder={dictation.listening ? t("assistant.listening") : label}
+            maxLength={100000}
+            readOnly={dictation.listening}
+            value={shown}
+            onChange={(e) => onChange(e.target.value)}
+            onKeyDown={sendOnEnter(() => !dictation.listening && onSend())}
+          />
+          <div className="sticky bottom-1.5 flex shrink-0 flex-col items-center gap-1.5">
+            <Tip label={dictation.listening ? t("assistant.stopListening") : t("conversations.dictate")}>
+              <button
+                type="button"
+                aria-label={dictation.listening ? t("assistant.stopListening") : t("conversations.dictate")}
+                aria-pressed={dictation.listening}
+                disabled={disabled || busy}
+                onClick={dictation.toggle}
+                className={`flex size-8 items-center justify-center rounded-full disabled:opacity-40 desk:size-7 ${dictation.listening ? "bg-danger text-white" : "text-text-secondary hover:bg-fill"}`}
+              >
+                {dictation.listening ? <Voice /> : <Icon name="microphone" size={18} />}
+              </button>
+            </Tip>
+            <Tip label={action}>
+              <button
+                type="button"
+                aria-label={action}
+                disabled={disabled || !value.trim() || busy || dictation.listening}
+                onClick={onSend}
+                className="flex size-8 items-center justify-center rounded-full bg-button text-on-button hover:opacity-85 disabled:opacity-40 desk:size-7"
+              >
+                {busy ? <Spinner size={16} className="text-on-button" /> : <Icon name="send" size={18} />}
+              </button>
+            </Tip>
+          </div>
+        </div>
       </div>
+      {dictation.error && <p className="type-footnote break-words text-danger">{dictation.error}</p>}
     </div>
+  );
+}
+
+/** Bars rising and falling one after another, while dictation listens. */
+function Voice() {
+  return (
+    <span aria-hidden className="flex h-3.5 items-center gap-[2px]">
+      {[0, 0.15, 0.3, 0.45].map((delay) => (
+        <span key={delay} className="voice-bar h-full w-[2.5px] rounded-full bg-current" style={{ animationDelay: `${delay}s` }} />
+      ))}
+    </span>
   );
 }
 
@@ -230,6 +279,7 @@ function NewConversation({ server, onStarted }: { server: ServerEntry; onStarted
           onChange={(e) => setInstructions(e.target.value)}
         />
         <Composer
+          server={server}
           value={text}
           onChange={setText}
           onSend={start}
@@ -418,6 +468,7 @@ function ConversationPage({ server, id, first, onFirstSent }: { server: ServerEn
       )}
       <div ref={end}>
         <Composer
+          server={server}
           value={text}
           onChange={setText}
           onSend={submit}

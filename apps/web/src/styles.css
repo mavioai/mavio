@@ -185,6 +185,24 @@
   }
 }
 
+/* Dictation's bars, rising and falling one after another as a voice does. */
+@keyframes voice {
+  0%,
+  100% {
+    scale: 1 0.3;
+  }
+  50% {
+    scale: 1 1;
+  }
+}
+.voice-bar {
+  animation: voice 0.9s ease-in-out infinite;
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+    scale: 1 0.6;
+  }
+}
+
 /* Artwork with no image: a quiet wash of fill from its top. */
 @utility art-placeholder {
   background: linear-gradient(160deg, var(--mavio-color-fill), transparent 70%);
