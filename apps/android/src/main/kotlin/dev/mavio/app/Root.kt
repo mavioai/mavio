@@ -551,8 +551,8 @@ private fun Screen(model: AppModel, route: Route) {
 
 /**
  * The phone's top, clear as the web UI's and iOS's: the wordmark, or Back
- * on a page opened from another, then search and the user's initial on a
- * circle of the tab bar's glass, which opens the settings. Its icons turn
+ * on a page opened from another, then, on the places alone, search and the
+ * user's initial on a circle of the tab bar's glass, which opens the settings. Its icons turn
  * white over a hero reaching up under it ([backdrop] of [route]); once the page has
  * scrolled under it with no hero there, an edge fades in behind it: the
  * page blurred under the background, fading out a little below it.
@@ -607,6 +607,8 @@ private fun Header(model: AppModel, back: Boolean, backdrop: HeaderBackdrop, rou
                 Wordmark(height = 20.dp)
             }
             Spacer(Modifier.weight(1f))
+            // Search and the avatar are the places' alone, as the tab bar.
+            if (back) return@Row
             Box(
                 Modifier
                     .size(36.dp)
