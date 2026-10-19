@@ -22,6 +22,9 @@ pub mod event {
         Notification(
             ::buffa::alloc::boxed::Box<super::super::super::NotificationReceived>,
         ),
+        ScanProgressChanged(
+            ::buffa::alloc::boxed::Box<super::super::super::ScanProgressChanged>,
+        ),
     }
     impl ::buffa::Oneof for Kind {}
     impl From<super::super::super::Connected> for Kind {
@@ -122,6 +125,17 @@ pub mod event {
     impl From<super::super::super::NotificationReceived>
     for ::core::option::Option<Kind> {
         fn from(v: super::super::super::NotificationReceived) -> Self {
+            Self::Some(Kind::from(v))
+        }
+    }
+    impl From<super::super::super::ScanProgressChanged> for Kind {
+        fn from(v: super::super::super::ScanProgressChanged) -> Self {
+            Self::ScanProgressChanged(::buffa::alloc::boxed::Box::new(v))
+        }
+    }
+    impl From<super::super::super::ScanProgressChanged>
+    for ::core::option::Option<Kind> {
+        fn from(v: super::super::super::ScanProgressChanged) -> Self {
             Self::Some(Kind::from(v))
         }
     }

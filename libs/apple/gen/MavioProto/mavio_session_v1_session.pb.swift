@@ -247,6 +247,14 @@ public nonisolated struct Mavio_Session_V1_Event: @unchecked Sendable {
     set {_uniqueStorage()._kind = .notification(newValue)}
   }
 
+  public var scanProgressChanged: Mavio_Session_V1_ScanProgressChanged {
+    get {
+      if case .scanProgressChanged(let v)? = _storage._kind {return v}
+      return Mavio_Session_V1_ScanProgressChanged()
+    }
+    set {_uniqueStorage()._kind = .scanProgressChanged(newValue)}
+  }
+
   public var unknownFields = SwiftProtobuf.UnknownStorage()
 
   public nonisolated enum OneOf_Kind: Equatable, Sendable {
@@ -260,6 +268,7 @@ public nonisolated struct Mavio_Session_V1_Event: @unchecked Sendable {
     case pluginChanged(Mavio_Session_V1_PluginChanged)
     case syncPlay(Mavio_Session_V1_SyncPlayUpdate)
     case notification(Mavio_Session_V1_NotificationReceived)
+    case scanProgressChanged(Mavio_Session_V1_ScanProgressChanged)
 
   }
 
@@ -453,6 +462,40 @@ public nonisolated struct Mavio_Session_V1_JobChanged: Sendable {
   fileprivate var _kind: String? = nil
   fileprivate var _libraryID: String? = nil
   fileprivate var _state: Mavio_Session_V1_JobState? = nil
+}
+
+/// ScanProgressChanged tells administrators how far a library's scan has
+/// come, at most twice a second while it runs, and once when it ends.
+public nonisolated struct Mavio_Session_V1_ScanProgressChanged: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  public var libraryID: String {
+    get {_libraryID ?? String()}
+    set {_libraryID = newValue}
+  }
+  /// Returns true if `libraryID` has been explicitly set.
+  public var hasLibraryID: Bool {self._libraryID != nil}
+  /// Clears the value of `libraryID`. Subsequent reads from it will return its default value.
+  public mutating func clearLibraryID() {self._libraryID = nil}
+
+  /// Unset once the scan and the work it queued are done.
+  public var progress: Mavio_Library_V1_ScanProgress {
+    get {_progress ?? Mavio_Library_V1_ScanProgress()}
+    set {_progress = newValue}
+  }
+  /// Returns true if `progress` has been explicitly set.
+  public var hasProgress: Bool {self._progress != nil}
+  /// Clears the value of `progress`. Subsequent reads from it will return its default value.
+  public mutating func clearProgress() {self._progress = nil}
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+
+  fileprivate var _libraryID: String? = nil
+  fileprivate var _progress: Mavio_Library_V1_ScanProgress? = nil
 }
 
 /// NotificationReceived tells the user of a notification as it is
@@ -1082,7 +1125,7 @@ nonisolated extension Mavio_Session_V1_SubscribeResponse: SwiftProtobuf.Message,
 
 nonisolated extension Mavio_Session_V1_Event: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".Event"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}time\0\u{1}connected\0\u{1}heartbeat\0\u{3}library_changed\0\u{3}user_data_changed\0\u{3}sessions_changed\0\u{1}command\0\u{3}job_changed\0\u{3}plugin_changed\0\u{3}sync_play\0\u{1}notification\0")
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}time\0\u{1}connected\0\u{1}heartbeat\0\u{3}library_changed\0\u{3}user_data_changed\0\u{3}sessions_changed\0\u{1}command\0\u{3}job_changed\0\u{3}plugin_changed\0\u{3}sync_play\0\u{1}notification\0\u{3}scan_progress_changed\0")
 
   fileprivate class _StorageClass {
     var _time: SwiftProtobuf.Google_Protobuf_Timestamp? = nil
@@ -1248,6 +1291,19 @@ nonisolated extension Mavio_Session_V1_Event: SwiftProtobuf.Message, SwiftProtob
             _storage._kind = .notification(v)
           }
         }()
+        case 12: try {
+          var v: Mavio_Session_V1_ScanProgressChanged?
+          var hadOneofValue = false
+          if let current = _storage._kind {
+            hadOneofValue = true
+            if case .scanProgressChanged(let m) = current {v = m}
+          }
+          try decoder.decodeSingularMessageField(value: &v)
+          if let v = v {
+            if hadOneofValue {try decoder.handleConflictingOneOf()}
+            _storage._kind = .scanProgressChanged(v)
+          }
+        }()
         default: break
         }
       }
@@ -1303,6 +1359,10 @@ nonisolated extension Mavio_Session_V1_Event: SwiftProtobuf.Message, SwiftProtob
       case .notification?: try {
         guard case .notification(let v)? = _storage._kind else { preconditionFailure() }
         try visitor.visitSingularMessageField(value: v, fieldNumber: 11)
+      }()
+      case .scanProgressChanged?: try {
+        guard case .scanProgressChanged(let v)? = _storage._kind else { preconditionFailure() }
+        try visitor.visitSingularMessageField(value: v, fieldNumber: 12)
       }()
       case nil: break
       }
@@ -1571,6 +1631,45 @@ nonisolated extension Mavio_Session_V1_JobChanged: SwiftProtobuf.Message, SwiftP
     if lhs._kind != rhs._kind {return false}
     if lhs._libraryID != rhs._libraryID {return false}
     if lhs._state != rhs._state {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Mavio_Session_V1_ScanProgressChanged: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".ScanProgressChanged"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}library_id\0\u{1}progress\0")
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularStringField(value: &self._libraryID) }()
+      case 2: try { try decoder.decodeSingularMessageField(value: &self._progress) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    try { if let v = self._libraryID {
+      try visitor.visitSingularStringField(value: v, fieldNumber: 1)
+    } }()
+    try { if let v = self._progress {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 2)
+    } }()
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Mavio_Session_V1_ScanProgressChanged, rhs: Mavio_Session_V1_ScanProgressChanged) -> Bool {
+    if lhs._libraryID != rhs._libraryID {return false}
+    if lhs._progress != rhs._progress {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

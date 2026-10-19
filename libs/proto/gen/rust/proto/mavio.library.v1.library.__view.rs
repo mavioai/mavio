@@ -104,6 +104,13 @@ pub struct LibraryView<'a> {
     ///
     /// Field 21: `image_url`
     pub image_url: ::core::option::Option<&'a str>,
+    /// How far the library's scan has come, for administrators; unset while
+    /// the library is not being scanned.
+    ///
+    /// Field 22: `scan_progress`
+    pub scan_progress: ::buffa::MessageFieldView<
+        super::super::__buffa::view::ScanProgressView<'a>,
+    >,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for LibraryView<'a> {
@@ -350,6 +357,27 @@ impl<'a> ::buffa::MessageView<'a> for LibraryView<'a> {
                 )?;
                 view.image_url = Some(::buffa::types::borrow_str(&mut cur)?);
             }
+            22u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __sub_ctx = ctx.descend()?;
+                let sub = ::buffa::types::borrow_bytes(&mut cur)?;
+                match view.scan_progress.as_mut() {
+                    Some(existing) => {
+                        ::buffa::MessageView::merge_into_view(existing, sub, __sub_ctx)?
+                    }
+                    None => {
+                        view.scan_progress = ::buffa::MessageFieldView::set(
+                            <super::super::__buffa::view::ScanProgressView as ::buffa::MessageView>::decode_view_ctx(
+                                sub,
+                                __sub_ctx,
+                            )?,
+                        );
+                    }
+                }
+            }
             4u32 => {
                 ::buffa::encoding::check_wire_type(
                     tag,
@@ -546,6 +574,15 @@ impl<'a> ::buffa::MessageView<'a> for LibraryView<'a> {
                 .map(|(k, v)| (k.to_string(), *v))
                 .collect(),
             image_url: self.image_url.map(|s| s.to_string()),
+            scan_progress: match self.scan_progress.as_option() {
+                Some(v) => {
+                    ::buffa::MessageField::<
+                        super::super::ScanProgress,
+                        ::buffa::Inline<super::super::ScanProgress>,
+                    >::some(v.to_owned_from_source(__buffa_src)?)
+                }
+                None => ::buffa::MessageField::none(),
+            },
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -655,6 +692,14 @@ impl<'a> ::buffa::ViewEncode<'a> for LibraryView<'a> {
         }
         if let Some(ref v) = self.image_url {
             size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if self.scan_progress.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.scan_progress.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 2u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
         }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
@@ -791,6 +836,14 @@ impl<'a> ::buffa::ViewEncode<'a> for LibraryView<'a> {
         }
         if let Some(ref v) = self.image_url {
             ::buffa::types::put_string_field(21u32, v, buf);
+        }
+        if self.scan_progress.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                22u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.scan_progress.write_to(__cache, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -1050,6 +1103,16 @@ impl LibraryOwnedView {
     pub fn image_url(&self) -> ::core::option::Option<&'_ str> {
         self.0.reborrow().image_url
     }
+    /// How far the library's scan has come, for administrators; unset while
+    /// the library is not being scanned.
+    ///
+    /// Field 22: `scan_progress`
+    #[must_use]
+    pub fn scan_progress(
+        &self,
+    ) -> &::buffa::MessageFieldView<super::super::__buffa::view::ScanProgressView<'_>> {
+        &self.0.reborrow().scan_progress
+    }
 }
 impl ::core::convert::From<::buffa::OwnedView<LibraryView<'static>>>
 for LibraryOwnedView {
@@ -1072,6 +1135,372 @@ for LibraryOwnedView {
 impl ::buffa::HasMessageView for super::super::Library {
     type View<'a> = LibraryView<'a>;
     type ViewHandle = LibraryOwnedView;
+}
+/// ScanProgress tells how far a library's scan and the work it queued
+/// have come: the scan reads the library's folders, then the files it
+/// found new or changed are probed and their items refreshed.
+#[derive(Clone, Debug, Default)]
+pub struct ScanProgressView<'a> {
+    /// Field 1: `library_id`
+    pub library_id: ::core::option::Option<&'a str>,
+    /// Field 2: `phase`
+    pub phase: ::core::option::Option<::buffa::EnumValue<super::super::ScanPhase>>,
+    /// The folders read or found unchanged, and those the scan expects: the
+    /// folders of the library's last scan, or those it found so far when
+    /// more.
+    ///
+    /// Field 3: `folders_done`
+    pub folders_done: ::core::option::Option<i32>,
+    /// Field 4: `folders_total`
+    pub folders_total: ::core::option::Option<i32>,
+    /// The probes and metadata refreshes of the scan's new and changed files
+    /// done, and those queued so far.
+    ///
+    /// Field 5: `items_done`
+    pub items_done: ::core::option::Option<i32>,
+    /// Field 6: `items_total`
+    pub items_total: ::core::option::Option<i32>,
+    /// The whole done, 0 to 1: reading the folders is its first quarter, the
+    /// probes and refreshes the rest.
+    ///
+    /// Field 7: `fraction`
+    pub fraction: ::core::option::Option<f64>,
+    pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
+}
+impl<'a> ::buffa::MessageView<'a> for ScanProgressView<'a> {
+    type Owned = super::super::ScanProgress;
+    fn decode_view(buf: &'a [u8]) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        let __limit = ::core::cell::Cell::new(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT);
+        let __elem = ::core::cell::Cell::new(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT);
+        <Self as ::buffa::MessageView>::decode_view_ctx(
+            buf,
+            ::buffa::DecodeContext::new(::buffa::RECURSION_LIMIT, &__limit)
+                .with_element_memory(&__elem),
+        )
+    }
+    fn decode_view_with_ctx(
+        buf: &'a [u8],
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        <Self as ::buffa::MessageView>::decode_view_ctx(buf, ctx)
+    }
+    #[inline]
+    fn merge_view_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        cur: &'a [u8],
+        before_tag: &'a [u8],
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<&'a [u8], ::buffa::DecodeError> {
+        let _ = ctx;
+        #[allow(unused_variables)]
+        let view = self;
+        let mut cur = cur;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.library_id = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.phase = Some(
+                    ::buffa::EnumValue::from(::buffa::types::decode_int32(&mut cur)?),
+                );
+            }
+            3u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.folders_done = Some(::buffa::types::decode_int32(&mut cur)?);
+            }
+            4u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.folders_total = Some(::buffa::types::decode_int32(&mut cur)?);
+            }
+            5u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.items_done = Some(::buffa::types::decode_int32(&mut cur)?);
+            }
+            6u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.items_total = Some(::buffa::types::decode_int32(&mut cur)?);
+            }
+            7u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Fixed64,
+                )?;
+                view.fraction = Some(::buffa::types::decode_double(&mut cur)?);
+            }
+            _ => {
+                ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
+                let span_len = before_tag.len() - cur.len();
+                view.__buffa_unknown_fields.push_record(before_tag, span_len, ctx)?;
+            }
+        }
+        ::core::result::Result::Ok(cur)
+    }
+    fn to_owned_message(
+        &self,
+    ) -> ::core::result::Result<super::super::ScanProgress, ::buffa::DecodeError> {
+        self.to_owned_from_source(None)
+    }
+    #[allow(clippy::useless_conversion, clippy::needless_update)]
+    fn to_owned_from_source(
+        &self,
+        __buffa_src: ::core::option::Option<&::buffa::bytes::Bytes>,
+    ) -> ::core::result::Result<super::super::ScanProgress, ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::alloc::string::ToString as _;
+        let _ = __buffa_src;
+        ::core::result::Result::Ok(super::super::ScanProgress {
+            library_id: self.library_id.map(|s| s.to_string()),
+            phase: self.phase,
+            folders_done: self.folders_done,
+            folders_total: self.folders_total,
+            items_done: self.items_done,
+            items_total: self.items_total,
+            fraction: self.fraction,
+            __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
+            ..::core::default::Default::default()
+        })
+    }
+}
+impl<'a> ::buffa::ViewEncode<'a> for ScanProgressView<'a> {
+    #[allow(clippy::needless_borrow, clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if let Some(ref v) = self.library_id {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.phase {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v.to_i32()) as u64;
+        }
+        if let Some(v) = self.folders_done {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.folders_total {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.items_done {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.items_total {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        if self.fraction.is_some() {
+            size += 1u64 + ::buffa::types::FIXED64_ENCODED_LEN as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    #[allow(clippy::needless_borrow)]
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if let Some(ref v) = self.library_id {
+            ::buffa::types::put_string_field(1u32, v, buf);
+        }
+        if let Some(ref v) = self.phase {
+            ::buffa::types::put_int32_field(2u32, v.to_i32(), buf);
+        }
+        if let Some(v) = self.folders_done {
+            ::buffa::types::put_int32_field(3u32, v, buf);
+        }
+        if let Some(v) = self.folders_total {
+            ::buffa::types::put_int32_field(4u32, v, buf);
+        }
+        if let Some(v) = self.items_done {
+            ::buffa::types::put_int32_field(5u32, v, buf);
+        }
+        if let Some(v) = self.items_total {
+            ::buffa::types::put_int32_field(6u32, v, buf);
+        }
+        if let Some(v) = self.fraction {
+            ::buffa::types::put_double_field(7u32, v, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+}
+impl<'a> ::buffa::MessageName for ScanProgressView<'a> {
+    const PACKAGE: &'static str = "mavio.library.v1";
+    const NAME: &'static str = "ScanProgress";
+    const FULL_NAME: &'static str = "mavio.library.v1.ScanProgress";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.library.v1.ScanProgress";
+}
+::buffa::impl_default_view_instance!(ScanProgressView);
+::buffa::impl_view_reborrow!(ScanProgressView);
+/** Self-contained, `'static` owned view of a `ScanProgress` message.
+
+ Wraps [`::buffa::OwnedView`]`<`[`ScanProgressView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
+
+ Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`ScanProgressView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
+#[derive(Clone, Debug)]
+pub struct ScanProgressOwnedView(::buffa::OwnedView<ScanProgressView<'static>>);
+impl ScanProgressOwnedView {
+    /// Decode an owned view from a [`::buffa::bytes::Bytes`] buffer.
+    ///
+    /// The view borrows directly from the buffer's data; the buffer is
+    /// retained inside the returned handle.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError`] if the buffer contains invalid
+    /// protobuf data.
+    pub fn decode(
+        bytes: ::buffa::bytes::Bytes,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            ScanProgressOwnedView(::buffa::OwnedView::decode(bytes)?),
+        )
+    }
+    /// Decode with custom [`::buffa::DecodeOptions`] (recursion limit,
+    /// max message size).
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError`] if the buffer is invalid or
+    /// exceeds the configured limits.
+    pub fn decode_with_options(
+        bytes: ::buffa::bytes::Bytes,
+        opts: &::buffa::DecodeOptions,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            ScanProgressOwnedView(::buffa::OwnedView::decode_with_options(bytes, opts)?),
+        )
+    }
+    /// Build from an owned message via an encode → decode round-trip.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError::MessageTooLarge`] if the
+    /// message's encoded size exceeds the 2 GiB protobuf limit, or
+    /// another [`::buffa::DecodeError`] if the re-encoded bytes are
+    /// somehow invalid (should not happen for well-formed messages).
+    pub fn from_owned(
+        msg: &super::super::ScanProgress,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            ScanProgressOwnedView(::buffa::OwnedView::from_owned(msg)?),
+        )
+    }
+    /// Borrow the full [`ScanProgressView`] with its lifetime tied to `&self`.
+    #[must_use]
+    pub fn view(&self) -> &ScanProgressView<'_> {
+        self.0.reborrow()
+    }
+    /// Convert to the owned message type.
+    ///
+    /// Infallible: this type's constructors wire-decode their
+    /// buffer, and a view produced by wire decoding always
+    /// converts. Delegates to [`::buffa::OwnedView::to_owned_message`],
+    /// whose contract also governs handles converted from a raw
+    /// [`::buffa::OwnedView`].
+    #[must_use]
+    pub fn to_owned_message(&self) -> super::super::ScanProgress {
+        self.0.to_owned_message()
+    }
+    /// The underlying bytes buffer.
+    #[must_use]
+    pub fn bytes(&self) -> &::buffa::bytes::Bytes {
+        self.0.bytes()
+    }
+    /// Consume the handle, returning the underlying bytes buffer.
+    #[must_use]
+    pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
+        self.0.into_bytes()
+    }
+    /// Field 1: `library_id`
+    #[must_use]
+    pub fn library_id(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().library_id
+    }
+    /// Field 2: `phase`
+    #[must_use]
+    pub fn phase(
+        &self,
+    ) -> ::core::option::Option<::buffa::EnumValue<super::super::ScanPhase>> {
+        self.0.reborrow().phase
+    }
+    /// The folders read or found unchanged, and those the scan expects: the
+    /// folders of the library's last scan, or those it found so far when
+    /// more.
+    ///
+    /// Field 3: `folders_done`
+    #[must_use]
+    pub fn folders_done(&self) -> ::core::option::Option<i32> {
+        self.0.reborrow().folders_done
+    }
+    /// Field 4: `folders_total`
+    #[must_use]
+    pub fn folders_total(&self) -> ::core::option::Option<i32> {
+        self.0.reborrow().folders_total
+    }
+    /// The probes and metadata refreshes of the scan's new and changed files
+    /// done, and those queued so far.
+    ///
+    /// Field 5: `items_done`
+    #[must_use]
+    pub fn items_done(&self) -> ::core::option::Option<i32> {
+        self.0.reborrow().items_done
+    }
+    /// Field 6: `items_total`
+    #[must_use]
+    pub fn items_total(&self) -> ::core::option::Option<i32> {
+        self.0.reborrow().items_total
+    }
+    /// The whole done, 0 to 1: reading the folders is its first quarter, the
+    /// probes and refreshes the rest.
+    ///
+    /// Field 7: `fraction`
+    #[must_use]
+    pub fn fraction(&self) -> ::core::option::Option<f64> {
+        self.0.reborrow().fraction
+    }
+}
+impl ::core::convert::From<::buffa::OwnedView<ScanProgressView<'static>>>
+for ScanProgressOwnedView {
+    fn from(inner: ::buffa::OwnedView<ScanProgressView<'static>>) -> Self {
+        ScanProgressOwnedView(inner)
+    }
+}
+impl ::core::convert::From<ScanProgressOwnedView>
+for ::buffa::OwnedView<ScanProgressView<'static>> {
+    fn from(wrapper: ScanProgressOwnedView) -> Self {
+        wrapper.0
+    }
+}
+impl ::core::convert::AsRef<::buffa::OwnedView<ScanProgressView<'static>>>
+for ScanProgressOwnedView {
+    fn as_ref(&self) -> &::buffa::OwnedView<ScanProgressView<'static>> {
+        &self.0
+    }
+}
+impl ::buffa::HasMessageView for super::super::ScanProgress {
+    type View<'a> = ScanProgressView<'a>;
+    type ViewHandle = ScanProgressOwnedView;
 }
 /// VirtualEpisodes configures which episodes refreshes list as virtual
 /// items in series without their files. Monitored series list every

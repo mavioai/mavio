@@ -206,6 +206,10 @@ pub use self::__buffa::view::JobChangedView;
 #[doc(inline)]
 pub use self::__buffa::view::JobChangedOwnedView;
 #[doc(inline)]
+pub use self::__buffa::view::ScanProgressChangedView;
+#[doc(inline)]
+pub use self::__buffa::view::ScanProgressChangedOwnedView;
+#[doc(inline)]
 pub use self::__buffa::view::NotificationReceivedView;
 #[doc(inline)]
 pub use self::__buffa::view::NotificationReceivedOwnedView;

@@ -56,6 +56,11 @@ pub mod event {
                 super::super::super::super::__buffa::view::NotificationReceivedView<'a>,
             >,
         ),
+        ScanProgressChanged(
+            ::buffa::alloc::boxed::Box<
+                super::super::super::super::__buffa::view::ScanProgressChangedView<'a>,
+            >,
+        ),
     }
 }
 pub mod command {

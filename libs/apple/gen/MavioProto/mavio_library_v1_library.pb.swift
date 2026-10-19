@@ -96,6 +96,49 @@ public nonisolated enum Mavio_Library_V1_LibraryKind: SwiftProtobuf.Enum, Swift.
 
 }
 
+/// ScanPhase is the part of a scan under way.
+public nonisolated enum Mavio_Library_V1_ScanPhase: SwiftProtobuf.Enum, Swift.CaseIterable {
+  public typealias RawValue = Int
+  case unspecified // = 0
+
+  /// Reading the library's folders.
+  case folders // = 1
+
+  /// Probing the new and changed files and refreshing their items.
+  case items // = 2
+  case UNRECOGNIZED(Int)
+
+  public init() {
+    self = .unspecified
+  }
+
+  public init?(rawValue: Int) {
+    switch rawValue {
+    case 0: self = .unspecified
+    case 1: self = .folders
+    case 2: self = .items
+    default: self = .UNRECOGNIZED(rawValue)
+    }
+  }
+
+  public var rawValue: Int {
+    switch self {
+    case .unspecified: return 0
+    case .folders: return 1
+    case .items: return 2
+    case .UNRECOGNIZED(let i): return i
+    }
+  }
+
+  // The compiler won't synthesize support with the UNRECOGNIZED case.
+  public static let allCases: [Mavio_Library_V1_ScanPhase] = [
+    .unspecified,
+    .folders,
+    .items,
+  ]
+
+}
+
 /// StorageClass tells what reading a file of a storage costs, which decides
 /// how much of the media the server reads on its own.
 public nonisolated enum Mavio_Library_V1_StorageClass: SwiftProtobuf.Enum, Swift.CaseIterable {
@@ -470,11 +513,113 @@ public nonisolated struct Mavio_Library_V1_Library: @unchecked Sendable {
   /// Clears the value of `imageURL`. Subsequent reads from it will return its default value.
   public mutating func clearImageURL() {_uniqueStorage()._imageURL = nil}
 
+  /// How far the library's scan has come, for administrators; unset while
+  /// the library is not being scanned.
+  public var scanProgress: Mavio_Library_V1_ScanProgress {
+    get {_storage._scanProgress ?? Mavio_Library_V1_ScanProgress()}
+    set {_uniqueStorage()._scanProgress = newValue}
+  }
+  /// Returns true if `scanProgress` has been explicitly set.
+  public var hasScanProgress: Bool {_storage._scanProgress != nil}
+  /// Clears the value of `scanProgress`. Subsequent reads from it will return its default value.
+  public mutating func clearScanProgress() {_uniqueStorage()._scanProgress = nil}
+
   public var unknownFields = SwiftProtobuf.UnknownStorage()
 
   public init() {}
 
   fileprivate var _storage = _StorageClass.defaultInstance
+}
+
+/// ScanProgress tells how far a library's scan and the work it queued
+/// have come: the scan reads the library's folders, then the files it
+/// found new or changed are probed and their items refreshed.
+public nonisolated struct Mavio_Library_V1_ScanProgress: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  public var libraryID: String {
+    get {_libraryID ?? String()}
+    set {_libraryID = newValue}
+  }
+  /// Returns true if `libraryID` has been explicitly set.
+  public var hasLibraryID: Bool {self._libraryID != nil}
+  /// Clears the value of `libraryID`. Subsequent reads from it will return its default value.
+  public mutating func clearLibraryID() {self._libraryID = nil}
+
+  public var phase: Mavio_Library_V1_ScanPhase {
+    get {_phase ?? .unspecified}
+    set {_phase = newValue}
+  }
+  /// Returns true if `phase` has been explicitly set.
+  public var hasPhase: Bool {self._phase != nil}
+  /// Clears the value of `phase`. Subsequent reads from it will return its default value.
+  public mutating func clearPhase() {self._phase = nil}
+
+  /// The folders read or found unchanged, and those the scan expects: the
+  /// folders of the library's last scan, or those it found so far when
+  /// more.
+  public var foldersDone: Int32 {
+    get {_foldersDone ?? 0}
+    set {_foldersDone = newValue}
+  }
+  /// Returns true if `foldersDone` has been explicitly set.
+  public var hasFoldersDone: Bool {self._foldersDone != nil}
+  /// Clears the value of `foldersDone`. Subsequent reads from it will return its default value.
+  public mutating func clearFoldersDone() {self._foldersDone = nil}
+
+  public var foldersTotal: Int32 {
+    get {_foldersTotal ?? 0}
+    set {_foldersTotal = newValue}
+  }
+  /// Returns true if `foldersTotal` has been explicitly set.
+  public var hasFoldersTotal: Bool {self._foldersTotal != nil}
+  /// Clears the value of `foldersTotal`. Subsequent reads from it will return its default value.
+  public mutating func clearFoldersTotal() {self._foldersTotal = nil}
+
+  /// The probes and metadata refreshes of the scan's new and changed files
+  /// done, and those queued so far.
+  public var itemsDone: Int32 {
+    get {_itemsDone ?? 0}
+    set {_itemsDone = newValue}
+  }
+  /// Returns true if `itemsDone` has been explicitly set.
+  public var hasItemsDone: Bool {self._itemsDone != nil}
+  /// Clears the value of `itemsDone`. Subsequent reads from it will return its default value.
+  public mutating func clearItemsDone() {self._itemsDone = nil}
+
+  public var itemsTotal: Int32 {
+    get {_itemsTotal ?? 0}
+    set {_itemsTotal = newValue}
+  }
+  /// Returns true if `itemsTotal` has been explicitly set.
+  public var hasItemsTotal: Bool {self._itemsTotal != nil}
+  /// Clears the value of `itemsTotal`. Subsequent reads from it will return its default value.
+  public mutating func clearItemsTotal() {self._itemsTotal = nil}
+
+  /// The whole done, 0 to 1: reading the folders is its first quarter, the
+  /// probes and refreshes the rest.
+  public var fraction: Double {
+    get {_fraction ?? 0}
+    set {_fraction = newValue}
+  }
+  /// Returns true if `fraction` has been explicitly set.
+  public var hasFraction: Bool {self._fraction != nil}
+  /// Clears the value of `fraction`. Subsequent reads from it will return its default value.
+  public mutating func clearFraction() {self._fraction = nil}
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+
+  fileprivate var _libraryID: String? = nil
+  fileprivate var _phase: Mavio_Library_V1_ScanPhase? = nil
+  fileprivate var _foldersDone: Int32? = nil
+  fileprivate var _foldersTotal: Int32? = nil
+  fileprivate var _itemsDone: Int32? = nil
+  fileprivate var _itemsTotal: Int32? = nil
+  fileprivate var _fraction: Double? = nil
 }
 
 /// VirtualEpisodes configures which episodes refreshes list as virtual
@@ -1073,6 +1218,10 @@ nonisolated extension Mavio_Library_V1_LibraryKind: SwiftProtobuf._ProtoNameProv
   public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{2}\0LIBRARY_KIND_UNSPECIFIED\0\u{1}LIBRARY_KIND_MOVIES\0\u{1}LIBRARY_KIND_SHOWS\0\u{1}LIBRARY_KIND_MUSIC\0\u{1}LIBRARY_KIND_MUSIC_VIDEOS\0\u{1}LIBRARY_KIND_HOME_VIDEOS\0\u{1}LIBRARY_KIND_BOOKS\0\u{1}LIBRARY_KIND_PHOTOS\0\u{1}LIBRARY_KIND_MIXED\0\u{1}LIBRARY_KIND_COLLECTIONS\0\u{1}LIBRARY_KIND_PLAYLISTS\0")
 }
 
+nonisolated extension Mavio_Library_V1_ScanPhase: SwiftProtobuf._ProtoNameProviding {
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{2}\0SCAN_PHASE_UNSPECIFIED\0\u{1}SCAN_PHASE_FOLDERS\0\u{1}SCAN_PHASE_ITEMS\0")
+}
+
 nonisolated extension Mavio_Library_V1_StorageClass: SwiftProtobuf._ProtoNameProviding {
   public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{2}\0STORAGE_CLASS_UNSPECIFIED\0\u{1}STORAGE_CLASS_LOCAL\0\u{1}STORAGE_CLASS_NETWORK\0\u{1}STORAGE_CLASS_CLOUD\0")
 }
@@ -1083,7 +1232,7 @@ nonisolated extension Mavio_Library_V1_HubKind: SwiftProtobuf._ProtoNameProvidin
 
 nonisolated extension Mavio_Library_V1_Library: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".Library"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}id\0\u{1}name\0\u{1}kind\0\u{1}paths\0\u{3}scan_interval\0\u{3}preferred_language\0\u{3}metadata_country\0\u{3}create_time\0\u{3}update_time\0\u{3}save_local_metadata\0\u{3}auto_collections\0\u{3}extract_trickplay\0\u{3}extract_chapter_images\0\u{3}analyze_loudness\0\u{3}download_lyrics\0\u{3}provider_order\0\u{3}virtual_episodes\0\u{1}hubs\0\u{3}storage_classes\0\u{3}effective_storage_classes\0\u{3}image_url\0")
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}id\0\u{1}name\0\u{1}kind\0\u{1}paths\0\u{3}scan_interval\0\u{3}preferred_language\0\u{3}metadata_country\0\u{3}create_time\0\u{3}update_time\0\u{3}save_local_metadata\0\u{3}auto_collections\0\u{3}extract_trickplay\0\u{3}extract_chapter_images\0\u{3}analyze_loudness\0\u{3}download_lyrics\0\u{3}provider_order\0\u{3}virtual_episodes\0\u{1}hubs\0\u{3}storage_classes\0\u{3}effective_storage_classes\0\u{3}image_url\0\u{3}scan_progress\0")
 
   fileprivate class _StorageClass {
     var _id: String? = nil
@@ -1107,6 +1256,7 @@ nonisolated extension Mavio_Library_V1_Library: SwiftProtobuf.Message, SwiftProt
     var _storageClasses: Dictionary<String,Mavio_Library_V1_StorageClass> = [:]
     var _effectiveStorageClasses: Dictionary<String,Mavio_Library_V1_StorageClass> = [:]
     var _imageURL: String? = nil
+    var _scanProgress: Mavio_Library_V1_ScanProgress? = nil
 
       // This property is used as the initial default value for new instances of the type.
       // The type itself is protecting the reference to its storage via CoW semantics.
@@ -1138,6 +1288,7 @@ nonisolated extension Mavio_Library_V1_Library: SwiftProtobuf.Message, SwiftProt
       _storageClasses = source._storageClasses
       _effectiveStorageClasses = source._effectiveStorageClasses
       _imageURL = source._imageURL
+      _scanProgress = source._scanProgress
     }
   }
 
@@ -1177,6 +1328,7 @@ nonisolated extension Mavio_Library_V1_Library: SwiftProtobuf.Message, SwiftProt
         case 19: try { try decoder.decodeMapField(fieldType: SwiftProtobuf._ProtobufEnumMap<SwiftProtobuf.ProtobufString,Mavio_Library_V1_StorageClass>.self, value: &_storage._storageClasses) }()
         case 20: try { try decoder.decodeMapField(fieldType: SwiftProtobuf._ProtobufEnumMap<SwiftProtobuf.ProtobufString,Mavio_Library_V1_StorageClass>.self, value: &_storage._effectiveStorageClasses) }()
         case 21: try { try decoder.decodeSingularStringField(value: &_storage._imageURL) }()
+        case 22: try { try decoder.decodeSingularMessageField(value: &_storage._scanProgress) }()
         default: break
         }
       }
@@ -1252,6 +1404,9 @@ nonisolated extension Mavio_Library_V1_Library: SwiftProtobuf.Message, SwiftProt
       try { if let v = _storage._imageURL {
         try visitor.visitSingularStringField(value: v, fieldNumber: 21)
       } }()
+      try { if let v = _storage._scanProgress {
+        try visitor.visitSingularMessageField(value: v, fieldNumber: 22)
+      } }()
     }
     try unknownFields.traverse(visitor: &visitor)
   }
@@ -1282,10 +1437,75 @@ nonisolated extension Mavio_Library_V1_Library: SwiftProtobuf.Message, SwiftProt
         if _storage._storageClasses != rhs_storage._storageClasses {return false}
         if _storage._effectiveStorageClasses != rhs_storage._effectiveStorageClasses {return false}
         if _storage._imageURL != rhs_storage._imageURL {return false}
+        if _storage._scanProgress != rhs_storage._scanProgress {return false}
         return true
       }
       if !storagesAreEqual {return false}
     }
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Mavio_Library_V1_ScanProgress: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".ScanProgress"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}library_id\0\u{1}phase\0\u{3}folders_done\0\u{3}folders_total\0\u{3}items_done\0\u{3}items_total\0\u{1}fraction\0")
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularStringField(value: &self._libraryID) }()
+      case 2: try { try decoder.decodeSingularEnumField(value: &self._phase) }()
+      case 3: try { try decoder.decodeSingularInt32Field(value: &self._foldersDone) }()
+      case 4: try { try decoder.decodeSingularInt32Field(value: &self._foldersTotal) }()
+      case 5: try { try decoder.decodeSingularInt32Field(value: &self._itemsDone) }()
+      case 6: try { try decoder.decodeSingularInt32Field(value: &self._itemsTotal) }()
+      case 7: try { try decoder.decodeSingularDoubleField(value: &self._fraction) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    try { if let v = self._libraryID {
+      try visitor.visitSingularStringField(value: v, fieldNumber: 1)
+    } }()
+    try { if let v = self._phase {
+      try visitor.visitSingularEnumField(value: v, fieldNumber: 2)
+    } }()
+    try { if let v = self._foldersDone {
+      try visitor.visitSingularInt32Field(value: v, fieldNumber: 3)
+    } }()
+    try { if let v = self._foldersTotal {
+      try visitor.visitSingularInt32Field(value: v, fieldNumber: 4)
+    } }()
+    try { if let v = self._itemsDone {
+      try visitor.visitSingularInt32Field(value: v, fieldNumber: 5)
+    } }()
+    try { if let v = self._itemsTotal {
+      try visitor.visitSingularInt32Field(value: v, fieldNumber: 6)
+    } }()
+    try { if let v = self._fraction {
+      try visitor.visitSingularDoubleField(value: v, fieldNumber: 7)
+    } }()
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Mavio_Library_V1_ScanProgress, rhs: Mavio_Library_V1_ScanProgress) -> Bool {
+    if lhs._libraryID != rhs._libraryID {return false}
+    if lhs._phase != rhs._phase {return false}
+    if lhs._foldersDone != rhs._foldersDone {return false}
+    if lhs._foldersTotal != rhs._foldersTotal {return false}
+    if lhs._itemsDone != rhs._itemsDone {return false}
+    if lhs._itemsTotal != rhs._itemsTotal {return false}
+    if lhs._fraction != rhs._fraction {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

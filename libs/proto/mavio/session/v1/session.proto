@@ -6,6 +6,7 @@ import "buf/validate/validate.proto";
 import "google/protobuf/duration.proto";
 import "google/protobuf/timestamp.proto";
 import "mavio/library/v1/item.proto";
+import "mavio/library/v1/library.proto";
 import "mavio/playback/v1/playback.proto";
 import "mavio/session/v1/syncplay.proto";
 import "mavio/system/v1/activity.proto";
@@ -66,6 +67,7 @@ message Event {
     PluginChanged plugin_changed = 9;
     SyncPlayUpdate sync_play = 10;
     NotificationReceived notification = 11;
+    ScanProgressChanged scan_progress_changed = 12;
   }
 }
 
@@ -115,6 +117,14 @@ message JobChanged {
   string kind = 2;
   string library_id = 3;
   JobState state = 4;
+}
+
+// ScanProgressChanged tells administrators how far a library's scan has
+// come, at most twice a second while it runs, and once when it ends.
+message ScanProgressChanged {
+  string library_id = 1;
+  // Unset once the scan and the work it queued are done.
+  mavio.library.v1.ScanProgress progress = 2;
 }
 
 enum JobState {

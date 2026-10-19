@@ -91,6 +91,38 @@ message Library {
   // parameters of images. Empty for callers without a session, which
   // fetch /images/collages/{id} with their credentials.
   string image_url = 21;
+  // How far the library's scan has come, for administrators; unset while
+  // the library is not being scanned.
+  ScanProgress scan_progress = 22;
+}
+
+// ScanProgress tells how far a library's scan and the work it queued
+// have come: the scan reads the library's folders, then the files it
+// found new or changed are probed and their items refreshed.
+message ScanProgress {
+  string library_id = 1;
+  ScanPhase phase = 2;
+  // The folders read or found unchanged, and those the scan expects: the
+  // folders of the library's last scan, or those it found so far when
+  // more.
+  int32 folders_done = 3;
+  int32 folders_total = 4;
+  // The probes and metadata refreshes of the scan's new and changed files
+  // done, and those queued so far.
+  int32 items_done = 5;
+  int32 items_total = 6;
+  // The whole done, 0 to 1: reading the folders is its first quarter, the
+  // probes and refreshes the rest.
+  double fraction = 7;
+}
+
+// ScanPhase is the part of a scan under way.
+enum ScanPhase {
+  SCAN_PHASE_UNSPECIFIED = 0;
+  // Reading the library's folders.
+  SCAN_PHASE_FOLDERS = 1;
+  // Probing the new and changed files and refreshing their items.
+  SCAN_PHASE_ITEMS = 2;
 }
 
 // StorageClass tells what reading a file of a storage costs, which decides

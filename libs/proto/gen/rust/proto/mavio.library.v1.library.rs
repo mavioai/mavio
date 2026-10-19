@@ -151,6 +151,68 @@ impl ::buffa::Enumeration for LibraryKind {
         ]
     }
 }
+/// ScanPhase is the part of a scan under way.
+#[allow(non_camel_case_types)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
+#[repr(i32)]
+pub enum ScanPhase {
+    SCAN_PHASE_UNSPECIFIED = 0i32,
+    /// Reading the library's folders.
+    SCAN_PHASE_FOLDERS = 1i32,
+    /// Probing the new and changed files and refreshing their items.
+    SCAN_PHASE_ITEMS = 2i32,
+}
+impl ScanPhase {
+    ///Idiomatic alias for [`Self::SCAN_PHASE_UNSPECIFIED`]; `Debug` prints the variant name.
+    #[allow(non_upper_case_globals)]
+    pub const Unspecified: Self = Self::SCAN_PHASE_UNSPECIFIED;
+    ///Idiomatic alias for [`Self::SCAN_PHASE_FOLDERS`]; `Debug` prints the variant name.
+    #[allow(non_upper_case_globals)]
+    pub const Folders: Self = Self::SCAN_PHASE_FOLDERS;
+    ///Idiomatic alias for [`Self::SCAN_PHASE_ITEMS`]; `Debug` prints the variant name.
+    #[allow(non_upper_case_globals)]
+    pub const Items: Self = Self::SCAN_PHASE_ITEMS;
+}
+impl ::core::default::Default for ScanPhase {
+    fn default() -> Self {
+        Self::SCAN_PHASE_UNSPECIFIED
+    }
+}
+impl ::buffa::Enumeration for ScanPhase {
+    fn from_i32(value: i32) -> ::core::option::Option<Self> {
+        match value {
+            0i32 => ::core::option::Option::Some(Self::SCAN_PHASE_UNSPECIFIED),
+            1i32 => ::core::option::Option::Some(Self::SCAN_PHASE_FOLDERS),
+            2i32 => ::core::option::Option::Some(Self::SCAN_PHASE_ITEMS),
+            _ => ::core::option::Option::None,
+        }
+    }
+    fn to_i32(&self) -> i32 {
+        *self as i32
+    }
+    fn proto_name(&self) -> &'static str {
+        match self {
+            Self::SCAN_PHASE_UNSPECIFIED => "SCAN_PHASE_UNSPECIFIED",
+            Self::SCAN_PHASE_FOLDERS => "SCAN_PHASE_FOLDERS",
+            Self::SCAN_PHASE_ITEMS => "SCAN_PHASE_ITEMS",
+        }
+    }
+    fn from_proto_name(name: &str) -> ::core::option::Option<Self> {
+        match name {
+            "SCAN_PHASE_UNSPECIFIED" => {
+                ::core::option::Option::Some(Self::SCAN_PHASE_UNSPECIFIED)
+            }
+            "SCAN_PHASE_FOLDERS" => {
+                ::core::option::Option::Some(Self::SCAN_PHASE_FOLDERS)
+            }
+            "SCAN_PHASE_ITEMS" => ::core::option::Option::Some(Self::SCAN_PHASE_ITEMS),
+            _ => ::core::option::Option::None,
+        }
+    }
+    fn values() -> &'static [Self] {
+        &[Self::SCAN_PHASE_UNSPECIFIED, Self::SCAN_PHASE_FOLDERS, Self::SCAN_PHASE_ITEMS]
+    }
+}
 /// StorageClass tells what reading a file of a storage costs, which decides
 /// how much of the media the server reads on its own.
 #[allow(non_camel_case_types)]
@@ -543,6 +605,14 @@ pub struct Library {
     ///
     /// Field 21: `image_url`
     pub image_url: ::core::option::Option<::buffa::alloc::string::String>,
+    /// How far the library's scan has come, for administrators; unset while
+    /// the library is not being scanned.
+    ///
+    /// Field 22: `scan_progress`
+    pub scan_progress: ::buffa::MessageField<
+        ScanProgress,
+        ::buffa::Inline<ScanProgress>,
+    >,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -570,6 +640,7 @@ impl ::core::fmt::Debug for Library {
             .field("storage_classes", &self.storage_classes)
             .field("effective_storage_classes", &self.effective_storage_classes)
             .field("image_url", &self.image_url)
+            .field("scan_progress", &self.scan_progress)
             .finish()
     }
 }
@@ -800,6 +871,14 @@ impl ::buffa::Message for Library {
         if let Some(ref v) = self.image_url {
             size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
+        if self.scan_progress.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.scan_progress.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 2u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -906,6 +985,14 @@ impl ::buffa::Message for Library {
         >(&self.effective_storage_classes, 20u32, buf);
         if let Some(ref v) = self.image_url {
             ::buffa::types::put_string_field(21u32, v, buf);
+        }
+        if self.scan_progress.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                22u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.scan_progress.write_to(__cache, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -1138,6 +1225,17 @@ impl ::buffa::Message for Library {
                     buf,
                 )?;
             }
+            22u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::Message::merge_length_delimited(
+                    self.scan_progress.get_or_insert_default(),
+                    buf,
+                    ctx,
+                )?;
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -1167,11 +1265,299 @@ impl ::buffa::Message for Library {
         self.storage_classes.clear();
         self.effective_storage_classes.clear();
         self.image_url = ::core::option::Option::None;
+        self.scan_progress = ::buffa::MessageField::none();
         self.__buffa_unknown_fields.clear();
     }
 }
 impl ::buffa::ExtensionSet for Library {
     const PROTO_FQN: &'static str = "mavio.library.v1.Library";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+/// ScanProgress tells how far a library's scan and the work it queued
+/// have come: the scan reads the library's folders, then the files it
+/// found new or changed are probed and their items refreshed.
+#[derive(Clone, PartialEq, Default)]
+pub struct ScanProgress {
+    /// Field 1: `library_id`
+    pub library_id: ::core::option::Option<::buffa::alloc::string::String>,
+    /// Field 2: `phase`
+    pub phase: ::core::option::Option<::buffa::EnumValue<ScanPhase>>,
+    /// The folders read or found unchanged, and those the scan expects: the
+    /// folders of the library's last scan, or those it found so far when
+    /// more.
+    ///
+    /// Field 3: `folders_done`
+    pub folders_done: ::core::option::Option<i32>,
+    /// Field 4: `folders_total`
+    pub folders_total: ::core::option::Option<i32>,
+    /// The probes and metadata refreshes of the scan's new and changed files
+    /// done, and those queued so far.
+    ///
+    /// Field 5: `items_done`
+    pub items_done: ::core::option::Option<i32>,
+    /// Field 6: `items_total`
+    pub items_total: ::core::option::Option<i32>,
+    /// The whole done, 0 to 1: reading the folders is its first quarter, the
+    /// probes and refreshes the rest.
+    ///
+    /// Field 7: `fraction`
+    pub fraction: ::core::option::Option<f64>,
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for ScanProgress {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("ScanProgress")
+            .field("library_id", &self.library_id)
+            .field("phase", &self.phase)
+            .field("folders_done", &self.folders_done)
+            .field("folders_total", &self.folders_total)
+            .field("items_done", &self.items_done)
+            .field("items_total", &self.items_total)
+            .field("fraction", &self.fraction)
+            .finish()
+    }
+}
+impl ScanProgress {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.library.v1.ScanProgress";
+}
+impl ScanProgress {
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::library_id`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_library_id(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.library_id = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::phase`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_phase(
+        mut self,
+        value: impl Into<::buffa::EnumValue<ScanPhase>>,
+    ) -> Self {
+        self.phase = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::folders_done`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_folders_done(mut self, value: i32) -> Self {
+        self.folders_done = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::folders_total`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_folders_total(mut self, value: i32) -> Self {
+        self.folders_total = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::items_done`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_items_done(mut self, value: i32) -> Self {
+        self.items_done = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::items_total`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_items_total(mut self, value: i32) -> Self {
+        self.items_total = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::fraction`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_fraction(mut self, value: f64) -> Self {
+        self.fraction = Some(value);
+        self
+    }
+}
+::buffa::impl_default_instance!(ScanProgress);
+impl ::buffa::MessageName for ScanProgress {
+    const PACKAGE: &'static str = "mavio.library.v1";
+    const NAME: &'static str = "ScanProgress";
+    const FULL_NAME: &'static str = "mavio.library.v1.ScanProgress";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.library.v1.ScanProgress";
+}
+impl ::buffa::Message for ScanProgress {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if let Some(ref v) = self.library_id {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.phase {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v.to_i32()) as u64;
+        }
+        if let Some(v) = self.folders_done {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.folders_total {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.items_done {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.items_total {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        if self.fraction.is_some() {
+            size += 1u64 + ::buffa::types::FIXED64_ENCODED_LEN as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if let Some(ref v) = self.library_id {
+            ::buffa::types::put_string_field(1u32, v, buf);
+        }
+        if let Some(ref v) = self.phase {
+            ::buffa::types::put_int32_field(2u32, v.to_i32(), buf);
+        }
+        if let Some(v) = self.folders_done {
+            ::buffa::types::put_int32_field(3u32, v, buf);
+        }
+        if let Some(v) = self.folders_total {
+            ::buffa::types::put_int32_field(4u32, v, buf);
+        }
+        if let Some(v) = self.items_done {
+            ::buffa::types::put_int32_field(5u32, v, buf);
+        }
+        if let Some(v) = self.items_total {
+            ::buffa::types::put_int32_field(6u32, v, buf);
+        }
+        if let Some(v) = self.fraction {
+            ::buffa::types::put_double_field(7u32, v, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .library_id
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.phase = ::core::option::Option::Some(
+                    ::buffa::EnumValue::from(::buffa::types::decode_int32(buf)?),
+                );
+            }
+            3u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.folders_done = ::core::option::Option::Some(
+                    ::buffa::types::decode_int32(buf)?,
+                );
+            }
+            4u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.folders_total = ::core::option::Option::Some(
+                    ::buffa::types::decode_int32(buf)?,
+                );
+            }
+            5u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.items_done = ::core::option::Option::Some(
+                    ::buffa::types::decode_int32(buf)?,
+                );
+            }
+            6u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.items_total = ::core::option::Option::Some(
+                    ::buffa::types::decode_int32(buf)?,
+                );
+            }
+            7u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Fixed64,
+                )?;
+                self.fraction = ::core::option::Option::Some(
+                    ::buffa::types::decode_double(buf)?,
+                );
+            }
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.library_id = ::core::option::Option::None;
+        self.phase = ::core::option::Option::None;
+        self.folders_done = ::core::option::Option::None;
+        self.folders_total = ::core::option::Option::None;
+        self.items_done = ::core::option::Option::None;
+        self.items_total = ::core::option::Option::None;
+        self.fraction = ::core::option::Option::None;
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for ScanProgress {
+    const PROTO_FQN: &'static str = "mavio.library.v1.ScanProgress";
     fn unknown_fields(&self) -> &::buffa::UnknownFields {
         &self.__buffa_unknown_fields
     }

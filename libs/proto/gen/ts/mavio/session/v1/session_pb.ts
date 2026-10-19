@@ -9,6 +9,8 @@ import type { Duration, Timestamp } from "@bufbuild/protobuf/wkt";
 import { file_google_protobuf_duration, file_google_protobuf_timestamp } from "@bufbuild/protobuf/wkt";
 import type { Item } from "../../library/v1/item_pb";
 import { file_mavio_library_v1_item } from "../../library/v1/item_pb";
+import type { ScanProgress } from "../../library/v1/library_pb";
+import { file_mavio_library_v1_library } from "../../library/v1/library_pb";
 import type { PlayMethod } from "../../playback/v1/playback_pb";
 import { file_mavio_playback_v1_playback } from "../../playback/v1/playback_pb";
 import type { SyncPlayUpdate } from "./syncplay_pb";
@@ -25,7 +27,7 @@ import type { Message as Message$1 } from "@bufbuild/protobuf";
  * Describes the file mavio/session/v1/session.proto.
  */
 export const file_mavio_session_v1_session: GenFile = /*@__PURE__*/
-  fileDesc("Ch5tYXZpby9zZXNzaW9uL3YxL3Nlc3Npb24ucHJvdG8SEG1hdmlvLnNlc3Npb24udjEiEgoQU3Vic2NyaWJlUmVxdWVzdCI7ChFTdWJzY3JpYmVSZXNwb25zZRImCgVldmVudBgBIAEoCzIXLm1hdmlvLnNlc3Npb24udjEuRXZlbnQi9gQKBUV2ZW50EigKBHRpbWUYASABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEjAKCWNvbm5lY3RlZBgCIAEoCzIbLm1hdmlvLnNlc3Npb24udjEuQ29ubmVjdGVkSAASMAoJaGVhcnRiZWF0GAMgASgLMhsubWF2aW8uc2Vzc2lvbi52MS5IZWFydGJlYXRIABI7Cg9saWJyYXJ5X2NoYW5nZWQYBCABKAsyIC5tYXZpby5zZXNzaW9uLnYxLkxpYnJhcnlDaGFuZ2VkSAASPgoRdXNlcl9kYXRhX2NoYW5nZWQYBSABKAsyIS5tYXZpby5zZXNzaW9uLnYxLlVzZXJEYXRhQ2hhbmdlZEgAEj0KEHNlc3Npb25zX2NoYW5nZWQYBiABKAsyIS5tYXZpby5zZXNzaW9uLnYxLlNlc3Npb25zQ2hhbmdlZEgAEjQKB2NvbW1hbmQYByABKAsyIS5tYXZpby5zZXNzaW9uLnYxLkNvbW1hbmRSZWNlaXZlZEgAEjMKC2pvYl9jaGFuZ2VkGAggASgLMhwubWF2aW8uc2Vzc2lvbi52MS5Kb2JDaGFuZ2VkSAASOQoOcGx1Z2luX2NoYW5nZWQYCSABKAsyHy5tYXZpby5zZXNzaW9uLnYxLlBsdWdpbkNoYW5nZWRIABI1CglzeW5jX3BsYXkYCiABKAsyIC5tYXZpby5zZXNzaW9uLnYxLlN5bmNQbGF5VXBkYXRlSAASPgoMbm90aWZpY2F0aW9uGAsgASgLMiYubWF2aW8uc2Vzc2lvbi52MS5Ob3RpZmljYXRpb25SZWNlaXZlZEgAQgYKBGtpbmQiHwoJQ29ubmVjdGVkEhIKCnNlc3Npb25faWQYASABKAkiCwoJSGVhcnRiZWF0IlkKDkxpYnJhcnlDaGFuZ2VkEhMKC2xpYnJhcnlfaWRzGAEgAygJEhgKEGNoYW5nZWRfaXRlbV9pZHMYAiADKAkSGAoQcmVtb3ZlZF9pdGVtX2lkcxgDIAMoCSI9Cg9Vc2VyRGF0YUNoYW5nZWQSKgoJdXNlcl9kYXRhGAEgAygLMhcubWF2aW8udXNlci52MS5Vc2VyRGF0YSIlCg9TZXNzaW9uc0NoYW5nZWQSEgoKc2Vzc2lvbl9pZBgBIAEoCSJuCg9Db21tYW5kUmVjZWl2ZWQSFwoPZnJvbV9zZXNzaW9uX2lkGAEgASgJEhYKDmZyb21fdXNlcl9uYW1lGAIgASgJEioKB2NvbW1hbmQYAyABKAsyGS5tYXZpby5zZXNzaW9uLnYxLkNvbW1hbmQiaQoKSm9iQ2hhbmdlZBIOCgZqb2JfaWQYASABKAkSDAoEa2luZBgCIAEoCRISCgpsaWJyYXJ5X2lkGAMgASgJEikKBXN0YXRlGAQgASgOMhoubWF2aW8uc2Vzc2lvbi52MS5Kb2JTdGF0ZSJDChROb3RpZmljYXRpb25SZWNlaXZlZBIrCghhY3Rpdml0eRgBIAEoCzIZLm1hdmlvLnN5c3RlbS52MS5BY3Rpdml0eSI4Cg1QbHVnaW5DaGFuZ2VkEicKBnBsdWdpbhgBIAEoCzIXLm1hdmlvLnN5c3RlbS52MS5QbHVnaW4i1QIKB1Nlc3Npb24SCgoCaWQYASABKAkSDwoHdXNlcl9pZBgCIAEoCRIRCgl1c2VyX25hbWUYAyABKAkSEQoJZGV2aWNlX2lkGAQgASgJEhMKC2RldmljZV9uYW1lGAUgASgJEg4KBmNsaWVudBgGIAEoCRIWCg5jbGllbnRfdmVyc2lvbhgHIAEoCRIyCg5sYXN0X3NlZW5fdGltZRgIIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASDgoGb25saW5lGAkgASgIEjEKC25vd19wbGF5aW5nGAogASgLMhwubWF2aW8uc2Vzc2lvbi52MS5Ob3dQbGF5aW5nEhEKCXBsdWdpbl9pZBgLIAEoCRIvCgtjcmVhdGVfdGltZRgMIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASDwoHY3VycmVudBgNIAEoCCKzAQoKTm93UGxheWluZxITCgtwbGF5YmFja19pZBgBIAEoCRIkCgRpdGVtGAIgASgLMhYubWF2aW8ubGlicmFyeS52MS5JdGVtEisKCHBvc2l0aW9uGAMgASgLMhkuZ29vZ2xlLnByb3RvYnVmLkR1cmF0aW9uEg4KBnBhdXNlZBgEIAEoCBItCgZtZXRob2QYBSABKA4yHS5tYXZpby5wbGF5YmFjay52MS5QbGF5TWV0aG9kIvUBCgdDb21tYW5kEiYKBHBsYXkYASABKAsyFi5tYXZpby5zZXNzaW9uLnYxLlBsYXlIABIxCgpwbGF5X3N0YXRlGAIgASgLMhsubWF2aW8uc2Vzc2lvbi52MS5QbGF5U3RhdGVIABImCgRzZWVrGAMgASgLMhYubWF2aW8uc2Vzc2lvbi52MS5TZWVrSAASLAoHbWVzc2FnZRgEIAEoCzIZLm1hdmlvLnNlc3Npb24udjEuTWVzc2FnZUgAEioKBnZvbHVtZRgFIAEoCzIYLm1hdmlvLnNlc3Npb24udjEuVm9sdW1lSABCDQoEa2luZBIFukgCCAEihwEKBFBsYXkSJAoIaXRlbV9pZHMYASADKAlCErpID5IBDAgBEOgHIgVyA7ABARIcCgtzdGFydF9pbmRleBgCIAEoBUIHukgEGgIoABI7Cg5zdGFydF9wb3NpdGlvbhgDIAEoCzIZLmdvb2dsZS5wcm90b2J1Zi5EdXJhdGlvbkIIukgFqgECMgAiTwoJUGxheVN0YXRlEkIKB2NvbW1hbmQYASABKA4yIi5tYXZpby5zZXNzaW9uLnYxLlBsYXlTdGF0ZUNvbW1hbmRCDbpICsgBAYIBBBABIAAiQAoEU2VlaxI4Cghwb3NpdGlvbhgBIAEoCzIZLmdvb2dsZS5wcm90b2J1Zi5EdXJhdGlvbkILukgIyAEBqgECMgAiXAoHTWVzc2FnZRIbCgR0ZXh0GAEgASgJQg26SArIAQFyBRABGOgHEjQKB3RpbWVvdXQYAiABKAsyGS5nb29nbGUucHJvdG9idWYuRHVyYXRpb25CCLpIBaoBAioAInwKBlZvbHVtZRIYCgVsZXZlbBgBIAEoBUIJukgGGgQYZCgAEg0KBW11dGVkGAIgASgIOkm6SEYaRAoKdm9sdW1lLnNldBISc2V0IGxldmVsIG9yIG11dGVkGiJoYXModGhpcy5sZXZlbCkgfHwgaGFzKHRoaXMubXV0ZWQpIigKE0xpc3RTZXNzaW9uc1JlcXVlc3QSEQoJYWxsX3VzZXJzGAEgASgIIkMKFExpc3RTZXNzaW9uc1Jlc3BvbnNlEisKCHNlc3Npb25zGAEgAygLMhkubWF2aW8uc2Vzc2lvbi52MS5TZXNzaW9uIi8KFFJldm9rZVNlc3Npb25SZXF1ZXN0EhcKAmlkGAEgASgJQgu6SAjIAQFyA7ABASIXChVSZXZva2VTZXNzaW9uUmVzcG9uc2UiaQoSU2VuZENvbW1hbmRSZXF1ZXN0Eh8KCnNlc3Npb25faWQYASABKAlCC7pICMgBAXIDsAEBEjIKB2NvbW1hbmQYAiABKAsyGS5tYXZpby5zZXNzaW9uLnYxLkNvbW1hbmRCBrpIA8gBASIVChNTZW5kQ29tbWFuZFJlc3BvbnNlKmsKCEpvYlN0YXRlEhkKFUpPQl9TVEFURV9VTlNQRUNJRklFRBAAEhUKEUpPQl9TVEFURV9SVU5OSU5HEAESFwoTSk9CX1NUQVRFX1NVQ0NFRURFRBACEhQKEEpPQl9TVEFURV9GQUlMRUQQAyrPAQoQUGxheVN0YXRlQ29tbWFuZBIiCh5QTEFZX1NUQVRFX0NPTU1BTkRfVU5TUEVDSUZJRUQQABIcChhQTEFZX1NUQVRFX0NPTU1BTkRfUEFVU0UQARIeChpQTEFZX1NUQVRFX0NPTU1BTkRfVU5QQVVTRRACEhsKF1BMQVlfU1RBVEVfQ09NTUFORF9TVE9QEAMSGwoXUExBWV9TVEFURV9DT01NQU5EX05FWFQQBBIfChtQTEFZX1NUQVRFX0NPTU1BTkRfUFJFVklPVVMQBTJmCgxFdmVudFNlcnZpY2USVgoJU3Vic2NyaWJlEiIubWF2aW8uc2Vzc2lvbi52MS5TdWJzY3JpYmVSZXF1ZXN0GiMubWF2aW8uc2Vzc2lvbi52MS5TdWJzY3JpYmVSZXNwb25zZTABMrICCg5TZXNzaW9uU2VydmljZRJiCgxMaXN0U2Vzc2lvbnMSJS5tYXZpby5zZXNzaW9uLnYxLkxpc3RTZXNzaW9uc1JlcXVlc3QaJi5tYXZpby5zZXNzaW9uLnYxLkxpc3RTZXNzaW9uc1Jlc3BvbnNlIgOQAgESYAoNUmV2b2tlU2Vzc2lvbhImLm1hdmlvLnNlc3Npb24udjEuUmV2b2tlU2Vzc2lvblJlcXVlc3QaJy5tYXZpby5zZXNzaW9uLnYxLlJldm9rZVNlc3Npb25SZXNwb25zZRJaCgtTZW5kQ29tbWFuZBIkLm1hdmlvLnNlc3Npb24udjEuU2VuZENvbW1hbmRSZXF1ZXN0GiUubWF2aW8uc2Vzc2lvbi52MS5TZW5kQ29tbWFuZFJlc3BvbnNlQs0BChRjb20ubWF2aW8uc2Vzc2lvbi52MUIMU2Vzc2lvblByb3RvUAFaRWdpdGh1Yi5jb20vbWF2aW9haS9tYXZpby9saWJzL3Byb3RvL2dlbi9nby9tYXZpby9zZXNzaW9uL3YxO3Nlc3Npb252MaICA01TWKoCEE1hdmlvLlNlc3Npb24uVjHKAhBNYXZpb1xTZXNzaW9uXFYx4gIcTWF2aW9cU2Vzc2lvblxWMVxHUEJNZXRhZGF0YeoCEk1hdmlvOjpTZXNzaW9uOjpWMWIIZWRpdGlvbnNw6Ac", [file_buf_validate_validate, file_google_protobuf_duration, file_google_protobuf_timestamp, file_mavio_library_v1_item, file_mavio_playback_v1_playback, file_mavio_session_v1_syncplay, file_mavio_system_v1_activity, file_mavio_system_v1_plugin, file_mavio_user_v1_user]);
+  fileDesc("Ch5tYXZpby9zZXNzaW9uL3YxL3Nlc3Npb24ucHJvdG8SEG1hdmlvLnNlc3Npb24udjEiEgoQU3Vic2NyaWJlUmVxdWVzdCI7ChFTdWJzY3JpYmVSZXNwb25zZRImCgVldmVudBgBIAEoCzIXLm1hdmlvLnNlc3Npb24udjEuRXZlbnQivgUKBUV2ZW50EigKBHRpbWUYASABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEjAKCWNvbm5lY3RlZBgCIAEoCzIbLm1hdmlvLnNlc3Npb24udjEuQ29ubmVjdGVkSAASMAoJaGVhcnRiZWF0GAMgASgLMhsubWF2aW8uc2Vzc2lvbi52MS5IZWFydGJlYXRIABI7Cg9saWJyYXJ5X2NoYW5nZWQYBCABKAsyIC5tYXZpby5zZXNzaW9uLnYxLkxpYnJhcnlDaGFuZ2VkSAASPgoRdXNlcl9kYXRhX2NoYW5nZWQYBSABKAsyIS5tYXZpby5zZXNzaW9uLnYxLlVzZXJEYXRhQ2hhbmdlZEgAEj0KEHNlc3Npb25zX2NoYW5nZWQYBiABKAsyIS5tYXZpby5zZXNzaW9uLnYxLlNlc3Npb25zQ2hhbmdlZEgAEjQKB2NvbW1hbmQYByABKAsyIS5tYXZpby5zZXNzaW9uLnYxLkNvbW1hbmRSZWNlaXZlZEgAEjMKC2pvYl9jaGFuZ2VkGAggASgLMhwubWF2aW8uc2Vzc2lvbi52MS5Kb2JDaGFuZ2VkSAASOQoOcGx1Z2luX2NoYW5nZWQYCSABKAsyHy5tYXZpby5zZXNzaW9uLnYxLlBsdWdpbkNoYW5nZWRIABI1CglzeW5jX3BsYXkYCiABKAsyIC5tYXZpby5zZXNzaW9uLnYxLlN5bmNQbGF5VXBkYXRlSAASPgoMbm90aWZpY2F0aW9uGAsgASgLMiYubWF2aW8uc2Vzc2lvbi52MS5Ob3RpZmljYXRpb25SZWNlaXZlZEgAEkYKFXNjYW5fcHJvZ3Jlc3NfY2hhbmdlZBgMIAEoCzIlLm1hdmlvLnNlc3Npb24udjEuU2NhblByb2dyZXNzQ2hhbmdlZEgAQgYKBGtpbmQiHwoJQ29ubmVjdGVkEhIKCnNlc3Npb25faWQYASABKAkiCwoJSGVhcnRiZWF0IlkKDkxpYnJhcnlDaGFuZ2VkEhMKC2xpYnJhcnlfaWRzGAEgAygJEhgKEGNoYW5nZWRfaXRlbV9pZHMYAiADKAkSGAoQcmVtb3ZlZF9pdGVtX2lkcxgDIAMoCSI9Cg9Vc2VyRGF0YUNoYW5nZWQSKgoJdXNlcl9kYXRhGAEgAygLMhcubWF2aW8udXNlci52MS5Vc2VyRGF0YSIlCg9TZXNzaW9uc0NoYW5nZWQSEgoKc2Vzc2lvbl9pZBgBIAEoCSJuCg9Db21tYW5kUmVjZWl2ZWQSFwoPZnJvbV9zZXNzaW9uX2lkGAEgASgJEhYKDmZyb21fdXNlcl9uYW1lGAIgASgJEioKB2NvbW1hbmQYAyABKAsyGS5tYXZpby5zZXNzaW9uLnYxLkNvbW1hbmQiaQoKSm9iQ2hhbmdlZBIOCgZqb2JfaWQYASABKAkSDAoEa2luZBgCIAEoCRISCgpsaWJyYXJ5X2lkGAMgASgJEikKBXN0YXRlGAQgASgOMhoubWF2aW8uc2Vzc2lvbi52MS5Kb2JTdGF0ZSJbChNTY2FuUHJvZ3Jlc3NDaGFuZ2VkEhIKCmxpYnJhcnlfaWQYASABKAkSMAoIcHJvZ3Jlc3MYAiABKAsyHi5tYXZpby5saWJyYXJ5LnYxLlNjYW5Qcm9ncmVzcyJDChROb3RpZmljYXRpb25SZWNlaXZlZBIrCghhY3Rpdml0eRgBIAEoCzIZLm1hdmlvLnN5c3RlbS52MS5BY3Rpdml0eSI4Cg1QbHVnaW5DaGFuZ2VkEicKBnBsdWdpbhgBIAEoCzIXLm1hdmlvLnN5c3RlbS52MS5QbHVnaW4i1QIKB1Nlc3Npb24SCgoCaWQYASABKAkSDwoHdXNlcl9pZBgCIAEoCRIRCgl1c2VyX25hbWUYAyABKAkSEQoJZGV2aWNlX2lkGAQgASgJEhMKC2RldmljZV9uYW1lGAUgASgJEg4KBmNsaWVudBgGIAEoCRIWCg5jbGllbnRfdmVyc2lvbhgHIAEoCRIyCg5sYXN0X3NlZW5fdGltZRgIIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASDgoGb25saW5lGAkgASgIEjEKC25vd19wbGF5aW5nGAogASgLMhwubWF2aW8uc2Vzc2lvbi52MS5Ob3dQbGF5aW5nEhEKCXBsdWdpbl9pZBgLIAEoCRIvCgtjcmVhdGVfdGltZRgMIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASDwoHY3VycmVudBgNIAEoCCKzAQoKTm93UGxheWluZxITCgtwbGF5YmFja19pZBgBIAEoCRIkCgRpdGVtGAIgASgLMhYubWF2aW8ubGlicmFyeS52MS5JdGVtEisKCHBvc2l0aW9uGAMgASgLMhkuZ29vZ2xlLnByb3RvYnVmLkR1cmF0aW9uEg4KBnBhdXNlZBgEIAEoCBItCgZtZXRob2QYBSABKA4yHS5tYXZpby5wbGF5YmFjay52MS5QbGF5TWV0aG9kIvUBCgdDb21tYW5kEiYKBHBsYXkYASABKAsyFi5tYXZpby5zZXNzaW9uLnYxLlBsYXlIABIxCgpwbGF5X3N0YXRlGAIgASgLMhsubWF2aW8uc2Vzc2lvbi52MS5QbGF5U3RhdGVIABImCgRzZWVrGAMgASgLMhYubWF2aW8uc2Vzc2lvbi52MS5TZWVrSAASLAoHbWVzc2FnZRgEIAEoCzIZLm1hdmlvLnNlc3Npb24udjEuTWVzc2FnZUgAEioKBnZvbHVtZRgFIAEoCzIYLm1hdmlvLnNlc3Npb24udjEuVm9sdW1lSABCDQoEa2luZBIFukgCCAEihwEKBFBsYXkSJAoIaXRlbV9pZHMYASADKAlCErpID5IBDAgBEOgHIgVyA7ABARIcCgtzdGFydF9pbmRleBgCIAEoBUIHukgEGgIoABI7Cg5zdGFydF9wb3NpdGlvbhgDIAEoCzIZLmdvb2dsZS5wcm90b2J1Zi5EdXJhdGlvbkIIukgFqgECMgAiTwoJUGxheVN0YXRlEkIKB2NvbW1hbmQYASABKA4yIi5tYXZpby5zZXNzaW9uLnYxLlBsYXlTdGF0ZUNvbW1hbmRCDbpICsgBAYIBBBABIAAiQAoEU2VlaxI4Cghwb3NpdGlvbhgBIAEoCzIZLmdvb2dsZS5wcm90b2J1Zi5EdXJhdGlvbkILukgIyAEBqgECMgAiXAoHTWVzc2FnZRIbCgR0ZXh0GAEgASgJQg26SArIAQFyBRABGOgHEjQKB3RpbWVvdXQYAiABKAsyGS5nb29nbGUucHJvdG9idWYuRHVyYXRpb25CCLpIBaoBAioAInwKBlZvbHVtZRIYCgVsZXZlbBgBIAEoBUIJukgGGgQYZCgAEg0KBW11dGVkGAIgASgIOkm6SEYaRAoKdm9sdW1lLnNldBISc2V0IGxldmVsIG9yIG11dGVkGiJoYXModGhpcy5sZXZlbCkgfHwgaGFzKHRoaXMubXV0ZWQpIigKE0xpc3RTZXNzaW9uc1JlcXVlc3QSEQoJYWxsX3VzZXJzGAEgASgIIkMKFExpc3RTZXNzaW9uc1Jlc3BvbnNlEisKCHNlc3Npb25zGAEgAygLMhkubWF2aW8uc2Vzc2lvbi52MS5TZXNzaW9uIi8KFFJldm9rZVNlc3Npb25SZXF1ZXN0EhcKAmlkGAEgASgJQgu6SAjIAQFyA7ABASIXChVSZXZva2VTZXNzaW9uUmVzcG9uc2UiaQoSU2VuZENvbW1hbmRSZXF1ZXN0Eh8KCnNlc3Npb25faWQYASABKAlCC7pICMgBAXIDsAEBEjIKB2NvbW1hbmQYAiABKAsyGS5tYXZpby5zZXNzaW9uLnYxLkNvbW1hbmRCBrpIA8gBASIVChNTZW5kQ29tbWFuZFJlc3BvbnNlKmsKCEpvYlN0YXRlEhkKFUpPQl9TVEFURV9VTlNQRUNJRklFRBAAEhUKEUpPQl9TVEFURV9SVU5OSU5HEAESFwoTSk9CX1NUQVRFX1NVQ0NFRURFRBACEhQKEEpPQl9TVEFURV9GQUlMRUQQAyrPAQoQUGxheVN0YXRlQ29tbWFuZBIiCh5QTEFZX1NUQVRFX0NPTU1BTkRfVU5TUEVDSUZJRUQQABIcChhQTEFZX1NUQVRFX0NPTU1BTkRfUEFVU0UQARIeChpQTEFZX1NUQVRFX0NPTU1BTkRfVU5QQVVTRRACEhsKF1BMQVlfU1RBVEVfQ09NTUFORF9TVE9QEAMSGwoXUExBWV9TVEFURV9DT01NQU5EX05FWFQQBBIfChtQTEFZX1NUQVRFX0NPTU1BTkRfUFJFVklPVVMQBTJmCgxFdmVudFNlcnZpY2USVgoJU3Vic2NyaWJlEiIubWF2aW8uc2Vzc2lvbi52MS5TdWJzY3JpYmVSZXF1ZXN0GiMubWF2aW8uc2Vzc2lvbi52MS5TdWJzY3JpYmVSZXNwb25zZTABMrICCg5TZXNzaW9uU2VydmljZRJiCgxMaXN0U2Vzc2lvbnMSJS5tYXZpby5zZXNzaW9uLnYxLkxpc3RTZXNzaW9uc1JlcXVlc3QaJi5tYXZpby5zZXNzaW9uLnYxLkxpc3RTZXNzaW9uc1Jlc3BvbnNlIgOQAgESYAoNUmV2b2tlU2Vzc2lvbhImLm1hdmlvLnNlc3Npb24udjEuUmV2b2tlU2Vzc2lvblJlcXVlc3QaJy5tYXZpby5zZXNzaW9uLnYxLlJldm9rZVNlc3Npb25SZXNwb25zZRJaCgtTZW5kQ29tbWFuZBIkLm1hdmlvLnNlc3Npb24udjEuU2VuZENvbW1hbmRSZXF1ZXN0GiUubWF2aW8uc2Vzc2lvbi52MS5TZW5kQ29tbWFuZFJlc3BvbnNlQs0BChRjb20ubWF2aW8uc2Vzc2lvbi52MUIMU2Vzc2lvblByb3RvUAFaRWdpdGh1Yi5jb20vbWF2aW9haS9tYXZpby9saWJzL3Byb3RvL2dlbi9nby9tYXZpby9zZXNzaW9uL3YxO3Nlc3Npb252MaICA01TWKoCEE1hdmlvLlNlc3Npb24uVjHKAhBNYXZpb1xTZXNzaW9uXFYx4gIcTWF2aW9cU2Vzc2lvblxWMVxHUEJNZXRhZGF0YeoCEk1hdmlvOjpTZXNzaW9uOjpWMWIIZWRpdGlvbnNw6Ac", [file_buf_validate_validate, file_google_protobuf_duration, file_google_protobuf_timestamp, file_mavio_library_v1_item, file_mavio_library_v1_library, file_mavio_playback_v1_playback, file_mavio_session_v1_syncplay, file_mavio_system_v1_activity, file_mavio_system_v1_plugin, file_mavio_user_v1_user]);
 
 /**
  * @generated from message mavio.session.v1.SubscribeRequest
@@ -133,6 +135,12 @@ export type Event = Message$1<"mavio.session.v1.Event"> & {
      */
     value: NotificationReceived;
     case: "notification";
+  } | {
+    /**
+     * @generated from field: mavio.session.v1.ScanProgressChanged scan_progress_changed = 12;
+     */
+    value: ScanProgressChanged;
+    case: "scanProgressChanged";
   } | { case: undefined; value?: undefined };
 };
 
@@ -318,6 +326,33 @@ export const JobChangedSchema: GenMessage<JobChanged> = /*@__PURE__*/
   messageDesc(file_mavio_session_v1_session, 9);
 
 /**
+ * ScanProgressChanged tells administrators how far a library's scan has
+ * come, at most twice a second while it runs, and once when it ends.
+ *
+ * @generated from message mavio.session.v1.ScanProgressChanged
+ */
+export type ScanProgressChanged = Message$1<"mavio.session.v1.ScanProgressChanged"> & {
+  /**
+   * @generated from field: string library_id = 1;
+   */
+  libraryId: string;
+
+  /**
+   * Unset once the scan and the work it queued are done.
+   *
+   * @generated from field: mavio.library.v1.ScanProgress progress = 2;
+   */
+  progress?: ScanProgress | undefined;
+};
+
+/**
+ * Describes the message mavio.session.v1.ScanProgressChanged.
+ * Use `create(ScanProgressChangedSchema)` to create a new message.
+ */
+export const ScanProgressChangedSchema: GenMessage<ScanProgressChanged> = /*@__PURE__*/
+  messageDesc(file_mavio_session_v1_session, 10);
+
+/**
  * NotificationReceived tells the user of a notification as it is
  * recorded: an activity concerning them, such as their request approved
  * or available or their issue resolved, as ActivityService lists their
@@ -338,7 +373,7 @@ export type NotificationReceived = Message$1<"mavio.session.v1.NotificationRecei
  * Use `create(NotificationReceivedSchema)` to create a new message.
  */
 export const NotificationReceivedSchema: GenMessage<NotificationReceived> = /*@__PURE__*/
-  messageDesc(file_mavio_session_v1_session, 10);
+  messageDesc(file_mavio_session_v1_session, 11);
 
 /**
  * PluginChanged tells administrators a plugin's new state.
@@ -357,7 +392,7 @@ export type PluginChanged = Message$1<"mavio.session.v1.PluginChanged"> & {
  * Use `create(PluginChangedSchema)` to create a new message.
  */
 export const PluginChangedSchema: GenMessage<PluginChanged> = /*@__PURE__*/
-  messageDesc(file_mavio_session_v1_session, 11);
+  messageDesc(file_mavio_session_v1_session, 12);
 
 /**
  * Session is a signed-in device.
@@ -447,7 +482,7 @@ export type Session = Message$1<"mavio.session.v1.Session"> & {
  * Use `create(SessionSchema)` to create a new message.
  */
 export const SessionSchema: GenMessage<Session> = /*@__PURE__*/
-  messageDesc(file_mavio_session_v1_session, 12);
+  messageDesc(file_mavio_session_v1_session, 13);
 
 /**
  * NowPlaying is what a device plays.
@@ -488,7 +523,7 @@ export type NowPlaying = Message$1<"mavio.session.v1.NowPlaying"> & {
  * Use `create(NowPlayingSchema)` to create a new message.
  */
 export const NowPlayingSchema: GenMessage<NowPlaying> = /*@__PURE__*/
-  messageDesc(file_mavio_session_v1_session, 13);
+  messageDesc(file_mavio_session_v1_session, 14);
 
 /**
  * Command is what one device asks another to do.
@@ -537,7 +572,7 @@ export type Command = Message$1<"mavio.session.v1.Command"> & {
  * Use `create(CommandSchema)` to create a new message.
  */
 export const CommandSchema: GenMessage<Command> = /*@__PURE__*/
-  messageDesc(file_mavio_session_v1_session, 14);
+  messageDesc(file_mavio_session_v1_session, 15);
 
 /**
  * Play starts playing items, as a queue.
@@ -568,7 +603,7 @@ export type Play = Message$1<"mavio.session.v1.Play"> & {
  * Use `create(PlaySchema)` to create a new message.
  */
 export const PlaySchema: GenMessage<Play> = /*@__PURE__*/
-  messageDesc(file_mavio_session_v1_session, 15);
+  messageDesc(file_mavio_session_v1_session, 16);
 
 /**
  * PlayState changes the playback.
@@ -587,7 +622,7 @@ export type PlayState = Message$1<"mavio.session.v1.PlayState"> & {
  * Use `create(PlayStateSchema)` to create a new message.
  */
 export const PlayStateSchema: GenMessage<PlayState> = /*@__PURE__*/
-  messageDesc(file_mavio_session_v1_session, 16);
+  messageDesc(file_mavio_session_v1_session, 17);
 
 /**
  * Seek moves the playback.
@@ -606,7 +641,7 @@ export type Seek = Message$1<"mavio.session.v1.Seek"> & {
  * Use `create(SeekSchema)` to create a new message.
  */
 export const SeekSchema: GenMessage<Seek> = /*@__PURE__*/
-  messageDesc(file_mavio_session_v1_session, 17);
+  messageDesc(file_mavio_session_v1_session, 18);
 
 /**
  * Message shows a text.
@@ -632,7 +667,7 @@ export type Message = Message$1<"mavio.session.v1.Message"> & {
  * Use `create(MessageSchema)` to create a new message.
  */
 export const MessageSchema: GenMessage<Message> = /*@__PURE__*/
-  messageDesc(file_mavio_session_v1_session, 18);
+  messageDesc(file_mavio_session_v1_session, 19);
 
 /**
  * Volume sets the volume, mutes or unmutes; it sets one of them at least.
@@ -658,7 +693,7 @@ export type Volume = Message$1<"mavio.session.v1.Volume"> & {
  * Use `create(VolumeSchema)` to create a new message.
  */
 export const VolumeSchema: GenMessage<Volume> = /*@__PURE__*/
-  messageDesc(file_mavio_session_v1_session, 19);
+  messageDesc(file_mavio_session_v1_session, 20);
 
 /**
  * @generated from message mavio.session.v1.ListSessionsRequest
@@ -677,7 +712,7 @@ export type ListSessionsRequest = Message$1<"mavio.session.v1.ListSessionsReques
  * Use `create(ListSessionsRequestSchema)` to create a new message.
  */
 export const ListSessionsRequestSchema: GenMessage<ListSessionsRequest> = /*@__PURE__*/
-  messageDesc(file_mavio_session_v1_session, 20);
+  messageDesc(file_mavio_session_v1_session, 21);
 
 /**
  * @generated from message mavio.session.v1.ListSessionsResponse
@@ -694,7 +729,7 @@ export type ListSessionsResponse = Message$1<"mavio.session.v1.ListSessionsRespo
  * Use `create(ListSessionsResponseSchema)` to create a new message.
  */
 export const ListSessionsResponseSchema: GenMessage<ListSessionsResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_session_v1_session, 21);
+  messageDesc(file_mavio_session_v1_session, 22);
 
 /**
  * @generated from message mavio.session.v1.RevokeSessionRequest
@@ -711,7 +746,7 @@ export type RevokeSessionRequest = Message$1<"mavio.session.v1.RevokeSessionRequ
  * Use `create(RevokeSessionRequestSchema)` to create a new message.
  */
 export const RevokeSessionRequestSchema: GenMessage<RevokeSessionRequest> = /*@__PURE__*/
-  messageDesc(file_mavio_session_v1_session, 22);
+  messageDesc(file_mavio_session_v1_session, 23);
 
 /**
  * @generated from message mavio.session.v1.RevokeSessionResponse
@@ -724,7 +759,7 @@ export type RevokeSessionResponse = Message$1<"mavio.session.v1.RevokeSessionRes
  * Use `create(RevokeSessionResponseSchema)` to create a new message.
  */
 export const RevokeSessionResponseSchema: GenMessage<RevokeSessionResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_session_v1_session, 23);
+  messageDesc(file_mavio_session_v1_session, 24);
 
 /**
  * @generated from message mavio.session.v1.SendCommandRequest
@@ -746,7 +781,7 @@ export type SendCommandRequest = Message$1<"mavio.session.v1.SendCommandRequest"
  * Use `create(SendCommandRequestSchema)` to create a new message.
  */
 export const SendCommandRequestSchema: GenMessage<SendCommandRequest> = /*@__PURE__*/
-  messageDesc(file_mavio_session_v1_session, 24);
+  messageDesc(file_mavio_session_v1_session, 25);
 
 /**
  * @generated from message mavio.session.v1.SendCommandResponse
@@ -759,7 +794,7 @@ export type SendCommandResponse = Message$1<"mavio.session.v1.SendCommandRespons
  * Use `create(SendCommandResponseSchema)` to create a new message.
  */
 export const SendCommandResponseSchema: GenMessage<SendCommandResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_session_v1_session, 25);
+  messageDesc(file_mavio_session_v1_session, 26);
 
 /**
  * @generated from enum mavio.session.v1.JobState

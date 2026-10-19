@@ -186,6 +186,10 @@ pub use self::__buffa::view::LibraryView;
 #[doc(inline)]
 pub use self::__buffa::view::LibraryOwnedView;
 #[doc(inline)]
+pub use self::__buffa::view::ScanProgressView;
+#[doc(inline)]
+pub use self::__buffa::view::ScanProgressOwnedView;
+#[doc(inline)]
 pub use self::__buffa::view::VirtualEpisodesView;
 #[doc(inline)]
 pub use self::__buffa::view::VirtualEpisodesOwnedView;

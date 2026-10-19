@@ -12811,6 +12811,15 @@
             "type": "string",
             "title": "image_url",
             "description": "The signed URL of the library's collage of its items, relative to the\n server's base URL, for the caller's session; it takes the size\n parameters of images. Empty for callers without a session, which\n fetch /images/collages/{id} with their credentials."
+          },
+          "scanProgress": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.library.v1.ScanProgress"
+              }
+            ],
+            "title": "scan_progress",
+            "description": "How far the library's scan has come, for administrators; unset while\n the library is not being scanned."
           }
         },
         "title": "Library",
@@ -14481,6 +14490,64 @@
         },
         "title": "ScanLibraryResponse",
         "additionalProperties": false
+      },
+      "mavio.library.v1.ScanPhase": {
+        "type": "string",
+        "title": "ScanPhase",
+        "enum": [
+          "SCAN_PHASE_UNSPECIFIED",
+          "SCAN_PHASE_FOLDERS",
+          "SCAN_PHASE_ITEMS"
+        ],
+        "description": "ScanPhase is the part of a scan under way."
+      },
+      "mavio.library.v1.ScanProgress": {
+        "type": "object",
+        "properties": {
+          "libraryId": {
+            "type": "string",
+            "title": "library_id"
+          },
+          "phase": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.library.v1.ScanPhase"
+              }
+            ],
+            "title": "phase"
+          },
+          "foldersDone": {
+            "type": "integer",
+            "title": "folders_done",
+            "format": "int32",
+            "description": "The folders read or found unchanged, and those the scan expects: the\n folders of the library's last scan, or those it found so far when\n more."
+          },
+          "foldersTotal": {
+            "type": "integer",
+            "title": "folders_total",
+            "format": "int32"
+          },
+          "itemsDone": {
+            "type": "integer",
+            "title": "items_done",
+            "format": "int32",
+            "description": "The probes and metadata refreshes of the scan's new and changed files\n done, and those queued so far."
+          },
+          "itemsTotal": {
+            "type": "integer",
+            "title": "items_total",
+            "format": "int32"
+          },
+          "fraction": {
+            "type": "number",
+            "title": "fraction",
+            "format": "double",
+            "description": "The whole done, 0 to 1: reading the folders is its first quarter, the\n probes and refreshes the rest."
+          }
+        },
+        "title": "ScanProgress",
+        "additionalProperties": false,
+        "description": "ScanProgress tells how far a library's scan and the work it queued\n have come: the scan reads the library's folders, then the files it\n found new or changed are probed and their items refreshed."
       },
       "mavio.library.v1.SearchRemoteLyricsRequest": {
         "type": "object",
@@ -17589,6 +17656,20 @@
           {
             "type": "object",
             "properties": {
+              "scanProgressChanged": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/mavio.session.v1.ScanProgressChanged"
+                  }
+                ],
+                "title": "scan_progress_changed"
+              }
+            },
+            "title": "scan_progress_changed"
+          },
+          {
+            "type": "object",
+            "properties": {
               "sessionsChanged": {
                 "allOf": [
                   {
@@ -17671,6 +17752,11 @@
                 },
                 {
                   "required": [
+                    "scanProgressChanged"
+                  ]
+                },
+                {
+                  "required": [
                     "sessionsChanged"
                   ]
                 },
@@ -17722,6 +17808,11 @@
                   {
                     "required": [
                       "pluginChanged"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "scanProgressChanged"
                     ]
                   },
                   {
@@ -18236,6 +18327,27 @@
         "type": "object",
         "title": "RevokeSessionResponse",
         "additionalProperties": false
+      },
+      "mavio.session.v1.ScanProgressChanged": {
+        "type": "object",
+        "properties": {
+          "libraryId": {
+            "type": "string",
+            "title": "library_id"
+          },
+          "progress": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.library.v1.ScanProgress"
+              }
+            ],
+            "title": "progress",
+            "description": "Unset once the scan and the work it queued are done."
+          }
+        },
+        "title": "ScanProgressChanged",
+        "additionalProperties": false,
+        "description": "ScanProgressChanged tells administrators how far a library's scan has\n come, at most twice a second while it runs, and once when it ends."
       },
       "mavio.session.v1.Seek": {
         "type": "object",
