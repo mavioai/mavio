@@ -38,6 +38,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Brush
@@ -77,6 +78,7 @@ import dev.mavio.ui.shapeOf
 import dev.mavio.ui.text
 import dev.mavio.ui.theme
 import kotlinx.coroutines.delay
+import mavio.acquisition.v1.Profile.MediaKind
 
 /** A title the hero shows, and the line above it. */
 private data class HeroEntry(val card: Card, val eyebrow: String)
@@ -371,8 +373,11 @@ internal fun HomeShelf(row: HomeRow, title: String, several: Boolean) {
         }
         is RowContent.Titles -> {
             if (content.v1.isEmpty()) return
-            Shelf(title, badge = badge) {
-                items(content.v1, key = { it.title + it.year }) { TitlePoster(it) }
+            val notOnServers: @Composable () -> Unit = {
+                Text(stringResource(R.string.home_not_on_servers), style = theme.type.footnote.text, color = theme.colors.textTertiary, maxLines = 1)
+            }
+            Shelf(title, badge = notOnServers) {
+                items(content.v1, key = { it.title + it.year }) { TitlePoster(row.serverId, it) }
             }
         }
         RowContent.Loading -> Shelf(title, badge = badge) {
@@ -406,10 +411,30 @@ private fun ServerBadge(name: String) {
     )
 }
 
-/** A title not on the servers yet: its poster, title and year. */
+/**
+ * A title of a row from outside the servers: its poster, title and year,
+ * opening its details where a server has it, or else on Discover of the
+ * row's server, to be requested, as the web UI's.
+ */
 @Composable
-private fun TitlePoster(title: TitleCard) {
-    Column(Modifier.width(theme.layout.poster)) {
+private fun TitlePoster(serverId: String?, title: TitleCard) {
+    val navigator = LocalNavigator.current
+    val at = title.available.firstOrNull()
+    val tmdb = title.externalIds["tmdb"]?.toIntOrNull()
+    val open: (() -> Unit)? = when {
+        at != null -> { -> navigator.open(Route.Item(at.serverId, at.itemId)) }
+        serverId != null && tmdb != null -> { ->
+            val kind = if (title.movie) MediaKind.MEDIA_KIND_MOVIE_VALUE else MediaKind.MEDIA_KIND_SERIES_VALUE
+            navigator.open(Route.Title(serverId, kind, tmdb))
+        }
+        else -> null
+    }
+    Column(
+        Modifier
+            .width(theme.layout.poster)
+            .then(if (open != null) Modifier.clickable(onClick = open) else Modifier)
+            .alpha(if (at != null) 1f else 0.8f),
+    ) {
         Artwork(
             title.posterUrl,
             Modifier

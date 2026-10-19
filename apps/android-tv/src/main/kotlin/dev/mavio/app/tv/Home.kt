@@ -42,6 +42,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -91,6 +92,7 @@ import dev.mavio.ui.text
 import dev.mavio.ui.theme
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import mavio.acquisition.v1.Profile.MediaKind
 
 /** A title the hero shows, and the line above it. */
 private data class HeroEntry(val card: Card, val eyebrow: String)
@@ -326,9 +328,16 @@ internal fun HomeShelf(row: HomeRow, title: String, several: Boolean, state: Laz
         }
         is RowContent.Titles -> {
             if (content.v1.isEmpty()) return
-            TvShelf(title, state, badge) {
+            val notOnServers: @Composable () -> Unit = {
+                Text(stringResource(R.string.home_not_on_servers), style = theme.type.footnote.text, color = theme.colors.textTertiary, maxLines = 1)
+            }
+            TvShelf(title, state, notOnServers) {
                 itemsIndexed(content.v1, key = { _, t -> t.title + t.year }) { i, t ->
-                    TitlePoster(t, if (i == 0 && entry != null) Modifier.focusRequester(entry) else Modifier)
+                    TitlePoster(
+                        row.serverId,
+                        t,
+                        (if (i == 0 && entry != null) Modifier.focusRequester(entry) else Modifier).focusKey(focus, "${row.id}/${t.title}/${t.year}"),
+                    )
                 }
             }
         }
@@ -428,12 +437,27 @@ fun TvItemCard(card: Card, modifier: Modifier = Modifier, shape: CardShape = sha
     }
 }
 
-/** A title not on the servers yet: its poster, title and year. */
+/**
+ * A title of a row from outside the servers: its poster, title and year,
+ * opening its details where a server has it, or else on Discover of the
+ * row's server, to be requested, as the web UI's.
+ */
 @Composable
-private fun TitlePoster(title: TitleCard, modifier: Modifier) {
+private fun TitlePoster(serverId: String?, title: TitleCard, modifier: Modifier) {
+    val pages = LocalPages.current
     val state = remember { Focusable() }
     val focused = state.focused()
-    Column(modifier.shakes().width(theme.layout.poster).focusCard(focused).selectable(state) {}) {
+    val at = title.available.firstOrNull()
+    val tmdb = title.externalIds["tmdb"]?.toIntOrNull()
+    Column(
+        modifier.shakes().width(theme.layout.poster).focusCard(focused).alpha(if (at != null) 1f else 0.8f).selectable(state) {
+            when {
+                at != null -> pages.openItem(at.serverId, at.itemId)
+                serverId != null && tmdb != null ->
+                    pages.openTitle(serverId, if (title.movie) MediaKind.MEDIA_KIND_MOVIE_VALUE else MediaKind.MEDIA_KIND_SERIES_VALUE, tmdb)
+            }
+        },
+    ) {
         Artwork(
             title.posterUrl,
             Modifier
