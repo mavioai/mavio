@@ -1002,8 +1002,8 @@ private struct StatusBadge: View {
             .type(theme.type.caption).fontWeight(.semibold)
             .padding(.horizontal, MavioSpacing.s8)
             .padding(.vertical, 2)
-            .foregroundStyle(open ? theme.colors.onAccent : .white)
-            .background(open ? theme.colors.accent : Color(hex: 0x34C759), in: .capsule)
+            .foregroundStyle(open ? theme.colors.onButton : .white)
+            .background(open ? theme.colors.button : Color(hex: 0x34C759), in: .capsule)
     }
 }
 

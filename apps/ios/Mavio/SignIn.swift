@@ -191,7 +191,7 @@ struct SignInView: View {
                             Task { await probe(server.address) }
                         } label: {
                             HStack(spacing: MavioSpacing.s12) {
-                                Icon("server", size: 22).foregroundStyle(theme.colors.accent)
+                                Icon("server", size: 22).foregroundStyle(theme.colors.textPrimary)
                                 VStack(alignment: .leading, spacing: 2) {
                                     Text(server.name).font(.system(size: 17, weight: .semibold))
                                         .foregroundStyle(theme.colors.textPrimary)

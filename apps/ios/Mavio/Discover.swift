@@ -440,7 +440,7 @@ private struct StatusMark: View {
             Icon(available ? "check" : "pending", size: 16)
                 .foregroundStyle(.white)
                 .padding(2)
-                .background(available ? theme.colors.accent : theme.colors.scrim, in: .circle)
+                .background(available ? theme.colors.success : theme.colors.scrim, in: .circle)
                 .opacity(status == .partiallyAvailable ? 0.7 : 1)
                 .padding(6)
                 .accessibilityLabel(statusLabel(status) ?? "")
