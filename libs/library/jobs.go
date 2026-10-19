@@ -33,6 +33,9 @@ type LibraryPayload struct {
 // ItemPayload is the payload of JobRefresh jobs.
 type ItemPayload struct {
 	ItemID core.ID `json:"item_id"`
+	// LibraryID is the library whose scan queued the refresh, which follows
+	// its progress; empty for other refreshes.
+	LibraryID core.ID `json:"library_id,omitzero"`
 	// Probed marks a refresh following a probe of new or changed media
 	// files.
 	Probed bool `json:"probed,omitempty"`
@@ -56,10 +59,19 @@ func RefreshJob(itemID core.ID, at time.Time) core.Job {
 	return core.Job{ID: core.NewID(), Kind: JobRefresh, Payload: payload, UniqueKey: JobRefresh + ":" + itemID.String(), MaxAttempts: 3, RunAt: at}
 }
 
+// ScanRefreshJob returns a job refreshing an item's metadata that the scan
+// of lib queued, which follows the scan's progress.
+func ScanRefreshJob(itemID, lib core.ID, at time.Time) core.Job {
+	job := RefreshJob(itemID, at)
+	job.Payload, _ = json.Marshal(ItemPayload{ItemID: itemID, LibraryID: lib})
+	return job
+}
+
 // ProbedRefreshJob returns a job refreshing an item's metadata after its
-// new or changed media files were probed, which Jobs.Probed is told of.
-func ProbedRefreshJob(itemID core.ID, at time.Time) core.Job {
-	payload, _ := json.Marshal(ItemPayload{ItemID: itemID, Probed: true})
+// new or changed media files were probed, which Jobs.Probed is told of;
+// lib is the library whose scan queued the probe, if any.
+func ProbedRefreshJob(itemID, lib core.ID, at time.Time) core.Job {
+	payload, _ := json.Marshal(ItemPayload{ItemID: itemID, LibraryID: lib, Probed: true})
 	return core.Job{ID: core.NewID(), Kind: JobRefresh, Payload: payload, UniqueKey: JobRefresh + ":probed:" + itemID.String(), MaxAttempts: 3, RunAt: at}
 }
 
@@ -352,9 +364,9 @@ func (j *Jobs) probe(ctx context.Context, job core.Job) ([]core.Job, error) {
 			return nil, ignoreGone(err)
 		}
 	}
-	next := []core.Job{RefreshJob(it.ID, j.now())}
+	next := []core.Job{ScanRefreshJob(it.ID, p.LibraryID, j.now())}
 	if len(probed) > 0 {
-		next[0] = ProbedRefreshJob(it.ID, j.now())
+		next[0] = ProbedRefreshJob(it.ID, p.LibraryID, j.now())
 	}
 	if j.Keyframes != nil && !audio && keyframes {
 		next = append(next, KeyframesJob(it.ID, j.now(), KeyframesBackground))

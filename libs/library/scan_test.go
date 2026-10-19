@@ -1,6 +1,7 @@
 package library
 
 import (
+	"encoding/json"
 	"maps"
 	"os"
 	"path/filepath"
@@ -173,6 +174,38 @@ func TestScanMovies(t *testing.T) {
 	f.clock = f.clock.Add(31 * 24 * time.Hour)
 	if st = f.scan(); st.Purged != 2 {
 		t.Errorf("purged = %d", st.Purged)
+	}
+}
+
+func TestScanReportsFolders(t *testing.T) {
+	f := newScan(t, core.LibraryMovies)
+	tree(t, f.root, "Up (2009)/Up (2009).mkv", "Brazil (1985)/Brazil (1985).mkv")
+	type report struct{ read, found int }
+	var reports []report
+	f.sc.OnFolders = func(lib core.ID, read, found int) {
+		if lib != f.lib.ID {
+			t.Errorf("library = %v, want %v", lib, f.lib.ID)
+		}
+		reports = append(reports, report{read, found})
+	}
+	f.scan()
+	if got, want := reports[0], (report{0, 1}); got != want {
+		t.Errorf("first report = %v, want %v", got, want)
+	}
+	last := reports[len(reports)-1]
+	if last.read != last.found || last.read < 3 {
+		t.Errorf("last report = %v, want every folder read, the root and both movies'", last)
+	}
+	for _, r := range reports {
+		if r.read > r.found {
+			t.Errorf("report = %v, read more than found", r)
+		}
+	}
+	for _, j := range f.store.jobs {
+		var p ProbePayload
+		if err := json.Unmarshal(j.Payload, &p); err != nil || p.LibraryID != f.lib.ID {
+			t.Errorf("probe payload = %s, want library %v", j.Payload, f.lib.ID)
+		}
 	}
 }
 

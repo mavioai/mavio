@@ -28,6 +28,9 @@ const JobProbe = "media.probe"
 // ProbePayload is the payload of JobProbe jobs.
 type ProbePayload struct {
 	ItemID core.ID `json:"item_id"`
+	// LibraryID is the library whose scan queued the probe, which follows
+	// its progress.
+	LibraryID core.ID `json:"library_id,omitzero"`
 }
 
 // Scanner reconciles libraries with their folders.
@@ -82,6 +85,10 @@ type Scanner struct {
 	// SubtitleFolder gives where subtitle files are found besides beside
 	// their videos; nil finds them beside their videos only.
 	SubtitleFolder func() SubtitleFolder
+	// OnFolders is told, as a scan reads a library's folders, how many it
+	// has read and how many it has found, its roots among them; nil
+	// ignores them.
+	OnFolders func(lib core.ID, read, found int)
 }
 
 // classify returns the storage class of a file or folder of lib.
@@ -137,6 +144,7 @@ func (s *Scanner) Scan(ctx context.Context, lib core.Library) (ScanStats, error)
 	if sc.devices == nil {
 		sc.devices = &storage.Detector{}
 	}
+	sc.folders(0, len(lib.Paths))
 	for _, root := range lib.Paths {
 		if err := sc.root(ctx, root); err != nil {
 			return sc.stats, err
@@ -174,6 +182,8 @@ type scan struct {
 	devices *storage.Detector
 	mu      sync.Mutex
 	stats   ScanStats
+	// read and found count the folders for OnFolders.
+	read, found int
 	// subFolder is where subtitle files are found besides beside their
 	// videos.
 	subFolder SubtitleFolder
@@ -183,6 +193,19 @@ func (sc *scan) count(f func(*ScanStats)) {
 	sc.mu.Lock()
 	f(&sc.stats)
 	sc.mu.Unlock()
+}
+
+// folders counts folders read and found, and tells OnFolders.
+func (sc *scan) folders(read, found int) {
+	if sc.OnFolders == nil {
+		return
+	}
+	sc.mu.Lock()
+	sc.read += read
+	sc.found += found
+	r, f := sc.read, sc.found
+	sc.mu.Unlock()
+	sc.OnFolders(sc.lib.ID, r, f)
 }
 
 // task is a folder to scan.
@@ -205,6 +228,7 @@ func (sc *scan) root(ctx context.Context, base string) error {
 		// An unmounted or unreadable root keeps its items until it is back.
 		sc.logger().WarnContext(ctx, "library folder unavailable", "path", base, "err", err)
 		sc.count(func(s *ScanStats) { s.Unreadable++ })
+		sc.folders(1, 0)
 		return sc.Store.Items().MarkSeen(ctx, sc.lib.ID, base, sc.gen)
 	}
 	defer s.Close()
@@ -230,6 +254,7 @@ func (sc *scan) walk(ctx context.Context, rfs rootFS, ignores *IgnoreFiles, walk
 			if err != nil {
 				return err
 			}
+			sc.folders(1, len(subs))
 			for _, sub := range subs {
 				visit(sub)
 			}
@@ -526,7 +551,7 @@ func (sc *scan) save(ctx context.Context, rfs rootFS, res Result, parent core.ID
 		return core.NilID, err
 	}
 	for _, id := range probes {
-		payload, err := json.Marshal(ProbePayload{ItemID: id})
+		payload, err := json.Marshal(ProbePayload{ItemID: id, LibraryID: sc.lib.ID})
 		if err != nil {
 			return core.NilID, err
 		}
@@ -542,7 +567,7 @@ func (sc *scan) save(ctx context.Context, rfs rootFS, res Result, parent core.ID
 		}
 	}
 	for _, id := range refreshes {
-		job := RefreshJob(id, sc.now())
+		job := ScanRefreshJob(id, sc.lib.ID, sc.now())
 		if _, err := sc.Store.Jobs().Enqueue(ctx, &job); err != nil {
 			return core.NilID, err
 		}
