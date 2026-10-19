@@ -132,6 +132,10 @@ func theme(dark, tv bool) *ui.Theme {
 	if tv {
 		t.Background = Color(p.TvBackground)
 		t.FontSize = design.TvTypography.Body.Size
+		// A control with focus turns white with black content, and a
+		// field is ringed in white 3 pt wide (docs/tv.md §4).
+		t.Focus, t.FocusWidth = ui.RGB(255, 255, 255), 3
+		t.FocusFill, t.FocusText = ui.RGB(255, 255, 255), ui.RGB(0, 0, 0)
 	}
 	return t
 }

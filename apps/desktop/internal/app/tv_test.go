@@ -614,6 +614,7 @@ func TestTVSelect(t *testing.T) {
 		h.tt.Key(0, k)
 		h.settle()
 	}
+	h.save(shots, "tv-field")
 	key(ui.KeyDown)
 	if !h.tt.Focused("Metadata language") {
 		t.Fatalf("down from the server name did not reach the select")
