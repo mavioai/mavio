@@ -78,6 +78,7 @@ import dev.mavio.design.MavioSpacing
 import dev.mavio.ui.ButtonKind
 import dev.mavio.ui.MavioButton
 import dev.mavio.ui.MavioIcon
+import dev.mavio.ui.Quality
 import dev.mavio.ui.R
 import dev.mavio.ui.StatusView
 import dev.mavio.ui.text

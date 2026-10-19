@@ -7,16 +7,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.core.content.edit
+import dev.mavio.ui.Quality
 import dev.mavio.ui.R
-
-/** The most the server sends this device, as the web UI's qualities. */
-enum class Quality(val key: String, val bitrate: Long, @StringRes val label: Int?) {
-    ORIGINAL("original", 200_000_000, R.string.player_quality_original),
-    AUTO("auto", 40_000_000, R.string.player_quality_auto),
-    P1080("1080p", 10_000_000, null),
-    P720("720p", 4_000_000, null),
-    P480("480p", 1_500_000, null),
-}
 
 /** The theme the app takes on this device. */
 enum class Appearance(val key: String, @StringRes val label: Int) {
@@ -29,12 +21,10 @@ enum class Appearance(val key: String, @StringRes val label: Int) {
  * This device's settings, as the web UI keeps them in the browser; the
  * screens showing them follow their changes.
  */
-class Prefs(context: Context) {
+class Prefs(private val context: Context) {
     private val prefs = context.getSharedPreferences("player", Context.MODE_PRIVATE)
 
-    private var quality0 by mutableStateOf(
-        prefs.getString(QUALITY, null).let { key -> Quality.entries.firstOrNull { it.key == key } } ?: Quality.AUTO,
-    )
+    private var quality0 by mutableStateOf(Quality.stored(context))
     private var autoplayNext0 by mutableStateOf(prefs.getBoolean(AUTOPLAY_NEXT, true))
     private var appearance0 by mutableStateOf(
         prefs.getString(APPEARANCE, null).let { key -> Appearance.entries.firstOrNull { it.key == key } } ?: Appearance.SYSTEM,
@@ -45,7 +35,7 @@ class Prefs(context: Context) {
         get() = quality0
         set(value) {
             quality0 = value
-            prefs.edit { putString(QUALITY, value.key) }
+            Quality.store(context, value)
         }
 
     /** Whether an episode's end plays the next. */
@@ -65,7 +55,6 @@ class Prefs(context: Context) {
         }
 
     private companion object {
-        const val QUALITY = "quality"
         const val AUTOPLAY_NEXT = "autoplayNext"
         const val APPEARANCE = "appearance"
     }

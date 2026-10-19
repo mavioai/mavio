@@ -107,6 +107,7 @@ import dev.mavio.player.chooseTracks
 import dev.mavio.player.createPlayer
 import dev.mavio.player.engineFor
 import dev.mavio.ui.MavioIcon
+import dev.mavio.ui.Quality
 import dev.mavio.ui.R
 import dev.mavio.ui.languageName
 import dev.mavio.ui.text
