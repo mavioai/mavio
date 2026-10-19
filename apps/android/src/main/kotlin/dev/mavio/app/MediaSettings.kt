@@ -11,12 +11,14 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -32,14 +34,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.protobuf.Duration
 import dev.mavio.core.AppModel
+import dev.mavio.core.ScanProgress
 import dev.mavio.core.call
 import dev.mavio.core.choices
 import dev.mavio.core.localization
@@ -131,6 +136,15 @@ private suspend fun scan(model: AppModel, serverId: String, id: String): Pair<In
     0 to e.reason
 }
 
+/** What a library's scan is doing, and how far it has come. */
+@Composable
+private fun describe(p: ScanProgress): String =
+    if (p.readingFolders) {
+        stringResource(R.string.libraries_scan_folders, p.foldersDone.toString(), p.foldersTotal.toString())
+    } else {
+        stringResource(R.string.libraries_scan_items, p.itemsDone.toString(), p.itemsTotal.toString())
+    }
+
 /** Libraries: the server's libraries with their kinds and folders, each to scan and to open. */
 @Composable
 internal fun LibrariesPage(model: AppModel, serverId: String) {
@@ -141,11 +155,20 @@ internal fun LibrariesPage(model: AppModel, serverId: String) {
     val scanning = remember { mutableStateMapOf<String, Boolean>() }
     val scope = rememberCoroutineScope()
     val navigator = LocalNavigator.current
+    val progress = model.scanProgress.collectAsStateWithLifecycle().value[serverId].orEmpty()
+    // A scan that ended says so until the page is left or the library is scanned again.
+    var wasScanning by remember { mutableStateOf(emptySet<String>()) }
+    LaunchedEffect(progress.keys) {
+        (wasScanning - progress.keys).forEach { scanned[it] = R.string.libraries_scan_done to null }
+        wasScanning = progress.keys
+    }
     LaunchedEffect(serverId) {
         attempt({ failure = it }) {
             val collator = Collator.getInstance()
-            libraries = model.client.call(serverId, Procedure.libraries("ListLibraries"), listLibrariesRequest {}, ListLibrariesResponse::parseFrom)
+            val listed = model.client.call(serverId, Procedure.libraries("ListLibraries"), listLibrariesRequest {}, ListLibrariesResponse::parseFrom)
                 .librariesList
+            model.listedScans(serverId, listed)
+            libraries = listed
                 .filter { it.kind != LibraryKind.LIBRARY_KIND_COLLECTIONS && it.kind != LibraryKind.LIBRARY_KIND_PLAYLISTS }
                 .sortedWith { a, b -> collator.compare(a.name, b.name) }
             failure = null
@@ -169,13 +192,27 @@ internal fun LibrariesPage(model: AppModel, serverId: String) {
                     ) {
                         ColorTile(k.icon, k.color)
                         val told = scanned[l.id]
-                        Lines(
-                            l.name,
-                            told?.let { it.second ?: stringResource(it.first) }
-                                ?: "${stringResource(k.title)} · ${pluralStringResource(R.plurals.libraries_folder_count, l.pathsCount, l.pathsCount)}",
-                            Modifier.weight(1f),
-                            maxLines = 1,
-                        )
+                        val scan = progress[l.id]
+                        Column(Modifier.weight(1f)) {
+                            Lines(
+                                l.name,
+                                scan?.let { describe(it) }
+                                    ?: told?.let { it.second ?: stringResource(it.first) }
+                                    ?: "${stringResource(k.title)} · ${pluralStringResource(R.plurals.libraries_folder_count, l.pathsCount, l.pathsCount)}",
+                                maxLines = 1,
+                            )
+                            if (scan != null) {
+                                LinearProgressIndicator(
+                                    { scan.fraction.toFloat().coerceIn(0f, 1f) },
+                                    Modifier.fillMaxWidth().padding(top = MavioSpacing.s4).height(4.dp),
+                                    color = theme.colors.accent,
+                                    trackColor = theme.colors.fill,
+                                    strokeCap = StrokeCap.Round,
+                                    gapSize = 0.dp,
+                                    drawStopIndicator = {},
+                                )
+                            }
+                        }
                         val busy = scanning[l.id] == true
                         MavioButton(
                             if (busy) "…" else stringResource(R.string.libraries_scan),

@@ -52,6 +52,14 @@ class AppModel(context: Context, clientName: String) {
     /** The state of each server's stream. */
     val states: StateFlow<Map<String, StreamState>> = _states.asStateFlow()
 
+    private val _scanProgress = MutableStateFlow<Map<String, Map<String, ScanProgress>>>(emptyMap())
+
+    /**
+     * How far the libraries' scans have come, by server and library, as the
+     * servers tell administrators.
+     */
+    val scanProgress: StateFlow<Map<String, Map<String, ScanProgress>>> = _scanProgress.asStateFlow()
+
     private val _home = MutableStateFlow<List<Row>>(emptyList())
 
     /** The rows of Home. */
@@ -182,6 +190,25 @@ class AppModel(context: Context, clientName: String) {
         reloadServers()
     }
 
+    /**
+     * Takes the scan progress of a server's libraries as listed, which the
+     * server's events then carry on.
+     */
+    fun listedScans(serverId: String, libraries: List<mavio.library.v1.LibraryOuterClass.Library>) {
+        val scans = libraries.filter { it.hasScanProgress() }.associate { l ->
+            val p = l.scanProgress
+            l.id to ScanProgress(
+                readingFolders = p.phase == mavio.library.v1.LibraryOuterClass.ScanPhase.SCAN_PHASE_FOLDERS,
+                foldersDone = p.foldersDone,
+                foldersTotal = p.foldersTotal,
+                itemsDone = p.itemsDone,
+                itemsTotal = p.itemsTotal,
+                fraction = p.fraction,
+            )
+        }
+        _scanProgress.update { it + (serverId to scans) }
+    }
+
     /** Signs out of a server and forgets it. */
     suspend fun remove(serverId: String) {
         client.removeServer(serverId)
@@ -243,7 +270,12 @@ class AppModel(context: Context, clientName: String) {
                 }
             }
             is Push.Event -> when (push.event) {
-                is ServerEvent.SessionsChanged, is ServerEvent.ScanProgressChanged -> Unit
+                is ServerEvent.SessionsChanged -> Unit
+                is ServerEvent.ScanProgressChanged -> _scanProgress.update {
+                    val e = push.event
+                    val scans = it[push.serverId].orEmpty()
+                    it + (push.serverId to if (e.progress == null) scans - e.libraryId else scans + (e.libraryId to e.progress))
+                }
                 else -> bump(push.serverId)
             }
             is Push.Home -> _home.value = push.rows

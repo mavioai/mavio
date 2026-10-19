@@ -717,7 +717,8 @@ flowchart TD
     - [x] Libraries (`apps/web/src/screens/admin/libraries.tsx`, `libs/client-ts/src/admin.ts`): adding, editing, removing and scanning libraries, with a folder picker (`LibraryService`, `ListDirectory`)
     - [x] Each library's scan progress in Libraries on the desktop (`apps/desktop/internal/app/libraries.go`), from the core's `ScanProgressChanged` event of its C ABI and the libraries' `scan_progress`
     - [x] Each library's scan progress in Libraries as on iOS ([Clients §6.3.4](clients.md)) in the web UI (`apps/web/src/screens/admin/libraries.tsx`): the `ScanProgressChanged` event and the libraries' `scan_progress`, in place of the notice that a scan started
-    - [ ] The same on Android
+    - [x] The same on the Android phone (`apps/android/src/main/kotlin/dev/mavio/app/MediaSettings.kt`), from the core's `ScanProgressChanged` event kept by `AppModel` and the libraries' `scan_progress`
+      - [ ] Checked on a phone during a scan
     - [x] Auto quality on the desktop as on iOS ([Clients §6.5](clients.md)), by the `local` the core's C ABI gives each `ServerRecord` from `is_local_address`
     - [ ] Auto quality as on iOS ([Clients §6.5](clients.md)), in the web UI and on Android: 100 Mbit/s from a server on the local network, 40 otherwise; the core's `is_local_address` for Android, the page's host for the web UI
     - [ ] A library's providers in order and its hubs on Home and Recommended (`ProviderOrder`, `LibraryHubs`)
