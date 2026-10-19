@@ -92,6 +92,7 @@ type fakeCore struct {
 	remotes        []*storagev1.Remote
 	offline        []*storagev1.OfflineClient
 	answers        []string
+	searchErr      error // when set, what searching a server fails with
 	acq            *fakeAcquisition
 	wanted         *fakeWanted
 	downloads      *fakeDownloads
@@ -294,6 +295,8 @@ func (f *fakeCore) Stream(ctx context.Context, req *capiv1.Request, part func(*c
 		return f.callServerStream(ctx, req.GetCallServerStream(), part)
 	case req.HasRunIntent():
 		return f.runIntent(req.GetRunIntent())
+	case req.HasSearchServer() && f.searchErr != nil:
+		return nil, f.searchErr
 	case req.HasSearch(), req.HasSearchServer():
 		var cards []*capiv1.Card
 		q := strings.ToLower(req.GetSearch().GetQuery() + req.GetSearchServer().GetQuery())

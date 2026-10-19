@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"fmt"
 	"net/url"
 	"strings"
 	"time"
@@ -176,7 +177,14 @@ func (a *App) searchServers(query string) {
 		}
 		load(a, t, key("search", id, query, a.generation), func(ctx context.Context) (searched, error) {
 			m, err := a.opts.Core.Call(ctx, capiv1.Request_builder{SearchServer: capiv1.SearchServer_builder{ServerId: id, Query: query}.Build()}.Build())
-			return searched{query, m.GetSearchResults().GetServers()[0]}, err
+			if err != nil {
+				return searched{}, err
+			}
+			servers := m.GetSearchResults().GetServers()
+			if len(servers) == 0 {
+				return searched{}, fmt.Errorf("search %s: no results", id)
+			}
+			return searched{query, servers[0]}, nil
 		})
 	}
 }
@@ -333,10 +341,12 @@ func (a *App) searchResults(c *ui.Context, query string, grid bool) {
 		// Searching again keeps what it found meanwhile.
 		searching = searching || t.loading
 		switch {
-		case !t.loaded || t.value.query != query:
+		case !t.loaded:
 			searching = true
 		case t.err != nil:
 			answered = append(answered, capiv1.ServerResults_builder{ServerId: sv.GetId(), ServerName: sv.GetName(), Error: t.err.Error()}.Build())
+		case t.value.query != query:
+			searching = true
 		default:
 			answered = append(answered, t.value.results)
 		}

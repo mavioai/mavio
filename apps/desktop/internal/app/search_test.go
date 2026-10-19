@@ -5,6 +5,7 @@ import (
 
 	"github.com/egoist/mygo/ui"
 
+	"github.com/mavioai/mavio/libs/client-rust/capi"
 	capiv1 "github.com/mavioai/mavio/libs/client-rust/capi/gen/mavio/capi/v1"
 )
 
@@ -116,5 +117,25 @@ func TestSearchPageField(t *testing.T) {
 	h.settle()
 	if l := h.app.router.Location(); l != "/search" || h.tt.HasText("The Long Orbit") {
 		t.Errorf("location = %q, texts = %q, want = /search with no results", l, h.tt.Texts())
+	}
+}
+
+// A server the core cannot search shows as unreachable, the results of
+// discovery still shown.
+func TestSearchFailed(t *testing.T) {
+	h := newHarness(t, true, 1280, 900)
+	h.core.searchErr = &capi.Error{Code: capiv1.Error_CODE_INVALID, Reason: "unreachable"}
+	h.app.searchFor("orb")
+	for range 20 {
+		if h.tt.HasText("From Discover") {
+			break
+		}
+		h.settle()
+	}
+	want := h.core.s.Server.Name + " is unreachable"
+	for _, w := range []string{want, "From Discover"} {
+		if !h.tt.HasText(w) {
+			t.Errorf("no %q; texts = %q", w, h.tt.Texts())
+		}
 	}
 }
