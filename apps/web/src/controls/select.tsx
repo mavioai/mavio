@@ -113,6 +113,9 @@ function pickerMatch(o: PickerOption, query: string): boolean {
  * A choice among many options, found by typing into the field: its popup
  * lists the options holding what was typed, one compact row each, under
  * filters chosen one per group and the count of the options matching.
+ * With labels.search, it is a button as a select is, showing the option
+ * chosen or the placeholder, and the field searching is in its popup, as
+ * wide as the line holding the button.
  */
 export function Picker({
   value,
@@ -129,11 +132,21 @@ export function Picker({
   label: string;
   /** Groups of filters, one of each group chosen, or none for all. */
   filters?: PickerFilter[][];
-  labels: { placeholder: string; empty: string; all: string; count: (n: number) => string; first: (shown: number, n: number) => string };
+  labels: {
+    placeholder: string;
+    /** The placeholder of the search field in the popup, which makes the picker a button. */
+    search?: string;
+    empty: string;
+    all: string;
+    count: (n: number) => string;
+    first: (shown: number, n: number) => string;
+  };
   className?: string;
 }) {
   const { tv } = usePrefs();
   const [open, setOpen] = useState(false);
+  // The line holding a button, which its popup spans.
+  const [line, setLine] = useState<HTMLElement | null>(null);
   const selected = options.find((o) => o.value === value) ?? null;
   // What is typed while the popup is open; closed, the field shows the option chosen.
   const [query, setQuery] = useState<string | null>(null);
@@ -149,7 +162,7 @@ export function Picker({
       items={items}
       value={selected}
       onValueChange={(o: PickerOption | null) => onChange(o?.value)}
-      inputValue={query ?? selected?.label ?? ""}
+      inputValue={query ?? (labels.search === undefined ? (selected?.label ?? "") : "")}
       onInputValueChange={(q, { reason }) => setQuery(["input-change", "input-clear", "input-paste"].includes(reason) ? q : null)}
       open={open}
       onOpenChange={(o) => {
@@ -162,6 +175,16 @@ export function Picker({
       limit={pickerLimit}
       autoHighlight
     >
+      {labels.search !== undefined ? (
+        <Combobox.Trigger
+          ref={(el: HTMLElement | null) => setLine(el?.parentElement ?? null)}
+          aria-label={label}
+          className={`flex min-h-9 max-w-full min-w-0 items-center justify-between gap-2 rounded-md bg-fill ps-2.5 pe-2.5 text-start type-callout text-on-background hover:bg-fill-selected data-popup-open:bg-fill-selected desk:min-h-7 desk:gap-1.5 desk:ps-2 desk:pe-1.5 ${className ?? ""}`}
+        >
+          <span className={`min-w-0 truncate ${selected ? "" : "text-text-secondary"}`}>{selected?.label ?? labels.placeholder}</span>
+          <Icon name="expand" size={14} className="shrink-0 text-text-secondary" />
+        </Combobox.Trigger>
+      ) : (
       <div className={`relative ${className ?? ""}`}>
         {/* On the television OK opens its options, as a select's, and up
             and down move focus on while they are closed. */}
@@ -187,9 +210,22 @@ export function Picker({
           <Icon name="expand" size={14} />
         </Combobox.Trigger>
       </div>
+      )}
       <Combobox.Portal>
-        <Combobox.Positioner sideOffset={4} align="start" className="z-50 outline-none">
-          <Combobox.Popup className={`${popup} flex w-[min(36rem,calc(100vw-32px))] flex-col`}>
+        <Combobox.Positioner anchor={labels.search === undefined ? undefined : line} sideOffset={4} align="start" className="z-50 outline-none">
+          <Combobox.Popup
+            className={`${popup} flex flex-col ${labels.search === undefined ? "w-[min(36rem,calc(100vw-32px))]" : "w-[var(--anchor-width)] max-w-[calc(100vw-32px)]"}`}
+          >
+            {labels.search !== undefined && (
+              <div className="mb-1 px-1 pt-0.5">
+                <div className="relative">
+                  <Icon name="search" size={16} className="pointer-events-none absolute inset-y-0 start-2.5 my-auto text-text-secondary" />
+                  <Combobox.Input aria-label={label} placeholder={labels.search} className={`${input} ps-8`} />
+                </div>
+              </div>
+            )}
+            {/* A button's popup counts its options only when filtered or cut short. */}
+            {(labels.search === undefined || filters.length > 0 || count > pickerLimit) && (
             <div className="mb-1 flex flex-wrap items-center gap-x-3 gap-y-1 border-b border-border px-1 pb-1.5">
               {filters.map((group, g) => (
                 <div key={g} className="flex items-center gap-0.5">
@@ -205,6 +241,7 @@ export function Picker({
                 {count > pickerLimit ? labels.first(pickerLimit, count) : labels.count(count)}
               </span>
             </div>
+            )}
             <Combobox.Empty className="px-2.5 py-2 type-callout text-text-secondary empty:hidden">{labels.empty}</Combobox.Empty>
             <Combobox.List className="max-h-[min(calc(var(--available-height)-3rem),26rem)] overflow-y-auto">
               {(o: PickerOption) => (

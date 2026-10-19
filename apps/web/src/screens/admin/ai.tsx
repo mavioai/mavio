@@ -88,6 +88,7 @@ function ProvidersList({ server }: { server: ServerEntry }) {
               }))}
               labels={{
                 placeholder: t("ai.chooseProvider"),
+                search: t("nav.search"),
                 empty: t("schema.noMatches"),
                 all: t("schema.all"),
                 count: (count) => t("schema.matches", { count }),
