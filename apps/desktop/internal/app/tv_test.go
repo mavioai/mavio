@@ -7,6 +7,8 @@ import (
 	"time"
 
 	"github.com/egoist/mygo/ui"
+
+	capiv1 "github.com/mavioai/mavio/libs/client-rust/capi/gen/mavio/capi/v1"
 )
 
 func TestTVMode(t *testing.T) {
@@ -178,6 +180,45 @@ func TestTVDetailsAndLibrary(t *testing.T) {
 		}
 	}
 	h.save(shots, "tv-library-all")
+
+	// The order is a menu of the app's own, opening with focus on the
+	// current one; choosing returns focus to its button, as back does
+	// (docs/tv.md §5).
+	for range 6 {
+		if h.tt.Focused("Sort: Name") {
+			break
+		}
+		key(ui.KeyRight)
+	}
+	if !h.tt.Focused("Sort: Name") {
+		t.Fatalf("right along the filters: the order has no focus; texts = %q", h.tt.Texts())
+	}
+	key(ui.KeyEnter)
+	if !h.tt.Focused("Name") {
+		t.Fatalf("the order's menu opened without focus on Name; texts = %q", h.tt.Texts())
+	}
+	h.save(shots, "tv-library-sort")
+	key(ui.KeyDown)
+	key(ui.KeyEnter)
+	if !h.tt.Focused("Sort: Date Added") {
+		t.Errorf("choosing Date Added left focus off the order; texts = %q", h.tt.Texts())
+	}
+	for k, st := range h.app.libraryStates {
+		if st.sort != capiv1.Sort_SORT_DATE_ADDED {
+			t.Errorf("%s: sort = %v, want = %v", k, st.sort, capiv1.Sort_SORT_DATE_ADDED)
+		}
+	}
+	key(ui.KeyEnter)
+	if !h.tt.Focused("Date Added") {
+		t.Fatalf("the order's menu opened without focus on Date Added")
+	}
+	key(ui.KeyEscape)
+	if !h.tt.Focused("Sort: Date Added") || h.app.menuOpen() {
+		t.Errorf("back left the menu open or focus off its button")
+	}
+	if got := h.app.router.Path(); !strings.HasPrefix(got, "/library/") {
+		t.Fatalf("back closing the menu left the library: path = %q", got)
+	}
 	key(ui.KeyEscape)
 	if got := h.app.router.Path(); got != "/libraries" {
 		t.Fatalf("back from a library: path = %q, want = /libraries", got)
