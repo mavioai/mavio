@@ -17,6 +17,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
@@ -25,6 +26,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -93,8 +95,21 @@ private fun Shell(model: AppModel) {
     val scope = rememberCoroutineScope()
     val pages = remember { Pages() }
     val actions = remember(pages) { HomeActions(open = pages::open, play = { pages.play(it.serverId, it.itemId, it.title) }) }
+    // Search opened from the bar returns focus to its pill.
+    val search = remember { FocusRequester() }
+    var fromBar by remember { mutableStateOf(false) }
+    var onSearchPill by remember { mutableStateOf(false) }
     val top = pages.top
-    if (top != null) claim = true
+    if (top != null) claim = !fromBar
+    LaunchedEffect(top == null) {
+        if (top != null || !fromBar) return@LaunchedEffect
+        fromBar = false
+        // The window gives focus back to the current tab a frame or two late.
+        repeat(10) {
+            withFrameNanos {}
+            if (!onSearchPill) runCatching { search.requestFocus() }
+        }
+    }
     BackHandler(top == null && (inPage || tab != Tab.Home)) {
         if (inPage) {
             state.focus.last = null
@@ -115,6 +130,7 @@ private fun Shell(model: AppModel) {
             when (top) {
                 is Page.Details -> key(top) { DetailsPage(model, top) }
                 is Page.Library -> key(top) { LibraryPage(model, top) }
+                is Page.Search -> key(top) { SearchPage(model, top) }
                 is Page.Player -> key(top) { PlayerPage(model, top) }
                 null -> {
                     Box(Modifier.fillMaxSize().onFocusChanged { inPage = it.hasFocus }) {
@@ -125,7 +141,18 @@ private fun Shell(model: AppModel) {
                             }
                         }
                     }
-                    NavBar(tab, tabs, scrolled(state.list), state.entry) {
+                    NavBar(
+                        tab,
+                        tabs,
+                        search,
+                        { onSearchPill = it },
+                        scrolled(state.list),
+                        state.entry,
+                        onSearch = {
+                            fromBar = true
+                            pages.openSearch()
+                        },
+                    ) {
                         claim = false
                         tab = it
                     }
@@ -146,11 +173,21 @@ private fun scrolled(list: LazyListState): Boolean {
  * The navigation bar: the tabs in a pill centered at the top, the current
  * one filled, over a band of the background once the page scrolls; focus
  * entering the tabs goes to the current one, and down from them to the
- * page's first element, [page].
+ * page's first element, [page]. Search follows the tabs, opening only
+ * when selected.
  */
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-private fun NavBar(current: Tab, tabs: Map<Tab, FocusRequester>, scrolled: Boolean, page: FocusRequester, onTab: (Tab) -> Unit) {
+private fun NavBar(
+    current: Tab,
+    tabs: Map<Tab, FocusRequester>,
+    search: FocusRequester,
+    onSearchFocus: (Boolean) -> Unit,
+    scrolled: Boolean,
+    page: FocusRequester,
+    onSearch: () -> Unit,
+    onTab: (Tab) -> Unit,
+) {
     val band by animateColorAsState(if (scrolled) theme.colors.tvBackground else Color.Transparent, label = "band")
     Box(
         Modifier
@@ -171,6 +208,14 @@ private fun NavBar(current: Tab, tabs: Map<Tab, FocusRequester>, scrolled: Boole
             Tab.entries.forEach { t ->
                 TabPill(t, t == current, Modifier.focusRequester(tabs.getValue(t)).focusProperties { down = page }) { onTab(t) }
             }
+            // Search hides the tabs, so it opens only when selected.
+            TvChoice(
+                stringResource(R.string.nav_search),
+                false,
+                Modifier.onFocusChanged { onSearchFocus(it.isFocused) }.focusRequester(search).focusProperties { down = page },
+                onFocus = false,
+                onChoose = onSearch,
+            )
         }
     }
 }

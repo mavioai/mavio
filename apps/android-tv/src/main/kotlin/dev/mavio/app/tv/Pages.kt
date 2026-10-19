@@ -15,13 +15,15 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import dev.mavio.core.Card
 import dev.mavio.core.Row
+import dev.mavio.core.SearchResults
 import dev.mavio.core.Sort
 import java.time.Duration
 
 /**
  * A page over the tabs, which hides the navigation bar (docs/tv.md §6.2,
- * §6.3, §7): an item's details, a library, or an item's playback. Each keeps where it was, so
- * that back returns to it as it was left.
+ * §6.3, §6.4, §7): an item's details, a library, Search, or an item's
+ * playback. Each keeps where it was, so that back returns to it as it was
+ * left.
  */
 sealed class Page {
     /** An item's details. */
@@ -69,6 +71,30 @@ sealed class Page {
         val focus = FocusMemory()
     }
 
+    /** Search (docs/tv.md §6.4): what is typed, the query searched, and its results. */
+    class Search : Page() {
+        /** What the keyboard typed. */
+        var text by mutableStateOf("")
+
+        /** What is searched, [text] after a pause in typing. */
+        var query by mutableStateOf("")
+
+        /** The results of a query. */
+        var results by mutableStateOf<Pair<String, Result<List<SearchResults>>>?>(null)
+
+        /** The suggestions' scroll. */
+        val list = LazyListState()
+
+        /** The suggestions' rows' scrolls. */
+        val rows = RowStates()
+
+        /** The results' scroll. */
+        val grid = LazyGridState()
+
+        /** The element that had focus. */
+        val focus = FocusMemory()
+    }
+
     /** An item's playback, from [start] when set. */
     class Player(val serverId: String, val itemId: String, val title: String, val mediaSourceId: String?, val start: Duration?) : Page()
 }
@@ -91,6 +117,11 @@ class Pages {
     /** Opens the library [libraryId] of [serverId], named [name]. */
     fun openLibrary(serverId: String, libraryId: String, name: String) {
         stack += Page.Library(serverId, libraryId, name)
+    }
+
+    /** Opens Search. */
+    fun openSearch() {
+        stack += Page.Search()
     }
 
     /** Plays an item, from [start] when set. */

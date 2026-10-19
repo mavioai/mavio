@@ -202,10 +202,10 @@ fun TvButton(
  * A pill of a choice that focus makes, as a tab, a library's Recommended
  * and All or its filters (docs/tv.md §3, §6.3): filled with
  * `color.fillSelected` while current, white with focus, and chosen as
- * focus moves to it.
+ * focus moves to it, or only when selected unless [onFocus].
  */
 @Composable
-fun TvChoice(label: String, current: Boolean, modifier: Modifier = Modifier, horizontal: Dp = 28.dp, onChoose: () -> Unit) {
+fun TvChoice(label: String, current: Boolean, modifier: Modifier = Modifier, horizontal: Dp = 28.dp, onFocus: Boolean = true, onChoose: () -> Unit) {
     val state = remember { Focusable() }
     val focused = state.focused()
     Text(
@@ -219,7 +219,7 @@ fun TvChoice(label: String, current: Boolean, modifier: Modifier = Modifier, hor
                     else -> Color.Transparent
                 },
             )
-            .onFocusChanged { if (it.isFocused && !current) onChoose() }
+            .onFocusChanged { if (onFocus && it.isFocused && !current) onChoose() }
             .selectable(state, onChoose)
             .padding(horizontal = horizontal, vertical = 10.dp),
         style = theme.type.headline.text,

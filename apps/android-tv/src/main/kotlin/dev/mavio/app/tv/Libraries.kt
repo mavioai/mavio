@@ -344,8 +344,8 @@ private fun AllItems(model: AppModel, page: Page.Library, header: @Composable ()
         horizontalArrangement = Arrangement.spacedBy(theme.layout.gutter),
         verticalArrangement = Arrangement.spacedBy(MavioSpacing.s32),
     ) {
-        line("header") { header() }
-        line("filters") {
+        gridLine("header") { header() }
+        gridLine("filters") {
             Row(horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s16), verticalAlignment = Alignment.CenterVertically) {
                 TvChoices(filters.getValue(page.shown)) {
                     Shown.entries.forEach { k ->
@@ -364,7 +364,7 @@ private fun AllItems(model: AppModel, page: Page.Library, header: @Composable ()
             }
         }
         when {
-            loaded.cards.isEmpty() && loaded.failed -> line("error") {
+            loaded.cards.isEmpty() && loaded.failed -> gridLine("error") {
                 StatusView(
                     stringResource(R.string.state_error),
                     Modifier.padding(top = MavioSpacing.s48),
@@ -375,7 +375,7 @@ private fun AllItems(model: AppModel, page: Page.Library, header: @Composable ()
                     },
                 )
             }
-            loaded.cards.isEmpty() && !loaded.more -> line("empty") {
+            loaded.cards.isEmpty() && !loaded.more -> gridLine("empty") {
                 StatusView(stringResource(R.string.state_empty), Modifier.padding(top = MavioSpacing.s48))
             }
             loaded.cards.isEmpty() -> items(12) { CardPlaceholder() }
@@ -387,7 +387,7 @@ private fun AllItems(model: AppModel, page: Page.Library, header: @Composable ()
 }
 
 /** An item of a grid across all its columns. */
-private fun LazyGridScope.line(key: String, content: @Composable () -> Unit) =
+internal fun LazyGridScope.gridLine(key: String, content: @Composable () -> Unit) =
     item(key = key, span = { GridItemSpan(maxLineSpan) }) { content() }
 
 /**
