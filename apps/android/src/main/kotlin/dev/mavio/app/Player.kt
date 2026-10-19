@@ -294,7 +294,7 @@ fun PlayerScreen(model: AppModel, route: Route.Player) {
         } else if (player != null && p != null) {
             // Picture in picture shows the video alone.
             if (!pip.active) {
-                val chip: (@Composable () -> Unit)? = group?.let { g -> { GroupChip(model, route.serverId, g.group) } }
+                val chip: (@Composable (onOpen: (Boolean) -> Unit) -> Unit)? = group?.let { g -> { onOpen -> GroupChip(model, route.serverId, g.group, onOpen) } }
                 Controls(controls ?: player, route.title, p, selection.quality, playNext, pip.enter, chip) { picked ->
                     resume = Duration.ofMillis(player.currentPosition)
                     // The quality stays this device's, as the web UI's.
@@ -500,7 +500,7 @@ private fun Controls(
     quality: Quality,
     playNext: (() -> Unit)?,
     pictureInPicture: (() -> Unit)?,
-    chip: (@Composable () -> Unit)?,
+    chip: (@Composable (onOpen: (Boolean) -> Unit) -> Unit)?,
     onPick: (Selection) -> Unit,
 ) {
     val navigator = LocalNavigator.current
@@ -511,9 +511,11 @@ private fun Controls(
     var shown by remember { mutableStateOf(true) }
     var touched by remember { mutableLongStateOf(0L) }
     var seeking by remember { mutableStateOf<Float?>(null) }
+    // The group's sheet, opened from the chip, keeps the controls that host it.
+    var grouping by remember { mutableStateOf(false) }
     val touch = { touched = System.currentTimeMillis() }
-    LaunchedEffect(shown, touched, playPause.showPlay, seeking, panel) {
-        if (shown && !playPause.showPlay && seeking == null && panel == null) {
+    LaunchedEffect(shown, touched, playPause.showPlay, seeking, panel, grouping) {
+        if (shown && !playPause.showPlay && seeking == null && panel == null && !grouping) {
             delay(CONTROLS_TIMEOUT_MS)
             shown = false
         }
@@ -558,7 +560,7 @@ private fun Controls(
                             overflow = TextOverflow.Ellipsis,
                         )
                     }
-                    chip?.invoke()
+                    chip?.invoke { grouping = it }
                 }
                 Column(
                     Modifier

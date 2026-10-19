@@ -266,8 +266,12 @@ internal fun GroupIndicator(model: AppModel, modifier: Modifier) {
 
 /** The player's chip of the group it follows: who it waits for, else the group's name and size; it opens the group. */
 @Composable
-internal fun GroupChip(model: AppModel, serverId: String, group: SyncPlayGroup, modifier: Modifier = Modifier) {
+internal fun GroupChip(model: AppModel, serverId: String, group: SyncPlayGroup, onOpen: (Boolean) -> Unit, modifier: Modifier = Modifier) {
     var open by remember { mutableStateOf(false) }
+    DisposableEffect(open) {
+        onOpen(open)
+        onDispose { onOpen(false) }
+    }
     Row(
         modifier
             .height(36.dp)
