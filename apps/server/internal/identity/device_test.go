@@ -58,3 +58,36 @@ func TestMachineIDStable(t *testing.T) {
 		t.Errorf("machineID = %q, then %q", got, again)
 	}
 }
+
+func TestRuntimeCgroup(t *testing.T) {
+	for _, tc := range []struct {
+		name, cgroup string
+		want         bool
+	}{
+		{"host v2", "0::/init.scope\n", false},
+		{"namespaced v2", "0::/\n", false},
+		{"host v1", "12:pids:/\n11:memory:/init.scope\n", false},
+		{"docker v1", "12:pids:/docker/3f1a2b\n", true},
+		{"kubernetes v2", "0::/kubepods.slice/kubepods-burstable.slice/cri-containerd-9a.scope\n", true},
+		{"podman v2", "0::/machine.slice/libpod-4c2e.scope/container\n", true},
+	} {
+		if got := runtimeCgroup(tc.cgroup); got != tc.want {
+			t.Errorf("%s: runtimeCgroup = %v, want = %v", tc.name, got, tc.want)
+		}
+	}
+}
+
+func TestOverlayRoot(t *testing.T) {
+	for _, tc := range []struct {
+		name, mountinfo string
+		want            bool
+	}{
+		{"host", "22 1 259:2 / / rw,relatime shared:1 - ext4 /dev/nvme0n1p2 rw\n24 22 0:5 / /dev rw - devtmpfs udev rw\n", false},
+		{"container", "612 541 0:52 / / rw,relatime master:301 - overlay overlay rw,lowerdir=/var/lib/docker/overlay2/l/A\n613 612 0:56 / /proc rw - proc proc rw\n", true},
+		{"overlay elsewhere", "22 1 259:2 / / rw - btrfs /dev/sda2 rw\n30 22 0:52 / /mnt rw - overlay overlay rw\n", false},
+	} {
+		if got := overlayRoot(tc.mountinfo); got != tc.want {
+			t.Errorf("%s: overlayRoot = %v, want = %v", tc.name, got, tc.want)
+		}
+	}
+}
