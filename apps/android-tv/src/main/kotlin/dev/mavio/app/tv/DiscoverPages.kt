@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyGridScope
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
@@ -57,22 +58,27 @@ import dev.mavio.ui.TvChoice
 import dev.mavio.ui.TvChoices
 import dev.mavio.ui.TvScrolling
 import dev.mavio.ui.collectionStatus
+import dev.mavio.ui.crewLabels
 import dev.mavio.ui.discoverLanguage
 import dev.mavio.ui.discovered
 import dev.mavio.ui.longDayText
 import dev.mavio.ui.sized
 import dev.mavio.ui.statusLabel
 import dev.mavio.ui.text
+import dev.mavio.ui.titleCredits
 import dev.mavio.ui.theme
 import dev.mavio.ui.titleKey
 import dev.mavio.ui.tmdbId
 import dev.mavio.ui.yearsBetween
 import mavio.acquisition.v1.Discover.GetCollectionResponse
 import mavio.acquisition.v1.Discover.GetPersonResponse
+import mavio.acquisition.v1.Discover.GetTitleResponse
 import mavio.acquisition.v1.Discover.PersonTitle
 import mavio.acquisition.v1.Profile.MediaKind
 import mavio.acquisition.v1.getCollectionRequest
 import mavio.acquisition.v1.getPersonRequest
+import mavio.acquisition.v1.getTitleRequest
+import mavio.library.v1.ItemOuterClass.CreditKind
 
 /**
  * A discovered page's response once loaded: a spinner while it loads, an
@@ -99,7 +105,7 @@ private fun <T : MessageLite> DiscoveredLoaded(result: Result<T>?, missing: (T) 
 /** A grid of discovered titles as a catalog's, its [content] lines and cards. */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun TitlesGrid(state: androidx.compose.foundation.lazy.grid.LazyGridState, content: LazyGridScope.() -> Unit) {
+private fun TitlesGrid(state: LazyGridState, content: LazyGridScope.() -> Unit) {
     val density = LocalDensity.current
     val scrolling = remember(density) { with(density) { TvScrolling(200.dp.toPx(), 120.dp.toPx()) } }
     CompositionLocalProvider(LocalBringIntoViewSpec provides scrolling) {
@@ -298,6 +304,76 @@ fun CollectionPage(page: Page.Collection) {
                 val t = c.partsList[i]
                 TvTitleCard(t, (if (i == 0) Modifier.focusRequester(first) else Modifier).focusKey(page.focus, titleKey(t)), fill = true) {
                     pages.openTitle(page.serverId, t.mediaKindValue, t.tmdbId)
+                }
+            }
+        }
+    }
+}
+
+/**
+ * A discovered title's whole cast and crew on a television (docs/tv.md
+ * §6.3), or its crew alone, as an item's: each group under its heading,
+ * each person opening their page, focus starting on the first.
+ */
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun TitleCreditsPage(page: Page.TitleCredits) {
+    var attempt by remember { mutableIntStateOf(0) }
+    val result by discovered(
+        page.serverId,
+        "GetTitle",
+        remember(page) {
+            getTitleRequest {
+                mediaKindValue = page.mediaKind
+                tmdbId = page.tmdbId
+                language = discoverLanguage
+            }
+        },
+        GetTitleResponse::parseFrom,
+        attempt,
+    )
+    DiscoveredLoaded(result, { !it.hasTitle() }, { attempt++ }) { r ->
+        val pages = LocalPages.current
+        val all = remember(r) { titleCredits(r.title.creditsList) }
+        val credits = if (page.crew) all.filter { !it.isCast } else all
+        val groups = (listOf(CreditKind.CREDIT_KIND_ACTOR to R.string.credits_cast, CreditKind.CREDIT_KIND_GUEST_STAR to R.string.credits_guest_stars) + crewLabels)
+            .map { (kind, label) -> label to credits.filter { it.kind == kind }.sortedBy { it.order } }
+            .filter { it.second.isNotEmpty() }
+        val first = page.focus.of("first")
+        LaunchedEffect(Unit) { page.focus.restore(first) }
+        val density = LocalDensity.current
+        val scrolling = remember(density) { with(density) { TvScrolling(200.dp.toPx(), 120.dp.toPx()) } }
+        CompositionLocalProvider(LocalBringIntoViewSpec provides scrolling) {
+            LazyVerticalGrid(
+                GridCells.Adaptive(180.dp),
+                Modifier.fillMaxSize(),
+                state = page.grid,
+                contentPadding = PaddingValues(start = theme.layout.margin, end = theme.layout.margin, bottom = MavioSpacing.s48),
+                horizontalArrangement = Arrangement.spacedBy(theme.layout.gutter),
+                verticalArrangement = Arrangement.spacedBy(MavioSpacing.s24),
+            ) {
+                gridLine("header") {
+                    Text(
+                        stringResource(if (page.crew) R.string.credits_full_crew else R.string.item_cast),
+                        Modifier.padding(top = MavioSpacing.s48),
+                        style = theme.type.title1.text,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1,
+                    )
+                }
+                if (credits.isEmpty()) {
+                    gridLine("none") { Text(stringResource(R.string.credits_none), style = theme.type.body.text, color = theme.colors.textSecondary) }
+                }
+                groups.forEachIndexed { g, (label, people) ->
+                    gridLine("group/$label") { Text(stringResource(label), Modifier.padding(top = MavioSpacing.s16), style = theme.type.title3.text) }
+                    items(people.size, key = { "$label/$it" }) { i ->
+                        val credit = people[i]
+                        Box(Modifier.fillMaxWidth(), Alignment.TopCenter) {
+                            CreditCard(credit, Modifier.focusKey(page.focus, if (g == 0 && i == 0) "first" else "$label/$i")) {
+                                pages.openPerson(page.serverId, credit.tmdbId)
+                            }
+                        }
+                    }
                 }
             }
         }

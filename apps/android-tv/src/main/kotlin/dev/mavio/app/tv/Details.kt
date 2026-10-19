@@ -714,7 +714,7 @@ private fun initials(name: String): String =
 
 /** The cast's last card, opening the whole cast and crew: an arrow in a circle over See All. */
 @Composable
-private fun CastAllCard(modifier: Modifier, onClick: () -> Unit) {
+internal fun CastAllCard(modifier: Modifier, onClick: () -> Unit) {
     val state = remember { Focusable() }
     val focused = state.focused()
     Column(modifier.shakes().width(180.dp).focusCard(focused).selectable(state, onClick), horizontalAlignment = Alignment.CenterHorizontally) {
@@ -832,7 +832,7 @@ private fun About(details: Details, source: Source?, focus: FocusMemory) {
 
 /** View Full Crew: a link under the leading crew, white with black text once it has focus. */
 @Composable
-private fun FullCrew(modifier: Modifier, onClick: () -> Unit) {
+internal fun FullCrew(modifier: Modifier, onClick: () -> Unit) {
     val state = remember { Focusable() }
     val focused = state.focused()
     Row(

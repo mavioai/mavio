@@ -45,6 +45,7 @@ import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Brush
@@ -203,7 +204,15 @@ private fun TitleContent(page: Page.Title, title: Title) {
                     Modifier.padding(start = theme.layout.margin, end = theme.layout.margin, top = MavioSpacing.s32, bottom = MavioSpacing.s16),
                     horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s48),
                 ) {
-                    TitleOverview(title, credits, focus, open, { pages.openPerson(page.serverId, it) }, Modifier.weight(1f))
+                    TitleOverview(
+                        title,
+                        credits,
+                        focus,
+                        open,
+                        { pages.openPerson(page.serverId, it) },
+                        { pages.openTitleCredits(page.serverId, title.mediaKindValue, title.tmdbId, crew = true) },
+                        Modifier.weight(1f),
+                    )
                     Column(Modifier.width(560.dp), verticalArrangement = Arrangement.spacedBy(MavioSpacing.s16)) {
                         CollectionCard(page.serverId, title, Modifier.focusKey(focus, "collection"))
                         TitleFacts(page.serverId, title)
@@ -218,6 +227,9 @@ private fun TitleContent(page: Page.Title, title: Title) {
                 TvShelf(stringResource(R.string.item_cast), page.rows.of("cast")) {
                     items(cast.size, key = { "${cast[it].tmdbId}/${cast[it].name}/$it" }) { i ->
                         CreditCard(cast[i], Modifier.focusKey(focus, "cast/$i")) { pages.openPerson(page.serverId, cast[i].tmdbId) }
+                    }
+                    item(key = "all") {
+                        CastAllCard(Modifier.focusKey(focus, "cast/all")) { pages.openTitleCredits(page.serverId, title.mediaKindValue, title.tmdbId, crew = false) }
                     }
                 }
             }
@@ -355,6 +367,7 @@ private fun TitleOverview(
     focus: FocusMemory,
     open: ((CatalogFilters) -> Unit)?,
     openPerson: (Int) -> Unit,
+    onFullCrew: () -> Unit,
     modifier: Modifier,
 ) {
     val colors = theme.colors
@@ -364,6 +377,7 @@ private fun TitleOverview(
         }
         Text(stringResource(R.string.discover_overview), style = theme.type.title3.text)
         Text(title.overview.ifEmpty { stringResource(R.string.discover_no_overview) }, style = theme.type.body.text)
+        val keywords = title.keywordRefsList.map { NamedValue(it.id, it.name) }.ifEmpty { title.keywordsList.map { NamedValue("", it) } }
         val crew = credits.withIndex()
             .filter { (_, c) -> !c.isCast && crewLabels.any { it.first == c.kind } }
             .sortedWith(compareBy({ crewRank(it.value) }, { it.index }))
@@ -380,6 +394,21 @@ private fun TitleOverview(
                             Modifier
                                 .shakes()
                                 .focusKey(focus, "crew/$i")
+                                .then(
+                                    // From the last row, the row's last person moves down to View Full
+                                    // Crew, and the others past it, to the keywords.
+                                    if (i >= (crew.size - 1) / 2 * 2) {
+                                        Modifier.focusProperties {
+                                            if (i % 2 == 1 || i == crew.lastIndex) {
+                                                down = focus.of("fullCrew")
+                                            } else if (keywords.firstOrNull()?.id?.isNotEmpty() == true && open != null) {
+                                                down = focus.of("keyword/0")
+                                            }
+                                        }
+                                    } else {
+                                        Modifier
+                                    },
+                                )
                                 .clip(RoundedCornerShape(10.dp))
                                 .background(if (focused) Color.White else Color.Transparent)
                                 .selectable(state) { if (c.tmdbId > 0) openPerson(c.tmdbId) }
@@ -395,9 +424,9 @@ private fun TitleOverview(
                     }
                 }
             }
+            FullCrew(Modifier.focusKey(focus, "fullCrew").focusProperties { up = focus.of("crew/${crew.lastIndex}") }, onFullCrew)
         }
         // The keywords open the popular titles of each.
-        val keywords = title.keywordRefsList.map { NamedValue(it.id, it.name) }.ifEmpty { title.keywordsList.map { NamedValue("", it) } }
         if (keywords.isNotEmpty()) {
             FlowRow(horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s8), verticalArrangement = Arrangement.spacedBy(MavioSpacing.s8)) {
                 keywords.forEachIndexed { i, k ->
@@ -772,7 +801,7 @@ private fun SeasonEpisodes(serverId: String, tmdbId: Int, seasonNumber: Int) {
 
 /** A person of the cast: the photo in a circle, which grows with focus, the name and the role. */
 @Composable
-private fun CreditCard(credit: Credit, modifier: Modifier, onClick: () -> Unit) {
+internal fun CreditCard(credit: Credit, modifier: Modifier, onClick: () -> Unit) {
     val state = remember { Focusable() }
     val focused = state.focused()
     Column(modifier.shakes().width(180.dp).focusCard(focused).selectable(state) { if (credit.tmdbId > 0) onClick() }, horizontalAlignment = Alignment.CenterHorizontally) {

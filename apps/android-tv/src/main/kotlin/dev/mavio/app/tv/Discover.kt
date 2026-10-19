@@ -75,6 +75,7 @@ import dev.mavio.ui.tmdbId
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
+import mavio.plugin.v1.Discovery.CatalogKind
 import mavio.acquisition.v1.Discover.DiscoverResponse
 import mavio.acquisition.v1.Discover.DiscoveredTitle
 import mavio.acquisition.v1.Discover.MediaStatus
@@ -318,6 +319,8 @@ fun CatalogPage(page: Page.Catalog) {
     val kind = MediaKind.forNumber(page.mediaKind) ?: MediaKind.MEDIA_KIND_UNSPECIFIED
     val title = when {
         found == null -> ""
+        page.tmdbId > 0 && found.kind == CatalogKind.CATALOG_KIND_RECOMMENDATIONS -> stringResource(R.string.discover_recommendations)
+        page.tmdbId > 0 && found.kind == CatalogKind.CATALOG_KIND_SIMILAR -> stringResource(R.string.discover_similar)
         page.tmdbId > 0 -> found.name
         else -> rowTitle(CatalogRow(found, kind))
     }
