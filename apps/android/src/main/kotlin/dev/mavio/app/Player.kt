@@ -685,7 +685,7 @@ private fun OptionsPanel(
                                 Modifier
                                     .alpha(if (free) 1f else 0.4f)
                                     .clip(CircleShape)
-                                    .background(if (on) Color.White else Color.White.copy(alpha = 0.1f))
+                                    .background(Color.White.copy(alpha = if (on) 0.3f else 0.1f))
                                     .clickable(enabled = free) {
                                         player.setPlaybackSpeed(r)
                                         speed = r
@@ -693,7 +693,7 @@ private fun OptionsPanel(
                                     .padding(horizontal = 12.dp, vertical = 6.dp),
                                 style = theme.type.footnote.text,
                                 fontWeight = FontWeight.SemiBold,
-                                color = if (on) Color.Black else Color.White,
+                                color = Color.White,
                             )
                         }
                     }
