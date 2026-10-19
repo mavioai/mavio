@@ -155,7 +155,7 @@ private fun Member(user: SwitchableUser, modifier: Modifier) {
  * the fourth digit sends it, and a wrong one clears the dots.
  */
 @Composable
-private fun PinPad(name: String, busy: Boolean, error: String?, enter: (String) -> Unit, cancel: () -> Unit) {
+internal fun PinPad(name: String, busy: Boolean, error: String?, enter: (String) -> Unit, cancel: () -> Unit) {
     var pin by remember { mutableStateOf("") }
     val haptics = LocalHapticFeedback.current
     LaunchedEffect(error) {

@@ -243,7 +243,7 @@ private fun AccountPage(model: AppModel) {
 
 /** The Mavio account signed in, followed. */
 @Composable
-private fun signedInAccount(model: AppModel): Account? {
+internal fun signedInAccount(model: AppModel): Account? {
     val state by model.signInState.collectAsStateWithLifecycle()
     return (state as? SignInState.Account)?.v1
 }
@@ -257,7 +257,7 @@ internal fun signedInServers(model: AppModel): List<ServerRecord> {
 }
 
 /** The account's page at the mavio.dev whose API it signed in with. */
-private fun manage(account: Account): Uri? {
+internal fun manage(account: Account): Uri? {
     val api = account.api.trimEnd('/').takeIf { it.startsWith("http") } ?: return null
     return (api.removeSuffix("/api") + "/account").toUri()
 }

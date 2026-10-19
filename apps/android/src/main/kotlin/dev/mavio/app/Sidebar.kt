@@ -1,6 +1,23 @@
 package dev.mavio.app
 
 import androidx.annotation.DrawableRes
+import android.content.Intent
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.semantics.selected
+import dev.mavio.core.ServerRecord
+import dev.mavio.core.SwitchableUser
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.launch
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -157,24 +174,7 @@ internal fun SidebarPanel(
             }
         }
         Box(Modifier.fillMaxWidth().height(1.dp).background(colors.border))
-        val user = stringResource(R.string.nav_user_menu, name)
-        Row(
-            Modifier
-                .fillMaxWidth()
-                .padding(if (rail) 8.dp else 6.dp)
-                .clip(RoundedCornerShape(10.dp))
-                .background(if (place == Route.Settings) colors.fillSelected else colors.sidebar)
-                .clickable { onSelect(Route.Settings) }
-                .semantics { contentDescription = user }
-                .padding(6.dp),
-            horizontalArrangement = if (rail) Arrangement.Center else Arrangement.spacedBy(10.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Avatar(name)
-            if (!rail) {
-                Text(name, Modifier.weight(1f), style = theme.type.callout.text, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            }
-        }
+        UserMenu(model, rail, name, shown, place == Route.Settings, onSelect)
     }
 }
 
@@ -227,6 +227,220 @@ private fun NavItem(
                 overflow = TextOverflow.Ellipsis,
             )
             Spacer(Modifier.weight(1f))
+        }
+    }
+}
+
+/**
+ * The user at the sidebar's foot and the menu it opens, as the web UI's:
+ * the user with the appearance beside it, the server's other users to
+ * switch to, the settings, the account at mavio.dev or the servers, and
+ * signing out.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun UserMenu(model: AppModel, rail: Boolean, name: String, servers: List<ServerRecord>, selected: Boolean, onSelect: (Route) -> Unit) {
+    val colors = theme.colors
+    val context = LocalContext.current
+    val navigator = LocalNavigator.current
+    val scope = rememberCoroutineScope()
+    val account = signedInAccount(model)
+    val standalone = servers.firstOrNull()?.takeIf { account == null }
+    val line = if (account != null) pluralStringResource(R.plurals.menu_server_count, servers.size, servers.size) else standalone?.name.orEmpty()
+    var open by remember { mutableStateOf(false) }
+    var users by remember { mutableStateOf<List<SwitchableUser>>(emptyList()) }
+    var asking by remember { mutableStateOf<SwitchableUser?>(null) }
+    var busy by remember { mutableStateOf(false) }
+    var failure by remember { mutableStateOf<String?>(null) }
+    LaunchedEffect(standalone?.id, standalone?.userId, open) {
+        if (open) users = standalone?.let { s -> runCatching { model.client.switchableUsers(s.id) }.getOrNull() }.orEmpty()
+    }
+    fun switchTo(user: SwitchableUser, pin: String?) {
+        val server = standalone ?: return
+        busy = true
+        failure = null
+        scope.launch {
+            try {
+                model.switchUser(server.id, user.id, pin)
+                asking = null
+                open = false
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                failure = e.reason
+            }
+            busy = false
+        }
+    }
+    val label = stringResource(R.string.nav_user_menu, name)
+    Box(Modifier.padding(if (rail) 8.dp else 6.dp)) {
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(10.dp))
+                .background(if (selected || open) colors.fillSelected else colors.sidebar)
+                .clickable { open = true }
+                .semantics { contentDescription = label }
+                .padding(6.dp),
+            horizontalArrangement = if (rail) Arrangement.Center else Arrangement.spacedBy(10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Avatar(name, size = if (rail) 28.dp else 32.dp)
+            if (!rail) {
+                Column(Modifier.weight(1f)) {
+                    Text(name, style = theme.type.callout.text, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    if (line.isNotEmpty()) {
+                        Text(line, style = theme.type.caption.text, color = colors.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    }
+                }
+                MavioIcon(R.drawable.ic_selector, size = 16.dp, tint = colors.textTertiary)
+            }
+        }
+        DropdownMenu(
+            open,
+            onDismissRequest = { open = false },
+            modifier = Modifier.width(300.dp),
+            shape = RoundedCornerShape(14.dp),
+            containerColor = colors.surfaceOverlay,
+        ) {
+            Row(
+                Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Avatar(name, size = 36.dp)
+                Column(Modifier.weight(1f)) {
+                    Text(name, style = theme.type.headline.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    Text(
+                        if (account != null) stringResource(R.string.auth_mavio_account) else stringResource(R.string.auth_standalone_user, line),
+                        style = theme.type.footnote.text,
+                        color = colors.textSecondary,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+                ThemeSwitch()
+            }
+            if (users.size > 1) {
+                MenuRule()
+                Text(
+                    stringResource(R.string.auth_switch_user),
+                    Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+                    style = theme.type.caption.text,
+                    fontWeight = FontWeight.SemiBold,
+                    color = colors.textTertiary,
+                )
+                users.forEach { u ->
+                    DropdownMenuItem(
+                        text = { Text(u.name, style = theme.type.callout.text, maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                        onClick = {
+                            if (u.hasPin) {
+                                open = false
+                                asking = u
+                            } else {
+                                switchTo(u, null)
+                            }
+                        },
+                        leadingIcon = { Avatar(u.name, size = 24.dp) },
+                        trailingIcon = when {
+                            u.current -> ({ MavioIcon(R.drawable.ic_check, size = 16.dp, tint = colors.accentText) })
+                            u.hasPin -> ({ MavioIcon(R.drawable.ic_lock, size = 14.dp, tint = colors.textTertiary) })
+                            else -> null
+                        },
+                        enabled = !u.current && !busy,
+                    )
+                }
+                failure?.takeIf { asking == null }?.let {
+                    Text(it, Modifier.padding(horizontal = 12.dp, vertical = 4.dp), style = theme.type.footnote.text, color = colors.danger)
+                }
+            }
+            MenuRule()
+            MenuEntry(R.drawable.ic_settings, stringResource(R.string.nav_settings)) {
+                open = false
+                onSelect(Route.Settings)
+            }
+            val manage = account?.let { manage(it) }
+            if (manage != null) {
+                MenuEntry(R.drawable.ic_external, stringResource(R.string.menu_manage_account)) {
+                    open = false
+                    context.startActivity(Intent(Intent.ACTION_VIEW, manage))
+                }
+            } else if (account == null) {
+                MenuEntry(R.drawable.ic_server, stringResource(R.string.menu_manage_servers)) {
+                    open = false
+                    onSelect(Route.Settings)
+                    val page = Route.Setting(SettingsPage.Account)
+                    if (navigator.top != page) navigator.open(page)
+                }
+            }
+            MenuRule()
+            MenuEntry(R.drawable.ic_sign_out, stringResource(R.string.auth_sign_out)) {
+                open = false
+                // Signing the account out forgets its servers too.
+                scope.launch { runCatching { model.signOut() } }
+            }
+        }
+    }
+    asking?.let { user ->
+        ModalBottomSheet(
+            {
+                asking = null
+                failure = null
+            },
+            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+            containerColor = colors.background,
+        ) {
+            PinPad(user.name, busy, failure, { switchTo(user, it) }) {
+                asking = null
+                failure = null
+            }
+        }
+    }
+}
+
+/** An entry of the user menu: its icon and label. */
+@Composable
+private fun MenuEntry(@DrawableRes icon: Int, label: String, onClick: () -> Unit) {
+    DropdownMenuItem(
+        text = { Text(label, style = theme.type.callout.text) },
+        onClick = onClick,
+        leadingIcon = { MavioIcon(icon, size = 18.dp, tint = theme.colors.textSecondary) },
+    )
+}
+
+/** A rule between the user menu's groups. */
+@Composable
+private fun MenuRule() {
+    Box(Modifier.padding(vertical = 4.dp).fillMaxWidth().height(1.dp).background(theme.colors.border))
+}
+
+/** The appearance, chosen beside the user's name: the system's, light or dark. */
+@Composable
+private fun ThemeSwitch() {
+    val prefs = LocalPrefs.current
+    val colors = theme.colors
+    Row(Modifier.clip(CircleShape).background(colors.fill).padding(2.dp), horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+        listOf(
+            Triple(Appearance.SYSTEM, R.drawable.ic_appearance, R.string.settings_system),
+            Triple(Appearance.LIGHT, R.drawable.ic_light_mode, R.string.settings_light),
+            Triple(Appearance.DARK, R.drawable.ic_dark_mode, R.string.settings_dark),
+        ).forEach { (value, icon, label) ->
+            val on = prefs.appearance == value
+            val description = stringResource(label)
+            Box(
+                Modifier
+                    .size(28.dp)
+                    .clip(CircleShape)
+                    .background(if (on) colors.surfaceRaised else colors.fill)
+                    .clickable { prefs.appearance = value }
+                    .semantics {
+                        contentDescription = description
+                        this.selected = on
+                    },
+                Alignment.Center,
+            ) {
+                MavioIcon(icon, size = 16.dp, tint = if (on) colors.textPrimary else colors.textSecondary)
+            }
         }
     }
 }
