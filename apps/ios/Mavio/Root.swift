@@ -67,11 +67,11 @@ final class Router {
 
 /// The top-level destinations.
 enum Tab: Hashable {
-    case home, libraries, discover, search, downloads, settings
+    case home, libraries, discover, search
 }
 
 /// The sign-in screen until a server is added, then the destinations in a
-/// tab bar on iPhone and a sidebar on iPad.
+/// tab bar, which an iPad shows at the top and turns into a sidebar.
 struct RootView: View {
     @Environment(AppModel.self) private var model
     @Environment(\.scenePhase) private var phase
@@ -136,23 +136,14 @@ struct RootView: View {
                     tabLabel(MavioStrings.navDiscover, "discover")
                 }
             }
-            // A phone has search and the settings in its top bar, and the
-            // downloads in the settings; an iPad's sidebar has them all.
+            // A phone has search in its top bar, an iPad a search tab at
+            // the tab bar's end; both open the settings from the avatar at
+            // the top bar's right, and the downloads from the settings.
             if sizeClass == .regular {
                 SwiftUI.Tab(value: Tab.search, role: .search) {
                     Stack { SearchView() }
                 } label: {
                     tabLabel(MavioStrings.navSearch, "search")
-                }
-                SwiftUI.Tab(value: Tab.downloads) {
-                    Stack { DownloadsView() }
-                } label: {
-                    tabLabel(MavioStrings.navDownloads, "downloads")
-                }
-                SwiftUI.Tab(value: Tab.settings) {
-                    Stack { SettingsView() }
-                } label: {
-                    tabLabel(MavioStrings.navSettings, "settings")
                 }
             }
         }
@@ -213,35 +204,30 @@ struct Stack<Content: View>: View {
     }
 }
 
-/// The top of a tab's first screen on a phone, as the web UI's: the
-/// wordmark, and at the right search and the user's avatar opening the
+/// The top of a tab's first screen, as the web UI's: on a phone the
+/// wordmark and search, and at the right the user's avatar opening the
 /// settings.
 private struct TopBar: ViewModifier {
     @Environment(AppModel.self) private var model
     @Environment(\.horizontalSizeClass) private var sizeClass
 
     func body(content: Content) -> some View {
-        if sizeClass == .regular {
-            content
-        } else {
-            bar(content)
-        }
-    }
-
-    private func bar(_ content: Content) -> some View {
         let name = model.account?.name ?? model.signedInServers.first?.userName ?? ""
+        let phone = sizeClass != .regular
         return content.toolbar {
-            ToolbarItem(placement: .topBarLeading) {
-                Wordmark(height: 20).accessibilityLabel("Mavio")
-            }
-            .hiddenSharedBackground()
-            ToolbarItem(placement: .topBarTrailing) {
-                NavigationLink(value: Route.search) {
-                    Icon("search", size: 22)
+            if phone {
+                ToolbarItem(placement: .topBarLeading) {
+                    Wordmark(height: 20).accessibilityLabel("Mavio")
                 }
-                .accessibilityLabel(MavioStrings.navSearch)
+                .hiddenSharedBackground()
+                ToolbarItem(placement: .topBarTrailing) {
+                    NavigationLink(value: Route.search) {
+                        Icon("search", size: 22)
+                    }
+                    .accessibilityLabel(MavioStrings.navSearch)
+                }
+                .hiddenSharedBackground()
             }
-            .hiddenSharedBackground()
             ToolbarItem(placement: .topBarTrailing) {
                 NavigationLink(value: Route.settings) {
                     Avatar(name: name, size: 32)

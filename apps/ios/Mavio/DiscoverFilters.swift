@@ -91,6 +91,8 @@ struct CatalogFiltersSheet: View {
             }
         }
         .presentationDetents([.large])
+        // On an iPad the sheet of a page, taller than a form's.
+        .presentationSizing(.page)
         .presentationBackground(theme.colors.background)
     }
 
