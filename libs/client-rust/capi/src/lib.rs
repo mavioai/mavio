@@ -647,6 +647,11 @@ impl Client {
             Call::Search(s) => answer(core.search(&s.query).await, |r| {
                 convert::search_results(r).into()
             }),
+            Call::SearchServer(s) => {
+                answer(core.search_server(&s.server_id, &s.query).await, |r| {
+                    convert::search_results(vec![r]).into()
+                })
+            }
             Call::Play(p) => self.play(&core, *p).await,
             Call::UpdatePlayback(u) => {
                 let session = match self.session(u.session) {

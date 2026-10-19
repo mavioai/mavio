@@ -1091,6 +1091,14 @@ impl ::buffa::Message for Request {
                         += 2u64 + ::buffa::encoding::varint_len(inner as u64) as u64
                             + inner as u64;
                 }
+                __buffa::oneof::request::Kind::SearchServer(x) => {
+                    let __slot = __cache.reserve();
+                    let inner = x.compute_size(__cache);
+                    __cache.set(__slot, inner);
+                    size
+                        += 2u64 + ::buffa::encoding::varint_len(inner as u64) as u64
+                            + inner as u64;
+                }
             }
         }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
@@ -1396,6 +1404,14 @@ impl ::buffa::Message for Request {
                 __buffa::oneof::request::Kind::CallServer(x) => {
                     ::buffa::types::put_len_delimited_header(
                         37u32,
+                        u64::from(__cache.consume_next()),
+                        buf,
+                    );
+                    x.write_to(__cache, buf);
+                }
+                __buffa::oneof::request::Kind::SearchServer(x) => {
+                    ::buffa::types::put_len_delimited_header(
+                        38u32,
                         u64::from(__cache.consume_next()),
                         buf,
                     );
@@ -2153,6 +2169,26 @@ impl ::buffa::Message for Request {
                     ::buffa::Message::merge_length_delimited(&mut val, buf, ctx)?;
                     self.kind = ::core::option::Option::Some(
                         __buffa::oneof::request::Kind::CallServer(
+                            ::buffa::alloc::boxed::Box::new(val),
+                        ),
+                    );
+                }
+            }
+            38u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                if let ::core::option::Option::Some(
+                    __buffa::oneof::request::Kind::SearchServer(ref mut existing),
+                ) = self.kind
+                {
+                    ::buffa::Message::merge_length_delimited(&mut **existing, buf, ctx)?;
+                } else {
+                    let mut val = ::core::default::Default::default();
+                    ::buffa::Message::merge_length_delimited(&mut val, buf, ctx)?;
+                    self.kind = ::core::option::Option::Some(
+                        __buffa::oneof::request::Kind::SearchServer(
                             ::buffa::alloc::boxed::Box::new(val),
                         ),
                     );
@@ -6310,6 +6346,123 @@ impl ::buffa::Message for Search {
 }
 impl ::buffa::ExtensionSet for Search {
     const PROTO_FQN: &'static str = "mavio.capi.v1.Search";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+/// Searches one server, for screens that show each server's results as it
+/// answers; answered with SearchResults of that server, its error in them.
+#[derive(Clone, PartialEq, Default)]
+pub struct SearchServer {
+    /// Field 1: `server_id`
+    pub server_id: ::buffa::alloc::string::String,
+    /// Field 2: `query`
+    pub query: ::buffa::alloc::string::String,
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for SearchServer {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("SearchServer")
+            .field("server_id", &self.server_id)
+            .field("query", &self.query)
+            .finish()
+    }
+}
+impl SearchServer {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.capi.v1.SearchServer";
+}
+::buffa::impl_default_instance!(SearchServer);
+impl ::buffa::MessageName for SearchServer {
+    const PACKAGE: &'static str = "mavio.capi.v1";
+    const NAME: &'static str = "SearchServer";
+    const FULL_NAME: &'static str = "mavio.capi.v1.SearchServer";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.capi.v1.SearchServer";
+}
+impl ::buffa::Message for SearchServer {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if !self.server_id.is_empty() {
+            size += 1u64 + ::buffa::types::string_encoded_len(&self.server_id) as u64;
+        }
+        if !self.query.is_empty() {
+            size += 1u64 + ::buffa::types::string_encoded_len(&self.query) as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if !self.server_id.is_empty() {
+            ::buffa::types::put_string_field(1u32, &self.server_id, buf);
+        }
+        if !self.query.is_empty() {
+            ::buffa::types::put_string_field(2u32, &self.query, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(&mut self.server_id, buf)?;
+            }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(&mut self.query, buf)?;
+            }
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.server_id.clear();
+        self.query.clear();
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for SearchServer {
+    const PROTO_FQN: &'static str = "mavio.capi.v1.SearchServer";
     fn unknown_fields(&self) -> &::buffa::UnknownFields {
         &self.__buffa_unknown_fields
     }

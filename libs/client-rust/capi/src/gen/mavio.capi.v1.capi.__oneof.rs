@@ -61,6 +61,7 @@ pub mod request {
         SyncAccount(::buffa::alloc::boxed::Box<super::super::super::SyncAccount>),
         SignOut(::buffa::alloc::boxed::Box<super::super::super::SignOut>),
         CallServer(::buffa::alloc::boxed::Box<super::super::super::CallServer>),
+        SearchServer(::buffa::alloc::boxed::Box<super::super::super::SearchServer>),
     }
     impl ::buffa::Oneof for Kind {}
     impl From<super::super::super::Open> for Kind {
@@ -433,6 +434,16 @@ pub mod request {
     }
     impl From<super::super::super::CallServer> for ::core::option::Option<Kind> {
         fn from(v: super::super::super::CallServer) -> Self {
+            Self::Some(Kind::from(v))
+        }
+    }
+    impl From<super::super::super::SearchServer> for Kind {
+        fn from(v: super::super::super::SearchServer) -> Self {
+            Self::SearchServer(::buffa::alloc::boxed::Box::new(v))
+        }
+    }
+    impl From<super::super::super::SearchServer> for ::core::option::Option<Kind> {
+        fn from(v: super::super::super::SearchServer) -> Self {
             Self::Some(Kind::from(v))
         }
     }

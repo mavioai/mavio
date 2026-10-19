@@ -50,6 +50,7 @@ message Request {
     SyncAccount sync_account = 35;
     SignOut sign_out = 36;
     CallServer call_server = 37;
+    SearchServer search_server = 38;
   }
 }
 
@@ -300,6 +301,13 @@ message SetFavorite {
 // Searches every server at once; answered with SearchResults.
 message Search {
   string query = 1;
+}
+
+// Searches one server, for screens that show each server's results as it
+// answers; answered with SearchResults of that server, its error in them.
+message SearchServer {
+  string server_id = 1;
+  string query = 2;
 }
 
 // Starts playing an item; answered with a Playback, whose session the app

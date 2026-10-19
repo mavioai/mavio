@@ -191,6 +191,11 @@ pub mod request {
                 super::super::super::super::__buffa::view::CallServerView<'a>,
             >,
         ),
+        SearchServer(
+            ::buffa::alloc::boxed::Box<
+                super::super::super::super::__buffa::view::SearchServerView<'a>,
+            >,
+        ),
     }
 }
 pub mod message {

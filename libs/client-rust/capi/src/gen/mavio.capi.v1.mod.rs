@@ -184,6 +184,10 @@ pub use self::__buffa::view::SearchView;
 #[doc(inline)]
 pub use self::__buffa::view::SearchOwnedView;
 #[doc(inline)]
+pub use self::__buffa::view::SearchServerView;
+#[doc(inline)]
+pub use self::__buffa::view::SearchServerOwnedView;
+#[doc(inline)]
 pub use self::__buffa::view::PlayView;
 #[doc(inline)]
 pub use self::__buffa::view::PlayOwnedView;
