@@ -7,11 +7,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -30,6 +32,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
@@ -45,9 +48,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import dev.mavio.core.AppModel
+import dev.mavio.core.localization
 import dev.mavio.design.MavioRadius
 import dev.mavio.design.MavioSpacing
 import dev.mavio.ui.Artwork
+import dev.mavio.ui.ButtonKind
 import dev.mavio.ui.CardPlaceholder
 import dev.mavio.ui.CatalogFilters
 import dev.mavio.ui.CatalogRow
@@ -55,10 +61,14 @@ import dev.mavio.ui.Focusable
 import dev.mavio.ui.LocalDiscover
 import dev.mavio.ui.MavioIcon
 import dev.mavio.ui.R
+import dev.mavio.ui.SettingsButton
 import dev.mavio.ui.StatusView
+import dev.mavio.ui.TvDialog
 import dev.mavio.ui.TvScrolling
 import dev.mavio.ui.catalogRequest
 import dev.mavio.ui.discovered
+import dev.mavio.ui.filterSections
+import dev.mavio.ui.filterable
 import dev.mavio.ui.focusArtwork
 import dev.mavio.ui.focusCard
 import dev.mavio.ui.focused
@@ -75,11 +85,12 @@ import dev.mavio.ui.tmdbId
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
-import mavio.plugin.v1.Discovery.CatalogKind
+import mavio.acquisition.v1.Discover.Catalog
 import mavio.acquisition.v1.Discover.DiscoverResponse
 import mavio.acquisition.v1.Discover.DiscoveredTitle
 import mavio.acquisition.v1.Discover.MediaStatus
 import mavio.acquisition.v1.Profile.MediaKind
+import mavio.plugin.v1.Discovery.CatalogKind
 
 /**
  * Discover on a television (docs/tv.md §6.3): a row of each catalog of
@@ -278,7 +289,7 @@ internal class TitlePages {
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun CatalogPage(page: Page.Catalog) {
+fun CatalogPage(model: AppModel, page: Page.Catalog) {
     val discover = LocalDiscover.current
     val pages = LocalPages.current
     val found = discover.discovery?.catalogs?.firstOrNull { it.id == page.catalogId }
@@ -324,8 +335,23 @@ fun CatalogPage(page: Page.Catalog) {
         page.tmdbId > 0 -> found.name
         else -> rowTitle(CatalogRow(found, kind))
     }
+    // Recommendations and similar titles take no filters.
+    val filterable = found?.filterable(page.tmdbId) == true
+    val n = page.filters.count
+    var filtering by remember { mutableStateOf(false) }
+    val filters = remember { FocusRequester() }
+    fun apply(f: CatalogFilters) = pages.replace(Page.Catalog(page.serverId, page.catalogId, page.mediaKind, page.tmdbId, f))
     val density = LocalDensity.current
     val scrolling = remember(density) { with(density) { TvScrolling(200.dp.toPx(), 120.dp.toPx()) } }
+    if (filtering && found != null) {
+        FiltersDialog(model, page.serverId, found, kind, page.filters, onDismiss = {
+            filtering = false
+            runCatching { filters.requestFocus() }
+        }) {
+            filtering = false
+            apply(it)
+        }
+    }
     CompositionLocalProvider(LocalBringIntoViewSpec provides scrolling) {
         LazyVerticalGrid(
             GridCells.Adaptive(theme.layout.poster),
@@ -336,13 +362,28 @@ fun CatalogPage(page: Page.Catalog) {
             verticalArrangement = Arrangement.spacedBy(MavioSpacing.s32),
         ) {
             gridLine("header") {
-                Text(
-                    title.ifEmpty { " " },
+                Row(
                     Modifier.padding(top = MavioSpacing.s48, bottom = MavioSpacing.s8),
-                    style = theme.type.title1.text,
-                    fontWeight = FontWeight.Bold,
-                    maxLines = 1,
-                )
+                    horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s24),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        title.ifEmpty { " " },
+                        Modifier.weight(1f),
+                        style = theme.type.title1.text,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1,
+                    )
+                    if (filterable) {
+                        SettingsButton(
+                            if (n > 0) "${stringResource(R.string.discover_filters)} ($n)" else stringResource(R.string.discover_filters),
+                            { filtering = true },
+                            Modifier.focusRequester(filters).focusKey(page.focus, "filters"),
+                            kind = if (n > 0 || page.filters.sort != 0) ButtonKind.Primary else ButtonKind.Secondary,
+                            icon = R.drawable.ic_filter,
+                        )
+                    }
+                }
             }
             when {
                 loaded.titles.isEmpty() && loaded.failed -> gridLine("error") {
@@ -354,6 +395,14 @@ fun CatalogPage(page: Page.Catalog) {
                             loaded.reset()
                             attempt++
                         },
+                    )
+                }
+                loaded.titles.isEmpty() && !loaded.more && (n > 0 || page.filters.sort != 0) -> gridLine("none") {
+                    StatusView(
+                        stringResource(R.string.discover_no_matches),
+                        Modifier.padding(top = MavioSpacing.s48),
+                        icon = R.drawable.ic_search,
+                        action = stringResource(R.string.discover_reset) to { apply(CatalogFilters()) },
                     )
                 }
                 loaded.titles.isEmpty() && !loaded.more -> gridLine("empty") {
@@ -378,6 +427,39 @@ fun CatalogPage(page: Page.Catalog) {
                     }
                 }
             }
+        }
+    }
+}
+
+/**
+ * The dialog of a catalog's filters and sorts (docs/tv.md §6.3), as the
+ * web UI's: its sections scroll above Reset and Apply.
+ */
+@Composable
+private fun FiltersDialog(
+    model: AppModel,
+    serverId: String,
+    catalog: Catalog,
+    kind: MediaKind,
+    initial: CatalogFilters,
+    onDismiss: () -> Unit,
+    onApply: (CatalogFilters) -> Unit,
+) {
+    var f by remember { mutableStateOf(initial) }
+    val localization by produceState<Pair<List<Pair<String, String>>, List<Pair<String, String>>>?>(null, serverId) {
+        value = model.localization(serverId)
+    }
+    TvDialog(stringResource(R.string.discover_filters), onDismiss, width = 1080.dp) {
+        LazyColumn(
+            Modifier.fillMaxWidth().heightIn(max = 600.dp),
+            // Room for a focused element's ring and shadow.
+            contentPadding = PaddingValues(horizontal = MavioSpacing.s8),
+        ) {
+            filterSections(serverId, catalog, kind, f, localization) { f = it }
+        }
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s16, Alignment.End)) {
+            SettingsButton(stringResource(R.string.discover_reset), { f = CatalogFilters() }, kind = ButtonKind.Secondary)
+            SettingsButton(stringResource(R.string.discover_apply), { onApply(f) })
         }
     }
 }

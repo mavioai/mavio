@@ -152,7 +152,7 @@ private fun Shell(model: AppModel) {
                 is Page.Details -> key(top) { DetailsPage(model, top) }
                 is Page.Library -> key(top) { LibraryPage(model, top) }
                 is Page.Credits -> key(top) { CreditsPage(model, top) }
-                is Page.Catalog -> key(top) { CatalogPage(top) }
+                is Page.Catalog -> key(top) { CatalogPage(model, top) }
                 is Page.Title -> key(top) { TitlePage(top) }
                 is Page.Person -> key(top) { PersonPage(top) }
                 is Page.Collection -> key(top) { CollectionPage(top) }

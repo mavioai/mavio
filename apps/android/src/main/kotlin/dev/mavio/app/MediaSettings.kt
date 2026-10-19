@@ -41,6 +41,8 @@ import androidx.compose.ui.unit.dp
 import com.google.protobuf.Duration
 import dev.mavio.core.AppModel
 import dev.mavio.core.call
+import dev.mavio.core.choices
+import dev.mavio.core.localization
 import dev.mavio.design.MavioSpacing
 import dev.mavio.ui.ButtonKind
 import dev.mavio.ui.ChoiceRow
@@ -308,7 +310,7 @@ fun ManagedLibraryScreen(model: AppModel, route: Route.ManagedLibrary) {
                 failure = null
             }
         }
-        localization(model, serverId).let { (l, c) ->
+        model.localization(serverId).let { (l, c) ->
             languages = l
             countries = c
         }

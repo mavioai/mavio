@@ -35,19 +35,11 @@ import dev.mavio.ui.R
 import dev.mavio.ui.RowLabel
 import dev.mavio.ui.text
 import dev.mavio.ui.theme
-import java.text.Collator
-import java.util.Locale
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
-import mavio.system.v1.Localization.ListCountriesResponse
-import mavio.system.v1.Localization.ListLanguagesResponse
 import mavio.system.v1.System.GetServerSettingsResponse
 import mavio.system.v1.System.ServerSettings
 import mavio.system.v1.System.UpdateServerSettingsResponse
 import mavio.system.v1.getServerSettingsRequest
-import mavio.system.v1.listCountriesRequest
-import mavio.system.v1.listLanguagesRequest
 import mavio.system.v1.updateServerSettingsRequest
 
 /** A text field's row, its value right of its label. */
@@ -194,39 +186,6 @@ internal class SettingsEditor(private val model: AppModel, private val serverId:
         }
     }
 }
-
-/** The choices of a list, with the value chosen though the list lacks it. */
-internal fun choices(list: List<Pair<String, String>>, chosen: String): List<Pair<String, String>> =
-    if (chosen.isEmpty() || list.any { it.first == chosen }) list else list + (chosen to chosen)
-
-/**
- * The languages and countries of a server's metadata, named in the user's
- * language where it can, by name, without repeats.
- */
-internal suspend fun localization(model: AppModel, serverId: String): Pair<List<Pair<String, String>>, List<Pair<String, String>>> = coroutineScope {
-    val langs = async {
-        runCatching {
-            model.client.call(serverId, Procedure.localization("ListLanguages"), listLanguagesRequest {}, ListLanguagesResponse::parseFrom)
-        }.getOrNull()
-    }
-    val ctrs = async {
-        runCatching {
-            model.client.call(serverId, Procedure.localization("ListCountries"), listCountriesRequest {}, ListCountriesResponse::parseFrom)
-        }.getOrNull()
-    }
-    val locale = Locale.getDefault()
-    val collator = Collator.getInstance(locale)
-    fun named(list: List<Pair<String, String>>, of: (String) -> String) = list
-        .filter { it.first.isNotEmpty() }
-        .distinctBy { it.first }
-        .map { (code, name) -> code to of(code).takeIf { it.isNotEmpty() && it != code }.orEmptyOr(name) }
-        .sortedWith { a, b -> collator.compare(a.second, b.second) }
-    val languages = named(langs.await()?.languagesList?.map { it.code to it.name }.orEmpty()) { Locale.forLanguageTag(it).getDisplayLanguage(locale) }
-    val countries = named(ctrs.await()?.countriesList?.map { it.code to it.name }.orEmpty()) { Locale("", it).getDisplayCountry(locale) }
-    languages to countries
-}
-
-private fun String?.orEmptyOr(fallback: String) = this ?: fallback
 
 /** A question before doing what cannot be undone, its action in red. */
 @Composable

@@ -28,6 +28,8 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import dev.mavio.core.AppModel
 import dev.mavio.core.call
+import dev.mavio.core.choices
+import dev.mavio.core.localization
 import dev.mavio.design.MavioSpacing
 import dev.mavio.ui.ButtonKind
 import dev.mavio.ui.ChoiceRow
@@ -139,7 +141,7 @@ internal fun GeneralPage(model: AppModel, serverId: String) {
         }
         editor.load()
         editor.saved?.let { draft = GeneralDraft(it.settings) }
-        localization(model, serverId).let { (l, c) ->
+        model.localization(serverId).let { (l, c) ->
             languages = l
             countries = c
         }

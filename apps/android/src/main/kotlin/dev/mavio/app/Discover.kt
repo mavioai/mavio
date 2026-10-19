@@ -60,6 +60,7 @@ import dev.mavio.ui.Shelf
 import dev.mavio.ui.StatusView
 import dev.mavio.ui.catalogRequest
 import dev.mavio.ui.discovered
+import dev.mavio.ui.filterable
 import dev.mavio.ui.rowTitle
 import dev.mavio.ui.rowsOf
 import dev.mavio.ui.sized
@@ -257,7 +258,7 @@ fun CatalogScreen(model: AppModel, route: Route.Catalog) {
         else -> rowTitle(CatalogRow(found, kind))
     }
     // Recommendations and similar titles take no filters.
-    val filterable = found != null && route.tmdbId == 0 && (found.filtersCount > 0 || found.sortsCount > 0)
+    val filterable = found?.filterable(route.tmdbId) == true
     val n = filters.count
     TitleGrid(
         route.serverId,
