@@ -76,5 +76,6 @@
   "users": "users",
   "lock": "lock-simple",
   "quality": "monitor-play",
-  "backspace": "backspace"
+  "backspace": "backspace",
+  "send": "arrow-up"
 }

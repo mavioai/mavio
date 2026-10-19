@@ -1846,6 +1846,7 @@
     <string name="conversations_untitled">未命名</string>
     <string name="conversations_usage">输入 %1$s 个词元，输出 %2$s 个 · %3$s</string>
     <string name="conversations_send">发送</string>
+    <string name="conversations_dictate">语音输入</string>
     <string name="conversations_placeholder">给 %s 发消息</string>
     <string name="conversations_you">你</string>
     <string name="conversations_retry">重试</string>

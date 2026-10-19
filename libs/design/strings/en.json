@@ -1815,6 +1815,7 @@
   "conversations.untitled": { "message": "Untitled", "description": "Title of a conversation without one." },
   "conversations.usage": { "message": "{input} tokens in, {output} out · {cost}", "description": "What a conversation used: tokens and cost in US dollars." },
   "conversations.send": { "message": "Send", "description": "Button sending a message." },
+  "conversations.dictate": { "message": "Dictate", "description": "Button of an AI conversation's message field that listens to the microphone and writes what is said into the field." },
   "conversations.placeholder": { "message": "Message {model}", "description": "Placeholder of the message field, with the model's name." },
   "conversations.you": { "message": "You", "description": "Who wrote a message the user sent." },
   "conversations.retry": { "message": "Try Again", "description": "Button sending a failed message again." },

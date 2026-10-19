@@ -5784,6 +5784,9 @@ public enum MavioStrings {
     /// Button sending a message.
     public static var conversationsSend: String { NSLocalizedString("conversations.send", bundle: .module, comment: "") }
 
+    /// Button of an AI conversation's message field that listens to the microphone and writes what is said into the field.
+    public static var conversationsDictate: String { NSLocalizedString("conversations.dictate", bundle: .module, comment: "") }
+
     /// Placeholder of the message field, with the model's name.
     public static func conversationsPlaceholder(model: String) -> String {
         String.localizedStringWithFormat(NSLocalizedString("conversations.placeholder", bundle: .module, comment: ""), model)

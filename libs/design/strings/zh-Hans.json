@@ -1814,6 +1814,7 @@
   "conversations.untitled": "未命名",
   "conversations.usage": "输入 {input} 个词元，输出 {output} 个 · {cost}",
   "conversations.send": "发送",
+  "conversations.dictate": "语音输入",
   "conversations.placeholder": "给 {model} 发消息",
   "conversations.you": "你",
   "conversations.retry": "重试",

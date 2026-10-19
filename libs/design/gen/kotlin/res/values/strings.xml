@@ -3671,6 +3671,8 @@
     <string name="conversations_usage">%1$s tokens in, %2$s out · %3$s</string>
     <!-- Button sending a message. -->
     <string name="conversations_send">Send</string>
+    <!-- Button of an AI conversation's message field that listens to the microphone and writes what is said into the field. -->
+    <string name="conversations_dictate">Dictate</string>
     <!-- Placeholder of the message field, with the model's name. -->
     <string name="conversations_placeholder">Message %s</string>
     <!-- Who wrote a message the user sent. -->

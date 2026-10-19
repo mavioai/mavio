@@ -32797,6 +32797,24 @@
         }
       }
     },
+    "conversations.dictate": {
+      "comment": "Button of an AI conversation's message field that listens to the microphone and writes what is said into the field.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dictate"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "语音输入"
+          }
+        }
+      }
+    },
     "conversations.placeholder": {
       "comment": "Placeholder of the message field, with the model's name.",
       "extractionState": "manual",

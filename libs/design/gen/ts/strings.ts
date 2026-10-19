@@ -1803,6 +1803,7 @@ export type MessageKey =
   | 'conversations.untitled'
   | 'conversations.usage'
   | 'conversations.send'
+  | 'conversations.dictate'
   | 'conversations.placeholder'
   | 'conversations.you'
   | 'conversations.retry'
@@ -3739,6 +3740,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "conversations.untitled": "Untitled",
     "conversations.usage": "{input} tokens in, {output} out · {cost}",
     "conversations.send": "Send",
+    "conversations.dictate": "Dictate",
     "conversations.placeholder": "Message {model}",
     "conversations.you": "You",
     "conversations.retry": "Try Again",
@@ -5673,6 +5675,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "conversations.untitled": "未命名",
     "conversations.usage": "输入 {input} 个词元，输出 {output} 个 · {cost}",
     "conversations.send": "发送",
+    "conversations.dictate": "语音输入",
     "conversations.placeholder": "给 {model} 发消息",
     "conversations.you": "你",
     "conversations.retry": "重试",
