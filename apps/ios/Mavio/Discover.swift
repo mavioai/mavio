@@ -255,7 +255,7 @@ struct CatalogShelf: View {
                     Shelf(query.title) {
                         Spacer()
                         if more {
-                            NavigationLink(MavioStrings.homeMore, value: Route.catalog(query)).type(theme.type.callout)
+                            RouteLink(MavioStrings.homeMore, value: Route.catalog(query)).type(theme.type.callout)
                         }
                     } content: {
                         ForEach(titles, id: \.key) {
@@ -397,7 +397,7 @@ struct DiscoveredTitleCard: View {
     @Environment(\.theme) private var theme
 
     var body: some View {
-        NavigationLink(value: Route.title(serverId: serverId, kind: title.mediaKind, tmdbId: title.tmdbId)) {
+        RouteLink(value: Route.title(serverId: serverId, kind: title.mediaKind, tmdbId: title.tmdbId)) {
             VStack(alignment: .leading, spacing: MavioSpacing.s4) {
                 ArtworkView(
                     sized(title.posterURL, 342), title: title.name,

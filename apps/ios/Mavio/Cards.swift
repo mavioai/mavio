@@ -13,7 +13,7 @@ struct CardLink: View {
     @Environment(\.theme) private var theme
 
     var body: some View {
-        NavigationLink(value: Route.item(serverId: card.serverId, itemId: card.itemId)) {
+        RouteLink(value: Route.item(serverId: card.serverId, itemId: card.itemId)) {
             if wide ?? isWide(card) {
                 ThumbCard(card, width: width)
             } else {
@@ -120,7 +120,7 @@ struct RowView: View {
         }
         Spacer()
         if row.more, let serverId = row.serverId, let hubId = row.hubId {
-            NavigationLink(
+            RouteLink(
                 MavioStrings.homeMore, value: Route.hub(serverId: serverId, hubId: hubId, title: rowTitle(row))
             )
             .type(theme.type.callout)
@@ -146,11 +146,10 @@ struct TitleCardView: View {
         }
         .frame(width: theme.layout.poster)
         if let copy = title.available.first {
-            NavigationLink(value: Route.item(serverId: copy.serverId, itemId: copy.itemId)) { poster }
+            RouteLink(value: Route.item(serverId: copy.serverId, itemId: copy.itemId)) { poster }
                 .buttonStyle(.plain)
         } else if let serverId, let tmdbId = title.externalIds["tmdb"].flatMap({ Int32($0) }) {
-            NavigationLink(value: Route.title(serverId: serverId, kind: title.movie ? .movie : .series, tmdbId: tmdbId))
-            {
+            RouteLink(value: Route.title(serverId: serverId, kind: title.movie ? .movie : .series, tmdbId: tmdbId)) {
                 poster
             }
             .buttonStyle(.plain)

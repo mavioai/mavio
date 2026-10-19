@@ -163,12 +163,17 @@ struct RootView: View {
 struct Stack<Content: View>: View {
     @ViewBuilder let content: Content
     @Environment(\.theme) private var theme
+    @Environment(\.horizontalSizeClass) private var sizeClass
+    @State private var path = NavigationPath()
+    @State private var tabBar = Visibility.visible
 
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $path) {
             content
                 .background(theme.colors.background)
                 .modifier(TopBar())
+                .onAppear { tabBar = .visible }
+                .toolbar(sizeClass == .regular ? tabBar : .automatic, for: .tabBar)
                 .navigationDestination(for: Route.self) { route in
                     Group {
                         switch route {
@@ -198,9 +203,63 @@ struct Stack<Content: View>: View {
                     .modifier(HiddenTabBar())
                 }
         }
+        .environment(\.openRoute, opener)
         // Toolbar buttons and rows take the label's color, as in the web UI;
         // the tab bar keeps the accent.
         .tint(theme.colors.textPrimary)
+    }
+
+    private var opener: ((Route) -> Void)? {
+        guard sizeClass == .regular else { return nil }
+        return { open($0) }
+    }
+
+    /// Opens a page on the iPad, from the first screen only once the tab bar
+    /// at the top is hidden: hidden with the push, it would give its space
+    /// back after it, the page jumping up.
+    private func open(_ route: Route) {
+        guard path.isEmpty else {
+            path.append(route)
+            return
+        }
+        tabBar = .hidden
+        Task { @MainActor in path.append(route) }
+    }
+}
+
+extension EnvironmentValues {
+    /// How a `RouteLink` opens its page, when the stack opens it itself.
+    @Entry var openRoute: ((Route) -> Void)? = nil
+}
+
+/// A link to a page of the stack: a `NavigationLink`, or on the iPad a
+/// button the stack opens the page for.
+struct RouteLink<Label: View>: View {
+    let value: Route
+    @ViewBuilder let label: Label
+    @Environment(\.openRoute) private var open
+
+    init(value: Route, @ViewBuilder label: () -> Label) {
+        self.value = value
+        self.label = label()
+    }
+
+    var body: some View {
+        if let open {
+            Button {
+                open(value)
+            } label: {
+                label
+            }
+        } else {
+            NavigationLink(value: value) { label }
+        }
+    }
+}
+
+extension RouteLink where Label == Text {
+    init(_ title: String, value: Route) {
+        self.init(value: value) { Text(title) }
     }
 }
 
@@ -221,7 +280,7 @@ private struct TopBar: ViewModifier {
                 }
                 .hiddenSharedBackground()
                 ToolbarItem(placement: .topBarTrailing) {
-                    NavigationLink(value: Route.search) {
+                    RouteLink(value: Route.search) {
                         Icon("search", size: 22)
                     }
                     .accessibilityLabel(MavioStrings.navSearch)
@@ -229,7 +288,7 @@ private struct TopBar: ViewModifier {
                 .hiddenSharedBackground()
             }
             ToolbarItem(placement: .topBarTrailing) {
-                NavigationLink(value: Route.settings) {
+                RouteLink(value: Route.settings) {
                     Avatar(name: name, size: 32)
                 }
                 .accessibilityLabel(MavioStrings.navSettings)
@@ -239,15 +298,11 @@ private struct TopBar: ViewModifier {
     }
 }
 
-/// On the iPhone the tab bar shows on the tabs' first screens alone, as the
-/// web UI's, and hides on a page opened from one. The iPad's, at the top,
-/// stays, as in the system's apps: hidden, it would take the space it held
-/// back only once the page is in, the page jumping up.
+/// The tab bar shows on the tabs' first screens alone, as the web UI's,
+/// and hides on a page opened from one.
 private struct HiddenTabBar: ViewModifier {
-    @Environment(\.horizontalSizeClass) private var sizeClass
-
     func body(content: Content) -> some View {
-        content.toolbar(sizeClass == .regular ? .automatic : .hidden, for: .tabBar)
+        content.toolbar(.hidden, for: .tabBar)
     }
 }
 

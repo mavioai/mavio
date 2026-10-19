@@ -19,7 +19,7 @@ struct LibrariesView: View {
                         }
                         if let entries = libraries[server.id]?.libraries {
                             CardGrid(items: entries, wide: true) { library in
-                                NavigationLink(value: Route.library(library)) {
+                                RouteLink(value: Route.library(library)) {
                                     LibraryCard(library: library)
                                 }
                                 .buttonStyle(.plain)

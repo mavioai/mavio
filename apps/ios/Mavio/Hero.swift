@@ -212,7 +212,7 @@ private struct HeroPage: View {
                     }
                     .buttonStyle(MavioButtonStyle(.artworkPrimary))
                 }
-                NavigationLink(value: Route.item(serverId: card.serverId, itemId: card.itemId)) {
+                RouteLink(value: Route.item(serverId: card.serverId, itemId: card.itemId)) {
                     Label {
                         Text(MavioStrings.itemDetails)
                     } icon: {
