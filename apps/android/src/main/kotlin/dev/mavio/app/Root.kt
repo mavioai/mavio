@@ -350,7 +350,8 @@ private fun Shell(model: AppModel) {
                                     LocalBottomInset provides if (route == stack.firstOrNull()) rootInset else bars,
                                     LocalHeaderRoute provides route,
                                 ) {
-                                    Box(Modifier.fillMaxSize().nestedScroll(backdrop.tracking(route))) { Screen(model, it) }
+                                    // Opaque, so that the screen it slides over or uncovers does not show through it.
+                                    Box(Modifier.fillMaxSize().background(theme.colors.background).nestedScroll(backdrop.tracking(route))) { Screen(model, it) }
                                 }
                             }
                         },
