@@ -3,14 +3,14 @@
 // request (§6.3.28). A search runs when it is confirmed; on the
 // television it runs as the on-screen keyboard types, beside the results
 // (docs/tv.md §6.4).
-import { type SearchResults, titlesOf, useDiscovery, useHome, useSearch, useSearchTitles, useSignedIn } from "@mavio/client-ts";
+import { type SearchResults, titlesOf, useDiscovery, useHome, useSearch, useSearchAgain, useSearchTitles, useSignedIn } from "@mavio/client-ts";
 import { getRouteApi, useNavigate } from "@tanstack/react-router";
 import { type CSSProperties, type KeyboardEvent, useEffect, useRef, useState } from "react";
 
 import { discoverLanguage, t } from "../i18n.ts";
 import { Icon } from "../icon.tsx";
 import { usePrefs, useWidthClass } from "../prefs.ts";
-import { CardPlaceholder, Grid, ItemCard, Shelf, StatusView } from "../ui.tsx";
+import { Grid, ItemCard, Loading, Shelf, StatusView } from "../ui.tsx";
 import { tmdbOf, TitleCard } from "./discover.tsx";
 import { SectionView } from "./home.tsx";
 
@@ -31,6 +31,7 @@ function StandardSearch() {
   // The expanded sidebar has the field already.
   const field = !(useWidthClass() === "expanded" && sidebar);
   const results = useSearch(q);
+  const again = useSearchAgain();
   return (
     <div className="pt-4 pb-6">
       {field && (
@@ -39,7 +40,9 @@ function StandardSearch() {
           className="px-margin pb-2"
           onSubmit={(e) => {
             e.preventDefault();
-            void navigate({ to: "/search", search: { q: text.trim() || undefined } });
+            // Results are kept, coming back to them; confirming the query again searches again.
+            if (text.trim() === q && q !== "") again(q);
+            else void navigate({ to: "/search", search: { q: text.trim() || undefined } });
           }}
         >
           <label className="flex min-h-12 items-center gap-3 rounded-lg bg-surface-raised px-4">
@@ -159,21 +162,16 @@ function Results({ q, results, grid }: { q: string; results: SearchResults[]; gr
   const found = useSearchTitles(discovery.catalogs.length > 0 ? discovery.server : undefined, q, discoverLanguage);
   const titles = titlesOf(found.data?.pages);
   if (q === "") return null;
-  const none =
-    results.every((r) => !r.pending) && results.every((r) => r.items.length === 0) && !discovery.pending && !found.isLoading && titles.length === 0;
+  const searching = results.some((r) => r.pending) || discovery.pending || found.isLoading;
+  const shown = results.some((r) => !r.pending && (r.items.length > 0 || r.error)) || titles.length > 0;
+  // One spinner while nothing is drawn yet, and No Results once all answered with nothing.
+  if (!shown) return searching ? <Loading /> : <StatusView icon="search" title={t("search.noResults")} />;
   return (
     <>
       {results.map(({ server, items, pending, error }) => {
         const title = several ? server.name : t("search.server");
-        if (pending) {
-          return (
-            <Shelf key={server.id} title={title}>
-              {Array.from({ length: 6 }, (_, i) => (
-                <CardPlaceholder key={i} />
-              ))}
-            </Shelf>
-          );
-        }
+        // A server's row shows once it answers with results, never while it searches.
+        if (pending) return null;
         if (error) {
           return (
             <p key={server.id} className="flex items-center gap-2 px-margin py-3 type-callout text-text-tertiary">
@@ -220,7 +218,6 @@ function Results({ q, results, grid }: { q: string; results: SearchResults[]; gr
             ))}
           </Shelf>
         ))}
-      {none && <StatusView icon="search" title={t("search.noResults")} />}
     </>
   );
 }

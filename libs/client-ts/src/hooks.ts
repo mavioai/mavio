@@ -465,7 +465,9 @@ export function useSearch(query: string): SearchResults[] {
       queryFn: async () =>
         (await servers.client(ItemService, s).listItems({ search: q, kinds: searchKinds, limit: 50 })).items,
       enabled: q !== "",
-      staleTime: 60_000,
+      // Kept as Search returns to them; confirming the query again searches again (useSearchAgain).
+      staleTime: Infinity,
+      gcTime: 30 * 60_000,
     })),
     combine: (results) =>
       list.map((server, i) => ({
@@ -475,6 +477,23 @@ export function useSearch(query: string): SearchResults[] {
         error: results[i].isError ? errorMessage(results[i].error) : undefined,
       })),
   });
+}
+
+/**
+ * Searches every server and Discover for a query again, as confirming
+ * the query searched already does: Search keeps its results otherwise.
+ */
+export function useSearchAgain(): (query: string) => void {
+  const qc = useQueryClient();
+  return useCallback(
+    (query: string) => {
+      const q = query.trim();
+      void qc.refetchQueries({
+        predicate: ({ queryKey: k }) => k[0] === "mavio" && ((k[2] === "search" && k[3] === q) || (k[2] === "discover" && k[3] === "search" && k[4] === q)),
+      });
+    },
+    [qc],
+  );
 }
 
 /** The kinds of a server's queries whose lists the user's data chooses or orders, or sums up for a series. */

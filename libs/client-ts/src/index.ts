@@ -60,6 +60,7 @@ export {
   usePrefetchItem,
   useRecommended,
   useSearch,
+  useSearchAgain,
   useServer,
   useServers,
   useServersStore,

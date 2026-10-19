@@ -189,7 +189,9 @@ export function useSearchTitles(server: ServerEntry | undefined, query: string, 
     initialPageParam: 1,
     getNextPageParam: (last) => last.next,
     enabled: !!server && query.trim() !== "",
-    staleTime: 5 * 60_000,
+    // Kept as Search returns to them; confirming the query again searches again (useSearchAgain).
+    staleTime: Infinity,
+    gcTime: 30 * 60_000,
   });
 }
 
