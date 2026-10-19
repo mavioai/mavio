@@ -16,6 +16,11 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.runtime.mutableStateMapOf
+import dev.mavio.design.TabletLayout
+import dev.mavio.ui.LocalTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -269,44 +274,54 @@ fun Root(model: AppModel) {
     }
 }
 
+/**
+ * The places' stacks of screens, shown in the phone's layout or the wide
+ * one as the window's width decides (docs/clients.md §6.3), which keep what
+ * they hold as the window crosses from one to the other.
+ */
 @Composable
 private fun Shell(model: AppModel) {
-    var tab by rememberSaveable { mutableStateOf(Tab.Home) }
+    // The place shown: a tab's, or in the wide layout one of the sidebar's.
+    var place by remember { mutableStateOf<Route>(Route.Home) }
     val signedIn by model.signedIn.collectAsStateWithLifecycle()
     val discover = remember { DiscoverState(model) }
     LaunchedEffect(signedIn) { discover.load(model.signedInServers.map { it.id }) }
     // Discover's tab shows while a server discovers.
     val tabs = Tab.entries.filter { it != Tab.Discover || discover.discovery != null }
-    LaunchedEffect(tabs) { if (tab !in tabs) tab = Tab.Home }
-    val stacks = remember { Tab.entries.associateWith { mutableStateListOf(it.root) } }
-    val navigator = remember { Navigator { stacks.getValue(tab) } }
-    val stack = stacks.getValue(tab)
+    LaunchedEffect(tabs) { if (place == Route.Discover && Tab.Discover !in tabs) place = Route.Home }
+    val stacks = remember { mutableStateMapOf<Route, SnapshotStateList<Route>>().apply { Tab.entries.forEach { put(it.root, mutableStateListOf(it.root)) } } }
+    val select = { p: Route ->
+        if (p !in stacks) stacks[p] = mutableStateListOf(p)
+        if (p == place) {
+            // Choosing the place shown goes back to its first screen.
+            stacks.getValue(p).let { while (it.size > 1) it.removeAt(it.lastIndex) }
+        }
+        place = p
+    }
+    val stack = stacks[place] ?: stacks.getValue(Route.Home)
+    val navigator = remember { Navigator { stacks[place] ?: stacks.getValue(Route.Home) } }
     val haze = rememberHazeState()
-    // Each tab keeps its screens' state while another shows.
+    // Each place keeps its screens' state while another shows.
     val saved = rememberSaveableStateHolder()
     val bars = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
-    // The tab bar shows on the tabs' first screens alone.
-    val tabBar = stack.size == 1
-    CompositionLocalProvider(
-        LocalNavigator provides navigator,
-        LocalDiscover provides discover,
-        // The pages scroll under the header and the floating tab bar, which blur them.
-        LocalTopInset provides HEADER_HEIGHT + WindowInsets.statusBars.asPaddingValues().calculateTopPadding(),
-    ) {
-        Box(Modifier.fillMaxSize().background(theme.colors.background)) {
-            // Switching tabs shows the other tab's stack at once, without sliding.
-            saved.SaveableStateProvider(tab) {
-                key(tab) {
+    val statusBar = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
+    // The player and the sign-in take the whole screen.
+    val chrome = stack.lastOrNull().let { it !is Route.Player && it != Route.AddServer }
+    BoxWithConstraints(Modifier.fillMaxSize().background(theme.colors.background)) {
+        val wide = maxWidth >= 600.dp
+        val content = @Composable { modifier: Modifier, rootInset: Dp ->
+            // Keyed by the place's text, which the saved state can hold.
+            saved.SaveableStateProvider(place.toString()) {
+                key(place) {
                     NavDisplay(
                         backStack = stack,
-                        modifier = Modifier.fillMaxSize().hazeSource(haze),
+                        modifier = modifier.hazeSource(haze),
                         onBack = { stack.removeLastOrNull() },
                         // A screen keeps its state, as where it was scrolled, under those opened over it.
                         entryDecorators = listOf(rememberSaveableStateHolderNavEntryDecorator()),
                         entryProvider = { route ->
                             NavEntry(route) {
-                                val root = Tab.entries.any { t -> t.root == it }
-                                CompositionLocalProvider(LocalBottomInset provides if (root) TAB_BAR_HEIGHT + 24.dp + bars else bars) {
+                                CompositionLocalProvider(LocalBottomInset provides if (route == stack.firstOrNull()) rootInset else bars) {
                                     Screen(model, it)
                                 }
                             }
@@ -317,27 +332,104 @@ private fun Shell(model: AppModel) {
                     )
                 }
             }
-            // The player and the sign-in take the whole screen.
-            if (stack.lastOrNull().let { it !is Route.Player && it != Route.AddServer }) {
-                Header(model, back = stack.size > 1, Modifier.align(Alignment.TopCenter), haze)
-                AnimatedVisibility(
-                    tabBar,
-                    Modifier.align(Alignment.BottomCenter),
-                    enter = slideInVertically(tween(PAGE_MILLIS)) { it },
-                    exit = slideOutVertically(tween(PAGE_MILLIS)) { it },
-                ) {
-                    TabBar(tabs, tab, haze) {
-                        if (it == tab) {
-                            // Tapping the current tab goes back to its first screen.
-                            while (stack.size > 1) stack.removeAt(stack.lastIndex)
+        }
+        if (wide) {
+            // Up to 840 dp the sidebar is a rail whose toggle lays the full
+            // sidebar over the content; wider, the toggle collapses it.
+            val overlay = maxWidth < 840.dp
+            var expanded by rememberSaveable { mutableStateOf(true) }
+            var over by remember { mutableStateOf(false) }
+            LaunchedEffect(place, overlay) { over = false }
+            val rail = overlay || !expanded
+            val layout = TabletLayout
+            CompositionLocalProvider(
+                LocalTheme provides theme.copy(layout = layout),
+                LocalNavigator provides navigator,
+                LocalDiscover provides discover,
+                // A page opened from another keeps clear of Back above it.
+                LocalTopInset provides statusBar + if (stack.size > 1 && chrome) BACK_ROW else MavioSpacing.s12,
+            ) {
+                Row(Modifier.fillMaxSize()) {
+                    if (chrome) {
+                        SidebarPanel(
+                            model,
+                            rail,
+                            place,
+                            discover.discovery != null,
+                            Modifier.width(if (rail) layout.rail else layout.sidebar),
+                            onToggle = { if (overlay) over = true else expanded = !expanded },
+                            onSelect = select,
+                        )
+                        Box(Modifier.fillMaxHeight().width(1.dp).background(theme.colors.border))
+                    }
+                    Box(Modifier.weight(1f).fillMaxHeight()) {
+                        content(Modifier.fillMaxSize(), bars)
+                        if (stack.size > 1 && chrome) {
+                            Box(
+                                Modifier
+                                    .statusBarsPadding()
+                                    .padding(12.dp)
+                                    .size(36.dp)
+                                    .shadow(8.dp, CircleShape)
+                                    .clip(CircleShape)
+                                    .glass(haze, glassTint(), radius = 12.dp, saturation = 1.8f)
+                                    .clickable { navigator.back() },
+                                Alignment.Center,
+                            ) {
+                                MavioIcon(R.drawable.ic_back, size = 18.dp, contentDescription = stringResource(R.string.action_back))
+                            }
                         }
-                        tab = it
+                    }
+                }
+                if (over && chrome) {
+                    Box(
+                        Modifier
+                            .fillMaxSize()
+                            .background(theme.colors.scrim)
+                            .clickable(remember { MutableInteractionSource() }, null) { over = false },
+                    ) {
+                        SidebarPanel(
+                            model,
+                            rail = false,
+                            place,
+                            discover.discovery != null,
+                            Modifier.width(layout.sidebar).shadow(16.dp).clickable(remember { MutableInteractionSource() }, null) {},
+                            onToggle = { over = false },
+                            onSelect = select,
+                        )
+                    }
+                }
+            }
+        } else {
+            // The tab whose place shows; a library chosen in the wide layout is the libraries'.
+            val tab = Tab.entries.firstOrNull { it.root == place } ?: if (place is Route.Library) Tab.Libraries else Tab.Home
+            CompositionLocalProvider(
+                LocalNavigator provides navigator,
+                LocalDiscover provides discover,
+                // The pages scroll under the header and the floating tab bar, which blur them.
+                LocalTopInset provides HEADER_HEIGHT + statusBar,
+            ) {
+                // The tab bar shows on the tabs' first screens alone.
+                val tabBar = stack.size == 1
+                content(Modifier.fillMaxSize(), TAB_BAR_HEIGHT + 24.dp + bars)
+                if (chrome) {
+                    Header(model, back = stack.size > 1, Modifier.align(Alignment.TopCenter), haze)
+                    AnimatedVisibility(
+                        tabBar,
+                        Modifier.align(Alignment.BottomCenter),
+                        enter = slideInVertically(tween(PAGE_MILLIS)) { it },
+                        exit = slideOutVertically(tween(PAGE_MILLIS)) { it },
+                    ) {
+                        TabBar(tabs, tab, haze) { select(it.root) }
                     }
                 }
             }
         }
     }
 }
+
+/** The height of the row Back has above a page opened from another in the wide layout. */
+private val BACK_ROW = 60.dp
 
 /** The height of the tab bar's pill. */
 private val TAB_BAR_HEIGHT = 60.dp
