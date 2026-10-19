@@ -3,8 +3,10 @@ package openai
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strings"
+	"sync/atomic"
 	"unicode"
 
 	"github.com/mavioai/mavio/plugins/voice/internal/service"
@@ -67,18 +69,36 @@ func title(s string) string {
 type Synthesizer struct {
 	c      *client
 	voices []service.Voice
+	// mp3Only is a service that rejected Opus, as OpenRouter's do: it is
+	// asked for MP3, which every client plays too.
+	mp3Only atomic.Bool
 }
 
 // Voices implements service.Synthesizer; they speak any language.
 func (s *Synthesizer) Voices() []service.Voice { return s.voices }
 
-// Synthesize implements service.Synthesizer.
+// Synthesize implements service.Synthesizer: Opus in Ogg unless MP3 is
+// asked for or the service takes no Opus.
 func (s *Synthesizer) Synthesize(ctx context.Context, voice, text, _ string, format service.Format, speed float64) (service.Speech, error) {
-	req := map[string]any{"model": s.c.model, "input": text, "voice": voice, "response_format": "opus"}
-	contentType := "audio/ogg"
-	if format == service.MP3 {
-		req["response_format"], contentType = "mp3", "audio/mpeg"
+	if format == service.OggOpus && !s.mp3Only.Load() {
+		speech, err := s.synthesize(ctx, voice, text, "opus", speed)
+		if !errors.Is(err, service.ErrRejected) {
+			return speech, err
+		}
+		// The service may take no Opus; MP3 tells.
+		speech, err2 := s.synthesize(ctx, voice, text, "mp3", speed)
+		if err2 != nil {
+			return service.Speech{}, err
+		}
+		s.mp3Only.Store(true)
+		return speech, nil
 	}
+	return s.synthesize(ctx, voice, text, "mp3", speed)
+}
+
+// synthesize asks the service for speech in an encoding, opus or mp3.
+func (s *Synthesizer) synthesize(ctx context.Context, voice, text, encoding string, speed float64) (service.Speech, error) {
+	req := map[string]any{"model": s.c.model, "input": text, "voice": voice, "response_format": encoding}
 	if speed > 0 {
 		req["speed"] = speed
 	}
@@ -89,6 +109,10 @@ func (s *Synthesizer) Synthesize(ctx context.Context, voice, text, _ string, for
 	audio, err := s.c.do(ctx, "/audio/speech", "application/json", body)
 	if err != nil {
 		return service.Speech{}, err
+	}
+	contentType := "audio/ogg"
+	if encoding == "mp3" {
+		contentType = "audio/mpeg"
 	}
 	return service.Speech{Audio: audio, ContentType: contentType}, nil
 }

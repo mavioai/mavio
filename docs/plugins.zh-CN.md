@@ -191,7 +191,7 @@ manifest 在 `external_id_kinds` 中声明外部 ID 类型：键、显示名称�
 ### 8.16 语音识别与合成
 `SPEECH_TO_TEXT` 为助手识别语音（[助手 §8](assistant.zh-CN.md#8-语音)），并转写字幕（[架构 §14.5](architecture.zh-CN.md#145-翻译与转写)）。`SpeechToTextService.ListRecognizers` 列出插件实现的识别器，每个都有名称、显示名称、设置、是否启用、语言（BCP 47）、可接受的最长音频，是否给出时间戳、是否检测语言、是否翻译为英语、是否接受提示，以及管理员是否允许它转写字幕。`RecognizeSpeech` 识别放在请求中的音频（16 kHz 单声道 16 位 PCM），或从宿主 API 的 URL（`/speech/audio/{token}`，与视频开头对齐的 PCM；参数 `stream` 选择音频流，`seconds` 只取开头若干秒）读取的音频；结果为文本，或按要求为带时间的分段；可指定语言或检测语言，可转写或翻译为英语，可附带提示。`DetectSpeechLanguage` 检测前 30 秒的语言。失败带有 Connect 错误码，与 AI 网关相同。
 
-`TEXT_TO_SPEECH` 朗读助手的回答。`TextToSpeechService.ListVoices` 列出插件的合成器及其设置与是否启用，以及已启用合成器的语音（`<synthesizer>/<voice>`），每个都有名称与语言；`SynthesizeSpeech` 以请求指定的语速与格式（Ogg 封装的 Opus，或 MP3）返回用某个语音朗读一段文本的语音。
+`TEXT_TO_SPEECH` 朗读助手的回答。`TextToSpeechService.ListVoices` 列出插件的合成器及其设置与是否启用，以及已启用合成器的语音（`<synthesizer>/<voice>`），每个都有名称与语言；`SynthesizeSpeech` 以请求指定的语速与格式（Ogg 封装的 Opus，或 MP3）返回用某个语音朗读一段文本的语音，服务不接受 Opus 时返回 MP3。
 
 `plugins/voice` 以 Go 子进程插件提供这两项能力：其设置启用并配置每个识别器与合成器，从它实现的服务中选取（来源为 `speech-recognizers` 与 `speech-synthesizers` 的 `x-mavio-options`），带有该种服务自己的设置，如地址、key（机密项）与模型——识别有 whisper-asr-webservice 与 OpenAI 兼容的转写 API，合成有 OpenAI 兼容的语音 API——服务端以插件的 ID 加上它们自己的名称来命名它们。whisper-asr-webservice 是从 `plugins/subtitles` 移来的 Bazarr Whisper 提供者，连同其语言映射、两个超时设置与测试用例；每段话一次性交给服务。
 

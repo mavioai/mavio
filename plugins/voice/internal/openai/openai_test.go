@@ -25,6 +25,8 @@ type fakeAPI struct {
 	sizes  []int
 	fields []string
 	speech map[string]any
+	// noOpus rejects Opus, as OpenRouter does.
+	noOpus bool
 }
 
 func (f *fakeAPI) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -51,6 +53,10 @@ func (f *fakeAPI) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		_, _ = io.WriteString(w, `{"text":" Bonjour.","language":"french","segments":[{"start":0.5,"end":0.9,"text":" Bonjour."}]}`)
 	case "/v1/audio/speech":
 		_ = json.NewDecoder(r.Body).Decode(&f.speech)
+		if f.noOpus && f.speech["response_format"] == "opus" {
+			http.Error(w, `{"error":"expected one of mp3, pcm"}`, http.StatusBadRequest)
+			return
+		}
 		_, _ = io.WriteString(w, "OggS")
 	default:
 		http.NotFound(w, r)
@@ -142,5 +148,26 @@ func TestSynthesize(t *testing.T) {
 	f.speech = nil
 	if _, err := s.Synthesize(t.Context(), "af_heart", "Hello.", "en", service.OggOpus, 0); err != nil || f.speech["response_format"] != "opus" || f.speech["speed"] != nil {
 		t.Errorf("Opus request = %v, %v", f.speech, err)
+	}
+}
+
+func TestSynthesizeWithoutOpus(t *testing.T) {
+	f, base := newAPI(t)
+	f.noOpus = true
+	s, err := NewSynthesizer(service.Env{}, json.RawMessage(`{"base_url":"`+base+`","api_key":"key","model":"fish-audio/drama-3","voices":"v"}`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for i := range 2 {
+		speech, err := s.Synthesize(t.Context(), "v", "Hello.", "en", service.OggOpus, 0)
+		if err != nil {
+			t.Fatalf("speech %d: %v", i, err)
+		}
+		if speech.ContentType != "audio/mpeg" || f.speech["response_format"] != "mp3" {
+			t.Errorf("speech %d: got = %s, %v, want = audio/mpeg, mp3", i, speech.ContentType, f.speech["response_format"])
+		}
+	}
+	if !s.(*Synthesizer).mp3Only.Load() {
+		t.Errorf("mp3Only = false, want = true")
 	}
 }

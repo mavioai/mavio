@@ -167,7 +167,7 @@ For models that write code well, a conversation also offers pi-durable's code mo
 
 ### 8.3 Synthesis
 * **The device's voices first**: the browser's `speechSynthesis`, `AVSpeechSynthesizer`, Android's `TextToSpeech`, with a voice of the answer's language.
-* **Server voices** (`TEXT_TO_SPEECH`) when the user chooses one, or when the device has no voice for the language: `POST /assistant/speech` with the text, the voice and the language returns the audio, Opus in Ogg or MP3 as the client asks.
+* **Server voices** (`TEXT_TO_SPEECH`) when the user chooses one, or when the device has no voice for the language: `POST /assistant/speech` with the text, the voice and the language returns the audio, Opus in Ogg or MP3 as the client asks; MP3, which every client plays, when the service takes no Opus.
 * Answers are spoken a sentence at a time as the text arrives, so speech starts before the answer ends; speaking stops when the user talks or presses the button again.
 
 ### 8.4 Speech Plugins

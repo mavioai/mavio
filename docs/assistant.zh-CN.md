@@ -167,7 +167,7 @@ AI 路径不可用时，未匹配的请求按作品或人物搜索，因此只�
 
 ### 8.3 合成
 * **优先使用设备的语音**：浏览器的 `speechSynthesis`、`AVSpeechSynthesizer`、Android 的 `TextToSpeech`，选用回答语言的语音。
-* 用户选择服务端语音时，或设备没有该语言的语音时，使用**服务端语音**（`TEXT_TO_SPEECH`）：`POST /assistant/speech` 带上文本、语音与语言，返回音频，按客户端要求为 Ogg 封装的 Opus 或 MP3。
+* 用户选择服务端语音时，或设备没有该语言的语音时，使用**服务端语音**（`TEXT_TO_SPEECH`）：`POST /assistant/speech` 带上文本、语音与语言，返回音频，按客户端要求为 Ogg 封装的 Opus 或 MP3；服务不接受 Opus 时为每个客户端都能播放的 MP3。
 * 回答随文本到达逐句朗读，因此在回答结束之前就开始说话；用户开口或再次按下按钮时停止朗读。
 
 ### 8.4 语音插件

@@ -167,10 +167,17 @@ func Answer(resp *http.Response) ([]byte, error) {
 		if len(msg) > 500 {
 			msg = msg[:500]
 		}
+		if resp.StatusCode == http.StatusBadRequest {
+			return nil, fmt.Errorf("%w: %w: %s", ErrService, ErrRejected, msg)
+		}
 		return nil, fmt.Errorf("%w: %s: %s", ErrService, resp.Status, msg)
 	}
 	return body, nil
 }
+
+// ErrRejected is a request a service answered 400 Bad Request to, such as
+// with an option it does not take.
+var ErrRejected = errors.New("400 Bad Request")
 
 // ErrService is a service that failed to answer.
 var ErrService = errors.New("the service failed")
