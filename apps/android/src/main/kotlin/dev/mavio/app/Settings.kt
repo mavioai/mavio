@@ -166,7 +166,7 @@ fun SettingsPageScreen(model: AppModel, page: SettingsPage) {
 
 /** The user's card: the Mavio account, or the user of the server signed in to. */
 @Composable
-private fun AccountCard(model: AppModel, modifier: Modifier) {
+internal fun AccountCard(model: AppModel, modifier: Modifier, chevron: Boolean = true) {
     val account = signedInAccount(model)
     val server = signedInServers(model).firstOrNull()
     val name = account?.name ?: server?.userName.orEmpty()
@@ -185,7 +185,7 @@ private fun AccountCard(model: AppModel, modifier: Modifier) {
                 maxLines = 1,
             )
         }
-        Chevron()
+        if (chevron) Chevron()
     }
 }
 

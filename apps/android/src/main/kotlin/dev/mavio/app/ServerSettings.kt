@@ -133,6 +133,19 @@ private val TOP: List<Any> = listOf(
 )
 
 /**
+ * The Server group's first level for a user, administering the server or
+ * not: others see the sections any user has, and a menu left with one
+ * section is that section.
+ */
+internal fun serverEntries(admin: Boolean): List<Any> = TOP.mapNotNull { entry ->
+    when (entry) {
+        is ServerSection -> entry.takeIf { it.forAnyone || admin }
+        is ServerMenu -> entry.sections.filter { it.forAnyone || admin }.let { if (it.size > 1) entry else it.firstOrNull() }
+        else -> null
+    }
+}
+
+/**
  * The settings' Server group, as the web UI's on a phone (docs/clients.md
  * §6.3): the picker of the servers signed in to, then the sections of the
  * server chosen, its administrators' with the devices signed in as the user
@@ -158,15 +171,7 @@ internal fun LazyListScope.serverGroup(model: AppModel, servers: List<ServerReco
                 ChoiceRow(stringResource(R.string.auth_server), servers.map { it.id to it.name }, server.id) { serverId = it }
                 RowDivider()
             }
-            // Others see the sections any user has; a menu left with one section is that section.
-            val shown = TOP.mapNotNull { entry ->
-                when (entry) {
-                    is ServerSection -> entry.takeIf { it.forAnyone || admin[server.id] == true }
-                    is ServerMenu -> entry.sections.filter { it.forAnyone || admin[server.id] == true }
-                        .let { if (it.size > 1) entry else it.firstOrNull() }
-                    else -> null
-                }
-            }
+            val shown = serverEntries(admin[server.id] == true)
             shown.forEachIndexed { i, entry ->
                 if (i > 0) RowDivider(tiled = true)
                 when (entry) {

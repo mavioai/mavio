@@ -313,6 +313,11 @@ private fun Shell(model: AppModel) {
     FollowGroup(model, navigator)
     BoxWithConstraints(Modifier.fillMaxSize().background(theme.colors.background)) {
         val wide = maxWidth >= 600.dp
+        // The wide layout's settings have a sidebar of their own and show a section beside it.
+        val settings = wide && place == Route.Settings
+        LaunchedEffect(settings, stack.size) { if (settings && stack.size == 1) stack.add(FIRST_SETTING) }
+        // Above the section the sidebar chose, Back leads to the page under it.
+        val backShown = chrome && stack.size > if (settings) 2 else 1
         val content = @Composable { modifier: Modifier, rootInset: Dp ->
             // Keyed by the place's text, which the saved state can hold.
             saved.SaveableStateProvider(place.toString()) {
@@ -320,7 +325,7 @@ private fun Shell(model: AppModel) {
                     NavDisplay(
                         backStack = stack,
                         modifier = modifier.hazeSource(haze),
-                        onBack = { stack.removeLastOrNull() },
+                        onBack = { if (settings && stack.size <= 2) select(Route.Home) else stack.removeLastOrNull() },
                         // A screen keeps its state, as where it was scrolled, under those opened over it.
                         entryDecorators = listOf(rememberSaveableStateHolderNavEntryDecorator()),
                         entryProvider = { route ->
@@ -351,10 +356,16 @@ private fun Shell(model: AppModel) {
                 LocalNavigator provides navigator,
                 LocalDiscover provides discover,
                 // A page opened from another keeps clear of Back above it.
-                LocalTopInset provides statusBar + if (stack.size > 1 && chrome) BACK_ROW else MavioSpacing.s12,
+                LocalTopInset provides statusBar + if (backShown) BACK_ROW else MavioSpacing.s12,
             ) {
                 Row(Modifier.fillMaxSize()) {
-                    if (chrome) {
+                    if (chrome && settings) {
+                        SettingsSidebar(model, stack.getOrNull(1), Modifier.width(layout.sidebar), onHome = { select(Route.Home) }) { r ->
+                            while (stack.size > 1) stack.removeAt(stack.lastIndex)
+                            stack.add(r)
+                        }
+                        Box(Modifier.fillMaxHeight().width(1.dp).background(theme.colors.border))
+                    } else if (chrome) {
                         SidebarPanel(
                             model,
                             rail,
@@ -367,8 +378,9 @@ private fun Shell(model: AppModel) {
                         Box(Modifier.fillMaxHeight().width(1.dp).background(theme.colors.border))
                     }
                     Box(Modifier.weight(1f).fillMaxHeight()) {
-                        content(Modifier.fillMaxSize(), bars)
-                        if (stack.size > 1 && chrome) {
+                        // A section is centered in the space left, at most 900 dp wide.
+                        content(if (settings) Modifier.fillMaxHeight().widthIn(max = 900.dp).align(Alignment.TopCenter) else Modifier.fillMaxSize(), bars)
+                        if (backShown) {
                             Box(
                                 Modifier
                                     .statusBarsPadding()
