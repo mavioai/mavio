@@ -136,7 +136,7 @@ export function CastShelf({
         all(
           "group w-40 shrink-0 snap-start rounded-lg text-center",
           <>
-            <div data-art className="mx-auto flex aspect-square w-36 items-center justify-center rounded-full bg-surface-raised">
+            <div data-art className="mx-auto flex aspect-square w-36 items-center justify-center rounded-full bg-fill">
               <Icon name="forward" size={40} />
             </div>
             <div className="mt-2 type-callout">{t("credits.all")}</div>

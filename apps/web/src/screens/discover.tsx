@@ -218,7 +218,7 @@ export function CatalogShelf({
       {tv &&
         all(
           "block w-poster shrink-0 snap-start",
-          <div data-art className="flex aspect-[2/3] flex-col items-center justify-center gap-3 rounded-md bg-surface-raised type-headline">
+          <div data-art className="flex aspect-[2/3] flex-col items-center justify-center gap-3 rounded-md bg-fill type-headline">
             <Icon name="forward" size={40} />
             {t("home.more")}
           </div>,
