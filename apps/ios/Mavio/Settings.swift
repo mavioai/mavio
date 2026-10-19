@@ -69,6 +69,9 @@ struct SettingsView: View {
         }
         .scrollContentBackground(.hidden)
         .navigationTitle(MavioStrings.navSettings)
+        // Large at the top left wherever it is opened from, centered small
+        // in the bar once scrolled.
+        .navigationBarTitleDisplayMode(.large)
     }
 }
 
