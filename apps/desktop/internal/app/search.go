@@ -68,7 +68,13 @@ func (a *App) search(c *ui.Context) {
 	ui.Column(c).Fill().Children(func() {
 		a.pageHeader(c, style.T(c, "nav.search"), func() {
 			if ui.SearchField(c, &s.query).Placeholder(style.T(c, "search.placeholder")).AutoFocus().Grow(1).MaxWidth(560).Height(36).Submitted() {
-				s.ran = strings.TrimSpace(s.query)
+				// Results are kept, coming back to them; confirming the
+				// query again searches again.
+				if q := strings.TrimSpace(s.query); q == s.ran {
+					s.results.key, s.titles.key = "", ""
+				} else {
+					s.ran = q
+				}
 			}
 		})
 		if query == "" {
@@ -199,9 +205,10 @@ func (a *App) tvQuery(c *ui.Context) {
 }
 
 // searchResults builds what the search found for query, as the web
-// UI's: a row of each server, in their order, titled by its name when
-// there are several, its cards' placeholders while it searches, a line
-// for one that cannot be reached and nothing for one that found nothing;
+// UI's: a row of each server that answered with results, in their order,
+// titled by its name when there are several, a line for one that cannot
+// be reached and nothing for one that found nothing, while it searches or
+// after;
 // then the titles the first server that discovers finds, to request
 // (§6.3.28). The TV mode has grids in place of rows.
 func (a *App) searchResults(c *ui.Context, query string, grid bool) {
@@ -253,19 +260,29 @@ func (a *App) searchResults(c *ui.Context, query string, grid bool) {
 		return style.T(c, "search.server")
 	}
 	searching := !t.loaded || t.value.query != query
-	none := !searching && t.err == nil && !pending && (server == "" || !found.loading) && len(titles) == 0
+	shown := len(titles) > 0
+	if !searching && t.err == nil {
+		for _, r := range t.value.results.GetServers() {
+			shown = shown || r.GetError() != "" || len(r.GetCards()) > 0
+		}
+	}
+	// One indicator while nothing is drawn yet, and No Results once all
+	// answered with nothing.
+	if !shown && (searching || t.err == nil) {
+		if searching || pending || server != "" && (!found.loaded || found.loading) {
+			loading(c, t.started)
+		} else {
+			statusView(c, "search", style.T(c, "search.noResults"), "", nil)
+		}
+		return
+	}
 	switch {
 	case searching:
-		for _, sv := range a.servers {
-			section(sv.GetId(), title(sv.GetName()), func() {
-				for range 6 {
-					ui.Box(c).Size(width, width*1.5).Shrink(0).Radius(design.RadiusMd).Background(style.Color(colors.Fill))
-				}
-			})
-		}
 	case t.err != nil:
 		taskStatus(c, t, func() { t.key = "" }, nil)
 	default:
+		// A server's row shows once it answers with results, never while
+		// it searches.
 		for _, r := range t.value.results.GetServers() {
 			switch {
 			case r.GetError() != "":
@@ -274,7 +291,6 @@ func (a *App) searchResults(c *ui.Context, query string, grid bool) {
 					style.Text(ui.Text(c, style.T(c, "home.serverUnreachable", "server", r.GetServerName())), style.Type(c).Callout).TextColor(style.Color(colors.TextTertiary))
 				})
 			case len(r.GetCards()) > 0:
-				none = false
 				section(r.GetServerId(), title(r.GetServerName()), func() {
 					for _, card := range r.GetCards() {
 						a.posterCard(c, card, width)
@@ -289,8 +305,5 @@ func (a *App) searchResults(c *ui.Context, query string, grid bool) {
 				a.discoveredCard(c, server, title, width, "")
 			}
 		})
-	}
-	if none {
-		statusView(c, "search", style.T(c, "search.noResults"), "", nil)
 	}
 }

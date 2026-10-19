@@ -4,6 +4,8 @@ import (
 	"testing"
 
 	"github.com/egoist/mygo/ui"
+
+	capiv1 "github.com/mavioai/mavio/libs/client-rust/capi/gen/mavio/capi/v1"
 )
 
 // Search runs as it is confirmed, and lists the server's row titled From
@@ -31,4 +33,32 @@ func TestSearch(t *testing.T) {
 		}
 	}
 	h.save(shots, "search")
+
+	// Confirming the query again searches again, keeping the results
+	// shown meanwhile.
+	before := len(h.core.requestsOf((*capiv1.Request).HasSearch))
+	h.tt.Key(0, ui.KeyEnter)
+	if !h.tt.HasText("The Long Orbit") {
+		t.Errorf("the results went as the search ran again; texts = %q", h.tt.Texts())
+	}
+	h.settle()
+	after := len(h.core.requestsOf((*capiv1.Request).HasSearch))
+	if after != before+1 {
+		t.Errorf("searches = %d, want = %d", after, before+1)
+	}
+
+	// A query nothing matches says so, with no row.
+	h.click("Clear")
+	h.tt.ClickAt(574, 70)
+	h.tt.Type("zzz")
+	h.tt.Key(0, ui.KeyEnter)
+	for range 10 {
+		if h.tt.HasText("No results") {
+			break
+		}
+		h.settle()
+	}
+	if !h.tt.HasText("No results") || h.tt.HasText("From the Server") {
+		t.Errorf("no results: texts = %q", h.tt.Texts())
+	}
 }
