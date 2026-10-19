@@ -234,8 +234,12 @@ private fun AccountPage(model: AppModel) {
                     if (i > 0) RowDivider()
                     ServerRow(model, s, i, servers, s.id in signedIn)
                 }
-                if (servers.isNotEmpty()) RowDivider()
-                LinkRow(stringResource(R.string.auth_add_server), R.drawable.ic_add) { navigator.open(Route.AddServer) }
+                // A Mavio account's servers are those it lists, which syncing
+                // keeps, so a server added beside them would vanish.
+                if (account == null) {
+                    if (servers.isNotEmpty()) RowDivider()
+                    LinkRow(stringResource(R.string.auth_add_server), R.drawable.ic_add) { navigator.open(Route.AddServer) }
+                }
             }
         }
         if (signedIn.isNotEmpty()) item { AuthorizeDevice(model, servers.filter { it.id in signedIn }) }
@@ -274,6 +278,7 @@ private fun ServerRow(model: AppModel, server: ServerRecord, index: Int, servers
     val context = LocalContext.current
     val navigator = LocalNavigator.current
     var open by remember { mutableStateOf(false) }
+    val account = signedInAccount(model)
     val colors = theme.colors
     fun move(by: Int) {
         val ids = servers.map { it.id }.toMutableList()
@@ -319,7 +324,9 @@ private fun ServerRow(model: AppModel, server: ServerRecord, index: Int, servers
                     context.getSystemService(ClipboardManager::class.java)
                         .setPrimaryClip(ClipData.newPlainText(server.name, server.address))
                 }
-                if (!signedIn) Item(stringResource(R.string.auth_sign_in), R.drawable.ic_profile) { navigator.open(Route.AddServer) }
+                if (!signedIn && account == null) {
+                    Item(stringResource(R.string.auth_sign_in), R.drawable.ic_profile) { navigator.open(Route.AddServer) }
+                }
                 Item(stringResource(R.string.auth_sign_out), R.drawable.ic_sign_out, colors.danger) {
                     scope.launch { runCatching { model.remove(server.id) } }
                 }

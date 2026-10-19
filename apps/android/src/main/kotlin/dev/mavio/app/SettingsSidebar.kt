@@ -105,12 +105,14 @@ internal fun SettingsSidebar(model: AppModel, section: Route?, modifier: Modifie
             var serverId by rememberSaveable { mutableStateOf(shownId ?: servers.first().id) }
             LaunchedEffect(shownId) { shownId?.let { serverId = it } }
             val server = servers.firstOrNull { it.id == serverId } ?: servers.first()
-            // Whether the user administers each server, once known.
+            // Whether the user administers each server, once known, by
+            // server and user, as switching users changes it.
             val admin = remember { mutableStateMapOf<String, Boolean>() }
-            LaunchedEffect(server.id) {
+            val adminKey = "${server.id}/${server.userId}"
+            LaunchedEffect(adminKey) {
                 runCatching {
                     model.client.call(server.id, Procedure.users("GetCurrentUser"), getCurrentUserRequest {}, GetCurrentUserResponse::parseFrom)
-                }.onSuccess { admin[server.id] = it.user.admin }
+                }.onSuccess { admin[adminKey] = it.user.admin }
             }
             Heading(stringResource(R.string.settings_server_group)) {
                 if (servers.size > 1) {
@@ -118,7 +120,7 @@ internal fun SettingsSidebar(model: AppModel, section: Route?, modifier: Modifie
                         ChoiceRow(stringResource(R.string.auth_server), servers.map { it.id to it.name }, server.id) { serverId = it }
                     }
                 }
-                serverEntries(admin[server.id] == true).forEach { entry ->
+                serverEntries(admin[adminKey] == true).forEach { entry ->
                     when (entry) {
                         is ServerSection -> Link(entry.title, entry.icon, entry.color, Route.ServerSetting(server.id, entry), section, onSelect)
                         is ServerMenu -> Menu(entry, server.id, section, onSelect)

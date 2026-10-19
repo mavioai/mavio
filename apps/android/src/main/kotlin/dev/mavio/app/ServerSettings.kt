@@ -156,14 +156,16 @@ internal fun LazyListScope.serverGroup(model: AppModel, servers: List<ServerReco
     item(key = "server-group") {
         var serverId by rememberSaveable { mutableStateOf(servers.first().id) }
         val server = servers.firstOrNull { it.id == serverId } ?: servers.first()
-        // Whether the user administers each server, once known; kept while
-        // pages open over the settings, so that coming back finds the
-        // group as long as it was, and where it was scrolled.
+        // Whether the user administers each server, once known, by server
+        // and user, as switching users changes it; kept while pages open
+        // over the settings, so that coming back finds the group as long
+        // as it was, and where it was scrolled.
         var admin by rememberSaveable { mutableStateOf(HashMap<String, Boolean>()) }
-        LaunchedEffect(server.id) {
+        val adminKey = "${server.id}/${server.userId}"
+        LaunchedEffect(adminKey) {
             runCatching {
                 model.client.call(server.id, Procedure.users("GetCurrentUser"), getCurrentUserRequest {}, GetCurrentUserResponse::parseFrom)
-            }.onSuccess { admin = HashMap(admin).apply { put(server.id, it.user.admin) } }
+            }.onSuccess { admin = HashMap(admin).apply { put(adminKey, it.user.admin) } }
         }
         val navigator = LocalNavigator.current
         Group(stringResource(R.string.settings_server_group)) {
@@ -171,7 +173,7 @@ internal fun LazyListScope.serverGroup(model: AppModel, servers: List<ServerReco
                 ChoiceRow(stringResource(R.string.auth_server), servers.map { it.id to it.name }, server.id) { serverId = it }
                 RowDivider()
             }
-            val shown = serverEntries(admin[server.id] == true)
+            val shown = serverEntries(admin[adminKey] == true)
             shown.forEachIndexed { i, entry ->
                 if (i > 0) RowDivider(tiled = true)
                 when (entry) {
