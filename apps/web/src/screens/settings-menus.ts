@@ -6,14 +6,13 @@ import { t } from "../i18n.ts";
 import type { IconName } from "../icon.tsx";
 
 /** A menu of the server's settings. */
-export type MenuId = "media" | "acquiring" | "extensions" | "maintenance";
+export type MenuId = "media" | "acquiring" | "maintenance";
 
 /** The sections of each menu, in their order. */
 export const menuSections: Record<MenuId, readonly string[]> = {
   media: ["libraries", "storage", "transcoding"],
   acquiring: ["acquisition", "wanted", "downloads", "subtitles"],
-  extensions: ["plugins", "ai"],
-  maintenance: ["activity", "issues", "tasks", "logs", "backups"],
+  maintenance: ["activity", "issues", "tasks", "logs", "backups", "api-keys"],
 };
 
 export function isMenu(s: string | undefined): s is MenuId {

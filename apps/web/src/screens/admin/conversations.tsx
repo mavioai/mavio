@@ -16,7 +16,8 @@ import {
 } from "@mavio/client-ts";
 import { type AgentSession, type AiModel, AiRole, type AiUsage } from "@mavio/proto/mavio/plugin/v1/ai_pb";
 import { useNavigate, useSearch } from "@tanstack/react-router";
-import { type KeyboardEvent, useEffect, useRef, useState } from "react";
+import { useWindowVirtualizer } from "@tanstack/react-virtual";
+import { type KeyboardEvent, useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import { locale, t } from "../../i18n.ts";
 import { modelDetail } from "../../ai-model.ts";
@@ -120,7 +121,11 @@ function modelOf(options: ModelOption[], c: AgentSession): ModelOption {
 /** A model's name and its provider's, on one line. */
 const modelName = (m: ModelOption) => `${m.label} (${m.providerName})`;
 
-/** A field for a message, its button sending it in a column of its own at its end, at the bottom. */
+/**
+ * A field for a message, its button sending it in a column of its own at its
+ * end, at the bottom: the field grows and shrinks with its text, and from its
+ * highest scrolls, the scroll bar at the edge beyond the button.
+ */
 function Composer({
   value,
   onChange,
@@ -138,10 +143,20 @@ function Composer({
   busy: boolean;
   disabled?: boolean;
 }) {
+  const field = useRef<HTMLTextAreaElement>(null);
+  // As tall as its text, which the box around it scrolls.
+  useLayoutEffect(() => {
+    const el = field.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${el.scrollHeight}px`;
+  }, [value]);
   return (
-    <div className="flex items-end gap-2 rounded-md border border-border bg-surface p-1.5 ps-0 focus-within:border-focus">
+    <div className="overflow-hidden rounded-md border border-border bg-surface focus-within:border-focus">
+      <div className="flex max-h-60 items-end gap-2 overflow-y-auto p-1.5 ps-0">
       <textarea
-        className="min-h-16 min-w-0 flex-1 resize-none self-stretch bg-transparent ps-3 pt-0.5 type-callout text-on-background placeholder:text-text-tertiary focus:outline-none"
+        ref={field}
+        className="min-h-16 min-w-0 flex-1 resize-none overflow-hidden bg-transparent ps-3 pt-0.5 type-callout text-on-background placeholder:text-text-tertiary focus:outline-none"
         rows={2}
         aria-label={label}
         placeholder={label}
@@ -154,10 +169,11 @@ function Composer({
         type="button"
         disabled={disabled || !value.trim() || busy}
         onClick={onSend}
-        className="min-h-8 shrink-0 rounded-full bg-button px-3.5 type-footnote font-semibold text-on-button hover:opacity-85 disabled:opacity-40 desk:min-h-7"
+        className="sticky bottom-0 min-h-8 shrink-0 rounded-full bg-button px-3.5 type-footnote font-semibold text-on-button hover:opacity-85 disabled:opacity-40 desk:min-h-7"
       >
         {busy ? "…" : action}
       </button>
+      </div>
     </div>
   );
 }
@@ -233,10 +249,29 @@ function NewConversation({ server, onStarted }: { server: ServerEntry; onStarted
  * model as the model picker's rows show it; each short of the other side,
  * so that the two stand apart.
  */
-function Bubble({ who, text, pending }: { who?: ModelOption; text: string; pending?: boolean }) {
+function Bubble({
+  who,
+  text,
+  pending,
+  index,
+  measure,
+  top,
+}: {
+  who?: ModelOption;
+  text: string;
+  pending?: boolean;
+  index: number;
+  measure: (el: HTMLElement | null) => void;
+  top: number;
+}) {
   const user = !who;
   return (
-    <li className={`flex flex-col gap-1 ${user ? "items-end ps-[15%]" : "items-start pe-[15%]"}`}>
+    <li
+      ref={measure}
+      data-index={index}
+      className={`absolute start-0 top-0 flex w-full flex-col gap-1 ${user ? "items-end ps-[15%]" : "items-start pe-[15%]"}`}
+      style={{ transform: `translateY(${top}px)` }}
+    >
       {who ? (
         <span className="flex min-w-0 max-w-full items-center gap-2 px-1 type-callout">
           <ModelLabel option={who} />
@@ -250,6 +285,51 @@ function Bubble({ who, text, pending }: { who?: ModelOption; text: string; pendi
         {text || (pending ? "…" : "")}
       </div>
     </li>
+  );
+}
+
+/** A message of a conversation, or of the exchange under way. */
+interface Said {
+  key: string;
+  who?: ModelOption;
+  text: string;
+  pending?: boolean;
+}
+
+/** The messages, only those scrolled into view drawn (TanStack Virtual), the page scrolling them. */
+function Messages({ said }: { said: Said[] }) {
+  const list = useRef<HTMLUListElement>(null);
+  // Where the list starts on the page, from which its rows are placed.
+  const [margin, setMargin] = useState(0);
+  useLayoutEffect(() => {
+    const el = list.current;
+    if (el) setMargin(el.getBoundingClientRect().top + window.scrollY);
+  });
+  const virtualizer = useWindowVirtualizer({
+    count: said.length,
+    estimateSize: () => 96,
+    gap: 16,
+    overscan: 6,
+    scrollMargin: margin,
+    getItemKey: (i) => said[i].key,
+  });
+  return (
+    <ul ref={list} className="relative" style={{ height: virtualizer.getTotalSize() }} aria-live="polite">
+      {virtualizer.getVirtualItems().map((row) => {
+        const m = said[row.index];
+        return (
+          <Bubble
+            key={row.key}
+            index={row.index}
+            measure={virtualizer.measureElement}
+            top={row.start - virtualizer.options.scrollMargin}
+            who={m.who}
+            text={m.text}
+            pending={m.pending}
+          />
+        );
+      })}
+    </ul>
   );
 }
 
@@ -297,6 +377,7 @@ function ConversationPage({ server, id, first, onFirstSent }: { server: ServerEn
   return (
     <Page
       title={c.title || t("conversations.untitled")}
+      documentTitle={`${t("settings.conversations")} · ${c.title || t("conversations.untitled")}`}
       message={`${modelName(model)} · ${usageOf(c.usage)}`}
       back={back}
     >
@@ -315,18 +396,18 @@ function ConversationPage({ server, id, first, onFirstSent }: { server: ServerEn
         />
       )}
       {remove.isError && <p className="type-callout break-words text-danger">{errorMessage(remove.error)}</p>}
-      <ul className="flex flex-col gap-4" aria-live="polite">
-        {messages.map((m, i) => (
-          <Bubble key={i} who={m.role === AiRole.USER ? undefined : model} text={m.text} />
-        ))}
-        {/* A failed message shows as the conversation kept it. */}
-        {exchange && exchange.error === undefined && (
-          <>
-            <Bubble text={exchange.text} />
-            <Bubble who={model} text={exchange.answer} pending />
-          </>
-        )}
-      </ul>
+      <Messages
+        said={[
+          ...messages.map((m, i) => ({ key: String(i), who: m.role === AiRole.USER ? undefined : model, text: m.text })),
+          // A failed message shows as the conversation kept it.
+          ...(exchange && exchange.error === undefined
+            ? [
+                { key: "sending", text: exchange.text },
+                { key: "answer", who: model, text: exchange.answer, pending: true },
+              ]
+            : []),
+        ]}
+      />
       {exchange?.error !== undefined && (
         <div className="flex flex-wrap items-center gap-3">
           <p className="type-callout break-words text-danger">{errorMessage(exchange.error)}</p>

@@ -19,9 +19,9 @@ function headingOf(waited: boolean): HTMLElement | undefined {
   return named ?? (h1?.hasAttribute("data-title-later") && !waited ? undefined : h1);
 }
 
-/** The page's title: its heading's text, else the destination of the navigation it is. */
+/** The page's title: its heading's data-title, else its text, else the destination of the navigation it is. */
 function titleOf(heading?: HTMLElement): string | undefined {
-  const text = heading?.textContent?.trim();
+  const text = heading?.dataset.title?.trim() || heading?.textContent?.trim();
   if (text) return text;
   return document.querySelector("nav [aria-current=page]")?.textContent?.trim() || undefined;
 }

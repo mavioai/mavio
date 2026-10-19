@@ -28,12 +28,15 @@ export const SectionTrail = createContext<ReactNode>(null);
  */
 export function Page({
   title,
+  documentTitle,
   message,
   actions,
   back,
   children,
 }: {
   title: ReactNode;
+  /** The browser's title of the page, where it is more than its heading. */
+  documentTitle?: string;
   message?: ReactNode;
   actions?: ReactNode;
   back?: ReactNode;
@@ -47,7 +50,9 @@ export function Page({
       <header className="flex flex-wrap items-center gap-4">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-4">
-            <h2 data-title className="min-w-0 flex-1 type-title1">{title}</h2>
+            <h2 data-title={documentTitle ?? ""} className="min-w-0 flex-1 type-title1">
+              {title}
+            </h2>
             {!back && accessory}
           </div>
           {message && <p className="mt-1 type-body text-text-secondary">{message}</p>}
@@ -120,7 +125,6 @@ export function Trail({ menu, section }: { menu?: MenuId; section?: { id: string
 const menuTitles: Record<MenuId, () => string> = {
   media: () => t("settings.mediaMenu"),
   acquiring: () => t("settings.acquisitionMenu"),
-  extensions: () => t("settings.extensionsMenu"),
   maintenance: () => t("settings.maintenanceMenu"),
 };
 

@@ -4,9 +4,9 @@
 // user's card, with its credentials and the servers in their order; and
 // those of a server, chosen above them with a Mavio account, the
 // devices signed in to it as the user and, for its administrators, its
-// overview, general settings, users and API keys, and menus of the rest:
-// media, acquisition and downloads, extensions, and monitoring and
-// maintenance. Wide windows show them beside their own sidebar, the menus
+// overview, general settings and users, the menus of media and of
+// acquisition and downloads, AI, plugins, proxies, and the menu of
+// monitoring and maintenance. Wide windows show them beside their own sidebar, the menus
 // opening in place; phones and televisions list them first, a menu as a
 // list of its own.
 import { timestampDate } from "@bufbuild/protobuf/wkt";
@@ -103,7 +103,6 @@ const sections: Record<SectionId, { icon: IconName; color: string; title: () => 
 const menus: Record<MenuId, { icon: IconName; color: string; title: () => string }> = {
   media: { icon: "movies", color: "#FF9F0A", title: () => t("settings.mediaMenu") },
   acquiring: { icon: "cloud", color: "#30D158", title: () => t("settings.acquisitionMenu") },
-  extensions: { icon: "plugins", color: "#5E5CE6", title: () => t("settings.extensionsMenu") },
   maintenance: { icon: "admin", color: "#8E8E93", title: () => t("settings.maintenanceMenu") },
 };
 
@@ -119,14 +118,15 @@ const deviceSections: SectionId[] = ["appearance", "playback", "subtitles-audio"
 
 /**
  * The groups: the advanced tools and the AI conversations of the server
- * chosen, for administrators; this device's sections; and the server's, in the order a server is set up and kept:
- * the server and who reaches it, then the menus of its media, of acquiring
- * media, of what extends it, and of watching over and maintaining it.
+ * chosen, for administrators; this device's sections; and the server's, in
+ * the order a server is set up and kept: the server and who reaches it, the
+ * menus of its media and of acquiring media, what extends it and how it
+ * reaches out, and the menu of watching over and maintaining it.
  */
 const allGroups: { title: () => string; entries: Entry[]; server?: boolean; tools?: boolean }[] = [
   { title: () => t("settings.advancedGroup"), entries: [...tools, "conversations"], tools: true },
   { title: () => t("settings.thisDevice"), entries: ["appearance", "playback", "subtitles-audio", "assistant"] },
-  { title: () => t("settings.serverGroup"), entries: ["overview", "general", "users", "devices", "api-keys", "proxies", "media", "acquiring", "extensions", "maintenance"], server: true },
+  { title: () => t("settings.serverGroup"), entries: ["overview", "general", "users", "devices", "media", "acquiring", "ai", "plugins", "proxies", "maintenance"], server: true },
 ];
 
 /** The server whose settings are shown, whether the user administers it, and whether that is known yet. */
