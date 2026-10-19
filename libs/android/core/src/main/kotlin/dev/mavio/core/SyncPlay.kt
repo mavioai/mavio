@@ -14,15 +14,22 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import mavio.session.v1.Syncplay.GetTimeResponse
+import mavio.session.v1.Syncplay.JoinGroupResponse
 import mavio.session.v1.Syncplay.LeaveGroupResponse
+import mavio.session.v1.Syncplay.ListGroupsResponse
 import mavio.session.v1.Syncplay.ReportPingResponse
 import mavio.session.v1.Syncplay.SyncPlayGroup
 import mavio.session.v1.Syncplay.SyncPlayMember
+import mavio.session.v1.Syncplay.SyncPlayCommandKind
 import mavio.session.v1.Syncplay.SyncPlayState
 import mavio.session.v1.Syncplay.SyncPlayUpdate
 import mavio.session.v1.getTimeRequest
+import mavio.session.v1.joinGroupRequest
 import mavio.session.v1.leaveGroupRequest
+import mavio.session.v1.listGroupsRequest
 import mavio.session.v1.reportPingRequest
+import mavio.session.v1.syncPlayCommand
+import mavio.session.v1.syncPlayUpdate
 
 /**
  * SyncPlay (docs/clients.md §6.3.24): the group the device is in, kept
@@ -74,7 +81,29 @@ class SyncPlay internal constructor(private val client: Client, private val scop
     }
 
     internal fun connected(serverId: String, sessionId: String) {
-        sessions[serverId] = sessionId
+        val again = sessions.put(serverId, sessionId) != null
+        val j = _joined.value
+        if (again && j?.serverId == serverId) scope.launch { runCatching { resume(j) } }
+    }
+
+    /**
+     * Takes the group up again after the server's stream came back: the
+     * server drops a device whose stream goes away, and the device misses
+     * the group's updates meanwhile. A device dropped joins again, which
+     * makes the group wait for it; one still in the group carries out where
+     * the group is now.
+     */
+    private suspend fun resume(was: Joined) {
+        val serverId = was.serverId
+        val group = call(serverId, "ListGroups", listGroupsRequest {}, ListGroupsResponse::parseFrom)
+            .groupsList.firstOrNull { it.id == was.group.id }
+        if (_joined.value?.group?.id != was.group.id) return
+        when {
+            group == null -> update(serverId, SyncPlayUpdate.getDefaultInstance())
+            group.membersList.none { it.sessionId == sessions[serverId] } ->
+                enter(serverId, call(serverId, "JoinGroup", joinGroupRequest { groupId = group.id }, JoinGroupResponse::parseFrom).group)
+            else -> update(serverId, caughtUp(group, serverNow()))
+        }
     }
 
     internal fun update(serverId: String, update: SyncPlayUpdate) {
@@ -119,6 +148,26 @@ class SyncPlay internal constructor(private val client: Client, private val scop
     }
 
     companion object {
+        /** The update that brings a player to where a group is at a time of the server's clock. */
+        fun caughtUp(group: SyncPlayGroup, serverMs: Long): SyncPlayUpdate {
+            val kind = when (group.state) {
+                SyncPlayState.SYNC_PLAY_STATE_PLAYING -> SyncPlayCommandKind.SYNC_PLAY_COMMAND_KIND_UNPAUSE
+                SyncPlayState.SYNC_PLAY_STATE_PAUSED -> SyncPlayCommandKind.SYNC_PLAY_COMMAND_KIND_PAUSE
+                else -> null
+            }
+            return syncPlayUpdate {
+                this.group = group
+                if (kind != null) {
+                    command = syncPlayCommand {
+                        this.kind = kind
+                        position = duration(group.positionAt(serverMs))
+                        when_ = timestamp(serverMs)
+                        group.entry?.let { entryId = it.id }
+                    }
+                }
+            }
+        }
+
         /**
          * The offset and round trip of an exchange sent at t0 and answered
          * at t3 by the device's clock, which the server received at t1 and
