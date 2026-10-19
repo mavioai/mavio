@@ -43,6 +43,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.mavio.core.AppModel
 import dev.mavio.core.SignInState
 import dev.mavio.design.MavioSpacing
+import dev.mavio.ui.DiscoverState
+import dev.mavio.ui.LocalDiscover
 import dev.mavio.ui.R
 import dev.mavio.ui.text
 import dev.mavio.ui.theme
@@ -52,6 +54,9 @@ import kotlinx.coroutines.launch
 enum class Tab(val title: Int) {
     Home(R.string.nav_home),
     Libraries(R.string.nav_libraries),
+
+    /** Shown while a server discovers. */
+    Discover(R.string.nav_discover),
 }
 
 /** What a tab's page keeps while another shows: its scroll, its rows' and the element that had focus. */
@@ -72,7 +77,9 @@ fun Root(model: AppModel) {
     if (state is SignInState.SignedOut && signedIn.isEmpty()) {
         SignInScreen(model)
     } else {
-        Shell(model)
+        val discover = remember { DiscoverState(model) }
+        LaunchedEffect(signedIn) { discover.load(model.signedInServers.map { it.id }) }
+        CompositionLocalProvider(LocalDiscover provides discover) { Shell(model) }
     }
 }
 
@@ -84,7 +91,10 @@ fun Root(model: AppModel) {
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun Shell(model: AppModel) {
-    var tab by rememberSaveable { mutableStateOf(Tab.Home) }
+    var chosen by rememberSaveable { mutableStateOf(Tab.Home) }
+    // Discover's tab shows while a server discovers.
+    val shown = Tab.entries.filter { it != Tab.Discover || LocalDiscover.current.discovery != null }
+    val tab = chosen.takeIf { it in shown } ?: Tab.Home
     val tabs = remember { Tab.entries.associateWith { FocusRequester() } }
     var inPage by remember { mutableStateOf(false) }
     val states = remember { Tab.entries.associateWith { TabState() } }
@@ -130,6 +140,8 @@ private fun Shell(model: AppModel) {
             when (top) {
                 is Page.Details -> key(top) { DetailsPage(model, top) }
                 is Page.Library -> key(top) { LibraryPage(model, top) }
+                is Page.Catalog -> key(top) { CatalogPage(top) }
+                is Page.Title -> key(top) { TitlePage(top) }
                 is Page.Search -> key(top) { SearchPage(model, top) }
                 is Page.Player -> key(top) { PlayerPage(model, top) }
                 null -> {
@@ -138,11 +150,13 @@ private fun Shell(model: AppModel) {
                             when (tab) {
                                 Tab.Home -> HomePage(model, state.list, state.rows, state.focus, state.entry, claim, actions)
                                 Tab.Libraries -> LibrariesPage(model, state.list, state.focus, state.entry, claim)
+                                Tab.Discover -> DiscoverPage(state.list, state.rows, state.focus, state.entry, claim)
                             }
                         }
                     }
                     NavBar(
                         tab,
+                        shown,
                         tabs,
                         search,
                         { onSearchPill = it },
@@ -154,7 +168,7 @@ private fun Shell(model: AppModel) {
                         },
                     ) {
                         claim = false
-                        tab = it
+                        chosen = it
                     }
                 }
             }
@@ -180,6 +194,7 @@ private fun scrolled(list: LazyListState): Boolean {
 @Composable
 private fun NavBar(
     current: Tab,
+    shown: List<Tab>,
     tabs: Map<Tab, FocusRequester>,
     search: FocusRequester,
     onSearchFocus: (Boolean) -> Unit,
@@ -205,7 +220,7 @@ private fun NavBar(
                 .padding(6.dp),
             horizontalArrangement = Arrangement.spacedBy(4.dp),
         ) {
-            Tab.entries.forEach { t ->
+            shown.forEach { t ->
                 TabPill(t, t == current, Modifier.focusRequester(tabs.getValue(t)).focusProperties { down = page }) { onTab(t) }
             }
             // Search hides the tabs, so it opens only when selected.

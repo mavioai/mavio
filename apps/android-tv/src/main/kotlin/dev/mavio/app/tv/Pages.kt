@@ -17,13 +17,14 @@ import dev.mavio.core.Card
 import dev.mavio.core.Row
 import dev.mavio.core.SearchResults
 import dev.mavio.core.Sort
+import dev.mavio.ui.CatalogFilters
 import java.time.Duration
 
 /**
  * A page over the tabs, which hides the navigation bar (docs/tv.md §6.2,
- * §6.3, §6.4, §7): an item's details, a library, Search, or an item's
- * playback. Each keeps where it was, so that back returns to it as it was
- * left.
+ * §6.3, §6.4, §7): an item's details, a library, a catalog of Discover,
+ * a discovered title, Search, or an item's playback. Each keeps where
+ * it was, so that back returns to it as it was left.
  */
 sealed class Page {
     /** An item's details. */
@@ -95,6 +96,37 @@ sealed class Page {
         val focus = FocusMemory()
     }
 
+    /**
+     * A catalog of Discover (docs/tv.md §6.3): its titles as they load,
+     * of [mediaKind], like the title [tmdbId] when set, narrowed by
+     * [filters], as a discovered title's genre or keyword opens it.
+     */
+    class Catalog(val serverId: String, val catalogId: String, val mediaKind: Int, val tmdbId: Int, val filters: CatalogFilters) : Page() {
+        /** Its titles loaded so far. */
+        internal val titles = TitlePages()
+
+        /** Its scroll. */
+        val grid = LazyGridState()
+
+        /** The element that had focus. */
+        val focus = FocusMemory()
+    }
+
+    /** A discovered title (docs/tv.md §6.3), a movie or series by its TMDB ID. */
+    class Title(val serverId: String, val mediaKind: Int, val tmdbId: Int) : Page() {
+        /** The page's scroll. */
+        val list = LazyListState()
+
+        /** Its rows' scrolls. */
+        val rows = RowStates()
+
+        /** The seasons showing their episodes. */
+        val open = mutableStateListOf<Int>()
+
+        /** The element that had focus. */
+        val focus = FocusMemory()
+    }
+
     /** An item's playback, from [start] when set. */
     class Player(val serverId: String, val itemId: String, val title: String, val mediaSourceId: String?, val start: Duration?) : Page()
 }
@@ -117,6 +149,21 @@ class Pages {
     /** Opens the library [libraryId] of [serverId], named [name]. */
     fun openLibrary(serverId: String, libraryId: String, name: String) {
         stack += Page.Library(serverId, libraryId, name)
+    }
+
+    /** Opens the item [itemId] of [serverId]. */
+    fun openItem(serverId: String, itemId: String) {
+        stack += Page.Details(serverId, itemId)
+    }
+
+    /** Opens a catalog of Discover. */
+    fun openCatalog(serverId: String, catalogId: String, mediaKind: Int, tmdbId: Int = 0, filters: CatalogFilters = CatalogFilters()) {
+        stack += Page.Catalog(serverId, catalogId, mediaKind, tmdbId, filters)
+    }
+
+    /** Opens a discovered title. */
+    fun openTitle(serverId: String, mediaKind: Int, tmdbId: Int) {
+        stack += Page.Title(serverId, mediaKind, tmdbId)
     }
 
     /** Opens Search. */
