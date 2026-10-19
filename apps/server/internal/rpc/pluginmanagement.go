@@ -282,8 +282,20 @@ func (s *PluginManagementService) ListPluginConfigOptions(ctx context.Context, r
 			return nil, connectError(ctx, err)
 		}
 	}
+	// The plugin's own options, with the settings they take, are in its
+	// language files.
+	tr := s.translator(ctx, req.GetPluginId())
+	if req.GetSource() == manifest.OptionsDownloadClients || req.GetSource() == manifest.OptionsProxies {
+		tr = nil
+	}
 	out := make([]*systemv1.PluginConfigOption, 0, len(options))
 	for _, o := range options {
+		if tr != nil {
+			o.Name, o.Description = tr(o.Name), tr(o.Description)
+			if o.SettingsSchema != "" {
+				o.SettingsSchema = manifest.LocalizeSchema(o.SettingsSchema, tr)
+			}
+		}
 		out = append(out, systemv1.PluginConfigOption_builder{
 			Value: &o.Value, Name: &o.Name, Description: &o.Description, Tags: o.Tags, SettingsSchema: &o.SettingsSchema,
 		}.Build())

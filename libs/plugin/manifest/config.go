@@ -29,6 +29,12 @@ const (
 	// OptionsDownloadClientDefinitions are the definitions of the plugin's
 	// download client provider, with their settings.
 	OptionsDownloadClientDefinitions = "download-client-definitions"
+	// OptionsSpeechRecognizers are the recognizers the plugin's
+	// SPEECH_TO_TEXT service implements, with their settings.
+	OptionsSpeechRecognizers = "speech-recognizers"
+	// OptionsSpeechSynthesizers are the synthesizers the plugin's
+	// TEXT_TO_SPEECH service implements, with their settings.
+	OptionsSpeechSynthesizers = "speech-synthesizers"
 	// OptionsDownloadClients are the download clients of every download
 	// client provider, as "<plugin>/<client>".
 	OptionsDownloadClients = "download-clients"

@@ -193,7 +193,7 @@ manifest 在 `external_id_kinds` 中声明外部 ID 类型：键、显示名称�
 
 `TEXT_TO_SPEECH` 朗读助手的回答。`TextToSpeechService.ListVoices` 列出插件的合成器及其设置与是否启用，以及已启用合成器的语音（`<synthesizer>/<voice>`），每个都有名称与语言；`SynthesizeSpeech` 以请求指定的语速与格式（Ogg 封装的 Opus，或 MP3）返回用某个语音朗读一段文本的语音。
 
-`plugins/voice` 以 Go 子进程插件提供这两项能力：其设置启用并配置每个识别器与合成器，包括地址、key（机密项）与模型——识别有 whisper-asr-webservice 与 OpenAI 兼容的转写 API，合成有 OpenAI 兼容的语音 API——服务端以插件的 ID 加上它们自己的名称来命名它们。whisper-asr-webservice 是从 `plugins/subtitles` 移来的 Bazarr Whisper 提供者，连同其语言映射、两个超时设置与测试用例；每段话一次性交给服务。
+`plugins/voice` 以 Go 子进程插件提供这两项能力：其设置启用并配置每个识别器与合成器，从它实现的服务中选取（来源为 `speech-recognizers` 与 `speech-synthesizers` 的 `x-mavio-options`），带有该种服务自己的设置，如地址、key（机密项）与模型——识别有 whisper-asr-webservice 与 OpenAI 兼容的转写 API，合成有 OpenAI 兼容的语音 API——服务端以插件的 ID 加上它们自己的名称来命名它们。whisper-asr-webservice 是从 `plugins/subtitles` 移来的 Bazarr Whisper 提供者，连同其语言映射、两个超时设置与测试用例；每段话一次性交给服务。
 
 ### 8.17 质询求解器
 `CHALLENGE_SOLVER` 解答位于 Cloudflare 或 DDoS-Guard 之后的站点的质询（[架构 §17.2](architecture.zh-CN.md#172-质询求解器)）。`ChallengeSolverService.Solve` 接受 URL、方法（GET，或带表单正文及其内容类型的 POST）、求解时经由的代理与超时，返回通过质询的 cookie（名称、值、域、路径）、取得它们时的 user agent 以及解答它的求解器。其他插件从不直接调用它：它们以代理的 ID 调用 `HostService.SolveChallenge`，由服务端解析代理后依次交给就绪的求解插件；没有时答复 unavailable。由 `plugins/solvers` 以 FlareSolverr 提供（§12）。

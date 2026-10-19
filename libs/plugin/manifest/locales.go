@@ -143,6 +143,12 @@ func Strings(m *pluginv1.Manifest) []string {
 	return out
 }
 
+// LocalizeSchema returns a JSON Schema, such as the settings schema of a
+// configuration option, with its titles and descriptions translated by tr.
+func LocalizeSchema(schema string, tr func(string) string) string {
+	return localizeSchema(schema, tr)
+}
+
 // localizeSchema returns a JSON Schema with its titles and descriptions
 // translated by tr, its members kept in their order, which forms follow;
 // a schema that cannot be read is returned as it is.

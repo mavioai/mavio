@@ -2,6 +2,7 @@ package plugins
 
 import (
 	"bytes"
+	"cmp"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -26,8 +27,9 @@ type ConfigOption struct {
 }
 
 // Definitions returns the definitions of a started plugin's provider, the
-// options of manifest.OptionsIndexerDefinitions or
-// manifest.OptionsDownloadClientDefinitions.
+// options of manifest.OptionsIndexerDefinitions,
+// manifest.OptionsDownloadClientDefinitions,
+// manifest.OptionsSpeechRecognizers or manifest.OptionsSpeechSynthesizers.
 func (m *Manager) Definitions(ctx context.Context, id, source string) ([]ConfigOption, error) {
 	pl, man, err := m.started(id)
 	if err != nil {
@@ -64,6 +66,28 @@ func (m *Manager) Definitions(ctx context.Context, id, source string) ([]ConfigO
 				Tags:           tags(d.GetProtocol(), pluginv1.IndexerPrivacy_INDEXER_PRIVACY_UNSPECIFIED, ""),
 				SettingsSchema: SettingsSchema(d.GetFields()),
 			})
+		}
+	case manifest.OptionsSpeechRecognizers:
+		if !manifest.HasCapability(man, pluginv1.Capability_CAPABILITY_SPEECH_TO_TEXT) || pl.Speech() == nil {
+			return nil, fmt.Errorf("%w: plugin %s provides no recognizers", core.ErrInvalid, id)
+		}
+		resp, err := pl.Speech().ListRecognizers(ctx, &pluginv1.ListRecognizersRequest{})
+		if err != nil {
+			return nil, fmt.Errorf("list the recognizers of plugin %s: %w", id, err)
+		}
+		for _, r := range resp.GetRecognizers() {
+			out = append(out, ConfigOption{Value: r.GetName(), Name: cmp.Or(r.GetDisplayName(), r.GetName()), SettingsSchema: SettingsSchema(r.GetSettings())})
+		}
+	case manifest.OptionsSpeechSynthesizers:
+		if !manifest.HasCapability(man, pluginv1.Capability_CAPABILITY_TEXT_TO_SPEECH) || pl.Voices() == nil {
+			return nil, fmt.Errorf("%w: plugin %s provides no synthesizers", core.ErrInvalid, id)
+		}
+		resp, err := pl.Voices().ListVoices(ctx, &pluginv1.ListVoicesRequest{})
+		if err != nil {
+			return nil, fmt.Errorf("list the synthesizers of plugin %s: %w", id, err)
+		}
+		for _, s := range resp.GetSynthesizers() {
+			out = append(out, ConfigOption{Value: s.GetName(), Name: cmp.Or(s.GetDisplayName(), s.GetName()), SettingsSchema: SettingsSchema(s.GetSettings())})
 		}
 	default:
 		return nil, fmt.Errorf("%w: unknown source of options %q", core.ErrInvalid, source)
