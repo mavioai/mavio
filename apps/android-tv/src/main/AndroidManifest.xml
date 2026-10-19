@@ -13,6 +13,7 @@
         android:name=".MavioApplication"
         android:banner="@drawable/banner"
         android:label="Mavio"
+        android:localeConfig="@xml/locales_config"
         android:supportsRtl="true"
         android:usesCleartextTraffic="true"
         android:theme="@style/Theme.Mavio">
