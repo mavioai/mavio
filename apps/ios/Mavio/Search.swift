@@ -42,7 +42,11 @@ struct SearchView: View {
                             }
                         }
                     }
-                    if none {
+                    if waiting {
+                        ProgressView()
+                            .frame(maxWidth: .infinity)
+                            .padding(.top, MavioSpacing.s40)
+                    } else if none {
                         StatusView(icon: "search", title: MavioStrings.searchNoResults)
                             .padding(.top, MavioSpacing.s40)
                     }
@@ -69,8 +73,9 @@ struct SearchView: View {
         .task(id: discoverSearch) { await searchTitles(discoverSearch) }
     }
 
-    /// A server's row: placeholders while it searches, a line when it
-    /// cannot be reached, and nothing when it found nothing.
+    /// A server's row once it has answered: a line when it cannot be
+    /// reached, and nothing when it found nothing, so that no row shows
+    /// while it searches only to vanish.
     @ViewBuilder private func row(_ server: ServerRecord) -> some View {
         let title = servers.count > 1 ? server.name : MavioStrings.searchServer
         if let found = results[server.id] {
@@ -90,11 +95,18 @@ struct SearchView: View {
                     ForEach(found.cards, id: \.self) { CardLink(card: $0, width: theme.layout.poster) }
                 }
             }
-        } else {
-            Shelf(title) {
-                ForEach(0..<6, id: \.self) { _ in CardPlaceholder() }
-            }
         }
+    }
+
+    /// Whether something is still searching and nothing has been drawn yet.
+    private var waiting: Bool {
+        let answering =
+            servers.contains { results[$0.id] == nil } || !discovery.loaded
+            || (discovery.server != nil && titles == nil)
+        let drawn =
+            servers.contains { results[$0.id].map { $0.error != nil || !$0.cards.isEmpty } ?? false }
+            || titles?.isEmpty == false
+        return answering && !drawn
     }
 
     /// Whether everything has answered and found nothing.
