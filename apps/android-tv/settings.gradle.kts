@@ -19,3 +19,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "mavio-android-tv"
 includeBuild("../../libs/android")
+// Generates the app's baseline profile and measures its start.
+include(":baselineprofile")

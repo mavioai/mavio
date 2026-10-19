@@ -18,6 +18,8 @@ android {
     compileSdk = 37
     defaultConfig {
         minSdk = 26
+        // The rules an app's R8 keeps this library's code by.
+        consumerProguardFiles("consumer-rules.pro")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 }

@@ -232,7 +232,7 @@ jobs:
           path: dist/deps
           key: deps-android-${{ hashFiles('tools/deps/deps.txt') }}
       - run: pnpm install --frozen-lockfile
-      - run: pnpm nx run-many -t lint build test --projects '${{ join(fromJSON(needs.plan.outputs.android), ',') }}' --output-style=static
+      - run: pnpm nx run-many -t lint build release test --projects '${{ join(fromJSON(needs.plan.outputs.android), ',') }}' --output-style=static
       - if: ${{ !cancelled() && github.ref == 'refs/heads/main' && steps.deps.outputs.cache-hit != 'true' }}
         uses: actions/cache/save@v4
         with:

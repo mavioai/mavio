@@ -46,6 +46,44 @@
       "cache": true,
       "parallelism": false
     },
+    "release": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "gradle --console=plain assembleRelease",
+        "cwd": "{projectRoot}"
+      },
+      "dependsOn": [
+        {
+          "projects": [
+            "android-lib"
+          ],
+          "target": "core"
+        },
+        {
+          "projects": [
+            "android-lib"
+          ],
+          "target": "mpv"
+        },
+        {
+          "projects": [
+            "android-lib"
+          ],
+          "target": "ffmpeg"
+        }
+      ],
+      "inputs": [
+        "gradle",
+        "^gradle",
+        "{workspaceRoot}/libs/proto/mavio/**/*.proto",
+        {
+          "dependentTasksOutputFiles": "**/*",
+          "transitive": true
+        }
+      ],
+      "cache": true,
+      "parallelism": false
+    },
     "lint": {
       "executor": "nx:run-commands",
       "options": {
