@@ -69,6 +69,7 @@ func (a *App) tvShell(c *ui.Context) {
 	} else {
 		a.userMenuOpen = false
 	}
+	a.tvKeyboardKeys(c)
 	a.tvBack(c)
 	a.focusKeys(c, a.userMenuOpen)
 	// Focus returns to the menu's button as the menu closes.
@@ -228,6 +229,22 @@ func (a *App) tvBack(c *ui.Context) {
 		a.goBack()
 		return
 	}
+	if path == "/search" && a.searchState.query != "" {
+		// Search's back deletes a character, and leaves only once there
+		// is none (docs/tv.md §6.4).
+		a.searchState.query = dropLast(a.searchState.query)
+		return
+	}
+	if path == "/search" {
+		// Search, which hides the tabs, returns to where it was opened
+		// from (docs/tv.md §4).
+		if a.places.at > 0 {
+			a.router.Go(-1)
+		} else {
+			a.replace("/home")
+		}
+		return
+	}
 	at := f.focused()
 	if at >= 0 && f.items[at].region == regionTabs {
 		if path != "/home" {
@@ -243,7 +260,12 @@ func (a *App) tvBack(c *ui.Context) {
 			s.ScrollTo(0, 0, ui.Smooth)
 		}
 	}
-	if tab := f.currentTab(); tab >= 0 {
-		a.focusTo(c, tab)
+	tab := f.currentTab()
+	if tab < 0 && path != "/home" {
+		// A tab's page without its tab, as Discover with no server
+		// discovering, leaves for Home.
+		a.replace("/home")
+		return
 	}
+	a.focusTo(c, tab)
 }

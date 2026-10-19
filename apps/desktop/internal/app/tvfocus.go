@@ -35,6 +35,30 @@ type focusItem struct {
 	// choice is the choice the item is an element of, 0 for none.
 	choice  int
 	focused bool
+	// id is the element's (ui.Element.ID); other tells an element that
+	// focus moves to as well, of those MyGo reports, which the frame did
+	// not make an item.
+	id    uint64
+	other bool
+	// flow is the region in the page's flow the item is in, 0 for none,
+	// and column its column there; marks are its marks (focusMarks).
+	flow, column int
+	marks        focusMarks
+}
+
+// focusMarks mark elements of a region in the page's flow, as the web
+// UI's data attributes do (apps/web/src/shell/spatial.ts): beside, those
+// left and right cross between its columns from and to; end, one at the
+// end of what is above it, which up and down reach only from the last
+// element of a row of its block; aside, one aside above a row, as
+// Discover's Requests over its first row, which down passes, from the tabs
+// as from above, and up reaches only from the row below's elements past
+// its first, down from the tabs landing on that row's first; and block,
+// the block of a column it is in, into which up and down land on the first
+// element of a row.
+type focusMarks struct {
+	block              string
+	beside, end, aside bool
 }
 
 // focusEngine moves focus with the arrow keys by rows in the TV mode, as
@@ -50,20 +74,22 @@ type focusEngine struct {
 	scroll *ui.ScrollState
 	// choice is the choice being built, choices how many the frame has.
 	choice, choices int
+	// flow, column and marks are those of what is being built, flows and
+	// columns how many the frame has.
+	flow, column, flows, columns int
+	marks                        focusMarks
 	// reveal tells the item focused next to scroll itself into view, as
 	// one of a grid does, which the page's scroll does not hold.
 	reveal bool
 	// want is the item the frame focuses: its place in the order, or
 	// focusFirst for the page's first; -1 for none.
 	want int
-	// at is the item last focused, location the page it was on, and
-	// saved where focus was on the pages left, by their locations, so that
-	// it returns there.
+	// at is the item last focused, another element's place after the
+	// items included, location the page it was on, and saved where focus
+	// was on the pages left, by their locations, so that it returns there.
 	at       int
 	location string
 	saved    map[string]int
-	// rowFocused tells that the row being built has focus.
-	rowFocused bool
 	// last is where the item last focused was, while it is on the page
 	// shown, so that focus whose element goes goes to the item nearest it.
 	last    ui.Rect
@@ -74,6 +100,15 @@ type focusEngine struct {
 	// waited is how many frames focus that went waited for the items to
 	// be laid out.
 	waited int
+	// frames is how many frames the page has been shown, the elements MyGo
+	// reports being those of the frame before.
+	frames int
+	// initial is the item a page opens with focus on in place of its
+	// first, -1 for none, and first the first that took focus as the page
+	// opened in the frame being built; initialMark tells that what is
+	// built is the initial item.
+	initial, first int
+	initialMark    bool
 	// dots is the user menu's button, to which focus returns as the menu
 	// closes.
 	dots int
@@ -84,6 +119,57 @@ func (a *App) beginFocus() {
 	f := &a.focus
 	f.items, f.region, f.view, f.scroll = f.items[:0], regionPage, ui.Rect{}, nil
 	f.choice, f.choices = 0, 0
+	f.flow, f.column, f.flows, f.columns, f.marks = 0, 0, 0, 0, focusMarks{}
+	f.initial, f.first = -1, -1
+}
+
+// initialFocus builds what fn builds as the item the page opens with focus
+// on in place of its first, as the details' Play (the web UI's
+// data-tv-initial).
+func (a *App) initialFocus(fn func()) {
+	f := &a.focus
+	f.initialMark = true
+	fn()
+	f.initialMark = false
+}
+
+// inFlow builds what fn builds as a region in the page's flow, as an
+// item's details at the foot of its page (docs/tv.md §6.2): up and down
+// leave it only from its first and last rows, to the row before or after
+// it, landing on its first element as they come into it, and left and
+// right keep within it.
+func (a *App) inFlow(fn func()) {
+	f := &a.focus
+	f.flows++
+	was := f.flow
+	f.flow = f.flows
+	fn()
+	f.flow = was
+}
+
+// inColumn builds what fn builds as a column of a region in the page's
+// flow, which has rows of its own while beside another.
+func (a *App) inColumn(fn func()) {
+	f := &a.focus
+	f.columns++
+	was := f.column
+	f.column = f.columns
+	fn()
+	f.column = was
+}
+
+// marked builds what fn builds with the marks m besides those around it.
+func (a *App) marked(m focusMarks, fn func()) {
+	f := &a.focus
+	was := f.marks
+	if m.block != "" {
+		f.marks.block = m.block
+	}
+	f.marks.beside = was.beside || m.beside
+	f.marks.end = was.end || m.end
+	f.marks.aside = was.aside || m.aside
+	fn()
+	f.marks = was
 }
 
 // inChoice builds what fn builds as one choice that focus makes, as a
@@ -128,7 +214,16 @@ func (a *App) tvFocus(c *ui.Context, el ui.Element, current bool) bool {
 	}
 	i := len(f.items)
 	el.Focusable().FocusRing(false)
-	if f.want == i || f.want == focusFirst && f.region == regionPage {
+	if f.initialMark && f.initial < 0 {
+		f.initial = i
+	}
+	// A page opens on its first item, in a region of its own as well, as
+	// Search's keyboard, past those aside.
+	first := f.want == focusFirst && f.region != regionTabs && f.region != regionMenu && !f.marks.aside
+	if first {
+		f.first = i
+	}
+	if f.want == i || first {
 		el.Focus()
 		if f.reveal {
 			el.ScrollIntoView()
@@ -140,7 +235,10 @@ func (a *App) tvFocus(c *ui.Context, el ui.Element, current bool) bool {
 	if focused {
 		f.at = i
 	}
-	f.items = append(f.items, focusItem{rect: el.Bounds(), region: f.region, view: f.view, scroll: f.scroll, current: current, choice: f.choice, focused: focused})
+	f.items = append(f.items, focusItem{
+		rect: el.Bounds(), region: f.region, view: f.view, scroll: f.scroll, current: current, choice: f.choice, focused: focused, id: el.ID(),
+		flow: f.flow, column: f.column, marks: f.marks,
+	})
 	return focused
 }
 
@@ -154,6 +252,21 @@ func (a *App) tvFocusLit(c *ui.Context, el ui.Element, current bool) bool {
 	}
 	shadow := style.Color(style.Colors(c).TvFocusShadow)
 	el.Background(ui.RGB(255, 255, 255)).Shadow(0, 8, 24, 0, shadow)
+	return true
+}
+
+// tvLink makes el a link focus moves to in the TV mode, as the web UI's
+// links: with focus it turns white, its content to be black, ringed in
+// white and over a shadow, its corners rounded by radius, and its layout
+// unchanged, so that nothing around it moves (docs/tv.md §4); it reports
+// whether it has focus.
+func (a *App) tvLink(c *ui.Context, el ui.Element, radius float32) bool {
+	if !a.tvFocus(c, el, false) {
+		return false
+	}
+	white := ui.RGB(255, 255, 255)
+	el.Background(white).Radius(radius).
+		Shadow(0, 8, 24, 0, style.Color(style.Colors(c).TvFocusShadow)).Shadow(0, 0, 0, 6, white)
 	return true
 }
 
@@ -171,7 +284,7 @@ func (a *App) focusPage() {
 	if f.location != "" {
 		f.saved[f.location] = f.at
 	}
-	f.location, f.want, f.hasLast = loc, focusFirst, false
+	f.location, f.want, f.hasLast, f.frames = loc, focusFirst, false, 0
 	if i, ok := f.saved[loc]; ok {
 		f.want = i
 	}
@@ -187,18 +300,79 @@ func (f *focusEngine) focused() int {
 }
 
 // focusKeys moves focus with the arrow keys, and gives the page's first
-// item focus where nothing has it.
+// element focus where nothing has it. Focus moves among the items and the
+// other elements that take it alike, as a field of the settings, those the
+// items do not name lying in the page; an arrow a field keeps, as its
+// caret's, is its own, and in a dialog MyGo moves focus by rows itself
+// (ui.Context.SpatialFocus).
 func (a *App) focusKeys(c *ui.Context, menuOpen bool) {
 	f := &a.focus
-	dir := ui.Key(0)
-	for _, k := range []ui.Key{ui.KeyUp, ui.KeyDown, ui.KeyLeft, ui.KeyRight} {
-		if c.Shortcut(0, k) {
-			dir = k
+	c.SpatialFocus()
+	if c.InDialog() {
+		return
+	}
+	f.frames++
+	if f.first >= 0 && f.initial > f.first {
+		// The page opens with focus on its initial item in place of its
+		// first, as the details' on Play.
+		a.focusItem(c, f.initial)
+		c.After(0)
+		return
+	}
+	if f.want != -1 && f.frames < 2 {
+		// The elements MyGo reports are still the page's before.
+		c.After(0)
+		return
+	}
+	a.addOthers(c)
+	if f.want >= 0 && f.want < len(f.items) && f.items[f.want].other {
+		// Back on a page, focus returns to the element it was on.
+		a.focusItem(c, f.want)
+		f.want, f.waited = -1, 0
+		c.After(0)
+		return
+	}
+	if f.want == focusFirst && f.frames >= 2 && !slices.ContainsFunc(f.items, func(it focusItem) bool { return it.region == regionPage && !it.other }) {
+		// A page of no items, as a section of the settings, opens at its
+		// first element (docs/tv.md §4).
+		if i := slices.IndexFunc(f.items, func(it focusItem) bool { return it.other }); i >= 0 {
+			a.focusItem(c, i)
+			f.want = -1
+			c.After(0)
+			return
 		}
 	}
+	if f.want >= len(f.items) {
+		// The element it returns to is not laid out yet; failing it, the
+		// page's first.
+		if f.waited < 3 {
+			f.waited++
+		} else {
+			f.want, f.waited = focusFirst, 0
+		}
+		c.After(0)
+		return
+	}
 	at := f.focused()
+	if at >= 0 {
+		f.at = at
+	}
+	dir := ui.Key(0)
+	if at >= 0 {
+		// The menu keeps focus within itself.
+		inMenu := f.items[at].region == regionMenu
+		for _, k := range []ui.Key{ui.KeyUp, ui.KeyDown, ui.KeyLeft, ui.KeyRight} {
+			if (inMenu || !c.KeepsArrow(k)) && c.Shortcut(0, k) {
+				dir = k
+			}
+		}
+	}
 	if at >= 0 && f.items[at].rect.W > 0 {
 		f.last, f.hasLast = f.items[at].rect, true
+	}
+	if at < 0 && c.HasFocus() {
+		// On an element in no row, as one a popup of MyGo's holds.
+		return
 	}
 	if at < 0 && f.want == -1 && !menuOpen && f.hasLast {
 		// The element with focus went, as a page's part replaced: focus
@@ -208,15 +382,22 @@ func (a *App) focusKeys(c *ui.Context, menuOpen bool) {
 		if f.waited < 2 && unlaid {
 			f.waited++
 		} else if i := f.nearestTo(f.last); i >= 0 {
-			f.want, f.waited = i, 0
+			a.focusItem(c, i)
+			f.waited = 0
 		}
 		c.After(0)
 		return
 	}
 	if at < 0 {
 		if f.want == -1 && !menuOpen && len(f.items) > 0 {
-			f.want = focusFirst
-			if !slices.ContainsFunc(f.items, func(it focusItem) bool { return it.region == regionPage }) {
+			switch {
+			case slices.ContainsFunc(f.items, func(it focusItem) bool { return it.region == regionPage && !it.other }):
+				f.want = focusFirst
+			case slices.ContainsFunc(f.items, func(it focusItem) bool { return it.other }):
+				// A page of no items, as a section of the settings, at its
+				// first element.
+				a.focusItem(c, slices.IndexFunc(f.items, func(it focusItem) bool { return it.other }))
+			default:
 				f.want = 0
 			}
 			c.After(0)
@@ -228,11 +409,57 @@ func (a *App) focusKeys(c *ui.Context, menuOpen bool) {
 	}
 	to := f.enter(at, f.step(at, dir))
 	if to < 0 {
+		// Where focus cannot move, the element shakes (docs/tv.md §4).
+		c.ShakeFocus()
 		return
 	}
-	f.want = to
-	a.revealItem(c, f.items[to])
+	a.focusItem(c, to)
 	c.After(0)
+}
+
+// addOthers adds the elements that take focus which the frame made no
+// items, as fields and buttons of the settings, as items of the page.
+func (a *App) addOthers(c *ui.Context) {
+	f := &a.focus
+	items := make(map[uint64]bool, len(f.items))
+	for _, it := range f.items {
+		items[it.id] = true
+	}
+	for _, e := range c.FocusableElements() {
+		if items[e.ID] {
+			continue
+		}
+		it := focusItem{rect: e.Bounds, region: regionPage, id: e.ID, other: true, focused: e.Focused, view: e.Shown}
+		if e.Shown.W == 0 || e.Shown.H == 0 {
+			// Wholly out of view, as a card a row scrolled away.
+			it.view = ui.Rect{X: e.Bounds.X - 2, W: 1, H: 1}
+		}
+		f.items = append(f.items, it)
+	}
+}
+
+// focusItem gives focus to the item at i, scrolled into view: an item in
+// the next frame, another element at once.
+func (a *App) focusItem(c *ui.Context, i int) {
+	f := &a.focus
+	if i < 0 || i >= len(f.items) {
+		return
+	}
+	it := f.items[i]
+	if !it.other {
+		f.want = i
+		a.revealItem(c, it)
+		return
+	}
+	c.FocusID(it.id)
+	// The page stops 200 points below the window's top, and 120 above its
+	// bottom, as for an item; elsewhere, as in the settings' scroll, it
+	// scrolls only to show it.
+	if _, ok := a.scrolls["page:"+a.pagePath]; ok && it.region == regionPage {
+		a.revealItem(c, it)
+	} else {
+		c.RevealID(it.id)
+	}
 }
 
 // revealItem scrolls the page and the item's row so that the item shows,
@@ -241,7 +468,9 @@ func (a *App) focusKeys(c *ui.Context, menuOpen bool) {
 // first screen returns the page to its top.
 func (a *App) revealItem(c *ui.Context, it focusItem) {
 	if s := it.scroll; s != nil && it.view.W > 0 {
-		const room = 24
+		// The row keeps the page's margin beside the item, as the web UI's
+		// scroll-padding.
+		room := style.Layout(c).Margin
 		r, v := it.rect, it.view
 		switch {
 		case r.X < v.X+room:
@@ -429,23 +658,116 @@ func (f *focusEngine) nearest(from ui.Rect, dir ui.Key, idx []int) int {
 	return best
 }
 
+// sameRegion reports whether two items lie in one region: of the same
+// name and in the same region of the page's flow, or in none.
+func sameRegion(a, b focusItem) bool {
+	return a.region == b.region && a.flow == b.flow
+}
+
+// columnsOf returns the column of a region of the page's flow each item
+// is in while that column lies beside another of the region, 0 where not
+// (columnOf in the web UI's spatial.ts).
+func (f *focusEngine) columnsOf() []int {
+	type key struct{ flow, column int }
+	bounds := map[key]ui.Rect{}
+	for _, it := range f.items {
+		if it.flow == 0 || it.column == 0 || it.rect.W == 0 {
+			continue
+		}
+		k := key{it.flow, it.column}
+		r, ok := bounds[k]
+		if !ok {
+			bounds[k] = it.rect
+			continue
+		}
+		x, right := min(r.X, it.rect.X), max(r.X+r.W, it.rect.X+it.rect.W)
+		y, bottom := min(r.Y, it.rect.Y), max(r.Y+r.H, it.rect.Y+it.rect.H)
+		bounds[k] = ui.Rect{X: x, Y: y, W: right - x, H: bottom - y}
+	}
+	cols := make([]int, len(f.items))
+	for i, it := range f.items {
+		r, ok := bounds[key{it.flow, it.column}]
+		if !ok {
+			continue
+		}
+		for k, o := range bounds {
+			if k.flow == it.flow && k.column != it.column && (o.X >= r.X+r.W || o.X+o.W <= r.X) {
+				cols[i] = it.column
+				break
+			}
+		}
+	}
+	return cols
+}
+
+// acrossFlow returns where up or down goes from row across a region of
+// the page's flow (acrossFlow in the web UI's spatial.ts): the first item
+// in view of what follows the row in the page, or of the last row of what
+// precedes it, in its first column where a region of the flow; the
+// nearest across x of that row where not; -1 where neither side is such a
+// region. A region of the flow is left whole, past its other columns.
+func (f *focusEngine) acrossFlow(row []int, down bool, x float32, cols []int) int {
+	from := f.items[row[0]]
+	leaving := from.flow != 0
+	lo, hi := slices.Min(row), slices.Max(row)
+	var page []int
+	for i, it := range f.items {
+		if it.rect.W == 0 || it.rect.H == 0 || it.region == regionTabs || it.region == regionMenu || leaving && sameRegion(it, from) {
+			continue
+		}
+		if down && i > hi || !down && i < lo {
+			page = append(page, i)
+		}
+	}
+	if len(page) == 0 {
+		return -1
+	}
+	next := page[0]
+	if !down {
+		next = page[len(page)-1]
+	}
+	to := f.items[next]
+	if sameRegion(to, from) || to.flow == 0 && !leaving {
+		return -1
+	}
+	if down {
+		in := slices.DeleteFunc(page, func(i int) bool { return !sameRegion(f.items[i], to) || cols[i] != cols[next] })
+		return f.endOf(f.rowsOf(in)[0], false)
+	}
+	into := slices.DeleteFunc(page, func(i int) bool { return !sameRegion(f.items[i], to) })
+	if to.flow == 0 {
+		rows := f.rowsOf(into)
+		return f.closestTo(rows[len(rows)-1], x)
+	}
+	first := cols[into[0]]
+	rows := f.rowsOf(slices.DeleteFunc(into, func(i int) bool { return cols[i] != first }))
+	return f.endOf(rows[len(rows)-1], false)
+}
+
 // step returns the item focus moves to from at in the direction dir, -1
-// for none (docs/tv.md §4): up and down to the row above or below, to its
-// item nearest across; left and right along the row, and from its ends
-// into a region beside, else to the last item in view of the row above or
-// the first of the row below. Above the page's first row are the tabs, at
-// the current one; the menu keeps focus within itself.
+// for none (docs/tv.md §4), as the web UI's (apps/web/src/shell/spatial.ts):
+// up and down to the row above or below, to its item nearest across, or
+// its first where in another block; left and right along the row, and
+// from its ends into a region beside, else to the last item in view of
+// the row above or the first of the row below. Above the page's first row
+// are the tabs, at the current one; the menu keeps focus within itself. A
+// region of the page's flow is left by up and down only from its first
+// and last rows, its columns crossed only from and to what is marked
+// beside, and what is marked at an end reached only from a row's last.
 func (f *focusEngine) step(at int, dir ui.Key) int {
 	from := f.items[at]
 	region := from.region
+	cols := f.columnsOf()
 	var mine, page, others []int
 	for i, it := range f.items {
 		if it.rect.W == 0 || it.rect.H == 0 {
 			continue
 		}
 		switch {
-		case it.region == region:
-			mine = append(mine, i)
+		case sameRegion(it, from):
+			if cols[i] == cols[at] {
+				mine = append(mine, i)
+			}
 		case region != regionMenu && it.region != regionMenu && it.region != regionTabs:
 			others = append(others, i)
 		}
@@ -461,16 +783,37 @@ func (f *focusEngine) step(at int, dir ui.Key) int {
 	row := rows[ri]
 	i := slices.Index(row, at)
 	x := from.rect.X + from.rect.W/2
-	var previous, below []int
-	if ri > 0 {
-		previous = rows[ri-1]
+	block := from.marks.block
+	// The row above or below, past what only the last item of a row of its
+	// block reaches.
+	rowAt := func(d int) []int {
+		for j := ri + d; j >= 0 && j < len(rows); j += d {
+			r := slices.DeleteFunc(slices.Clone(rows[j]), func(k int) bool {
+				m := f.items[k].marks
+				return m.end && (i != len(row)-1 || m.block != block) || m.aside && (d != -1 || i == 0 || j != ri-1)
+			})
+			if len(r) > 0 {
+				return r
+			}
+		}
+		return nil
 	}
-	if ri+1 < len(rows) {
-		below = rows[ri+1]
+	// Into another block, focus lands on the row's first item.
+	to := func(r []int) int {
+		if f.items[r[0]].marks.block != block {
+			return f.endOf(r, false)
+		}
+		return f.closestTo(r, x)
 	}
+	previous, below := rowAt(-1), rowAt(1)
 	inTabs := region == regionTabs
+	aside := false
 	if inTabs {
 		below = nil
+		page = slices.DeleteFunc(page, func(k int) bool {
+			aside = aside || f.items[k].marks.aside
+			return f.items[k].marks.aside
+		})
 		if r := f.rowsOf(page); len(r) > 0 {
 			below = r[0]
 		}
@@ -481,17 +824,37 @@ func (f *focusEngine) step(at int, dir ui.Key) int {
 		}
 		return f.currentTab()
 	}
+	inFlow := !inTabs && from.flow != 0
+	across := func(down bool, next []int) int {
+		if inTabs || region == regionMenu || inFlow && next != nil {
+			return -1
+		}
+		return f.acrossFlow(row, down, x, cols)
+	}
 	switch dir {
 	case ui.KeyUp:
+		// A row of the page goes first to a region of the flow between it
+		// and the row above.
+		if k := across(false, previous); k >= 0 {
+			return k
+		}
 		if previous != nil {
-			return f.closestTo(previous, x)
+			return to(previous)
 		}
 		return above()
 	case ui.KeyDown:
-		if below != nil {
+		if k := across(true, below); k >= 0 {
+			return k
+		}
+		switch {
+		case below == nil:
+			return -1
+		case inTabs && aside:
+			return f.endOf(below, false)
+		case inTabs:
 			return f.closestTo(below, x)
 		}
-		return -1
+		return to(below)
 	}
 	right := dir == ui.KeyRight
 	if j := i + 1; right && j < len(row) {
@@ -503,7 +866,27 @@ func (f *focusEngine) step(at int, dir ui.Key) int {
 	if inTabs || region == regionMenu {
 		return -1
 	}
-	if beside := f.nearest(from.rect, dir, slices.DeleteFunc(others, func(k int) bool { return f.items[k].region == region })); beside >= 0 {
+	if inFlow {
+		if from.marks.beside {
+			var other []int
+			for k, it := range f.items {
+				if it.rect.W != 0 && sameRegion(it, from) && cols[k] != cols[at] && it.marks.beside {
+					other = append(other, k)
+				}
+			}
+			if k := f.nearest(from.rect, dir, other); k >= 0 {
+				return k
+			}
+		}
+		switch {
+		case right && below != nil:
+			return f.endOf(below, false)
+		case !right && previous != nil:
+			return f.endOf(previous, true)
+		}
+		return -1
+	}
+	if beside := f.nearest(from.rect, dir, others); beside >= 0 {
 		return beside
 	}
 	if right {

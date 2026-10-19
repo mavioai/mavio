@@ -12,18 +12,21 @@ import (
 
 	capiv1 "github.com/mavioai/mavio/libs/client-rust/capi/gen/mavio/capi/v1"
 	design "github.com/mavioai/mavio/libs/design/gen/go"
+	acquisitionv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/acquisition/v1"
 	libraryv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/library/v1"
+	pluginv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1"
 
 	"github.com/mavioai/mavio/apps/desktop/internal/style"
 )
 
 // itemInfo is what the details show of the server's own item beyond the
 // core's details: its credits by job, facts and files, its extras, and
-// the collection it belongs to.
+// the collection it belongs to, and the series of an episode or season.
 type itemInfo struct {
 	item       *libraryv1.GetItemResponse
 	extras     []*libraryv1.Item
 	collection *libraryv1.Item
+	series     *libraryv1.Item
 }
 
 // loadInfo loads an item's info from its server.
@@ -47,6 +50,13 @@ func (a *App) loadInfo(st *detailsState, server, id string) *task[*itemInfo] {
 			if e.GetExtra() != libraryv1.ExtraKind_EXTRA_KIND_THEME_SONG && e.GetExtra() != libraryv1.ExtraKind_EXTRA_KIND_THEME_VIDEO {
 				info.extras = append(info.extras, e)
 			}
+		}
+		if sid := res.GetItem().GetSeriesId(); sid != "" {
+			series, err := items.GetItem(ctx, libraryv1.GetItemRequest_builder{Id: &sid}.Build())
+			if err != nil {
+				return nil, err
+			}
+			info.series = series.GetItem()
 		}
 		if it := res.GetItem(); it.GetCollectionName() != "" {
 			cols, err := items.ListItems(ctx, libraryv1.ListItemsRequest_builder{
@@ -136,12 +146,17 @@ func (a *App) collectionBanner(c *ui.Context, server string, d *capiv1.Details, 
 	if image == "" {
 		image = d.GetBackdrop().GetUrl()
 	}
-	b := ui.ButtonBase(c).Margin(0, style.Layout(c).Margin).Height(112).Radius(14).Clip().
+	// On the television it is taller, its name larger (docs/tv.md §6.2).
+	tv := style.TV(c)
+	height, padX, name := float32(112), float32(24), style.Type(c).Title3
+	if tv {
+		height, padX, name = 160, 40, style.Type(c).Title1
+	}
+	b := ui.ButtonBase(c).Margin(0, style.Layout(c).Margin).Height(height).Radius(14).Clip().
 		Background(style.Color(style.Colors(c).SurfaceRaised)).Label(col.GetName())
 	hovered := b.Hovered()
 	if a.tvFocus(c, b, false) {
-		colors := style.Colors(c)
-		b.Shadow(0, 12, 32, 0, style.Color(colors.TvFocusShadow)).Shadow(0, 0, 0, 4.5, style.Color(colors.Accent)).Shadow(0, 0, 0, 1.5, style.Color(colors.Background))
+		artRing(c, b, true)
 		hovered = true
 	}
 	b.Children(func() {
@@ -156,10 +171,10 @@ func (a *App) collectionBanner(c *ui.Context, server string, d *capiv1.Details, 
 			Stops: []ui.GradientStop{{At: 0, Color: ui.RGBA(0, 0, 0, 0.8)}, {At: 0.6, Color: ui.RGBA(0, 0, 0, 0.55)}, {At: 1, Color: ui.RGBA(0, 0, 0, 0.3)}},
 		})
 		// Over the artwork, which is positioned as well.
-		ui.Row(c).Absolute().Top(0).Left(0).Right(0).Bottom(0).Padding(20, 24).Gap(16).AlignItems(ui.Center).Children(func() {
+		ui.Row(c).Absolute().Top(0).Left(0).Right(0).Bottom(0).Padding(20, padX).Gap(16).AlignItems(ui.Center).Children(func() {
 			ui.Column(c).Grow(1).MinWidth(0).Children(func() {
 				style.Text(ui.Text(c, style.T(c, "item.collection")), style.Type(c).Footnote).FontWeight(600).TextColor(white.Alpha(0.7))
-				style.Text(ui.Text(c, col.GetName()), style.Type(c).Title3).TextColor(white).SingleLine()
+				style.Text(ui.Text(c, col.GetName()), name).TextColor(white).SingleLine()
 			})
 			pill := ui.Row(c).Height(36).Padding(0, 16).Gap(4).Radius(18).AlignItems(ui.Center).Background(white.Alpha(0.2))
 			if hovered {
@@ -179,14 +194,26 @@ func (a *App) collectionBanner(c *ui.Context, server string, d *capiv1.Details, 
 // fact is a caption over its value.
 type fact struct{ caption, value string }
 
-// about builds the details at the foot: the overview with the tagline,
-// the leading crew, keywords and links beside the ratings and facts, and
-// under them the media of the version chosen.
+// about builds the details at the foot, as the web UI's: the overview
+// with the tagline, the leading crew, tags and links beside the ratings,
+// the facts, where the title streams and the media of the version chosen.
+// What the metadata providers tell of a movie or series beyond what the
+// library keeps, as Seerr shows, fills in its status, releases, next
+// episode, budget and takings. On the television it is a region in the
+// page's flow, its two columns crossed from the leading crew (docs/tv.md
+// §6.2).
 func (a *App) about(c *ui.Context, st *detailsState, d *capiv1.Details, info *itemInfo, credits []creditEntry) {
 	colors := style.Colors(c)
 	card := d.GetCard()
 	server := card.GetServerId()
 	it := info.item.GetItem()
+	tv := style.TV(c)
+	kind, tmdb := mediaKindOfItem(it), tmdbOfItem(it)
+	titled := kind != acquisitionv1.MediaKind_MEDIA_KIND_UNSPECIFIED && tmdb > 0
+	var title *acquisitionv1.Title
+	if titled {
+		title = a.discoveredTitle(c, server, kind, tmdb).value
+	}
 	var facts []fact
 	add := func(caption, value string) {
 		if value != "" {
@@ -194,7 +221,31 @@ func (a *App) about(c *ui.Context, st *detailsState, d *capiv1.Details, info *it
 		}
 	}
 	day := func(t time.Time) string { return t.Local().Format("Jan 2, 2006") }
+	// A movie's releases together, what the library keeps first.
+	var releases []string
+	if it.GetKind() == libraryv1.ItemKind_ITEM_KIND_MOVIE {
+		for _, r := range []struct {
+			ts  interface{ AsTime() time.Time }
+			has bool
+			alt string
+		}{
+			{it.GetPremiereDate(), it.HasPremiereDate(), title.GetTheatricalReleaseDate()},
+			{it.GetDigitalReleaseDate(), it.HasDigitalReleaseDate(), title.GetDigitalReleaseDate()},
+			{it.GetPhysicalReleaseDate(), it.HasPhysicalReleaseDate(), title.GetPhysicalReleaseDate()},
+		} {
+			switch {
+			case r.has:
+				releases = append(releases, day(r.ts.AsTime()))
+			case r.alt != "":
+				releases = append(releases, dayText(r.alt))
+			}
+		}
+	}
 	switch {
+	case len(releases) > 1:
+		add("discover.releaseDates", strings.Join(releases, "\n"))
+	case len(releases) == 1:
+		add("discover.releaseDate", releases[0])
 	case d.HasPremiereMs():
 		caption := "item.released"
 		switch card.GetKind() {
@@ -207,33 +258,58 @@ func (a *App) about(c *ui.Context, st *detailsState, d *capiv1.Details, info *it
 	case it.HasPremiereDate():
 		add("item.released", day(it.GetPremiereDate().AsTime()))
 	}
-	if it.GetKind() == libraryv1.ItemKind_ITEM_KIND_SERIES {
-		switch it.GetSeriesStatus() {
-		case libraryv1.SeriesStatus_SERIES_STATUS_CONTINUING:
-			add("item.status", style.T(c, "item.continuing"))
-		case libraryv1.SeriesStatus_SERIES_STATUS_ENDED:
-			add("item.status", style.T(c, "item.ended"))
-			if it.HasEndDate() {
-				add("item.lastAired", day(it.GetEndDate().AsTime()))
-			}
+	series := it.GetKind() == libraryv1.ItemKind_ITEM_KIND_SERIES
+	switch {
+	case series && it.GetSeriesStatus() == libraryv1.SeriesStatus_SERIES_STATUS_CONTINUING:
+		add("item.status", style.T(c, "item.continuing"))
+	case series && it.GetSeriesStatus() == libraryv1.SeriesStatus_SERIES_STATUS_ENDED:
+		add("item.status", style.T(c, "item.ended"))
+	default:
+		if s, ok := productionStatuses[title.GetProductionStatus()]; ok {
+			add("item.status", style.T(c, s))
 		}
+	}
+	if series && it.GetSeriesStatus() == libraryv1.SeriesStatus_SERIES_STATUS_ENDED && it.HasEndDate() {
+		add("item.lastAired", day(it.GetEndDate().AsTime()))
+	}
+	if series && title.GetNextAirDate() != "" {
+		add("item.nextAirDate", dayText(title.GetNextAirDate()))
 	}
 	if ms := card.GetRuntimeMs(); ms > 0 {
 		add("item.runtime", runtime(time.Duration(ms)*time.Millisecond))
 	}
 	add("item.rated", d.GetOfficialRating())
-	add("item.genres", strings.Join(d.GetGenres(), ", "))
-	studios := "item.studio"
+	// An episode or season shows its series' genres and studios.
+	genres, studios := it.GetGenres(), it.GetStudios()
+	if len(genres) == 0 {
+		genres = info.series.GetGenres()
+	}
+	if len(studios) == 0 {
+		studios = info.series.GetStudios()
+	}
+	if len(genres) == 0 {
+		genres = d.GetGenres()
+	}
+	add("item.genres", strings.Join(genres, ", "))
+	studioCaption := "item.studio"
 	switch it.GetKind() {
 	case libraryv1.ItemKind_ITEM_KIND_SERIES, libraryv1.ItemKind_ITEM_KIND_SEASON, libraryv1.ItemKind_ITEM_KIND_EPISODE:
-		studios = "item.networks"
+		studioCaption = "item.networks"
 	}
-	add(studios, strings.Join(it.GetStudios(), ", "))
-	add("item.country", strings.Join(it.GetProductionLocations(), "\n"))
-	add("item.originalLanguage", languageName(c, it.GetOriginalLanguage()))
+	add(studioCaption, strings.Join(studios, ", "))
+	countries := it.GetProductionLocations()
+	if len(countries) == 0 {
+		for _, code := range title.GetProductionCountries() {
+			countries = append(countries, countryName(c, code))
+		}
+	}
+	add("item.country", strings.Join(countries, "\n"))
+	add("item.originalLanguage", languageName(c, cmpOr(it.GetOriginalLanguage(), title.GetOriginalLanguage())))
 	if it.GetOriginalTitle() != it.GetName() {
 		add("item.originalTitle", it.GetOriginalTitle())
 	}
+	add("item.budget", moneyText(title.GetBudget()))
+	add("item.revenue", moneyText(title.GetRevenue()))
 	if it.HasDateAdded() && !it.GetVirtual() {
 		add("item.dateAdded", day(it.GetDateAdded().AsTime()))
 	}
@@ -242,75 +318,135 @@ func (a *App) about(c *ui.Context, st *detailsState, d *capiv1.Details, info *it
 	if it.GetKind() != libraryv1.ItemKind_ITEM_KIND_EPISODE && it.GetKind() != libraryv1.ItemKind_ITEM_KIND_SEASON {
 		tags = it.GetTags()
 	}
-	links := it.GetExternalUrls()
-	// A television opens no web pages (docs/tv.md §1).
-	if a.opts.OpenURL == nil || style.TV(c) {
-		links = nil
+	// A television opens no web pages (docs/tv.md §1); a movie or series
+	// links elsewhere as its discovered title does.
+	var links []externalLink
+	if a.opts.OpenURL != nil && !tv {
+		if titled {
+			if title != nil {
+				links = titleLinks(c, title, a.ratings(server, kind, tmdb).value)
+			}
+		} else {
+			for _, l := range it.GetExternalUrls() {
+				links = append(links, externalLink{l.GetName(), l.GetUrl()})
+			}
+		}
 	}
-	ratings := it.GetCommunityRating() > 0 || it.GetCriticRating() > 0
+	scored := title != nil && (title.GetVoteCount() > 0 || len(a.ratings(server, kind, tmdb).value) > 0)
+	ratings := scored || it.GetCommunityRating() > 0 || it.GetCriticRating() > 0
 	leading := slices.ContainsFunc(credits, func(e creditEntry) bool { return !e.cast() })
+	streaming := title.GetWatchProviders()
 	text := d.GetOverview()
-	if text == "" && !ratings && !leading && len(tags) == 0 && len(facts) == 0 && len(media) == 0 && len(links) == 0 {
+	if text == "" && !ratings && !leading && len(tags) == 0 && len(facts) == 0 && len(media) == 0 && len(links) == 0 && len(streaming) == 0 {
 		return
 	}
-	ui.Column(c).Padding(0, style.Layout(c).Margin).Gap(16).Children(func() {
+	// Side by side where there is room, else one under the other.
+	wide := a.contentWidth >= 1024
+	ui.Column(c).Padding(4, style.Layout(c).Margin, 0).Gap(16).Children(func() {
 		style.Text(ui.Text(c, style.T(c, "item.details")), style.Type(c).Title3).TextColor(style.Color(colors.TextPrimary))
-		ui.Row(c).GapX(64).GapY(32).AlignItems(ui.Start).Wrap().Children(func() {
-			if text != "" || leading || len(tags) > 0 || len(links) > 0 {
-				ui.Column(c).Basis(360).Grow(1).MaxWidth(640).Gap(20).Children(func() {
-					if text != "" {
-						ui.Column(c).Gap(8).Children(func() {
-							if d.GetTagline() != "" {
-								style.Text(ui.Text(c, d.GetTagline()), style.Type(c).Headline).TextColor(style.Color(colors.TextPrimary))
-							}
-							style.Text(ui.Text(c, text), style.Type(c).Body).TextColor(style.Color(colors.TextSecondary)).Selectable()
-						})
-					}
-					a.crewList(c, server, card.GetItemId(), credits)
-					if len(tags) > 0 {
-						ui.Column(c).Gap(8).Children(func() {
-							style.Text(ui.Text(c, style.T(c, "item.tags")), style.Type(c).Footnote).FontWeight(600).TextColor(style.Color(colors.TextSecondary))
-							ui.Row(c).Gap(8).Wrap().Children(func() {
-								for _, tag := range tags {
-									style.Text(ui.Text(c.Key(tag), tag), style.Type(c).Footnote).TextColor(style.Color(colors.TextPrimary)).
-										Padding(4, 12).Radius(design.RadiusFull).Border(1, style.Color(colors.Border))
-								}
-							})
-						})
-					}
-					if len(links) > 0 {
-						ui.Row(c).Gap(8).Wrap().Children(func() {
-							for i, l := range links {
-								if linkChip(c.Key(i), l.GetName()).Clicked() {
-									_ = a.opts.OpenURL(l.GetUrl())
-								}
-							}
-						})
-					}
-				})
+		a.inFlow(func() {
+			box := ui.Column(c).Gap(32)
+			if wide {
+				box = ui.Row(c).Gap(64).AlignItems(ui.Start)
 			}
-			ui.Column(c).Basis(360).Grow(1).MinWidth(0).Gap(32).Children(func() {
-				if ratings {
-					ratingTiles(c, it)
+			box.Children(func() {
+				if text != "" || leading || len(tags) > 0 || len(links) > 0 {
+					a.inColumn(func() {
+						col := ui.Column(c).MinWidth(0).Gap(20)
+						if wide {
+							col.WidthPercent(44).Shrink(0)
+						}
+						col.Children(func() {
+							if text != "" {
+								ui.Column(c).Gap(8).Children(func() {
+									if d.GetTagline() != "" {
+										style.Text(ui.Text(c, d.GetTagline()), style.Type(c).Headline).TextColor(style.Color(colors.TextPrimary))
+									}
+									style.Text(ui.Text(c, text), style.Type(c).Body).TextColor(style.Color(colors.TextSecondary)).Selectable()
+								})
+							}
+							a.crewList(c, server, card.GetItemId(), credits)
+							if len(tags) > 0 {
+								ui.Column(c).Gap(8).Children(func() {
+									style.Text(ui.Text(c, style.T(c, "item.tags")), style.Type(c).Footnote).FontWeight(600).TextColor(style.Color(colors.TextSecondary))
+									ui.Row(c).Gap(8).Wrap().Children(func() {
+										for _, tag := range tags {
+											style.Text(ui.Text(c.Key(tag), tag), style.Type(c).Footnote).TextColor(style.Color(colors.TextPrimary)).
+												Padding(4, 12).Radius(design.RadiusFull).Border(1, style.Color(colors.Border))
+										}
+									})
+								})
+							}
+							if len(links) > 0 {
+								ui.Row(c).Gap(8).Wrap().Children(func() {
+									for i, l := range links {
+										if a.linkChip(c.Key(i), l.name).Clicked() {
+											_ = a.opts.OpenURL(l.url)
+										}
+									}
+								})
+							}
+						})
+					})
 				}
-				factGrid(c, facts)
-				factGrid(c, media)
+				a.inColumn(func() {
+					a.marked(focusMarks{beside: true}, func() {
+						ui.Column(c).Grow(1).Basis(0).MinWidth(0).Gap(32).Children(func() {
+							switch {
+							case scored:
+								ui.Row(c).Justify(ui.Start).Children(func() { a.titleRatings(c, server, title) })
+							case ratings:
+								ratingTiles(c, it)
+							}
+							factGrid(c, facts)
+							watchProviders(c, a, streaming)
+							factGrid(c, media)
+						})
+					})
+				})
 			})
 		})
 	})
 }
 
+// watchProviders builds where a title streams: the services' logos, else
+// their names.
+func watchProviders(c *ui.Context, a *App, ps []*pluginv1.WatchProvider) {
+	if len(ps) == 0 {
+		return
+	}
+	colors := style.Colors(c)
+	ui.Column(c).Gap(8).Children(func() {
+		style.Text(ui.Text(c, style.T(c, "item.streaming")), style.Type(c).Footnote).FontWeight(600).TextColor(style.Color(colors.TextSecondary))
+		ui.Row(c).Gap(12).Wrap().Children(func() {
+			for i, p := range ps {
+				if bitmap := a.opts.Images.Get(p.GetLogoUrl(), 40, scale); bitmap != nil {
+					ui.Box(c.Key(i)).Size(40, 40).Radius(8).Clip().Tooltip(p.GetName()).Children(func() {
+						ui.Image(c, bitmap).Fill().Fit(ui.Cover)
+					})
+				} else {
+					style.Text(ui.Text(c.Key(i), p.GetName()), style.Type(c).Callout).TextColor(style.Color(colors.TextPrimary))
+				}
+			}
+		})
+	})
+}
+
 // linkChip builds a pill opening a page elsewhere.
-func linkChip(c *ui.Context, label string) ui.Element {
+func (a *App) linkChip(c *ui.Context, label string) ui.Element {
 	colors := style.Colors(c)
 	b := ui.ButtonBase(c).Height(30).Padding(0, 14).Gap(6).Radius(design.RadiusFull).AlignItems(ui.Center).
 		Background(style.Color(colors.Fill)).Label(label)
-	if b.Hovered() {
+	fg, sub := style.Color(colors.TextPrimary), style.Color(colors.TextSecondary)
+	switch {
+	case a.tvLink(c, b, design.RadiusFull):
+		fg, sub = ui.RGB(0, 0, 0), style.Color(design.LightColors.TextSecondary)
+	case b.Hovered():
 		b.Background(style.Color(colors.FillSelected))
 	}
 	b.Children(func() {
-		style.Text(ui.Text(c, label), style.Type(c).Footnote).FontWeight(600).TextColor(style.Color(colors.TextPrimary))
-		ui.Icon(c, style.Icon("external", false)).Size(14, 14).TextColor(style.Color(colors.TextSecondary))
+		style.Text(ui.Text(c, label), style.Type(c).Footnote).FontWeight(600).TextColor(fg)
+		ui.Icon(c, style.Icon("external", false)).Size(14, 14).TextColor(sub)
 	})
 	return b
 }

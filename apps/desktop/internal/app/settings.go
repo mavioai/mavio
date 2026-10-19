@@ -8,6 +8,7 @@ import (
 	"time"
 	"unicode"
 
+	"github.com/egoist/mygo/plugins/glass"
 	"github.com/egoist/mygo/ui"
 	"golang.org/x/text/language"
 	"golang.org/x/text/language/display"
@@ -175,6 +176,10 @@ func (a *App) settings(c *ui.Context, r *ui.Route) {
 	// it changes, which alone fades in.
 	r.Match("/settings/{section...}")
 	id := strings.SplitN(r.Param("section"), "/", 2)[0]
+	if style.TV(c) {
+		a.tvSettings(c, r, id)
+		return
+	}
 	if id == "" {
 		// A section, so that going to another fades it in rather than
 		// sliding in as a page deeper.
@@ -284,7 +289,7 @@ func (a *App) serverChoice(c *ui.Context) {
 		names[i] = s.GetName()
 	}
 	chosen := a.chosenServer().GetName()
-	sel := ui.Select(c, &chosen, names).FillWidth().Margin(0, 0, 6).Label(style.T(c, "settings.serverChoice"))
+	sel := selectOf(c, &chosen, names).FillWidth().Margin(0, 0, 6).Label(style.T(c, "settings.serverChoice"))
 	if sel.Changed() {
 		if i := slices.Index(names, chosen); i >= 0 {
 			a.settingsState.server = a.servers[i].GetId()
@@ -538,14 +543,14 @@ func (g *settingsGroup) row(label, detail string, leading, control func()) {
 func (g *settingsGroup) switchRow(label, detail string, on *bool) bool {
 	c := g.c
 	g.divider()
-	colors := style.Colors(c)
 	changed := false
 	b := ui.ButtonBase(c.Key(g.rows)).MinHeight(52).Padding(10, 16).Gap(12).AlignItems(ui.Center).Label(label)
+	fg, sub := rowColors(c, b)
 	b.Children(func() {
 		ui.Column(c).Grow(1).MinWidth(0).Children(func() {
-			style.Text(ui.Text(c, label), style.Type(c).Body).TextColor(style.Color(colors.TextPrimary))
+			style.Text(ui.Text(c, label), style.Type(c).Body).TextColor(fg)
 			if detail != "" {
-				style.Text(ui.Text(c, detail), style.Type(c).Footnote).TextColor(style.Color(colors.TextSecondary))
+				style.Text(ui.Text(c, detail), style.Type(c).Footnote).TextColor(sub)
 			}
 		})
 		changed = ui.Switch(c, on).Label(label).Changed()
@@ -564,24 +569,44 @@ func (g *settingsGroup) link(key, icon string, color ui.Color, label, detail str
 	g.divider()
 	colors := style.Colors(c)
 	b := ui.ButtonBase(c.Key(key)).MinHeight(52).Padding(10, 16).Gap(12).AlignItems(ui.Center).Justify(ui.Start).Label(label).Disabled(!opens)
-	if opens && b.Hovered() {
+	if opens && b.Hovered() && !style.TV(c) {
 		b.Background(style.Color(colors.Fill))
+	}
+	fg, sub := style.Color(colors.TextPrimary), style.Color(colors.TextSecondary)
+	if opens {
+		fg, sub = rowColors(c, b)
 	}
 	b.Children(func() {
 		if icon != "" {
 			sectionTile(c, icon, color)
 		}
 		ui.Column(c).Grow(1).MinWidth(0).Children(func() {
-			style.Text(ui.Text(c, label), style.Type(c).Body).TextColor(style.Color(colors.TextPrimary)).MaxLines(1)
+			style.Text(ui.Text(c, label), style.Type(c).Body).TextColor(fg).MaxLines(1)
 			if detail != "" {
-				style.Text(ui.Text(c, detail), style.Type(c).Footnote).TextColor(style.Color(colors.TextSecondary))
+				style.Text(ui.Text(c, detail), style.Type(c).Footnote).TextColor(sub)
 			}
 		})
 		if opens {
-			ui.Icon(c, style.Icon("forward", false)).Size(16, 16).Shrink(0).TextColor(style.Color(colors.TextTertiary))
+			ui.Icon(c, style.Icon("forward", false)).Size(16, 16).Shrink(0).TextColor(sub)
 		}
 	})
 	return opens && b.Clicked()
+}
+
+// rowColors returns the colors of a row's text and the line under it: in
+// the TV mode a row with focus turns white, its text black, its corners
+// rounded as its group's (docs/tv.md §4).
+func rowColors(c *ui.Context, b ui.Element) (fg, sub ui.Color) {
+	colors := style.Colors(c)
+	if !style.TV(c) {
+		return style.Color(colors.TextPrimary), style.Color(colors.TextSecondary)
+	}
+	b.FocusRing(false).Radius(14)
+	if !b.Focused() {
+		return style.Color(colors.TextPrimary), style.Color(colors.TextSecondary)
+	}
+	b.Background(ui.RGB(255, 255, 255)).Shadow(0, 8, 24, 0, style.Color(colors.TvFocusShadow))
+	return ui.RGB(0, 0, 0), style.Color(design.LightColors.TextSecondary)
 }
 
 // block adds a row of its own content.
@@ -594,13 +619,66 @@ func (g *settingsGroup) block(fn func()) {
 // and reports a new choice.
 func choose(c *ui.Context, label string, value *int, labels []string) bool {
 	chosen := labels[max(0, min(*value, len(labels)-1))]
-	if ui.Select(c, &chosen, labels).MinWidth(200).Label(label).Changed() {
+	if selectOf(c, &chosen, labels).MinWidth(200).Label(label).Changed() {
 		if i := slices.Index(labels, chosen); i >= 0 && i != *value {
 			*value = i
 			return true
 		}
 	}
 	return false
+}
+
+// selectOf builds a drop-down of labels choosing *chosen, which Changed
+// reports. On the television, as the web UI's (docs/tv.md §5), it turns
+// white with focus, up and down move focus on from it while it is closed,
+// and select opens its options below it as the menus open, in frosted
+// glass with larger items, on the chosen one.
+func selectOf(c *ui.Context, chosen *string, labels []string) ui.Element {
+	if !style.TV(c) {
+		return ui.Select(c, chosen, labels)
+	}
+	colors := style.Colors(c)
+	sp := ui.SelectBase(c, chosen)
+	sp.Trigger.PassArrows()
+	b := sp.Trigger.MinHeight(36).Padding(0, 10).Gap(8).Radius(6).AlignItems(ui.Center).FocusRing(false).
+		Background(style.Color(colors.Fill))
+	fg, sub := style.Color(colors.TextPrimary), style.Color(colors.TextSecondary)
+	switch {
+	case b.Focused():
+		b.Background(ui.RGB(255, 255, 255))
+		fg, sub = ui.RGB(0, 0, 0), style.Color(design.LightColors.TextSecondary)
+	case sp.Open():
+		b.Background(style.Color(colors.FillSelected))
+	}
+	b.Children(func() {
+		style.Text(ui.Text(c, *chosen), style.Type(c).Callout).TextColor(fg).SingleLine().Grow(1).MinWidth(0)
+		ui.Icon(c, style.Icon("expand", false)).Size(14, 14).Shrink(0).TextColor(sub)
+	})
+	shadow := design.ElevationLevel3
+	sp.Popup(func(panel ui.Element) {
+		panel.Margin(8, 0, 0, 0).Radius(14).Material(glass.Blur{Radius: 48}).AlignItems(ui.Stretch).
+			Shadow(shadow.X, shadow.Y, shadow.Blur, shadow.Spread, style.Color(shadow.Color))
+		ui.Scroll(c).MaxHeight(384).Radius(14).Background(style.Color(colors.SurfaceOverlay).Alpha(0.45)).Border(1, style.Color(colors.Border)).Children(func() {
+			ui.Column(c).Padding(6).AlignItems(ui.Stretch).Children(func() {
+				for _, l := range labels {
+					item := sp.Item(l).MinHeight(48).Padding(0, 10).Gap(10).Radius(8).AlignItems(ui.Center)
+					if item.Highlighted() {
+						item.Background(style.Color(colors.Fill))
+					}
+					item.Children(func() {
+						check := ui.Box(c).Size(16, 16).Shrink(0)
+						if l == *chosen {
+							check.Children(func() {
+								ui.Icon(c, style.Icon("check", false)).Size(16, 16).TextColor(style.Color(colors.Accent))
+							})
+						}
+						style.Text(ui.Text(c, l), style.Type(c).Headline).TextColor(style.Color(colors.TextPrimary)).SingleLine()
+					})
+				}
+			})
+		})
+	})
+	return b
 }
 
 func (a *App) appearanceSection(c *ui.Context) {

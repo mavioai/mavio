@@ -475,6 +475,11 @@ func optionControl(c *ui.Context, o *storagev1.Option, value string, set bool, p
 			suggestions[i] = e.GetValue()
 		}
 		in = ui.Autocomplete(c, &v, suggestions)
+		// On the television up and down move focus on from it while its
+		// suggestions are closed (docs/tv.md §4).
+		if style.TV(c) {
+			in.PassArrows()
+		}
 	} else {
 		in = ui.TextInput(c, &v)
 		if o.GetPassword() {

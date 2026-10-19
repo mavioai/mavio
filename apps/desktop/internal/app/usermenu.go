@@ -91,7 +91,7 @@ func (a *App) userMenu(c *ui.Context, panel ui.Element) {
 		}
 		if a.menuItem(c, "settings", style.T(c, "nav.settings"), settings, tv) {
 			a.userMenuOpen = false
-			a.router.Push("/settings/appearance")
+			a.router.Push("/settings")
 		}
 		icon, text := "television", style.T(c, "menu.tvMode")
 		if tv {

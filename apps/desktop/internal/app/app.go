@@ -134,6 +134,8 @@ type App struct {
 	places places
 	// focus moves focus with the arrow keys in the TV mode.
 	focus focusEngine
+	// tvKeys is the TV mode's keyboard for fields.
+	tvKeys tvKeyboard
 	// pagePath is the path of the page being built.
 	pagePath    string
 	sidebarOpen bool // the sidebar shown over the content in medium width
@@ -307,6 +309,7 @@ func tvShortcut(c *ui.Context) bool {
 // setTV turns the TV mode on or off and keeps it.
 func (a *App) setTV(on bool) {
 	a.prefs.TV = on
+	a.tvKeys = tvKeyboard{}
 	a.savePreferences()
 }
 
@@ -389,10 +392,14 @@ func (a *App) View(c *ui.Context) {
 			return
 		}
 		if c.Shortcut(ui.Cmd, ui.KeyComma) && !strings.HasPrefix(a.router.Path(), "/settings") {
-			a.router.Push("/settings/appearance")
+			a.router.Push("/settings")
 		}
 		// The settings have a layout of their own, as in the web UI.
 		if strings.HasPrefix(a.router.Path(), "/settings") {
+			if a.prefs.TV {
+				a.tvSettingsView(c)
+				return
+			}
 			a.router.View(c, func(r *ui.Route) { a.settings(c, r) })
 			return
 		}

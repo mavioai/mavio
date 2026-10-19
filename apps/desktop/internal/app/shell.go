@@ -156,8 +156,10 @@ func (a *App) page(c *ui.Context, r *ui.Route) {
 		a.discoverPage(c, r)
 	case r.Match("/catalog/{server}/{catalog}"):
 		a.catalogPage(c, r)
+	case r.Match("/title/{server}/{kind}/{tmdb}/credits"):
+		a.titleCreditsPage(c, r, false)
 	case r.Match("/title/{server}/{kind}/{tmdb}/crew"):
-		a.titleCrewPage(c, r)
+		a.titleCreditsPage(c, r, true)
 	case r.Match("/title/{server}/{kind}/{tmdb}"):
 		a.titlePage(c, r)
 	case r.Match("/discover/person/{server}/{tmdb}"):

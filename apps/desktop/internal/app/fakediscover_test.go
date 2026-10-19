@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"slices"
+	"strings"
 
 	acquisitionv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/acquisition/v1"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/acquisition/v1/acquisitionv1connect"
@@ -108,6 +109,7 @@ func (d *fakeDiscover) GetTitle(_ context.Context, r *acquisitionv1.GetTitleRequ
 			MediaKind: new(t.kind), TmdbId: new(t.tmdb), Name: new(t.name), Year: new(t.year), ItemId: new(t.itemID),
 			Status: new(status), Requestable: new(t.itemID == "" && status == acquisitionv1.MediaStatus_MEDIA_STATUS_UNSPECIFIED),
 			Overview: new("A crew far from home finds the way back."), Tagline: new("Every orbit ends."), Genres: []string{"Science Fiction", "Drama"},
+			GenreRefs:      []*pluginv1.Reference{pluginv1.Reference_builder{Id: new("878"), Name: new("Science Fiction")}.Build(), pluginv1.Reference_builder{Id: new("18"), Name: new("Drama")}.Build()},
 			OfficialRating: new("PG-13"), RuntimeMinutes: new(int32(124)),
 			OriginalLanguage: new("en"), ProductionCountries: []string{"US", "NZ"}, Budget: new(int64(90_000_000)), VoteCount: new(int32(1200)),
 			CommunityRating: new(7.6), PremiereDate: new("2024-03-08"), ProductionStatus: new(pluginv1.ProductionStatus_PRODUCTION_STATUS_RELEASED),
@@ -139,7 +141,14 @@ func (d *fakeDiscover) GetTitle(_ context.Context, r *acquisitionv1.GetTitleRequ
 	return &acquisitionv1.GetTitleResponse{}, nil
 }
 
-func (d *fakeDiscover) GetSeason(_ context.Context, r *acquisitionv1.GetSeasonRequest) (*acquisitionv1.GetSeasonResponse, error) {
+func (d *fakeDiscover) GetSeason(ctx context.Context, r *acquisitionv1.GetSeasonRequest) (*acquisitionv1.GetSeasonResponse, error) {
+	if g := d.f.seasonGate; g != nil {
+		select {
+		case <-g:
+		case <-ctx.Done():
+			return nil, ctx.Err()
+		}
+	}
 	var episodes []*acquisitionv1.SeasonEpisode
 	for n := int32(1); n <= 3; n++ {
 		episodes = append(episodes, acquisitionv1.SeasonEpisode_builder{
@@ -225,6 +234,18 @@ func (q *fakeRequests) DeleteRequest(_ context.Context, r *acquisitionv1.DeleteR
 
 func (q *fakeRequests) GetQuota(context.Context, *acquisitionv1.GetQuotaRequest) (*acquisitionv1.GetQuotaResponse, error) {
 	return &acquisitionv1.GetQuotaResponse{}, nil
+}
+
+func (d *fakeDiscover) SearchTitles(_ context.Context, r *acquisitionv1.SearchTitlesRequest) (*acquisitionv1.SearchTitlesResponse, error) {
+	d.f.mu.Lock()
+	defer d.f.mu.Unlock()
+	var titles []*acquisitionv1.DiscoveredTitle
+	for i, t := range fakeTitles {
+		if strings.Contains(strings.ToLower(t.name), strings.ToLower(r.GetQuery())) {
+			titles = append(titles, d.discovered(i))
+		}
+	}
+	return acquisitionv1.SearchTitlesResponse_builder{Titles: titles}.Build(), nil
 }
 
 func (d *fakeDiscover) discovered(i int) *acquisitionv1.DiscoveredTitle {

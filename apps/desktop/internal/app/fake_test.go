@@ -79,6 +79,7 @@ type fakeCore struct {
 	taskRuns       int                      // the tasks run
 	scans          int                      // the libraries scanned
 	titleRequests  []*acquisitionv1.Request // the requests of titles
+	seasonGate     chan struct{}            // when set, holds a season's episodes until closed
 	discovers      []*acquisitionv1.DiscoverRequest
 	blocked        []int32 // the collections blocklisted
 	users          []*userv1.User

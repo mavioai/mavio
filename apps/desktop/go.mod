@@ -20,7 +20,7 @@ require (
 	golang.org/x/image v0.46.0 // indirect
 )
 
-replace github.com/egoist/mygo => github.com/mavioai/mygo v0.0.0-20261017101849-79674cdfa118
+replace github.com/egoist/mygo => github.com/mavioai/mygo v0.0.0-20261019093539-a2b4bde71e56
 
 replace github.com/mavioai/mavio/libs/design => ../../libs/design
 

@@ -131,29 +131,44 @@ func moneyText(dollars int64) string {
 }
 
 // titleOverview builds a discovered title's overview, leading crew and
-// keywords beside its collection and facts, as Seerr's.
+// keywords beside its collection and facts, as Seerr's. On the
+// television it is a region of the page's flow, its two columns side by
+// side (docs/tv.md §6.3).
 func (a *App) titleOverview(c *ui.Context, server string, title *acquisitionv1.Title) {
-	colors := style.Colors(c)
-	credits := titleCredits(title)
-	ui.Row(c).Padding(0, style.Layout(c).Margin).GapX(32).GapY(32).AlignItems(ui.Start).Wrap().Children(func() {
-		ui.Column(c).Basis(480).Grow(1).MinWidth(0).Gap(16).Children(func() {
-			if t := title.GetTagline(); t != "" {
-				style.Text(ui.Text(c, t), style.Type(c).Title3).FontWeight(400).Italic().TextColor(style.Color(colors.TextSecondary))
-			}
-			style.Text(ui.Text(c, style.T(c, "discover.overview")), style.Type(c).Title3).TextColor(style.Color(colors.TextPrimary))
-			overview := title.GetOverview()
-			if overview == "" {
-				overview = style.T(c, "discover.noOverview")
-			}
-			style.Text(ui.Text(c, overview), style.Type(c).Body).TextColor(style.Color(colors.TextPrimary)).Selectable()
-			a.leadingCrew(c, server, credits, func() {
-				a.router.Push(titlePath(server, title.GetMediaKind(), title.GetTmdbId()) + "/crew")
+	a.inFlow(func() {
+		ui.Row(c).Padding(0, style.Layout(c).Margin).GapX(32).GapY(32).AlignItems(ui.Start).Wrap().Children(func() {
+			a.inColumn(func() { a.overviewColumn(c, server, title) })
+			a.inColumn(func() {
+				a.marked(focusMarks{beside: true}, func() {
+					ui.Column(c).Basis(320).MaxWidth(380).Grow(1).MinWidth(0).Gap(24).Children(func() {
+						a.collectionCard(c, server, title)
+						a.titleFactBox(c, server, title)
+					})
+				})
 			})
-			a.keywords(c, server, title)
 		})
-		ui.Column(c).Basis(320).MaxWidth(380).Grow(1).MinWidth(0).Gap(24).Children(func() {
-			a.collectionCard(c, server, title)
-			a.titleFactBox(c, server, title)
+	})
+}
+
+// overviewColumn builds a title's tagline, overview, leading crew and
+// keywords.
+func (a *App) overviewColumn(c *ui.Context, server string, title *acquisitionv1.Title) {
+	colors := style.Colors(c)
+	ui.Column(c).Basis(480).Grow(1).MinWidth(0).Gap(16).Children(func() {
+		if t := title.GetTagline(); t != "" {
+			style.Text(ui.Text(c, t), style.Type(c).Title3).FontWeight(400).Italic().TextColor(style.Color(colors.TextSecondary))
+		}
+		style.Text(ui.Text(c, style.T(c, "discover.overview")), style.Type(c).Title3).TextColor(style.Color(colors.TextPrimary))
+		overview := title.GetOverview()
+		if overview == "" {
+			overview = style.T(c, "discover.noOverview")
+		}
+		style.Text(ui.Text(c, overview), style.Type(c).Body).TextColor(style.Color(colors.TextPrimary)).Selectable()
+		a.leadingCrew(c, server, titleCredits(title), func() {
+			a.router.Push(titlePath(server, title.GetMediaKind(), title.GetTmdbId()) + "/crew")
+		})
+		a.marked(focusMarks{block: "keywords"}, func() {
+			a.keywords(c, server, title)
 		})
 	})
 }
@@ -176,42 +191,16 @@ func (a *App) leadingCrew(c *ui.Context, server string, credits []creditEntry, m
 		return
 	}
 	slices.SortStableFunc(crew, func(x, y ranked) int { return x.rank - y.rank })
-	crew = crew[:min(len(crew), 6)]
-	colors := style.Colors(c)
+	names := make([]creditEntry, 0, 6)
+	for _, r := range crew[:min(len(crew), 6)] {
+		names = append(names, r.e)
+	}
 	ui.Column(c).Gap(12).Padding(8, 0, 0).Children(func() {
-		ui.Row(c).GapX(24).GapY(16).Wrap().Children(func() {
-			for i, r := range crew {
-				e := r.e
-				job := style.T(c, crewLabels[crewRank(e.kind)].label)
-				if e.kind == libraryv1.CreditKind_CREDIT_KIND_OTHER && e.role != "" {
-					job = e.role
-				}
-				ui.Column(c.Key(i)).Width(180).AlignItems(ui.Start).Children(func() {
-					style.Text(ui.Text(c, job), style.Type(c).Headline).TextColor(style.Color(colors.TextPrimary)).SingleLine()
-					b := ui.ButtonBase(c).Cursor(ui.CursorPointer).Label(e.name)
-					b.Children(func() {
-						name := style.Text(ui.Text(c, e.name), style.Type(c).Callout).TextColor(style.Color(colors.TextSecondary)).SingleLine()
-						if b.Hovered() && (e.personID != "" || e.tmdb != "") {
-							name.TextColor(style.Color(colors.TextPrimary)).Underline()
-						}
-					})
-					if b.Clicked() {
-						a.openPerson(server, e)
-					}
-				})
-			}
+		a.marked(focusMarks{block: "crew", beside: true}, func() {
+			a.crewNames(c, server, names)
 		})
-		ui.Row(c).Justify(ui.End).Children(func() {
-			b := ui.ButtonBase(c).Gap(4).AlignItems(ui.Center).Label(style.T(c, "discover.fullCrew"))
-			b.Children(func() {
-				tc := style.Color(colors.TextSecondary)
-				if b.Hovered() {
-					tc = style.Color(colors.TextPrimary)
-				}
-				style.Text(ui.Text(c, style.T(c, "discover.fullCrew")), style.Type(c).Callout).TextColor(tc)
-				ui.Icon(c, style.Icon("forward", false)).Size(16, 16).TextColor(tc)
-			})
-			if b.Clicked() {
+		a.marked(focusMarks{block: "crew", beside: true, end: true}, func() {
+			if a.crewMore(c).Clicked() {
 				more()
 			}
 		})
@@ -233,15 +222,24 @@ func (a *App) keywords(c *ui.Context, server string, title *acquisitionv1.Title)
 	colors := style.Colors(c)
 	ui.Row(c).Gap(8).Wrap().Padding(8, 0, 0).Children(func() {
 		for i, k := range refs {
-			b := ui.ButtonBase(c.Key(i)).Padding(4, 12).Radius(design.RadiusFull).Background(style.Color(colors.Fill)).Label(k.GetName())
 			linked := k.GetId() != "" && a.alikePath(c, server, title.GetMediaKind(), catalogFilter{Keywords: namedOf([]*pluginv1.Reference{k})}) != ""
-			if b.Hovered() && linked {
+			if !linked {
+				style.Text(ui.Text(c.Key(i), k.GetName()), style.Type(c).Footnote).TextColor(style.Color(colors.TextPrimary)).
+					Padding(4, 12).Radius(design.RadiusFull).Background(style.Color(colors.Fill))
+				continue
+			}
+			b := ui.ButtonBase(c.Key(i)).Padding(4, 12).Radius(design.RadiusFull).Background(style.Color(colors.Fill)).Label(k.GetName())
+			fg := style.Color(colors.TextPrimary)
+			switch {
+			case a.tvLink(c, b, design.RadiusFull):
+				fg = ui.RGB(0, 0, 0)
+			case b.Hovered():
 				b.Background(style.Color(colors.FillSelected))
 			}
 			b.Children(func() {
-				style.Text(ui.Text(c, k.GetName()), style.Type(c).Footnote).TextColor(style.Color(colors.TextPrimary))
+				style.Text(ui.Text(c, k.GetName()), style.Type(c).Footnote).TextColor(fg)
 			})
-			if b.Clicked() && linked {
+			if b.Clicked() {
 				a.router.Push(a.alikePath(c, server, title.GetMediaKind(), catalogFilter{Keywords: namedOf([]*pluginv1.Reference{k})}))
 			}
 		}
@@ -268,6 +266,10 @@ func (a *App) collectionCard(c *ui.Context, server string, title *acquisitionv1.
 	b := ui.ButtonBase(c).Height(80).Radius(14).Clip().AlignItems(ui.Center).
 		Background(style.Color(design.DarkColors.SurfaceRaised)).Label(name)
 	hovered := b.Hovered()
+	if a.tvFocus(c, b, false) {
+		hovered = true
+		artRing(c, b, true)
+	}
 	b.Children(func() {
 		backdrop := col.GetBackdropUrl()
 		if backdrop == "" {
@@ -316,7 +318,10 @@ var ratingOrder = []pluginv1.RatingSource{
 func (a *App) titleRatings(c *ui.Context, server string, title *acquisitionv1.Title) {
 	kind, tmdb := title.GetMediaKind(), title.GetTmdbId()
 	rs := a.ratings(server, kind, tmdb).value
-	type shown struct{ mark, score, tip, url string }
+	type shown struct {
+		logo            string
+		score, tip, url string
+	}
 	var all []shown
 	for _, src := range ratingOrder {
 		for _, r := range rs {
@@ -326,28 +331,28 @@ func (a *App) titleRatings(c *ui.Context, server string, title *acquisitionv1.Ti
 			fresh := r.GetScore() >= 60
 			switch src {
 			case pluginv1.RatingSource_RATING_SOURCE_IMDB:
-				all = append(all, shown{"IMDb", fmt.Sprintf("%.1f", r.GetScore()), style.T(c, "discover.imdbScore", "votes", compactCount(r.GetVotes())), r.GetUrl()})
+				all = append(all, shown{"imdb", fmt.Sprintf("%.1f", r.GetScore()), style.T(c, "discover.imdbScore", "votes", compactCount(r.GetVotes())), r.GetUrl()})
 			case pluginv1.RatingSource_RATING_SOURCE_ROTTEN_TOMATOES_CRITICS:
 				tip := style.T(c, "discover.tomatometer")
 				if r.GetCertified() {
 					tip = style.T(c, "discover.tomatometerCertified")
 				}
-				mark := "🍅"
+				logo := "rt-fresh"
 				if !fresh {
-					mark = "🤢"
+					logo = "rt-rotten"
 				}
-				all = append(all, shown{mark, fmt.Sprintf("%.0f%%", r.GetScore()), tip, r.GetUrl()})
+				all = append(all, shown{logo, fmt.Sprintf("%.0f%%", r.GetScore()), tip, r.GetUrl()})
 			default:
-				mark := "🍿"
+				logo := "rt-aud-fresh"
 				if !fresh {
-					mark = "🫤"
+					logo = "rt-aud-rotten"
 				}
-				all = append(all, shown{mark, fmt.Sprintf("%.0f%%", r.GetScore()), style.T(c, "discover.audienceScore"), r.GetUrl()})
+				all = append(all, shown{logo, fmt.Sprintf("%.0f%%", r.GetScore()), style.T(c, "discover.audienceScore"), r.GetUrl()})
 			}
 		}
 	}
 	if title.GetVoteCount() > 0 {
-		all = append(all, shown{"TMDB", fmt.Sprintf("%.0f%%", title.GetCommunityRating()*10), style.T(c, "discover.tmdbScore"), tmdbURL(c, kind, tmdb)})
+		all = append(all, shown{"tmdb-wide", fmt.Sprintf("%.0f%%", title.GetCommunityRating()*10), style.T(c, "discover.tmdbScore"), tmdbURL(c, kind, tmdb)})
 	}
 	if len(all) == 0 {
 		return
@@ -356,10 +361,21 @@ func (a *App) titleRatings(c *ui.Context, server string, title *acquisitionv1.Ti
 	ui.Row(c).Padding(10, 16).GapX(16).GapY(4).Justify(ui.Center).Wrap().Children(func() {
 		for i, s := range all {
 			b := ui.ButtonBase(c.Key(i)).Gap(6).AlignItems(ui.Center).Label(s.tip).Tooltip(s.tip)
+			fg := style.Color(colors.TextPrimary)
+			lit := a.tvLink(c, b, 6)
+			if lit {
+				fg = ui.RGB(0, 0, 0)
+			}
 			b.Children(func() {
-				style.Text(ui.Text(c, s.mark), style.Type(c).Footnote).FontWeight(800).TextColor(style.Color(colors.TextSecondary))
-				t := style.Text(ui.Text(c, s.score), style.Type(c).Callout).FontWeight(600).TextColor(style.Color(colors.TextPrimary))
-				if b.Hovered() {
+				// The logos 20 high, TMDB's wide one 16, as the web UI's.
+				logo, h := style.Service(s.logo, false), float32(20)
+				if s.logo == "tmdb-wide" {
+					h = 16
+				}
+				w, lh := logo.Size()
+				ui.Image(c, logo).Size(h*w/lh, h).Label(s.tip)
+				t := style.Text(ui.Text(c, s.score), style.Type(c).Callout).FontWeight(600).TextColor(fg)
+				if b.Hovered() && !lit {
 					t.Underline()
 				}
 			})
@@ -431,6 +447,38 @@ func titleLinks(c *ui.Context, title *acquisitionv1.Title, ratings []*pluginv1.R
 	return links
 }
 
+// serviceLogos are the logos of titleLinks' links, by name, as Seerr's:
+// each as wide as Seerr's, the mono ones white alone and drawn in the
+// text's color.
+var serviceLogos = map[string]struct {
+	logo  string
+	width float32
+	mono  bool
+}{
+	"TMDB":            {"tmdb", 32, false},
+	"TVDB":            {"tvdb", 36, true},
+	"IMDb":            {"imdb", 32, false},
+	"Rotten Tomatoes": {"rt", 56, false},
+	"Trakt":           {"trakt", 32, false},
+	"Simkl":           {"simkl", 32, true},
+	"Letterboxd":      {"letterboxd", 32, false},
+}
+
+// logoLink builds a link elsewhere as its logo, which logo builds in the
+// color given, faint until hovered or focused, as the web UI's.
+func (a *App) logoLink(c *ui.Context, label string, logo func(fg ui.Color)) ui.Element {
+	b := ui.ButtonBase(c).AlignItems(ui.Center).Cursor(ui.CursorPointer).Label(label).Tooltip(label)
+	fg := style.Color(style.Colors(c).TextPrimary)
+	switch {
+	case a.tvLink(c, b, 6):
+		fg = ui.RGB(0, 0, 0)
+	case !b.Hovered():
+		b.Opacity(0.5)
+	}
+	b.Children(func() { logo(fg) })
+	return b
+}
+
 // minStudios are the studios shown before Show More.
 const minStudios = 5
 
@@ -466,9 +514,13 @@ func (a *App) titleFactBox(c *ui.Context, server string, title *acquisitionv1.Ti
 			return
 		}
 		b := ui.ButtonBase(c.Key(text)).Cursor(ui.CursorPointer).Label(text)
+		lit := a.tvLink(c, b, 6)
 		b.Children(func() {
 			t := style.Text(ui.Text(c, text), style.Type(c).Callout).TextColor(style.Color(colors.TextSecondary)).TextAlign(ui.End)
-			if b.Hovered() {
+			switch {
+			case lit:
+				t.TextColor(ui.RGB(0, 0, 0))
+			case b.Hovered():
 				t.Underline()
 			}
 		})
@@ -489,13 +541,13 @@ func (a *App) titleFactBox(c *ui.Context, server string, title *acquisitionv1.Ti
 		if s, ok := productionStatuses[title.GetProductionStatus()]; ok {
 			row(style.T(c, "item.status"), func() { value(style.T(c, s)) })
 		}
-		type release struct{ label, date string }
+		type release struct{ icon, label, date string }
 		var releases []release
 		if !series {
 			for _, r := range []release{
-				{style.T(c, "discover.theatricalRelease"), title.GetTheatricalReleaseDate()},
-				{style.T(c, "item.digitalRelease"), title.GetDigitalReleaseDate()},
-				{style.T(c, "item.physicalRelease"), title.GetPhysicalReleaseDate()},
+				{"movies", style.T(c, "discover.theatricalRelease"), title.GetTheatricalReleaseDate()},
+				{"devices", style.T(c, "item.digitalRelease"), title.GetDigitalReleaseDate()},
+				{"collections", style.T(c, "item.physicalRelease"), title.GetPhysicalReleaseDate()},
 			} {
 				if r.date != "" {
 					releases = append(releases, r)
@@ -509,8 +561,13 @@ func (a *App) titleFactBox(c *ui.Context, server string, title *acquisitionv1.Ti
 				label = style.T(c, "discover.releaseDates")
 			}
 			row(label, func() {
+				// Each date with the icon of how it was released, named on
+				// hover.
 				for _, r := range releases {
-					style.Text(ui.Text(c.Key(r.label), dayText(r.date)), style.Type(c).Callout).TextColor(style.Color(colors.TextSecondary)).Tooltip(r.label)
+					ui.Row(c.Key(r.label)).Gap(6).AlignItems(ui.Center).Tooltip(r.label).Children(func() {
+						ui.Icon(c, style.Icon(r.icon, false)).Size(14, 14).TextColor(style.Color(colors.TextSecondary)).Label(r.label)
+						style.Text(ui.Text(c, dayText(r.date)), style.Type(c).Callout).TextColor(style.Color(colors.TextSecondary))
+					})
 				}
 			})
 		case title.GetPremiereDate() != "":
@@ -589,9 +646,13 @@ func (a *App) titleFactBox(c *ui.Context, server string, title *acquisitionv1.Ti
 						label = style.T(c, "action.showLess")
 					}
 					b := ui.ButtonBase(c).Gap(4).AlignItems(ui.Center).Label(label)
+					fg := style.Color(colors.TextSecondary)
+					if a.tvLink(c, b, 6) {
+						fg = ui.RGB(0, 0, 0)
+					}
 					b.Children(func() {
-						style.Text(ui.Text(c, label), style.Type(c).Callout).TextColor(style.Color(colors.TextSecondary))
-						chevron := ui.Icon(c, style.Icon("expand", false)).Size(14, 14).TextColor(style.Color(colors.TextSecondary))
+						style.Text(ui.Text(c, label), style.Type(c).Callout).TextColor(fg)
+						chevron := ui.Icon(c, style.Icon("expand", false)).Size(14, 14).TextColor(fg)
 						if st.allStudios {
 							chevron.Rotate(180)
 						}
@@ -622,15 +683,28 @@ func (a *App) titleFactBox(c *ui.Context, server string, title *acquisitionv1.Ti
 		}
 		divider(n)
 		ui.Column(c).Padding(12, 16).AlignItems(ui.Center).Children(func() {
-			ui.Row(c).Gap(8).Justify(ui.Center).Wrap().Children(func() {
+			ui.Row(c).GapX(20).GapY(12).Justify(ui.Center).AlignItems(ui.Center).Wrap().Children(func() {
+				// First Mavio's, opening the item when the server has it,
+				// where Seerr links its media server.
 				if id := title.GetItemId(); id != "" {
-					if linkChip(c, style.T(c, "discover.openItem")).Clicked() {
+					if a.logoLink(c, style.T(c, "discover.openItem"), func(ui.Color) {
+						ui.Image(c, style.Wordmark).Size(14*244.0/64, 14)
+					}).Clicked() {
 						a.router.Push("/item/" + server + "/" + id)
 					}
 				}
 				if a.opts.OpenURL != nil {
 					for i, l := range titleLinks(c, title, rs) {
-						if linkChip(c.Key(i), l.name).Clicked() {
+						s := serviceLogos[l.name]
+						if a.logoLink(c.Key(i), l.name, func(fg ui.Color) {
+							logo := style.Service(s.logo, s.mono)
+							w, h := logo.Size()
+							if s.mono {
+								ui.Icon(c, logo).Size(s.width, s.width*h/w).TextColor(fg)
+							} else {
+								ui.Image(c, logo).Size(s.width, s.width*h/w)
+							}
+						}).Clicked() {
 							_ = a.opts.OpenURL(l.url)
 						}
 					}
@@ -640,16 +714,32 @@ func (a *App) titleFactBox(c *ui.Context, server string, title *acquisitionv1.Ti
 	})
 }
 
-// titleCrewPage builds the whole crew of a discovered title, by job.
-func (a *App) titleCrewPage(c *ui.Context, r *ui.Route) {
+// titleCreditsPage builds the whole cast and crew of a discovered title,
+// which the cast's See All opens, or with crew its crew alone, by job,
+// which View Full Crew opens, as Seerr's crew page.
+func (a *App) titleCreditsPage(c *ui.Context, r *ui.Route, crew bool) {
 	server, kind, tmdb := r.Param("server"), mediaKindOf(r.Param("kind")), tmdbParam(r)
 	t := a.discoveredTitle(c, server, kind, tmdb)
 	if taskStatus(c, t, func() { a.discoverState.titles[key(server, kind, tmdb)].key = "" }, nil) {
 		return
 	}
-	title := style.T(c, "credits.fullCrew")
+	title := style.T(c, "item.cast")
+	credits := titleCredits(t.value)
+	if crew {
+		title = style.T(c, "credits.fullCrew")
+		credits = slices.DeleteFunc(credits, creditEntry.cast)
+	}
 	r.Title(title)
-	credits := slices.DeleteFunc(titleCredits(t.value), creditEntry.cast)
+	of := func(kind libraryv1.CreditKind) []creditEntry {
+		var out []creditEntry
+		for _, e := range credits {
+			if e.kind == kind {
+				out = append(out, e)
+			}
+		}
+		slices.SortStableFunc(out, func(x, y creditEntry) int { return int(x.order - y.order) })
+		return out
+	}
 	colors := style.Colors(c)
 	ui.Scroll(c).TrackScroll(a.pageScroll(a.pagePath)).Fill().Children(func() {
 		ui.Column(c).Gap(24).Padding(0, 0, 40).Children(func() {
@@ -659,14 +749,10 @@ func (a *App) titleCrewPage(c *ui.Context, r *ui.Route) {
 			if len(credits) == 0 {
 				style.Text(ui.Text(c, style.T(c, "credits.none")), style.Type(c).Body).TextColor(style.Color(colors.TextSecondary)).Margin(0, style.Layout(c).Margin)
 			}
+			a.people(c, server, style.T(c, "credits.cast"), of(libraryv1.CreditKind_CREDIT_KIND_ACTOR))
+			a.people(c, server, style.T(c, "credits.guestStars"), of(libraryv1.CreditKind_CREDIT_KIND_GUEST_STAR))
 			for _, l := range crewLabels {
-				var of []creditEntry
-				for _, e := range credits {
-					if e.kind == l.kind {
-						of = append(of, e)
-					}
-				}
-				a.people(c, server, style.T(c, l.label), of)
+				a.people(c, server, style.T(c, l.label), of(l.kind))
 			}
 		})
 	})

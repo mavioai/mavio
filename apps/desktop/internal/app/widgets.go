@@ -155,22 +155,9 @@ func taskStatus[T any](c *ui.Context, t *task[T], retry func(), placeholder func
 func (a *App) artwork(c *ui.Context, art *capiv1.Artwork, icon string, card *capiv1.Card, width, height float32, hovered bool) {
 	colors := style.Colors(c)
 	box := ui.Box(c).Size(width, height).Shrink(0).Radius(design.RadiusMd).Background(style.Color(colors.SurfaceRaised))
-	tv := style.TV(c)
-	switch {
-	case hovered && tv:
-		// Focused on the television: a ring of the accent 1.5 points apart,
-		// over a shadow (docs/tv.md §4).
-		box.Shadow(0, 12, 32, 0, style.Color(colors.TvFocusShadow)).Shadow(0, 0, 0, 4.5, style.Color(colors.Accent)).
-			Shadow(0, 0, 0, 1.5, style.Color(colors.Background))
-	case hovered:
-		box.Shadow(0, 0, 0, 3, style.Color(colors.Accent))
-	}
+	artRing(c, box, hovered)
 	box.Children(func() {
-		inner := ui.Box(c).Fill().Radius(design.RadiusMd).Clip()
-		if hovered && !tv {
-			inner.Border(1, style.Color(colors.Background))
-		}
-		inner.Children(func() {
+		ui.Box(c).Fill().Radius(design.RadiusMd).Clip().Children(func() {
 			if bitmap := a.opts.Images.Get(art.GetUrl(), width, scale); bitmap != nil {
 				ui.Image(c, bitmap).Fill().Fit(ui.Cover)
 			} else if art.GetUrl() == "" || a.imageFailed(art.GetUrl(), width) {
@@ -199,6 +186,22 @@ func (a *App) artwork(c *ui.Context, art *capiv1.Artwork, icon string, card *cap
 			}
 		})
 	})
+}
+
+// artRing rings a card's artwork el when hovered, or focused on the
+// television: a thin ring of the accent a little apart from it, over a
+// shadow on the television (libs/design/components.md, States).
+func artRing(c *ui.Context, el ui.Element, hovered bool) {
+	if !hovered {
+		return
+	}
+	colors := style.Colors(c)
+	ring, gap := float32(3), float32(1)
+	if style.TV(c) {
+		ring, gap = 3.5, 1.5
+		el.Shadow(0, 12, 32, 0, style.Color(colors.TvFocusShadow))
+	}
+	el.Shadow(0, 0, 0, ring, style.Color(colors.Accent)).Shadow(0, 0, 0, gap, style.Color(colors.Background))
 }
 
 // noArtwork builds the placeholder of missing artwork, width wide: a quiet
@@ -298,9 +301,6 @@ func (a *App) cardFocus(c *ui.Context, b ui.Element) bool {
 	}
 	s := b.Animate("focus", scale, design.DurationFast)
 	b.TransformOrigin(0.5, 0.5).Scale(s, s)
-	if a.focus.rowFocused && !focused {
-		b.Opacity(0.75)
-	}
 	return focused
 }
 
@@ -371,45 +371,65 @@ func (a *App) labeledShelf(c *ui.Context, id, title string, more func(), label s
 				scroll.ScrollTo(min(scroll.X+step, scroll.MaxX), 0, ui.Smooth)
 			}
 		})
-		// The padding leaves room for a hovered card's ring, which the
-		// scroll would clip; the column's gap is the less for it.
-		row := ui.ScrollHorizontal(c).TrackScroll(scroll)
-		gap, pad := style.Layout(c).Gutter*1.5, float32(4)
-		if style.TV(c) {
-			// Room above and below for a focused card to grow.
-			gap, pad = style.Layout(c).Gutter, 20
-		}
-		row.Children(func() {
-			f := &a.focus
-			was := f.rowFocused
-			f.rowFocused = style.TV(c) && row.FocusWithin()
-			a.inScrollRow(row.Bounds(), scroll, func() {
-				ui.Row(c).Padding(pad, style.Layout(c).Margin).Gap(gap).AlignItems(ui.Start).Children(func() {
-					cards()
-					if label != "" && more != nil && style.TV(c) {
-						a.seeAllCard(c, label, more)
-					}
-				})
-			})
-			f.rowFocused = was
+		a.cardRow(c, scroll, func() {
+			cards()
+			if label != "" && more != nil && style.TV(c) {
+				a.seeAllCard(c, label, more, true)
+			}
+		})
+	})
+}
+
+// cardRow builds cards in a row that scroll scrolls sideways, without
+// bars; on the television focus moving along it scrolls it.
+func (a *App) cardRow(c *ui.Context, scroll *ui.ScrollState, cards func()) {
+	// The padding leaves room for a hovered card's ring, which the scroll
+	// would clip; the column's gap is the less for it.
+	row := ui.ScrollHorizontal(c).TrackScroll(scroll).HideScrollbars()
+	gap, pad := style.Layout(c).Gutter*1.5, float32(4)
+	if style.TV(c) {
+		// Room above and below for a focused card to grow.
+		gap, pad = style.Layout(c).Gutter, 20
+	}
+	row.Children(func() {
+		a.inScrollRow(row.Bounds(), scroll, func() {
+			ui.Row(c).Padding(pad, style.Layout(c).Margin).Gap(gap).AlignItems(ui.Start).Children(cards)
 		})
 	})
 }
 
 // seeAllCard builds the card ending a row on the television, which opens
-// all of what the row shows (docs/tv.md §6.2, §6.3).
-func (a *App) seeAllCard(c *ui.Context, label string, more func()) {
+// all of what the row shows (docs/tv.md §6.2, §6.3): round as a person's
+// when round, else a poster's, focused as a card is.
+func (a *App) seeAllCard(c *ui.Context, label string, more func(), round bool) {
 	colors := style.Colors(c)
-	b := ui.ButtonBase(c.Key("see-all")).Cursor(ui.CursorPointer).Column().Width(120).Gap(8).AlignItems(ui.Center).Label(label)
-	if a.tvFocusLit(c, b, false) {
-		b.Padding(8).Margin(-8).Radius(design.RadiusLg)
-		colors = &design.LightColors
+	width, art := style.Layout(c).Poster, style.Layout(c).Poster*1.5
+	if round {
+		width, art = 160, 144
+	}
+	b := ui.ButtonBase(c.Key("see-all")).Cursor(ui.CursorPointer).Column().Width(width).Gap(8).AlignItems(ui.Center).Label(label)
+	focused := a.cardFocus(c, b) || b.Hovered()
+	// On the television white belongs to focus alone (docs/tv.md §4), which
+	// the raised surface is in the light theme.
+	bg := colors.SurfaceRaised
+	if style.TV(c) {
+		bg = colors.Fill
 	}
 	b.Children(func() {
-		ui.Box(c).Size(96, 96).Radius(48).Background(style.Color(colors.Fill)).Center().Children(func() {
-			ui.Icon(c, style.Icon("forward", false)).Size(32, 32).TextColor(style.Color(colors.TextPrimary))
+		box := ui.Column(c).Size(width, art).Radius(design.RadiusMd).Gap(12).Center().Background(style.Color(bg))
+		if round {
+			box.Size(art, art).Radius(art / 2)
+		}
+		artRing(c, box, focused)
+		box.Children(func() {
+			ui.Icon(c, style.Icon("forward", false)).Size(40, 40).TextColor(style.Color(colors.TextPrimary))
+			if !round {
+				style.Text(ui.Text(c, label), style.Type(c).Headline).TextColor(style.Color(colors.TextPrimary)).TextAlign(ui.Center)
+			}
 		})
-		style.Text(ui.Text(c, label), style.Type(c).Callout).FontWeight(600).TextColor(style.Color(colors.TextPrimary)).TextAlign(ui.Center).MaxLines(2)
+		if round {
+			style.Text(ui.Text(c, label), style.Type(c).Callout).TextColor(style.Color(colors.TextPrimary)).TextAlign(ui.Center).MaxLines(2)
+		}
 	})
 	if b.Clicked() {
 		more()

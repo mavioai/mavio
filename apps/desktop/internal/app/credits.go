@@ -7,7 +7,6 @@ import (
 	"github.com/egoist/mygo/ui"
 
 	capiv1 "github.com/mavioai/mavio/libs/client-rust/capi/gen/mavio/capi/v1"
-	design "github.com/mavioai/mavio/libs/design/gen/go"
 	libraryv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/library/v1"
 
 	"github.com/mavioai/mavio/apps/desktop/internal/style"
@@ -143,29 +142,22 @@ func (a *App) castShelf(c *ui.Context, server, id string, credits []creditEntry)
 // play or their job; it opens their page.
 func (a *App) personTile(c *ui.Context, server string, e creditEntry, label string, width float32) {
 	colors := style.Colors(c)
-	b := ui.ButtonBase(c).Cursor(ui.CursorPointer).Column().Width(width).Gap(4).AlignItems(ui.Center).Label(e.name)
-	// On the television, a person with focus turns white with black
-	// content (docs/tv.md §4).
-	if a.tvFocusLit(c, b, false) {
-		b.Padding(8).Margin(-8).Radius(design.RadiusLg)
-		colors = &design.LightColors
+	photo := width - 24
+	if style.TV(c) {
+		// On the television, as large as the web UI's, and focused as a card
+		// is (docs/tv.md §4).
+		width, photo = 160, 144
 	}
-	hovered := b.Hovered()
+	b := ui.ButtonBase(c).Cursor(ui.CursorPointer).Column().Width(width).Gap(4).AlignItems(ui.Center).Label(e.name)
+	hovered := a.cardFocus(c, b) || b.Hovered()
 	if b.Pressed() {
 		b.Opacity(0.8)
 	}
-	photo := width - 24
 	b.Children(func() {
 		circle := ui.Box(c).Size(photo, photo).Radius(photo / 2).Background(style.Color(colors.Fill))
-		if hovered {
-			circle.Shadow(0, 0, 0, 3, style.Color(colors.Accent))
-		}
+		artRing(c, circle, hovered)
 		circle.Children(func() {
-			inner := ui.Box(c).Fill().Radius(photo / 2).Clip()
-			if hovered {
-				inner.Border(1, style.Color(colors.Background))
-			}
-			inner.Children(func() {
+			ui.Box(c).Fill().Radius(photo / 2).Clip().Children(func() {
 				if bitmap := a.opts.Images.Get(e.photo, photo, scale); bitmap != nil {
 					ui.Image(c, bitmap).Fill().Fit(ui.Cover)
 				} else {
@@ -174,7 +166,7 @@ func (a *App) personTile(c *ui.Context, server string, e creditEntry, label stri
 			})
 		})
 		name := style.Text(ui.Text(c, e.name), style.Type(c).Callout).TextColor(style.Color(colors.TextPrimary)).TextAlign(ui.Center).MaxLines(2).Margin(4, 0, 0)
-		if hovered {
+		if b.Hovered() {
 			name.Underline()
 		}
 		style.Text(ui.Text(c, label), style.Type(c).Footnote).TextColor(style.Color(colors.TextSecondary)).TextAlign(ui.Center).MaxLines(2)
@@ -268,7 +260,10 @@ func (a *App) people(c *ui.Context, server, title string, credits []creditEntry)
 }
 
 // crewList builds an item's leading crew, each their job over their
-// name, with View Full Crew opening the whole cast and crew.
+// name, with View Full Crew opening the whole cast and crew. On the
+// television, in a region of the page's flow, left and right cross from
+// them to the column beside, and View Full Crew is reached by up and down
+// only from the last name of a row (docs/tv.md §6.2).
 func (a *App) crewList(c *ui.Context, server, id string, credits []creditEntry) {
 	var crew []creditEntry
 	for _, e := range credits {
@@ -281,42 +276,70 @@ func (a *App) crewList(c *ui.Context, server, id string, credits []creditEntry) 
 	}
 	slices.SortStableFunc(crew, func(x, y creditEntry) int { return crewRank(x.kind) - crewRank(y.kind) })
 	crew = crew[:min(len(crew), 6)]
-	colors := style.Colors(c)
 	ui.Column(c).Gap(12).AlignItems(ui.Start).Children(func() {
-		ui.Row(c).GapX(24).GapY(16).Wrap().Children(func() {
-			for i, e := range crew {
-				job := style.T(c, crewLabels[crewRank(e.kind)].label)
-				if e.kind == libraryv1.CreditKind_CREDIT_KIND_OTHER && e.role != "" {
-					job = e.role
-				}
-				ui.Column(c.Key(i)).Width(160).AlignItems(ui.Start).Children(func() {
-					style.Text(ui.Text(c, job), style.Type(c).Headline).TextColor(style.Color(colors.TextPrimary)).SingleLine()
-					b := ui.ButtonBase(c).Cursor(ui.CursorPointer).Label(e.name)
-					lit := a.tvFocusLit(c, b, false)
-					if lit {
-						b.Padding(2, 8).Margin(-2, -8).Radius(design.RadiusSm)
-					}
-					b.Children(func() {
-						name := style.Text(ui.Text(c, e.name), style.Type(c).Callout).TextColor(style.Color(colors.TextSecondary)).SingleLine()
-						if lit {
-							name.TextColor(ui.RGB(0, 0, 0))
-						}
-						if b.Hovered() {
-							name.TextColor(style.Color(colors.TextPrimary)).Underline()
-						}
-					})
-					if b.Clicked() && e.personID != "" {
-						a.router.Push("/person/" + server + "/" + e.personID)
-					}
-				})
+		a.marked(focusMarks{block: "crew", beside: true}, func() {
+			a.crewNames(c, server, crew)
+		})
+		a.marked(focusMarks{block: "crew", beside: true, end: true}, func() {
+			if a.crewMore(c).Clicked() {
+				a.router.Push("/crew/" + server + "/" + id)
 			}
 		})
-		full := linkButton(c, style.T(c, "discover.fullCrew"))
-		if a.tvFocusLit(c, full, false) {
-			full.Padding(2, 8).Margin(-2, -8).Radius(design.RadiusSm)
-		}
-		if full.Clicked() {
-			a.router.Push("/crew/" + server + "/" + id)
+	})
+}
+
+// crewMore builds the link under the leading crew opening the whole crew,
+// as the web UI's: at the end of the names, before a chevron.
+func (a *App) crewMore(c *ui.Context) ui.Element {
+	colors := style.Colors(c)
+	label := style.T(c, "discover.fullCrew")
+	b := ui.ButtonBase(c.Key("full-crew")).Gap(4).AlignItems(ui.Center).AlignSelf(ui.End).Cursor(ui.CursorPointer).Label(label)
+	tc := style.Color(colors.TextSecondary)
+	switch {
+	case a.tvLink(c, b, 6):
+		tc = ui.RGB(0, 0, 0)
+	case b.Hovered():
+		tc = style.Color(colors.TextPrimary)
+	}
+	b.Children(func() {
+		style.Text(ui.Text(c, label), style.Type(c).Callout).TextColor(tc)
+		ui.Icon(c, style.Icon("forward", false)).Size(16, 16).TextColor(tc)
+	})
+	return b
+}
+
+// crewNames builds the leading crew, each their job over their name,
+// opening their page.
+func (a *App) crewNames(c *ui.Context, server string, crew []creditEntry) {
+	colors := style.Colors(c)
+	ui.Row(c).GapX(24).GapY(16).Wrap().Children(func() {
+		for i, e := range crew {
+			job := style.T(c, crewLabels[crewRank(e.kind)].label)
+			if e.kind == libraryv1.CreditKind_CREDIT_KIND_OTHER && e.role != "" {
+				job = e.role
+			}
+			ui.Column(c.Key(i)).Width(160).AlignItems(ui.Start).Children(func() {
+				style.Text(ui.Text(c, job), style.Type(c).Headline).TextColor(style.Color(colors.TextPrimary)).SingleLine()
+				// One with no page is no link, which focus would stop at.
+				if e.personID == "" && e.tmdb == "" {
+					style.Text(ui.Text(c, e.name), style.Type(c).Callout).TextColor(style.Color(colors.TextSecondary)).SingleLine().MaxWidth(160)
+					return
+				}
+				b := ui.ButtonBase(c).Cursor(ui.CursorPointer).MaxWidth(160).Label(e.name)
+				lit := a.tvLink(c, b, 6)
+				b.Children(func() {
+					name := style.Text(ui.Text(c, e.name), style.Type(c).Callout).TextColor(style.Color(colors.TextSecondary)).SingleLine()
+					switch {
+					case lit:
+						name.TextColor(ui.RGB(0, 0, 0))
+					case b.Hovered():
+						name.TextColor(style.Color(colors.TextPrimary)).Underline()
+					}
+				})
+				if b.Clicked() {
+					a.openPerson(server, e)
+				}
+			})
 		}
 	})
 }

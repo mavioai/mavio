@@ -12,6 +12,9 @@ import (
 // Layout returns the layout of the frame's form factor: television's in
 // TV mode (TV), else the desktop's.
 func Layout(c *ui.Context) *design.Layout {
+	if t := c.Theme(); t == paneThemes()[0] || t == paneThemes()[1] {
+		return &tvPaneLayout
+	}
 	if TV(c) {
 		return &design.TvLayout
 	}
@@ -31,8 +34,23 @@ func Type(c *ui.Context) *design.Typography {
 // theme of Theme's for television.
 func TV(c *ui.Context) bool {
 	t := c.Theme()
-	tv := tvThemes()
-	return t == tv[0] || t == tv[1]
+	tv, pane := tvThemes(), paneThemes()
+	return t == tv[0] || t == tv[1] || t == pane[0] || t == pane[1]
+}
+
+// tvPaneLayout is the layout of a pane of the TV mode beside another,
+// whose margin keeps only a little room for a focused card to grow.
+var tvPaneLayout = func() design.Layout {
+	l := design.TvLayout
+	l.Margin = 24
+	return l
+}()
+
+// Pane returns the theme of a pane of the TV mode beside another, as
+// Search's results beside its keyboard (docs/tv.md §6.4), the dark one
+// when dark: a theme for television whose layout's margin is 24.
+func Pane(dark bool) *ui.Theme {
+	return paneThemes()[1-b2i(dark)]
 }
 
 // Color returns c as MyGo's color.
@@ -70,6 +88,8 @@ func b2i(b bool) int {
 var (
 	themes   = sync.OnceValue(func() [2]*ui.Theme { return [2]*ui.Theme{theme(true, false), theme(false, false)} })
 	tvThemes = sync.OnceValue(func() [2]*ui.Theme { return [2]*ui.Theme{theme(true, true), theme(false, true)} })
+	// paneThemes are the TV mode's for a pane beside another (Pane).
+	paneThemes = sync.OnceValue(func() [2]*ui.Theme { return [2]*ui.Theme{theme(true, true), theme(false, true)} })
 )
 
 // Theme returns MyGo's theme of the dark or the light colors, for

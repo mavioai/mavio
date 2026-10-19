@@ -106,9 +106,14 @@ func (a *App) visitPlaces() {
 	}
 	stack, ok := p.stacks[p.current]
 	if !ok {
-		// A page opened directly is Home's.
+		// A page opened directly is its parent's, Back returning there.
 		p.current = "/home"
 		p.stacks[p.current] = []string{"/home", path}
+		if p.tv {
+			parents := parentsOf(path)
+			p.current = parents[0]
+			p.stacks[p.current] = append(parents, path)
+		}
 		return
 	}
 	// A page among the place's ends them, as Back returns to it.
@@ -121,6 +126,25 @@ func (a *App) visitPlaces() {
 		stack = append(stack, path)
 	}
 	p.stacks[p.current] = stack
+}
+
+// parentsOf returns the pages above a page opened directly in the TV mode,
+// from its place (docs/tv.md §4): a title's cast or crew lies in the title,
+// a library in Libraries, a discovered title, a catalog or the requests in
+// Discover, anything else in Home.
+func parentsOf(path string) []string {
+	parts := strings.Split(strings.Trim(path, "/"), "/")
+	switch {
+	case (parts[0] == "credits" || parts[0] == "crew") && len(parts) == 3:
+		return []string{"/home", "/item/" + parts[1] + "/" + parts[2]}
+	case parts[0] == "title" && len(parts) == 5 && parts[4] == "crew":
+		return []string{"/discover", "/" + strings.Join(parts[:4], "/")}
+	case parts[0] == "library":
+		return []string{"/libraries"}
+	case parts[0] == "title" || parts[0] == "catalog" || parts[0] == "requests" || parts[0] == "discover":
+		return []string{"/discover"}
+	}
+	return []string{"/home"}
 }
 
 // openPlace opens the place of path: another place at the page last shown

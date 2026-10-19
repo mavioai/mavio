@@ -242,26 +242,68 @@ func (a *App) discoverPage(c *ui.Context, r *ui.Route) {
 	r.Title(style.T(c, "nav.discover"))
 	server, catalogs, pending := a.discovery(c)
 	ui.Column(c).Fill().Children(func() {
-		a.pageHeader(c, style.T(c, "nav.discover"), func() {
-			if server != "" && secondaryButton(c, "pending", style.T(c, "requests.title")).Clicked() {
-				a.router.Push("/requests/" + server)
-			}
-		})
 		switch {
 		case pending:
+			a.discoverHeader(c, "")
 			ui.Column(c).Gap(32).Children(func() { placeholderShelf(c, 8); placeholderShelf(c, 8) })
 			return
 		case server == "":
+			a.discoverHeader(c, "")
 			statusView(c, "discover", style.T(c, "discover.notSetUp"), style.T(c, "discover.notSetUpMessage"), nil)
 			return
 		}
+		// The header scrolls with the rows, as the web UI's does.
 		ui.Scroll(c).TrackScroll(a.pageScroll(a.pagePath)).Grow(1).Children(func() {
-			ui.Column(c).Gap(32).Padding(0, 0, 40).Children(func() {
-				for _, row := range rowsOf(catalogs) {
-					a.catalogShelf(c, server, row, catalogRowTitle(c, row), 0)
-				}
+			ui.Column(c).Padding(0, 0, 40).Children(func() {
+				a.discoverHeader(c, server)
+				ui.Column(c).Gap(32).Children(func() {
+					for _, row := range rowsOf(catalogs) {
+						a.catalogShelf(c, server, row, catalogRowTitle(c, row), 0)
+					}
+				})
 			})
 		})
+	})
+}
+
+// discoverHeader builds Discover's header: its title, but on the
+// television, and at the right Requests, opening the requests of server
+// when it is not "", aside above the first row (docs/tv.md §4).
+func (a *App) discoverHeader(c *ui.Context, server string) {
+	colors := style.Colors(c)
+	tv := style.TV(c)
+	top, bottom := a.pageTop(c), float32(16)
+	if tv {
+		top, bottom = 16, 8
+	}
+	ui.Row(c).Padding(top, style.Layout(c).Margin, bottom).Gap(12).AlignItems(ui.End).DragWindow().Children(func() {
+		if !tv {
+			style.Text(ui.Text(c, style.T(c, "nav.discover")), style.Type(c).Title1).TextColor(style.Color(colors.TextPrimary)).SingleLine().Shrink(1)
+		}
+		ui.Spacer(c)
+		if server == "" {
+			return
+		}
+		label := style.T(c, "requests.title")
+		b := ui.ButtonBase(c.Key("requests")).MinHeight(36).Padding(6, 16).Gap(6).Radius(18).AlignItems(ui.Center).Shrink(0).Label(label)
+		fg := style.Color(colors.TextPrimary)
+		var lit bool
+		a.marked(focusMarks{aside: true}, func() { lit = a.tvFocusLit(c, b, false) })
+		switch {
+		case lit:
+			fg = ui.RGB(0, 0, 0)
+		case b.Hovered():
+			b.Background(style.Color(colors.FillSelected))
+		default:
+			b.Background(style.Color(colors.Fill))
+		}
+		b.Children(func() {
+			ui.Icon(c, style.Icon("pending", false)).Size(16, 16).TextColor(fg)
+			style.Text(ui.Text(c, label), style.Type(c).Callout).FontWeight(600).TextColor(fg).SingleLine()
+		})
+		if b.Clicked() {
+			a.router.Push("/requests/" + server)
+		}
 	})
 }
 
@@ -310,6 +352,10 @@ func (a *App) catalogShelf(c *ui.Context, server string, row catalogRow, title s
 		for _, title := range titles {
 			a.discoveredCard(c, server, title, style.Layout(c).Poster, "")
 		}
+		// On the television, More is the row's last card instead.
+		if more != nil && style.TV(c) {
+			a.seeAllCard(c, style.T(c, "home.more"), more, false)
+		}
 	})
 }
 
@@ -319,7 +365,7 @@ func (a *App) discoveredCard(c *ui.Context, server string, t *acquisitionv1.Disc
 	colors := style.Colors(c)
 	tmdb := tmdbOf(t)
 	b := ui.ButtonBase(c.Key(key(t.GetMediaKind(), tmdb, t.GetName()))).Cursor(ui.CursorPointer).Column().Width(width).Gap(6).AlignItems(ui.Start).Label(t.GetName())
-	hovered := b.Hovered()
+	hovered := a.cardFocus(c, b) || b.Hovered()
 	if b.Pressed() {
 		b.Opacity(0.8)
 	}
@@ -556,7 +602,7 @@ func (a *App) titlePage(c *ui.Context, r *ui.Route) {
 }
 
 // titleFacts returns the line of a title's facts, as Seerr's: the year,
-// then its kind, rating, runtime and genres.
+// then its kind, rating and runtime; its genres follow.
 func titleFacts(c *ui.Context, t *acquisitionv1.Title) string {
 	var facts []string
 	if t.GetYear() > 0 {
@@ -573,31 +619,64 @@ func titleFacts(c *ui.Context, t *acquisitionv1.Title) string {
 	if m := t.GetRuntimeMinutes(); m > 0 {
 		facts = append(facts, style.T(c, "time.minutes", "count", int(m)))
 	}
-	genres := t.GetGenres()
-	facts = append(facts, genres[:min(len(genres), 3)]...)
 	return strings.Join(facts, " · ")
+}
+
+// titleGenres builds a title's first three genres after its facts, each
+// opening the popular titles of the genre.
+func (a *App) titleGenres(c *ui.Context, server string, title *acquisitionv1.Title, fg ui.Color) {
+	genres := title.GetGenreRefs()
+	if len(genres) == 0 {
+		for _, g := range title.GetGenres() {
+			genres = append(genres, pluginv1.Reference_builder{Name: &g}.Build())
+		}
+	}
+	for i, g := range genres[:min(len(genres), 3)] {
+		sep := "/"
+		if i == 0 {
+			sep = "·"
+		}
+		style.Text(ui.Text(c.Key(key("sep", i)), sep), style.Type(c).Callout).TextColor(fg).Margin(0, 5)
+		path := ""
+		if g.GetId() != "" {
+			path = a.alikePath(c, server, title.GetMediaKind(), catalogFilter{Genres: []string{g.GetId()}})
+		}
+		if path == "" {
+			style.Text(ui.Text(c.Key(i), g.GetName()), style.Type(c).Callout).TextColor(fg)
+			continue
+		}
+		b := ui.ButtonBase(c.Key(i)).Cursor(ui.CursorPointer).Label(g.GetName())
+		tc := fg
+		lit := a.tvLink(c, b, 6)
+		if lit {
+			tc = ui.RGB(0, 0, 0)
+		}
+		b.Children(func() {
+			t := style.Text(ui.Text(c, g.GetName()), style.Type(c).Callout).TextColor(tc)
+			if b.Hovered() && !lit {
+				t.Underline()
+			}
+		})
+		if b.Clicked() {
+			a.router.Push(path)
+		}
+	}
 }
 
 func (a *App) titleHeader(c *ui.Context, server string, title *acquisitionv1.Title) {
 	st := &a.discoverState
 	_, wh := c.Size()
+	tv := style.TV(c)
 	height := min(max(wh*0.7, 520), 700)
+	posterW, textW, titleSize := float32(200), float32(640), float32(52)
+	if tv {
+		height, posterW, textW, titleSize = wh*0.86, 300, 960, 72
+	}
 	white := ui.RGB(255, 255, 255)
 	backdrop, blurred := sized(title.GetBackdropUrl(), 1280), false
 	if backdrop == "" {
 		backdrop, blurred = sized(title.GetPosterUrl(), 342), true
 	}
-	series := title.GetMediaKind() == acquisitionv1.MediaKind_MEDIA_KIND_SERIES
-	admin := a.isAdmin(server)
-	var pending []string
-	for _, r := range title.GetRequests() {
-		if r.GetStatus() == acquisitionv1.RequestStatus_REQUEST_STATUS_PENDING {
-			pending = append(pending, r.GetId())
-		}
-	}
-	some := slices.ContainsFunc(title.GetSeasons(), func(s *acquisitionv1.SeasonStatus) bool {
-		return s.GetStatus() != acquisitionv1.MediaStatus_MEDIA_STATUS_UNSPECIFIED && s.GetStatus() != acquisitionv1.MediaStatus_MEDIA_STATUS_DELETED
-	})
 	ui.Box(c).Height(height).Clip().Background(style.Color(design.DarkColors.SurfaceRaised)).DragWindow().Children(func() {
 		if bitmap := a.opts.Images.Get(backdrop, a.contentWidth, scale); bitmap != nil {
 			img := ui.Image(c, bitmap).Absolute().Top(0).Left(0).Right(0).Bottom(0).Fit(ui.Cover)
@@ -609,64 +688,101 @@ func (a *App) titleHeader(c *ui.Context, server string, title *acquisitionv1.Tit
 			Angle: 55,
 			Stops: []ui.GradientStop{{At: 0, Color: ui.RGBA(0, 0, 0, 0.9)}, {At: 0.5, Color: ui.RGBA(0, 0, 0, 0.45)}, {At: 1, Color: ui.RGBA(0, 0, 0, 0)}},
 		})
-		ui.Row(c).Absolute().Left(40).Right(40).Bottom(40).Gap(40).AlignItems(ui.End).Children(func() {
-			if poster := a.opts.Images.Get(sized(title.GetPosterUrl(), 500), 200, scale); poster != nil {
-				ui.Box(c).Width(200).Height(300).Shrink(0).Radius(8).Clip().Shadow(0, 12, 32, 0, ui.RGBA(0, 0, 0, 0.4)).Children(func() {
+		block := ui.Row(c).Absolute().Left(40).Right(40).Bottom(40).Gap(40).AlignItems(ui.End)
+		if tv {
+			margin := style.Layout(c).Margin
+			block.Left(margin).Right(margin).Bottom(wh * 0.1)
+		}
+		block.Children(func() {
+			if poster := a.opts.Images.Get(sized(title.GetPosterUrl(), 500), posterW, scale); poster != nil {
+				ui.Box(c).Width(posterW).Height(posterW*1.5).Shrink(0).Radius(8).Clip().Shadow(0, 12, 32, 0, ui.RGBA(0, 0, 0, 0.4)).Children(func() {
 					ui.Image(c, poster).Fill().Fit(ui.Cover)
 				})
 			}
-			ui.Column(c).MaxWidth(640).MinWidth(0).Gap(12).Children(func() {
-				style.Text(ui.Text(c, title.GetName()), style.Type(c).Display).TextColor(white).MaxLines(3).Selectable()
-				ui.Row(c).Gap(12).AlignItems(ui.Center).Wrap().Children(func() {
-					style.Text(ui.Text(c, titleFacts(c, title)), style.Type(c).Callout).TextColor(white.Alpha(0.8))
-					if s := statusLabel(c, title.GetStatus()); s != "" {
-						style.Text(ui.Text(c, s), style.Type(c).Caption).FontWeight(600).TextColor(white).Padding(1, 6).Radius(4).Background(white.Alpha(0.2))
-					}
+			ui.Column(c).MaxWidth(textW).MinWidth(0).Gap(12).Children(func() {
+				style.Text(ui.Text(c, title.GetName()), style.Type(c).Display).FontSize(titleSize).FontWeight(700).LineHeight(1.05).
+					TextColor(white).MaxLines(3).Selectable()
+				// On the television the genres, the actions and the overview
+				// below are each a region of their own (docs/tv.md §6.3).
+				a.inFlow(func() {
+					ui.Row(c).GapX(12).GapY(6).AlignItems(ui.Center).Wrap().Children(func() {
+						ui.Row(c).AlignItems(ui.Center).Wrap().Children(func() {
+							style.Text(ui.Text(c, titleFacts(c, title)), style.Type(c).Callout).TextColor(white.Alpha(0.8))
+							a.titleGenres(c, server, title, white.Alpha(0.8))
+						})
+						if s := statusLabel(c, title.GetStatus()); s != "" {
+							style.Text(ui.Text(c, s), style.Type(c).Caption).FontWeight(600).TextColor(white).Padding(1, 6).Radius(4).Background(white.Alpha(0.2))
+						}
+					})
 				})
-				ui.Row(c).Gap(12).Wrap().Padding(8, 0, 0).Children(func() {
-					primary := true
-					if title.GetItemId() != "" {
-						if a.heroButton(c, "play", style.T(c, "discover.watch"), true).Clicked() {
-							a.router.Push("/item/" + server + "/" + title.GetItemId())
-						}
-						primary = false
-					}
-					if urls := title.GetTrailerUrls(); len(urls) > 0 && a.opts.OpenURL != nil {
-						if a.heroButton(c, "movies", style.T(c, "item.trailer"), false).Clicked() {
-							_ = a.opts.OpenURL(urls[0])
-						}
-					}
-					if title.GetRequestable() {
-						label := style.T(c, "discover.request")
-						if series && some {
-							label = style.T(c, "discover.requestMore")
-						}
-						b := a.heroButton(c, "add", label, primary)
-						if st.busy {
-							b.Opacity(0.5)
-						}
-						if b.Clicked() && !st.busy {
-							if series {
-								a.askSeasons(title, nil)
-							} else {
-								a.createRequest(server, title, nil)
-							}
-						}
-					}
-					if admin && len(pending) > 0 {
-						if a.heroButton(c, "check", style.T(c, "requests.approve"), false).Clicked() && !st.busy {
-							a.requestAction(server, pending, "approve")
-						}
-						if a.heroButton(c, "close", style.T(c, "requests.decline"), false).Clicked() && !st.busy {
-							a.requestAction(server, pending, "decline")
-						}
-					}
+				if o := title.GetOverview(); tv && o != "" {
+					style.Text(ui.Text(c, o), style.Type(c).Body).TextColor(white.Alpha(0.85)).MaxLines(2)
+				}
+				a.initialFocus(func() {
+					a.inFlow(func() { a.titleActions(c, server, title) })
 				})
 				if st.err != nil {
 					style.Text(ui.Text(c, style.T(c, "discover.requestFailed", "reason", errorMessage(c, st.err))), style.Type(c).Callout).TextColor(white).Selectable()
 				}
 			})
 		})
+	})
+}
+
+// titleActions builds a title's actions: to watch it, its trailer but on
+// the television, which opens no web pages, to request it, and to approve
+// or decline its pending requests.
+func (a *App) titleActions(c *ui.Context, server string, title *acquisitionv1.Title) {
+	st := &a.discoverState
+	series := title.GetMediaKind() == acquisitionv1.MediaKind_MEDIA_KIND_SERIES
+	admin := a.isAdmin(server)
+	var pending []string
+	for _, r := range title.GetRequests() {
+		if r.GetStatus() == acquisitionv1.RequestStatus_REQUEST_STATUS_PENDING {
+			pending = append(pending, r.GetId())
+		}
+	}
+	some := slices.ContainsFunc(title.GetSeasons(), func(s *acquisitionv1.SeasonStatus) bool {
+		return s.GetStatus() != acquisitionv1.MediaStatus_MEDIA_STATUS_UNSPECIFIED && s.GetStatus() != acquisitionv1.MediaStatus_MEDIA_STATUS_DELETED
+	})
+	ui.Row(c).Gap(12).Wrap().Padding(8, 0, 0).Children(func() {
+		primary := true
+		if title.GetItemId() != "" {
+			if a.heroButton(c, "play", style.T(c, "discover.watch"), true).Clicked() {
+				a.router.Push("/item/" + server + "/" + title.GetItemId())
+			}
+			primary = false
+		}
+		if urls := title.GetTrailerUrls(); len(urls) > 0 && a.opts.OpenURL != nil && !style.TV(c) {
+			if a.heroButton(c, "movies", style.T(c, "item.trailer"), false).Clicked() {
+				_ = a.opts.OpenURL(urls[0])
+			}
+		}
+		if title.GetRequestable() {
+			label := style.T(c, "discover.request")
+			if series && some {
+				label = style.T(c, "discover.requestMore")
+			}
+			b := a.heroButton(c, "add", label, primary)
+			if st.busy {
+				b.Opacity(0.5)
+			}
+			if b.Clicked() && !st.busy {
+				if series {
+					a.askSeasons(title, nil)
+				} else {
+					a.createRequest(server, title, nil)
+				}
+			}
+		}
+		if admin && len(pending) > 0 {
+			if a.heroButton(c, "check", style.T(c, "requests.approve"), false).Clicked() && !st.busy {
+				a.requestAction(server, pending, "approve")
+			}
+			if a.heroButton(c, "close", style.T(c, "requests.decline"), false).Clicked() && !st.busy {
+				a.requestAction(server, pending, "decline")
+			}
+		}
 	})
 }
 
@@ -859,35 +975,81 @@ func (a *App) titleSeasons(c *ui.Context, server string, title *acquisitionv1.Ti
 		}
 		return int(y.GetSeasonNumber() - x.GetSeasonNumber())
 	})
-	ui.Column(c).Padding(0, style.Layout(c).Margin).Gap(8).Children(func() {
-		style.Text(ui.Text(c, style.T(c, "item.seasons")), style.Type(c).Title3).TextColor(style.Color(colors.TextPrimary))
-		for _, s := range seasons {
-			n := s.GetSeasonNumber()
-			ok := key(server, title.GetTmdbId(), n)
-			open := st.open[ok]
-			ui.Column(c.Key(n)).Radius(10).Clip().Border(1, style.Color(colors.Border)).Background(style.Color(colors.SurfaceRaised)).Children(func() {
-				b := ui.ButtonBase(c).MinHeight(48).Padding(8, 16).Gap(12).AlignItems(ui.Center).Label(seasonName(c, n))
-				b.Children(func() {
-					style.Text(ui.Text(c, seasonName(c, n)), style.Type(c).Headline).TextColor(style.Color(colors.TextPrimary)).Grow(1).SingleLine()
-					if s.GetEpisodeCount() > 0 {
-						style.Text(ui.Text(c, style.T(c, "item.episodeCount", "count", int(s.GetEpisodeCount()))), style.Type(c).Callout).TextColor(style.Color(colors.TextSecondary))
+	tv := style.TV(c)
+	// A block of its own: down from it, focus lands on the cast's first.
+	a.marked(focusMarks{block: "seasons"}, func() {
+		ui.Column(c).Padding(0, style.Layout(c).Margin).Gap(8).Children(func() {
+			style.Text(ui.Text(c, style.T(c, "item.seasons")), style.Type(c).Title3).TextColor(style.Color(colors.TextPrimary))
+			for _, s := range seasons {
+				n := s.GetSeasonNumber()
+				ok := key(server, title.GetTmdbId(), n)
+				open := st.open[ok]
+				box := ui.Column(c.Key(n)).Radius(10).Clip()
+				// On the television a box of color.fill, white and raised with
+				// its row's focus; while it shows its episodes, only its row
+				// white and the box its size, as the web UI's.
+				if tv {
+					box.Background(style.Color(colors.Fill))
+				} else {
+					box.Border(1, style.Color(colors.Border)).Background(style.Color(colors.SurfaceRaised))
+				}
+				box.Children(func() {
+					b := ui.ButtonBase(c).MinHeight(48).Padding(8, 16).Gap(12).AlignItems(ui.Center).Label(seasonName(c, n))
+					fg, sub, pill := style.Color(colors.TextPrimary), style.Color(colors.TextSecondary), style.Color(colors.Fill)
+					lit := a.tvFocus(c, b, false)
+					scale := float32(1)
+					if lit {
+						fg, sub, pill = ui.RGB(0, 0, 0), style.Color(design.LightColors.TextSecondary), style.Color(design.LightColors.Fill)
+						box.Shadow(0, 8, 24, 0, style.Color(colors.TvFocusShadow))
+						if open {
+							b.Background(ui.RGB(255, 255, 255))
+						} else {
+							box.Background(ui.RGB(255, 255, 255))
+							scale = 1.02
+						}
 					}
-					if l := statusLabel(c, s.GetStatus()); l != "" {
-						style.Text(ui.Text(c, l), style.Type(c).Footnote).FontWeight(600).TextColor(style.Color(colors.TextPrimary)).Padding(2, 10).Radius(design.RadiusFull).Background(style.Color(colors.Fill))
+					if tv {
+						k := box.Animate("focus", scale, design.DurationFast)
+						box.TransformOrigin(0.5, 0.5).Scale(k, k)
 					}
-					chevron := ui.Icon(c, style.Icon("expand", false)).Size(16, 16).TextColor(style.Color(colors.TextSecondary))
+					b.Children(func() {
+						style.Text(ui.Text(c, seasonName(c, n)), style.Type(c).Headline).TextColor(fg).Grow(1).SingleLine()
+						if s.GetEpisodeCount() > 0 {
+							style.Text(ui.Text(c, style.T(c, "item.episodeCount", "count", int(s.GetEpisodeCount()))), style.Type(c).Callout).TextColor(sub)
+						}
+						if l := statusLabel(c, s.GetStatus()); l != "" {
+							style.Text(ui.Text(c, l), style.Type(c).Footnote).FontWeight(600).TextColor(fg).Padding(2, 10).Radius(design.RadiusFull).Background(pill)
+						}
+						chevron := ui.Icon(c, style.Icon("expand", false)).Size(16, 16).TextColor(sub)
+						if open {
+							chevron.Rotate(180)
+						}
+					})
+					if b.Clicked() {
+						st.open[ok] = !open
+						open = !open
+					}
+					// The episodes grow into view as the season opens, and as
+					// they load, and shrink away as it closes: the panel eases
+					// to the height its content had in the last frame.
+					panel := ui.Column(c).Shrink(0).ClipY()
+					var inner ui.Element
+					panel.Children(func() {
+						inner = ui.Column(c).Shrink(0)
+						inner.Children(func() {
+							if open || panel.LayoutBounds().H > 0.5 {
+								a.seasonEpisodes(c, server, title.GetTmdbId(), n)
+							}
+						})
+					})
+					target := float32(0)
 					if open {
-						chevron.Rotate(180)
+						target = inner.LayoutBounds().H
 					}
+					panel.Height(box.Animate("height", target, design.DurationNormal))
 				})
-				if b.Clicked() {
-					st.open[ok] = !open
-				}
-				if open {
-					a.seasonEpisodes(c, server, title.GetTmdbId(), n)
-				}
-			})
-		}
+			}
+		})
 	})
 }
 
@@ -915,7 +1077,7 @@ func (a *App) seasonEpisodes(c *ui.Context, server string, tmdb, number int32) {
 	}
 	switch {
 	case !t.loaded:
-		ui.Box(c).Padding(0, 16, 16).Children(func() { activityIndicator(c, 20, t.started) })
+		ui.Column(c).Padding(16).Center().Children(func() { activityIndicator(c, 20, t.started) })
 		return
 	case t.err != nil:
 		note(style.T(c, "state.error"))
@@ -969,7 +1131,8 @@ func (a *App) titleCast(c *ui.Context, server string, title *acquisitionv1.Title
 	}
 	slices.SortStableFunc(cast, func(x, y creditEntry) int { return int(x.order - y.order) })
 	cast = cast[:min(len(cast), 20)]
-	a.shelf(c, key("titleCast", server, title.GetTmdbId()), style.T(c, "item.cast"), nil, func() {
+	all := func() { a.router.Push(titlePath(server, title.GetMediaKind(), title.GetTmdbId()) + "/credits") }
+	a.labeledShelf(c, key("titleCast", server, title.GetTmdbId()), style.T(c, "item.cast"), all, style.T(c, "credits.all"), func() {
 		for i, e := range cast {
 			a.personTile(c.Key(i), server, e, e.role, 120)
 		}
