@@ -1,5 +1,9 @@
 package dev.mavio.app.tv
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Intent
+import android.net.Uri
 import android.view.WindowManager
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
@@ -14,6 +18,8 @@ import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -23,16 +29,17 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -42,9 +49,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Brush
@@ -54,10 +64,15 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.layout.boundsInRoot
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.Lifecycle
@@ -78,6 +93,7 @@ import dev.mavio.core.AudioStream
 import dev.mavio.core.Details
 import dev.mavio.core.PlaybackInfo
 import dev.mavio.core.PlaybackOptions
+import dev.mavio.core.PlayKind
 import dev.mavio.core.PlaybackSession
 import dev.mavio.core.Source
 import dev.mavio.core.SubtitleStream
@@ -87,6 +103,7 @@ import dev.mavio.player.chooseTracks
 import dev.mavio.player.createPlayer
 import dev.mavio.player.engineFor
 import dev.mavio.ui.MavioIcon
+import dev.mavio.ui.Quality
 import dev.mavio.ui.R
 import dev.mavio.ui.languageName
 import dev.mavio.ui.text
@@ -94,9 +111,6 @@ import dev.mavio.ui.theme
 import java.time.Duration
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
-
-/** The bitrate the server keeps to, as the other apps' Auto quality. */
-private const val AUTO_BITRATE = 40_000_000L
 
 /** How far left and right seek. */
 private const val SEEK_MS = 10_000L
@@ -116,11 +130,28 @@ private class Position {
     var ended = false
 }
 
-/** The audio and subtitle streams picked, by the server's indexes; -1 turns the subtitles off. */
-private data class Selection(val audio: Int? = null, val subtitle: Int? = null)
+/**
+ * The audio and subtitle streams picked, by the server's indexes (-1 turns
+ * the subtitles off), and the quality.
+ */
+private data class Selection(val audio: Int? = null, val subtitle: Int? = null, val quality: Quality = Quality.AUTO)
 
-/** The side panel's pickers. */
-private enum class Panel { AUDIO, SUBTITLES }
+/** The tabs of the side panel, as the web UI's. */
+private enum class Panel(val label: Int) {
+    AUDIO(R.string.player_audio),
+    SUBTITLES(R.string.player_subtitles),
+    QUALITY(R.string.player_quality),
+    INFO(R.string.player_info),
+}
+
+/** The side panel open, which stays while the streams change, and the row's button that opened it. */
+private class Options {
+    var panel by mutableStateOf<Panel?>(null)
+    var opener = Panel.AUDIO
+}
+
+/** The speeds the player offers. */
+private val SPEEDS = listOf(0.5f, 0.75f, 1f, 1.25f, 1.5f, 2f)
 
 /**
  * The player on a television (docs/tv.md §7): the video over the whole
@@ -138,11 +169,12 @@ fun PlayerPage(model: AppModel, page: Page.Player) {
     val pages = LocalPages.current
     var playback by remember(page) { mutableStateOf<Playback?>(null) }
     var failure by remember(page) { mutableStateOf<String?>(null) }
-    var selection by remember(page) { mutableStateOf(Selection()) }
+    var selection by remember(page) { mutableStateOf(Selection(quality = Quality.stored(context))) }
     // Where the next start begins: the resume position, then where the streams changed.
     var resume by remember(page) { mutableStateOf(page.start) }
     var sourceId by remember(page) { mutableStateOf(page.mediaSourceId) }
     var details by remember(page) { mutableStateOf<Details?>(null) }
+    val options = remember(page) { Options() }
     KeepScreenOn()
     LaunchedEffect(page, selection) {
         playback = null
@@ -150,7 +182,7 @@ fun PlayerPage(model: AppModel, page: Page.Player) {
         try {
             val item = details ?: runCatching { model.client.details(page.serverId, page.itemId) }.getOrNull()
             details = item
-            session = model.play(page.serverId, page.itemId, PlaybackOptions(sourceId, selection.audio, selection.subtitle, AUTO_BITRATE, resume, false))
+            session = model.play(page.serverId, page.itemId, PlaybackOptions(sourceId, selection.audio, selection.subtitle, selection.quality.bitrate, resume, false))
             val info = session.info()
             sourceId = info.mediaSourceId
             val source = item?.sources?.firstOrNull { it.serverId == page.serverId && it.mediaSourceId == info.mediaSourceId }
@@ -190,7 +222,7 @@ fun PlayerPage(model: AppModel, page: Page.Player) {
             }
 
             override fun onPlayerError(error: PlaybackException) {
-                if (p != null && engine == PlayerEngine.MEDIA3 && p.info.kind == dev.mavio.core.PlayKind.DIRECT_PLAY) {
+                if (p != null && engine == PlayerEngine.MEDIA3 && p.info.kind == PlayKind.DIRECT_PLAY) {
                     startMs = player?.currentPosition ?: startMs
                     engine = PlayerEngine.MPV
                 } else {
@@ -231,8 +263,10 @@ fun PlayerPage(model: AppModel, page: Page.Player) {
         if (error != null) {
             Failure(error)
         } else if (player != null && p != null) {
-            Controller(player, page.title, p, playNext) { picked ->
+            Controller(player, page.title, p, selection.quality, options, playNext) { picked ->
                 resume = Duration.ofMillis(player.currentPosition)
+                // The quality stays this device's, as the web UI's.
+                Quality.store(context, picked.quality)
                 selection = picked
             }
         } else {
@@ -296,12 +330,18 @@ private fun heading(context: android.content.Context, details: Details): String?
  */
 @OptIn(UnstableApi::class)
 @Composable
-private fun Controller(player: Player, title: String, playback: Playback, playNext: (() -> Unit)?, onPick: (Selection) -> Unit) {
+private fun Controller(player: Player, title: String, playback: Playback, quality: Quality, options: Options, playNext: (() -> Unit)?, onPick: (Selection) -> Unit) {
     val pages = LocalPages.current
     val playPause = rememberPlayPauseButtonState(player)
     val progress = rememberProgressStateWithTickInterval(player, 500, rememberCoroutineScope())
     var shown by remember { mutableStateOf(false) }
-    var panel by remember { mutableStateOf<Panel?>(null) }
+    var panel by options::panel
+    // An open panel keeps the controller up, as the web UI's.
+    val visible = shown || panel != null
+    // How far the timeline's top is from the screen's foot, the panel sitting above it, as the web UI's.
+    var bottom by remember { mutableFloatStateOf(0f) }
+    var timeline by remember { mutableFloatStateOf(0f) }
+    val density = LocalDensity.current
     var pressed by remember { mutableLongStateOf(0L) }
     var inRow by remember { mutableStateOf(false) }
     val idle = remember { FocusRequester() }
@@ -314,8 +354,8 @@ private fun Controller(player: Player, title: String, playback: Playback, playNe
         }
     }
     // Outside the row, focus stays on the page, which shows none.
-    LaunchedEffect(shown) {
-        if (shown) return@LaunchedEffect
+    LaunchedEffect(visible) {
+        if (visible) return@LaunchedEffect
         withFrameNanos {}
         runCatching { idle.requestFocus() }
     }
@@ -333,20 +373,19 @@ private fun Controller(player: Player, title: String, playback: Playback, playNe
     BackHandler {
         when {
             panel != null -> {
-                val opener = openers.getValue(panel!!)
                 panel = null
-                runCatching { opener.requestFocus() }
+                shown = true
+                runCatching { openers.getValue(options.opener).requestFocus() }
             }
             shown -> shown = false
             else -> pages.back()
         }
     }
-    val buttons = playNext != null || playback.info.subtitles.isNotEmpty() || playback.source?.subtitles?.isNotEmpty() == true ||
-        (playback.source?.audio?.size ?: 0) > 1
-    val buffering = player.playbackState == Player.STATE_BUFFERING || player.playbackState == Player.STATE_IDLE
+    val buffering = rememberBuffering(player)
     Box(
         Modifier
             .fillMaxSize()
+            .onGloballyPositioned { bottom = it.boundsInRoot().bottom }
             .onPreviewKeyEvent { e ->
                 if (e.type == KeyEventType.KeyDown) pressed = System.nanoTime()
                 val down = e.type == KeyEventType.KeyDown
@@ -375,7 +414,7 @@ private fun Controller(player: Player, title: String, playback: Playback, playNe
                     }
                     e.key == Key.DirectionDown -> {
                         if (down) {
-                            if (shown && buttons) runCatching { row.requestFocus() } else shown = true
+                            if (shown) runCatching { row.requestFocus() } else shown = true
                         }
                         true
                     }
@@ -394,7 +433,7 @@ private fun Controller(player: Player, title: String, playback: Playback, playNe
             .focusable(),
     ) {
         if (buffering) CircularProgressIndicator(Modifier.align(Alignment.Center).size(72.dp), color = Color.White, strokeWidth = 5.dp)
-        AnimatedVisibility(shown, Modifier.fillMaxSize(), enter = fadeIn(), exit = fadeOut()) {
+        AnimatedVisibility(visible, Modifier.fillMaxSize(), enter = fadeIn(), exit = fadeOut()) {
             Box(Modifier.fillMaxSize()) {
                 Column(
                     Modifier
@@ -408,7 +447,7 @@ private fun Controller(player: Player, title: String, playback: Playback, playNe
                     Text(title, style = theme.type.title1.text, fontWeight = FontWeight.Bold, color = Color.White, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     val duration = progress.durationMs.coerceAtLeast(0)
                     val now = progress.currentPositionMs.coerceAtLeast(0)
-                    Timeline(if (duration > 0) now.toFloat() / duration else 0f)
+                    Timeline(if (duration > 0) now.toFloat() / duration else 0f, Modifier.onGloballyPositioned { timeline = it.boundsInRoot().top })
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s16)) {
                         // Whether it plays, which select changes.
                         MavioIcon(if (playPause.showPlay) R.drawable.ic_pause_fill else R.drawable.ic_play_fill, size = 28.dp, tint = Color.White)
@@ -418,31 +457,33 @@ private fun Controller(player: Player, title: String, playback: Playback, playNe
                             style = theme.type.headline.text,
                             color = Color.White.copy(alpha = 0.85f),
                         )
-                        if (buttons) {
-                            Row(
-                                Modifier
-                                    .onFocusChanged { inRow = it.hasFocus }
-                                    .focusRequester(row)
-                                    .focusGroup(),
-                                horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s16),
-                                verticalAlignment = Alignment.CenterVertically,
+                        Row(
+                            Modifier
+                                .onFocusChanged { inRow = it.hasFocus }
+                                .focusRequester(row)
+                                .focusGroup(),
+                            horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s16),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            playNext?.let { TvButton(stringResource(R.string.player_next_episode), it, icon = R.drawable.ic_next_fill) }
+                            if (playback.info.subtitles.isNotEmpty()) {
+                                val on = (playback.info.subtitleStreamIndex ?: -1) >= 0
+                                TvCircleButton(
+                                    if (on) R.drawable.ic_subtitles_fill else R.drawable.ic_subtitles,
+                                    stringResource(R.string.player_subtitles),
+                                    Modifier.focusRequester(openers.getValue(Panel.SUBTITLES)),
+                                ) {
+                                    options.opener = Panel.SUBTITLES
+                                    panel = Panel.SUBTITLES
+                                }
+                            }
+                            TvCircleButton(
+                                R.drawable.ic_audio,
+                                stringResource(R.string.player_audio),
+                                Modifier.focusRequester(openers.getValue(Panel.AUDIO)),
                             ) {
-                                playNext?.let { TvButton(stringResource(R.string.player_next_episode), it, icon = R.drawable.ic_next_fill) }
-                                if (playback.info.subtitles.isNotEmpty() || playback.source?.subtitles?.isNotEmpty() == true) {
-                                    val on = (playback.info.subtitleStreamIndex ?: -1) >= 0
-                                    TvCircleButton(
-                                        if (on) R.drawable.ic_subtitles_fill else R.drawable.ic_subtitles,
-                                        stringResource(R.string.player_subtitles),
-                                        Modifier.focusRequester(openers.getValue(Panel.SUBTITLES)),
-                                    ) { panel = Panel.SUBTITLES }
-                                }
-                                if ((playback.source?.audio?.size ?: 0) > 1) {
-                                    TvCircleButton(
-                                        R.drawable.ic_audio,
-                                        stringResource(R.string.player_audio),
-                                        Modifier.focusRequester(openers.getValue(Panel.AUDIO)),
-                                    ) { panel = Panel.AUDIO }
-                                }
+                                options.opener = Panel.AUDIO
+                                panel = Panel.AUDIO
                             }
                         }
                     }
@@ -450,62 +491,273 @@ private fun Controller(player: Player, title: String, playback: Playback, playNe
             }
         }
         panel?.let { open ->
-            SidePanel(open, playback, Modifier.align(Alignment.CenterEnd)) { picked ->
-                panel = null
-                shown = false
-                onPick(picked)
-            }
+            SidePanel(open, player, playback, quality, with(density) { (bottom - timeline).coerceAtLeast(0f).toDp() } + MavioSpacing.s16, Modifier.align(Alignment.BottomEnd), onTab = { panel = it }, onPick = onPick)
         }
     }
 }
 
+/** Whether [player] waits for media, following its state as it changes. */
+@Composable
+private fun rememberBuffering(player: Player): Boolean {
+    fun waiting() = player.playbackState == Player.STATE_BUFFERING || player.playbackState == Player.STATE_IDLE
+    var buffering by remember(player) { mutableStateOf(waiting()) }
+    DisposableEffect(player) {
+        val listener = object : Player.Listener {
+            override fun onPlaybackStateChanged(state: Int) {
+                buffering = waiting()
+            }
+        }
+        player.addListener(listener)
+        buffering = waiting()
+        onDispose { player.removeListener(listener) }
+    }
+    return buffering
+}
+
 /** How far the playback is, as a slim bar across the controller. */
 @Composable
-private fun Timeline(fraction: Float) {
-    Box(Modifier.fillMaxWidth().height(8.dp).clip(CircleShape).background(Color.White.copy(alpha = 0.3f))) {
+private fun Timeline(fraction: Float, modifier: Modifier) {
+    Box(modifier.fillMaxWidth().height(8.dp).clip(CircleShape).background(Color.White.copy(alpha = 0.3f))) {
         Box(Modifier.fillMaxWidth(fraction.coerceIn(0f, 1f)).fillMaxHeight().background(Color.White))
     }
 }
 
 /**
- * The side panel of the audio streams or the subtitles, dark glass at the
- * screen's end, with focus on the current choice.
+ * The side panel of the player's options, as the web UI's: dark glass over
+ * the video's corner, [above] its foot, over the timeline, with the
+ * tabs of the audio streams and the speed, the subtitles, the quality and
+ * the playback's information. Focus starts
+ * on the current choice of the tab opened and stays within the panel; a
+ * tab shows as focus moves to it, and focus entering the tabs lands on the
+ * current one.
  */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun SidePanel(panel: Panel, playback: Playback, modifier: Modifier, onPick: (Selection) -> Unit) {
+private fun SidePanel(
+    panel: Panel,
+    player: Player,
+    playback: Playback,
+    quality: Quality,
+    above: Dp,
+    modifier: Modifier,
+    onTab: (Panel) -> Unit,
+    onPick: (Selection) -> Unit,
+) {
+    val context = LocalContext.current
     val info = playback.info
     val source = playback.source
-    val current = Selection(info.audioStreamIndex, info.subtitleStreamIndex ?: -1)
-    val choices: List<Triple<Boolean, Pair<String, String>, Selection>> = when (panel) {
-        Panel.AUDIO -> source?.audio.orEmpty().map { a -> Triple(a.index == info.audioStreamIndex, audioLabel(a), current.copy(audio = a.index)) }
-        Panel.SUBTITLES -> listOf(Triple((info.subtitleStreamIndex ?: -1) < 0, stringResource(R.string.player_subtitles_off) to "", current.copy(subtitle = -1))) +
-            source?.subtitles.orEmpty().map { s -> Triple(s.index == info.subtitleStreamIndex, subtitleLabel(s), current.copy(subtitle = s.index)) }
-    }
+    val current = Selection(info.audioStreamIndex, info.subtitleStreamIndex ?: -1, quality)
+    // Without subtitles there is no tab for them, as the web UI's.
+    val tabs = Panel.entries.filter { it != Panel.SUBTITLES || info.subtitles.isNotEmpty() }
     val chosen = remember { FocusRequester() }
-    LaunchedEffect(panel) {
+    val tabFocus = remember { FocusRequester() }
+    LaunchedEffect(Unit) {
         withFrameNanos {}
-        runCatching { chosen.requestFocus() }
+        if (!runCatching { chosen.requestFocus() }.getOrDefault(false)) runCatching { tabFocus.requestFocus() }
     }
     Column(
         modifier
-            .fillMaxHeight()
-            .width(560.dp)
-            .background(Color(0xE6171717))
-            .border(1.dp, Color.White.copy(alpha = 0.1f))
-            .padding(vertical = 64.dp),
+            .padding(start = MavioSpacing.s16, top = MavioSpacing.s16, end = theme.layout.margin, bottom = above)
+            .width(360.dp)
+            .clip(RoundedCornerShape(18.dp))
+            .background(Color(0xBF171717))
+            .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(18.dp))
+            .focusProperties { onExit = { if (requestedFocusDirection != FocusDirection.Enter) cancelFocusChange() } }
+            .focusGroup(),
     ) {
-        Text(
-            stringResource(if (panel == Panel.AUDIO) R.string.player_audio else R.string.player_subtitles),
-            Modifier.padding(horizontal = 40.dp, vertical = MavioSpacing.s16),
-            style = theme.type.title2.text,
-            fontWeight = FontWeight.Bold,
-            color = Color.White,
-        )
-        LazyColumn(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(MavioSpacing.s4)) {
-            items(choices) { (checked, label, selection) ->
-                Choice(checked, label, if (checked) Modifier.focusRequester(chosen) else Modifier) { onPick(selection) }
+        Row(
+            Modifier
+                .padding(12.dp)
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(9.dp))
+                .background(Color.White.copy(alpha = 0.1f))
+                .padding(2.dp)
+                .focusProperties { onEnter = { tabFocus.requestFocus() } }
+                .focusGroup(),
+        ) {
+            tabs.forEach { tab ->
+                Tab(stringResource(tab.label), tab == panel, Modifier.weight(1f).then(if (tab == panel) Modifier.focusRequester(tabFocus) else Modifier)) { onTab(tab) }
             }
         }
+        Column(
+            Modifier
+                .weight(1f, fill = false)
+                .verticalScroll(rememberScrollState())
+                .padding(start = 8.dp, end = 8.dp, bottom = 12.dp),
+        ) {
+            val first = { checked: Boolean -> if (checked) Modifier.focusRequester(chosen) else Modifier }
+            when (panel) {
+                Panel.AUDIO -> {
+                    source?.audio.orEmpty().forEach { a ->
+                        val checked = a.index == info.audioStreamIndex
+                        Choice(checked, audioLabel(a), first(checked)) { onPick(current.copy(audio = a.index)) }
+                    }
+                    Heading(stringResource(R.string.player_speed))
+                    var speed by remember { mutableFloatStateOf(player.playbackParameters.speed) }
+                    // A group's speed stays the group's.
+                    val free = player.isCommandAvailable(Player.COMMAND_SET_SPEED_AND_PITCH)
+                    FlowRow(
+                        Modifier.padding(horizontal = 10.dp),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        verticalArrangement = Arrangement.spacedBy(6.dp),
+                    ) {
+                        SPEEDS.forEach { r ->
+                            Speed("${if (r % 1f == 0f) r.toInt().toString() else r.toString()}×", r == speed, free) {
+                                player.setPlaybackSpeed(r)
+                                speed = r
+                            }
+                        }
+                    }
+                }
+                Panel.SUBTITLES -> {
+                    val picked = info.subtitleStreamIndex ?: -1
+                    Choice(picked < 0, stringResource(R.string.player_subtitles_off) to "", first(picked < 0)) { onPick(current.copy(subtitle = -1)) }
+                    info.subtitles.forEach { t ->
+                        val stream = source?.subtitles?.firstOrNull { it.index == t.streamIndex }
+                        val label = stream?.let { subtitleLabel(it) }
+                            ?: ((t.title ?: languageName(t.language) ?: "#${t.streamIndex}") to t.format.uppercase())
+                        val checked = t.streamIndex == picked
+                        Choice(checked, label, first(checked)) { onPick(current.copy(subtitle = t.streamIndex)) }
+                    }
+                }
+                Panel.QUALITY -> Quality.entries.forEach { q ->
+                    Choice(q == quality, (q.label?.let { stringResource(it) } ?: q.key) to "", first(q == quality)) {
+                        if (q != quality) onPick(current.copy(quality = q))
+                    }
+                }
+                Panel.INFO -> Column(
+                    Modifier.padding(top = 4.dp),
+                    verticalArrangement = Arrangement.spacedBy(MavioSpacing.s16),
+                ) {
+                    Fact(
+                        stringResource(R.string.player_method),
+                        stringResource(
+                            when (info.kind) {
+                                PlayKind.DIRECT_PLAY -> R.string.player_direct_play
+                                PlayKind.DIRECT_STREAM -> R.string.player_direct_stream
+                                PlayKind.TRANSCODE -> R.string.player_transcode
+                            },
+                        ),
+                    )
+                    source?.let { s ->
+                        Fact(
+                            stringResource(R.string.player_source),
+                            listOfNotNull(s.name, s.container?.split(',')?.first()?.uppercase()).joinToString(" · "),
+                        )
+                    }
+                    Column {
+                        PanelAction(R.drawable.ic_external, stringResource(R.string.player_open_external)) {
+                            val intent = Intent(Intent.ACTION_VIEW).setDataAndType(Uri.parse(info.url), "video/*")
+                            runCatching { context.startActivity(Intent.createChooser(intent, null)) }
+                        }
+                        PanelAction(null, stringResource(R.string.player_copy_link)) {
+                            context.getSystemService(ClipboardManager::class.java)?.setPrimaryClip(ClipData.newPlainText(null, info.url))
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+/** A tab of the side panel, chosen as focus moves to it: filled when chosen, white with focus. */
+@Composable
+private fun Tab(label: String, chosen: Boolean, modifier: Modifier, onChoose: () -> Unit) {
+    val state = remember { Focusable() }
+    val focused = state.focused()
+    Text(
+        label,
+        modifier
+            .onFocusChanged { if (it.isFocused && !chosen) onChoose() }
+            .clip(RoundedCornerShape(7.dp))
+            .background(
+                when {
+                    focused -> Color.White
+                    chosen -> Color.White.copy(alpha = 0.25f)
+                    else -> Color.Transparent
+                },
+            )
+            .selectable(state, onChoose)
+            .padding(horizontal = 8.dp, vertical = 4.dp),
+        style = theme.type.footnote.text,
+        fontWeight = FontWeight.SemiBold,
+        color = when {
+            focused -> Color.Black
+            chosen -> Color.White
+            else -> Color.White.copy(alpha = 0.7f)
+        },
+        textAlign = TextAlign.Center,
+        maxLines = 1,
+    )
+}
+
+/**
+ * A speed of the side panel: filled when chosen and white with focus, so
+ * that focus on the chosen one shows.
+ */
+@Composable
+private fun Speed(label: String, chosen: Boolean, enabled: Boolean, onClick: () -> Unit) {
+    val state = remember { Focusable() }
+    val focused = state.focused()
+    Text(
+        label,
+        Modifier
+            .alpha(if (enabled) 1f else 0.4f)
+            .clip(CircleShape)
+            .background(
+                when {
+                    focused -> Color.White
+                    chosen -> Color.White.copy(alpha = 0.3f)
+                    else -> Color.White.copy(alpha = 0.1f)
+                },
+            )
+            .then(if (enabled) Modifier.selectable(state, onClick) else Modifier)
+            .padding(horizontal = 12.dp, vertical = 4.dp),
+        style = theme.type.footnote.text,
+        fontWeight = FontWeight.SemiBold,
+        color = if (focused) Color.Black else Color.White,
+    )
+}
+
+/** A heading in the side panel. */
+@Composable
+private fun Heading(label: String) {
+    Text(
+        label,
+        Modifier.padding(start = 10.dp, top = MavioSpacing.s16, bottom = MavioSpacing.s8),
+        style = theme.type.footnote.text,
+        fontWeight = FontWeight.SemiBold,
+        color = Color.White.copy(alpha = 0.6f),
+    )
+}
+
+/** An action in the panel's information: its icon and its name, white with focus. */
+@Composable
+private fun PanelAction(icon: Int?, label: String, onClick: () -> Unit) {
+    val state = remember { Focusable() }
+    val focused = state.focused()
+    val color = if (focused) Color.Black else Color.White
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(10.dp))
+            .background(if (focused) Color.White else Color.Transparent)
+            .selectable(state, onClick)
+            .padding(horizontal = 10.dp, vertical = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s12),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        icon?.let { MavioIcon(it, size = 20.dp, tint = color.copy(alpha = 0.7f)) }
+        Text(label, style = theme.type.callout.text, color = color)
+    }
+}
+
+/** A fact of the playback in the side panel: its label over its value. */
+@Composable
+private fun Fact(label: String, value: String) {
+    Column(Modifier.padding(horizontal = 10.dp)) {
+        Text(label, style = theme.type.footnote.text, fontWeight = FontWeight.SemiBold, color = Color.White.copy(alpha = 0.6f))
+        Text(value, Modifier.padding(top = 2.dp), style = theme.type.callout.text, color = Color.White)
     }
 }
 
@@ -517,23 +769,21 @@ private fun Choice(checked: Boolean, label: Pair<String, String>, modifier: Modi
     val color = if (focused) Color.Black else Color.White
     Row(
         modifier
-            .padding(horizontal = MavioSpacing.s24)
             .fillMaxWidth()
-            .then(if (focused) Modifier.shadow(12.dp, RoundedCornerShape(12.dp)) else Modifier)
-            .clip(RoundedCornerShape(12.dp))
+            .clip(RoundedCornerShape(10.dp))
             .background(if (focused) Color.White else Color.Transparent)
             .selectable(state, onClick)
-            .padding(horizontal = MavioSpacing.s16, vertical = MavioSpacing.s12),
+            .padding(horizontal = 10.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s12),
     ) {
-        Box(Modifier.size(28.dp), Alignment.Center) {
-            if (checked) MavioIcon(R.drawable.ic_check, size = 28.dp, tint = color)
+        Box(Modifier.width(20.dp), Alignment.Center) {
+            if (checked) MavioIcon(R.drawable.ic_check, size = 20.dp, tint = theme.colors.accent)
         }
         Column(Modifier.weight(1f)) {
-            Text(label.first, style = theme.type.headline.text, color = color, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(label.first, style = theme.type.callout.text, color = color, maxLines = 1, overflow = TextOverflow.Ellipsis)
             if (label.second.isNotEmpty()) {
-                Text(label.second, style = theme.type.footnote.text, color = color.copy(alpha = 0.7f), maxLines = 1)
+                Text(label.second, style = theme.type.caption.text, color = color.copy(alpha = 0.6f), maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
         }
     }
