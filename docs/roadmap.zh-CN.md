@@ -626,7 +626,7 @@ flowchart TD
   - [x] tvOS 上的 Rust：在 `nightly-2026-10-10` 上以 `-Zbuild-std` 构建，`mavio-api` 及其 `events` 示例可为 `aarch64-apple-tvos` 与 `aarch64-apple-tvos-sim` 构建，示例在 tvOS 模拟器中运行，TLS（rustls 与 aws-lc-rs）可构建
   - [x] connect-rust 与 `EventService` 的流：`libs/client-rust/api/examples/events.rs` 登录并打印设备的事件，在 macOS 与 tvOS 模拟器上均可运行
   - [x] macOS、iOS 与 tvOS 上的 AetherEngine 7.34.0：在 Mac 上，HDR10 Matroska 源经引擎重封装由 AVPlayer 播放、VideoToolbox 解码，并提高显示器的 EDR 余量；画中画在其 `AVPlayerLayer` 上启动，VP9、AV1 与 MPEG-2 走软件路径时则在其 `AVSampleBufferDisplayLayer` 上启动；ASS 轨道以原始事件行连同脚本头送达。iPad 与 Apple TV 模拟器以软件路径播放相同的源，iPad 模拟器在应用转入后台时在样本缓冲显示层上进入画中画
-    - [ ] 在用户的设备上：iPhone 或 iPad 上画中画内的画面、Apple TV 上的 HDR10 与显示条件，以及杜比视界源
+    - [ ] 在用户的设备上：iPad 上画中画内的画面（iPhone 上已检查）、Apple TV 上的 HDR10 与显示条件，以及杜比视界源
   - [x] 取自 fork `mavioai/AetherEngine` 分支 `v7.39.0-mavio` 的 AetherEngine 7.39.0：libdovi 链接进核心，由核心向引擎仅含头文件的 `Dovi` 模块导出其 C API，因此应用只链接一份 Rust 标准库；`MavioPlayer` 的测试与 iPhone 应用在没有 LibDovi 的情况下完成链接
     - [ ] TrueHD Atmos 对象音频（trait `TrueHDObjectAudio`）：以同样方式把 fork `mavioai/LibTrueHD` 的 `truehd-atmos-ffi` 链接进核心，待其专利授权问题解决后进行
   - [x] macOS 上的 MyGo 视频元素：MyGo 分叉 `mavioai/mygo` 的 `v0.5.5-mavio` 分支上的 `Window.NewVideoView` 与 `ui.Video`，附 MyGo 的单元测试与端到端测试；来自 mavio-deps 的 macOS 版 libmpv（`mpv-macos-0.41.0.g88eb9f2-1`），带有 Mavio 把它嵌入 `wid` 所指视图的补丁。以 purego 加载 libmpv 的原型在 MyGo 窗口中播放 SDR H.264 与 HDR10 HEVC，由 VideoToolbox 解码，`gpu-next` 运行在 MoltenVK 上，HDR10 以 PQ 输出；视频之上的 MyGo 控件接收点击；mpv 不打开自己的窗口
@@ -672,7 +672,7 @@ flowchart TD
 - [x] iPhone 与 iPad 应用（`apps/ios`、`libs/apple`）：登录（密码、首个用户、Quick Connect、附近发现的服务器、在浏览器中或以链接码登录 Mavio 账户并在个人资料页退出）、多台服务器且令牌保存在钥匙串、合并的首页、带推荐与媒体库标签的媒体库、排序与筛选、推荐栏、跨服务器搜索、带版本与其他服务器副本的详情、播放器（按应用声明的能力选用 AVPlayer 或 AetherEngine、服务端的 HLS、音轨与字幕轨、播放速度、AirPlay、AVPlayer 的画中画）、以后台 `URLSession` 下载并离线播放且补报进度、授权设备；iPhone 上为底部标签栏，iPad 上为系统位于顶部的标签栏，搜索在其末尾，两者都在从标签打开的页面上隐藏；两者都从顶栏右侧的头像进入设置，下载在设置中
   - [ ] 发现与请求页面，随 P20
   - [x] AetherEngine 播放时的画中画：围绕原生路径的 `AVPlayerLayer`，或软件路径的 `AVSampleBufferDisplayLayer` 及其 `SoftwarePiPSource` 给出的播放控制；窗口打开期间告知引擎，使其管线在后台保持运行，并把字幕绘入窗口
-  - [ ] 在设备上试用画中画与正在播放：模拟器既不支持画中画，也不在锁屏显示正在播放
+  - [ ] 在设备上试用正在播放：模拟器不在锁屏显示它；画中画已在 iPhone 上检查
   - [x] 借助 libass 保留样式的 ASS 字幕：AetherEngine 保留 ASS 轨道（内嵌或外挂）的事件行，`ASSRenderer` 按脚本的样式、用文件附带的字体，在显示的每一帧把它们绘制在画面上；其他轨道仍用普通字幕层
   - [x] 两种引擎的正在播放与远程命令（`MPNowPlayingInfoCenter`、`MPRemoteCommandCenter`）：标题、剧集与集数、封面、位置与速度；播放、暂停、10 秒快进快退、跳转位置，以及下一集
   - [x] 一集结束时播放下一集
@@ -689,7 +689,7 @@ flowchart TD
   - [x] iPhone 与 iPad 应用的详情页显示发现服务器对电影或剧集提供的内容，与 Web UI 一致：推荐、带标志的评分、媒体库缺少的上映日期与状态、下一集播出日期、预算与票房、带国旗的国家、流媒体服务与外部链接标志，经由共享核心的详情新带上的条目在其他站点的 ID
   - [x] iPhone 与 iPad 应用详情页上的问题，与 Web UI 一致：允许报告问题的用户与管理员从「更多」菜单报告电影、剧集、季或单集的问题，报告后打开该问题；条目的未解决问题列在详细信息之后，每个均可打开
   - [ ] iPhone 与 iPad 应用其余的详情页：Request More、管理员的获取与字幕
-  - [x] iPhone 与 iPad 应用从详情页的演职人员打开的人物页，与 Web UI 一致（照片、日期、简介与链接，以及署名其中的电影、剧集与单集），以及类型、关键词与工作室打开按它们筛选的媒体库网格，经由共享核心新增的调用；尚未在真机上检查
+  - [x] iPhone 与 iPad 应用从详情页的演职人员打开的人物页，与 Web UI 一致（照片、日期、简介与链接，以及署名其中的电影、剧集与单集），以及类型、关键词与工作室打开按它们筛选的媒体库网格，经由共享核心新增的调用
   - [x] iPhone 与 iPad 应用的发现，与 Web UI 一致，在有已登录服务器提供发现时作为媒体库之后的标签：各目录作为推荐栏并带「查看全部」，目录的分页，发现的作品（页头，带评分标志的详细信息、预算与票房、播出日期、流媒体服务与外部链接，主创、关键词、各季及其各集，演职人员及其单独页面，合集，以及相似作品），发现的人物与合集；服务器没有的推荐作品以发现页打开
   - [x] iPhone 与 iPad 应用中目录的筛选与排序，与 Web 界面一致：一个面板，含目录支持的排序、类型、制片公司、关键词、按国家的流媒体服务、原始语言、年份、时长、评分与评分人数（`ListFilterValues`），已在 iPhone 模拟器上检查
   - [ ] iPhone 与 iPad 应用其余的发现：暂不做的请求（作品页的下半部分、人物与合集页已在 iPhone 模拟器上检查，首页、媒体库、详情、发现及其筛选已在 iPad 模拟器上检查）
