@@ -164,7 +164,7 @@ function Results({ q, results, grid }: { q: string; results: SearchResults[]; gr
   return (
     <>
       {results.map(({ server, items, pending, error }) => {
-        const title = several ? server.name : t("nav.search");
+        const title = several ? server.name : t("search.server");
         if (pending) {
           return (
             <Shelf key={server.id} title={title}>

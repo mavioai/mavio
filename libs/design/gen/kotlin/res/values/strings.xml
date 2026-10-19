@@ -689,6 +689,8 @@
     <string name="search_clear">Clear</string>
     <!-- Row of the movies and series discovery providers find by name. -->
     <string name="search_discover">From Discover</string>
+    <!-- Row of the server's items a search finds, when only one server is signed in; with several, each row is titled by its server's name. -->
+    <string name="search_server">From the Server</string>
     <!-- User menu item opening the Mavio account's page at mavio.dev. -->
     <string name="menu_manage_account">Manage Account at mavio.dev</string>
     <!-- User menu item opening the servers' settings. -->

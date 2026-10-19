@@ -337,6 +337,7 @@
   "search.backspace": "删除",
   "search.clear": "清空",
   "search.discover": "来自发现",
+  "search.server": "来自服务器",
   "menu.manageAccount": "在 mavio.dev 管理账户",
   "menu.manageServers": "管理服务器",
   "menu.serverCount": "{count, plural, other {# 台服务器}}",

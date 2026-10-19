@@ -6139,6 +6139,24 @@
         }
       }
     },
+    "search.server": {
+      "comment": "Row of the server's items a search finds, when only one server is signed in; with several, each row is titled by its server's name.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "From the Server"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "来自服务器"
+          }
+        }
+      }
+    },
     "menu.manageAccount": {
       "comment": "User menu item opening the Mavio account's page at mavio.dev.",
       "extractionState": "manual",

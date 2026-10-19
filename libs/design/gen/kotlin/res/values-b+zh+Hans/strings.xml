@@ -349,6 +349,7 @@
     <string name="search_backspace">删除</string>
     <string name="search_clear">清空</string>
     <string name="search_discover">来自发现</string>
+    <string name="search_server">来自服务器</string>
     <string name="menu_manage_account">在 mavio.dev 管理账户</string>
     <string name="menu_manage_servers">管理服务器</string>
     <plurals name="menu_server_count">
