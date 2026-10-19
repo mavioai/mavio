@@ -41,6 +41,9 @@ struct SearchView: View {
         .searchable(
             text: $query, placement: .navigationBarDrawer(displayMode: .always), prompt: MavioStrings.searchPlaceholder
         )
+        // Typing keeps the title in place, instead of the bar sliding up
+        // over it and back.
+        .searchPresentationToolbarBehavior(.avoidHidingContent)
         // Opened from the top bar's button, it is ready to type into.
         .searchFocused($focused)
         .onAppear { focused = true }
