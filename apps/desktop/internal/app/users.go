@@ -337,6 +337,9 @@ func (a *App) adminLibraries() *task[[]*libraryv1.Library] {
 	st := &a.settingsState.admin
 	return adminTask(a, &st.libs, "libraries", func(ctx context.Context, s string) ([]*libraryv1.Library, error) {
 		res, err := a.libraryService(s).ListLibraries(ctx, &libraryv1.ListLibrariesRequest{})
+		if err == nil {
+			a.opts.Update(func() { a.listedScans(s, res.GetLibraries()) })
+		}
 		return res.GetLibraries(), err
 	})
 }

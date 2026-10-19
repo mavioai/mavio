@@ -126,6 +126,9 @@ type App struct {
 	servers      []*capiv1.ServerRecord
 	// state is the state of each server's stream.
 	state map[string]capiv1.StreamState_State
+	// scans are how far the libraries' scans have come, by server and
+	// library, as the servers tell administrators.
+	scans map[string]map[string]*capiv1.ScanProgress
 	// generation counts the changes of the servers' content, so that what
 	// shows them loads again.
 	generation int
@@ -244,6 +247,8 @@ func (a *App) Event(e *capiv1.Event) {
 			a.state[id] = e.GetState().GetState()
 		case e.HasConnected(), e.HasLibraryChanged(), e.HasUserDataChanged():
 			a.generation++
+		case e.HasScanProgressChanged():
+			a.scanChanged(id, e.GetScanProgressChanged())
 		}
 	})
 }

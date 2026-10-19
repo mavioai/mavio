@@ -13,6 +13,7 @@ import (
 	"github.com/egoist/mygo/ui"
 	"google.golang.org/protobuf/types/known/durationpb"
 
+	capiv1 "github.com/mavioai/mavio/libs/client-rust/capi/gen/mavio/capi/v1"
 	libraryv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/library/v1"
 	storagev1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/storage/v1"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/storage/v1/storagev1connect"
@@ -205,10 +206,16 @@ func (a *App) libraryList(c *ui.Context) {
 		for _, l := range libs {
 			k := libraryKindOf(l.GetKind())
 			detail := style.T(c, k.title) + " · " + style.T(c, "libraries.folderCount", "count", len(l.GetPaths()))
-			if n, ok := st.notices[l.GetId()]; ok {
+			id := l.GetId()
+			progress := a.scans[a.chosenServer().GetId()][id]
+			switch n, ok := st.notices[id]; {
+			case progress != nil:
+				detail = scanDetail(c, progress)
+			case st.scanned[id]:
+				detail = style.T(c, "libraries.scanDone")
+			case ok:
 				detail = n
 			}
-			id := l.GetId()
 			g.divider()
 			ui.Row(c.Key(id)).MinHeight(52).Padding(10, 16).Gap(12).AlignItems(ui.Center).Children(func() {
 				b := ui.ButtonBase(c).Grow(1).MinWidth(0).Gap(12).AlignItems(ui.Center).Justify(ui.Start).Label(l.GetName())
@@ -220,6 +227,11 @@ func (a *App) libraryList(c *ui.Context) {
 							t.Underline()
 						}
 						style.Text(ui.Text(c, detail), style.Type(c).Footnote).TextColor(style.Color(colors.TextSecondary))
+						if progress != nil {
+							ui.Box(c).Height(4).Radius(2).Margin(4, 0, 0, 0).Background(style.Color(colors.Fill)).Role(ui.RoleProgress).Children(func() {
+								ui.Box(c).Height(4).Radius(2).WidthPercent(float32(min(max(progress.GetFraction(), 0), 1) * 100)).Background(style.Color(colors.Accent))
+							})
+						}
 					})
 				})
 				if b.Clicked() {
@@ -244,6 +256,7 @@ func (a *App) scanButton(c *ui.Context, id string, done func(notice string, err 
 		label = "…"
 	}
 	if smallButton(c.Key("scan"+id), label, st.running != "") {
+		delete(st.scanned, id)
 		a.startAction(id, func(ctx context.Context) (string, error) {
 			res, err := a.libraryService(server).ScanLibrary(ctx, libraryv1.ScanLibraryRequest_builder{Id: &id}.Build())
 			if res.GetEnqueued() {
@@ -252,6 +265,58 @@ func (a *App) scanButton(c *ui.Context, id string, done func(notice string, err 
 			return "libraries.scanPending", err
 		}, done)
 	}
+}
+
+// scanDetail tells what a library's scan does, and how far it has come.
+func scanDetail(c *ui.Context, p *capiv1.ScanProgress) string {
+	if p.GetReadingFolders() {
+		return style.T(c, "libraries.scanFolders", "done", p.GetFoldersDone(), "total", p.GetFoldersTotal())
+	}
+	return style.T(c, "libraries.scanItems", "done", p.GetItemsDone(), "total", p.GetItemsTotal())
+}
+
+// listedScans takes the scans of a server's libraries as listed, which
+// the server's events then carry on.
+func (a *App) listedScans(server string, libs []*libraryv1.Library) {
+	scans := map[string]*capiv1.ScanProgress{}
+	for _, l := range libs {
+		if !l.HasScanProgress() {
+			continue
+		}
+		p := l.GetScanProgress()
+		scans[l.GetId()] = capiv1.ScanProgress_builder{
+			ReadingFolders: p.GetPhase() == libraryv1.ScanPhase_SCAN_PHASE_FOLDERS,
+			FoldersDone:    p.GetFoldersDone(),
+			FoldersTotal:   p.GetFoldersTotal(),
+			ItemsDone:      p.GetItemsDone(),
+			ItemsTotal:     p.GetItemsTotal(),
+			Fraction:       p.GetFraction(),
+		}.Build()
+	}
+	if a.scans == nil {
+		a.scans = map[string]map[string]*capiv1.ScanProgress{}
+	}
+	a.scans[server] = scans
+}
+
+// scanChanged takes how far a library's scan has come, or that it ended.
+func (a *App) scanChanged(server string, e *capiv1.ScanProgressChanged) {
+	if a.scans == nil {
+		a.scans = map[string]map[string]*capiv1.ScanProgress{}
+	}
+	if a.scans[server] == nil {
+		a.scans[server] = map[string]*capiv1.ScanProgress{}
+	}
+	st := &a.settingsState.admin
+	if e.HasProgress() {
+		a.scans[server][e.GetLibraryId()] = e.GetProgress()
+		return
+	}
+	delete(a.scans[server], e.GetLibraryId())
+	if st.scanned == nil {
+		st.scanned = map[string]bool{}
+	}
+	st.scanned[e.GetLibraryId()] = true
 }
 
 // libraryPage builds a library's page, or that of a new one when id is

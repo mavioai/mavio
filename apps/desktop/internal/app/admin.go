@@ -57,6 +57,7 @@ type adminState struct {
 	logRefresh    int
 	notices       map[string]string // of tasks run and libraries scanned
 	running       string            // the task or library being started
+	scanned       map[string]bool   // the libraries whose scan ended
 }
 
 func (a *App) systemService(id string) systemv1connect.SystemServiceClient {
