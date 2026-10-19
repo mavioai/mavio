@@ -1,6 +1,6 @@
 // swift-tools-version: 6.2
-// The design system's Swift package for the Apple apps: the tokens, icons
-// and strings build/build.js generates into gen/swift.
+// The design system's Swift package for the Apple apps: the tokens, icons,
+// strings and AI providers' logos build/build.js generates into gen/swift.
 import PackageDescription
 
 let package = Package(
@@ -12,7 +12,7 @@ let package = Package(
         .target(
             name: "MavioDesign",
             path: "gen/swift",
-            resources: [.process("Icons.xcassets"), .process("Localizable.xcstrings")]
+            resources: [.process("Icons.xcassets"), .process("ProviderLogos.xcassets"), .process("Localizable.xcstrings")]
         )
     ]
 )
