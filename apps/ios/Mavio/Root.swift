@@ -239,11 +239,15 @@ private struct TopBar: ViewModifier {
     }
 }
 
-/// The tab bar shows on the tabs' first screens alone, as the web UI's,
-/// and hides on a page opened from one.
+/// On the iPhone the tab bar shows on the tabs' first screens alone, as the
+/// web UI's, and hides on a page opened from one. The iPad's, at the top,
+/// stays, as in the system's apps: hidden, it would take the space it held
+/// back only once the page is in, the page jumping up.
 private struct HiddenTabBar: ViewModifier {
+    @Environment(\.horizontalSizeClass) private var sizeClass
+
     func body(content: Content) -> some View {
-        content.toolbar(.hidden, for: .tabBar)
+        content.toolbar(sizeClass == .regular ? .automatic : .hidden, for: .tabBar)
     }
 }
 
