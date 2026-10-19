@@ -1,6 +1,7 @@
 //! The Connect clients of one server, over HTTP/1.1 and HTTP/2, with TLS
 //! for `https` addresses.
 
+use std::net::IpAddr;
 use std::sync::{Arc, OnceLock};
 use std::time::Duration;
 
@@ -61,6 +62,49 @@ pub fn parse_address(input: &str) -> Result<Uri> {
     format!("{scheme}://{authority}{path}")
         .parse()
         .map_err(|e| Error::Invalid(format!("address {input:?}: {e}")))
+}
+
+/// Whether a server's address is on the local network: a loopback,
+/// private or link-local IP address, a `localhost` or `.local` name, or a
+/// mavio.site name of such an address (`192-168-1-10.<ID>.mavio.site`).
+/// Clients send more over it than over the internet, where an upload or a
+/// relay sets the pace.
+pub fn is_local_address(address: &str) -> bool {
+    let Ok(uri) = parse_address(address) else {
+        return false;
+    };
+    let Some(host) = uri.host() else {
+        return false;
+    };
+    let host = host.trim_start_matches('[').trim_end_matches(']');
+    let host = host.to_ascii_lowercase();
+    if host == "localhost" || host.ends_with(".localhost") || host.ends_with(".local") {
+        return true;
+    }
+    if let Ok(ip) = host.parse::<IpAddr>() {
+        return is_local_ip(ip);
+    }
+    // `<address>.<ID>.mavio.site`, the address written with dashes.
+    let labels: Vec<&str> = host.split('.').collect();
+    if let [label, _, "mavio", "site"] = labels.as_slice() {
+        let ip = label
+            .replace('-', ".")
+            .parse::<IpAddr>()
+            .ok()
+            .or_else(|| label.replace('-', ":").parse::<IpAddr>().ok());
+        return ip.is_some_and(is_local_ip);
+    }
+    false
+}
+
+fn is_local_ip(ip: IpAddr) -> bool {
+    match ip {
+        IpAddr::V4(ip) => ip.is_loopback() || ip.is_private() || ip.is_link_local(),
+        IpAddr::V6(ip) => match ip.to_ipv4_mapped() {
+            Some(v4) => is_local_ip(IpAddr::V4(v4)),
+            None => ip.is_loopback() || ip.is_unique_local() || ip.is_unicast_link_local(),
+        },
+    }
 }
 
 /// The environment variable naming a file of PEM certificates trusted as
@@ -340,6 +384,50 @@ mod tests {
                 got.as_deref().map_err(|_| ()),
                 want,
                 "parse_address({input:?})"
+            );
+        }
+    }
+
+    #[test]
+    fn local_addresses() {
+        let cases = [
+            ("192.168.31.147:8688", true),
+            ("https://10.0.0.2", true),
+            ("http://172.20.1.1:8686", true),
+            ("127.0.0.1", true),
+            ("169.254.3.4", true),
+            ("http://[::1]:8686", true),
+            ("http://[fd12:3456::1]:8686", true),
+            ("http://[fe80::1]:8686", true),
+            ("localhost:8686", true),
+            ("media.local", true),
+            (
+                "https://192-168-1-10.abcdefghijklmnopqrstuvwxyz234567.mavio.site",
+                true,
+            ),
+            (
+                "https://fd12-3456--1.abcdefghijklmnopqrstuvwxyz234567.mavio.site",
+                true,
+            ),
+            (
+                "https://203-0-113-5.abcdefghijklmnopqrstuvwxyz234567.mavio.site",
+                false,
+            ),
+            (
+                "https://relay-eu-abc.abcdefghijklmnopqrstuvwxyz234567.mavio.site",
+                false,
+            ),
+            ("https://media.example.com", false),
+            ("203.0.113.5", false),
+            ("100.64.0.1", false),
+            ("http://[2001:db8::1]:8686", false),
+            ("", false),
+        ];
+        for (address, want) in cases {
+            let got = is_local_address(address);
+            assert_eq!(
+                got, want,
+                "is_local_address({address:?}) = {got}, want = {want}"
             );
         }
     }

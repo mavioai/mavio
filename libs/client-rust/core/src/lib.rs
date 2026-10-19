@@ -26,7 +26,7 @@ pub use client::{
     AudioStream, Core, CreditEntry, Details, DownloadEntry, Filter, HomeObserver, Libraries,
     LibraryEntry, LibraryType, Listener, Page, PersonDetails, SearchResults, Sort, Source,
 };
-pub use connection::{Connection, DEFAULT_PORT, parse_address};
+pub use connection::{Connection, DEFAULT_PORT, is_local_address, parse_address};
 pub use details::{
     CollectionLink, CreditJob, Episode, ExternalLink, Extra, ExtraKind, SeriesLink, SeriesStatus,
     SubtitleStream, VideoRange, VideoStream,

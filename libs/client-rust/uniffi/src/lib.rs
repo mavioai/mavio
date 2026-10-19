@@ -40,6 +40,13 @@ pub fn core_version() -> String {
     mavio_core::VERSION.to_owned()
 }
 
+/// Whether a server's address is on the local network, where clients
+/// send more than over the internet.
+#[uniffi::export]
+pub fn is_local_address(address: String) -> bool {
+    mavio_core::is_local_address(&address)
+}
+
 /// The runtime of the core's tasks.
 fn runtime() -> &'static Runtime {
     static RUNTIME: OnceLock<Runtime> = OnceLock::new();
