@@ -45,6 +45,7 @@ import dev.mavio.core.Source
 import dev.mavio.core.addToList
 import dev.mavio.core.createList
 import dev.mavio.core.deleteList
+import dev.mavio.core.identifiableKinds
 import dev.mavio.core.issueTypes
 import dev.mavio.core.itemLists
 import dev.mavio.core.itemRights
@@ -76,13 +77,13 @@ import dev.mavio.ui.focused
 import dev.mavio.ui.format
 import dev.mavio.ui.range
 import dev.mavio.ui.resolution
-import dev.mavio.ui.surround
-import dev.mavio.ui.versionName
 import dev.mavio.ui.selectable
 import dev.mavio.ui.shakes
 import dev.mavio.ui.sizeText
+import dev.mavio.ui.surround
 import dev.mavio.ui.text
 import dev.mavio.ui.theme
+import dev.mavio.ui.versionName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -208,6 +209,9 @@ private enum class ItemDialog(@StringRes val label: Int) {
     Report(R.string.issues_report),
     Collection(R.string.lists_add_to_collection),
     Refresh(R.string.metadata_refresh),
+    Edit(R.string.metadata_edit),
+    Identify(R.string.metadata_identify),
+    Images(R.string.metadata_images),
     Rename(R.string.lists_rename),
     Delete(R.string.lists_delete),
 }
@@ -216,8 +220,8 @@ private enum class ItemDialog(@StringRes val label: Int) {
  * The More menu of an item's actions, as the web UI's (docs/tv.md §5): a
  * circle opening its menu above it, and the dialogs it opens: playing the
  * item on another device, watching it together, adding it to a playlist, reporting a problem,
- * and for administrators adding it to a collection and refreshing its
- * metadata; a playlist, or a collection for administrators, renamed or
+ * and for administrators adding it to a collection, editing and refreshing
+ * its metadata, identifying it and choosing its images; a playlist, or a collection for administrators, renamed or
  * deleted.
  */
 @Composable
@@ -242,13 +246,19 @@ internal fun TvMoreMenu(model: AppModel, details: Details, modifier: Modifier = 
         if (listable(card.kind)) add(ItemDialog.Playlist)
         if (card.kind in reportableKinds && mayReport) add(ItemDialog.Report)
         if (listable(card.kind) && admin) add(ItemDialog.Collection)
-        if (admin && card.kind != CardKind.PLAYLIST && card.kind != CardKind.COLLECTION) add(ItemDialog.Refresh)
+        if (admin && card.kind != CardKind.PLAYLIST) {
+            add(ItemDialog.Edit)
+            if (card.kind in identifiableKinds) add(ItemDialog.Identify)
+            if (card.kind != CardKind.COLLECTION) add(ItemDialog.Refresh)
+            add(ItemDialog.Images)
+        }
         if (own) {
             add(ItemDialog.Rename)
             add(ItemDialog.Delete)
         }
     }
     if (entries.isEmpty()) return
+    val pages = LocalPages.current
     var open by remember { mutableStateOf(false) }
     var dialog by remember { mutableStateOf<ItemDialog?>(null) }
     val button = remember { FocusRequester() }
@@ -269,7 +279,12 @@ internal fun TvMoreMenu(model: AppModel, details: Details, modifier: Modifier = 
                     TvMenuItem(
                         {
                             open = false
-                            dialog = e
+                            when (e) {
+                                ItemDialog.Edit -> pages.openMetadata(MetadataPage.Edit, card)
+                                ItemDialog.Identify -> pages.openMetadata(MetadataPage.Identify, card)
+                                ItemDialog.Images -> pages.openMetadata(MetadataPage.Images, card)
+                                else -> dialog = e
+                            }
                         },
                         if (i == 0) Modifier.focusRequester(first) else Modifier,
                     ) {
@@ -293,7 +308,7 @@ internal fun TvMoreMenu(model: AppModel, details: Details, modifier: Modifier = 
         ItemDialog.Refresh -> RefreshDialog(model, card, back)
         ItemDialog.Rename -> RenameDialog(model, card, back)
         ItemDialog.Delete -> DeleteDialog(model, card, scope, back)
-        null -> {}
+        ItemDialog.Edit, ItemDialog.Identify, ItemDialog.Images, null -> {}
     }
 }
 

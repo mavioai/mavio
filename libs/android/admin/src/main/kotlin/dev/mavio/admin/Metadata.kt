@@ -1,9 +1,8 @@
-package dev.mavio.app
+package dev.mavio.admin
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -41,11 +40,6 @@ import com.google.protobuf.MessageLite
 import com.google.protobuf.duration
 import com.google.protobuf.fieldMask
 import com.google.protobuf.timestamp
-import dev.mavio.admin.ConfirmDialog
-import dev.mavio.admin.Note
-import dev.mavio.admin.Procedure
-import dev.mavio.admin.TextRow
-import dev.mavio.admin.reason
 import dev.mavio.core.AppModel
 import dev.mavio.core.call
 import dev.mavio.core.instant
@@ -54,12 +48,18 @@ import dev.mavio.design.MavioSpacing
 import dev.mavio.ui.Artwork
 import dev.mavio.ui.ButtonKind
 import dev.mavio.ui.ChoiceRow
+import dev.mavio.ui.FieldKind
 import dev.mavio.ui.Group
-import dev.mavio.ui.MavioButton
+import dev.mavio.ui.LocalTelevision
+import dev.mavio.ui.Pressable
+import dev.mavio.ui.PressableBox
 import dev.mavio.ui.R
 import dev.mavio.ui.RowDivider
+import dev.mavio.ui.SettingsButton
 import dev.mavio.ui.SettingsList
 import dev.mavio.ui.SwitchRow
+import dev.mavio.ui.TvKeyboard
+import dev.mavio.ui.rowPadding
 import dev.mavio.ui.text
 import dev.mavio.ui.theme
 import java.math.BigDecimal
@@ -201,13 +201,12 @@ private val lockable = listOf(
 
 /** Edits an item's fields and locks, as the web UI's Edit Metadata; saves only those changed. */
 @Composable
-fun EditMetadataScreen(model: AppModel, route: Route.EditMetadata) {
-    WithItem(model, route.serverId, route.itemId) { loaded -> EditForm(model, route.serverId, loaded.item) }
+fun EditMetadataScreen(model: AppModel, serverId: String, itemId: String, onDone: () -> Unit) {
+    WithItem(model, serverId, itemId) { loaded -> EditForm(model, serverId, loaded.item, onDone) }
 }
 
 @Composable
-private fun EditForm(model: AppModel, serverId: String, item: Item) {
-    val navigator = LocalNavigator.current
+private fun EditForm(model: AppModel, serverId: String, item: Item, onDone: () -> Unit) {
     val scope = rememberCoroutineScope()
     val before = remember(item) { fieldsOf(item) }
     var fields by remember(item) { mutableStateOf(before) }
@@ -252,7 +251,7 @@ private fun EditForm(model: AppModel, serverId: String, item: Item) {
         }
         item {
             Group(stringResource(R.string.metadata_overview)) {
-                AreaField(fields["overview"].orEmpty()) { fields = fields + ("overview" to it) }
+                AreaField(stringResource(R.string.metadata_overview), fields["overview"].orEmpty()) { fields = fields + ("overview" to it) }
             }
         }
         item {
@@ -352,12 +351,12 @@ private fun EditForm(model: AppModel, serverId: String, item: Item) {
         item {
             Column(verticalArrangement = Arrangement.spacedBy(MavioSpacing.s8)) {
                 failure?.let { Text(it, style = theme.type.footnote.text, color = theme.colors.danger) }
-                MavioButton(
+                SettingsButton(
                     if (saving) "…" else stringResource(R.string.metadata_save),
                     {
                         if (paths.isEmpty()) {
-                            navigator.back()
-                            return@MavioButton
+                            onDone()
+                            return@SettingsButton
                         }
                         saving = true
                         scope.launch {
@@ -375,7 +374,7 @@ private fun EditForm(model: AppModel, serverId: String, item: Item) {
                                 )
                             }.onSuccess {
                                 model.bump(serverId)
-                                navigator.back()
+                                onDone()
                             }.onFailure { failure = it.reason }
                             saving = false
                         }
@@ -417,9 +416,24 @@ private fun metadataOf(f: Fields, ids: Map<String, String>, locked: Boolean, loc
     lockedFields += locks
 }
 
-/** A field of several lines, filling its group. */
+/** A field of several lines, filling its group; on a television, its text opening the keyboard. */
 @Composable
-private fun AreaField(value: String, onChange: (String) -> Unit) {
+private fun AreaField(label: String, value: String, onChange: (String) -> Unit) {
+    if (LocalTelevision.current) {
+        var typing by remember { mutableStateOf(false) }
+        Pressable({ typing = true }, Modifier.fillMaxWidth()) {
+            Text(
+                value,
+                Modifier.fillMaxWidth().heightIn(min = 120.dp).padding(horizontal = rowPadding, vertical = 12.dp),
+                style = theme.type.body.text,
+                color = theme.colors.textSecondary,
+                maxLines = 5,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
+        if (typing) TvKeyboard(label, value, FieldKind.Lines, onChange) { typing = false }
+        return
+    }
     BasicTextField(
         value,
         onChange,
@@ -433,13 +447,12 @@ private fun AreaField(value: String, onChange: (String) -> Unit) {
 
 /** Searches the providers for what an item is and identifies it as a result, as the web UI's Identify. */
 @Composable
-fun IdentifyScreen(model: AppModel, route: Route.Identify) {
-    WithItem(model, route.serverId, route.itemId) { loaded -> IdentifyPage(model, route.serverId, loaded.item) }
+fun IdentifyScreen(model: AppModel, serverId: String, itemId: String, onDone: () -> Unit) {
+    WithItem(model, serverId, itemId) { loaded -> IdentifyPage(model, serverId, loaded.item, onDone) }
 }
 
 @Composable
-private fun IdentifyPage(model: AppModel, serverId: String, item: Item) {
-    val navigator = LocalNavigator.current
+private fun IdentifyPage(model: AppModel, serverId: String, item: Item, onDone: () -> Unit) {
     val scope = rememberCoroutineScope()
     var name by remember { mutableStateOf(item.name) }
     var year by remember { mutableStateOf(num(item.productionYear)) }
@@ -480,7 +493,7 @@ private fun IdentifyPage(model: AppModel, serverId: String, item: Item) {
                         fieldWidth = 80,
                     )
                 }
-                MavioButton(
+                SettingsButton(
                     stringResource(R.string.metadata_search),
                     { query = name.trim() to (year.trim().toIntOrNull() ?: 0) },
                     kind = ButtonKind.Secondary,
@@ -515,7 +528,7 @@ private fun IdentifyPage(model: AppModel, serverId: String, item: Item) {
                                         )
                                     }.onSuccess {
                                         model.bump(serverId)
-                                        navigator.back()
+                                        onDone()
                                     }.onFailure { failure = it.reason }
                                     busy = false
                                 }
@@ -554,7 +567,7 @@ private fun ResultRow(r: RemoteSearchResult, busy: Boolean, onIdentify: () -> Un
                 Text(r.overview, style = theme.type.footnote.text, color = colors.textSecondary, maxLines = 2, overflow = TextOverflow.Ellipsis)
             }
         }
-        MavioButton(stringResource(R.string.metadata_identify), onIdentify, kind = ButtonKind.Secondary, enabled = !busy)
+        SettingsButton(stringResource(R.string.metadata_identify), onIdentify, kind = ButtonKind.Secondary, enabled = !busy)
     }
 }
 
@@ -572,10 +585,10 @@ private val imageKinds = listOf(
 
 /** An item's images of a kind, deleted, replaced from the providers' or by an upload, as the web UI's Images. */
 @Composable
-fun ItemImagesScreen(model: AppModel, route: Route.ItemImages) {
+fun ItemImagesScreen(model: AppModel, serverId: String, itemId: String) {
     var attempt by remember { mutableIntStateOf(0) }
-    WithItem(model, route.serverId, route.itemId, attempt) { loaded ->
-        ImagesPage(model, route.serverId, loaded) { attempt++ }
+    WithItem(model, serverId, itemId, attempt) { loaded ->
+        ImagesPage(model, serverId, loaded) { attempt++ }
     }
 }
 
@@ -636,6 +649,7 @@ private fun ImagesPage(model: AppModel, serverId: String, loaded: Loaded, reload
         }
     }
     val wide = kind != ImageKind.IMAGE_KIND_PRIMARY && kind != ImageKind.IMAGE_KIND_DISC
+    val tv = LocalTelevision.current
     val current = item.imagesList.filter { it.kind == kind && it.url.isNotEmpty() }
     SettingsList(stringResource(R.string.metadata_images_title, item.name)) {
         item {
@@ -643,8 +657,9 @@ private fun ImagesPage(model: AppModel, serverId: String, loaded: Loaded, reload
                 Group {
                     ChoiceRow(stringResource(R.string.metadata_image_kind), imageKinds.map { it.first to stringResource(it.second) }, kind) { kind = it }
                 }
-                Row(horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s12), verticalAlignment = Alignment.CenterVertically) {
-                    MavioButton(
+                // A television has no images of its own to upload.
+                if (!tv) Row(horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s12), verticalAlignment = Alignment.CenterVertically) {
+                    SettingsButton(
                         stringResource(R.string.metadata_upload_image),
                         { pick.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) },
                         kind = ButtonKind.Secondary,
@@ -670,13 +685,15 @@ private fun ImagesPage(model: AppModel, serverId: String, loaded: Loaded, reload
                                 style = theme.type.caption.text,
                                 color = theme.colors.textSecondary,
                             )
-                            Text(
-                                stringResource(R.string.metadata_delete_image),
-                                Modifier.clickable(enabled = !busy) { deleting = image },
-                                style = theme.type.footnote.text,
-                                fontWeight = FontWeight.SemiBold,
-                                color = theme.colors.danger,
-                            )
+                            PressableBox({ deleting = image }, enabled = !busy) {
+                                Text(
+                                    stringResource(R.string.metadata_delete_image),
+                                    Modifier.padding(horizontal = if (tv) 12.dp else 0.dp, vertical = if (tv) 6.dp else 0.dp),
+                                    style = theme.type.footnote.text,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = theme.colors.danger,
+                                )
+                            }
                         }
                     }
                 }
@@ -691,8 +708,8 @@ private fun ImagesPage(model: AppModel, serverId: String, loaded: Loaded, reload
                     list.isEmpty() -> Text(stringResource(R.string.metadata_no_remote_images), style = theme.type.callout.text, color = theme.colors.textSecondary)
                 }
                 ImageGrid(list.orEmpty(), wide) { r, modifier ->
-                    Column(
-                        modifier.clip(RoundedCornerShape(MavioRadius.md)).clickable(enabled = !busy) {
+                    PressableBox(
+                        {
                             change {
                                 metadata(
                                     model,
@@ -707,17 +724,21 @@ private fun ImagesPage(model: AppModel, serverId: String, loaded: Loaded, reload
                                 )
                             }
                         },
-                        verticalArrangement = Arrangement.spacedBy(MavioSpacing.s4),
+                        modifier,
+                        enabled = !busy,
+                        shape = RoundedCornerShape(MavioRadius.md),
                     ) {
-                        Artwork(r.url, Modifier.fillMaxWidth().aspectRatio(if (wide) 16f / 9f else 2f / 3f).clip(RoundedCornerShape(MavioRadius.md)))
-                        Text(
-                            listOf(r.provider, if (r.width > 0 && r.height > 0) "${r.width}×${r.height}" else "", r.language)
-                                .filter { it.isNotEmpty() }.joinToString(" · "),
-                            style = theme.type.caption.text,
-                            color = theme.colors.textSecondary,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                        )
+                        Column(Modifier.padding(if (tv) 6.dp else 0.dp), verticalArrangement = Arrangement.spacedBy(MavioSpacing.s4)) {
+                            Artwork(r.url, Modifier.fillMaxWidth().aspectRatio(if (wide) 16f / 9f else 2f / 3f).clip(RoundedCornerShape(MavioRadius.md)))
+                            Text(
+                                listOf(r.provider, if (r.width > 0 && r.height > 0) "${r.width}×${r.height}" else "", r.language)
+                                    .filter { it.isNotEmpty() }.joinToString(" · "),
+                                style = theme.type.caption.text,
+                                color = theme.colors.textSecondary,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                        }
                     }
                 }
             }
@@ -756,10 +777,11 @@ private fun ImageSection(title: String, content: @Composable () -> Unit) {
     }
 }
 
-/** Images in rows, two wide ones or three posters to a row. */
+/** Images in rows, two wide ones or three posters to a row, on a television three or five. */
 @Composable
 private fun <T> ImageGrid(images: List<T>, wide: Boolean, cell: @Composable (T, Modifier) -> Unit) {
-    val columns = if (wide) 2 else 3
+    val tv = LocalTelevision.current
+    val columns = if (wide) (if (tv) 3 else 2) else (if (tv) 5 else 3)
     Column(verticalArrangement = Arrangement.spacedBy(MavioSpacing.s12)) {
         images.chunked(columns).forEach { row ->
             Row(horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s12)) {

@@ -96,6 +96,9 @@ import dev.chrisbanes.haze.rememberHazeState
 import dev.mavio.admin.AdminHost
 import dev.mavio.admin.AdminPage
 import dev.mavio.admin.AdminScreen
+import dev.mavio.admin.EditMetadataScreen
+import dev.mavio.admin.IdentifyScreen
+import dev.mavio.admin.ItemImagesScreen
 import dev.mavio.admin.LocalAdmin
 import dev.mavio.core.AppModel
 import dev.mavio.core.Card
@@ -536,9 +539,9 @@ private fun Screen(model: AppModel, route: Route) {
                 Route.Settings -> SettingsScreen(model)
                 is Route.Setting -> SettingsPageScreen(model, route.page)
                 is Route.Admin -> AdminScreen(model, route.page)
-                is Route.EditMetadata -> EditMetadataScreen(model, route)
-                is Route.Identify -> IdentifyScreen(model, route)
-                is Route.ItemImages -> ItemImagesScreen(model, route)
+                is Route.EditMetadata -> EditMetadataScreen(model, route.serverId, route.itemId, LocalNavigator.current::back)
+                is Route.Identify -> IdentifyScreen(model, route.serverId, route.itemId, LocalNavigator.current::back)
+                is Route.ItemImages -> ItemImagesScreen(model, route.serverId, route.itemId)
                 else -> StatusView(stringResource(R.string.state_loading))
             }
         }

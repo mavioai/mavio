@@ -212,9 +212,15 @@ sealed class Page {
         val recall = FocusRecall()
     }
 
+    /** An item's metadata edited, the item identified, or its images chosen, from its More menu. */
+    class Metadata(val kind: MetadataPage, val serverId: String, val itemId: String) : Page()
+
     /** An item's playback, from [start] when set. */
     class Player(val serverId: String, val itemId: String, val title: String, val mediaSourceId: String?, val start: Duration?) : Page()
 }
+
+/** What a [Page.Metadata] does. */
+enum class MetadataPage { Edit, Identify, Images }
 
 /** The pages opened over the tabs, the last on top. */
 class Pages {
@@ -280,6 +286,11 @@ class Pages {
     /** Opens connecting to a server. */
     fun openAddServer() {
         stack += Page.AddServer()
+    }
+
+    /** Opens an item's metadata page. */
+    fun openMetadata(kind: MetadataPage, card: Card) {
+        stack += Page.Metadata(kind, card.serverId, card.itemId)
     }
 
     /** Opens a page of a server's administration. */

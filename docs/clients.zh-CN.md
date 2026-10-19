@@ -127,7 +127,7 @@ flowchart LR
   * `core`：核心的 Kotlin API 及其上的应用服务——账户、能力探测、以 WorkManager 下载——以及服务器 API 的消息，构建时由 Maven 上与 protobuf 运行时同一版本的 protoc 生成为 Kotlin lite（BSD-3-Clause）：核心未建模的界面（设置）用它们经由核心（`callServer`）调用服务器的 API，与 Apple 应用相同（§4.2）。它声明 `INTERNET` 权限与 `ACCESS_LOCAL_NETWORK`，后者是 Android 17 访问局域网地址所必需的，而大多数服务器都在局域网中；应用在发现或登录之前申请后者，并允许明文 HTTP（`usesCleartextTraffic`），否则 Media3 会拒绝，而局域网中的服务器以普通 HTTP 提供媒体；
   * `player`：一个播放器接口、两个引擎，其上是提供后台播放与系统控制的 `MediaSessionService`，以及画中画（Android 的画中画可用于任何 `SurfaceView`）；还有跟随同步播放小组的播放器（§6.3.24）；
   * `ui`：共享的 Compose 组件与设计 tokens；
-  * `admin`：设置的服务器分组中供服务器管理员使用的页面，基于 `ui`，两个应用各以自己的布局打开。
+  * `admin`：设置的服务器分组中供服务器管理员使用的页面，以及编辑条目的元数据、识别条目与选择其图片的页面，基于 `ui`，两个应用各以自己的布局打开。
 * **启动**：与 iPhone 相同（§4.2），SplashScreen API 让标志停留在背景上，直到主页能完整绘制——其推荐行与首屏的图片——最长两秒，然后标志放大并淡出进入主页。Coil 把图片存在磁盘上，以去掉服务器签名后的 URL 为键；仍在加载的图片是一块纯色底，图片在其上淡入。
 * **播放引擎**，与 Apple 平台相同的优先顺序：Media3，其次 libmpv，最后由服务端处理。
   * **能力**：应用在 `direct_play` 中声明 Media3 在该设备上能播放的配置与 libmpv 能播放的配置，使服务端只在两者都不能播放时才重封装或转码。

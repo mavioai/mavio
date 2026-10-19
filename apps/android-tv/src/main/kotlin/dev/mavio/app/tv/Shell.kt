@@ -41,6 +41,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.mavio.admin.AdminHost
 import dev.mavio.admin.AdminPage
 import dev.mavio.admin.AdminScreen
+import dev.mavio.admin.EditMetadataScreen
+import dev.mavio.admin.IdentifyScreen
+import dev.mavio.admin.ItemImagesScreen
 import dev.mavio.admin.LocalAdmin
 import dev.mavio.core.AppModel
 import dev.mavio.core.SignInState
@@ -48,9 +51,9 @@ import dev.mavio.design.MavioSpacing
 import dev.mavio.ui.DiscoverState
 import dev.mavio.ui.FocusShake
 import dev.mavio.ui.LocalDiscover
-import dev.mavio.ui.RecallingFocus
 import dev.mavio.ui.LocalFocusShake
 import dev.mavio.ui.R
+import dev.mavio.ui.RecallingFocus
 import dev.mavio.ui.TvChoice
 import dev.mavio.ui.movesFocus
 import dev.mavio.ui.theme
@@ -183,6 +186,13 @@ private fun Shell(model: AppModel) {
                 is Page.TitleCredits -> key(top) { TitleCreditsPage(top) }
                 is Page.Search -> key(top) { SearchPage(model, top) }
                 is Page.Player -> key(top) { PlayerPage(model, top) }
+                is Page.Metadata -> key(top) {
+                    when (top.kind) {
+                        MetadataPage.Edit -> EditMetadataScreen(model, top.serverId, top.itemId, pages::back)
+                        MetadataPage.Identify -> IdentifyScreen(model, top.serverId, top.itemId, pages::back)
+                        MetadataPage.Images -> ItemImagesScreen(model, top.serverId, top.itemId)
+                    }
+                }
                 is Page.Settings -> key(top) { SettingsPage(model, top) }
                 is Page.AddServer -> key(top) { SignInScreen(model, adding = true) { pages.back() } }
                 is Page.Admin -> key(top) {
