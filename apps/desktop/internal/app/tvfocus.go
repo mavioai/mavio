@@ -109,6 +109,12 @@ type focusEngine struct {
 	// built is the initial item.
 	initial, first int
 	initialMark    bool
+	// lead is the item a page opening would focus in the frame being
+	// built, and opening the element focus took as the page opened while
+	// it keeps it unmoved, 0 for none: rows that load in any order, as
+	// Discover's, move it to the page's first as they come above it.
+	lead    int
+	opening uint64
 	// dots is the user menu's button, to which focus returns as the menu
 	// closes.
 	dots int
@@ -120,7 +126,7 @@ func (a *App) beginFocus() {
 	f.items, f.region, f.view, f.scroll = f.items[:0], regionPage, ui.Rect{}, nil
 	f.choice, f.choices = 0, 0
 	f.flow, f.column, f.flows, f.columns, f.marks = 0, 0, 0, 0, focusMarks{}
-	f.initial, f.first = -1, -1
+	f.initial, f.first, f.lead = -1, -1, -1
 }
 
 // initialFocus builds what fn builds as the item the page opens with focus
@@ -219,9 +225,14 @@ func (a *App) tvFocus(c *ui.Context, el ui.Element, current bool) bool {
 	}
 	// A page opens on its first item, in a region of its own as well, as
 	// Search's keyboard, past those aside.
-	first := f.want == focusFirst && f.region != regionTabs && f.region != regionMenu && !f.marks.aside
+	eligible := f.region != regionTabs && f.region != regionMenu && !f.marks.aside
+	if eligible && f.lead < 0 {
+		f.lead = i
+	}
+	first := f.want == focusFirst && eligible
 	if first {
 		f.first = i
+		f.opening = el.ID()
 	}
 	if f.want == i || first {
 		el.Focus()
@@ -284,7 +295,7 @@ func (a *App) focusPage() {
 	if f.location != "" {
 		f.saved[f.location] = f.at
 	}
-	f.location, f.want, f.hasLast, f.frames = loc, focusFirst, false, 0
+	f.location, f.want, f.hasLast, f.frames, f.opening = loc, focusFirst, false, 0, 0
 	if i, ok := f.saved[loc]; ok {
 		f.want = i
 	}
@@ -365,6 +376,18 @@ func (a *App) focusKeys(c *ui.Context, menuOpen bool) {
 			if (inMenu || !c.KeepsArrow(k)) && c.Shortcut(0, k) {
 				dir = k
 			}
+		}
+	}
+	if f.opening != 0 {
+		switch {
+		case at < 0 || f.items[at].id != f.opening || dir != 0:
+			f.opening = 0
+		case f.lead >= 0 && f.lead != at:
+			// Items came above the one the page opened on.
+			f.opening = f.items[f.lead].id
+			a.focusItem(c, f.lead)
+			c.After(0)
+			return
 		}
 	}
 	if at >= 0 && f.items[at].rect.W > 0 {
