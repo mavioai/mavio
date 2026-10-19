@@ -10,9 +10,10 @@ mod types;
 
 use std::fmt;
 use std::future::Future;
-use std::sync::{Arc, OnceLock};
+use std::sync::{Arc, Mutex, OnceLock};
 use std::time::{Duration, SystemTime};
 
+use buffa::Message;
 use mavio_api::proto::mavio::playback::v1::{PlayMethod, SubtitleMethod};
 use mavio_api::proto::mavio::session::v1::__buffa::oneof::event::Kind;
 use mavio_api::proto::mavio::session::v1::Event;
@@ -236,13 +237,43 @@ pub trait CoreListener: Send + Sync {
     fn servers_changed(&self);
 }
 
-struct Listener(Arc<dyn CoreListener>);
+/// Receives what concerns SyncPlay from the servers' streams. The app
+/// implements it and sets it with `Client::set_sync_play_listener`.
+#[uniffi::export(with_foreign)]
+pub trait SyncPlayListener: Send + Sync {
+    /// A server's stream came up as the device's session, which the
+    /// members of SyncPlay groups are.
+    fn connected(&self, server_id: String, session_id: String);
+    /// A server sent a SyncPlay group's change or command: an encoded
+    /// `mavio.session.v1.SyncPlayUpdate`.
+    fn update(&self, server_id: String, update: Vec<u8>);
+}
+
+/// The SyncPlay listener the app set, if any.
+type SyncPlaySlot = Arc<Mutex<Option<Arc<dyn SyncPlayListener>>>>;
+
+struct Listener(Arc<dyn CoreListener>, SyncPlaySlot);
 
 impl mavio_core::Listener for Listener {
     fn server_state(&self, server_id: &str, state: StreamState) {
         self.0.server_state(server_id.to_owned(), state);
     }
     fn event(&self, server_id: &str, event: &Event) {
+        let sync_play = self.1.lock().ok().and_then(|l| l.clone());
+        if let Some(sync_play) = sync_play {
+            match event.kind.as_ref() {
+                Some(Kind::Connected(c)) => {
+                    sync_play.connected(
+                        server_id.to_owned(),
+                        c.session_id.clone().unwrap_or_default(),
+                    );
+                }
+                Some(Kind::SyncPlay(u)) => {
+                    sync_play.update(server_id.to_owned(), u.encode_to_vec())
+                }
+                _ => {}
+            }
+        }
         if let Some(event) = ServerEvent::from_event(event) {
             self.0.event(server_id.to_owned(), event);
         }
@@ -483,7 +514,7 @@ fn playback_info(conn_url: impl Fn(&str) -> String, p: &mavio_core::Playback) ->
 /// The core of an app: its servers, their event streams, the data of its
 /// screens, playback and downloads.
 #[derive(uniffi::Object)]
-pub struct Client(Arc<Core>);
+pub struct Client(Arc<Core>, SyncPlaySlot);
 
 impl Client {
     /// Runs a call of the core on its runtime.
@@ -509,13 +540,22 @@ impl Client {
         listener: Arc<dyn CoreListener>,
     ) -> Result<Arc<Self>> {
         let store = Arc::new(Store::open(database_path)?);
+        let sync_play = SyncPlaySlot::default();
         let core = Core::new(
             store,
             Arc::new(Tokens(tokens)),
             device,
-            Arc::new(Listener(listener)),
+            Arc::new(Listener(listener, sync_play.clone())),
         );
-        Ok(Arc::new(Client(Arc::new(core))))
+        Ok(Arc::new(Client(Arc::new(core), sync_play)))
+    }
+
+    /// Sends what concerns SyncPlay from the servers' streams to listener,
+    /// from the next event on.
+    pub fn set_sync_play_listener(&self, listener: Arc<dyn SyncPlayListener>) {
+        if let Ok(mut slot) = self.1.lock() {
+            *slot = Some(listener);
+        }
     }
 
     /// Follows the event streams of every signed-in server; the app calls
@@ -1135,5 +1175,62 @@ mod tests {
             }
             std::thread::park();
         }
+    }
+
+    #[derive(Default)]
+    struct Recorder(Mutex<Vec<(String, String, Vec<u8>)>>);
+
+    impl SyncPlayListener for Recorder {
+        fn connected(&self, server_id: String, session_id: String) {
+            self.0
+                .lock()
+                .unwrap()
+                .push((server_id, session_id, Vec::new()));
+        }
+        fn update(&self, server_id: String, update: Vec<u8>) {
+            self.0
+                .lock()
+                .unwrap()
+                .push((server_id, String::new(), update));
+        }
+    }
+
+    #[test]
+    fn sync_play_listener_gets_the_session_and_the_groups_updates() {
+        use mavio_api::proto::mavio::session::v1::{Connected, SyncPlayGroup, SyncPlayUpdate};
+
+        let slot = SyncPlaySlot::default();
+        let listener = Listener(Arc::new(Quiet), slot.clone());
+        let connected = Event {
+            kind: Some(Kind::Connected(Box::new(Connected {
+                session_id: Some("s1".into()),
+                ..Default::default()
+            }))),
+            ..Default::default()
+        };
+        // Nothing reaches a listener before it is set.
+        mavio_core::Listener::event(&listener, "srv", &connected);
+        let recorder = Arc::new(Recorder::default());
+        *slot.lock().unwrap() = Some(recorder.clone());
+        mavio_core::Listener::event(&listener, "srv", &connected);
+        let update = SyncPlayUpdate {
+            group: SyncPlayGroup {
+                id: Some("g1".into()),
+                ..Default::default()
+            }
+            .into(),
+            ..Default::default()
+        };
+        let pushed = Event {
+            kind: Some(Kind::SyncPlay(Box::new(update.clone()))),
+            ..Default::default()
+        };
+        mavio_core::Listener::event(&listener, "srv", &pushed);
+        let got = recorder.0.lock().unwrap().clone();
+        let want = vec![
+            ("srv".to_owned(), "s1".to_owned(), Vec::new()),
+            ("srv".to_owned(), String::new(), update.encode_to_vec()),
+        ];
+        assert_eq!(got, want, "got = {got:?}, want = {want:?}");
     }
 }

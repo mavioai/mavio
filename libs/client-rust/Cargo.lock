@@ -938,6 +938,7 @@ dependencies = [
 name = "mavio-uniffi"
 version = "0.0.0"
 dependencies = [
+ "buffa",
  "dolby_vision",
  "mavio-api",
  "mavio-core",

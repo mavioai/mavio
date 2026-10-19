@@ -20,6 +20,7 @@ crate-type = ["lib", "cdylib"]
 dovi = ["dep:dolby_vision"]
 
 [dependencies]
+buffa.workspace = true
 # The version of the header in the AetherEngine fork's Dovi module.
 dolby_vision = { version = "=3.4.0", features = ["capi"], optional = true }
 mavio-api = { path = "../api" }
