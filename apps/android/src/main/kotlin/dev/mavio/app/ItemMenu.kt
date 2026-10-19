@@ -40,6 +40,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import dev.mavio.admin.AdminPage
+import dev.mavio.admin.ConfirmDialog
+import dev.mavio.admin.deviceName
+import dev.mavio.admin.reason
 import dev.mavio.core.AppModel
 import dev.mavio.core.Card
 import dev.mavio.core.CardKind
@@ -389,7 +393,7 @@ private fun ReportSheet(model: AppModel, card: Card, onDismiss: () -> Unit) {
                     runCatching { model.reportIssue(card, type, s, episode.toIntOrNull() ?: 0, message.trim()) }
 .onSuccess {
                         onDismiss()
-                        if (it != null) navigator.open(Route.IssuePage(card.serverId, it))
+                        if (it != null) navigator.open(Route.Admin(AdminPage.IssuePage(card.serverId, it)))
                     }.onFailure { failure = it.reason }
                     busy = false
                 }

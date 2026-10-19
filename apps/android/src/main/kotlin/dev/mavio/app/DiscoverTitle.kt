@@ -58,6 +58,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import dev.mavio.admin.reason
 import dev.mavio.design.MavioRadius
 import dev.mavio.design.MavioSpacing
 import dev.mavio.design.TabletLayout
@@ -81,6 +82,7 @@ import dev.mavio.ui.dayText
 import dev.mavio.ui.discoverLanguage
 import dev.mavio.ui.discovered
 import dev.mavio.ui.languageName
+import dev.mavio.ui.line
 import dev.mavio.ui.minutesText
 import dev.mavio.ui.moneyText
 import dev.mavio.ui.productionStatus

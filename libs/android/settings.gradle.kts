@@ -17,4 +17,4 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "mavio-android"
-include(":core", ":player", ":ui")
+include(":core", ":player", ":ui", ":admin")

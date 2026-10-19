@@ -46,6 +46,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
+import dev.mavio.admin.Note
+import dev.mavio.admin.reason
 import dev.mavio.core.AccountSecurity
 import dev.mavio.core.AppModel
 import dev.mavio.core.ServerRecord

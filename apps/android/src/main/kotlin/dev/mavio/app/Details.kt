@@ -67,6 +67,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import dev.mavio.admin.ItemIssues
 import dev.mavio.core.AppModel
 import dev.mavio.core.Card
 import dev.mavio.core.CardKind

@@ -63,7 +63,9 @@ import dev.mavio.ui.CardPlaceholder
 import dev.mavio.ui.ItemCard
 import dev.mavio.ui.MavioIcon
 import dev.mavio.ui.R
+import dev.mavio.ui.Segmented
 import dev.mavio.ui.StatusView
+import dev.mavio.ui.line
 import dev.mavio.ui.rowTitle
 import dev.mavio.ui.text
 import dev.mavio.ui.theme
@@ -182,10 +184,6 @@ internal fun ScreenTitle(title: String) {
     )
 }
 
-/** An item of a grid across its whole width. */
-internal fun LazyGridScope.line(key: String, content: @Composable () -> Unit) =
-    item(key = key, span = { GridItemSpan(maxLineSpan) }) { content() }
-
 /** What a library's grid shows of its items. */
 private enum class Shown(val label: Int) {
     ALL(R.string.library_filter_all),
@@ -236,34 +234,6 @@ fun LibraryScreen(model: AppModel, route: Route.Library) {
         }
     }
     if (all) AllItems(model, route, header) else Recommended(model, route, header)
-}
-
-/** A choice of a few, side by side in a well, the chosen one raised, as the web UI's. */
-@Composable
-internal fun Segmented(labels: List<String>, chosen: Int, onChoose: (Int) -> Unit) {
-    val colors = theme.colors
-    Row(
-        Modifier
-            .clip(RoundedCornerShape(9.dp))
-            .background(colors.fill)
-            .padding(2.dp),
-    ) {
-        labels.forEachIndexed { i, label ->
-            val active = i == chosen
-            Text(
-                label,
-                Modifier
-                    .then(if (active) Modifier.shadow(1.dp, RoundedCornerShape(7.dp)) else Modifier)
-                    .clip(RoundedCornerShape(7.dp))
-                    .background(if (active) colors.surfaceOverlay else Color.Transparent)
-                    .clickable { onChoose(i) }
-                    .padding(horizontal = MavioSpacing.s16, vertical = MavioSpacing.s4),
-                style = theme.type.callout.text,
-                fontWeight = FontWeight.SemiBold,
-                color = if (active) colors.textPrimary else colors.textSecondary,
-            )
-        }
-    }
 }
 
 /** A library's Recommended tab: its shelves, as Home's. */

@@ -1,4 +1,4 @@
-package dev.mavio.app
+package dev.mavio.admin
 
 import android.content.Context
 import android.icu.text.MeasureFormat
@@ -10,7 +10,6 @@ import android.text.format.Formatter
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,8 +22,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
@@ -62,15 +59,21 @@ import dev.mavio.core.instant
 import dev.mavio.design.MavioSpacing
 import dev.mavio.ui.ButtonKind
 import dev.mavio.ui.Chevron
+import dev.mavio.ui.ChoiceMenuBox
 import dev.mavio.ui.ChoiceRow
 import dev.mavio.ui.Group
-import dev.mavio.ui.MavioButton
 import dev.mavio.ui.MavioIcon
+import dev.mavio.ui.Pressable
 import dev.mavio.ui.R
 import dev.mavio.ui.RowDivider
+import dev.mavio.ui.Segmented
+import dev.mavio.ui.SettingsButton
 import dev.mavio.ui.SettingsField
 import dev.mavio.ui.SettingsList
 import dev.mavio.ui.StatusView
+import dev.mavio.ui.line
+import dev.mavio.ui.PressableBox
+import dev.mavio.ui.rowPadding
 import dev.mavio.ui.text
 import dev.mavio.ui.theme
 import java.net.HttpURLConnection
@@ -149,10 +152,10 @@ internal suspend fun <T> attempt(onFailure: (String) -> Unit, block: suspend () 
 
 /** A line saying a list is empty, or why it could not be read. */
 @Composable
-internal fun Note(text: String, failed: Boolean = false) {
+fun Note(text: String, failed: Boolean = false) {
     Text(
         text,
-        Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
+        Modifier.fillMaxWidth().padding(horizontal = rowPadding, vertical = 12.dp),
         style = theme.type.callout.text,
         color = if (failed) theme.colors.danger else theme.colors.textSecondary,
     )
@@ -161,12 +164,14 @@ internal fun Note(text: String, failed: Boolean = false) {
 /** A "Show More" line. */
 @Composable
 private fun ShowMore(onClick: () -> Unit) {
-    Text(
-        stringResource(R.string.activity_show_more),
-        Modifier.fillMaxWidth().clickable(onClick = onClick).heightIn(min = 44.dp).padding(horizontal = 16.dp, vertical = 12.dp),
-        style = theme.type.body.text,
-        color = theme.colors.accentText,
-    )
+    Pressable(onClick, Modifier.fillMaxWidth()) {
+        Text(
+            stringResource(R.string.activity_show_more),
+            Modifier.fillMaxWidth().heightIn(min = 44.dp).padding(horizontal = rowPadding, vertical = 12.dp),
+            style = theme.type.body.text,
+            color = theme.colors.accentText,
+        )
+    }
 }
 
 /** A colored dot, of a severity or state. */
@@ -177,27 +182,16 @@ private fun Dot(color: Color, modifier: Modifier = Modifier) {
 
 /** A choice of what a list shows, beside its title, as the web UI's select. */
 @Composable
-internal fun <T> HeaderChoice(choices: List<Pair<T, String>>, chosen: T, onChoose: (T) -> Unit) {
-    var open by remember { mutableStateOf(false) }
-    Box {
-        Row(
-            Modifier.clip(RoundedCornerShape(8.dp)).clickable { open = true }.padding(horizontal = 8.dp, vertical = 4.dp),
-            horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s4),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(choices.firstOrNull { it.first == chosen }?.second.orEmpty(), style = theme.type.callout.text, color = theme.colors.textSecondary)
-            MavioIcon(R.drawable.ic_selector, size = 14.dp, tint = theme.colors.textSecondary)
-        }
-        DropdownMenu(open, onDismissRequest = { open = false }) {
-            choices.forEach { (value, text) ->
-                DropdownMenuItem(
-                    text = { Text(text, style = theme.type.callout.text) },
-                    onClick = {
-                        open = false
-                        onChoose(value)
-                    },
-                    trailingIcon = { if (value == chosen) MavioIcon(R.drawable.ic_check, size = 18.dp) },
-                )
+fun <T> HeaderChoice(choices: List<Pair<T, String>>, chosen: T, onChoose: (T) -> Unit) {
+    ChoiceMenuBox(choices, chosen, onChoose, width = 360.dp) { open ->
+        PressableBox(open, shape = RoundedCornerShape(8.dp)) {
+            Row(
+                Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s4),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(choices.firstOrNull { it.first == chosen }?.second.orEmpty(), style = theme.type.callout.text, color = theme.colors.textSecondary)
+                MavioIcon(R.drawable.ic_selector, size = 14.dp, tint = theme.colors.textSecondary)
             }
         }
     }
@@ -205,7 +199,7 @@ internal fun <T> HeaderChoice(choices: List<Pair<T, String>>, chosen: T, onChoos
 
 /** A row's first line, with its details below. */
 @Composable
-internal fun Lines(title: String, detail: String?, modifier: Modifier = Modifier, maxLines: Int = Int.MAX_VALUE) {
+fun Lines(title: String, detail: String?, modifier: Modifier = Modifier, maxLines: Int = Int.MAX_VALUE) {
     Column(modifier, verticalArrangement = Arrangement.spacedBy(2.dp)) {
         Text(title, style = theme.type.body.text, maxLines = maxLines)
         if (!detail.isNullOrEmpty()) {
@@ -221,7 +215,7 @@ internal fun Lines(title: String, detail: String?, modifier: Modifier = Modifier
  * five seconds, and what happened on it lately, every thirty.
  */
 @Composable
-internal fun ActivityPage(model: AppModel, serverId: String) {
+fun ActivityPage(model: AppModel, serverId: String) {
     var sessions by remember { mutableStateOf<List<Session>?>(null) }
     var sessionsFailure by remember { mutableStateOf<String?>(null) }
     var activities by remember { mutableStateOf<ListActivitiesResponse?>(null) }
@@ -307,7 +301,7 @@ private fun PlayingRow(s: Session) {
     val item = np.item
     val runtime = if (item.hasRuntime()) item.runtime.seconds else 0
     val position = if (np.hasPosition()) np.position.seconds else 0
-    Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp), verticalArrangement = Arrangement.spacedBy(MavioSpacing.s8)) {
+    Column(Modifier.fillMaxWidth().padding(horizontal = rowPadding, vertical = 10.dp), verticalArrangement = Arrangement.spacedBy(MavioSpacing.s8)) {
         Row(horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s12), verticalAlignment = Alignment.CenterVertically) {
             Box(
                 Modifier.size(28.dp).background(if (np.paused) Color(0xFF8E8E93) else Color(0xFF34C759), RoundedCornerShape(7.dp)),
@@ -348,7 +342,7 @@ private fun method(m: PlayMethod): Int? = when (m) {
 }
 
 /** What an item is of, under its name: an episode's series and numbers, a season's series, music's artists. */
-internal fun subtitleOf(item: Item): String? = when (item.kind) {
+fun subtitleOf(item: Item): String? = when (item.kind) {
     ItemKind.ITEM_KIND_EPISODE -> {
         val n = when {
             item.hasParentIndexNumber() && item.hasIndexNumber() -> "S${item.parentIndexNumber}:E${item.indexNumber}"
@@ -376,7 +370,7 @@ private fun ActivityRow(a: Activity) {
         Severity.SEVERITY_ERROR -> Color(0xFFFF3B30)
         else -> theme.colors.textTertiary
     }
-    Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp), horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s12)) {
+    Row(Modifier.fillMaxWidth().padding(horizontal = rowPadding, vertical = 10.dp), horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s12)) {
         Dot(color, Modifier.padding(top = 8.dp))
         Lines(a.title, a.message, Modifier.weight(1f))
         if (a.hasTime()) Text(fromNow(a.time), style = theme.type.footnote.text, color = theme.colors.textSecondary)
@@ -432,7 +426,7 @@ private fun lengthOf(locale: java.util.Locale, d: Duration): String {
  * now; and the jobs of its queue, filtered by state.
  */
 @Composable
-internal fun TasksPage(model: AppModel, serverId: String) {
+fun TasksPage(model: AppModel, serverId: String) {
     var tasks by remember { mutableStateOf<List<Task>?>(null) }
     var failure by remember { mutableStateOf<String?>(null) }
     var jobs by remember { mutableStateOf<ListJobsResponse?>(null) }
@@ -549,7 +543,7 @@ private fun TaskRow(task: Task, notices: SnapshotStateMap<String, Pair<Notice, S
     val every = if (task.hasInterval()) stringResource(R.string.tasks_every, lengthOf(LocalLocale.current.platformLocale, task.interval)) else stringResource(R.string.tasks_on_demand)
     val next = if (!task.running && task.hasNextRunTime()) stringResource(R.string.tasks_next, fromNow(task.nextRunTime)) else null
     Row(
-        Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp),
+        Modifier.fillMaxWidth().padding(horizontal = rowPadding, vertical = 10.dp),
         horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s12),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -570,7 +564,7 @@ private fun TaskRow(task: Task, notices: SnapshotStateMap<String, Pair<Notice, S
                 Text(last.lastError, style = theme.type.footnote.text, color = theme.colors.danger)
             }
         }
-        MavioButton(if (starting) "…" else stringResource(R.string.tasks_run), onRun, kind = ButtonKind.Secondary, enabled = !starting && !task.running)
+        SettingsButton(if (starting) "…" else stringResource(R.string.tasks_run), onRun, kind = ButtonKind.Secondary, enabled = !starting && !task.running)
     }
 }
 
@@ -587,7 +581,7 @@ private fun JobRow(job: Job) {
     } else {
         time?.let(::fromNow)
     }
-    Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+    Column(Modifier.fillMaxWidth().padding(horizontal = rowPadding, vertical = 10.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
         Text(job.kind, style = theme.type.body.text)
         Row(horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s4), verticalAlignment = Alignment.CenterVertically) {
             Dot(job.state.color())
@@ -619,7 +613,7 @@ private fun levelName(level: LogLevel): Int = when (level) {
 
 /** Logs (docs/clients.md §6.3.25): the server's recent log records at a level or above, from a period, filtered by words. */
 @Composable
-internal fun LogsPage(model: AppModel, serverId: String) {
+fun LogsPage(model: AppModel, serverId: String) {
     var records by remember { mutableStateOf<List<LogRecord>?>(null) }
     var failure by remember { mutableStateOf<String?>(null) }
     var level by rememberSaveable { mutableStateOf(LogLevel.LOG_LEVEL_INFO) }
@@ -663,7 +657,7 @@ internal fun LogsPage(model: AppModel, serverId: String) {
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s8), verticalAlignment = Alignment.CenterVertically) {
                     SettingsField(filter, { filter = it }, stringResource(R.string.logs_filter), Modifier.weight(1f))
-                    MavioButton(if (fetching) "…" else stringResource(R.string.logs_refresh), { reload++ }, kind = ButtonKind.Secondary, enabled = !fetching)
+                    SettingsButton(if (fetching) "…" else stringResource(R.string.logs_refresh), { reload++ }, kind = ButtonKind.Secondary, enabled = !fetching)
                 }
             }
         }
@@ -709,7 +703,7 @@ private fun LogRow(record: LogRecord, first: Boolean, last: Boolean) {
     Column(joined.fillMaxWidth().clip(shape).background(theme.colors.surface)) {
         if (!first) HorizontalDivider(Modifier.padding(start = 16.dp), color = theme.colors.border)
         SelectionContainer {
-            Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Column(Modifier.fillMaxWidth().padding(horizontal = rowPadding, vertical = 10.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Row(horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s8)) {
                     record.time.instant?.let {
                         Text(logClock.format(Date(it.toEpochMilli())), style = theme.type.footnote.text, color = theme.colors.textSecondary)
@@ -734,7 +728,7 @@ private fun LogRow(record: LogRecord, first: Boolean, last: Boolean) {
 
 /** Backups (docs/clients.md §6.3.14): the server's backups, made, saved to the device's files and deleted here. */
 @Composable
-internal fun BackupsPage(model: AppModel, serverId: String) {
+fun BackupsPage(model: AppModel, serverId: String) {
     var backups by remember { mutableStateOf<List<Backup>?>(null) }
     var failure by remember { mutableStateOf<String?>(null) }
     var creating by remember { mutableStateOf(false) }
@@ -769,7 +763,7 @@ internal fun BackupsPage(model: AppModel, serverId: String) {
         item {
             Group(footer = stringResource(R.string.backups_restore_footer)) {
                 Row(
-                    Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
+                    Modifier.fillMaxWidth().padding(horizontal = rowPadding, vertical = 12.dp),
                     horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s12),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
@@ -778,7 +772,7 @@ internal fun BackupsPage(model: AppModel, serverId: String) {
                         stringResource(if (creating) R.string.backups_creating else R.string.backups_create_detail),
                         Modifier.weight(1f),
                     )
-                    MavioButton(
+                    SettingsButton(
                         if (creating) "…" else stringResource(R.string.backups_create_action),
                         {
                             creating = true
@@ -851,10 +845,7 @@ internal fun BackupsPage(model: AppModel, serverId: String) {
 /** An action shown as its icon alone. */
 @Composable
 private fun IconAction(icon: Int, label: String, enabled: Boolean = true, tint: Color = theme.colors.accentText, onClick: () -> Unit) {
-    Box(
-        Modifier.size(40.dp).clip(CircleShape).clickable(enabled = enabled, onClickLabel = label, onClick = onClick),
-        Alignment.Center,
-    ) {
+    PressableBox(onClick, Modifier.size(40.dp), enabled, label, CircleShape) {
         MavioIcon(icon, size = 20.dp, tint = if (enabled) tint else theme.colors.textTertiary)
     }
 }
@@ -932,7 +923,7 @@ private const val ISSUES_PAGE = 50
  * page.
  */
 @Composable
-internal fun IssuesPage(model: AppModel, serverId: String) {
+fun IssuesPage(model: AppModel, serverId: String) {
     var issues by remember { mutableStateOf<List<Issue>?>(null) }
     var total by remember { mutableIntStateOf(0) }
     var failure by remember { mutableStateOf<String?>(null) }
@@ -940,7 +931,7 @@ internal fun IssuesPage(model: AppModel, serverId: String) {
     val names = remember { IssueNames() }
     val server = model.servers.collectAsState().value.firstOrNull { it.id == serverId }
     val scope = rememberCoroutineScope()
-    val navigator = LocalNavigator.current
+    val navigator = LocalAdmin.current
     suspend fun load(offset: Int) {
         attempt({ failure = it }) {
             val r = model.client.call(
@@ -975,7 +966,7 @@ internal fun IssuesPage(model: AppModel, serverId: String) {
             Group(footer = if (!list.isNullOrEmpty()) pluralStringResource(R.plurals.issues_count, total, total) else null) {
                 list.orEmpty().forEachIndexed { i, issue ->
                     if (i > 0) RowDivider()
-                    IssueRow(issue, names, server, showItem = true) { navigator.open(Route.IssuePage(serverId, issue.id)) }
+                    IssueRow(issue, names, server, showItem = true) { navigator.open(AdminPage.IssuePage(serverId, issue.id)) }
                 }
                 if (list != null && list.size < total) {
                     RowDivider()
@@ -998,24 +989,26 @@ internal fun IssuesPage(model: AppModel, serverId: String) {
 @Composable
 private fun IssueRow(issue: Issue, names: IssueNames, server: ServerRecord?, showItem: Boolean, onClick: () -> Unit) {
     val context = LocalContext.current
-    Row(
-        Modifier.fillMaxWidth().clickable(onClick = onClick).padding(horizontal = 16.dp, vertical = 10.dp),
-        horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s12),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Lines(
-            listOfNotNull(if (showItem) names.items[issue.itemId] else null, issue.type.title()?.let { stringResource(it) }, issue.numbers())
-                .filter { it.isNotEmpty() }.joinToString(" · "),
-            listOfNotNull(
-                issue.commentsList.firstOrNull()?.message,
-                names.user(context, issue.createdBy, server),
-                if (issue.hasUpdateTime()) fromNow(issue.updateTime) else null,
-            ).filter { it.isNotEmpty() }.joinToString(" · "),
-            Modifier.weight(1f),
-            maxLines = 1,
-        )
-        IssueBadge(issue.status)
-        Chevron()
+    Pressable(onClick, Modifier.fillMaxWidth()) {
+        Row(
+            Modifier.fillMaxWidth().padding(horizontal = rowPadding, vertical = 10.dp),
+            horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s12),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Lines(
+                listOfNotNull(if (showItem) names.items[issue.itemId] else null, issue.type.title()?.let { stringResource(it) }, issue.numbers())
+                    .filter { it.isNotEmpty() }.joinToString(" · "),
+                listOfNotNull(
+                    issue.commentsList.firstOrNull()?.message,
+                    names.user(context, issue.createdBy, server),
+                    if (issue.hasUpdateTime()) fromNow(issue.updateTime) else null,
+                ).filter { it.isNotEmpty() }.joinToString(" · "),
+                Modifier.weight(1f),
+                maxLines = 1,
+            )
+            IssueBadge(issue.status)
+            Chevron()
+        }
     }
 }
 
@@ -1024,12 +1017,12 @@ private fun IssueRow(issue: Issue, names: IssueNames, server: ServerRecord?, sho
  * page; with none, nothing is shown.
  */
 @Composable
-internal fun ItemIssues(model: AppModel, serverId: String, itemId: String) {
+fun ItemIssues(model: AppModel, serverId: String, itemId: String) {
     val revisions by model.revisions.collectAsStateWithLifecycle()
     var issues by remember(serverId, itemId) { mutableStateOf<List<Issue>>(emptyList()) }
     val names = remember(serverId) { IssueNames() }
     val server = model.servers.collectAsState().value.firstOrNull { it.id == serverId }
-    val navigator = LocalNavigator.current
+    val navigator = LocalAdmin.current
     LaunchedEffect(serverId, itemId, revisions[serverId]) {
         runCatching {
             model.client.call(
@@ -1054,7 +1047,7 @@ internal fun ItemIssues(model: AppModel, serverId: String, itemId: String) {
         Group {
             issues.forEachIndexed { i, issue ->
                 if (i > 0) RowDivider()
-                IssueRow(issue, names, server, showItem = false) { navigator.open(Route.IssuePage(serverId, issue.id)) }
+                IssueRow(issue, names, server, showItem = false) { navigator.open(AdminPage.IssuePage(serverId, issue.id)) }
             }
         }
     }
@@ -1075,7 +1068,7 @@ private fun IssueBadge(status: IssueStatus) {
 
 /** An issue: its item, kind and status, its comments, a comment to add, and resolving, reopening or deleting it. */
 @Composable
-fun IssueScreen(model: AppModel, route: Route.IssuePage) {
+fun IssueScreen(model: AppModel, route: AdminPage.IssuePage) {
     val serverId = route.serverId
     var issue by remember { mutableStateOf<Issue?>(null) }
     var failure by remember { mutableStateOf<String?>(null) }
@@ -1086,7 +1079,7 @@ fun IssueScreen(model: AppModel, route: Route.IssuePage) {
     val server = model.servers.collectAsState().value.firstOrNull { it.id == serverId }
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
-    val navigator = LocalNavigator.current
+    val navigator = LocalAdmin.current
     LaunchedEffect(serverId, route.id) {
         attempt({ failure = it }) {
             val i = model.client.call(serverId, Procedure.issues("GetIssue"), getIssueRequest { id = route.id }, GetIssueResponse::parseFrom).issue
@@ -1132,7 +1125,7 @@ fun IssueScreen(model: AppModel, route: Route.IssuePage) {
                         Lines(
                             c.message,
                             listOfNotNull(names.user(context, c.userId, server), if (c.hasCreateTime()) fromNow(c.createTime) else null).joinToString(" · "),
-                            Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp),
+                            Modifier.fillMaxWidth().padding(horizontal = rowPadding, vertical = 10.dp),
                         )
                     }
                 }
@@ -1141,7 +1134,7 @@ fun IssueScreen(model: AppModel, route: Route.IssuePage) {
         item {
             Column(verticalArrangement = Arrangement.spacedBy(MavioSpacing.s8)) {
                 SettingsField(comment, { comment = it }, stringResource(R.string.issues_comment))
-                MavioButton(
+                SettingsButton(
                     stringResource(R.string.issues_comment_send),
                     {
                         val message = comment.trim()
@@ -1202,11 +1195,13 @@ fun IssueScreen(model: AppModel, route: Route.IssuePage) {
 
 /** An action of a group, in its color. */
 @Composable
-internal fun ActionRow(label: String, color: Color, enabled: Boolean, onClick: () -> Unit) {
-    Text(
-        label,
-        Modifier.fillMaxWidth().clickable(enabled = enabled, onClick = onClick).heightIn(min = 48.dp).padding(horizontal = 16.dp, vertical = 13.dp),
-        style = theme.type.body.text,
-        color = if (enabled) color else theme.colors.textTertiary,
-    )
+fun ActionRow(label: String, color: Color, enabled: Boolean, onClick: () -> Unit) {
+    Pressable({ if (enabled) onClick() }, Modifier.fillMaxWidth()) {
+        Text(
+            label,
+            Modifier.fillMaxWidth().heightIn(min = 48.dp).padding(horizontal = rowPadding, vertical = 13.dp),
+            style = theme.type.body.text,
+            color = if (enabled) color else theme.colors.textTertiary,
+        )
+    }
 }

@@ -1,9 +1,8 @@
-package dev.mavio.app
+package dev.mavio.admin
 
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,6 +15,8 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LinearProgressIndicator
@@ -31,8 +32,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.platform.LocalFocusManager
@@ -50,17 +54,23 @@ import dev.mavio.core.choices
 import dev.mavio.core.localization
 import dev.mavio.design.MavioSpacing
 import dev.mavio.ui.ButtonKind
+import dev.mavio.ui.ChoiceMenuBox
 import dev.mavio.ui.ChoiceRow
 import dev.mavio.ui.Group
 import dev.mavio.ui.LinkRow
-import dev.mavio.ui.MavioButton
+import dev.mavio.ui.LocalTelevision
 import dev.mavio.ui.MavioIcon
+import dev.mavio.ui.Pressable
 import dev.mavio.ui.R
 import dev.mavio.ui.RowDivider
+import dev.mavio.ui.SettingsButton
 import dev.mavio.ui.SettingsField
 import dev.mavio.ui.SettingsList
 import dev.mavio.ui.StatusView
 import dev.mavio.ui.SwitchRow
+import dev.mavio.ui.TvDialog
+import dev.mavio.ui.PressableBox
+import dev.mavio.ui.rowPadding
 import dev.mavio.ui.text
 import dev.mavio.ui.theme
 import java.text.Collator
@@ -147,14 +157,14 @@ private fun describe(p: ScanProgress): String =
 
 /** Libraries: the server's libraries with their kinds and folders, each to scan and to open. */
 @Composable
-internal fun LibrariesPage(model: AppModel, serverId: String) {
+fun LibrariesPage(model: AppModel, serverId: String) {
     var libraries by remember { mutableStateOf<List<Library>?>(null) }
     var failure by remember { mutableStateOf<String?>(null) }
     // What scanning a library told, by its ID: a string's resource, or why it failed.
     val scanned = remember { mutableStateMapOf<String, Pair<Int, String?>>() }
     val scanning = remember { mutableStateMapOf<String, Boolean>() }
     val scope = rememberCoroutineScope()
-    val navigator = LocalNavigator.current
+    val navigator = LocalAdmin.current
     val progress = model.scanProgress.collectAsStateWithLifecycle().value[serverId].orEmpty()
     // A scan that ended says so until the page is left or the library is scanned again.
     var wasScanning by remember { mutableStateOf(emptySet<String>()) }
@@ -184,37 +194,45 @@ internal fun LibrariesPage(model: AppModel, serverId: String) {
             Group {
                 list.forEach { l ->
                     val k = LibraryKindStyle.of(l.kind)
+                    // Scan beside the row rather than in it, for focus to move to it.
                     Row(
-                        Modifier.fillMaxWidth().clickable { navigator.open(Route.ManagedLibrary(serverId, l.id)) }
-                            .padding(start = 16.dp, end = 12.dp, top = 8.dp, bottom = 8.dp),
-                        horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s16),
+                        Modifier.fillMaxWidth().padding(end = 12.dp),
+                        horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s8),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        ColorTile(k.icon, k.color)
-                        val told = scanned[l.id]
-                        val scan = progress[l.id]
-                        Column(Modifier.weight(1f)) {
-                            Lines(
-                                l.name,
-                                scan?.let { describe(it) }
-                                    ?: told?.let { it.second ?: stringResource(it.first) }
-                                    ?: "${stringResource(k.title)} · ${pluralStringResource(R.plurals.libraries_folder_count, l.pathsCount, l.pathsCount)}",
-                                maxLines = 1,
-                            )
-                            if (scan != null) {
-                                LinearProgressIndicator(
-                                    { scan.fraction.toFloat().coerceIn(0f, 1f) },
-                                    Modifier.fillMaxWidth().padding(top = MavioSpacing.s4).height(4.dp),
-                                    color = theme.colors.accent,
-                                    trackColor = theme.colors.fill,
-                                    strokeCap = StrokeCap.Round,
-                                    gapSize = 0.dp,
-                                    drawStopIndicator = {},
-                                )
+                        Pressable({ navigator.open(AdminPage.ManagedLibrary(serverId, l.id)) }, Modifier.weight(1f)) {
+                            Row(
+                                Modifier.fillMaxWidth().padding(start = rowPadding, end = 8.dp, top = 8.dp, bottom = 8.dp),
+                                horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s16),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                ColorTile(k.icon, k.color)
+                                val told = scanned[l.id]
+                                val scan = progress[l.id]
+                                Column(Modifier.weight(1f)) {
+                                    Lines(
+                                        l.name,
+                                        scan?.let { describe(it) }
+                                            ?: told?.let { it.second ?: stringResource(it.first) }
+                                            ?: "${stringResource(k.title)} · ${pluralStringResource(R.plurals.libraries_folder_count, l.pathsCount, l.pathsCount)}",
+                                        maxLines = 1,
+                                    )
+                                    if (scan != null) {
+                                        LinearProgressIndicator(
+                                            { scan.fraction.toFloat().coerceIn(0f, 1f) },
+                                            Modifier.fillMaxWidth().padding(top = MavioSpacing.s4).height(4.dp),
+                                            color = theme.colors.accent,
+                                            trackColor = theme.colors.fill,
+                                            strokeCap = StrokeCap.Round,
+                                            gapSize = 0.dp,
+                                            drawStopIndicator = {},
+                                        )
+                                    }
+                                }
                             }
                         }
                         val busy = scanning[l.id] == true
-                        MavioButton(
+                        SettingsButton(
                             if (busy) "…" else stringResource(R.string.libraries_scan),
                             {
                                 scanning[l.id] = true
@@ -233,7 +251,7 @@ internal fun LibrariesPage(model: AppModel, serverId: String) {
                     Note(stringResource(R.string.libraries_none))
                     RowDivider()
                 }
-                LinkRow(stringResource(R.string.libraries_add), R.drawable.ic_add) { navigator.open(Route.ManagedLibrary(serverId, null)) }
+                LinkRow(stringResource(R.string.libraries_add), R.drawable.ic_add) { navigator.open(AdminPage.ManagedLibrary(serverId, null)) }
             }
         }
     }
@@ -315,7 +333,7 @@ private data class LibraryDraft(
  * and the missing episodes of its series.
  */
 @Composable
-fun ManagedLibraryScreen(model: AppModel, route: Route.ManagedLibrary) {
+fun ManagedLibraryScreen(model: AppModel, route: AdminPage.ManagedLibrary) {
     val serverId = route.serverId
     // The library as saved; null until a new one is added.
     var library by remember { mutableStateOf<Library?>(null) }
@@ -331,7 +349,7 @@ fun ManagedLibraryScreen(model: AppModel, route: Route.ManagedLibrary) {
     var confirming by remember { mutableStateOf(false) }
     var browsing by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
-    val navigator = LocalNavigator.current
+    val navigator = LocalAdmin.current
     val focus = LocalFocusManager.current
     val told = mapOf(
         R.string.libraries_scan_queued to stringResource(R.string.libraries_scan_queued),
@@ -388,11 +406,11 @@ fun ManagedLibraryScreen(model: AppModel, route: Route.ManagedLibrary) {
                     Column(Modifier.fillMaxWidth().padding(start = 16.dp, end = 4.dp, top = 6.dp)) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(path, Modifier.weight(1f), style = theme.type.body.text)
-                            Box(
-                                Modifier.size(40.dp).clickable(onClickLabel = stringResource(R.string.libraries_remove_folder)) {
-                                    set { copy(paths = paths - path) }
-                                },
-                                Alignment.Center,
+                            PressableBox(
+                                { set { copy(paths = paths - path) } },
+                                Modifier.size(40.dp),
+                                onClickLabel = stringResource(R.string.libraries_remove_folder),
+                                shape = CircleShape,
                             ) {
                                 MavioIcon(R.drawable.ic_close, size = 16.dp, tint = theme.colors.textSecondary)
                             }
@@ -413,12 +431,12 @@ fun ManagedLibraryScreen(model: AppModel, route: Route.ManagedLibrary) {
                     RowDivider()
                 }
                 Row(
-                    Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp),
+                    Modifier.fillMaxWidth().padding(horizontal = rowPadding, vertical = 10.dp),
                     horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s8),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     SettingsField(typed, { typed = it }, stringResource(R.string.libraries_folder_path), Modifier.weight(1f))
-                    MavioButton(
+                    SettingsButton(
                         stringResource(R.string.libraries_add_folder),
                         {
                             add(typed)
@@ -524,7 +542,7 @@ fun ManagedLibraryScreen(model: AppModel, route: Route.ManagedLibrary) {
         item {
             val savedNotice = stringResource(R.string.libraries_saved)
             Row(horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s12), verticalAlignment = Alignment.CenterVertically) {
-                MavioButton(
+                SettingsButton(
                     if (saving) "…" else stringResource(if (library == null) R.string.libraries_create else R.string.action_save),
                     {
                         focus.clearFocus()
@@ -651,14 +669,23 @@ private fun FolderSheet(model: AppModel, serverId: String, chosen: List<String>,
             }
         }
     }
-    val sheet = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    ModalBottomSheet(onDismiss, sheetState = sheet, containerColor = theme.colors.surfaceRaised) {
-        // As tall at every folder, rather than growing and shrinking with it.
-        LazyColumn(Modifier.fillMaxWidth().fillMaxHeight(0.9f), contentPadding = PaddingValues(horizontal = theme.layout.margin, vertical = MavioSpacing.s8)) {
+    val tv = LocalTelevision.current
+    // On a television focus goes to the first folder as each one shows.
+    val top = remember { FocusRequester() }
+    if (tv) {
+        LaunchedEffect(folders) {
+            if (folders == null) return@LaunchedEffect
+            repeat(5) {
+                withFrameNanos {}
+                if (runCatching { top.requestFocus() }.getOrDefault(false)) return@LaunchedEffect
+            }
+        }
+    }
+    val content: LazyListScope.() -> Unit = {
             item {
                 Row(Modifier.padding(bottom = MavioSpacing.s12), verticalAlignment = Alignment.CenterVertically) {
                     Column(Modifier.weight(1f)) {
-                        Text(stringResource(R.string.libraries_browse), style = theme.type.title2.text)
+                        if (!tv) Text(stringResource(R.string.libraries_browse), style = theme.type.title2.text)
                         Text(
                             here.ifEmpty { stringResource(R.string.libraries_roots) },
                             style = theme.type.callout.text,
@@ -667,7 +694,7 @@ private fun FolderSheet(model: AppModel, serverId: String, chosen: List<String>,
                             overflow = TextOverflow.Ellipsis,
                         )
                     }
-                    MavioButton(
+                    SettingsButton(
                         stringResource(R.string.libraries_choose_folder),
                         {
                             choose(here)
@@ -678,10 +705,12 @@ private fun FolderSheet(model: AppModel, serverId: String, chosen: List<String>,
                 }
             }
             if (here.isNotEmpty()) {
-                item { FolderRow(stringResource(R.string.libraries_parent_folder), R.drawable.ic_back) { path = parent } }
+                item { FolderRow(stringResource(R.string.libraries_parent_folder), R.drawable.ic_back, Modifier.focusRequester(top)) { path = parent } }
             }
             folders?.let { list ->
-                items(list.size) { i -> FolderRow(list[i].second, R.drawable.ic_folder) { path = list[i].first } }
+                items(list.size) { i ->
+                    FolderRow(list[i].second, R.drawable.ic_folder, if (i == 0 && here.isEmpty()) Modifier.focusRequester(top) else Modifier) { path = list[i].first }
+                }
             }
             item {
                 when {
@@ -690,19 +719,36 @@ private fun FolderSheet(model: AppModel, serverId: String, chosen: List<String>,
                     folders == null -> Note(stringResource(R.string.state_loading))
                 }
             }
+    }
+    // The television's is a dialog of the folders, as tall at every folder.
+    if (tv) {
+        TvDialog(stringResource(R.string.libraries_browse), onDismiss, width = 900.dp) {
+            LazyColumn(Modifier.fillMaxWidth().height(560.dp), content = content)
         }
+        return
+    }
+    val sheet = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    ModalBottomSheet(onDismiss, sheetState = sheet, containerColor = theme.colors.surfaceRaised) {
+        // As tall at every folder, rather than growing and shrinking with it.
+        LazyColumn(
+            Modifier.fillMaxWidth().fillMaxHeight(0.9f),
+            contentPadding = PaddingValues(horizontal = theme.layout.margin, vertical = MavioSpacing.s8),
+            content = content,
+        )
     }
 }
 
 @Composable
-private fun FolderRow(name: String, @DrawableRes icon: Int, onClick: () -> Unit) {
-    Row(
-        Modifier.fillMaxWidth().clickable(onClick = onClick).heightIn(min = 48.dp).padding(horizontal = 4.dp),
-        horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s12),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        MavioIcon(icon, size = 20.dp, tint = theme.colors.textSecondary)
-        Text(name, style = theme.type.body.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
+private fun FolderRow(name: String, @DrawableRes icon: Int, modifier: Modifier = Modifier, onClick: () -> Unit) {
+    Pressable(onClick, modifier.fillMaxWidth()) {
+        Row(
+            Modifier.fillMaxWidth().heightIn(min = 48.dp).padding(horizontal = if (LocalTelevision.current) rowPadding else 4.dp),
+            horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s12),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            MavioIcon(icon, size = 20.dp, tint = theme.colors.textSecondary)
+            Text(name, style = theme.type.body.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        }
     }
 }
 

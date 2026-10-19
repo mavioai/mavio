@@ -39,6 +39,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import dev.mavio.admin.serverGroup
 import dev.mavio.core.AppModel
 import dev.mavio.core.ServerRecord
 import dev.mavio.core.StreamState
@@ -107,6 +108,7 @@ fun SettingsPage(model: AppModel, page: Page.Settings) {
 private fun SettingsListPage(model: AppModel, page: Page.Settings) {
     val signedIn by model.signedIn.collectAsStateWithLifecycle()
     val switching = rememberUserSwitching(model)
+    val servers = signedInServers(model)
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val focus = page.focus
@@ -159,6 +161,7 @@ private fun SettingsListPage(model: AppModel, page: Page.Settings) {
                 }
             }
         }
+        serverGroup(model, servers, page.admins) { Modifier.focusKey(focus, it) }
         item {
             Group {
                 val app = remember { context.packageManager.getPackageInfo(context.packageName, 0).versionName.orEmpty() }

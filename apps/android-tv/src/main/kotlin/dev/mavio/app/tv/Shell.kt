@@ -22,6 +22,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
@@ -37,12 +38,17 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import dev.mavio.admin.AdminHost
+import dev.mavio.admin.AdminPage
+import dev.mavio.admin.AdminScreen
+import dev.mavio.admin.LocalAdmin
 import dev.mavio.core.AppModel
 import dev.mavio.core.SignInState
 import dev.mavio.design.MavioSpacing
 import dev.mavio.ui.DiscoverState
 import dev.mavio.ui.FocusShake
 import dev.mavio.ui.LocalDiscover
+import dev.mavio.ui.RecallingFocus
 import dev.mavio.ui.LocalFocusShake
 import dev.mavio.ui.R
 import dev.mavio.ui.TvChoice
@@ -145,7 +151,24 @@ private fun Shell(model: AppModel) {
     }
     // Back from a page returns to what opened it.
     BackHandler(top != null) { pages.back() }
-    CompositionLocalProvider(LocalPages provides pages) {
+    // The administration's pages open over the settings; the television controls no other device.
+    val admin = remember(pages) {
+        object : AdminHost {
+            override fun open(page: AdminPage) = pages.openAdmin(page)
+            override fun back() = pages.back()
+            override val remote = null
+        }
+    }
+    // The administration's pages keep their state while pages open over them.
+    val kept = rememberSaveableStateHolder()
+    val admins = remember { mutableSetOf<Int>() }
+    val open = pages.all.filterIsInstance<Page.Admin>().map { it.id }.toSet()
+    LaunchedEffect(open) {
+        (admins - open).forEach { kept.removeState(it) }
+        admins.clear()
+        admins += open
+    }
+    CompositionLocalProvider(LocalPages provides pages, LocalAdmin provides admin) {
         Box(Modifier.fillMaxSize().background(theme.colors.tvBackground)) {
             // A page covers the tabs, which keep where they were for its return.
             when (top) {
@@ -161,6 +184,11 @@ private fun Shell(model: AppModel) {
                 is Page.Player -> key(top) { PlayerPage(model, top) }
                 is Page.Settings -> key(top) { SettingsPage(model, top) }
                 is Page.AddServer -> key(top) { SignInScreen(model, adding = true) { pages.back() } }
+                is Page.Admin -> key(top) {
+                    kept.SaveableStateProvider(top.id) {
+                        RecallingFocus(top.recall) { AdminScreen(model, top.page) }
+                    }
+                }
                 null -> {
                     Box(Modifier.fillMaxSize().onFocusChanged { inPage = it.hasFocus }) {
                         key(tab) {

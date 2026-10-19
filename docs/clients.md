@@ -27,7 +27,7 @@ Each app is built for one interaction model — touch, the television remote, th
 | `libs/client-ts` | TypeScript: Connect client (`connect-es`) and TanStack Query hooks | `apps/web` |
 | `libs/client-rust` | Rust: servers, sign-in, events, offline store, playback reporting, downloads | Every native app: through UniFFI from Swift and Kotlin, through a C ABI from Go |
 | `libs/apple` | Swift packages: the core's Swift API and app services, the player, shared SwiftUI components | `apps/ios`, `apps/tvos`, `apps/macos` |
-| `libs/android` | Kotlin modules: the core's Kotlin API and app services, the player, shared Compose components | `apps/android`, `apps/android-tv` |
+| `libs/android` | Kotlin modules: the core's Kotlin API and app services, the player, shared Compose components and the server settings' screens | `apps/android`, `apps/android-tv` |
 | `libs/design` | Design tokens (DTCG JSON), icons, the logo, component specifications and strings, compiled for every client | Every client |
 
 ---
@@ -126,7 +126,8 @@ The server owns every decision that depends on the library, the user or other de
 * **`libs/android`**, Gradle modules shared by both apps, which include it as a composite build:
   * `core`: the core's Kotlin API with the app services above it — accounts, capability probing, downloads with WorkManager — and the messages of the server's API, generated in Kotlin lite at build time by protoc from Maven at the version of the protobuf runtime (BSD-3-Clause): the screens the core does not model, the settings, call the server's API with them through the core (`callServer`), as the Apple apps do (§4.2). It declares the `INTERNET` permission and `ACCESS_LOCAL_NETWORK`, which Android 17 requires to reach an address on the local network, where most servers are; the apps request the latter before discovery or sign-in, and allow cleartext HTTP (`usesCleartextTraffic`), which Media3 otherwise refuses, as servers on the local network serve their media over plain HTTP;
   * `player`: one player interface with two engines, behind a `MediaSessionService` for background playback and system controls, and Picture in Picture, which on Android takes any `SurfaceView`;
-  * `ui`: shared Compose components and the design tokens.
+  * `ui`: shared Compose components and the design tokens;
+  * `admin`: the screens of the settings' Server group for a server's administrators, on `ui`, which both apps open, each in its own layout.
 * **Launch**: as on the iPhone (§4.2), the SplashScreen API keeps the mark on the background until Home can be drawn whole — its rows and the first screen's images — for at most two seconds, then the mark grows as it fades into Home. Coil keeps the images on disk, keyed by their URLs without the servers' signatures; artwork still loading is a plain fill into which it fades.
 * **Player engines**, in order of preference as on Apple platforms: Media3, then libmpv, then the server's processing.
   * **Capabilities**: the app declares in `direct_play` the profiles Media3 plays on the device and those libmpv plays, so that the server remuxes or transcodes a source only when neither can.
@@ -422,7 +423,7 @@ mavio/
 │   │   ├── capi/                # C ABI for Go, and its Go binding (a Go module)
 │   │   └── proto/               # Messages of the C ABI (mavio.capi.v1)
 │   ├── apple/                   # [Swift] MavioKit, MavioPlayer, MavioUI
-│   ├── android/                 # [Kotlin] core, player, ui
+│   ├── android/                 # [Kotlin] core, player, ui, admin
 │   ├── intent/                  # [Rust] The assistant's grammar; WASM for the web UI and the server
 │   └── design/                  # Tokens, icons, components, strings; gen/{ts,swift,kotlin,go}
 ```

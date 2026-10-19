@@ -28,8 +28,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
@@ -69,6 +73,8 @@ import androidx.compose.ui.window.PopupProperties
 import androidx.compose.ui.zIndex
 import dev.mavio.design.MavioRadius
 import dev.mavio.design.MavioSpacing
+import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 // The television's canvas and focus (docs/tv.md §2, §4): the screen is
@@ -209,6 +215,7 @@ fun TvButton(
             .then(if (focused) Modifier.shadow(12.dp, shape, ambientColor = theme.colors.tvFocusShadow, spotColor = theme.colors.tvFocusShadow) else Modifier)
             .clip(shape)
             .background(if (focused) Color.White else fill)
+            .recallsFocus()
             .selectable(state, onClick)
             .padding(horizontal = MavioSpacing.s40),
         horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s12, Alignment.CenterHorizontally),
@@ -436,3 +443,75 @@ fun Modifier.movesFocus(): Modifier {
         true
     }
 }
+
+/**
+ * Where focus was on a page of the television whose state is kept while
+ * pages open over it, as the settings' pages (docs/tv.md §4): composed
+ * again on its return, the element that had focus last takes it again, its
+ * list scrolled back to where it was.
+ */
+class FocusRecall {
+    private var stamp = 0
+
+    /** The stamp of the element that had focus last, or 0. */
+    internal var last = 0
+
+    /** Whether the page has returned and its element has yet to take focus. */
+    internal var returning by mutableStateOf(false)
+
+    internal fun next(): Int = ++stamp
+}
+
+/** The [FocusRecall] of the page composed, on a television whose page keeps its state. */
+val LocalFocusRecall = staticCompositionLocalOf<FocusRecall?> { null }
+
+/**
+ * A page [content] whose element that had focus last takes it again when
+ * the page is composed again, on its return, as long as it shows within
+ * three seconds, its rows loading again.
+ */
+@Composable
+fun RecallingFocus(recall: FocusRecall, content: @Composable () -> Unit) {
+    remember {
+        recall.returning = recall.last != 0
+        true
+    }
+    LaunchedEffect(Unit) {
+        delay(3.seconds)
+        recall.returning = false
+    }
+    CompositionLocalProvider(LocalFocusRecall provides recall, content = content)
+}
+
+/**
+ * Registers the focusable this modifies, put before it, with the page's
+ * [FocusRecall]: when the page returns, it takes focus again if it had it
+ * last.
+ */
+@Composable
+fun Modifier.recallsFocus(): Modifier {
+    val recall = LocalFocusRecall.current ?: return this
+    var mine by rememberSaveable { mutableIntStateOf(0) }
+    val requester = remember { FocusRequester() }
+    if (recall.returning && mine != 0 && mine == recall.last) {
+        LaunchedEffect(Unit) {
+            // It is laid out a frame or two after it is composed.
+            repeat(10) {
+                withFrameNanos {}
+                if (runCatching { requester.requestFocus() }.getOrDefault(false)) {
+                    recall.returning = false
+                    return@LaunchedEffect
+                }
+            }
+        }
+    }
+    return focusRequester(requester).onFocusChanged {
+        // Until the element that had focus takes it, focus given to others,
+        // as the page's first, is not its user's.
+        if (it.isFocused && !(recall.returning && mine != recall.last)) {
+            mine = recall.next()
+            recall.last = mine
+        }
+    }
+}
+

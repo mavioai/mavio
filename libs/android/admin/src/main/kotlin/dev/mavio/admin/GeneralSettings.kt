@@ -1,9 +1,8 @@
-package dev.mavio.app
+package dev.mavio.admin
 
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -32,15 +31,20 @@ import dev.mavio.core.choices
 import dev.mavio.core.localization
 import dev.mavio.design.MavioSpacing
 import dev.mavio.ui.ButtonKind
+import dev.mavio.ui.ChoiceMenuBox
 import dev.mavio.ui.ChoiceRow
 import dev.mavio.ui.Group
-import dev.mavio.ui.MavioButton
+import dev.mavio.ui.LocalTelevision
+import dev.mavio.ui.Pressable
 import dev.mavio.ui.R
 import dev.mavio.ui.RowDivider
+import dev.mavio.ui.SettingsButton
 import dev.mavio.ui.SettingsField
 import dev.mavio.ui.SettingsList
 import dev.mavio.ui.StatusView
 import dev.mavio.ui.SwitchRow
+import dev.mavio.ui.PressableBox
+import dev.mavio.ui.rowPadding
 import dev.mavio.ui.text
 import dev.mavio.ui.theme
 import kotlinx.coroutines.CancellationException
@@ -66,7 +70,7 @@ import mavio.user.v1.UserOuterClass.ListUsersResponse
 import mavio.user.v1.listUsersRequest
 
 /** A page of the server's settings while they load or failed to. */
-internal fun LazyListScope.loading(editor: SettingsEditor) {
+fun LazyListScope.loading(editor: SettingsEditor) {
     if (editor.saved == null) {
         val failure = editor.failure
         item { if (failure == null) StatusView(stringResource(R.string.state_loading)) else StatusView(failure, icon = R.drawable.ic_error) }
@@ -125,7 +129,7 @@ private data class GeneralDraft(
  * resets forgotten passwords, and how it is reached.
  */
 @Composable
-internal fun GeneralPage(model: AppModel, serverId: String) {
+fun GeneralPage(model: AppModel, serverId: String) {
     val editor = remember(serverId) { SettingsEditor(model, serverId) }
     var draft by remember { mutableStateOf(GeneralDraft()) }
     var languages by remember { mutableStateOf<List<Pair<String, String>>>(emptyList()) }
@@ -259,7 +263,7 @@ private val DEINTERLACERS = listOf("yadif", "bwdif")
  * of running transcodes.
  */
 @Composable
-internal fun TranscodingPage(model: AppModel, serverId: String) {
+fun TranscodingPage(model: AppModel, serverId: String) {
     val editor = remember(serverId) { SettingsEditor(model, serverId) }
     var draft by remember { mutableStateOf(TranscodingSettings.getDefaultInstance()) }
     LaunchedEffect(editor) {
@@ -420,7 +424,7 @@ private data class MadeKey(val id: String, val name: String, val token: String)
  * shown once, when it is made.
  */
 @Composable
-internal fun ApiKeysPage(model: AppModel, serverId: String) {
+fun ApiKeysPage(model: AppModel, serverId: String) {
     var keys by remember { mutableStateOf<List<ApiKey>?>(null) }
     val users = remember { mutableStateMapOf<String, String>() }
     var failure by remember { mutableStateOf<String?>(null) }
@@ -477,7 +481,7 @@ internal fun ApiKeysPage(model: AppModel, serverId: String) {
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     SettingsField(name, { name = it }, stringResource(R.string.keys_name), Modifier.weight(1f))
-                    MavioButton(if (creating) "…" else stringResource(R.string.keys_create), ::create, enabled = name.isNotBlank() && !creating)
+                    SettingsButton(if (creating) "…" else stringResource(R.string.keys_create), ::create, enabled = name.isNotBlank() && !creating)
                 }
                 createFailure?.let { Text(it, Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp), style = theme.type.callout.text, color = theme.colors.danger) }
             }
@@ -491,7 +495,7 @@ internal fun ApiKeysPage(model: AppModel, serverId: String) {
                             Text(key.token, style = theme.type.callout.text.copy(fontFamily = FontFamily.Monospace))
                         }
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            MavioButton(
+                            SettingsButton(
                                 stringResource(if (copied) R.string.users_copied else R.string.keys_copy),
                                 {
                                     context.getSystemService(ClipboardManager::class.java)
@@ -501,12 +505,14 @@ internal fun ApiKeysPage(model: AppModel, serverId: String) {
                                 kind = ButtonKind.Secondary,
                             )
                             Column(Modifier.weight(1f)) {}
-                            Text(
-                                stringResource(R.string.keys_done),
-                                Modifier.clickable { made = null }.padding(8.dp),
-                                style = theme.type.callout.text,
-                                color = theme.colors.accentText,
-                            )
+                            PressableBox({ made = null }) {
+                                Text(
+                                    stringResource(R.string.keys_done),
+                                    Modifier.padding(8.dp),
+                                    style = theme.type.callout.text,
+                                    color = theme.colors.accentText,
+                                )
+                            }
                         }
                     }
                 }
@@ -517,7 +523,7 @@ internal fun ApiKeysPage(model: AppModel, serverId: String) {
                 keys.orEmpty().forEachIndexed { i, k ->
                     if (i > 0) RowDivider()
                     Row(
-                        Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp),
+                        Modifier.fillMaxWidth().padding(horizontal = rowPadding, vertical = 10.dp),
                         horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s12),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
@@ -525,12 +531,14 @@ internal fun ApiKeysPage(model: AppModel, serverId: String) {
                             Text(k.name, style = theme.type.body.text)
                             Text(keyDetail(context, k, users), style = theme.type.footnote.text, color = theme.colors.textSecondary)
                         }
-                        Text(
-                            stringResource(R.string.keys_revoke),
-                            Modifier.clickable { revoking = k }.padding(vertical = 6.dp),
-                            style = theme.type.callout.text,
-                            color = theme.colors.danger,
-                        )
+                        PressableBox({ revoking = k }) {
+                            Text(
+                                stringResource(R.string.keys_revoke),
+                                Modifier.padding(horizontal = if (LocalTelevision.current) 12.dp else 0.dp, vertical = 6.dp),
+                                style = theme.type.callout.text,
+                                color = theme.colors.danger,
+                            )
+                        }
                     }
                 }
                 val error = failure

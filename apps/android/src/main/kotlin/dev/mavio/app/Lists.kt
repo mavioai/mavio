@@ -35,6 +35,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import dev.mavio.admin.Procedure
+import dev.mavio.admin.reason
 import dev.mavio.core.AppModel
 import dev.mavio.core.Card
 import dev.mavio.core.Details
@@ -44,10 +46,10 @@ import dev.mavio.design.MavioSpacing
 import dev.mavio.ui.Artwork
 import dev.mavio.ui.ButtonKind
 import dev.mavio.ui.ItemCard
-import dev.mavio.ui.itemIcon
 import dev.mavio.ui.MavioButton
 import dev.mavio.ui.MavioIcon
 import dev.mavio.ui.R
+import dev.mavio.ui.itemIcon
 import dev.mavio.ui.minutesText
 import dev.mavio.ui.subtitleOf
 import dev.mavio.ui.text

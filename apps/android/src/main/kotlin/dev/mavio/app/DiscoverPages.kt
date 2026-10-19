@@ -37,10 +37,12 @@ import dev.mavio.design.MavioSpacing
 import dev.mavio.design.TabletLayout
 import dev.mavio.ui.Artwork
 import dev.mavio.ui.R
+import dev.mavio.ui.Segmented
 import dev.mavio.ui.collectionStatus
 import dev.mavio.ui.discoverLanguage
-import dev.mavio.ui.longDayText
 import dev.mavio.ui.discovered
+import dev.mavio.ui.line
+import dev.mavio.ui.longDayText
 import dev.mavio.ui.sized
 import dev.mavio.ui.statusLabel
 import dev.mavio.ui.text

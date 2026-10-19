@@ -93,6 +93,10 @@ import dev.chrisbanes.haze.blur.HazeColorEffect
 import dev.chrisbanes.haze.blur.hazeBlur
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
+import dev.mavio.admin.AdminHost
+import dev.mavio.admin.AdminPage
+import dev.mavio.admin.AdminScreen
+import dev.mavio.admin.LocalAdmin
 import dev.mavio.core.AppModel
 import dev.mavio.core.Card
 import dev.mavio.core.SignInState
@@ -145,14 +149,11 @@ sealed interface Route {
     /** A page of the settings. */
     data class Setting(val page: SettingsPage) : Route
 
-    /** A section of a server's settings. */
-    data class ServerSetting(val serverId: String, val section: ServerSection) : Route
+    /** A page of a server's administration. */
+    data class Admin(val page: AdminPage) : Route
 
-    /** A menu of a server's settings. */
-    data class ServerMenuPage(val serverId: String, val menu: ServerMenu) : Route
 
-    /** An issue reported on a server. */
-    data class IssuePage(val serverId: String, val id: String) : Route
+
 
     /** An item's metadata edited. */
     data class EditMetadata(val serverId: String, val itemId: String) : Route
@@ -163,17 +164,9 @@ sealed interface Route {
     /** An item's images chosen. */
     data class ItemImages(val serverId: String, val itemId: String) : Route
 
-    /** A library of a server's settings, or a new one's when id is null. */
-    data class ManagedLibrary(val serverId: String, val id: String?) : Route
 
-    /** A user of a server, or a new one's page when id is null; standalone when the server keeps its own accounts. */
-    data class ManagedUser(val serverId: String, val id: String?, val standalone: Boolean) : Route
 
-    /** Adding an rclone remote to a server. */
-    data class NewRemote(val serverId: String) : Route
 
-    /** An rclone remote of a server. */
-    data class StorageRemote(val serverId: String, val name: String) : Route
 
     /** Signing in to one more server. */
     data object AddServer : Route
@@ -317,6 +310,14 @@ private fun Shell(model: AppModel) {
     }
     val stack = stacks[place] ?: stacks.getValue(Route.Home)
     val navigator = remember { Navigator { stacks[place] ?: stacks.getValue(Route.Home) } }
+    val admin = remember(navigator) {
+        object : AdminHost {
+            override fun open(page: AdminPage) = navigator.open(Route.Admin(page))
+            override fun back() = navigator.back()
+            override val remote: @Composable (AppModel, String, String, () -> Unit) -> Unit =
+                { model, serverId, sessionId, onDismiss -> RemoteSheet(model, serverId, sessionId, onDismiss) }
+        }
+    }
     val haze = rememberHazeState()
     val backdrop = remember { HeaderBackdrop() }
     // Each place keeps its screens' state while another shows.
@@ -379,6 +380,7 @@ private fun Shell(model: AppModel) {
                 LocalTheme provides theme.copy(layout = layout),
                 LocalNavigator provides navigator,
                 LocalDiscover provides discover,
+                LocalAdmin provides admin,
                 LocalSearch provides search,
                 LocalHeaderBackdrop provides backdrop,
                 // A page opened from another keeps clear of Back above it.
@@ -448,6 +450,7 @@ private fun Shell(model: AppModel) {
             CompositionLocalProvider(
                 LocalNavigator provides navigator,
                 LocalDiscover provides discover,
+                LocalAdmin provides admin,
                 LocalSearch provides search,
                 LocalHeaderBackdrop provides backdrop,
                 // The pages scroll under the header and the floating tab bar, which blur them.
@@ -532,16 +535,10 @@ private fun Screen(model: AppModel, route: Route) {
             when (route) {
                 Route.Settings -> SettingsScreen(model)
                 is Route.Setting -> SettingsPageScreen(model, route.page)
-                is Route.ServerSetting -> ServerSettingScreen(model, route)
-                is Route.ServerMenuPage -> ServerMenuScreen(route)
-                is Route.IssuePage -> IssueScreen(model, route)
+                is Route.Admin -> AdminScreen(model, route.page)
                 is Route.EditMetadata -> EditMetadataScreen(model, route)
                 is Route.Identify -> IdentifyScreen(model, route)
                 is Route.ItemImages -> ItemImagesScreen(model, route)
-                is Route.ManagedLibrary -> ManagedLibraryScreen(model, route)
-                is Route.ManagedUser -> ManagedUserScreen(model, route)
-                is Route.NewRemote -> NewRemoteScreen(model, route)
-                is Route.StorageRemote -> StorageRemoteScreen(model, route)
                 else -> StatusView(stringResource(R.string.state_loading))
             }
         }

@@ -5,6 +5,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusGroup
+import androidx.compose.foundation.focusable
+import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,6 +24,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.DropdownMenu
@@ -40,7 +43,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -52,8 +58,14 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -63,6 +75,10 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.mavio.design.LightColors
 import dev.mavio.design.MavioSpacing
+import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 
 // The rows the settings are made of, on a phone, a tablet and a television
 // alike: on a television each row takes focus and turns white with it, as
@@ -70,7 +86,7 @@ import dev.mavio.design.MavioSpacing
 // a menu of choices and a field opens the keyboard (docs/tv.md §4, §5).
 
 /** The horizontal padding of a row. */
-internal val rowPadding: Dp
+val rowPadding: Dp
     @Composable get() = if (LocalTelevision.current) 24.dp else 16.dp
 
 /** The least height of a row, [phone]'s on a phone. */
@@ -96,6 +112,7 @@ fun Pressable(onClick: () -> Unit, modifier: Modifier = Modifier, content: @Comp
             .shakes()
             .then(if (focused) Modifier.shadow(12.dp, shape, ambientColor = theme.colors.tvFocusShadow, spotColor = theme.colors.tvFocusShadow) else Modifier)
             .background(if (focused) Color.White else Color.Transparent, shape)
+            .recallsFocus()
             .selectable(state, onClick),
     ) {
         if (focused) OnWhite(content) else content()
@@ -111,6 +128,7 @@ fun OnWhite(content: @Composable () -> Unit) {
         textTertiary = LightColors.textTertiary,
         accentText = Color.Black,
         border = LightColors.border,
+        fill = LightColors.fill,
     )
     CompositionLocalProvider(LocalTheme provides theme.copy(colors = colors), LocalContentColor provides Color.Black, content = content)
 }
@@ -118,13 +136,34 @@ fun OnWhite(content: @Composable () -> Unit) {
 /**
  * A page of settings: its title, an optional message, then its groups. On
  * a television it is a centered column, as the web UI's is, and opens with
- * focus on its first element unless something in it has taken focus.
+ * focus on its first element unless something in it has taken focus; with
+ * nothing to focus, the page takes focus itself and up and down scroll it.
  */
 @Composable
 fun SettingsList(title: String, message: String? = null, large: Boolean = false, content: LazyListScope.() -> Unit) {
     val tv = LocalTelevision.current
     val requester = remember { FocusRequester() }
     var within by remember { mutableStateOf(false) }
+    // Whether the page itself has focus, holding nothing to focus.
+    var alone by remember { mutableStateOf(false) }
+    var fallback by remember { mutableStateOf(false) }
+    val list = rememberLazyListState()
+    val recall = LocalFocusRecall.current
+    if (recall != null) {
+        // Where the list was scrolled, for its return: its rows load again.
+        var spot by rememberSaveable { mutableStateOf(intArrayOf(0, 0)) }
+        LaunchedEffect(list) {
+            val (index, offset) = spot
+            if (index > 0 || offset > 0) {
+                withTimeoutOrNull(3.seconds) { snapshotFlow { list.layoutInfo.totalItemsCount }.first { it > index } }
+                list.scrollToItem(index, offset)
+            }
+            snapshotFlow { list.firstVisibleItemIndex to list.firstVisibleItemScrollOffset }.collect { spot = intArrayOf(it.first, it.second) }
+        }
+    }
+    val scope = rememberCoroutineScope()
+    val focusManager = LocalFocusManager.current
+    val step = with(LocalDensity.current) { 240.dp.toPx() }
     if (tv) {
         LaunchedEffect(Unit) {
             // Its rows are laid out a frame or two after it.
@@ -133,6 +172,9 @@ fun SettingsList(title: String, message: String? = null, large: Boolean = false,
                 if (within) return@LaunchedEffect
                 runCatching { requester.requestFocus(FocusDirection.Enter) }
             }
+            fallback = true
+            withFrameNanos {}
+            if (!within) runCatching { requester.requestFocus() }
         }
     }
     Box(Modifier.fillMaxSize(), Alignment.TopCenter) {
@@ -141,8 +183,35 @@ fun SettingsList(title: String, message: String? = null, large: Boolean = false,
                 .then(if (tv) Modifier.widthIn(max = 1000.dp) else Modifier)
                 .fillMaxSize()
                 .focusRequester(requester)
-                .onFocusChanged { within = it.hasFocus }
+                .onFocusChanged {
+                    within = it.hasFocus
+                    alone = it.isFocused
+                    // Once a row has focus the page no longer takes it, so
+                    // that back, which leaves the focused element, leaves the page.
+                    if (it.hasFocus && !it.isFocused) fallback = false
+                }
+                .then(
+                    if (fallback) {
+                        Modifier
+                            .onKeyEvent { e ->
+                                val by = when (e.key) {
+                                    Key.DirectionDown -> step
+                                    Key.DirectionUp -> -step
+                                    else -> return@onKeyEvent false
+                                }
+                                if (!alone) return@onKeyEvent false
+                                if (e.type == KeyEventType.KeyDown && !focusManager.moveFocus(FocusDirection.Enter)) {
+                                    scope.launch { list.animateScrollBy(by) }
+                                }
+                                true
+                            }
+                            .focusable()
+                    } else {
+                        Modifier
+                    },
+                )
                 .focusGroup(),
+            state = list,
             contentPadding = if (tv) {
                 PaddingValues(start = MavioSpacing.s24, end = MavioSpacing.s24, top = MavioSpacing.s64, bottom = MavioSpacing.s64)
             } else {
@@ -460,6 +529,7 @@ private fun TvField(
                     },
                     shape,
                 )
+                .recallsFocus()
                 .selectable(state) { typing = true }
                 .padding(horizontal = 20.dp),
             Alignment.CenterStart,
@@ -474,20 +544,20 @@ private fun TvField(
             )
         }
     }
-    if (typing) {
-        val kind = when {
-            secret -> FieldKind.Secret
-            keyboard == KeyboardType.Number -> FieldKind.Integer
-            keyboard == KeyboardType.Decimal -> FieldKind.Decimal
-            else -> FieldKind.Text
-        }
-        TvKeyboard(label ?: placeholder.orEmpty(), value, kind, onChange) { typing = false }
-    }
+    if (typing) TvKeyboard(label ?: placeholder.orEmpty(), value, fieldKind(keyboard, secret), onChange) { typing = false }
+}
+
+/** The television keyboard's keys for a field of [keyboard], or a secret. */
+fun fieldKind(keyboard: KeyboardType, secret: Boolean = false): FieldKind = when {
+    secret -> FieldKind.Secret
+    keyboard == KeyboardType.Number -> FieldKind.Integer
+    keyboard == KeyboardType.Decimal -> FieldKind.Decimal
+    else -> FieldKind.Text
 }
 
 /**
- * A button of the settings: the design system's, or on a television one
- * that turns white with focus, [kind] choosing its fill.
+ * A button of the settings: the design system's, [kind] choosing its fill,
+ * or on a television one in `color.fill` that turns white with focus.
  */
 @Composable
 fun SettingsButton(
@@ -503,13 +573,14 @@ fun SettingsButton(
         MavioButton(label, onClick, modifier, kind, icon, large, enabled)
         return
     }
-    val primary = kind == ButtonKind.Primary
+    // Every kind is in `color.fill` until focus turns it white, as a
+    // filled one would look focused; disabled, it is dimmed.
     TvButton(
         label,
         { if (enabled) onClick() },
-        modifier.alpha(if (enabled) 1f else 0.4f),
+        modifier.alpha(if (enabled) 1f else 0.5f),
         icon,
-        fill = if (primary) theme.colors.button else theme.colors.fill,
-        content = if (primary) theme.colors.onButton else theme.colors.textPrimary,
+        fill = theme.colors.fill,
+        content = theme.colors.textPrimary,
     )
 }

@@ -44,6 +44,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import dev.mavio.admin.deviceName
+import dev.mavio.admin.reason
 import dev.mavio.core.AppModel
 import dev.mavio.core.DeviceSession
 import dev.mavio.core.RemoteCommand

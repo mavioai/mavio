@@ -1,4 +1,4 @@
-package dev.mavio.app
+package dev.mavio.admin
 
 import android.content.Context
 import android.icu.text.MeasureFormat
@@ -10,7 +10,6 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -49,15 +48,21 @@ import dev.mavio.core.ServerRecord
 import dev.mavio.core.call
 import dev.mavio.core.instant
 import dev.mavio.design.MavioSpacing
+import dev.mavio.ui.ChoiceMenuBox
 import dev.mavio.ui.ChoiceRow
 import dev.mavio.ui.EntryRow
 import dev.mavio.ui.Group
+import dev.mavio.ui.LocalTelevision
 import dev.mavio.ui.MavioIcon
+import dev.mavio.ui.Pressable
+import dev.mavio.ui.PressableBox
 import dev.mavio.ui.R
 import dev.mavio.ui.RowDivider
+import dev.mavio.ui.SettingsButton
 import dev.mavio.ui.SettingsList
 import dev.mavio.ui.StatusView
 import dev.mavio.ui.ValueRow
+import dev.mavio.ui.rowPadding
 import dev.mavio.ui.text
 import dev.mavio.ui.theme
 import java.text.NumberFormat
@@ -143,7 +148,7 @@ private val TOP: List<Any> = listOf(
  * not: others see the sections any user has, and a menu left with one
  * section is that section.
  */
-internal fun serverEntries(admin: Boolean): List<Any> = TOP.mapNotNull { entry ->
+fun serverEntries(admin: Boolean): List<Any> = TOP.mapNotNull { entry ->
     when (entry) {
         is ServerSection -> entry.takeIf { it.forAnyone || admin }
         is ServerMenu -> entry.sections.filter { it.forAnyone || admin }.let { if (it.size > 1) entry else it.firstOrNull() }
@@ -157,37 +162,46 @@ internal fun serverEntries(admin: Boolean): List<Any> = TOP.mapNotNull { entry -
  * server chosen, its administrators' with the devices signed in as the user
  * among them.
  */
-internal fun LazyListScope.serverGroup(model: AppModel, servers: List<ServerRecord>) {
+fun LazyListScope.serverGroup(
+    model: AppModel,
+    servers: List<ServerRecord>,
+    known: MutableMap<String, Boolean>? = null,
+    entry: (String) -> Modifier = { Modifier },
+) {
     if (servers.isEmpty()) return
     item(key = "server-group") {
         var serverId by rememberSaveable { mutableStateOf(servers.first().id) }
         val server = servers.firstOrNull { it.id == serverId } ?: servers.first()
         // Whether the user administers each server, once known, by server
         // and user, as switching users changes it; kept while pages open
-        // over the settings, so that coming back finds the group as long
-        // as it was, and where it was scrolled.
-        var admin by rememberSaveable { mutableStateOf(HashMap<String, Boolean>()) }
+        // over the settings, in [known] where the settings are composed
+        // again, so that coming back finds the group as long as it was,
+        // and where it was scrolled or focused.
+        var saved by rememberSaveable { mutableStateOf(HashMap<String, Boolean>()) }
+        val admin: Map<String, Boolean> = known ?: saved
         val adminKey = "${server.id}/${server.userId}"
         LaunchedEffect(adminKey) {
             runCatching {
                 model.client.call(server.id, Procedure.users("GetCurrentUser"), getCurrentUserRequest {}, GetCurrentUserResponse::parseFrom)
-            }.onSuccess { admin = HashMap(admin).apply { put(adminKey, it.user.admin) } }
+            }.onSuccess {
+                if (known != null) known[adminKey] = it.user.admin else saved = HashMap(saved).apply { put(adminKey, it.user.admin) }
+            }
         }
-        val navigator = LocalNavigator.current
+        val navigator = LocalAdmin.current
         Group(stringResource(R.string.settings_server_group)) {
             if (servers.size > 1) {
                 ChoiceRow(stringResource(R.string.auth_server), servers.map { it.id to it.name }, server.id) { serverId = it }
                 RowDivider()
             }
             val shown = serverEntries(admin[adminKey] == true)
-            shown.forEachIndexed { i, entry ->
+            shown.forEachIndexed { i, shownEntry ->
                 if (i > 0) RowDivider(tiled = true)
-                when (entry) {
-                    is ServerSection -> EntryRow(stringResource(entry.title), entry.icon, entry.color) {
-                        navigator.open(Route.ServerSetting(server.id, entry))
+                when (shownEntry) {
+                    is ServerSection -> EntryRow(stringResource(shownEntry.title), shownEntry.icon, shownEntry.color, entry("server/${shownEntry.name}")) {
+                        navigator.open(AdminPage.ServerSetting(server.id, shownEntry))
                     }
-                    is ServerMenu -> EntryRow(stringResource(entry.title), entry.icon, entry.color) {
-                        navigator.open(Route.ServerMenuPage(server.id, entry))
+                    is ServerMenu -> EntryRow(stringResource(shownEntry.title), shownEntry.icon, shownEntry.color, entry("server/${shownEntry.name}")) {
+                        navigator.open(AdminPage.ServerMenuPage(server.id, shownEntry))
                     }
                 }
             }
@@ -197,7 +211,7 @@ internal fun LazyListScope.serverGroup(model: AppModel, servers: List<ServerReco
 
 /** A section of the Server group. */
 @Composable
-fun ServerSettingScreen(model: AppModel, route: Route.ServerSetting) {
+fun ServerSettingScreen(model: AppModel, route: AdminPage.ServerSetting) {
     when (route.section) {
         ServerSection.Overview -> OverviewPage(model, route.serverId)
         ServerSection.General -> GeneralPage(model, route.serverId)
@@ -217,15 +231,15 @@ fun ServerSettingScreen(model: AppModel, route: Route.ServerSetting) {
 
 /** A menu's page: its sections, as the Server group lists its own; only an administrator sees one. */
 @Composable
-fun ServerMenuScreen(route: Route.ServerMenuPage) {
-    val navigator = LocalNavigator.current
+fun ServerMenuScreen(route: AdminPage.ServerMenuPage) {
+    val navigator = LocalAdmin.current
     SettingsList(stringResource(route.menu.title)) {
         item {
             Group {
                 route.menu.sections.forEachIndexed { i, section ->
                     if (i > 0) RowDivider(tiled = true)
                     EntryRow(stringResource(section.title), section.icon, section.color) {
-                        navigator.open(Route.ServerSetting(route.serverId, section))
+                        navigator.open(AdminPage.ServerSetting(route.serverId, section))
                     }
                 }
             }
@@ -234,7 +248,7 @@ fun ServerMenuScreen(route: Route.ServerMenuPage) {
 }
 
 /** What went wrong, as the server or the core told it. */
-internal val Throwable.reason: String get() = message ?: toString()
+val Throwable.reason: String get() = message ?: toString()
 
 /**
  * Overview (docs/clients.md §6.3.6): whether the server serves, its version
@@ -288,7 +302,7 @@ private fun OverviewPage(model: AppModel, serverId: String) {
         item {
             Group(stringResource(R.string.overview_server)) {
                 Row(
-                    Modifier.fillMaxWidth().heightIn(min = 48.dp).padding(horizontal = 16.dp),
+                    Modifier.fillMaxWidth().heightIn(min = 48.dp).padding(horizontal = rowPadding),
                     horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s8),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
@@ -316,7 +330,7 @@ private fun OverviewPage(model: AppModel, serverId: String) {
                 }
                 runtime?.let { r ->
                     RowDivider()
-                    Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp), horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s12)) {
+                    Row(Modifier.fillMaxWidth().padding(horizontal = rowPadding, vertical = 12.dp), horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s12)) {
                         Text(stringResource(R.string.overview_container_engine), style = theme.type.body.text)
                         Column(Modifier.weight(1f), horizontalAlignment = Alignment.End) {
                             Text(engine(context, r), style = theme.type.body.text, color = theme.colors.textSecondary, textAlign = TextAlign.End)
@@ -550,6 +564,7 @@ private fun Dots(values: List<Double?>, color: Color) {
 /** Devices: the devices signed in to the server as the user, each but this one signed out from here. */
 @Composable
 private fun DevicesPage(model: AppModel, serverId: String) {
+    val tv = LocalTelevision.current
     var devices by remember { mutableStateOf<List<DeviceSession>?>(null) }
     var failure by remember { mutableStateOf<String?>(null) }
     var busy by remember { mutableStateOf(false) }
@@ -568,8 +583,9 @@ private fun DevicesPage(model: AppModel, serverId: String) {
     }
     LaunchedEffect(serverId, reload) { load() }
     val context = LocalContext.current
+    val remote = LocalAdmin.current.remote
     controlling?.let {
-        RemoteSheet(model, serverId, it) {
+        remote?.invoke(model, serverId, it) {
             controlling = null
             reload++
         }
@@ -583,7 +599,7 @@ private fun DevicesPage(model: AppModel, serverId: String) {
                     list.forEachIndexed { i, device ->
                         if (i > 0) RowDivider()
                         Row(
-                            Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp),
+                            Modifier.fillMaxWidth().padding(horizontal = rowPadding, vertical = 10.dp),
                             horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s12),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
@@ -602,35 +618,40 @@ private fun DevicesPage(model: AppModel, serverId: String) {
                             if (device.current) {
                                 Text(stringResource(R.string.settings_this_device), style = theme.type.callout.text, color = theme.colors.textSecondary)
                             } else {
-                                if (device.online) {
+                                if (device.online && remote != null) {
+                                    PressableBox({ controlling = device.id }) {
+                                        Text(
+                                            stringResource(R.string.remote_control),
+                                            Modifier.padding(horizontal = if (tv) 12.dp else 0.dp, vertical = 6.dp),
+                                            style = theme.type.callout.text,
+                                            color = theme.colors.accentText,
+                                        )
+                                    }
+                                }
+                                PressableBox(
+                                    {
+                                        busy = true
+                                        scope.launch {
+                                            try {
+                                                model.client.signOutDevice(serverId, device.id)
+                                            } catch (e: CancellationException) {
+                                                throw e
+                                            } catch (e: Exception) {
+                                                failure = e.reason
+                                            }
+                                            load()
+                                            busy = false
+                                        }
+                                    },
+                                    enabled = !busy,
+                                ) {
                                     Text(
-                                        stringResource(R.string.remote_control),
-                                        Modifier.clickable { controlling = device.id }.padding(vertical = 6.dp),
+                                        stringResource(R.string.auth_sign_out),
+                                        Modifier.padding(horizontal = if (tv) 12.dp else 0.dp, vertical = 6.dp),
                                         style = theme.type.callout.text,
-                                        color = theme.colors.accentText,
+                                        color = theme.colors.danger,
                                     )
                                 }
-                                Text(
-                                    stringResource(R.string.auth_sign_out),
-                                    Modifier
-                                        .clickable(enabled = !busy) {
-                                            busy = true
-                                            scope.launch {
-                                                try {
-                                                    model.client.signOutDevice(serverId, device.id)
-                                                } catch (e: CancellationException) {
-                                                    throw e
-                                                } catch (e: Exception) {
-                                                    failure = e.reason
-                                                }
-                                                load()
-                                                busy = false
-                                            }
-                                        }
-                                        .padding(vertical = 6.dp),
-                                    style = theme.type.callout.text,
-                                    color = theme.colors.danger,
-                                )
                             }
                         }
                     }
@@ -642,7 +663,7 @@ private fun DevicesPage(model: AppModel, serverId: String) {
 }
 
 /** A device's name, or its client's when it has none. */
-internal fun deviceName(d: DeviceSession): String = d.deviceName.ifEmpty { d.client.ifEmpty { "—" } }
+fun deviceName(d: DeviceSession): String = d.deviceName.ifEmpty { d.client.ifEmpty { "—" } }
 
 /** A device's client and what it does: what it plays, online, or when it was last seen. */
 private fun deviceDetail(context: Context, d: DeviceSession): String {

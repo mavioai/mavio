@@ -5,6 +5,7 @@ import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
@@ -14,11 +15,13 @@ import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
+import dev.mavio.admin.AdminPage
 import dev.mavio.core.Card
 import dev.mavio.core.Row
 import dev.mavio.core.SearchResults
 import dev.mavio.core.Sort
 import dev.mavio.ui.CatalogFilters
+import dev.mavio.ui.FocusRecall
 import java.time.Duration
 
 /**
@@ -192,10 +195,22 @@ sealed class Page {
 
         /** The element of the list that had focus. */
         val focus = FocusMemory()
+
+        /** Whether the user administers each server, by server and user, for the Server group. */
+        val admins = mutableStateMapOf<String, Boolean>()
     }
 
     /** Connecting to a server and signing in to it, from the account (docs/tv.md §6.5). */
     class AddServer : Page()
+
+    /**
+     * A page of a server's administration, from the settings' Server group,
+     * its state kept under [id] while pages open over it.
+     */
+    class Admin(val page: AdminPage, val id: Int) : Page() {
+        /** Where focus was, for its return. */
+        val recall = FocusRecall()
+    }
 
     /** An item's playback, from [start] when set. */
     class Player(val serverId: String, val itemId: String, val title: String, val mediaSourceId: String?, val start: Duration?) : Page()
@@ -204,6 +219,7 @@ sealed class Page {
 /** The pages opened over the tabs, the last on top. */
 class Pages {
     private val stack = mutableStateListOf<Page>()
+    private var admins = 0
 
     /** The page on top, if any. */
     val top: Page? get() = stack.lastOrNull()
@@ -264,6 +280,11 @@ class Pages {
     /** Opens connecting to a server. */
     fun openAddServer() {
         stack += Page.AddServer()
+    }
+
+    /** Opens a page of a server's administration. */
+    fun openAdmin(page: AdminPage) {
+        stack += Page.Admin(page, ++admins)
     }
 
     /** Opens the settings. */

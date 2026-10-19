@@ -42,6 +42,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import dev.mavio.admin.reason
 import dev.mavio.core.AppModel
 import dev.mavio.core.Card
 import dev.mavio.core.CardKind
@@ -59,6 +60,7 @@ import dev.mavio.ui.StatusView
 import dev.mavio.ui.crewOrder
 import dev.mavio.ui.isCast
 import dev.mavio.ui.label
+import dev.mavio.ui.line
 import dev.mavio.ui.text
 import dev.mavio.ui.theme
 import java.time.Instant

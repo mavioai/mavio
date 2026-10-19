@@ -28,6 +28,7 @@ dependencies {
     implementation("dev.mavio.android:core:0.0.0")
     implementation("dev.mavio.android:player:0.0.0")
     implementation("dev.mavio.android:ui:0.0.0")
+    implementation("dev.mavio.android:admin:0.0.0")
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.core.ktx)
     implementation(libs.media3.ui)

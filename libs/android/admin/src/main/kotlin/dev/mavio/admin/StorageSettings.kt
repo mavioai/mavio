@@ -1,4 +1,4 @@
-package dev.mavio.app
+package dev.mavio.admin
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -6,7 +6,6 @@ import android.icu.text.NumberFormat
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,8 +19,6 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -53,20 +50,26 @@ import dev.mavio.core.call
 import dev.mavio.design.MavioSpacing
 import dev.mavio.ui.ButtonKind
 import dev.mavio.ui.Chevron
+import dev.mavio.ui.ChoiceMenuBox
 import dev.mavio.ui.ChoiceRow
 import dev.mavio.ui.Group
 import dev.mavio.ui.LinkRow
-import dev.mavio.ui.MavioButton
+import dev.mavio.ui.LocalTelevision
 import dev.mavio.ui.MavioIcon
 import dev.mavio.ui.MavioSwitch
+import dev.mavio.ui.Pressable
+import dev.mavio.ui.PressableBox
 import dev.mavio.ui.R
 import dev.mavio.ui.RowDivider
 import dev.mavio.ui.RowLabel
+import dev.mavio.ui.SettingsButton
 import dev.mavio.ui.SettingsField
 import dev.mavio.ui.SettingsList
 import dev.mavio.ui.StatusView
 import dev.mavio.ui.SwitchRow
 import dev.mavio.ui.ValueRow
+import dev.mavio.ui.line
+import dev.mavio.ui.rowPadding
 import dev.mavio.ui.text
 import dev.mavio.ui.theme
 import java.text.Collator
@@ -186,7 +189,7 @@ private fun Tile(@DrawableRes icon: Int, color: Color, size: Int = 28) {
  * with whether the server reaches it, to open and add, and rclone's status.
  */
 @Composable
-internal fun StoragePage(model: AppModel, serverId: String) {
+fun StoragePage(model: AppModel, serverId: String) {
     var status by remember { mutableStateOf<GetStatusResponse?>(null) }
     var statusFailure by remember { mutableStateOf<String?>(null) }
     var disks by remember { mutableStateOf<List<Disk>?>(null) }
@@ -194,7 +197,7 @@ internal fun StoragePage(model: AppModel, serverId: String) {
     var remotes by remember { mutableStateOf<List<Remote>?>(null) }
     var remotesFailure by remember { mutableStateOf<String?>(null) }
     var providers by remember { mutableStateOf<List<Provider>>(emptyList()) }
-    val navigator = LocalNavigator.current
+    val navigator = LocalAdmin.current
     val context = LocalContext.current
     LaunchedEffect(serverId) {
         coroutineScope {
@@ -237,7 +240,7 @@ internal fun StoragePage(model: AppModel, serverId: String) {
             item {
                 Group(stringResource(R.string.storage_remotes), stringResource(R.string.storage_remotes_footer)) {
                     remotes.orEmpty().forEach { r ->
-                        RemoteRow(model, serverId, r, kindName(context, providers, r.type)) { navigator.open(Route.StorageRemote(serverId, r.name)) }
+                        RemoteRow(model, serverId, r, kindName(context, providers, r.type)) { navigator.open(AdminPage.StorageRemote(serverId, r.name)) }
                         RowDivider(tiled = true)
                     }
                     if (remotes?.isEmpty() == true) {
@@ -248,7 +251,7 @@ internal fun StoragePage(model: AppModel, serverId: String) {
                         Note(it, failed = true)
                         RowDivider()
                     }
-                    LinkRow(stringResource(R.string.storage_add), R.drawable.ic_add) { navigator.open(Route.NewRemote(serverId)) }
+                    LinkRow(stringResource(R.string.storage_add), R.drawable.ic_add) { navigator.open(AdminPage.NewRemote(serverId)) }
                 }
             }
         }
@@ -258,7 +261,7 @@ internal fun StoragePage(model: AppModel, serverId: String) {
                     if (it.available) stringResource(R.string.storage_available) else it.error.ifEmpty { stringResource(R.string.storage_unavailable) }
                 } ?: "…"
                 Row(
-                    Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 14.dp),
+                    Modifier.fillMaxWidth().padding(horizontal = rowPadding, vertical = 14.dp),
                     horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s8),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
@@ -282,7 +285,7 @@ internal fun StoragePage(model: AppModel, serverId: String) {
                 status?.takeIf { it.available }?.let {
                     RowDivider()
                     Row(
-                        Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp),
+                        Modifier.fillMaxWidth().padding(horizontal = rowPadding, vertical = 10.dp),
                         horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s12),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
@@ -313,7 +316,7 @@ private fun DiskRow(disk: Disk) {
         DiskKind.DISK_KIND_CLOUD -> Triple(R.drawable.ic_cloud_fill, Cloud, R.string.storage_disk_cloud)
         else -> Triple(R.drawable.ic_disk_fill, Color(0xFF8E8E93), R.string.storage_disk_unknown)
     }
-    Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp), horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s16)) {
+    Row(Modifier.fillMaxWidth().padding(horizontal = rowPadding, vertical = 10.dp), horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s16)) {
         Tile(icon, color)
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
             Row(horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s12), verticalAlignment = Alignment.CenterVertically) {
@@ -364,34 +367,36 @@ private fun RemoteRow(model: AppModel, serverId: String, remote: Remote, kind: S
             else -> null
         }
     }
-    Row(
-        Modifier.fillMaxWidth().clickable(onClick = onClick).padding(start = 16.dp, end = 16.dp, top = 10.dp, bottom = 10.dp),
-        horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s16),
-    ) {
-        Tile(R.drawable.ic_cloud_fill, Cloud)
-        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            Row(horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s8), verticalAlignment = Alignment.CenterVertically) {
-                Text(remote.name, style = theme.type.body.text, maxLines = 1)
-                Box(
-                    Modifier.size(6.dp).background(
-                        when {
-                            reached == null -> theme.colors.fill
-                            reached!!.isEmpty() -> Green
-                            else -> theme.colors.danger
-                        },
-                        CircleShape,
-                    ),
-                )
+    Pressable(onClick, Modifier.fillMaxWidth()) {
+        Row(
+            Modifier.fillMaxWidth().padding(horizontal = rowPadding, vertical = 10.dp),
+            horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s16),
+        ) {
+            Tile(R.drawable.ic_cloud_fill, Cloud)
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s8), verticalAlignment = Alignment.CenterVertically) {
+                    Text(remote.name, style = theme.type.body.text, maxLines = 1)
+                    Box(
+                        Modifier.size(6.dp).background(
+                            when {
+                                reached == null -> theme.colors.fill
+                                reached!!.isEmpty() -> Green
+                                else -> theme.colors.danger
+                            },
+                            CircleShape,
+                        ),
+                    )
+                }
+                Text(kind, style = theme.type.footnote.text, color = theme.colors.textSecondary, maxLines = 1)
+                val failed = reached?.takeIf { it.isNotEmpty() }
+                when {
+                    failed != null -> Text(failed, style = theme.type.footnote.text, color = theme.colors.danger, maxLines = 2)
+                    used != null && usage!!.hasTotalBytes() && usage!!.totalBytes > 0 -> UsageBar(used, usage!!.totalBytes)
+                    used != null -> Text(stringResource(R.string.storage_used, capacity(used)), style = theme.type.footnote.text, color = theme.colors.textSecondary)
+                }
             }
-            Text(kind, style = theme.type.footnote.text, color = theme.colors.textSecondary, maxLines = 1)
-            val failed = reached?.takeIf { it.isNotEmpty() }
-            when {
-                failed != null -> Text(failed, style = theme.type.footnote.text, color = theme.colors.danger, maxLines = 2)
-                used != null && usage!!.hasTotalBytes() && usage!!.totalBytes > 0 -> UsageBar(used, usage!!.totalBytes)
-                used != null -> Text(stringResource(R.string.storage_used, capacity(used)), style = theme.type.footnote.text, color = theme.colors.textSecondary)
-            }
+            Box(Modifier.padding(top = 4.dp)) { Chevron() }
         }
-        Box(Modifier.padding(top = 4.dp)) { Chevron() }
     }
 }
 
@@ -431,33 +436,25 @@ private fun exampleLabel(e: Example): String {
 private fun OptionControl(option: Option, value: String, onChange: (String) -> Unit, provider: String, placeholder: String? = null) {
     val examples = option.examplesList.filter { providerMatches(it.provider, provider) }
     val current = value.ifEmpty { option.defaultValue }
-    var open by remember { mutableStateOf(false) }
+    val tv = LocalTelevision.current
     when {
-        option.type == "bool" -> MavioSwitch(current == "true") { onChange(if (it) "true" else "false") }
-        examples.isNotEmpty() && option.exclusive -> Box {
-            Row(
-                Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp)).background(theme.colors.fill).clickable { open = true }
-                    .padding(horizontal = 12.dp, vertical = 12.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(
-                    examples.firstOrNull { it.value == current }?.let(::exampleLabel) ?: current.ifEmpty { "—" },
-                    Modifier.weight(1f),
-                    style = theme.type.body.text,
-                    maxLines = 1,
-                )
-                MavioIcon(R.drawable.ic_selector, size = 16.dp, tint = theme.colors.textSecondary)
-            }
-            DropdownMenu(open, onDismissRequest = { open = false }) {
-                examples.forEach { e ->
-                    DropdownMenuItem(
-                        text = { Text(exampleLabel(e), style = theme.type.callout.text) },
-                        onClick = {
-                            open = false
-                            onChange(e.value)
-                        },
-                        trailingIcon = { if (e.value == current) MavioIcon(R.drawable.ic_check, size = 18.dp) },
+        option.type == "bool" -> PressableBox({ onChange(if (current == "true") "false" else "true") }, shape = CircleShape) {
+            MavioSwitch(current == "true", if (tv) null else { on -> onChange(if (on) "true" else "false") })
+        }
+        examples.isNotEmpty() && option.exclusive -> ChoiceMenuBox(examples.map { it.value to exampleLabel(it) }, current, onChange, Modifier.fillMaxWidth()) { open ->
+            PressableBox(open, Modifier.fillMaxWidth()) {
+                Row(
+                    Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp)).background(theme.colors.fill)
+                        .padding(horizontal = 12.dp, vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        examples.firstOrNull { it.value == current }?.let(::exampleLabel) ?: current.ifEmpty { "—" },
+                        Modifier.weight(1f),
+                        style = theme.type.body.text,
+                        maxLines = 1,
                     )
+                    MavioIcon(R.drawable.ic_selector, size = 16.dp, tint = theme.colors.textSecondary)
                 }
             }
         }
@@ -472,20 +469,9 @@ private fun OptionControl(option: Option, value: String, onChange: (String) -> U
                 keyboard = if (option.type == "int") KeyboardType.Number else KeyboardType.Text,
             )
             if (examples.isNotEmpty() && !option.password) {
-                Box {
-                    Box(Modifier.size(40.dp).clip(CircleShape).clickable(onClickLabel = option.name) { open = true }, Alignment.Center) {
+                ChoiceMenuBox(examples.map { it.value to exampleLabel(it) }, null, onChange) { open ->
+                    PressableBox(open, Modifier.size(40.dp), onClickLabel = option.name, shape = CircleShape) {
                         MavioIcon(R.drawable.ic_expand, size = 16.dp, tint = theme.colors.textSecondary)
-                    }
-                    DropdownMenu(open, onDismissRequest = { open = false }) {
-                        examples.forEach { e ->
-                            DropdownMenuItem(
-                                text = { Text(exampleLabel(e), style = theme.type.callout.text) },
-                                onClick = {
-                                    open = false
-                                    onChange(e.value)
-                                },
-                            )
-                        }
                     }
                 }
             }
@@ -499,7 +485,7 @@ private fun OptionField(option: Option, value: String, onChange: (String) -> Uni
     val help = option.help.trim()
     val inline = option.type == "bool"
     val danger = theme.colors.danger
-    Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp), verticalArrangement = Arrangement.spacedBy(MavioSpacing.s8)) {
+    Column(Modifier.fillMaxWidth().padding(horizontal = rowPadding, vertical = 10.dp), verticalArrangement = Arrangement.spacedBy(MavioSpacing.s8)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(
@@ -552,7 +538,7 @@ private val remoteName = Regex("[A-Za-z0-9_][A-Za-z0-9_.+@-]*")
  * added.
  */
 @Composable
-fun NewRemoteScreen(model: AppModel, route: Route.NewRemote) {
+fun NewRemoteScreen(model: AppModel, route: AdminPage.NewRemote) {
     val serverId = route.serverId
     var providers by remember { mutableStateOf<List<Provider>>(emptyList()) }
     var taken by remember { mutableStateOf<List<String>>(emptyList()) }
@@ -565,7 +551,7 @@ fun NewRemoteScreen(model: AppModel, route: Route.NewRemote) {
     var saving by remember { mutableStateOf(false) }
     var failure by remember { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
-    val navigator = LocalNavigator.current
+    val navigator = LocalAdmin.current
     val focus = LocalFocusManager.current
     val context = LocalContext.current
     LaunchedEffect(serverId) {
@@ -623,10 +609,10 @@ fun NewRemoteScreen(model: AppModel, route: Route.NewRemote) {
         }
         item {
             Row(horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s12), verticalAlignment = Alignment.CenterVertically) {
-                MavioButton(
+                SettingsButton(
                     if (saving) "…" else stringResource(R.string.storage_create),
                     {
-                        val p = provider ?: return@MavioButton
+                        val p = provider ?: return@SettingsButton
                         focus.clearFocus()
                         saving = true
                         failure = null
@@ -657,7 +643,7 @@ fun NewRemoteScreen(model: AppModel, route: Route.NewRemote) {
 
 /** A remote's page. */
 @Composable
-fun StorageRemoteScreen(model: AppModel, route: Route.StorageRemote) {
+fun StorageRemoteScreen(model: AppModel, route: AdminPage.StorageRemote) {
     RemotePage(model, route.serverId, route.name)
 }
 
@@ -683,7 +669,7 @@ private fun RemotePage(model: AppModel, serverId: String, name: String) {
     var confirming by remember { mutableStateOf(false) }
     var reload by remember { mutableIntStateOf(0) }
     val scope = rememberCoroutineScope()
-    val navigator = LocalNavigator.current
+    val navigator = LocalAdmin.current
     val focus = LocalFocusManager.current
     val context = LocalContext.current
     val savedNotice = stringResource(R.string.storage_saved)
@@ -782,8 +768,8 @@ private fun RemotePage(model: AppModel, serverId: String, name: String) {
         }
         item {
             Row(horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s12), verticalAlignment = Alignment.CenterVertically) {
-                MavioButton(if (saving) "…" else stringResource(R.string.action_save), { update(changes, savedNotice) }, enabled = changes.isNotEmpty() && !saving)
-                MavioButton(stringResource(R.string.storage_reconfigure), { update(emptyMap(), reconfiguredNotice) }, kind = ButtonKind.Secondary, enabled = !saving)
+                SettingsButton(if (saving) "…" else stringResource(R.string.action_save), { update(changes, savedNotice) }, enabled = changes.isNotEmpty() && !saving)
+                SettingsButton(stringResource(R.string.storage_reconfigure), { update(emptyMap(), reconfiguredNotice) }, kind = ButtonKind.Secondary, enabled = !saving)
             }
         }
         if (failure != null || notice != null && changes.isEmpty()) {
@@ -834,7 +820,7 @@ private fun RemoteFolders(model: AppModel, serverId: String, remote: String) {
     }
     Group(stringResource(R.string.storage_folders), stringResource(R.string.storage_folders_footer)) {
         SelectionContainer {
-            Text(here, Modifier.padding(horizontal = 16.dp, vertical = 12.dp), style = theme.type.callout.text, color = theme.colors.textSecondary)
+            Text(here, Modifier.padding(horizontal = rowPadding, vertical = 12.dp), style = theme.type.callout.text, color = theme.colors.textSecondary)
         }
         if (here != root) {
             RowDivider()
@@ -994,13 +980,13 @@ private fun RemoteQuestions(model: AppModel, serverId: String, name: String, que
                 Row(horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s12)) {
                     if (!waiting && !cancelled) {
                         if (confirm) {
-                            MavioButton(stringResource(R.string.storage_yes), { send("true") }, enabled = !pending)
-                            MavioButton(stringResource(R.string.storage_no), { send("false") }, kind = ButtonKind.Secondary, enabled = !pending)
+                            SettingsButton(stringResource(R.string.storage_yes), { send("true") }, enabled = !pending)
+                            SettingsButton(stringResource(R.string.storage_no), { send("false") }, kind = ButtonKind.Secondary, enabled = !pending)
                         } else {
-                            MavioButton(if (pending) "…" else stringResource(R.string.storage_continue), { send(answer) }, enabled = !pending)
+                            SettingsButton(if (pending) "…" else stringResource(R.string.storage_continue), { send(answer) }, enabled = !pending)
                         }
                     }
-                    MavioButton(
+                    SettingsButton(
                         stringResource(if (cancelled) R.string.storage_cancelling else R.string.action_cancel),
                         {
                             cancelled = true

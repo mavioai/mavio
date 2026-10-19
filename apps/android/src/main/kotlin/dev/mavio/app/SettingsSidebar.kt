@@ -37,6 +37,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import dev.mavio.admin.AdminPage
+import dev.mavio.admin.Procedure
+import dev.mavio.admin.ServerMenu
+import dev.mavio.admin.ServerSection
+import dev.mavio.admin.serverEntries
 import dev.mavio.core.AppModel
 import dev.mavio.core.call
 import dev.mavio.design.MavioSpacing
@@ -104,7 +109,7 @@ internal fun SettingsSidebar(model: AppModel, section: Route?, modifier: Modifie
         }
         if (servers.isNotEmpty()) {
             // The server whose sections show: the section's, else the first.
-            val shownId = (section as? Route.ServerSetting)?.serverId
+            val shownId = ((section as? Route.Admin)?.page as? AdminPage.ServerSetting)?.serverId
             var serverId by rememberSaveable { mutableStateOf(shownId ?: servers.first().id) }
             LaunchedEffect(shownId) { shownId?.let { serverId = it } }
             val server = servers.firstOrNull { it.id == serverId } ?: servers.first()
@@ -125,7 +130,7 @@ internal fun SettingsSidebar(model: AppModel, section: Route?, modifier: Modifie
                 }
                 serverEntries(admin[adminKey] == true).forEach { entry ->
                     when (entry) {
-                        is ServerSection -> Link(entry.title, entry.icon, entry.color, Route.ServerSetting(server.id, entry), section, onSelect)
+                        is ServerSection -> Link(entry.title, entry.icon, entry.color, Route.Admin(AdminPage.ServerSetting(server.id, entry)), section, onSelect)
                         is ServerMenu -> Menu(entry, server.id, section, onSelect)
                     }
                 }
@@ -173,7 +178,8 @@ private fun Link(title: Int, @DrawableRes icon: Int, color: Color, route: Route,
 /** A menu of sections, opening in place; open while it holds the section shown. */
 @Composable
 private fun Menu(menu: ServerMenu, serverId: String, section: Route?, onSelect: (Route) -> Unit) {
-    val holds = section is Route.ServerSetting && section.serverId == serverId && section.section in menu.sections
+    val shown = (section as? Route.Admin)?.page as? AdminPage.ServerSetting
+    val holds = shown != null && shown.serverId == serverId && shown.section in menu.sections
     var open by rememberSaveable(menu) { mutableStateOf(holds) }
     LaunchedEffect(holds) { if (holds) open = true }
     Row(
@@ -194,7 +200,7 @@ private fun Menu(menu: ServerMenu, serverId: String, section: Route?, onSelect: 
     }
     if (open) {
         Column(Modifier.padding(start = 24.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            menu.sections.forEach { s -> Link(s.title, s.icon, s.color, Route.ServerSetting(serverId, s), section, onSelect) }
+            menu.sections.forEach { s -> Link(s.title, s.icon, s.color, Route.Admin(AdminPage.ServerSetting(serverId, s)), section, onSelect) }
         }
     }
 }

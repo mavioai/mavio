@@ -61,6 +61,7 @@ import dev.mavio.ui.StatusView
 import dev.mavio.ui.catalogRequest
 import dev.mavio.ui.discovered
 import dev.mavio.ui.filterable
+import dev.mavio.ui.line
 import dev.mavio.ui.rowTitle
 import dev.mavio.ui.rowsOf
 import dev.mavio.ui.sized

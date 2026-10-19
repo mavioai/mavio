@@ -1,10 +1,9 @@
-package dev.mavio.app
+package dev.mavio.admin
 
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.net.Uri
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -41,19 +40,22 @@ import dev.mavio.design.MavioSpacing
 import dev.mavio.ui.Avatar
 import dev.mavio.ui.ButtonKind
 import dev.mavio.ui.Chevron
+import dev.mavio.ui.ChoiceMenuBox
 import dev.mavio.ui.ChoiceRow
 import dev.mavio.ui.Group
 import dev.mavio.ui.LinkRow
-import dev.mavio.ui.MavioButton
 import dev.mavio.ui.MavioIcon
+import dev.mavio.ui.Pressable
 import dev.mavio.ui.R
 import dev.mavio.ui.RowDivider
 import dev.mavio.ui.RowLabel
+import dev.mavio.ui.SettingsButton
 import dev.mavio.ui.SettingsField
 import dev.mavio.ui.SettingsList
 import dev.mavio.ui.StatusView
 import dev.mavio.ui.SwitchRow
 import dev.mavio.ui.ValueRow
+import dev.mavio.ui.rowPadding
 import dev.mavio.ui.text
 import dev.mavio.ui.theme
 import java.text.Collator
@@ -164,11 +166,11 @@ private fun restrictions(): List<Pair<RestrictionProfile, String>> = listOf(
 
 /** Users: the users of the server, adding one, and its invitation links. */
 @Composable
-internal fun UsersPage(model: AppModel, serverId: String) {
+fun UsersPage(model: AppModel, serverId: String) {
     var users by remember { mutableStateOf<List<User>?>(null) }
     var failure by remember { mutableStateOf<String?>(null) }
     var standalone by remember { mutableStateOf(false) }
-    val navigator = LocalNavigator.current
+    val navigator = LocalAdmin.current
     LaunchedEffect(serverId) {
         coroutineScope {
             val s = async { standalone(model, serverId) }
@@ -187,26 +189,28 @@ internal fun UsersPage(model: AppModel, serverId: String) {
             Group {
                 users.orEmpty().forEachIndexed { i, u ->
                     if (i > 0) RowDivider(tiled = true)
-                    Row(
-                        Modifier.fillMaxWidth().clickable { navigator.open(Route.ManagedUser(serverId, u.id, standalone)) }
-                            .padding(horizontal = 16.dp, vertical = 10.dp),
-                        horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s12),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Avatar(u.name)
-                        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                            Row(horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s8), verticalAlignment = Alignment.CenterVertically) {
-                                Text(u.name, Modifier.weight(1f, fill = false), style = theme.type.body.text, maxLines = 1)
-                                Badges(u)
+                    Pressable({ navigator.open(AdminPage.ManagedUser(serverId, u.id, standalone)) }, Modifier.fillMaxWidth()) {
+                        Row(
+                            Modifier.fillMaxWidth()
+                                .padding(horizontal = rowPadding, vertical = 10.dp),
+                            horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s12),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Avatar(u.name)
+                            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                                Row(horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s8), verticalAlignment = Alignment.CenterVertically) {
+                                    Text(u.name, Modifier.weight(1f, fill = false), style = theme.type.body.text, maxLines = 1)
+                                    Badges(u)
+                                }
+                                Text(
+                                    if (u.hasLastLoginTime()) stringResource(R.string.users_last_sign_in, day(u.lastLoginTime)) else stringResource(R.string.users_never_signed_in),
+                                    style = theme.type.footnote.text,
+                                    color = theme.colors.textSecondary,
+                                    maxLines = 1,
+                                )
                             }
-                            Text(
-                                if (u.hasLastLoginTime()) stringResource(R.string.users_last_sign_in, day(u.lastLoginTime)) else stringResource(R.string.users_never_signed_in),
-                                style = theme.type.footnote.text,
-                                color = theme.colors.textSecondary,
-                                maxLines = 1,
-                            )
+                            Chevron()
                         }
-                        Chevron()
                     }
                 }
                 when {
@@ -215,7 +219,7 @@ internal fun UsersPage(model: AppModel, serverId: String) {
                 }
                 if (standalone && users != null) {
                     RowDivider()
-                    LinkRow(stringResource(R.string.users_add), R.drawable.ic_add) { navigator.open(Route.ManagedUser(serverId, null, true)) }
+                    LinkRow(stringResource(R.string.users_add), R.drawable.ic_add) { navigator.open(AdminPage.ManagedUser(serverId, null, true)) }
                 }
             }
         }
@@ -232,12 +236,14 @@ private fun PinRow(label: String, pin: String, detail: String?, onChange: (Strin
 /** A row of a library, checked when chosen. */
 @Composable
 private fun LibraryCheckRow(name: String, on: Boolean, enabled: Boolean, onClick: () -> Unit) {
-    Row(
-        Modifier.fillMaxWidth().clickable(enabled = enabled, onClick = onClick).heightIn(min = 48.dp).padding(horizontal = 16.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(name, Modifier.weight(1f), style = theme.type.body.text)
-        if (on) MavioIcon(R.drawable.ic_check, size = 18.dp, tint = theme.colors.accentText)
+    Pressable({ if (enabled) onClick() }, Modifier.fillMaxWidth()) {
+        Row(
+            Modifier.fillMaxWidth().heightIn(min = 48.dp).padding(horizontal = rowPadding, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(name, Modifier.weight(1f), style = theme.type.body.text)
+            if (on) MavioIcon(R.drawable.ic_check, size = 18.dp, tint = theme.colors.accentText)
+        }
     }
 }
 
@@ -247,7 +253,7 @@ private fun LibraryCheckRow(name: String, on: Boolean, enabled: Boolean, onClick
  * page when id is set.
  */
 @Composable
-fun ManagedUserScreen(model: AppModel, route: Route.ManagedUser) {
+fun ManagedUserScreen(model: AppModel, route: AdminPage.ManagedUser) {
     var created by remember { mutableStateOf<User?>(null) }
     created?.let {
         UserPage(model, route.serverId, it, standalone = true)
@@ -295,7 +301,7 @@ fun ManagedUserScreen(model: AppModel, route: Route.ManagedUser) {
                     RowDivider()
                     ChoiceRow(stringResource(R.string.users_restriction), restrictions(), restriction, stringResource(R.string.users_restriction_detail)) { restriction = it }
                 } else {
-                    Column(Modifier.padding(horizontal = 16.dp, vertical = 10.dp)) {
+                    Column(Modifier.padding(horizontal = rowPadding, vertical = 10.dp)) {
                         SettingsField(password, { password = it }, stringResource(R.string.auth_password), secret = true)
                     }
                 }
@@ -303,7 +309,7 @@ fun ManagedUserScreen(model: AppModel, route: Route.ManagedUser) {
         }
         item {
             Row(horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s12), verticalAlignment = Alignment.CenterVertically) {
-                MavioButton(
+                SettingsButton(
                     if (saving) "…" else stringResource(R.string.users_create),
                     {
                         focus.clearFocus()
@@ -407,7 +413,7 @@ private fun Toggle(label: String, on: Boolean, detail: String? = null, own: Bool
         SwitchRow(label, on, detail, onChange)
     } else {
         Row(
-            Modifier.fillMaxWidth().heightIn(min = 52.dp).padding(horizontal = 16.dp, vertical = 8.dp),
+            Modifier.fillMaxWidth().heightIn(min = 52.dp).padding(horizontal = rowPadding, vertical = 8.dp),
             horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s12),
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -420,7 +426,7 @@ private fun Toggle(label: String, on: Boolean, detail: String? = null, own: Bool
 /** A field of labels separated by commas. */
 @Composable
 private fun LabelsRow(label: String, detail: String, value: String, enabled: Boolean, onChange: (String) -> Unit) {
-    Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp), verticalArrangement = Arrangement.spacedBy(MavioSpacing.s8)) {
+    Column(Modifier.fillMaxWidth().padding(horizontal = rowPadding, vertical = 10.dp), verticalArrangement = Arrangement.spacedBy(MavioSpacing.s8)) {
         RowLabel(label, detail)
         if (enabled) {
             SettingsField(value, onChange, null)
@@ -445,7 +451,7 @@ private fun UserPage(model: AppModel, serverId: String, initial: User, standalon
     var failure by remember { mutableStateOf<String?>(null) }
     var confirming by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
-    val navigator = LocalNavigator.current
+    val navigator = LocalAdmin.current
     val focus = LocalFocusManager.current
     val savedNotice = stringResource(R.string.users_saved)
     LaunchedEffect(serverId) {
@@ -483,7 +489,7 @@ private fun UserPage(model: AppModel, serverId: String, initial: User, standalon
                 footer = if (!standalone) stringResource(R.string.users_mavio_dev_note) else null,
             ) {
                 Row(
-                    Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
+                    Modifier.fillMaxWidth().padding(horizontal = rowPadding, vertical = 12.dp),
                     horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s12),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
@@ -640,7 +646,7 @@ private fun UserPage(model: AppModel, serverId: String, initial: User, standalon
 private fun CopyLink(link: String) {
     val context = LocalContext.current
     var copied by remember(link) { mutableStateOf(false) }
-    MavioButton(
+    SettingsButton(
         stringResource(if (copied) R.string.users_copied else R.string.users_copy_link),
         {
             context.getSystemService(ClipboardManager::class.java).setPrimaryClip(ClipData.newPlainText(link, link))
@@ -655,12 +661,12 @@ private fun CopyLink(link: String) {
 @Composable
 private fun ButtonRow(label: String, detail: String?, action: String, enabled: Boolean = true, onClick: () -> Unit) {
     Row(
-        Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp),
+        Modifier.fillMaxWidth().padding(horizontal = rowPadding, vertical = 10.dp),
         horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s12),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         RowLabel(label, detail, Modifier.weight(1f))
-        MavioButton(action, onClick, kind = ButtonKind.Secondary, enabled = enabled)
+        SettingsButton(action, onClick, kind = ButtonKind.Secondary, enabled = enabled)
     }
 }
 
@@ -709,14 +715,14 @@ private fun SignIns(model: AppModel, serverId: String, user: User, changed: (Use
         // Users change their own password, with the current one, in their account's settings.
         if (user.authProvider.isEmpty() && user.id != server?.userId) {
             divider()
-            Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp), verticalArrangement = Arrangement.spacedBy(MavioSpacing.s8)) {
+            Column(Modifier.fillMaxWidth().padding(horizontal = rowPadding, vertical = 10.dp), verticalArrangement = Arrangement.spacedBy(MavioSpacing.s8)) {
                 RowLabel(
                     stringResource(if (user.managed) R.string.users_give_password else R.string.users_set_password),
                     stringResource(if (user.managed) R.string.users_give_password_detail else R.string.users_set_password_detail),
                 )
                 Row(horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s8), verticalAlignment = Alignment.CenterVertically) {
                     SettingsField(password, { password = it }, null, Modifier.weight(1f), stringResource(R.string.auth_password), secret = true)
-                    MavioButton(
+                    SettingsButton(
                         stringResource(R.string.users_set),
                         {
                             run(if (user.managed) R.string.users_converted else R.string.users_password_set) {
@@ -756,7 +762,7 @@ private fun SignIns(model: AppModel, serverId: String, user: User, changed: (Use
                 Column(Modifier.weight(1f)) {
                     PinRow(stringResource(R.string.users_pin), pin, stringResource(if (user.hasPin) R.string.users_pin_on else R.string.users_pin_off)) { pin = it }
                 }
-                MavioButton(stringResource(R.string.users_set), { setPin(pin) }, kind = ButtonKind.Secondary, enabled = pin.length == 4 && !busy)
+                SettingsButton(stringResource(R.string.users_set), { setPin(pin) }, kind = ButtonKind.Secondary, enabled = pin.length == 4 && !busy)
                 androidx.compose.foundation.layout.Spacer(Modifier.width(16.dp))
             }
             if (user.hasPin) {
@@ -764,7 +770,7 @@ private fun SignIns(model: AppModel, serverId: String, user: User, changed: (Use
                 ActionRow(stringResource(R.string.users_clear), theme.colors.accentText, !busy) { setPin("") }
             }
             RowDivider()
-            Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp), verticalArrangement = Arrangement.spacedBy(MavioSpacing.s8)) {
+            Column(Modifier.fillMaxWidth().padding(horizontal = rowPadding, vertical = 10.dp), verticalArrangement = Arrangement.spacedBy(MavioSpacing.s8)) {
                 SelectionContainer {
                     Column { RowLabel(stringResource(R.string.users_invite_managed), link ?: stringResource(R.string.users_invite_managed_detail)) }
                 }
@@ -772,7 +778,7 @@ private fun SignIns(model: AppModel, serverId: String, user: User, changed: (Use
                 if (l != null) {
                     CopyLink(l)
                 } else {
-                    MavioButton(
+                    SettingsButton(
                         stringResource(R.string.users_create_link),
                         {
                             busy = true
@@ -898,7 +904,7 @@ private fun Invitations(model: AppModel, serverId: String, users: List<User>) {
     Column(verticalArrangement = Arrangement.spacedBy(24.dp)) {
         Group(stringResource(R.string.users_invitations), failure ?: stringResource(R.string.users_invitations_footer)) {
             if (link != null) {
-                Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp), verticalArrangement = Arrangement.spacedBy(MavioSpacing.s8)) {
+                Column(Modifier.fillMaxWidth().padding(horizontal = rowPadding, vertical = 10.dp), verticalArrangement = Arrangement.spacedBy(MavioSpacing.s8)) {
                     SelectionContainer { Column { RowLabel(stringResource(R.string.users_link_made), link) } }
                     CopyLink(link)
                 }
@@ -920,8 +926,8 @@ private fun Invitations(model: AppModel, serverId: String, users: List<User>) {
                 RowDivider()
                 SwitchRow(stringResource(R.string.users_allow_download), download) { download = it }
                 RowDivider()
-                Row(Modifier.padding(horizontal = 16.dp, vertical = 10.dp), horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s12)) {
-                    MavioButton(
+                Row(Modifier.padding(horizontal = rowPadding, vertical = 10.dp), horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s12)) {
+                    SettingsButton(
                         stringResource(R.string.users_create_link),
                         {
                             busy = true
@@ -951,7 +957,7 @@ private fun Invitations(model: AppModel, serverId: String, users: List<User>) {
                         },
                         enabled = !busy && uses in 1..100 && days in 1..30,
                     )
-                    MavioButton(stringResource(R.string.action_cancel), { making = false }, kind = ButtonKind.Secondary)
+                    SettingsButton(stringResource(R.string.action_cancel), { making = false }, kind = ButtonKind.Secondary)
                 }
             } else {
                 LinkRow(stringResource(R.string.users_invite), R.drawable.ic_add) {
