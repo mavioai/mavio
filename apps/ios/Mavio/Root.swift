@@ -71,7 +71,7 @@ enum Tab: Hashable {
 }
 
 /// The sign-in screen until a server is added, then the destinations in a
-/// tab bar, which an iPad shows at the top and turns into a sidebar.
+/// tab bar, which an iPad shows at the top.
 struct RootView: View {
     @Environment(AppModel.self) private var model
     @Environment(\.scenePhase) private var phase
@@ -147,7 +147,7 @@ struct RootView: View {
                 }
             }
         }
-        .tabViewStyle(.sidebarAdaptable)
+        .tabViewStyle(.tabBarOnly)
     }
 
     private func tabLabel(_ title: String, _ icon: String) -> some View {
@@ -239,13 +239,11 @@ private struct TopBar: ViewModifier {
     }
 }
 
-/// A phone's tab bar shows on the tabs' first screens alone, as the web UI's,
-/// and hides on a page opened from one; the iPad's sidebar stays.
+/// The tab bar shows on the tabs' first screens alone, as the web UI's,
+/// and hides on a page opened from one.
 private struct HiddenTabBar: ViewModifier {
-    @Environment(\.horizontalSizeClass) private var sizeClass
-
     func body(content: Content) -> some View {
-        content.toolbar(sizeClass == .regular ? .automatic : .hidden, for: .tabBar)
+        content.toolbar(.hidden, for: .tabBar)
     }
 }
 
