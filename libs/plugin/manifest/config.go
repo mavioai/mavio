@@ -35,6 +35,12 @@ const (
 	// OptionsSpeechSynthesizers are the synthesizers the plugin's
 	// TEXT_TO_SPEECH service implements, with their settings.
 	OptionsSpeechSynthesizers = "speech-synthesizers"
+	// OptionsSubtitleProviders are the subtitle sites the plugin's
+	// SUBTITLE_PROVIDER service implements, with their settings.
+	OptionsSubtitleProviders = "subtitle-providers"
+	// OptionsSubtitleTranslators are the translators the plugin's
+	// SUBTITLE_TRANSLATOR service implements, with their settings.
+	OptionsSubtitleTranslators = "subtitle-translators"
 	// OptionsDownloadClients are the download clients of every download
 	// client provider, as "<plugin>/<client>".
 	OptionsDownloadClients = "download-clients"

@@ -29,7 +29,8 @@ type ConfigOption struct {
 // Definitions returns the definitions of a started plugin's provider, the
 // options of manifest.OptionsIndexerDefinitions,
 // manifest.OptionsDownloadClientDefinitions,
-// manifest.OptionsSpeechRecognizers or manifest.OptionsSpeechSynthesizers.
+// manifest.OptionsSpeechRecognizers, manifest.OptionsSpeechSynthesizers,
+// manifest.OptionsSubtitleProviders or manifest.OptionsSubtitleTranslators.
 func (m *Manager) Definitions(ctx context.Context, id, source string) ([]ConfigOption, error) {
 	pl, man, err := m.started(id)
 	if err != nil {
@@ -88,6 +89,28 @@ func (m *Manager) Definitions(ctx context.Context, id, source string) ([]ConfigO
 		}
 		for _, s := range resp.GetSynthesizers() {
 			out = append(out, ConfigOption{Value: s.GetName(), Name: cmp.Or(s.GetDisplayName(), s.GetName()), SettingsSchema: SettingsSchema(s.GetSettings())})
+		}
+	case manifest.OptionsSubtitleProviders:
+		if !manifest.HasCapability(man, pluginv1.Capability_CAPABILITY_SUBTITLE_PROVIDER) || pl.Subtitles() == nil {
+			return nil, fmt.Errorf("%w: plugin %s provides no subtitle sites", core.ErrInvalid, id)
+		}
+		resp, err := pl.Subtitles().ListSubtitleProviders(ctx, &pluginv1.ListSubtitleProvidersRequest{})
+		if err != nil {
+			return nil, fmt.Errorf("list the subtitle providers of plugin %s: %w", id, err)
+		}
+		for _, p := range resp.GetProviders() {
+			out = append(out, ConfigOption{Value: p.GetName(), Name: cmp.Or(p.GetDisplayName(), p.GetName()), SettingsSchema: SettingsSchema(p.GetSettings())})
+		}
+	case manifest.OptionsSubtitleTranslators:
+		if !manifest.HasCapability(man, pluginv1.Capability_CAPABILITY_SUBTITLE_TRANSLATOR) || pl.Translators() == nil {
+			return nil, fmt.Errorf("%w: plugin %s provides no subtitle translators", core.ErrInvalid, id)
+		}
+		resp, err := pl.Translators().ListSubtitleTranslators(ctx, &pluginv1.ListSubtitleTranslatorsRequest{})
+		if err != nil {
+			return nil, fmt.Errorf("list the subtitle translators of plugin %s: %w", id, err)
+		}
+		for _, t := range resp.GetTranslators() {
+			out = append(out, ConfigOption{Value: t.GetName(), Name: cmp.Or(t.GetDisplayName(), t.GetName()), SettingsSchema: SettingsSchema(t.GetSettings())})
 		}
 	default:
 		return nil, fmt.Errorf("%w: unknown source of options %q", core.ErrInvalid, source)

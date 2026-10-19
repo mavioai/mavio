@@ -1832,7 +1832,8 @@ pub struct ListPluginConfigOptionsRequestView<'a> {
     /// The source x-mavio-options names: "indexer-definitions" and
     /// "download-client-definitions", the definitions of the plugin's
     /// providers, "speech-recognizers" and "speech-synthesizers", the services
-    /// of its speech providers, or "download-clients", the clients of every
+    /// of its speech providers, "subtitle-providers" and
+    /// "subtitle-translators", those of its subtitle providers, or "download-clients", the clients of every
     /// download client provider.
     ///
     /// Field 2: `source`
@@ -2050,7 +2051,8 @@ impl ListPluginConfigOptionsRequestOwnedView {
     /// The source x-mavio-options names: "indexer-definitions" and
     /// "download-client-definitions", the definitions of the plugin's
     /// providers, "speech-recognizers" and "speech-synthesizers", the services
-    /// of its speech providers, or "download-clients", the clients of every
+    /// of its speech providers, "subtitle-providers" and
+    /// "subtitle-translators", those of its subtitle providers, or "download-clients", the clients of every
     /// download client provider.
     ///
     /// Field 2: `source`
