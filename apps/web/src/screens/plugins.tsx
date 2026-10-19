@@ -556,6 +556,11 @@ const containerStates: Record<ContainerState, () => string> = {
 
 /** The docker run command a container runs as, shown when asked for. */
 export function ContainerCommand({ command }: { command: string }) {
+  return <ContainerDisclosure label={t("plugins.command")} text={command} />;
+}
+
+/** Text of a container's, such as its command or error, shown when asked for. */
+export function ContainerDisclosure({ label, text, danger }: { label: string; text: string; danger?: boolean }) {
   const [shown, setShown] = useState(false);
   return (
     <div className="flex flex-col items-start gap-1.5 px-4 pb-2.5">
@@ -566,10 +571,14 @@ export function ContainerCommand({ command }: { command: string }) {
         onClick={() => setShown(!shown)}
       >
         <Icon name="expand" size={14} className={`shrink-0 transition-transform ${shown ? "" : "-rotate-90"}`} />
-        {t(shown ? "plugins.hideCommand" : "plugins.showCommand")}
+        {label}
       </button>
       {shown && (
-        <pre className="w-full overflow-x-auto rounded-md bg-fill p-2.5 type-footnote whitespace-pre-wrap break-all select-all">{command}</pre>
+        <pre
+          className={`w-full overflow-x-auto rounded-md bg-fill p-2.5 type-footnote whitespace-pre-wrap break-all select-all ${danger ? "text-danger" : ""}`}
+        >
+          {text}
+        </pre>
       )}
     </div>
   );

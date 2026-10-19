@@ -1010,10 +1010,10 @@
     <string name="plugins_container_proxy_message">The container goes from reaching sites directly to through the server, or back, which takes another container. It is created again now; its volumes stay.</string>
     <!-- Action recreating a container with its new proxy. -->
     <string name="plugins_container_recreate">Recreate</string>
-    <!-- Shows the docker run command equivalent to how the server runs a container. -->
-    <string name="plugins_show_command">Show Command</string>
-    <!-- Hides the docker run command of a container. -->
-    <string name="plugins_hide_command">Hide Command</string>
+    <!-- Shows or hides the docker run command equivalent to how the server runs a container. -->
+    <string name="plugins_command">Start Command</string>
+    <!-- Shows or hides why a container failed to start or stopped responding. -->
+    <string name="plugins_container_error">Error</string>
     <!-- State of a server of the account that does not answer at any of its addresses. -->
     <string name="auth_unreachable">Can\'t be reached</string>
     <!-- Adds another server to sign in to. -->

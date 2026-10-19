@@ -500,8 +500,8 @@ export type MessageKey =
   | 'plugins.containerProxyTitle'
   | 'plugins.containerProxyMessage'
   | 'plugins.containerRecreate'
-  | 'plugins.showCommand'
-  | 'plugins.hideCommand'
+  | 'plugins.command'
+  | 'plugins.containerError'
   | 'auth.unreachable'
   | 'auth.othersUseApp'
   | 'auth.setUpElsewhere'
@@ -2431,8 +2431,8 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "plugins.containerProxyTitle": "Recreate {name}?",
     "plugins.containerProxyMessage": "The container goes from reaching sites directly to through the server, or back, which takes another container. It is created again now; its volumes stay.",
     "plugins.containerRecreate": "Recreate",
-    "plugins.showCommand": "Show Command",
-    "plugins.hideCommand": "Hide Command",
+    "plugins.command": "Start Command",
+    "plugins.containerError": "Error",
     "auth.unreachable": "Can't be reached",
     "auth.othersUseApp": "Only the administrator signs in here. Everyone else watches at {host}.",
     "auth.setUpElsewhere": "Set Up {server} on a Computer or Phone",
@@ -4360,8 +4360,8 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "plugins.containerProxyTitle": "重建 {name}？",
     "plugins.containerProxyMessage": "容器将从直连改为经服务器代理，或反过来，这需要重新创建容器。现在将重建容器，其数据卷保留。",
     "plugins.containerRecreate": "重建",
-    "plugins.showCommand": "显示启动命令",
-    "plugins.hideCommand": "隐藏启动命令",
+    "plugins.command": "启动命令",
+    "plugins.containerError": "错误原因",
     "auth.unreachable": "无法连接",
     "auth.othersUseApp": "只有管理员可以登录，其他人请在 {host} 观看。",
     "auth.setUpElsewhere": "请在电脑或手机上设置 {server}",

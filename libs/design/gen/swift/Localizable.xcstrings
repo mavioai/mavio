@@ -9019,38 +9019,38 @@
         }
       }
     },
-    "plugins.showCommand": {
-      "comment": "Shows the docker run command equivalent to how the server runs a container.",
+    "plugins.command": {
+      "comment": "Shows or hides the docker run command equivalent to how the server runs a container.",
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Show Command"
+            "value": "Start Command"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "显示启动命令"
+            "value": "启动命令"
           }
         }
       }
     },
-    "plugins.hideCommand": {
-      "comment": "Hides the docker run command of a container.",
+    "plugins.containerError": {
+      "comment": "Shows or hides why a container failed to start or stopped responding.",
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Hide Command"
+            "value": "Error"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "隐藏启动命令"
+            "value": "错误原因"
           }
         }
       }

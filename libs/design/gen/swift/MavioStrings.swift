@@ -1616,11 +1616,11 @@ public enum MavioStrings {
     /// Action recreating a container with its new proxy.
     public static var pluginsContainerRecreate: String { NSLocalizedString("plugins.containerRecreate", bundle: .module, comment: "") }
 
-    /// Shows the docker run command equivalent to how the server runs a container.
-    public static var pluginsShowCommand: String { NSLocalizedString("plugins.showCommand", bundle: .module, comment: "") }
+    /// Shows or hides the docker run command equivalent to how the server runs a container.
+    public static var pluginsCommand: String { NSLocalizedString("plugins.command", bundle: .module, comment: "") }
 
-    /// Hides the docker run command of a container.
-    public static var pluginsHideCommand: String { NSLocalizedString("plugins.hideCommand", bundle: .module, comment: "") }
+    /// Shows or hides why a container failed to start or stopped responding.
+    public static var pluginsContainerError: String { NSLocalizedString("plugins.containerError", bundle: .module, comment: "") }
 
     /// State of a server of the account that does not answer at any of its addresses.
     public static var authUnreachable: String { NSLocalizedString("auth.unreachable", bundle: .module, comment: "") }

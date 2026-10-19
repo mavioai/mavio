@@ -10,7 +10,7 @@ import { t } from "../../i18n.ts";
 import { Group, Row } from "../../ui.tsx";
 import { lengthOf, Page } from "./common.tsx";
 import { Load } from "./load.tsx";
-import { ContainerCommand, containerState } from "../plugins.tsx";
+import { ContainerCommand, ContainerDisclosure, containerState } from "../plugins.tsx";
 
 /** The section of the server chosen in the settings. */
 export function OverviewSection({ server }: { server: ServerEntry }) {
@@ -66,7 +66,7 @@ function ServerInfo({ server }: { server: ServerEntry }) {
   );
 }
 
-/** The containers of the plugins: which plugin each is for, its state, and the command it runs as. */
+/** The containers of the plugins: which plugin each is for, its state, the command it runs as, and why it failed. */
 function Containers({ server }: { server: ServerEntry }) {
   const list = useContainers(server);
   const plugins = usePlugins(server);
@@ -87,9 +87,10 @@ function Containers({ server }: { server: ServerEntry }) {
           <div key={`${c.pluginId}/${c.dependency?.name}`} className="flex flex-col">
             <Row
               label={c.dependency?.name ?? ""}
-              detail={[t("overview.containerOf", { plugin: pluginName(c.pluginId) }), st?.error ? `${state}: ${st.error}` : state].filter(Boolean).join(" · ")}
+              detail={[t("overview.containerOf", { plugin: pluginName(c.pluginId) }), state].filter(Boolean).join(" · ")}
             />
             {command && <ContainerCommand command={command} />}
+            {st?.error && <ContainerDisclosure label={t("plugins.containerError")} text={st.error} danger />}
           </div>
         );
       })}
