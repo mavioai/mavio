@@ -18,6 +18,8 @@ export interface Dictation {
   error?: string;
   /** Listens, or, while listening, ends the speech, which is then recognized. */
   toggle(): void;
+  /** Clears the error. */
+  dismiss(): void;
 }
 
 /** Listens on a server or in the browser, giving each utterance recognized to onText. */
@@ -82,5 +84,7 @@ export function useDictation(server: ServerEntry | undefined, onText: (text: str
     else if (!state.listening) void listen();
   }, [listen, state.listening]);
 
-  return { ...state, toggle };
+  const dismiss = useCallback(() => setState((s) => ({ ...s, error: undefined })), []);
+
+  return { ...state, toggle, dismiss };
 }

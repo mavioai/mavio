@@ -211,7 +211,19 @@ function Composer({
           </div>
         </div>
       </div>
-      {dictation.error && <p className="type-footnote break-words text-danger">{dictation.error}</p>}
+      {dictation.error && (
+        <div className="flex items-start gap-1.5">
+          <p className="min-w-0 flex-1 type-footnote break-words text-danger">{dictation.error}</p>
+          <button
+            type="button"
+            aria-label={t("remote.dismiss")}
+            onClick={dictation.dismiss}
+            className="-my-0.5 flex size-5 shrink-0 items-center justify-center rounded-full text-text-secondary hover:bg-fill"
+          >
+            <Icon name="close" size={14} />
+          </button>
+        </div>
+      )}
     </div>
   );
 }
