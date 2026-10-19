@@ -2,6 +2,8 @@ package app
 
 import (
 	"bytes"
+	"context"
+	"encoding/binary"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -16,11 +18,11 @@ import (
 	capiv1 "github.com/mavioai/mavio/libs/client-rust/capi/gen/mavio/capi/v1"
 )
 
-// coreTransport sends the unary calls of libs/proto's Connect clients
-// through the core, which calls the server as the session signed in to
-// it: the screens the core does not model, such as a person or the
-// settings, use the server's API as the web UI does. A client's base URL
-// names the server, as serverURL makes it.
+// coreTransport sends the unary and server-streaming calls of libs/proto's
+// Connect clients through the core, which calls the server as the session
+// signed in to it: the screens the core does not model, such as a person
+// or the settings, use the server's API as the web UI does. A client's
+// base URL names the server, as serverURL makes it.
 type coreTransport struct {
 	core  Core
 	bases *bases
@@ -73,7 +75,7 @@ func (t coreTransport) RoundTrip(r *http.Request) (*http.Response, error) {
 		return nil, fmt.Errorf("core transport: %s names no server", r.URL)
 	}
 	if r.Method != http.MethodPost {
-		return nil, fmt.Errorf("core transport: %s %s: only unary POST calls go through the core", r.Method, r.URL.Path)
+		return nil, fmt.Errorf("core transport: %s %s: only POST calls go through the core", r.Method, r.URL.Path)
 	}
 	var body []byte
 	if r.Body != nil {
@@ -83,6 +85,9 @@ func (t coreTransport) RoundTrip(r *http.Request) (*http.Response, error) {
 		if err != nil {
 			return nil, err
 		}
+	}
+	if r.Header.Get("Content-Type") == connectStream {
+		return t.stream(r, id, body)
 	}
 	m, err := t.core.Call(r.Context(), capiv1.Request_builder{CallServer: capiv1.CallServer_builder{
 		ServerId: id, Procedure: r.URL.Path, Request: body,
@@ -99,9 +104,74 @@ func (t coreTransport) RoundTrip(r *http.Request) (*http.Response, error) {
 	return response(r, http.StatusOK, "application/proto", res.GetBody()), nil
 }
 
+// connectStream is the content type of Connect's streaming calls, whose
+// messages are enveloped: a byte of flags, four of length, the message.
+const connectStream = "application/connect+proto"
+
+// The flags of a Connect envelope: the end of the stream, its message
+// JSON with the error, if any.
+const envelopeEnd = 0x02
+
+// stream sends a server-streaming call through the core, answering with
+// the server's messages enveloped as they come and the stream's end.
+func (t coreTransport) stream(r *http.Request, id string, body []byte) (*http.Response, error) {
+	if len(body) < 5 || body[0] != 0 || int(binary.BigEndian.Uint32(body[1:5])) != len(body)-5 {
+		return nil, fmt.Errorf("core transport: %s: a stream's request is one message", r.URL.Path)
+	}
+	pr, pw := io.Pipe()
+	write := func(flags byte, msg []byte) error {
+		var head [5]byte
+		head[0] = flags
+		binary.BigEndian.PutUint32(head[1:], uint32(len(msg)))
+		_, err := pw.Write(append(head[:], msg...))
+		return err
+	}
+	go func() {
+		var failed error
+		_, err := t.core.Stream(r.Context(), capiv1.Request_builder{CallServerStream: capiv1.CallServerStream_builder{
+			ServerId: id, Procedure: r.URL.Path, Request: body[5:],
+		}.Build()}.Build(), func(m *capiv1.Message) {
+			if failed == nil {
+				failed = write(0, m.GetResponse().GetBody())
+			}
+		})
+		if failed != nil {
+			// The client stopped reading.
+			pw.CloseWithError(failed)
+			return
+		}
+		end := []byte("{}")
+		if err != nil {
+			code := connect.CodeUnknown
+			if errors.Is(err, context.Canceled) {
+				code = connect.CodeCanceled
+			}
+			msg := err.Error()
+			if e := (*capi.Error)(nil); errors.As(err, &e) {
+				code, _ = connectCode(e)
+				msg = e.Reason
+			}
+			end, _ = json.Marshal(map[string]any{"error": map[string]string{"code": code.String(), "message": msg}})
+		}
+		_ = write(envelopeEnd, end)
+		pw.Close()
+	}()
+	res := response(r, http.StatusOK, connectStream, nil)
+	res.Body, res.ContentLength = pr, -1
+	return res, nil
+}
+
 // connectError answers as the server would have failed: with Connect's
 // JSON error of the core's code.
 func connectError(r *http.Request, e *capi.Error) *http.Response {
+	code, status := connectCode(e)
+	b, _ := json.Marshal(map[string]string{"code": code.String(), "message": e.Reason})
+	return response(r, status, "application/json", b)
+}
+
+// connectCode is Connect's code of the core's error, with the HTTP status
+// a server answers it with.
+func connectCode(e *capi.Error) (connect.Code, int) {
 	code, status := connect.CodeUnknown, http.StatusInternalServerError
 	switch e.Code {
 	case capiv1.Error_CODE_UNREACHABLE:
@@ -117,8 +187,7 @@ func connectError(r *http.Request, e *capi.Error) *http.Response {
 	case capiv1.Error_CODE_FAILED_PRECONDITION:
 		code, status = connect.CodeFailedPrecondition, http.StatusBadRequest
 	}
-	b, _ := json.Marshal(map[string]string{"code": code.String(), "message": e.Reason})
-	return response(r, status, "application/json", b)
+	return code, status
 }
 
 func response(r *http.Request, status int, contentType string, body []byte) *http.Response {

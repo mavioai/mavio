@@ -15,6 +15,7 @@ import (
 
 	"github.com/mavioai/mavio/libs/client-rust/capi"
 	capiv1 "github.com/mavioai/mavio/libs/client-rust/capi/gen/mavio/capi/v1"
+	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/assistant/v1/assistantv1connect"
 	libraryv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/library/v1"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/library/v1/libraryv1connect"
 	playbackv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/playback/v1"
@@ -56,6 +57,8 @@ func (f *fakeCore) apiHandler() http.Handler {
 	f.handleDiscover(mux)
 	f.handleLists(mux)
 	f.handleMetadata(mux)
+	f.assistant = &fakeAssistant{f: f}
+	mux.Handle(assistantv1connect.NewAssistantServiceHandler(f.assistant))
 	f.users = fakeUserList()
 	f.prefs = userv1.PlaybackPreferences_builder{
 		AudioLanguages: []string{"jpn", "eng"}, SubtitleLanguages: []string{"eng"},

@@ -257,6 +257,7 @@ func (a *App) titleBar(c *ui.Context, medium, expanded bool) {
 			return
 		}
 		ui.Spacer(c)
+		a.assistantButton(c, nil, 28)
 		label := style.T(c, "nav.collapseSidebar")
 		if iconButton(c, "sidebar", label).Clicked() {
 			if medium {
@@ -388,6 +389,9 @@ func (a *App) rail(c *ui.Context, medium bool) {
 					})
 					if cell.Clicked() {
 						a.openPlace(it.path)
+					}
+					if it.path == "/search" {
+						ui.Row(c).Justify(ui.Center).Children(func() { a.assistantButton(c, nil, 40) })
 					}
 				}
 			})

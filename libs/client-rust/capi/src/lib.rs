@@ -251,6 +251,36 @@ fn answer<T>(result: mavio_core::Result<T>, f: impl FnOnce(T) -> Answer) -> Answ
     result.map_or_else(Answer::from, f)
 }
 
+/// Runs a function of the assistant's grammar on its request's message,
+/// answering with its answer's.
+fn run_intent(function: &str, request: &[u8]) -> Answer {
+    use mavio_intent::proto::{ExamplesRequest, ParseIntentRequest, ReplyRequest};
+    fn run<Req: buffa::Message, Res: buffa::Message>(
+        request: &[u8],
+        f: impl FnOnce(&Req) -> Res,
+    ) -> Answer {
+        match Req::decode_from_slice(request) {
+            Ok(req) => Answer::Response(Box::new(pb::ServerResponse {
+                body: f(&req).encode_to_vec(),
+                ..Default::default()
+            })),
+            Err(e) => error(
+                pb::error::Code::CODE_INVALID,
+                format!("the request is not a message: {e}"),
+            ),
+        }
+    }
+    match function {
+        "parse" => run::<ParseIntentRequest, _>(request, mavio_intent::parse),
+        "reply" => run::<ReplyRequest, _>(request, mavio_intent::reply),
+        "examples" => run::<ExamplesRequest, _>(request, mavio_intent::examples),
+        _ => error(
+            pb::error::Code::CODE_INVALID,
+            format!("the grammar has no function {function:?}"),
+        ),
+    }
+}
+
 fn done() -> Answer {
     pb::Done::default().into()
 }
@@ -602,6 +632,22 @@ impl Client {
                     }))
                 },
             ),
+            Call::CallServerStream(c) => {
+                let sender = self.sender;
+                let streamed = core
+                    .call_stream(&c.server_id, &c.procedure, c.request.clone(), |body| {
+                        sender.part(
+                            number,
+                            Answer::Response(Box::new(pb::ServerResponse {
+                                body,
+                                ..Default::default()
+                            })),
+                        );
+                    })
+                    .await;
+                answer(streamed, |_| done())
+            }
+            Call::RunIntent(r) => run_intent(&r.function, &r.request),
             Call::SyncAccount(_) => answer(core.sync_account().await, |()| done()),
             Call::SignOut(_) => answer(core.sign_out().await, |()| done()),
             Call::LoadHome(_) => {

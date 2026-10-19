@@ -40,6 +40,14 @@ pub use self::__buffa::view::CallServerView;
 #[doc(inline)]
 pub use self::__buffa::view::CallServerOwnedView;
 #[doc(inline)]
+pub use self::__buffa::view::CallServerStreamView;
+#[doc(inline)]
+pub use self::__buffa::view::CallServerStreamOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::RunIntentView;
+#[doc(inline)]
+pub use self::__buffa::view::RunIntentOwnedView;
+#[doc(inline)]
 pub use self::__buffa::view::ServerResponseView;
 #[doc(inline)]
 pub use self::__buffa::view::ServerResponseOwnedView;

@@ -63,6 +63,10 @@ pub mod request {
         CallServer(::buffa::alloc::boxed::Box<super::super::super::CallServer>),
         SearchServer(::buffa::alloc::boxed::Box<super::super::super::SearchServer>),
         SwitchUser(::buffa::alloc::boxed::Box<super::super::super::SwitchUser>),
+        CallServerStream(
+            ::buffa::alloc::boxed::Box<super::super::super::CallServerStream>,
+        ),
+        RunIntent(::buffa::alloc::boxed::Box<super::super::super::RunIntent>),
     }
     impl ::buffa::Oneof for Kind {}
     impl From<super::super::super::Open> for Kind {
@@ -455,6 +459,26 @@ pub mod request {
     }
     impl From<super::super::super::SwitchUser> for ::core::option::Option<Kind> {
         fn from(v: super::super::super::SwitchUser) -> Self {
+            Self::Some(Kind::from(v))
+        }
+    }
+    impl From<super::super::super::CallServerStream> for Kind {
+        fn from(v: super::super::super::CallServerStream) -> Self {
+            Self::CallServerStream(::buffa::alloc::boxed::Box::new(v))
+        }
+    }
+    impl From<super::super::super::CallServerStream> for ::core::option::Option<Kind> {
+        fn from(v: super::super::super::CallServerStream) -> Self {
+            Self::Some(Kind::from(v))
+        }
+    }
+    impl From<super::super::super::RunIntent> for Kind {
+        fn from(v: super::super::super::RunIntent) -> Self {
+            Self::RunIntent(::buffa::alloc::boxed::Box::new(v))
+        }
+    }
+    impl From<super::super::super::RunIntent> for ::core::option::Option<Kind> {
+        fn from(v: super::super::super::RunIntent) -> Self {
             Self::Some(Kind::from(v))
         }
     }

@@ -150,6 +150,7 @@ type App struct {
 	issues issuesState
 	// switching switches the standalone server's session to another user.
 	switching switchState
+	assistant assistantState
 
 	places places
 	// focus moves focus with the arrow keys in the TV mode.
@@ -413,6 +414,7 @@ func (a *App) View(c *ui.Context) {
 	default:
 		// The PIN pad of the user switched to shows over every page.
 		defer a.pinPad(c)
+		defer a.assistantPanel(c, nil)
 		if p := a.playerOf(nil); p != nil {
 			a.playerView(c, p)
 			return

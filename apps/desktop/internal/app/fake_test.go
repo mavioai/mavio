@@ -97,6 +97,7 @@ type fakeCore struct {
 	downloads      *fakeDownloads
 	subtitles      *fakeSubtitles
 	issues         *fakeIssues
+	assistant      *fakeAssistant
 	playlists      []*fakeList
 	collections    map[string]*fakeList
 	commands       []*sessionv1.SendCommandRequest // sent to the user's devices
@@ -289,6 +290,10 @@ func (f *fakeCore) Stream(ctx context.Context, req *capiv1.Request, part func(*c
 		m.Done = &capiv1.Done{}
 	case req.HasCallServer():
 		return f.callServer(ctx, req.GetCallServer())
+	case req.HasCallServerStream():
+		return f.callServerStream(ctx, req.GetCallServerStream(), part)
+	case req.HasRunIntent():
+		return f.runIntent(req.GetRunIntent())
 	case req.HasSearch(), req.HasSearchServer():
 		var cards []*capiv1.Card
 		q := strings.ToLower(req.GetSearch().GetQuery() + req.GetSearchServer().GetQuery())

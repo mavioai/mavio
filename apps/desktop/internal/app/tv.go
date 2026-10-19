@@ -113,6 +113,7 @@ func (a *App) tvBar(c *ui.Context) {
 				})
 			})
 			ui.Row(c).Absolute().Top(42).Right(style.Layout(c).Margin).Gap(8).AlignItems(ui.Center).Children(func() {
+				a.tvAssistantButton(c)
 				a.tvDots(c)
 			})
 		})

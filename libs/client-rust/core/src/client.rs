@@ -813,6 +813,22 @@ impl Core {
         Ok((body, conn.url("")))
     }
 
+    /// Calls a server-streaming procedure of a server signed in to as its
+    /// session, with a request encoded as protobuf, giving `message` each
+    /// response encoded the same way; answers with the base URL it reached
+    /// the server at.
+    pub async fn call_stream(
+        &self,
+        server_id: &str,
+        procedure: &str,
+        request: Vec<u8>,
+        message: impl FnMut(Vec<u8>),
+    ) -> Result<String> {
+        let conn = self.servers.connection(server_id)?;
+        conn.call_stream(procedure, request, message).await?;
+        Ok(conn.url(""))
+    }
+
     /// Resolves a plain HTTP path of a server signed in to, answering its
     /// URL and the session's access token to send it with.
     pub async fn authorize(&self, server_id: &str, path: &str) -> Result<(String, String)> {

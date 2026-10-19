@@ -52,6 +52,8 @@ message Request {
     CallServer call_server = 37;
     SearchServer search_server = 38;
     SwitchUser switch_user = 39;
+    CallServerStream call_server_stream = 40;
+    RunIntent run_intent = 41;
   }
 }
 
@@ -64,6 +66,29 @@ message CallServer {
   string procedure = 2;
   // The request, encoded as protobuf.
   bytes request = 3;
+}
+
+// Calls a server-streaming procedure of a server signed in to, such as
+// the assistant's Ask, as CallServer calls a unary one: answered with a
+// ServerResponse for each message of the stream, each but the last
+// marked more, then Done.
+message CallServerStream {
+  string server_id = 1;
+  // The procedure's path, such as "/mavio.assistant.v1.AssistantService/Ask".
+  string procedure = 2;
+  // The request, encoded as protobuf.
+  bytes request = 3;
+}
+
+// Runs a function of the assistant's grammar (libs/intent), the fast path
+// of docs/assistant.md §4, answered with a ServerResponse whose body is
+// the answer.
+message RunIntent {
+  // The function: "parse" takes a mavio.intent.v1.ParseIntentRequest,
+  // "reply" a ReplyRequest and "examples" an ExamplesRequest.
+  string function = 1;
+  // The function's request, encoded as protobuf.
+  bytes request = 2;
 }
 
 // A CallServer's response.

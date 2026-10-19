@@ -1107,6 +1107,22 @@ impl ::buffa::Message for Request {
                         += 2u64 + ::buffa::encoding::varint_len(inner as u64) as u64
                             + inner as u64;
                 }
+                __buffa::oneof::request::Kind::CallServerStream(x) => {
+                    let __slot = __cache.reserve();
+                    let inner = x.compute_size(__cache);
+                    __cache.set(__slot, inner);
+                    size
+                        += 2u64 + ::buffa::encoding::varint_len(inner as u64) as u64
+                            + inner as u64;
+                }
+                __buffa::oneof::request::Kind::RunIntent(x) => {
+                    let __slot = __cache.reserve();
+                    let inner = x.compute_size(__cache);
+                    __cache.set(__slot, inner);
+                    size
+                        += 2u64 + ::buffa::encoding::varint_len(inner as u64) as u64
+                            + inner as u64;
+                }
             }
         }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
@@ -1428,6 +1444,22 @@ impl ::buffa::Message for Request {
                 __buffa::oneof::request::Kind::SwitchUser(x) => {
                     ::buffa::types::put_len_delimited_header(
                         39u32,
+                        u64::from(__cache.consume_next()),
+                        buf,
+                    );
+                    x.write_to(__cache, buf);
+                }
+                __buffa::oneof::request::Kind::CallServerStream(x) => {
+                    ::buffa::types::put_len_delimited_header(
+                        40u32,
+                        u64::from(__cache.consume_next()),
+                        buf,
+                    );
+                    x.write_to(__cache, buf);
+                }
+                __buffa::oneof::request::Kind::RunIntent(x) => {
+                    ::buffa::types::put_len_delimited_header(
+                        41u32,
                         u64::from(__cache.consume_next()),
                         buf,
                     );
@@ -2230,6 +2262,46 @@ impl ::buffa::Message for Request {
                     );
                 }
             }
+            40u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                if let ::core::option::Option::Some(
+                    __buffa::oneof::request::Kind::CallServerStream(ref mut existing),
+                ) = self.kind
+                {
+                    ::buffa::Message::merge_length_delimited(&mut **existing, buf, ctx)?;
+                } else {
+                    let mut val = ::core::default::Default::default();
+                    ::buffa::Message::merge_length_delimited(&mut val, buf, ctx)?;
+                    self.kind = ::core::option::Option::Some(
+                        __buffa::oneof::request::Kind::CallServerStream(
+                            ::buffa::alloc::boxed::Box::new(val),
+                        ),
+                    );
+                }
+            }
+            41u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                if let ::core::option::Option::Some(
+                    __buffa::oneof::request::Kind::RunIntent(ref mut existing),
+                ) = self.kind
+                {
+                    ::buffa::Message::merge_length_delimited(&mut **existing, buf, ctx)?;
+                } else {
+                    let mut val = ::core::default::Default::default();
+                    ::buffa::Message::merge_length_delimited(&mut val, buf, ctx)?;
+                    self.kind = ::core::option::Option::Some(
+                        __buffa::oneof::request::Kind::RunIntent(
+                            ::buffa::alloc::boxed::Box::new(val),
+                        ),
+                    );
+                }
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -2391,6 +2463,269 @@ impl ::buffa::Message for CallServer {
 }
 impl ::buffa::ExtensionSet for CallServer {
     const PROTO_FQN: &'static str = "mavio.capi.v1.CallServer";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+/// Calls a server-streaming procedure of a server signed in to, such as
+/// the assistant's Ask, as CallServer calls a unary one: answered with a
+/// ServerResponse for each message of the stream, each but the last
+/// marked more, then Done.
+#[derive(Clone, PartialEq, Default)]
+pub struct CallServerStream {
+    /// Field 1: `server_id`
+    pub server_id: ::buffa::alloc::string::String,
+    /// The procedure's path, such as "/mavio.assistant.v1.AssistantService/Ask".
+    ///
+    /// Field 2: `procedure`
+    pub procedure: ::buffa::alloc::string::String,
+    /// The request, encoded as protobuf.
+    ///
+    /// Field 3: `request`
+    pub request: ::buffa::alloc::vec::Vec<u8>,
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for CallServerStream {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("CallServerStream")
+            .field("server_id", &self.server_id)
+            .field("procedure", &self.procedure)
+            .field("request", &self.request)
+            .finish()
+    }
+}
+impl CallServerStream {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.capi.v1.CallServerStream";
+}
+::buffa::impl_default_instance!(CallServerStream);
+impl ::buffa::MessageName for CallServerStream {
+    const PACKAGE: &'static str = "mavio.capi.v1";
+    const NAME: &'static str = "CallServerStream";
+    const FULL_NAME: &'static str = "mavio.capi.v1.CallServerStream";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.capi.v1.CallServerStream";
+}
+impl ::buffa::Message for CallServerStream {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if !self.server_id.is_empty() {
+            size += 1u64 + ::buffa::types::string_encoded_len(&self.server_id) as u64;
+        }
+        if !self.procedure.is_empty() {
+            size += 1u64 + ::buffa::types::string_encoded_len(&self.procedure) as u64;
+        }
+        if !self.request.is_empty() {
+            size += 1u64 + ::buffa::types::bytes_encoded_len(&self.request) as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if !self.server_id.is_empty() {
+            ::buffa::types::put_string_field(1u32, &self.server_id, buf);
+        }
+        if !self.procedure.is_empty() {
+            ::buffa::types::put_string_field(2u32, &self.procedure, buf);
+        }
+        if !self.request.is_empty() {
+            ::buffa::types::put_shared_bytes_field(3u32, &self.request, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(&mut self.server_id, buf)?;
+            }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(&mut self.procedure, buf)?;
+            }
+            3u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_bytes(&mut self.request, buf)?;
+            }
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.server_id.clear();
+        self.procedure.clear();
+        self.request.clear();
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for CallServerStream {
+    const PROTO_FQN: &'static str = "mavio.capi.v1.CallServerStream";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+/// Runs a function of the assistant's grammar (libs/intent), the fast path
+/// of docs/assistant.md §4, answered with a ServerResponse whose body is
+/// the answer.
+#[derive(Clone, PartialEq, Default)]
+pub struct RunIntent {
+    /// The function: "parse" takes a mavio.intent.v1.ParseIntentRequest,
+    /// "reply" a ReplyRequest and "examples" an ExamplesRequest.
+    ///
+    /// Field 1: `function`
+    pub function: ::buffa::alloc::string::String,
+    /// The function's request, encoded as protobuf.
+    ///
+    /// Field 2: `request`
+    pub request: ::buffa::alloc::vec::Vec<u8>,
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for RunIntent {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("RunIntent")
+            .field("function", &self.function)
+            .field("request", &self.request)
+            .finish()
+    }
+}
+impl RunIntent {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.capi.v1.RunIntent";
+}
+::buffa::impl_default_instance!(RunIntent);
+impl ::buffa::MessageName for RunIntent {
+    const PACKAGE: &'static str = "mavio.capi.v1";
+    const NAME: &'static str = "RunIntent";
+    const FULL_NAME: &'static str = "mavio.capi.v1.RunIntent";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.capi.v1.RunIntent";
+}
+impl ::buffa::Message for RunIntent {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if !self.function.is_empty() {
+            size += 1u64 + ::buffa::types::string_encoded_len(&self.function) as u64;
+        }
+        if !self.request.is_empty() {
+            size += 1u64 + ::buffa::types::bytes_encoded_len(&self.request) as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if !self.function.is_empty() {
+            ::buffa::types::put_string_field(1u32, &self.function, buf);
+        }
+        if !self.request.is_empty() {
+            ::buffa::types::put_shared_bytes_field(2u32, &self.request, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(&mut self.function, buf)?;
+            }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_bytes(&mut self.request, buf)?;
+            }
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.function.clear();
+        self.request.clear();
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for RunIntent {
+    const PROTO_FQN: &'static str = "mavio.capi.v1.RunIntent";
     fn unknown_fields(&self) -> &::buffa::UnknownFields {
         &self.__buffa_unknown_fields
     }

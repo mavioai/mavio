@@ -232,7 +232,11 @@ func TestTVPlayer(t *testing.T) {
 	key(ui.KeyRight)
 	focused("Audio", "right from Subtitles")
 	key(ui.KeyRight)
-	focused("Audio", "right from the row's last")
+	focused("Assistant", "right from Audio")
+	key(ui.KeyRight)
+	focused("Assistant", "right from the row's last")
+	key(ui.KeyLeft)
+	focused("Audio", "left from Assistant")
 	// The panel opens with focus on its current choice, and closing it
 	// returns focus to its button.
 	key(ui.KeyEnter)

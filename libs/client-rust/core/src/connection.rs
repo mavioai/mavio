@@ -30,6 +30,15 @@ pub const DEFAULT_PORT: u16 = 8686;
 /// unreachable.
 const CALL_TIMEOUT: Duration = Duration::from_secs(20);
 
+/// How long a streaming call may wait for its next message, as a model
+/// thinks, before the server counts as unreachable.
+const STREAM_IDLE: Duration = Duration::from_secs(120);
+
+/// The flags of a Connect envelope: a compressed message, and the end of
+/// the stream with its error, if any.
+const ENVELOPE_COMPRESSED: u8 = 0x01;
+const ENVELOPE_END: u8 = 0x02;
+
 /// Parses an address the user typed: a URL, or a host with an optional
 /// port, which gets `http://` and, without a port, the default port. A path
 /// is kept, for servers behind a reverse proxy at a base URL.
@@ -272,6 +281,88 @@ impl Connection {
             .map_err(|_| Error::Unreachable(format!("{procedure} timed out")))?
     }
 
+    /// Calls a server-streaming procedure with a request encoded as
+    /// protobuf, giving `message` each response encoded the same way as it
+    /// comes: the streams of the screens the core does not model, such as
+    /// the assistant's answers.
+    pub async fn call_stream(
+        &self,
+        procedure: &str,
+        request: Vec<u8>,
+        mut message: impl FnMut(Vec<u8>),
+    ) -> Result<()> {
+        if !procedure.starts_with("/mavio.") || procedure.matches('/').count() != 2 {
+            return Err(Error::Invalid(format!("procedure {procedure:?}")));
+        }
+        let uri: Uri = self
+            .url(procedure)
+            .parse()
+            .map_err(|e| Error::Invalid(format!("procedure {procedure:?}: {e}")))?;
+        let len = u32::try_from(request.len())
+            .map_err(|_| Error::Invalid(format!("{procedure}: the request is too large")))?;
+        let mut envelope = Vec::with_capacity(5 + request.len());
+        envelope.push(0);
+        envelope.extend_from_slice(&len.to_be_bytes());
+        envelope.extend_from_slice(&request);
+        let req = Request::post(uri)
+            .header(CONTENT_TYPE, "application/connect+proto")
+            .header("connect-protocol-version", "1")
+            .body(
+                Full::new(Bytes::from(envelope))
+                    .map_err(|e| match e {})
+                    .boxed(),
+            )
+            .map_err(|e| Error::Invalid(e.to_string()))?;
+        let timed_out = || Error::Unreachable(format!("{procedure} timed out"));
+        let resp = tokio::time::timeout(CALL_TIMEOUT, self.transport().send(req))
+            .await
+            .map_err(|_| timed_out())??;
+        let status = resp.status();
+        let mut body = resp.into_body();
+        if !status.is_success() {
+            let body = tokio::time::timeout(CALL_TIMEOUT, body.collect())
+                .await
+                .map_err(|_| timed_out())?
+                .map_err(|e| Error::Unreachable(e.to_string()))?
+                .to_bytes();
+            return Err(call_error(status, &body));
+        }
+        let mut buf = Vec::new();
+        loop {
+            while buf.len() >= 5 {
+                let flags = buf[0];
+                let len = u32::from_be_bytes([buf[1], buf[2], buf[3], buf[4]]) as usize;
+                if buf.len() < 5 + len {
+                    break;
+                }
+                let data: Vec<u8> = buf.drain(..5 + len).skip(5).collect();
+                if flags & ENVELOPE_END != 0 {
+                    return end_stream(&data);
+                }
+                if flags & ENVELOPE_COMPRESSED != 0 {
+                    return Err(Error::Server(format!(
+                        "{procedure}: a compressed message, which was not asked for"
+                    )));
+                }
+                message(data);
+            }
+            match tokio::time::timeout(STREAM_IDLE, body.frame()).await {
+                Err(_) => return Err(timed_out()),
+                Ok(None) => {
+                    return Err(Error::Unreachable(format!(
+                        "{procedure}: the stream ended early"
+                    )));
+                }
+                Ok(Some(Err(e))) => return Err(Error::Unreachable(e.to_string())),
+                Ok(Some(Ok(frame))) => {
+                    if let Ok(data) = frame.into_data() {
+                        buf.extend_from_slice(&data);
+                    }
+                }
+            }
+        }
+    }
+
     fn config(&self, timeout: Option<Duration>) -> ClientConfig {
         let mut config = ClientConfig::new(self.base.clone());
         if let Some(timeout) = timeout {
@@ -355,6 +446,23 @@ fn call_error(status: StatusCode, body: &[u8]) -> Error {
         ),
     };
     ConnectError::new(code, message).into()
+}
+
+/// The error of a stream's end message, JSON with the error under
+/// `error` when the stream failed.
+fn end_stream(body: &[u8]) -> Result<()> {
+    #[derive(serde::Deserialize)]
+    struct End {
+        error: Option<serde_json::Value>,
+    }
+    match serde_json::from_slice::<End>(body) {
+        Ok(End { error: None }) => Ok(()),
+        Ok(End { error: Some(e) }) => Err(call_error(
+            StatusCode::OK,
+            &serde_json::to_vec(&e).unwrap_or_default(),
+        )),
+        Err(e) => Err(Error::Server(format!("the stream's end: {e}"))),
+    }
 }
 
 #[cfg(test)]

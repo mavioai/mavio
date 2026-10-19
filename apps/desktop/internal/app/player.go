@@ -123,6 +123,8 @@ type player struct {
 	// focusChoice is for how many frames more the panel focuses its
 	// current choice as it opens.
 	want, rowAt, rowLen, opener, focusChoice int
+	// volume is mpv's, from 0 to 100, which the assistant sets.
+	volume int
 }
 
 // playerOf returns the player showing in win, nil for the app's window.
@@ -168,7 +170,7 @@ func (a *App) playIn(win Window, server, item string, options *capiv1.PlaybackOp
 	if options == nil {
 		options = &capiv1.PlaybackOptions{}
 	}
-	p := &player{server: server, item: item, next: next, options: options, win: win}
+	p := &player{server: server, item: item, next: next, options: options, win: win, volume: 100}
 	a.players = append(a.players, p)
 	if win != nil {
 		win.Focus()
@@ -497,6 +499,10 @@ func cmpOr(s ...string) string {
 // playerKeys handles the player's keys: space and k, the arrows and j/l,
 // f, m; Escape closes the panel, then leaves full screen, then the player.
 func (a *App) playerKeys(c *ui.Context, p *player) {
+	// The assistant's panel over the player takes the keys.
+	if a.assistant.open && a.assistant.win == p.win {
+		return
+	}
 	pressed := func(keys ...ui.Key) bool {
 		for _, k := range keys {
 			if c.Shortcut(0, k) {
@@ -685,6 +691,7 @@ func (a *App) playerWindowView(c *ui.Context, win Window) {
 		win.SetTitle(title)
 	}
 	a.playerView(c, p)
+	a.assistantPanel(c, win)
 }
 
 // playerView builds player p: the video under the on-screen controller
@@ -862,6 +869,9 @@ func (a *App) playerBottomBar(c *ui.Context, p *player) {
 						p.panel = togglePanel(p.panel, tabSubtitles)
 					}
 				}
+				if a.assistantOn(c) && playerButton(c, "microphone", style.T(c, "assistant.title"), a.assistant.open, false, 44).Clicked() {
+					a.openAssistant(p.win)
+				}
 				options := p.panel != tabNone && p.panel != tabSubtitles
 				if playerButton(c, "settings", style.T(c, "player.options"), false, options, 44).Clicked() {
 					p.panel = togglePanel(p.panel, tabAudio)
@@ -930,6 +940,9 @@ func (a *App) tvPlayerRow(c *ui.Context, p *player, total time.Duration) {
 			}
 			if tvPlayerButton(c, p, "audio", style.T(c, "player.audio"), false, p.panel != tabNone && p.panel != tabSubtitles) {
 				open(tabAudio)
+			}
+			if a.assistantOn(c) && tvPlayerButton(c, p, "microphone", style.T(c, "assistant.title"), a.assistant.open, false) {
+				a.openAssistant(p.win)
 			}
 		})
 	})

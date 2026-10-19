@@ -201,6 +201,16 @@ pub mod request {
                 super::super::super::super::__buffa::view::SwitchUserView<'a>,
             >,
         ),
+        CallServerStream(
+            ::buffa::alloc::boxed::Box<
+                super::super::super::super::__buffa::view::CallServerStreamView<'a>,
+            >,
+        ),
+        RunIntent(
+            ::buffa::alloc::boxed::Box<
+                super::super::super::super::__buffa::view::RunIntentView<'a>,
+            >,
+        ),
     }
 }
 pub mod message {
