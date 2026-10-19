@@ -246,6 +246,15 @@ type observedJobs struct {
 	o *observed
 }
 
+func (q observedJobs) Enqueue(ctx context.Context, job *core.Job) (bool, error) {
+	added, err := q.JobQueue.Enqueue(ctx, job)
+	if err == nil && added {
+		queued := *job
+		q.o.report(func() { q.o.hub.jobEnqueued(queued) })
+	}
+	return added, err
+}
+
 func (q observedJobs) Lease(ctx context.Context, owner string, kinds []string, ttl time.Duration) (core.Job, error) {
 	job, err := q.JobQueue.Lease(ctx, owner, kinds, ttl)
 	if err == nil {

@@ -673,6 +673,8 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 		scanner.SubtitleFolder = subtitleFolder(set, metadataDir)
 		// Subtitle files a scan finds or loses change what is wanted.
 		scanner.OnSidecars = subs.Sidecars
+		// Administrators follow how far scans have come.
+		scanner.OnFolders = hub.ScanFolders
 		g.Go(func() error {
 			if err := worker.Run(ctx); !errors.Is(err, context.Canceled) {
 				return err

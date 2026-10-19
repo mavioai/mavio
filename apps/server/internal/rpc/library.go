@@ -44,6 +44,9 @@ type LibraryService struct {
 	// Storages opens the storage of library paths, which must be folders;
 	// nil opens local folders only.
 	Storages *library.Storages
+	// Progress returns how far a library's scan has come, nil while it is
+	// not being scanned; nil reports none.
+	Progress func(lib core.ID) *libraryv1.ScanProgress
 
 	store core.Store
 	now   func() time.Time
@@ -271,6 +274,11 @@ func (s *LibraryService) toProto(ctx context.Context, lib *core.Library, admin b
 			classes = s.Classes(lib)
 		}
 		l.SetEffectiveStorageClasses(storageClassesToProto(classes))
+	}
+	if admin && s.Progress != nil {
+		if p := s.Progress(lib.ID); p != nil {
+			l.SetScanProgress(p)
+		}
 	}
 	return l
 }

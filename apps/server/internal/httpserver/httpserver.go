@@ -235,6 +235,9 @@ func Handler(opts Options) (http.Handler, error) {
 	mux.Handle("GET /system/backups/{name}", backupDownload(authn, opts.Backups))
 	libraries := rpc.NewLibraryService(opts.Store)
 	libraries.Storages = opts.Storages
+	if opts.Hub != nil {
+		libraries.Progress = opts.Hub.ScanProgress
+	}
 	if libraries.Classes = storage.NewClassifier(nil).Classes; opts.Storage != nil {
 		libraries.Classes = opts.Storage.Classes
 	}

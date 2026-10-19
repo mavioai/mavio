@@ -152,6 +152,11 @@ func TestHub(t *testing.T) {
 			if e := next(adminTV).GetJobChanged(); e.GetState() != want || e.GetLibraryId() != shows.ID.String() {
 				t.Errorf("job event = %v, want %v", e, want)
 			}
+			// Each is followed by the scan's progress: begun, then ended.
+			e := next(adminTV).GetScanProgressChanged()
+			if e.GetLibraryId() != shows.ID.String() || e.HasProgress() != (want == sessionv1.JobState_JOB_STATE_RUNNING) {
+				t.Errorf("progress event = %v after %v", e, want)
+			}
 		}
 		if e := next(kidTablet); e != nil {
 			t.Errorf("kid got a job event: %v", e)

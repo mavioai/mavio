@@ -68,6 +68,8 @@ type Hub struct {
 	removed map[core.ID]core.ID // item → library
 	// tasks are the running jobs of tasks, by job ID.
 	tasks map[core.ID]core.Job
+	// scans follows the progress of library scans.
+	scans scans
 	// offline are told of sessions going offline, online of sessions
 	// opening a stream.
 	offline, online []func(session core.ID)
@@ -99,6 +101,7 @@ func New(cfg Config) *Hub {
 		log = slog.New(slog.DiscardHandler)
 	}
 	h := &Hub{cfg: cfg, log: log, subs: map[core.ID]*Subscriber{}, tasks: map[core.ID]core.Job{}}
+	h.scans.libs, h.scans.folders = map[core.ID]*scanProgress{}, map[core.ID]int{}
 	h.resetPending()
 	return h
 }
@@ -283,12 +286,15 @@ func (h *Hub) JobLeased(job core.Job) {
 	h.mu.Unlock()
 	if job.Kind == library.JobScan {
 		h.jobChanged(job, sessionv1.JobState_JOB_STATE_RUNNING)
+		h.scanLeased(job)
 	}
 }
 
 // JobEnded tells administrators that a scan succeeded or failed, and
-// plugins that a task's run ended; cause is why it failed.
+// plugins that a task's run ended; cause is why it failed. It counts the
+// probes and refreshes of scans.
 func (h *Hub) JobEnded(id core.ID, cause error) {
+	h.jobDone(id)
 	h.mu.Lock()
 	job, ok := h.tasks[id]
 	delete(h.tasks, id)
@@ -302,6 +308,7 @@ func (h *Hub) JobEnded(id core.ID, cause error) {
 			state = sessionv1.JobState_JOB_STATE_FAILED
 		}
 		h.jobChanged(job, state)
+		h.scanEnded(job)
 	}
 	h.taskEnded(job, cause)
 }
