@@ -26,10 +26,8 @@ import (
 const dialTimeout = 30 * time.Second
 
 // noProxy are the hosts programs sent to the Gateway reach directly: this
-// machine and the local network, as the Gateway itself would. It names no
-// IPv6 block, which Python's httpx fails on (fc00::/7 stops it creating a
-// client); the Gateway reaches those addresses directly all the same.
-var noProxy = []string{"localhost", "127.0.0.1", "::1", "10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16", ".local"}
+// machine and the local network, as the Gateway itself would.
+var noProxy = []string{"localhost", "127.0.0.1", "::1", "10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16", "fc00::/7", ".local"}
 
 // Gateway is an HTTP proxy on the server's own listener, through which
 // the programs the server starts, its process plugins and their managed

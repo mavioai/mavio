@@ -324,6 +324,18 @@ public nonisolated struct Mavio_Plugin_V1_ContainerDependency: Sendable {
   /// Clears the value of `direct`. Subsequent reads from it will return its default value.
   public mutating func clearDirect() {self._direct = nil}
 
+  /// Whether a managed container's NO_PROXY lists IPv4 blocks alone, for a
+  /// service whose HTTP library fails on IPv6 ones, such as Python's httpx
+  /// on fc00::/7; single addresses such as ::1 stay.
+  public var noProxyIpv4Only: Bool {
+    get {_noProxyIpv4Only ?? false}
+    set {_noProxyIpv4Only = newValue}
+  }
+  /// Returns true if `noProxyIpv4Only` has been explicitly set.
+  public var hasNoProxyIpv4Only: Bool {self._noProxyIpv4Only != nil}
+  /// Clears the value of `noProxyIpv4Only`. Subsequent reads from it will return its default value.
+  public mutating func clearNoProxyIpv4Only() {self._noProxyIpv4Only = nil}
+
   public var unknownFields = SwiftProtobuf.UnknownStorage()
 
   public init() {}
@@ -340,6 +352,7 @@ public nonisolated struct Mavio_Plugin_V1_ContainerDependency: Sendable {
   fileprivate var _required: Bool? = nil
   fileprivate var _hostAccess: Bool? = nil
   fileprivate var _direct: Bool? = nil
+  fileprivate var _noProxyIpv4Only: Bool? = nil
 }
 
 /// ContainerStatus is how a container dependency is reached and whether it
@@ -471,7 +484,7 @@ nonisolated extension Mavio_Plugin_V1_ContainerState: SwiftProtobuf._ProtoNamePr
 
 nonisolated extension Mavio_Plugin_V1_ContainerDependency: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".ContainerDependency"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}name\0\u{1}description\0\u{1}image\0\u{1}port\0\u{3}health_path\0\u{1}command\0\u{1}env\0\u{1}volumes\0\u{1}gpu\0\u{3}gpu_image\0\u{3}memory_mib\0\u{1}cpus\0\u{1}required\0\u{3}host_access\0\u{1}direct\0")
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}name\0\u{1}description\0\u{1}image\0\u{1}port\0\u{3}health_path\0\u{1}command\0\u{1}env\0\u{1}volumes\0\u{1}gpu\0\u{3}gpu_image\0\u{3}memory_mib\0\u{1}cpus\0\u{1}required\0\u{3}host_access\0\u{1}direct\0\u{3}no_proxy_ipv4_only\0")
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -494,6 +507,7 @@ nonisolated extension Mavio_Plugin_V1_ContainerDependency: SwiftProtobuf.Message
       case 13: try { try decoder.decodeSingularBoolField(value: &self._required) }()
       case 14: try { try decoder.decodeSingularBoolField(value: &self._hostAccess) }()
       case 15: try { try decoder.decodeSingularBoolField(value: &self._direct) }()
+      case 16: try { try decoder.decodeSingularBoolField(value: &self._noProxyIpv4Only) }()
       default: break
       }
     }
@@ -549,6 +563,9 @@ nonisolated extension Mavio_Plugin_V1_ContainerDependency: SwiftProtobuf.Message
     try { if let v = self._direct {
       try visitor.visitSingularBoolField(value: v, fieldNumber: 15)
     } }()
+    try { if let v = self._noProxyIpv4Only {
+      try visitor.visitSingularBoolField(value: v, fieldNumber: 16)
+    } }()
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -568,6 +585,7 @@ nonisolated extension Mavio_Plugin_V1_ContainerDependency: SwiftProtobuf.Message
     if lhs._required != rhs._required {return false}
     if lhs._hostAccess != rhs._hostAccess {return false}
     if lhs._direct != rhs._direct {return false}
+    if lhs._noProxyIpv4Only != rhs._noProxyIpv4Only {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

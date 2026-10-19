@@ -5,6 +5,8 @@ import (
 	"errors"
 	"log/slog"
 	"net"
+	"net/netip"
+	"slices"
 	"strconv"
 	"strings"
 	"sync"
@@ -103,18 +105,38 @@ func (g *gatewayUsers) containerEnv(ctx context.Context, m *pluginv1.Manifest, c
 		return nil
 	}
 	user := g.names.Container(c.PluginID, c.Name)
-	var siblings []string
+	var (
+		siblings []string
+		ipv4Only bool
+	)
 	for _, spec := range m.GetContainers() {
 		siblings = append(siblings, g.names.Container(c.PluginID, spec.GetName()))
+		if spec.GetName() == c.Name {
+			ipv4Only = spec.GetNoProxyIpv4Only()
+		}
 	}
 	return func(host string) map[string]string {
 		out := map[string]string{}
 		for _, kv := range g.gateway.Env(user, net.JoinHostPort(host, strconv.Itoa(g.port)), siblings...) {
 			k, v, _ := strings.Cut(kv, "=")
+			if ipv4Only && strings.EqualFold(k, "NO_PROXY") {
+				v = withoutIPv6Blocks(v)
+			}
 			out[k] = v
 		}
 		return out
 	}
+}
+
+// withoutIPv6Blocks leaves the IPv6 blocks, such as fc00::/7, out of a
+// NO_PROXY list, keeping single addresses such as ::1.
+func withoutIPv6Blocks(noProxy string) string {
+	hosts := strings.Split(noProxy, ",")
+	hosts = slices.DeleteFunc(hosts, func(h string) bool {
+		p, err := netip.ParsePrefix(strings.TrimSpace(h))
+		return err == nil && p.Addr().Is6()
+	})
+	return strings.Join(hosts, ",")
 }
 
 // pluginChanged follows a plugin's new proxy: its tunnels end, and it

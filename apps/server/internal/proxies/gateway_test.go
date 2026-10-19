@@ -191,12 +191,6 @@ func TestGatewayEnv(t *testing.T) {
 			t.Errorf("no_proxy got = %v, want %s in it", no, h)
 		}
 	}
-	// Python's httpx fails on an IPv6 block.
-	for _, h := range no {
-		if strings.Contains(h, ":") && strings.Contains(h, "/") {
-			t.Errorf("no_proxy got = %v, want no IPv6 block such as %s", no, h)
-		}
-	}
 	if v, ok := got["ALL_PROXY"]; !ok || v != "" {
 		t.Errorf("ALL_PROXY got = %q, %v, want = empty", v, ok)
 	}

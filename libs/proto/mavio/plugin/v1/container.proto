@@ -51,6 +51,10 @@ message ContainerDependency {
   // given the proxy of each request, such as a challenge solver: the server
   // offers no proxy choice for it and sends its requests through none.
   bool direct = 15;
+  // Whether a managed container's NO_PROXY lists IPv4 blocks alone, for a
+  // service whose HTTP library fails on IPv6 ones, such as Python's httpx
+  // on fc00::/7; single addresses such as ::1 stay.
+  bool no_proxy_ipv4_only = 16;
 }
 
 // GpuSupport is whether a container dependency uses a GPU.

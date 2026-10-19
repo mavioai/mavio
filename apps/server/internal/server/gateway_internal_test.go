@@ -21,3 +21,15 @@ func TestGatewayAddress(t *testing.T) {
 		}
 	}
 }
+
+func TestWithoutIPv6Blocks(t *testing.T) {
+	for in, want := range map[string]string{
+		"localhost,127.0.0.1,::1,10.0.0.0/8,fc00::/7,.local": "localhost,127.0.0.1,::1,10.0.0.0/8,.local",
+		"fe80::/10, 192.168.0.0/16":                          " 192.168.0.0/16",
+		"":                                                   "",
+	} {
+		if got := withoutIPv6Blocks(in); got != want {
+			t.Errorf("withoutIPv6Blocks(%q) got = %q, want = %q", in, got, want)
+		}
+	}
+}

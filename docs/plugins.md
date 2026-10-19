@@ -246,6 +246,7 @@ The manifest's `containers` lists the dependencies, each with:
 * `gpu`: unset for none, `GPU_SUPPORT_OPTIONAL` or `GPU_SUPPORT_REQUIRED` (NVIDIA), and `gpu_image`, by digest too, the image used with a GPU when it is another; `memory_mib` and `cpus`: the limits of a managed container.
 * `host_access`: whether the service reaches services on the server's host, by the name `host.docker.internal`: Docker maps it to the host (`host-gateway`), and Docker Desktop and Podman name it themselves. On Linux a service on the host must listen beyond its loopback interface to be reached.
 * `direct`: whether a managed container reaches sites only directly, for a service given the proxy of each request, such as FlareSolverr: the server offers no proxy choice for it and gives its container none (§12.1).
+* `no_proxy_ipv4_only`: whether a managed container's `NO_PROXY` lists IPv4 blocks alone, for a service whose HTTP library fails on IPv6 ones, such as Python's httpx on `fc00::/7`; single addresses such as `::1` stay.
 * `required`: whether the plugin cannot do without it. Optional dependencies, such as whisper-asr-webservice beside the plugin's OpenAI-compatible recognizer, stay `unset` until an administrator chooses.
 
 Installing or upgrading a plugin shows its dependencies with their images, so an administrator approves them with the plugin; a new image digest in an upgrade replaces a managed container when the plugin starts.
@@ -260,7 +261,7 @@ Installing or upgrading a plugin shows its dependencies with their images, so an
 * Clients mark each dependency required or optional, and offer managed when an engine is available and otherwise the commands, `docker run` and a Compose service, with the address they lead to filled in ([Architecture §16.4](architecture.md#164-external-dependencies)).
 
 ### 11.4 `plugins/voice`
-whisper-asr-webservice is the first dependency declared, named `whisper`: its CPU image, with `GPU_SUPPORT_OPTIONAL` and its GPU image as `gpu_image`, port 9000 with `/docs` as its health check, faster-whisper's `small` model, its model cache in a volume. The plugin reads its dependencies' addresses with `HostService.ListContainers` when configured; while `whisper` has one, the plugin's `whisper` recognizer uses it in place of its `endpoint` setting.
+whisper-asr-webservice is the first dependency declared, named `whisper`: its CPU image, with `GPU_SUPPORT_OPTIONAL` and its GPU image as `gpu_image`, port 9000 with `/docs` as its health check, faster-whisper's `small` model, its model cache in a volume, and `no_proxy_ipv4_only`, as its httpx fails on IPv6 blocks. The plugin reads its dependencies' addresses with `HostService.ListContainers` when configured; while `whisper` has one, the plugin's `whisper` recognizer uses it in place of its `endpoint` setting.
 
 ## 12. Proxies and `plugins/solvers`
 

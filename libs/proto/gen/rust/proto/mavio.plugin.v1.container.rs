@@ -327,6 +327,12 @@ pub struct ContainerDependency {
     ///
     /// Field 15: `direct`
     pub direct: ::core::option::Option<bool>,
+    /// Whether a managed container's NO_PROXY lists IPv4 blocks alone, for a
+    /// service whose HTTP library fails on IPv6 ones, such as Python's httpx
+    /// on fc00::/7; single addresses such as ::1 stay.
+    ///
+    /// Field 16: `no_proxy_ipv4_only`
+    pub no_proxy_ipv4_only: ::core::option::Option<bool>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -348,6 +354,7 @@ impl ::core::fmt::Debug for ContainerDependency {
             .field("required", &self.required)
             .field("host_access", &self.host_access)
             .field("direct", &self.direct)
+            .field("no_proxy_ipv4_only", &self.no_proxy_ipv4_only)
             .finish()
     }
 }
@@ -458,6 +465,13 @@ impl ContainerDependency {
         self.direct = Some(value);
         self
     }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::no_proxy_ipv4_only`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_no_proxy_ipv4_only(mut self, value: bool) -> Self {
+        self.no_proxy_ipv4_only = Some(value);
+        self
+    }
 }
 ::buffa::impl_default_instance!(ContainerDependency);
 impl ::buffa::MessageName for ContainerDependency {
@@ -530,6 +544,9 @@ impl ::buffa::Message for ContainerDependency {
         if self.direct.is_some() {
             size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
         }
+        if self.no_proxy_ipv4_only.is_some() {
+            size += 2u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -588,6 +605,9 @@ impl ::buffa::Message for ContainerDependency {
         }
         if let Some(v) = self.direct {
             ::buffa::types::put_bool_field(15u32, v, buf);
+        }
+        if let Some(v) = self.no_proxy_ipv4_only {
+            ::buffa::types::put_bool_field(16u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -754,6 +774,15 @@ impl ::buffa::Message for ContainerDependency {
                     ::buffa::types::decode_bool(buf)?,
                 );
             }
+            16u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.no_proxy_ipv4_only = ::core::option::Option::Some(
+                    ::buffa::types::decode_bool(buf)?,
+                );
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -777,6 +806,7 @@ impl ::buffa::Message for ContainerDependency {
         self.required = ::core::option::Option::None;
         self.host_access = ::core::option::Option::None;
         self.direct = ::core::option::Option::None;
+        self.no_proxy_ipv4_only = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }

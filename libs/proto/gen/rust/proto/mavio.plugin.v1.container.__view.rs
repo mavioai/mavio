@@ -81,6 +81,12 @@ pub struct ContainerDependencyView<'a> {
     ///
     /// Field 15: `direct`
     pub direct: ::core::option::Option<bool>,
+    /// Whether a managed container's NO_PROXY lists IPv4 blocks alone, for a
+    /// service whose HTTP library fails on IPv6 ones, such as Python's httpx
+    /// on fc00::/7; single addresses such as ::1 stay.
+    ///
+    /// Field 16: `no_proxy_ipv4_only`
+    pub no_proxy_ipv4_only: ::core::option::Option<bool>,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for ContainerDependencyView<'a> {
@@ -198,6 +204,13 @@ impl<'a> ::buffa::MessageView<'a> for ContainerDependencyView<'a> {
                     ::buffa::encoding::WireType::Varint,
                 )?;
                 view.direct = Some(::buffa::types::decode_bool(&mut cur)?);
+            }
+            16u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.no_proxy_ipv4_only = Some(::buffa::types::decode_bool(&mut cur)?);
             }
             6u32 => {
                 ::buffa::encoding::check_wire_type(
@@ -339,6 +352,7 @@ impl<'a> ::buffa::MessageView<'a> for ContainerDependencyView<'a> {
             required: self.required,
             host_access: self.host_access,
             direct: self.direct,
+            no_proxy_ipv4_only: self.no_proxy_ipv4_only,
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -400,6 +414,9 @@ impl<'a> ::buffa::ViewEncode<'a> for ContainerDependencyView<'a> {
         }
         if self.direct.is_some() {
             size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
+        if self.no_proxy_ipv4_only.is_some() {
+            size += 2u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
         }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
@@ -494,6 +511,9 @@ impl<'a> ::buffa::ViewEncode<'a> for ContainerDependencyView<'a> {
         }
         if let Some(v) = self.direct {
             ::buffa::types::put_bool_field(15u32, v, buf);
+        }
+        if let Some(v) = self.no_proxy_ipv4_only {
+            ::buffa::types::put_bool_field(16u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -710,6 +730,15 @@ impl ContainerDependencyOwnedView {
     #[must_use]
     pub fn direct(&self) -> ::core::option::Option<bool> {
         self.0.reborrow().direct
+    }
+    /// Whether a managed container's NO_PROXY lists IPv4 blocks alone, for a
+    /// service whose HTTP library fails on IPv6 ones, such as Python's httpx
+    /// on fc00::/7; single addresses such as ::1 stay.
+    ///
+    /// Field 16: `no_proxy_ipv4_only`
+    #[must_use]
+    pub fn no_proxy_ipv4_only(&self) -> ::core::option::Option<bool> {
+        self.0.reborrow().no_proxy_ipv4_only
     }
 }
 impl ::core::convert::From<::buffa::OwnedView<ContainerDependencyView<'static>>>

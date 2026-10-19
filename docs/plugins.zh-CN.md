@@ -246,6 +246,7 @@ DLNA 是第一方进程插件：它需要 UDP 组播（WASM 没有 socket）和�
 * `gpu`：不设置表示不用，或 `GPU_SUPPORT_OPTIONAL`、`GPU_SUPPORT_REQUIRED`（NVIDIA），以及 `gpu_image`：使用 GPU 时若为另一个镜像，则为该镜像，同样带 digest；`memory_mib` 与 `cpus`：托管容器的限制。
 * `host_access`：服务是否以名称 `host.docker.internal` 访问服务器宿主机上的服务：Docker 把它映射到宿主机（`host-gateway`），Docker Desktop 与 Podman 自行提供该名称。在 Linux 上，宿主机上的服务须监听回环接口之外的接口才能被访问。
 * `direct`：托管容器是否只直连访问站点，用于每个请求都带有代理的服务，例如 FlareSolverr：服务器不为它提供代理选择，也不给其容器设置代理（§12.1）。
+* `no_proxy_ipv4_only`：托管容器的 `NO_PROXY` 是否只列出 IPv4 网段，用于 HTTP 库处理不了 IPv6 网段的服务，例如遇到 `fc00::/7` 的 Python httpx；`::1` 这样的单个地址保留。
 * `required`：插件是否离不开它。可选依赖（例如与插件的 OpenAI 兼容识别器并列的 whisper-asr-webservice）在管理员选择之前保持 `unset`。
 
 安装或升级插件时显示其依赖及镜像，管理员随插件一并批准；升级带来新的镜像 digest 时，插件启动时替换托管容器。
@@ -260,7 +261,7 @@ DLNA 是第一方进程插件：它需要 UDP 组播（WASM 没有 socket）和�
 * 客户端标明每个依赖是必需还是可选；有引擎时提供托管；否则提供命令（`docker run` 与一个 Compose 服务），并预填它们对应的地址（[架构 §16.4](architecture.zh-CN.md#164-外部依赖)）。
 
 ### 11.4 `plugins/voice`
-whisper-asr-webservice 是第一个被声明的依赖，名为 `whisper`：其 CPU 镜像，`GPU_SUPPORT_OPTIONAL` 并以其 GPU 镜像为 `gpu_image`，端口 9000 并以 `/docs` 作健康检查，faster-whisper 的 `small` 模型，模型缓存放在一个卷中。插件被配置时通过 `HostService.ListContainers` 读取其依赖的地址；`whisper` 有地址时，插件的 `whisper` 识别器用它代替其 `endpoint` 设置。
+whisper-asr-webservice 是第一个被声明的依赖，名为 `whisper`：其 CPU 镜像，`GPU_SUPPORT_OPTIONAL` 并以其 GPU 镜像为 `gpu_image`，端口 9000 并以 `/docs` 作健康检查，faster-whisper 的 `small` 模型，模型缓存放在一个卷中，并声明 `no_proxy_ipv4_only`，因为它的 httpx 处理不了 IPv6 网段。插件被配置时通过 `HostService.ListContainers` 读取其依赖的地址；`whisper` 有地址时，插件的 `whisper` 识别器用它代替其 `endpoint` 设置。
 
 ## 12. 代理与 `plugins/solvers`
 

@@ -16789,6 +16789,11 @@
             "type": "boolean",
             "title": "direct",
             "description": "Whether a managed container reaches sites only directly, for a service\n given the proxy of each request, such as a challenge solver: the server\n offers no proxy choice for it and sends its requests through none."
+          },
+          "noProxyIpv4Only": {
+            "type": "boolean",
+            "title": "no_proxy_ipv4_only",
+            "description": "Whether a managed container's NO_PROXY lists IPv4 blocks alone, for a\n service whose HTTP library fails on IPv6 ones, such as Python's httpx\n on fc00::/7; single addresses such as ::1 stay."
           }
         },
         "title": "ContainerDependency",

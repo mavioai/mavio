@@ -181,26 +181,27 @@ func (x ContainerState) Number() protoreflect.EnumNumber {
 // container engine (managed) or reaches it at an address an administrator
 // gives (external); the plugin sees only its address.
 type ContainerDependency struct {
-	state                  protoimpl.MessageState `protogen:"opaque.v1"`
-	xxx_hidden_Name        *string                `protobuf:"bytes,1,opt,name=name"`
-	xxx_hidden_Description *string                `protobuf:"bytes,2,opt,name=description"`
-	xxx_hidden_Image       *string                `protobuf:"bytes,3,opt,name=image"`
-	xxx_hidden_Port        uint32                 `protobuf:"varint,4,opt,name=port"`
-	xxx_hidden_HealthPath  *string                `protobuf:"bytes,5,opt,name=health_path,json=healthPath"`
-	xxx_hidden_Command     []string               `protobuf:"bytes,6,rep,name=command"`
-	xxx_hidden_Env         map[string]string      `protobuf:"bytes,7,rep,name=env" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	xxx_hidden_Volumes     map[string]string      `protobuf:"bytes,8,rep,name=volumes" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	xxx_hidden_Gpu         GpuSupport             `protobuf:"varint,9,opt,name=gpu,enum=mavio.plugin.v1.GpuSupport"`
-	xxx_hidden_GpuImage    *string                `protobuf:"bytes,10,opt,name=gpu_image,json=gpuImage"`
-	xxx_hidden_MemoryMib   uint32                 `protobuf:"varint,11,opt,name=memory_mib,json=memoryMib"`
-	xxx_hidden_Cpus        float64                `protobuf:"fixed64,12,opt,name=cpus"`
-	xxx_hidden_Required    bool                   `protobuf:"varint,13,opt,name=required"`
-	xxx_hidden_HostAccess  bool                   `protobuf:"varint,14,opt,name=host_access,json=hostAccess"`
-	xxx_hidden_Direct      bool                   `protobuf:"varint,15,opt,name=direct"`
-	XXX_raceDetectHookData protoimpl.RaceDetectHookData
-	XXX_presence           [1]uint32
-	unknownFields          protoimpl.UnknownFields
-	sizeCache              protoimpl.SizeCache
+	state                      protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Name            *string                `protobuf:"bytes,1,opt,name=name"`
+	xxx_hidden_Description     *string                `protobuf:"bytes,2,opt,name=description"`
+	xxx_hidden_Image           *string                `protobuf:"bytes,3,opt,name=image"`
+	xxx_hidden_Port            uint32                 `protobuf:"varint,4,opt,name=port"`
+	xxx_hidden_HealthPath      *string                `protobuf:"bytes,5,opt,name=health_path,json=healthPath"`
+	xxx_hidden_Command         []string               `protobuf:"bytes,6,rep,name=command"`
+	xxx_hidden_Env             map[string]string      `protobuf:"bytes,7,rep,name=env" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	xxx_hidden_Volumes         map[string]string      `protobuf:"bytes,8,rep,name=volumes" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	xxx_hidden_Gpu             GpuSupport             `protobuf:"varint,9,opt,name=gpu,enum=mavio.plugin.v1.GpuSupport"`
+	xxx_hidden_GpuImage        *string                `protobuf:"bytes,10,opt,name=gpu_image,json=gpuImage"`
+	xxx_hidden_MemoryMib       uint32                 `protobuf:"varint,11,opt,name=memory_mib,json=memoryMib"`
+	xxx_hidden_Cpus            float64                `protobuf:"fixed64,12,opt,name=cpus"`
+	xxx_hidden_Required        bool                   `protobuf:"varint,13,opt,name=required"`
+	xxx_hidden_HostAccess      bool                   `protobuf:"varint,14,opt,name=host_access,json=hostAccess"`
+	xxx_hidden_Direct          bool                   `protobuf:"varint,15,opt,name=direct"`
+	xxx_hidden_NoProxyIpv4Only bool                   `protobuf:"varint,16,opt,name=no_proxy_ipv4_only,json=noProxyIpv4Only"`
+	XXX_raceDetectHookData     protoimpl.RaceDetectHookData
+	XXX_presence               [1]uint32
+	unknownFields              protoimpl.UnknownFields
+	sizeCache                  protoimpl.SizeCache
 }
 
 func (x *ContainerDependency) Reset() {
@@ -350,29 +351,36 @@ func (x *ContainerDependency) GetDirect() bool {
 	return false
 }
 
+func (x *ContainerDependency) GetNoProxyIpv4Only() bool {
+	if x != nil {
+		return x.xxx_hidden_NoProxyIpv4Only
+	}
+	return false
+}
+
 func (x *ContainerDependency) SetName(v string) {
 	x.xxx_hidden_Name = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 15)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 16)
 }
 
 func (x *ContainerDependency) SetDescription(v string) {
 	x.xxx_hidden_Description = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 15)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 16)
 }
 
 func (x *ContainerDependency) SetImage(v string) {
 	x.xxx_hidden_Image = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 15)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 16)
 }
 
 func (x *ContainerDependency) SetPort(v uint32) {
 	x.xxx_hidden_Port = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 15)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 16)
 }
 
 func (x *ContainerDependency) SetHealthPath(v string) {
 	x.xxx_hidden_HealthPath = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 15)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 16)
 }
 
 func (x *ContainerDependency) SetCommand(v []string) {
@@ -389,37 +397,42 @@ func (x *ContainerDependency) SetVolumes(v map[string]string) {
 
 func (x *ContainerDependency) SetGpu(v GpuSupport) {
 	x.xxx_hidden_Gpu = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 8, 15)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 8, 16)
 }
 
 func (x *ContainerDependency) SetGpuImage(v string) {
 	x.xxx_hidden_GpuImage = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 15)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 16)
 }
 
 func (x *ContainerDependency) SetMemoryMib(v uint32) {
 	x.xxx_hidden_MemoryMib = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 15)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 16)
 }
 
 func (x *ContainerDependency) SetCpus(v float64) {
 	x.xxx_hidden_Cpus = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 11, 15)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 11, 16)
 }
 
 func (x *ContainerDependency) SetRequired(v bool) {
 	x.xxx_hidden_Required = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 12, 15)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 12, 16)
 }
 
 func (x *ContainerDependency) SetHostAccess(v bool) {
 	x.xxx_hidden_HostAccess = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 13, 15)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 13, 16)
 }
 
 func (x *ContainerDependency) SetDirect(v bool) {
 	x.xxx_hidden_Direct = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 14, 15)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 14, 16)
+}
+
+func (x *ContainerDependency) SetNoProxyIpv4Only(v bool) {
+	x.xxx_hidden_NoProxyIpv4Only = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 15, 16)
 }
 
 func (x *ContainerDependency) HasName() bool {
@@ -506,6 +519,13 @@ func (x *ContainerDependency) HasDirect() bool {
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 14)
 }
 
+func (x *ContainerDependency) HasNoProxyIpv4Only() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 15)
+}
+
 func (x *ContainerDependency) ClearName() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_Name = nil
@@ -566,6 +586,11 @@ func (x *ContainerDependency) ClearDirect() {
 	x.xxx_hidden_Direct = false
 }
 
+func (x *ContainerDependency) ClearNoProxyIpv4Only() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 15)
+	x.xxx_hidden_NoProxyIpv4Only = false
+}
+
 type ContainerDependency_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
@@ -613,6 +638,10 @@ type ContainerDependency_builder struct {
 	// given the proxy of each request, such as a challenge solver: the server
 	// offers no proxy choice for it and sends its requests through none.
 	Direct *bool
+	// Whether a managed container's NO_PROXY lists IPv4 blocks alone, for a
+	// service whose HTTP library fails on IPv6 ones, such as Python's httpx
+	// on fc00::/7; single addresses such as ::1 stay.
+	NoProxyIpv4Only *bool
 }
 
 func (b0 ContainerDependency_builder) Build() *ContainerDependency {
@@ -620,55 +649,59 @@ func (b0 ContainerDependency_builder) Build() *ContainerDependency {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Name != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 15)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 16)
 		x.xxx_hidden_Name = b.Name
 	}
 	if b.Description != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 15)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 16)
 		x.xxx_hidden_Description = b.Description
 	}
 	if b.Image != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 15)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 16)
 		x.xxx_hidden_Image = b.Image
 	}
 	if b.Port != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 15)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 16)
 		x.xxx_hidden_Port = *b.Port
 	}
 	if b.HealthPath != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 15)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 16)
 		x.xxx_hidden_HealthPath = b.HealthPath
 	}
 	x.xxx_hidden_Command = b.Command
 	x.xxx_hidden_Env = b.Env
 	x.xxx_hidden_Volumes = b.Volumes
 	if b.Gpu != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 8, 15)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 8, 16)
 		x.xxx_hidden_Gpu = *b.Gpu
 	}
 	if b.GpuImage != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 15)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 16)
 		x.xxx_hidden_GpuImage = b.GpuImage
 	}
 	if b.MemoryMib != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 15)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 16)
 		x.xxx_hidden_MemoryMib = *b.MemoryMib
 	}
 	if b.Cpus != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 11, 15)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 11, 16)
 		x.xxx_hidden_Cpus = *b.Cpus
 	}
 	if b.Required != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 12, 15)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 12, 16)
 		x.xxx_hidden_Required = *b.Required
 	}
 	if b.HostAccess != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 13, 15)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 13, 16)
 		x.xxx_hidden_HostAccess = *b.HostAccess
 	}
 	if b.Direct != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 14, 15)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 14, 16)
 		x.xxx_hidden_Direct = *b.Direct
+	}
+	if b.NoProxyIpv4Only != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 15, 16)
+		x.xxx_hidden_NoProxyIpv4Only = *b.NoProxyIpv4Only
 	}
 	return m0
 }
@@ -1055,7 +1088,7 @@ var File_mavio_plugin_v1_container_proto protoreflect.FileDescriptor
 
 const file_mavio_plugin_v1_container_proto_rawDesc = "" +
 	"\n" +
-	"\x1fmavio/plugin/v1/container.proto\x12\x0fmavio.plugin.v1\"\x86\x05\n" +
+	"\x1fmavio/plugin/v1/container.proto\x12\x0fmavio.plugin.v1\"\xb3\x05\n" +
 	"\x13ContainerDependency\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12 \n" +
 	"\vdescription\x18\x02 \x01(\tR\vdescription\x12\x14\n" +
@@ -1075,7 +1108,8 @@ const file_mavio_plugin_v1_container_proto_rawDesc = "" +
 	"\brequired\x18\r \x01(\bR\brequired\x12\x1f\n" +
 	"\vhost_access\x18\x0e \x01(\bR\n" +
 	"hostAccess\x12\x16\n" +
-	"\x06direct\x18\x0f \x01(\bR\x06direct\x1a6\n" +
+	"\x06direct\x18\x0f \x01(\bR\x06direct\x12+\n" +
+	"\x12no_proxy_ipv4_only\x18\x10 \x01(\bR\x0fnoProxyIpv4Only\x1a6\n" +
 	"\bEnvEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\x1a:\n" +
