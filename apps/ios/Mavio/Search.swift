@@ -2,36 +2,41 @@ import MavioKit
 import MavioUI
 import SwiftUI
 
-/// Search across every server, the results by server.
+/// Search across every server, as the web UI's (docs/clients.md §5.4,
+/// §6.3.28): a row of each server's results as it answers, in the order of
+/// the servers, then the titles the server that discovers finds, to
+/// request. A search runs when it is confirmed with Return.
 struct SearchView: View {
     @Environment(AppModel.self) private var model
+    @Environment(Discovery.self) private var discovery
     @Environment(\.theme) private var theme
     @State private var query = ""
-    @State private var results: [SearchResults]?
+    /// The query searched, empty before the first search.
+    @State private var searched = ""
+    /// The servers asked, and what each has answered.
+    @State private var servers: [ServerRecord] = []
+    @State private var results: [String: SearchResults] = [:]
+    /// The titles found to discover, nil while they are being searched.
+    @State private var titles: [DiscoveredTitle]?
     @FocusState private var focused: Bool
 
     var body: some View {
         ScrollView {
-            LazyVStack(alignment: .leading, spacing: MavioSpacing.s16) {
-                if let results {
-                    ForEach(results, id: \.serverId) { group in
-                        if !group.cards.isEmpty || group.error != nil {
-                            VStack(alignment: .leading, spacing: MavioSpacing.s8) {
-                                if results.count > 1 {
-                                    Text(group.serverName).type(theme.type.title3)
-                                        .padding(.horizontal, theme.layout.margin)
-                                }
-                                if group.error != nil {
-                                    Text(MavioStrings.homeServerUnreachable(server: group.serverName))
-                                        .foregroundStyle(theme.colors.textTertiary)
-                                        .padding(.horizontal, theme.layout.margin)
-                                }
-                                CardGrid(items: group.cards) { CardLink(card: $0) }
+            LazyVStack(alignment: .leading, spacing: 0) {
+                if !searched.isEmpty {
+                    ForEach(servers, id: \.id) { server in
+                        row(server)
+                    }
+                    if let server = discovery.server, let titles, !titles.isEmpty {
+                        Shelf(MavioStrings.searchDiscover) {
+                            ForEach(titles, id: \.key) {
+                                DiscoveredTitleCard(serverId: server.id, title: $0, width: theme.layout.poster)
                             }
                         }
                     }
-                    if results.allSatisfy({ $0.cards.isEmpty }) {
-                        StatusView(title: MavioStrings.searchNoResults).padding(.top, MavioSpacing.s40)
+                    if none {
+                        StatusView(icon: "search", title: MavioStrings.searchNoResults)
+                            .padding(.top, MavioSpacing.s40)
                     }
                 }
             }
@@ -44,20 +49,92 @@ struct SearchView: View {
         // Typing keeps the title in place, instead of the bar sliding up
         // over it and back.
         .searchPresentationToolbarBehavior(.avoidHidingContent)
-        // Opened from the top bar's button, it is ready to type into.
+        // Opened from the top bar's button before anything is searched, it
+        // is ready to type into.
         .searchFocused($focused)
-        .onAppear { focused = true }
-        .task(id: query) {
-            let q = query.trimmingCharacters(in: .whitespaces)
-            guard !q.isEmpty else {
-                results = nil
-                return
+        .onAppear { focused = searched.isEmpty }
+        .onSubmit(of: .search) {
+            searched = query.trimmingCharacters(in: .whitespaces)
+        }
+        .task(id: searched) { await search(searched) }
+        .task(id: DiscoverSearch(query: searched, server: discovery.server?.id, loaded: discovery.loaded)) {
+            await searchTitles(searched)
+        }
+    }
+
+    /// A server's row: placeholders while it searches, a line when it
+    /// cannot be reached, and nothing when it found nothing.
+    @ViewBuilder private func row(_ server: ServerRecord) -> some View {
+        let title = servers.count > 1 ? server.name : MavioStrings.searchServer
+        if let found = results[server.id] {
+            if let error = found.error {
+                Label {
+                    Text(MavioStrings.homeServerUnreachable(server: server.name))
+                } icon: {
+                    Icon("offline", size: 18)
+                }
+                .type(theme.type.callout)
+                .foregroundStyle(theme.colors.textTertiary)
+                .help(error)
+                .padding(.horizontal, theme.layout.margin)
+                .padding(.vertical, MavioSpacing.s12)
+            } else if !found.cards.isEmpty {
+                Shelf(title) {
+                    ForEach(found.cards, id: \.self) { CardLink(card: $0, width: theme.layout.poster) }
+                }
             }
-            try? await Task.sleep(for: .milliseconds(300))
-            guard !Task.isCancelled else { return }
-            if let found = try? await model.client.search(query: q), !Task.isCancelled {
-                results = found
+        } else {
+            Shelf(title) {
+                ForEach(0..<6, id: \.self) { _ in CardPlaceholder() }
             }
         }
     }
+
+    /// Whether everything has answered and found nothing.
+    private var none: Bool {
+        servers.allSatisfy { results[$0.id]?.cards.isEmpty ?? false } && discovery.loaded && titles?.isEmpty == true
+    }
+
+    /// Asks every signed-in server at once, drawing each as it answers.
+    private func search(_ q: String) async {
+        servers = q.isEmpty ? [] : model.signedInServers
+        results = [:]
+        guard !q.isEmpty else { return }
+        await withTaskGroup(of: SearchResults?.self) { group in
+            for server in servers {
+                group.addTask { [client = model.client] in
+                    try? await client.searchServer(serverId: server.id, query: q)
+                }
+            }
+            for await found in group {
+                guard let found, !Task.isCancelled else { continue }
+                results[found.serverId] = found
+            }
+        }
+    }
+
+    /// Asks the server that discovers for titles of the query.
+    private func searchTitles(_ q: String) async {
+        titles = nil
+        guard !q.isEmpty, discovery.loaded else { return }
+        guard let server = discovery.server else {
+            titles = []
+            return
+        }
+        var request = Mavio_Acquisition_V1_SearchTitlesRequest()
+        request.query = q
+        request.language = discoverLanguage
+        let response = try? await model.call(
+            server, Procedure.discover("SearchTitles"), request, as: Mavio_Acquisition_V1_SearchTitlesResponse.self)
+        guard !Task.isCancelled else { return }
+        var seen = Set<String>()
+        titles = (response?.titles ?? []).filter { seen.insert($0.key).inserted }
+    }
+}
+
+/// What the titles to discover are searched by.
+private struct DiscoverSearch: Equatable {
+    let query: String
+    let server: String?
+    let loaded: Bool
 }
