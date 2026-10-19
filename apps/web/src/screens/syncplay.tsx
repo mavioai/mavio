@@ -171,15 +171,19 @@ export function SyncPlayDialog({ server, item, onClose }: { server: ServerEntry;
   );
 }
 
-/** The player's chip of the group it follows: who it waits for, else the group's name and size; it opens the group. */
-export function GroupChip({ server, group }: { server: ServerEntry; group: SyncPlayGroup }) {
+/**
+ * The player's chip of the group it follows: who it waits for, else the
+ * group's name and size; it opens the group. At the top bar's end, or on the
+ * television first in the controller's row of buttons, as tall as they are.
+ */
+export function GroupChip({ server, group, tv = false }: { server: ServerEntry; group: SyncPlayGroup; tv?: boolean }) {
   const [open, setOpen] = useState(false);
   return (
     <>
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="ml-auto flex h-9 min-w-0 items-center gap-1.5 rounded-full bg-white/15 px-3.5 type-footnote font-semibold backdrop-blur-xl hover:bg-white/25"
+        className={`flex min-w-0 items-center rounded-full bg-white/15 font-semibold backdrop-blur-xl hover:bg-white/25 ${tv ? "h-12 gap-2 px-5 type-callout" : "ml-auto h-9 gap-1.5 px-3.5 type-footnote"}`}
       >
         <Icon name="users" fill size={16} />
         <span className="truncate">
@@ -191,8 +195,12 @@ export function GroupChip({ server, group }: { server: ServerEntry; group: SyncP
   );
 }
 
-/** The screens' indicator of the browser's group, opening it. */
-export function GroupIndicator() {
+/**
+ * The screens' indicator of the browser's group, opening it: floating at the
+ * screen's bottom right, or with tv, a button of the tabs' height in the
+ * television's navigation bar (docs/tv.md §3), white with focus.
+ */
+export function GroupIndicator({ tv = false }: { tv?: boolean }) {
   const sp = useSyncPlay();
   const { pathname } = useLocation();
   // Above the phone's tab bar where it shows.
@@ -200,6 +208,21 @@ export function GroupIndicator() {
   const [open, setOpen] = useState(false);
   const joined = sp?.joined;
   if (!joined || pathname.includes("/play/")) return null;
+  const label = t("syncplay.chip", { name: joined.group.name, count: joined.group.members.length });
+  if (tv)
+    return (
+      <>
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          className="tv-pill flex max-w-80 items-center gap-2 rounded-full bg-surface-raised/60 px-6 py-2.5 type-headline text-text-secondary backdrop-blur-xl"
+        >
+          <Icon name="users" fill size={22} />
+          <span className="truncate">{label}</span>
+        </button>
+        {open && <SyncPlayDialog server={joined.server} onClose={() => setOpen(false)} />}
+      </>
+    );
   return (
     <>
       <button
@@ -208,7 +231,7 @@ export function GroupIndicator() {
         className={`fixed right-4 z-30 flex h-10 max-w-[calc(100vw-32px)] items-center gap-2 rounded-full border border-border bg-surface-overlay/90 px-4 type-footnote font-semibold text-on-background shadow-level2 backdrop-blur-xl hover:tint ${tabs ? "bottom-[calc(68px+env(safe-area-inset-bottom))]" : "bottom-[calc(16px+env(safe-area-inset-bottom))]"}`}
       >
         <Icon name="users" fill size={18} />
-        <span className="truncate">{t("syncplay.chip", { name: joined.group.name, count: joined.group.members.length })}</span>
+        <span className="truncate">{label}</span>
       </button>
       {open && <SyncPlayDialog server={joined.server} onClose={() => setOpen(false)} />}
     </>

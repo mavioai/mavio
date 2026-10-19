@@ -39,7 +39,8 @@ export function Shell() {
         <PageTitle moveFocus={!tv} />
         <Content />
         <RemoteCommands />
-        <GroupIndicator />
+        {/* The television's is in its navigation bar (tv.tsx). */}
+        {!tv && <GroupIndicator />}
         {tv && <TvKeyboard />}
       </AssistantProvider>
     </SyncPlayProvider>

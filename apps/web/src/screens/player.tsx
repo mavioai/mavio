@@ -550,7 +550,7 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
             )}
             <div className="truncate type-title3 font-semibold">{current?.name ?? ""}</div>
           </div>
-          {group && <GroupChip server={server} group={group.group} />}
+          {group && !tv && <GroupChip server={server} group={group.group} />}
         </div>
 
         <div className="pointer-events-auto absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent px-5 pt-16 pb-4">
@@ -561,7 +561,8 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
               <span className="type-callout text-white/85 tabular-nums">
                 {clock(time)} / {clock(total)}
               </span>
-              <div ref={row} data-tv-row className="ml-auto flex items-center gap-2">
+              <div ref={row} data-tv-row className="ml-auto flex min-w-0 items-center gap-2">
+                {group && <GroupChip server={server} group={group.group} tv />}
                 {(next.data || (group && group.group.currentIndex < group.group.queue.length - 1)) && (
                   <button
                     type="button"

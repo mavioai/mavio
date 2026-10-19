@@ -1,12 +1,13 @@
 // The television layout (docs/tv.md), the same as on tvOS and
-// Android TV: tabs in a pill at the top, the user menu's dots at the right,
-// and focus moved with the arrow keys.
+// Android TV: tabs in a pill at the top, the SyncPlay group, the assistant
+// and the user menu's dots at the right, and focus moved with the arrow keys.
 import { useDiscovery } from "@mavio/client-ts";
 import { Link, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
 import { useSyncExternalStore } from "react";
 
 import { AssistantButton } from "../assistant/panel.tsx";
 import { discoverLanguage, t } from "../i18n.ts";
+import { GroupIndicator } from "../screens/syncplay.tsx";
 import { UserButton } from "./user-menu.tsx";
 
 const allTabs: { to: "/" | "/libraries" | "/discover" | "/search"; label: () => string }[] = [
@@ -59,8 +60,9 @@ export function TvShell() {
                 </Link>
               ))}
             </nav>
-            {/* The assistant and the user menu's dots, at the screen's right, centered on the tabs. */}
+            {/* The SyncPlay group while in one, the assistant and the user menu's dots, at the screen's right, centered on the tabs. */}
             <div className="pointer-events-auto absolute right-0 flex items-center gap-2">
+              <GroupIndicator tv />
               <AssistantButton size={26} className="tv-pill flex size-12 items-center justify-center rounded-full bg-surface-raised/60 text-text-secondary backdrop-blur-xl" />
               <UserButton dots placement="below" />
             </div>
