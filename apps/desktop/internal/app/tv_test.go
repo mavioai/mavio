@@ -260,10 +260,12 @@ func TestTVKeyboard(t *testing.T) {
 		}
 		h.settle()
 	}
-	// The section opens on its first element laid out, which the server
-	// name, loading, may not be yet.
-	if h.tt.Focused("Metadata language") {
-		h.tt.Key(0, ui.KeyUp)
+	// The section opens on its first element, the server name, though it
+	// may load after the selects below it.
+	for range 10 {
+		if h.tt.Focused("Server name") {
+			break
+		}
 		h.settle()
 	}
 	if !h.tt.Focused("Server name") {

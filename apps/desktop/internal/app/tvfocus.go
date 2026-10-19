@@ -336,6 +336,10 @@ func (a *App) focusKeys(c *ui.Context, menuOpen bool) {
 		return
 	}
 	a.addOthers(c)
+	if f.lead < 0 {
+		// A page of no items opens on its first element.
+		f.lead = slices.IndexFunc(f.items, func(it focusItem) bool { return it.other })
+	}
 	if f.want >= 0 && f.want < len(f.items) && f.items[f.want].other {
 		// Back on a page, focus returns to the element it was on.
 		a.focusItem(c, f.want)
@@ -348,7 +352,7 @@ func (a *App) focusKeys(c *ui.Context, menuOpen bool) {
 		// first element (docs/tv.md §4).
 		if i := slices.IndexFunc(f.items, func(it focusItem) bool { return it.other }); i >= 0 {
 			a.focusItem(c, i)
-			f.want = -1
+			f.want, f.opening = -1, f.items[i].id
 			c.After(0)
 			return
 		}
@@ -380,10 +384,11 @@ func (a *App) focusKeys(c *ui.Context, menuOpen bool) {
 	}
 	if f.opening != 0 {
 		switch {
-		case at < 0 || f.items[at].id != f.opening || dir != 0:
+		case dir != 0 || at >= 0 && f.items[at].id != f.opening:
 			f.opening = 0
 		case f.lead >= 0 && f.lead != at:
-			// Items came above the one the page opened on.
+			// Items came above the one the page opened on, or it went,
+			// rebuilt below them.
 			f.opening = f.items[f.lead].id
 			a.focusItem(c, f.lead)
 			c.After(0)
@@ -419,7 +424,9 @@ func (a *App) focusKeys(c *ui.Context, menuOpen bool) {
 			case slices.ContainsFunc(f.items, func(it focusItem) bool { return it.other }):
 				// A page of no items, as a section of the settings, at its
 				// first element.
-				a.focusItem(c, slices.IndexFunc(f.items, func(it focusItem) bool { return it.other }))
+				i := slices.IndexFunc(f.items, func(it focusItem) bool { return it.other })
+				a.focusItem(c, i)
+				f.opening = f.items[i].id
 			default:
 				f.want = 0
 			}
