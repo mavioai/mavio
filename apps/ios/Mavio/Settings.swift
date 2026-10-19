@@ -30,9 +30,6 @@ struct SettingsView: View {
                 SwitchUserSection(server: server, users: switchable)
             }
             Section(MavioStrings.settingsThisDevice) {
-                NavigationLink(value: Route.downloads) {
-                    EntryLabel(MavioStrings.navDownloads, icon: "downloads", color: Color(hex: 0x0A84FF))
-                }
                 NavigationLink {
                     AppearanceView()
                 } label: {
@@ -49,6 +46,9 @@ struct SettingsView: View {
                     } label: {
                         EntryLabel(MavioStrings.settingsSubtitlesAudio, icon: "subtitles", color: Color(hex: 0x34C759))
                     }
+                }
+                NavigationLink(value: Route.downloads) {
+                    EntryLabel(MavioStrings.navDownloads, icon: "downloads", color: Color(hex: 0x0A84FF))
                 }
             }
             if let server = chosen {

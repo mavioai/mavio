@@ -11,6 +11,13 @@ struct DownloadsView: View {
     var body: some View {
         let downloads = model.downloads
         List {
+            // Where downloads are kept, so they are not taken for a cache.
+            if !downloads.entries.isEmpty {
+                Text(MavioStrings.downloadMessage)
+                    .type(theme.type.footnote)
+                    .foregroundStyle(theme.colors.textSecondary)
+                    .listRowSeparator(.hidden)
+            }
             ForEach(downloads.entries, id: \.self) { entry in
                 Button {
                     if let file = downloads.file(entry) {
