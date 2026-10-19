@@ -21,8 +21,9 @@ public struct ArtworkView: View {
 
     /// The image, or its placeholder.
     public var body: some View {
-        ZStack {
-            theme.colors.surfaceRaised
+        // The fill takes the size offered; an image of other proportions,
+        // filling it, cannot grow it.
+        theme.colors.surfaceRaised.overlay {
             if let url, let parsed = URL(string: url) {
                 LazyImage(url: parsed, transaction: Transaction(animation: .easeOut(duration: MavioDuration.slow))) {
                     state in
