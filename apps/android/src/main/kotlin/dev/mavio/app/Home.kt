@@ -35,6 +35,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -78,6 +79,7 @@ import dev.mavio.ui.shapeOf
 import dev.mavio.ui.text
 import dev.mavio.ui.theme
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import mavio.acquisition.v1.Profile.MediaKind
 
 /** A title the hero shows, and the line above it. */
@@ -97,7 +99,7 @@ fun HomeScreen(model: AppModel) {
     val rows by model.home.collectAsStateWithLifecycle()
     val signedIn by model.signedIn.collectAsStateWithLifecycle()
     var refreshing by remember { mutableStateOf(false) }
-    LaunchedEffect(rows) { refreshing = false }
+    val scope = rememberCoroutineScope()
     val titles = rows.associate { it.id to rowTitle(it) }
     val hero = remember(rows, titles) { heroEntries(rows, titles) }
     val top = LocalTopInset.current
@@ -106,7 +108,12 @@ fun HomeScreen(model: AppModel) {
         refreshing,
         onRefresh = {
             refreshing = true
-            model.refreshHome()
+            // The spinner goes with the load, though the rows come back the same.
+            val load = model.refreshHome()
+            scope.launch {
+                load.join()
+                refreshing = false
+            }
         },
         Modifier.fillMaxSize(),
         state = pull,

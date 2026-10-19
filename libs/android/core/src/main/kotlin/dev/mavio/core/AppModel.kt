@@ -125,12 +125,12 @@ class AppModel(context: Context, clientName: String) {
         client.stop()
     }
 
-    /** Loads Home again from every server. */
-    fun refreshHome() {
+    /** Loads Home again from every server; the job ends with the load, whether or not the rows changed. */
+    fun refreshHome(): Job {
         homeJob?.cancel()
-        homeJob = scope.launch {
+        return scope.launch {
             runCatching { client.loadHome(relay) }
-        }
+        }.also { homeJob = it }
     }
 
     /**
