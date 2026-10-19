@@ -91,9 +91,9 @@ import androidx.media3.ui.compose.state.rememberProgressStateWithTickInterval
 import dev.mavio.core.AppModel
 import dev.mavio.core.AudioStream
 import dev.mavio.core.Details
+import dev.mavio.core.PlayKind
 import dev.mavio.core.PlaybackInfo
 import dev.mavio.core.PlaybackOptions
-import dev.mavio.core.PlayKind
 import dev.mavio.core.PlaybackSession
 import dev.mavio.core.Source
 import dev.mavio.core.SubtitleStream
@@ -102,10 +102,15 @@ import dev.mavio.player.PlayerEngine
 import dev.mavio.player.chooseTracks
 import dev.mavio.player.createPlayer
 import dev.mavio.player.engineFor
+import dev.mavio.ui.Focusable
+import dev.mavio.ui.LocalPrefs
 import dev.mavio.ui.MavioIcon
 import dev.mavio.ui.Quality
 import dev.mavio.ui.R
+import dev.mavio.ui.TvButton
+import dev.mavio.ui.focused
 import dev.mavio.ui.languageName
+import dev.mavio.ui.selectable
 import dev.mavio.ui.text
 import dev.mavio.ui.theme
 import java.time.Duration
@@ -167,9 +172,10 @@ private val SPEEDS = listOf(0.5f, 0.75f, 1f, 1.25f, 1.5f, 2f)
 fun PlayerPage(model: AppModel, page: Page.Player) {
     val context = LocalContext.current
     val pages = LocalPages.current
+    val prefs = LocalPrefs.current
     var playback by remember(page) { mutableStateOf<Playback?>(null) }
     var failure by remember(page) { mutableStateOf<String?>(null) }
-    var selection by remember(page) { mutableStateOf(Selection(quality = Quality.stored(context))) }
+    var selection by remember(page) { mutableStateOf(Selection(quality = prefs.quality)) }
     // Where the next start begins: the resume position, then where the streams changed.
     var resume by remember(page) { mutableStateOf(page.start) }
     var sourceId by remember(page) { mutableStateOf(page.mediaSourceId) }
@@ -213,7 +219,8 @@ fun PlayerPage(model: AppModel, page: Page.Player) {
                 if (state == Player.STATE_ENDED && p != null && !position.ended) {
                     position.ended = true
                     model.finish(page.serverId, p.session, null)
-                    currentNext?.invoke() ?: pages.back()
+                    // The next episode plays only while the settings say so.
+                    currentNext?.takeIf { prefs.autoplayNext }?.invoke() ?: pages.back()
                 }
             }
 
@@ -266,7 +273,7 @@ fun PlayerPage(model: AppModel, page: Page.Player) {
             Controller(player, page.title, p, selection.quality, options, playNext) { picked ->
                 resume = Duration.ofMillis(player.currentPosition)
                 // The quality stays this device's, as the web UI's.
-                Quality.store(context, picked.quality)
+                prefs.quality = picked.quality
                 selection = picked
             }
         } else {

@@ -39,6 +39,7 @@ import dev.mavio.core.LinkCode
 import dev.mavio.design.MavioSpacing
 import dev.mavio.ui.PosterWall
 import dev.mavio.ui.R
+import dev.mavio.ui.TvButton
 import dev.mavio.ui.Wordmark
 import dev.mavio.ui.theme
 import java.time.Duration

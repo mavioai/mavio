@@ -48,10 +48,18 @@ import dev.mavio.design.MavioRadius
 import dev.mavio.design.MavioSpacing
 import dev.mavio.ui.Artwork
 import dev.mavio.ui.ButtonKind
+import dev.mavio.ui.ChoiceRow
+import dev.mavio.ui.Group
 import dev.mavio.ui.MavioButton
 import dev.mavio.ui.R
+import dev.mavio.ui.RowDivider
+import dev.mavio.ui.SettingsList
+import dev.mavio.ui.SwitchRow
 import dev.mavio.ui.text
 import dev.mavio.ui.theme
+import java.math.BigDecimal
+import java.time.LocalDate
+import java.time.ZoneOffset
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -81,9 +89,6 @@ import mavio.library.v1.listRemoteImagesRequest
 import mavio.library.v1.searchRemoteRequest
 import mavio.library.v1.setItemImageRequest
 import mavio.library.v1.updateItemRequest
-import java.math.BigDecimal
-import java.time.LocalDate
-import java.time.ZoneOffset
 
 // An item's metadata from its More menu, for administrators, as the web
 // UI's (docs/clients.md §6.3.22): its fields edited and locked, the item

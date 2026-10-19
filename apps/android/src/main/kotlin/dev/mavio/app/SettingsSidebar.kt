@@ -40,8 +40,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.mavio.core.AppModel
 import dev.mavio.core.call
 import dev.mavio.design.MavioSpacing
+import dev.mavio.ui.AccountCard
+import dev.mavio.ui.ChoiceRow
 import dev.mavio.ui.MavioIcon
 import dev.mavio.ui.R
+import dev.mavio.ui.signedInServers
 import dev.mavio.ui.text
 import dev.mavio.ui.theme
 import mavio.user.v1.UserOuterClass.GetCurrentUserResponse

@@ -16,8 +16,8 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -55,11 +55,15 @@ import dev.mavio.core.SearchResults
 import dev.mavio.design.MavioRadius
 import dev.mavio.design.MavioSpacing
 import dev.mavio.ui.CardPlaceholder
+import dev.mavio.ui.Focusable
 import dev.mavio.ui.LocalTheme
 import dev.mavio.ui.MavioIcon
 import dev.mavio.ui.R
 import dev.mavio.ui.StatusView
+import dev.mavio.ui.TvScrolling
+import dev.mavio.ui.focused
 import dev.mavio.ui.rowTitle
+import dev.mavio.ui.selectable
 import dev.mavio.ui.text
 import dev.mavio.ui.theme
 import kotlinx.coroutines.delay

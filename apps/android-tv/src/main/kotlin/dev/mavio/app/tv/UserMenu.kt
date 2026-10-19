@@ -17,6 +17,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -43,59 +44,70 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.mavio.core.AppModel
-import dev.mavio.core.SignInState
+import dev.mavio.core.ServerRecord
 import dev.mavio.core.SwitchableUser
 import dev.mavio.design.MavioRadius
 import dev.mavio.design.MavioSpacing
 import dev.mavio.ui.Avatar
+import dev.mavio.ui.Focusable
 import dev.mavio.ui.MavioIcon
+import dev.mavio.ui.OnCanvas
 import dev.mavio.ui.R
+import dev.mavio.ui.focused
+import dev.mavio.ui.selectable
+import dev.mavio.ui.signedInAccount
+import dev.mavio.ui.signedInServers
 import dev.mavio.ui.text
 import dev.mavio.ui.theme
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 /**
- * The menu button at the navigation bar's right and the user menu it opens
- * (docs/tv.md §3, §5): three dots, bare, and in the tabs' glass with focus
- * or while its menu is open, white with focus. The menu is headed by the
- * user's avatar and name, then the server's other users to switch to and
- * signing out; back closes it, returning focus to the button.
+ * Switching the standalone server's user, as the user menu and the
+ * settings' members do: its other users, loaded by [load], the one asking
+ * for its PIN, and what went wrong.
  */
-@Composable
-fun MenuButton(model: AppModel, modifier: Modifier = Modifier) {
-    val state by model.signInState.collectAsStateWithLifecycle()
-    val servers by model.servers.collectAsStateWithLifecycle()
-    val signedIn by model.signedIn.collectAsStateWithLifecycle()
-    val shown = servers.filter { it.id in signedIn }
-    val account = (state as? SignInState.Account)?.v1
-    val name = account?.name ?: shown.firstOrNull()?.userName.orEmpty()
-    val standalone = shown.firstOrNull()?.takeIf { account == null }
-    val scope = rememberCoroutineScope()
-    var open by remember { mutableStateOf(false) }
-    var users by remember { mutableStateOf<List<SwitchableUser>>(emptyList()) }
-    var asking by remember { mutableStateOf<SwitchableUser?>(null) }
-    var busy by remember { mutableStateOf(false) }
-    var failure by remember { mutableStateOf<String?>(null) }
-    val button = remember { FocusRequester() }
-    LaunchedEffect(standalone?.id, standalone?.userId, open) {
-        if (open) users = standalone?.let { s -> runCatching { model.client.switchableUsers(s.id) }.getOrNull() }.orEmpty()
+@Stable
+class UserSwitching(private val model: AppModel, private val scope: CoroutineScope) {
+    /** The standalone server signed in to, whose users switch; null with a Mavio account. */
+    var server by mutableStateOf<ServerRecord?>(null)
+
+    /** The server's users, the current one among them. */
+    var users by mutableStateOf<List<SwitchableUser>>(emptyList())
+        private set
+
+    /** The user whose PIN the pad asks for. */
+    var asking by mutableStateOf<SwitchableUser?>(null)
+
+    /** Whether a switch is under way. */
+    var busy by mutableStateOf(false)
+        private set
+
+    /** Why the last switch failed. */
+    var failure by mutableStateOf<String?>(null)
+
+    /** Loads the server's users. */
+    suspend fun load() {
+        users = server?.let { s -> runCatching { model.client.switchableUsers(s.id) }.getOrNull() }.orEmpty()
     }
-    fun close() {
-        open = false
-        runCatching { button.requestFocus() }
+
+    /** Switches to [user], asking for its PIN first when it has one; [done] runs once switched. */
+    fun choose(user: SwitchableUser, done: () -> Unit) {
+        if (user.hasPin) asking = user else switchTo(user, null, done)
     }
-    fun switchTo(user: SwitchableUser, pin: String?) {
-        val server = standalone ?: return
+
+    /** Switches to [user] with [pin]; [done] runs once switched. */
+    fun switchTo(user: SwitchableUser, pin: String?, done: () -> Unit) {
+        val s = server ?: return
         busy = true
         failure = null
         scope.launch {
             try {
-                model.switchUser(server.id, user.id, pin)
+                model.switchUser(s.id, user.id, pin)
                 asking = null
-                close()
+                done()
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
@@ -103,6 +115,54 @@ fun MenuButton(model: AppModel, modifier: Modifier = Modifier) {
             }
             busy = false
         }
+    }
+}
+
+/** [UserSwitching] for the standalone server signed in to, followed. */
+@Composable
+fun rememberUserSwitching(model: AppModel): UserSwitching {
+    val scope = rememberCoroutineScope()
+    val switching = remember(model) { UserSwitching(model, scope) }
+    val servers = signedInServers(model)
+    switching.server = servers.firstOrNull()?.takeIf { signedInAccount(model) == null }
+    return switching
+}
+
+/** The PIN pad of [switching]'s user asking for one; [done] runs once switched or cancelled. */
+@Composable
+fun SwitchingPin(switching: UserSwitching, done: () -> Unit) {
+    switching.asking?.let { user ->
+        TvPinPad(user.name, switching.busy, switching.failure, { switching.switchTo(user, it, done) }) {
+            switching.asking = null
+            switching.failure = null
+            done()
+        }
+    }
+}
+
+/**
+ * The menu button at the navigation bar's right and the user menu it opens
+ * (docs/tv.md §3, §5): three dots, bare, and in the tabs' glass with focus
+ * or while its menu is open, white with focus. The menu is headed by the
+ * user's avatar and name, then the server's other users to switch to, the
+ * settings, opened through [onSettings], and signing out; it opens with
+ * focus on Settings, and back closes it, returning focus to the button,
+ * [button].
+ */
+@Composable
+fun MenuButton(model: AppModel, button: FocusRequester, modifier: Modifier = Modifier, onSettings: () -> Unit) {
+    val account = signedInAccount(model)
+    val shown = signedInServers(model)
+    val name = account?.name ?: shown.firstOrNull()?.userName.orEmpty()
+    val switching = rememberUserSwitching(model)
+    val scope = rememberCoroutineScope()
+    var open by remember { mutableStateOf(false) }
+    LaunchedEffect(switching.server?.id, switching.server?.userId, open) {
+        if (open) switching.load()
+    }
+    fun close() {
+        open = false
+        runCatching { button.requestFocus() }
     }
     val focus = remember { Focusable() }
     val focused = focus.focused()
@@ -131,35 +191,37 @@ fun MenuButton(model: AppModel, modifier: Modifier = Modifier) {
             val line = if (account != null) {
                 stringResource(R.string.auth_mavio_account)
             } else {
-                stringResource(R.string.auth_standalone_user, standalone?.name.orEmpty())
+                stringResource(R.string.auth_standalone_user, switching.server?.name.orEmpty())
             }
-            UserMenu(name, line, users, busy, failure.takeIf { asking == null }, onDismiss = ::close, onUser = { u ->
-                if (u.hasPin) {
+            UserMenu(
+                name,
+                line,
+                switching.users,
+                switching.busy,
+                switching.failure.takeIf { switching.asking == null },
+                onDismiss = ::close,
+                onUser = { u ->
+                    if (u.hasPin) open = false
+                    switching.choose(u, ::close)
+                },
+                onSettings = {
                     open = false
-                    asking = u
-                } else {
-                    switchTo(u, null)
-                }
-            }) {
+                    onSettings()
+                },
+            ) {
                 open = false
                 // Signing the account out forgets its servers too.
                 scope.launch { runCatching { model.signOut() } }
             }
         }
     }
-    asking?.let { user ->
-        TvPinPad(user.name, busy, failure, { switchTo(user, it) }) {
-            asking = null
-            failure = null
-            runCatching { button.requestFocus() }
-        }
-    }
+    SwitchingPin(switching) { runCatching { button.requestFocus() } }
 }
 
 /** The menu button's size, the height of the tabs' pill. */
 private val BUTTON = 64.dp
 
-/** The user menu below the button, at the screen's right, opening with focus on its first entry. */
+/** The user menu below the button, at the screen's right, opening with focus on Settings. */
 @Composable
 private fun UserMenu(
     name: String,
@@ -169,6 +231,7 @@ private fun UserMenu(
     failure: String?,
     onDismiss: () -> Unit,
     onUser: (SwitchableUser) -> Unit,
+    onSettings: () -> Unit,
     onSignOut: () -> Unit,
 ) {
     val density = LocalDensity.current
@@ -206,8 +269,6 @@ private fun UserMenu(
                         Text(line, style = theme.type.footnote.text, color = theme.colors.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     }
                 }
-                var firstTaken = false
-                fun Modifier.firstEntry(): Modifier = if (firstTaken) this else this.focusRequester(first).also { firstTaken = true }
                 if (users.size > 1) {
                     MenuRule()
                     Text(
@@ -220,7 +281,7 @@ private fun UserMenu(
                     users.forEach { u ->
                         MenuEntry(
                             u.name,
-                            if (u.current) Modifier else Modifier.firstEntry(),
+                            Modifier,
                             leading = { Avatar(u.name, size = 36.dp) },
                             trailing = when {
                                 u.current -> R.drawable.ic_check
@@ -236,79 +297,88 @@ private fun UserMenu(
                 }
                 MenuRule()
                 MenuEntry(
+                    stringResource(R.string.nav_settings),
+                    Modifier.focusRequester(first),
+                    leading = { MavioIcon(R.drawable.ic_settings, size = 28.dp, tint = theme.colors.textSecondary) },
+                    onClick = onSettings,
+                )
+                MenuRule()
+                MenuEntry(
                     stringResource(R.string.auth_sign_out),
-                    Modifier.firstEntry(),
+                    Modifier,
                     leading = { MavioIcon(R.drawable.ic_sign_out, size = 28.dp, tint = theme.colors.textSecondary) },
                     onClick = onSignOut,
                 )
-            } }
-        }
-    }
-
-    /** An entry of the user menu, filled with `color.fill` with focus. */
-    @Composable
-    private fun MenuEntry(
-        label: String,
-        modifier: Modifier,
-        leading: @Composable () -> Unit,
-        @DrawableRes trailing: Int? = null,
-        enabled: Boolean = true,
-        onClick: () -> Unit,
-    ) {
-        val state = remember { Focusable() }
-        val focused = state.focused()
-        Row(
-            modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(MavioRadius.md))
-                .background(if (focused) theme.colors.fill else Color.Transparent)
-                .selectable(state) { if (enabled) onClick() }
-                .padding(horizontal = MavioSpacing.s16, vertical = MavioSpacing.s12),
-            horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s16),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            leading()
-            Text(label, Modifier.weight(1f), style = theme.type.headline.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            trailing?.let { MavioIcon(it, size = 24.dp, tint = if (it == R.drawable.ic_check) theme.colors.accentText else theme.colors.textTertiary) }
-        }
-    }
-
-    /** A rule between the user menu's groups. */
-    @Composable
-    private fun MenuRule() {
-        Box(Modifier.padding(vertical = MavioSpacing.s4).fillMaxWidth().height(1.dp).background(theme.colors.border))
-    }
-
-    /**
-     * Asks for a user's four-digit PIN on a keypad over the page, as the web
-     * UI's on a television: the fourth digit sends it and a wrong one clears
-     * the dots; back deletes a digit, and closes the pad once there is none
-     * (docs/tv.md §4).
-     */
-    @Composable
-    fun TvPinPad(name: String, busy: Boolean, error: String?, enter: (String) -> Unit, cancel: () -> Unit) {
-        var pin by remember { mutableStateOf("") }
-        val first = remember { FocusRequester() }
-        LaunchedEffect(error) { if (error != null) pin = "" }
-        LaunchedEffect(Unit) {
-            withFrameNanos {}
-            runCatching { first.requestFocus() }
-        }
-        val canvas = LocalDensity.current
-        fun press(k: String) {
-            when (k) {
-                "⌫" -> pin = pin.dropLast(1)
-                else -> if (pin.length < 4 && !busy) {
-                    pin += k
-                    if (pin.length == 4) enter(pin)
-                }
             }
         }
-        Dialog(
-            onDismissRequest = { if (pin.isEmpty()) cancel() else pin = pin.dropLast(1) },
-            properties = DialogProperties(usePlatformDefaultWidth = false),
-        ) {
-            OnCanvas(canvas) { Column(
+    }
+}
+
+/** An entry of the user menu, filled with `color.fill` with focus. */
+@Composable
+private fun MenuEntry(
+    label: String,
+    modifier: Modifier,
+    leading: @Composable () -> Unit,
+    @DrawableRes trailing: Int? = null,
+    enabled: Boolean = true,
+    onClick: () -> Unit,
+) {
+    val state = remember { Focusable() }
+    val focused = state.focused()
+    Row(
+        modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(MavioRadius.md))
+            .background(if (focused) theme.colors.fill else Color.Transparent)
+            .selectable(state) { if (enabled) onClick() }
+            .padding(horizontal = MavioSpacing.s16, vertical = MavioSpacing.s12),
+        horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s16),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        leading()
+        Text(label, Modifier.weight(1f), style = theme.type.headline.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        trailing?.let { MavioIcon(it, size = 24.dp, tint = if (it == R.drawable.ic_check) theme.colors.accentText else theme.colors.textTertiary) }
+    }
+}
+
+/** A rule between the user menu's groups. */
+@Composable
+private fun MenuRule() {
+    Box(Modifier.padding(vertical = MavioSpacing.s4).fillMaxWidth().height(1.dp).background(theme.colors.border))
+}
+
+/**
+ * Asks for a user's four-digit PIN on a keypad over the page, as the web
+ * UI's on a television: the fourth digit sends it and a wrong one clears
+ * the dots; back deletes a digit, and closes the pad once there is none
+ * (docs/tv.md §4).
+ */
+@Composable
+fun TvPinPad(name: String, busy: Boolean, error: String?, enter: (String) -> Unit, cancel: () -> Unit) {
+    var pin by remember { mutableStateOf("") }
+    val first = remember { FocusRequester() }
+    LaunchedEffect(error) { if (error != null) pin = "" }
+    LaunchedEffect(Unit) {
+        withFrameNanos {}
+        runCatching { first.requestFocus() }
+    }
+    val canvas = LocalDensity.current
+    fun press(k: String) {
+        when (k) {
+            "⌫" -> pin = pin.dropLast(1)
+            else -> if (pin.length < 4 && !busy) {
+                pin += k
+                if (pin.length == 4) enter(pin)
+            }
+        }
+    }
+    Dialog(
+        onDismissRequest = { if (pin.isEmpty()) cancel() else pin = pin.dropLast(1) },
+        properties = DialogProperties(usePlatformDefaultWidth = false),
+    ) {
+        OnCanvas(canvas) {
+            Column(
                 Modifier
                     .clip(RoundedCornerShape(MavioRadius.xl))
                     .background(theme.colors.surfaceOverlay)

@@ -50,14 +50,15 @@ import dev.mavio.core.RemoteCommand
 import dev.mavio.core.RemotePlayback
 import dev.mavio.design.MavioSpacing
 import dev.mavio.ui.Artwork
+import dev.mavio.ui.Group
 import dev.mavio.ui.MavioIcon
 import dev.mavio.ui.R
 import dev.mavio.ui.text
 import dev.mavio.ui.theme
+import java.time.Duration
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.time.Duration
 
 /** How often what the device plays is read again. */
 private const val REFRESH = 2_000L

@@ -42,14 +42,17 @@ import dev.mavio.design.MavioSpacing
 import dev.mavio.ui.Artwork
 import dev.mavio.ui.ButtonKind
 import dev.mavio.ui.CatalogFilters
+import dev.mavio.ui.ChoiceRow
 import dev.mavio.ui.MavioButton
 import dev.mavio.ui.MavioIcon
 import dev.mavio.ui.NamedValue
 import dev.mavio.ui.R
+import dev.mavio.ui.SettingsField
 import dev.mavio.ui.discoverLanguage
 import dev.mavio.ui.discovered
 import dev.mavio.ui.text
 import dev.mavio.ui.theme
+import java.time.Year
 import kotlinx.coroutines.delay
 import mavio.acquisition.v1.Discover.Catalog
 import mavio.acquisition.v1.Discover.ListFilterValuesResponse
@@ -58,7 +61,6 @@ import mavio.acquisition.v1.listFilterValuesRequest
 import mavio.plugin.v1.Discovery.DiscoverFilter
 import mavio.plugin.v1.Discovery.DiscoverSort
 import mavio.plugin.v1.Discovery.FilterValue
-import java.time.Year
 
 /** The country of the streaming services until another is chosen, the one with the most of them. */
 private const val DEFAULT_REGION = "US"

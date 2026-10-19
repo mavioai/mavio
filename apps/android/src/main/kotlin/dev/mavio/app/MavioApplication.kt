@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.pm.ApplicationInfo
 import android.system.Os
 import dev.mavio.core.AppModel
+import dev.mavio.ui.Prefs
 import dev.mavio.ui.installImages
 import kotlinx.coroutines.flow.MutableStateFlow
 

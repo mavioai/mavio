@@ -32,8 +32,11 @@ import dev.mavio.core.instant
 import dev.mavio.design.MavioSpacing
 import dev.mavio.ui.MavioButton
 import dev.mavio.ui.R
+import dev.mavio.ui.RowLabel
 import dev.mavio.ui.text
 import dev.mavio.ui.theme
+import java.text.Collator
+import java.util.Locale
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -46,8 +49,6 @@ import mavio.system.v1.getServerSettingsRequest
 import mavio.system.v1.listCountriesRequest
 import mavio.system.v1.listLanguagesRequest
 import mavio.system.v1.updateServerSettingsRequest
-import java.text.Collator
-import java.util.Locale
 
 /** A text field's row, its value right of its label. */
 @Composable

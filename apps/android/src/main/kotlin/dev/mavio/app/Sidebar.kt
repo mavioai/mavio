@@ -56,10 +56,13 @@ import dev.mavio.core.ServerRecord
 import dev.mavio.core.SignInState
 import dev.mavio.core.SwitchableUser
 import dev.mavio.design.MavioSpacing
+import dev.mavio.ui.Appearance
 import dev.mavio.ui.Avatar
+import dev.mavio.ui.LocalPrefs
 import dev.mavio.ui.MavioIcon
 import dev.mavio.ui.R
 import dev.mavio.ui.Wordmark
+import dev.mavio.ui.signedInAccount
 import dev.mavio.ui.text
 import dev.mavio.ui.theme
 import kotlinx.coroutines.CancellationException

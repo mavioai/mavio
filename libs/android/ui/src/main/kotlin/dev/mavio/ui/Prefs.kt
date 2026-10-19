@@ -1,4 +1,4 @@
-package dev.mavio.app
+package dev.mavio.ui
 
 import android.content.Context
 import androidx.annotation.StringRes
@@ -7,8 +7,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.core.content.edit
-import dev.mavio.ui.Quality
-import dev.mavio.ui.R
 
 /** The theme the app takes on this device. */
 enum class Appearance(val key: String, @StringRes val label: Int) {

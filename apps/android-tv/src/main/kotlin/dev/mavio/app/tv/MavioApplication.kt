@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.pm.ApplicationInfo
 import android.system.Os
 import dev.mavio.core.AppModel
+import dev.mavio.ui.Prefs
 import dev.mavio.ui.installImages
 
 /** The app, which owns the core for as long as its process lives. */
@@ -11,6 +12,9 @@ class MavioApplication : Application() {
     /** The app's state over the core. */
     lateinit var model: AppModel
         private set
+
+    /** This device's settings. */
+    val prefs by lazy { Prefs(this) }
 
     override fun onCreate() {
         super.onCreate()

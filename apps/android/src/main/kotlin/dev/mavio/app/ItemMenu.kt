@@ -52,7 +52,9 @@ import dev.mavio.ui.ButtonKind
 import dev.mavio.ui.CircleButton
 import dev.mavio.ui.MavioButton
 import dev.mavio.ui.MavioIcon
+import dev.mavio.ui.MavioSwitch
 import dev.mavio.ui.R
+import dev.mavio.ui.SettingsField
 import dev.mavio.ui.text
 import dev.mavio.ui.theme
 import kotlinx.coroutines.launch

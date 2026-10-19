@@ -27,8 +27,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -49,11 +49,20 @@ import dev.mavio.core.ServerRecord
 import dev.mavio.core.call
 import dev.mavio.core.instant
 import dev.mavio.design.MavioSpacing
+import dev.mavio.ui.ChoiceRow
+import dev.mavio.ui.EntryRow
+import dev.mavio.ui.Group
 import dev.mavio.ui.MavioIcon
 import dev.mavio.ui.R
+import dev.mavio.ui.RowDivider
+import dev.mavio.ui.SettingsList
 import dev.mavio.ui.StatusView
+import dev.mavio.ui.ValueRow
 import dev.mavio.ui.text
 import dev.mavio.ui.theme
+import java.text.NumberFormat
+import java.time.Duration
+import java.time.Instant
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -69,9 +78,6 @@ import mavio.system.v1.getSystemInfoRequest
 import mavio.system.v1.getSystemLoadRequest
 import mavio.user.v1.UserOuterClass.GetCurrentUserResponse
 import mavio.user.v1.getCurrentUserRequest
-import java.time.Duration
-import java.time.Instant
-import java.text.NumberFormat
 
 /** The paths of the server's procedures the settings call. */
 object Procedure {

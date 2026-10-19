@@ -43,12 +43,20 @@ import dev.mavio.core.AppModel
 import dev.mavio.core.call
 import dev.mavio.design.MavioSpacing
 import dev.mavio.ui.ButtonKind
+import dev.mavio.ui.ChoiceRow
+import dev.mavio.ui.Group
+import dev.mavio.ui.LinkRow
 import dev.mavio.ui.MavioButton
 import dev.mavio.ui.MavioIcon
 import dev.mavio.ui.R
+import dev.mavio.ui.RowDivider
+import dev.mavio.ui.SettingsField
+import dev.mavio.ui.SettingsList
 import dev.mavio.ui.StatusView
+import dev.mavio.ui.SwitchRow
 import dev.mavio.ui.text
 import dev.mavio.ui.theme
+import java.text.Collator
 import kotlinx.coroutines.launch
 import mavio.library.v1.LibraryOuterClass.CreateLibraryResponse
 import mavio.library.v1.LibraryOuterClass.DeleteLibraryResponse
@@ -76,7 +84,6 @@ import mavio.storage.v1.listFoldersRequest
 import mavio.storage.v1.listRemotesRequest
 import mavio.system.v1.System.ListDirectoryResponse
 import mavio.system.v1.listDirectoryRequest
-import java.text.Collator
 
 // The Media menu's Libraries (docs/clients.md §6.3.4), as the web UI's on a
 // phone: the server's libraries, to scan, and a library's page to add,

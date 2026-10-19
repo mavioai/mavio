@@ -23,7 +23,7 @@ import java.time.Duration
 /**
  * A page over the tabs, which hides the navigation bar (docs/tv.md §6.2,
  * §6.3, §6.4, §7): an item's details, a library, a catalog of Discover,
- * a discovered title, Search, or an item's playback. Each keeps where
+ * a discovered title, Search, the settings, or an item's playback. Each keeps where
  * it was, so that back returns to it as it was left.
  */
 sealed class Page {
@@ -127,6 +127,18 @@ sealed class Page {
         val focus = FocusMemory()
     }
 
+    /**
+     * The settings (docs/tv.md §6.6): their list, or the [section]
+     * selected from it in its place.
+     */
+    class Settings : Page() {
+        /** The section shown, or null for the list. */
+        var section by mutableStateOf<SettingsSection?>(null)
+
+        /** The element of the list that had focus. */
+        val focus = FocusMemory()
+    }
+
     /** An item's playback, from [start] when set. */
     class Player(val serverId: String, val itemId: String, val title: String, val mediaSourceId: String?, val start: Duration?) : Page()
 }
@@ -169,6 +181,11 @@ class Pages {
     /** Opens Search. */
     fun openSearch() {
         stack += Page.Search()
+    }
+
+    /** Opens the settings. */
+    fun openSettings() {
+        stack += Page.Settings()
     }
 
     /** Plays an item, from [start] when set. */

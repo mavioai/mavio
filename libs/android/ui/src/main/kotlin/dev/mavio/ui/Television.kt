@@ -1,4 +1,4 @@
-package dev.mavio.app.tv
+package dev.mavio.ui
 
 import androidx.annotation.DrawableRes
 import androidx.compose.animation.core.animateFloatAsState
@@ -12,7 +12,6 @@ import androidx.compose.foundation.gestures.BringIntoViewSpec
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -29,6 +28,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -58,10 +58,6 @@ import androidx.compose.ui.window.PopupProperties
 import androidx.compose.ui.zIndex
 import dev.mavio.design.MavioRadius
 import dev.mavio.design.MavioSpacing
-import dev.mavio.ui.MavioIcon
-import dev.mavio.ui.R
-import dev.mavio.ui.text
-import dev.mavio.ui.theme
 
 // The television's canvas and focus (docs/tv.md §2, §4): the screen is
 // 1920 points wide, as on Apple TV and in the web UI's television mode, and
@@ -70,17 +66,20 @@ import dev.mavio.ui.theme
 /** The width of the canvas the television's tokens are given in, in points. */
 private const val CANVAS_WIDTH = 1920f
 
+/** Whether the app is laid out for a television, driven by a remote. */
+val LocalTelevision = staticCompositionLocalOf { false }
+
 /**
  * Draws [content] on a canvas 1920 points wide, whatever the screen's
  * density, so that the `tv` tokens lay out as on Apple TV and in the web
- * UI's television mode.
+ * UI's television mode, and marks it as the television's ([LocalTelevision]).
  */
 @Composable
 fun TvCanvas(content: @Composable () -> Unit) {
     BoxWithConstraints {
         val font = LocalDensity.current.fontScale
         val density = constraints.maxWidth / CANVAS_WIDTH
-        CompositionLocalProvider(LocalDensity provides Density(density, font), content = content)
+        CompositionLocalProvider(LocalDensity provides Density(density, font), LocalTelevision provides true, content = content)
     }
 }
 
@@ -261,7 +260,8 @@ fun TvChoices(current: FocusRequester, modifier: Modifier = Modifier, content: @
 
 /**
  * A menu of choices over the page (docs/tv.md §5), [width] wide below what
- * it is placed in, [below] its top: frosted glass whose items fill with
+ * it is placed in, [below] its top, at its left or as [alignment] places
+ * it: frosted glass whose items fill with
  * `color.fill` with focus, the current one checked. It opens with focus on
  * the current choice; back closes it.
  */
@@ -273,6 +273,7 @@ fun <T> TvChoiceMenu(
     width: Dp,
     label: @Composable (T) -> String,
     onDismiss: () -> Unit,
+    alignment: Alignment = Alignment.TopStart,
     onChoose: (T) -> Unit,
 ) {
     val density = LocalDensity.current
@@ -282,6 +283,7 @@ fun <T> TvChoiceMenu(
         runCatching { chosen.requestFocus() }
     }
     Popup(
+        alignment = alignment,
         offset = with(density) { IntOffset(0, (below + MavioSpacing.s8).roundToPx()) },
         onDismissRequest = onDismiss,
         properties = PopupProperties(focusable = true),

@@ -16,34 +16,19 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -61,27 +46,34 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.mavio.core.Account
 import dev.mavio.core.AppModel
-import dev.mavio.core.PlaybackPreferences
 import dev.mavio.core.ServerRecord
-import dev.mavio.core.SignInState
 import dev.mavio.core.StreamState
-import dev.mavio.core.SubtitleMode
 import dev.mavio.design.MavioSpacing
-import dev.mavio.ui.Avatar
+import dev.mavio.ui.AccountCard
+import dev.mavio.ui.Appearance
 import dev.mavio.ui.ButtonKind
+import dev.mavio.ui.ChoiceRow
+import dev.mavio.ui.EntryRow
+import dev.mavio.ui.Group
+import dev.mavio.ui.LinkRow
+import dev.mavio.ui.LocalPrefs
 import dev.mavio.ui.MavioButton
 import dev.mavio.ui.MavioIcon
-import dev.mavio.ui.Quality
+import dev.mavio.ui.NameRow
+import dev.mavio.ui.PlaybackSettings
 import dev.mavio.ui.R
-import dev.mavio.ui.StatusView
+import dev.mavio.ui.RowDivider
+import dev.mavio.ui.SettingsField
+import dev.mavio.ui.SettingsList
+import dev.mavio.ui.SubtitlesAudioSettings
+import dev.mavio.ui.ValueRow
+import dev.mavio.ui.signedInAccount
+import dev.mavio.ui.signedInServers
 import dev.mavio.ui.text
 import dev.mavio.ui.theme
 import kotlinx.coroutines.CancellationException
@@ -161,33 +153,8 @@ fun SettingsPageScreen(model: AppModel, page: SettingsPage) {
     when (page) {
         SettingsPage.Account -> AccountPage(model)
         SettingsPage.Appearance -> AppearancePage()
-        SettingsPage.Playback -> PlaybackPage()
-        SettingsPage.SubtitlesAudio -> SubtitlesAudioPage(model)
-    }
-}
-
-/** The user's card: the Mavio account, or the user of the server signed in to. */
-@Composable
-internal fun AccountCard(model: AppModel, modifier: Modifier, chevron: Boolean = true) {
-    val account = signedInAccount(model)
-    val server = signedInServers(model).firstOrNull()
-    val name = account?.name ?: server?.userName.orEmpty()
-    Row(
-        modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
-        horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s12),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Avatar(name, size = 44.dp)
-        Column(Modifier.weight(1f)) {
-            Text(name, style = theme.type.headline.text, maxLines = 1)
-            Text(
-                if (account != null) stringResource(R.string.auth_mavio_account) else server?.name.orEmpty(),
-                style = theme.type.footnote.text,
-                color = theme.colors.textSecondary,
-                maxLines = 1,
-            )
-        }
-        if (chevron) Chevron()
+        SettingsPage.Playback -> PlaybackSettings()
+        SettingsPage.SubtitlesAudio -> SubtitlesAudioSettings(model)
     }
 }
 
@@ -245,21 +212,6 @@ private fun AccountPage(model: AppModel) {
         }
         if (signedIn.isNotEmpty()) item { AuthorizeDevice(model, servers.filter { it.id in signedIn }) }
     }
-}
-
-/** The Mavio account signed in, followed. */
-@Composable
-internal fun signedInAccount(model: AppModel): Account? {
-    val state by model.signInState.collectAsStateWithLifecycle()
-    return (state as? SignInState.Account)?.v1
-}
-
-/** The servers signed in to, in the user's order, followed. */
-@Composable
-internal fun signedInServers(model: AppModel): List<ServerRecord> {
-    val servers by model.servers.collectAsStateWithLifecycle()
-    val signedIn by model.signedIn.collectAsStateWithLifecycle()
-    return servers.filter { it.id in signedIn }
 }
 
 /** The account's page at the mavio.dev whose API it signed in with. */
@@ -520,352 +472,4 @@ private fun Pane(dark: Boolean, modifier: Modifier) {
             CornerRadius(line / 2),
         )
     }
-}
-
-/**
- * Playback, as the web UI's: the highest quality streamed to this device,
- * which the player's panel also sets, and whether the next episode plays
- * when one ends.
- */
-@Composable
-private fun PlaybackPage() {
-    val prefs = LocalPrefs.current
-    val context = LocalContext.current
-    SettingsList(stringResource(R.string.settings_playback)) {
-        item {
-            Group(footer = stringResource(R.string.settings_appearance_message)) {
-                ChoiceRow(
-                    stringResource(R.string.settings_max_quality),
-                    Quality.entries.map { it to (it.label?.let(context::getString) ?: it.key) },
-                    prefs.quality,
-                ) { prefs.quality = it }
-                RowDivider()
-                SwitchRow(stringResource(R.string.settings_autoplay_next), prefs.autoplayNext) { prefs.autoplayNext = it }
-            }
-        }
-    }
-}
-
-/** When subtitles show, in the web UI's order. */
-private val SUBTITLE_MODES = listOf(
-    SubtitleMode.DEFAULT to R.string.settings_subtitle_mode_default,
-    SubtitleMode.ALWAYS to R.string.settings_subtitle_mode_always,
-    SubtitleMode.FOREIGN to R.string.settings_subtitle_mode_foreign,
-    SubtitleMode.SMART to R.string.settings_subtitle_mode_smart,
-    SubtitleMode.FORCED to R.string.settings_subtitle_mode_forced,
-    SubtitleMode.NEVER to R.string.settings_subtitle_mode_none,
-)
-
-/** Three-letter codes from a field: lowercase, separated by commas or spaces; null when one is not. */
-private fun languages(text: String): List<String>? {
-    val list = text.lowercase().split(Regex("[\\s,，、]+")).filter { it.isNotEmpty() }
-    return list.takeIf { codes -> codes.all { it.matches(Regex("[a-z]{3}")) } }
-}
-
-/**
- * The user's languages and when subtitles show, read from the first
- * server signed in to and saved to each of them.
- */
-@Composable
-private fun SubtitlesAudioPage(model: AppModel) {
-    // The preferences as saved; null while they load.
-    var saved by remember { mutableStateOf<Result<PlaybackPreferences>?>(null) }
-    LaunchedEffect(Unit) { saved = runCatching { model.client.playbackPreferences() } }
-    var audio by remember { mutableStateOf("") }
-    var subtitles by remember { mutableStateOf("") }
-    var mode by remember { mutableStateOf(SubtitleMode.DEFAULT) }
-    LaunchedEffect(saved) {
-        saved?.getOrNull()?.let {
-            audio = it.audioLanguages.joinToString(", ")
-            subtitles = it.subtitleLanguages.joinToString(", ")
-            mode = it.subtitleMode
-        }
-    }
-    var busy by remember { mutableStateOf(false) }
-    var error by remember { mutableStateOf<String?>(null) }
-    val scope = rememberCoroutineScope()
-    SettingsList(stringResource(R.string.settings_subtitles_audio), stringResource(R.string.settings_subtitles_audio_message)) {
-        val prefs = saved?.getOrNull()
-        when {
-            saved == null -> item { StatusView(stringResource(R.string.state_loading)) }
-            prefs == null -> item { StatusView(stringResource(R.string.state_error), icon = R.drawable.ic_error) }
-            else -> {
-                val a = languages(audio)
-                val s = languages(subtitles)
-                val changed = audio != prefs.audioLanguages.joinToString(", ") ||
-                    subtitles != prefs.subtitleLanguages.joinToString(", ") ||
-                    mode != prefs.subtitleMode
-                item {
-                    Group(footer = stringResource(R.string.settings_languages_hint)) {
-                        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(MavioSpacing.s16)) {
-                            SettingsField(audio, { audio = it }, stringResource(R.string.settings_audio_languages), placeholder = "chi, eng", error = a == null)
-                            SettingsField(subtitles, { subtitles = it }, stringResource(R.string.settings_subtitle_languages), placeholder = "chi, eng", error = s == null)
-                        }
-                    }
-                }
-                item {
-                    Group {
-                        ChoiceRow(
-                            stringResource(R.string.settings_subtitle_mode),
-                            SUBTITLE_MODES.map { (m, label) -> m to stringResource(label) },
-                            mode,
-                        ) { mode = it }
-                    }
-                }
-                item {
-                    Row(horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s12), verticalAlignment = Alignment.CenterVertically) {
-                        MavioButton(
-                            stringResource(R.string.action_save),
-                            {
-                                if (a == null || s == null) return@MavioButton
-                                busy = true
-                                error = null
-                                scope.launch {
-                                    try {
-                                        val next = PlaybackPreferences(a, s, mode, prefs.playDefaultAudioTrack)
-                                        model.client.setPlaybackPreferences(next)
-                                        saved = Result.success(next)
-                                    } catch (e: CancellationException) {
-                                        throw e
-                                    } catch (e: Exception) {
-                                        error = e.message ?: e.toString()
-                                    } finally {
-                                        busy = false
-                                    }
-                                }
-                            },
-                            enabled = changed && a != null && s != null && !busy,
-                        )
-                        error?.let { Text(it, style = theme.type.callout.text, color = theme.colors.danger) }
-                    }
-                }
-            }
-        }
-    }
-}
-
-/** A page of settings: its title, an optional message, then its groups. */
-@Composable
-internal fun SettingsList(title: String, message: String? = null, large: Boolean = false, content: LazyListScope.() -> Unit) {
-    LazyColumn(
-        Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(
-            start = theme.layout.margin,
-            end = theme.layout.margin,
-            top = MavioSpacing.s16,
-            // No tab bar below the settings.
-            bottom = MavioSpacing.s24 + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding(),
-        ),
-        verticalArrangement = Arrangement.spacedBy(MavioSpacing.s24),
-    ) {
-        item {
-            Column(verticalArrangement = Arrangement.spacedBy(MavioSpacing.s4)) {
-                Text(title, style = (if (large) theme.type.title1 else theme.type.title2).text, fontWeight = FontWeight.Bold)
-                if (message != null) Text(message, style = theme.type.callout.text, color = theme.colors.textSecondary)
-            }
-        }
-        content()
-    }
-}
-
-/** A group of rows on a card, with an optional title above, an action beside it, and a footer below. */
-@Composable
-internal fun Group(
-    title: String? = null,
-    footer: String? = null,
-    action: (@Composable () -> Unit)? = null,
-    content: @Composable ColumnScope.() -> Unit,
-) {
-    Column(verticalArrangement = Arrangement.spacedBy(MavioSpacing.s8)) {
-        if (title != null || action != null) {
-            Row(Modifier.padding(horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-                Text(title.orEmpty(), Modifier.weight(1f), style = theme.type.headline.text)
-                action?.invoke()
-            }
-        }
-        Column(
-            Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(theme.colors.surface),
-            content = content,
-        )
-        if (footer != null) {
-            Text(footer, Modifier.padding(horizontal = 4.dp), style = theme.type.footnote.text, color = theme.colors.textSecondary)
-        }
-    }
-}
-
-/** The line between rows, after the tiles when tiled. */
-@Composable
-internal fun RowDivider(tiled: Boolean = false) {
-    HorizontalDivider(Modifier.padding(start = if (tiled) 60.dp else 16.dp), color = theme.colors.border)
-}
-
-/** A row opening a section: its icon on a colored tile, and its title. */
-@Composable
-internal fun EntryRow(title: String, @DrawableRes icon: Int, color: Color, onClick: () -> Unit) {
-    Row(
-        Modifier.fillMaxWidth().clickable(onClick = onClick).heightIn(min = 52.dp).padding(horizontal = 16.dp),
-        horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s16),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Box(Modifier.size(28.dp).background(color, RoundedCornerShape(7.dp)), Alignment.Center) {
-            MavioIcon(icon, size = 17.dp, tint = Color.White)
-        }
-        Text(title, Modifier.weight(1f), style = theme.type.body.text)
-        Chevron()
-    }
-}
-
-/** The arrow of a row opening a page. */
-@Composable
-internal fun Chevron() {
-    MavioIcon(R.drawable.ic_forward, size = 18.dp, tint = theme.colors.textTertiary)
-}
-
-/** A label and its value. */
-@Composable
-internal fun ValueRow(label: String, value: String) {
-    Row(
-        Modifier.fillMaxWidth().heightIn(min = 48.dp).padding(horizontal = 16.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(label, Modifier.weight(1f), style = theme.type.body.text)
-        Text(value, style = theme.type.body.text, color = theme.colors.textSecondary)
-    }
-}
-
-/** A person's initial and name. */
-@Composable
-private fun NameRow(name: String) {
-    Row(
-        Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
-        horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s12),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Avatar(name, size = 44.dp)
-        Text(name, style = theme.type.headline.text)
-    }
-}
-
-/** An action in the accent's color, with its icon. */
-@Composable
-internal fun LinkRow(label: String, @DrawableRes icon: Int, onClick: () -> Unit) {
-    Row(
-        Modifier.fillMaxWidth().clickable(onClick = onClick).heightIn(min = 48.dp).padding(horizontal = 16.dp),
-        horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s12),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        MavioIcon(icon, size = 18.dp, tint = theme.colors.accentText)
-        Text(label, style = theme.type.body.text, color = theme.colors.accentText)
-    }
-}
-
-/** A row's label, with what it means below it. */
-@Composable
-internal fun RowLabel(label: String, detail: String? = null, modifier: Modifier = Modifier) {
-    Column(modifier, verticalArrangement = Arrangement.spacedBy(2.dp)) {
-        Text(label, style = theme.type.body.text)
-        if (detail != null) Text(detail, style = theme.type.footnote.text, color = theme.colors.textSecondary)
-    }
-}
-
-/** A setting turned on and off. */
-@Composable
-internal fun SwitchRow(label: String, checked: Boolean, detail: String? = null, onChange: (Boolean) -> Unit) {
-    Row(
-        Modifier.fillMaxWidth().clickable { onChange(!checked) }.heightIn(min = 52.dp).padding(horizontal = 16.dp, vertical = 8.dp),
-        horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s12),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        RowLabel(label, detail, Modifier.weight(1f))
-        MavioSwitch(checked, onChange)
-    }
-}
-
-/** A switch in the design system's colors. */
-@Composable
-internal fun MavioSwitch(checked: Boolean, onChange: (Boolean) -> Unit) {
-    Switch(
-        checked,
-        onChange,
-        colors = SwitchDefaults.colors(
-            checkedTrackColor = theme.colors.success,
-            checkedThumbColor = Color.White,
-            uncheckedTrackColor = theme.colors.fill,
-            uncheckedThumbColor = Color.White,
-            uncheckedBorderColor = Color.Transparent,
-        ),
-    )
-}
-
-/** A setting chosen from a menu, showing its choice. */
-@Composable
-internal fun <T> ChoiceRow(label: String, choices: List<Pair<T, String>>, chosen: T, detail: String? = null, onChoose: (T) -> Unit) {
-    var open by remember { mutableStateOf(false) }
-    Row(
-        Modifier.fillMaxWidth().clickable { open = true }.heightIn(min = 52.dp).padding(horizontal = 16.dp, vertical = 8.dp),
-        horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s8),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        RowLabel(label, detail, Modifier.weight(1f))
-        // The menu opens at the choice.
-        Box {
-            Row(horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s8), verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    choices.firstOrNull { it.first == chosen }?.second.orEmpty(),
-                    Modifier.widthIn(max = if (detail == null) 200.dp else 150.dp),
-                    style = theme.type.body.text,
-                    color = theme.colors.textSecondary,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-                MavioIcon(R.drawable.ic_selector, size = 16.dp, tint = theme.colors.textSecondary)
-            }
-            DropdownMenu(open, onDismissRequest = { open = false }) {
-                choices.forEach { (value, text) ->
-                    DropdownMenuItem(
-                        text = { Text(text, style = theme.type.callout.text) },
-                        onClick = {
-                            open = false
-                            onChoose(value)
-                        },
-                        trailingIcon = { if (value == chosen) MavioIcon(R.drawable.ic_check, size = 18.dp) },
-                    )
-                }
-            }
-        }
-    }
-}
-
-/** A text field of the settings. */
-@Composable
-internal fun SettingsField(
-    value: String,
-    onChange: (String) -> Unit,
-    label: String?,
-    modifier: Modifier = Modifier.fillMaxWidth(),
-    placeholder: String? = null,
-    keyboard: KeyboardType = KeyboardType.Text,
-    error: Boolean = false,
-    secret: Boolean = false,
-) {
-    OutlinedTextField(
-        value,
-        onChange,
-        modifier,
-        label = label?.let { { Text(it) } },
-        placeholder = placeholder?.let { { Text(it) } },
-        singleLine = true,
-        isError = error,
-        visualTransformation = if (secret) PasswordVisualTransformation() else VisualTransformation.None,
-        keyboardOptions = KeyboardOptions(keyboardType = keyboard, autoCorrectEnabled = false),
-        shape = RoundedCornerShape(10.dp),
-        colors = OutlinedTextFieldDefaults.colors(
-            focusedContainerColor = theme.colors.fill,
-            unfocusedContainerColor = theme.colors.fill,
-            focusedBorderColor = theme.colors.textSecondary,
-            unfocusedBorderColor = theme.colors.border,
-            focusedLabelColor = theme.colors.textSecondary,
-            cursorColor = theme.colors.textPrimary,
-        ),
-    )
 }

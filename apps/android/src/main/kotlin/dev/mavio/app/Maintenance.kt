@@ -1,9 +1,9 @@
 package dev.mavio.app
 
 import android.content.Context
+import android.icu.text.MeasureFormat
 import android.icu.util.Measure
 import android.icu.util.MeasureUnit
-import android.icu.text.MeasureFormat
 import android.net.Uri
 import android.text.format.DateUtils
 import android.text.format.Formatter
@@ -32,7 +32,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
@@ -44,9 +43,9 @@ import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.layout
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.res.pluralStringResource
@@ -54,6 +53,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.protobuf.Duration
 import dev.mavio.core.AppModel
 import dev.mavio.core.ServerRecord
@@ -61,12 +61,22 @@ import dev.mavio.core.call
 import dev.mavio.core.instant
 import dev.mavio.design.MavioSpacing
 import dev.mavio.ui.ButtonKind
+import dev.mavio.ui.Chevron
+import dev.mavio.ui.ChoiceRow
+import dev.mavio.ui.Group
 import dev.mavio.ui.MavioButton
 import dev.mavio.ui.MavioIcon
 import dev.mavio.ui.R
+import dev.mavio.ui.RowDivider
+import dev.mavio.ui.SettingsField
+import dev.mavio.ui.SettingsList
 import dev.mavio.ui.StatusView
 import dev.mavio.ui.text
 import dev.mavio.ui.theme
+import java.net.HttpURLConnection
+import java.net.URL
+import java.text.DateFormat
+import java.util.Date
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -122,10 +132,6 @@ import mavio.system.v1.listTasksRequest
 import mavio.system.v1.runTaskRequest
 import mavio.user.v1.UserOuterClass.ListUsersResponse
 import mavio.user.v1.listUsersRequest
-import java.net.HttpURLConnection
-import java.net.URL
-import java.text.DateFormat
-import java.util.Date
 
 // The settings' sections of watching over and keeping a server, as the web
 // UI's on a phone: Activity, Issues, Tasks, Logs and Backups

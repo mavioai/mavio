@@ -45,6 +45,7 @@ import dev.mavio.design.MavioSpacing
 import dev.mavio.ui.DiscoverState
 import dev.mavio.ui.LocalDiscover
 import dev.mavio.ui.R
+import dev.mavio.ui.TvChoice
 import dev.mavio.ui.text
 import dev.mavio.ui.theme
 import kotlinx.coroutines.launch
@@ -104,19 +105,22 @@ private fun Shell(model: AppModel) {
     val scope = rememberCoroutineScope()
     val pages = remember { Pages() }
     val actions = remember(pages) { HomeActions(open = pages::open, play = { pages.play(it.serverId, it.itemId, it.title) }) }
-    // Search opened from the bar returns focus to its pill.
+    // Search and the settings opened from the bar return focus to what
+    // opened them, its pill or the menu button.
     val search = remember { FocusRequester() }
-    var fromBar by remember { mutableStateOf(false) }
-    var onSearchPill by remember { mutableStateOf(false) }
+    val menu = remember { FocusRequester() }
+    var fromBar by remember { mutableStateOf<FocusRequester?>(null) }
+    var onOpener by remember { mutableStateOf(false) }
     val top = pages.top
-    if (top != null) claim = !fromBar
+    if (top != null) claim = fromBar == null
     LaunchedEffect(top == null) {
-        if (top != null || !fromBar) return@LaunchedEffect
-        fromBar = false
+        val opener = fromBar
+        if (top != null || opener == null) return@LaunchedEffect
+        fromBar = null
         // The window gives focus back to the current tab a frame or two late.
         repeat(10) {
             withFrameNanos {}
-            if (!onSearchPill) runCatching { search.requestFocus() }
+            if (!onOpener) runCatching { opener.requestFocus() }
         }
     }
     BackHandler(top == null && (inPage || tab != Tab.Home)) {
@@ -143,6 +147,7 @@ private fun Shell(model: AppModel) {
                 is Page.Title -> key(top) { TitlePage(top) }
                 is Page.Search -> key(top) { SearchPage(model, top) }
                 is Page.Player -> key(top) { PlayerPage(model, top) }
+                is Page.Settings -> key(top) { SettingsPage(model, top) }
                 null -> {
                     Box(Modifier.fillMaxSize().onFocusChanged { inPage = it.hasFocus }) {
                         key(tab) {
@@ -159,12 +164,17 @@ private fun Shell(model: AppModel) {
                         shown,
                         tabs,
                         search,
-                        { onSearchPill = it },
+                        menu,
+                        { onOpener = it },
                         scrolled(state.list),
                         state.entry,
                         onSearch = {
-                            fromBar = true
+                            fromBar = search
                             pages.openSearch()
+                        },
+                        onSettings = {
+                            fromBar = menu
+                            pages.openSettings()
                         },
                     ) {
                         claim = false
@@ -198,10 +208,12 @@ private fun NavBar(
     shown: List<Tab>,
     tabs: Map<Tab, FocusRequester>,
     search: FocusRequester,
-    onSearchFocus: (Boolean) -> Unit,
+    menu: FocusRequester,
+    onOpenerFocus: (Boolean) -> Unit,
     scrolled: Boolean,
     page: FocusRequester,
     onSearch: () -> Unit,
+    onSettings: () -> Unit,
     onTab: (Tab) -> Unit,
 ) {
     val band by animateColorAsState(if (scrolled) theme.colors.tvBackground else Color.Transparent, label = "band")
@@ -229,12 +241,17 @@ private fun NavBar(
             TvChoice(
                 stringResource(R.string.nav_search),
                 false,
-                Modifier.onFocusChanged { onSearchFocus(it.isFocused) }.focusRequester(search).focusProperties { down = page },
+                Modifier.onFocusChanged { onOpenerFocus(it.isFocused) }.focusRequester(search).focusProperties { down = page },
                 onFocus = false,
                 onChoose = onSearch,
             )
         }
-        MenuButton(model, Modifier.align(Alignment.CenterEnd).focusProperties { down = page })
+        MenuButton(
+            model,
+            menu,
+            Modifier.align(Alignment.CenterEnd).onFocusChanged { onOpenerFocus(it.hasFocus) }.focusProperties { down = page },
+            onSettings,
+        )
     }
 }
 
