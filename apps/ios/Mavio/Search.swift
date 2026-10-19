@@ -13,11 +13,19 @@ struct SearchView: View {
     @State private var query = ""
     /// The query searched, empty before the first search.
     @State private var searched = ""
+    /// How many times a query has been confirmed: confirming the same one
+    /// again searches again.
+    @State private var submitted = 0
     /// The servers asked, and what each has answered.
     @State private var servers: [ServerRecord] = []
     @State private var results: [String: SearchResults] = [:]
     /// The titles found to discover, nil while they are being searched.
     @State private var titles: [DiscoveredTitle]?
+    /// What every server, and what the server that discovers, has answered
+    /// in full, which coming back from a result keeps rather than asks
+    /// again.
+    @State private var answered: SearchKey?
+    @State private var titlesAnswered: DiscoverSearch?
     @FocusState private var focused: Bool
 
     var body: some View {
@@ -55,11 +63,10 @@ struct SearchView: View {
         .onAppear { focused = searched.isEmpty }
         .onSubmit(of: .search) {
             searched = query.trimmingCharacters(in: .whitespaces)
+            submitted += 1
         }
-        .task(id: searched) { await search(searched) }
-        .task(id: DiscoverSearch(query: searched, server: discovery.server?.id, loaded: discovery.loaded)) {
-            await searchTitles(searched)
-        }
+        .task(id: searchKey) { await search(searchKey) }
+        .task(id: discoverSearch) { await searchTitles(discoverSearch) }
     }
 
     /// A server's row: placeholders while it searches, a line when it
@@ -95,8 +102,16 @@ struct SearchView: View {
         servers.allSatisfy { results[$0.id]?.cards.isEmpty ?? false } && discovery.loaded && titles?.isEmpty == true
     }
 
+    private var searchKey: SearchKey { SearchKey(query: searched, submitted: submitted) }
+
+    private var discoverSearch: DiscoverSearch {
+        DiscoverSearch(search: searchKey, server: discovery.server?.id, loaded: discovery.loaded)
+    }
+
     /// Asks every signed-in server at once, drawing each as it answers.
-    private func search(_ q: String) async {
+    private func search(_ key: SearchKey) async {
+        guard key != answered else { return }
+        let q = key.query
         servers = q.isEmpty ? [] : model.signedInServers
         results = [:]
         guard !q.isEmpty else { return }
@@ -111,10 +126,13 @@ struct SearchView: View {
                 results[found.serverId] = found
             }
         }
+        if !Task.isCancelled { answered = key }
     }
 
     /// Asks the server that discovers for titles of the query.
-    private func searchTitles(_ q: String) async {
+    private func searchTitles(_ key: DiscoverSearch) async {
+        guard key != titlesAnswered else { return }
+        let q = key.search.query
         titles = nil
         guard !q.isEmpty, discovery.loaded else { return }
         guard let server = discovery.server else {
@@ -129,12 +147,20 @@ struct SearchView: View {
         guard !Task.isCancelled else { return }
         var seen = Set<String>()
         titles = (response?.titles ?? []).filter { seen.insert($0.key).inserted }
+        titlesAnswered = key
     }
+}
+
+/// A confirmed query: what has been answered, which coming back from a
+/// result does not ask again but confirming it again does.
+private struct SearchKey: Equatable {
+    let query: String
+    let submitted: Int
 }
 
 /// What the titles to discover are searched by.
 private struct DiscoverSearch: Equatable {
-    let query: String
+    let search: SearchKey
     let server: String?
     let loaded: Bool
 }
