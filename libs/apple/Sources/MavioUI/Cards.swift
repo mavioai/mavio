@@ -3,8 +3,9 @@ import MavioKit
 import NukeUI
 import SwiftUI
 
-/// An image loaded from a server, over a placeholder of its final size: the
-/// icon of what it shows while it loads or when there is none.
+/// An image loaded from a server, over a placeholder of its final size: a
+/// plain fill while it loads, into which it fades, and the icon of what it
+/// shows only when there is none, so that no icon flashes before an image.
 public struct ArtworkView: View {
     private let url: String?
     private let title: String?
@@ -29,7 +30,7 @@ public struct ArtworkView: View {
                     state in
                     if let image = state.image {
                         image.resizable().scaledToFill()
-                    } else {
+                    } else if state.error != nil {
                         placeholder
                     }
                 }

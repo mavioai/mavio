@@ -80,6 +80,9 @@ struct RootView: View {
     @State private var router = Router()
     @State private var discovery = Discovery()
     @State private var tab: Tab = .home
+    /// Whether the launch's mark still shows, and whether it may leave.
+    @State private var launching = true
+    @State private var ready = false
 
     private var theme: Theme {
         Theme(colors: scheme == .light ? .light : .dark, layout: sizeClass == .regular ? .tablet : .phone)
@@ -92,6 +95,15 @@ struct RootView: View {
             } else {
                 tabs
             }
+        }
+        .overlay {
+            if launching {
+                LaunchView(ready: ready) { launching = false }
+            }
+        }
+        .task {
+            await LaunchView.prepare(model)
+            ready = true
         }
         .environment(router)
         .environment(discovery)

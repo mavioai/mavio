@@ -34,6 +34,7 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
                 setenv("MAVIO_EXTRA_CA_CERTS", ca.path(percentEncoded: false), 1)
             }
         #endif
+        ImageCaching.configure()
         do {
             model = try MainActor.assumeIsolated { try AppModel() }
             failure = nil
