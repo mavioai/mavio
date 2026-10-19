@@ -34165,6 +34165,78 @@
         }
       }
     },
+    "assistant.playAnswer": {
+      "comment": "Accessibility label of the button playing an answer of a conversation as it was spoken.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Play the Answer"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "播放回答"
+          }
+        }
+      }
+    },
+    "assistant.stopAnswer": {
+      "comment": "Accessibility label of the button stopping an answer being played.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stop"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "停止"
+          }
+        }
+      }
+    },
+    "assistant.copyMessage": {
+      "comment": "Accessibility label of the button copying a request or an answer of a conversation.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copy"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "复制"
+          }
+        }
+      }
+    },
+    "assistant.copiedMessage": {
+      "comment": "Accessibility label of the copy button once a request or an answer is copied.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copied"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已复制"
+          }
+        }
+      }
+    },
     "assistant.settingsMessage": {
       "comment": "Description of the assistant's settings.",
       "extractionState": "manual",

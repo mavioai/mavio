@@ -273,13 +273,19 @@ type speechRequest struct {
 	Voice string `json:"voice"`
 	// Format is "mp3" or "opus" (Opus in Ogg, the default).
 	Format string `json:"format"`
+	// SpeechID is the AskRequest's speech_id, and Index the sentence's
+	// place in its answer: the audio is kept with the answer.
+	SpeechID string `json:"speech_id"`
+	Index    int    `json:"index"`
 }
 
 // SpeechHandler serves POST /assistant/speech, which speaks a text with a
-// server voice (§8.3); resolve authenticates the request.
+// server voice (§8.3), keeping it with its answer when the request names
+// the answer's speech; resolve authenticates the request.
 func (s *Service) SpeechHandler(resolve func(r *http.Request) (auth.Principal, error)) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if _, err := resolve(r); err != nil {
+		p, err := resolve(r)
+		if err != nil {
 			http.Error(w, err.Error(), http.StatusUnauthorized)
 			return
 		}
@@ -312,6 +318,10 @@ func (s *Service) SpeechHandler(resolve func(r *http.Request) (auth.Principal, e
 		ct := resp.GetContentType()
 		if ct == "" {
 			ct = map[bool]string{true: "audio/mpeg", false: "audio/ogg"}[req.Format == "mp3"]
+		}
+		if req.SpeechID != "" {
+			media, _, _ := strings.Cut(ct, ";")
+			s.rec.add(p.User.ID, req.SpeechID, req.Index, strings.TrimSpace(media), resp.GetAudio(), s.now())
 		}
 		w.Header().Set("Content-Type", ct)
 		w.Header().Set("Cache-Control", "no-store")

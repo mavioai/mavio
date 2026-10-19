@@ -72,6 +72,8 @@ type turn struct {
 	call   *call
 	done   *assistantv1.Done
 	sendMu sync.Mutex
+	// remembered is a turn the fast path adds to the conversation itself.
+	remembered bool
 }
 
 func (t *turn) emit(r *assistantv1.AskResponse) {
@@ -91,6 +93,9 @@ func (s *Service) Ask(ctx context.Context, req *assistantv1.AskRequest, stream *
 	t := s.newTurn(ctx, p, set, req, stream.Send)
 	if err := t.run(); err != nil {
 		return err
+	}
+	if conv := t.done.GetConversationId(); !t.remembered && conv != "" {
+		s.rec.bind(p.User.ID, req.GetSpeechId(), conv, t.done.GetAnswer(), s.now())
 	}
 	t.emit(assistantv1.AskResponse_builder{Done: t.done}.Build())
 	return nil

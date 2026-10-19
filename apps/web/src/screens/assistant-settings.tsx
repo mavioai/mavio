@@ -6,6 +6,7 @@ import { clone, create, equals } from "@bufbuild/protobuf";
 import { timestampDate } from "@bufbuild/protobuf/wkt";
 import {
   errorMessage,
+  keptSpeech,
   type ServerEntry,
   useAiModels,
   useAiProviders,
@@ -16,18 +17,22 @@ import {
   useAssistantMemories,
   useAssistantSettings,
   useUpdateAssistantSettings,
+  useServersStore,
   useUsers,
 } from "@mavio/client-ts";
 import {
   AssistantAccess,
+  type AssistantMessage,
   type AssistantSettings,
   AssistantSettingsSchema,
   type AssistantVoiceChoice,
   AssistantVoiceChoiceSchema,
 } from "@mavio/proto/mavio/assistant/v1/assistant_pb";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { Checkbox, NumberField, Switch } from "../controls/inputs.tsx";
+import { Tip } from "../controls/tooltip.tsx";
+import { Icon, type IconName } from "../icon.tsx";
 import { Confirm } from "../controls/dialog.tsx";
 import { Select } from "../controls/select.tsx";
 import { ModelPicker } from "../controls/model-picker.tsx";
@@ -41,6 +46,7 @@ import { browserRecognizes } from "../assistant/listen.ts";
 import { patched } from "./admin/common.tsx";
 
 const when = new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeStyle: "short" });
+const clock = new Intl.DateTimeFormat(locale, { timeStyle: "short" });
 
 /** This browser's assistant settings, and the user's memories and conversations on a server. */
 export function AssistantPrefs({ server }: { server?: ServerEntry }) {
@@ -180,12 +186,14 @@ function Conversations({ server }: { server: ServerEntry }) {
 
 function Messages({ server, id, onDelete }: { server: ServerEntry; id: string; onDelete: () => void }) {
   const conversation = useAssistantConversation(server, id);
+  const playing = useKeptSpeech(server);
   return (
     <div className="flex flex-col gap-2 px-4 pb-3">
       {conversation.data?.messages.map((m, i) => (
-        <p key={i} className={`max-w-[85%] rounded-[14px] px-3 py-2 type-callout whitespace-pre-wrap ${m.user ? "self-end bg-button text-on-button" : "self-start bg-fill"}`}>
-          {m.text}
-        </p>
+        <div key={i} className={`flex max-w-[85%] flex-col gap-0.5 ${m.user ? "items-end self-end" : "items-start self-start"}`}>
+          <p className={`rounded-[14px] px-3 py-2 type-callout whitespace-pre-wrap ${m.user ? "bg-button text-on-button" : "bg-fill"}`}>{m.text}</p>
+          <MessageBar message={m} playing={playing.at === i} onPlay={() => playing.toggle(i, m.speech)} />
+        </div>
       ))}
       {conversation.isError && <p className="type-callout text-danger">{errorMessage(conversation.error)}</p>}
       <Button variant="plain" className="self-start text-danger" onClick={onDelete}>
@@ -193,6 +201,93 @@ function Messages({ server, id, onDelete }: { server: ServerEntry; id: string; o
       </Button>
     </div>
   );
+}
+
+/** A message's time, and buttons copying it and, when its speech was kept, playing it. */
+function MessageBar({ message: m, playing, onPlay }: { message: AssistantMessage; playing: boolean; onPlay: () => void }) {
+  const [copied, setCopied] = useState(false);
+  const at = m.time && timestampDate(m.time);
+  return (
+    <div className={`flex items-center gap-0.5 ${m.user ? "flex-row-reverse" : ""}`}>
+      {at && (
+        <time dateTime={at.toISOString()} title={when.format(at)} className="px-1 type-caption text-text-tertiary">
+          {at.toDateString() === new Date().toDateString() ? clock.format(at) : when.format(at)}
+        </time>
+      )}
+      <BarButton
+        icon={copied ? "check" : "copy"}
+        label={copied ? t("assistant.copiedMessage") : t("assistant.copyMessage")}
+        onClick={() =>
+          void navigator.clipboard?.writeText(m.text).then(
+            () => (setCopied(true), setTimeout(() => setCopied(false), 2000)),
+            () => {},
+          )
+        }
+      />
+      {m.speech.length > 0 && (
+        <BarButton icon={playing ? "pause" : "play"} label={playing ? t("assistant.stopAnswer") : t("assistant.playAnswer")} onClick={onPlay} />
+      )}
+    </div>
+  );
+}
+
+function BarButton({ icon, label, onClick }: { icon: IconName; label: string; onClick: () => void }) {
+  return (
+    <Tip label={label}>
+      <button
+        type="button"
+        aria-label={label}
+        className="flex size-7 items-center justify-center rounded-md text-text-tertiary hover:bg-fill hover:text-on-background"
+        onClick={onClick}
+      >
+        <Icon name={icon} size={15} />
+      </button>
+    </Tip>
+  );
+}
+
+/** Plays the kept speech of an answer, a sentence after another, one answer at a time. */
+function useKeptSpeech(server: ServerEntry) {
+  const servers = useServersStore();
+  const [at, setAt] = useState<number>();
+  const run = useRef<{ abort: AbortController; audio?: HTMLAudioElement }>(undefined);
+  const stop = () => {
+    run.current?.abort.abort();
+    run.current?.audio?.pause();
+    run.current = undefined;
+    setAt(undefined);
+  };
+  useEffect(() => stop, []);
+  const toggle = (i: number, urls: string[]) => {
+    const again = at === i;
+    stop();
+    if (again) return;
+    const r = { abort: new AbortController() } as { abort: AbortController; audio?: HTMLAudioElement };
+    run.current = r;
+    setAt(i);
+    void (async () => {
+      // Each sentence is fetched while the one before plays.
+      let next = keptSpeech(servers, server, urls[0], r.abort.signal);
+      for (let j = 0; j < urls.length && !r.abort.signal.aborted; j++) {
+        const blob = await next.catch(() => undefined);
+        if (j + 1 < urls.length) next = keptSpeech(servers, server, urls[j + 1], r.abort.signal);
+        if (!blob || r.abort.signal.aborted) continue;
+        const url = URL.createObjectURL(blob);
+        const audio = new Audio(url);
+        r.audio = audio;
+        await new Promise<void>((resolve) => {
+          audio.onended = audio.onerror = audio.onpause = () => resolve();
+          audio.play().catch(() => resolve());
+        });
+        URL.revokeObjectURL(url);
+      }
+      if (run.current === r) {
+        run.current = undefined;
+        setAt(undefined);
+      }
+    })();
+  };
+  return { at, toggle };
 }
 
 /** The server's assistant settings, in its AI settings. */

@@ -8453,6 +8453,12 @@
             },
             "title": "failed_actions",
             "description": "Client actions of the last answer the client could not carry out."
+          },
+          "speechId": {
+            "type": "string",
+            "title": "speech_id",
+            "pattern": "^([A-Za-z0-9_-]{8,64})?$",
+            "description": "An ID the client makes for the answer's speech: the audio of the\n POST /assistant/speech requests naming it is kept with the answer in\n its conversation (docs/assistant.md §8.3)."
           }
         },
         "title": "AskRequest",
@@ -8743,6 +8749,14 @@
               }
             ],
             "title": "time"
+          },
+          "speech": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "speech",
+            "description": "An answer's speech as it was spoken, a sentence a URL relative to the\n server's base URL, in order; none when none was kept."
           }
         },
         "title": "AssistantMessage",

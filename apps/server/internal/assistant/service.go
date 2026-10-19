@@ -67,6 +67,9 @@ type Config struct {
 	ServerName func() string
 	// Key signs the listening URLs.
 	Key []byte
+	// SpeechDir holds the speech of answers kept with their conversations;
+	// empty keeps none.
+	SpeechDir string
 	// Activity records what the assistant does; nil records nothing.
 	Activity *activity.Log
 	Logger   *slog.Logger
@@ -91,6 +94,7 @@ type Service struct {
 	// listens are the listening tokens used, until they expire.
 	listens map[string]time.Time
 	vad     vadLoader
+	rec     *recorder
 }
 
 var _ assistantv1connect.AssistantServiceHandler = (*Service)(nil)
@@ -113,7 +117,7 @@ func New(cfg Config) *Service {
 	s := &Service{
 		cfg: cfg, log: cfg.Logger, now: cfg.Now,
 		dialogs: map[core.ID]*dialog{}, calls: map[string]callResult{}, turns: map[string]*aiTurn{},
-		listens: map[string]time.Time{},
+		listens: map[string]time.Time{}, rec: newRecorder(cfg.SpeechDir, cfg.Logger),
 	}
 	s.tool = map[string]*tool{}
 	for _, t := range tools() {

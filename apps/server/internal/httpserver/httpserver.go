@@ -326,6 +326,9 @@ func Handler(opts Options) (http.Handler, error) {
 		mux.Handle("POST "+assistant.SpeechPath, a.SpeechHandler(func(r *http.Request) (auth.Principal, error) {
 			return authn.ResolveRequest(r, assistantv1connect.AssistantServiceAskProcedure)
 		}))
+		mux.Handle("GET "+assistant.KeptSpeechPath, a.KeptSpeechHandler(func(r *http.Request) (auth.Principal, error) {
+			return authn.ResolveRequest(r, assistantv1connect.AssistantServiceGetAssistantConversationProcedure)
+		}))
 	}
 	// Media is fetched through signed URLs, or with credentials.
 	media := http.NewServeMux()

@@ -6016,6 +6016,18 @@ public enum MavioStrings {
     /// Button deleting a conversation with the assistant.
     public static var assistantDeleteConversation: String { NSLocalizedString("assistant.deleteConversation", bundle: .module, comment: "") }
 
+    /// Accessibility label of the button playing an answer of a conversation as it was spoken.
+    public static var assistantPlayAnswer: String { NSLocalizedString("assistant.playAnswer", bundle: .module, comment: "") }
+
+    /// Accessibility label of the button stopping an answer being played.
+    public static var assistantStopAnswer: String { NSLocalizedString("assistant.stopAnswer", bundle: .module, comment: "") }
+
+    /// Accessibility label of the button copying a request or an answer of a conversation.
+    public static var assistantCopyMessage: String { NSLocalizedString("assistant.copyMessage", bundle: .module, comment: "") }
+
+    /// Accessibility label of the copy button once a request or an answer is copied.
+    public static var assistantCopiedMessage: String { NSLocalizedString("assistant.copiedMessage", bundle: .module, comment: "") }
+
     /// Description of the assistant's settings.
     public static var assistantSettingsMessage: String { NSLocalizedString("assistant.settingsMessage", bundle: .module, comment: "") }
 

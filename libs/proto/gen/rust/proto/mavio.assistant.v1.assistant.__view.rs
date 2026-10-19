@@ -2074,6 +2074,12 @@ pub struct AskRequestView<'a> {
     ///
     /// Field 7: `failed_actions`
     pub failed_actions: ::buffa::RepeatedView<'a, &'a str>,
+    /// An ID the client makes for the answer's speech: the audio of the
+    /// POST /assistant/speech requests naming it is kept with the answer in
+    /// its conversation (docs/assistant.md §8.3).
+    ///
+    /// Field 8: `speech_id`
+    pub speech_id: ::core::option::Option<&'a str>,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for AskRequestView<'a> {
@@ -2190,6 +2196,13 @@ impl<'a> ::buffa::MessageView<'a> for AskRequestView<'a> {
                 )?;
                 view.choice = Some(::buffa::types::borrow_str(&mut cur)?);
             }
+            8u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.speech_id = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
             7u32 => {
                 ::buffa::encoding::check_wire_type(
                     tag,
@@ -2254,6 +2267,7 @@ impl<'a> ::buffa::MessageView<'a> for AskRequestView<'a> {
             },
             choice: self.choice.map(|s| s.to_string()),
             failed_actions: self.failed_actions.iter().map(|s| s.to_string()).collect(),
+            speech_id: self.speech_id.map(|s| s.to_string()),
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -2299,6 +2313,9 @@ impl<'a> ::buffa::ViewEncode<'a> for AskRequestView<'a> {
             size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
         for v in &self.failed_actions {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.speech_id {
             size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
@@ -2347,6 +2364,9 @@ impl<'a> ::buffa::ViewEncode<'a> for AskRequestView<'a> {
         }
         for v in &self.failed_actions {
             ::buffa::types::put_string_field(7u32, v, buf);
+        }
+        if let Some(ref v) = self.speech_id {
+            ::buffa::types::put_string_field(8u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -2496,6 +2516,15 @@ impl AskRequestOwnedView {
     #[must_use]
     pub fn failed_actions(&self) -> &::buffa::RepeatedView<'_, &'_ str> {
         &self.0.reborrow().failed_actions
+    }
+    /// An ID the client makes for the answer's speech: the audio of the
+    /// POST /assistant/speech requests naming it is kept with the answer in
+    /// its conversation (docs/assistant.md §8.3).
+    ///
+    /// Field 8: `speech_id`
+    #[must_use]
+    pub fn speech_id(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().speech_id
     }
 }
 impl ::core::convert::From<::buffa::OwnedView<AskRequestView<'static>>>
@@ -8688,6 +8717,11 @@ pub struct AssistantMessageView<'a> {
     pub time: ::buffa::MessageFieldView<
         ::buffa_types::google::protobuf::__buffa::view::TimestampView<'a>,
     >,
+    /// An answer's speech as it was spoken, a sentence a URL relative to the
+    /// server's base URL, in order; none when none was kept.
+    ///
+    /// Field 4: `speech`
+    pub speech: ::buffa::RepeatedView<'a, &'a str>,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for AssistantMessageView<'a> {
@@ -8755,6 +8789,17 @@ impl<'a> ::buffa::MessageView<'a> for AssistantMessageView<'a> {
                     }
                 }
             }
+            4u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __elem = ::buffa::types::borrow_str(&mut cur)?;
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&__elem),
+                )?;
+                view.speech.push(__elem);
+            }
             _ => {
                 ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
                 let span_len = before_tag.len() - cur.len();
@@ -8788,6 +8833,7 @@ impl<'a> ::buffa::MessageView<'a> for AssistantMessageView<'a> {
                 }
                 None => ::buffa::MessageField::none(),
             },
+            speech: self.speech.iter().map(|s| s.to_string()).collect(),
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -8813,6 +8859,9 @@ impl<'a> ::buffa::ViewEncode<'a> for AssistantMessageView<'a> {
                 += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
                     + inner_size as u64;
         }
+        for v in &self.speech {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -8837,6 +8886,9 @@ impl<'a> ::buffa::ViewEncode<'a> for AssistantMessageView<'a> {
                 buf,
             );
             self.time.write_to(__cache, buf);
+        }
+        for v in &self.speech {
+            ::buffa::types::put_string_field(4u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -8951,6 +9003,14 @@ impl AssistantMessageOwnedView {
         ::buffa_types::google::protobuf::__buffa::view::TimestampView<'_>,
     > {
         &self.0.reborrow().time
+    }
+    /// An answer's speech as it was spoken, a sentence a URL relative to the
+    /// server's base URL, in order; none when none was kept.
+    ///
+    /// Field 4: `speech`
+    #[must_use]
+    pub fn speech(&self) -> &::buffa::RepeatedView<'_, &'_ str> {
+        &self.0.reborrow().speech
     }
 }
 impl ::core::convert::From<::buffa::OwnedView<AssistantMessageView<'static>>>

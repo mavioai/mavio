@@ -163,12 +163,13 @@ For models that write code well, a conversation also offers pi-durable's code mo
 ### 8.2 Listening on the Server
 * `AssistantService.StartListening` returns a WebSocket URL signed for the session, valid for a minute, with the recognizer chosen (the settings', else the first ready `SPEECH_TO_TEXT` recognizer) and the language.
 * The client sends 16 kHz mono 16-bit PCM in binary frames and the text `end` when the user releases the key; without a release, the utterance ends after a second of silence detected by Silero VAD (`libs/media/vad`), and it lasts at most 30 seconds. The server then gives the utterance to the recognizer with the user's hints, when the recognizer takes them and the settings allow, and sends back the final text and its language as JSON.
-* Audio is never stored.
+* What the user says is never stored.
 
 ### 8.3 Synthesis
 * **The device's voices first**: the browser's `speechSynthesis`, `AVSpeechSynthesizer`, Android's `TextToSpeech`, with a voice of the answer's language.
 * **Server voices** (`TEXT_TO_SPEECH`) when the user chooses one, or when the device has no voice for the language: `POST /assistant/speech` with the text, the voice and the language returns the audio, Opus in Ogg or MP3 as the client asks; MP3, which every client plays, when the service takes no Opus.
 * Answers are spoken a sentence at a time as the text arrives, so speech starts before the answer ends; speaking stops when the user talks or presses the button again.
+* **Kept speech**: what server voices speak is kept with the answer in its conversation. The client names an ID of its own for the answer's speech in `AskRequest.speech_id` and, with each sentence's place, in its `POST /assistant/speech` requests; the server holds the sentences in memory until the answer's conversation is known, for at most ten minutes, then writes each to a file in the speech folder (`speech-dir`, `speech/` in the server's home), in a folder per conversation holding a folder per answer named after its text, so that an answer spoken again replaces its speech. `GetAssistantConversation` lists each answer's sentences as URLs, which serve the conversation's user alone; deleting a conversation, by the user or after the retention, deletes its speech. What the device's voices speak is not kept.
 
 ### 8.4 Speech Plugins
 `SPEECH_TO_TEXT` and `TEXT_TO_SPEECH` ([Plugins §8.16](plugins.md#816-speech-recognition-and-synthesis)) are provided by `plugins/voice`, a Go process plugin whose recognizers and synthesizers the administrator enables and configures in its settings; the server names a recognizer `<plugin>/<recognizer>` and a voice `<plugin>/<synthesizer>/<voice>`:
@@ -213,7 +214,7 @@ Requests from Siri, Shortcuts, Android's voice search and play-from-search arriv
 
 * **The server's assistant settings**: whether the assistant is on, its model (`ai/<provider>/<model>`) and whether code mode is used with it, which users may use the AI path, the idle time and retention of conversations, whether memory is on, the recognizer and the default voice of each language, and whether hints are sent to recognizers.
 * **The user's settings** (§9.1) are kept on the device, the voice and the order of recognizers per device.
-* **Privacy**: audio is never stored, and leaves the device only for the server's recognizer and, through it, the service the administrator configured. Requests and answers are stored only in conversations, deleted after the retention time or by the user; memories are visible to the user and deleted with them. The AI path's tokens and cost are counted per conversation and shown with it.
+* **Privacy**: what the user says is never stored, and leaves the device only for the server's recognizer and, through it, the service the administrator configured. Requests and answers are stored only in conversations, with the speech of answers that server voices spoke (§8.3), deleted after the retention time or by the user; memories are visible to the user and deleted with them. The AI path's tokens and cost are counted per conversation and shown with it.
 
 ## 11. Testing
 

@@ -314,7 +314,12 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
       // Whether the answer waits for the user: a confirmation, or results to choose from.
       let waits = false;
       try {
-        const events = ask(servers, srv, { ...req, text, intent, context, spoken, failedActions: failed.current.splice(0) }, abort.signal);
+        const events = ask(
+          servers,
+          srv,
+          { ...req, text, intent, context, spoken, failedActions: failed.current.splice(0), speechId: voice?.speechId ?? "" },
+          abort.signal,
+        );
         for await (const e of events) {
           const ev = e.event;
           switch (ev.case) {

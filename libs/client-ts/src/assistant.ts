@@ -66,21 +66,32 @@ export interface Heard {
 
 /**
  * Speaks a text with a server voice (§8.3): its audio, Opus in Ogg unless
- * MP3 is asked for. An empty voice is the settings' for the language.
+ * MP3 is asked for. An empty voice is the settings' for the language. A
+ * sentence of an answer names the request's speechId and its index in the
+ * answer, so that the server keeps it with the answer.
  */
 export async function speakWithServer(
   servers: Servers,
   server: ServerEntry,
-  speech: { text: string; language: string; voice?: string; format?: "opus" | "mp3" },
+  speech: { text: string; language: string; voice?: string; format?: "opus" | "mp3"; speechId?: string; index?: number },
   signal?: AbortSignal,
 ): Promise<Blob> {
   const token = await servers.token(server.id);
+  const { speechId, ...rest } = speech;
   const res = await fetch(urlOf(server, "assistant/speech"), {
     method: "POST",
     headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-    body: JSON.stringify({ voice: "", format: "opus", ...speech }),
+    body: JSON.stringify({ voice: "", format: "opus", ...rest, ...(speechId ? { speech_id: speechId } : {}) }),
     signal,
   });
+  if (!res.ok) throw new Error((await res.text()).trim() || res.statusText);
+  return await res.blob();
+}
+
+/** A sentence of an answer's kept speech, from its URL in AssistantMessage.speech. */
+export async function keptSpeech(servers: Servers, server: ServerEntry, url: string, signal?: AbortSignal): Promise<Blob> {
+  const token = await servers.token(server.id);
+  const res = await fetch(urlOf(server, url), { headers: token ? { Authorization: `Bearer ${token}` } : {}, signal });
   if (!res.ok) throw new Error((await res.text()).trim() || res.statusText);
   return await res.blob();
 }

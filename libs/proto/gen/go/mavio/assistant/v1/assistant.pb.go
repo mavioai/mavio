@@ -1259,6 +1259,7 @@ type AskRequest struct {
 	xxx_hidden_Answer        *ConfirmationAnswer    `protobuf:"bytes,5,opt,name=answer"`
 	xxx_hidden_Choice        *string                `protobuf:"bytes,6,opt,name=choice"`
 	xxx_hidden_FailedActions []string               `protobuf:"bytes,7,rep,name=failed_actions,json=failedActions"`
+	xxx_hidden_SpeechId      *string                `protobuf:"bytes,8,opt,name=speech_id,json=speechId"`
 	XXX_raceDetectHookData   protoimpl.RaceDetectHookData
 	XXX_presence             [1]uint32
 	unknownFields            protoimpl.UnknownFields
@@ -1345,9 +1346,19 @@ func (x *AskRequest) GetFailedActions() []string {
 	return nil
 }
 
+func (x *AskRequest) GetSpeechId() string {
+	if x != nil {
+		if x.xxx_hidden_SpeechId != nil {
+			return *x.xxx_hidden_SpeechId
+		}
+		return ""
+	}
+	return ""
+}
+
 func (x *AskRequest) SetText(v string) {
 	x.xxx_hidden_Text = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 7)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 8)
 }
 
 func (x *AskRequest) SetIntent(v *v1.Intent) {
@@ -1360,7 +1371,7 @@ func (x *AskRequest) SetContext(v *AskContext) {
 
 func (x *AskRequest) SetSpoken(v bool) {
 	x.xxx_hidden_Spoken = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 7)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 8)
 }
 
 func (x *AskRequest) SetAnswer(v *ConfirmationAnswer) {
@@ -1369,11 +1380,16 @@ func (x *AskRequest) SetAnswer(v *ConfirmationAnswer) {
 
 func (x *AskRequest) SetChoice(v string) {
 	x.xxx_hidden_Choice = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 7)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 8)
 }
 
 func (x *AskRequest) SetFailedActions(v []string) {
 	x.xxx_hidden_FailedActions = v
+}
+
+func (x *AskRequest) SetSpeechId(v string) {
+	x.xxx_hidden_SpeechId = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 8)
 }
 
 func (x *AskRequest) HasText() bool {
@@ -1418,6 +1434,13 @@ func (x *AskRequest) HasChoice() bool {
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 5)
 }
 
+func (x *AskRequest) HasSpeechId() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 7)
+}
+
 func (x *AskRequest) ClearText() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_Text = nil
@@ -1445,6 +1468,11 @@ func (x *AskRequest) ClearChoice() {
 	x.xxx_hidden_Choice = nil
 }
 
+func (x *AskRequest) ClearSpeechId() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 7)
+	x.xxx_hidden_SpeechId = nil
+}
+
 type AskRequest_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
@@ -1462,6 +1490,10 @@ type AskRequest_builder struct {
 	Choice *string
 	// Client actions of the last answer the client could not carry out.
 	FailedActions []string
+	// An ID the client makes for the answer's speech: the audio of the
+	// POST /assistant/speech requests naming it is kept with the answer in
+	// its conversation (docs/assistant.md §8.3).
+	SpeechId *string
 }
 
 func (b0 AskRequest_builder) Build() *AskRequest {
@@ -1469,21 +1501,25 @@ func (b0 AskRequest_builder) Build() *AskRequest {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Text != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 7)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 8)
 		x.xxx_hidden_Text = b.Text
 	}
 	x.xxx_hidden_Intent = b.Intent
 	x.xxx_hidden_Context = b.Context
 	if b.Spoken != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 7)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 8)
 		x.xxx_hidden_Spoken = *b.Spoken
 	}
 	x.xxx_hidden_Answer = b.Answer
 	if b.Choice != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 7)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 8)
 		x.xxx_hidden_Choice = b.Choice
 	}
 	x.xxx_hidden_FailedActions = b.FailedActions
+	if b.SpeechId != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 8)
+		x.xxx_hidden_SpeechId = b.SpeechId
+	}
 	return m0
 }
 
@@ -4801,6 +4837,7 @@ type AssistantMessage struct {
 	xxx_hidden_User        bool                   `protobuf:"varint,1,opt,name=user"`
 	xxx_hidden_Text        *string                `protobuf:"bytes,2,opt,name=text"`
 	xxx_hidden_Time        *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=time"`
+	xxx_hidden_Speech      []string               `protobuf:"bytes,4,rep,name=speech"`
 	XXX_raceDetectHookData protoimpl.RaceDetectHookData
 	XXX_presence           [1]uint32
 	unknownFields          protoimpl.UnknownFields
@@ -4856,18 +4893,29 @@ func (x *AssistantMessage) GetTime() *timestamppb.Timestamp {
 	return nil
 }
 
+func (x *AssistantMessage) GetSpeech() []string {
+	if x != nil {
+		return x.xxx_hidden_Speech
+	}
+	return nil
+}
+
 func (x *AssistantMessage) SetUser(v bool) {
 	x.xxx_hidden_User = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 3)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 4)
 }
 
 func (x *AssistantMessage) SetText(v string) {
 	x.xxx_hidden_Text = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 3)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 4)
 }
 
 func (x *AssistantMessage) SetTime(v *timestamppb.Timestamp) {
 	x.xxx_hidden_Time = v
+}
+
+func (x *AssistantMessage) SetSpeech(v []string) {
+	x.xxx_hidden_Speech = v
 }
 
 func (x *AssistantMessage) HasUser() bool {
@@ -4912,6 +4960,9 @@ type AssistantMessage_builder struct {
 	User *bool
 	Text *string
 	Time *timestamppb.Timestamp
+	// An answer's speech as it was spoken, a sentence a URL relative to the
+	// server's base URL, in order; none when none was kept.
+	Speech []string
 }
 
 func (b0 AssistantMessage_builder) Build() *AssistantMessage {
@@ -4919,14 +4970,15 @@ func (b0 AssistantMessage_builder) Build() *AssistantMessage {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.User != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 3)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 4)
 		x.xxx_hidden_User = *b.User
 	}
 	if b.Text != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 3)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 4)
 		x.xxx_hidden_Text = b.Text
 	}
 	x.xxx_hidden_Time = b.Time
+	x.xxx_hidden_Speech = b.Speech
 	return m0
 }
 
@@ -6179,7 +6231,7 @@ const file_mavio_assistant_v1_assistant_proto_rawDesc = "" +
 	"\x05Voice\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x1c\n" +
-	"\tlanguages\x18\x03 \x03(\tR\tlanguages\"\xbd\x03\n" +
+	"\tlanguages\x18\x03 \x03(\tR\tlanguages\"\xfb\x03\n" +
 	"\n" +
 	"AskRequest\x12\x1c\n" +
 	"\x04text\x18\x01 \x01(\tB\b\xbaH\x05r\x03\x18\xd0\x0fR\x04text\x12/\n" +
@@ -6188,7 +6240,8 @@ const file_mavio_assistant_v1_assistant_proto_rawDesc = "" +
 	"\x06spoken\x18\x04 \x01(\bR\x06spoken\x12>\n" +
 	"\x06answer\x18\x05 \x01(\v2&.mavio.assistant.v1.ConfirmationAnswerR\x06answer\x12\x16\n" +
 	"\x06choice\x18\x06 \x01(\tR\x06choice\x12%\n" +
-	"\x0efailed_actions\x18\a \x03(\tR\rfailedActions:\x8e\x01\xbaH\x8a\x01\x1a\x87\x01\n" +
+	"\x0efailed_actions\x18\a \x03(\tR\rfailedActions\x12<\n" +
+	"\tspeech_id\x18\b \x01(\tB\x1f\xbaH\x1cr\x1a2\x18^([A-Za-z0-9_-]{8,64})?$R\bspeechId:\x8e\x01\xbaH\x8a\x01\x1a\x87\x01\n" +
 	"\vask.request\x12*text, intent, answer or choice is required\x1aLthis.text != '' || has(this.intent) || has(this.answer) || this.choice != ''\"\xfd\x01\n" +
 	"\n" +
 	"AskContext\x12\x1c\n" +
@@ -6300,11 +6353,12 @@ const file_mavio_assistant_v1_assistant_proto_rawDesc = "" +
 	"createTime\x12;\n" +
 	"\vupdate_time\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\n" +
 	"updateTime\x12.\n" +
-	"\x05usage\x18\x06 \x01(\v2\x18.mavio.plugin.v1.AiUsageR\x05usage\"j\n" +
+	"\x05usage\x18\x06 \x01(\v2\x18.mavio.plugin.v1.AiUsageR\x05usage\"\x82\x01\n" +
 	"\x10AssistantMessage\x12\x12\n" +
 	"\x04user\x18\x01 \x01(\bR\x04user\x12\x12\n" +
 	"\x04text\x18\x02 \x01(\tR\x04text\x12.\n" +
-	"\x04time\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\x04time\"#\n" +
+	"\x04time\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\x04time\x12\x16\n" +
+	"\x06speech\x18\x04 \x03(\tR\x06speech\"#\n" +
 	"!ListAssistantConversationsRequest\"u\n" +
 	"\"ListAssistantConversationsResponse\x12O\n" +
 	"\rconversations\x18\x01 \x03(\v2).mavio.assistant.v1.AssistantConversationR\rconversations\":\n" +

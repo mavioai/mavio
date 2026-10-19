@@ -53,6 +53,7 @@ func TestLoadDefaults(t *testing.T) {
 		{"plugin-data-dir", cfg.PluginDataDir, filepath.Join(home, "plugin-data")},
 		{"metadata-dir", cfg.MetadataDir, filepath.Join(home, "metadata")},
 		{"backup-dir", cfg.BackupDir, filepath.Join(home, "backups")},
+		{"speech-dir", cfg.SpeechDir, filepath.Join(home, "speech")},
 		{"discovery-addr", cfg.DiscoveryAddr, ":7359"},
 		{"plugin-catalog", cfg.PluginCatalog, "https://github.com/mavioai/plugins/releases/latest/download/catalog.json"},
 		{"mavio-dev-url", cfg.MavioDevURL, "https://mavio.dev/api"},

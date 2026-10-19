@@ -180,6 +180,10 @@ message AskRequest {
   string choice = 6;
   // Client actions of the last answer the client could not carry out.
   repeated string failed_actions = 7;
+  // An ID the client makes for the answer's speech: the audio of the
+  // POST /assistant/speech requests naming it is kept with the answer in
+  // its conversation (docs/assistant.md §8.3).
+  string speech_id = 8 [(buf.validate.field).string.pattern = "^([A-Za-z0-9_-]{8,64})?$"];
 }
 
 // AskContext is where the request is made.
@@ -411,6 +415,9 @@ message AssistantMessage {
   bool user = 1;
   string text = 2;
   google.protobuf.Timestamp time = 3;
+  // An answer's speech as it was spoken, a sentence a URL relative to the
+  // server's base URL, in order; none when none was kept.
+  repeated string speech = 4;
 }
 
 message ListAssistantConversationsRequest {}

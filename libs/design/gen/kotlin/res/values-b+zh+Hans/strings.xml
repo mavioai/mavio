@@ -1924,6 +1924,10 @@
     <string name="assistant_conversations_footer">对话会在服务器保留期满后删除。</string>
     <string name="assistant_no_conversations">还没有对话。</string>
     <string name="assistant_delete_conversation">删除对话</string>
+    <string name="assistant_play_answer">播放回答</string>
+    <string name="assistant_stop_answer">停止</string>
+    <string name="assistant_copy_message">复制</string>
+    <string name="assistant_copied_message">已复制</string>
     <string name="assistant_settings_message">助手在此设备上如何聆听和回答，以及它保存的关于你的内容。</string>
     <string name="assistant_server">助手</string>
     <string name="assistant_enabled">开启助手</string>

@@ -1720,6 +1720,12 @@ pub struct AskRequest {
     ///
     /// Field 7: `failed_actions`
     pub failed_actions: ::buffa::alloc::vec::Vec<::buffa::alloc::string::String>,
+    /// An ID the client makes for the answer's speech: the audio of the
+    /// POST /assistant/speech requests naming it is kept with the answer in
+    /// its conversation (docs/assistant.md §8.3).
+    ///
+    /// Field 8: `speech_id`
+    pub speech_id: ::core::option::Option<::buffa::alloc::string::String>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -1733,6 +1739,7 @@ impl ::core::fmt::Debug for AskRequest {
             .field("answer", &self.answer)
             .field("choice", &self.choice)
             .field("failed_actions", &self.failed_actions)
+            .field("speech_id", &self.speech_id)
             .finish()
     }
 }
@@ -1769,6 +1776,16 @@ impl AskRequest {
         value: impl Into<::buffa::alloc::string::String>,
     ) -> Self {
         self.choice = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::speech_id`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_speech_id(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.speech_id = Some(value.into());
         self
     }
 }
@@ -1828,6 +1845,9 @@ impl ::buffa::Message for AskRequest {
         for v in &self.failed_actions {
             size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
+        if let Some(ref v) = self.speech_id {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -1873,6 +1893,9 @@ impl ::buffa::Message for AskRequest {
         }
         for v in &self.failed_actions {
             ::buffa::types::put_string_field(7u32, v, buf);
+        }
+        if let Some(ref v) = self.speech_id {
+            ::buffa::types::put_string_field(8u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -1960,6 +1983,18 @@ impl ::buffa::Message for AskRequest {
                 )?;
                 self.failed_actions.push(__elem);
             }
+            8u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .speech_id
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -1975,6 +2010,7 @@ impl ::buffa::Message for AskRequest {
         self.answer = ::buffa::MessageField::none();
         self.choice = ::core::option::Option::None;
         self.failed_actions.clear();
+        self.speech_id = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }
@@ -5834,6 +5870,11 @@ pub struct AssistantMessage {
         ::buffa_types::google::protobuf::Timestamp,
         ::buffa::Inline<::buffa_types::google::protobuf::Timestamp>,
     >,
+    /// An answer's speech as it was spoken, a sentence a URL relative to the
+    /// server's base URL, in order; none when none was kept.
+    ///
+    /// Field 4: `speech`
+    pub speech: ::buffa::alloc::vec::Vec<::buffa::alloc::string::String>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -5843,6 +5884,7 @@ impl ::core::fmt::Debug for AssistantMessage {
             .field("user", &self.user)
             .field("text", &self.text)
             .field("time", &self.time)
+            .field("speech", &self.speech)
             .finish()
     }
 }
@@ -5906,6 +5948,9 @@ impl ::buffa::Message for AssistantMessage {
                 += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
                     + inner_size as u64;
         }
+        for v in &self.speech {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -5929,6 +5974,9 @@ impl ::buffa::Message for AssistantMessage {
                 buf,
             );
             self.time.write_to(__cache, buf);
+        }
+        for v in &self.speech {
+            ::buffa::types::put_string_field(4u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -5973,6 +6021,17 @@ impl ::buffa::Message for AssistantMessage {
                     ctx,
                 )?;
             }
+            4u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __elem = ::buffa::types::decode_string(buf)?;
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&__elem),
+                )?;
+                self.speech.push(__elem);
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -5984,6 +6043,7 @@ impl ::buffa::Message for AssistantMessage {
         self.user = ::core::option::Option::None;
         self.text = ::core::option::Option::None;
         self.time = ::buffa::MessageField::none();
+        self.speech.clear();
         self.__buffa_unknown_fields.clear();
     }
 }

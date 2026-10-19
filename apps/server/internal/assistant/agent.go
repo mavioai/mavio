@@ -498,6 +498,7 @@ func (s *Service) handleCall(ctx context.Context, ag pluginv1connect.AgentSessio
 // remember adds a fast-path request and its answer to the user's
 // conversation, so that the model knows what was done (§7.1).
 func (t *turn) remember(text string) {
+	t.remembered = true
 	ag, ok := t.s.agents(t.set, &t.p.User)
 	if !ok || text == "" || t.done.GetAnswer() == "" {
 		return
@@ -519,7 +520,9 @@ func (t *turn) remember(text string) {
 			},
 		}.Build()); err != nil {
 			t.s.log.WarnContext(ctx, "assistant: add messages", "err", err)
+			return
 		}
+		t.s.rec.bind(t.p.User.ID, t.req.GetSpeechId(), conv, answer, t.s.now())
 	}()
 }
 
@@ -539,6 +542,7 @@ func (s *Service) sweep(ctx context.Context) {
 		}
 	}
 	s.mu.Unlock()
+	s.rec.forget(now)
 	if s.cfg.Agents == nil || s.cfg.Users == nil {
 		return
 	}
@@ -552,6 +556,9 @@ func (s *Service) sweep(ctx context.Context) {
 	}
 	retention := time.Duration(s.cfg.Settings().RetentionDays) * 24 * time.Hour
 	gone := map[string]bool{}
+	// live are the conversations whose speech is kept.
+	live := map[string]bool{}
+	defer s.rec.prune(live, now)
 	for _, sess := range list.GetSessions() {
 		if sess.GetLabels()[assistantLabel] == "" {
 			continue
@@ -567,8 +574,11 @@ func (s *Service) sweep(ctx context.Context) {
 		if gone[owner] || now.Sub(sess.GetUpdated().AsTime()) > retention {
 			if _, err := ag.DeleteAgentSession(ctx, pluginv1.DeleteAgentSessionRequest_builder{Id: new(sess.GetId())}.Build()); err != nil {
 				s.log.WarnContext(ctx, "assistant: delete conversation", "err", err)
+				live[sess.GetId()] = true
 			}
+			continue
 		}
+		live[sess.GetId()] = true
 	}
 	for owner, isGone := range gone {
 		if isGone && owner != "" {
@@ -657,9 +667,14 @@ func (s *Service) GetAssistantConversation(ctx context.Context, req *assistantv1
 				text = rest
 			}
 		}
-		msgs = append(msgs, assistantv1.AssistantMessage_builder{
-			User: new(m.GetRole() == pluginv1.AiRole_AI_ROLE_USER), Text: &text, Time: m.GetTime(),
-		}.Build())
+		user := m.GetRole() == pluginv1.AiRole_AI_ROLE_USER
+		var speech []string
+		if !user {
+			for _, name := range s.rec.parts(req.GetId(), text) {
+				speech = append(speech, KeptSpeechURL(req.GetId(), answerKey(text), name))
+			}
+		}
+		msgs = append(msgs, assistantv1.AssistantMessage_builder{User: &user, Text: &text, Time: m.GetTime(), Speech: speech}.Build())
 	}
 	return assistantv1.GetAssistantConversationResponse_builder{Conversation: conversationToProto(resp.GetSession()), Messages: msgs}.Build(), nil
 }
@@ -673,6 +688,7 @@ func (s *Service) DeleteAssistantConversation(ctx context.Context, req *assistan
 	if _, err := ag.DeleteAgentSession(ctx, pluginv1.DeleteAgentSessionRequest_builder{Id: new(req.GetId())}.Build()); err != nil {
 		return nil, err
 	}
+	s.rec.remove(req.GetId())
 	d := s.dialog(p.User.ID)
 	d.mu.Lock()
 	if d.conversation == req.GetId() {

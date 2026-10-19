@@ -587,6 +587,18 @@ public nonisolated struct Mavio_Assistant_V1_AskRequest: @unchecked Sendable {
     set {_uniqueStorage()._failedActions = newValue}
   }
 
+  /// An ID the client makes for the answer's speech: the audio of the
+  /// POST /assistant/speech requests naming it is kept with the answer in
+  /// its conversation (docs/assistant.md §8.3).
+  public var speechID: String {
+    get {_storage._speechID ?? String()}
+    set {_uniqueStorage()._speechID = newValue}
+  }
+  /// Returns true if `speechID` has been explicitly set.
+  public var hasSpeechID: Bool {_storage._speechID != nil}
+  /// Clears the value of `speechID`. Subsequent reads from it will return its default value.
+  public mutating func clearSpeechID() {_uniqueStorage()._speechID = nil}
+
   public var unknownFields = SwiftProtobuf.UnknownStorage()
 
   public init() {}
@@ -1592,6 +1604,10 @@ public nonisolated struct Mavio_Assistant_V1_AssistantMessage: Sendable {
   /// Clears the value of `time`. Subsequent reads from it will return its default value.
   public mutating func clearTime() {self._time = nil}
 
+  /// An answer's speech as it was spoken, a sentence a URL relative to the
+  /// server's base URL, in order; none when none was kept.
+  public var speech: [String] = []
+
   public var unknownFields = SwiftProtobuf.UnknownStorage()
 
   public init() {}
@@ -2264,7 +2280,7 @@ nonisolated extension Mavio_Assistant_V1_Voice: SwiftProtobuf.Message, SwiftProt
 
 nonisolated extension Mavio_Assistant_V1_AskRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".AskRequest"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}text\0\u{1}intent\0\u{1}context\0\u{1}spoken\0\u{1}answer\0\u{1}choice\0\u{3}failed_actions\0")
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}text\0\u{1}intent\0\u{1}context\0\u{1}spoken\0\u{1}answer\0\u{1}choice\0\u{3}failed_actions\0\u{3}speech_id\0")
 
   fileprivate class _StorageClass {
     var _text: String? = nil
@@ -2274,6 +2290,7 @@ nonisolated extension Mavio_Assistant_V1_AskRequest: SwiftProtobuf.Message, Swif
     var _answer: Mavio_Assistant_V1_ConfirmationAnswer? = nil
     var _choice: String? = nil
     var _failedActions: [String] = []
+    var _speechID: String? = nil
 
       // This property is used as the initial default value for new instances of the type.
       // The type itself is protecting the reference to its storage via CoW semantics.
@@ -2291,6 +2308,7 @@ nonisolated extension Mavio_Assistant_V1_AskRequest: SwiftProtobuf.Message, Swif
       _answer = source._answer
       _choice = source._choice
       _failedActions = source._failedActions
+      _speechID = source._speechID
     }
   }
 
@@ -2316,6 +2334,7 @@ nonisolated extension Mavio_Assistant_V1_AskRequest: SwiftProtobuf.Message, Swif
         case 5: try { try decoder.decodeSingularMessageField(value: &_storage._answer) }()
         case 6: try { try decoder.decodeSingularStringField(value: &_storage._choice) }()
         case 7: try { try decoder.decodeRepeatedStringField(value: &_storage._failedActions) }()
+        case 8: try { try decoder.decodeSingularStringField(value: &_storage._speechID) }()
         default: break
         }
       }
@@ -2349,6 +2368,9 @@ nonisolated extension Mavio_Assistant_V1_AskRequest: SwiftProtobuf.Message, Swif
       if !_storage._failedActions.isEmpty {
         try visitor.visitRepeatedStringField(value: _storage._failedActions, fieldNumber: 7)
       }
+      try { if let v = _storage._speechID {
+        try visitor.visitSingularStringField(value: v, fieldNumber: 8)
+      } }()
     }
     try unknownFields.traverse(visitor: &visitor)
   }
@@ -2365,6 +2387,7 @@ nonisolated extension Mavio_Assistant_V1_AskRequest: SwiftProtobuf.Message, Swif
         if _storage._answer != rhs_storage._answer {return false}
         if _storage._choice != rhs_storage._choice {return false}
         if _storage._failedActions != rhs_storage._failedActions {return false}
+        if _storage._speechID != rhs_storage._speechID {return false}
         return true
       }
       if !storagesAreEqual {return false}
@@ -3413,7 +3436,7 @@ nonisolated extension Mavio_Assistant_V1_AssistantConversation: SwiftProtobuf.Me
 
 nonisolated extension Mavio_Assistant_V1_AssistantMessage: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".AssistantMessage"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}user\0\u{1}text\0\u{1}time\0")
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}user\0\u{1}text\0\u{1}time\0\u{1}speech\0")
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -3424,6 +3447,7 @@ nonisolated extension Mavio_Assistant_V1_AssistantMessage: SwiftProtobuf.Message
       case 1: try { try decoder.decodeSingularBoolField(value: &self._user) }()
       case 2: try { try decoder.decodeSingularStringField(value: &self._text) }()
       case 3: try { try decoder.decodeSingularMessageField(value: &self._time) }()
+      case 4: try { try decoder.decodeRepeatedStringField(value: &self.speech) }()
       default: break
       }
     }
@@ -3443,6 +3467,9 @@ nonisolated extension Mavio_Assistant_V1_AssistantMessage: SwiftProtobuf.Message
     try { if let v = self._time {
       try visitor.visitSingularMessageField(value: v, fieldNumber: 3)
     } }()
+    if !self.speech.isEmpty {
+      try visitor.visitRepeatedStringField(value: self.speech, fieldNumber: 4)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -3450,6 +3477,7 @@ nonisolated extension Mavio_Assistant_V1_AssistantMessage: SwiftProtobuf.Message
     if lhs._user != rhs._user {return false}
     if lhs._text != rhs._text {return false}
     if lhs._time != rhs._time {return false}
+    if lhs.speech != rhs.speech {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

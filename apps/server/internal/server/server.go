@@ -116,6 +116,9 @@ type Config struct {
 	MetadataDir string
 	// BackupDir holds backups; empty makes none.
 	BackupDir string
+	// SpeechDir holds the speech of the assistant's answers kept with
+	// their conversations; empty keeps none.
+	SpeechDir string
 	// Restore, when set, is a backup restored into the empty database
 	// before the server starts.
 	Restore string
@@ -501,7 +504,7 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 			return s.Assistant, err
 		},
 		Grammar: grammar, Agents: plugs.AgentSessions, Recognizers: plugs.Recognizers, Voices: plugs.VoicePlugins,
-		ServerName: serverName, Key: key.Derive("assistant-listen"), Activity: activityLog, Logger: log,
+		ServerName: serverName, Key: key.Derive("assistant-listen"), SpeechDir: cfg.SpeechDir, Activity: activityLog, Logger: log,
 	})
 	h, err := httpserver.Handler(httpserver.Options{
 		Assistant: helper,

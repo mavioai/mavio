@@ -1877,6 +1877,10 @@ export type MessageKey =
   | 'assistant.conversationsFooter'
   | 'assistant.noConversations'
   | 'assistant.deleteConversation'
+  | 'assistant.playAnswer'
+  | 'assistant.stopAnswer'
+  | 'assistant.copyMessage'
+  | 'assistant.copiedMessage'
   | 'assistant.settingsMessage'
   | 'assistant.server'
   | 'assistant.enabled'
@@ -3814,6 +3818,10 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "assistant.conversationsFooter": "Conversations are deleted after the time the server keeps them.",
     "assistant.noConversations": "No conversations yet.",
     "assistant.deleteConversation": "Delete Conversation",
+    "assistant.playAnswer": "Play the Answer",
+    "assistant.stopAnswer": "Stop",
+    "assistant.copyMessage": "Copy",
+    "assistant.copiedMessage": "Copied",
     "assistant.settingsMessage": "How the assistant listens and answers on this device, and what it keeps about you.",
     "assistant.server": "Assistant",
     "assistant.enabled": "Turn On the Assistant",
@@ -5749,6 +5757,10 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "assistant.conversationsFooter": "对话会在服务器保留期满后删除。",
     "assistant.noConversations": "还没有对话。",
     "assistant.deleteConversation": "删除对话",
+    "assistant.playAnswer": "播放回答",
+    "assistant.stopAnswer": "停止",
+    "assistant.copyMessage": "复制",
+    "assistant.copiedMessage": "已复制",
     "assistant.settingsMessage": "助手在此设备上如何聆听和回答，以及它保存的关于你的内容。",
     "assistant.server": "助手",
     "assistant.enabled": "开启助手",

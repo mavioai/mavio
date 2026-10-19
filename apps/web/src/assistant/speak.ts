@@ -27,6 +27,10 @@ export interface ServerVoices {
 
 /** Speaks sentences in order, until stopped. */
 export class Speaker {
+  /** The ID of the answer's speech, so that the server keeps what its voices speak with the answer. */
+  readonly speechId = Array.from(crypto.getRandomValues(new Uint8Array(16)), (b) => b.toString(16).padStart(2, "0")).join("");
+  // The place of the next sentence a server voice speaks.
+  private index = 0;
   // Each sentence's audio from the server, fetched as it is said so that
   // the next is ready when one ends.
   private queue: Promise<Blob | undefined>[] = [];
@@ -53,7 +57,9 @@ export class Speaker {
     const s = this.server;
     if (!s) return;
     this.queue.push(
-      speakWithServer(s.servers, s.server, { text: sentence, language, voice: this.voice }, this.abort.signal).catch(() => undefined),
+      speakWithServer(s.servers, s.server, { text: sentence, language, voice: this.voice, speechId: this.speechId, index: this.index++ }, this.abort.signal).catch(
+        () => undefined,
+      ),
     );
     void this.drain();
   }

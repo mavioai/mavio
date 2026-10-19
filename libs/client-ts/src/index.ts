@@ -204,6 +204,7 @@ export { useCurrentUser, useIssue, useIssueActions, useIssues } from "./issues.t
 export {
   ask,
   type Heard,
+  keptSpeech,
   Sentences,
   speakWithServer,
   startListening,
