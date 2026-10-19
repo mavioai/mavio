@@ -60,6 +60,8 @@ type Options struct {
 	HostAPI http.Handler
 	// DataDir is mounted writable at /data; empty mounts nothing.
 	DataDir string
+	// DeviceID is passed in MAVIO_DEVICE_ID; empty passes none.
+	DeviceID string
 	// AllowHost lets a plugin fetch hosts its manifest does not name,
 	// such as its container dependencies'; nil allows none.
 	AllowHost func(ctx context.Context, plugin, host string) bool
@@ -208,6 +210,9 @@ func (p *Plugin) newInstance(ctx context.Context) (*instance, error) {
 	if p.opts.DataDir != "" {
 		fsConfig = fsConfig.WithDirMount(p.opts.DataDir, DataMount)
 		cfg = cfg.WithEnv(proc.EnvData, DataMount)
+	}
+	if p.opts.DeviceID != "" {
+		cfg = cfg.WithEnv(proc.EnvDeviceID, p.opts.DeviceID)
 	}
 	name := fmt.Sprintf("%s#%d", p.manifest.GetId(), p.nextModule.Add(1))
 	mod, err := p.runtime.InstantiateModule(ctx, p.compiled, cfg.

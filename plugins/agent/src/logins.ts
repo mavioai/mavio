@@ -3,7 +3,7 @@
 // show and answers its prompts.
 
 import { randomUUID } from "node:crypto";
-import type { AuthEvent, AuthPrompt, AuthType, Models } from "@earendil-works/pi-ai";
+import type { AuthEvent, AuthPrompt, AuthType, LoginOptions, Models } from "@earendil-works/pi-ai";
 
 /** A login's state. */
 export type LoginState = "running" | "succeeded" | "failed" | "canceled";
@@ -48,11 +48,14 @@ const maxEvents = 100;
 /** Logins runs the login flows the server starts. */
 export class Logins {
 	readonly #models: Models;
+	readonly #options: LoginOptions;
 	readonly #now: () => number;
 	readonly #logins = new Map<string, Login>();
 
-	constructor(models: Models, now: () => number = Date.now) {
+	/** options give the flows the installation's ID and the name the plugin introduces itself with. */
+	constructor(models: Models, options: LoginOptions = {}, now: () => number = Date.now) {
 		this.#models = models;
+		this.#options = options;
 		this.#now = now;
 	}
 
@@ -101,7 +104,7 @@ export class Logins {
 				changed(login);
 			},
 		};
-		this.#models.login(providerId, type, interaction).then(
+		this.#models.login(providerId, type, interaction, this.#options).then(
 			() => this.#end(login, "succeeded"),
 			(error: unknown) =>
 				this.#end(

@@ -305,7 +305,7 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 	plugs, err := plugins.Open(ctx, plugins.Config{
 		Dir: cfg.PluginDir, CacheDir: pluginCache, Store: db, Logger: log, HostAPI: hostAPI, ConfigureLater: true,
 		Client:  outbound(5*time.Minute, func(p *core.OutboundProxies) string { return p.PluginCatalogs }),
-		DataDir: cfg.PluginDataDir, Fetch: pluginFetch, Activity: activityLog, DevicesChanged: hub.SharedSessionsChanged,
+		DataDir: cfg.PluginDataDir, DeviceID: identity.DeviceID(key.ID()), Fetch: pluginFetch, Activity: activityLog, DevicesChanged: hub.SharedSessionsChanged,
 		Catalogs: func() []string { return set.Get().PluginCatalogs }, Containers: deps, Env: users.env, Track: cfg.track("plugin"),
 		Disabled: set.Get().DisabledPlugins,
 		SaveDisabled: func(ctx context.Context, ids []string) error {

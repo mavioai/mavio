@@ -72,7 +72,10 @@ type Config struct {
 	// DataDir holds the plugins' data folders, kept across upgrades and
 	// deleted on uninstall; empty gives plugins none.
 	DataDir string
-	Store   core.Store
+	// DeviceID is the UUID plugins are given for this machine
+	// (identity.DeviceID); empty gives none.
+	DeviceID string
+	Store    core.Store
 	// Catalogs returns the URLs of the plugin catalogs; nil means none.
 	Catalogs func() []string
 	// Disabled are the IDs of the plugins not to start.
@@ -200,10 +203,11 @@ func Open(ctx context.Context, cfg Config) (*Manager, error) {
 	// Event delivery outlives the request that installs a plugin.
 	m.ctx, m.cancel = context.WithCancel(context.WithoutCancel(ctx))
 	m.opts = host.Options{
-		WASM:    wasm.Options{CacheDir: cfg.CacheDir, FetchClient: cfg.Fetch, AllowHost: cfg.allowHost, Logger: m.log},
-		Process: process.Options{Track: cfg.Track, Logger: m.log},
-		DataDir: cfg.DataDir,
-		Env:     cfg.Env,
+		WASM:     wasm.Options{CacheDir: cfg.CacheDir, FetchClient: cfg.Fetch, AllowHost: cfg.allowHost, Logger: m.log},
+		Process:  process.Options{Track: cfg.Track, Logger: m.log},
+		DataDir:  cfg.DataDir,
+		DeviceID: cfg.DeviceID,
+		Env:      cfg.Env,
 	}
 	if cfg.HostAPI != nil {
 		m.opts.HostAPI = func(man *pluginv1.Manifest) http.Handler {

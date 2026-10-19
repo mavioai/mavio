@@ -79,6 +79,9 @@ type Options struct {
 	// DataDir holds a writable data folder per plugin, named by its ID and
 	// created when the plugin starts; empty gives plugins none.
 	DataDir string
+	// DeviceID is the UUID both runtimes pass plugins in MAVIO_DEVICE_ID
+	// for the host's machine; empty passes none.
+	DeviceID string
 }
 
 // WithCallTimeout returns ctx bounding the calls made with it by d instead
@@ -116,6 +119,9 @@ func Open(ctx context.Context, dir string, opts Options) (Plugin, error) {
 			return nil, fmt.Errorf("plugin %s: data folder: %w", m.GetId(), err)
 		}
 		opts.WASM.DataDir, opts.Process.DataDir = dir, dir
+	}
+	if opts.DeviceID != "" {
+		opts.WASM.DeviceID, opts.Process.DeviceID = opts.DeviceID, opts.DeviceID
 	}
 	var p Plugin
 	switch m.GetRuntime() {

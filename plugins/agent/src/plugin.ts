@@ -17,6 +17,7 @@ import { HealthResponseSchema, ManifestSchema, PluginService } from "@mavio/prot
 import manifest from "../manifest.json" with { type: "json" };
 import { customProvider, parseConfig } from "./config.ts";
 import { FileCredentialStore } from "./credentials.ts";
+import { deviceId } from "./device.ts";
 import { gateway } from "./gateway.ts";
 import { HostCalls } from "./host.ts";
 import { Logins } from "./logins.ts";
@@ -33,6 +34,8 @@ export const version = manifest.version;
 export interface PluginOptions {
 	/** The plugin's data folder; nothing is kept without one. */
 	dataDir?: string;
+	/** The host's ID of the machine (MAVIO_DEVICE_ID), which logins send providers. */
+	deviceId?: string;
 	/** Replace the built-in providers, for tests. */
 	providers?: Provider[];
 }
@@ -60,7 +63,10 @@ export async function openPlugin(o: PluginOptions = {}): Promise<Plugin> {
 	for (const p of o.providers ?? []) models.setProvider(p);
 	const builtIn = new Set(models.getProviders().map((p) => p.id));
 	let custom = new Set<string>();
-	const logins = new Logins(models);
+	const logins = new Logins(models, {
+		getDeviceId: deviceId(o.deviceId ?? "", o.dataDir ? join(o.dataDir, "device-id") : undefined),
+		agentName: "Mavio",
+	});
 	const deleted = new Deleted(o.dataDir ? join(o.dataDir, "deleted-sessions.json") : undefined);
 	let storage: Storage = new MemoryStorage();
 	if (o.dataDir) {

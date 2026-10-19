@@ -20,6 +20,11 @@ const (
 	// both runtimes, as Servarr applications name them in their
 	// User-Agent, such as "ubuntu 22.04".
 	EnvHostOS = "MAVIO_HOST_OS"
+	// EnvDeviceID names a UUID standing for the host's machine to the
+	// services the plugin signs in to, in both runtimes: stable across
+	// restarts, upgrades and reinstalls, and derived rather than the
+	// hardware ID itself.
+	EnvDeviceID = "MAVIO_DEVICE_ID"
 	// EnvLifeline is "stdin" when the plugin's stdin is a pipe the host
 	// holds open while it lives: the plugin exits, as on SIGTERM, when it
 	// reads the pipe's end, which comes however the host ends, killed

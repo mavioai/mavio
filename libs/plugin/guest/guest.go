@@ -110,6 +110,13 @@ func DataDir() string { return os.Getenv(proc.EnvData) }
 // "ubuntu 22.04" or "macos 14.5"; empty outside a Mavio host.
 func HostOS() string { return os.Getenv(proc.EnvHostOS) }
 
+// DeviceID returns a UUID standing for the host's machine, for the
+// services the plugin signs in to that tell installations apart, such as
+// OpenAI's agent host ID: the same across restarts, upgrades and
+// reinstalls, derived from the machine's hardware ID or, where it has none,
+// from the server's ID; empty outside a Mavio host.
+func DeviceID() string { return os.Getenv(proc.EnvDeviceID) }
+
 // SetHTTPClient replaces the client returned by HTTPClient. Runtime entry
 // points call it; plugins normally do not.
 func SetHTTPClient(c *http.Client) {

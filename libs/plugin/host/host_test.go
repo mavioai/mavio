@@ -508,6 +508,17 @@ func TestHostOS(t *testing.T) {
 	})
 }
 
+// TestDeviceID checks that plugins of both runtimes learn the device ID.
+func TestDeviceID(t *testing.T) {
+	const want = "0b7a9f1e-5c2d-5e8f-9a1b-2c3d4e5f6a7b"
+	eachRuntime(t, func(t *testing.T, rt string) {
+		p := openWith(t, rt, func(o *host.Options) { o.DeviceID = want })
+		if got, err := search(t.Context(), p, "env:MAVIO_DEVICE_ID"); err != nil || got != want {
+			t.Errorf("MAVIO_DEVICE_ID got = %q, %v, want = %q", got, err, want)
+		}
+	})
+}
+
 // TestEnv checks that a process plugin's environment gets what Env
 // returns for it, over Process.Env.
 func TestEnv(t *testing.T) {

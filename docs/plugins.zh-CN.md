@@ -103,6 +103,7 @@ manifest 在 `permissions.api` 中列出插件可以调用的服务：`<package>
 * **任务**：`TASK_RUNNER` 插件的 manifest 列出任务（ID、名称、说明、至少一分钟的间隔、超时）。它们以 `plugin:{plugin}:{task}` 出现在 `TaskService` 中，并带有插件 ID；它们作为 `plugin.task` 作业在单独的 worker 上运行，调用 `TaskRunnerService.RunTask`：自插件启动起按间隔运行，每次运行排入下一次；也可按需运行。任务的超时（至多六小时，未设置时为一小时）在该次调用中取代 WASM 的调用超时。插件未就绪时跳过定时运行；已不存在的任务的运行被丢弃。
 * **数据目录**：每个插件有一个可写目录 `<home>/plugin-data/<id>`（`--plugin-data-dir`），升级时保留，纳入备份，卸载时删除。两种运行时都通过 `MAVIO_PLUGIN_DATA` 告知插件其路径（`guest.DataDir()`）；WASM 插件在 `/data` 看到它。
 * **宿主操作系统**：两种运行时都通过 `MAVIO_HOST_OS`（`guest.HostOS()`）告知宿主的操作系统及其版本，按 Servarr 应用在 User-Agent 中的写法小写，如 `ubuntu 22.04`：Linux 上取自 `/etc/*release` 的 `ID` 与 `VERSION_ID`，macOS 上取自系统版本属性列表，Windows 上取自 `RtlGetVersion`。
+* **设备 ID**：两种运行时都通过 `MAVIO_DEVICE_ID`（`guest.DeviceID()`，TypeScript 中为 `deviceId()`）给插件一个 UUID，代表本机面向那些区分安装的服务——如 OpenAI 的 agent host ID，agent 插件用 ChatGPT 登录时会发送它。它是由本机硬件 ID（Linux 的 `machine-id`、macOS 的 `IOPlatformUUID`、Windows 的 `MachineGuid`）推导出的第 5 版 UUID；在容器中或本机没有硬件 ID 时，改由服务器的 ID（首次启动时随 `$MAVIO_HOME` 生成）推导。这样它在重启、升级和重装之间保持不变，又不泄露硬件 ID。
 
 ## 7. 远程设备
 * `DEVICE_CONTROLLER` 插件（还需要 `permissions.act_as_users`）通过 `HostService.SetDevices` 保持其设备列表为最新：ID、名称、产品，以及每个设备接受的命令种类。任何插件都可以不经作用域调用 `mavio.plugin.v1.HostService`；其他调用者返回 `permission_denied`。其 `GetServerInfo` 给出服务端的名称、版本、HTTP 与 HTTPS 端口以及基础 URL，供插件生成交给局域网设备的 URL。

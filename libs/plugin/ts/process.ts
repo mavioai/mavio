@@ -19,6 +19,7 @@ export const env = {
 	hostAddress: "MAVIO_HOST_ADDRESS",
 	data: "MAVIO_PLUGIN_DATA",
 	hostOS: "MAVIO_HOST_OS",
+	deviceId: "MAVIO_DEVICE_ID",
 	/**
 	 * "stdin" when stdin is a pipe the host holds open while it lives: the
 	 * plugin stops when it ends, however the host ended.
@@ -54,6 +55,15 @@ export function dataDir(): string {
 /** The host's operating system and its version, such as "ubuntu 22.04". */
 export function hostOS(): string {
 	return process.env[env.hostOS] ?? "";
+}
+
+/**
+ * A UUID standing for the host's machine, for the services the plugin
+ * signs in to that tell installations apart: the same across restarts,
+ * upgrades and reinstalls; empty outside a Mavio host.
+ */
+export function deviceId(): string {
+	return process.env[env.deviceId] ?? "";
 }
 
 /** What serve serves. */

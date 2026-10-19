@@ -58,6 +58,8 @@ type Options struct {
 	// DataDir is the plugin's writable data folder, passed in
 	// MAVIO_PLUGIN_DATA; empty passes none.
 	DataDir string
+	// DeviceID is passed in MAVIO_DEVICE_ID; empty passes none.
+	DeviceID string
 	// Track records each process started, by its process ID, until it
 	// exits and the returned function is called; nil records none.
 	Track  func(pid int) (done func())
@@ -289,6 +291,9 @@ func (p *Plugin) launch(ctx context.Context) error {
 	}
 	if p.opts.DataDir != "" {
 		cmd.Env = append(cmd.Env, proc.EnvData+"="+p.opts.DataDir)
+	}
+	if p.opts.DeviceID != "" {
+		cmd.Env = append(cmd.Env, proc.EnvDeviceID+"="+p.opts.DeviceID)
 	}
 	cmd.Dir = filepath.Dir(p.path)
 	configure(cmd)
