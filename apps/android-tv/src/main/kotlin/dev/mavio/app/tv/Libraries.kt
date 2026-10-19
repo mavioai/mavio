@@ -116,11 +116,15 @@ fun LibrariesPage(model: AppModel, list: LazyListState, focus: FocusMemory, entr
     val shown = servers.filter { it.id in signedIn }
     val pages = LocalPages.current
     // Each server's libraries load on their own, so that one that can't
-    // be reached holds up none of the others.
-    val libraries = remember { mutableStateOf(mapOf<String, Result<Libraries>>()) }
+    // be reached holds up none of the others. Those loaded before show at
+    // once on the tab's return.
+    val libraries = remember {
+        mutableStateOf(shown.mapNotNull { s -> model.heldLibraries(s.id)?.let { s.id to Result.success(it) } }.toMap())
+    }
     shown.forEach { server ->
         LaunchedEffect(server.id, revisions[server.id]) {
-            val result = runCatching { model.client.libraries(server.id) }
+            if (model.heldLibraries(server.id) != null) return@LaunchedEffect
+            val result = runCatching { model.libraries(server.id) }
             libraries.value += server.id to result
         }
     }

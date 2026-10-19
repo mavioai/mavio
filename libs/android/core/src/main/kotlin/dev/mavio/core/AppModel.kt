@@ -5,6 +5,7 @@ import android.os.Build
 import android.provider.Settings
 import java.io.File
 import java.util.UUID
+import java.util.concurrent.ConcurrentHashMap
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -63,6 +64,9 @@ class AppModel(context: Context, clientName: String) {
 
     private var homeJob: Job? = null
 
+    /** Each server's libraries as last loaded, with the user and revision they were loaded for. */
+    private val loadedLibraries = ConcurrentHashMap<String, Triple<String, Int, Libraries>>()
+
     /** The group the device watches together with others in. */
     val syncPlay: SyncPlay
 
@@ -116,6 +120,26 @@ class AppModel(context: Context, clientName: String) {
         homeJob = scope.launch {
             runCatching { client.loadHome(relay) }
         }
+    }
+
+    /**
+     * A server's libraries as last loaded, while still current for its
+     * user and revision, so that the Libraries tab shows them at once on
+     * its return rather than loading them again.
+     */
+    fun heldLibraries(serverId: String): Libraries? {
+        val (user, revision, libraries) = loadedLibraries[serverId] ?: return null
+        return libraries.takeIf { user == server(serverId)?.userId && revision == (revisions.value[serverId] ?: 0) }
+    }
+
+    /** Loads a server's libraries, keeping them for [heldLibraries]. */
+    suspend fun libraries(serverId: String): Libraries {
+        val user = server(serverId)?.userId
+        val revision = revisions.value[serverId] ?: 0
+        val libraries = client.libraries(serverId)
+        // Those of a server that could not be reached are not kept.
+        if (user != null && !libraries.offline) loadedLibraries[serverId] = Triple(user, revision, libraries)
+        return libraries
     }
 
     /** Marks a server's data changed, reloading Home and the screens showing it. */

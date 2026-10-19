@@ -102,9 +102,10 @@ fun LibrariesScreen(model: AppModel) {
             item(key = "libraries/${server.id}") {
                 // Each server's libraries load on their own, so that one
                 // that can't be reached holds up none of the others.
-                var libraries by remember(server.id) { mutableStateOf<Result<Libraries>?>(null) }
+                // Those loaded before show at once on the tab's return.
+                var libraries by remember(server.id) { mutableStateOf(model.heldLibraries(server.id)?.let { Result.success(it) }) }
                 LaunchedEffect(server.id, revisions[server.id]) {
-                    libraries = runCatching { model.client.libraries(server.id) }
+                    if (model.heldLibraries(server.id) == null) libraries = runCatching { model.libraries(server.id) }
                 }
                 val result = libraries
                 val list = result?.getOrNull()
