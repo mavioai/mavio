@@ -104,7 +104,9 @@ struct RootView: View {
                 .environment(model)
         }
         .sheet(isPresented: $router.addingServer) {
-            SignInView(adding: true)
+            // A sheet takes the environment of where it is presented, outside
+            // the theme's.
+            SignInView(adding: true).environment(\.theme, theme)
         }
         .task(id: model.signedIn) { await discovery.load(model) }
         .onChange(of: phase, initial: true) { _, phase in

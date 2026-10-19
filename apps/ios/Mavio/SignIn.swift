@@ -258,6 +258,7 @@ struct SignInView: View {
             Text(MavioStrings.authSetUpElsewhereMessage).modifier(BodyText())
             Text(info.address.replacing(/^https?:\/\//, with: ""))
                 .font(.system(size: 30, weight: .semibold, design: .monospaced))
+                .foregroundStyle(theme.colors.textPrimary)
                 .textSelection(.enabled)
             Action(MavioStrings.authOpenInBrowser, icon: "external") {
                 if let url = URL(string: info.address) { openURL(url) }
@@ -415,8 +416,11 @@ struct SignInView: View {
 
 /// The title of a step, 30 pt bold as the web UI's on a phone.
 private struct Title: ViewModifier {
+    @Environment(\.theme) private var theme
+
     func body(content: Content) -> some View {
-        content.font(.system(size: 30, weight: .bold)).tracking(-0.3).fixedSize(horizontal: false, vertical: true)
+        content.font(.system(size: 30, weight: .bold)).tracking(-0.3).foregroundStyle(theme.colors.textPrimary)
+            .fixedSize(horizontal: false, vertical: true)
     }
 }
 
