@@ -42,12 +42,16 @@ import dev.mavio.design.MavioRadius
 import dev.mavio.design.MavioSpacing
 import dev.mavio.ui.CardPlaceholder
 import dev.mavio.ui.ItemCard
+import dev.mavio.ui.LocalDiscover
 import dev.mavio.ui.MavioIcon
 import dev.mavio.ui.R
 import dev.mavio.ui.Shelf
 import dev.mavio.ui.StatusView
+import dev.mavio.ui.discoverLanguage
+import dev.mavio.ui.discovered
 import dev.mavio.ui.text
 import dev.mavio.ui.theme
+import dev.mavio.ui.titleKey
 
 /**
  * Search, as the web UI's phone layout (docs/clients.md §5.4): a field,

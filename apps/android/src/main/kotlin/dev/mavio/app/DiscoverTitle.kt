@@ -63,14 +63,22 @@ import dev.mavio.design.MavioSpacing
 import dev.mavio.design.TabletLayout
 import dev.mavio.ui.Artwork
 import dev.mavio.ui.ButtonKind
+import dev.mavio.ui.CatalogFilters
+import dev.mavio.ui.CatalogRow
+import dev.mavio.ui.LocalDiscover
 import dev.mavio.ui.MavioButton
 import dev.mavio.ui.MavioIcon
+import dev.mavio.ui.NamedValue
 import dev.mavio.ui.R
 import dev.mavio.ui.Shelf
 import dev.mavio.ui.StatusView
 import dev.mavio.ui.blurAvailable
+import dev.mavio.ui.discoverLanguage
+import dev.mavio.ui.discovered
 import dev.mavio.ui.languageName
 import dev.mavio.ui.minutesText
+import dev.mavio.ui.sized
+import dev.mavio.ui.statusLabel
 import dev.mavio.ui.text
 import dev.mavio.ui.theme
 import java.text.NumberFormat
@@ -1042,7 +1050,3 @@ fun TitleCreditsScreen(route: Route.TitleCredits) {
         }
     }
 }
-
-/** Whether a status is of a title the server has, at least in part. */
-internal fun MediaStatus.available(): Boolean =
-    this == MediaStatus.MEDIA_STATUS_AVAILABLE || this == MediaStatus.MEDIA_STATUS_PARTIALLY_AVAILABLE

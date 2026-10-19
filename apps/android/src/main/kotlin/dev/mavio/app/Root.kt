@@ -90,12 +90,16 @@ import dev.mavio.core.SignInState
 import dev.mavio.design.MavioSpacing
 import dev.mavio.design.TabletLayout
 import dev.mavio.ui.Artwork
+import dev.mavio.ui.CatalogFilters
+import dev.mavio.ui.DiscoverState
+import dev.mavio.ui.LocalDiscover
 import dev.mavio.ui.LocalTheme
 import dev.mavio.ui.MavioIcon
 import dev.mavio.ui.R
 import dev.mavio.ui.StatusView
 import dev.mavio.ui.Wordmark
 import dev.mavio.ui.blurAvailable
+import dev.mavio.ui.discovered
 import dev.mavio.ui.text
 import dev.mavio.ui.theme
 import kotlin.math.roundToInt

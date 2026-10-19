@@ -39,8 +39,14 @@ import dev.mavio.design.MavioSpacing
 import dev.mavio.design.TabletLayout
 import dev.mavio.ui.Artwork
 import dev.mavio.ui.R
+import dev.mavio.ui.available
+import dev.mavio.ui.discoverLanguage
+import dev.mavio.ui.discovered
+import dev.mavio.ui.sized
+import dev.mavio.ui.statusLabel
 import dev.mavio.ui.text
 import dev.mavio.ui.theme
+import dev.mavio.ui.tmdbId
 import java.time.LocalDate
 import java.time.Period
 import java.time.format.DateTimeFormatter
