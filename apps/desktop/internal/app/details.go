@@ -34,6 +34,7 @@ type detailsState struct {
 	// scrolledTo tells that an episode's season scrolled to it.
 	episodeInfo task[map[string]*libraryv1.Item]
 	scrolledTo  bool
+	more        moreState
 }
 
 // details builds an item's details, as the web UI's
@@ -550,6 +551,9 @@ func (a *App) actions(c *ui.Context, st *detailsState, d *capiv1.Details, info *
 			}
 			if len(sources) > 1 {
 				a.versionMenu(c, st, d)
+			}
+			if info != nil {
+				a.moreMenu(c, st, card.GetServerId(), info.item.GetItem())
 			}
 		})
 		if target == nil {

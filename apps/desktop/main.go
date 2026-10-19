@@ -150,7 +150,14 @@ func run() error {
 		SetAppearance: setAppearance,
 		SetLocale:     mygo.App.SetLocale,
 		OpenURL:       mygo.Shell.OpenExternal,
-		MavioDev:      cmp.Or(os.Getenv("MAVIO_DEV_URL"), "https://mavio.dev/api"),
+		ChooseFile: func(kind string, extensions []string) (string, error) {
+			paths, err := mygo.Dialog.Open(mygo.OpenDialogOptions{Parent: win, Filters: []mygo.FileFilter{{Name: kind, Extensions: extensions}}})
+			if err != nil || len(paths) == 0 {
+				return "", err
+			}
+			return paths[0], nil
+		},
+		MavioDev: cmp.Or(os.Getenv("MAVIO_DEV_URL"), "https://mavio.dev/api"),
 		NewWindow: func(view func(*ui.Context), closed func()) app.Window {
 			opts := mygo.WindowOptions{
 				Title:           "Mavio",

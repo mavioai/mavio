@@ -56,6 +56,10 @@ type Options struct {
 	SetLocale func(string)
 	// OpenURL opens a URL in the browser.
 	OpenURL func(string) error
+	// ChooseFile asks the user for a file of a kind, given by its name
+	// and extensions, and returns its path, empty when none was chosen;
+	// it blocks until the user answers. Nil chooses none.
+	ChooseFile func(kind string, extensions []string) (string, error)
 	// MavioDev is the API of the mavio.dev Mavio accounts sign in at.
 	MavioDev string
 	// NewWindow opens a window of the player's, which view builds, and
@@ -136,6 +140,9 @@ type App struct {
 	// shows them loads again.
 	generation int
 	libraries  map[string]*task[*capiv1.Libraries]
+	// sessionsChanged counts the changes of the user's devices, so that
+	// the remote control shows them again.
+	sessionsChanged int
 
 	places places
 	// focus moves focus with the arrow keys in the TV mode.
@@ -250,6 +257,8 @@ func (a *App) Event(e *capiv1.Event) {
 			a.state[id] = e.GetState().GetState()
 		case e.HasConnected(), e.HasLibraryChanged(), e.HasUserDataChanged():
 			a.generation++
+		case e.HasSessionsChanged():
+			a.sessionsChanged++
 		case e.HasScanProgressChanged():
 			a.scanChanged(id, e.GetScanProgressChanged())
 		}

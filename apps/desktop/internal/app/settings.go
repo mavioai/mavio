@@ -133,6 +133,8 @@ type settingsState struct {
 	sessions  task[[]*sessionv1.Session]
 	reload    int // counts the sessions' changes
 	revoking  string
+	// remote is the control of a device.
+	remote    remoteState
 	err       error // of the last change
 	copied    string
 	code      string // the Quick Connect code typed
@@ -1131,6 +1133,18 @@ func (a *App) devicesSection(c *ui.Context) {
 					style.Text(ui.Text(c, style.T(c, "settings.thisDevice")), style.Type(c).Callout).TextColor(style.Color(colors.TextSecondary))
 					return
 				}
+				if s.GetOnline() {
+					cb := ui.ButtonBase(c.Key("control-"+s.GetId())).Padding(6, 10).Radius(8).Label(style.T(c, "remote.control"))
+					if cb.Hovered() {
+						cb.Background(style.Color(colors.Fill))
+					}
+					cb.Children(func() {
+						style.Text(ui.Text(c, style.T(c, "remote.control")), style.Type(c).Body).TextColor(style.Color(colors.Accent))
+					})
+					if cb.Clicked() {
+						st.remote = remoteState{open: true, session: s.GetId(), volume: 100}
+					}
+				}
 				if s.GetPluginId() != "" {
 					return
 				}
@@ -1157,6 +1171,9 @@ func (a *App) devicesSection(c *ui.Context) {
 	})
 	if st.err != nil {
 		style.Text(ui.Text(c, errorMessage(c, st.err)), style.Type(c).Callout).TextColor(style.Color(colors.Danger))
+	}
+	if st.remote.open {
+		a.remoteDialog(c, &st.remote, id)
 	}
 }
 

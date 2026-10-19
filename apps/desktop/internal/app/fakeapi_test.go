@@ -54,6 +54,8 @@ func (f *fakeCore) apiHandler() http.Handler {
 	mux.Handle(sessionv1connect.NewSessionServiceHandler(&fakeSessions{f: f}))
 	f.handleAdmin(mux)
 	f.handleDiscover(mux)
+	f.handleLists(mux)
+	f.handleMetadata(mux)
 	f.users = fakeUserList()
 	f.prefs = userv1.PlaybackPreferences_builder{
 		AudioLanguages: []string{"jpn", "eng"}, SubtitleLanguages: []string{"eng"},
@@ -242,6 +244,8 @@ func (api *fakeAPI) ListItems(_ context.Context, r *libraryv1.ListItemsRequest) 
 	case len(r.GetKinds()) == 1 && r.GetKinds()[0] == libraryv1.ItemKind_ITEM_KIND_COLLECTION:
 		items = append(items, libraryv1.Item_builder{
 			Id: new("orbit-collection"), Name: new("The Orbit Collection"), Kind: new(libraryv1.ItemKind_ITEM_KIND_COLLECTION),
+		}.Build(), libraryv1.Item_builder{
+			Id: new("space-classics"), Name: new("Space Classics"), Kind: new(libraryv1.ItemKind_ITEM_KIND_COLLECTION),
 		}.Build())
 	}
 	return libraryv1.ListItemsResponse_builder{Items: items, Total: new(int32(len(items)))}.Build(), nil

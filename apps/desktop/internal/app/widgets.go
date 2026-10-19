@@ -74,6 +74,17 @@ func segmented(c *ui.Context, selected *int, labels ...string) ui.Element {
 
 // secondaryButton builds a button on the fill color.
 func secondaryButton(c *ui.Context, icon, label string) ui.Element {
+	return tintedButton(c, icon, label, style.Color(style.Colors(c).TextPrimary))
+}
+
+// destructiveButton builds a button on the fill color whose label is of
+// the danger color.
+func destructiveButton(c *ui.Context, label string) ui.Element {
+	return tintedButton(c, "", label, style.Color(style.Colors(c).Danger))
+}
+
+// tintedButton builds a button on the fill color with content of fg.
+func tintedButton(c *ui.Context, icon, label string, fg ui.Color) ui.Element {
 	colors := style.Colors(c)
 	b := ui.ButtonBase(c).Height(36).Padding(0, 16).Gap(8).Radius(18).AlignItems(ui.Center).Justify(ui.Center).
 		Background(style.Color(colors.Fill)).Label(label)
@@ -85,9 +96,9 @@ func secondaryButton(c *ui.Context, icon, label string) ui.Element {
 	}
 	b.Children(func() {
 		if icon != "" {
-			ui.Icon(c, style.Icon(icon, false)).Size(18, 18).TextColor(style.Color(colors.TextPrimary))
+			ui.Icon(c, style.Icon(icon, false)).Size(18, 18).TextColor(fg)
 		}
-		style.Text(ui.Text(c, label), style.Type(c).Headline).TextColor(style.Color(colors.TextPrimary)).SingleLine()
+		style.Text(ui.Text(c, label), style.Type(c).Headline).TextColor(fg).SingleLine()
 	})
 	return b
 }

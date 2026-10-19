@@ -96,6 +96,10 @@ type fakeCore struct {
 	wanted         *fakeWanted
 	downloads      *fakeDownloads
 	subtitles      *fakeSubtitles
+	playlists      []*fakeList
+	collections    map[string]*fakeList
+	commands       []*sessionv1.SendCommandRequest // sent to the user's devices
+	metadata       metadataCalls
 
 	mu       sync.Mutex
 	calls    []string
