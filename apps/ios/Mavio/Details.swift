@@ -74,6 +74,12 @@ private struct DetailsContent: View {
     @State private var sourceIndex = 0
     @State private var overviewOpen = false
     @State private var copy: Source?
+    /// Whether the user may report problems on the server: administrators,
+    /// and users allowed to.
+    @State private var mayReport = false
+    @State private var reporting = false
+    /// Counts the issues reported here, which lists them again.
+    @State private var reports = 0
 
     private var card: Card { details.card }
     private var phone: Bool { sizeClass != .regular }
@@ -126,6 +132,9 @@ private struct DetailsContent: View {
                     }
                     Recommendations(details: details)
                     AboutSection(details: details, source: source, overview: !phone)
+                    if let server = model.server(card.serverId), !details.offline {
+                        ItemIssues(server: server, itemId: card.itemId, version: reports)
+                    }
                 }
                 .padding(.top, MavioSpacing.s24)
             }
@@ -138,6 +147,22 @@ private struct DetailsContent: View {
             DetailsView(serverId: copy.serverId, itemId: copy.itemId)
         }
         .sheet(isPresented: $overviewOpen) { OverviewSheet(details: details) }
+        .sheet(isPresented: $reporting) {
+            if let server = model.server(card.serverId) {
+                ReportIssueView(
+                    server: server, itemId: card.itemId, name: card.title, series: card.kind == .series
+                ) { reports += 1 }
+            }
+        }
+        .task(id: card.serverId) { await loadMayReport() }
+    }
+
+    private func loadMayReport() async {
+        guard !details.offline else { return }
+        let response = try? await model.client.call(
+            card.serverId, Procedure.users("GetCurrentUser"), Mavio_User_V1_GetCurrentUserRequest(),
+            as: Mavio_User_V1_GetCurrentUserResponse.self)
+        if let user = response?.user { mayReport = user.admin || user.policy.reportIssues }
     }
 
     // MARK: Header
@@ -416,6 +441,18 @@ private struct DetailsContent: View {
         .buttonStyle(circle)
         if own.count > 1 || !copies.isEmpty { versionMenu }
         if source != nil, !details.offline { downloadButton }
+        if mayReport, [.movie, .series, .season, .episode].contains(card.kind) { moreMenu }
+    }
+
+    /// The More menu, which reports a problem with the item.
+    private var moreMenu: some View {
+        Menu {
+            Button(MavioStrings.issuesReport) { reporting = true }
+        } label: {
+            Icon("more", size: 20).accessibilityLabel(MavioStrings.listsMore)
+        }
+        .menuStyle(.button)
+        .buttonStyle(circle)
     }
 
     private func status(_ next: NextUp) -> some View {

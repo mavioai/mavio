@@ -829,7 +829,7 @@ struct BackupsView: View {
 // MARK: Issues
 
 extension Mavio_Acquisition_V1_IssueType {
-    fileprivate var title: String {
+    var title: String {
         switch self {
         case .video: MavioStrings.issuesVideo
         case .audio: MavioStrings.issuesAudio
@@ -842,7 +842,7 @@ extension Mavio_Acquisition_V1_IssueType {
 
 extension Mavio_Acquisition_V1_Issue {
     /// The season or episode of a series it is about.
-    fileprivate var numbers: String? {
+    var numbers: String? {
         guard seasonNumber > 0 else { return nil }
         return episodeNumber > 0
             ? String(format: "S%02dE%02d", seasonNumber, episodeNumber)
@@ -852,7 +852,7 @@ extension Mavio_Acquisition_V1_Issue {
 
 /// The names of items and users issues name, read once.
 @MainActor @Observable
-private final class IssueNames {
+final class IssueNames {
     var items: [String: String] = [:]
     var users: [String: String] = [:]
     private var asked: Set<String> = []
@@ -1009,7 +1009,7 @@ private struct StatusBadge: View {
 
 /// An issue in a list: its item, kind, numbers and status, what it says,
 /// who reported it and when it last changed.
-private struct IssueRow: View {
+struct IssueRow: View {
     let issue: Mavio_Acquisition_V1_Issue
     let item: String?
     let by: String
@@ -1037,7 +1037,7 @@ private struct IssueRow: View {
 
 /// An issue: its item, kind and status, its comments, a comment to add,
 /// and resolving, reopening or deleting it.
-private struct IssueView: View {
+struct IssueView: View {
     let server: ServerRecord
     let id: String
     let names: IssueNames
@@ -1185,5 +1185,185 @@ private struct IssueView: View {
             }
             busy = false
         }
+    }
+}
+
+/// Reports a problem with a movie, series, season or episode: its kind, for
+/// a series the season and episode, 0 for all, and what is wrong; the issue
+/// opens once reported.
+struct ReportIssueView: View {
+    let server: ServerRecord
+    let itemId: String
+    let name: String
+    let series: Bool
+    /// Called once the issue is reported.
+    let reported: () -> Void
+    @Environment(AppModel.self) private var model
+    @Environment(\.theme) private var theme
+    @Environment(\.dismiss) private var dismiss
+    @State private var type = Mavio_Acquisition_V1_IssueType.video
+    @State private var season = 0
+    @State private var episode = 0
+    @State private var message = ""
+    @State private var busy = false
+    @State private var failure: String?
+    @State private var created: String?
+    @State private var names = IssueNames()
+
+    private static let types: [Mavio_Acquisition_V1_IssueType] = [.video, .audio, .subtitles, .other]
+
+    var body: some View {
+        NavigationStack {
+            Group {
+                if let created {
+                    IssueView(server: server, id: created, names: names) { _ in }
+                } else {
+                    form
+                }
+            }
+            .toolbar {
+                if created == nil {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button(MavioStrings.actionCancel) { dismiss() }
+                    }
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button(MavioStrings.issuesSend, action: send)
+                            .disabled(message.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || busy)
+                    }
+                } else {
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button(MavioStrings.actionDone) { dismiss() }
+                    }
+                }
+            }
+        }
+    }
+
+    private var form: some View {
+        Form {
+            Section(MavioStrings.issuesType) {
+                Picker(MavioStrings.issuesType, selection: $type) {
+                    ForEach(Self.types, id: \.self) { Text($0.title).tag($0) }
+                }
+                .pickerStyle(.segmented)
+                .labelsHidden()
+                .listRowBackground(Color.clear)
+                .listRowInsets(EdgeInsets())
+            }
+            if series {
+                Section {
+                    Stepper(value: $season, in: 0...999) {
+                        LabeledContent(MavioStrings.issuesSeason, value: String(season))
+                    }
+                    Stepper(value: $episode, in: 0...9999) {
+                        LabeledContent(MavioStrings.issuesEpisode, value: String(season == 0 ? 0 : episode))
+                    }
+                    .disabled(season == 0)
+                } footer: {
+                    Text(MavioStrings.issuesAllNumbers)
+                }
+            }
+            Section {
+                TextField(MavioStrings.issuesMessage, text: $message, axis: .vertical)
+                    .lineLimit(4...10)
+            }
+            if let failure {
+                Note(text: failure, failed: true)
+            }
+        }
+        .settingsPage(MavioStrings.issuesReportTitle(name: name))
+        .background(theme.colors.background)
+    }
+
+    private func send() {
+        var request = Mavio_Acquisition_V1_CreateIssueRequest()
+        request.itemID = itemId
+        request.type = type
+        request.seasonNumber = series ? Int32(season) : 0
+        request.episodeNumber = series && season > 0 ? Int32(episode) : 0
+        request.message = message.trimmingCharacters(in: .whitespacesAndNewlines)
+        busy = true
+        Task {
+            do {
+                let r = try await model.call(
+                    server, Procedure.issues("CreateIssue"), request, as: Mavio_Acquisition_V1_CreateIssueResponse.self)
+                reported()
+                if r.hasIssue { created = r.issue.id } else { dismiss() }
+            } catch {
+                failure = error.reason
+            }
+            busy = false
+        }
+    }
+}
+
+/// An item's open issues the user may see, on its details; each opens.
+struct ItemIssues: View {
+    let server: ServerRecord
+    let itemId: String
+    /// Changes when an issue was reported, to read them again.
+    let version: Int
+    @Environment(AppModel.self) private var model
+    @Environment(\.theme) private var theme
+    @State private var issues: [Mavio_Acquisition_V1_Issue] = []
+    @State private var names = IssueNames()
+    @State private var open: String?
+
+    var body: some View {
+        // A stack even when empty, as the task reading the issues needs a view.
+        VStack(alignment: .leading, spacing: 0) {
+            if !issues.isEmpty {
+                VStack(alignment: .leading, spacing: MavioSpacing.s12) {
+                    Text(MavioStrings.issuesItemTitle).type(theme.type.title3)
+                    VStack(spacing: 0) {
+                        ForEach(issues, id: \.id) { issue in
+                            if issue.id != issues.first?.id { Divider().padding(.leading, MavioSpacing.s16) }
+                            Button {
+                                open = issue.id
+                            } label: {
+                                IssueRow(issue: issue, item: nil, by: names.user(issue.createdBy, server))
+                                    .padding(.horizontal, MavioSpacing.s16)
+                                    .padding(.vertical, MavioSpacing.s12)
+                                    .contentShape(.rect)
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                    .background(theme.colors.surface, in: .rect(cornerRadius: MavioRadius.lg))
+                }
+                .padding(.horizontal, theme.layout.margin)
+                .padding(.top, MavioSpacing.s24)
+            }
+        }
+        .task(id: version) { await load() }
+        .sheet(item: Binding(get: { open.map(OpenIssue.init) }, set: { open = $0?.id })) { opened in
+            NavigationStack {
+                IssueView(server: server, id: opened.id, names: names) { _ in }
+                    .toolbar {
+                        ToolbarItem(placement: .confirmationAction) {
+                            Button(MavioStrings.actionDone) { open = nil }
+                        }
+                    }
+            }
+            .onDisappear { Task { await load() } }
+        }
+    }
+
+    private struct OpenIssue: Identifiable {
+        let id: String
+    }
+
+    private func load() async {
+        var request = Mavio_Acquisition_V1_ListIssuesRequest()
+        request.itemID = itemId
+        request.statuses = [.open]
+        request.sort = .modified
+        request.limit = 50
+        guard
+            let r = try? await model.call(
+                server, Procedure.issues("ListIssues"), request, as: Mavio_Acquisition_V1_ListIssuesResponse.self)
+        else { return }
+        issues = r.issues
+        await names.loadUsers(model, server)
     }
 }
