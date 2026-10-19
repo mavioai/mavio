@@ -683,6 +683,7 @@ type ContainerStatus struct {
 	xxx_hidden_State       ContainerState         `protobuf:"varint,4,opt,name=state,enum=mavio.plugin.v1.ContainerState"`
 	xxx_hidden_Error       *string                `protobuf:"bytes,5,opt,name=error"`
 	xxx_hidden_Progress    float64                `protobuf:"fixed64,6,opt,name=progress"`
+	xxx_hidden_Queued      bool                   `protobuf:"varint,7,opt,name=queued"`
 	XXX_raceDetectHookData protoimpl.RaceDetectHookData
 	XXX_presence           [1]uint32
 	unknownFields          protoimpl.UnknownFields
@@ -769,34 +770,46 @@ func (x *ContainerStatus) GetProgress() float64 {
 	return 0
 }
 
+func (x *ContainerStatus) GetQueued() bool {
+	if x != nil {
+		return x.xxx_hidden_Queued
+	}
+	return false
+}
+
 func (x *ContainerStatus) SetName(v string) {
 	x.xxx_hidden_Name = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 6)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 7)
 }
 
 func (x *ContainerStatus) SetMode(v ContainerMode) {
 	x.xxx_hidden_Mode = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 6)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 7)
 }
 
 func (x *ContainerStatus) SetAddress(v string) {
 	x.xxx_hidden_Address = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 6)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 7)
 }
 
 func (x *ContainerStatus) SetState(v ContainerState) {
 	x.xxx_hidden_State = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 6)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 7)
 }
 
 func (x *ContainerStatus) SetError(v string) {
 	x.xxx_hidden_Error = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 6)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 7)
 }
 
 func (x *ContainerStatus) SetProgress(v float64) {
 	x.xxx_hidden_Progress = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 6)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 7)
+}
+
+func (x *ContainerStatus) SetQueued(v bool) {
+	x.xxx_hidden_Queued = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 7)
 }
 
 func (x *ContainerStatus) HasName() bool {
@@ -841,6 +854,13 @@ func (x *ContainerStatus) HasProgress() bool {
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 5)
 }
 
+func (x *ContainerStatus) HasQueued() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 6)
+}
+
 func (x *ContainerStatus) ClearName() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_Name = nil
@@ -871,6 +891,11 @@ func (x *ContainerStatus) ClearProgress() {
 	x.xxx_hidden_Progress = 0
 }
 
+func (x *ContainerStatus) ClearQueued() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 6)
+	x.xxx_hidden_Queued = false
+}
+
 type ContainerStatus_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
@@ -884,6 +909,8 @@ type ContainerStatus_builder struct {
 	Error *string
 	// While its image is pulled, the fraction downloaded, 0 to 1.
 	Progress *float64
+	// While its image is pulled, whether the pull waits for others to end.
+	Queued *bool
 }
 
 func (b0 ContainerStatus_builder) Build() *ContainerStatus {
@@ -891,28 +918,32 @@ func (b0 ContainerStatus_builder) Build() *ContainerStatus {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Name != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 6)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 7)
 		x.xxx_hidden_Name = b.Name
 	}
 	if b.Mode != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 6)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 7)
 		x.xxx_hidden_Mode = *b.Mode
 	}
 	if b.Address != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 6)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 7)
 		x.xxx_hidden_Address = b.Address
 	}
 	if b.State != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 6)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 7)
 		x.xxx_hidden_State = *b.State
 	}
 	if b.Error != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 6)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 7)
 		x.xxx_hidden_Error = b.Error
 	}
 	if b.Progress != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 6)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 7)
 		x.xxx_hidden_Progress = *b.Progress
+	}
+	if b.Queued != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 7)
+		x.xxx_hidden_Queued = *b.Queued
 	}
 	return m0
 }
@@ -1050,14 +1081,15 @@ const file_mavio_plugin_v1_container_proto_rawDesc = "" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\x1a:\n" +
 	"\fVolumesEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xdc\x01\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xf4\x01\n" +
 	"\x0fContainerStatus\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x122\n" +
 	"\x04mode\x18\x02 \x01(\x0e2\x1e.mavio.plugin.v1.ContainerModeR\x04mode\x12\x18\n" +
 	"\aaddress\x18\x03 \x01(\tR\aaddress\x125\n" +
 	"\x05state\x18\x04 \x01(\x0e2\x1f.mavio.plugin.v1.ContainerStateR\x05state\x12\x14\n" +
 	"\x05error\x18\x05 \x01(\tR\x05error\x12\x1a\n" +
-	"\bprogress\x18\x06 \x01(\x01R\bprogress\"\x17\n" +
+	"\bprogress\x18\x06 \x01(\x01R\bprogress\x12\x16\n" +
+	"\x06queued\x18\a \x01(\bR\x06queued\"\x17\n" +
 	"\x15ListContainersRequest\"Z\n" +
 	"\x16ListContainersResponse\x12@\n" +
 	"\n" +

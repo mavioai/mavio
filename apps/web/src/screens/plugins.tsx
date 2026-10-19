@@ -8,6 +8,7 @@ import {
   errorMessage,
   type ServerEntry,
   useCatalogPlugins,
+  useContainerRuntime,
   usePluginActions,
   usePluginCatalogs,
   usePluginConfig,
@@ -16,7 +17,7 @@ import {
   usePlugins,
   useProxies,
 } from "@mavio/client-ts";
-import { ContainerMode, ContainerState, GpuSupport } from "@mavio/proto/mavio/plugin/v1/container_pb";
+import { ContainerMode, ContainerState, type ContainerStatus, GpuSupport } from "@mavio/proto/mavio/plugin/v1/container_pb";
 import { Category, Runtime } from "@mavio/proto/mavio/plugin/v1/plugin_pb";
 import {
   type CatalogPlugin,
@@ -537,7 +538,14 @@ function ConfigForm({ server, id, schema, saved }: { server: ServerEntry; id: st
   );
 }
 
-export const containerStates: Record<ContainerState, () => string> = {
+/** A container dependency's state, with how much of its image is downloaded. */
+export function containerState(st: ContainerStatus): string {
+  if (st.state === ContainerState.PULLING && st.queued) return t("plugins.containerQueued");
+  if (st.state === ContainerState.PULLING && st.progress > 0) return `${containerStates[st.state]()} ${Math.floor(st.progress * 100)}%`;
+  return containerStates[st.state]();
+}
+
+const containerStates: Record<ContainerState, () => string> = {
   [ContainerState.UNSPECIFIED]: () => t("plugins.containerUnavailable"),
   [ContainerState.PULLING]: () => t("plugins.containerPulling"),
   [ContainerState.STARTING]: () => t("plugins.containerStarting"),
@@ -582,6 +590,8 @@ function Containers({ server, id }: { server: ServerEntry; id: string }) {
 function ContainerDependency({ server, id, c }: { server: ServerEntry; id: string; c: PluginContainer }) {
   const actions = usePluginActions(server);
   const proxies = useProxies(server);
+  // A GPU is offered only where the engine gives containers one.
+  const gpu = useContainerRuntime(server).data?.gpu ?? false;
   const [recreating, setRecreating] = useState<string>();
   const d = c.dependency!;
   const st = c.status;
@@ -589,15 +599,11 @@ function ContainerDependency({ server, id, c }: { server: ServerEntry; id: strin
   const [address, setAddress] = useState(mode === ContainerMode.EXTERNAL ? (st?.address ?? "") : "");
   const [chosen, setChosen] = useState(mode);
   const set = (m: ContainerMode, extra: { address?: string; useGpu?: boolean; proxy?: string } = {}, onSettled?: () => void) =>
-    actions.setContainer.mutate({ pluginId: id, name: d.name, mode: m, useGpu: c.useGpu, ...extra }, { onSettled });
+    actions.setContainer.mutate({ pluginId: id, name: d.name, mode: m, useGpu: gpu && c.useGpu, ...extra }, { onSettled });
   const proxy =
     actions.setContainer.isPending && actions.setContainer.variables?.proxy !== undefined ? actions.setContainer.variables.proxy : c.proxy;
   const setProxy = (p: string) => set(ContainerMode.MANAGED, { proxy: p }, () => setRecreating(undefined));
-  const state =
-    st &&
-    (st.state === ContainerState.PULLING && st.progress > 0
-      ? `${containerStates[st.state]()} ${Math.floor(st.progress * 100)}%`
-      : containerStates[st.state]());
+  const state = st && containerState(st);
   const commands = (title: string, cmds: ContainerCommands | undefined) =>
     cmds && (
       <div className="flex flex-col gap-1.5 px-4 py-2.5">
@@ -628,11 +634,11 @@ function ContainerDependency({ server, id, c }: { server: ServerEntry; id: strin
           onChange={(v) => {
             const m = Number(v) as ContainerMode;
             setChosen(m);
-            if (m !== ContainerMode.EXTERNAL) set(m, { useGpu: m === ContainerMode.MANAGED && (c.useGpu || d.gpu === GpuSupport.REQUIRED) });
+            if (m !== ContainerMode.EXTERNAL) set(m, { useGpu: m === ContainerMode.MANAGED && (d.gpu === GpuSupport.REQUIRED || (gpu && c.useGpu)) });
           }}
         />
       </Row>
-      {chosen === ContainerMode.MANAGED && d.gpu !== GpuSupport.UNSPECIFIED && (
+      {chosen === ContainerMode.MANAGED && d.gpu !== GpuSupport.UNSPECIFIED && gpu && (
         <Row label={t("plugins.containerUseGpu")}>
           <Switch
             on={c.useGpu}

@@ -307,6 +307,10 @@ func (s *Service) runPlugin(ctx context.Context, m *pluginv1.Manifest) error {
 
 // resolve is Resolve, with the environment of the dependency's proxy.
 func (s *Service) resolve(ctx context.Context, m *pluginv1.Manifest, spec *pluginv1.ContainerDependency, c core.PluginContainer) containers.Dependency {
+	// One that may use a GPU runs without on an engine giving it none.
+	if rt, _ := s.Runtime(ctx, false); !rt.GPU && spec.GetGpu() == pluginv1.GpuSupport_GPU_SUPPORT_OPTIONAL {
+		c.UseGPU = false
+	}
 	d := Resolve(s.cfg.Names, spec, c)
 	if s.cfg.ProxyEnv != nil && !spec.GetDirect() {
 		d.ProxyEnv = s.cfg.ProxyEnv(ctx, m, c)
@@ -567,7 +571,8 @@ func (s *Service) AllowsHost(ctx context.Context, pluginID, host string) bool {
 // Set sets how a dependency is reached and returns it, generating its
 // secrets the first time, and configures the plugin again when its mode
 // or address changed. A managed dependency needs a container engine
-// (ErrNoEngine); it runs while its plugin runs, reaching sites through
+// (ErrNoEngine), and one requiring a GPU an engine giving it one; one
+// that may use a GPU runs without on an engine giving none. It runs while its plugin runs, reaching sites through
 // the proxy of ID proxy, which nil keeps. Leaving managed removes its
 // container and keeps its volumes.
 func (s *Service) Set(ctx context.Context, pluginID, name string, mode core.ContainerMode, address string, useGPU bool, proxy *string) (Dependency, error) {
@@ -589,6 +594,9 @@ func (s *Service) Set(ctx context.Context, pluginID, name string, mode core.Cont
 	if mode == core.ContainerManaged {
 		if sup, err = s.supervisor(ctx); err != nil {
 			return Dependency{}, err
+		}
+		if rt, _ := s.Runtime(ctx, false); !rt.GPU && spec.GetGpu() == pluginv1.GpuSupport_GPU_SUPPORT_REQUIRED {
+			return Dependency{}, fmt.Errorf("%w: container %s of plugin %s needs an NVIDIA GPU, which the container engine gives none of", core.ErrInvalid, name, pluginID)
 		}
 	}
 	old, err := s.kept(ctx, pluginID, name)
@@ -727,6 +735,7 @@ func (s *Service) status(ctx context.Context, spec *pluginv1.ContainerDependency
 			st.SetAddress(managedAddress(ms))
 			if ms.State == containers.Pulling {
 				st.SetProgress(ms.Progress)
+				st.SetQueued(ms.Queued)
 			}
 			if ms.Err != nil {
 				st.SetError(ms.Err.Error())

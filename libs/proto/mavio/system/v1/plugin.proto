@@ -230,6 +230,9 @@ message ContainerRuntime {
   // Whether the server reaches what it runs through ports on the
   // loopback interface rather than a network its container joins.
   bool on_host = 9;
+  // Whether the engine gives containers NVIDIA GPUs: it has the NVIDIA
+  // Container Toolkit's runtime, or a CDI NVIDIA device.
+  bool gpu = 10;
 }
 
 message GetContainerRuntimeRequest {

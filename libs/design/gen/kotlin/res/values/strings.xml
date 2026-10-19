@@ -966,6 +966,8 @@
     <string name="plugins_container_address">Address</string>
     <!-- State of a container dependency whose image is being downloaded. -->
     <string name="plugins_container_pulling">Downloading</string>
+    <!-- State of a container dependency whose image download waits for other downloads to end. -->
+    <string name="plugins_container_queued">Waiting to Download</string>
     <!-- State of a container dependency starting. -->
     <string name="plugins_container_starting">Starting</string>
     <!-- State of a container dependency that can be used. -->

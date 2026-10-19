@@ -2,12 +2,14 @@ package containers
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io/fs"
 	"os"
 	"path/filepath"
 	"slices"
+	"strings"
 	"time"
 
 	"github.com/mavioai/mavio/libs/core"
@@ -29,6 +31,9 @@ type Runtime struct {
 	APIVersion string
 	// Rootless reports an engine running without root.
 	Rootless bool
+	// GPU reports an engine giving containers NVIDIA GPUs: it has the
+	// NVIDIA Container Toolkit's runtime, or a CDI NVIDIA device.
+	GPU bool
 	// InContainer reports that the server runs in a container.
 	InContainer bool
 	// Self is the server's own container, when it runs in one the
@@ -72,6 +77,7 @@ func Detect(ctx context.Context, o Options) (Runtime, error) {
 		}
 		rt.Client, rt.Version, rt.APIVersion = c, v, c.APIVersion()
 		rt.Rootless = slices.Contains(info.SecurityOptions, "name=rootless")
+		rt.GPU = info.gpu()
 		if rt.InContainer {
 			self, err := findSelf(ctx, c, o.Hostname)
 			if err != nil {
@@ -90,6 +96,27 @@ func Detect(ctx context.Context, o Options) (Runtime, error) {
 // info is what Detect reads of an engine's /info.
 type info struct {
 	SecurityOptions []string
+	// Runtimes are the OCI runtimes by name, "nvidia" among them once
+	// the NVIDIA Container Toolkit configured the engine.
+	Runtimes map[string]json.RawMessage
+	// DiscoveredDevices are the CDI devices the engine found, Docker 28.2
+	// and newer.
+	DiscoveredDevices []struct {
+		Source string
+		ID     string
+	}
+}
+
+// gpu reports whether the engine gives containers NVIDIA GPUs.
+func (i info) gpu() bool {
+	for name := range i.Runtimes {
+		if strings.Contains(name, "nvidia") {
+			return true
+		}
+	}
+	return slices.ContainsFunc(i.DiscoveredDevices, func(d struct{ Source, ID string }) bool {
+		return d.Source == "cdi" && strings.HasPrefix(d.ID, "nvidia.com/gpu")
+	})
 }
 
 // probe pings an engine, negotiates its API version and reads its info.

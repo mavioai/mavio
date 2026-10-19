@@ -16856,6 +16856,11 @@
             "title": "progress",
             "format": "double",
             "description": "While its image is pulled, the fraction downloaded, 0 to 1."
+          },
+          "queued": {
+            "type": "boolean",
+            "title": "queued",
+            "description": "While its image is pulled, whether the pull waits for others to end."
           }
         },
         "title": "ContainerStatus",
@@ -19972,6 +19977,11 @@
             "type": "boolean",
             "title": "on_host",
             "description": "Whether the server reaches what it runs through ports on the\n loopback interface rather than a network its container joins."
+          },
+          "gpu": {
+            "type": "boolean",
+            "title": "gpu",
+            "description": "Whether the engine gives containers NVIDIA GPUs: it has the NVIDIA\n Container Toolkit's runtime, or a CDI NVIDIA device."
           }
         },
         "title": "ContainerRuntime",

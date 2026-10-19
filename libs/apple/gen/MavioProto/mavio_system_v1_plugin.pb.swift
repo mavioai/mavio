@@ -773,6 +773,17 @@ public nonisolated struct Mavio_System_V1_ContainerRuntime: Sendable {
   /// Clears the value of `onHost`. Subsequent reads from it will return its default value.
   public mutating func clearOnHost() {self._onHost = nil}
 
+  /// Whether the engine gives containers NVIDIA GPUs: it has the NVIDIA
+  /// Container Toolkit's runtime, or a CDI NVIDIA device.
+  public var gpu: Bool {
+    get {_gpu ?? false}
+    set {_gpu = newValue}
+  }
+  /// Returns true if `gpu` has been explicitly set.
+  public var hasGpu: Bool {self._gpu != nil}
+  /// Clears the value of `gpu`. Subsequent reads from it will return its default value.
+  public mutating func clearGpu() {self._gpu = nil}
+
   public var unknownFields = SwiftProtobuf.UnknownStorage()
 
   public init() {}
@@ -786,6 +797,7 @@ public nonisolated struct Mavio_System_V1_ContainerRuntime: Sendable {
   fileprivate var _rootless: Bool? = nil
   fileprivate var _inContainer: Bool? = nil
   fileprivate var _onHost: Bool? = nil
+  fileprivate var _gpu: Bool? = nil
 }
 
 public nonisolated struct Mavio_System_V1_GetContainerRuntimeRequest: Sendable {
@@ -1930,7 +1942,7 @@ nonisolated extension Mavio_System_V1_SetPluginEnabledResponse: SwiftProtobuf.Me
 
 nonisolated extension Mavio_System_V1_ContainerRuntime: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".ContainerRuntime"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}available\0\u{1}reason\0\u{1}endpoint\0\u{1}engine\0\u{1}version\0\u{3}api_version\0\u{1}rootless\0\u{3}in_container\0\u{3}on_host\0")
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}available\0\u{1}reason\0\u{1}endpoint\0\u{1}engine\0\u{1}version\0\u{3}api_version\0\u{1}rootless\0\u{3}in_container\0\u{3}on_host\0\u{1}gpu\0")
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -1947,6 +1959,7 @@ nonisolated extension Mavio_System_V1_ContainerRuntime: SwiftProtobuf.Message, S
       case 7: try { try decoder.decodeSingularBoolField(value: &self._rootless) }()
       case 8: try { try decoder.decodeSingularBoolField(value: &self._inContainer) }()
       case 9: try { try decoder.decodeSingularBoolField(value: &self._onHost) }()
+      case 10: try { try decoder.decodeSingularBoolField(value: &self._gpu) }()
       default: break
       }
     }
@@ -1984,6 +1997,9 @@ nonisolated extension Mavio_System_V1_ContainerRuntime: SwiftProtobuf.Message, S
     try { if let v = self._onHost {
       try visitor.visitSingularBoolField(value: v, fieldNumber: 9)
     } }()
+    try { if let v = self._gpu {
+      try visitor.visitSingularBoolField(value: v, fieldNumber: 10)
+    } }()
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -1997,6 +2013,7 @@ nonisolated extension Mavio_System_V1_ContainerRuntime: SwiftProtobuf.Message, S
     if lhs._rootless != rhs._rootless {return false}
     if lhs._inContainer != rhs._inContainer {return false}
     if lhs._onHost != rhs._onHost {return false}
+    if lhs._gpu != rhs._gpu {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

@@ -3,14 +3,14 @@
 // load of its computer, and the plugins' containers.
 import { timestampDate } from "@bufbuild/protobuf/wkt";
 import { errorMessage, type ServerEntry, useContainerRuntime, useContainers, usePlugins, useSystemInfo } from "@mavio/client-ts";
-import { ContainerMode, ContainerState } from "@mavio/proto/mavio/plugin/v1/container_pb";
+import { ContainerMode } from "@mavio/proto/mavio/plugin/v1/container_pb";
 import { GetHealthResponse_Status } from "@mavio/proto/mavio/system/v1/system_pb";
 
 import { t } from "../../i18n.ts";
 import { Group, Row } from "../../ui.tsx";
 import { lengthOf, Page } from "./common.tsx";
 import { Load } from "./load.tsx";
-import { ContainerCommand, containerStates } from "../plugins.tsx";
+import { ContainerCommand, containerState } from "../plugins.tsx";
 
 /** The section of the server chosen in the settings. */
 export function OverviewSection({ server }: { server: ServerEntry }) {
@@ -81,9 +81,7 @@ function Containers({ server }: { server: ServerEntry }) {
           st &&
           (external
             ? t("overview.containerExternal", { address: st.address })
-            : st.state === ContainerState.PULLING && st.progress > 0
-              ? `${containerStates[st.state]()} ${Math.floor(st.progress * 100)}%`
-              : containerStates[st.state]());
+            : containerState(st));
         const command = external ? (c.useGpu ? c.gpuCommands : c.commands)?.dockerRun : c.command;
         return (
           <div key={`${c.pluginId}/${c.dependency?.name}`} className="flex flex-col">

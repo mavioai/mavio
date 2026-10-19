@@ -8623,6 +8623,24 @@
         }
       }
     },
+    "plugins.containerQueued": {
+      "comment": "State of a container dependency whose image download waits for other downloads to end.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Waiting to Download"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "等待下载"
+          }
+        }
+      }
+    },
     "plugins.containerStarting": {
       "comment": "State of a container dependency starting.",
       "extractionState": "manual",

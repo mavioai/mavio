@@ -1542,6 +1542,9 @@ public enum MavioStrings {
     /// State of a container dependency whose image is being downloaded.
     public static var pluginsContainerPulling: String { NSLocalizedString("plugins.containerPulling", bundle: .module, comment: "") }
 
+    /// State of a container dependency whose image download waits for other downloads to end.
+    public static var pluginsContainerQueued: String { NSLocalizedString("plugins.containerQueued", bundle: .module, comment: "") }
+
     /// State of a container dependency starting.
     public static var pluginsContainerStarting: String { NSLocalizedString("plugins.containerStarting", bundle: .module, comment: "") }
 

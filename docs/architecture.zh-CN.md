@@ -623,7 +623,7 @@ Mavio 为电影与单集查找缺少的字幕，即 Bazarr 在 Sonarr 与 Radarr
 
 ### 16.1 引擎检测
 * **端点**：`--container-endpoint`（`MAVIO_CONTAINER_ENDPOINT`），否则 `DOCKER_HOST`，否则以下第一个有应答的：`/var/run/docker.sock`、`$XDG_RUNTIME_DIR/docker.sock`（rootless Docker）、`~/.docker/run/docker.sock`（macOS 上的 Docker Desktop）、`$XDG_RUNTIME_DIR/podman/podman.sock`、`/run/podman/podman.sock`，Windows 上为命名管道 `//./pipe/docker_engine`。接受 `unix://`、`npipe://` 与 `tcp://` 端点；`tcp://` 端点必须是回环地址。
-* **检查**：`GET /_ping` 与 `GET /version`；Engine API 低于 1.41（Docker 20.10、Podman 3）的引擎被拒绝；请求使用引擎最新的 API 版本，至多 1.47，但不低于引擎接受的最旧版本。服务端在启动时以及管理员要求时检测，并保留托管依赖正在其上运行的引擎；结果（`ContainerRuntime`：是否可用或不可用的原因、端点、引擎名称与版本、是否 rootless、服务端运行在何处）由 `PluginManagementService.GetContainerRuntime` 报告。
+* **检查**：`GET /_ping` 与 `GET /version`；Engine API 低于 1.41（Docker 20.10、Podman 3）的引擎被拒绝；请求使用引擎最新的 API 版本，至多 1.47，但不低于引擎接受的最旧版本。服务端在启动时以及管理员要求时检测，并保留托管依赖正在其上运行的引擎；结果（`ContainerRuntime`：是否可用或不可用的原因、端点、引擎名称与版本、是否 rootless、是否为容器提供 NVIDIA GPU（依据其 info 中 NVIDIA Container Toolkit 的 `nvidia` 运行时或 CDI 设备 `nvidia.com/gpu`）、服务端运行在何处）由 `PluginManagementService.GetContainerRuntime` 报告。
 * **服务端运行在何处**：存在 `/.dockerenv` 或 `/run/.containerenv` 时视为运行在容器中。有引擎时，服务端检查自己的容器（按其主机名，即容器 ID）以获知网络模式；使用宿主机网络的服务端视为运行在宿主机上。
 * **客户端**：`libs/containers` 用 `net/http` 经 socket 调用它需要的端点（ping、version、info、镜像拉取与检查、网络创建、检查、连接与删除、容器创建、启动、停止、检查、列出与删除、卷列出与删除；卷由挂载它的容器带标签创建），Windows 上把命名管道作为文件打开。Podman 兼容 Docker 的 API 就是同一套 API。
 
@@ -634,8 +634,8 @@ Mavio 为电影与单集查找缺少的字幕，即 Bazarr 在 Sonarr 与 Radarr
 * **服务端在容器中**：服务端创建 `mavio` 桥接网络，把自己的容器连入，并在其中运行依赖而不发布端口；地址为 `http://mavio-<plugin>-<name>:<port>`。引擎找不到其自身容器的服务端（主机名不是其容器的 ID）不能托管依赖。
 
 ### 16.3 托管依赖
-* **允许**：按 digest 指定的镜像；声明的命令、环境变量、端口与命名卷；内存与 CPU 限制；声明需要且管理员允许时，经设备请求使用 NVIDIA GPU。绝不使用特权模式、额外的 capability、宿主机的网络、PID 或 IPC 命名空间、设备，或宿主机路径的绑定挂载。
-* **生命周期**：托管依赖随其插件运行：插件启动时，服务端确保网络存在，镜像缺失时拉取（在独立工作者上运行的 `plugin.container_pull` 任务，其进度即各层已下载的比例，显示在 `TaskService.ListJobs` 与依赖的 `pulling` 状态中），`dev.mavio.spec` 不同时替换容器，启动它并等待其健康检查通过；插件停止、被禁用或服务端关闭时，容器被停止。容器不设重启策略：服务端每 30 秒检查一次健康状态，连续三次失败后重启，退避方式与进程运行时相同（§7.3）。
+* **允许**：按 digest 指定的镜像；声明的命令、环境变量、端口与命名卷；内存与 CPU 限制；声明需要、管理员允许且引擎提供时，经设备请求使用 NVIDIA GPU；引擎不提供 GPU 时，可用 GPU 的依赖不用 GPU 运行，必须用 GPU 的依赖不能托管。绝不使用特权模式、额外的 capability、宿主机的网络、PID 或 IPC 命名空间、设备，或宿主机路径的绑定挂载。
+* **生命周期**：托管依赖随其插件运行：插件启动时，服务端确保网络存在，镜像缺失时拉取（在独立工作者上运行的 `plugin.container_pull` 任务，其进度即各层已下载的比例，显示在 `TaskService.ListJobs` 与依赖的 `pulling` 状态中，该状态也说明任务是否在等待其他拉取结束；不再有人等待的拉取，例如依赖改用另一个镜像时，会被跳过，或在最后一个等待者离开两秒后取消），`dev.mavio.spec` 不同时替换容器，启动它并等待其健康检查通过；插件停止、被禁用或服务端关闭时，容器被停止。容器不设重启策略：服务端每 30 秒检查一次健康状态，连续三次失败后重启，退避方式与进程运行时相同（§7.3）。
 * **对账**：启动时服务端列出带自己 ID 的对象，删除不再声明或不再托管的依赖的容器，并停止插件未在运行的运行中容器，即未经停止就结束的服务端遗留的容器。卸载插件时删除其容器与卷，如同删除其数据目录；把依赖改为外部时删除其容器、保留其卷。
 * **密钥**：声明要求服务端生成的值（`${secret:<key>}`，[插件 §11.1](plugins.zh-CN.md#111-声明)）随依赖保存，并传入容器的环境变量；它们从不写入日志。
 

@@ -2185,6 +2185,7 @@ type ContainerRuntime struct {
 	xxx_hidden_Rootless    bool                   `protobuf:"varint,7,opt,name=rootless"`
 	xxx_hidden_InContainer bool                   `protobuf:"varint,8,opt,name=in_container,json=inContainer"`
 	xxx_hidden_OnHost      bool                   `protobuf:"varint,9,opt,name=on_host,json=onHost"`
+	xxx_hidden_Gpu         bool                   `protobuf:"varint,10,opt,name=gpu"`
 	XXX_raceDetectHookData protoimpl.RaceDetectHookData
 	XXX_presence           [1]uint32
 	unknownFields          protoimpl.UnknownFields
@@ -2294,49 +2295,61 @@ func (x *ContainerRuntime) GetOnHost() bool {
 	return false
 }
 
+func (x *ContainerRuntime) GetGpu() bool {
+	if x != nil {
+		return x.xxx_hidden_Gpu
+	}
+	return false
+}
+
 func (x *ContainerRuntime) SetAvailable(v bool) {
 	x.xxx_hidden_Available = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 9)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 10)
 }
 
 func (x *ContainerRuntime) SetReason(v string) {
 	x.xxx_hidden_Reason = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 9)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 10)
 }
 
 func (x *ContainerRuntime) SetEndpoint(v string) {
 	x.xxx_hidden_Endpoint = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 9)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 10)
 }
 
 func (x *ContainerRuntime) SetEngine(v string) {
 	x.xxx_hidden_Engine = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 9)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 10)
 }
 
 func (x *ContainerRuntime) SetVersion(v string) {
 	x.xxx_hidden_Version = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 9)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 10)
 }
 
 func (x *ContainerRuntime) SetApiVersion(v string) {
 	x.xxx_hidden_ApiVersion = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 9)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 10)
 }
 
 func (x *ContainerRuntime) SetRootless(v bool) {
 	x.xxx_hidden_Rootless = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 9)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 10)
 }
 
 func (x *ContainerRuntime) SetInContainer(v bool) {
 	x.xxx_hidden_InContainer = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 9)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 10)
 }
 
 func (x *ContainerRuntime) SetOnHost(v bool) {
 	x.xxx_hidden_OnHost = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 8, 9)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 8, 10)
+}
+
+func (x *ContainerRuntime) SetGpu(v bool) {
+	x.xxx_hidden_Gpu = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 10)
 }
 
 func (x *ContainerRuntime) HasAvailable() bool {
@@ -2402,6 +2415,13 @@ func (x *ContainerRuntime) HasOnHost() bool {
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 8)
 }
 
+func (x *ContainerRuntime) HasGpu() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 9)
+}
+
 func (x *ContainerRuntime) ClearAvailable() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_Available = false
@@ -2447,6 +2467,11 @@ func (x *ContainerRuntime) ClearOnHost() {
 	x.xxx_hidden_OnHost = false
 }
 
+func (x *ContainerRuntime) ClearGpu() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 9)
+	x.xxx_hidden_Gpu = false
+}
+
 type ContainerRuntime_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
@@ -2465,6 +2490,9 @@ type ContainerRuntime_builder struct {
 	// Whether the server reaches what it runs through ports on the
 	// loopback interface rather than a network its container joins.
 	OnHost *bool
+	// Whether the engine gives containers NVIDIA GPUs: it has the NVIDIA
+	// Container Toolkit's runtime, or a CDI NVIDIA device.
+	Gpu *bool
 }
 
 func (b0 ContainerRuntime_builder) Build() *ContainerRuntime {
@@ -2472,40 +2500,44 @@ func (b0 ContainerRuntime_builder) Build() *ContainerRuntime {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Available != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 9)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 10)
 		x.xxx_hidden_Available = *b.Available
 	}
 	if b.Reason != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 9)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 10)
 		x.xxx_hidden_Reason = b.Reason
 	}
 	if b.Endpoint != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 9)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 10)
 		x.xxx_hidden_Endpoint = b.Endpoint
 	}
 	if b.Engine != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 9)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 10)
 		x.xxx_hidden_Engine = b.Engine
 	}
 	if b.Version != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 9)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 10)
 		x.xxx_hidden_Version = b.Version
 	}
 	if b.ApiVersion != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 9)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 10)
 		x.xxx_hidden_ApiVersion = b.ApiVersion
 	}
 	if b.Rootless != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 9)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 10)
 		x.xxx_hidden_Rootless = *b.Rootless
 	}
 	if b.InContainer != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 9)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 10)
 		x.xxx_hidden_InContainer = *b.InContainer
 	}
 	if b.OnHost != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 8, 9)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 8, 10)
 		x.xxx_hidden_OnHost = *b.OnHost
+	}
+	if b.Gpu != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 10)
+		x.xxx_hidden_Gpu = *b.Gpu
 	}
 	return m0
 }
@@ -3893,7 +3925,7 @@ const file_mavio_system_v1_plugin_proto_rawDesc = "" +
 	"\tplugin_id\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\bpluginId\x12\x18\n" +
 	"\aenabled\x18\x02 \x01(\bR\aenabled\"K\n" +
 	"\x18SetPluginEnabledResponse\x12/\n" +
-	"\x06plugin\x18\x01 \x01(\v2\x17.mavio.system.v1.PluginR\x06plugin\"\x8f\x02\n" +
+	"\x06plugin\x18\x01 \x01(\v2\x17.mavio.system.v1.PluginR\x06plugin\"\xa1\x02\n" +
 	"\x10ContainerRuntime\x12\x1c\n" +
 	"\tavailable\x18\x01 \x01(\bR\tavailable\x12\x16\n" +
 	"\x06reason\x18\x02 \x01(\tR\x06reason\x12\x1a\n" +
@@ -3904,7 +3936,9 @@ const file_mavio_system_v1_plugin_proto_rawDesc = "" +
 	"apiVersion\x12\x1a\n" +
 	"\brootless\x18\a \x01(\bR\brootless\x12!\n" +
 	"\fin_container\x18\b \x01(\bR\vinContainer\x12\x17\n" +
-	"\aon_host\x18\t \x01(\bR\x06onHost\"4\n" +
+	"\aon_host\x18\t \x01(\bR\x06onHost\x12\x10\n" +
+	"\x03gpu\x18\n" +
+	" \x01(\bR\x03gpu\"4\n" +
 	"\x1aGetContainerRuntimeRequest\x12\x16\n" +
 	"\x06detect\x18\x01 \x01(\bR\x06detect\"Z\n" +
 	"\x1bGetContainerRuntimeResponse\x12;\n" +

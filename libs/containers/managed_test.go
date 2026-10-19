@@ -379,13 +379,15 @@ func TestPullFraction(t *testing.T) {
 func TestSupervisorPullProgress(t *testing.T) {
 	synctest.Test(t, func(t *testing.T) {
 		e, h := containerstest.New(), &health{}
-		release := make(chan struct{})
+		start, release := make(chan struct{}), make(chan struct{})
 		var seen []containers.Status
 		var mu sync.Mutex
 		s := containers.NewSupervisor(containers.SupervisorOptions{
 			Engine: e, Server: "server-1", Probe: h.probe,
 			OnChange: func(_, _ string, st containers.Status) { mu.Lock(); seen = append(seen, st); mu.Unlock() },
 			Pull: func(ctx context.Context, ref string, progress func(containers.PullProgress)) error {
+				progress(containers.PullProgress{Status: containers.PullQueued})
+				<-start
 				progress(containers.PullProgress{Layer: "a", Status: "Downloading", Current: 50, Total: 100})
 				<-release
 				return e.PullImage(ctx, ref, nil)
@@ -394,8 +396,13 @@ func TestSupervisorPullProgress(t *testing.T) {
 		defer s.Close(context.Background())
 		s.Start(whisper())
 		synctest.Wait()
-		if st, _ := s.Status("dev.mavio.voice", "whisper"); st.State != containers.Pulling || st.Progress != 0.5 {
-			t.Errorf("Status while pulling = %+v, want pulling at 0.5", st)
+		if st, _ := s.Status("dev.mavio.voice", "whisper"); st.State != containers.Pulling || !st.Queued {
+			t.Errorf("Status while queued = %+v, want pulling, queued", st)
+		}
+		close(start)
+		synctest.Wait()
+		if st, _ := s.Status("dev.mavio.voice", "whisper"); st.State != containers.Pulling || st.Progress != 0.5 || st.Queued {
+			t.Errorf("Status while pulling = %+v, want pulling at 0.5, not queued", st)
 		}
 		close(release)
 		synctest.Wait()

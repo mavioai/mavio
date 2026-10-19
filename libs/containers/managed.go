@@ -155,6 +155,8 @@ type Status struct {
 	Err     error
 	// Progress is the fraction of the image downloaded while Pulling.
 	Progress float64
+	// Queued reports, while Pulling, a pull waiting for others to end.
+	Queued bool
 }
 
 // Engine is the part of the Engine API the Supervisor uses; *Client
@@ -194,7 +196,9 @@ type SupervisorOptions struct {
 	// published on the loopback interface. Empty for a server on the host.
 	Self string
 	// Pull pulls an image, telling of its progress; nil pulls it with
-	// Engine.PullImage. The server runs pulls as jobs through it.
+	// Engine.PullImage. The server runs pulls as jobs through it, telling
+	// PullQueued while a job waits for others, and cancels a pull that
+	// nothing waits for any longer.
 	Pull func(ctx context.Context, ref string, progress func(PullProgress)) error
 	// OnChange is called with a dependency's status whenever it changes,
 	// never concurrently for one dependency; nil calls nothing.
@@ -497,7 +501,7 @@ func (s *Supervisor) set(r *run, st Status) {
 	s.mu.Lock()
 	current := s.runs[key(r.dep.Plugin, r.dep.Name)] == r
 	changed := current && (r.status.State != st.State || r.status.Address != st.Address || r.status.Progress != st.Progress ||
-		errString(r.status.Err) != errString(st.Err))
+		r.status.Queued != st.Queued || errString(r.status.Err) != errString(st.Err))
 	if current {
 		r.status = st
 	}
@@ -598,15 +602,24 @@ func (s *Supervisor) ensure(ctx context.Context, r *run, name string) (id, addr 
 			s.set(r, Status{State: Pulling})
 			s.o.Logger.InfoContext(ctx, "pulling a dependency's image", "container", name, "image", d.Image)
 			var (
-				mu   sync.Mutex
-				frac PullFraction
+				mu     sync.Mutex
+				frac   PullFraction
+				done   float64
+				queued bool
 			)
 			err := s.o.Pull(ctx, d.Image, func(p PullProgress) {
 				mu.Lock()
+				q := p == PullProgress{Status: PullQueued}
 				f, moved := frac.Add(p)
-				mu.Unlock()
 				if moved {
-					s.set(r, Status{State: Pulling, Progress: f})
+					done = f
+				}
+				changed := moved || q != queued
+				queued = q
+				st := Status{State: Pulling, Progress: done, Queued: q}
+				mu.Unlock()
+				if changed {
+					s.set(r, st)
 				}
 			})
 			if err != nil {

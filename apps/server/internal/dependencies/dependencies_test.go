@@ -41,9 +41,17 @@ func (f *fakePlugins) Reconfigure(context.Context, string) error {
 	return nil
 }
 
-// onHost detects an engine with a client that reaches nothing, for a
-// server on the host.
-func onHost(context.Context) (containers.Runtime, error) {
+// onHost detects an engine with a client that reaches nothing, giving
+// GPUs, for a server on the host.
+func onHost(ctx context.Context) (containers.Runtime, error) {
+	rt, err := withoutGPU(ctx)
+	rt.GPU = true
+	return rt, err
+}
+
+// withoutGPU detects an engine with a client that reaches nothing, giving
+// no GPU, for a server on the host.
+func withoutGPU(context.Context) (containers.Runtime, error) {
 	return containers.Runtime{
 		Client:  containers.NewClient(containers.Endpoint{Network: containers.Unix, Address: "/run/none.sock"}),
 		Version: containers.Version{Engine: "docker", Version: "29.0.0"}, APIVersion: "1.47",
@@ -393,8 +401,8 @@ func TestPullJob(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if st := deps[0].Status.GetState(); st != pluginv1.ContainerState_CONTAINER_STATE_PULLING {
-		t.Errorf("state while the job waits = %v, want pulling", st)
+	if st := deps[0].Status; st.GetState() != pluginv1.ContainerState_CONTAINER_STATE_PULLING || !st.GetQueued() {
+		t.Errorf("status while the job waits = %v, want pulling, queued", st)
 	}
 	if _, err := s.RunPull(ctx, job); err != nil {
 		t.Fatal(err)
@@ -406,6 +414,87 @@ func TestPullJob(t *testing.T) {
 		deps, _ := s.List(ctx, pluginID)
 		return deps[0].Status.GetState() == pluginv1.ContainerState_CONTAINER_STATE_READY
 	})
+}
+
+func TestPullAbandoned(t *testing.T) {
+	engine := containerstest.New()
+	q := &queue{jobs: make(chan core.Job, 4)}
+	s, plugs, _ := newService(t, func(c *dependencies.Config) {
+		c.Detect = onHost
+		c.Engine = func(containers.Runtime) containers.Engine { return engine }
+		c.Jobs = q
+		c.Poll = 5 * time.Millisecond
+		c.Probe = func(context.Context, string, string) error { return nil }
+	})
+	ctx := t.Context()
+	next := func() core.Job {
+		t.Helper()
+		select {
+		case job := <-q.jobs:
+			return job
+		case <-time.After(5 * time.Second):
+			t.Fatal("no pull job was queued")
+			return core.Job{}
+		}
+	}
+	if _, err := s.Set(ctx, pluginID, "whisper", core.ContainerManaged, "", false, nil); err != nil {
+		t.Fatal(err)
+	}
+	s.PluginStarted(ctx, plugs.manifest)
+	cpu := next()
+	// Taking the GPU image leaves the pull of the CPU image waiting for nothing.
+	if _, err := s.Set(ctx, pluginID, "whisper", core.ContainerManaged, "", true, nil); err != nil {
+		t.Fatal(err)
+	}
+	gpu := next()
+	if !strings.Contains(string(gpu.Payload), "whisper:1-gpu") {
+		t.Fatalf("job = %s, want a pull of whisper:1-gpu", gpu.Payload)
+	}
+	engine.Took()
+	if _, err := s.RunPull(ctx, cpu); err != nil {
+		t.Fatal(err)
+	}
+	if got := engine.Took(); len(got) != 0 {
+		t.Errorf("calls of a pull nothing waits for = %q, want none", got)
+	}
+	if _, err := s.RunPull(ctx, gpu); err != nil {
+		t.Fatal(err)
+	}
+	eventually(t, "whisper ready", func() bool {
+		deps, _ := s.List(ctx, pluginID)
+		return deps[0].Status.GetState() == pluginv1.ContainerState_CONTAINER_STATE_READY
+	})
+}
+
+func TestManagedWithoutGPU(t *testing.T) {
+	engine := containerstest.New()
+	s, plugs, _ := newService(t, func(c *dependencies.Config) {
+		c.Detect = withoutGPU
+		c.Engine = func(containers.Runtime) containers.Engine { return engine }
+		c.Poll = 5 * time.Millisecond
+		c.Probe = func(context.Context, string, string) error { return nil }
+	})
+	ctx := t.Context()
+	if _, err := s.Set(ctx, pluginID, "whisper", core.ContainerManaged, "", true, nil); err != nil {
+		t.Fatal(err)
+	}
+	s.PluginStarted(ctx, plugs.manifest)
+	eventually(t, "whisper running", func() bool {
+		_, running, _ := engine.Spec("mavio-voice-whisper")
+		return running
+	})
+	if spec, _, _ := engine.Spec("mavio-voice-whisper"); spec.GPU || spec.Image != "whisper:1"+testDigest {
+		t.Errorf("container = %+v, want the CPU image without a GPU", spec)
+	}
+
+	plugs.manifest = pluginv1.Manifest_builder{Id: new(pluginID), Containers: []*pluginv1.ContainerDependency{
+		pluginv1.ContainerDependency_builder{
+			Name: new("cuda"), Image: new("cuda:1" + testDigest), Port: new(uint32(9000)), Gpu: pluginv1.GpuSupport_GPU_SUPPORT_REQUIRED.Enum(),
+		}.Build(),
+	}}.Build()
+	if _, err := s.Set(ctx, pluginID, "cuda", core.ContainerManaged, "", true, nil); !errors.Is(err, core.ErrInvalid) {
+		t.Errorf("Set of a dependency requiring a GPU = %v, want core.ErrInvalid", err)
+	}
 }
 
 func TestManagedProxy(t *testing.T) {

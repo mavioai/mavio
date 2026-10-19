@@ -251,12 +251,12 @@ DLNA 是第一方进程插件：它需要 UDP 组播（WASM 没有 socket）和�
 安装或升级插件时显示其依赖及镜像，管理员随插件一并批准；升级带来新的镜像 digest 时，插件启动时替换托管容器。
 
 ### 11.2 地址
-* `HostService.ListContainers` 返回插件的依赖及其模式（`unset`、`managed`、`external`）、地址与状态（`pulling`、`starting`、`ready`、`unhealthy`、`unavailable`）。与 `HostService` 的其他方法一样，任何插件都可调用（§7）。
+* `HostService.ListContainers` 返回插件的依赖及其模式（`unset`、`managed`、`external`）、地址与状态（`pulling`、`starting`、`ready`、`unhealthy`、`unavailable`），拉取时还有已下载的比例，或拉取是否在等待其他拉取。与 `HostService` 的其他方法一样，任何插件都可调用（§7）。
 * 地址变化时，服务端用已保存的配置再次调用 `Configure`，因此插件在被配置时读取地址。
 * 依赖未就绪时插件照常工作，并报告需要该依赖的操作的失败，如同面对一个无法访问的服务。
 
 ### 11.3 管理
-* `PluginManagementService.GetContainerRuntime` 说明是否有可用的容器引擎，`ListPluginContainers` 列出插件的依赖及运行它们的命令，`SetPluginContainer` 把某个依赖设为托管，或设为外部并给出地址。
+* `PluginManagementService.GetContainerRuntime` 说明是否有可用的容器引擎，以及它是否为容器提供 NVIDIA GPU，客户端只在提供时才给出 GPU 选项，`ListPluginContainers` 列出插件的依赖及运行它们的命令，`SetPluginContainer` 把某个依赖设为托管，或设为外部并给出地址。
 * 有引擎时客户端提供托管；否则提供命令（`docker run` 与一个 Compose 服务），并预填它们对应的地址（[架构 §16.4](architecture.zh-CN.md#164-外部依赖)）。
 
 ### 11.4 `plugins/voice`

@@ -757,6 +757,10 @@ pub struct ContainerStatusView<'a> {
     ///
     /// Field 6: `progress`
     pub progress: ::core::option::Option<f64>,
+    /// While its image is pulled, whether the pull waits for others to end.
+    ///
+    /// Field 7: `queued`
+    pub queued: ::core::option::Option<bool>,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for ContainerStatusView<'a> {
@@ -835,6 +839,13 @@ impl<'a> ::buffa::MessageView<'a> for ContainerStatusView<'a> {
                 )?;
                 view.progress = Some(::buffa::types::decode_double(&mut cur)?);
             }
+            7u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.queued = Some(::buffa::types::decode_bool(&mut cur)?);
+            }
             _ => {
                 ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
                 let span_len = before_tag.len() - cur.len();
@@ -863,6 +874,7 @@ impl<'a> ::buffa::MessageView<'a> for ContainerStatusView<'a> {
             state: self.state,
             error: self.error.map(|s| s.to_string()),
             progress: self.progress,
+            queued: self.queued,
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -892,6 +904,9 @@ impl<'a> ::buffa::ViewEncode<'a> for ContainerStatusView<'a> {
         if self.progress.is_some() {
             size += 1u64 + ::buffa::types::FIXED64_ENCODED_LEN as u64;
         }
+        if self.queued.is_some() {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -920,6 +935,9 @@ impl<'a> ::buffa::ViewEncode<'a> for ContainerStatusView<'a> {
         }
         if let Some(v) = self.progress {
             ::buffa::types::put_double_field(6u32, v, buf);
+        }
+        if let Some(v) = self.queued {
+            ::buffa::types::put_bool_field(7u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -1054,6 +1072,13 @@ impl ContainerStatusOwnedView {
     #[must_use]
     pub fn progress(&self) -> ::core::option::Option<f64> {
         self.0.reborrow().progress
+    }
+    /// While its image is pulled, whether the pull waits for others to end.
+    ///
+    /// Field 7: `queued`
+    #[must_use]
+    pub fn queued(&self) -> ::core::option::Option<bool> {
+        self.0.reborrow().queued
     }
 }
 impl ::core::convert::From<::buffa::OwnedView<ContainerStatusView<'static>>>

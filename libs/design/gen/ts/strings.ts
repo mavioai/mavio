@@ -478,6 +478,7 @@ export type MessageKey =
   | 'plugins.containerUseGpu'
   | 'plugins.containerAddress'
   | 'plugins.containerPulling'
+  | 'plugins.containerQueued'
   | 'plugins.containerStarting'
   | 'plugins.containerReady'
   | 'plugins.containerUnhealthy'
@@ -2406,6 +2407,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "plugins.containerUseGpu": "Use GPU",
     "plugins.containerAddress": "Address",
     "plugins.containerPulling": "Downloading",
+    "plugins.containerQueued": "Waiting to Download",
     "plugins.containerStarting": "Starting",
     "plugins.containerReady": "Ready",
     "plugins.containerUnhealthy": "Not Responding",
@@ -4332,6 +4334,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "plugins.containerUseGpu": "使用 GPU",
     "plugins.containerAddress": "地址",
     "plugins.containerPulling": "正在下载",
+    "plugins.containerQueued": "等待下载",
     "plugins.containerStarting": "正在启动",
     "plugins.containerReady": "就绪",
     "plugins.containerUnhealthy": "无响应",

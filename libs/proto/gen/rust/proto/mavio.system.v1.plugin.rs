@@ -3042,6 +3042,11 @@ pub struct ContainerRuntime {
     ///
     /// Field 9: `on_host`
     pub on_host: ::core::option::Option<bool>,
+    /// Whether the engine gives containers NVIDIA GPUs: it has the NVIDIA
+    /// Container Toolkit's runtime, or a CDI NVIDIA device.
+    ///
+    /// Field 10: `gpu`
+    pub gpu: ::core::option::Option<bool>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -3057,6 +3062,7 @@ impl ::core::fmt::Debug for ContainerRuntime {
             .field("rootless", &self.rootless)
             .field("in_container", &self.in_container)
             .field("on_host", &self.on_host)
+            .field("gpu", &self.gpu)
             .finish()
     }
 }
@@ -3146,6 +3152,13 @@ impl ContainerRuntime {
         self.on_host = Some(value);
         self
     }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::gpu`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_gpu(mut self, value: bool) -> Self {
+        self.gpu = Some(value);
+        self
+    }
 }
 ::buffa::impl_default_instance!(ContainerRuntime);
 impl ::buffa::MessageName for ContainerRuntime {
@@ -3194,6 +3207,9 @@ impl ::buffa::Message for ContainerRuntime {
         if self.on_host.is_some() {
             size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
         }
+        if self.gpu.is_some() {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -3230,6 +3246,9 @@ impl ::buffa::Message for ContainerRuntime {
         }
         if let Some(v) = self.on_host {
             ::buffa::types::put_bool_field(9u32, v, buf);
+        }
+        if let Some(v) = self.gpu {
+            ::buffa::types::put_bool_field(10u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -3334,6 +3353,15 @@ impl ::buffa::Message for ContainerRuntime {
                     ::buffa::types::decode_bool(buf)?,
                 );
             }
+            10u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.gpu = ::core::option::Option::Some(
+                    ::buffa::types::decode_bool(buf)?,
+                );
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -3351,6 +3379,7 @@ impl ::buffa::Message for ContainerRuntime {
         self.rootless = ::core::option::Option::None;
         self.in_container = ::core::option::Option::None;
         self.on_host = ::core::option::Option::None;
+        self.gpu = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }

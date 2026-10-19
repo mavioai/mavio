@@ -245,6 +245,33 @@ func TestDetect(t *testing.T) {
 	}
 }
 
+func TestDetectGPU(t *testing.T) {
+	tests := []struct {
+		name string
+		info map[string]any
+		want bool
+	}{
+		{"none", map[string]any{"Runtimes": map[string]any{"runc": map[string]any{"path": "runc"}}}, false},
+		{"nvidia runtime", map[string]any{"Runtimes": map[string]any{"runc": map[string]any{}, "nvidia": map[string]any{"path": "nvidia-container-runtime"}}}, true},
+		{"cdi device", map[string]any{"DiscoveredDevices": []any{map[string]any{"Source": "cdi", "ID": "nvidia.com/gpu=all"}}}, true},
+		{"other cdi device", map[string]any{"DiscoveredDevices": []any{map[string]any{"Source": "cdi", "ID": "vendor.com/device=0"}}}, false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			f := startFake(t, "1.47")
+			f.route("GET /v1.47/info", jsonRoute(tt.info))
+			rt, err := Detect(t.Context(), Options{Endpoint: f.ep.String(), Root: t.TempDir()})
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer rt.Client.Close()
+			if rt.GPU != tt.want {
+				t.Errorf("Detect: GPU = %v, want = %v", rt.GPU, tt.want)
+			}
+		})
+	}
+}
+
 func TestDetectOnHost(t *testing.T) {
 	f := startFake(t, "1.47")
 	f.route("GET /v1.47/info", jsonRoute(map[string]any{}))

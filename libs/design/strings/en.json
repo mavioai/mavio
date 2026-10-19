@@ -479,6 +479,7 @@
   "plugins.containerUseGpu": { "message": "Use GPU", "description": "Switch letting a container dependency the server runs use an NVIDIA GPU." },
   "plugins.containerAddress": { "message": "Address", "description": "Field of the address of a container dependency run elsewhere." },
   "plugins.containerPulling": { "message": "Downloading", "description": "State of a container dependency whose image is being downloaded." },
+  "plugins.containerQueued": { "message": "Waiting to Download", "description": "State of a container dependency whose image download waits for other downloads to end." },
   "plugins.containerStarting": { "message": "Starting", "description": "State of a container dependency starting." },
   "plugins.containerReady": { "message": "Ready", "description": "State of a container dependency that can be used." },
   "plugins.containerUnhealthy": { "message": "Not Responding", "description": "State of a container dependency whose health check fails." },

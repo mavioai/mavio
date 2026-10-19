@@ -251,12 +251,12 @@ The manifest's `containers` lists the dependencies, each with:
 Installing or upgrading a plugin shows its dependencies with their images, so an administrator approves them with the plugin; a new image digest in an upgrade replaces a managed container when the plugin starts.
 
 ### 11.2 Addresses
-* `HostService.ListContainers` returns the plugin's dependencies with their mode (`unset`, `managed`, `external`), address and state (`pulling`, `starting`, `ready`, `unhealthy`, `unavailable`). Every plugin may call it, like the rest of `HostService` (§7).
+* `HostService.ListContainers` returns the plugin's dependencies with their mode (`unset`, `managed`, `external`), address and state (`pulling`, `starting`, `ready`, `unhealthy`, `unavailable`), while pulling with the fraction downloaded or whether the pull waits for others. Every plugin may call it, like the rest of `HostService` (§7).
 * When an address changes, the server calls `Configure` again with the stored configuration, so a plugin reads its addresses when it is configured.
 * A plugin keeps working while a dependency is not ready and reports the failures of what needs it, as it does for an unreachable service.
 
 ### 11.3 Administration
-* `PluginManagementService.GetContainerRuntime` tells whether a container engine is available, `ListPluginContainers` lists a plugin's dependencies with the commands that run them, and `SetPluginContainer` makes one managed or external with an address.
+* `PluginManagementService.GetContainerRuntime` tells whether a container engine is available and whether it gives containers NVIDIA GPUs, which clients offer only then, `ListPluginContainers` lists a plugin's dependencies with the commands that run them, and `SetPluginContainer` makes one managed or external with an address.
 * Clients offer managed when an engine is available and otherwise the commands, `docker run` and a Compose service, with the address they lead to filled in ([Architecture §16.4](architecture.md#164-external-dependencies)).
 
 ### 11.4 `plugins/voice`

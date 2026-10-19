@@ -812,6 +812,10 @@ pub struct ContainerStatus {
     ///
     /// Field 6: `progress`
     pub progress: ::core::option::Option<f64>,
+    /// While its image is pulled, whether the pull waits for others to end.
+    ///
+    /// Field 7: `queued`
+    pub queued: ::core::option::Option<bool>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -824,6 +828,7 @@ impl ::core::fmt::Debug for ContainerStatus {
             .field("state", &self.state)
             .field("error", &self.error)
             .field("progress", &self.progress)
+            .field("queued", &self.queued)
             .finish()
     }
 }
@@ -892,6 +897,13 @@ impl ContainerStatus {
         self.progress = Some(value);
         self
     }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::queued`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_queued(mut self, value: bool) -> Self {
+        self.queued = Some(value);
+        self
+    }
 }
 ::buffa::impl_default_instance!(ContainerStatus);
 impl ::buffa::MessageName for ContainerStatus {
@@ -931,6 +943,9 @@ impl ::buffa::Message for ContainerStatus {
         if self.progress.is_some() {
             size += 1u64 + ::buffa::types::FIXED64_ENCODED_LEN as u64;
         }
+        if self.queued.is_some() {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -958,6 +973,9 @@ impl ::buffa::Message for ContainerStatus {
         }
         if let Some(v) = self.progress {
             ::buffa::types::put_double_field(6u32, v, buf);
+        }
+        if let Some(v) = self.queued {
+            ::buffa::types::put_bool_field(7u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -1029,6 +1047,15 @@ impl ::buffa::Message for ContainerStatus {
                     ::buffa::types::decode_double(buf)?,
                 );
             }
+            7u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.queued = ::core::option::Option::Some(
+                    ::buffa::types::decode_bool(buf)?,
+                );
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -1043,6 +1070,7 @@ impl ::buffa::Message for ContainerStatus {
         self.state = ::core::option::Option::None;
         self.error = ::core::option::Option::None;
         self.progress = ::core::option::Option::None;
+        self.queued = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }

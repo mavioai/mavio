@@ -407,6 +407,16 @@ public nonisolated struct Mavio_Plugin_V1_ContainerStatus: Sendable {
   /// Clears the value of `progress`. Subsequent reads from it will return its default value.
   public mutating func clearProgress() {self._progress = nil}
 
+  /// While its image is pulled, whether the pull waits for others to end.
+  public var queued: Bool {
+    get {_queued ?? false}
+    set {_queued = newValue}
+  }
+  /// Returns true if `queued` has been explicitly set.
+  public var hasQueued: Bool {self._queued != nil}
+  /// Clears the value of `queued`. Subsequent reads from it will return its default value.
+  public mutating func clearQueued() {self._queued = nil}
+
   public var unknownFields = SwiftProtobuf.UnknownStorage()
 
   public init() {}
@@ -417,6 +427,7 @@ public nonisolated struct Mavio_Plugin_V1_ContainerStatus: Sendable {
   fileprivate var _state: Mavio_Plugin_V1_ContainerState? = nil
   fileprivate var _error: String? = nil
   fileprivate var _progress: Double? = nil
+  fileprivate var _queued: Bool? = nil
 }
 
 public nonisolated struct Mavio_Plugin_V1_ListContainersRequest: Sendable {
@@ -564,7 +575,7 @@ nonisolated extension Mavio_Plugin_V1_ContainerDependency: SwiftProtobuf.Message
 
 nonisolated extension Mavio_Plugin_V1_ContainerStatus: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".ContainerStatus"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}name\0\u{1}mode\0\u{1}address\0\u{1}state\0\u{1}error\0\u{1}progress\0")
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}name\0\u{1}mode\0\u{1}address\0\u{1}state\0\u{1}error\0\u{1}progress\0\u{1}queued\0")
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -578,6 +589,7 @@ nonisolated extension Mavio_Plugin_V1_ContainerStatus: SwiftProtobuf.Message, Sw
       case 4: try { try decoder.decodeSingularEnumField(value: &self._state) }()
       case 5: try { try decoder.decodeSingularStringField(value: &self._error) }()
       case 6: try { try decoder.decodeSingularDoubleField(value: &self._progress) }()
+      case 7: try { try decoder.decodeSingularBoolField(value: &self._queued) }()
       default: break
       }
     }
@@ -606,6 +618,9 @@ nonisolated extension Mavio_Plugin_V1_ContainerStatus: SwiftProtobuf.Message, Sw
     try { if let v = self._progress {
       try visitor.visitSingularDoubleField(value: v, fieldNumber: 6)
     } }()
+    try { if let v = self._queued {
+      try visitor.visitSingularBoolField(value: v, fieldNumber: 7)
+    } }()
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -616,6 +631,7 @@ nonisolated extension Mavio_Plugin_V1_ContainerStatus: SwiftProtobuf.Message, Sw
     if lhs._state != rhs._state {return false}
     if lhs._error != rhs._error {return false}
     if lhs._progress != rhs._progress {return false}
+    if lhs._queued != rhs._queued {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

@@ -19,6 +19,10 @@ type Image struct {
 	Arch        string `json:"Architecture"`
 }
 
+// PullQueued is the Status of the PullProgress, without a layer, telling
+// that a pull waits for others to end before it starts.
+const PullQueued = "Queued"
+
 // PullProgress is a step of an image pull: a layer's status, such as
 // "Downloading" or "Pull complete", with its bytes done of its total when
 // known.

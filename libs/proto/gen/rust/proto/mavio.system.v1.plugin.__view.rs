@@ -5326,6 +5326,11 @@ pub struct ContainerRuntimeView<'a> {
     ///
     /// Field 9: `on_host`
     pub on_host: ::core::option::Option<bool>,
+    /// Whether the engine gives containers NVIDIA GPUs: it has the NVIDIA
+    /// Container Toolkit's runtime, or a CDI NVIDIA device.
+    ///
+    /// Field 10: `gpu`
+    pub gpu: ::core::option::Option<bool>,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for ContainerRuntimeView<'a> {
@@ -5421,6 +5426,13 @@ impl<'a> ::buffa::MessageView<'a> for ContainerRuntimeView<'a> {
                 )?;
                 view.on_host = Some(::buffa::types::decode_bool(&mut cur)?);
             }
+            10u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.gpu = Some(::buffa::types::decode_bool(&mut cur)?);
+            }
             _ => {
                 ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
                 let span_len = before_tag.len() - cur.len();
@@ -5452,6 +5464,7 @@ impl<'a> ::buffa::MessageView<'a> for ContainerRuntimeView<'a> {
             rootless: self.rootless,
             in_container: self.in_container,
             on_host: self.on_host,
+            gpu: self.gpu,
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -5488,6 +5501,9 @@ impl<'a> ::buffa::ViewEncode<'a> for ContainerRuntimeView<'a> {
             size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
         }
         if self.on_host.is_some() {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
+        if self.gpu.is_some() {
             size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
         }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
@@ -5527,6 +5543,9 @@ impl<'a> ::buffa::ViewEncode<'a> for ContainerRuntimeView<'a> {
         }
         if let Some(v) = self.on_host {
             ::buffa::types::put_bool_field(9u32, v, buf);
+        }
+        if let Some(v) = self.gpu {
+            ::buffa::types::put_bool_field(10u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -5676,6 +5695,14 @@ impl ContainerRuntimeOwnedView {
     #[must_use]
     pub fn on_host(&self) -> ::core::option::Option<bool> {
         self.0.reborrow().on_host
+    }
+    /// Whether the engine gives containers NVIDIA GPUs: it has the NVIDIA
+    /// Container Toolkit's runtime, or a CDI NVIDIA device.
+    ///
+    /// Field 10: `gpu`
+    #[must_use]
+    pub fn gpu(&self) -> ::core::option::Option<bool> {
+        self.0.reborrow().gpu
     }
 }
 impl ::core::convert::From<::buffa::OwnedView<ContainerRuntimeView<'static>>>

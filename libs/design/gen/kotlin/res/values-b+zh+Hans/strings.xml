@@ -488,6 +488,7 @@
     <string name="plugins_container_use_gpu">使用 GPU</string>
     <string name="plugins_container_address">地址</string>
     <string name="plugins_container_pulling">正在下载</string>
+    <string name="plugins_container_queued">等待下载</string>
     <string name="plugins_container_starting">正在启动</string>
     <string name="plugins_container_ready">就绪</string>
     <string name="plugins_container_unhealthy">无响应</string>
