@@ -302,14 +302,14 @@ private struct TopBar: ViewModifier {
 
     /// The avatar opening the settings: the user's initial on the bar's
     /// glass, or on the phone's bar, which has none for it, in a circle of
-    /// the bar's own translucence, its letter of the search icon's color.
+    /// the bar's own material, its letter of the search icon's color.
     @ViewBuilder private func settings(_ name: String, circle: Bool = false) -> some View {
         let initial = Text(name.first.map { String($0).uppercased() } ?? "")
         RouteLink(value: Route.settings) {
             if circle {
                 initial.font(.system(size: 15, weight: .semibold))
                     .frame(width: 32, height: 32)
-                    .background(.fill.secondary, in: .circle)
+                    .background(.ultraThinMaterial, in: .circle)
             } else {
                 initial.font(.system(size: 17, weight: .semibold))
             }
