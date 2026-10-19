@@ -10193,6 +10193,15 @@ func (x *Event) GetServersChanged() *ServersChanged {
 	return nil
 }
 
+func (x *Event) GetScanProgressChanged() *ScanProgressChanged {
+	if x != nil {
+		if x, ok := x.xxx_hidden_Kind.(*event_ScanProgressChanged); ok {
+			return x.ScanProgressChanged
+		}
+	}
+	return nil
+}
+
 func (x *Event) SetServerId(v string) {
 	x.xxx_hidden_ServerId = v
 }
@@ -10251,6 +10260,14 @@ func (x *Event) SetServersChanged(v *ServersChanged) {
 		return
 	}
 	x.xxx_hidden_Kind = &event_ServersChanged{v}
+}
+
+func (x *Event) SetScanProgressChanged(v *ScanProgressChanged) {
+	if v == nil {
+		x.xxx_hidden_Kind = nil
+		return
+	}
+	x.xxx_hidden_Kind = &event_ScanProgressChanged{v}
 }
 
 func (x *Event) HasKind() bool {
@@ -10316,6 +10333,14 @@ func (x *Event) HasServersChanged() bool {
 	return ok
 }
 
+func (x *Event) HasScanProgressChanged() bool {
+	if x == nil {
+		return false
+	}
+	_, ok := x.xxx_hidden_Kind.(*event_ScanProgressChanged)
+	return ok
+}
+
 func (x *Event) ClearKind() {
 	x.xxx_hidden_Kind = nil
 }
@@ -10362,6 +10387,12 @@ func (x *Event) ClearServersChanged() {
 	}
 }
 
+func (x *Event) ClearScanProgressChanged() {
+	if _, ok := x.xxx_hidden_Kind.(*event_ScanProgressChanged); ok {
+		x.xxx_hidden_Kind = nil
+	}
+}
+
 const Event_Kind_not_set_case case_Event_Kind = 0
 const Event_State_case case_Event_Kind = 2
 const Event_Connected_case case_Event_Kind = 3
@@ -10370,6 +10401,7 @@ const Event_UserDataChanged_case case_Event_Kind = 5
 const Event_SessionsChanged_case case_Event_Kind = 6
 const Event_TokenChanged_case case_Event_Kind = 7
 const Event_ServersChanged_case case_Event_Kind = 8
+const Event_ScanProgressChanged_case case_Event_Kind = 9
 
 func (x *Event) WhichKind() case_Event_Kind {
 	if x == nil {
@@ -10390,6 +10422,8 @@ func (x *Event) WhichKind() case_Event_Kind {
 		return Event_TokenChanged_case
 	case *event_ServersChanged:
 		return Event_ServersChanged_case
+	case *event_ScanProgressChanged:
+		return Event_ScanProgressChanged_case
 	default:
 		return Event_Kind_not_set_case
 	}
@@ -10400,13 +10434,14 @@ type Event_builder struct {
 
 	ServerId string
 	// Fields of oneof xxx_hidden_Kind:
-	State           *StreamState
-	Connected       *Connected
-	LibraryChanged  *LibraryChanged
-	UserDataChanged *UserDataChanged
-	SessionsChanged *SessionsChanged
-	TokenChanged    *TokenChanged
-	ServersChanged  *ServersChanged
+	State               *StreamState
+	Connected           *Connected
+	LibraryChanged      *LibraryChanged
+	UserDataChanged     *UserDataChanged
+	SessionsChanged     *SessionsChanged
+	TokenChanged        *TokenChanged
+	ServersChanged      *ServersChanged
+	ScanProgressChanged *ScanProgressChanged
 	// -- end of xxx_hidden_Kind
 }
 
@@ -10435,6 +10470,9 @@ func (b0 Event_builder) Build() *Event {
 	}
 	if b.ServersChanged != nil {
 		x.xxx_hidden_Kind = &event_ServersChanged{b.ServersChanged}
+	}
+	if b.ScanProgressChanged != nil {
+		x.xxx_hidden_Kind = &event_ScanProgressChanged{b.ScanProgressChanged}
 	}
 	return m0
 }
@@ -10481,6 +10519,10 @@ type event_ServersChanged struct {
 	ServersChanged *ServersChanged `protobuf:"bytes,8,opt,name=servers_changed,json=serversChanged,oneof"`
 }
 
+type event_ScanProgressChanged struct {
+	ScanProgressChanged *ScanProgressChanged `protobuf:"bytes,9,opt,name=scan_progress_changed,json=scanProgressChanged,oneof"`
+}
+
 func (*event_State) isEvent_Kind() {}
 
 func (*event_Connected) isEvent_Kind() {}
@@ -10494,6 +10536,8 @@ func (*event_SessionsChanged) isEvent_Kind() {}
 func (*event_TokenChanged) isEvent_Kind() {}
 
 func (*event_ServersChanged) isEvent_Kind() {}
+
+func (*event_ScanProgressChanged) isEvent_Kind() {}
 
 // The servers changed as the Mavio account's servers were followed; the
 // app lists them again. Its server_id is empty.
@@ -10846,6 +10890,223 @@ func (b0 SessionsChanged_builder) Build() *SessionsChanged {
 	return m0
 }
 
+// How far a library's scan has come, which the server tells
+// administrators at most twice a second while it runs, and once when it
+// ends.
+type ScanProgressChanged struct {
+	state                protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_LibraryId string                 `protobuf:"bytes,1,opt,name=library_id,json=libraryId"`
+	xxx_hidden_Progress  *ScanProgress          `protobuf:"bytes,2,opt,name=progress"`
+	unknownFields        protoimpl.UnknownFields
+	sizeCache            protoimpl.SizeCache
+}
+
+func (x *ScanProgressChanged) Reset() {
+	*x = ScanProgressChanged{}
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[81]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ScanProgressChanged) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ScanProgressChanged) ProtoMessage() {}
+
+func (x *ScanProgressChanged) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[81]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *ScanProgressChanged) GetLibraryId() string {
+	if x != nil {
+		return x.xxx_hidden_LibraryId
+	}
+	return ""
+}
+
+func (x *ScanProgressChanged) GetProgress() *ScanProgress {
+	if x != nil {
+		return x.xxx_hidden_Progress
+	}
+	return nil
+}
+
+func (x *ScanProgressChanged) SetLibraryId(v string) {
+	x.xxx_hidden_LibraryId = v
+}
+
+func (x *ScanProgressChanged) SetProgress(v *ScanProgress) {
+	x.xxx_hidden_Progress = v
+}
+
+func (x *ScanProgressChanged) HasProgress() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_Progress != nil
+}
+
+func (x *ScanProgressChanged) ClearProgress() {
+	x.xxx_hidden_Progress = nil
+}
+
+type ScanProgressChanged_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	LibraryId string
+	// Unset once the scan and the work it queued are done.
+	Progress *ScanProgress
+}
+
+func (b0 ScanProgressChanged_builder) Build() *ScanProgressChanged {
+	m0 := &ScanProgressChanged{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_LibraryId = b.LibraryId
+	x.xxx_hidden_Progress = b.Progress
+	return m0
+}
+
+// How far a library's scan has come.
+type ScanProgress struct {
+	state                     protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_ReadingFolders bool                   `protobuf:"varint,1,opt,name=reading_folders,json=readingFolders"`
+	xxx_hidden_FoldersDone    int32                  `protobuf:"varint,2,opt,name=folders_done,json=foldersDone"`
+	xxx_hidden_FoldersTotal   int32                  `protobuf:"varint,3,opt,name=folders_total,json=foldersTotal"`
+	xxx_hidden_ItemsDone      int32                  `protobuf:"varint,4,opt,name=items_done,json=itemsDone"`
+	xxx_hidden_ItemsTotal     int32                  `protobuf:"varint,5,opt,name=items_total,json=itemsTotal"`
+	xxx_hidden_Fraction       float64                `protobuf:"fixed64,6,opt,name=fraction"`
+	unknownFields             protoimpl.UnknownFields
+	sizeCache                 protoimpl.SizeCache
+}
+
+func (x *ScanProgress) Reset() {
+	*x = ScanProgress{}
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[82]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ScanProgress) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ScanProgress) ProtoMessage() {}
+
+func (x *ScanProgress) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[82]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *ScanProgress) GetReadingFolders() bool {
+	if x != nil {
+		return x.xxx_hidden_ReadingFolders
+	}
+	return false
+}
+
+func (x *ScanProgress) GetFoldersDone() int32 {
+	if x != nil {
+		return x.xxx_hidden_FoldersDone
+	}
+	return 0
+}
+
+func (x *ScanProgress) GetFoldersTotal() int32 {
+	if x != nil {
+		return x.xxx_hidden_FoldersTotal
+	}
+	return 0
+}
+
+func (x *ScanProgress) GetItemsDone() int32 {
+	if x != nil {
+		return x.xxx_hidden_ItemsDone
+	}
+	return 0
+}
+
+func (x *ScanProgress) GetItemsTotal() int32 {
+	if x != nil {
+		return x.xxx_hidden_ItemsTotal
+	}
+	return 0
+}
+
+func (x *ScanProgress) GetFraction() float64 {
+	if x != nil {
+		return x.xxx_hidden_Fraction
+	}
+	return 0
+}
+
+func (x *ScanProgress) SetReadingFolders(v bool) {
+	x.xxx_hidden_ReadingFolders = v
+}
+
+func (x *ScanProgress) SetFoldersDone(v int32) {
+	x.xxx_hidden_FoldersDone = v
+}
+
+func (x *ScanProgress) SetFoldersTotal(v int32) {
+	x.xxx_hidden_FoldersTotal = v
+}
+
+func (x *ScanProgress) SetItemsDone(v int32) {
+	x.xxx_hidden_ItemsDone = v
+}
+
+func (x *ScanProgress) SetItemsTotal(v int32) {
+	x.xxx_hidden_ItemsTotal = v
+}
+
+func (x *ScanProgress) SetFraction(v float64) {
+	x.xxx_hidden_Fraction = v
+}
+
+type ScanProgress_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	// Whether it reads the library's folders; else it probes the new and
+	// changed files and refreshes their items.
+	ReadingFolders bool
+	FoldersDone    int32
+	FoldersTotal   int32
+	ItemsDone      int32
+	ItemsTotal     int32
+	// How far the whole scan has come, from 0 to 1.
+	Fraction float64
+}
+
+func (b0 ScanProgress_builder) Build() *ScanProgress {
+	m0 := &ScanProgress{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_ReadingFolders = b.ReadingFolders
+	x.xxx_hidden_FoldersDone = b.FoldersDone
+	x.xxx_hidden_FoldersTotal = b.FoldersTotal
+	x.xxx_hidden_ItemsDone = b.ItemsDone
+	x.xxx_hidden_ItemsTotal = b.ItemsTotal
+	x.xxx_hidden_Fraction = b.Fraction
+	return m0
+}
+
 // The core has a new secret under the event's server ID, a session's
 // credentials or the device key, which the app keeps as it is in the
 // system's secure storage, or forgot it when the token is empty.
@@ -10858,7 +11119,7 @@ type TokenChanged struct {
 
 func (x *TokenChanged) Reset() {
 	*x = TokenChanged{}
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[81]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[83]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -10870,7 +11131,7 @@ func (x *TokenChanged) String() string {
 func (*TokenChanged) ProtoMessage() {}
 
 func (x *TokenChanged) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[81]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[83]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -11320,7 +11581,7 @@ const file_mavio_capi_v1_capi_proto_rawDesc = "" +
 	"\adefault\x18\x04 \x01(\bR\adefault\x12\x16\n" +
 	"\x06forced\x18\x05 \x01(\bR\x06forced\x12\x16\n" +
 	"\x06format\x18\x06 \x01(\tR\x06format\x12\x10\n" +
-	"\x03url\x18\a \x01(\tR\x03url\"\x8d\x04\n" +
+	"\x03url\x18\a \x01(\tR\x03url\"\xe7\x04\n" +
 	"\x05Event\x12\x1b\n" +
 	"\tserver_id\x18\x01 \x01(\tR\bserverId\x122\n" +
 	"\x05state\x18\x02 \x01(\v2\x1a.mavio.capi.v1.StreamStateH\x00R\x05state\x128\n" +
@@ -11329,7 +11590,8 @@ const file_mavio_capi_v1_capi_proto_rawDesc = "" +
 	"\x11user_data_changed\x18\x05 \x01(\v2\x1e.mavio.capi.v1.UserDataChangedH\x00R\x0fuserDataChanged\x12K\n" +
 	"\x10sessions_changed\x18\x06 \x01(\v2\x1e.mavio.capi.v1.SessionsChangedH\x00R\x0fsessionsChanged\x12B\n" +
 	"\rtoken_changed\x18\a \x01(\v2\x1b.mavio.capi.v1.TokenChangedH\x00R\ftokenChanged\x12H\n" +
-	"\x0fservers_changed\x18\b \x01(\v2\x1d.mavio.capi.v1.ServersChangedH\x00R\x0eserversChangedB\x06\n" +
+	"\x0fservers_changed\x18\b \x01(\v2\x1d.mavio.capi.v1.ServersChangedH\x00R\x0eserversChanged\x12X\n" +
+	"\x15scan_progress_changed\x18\t \x01(\v2\".mavio.capi.v1.ScanProgressChangedH\x00R\x13scanProgressChangedB\x06\n" +
 	"\x04kind\"\x10\n" +
 	"\x0eServersChanged\"\xb8\x01\n" +
 	"\vStreamState\x126\n" +
@@ -11348,7 +11610,20 @@ const file_mavio_capi_v1_capi_proto_rawDesc = "" +
 	"\x10removed_item_ids\x18\x03 \x03(\tR\x0eremovedItemIds\",\n" +
 	"\x0fUserDataChanged\x12\x19\n" +
 	"\bitem_ids\x18\x01 \x03(\tR\aitemIds\"\x11\n" +
-	"\x0fSessionsChanged\"$\n" +
+	"\x0fSessionsChanged\"m\n" +
+	"\x13ScanProgressChanged\x12\x1d\n" +
+	"\n" +
+	"library_id\x18\x01 \x01(\tR\tlibraryId\x127\n" +
+	"\bprogress\x18\x02 \x01(\v2\x1b.mavio.capi.v1.ScanProgressR\bprogress\"\xdb\x01\n" +
+	"\fScanProgress\x12'\n" +
+	"\x0freading_folders\x18\x01 \x01(\bR\x0ereadingFolders\x12!\n" +
+	"\ffolders_done\x18\x02 \x01(\x05R\vfoldersDone\x12#\n" +
+	"\rfolders_total\x18\x03 \x01(\x05R\ffoldersTotal\x12\x1d\n" +
+	"\n" +
+	"items_done\x18\x04 \x01(\x05R\titemsDone\x12\x1f\n" +
+	"\vitems_total\x18\x05 \x01(\x05R\n" +
+	"itemsTotal\x12\x1a\n" +
+	"\bfraction\x18\x06 \x01(\x01R\bfraction\"$\n" +
 	"\fTokenChanged\x12\x14\n" +
 	"\x05token\x18\x01 \x01(\tR\x05token*|\n" +
 	"\x04Sort\x12\x14\n" +
@@ -11417,7 +11692,7 @@ const file_mavio_capi_v1_capi_proto_rawDesc = "" +
 	"\x11com.mavio.capi.v1B\tCapiProtoP\x01ZGgithub.com/mavioai/mavio/libs/client-rust/capi/gen/mavio/capi/v1;capiv1\xa2\x02\x03MCX\xaa\x02\rMavio.Capi.V1\xca\x02\rMavio\\Capi\\V1\xe2\x02\x19Mavio\\Capi\\V1\\GPBMetadata\xea\x02\x0fMavio::Capi::V1\x92\x03\x02\b\x02b\beditionsp\xe8\a"
 
 var file_mavio_capi_v1_capi_proto_enumTypes = make([]protoimpl.EnumInfo, 8)
-var file_mavio_capi_v1_capi_proto_msgTypes = make([]protoimpl.MessageInfo, 84)
+var file_mavio_capi_v1_capi_proto_msgTypes = make([]protoimpl.MessageInfo, 86)
 var file_mavio_capi_v1_capi_proto_goTypes = []any{
 	(Sort)(0),                     // 0: mavio.capi.v1.Sort
 	(AccountMode)(0),              // 1: mavio.capi.v1.AccountMode
@@ -11508,9 +11783,11 @@ var file_mavio_capi_v1_capi_proto_goTypes = []any{
 	(*LibraryChanged)(nil),        // 86: mavio.capi.v1.LibraryChanged
 	(*UserDataChanged)(nil),       // 87: mavio.capi.v1.UserDataChanged
 	(*SessionsChanged)(nil),       // 88: mavio.capi.v1.SessionsChanged
-	(*TokenChanged)(nil),          // 89: mavio.capi.v1.TokenChanged
-	nil,                           // 90: mavio.capi.v1.Open.TokensEntry
-	nil,                           // 91: mavio.capi.v1.TitleCard.ExternalIdsEntry
+	(*ScanProgressChanged)(nil),   // 89: mavio.capi.v1.ScanProgressChanged
+	(*ScanProgress)(nil),          // 90: mavio.capi.v1.ScanProgress
+	(*TokenChanged)(nil),          // 91: mavio.capi.v1.TokenChanged
+	nil,                           // 92: mavio.capi.v1.Open.TokensEntry
+	nil,                           // 93: mavio.capi.v1.TitleCard.ExternalIdsEntry
 }
 var file_mavio_capi_v1_capi_proto_depIdxs = []int32{
 	11,  // 0: mavio.capi.v1.Request.open:type_name -> mavio.capi.v1.Open
@@ -11551,7 +11828,7 @@ var file_mavio_capi_v1_capi_proto_depIdxs = []int32{
 	35,  // 35: mavio.capi.v1.Request.sign_out:type_name -> mavio.capi.v1.SignOut
 	9,   // 36: mavio.capi.v1.Request.call_server:type_name -> mavio.capi.v1.CallServer
 	12,  // 37: mavio.capi.v1.Open.device:type_name -> mavio.capi.v1.Device
-	90,  // 38: mavio.capi.v1.Open.tokens:type_name -> mavio.capi.v1.Open.TokensEntry
+	92,  // 38: mavio.capi.v1.Open.tokens:type_name -> mavio.capi.v1.Open.TokensEntry
 	0,   // 39: mavio.capi.v1.ListLibraryItems.sort:type_name -> mavio.capi.v1.Sort
 	41,  // 40: mavio.capi.v1.ListLibraryItems.filter:type_name -> mavio.capi.v1.Filter
 	47,  // 41: mavio.capi.v1.Play.options:type_name -> mavio.capi.v1.PlaybackOptions
@@ -11582,7 +11859,7 @@ var file_mavio_capi_v1_capi_proto_depIdxs = []int32{
 	62,  // 66: mavio.capi.v1.Card.poster:type_name -> mavio.capi.v1.Artwork
 	62,  // 67: mavio.capi.v1.Card.thumb:type_name -> mavio.capi.v1.Artwork
 	63,  // 68: mavio.capi.v1.Card.versions:type_name -> mavio.capi.v1.Version
-	91,  // 69: mavio.capi.v1.TitleCard.external_ids:type_name -> mavio.capi.v1.TitleCard.ExternalIdsEntry
+	93,  // 69: mavio.capi.v1.TitleCard.external_ids:type_name -> mavio.capi.v1.TitleCard.ExternalIdsEntry
 	63,  // 70: mavio.capi.v1.TitleCard.available:type_name -> mavio.capi.v1.Version
 	3,   // 71: mavio.capi.v1.Row.kind:type_name -> mavio.capi.v1.RowKind
 	67,  // 72: mavio.capi.v1.Row.items:type_name -> mavio.capi.v1.Cards
@@ -11612,14 +11889,16 @@ var file_mavio_capi_v1_capi_proto_depIdxs = []int32{
 	86,  // 96: mavio.capi.v1.Event.library_changed:type_name -> mavio.capi.v1.LibraryChanged
 	87,  // 97: mavio.capi.v1.Event.user_data_changed:type_name -> mavio.capi.v1.UserDataChanged
 	88,  // 98: mavio.capi.v1.Event.sessions_changed:type_name -> mavio.capi.v1.SessionsChanged
-	89,  // 99: mavio.capi.v1.Event.token_changed:type_name -> mavio.capi.v1.TokenChanged
+	91,  // 99: mavio.capi.v1.Event.token_changed:type_name -> mavio.capi.v1.TokenChanged
 	83,  // 100: mavio.capi.v1.Event.servers_changed:type_name -> mavio.capi.v1.ServersChanged
-	7,   // 101: mavio.capi.v1.StreamState.state:type_name -> mavio.capi.v1.StreamState.State
-	102, // [102:102] is the sub-list for method output_type
-	102, // [102:102] is the sub-list for method input_type
-	102, // [102:102] is the sub-list for extension type_name
-	102, // [102:102] is the sub-list for extension extendee
-	0,   // [0:102] is the sub-list for field type_name
+	89,  // 101: mavio.capi.v1.Event.scan_progress_changed:type_name -> mavio.capi.v1.ScanProgressChanged
+	7,   // 102: mavio.capi.v1.StreamState.state:type_name -> mavio.capi.v1.StreamState.State
+	90,  // 103: mavio.capi.v1.ScanProgressChanged.progress:type_name -> mavio.capi.v1.ScanProgress
+	104, // [104:104] is the sub-list for method output_type
+	104, // [104:104] is the sub-list for method input_type
+	104, // [104:104] is the sub-list for extension type_name
+	104, // [104:104] is the sub-list for extension extendee
+	0,   // [0:104] is the sub-list for field type_name
 }
 
 func init() { file_mavio_capi_v1_capi_proto_init() }
@@ -11701,6 +11980,7 @@ func file_mavio_capi_v1_capi_proto_init() {
 		(*event_SessionsChanged)(nil),
 		(*event_TokenChanged)(nil),
 		(*event_ServersChanged)(nil),
+		(*event_ScanProgressChanged)(nil),
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -11708,7 +11988,7 @@ func file_mavio_capi_v1_capi_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_mavio_capi_v1_capi_proto_rawDesc), len(file_mavio_capi_v1_capi_proto_rawDesc)),
 			NumEnums:      8,
-			NumMessages:   84,
+			NumMessages:   86,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

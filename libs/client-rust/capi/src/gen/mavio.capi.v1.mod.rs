@@ -356,6 +356,14 @@ pub use self::__buffa::view::SessionsChangedView;
 #[doc(inline)]
 pub use self::__buffa::view::SessionsChangedOwnedView;
 #[doc(inline)]
+pub use self::__buffa::view::ScanProgressChangedView;
+#[doc(inline)]
+pub use self::__buffa::view::ScanProgressChangedOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ScanProgressView;
+#[doc(inline)]
+pub use self::__buffa::view::ScanProgressOwnedView;
+#[doc(inline)]
 pub use self::__buffa::view::TokenChangedView;
 #[doc(inline)]
 pub use self::__buffa::view::TokenChangedOwnedView;

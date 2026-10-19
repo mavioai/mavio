@@ -702,6 +702,9 @@ pub mod event {
         ),
         TokenChanged(::buffa::alloc::boxed::Box<super::super::super::TokenChanged>),
         ServersChanged(::buffa::alloc::boxed::Box<super::super::super::ServersChanged>),
+        ScanProgressChanged(
+            ::buffa::alloc::boxed::Box<super::super::super::ScanProgressChanged>,
+        ),
     }
     impl ::buffa::Oneof for Kind {}
     impl From<super::super::super::StreamState> for Kind {
@@ -771,6 +774,17 @@ pub mod event {
     }
     impl From<super::super::super::ServersChanged> for ::core::option::Option<Kind> {
         fn from(v: super::super::super::ServersChanged) -> Self {
+            Self::Some(Kind::from(v))
+        }
+    }
+    impl From<super::super::super::ScanProgressChanged> for Kind {
+        fn from(v: super::super::super::ScanProgressChanged) -> Self {
+            Self::ScanProgressChanged(::buffa::alloc::boxed::Box::new(v))
+        }
+    }
+    impl From<super::super::super::ScanProgressChanged>
+    for ::core::option::Option<Kind> {
+        fn from(v: super::super::super::ScanProgressChanged) -> Self {
             Self::Some(Kind::from(v))
         }
     }

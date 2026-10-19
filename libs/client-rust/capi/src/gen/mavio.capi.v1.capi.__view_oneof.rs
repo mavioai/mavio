@@ -354,5 +354,10 @@ pub mod event {
                 super::super::super::super::__buffa::view::ServersChangedView<'a>,
             >,
         ),
+        ScanProgressChanged(
+            ::buffa::alloc::boxed::Box<
+                super::super::super::super::__buffa::view::ScanProgressChangedView<'a>,
+            >,
+        ),
     }
 }

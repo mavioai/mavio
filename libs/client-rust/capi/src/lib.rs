@@ -26,6 +26,7 @@ use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::{Arc, Mutex, OnceLock};
 
 use buffa::Message as _;
+use mavio_api::proto::mavio::library::v1::ScanPhase;
 use mavio_api::proto::mavio::playback::v1::ClientCapabilities;
 use mavio_api::proto::mavio::session::v1::__buffa::oneof::event::Kind as EventKind;
 use mavio_api::proto::mavio::session::v1::Event;
@@ -165,6 +166,25 @@ impl mavio_core::Listener for Listener {
             }
             .into(),
             Some(EventKind::SessionsChanged(_)) => pb::SessionsChanged::default().into(),
+            Some(EventKind::ScanProgressChanged(c)) => pb::ScanProgressChanged {
+                library_id: c.library_id.clone().unwrap_or_default(),
+                progress: c
+                    .progress
+                    .as_option()
+                    .map(|p| pb::ScanProgress {
+                        reading_folders: p.phase.as_ref().and_then(|p| p.as_known())
+                            == Some(ScanPhase::SCAN_PHASE_FOLDERS),
+                        folders_done: p.folders_done.unwrap_or_default(),
+                        folders_total: p.folders_total.unwrap_or_default(),
+                        items_done: p.items_done.unwrap_or_default(),
+                        items_total: p.items_total.unwrap_or_default(),
+                        fraction: p.fraction.unwrap_or_default(),
+                        ..Default::default()
+                    })
+                    .into(),
+                ..Default::default()
+            }
+            .into(),
             _ => return,
         };
         self.0.event(server_id, kind);

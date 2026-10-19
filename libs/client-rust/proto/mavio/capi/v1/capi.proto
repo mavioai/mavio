@@ -843,6 +843,7 @@ message Event {
     SessionsChanged sessions_changed = 6;
     TokenChanged token_changed = 7;
     ServersChanged servers_changed = 8;
+    ScanProgressChanged scan_progress_changed = 9;
   }
 }
 
@@ -885,6 +886,28 @@ message UserDataChanged {
 
 // The sessions of the user's devices changed.
 message SessionsChanged {}
+
+// How far a library's scan has come, which the server tells
+// administrators at most twice a second while it runs, and once when it
+// ends.
+message ScanProgressChanged {
+  string library_id = 1;
+  // Unset once the scan and the work it queued are done.
+  ScanProgress progress = 2;
+}
+
+// How far a library's scan has come.
+message ScanProgress {
+  // Whether it reads the library's folders; else it probes the new and
+  // changed files and refreshes their items.
+  bool reading_folders = 1;
+  int32 folders_done = 2;
+  int32 folders_total = 3;
+  int32 items_done = 4;
+  int32 items_total = 5;
+  // How far the whole scan has come, from 0 to 1.
+  double fraction = 6;
+}
 
 // The core has a new secret under the event's server ID, a session's
 // credentials or the device key, which the app keeps as it is in the
