@@ -279,28 +279,38 @@ private struct TopBar: ViewModifier {
                     Wordmark(height: 20).accessibilityLabel("Mavio")
                 }
                 .hiddenSharedBackground()
-                // Search and the avatar on one glass, as the bar buttons of
-                // the system's apps, their marks taking its light or dark.
-                ToolbarItemGroup(placement: .topBarTrailing) {
-                    RouteLink(value: Route.search) {
-                        Icon("search", size: 22)
+                // Search bare beside the avatar on its glass, the two as
+                // close as the web UI's.
+                ToolbarItem(placement: .topBarTrailing) {
+                    HStack(spacing: MavioSpacing.s12) {
+                        RouteLink(value: Route.search) {
+                            Icon("search", size: 22)
+                        }
+                        .accessibilityLabel(MavioStrings.navSearch)
+                        settings(name, glass: true)
                     }
-                    .accessibilityLabel(MavioStrings.navSearch)
-                    settings(name)
+                    .buttonStyle(.plain)
                 }
+                .hiddenSharedBackground()
             } else {
-                // On the glass the tab bar beside it has.
+                // On the glass the tab bar beside it has, its letter taking
+                // the glass's light or dark as the tabs' do.
                 ToolbarItem(placement: .topBarTrailing) { settings(name) }
             }
         }
     }
 
     /// The avatar opening the settings: the user's initial on the bar's
-    /// glass.
-    private func settings(_ name: String) -> some View {
+    /// glass, or on glass of its own where the bar has none for it.
+    @ViewBuilder private func settings(_ name: String, glass: Bool = false) -> some View {
+        let initial = Text(name.first.map { String($0).uppercased() } ?? "")
+            .font(.system(size: 17, weight: .semibold))
         RouteLink(value: Route.settings) {
-            Text(name.first.map { String($0).uppercased() } ?? "")
-                .font(.system(size: 17, weight: .semibold))
+            if glass {
+                initial.frame(width: 44, height: 44).contentShape(.circle).glass(in: .circle)
+            } else {
+                initial
+            }
         }
         .accessibilityLabel(MavioStrings.navSettings)
     }
