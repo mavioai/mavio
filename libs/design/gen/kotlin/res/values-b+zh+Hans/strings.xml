@@ -228,6 +228,7 @@
     <string name="download_progress">%1$s，共 %2$s</string>
     <string name="download_resume">继续下载</string>
     <string name="download_empty_message">下载的项目可以在没有网络时在这里播放。</string>
+    <string name="download_message">下载的内容保存在这台设备上，没有网络时也能播放。</string>
     <string name="player_play">播放</string>
     <string name="player_pause">暂停</string>
     <plurals name="player_seek_back">

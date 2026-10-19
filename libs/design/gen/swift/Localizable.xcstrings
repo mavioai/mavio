@@ -3979,6 +3979,24 @@
         }
       }
     },
+    "download.message": {
+      "comment": "Note atop the Downloads screen: where downloads are kept.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Downloads are saved on this device and play without a connection."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "下载的内容保存在这台设备上，没有网络时也能播放。"
+          }
+        }
+      }
+    },
     "player.play": {
       "comment": "Accessibility label of the play button of the player.",
       "extractionState": "manual",

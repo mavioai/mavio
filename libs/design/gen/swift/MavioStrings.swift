@@ -737,6 +737,9 @@ public enum MavioStrings {
     /// Message of the empty Downloads screen.
     public static var downloadEmptyMessage: String { NSLocalizedString("download.emptyMessage", bundle: .module, comment: "") }
 
+    /// Note atop the Downloads screen: where downloads are kept.
+    public static var downloadMessage: String { NSLocalizedString("download.message", bundle: .module, comment: "") }
+
     /// Accessibility label of the play button of the player.
     public static var playerPlay: String { NSLocalizedString("player.play", bundle: .module, comment: "") }
 

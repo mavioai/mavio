@@ -449,6 +449,8 @@
     <string name="download_resume">Resume Download</string>
     <!-- Message of the empty Downloads screen. -->
     <string name="download_empty_message">Items you download play here without a connection.</string>
+    <!-- Note atop the Downloads screen: where downloads are kept. -->
+    <string name="download_message">Downloads are saved on this device and play without a connection.</string>
     <!-- Accessibility label of the play button of the player. -->
     <string name="player_play">Play</string>
     <!-- Accessibility label of the pause button of the player. -->
