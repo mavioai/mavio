@@ -28,8 +28,8 @@ func TestSearch(t *testing.T) {
 		}
 		h.settle()
 	}
-	if p := h.app.router.Path(); p != "/search" {
-		t.Errorf("path = %q, want = %q", p, "/search")
+	if l := h.app.router.Location(); l != "/search?q=orb" {
+		t.Errorf("location = %q, want = %q", l, "/search?q=orb")
 	}
 	for _, w := range []string{"From the Server", "From Discover", "The Long Orbit"} {
 		if !h.tt.HasText(w) {
@@ -64,6 +64,32 @@ func TestSearch(t *testing.T) {
 	if !h.tt.HasText("No results") || h.tt.HasText("From the Server") {
 		t.Errorf("no results: texts = %q", h.tt.Texts())
 	}
+
+	// Each search is an entry of the history: Back returns to the one
+	// before, the field following it.
+	h.app.router.Go(-1)
+	h.settle()
+	if got := h.app.searchState.query; got != "orb" || !h.tt.HasText("The Long Orbit") {
+		t.Errorf("back: query = %q, texts = %q", got, h.tt.Texts())
+	}
+	// Leaving Search empties the field; Search, chosen again, returns
+	// to its query.
+	h.click("Home")
+	if got := h.app.searchState.query; got != "" {
+		t.Errorf("query on Home = %q, want = empty", got)
+	}
+	// Confirming no query stays where it is.
+	h.tt.Key(ui.Cmd, ui.KeyK)
+	h.tt.Key(0, ui.KeyEnter)
+	h.settle()
+	if p := h.app.router.Path(); p != "/home" {
+		t.Errorf("path = %q, want = /home", p)
+	}
+	h.app.openPlace("/search")
+	h.settle()
+	if l, q := h.app.router.Location(), h.app.searchState.query; l != "/search?q=orb" || q != "orb" {
+		t.Errorf("location = %q, query = %q, want = /search?q=orb", l, q)
+	}
 }
 
 // Where no expanded sidebar shows a field, the Search page has its own,
@@ -83,5 +109,12 @@ func TestSearchPageField(t *testing.T) {
 	}
 	if !h.tt.HasText("The Long Orbit") {
 		t.Errorf("no results; texts = %q", h.tt.Texts())
+	}
+	// Confirming no query clears the search.
+	h.click("Clear")
+	h.tt.Key(0, ui.KeyEnter)
+	h.settle()
+	if l := h.app.router.Location(); l != "/search" || h.tt.HasText("The Long Orbit") {
+		t.Errorf("location = %q, texts = %q, want = /search with no results", l, h.tt.Texts())
 	}
 }

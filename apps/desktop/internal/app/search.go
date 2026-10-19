@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"net/url"
 	"strings"
 	"time"
 
@@ -19,11 +20,13 @@ const searchDelay = 300 * time.Millisecond
 
 // searchState is the search's state.
 type searchState struct {
+	// query is the fields' text; the query searched is the Search page's
+	// address's q, as the web UI's, so that each search is an entry of
+	// the history.
 	query string
-	// ran is the query confirmed, which the search runs outside the TV
-	// mode.
-	ran     string
-	typed   string // the query when it last changed
+	// seen is the address's query when the text last followed it.
+	seen    string
+	typed   string // the TV mode's text when it last changed
 	changed time.Time
 	// servers are what each server found, searched one by one so that
 	// each one's row shows as it answers.
@@ -38,23 +41,57 @@ type searched struct {
 	results *capiv1.ServerResults
 }
 
+// searchPath returns the Search page's address searching for query.
+func searchPath(query string) string {
+	if query == "" {
+		return "/search"
+	}
+	return "/search?" + url.Values{"q": {query}}.Encode()
+}
+
+// searchedQuery returns the query the page shown searches for: its
+// address's on Search, else none.
+func (a *App) searchedQuery() string {
+	if a.router.Path() != "/search" {
+		return ""
+	}
+	loc := a.router.Location()
+	_, raw, _ := strings.Cut(loc, "?")
+	v, _ := url.ParseQuery(raw)
+	return strings.TrimSpace(v.Get("q"))
+}
+
+// followSearch sets the fields' text to the query searched as it changes
+// other than by typing, as going back, and to nothing leaving Search.
+func (a *App) followSearch() {
+	s := &a.searchState
+	if q := a.searchedQuery(); q != s.seen {
+		s.seen, s.query = q, q
+	}
+}
+
 // search builds the search: a field, confirmed with Return, and what each
 // server found (docs/clients.md §5.4); in the TV mode it runs as the
-// keyboard types.
+// keyboard types, the address following the query after a pause.
 func (a *App) search(c *ui.Context) {
 	s := &a.searchState
 	tv := style.TV(c)
-	query := s.ran
+	a.followSearch()
+	query := s.seen
 	if tv {
 		now := c.Now()
 		if s.query != s.typed {
 			s.typed, s.changed = s.query, now
 		}
-		query = strings.TrimSpace(s.query)
-		if wait := searchDelay - now.Sub(s.changed); wait > 0 && query != "" {
-			c.After(wait)
-			a.tvSearch(c, query)
-			return
+		if typed := strings.TrimSpace(s.query); typed != query {
+			if wait := searchDelay - now.Sub(s.changed); wait > 0 {
+				c.After(wait)
+			} else {
+				// The address takes the query's place, so that results
+				// are its own while Back deletes rather than goes back.
+				s.seen, query = typed, typed
+				a.replace(searchPath(typed))
+			}
 		}
 	}
 	if query != "" {
@@ -69,8 +106,12 @@ func (a *App) search(c *ui.Context) {
 	var field func()
 	if w < design.BreakpointExpanded || a.prefs.SidebarCollapsed {
 		field = func() {
-			if ui.SearchField(c, &s.query).Placeholder(style.T(c, "search.placeholder")).AutoFocus().Grow(1).MaxWidth(560).Height(36).Submitted() {
-				a.confirmSearch()
+			f := ui.SearchField(c, &s.query).Placeholder(style.T(c, "search.placeholder")).Grow(1).MaxWidth(560).Height(36)
+			if query == "" {
+				f.AutoFocus()
+			}
+			if f.Submitted() {
+				a.confirmSearch(true)
 			}
 		}
 	}
@@ -87,15 +128,32 @@ func (a *App) search(c *ui.Context) {
 	})
 }
 
-// confirmSearch runs the search of the query typed. Results are kept,
-// coming back to them; confirming the query again searches again.
-func (a *App) confirmSearch() {
-	s := &a.searchState
-	q := strings.TrimSpace(s.query)
-	if q != s.ran {
-		s.ran = q
-		return
+// confirmSearch searches for the query typed, as the web UI's: on the
+// Search page, in a new entry of the history; results are kept, coming
+// back to them, and confirming the query searched again searches again.
+// Confirming no query clears the Search page's, unless the field is the
+// sidebar's, which then does nothing.
+func (a *App) confirmSearch(clears bool) {
+	q := strings.TrimSpace(a.searchState.query)
+	switch {
+	case q != "" && q == a.searchedQuery():
+		a.searchAgain()
+	case q != "" || clears && a.router.Path() == "/search":
+		a.searchFor(q)
 	}
+}
+
+// searchFor opens the Search page searching for query.
+func (a *App) searchFor(query string) {
+	s := &a.searchState
+	s.seen, s.query = query, query
+	a.router.Push(searchPath(query))
+}
+
+// searchAgain searches every server and discovery again for the query
+// searched, keeping what they found meanwhile.
+func (a *App) searchAgain() {
+	s := &a.searchState
 	for _, t := range s.servers {
 		t.key = ""
 	}

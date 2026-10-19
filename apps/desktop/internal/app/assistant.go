@@ -462,9 +462,7 @@ func (a *App) perform(server string, act *assistantv1.ClientAction) bool {
 			a.router.Push("/library/" + server + "/" + n.GetId())
 		case assistantv1.NavigateTarget_NAVIGATE_TARGET_SEARCH:
 			a.leavePlayer()
-			a.searchState.query = n.GetQuery()
-			a.confirmSearch()
-			a.openPlace("/search")
+			a.searchFor(strings.TrimSpace(n.GetQuery()))
 		case assistantv1.NavigateTarget_NAVIGATE_TARGET_SETTINGS:
 			a.leavePlayer()
 			a.router.Push("/settings")

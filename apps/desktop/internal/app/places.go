@@ -21,6 +21,9 @@ type places struct {
 	// stacks are each place's pages, from the place to the page last
 	// shown, by the place's path.
 	stacks map[string][]string
+	// locations are the location each page was last shown at, its
+	// query among it, which the page returns to as the web UI's do.
+	locations map[string]string
 	// current is the place shown, and shown the page seen last.
 	current, shown string
 	// history follows the router's: the locations of its entries, at
@@ -91,6 +94,10 @@ func (a *App) visitPlaces() {
 	p.replacing = false
 	p.follow(loc, replacing)
 	path := a.router.Path()
+	if p.locations == nil {
+		p.locations = map[string]string{}
+	}
+	p.locations[path] = loc
 	if path == p.shown {
 		return
 	}
@@ -164,7 +171,15 @@ func (a *App) openPlace(path string) {
 		return
 	}
 	p.current = path
-	a.router.Push(page)
+	a.router.Push(p.location(page))
+}
+
+// location returns the location the page at path was last shown at.
+func (p *places) location(path string) string {
+	if loc, ok := p.locations[path]; ok {
+		return loc
+	}
+	return path
 }
 
 // replace shows path in place of the page shown, in the router's history
@@ -192,9 +207,9 @@ func (a *App) goBack() {
 	}
 	switch {
 	case i > 0:
-		a.router.Push(stack[i-1])
+		a.router.Push(p.location(stack[i-1]))
 	case p.current != "":
-		a.router.Push(p.current)
+		a.router.Push(p.location(p.current))
 	default:
 		a.router.Push("/home")
 	}
@@ -206,7 +221,8 @@ func (a *App) pageScroll(path string) *ui.ScrollState {
 	return a.shelfScroll("page:" + path)
 }
 
-// prunePageScrolls forgets where the pages no place keeps were scrolled.
+// prunePageScrolls forgets where the pages no place keeps were scrolled,
+// and their locations.
 func (a *App) prunePageScrolls() {
 	for k := range a.scrolls {
 		path, ok := strings.CutPrefix(k, "page:")
@@ -219,6 +235,15 @@ func (a *App) prunePageScrolls() {
 		}
 		if !kept {
 			delete(a.scrolls, k)
+		}
+	}
+	for path := range a.places.locations {
+		kept := false
+		for _, stack := range a.places.stacks {
+			kept = kept || slices.Contains(stack, path)
+		}
+		if !kept {
+			delete(a.places.locations, path)
 		}
 	}
 }

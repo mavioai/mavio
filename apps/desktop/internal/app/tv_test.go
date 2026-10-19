@@ -694,6 +694,10 @@ func TestTVSearch(t *testing.T) {
 	if !h.tt.HasText("The Long Orbit") || !h.tt.HasText("From Discover") {
 		t.Fatalf("searching found nothing; texts = %q", h.tt.Texts())
 	}
+	// The address follows the query in place of the page's own.
+	if got := h.app.router.Location(); got != "/search?q=orb" {
+		t.Errorf("location = %q, want = /search?q=orb", got)
+	}
 	h.save(shots, "tv-search-results")
 	// From the keyboard's right edge into the results, and back.
 	for range 5 {

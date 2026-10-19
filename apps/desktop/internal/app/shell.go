@@ -299,11 +299,14 @@ func (a *App) sidebar(c *ui.Context, medium bool) {
 
 // sidebarSearch builds the sidebar's search field, in place of Search's
 // row, as the web UI's: its search runs on the Search page as Return
-// confirms it, and typing alone does not leave the page (docs/clients.md
+// confirms a query, and typing alone does not leave the page (docs/clients.md
 // §5.4). ⌘K (Ctrl+K) puts the focus in it.
 func (a *App) sidebarSearch(c *ui.Context) {
 	colors := style.Colors(c)
 	s := &a.searchState
+	// Its text is the query searched while Search shows, else what was
+	// typed since leaving it.
+	a.followSearch()
 	ui.Box(c).Margin(0, 0, 8).Children(func() {
 		f := ui.SearchField(c, &s.query).Label(style.T(c, "nav.search")).Placeholder(style.T(c, "nav.search")).
 			FillWidth().Height(36).Radius(design.RadiusMd).Background(style.Color(colors.Fill))
@@ -311,10 +314,7 @@ func (a *App) sidebarSearch(c *ui.Context) {
 			f.Focus()
 		}
 		if f.Submitted() {
-			a.confirmSearch()
-			if a.router.Path() != "/search" {
-				a.router.Push("/search")
-			}
+			a.confirmSearch(false)
 		}
 		if s.query == "" {
 			keys := "⌘K"
