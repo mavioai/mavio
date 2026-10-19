@@ -860,6 +860,10 @@
     <string name="plugins_state_disabled">Disabled</string>
     <!-- Label of the switch enabling a plugin. -->
     <string name="plugins_enabled">Enabled</string>
+    <!-- Tooltip of a plugin's disabled switch while the plugin starts. -->
+    <string name="plugins_enabling">Starting the plugin…</string>
+    <!-- Tooltip of a plugin's disabled switch while the plugin stops. -->
+    <string name="plugins_disabling">Stopping the plugin…</string>
     <!-- Button installing a plugin. -->
     <string name="plugins_install">Install</string>
     <!-- Button updating a plugin; version is the newest. -->

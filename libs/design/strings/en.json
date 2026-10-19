@@ -426,6 +426,8 @@
   "plugins.stateFailed": { "message": "Failed", "description": "State of a plugin that could not start." },
   "plugins.stateDisabled": { "message": "Disabled", "description": "State of a plugin an administrator disabled." },
   "plugins.enabled": { "message": "Enabled", "description": "Label of the switch enabling a plugin." },
+  "plugins.enabling": { "message": "Starting the plugin…", "description": "Tooltip of a plugin's disabled switch while the plugin starts." },
+  "plugins.disabling": { "message": "Stopping the plugin…", "description": "Tooltip of a plugin's disabled switch while the plugin stops." },
   "plugins.install": { "message": "Install", "description": "Button installing a plugin." },
   "plugins.update": { "message": "Update to {version}", "description": "Button updating a plugin; version is the newest." },
   "plugins.uninstall": { "message": "Uninstall", "description": "Button uninstalling a plugin." },

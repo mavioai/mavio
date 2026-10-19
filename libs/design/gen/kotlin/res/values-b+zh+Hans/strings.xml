@@ -435,6 +435,8 @@
     <string name="plugins_state_failed">失败</string>
     <string name="plugins_state_disabled">已停用</string>
     <string name="plugins_enabled">启用</string>
+    <string name="plugins_enabling">正在启动插件…</string>
+    <string name="plugins_disabling">正在停止插件…</string>
     <string name="plugins_install">安装</string>
     <string name="plugins_update">更新到 %s</string>
     <string name="plugins_uninstall">卸载</string>

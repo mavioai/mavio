@@ -1373,6 +1373,12 @@ public enum MavioStrings {
     /// Label of the switch enabling a plugin.
     public static var pluginsEnabled: String { NSLocalizedString("plugins.enabled", bundle: .module, comment: "") }
 
+    /// Tooltip of a plugin's disabled switch while the plugin starts.
+    public static var pluginsEnabling: String { NSLocalizedString("plugins.enabling", bundle: .module, comment: "") }
+
+    /// Tooltip of a plugin's disabled switch while the plugin stops.
+    public static var pluginsDisabling: String { NSLocalizedString("plugins.disabling", bundle: .module, comment: "") }
+
     /// Button installing a plugin.
     public static var pluginsInstall: String { NSLocalizedString("plugins.install", bundle: .module, comment: "") }
 

@@ -39,6 +39,7 @@ import type { SettingsSearch } from "./settings.tsx";
 import { proxyChoices, proxyDirect } from "./admin/proxies.tsx";
 import { BackLink, SectionTrail, TitleAccessory } from "./admin/common.tsx";
 import { Confirm } from "../controls/dialog.tsx";
+import { Tip } from "../controls/tooltip.tsx";
 import { useUnsavedGuard } from "../controls/unsaved.tsx";
 
 const states: Record<PluginState, () => string> = {
@@ -354,11 +355,17 @@ function PluginPage({ server, id }: { server: ServerEntry; id: string }) {
           )}
           {e.installed && (
             <>
-              <Switch
-                on={toggling ? !enabled : enabled}
-                label={t("plugins.enabled")}
-                onChange={(on) => !toggling && actions.setEnabled.mutate({ id, enabled: on })}
-              />
+              {/* Starting or stopping a process plugin takes a while; the switch waits for it. */}
+              <Tip label={t(enabled ? "plugins.disabling" : "plugins.enabling")} disabled={!toggling}>
+                <span className="inline-flex">
+                  <Switch
+                    on={toggling ? !enabled : enabled}
+                    label={t("plugins.enabled")}
+                    disabled={toggling}
+                    onChange={(on) => actions.setEnabled.mutate({ id, enabled: on })}
+                  />
+                </span>
+              </Tip>
               <Button variant="secondary" className="text-danger" onClick={() => setConfirming(true)}>
                 {t("plugins.uninstall")}
               </Button>

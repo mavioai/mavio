@@ -7669,6 +7669,42 @@
         }
       }
     },
+    "plugins.enabling": {
+      "comment": "Tooltip of a plugin's disabled switch while the plugin starts.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Starting the plugin…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在启动插件…"
+          }
+        }
+      }
+    },
+    "plugins.disabling": {
+      "comment": "Tooltip of a plugin's disabled switch while the plugin stops.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stopping the plugin…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在停止插件…"
+          }
+        }
+      }
+    },
     "plugins.install": {
       "comment": "Button installing a plugin.",
       "extractionState": "manual",

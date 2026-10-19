@@ -425,6 +425,8 @@ export type MessageKey =
   | 'plugins.stateFailed'
   | 'plugins.stateDisabled'
   | 'plugins.enabled'
+  | 'plugins.enabling'
+  | 'plugins.disabling'
   | 'plugins.install'
   | 'plugins.update'
   | 'plugins.uninstall'
@@ -2358,6 +2360,8 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "plugins.stateFailed": "Failed",
     "plugins.stateDisabled": "Disabled",
     "plugins.enabled": "Enabled",
+    "plugins.enabling": "Starting the plugin…",
+    "plugins.disabling": "Stopping the plugin…",
     "plugins.install": "Install",
     "plugins.update": "Update to {version}",
     "plugins.uninstall": "Uninstall",
@@ -4289,6 +4293,8 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "plugins.stateFailed": "失败",
     "plugins.stateDisabled": "已停用",
     "plugins.enabled": "启用",
+    "plugins.enabling": "正在启动插件…",
+    "plugins.disabling": "正在停止插件…",
     "plugins.install": "安装",
     "plugins.update": "更新到 {version}",
     "plugins.uninstall": "卸载",
