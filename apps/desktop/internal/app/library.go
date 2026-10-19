@@ -111,6 +111,20 @@ func (a *App) library(c *ui.Context, r *ui.Route) {
 			a.tvPill(c, labels, &st.filter)
 		}
 		ui.Spacer(c)
+		if style.TV(c) {
+			labels := make([]string, len(sorts))
+			current := 0
+			for i, s := range sorts {
+				labels[i] = style.T(c, s.key)
+				if s.sort == st.sort {
+					current = i
+				}
+			}
+			if i := a.tvChoiceMenu(c, "sort", "sort", style.T(c, "library.sortBy", "sort", sortName), labels, current); i >= 0 {
+				st.sort = sorts[i].sort
+			}
+			return
+		}
 		ui.MenuButton(c, style.T(c, "library.sortBy", "sort", sortName), func(m *ui.Menu) {
 			for _, s := range sorts {
 				if m.Item(style.T(c, s.key)).Checked(s.sort == st.sort).Chosen() {
@@ -118,9 +132,6 @@ func (a *App) library(c *ui.Context, r *ui.Route) {
 				}
 			}
 		})
-		if style.TV(c) {
-			return
-		}
 		ui.MenuButton(c, style.T(c, filters[st.filter]), func(m *ui.Menu) {
 			for i, f := range filters {
 				if m.Item(style.T(c, f)).Checked(i == st.filter).Chosen() {

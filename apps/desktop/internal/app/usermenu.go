@@ -55,7 +55,6 @@ func (a *App) userButton(c *ui.Context, withName bool) {
 // its material.
 func (a *App) userMenu(c *ui.Context, panel ui.Element) {
 	colors := style.Colors(c)
-	shadow := design.ElevationLevel3
 	// On the television, wider for the larger type and in frosted glass,
 	// so that the artwork behind shows through (docs/tv.md §5).
 	tv := style.TV(c)
@@ -63,10 +62,7 @@ func (a *App) userMenu(c *ui.Context, panel ui.Element) {
 	if tv {
 		width, blur, tint = 400, 48, 0.45
 	}
-	panel.Margin(8, 0, 0, 0).Width(width).Radius(14).Material(glass.Blur{Radius: blur}).AlignItems(ui.Stretch).
-		Shadow(shadow.X, shadow.Y, shadow.Blur, shadow.Spread, style.Color(shadow.Color))
-	ui.Column(c).Radius(14).Background(style.Color(colors.SurfaceOverlay).Alpha(tint)).Border(1, style.Color(colors.Border)).
-		Padding(6).AlignItems(ui.Stretch).Children(func() {
+	menuPanel(c, panel, width, tint, blur, func() {
 		name, line := a.accountName(c)
 		kind := style.T(c, "auth.standaloneUser", "server", line)
 		if a.account != nil {
@@ -171,6 +167,19 @@ func (a *App) themeSwitch(c *ui.Context) {
 			}
 		}
 	})
+}
+
+// menuPanel lays out a menu of the app's own in panel, a popup of glass
+// width points wide blurred by blur, its tint at tint on a column of its
+// own over the blur, as an element's background takes the place of its
+// material; fill builds its items.
+func menuPanel(c *ui.Context, panel ui.Element, width, tint, blur float32, fill func()) {
+	colors := style.Colors(c)
+	shadow := design.ElevationLevel3
+	panel.Margin(8, 0, 0, 0).Width(width).Radius(14).Material(glass.Blur{Radius: blur}).AlignItems(ui.Stretch).
+		Shadow(shadow.X, shadow.Y, shadow.Blur, shadow.Spread, style.Color(shadow.Color))
+	ui.Column(c).Radius(14).Background(style.Color(colors.SurfaceOverlay).Alpha(tint)).Border(1, style.Color(colors.Border)).
+		Padding(6).AlignItems(ui.Stretch).Children(fill)
 }
 
 // menuItem builds an item of a menu of the app's own, as the web UI's:

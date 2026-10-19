@@ -55,6 +55,8 @@ func (a *App) tvShell(c *ui.Context) {
 	a.beginFocus()
 	path := a.router.Path()
 	bar := tvShowsBar(path)
+	// A menu of the page closes as the page builds, as a choice is made.
+	menuWasOpen := a.menuOpen()
 	page := ui.Column(c).Fill().Background(style.Color(colors.Background))
 	// Home's hero reaches the top of the screen, behind the bar.
 	if bar && path != "/home" {
@@ -63,7 +65,6 @@ func (a *App) tvShell(c *ui.Context) {
 	page.Children(func() {
 		a.router.View(c, func(r *ui.Route) { a.page(c, r) })
 	})
-	menuWasOpen := a.userMenuOpen
 	if bar {
 		a.tvBar(c)
 	} else {
@@ -71,12 +72,18 @@ func (a *App) tvShell(c *ui.Context) {
 	}
 	a.tvKeyboardKeys(c)
 	a.tvBack(c)
-	a.focusKeys(c, a.userMenuOpen)
+	a.focusKeys(c, a.menuOpen())
 	// Focus returns to the menu's button as the menu closes.
-	if menuWasOpen && !a.userMenuOpen {
-		a.focus.want = a.focus.dots
+	if menuWasOpen && !a.menuOpen() {
+		a.focus.want = a.focus.menuButton
 		c.After(0)
 	}
+}
+
+// menuOpen tells whether a menu is open in the TV mode, where focus stays
+// within it (docs/tv.md §5).
+func (a *App) menuOpen() bool {
+	return a.userMenuOpen || a.tvMenuOpen != ""
 }
 
 // tvBar builds the navigation bar: the tabs in a pill centered at the
@@ -209,9 +216,79 @@ func (a *App) tvDots(c *ui.Context) {
 	if b.Clicked() {
 		a.userMenuOpen = !a.userMenuOpen
 	}
+	if a.userMenuOpen {
+		a.focus.menuButton = a.focus.dots
+	}
 	ui.PopoverBase(c, b, &a.userMenuOpen, func(panel ui.Element) {
 		a.inRegion(regionMenu, func() { a.userMenu(c, panel) })
 	})
+}
+
+// tvChoiceMenu builds a button opening a menu of choices of the app's own
+// in the TV mode, as the web UI's (docs/tv.md §5): with icon and label,
+// white with focus and filled with color.fill while its menu is open; the
+// menu in frosted glass, 320 points wide, its items marking the current
+// choice and opening with focus on it. Back closes it, focus returning to
+// the button. It returns the choice made, -1 for none.
+func (a *App) tvChoiceMenu(c *ui.Context, key, icon, label string, choices []string, current int) int {
+	colors := style.Colors(c)
+	open := a.tvMenuOpen == key
+	b := ui.ButtonBase(c.Key("menu-"+key)).Height(48).Padding(0, 20).Gap(8).Radius(design.RadiusFull).AlignItems(ui.Center).Label(label)
+	at := len(a.focus.items)
+	fg := style.Color(colors.TextSecondary)
+	switch {
+	case a.tvFocus(c, b, false):
+		b.Background(ui.RGB(255, 255, 255))
+		fg = ui.RGB(0, 0, 0)
+	case open:
+		b.Background(style.Color(colors.Fill))
+		fg = style.Color(colors.TextPrimary)
+	}
+	b.Children(func() {
+		ui.Icon(c, style.Icon(icon, false)).Size(22, 22).TextColor(fg)
+		style.Text(ui.Text(c, label), style.Type(c).Headline).TextColor(fg).SingleLine()
+	})
+	if b.Clicked() {
+		open = !open
+	}
+	if open {
+		a.focus.menuButton = at
+	}
+	chosen := -1
+	ui.PopoverBase(c, b, &open, func(panel ui.Element) {
+		a.inRegion(regionMenu, func() {
+			menuPanel(c, panel, 320, 0.45, 48, func() {
+				for i, choice := range choices {
+					it := ui.ButtonBase(c.Key(i)).MinHeight(48).Padding(6, 10).Gap(10).Radius(8).AlignItems(ui.Center).
+						Label(choice).Role(ui.RoleMenuItemRadio).Checked(i == current)
+					if i == current {
+						it.AutoFocus()
+					}
+					if a.tvFocus(c, it, i == current) {
+						it.Background(style.Color(colors.Fill))
+					}
+					it.Children(func() {
+						ui.Box(c).Width(16).Shrink(0).Children(func() {
+							if i == current {
+								ui.Icon(c, style.Icon("check", false)).Size(16, 16).TextColor(style.Color(colors.AccentText))
+							}
+						})
+						style.Text(ui.Text(c, choice), style.Type(c).Headline).TextColor(style.Color(colors.TextPrimary)).SingleLine().Grow(1)
+					})
+					if it.Clicked() {
+						chosen, open = i, false
+					}
+				}
+			})
+		})
+	})
+	switch {
+	case open:
+		a.tvMenuOpen = key
+	case a.tvMenuOpen == key:
+		a.tvMenuOpen = ""
+	}
+	return chosen
 }
 
 // tvBack goes up a level with Escape and Backspace (docs/tv.md §4): on a
@@ -220,7 +297,12 @@ func (a *App) tvDots(c *ui.Context) {
 // An open menu closes by itself.
 func (a *App) tvBack(c *ui.Context) {
 	back := c.Shortcut(0, ui.KeyEscape) || c.Shortcut(0, ui.KeyBackspace)
-	if a.userMenuOpen || !back {
+	if !back {
+		return
+	}
+	if a.menuOpen() {
+		// Back closes the menu, focus returning to its button.
+		a.userMenuOpen, a.tvMenuOpen = false, ""
 		return
 	}
 	f := &a.focus

@@ -123,6 +123,9 @@ type App struct {
 	account *capiv1.Account
 	// userMenuOpen tells whether the user menu is open.
 	userMenuOpen bool
+	// tvMenuOpen is the key of the TV mode's menu open other than the
+	// user menu, "" for none (tvChoiceMenu).
+	tvMenuOpen string
 	servers      []*capiv1.ServerRecord
 	// state is the state of each server's stream.
 	state map[string]capiv1.StreamState_State

@@ -115,9 +115,9 @@ type focusEngine struct {
 	// Discover's, move it to the page's first as they come above it.
 	lead    int
 	opening uint64
-	// dots is the user menu's button, to which focus returns as the menu
-	// closes.
-	dots int
+	// dots is the user menu's button; menuButton is the button of the
+	// menu open, to which focus returns as the menu closes.
+	dots, menuButton int
 }
 
 // beginFocus starts the frame's items.
@@ -241,8 +241,8 @@ func (a *App) tvFocus(c *ui.Context, el ui.Element, current bool) bool {
 		}
 		f.want, f.reveal = -1, false
 	}
-	// While the user menu is open, focus is in it.
-	focused := el.Focused() && (!a.userMenuOpen || f.region == regionMenu)
+	// While a menu is open, focus is in it.
+	focused := el.Focused() && (!a.menuOpen() || f.region == regionMenu)
 	if focused {
 		f.at = i
 	}
