@@ -1855,6 +1855,7 @@
   "assistant.talk": "按住说话",
   "assistant.stopListening": "停止聆听",
   "assistant.placeholder": "向 Mavio 提问或下达指令",
+  "assistant.messagePlaceholder": "发消息给助手",
   "assistant.send": "发送",
   "assistant.listening": "正在聆听…",
   "assistant.working": "正在处理…",

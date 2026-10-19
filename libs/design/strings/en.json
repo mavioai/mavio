@@ -1856,6 +1856,7 @@
   "assistant.talk": { "message": "Hold to Talk", "description": "Microphone button of the assistant's panel, held to talk or tapped to talk until the speech ends." },
   "assistant.stopListening": { "message": "Stop Listening", "description": "Microphone button of the assistant's panel while it listens." },
   "assistant.placeholder": { "message": "Ask or tell Mavio what to do", "description": "Placeholder of the assistant's field for typed requests." },
+  "assistant.messagePlaceholder": { "message": "Message the Assistant", "description": "Placeholder of the field of the web UI's assistant panel, shown as a conversation." },
   "assistant.send": { "message": "Send", "description": "Button sending a typed request to the assistant." },
   "assistant.listening": { "message": "Listening…", "description": "Status of the assistant's panel while it listens." },
   "assistant.working": { "message": "Working on it…", "description": "Status of the assistant's panel while a request runs." },

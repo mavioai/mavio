@@ -1891,6 +1891,7 @@
     <string name="assistant_talk">按住说话</string>
     <string name="assistant_stop_listening">停止聆听</string>
     <string name="assistant_placeholder">向 Mavio 提问或下达指令</string>
+    <string name="assistant_message_placeholder">发消息给助手</string>
     <string name="assistant_send">发送</string>
     <string name="assistant_listening">正在聆听…</string>
     <string name="assistant_working">正在处理…</string>

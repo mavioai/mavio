@@ -1844,6 +1844,7 @@ export type MessageKey =
   | 'assistant.talk'
   | 'assistant.stopListening'
   | 'assistant.placeholder'
+  | 'assistant.messagePlaceholder'
   | 'assistant.send'
   | 'assistant.listening'
   | 'assistant.working'
@@ -3785,6 +3786,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "assistant.talk": "Hold to Talk",
     "assistant.stopListening": "Stop Listening",
     "assistant.placeholder": "Ask or tell Mavio what to do",
+    "assistant.messagePlaceholder": "Message the Assistant",
     "assistant.send": "Send",
     "assistant.listening": "Listening…",
     "assistant.working": "Working on it…",
@@ -5724,6 +5726,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "assistant.talk": "按住说话",
     "assistant.stopListening": "停止聆听",
     "assistant.placeholder": "向 Mavio 提问或下达指令",
+    "assistant.messagePlaceholder": "发消息给助手",
     "assistant.send": "发送",
     "assistant.listening": "正在聆听…",
     "assistant.working": "正在处理…",

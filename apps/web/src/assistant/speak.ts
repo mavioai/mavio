@@ -27,14 +27,17 @@ export interface ServerVoices {
 
 /** Speaks sentences in order, until stopped. */
 export class Speaker {
-  /** The ID of the answer's speech, so that the server keeps what its voices speak with the answer; "" when it keeps none. */
-  readonly speechId: string;
+  /** The ID of the answer's speech, so that the server keeps what its voices speak with the answer. */
+  readonly speechId = Array.from(crypto.getRandomValues(new Uint8Array(16)), (b) => b.toString(16).padStart(2, "0")).join("");
   // The place of the next sentence a server voice speaks.
   private index = 0;
   // Each sentence's audio from the server, fetched as it is said so that
   // the next is ready when one ends.
   private queue: Promise<Blob | undefined>[] = [];
   private playing = false;
+  // The server's audio of the sentences said, which it keeps: played
+  // again, never spoken again.
+  private kept: Promise<Blob | undefined>[] = [];
   // The sentences the browser's voice has yet to finish.
   private utterances = 0;
   private was = false;
@@ -42,14 +45,18 @@ export class Speaker {
   private audio?: HTMLAudioElement;
   private abort = new AbortController();
 
-  /** voice is a server voice's ID, or "" for the browser's; keep, whether the server keeps the speech; onSpeaking hears it start and end. */
+  /** voice is a server voice's ID, or "" for the browser's; onSpeaking hears it start and end. */
   constructor(
     private readonly voice: string,
     private readonly server?: ServerVoices,
-    { keep = true, onSpeaking }: { keep?: boolean; onSpeaking?: (speaking: boolean) => void } = {},
+    onSpeaking?: (speaking: boolean) => void,
   ) {
-    this.speechId = keep ? Array.from(crypto.getRandomValues(new Uint8Array(16)), (b) => b.toString(16).padStart(2, "0")).join("") : "";
     this.onSpeaking = onSpeaking;
+  }
+
+  /** Whether the server's voices said any of it, to play again. */
+  get replayable(): boolean {
+    return this.kept.length > 0;
   }
 
   /** Whether a sentence is being said or waits to be. */
@@ -75,11 +82,18 @@ export class Speaker {
     }
     const s = this.server;
     if (!s) return;
-    this.queue.push(
-      speakWithServer(s.servers, s.server, { text: sentence, language, voice: this.voice, speechId: this.speechId || undefined, index: this.index++ }, this.abort.signal).catch(
-        () => undefined,
-      ),
+    const audio = speakWithServer(s.servers, s.server, { text: sentence, language, voice: this.voice, speechId: this.speechId, index: this.index++ }, this.abort.signal).catch(
+      () => undefined,
     );
+    this.kept.push(audio);
+    this.queue.push(audio);
+    void this.drain();
+  }
+
+  /** Plays again what the server's voices said, with no voice speaking it again. */
+  again() {
+    this.stop();
+    this.queue = [...this.kept];
     void this.drain();
   }
 

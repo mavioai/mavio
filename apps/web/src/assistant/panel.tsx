@@ -1,5 +1,7 @@
 // The assistant's panel (docs/assistant.md §9.1, §9.2): over any page, the
-// player's included, it shows the text heard as it grows, the answer,
+// player's included, it shows as the AI Conversations do the text heard as
+// it grows and the answer, each with buttons copying it and, the answer
+// server voices said, playing that again, and its time,
 // results to choose from and a pending confirmation, and takes typed
 // requests. The assistant button and a key held talk; a request goes
 // through the fast path (fast.ts) and else to the server's Ask, whose
@@ -42,6 +44,7 @@ import { Artwork, subtitleOf } from "../ui.tsx";
 import { grammar, runLocal } from "./fast.ts";
 import { browserRecognizes, denied, isDenied, type Listening, listenInBrowser, listenOnServer, microphoneAllowed } from "./listen.ts";
 import { openPlayer } from "./player.ts";
+import { bubble, MessageBar } from "./message-bar.tsx";
 import { Speaker } from "./speak.ts";
 
 /** The key held to talk, outside text fields. */
@@ -60,18 +63,25 @@ interface State {
   open: boolean;
   /** What the user said or typed; partial while listening. */
   heard: string;
+  /** When it was said, once said. */
+  heardAt?: Date;
   listening: boolean;
   working: boolean;
   /** The summaries of the tools running or run. */
   activity: { id: string; summary: string; done: boolean; failed: boolean }[];
   answer: string;
+  /** When the answer ended. */
+  answerAt?: Date;
+  /** Whether the answer is being spoken, and whether server voices said it, to play again. */
+  speaking: boolean;
+  replayable: boolean;
   items: Item[];
   choose: boolean;
   confirmation?: { id: string; text: string };
   error?: string;
 }
 
-const idle: State = { open: false, heard: "", listening: false, working: false, activity: [], answer: "", items: [], choose: false };
+const idle: State = { open: false, heard: "", listening: false, working: false, activity: [], answer: "", speaking: false, replayable: false, items: [], choose: false };
 
 interface Assistant {
   /** The server whose assistant answers, when it is on. */
@@ -139,7 +149,8 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
   const stopSpeaking = useCallback(() => {
     speaker.current?.stop();
     speaker.current = undefined;
-  }, []);
+    set({ speaking: false, replayable: false });
+  }, [set]);
 
   const close = useCallback(() => {
     clearTimeout(linger.current);
@@ -244,16 +255,25 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
   const speakerFor = useCallback(
     (spoken: boolean): Speaker | undefined => {
       const { prefs: pr, server: srv, info: inf } = latest.current;
-      if (!spoken || !pr.assistantSpeak) return undefined;
       stopSpeaking();
-      speaker.current = new Speaker(
+      if (!spoken || !pr.assistantSpeak) return undefined;
+      const sp: Speaker = new Speaker(
         pr.assistantVoice,
         srv && inf ? { servers, server: srv, languages: inf.voices.flatMap((v) => v.languages) } : undefined,
+        (speaking) => speaker.current === sp && set({ speaking, replayable: sp.replayable }),
       );
-      return speaker.current;
+      speaker.current = sp;
+      return sp;
     },
-    [servers, stopSpeaking],
+    [servers, set, stopSpeaking],
   );
+
+  /** Stops speaking the answer, or plays again what the server's voices said of it, which the server keeps. */
+  const toggleSpeaking = useCallback(() => {
+    const sp = speaker.current;
+    if (sp?.speaking) sp.stop();
+    else sp?.again();
+  }, []);
 
   const request = useCallback(
     async (req: MessageInitShape<typeof AskRequestSchema>, spoken: boolean, heardLanguage = "") => {
@@ -264,7 +284,18 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
       const abort = new AbortController();
       running.current = abort;
       const text = req.text?.trim() ?? "";
-      set({ open: true, heard: text || s.heard, working: true, activity: [], answer: "", error: undefined, confirmation: undefined, ...(req.choice || text ? { items: [], choose: false } : {}) });
+      set({
+        open: true,
+        heard: text || s.heard,
+        heardAt: text ? new Date() : s.heardAt,
+        working: true,
+        activity: [],
+        answer: "",
+        answerAt: undefined,
+        error: undefined,
+        confirmation: undefined,
+        ...(req.choice || text ? { items: [], choose: false } : {}),
+      });
       const voice = speakerFor(spoken);
       const lang = heardLanguage || speechLanguage;
 
@@ -284,7 +315,7 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
         });
         if (intent && reply) {
           const answer = g.reply(intent.language || lang, reply.key, reply.args);
-          set({ working: false, answer });
+          set({ working: false, answer, answerAt: new Date() });
           voice?.say(answer, intent.language || lang);
           lingerThenClose();
           return;
@@ -353,7 +384,7 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
               break;
           }
         }
-        set((st) => ({ working: false, error: failed.current.length > 0 && !st.answer ? t("assistant.cantDo") : undefined }));
+        set((st) => ({ working: false, answerAt: new Date(), error: failed.current.length > 0 && !st.answer ? t("assistant.cantDo") : undefined }));
         if (!waits) lingerThenClose();
       } catch (err) {
         if (abort.signal.aborted) return;
@@ -383,7 +414,17 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
       set({ open: true, error: t("assistant.noRecognizer") });
       return;
     }
-    set({ open: true, listening: true, heard: "", answer: "", activity: [], error: undefined, ...(latest.current.state.choose ? {} : { items: [] }) });
+    set({
+      open: true,
+      listening: true,
+      heard: "",
+      heardAt: undefined,
+      answer: "",
+      answerAt: undefined,
+      activity: [],
+      error: undefined,
+      ...(latest.current.state.choose ? {} : { items: [] }),
+    });
     const hearing = {
       partial: (text: string) => set({ heard: text }),
       final: (text: string, language: string) => {
@@ -495,6 +536,7 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
           onConfirm={answerConfirmation}
           onChoose={choose}
           onTouch={() => clearTimeout(linger.current)}
+          onPlay={toggleSpeaking}
         />
       )}
     </Context.Provider>
@@ -513,6 +555,7 @@ function Panel({
   onConfirm,
   onChoose,
   onTouch,
+  onPlay,
 }: {
   server: ServerEntry;
   state: State;
@@ -525,6 +568,7 @@ function Panel({
   onConfirm: (confirmed: boolean) => void;
   onChoose: (item: Item) => void;
   onTouch: () => void;
+  onPlay: () => void;
 }) {
   const [text, setText] = useState("");
   const keyboard = useShortcutsShown();
@@ -557,21 +601,35 @@ function Panel({
           <Icon name="close" size={16} />
         </button>
       </header>
-      <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-4 py-3" aria-live="polite">
+      <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto px-4 py-3" aria-live="polite">
         {off && <p className="type-callout text-text-secondary">{t("assistant.off")}</p>}
-        {state.heard && <p className={`type-title3 ${state.listening ? "text-text-secondary" : ""}`}>{state.heard}</p>}
-        {status && <p className="type-callout text-text-secondary">{status}</p>}
-        {state.activity.length > 0 && (
-          <ul className="flex flex-col gap-1">
-            {state.activity.map((a) => (
-              <li key={a.id} className={`flex items-center gap-2 type-footnote ${a.failed ? "text-danger" : "text-text-secondary"}`}>
-                <Icon name={a.failed ? "error" : a.done ? "check" : "pending"} size={14} />
-                {a.summary}
-              </li>
-            ))}
-          </ul>
+        {state.heard && (
+          <div className="flex flex-col items-end gap-1 ps-[15%]">
+            <span className="px-1 type-caption text-text-tertiary">{t("conversations.you")}</span>
+            <p className={`${bubble(true, "bg-background")} ${state.listening ? "text-text-secondary" : ""}`}>{state.heard}</p>
+            {!state.listening && <MessageBar text={state.heard} at={state.heardAt} />}
+          </div>
         )}
-        {state.answer && <p className="type-body whitespace-pre-wrap">{state.answer}</p>}
+        {(status || state.activity.length > 0 || state.answer) && (
+          <div className="flex flex-col items-start gap-1 pe-[15%]">
+            <span className="px-1 type-callout">{t("assistant.title")}</span>
+            {status && <p className="px-1 type-callout text-text-secondary">{status}</p>}
+            {state.activity.length > 0 && (
+              <ul className="flex flex-col gap-1 px-1">
+                {state.activity.map((a) => (
+                  <li key={a.id} className={`flex items-center gap-2 type-footnote ${a.failed ? "text-danger" : "text-text-secondary"}`}>
+                    <Icon name={a.failed ? "error" : a.done ? "check" : "pending"} size={14} />
+                    {a.summary}
+                  </li>
+                ))}
+              </ul>
+            )}
+            {state.answer && <p className={bubble(false, "bg-background")}>{state.answer}</p>}
+            {state.answer && state.answerAt && (
+              <MessageBar text={state.answer} at={state.answerAt} playing={state.speaking} onPlay={state.replayable ? onPlay : undefined} />
+            )}
+          </div>
+        )}
         {state.items.length > 0 && (
           <ul className="flex flex-col divide-y divide-border overflow-hidden rounded-[14px] bg-background">
             {state.items.map((item, i) => (
@@ -628,8 +686,8 @@ function Panel({
         <input
           value={text}
           onChange={(e) => (setText(e.target.value), onTouch())}
-          placeholder={keyboard ? `${t("assistant.placeholder")} · ${t("assistant.shortcut", { key: talkKey.toUpperCase() })}` : t("assistant.placeholder")}
-          aria-label={t("assistant.placeholder")}
+          placeholder={keyboard ? `${t("assistant.messagePlaceholder")} · ${t("assistant.shortcut", { key: talkKey.toUpperCase() })}` : t("assistant.messagePlaceholder")}
+          aria-label={t("assistant.messagePlaceholder")}
           maxLength={2000}
           className="min-h-10 min-w-0 flex-1 rounded-full bg-fill px-4 type-body placeholder:text-text-tertiary focus:outline-none"
         />

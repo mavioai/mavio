@@ -33571,6 +33571,24 @@
         }
       }
     },
+    "assistant.messagePlaceholder": {
+      "comment": "Placeholder of the field of the web UI's assistant panel, shown as a conversation.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Message the Assistant"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "发消息给助手"
+          }
+        }
+      }
+    },
     "assistant.send": {
       "comment": "Button sending a typed request to the assistant.",
       "extractionState": "manual",

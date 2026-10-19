@@ -3759,6 +3759,8 @@
     <string name="assistant_stop_listening">Stop Listening</string>
     <!-- Placeholder of the assistant's field for typed requests. -->
     <string name="assistant_placeholder">Ask or tell Mavio what to do</string>
+    <!-- Placeholder of the field of the web UI's assistant panel, shown as a conversation. -->
+    <string name="assistant_message_placeholder">Message the Assistant</string>
     <!-- Button sending a typed request to the assistant. -->
     <string name="assistant_send">Send</string>
     <!-- Status of the assistant's panel while it listens. -->

@@ -6,7 +6,6 @@ import { clone, create, equals } from "@bufbuild/protobuf";
 import { timestampDate } from "@bufbuild/protobuf/wkt";
 import {
   errorMessage,
-  keptSpeech,
   type ServerEntry,
   useAiModels,
   useAiProviders,
@@ -17,7 +16,6 @@ import {
   useAssistantMemories,
   useAssistantSettings,
   useUpdateAssistantSettings,
-  useServersStore,
   useUsers,
 } from "@mavio/client-ts";
 import {
@@ -27,7 +25,7 @@ import {
   type AssistantVoiceChoice,
   AssistantVoiceChoiceSchema,
 } from "@mavio/proto/mavio/assistant/v1/assistant_pb";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 
 import { Checkbox, NumberField, Switch } from "../controls/inputs.tsx";
 import { Confirm } from "../controls/dialog.tsx";
@@ -40,6 +38,7 @@ import { locale, t } from "../i18n.ts";
 import { setPrefs, usePrefs } from "../prefs.ts";
 import { Button, Group, Row } from "../ui.tsx";
 import { browserRecognizes } from "../assistant/listen.ts";
+import { useKeptSpeech } from "../assistant/kept-speech.ts";
 import { MessageBar } from "../assistant/message-bar.tsx";
 import { patched } from "./admin/common.tsx";
 
@@ -192,9 +191,8 @@ function Messages({ server, id, onDelete }: { server: ServerEntry; id: string; o
           <MessageBar
             text={m.text}
             at={m.time && timestampDate(m.time)}
-            user={m.user}
-            playing={playing.at === i}
-            onPlay={m.speech.length > 0 ? () => playing.toggle(i, m.speech) : undefined}
+            playing={playing.at === String(i)}
+            onPlay={m.speech.length > 0 ? () => playing.toggle(String(i), m.speech) : undefined}
           />
         </div>
       ))}
@@ -204,50 +202,6 @@ function Messages({ server, id, onDelete }: { server: ServerEntry; id: string; o
       </Button>
     </div>
   );
-}
-
-/** Plays the kept speech of an answer, a sentence after another, one answer at a time. */
-function useKeptSpeech(server: ServerEntry) {
-  const servers = useServersStore();
-  const [at, setAt] = useState<number>();
-  const run = useRef<{ abort: AbortController; audio?: HTMLAudioElement }>(undefined);
-  const stop = () => {
-    run.current?.abort.abort();
-    run.current?.audio?.pause();
-    run.current = undefined;
-    setAt(undefined);
-  };
-  useEffect(() => stop, []);
-  const toggle = (i: number, urls: string[]) => {
-    const again = at === i;
-    stop();
-    if (again) return;
-    const r = { abort: new AbortController() } as { abort: AbortController; audio?: HTMLAudioElement };
-    run.current = r;
-    setAt(i);
-    void (async () => {
-      // Each sentence is fetched while the one before plays.
-      let next = keptSpeech(servers, server, urls[0], r.abort.signal);
-      for (let j = 0; j < urls.length && !r.abort.signal.aborted; j++) {
-        const blob = await next.catch(() => undefined);
-        if (j + 1 < urls.length) next = keptSpeech(servers, server, urls[j + 1], r.abort.signal);
-        if (!blob || r.abort.signal.aborted) continue;
-        const url = URL.createObjectURL(blob);
-        const audio = new Audio(url);
-        r.audio = audio;
-        await new Promise<void>((resolve) => {
-          audio.onended = audio.onerror = audio.onpause = () => resolve();
-          audio.play().catch(() => resolve());
-        });
-        URL.revokeObjectURL(url);
-      }
-      if (run.current === r) {
-        run.current = undefined;
-        setAt(undefined);
-      }
-    })();
-  };
-  return { at, toggle };
 }
 
 /** The server's assistant settings, in its AI settings. */

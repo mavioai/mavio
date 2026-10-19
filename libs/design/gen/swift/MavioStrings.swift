@@ -5913,6 +5913,9 @@ public enum MavioStrings {
     /// Placeholder of the assistant's field for typed requests.
     public static var assistantPlaceholder: String { NSLocalizedString("assistant.placeholder", bundle: .module, comment: "") }
 
+    /// Placeholder of the field of the web UI's assistant panel, shown as a conversation.
+    public static var assistantMessagePlaceholder: String { NSLocalizedString("assistant.messagePlaceholder", bundle: .module, comment: "") }
+
     /// Button sending a typed request to the assistant.
     public static var assistantSend: String { NSLocalizedString("assistant.send", bundle: .module, comment: "") }
 
