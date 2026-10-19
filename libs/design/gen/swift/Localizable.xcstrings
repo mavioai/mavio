@@ -33751,6 +33751,24 @@
         }
       }
     },
+    "assistant.recognitionTimedOut": {
+      "comment": "Error of the assistant's panel when the server's speech recognizer does not answer within a minute.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Speech recognition took longer than a minute. Try again, or type your request."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "语音识别超过一分钟仍未完成。请重试，或改为输入请求。"
+          }
+        }
+      }
+    },
     "assistant.noRecognizer": {
       "comment": "Note of the assistant's panel when no recognizer can be used.",
       "extractionState": "manual",

@@ -3779,6 +3779,8 @@
     <string name="assistant_no_microphone">The microphone can\'t be used: %s</string>
     <!-- Error of the assistant's panel when the browser or the user refuses the microphone. -->
     <string name="assistant_microphone_denied">Allow this site to use the microphone to talk, or type your request.</string>
+    <!-- Error of the assistant's panel when the server's speech recognizer does not answer within a minute. -->
+    <string name="assistant_recognition_timed_out">Speech recognition took longer than a minute. Try again, or type your request.</string>
     <!-- Note of the assistant's panel when no recognizer can be used. -->
     <string name="assistant_no_recognizer">Neither the server nor this browser recognizes speech; type your request instead.</string>
     <!-- Note of the assistant's panel when the server's assistant is turned off. -->

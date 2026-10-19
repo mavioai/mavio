@@ -5947,6 +5947,9 @@ public enum MavioStrings {
     /// Error of the assistant's panel when the browser or the user refuses the microphone.
     public static var assistantMicrophoneDenied: String { NSLocalizedString("assistant.microphoneDenied", bundle: .module, comment: "") }
 
+    /// Error of the assistant's panel when the server's speech recognizer does not answer within a minute.
+    public static var assistantRecognitionTimedOut: String { NSLocalizedString("assistant.recognitionTimedOut", bundle: .module, comment: "") }
+
     /// Note of the assistant's panel when no recognizer can be used.
     public static var assistantNoRecognizer: String { NSLocalizedString("assistant.noRecognizer", bundle: .module, comment: "") }
 

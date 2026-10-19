@@ -162,7 +162,7 @@ For models that write code well, a conversation also offers pi-durable's code mo
 
 ### 8.2 Listening on the Server
 * `AssistantService.StartListening` returns a WebSocket URL signed for the session, valid for a minute, with the recognizer chosen (the settings', else the first ready `SPEECH_TO_TEXT` recognizer) and the language.
-* The client sends 16 kHz mono 16-bit PCM in binary frames and the text `end` when the user releases the key; without a release, the utterance ends after a second of silence detected by Silero VAD (`libs/media/vad`), and it lasts at most 30 seconds. The server then gives the utterance to the recognizer with the user's hints, when the recognizer takes them and the settings allow, and sends back the final text and its language as JSON.
+* The client sends 16 kHz mono 16-bit PCM in binary frames and the text `end` when the user releases the key; without a release, the utterance ends after a second of silence detected by Silero VAD (`libs/media/vad`), and it lasts at most 30 seconds. The server then gives the utterance to the recognizer with the user's hints, when the recognizer takes them and the settings allow, and sends back the final text and its language as JSON; a recognizer that has not answered within a minute ends the utterance with the error `recognition timed out`, which the clients show as a timeout.
 * What the user says is never stored.
 
 ### 8.3 Synthesis

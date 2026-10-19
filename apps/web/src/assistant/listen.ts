@@ -162,6 +162,9 @@ export function browserRecognizes(): boolean {
 /** What Hearing.error is told when the microphone is refused or missing. */
 export const denied = "microphone denied";
 
+/** What the server's recognizer answers when it takes longer than a minute (docs/assistant.md §8.2). */
+export const timedOut = "recognition timed out";
+
 /** Reports whether an error opening the microphone is its refusal. */
 export function isDenied(err: unknown): boolean {
   return err instanceof DOMException && (err.name === "NotAllowedError" || err.name === "NotFoundError");

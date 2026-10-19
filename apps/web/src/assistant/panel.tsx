@@ -42,7 +42,7 @@ import { useShortcutsShown } from "../keys.ts";
 import { isTabPlace } from "../shell/places.ts";
 import { Artwork, subtitleOf } from "../ui.tsx";
 import { grammar, runLocal } from "./fast.ts";
-import { browserRecognizes, denied, isDenied, type Listening, listenInBrowser, listenOnServer, microphoneAllowed } from "./listen.ts";
+import { browserRecognizes, denied, isDenied, type Listening, listenInBrowser, listenOnServer, microphoneAllowed, timedOut } from "./listen.ts";
 import { openPlayer } from "./player.ts";
 import { bubble, MessageBar } from "./message-bar.tsx";
 import { Speaker } from "./speak.ts";
@@ -435,7 +435,10 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
       },
       error: (message: string) => {
         listening.current = undefined;
-        set({ listening: false, error: message === denied ? t("assistant.microphoneDenied") : message });
+        set({
+          listening: false,
+          error: message === denied ? t("assistant.microphoneDenied") : message === timedOut ? t("assistant.recognitionTimedOut") : message,
+        });
       },
     };
     for (const r of order) {

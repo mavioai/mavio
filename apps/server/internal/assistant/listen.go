@@ -42,7 +42,14 @@ const (
 	maxUtterance = 30 * time.Second
 	endSilence   = time.Second
 	speechProb   = 0.5
+	// maxRecognition is how long the recognizer may take, past which the
+	// client is told errTimedOut.
+	maxRecognition = time.Minute
 )
+
+// errTimedOut is the error the client is sent when the recognizer takes
+// longer than maxRecognition; clients recognize its text.
+var errTimedOut = errors.New("recognition timed out")
 
 // listenToken is what a listening URL carries, signed.
 type listenToken struct {
@@ -253,8 +260,13 @@ read:
 	if set := s.cfg.Settings(); set.Hints && r.Info.GetHints() {
 		req.SetHints(s.hints(auth.WithPrincipal(ctx, auth.Principal{User: u}), auth.Principal{User: u}))
 	}
-	resp, err := r.Recognize(ctx, req)
+	rctx, cancel := context.WithTimeout(ctx, maxRecognition)
+	defer cancel()
+	resp, err := r.Recognize(rctx, req)
 	if err != nil {
+		if ctx.Err() == nil && errors.Is(rctx.Err(), context.DeadlineExceeded) {
+			return "", "", errTimedOut
+		}
 		return "", "", fmt.Errorf("recognize: %w", err)
 	}
 	lang := resp.GetLanguage()

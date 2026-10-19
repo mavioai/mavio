@@ -1866,6 +1866,7 @@
   "assistant.insecure": { "message": "The microphone works only on a secure (HTTPS) address; type your request instead.", "description": "Note of the assistant's panel when the page is served over plain HTTP." },
   "assistant.noMicrophone": { "message": "The microphone can't be used: {error}", "description": "Error of the assistant's panel when the microphone cannot be opened; error says why." },
   "assistant.microphoneDenied": { "message": "Allow this site to use the microphone to talk, or type your request.", "description": "Error of the assistant's panel when the browser or the user refuses the microphone." },
+  "assistant.recognitionTimedOut": { "message": "Speech recognition took longer than a minute. Try again, or type your request.", "description": "Error of the assistant's panel when the server's speech recognizer does not answer within a minute." },
   "assistant.noRecognizer": { "message": "Neither the server nor this browser recognizes speech; type your request instead.", "description": "Note of the assistant's panel when no recognizer can be used." },
   "assistant.off": { "message": "The assistant is off on this server.", "description": "Note of the assistant's panel when the server's assistant is turned off." },
   "assistant.cantDo": { "message": "This page can't do that.", "description": "Answer of the assistant when the page cannot carry out an action, such as controlling playback with nothing playing." },

@@ -1854,6 +1854,7 @@ export type MessageKey =
   | 'assistant.insecure'
   | 'assistant.noMicrophone'
   | 'assistant.microphoneDenied'
+  | 'assistant.recognitionTimedOut'
   | 'assistant.noRecognizer'
   | 'assistant.off'
   | 'assistant.cantDo'
@@ -3796,6 +3797,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "assistant.insecure": "The microphone works only on a secure (HTTPS) address; type your request instead.",
     "assistant.noMicrophone": "The microphone can't be used: {error}",
     "assistant.microphoneDenied": "Allow this site to use the microphone to talk, or type your request.",
+    "assistant.recognitionTimedOut": "Speech recognition took longer than a minute. Try again, or type your request.",
     "assistant.noRecognizer": "Neither the server nor this browser recognizes speech; type your request instead.",
     "assistant.off": "The assistant is off on this server.",
     "assistant.cantDo": "This page can't do that.",
@@ -5736,6 +5738,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "assistant.insecure": "麦克风只能在安全（HTTPS）地址下使用；请改为输入请求。",
     "assistant.noMicrophone": "无法使用麦克风：{error}",
     "assistant.microphoneDenied": "请允许此网站使用麦克风以便说话，或改为输入请求。",
+    "assistant.recognitionTimedOut": "语音识别超过一分钟仍未完成。请重试，或改为输入请求。",
     "assistant.noRecognizer": "服务器和此浏览器都无法识别语音；请改为输入请求。",
     "assistant.off": "此服务器已关闭助手。",
     "assistant.cantDo": "此页面无法执行该操作。",

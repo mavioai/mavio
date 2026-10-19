@@ -1901,6 +1901,7 @@
     <string name="assistant_insecure">麦克风只能在安全（HTTPS）地址下使用；请改为输入请求。</string>
     <string name="assistant_no_microphone">无法使用麦克风：%s</string>
     <string name="assistant_microphone_denied">请允许此网站使用麦克风以便说话，或改为输入请求。</string>
+    <string name="assistant_recognition_timed_out">语音识别超过一分钟仍未完成。请重试，或改为输入请求。</string>
     <string name="assistant_no_recognizer">服务器和此浏览器都无法识别语音；请改为输入请求。</string>
     <string name="assistant_off">此服务器已关闭助手。</string>
     <string name="assistant_cant_do">此页面无法执行该操作。</string>

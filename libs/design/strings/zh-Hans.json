@@ -1865,6 +1865,7 @@
   "assistant.insecure": "麦克风只能在安全（HTTPS）地址下使用；请改为输入请求。",
   "assistant.noMicrophone": "无法使用麦克风：{error}",
   "assistant.microphoneDenied": "请允许此网站使用麦克风以便说话，或改为输入请求。",
+  "assistant.recognitionTimedOut": "语音识别超过一分钟仍未完成。请重试，或改为输入请求。",
   "assistant.noRecognizer": "服务器和此浏览器都无法识别语音；请改为输入请求。",
   "assistant.off": "此服务器已关闭助手。",
   "assistant.cantDo": "此页面无法执行该操作。",
