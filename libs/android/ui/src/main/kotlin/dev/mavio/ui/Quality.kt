@@ -12,6 +12,9 @@ enum class Quality(val key: String, val bitrate: Long, @StringRes val label: Int
     P480("480p", 1_500_000, null),
     ;
 
+    /** The most the server sends: [AUTO] is 100 Mbit/s from a server on the local network, as iOS's. */
+    fun bitrate(local: Boolean): Long = if (this == AUTO && local) 100_000_000 else bitrate
+
     companion object {
         /** The quality this device keeps in [context], [AUTO] unless chosen. */
         fun stored(context: Context): Quality =

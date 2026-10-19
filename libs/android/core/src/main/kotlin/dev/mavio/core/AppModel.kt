@@ -101,6 +101,9 @@ class AppModel(context: Context, clientName: String) {
     /** A server by ID. */
     fun server(id: String): ServerRecord? = servers.value.firstOrNull { it.id == id }
 
+    /** Whether the server is reached at an address of the local network. */
+    fun local(id: String): Boolean = server(id)?.let { isLocalAddress(it.address) } ?: false
+
     /** Reads the servers again from the core. */
     fun reloadServers() {
         _signInState.value = runCatching { client.signInState() }.getOrDefault(SignInState.SignedOut)

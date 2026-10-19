@@ -182,7 +182,7 @@ fun PlayerScreen(model: AppModel, route: Route.Player) {
             session = model.play(
                 route.serverId,
                 route.itemId,
-                PlaybackOptions(sourceId, selection.audio, selection.subtitle, selection.quality.bitrate, resume, false),
+                PlaybackOptions(sourceId, selection.audio, selection.subtitle, selection.quality.bitrate(model.local(route.serverId)), resume, false),
             )
             val info = session.info()
             sourceId = info.mediaSourceId

@@ -194,7 +194,7 @@ fun PlayerPage(model: AppModel, page: Page.Player) {
         try {
             val item = details ?: runCatching { model.client.details(page.serverId, page.itemId) }.getOrNull()
             details = item
-            session = model.play(page.serverId, page.itemId, PlaybackOptions(sourceId, selection.audio, selection.subtitle, selection.quality.bitrate, resume, false))
+            session = model.play(page.serverId, page.itemId, PlaybackOptions(sourceId, selection.audio, selection.subtitle, selection.quality.bitrate(model.local(page.serverId)), resume, false))
             val info = session.info()
             sourceId = info.mediaSourceId
             val source = item?.sources?.firstOrNull { it.serverId == page.serverId && it.mediaSourceId == info.mediaSourceId }
