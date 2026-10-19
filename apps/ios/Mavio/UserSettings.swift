@@ -137,12 +137,13 @@ struct SubtitlesAudioView: View {
 }
 
 /// The users of a standalone server as avatars, to switch to with their
-/// PIN, as the web UI's account settings show them.
+/// PIN, as the web UI's account settings show them. The list loads them
+/// with `load`: a section of no rows is no view, whose task would not run.
 struct SwitchUserSection: View {
     let server: ServerRecord
+    let users: [SwitchableUser]
     @Environment(AppModel.self) private var model
     @Environment(\.theme) private var theme
-    @State private var users: [SwitchableUser] = []
     @State private var asking: SwitchableUser?
     @State private var busy = false
     @State private var failure: String?
@@ -173,9 +174,6 @@ struct SwitchUserSection: View {
                 }
             }
         }
-        .task(id: server.userId) {
-            users = (try? await model.client.switchableUsers(serverId: server.id)) ?? []
-        }
         .sheet(
             isPresented: Binding(get: { asking != nil }, set: { if !$0 { asking = nil } })
         ) {
@@ -190,6 +188,11 @@ struct SwitchUserSection: View {
                 .presentationBackground(theme.colors.background)
             }
         }
+    }
+
+    /// The users a server's session can switch to.
+    static func load(_ model: AppModel, _ server: ServerRecord) async -> [SwitchableUser] {
+        (try? await model.client.switchableUsers(serverId: server.id)) ?? []
     }
 
     private func member(_ user: SwitchableUser) -> some View {
@@ -306,12 +309,13 @@ private struct PinPad: View {
 
 /// Sign-In and Security on a standalone server, as the web UI's: the
 /// password, the passkeys, the authenticator app and the PIN; a managed
-/// user has none of them.
+/// user has none of them. The list loads them with `load`, as the
+/// switchable users.
 struct SecuritySections: View {
     let server: ServerRecord
+    @Binding var security: AccountSecurity?
     @Environment(AppModel.self) private var model
     @Environment(\.theme) private var theme
-    @State private var security: AccountSecurity?
     @State private var busy = false
     @State private var failure: String?
     @State private var editing: Editing?
@@ -362,7 +366,6 @@ struct SecuritySections: View {
                 }
             }
         }
-        .task(id: server.userId) { await load() }
     }
 
     private var password: some View {
@@ -503,13 +506,9 @@ struct SecuritySections: View {
         (current, new, pin) = ("", "", "")
     }
 
-    private func load() async {
-        do {
-            security = try await model.client.security(serverId: server.id)
-        } catch is CancellationError {
-        } catch {
-            failure = (error as? CoreError)?.reason ?? error.localizedDescription
-        }
+    /// How the user signs in to a server.
+    static func load(_ model: AppModel, _ server: ServerRecord) async -> AccountSecurity? {
+        try? await model.client.security(serverId: server.id)
     }
 
     /// Runs a change, then reads the user's security again.
@@ -523,7 +522,7 @@ struct SecuritySections: View {
             } catch {
                 failure = (error as? CoreError)?.reason ?? error.localizedDescription
             }
-            await load()
+            if let security = await Self.load(model, server) { self.security = security }
         }
     }
 }

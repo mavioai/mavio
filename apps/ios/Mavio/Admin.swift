@@ -26,8 +26,11 @@ struct ServerGroup: View {
     @Binding var serverId: String
     @Environment(AppModel.self) private var model
     @Environment(\.theme) private var theme
-    /// Whether the user administers the server, once known.
+    /// Whether a server's user administers it, once known, by the server
+    /// and user: switching users asks again.
     @State private var admin: [String: Bool] = [:]
+
+    private var key: String { "\(server.id)/\(server.userId)" }
 
     var body: some View {
         Section {
@@ -37,7 +40,7 @@ struct ServerGroup: View {
                 }
                 .tint(theme.colors.textSecondary)
             }
-            ForEach(ServerEntry.shown(admin: admin[server.id] == true), id: \.self) { entry in
+            ForEach(ServerEntry.shown(admin: admin[key] == true), id: \.self) { entry in
                 NavigationLink {
                     entry.view(server)
                 } label: {
@@ -47,14 +50,14 @@ struct ServerGroup: View {
         } header: {
             Text(MavioStrings.settingsServerGroup)
         }
-        .task(id: server.id) { await loadAdmin() }
+        .task(id: key) { await loadAdmin() }
     }
 
     private func loadAdmin() async {
         let response = try? await model.client.call(
             server.id, Procedure.users("GetCurrentUser"), Mavio_User_V1_GetCurrentUserRequest(),
             as: Mavio_User_V1_GetCurrentUserResponse.self)
-        if let response { admin[server.id] = response.user.admin }
+        if let response { admin[key] = response.user.admin }
     }
 }
 

@@ -10,6 +10,7 @@ struct SettingsView: View {
     @Environment(AppModel.self) private var model
     @Environment(\.theme) private var theme
     @State private var serverId = ""
+    @State private var switchable: [SwitchableUser] = []
 
     /// The server whose settings the Server group shows.
     private var chosen: ServerRecord? {
@@ -25,8 +26,8 @@ struct SettingsView: View {
                     AccountCard()
                 }
             }
-            if model.account == nil, let server = model.signedInServers.first {
-                SwitchUserSection(server: server)
+            if let server = standalone {
+                SwitchUserSection(server: server, users: switchable)
             }
             Section(MavioStrings.settingsThisDevice) {
                 NavigationLink(value: Route.downloads) {
@@ -72,6 +73,14 @@ struct SettingsView: View {
         // Large at the top left wherever it is opened from, centered small
         // in the bar once scrolled.
         .navigationBarTitleDisplayMode(.large)
+        .task(id: standalone?.userId) {
+            if let server = standalone { switchable = await SwitchUserSection.load(model, server) }
+        }
+    }
+
+    /// The server a device without a Mavio account signs in to.
+    private var standalone: ServerRecord? {
+        model.account == nil ? model.signedInServers.first : nil
     }
 }
 
@@ -105,6 +114,13 @@ private struct AccountView: View {
     @Environment(AppModel.self) private var model
     @Environment(Router.self) private var router
     @Environment(\.theme) private var theme
+    @State private var switchable: [SwitchableUser] = []
+    @State private var security: AccountSecurity?
+
+    /// The server a device without a Mavio account signs in to.
+    private var standalone: ServerRecord? {
+        model.account == nil ? model.signedInServers.first : nil
+    }
 
     var body: some View {
         List {
@@ -135,8 +151,8 @@ private struct AccountView: View {
                 } footer: {
                     Text(MavioStrings.settingsStandaloneAccountMessage(name: server.userName, server: server.name))
                 }
-                SwitchUserSection(server: server)
-                SecuritySections(server: server)
+                SwitchUserSection(server: server, users: switchable)
+                SecuritySections(server: server, security: $security)
             }
             Section {
                 ForEach(model.servers, id: \.id) { server in
@@ -147,7 +163,7 @@ private struct AccountView: View {
                             }
                         }
                         .contextMenu {
-                            if !model.signedIn.contains(server.id) {
+                            if model.account == nil, !model.signedIn.contains(server.id) {
                                 Button(MavioStrings.authSignIn) { router.addingServer = true }
                             }
                             Button(MavioStrings.authSignOut, role: .destructive) {
@@ -160,7 +176,11 @@ private struct AccountView: View {
                     ids.move(fromOffsets: from, toOffset: to)
                     model.order(ids)
                 }
-                Button(MavioStrings.authAddServer) { router.addingServer = true }
+                // A Mavio account follows its own servers, removing any other
+                // the device signs in to.
+                if model.account == nil {
+                    Button(MavioStrings.authAddServer) { router.addingServer = true }
+                }
             } header: {
                 Text(MavioStrings.authServers)
             } footer: {
@@ -177,6 +197,12 @@ private struct AccountView: View {
         .navigationTitle(MavioStrings.settingsAccount)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar { EditButton() }
+        .task(id: standalone?.userId) {
+            guard let server = standalone else { return }
+            async let users = SwitchUserSection.load(model, server)
+            async let security = SecuritySections.load(model, server)
+            (switchable, self.security) = await (users, security)
+        }
     }
 
     /// The account's page at the mavio.dev whose API it signed in with.
