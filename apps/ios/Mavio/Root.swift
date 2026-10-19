@@ -307,12 +307,24 @@ private struct TopBar: ViewModifier {
             .font(.system(size: 17, weight: .semibold))
         RouteLink(value: Route.settings) {
             if glass {
-                initial.frame(width: 44, height: 44).contentShape(.circle).glass(in: .circle)
+                initial.frame(width: 44, height: 44).contentShape(.circle).modifier(ClearGlass())
             } else {
                 initial
             }
         }
         .accessibilityLabel(MavioStrings.navSettings)
+    }
+}
+
+/// The clearer of Liquid Glass's two, the avatar's on a phone, which lets
+/// more of the bar show through.
+private struct ClearGlass: ViewModifier {
+    func body(content: Content) -> some View {
+        if #available(iOS 26, *) {
+            content.glassEffect(.clear.interactive(), in: .circle)
+        } else {
+            content.background(.ultraThinMaterial, in: .circle)
+        }
     }
 }
 
