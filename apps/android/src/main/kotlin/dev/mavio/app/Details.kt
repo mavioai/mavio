@@ -62,13 +62,8 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.LinkAnnotation
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.TextLinkStyles
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.text.withLink
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -86,25 +81,27 @@ import dev.mavio.design.MavioRadius
 import dev.mavio.design.MavioSpacing
 import dev.mavio.design.TabletLayout
 import dev.mavio.ui.Artwork
-import dev.mavio.ui.ButtonKind
 import dev.mavio.ui.CircleButton
+import dev.mavio.ui.FactList
 import dev.mavio.ui.ItemCard
 import dev.mavio.ui.LocalTheme
 import dev.mavio.ui.Logo
+import dev.mavio.ui.MIN_ITEM_STUDIOS
 import dev.mavio.ui.MavioButton
 import dev.mavio.ui.MavioIcon
-import dev.mavio.ui.PersonCard
 import dev.mavio.ui.ProgressBar
 import dev.mavio.ui.R
+import dev.mavio.ui.RatingCard
 import dev.mavio.ui.Shelf
 import dev.mavio.ui.StatusView
+import dev.mavio.ui.aboutFacts
 import dev.mavio.ui.blurAvailable
 import dev.mavio.ui.crewOrder
 import dev.mavio.ui.format
 import dev.mavio.ui.isCast
 import dev.mavio.ui.itemIcon
 import dev.mavio.ui.label
-import dev.mavio.ui.languageName
+import dev.mavio.ui.mediaFacts
 import dev.mavio.ui.minutesText
 import dev.mavio.ui.range
 import dev.mavio.ui.resolution
@@ -1185,10 +1182,10 @@ private fun AboutSection(details: Details, source: Source?) {
         }
         val links = mapOf(
             stringResource(R.string.item_genres) to details.genres.map { g -> g to narrowed(details) { genre = g } },
-            studiosKey to (if (allStudios) details.studios else details.studios.take(MIN_STUDIOS)).map { st -> st to narrowed(details) { studio = st } },
+            studiosKey to (if (allStudios) details.studios else details.studios.take(MIN_ITEM_STUDIOS)).map { st -> st to narrowed(details) { studio = st } },
         )
         FactList(facts, links) { key ->
-            if (key == studiosKey && details.studios.size > MIN_STUDIOS) {
+            if (key == studiosKey && details.studios.size > MIN_ITEM_STUDIOS) {
                 Text(
                     stringResource(if (allStudios) R.string.action_show_less else R.string.discover_show_more),
                     Modifier.clickable { allStudios = !allStudios },
@@ -1219,139 +1216,6 @@ private class LibraryNarrowing {
     var genre: String? = null
     var tag: String? = null
     var studio: String? = null
-}
-
-/** How many studios show until Show More. */
-private const val MIN_STUDIOS = 3
-
-/** The release, status, runtime, rating, genres, studios, countries, languages and when it was added. */
-@Composable
-private fun aboutFacts(details: Details, studiosKey: String, allStudios: Boolean): List<Pair<String, String>> {
-    val card = details.card
-    val rows = mutableListOf<Pair<String, String?>>()
-    if (card.kind == CardKind.MOVIE) {
-        val releases = listOfNotNull(
-            details.premiere?.let { "${stringResource(R.string.discover_theatrical_release)}  ${day(it)}" },
-            details.digitalRelease?.let { "${stringResource(R.string.item_digital_release)}  ${day(it)}" },
-            details.physicalRelease?.let { "${stringResource(R.string.item_physical_release)}  ${day(it)}" },
-        )
-        rows += if (releases.size > 1) {
-            stringResource(R.string.discover_release_dates) to releases.joinToString("\n")
-        } else {
-            stringResource(R.string.discover_release_date) to details.premiere?.let(::day)
-        }
-    } else {
-        val key = when (card.kind) {
-            CardKind.SERIES -> R.string.item_first_aired
-            CardKind.EPISODE -> R.string.item_aired
-            else -> R.string.item_released
-        }
-        rows += stringResource(key) to details.premiere?.let(::day)
-    }
-    if (card.kind == CardKind.SERIES) {
-        rows += stringResource(R.string.item_status) to when (details.seriesStatus) {
-            SeriesStatus.CONTINUING -> stringResource(R.string.item_continuing)
-            SeriesStatus.ENDED -> stringResource(R.string.item_ended)
-            else -> null
-        }
-        rows += stringResource(R.string.item_last_aired) to
-            if (details.seriesStatus == SeriesStatus.ENDED) details.endDate?.let(::day) else null
-    }
-    rows += stringResource(R.string.item_runtime) to
-        if (card.kind == CardKind.SERIES) null else card.runtime?.let { minutesText(it.toMinutes()) }
-    rows += stringResource(R.string.item_rated) to details.officialRating
-    rows += stringResource(R.string.item_genres) to details.genres.takeIf { it.isNotEmpty() }?.joinToString(", ")
-    rows += studiosKey to details.studios.takeIf { it.isNotEmpty() }
-        ?.let { if (allStudios) it else it.take(MIN_STUDIOS) }?.joinToString(", ")
-    rows += stringResource(R.string.item_country) to details.countries.takeIf { it.isNotEmpty() }?.joinToString("\n")
-    rows += stringResource(R.string.item_original_language) to details.originalLanguage?.let { languageName(it) ?: it }
-    rows += stringResource(R.string.item_original_title) to details.originalTitle?.takeIf { it != card.title }
-    rows += stringResource(R.string.item_date_added) to details.dateAdded?.let(::day)
-    return rows.mapNotNull { (k, v) -> v?.let { k to it } }
-}
-
-/** The chosen version's video, audio, subtitles and file. */
-@Composable
-private fun mediaFacts(source: Source, context: android.content.Context): List<Pair<String, String>> {
-    val video = source.video?.let { v -> listOfNotNull(source.resolution, v.codec.uppercase(), source.range).joinToString(" · ") }
-    val audio = source.audio.takeIf { it.isNotEmpty() }?.joinToString("\n") { a ->
-        val channels = when {
-            a.channels == 6 -> "5.1"
-            a.channels == 8 -> "7.1"
-            a.channels > 0 -> "${a.channels} ch"
-            else -> null
-        }
-        listOfNotNull(a.title ?: languageName(a.language), a.codec.uppercase(), channels).joinToString(" · ")
-    }
-    val subtitles = source.subtitles.takeIf { it.isNotEmpty() }?.joinToString("\n") { s ->
-        listOfNotNull(s.title ?: languageName(s.language), s.codec.uppercase()).joinToString(" · ")
-    }
-    val file = listOfNotNull(source.fileName, source.sizeText(context)).joinToString("\n").ifEmpty { null }
-    return listOf(
-        stringResource(R.string.item_video) to video,
-        stringResource(R.string.item_audio_tracks) to audio,
-        stringResource(R.string.item_subtitle_tracks) to subtitles,
-        stringResource(R.string.item_file) to file,
-    ).mapNotNull { (k, v) -> v?.let { k to it } }
-}
-
-/** A rating, large, with its caption and scale. */
-@Composable
-private fun RatingCard(label: String, scale: String?, value: @Composable () -> Unit) {
-    val colors = theme.colors
-    Column(
-        Modifier
-            .widthIn(min = 144.dp)
-            .clip(RoundedCornerShape(12.dp))
-            .background(colors.fill)
-            .padding(horizontal = MavioSpacing.s16, vertical = MavioSpacing.s12),
-        verticalArrangement = Arrangement.spacedBy(MavioSpacing.s4),
-    ) {
-        Text(label, style = theme.type.footnote.text, fontWeight = FontWeight.SemiBold, color = colors.textSecondary)
-        Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
-            value()
-            scale?.let { Text(it, style = theme.type.callout.text, color = colors.textTertiary) }
-        }
-    }
-}
-
-/** Facts, each a caption over its value, two to a line. */
-@Composable
-private fun FactList(
-    rows: List<Pair<String, String>>,
-    links: Map<String, List<Pair<String, (() -> Unit)?>>>,
-    extra: @Composable (String) -> Unit,
-) {
-    if (rows.isEmpty()) return
-    val colors = theme.colors
-    FlowRow(maxItemsInEachRow = 2, verticalArrangement = Arrangement.spacedBy(MavioSpacing.s20)) {
-        rows.forEach { (key, value) ->
-            Column(Modifier.weight(1f).padding(end = MavioSpacing.s32), verticalArrangement = Arrangement.spacedBy(MavioSpacing.s4)) {
-                Text(key, style = theme.type.footnote.text, fontWeight = FontWeight.SemiBold, color = colors.textSecondary)
-                val values = links[key]
-                if (values != null && values.any { it.second != null }) {
-                    // Each value opening what it links to.
-                    Text(
-                        buildAnnotatedString {
-                            values.forEachIndexed { i, (text, open) ->
-                                if (i > 0) append(", ")
-                                if (open == null) {
-                                    append(text)
-                                } else {
-                                    withLink(LinkAnnotation.Clickable(text, TextLinkStyles(SpanStyle(color = colors.textPrimary))) { open() }) { append(text) }
-                                }
-                            }
-                        },
-                        style = theme.type.callout.text,
-                        color = colors.textPrimary,
-                    )
-                } else {
-                    Text(value, style = theme.type.callout.text)
-                }
-                extra(key)
-            }
-        }
-    }
 }
 
 /** A details hero's artwork: the backdrop or still, else the poster blurred. */

@@ -8,6 +8,8 @@ import androidx.compose.foundation.gestures.LocalBringIntoViewSpec
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -48,6 +50,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.pluralStringResource
@@ -62,6 +65,7 @@ import dev.mavio.core.AppModel
 import dev.mavio.core.Card
 import dev.mavio.core.CardKind
 import dev.mavio.core.CreditEntry
+import dev.mavio.core.CreditJob
 import dev.mavio.core.Details
 import dev.mavio.core.Episode
 import dev.mavio.core.ExtraKind
@@ -71,22 +75,29 @@ import dev.mavio.design.MavioRadius
 import dev.mavio.design.MavioSpacing
 import dev.mavio.ui.Artwork
 import dev.mavio.ui.CardShape
+import dev.mavio.ui.FactList
 import dev.mavio.ui.Focusable
 import dev.mavio.ui.Logo
 import dev.mavio.ui.MavioIcon
 import dev.mavio.ui.ProgressBar
 import dev.mavio.ui.R
+import dev.mavio.ui.RatingCard
 import dev.mavio.ui.StatusView
 import dev.mavio.ui.TvButton
 import dev.mavio.ui.TvScrolling
+import dev.mavio.ui.aboutFacts
+import dev.mavio.ui.crewOrder
 import dev.mavio.ui.focusArtwork
 import dev.mavio.ui.focusCard
 import dev.mavio.ui.focused
 import dev.mavio.ui.isCast
+import dev.mavio.ui.label
+import dev.mavio.ui.mediaFacts
 import dev.mavio.ui.minutesText
 import dev.mavio.ui.range
 import dev.mavio.ui.resolution
 import dev.mavio.ui.selectable
+import dev.mavio.ui.shownRole
 import dev.mavio.ui.surround
 import dev.mavio.ui.text
 import dev.mavio.ui.theme
@@ -247,11 +258,18 @@ private fun DetailsContent(model: AppModel, details: Details, page: Page.Details
                     }
                 }
             }
-            val cast = details.credits.filter { it.job.isCast }
+            // The cast in billing order, then the creators, directors and writers.
+            val cast = details.credits.filter { it.job.isCast } +
+                details.credits.filter { it.job == CreditJob.CREATOR || it.job == CreditJob.DIRECTOR || it.job == CreditJob.WRITER }
             if (cast.isNotEmpty()) item(key = "cast") {
+                val context = LocalContext.current
                 TvShelf(stringResource(R.string.item_cast), page.rows.of("cast")) {
-                    items(cast, key = { it.personId + it.role }) { c ->
-                        PersonCard(c, Modifier.focusKey(focus, "cast/${c.personId}/${c.role}"))
+                    items(cast.size, key = { "cast/$it" }) { i ->
+                        val c = cast[i]
+                        PersonCard(c.copy(role = c.shownRole(context)), Modifier.focusKey(focus, "cast/$i"))
+                    }
+                    item(key = "all") {
+                        CastAllCard(Modifier.focusKey(focus, "cast/all")) { pages.openCredits(card.serverId, card.itemId, crew = false) }
                     }
                 }
             }
@@ -271,6 +289,7 @@ private fun DetailsContent(model: AppModel, details: Details, page: Page.Details
                     }
                 }
             }
+            item(key = "about") { About(details, source, focus) }
         }
     }
 }
@@ -645,9 +664,9 @@ private fun EpisodeCard(episode: Episode, short: String?, current: Boolean, modi
     }
 }
 
-/** A person of the cast: the photo in a circle, which grows with focus, the name and the role. */
+/** A person of the cast or crew: the photo in a circle, which grows with focus, the name and the role. */
 @Composable
-private fun PersonCard(credit: CreditEntry, modifier: Modifier) {
+internal fun PersonCard(credit: CreditEntry, modifier: Modifier) {
     val state = remember { Focusable() }
     val focused = state.focused()
     Column(modifier.width(180.dp).focusCard(focused).selectable(state) {}, horizontalAlignment = Alignment.CenterHorizontally) {
@@ -672,3 +691,141 @@ private fun PersonCard(credit: CreditEntry, modifier: Modifier) {
 
 private fun initials(name: String): String =
     name.split(" ").filter { it.isNotEmpty() }.take(2).joinToString("") { it.take(1) }
+
+/** The cast's last card, opening the whole cast and crew: an arrow in a circle over See All. */
+@Composable
+private fun CastAllCard(modifier: Modifier, onClick: () -> Unit) {
+    val state = remember { Focusable() }
+    val focused = state.focused()
+    Column(modifier.width(180.dp).focusCard(focused).selectable(state, onClick), horizontalAlignment = Alignment.CenterHorizontally) {
+        Box(
+            Modifier
+                .focusArtwork(focused, 80.dp)
+                .size(160.dp)
+                .clip(CircleShape)
+                .background(theme.colors.surfaceRaised),
+            Alignment.Center,
+        ) {
+            MavioIcon(R.drawable.ic_forward, size = 40.dp)
+        }
+        Spacer(Modifier.height(MavioSpacing.s12))
+        Text(stringResource(R.string.credits_all), style = theme.type.headline.text, maxLines = 1, textAlign = TextAlign.Center)
+    }
+}
+
+/**
+ * The item's details (docs/tv.md §6.2), a region in the page's flow: the
+ * tagline and overview, the leading crew with View Full Crew, and the
+ * tags beside the ratings, the facts and the chosen version's media. Only
+ * View Full Crew takes focus; a television opens no web pages.
+ */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun About(details: Details, source: Source?, focus: FocusMemory) {
+    val pages = LocalPages.current
+    val card = details.card
+    val colors = theme.colors
+    val context = LocalContext.current
+    val inSeries = card.kind == CardKind.SERIES || card.kind == CardKind.SEASON || card.kind == CardKind.EPISODE
+    val crew = details.credits.withIndex()
+        .filter { !it.value.job.isCast }
+        .sortedWith(compareBy({ crewOrder.indexOf(it.value.job).let { i -> if (i < 0) Int.MAX_VALUE else i } }, { it.index }))
+        .map { it.value }
+        .take(6)
+    val tags = if (card.kind == CardKind.EPISODE || card.kind == CardKind.SEASON) emptyList() else details.tags
+    val studiosKey = stringResource(if (inSeries) R.string.item_networks else R.string.item_studio)
+    val facts = aboutFacts(details, studiosKey, allStudios = true)
+    val media = source?.let { mediaFacts(it, context) }.orEmpty()
+    val community = details.communityRating?.takeIf { it > 0f }
+    val critic = details.criticRating?.takeIf { it > 0f }
+    val overview = details.overview
+    val left = overview != null || crew.isNotEmpty() || tags.isNotEmpty()
+    if (!left && facts.isEmpty() && media.isEmpty() && community == null && critic == null) return
+    Column(
+        Modifier.padding(start = theme.layout.margin, end = theme.layout.margin, top = MavioSpacing.s32, bottom = MavioSpacing.s16),
+        verticalArrangement = Arrangement.spacedBy(MavioSpacing.s16),
+    ) {
+        Text(stringResource(R.string.item_details), style = theme.type.title3.text)
+        Row(horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s64)) {
+            if (left) {
+                Column(Modifier.weight(0.44f), verticalArrangement = Arrangement.spacedBy(MavioSpacing.s20)) {
+                    if (overview != null) {
+                        Column(verticalArrangement = Arrangement.spacedBy(MavioSpacing.s8)) {
+                            details.tagline?.let { Text(it, style = theme.type.headline.text) }
+                            Text(overview, style = theme.type.body.text, color = colors.textSecondary)
+                        }
+                    }
+                    if (crew.isNotEmpty()) {
+                        FlowRow(maxItemsInEachRow = 2, verticalArrangement = Arrangement.spacedBy(MavioSpacing.s16)) {
+                            crew.forEach { c ->
+                                Column(Modifier.weight(1f).padding(end = MavioSpacing.s24)) {
+                                    Text(
+                                        if (c.job == CreditJob.OTHER) c.role ?: stringResource(c.job.label) else stringResource(c.job.label),
+                                        style = theme.type.headline.text,
+                                    )
+                                    Text(c.name, style = theme.type.callout.text, color = colors.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                }
+                            }
+                        }
+                        FullCrew(Modifier.focusKey(focus, "fullCrew")) { pages.openCredits(card.serverId, card.itemId, crew = true) }
+                    }
+                    if (tags.isNotEmpty()) {
+                        Column(verticalArrangement = Arrangement.spacedBy(MavioSpacing.s8)) {
+                            Text(stringResource(R.string.item_tags), style = theme.type.footnote.text, fontWeight = FontWeight.SemiBold, color = colors.textSecondary)
+                            FlowRow(horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s8), verticalArrangement = Arrangement.spacedBy(MavioSpacing.s8)) {
+                                tags.forEach {
+                                    Text(
+                                        it,
+                                        Modifier
+                                            .border(1.dp, colors.border, CircleShape)
+                                            .padding(horizontal = MavioSpacing.s12, vertical = MavioSpacing.s4),
+                                        style = theme.type.footnote.text,
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            Column(Modifier.weight(0.56f), verticalArrangement = Arrangement.spacedBy(MavioSpacing.s32)) {
+                if (community != null || critic != null) {
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s12), verticalArrangement = Arrangement.spacedBy(MavioSpacing.s12)) {
+                        community?.let {
+                            RatingCard(stringResource(R.string.item_community_rating), "/ 10") {
+                                MavioIcon(R.drawable.ic_rating_fill, size = 22.dp, tint = Color(0xFFFFD60A))
+                                Text(String.format(LocalLocale.current.platformLocale, "%.1f", it), style = theme.type.title2.text, fontWeight = FontWeight.Bold)
+                            }
+                        }
+                        critic?.let {
+                            RatingCard(stringResource(R.string.item_critic_rating), null) {
+                                Text("${Math.round(it)}%", style = theme.type.title2.text, fontWeight = FontWeight.Bold)
+                            }
+                        }
+                    }
+                }
+                FactList(facts, emptyMap()) {}
+                FactList(media, emptyMap()) {}
+            }
+        }
+    }
+}
+
+/** View Full Crew: a link under the leading crew, white with black text once it has focus. */
+@Composable
+private fun FullCrew(modifier: Modifier, onClick: () -> Unit) {
+    val state = remember { Focusable() }
+    val focused = state.focused()
+    Row(
+        modifier
+            .clip(RoundedCornerShape(MavioRadius.md))
+            .background(if (focused) Color.White else Color.Transparent)
+            .selectable(state, onClick)
+            .padding(horizontal = MavioSpacing.s12, vertical = MavioSpacing.s8),
+        horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s4),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        val ink = if (focused) Color.Black else theme.colors.textPrimary
+        Text(stringResource(R.string.discover_full_crew), style = theme.type.callout.text, fontWeight = FontWeight.SemiBold, color = ink)
+        MavioIcon(R.drawable.ic_forward, size = 16.dp, tint = ink)
+    }
+}

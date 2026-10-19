@@ -143,6 +143,7 @@ private fun Shell(model: AppModel) {
             when (top) {
                 is Page.Details -> key(top) { DetailsPage(model, top) }
                 is Page.Library -> key(top) { LibraryPage(model, top) }
+                is Page.Credits -> key(top) { CreditsPage(model, top) }
                 is Page.Catalog -> key(top) { CatalogPage(top) }
                 is Page.Title -> key(top) { TitlePage(top) }
                 is Page.Search -> key(top) { SearchPage(model, top) }

@@ -112,6 +112,18 @@ sealed class Page {
         val focus = FocusMemory()
     }
 
+    /**
+     * An item's whole cast and crew, which the cast's See All opens, or its
+     * crew alone, which View Full Crew opens (docs/tv.md §6.2).
+     */
+    class Credits(val serverId: String, val itemId: String, val crew: Boolean) : Page() {
+        /** Its scroll. */
+        val grid = LazyGridState()
+
+        /** The element that had focus. */
+        val focus = FocusMemory()
+    }
+
     /** A discovered title (docs/tv.md §6.3), a movie or series by its TMDB ID. */
     class Title(val serverId: String, val mediaKind: Int, val tmdbId: Int) : Page() {
         /** The page's scroll. */
@@ -166,6 +178,11 @@ class Pages {
     /** Opens the item [itemId] of [serverId]. */
     fun openItem(serverId: String, itemId: String) {
         stack += Page.Details(serverId, itemId)
+    }
+
+    /** Opens an item's whole cast and crew, or its [crew] alone. */
+    fun openCredits(serverId: String, itemId: String, crew: Boolean) {
+        stack += Page.Credits(serverId, itemId, crew)
     }
 
     /** Opens a catalog of Discover. */
