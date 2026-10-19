@@ -291,6 +291,9 @@ private struct TopBar: ViewModifier {
                         }
                         .accessibilityLabel(MavioStrings.navSettings)
                     }
+                    // Without the bar buttons' padding, which would set them
+                    // apart.
+                    .buttonStyle(.plain)
                 }
                 .hiddenSharedBackground()
             } else {
