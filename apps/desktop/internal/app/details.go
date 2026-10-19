@@ -35,6 +35,8 @@ type detailsState struct {
 	episodeInfo task[map[string]*libraryv1.Item]
 	scrolledTo  bool
 	more        moreState
+	allStudios  bool // the studios shown past minStudios
+	acquire     acquireState
 }
 
 // details builds an item's details, as the web UI's
@@ -82,12 +84,14 @@ func (a *App) details(c *ui.Context, r *ui.Route, server, id string) {
 				if info.value != nil {
 					a.recommendations(c, info.value.item.GetItem())
 					a.about(c, st, d, info.value, credits)
+					a.acquisition(c, &st.acquire, server, info.value.item.GetItem())
 				} else {
 					a.facts(c, st, d)
 				}
 			})
 		})
 	})
+	a.requestDialog(c, server)
 }
 
 // mediaKindOfItem returns the kind of title discovery knows a movie or
@@ -284,7 +288,7 @@ func (a *App) detailsHeader(c *ui.Context, st *detailsState, d *capiv1.Details, 
 				}
 				badges := detailBadges(d, a.chosenSource(st, d, info))
 				several := len(a.servers) > 1 && d.GetServerName() != ""
-				if len(badges) > 0 || several {
+				if len(badges) > 0 || several || info != nil {
 					ui.Row(c).GapX(12).GapY(6).Wrap().AlignItems(ui.Center).Children(func() {
 						for _, b := range badges {
 							style.Text(ui.Text(c.Key(b), b), style.Type(c).Caption).FontWeight(600).TextColor(white.Alpha(0.9)).
@@ -293,6 +297,9 @@ func (a *App) detailsHeader(c *ui.Context, st *detailsState, d *capiv1.Details, 
 						if several {
 							style.Text(ui.Text(c, d.GetServerName()), style.Type(c).Caption).TextColor(white.Alpha(0.8)).
 								Padding(0, 6).Radius(4).Background(white.Alpha(0.2))
+						}
+						if info != nil {
+							a.downloadBadge(c, &st.acquire, d.GetCard().GetServerId(), info.item.GetItem())
 						}
 					})
 				}
@@ -759,6 +766,9 @@ func (a *App) episodes(c *ui.Context, st *detailsState, d *capiv1.Details, info 
 					style.Text(ui.Text(c, season.GetTitle()), style.Type(c).Callout).TextColor(style.Color(colors.TextSecondary)).SingleLine()
 				}
 				ui.Spacer(c)
+				if info != nil {
+					a.requestMore(c, server, info.item.GetItem())
+				}
 				if a.moreLink(c, style.T(c, "home.more")).Clicked() {
 					a.open(season)
 				}

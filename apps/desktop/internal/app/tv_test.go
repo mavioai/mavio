@@ -137,10 +137,16 @@ func TestTVDetailsAndLibrary(t *testing.T) {
 		t.Fatalf("down the details reached no leading crew")
 	}
 	h.save(shots, "tv-details-about")
-	// View Full Crew is reached by down only from the last of a row.
+	// View Full Crew is reached by down only from the last of a row: down
+	// from the others passes it to the keywords' first, and up from them
+	// returns to the crew's first.
 	key(ui.KeyDown)
+	if !h.tt.Focused("space station") {
+		t.Errorf("down from the first of the crew: space station has no focus")
+	}
+	key(ui.KeyUp)
 	if !h.tt.Focused("Inès Varga") {
-		t.Errorf("down from the first of the crew left it")
+		t.Errorf("up from the keywords: Inès Varga has no focus")
 	}
 	key(ui.KeyRight)
 	if !h.tt.Focused("Jonah Pike") {

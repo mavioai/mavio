@@ -143,6 +143,9 @@ type App struct {
 	// sessionsChanged counts the changes of the user's devices, so that
 	// the remote control shows them again.
 	sessionsChanged int
+	// itemServer, while set, is the server the downloads' rows act on in
+	// place of the one chosen in the settings: an item's details'.
+	itemServer string
 
 	places places
 	// focus moves focus with the arrow keys in the TV mode.

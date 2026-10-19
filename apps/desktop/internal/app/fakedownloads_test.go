@@ -25,6 +25,7 @@ type fakeDownloads struct {
 	removed   []*acquisitionv1.RemoveFromQueueRequest
 	failed    []string
 	imported  []*acquisitionv1.ManualImportRequest
+	grabbed   []string // the releases grabbed, by item and title
 }
 
 func newFakeDownloads() *fakeDownloads {
@@ -70,10 +71,20 @@ func (*fakeDownloads) ListDownloadClients(context.Context, *acquisitionv1.ListDo
 	}}.Build(), nil
 }
 
-func (s *fakeDownloads) ListQueue(context.Context, *acquisitionv1.ListQueueRequest) (*acquisitionv1.ListQueueResponse, error) {
+func (s *fakeDownloads) ListQueue(_ context.Context, r *acquisitionv1.ListQueueRequest) (*acquisitionv1.ListQueueResponse, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	return acquisitionv1.ListQueueResponse_builder{Items: slices.Clone(s.queue), Total: new(int32(len(s.queue)))}.Build(), nil
+	items := slices.DeleteFunc(slices.Clone(s.queue), func(q *acquisitionv1.QueueItem) bool {
+		return r.GetItemId() != "" && q.GetItemId() != r.GetItemId()
+	})
+	return acquisitionv1.ListQueueResponse_builder{Items: items, Total: new(int32(len(items)))}.Build(), nil
+}
+
+func (s *fakeDownloads) GrabRelease(_ context.Context, r *acquisitionv1.GrabReleaseRequest) (*acquisitionv1.GrabReleaseResponse, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.grabbed = append(s.grabbed, r.GetItemId()+" "+r.GetRelease().GetTitle())
+	return &acquisitionv1.GrabReleaseResponse{}, nil
 }
 
 func (s *fakeDownloads) RemoveFromQueue(_ context.Context, r *acquisitionv1.RemoveFromQueueRequest) (*acquisitionv1.RemoveFromQueueResponse, error) {
@@ -88,7 +99,7 @@ func (s *fakeDownloads) ListHistory(_ context.Context, r *acquisitionv1.ListHist
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	events := slices.DeleteFunc(slices.Clone(s.history), func(e *acquisitionv1.HistoryEvent) bool {
-		return len(r.GetTypes()) > 0 && !slices.Contains(r.GetTypes(), e.GetType())
+		return len(r.GetTypes()) > 0 && !slices.Contains(r.GetTypes(), e.GetType()) || r.GetItemId() != "" && e.GetItemId() != r.GetItemId()
 	})
 	return acquisitionv1.ListHistoryResponse_builder{Events: events, Total: new(int32(len(events)))}.Build(), nil
 }

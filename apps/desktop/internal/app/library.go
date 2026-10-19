@@ -2,11 +2,13 @@ package app
 
 import (
 	"context"
+	"net/url"
 	"time"
 
 	"github.com/egoist/mygo/ui"
 
 	capiv1 "github.com/mavioai/mavio/libs/client-rust/capi/gen/mavio/capi/v1"
+	design "github.com/mavioai/mavio/libs/design/gen/go"
 
 	"github.com/mavioai/mavio/apps/desktop/internal/style"
 )
@@ -81,6 +83,14 @@ func (a *App) library(c *ui.Context, r *ui.Route) {
 		})
 		return
 	}
+	// An item's details open the items of one of its genres, keywords or
+	// studios, which a pill tells and removes.
+	var value, valueLabel string
+	for _, v := range []struct{ query, label string }{{"genre", "library.genreValue"}, {"tag", "library.tagValue"}, {"studio", "library.studioValue"}} {
+		if q := r.Query(v.query); q != "" && value == "" {
+			value, valueLabel = v.query+"\x00"+q, style.T(c, v.label, "value", q)
+		}
+	}
 	filters := []string{"library.filterAll", "library.filterUnplayed", "library.filterPlayed", "library.filterFavorites"}
 	sorts := []struct {
 		sort capiv1.Sort
@@ -101,6 +111,9 @@ func (a *App) library(c *ui.Context, r *ui.Route) {
 	}
 	controls := func() {
 		tabs()
+		if valueLabel != "" && a.valuePill(c, valueLabel).Clicked() {
+			a.router.Replace(libraryPath(server, id, "", ""))
+		}
 		// On the television, the filters are a pill alike, which focus
 		// applies (docs/tv.md §6.3).
 		if style.TV(c) {
@@ -149,13 +162,65 @@ func (a *App) library(c *ui.Context, r *ui.Route) {
 	case 3:
 		filter.Favorite = true
 	}
+	switch kind, v, _ := cutValue(value); kind {
+	case "genre":
+		filter.Genre = v
+	case "tag":
+		filter.Tag = v
+	case "studio":
+		filter.Studio = v
+	}
 	f := filter.Build()
-	a.cardGrid(c, key("library", server, id, st.sort, st.filter), name, controls, func(ctx context.Context, offset, limit uint32) (*capiv1.Page, error) {
+	a.cardGrid(c, key("library", server, id, st.sort, st.filter, value), name, controls, func(ctx context.Context, offset, limit uint32) (*capiv1.Page, error) {
 		m, err := a.opts.Core.Call(ctx, capiv1.Request_builder{ListLibraryItems: capiv1.ListLibraryItems_builder{
 			ServerId: server, LibraryId: id, Sort: st.sort, Filter: f, Offset: offset, Limit: limit,
 		}.Build()}.Build())
 		return m.GetPage(), err
 	})
+}
+
+// libraryPath returns the path of a library's grid, of the items with a
+// genre, tag or studio when kind names one.
+func libraryPath(server, id, kind, value string) string {
+	p := "/library/" + server + "/" + id
+	if kind != "" {
+		p += "?" + url.Values{kind: {value}}.Encode()
+	}
+	return p
+}
+
+// cutValue splits a library's value filter into its kind and value.
+func cutValue(v string) (kind, value string, ok bool) {
+	for i := range len(v) {
+		if v[i] == 0 {
+			return v[:i], v[i+1:], true
+		}
+	}
+	return "", "", false
+}
+
+// valuePill builds the accent pill telling a library's value filter,
+// which removes it.
+func (a *App) valuePill(c *ui.Context, label string) ui.Element {
+	colors := style.Colors(c)
+	tv := style.TV(c)
+	b := ui.ButtonBase(c).Height(32).Padding(0, 10, 0, 14).Gap(6).Radius(design.RadiusFull).AlignItems(ui.Center).
+		Background(style.Color(colors.Accent)).Label(label + ", " + style.T(c, "library.clearValue"))
+	if tv {
+		b.Height(48).Padding(0, 20)
+	}
+	if b.Hovered() {
+		b.Opacity(0.9)
+	}
+	b.Children(func() {
+		ts := style.Type(c).Callout
+		if tv {
+			ts = style.Type(c).Headline
+		}
+		style.Text(ui.Text(c, label), ts).FontWeight(600).TextColor(style.Color(colors.OnAccent)).SingleLine()
+		ui.Icon(c, style.Icon("close", false)).Size(14, 14).TextColor(style.Color(colors.OnAccent))
+	})
+	return b
 }
 
 // pageHeader builds the top of a page with a title and controls beside it.

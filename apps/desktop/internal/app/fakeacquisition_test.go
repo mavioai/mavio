@@ -80,6 +80,28 @@ func (f *fakeCore) handleAcquisition(mux *http.ServeMux) {
 	mux.Handle(acquisitionv1connect.NewWantedServiceHandler(f.wanted))
 }
 
+func (fakeIndexers) SearchReleases(context.Context, *acquisitionv1.SearchReleasesRequest) (*acquisitionv1.SearchReleasesResponse, error) {
+	torrent := acquisitionv1.DownloadProtocol_DOWNLOAD_PROTOCOL_TORRENT
+	quality := func(name string) *acquisitionv1.ParsedRelease {
+		return acquisitionv1.ParsedRelease_builder{Quality: acquisitionv1.ReleaseQuality_builder{Name: &name}.Build(), Languages: []string{"English"}}.Build()
+	}
+	return acquisitionv1.SearchReleasesResponse_builder{
+		Releases: []*acquisitionv1.Release{
+			acquisitionv1.Release_builder{
+				IndexerId: new("1"), IndexerName: new("Nyaa"), Guid: new("g1"), Title: new("Orbit.2024.1080p.BluRay.x265-GRP"), Size: new(int64(6_400_000_000)),
+				Protocol: &torrent, Seeders: new(int32(42)), Peers: new(int32(50)), Parsed: quality("Bluray-1080p"),
+				CustomFormats: []string{"x265"}, CustomFormatScore: new(int32(10)), PublishDate: timestamppb.New(time.Now().Add(-72 * time.Hour)),
+			}.Build(),
+			acquisitionv1.Release_builder{
+				IndexerId: new("1"), IndexerName: new("Nyaa"), Guid: new("g2"), Title: new("Orbit.2024.CAM"), Size: new(int64(900_000_000)),
+				Protocol: &torrent, Seeders: new(int32(3)), Peers: new(int32(4)), Parsed: quality("CAM"),
+				Rejections: []*acquisitionv1.Rejection{acquisitionv1.Rejection_builder{Reason: new("quality_not_wanted"), Message: new("CAM is not wanted in profile")}.Build()},
+			}.Build(),
+		},
+		Failures: []*acquisitionv1.IndexerFailure{acquisitionv1.IndexerFailure_builder{PluginId: new("dev.mavio.prowlarr"), IndexerId: new("2"), Message: new("timed out")}.Build()},
+	}.Build(), nil
+}
+
 func (fakeIndexers) ListIndexers(context.Context, *acquisitionv1.ListIndexersRequest) (*acquisitionv1.ListIndexersResponse, error) {
 	return acquisitionv1.ListIndexersResponse_builder{
 		Indexers: []*acquisitionv1.Indexer{
@@ -303,6 +325,7 @@ type fakeWanted struct {
 	episodes  []*acquisitionv1.WantedEpisode
 	searched  []string // the items searched for, "all" for all
 	rssSynced bool
+	updated   []*acquisitionv1.Wanted
 }
 
 func newFakeWanted() *fakeWanted {
@@ -373,6 +396,7 @@ func (s *fakeWanted) GetWanted(_ context.Context, r *acquisitionv1.GetWantedRequ
 func (s *fakeWanted) UpdateWanted(_ context.Context, r *acquisitionv1.UpdateWantedRequest) (*acquisitionv1.UpdateWantedResponse, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
+	s.updated = append(s.updated, r.GetWanted())
 	if !r.GetWanted().GetMonitored() {
 		s.movies = slices.DeleteFunc(s.movies, func(m *acquisitionv1.WantedMovie) bool { return m.GetItemId() == r.GetWanted().GetItemId() })
 	}

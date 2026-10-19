@@ -160,8 +160,9 @@ type languagesForm struct {
 // chosenServer returns the server whose settings are shown: the one chosen,
 // else the first.
 func (a *App) chosenServer() *capiv1.ServerRecord {
+	chosen := cmpOr(a.itemServer, a.settingsState.server)
 	for _, s := range a.servers {
-		if s.GetId() == a.settingsState.server {
+		if s.GetId() == chosen {
 			return s
 		}
 	}

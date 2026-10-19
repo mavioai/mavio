@@ -191,8 +191,11 @@ func (a *App) collectionBanner(c *ui.Context, server string, d *capiv1.Details, 
 	}
 }
 
-// fact is a caption over its value.
-type fact struct{ caption, value string }
+// fact is a caption over its value, which build draws when it links.
+type fact struct {
+	caption, value string
+	build          func()
+}
 
 // about builds the details at the foot, as the web UI's: the overview
 // with the tagline, the leading crew, tags and links beside the ratings,
@@ -217,7 +220,7 @@ func (a *App) about(c *ui.Context, st *detailsState, d *capiv1.Details, info *it
 	var facts []fact
 	add := func(caption, value string) {
 		if value != "" {
-			facts = append(facts, fact{style.T(c, caption), value})
+			facts = append(facts, fact{style.T(c, caption), value, nil})
 		}
 	}
 	day := func(t time.Time) string { return t.Local().Format("Jan 2, 2006") }
@@ -290,13 +293,31 @@ func (a *App) about(c *ui.Context, st *detailsState, d *capiv1.Details, info *it
 	if len(genres) == 0 {
 		genres = d.GetGenres()
 	}
-	add("item.genres", strings.Join(genres, ", "))
+	// Genres and studios open their items in the library.
+	library := cmpOr(it.GetLibraryId(), info.series.GetLibraryId())
+	if len(genres) > 0 {
+		facts = append(facts, fact{style.T(c, "item.genres"), strings.Join(genres, ", "), func() {
+			a.valueLinks(c, server, library, "genre", genres, nil)
+		}})
+	}
 	studioCaption := "item.studio"
 	switch it.GetKind() {
 	case libraryv1.ItemKind_ITEM_KIND_SERIES, libraryv1.ItemKind_ITEM_KIND_SEASON, libraryv1.ItemKind_ITEM_KIND_EPISODE:
 		studioCaption = "item.networks"
 	}
-	add(studioCaption, strings.Join(studios, ", "))
+	if len(studios) > 0 {
+		facts = append(facts, fact{style.T(c, studioCaption), strings.Join(studios, ", "), func() {
+			shown := studios
+			if !st.allStudios {
+				shown = studios[:min(len(studios), minStudios)]
+			}
+			a.valueLinks(c, server, library, "studio", shown, func() {
+				if len(studios) > minStudios {
+					a.showMoreToggle(c, &st.allStudios)
+				}
+			})
+		}})
+	}
 	countries := it.GetProductionLocations()
 	if len(countries) == 0 {
 		for _, code := range title.GetProductionCountries() {
@@ -371,8 +392,9 @@ func (a *App) about(c *ui.Context, st *detailsState, d *capiv1.Details, info *it
 									style.Text(ui.Text(c, style.T(c, "item.tags")), style.Type(c).Footnote).FontWeight(600).TextColor(style.Color(colors.TextSecondary))
 									ui.Row(c).Gap(8).Wrap().Children(func() {
 										for _, tag := range tags {
-											style.Text(ui.Text(c.Key(tag), tag), style.Type(c).Footnote).TextColor(style.Color(colors.TextPrimary)).
-												Padding(4, 12).Radius(design.RadiusFull).Border(1, style.Color(colors.Border))
+											if a.tagChip(c.Key(tag), tag).Clicked() {
+												a.router.Push(libraryPath(server, library, "tag", tag))
+											}
 										}
 									})
 								})
@@ -391,7 +413,13 @@ func (a *App) about(c *ui.Context, st *detailsState, d *capiv1.Details, info *it
 				}
 				a.inColumn(func() {
 					a.marked(focusMarks{beside: true}, func() {
-						ui.Column(c).Grow(1).Basis(0).MinWidth(0).Gap(32).Children(func() {
+						// Beside the overview it takes the rest of the row; under
+						// it, its own height.
+						col := ui.Column(c).MinWidth(0).Gap(32)
+						if wide {
+							col.Grow(1).Basis(0)
+						}
+						col.Children(func() {
 							switch {
 							case scored:
 								ui.Row(c).Justify(ui.Start).Children(func() { a.titleRatings(c, server, title) })
@@ -451,6 +479,80 @@ func (a *App) linkChip(c *ui.Context, label string) ui.Element {
 	return b
 }
 
+// valueLinks builds an item's genres or studios, each opening the items
+// of the library that have it, and then after.
+func (a *App) valueLinks(c *ui.Context, server, library, kind string, values []string, after func()) {
+	colors := style.Colors(c)
+	ui.Row(c).GapY(2).Wrap().AlignItems(ui.Center).Children(func() {
+		for i, v := range values {
+			b := ui.ButtonBase(c.Key(v)).Cursor(ui.CursorPointer).Label(v)
+			lit := a.tvLink(c, b, 6)
+			b.Children(func() {
+				t := style.Text(ui.Text(c, v), style.Type(c).Callout).TextColor(style.Color(colors.TextPrimary))
+				switch {
+				case lit:
+					t.TextColor(ui.RGB(0, 0, 0))
+				case b.Hovered():
+					t.Underline()
+				}
+			})
+			if b.Clicked() && library != "" {
+				a.router.Push(libraryPath(server, library, kind, v))
+			}
+			if i < len(values)-1 {
+				style.Text(ui.Text(c.Key(i), ","), style.Type(c).Callout).TextColor(style.Color(colors.TextPrimary))
+				ui.Box(c.Key(key("space", i))).Width(4)
+			}
+		}
+		if after != nil {
+			ui.Box(c).Width(8)
+			after()
+		}
+	})
+}
+
+// showMoreToggle builds Show More, or Show Less once on, beside values
+// shortened.
+func (a *App) showMoreToggle(c *ui.Context, on *bool) {
+	colors := style.Colors(c)
+	label := style.T(c, "discover.showMore")
+	if *on {
+		label = style.T(c, "action.showLess")
+	}
+	b := ui.ButtonBase(c).Gap(4).AlignItems(ui.Center).Label(label)
+	fg := style.Color(colors.TextSecondary)
+	if a.tvLink(c, b, 6) {
+		fg = ui.RGB(0, 0, 0)
+	}
+	b.Children(func() {
+		style.Text(ui.Text(c, label), style.Type(c).Callout).TextColor(fg)
+		chevron := ui.Icon(c, style.Icon("expand", false)).Size(14, 14).TextColor(fg)
+		if *on {
+			chevron.Rotate(180)
+		}
+	})
+	if b.Clicked() {
+		*on = !*on
+	}
+}
+
+// tagChip builds a keyword's pill, which opens its items in the library.
+func (a *App) tagChip(c *ui.Context, tag string) ui.Element {
+	colors := style.Colors(c)
+	b := ui.ButtonBase(c).Padding(4, 12).Radius(design.RadiusFull).Border(1, style.Color(colors.Border)).Cursor(ui.CursorPointer).Label(tag)
+	fg := style.Color(colors.TextPrimary)
+	switch {
+	case a.tvLink(c, b, design.RadiusFull):
+		fg = ui.RGB(0, 0, 0)
+	case b.Hovered():
+		b.Background(style.Color(colors.Fill))
+	}
+	b.Children(func() {
+		style.Text(ui.Text(c, tag), style.Type(c).Footnote).TextColor(fg)
+	})
+	return b
+}
+
 // factGrid builds facts in columns at least 200 wide.
 func factGrid(c *ui.Context, facts []fact) {
 	if len(facts) == 0 {
@@ -461,6 +563,10 @@ func factGrid(c *ui.Context, facts []fact) {
 		for _, f := range facts {
 			ui.Column(c.Key(f.caption)).Basis(200).Grow(1).MinWidth(0).Gap(4).Children(func() {
 				style.Text(ui.Text(c, f.caption), style.Type(c).Footnote).FontWeight(600).TextColor(style.Color(colors.TextSecondary))
+				if f.build != nil {
+					f.build()
+					return
+				}
 				style.Text(ui.Text(c, f.value), style.Type(c).Callout).TextColor(style.Color(colors.TextPrimary)).Selectable()
 			})
 		}
@@ -513,7 +619,7 @@ func (a *App) mediaFacts(c *ui.Context, st *detailsState, d *capiv1.Details, inf
 	var facts []fact
 	add := func(caption, value string) {
 		if value != "" {
-			facts = append(facts, fact{style.T(c, caption), value})
+			facts = append(facts, fact{style.T(c, caption), value, nil})
 		}
 	}
 	streams := func(kind libraryv1.StreamKind) []string {
