@@ -79,17 +79,12 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
-import androidx.media3.common.C
-import androidx.media3.common.MediaItem
-import androidx.media3.common.MimeTypes
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
-import androidx.media3.common.TrackSelectionOverride
 import androidx.media3.common.Tracks
 import androidx.media3.common.VideoSize
 import androidx.media3.common.text.CueGroup
 import androidx.media3.common.util.UnstableApi
-import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.session.MediaSession
 import androidx.media3.ui.SubtitleView
@@ -101,15 +96,16 @@ import dev.mavio.app.R as AppR
 import dev.mavio.core.AppModel
 import dev.mavio.core.AudioStream
 import dev.mavio.core.Details
-import dev.mavio.core.DeviceProfile
 import dev.mavio.core.PlayKind
 import dev.mavio.core.PlaybackInfo
 import dev.mavio.core.PlaybackOptions
 import dev.mavio.core.PlaybackSession
 import dev.mavio.core.Source
 import dev.mavio.core.SubtitleStream
-import dev.mavio.player.MpvPlayer
 import dev.mavio.player.PlayerEngine
+import dev.mavio.player.chooseTracks
+import dev.mavio.player.createPlayer
+import dev.mavio.player.engineFor
 import dev.mavio.ui.MavioIcon
 import dev.mavio.ui.R
 import dev.mavio.ui.languageName
@@ -186,11 +182,7 @@ fun PlayerScreen(model: AppModel, route: Route.Player) {
             val info = session.info()
             sourceId = info.mediaSourceId
             val source = item?.sources?.firstOrNull { it.serverId == route.serverId && it.mediaSourceId == info.mediaSourceId }
-            val engine = if (info.kind == PlayKind.DIRECT_PLAY && source != null && !DeviceProfile.media3Plays(source)) {
-                PlayerEngine.MPV
-            } else {
-                PlayerEngine.MEDIA3
-            }
+            val engine = engineFor(info, source)
             playback = Playback(session, info, item, item?.let { heading(context, it) }, engine)
         } catch (e: CancellationException) {
             session?.let { model.finish(route.serverId, it, resume) }
@@ -208,7 +200,7 @@ fun PlayerScreen(model: AppModel, route: Route.Player) {
     val player = remember(p, engine) {
         // A group's member waits for the group to play.
         val follows = model.syncPlay.joined.value.playing(route.serverId, route.itemId) != null
-        p?.let { createPlayer(context, engine ?: it.engine, it, startMs, autoplay = !follows) }
+        p?.let { createPlayer(context, engine ?: it.engine, it.info, it.source, startMs, autoplay = !follows) }
     }
     // The SyncPlay group playing the item, which the controls ask instead of the player.
     val group = rememberGroupPlayer(model, route.serverId, route.itemId, player) { navigator.back() }
@@ -239,7 +231,7 @@ fun PlayerScreen(model: AppModel, route: Route.Player) {
             }
 
             override fun onTracksChanged(tracks: Tracks) {
-                if (p != null && player is ExoPlayer) chooseTracks(player, tracks, p)
+                if (p != null && player is ExoPlayer) chooseTracks(player, tracks, p.info, p.source)
             }
 
             override fun onPlayerError(error: PlaybackException) {
@@ -328,111 +320,6 @@ private fun Subtitles(player: Player) {
         { context -> SubtitleView(context).apply { setUserDefaultStyle(); setUserDefaultTextSize() }.also { view = it } },
         Modifier.fillMaxSize(),
     )
-}
-
-/** Media3 with its FFmpeg extension, or libmpv, playing from startMs once prepared, with the streams picked. */
-@OptIn(UnstableApi::class)
-private fun createPlayer(context: Context, engine: PlayerEngine, playback: Playback, startMs: Long, autoplay: Boolean): Player {
-    val info = playback.info
-    val player = when (engine) {
-        PlayerEngine.MPV -> MpvPlayer(context).apply { mpvTracks(playback)?.let { (audio, subtitle) -> selectTracks(audio, subtitle) } }
-        PlayerEngine.MEDIA3 -> {
-            val renderers = DefaultRenderersFactory(context)
-                .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_ON)
-            ExoPlayer.Builder(context, renderers).build().apply {
-                // Off unless a subtitle was picked; chooseTracks picks it.
-                trackSelectionParameters = trackSelectionParameters.buildUpon()
-                    .setTrackTypeDisabled(C.TRACK_TYPE_TEXT, (info.subtitleStreamIndex ?: -1) < 0)
-                    .build()
-            }
-        }
-    }
-    val item = MediaItem.Builder().setUri(info.url)
-    if (".m3u8" in info.url) item.setMimeType(MimeTypes.APPLICATION_M3U8)
-    // The subtitle picked, when it is a file of its own.
-    val external = info.subtitles.firstOrNull { it.streamIndex == info.subtitleStreamIndex && it.url != null }
-    val mime = external?.let { subtitleMime(it.format) }
-    if (external != null && mime != null) {
-        item.setSubtitleConfigurations(
-            listOf(
-                MediaItem.SubtitleConfiguration.Builder(Uri.parse(external.url))
-                    .setId(EXTERNAL_SUBTITLE)
-                    .setMimeType(mime)
-                    .setLanguage(external.language)
-                    .setLabel(external.title)
-                    .setSelectionFlags(C.SELECTION_FLAG_DEFAULT)
-                    .build(),
-            ),
-        )
-    }
-    player.setMediaItem(item.build(), startMs)
-    player.prepare()
-    player.playWhenReady = autoplay
-    return player
-}
-
-/** The ID Media3 gives the subtitle file added beside the media. */
-private const val EXTERNAL_SUBTITLE = "mavio-external"
-
-/** The MIME type of a subtitle file's format, for those Media3 reads. */
-private fun subtitleMime(format: String): String? = when (format.lowercase()) {
-    "srt", "subrip" -> MimeTypes.APPLICATION_SUBRIP
-    "vtt", "webvtt" -> MimeTypes.TEXT_VTT
-    "ass", "ssa" -> MimeTypes.TEXT_SSA
-    "ttml" -> MimeTypes.APPLICATION_TTML
-    else -> null
-}
-
-/**
- * The tracks libmpv plays from the file the server sends whole: the
- * position of the picked streams among the file's audio and its embedded
- * subtitles, from 1, and 0 for the subtitles off or shown from a file of
- * their own.
- */
-private fun mpvTracks(playback: Playback): Pair<Int?, Int?>? {
-    val source = playback.source ?: return null
-    val info = playback.info
-    val audio = info.audioStreamIndex?.let { i -> source.audio.sortedBy { it.index }.indexOfFirst { it.index == i } + 1 }?.takeIf { it > 0 }
-    val chosen = info.subtitleStreamIndex ?: -1
-    val embedded = source.subtitles.filter { !it.external }.sortedBy { it.index }
-    val subtitle = if (chosen < 0) 0 else embedded.indexOfFirst { it.index == chosen } + 1
-    return audio to subtitle
-}
-
-/**
- * Picks in Media3 the streams the server says play: in a file sent whole,
- * the audio and the embedded subtitle at their positions among the file's
- * tracks; the subtitle file added beside it; in a stream the server
- * processes, its one subtitle track.
- */
-@OptIn(UnstableApi::class)
-private fun chooseTracks(player: ExoPlayer, tracks: Tracks, playback: Playback) {
-    val info = playback.info
-    val params = player.trackSelectionParameters.buildUpon()
-    val audioGroups = tracks.groups.filter { it.type == C.TRACK_TYPE_AUDIO }
-    val textGroups = tracks.groups.filter { it.type == C.TRACK_TYPE_TEXT }
-    val direct = info.kind == PlayKind.DIRECT_PLAY
-    val source = playback.source
-    if (direct && source != null && audioGroups.size > 1) {
-        val at = source.audio.sortedBy { it.index }.indexOfFirst { it.index == info.audioStreamIndex }
-        audioGroups.getOrNull(at)?.let { params.setOverrideForType(TrackSelectionOverride(it.mediaTrackGroup, 0)) }
-    }
-    val chosen = info.subtitleStreamIndex ?: -1
-    if (chosen >= 0) {
-        val external = textGroups.firstOrNull { g -> (0 until g.length).any { g.getTrackFormat(it).id?.contains(EXTERNAL_SUBTITLE) == true } }
-        val own = textGroups.filter { it != external }
-        val group = when {
-            external != null -> external
-            direct && source != null -> {
-                val at = source.subtitles.filter { !it.external }.sortedBy { it.index }.indexOfFirst { it.index == chosen }
-                own.getOrNull(at)
-            }
-            else -> own.firstOrNull()
-        }
-        group?.let { params.setOverrideForType(TrackSelectionOverride(it.mediaTrackGroup, 0)) }
-    }
-    val built = params.build()
-    if (built != player.trackSelectionParameters) player.trackSelectionParameters = built
 }
 
 /** An episode's series and numbers, as "Atlas Station · S1 E2". */

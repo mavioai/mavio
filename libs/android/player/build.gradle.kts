@@ -31,6 +31,8 @@ androidComponents {
 }
 
 dependencies {
+    // The playbacks the server starts, and the sources' streams.
+    api(project(":core"))
     api(libs.media3.exoplayer)
     api(libs.media3.exoplayer.hls)
     api(libs.media3.session)
