@@ -64,21 +64,18 @@ func (a *App) search(c *ui.Context) {
 		a.tvSearch(c, query)
 		return
 	}
-	ui.Column(c).Fill().Children(func() {
-		a.pageHeader(c, style.T(c, "nav.search"), func() {
+	// The expanded sidebar has the field already.
+	w, _ := c.Size()
+	var field func()
+	if w < design.BreakpointExpanded || a.prefs.SidebarCollapsed {
+		field = func() {
 			if ui.SearchField(c, &s.query).Placeholder(style.T(c, "search.placeholder")).AutoFocus().Grow(1).MaxWidth(560).Height(36).Submitted() {
-				// Results are kept, coming back to them; confirming the
-				// query again searches again.
-				if q := strings.TrimSpace(s.query); q == s.ran {
-					for _, t := range s.servers {
-						t.key = ""
-					}
-					s.titles.key = ""
-				} else {
-					s.ran = q
-				}
+				a.confirmSearch()
 			}
-		})
+		}
+	}
+	ui.Column(c).Fill().Children(func() {
+		a.pageHeader(c, style.T(c, "nav.search"), field)
 		if query == "" {
 			return
 		}
@@ -88,6 +85,21 @@ func (a *App) search(c *ui.Context) {
 			})
 		})
 	})
+}
+
+// confirmSearch runs the search of the query typed. Results are kept,
+// coming back to them; confirming the query again searches again.
+func (a *App) confirmSearch() {
+	s := &a.searchState
+	q := strings.TrimSpace(s.query)
+	if q != s.ran {
+		s.ran = q
+		return
+	}
+	for _, t := range s.servers {
+		t.key = ""
+	}
+	s.titles.key = ""
 }
 
 // searchServers searches each server for query, those not searched for

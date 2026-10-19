@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"math"
+	goruntime "runtime"
 	"unicode"
 	"unicode/utf8"
 
@@ -276,6 +277,10 @@ func (a *App) sidebar(c *ui.Context, medium bool) {
 		ui.Scroll(c).Grow(1).Children(func() {
 			ui.Column(c).Padding(0, 12, 12).Gap(2).Children(func() {
 				for _, it := range top {
+					if it.path == "/search" {
+						a.sidebarSearch(c)
+						continue
+					}
 					a.sidebarRow(c, it, a.places.current == it.path)
 				}
 				for _, sec := range sections {
@@ -288,6 +293,37 @@ func (a *App) sidebar(c *ui.Context, medium bool) {
 			})
 		})
 		a.userButton(c, true)
+	})
+}
+
+// sidebarSearch builds the sidebar's search field, in place of Search's
+// row, as the web UI's: its search runs on the Search page as Return
+// confirms it, and typing alone does not leave the page (docs/clients.md
+// §5.4). ⌘K (Ctrl+K) puts the focus in it.
+func (a *App) sidebarSearch(c *ui.Context) {
+	colors := style.Colors(c)
+	s := &a.searchState
+	ui.Box(c).Margin(0, 0, 8).Children(func() {
+		f := ui.SearchField(c, &s.query).Label(style.T(c, "nav.search")).Placeholder(style.T(c, "nav.search")).
+			FillWidth().Height(36).Radius(design.RadiusMd).Background(style.Color(colors.Fill))
+		if c.Shortcut(ui.Cmd, ui.KeyK) {
+			f.Focus()
+		}
+		if f.Submitted() {
+			a.confirmSearch()
+			if a.router.Path() != "/search" {
+				a.router.Push("/search")
+			}
+		}
+		if s.query == "" {
+			keys := "⌘K"
+			if goruntime.GOOS != "darwin" {
+				keys = "Ctrl+K"
+			}
+			ui.Row(c).Absolute().Top(0).Bottom(0).Right(10).AlignItems(ui.Center).PassThrough().Children(func() {
+				style.Text(ui.Text(c, keys), style.Type(c).Caption).TextColor(style.Color(colors.TextTertiary))
+			})
+		}
 	})
 }
 

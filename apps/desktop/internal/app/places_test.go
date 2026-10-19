@@ -20,8 +20,8 @@ func TestPlaces(t *testing.T) {
 		t.Fatalf("a page opened from Home shows no Back; texts = %q", h.tt.Texts())
 	}
 	// Another place and back returns to the page last shown in Home.
-	h.click("Search")
-	path("/search", "choosing Search")
+	h.click("Discover")
+	path("/discover", "choosing Discover")
 	h.click("Home")
 	path(item, "choosing Home again")
 	if got := h.app.places.current; got != "/home" {
