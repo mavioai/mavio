@@ -243,7 +243,7 @@ class AppModel(context: Context, clientName: String) {
                 }
             }
             is Push.Event -> when (push.event) {
-                is ServerEvent.SessionsChanged -> Unit
+                is ServerEvent.SessionsChanged, is ServerEvent.ScanProgressChanged -> Unit
                 else -> bump(push.serverId)
             }
             is Push.Home -> _home.value = push.rows

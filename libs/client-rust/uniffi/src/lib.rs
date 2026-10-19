@@ -14,6 +14,7 @@ use std::sync::{Arc, Mutex, OnceLock};
 use std::time::{Duration, SystemTime};
 
 use buffa::Message;
+use mavio_api::proto::mavio::library::v1::ScanPhase;
 use mavio_api::proto::mavio::playback::v1::{PlayMethod, SubtitleMethod};
 use mavio_api::proto::mavio::session::v1::__buffa::oneof::event::Kind;
 use mavio_api::proto::mavio::session::v1::Event;
@@ -200,6 +201,33 @@ pub enum ServerEvent {
     },
     /// The sessions of the user's devices changed.
     SessionsChanged,
+    /// How far a library's scan has come, sent to administrators.
+    ScanProgressChanged {
+        /// The library.
+        library_id: String,
+        /// Its progress; none once the scan and the work it queued are
+        /// done.
+        progress: Option<ScanProgress>,
+    },
+}
+
+/// How far a library's scan has come: it reads the library's folders,
+/// then the files it found new or changed are probed and their items
+/// refreshed.
+#[derive(Debug, Clone, PartialEq, uniffi::Record)]
+pub struct ScanProgress {
+    /// Whether it reads the folders; else it probes and refreshes.
+    pub reading_folders: bool,
+    /// The folders read, and those expected.
+    pub folders_done: i32,
+    /// The folders expected.
+    pub folders_total: i32,
+    /// The probes and refreshes done.
+    pub items_done: i32,
+    /// The probes and refreshes queued.
+    pub items_total: i32,
+    /// The whole done, 0 to 1.
+    pub fraction: f64,
 }
 
 impl ServerEvent {
@@ -219,6 +247,18 @@ impl ServerEvent {
                     .collect(),
             },
             Kind::SessionsChanged(_) => ServerEvent::SessionsChanged,
+            Kind::ScanProgressChanged(c) => ServerEvent::ScanProgressChanged {
+                library_id: c.library_id.clone().unwrap_or_default(),
+                progress: c.progress.as_option().map(|p| ScanProgress {
+                    reading_folders: p.phase.as_ref().and_then(|p| p.as_known())
+                        == Some(ScanPhase::SCAN_PHASE_FOLDERS),
+                    folders_done: p.folders_done.unwrap_or_default(),
+                    folders_total: p.folders_total.unwrap_or_default(),
+                    items_done: p.items_done.unwrap_or_default(),
+                    items_total: p.items_total.unwrap_or_default(),
+                    fraction: p.fraction.unwrap_or_default(),
+                }),
+            },
             _ => return None,
         })
     }
