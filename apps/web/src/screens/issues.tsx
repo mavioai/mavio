@@ -216,7 +216,7 @@ export function IssueDialog({ server, id, onClose }: { server: ServerEntry; id: 
 function StatusBadge({ status }: { status: IssueStatus }) {
   const open = status === IssueStatus.OPEN;
   return (
-    <span className={`rounded-full px-2 py-0.5 type-caption font-semibold ${open ? "bg-accent text-on-accent" : "bg-[#34C759] text-white"}`}>
+    <span className={`rounded-full px-2 py-0.5 type-caption font-semibold ${open ? "bg-button text-on-button" : "bg-[#34C759] text-white"}`}>
       {open ? t("issues.open") : t("issues.resolved")}
     </span>
   );

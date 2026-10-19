@@ -191,7 +191,7 @@ function Keyboard({ field, onClose }: { field: Field; onClose: () => void }) {
             <button type="button" onClick={() => change(() => "")} className={`${key} flex-1`}>
               {t("search.clear")}
             </button>
-            <button type="button" onClick={onClose} className={`${key.replace("bg-fill", "bg-accent")} flex-1 text-on-accent`}>
+            <button type="button" onClick={onClose} className={`${key.replace("bg-fill", "bg-button")} flex-1 text-on-button`}>
               {t("action.done")}
             </button>
           </div>

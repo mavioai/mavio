@@ -541,7 +541,7 @@ function Panel({
       className={`fixed inset-x-3 ${tabs ? "bottom-[calc(72px+env(safe-area-inset-bottom))]" : "bottom-[calc(12px+env(safe-area-inset-bottom))]"} z-50 mx-auto flex max-h-[70vh] max-w-xl flex-col overflow-hidden rounded-[20px] border border-border bg-surface text-on-background shadow-level3 sm:bottom-6`}
     >
       <header className="flex items-center gap-2 px-4 pt-3">
-        <Icon name="microphone" fill size={18} className="text-accent-text" />
+        <Icon name="microphone" fill size={18} />
         <h2 className="flex-1 type-headline">{t("assistant.title")}</h2>
         <button
           type="button"

@@ -185,7 +185,7 @@
   }
 }
 
-/* Artwork with no image: a quiet wash of the accent from its top. */
+/* Artwork with no image: a quiet wash of fill from its top. */
 @utility art-placeholder {
   background: linear-gradient(160deg, var(--mavio-color-fill), transparent 70%);
 }

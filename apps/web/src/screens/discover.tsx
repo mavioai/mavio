@@ -112,7 +112,7 @@ function StatusMark({ status }: { status: MediaStatus }) {
     <span
       role="img"
       aria-label={statusLabel(status)}
-      className={`absolute top-1.5 right-1.5 flex rounded-full p-0.5 text-white ${available ? "bg-accent" : "bg-scrim"} ${
+      className={`absolute top-1.5 right-1.5 flex rounded-full p-0.5 text-white ${available ? "bg-success" : "bg-scrim"} ${
         status === MediaStatus.PARTIALLY_AVAILABLE ? "opacity-70" : ""
       }`}
     >
@@ -513,7 +513,7 @@ export function DownloadBadge({ server, itemId }: { server: ServerEntry; itemId:
   const size = downloading.reduce((n, d) => n + Number(d.size), 0);
   const left = downloading.reduce((n, d) => n + Number(d.remainingSize), 0);
   const percent = Math.round(Math.max(0, Math.min(1, 1 - left / size)) * 100);
-  return <span className="rounded-[4px] bg-accent px-1.5 type-caption font-semibold text-white">{t("discover.downloading", { percent })}</span>;
+  return <span className="rounded-[4px] bg-scrim px-1.5 type-caption font-semibold text-white">{t("discover.downloading", { percent })}</span>;
 }
 
 /**

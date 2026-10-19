@@ -165,7 +165,7 @@ function Bubble({ user, who, text, pending }: { user: boolean; who: string; text
     <li className={`flex flex-col gap-1 ${user ? "items-end" : "items-start"}`}>
       <span className="px-1 type-caption1 text-text-secondary">{who}</span>
       <div
-        className={`max-w-[min(100%,42rem)] rounded-lg px-3.5 py-2.5 type-body break-words whitespace-pre-wrap ${user ? "bg-accent text-on-accent" : "bg-surface"}`}
+        className={`max-w-[min(100%,42rem)] rounded-lg px-3.5 py-2.5 type-body break-words whitespace-pre-wrap ${user ? "bg-button text-on-button" : "bg-surface"}`}
       >
         {text || (pending ? "…" : "")}
       </div>

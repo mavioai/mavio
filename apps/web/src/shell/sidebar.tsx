@@ -97,7 +97,7 @@ export function SidebarPanel({ rail, onToggle }: { rail: boolean; onToggle: () =
                   aria-label={rail ? l.name : undefined}
                   className={itemClass(rail)}
                 >
-                  <Icon name={libraryIcon(l.kind)} size={20} className="shrink-0 text-accent-text" />
+                  <Icon name={libraryIcon(l.kind)} size={20} className="shrink-0" />
                   {!rail && <span className="truncate">{l.name}</span>}
                 </Link>
               </Tip>

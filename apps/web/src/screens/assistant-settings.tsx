@@ -180,7 +180,7 @@ function Messages({ server, id, onDelete }: { server: ServerEntry; id: string; o
   return (
     <div className="flex flex-col gap-2 px-4 pb-3">
       {conversation.data?.messages.map((m, i) => (
-        <p key={i} className={`max-w-[85%] rounded-[14px] px-3 py-2 type-callout whitespace-pre-wrap ${m.user ? "self-end bg-accent text-on-accent" : "self-start bg-fill"}`}>
+        <p key={i} className={`max-w-[85%] rounded-[14px] px-3 py-2 type-callout whitespace-pre-wrap ${m.user ? "self-end bg-button text-on-button" : "self-start bg-fill"}`}>
           {m.text}
         </p>
       ))}

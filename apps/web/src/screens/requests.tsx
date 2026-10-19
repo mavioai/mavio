@@ -66,7 +66,7 @@ function statusName(status: RequestStatus): string {
 
 const statusStyles: Partial<Record<RequestStatus, string>> = {
   [RequestStatus.PENDING]: "bg-fill",
-  [RequestStatus.APPROVED]: "bg-accent text-on-accent",
+  [RequestStatus.APPROVED]: "bg-button text-on-button",
   [RequestStatus.COMPLETED]: "bg-[#34C759] text-white",
   [RequestStatus.FAILED]: "bg-danger text-white",
   [RequestStatus.DECLINED]: "bg-fill text-text-secondary",

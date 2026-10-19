@@ -121,7 +121,7 @@ export const heroClip = "[clip-path:inset(-52px_0_0_0)]";
 
 /**
  * An image that fades in, over a placeholder of its final size; with none,
- * the placeholder stays, a quiet wash of the accent with the icon of what
+ * the placeholder stays, a quiet wash of fill with the icon of what
  * it shows.
  */
 export function Artwork({ src, alt, icon = "movies", className }: { src?: string; alt: string; icon?: IconName; className?: string }) {

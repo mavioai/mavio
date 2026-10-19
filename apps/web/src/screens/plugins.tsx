@@ -248,7 +248,7 @@ function Badge({ entry: e }: { entry: Entry }) {
     <span className="flex flex-wrap items-center gap-x-2">
       {mark(t("plugins.installed"), "text-text-secondary")}
       {mark(states[state](), tone)}
-      {updateOf(e) && mark(t("plugins.updateAvailable"), "text-accent-text")}
+      {updateOf(e) && mark(t("plugins.updateAvailable"), "text-on-background")}
     </span>
   );
 }

@@ -207,7 +207,7 @@ export function GroupIndicator() {
         onClick={() => setOpen(true)}
         className={`fixed right-4 z-30 flex h-10 max-w-[calc(100vw-32px)] items-center gap-2 rounded-full border border-border bg-surface-overlay/90 px-4 type-footnote font-semibold text-on-background shadow-level2 backdrop-blur-xl hover:tint ${tabs ? "bottom-[calc(68px+env(safe-area-inset-bottom))]" : "bottom-[calc(16px+env(safe-area-inset-bottom))]"}`}
       >
-        <Icon name="users" fill size={18} className="text-accent-text" />
+        <Icon name="users" fill size={18} />
         <span className="truncate">{t("syncplay.chip", { name: joined.group.name, count: joined.group.members.length })}</span>
       </button>
       {open && <SyncPlayDialog server={joined.server} onClose={() => setOpen(false)} />}

@@ -327,7 +327,7 @@ function ReleaseLine({ server, release: r }: { server: ServerEntry; release: Rel
   return (
     <tr>
       <td className={cell}>
-        <span className={`rounded px-1.5 py-0.5 type-caption font-medium ${torrent ? "bg-accent/15 text-accent-text" : "bg-fill text-text-secondary"}`}>
+        <span className={`rounded px-1.5 py-0.5 type-caption font-medium ${torrent ? "bg-fill-selected text-on-background" : "bg-fill text-text-secondary"}`}>
           {torrent ? t("indexers.torrent") : t("acquire.usenet")}
         </span>
       </td>
