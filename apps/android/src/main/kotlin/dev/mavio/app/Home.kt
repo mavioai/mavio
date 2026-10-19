@@ -210,7 +210,7 @@ private fun Hero(entries: List<HeroEntry>, wide: Boolean) {
                     if (wide) {
                         Modifier
                             .align(Alignment.BottomStart)
-                            .padding(start = MavioSpacing.s40, bottom = MavioSpacing.s40)
+                            .padding(start = MavioSpacing.s40, end = MavioSpacing.s40, bottom = MavioSpacing.s40)
                             .widthIn(max = 560.dp)
                     } else {
                         Modifier

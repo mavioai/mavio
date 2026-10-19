@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -191,13 +192,9 @@ fun PersonScreen(model: AppModel, route: Route.Person) {
     }
 }
 
-/** A person's photo, name, dates, biography and links, one above the other. */
-@OptIn(ExperimentalLayoutApi::class)
+/** A person's photo, then name, dates, biography and links: one above the other, or beside the photo from 640 dp. */
 @Composable
 private fun PersonHeader(person: PersonDetails) {
-    val colors = theme.colors
-    val uri = LocalUriHandler.current
-    var more by rememberSaveable { mutableStateOf(false) }
     val format = DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG)
     val day = { i: Instant -> i.atZone(ZoneId.systemDefault()).toLocalDate() }
     val facts = listOfNotNull(
@@ -208,17 +205,43 @@ private fun PersonHeader(person: PersonDetails) {
         person.birthPlace,
         person.died?.let { stringResource(R.string.person_died, day(it).format(format)) },
     )
-    Column(
-        Modifier.padding(start = theme.layout.margin, end = theme.layout.margin, top = MavioSpacing.s24),
-        verticalArrangement = Arrangement.spacedBy(MavioSpacing.s12),
-    ) {
+    // From 640 dp the photo stands beside the rest, as the web UI's.
+    val row = windowWidth() >= 640.dp
+    val photo = @Composable {
         Artwork(
             person.photo?.url,
             // The photo keeps twice the gap from the name that the rest keep.
-            Modifier.padding(bottom = MavioSpacing.s12).width(160.dp).aspectRatio(2f / 3f).clip(RoundedCornerShape(14.dp)),
+            Modifier
+                .padding(bottom = if (row) 0.dp else MavioSpacing.s12)
+                .width(if (row) 208.dp else 160.dp)
+                .aspectRatio(2f / 3f)
+                .clip(RoundedCornerShape(14.dp)),
             icon = R.drawable.ic_profile,
             contentDescription = person.name,
         )
+    }
+    val padding = Modifier.padding(start = theme.layout.margin, end = theme.layout.margin, top = MavioSpacing.s24)
+    if (row) {
+        Row(padding, horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s24)) {
+            photo()
+            Box(Modifier.widthIn(max = 768.dp)) { PersonInfo(person, facts) }
+        }
+    } else {
+        Column(padding, verticalArrangement = Arrangement.spacedBy(MavioSpacing.s12)) {
+            photo()
+            PersonInfo(person, facts)
+        }
+    }
+}
+
+/** A person's name, facts, overview and links. */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun PersonInfo(person: PersonDetails, facts: List<String>) {
+    val colors = theme.colors
+    val uri = LocalUriHandler.current
+    var more by rememberSaveable { mutableStateOf(false) }
+    Column(verticalArrangement = Arrangement.spacedBy(MavioSpacing.s12)) {
         Text(person.name, style = theme.type.title1.text, fontWeight = FontWeight.Bold)
         facts.forEach { Text(it, style = theme.type.callout.text, color = colors.textSecondary) }
         person.overview?.let { overview ->

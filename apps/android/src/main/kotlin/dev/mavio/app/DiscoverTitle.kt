@@ -41,21 +41,26 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLocale
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dev.mavio.design.MavioRadius
 import dev.mavio.design.MavioSpacing
+import dev.mavio.design.TabletLayout
 import dev.mavio.ui.Artwork
 import dev.mavio.ui.ButtonKind
 import dev.mavio.ui.MavioButton
@@ -68,6 +73,12 @@ import dev.mavio.ui.languageName
 import dev.mavio.ui.minutesText
 import dev.mavio.ui.text
 import dev.mavio.ui.theme
+import java.text.NumberFormat
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
+import java.util.Currency
+import java.util.Locale
 import mavio.acquisition.v1.Discover.GetCollectionResponse
 import mavio.acquisition.v1.Discover.GetRatingsResponse
 import mavio.acquisition.v1.Discover.GetSeasonResponse
@@ -85,12 +96,6 @@ import mavio.library.v1.ItemOuterClass.CreditKind
 import mavio.plugin.v1.Discovery.CatalogKind
 import mavio.plugin.v1.MetadataOuterClass.ProductionStatus
 import mavio.plugin.v1.Ratings.RatingSource
-import java.text.NumberFormat
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import java.time.format.FormatStyle
-import java.util.Currency
-import java.util.Locale
 
 /** A discovered title as GetTitle answers, null while it is on its way. */
 @Composable
@@ -165,37 +170,57 @@ private fun TitleDetails(serverId: String, title: Title) {
     val catalogs = LocalDiscover.current.discovery?.catalogs.orEmpty()
     val series = title.mediaKind == MediaKind.MEDIA_KIND_SERIES
     val credits = remember(title) { titleCredits(title.creditsList) }
-    LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(top = LocalTopInset.current, bottom = LocalBottomInset.current + MavioSpacing.s40)) {
-        item(key = "header") { TitleHeader(serverId, title) }
-        item(key = "actions") {
-            // On a phone the actions fill their rows, as many on each as their names fit.
-            FlowRow(
-                Modifier.padding(start = theme.layout.margin, end = theme.layout.margin, top = MavioSpacing.s16),
-                horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s12),
-                verticalArrangement = Arrangement.spacedBy(MavioSpacing.s12),
-            ) {
-                if (title.itemId.isNotEmpty()) {
-                    MavioButton(
-                        stringResource(R.string.discover_watch),
-                        { navigator.open(Route.Item(serverId, title.itemId)) },
-                        Modifier.weight(1f),
-                        icon = R.drawable.ic_play_fill,
-                        large = true,
-                    )
-                }
-                title.trailerUrlsList.firstOrNull()?.let { trailer ->
-                    MavioButton(
-                        stringResource(R.string.item_trailer),
-                        { runCatching { uri.openUri(trailer) } },
-                        Modifier.weight(1f),
-                        kind = ButtonKind.Secondary,
-                        icon = R.drawable.ic_movies,
-                        large = true,
-                    )
-                }
+    // The wide layout's hero reaches the content's top and holds the
+    // actions; where the window is 1024 dp wide the facts stand beside the
+    // overview, as the web UI's.
+    val wide = theme.layout == TabletLayout
+    val columns = wide && windowWidth() >= 1024.dp
+    val margin = theme.layout.margin
+    val actions = @Composable {
+        // On a phone the actions fill their rows, as many on each as their names fit.
+        FlowRow(
+            if (wide) Modifier.padding(top = MavioSpacing.s8) else Modifier.padding(start = margin, end = margin, top = MavioSpacing.s16),
+            horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s12),
+            verticalArrangement = Arrangement.spacedBy(MavioSpacing.s12),
+        ) {
+            val share = if (wide) Modifier else Modifier.weight(1f)
+            if (title.itemId.isNotEmpty()) {
+                MavioButton(
+                    stringResource(R.string.discover_watch),
+                    { navigator.open(Route.Item(serverId, title.itemId)) },
+                    share,
+                    icon = R.drawable.ic_play_fill,
+                    large = true,
+                )
+            }
+            title.trailerUrlsList.firstOrNull()?.let { trailer ->
+                MavioButton(
+                    stringResource(R.string.item_trailer),
+                    { runCatching { uri.openUri(trailer) } },
+                    share,
+                    kind = if (wide) ButtonKind.Glass else ButtonKind.Secondary,
+                    icon = R.drawable.ic_movies,
+                    large = true,
+                )
             }
         }
-        item(key = "overview") { TitleOverview(serverId, title, credits) }
+    }
+    LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(top = if (wide) 0.dp else LocalTopInset.current, bottom = LocalBottomInset.current + MavioSpacing.s40)) {
+        item(key = "header") { TitleHeader(serverId, title, if (wide) actions else null) }
+        if (!wide) item(key = "actions") { actions() }
+        item(key = "overview") {
+            if (columns) {
+                Row(Modifier.padding(horizontal = margin), horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s32)) {
+                    TitleOverview(serverId, title, credits, Modifier.weight(1f), collection = false)
+                    Column(Modifier.width(380.dp).padding(top = MavioSpacing.s24), verticalArrangement = Arrangement.spacedBy(MavioSpacing.s12)) {
+                        CollectionCard(serverId, title)
+                        TitleFacts(serverId, title, Modifier)
+                    }
+                }
+            } else {
+                TitleOverview(serverId, title, credits, Modifier.padding(horizontal = margin))
+            }
+        }
         if (series && title.seasonsCount > 0) item(key = "seasons") { Seasons(serverId, title.tmdbId, title.seasonsList) }
         item(key = "cast") {
             val cast = credits.filter { it.isCast }.sortedBy { it.order }.take(20)
@@ -219,25 +244,25 @@ private fun TitleDetails(serverId: String, title: Title) {
                 tmdbId = title.tmdbId,
             )
         }
-        item(key = "facts") { TitleFacts(serverId, title) }
+        if (!columns) item(key = "facts") { TitleFacts(serverId, title, Modifier.padding(horizontal = margin, vertical = MavioSpacing.s12)) }
     }
 }
 
 /**
  * The hero of a discovered title: its backdrop, else its poster blurred,
- * in a square as wide as the screen below the header, and over it the
- * title, its facts and its status.
+ * and over it the title, its facts and its status, then [actions] where
+ * the hero holds them.
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun TitleHeader(serverId: String, title: Title) {
+private fun TitleHeader(serverId: String, title: Title, actions: (@Composable () -> Unit)?) {
     val series = title.mediaKind == MediaKind.MEDIA_KIND_SERIES
     val open = alike(serverId, title.mediaKind)
-    DiscoverHero(title.backdropUrl, title.posterUrl) {
+    DiscoverHero(title.backdropUrl, title.posterUrl, TITLE_HERO) { big ->
         Text(
             title.name,
-            fontSize = 34.sp,
-            lineHeight = 36.sp,
+            fontSize = if (big) 52.sp else 34.sp,
+            lineHeight = if (big) 55.sp else 36.sp,
             fontWeight = FontWeight.Bold,
             color = Color.White,
         )
@@ -267,6 +292,7 @@ private fun TitleHeader(serverId: String, title: Title) {
             }
             statusLabel(title.status)?.let { StatusBadge(stringResource(it)) }
         }
+        actions?.invoke()
     }
 }
 
@@ -285,13 +311,26 @@ internal fun StatusBadge(label: String) {
     )
 }
 
+/** The window's width, which the web UI's breakpoints are of. */
+@Composable
+internal fun windowWidth(): Dp = with(LocalDensity.current) { LocalWindowInfo.current.containerSize.width.toDp() }
+
+/** How high a discover hero is in the wide layout: a share of the window's height, between two bounds. */
+internal class WideHero(val share: Float, val min: Dp, val max: Dp)
+
+/** A discovered title's hero in the wide layout, as the web UI's. */
+private val TITLE_HERO = WideHero(0.7f, 520.dp, 700.dp)
+
 /**
- * A square hero as wide as the screen, right below the header, its
- * artwork's colors spreading up into the header: the backdrop, else the
- * poster blurred; and over its lower part, darkened, the content.
+ * A discover hero, its artwork the backdrop, else the poster blurred, and
+ * over its lower part, darkened, the content, told whether its title is
+ * large. On a phone a square as wide as the screen, right below the
+ * header, its artwork's colors spreading up into the header; in the wide
+ * layout as high as [wide] says but no taller than the window, shaded from
+ * the left, with the poster beside the content, as the web UI's.
  */
 @Composable
-internal fun DiscoverHero(backdrop: String, poster: String, content: @Composable () -> Unit) {
+internal fun DiscoverHero(backdrop: String, poster: String, wide: WideHero, content: @Composable (big: Boolean) -> Unit) {
     val art: @Composable () -> Unit = {
         when {
             backdrop.isNotEmpty() -> Artwork(sized(backdrop, 1280), Modifier.fillMaxSize())
@@ -308,6 +347,40 @@ internal fun DiscoverHero(backdrop: String, poster: String, content: @Composable
             )
         }
     }
+    if (theme.layout == TabletLayout) {
+        val window = with(LocalDensity.current) { LocalWindowInfo.current.containerSize.height.toDp() }
+        val height = (window * wide.share).coerceIn(wide.min, wide.max).coerceAtMost(window)
+        val short = height < wide.min
+        Box(Modifier.fillMaxWidth().height(height).clipToBounds().background(theme.colors.surface)) {
+            art()
+            Box(
+                Modifier
+                    .fillMaxSize()
+                    .background(Brush.horizontalGradient(0f to Color.Black.copy(alpha = 0.82f), 0.45f to Color.Black.copy(alpha = 0.45f), 0.75f to Color.Transparent)),
+            )
+            Box(Modifier.fillMaxSize().background(Brush.verticalGradient(0.45f to Color.Transparent, 1f to Color.Black.copy(alpha = 0.75f))))
+            Row(
+                Modifier
+                    .align(Alignment.BottomStart)
+                    .padding(horizontal = MavioSpacing.s40, vertical = if (short) MavioSpacing.s24 else MavioSpacing.s40),
+                horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s40),
+                verticalAlignment = Alignment.Bottom,
+            ) {
+                if (poster.isNotEmpty()) {
+                    Artwork(
+                        sized(poster, 500),
+                        Modifier
+                            .width(if (short) 140.dp else 200.dp)
+                            .aspectRatio(2f / 3f)
+                            .shadow(12.dp, RoundedCornerShape(8.dp))
+                            .clip(RoundedCornerShape(8.dp)),
+                    )
+                }
+                Column(Modifier.widthIn(max = 640.dp), verticalArrangement = Arrangement.spacedBy(MavioSpacing.s12)) { content(!short) }
+            }
+        }
+        return
+    }
     Box(Modifier.fillMaxWidth().aspectRatio(1f)) {
         HeroBleed(1f, art)
         Box(Modifier.matchParentSize().clipToBounds().background(theme.colors.surface)) {
@@ -323,7 +396,7 @@ internal fun DiscoverHero(backdrop: String, poster: String, content: @Composable
                     .padding(start = theme.layout.margin, end = theme.layout.margin, bottom = MavioSpacing.s24)
                     .widthIn(max = 640.dp),
                 verticalArrangement = Arrangement.spacedBy(MavioSpacing.s12),
-            ) { content() }
+            ) { content(false) }
         }
     }
 }
@@ -391,12 +464,12 @@ private fun crewRank(c: Credit): Int {
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun TitleOverview(serverId: String, title: Title, credits: List<Credit>) {
+private fun TitleOverview(serverId: String, title: Title, credits: List<Credit>, modifier: Modifier, collection: Boolean = true) {
     val navigator = LocalNavigator.current
     val colors = theme.colors
     val open = alike(serverId, title.mediaKind)
     Column(
-        Modifier.padding(start = theme.layout.margin, end = theme.layout.margin, top = MavioSpacing.s24, bottom = MavioSpacing.s12),
+        modifier.padding(top = MavioSpacing.s24, bottom = MavioSpacing.s12),
         verticalArrangement = Arrangement.spacedBy(MavioSpacing.s16),
     ) {
         if (title.tagline.isNotEmpty()) {
@@ -463,7 +536,7 @@ private fun TitleOverview(serverId: String, title: Title, credits: List<Credit>)
                 }
             }
         }
-        CollectionCard(serverId, title)
+        if (collection) CollectionCard(serverId, title)
     }
 }
 
@@ -578,7 +651,7 @@ private fun productionStatus(s: ProductionStatus): String? = when (s) {
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun TitleFacts(serverId: String, title: Title) {
+private fun TitleFacts(serverId: String, title: Title, modifier: Modifier) {
     val series = title.mediaKind == MediaKind.MEDIA_KIND_SERIES
     val open = alike(serverId, title.mediaKind)
     val navigator = LocalNavigator.current
@@ -680,8 +753,7 @@ private fun TitleFacts(serverId: String, title: Title) {
         )
     }
     Column(
-        Modifier
-            .padding(horizontal = theme.layout.margin, vertical = MavioSpacing.s12)
+        modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(14.dp))
             .border(1.dp, colors.border, RoundedCornerShape(14.dp)),
@@ -714,12 +786,17 @@ private fun titleLinks(title: Title): List<ExternalLink> {
 /** The links to a title or person elsewhere, centered; first, Open in Library when the server has it. */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-internal fun ExternalLinks(links: List<ExternalLink>, openItem: (() -> Unit)? = null, modifier: Modifier = Modifier.fillMaxWidth().padding(12.dp)) {
+internal fun ExternalLinks(
+    links: List<ExternalLink>,
+    openItem: (() -> Unit)? = null,
+    modifier: Modifier = Modifier.fillMaxWidth().padding(12.dp),
+    start: Boolean = false,
+) {
     val uri = LocalUriHandler.current
     val colors = theme.colors
     FlowRow(
         modifier,
-        horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s8, Alignment.CenterHorizontally),
+        horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s8, if (start) Alignment.Start else Alignment.CenterHorizontally),
         verticalArrangement = Arrangement.spacedBy(MavioSpacing.s8),
     ) {
         val chip = Modifier.clip(CircleShape).background(colors.fill)

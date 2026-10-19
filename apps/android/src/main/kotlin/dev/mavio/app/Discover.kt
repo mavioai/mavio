@@ -65,6 +65,8 @@ import dev.mavio.ui.Shelf
 import dev.mavio.ui.StatusView
 import dev.mavio.ui.text
 import dev.mavio.ui.theme
+import java.io.Serializable
+import java.util.Locale
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -80,8 +82,6 @@ import mavio.acquisition.v1.Profile.MediaKind
 import mavio.acquisition.v1.discoverRequest
 import mavio.acquisition.v1.listCatalogsRequest
 import mavio.plugin.v1.Discovery.CatalogKind
-import java.io.Serializable
-import java.util.Locale
 
 /** The server Discover asks, the first signed-in server whose discovery providers offer catalogs, with its catalogs. */
 data class Discovery(val serverId: String, val catalogs: List<Catalog>)
@@ -545,6 +545,7 @@ internal fun TitleGrid(
     empty: LazyGridScope.() -> Unit = {},
     footer: LazyGridScope.() -> Unit = {},
     roles: List<String>? = null,
+    top: Dp = LocalTopInset.current,
 ) {
     val margin = theme.layout.margin
     LazyVerticalGrid(
@@ -554,7 +555,7 @@ internal fun TitleGrid(
         contentPadding = PaddingValues(
             start = margin,
             end = margin,
-            top = LocalTopInset.current,
+            top = top,
             bottom = LocalBottomInset.current + MavioSpacing.s24,
         ),
         horizontalArrangement = Arrangement.spacedBy(theme.layout.gutter * 1.5f),
