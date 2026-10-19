@@ -53,7 +53,8 @@ function Content() {
   const { pathname, href } = useLocation();
   const prefs = usePrefs();
   const width = useWidthClass();
-  useEvents(useEventHub().emit);
+  // A tab playing keeps the session's events from a tab coming to the front.
+  useEvents(useEventHub().emit, () => location.pathname.includes("/play/"));
   useShortcuts(prefs.tv);
   const bare = ["/sign-in", "/setup", "/auth/callback", "/invite"].includes(pathname);
   // On the television, focus moves with the arrows on every page, and Back

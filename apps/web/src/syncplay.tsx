@@ -2,11 +2,13 @@
 // is in, kept from its servers' events, with the clock kept in step with
 // the group's server; a group asking its members to play brings the player
 // to its entry, where useGroupPlayer has the video follow the group.
+import { create } from "@bufbuild/protobuf";
 import { durationFromMs, durationMs, timestampFromMs, timestampMs } from "@bufbuild/protobuf/wkt";
 import { groupPositionAt, type ServerEntry, syncClock, useServersStore } from "@mavio/client-ts";
 import {
   type SyncPlayCommand,
   SyncPlayCommandKind,
+  SyncPlayCommandSchema,
   type SyncPlayGroup,
   SyncPlayService,
   SyncPlayState,
@@ -129,6 +131,32 @@ export interface GroupPlayer {
 const HAVE_FUTURE_DATA = 3;
 
 /**
+ * The command a video missed, by the group's state: to pause at the
+ * group's position, or to play on from where the group is now; none when
+ * the video is where the group is, or the group waits.
+ */
+export function caughtUp(
+  group: SyncPlayGroup,
+  now: number,
+  video: { paused: boolean; currentTime: number },
+): SyncPlayCommand | undefined {
+  const at = groupPositionAt(group, now);
+  const off = Math.abs(video.currentTime - at / 1000);
+  if (group.state === SyncPlayState.PAUSED && (!video.paused || off > 0.5)) {
+    return create(SyncPlayCommandSchema, { kind: SyncPlayCommandKind.PAUSE, position: durationFromMs(Math.round(at)) });
+  }
+  // A video playing near the group's position is kept up with by the player.
+  if (group.state === SyncPlayState.PLAYING && video.paused) {
+    return create(SyncPlayCommandSchema, {
+      kind: SyncPlayCommandKind.UNPAUSE,
+      position: durationFromMs(Math.round(at)),
+      when: timestampFromMs(now),
+    });
+  }
+  return undefined;
+}
+
+/**
  * Has a player's video follow the group while the group plays its item:
  * it waits paused at the group's position until the group plays, reports
  * when it is ready or buffering, carries out the group's commands at their
@@ -207,10 +235,14 @@ export function useGroupPlayer(
   useServerEvents((s, e) => {
     if (s.id !== server.id || e.kind.case !== "syncPlay") return;
     const g = e.kind.value.group;
-    const c: SyncPlayCommand | undefined = e.kind.value.command;
     const v = video.current;
     const sync = latest.current.sp;
-    if (!c || !v || !sync || !g || g.queue[g.currentIndex]?.itemId !== itemId) return;
+    if (!v || !sync || !g || g.queue[g.currentIndex]?.itemId !== itemId) return;
+    // An update with no command, as the group sent again when the stream
+    // reopens, has the video catch up with the group's state, whose
+    // commands it may have missed.
+    const c: SyncPlayCommand | undefined = e.kind.value.command ?? caughtUp(g, sync.serverNow(), v);
+    if (!c) return;
     clearTimeout(timer.current);
     const at = c.position ? durationMs(c.position) : 0;
     switch (c.kind) {
