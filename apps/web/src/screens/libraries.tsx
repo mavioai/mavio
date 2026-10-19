@@ -26,7 +26,7 @@ export function LibrariesScreen() {
             style={{ gridTemplateColumns: "repeat(auto-fill, minmax(var(--mavio-layout-thumbnail), 1fr))" }}
           >
             {pending &&
-              Array.from({ length: 3 }, (_, i) => <div key={i} className="aspect-video rounded-md bg-surface-raised" />)}
+              Array.from({ length: 3 }, (_, i) => <div key={i} className="aspect-video rounded-md bg-fill" />)}
             {libraries.map((l) => (
               <Link
                 key={l.id}

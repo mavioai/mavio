@@ -100,7 +100,7 @@ export function Artwork({ src, alt, icon = "movies", className }: { src?: string
   const [loaded, setLoaded] = useState(false);
   const [failed, setFailed] = useState(false);
   return (
-    <div data-art className={`relative overflow-hidden bg-surface-raised ${className ?? ""}`}>
+    <div data-art className={`relative overflow-hidden bg-fill ${className ?? ""}`}>
       {src && !failed ? (
         <img
           src={src}
@@ -207,8 +207,8 @@ export function ItemCard({
 export function CardPlaceholder({ shape = "poster" }: { shape?: Shape }) {
   return (
     <div className={`shrink-0 ${widths[shape]}`} aria-hidden>
-      <div className={`${aspects[shape]} rounded-md bg-surface-raised`} />
-      <div className="mt-2 h-4 w-3/4 rounded-xs bg-surface-raised" />
+      <div className={`${aspects[shape]} rounded-md bg-fill`} />
+      <div className="mt-2 h-4 w-3/4 rounded-xs bg-fill" />
     </div>
   );
 }

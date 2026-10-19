@@ -108,7 +108,7 @@ export function SectionView({ section: s, several }: { section: Section; several
   );
   if (c.type === "loading") {
     return (
-      <Shelf title={<span aria-hidden className="block h-5 w-36 rounded-xs bg-surface-raised" />}>
+      <Shelf title={<span aria-hidden className="block h-5 w-36 rounded-xs bg-fill" />}>
         {Array.from({ length: 8 }, (_, i) => (
           <CardPlaceholder key={i} />
         ))}
