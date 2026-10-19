@@ -25057,6 +25057,24 @@
         }
       }
     },
+    "ai.copyLink": {
+      "comment": "Tooltip of the button copying the address of a provider's sign-in page.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copy Link"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "复制链接"
+          }
+        }
+      }
+    },
     "ai.enterCode": {
       "comment": "Shown above a device code of an AI provider's sign-in.",
       "extractionState": "manual",

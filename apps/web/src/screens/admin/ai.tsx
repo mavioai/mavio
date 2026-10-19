@@ -24,6 +24,8 @@ import { AssistantServerSettings } from "../assistant-settings.tsx";
 import { BackLink, Page, PageLink } from "./common.tsx";
 import { input } from "../../controls/styles.ts";
 import { Confirm } from "../../controls/dialog.tsx";
+import { Tip } from "../../controls/tooltip.tsx";
+import { Icon } from "../../icon.tsx";
 
 /** The section of the server chosen in the settings. */
 export function AiSection({ server }: { server: ServerEntry }) {
@@ -255,7 +257,7 @@ function LoginEvent({ event }: { event: AiLoginEvent }) {
           >
             {t("ai.openPage")}
           </a>
-          <span className="type-footnote break-all text-text-secondary">{e.value.url}</span>
+          <CopyableUrl url={e.value.url} />
         </div>
       );
     case "deviceCode":
@@ -272,6 +274,33 @@ function LoginEvent({ event }: { event: AiLoginEvent }) {
       return <p className="px-4 py-2.5 type-callout text-text-secondary">{e.value}</p>;
   }
   return null;
+}
+
+/** A long address on one line, cut to fit, with a button copying it. */
+function CopyableUrl({ url }: { url: string }) {
+  const [copied, setCopied] = useState(false);
+  return (
+    <div className="flex min-w-0 items-center gap-1">
+      <span className="min-w-0 flex-1 truncate type-footnote text-text-secondary" title={url}>
+        {url}
+      </span>
+      <Tip label={copied ? t("users.copied") : t("ai.copyLink")}>
+        <button
+          type="button"
+          aria-label={t("ai.copyLink")}
+          className="flex size-8 shrink-0 items-center justify-center rounded-lg text-text-secondary hover:bg-fill hover:text-on-background"
+          onClick={() =>
+            void navigator.clipboard?.writeText(url).then(
+              () => setCopied(true),
+              () => {},
+            )
+          }
+        >
+          <Icon name={copied ? "check" : "copy"} size={16} />
+        </button>
+      </Tip>
+    </div>
+  );
 }
 
 function LoginPrompt({
@@ -328,12 +357,17 @@ function Models({ server, provider }: { server: ServerEntry; provider: AiProvide
   const models = useAiModels(server, false, provider.id);
   return (
     <Group title={t("ai.models")} footer={provider.available ? undefined : t("ai.modelsFooter")}>
-      {(models.data ?? []).map((m) => (
-        <div key={m.id} className="px-4 py-2.5">
-          <div className="type-body">{m.name || m.id}</div>
-          <div className="type-footnote break-words text-text-secondary">{modelDetail(m)}</div>
+      {models.isSuccess && models.data.length > 0 && (
+        // Providers list up to hundreds of models; the list scrolls within the group.
+        <div className="flex max-h-[28rem] flex-col divide-y divide-border overflow-y-auto">
+          {models.data.map((m) => (
+            <div key={m.id} className="px-4 py-2.5">
+              <div className="type-body">{m.name || m.id}</div>
+              <div className="type-footnote break-words text-text-secondary">{modelDetail(m)}</div>
+            </div>
+          ))}
         </div>
-      ))}
+      )}
       {models.isSuccess && models.data.length === 0 && <p className="px-4 py-3 type-callout text-text-secondary">{t("ai.noModels")}</p>}
       {models.isError && <p className="px-4 py-3 type-callout text-danger">{errorMessage(models.error)}</p>}
     </Group>

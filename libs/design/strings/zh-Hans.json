@@ -1390,6 +1390,7 @@
   "ai.loginFailed": "登录失败。",
   "ai.loginCanceled": "登录已取消。",
   "ai.openPage": "打开登录页面",
+  "ai.copyLink": "复制链接",
   "ai.enterCode": "请在提供商页面输入此代码：",
   "ai.answer": "回答",
   "ai.manualCode": "如果页面跳转到无法打开的地址，请将该地址或其中的代码粘贴到这里。",

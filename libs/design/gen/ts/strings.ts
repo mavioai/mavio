@@ -1379,6 +1379,7 @@ export type MessageKey =
   | 'ai.loginFailed'
   | 'ai.loginCanceled'
   | 'ai.openPage'
+  | 'ai.copyLink'
   | 'ai.enterCode'
   | 'ai.answer'
   | 'ai.manualCode'
@@ -3314,6 +3315,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "ai.loginFailed": "The sign-in failed.",
     "ai.loginCanceled": "The sign-in was canceled.",
     "ai.openPage": "Open Sign-In Page",
+    "ai.copyLink": "Copy Link",
     "ai.enterCode": "Enter this code on the provider's page:",
     "ai.answer": "Answer",
     "ai.manualCode": "If the page redirected to an address that did not load, paste that address or its code here.",
@@ -5247,6 +5249,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "ai.loginFailed": "登录失败。",
     "ai.loginCanceled": "登录已取消。",
     "ai.openPage": "打开登录页面",
+    "ai.copyLink": "复制链接",
     "ai.enterCode": "请在提供商页面输入此代码：",
     "ai.answer": "回答",
     "ai.manualCode": "如果页面跳转到无法打开的地址，请将该地址或其中的代码粘贴到这里。",

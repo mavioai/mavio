@@ -1410,6 +1410,7 @@
     <string name="ai_login_failed">登录失败。</string>
     <string name="ai_login_canceled">登录已取消。</string>
     <string name="ai_open_page">打开登录页面</string>
+    <string name="ai_copy_link">复制链接</string>
     <string name="ai_enter_code">请在提供商页面输入此代码：</string>
     <string name="ai_answer">回答</string>
     <string name="ai_manual_code">如果页面跳转到无法打开的地址，请将该地址或其中的代码粘贴到这里。</string>

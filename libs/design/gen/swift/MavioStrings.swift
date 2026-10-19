@@ -4384,6 +4384,9 @@ public enum MavioStrings {
     /// Button opening the page of an AI provider's sign-in.
     public static var aiOpenPage: String { NSLocalizedString("ai.openPage", bundle: .module, comment: "") }
 
+    /// Tooltip of the button copying the address of a provider's sign-in page.
+    public static var aiCopyLink: String { NSLocalizedString("ai.copyLink", bundle: .module, comment: "") }
+
     /// Shown above a device code of an AI provider's sign-in.
     public static var aiEnterCode: String { NSLocalizedString("ai.enterCode", bundle: .module, comment: "") }
 

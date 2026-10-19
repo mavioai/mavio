@@ -2805,6 +2805,8 @@
     <string name="ai_login_canceled">The sign-in was canceled.</string>
     <!-- Button opening the page of an AI provider's sign-in. -->
     <string name="ai_open_page">Open Sign-In Page</string>
+    <!-- Tooltip of the button copying the address of a provider's sign-in page. -->
+    <string name="ai_copy_link">Copy Link</string>
     <!-- Shown above a device code of an AI provider's sign-in. -->
     <string name="ai_enter_code">Enter this code on the provider\'s page:</string>
     <!-- Label of an answer to a sign-in question without a message. -->

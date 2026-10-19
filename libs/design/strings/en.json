@@ -1391,6 +1391,7 @@
   "ai.loginFailed": { "message": "The sign-in failed.", "description": "Shown when an AI provider's sign-in failed without a message." },
   "ai.loginCanceled": { "message": "The sign-in was canceled.", "description": "Shown when an AI provider's sign-in was canceled." },
   "ai.openPage": { "message": "Open Sign-In Page", "description": "Button opening the page of an AI provider's sign-in." },
+  "ai.copyLink": { "message": "Copy Link", "description": "Tooltip of the button copying the address of a provider's sign-in page." },
   "ai.enterCode": { "message": "Enter this code on the provider's page:", "description": "Shown above a device code of an AI provider's sign-in." },
   "ai.answer": { "message": "Answer", "description": "Label of an answer to a sign-in question without a message." },
   "ai.manualCode": { "message": "If the page redirected to an address that did not load, paste that address or its code here.", "description": "Hint of a manual code question of an AI provider's sign-in." },
