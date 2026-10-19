@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
@@ -37,8 +38,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -54,6 +58,7 @@ import dev.mavio.core.RowKind
 import dev.mavio.core.TitleCard
 import dev.mavio.design.MavioRadius
 import dev.mavio.design.MavioSpacing
+import dev.mavio.design.TabletLayout
 import dev.mavio.ui.Artwork
 import dev.mavio.ui.ButtonKind
 import dev.mavio.ui.CardPlaceholder
@@ -115,10 +120,12 @@ fun HomeScreen(model: AppModel) {
             StatusView(stringResource(R.string.state_loading))
             return@PullToRefreshBox
         }
-        LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(top = top, bottom = LocalBottomInset.current)) {
+        // The wide layout's hero reaches the content's top.
+        val wide = theme.layout == TabletLayout && hero.isNotEmpty()
+        LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(top = if (wide) 0.dp else top, bottom = LocalBottomInset.current)) {
             if (hero.isNotEmpty()) {
                 item(key = "hero") {
-                    Hero(hero)
+                    Hero(hero, wide)
                     Spacer(Modifier.height(MavioSpacing.s24))
                 }
             }
@@ -147,9 +154,12 @@ private fun heroEntries(rows: List<HomeRow>, titles: Map<String, String>): List<
     return out
 }
 
-/** The hero: the titles one after another, each with its facts and the buttons to play it and open its details. */
+/**
+ * The hero: the titles one after another, each with its facts and the
+ * buttons to play it and open its details; [wide] in the wide layout.
+ */
 @Composable
-private fun Hero(entries: List<HeroEntry>) {
+private fun Hero(entries: List<HeroEntry>, wide: Boolean) {
     val navigator = LocalNavigator.current
     val pager = rememberPagerState { entries.size }
     LaunchedEffect(pager, entries.size) {
@@ -158,31 +168,55 @@ private fun Hero(entries: List<HeroEntry>) {
             pager.animateScrollToPage((pager.currentPage + 1) % entries.size)
         }
     }
-    // A 4:5 frame as wide as the screen, right below the header, its
-    // backdrop cropped to it and its colors spreading up into the header.
-    Box(Modifier.fillMaxWidth().aspectRatio(4f / 5f)) {
-        HeroBleed(4f / 5f) {
-            Artwork(entries[pager.currentPage].card.backdrop?.url, Modifier.fillMaxSize(), contentDescription = null)
+    // On a phone a 4:5 frame as wide as the screen, right below the header,
+    // its backdrop cropped to it and its colors spreading up into the
+    // header; in the wide layout a frame 470 dp high, as the web UI's, but
+    // no taller than the window.
+    val window = with(LocalDensity.current) { LocalWindowInfo.current.containerSize.height.toDp() }
+    val height = HERO_WIDE_HEIGHT.coerceAtMost(window)
+    val short = height < HERO_WIDE_HEIGHT
+    val frame = if (wide) Modifier.fillMaxWidth().height(height).clipToBounds() else Modifier.fillMaxWidth().aspectRatio(4f / 5f)
+    Box(frame) {
+        if (!wide) {
+            HeroBleed(4f / 5f) {
+                Artwork(entries[pager.currentPage].card.backdrop?.url, Modifier.fillMaxSize(), contentDescription = null)
+            }
         }
         HorizontalPager(pager, Modifier.fillMaxSize()) { page ->
             val (card, eyebrow) = entries[page]
             Box(Modifier.fillMaxSize().background(theme.colors.surface)) {
                 Artwork(card.backdrop?.url, Modifier.fillMaxSize(), contentDescription = null)
-                Box(
-                    Modifier
-                        .fillMaxSize()
-                        .background(
-                            Brush.verticalGradient(
-                                0f to Color.Transparent,
-                                0.5f to Color.Black.copy(alpha = 0.4f),
-                                1f to Color.Black.copy(alpha = 0.9f),
+                if (wide) {
+                    Box(
+                        Modifier
+                            .fillMaxSize()
+                            .background(Brush.horizontalGradient(0f to Color.Black.copy(alpha = 0.78f), 0.45f to Color.Black.copy(alpha = 0.35f), 0.75f to Color.Transparent)),
+                    )
+                    Box(Modifier.fillMaxSize().background(Brush.verticalGradient(0.55f to Color.Transparent, 1f to Color.Black.copy(alpha = 0.55f))))
+                } else {
+                    Box(
+                        Modifier
+                            .fillMaxSize()
+                            .background(
+                                Brush.verticalGradient(
+                                    0f to Color.Transparent,
+                                    0.5f to Color.Black.copy(alpha = 0.4f),
+                                    1f to Color.Black.copy(alpha = 0.9f),
+                                ),
                             ),
-                        ),
-                )
+                    )
+                }
                 Column(
-                    Modifier
-                        .align(Alignment.BottomStart)
-                        .padding(start = theme.layout.margin, end = theme.layout.margin, bottom = MavioSpacing.s32),
+                    if (wide) {
+                        Modifier
+                            .align(Alignment.BottomStart)
+                            .padding(start = MavioSpacing.s40, bottom = MavioSpacing.s40)
+                            .widthIn(max = 560.dp)
+                    } else {
+                        Modifier
+                            .align(Alignment.BottomStart)
+                            .padding(start = theme.layout.margin, end = theme.layout.margin, bottom = MavioSpacing.s32)
+                    },
                     verticalArrangement = Arrangement.spacedBy(MavioSpacing.s12),
                 ) {
                     Text(
@@ -192,11 +226,13 @@ private fun Hero(entries: List<HeroEntry>) {
                         letterSpacing = 0.5.sp,
                         color = Color.White.copy(alpha = 0.75f),
                     )
-                    Logo(card.logo?.url, card.title, Modifier.heightIn(max = HERO_LOGO_HEIGHT).fillMaxWidth(0.8f)) {
+                    val logoHeight = if (wide && short) 72.dp else HERO_LOGO_HEIGHT
+                    Logo(card.logo?.url, card.title, Modifier.heightIn(max = logoHeight).fillMaxWidth(0.8f)) {
+                        val big = wide && !short
                         Text(
                             card.title,
-                            fontSize = 34.sp,
-                            lineHeight = 36.sp,
+                            fontSize = if (big) 52.sp else 34.sp,
+                            lineHeight = if (big) 55.sp else 36.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color.White,
                             maxLines = 2,
@@ -204,18 +240,30 @@ private fun Hero(entries: List<HeroEntry>) {
                         )
                     }
                     HeroFacts(card)
+                    val overview = card.overview
+                    if (wide && overview != null) {
+                        Text(
+                            overview,
+                            style = theme.type.body.text,
+                            color = Color.White.copy(alpha = 0.85f),
+                            maxLines = if (short) 2 else 3,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    }
                     Row(
                         Modifier.padding(top = MavioSpacing.s4),
                         horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s12),
                     ) {
+                        // On a phone the buttons share the width.
+                        val share = if (wide) Modifier else Modifier.weight(1f)
                         if (card.kind != CardKind.SERIES) {
                             HeroButton(
                                 stringResource(R.string.item_play),
-                                Modifier.weight(1f),
+                                share,
                                 white = true,
                             ) { navigator.play(card.serverId, card.itemId, card.title, null, null) }
                         }
-                        HeroButton(stringResource(R.string.item_details), Modifier.weight(1f), white = false) {
+                        HeroButton(stringResource(R.string.item_details), share, white = false) {
                             navigator.open(card)
                         }
                     }
@@ -224,9 +272,15 @@ private fun Hero(entries: List<HeroEntry>) {
         }
         if (entries.size > 1) {
             Row(
-                Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(top = MavioSpacing.s16, end = theme.layout.margin),
+                if (wide) {
+                    Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(end = MavioSpacing.s32, bottom = MavioSpacing.s32)
+                } else {
+                    Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(top = MavioSpacing.s16, end = theme.layout.margin)
+                },
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
             ) {
                 repeat(entries.size) {
@@ -241,6 +295,9 @@ private fun Hero(entries: List<HeroEntry>) {
         }
     }
 }
+
+/** The height of the hero in the wide layout. */
+private val HERO_WIDE_HEIGHT = 470.dp
 
 /** The height of the hero's logo, or its title where there is none. */
 private val HERO_LOGO_HEIGHT = 96.dp
@@ -280,7 +337,8 @@ private fun HeroButton(label: String, modifier: Modifier, white: Boolean, onClic
                 .height(44.dp)
                 .clip(RoundedCornerShape(10.dp))
                 .background(Color.White)
-                .clickable(onClick = onClick),
+                .clickable(onClick = onClick)
+                .padding(horizontal = MavioSpacing.s24),
             horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s8, Alignment.CenterHorizontally),
             verticalAlignment = Alignment.CenterVertically,
         ) {
