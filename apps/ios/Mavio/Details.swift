@@ -648,10 +648,12 @@ private struct DetailsContent: View {
 /// of the window's height, from 520 to 700 pt.
 struct HeaderSize: ViewModifier {
     let phone: Bool
+    @Environment(\.heroInset) private var inset
 
     func body(content: Content) -> some View {
         if phone {
-            content.aspectRatio(1, contentMode: .fit)
+            // Square below the bars, the bars' height above.
+            content.aspectRatio(1, contentMode: .fit).padding(.top, inset)
         } else {
             content.containerRelativeFrame(.vertical) { height, _ in min(max(520, height * 0.7), 700) }
         }

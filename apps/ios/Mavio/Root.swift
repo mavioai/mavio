@@ -301,20 +301,33 @@ private struct TopBar: ViewModifier {
     }
 
     /// The avatar opening the settings: the user's initial on the bar's
-    /// glass, or on the phone's bar, which has none for it, in a circle of
-    /// the bar's own material, its letter of the search icon's color.
+    /// glass, or on the phone, beside search, on glass of its own, as the
+    /// iPad's.
     @ViewBuilder private func settings(_ name: String, circle: Bool = false) -> some View {
         let initial = Text(name.first.map { String($0).uppercased() } ?? "")
         RouteLink(value: Route.settings) {
             if circle {
-                initial.font(.system(size: 15, weight: .semibold))
-                    .frame(width: 32, height: 32)
-                    .background(.ultraThinMaterial, in: .circle)
+                initial.font(.system(size: 17, weight: .semibold))
+                    .frame(width: 44, height: 44)
+                    .contentShape(.circle)
+                    .modifier(ClearGlass())
             } else {
                 initial.font(.system(size: 17, weight: .semibold))
             }
         }
         .accessibilityLabel(MavioStrings.navSettings)
+    }
+}
+
+/// The clearer of Liquid Glass's two, as over media, the avatar's on a
+/// phone, its letter light as the bare search icon beside it.
+private struct ClearGlass: ViewModifier {
+    func body(content: Content) -> some View {
+        if #available(iOS 26, *) {
+            content.glassEffect(.clear.interactive(), in: .circle)
+        } else {
+            content.background(.ultraThinMaterial, in: .circle)
+        }
     }
 }
 

@@ -39,6 +39,7 @@ struct HeroView: View {
     @Environment(\.theme) private var theme
     @Environment(\.horizontalSizeClass) private var sizeClass
     @State private var dragging = false
+    @Environment(\.heroInset) private var heroInset
 
     /// How long each title shows before the next.
     private static let interval = Duration.seconds(9)
@@ -100,7 +101,7 @@ struct HeroView: View {
         .animation(.easeOut(duration: MavioDuration.fast), value: index)
         .padding(.horizontal, phone ? theme.layout.margin : MavioSpacing.s32)
         // On a phone the dots sit at the top.
-        .padding(.top, phone ? MavioSpacing.s16 : 0)
+        .padding(.top, phone ? heroInset + MavioSpacing.s16 : 0)
         .padding(.bottom, phone ? 0 : MavioSpacing.s24)
     }
 }
@@ -109,10 +110,14 @@ struct HeroView: View {
 /// high.
 private struct HeroSize: ViewModifier {
     let phone: Bool
+    @Environment(\.heroInset) private var inset
 
     func body(content: Content) -> some View {
         if phone {
-            content.frame(maxWidth: .infinity).aspectRatio(4 / 5, contentMode: .fit)
+            // 4:5 below the bars, the bars' height above.
+            Color.clear.frame(maxWidth: .infinity).aspectRatio(4 / 5, contentMode: .fit)
+                .padding(.top, inset)
+                .overlay { content }
         } else {
             content.frame(height: 470)
         }
@@ -260,7 +265,10 @@ extension View {
     /// softened and stretched up, so that each column's color goes straight
     /// on under the bar's glass, meeting the hero at a sharp edge.
     @ViewBuilder func heroBleed<Art: View>(phone: Bool, aspect: CGFloat, @ViewBuilder art: () -> Art) -> some View {
-        if phone {
+        if #available(iOS 26, *) {
+            // The hero itself reaches the top under the bar's clear glass.
+            self
+        } else if phone {
             let art = art()
             background(alignment: .top) {
                 GeometryReader { geo in
@@ -286,8 +294,8 @@ extension View {
 }
 
 /// A screen led by a hero. On a phone the hero sits below the navigation
-/// bar, which is of the tab bar's glass over the hero's colors and what
-/// scrolls under it, meeting them at a sharp edge; on an iPad the hero
+/// bar, which is clear over the hero's colors, meeting them at a sharp
+/// edge; on an iPad the hero
 /// reaches the top under a clear bar. The bar's title appears once the hero
 /// is scrolled past.
 struct HeroChrome: ViewModifier {
@@ -295,10 +303,17 @@ struct HeroChrome: ViewModifier {
     let phone: Bool
     @Environment(\.theme) private var theme
     @State private var past = false
+    @State private var inset: CGFloat = 0
 
     func body(content: Content) -> some View {
         content
-            .ignoresSafeArea(edges: phone ? [] : .top)
+            .environment(\.heroInset, phone ? inset : 0)
+            .ignoresSafeArea(edges: reachesTop ? .top : [])
+            .onGeometryChange(for: CGFloat.self) {
+                $0.safeAreaInsets.top
+            } action: {
+                inset = $0
+            }
             .onScrollGeometryChange(for: Bool.self) { geo in
                 geo.contentOffset.y + geo.contentInsets.top > geo.containerSize.height * 0.5
             } action: { _, now in
@@ -313,27 +328,34 @@ struct HeroChrome: ViewModifier {
             .modifier(HeroBarGlass(phone: phone, past: past))
             .toolbarColorScheme(past ? nil : .dark, for: .navigationBar)
     }
+
+    /// Whether the hero reaches the top, under the bars: on an iPad, and
+    /// from iOS 26, whose bars are of clear glass, on a phone too.
+    private var reachesTop: Bool {
+        if #available(iOS 26, *) { return true }
+        return !phone
+    }
 }
 
-/// The navigation bar's glass: on a phone always, a thin material through
-/// which the hero's colors show, as the web UI's header of the tab bar's
-/// glass; on an iPad none over the hero.
+extension EnvironmentValues {
+    /// How far a phone's hero reaches up under the status bar and the
+    /// navigation bar, which its height takes in.
+    @Entry var heroInset: CGFloat = 0
+}
+
+/// The navigation bar's glass: on iOS 26 none over the hero, the bar's
+/// buttons of Liquid Glass on the hero's colors, and the bar's own once the
+/// hero is scrolled past; before it, on a phone always a thin material
+/// through which the hero's colors show.
 private struct HeroBarGlass: ViewModifier {
     let phone: Bool
     let past: Bool
 
     func body(content: Content) -> some View {
         if #available(iOS 26, *) {
-            if phone {
-                content
-                    .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
-                    .toolbarBackground(.visible, for: .navigationBar)
-                    .scrollEdgeEffectHidden(true, for: .top)
-            } else {
-                content
-                    .toolbarBackground(past ? .visible : .hidden, for: .navigationBar)
-                    .scrollEdgeEffectHidden(!past, for: .top)
-            }
+            content
+                .toolbarBackground(past ? .visible : .hidden, for: .navigationBar)
+                .scrollEdgeEffectHidden(!past, for: .top)
         } else {
             content.toolbarBackground(phone || past ? .visible : .hidden, for: .navigationBar)
         }
