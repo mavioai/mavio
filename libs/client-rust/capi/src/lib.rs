@@ -290,6 +290,7 @@ fn account(a: Option<mavio_core::Account>) -> Answer {
 fn record(s: mavio_core::ServerRecord) -> pb::ServerRecord {
     pb::ServerRecord {
         id: s.id,
+        local: mavio_core::is_local_address(&s.address),
         address: s.address,
         name: s.name,
         version: s.version,

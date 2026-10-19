@@ -15016,6 +15016,12 @@ pub struct ServerRecordView<'a> {
     pub user_id: &'a str,
     /// Field 6: `user_name`
     pub user_name: &'a str,
+    /// Whether its address is on the local network: a loopback, private or
+    /// link-local address, a localhost or .local name, or the mavio.site
+    /// name of such an address.
+    ///
+    /// Field 7: `local`
+    pub local: bool,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for ServerRecordView<'a> {
@@ -15090,6 +15096,13 @@ impl<'a> ::buffa::MessageView<'a> for ServerRecordView<'a> {
                 )?;
                 view.user_name = ::buffa::types::borrow_str(&mut cur)?;
             }
+            7u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.local = ::buffa::types::decode_bool(&mut cur)?;
+            }
             _ => {
                 ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
                 let span_len = before_tag.len() - cur.len();
@@ -15118,6 +15131,7 @@ impl<'a> ::buffa::MessageView<'a> for ServerRecordView<'a> {
             version: self.version.to_string(),
             user_id: self.user_id.to_string(),
             user_name: self.user_name.to_string(),
+            local: self.local,
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -15147,6 +15161,9 @@ impl<'a> ::buffa::ViewEncode<'a> for ServerRecordView<'a> {
         if !self.user_name.is_empty() {
             size += 1u64 + ::buffa::types::string_encoded_len(&self.user_name) as u64;
         }
+        if self.local {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -15175,6 +15192,9 @@ impl<'a> ::buffa::ViewEncode<'a> for ServerRecordView<'a> {
         }
         if !self.user_name.is_empty() {
             ::buffa::types::put_string_field(6u32, &self.user_name, buf);
+        }
+        if self.local {
+            ::buffa::types::put_bool_field(7u32, self.local, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -15296,6 +15316,15 @@ impl ServerRecordOwnedView {
     #[must_use]
     pub fn user_name(&self) -> &'_ str {
         self.0.reborrow().user_name
+    }
+    /// Whether its address is on the local network: a loopback, private or
+    /// link-local address, a localhost or .local name, or the mavio.site
+    /// name of such an address.
+    ///
+    /// Field 7: `local`
+    #[must_use]
+    pub fn local(&self) -> bool {
+        self.0.reborrow().local
     }
 }
 impl ::core::convert::From<::buffa::OwnedView<ServerRecordView<'static>>>

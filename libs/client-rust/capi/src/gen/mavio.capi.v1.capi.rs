@@ -8779,6 +8779,12 @@ pub struct ServerRecord {
     pub user_id: ::buffa::alloc::string::String,
     /// Field 6: `user_name`
     pub user_name: ::buffa::alloc::string::String,
+    /// Whether its address is on the local network: a loopback, private or
+    /// link-local address, a localhost or .local name, or the mavio.site
+    /// name of such an address.
+    ///
+    /// Field 7: `local`
+    pub local: bool,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -8791,6 +8797,7 @@ impl ::core::fmt::Debug for ServerRecord {
             .field("version", &self.version)
             .field("user_id", &self.user_id)
             .field("user_name", &self.user_name)
+            .field("local", &self.local)
             .finish()
     }
 }
@@ -8839,6 +8846,9 @@ impl ::buffa::Message for ServerRecord {
         if !self.user_name.is_empty() {
             size += 1u64 + ::buffa::types::string_encoded_len(&self.user_name) as u64;
         }
+        if self.local {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -8866,6 +8876,9 @@ impl ::buffa::Message for ServerRecord {
         }
         if !self.user_name.is_empty() {
             ::buffa::types::put_string_field(6u32, &self.user_name, buf);
+        }
+        if self.local {
+            ::buffa::types::put_bool_field(7u32, self.local, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -8922,6 +8935,13 @@ impl ::buffa::Message for ServerRecord {
                 )?;
                 ::buffa::types::merge_string(&mut self.user_name, buf)?;
             }
+            7u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.local = ::buffa::types::decode_bool(buf)?;
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -8936,6 +8956,7 @@ impl ::buffa::Message for ServerRecord {
         self.version.clear();
         self.user_id.clear();
         self.user_name.clear();
+        self.local = false;
         self.__buffa_unknown_fields.clear();
     }
 }

@@ -6787,6 +6787,7 @@ type ServerRecord struct {
 	xxx_hidden_Version  string                 `protobuf:"bytes,4,opt,name=version"`
 	xxx_hidden_UserId   string                 `protobuf:"bytes,5,opt,name=user_id,json=userId"`
 	xxx_hidden_UserName string                 `protobuf:"bytes,6,opt,name=user_name,json=userName"`
+	xxx_hidden_Local    bool                   `protobuf:"varint,7,opt,name=local"`
 	unknownFields       protoimpl.UnknownFields
 	sizeCache           protoimpl.SizeCache
 }
@@ -6858,6 +6859,13 @@ func (x *ServerRecord) GetUserName() string {
 	return ""
 }
 
+func (x *ServerRecord) GetLocal() bool {
+	if x != nil {
+		return x.xxx_hidden_Local
+	}
+	return false
+}
+
 func (x *ServerRecord) SetId(v string) {
 	x.xxx_hidden_Id = v
 }
@@ -6882,6 +6890,10 @@ func (x *ServerRecord) SetUserName(v string) {
 	x.xxx_hidden_UserName = v
 }
 
+func (x *ServerRecord) SetLocal(v bool) {
+	x.xxx_hidden_Local = v
+}
+
 type ServerRecord_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
@@ -6891,6 +6903,10 @@ type ServerRecord_builder struct {
 	Version  string
 	UserId   string
 	UserName string
+	// Whether its address is on the local network: a loopback, private or
+	// link-local address, a localhost or .local name, or the mavio.site
+	// name of such an address.
+	Local bool
 }
 
 func (b0 ServerRecord_builder) Build() *ServerRecord {
@@ -6903,6 +6919,7 @@ func (b0 ServerRecord_builder) Build() *ServerRecord {
 	x.xxx_hidden_Version = b.Version
 	x.xxx_hidden_UserId = b.UserId
 	x.xxx_hidden_UserName = b.UserName
+	x.xxx_hidden_Local = b.Local
 	return m0
 }
 
@@ -11413,14 +11430,15 @@ const file_mavio_capi_v1_capi_proto_rawDesc = "" +
 	"\n" +
 	"expires_ms\x18\x05 \x01(\x03R\texpiresMs\x12\x1f\n" +
 	"\vinterval_ms\x18\x06 \x01(\rR\n" +
-	"intervalMs\"\x9c\x01\n" +
+	"intervalMs\"\xb2\x01\n" +
 	"\fServerRecord\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x18\n" +
 	"\aaddress\x18\x02 \x01(\tR\aaddress\x12\x12\n" +
 	"\x04name\x18\x03 \x01(\tR\x04name\x12\x18\n" +
 	"\aversion\x18\x04 \x01(\tR\aversion\x12\x17\n" +
 	"\auser_id\x18\x05 \x01(\tR\x06userId\x12\x1b\n" +
-	"\tuser_name\x18\x06 \x01(\tR\buserName\"@\n" +
+	"\tuser_name\x18\x06 \x01(\tR\buserName\x12\x14\n" +
+	"\x05local\x18\a \x01(\bR\x05local\"@\n" +
 	"\aServers\x125\n" +
 	"\aservers\x18\x01 \x03(\v2\x1b.mavio.capi.v1.ServerRecordR\aservers\"D\n" +
 	"\fFoundServers\x124\n" +
