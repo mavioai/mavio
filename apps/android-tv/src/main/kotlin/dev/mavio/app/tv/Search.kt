@@ -64,6 +64,7 @@ import dev.mavio.ui.TvScrolling
 import dev.mavio.ui.focused
 import dev.mavio.ui.rowTitle
 import dev.mavio.ui.selectable
+import dev.mavio.ui.shakes
 import dev.mavio.ui.text
 import dev.mavio.ui.theme
 import kotlinx.coroutines.delay
@@ -188,6 +189,7 @@ private fun RowScope.SearchKey(label: String, modifier: Modifier, onClick: () ->
     val focused = state.focused()
     Box(
         modifier
+            .shakes()
             .clip(RoundedCornerShape(MavioRadius.lg))
             .background(if (focused) Color.White else theme.colors.fill)
             .selectable(state, onClick),

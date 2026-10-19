@@ -93,6 +93,7 @@ fun Pressable(onClick: () -> Unit, modifier: Modifier = Modifier, content: @Comp
     val shape = RoundedCornerShape(14.dp)
     Box(
         modifier
+            .shakes()
             .then(if (focused) Modifier.shadow(12.dp, shape, ambientColor = theme.colors.tvFocusShadow, spotColor = theme.colors.tvFocusShadow) else Modifier)
             .background(if (focused) Color.White else Color.Transparent, shape)
             .selectable(state, onClick),
@@ -445,6 +446,7 @@ private fun TvField(
         if (label != null) Text(label, style = theme.type.callout.text, color = theme.colors.textSecondary)
         Box(
             Modifier
+                .shakes()
                 .fillMaxWidth()
                 .heightIn(min = 64.dp)
                 .clip(shape)

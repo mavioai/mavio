@@ -84,6 +84,7 @@ import dev.mavio.ui.itemIcon
 import dev.mavio.ui.minutesText
 import dev.mavio.ui.rowTitle
 import dev.mavio.ui.selectable
+import dev.mavio.ui.shakes
 import dev.mavio.ui.shapeOf
 import dev.mavio.ui.subtitleOf
 import dev.mavio.ui.text
@@ -390,7 +391,7 @@ fun TvItemCard(card: Card, modifier: Modifier = Modifier, shape: CardShape = sha
     val state = remember { Focusable() }
     val focused = state.focused()
     val width = if (shape == CardShape.Thumb) theme.layout.thumbnail else theme.layout.poster
-    Column(modifier.then(if (fill) Modifier.fillMaxWidth() else Modifier.width(width)).focusCard(focused).selectable(state, onClick)) {
+    Column(modifier.shakes().then(if (fill) Modifier.fillMaxWidth() else Modifier.width(width)).focusCard(focused).selectable(state, onClick)) {
         Box(Modifier.focusArtwork(focused, MavioRadius.md)) {
             val art = if (shape == CardShape.Thumb) card.thumb ?: card.poster else card.poster ?: card.thumb
             Artwork(
@@ -432,7 +433,7 @@ fun TvItemCard(card: Card, modifier: Modifier = Modifier, shape: CardShape = sha
 private fun TitlePoster(title: TitleCard, modifier: Modifier) {
     val state = remember { Focusable() }
     val focused = state.focused()
-    Column(modifier.width(theme.layout.poster).focusCard(focused).selectable(state) {}) {
+    Column(modifier.shakes().width(theme.layout.poster).focusCard(focused).selectable(state) {}) {
         Artwork(
             title.posterUrl,
             Modifier

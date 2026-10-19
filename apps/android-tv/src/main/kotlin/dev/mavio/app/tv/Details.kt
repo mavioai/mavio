@@ -97,6 +97,7 @@ import dev.mavio.ui.minutesText
 import dev.mavio.ui.range
 import dev.mavio.ui.resolution
 import dev.mavio.ui.selectable
+import dev.mavio.ui.shakes
 import dev.mavio.ui.shownRole
 import dev.mavio.ui.surround
 import dev.mavio.ui.text
@@ -518,6 +519,7 @@ fun TvCircleButton(icon: Int, label: String, modifier: Modifier = Modifier, tint
     Box(contentAlignment = Alignment.Center) {
         Box(
             modifier
+                .shakes()
                 .size(64.dp)
                 .then(if (focused) Modifier.shadow(12.dp, CircleShape, ambientColor = theme.colors.tvFocusShadow, spotColor = theme.colors.tvFocusShadow) else Modifier)
                 .clip(CircleShape)
@@ -575,6 +577,7 @@ private fun SeasonPill(title: String, chosen: Boolean, modifier: Modifier, onCho
     Text(
         title,
         modifier
+            .shakes()
             .onFocusChanged { if (it.isFocused) onChoose() }
             .clip(CircleShape)
             .background(
@@ -618,7 +621,7 @@ private fun EpisodeCard(episode: Episode, short: String?, current: Boolean, modi
     val state = remember { Focusable() }
     val focused = state.focused()
     val card = episode.card
-    Column(modifier.width(theme.layout.thumbnail).focusCard(focused).selectable(state, onClick)) {
+    Column(modifier.shakes().width(theme.layout.thumbnail).focusCard(focused).selectable(state, onClick)) {
         Box(Modifier.focusArtwork(focused, MavioRadius.md)) {
             Artwork(
                 (card.thumb ?: card.backdrop ?: card.poster)?.url,
@@ -669,7 +672,7 @@ private fun EpisodeCard(episode: Episode, short: String?, current: Boolean, modi
 internal fun PersonCard(credit: CreditEntry, modifier: Modifier) {
     val state = remember { Focusable() }
     val focused = state.focused()
-    Column(modifier.width(180.dp).focusCard(focused).selectable(state) {}, horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(modifier.shakes().width(180.dp).focusCard(focused).selectable(state) {}, horizontalAlignment = Alignment.CenterHorizontally) {
         Box(
             Modifier
                 .focusArtwork(focused, 80.dp)
@@ -697,7 +700,7 @@ private fun initials(name: String): String =
 private fun CastAllCard(modifier: Modifier, onClick: () -> Unit) {
     val state = remember { Focusable() }
     val focused = state.focused()
-    Column(modifier.width(180.dp).focusCard(focused).selectable(state, onClick), horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(modifier.shakes().width(180.dp).focusCard(focused).selectable(state, onClick), horizontalAlignment = Alignment.CenterHorizontally) {
         Box(
             Modifier
                 .focusArtwork(focused, 80.dp)
@@ -817,6 +820,7 @@ private fun FullCrew(modifier: Modifier, onClick: () -> Unit) {
     val focused = state.focused()
     Row(
         modifier
+            .shakes()
             .clip(RoundedCornerShape(MavioRadius.md))
             .background(if (focused) Color.White else Color.Transparent)
             .selectable(state, onClick)

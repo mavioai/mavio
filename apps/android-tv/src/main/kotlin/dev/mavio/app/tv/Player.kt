@@ -83,6 +83,7 @@ import androidx.media3.common.Tracks
 import androidx.media3.common.text.CueGroup
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.session.MediaSession
 import androidx.media3.ui.SubtitleView
 import androidx.media3.ui.compose.ContentFrame
 import androidx.media3.ui.compose.PlayerSurface
@@ -111,9 +112,11 @@ import dev.mavio.ui.TvButton
 import dev.mavio.ui.focused
 import dev.mavio.ui.languageName
 import dev.mavio.ui.selectable
+import dev.mavio.ui.shakes
 import dev.mavio.ui.text
 import dev.mavio.ui.theme
 import java.time.Duration
+import java.util.UUID
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 
@@ -257,6 +260,13 @@ fun PlayerPage(model: AppModel, page: Page.Player) {
         }
     }
     LifecycleEventEffect(Lifecycle.Event.ON_STOP) { player?.pause() }
+    // The system's media controls, the remote's media keys and the
+    // assistant drive the player through its session; the next episode's
+    // starts while this one's player goes, so each has an ID of its own.
+    DisposableEffect(player) {
+        val session = player?.let { MediaSession.Builder(context, it).setId(UUID.randomUUID().toString()).build() }
+        onDispose { session?.release() }
+    }
 
     Box(Modifier.fillMaxSize().background(Color.Black)) {
         when {
@@ -675,6 +685,7 @@ private fun Tab(label: String, chosen: Boolean, modifier: Modifier, onChoose: ()
     Text(
         label,
         modifier
+            .shakes()
             .onFocusChanged { if (it.isFocused && !chosen) onChoose() }
             .clip(RoundedCornerShape(7.dp))
             .background(
@@ -709,6 +720,7 @@ private fun Speed(label: String, chosen: Boolean, enabled: Boolean, onClick: () 
     Text(
         label,
         Modifier
+            .shakes()
             .alpha(if (enabled) 1f else 0.4f)
             .clip(CircleShape)
             .background(
@@ -746,6 +758,7 @@ private fun PanelAction(icon: Int?, label: String, onClick: () -> Unit) {
     val color = if (focused) Color.Black else Color.White
     Row(
         Modifier
+            .shakes()
             .fillMaxWidth()
             .clip(RoundedCornerShape(10.dp))
             .background(if (focused) Color.White else Color.Transparent)
@@ -776,6 +789,7 @@ private fun Choice(checked: Boolean, label: Pair<String, String>, modifier: Modi
     val color = if (focused) Color.Black else Color.White
     Row(
         modifier
+            .shakes()
             .fillMaxWidth()
             .clip(RoundedCornerShape(10.dp))
             .background(if (focused) Color.White else Color.Transparent)

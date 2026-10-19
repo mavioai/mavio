@@ -193,6 +193,7 @@ private fun RowScope.Key(label: String, modifier: Modifier, enabled: Boolean = t
     }
     Box(
         modifier
+            .shakes()
             .height(56.dp)
             .alpha(if (enabled) 1f else 0.4f)
             .clip(RoundedCornerShape(MavioRadius.lg))

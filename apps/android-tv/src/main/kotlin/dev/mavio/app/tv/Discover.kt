@@ -65,6 +65,7 @@ import dev.mavio.ui.focused
 import dev.mavio.ui.rowTitle
 import dev.mavio.ui.rowsOf
 import dev.mavio.ui.selectable
+import dev.mavio.ui.shakes
 import dev.mavio.ui.sized
 import dev.mavio.ui.statusLabel
 import dev.mavio.ui.text
@@ -170,7 +171,7 @@ fun TvCatalogShelf(
 fun SeeAllCard(modifier: Modifier = Modifier, onClick: () -> Unit) {
     val state = remember { Focusable() }
     val focused = state.focused()
-    Column(modifier.width(theme.layout.poster).focusCard(focused).selectable(state, onClick)) {
+    Column(modifier.shakes().width(theme.layout.poster).focusCard(focused).selectable(state, onClick)) {
         Column(
             Modifier
                 .focusArtwork(focused, MavioRadius.md)
@@ -198,7 +199,7 @@ fun TvTitleCard(title: DiscoveredTitle, modifier: Modifier = Modifier, fill: Boo
     val state = remember { Focusable() }
     val focused = state.focused()
     val series = title.mediaKind == MediaKind.MEDIA_KIND_SERIES
-    Column(modifier.then(if (fill) Modifier.fillMaxWidth() else Modifier.width(theme.layout.poster)).focusCard(focused).selectable(state, onClick)) {
+    Column(modifier.shakes().then(if (fill) Modifier.fillMaxWidth() else Modifier.width(theme.layout.poster)).focusCard(focused).selectable(state, onClick)) {
         Box(Modifier.focusArtwork(focused, MavioRadius.md)) {
             Artwork(
                 sized(title.posterUrl, 342),

@@ -90,6 +90,7 @@ import dev.mavio.ui.moneyText
 import dev.mavio.ui.productionStatus
 import dev.mavio.ui.seasonName
 import dev.mavio.ui.selectable
+import dev.mavio.ui.shakes
 import dev.mavio.ui.sized
 import dev.mavio.ui.statusLabel
 import dev.mavio.ui.text
@@ -385,6 +386,7 @@ private fun TitleOverview(title: Title, credits: List<Credit>, focus: FocusMemor
                     Text(
                         k.name,
                         Modifier
+                            .shakes()
                             .then(if (linked) Modifier.focusKey(focus, "keyword/$i") else Modifier)
                             .clip(CircleShape)
                             .background(if (focused) Color.White else colors.fill)
@@ -417,6 +419,7 @@ private fun TvLink(label: String, modifier: Modifier, color: Color, onClick: () 
     Text(
         label,
         modifier
+            .shakes()
             .clip(RoundedCornerShape(6.dp))
             .background(if (focused) Color.White else Color.Transparent)
             .selectable(state, onClick)
@@ -659,6 +662,7 @@ private fun Season(serverId: String, tmdbId: Int, s: SeasonStatus, open: Boolean
         val secondary = if (focused) Color.Black.copy(alpha = 0.6f) else colors.textSecondary
         Row(
             modifier
+                .shakes()
                 .fillMaxWidth()
                 .background(if (focused) Color.White else Color.Transparent)
                 .selectable(state, onToggle)
@@ -743,7 +747,7 @@ private fun SeasonEpisodes(serverId: String, tmdbId: Int, seasonNumber: Int) {
 private fun CreditCard(credit: Credit, modifier: Modifier) {
     val state = remember { Focusable() }
     val focused = state.focused()
-    Column(modifier.width(180.dp).focusCard(focused).selectable(state) {}, horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(modifier.shakes().width(180.dp).focusCard(focused).selectable(state) {}, horizontalAlignment = Alignment.CenterHorizontally) {
         Box(
             Modifier
                 .focusArtwork(focused, 80.dp)

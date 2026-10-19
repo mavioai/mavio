@@ -74,6 +74,7 @@ import dev.mavio.ui.focusCard
 import dev.mavio.ui.focused
 import dev.mavio.ui.rowTitle
 import dev.mavio.ui.selectable
+import dev.mavio.ui.shakes
 import dev.mavio.ui.text
 import dev.mavio.ui.theme
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -191,6 +192,7 @@ private fun LibraryLine(libraries: List<LibraryEntry?>, serverId: String, focus:
             val focused = state.focused()
             Column(
                 (if (i == 0 && entry != null) Modifier.focusRequester(entry) else Modifier)
+                    .shakes()
                     .focusKey(focus, "$serverId/${library.id}")
                     .weight(1f)
                     .focusCard(focused)
@@ -425,6 +427,7 @@ private fun SortButton(sort: Sort, onSort: (Sort) -> Unit) {
     Box {
         Row(
             Modifier
+                .shakes()
                 .focusRequester(button)
                 // Nothing focusable sits to its right: the count is text.
                 .focusProperties { right = FocusRequester.Cancel }

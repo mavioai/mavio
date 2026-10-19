@@ -31,11 +31,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.type
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -43,7 +50,9 @@ import dev.mavio.core.AppModel
 import dev.mavio.core.SignInState
 import dev.mavio.design.MavioSpacing
 import dev.mavio.ui.DiscoverState
+import dev.mavio.ui.FocusShake
 import dev.mavio.ui.LocalDiscover
+import dev.mavio.ui.LocalFocusShake
 import dev.mavio.ui.R
 import dev.mavio.ui.TvChoice
 import dev.mavio.ui.text
@@ -69,17 +78,42 @@ private class TabState {
     val entry = FocusRequester()
 }
 
-/** The app: its sign-in until a Mavio account signs in, then its tabs. */
+/**
+ * The app: its sign-in until a Mavio account signs in, then its tabs. The
+ * D-pad moves focus, and where focus cannot move the focused element
+ * shakes (docs/tv.md §4).
+ */
 @Composable
 fun Root(model: AppModel) {
     val state by model.signInState.collectAsStateWithLifecycle()
     val signedIn by model.signedIn.collectAsStateWithLifecycle()
-    if (state is SignInState.SignedOut && signedIn.isEmpty()) {
-        SignInScreen(model)
-    } else {
-        val discover = remember { DiscoverState(model) }
-        LaunchedEffect(signedIn) { discover.load(model.signedInServers.map { it.id }) }
-        CompositionLocalProvider(LocalDiscover provides discover) { Shell(model) }
+    val shake = remember { FocusShake() }
+    val focusManager = LocalFocusManager.current
+    val scope = rememberCoroutineScope()
+    Box(
+        Modifier.fillMaxSize().onKeyEvent { e ->
+            val direction = when (e.key) {
+                Key.DirectionUp -> FocusDirection.Up
+                Key.DirectionDown -> FocusDirection.Down
+                Key.DirectionLeft -> FocusDirection.Left
+                Key.DirectionRight -> FocusDirection.Right
+                else -> null
+            }
+            // What the focused element and those around it leave.
+            if (direction == null || e.type != KeyEventType.KeyDown) return@onKeyEvent false
+            if (!focusManager.moveFocus(direction)) scope.launch { shake.shake() }
+            true
+        },
+    ) {
+        CompositionLocalProvider(LocalFocusShake provides shake) {
+            if (state is SignInState.SignedOut && signedIn.isEmpty()) {
+                SignInScreen(model)
+            } else {
+                val discover = remember { DiscoverState(model) }
+                LaunchedEffect(signedIn) { discover.load(model.signedInServers.map { it.id }) }
+                CompositionLocalProvider(LocalDiscover provides discover) { Shell(model) }
+            }
+        }
     }
 }
 

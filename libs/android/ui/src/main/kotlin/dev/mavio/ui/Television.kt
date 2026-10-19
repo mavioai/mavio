@@ -192,6 +192,7 @@ fun TvButton(
     val color = if (focused) Color.Black else content
     Row(
         modifier
+            .shakes()
             .height(height)
             .then(if (focused) Modifier.shadow(12.dp, shape, ambientColor = theme.colors.tvFocusShadow, spotColor = theme.colors.tvFocusShadow) else Modifier)
             .clip(shape)
@@ -219,6 +220,7 @@ fun TvChoice(label: String, current: Boolean, modifier: Modifier = Modifier, hor
     Text(
         label,
         modifier
+            .shakes()
             .clip(CircleShape)
             .background(
                 when {
@@ -304,7 +306,7 @@ fun <T> TvChoiceMenu(
                     val state = remember { Focusable() }
                     val focused = state.focused()
                     Row(
-                        (if (c == current) Modifier.focusRequester(chosen) else Modifier)
+                        (if (c == current) Modifier.focusRequester(chosen) else Modifier).shakes()
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(MavioRadius.md))
                             .background(if (focused) theme.colors.fill else Color.Transparent)

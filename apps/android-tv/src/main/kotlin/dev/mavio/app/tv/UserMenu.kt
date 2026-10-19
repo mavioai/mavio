@@ -56,6 +56,7 @@ import dev.mavio.ui.OnCanvas
 import dev.mavio.ui.R
 import dev.mavio.ui.focused
 import dev.mavio.ui.selectable
+import dev.mavio.ui.shakes
 import dev.mavio.ui.signedInAccount
 import dev.mavio.ui.signedInServers
 import dev.mavio.ui.text
@@ -170,6 +171,7 @@ fun MenuButton(model: AppModel, button: FocusRequester, modifier: Modifier = Mod
     Box(modifier) {
         Box(
             Modifier
+                .shakes()
                 .focusRequester(button)
                 .size(BUTTON)
                 .clip(CircleShape)
@@ -328,6 +330,7 @@ private fun MenuEntry(
     val focused = state.focused()
     Row(
         modifier
+            .shakes()
             .fillMaxWidth()
             .clip(RoundedCornerShape(MavioRadius.md))
             .background(if (focused) theme.colors.fill else Color.Transparent)
@@ -406,7 +409,7 @@ fun TvPinPad(name: String, busy: Boolean, error: String?, enter: (String) -> Uni
                                 val state = remember { Focusable() }
                                 val focused = state.focused()
                                 Box(
-                                    (if (k == "1") Modifier.focusRequester(first) else Modifier)
+                                    (if (k == "1") Modifier.focusRequester(first) else Modifier).shakes()
                                         .size(width = if (k == "0") 192.dp else 90.dp, height = 90.dp)
                                         .clip(RoundedCornerShape(MavioRadius.lg))
                                         .background(if (focused) Color.White else theme.colors.fill)
