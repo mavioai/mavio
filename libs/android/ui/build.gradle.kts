@@ -43,6 +43,7 @@ dependencies {
     api(libs.compose.ui)
     api(libs.compose.material3)
     api(libs.lifecycle.runtime.compose)
+    api(libs.androidx.core.splashscreen)
     implementation(libs.coil.compose)
     implementation(libs.coil.network.okhttp)
     implementation(libs.compose.ui.tooling.preview)

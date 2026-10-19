@@ -72,9 +72,10 @@ fun itemIcon(kind: CardKind): Int = when (kind) {
 }
 
 /**
- * An image loaded from a server, fading in over a placeholder of its final
- * size; with none, the placeholder stays, a quiet wash with the icon of
- * what it shows. Cropped to its space at [alignment].
+ * An image loaded from a server, fading in over a plain fill of its final
+ * size; with none, or when it fails, the placeholder stays, a quiet wash
+ * with the icon of what it shows, so that no icon flashes before an image.
+ * Cropped to its space at [alignment].
  */
 @Composable
 fun Artwork(
@@ -103,7 +104,7 @@ fun Artwork(
             }
         } else {
             AsyncImage(
-                model = url,
+                model = rememberImageRequest(url),
                 contentDescription = contentDescription,
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop,
@@ -125,7 +126,7 @@ fun Logo(url: String?, name: String, modifier: Modifier = Modifier, fallback: @C
         fallback()
     } else {
         AsyncImage(
-            model = url,
+            model = rememberImageRequest(url),
             contentDescription = name,
             modifier = modifier,
             contentScale = ContentScale.Fit,

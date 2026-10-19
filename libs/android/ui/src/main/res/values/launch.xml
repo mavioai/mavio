@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The launch screen's background, the theme's (background in the
+         design tokens); a television's is its own. -->
+    <color name="launch_background">#FFFFFFFF</color>
+</resources>

@@ -18,6 +18,7 @@
         android:theme="@style/Theme.Mavio">
         <activity
             android:name=".MainActivity"
+            android:theme="@style/Theme.Mavio.Launch"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

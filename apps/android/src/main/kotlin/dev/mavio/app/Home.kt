@@ -69,6 +69,7 @@ import dev.mavio.ui.MavioButton
 import dev.mavio.ui.R
 import dev.mavio.ui.Shelf
 import dev.mavio.ui.StatusView
+import dev.mavio.ui.heroKinds
 import dev.mavio.ui.minutesText
 import dev.mavio.ui.rowTitle
 import dev.mavio.ui.shapeOf
@@ -78,8 +79,6 @@ import kotlinx.coroutines.delay
 
 /** A title the hero shows, and the line above it. */
 private data class HeroEntry(val card: Card, val eyebrow: String)
-
-private val heroKinds = setOf(CardKind.MOVIE, CardKind.SERIES, CardKind.VIDEO, CardKind.MUSIC_VIDEO)
 
 /** How long each of the hero's titles shows before the next, in milliseconds. */
 private const val HERO_INTERVAL = 9000L

@@ -14,6 +14,7 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import dev.mavio.ui.MavioTheme
+import dev.mavio.ui.installLaunch
 
 /** The app's only activity; the player is its own. */
 class MainActivity : ComponentActivity() {
@@ -30,6 +31,7 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        installLaunch(model)
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         redirected(intent)

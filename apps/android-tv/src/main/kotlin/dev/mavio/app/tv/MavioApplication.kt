@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.pm.ApplicationInfo
 import android.system.Os
 import dev.mavio.core.AppModel
+import dev.mavio.ui.installImages
 
 /** The app, which owns the core for as long as its process lives. */
 class MavioApplication : Application() {
@@ -13,6 +14,7 @@ class MavioApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        installImages(this)
         // A debug build trusts the certificate authority of a development
         // mavio.dev, put in the app's files.
         val ca = filesDir.resolve("dev-ca.pem")

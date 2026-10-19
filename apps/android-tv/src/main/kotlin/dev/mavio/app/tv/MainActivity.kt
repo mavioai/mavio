@@ -6,12 +6,14 @@ import androidx.activity.compose.setContent
 import dev.mavio.design.TvLayout
 import dev.mavio.design.TvTypography
 import dev.mavio.ui.MavioTheme
+import dev.mavio.ui.installLaunch
 
 /** The app's only activity. */
 class MainActivity : ComponentActivity() {
     private val model get() = (application as MavioApplication).model
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        installLaunch(model)
         super.onCreate(savedInstanceState)
         setContent {
             // A television starts dark, as it is watched in dim rooms (docs/tv.md §1).

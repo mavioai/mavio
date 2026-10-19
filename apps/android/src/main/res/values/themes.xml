@@ -1,4 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <style name="Theme.Mavio" parent="android:Theme.Material.NoActionBar" />
+
+    <!-- The launch screen: the app icon's mark on the background, kept by
+         installLaunch until Home can be drawn whole (docs/clients.md §4.2). -->
+    <style name="Theme.Mavio.Launch" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/launch_background</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_launcher_foreground</item>
+        <item name="postSplashScreenTheme">@style/Theme.Mavio</item>
+    </style>
 </resources>

@@ -20,6 +20,7 @@
              into picture in picture. -->
         <activity
             android:name=".MainActivity"
+            android:theme="@style/Theme.Mavio.Launch"
             android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize|keyboardHidden|density|uiMode"
             android:exported="true"
             android:launchMode="singleTask"
