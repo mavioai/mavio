@@ -88,6 +88,10 @@ pub use self::__buffa::view::RemoveServerView;
 #[doc(inline)]
 pub use self::__buffa::view::RemoveServerOwnedView;
 #[doc(inline)]
+pub use self::__buffa::view::SwitchUserView;
+#[doc(inline)]
+pub use self::__buffa::view::SwitchUserOwnedView;
+#[doc(inline)]
 pub use self::__buffa::view::OrderServersView;
 #[doc(inline)]
 pub use self::__buffa::view::OrderServersOwnedView;

@@ -1099,6 +1099,14 @@ impl ::buffa::Message for Request {
                         += 2u64 + ::buffa::encoding::varint_len(inner as u64) as u64
                             + inner as u64;
                 }
+                __buffa::oneof::request::Kind::SwitchUser(x) => {
+                    let __slot = __cache.reserve();
+                    let inner = x.compute_size(__cache);
+                    __cache.set(__slot, inner);
+                    size
+                        += 2u64 + ::buffa::encoding::varint_len(inner as u64) as u64
+                            + inner as u64;
+                }
             }
         }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
@@ -1412,6 +1420,14 @@ impl ::buffa::Message for Request {
                 __buffa::oneof::request::Kind::SearchServer(x) => {
                     ::buffa::types::put_len_delimited_header(
                         38u32,
+                        u64::from(__cache.consume_next()),
+                        buf,
+                    );
+                    x.write_to(__cache, buf);
+                }
+                __buffa::oneof::request::Kind::SwitchUser(x) => {
+                    ::buffa::types::put_len_delimited_header(
+                        39u32,
                         u64::from(__cache.consume_next()),
                         buf,
                     );
@@ -2189,6 +2205,26 @@ impl ::buffa::Message for Request {
                     ::buffa::Message::merge_length_delimited(&mut val, buf, ctx)?;
                     self.kind = ::core::option::Option::Some(
                         __buffa::oneof::request::Kind::SearchServer(
+                            ::buffa::alloc::boxed::Box::new(val),
+                        ),
+                    );
+                }
+            }
+            39u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                if let ::core::option::Option::Some(
+                    __buffa::oneof::request::Kind::SwitchUser(ref mut existing),
+                ) = self.kind
+                {
+                    ::buffa::Message::merge_length_delimited(&mut **existing, buf, ctx)?;
+                } else {
+                    let mut val = ::core::default::Default::default();
+                    ::buffa::Message::merge_length_delimited(&mut val, buf, ctx)?;
+                    self.kind = ::core::option::Option::Some(
+                        __buffa::oneof::request::Kind::SwitchUser(
                             ::buffa::alloc::boxed::Box::new(val),
                         ),
                     );
@@ -3683,6 +3719,143 @@ impl ::buffa::Message for RemoveServer {
 }
 impl ::buffa::ExtensionSet for RemoveServer {
     const PROTO_FQN: &'static str = "mavio.capi.v1.RemoveServer";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+/// Switches a standalone server's session to another of its users, whom
+/// AuthService's ListSwitchableUsers lists, with their PIN when they have
+/// one; answered with its ServerRecord, of the user switched to.
+#[derive(Clone, PartialEq, Default)]
+pub struct SwitchUser {
+    /// Field 1: `server_id`
+    pub server_id: ::buffa::alloc::string::String,
+    /// Field 2: `user_id`
+    pub user_id: ::buffa::alloc::string::String,
+    /// Empty for a user without a PIN.
+    ///
+    /// Field 3: `pin`
+    pub pin: ::buffa::alloc::string::String,
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for SwitchUser {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("SwitchUser")
+            .field("server_id", &self.server_id)
+            .field("user_id", &self.user_id)
+            .field("pin", &self.pin)
+            .finish()
+    }
+}
+impl SwitchUser {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.capi.v1.SwitchUser";
+}
+::buffa::impl_default_instance!(SwitchUser);
+impl ::buffa::MessageName for SwitchUser {
+    const PACKAGE: &'static str = "mavio.capi.v1";
+    const NAME: &'static str = "SwitchUser";
+    const FULL_NAME: &'static str = "mavio.capi.v1.SwitchUser";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.capi.v1.SwitchUser";
+}
+impl ::buffa::Message for SwitchUser {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if !self.server_id.is_empty() {
+            size += 1u64 + ::buffa::types::string_encoded_len(&self.server_id) as u64;
+        }
+        if !self.user_id.is_empty() {
+            size += 1u64 + ::buffa::types::string_encoded_len(&self.user_id) as u64;
+        }
+        if !self.pin.is_empty() {
+            size += 1u64 + ::buffa::types::string_encoded_len(&self.pin) as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if !self.server_id.is_empty() {
+            ::buffa::types::put_string_field(1u32, &self.server_id, buf);
+        }
+        if !self.user_id.is_empty() {
+            ::buffa::types::put_string_field(2u32, &self.user_id, buf);
+        }
+        if !self.pin.is_empty() {
+            ::buffa::types::put_string_field(3u32, &self.pin, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(&mut self.server_id, buf)?;
+            }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(&mut self.user_id, buf)?;
+            }
+            3u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(&mut self.pin, buf)?;
+            }
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.server_id.clear();
+        self.user_id.clear();
+        self.pin.clear();
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for SwitchUser {
+    const PROTO_FQN: &'static str = "mavio.capi.v1.SwitchUser";
     fn unknown_fields(&self) -> &::buffa::UnknownFields {
         &self.__buffa_unknown_fields
     }

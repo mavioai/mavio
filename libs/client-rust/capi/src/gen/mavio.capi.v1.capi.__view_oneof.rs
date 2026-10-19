@@ -196,6 +196,11 @@ pub mod request {
                 super::super::super::super::__buffa::view::SearchServerView<'a>,
             >,
         ),
+        SwitchUser(
+            ::buffa::alloc::boxed::Box<
+                super::super::super::super::__buffa::view::SwitchUserView<'a>,
+            >,
+        ),
     }
 }
 pub mod message {

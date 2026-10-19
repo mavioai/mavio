@@ -76,6 +76,7 @@ func (a *App) userMenu(c *ui.Context, panel ui.Element) {
 			})
 			a.themeSwitch(c)
 		})
+		a.switchMenu(c)
 		menuSeparator(c)
 		settings, tvKeys := "⌘,", "⌃⌘T"
 		if goruntime.GOOS != "darwin" {

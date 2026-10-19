@@ -62,6 +62,7 @@ pub mod request {
         SignOut(::buffa::alloc::boxed::Box<super::super::super::SignOut>),
         CallServer(::buffa::alloc::boxed::Box<super::super::super::CallServer>),
         SearchServer(::buffa::alloc::boxed::Box<super::super::super::SearchServer>),
+        SwitchUser(::buffa::alloc::boxed::Box<super::super::super::SwitchUser>),
     }
     impl ::buffa::Oneof for Kind {}
     impl From<super::super::super::Open> for Kind {
@@ -444,6 +445,16 @@ pub mod request {
     }
     impl From<super::super::super::SearchServer> for ::core::option::Option<Kind> {
         fn from(v: super::super::super::SearchServer) -> Self {
+            Self::Some(Kind::from(v))
+        }
+    }
+    impl From<super::super::super::SwitchUser> for Kind {
+        fn from(v: super::super::super::SwitchUser) -> Self {
+            Self::SwitchUser(::buffa::alloc::boxed::Box::new(v))
+        }
+    }
+    impl From<super::super::super::SwitchUser> for ::core::option::Option<Kind> {
+        fn from(v: super::super::super::SwitchUser) -> Self {
             Self::Some(Kind::from(v))
         }
     }

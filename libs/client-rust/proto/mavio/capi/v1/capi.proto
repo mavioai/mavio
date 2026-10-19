@@ -51,6 +51,7 @@ message Request {
     SignOut sign_out = 36;
     CallServer call_server = 37;
     SearchServer search_server = 38;
+    SwitchUser switch_user = 39;
   }
 }
 
@@ -137,6 +138,16 @@ message Discover {
 // Signs out of a server and forgets it.
 message RemoveServer {
   string server_id = 1;
+}
+
+// Switches a standalone server's session to another of its users, whom
+// AuthService's ListSwitchableUsers lists, with their PIN when they have
+// one; answered with its ServerRecord, of the user switched to.
+message SwitchUser {
+  string server_id = 1;
+  string user_id = 2;
+  // Empty for a user without a PIN.
+  string pin = 3;
 }
 
 // Orders the servers as the user arranged them.

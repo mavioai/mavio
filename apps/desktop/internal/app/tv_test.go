@@ -257,11 +257,13 @@ func TestTVSettings(t *testing.T) {
 		t.Fatalf("the settings opened without focus on the account; texts = %q", h.tt.Texts())
 	}
 	h.save(shots, "tv-settings")
+	// The users to switch to come between the account and the sections.
+	key(ui.KeyDown)
 	key(ui.KeyDown)
 	key(ui.KeyEnter)
 	section := h.app.router.Location()
 	if settingsDepth(section) < 1 {
-		t.Fatalf("Return on the second row opened %q", section)
+		t.Fatalf("Return on the first section opened %q", section)
 	}
 	h.save(shots, "tv-settings-section")
 	key(ui.KeyEscape)

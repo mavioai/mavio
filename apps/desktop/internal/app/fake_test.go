@@ -210,6 +210,20 @@ func (f *fakeCore) Stream(ctx context.Context, req *capiv1.Request, part func(*c
 		}
 		f.servers = []*capiv1.ServerRecord{f.record()}
 		m.Server = f.record()
+	case req.HasSwitchUser():
+		r := req.GetSwitchUser()
+		var name string
+		for _, u := range f.users {
+			if u.GetId() == r.GetUserId() {
+				name = u.GetName()
+				if u.GetHasPin() && r.GetPin() != switchPin {
+					return nil, &capi.Error{Code: capiv1.Error_CODE_PERMISSION_DENIED, Reason: "wrong PIN"}
+				}
+			}
+		}
+		f.s.Server.UserID, f.s.Server.UserName = r.GetUserId(), name
+		f.servers = []*capiv1.ServerRecord{f.record()}
+		m.Server = f.record()
 	case req.HasListLibraries():
 		var libs []*capiv1.Library
 		for _, l := range f.s.Libraries {

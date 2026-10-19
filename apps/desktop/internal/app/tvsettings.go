@@ -71,6 +71,7 @@ func (a *App) tvSettingsList(c *ui.Context) {
 	colors := style.Colors(c)
 	style.Text(ui.Text(c, style.T(c, "nav.settings")), style.Type(c).Display).TextColor(style.Color(colors.TextPrimary))
 	a.tvAccountRow(c)
+	a.tvMembers(c)
 	admin, _ := a.admin()
 	server := a.chosenServer()
 	for _, g := range settingsGroups {

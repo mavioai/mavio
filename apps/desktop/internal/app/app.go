@@ -148,6 +148,8 @@ type App struct {
 	itemServer string
 	// issues are the issues reported with items, and their dialogs.
 	issues issuesState
+	// switching switches the standalone server's session to another user.
+	switching switchState
 
 	places places
 	// focus moves focus with the arrow keys in the TV mode.
@@ -409,6 +411,8 @@ func (a *App) View(c *ui.Context) {
 	case phaseSignIn:
 		a.signInView(c)
 	default:
+		// The PIN pad of the user switched to shows over every page.
+		defer a.pinPad(c)
 		if p := a.playerOf(nil); p != nil {
 			a.playerView(c, p)
 			return

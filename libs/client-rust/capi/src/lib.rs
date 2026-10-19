@@ -450,6 +450,12 @@ impl Client {
                 })
             }
             Call::RemoveServer(r) => answer(core.remove(&r.server_id).await, |()| done()),
+            Call::SwitchUser(s) => {
+                let pin = (!s.pin.is_empty()).then_some(s.pin.as_str());
+                answer(core.switch_user(&s.server_id, &s.user_id, pin).await, |s| {
+                    Answer::Server(Box::new(record(s)))
+                })
+            }
             Call::OrderServers(o) => answer(core.servers().order(&o.server_ids), |()| done()),
             Call::StartQuickConnect(s) => {
                 let qc = match core.servers().start_quick_connect(&s.address).await {
