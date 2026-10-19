@@ -8,6 +8,7 @@ import {
   errorMessage,
   type ServerEntry,
   useAiModels,
+  useAiProviders,
   useAssistant,
   useAssistantActions,
   useAssistantConversation,
@@ -29,6 +30,8 @@ import { useState } from "react";
 import { Checkbox, NumberField, Switch } from "../controls/inputs.tsx";
 import { Confirm } from "../controls/dialog.tsx";
 import { Select } from "../controls/select.tsx";
+import { ModelPicker } from "../controls/model-picker.tsx";
+import { modelDetail } from "../ai-model.ts";
 import { input } from "../controls/styles.ts";
 import { useUnsavedGuard } from "../controls/unsaved.tsx";
 import { locale, t } from "../i18n.ts";
@@ -202,6 +205,8 @@ export function AssistantServerSettings({ server }: { server: ServerEntry }) {
 function ServerForm({ server, settings }: { server: ServerEntry; settings: AssistantSettings }) {
   const update = useUpdateAssistantSettings(server);
   const models = useAiModels(server, true);
+  const providers = useAiProviders(server);
+  const providerNames = new Map((providers.data ?? []).map((p) => [p.id, p.name]));
   const users = useUsers(server);
   const info = useAssistant(server, locale);
   const [draft, setDraft] = useState(() => clone(AssistantSettingsSchema, settings));
@@ -222,14 +227,22 @@ function ServerForm({ server, settings }: { server: ServerEntry; settings: Assis
           <Switch on={draft.enabled} label={t("assistant.enabled")} onChange={(enabled) => set({ enabled })} />
         </Row>
         <Row label={t("assistant.model")}>
-          <Select
+          <ModelPicker
             value={draft.model}
             label={t("assistant.model")}
             disabled={off}
+            className="w-full sm:w-72"
             options={[
               { value: "", label: t("assistant.noModel") },
-              ...(models.data ?? []).map((m) => ({ value: `ai/${m.provider}/${m.id}`, label: `${m.name || m.id} (${m.provider})` })),
+              ...(models.data ?? []).map((m) => ({
+                value: `ai/${m.provider}/${m.id}`,
+                label: m.name || m.id,
+                detail: modelDetail(m),
+                provider: m.provider,
+                providerName: providerNames.get(m.provider) ?? m.provider,
+              })),
             ]}
+            labels={{ placeholder: t("assistant.noModel"), search: t("nav.search"), empty: t("schema.noMatches") }}
             onChange={(model) => set({ model })}
           />
         </Row>

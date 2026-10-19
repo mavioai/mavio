@@ -12,7 +12,7 @@ import {
   useAiModels,
   useAiProviders,
 } from "@mavio/client-ts";
-import { AiCredential, AiLoginPromptKind, type AiLoginEvent, AiLoginState, type AiModel, type AiProvider } from "@mavio/proto/mavio/plugin/v1/ai_pb";
+import { AiCredential, AiLoginPromptKind, type AiLoginEvent, AiLoginState, type AiProvider } from "@mavio/proto/mavio/plugin/v1/ai_pb";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useState } from "react";
 
@@ -26,6 +26,7 @@ import { input } from "../../controls/styles.ts";
 import { Confirm } from "../../controls/dialog.tsx";
 import { Tip } from "../../controls/tooltip.tsx";
 import { Icon } from "../../icon.tsx";
+import { modelDetail } from "../../ai-model.ts";
 
 /** The section of the server chosen in the settings. */
 export function AiSection({ server }: { server: ServerEntry }) {
@@ -336,21 +337,6 @@ function LoginPrompt({
       </Button>
     </div>
   );
-}
-
-const tokens = new Intl.NumberFormat([locale], { notation: "compact" });
-const dollars = new Intl.NumberFormat([locale], { style: "currency", currency: "USD", maximumFractionDigits: 2 });
-
-function modelDetail(m: AiModel) {
-  return [
-    m.id !== m.name && m.id,
-    m.contextWindow > 0n && t("ai.contextWindow", { tokens: tokens.format(m.contextWindow) }),
-    m.reasoning && t("ai.reasoning"),
-    m.images && t("ai.images"),
-    m.cost && (m.cost.input > 0 || m.cost.output > 0) && t("ai.cost", { input: dollars.format(m.cost.input), output: dollars.format(m.cost.output) }),
-  ]
-    .filter(Boolean)
-    .join(" · ");
 }
 
 function Models({ server, provider }: { server: ServerEntry; provider: AiProvider }) {

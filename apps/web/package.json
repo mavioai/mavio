@@ -19,6 +19,7 @@
     "@mavio/proto": "workspace:*",
     "@tanstack/react-query": "5.104.1",
     "@tanstack/react-router": "1.170.42",
+    "@tanstack/react-virtual": "3.14.13",
     "hls.js": "1.7.3",
     "react": "19.3.0",
     "react-dom": "19.3.0"
