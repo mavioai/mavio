@@ -1,18 +1,22 @@
 // The settings' AI Conversations (docs/clients.md §6.3.26): the
 // administrators' conversations with the models of the AI providers, a new
 // one started with a model, instructions and its first message, and a
-// conversation's messages with the answer streamed as the model writes it.
+// conversation's messages with the answer streamed as the model writes it,
+// each with its time and buttons copying it and reading it aloud.
 import { timestampDate } from "@bufbuild/protobuf/wkt";
 import {
   errorMessage,
   isNoAiGateway,
+  Sentences,
   type ServerEntry,
+  useAssistant,
   useAiConversation,
   useAiConversationActions,
   useAiConversations,
   useAiModels,
   useAiProviders,
   useAiSend,
+  useServersStore,
 } from "@mavio/client-ts";
 import { type AgentSession, type AiModel, AiRole, type AiUsage } from "@mavio/proto/mavio/plugin/v1/ai_pb";
 import { useNavigate, useSearch } from "@tanstack/react-router";
@@ -30,6 +34,9 @@ import { Confirm } from "../../controls/dialog.tsx";
 import { Tip } from "../../controls/tooltip.tsx";
 import { Icon } from "../../icon.tsx";
 import { useDictation } from "../../assistant/dictation.ts";
+import { MessageBar } from "../../assistant/message-bar.tsx";
+import { Speaker } from "../../assistant/speak.ts";
+import { usePrefs } from "../../prefs.ts";
 
 /** A message to send once its new conversation shows. */
 interface First {
@@ -315,6 +322,9 @@ function Bubble({
   who,
   text,
   pending,
+  at,
+  playing,
+  onPlay,
   index,
   measure,
   top,
@@ -322,6 +332,9 @@ function Bubble({
   who?: ModelOption;
   text: string;
   pending?: boolean;
+  at?: Date;
+  playing: boolean;
+  onPlay: () => void;
   index: number;
   measure: (el: HTMLElement | null) => void;
   top: number;
@@ -346,6 +359,7 @@ function Bubble({
       >
         {text || (pending ? "…" : "")}
       </div>
+      {!pending && text && <MessageBar text={text} at={at} user={user} playing={playing} onPlay={onPlay} />}
     </li>
   );
 }
@@ -356,10 +370,57 @@ interface Said {
   who?: ModelOption;
   text: string;
   pending?: boolean;
+  at?: Date;
+}
+
+/** The language a message is likely in, for a voice: Chinese for Han, else the UI's, or English when the UI's writes none of its letters. */
+function languageOf(text: string): string {
+  if (/\p{Script=Han}/u.test(text)) return locale.startsWith("zh") ? locale : "zh-CN";
+  return /^(zh|ja|ko)\b/.test(locale) ? "en" : locale;
+}
+
+/** Reads messages aloud with the voice of the assistant's settings, one at a time; the server keeps none of it. */
+function useReadAloud(server: ServerEntry) {
+  const servers = useServersStore();
+  const prefs = usePrefs();
+  const info = useAssistant(server, locale);
+  const [at, setAt] = useState<string>();
+  const speaker = useRef<Speaker>(undefined);
+  const stop = () => {
+    speaker.current?.stop();
+    speaker.current = undefined;
+    setAt(undefined);
+  };
+  useEffect(() => () => speaker.current?.stop(), []);
+  const toggle = (key: string, text: string) => {
+    const again = at === key;
+    stop();
+    if (again) return;
+    const sp: Speaker = new Speaker(
+      prefs.assistantVoice,
+      info.data ? { servers, server, languages: info.data.voices.flatMap((v) => v.languages) } : undefined,
+      {
+        keep: false,
+        onSpeaking: (speaking) => {
+          if (speaking || speaker.current !== sp) return;
+          speaker.current = undefined;
+          setAt(undefined);
+        },
+      },
+    );
+    speaker.current = sp;
+    setAt(key);
+    // Markdown's marks are not read.
+    const sentences = new Sentences();
+    for (const sentence of [...sentences.push(text.replace(/[*_`#>~|]+/g, " ")), ...sentences.end()]) sp.say(sentence, languageOf(sentence));
+    if (!sp.speaking) stop();
+  };
+  return { at, toggle };
 }
 
 /** The messages, only those scrolled into view drawn (TanStack Virtual), the page scrolling them. */
-function Messages({ said }: { said: Said[] }) {
+function Messages({ server, said }: { server: ServerEntry; said: Said[] }) {
+  const reading = useReadAloud(server);
   const list = useRef<HTMLUListElement>(null);
   // Where the list starts on the page, from which its rows are placed.
   const [margin, setMargin] = useState(0);
@@ -370,7 +431,7 @@ function Messages({ said }: { said: Said[] }) {
   const virtualizer = useWindowVirtualizer({
     count: said.length,
     estimateSize: () => 96,
-    gap: 16,
+    gap: 24,
     overscan: 6,
     scrollMargin: margin,
     getItemKey: (i) => said[i].key,
@@ -388,6 +449,9 @@ function Messages({ said }: { said: Said[] }) {
             who={m.who}
             text={m.text}
             pending={m.pending}
+            at={m.at}
+            playing={reading.at === m.key}
+            onPlay={() => reading.toggle(m.key, m.text)}
           />
         );
       })}
@@ -459,8 +523,9 @@ function ConversationPage({ server, id, first, onFirstSent }: { server: ServerEn
       )}
       {remove.isError && <p className="type-callout break-words text-danger">{errorMessage(remove.error)}</p>}
       <Messages
+        server={server}
         said={[
-          ...messages.map((m, i) => ({ key: String(i), who: m.role === AiRole.USER ? undefined : model, text: m.text })),
+          ...messages.map((m, i) => ({ key: String(i), who: m.role === AiRole.USER ? undefined : model, text: m.text, at: m.time && timestampDate(m.time) })),
           // A failed message shows as the conversation kept it.
           ...(exchange && exchange.error === undefined
             ? [

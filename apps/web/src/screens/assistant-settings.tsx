@@ -22,7 +22,6 @@ import {
 } from "@mavio/client-ts";
 import {
   AssistantAccess,
-  type AssistantMessage,
   type AssistantSettings,
   AssistantSettingsSchema,
   type AssistantVoiceChoice,
@@ -31,8 +30,6 @@ import {
 import { useEffect, useRef, useState } from "react";
 
 import { Checkbox, NumberField, Switch } from "../controls/inputs.tsx";
-import { Tip } from "../controls/tooltip.tsx";
-import { Icon, type IconName } from "../icon.tsx";
 import { Confirm } from "../controls/dialog.tsx";
 import { Select } from "../controls/select.tsx";
 import { ModelPicker } from "../controls/model-picker.tsx";
@@ -43,10 +40,10 @@ import { locale, t } from "../i18n.ts";
 import { setPrefs, usePrefs } from "../prefs.ts";
 import { Button, Group, Row } from "../ui.tsx";
 import { browserRecognizes } from "../assistant/listen.ts";
+import { MessageBar } from "../assistant/message-bar.tsx";
 import { patched } from "./admin/common.tsx";
 
 const when = new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeStyle: "short" });
-const clock = new Intl.DateTimeFormat(locale, { timeStyle: "short" });
 
 /** This browser's assistant settings, and the user's memories and conversations on a server. */
 export function AssistantPrefs({ server }: { server?: ServerEntry }) {
@@ -188,11 +185,17 @@ function Messages({ server, id, onDelete }: { server: ServerEntry; id: string; o
   const conversation = useAssistantConversation(server, id);
   const playing = useKeptSpeech(server);
   return (
-    <div className="flex flex-col gap-2 px-4 pb-3">
+    <div className="flex flex-col gap-4 px-4 pb-3">
       {conversation.data?.messages.map((m, i) => (
         <div key={i} className={`flex max-w-[85%] flex-col gap-0.5 ${m.user ? "items-end self-end" : "items-start self-start"}`}>
           <p className={`rounded-[14px] px-3 py-2 type-callout whitespace-pre-wrap ${m.user ? "bg-button text-on-button" : "bg-fill"}`}>{m.text}</p>
-          <MessageBar message={m} playing={playing.at === i} onPlay={() => playing.toggle(i, m.speech)} />
+          <MessageBar
+            text={m.text}
+            at={m.time && timestampDate(m.time)}
+            user={m.user}
+            playing={playing.at === i}
+            onPlay={m.speech.length > 0 ? () => playing.toggle(i, m.speech) : undefined}
+          />
         </div>
       ))}
       {conversation.isError && <p className="type-callout text-danger">{errorMessage(conversation.error)}</p>}
@@ -200,49 +203,6 @@ function Messages({ server, id, onDelete }: { server: ServerEntry; id: string; o
         {t("assistant.deleteConversation")}
       </Button>
     </div>
-  );
-}
-
-/** A message's time, and buttons copying it and, when its speech was kept, playing it. */
-function MessageBar({ message: m, playing, onPlay }: { message: AssistantMessage; playing: boolean; onPlay: () => void }) {
-  const [copied, setCopied] = useState(false);
-  const at = m.time && timestampDate(m.time);
-  return (
-    <div className={`flex items-center gap-0.5 ${m.user ? "flex-row-reverse" : ""}`}>
-      {at && (
-        <time dateTime={at.toISOString()} title={when.format(at)} className="px-1 type-caption text-text-tertiary">
-          {at.toDateString() === new Date().toDateString() ? clock.format(at) : when.format(at)}
-        </time>
-      )}
-      <BarButton
-        icon={copied ? "check" : "copy"}
-        label={copied ? t("assistant.copiedMessage") : t("assistant.copyMessage")}
-        onClick={() =>
-          void navigator.clipboard?.writeText(m.text).then(
-            () => (setCopied(true), setTimeout(() => setCopied(false), 2000)),
-            () => {},
-          )
-        }
-      />
-      {m.speech.length > 0 && (
-        <BarButton icon={playing ? "pause" : "play"} label={playing ? t("assistant.stopAnswer") : t("assistant.playAnswer")} onClick={onPlay} />
-      )}
-    </div>
-  );
-}
-
-function BarButton({ icon, label, onClick }: { icon: IconName; label: string; onClick: () => void }) {
-  return (
-    <Tip label={label}>
-      <button
-        type="button"
-        aria-label={label}
-        className="flex size-7 items-center justify-center rounded-md text-text-tertiary hover:bg-fill hover:text-on-background"
-        onClick={onClick}
-      >
-        <Icon name={icon} size={15} />
-      </button>
-    </Tip>
   );
 }
 
