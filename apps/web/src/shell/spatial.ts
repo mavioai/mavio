@@ -165,6 +165,14 @@ function columnOf(el: HTMLElement): Element {
  */
 const end = "[data-focus-end]";
 
+/**
+ * An element aside above a row (data-focus-aside), as Discover's Requests
+ * over its first row: down passes it, from the tabs as from above, and up
+ * reaches it only from the row below's elements past its first, up from
+ * the first going on past it. Down from the tabs lands on that row's first.
+ */
+export const aside = "[data-focus-aside]";
+
 /** Whether b comes after a in the document. */
 function after(a: Element, b: Element): boolean {
   return !!(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING) && !a.contains(b);
@@ -243,7 +251,9 @@ function step(active: HTMLElement, dir: Direction, all: HTMLElement[], tabs?: El
   const block = blockOf(active);
   const rowAt = (d: 1 | -1) => {
     for (let j = ri + d; rows[j]; j += d) {
-      const r = rows[j].filter((b) => !b.el.matches(end) || (i === row.length - 1 && blockOf(b.el) === block));
+      const r = rows[j].filter(
+        (b) => (!b.el.matches(end) || (i === row.length - 1 && blockOf(b.el) === block)) && (!b.el.matches(aside) || (d === -1 && i > 0 && j === ri - 1)),
+      );
       if (r.length) return r;
     }
   };
@@ -251,7 +261,7 @@ function step(active: HTMLElement, dir: Direction, all: HTMLElement[], tabs?: El
   const to = (r: Box[]) => (blockOf(r[0].el) !== block ? endOf(r, false) : closestTo(r, x));
   const previous = rowAt(-1);
   // Below the tabs is the page.
-  const below = inTabs ? rowsOf(all.filter((el) => !tabs.contains(el)))[0] : rowAt(1);
+  const below = inTabs ? rowsOf(all.filter((el) => !tabs.contains(el) && !el.matches(aside)))[0] : rowAt(1);
   const above = () => {
     if (!tabs || inTabs) return undefined;
     const items = all.filter((el) => tabs.contains(el));
@@ -266,6 +276,7 @@ function step(active: HTMLElement, dir: Direction, all: HTMLElement[], tabs?: El
     }
     case "ArrowDown": {
       const across = inTabs || (inFlow && below) ? undefined : acrossFlow(row, true, x, all, tabs);
+      if (inTabs && below && all.some((el) => el.matches(aside))) return endOf(below, false);
       return across ?? (below && (inTabs ? closestTo(below, x) : to(below)));
     }
     case "ArrowLeft":

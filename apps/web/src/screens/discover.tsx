@@ -156,6 +156,8 @@ export function DiscoverScreen() {
           to="/s/$serverId/requests"
           params={{ serverId: server.id }}
           search={{}}
+          // On the television, focus comes to it only up from the first row.
+          data-focus-aside
           className={`inline-flex min-h-9 shrink-0 cursor-default items-center gap-1.5 rounded-full bg-fill px-4 type-callout font-semibold hover:bg-fill-selected ${tv ? "mt-4 ml-auto" : "mb-2 ml-auto"}`}
         >
           <Icon name="pending" size={16} />

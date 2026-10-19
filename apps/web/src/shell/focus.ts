@@ -5,7 +5,7 @@
 import { useRouter } from "@tanstack/react-router";
 import { useEffect } from "react";
 
-import { chosenIn, focusable, openPopup, visible } from "./spatial.ts";
+import { aside, chosenIn, focusable, openPopup, visible } from "./spatial.ts";
 
 /** A point in the page's coordinates, which scrolling leaves in place. */
 export type Point = { x: number; y: number };
@@ -65,7 +65,7 @@ function target(): HTMLElement | undefined {
   if (scope) return all[0];
   if (waited < settle) return undefined;
   // The page's content, once it came, rather than the tabs above it.
-  const content = all.find((el) => el.closest("main"));
+  const content = all.find((el) => el.closest("main") && !el.matches(aside));
   if (!content && document.querySelector("main") && waited < initialWait) return undefined;
   return content ?? all[0];
 }
