@@ -387,9 +387,12 @@ func newHarness(t testing.TB, signedIn bool, width, height int) *harness {
 }
 
 // settle runs what the goroutines sent the main thread until they send no
-// more for a while, drawing frames between.
+// more for a while, drawing frames between. It draws one first, so that
+// what a change since the last starts loading, as a page pushed, loads
+// within the wait.
 func (h *harness) settle() {
 	h.t.Helper()
+	h.tt.Frame()
 	for {
 		select {
 		case fn := <-h.updates:
