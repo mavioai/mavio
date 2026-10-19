@@ -214,7 +214,7 @@
   "download.failed": { "message": "Download failed", "description": "State of a download that failed.", "platforms": ["apple", "android", "desktop"] },
   "download.progress": { "message": "{received} of {total}", "description": "Progress of a download; received and total are sizes such as 1.2 GB.", "platforms": ["apple", "android", "desktop"] },
   "download.resume": { "message": "Resume Download", "description": "Resumes a paused or failed download.", "platforms": ["apple", "android", "desktop"] },
-  "download.emptyMessage": { "message": "Items you download play here without a connection.", "description": "Message of the empty Downloads screen.", "platforms": ["apple", "android", "desktop"] },
+  "download.emptyMessage": { "message": "Downloads are saved on this device and play without a connection.", "description": "Message of the empty Downloads screen.", "platforms": ["apple", "android", "desktop"] },
   "download.message": { "message": "Downloads are saved on this device and play without a connection.", "description": "Note atop the Downloads screen: where downloads are kept.", "platforms": ["apple", "android", "desktop"] },
   "player.play": { "message": "Play", "description": "Accessibility label of the play button of the player." },
   "player.pause": { "message": "Pause", "description": "Accessibility label of the pause button of the player." },

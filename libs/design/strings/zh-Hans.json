@@ -213,7 +213,7 @@
   "download.failed": "下载失败",
   "download.progress": "{received}，共 {total}",
   "download.resume": "继续下载",
-  "download.emptyMessage": "下载的项目可以在没有网络时在这里播放。",
+  "download.emptyMessage": "下载的内容保存在这台设备上，没有网络时也能播放。",
   "download.message": "下载的内容保存在这台设备上，没有网络时也能播放。",
   "player.play": "播放",
   "player.pause": "暂停",
