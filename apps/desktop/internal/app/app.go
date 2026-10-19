@@ -146,6 +146,8 @@ type App struct {
 	// itemServer, while set, is the server the downloads' rows act on in
 	// place of the one chosen in the settings: an item's details'.
 	itemServer string
+	// issues are the issues reported with items, and their dialogs.
+	issues issuesState
 
 	places places
 	// focus moves focus with the arrow keys in the TV mode.

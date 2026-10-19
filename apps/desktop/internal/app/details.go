@@ -87,6 +87,7 @@ func (a *App) details(c *ui.Context, r *ui.Route, server, id string) {
 					a.about(c, st, d, info.value, credits)
 					a.acquisition(c, &st.acquire, server, info.value.item.GetItem())
 					a.itemSubtitles(c, &st.subs, server, info.value.item.GetItem())
+					a.itemIssues(c, server, info.value.item.GetItem())
 				} else {
 					a.facts(c, st, d)
 				}
@@ -94,6 +95,7 @@ func (a *App) details(c *ui.Context, r *ui.Route, server, id string) {
 		})
 	})
 	a.requestDialog(c, server)
+	a.issueDialogs(c, server)
 }
 
 // mediaKindOfItem returns the kind of title discovery knows a movie or

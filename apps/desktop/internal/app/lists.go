@@ -17,6 +17,7 @@ type moreDialog int
 const (
 	moreNone moreDialog = iota
 	morePlayOn
+	moreReport
 	morePlaylist
 	moreCollection
 	moreEdit
@@ -78,6 +79,9 @@ func (a *App) moreMenu(c *ui.Context, st *detailsState, server string, it *libra
 	if playable(kind) {
 		entries = append(entries, entry{morePlayOn, style.T(c, "remote.playOn")})
 	}
+	if reportable(kind) && a.mayReport(server) {
+		entries = append(entries, entry{moreReport, style.T(c, "issues.report")})
+	}
 	if listable(kind) {
 		entries = append(entries, entry{morePlaylist, style.T(c, "lists.addToPlaylist")})
 		if admin {
@@ -104,6 +108,10 @@ func (a *App) moreMenu(c *ui.Context, st *detailsState, server string, it *libra
 	a.overButton(c, "more", style.T(c, "lists.more"), false).Menu(func(menu *ui.Menu) {
 		for _, e := range entries {
 			if menu.Item(e.label).Chosen() {
+				if e.dialog == moreReport {
+					a.report(it)
+					continue
+				}
 				*m = moreState{dialog: e.dialog, open: true, remote: remoteState{open: true, volume: 100}}
 				switch e.dialog {
 				case moreRename:

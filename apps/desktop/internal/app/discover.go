@@ -43,6 +43,10 @@ type discoverState struct {
 	editing  *acquisitionv1.Request // the request whose seasons the dialog changes
 	chosen   map[int32]bool
 	removing string // the request whose removal is being confirmed
+	// managing tells the title's manage panel is open; manage holds
+	// its item's downloads.
+	managing bool
+	manage   acquireState
 
 	filters filtersState
 }
@@ -599,6 +603,10 @@ func (a *App) titlePage(c *ui.Context, r *ui.Route) {
 		})
 	})
 	a.requestDialog(c, server)
+	if a.discoverState.managing {
+		a.manageDialog(c, server, title)
+	}
+	a.issueDialogs(c, server)
 }
 
 // titleFacts returns the line of a title's facts, as Seerr's: the year,
@@ -782,6 +790,12 @@ func (a *App) titleActions(c *ui.Context, server string, title *acquisitionv1.Ti
 			if a.heroButton(c, "close", style.T(c, "requests.decline"), false).Clicked() && !st.busy {
 				a.requestAction(server, pending, "decline")
 			}
+		}
+		if title.GetItemId() != "" && a.mayReport(server) && a.heroButton(c, "error", style.T(c, "discover.reportIssue"), false).Clicked() {
+			a.report(titleItem(title))
+		}
+		if admin && a.heroButton(c, "settings", style.T(c, "discover.manage"), false).Clicked() {
+			st.managing, st.manage = true, acquireState{}
 		}
 	})
 }

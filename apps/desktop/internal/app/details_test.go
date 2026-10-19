@@ -94,7 +94,7 @@ func TestDetailsMore(t *testing.T) {
 	}
 	h.settle()
 	if got, want := h.tt.Menu(), []string{
-		"Play On…", "Add to Playlist", "Add to Collection", "Edit Metadata", "Identify", "Refresh Metadata", "Edit Images",
+		"Play On…", "Report a Problem…", "Add to Playlist", "Add to Collection", "Edit Metadata", "Identify", "Refresh Metadata", "Edit Images",
 	}; !slices.Equal(got, want) {
 		t.Errorf("menu = %q, want = %q", got, want)
 	}
