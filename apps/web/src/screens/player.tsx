@@ -688,7 +688,7 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
                       aria-pressed={r === speed}
                       disabled={!!group}
                       onClick={() => video.current && (video.current.playbackRate = r)}
-                      className={`h-8 rounded-full px-3 type-footnote font-semibold tabular-nums disabled:opacity-40 ${r === speed ? "bg-white text-black" : "bg-white/10 hover:bg-white/20"}`}
+                      className={`h-8 rounded-full px-3 type-footnote font-semibold tabular-nums disabled:opacity-40 ${r === speed ? "bg-white/30 text-white" : "bg-white/10 hover:bg-white/20"}`}
                     >
                       {r}×
                     </button>
