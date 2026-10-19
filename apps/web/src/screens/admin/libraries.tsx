@@ -1,6 +1,6 @@
 // The settings' Libraries (docs/clients.md §6.3.4): the libraries of the
 // server chosen, to scan, and a library's page to add, change and delete
-// it: its name, kind and folders, chosen from the server's file system,
+// it: how far each library's scan has come, its name, kind and folders, chosen from the server's file system,
 // with their storage classes, the language of its metadata, how often it
 // is scanned and what scans and refreshes make.
 import { create } from "@bufbuild/protobuf";
@@ -16,9 +16,11 @@ import {
   useLocalization,
   useServerLibraries,
 } from "@mavio/client-ts";
-import { type Library, LibraryKind, LibrarySpecSchema, StorageClass, VirtualEpisodesSchema } from "@mavio/proto/mavio/library/v1/library_pb";
+import { type Library, LibraryKind, LibrarySpecSchema, ScanPhase, type ScanProgress, StorageClass, VirtualEpisodesSchema } from "@mavio/proto/mavio/library/v1/library_pb";
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { type ReactNode, useState } from "react";
+
+import { useServerEvents } from "../../events.tsx";
 
 import { locale, t } from "../../i18n.ts";
 import { Icon } from "../../icon.tsx";
@@ -75,8 +77,18 @@ export function LibrariesSection({ server }: { server: ServerEntry }) {
   return <LibraryList server={server} />;
 }
 
+/** How far a library's scan has come, or that it finished since the page opened. */
+type Scan = ScanProgress | "done";
+
 function LibraryList({ server }: { server: ServerEntry }) {
   const libraries = useServerLibraries(server);
+  // The server's events carry on the progress the listing starts from.
+  const [scans, setScans] = useState<Record<string, Scan | undefined>>({});
+  useServerEvents((s, e) => {
+    if (s.id !== server.id || e.kind.case !== "scanProgressChanged") return;
+    const { libraryId, progress } = e.kind.value;
+    setScans((m) => ({ ...m, [libraryId]: progress ?? "done" }));
+  });
   const list = (libraries.data ?? []).filter(managed).sort((a, b) => a.name.localeCompare(b.name, locale));
   return (
     <Page
@@ -87,7 +99,13 @@ function LibraryList({ server }: { server: ServerEntry }) {
       {libraries.isSuccess && (
         <Group>
           {list.map((l) => (
-            <LibraryRow key={l.id} server={server} library={l} />
+            <LibraryRow
+              key={l.id}
+              server={server}
+              library={l}
+              scan={l.id in scans ? scans[l.id] : l.scanProgress}
+              onScan={() => setScans((m) => ({ ...m, [l.id]: undefined }))}
+            />
           ))}
           {list.length === 0 && <p className="px-4 py-3 type-callout text-text-secondary">{t("libraries.none")}</p>}
           <AddRow label={t("libraries.add")} search={{ library: "new" }} />
@@ -97,7 +115,11 @@ function LibraryList({ server }: { server: ServerEntry }) {
   );
 }
 
-function LibraryRow({ server, library: l }: { server: ServerEntry; library: Library }) {
+/**
+ * A library's row: its kind and folders, or while it is scanned what the
+ * scan does and a bar of how far it has come, then Scan finished.
+ */
+function LibraryRow({ server, library: l, scan, onScan }: { server: ServerEntry; library: Library; scan?: Scan; onScan: () => void }) {
   const cur = useSearch({ strict: false }) as SettingsSearch;
   const actions = useLibraryActions(server);
   const [scanned, setScanned] = useState<string>();
@@ -115,19 +137,31 @@ function LibraryRow({ server, library: l }: { server: ServerEntry; library: Libr
         <div className="min-w-0 flex-1">
           <div className="truncate type-body">{l.name}</div>
           <div className="truncate type-footnote text-text-secondary">
-            {scanned ?? [k.title(), t("libraries.folderCount", { count: l.paths.length })].join(" · ")}
+            {scan === "done"
+              ? t("libraries.scanDone")
+              : scan
+                ? scan.phase === ScanPhase.ITEMS
+                  ? t("libraries.scanItems", { done: scan.itemsDone, total: scan.itemsTotal })
+                  : t("libraries.scanFolders", { done: scan.foldersDone, total: scan.foldersTotal })
+                : (scanned ?? [k.title(), t("libraries.folderCount", { count: l.paths.length })].join(" · "))}
           </div>
+          {scan && scan !== "done" && (
+            <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-fill">
+              <div className="h-full rounded-full bg-accent transition-[width]" style={{ width: `${Math.min(1, Math.max(0, scan.fraction)) * 100}%` }} />
+            </div>
+          )}
         </div>
       </Link>
       <Button
         variant="secondary"
         disabled={scanning}
-        onClick={() =>
+        onClick={() => {
+          onScan();
           actions.scan.mutate(l.id, {
             onSuccess: (r) => setScanned(r.enqueued ? t("libraries.scanQueued") : t("libraries.scanPending")),
             onError: (e) => setScanned(errorMessage(e)),
-          })
-        }
+          });
+        }}
       >
         {scanning ? "…" : t("libraries.scan")}
       </Button>

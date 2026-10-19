@@ -715,7 +715,8 @@ flowchart TD
     - [x] Transcoding (`apps/web/src/screens/admin/transcoding.tsx`): hardware acceleration, the encoder, tone mapping, deinterlacing, the downmix and the transcode folder (`TranscodingSettings`)
     - [x] Libraries (`apps/web/src/screens/admin/libraries.tsx`, `libs/client-ts/src/admin.ts`): adding, editing, removing and scanning libraries, with a folder picker (`LibraryService`, `ListDirectory`)
     - [x] Each library's scan progress in Libraries on the desktop (`apps/desktop/internal/app/libraries.go`), from the core's `ScanProgressChanged` event of its C ABI and the libraries' `scan_progress`
-    - [ ] Each library's scan progress in Libraries as on iOS ([Clients §6.3.4](clients.md)), in the web UI and on Android: the `ScanProgressChanged` event and the libraries' `scan_progress`, in place of the notice that a scan started
+    - [x] Each library's scan progress in Libraries as on iOS ([Clients §6.3.4](clients.md)) in the web UI (`apps/web/src/screens/admin/libraries.tsx`): the `ScanProgressChanged` event and the libraries' `scan_progress`, in place of the notice that a scan started
+    - [ ] The same on Android
     - [ ] Auto quality as on iOS ([Clients §6.5](clients.md)), in the web UI, on Android and on the desktop: 100 Mbit/s from a server on the local network, 40 otherwise; the core's `is_local_address` for Android and the desktop, the page's host for the web UI
     - [ ] A library's providers in order and its hubs on Home and Recommended (`ProviderOrder`, `LibraryHubs`)
     - [x] Storage (`apps/web/src/screens/admin/storage.tsx`, `libs/client-ts/src/storage.ts`): rclone remotes with their authorization steps, and the offline clients (`StorageService`); walking the folders of rclone remotes in the folder picker
