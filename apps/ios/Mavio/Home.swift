@@ -31,7 +31,7 @@ struct HomeView: View {
             }
             .padding(.bottom, MavioSpacing.s8)
         }
-        .modifier(HomeChrome(hero: !entries.isEmpty))
+        .modifier(HomeChrome(hero: !entries.isEmpty, loading: model.home.isEmpty))
         .overlay {
             if model.home.isEmpty { ProgressView() }
         }
@@ -41,14 +41,18 @@ struct HomeView: View {
     }
 }
 
-/// Home's bar as a hero's when the hero leads it (HeroChrome).
+/// Home's bar as a hero's when the hero leads it (HeroChrome), and without
+/// its title while loading, which would show only until the hero hides it.
 private struct HomeChrome: ViewModifier {
     let hero: Bool
+    let loading: Bool
     @Environment(\.horizontalSizeClass) private var sizeClass
 
     func body(content: Content) -> some View {
         if hero {
             content.modifier(HeroChrome(title: MavioStrings.navHome, phone: sizeClass != .regular))
+        } else if loading {
+            content.navigationBarTitleDisplayMode(.inline).toolbar(removing: .title)
         } else {
             content
         }
