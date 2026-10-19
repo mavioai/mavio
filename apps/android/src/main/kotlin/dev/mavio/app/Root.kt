@@ -232,6 +232,9 @@ enum class Tab(val root: Route, @StringRes val label: Int, @DrawableRes val icon
 
 /** Opens screens on the current tab's stack. */
 class Navigator(private val stack: () -> SnapshotStateList<Route>) {
+    /** The screen shown. */
+    val top: Route? get() = stack().lastOrNull()
+
     /** Opens a route over the current screen. */
     fun open(route: Route) {
         stack().add(route)
@@ -307,6 +310,7 @@ private fun Shell(model: AppModel) {
     val statusBar = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
     // The player and the sign-in take the whole screen.
     val chrome = stack.lastOrNull().let { it !is Route.Player && it != Route.AddServer }
+    FollowGroup(model, navigator)
     BoxWithConstraints(Modifier.fillMaxSize().background(theme.colors.background)) {
         val wide = maxWidth >= 600.dp
         val content = @Composable { modifier: Modifier, rootInset: Dp ->
@@ -423,6 +427,18 @@ private fun Shell(model: AppModel) {
                         TabBar(tabs, tab, haze) { select(it.root) }
                     }
                 }
+            }
+        }
+        if (chrome) {
+            // The group's indicator, above the phone's tab bar where it shows.
+            val tabBar = !wide && stack.size == 1
+            CompositionLocalProvider(LocalNavigator provides navigator) {
+                GroupIndicator(
+                    model,
+                    Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(end = 16.dp, bottom = bars + if (tabBar) TAB_BAR_HEIGHT + 24.dp else 16.dp),
+                )
             }
         }
     }

@@ -107,6 +107,7 @@ private fun listable(kind: CardKind) = kind != CardKind.PLAYLIST && kind != Card
 /** A dialog of the More menu. */
 private enum class ItemDialog(@StringRes val label: Int) {
     PlayOn(R.string.remote_play_on),
+    Together(R.string.syncplay_watch_together),
     Playlist(R.string.lists_add_to_playlist),
     Report(R.string.issues_report),
     Collection(R.string.lists_add_to_collection),
@@ -120,7 +121,7 @@ private enum class ItemDialog(@StringRes val label: Int) {
 
 /**
  * The More menu of an item's actions, as the web UI's, and the dialogs it
- * opens: playing it on another device, adding it to a playlist, reporting a
+ * opens: playing it on another device, watching it together, adding it to a playlist, reporting a
  * problem, and for administrators adding it to a collection, editing and
  * refreshing its metadata, identifying it and choosing its images; a playlist, or a collection for administrators, renamed or
  * deleted.
@@ -142,7 +143,10 @@ internal fun MoreMenu(model: AppModel, details: Details) {
     }
     val own = card.kind == CardKind.PLAYLIST || (card.kind == CardKind.COLLECTION && admin)
     val entries = buildList {
-        if (card.kind in playable) add(ItemDialog.PlayOn)
+        if (card.kind in playable) {
+            add(ItemDialog.PlayOn)
+            add(ItemDialog.Together)
+        }
         if (listable(card.kind)) add(ItemDialog.Playlist)
         if (card.kind in reportable && mayReport) add(ItemDialog.Report)
         if (listable(card.kind) && admin) add(ItemDialog.Collection)
@@ -191,6 +195,7 @@ internal fun MoreMenu(model: AppModel, details: Details) {
     val close = { dialog = null }
     when (dialog) {
         ItemDialog.PlayOn -> PlayOnSheet(model, details, close)
+        ItemDialog.Together -> SyncPlaySheet(model, card.serverId, details, close)
         ItemDialog.Playlist -> AddSheet(model, card, collection = false, close)
         ItemDialog.Collection -> AddSheet(model, card, collection = true, close)
         ItemDialog.Report -> ReportSheet(model, card, close)
@@ -204,7 +209,7 @@ internal fun MoreMenu(model: AppModel, details: Details) {
 /** A sheet with a title over its content, scrolling when long. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun Sheet(title: String, onDismiss: () -> Unit, content: @Composable ColumnScope.() -> Unit) {
+internal fun Sheet(title: String, onDismiss: () -> Unit, content: @Composable ColumnScope.() -> Unit) {
     ModalBottomSheet(onDismiss, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true), containerColor = theme.colors.background) {
         Column(
             Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = theme.layout.margin).padding(bottom = MavioSpacing.s24),
@@ -218,7 +223,7 @@ private fun Sheet(title: String, onDismiss: () -> Unit, content: @Composable Col
 
 /** A row of a sheet's list: its icon, title and detail, with what follows it. */
 @Composable
-private fun SheetRow(icon: Int, title: String, detail: String? = null, enabled: Boolean = true, onClick: () -> Unit, trailing: @Composable () -> Unit = {}) {
+internal fun SheetRow(icon: Int, title: String, detail: String? = null, enabled: Boolean = true, onClick: () -> Unit, trailing: @Composable () -> Unit = {}) {
     Row(
         Modifier
             .fillMaxWidth()
@@ -240,7 +245,7 @@ private fun SheetRow(icon: Int, title: String, detail: String? = null, enabled: 
 
 /** An error under a sheet's content. */
 @Composable
-private fun Failure(text: String?) {
+internal fun SheetFailure(text: String?) {
     text?.let { Text(it, style = theme.type.footnote.text, color = theme.colors.danger) }
 }
 
@@ -298,7 +303,7 @@ private fun PlayOnSheet(model: AppModel, details: Details, onDismiss: () -> Unit
         if (targets?.isEmpty() == true) {
             Text(stringResource(R.string.remote_no_devices), style = theme.type.callout.text, color = theme.colors.textSecondary)
         }
-        Failure(failure)
+        SheetFailure(failure)
     }
 }
 
@@ -416,7 +421,7 @@ private fun AddSheet(model: AppModel, card: Card, collection: Boolean, onDismiss
                 }
             }, kind = ButtonKind.Secondary, enabled = name.isNotBlank() && !busy)
         }
-        Failure(failure)
+        SheetFailure(failure)
         Box(Modifier.fillMaxWidth(), Alignment.CenterEnd) { MavioButton(stringResource(R.string.keys_done), onDismiss) }
     }
 }
@@ -482,7 +487,7 @@ private fun ReportSheet(model: AppModel, card: Card, onDismiss: () -> Unit) {
             placeholder = { Text(stringResource(R.string.issues_message)) },
             keyboardOptions = KeyboardOptions.Default,
         )
-        Failure(failure)
+        SheetFailure(failure)
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s8, Alignment.End)) {
             MavioButton(stringResource(R.string.action_cancel), onDismiss, kind = ButtonKind.Secondary)
             MavioButton(stringResource(R.string.issues_send), {
@@ -530,7 +535,7 @@ private fun RefreshSheet(model: AppModel, card: Card, onDismiss: () -> Unit) {
             style = theme.type.footnote.text,
             color = theme.colors.textSecondary,
         )
-        Failure(failure)
+        SheetFailure(failure)
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s8, Alignment.End)) {
             MavioButton(stringResource(R.string.action_cancel), onDismiss, kind = ButtonKind.Secondary)
             MavioButton(stringResource(if (busy) R.string.metadata_refreshing else R.string.metadata_refresh), {
@@ -566,7 +571,7 @@ private fun RenameSheet(model: AppModel, card: Card, onDismiss: () -> Unit) {
     val scope = rememberCoroutineScope()
     Sheet(stringResource(R.string.lists_rename), onDismiss) {
         SettingsField(name, { if (it.length <= 200) name = it }, stringResource(R.string.lists_name))
-        Failure(failure)
+        SheetFailure(failure)
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s8, Alignment.End)) {
             MavioButton(stringResource(R.string.action_cancel), onDismiss, kind = ButtonKind.Secondary)
             MavioButton(stringResource(R.string.lists_save), {

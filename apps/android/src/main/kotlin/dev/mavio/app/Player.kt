@@ -56,9 +56,11 @@ import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -200,11 +202,22 @@ fun PlayerScreen(model: AppModel, route: Route.Player) {
     val p = playback
     // The episode after this one, which its end plays when the device says so.
     val next = p?.details?.next
-    val playNext = next?.let { e -> { navigator.replace(Route.Player(route.serverId, e.card.itemId, e.card.title, null, e.position)) } }
     var engine by remember(p) { mutableStateOf(p?.engine) }
     var startMs by remember(p) { mutableLongStateOf(p?.info?.startPosition?.toMillis() ?: 0) }
     val position = remember(p) { Position().also { it.ms = startMs } }
-    val player = remember(p, engine) { p?.let { createPlayer(context, engine ?: it.engine, it, startMs) } }
+    val player = remember(p, engine) {
+        // A group's member waits for the group to play.
+        val follows = model.syncPlay.joined.value.playing(route.serverId, route.itemId) != null
+        p?.let { createPlayer(context, engine ?: it.engine, it, startMs, autoplay = !follows) }
+    }
+    // The SyncPlay group playing the item, which the controls ask instead of the player.
+    val group = rememberGroupPlayer(model, route.serverId, route.itemId, player) { navigator.back() }
+    val currentGroup by rememberUpdatedState(group)
+    val controls = remember(player) { player?.let { GroupControls(it) { currentGroup } } }
+    val playNext = when {
+        group != null && (group.hasNext || next != null) -> { { group.next(listOfNotNull(next?.card?.itemId)) } }
+        else -> next?.let { e -> { navigator.replace(Route.Player(route.serverId, e.card.itemId, e.card.title, null, e.position)) } }
+    }
     DisposableEffect(p) {
         onDispose {
             if (p != null && !position.ended) model.finish(route.serverId, p.session, Duration.ofMillis(position.ms))
@@ -216,7 +229,12 @@ fun PlayerScreen(model: AppModel, route: Route.Player) {
                 if (state == Player.STATE_ENDED && p != null && !position.ended) {
                     position.ended = true
                     model.finish(route.serverId, p.session, null)
-                    if (playNext != null && prefs.autoplayNext) playNext() else navigator.back()
+                    val g = currentGroup
+                    when {
+                        g != null -> g.ended()
+                        playNext != null && prefs.autoplayNext -> playNext()
+                        else -> navigator.back()
+                    }
                 }
             }
 
@@ -256,8 +274,8 @@ fun PlayerScreen(model: AppModel, route: Route.Player) {
     // The system's media controls, headsets' keys and picture in picture's
     // buttons drive the player through its session; the next episode's
     // starts while this one's player goes, so each has an ID of its own.
-    DisposableEffect(player) {
-        val session = player?.let { MediaSession.Builder(context, it).setId(UUID.randomUUID().toString()).build() }
+    DisposableEffect(controls) {
+        val session = controls?.let { MediaSession.Builder(context, it).setId(UUID.randomUUID().toString()).build() }
         onDispose { session?.release() }
     }
     val pip = PictureInPicture(player)
@@ -276,7 +294,8 @@ fun PlayerScreen(model: AppModel, route: Route.Player) {
         } else if (player != null && p != null) {
             // Picture in picture shows the video alone.
             if (!pip.active) {
-                Controls(player, route.title, p, selection.quality, playNext, pip.enter) { picked ->
+                val chip: (@Composable () -> Unit)? = group?.let { g -> { GroupChip(model, route.serverId, g.group) } }
+                Controls(controls ?: player, route.title, p, selection.quality, playNext, pip.enter, chip) { picked ->
                     resume = Duration.ofMillis(player.currentPosition)
                     // The quality stays this device's, as the web UI's.
                     prefs.quality = picked.quality
@@ -313,7 +332,7 @@ private fun Subtitles(player: Player) {
 
 /** Media3 with its FFmpeg extension, or libmpv, playing from startMs once prepared, with the streams picked. */
 @OptIn(UnstableApi::class)
-private fun createPlayer(context: Context, engine: PlayerEngine, playback: Playback, startMs: Long): Player {
+private fun createPlayer(context: Context, engine: PlayerEngine, playback: Playback, startMs: Long, autoplay: Boolean): Player {
     val info = playback.info
     val player = when (engine) {
         PlayerEngine.MPV -> MpvPlayer(context).apply { mpvTracks(playback)?.let { (audio, subtitle) -> selectTracks(audio, subtitle) } }
@@ -348,7 +367,7 @@ private fun createPlayer(context: Context, engine: PlayerEngine, playback: Playb
     }
     player.setMediaItem(item.build(), startMs)
     player.prepare()
-    player.playWhenReady = true
+    player.playWhenReady = autoplay
     return player
 }
 
@@ -481,6 +500,7 @@ private fun Controls(
     quality: Quality,
     playNext: (() -> Unit)?,
     pictureInPicture: (() -> Unit)?,
+    chip: (@Composable () -> Unit)?,
     onPick: (Selection) -> Unit,
 ) {
     val navigator = LocalNavigator.current
@@ -525,7 +545,7 @@ private fun Controls(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     PlayerButton(R.drawable.ic_back, stringResource(R.string.player_back)) { navigator.back() }
-                    Column {
+                    Column(Modifier.weight(1f)) {
                         heading?.let {
                             Text(it, style = theme.type.footnote.text, color = Color.White.copy(alpha = 0.7f), maxLines = 1, overflow = TextOverflow.Ellipsis)
                         }
@@ -538,6 +558,7 @@ private fun Controls(
                             overflow = TextOverflow.Ellipsis,
                         )
                     }
+                    chip?.invoke()
                 }
                 Column(
                     Modifier
@@ -765,14 +786,17 @@ private fun OptionsPanel(
                         horizontalArrangement = Arrangement.spacedBy(6.dp),
                         verticalArrangement = Arrangement.spacedBy(6.dp),
                     ) {
+                        // A group's speed stays the group's.
+                        val free = player.isCommandAvailable(Player.COMMAND_SET_SPEED_AND_PITCH)
                         SPEEDS.forEach { r ->
                             val on = r == speed
                             Text(
                                 "${if (r % 1f == 0f) r.toInt().toString() else r.toString()}×",
                                 Modifier
+                                    .alpha(if (free) 1f else 0.4f)
                                     .clip(CircleShape)
                                     .background(if (on) Color.White else Color.White.copy(alpha = 0.1f))
-                                    .clickable {
+                                    .clickable(enabled = free) {
                                         player.setPlaybackSpeed(r)
                                         speed = r
                                     }

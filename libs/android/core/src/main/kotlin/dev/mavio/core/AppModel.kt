@@ -63,6 +63,9 @@ class AppModel(context: Context, clientName: String) {
 
     private var homeJob: Job? = null
 
+    /** The group the device watches together with others in. */
+    val syncPlay: SyncPlay
+
     init {
         val dir = context.filesDir.resolve("mavio").apply { mkdirs() }
         downloadsFolder = dir.resolve("Downloads").apply { mkdirs() }
@@ -72,6 +75,8 @@ class AppModel(context: Context, clientName: String) {
             KeystoreTokens(context),
             relay,
         )
+        syncPlay = SyncPlay(client, scope)
+        client.setSyncPlayListener(relay)
         reloadServers()
     }
 
@@ -222,6 +227,8 @@ class AppModel(context: Context, clientName: String) {
                 reloadServers()
                 refreshHome()
             }
+            is Push.Connected -> syncPlay.connected(push.serverId, push.sessionId)
+            is Push.SyncPlayUpdate -> syncPlay.update(push.serverId, push.update)
         }
     }
 
@@ -231,10 +238,12 @@ class AppModel(context: Context, clientName: String) {
         data class Event(val serverId: String, val event: ServerEvent) : Push
         data class Home(val rows: List<Row>) : Push
         data object ServersChanged : Push
+        data class Connected(val serverId: String, val sessionId: String) : Push
+        data class SyncPlayUpdate(val serverId: String, val update: mavio.session.v1.Syncplay.SyncPlayUpdate) : Push
     }
 
     /** Receives the core's callbacks on its threads and relays them. */
-    private inner class Relay : CoreListener, HomeListener {
+    private inner class Relay : CoreListener, HomeListener, SyncPlayListener {
         private fun push(push: Push) {
             scope.launch { receive(push) }
         }
@@ -246,6 +255,12 @@ class AppModel(context: Context, clientName: String) {
         override fun serversChanged() = push(Push.ServersChanged)
 
         override fun rows(rows: List<Row>) = push(Push.Home(rows))
+
+        override fun connected(serverId: String, sessionId: String) = push(Push.Connected(serverId, sessionId))
+
+        override fun update(serverId: String, update: ByteArray) {
+            runCatching { mavio.session.v1.Syncplay.SyncPlayUpdate.parseFrom(update) }.onSuccess { push(Push.SyncPlayUpdate(serverId, it)) }
+        }
     }
 
     private companion object {
