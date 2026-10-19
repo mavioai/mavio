@@ -866,7 +866,7 @@ impl Core {
                         (i, r.map(|r| r.into_owned()).map_err(Error::from))
                     });
                     match cached {
-                        Some((r, at)) => Hubs::Cached(r.hubs, at),
+                        Some((r, at)) => Hubs::Refreshing(r.hubs, at),
                         None => Hubs::Loading,
                     }
                 }
@@ -889,7 +889,7 @@ impl Core {
                     self.store.put_cached(&slot.server_id, "home", &r)?;
                     Hubs::Fresh(r.hubs)
                 }
-                (Err(_), kept @ Hubs::Cached(..)) => kept,
+                (Err(_), Hubs::Refreshing(h, at)) => Hubs::Cached(h, at),
                 (Err(e), _) => Hubs::Unavailable(e.to_string()),
             };
             draw(&slots);
@@ -1721,10 +1721,8 @@ mod tests {
         let frames = Frames::default();
         core.home(&frames).await.unwrap();
         let frames = frames.0.into_inner().unwrap();
-        assert_eq!(
-            frames[0],
-            ["sa/: loading", "sb/recently-added/l (offline): sb:b1"],
-        );
+        // b's kept hubs are offline only once it has not answered.
+        assert_eq!(frames[0], ["sa/: loading", "sb/recently-added/l: sb:b1"]);
         assert_eq!(
             frames.last().unwrap(),
             &[

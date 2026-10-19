@@ -182,7 +182,7 @@ A client is signed in at once to every server of its sign-in ([Accounts §7](acc
   * **the other hubs** follow server by server in the user's order, each server's in the order of its pinned libraries;
   * **Trending** from discovery appears once, from the first server that discovers, its titles marked available when any server has them; requests go to that server.
 * **Search** asks every server at once and lists the results by server. A search runs when it is confirmed: the field of the sidebar, or of the Search page where no sidebar shows it, searches when Return is pressed, and typing alone does not leave the page. On the television, Search is a page of its own, with an on-screen keyboard beside the results ([Television §6.4](tv.md#64-search)).
-* **Progressive and offline**: each server's hubs are drawn as they arrive, in their fixed places, so that a slow server holds back no other; an unreachable server's hubs come from the offline store, marked offline.
+* **Progressive and offline**: each server's hubs are drawn as they arrive, in their fixed places, so that a slow server holds back no other; Home is drawn at once from the offline store while every server is asked again, the hubs kept unmarked, and only an unreachable server's are marked offline.
 * **Played state** stays on each server: the same title played on one server is not marked played on another.
 
 ---

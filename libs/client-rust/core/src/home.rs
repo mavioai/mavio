@@ -20,8 +20,12 @@ pub enum Hubs {
     Loading,
     /// The server's hubs as it answered.
     Fresh(Vec<Hub>),
+    /// The hubs kept from the last answer, when they were kept, while the
+    /// server is asked again: shown as they are, not as offline, so that a
+    /// launch shows Home at once without a mark that its answer takes away.
+    Refreshing(Vec<Hub>, SystemTime),
     /// The hubs kept from the last answer, when they were kept: the server
-    /// is unreachable, or has not answered yet.
+    /// is unreachable.
     Cached(Vec<Hub>, SystemTime),
     /// The server is unreachable and nothing is kept of it, with why.
     Unavailable(String),
@@ -30,7 +34,7 @@ pub enum Hubs {
 impl Hubs {
     fn hubs(&self) -> &[Hub] {
         match self {
-            Hubs::Fresh(h) | Hubs::Cached(h, _) => h,
+            Hubs::Fresh(h) | Hubs::Refreshing(h, _) | Hubs::Cached(h, _) => h,
             Hubs::Loading | Hubs::Unavailable(_) => &[],
         }
     }
@@ -367,7 +371,7 @@ fn server_sections(servers: &[ServerHubs], s: usize, titles: &mut Titles) -> Vec
     match &server.hubs {
         Hubs::Loading => return placeholder(Content::Loading),
         Hubs::Unavailable(why) => return placeholder(Content::Unavailable(why.clone())),
-        Hubs::Fresh(_) | Hubs::Cached(..) => {}
+        Hubs::Fresh(_) | Hubs::Refreshing(..) | Hubs::Cached(..) => {}
     }
     let offline = matches!(server.hubs, Hubs::Cached(..));
     let mut out = Vec::new();
@@ -679,6 +683,16 @@ mod tests {
             ["a/: loading", "b/recently-added/l: b:m", "c/: unavailable"],
         );
         assert!(sections[1].offline && !sections[0].offline);
+    }
+
+    #[test]
+    fn kept_hubs_are_not_offline_while_the_server_is_asked_again() {
+        let kept = UNIX_EPOCH + Duration::from_secs(1);
+        let rows = vec![hub("recently-added/l", RA, vec![movie("m", "1", None)])];
+        let refreshing = merge(&[server("a", Hubs::Refreshing(rows.clone(), kept))]);
+        let failed = merge(&[server("a", Hubs::Cached(rows, kept))]);
+        assert_eq!(summary(&refreshing), summary(&failed));
+        assert!(!refreshing[0].offline && failed[0].offline);
     }
 
     #[test]
