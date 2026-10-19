@@ -516,7 +516,7 @@ func (a *App) catalogPage(c *ui.Context, r *ui.Route) {
 		case len(g.titles) == 0:
 			ui.Row(c).Padding(0, style.Layout(c).Margin).Gap(style.Layout(c).Gutter).Wrap().ClipY().Grow(1).Children(func() {
 				for range 12 {
-					ui.Box(c).Size(style.Layout(c).Poster, style.Layout(c).Poster*1.5).Radius(design.RadiusMd).Background(style.Color(colors.SurfaceRaised))
+					ui.Box(c).Size(style.Layout(c).Poster, style.Layout(c).Poster*1.5).Radius(design.RadiusMd).Background(style.Color(colors.Fill))
 				}
 			})
 			return

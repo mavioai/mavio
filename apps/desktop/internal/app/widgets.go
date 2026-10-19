@@ -154,7 +154,8 @@ func taskStatus[T any](c *ui.Context, t *task[T], retry func(), placeholder func
 // kind when icon is empty, and the card's overlays.
 func (a *App) artwork(c *ui.Context, art *capiv1.Artwork, icon string, card *capiv1.Card, width, height float32, hovered bool) {
 	colors := style.Colors(c)
-	box := ui.Box(c).Size(width, height).Shrink(0).Radius(design.RadiusMd).Background(style.Color(colors.SurfaceRaised))
+	// The fill, which shows on the light theme's white as on the dark.
+	box := ui.Box(c).Size(width, height).Shrink(0).Radius(design.RadiusMd).Background(style.Color(colors.Fill))
 	artRing(c, box, hovered)
 	box.Children(func() {
 		ui.Box(c).Fill().Radius(design.RadiusMd).Clip().Children(func() {
@@ -409,12 +410,9 @@ func (a *App) seeAllCard(c *ui.Context, label string, more func(), round bool) {
 	}
 	b := ui.ButtonBase(c.Key("see-all")).Cursor(ui.CursorPointer).Column().Width(width).Gap(8).AlignItems(ui.Center).Label(label)
 	focused := a.cardFocus(c, b) || b.Hovered()
-	// On the television white belongs to focus alone (docs/tv.md §4), which
-	// the raised surface is in the light theme.
-	bg := colors.SurfaceRaised
-	if style.TV(c) {
-		bg = colors.Fill
-	}
+	// The fill, which shows on the light theme's white, where white also
+	// belongs to focus alone on the television (docs/tv.md §4).
+	bg := colors.Fill
 	b.Children(func() {
 		box := ui.Column(c).Size(width, art).Radius(design.RadiusMd).Gap(12).Center().Background(style.Color(bg))
 		if round {
@@ -460,10 +458,10 @@ func (a *App) shelfScroll(id string) *ui.ScrollState {
 func placeholderShelf(c *ui.Context, n int) {
 	colors := style.Colors(c)
 	ui.Column(c).Gap(10).Children(func() {
-		ui.Box(c).Margin(0, style.Layout(c).Margin).Size(180, 22).Radius(design.RadiusSm).Background(style.Color(colors.SurfaceRaised))
+		ui.Box(c).Margin(0, style.Layout(c).Margin).Size(180, 22).Radius(design.RadiusSm).Background(style.Color(colors.Fill))
 		ui.Row(c).Padding(0, style.Layout(c).Margin).Gap(style.Layout(c).Gutter * 1.5).ClipX().Children(func() {
 			for range n {
-				ui.Box(c).Size(style.Layout(c).Poster, style.Layout(c).Poster*1.5).Shrink(0).Radius(design.RadiusMd).Background(style.Color(colors.SurfaceRaised))
+				ui.Box(c).Size(style.Layout(c).Poster, style.Layout(c).Poster*1.5).Shrink(0).Radius(design.RadiusMd).Background(style.Color(colors.Fill))
 			}
 		})
 	})
