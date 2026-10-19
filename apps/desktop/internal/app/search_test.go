@@ -36,13 +36,13 @@ func TestSearch(t *testing.T) {
 
 	// Confirming the query again searches again, keeping the results
 	// shown meanwhile.
-	before := len(h.core.requestsOf((*capiv1.Request).HasSearch))
+	before := len(h.core.requestsOf((*capiv1.Request).HasSearchServer))
 	h.tt.Key(0, ui.KeyEnter)
 	if !h.tt.HasText("The Long Orbit") {
 		t.Errorf("the results went as the search ran again; texts = %q", h.tt.Texts())
 	}
 	h.settle()
-	after := len(h.core.requestsOf((*capiv1.Request).HasSearch))
+	after := len(h.core.requestsOf((*capiv1.Request).HasSearchServer))
 	if after != before+1 {
 		t.Errorf("searches = %d, want = %d", after, before+1)
 	}

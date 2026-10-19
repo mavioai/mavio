@@ -25,15 +25,17 @@ type searchState struct {
 	ran     string
 	typed   string // the query when it last changed
 	changed time.Time
-	results task[searched]
+	// servers are what each server found, searched one by one so that
+	// each one's row shows as it answers.
+	servers map[string]*task[searched]
 	// titles are the titles discovery finds.
 	titles task[[]*acquisitionv1.DiscoveredTitle]
 }
 
-// searched is what the servers found for a query.
+// searched is what a server found for a query.
 type searched struct {
 	query   string
-	results *capiv1.SearchResults
+	results *capiv1.ServerResults
 }
 
 // search builds the search: a field, confirmed with Return, and what each
@@ -56,10 +58,7 @@ func (a *App) search(c *ui.Context) {
 		}
 	}
 	if query != "" {
-		load(a, &s.results, key("search", query, a.generation), func(ctx context.Context) (searched, error) {
-			m, err := a.opts.Core.Call(ctx, capiv1.Request_builder{Search: capiv1.Search_builder{Query: query}.Build()}.Build())
-			return searched{query, m.GetSearchResults()}, err
-		})
+		a.searchServers(query)
 	}
 	if tv {
 		a.tvSearch(c, query)
@@ -71,7 +70,10 @@ func (a *App) search(c *ui.Context) {
 				// Results are kept, coming back to them; confirming the
 				// query again searches again.
 				if q := strings.TrimSpace(s.query); q == s.ran {
-					s.results.key, s.titles.key = "", ""
+					for _, t := range s.servers {
+						t.key = ""
+					}
+					s.titles.key = ""
 				} else {
 					s.ran = q
 				}
@@ -86,6 +88,27 @@ func (a *App) search(c *ui.Context) {
 			})
 		})
 	})
+}
+
+// searchServers searches each server for query, those not searched for
+// it yet.
+func (a *App) searchServers(query string) {
+	s := &a.searchState
+	if s.servers == nil {
+		s.servers = map[string]*task[searched]{}
+	}
+	for _, sv := range a.servers {
+		id := sv.GetId()
+		t := s.servers[id]
+		if t == nil {
+			t = &task[searched]{}
+			s.servers[id] = t
+		}
+		load(a, t, key("search", id, query, a.generation), func(ctx context.Context) (searched, error) {
+			m, err := a.opts.Core.Call(ctx, capiv1.Request_builder{SearchServer: capiv1.SearchServer_builder{ServerId: id, Query: query}.Build()}.Build())
+			return searched{query, m.GetSearchResults().GetServers()[0]}, err
+		})
+	}
 }
 
 // tvKeys are the keys of the TV mode's search, as the web UI's.
@@ -215,7 +238,6 @@ func (a *App) searchResults(c *ui.Context, query string, grid bool) {
 	s := &a.searchState
 	colors := style.Colors(c)
 	layout := style.Layout(c)
-	t := &s.results
 	several := len(a.servers) > 1
 	width, _ := a.gridColumns(c)
 	if !grid {
@@ -224,8 +246,33 @@ func (a *App) searchResults(c *ui.Context, query string, grid bool) {
 	server, catalogs, pending := a.discovery(c)
 	found := &s.titles
 	var titles []*acquisitionv1.DiscoveredTitle
+	// What each server found so far, in their order, and whether any
+	// still searches.
+	var answered []*capiv1.ServerResults
+	searching := false
+	var started time.Time
+	for _, sv := range a.servers {
+		t := s.servers[sv.GetId()]
+		if t == nil || t.key != key("search", sv.GetId(), query, a.generation) {
+			searching = true
+			continue
+		}
+		if started.IsZero() || t.started.Before(started) {
+			started = t.started
+		}
+		// Searching again keeps what it found meanwhile.
+		searching = searching || t.loading
+		switch {
+		case !t.loaded || t.value.query != query:
+			searching = true
+		case t.err != nil:
+			answered = append(answered, capiv1.ServerResults_builder{ServerId: sv.GetId(), ServerName: sv.GetName(), Error: t.err.Error()}.Build())
+		default:
+			answered = append(answered, t.value.results)
+		}
+	}
 	// They are asked for once the query has settled, as the search.
-	if server != "" && len(catalogs) > 0 && t.key == key("search", query, a.generation) {
+	if server != "" && len(catalogs) > 0 && !started.IsZero() {
 		language := discoverLanguage(c)
 		k := key("titles", server, query, language, a.generation)
 		load(a, found, k, func(ctx context.Context) ([]*acquisitionv1.DiscoveredTitle, error) {
@@ -259,44 +306,35 @@ func (a *App) searchResults(c *ui.Context, query string, grid bool) {
 		}
 		return style.T(c, "search.server")
 	}
-	searching := !t.loaded || t.value.query != query
 	shown := len(titles) > 0
-	if !searching && t.err == nil {
-		for _, r := range t.value.results.GetServers() {
-			shown = shown || r.GetError() != "" || len(r.GetCards()) > 0
-		}
+	for _, r := range answered {
+		shown = shown || r.GetError() != "" || len(r.GetCards()) > 0
 	}
 	// One indicator while nothing is drawn yet, and No Results once all
 	// answered with nothing.
-	if !shown && (searching || t.err == nil) {
+	if !shown {
 		if searching || pending || server != "" && (!found.loaded || found.loading) {
-			loading(c, t.started)
+			loading(c, started)
 		} else {
 			statusView(c, "search", style.T(c, "search.noResults"), "", nil)
 		}
 		return
 	}
-	switch {
-	case searching:
-	case t.err != nil:
-		taskStatus(c, t, func() { t.key = "" }, nil)
-	default:
-		// A server's row shows once it answers with results, never while
-		// it searches.
-		for _, r := range t.value.results.GetServers() {
-			switch {
-			case r.GetError() != "":
-				ui.Row(c.Key(r.GetServerId())).Padding(12, layout.Margin).Gap(8).AlignItems(ui.Center).Children(func() {
-					ui.Icon(c, style.Icon("offline", false)).Size(18, 18).TextColor(style.Color(colors.TextTertiary))
-					style.Text(ui.Text(c, style.T(c, "home.serverUnreachable", "server", r.GetServerName())), style.Type(c).Callout).TextColor(style.Color(colors.TextTertiary))
-				})
-			case len(r.GetCards()) > 0:
-				section(r.GetServerId(), title(r.GetServerName()), func() {
-					for _, card := range r.GetCards() {
-						a.posterCard(c, card, width)
-					}
-				})
-			}
+	// A server's row shows once it answers with results, never while
+	// it searches.
+	for _, r := range answered {
+		switch {
+		case r.GetError() != "":
+			ui.Row(c.Key(r.GetServerId())).Padding(12, layout.Margin).Gap(8).AlignItems(ui.Center).Children(func() {
+				ui.Icon(c, style.Icon("offline", false)).Size(18, 18).TextColor(style.Color(colors.TextTertiary))
+				style.Text(ui.Text(c, style.T(c, "home.serverUnreachable", "server", r.GetServerName())), style.Type(c).Callout).TextColor(style.Color(colors.TextTertiary))
+			})
+		case len(r.GetCards()) > 0:
+			section(r.GetServerId(), title(r.GetServerName()), func() {
+				for _, card := range r.GetCards() {
+					a.posterCard(c, card, width)
+				}
+			})
 		}
 	}
 	if server != "" && len(titles) > 0 {

@@ -270,9 +270,9 @@ func (f *fakeCore) Stream(ctx context.Context, req *capiv1.Request, part func(*c
 		m.Done = &capiv1.Done{}
 	case req.HasCallServer():
 		return f.callServer(ctx, req.GetCallServer())
-	case req.HasSearch():
+	case req.HasSearch(), req.HasSearchServer():
 		var cards []*capiv1.Card
-		q := strings.ToLower(req.GetSearch().GetQuery())
+		q := strings.ToLower(req.GetSearch().GetQuery() + req.GetSearchServer().GetQuery())
 		for id, it := range f.s.Items {
 			if strings.Contains(strings.ToLower(it.Name), q) {
 				cards = append(cards, f.card(id, 0, false))
