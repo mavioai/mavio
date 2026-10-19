@@ -56,18 +56,25 @@ import dev.mavio.design.MavioRadius
 import dev.mavio.design.MavioSpacing
 import dev.mavio.ui.CardPlaceholder
 import dev.mavio.ui.Focusable
+import dev.mavio.ui.LocalDiscover
 import dev.mavio.ui.LocalTheme
 import dev.mavio.ui.MavioIcon
 import dev.mavio.ui.R
 import dev.mavio.ui.StatusView
 import dev.mavio.ui.TvScrolling
+import dev.mavio.ui.discoverLanguage
+import dev.mavio.ui.discovered
 import dev.mavio.ui.focused
 import dev.mavio.ui.rowTitle
 import dev.mavio.ui.selectable
 import dev.mavio.ui.shakes
 import dev.mavio.ui.text
 import dev.mavio.ui.theme
+import dev.mavio.ui.titleKey
+import dev.mavio.ui.tmdbId
 import kotlinx.coroutines.delay
+import mavio.acquisition.v1.Discover.SearchTitlesResponse
+import mavio.acquisition.v1.searchTitlesRequest
 
 /** The keys of Search's keyboard, in six columns. */
 private val KEYS = "abcdefghijklmnopqrstuvwxyz1234567890".toList()
@@ -230,6 +237,23 @@ private fun Results(model: AppModel, page: Page.Search) {
     val pages = LocalPages.current
     val result = page.results?.takeIf { it.first == page.query }?.second
     val list = result?.getOrNull()
+    // The titles the server that discovers finds, from Discover.
+    val discovery = LocalDiscover.current.discovery
+    val found = if (discovery == null) null else {
+        discovered(
+            discovery.serverId,
+            "SearchTitles",
+            remember(page.query) {
+                searchTitlesRequest {
+                    query = page.query
+                    language = discoverLanguage
+                    this.page = 1
+                }
+            },
+            SearchTitlesResponse::parseFrom,
+        ).value
+    }
+    val titles = found?.getOrNull()?.titlesList.orEmpty().distinctBy(::titleKey)
     LazyVerticalGrid(
         GridCells.Adaptive(theme.layout.poster),
         Modifier.fillMaxSize(),
@@ -246,10 +270,18 @@ private fun Results(model: AppModel, page: Page.Search) {
             list == null -> gridLine("error") {
                 StatusView(stringResource(R.string.state_error), Modifier.padding(top = MavioSpacing.s48), icon = R.drawable.ic_error)
             }
-            list.all { it.cards.isEmpty() && it.error == null } -> gridLine("none") {
+            list.all { it.cards.isEmpty() && it.error == null } && titles.isEmpty() && (discovery == null || found != null) -> gridLine("none") {
                 StatusView(stringResource(R.string.search_no_results), Modifier.padding(top = MavioSpacing.s48), icon = R.drawable.ic_search)
             }
             else -> list.forEach { found -> serverResults(found, several, page) { pages.open(it) } }
+        }
+        if (discovery != null && list != null && titles.isNotEmpty()) {
+            gridLine("discover") { ServerTitle(stringResource(R.string.search_discover)) }
+            items(titles, key = { "discover/${titleKey(it)}" }) { t ->
+                TvTitleCard(t, Modifier.focusKey(page.focus, "discover/${titleKey(t)}"), fill = true) {
+                    pages.openTitle(discovery.serverId, t.mediaKindValue, t.tmdbId)
+                }
+            }
         }
     }
 }
