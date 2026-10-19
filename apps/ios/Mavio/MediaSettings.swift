@@ -106,7 +106,7 @@ struct ManagedLibrariesView: View {
         .navigationTitle(MavioStrings.settingsLibraries)
         .navigationBarTitleDisplayMode(.inline)
         .task { await load() }
-        .refreshable { await load() }
+        .pullToRefresh { await load() }
         .onChange(of: scanningLibraries) { before, now in
             // A scan that ended says so until the page is left.
             for id in before.subtracting(now) {

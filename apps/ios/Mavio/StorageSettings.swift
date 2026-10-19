@@ -97,7 +97,7 @@ struct StorageView: View {
         .navigationTitle(MavioStrings.settingsStorage)
         .navigationBarTitleDisplayMode(.inline)
         .task { await load() }
-        .refreshable { await load() }
+        .pullToRefresh { await load() }
     }
 
     private var statusText: String {

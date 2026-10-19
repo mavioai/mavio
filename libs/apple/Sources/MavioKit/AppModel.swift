@@ -219,6 +219,13 @@ public final class AppModel {
         }
     }
 
+    /// Loads Home again from every server, returning once every server has
+    /// answered, as pulling Home down waits for.
+    public func reloadHome() async {
+        refreshHome()
+        await homeTask?.value
+    }
+
     /// Signs in to the server at address with a name and password.
     @discardableResult
     public func signIn(address: String, name: String, password: String) async throws -> ServerRecord {

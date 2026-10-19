@@ -71,7 +71,7 @@ struct UsersView: View {
         .navigationTitle(MavioStrings.settingsUsers)
         .navigationBarTitleDisplayMode(.inline)
         .task { await load() }
-        .refreshable { await load() }
+        .pullToRefresh { await load() }
     }
 
     private func reload() {

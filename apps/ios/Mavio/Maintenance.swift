@@ -133,7 +133,7 @@ struct ActivityView: View {
                 try? await Task.sleep(for: .seconds(30))
             }
         }
-        .refreshable {
+        .pullToRefresh {
             await loadSessions()
             await loadActivities()
         }
@@ -395,7 +395,7 @@ struct TasksView: View {
                 try? await Task.sleep(for: .seconds(5))
             }
         }
-        .refreshable {
+        .pullToRefresh {
             await loadTasks()
             await loadJobs()
         }
@@ -583,7 +583,7 @@ struct LogsView: View {
         }
         .overlay { if records == nil && failure == nil { ProgressView() } }
         .task(id: "\(level.rawValue)-\(hours)") { await load() }
-        .refreshable { await load() }
+        .pullToRefresh { await load() }
     }
 
     static func name(_ level: Mavio_System_V1_LogLevel) -> String {
@@ -748,7 +748,7 @@ struct BackupsView: View {
             saving = nil
         }
         .task { await load() }
-        .refreshable { await load() }
+        .pullToRefresh { await load() }
     }
 
     private func load() async {
@@ -963,7 +963,7 @@ struct IssuesView: View {
             await load(offset: 0)
         }
         .task { await names.loadUsers(model, server) }
-        .refreshable { await load(offset: 0) }
+        .pullToRefresh { await load(offset: 0) }
     }
 
     /// An issue changed on its page, or deleted when nil.
@@ -1106,7 +1106,7 @@ struct IssueView: View {
             Button(MavioStrings.issuesDelete, role: .destructive, action: remove)
         }
         .task { await load() }
-        .refreshable { await load() }
+        .pullToRefresh { await load() }
     }
 
     private func load() async {

@@ -35,7 +35,7 @@ struct HomeView: View {
         .overlay {
             if model.home.isEmpty { ProgressView() }
         }
-        .refreshable { model.refreshHome() }
+        .pullToRefresh { await model.reloadHome() }
         .navigationTitle(MavioStrings.navHome)
         .task { if model.home.isEmpty { model.refreshHome() } }
     }

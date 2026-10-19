@@ -191,7 +191,7 @@ private struct TitleContent: View {
             }
             .padding(.bottom, MavioSpacing.s40)
         }
-        .refreshable {
+        .pullToRefresh {
             await reload()
             refreshes += 1
         }
@@ -1089,7 +1089,7 @@ struct TitleCreditsView: View {
                     }
                     .padding(.vertical, MavioSpacing.s16)
                 }
-                .refreshable { await load() }
+                .pullToRefresh { await load() }
             } else if let failure {
                 StatusView(
                     icon: "error", title: MavioStrings.stateError, message: failure,

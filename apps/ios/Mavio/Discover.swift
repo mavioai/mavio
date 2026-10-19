@@ -27,25 +27,42 @@ final class Discovery {
     /// Whether the servers have answered.
     private(set) var loaded = false
 
-    /// Asks the servers signed in to, in their order.
+    /// Asks the servers signed in to, in their order. A server that cannot
+    /// be reached keeps Discover as it was, rather than taken for one that
+    /// does not discover; it is asked again once it is reached.
     func load(_ model: AppModel) async {
         var request = Mavio_Acquisition_V1_ListCatalogsRequest()
         request.language = discoverLanguage
+        var unreachable = false
         for server in model.signedInServers {
-            let response = try? await model.call(
-                server, Procedure.discover("ListCatalogs"), request,
-                as: Mavio_Acquisition_V1_ListCatalogsResponse.self)
-            if Task.isCancelled { return }
-            if let response, !response.catalogs.isEmpty {
+            let response: Mavio_Acquisition_V1_ListCatalogsResponse
+            do {
+                response = try await model.call(
+                    server, Procedure.discover("ListCatalogs"), request,
+                    as: Mavio_Acquisition_V1_ListCatalogsResponse.self)
+            } catch {
+                if Task.isCancelled { return }
+                unreachable = true
+                continue
+            }
+            if !response.catalogs.isEmpty {
                 self.server = server
                 catalogs = response.catalogs
                 loaded = true
                 return
             }
         }
-        server = nil
-        catalogs = []
+        if !unreachable || self.server.map({ s in !model.signedIn.contains(s.id) }) ?? true {
+            server = nil
+            catalogs = []
+        }
         loaded = true
+    }
+
+    /// What Discover is asked again on: the servers signed in to, and
+    /// whether each is reached.
+    static func key(_ model: AppModel) -> [String] {
+        model.signedInServers.map { "\($0.id):\(model.states[$0.id] == .online)" }
     }
 
     /// Discover's rows: Trending, Popular, Upcoming, Top Rated and the
@@ -214,7 +231,8 @@ struct DiscoverView: View {
     @Environment(AppModel.self) private var model
     @Environment(Discovery.self) private var discovery
     @Environment(\.theme) private var theme
-    @State private var refreshes = 0
+    /// The rows' first pages read again by the last pull.
+    @State private var refreshed: [CatalogQuery: Mavio_Acquisition_V1_DiscoverResponse] = [:]
 
     var body: some View {
         Group {
@@ -222,18 +240,13 @@ struct DiscoverView: View {
                 ScrollView {
                     LazyVStack(alignment: .leading, spacing: 0) {
                         ForEach(discovery.rows, id: \.self) { row in
-                            CatalogShelf(
-                                query: CatalogQuery(
-                                    serverId: server.id, catalog: row.catalog.id, kind: row.kind, title: row.title),
-                                refreshes: refreshes)
+                            let query = Self.query(server, row)
+                            CatalogShelf(query: query, refreshed: refreshed[query])
                         }
                     }
                     .padding(.bottom, MavioSpacing.s24)
                 }
-                .refreshable {
-                    await discovery.load(model)
-                    refreshes += 1
-                }
+                .pullToRefresh { await refresh() }
             } else if discovery.loaded {
                 StatusView(
                     icon: "discover", title: MavioStrings.discoverNotSetUp,
@@ -244,6 +257,28 @@ struct DiscoverView: View {
         }
         .navigationTitle(MavioStrings.navDiscover)
     }
+
+    private static func query(_ server: ServerRecord, _ row: CatalogRow) -> CatalogQuery {
+        CatalogQuery(serverId: server.id, catalog: row.catalog.id, kind: row.kind, title: row.title)
+    }
+
+    /// Reads the catalogs and every row's first page again, as pulling the
+    /// page down does, the rows changing once all have answered.
+    private func refresh() async {
+        await discovery.load(model)
+        guard let server = discovery.server else { return }
+        let queries = discovery.rows.map { Self.query(server, $0) }
+        var pages: [CatalogQuery: Mavio_Acquisition_V1_DiscoverResponse] = [:]
+        await withTaskGroup(of: (CatalogQuery, Mavio_Acquisition_V1_DiscoverResponse?).self) { group in
+            for query in queries {
+                group.addTask { await (query, try? model.discover(query, page: 1)) }
+            }
+            for await (query, page) in group {
+                if let page { pages[query] = page }
+            }
+        }
+        refreshed = pages
+    }
 }
 
 /// A row of a catalog's first page, with See All opening the catalog;
@@ -252,6 +287,8 @@ struct CatalogShelf: View {
     let query: CatalogQuery
     /// How often the page it is on was pulled down, each time read again.
     var refreshes = 0
+    /// Its first page as the page it is on read it again.
+    var refreshed: Mavio_Acquisition_V1_DiscoverResponse?
     @Environment(AppModel.self) private var model
     @Environment(\.theme) private var theme
     @State private var titles: [DiscoveredTitle]?
@@ -284,9 +321,14 @@ struct CatalogShelf: View {
                 if !Task.isCancelled, titles == nil { titles = [] }
                 return
             }
-            titles = page.titles
-            more = page.page < page.totalPages
+            show(page)
         }
+        .onChange(of: refreshed) { if let refreshed { show(refreshed) } }
+    }
+
+    private func show(_ page: Mavio_Acquisition_V1_DiscoverResponse) {
+        titles = page.titles
+        more = page.page < page.totalPages
     }
 }
 
@@ -346,7 +388,7 @@ struct CatalogView: View {
                 StatusView(icon: "search", title: MavioStrings.discoverNoMatches)
             }
         }
-        .refreshable { await refresh() }
+        .pullToRefresh { await refresh() }
         .navigationTitle(query.title)
         .toolbar {
             if filterable != nil {

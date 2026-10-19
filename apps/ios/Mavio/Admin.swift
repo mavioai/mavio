@@ -349,7 +349,7 @@ struct OverviewView: View {
         .background(theme.colors.background)
         .navigationTitle(MavioStrings.settingsOverview)
         .navigationBarTitleDisplayMode(.inline)
-        .refreshable {
+        .pullToRefresh {
             await loadInfo()
             await loadSamples()
         }

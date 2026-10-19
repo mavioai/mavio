@@ -650,7 +650,7 @@ struct ApiKeysView: View {
             Text(MavioStrings.keysRevokeMessage)
         }
         .task { await load() }
-        .refreshable { await load() }
+        .pullToRefresh { await load() }
     }
 
     private func detail(_ key: Mavio_Auth_V1_ApiKey) -> String {

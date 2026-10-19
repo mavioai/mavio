@@ -146,7 +146,7 @@ private struct DetailsContent: View {
             }
             .padding(.bottom, MavioSpacing.s40)
         }
-        .refreshable {
+        .pullToRefresh {
             reports += 1
             refreshes += 1
             await reload()

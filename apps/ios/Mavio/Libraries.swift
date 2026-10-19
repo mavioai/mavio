@@ -38,7 +38,7 @@ struct LibrariesView: View {
             .padding(.vertical, MavioSpacing.s16)
         }
         .navigationTitle(MavioStrings.navLibraries)
-        .refreshable { await load() }
+        .pullToRefresh { await load() }
         .task(id: model.signedInServers.map { "\($0.id):\(model.revision($0.id))" }) { await load() }
     }
 
@@ -139,7 +139,7 @@ struct LibraryView: View {
                 PagedGrid(page: $page, load: items)
             }
         }
-        .refreshable {
+        .pullToRefresh {
             switch tab {
             case .recommended: await loadRows()
             case .all: await $page.refresh(items)
@@ -324,7 +324,7 @@ struct HubView: View {
         ScrollView {
             PagedGrid(page: $page, load: items)
         }
-        .refreshable { await $page.refresh(items) }
+        .pullToRefresh { await $page.refresh(items) }
         .navigationTitle(title)
         .onChange(of: model.revision(serverId)) { page.reset() }
     }

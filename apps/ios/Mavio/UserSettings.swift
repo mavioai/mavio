@@ -580,7 +580,7 @@ struct DevicesView: View {
         .background(theme.colors.background)
         .navigationTitle(MavioStrings.settingsDevices)
         .navigationBarTitleDisplayMode(.inline)
-        .refreshable { await load() }
+        .pullToRefresh { await load() }
         .sheet(
             isPresented: Binding(get: { controlling != nil }, set: { if !$0 { controlling = nil } }),
             onDismiss: { Task { await load() } }
