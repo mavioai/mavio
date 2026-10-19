@@ -279,35 +279,30 @@ private struct TopBar: ViewModifier {
                     Wordmark(height: 20).accessibilityLabel("Mavio")
                 }
                 .hiddenSharedBackground()
-                // Search and the avatar side by side, as the web UI's.
-                ToolbarItem(placement: .topBarTrailing) {
-                    HStack(spacing: MavioSpacing.s12) {
-                        RouteLink(value: Route.search) {
-                            Icon("search", size: 22)
-                        }
-                        .accessibilityLabel(MavioStrings.navSearch)
-                        RouteLink(value: Route.settings) {
-                            Avatar(name: name, size: 32)
-                        }
-                        .accessibilityLabel(MavioStrings.navSettings)
+                // Search and the avatar on one glass, as the bar buttons of
+                // the system's apps, their marks taking its light or dark.
+                ToolbarItemGroup(placement: .topBarTrailing) {
+                    RouteLink(value: Route.search) {
+                        Icon("search", size: 22)
                     }
-                    // Without the bar buttons' padding, which would set them
-                    // apart.
-                    .buttonStyle(.plain)
+                    .accessibilityLabel(MavioStrings.navSearch)
+                    settings(name)
                 }
-                .hiddenSharedBackground()
             } else {
-                // On the glass the tab bar beside it has, its letter taking
-                // the glass's light or dark as the tabs' do.
-                ToolbarItem(placement: .topBarTrailing) {
-                    RouteLink(value: Route.settings) {
-                        Text(name.first.map { String($0).uppercased() } ?? "")
-                            .font(.system(size: 17, weight: .semibold))
-                    }
-                    .accessibilityLabel(MavioStrings.navSettings)
-                }
+                // On the glass the tab bar beside it has.
+                ToolbarItem(placement: .topBarTrailing) { settings(name) }
             }
         }
+    }
+
+    /// The avatar opening the settings: the user's initial on the bar's
+    /// glass.
+    private func settings(_ name: String) -> some View {
+        RouteLink(value: Route.settings) {
+            Text(name.first.map { String($0).uppercased() } ?? "")
+                .font(.system(size: 17, weight: .semibold))
+        }
+        .accessibilityLabel(MavioStrings.navSettings)
     }
 }
 
