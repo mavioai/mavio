@@ -236,13 +236,18 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
       if (!video.current?.paused) setControls(false);
     }, 3000);
   }, []);
+  const hide = useCallback(() => {
+    clearTimeout(hideTimer.current);
+    setControls(false);
+  }, []);
   useEffect(() => () => clearTimeout(hideTimer.current), []);
   // An open panel keeps the controls up.
   const shown = controls || panel !== undefined;
   const tv = usePrefs().tv;
 
-  // On the television (docs/tv.md §7), focus leaves the controls as they
-  // hide, so that the arrows seek again.
+  // On the television (docs/tv.md §7), focus leaves the controls' row as
+  // they hide, so that the arrows seek again.
+  const row = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (tv && !shown && shell.current?.contains(document.activeElement)) (document.activeElement as HTMLElement).blur();
   }, [tv, shown]);
@@ -371,10 +376,11 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
   });
 
   // Keyboard shortcuts: space and k, arrows and j/l, f, m; Escape closes
-  // the panel, then leaves. On the television Backspace is Back too, which
-  // hides the controls before it leaves; the arrows move focus among the
-  // controls while one has it, and seek while none has, when up, down and
-  // select give it to Play.
+  // the panel, then leaves. On the television (docs/tv.md §7) Backspace is
+  // Back too, which hides the controls before it leaves; down shows the
+  // controls, and again moves focus into their row, which up leaves; left
+  // and right seek, and select pauses, keeping the controls up, or plays,
+  // hiding them.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const target = e.target;
@@ -387,27 +393,52 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
           setPanel(undefined);
           poke();
         } else if (tv && shown) {
-          clearTimeout(hideTimer.current);
-          setControls(false);
+          (document.activeElement as HTMLElement | null)?.blur();
+          hide();
         } else if (tv || !document.fullscreenElement) back();
         return;
       }
-      const focused = shell.current?.contains(document.activeElement) ?? false;
-      // The arrows the focus moved with, and a slider's own.
-      if (e.defaultPrevented || (target instanceof HTMLInputElement && e.key.startsWith("Arrow"))) {
-        if (tv) poke();
+      if (tv) {
+        // The panel's choices take the keys while it is open.
+        if (panel !== undefined) {
+          poke();
+          return;
+        }
+        if (row.current?.contains(document.activeElement)) {
+          if (e.key === "ArrowUp") {
+            e.preventDefault();
+            (document.activeElement as HTMLElement).blur();
+          }
+          poke();
+          return;
+        }
+        if (e.key === "ArrowDown") {
+          e.preventDefault();
+          if (shown) row.current?.querySelector<HTMLElement>("button")?.focus();
+          poke();
+        } else if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
+          e.preventDefault();
+          seekBy(e.key === "ArrowLeft" ? -10 : 10);
+          poke();
+        } else if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          if (v.paused) {
+            play();
+            hide();
+          } else {
+            pause();
+            poke();
+          }
+        }
         return;
       }
+      const focused = shell.current?.contains(document.activeElement) ?? false;
+      // A slider's own arrows.
+      if (e.defaultPrevented || (target instanceof HTMLInputElement && e.key.startsWith("Arrow"))) return;
       if (panel !== undefined) return;
       // A focused button presses with space and Return.
       if (focused && target instanceof HTMLButtonElement && (e.key === " " || e.key === "Enter")) {
         poke();
-        return;
-      }
-      if (tv && !focused && (e.key === "ArrowUp" || e.key === "ArrowDown" || e.key === "Enter")) {
-        e.preventDefault();
-        poke();
-        shell.current?.querySelector<HTMLElement>("[data-primary]")?.focus();
         return;
       }
       const keys: Record<string, () => void> = {
@@ -428,7 +459,7 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
     };
     addEventListener("keydown", onKey);
     return () => removeEventListener("keydown", onKey);
-  }, [toggle, seekBy, fullScreen, back, poke, panel, tv, shown]);
+  }, [toggle, seekBy, fullScreen, back, poke, hide, play, pause, panel, tv, shown]);
 
   const current = item.data?.item;
   const source = item.data?.mediaSources.find((m) => m.id === info?.info.mediaSourceId);
@@ -462,7 +493,8 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
         crossOrigin="anonymous"
         onClick={() => (panel !== undefined ? setPanel(undefined) : toggle())}
         onDoubleClick={fullScreen}
-        onPlay={() => (setPaused(false), poke())}
+        // On the television playing hides the controls.
+        onPlay={() => (setPaused(false), tv ? hide() : poke())}
         onPause={() => {
           setPaused(true);
           setControls(true);
@@ -505,9 +537,11 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
 
       <div className={`pointer-events-none absolute inset-0 transition-opacity duration-300 ${shown ? "opacity-100" : "opacity-0"}`}>
         <div className="pointer-events-auto absolute inset-x-0 top-0 flex items-center gap-3 bg-gradient-to-b from-black/75 to-transparent px-5 pt-4 pb-12">
-          <PlayerButton label={t("player.back")} onClick={back}>
-            <Icon name="back" />
-          </PlayerButton>
+          {!tv && (
+            <PlayerButton label={t("player.back")} onClick={back}>
+              <Icon name="back" />
+            </PlayerButton>
+          )}
           <div className="min-w-0">
             {current?.seriesName && (
               <div className="truncate type-footnote text-white/70">
@@ -520,9 +554,37 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
         </div>
 
         <div className="pointer-events-auto absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent px-5 pt-16 pb-4">
-          <Scrubber time={time} total={total} onSeek={seekTo} />
+          {tv ? <Timeline time={time} total={total} /> : <Scrubber time={time} total={total} onSeek={seekTo} />}
+          {tv ? (
+            // The television's row: the remote's keys play, pause and seek.
+            <div className="mt-3 flex items-center gap-3">
+              <span className="type-callout text-white/85 tabular-nums">
+                {clock(time)} / {clock(total)}
+              </span>
+              <div ref={row} data-tv-row className="ml-auto flex items-center gap-2">
+                {(next.data || (group && group.group.currentIndex < group.group.queue.length - 1)) && (
+                  <button
+                    type="button"
+                    onClick={playNext}
+                    className="flex h-12 items-center gap-2 rounded-full bg-white/15 px-5 type-callout font-semibold backdrop-blur-xl"
+                  >
+                    <Icon name="next" fill size={20} />
+                    {t("player.nextEpisode")}
+                  </button>
+                )}
+                {subtitleTracks.length > 0 && (
+                  <PlayerButton label={t("player.subtitles")} onClick={() => openPanel("subtitles")} active={panel === "subtitles"}>
+                    <Icon name="subtitles" fill={subtitlesOn} />
+                  </PlayerButton>
+                )}
+                <PlayerButton label={t("player.audio")} onClick={() => openPanel("audio")} active={panel !== undefined && panel !== "subtitles"}>
+                  <Icon name="audio" />
+                </PlayerButton>
+              </div>
+            </div>
+          ) : (
           <div className="mt-2 flex items-center gap-1">
-            <PlayerButton label={paused ? t("player.play") : t("player.pause")} onClick={toggle} large primary>
+            <PlayerButton label={paused ? t("player.play") : t("player.pause")} onClick={toggle} large>
               <Icon name={paused ? "play" : "pause"} fill size={30} />
             </PlayerButton>
             <PlayerButton label={t("player.seekBack", { count: 10 })} onClick={() => seekBy(-10)}>
@@ -582,6 +644,7 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
               </PlayerButton>
             </div>
           </div>
+          )}
         </div>
       </div>
 
@@ -694,21 +757,27 @@ function Scrubber({ time, total, onSeek }: { time: number; total: number; onSeek
   return <Slider light min={0} max={total || 1} value={Math.min(time, total || 1)} label={t("player.position")} valueText={clock} onChange={onSeek} />;
 }
 
+/** The television's timeline, which the remote's left and right seek along. */
+function Timeline({ time, total }: { time: number; total: number }) {
+  return (
+    <div className="h-1.5 overflow-hidden rounded-full bg-white/25">
+      <div className="h-full bg-white" style={{ width: `${total ? Math.min(100, (time / total) * 100) : 0}%` }} />
+    </div>
+  );
+}
+
 function PlayerButton({
   label,
   onClick,
   children,
   active,
   large,
-  primary,
 }: {
   label: string;
   onClick: () => void;
   children: ReactNode;
   active?: boolean;
   large?: boolean;
-  /** Play, which focus goes to as the controls show on the television. */
-  primary?: boolean;
 }) {
   return (
     <Tip label={label}>
@@ -716,7 +785,6 @@ function PlayerButton({
         type="button"
         aria-label={label}
         aria-pressed={active}
-        data-primary={primary || undefined}
         onClick={onClick}
         className={`flex items-center justify-center rounded-full hover:bg-white/15 ${large ? "h-12 w-12" : "h-11 w-11"} ${active ? "bg-white/20" : ""}`}
       >

@@ -333,6 +333,8 @@ export function useSpatialNavigation(on = true) {
       if (active && keeps(active, e.key as Direction)) return;
       // The player seeks with the arrows while none of its controls has focus.
       if ((!active || active === document.body) && document.querySelector("[data-tv-player]")) return;
+      // Up and down in the player's row of buttons are the player's.
+      if (active?.closest("[data-tv-row]") && (e.key === "ArrowUp" || e.key === "ArrowDown")) return;
       // An open dialog, menu or list of options keeps focus within itself;
       // the keys a menu or list moves through its items with never reach here.
       const scope = openPopup("[aria-modal], [data-tv-popup]") ?? openPopup("[role=menu], [role=listbox]");
