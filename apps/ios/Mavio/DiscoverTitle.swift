@@ -130,7 +130,7 @@ struct TitleView: View {
     var body: some View {
         Group {
             if let title {
-                TitleContent(serverId: serverId, title: title)
+                TitleContent(serverId: serverId, title: title, reload: load)
             } else if let failure {
                 StatusView(
                     icon: "error", title: MavioStrings.stateError, message: failure,
@@ -156,12 +156,15 @@ struct TitleView: View {
 private struct TitleContent: View {
     let serverId: String
     let title: TitleInfo
+    /// Reads the title again, as pulling the page down does.
+    let reload: () async -> Void
     @Environment(AppModel.self) private var model
     @Environment(Discovery.self) private var discovery
     @Environment(\.theme) private var theme
     @Environment(\.horizontalSizeClass) private var sizeClass
     @Environment(\.openURL) private var openURL
     @State private var ratings: [Rating] = []
+    @State private var refreshes = 0
 
     private var phone: Bool { sizeClass != .regular }
     private var series: Bool { title.mediaKind == .series }
@@ -181,11 +184,16 @@ private struct TitleContent: View {
                             query: CatalogQuery(
                                 serverId: serverId, catalog: c.id, kind: title.mediaKind, tmdbId: title.tmdbID,
                                 title: c.kind == .recommendations
-                                    ? MavioStrings.discoverRecommendations : MavioStrings.discoverSimilar))
+                                    ? MavioStrings.discoverRecommendations : MavioStrings.discoverSimilar),
+                            refreshes: refreshes)
                     }
                 }
             }
             .padding(.bottom, MavioSpacing.s40)
+        }
+        .refreshable {
+            await reload()
+            refreshes += 1
         }
         .background(theme.colors.background)
         .navigationTitle(title.name)
@@ -1081,6 +1089,7 @@ struct TitleCreditsView: View {
                     }
                     .padding(.vertical, MavioSpacing.s16)
                 }
+                .refreshable { await load() }
             } else if let failure {
                 StatusView(
                     icon: "error", title: MavioStrings.stateError, message: failure,

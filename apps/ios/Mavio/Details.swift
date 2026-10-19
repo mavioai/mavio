@@ -16,7 +16,7 @@ struct DetailsView: View {
     var body: some View {
         Group {
             if let details {
-                DetailsContent(details: details)
+                DetailsContent(details: details, reload: load)
             } else if failure != nil {
                 StatusView(
                     icon: "error", title: MavioStrings.stateError, message: failure,
@@ -66,6 +66,8 @@ private struct NextUp {
 
 private struct DetailsContent: View {
     let details: Details
+    /// Reads the item again, as pulling the page down does.
+    let reload: () async -> Void
     @Environment(AppModel.self) private var model
     @Environment(Router.self) private var router
     @Environment(\.theme) private var theme
@@ -78,8 +80,12 @@ private struct DetailsContent: View {
     /// and users allowed to.
     @State private var mayReport = false
     @State private var reporting = false
-    /// Counts the issues reported here, which lists them again.
+    /// Counts the issues reported here and the pulls of the page, each
+    /// listing the issues again.
     @State private var reports = 0
+    /// How often the page was pulled down, which reads the recommendations
+    /// again.
+    @State private var refreshes = 0
 
     private var card: Card { details.card }
     private var phone: Bool { sizeClass != .regular }
@@ -130,7 +136,7 @@ private struct DetailsContent: View {
                             ForEach(details.similar, id: \.self) { CardLink(card: $0, width: theme.layout.poster) }
                         }
                     }
-                    Recommendations(details: details)
+                    Recommendations(details: details, refreshes: refreshes)
                     AboutSection(details: details, source: source, overview: !phone)
                     if let server = model.server(card.serverId), !details.offline {
                         ItemIssues(server: server, itemId: card.itemId, version: reports)
@@ -139,6 +145,11 @@ private struct DetailsContent: View {
                 .padding(.top, MavioSpacing.s24)
             }
             .padding(.bottom, MavioSpacing.s40)
+        }
+        .refreshable {
+            reports += 1
+            refreshes += 1
+            await reload()
         }
         .background(theme.colors.background)
         .navigationTitle(card.title)
@@ -1082,6 +1093,8 @@ private struct CollectionBanner: View {
 /// or series, those in a library opening their details there.
 private struct Recommendations: View {
     let details: Details
+    /// How often the details were pulled down.
+    let refreshes: Int
     @Environment(Discovery.self) private var discovery
 
     var body: some View {
@@ -1094,7 +1107,8 @@ private struct Recommendations: View {
             CatalogShelf(
                 query: CatalogQuery(
                     serverId: server.id, catalog: catalog.id, kind: kind, tmdbId: tmdbId,
-                    title: MavioStrings.discoverRecommendations))
+                    title: MavioStrings.discoverRecommendations),
+                refreshes: refreshes)
         }
     }
 }

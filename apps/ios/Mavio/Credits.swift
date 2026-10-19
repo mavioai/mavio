@@ -30,6 +30,7 @@ struct CreditsView: View {
                     }
                     .padding(.vertical, MavioSpacing.s16)
                 }
+                .refreshable { await load() }
             } else if failure != nil {
                 StatusView(
                     icon: "error", title: MavioStrings.stateError, message: failure,

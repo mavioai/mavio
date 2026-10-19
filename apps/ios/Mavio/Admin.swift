@@ -349,6 +349,10 @@ struct OverviewView: View {
         .background(theme.colors.background)
         .navigationTitle(MavioStrings.settingsOverview)
         .navigationBarTitleDisplayMode(.inline)
+        .refreshable {
+            await loadInfo()
+            await loadSamples()
+        }
         .task { await loadInfo() }
         .task {
             while !Task.isCancelled {

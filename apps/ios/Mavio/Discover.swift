@@ -211,8 +211,10 @@ func statusLabel(_ status: MediaStatus) -> String? {
 
 /// Discover: a row of each catalog of the first server that discovers.
 struct DiscoverView: View {
+    @Environment(AppModel.self) private var model
     @Environment(Discovery.self) private var discovery
     @Environment(\.theme) private var theme
+    @State private var refreshes = 0
 
     var body: some View {
         Group {
@@ -222,10 +224,15 @@ struct DiscoverView: View {
                         ForEach(discovery.rows, id: \.self) { row in
                             CatalogShelf(
                                 query: CatalogQuery(
-                                    serverId: server.id, catalog: row.catalog.id, kind: row.kind, title: row.title))
+                                    serverId: server.id, catalog: row.catalog.id, kind: row.kind, title: row.title),
+                                refreshes: refreshes)
                         }
                     }
                     .padding(.bottom, MavioSpacing.s24)
+                }
+                .refreshable {
+                    await discovery.load(model)
+                    refreshes += 1
                 }
             } else if discovery.loaded {
                 StatusView(
@@ -243,6 +250,8 @@ struct DiscoverView: View {
 /// nothing when it has no titles.
 struct CatalogShelf: View {
     let query: CatalogQuery
+    /// How often the page it is on was pulled down, each time read again.
+    var refreshes = 0
     @Environment(AppModel.self) private var model
     @Environment(\.theme) private var theme
     @State private var titles: [DiscoveredTitle]?
@@ -269,15 +278,21 @@ struct CatalogShelf: View {
                 }
             }
         }
-        .task(id: query) {
+        .task(id: ShelfKey(query: query, refreshes: refreshes)) {
+            // Read again, the titles shown stay when it cannot be.
             guard let page = try? await model.discover(query, page: 1) else {
-                if !Task.isCancelled { titles = [] }
+                if !Task.isCancelled, titles == nil { titles = [] }
                 return
             }
             titles = page.titles
             more = page.page < page.totalPages
         }
     }
+}
+
+private struct ShelfKey: Equatable {
+    let query: CatalogQuery
+    let refreshes: Int
 }
 
 /// All the titles of a catalog, page by page.
@@ -331,6 +346,7 @@ struct CatalogView: View {
                 StatusView(icon: "search", title: MavioStrings.discoverNoMatches)
             }
         }
+        .refreshable { await refresh() }
         .navigationTitle(query.title)
         .toolbar {
             if filterable != nil {
@@ -382,6 +398,17 @@ struct CatalogView: View {
         } catch {
             if query == current { failed = !(error is CancellationError) }
         }
+    }
+
+    /// Reads the first page again, as pulling the grid down does, in place
+    /// of the pages shown once it arrives; they stay when it cannot be read.
+    private func refresh() async {
+        let query = current
+        guard let response = try? await model.discover(query, page: 1), query == current else { return }
+        var seen = Set<String>()
+        titles = response.titles.filter { seen.insert($0.key).inserted }
+        next = response.page < response.totalPages ? response.page + 1 : nil
+        failed = false
     }
 }
 

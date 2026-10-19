@@ -136,21 +136,35 @@ struct LibraryView: View {
                 LibraryFilters(sort: $sort, filter: $filter, total: page.total)
                     .padding(.horizontal, theme.layout.margin)
                     .padding(.bottom, MavioSpacing.s16)
-                PagedGrid(page: $page) { offset, limit in
-                    try await model.client.libraryItems(
-                        serverId: library.serverId, libraryId: library.id, sort: sort, filter: filter, offset: offset,
-                        limit: limit)
-                }
+                PagedGrid(page: $page, load: items)
+            }
+        }
+        .refreshable {
+            switch tab {
+            case .recommended: await loadRows()
+            case .all: await $page.refresh(items)
             }
         }
         .navigationTitle(library.name)
         .task(id: model.revision(library.serverId)) {
-            rows = try? await model.client.recommended(serverId: library.serverId, libraryId: library.id)
+            await loadRows()
             if rows?.isEmpty == true { tab = .all }
         }
         .onChange(of: model.revision(library.serverId)) { page.reset() }
         .onChange(of: sort) { page.reset() }
         .onChange(of: filter) { page.reset() }
+    }
+
+    /// The Recommended tab's rows, kept when they cannot be read again.
+    private func loadRows() async {
+        if let loaded = try? await model.client.recommended(serverId: library.serverId, libraryId: library.id) {
+            rows = loaded
+        }
+    }
+
+    private func items(offset: UInt32, limit: UInt32) async throws -> Page {
+        try await model.client.libraryItems(
+            serverId: library.serverId, libraryId: library.id, sort: sort, filter: filter, offset: offset, limit: limit)
     }
 }
 
@@ -308,12 +322,15 @@ struct HubView: View {
 
     var body: some View {
         ScrollView {
-            PagedGrid(page: $page) { offset, limit in
-                try await model.client.hub(serverId: serverId, hubId: hubId, offset: offset, limit: limit)
-            }
+            PagedGrid(page: $page, load: items)
         }
+        .refreshable { await $page.refresh(items) }
         .navigationTitle(title)
         .onChange(of: model.revision(serverId)) { page.reset() }
+    }
+
+    private func items(offset: UInt32, limit: UInt32) async throws -> Page {
+        try await model.client.hub(serverId: serverId, hubId: hubId, offset: offset, limit: limit)
     }
 }
 
@@ -332,13 +349,26 @@ struct Paged: Equatable {
     }
 }
 
+extension Binding<Paged> {
+    /// Loads the grid's first page again, as pulling it down does, putting
+    /// it in place of the pages shown once it arrives rather than emptying
+    /// the grid first; the pages shown stay when it cannot be read.
+    @MainActor func refresh(_ load: (UInt32, UInt32) async throws -> Page) async {
+        guard let result = try? await load(0, PagedGrid.limit) else { return }
+        wrappedValue = Paged(
+            cards: result.cards, total: result.total ?? wrappedValue.total,
+            more: result.more && !result.cards.isEmpty, generation: wrappedValue.generation + 1)
+    }
+}
+
 /// A grid loading its pages as it scrolls.
 struct PagedGrid: View {
     @Binding var page: Paged
     let load: (UInt32, UInt32) async throws -> Page
     @Environment(\.theme) private var theme
 
-    private let limit: UInt32 = 60
+    /// The cards of a page.
+    static let limit: UInt32 = 60
 
     var body: some View {
         CardGrid(items: page.cards, wide: !page.cards.isEmpty && page.cards.allSatisfy(isWide)) { card in
@@ -364,7 +394,7 @@ struct PagedGrid: View {
         page.loading = true
         page.failed = false
         do {
-            let result = try await load(UInt32(page.cards.count), limit)
+            let result = try await load(UInt32(page.cards.count), Self.limit)
             guard generation == page.generation else { return }
             page.cards += result.cards
             page.total = result.total ?? page.total
