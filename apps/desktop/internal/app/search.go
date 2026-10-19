@@ -19,75 +19,64 @@ const searchDelay = 300 * time.Millisecond
 
 // searchState is the search's state.
 type searchState struct {
-	query   string
+	query string
+	// ran is the query confirmed, which the search runs outside the TV
+	// mode.
+	ran     string
 	typed   string // the query when it last changed
 	changed time.Time
-	results task[*capiv1.SearchResults]
-	// titles are the titles discovery finds, in the TV mode.
+	results task[searched]
+	// titles are the titles discovery finds.
 	titles task[[]*acquisitionv1.DiscoveredTitle]
 }
 
-// search builds the search: a field, and what each server found.
+// searched is what the servers found for a query.
+type searched struct {
+	query   string
+	results *capiv1.SearchResults
+}
+
+// search builds the search: a field, confirmed with Return, and what each
+// server found (docs/clients.md §5.4); in the TV mode it runs as the
+// keyboard types.
 func (a *App) search(c *ui.Context) {
 	s := &a.searchState
-	colors := style.Colors(c)
-	now := c.Now()
-	if s.query != s.typed {
-		s.typed, s.changed = s.query, now
+	tv := style.TV(c)
+	query := s.ran
+	if tv {
+		now := c.Now()
+		if s.query != s.typed {
+			s.typed, s.changed = s.query, now
+		}
+		query = strings.TrimSpace(s.query)
+		if wait := searchDelay - now.Sub(s.changed); wait > 0 && query != "" {
+			c.After(wait)
+			a.tvSearch(c, query)
+			return
+		}
 	}
-	query := strings.TrimSpace(s.query)
-	if wait := searchDelay - now.Sub(s.changed); wait > 0 && query != "" {
-		c.After(wait)
-	} else if query != "" {
-		load(a, &s.results, key("search", query, a.generation), func(ctx context.Context) (*capiv1.SearchResults, error) {
+	if query != "" {
+		load(a, &s.results, key("search", query, a.generation), func(ctx context.Context) (searched, error) {
 			m, err := a.opts.Core.Call(ctx, capiv1.Request_builder{Search: capiv1.Search_builder{Query: query}.Build()}.Build())
-			return m.GetSearchResults(), err
+			return searched{query, m.GetSearchResults()}, err
 		})
 	}
-	if style.TV(c) {
+	if tv {
 		a.tvSearch(c, query)
 		return
 	}
 	ui.Column(c).Fill().Children(func() {
 		a.pageHeader(c, style.T(c, "nav.search"), func() {
-			ui.SearchField(c, &s.query).Placeholder(style.T(c, "search.placeholder")).AutoFocus().Grow(1).MaxWidth(560).Height(36)
+			if ui.SearchField(c, &s.query).Placeholder(style.T(c, "search.placeholder")).AutoFocus().Grow(1).MaxWidth(560).Height(36).Submitted() {
+				s.ran = strings.TrimSpace(s.query)
+			}
 		})
 		if query == "" {
 			return
 		}
-		t := &s.results
-		if taskStatus(c, t, func() { t.key = "" }, nil) {
-			return
-		}
-		found := false
-		for _, r := range t.value.GetServers() {
-			found = found || len(r.GetCards()) > 0
-		}
-		if !found {
-			statusView(c, "search", style.T(c, "search.noResults"), "", nil)
-			return
-		}
-		width, _ := a.gridColumns(c)
 		ui.Scroll(c).TrackScroll(a.pageScroll(a.pagePath)).Grow(1).Children(func() {
-			ui.Column(c).Padding(0, style.Layout(c).Margin, 40).Gap(24).Children(func() {
-				for _, r := range t.value.GetServers() {
-					if len(r.GetCards()) == 0 && r.GetError() == "" {
-						continue
-					}
-					ui.Column(c.Key(r.GetServerId())).Gap(12).Children(func() {
-						if len(t.value.GetServers()) > 1 {
-							style.Text(ui.Text(c, r.GetServerName()), style.Type(c).Title3).TextColor(style.Color(colors.TextPrimary))
-						}
-						if r.GetError() != "" {
-							style.Text(ui.Text(c, style.T(c, "home.serverUnreachable", "server", r.GetServerName())), style.Type(c).Callout).TextColor(style.Color(colors.TextSecondary))
-						}
-						ui.Row(c).Wrap().Gap(style.Layout(c).Gutter).Children(func() {
-							for _, card := range r.GetCards() {
-								a.posterCard(c, card, width)
-							}
-						})
-					})
-				}
+			ui.Column(c).Padding(0, 0, 40).Gap(24).Children(func() {
+				a.searchResults(c, query, false)
 			})
 		})
 	})
@@ -168,7 +157,7 @@ func (a *App) tvSearch(c *ui.Context, query string) {
 					}
 					return
 				}
-				a.tvResults(c, query)
+				a.searchResults(c, query, true)
 			})
 		})
 		a.contentWidth = width
@@ -209,16 +198,22 @@ func (a *App) tvQuery(c *ui.Context) {
 	})
 }
 
-// tvResults builds what the TV mode's search found for query: in a grid
-// what each server found, under its name when there are several, then
-// the titles the server that discovers finds, to request.
-func (a *App) tvResults(c *ui.Context, query string) {
+// searchResults builds what the search found for query, as the web
+// UI's: a row of each server, in their order, titled by its name when
+// there are several, its cards' placeholders while it searches, a line
+// for one that cannot be reached and nothing for one that found nothing;
+// then the titles the first server that discovers finds, to request
+// (§6.3.28). The TV mode has grids in place of rows.
+func (a *App) searchResults(c *ui.Context, query string, grid bool) {
 	s := &a.searchState
 	colors := style.Colors(c)
 	layout := style.Layout(c)
 	t := &s.results
 	several := len(a.servers) > 1
 	width, _ := a.gridColumns(c)
+	if !grid {
+		width = layout.Poster
+	}
 	server, catalogs, pending := a.discovery(c)
 	found := &s.titles
 	var titles []*acquisitionv1.DiscoveredTitle
@@ -236,7 +231,11 @@ func (a *App) tvResults(c *ui.Context, query string) {
 	} else {
 		server = ""
 	}
-	grid := func(id, title string, cards func()) {
+	section := func(id, title string, cards func()) {
+		if !grid {
+			a.shelf(c, "search/"+id, title, nil, cards)
+			return
+		}
 		ui.Column(c.Key(id)).Gap(8).Children(func() {
 			if title != "" {
 				style.Text(ui.Text(c, title), style.Type(c).Title3).TextColor(style.Color(colors.TextPrimary)).Margin(0, layout.Margin)
@@ -244,15 +243,30 @@ func (a *App) tvResults(c *ui.Context, query string) {
 			ui.Row(c).Wrap().Padding(0, layout.Margin).GapX(layout.Gutter).GapY(24).Children(cards)
 		})
 	}
-	none := t.loaded && t.err == nil && !pending && (server == "" || !found.loading) && len(titles) == 0
+	title := func(name string) string {
+		if several {
+			return name
+		}
+		if grid {
+			return ""
+		}
+		return style.T(c, "search.server")
+	}
+	searching := !t.loaded || t.value.query != query
+	none := !searching && t.err == nil && !pending && (server == "" || !found.loading) && len(titles) == 0
 	switch {
-	case !t.loaded:
-		placeholderShelf(c, 6)
+	case searching:
+		for _, sv := range a.servers {
+			section(sv.GetId(), title(sv.GetName()), func() {
+				for range 6 {
+					ui.Box(c).Size(width, width*1.5).Shrink(0).Radius(design.RadiusMd).Background(style.Color(colors.Fill))
+				}
+			})
+		}
 	case t.err != nil:
 		taskStatus(c, t, func() { t.key = "" }, nil)
-		none = false
 	default:
-		for _, r := range t.value.GetServers() {
+		for _, r := range t.value.results.GetServers() {
 			switch {
 			case r.GetError() != "":
 				ui.Row(c.Key(r.GetServerId())).Padding(12, layout.Margin).Gap(8).AlignItems(ui.Center).Children(func() {
@@ -261,11 +275,7 @@ func (a *App) tvResults(c *ui.Context, query string) {
 				})
 			case len(r.GetCards()) > 0:
 				none = false
-				title := ""
-				if several {
-					title = r.GetServerName()
-				}
-				grid(r.GetServerId(), title, func() {
+				section(r.GetServerId(), title(r.GetServerName()), func() {
 					for _, card := range r.GetCards() {
 						a.posterCard(c, card, width)
 					}
@@ -274,7 +284,7 @@ func (a *App) tvResults(c *ui.Context, query string) {
 		}
 	}
 	if server != "" && len(titles) > 0 {
-		grid("discover", style.T(c, "search.discover"), func() {
+		section("discover", style.T(c, "search.discover"), func() {
 			for _, title := range titles {
 				a.discoveredCard(c, server, title, width, "")
 			}
