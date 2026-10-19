@@ -717,7 +717,8 @@ flowchart TD
     - [x] 桌面端“媒体库”中各媒体库的扫描进度（`apps/desktop/internal/app/libraries.go`），来自核心 C ABI 的 `ScanProgressChanged` 事件与媒体库的 `scan_progress`
     - [x] Web UI 中与 iOS 一致的“媒体库”中各媒体库的扫描进度（[客户端 §6.3.4](clients.zh-CN.md)，`apps/web/src/screens/admin/libraries.tsx`）：使用 `ScanProgressChanged` 事件与媒体库的 `scan_progress`，取代扫描已开始的提示
     - [ ] Android 上的同样功能
-    - [ ] 与 iOS 一致的“自动”画质（[客户端 §6.5](clients.zh-CN.md)），Web UI、Android 与桌面端：局域网中的服务器 100 Mbit/s，其他 40 Mbit/s；Android 与桌面端使用核心的 `is_local_address`，Web UI 依据页面的主机
+    - [x] 桌面端与 iOS 一致的“自动”画质（[客户端 §6.5](clients.zh-CN.md)），依据核心 C ABI 由 `is_local_address` 为每个 `ServerRecord` 给出的 `local`
+    - [ ] 与 iOS 一致的“自动”画质（[客户端 §6.5](clients.zh-CN.md)），Web UI 与 Android：局域网中的服务器 100 Mbit/s，其他 40 Mbit/s；Android 使用核心的 `is_local_address`，Web UI 依据页面的主机
     - [ ] 媒体库按顺序排列的提供者，以及其在首页与“推荐”中的行（`ProviderOrder`、`LibraryHubs`）
     - [x] 存储（`apps/web/src/screens/admin/storage.tsx`、`libs/client-ts/src/storage.ts`）：rclone 远端及其授权步骤，以及离线客户端（`StorageService`）；在目录选择器中浏览 rclone 远端的文件夹
     - [x] 用户（`apps/web/src/screens/admin/users.tsx`、`sign-in.tsx` 中的 `InviteScreen`）：添加、编辑与删除用户，其登录方式，邀请链接及位于 `/invite` 的邀请页面，用户的媒体库与家长分级（`UserService`、`ListRatings`、`AuthService.GetInvitation`、`AcceptInvitation`）

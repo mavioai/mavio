@@ -64,6 +64,10 @@ type quality struct {
 	bitrate int64
 }
 
+// localAuto is the bitrate Auto allows from a server on the local
+// network, where the internet's limits do not hold.
+const localAuto = 100_000_000
+
 // qualities are the qualities, in the order they are offered.
 var qualities = []quality{
 	{"original", 200_000_000},
@@ -173,7 +177,7 @@ func (a *App) startPlayback(p *player) {
 	p.starting++
 	n := p.starting
 	options := proto.CloneOf(p.options)
-	options.SetMaxBitrate(a.quality().bitrate)
+	options.SetMaxBitrate(a.bitrate(p.server))
 	caps, err := proto.Marshal(capabilities(options.GetMaxBitrate()))
 	if err != nil {
 		p.err = err
@@ -418,6 +422,20 @@ func (a *App) quality() quality {
 		}
 	}
 	return qualities[1]
+}
+
+// bitrate returns the bitrate the quality chosen allows from a server:
+// Auto allows more from one on the local network.
+func (a *App) bitrate(server string) int64 {
+	q := a.quality()
+	if q.key != "auto" {
+		return q.bitrate
+	}
+	i := slices.IndexFunc(a.servers, func(s *capiv1.ServerRecord) bool { return s.GetId() == server })
+	if i >= 0 && a.servers[i].GetLocal() {
+		return localAuto
+	}
+	return q.bitrate
 }
 
 // clock formats d as "1:02:03" or "2:03".

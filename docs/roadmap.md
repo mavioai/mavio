@@ -717,7 +717,8 @@ flowchart TD
     - [x] Each library's scan progress in Libraries on the desktop (`apps/desktop/internal/app/libraries.go`), from the core's `ScanProgressChanged` event of its C ABI and the libraries' `scan_progress`
     - [x] Each library's scan progress in Libraries as on iOS ([Clients §6.3.4](clients.md)) in the web UI (`apps/web/src/screens/admin/libraries.tsx`): the `ScanProgressChanged` event and the libraries' `scan_progress`, in place of the notice that a scan started
     - [ ] The same on Android
-    - [ ] Auto quality as on iOS ([Clients §6.5](clients.md)), in the web UI, on Android and on the desktop: 100 Mbit/s from a server on the local network, 40 otherwise; the core's `is_local_address` for Android and the desktop, the page's host for the web UI
+    - [x] Auto quality on the desktop as on iOS ([Clients §6.5](clients.md)), by the `local` the core's C ABI gives each `ServerRecord` from `is_local_address`
+    - [ ] Auto quality as on iOS ([Clients §6.5](clients.md)), in the web UI and on Android: 100 Mbit/s from a server on the local network, 40 otherwise; the core's `is_local_address` for Android, the page's host for the web UI
     - [ ] A library's providers in order and its hubs on Home and Recommended (`ProviderOrder`, `LibraryHubs`)
     - [x] Storage (`apps/web/src/screens/admin/storage.tsx`, `libs/client-ts/src/storage.ts`): rclone remotes with their authorization steps, and the offline clients (`StorageService`); walking the folders of rclone remotes in the folder picker
     - [x] Users (`apps/web/src/screens/admin/users.tsx`, `InviteScreen` in `sign-in.tsx`): adding, editing and removing users, their sign-ins, invitation links and the invitation screen at `/invite`, their libraries and parental ratings (`UserService`, `ListRatings`, `AuthService.GetInvitation`, `AcceptInvitation`)
