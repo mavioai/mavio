@@ -178,3 +178,115 @@ func TestPlayer(t *testing.T) {
 		t.Error("Escape did not close the player")
 	}
 }
+
+func TestTVPlayer(t *testing.T) {
+	h := newHarness(t, true, 1920, 1080)
+	h.app.setTV(true)
+	server := h.core.s.Server.ID
+	next := capiv1.Card_builder{ServerId: server, ItemId: "atlas-s2e4", Kind: capiv1.CardKind_CARD_KIND_EPISODE, Title: "Next"}.Build()
+	start := int64(12 * time.Minute / time.Millisecond)
+	h.app.play(server, "atlas-s2e3", capiv1.PlaybackOptions_builder{StartPositionMs: &start}.Build(), next)
+	h.settle()
+	v := h.video
+	playing := mpv.State{Loaded: true, Position: 12 * time.Minute, Duration: 42 * time.Minute, Speed: 1, Tracks: tracks}
+	v.emit(playing)
+	h.settle()
+	key := func(k ui.Key) {
+		t.Helper()
+		h.tt.Key(0, k)
+		h.settle()
+	}
+	focused := func(label, after string) {
+		t.Helper()
+		if !h.tt.Focused(label) {
+			t.Fatalf("after %s: %q has no focus; texts = %q", after, label, h.tt.Texts())
+		}
+	}
+	shown := func() bool {
+		_, ok := h.tt.Find("Next Episode")
+		return ok
+	}
+	// The controller has no way back, nor buttons to play, pause or seek.
+	for _, label := range []string{"Back", "Pause", "Full Screen"} {
+		if _, ok := h.tt.Find(label); ok {
+			t.Errorf("the TV mode's controller shows %q", label)
+		}
+	}
+	h.save(shots, "tv-player")
+
+	// Down moves focus into the row, along which left and right move.
+	key(ui.KeyDown)
+	focused("Next Episode", "down")
+	key(ui.KeyRight)
+	focused("Subtitles", "right from Next Episode")
+	key(ui.KeyRight)
+	focused("Audio", "right from Subtitles")
+	key(ui.KeyRight)
+	focused("Audio", "right from the row's last")
+	// The panel opens with focus on its current choice, and closing it
+	// returns focus to its button.
+	key(ui.KeyEnter)
+	if p := h.app.playerOf(nil); p.panel != tabAudio {
+		t.Fatalf("panel = %v, want = audio", p.panel)
+	}
+	focused("English Stereo", "opening the panel")
+	h.save(shots, "tv-player-audio")
+	// Focus keeps within the panel.
+	key(ui.KeyDown)
+	focused("Japanese", "down in the panel")
+	key(ui.KeyDown)
+	key(ui.KeyDown)
+	if h.tt.Focused("Audio") || h.tt.Focused("Next Episode") {
+		t.Fatal("focus left the panel")
+	}
+	key(ui.KeyEscape)
+	if p := h.app.playerOf(nil); p == nil || p.panel != tabNone {
+		t.Fatal("back did not close the panel alone")
+	}
+	focused("Audio", "closing the panel")
+
+	// Up leaves the row; left and right seek, and select pauses, keeping
+	// the controller up, and plays, hiding it.
+	key(ui.KeyUp)
+	if h.tt.Focused("Audio") {
+		t.Fatal("up did not leave the row")
+	}
+	key(ui.KeyLeft)
+	if !v.has("seek 710.000 absolute+exact") {
+		t.Errorf("commands = %q, want a seek 10 s earlier", v.commands)
+	}
+	key(ui.KeyEnter)
+	if !v.has("set pause yes") {
+		t.Errorf("commands = %q, want the pause", v.commands)
+	}
+	paused := playing
+	paused.Paused = true
+	v.emit(paused)
+	h.settle()
+	if !shown() {
+		t.Error("the controller hid while paused")
+	}
+	key(ui.KeyEnter)
+	if !v.has("set pause no") {
+		t.Errorf("commands = %q, want the play", v.commands)
+	}
+	v.emit(playing)
+	h.settle()
+	if shown() {
+		t.Error("playing on did not hide the controller")
+	}
+
+	// Back hides the controller, then leaves the player.
+	key(ui.KeyDown)
+	if !shown() {
+		t.Fatal("down did not show the controller")
+	}
+	key(ui.KeyEscape)
+	if shown() || h.app.playerOf(nil) == nil {
+		t.Fatal("back did not hide the controller alone")
+	}
+	key(ui.KeyEscape)
+	if h.app.playerOf(nil) != nil {
+		t.Error("back did not leave the player")
+	}
+}

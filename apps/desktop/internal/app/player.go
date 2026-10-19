@@ -113,6 +113,16 @@ type player struct {
 	// the title it was given.
 	win   Window
 	title string
+	// hidden tells that the TV mode's back or play hid the controller,
+	// until a key is pressed or the pointer moves (docs/tv.md §7).
+	hidden bool
+	// want is the button of the controller's row the TV mode focuses next,
+	// its place in the row plus one, -1 taking focus off the row and 0
+	// none; rowAt is the row's button with focus, -1 for none, rowLen how
+	// many buttons the row has, and opener the one that opened the panel.
+	// focusChoice is for how many frames more the panel focuses its
+	// current choice as it opens.
+	want, rowAt, rowLen, opener, focusChoice int
 }
 
 // playerOf returns the player showing in win, nil for the app's window.
@@ -158,7 +168,7 @@ func (a *App) playIn(win Window, server, item string, options *capiv1.PlaybackOp
 	if options == nil {
 		options = &capiv1.PlaybackOptions{}
 	}
-	p := &player{server: server, item: item, next: next, options: options, input: time.Now(), win: win}
+	p := &player{server: server, item: item, next: next, options: options, win: win}
 	a.players = append(a.players, p)
 	if win != nil {
 		win.Focus()
@@ -314,7 +324,8 @@ func (a *App) playerStateChanged(p *player, prev mpv.State) {
 		}()
 	}
 	if s.Paused != prev.Paused {
-		p.input = time.Now()
+		// The controller shows a while from the next frame.
+		p.input = time.Time{}
 	}
 	if s.Ended && !prev.Ended {
 		if len(p.next) > 0 && a.autoplayNext() {
@@ -489,11 +500,15 @@ func (a *App) playerKeys(c *ui.Context, p *player) {
 	pressed := func(keys ...ui.Key) bool {
 		for _, k := range keys {
 			if c.Shortcut(0, k) {
-				p.input = time.Now()
+				p.input, p.hidden = c.Now(), false
 				return true
 			}
 		}
 		return false
+	}
+	if style.TV(c) {
+		a.tvPlayerKeys(c, p, pressed)
+		return
 	}
 	switch {
 	case pressed(ui.KeyEscape):
@@ -516,6 +531,84 @@ func (a *App) playerKeys(c *ui.Context, p *player) {
 	case pressed(ui.KeyM):
 		a.setVideo(p, "mute", yesNo(!p.state.Muted))
 	}
+}
+
+// tvPlayerKeys handles the player's keys in the TV mode, as a remote's
+// (docs/tv.md §7): back closes the panel, then hides the controller, then
+// leaves; down shows the controller, and again moves focus into its row,
+// along which left and right move and which up leaves; elsewhere left and
+// right seek, and select pauses, keeping the controller up, or plays,
+// hiding it. The panel's choices take the arrows while it is open.
+func (a *App) tvPlayerKeys(c *ui.Context, p *player, pressed func(...ui.Key) bool) {
+	shown := p.controlsShown(c.Now())
+	switch {
+	case pressed(ui.KeyEscape, ui.KeyBackspace):
+		switch {
+		case p.panel != tabNone:
+			p.panel, p.want = tabNone, p.opener+1
+		case shown:
+			p.hidden, p.want = true, -1
+		default:
+			a.closePlayer(p, true)
+		}
+	case p.panel != tabNone:
+		c.SpatialFocus()
+	case p.rowAt >= 0:
+		switch {
+		case pressed(ui.KeyUp):
+			p.want = -1
+		case pressed(ui.KeyLeft):
+			if p.rowAt == 0 {
+				c.ShakeFocus()
+			} else {
+				p.want = p.rowAt
+			}
+		case pressed(ui.KeyRight):
+			if p.rowAt == p.rowLen-1 {
+				c.ShakeFocus()
+			} else {
+				p.want = p.rowAt + 2
+			}
+		case pressed(ui.KeyDown):
+			c.ShakeFocus()
+		}
+	case pressed(ui.KeyDown):
+		if shown {
+			p.want = 1
+		}
+	case pressed(ui.KeyLeft):
+		a.seekBy(p, -10*time.Second)
+	case pressed(ui.KeyRight):
+		a.seekBy(p, 10*time.Second)
+	case pressed(ui.KeyEnter, ui.KeySpace):
+		p.hidden = p.state.Paused
+		a.togglePause(p)
+	}
+}
+
+// controlsShown reports whether the controller shows at now: while the
+// panel is open or the item cannot play, and, unless hidden, while it is
+// paused or loading and for a while after the last input.
+func (p *player) controlsShown(now time.Time) bool {
+	return p.panel != tabNone || p.err != nil ||
+		!p.hidden && (p.state.Paused || !p.state.Loaded || now.Sub(p.input) < controlsTimeout)
+}
+
+// rowFocus makes b the next button of the controller's row in the TV
+// mode, focused as the keys move focus, and reports whether it has focus.
+func (p *player) rowFocus(b ui.Element) bool {
+	i := p.rowLen
+	p.rowLen++
+	b.FocusRing(false)
+	if p.want == i+1 {
+		b.Focus()
+		p.want = 0
+	}
+	if !b.Focused() {
+		return false
+	}
+	p.rowAt = i
+	return true
 }
 
 func yesNo(b bool) string {
@@ -602,12 +695,19 @@ func (a *App) playerView(c *ui.Context, p *player) {
 	if !a.playing(p) {
 		return
 	}
+	tv := style.TV(c)
+	p.rowAt, p.rowLen = -1, 0
 	load(a, &p.details, key("details", p.server, p.item), func(ctx context.Context) (*capiv1.Details, error) {
 		return a.getDetails(ctx, p.server, p.item)
 	})
 	now := c.Now()
+	if p.input.IsZero() {
+		// The controller shows as the player opens, and as it pauses or
+		// plays on.
+		p.input = now
+	}
 	idle := now.Sub(p.input)
-	shown := p.panel != tabNone || p.state.Paused || !p.state.Loaded || idle < controlsTimeout || p.err != nil
+	shown := p.controlsShown(now)
 	if shown && idle < controlsTimeout {
 		// Hidden then, until the pointer moves or a key is pressed.
 		c.After(controlsTimeout - idle)
@@ -616,13 +716,22 @@ func (a *App) playerView(c *ui.Context, p *player) {
 	root := ui.Box(c).Fill().Background(black)
 	if x, y, ok := root.PointerPosition(); ok && (x != p.pointer[0] || y != p.pointer[1]) {
 		p.pointer = [2]float32{x, y}
-		p.input = now
+		p.input, p.hidden = now, false
 	}
 	root.Children(func() {
 		if p.video != nil && p.video.View() != nil {
 			ui.Video(c, p.video.View()).Absolute().Top(0).Left(0).Right(0).Bottom(0)
 		}
 		surface := ui.Box(c).Absolute().Top(0).Left(0).Right(0).Bottom(0).DragWindow()
+		if tv && p.panel == tabNone {
+			// Focus off the controller's row is on an element of its own,
+			// which shows it nowhere and leaves select to the keys.
+			sink := ui.Box(c).Absolute().Top(0).Left(0).Size(1, 1).PassThrough().Focusable().FocusRing(false)
+			if p.want == -1 {
+				sink.Focus()
+				p.want = 0
+			}
+		}
 		if surface.DoubleClicked() {
 			a.toggleFullScreen(p)
 		} else if surface.Clicked() {
@@ -690,7 +799,7 @@ func (a *App) playerTopBar(c *ui.Context, p *player) {
 	bar := ui.Row(c).Absolute().Top(0).Left(0).Right(0).Padding(28, 20, 48).Gap(12).AlignItems(ui.Center).DragWindow().
 		LinearGradient(ui.LinearGradient{Angle: 180, From: ui.RGBA(0, 0, 0, 0.75), To: ui.RGBA(0, 0, 0, 0)})
 	bar.Children(func() {
-		if p.win == nil && playerButton(c, "back", style.T(c, "player.back"), false, false, 44).Clicked() {
+		if p.win == nil && !style.TV(c) && playerButton(c, "back", style.T(c, "player.back"), false, false, 44).Clicked() {
 			a.closePlayer(p, true)
 			return
 		}
@@ -715,6 +824,10 @@ func (a *App) playerBottomBar(c *ui.Context, p *player) {
 			{At: 0, Color: ui.RGBA(0, 0, 0, 0.85)}, {At: 0.5, Color: ui.RGBA(0, 0, 0, 0.4)}, {At: 1, Color: ui.RGBA(0, 0, 0, 0)},
 		}}).
 		Children(func() {
+			if style.TV(c) {
+				a.tvPlayerRow(c, p, total)
+				return
+			}
 			a.scrubber(c, p, total)
 			ui.Row(c).Gap(4).AlignItems(ui.Center).Children(func() {
 				label, icon := style.T(c, "player.pause"), "pause"
@@ -762,6 +875,85 @@ func (a *App) playerBottomBar(c *ui.Context, p *player) {
 				}
 			})
 		})
+}
+
+// tvPlayerRow builds the TV mode's timeline and, under it, the time and
+// the row of buttons focus moves into: the next episode, the subtitles
+// and the audio; the remote's keys play, pause and seek (docs/tv.md §7).
+func (a *App) tvPlayerRow(c *ui.Context, p *player, total time.Duration) {
+	white, black := ui.RGB(255, 255, 255), ui.RGB(0, 0, 0)
+	at := float32(0)
+	if total > 0 {
+		at = min(1, float32(p.state.Position.Seconds()/total.Seconds()))
+	}
+	ui.Box(c).FillWidth().Height(6).Label(style.T(c, "player.position")).Draw(func(pt *ui.Painter, r ui.Rect) {
+		pt.Fill(r, white.Alpha(0.25), 3)
+		pt.Fill(ui.Rect{X: r.X, Y: r.Y, W: r.W * at, H: r.H}, white, 3)
+	})
+	ui.Row(c).Gap(12).AlignItems(ui.Center).Margin(4, 0, 0).Children(func() {
+		style.Text(ui.Text(c, clock(p.state.Position)+" / "+clock(total)), style.Type(c).Callout).
+			TextColor(white.Alpha(0.85)).FontFeatures("tnum").SingleLine()
+		ui.Spacer(c)
+		// While the panel is open, focus keeps within it.
+		ui.Row(c).Gap(8).AlignItems(ui.Center).Disabled(p.panel != tabNone).Children(func() {
+			open := func(tab panelTab) {
+				p.input = c.Now()
+				p.opener = p.rowAt
+				p.panel = togglePanel(p.panel, tab)
+				p.focusChoice = 0
+				if p.panel != tabNone {
+					p.focusChoice = 3
+				}
+			}
+			if len(p.next) > 0 {
+				label := style.T(c, "player.nextEpisode")
+				b := ui.ButtonBase(c).Height(48).Padding(0, 20).Gap(8).Radius(24).AlignItems(ui.Center).
+					Background(white.Alpha(0.15)).Label(label)
+				color := white
+				if p.rowFocus(b) {
+					b.Background(white)
+					color = black
+				}
+				b.Children(func() {
+					ui.Icon(c, style.Icon("next", true)).Size(20, 20).TextColor(color)
+					style.Text(ui.Text(c, label), style.Type(c).Callout).FontWeight(600).TextColor(color).SingleLine()
+				})
+				if b.Clicked() {
+					a.playNext(p)
+				}
+			}
+			if len(p.playback.GetSubtitles()) > 0 {
+				on := p.playback.GetSubtitleStreamIndex() >= 0
+				if tvPlayerButton(c, p, "subtitles", style.T(c, "player.subtitles"), on, p.panel == tabSubtitles) {
+					open(tabSubtitles)
+				}
+			}
+			if tvPlayerButton(c, p, "audio", style.T(c, "player.audio"), false, p.panel != tabNone && p.panel != tabSubtitles) {
+				open(tabAudio)
+			}
+		})
+	})
+}
+
+// tvPlayerButton builds a round button of the TV mode's row, white with
+// focus, and reports whether it was pressed.
+func tvPlayerButton(c *ui.Context, p *player, icon, label string, fill, active bool) bool {
+	white := ui.RGB(255, 255, 255)
+	b := ui.ButtonBase(c).Size(44, 44).Radius(22).Center().Label(label)
+	color := white
+	switch {
+	case p.rowFocus(b):
+		b.Background(white)
+		color = ui.RGB(0, 0, 0)
+	case active:
+		b.Background(white.Alpha(0.2))
+	case b.Hovered():
+		b.Background(white.Alpha(0.15))
+	}
+	b.Children(func() {
+		ui.Icon(c, style.Icon(icon, fill)).Size(22, 22).TextColor(color)
+	})
+	return b.Clicked()
 }
 
 func togglePanel(open, tab panelTab) panelTab {
@@ -836,6 +1028,7 @@ func (a *App) playerPanel(c *ui.Context, p *player) {
 				if seg.Changed() {
 					p.panel = tabs[selected]
 				}
+				defer func() { p.focusChoice = max(p.focusChoice-1, 0) }()
 				ui.Scroll(c).Grow(1).MinHeight(0).Children(func() {
 					ui.Column(c).Padding(0, 8, 12).Children(func() {
 						switch p.panel {
@@ -845,7 +1038,7 @@ func (a *App) playerPanel(c *ui.Context, p *player) {
 							a.subtitlesTab(c, p)
 						case tabQuality:
 							for _, q := range qualities {
-								if choice(c.Key(q.key), qualityName(c, q), "", q.key == a.quality().key).Clicked() && q.key != a.quality().key {
+								if p.focusOpening(choice(c.Key(q.key), qualityName(c, q), "", q.key == a.quality().key), q.key == a.quality().key).Clicked() && q.key != a.quality().key {
 									a.prefs.Quality = q.key
 									a.savePreferences()
 									a.restart(p, func(*capiv1.PlaybackOptions) {})
@@ -886,7 +1079,7 @@ func (a *App) audioTab(c *ui.Context, p *player) {
 			details = append(details, fmt.Sprintf("%d ch", ch))
 		}
 		checked := p.playback.HasAudioStreamIndex() && s.GetIndex() == p.playback.GetAudioStreamIndex()
-		if choice(c.Key(key("audio", s.GetIndex())), name, strings.Join(details, " · "), checked).Clicked() && !checked {
+		if p.focusOpening(choice(c.Key(key("audio", s.GetIndex())), name, strings.Join(details, " · "), checked), checked).Clicked() && !checked {
 			index := s.GetIndex()
 			a.restart(p, func(o *capiv1.PlaybackOptions) { o.SetAudioStreamIndex(index) })
 		}
@@ -899,6 +1092,8 @@ func (a *App) audioTab(c *ui.Context, p *player) {
 			b := ui.ButtonBase(c.Key(key("speed", r))).Height(32).Padding(0, 12).Radius(16).Center().Label(label).Background(white.Alpha(0.1))
 			color := white
 			switch {
+			case tvLit(c, b):
+				color = ui.RGB(0, 0, 0)
 			case on:
 				b.Background(white)
 				color = ui.RGB(0, 0, 0)
@@ -921,7 +1116,7 @@ func (a *App) subtitlesTab(c *ui.Context, p *player) {
 	if !p.playback.HasSubtitleStreamIndex() {
 		current = -1
 	}
-	if choice(c.Key(key("sub", -1)), style.T(c, "player.subtitlesOff"), "", current < 0).Clicked() && current >= 0 {
+	if p.focusOpening(choice(c.Key(key("sub", -1)), style.T(c, "player.subtitlesOff"), "", current < 0), current < 0).Clicked() && current >= 0 {
 		a.restart(p, func(o *capiv1.PlaybackOptions) { o.SetSubtitleStreamIndex(-1) })
 	}
 	for _, s := range p.playback.GetSubtitles() {
@@ -932,7 +1127,7 @@ func (a *App) subtitlesTab(c *ui.Context, p *player) {
 			details = append(details, "Forced")
 		}
 		checked := s.GetStreamIndex() == current
-		if choice(c.Key(key("sub", s.GetStreamIndex())), name, strings.Join(details, " · "), checked).Clicked() && !checked {
+		if p.focusOpening(choice(c.Key(key("sub", s.GetStreamIndex())), name, strings.Join(details, " · "), checked), checked).Clicked() && !checked {
 			index := s.GetStreamIndex()
 			a.restart(p, func(o *capiv1.PlaybackOptions) { o.SetSubtitleStreamIndex(index) })
 		}
@@ -945,10 +1140,14 @@ func (a *App) subtitlesTab(c *ui.Context, p *player) {
 		delay := p.state.SubtitleDelay
 		step := func(label string, d time.Duration) {
 			b := ui.ButtonBase(c.Key(key("delay", label))).Size(32, 32).Radius(16).Center().Label(label).Background(white.Alpha(0.1))
-			if b.Hovered() {
+			color := white
+			switch {
+			case tvLit(c, b):
+				color = ui.RGB(0, 0, 0)
+			case b.Hovered():
 				b.Background(white.Alpha(0.2))
 			}
-			b.Children(func() { style.Text(ui.Text(c, label), style.Type(c).Headline).TextColor(white) })
+			b.Children(func() { style.Text(ui.Text(c, label), style.Type(c).Headline).TextColor(color) })
 			if b.Clicked() {
 				a.setVideo(p, "sub-delay", strconv.FormatFloat((delay+d).Seconds(), 'f', 3, 64))
 			}
@@ -999,7 +1198,11 @@ func panelHeading(c *ui.Context, title string) {
 func choice(c *ui.Context, name, details string, checked bool) ui.Element {
 	white := ui.RGB(255, 255, 255)
 	b := ui.ButtonBase(c).FillWidth().Padding(8, 10).Gap(12).Radius(10).AlignItems(ui.Center).Label(name)
-	if b.Hovered() {
+	color := white
+	switch {
+	case tvLit(c, b):
+		color = ui.RGB(0, 0, 0)
+	case b.Hovered():
 		b.Background(white.Alpha(0.1))
 	}
 	b.Children(func() {
@@ -1009,12 +1212,39 @@ func choice(c *ui.Context, name, details string, checked bool) ui.Element {
 			}
 		})
 		ui.Column(c).Grow(1).MinWidth(0).Children(func() {
-			style.Text(ui.Text(c, name), style.Type(c).Callout).TextColor(white).SingleLine()
+			style.Text(ui.Text(c, name), style.Type(c).Callout).TextColor(color).SingleLine()
 			if details != "" {
-				style.Text(ui.Text(c, details), style.Type(c).Caption).TextColor(white.Alpha(0.6)).SingleLine()
+				style.Text(ui.Text(c, details), style.Type(c).Caption).TextColor(color.Alpha(0.6)).SingleLine()
 			}
 		})
 	})
+	return b
+}
+
+// tvLit turns b white in the TV mode while it has focus, its content to
+// be black (docs/tv.md §4), and reports whether it did.
+func tvLit(c *ui.Context, b ui.Element) bool {
+	if !style.TV(c) {
+		return false
+	}
+	b.FocusRing(false)
+	if !b.Focused() {
+		return false
+	}
+	b.Background(ui.RGB(255, 255, 255))
+	return true
+}
+
+// focusOpening gives b, the panel's current choice, focus as the panel
+// opens in the TV mode (docs/tv.md §7).
+func (p *player) focusOpening(b ui.Element, current bool) ui.Element {
+	switch {
+	case !current || p.focusChoice == 0:
+	case b.Focused():
+		p.focusChoice = 0
+	default:
+		b.Focus()
+	}
 	return b
 }
 
