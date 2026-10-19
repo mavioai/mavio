@@ -169,7 +169,7 @@ internal fun SidebarPanel(
                 }
                 list.forEach { library ->
                     val p = libraryPlace(library)
-                    NavItem(rail, libraryIcon(library.kind), null, library.name, place == p, iconTint = colors.accentText) { onSelect(p) }
+                    NavItem(rail, libraryIcon(library.kind), null, library.name, place == p) { onSelect(p) }
                 }
             }
         }

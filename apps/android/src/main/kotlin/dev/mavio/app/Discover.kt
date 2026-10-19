@@ -299,7 +299,7 @@ private fun StatusMark(status: MediaStatus, modifier: Modifier) {
         if (available) R.drawable.ic_check else R.drawable.ic_pending,
         modifier
             .alpha(if (status == MediaStatus.MEDIA_STATUS_PARTIALLY_AVAILABLE) 0.7f else 1f)
-            .background(if (available) theme.colors.accent else theme.colors.scrim, CircleShape)
+            .background(if (available) theme.colors.success else theme.colors.scrim, CircleShape)
             .padding(2.dp),
         size = 16.dp,
         tint = Color.White,

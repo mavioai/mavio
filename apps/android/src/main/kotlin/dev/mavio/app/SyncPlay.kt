@@ -258,7 +258,7 @@ internal fun GroupIndicator(model: AppModel, modifier: Modifier) {
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        MavioIcon(R.drawable.ic_users_fill, size = 18.dp, tint = colors.accentText)
+        MavioIcon(R.drawable.ic_users_fill, size = 18.dp, tint = colors.textPrimary)
         Text(chip(j.group), style = theme.type.footnote.text, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
     }
     if (open) SyncPlaySheet(model, j.serverId, null) { open = false }

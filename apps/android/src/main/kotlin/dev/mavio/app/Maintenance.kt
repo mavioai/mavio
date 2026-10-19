@@ -1060,10 +1060,10 @@ private fun IssueBadge(status: IssueStatus) {
     val open = status == IssueStatus.ISSUE_STATUS_OPEN
     Text(
         stringResource(if (open) R.string.issues_open else R.string.issues_resolved),
-        Modifier.background(if (open) theme.colors.accent else Color(0xFF34C759), CircleShape).padding(horizontal = 8.dp, vertical = 2.dp),
+        Modifier.background(if (open) theme.colors.button else Color(0xFF34C759), CircleShape).padding(horizontal = 8.dp, vertical = 2.dp),
         style = theme.type.caption.text,
         fontWeight = FontWeight.SemiBold,
-        color = if (open) theme.colors.onAccent else Color.White,
+        color = if (open) theme.colors.onButton else Color.White,
     )
 }
 

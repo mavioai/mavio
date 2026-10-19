@@ -548,7 +548,7 @@ private fun AddressStep(model: AppModel, busy: Boolean, error: String?, onProbe:
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
-                    MavioIcon(R.drawable.ic_server, size = 22.dp, tint = theme.colors.accent)
+                    MavioIcon(R.drawable.ic_server, size = 22.dp, tint = theme.colors.textPrimary)
                     Column {
                         Text(f.name, style = theme.type.headline.text, maxLines = 1)
                         Text(f.address, style = theme.type.footnote.text, color = theme.colors.textSecondary, maxLines = 1)
