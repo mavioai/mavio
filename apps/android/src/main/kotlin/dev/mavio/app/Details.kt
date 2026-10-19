@@ -1,11 +1,5 @@
 package dev.mavio.app
 
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.TextLinkStyles
-import androidx.compose.ui.text.withLink
-import androidx.compose.ui.text.LinkAnnotation
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.foundation.layout.offset
 import android.text.format.DateFormat
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -23,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -37,8 +32,10 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -53,17 +50,25 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.LinkAnnotation
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextLinkStyles
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withLink
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -76,12 +81,15 @@ import dev.mavio.core.Details
 import dev.mavio.core.Episode
 import dev.mavio.core.SeriesStatus
 import dev.mavio.core.Source
+import dev.mavio.design.DarkColors
 import dev.mavio.design.MavioRadius
 import dev.mavio.design.MavioSpacing
+import dev.mavio.design.TabletLayout
 import dev.mavio.ui.Artwork
 import dev.mavio.ui.ButtonKind
 import dev.mavio.ui.CircleButton
 import dev.mavio.ui.ItemCard
+import dev.mavio.ui.LocalTheme
 import dev.mavio.ui.Logo
 import dev.mavio.ui.MavioButton
 import dev.mavio.ui.MavioIcon
@@ -220,14 +228,21 @@ private fun DetailsContent(model: AppModel, details: Details) {
             navigator.play(card.serverId, n.itemId, n.name, null, start)
         }
     }
-    LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(top = LocalTopInset.current, bottom = LocalBottomInset.current + MavioSpacing.s40)) {
-        item(key = "header") { Header(details, source, several = signedIn.size > 1) }
-        item(key = "actions") {
+    // The wide layout's hero reaches the content's top and holds the actions.
+    val wide = theme.layout == TabletLayout
+    val actions = @Composable { Actions(model, details, next, own, copies, source, onSource = { sourceIndex = own.indexOf(it) }, play = play, wide = wide) }
+    LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(top = if (wide) 0.dp else LocalTopInset.current, bottom = LocalBottomInset.current + MavioSpacing.s40)) {
+        if (wide) {
+            item(key = "header") { WideHeader(details, source, several = signedIn.size > 1, actions) }
+        } else {
+            item(key = "header") { Header(details, source, several = signedIn.size > 1) }
+        }
+        if (!wide) item(key = "actions") {
             Column(
                 Modifier.padding(start = theme.layout.margin, end = theme.layout.margin, top = MavioSpacing.s16),
                 verticalArrangement = Arrangement.spacedBy(MavioSpacing.s16),
             ) {
-                Actions(model, details, next, own, copies, source, onSource = { sourceIndex = own.indexOf(it) }, play = play)
+                actions()
                 details.overview?.let { InlineOverview(it) }
             }
         }
@@ -327,8 +342,57 @@ private fun Header(details: Details, source: Source?, several: Boolean) {
     }
 }
 
+/**
+ * The wide layout's hero, as the web UI's: the artwork across the content
+ * at 70% of the window's height, 520 to 700 dp but no taller than the
+ * window, shaded from the left and the bottom, and at its lower left the
+ * poster when there is no backdrop, the text, the overview and the actions.
+ */
 @Composable
-private fun HeaderText(details: Details, source: Source?, several: Boolean, modifier: Modifier) {
+private fun WideHeader(details: Details, source: Source?, several: Boolean, actions: @Composable () -> Unit) {
+    val card = details.card
+    val image = details.backdrop ?: if (card.kind == CardKind.EPISODE) card.thumb else null
+    val window = with(LocalDensity.current) { LocalWindowInfo.current.containerSize.height.toDp() }
+    val height = (window * 0.7f).coerceIn(520.dp, 700.dp).coerceAtMost(window)
+    Box(
+        Modifier
+            .fillMaxWidth()
+            .height(height)
+            .clipToBounds()
+            .background(theme.colors.surface),
+    ) {
+        HeaderArt(image?.url, card.poster?.url, card.kind)
+        Box(
+            Modifier
+                .fillMaxSize()
+                .background(Brush.horizontalGradient(0f to Color.Black.copy(alpha = 0.82f), 0.45f to Color.Black.copy(alpha = 0.45f), 0.75f to Color.Transparent)),
+        )
+        Box(Modifier.fillMaxSize().background(Brush.verticalGradient(0.45f to Color.Transparent, 1f to Color.Black.copy(alpha = 0.75f))))
+        // Over the artwork the colors are the dark appearance's.
+        CompositionLocalProvider(LocalTheme provides theme.copy(colors = DarkColors), LocalContentColor provides DarkColors.textPrimary) {
+            Row(
+                Modifier
+                    .align(Alignment.BottomStart)
+                    .padding(horizontal = MavioSpacing.s40, vertical = MavioSpacing.s32),
+                horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s40),
+                verticalAlignment = Alignment.Bottom,
+            ) {
+                val poster = card.poster
+                if (image == null && poster != null) {
+                    Artwork(poster.url, Modifier.width(200.dp).aspectRatio(2f / 3f).shadow(12.dp, RoundedCornerShape(8.dp)).clip(RoundedCornerShape(8.dp)))
+                }
+                Column(Modifier.widthIn(max = 640.dp), verticalArrangement = Arrangement.spacedBy(MavioSpacing.s16)) {
+                    HeaderText(details, source, several, Modifier, wide = true, short = height < 520.dp)
+                    details.overview?.let { InlineOverview(it) }
+                    actions()
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun HeaderText(details: Details, source: Source?, several: Boolean, modifier: Modifier, wide: Boolean = false, short: Boolean = false) {
     val card = details.card
     val navigator = LocalNavigator.current
     val inSeries = card.kind == CardKind.EPISODE || card.kind == CardKind.SEASON
@@ -353,10 +417,12 @@ private fun HeaderText(details: Details, source: Source?, several: Boolean, modi
             )
         }
         val title = @Composable {
-            Text(card.title, fontSize = 34.sp, lineHeight = 36.sp, fontWeight = FontWeight.Bold, color = Color.White)
+            // A hero shorter than a window's 70% keeps the title as a phone's, clear of Back.
+            val large = wide && !short
+            Text(card.title, fontSize = if (large) 52.sp else 34.sp, lineHeight = if (large) 55.sp else 36.sp, fontWeight = FontWeight.Bold, color = Color.White)
         }
         if (!inSeries && details.logo != null) {
-            Logo(details.logo?.url, card.title, Modifier.heightIn(max = 112.dp).fillMaxWidth(0.8f), fallback = title)
+            Logo(details.logo?.url, card.title, Modifier.heightIn(max = if (short) 72.dp else 112.dp).fillMaxWidth(0.8f), fallback = title)
         } else {
             title()
         }
@@ -472,6 +538,7 @@ private fun Actions(
     source: Source?,
     onSource: (Source) -> Unit,
     play: (NextUp, Duration?) -> Unit,
+    wide: Boolean = false,
 ) {
     val card = details.card
     val navigator = LocalNavigator.current
@@ -481,25 +548,30 @@ private fun Actions(
     var favorite by remember(card) { mutableStateOf(card.favorite) }
     var played by remember(card) { mutableStateOf(card.played) }
     Column(verticalArrangement = Arrangement.spacedBy(MavioSpacing.s12)) {
-        if (next != null) {
-            val label = when {
-                next.episode != null && next.resumable -> stringResource(R.string.item_resume_episode, next.episode)
-                next.episode != null -> stringResource(R.string.item_play_episode, next.episode)
-                next.resumable -> stringResource(R.string.item_resume)
-                else -> stringResource(R.string.item_play)
+        val primary = @Composable { modifier: Modifier ->
+            if (next != null) {
+                val label = when {
+                    next.episode != null && next.resumable -> stringResource(R.string.item_resume_episode, next.episode)
+                    next.episode != null -> stringResource(R.string.item_play_episode, next.episode)
+                    next.resumable -> stringResource(R.string.item_resume)
+                    else -> stringResource(R.string.item_play)
+                }
+                MavioButton(
+                    label,
+                    { play(next, if (next.resumable) next.position else null) },
+                    modifier,
+                    icon = R.drawable.ic_play_fill,
+                    large = true,
+                )
             }
-            MavioButton(
-                label,
-                { play(next, if (next.resumable) next.position else null) },
-                Modifier.fillMaxWidth().height(48.dp),
-                icon = R.drawable.ic_play_fill,
-                large = true,
-            )
         }
+        // Wide, Play leads the row of buttons; on a phone it spans the screen above them.
+        if (!wide) primary(Modifier.fillMaxWidth().height(48.dp))
         FlowRow(
             horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s12),
             verticalArrangement = Arrangement.spacedBy(MavioSpacing.s12),
         ) {
+            if (wide) primary(Modifier.height(44.dp))
             if (next != null && next.resumable) {
                 CircleButton(R.drawable.ic_previous, stringResource(R.string.item_from_start), { play(next, Duration.ZERO) })
             }
