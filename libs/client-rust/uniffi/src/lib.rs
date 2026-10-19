@@ -965,6 +965,12 @@ impl Client {
             .await
     }
 
+    /// Searches one server; its error is in the results.
+    pub async fn search_server(&self, server_id: String, query: String) -> Result<SearchResults> {
+        self.call(|c| async move { c.search_server(&server_id, &query).await })
+            .await
+    }
+
     /// Searches every server at once, the results in the user's order of
     /// servers.
     pub async fn search(&self, query: String) -> Result<Vec<SearchResults>> {

@@ -371,6 +371,16 @@ pub struct SearchResults {
     pub error: Option<String>,
 }
 
+/// The request of a search on one server.
+fn search_request(query: &str) -> ListItemsRequest {
+    ListItemsRequest {
+        search: Some(query.trim().to_owned()),
+        kinds: SEARCH_KINDS.iter().map(|&k| k.into()).collect(),
+        limit: Some(SEARCH_LIMIT),
+        ..Default::default()
+    }
+}
+
 /// A download, as the Downloads screen shows it.
 #[derive(Debug, Clone, PartialEq)]
 pub struct DownloadEntry {
@@ -953,22 +963,48 @@ impl Core {
         }))
     }
 
+    /// Searches one server, for screens that show each server's results as
+    /// it answers; its error is in the results.
+    pub async fn search_server(&self, server_id: &str, query: &str) -> Result<SearchResults> {
+        let server = self.servers.get(server_id)?;
+        let mut out = SearchResults {
+            server_id: server.id,
+            server_name: server.name,
+            cards: Vec::new(),
+            error: None,
+        };
+        let found = match self.servers.connection(server_id) {
+            Ok(conn) => conn
+                .items()
+                .list_items(search_request(query))
+                .await
+                .map_err(Error::from)
+                .map(|r| {
+                    let r = r.into_owned();
+                    r.items
+                        .iter()
+                        .map(|i| Card::new(&conn, server_id, i))
+                        .collect()
+                }),
+            Err(e) => Err(e),
+        };
+        match found {
+            Ok(cards) => out.cards = cards,
+            Err(e) => out.error = Some(e.to_string()),
+        }
+        Ok(out)
+    }
+
     /// Searches every signed-in server at once, the results in the user's
     /// order of servers.
     pub async fn search(&self, query: &str) -> Result<Vec<SearchResults>> {
-        let query = query.trim();
         let list = self.servers.list()?;
         let mut calls = JoinSet::new();
         let mut out: Vec<SearchResults> = Vec::with_capacity(list.len());
         for (i, s) in list.into_iter().enumerate() {
             let error = match self.servers.connection(&s.id) {
                 Ok(conn) => {
-                    let req = ListItemsRequest {
-                        search: Some(query.to_owned()),
-                        kinds: SEARCH_KINDS.iter().map(|&k| k.into()).collect(),
-                        limit: Some(SEARCH_LIMIT),
-                        ..Default::default()
-                    };
+                    let req = search_request(query);
                     let server_id = s.id.clone();
                     calls.spawn(async move {
                         let r = conn.items().list_items(req).await.map_err(Error::from);
@@ -1852,6 +1888,13 @@ mod tests {
         assert_eq!(got.len(), 2);
         assert_eq!(got[0].cards[0].item_id, "a1", "got = {got:?}");
         assert!(got[1].error.is_some(), "got = {:?}", got[1]);
+
+        // One server at a time, as screens drawing each as it answers ask.
+        let one = core.search_server("sa", " brazil ").await.unwrap();
+        assert_eq!(one.cards[0].item_id, "a1", "got = {one:?}");
+        let failed = core.search_server("sb", "brazil").await.unwrap();
+        assert_eq!(failed.server_name, "Friend");
+        assert!(failed.error.is_some(), "got = {failed:?}");
     }
 
     #[tokio::test]
