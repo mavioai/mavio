@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- The app icon's mark (libs/design/brand/mark.svg), the ribbon M in the
-     brand's gradient, sized as on app-icon-dark.svg within the adaptive
-     icon's safe zone. -->
+     brand's gradient, sized as on app-icon-dark.svg: 59 % of the 72 dp the
+     adaptive icon shows, its corners within the 66 dp safe zone. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:aapt="http://schemas.android.com/aapt"
     android:width="108dp"
@@ -9,10 +9,10 @@
     android:viewportWidth="108"
     android:viewportHeight="108">
     <group
-        android:scaleX="0.5625"
-        android:scaleY="0.5625"
-        android:translateX="25.875"
-        android:translateY="25.875">
+        android:scaleX="0.6640625"
+        android:scaleY="0.6640625"
+        android:translateX="20.796875"
+        android:translateY="20.796875">
         <path android:pathData="M18,18H34V82H18ZM66,18H82V82H66Z">
             <aapt:attr name="android:fillColor">
                 <gradient android:type="linear" android:startX="18" android:startY="14" android:endX="82" android:endY="86">
