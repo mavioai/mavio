@@ -205,6 +205,23 @@ describe("gateway", () => {
 		expect(state).toBe(AiLoginState.CANCELED);
 		expect(await code(ai.startAiLogin({ provider: "keyed" }))).toBe(Code.NotFound);
 	});
+
+	test("cancels the running login when another starts", async () => {
+		const { ai } = await start([oauthProvider()]);
+		const first = await ai.startAiLogin({ provider: "example" });
+		for await (const login of ai.watchAiLogin({ loginId: first.loginId })) if (login.prompt) break;
+		const second = await ai.startAiLogin({ provider: "example" });
+		let state = AiLoginState.UNSPECIFIED;
+		for await (const login of ai.watchAiLogin({ loginId: first.loginId })) state = login.state;
+		expect(state).toBe(AiLoginState.CANCELED);
+		for await (const login of ai.watchAiLogin({ loginId: second.loginId })) {
+			if (!login.prompt) continue;
+			await ai.answerAiLogin({ loginId: second.loginId, promptId: login.prompt.id, value: "7" });
+			break;
+		}
+		for await (const login of ai.watchAiLogin({ loginId: second.loginId })) state = login.state;
+		expect(state).toBe(AiLoginState.SUCCEEDED);
+	});
 });
 
 /** A provider that is available once its key is set. */

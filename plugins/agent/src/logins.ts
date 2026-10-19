@@ -29,6 +29,8 @@ interface Login {
 	error?: string;
 	abort: AbortController;
 	ended?: number;
+	/** Settles once the login has ended and let go of what it held. */
+	done: Promise<void>;
 	/** Wakes the watches of the login when it changes. */
 	waiters: Set<() => void>;
 }
@@ -59,11 +61,22 @@ export class Logins {
 		this.#now = now;
 	}
 
-	/** Starts logging in to a provider with type and returns the login's ID. */
+	/**
+	 * Starts logging in to a provider with type and returns the login's ID.
+	 * One login runs at a time: a new one cancels those still running, which
+	 * an administrator who left them can no longer finish, and starts once they
+	 * have ended, since flows such as ChatGPT's listen on a fixed local port.
+	 */
 	start(providerId: string, type: AuthType): string {
 		this.#expire();
+		const running = [...this.#logins.values()].filter((l) => l.state === "running");
+		for (const l of running) this.#cancel(l);
 		const id = randomUUID();
-		const login: Login = { state: "running", events: [], abort: new AbortController(), waiters: new Set() };
+		let ended = () => {};
+		const done = new Promise<void>((resolve) => {
+			ended = resolve;
+		});
+		const login: Login = { state: "running", events: [], abort: new AbortController(), done, waiters: new Set() };
 		this.#logins.set(id, login);
 		const interaction = {
 			signal: login.abort.signal,
@@ -104,15 +117,21 @@ export class Logins {
 				changed(login);
 			},
 		};
-		this.#models.login(providerId, type, interaction, this.#options).then(
-			() => this.#end(login, "succeeded"),
-			(error: unknown) =>
-				this.#end(
-					login,
-					login.abort.signal.aborted ? "canceled" : "failed",
-					error instanceof Error ? error.message : String(error),
-				),
-		);
+		Promise.all(running.map((l) => l.done))
+			.then(() => {
+				if (login.abort.signal.aborted) throw new Error("login canceled");
+				return this.#models.login(providerId, type, interaction, this.#options);
+			})
+			.then(
+				() => this.#end(login, "succeeded"),
+				(error: unknown) =>
+					this.#end(
+						login,
+						login.abort.signal.aborted ? "canceled" : "failed",
+						error instanceof Error ? error.message : String(error),
+					),
+			)
+			.finally(ended);
 		return id;
 	}
 
@@ -164,11 +183,14 @@ export class Logins {
 	cancel(id: string): boolean {
 		const login = this.#logins.get(id);
 		if (!login) return false;
-		if (login.state === "running") {
-			login.abort.abort();
-			login.prompt?.reject(new Error("login canceled"));
-		}
+		this.#cancel(login);
 		return true;
+	}
+
+	#cancel(login: Login): void {
+		if (login.state !== "running") return;
+		login.abort.abort();
+		login.prompt?.reject(new Error("login canceled"));
 	}
 
 	/** Cancels every running login. */
