@@ -715,6 +715,7 @@ flowchart TD
     - [x] 转码（`apps/web/src/screens/admin/transcoding.tsx`）：硬件加速、编码器、色调映射、去隔行、缩混与转码文件夹（`TranscodingSettings`）
     - [x] 媒体库（`apps/web/src/screens/admin/libraries.tsx`、`libs/client-ts/src/admin.ts`）：添加、编辑、删除与扫描媒体库，带目录选择器（`LibraryService`、`ListDirectory`）
     - [ ] 与 iOS 一致的“媒体库”中各媒体库的扫描进度（[客户端 §6.3.4](clients.zh-CN.md)），Web UI、Android 与桌面端：使用 `ScanProgressChanged` 事件与媒体库的 `scan_progress`，取代扫描已开始的提示
+    - [ ] 与 iOS 一致的“自动”画质（[客户端 §6.5](clients.zh-CN.md)），Web UI、Android 与桌面端：局域网中的服务器 100 Mbit/s，其他 40 Mbit/s；Android 与桌面端使用核心的 `is_local_address`，Web UI 依据页面的主机
     - [ ] 媒体库按顺序排列的提供者，以及其在首页与“推荐”中的行（`ProviderOrder`、`LibraryHubs`）
     - [x] 存储（`apps/web/src/screens/admin/storage.tsx`、`libs/client-ts/src/storage.ts`）：rclone 远端及其授权步骤，以及离线客户端（`StorageService`）；在目录选择器中浏览 rclone 远端的文件夹
     - [x] 用户（`apps/web/src/screens/admin/users.tsx`、`sign-in.tsx` 中的 `InviteScreen`）：添加、编辑与删除用户，其登录方式，邀请链接及位于 `/invite` 的邀请页面，用户的媒体库与家长分级（`UserService`、`ListRatings`、`AuthService.GetInvitation`、`AcceptInvitation`）
@@ -775,6 +776,7 @@ flowchart TD
   - [x] 与 Web UI 手机布局一致的设置“监控与维护”菜单：活动（正在播放的内容与按严重程度筛选的最近活动），问题（按状态筛选，问题的评论、添加评论、解决、重新打开与删除），任务（运行任务，按状态筛选的作业），日志（按级别、时间段与关键词筛选），备份（创建、保存到设备的文件与删除）；不含获取媒体与插件的任务和作业
   - [x] 与 Web UI 手机布局一致的设置媒体菜单中的媒体库与存储：媒体库列表与扫描，媒体库的名称、类型、文件夹及其存储类别，浏览服务器与 rclone 远端的文件夹，元数据与扫描设置，添加与删除；服务器的磁盘及用量、rclone 状态，远端及其可达性与用量，用类型的设置与配置问题（含扫描二维码）添加远端，修改、重新配置、浏览文件夹与删除远端；不含为获取服务的云盘离线下载
   - [x] “媒体库”中各媒体库的扫描进度（[客户端 §6.3.4](clients.zh-CN.md)）：读取文件夹或分析媒体及完成数与总数和进度条，来自服务端的 `ScanProgressChanged` 事件，结束后显示“扫描完成”
+  - [x] “自动”画质对局域网中的服务器允许 100 Mbit/s，其他情况 40 Mbit/s（[客户端 §6.5](clients.zh-CN.md)），由核心的 `is_local_address` 判断
   - [x] 与 Web UI 手机布局一致的设置“用户”页：用户列表及其标记与上次登录，用户的名称、状态、限制配置、可见的媒体库、分级与标签、下载、转码、码率与串流数、报告问题，其密码、PIN、身份验证器与通行密钥，将受管用户转为成员的链接，以及删除用户；添加成员或受管用户，服务器邀请链接的创建、复制与撤销；mavio.dev 账户按 mavio.dev 的设置显示；不含用户可请求的内容
   - [x] 在设备页控制用户的另一台设备，与 Web UI 的遥控器一致：正在播放的内容及可拖动的进度、播放按钮、音量，以及在其上显示的消息
   - [x] 在自管账户的服务器上凭头像与 PIN 键盘切换用户，以及账户页的登录与安全：修改密码、验证器应用、PIN 与通行密钥
