@@ -2,36 +2,34 @@ package dev.mavio.app
 
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ContentTransform
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.ContentTransform
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.animation.togetherWith
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.runtime.mutableStateMapOf
-import dev.mavio.design.TabletLayout
-import dev.mavio.ui.LocalTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -44,35 +42,34 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.movableContentOf
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
-import androidx.compose.runtime.key
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.BlurredEdgeTreatment
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.graphics.TransformOrigin
-import kotlin.math.roundToInt
-import androidx.compose.ui.unit.Constraints
-import androidx.compose.ui.graphics.luminance
-import dev.mavio.ui.Artwork
-import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.draw.BlurredEdgeTreatment
-import androidx.compose.ui.draw.blur
-import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -91,13 +88,17 @@ import dev.mavio.core.AppModel
 import dev.mavio.core.Card
 import dev.mavio.core.SignInState
 import dev.mavio.design.MavioSpacing
+import dev.mavio.design.TabletLayout
+import dev.mavio.ui.Artwork
+import dev.mavio.ui.LocalTheme
 import dev.mavio.ui.MavioIcon
 import dev.mavio.ui.R
-import dev.mavio.ui.blurAvailable
 import dev.mavio.ui.StatusView
 import dev.mavio.ui.Wordmark
+import dev.mavio.ui.blurAvailable
 import dev.mavio.ui.text
 import dev.mavio.ui.theme
+import kotlin.math.roundToInt
 
 /** A screen pushed: it slides in from the end over the one before, which moves aside a little. */
 private fun pushTransition(): ContentTransform =
@@ -311,14 +312,11 @@ private fun Shell(model: AppModel) {
     // The player and the sign-in take the whole screen.
     val chrome = stack.lastOrNull().let { it !is Route.Player && it != Route.AddServer }
     FollowGroup(model, navigator)
-    BoxWithConstraints(Modifier.fillMaxSize().background(theme.colors.background)) {
-        val wide = maxWidth >= 600.dp
-        // The wide layout's settings have a sidebar of their own and show a section beside it.
-        val settings = wide && place == Route.Settings
-        LaunchedEffect(settings, stack.size) { if (settings && stack.size == 1) stack.add(FIRST_SETTING) }
-        // Above the section the sidebar chose, Back leads to the page under it.
-        val backShown = chrome && stack.size > if (settings) 2 else 1
-        val content = @Composable { modifier: Modifier, rootInset: Dp ->
+    // The screens move between the phone's layout and the wide one with their state.
+    val screens = remember {
+        movableContentOf { modifier: Modifier, rootInset: Dp, settings: Boolean ->
+            val stack = stacks[place] ?: stacks.getValue(Route.Home)
+            val bars = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
             // Keyed by the place's text, which the saved state can hold.
             saved.SaveableStateProvider(place.toString()) {
                 key(place) {
@@ -342,6 +340,15 @@ private fun Shell(model: AppModel) {
                 }
             }
         }
+    }
+    BoxWithConstraints(Modifier.fillMaxSize().background(theme.colors.background)) {
+        val wide = maxWidth >= 600.dp
+        // The wide layout's settings have a sidebar of their own and show a section beside it.
+        val settings = wide && place == Route.Settings
+        LaunchedEffect(settings, stack.size) { if (settings && stack.size == 1) stack.add(FIRST_SETTING) }
+        // Above the section the sidebar chose, Back leads to the page under it.
+        val backShown = chrome && stack.size > if (settings) 2 else 1
+        val content = @Composable { modifier: Modifier, rootInset: Dp -> screens(modifier, rootInset, settings) }
         if (wide) {
             // Up to 840 dp the sidebar is a rail whose toggle lays the full
             // sidebar over the content; wider, the toggle collapses it.
