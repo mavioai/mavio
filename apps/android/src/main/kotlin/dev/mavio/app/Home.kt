@@ -5,6 +5,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -119,9 +120,9 @@ fun HomeScreen(model: AppModel) {
             StatusView(stringResource(R.string.state_loading))
             return@PullToRefreshBox
         }
-        // The wide layout's hero reaches the content's top.
+        // The hero reaches the content's top, on a phone up under the header.
         val wide = theme.layout == TabletLayout && hero.isNotEmpty()
-        LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(top = if (wide) 0.dp else top, bottom = LocalBottomInset.current)) {
+        LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(top = if (hero.isNotEmpty()) 0.dp else top, bottom = LocalBottomInset.current)) {
             if (hero.isNotEmpty()) {
                 item(key = "hero") {
                     Hero(hero, wide)
@@ -167,20 +168,17 @@ private fun Hero(entries: List<HeroEntry>, wide: Boolean) {
             pager.animateScrollToPage((pager.currentPage + 1) % entries.size)
         }
     }
-    // On a phone a 4:5 frame as wide as the screen, right below the header,
-    // its backdrop cropped to it and its colors spreading up into the
-    // header; in the wide layout a frame 470 dp high, as the web UI's, but
-    // no taller than the window.
+    // On a phone a 4:5 frame as wide as the screen reaching up under the
+    // header, its backdrop cropped to it; in the wide layout a frame 470 dp
+    // high, as the web UI's, but no taller than the window.
     val window = with(LocalDensity.current) { LocalWindowInfo.current.containerSize.height.toDp() }
     val height = HERO_WIDE_HEIGHT.coerceAtMost(window)
     val short = height < HERO_WIDE_HEIGHT
-    val frame = if (wide) Modifier.fillMaxWidth().height(height).clipToBounds() else Modifier.fillMaxWidth().aspectRatio(4f / 5f)
-    Box(frame) {
-        if (!wide) {
-            HeroBleed(4f / 5f) {
-                Artwork(entries[pager.currentPage].card.backdrop?.url, Modifier.fillMaxSize(), contentDescription = null)
-            }
-        }
+    val top = LocalTopInset.current
+    val frame: @Composable (@Composable BoxScope.() -> Unit) -> Unit = { content ->
+        if (wide) Box(Modifier.fillMaxWidth().height(height).clipToBounds(), content = content) else PhoneHero(4f / 5f, content = content)
+    }
+    frame {
         HorizontalPager(pager, Modifier.fillMaxSize()) { page ->
             val (card, eyebrow) = entries[page]
             Box(Modifier.fillMaxSize().background(theme.colors.surface)) {
@@ -278,7 +276,7 @@ private fun Hero(entries: List<HeroEntry>, wide: Boolean) {
                 } else {
                     Modifier
                         .align(Alignment.TopEnd)
-                        .padding(top = MavioSpacing.s16, end = theme.layout.margin)
+                        .padding(top = top + MavioSpacing.s16, end = theme.layout.margin)
                 },
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
             ) {

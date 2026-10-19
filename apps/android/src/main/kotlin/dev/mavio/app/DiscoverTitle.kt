@@ -95,7 +95,6 @@ import mavio.acquisition.v1.Discover.GetCollectionResponse
 import mavio.acquisition.v1.Discover.GetRatingsResponse
 import mavio.acquisition.v1.Discover.GetSeasonResponse
 import mavio.acquisition.v1.Discover.GetTitleResponse
-import mavio.acquisition.v1.Discover.MediaStatus
 import mavio.acquisition.v1.Discover.SeasonStatus
 import mavio.acquisition.v1.Discover.Title
 import mavio.acquisition.v1.Profile.MediaKind
@@ -203,7 +202,7 @@ private fun TitleDetails(serverId: String, title: Title) {
             }
         }
     }
-    LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(top = if (wide) 0.dp else LocalTopInset.current, bottom = LocalBottomInset.current + MavioSpacing.s40)) {
+    LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = LocalBottomInset.current + MavioSpacing.s40)) {
         item(key = "header") { TitleHeader(serverId, title, if (wide) actions else null) }
         if (!wide) item(key = "actions") { actions() }
         item(key = "overview") {
@@ -379,8 +378,7 @@ internal fun DiscoverHero(backdrop: String, poster: String, wide: WideHero, cont
         }
         return
     }
-    Box(Modifier.fillMaxWidth().aspectRatio(1f)) {
-        HeroBleed(1f, art)
+    PhoneHero(1f) {
         Box(Modifier.matchParentSize().clipToBounds().background(theme.colors.surface)) {
             art()
             Box(

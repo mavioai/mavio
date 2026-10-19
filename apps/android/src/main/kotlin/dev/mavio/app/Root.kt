@@ -4,6 +4,7 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ContentTransform
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
@@ -16,6 +17,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -29,7 +31,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -40,7 +41,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.Stable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.movableContentOf
@@ -55,24 +59,29 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.BlurredEdgeTreatment
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
-import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.layout
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
@@ -89,8 +98,6 @@ import dev.mavio.core.Card
 import dev.mavio.core.SignInState
 import dev.mavio.design.MavioSpacing
 import dev.mavio.design.TabletLayout
-import dev.mavio.ui.Artwork
-import dev.mavio.ui.Avatar
 import dev.mavio.ui.CatalogFilters
 import dev.mavio.ui.DiscoverState
 import dev.mavio.ui.LocalDiscover
@@ -310,6 +317,7 @@ private fun Shell(model: AppModel) {
     val stack = stacks[place] ?: stacks.getValue(Route.Home)
     val navigator = remember { Navigator { stacks[place] ?: stacks.getValue(Route.Home) } }
     val haze = rememberHazeState()
+    val backdrop = remember { HeaderBackdrop() }
     // Each place keeps its screens' state while another shows.
     val saved = rememberSaveableStateHolder()
     val bars = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
@@ -333,8 +341,11 @@ private fun Shell(model: AppModel) {
                         entryDecorators = listOf(rememberSaveableStateHolderNavEntryDecorator()),
                         entryProvider = { route ->
                             NavEntry(route) {
-                                CompositionLocalProvider(LocalBottomInset provides if (route == stack.firstOrNull()) rootInset else bars) {
-                                    Screen(model, it)
+                                CompositionLocalProvider(
+                                    LocalBottomInset provides if (route == stack.firstOrNull()) rootInset else bars,
+                                    LocalHeaderRoute provides route,
+                                ) {
+                                    Box(Modifier.fillMaxSize().nestedScroll(backdrop.tracking(route))) { Screen(model, it) }
                                 }
                             }
                         },
@@ -367,6 +378,7 @@ private fun Shell(model: AppModel) {
                 LocalTheme provides theme.copy(layout = layout),
                 LocalNavigator provides navigator,
                 LocalDiscover provides discover,
+                LocalHeaderBackdrop provides backdrop,
                 // A page opened from another keeps clear of Back above it.
                 LocalTopInset provides statusBar + if (backShown) BACK_ROW else MavioSpacing.s12,
             ) {
@@ -434,6 +446,7 @@ private fun Shell(model: AppModel) {
             CompositionLocalProvider(
                 LocalNavigator provides navigator,
                 LocalDiscover provides discover,
+                LocalHeaderBackdrop provides backdrop,
                 // The pages scroll under the header and the floating tab bar, which blur them.
                 LocalTopInset provides HEADER_HEIGHT + statusBar,
             ) {
@@ -441,7 +454,15 @@ private fun Shell(model: AppModel) {
                 val tabBar = stack.size == 1
                 content(Modifier.fillMaxSize(), TAB_BAR_HEIGHT + 24.dp + bars)
                 if (chrome) {
-                    Header(model, back = stack.size > 1, Modifier.align(Alignment.TopCenter), haze)
+                    val top = stack.last()
+                    Header(
+                        model,
+                        back = stack.size > 1,
+                        backdrop,
+                        top,
+                        Modifier.align(Alignment.TopCenter),
+                        haze,
+                    )
                     AnimatedVisibility(
                         tabBar,
                         Modifier.align(Alignment.BottomCenter),
@@ -525,54 +546,113 @@ private fun Screen(model: AppModel, route: Route) {
 }
 
 /**
- * The phone's top, as the web UI's: the wordmark, or Back on a page opened
- * from another, then search and the user's avatar, which opens the
- * settings.
+ * The phone's top, clear as the web UI's and iOS's: the wordmark, or Back
+ * on a page opened from another, then search and the user's initial on a
+ * circle of the tab bar's glass, which opens the settings. Its icons turn
+ * white over a hero reaching up under it ([backdrop] of [route]); once the page has
+ * scrolled under it with no hero there, an edge fades in behind it: the
+ * page blurred under the background, fading out a little below it.
  */
 @Composable
-private fun Header(model: AppModel, back: Boolean, modifier: Modifier, haze: HazeState) {
+private fun Header(model: AppModel, back: Boolean, backdrop: HeaderBackdrop, route: Route, modifier: Modifier, haze: HazeState) {
     val navigator = LocalNavigator.current
     val colors = theme.colors
     val state by model.signInState.collectAsStateWithLifecycle()
     val servers by model.servers.collectAsStateWithLifecycle()
     val name = (state as? SignInState.Account)?.v1?.name ?: servers.firstOrNull()?.userName.orEmpty()
-    Row(
-        modifier
-            .fillMaxWidth()
-            // The tab bar's glass, without its border.
-            .glass(haze, glassTint(), radius = 12.dp, saturation = 1.8f)
-            .statusBarsPadding()
-            .height(HEADER_HEIGHT)
-            .padding(horizontal = theme.layout.margin),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        if (back) {
+    // Read as the page scrolls, so they recompose the header alone, and only as they change.
+    val bottom = with(LocalDensity.current) { (HEADER_HEIGHT + WindowInsets.statusBars.asPaddingValues().calculateTopPadding()).toPx() }
+    val overHero by remember(backdrop, route, bottom) { derivedStateOf { backdrop.overHero(route, bottom) } }
+    val scrolled by remember(backdrop, route) { derivedStateOf { backdrop.scrolled(route) } }
+    val edge by animateFloatAsState(if (scrolled && !overHero) 1f else 0f, tween(200), label = "edge")
+    val ink = if (overHero) Color.White else colors.textPrimary
+    Box(modifier.fillMaxWidth()) {
+        if (edge > 0f) {
+            Box(
+                Modifier
+                    .matchParentSize()
+                    // Reaching below the header, taking none of its room.
+                    .layout { measurable, constraints ->
+                        val placeable = measurable.measure(Constraints.fixed(constraints.maxWidth, constraints.maxHeight + HEADER_EDGE.roundToPx()))
+                        layout(constraints.maxWidth, constraints.maxHeight) { placeable.place(0, 0) }
+                    }
+                    // Haze reads its style once; the fade is the layer's.
+                    .graphicsLayer { alpha = edge }
+                    .edge(haze, colors.background),
+            )
+        }
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .statusBarsPadding()
+                .height(HEADER_HEIGHT)
+                .padding(horizontal = theme.layout.margin),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            if (back) {
+                Box(
+                    Modifier
+                        .size(36.dp)
+                        .clip(CircleShape)
+                        .clickable { navigator.back() },
+                    Alignment.Center,
+                ) {
+                    MavioIcon(R.drawable.ic_back, size = 24.dp, tint = ink, contentDescription = stringResource(R.string.action_back))
+                }
+            } else {
+                Wordmark(height = 20.dp)
+            }
+            Spacer(Modifier.weight(1f))
             Box(
                 Modifier
                     .size(36.dp)
                     .clip(CircleShape)
-                    .clickable { navigator.back() },
+                    .clickable { navigator.open(Route.Search) },
                 Alignment.Center,
             ) {
-                MavioIcon(R.drawable.ic_back, size = 24.dp, contentDescription = stringResource(R.string.action_back))
+                MavioIcon(R.drawable.ic_search, size = 22.dp, tint = ink, contentDescription = stringResource(R.string.nav_search))
             }
-        } else {
-            Wordmark(height = 20.dp)
+            Spacer(Modifier.width(MavioSpacing.s8))
+            val dark = colors.background.luminance() < 0.5f
+            Box(
+                Modifier
+                    .size(36.dp)
+                    .shadow(if (dark) 16.dp else 8.dp, CircleShape)
+                    .clip(CircleShape)
+                    .glass(haze, glassTint(), radius = 12.dp, saturation = 1.8f)
+                    .clickable { navigator.open(Route.Settings) },
+                Alignment.Center,
+            ) {
+                Text(name.firstOrNull()?.uppercase().orEmpty(), style = theme.type.headline.text, color = colors.textPrimary)
+            }
         }
-        Spacer(Modifier.weight(1f))
-        Box(
-            Modifier
-                .size(36.dp)
-                .clip(CircleShape)
-                .clickable { navigator.open(Route.Search) },
-            Alignment.Center,
-        ) {
-            MavioIcon(R.drawable.ic_search, size = 22.dp, contentDescription = stringResource(R.string.nav_search))
-        }
-        Spacer(Modifier.width(MavioSpacing.s8))
-        Avatar(name, Modifier.clip(CircleShape).clickable { navigator.open(Route.Settings) })
     }
 }
+
+/** How far the header's edge reaches below it. */
+private val HEADER_EDGE = 20.dp
+
+/**
+ * The header's edge, as the web UI's: what scrolls under it blurred and
+ * more saturated, under the [background] from 90 % to transparent, fading
+ * out downward.
+ */
+private fun Modifier.edge(haze: HazeState, background: Color): Modifier = hazeBlur(
+    HazeInput.Sources(haze),
+    HazeBlurStyle {
+        blurEnabled(blurAvailable)
+        blurRadius(12.dp)
+        noiseFactor(0f)
+        mask(Brush.verticalGradient(0.6f to Color.Black, 1f to Color.Transparent))
+        colorEffects(
+            listOf(
+                HazeColorEffect.colorFilter(ColorFilter.colorMatrix(ColorMatrix().apply { setToSaturation(1.8f) })),
+                HazeColorEffect.tint(Brush.verticalGradient(0f to background.copy(alpha = 0.9f), 0.5f to background.copy(alpha = 0.7f), 1f to Color.Transparent)),
+            ),
+        )
+        fallbackColorEffect(HazeColorEffect.tint(Brush.verticalGradient(0f to background.copy(alpha = 0.95f), 1f to Color.Transparent)))
+    },
+)
 
 /** The phone's tabs, as the web UI's: a pill of glass floating over the page. */
 @Composable
@@ -623,49 +703,69 @@ private fun TabBar(tabs: List<Tab>, current: Tab, haze: HazeState, modifier: Mod
 private fun glassTint(): Color = if (theme.colors.background.luminance() < 0.5f) Color(0x61252528) else Color(0x59FFFFFF)
 
 /**
- * What lies behind the header above a phone's hero: the hero's artwork, as
- * the hero crops it ([aspectRatio] of the screen's width, drawn by [art]),
- * its top rows stretched up to the top of the screen and softened, so that
- * the artwork's top seems to go on under the header's glass, meeting it at
- * a sharp edge. Placed first in the hero's box, which must not clip it.
+ * What lies under the phone's header on each screen (by its route): how far
+ * the screen has scrolled from its top, as its scrolls tell through
+ * [tracking], and where its hero, reaching up under the header, ends.
  */
-@Composable
-fun HeroBleed(aspectRatio: Float, art: @Composable () -> Unit) {
-    val top = LocalTopInset.current
-    Box(
-        Modifier
-            .fillMaxWidth()
-            .layout { measurable, constraints ->
-                val height = top.roundToPx()
-                val placeable = measurable.measure(constraints.copy(minHeight = height, maxHeight = height))
-                // Above the hero, taking none of its room.
-                layout(constraints.minWidth, 0) { placeable.place(0, -height) }
-            }
-            .clipToBounds(),
-    ) {
-        Box(
-            Modifier
-                // As tall as the hero, overflowing the strip from its top.
-                .layout { measurable, constraints ->
-                    val width = constraints.maxWidth
-                    val placeable = measurable.measure(Constraints.fixed(width, (width / aspectRatio).roundToInt()))
-                    layout(width, constraints.maxHeight) { placeable.place(0, 0) }
-                }
-                // The band at the artwork's top, stretched over the strip.
-                .graphicsLayer {
-                    transformOrigin = TransformOrigin(0.5f, 0f)
-                    scaleY = top.toPx() / BLEED_BAND.toPx()
-                }
-                .then(if (blurAvailable) Modifier.blur(BLEED_BLUR, BlurredEdgeTreatment.Rectangle) else Modifier),
-        ) { art() }
+@Stable
+class HeaderBackdrop {
+    private val offsets = mutableStateMapOf<Route, Float>()
+    private val heroes = mutableStateMapOf<Route, Float>()
+
+    /** Follows what a screen scrolls, upward from its top or back. */
+    fun tracking(route: Route): NestedScrollConnection = object : NestedScrollConnection {
+        override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Offset {
+            if (consumed.y != 0f) offsets[route] = ((offsets[route] ?: 0f) - consumed.y).coerceAtLeast(0f)
+            // A list pulled past its top is at its top.
+            if (available.y > 0f) offsets[route] = 0f
+            return Offset.Zero
+        }
+    }
+
+    /** Whether the screen has scrolled from its top. */
+    fun scrolled(route: Route): Boolean = (offsets[route] ?: 0f) > 0.5f
+
+    /** Whether the screen's hero still shows under a header ending [headerBottom] pixels down. */
+    fun overHero(route: Route, headerBottom: Float): Boolean = (heroes[route] ?: 0f) - (offsets[route] ?: 0f) > headerBottom
+
+    internal fun hero(route: Route, bottom: Float?) {
+        // Where it ends on the page, as a list stops reporting what it no longer places.
+        if (bottom == null) heroes.remove(route) else heroes[route] = bottom + (offsets[route] ?: 0f)
     }
 }
 
-/** How much of the hero's top [HeroBleed] stretches behind the header. */
-private val BLEED_BAND = 6.dp
+/** The screens' [HeaderBackdrop]. */
+val LocalHeaderBackdrop = staticCompositionLocalOf { HeaderBackdrop() }
 
-/** How far [HeroBleed] softens the band, so that its pixels stretched up don't streak. */
-private val BLEED_BLUR = 24.dp
+/** The route of the screen composed, which its hero tells the header about. */
+val LocalHeaderRoute = staticCompositionLocalOf<Route> { Route.Home }
+
+/**
+ * A phone's hero reaching up under the clear header, as iOS's: from the
+ * screen's top, [aspectRatio] of its width and taller by the header and the
+ * status bar ([LocalTopInset]), telling the header where it ends, which
+ * turns the header's icons white while it shows under them.
+ */
+@Composable
+fun PhoneHero(aspectRatio: Float, modifier: Modifier = Modifier, content: @Composable BoxScope.() -> Unit) {
+    val top = LocalTopInset.current
+    val backdrop = LocalHeaderBackdrop.current
+    val route = LocalHeaderRoute.current
+    DisposableEffect(backdrop, route) { onDispose { backdrop.hero(route, null) } }
+    Box(
+        modifier
+            .fillMaxWidth()
+            .layout { measurable, constraints ->
+                val width = constraints.maxWidth
+                val height = (width / aspectRatio).roundToInt() + top.roundToPx()
+                val placeable = measurable.measure(Constraints.fixed(width, height))
+                layout(width, height) { placeable.place(0, 0) }
+            }
+            .onGloballyPositioned { backdrop.hero(route, it.boundsInWindow().bottom) }
+            .clipToBounds(),
+        content = content,
+    )
+}
 
 /**
  * Frosted glass over the pages, as the web UI's backdrop filter: what

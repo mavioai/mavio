@@ -228,7 +228,7 @@ private fun DetailsContent(model: AppModel, details: Details) {
     // The wide layout's hero reaches the content's top and holds the actions.
     val wide = theme.layout == TabletLayout
     val actions = @Composable { Actions(model, details, next, own, copies, source, onSource = { sourceIndex = own.indexOf(it) }, play = play, wide = wide) }
-    LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(top = if (wide) 0.dp else LocalTopInset.current, bottom = LocalBottomInset.current + MavioSpacing.s40)) {
+    LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = LocalBottomInset.current + MavioSpacing.s40)) {
         if (wide) {
             item(key = "header") { WideHeader(details, source, several = signedIn.size > 1, actions) }
         } else {
@@ -298,8 +298,8 @@ private fun DetailsContent(model: AppModel, details: Details) {
 // Header
 
 /**
- * The artwork in a square as wide as the screen right below the header,
- * its colors spreading up into the header, and over its lower
+ * The artwork in a square as wide as the screen reaching up under the
+ * header, and over its lower
  * left the series an episode or season belongs to, the logo or title, the
  * facts and the badges.
  */
@@ -307,8 +307,7 @@ private fun DetailsContent(model: AppModel, details: Details) {
 private fun Header(details: Details, source: Source?, several: Boolean) {
     val card = details.card
     val image = details.backdrop ?: if (card.kind == CardKind.EPISODE) card.thumb else null
-    Box(Modifier.fillMaxWidth().aspectRatio(1f)) {
-        HeroBleed(1f) { HeaderArt(image?.url, card.poster?.url, card.kind) }
+    PhoneHero(1f) {
         Box(
             Modifier
                 .matchParentSize()
