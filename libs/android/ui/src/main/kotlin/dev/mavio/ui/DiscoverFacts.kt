@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import java.text.NumberFormat
 import java.time.LocalDate
+import java.time.Period
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.util.Currency
@@ -16,6 +17,16 @@ import mavio.plugin.v1.MetadataOuterClass.ProductionStatus
 /** A date of the calendar as TMDB gives it, in the UI's language. */
 fun dayText(iso: String): String? = runCatching {
     LocalDate.parse(iso.take(10)).format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM))
+}.getOrNull()
+
+/** A date of the calendar as TMDB gives it, written out. */
+fun longDayText(iso: String): String? = runCatching {
+    LocalDate.parse(iso.take(10)).format(DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG))
+}.getOrNull()
+
+/** Whole years between two calendar dates, to today when the second is empty. */
+fun yearsBetween(from: String, to: String): Int? = runCatching {
+    Period.between(LocalDate.parse(from.take(10)), if (to.isEmpty()) LocalDate.now() else LocalDate.parse(to.take(10))).years
 }.getOrNull()
 
 /** An amount of US dollars, as TMDB gives budgets and revenues, or null when unknown. */

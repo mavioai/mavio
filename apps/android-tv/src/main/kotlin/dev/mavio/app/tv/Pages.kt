@@ -128,6 +128,33 @@ sealed class Page {
         val focus = FocusMemory()
     }
 
+    /**
+     * A discovered person (docs/tv.md §6.3) by their TMDB ID: the kinds
+     * of titles shown, whether the whole biography is, and where it was.
+     */
+    class Person(val serverId: String, val tmdbId: Int) : Page() {
+        /** All titles, movies or series: 0, 1 or 2. */
+        var kinds by mutableIntStateOf(0)
+
+        /** Whether the whole biography shows. */
+        var more by mutableStateOf(false)
+
+        /** Its scroll. */
+        val grid = LazyGridState()
+
+        /** The element that had focus. */
+        val focus = FocusMemory()
+    }
+
+    /** A discovered collection (docs/tv.md §6.3) by its TMDB ID. */
+    class Collection(val serverId: String, val tmdbId: Int) : Page() {
+        /** Its scroll. */
+        val grid = LazyGridState()
+
+        /** The element that had focus. */
+        val focus = FocusMemory()
+    }
+
     /** A discovered title (docs/tv.md §6.3), a movie or series by its TMDB ID. */
     class Title(val serverId: String, val mediaKind: Int, val tmdbId: Int) : Page() {
         /** The page's scroll. */
@@ -197,6 +224,16 @@ class Pages {
     /** Opens a discovered title. */
     fun openTitle(serverId: String, mediaKind: Int, tmdbId: Int) {
         stack += Page.Title(serverId, mediaKind, tmdbId)
+    }
+
+    /** Opens a discovered person. */
+    fun openPerson(serverId: String, tmdbId: Int) {
+        stack += Page.Person(serverId, tmdbId)
+    }
+
+    /** Opens a discovered collection. */
+    fun openCollection(serverId: String, tmdbId: Int) {
+        stack += Page.Collection(serverId, tmdbId)
     }
 
     /** Opens Search. */

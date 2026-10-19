@@ -154,6 +154,8 @@ private fun Shell(model: AppModel) {
                 is Page.Credits -> key(top) { CreditsPage(model, top) }
                 is Page.Catalog -> key(top) { CatalogPage(top) }
                 is Page.Title -> key(top) { TitlePage(top) }
+                is Page.Person -> key(top) { PersonPage(top) }
+                is Page.Collection -> key(top) { CollectionPage(top) }
                 is Page.Search -> key(top) { SearchPage(model, top) }
                 is Page.Player -> key(top) { PlayerPage(model, top) }
                 is Page.Settings -> key(top) { SettingsPage(model, top) }

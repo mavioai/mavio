@@ -195,7 +195,7 @@ fun SeeAllCard(modifier: Modifier = Modifier, onClick: () -> Unit) {
  * [fill], as in a grid.
  */
 @Composable
-fun TvTitleCard(title: DiscoveredTitle, modifier: Modifier = Modifier, fill: Boolean = false, onClick: () -> Unit) {
+fun TvTitleCard(title: DiscoveredTitle, modifier: Modifier = Modifier, fill: Boolean = false, role: String? = null, onClick: () -> Unit) {
     val state = remember { Focusable() }
     val focused = state.focused()
     val series = title.mediaKind == MediaKind.MEDIA_KIND_SERIES
@@ -220,6 +220,9 @@ fun TvTitleCard(title: DiscoveredTitle, modifier: Modifier = Modifier, fill: Boo
             color = theme.colors.textSecondary,
             maxLines = 1,
         )
+        if (!role.isNullOrEmpty()) {
+            Text(role, style = theme.type.footnote.text, color = theme.colors.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        }
     }
 }
 

@@ -203,9 +203,9 @@ private fun TitleContent(page: Page.Title, title: Title) {
                     Modifier.padding(start = theme.layout.margin, end = theme.layout.margin, top = MavioSpacing.s32, bottom = MavioSpacing.s16),
                     horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s48),
                 ) {
-                    TitleOverview(title, credits, focus, open, Modifier.weight(1f))
+                    TitleOverview(title, credits, focus, open, { pages.openPerson(page.serverId, it) }, Modifier.weight(1f))
                     Column(Modifier.width(560.dp), verticalArrangement = Arrangement.spacedBy(MavioSpacing.s16)) {
-                        CollectionCard(page.serverId, title)
+                        CollectionCard(page.serverId, title, Modifier.focusKey(focus, "collection"))
                         TitleFacts(page.serverId, title)
                     }
                 }
@@ -217,7 +217,7 @@ private fun TitleContent(page: Page.Title, title: Title) {
             if (cast.isNotEmpty()) item(key = "cast") {
                 TvShelf(stringResource(R.string.item_cast), page.rows.of("cast")) {
                     items(cast.size, key = { "${cast[it].tmdbId}/${cast[it].name}/$it" }) { i ->
-                        CreditCard(cast[i], Modifier.focusKey(focus, "cast/$i"))
+                        CreditCard(cast[i], Modifier.focusKey(focus, "cast/$i")) { pages.openPerson(page.serverId, cast[i].tmdbId) }
                     }
                 }
             }
@@ -349,7 +349,14 @@ private fun TitleHeader(
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun TitleOverview(title: Title, credits: List<Credit>, focus: FocusMemory, open: ((CatalogFilters) -> Unit)?, modifier: Modifier) {
+private fun TitleOverview(
+    title: Title,
+    credits: List<Credit>,
+    focus: FocusMemory,
+    open: ((CatalogFilters) -> Unit)?,
+    openPerson: (Int) -> Unit,
+    modifier: Modifier,
+) {
     val colors = theme.colors
     Column(modifier, verticalArrangement = Arrangement.spacedBy(MavioSpacing.s16)) {
         if (title.tagline.isNotEmpty()) {
@@ -364,13 +371,27 @@ private fun TitleOverview(title: Title, credits: List<Credit>, focus: FocusMemor
             .map { it.value }
         if (crew.isNotEmpty()) {
             FlowRow(Modifier.padding(top = MavioSpacing.s8), maxItemsInEachRow = 2, verticalArrangement = Arrangement.spacedBy(MavioSpacing.s16)) {
-                crew.forEach { c ->
-                    Column(Modifier.weight(1f).padding(end = MavioSpacing.s16)) {
-                        Text(
-                            if (c.kind == CreditKind.CREDIT_KIND_OTHER && c.role.isNotEmpty()) c.role else stringResource(crewLabels.first { it.first == c.kind }.second),
-                            style = theme.type.headline.text,
-                        )
-                        Text(c.name, style = theme.type.callout.text, color = colors.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                crew.forEachIndexed { i, c ->
+                    // Each opens the person's page, white with black text with focus.
+                    val state = remember { Focusable() }
+                    val focused = state.focused()
+                    Box(Modifier.weight(1f).padding(end = MavioSpacing.s16)) {
+                        Column(
+                            Modifier
+                                .shakes()
+                                .focusKey(focus, "crew/$i")
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(if (focused) Color.White else Color.Transparent)
+                                .selectable(state) { if (c.tmdbId > 0) openPerson(c.tmdbId) }
+                                .padding(horizontal = 10.dp, vertical = 6.dp),
+                        ) {
+                            Text(
+                                if (c.kind == CreditKind.CREDIT_KIND_OTHER && c.role.isNotEmpty()) c.role else stringResource(crewLabels.first { it.first == c.kind }.second),
+                                style = theme.type.headline.text,
+                                color = if (focused) Color.Black else colors.textPrimary,
+                            )
+                            Text(c.name, style = theme.type.callout.text, color = if (focused) Color.Black.copy(alpha = 0.7f) else colors.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        }
                     }
                 }
             }
@@ -413,7 +434,7 @@ private fun alike(serverId: String, kind: MediaKind): ((CatalogFilters) -> Unit)
 
 /** A link in a line of text: white with black text once it has focus. */
 @Composable
-private fun TvLink(label: String, modifier: Modifier, color: Color, onClick: () -> Unit) {
+internal fun TvLink(label: String, modifier: Modifier, color: Color, onClick: () -> Unit) {
     val state = remember { Focusable() }
     val focused = state.focused()
     Text(
@@ -431,7 +452,7 @@ private fun TvLink(label: String, modifier: Modifier, color: Color, onClick: () 
 
 /** A movie's collection as Seerr's card: its backdrop and name. */
 @Composable
-private fun CollectionCard(serverId: String, title: Title) {
+private fun CollectionCard(serverId: String, title: Title, modifier: Modifier) {
     val id = title.externalIdsMap["tmdb_collection"]?.toIntOrNull() ?: 0
     if (id <= 0) return
     val result by discovered(
@@ -447,12 +468,19 @@ private fun CollectionCard(serverId: String, title: Title) {
     )
     val collection = result?.getOrNull()?.collection
     val backdrop = collection?.backdropUrl?.ifEmpty { collection.posterUrl }.orEmpty()
+    val pages = LocalPages.current
+    val state = remember { Focusable() }
+    val focused = state.focused()
     Box(
-        Modifier
+        modifier
+            .shakes()
             .fillMaxWidth()
             .heightIn(min = 96.dp)
+            .focusCard(focused)
+            .focusArtwork(focused, 14.dp)
             .clip(RoundedCornerShape(14.dp))
-            .background(theme.colors.surfaceRaised),
+            .background(theme.colors.surfaceRaised)
+            .selectable(state) { pages.openCollection(serverId, id) },
     ) {
         if (backdrop.isNotEmpty()) Artwork(sized(backdrop, 780), Modifier.matchParentSize())
         Box(Modifier.matchParentSize().background(Brush.verticalGradient(listOf(Color.Black.copy(alpha = 0.45f), Color.Black.copy(alpha = 0.8f)))))
@@ -744,10 +772,10 @@ private fun SeasonEpisodes(serverId: String, tmdbId: Int, seasonNumber: Int) {
 
 /** A person of the cast: the photo in a circle, which grows with focus, the name and the role. */
 @Composable
-private fun CreditCard(credit: Credit, modifier: Modifier) {
+private fun CreditCard(credit: Credit, modifier: Modifier, onClick: () -> Unit) {
     val state = remember { Focusable() }
     val focused = state.focused()
-    Column(modifier.shakes().width(180.dp).focusCard(focused).selectable(state) {}, horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(modifier.shakes().width(180.dp).focusCard(focused).selectable(state) { if (credit.tmdbId > 0) onClick() }, horizontalAlignment = Alignment.CenterHorizontally) {
         Box(
             Modifier
                 .focusArtwork(focused, 80.dp)

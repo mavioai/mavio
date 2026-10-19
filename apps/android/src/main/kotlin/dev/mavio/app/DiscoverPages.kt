@@ -37,36 +37,22 @@ import dev.mavio.design.MavioSpacing
 import dev.mavio.design.TabletLayout
 import dev.mavio.ui.Artwork
 import dev.mavio.ui.R
-import dev.mavio.ui.available
+import dev.mavio.ui.collectionStatus
 import dev.mavio.ui.discoverLanguage
+import dev.mavio.ui.longDayText
 import dev.mavio.ui.discovered
 import dev.mavio.ui.sized
 import dev.mavio.ui.statusLabel
 import dev.mavio.ui.text
 import dev.mavio.ui.theme
 import dev.mavio.ui.tmdbId
-import java.time.LocalDate
-import java.time.Period
-import java.time.format.DateTimeFormatter
-import java.time.format.FormatStyle
-import mavio.acquisition.v1.Discover.DiscoveredTitle
+import dev.mavio.ui.yearsBetween
 import mavio.acquisition.v1.Discover.GetCollectionResponse
 import mavio.acquisition.v1.Discover.GetPersonResponse
-import mavio.acquisition.v1.Discover.MediaStatus
 import mavio.acquisition.v1.Discover.PersonTitle
 import mavio.acquisition.v1.Profile.MediaKind
 import mavio.acquisition.v1.getCollectionRequest
 import mavio.acquisition.v1.getPersonRequest
-
-/** A date of the calendar as TMDB gives it, written out. */
-private fun longDay(iso: String): String? = runCatching {
-    LocalDate.parse(iso.take(10)).format(DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG))
-}.getOrNull()
-
-/** Whole years between two calendar dates, to today when the second is empty. */
-private fun age(from: String, to: String): Int? = runCatching {
-    Period.between(LocalDate.parse(from.take(10)), if (to.isEmpty()) LocalDate.now() else LocalDate.parse(to.take(10))).years
-}.getOrNull()
 
 /**
  * A discovered person's page (docs/clients.md §6.3.2), as the web UI's on
@@ -97,9 +83,9 @@ fun DiscoveredPersonScreen(route: Route.DiscoveredPerson) {
             kinds == 0 || (it.title.mediaKind == MediaKind.MEDIA_KIND_SERIES) == (kinds == 2)
         }
         val facts = listOfNotNull(
-            longDay(p.birthday)?.let { stringResource(R.string.person_born, it, age(p.birthday, p.deathday)?.toString().orEmpty()) },
+            longDayText(p.birthday)?.let { stringResource(R.string.person_born, it, yearsBetween(p.birthday, p.deathday)?.toString().orEmpty()) },
             p.placeOfBirth.ifEmpty { null },
-            longDay(p.deathday)?.let { stringResource(R.string.person_died, it) },
+            longDayText(p.deathday)?.let { stringResource(R.string.person_died, it) },
         )
         val language = LocalLocale.current.platformLocale.toLanguageTag()
         val links = listOfNotNull(
@@ -191,20 +177,6 @@ private fun LazyGridScope.personTitles(serverId: String, label: Int, list: List<
         }
     }
     items(list.size, key = { "$label/$it" }) { i -> TitleCard(serverId, list[i].title, width = null, role = list[i].role) }
-}
-
-/**
- * What the server has of a collection, as Seerr marks it: available when
- * it has every movie, partially available when some, requested when every
- * other movie is requested, blocklisted when every movie is.
- */
-private fun collectionStatus(parts: List<DiscoveredTitle>): MediaStatus = when {
-    parts.isEmpty() -> MediaStatus.MEDIA_STATUS_UNSPECIFIED
-    parts.all { it.status == MediaStatus.MEDIA_STATUS_BLOCKLISTED } -> MediaStatus.MEDIA_STATUS_BLOCKLISTED
-    parts.all { it.status == MediaStatus.MEDIA_STATUS_AVAILABLE } -> MediaStatus.MEDIA_STATUS_AVAILABLE
-    parts.any { it.status.available() } -> MediaStatus.MEDIA_STATUS_PARTIALLY_AVAILABLE
-    parts.all { it.status == MediaStatus.MEDIA_STATUS_REQUESTED || it.status == MediaStatus.MEDIA_STATUS_WANTED } -> MediaStatus.MEDIA_STATUS_REQUESTED
-    else -> MediaStatus.MEDIA_STATUS_UNSPECIFIED
 }
 
 /**

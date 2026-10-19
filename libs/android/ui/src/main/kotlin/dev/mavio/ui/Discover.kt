@@ -242,3 +242,17 @@ fun titleKey(t: DiscoveredTitle) = "${t.mediaKindValue}/${t.externalIdsMap["tmdb
 /** Whether a status is of a title the server has, at least in part. */
 fun MediaStatus.available(): Boolean =
     this == MediaStatus.MEDIA_STATUS_AVAILABLE || this == MediaStatus.MEDIA_STATUS_PARTIALLY_AVAILABLE
+
+/**
+ * What the server has of a collection, as Seerr marks it: available when
+ * it has every movie, partially available when some, requested when every
+ * other movie is requested, blocklisted when every movie is.
+ */
+fun collectionStatus(parts: List<DiscoveredTitle>): MediaStatus = when {
+    parts.isEmpty() -> MediaStatus.MEDIA_STATUS_UNSPECIFIED
+    parts.all { it.status == MediaStatus.MEDIA_STATUS_BLOCKLISTED } -> MediaStatus.MEDIA_STATUS_BLOCKLISTED
+    parts.all { it.status == MediaStatus.MEDIA_STATUS_AVAILABLE } -> MediaStatus.MEDIA_STATUS_AVAILABLE
+    parts.any { it.status.available() } -> MediaStatus.MEDIA_STATUS_PARTIALLY_AVAILABLE
+    parts.all { it.status == MediaStatus.MEDIA_STATUS_REQUESTED || it.status == MediaStatus.MEDIA_STATUS_WANTED } -> MediaStatus.MEDIA_STATUS_REQUESTED
+    else -> MediaStatus.MEDIA_STATUS_UNSPECIFIED
+}
