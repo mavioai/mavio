@@ -198,3 +198,20 @@ func TestSettingsRoundTrip(t *testing.T) {
 		t.Errorf("settingsFromProto(settingsToProto(s)) = %+v, want = %+v", got, want)
 	}
 }
+
+func TestGrowth(t *testing.T) {
+	tests := []struct {
+		shown, answer, more string
+		ok                  bool
+	}{
+		{"", "天气预报", "天气预报", true},
+		{"天气预报", "天气预报我可管不着啦。", "我可管不着啦。", true},
+		{"天气预报", "天气预报", "", true},
+		{"天气预报", "明天", "", false},
+	}
+	for _, tt := range tests {
+		if more, ok := growth(tt.shown, tt.answer); more != tt.more || ok != tt.ok {
+			t.Errorf("growth(%q, %q) = %q, %v, want = %q, %v", tt.shown, tt.answer, more, ok, tt.more, tt.ok)
+		}
+	}
+}

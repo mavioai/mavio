@@ -271,27 +271,41 @@ func (s *Service) stream(ag pluginv1connect.AgentSessionServiceClient, conv, mes
 		return
 	}
 	defer st.Close()
-	var answer strings.Builder
+	// answer is the answer so far; shown what of it the client was sent.
+	var answer, shown string
 	for st.Receive() {
 		m := st.Msg()
 		switch {
 		case m.HasText():
-			answer.WriteString(m.GetText())
-			at.emit(assistantv1.AskResponse_builder{Answer: new(m.GetText())}.Build())
+			answer = m.GetText()
+			if more, ok := growth(shown, answer); ok && more != "" {
+				shown = answer
+				at.emit(assistantv1.AskResponse_builder{Answer: &more}.Build())
+			}
 		case m.HasDone():
 			if a := m.GetDone().GetAnswer().GetText(); a != "" {
-				answer.Reset()
-				answer.WriteString(a)
+				answer = a
 			}
 		}
 	}
 	if err := st.Err(); err != nil {
 		s.log.WarnContext(ctx, "assistant: message", "err", err)
-		if answer.Len() == 0 {
-			answer.WriteString(s.reply(ctx, lang, "failed", nil))
+		if answer == "" {
+			answer = s.reply(ctx, lang, "failed", nil)
 		}
 	}
-	done.SetAnswer(strings.TrimSpace(answer.String()))
+	done.SetAnswer(strings.TrimSpace(answer))
+}
+
+// growth returns what an answer so far adds to the text the client was
+// sent, which it continues; an answer that starts again differently, as a
+// retried attempt's may, adds nothing, and the done event's whole answer
+// replaces the text.
+func growth(shown, answer string) (string, bool) {
+	if !strings.HasPrefix(answer, shown) {
+		return "", false
+	}
+	return answer[len(shown):], true
 }
 
 // answerCall answers a model's call waiting for confirmation and streams
