@@ -31,11 +31,11 @@ struct HomeView: View {
             }
             .padding(.bottom, MavioSpacing.s8)
         }
+        .pullToRefresh { await model.reloadHome() }
         .modifier(HomeChrome(hero: !entries.isEmpty, loading: model.home.isEmpty))
         .overlay {
             if model.home.isEmpty { ProgressView() }
         }
-        .pullToRefresh { await model.reloadHome() }
         .navigationTitle(MavioStrings.navHome)
         .task { if model.home.isEmpty { model.refreshHome() } }
     }

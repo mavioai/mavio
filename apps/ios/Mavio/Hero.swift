@@ -319,6 +319,13 @@ struct HeroChrome: ViewModifier {
             } action: { _, now in
                 withAnimation(.easeOut(duration: MavioDuration.fast)) { past = now }
             }
+            // The refresh control of a page reaching the top is under the
+            // status bar, the hero covering it below; it is moved down
+            // below the bar, over the hero, where a page without a hero
+            // shows it.
+            .background {
+                if reachesTop { RefreshBelowBar(inset: inset) }
+            }
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .principal) {
@@ -358,6 +365,61 @@ private struct HeroBarGlass: ViewModifier {
                 .scrollEdgeEffectHidden(!past, for: .top)
         } else {
             content.toolbarBackground(phone || past ? .visible : .hidden, for: .navigationBar)
+        }
+    }
+}
+
+/// Moves the refresh control of the scroll view beside it down by inset,
+/// below the bars, drawn over the scroll view's content.
+private struct RefreshBelowBar: UIViewRepresentable {
+    let inset: CGFloat
+
+    func makeUIView(context: Context) -> Probe { Probe() }
+
+    func updateUIView(_ probe: Probe, context: Context) {
+        probe.inset = inset
+        probe.apply()
+    }
+
+    final class Probe: UIView {
+        var inset: CGFloat = 0
+        private weak var control: UIRefreshControl?
+
+        override func didMoveToWindow() {
+            super.didMoveToWindow()
+            apply()
+        }
+
+        override func layoutSubviews() {
+            super.layoutSubviews()
+            apply()
+        }
+
+        func apply() {
+            if control == nil { control = find() }
+            guard let control else { return }
+            control.layer.zPosition = 1
+            control.clipsToBounds = false
+            control.layer.sublayerTransform = CATransform3DMakeTranslation(0, inset, 0)
+        }
+
+        /// The refresh control of the nearest scroll view among the
+        /// probe's ancestors' descendants.
+        private func find() -> UIRefreshControl? {
+            var view = superview
+            while let ancestor = view {
+                if let control = Self.control(in: ancestor) { return control }
+                view = ancestor.superview
+            }
+            return nil
+        }
+
+        private static func control(in view: UIView) -> UIRefreshControl? {
+            if let scroll = view as? UIScrollView, let control = scroll.refreshControl { return control }
+            for subview in view.subviews {
+                if let control = control(in: subview) { return control }
+            }
+            return nil
         }
     }
 }
