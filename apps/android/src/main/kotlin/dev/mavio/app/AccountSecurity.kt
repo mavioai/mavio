@@ -52,17 +52,18 @@ import dev.mavio.core.ServerRecord
 import dev.mavio.core.SwitchableUser
 import dev.mavio.core.TotpSetup
 import dev.mavio.design.MavioSpacing
+import dev.mavio.ui.Avatar
 import dev.mavio.ui.ButtonKind
 import dev.mavio.ui.MavioButton
 import dev.mavio.ui.MavioIcon
 import dev.mavio.ui.R
 import dev.mavio.ui.text
 import dev.mavio.ui.theme
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.launch
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.launch
 
 // Switching users and Sign-In and Security on a standalone server, as the
 // web UI's account settings (docs/accounts.md): the server's users as

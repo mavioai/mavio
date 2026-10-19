@@ -90,6 +90,7 @@ import dev.mavio.core.SignInState
 import dev.mavio.design.MavioSpacing
 import dev.mavio.design.TabletLayout
 import dev.mavio.ui.Artwork
+import dev.mavio.ui.Avatar
 import dev.mavio.ui.CatalogFilters
 import dev.mavio.ui.DiscoverState
 import dev.mavio.ui.LocalDiscover
@@ -570,24 +571,6 @@ private fun Header(model: AppModel, back: Boolean, modifier: Modifier, haze: Haz
         }
         Spacer(Modifier.width(MavioSpacing.s8))
         Avatar(name, Modifier.clip(CircleShape).clickable { navigator.open(Route.Settings) })
-    }
-}
-
-/** The first letter of a name in a circle. */
-@Composable
-fun Avatar(name: String, modifier: Modifier = Modifier, size: Dp = 32.dp) {
-    Box(
-        modifier
-            .size(size)
-            .background(theme.colors.fillSelected, CircleShape),
-        Alignment.Center,
-    ) {
-        Text(
-            name.take(1).uppercase(),
-            fontSize = (size.value * 0.42f).sp,
-            fontWeight = FontWeight.SemiBold,
-            color = theme.colors.textSecondary,
-        )
     }
 }
 

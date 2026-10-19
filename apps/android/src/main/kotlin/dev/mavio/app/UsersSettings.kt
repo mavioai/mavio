@@ -38,6 +38,7 @@ import dev.mavio.core.AppModel
 import dev.mavio.core.call
 import dev.mavio.core.instant
 import dev.mavio.design.MavioSpacing
+import dev.mavio.ui.Avatar
 import dev.mavio.ui.ButtonKind
 import dev.mavio.ui.MavioButton
 import dev.mavio.ui.MavioIcon
@@ -45,6 +46,10 @@ import dev.mavio.ui.R
 import dev.mavio.ui.StatusView
 import dev.mavio.ui.text
 import dev.mavio.ui.theme
+import java.text.Collator
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
@@ -87,10 +92,6 @@ import mavio.user.v1.setPasswordRequest
 import mavio.user.v1.setPinRequest
 import mavio.user.v1.updateUserRequest
 import mavio.user.v1.userPolicy
-import java.text.Collator
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
-import java.time.format.FormatStyle
 
 // Users (docs/clients.md §6.3.5), as the web UI's on a phone: the users of
 // the server and its invitation links, and a user's page: its name, whether

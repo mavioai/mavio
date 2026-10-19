@@ -21,11 +21,11 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
@@ -75,6 +75,7 @@ import dev.mavio.core.SignInState
 import dev.mavio.core.StreamState
 import dev.mavio.core.SubtitleMode
 import dev.mavio.design.MavioSpacing
+import dev.mavio.ui.Avatar
 import dev.mavio.ui.ButtonKind
 import dev.mavio.ui.MavioButton
 import dev.mavio.ui.MavioIcon

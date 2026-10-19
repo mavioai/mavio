@@ -28,10 +28,12 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import dev.mavio.core.Card
 import dev.mavio.core.CardKind
@@ -272,3 +274,21 @@ fun PersonCard(credit: CreditEntry, modifier: Modifier = Modifier) {
 
 private fun initials(name: String): String =
     name.split(" ").filter { it.isNotEmpty() }.take(2).joinToString("") { it.take(1) }
+
+/** The first letter of a name in a circle. */
+@Composable
+fun Avatar(name: String, modifier: Modifier = Modifier, size: Dp = 32.dp) {
+    Box(
+        modifier
+            .size(size)
+            .background(theme.colors.fillSelected, CircleShape),
+        Alignment.Center,
+    ) {
+        Text(
+            name.take(1).uppercase(),
+            fontSize = (size.value * 0.42f).sp,
+            fontWeight = FontWeight.SemiBold,
+            color = theme.colors.textSecondary,
+        )
+    }
+}

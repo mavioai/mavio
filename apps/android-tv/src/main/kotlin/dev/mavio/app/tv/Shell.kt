@@ -34,7 +34,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.focus.focusRestorer
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
@@ -155,6 +154,7 @@ private fun Shell(model: AppModel) {
                         }
                     }
                     NavBar(
+                        model,
                         tab,
                         shown,
                         tabs,
@@ -193,6 +193,7 @@ private fun scrolled(list: LazyListState): Boolean {
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun NavBar(
+    model: AppModel,
     current: Tab,
     shown: List<Tab>,
     tabs: Map<Tab, FocusRequester>,
@@ -208,6 +209,9 @@ private fun NavBar(
         Modifier
             .fillMaxWidth()
             .background(band)
+            // Focus entering the bar from the page goes to the current tab.
+            .focusProperties { onEnter = { tabs.getValue(current).requestFocus() } }
+            .focusGroup()
             .padding(start = theme.layout.margin, end = theme.layout.margin, top = MavioSpacing.s32, bottom = MavioSpacing.s24),
         Alignment.Center,
     ) {
@@ -215,8 +219,6 @@ private fun NavBar(
             Modifier
                 .clip(CircleShape)
                 .background(theme.colors.surfaceRaised.copy(alpha = 0.6f))
-                .focusRestorer(tabs.getValue(current))
-                .focusGroup()
                 .padding(6.dp),
             horizontalArrangement = Arrangement.spacedBy(4.dp),
         ) {
@@ -232,6 +234,7 @@ private fun NavBar(
                 onChoose = onSearch,
             )
         }
+        MenuButton(model, Modifier.align(Alignment.CenterEnd).focusProperties { down = page })
     }
 }
 

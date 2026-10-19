@@ -85,6 +85,15 @@ fun TvCanvas(content: @Composable () -> Unit) {
 }
 
 /**
+ * [content] of a popup or a dialog on the television's canvas, [canvas]
+ * the density outside it, which the window it opens in does not keep.
+ */
+@Composable
+fun OnCanvas(canvas: Density, content: @Composable () -> Unit) {
+    CompositionLocalProvider(LocalDensity provides canvas, content = content)
+}
+
+/**
  * Scrolling that keeps the focused element in view (docs/tv.md §4):
  * [before] points past the start, as below the navigation bar, and
  * [after] before the end, with room for a card to grow.
@@ -277,31 +286,33 @@ fun <T> TvChoiceMenu(
         onDismissRequest = onDismiss,
         properties = PopupProperties(focusable = true),
     ) {
-        Column(
-            Modifier
-                .width(width)
-                .shadow(24.dp, RoundedCornerShape(MavioRadius.lg), ambientColor = theme.colors.tvFocusShadow, spotColor = theme.colors.tvFocusShadow)
-                .clip(RoundedCornerShape(MavioRadius.lg))
-                // Without a blur behind it, the glass is all but opaque.
-                .background(theme.colors.surfaceOverlay.copy(alpha = 0.95f))
-                .border(1.dp, theme.colors.border, RoundedCornerShape(MavioRadius.lg))
-                .padding(MavioSpacing.s8),
-            verticalArrangement = Arrangement.spacedBy(2.dp),
-        ) {
-            choices.forEach { c ->
-                val state = remember { Focusable() }
-                val focused = state.focused()
-                Row(
-                    (if (c == current) Modifier.focusRequester(chosen) else Modifier)
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(MavioRadius.md))
-                        .background(if (focused) theme.colors.fill else Color.Transparent)
-                        .selectable(state) { onChoose(c) }
-                        .padding(horizontal = MavioSpacing.s16, vertical = MavioSpacing.s12),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text(label(c), Modifier.weight(1f), style = theme.type.headline.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                    if (c == current) MavioIcon(R.drawable.ic_check, size = 24.dp, tint = theme.colors.accentText)
+        OnCanvas(density) {
+            Column(
+                Modifier
+                    .width(width)
+                    .shadow(24.dp, RoundedCornerShape(MavioRadius.lg), ambientColor = theme.colors.tvFocusShadow, spotColor = theme.colors.tvFocusShadow)
+                    .clip(RoundedCornerShape(MavioRadius.lg))
+                    // Without a blur behind it, the glass is all but opaque.
+                    .background(theme.colors.surfaceOverlay.copy(alpha = 0.95f))
+                    .border(1.dp, theme.colors.border, RoundedCornerShape(MavioRadius.lg))
+                    .padding(MavioSpacing.s8),
+                verticalArrangement = Arrangement.spacedBy(2.dp),
+            ) {
+                choices.forEach { c ->
+                    val state = remember { Focusable() }
+                    val focused = state.focused()
+                    Row(
+                        (if (c == current) Modifier.focusRequester(chosen) else Modifier)
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(MavioRadius.md))
+                            .background(if (focused) theme.colors.fill else Color.Transparent)
+                            .selectable(state) { onChoose(c) }
+                            .padding(horizontal = MavioSpacing.s16, vertical = MavioSpacing.s12),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(label(c), Modifier.weight(1f), style = theme.type.headline.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        if (c == current) MavioIcon(R.drawable.ic_check, size = 24.dp, tint = theme.colors.accentText)
+                    }
                 }
             }
         }
