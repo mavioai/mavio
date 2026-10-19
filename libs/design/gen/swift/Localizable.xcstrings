@@ -9829,6 +9829,60 @@
         }
       }
     },
+    "libraries.scanFolders": {
+      "comment": "Progress of a library's scan while it reads the library's folders.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reading folders · %1$@ of %2$@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在读取文件夹 · %1$@/%2$@"
+          }
+        }
+      }
+    },
+    "libraries.scanItems": {
+      "comment": "Progress of a library's scan while the new and changed files are probed and their items refreshed.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Analyzing media · %1$@ of %2$@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在分析媒体 · %1$@/%2$@"
+          }
+        }
+      }
+    },
+    "libraries.scanDone": {
+      "comment": "Shown once a library's scan and the work it queued are done.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scan finished"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "扫描完成"
+          }
+        }
+      }
+    },
     "libraries.saved": {
       "comment": "Shown after a library's changes were saved.",
       "extractionState": "manual",

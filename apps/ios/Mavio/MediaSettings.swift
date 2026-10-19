@@ -107,6 +107,24 @@ struct ManagedLibrariesView: View {
         .navigationBarTitleDisplayMode(.inline)
         .task { await load() }
         .refreshable { await load() }
+        .onChange(of: scanningLibraries) { before, now in
+            // A scan that ended says so until the page is left.
+            for id in before.subtracting(now) {
+                scanned[id] = MavioStrings.librariesScanDone
+            }
+        }
+    }
+
+    /// The libraries being scanned.
+    private var scanningLibraries: Set<String> {
+        Set(model.scanProgress[server.id].map { Array($0.keys) } ?? [])
+    }
+
+    /// What a library's scan is doing, and how far it has come.
+    private static func describe(_ p: ScanProgress) -> String {
+        p.readingFolders
+            ? MavioStrings.librariesScanFolders(done: "\(p.foldersDone)", total: "\(p.foldersTotal)")
+            : MavioStrings.librariesScanItems(done: "\(p.itemsDone)", total: "\(p.itemsTotal)")
     }
 
     private func row(_ library: Mavio_Library_V1_Library) -> some View {
@@ -115,13 +133,19 @@ struct ManagedLibrariesView: View {
         // rather than a chevron.
         return HStack(spacing: MavioSpacing.s12) {
             ColorTile(icon: k.icon, color: k.color)
+            let progress = model.scanProgress[server.id]?[library.id]
             VStack(alignment: .leading, spacing: 2) {
                 Text(library.name).lineLimit(1)
                 Text(
-                    scanned[library.id]
+                    progress.map(Self.describe)
+                        ?? scanned[library.id]
                         ?? "\(k.title) · \(MavioStrings.librariesFolderCount(count: library.paths.count))"
                 )
                 .type(theme.type.footnote).foregroundStyle(theme.colors.textSecondary).lineLimit(1)
+                .monospacedDigit()
+                if let progress {
+                    ProgressView(value: progress.fraction).padding(.top, MavioSpacing.s4)
+                }
             }
             Spacer(minLength: 0)
             Button(scanning.contains(library.id) ? "…" : MavioStrings.librariesScan) { scan(library) }
@@ -144,10 +168,13 @@ struct ManagedLibrariesView: View {
 
     private func load() async {
         do {
-            libraries = try await model.call(
+            let listed = try await model.call(
                 server, Procedure.libraries("ListLibraries"), Mavio_Library_V1_ListLibrariesRequest(),
                 as: Mavio_Library_V1_ListLibrariesResponse.self
             ).libraries
+            model.listedScans(server.id, listed)
+            libraries =
+                listed
                 .filter { $0.kind != .collections && $0.kind != .playlists }
                 .sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
             failure = nil

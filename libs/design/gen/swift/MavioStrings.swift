@@ -1767,6 +1767,19 @@ public enum MavioStrings {
     /// Shown when a scan of the library was already queued.
     public static var librariesScanPending: String { NSLocalizedString("libraries.scanPending", bundle: .module, comment: "") }
 
+    /// Progress of a library's scan while it reads the library's folders.
+    public static func librariesScanFolders(done: String, total: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("libraries.scanFolders", bundle: .module, comment: ""), done, total)
+    }
+
+    /// Progress of a library's scan while the new and changed files are probed and their items refreshed.
+    public static func librariesScanItems(done: String, total: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("libraries.scanItems", bundle: .module, comment: ""), done, total)
+    }
+
+    /// Shown once a library's scan and the work it queued are done.
+    public static var librariesScanDone: String { NSLocalizedString("libraries.scanDone", bundle: .module, comment: "") }
+
     /// Shown after a library's changes were saved.
     public static var librariesSaved: String { NSLocalizedString("libraries.saved", bundle: .module, comment: "") }
 

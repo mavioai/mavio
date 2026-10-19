@@ -561,6 +561,9 @@
     <string name="libraries_scan">扫描</string>
     <string name="libraries_scan_queued">已开始扫描</string>
     <string name="libraries_scan_pending">已有扫描在等待</string>
+    <string name="libraries_scan_folders">正在读取文件夹 · %1$s/%2$s</string>
+    <string name="libraries_scan_items">正在分析媒体 · %1$s/%2$s</string>
+    <string name="libraries_scan_done">扫描完成</string>
     <string name="libraries_saved">已保存</string>
     <string name="libraries_name">名称</string>
     <string name="libraries_kind">内容类型</string>

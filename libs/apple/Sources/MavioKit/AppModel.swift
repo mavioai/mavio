@@ -62,6 +62,9 @@ public final class AppModel {
     public private(set) var states: [String: StreamState] = [:]
     /// The rows of Home.
     public private(set) var home: [Row] = []
+    /// How far the libraries' scans have come, by server and library, as
+    /// the servers tell administrators.
+    public private(set) var scanProgress: [String: [String: ScanProgress]] = [:]
     /// The folder of downloaded files.
     public let downloadsFolder: URL
     /// The downloads.
@@ -134,6 +137,8 @@ public final class AppModel {
                 bump(id)
             case .sessionsChanged:
                 break
+            case let .scanProgressChanged(library, progress):
+                scanProgress[id, default: [:]][library] = progress
             }
         case let .home(rows):
             home = rows
@@ -141,6 +146,19 @@ public final class AppModel {
             reloadServers()
             refreshHome()
         }
+    }
+
+    /// Takes the scan progress of a server's libraries as listed, which the
+    /// server's events then carry on.
+    public func listedScans(_ serverId: String, _ libraries: [Mavio_Library_V1_Library]) {
+        var scans: [String: ScanProgress] = [:]
+        for l in libraries where l.hasScanProgress {
+            let p = l.scanProgress
+            scans[l.id] = ScanProgress(
+                readingFolders: p.phase == .folders, foldersDone: p.foldersDone, foldersTotal: p.foldersTotal,
+                itemsDone: p.itemsDone, itemsTotal: p.itemsTotal, fraction: p.fraction)
+        }
+        scanProgress[serverId] = scans
     }
 
     /// Marks a server's data changed, reloading Home and the screens showing it.

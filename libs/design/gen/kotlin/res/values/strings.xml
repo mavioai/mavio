@@ -1110,6 +1110,12 @@
     <string name="libraries_scan_queued">Scan started</string>
     <!-- Shown when a scan of the library was already queued. -->
     <string name="libraries_scan_pending">A scan is already waiting</string>
+    <!-- Progress of a library's scan while it reads the library's folders. -->
+    <string name="libraries_scan_folders">Reading folders · %1$s of %2$s</string>
+    <!-- Progress of a library's scan while the new and changed files are probed and their items refreshed. -->
+    <string name="libraries_scan_items">Analyzing media · %1$s of %2$s</string>
+    <!-- Shown once a library's scan and the work it queued are done. -->
+    <string name="libraries_scan_done">Scan finished</string>
     <!-- Shown after a library's changes were saved. -->
     <string name="libraries_saved">Saved</string>
     <!-- Label of a library's name. -->

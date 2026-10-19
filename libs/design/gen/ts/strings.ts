@@ -537,6 +537,9 @@ export type MessageKey =
   | 'libraries.scan'
   | 'libraries.scanQueued'
   | 'libraries.scanPending'
+  | 'libraries.scanFolders'
+  | 'libraries.scanItems'
+  | 'libraries.scanDone'
   | 'libraries.saved'
   | 'libraries.name'
   | 'libraries.kind'
@@ -2461,6 +2464,9 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "libraries.scan": "Scan",
     "libraries.scanQueued": "Scan started",
     "libraries.scanPending": "A scan is already waiting",
+    "libraries.scanFolders": "Reading folders · {done} of {total}",
+    "libraries.scanItems": "Analyzing media · {done} of {total}",
+    "libraries.scanDone": "Scan finished",
     "libraries.saved": "Saved",
     "libraries.name": "Name",
     "libraries.kind": "Content",
@@ -4383,6 +4389,9 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "libraries.scan": "扫描",
     "libraries.scanQueued": "已开始扫描",
     "libraries.scanPending": "已有扫描在等待",
+    "libraries.scanFolders": "正在读取文件夹 · {done}/{total}",
+    "libraries.scanItems": "正在分析媒体 · {done}/{total}",
+    "libraries.scanDone": "扫描完成",
     "libraries.saved": "已保存",
     "libraries.name": "名称",
     "libraries.kind": "内容类型",
