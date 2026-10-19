@@ -25,18 +25,11 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
-import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
-import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -69,6 +62,7 @@ import dev.mavio.ui.CardShape
 import dev.mavio.ui.ItemCard
 import dev.mavio.ui.Logo
 import dev.mavio.ui.MavioButton
+import dev.mavio.ui.PullToRefresh
 import dev.mavio.ui.R
 import dev.mavio.ui.Shelf
 import dev.mavio.ui.StatusView
@@ -79,7 +73,6 @@ import dev.mavio.ui.shapeOf
 import dev.mavio.ui.text
 import dev.mavio.ui.theme
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import mavio.acquisition.v1.Profile.MediaKind
 
 /** A title the hero shows, and the line above it. */
@@ -93,41 +86,21 @@ private const val HERO_INTERVAL = 9000L
  * titles, then a shelf for each row the servers return, pulled down to
  * load again.
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(model: AppModel) {
     val rows by model.home.collectAsStateWithLifecycle()
     val signedIn by model.signedIn.collectAsStateWithLifecycle()
-    var refreshing by remember { mutableStateOf(false) }
-    val scope = rememberCoroutineScope()
     val titles = rows.associate { it.id to rowTitle(it) }
     val hero = remember(rows, titles) { heroEntries(rows, titles) }
     val top = LocalTopInset.current
-    val pull = rememberPullToRefreshState()
-    PullToRefreshBox(
-        refreshing,
-        onRefresh = {
-            refreshing = true
-            // The spinner goes with the load, though the rows come back the same.
-            val load = model.refreshHome()
-            scope.launch {
-                load.join()
-                refreshing = false
-            }
-        },
-        Modifier.fillMaxSize(),
-        state = pull,
-        indicator = {
-            PullToRefreshDefaults.Indicator(
-                state = pull,
-                isRefreshing = refreshing,
-                modifier = Modifier.align(Alignment.TopCenter).padding(top = top),
-            )
-        },
+    PullToRefresh(
+        // The spinner goes with the load, though the rows come back the same.
+        refresh = { model.refreshHome().join() },
+        top = top,
     ) {
         if (rows.isEmpty()) {
             StatusView(stringResource(R.string.state_loading))
-            return@PullToRefreshBox
+            return@PullToRefresh
         }
         // The hero reaches the content's top, on a phone up under the header.
         val wide = theme.layout == TabletLayout && hero.isNotEmpty()

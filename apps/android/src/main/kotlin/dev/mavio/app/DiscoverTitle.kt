@@ -67,11 +67,13 @@ import dev.mavio.ui.ButtonKind
 import dev.mavio.ui.CatalogFilters
 import dev.mavio.ui.CatalogRow
 import dev.mavio.ui.Credit
+import dev.mavio.ui.DiscoverPullToRefresh
 import dev.mavio.ui.LocalDiscover
 import dev.mavio.ui.MavioButton
 import dev.mavio.ui.MavioIcon
 import dev.mavio.ui.NamedValue
 import dev.mavio.ui.R
+import dev.mavio.ui.Reload
 import dev.mavio.ui.Shelf
 import dev.mavio.ui.StatusView
 import dev.mavio.ui.blurAvailable
@@ -86,6 +88,7 @@ import dev.mavio.ui.line
 import dev.mavio.ui.minutesText
 import dev.mavio.ui.moneyText
 import dev.mavio.ui.productionStatus
+import dev.mavio.ui.rememberReload
 import dev.mavio.ui.seasonName
 import dev.mavio.ui.sized
 import dev.mavio.ui.statusLabel
@@ -111,7 +114,7 @@ import mavio.plugin.v1.Ratings.RatingSource
 
 /** A discovered title as GetTitle answers, null while it is on its way. */
 @Composable
-private fun discoveredTitle(serverId: String, mediaKind: Int, tmdbId: Int, attempt: Int) = discovered(
+private fun discoveredTitle(serverId: String, mediaKind: Int, tmdbId: Int, reload: Reload) = discovered(
     serverId,
     "GetTitle",
     remember(mediaKind, tmdbId) {
@@ -122,12 +125,15 @@ private fun discoveredTitle(serverId: String, mediaKind: Int, tmdbId: Int, attem
         }
     },
     GetTitleResponse::parseFrom,
-    attempt,
+    reload = reload,
 )
 
-/** What a page shows while what it shows loads, or why it can't. */
+/**
+ * What a page shows while what it shows loads, or why it can't; once
+ * loaded, read again from [serverId] by pulling it down.
+ */
 @Composable
-internal fun <T> Loaded(result: Result<T>?, missing: (T) -> Boolean, onRetry: () -> Unit, content: @Composable (T) -> Unit) {
+internal fun <T> Loaded(result: Result<T>?, missing: (T) -> Boolean, serverId: String, reload: Reload, content: @Composable (T) -> Unit) {
     val value = result?.getOrNull()
     when {
         result == null -> Box(Modifier.fillMaxSize(), Alignment.Center) { CircularProgressIndicator() }
@@ -136,19 +142,19 @@ internal fun <T> Loaded(result: Result<T>?, missing: (T) -> Boolean, onRetry: ()
             Modifier.padding(top = LocalTopInset.current),
             icon = R.drawable.ic_error,
             message = result.exceptionOrNull()?.reason,
-            action = stringResource(R.string.action_retry) to onRetry,
+            action = stringResource(R.string.action_retry) to reload::retry,
         )
         missing(value) -> StatusView(stringResource(R.string.state_empty), Modifier.padding(top = LocalTopInset.current), icon = R.drawable.ic_search)
-        else -> content(value)
+        else -> DiscoverPullToRefresh(serverId, reload, top = LocalTopInset.current) { content(value) }
     }
 }
 
 /** A discovered title (docs/clients.md §6.3.2), as the web UI's on a phone, its requests left out. */
 @Composable
 fun TitleScreen(route: Route.Title) {
-    var attempt by remember { mutableIntStateOf(0) }
-    val result by discoveredTitle(route.serverId, route.mediaKind, route.tmdbId, attempt)
-    Loaded(result, { !it.hasTitle() }, { attempt++ }) { TitleDetails(route.serverId, it.title) }
+    val reload = rememberReload()
+    val result by discoveredTitle(route.serverId, route.mediaKind, route.tmdbId, reload)
+    Loaded(result, { !it.hasTitle() }, route.serverId, reload) { TitleDetails(route.serverId, it.title) }
 }
 
 /** Opens the popular titles of a kind filtered alike; null without such a catalog. */
@@ -930,9 +936,9 @@ internal fun CreditTile(serverId: String, c: Credit, label: String, modifier: Mo
 /** A discovered title's cast and crew, or its crew alone, as the web UI's. */
 @Composable
 fun TitleCreditsScreen(route: Route.TitleCredits) {
-    var attempt by remember { mutableIntStateOf(0) }
-    val result by discoveredTitle(route.serverId, route.mediaKind, route.tmdbId, attempt)
-    Loaded(result, { !it.hasTitle() }, { attempt++ }) { r ->
+    val reload = rememberReload()
+    val result by discoveredTitle(route.serverId, route.mediaKind, route.tmdbId, reload)
+    Loaded(result, { !it.hasTitle() }, route.serverId, reload) { r ->
         val all = remember(r) { titleCredits(r.title.creditsList) }
         val credits = if (route.crew) all.filter { !it.isCast } else all
         val groups = (listOf(CreditKind.CREDIT_KIND_ACTOR to R.string.credits_cast, CreditKind.CREDIT_KIND_GUEST_STAR to R.string.credits_guest_stars) + crewLabels)

@@ -55,6 +55,7 @@ import dev.mavio.ui.CatalogRow
 import dev.mavio.ui.LocalDiscover
 import dev.mavio.ui.MavioButton
 import dev.mavio.ui.MavioIcon
+import dev.mavio.ui.PullToRefresh
 import dev.mavio.ui.R
 import dev.mavio.ui.Shelf
 import dev.mavio.ui.StatusView
@@ -71,8 +72,10 @@ import dev.mavio.ui.theme
 import dev.mavio.ui.titleKey
 import dev.mavio.ui.tmdbId
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.launch
 import mavio.acquisition.v1.Discover.Catalog
 import mavio.acquisition.v1.Discover.DiscoverResponse
 import mavio.acquisition.v1.Discover.DiscoveredTitle
@@ -150,12 +153,33 @@ fun DiscoverScreen() {
         )
         return
     }
-    LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(top = LocalTopInset.current, bottom = LocalBottomInset.current)) {
-        item(key = "title") {
-            Box(Modifier.padding(horizontal = theme.layout.margin)) { ScreenTitle(stringResource(R.string.nav_discover)) }
-        }
-        items(rowsOf(discovery.catalogs), key = { "${it.catalog.id}/${it.mediaKind}" }) { row ->
-            CatalogShelf(discovery.serverId, row, rowTitle(row))
+    val discover = LocalDiscover.current
+    val rows = rowsOf(discovery.catalogs)
+    var attempt by remember { mutableIntStateOf(0) }
+    val top = LocalTopInset.current
+    // A pull asks every row's first page again, then the rows show them.
+    PullToRefresh(
+        refresh = {
+            discover.forget(discovery.serverId)
+            coroutineScope {
+                rows.forEach { row ->
+                    launch {
+                        val request = catalogRequest(row.catalog.id, row.mediaKind.number, 0, CatalogFilters(), 1)
+                        runCatching { discover.call(discovery.serverId, "Discover", request, DiscoverResponse::parseFrom) }
+                    }
+                }
+            }
+            attempt++
+        },
+        top = top,
+    ) {
+        LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(top = top, bottom = LocalBottomInset.current)) {
+            item(key = "title") {
+                Box(Modifier.padding(horizontal = theme.layout.margin)) { ScreenTitle(stringResource(R.string.nav_discover)) }
+            }
+            items(rows, key = { "${it.catalog.id}/${it.mediaKind}" }) { row ->
+                CatalogShelf(discovery.serverId, row, rowTitle(row), attempt = attempt)
+            }
         }
     }
 }
@@ -166,10 +190,10 @@ fun DiscoverScreen() {
  * or can't be listed.
  */
 @Composable
-internal fun CatalogShelf(serverId: String, row: CatalogRow, title: String, tmdbId: Int = 0, filters: CatalogFilters? = null) {
+internal fun CatalogShelf(serverId: String, row: CatalogRow, title: String, tmdbId: Int = 0, filters: CatalogFilters? = null, attempt: Int = 0) {
     val navigator = LocalNavigator.current
     val request = remember(row, tmdbId, filters) { catalogRequest(row.catalog.id, row.mediaKind.number, tmdbId, filters ?: CatalogFilters(), 1) }
-    val result by discovered(serverId, "Discover", request, DiscoverResponse::parseFrom)
+    val result by discovered(serverId, "Discover", request, DiscoverResponse::parseFrom, attempt)
     val page = result?.getOrNull()
     if (result?.isFailure == true || (page != null && page.titlesCount == 0)) return
     val more: (@Composable () -> Unit)? = if (page != null && page.page < page.totalPages && filters == null) {
@@ -222,8 +246,8 @@ fun CatalogScreen(model: AppModel, route: Route.Catalog) {
     var filters by rememberSaveable { mutableStateOf(route.filters) }
     var filtering by remember { mutableStateOf(false) }
     var attempt by remember { mutableIntStateOf(0) }
-    val pages = remember(filters, attempt) { TitlePages() }
-    suspend fun next() {
+    var pages by remember(filters, attempt) { mutableStateOf(TitlePages()) }
+    suspend fun next(pages: TitlePages) {
         if (pages.loading || !pages.more || pages.failed) return
         pages.loading = true
         try {
@@ -245,12 +269,13 @@ fun CatalogScreen(model: AppModel, route: Route.Catalog) {
     }
     val grid = rememberLazyGridState()
     LaunchedEffect(pages) {
-        next()
+        val loading = pages
+        next(loading)
         // The next page as the end comes near.
         snapshotFlow { grid.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0 }
             .distinctUntilChanged()
             .filter { it >= grid.layoutInfo.totalItemsCount - 12 }
-            .collect { next() }
+            .collect { next(loading) }
     }
     val kind = MediaKind.forNumber(route.mediaKind) ?: MediaKind.MEDIA_KIND_UNSPECIFIED
     val title = when {
@@ -261,60 +286,71 @@ fun CatalogScreen(model: AppModel, route: Route.Catalog) {
     // Recommendations and similar titles take no filters.
     val filterable = found?.filterable(route.tmdbId) == true
     val n = filters.count
-    TitleGrid(
-        route.serverId,
-        pages.titles,
-        state = grid,
-        header = {
-            line("header") {
-                Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s12)) {
-                    Box(Modifier.weight(1f)) { ScreenTitle(title.ifEmpty { " " }) }
-                    if (filterable) {
-                        MavioButton(
-                            if (n > 0) "${stringResource(R.string.discover_filters)} ($n)" else stringResource(R.string.discover_filters),
-                            { filtering = true },
-                            Modifier.padding(bottom = MavioSpacing.s8),
-                            kind = if (n > 0 || filters.sort != 0) ButtonKind.Primary else ButtonKind.Secondary,
-                            icon = R.drawable.ic_filter,
-                        )
+    // A pull asks the first page again, the grid keeping its titles until it comes.
+    PullToRefresh(
+        refresh = {
+            discover.forget(route.serverId)
+            val fresh = TitlePages()
+            next(fresh)
+            pages = fresh
+        },
+        top = LocalTopInset.current,
+    ) {
+        TitleGrid(
+            route.serverId,
+            pages.titles,
+            state = grid,
+            header = {
+                line("header") {
+                    Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s12)) {
+                        Box(Modifier.weight(1f)) { ScreenTitle(title.ifEmpty { " " }) }
+                        if (filterable) {
+                            MavioButton(
+                                if (n > 0) "${stringResource(R.string.discover_filters)} ($n)" else stringResource(R.string.discover_filters),
+                                { filtering = true },
+                                Modifier.padding(bottom = MavioSpacing.s8),
+                                kind = if (n > 0 || filters.sort != 0) ButtonKind.Primary else ButtonKind.Secondary,
+                                icon = R.drawable.ic_filter,
+                            )
+                        }
                     }
                 }
-            }
-        },
-        empty = {
-            when {
-                pages.failed -> line("error") {
-                    StatusView(
-                        stringResource(R.string.state_error),
-                        Modifier.padding(top = MavioSpacing.s48),
-                        icon = R.drawable.ic_error,
-                        action = stringResource(R.string.action_retry) to { attempt++ },
-                    )
+            },
+            empty = {
+                when {
+                    pages.failed -> line("error") {
+                        StatusView(
+                            stringResource(R.string.state_error),
+                            Modifier.padding(top = MavioSpacing.s48),
+                            icon = R.drawable.ic_error,
+                            action = stringResource(R.string.action_retry) to { attempt++ },
+                        )
+                    }
+                    pages.more || pages.loading -> items(12) { CardPlaceholder() }
+                    n > 0 || filters.sort != 0 -> line("none") {
+                        StatusView(
+                            stringResource(R.string.discover_no_matches),
+                            Modifier.padding(top = MavioSpacing.s48),
+                            icon = R.drawable.ic_search,
+                            action = stringResource(R.string.discover_reset) to { filters = CatalogFilters() },
+                        )
+                    }
+                    else -> line("empty") { StatusView(stringResource(R.string.state_empty), Modifier.padding(top = MavioSpacing.s48)) }
                 }
-                pages.more || pages.loading -> items(12) { CardPlaceholder() }
-                n > 0 || filters.sort != 0 -> line("none") {
-                    StatusView(
-                        stringResource(R.string.discover_no_matches),
-                        Modifier.padding(top = MavioSpacing.s48),
-                        icon = R.drawable.ic_search,
-                        action = stringResource(R.string.discover_reset) to { filters = CatalogFilters() },
-                    )
+            },
+            footer = {
+                if (pages.titles.isNotEmpty() && pages.more) {
+                    line("more") {
+                        Box(Modifier.fillMaxWidth().padding(MavioSpacing.s16), Alignment.Center) { CircularProgressIndicator(Modifier.width(24.dp)) }
+                    }
                 }
-                else -> line("empty") { StatusView(stringResource(R.string.state_empty), Modifier.padding(top = MavioSpacing.s48)) }
+            },
+        )
+        if (filtering && found != null) {
+            FiltersSheet(model, route.serverId, found, kind, filters, onDismiss = { filtering = false }) {
+                filtering = false
+                filters = it
             }
-        },
-        footer = {
-            if (pages.titles.isNotEmpty() && pages.more) {
-                line("more") {
-                    Box(Modifier.fillMaxWidth().padding(MavioSpacing.s16), Alignment.Center) { CircularProgressIndicator(Modifier.width(24.dp)) }
-                }
-            }
-        },
-    )
-    if (filtering && found != null) {
-        FiltersSheet(model, route.serverId, found, kind, filters, onDismiss = { filtering = false }) {
-            filtering = false
-            filters = it
         }
     }
 }

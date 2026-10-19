@@ -172,7 +172,7 @@ fun LibrariesPage(model: AppModel, serverId: String) {
         (wasScanning - progress.keys).forEach { scanned[it] = R.string.libraries_scan_done to null }
         wasScanning = progress.keys
     }
-    LaunchedEffect(serverId) {
+    suspend fun load() {
         attempt({ failure = it }) {
             val collator = Collator.getInstance()
             val listed = model.client.call(serverId, Procedure.libraries("ListLibraries"), listLibrariesRequest {}, ListLibrariesResponse::parseFrom)
@@ -184,7 +184,8 @@ fun LibrariesPage(model: AppModel, serverId: String) {
             failure = null
         }
     }
-    SettingsList(stringResource(R.string.settings_libraries), stringResource(R.string.libraries_message)) {
+    LaunchedEffect(serverId) { load() }
+    SettingsList(stringResource(R.string.settings_libraries), stringResource(R.string.libraries_message), refresh = { load() }) {
         val list = libraries
         if (list == null) {
             item { if (failure == null) StatusView(stringResource(R.string.state_loading)) else StatusView(failure!!, icon = R.drawable.ic_error) }

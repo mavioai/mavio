@@ -28,7 +28,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -55,12 +54,15 @@ import dev.mavio.ui.Artwork
 import dev.mavio.ui.ItemCard
 import dev.mavio.ui.MavioIcon
 import dev.mavio.ui.PersonCard
+import dev.mavio.ui.PullToRefresh
 import dev.mavio.ui.R
+import dev.mavio.ui.Reload
 import dev.mavio.ui.StatusView
 import dev.mavio.ui.crewOrder
 import dev.mavio.ui.isCast
 import dev.mavio.ui.label
 import dev.mavio.ui.line
+import dev.mavio.ui.rememberReload
 import dev.mavio.ui.text
 import dev.mavio.ui.theme
 import java.time.Instant
@@ -71,15 +73,15 @@ import java.time.format.FormatStyle
 import kotlin.coroutines.cancellation.CancellationException
 
 /**
- * Loads something of a server again as the server changes, keeping what
- * was shown when a later load fails.
+ * Loads something of a server again as the server changes and as [reload]
+ * asks, keeping what was shown when a later load fails.
  */
 @Composable
-private fun <T : Any> loaded(model: AppModel, serverId: String, key: Any, attempt: Int, load: suspend () -> T): Pair<T?, String?> {
+private fun <T : Any> loaded(model: AppModel, serverId: String, key: Any, reload: Reload, load: suspend () -> T): Pair<T?, String?> {
     val revisions by model.revisions.collectAsStateWithLifecycle()
     var value by remember(serverId, key) { mutableStateOf<T?>(null) }
     var failure by remember(serverId, key) { mutableStateOf<String?>(null) }
-    LaunchedEffect(serverId, key, revisions[serverId], attempt) {
+    LaunchedEffect(serverId, key, revisions[serverId], reload.attempt) {
         try {
             value = load()
             failure = null
@@ -88,6 +90,7 @@ private fun <T : Any> loaded(model: AppModel, serverId: String, key: Any, attemp
         } catch (e: Exception) {
             if (value == null) failure = e.reason
         }
+        reload.done()
     }
     return value to failure
 }
@@ -115,36 +118,38 @@ private fun Pending(failure: String?, onRetry: () -> Unit) {
  */
 @Composable
 fun CreditsScreen(model: AppModel, route: Route.Credits) {
-    var attempt by remember { mutableIntStateOf(0) }
-    val (details, failure) = loaded(model, route.serverId, route.itemId, attempt) { model.client.details(route.serverId, route.itemId) }
-    if (details == null) return Pending(failure) { attempt++ }
+    val reload = rememberReload()
+    val (details, failure) = loaded(model, route.serverId, route.itemId, reload) { model.client.details(route.serverId, route.itemId) }
+    if (details == null) return Pending(failure, reload::retry)
     val credits = if (route.crew) details.credits.filter { !it.job.isCast } else details.credits
     val groups = (listOf(CreditJob.ACTOR, CreditJob.GUEST_STAR) + crewOrder)
         .map { job -> job to credits.filter { it.job == job } }
         .filter { it.second.isNotEmpty() }
-    LazyVerticalGrid(
-        GridCells.Adaptive(112.dp),
-        Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(
-            start = theme.layout.margin,
-            end = theme.layout.margin,
-            top = LocalTopInset.current,
-            bottom = LocalBottomInset.current + MavioSpacing.s24,
-        ),
-        horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s16),
-        verticalArrangement = Arrangement.spacedBy(MavioSpacing.s24),
-    ) {
-        line("title") { ScreenTitle(stringResource(if (route.crew) R.string.credits_full_crew else R.string.item_cast)) }
-        if (credits.isEmpty()) {
-            line("none") { Text(stringResource(R.string.credits_none), style = theme.type.body.text, color = theme.colors.textSecondary) }
-        }
-        groups.forEach { (job, people) ->
-            line("group/$job") { Text(stringResource(job.label), Modifier.padding(top = MavioSpacing.s8), style = theme.type.title3.text) }
-            items(people.size, key = { "$job/$it" }) { i ->
-                val credit = people[i]
-                // The cast's characters, and what the crew's Other did.
-                val role = if (job == CreditJob.OTHER || job.isCast) credit.role else null
-                Box(Modifier.fillMaxWidth(), Alignment.TopCenter) { PersonLink(route.serverId, credit.copy(role = role)) }
+    PullToRefresh(reload, top = LocalTopInset.current) {
+        LazyVerticalGrid(
+            GridCells.Adaptive(112.dp),
+            Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(
+                start = theme.layout.margin,
+                end = theme.layout.margin,
+                top = LocalTopInset.current,
+                bottom = LocalBottomInset.current + MavioSpacing.s24,
+            ),
+            horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s16),
+            verticalArrangement = Arrangement.spacedBy(MavioSpacing.s24),
+        ) {
+            line("title") { ScreenTitle(stringResource(if (route.crew) R.string.credits_full_crew else R.string.item_cast)) }
+            if (credits.isEmpty()) {
+                line("none") { Text(stringResource(R.string.credits_none), style = theme.type.body.text, color = theme.colors.textSecondary) }
+            }
+            groups.forEach { (job, people) ->
+                line("group/$job") { Text(stringResource(job.label), Modifier.padding(top = MavioSpacing.s8), style = theme.type.title3.text) }
+                items(people.size, key = { "$job/$it" }) { i ->
+                    val credit = people[i]
+                    // The cast's characters, and what the crew's Other did.
+                    val role = if (job == CreditJob.OTHER || job.isCast) credit.role else null
+                    Box(Modifier.fillMaxWidth(), Alignment.TopCenter) { PersonLink(route.serverId, credit.copy(role = role)) }
+                }
             }
         }
     }
@@ -170,25 +175,27 @@ internal fun PersonLink(serverId: String, credit: CreditEntry, modifier: Modifie
  */
 @Composable
 fun PersonScreen(model: AppModel, route: Route.Person) {
-    var attempt by remember { mutableIntStateOf(0) }
-    val (person, failure) = loaded(model, route.serverId, route.personId, attempt) { model.client.person(route.serverId, route.personId) }
-    if (person == null) return Pending(failure) { attempt++ }
-    LazyColumn(
-        Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(top = LocalTopInset.current, bottom = LocalBottomInset.current + MavioSpacing.s40),
-    ) {
-        item(key = "header") { PersonHeader(person) }
-        titles("movies", R.string.person_movies, person.items.filter { it.kind == CardKind.MOVIE })
-        titles("series", R.string.person_series, person.items.filter { it.kind == CardKind.SERIES })
-        titles("episodes", R.string.person_episodes, person.items.filter { it.kind == CardKind.EPISODE }, wide = true)
-        if (person.items.isEmpty()) {
-            item(key = "none") {
-                Text(
-                    stringResource(R.string.person_none),
-                    Modifier.padding(start = theme.layout.margin, end = theme.layout.margin, top = MavioSpacing.s32),
-                    style = theme.type.body.text,
-                    color = theme.colors.textSecondary,
-                )
+    val reload = rememberReload()
+    val (person, failure) = loaded(model, route.serverId, route.personId, reload) { model.client.person(route.serverId, route.personId) }
+    if (person == null) return Pending(failure, reload::retry)
+    PullToRefresh(reload, top = LocalTopInset.current) {
+        LazyColumn(
+            Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(top = LocalTopInset.current, bottom = LocalBottomInset.current + MavioSpacing.s40),
+        ) {
+            item(key = "header") { PersonHeader(person) }
+            titles("movies", R.string.person_movies, person.items.filter { it.kind == CardKind.MOVIE })
+            titles("series", R.string.person_series, person.items.filter { it.kind == CardKind.SERIES })
+            titles("episodes", R.string.person_episodes, person.items.filter { it.kind == CardKind.EPISODE }, wide = true)
+            if (person.items.isEmpty()) {
+                item(key = "none") {
+                    Text(
+                        stringResource(R.string.person_none),
+                        Modifier.padding(start = theme.layout.margin, end = theme.layout.margin, top = MavioSpacing.s32),
+                        style = theme.type.body.text,
+                        color = theme.colors.textSecondary,
+                    )
+                }
             }
         }
     }

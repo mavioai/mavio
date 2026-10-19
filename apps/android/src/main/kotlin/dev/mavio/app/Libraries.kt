@@ -34,6 +34,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -62,6 +63,7 @@ import dev.mavio.ui.Artwork
 import dev.mavio.ui.CardPlaceholder
 import dev.mavio.ui.ItemCard
 import dev.mavio.ui.MavioIcon
+import dev.mavio.ui.PullToRefresh
 import dev.mavio.ui.R
 import dev.mavio.ui.Segmented
 import dev.mavio.ui.StatusView
@@ -69,8 +71,10 @@ import dev.mavio.ui.line
 import dev.mavio.ui.rowTitle
 import dev.mavio.ui.text
 import dev.mavio.ui.theme
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.launch
 
 /** How many items a page of a library's grid holds. */
 private const val PAGE_SIZE = 60u
@@ -84,48 +88,60 @@ fun LibrariesScreen(model: AppModel) {
     val shown = servers.filter { it.id in signedIn }
     val navigator = LocalNavigator.current
     val margin = theme.layout.margin
-    LazyColumn(
-        Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(
-            start = margin,
-            end = margin,
-            top = LocalTopInset.current,
-            bottom = LocalBottomInset.current + MavioSpacing.s24,
-        ),
-        verticalArrangement = Arrangement.spacedBy(MavioSpacing.s16),
-    ) {
-        item(key = "title") { ScreenTitle(stringResource(R.string.nav_libraries)) }
-        shown.forEach { server ->
-            if (shown.size > 1) {
-                item(key = "server/${server.id}") {
-                    Text(server.name, Modifier.padding(top = MavioSpacing.s12), style = theme.type.title3.text)
-                }
+    // Each server's libraries, kept here for a pull to load them all again.
+    val loaded = remember { mutableStateMapOf<String, Result<Libraries>>() }
+    val top = LocalTopInset.current
+    PullToRefresh(
+        refresh = {
+            coroutineScope {
+                shown.forEach { server -> launch { loaded[server.id] = runCatching { model.libraries(server.id) } } }
             }
-            item(key = "libraries/${server.id}") {
-                // Each server's libraries load on their own, so that one
-                // that can't be reached holds up none of the others.
-                // Those loaded before show at once on the tab's return.
-                var libraries by remember(server.id) { mutableStateOf(model.heldLibraries(server.id)?.let { Result.success(it) }) }
-                LaunchedEffect(server.id, revisions[server.id]) {
-                    if (model.heldLibraries(server.id) == null) libraries = runCatching { model.libraries(server.id) }
-                }
-                val result = libraries
-                val list = result?.getOrNull()
-                when {
-                    result == null -> LibraryRow(List(3) { null }) {}
-                    list == null || (list.offline && list.libraries.isEmpty()) -> Row(
-                        horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s8),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        MavioIcon(R.drawable.ic_offline, size = 18.dp, tint = theme.colors.textTertiary)
-                        Text(
-                            stringResource(R.string.home_server_unreachable, server.name),
-                            style = theme.type.callout.text,
-                            color = theme.colors.textTertiary,
-                        )
+        },
+        top = top,
+    ) {
+        LazyColumn(
+            Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(
+                start = margin,
+                end = margin,
+                top = top,
+                bottom = LocalBottomInset.current + MavioSpacing.s24,
+            ),
+            verticalArrangement = Arrangement.spacedBy(MavioSpacing.s16),
+        ) {
+            item(key = "title") { ScreenTitle(stringResource(R.string.nav_libraries)) }
+            shown.forEach { server ->
+                if (shown.size > 1) {
+                    item(key = "server/${server.id}") {
+                        Text(server.name, Modifier.padding(top = MavioSpacing.s12), style = theme.type.title3.text)
                     }
-                    else -> LibraryRow(list.libraries) { library ->
-                        navigator.open(Route.Library(server.id, library.id, library.name))
+                }
+                item(key = "libraries/${server.id}") {
+                    // Each server's libraries load on their own, so that one
+                    // that can't be reached holds up none of the others.
+                    // Those loaded before show at once on the tab's return.
+                    LaunchedEffect(server.id, revisions[server.id]) {
+                        val held = model.heldLibraries(server.id)
+                        loaded[server.id] = if (held != null) Result.success(held) else runCatching { model.libraries(server.id) }
+                    }
+                    val result = loaded[server.id] ?: model.heldLibraries(server.id)?.let { Result.success(it) }
+                    val list = result?.getOrNull()
+                    when {
+                        result == null -> LibraryRow(List(3) { null }) {}
+                        list == null || (list.offline && list.libraries.isEmpty()) -> Row(
+                            horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s8),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            MavioIcon(R.drawable.ic_offline, size = 18.dp, tint = theme.colors.textTertiary)
+                            Text(
+                                stringResource(R.string.home_server_unreachable, server.name),
+                                style = theme.type.callout.text,
+                                color = theme.colors.textTertiary,
+                            )
+                        }
+                        else -> LibraryRow(list.libraries) { library ->
+                            navigator.open(Route.Library(server.id, library.id, library.name))
+                        }
                     }
                 }
             }
@@ -246,24 +262,27 @@ private fun Recommended(model: AppModel, route: Route.Library, header: @Composab
         rows = runCatching { model.client.recommended(route.serverId, route.libraryId) }
     }
     val result = rows
-    LazyColumn(
-        Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(top = LocalTopInset.current, bottom = LocalBottomInset.current + MavioSpacing.s24),
-    ) {
-        item(key = "header") { Box(Modifier.padding(horizontal = theme.layout.margin)) { header() } }
-        val list = result?.getOrNull()
-        when {
-            result == null -> item { StatusView(stringResource(R.string.state_loading), Modifier.padding(top = MavioSpacing.s64)) }
-            list == null -> item {
-                StatusView(
-                    stringResource(R.string.state_error),
-                    Modifier.padding(top = MavioSpacing.s64),
-                    icon = R.drawable.ic_error,
-                    action = stringResource(R.string.action_retry) to { attempt++ },
-                )
+    val top = LocalTopInset.current
+    PullToRefresh(refresh = { rows = runCatching { model.client.recommended(route.serverId, route.libraryId) } }, top = top) {
+        LazyColumn(
+            Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(top = top, bottom = LocalBottomInset.current + MavioSpacing.s24),
+        ) {
+            item(key = "header") { Box(Modifier.padding(horizontal = theme.layout.margin)) { header() } }
+            val list = result?.getOrNull()
+            when {
+                result == null -> item { StatusView(stringResource(R.string.state_loading), Modifier.padding(top = MavioSpacing.s64)) }
+                list == null -> item {
+                    StatusView(
+                        stringResource(R.string.state_error),
+                        Modifier.padding(top = MavioSpacing.s64),
+                        icon = R.drawable.ic_error,
+                        action = stringResource(R.string.action_retry) to { attempt++ },
+                    )
+                }
+                list.isEmpty() -> item { StatusView(stringResource(R.string.state_empty), Modifier.padding(top = MavioSpacing.s64)) }
+                else -> items(list, key = { it.id }) { row -> HomeShelf(row, rowTitle(row), several = false) }
             }
-            list.isEmpty() -> item { StatusView(stringResource(R.string.state_empty), Modifier.padding(top = MavioSpacing.s64)) }
-            else -> items(list, key = { it.id }) { row -> HomeShelf(row, rowTitle(row), several = false) }
         }
     }
 }
@@ -298,8 +317,8 @@ private fun AllItems(model: AppModel, route: Route.Library, header: @Composable 
         tag = tag,
         studio = studio,
     )
-    val pages = remember(filter, sort, revisions[route.serverId], attempt) { Pages() }
-    suspend fun next() {
+    var pages by remember(filter, sort, revisions[route.serverId], attempt) { mutableStateOf(Pages()) }
+    suspend fun next(pages: Pages) {
         if (pages.loading || !pages.more || pages.failed) return
         pages.loading = true
         runCatching {
@@ -313,104 +332,116 @@ private fun AllItems(model: AppModel, route: Route.Library, header: @Composable 
     }
     val grid = rememberLazyGridState()
     LaunchedEffect(pages) {
-        next()
+        val loading = pages
+        next(loading)
         // The next page as the end comes near.
         snapshotFlow { grid.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0 }
             .distinctUntilChanged()
             .filter { it >= grid.layoutInfo.totalItemsCount - 12 }
-            .collect { next() }
+            .collect { next(loading) }
     }
     val navigator = LocalNavigator.current
     val margin = theme.layout.margin
     val colors = theme.colors
-    LazyVerticalGrid(
-        GridCells.Adaptive(theme.layout.poster),
-        Modifier.fillMaxSize(),
-        state = grid,
-        contentPadding = PaddingValues(
-            start = margin,
-            end = margin,
-            top = LocalTopInset.current,
-            bottom = LocalBottomInset.current + MavioSpacing.s24,
-        ),
-        horizontalArrangement = Arrangement.spacedBy(theme.layout.gutter * 1.5f),
-        verticalArrangement = Arrangement.spacedBy(MavioSpacing.s24),
+    val top = LocalTopInset.current
+    // A pull loads the first page again, the grid keeping its cards until it comes.
+    PullToRefresh(
+        refresh = {
+            val fresh = Pages()
+            next(fresh)
+            pages = fresh
+        },
+        top = top,
     ) {
-        line("header") { header() }
-        line("filters") {
-            FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s8),
-                verticalArrangement = Arrangement.spacedBy(MavioSpacing.s8),
-                itemVerticalAlignment = Alignment.CenterVertically,
-            ) {
-                val narrowed = genre?.let { R.string.library_genre_value to it }
-                    ?: tag?.let { R.string.library_tag_value to it }
-                    ?: studio?.let { R.string.library_studio_value to it }
-                narrowed?.let { (label, value) ->
-                    Row(
-                        Modifier
-                            .height(32.dp)
-                            .clip(CircleShape)
-                            .background(colors.accent)
-                            .clickable {
-                                genre = null
-                                tag = null
-                                studio = null
-                            }
-                            .padding(start = 14.dp, end = 10.dp),
-                        horizontalArrangement = Arrangement.spacedBy(6.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
+        LazyVerticalGrid(
+            GridCells.Adaptive(theme.layout.poster),
+            Modifier.fillMaxSize(),
+            state = grid,
+            contentPadding = PaddingValues(
+                start = margin,
+                end = margin,
+                top = top,
+                bottom = LocalBottomInset.current + MavioSpacing.s24,
+            ),
+            horizontalArrangement = Arrangement.spacedBy(theme.layout.gutter * 1.5f),
+            verticalArrangement = Arrangement.spacedBy(MavioSpacing.s24),
+        ) {
+            line("header") { header() }
+            line("filters") {
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s8),
+                    verticalArrangement = Arrangement.spacedBy(MavioSpacing.s8),
+                    itemVerticalAlignment = Alignment.CenterVertically,
+                ) {
+                    val narrowed = genre?.let { R.string.library_genre_value to it }
+                        ?: tag?.let { R.string.library_tag_value to it }
+                        ?: studio?.let { R.string.library_studio_value to it }
+                    narrowed?.let { (label, value) ->
+                        Row(
+                            Modifier
+                                .height(32.dp)
+                                .clip(CircleShape)
+                                .background(colors.accent)
+                                .clickable {
+                                    genre = null
+                                    tag = null
+                                    studio = null
+                                }
+                                .padding(start = 14.dp, end = 10.dp),
+                            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Text(
+                                stringResource(label, value),
+                                style = theme.type.callout.text,
+                                fontWeight = FontWeight.SemiBold,
+                                color = colors.onAccent,
+                            )
+                            MavioIcon(R.drawable.ic_close, size = 14.dp, tint = colors.onAccent)
+                        }
+                    }
+                    Shown.entries.forEach { k ->
+                        val active = k == shown
                         Text(
-                            stringResource(label, value),
+                            stringResource(k.label),
+                            Modifier
+                                .height(32.dp)
+                                .clip(CircleShape)
+                                .background(if (active) colors.button else colors.fill)
+                                .clickable { shown = k }
+                                .padding(horizontal = 14.dp)
+                                .wrapContentHeight(Alignment.CenterVertically),
                             style = theme.type.callout.text,
-                            fontWeight = FontWeight.SemiBold,
-                            color = colors.onAccent,
+                            fontWeight = FontWeight.Medium,
+                            color = if (active) colors.onButton else colors.textPrimary,
                         )
-                        MavioIcon(R.drawable.ic_close, size = 14.dp, tint = colors.onAccent)
+                    }
+                    SortMenu(sort) { sort = it }
+                    pages.total?.let {
+                        Text(
+                            pluralStringResource(R.plurals.library_item_count, it.toInt(), it.toInt()),
+                            style = theme.type.callout.text,
+                            color = colors.textTertiary,
+                        )
                     }
                 }
-                Shown.entries.forEach { k ->
-                    val active = k == shown
-                    Text(
-                        stringResource(k.label),
-                        Modifier
-                            .height(32.dp)
-                            .clip(CircleShape)
-                            .background(if (active) colors.button else colors.fill)
-                            .clickable { shown = k }
-                            .padding(horizontal = 14.dp)
-                            .wrapContentHeight(Alignment.CenterVertically),
-                        style = theme.type.callout.text,
-                        fontWeight = FontWeight.Medium,
-                        color = if (active) colors.onButton else colors.textPrimary,
+            }
+            when {
+                pages.cards.isEmpty() && pages.failed -> line("error") {
+                    StatusView(
+                        stringResource(R.string.state_error),
+                        Modifier.padding(top = MavioSpacing.s48),
+                        icon = R.drawable.ic_error,
+                        action = stringResource(R.string.action_retry) to { attempt++ },
                     )
                 }
-                SortMenu(sort) { sort = it }
-                pages.total?.let {
-                    Text(
-                        pluralStringResource(R.plurals.library_item_count, it.toInt(), it.toInt()),
-                        style = theme.type.callout.text,
-                        color = colors.textTertiary,
-                    )
+                pages.cards.isEmpty() && !pages.more -> line("empty") {
+                    StatusView(stringResource(R.string.state_empty), Modifier.padding(top = MavioSpacing.s48))
                 }
-            }
-        }
-        when {
-            pages.cards.isEmpty() && pages.failed -> line("error") {
-                StatusView(
-                    stringResource(R.string.state_error),
-                    Modifier.padding(top = MavioSpacing.s48),
-                    icon = R.drawable.ic_error,
-                    action = stringResource(R.string.action_retry) to { attempt++ },
-                )
-            }
-            pages.cards.isEmpty() && !pages.more -> line("empty") {
-                StatusView(stringResource(R.string.state_empty), Modifier.padding(top = MavioSpacing.s48))
-            }
-            pages.cards.isEmpty() -> items(12) { CardPlaceholder() }
-            else -> items(pages.cards, key = { "${it.serverId}/${it.itemId}" }) { card ->
-                ItemCard(card, Modifier.clickable { navigator.open(card) }, width = null)
+                pages.cards.isEmpty() -> items(12) { CardPlaceholder() }
+                else -> items(pages.cards, key = { "${it.serverId}/${it.itemId}" }) { card ->
+                    ItemCard(card, Modifier.clickable { navigator.open(card) }, width = null)
+                }
             }
         }
     }

@@ -171,19 +171,19 @@ fun UsersPage(model: AppModel, serverId: String) {
     var failure by remember { mutableStateOf<String?>(null) }
     var standalone by remember { mutableStateOf(false) }
     val navigator = LocalAdmin.current
-    LaunchedEffect(serverId) {
-        coroutineScope {
-            val s = async { standalone(model, serverId) }
-            attempt({ failure = it }) {
-                users = users(model, serverId)
-                failure = null
-            }
-            standalone = s.await()
+    suspend fun load() = coroutineScope {
+        val s = async { standalone(model, serverId) }
+        attempt({ failure = it }) {
+            users = users(model, serverId)
+            failure = null
         }
+        standalone = s.await()
     }
+    LaunchedEffect(serverId) { load() }
     SettingsList(
         stringResource(R.string.settings_users),
         users?.let { stringResource(if (standalone) R.string.users_message else R.string.users_message_mavio_dev) },
+        refresh = { load() },
     ) {
         item {
             Group {

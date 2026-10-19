@@ -69,6 +69,7 @@ import java.text.NumberFormat
 import java.time.Duration
 import java.time.Instant
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import mavio.system.v1.PluginOuterClass.ContainerRuntime
@@ -264,7 +265,7 @@ private fun OverviewPage(model: AppModel, serverId: String) {
     var samples by remember { mutableStateOf<List<LoadSample>>(emptyList()) }
     var loadFailure by remember { mutableStateOf<String?>(null) }
     val client = model.client
-    LaunchedEffect(serverId) {
+    suspend fun load() = coroutineScope {
         launch {
             serving = runCatching {
                 client.call(serverId, Procedure.system("GetHealth"), getHealthRequest {}, GetHealthResponse::parseFrom)
@@ -284,6 +285,7 @@ private fun OverviewPage(model: AppModel, serverId: String) {
             failure = e.reason
         }
     }
+    LaunchedEffect(serverId) { load() }
     LaunchedEffect(serverId) {
         while (true) {
             try {
@@ -298,7 +300,7 @@ private fun OverviewPage(model: AppModel, serverId: String) {
         }
     }
     val context = LocalContext.current
-    SettingsList(stringResource(R.string.settings_overview)) {
+    SettingsList(stringResource(R.string.settings_overview), refresh = { load() }) {
         item {
             Group(stringResource(R.string.overview_server)) {
                 Row(
@@ -590,7 +592,7 @@ private fun DevicesPage(model: AppModel, serverId: String) {
             reload++
         }
     }
-    SettingsList(stringResource(R.string.settings_devices), stringResource(R.string.settings_devices_message)) {
+    SettingsList(stringResource(R.string.settings_devices), stringResource(R.string.settings_devices_message), refresh = { load() }) {
         val list = devices
         when {
             list == null && failure == null -> item { StatusView(stringResource(R.string.state_loading)) }

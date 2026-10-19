@@ -134,13 +134,20 @@ fun OnWhite(content: @Composable () -> Unit) {
 }
 
 /**
- * A page of settings: its title, an optional message, then its groups. On
- * a television it is a centered column, as the web UI's is, and opens with
- * focus on its first element unless something in it has taken focus; with
- * nothing to focus, the page takes focus itself and up and down scroll it.
+ * A page of settings: its title, an optional message, then its groups;
+ * read again by pulling it down when it has [refresh]. On a television it
+ * is a centered column, as the web UI's is, and opens with focus on its
+ * first element unless something in it has taken focus; with nothing to
+ * focus, the page takes focus itself and up and down scroll it.
  */
 @Composable
-fun SettingsList(title: String, message: String? = null, large: Boolean = false, content: LazyListScope.() -> Unit) {
+fun SettingsList(
+    title: String,
+    message: String? = null,
+    large: Boolean = false,
+    refresh: (suspend () -> Unit)? = null,
+    content: LazyListScope.() -> Unit,
+) {
     val tv = LocalTelevision.current
     val requester = remember { FocusRequester() }
     var within by remember { mutableStateOf(false) }
@@ -177,61 +184,64 @@ fun SettingsList(title: String, message: String? = null, large: Boolean = false,
             if (!within) runCatching { requester.requestFocus() }
         }
     }
-    Box(Modifier.fillMaxSize(), Alignment.TopCenter) {
-        LazyColumn(
-            Modifier
-                .then(if (tv) Modifier.widthIn(max = 1000.dp) else Modifier)
-                .fillMaxSize()
-                .focusRequester(requester)
-                .onFocusChanged {
-                    within = it.hasFocus
-                    alone = it.isFocused
-                    // Once a row has focus the page no longer takes it, so
-                    // that back, which leaves the focused element, leaves the page.
-                    if (it.hasFocus && !it.isFocused) fallback = false
-                }
-                .then(
-                    if (fallback) {
-                        Modifier
-                            .onKeyEvent { e ->
-                                val by = when (e.key) {
-                                    Key.DirectionDown -> step
-                                    Key.DirectionUp -> -step
-                                    else -> return@onKeyEvent false
+    // Without refresh, pulling does nothing.
+    PullToRefresh(refresh = refresh ?: {}, enabled = refresh != null) {
+        Box(Modifier.fillMaxSize(), Alignment.TopCenter) {
+            LazyColumn(
+                Modifier
+                    .then(if (tv) Modifier.widthIn(max = 1000.dp) else Modifier)
+                    .fillMaxSize()
+                    .focusRequester(requester)
+                    .onFocusChanged {
+                        within = it.hasFocus
+                        alone = it.isFocused
+                        // Once a row has focus the page no longer takes it, so
+                        // that back, which leaves the focused element, leaves the page.
+                        if (it.hasFocus && !it.isFocused) fallback = false
+                    }
+                    .then(
+                        if (fallback) {
+                            Modifier
+                                .onKeyEvent { e ->
+                                    val by = when (e.key) {
+                                        Key.DirectionDown -> step
+                                        Key.DirectionUp -> -step
+                                        else -> return@onKeyEvent false
+                                    }
+                                    if (!alone) return@onKeyEvent false
+                                    if (e.type == KeyEventType.KeyDown && !focusManager.moveFocus(FocusDirection.Enter)) {
+                                        scope.launch { list.animateScrollBy(by) }
+                                    }
+                                    true
                                 }
-                                if (!alone) return@onKeyEvent false
-                                if (e.type == KeyEventType.KeyDown && !focusManager.moveFocus(FocusDirection.Enter)) {
-                                    scope.launch { list.animateScrollBy(by) }
-                                }
-                                true
-                            }
-                            .focusable()
-                    } else {
-                        Modifier
-                    },
-                )
-                .focusGroup(),
-            state = list,
-            contentPadding = if (tv) {
-                PaddingValues(start = MavioSpacing.s24, end = MavioSpacing.s24, top = MavioSpacing.s64, bottom = MavioSpacing.s64)
-            } else {
-                PaddingValues(
-                    start = theme.layout.margin,
-                    end = theme.layout.margin,
-                    top = MavioSpacing.s16,
-                    // No tab bar below the settings.
-                    bottom = MavioSpacing.s24 + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding(),
-                )
-            },
-            verticalArrangement = Arrangement.spacedBy(if (tv) MavioSpacing.s32 else MavioSpacing.s24),
-        ) {
-            item {
-                Column(verticalArrangement = Arrangement.spacedBy(MavioSpacing.s4)) {
-                    Text(title, style = (if (large) theme.type.title1 else theme.type.title2).text, fontWeight = FontWeight.Bold)
-                    if (message != null) Text(message, style = theme.type.callout.text, color = theme.colors.textSecondary)
+                                .focusable()
+                        } else {
+                            Modifier
+                        },
+                    )
+                    .focusGroup(),
+                state = list,
+                contentPadding = if (tv) {
+                    PaddingValues(start = MavioSpacing.s24, end = MavioSpacing.s24, top = MavioSpacing.s64, bottom = MavioSpacing.s64)
+                } else {
+                    PaddingValues(
+                        start = theme.layout.margin,
+                        end = theme.layout.margin,
+                        top = MavioSpacing.s16,
+                        // No tab bar below the settings.
+                        bottom = MavioSpacing.s24 + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding(),
+                    )
+                },
+                verticalArrangement = Arrangement.spacedBy(if (tv) MavioSpacing.s32 else MavioSpacing.s24),
+            ) {
+                item {
+                    Column(verticalArrangement = Arrangement.spacedBy(MavioSpacing.s4)) {
+                        Text(title, style = (if (large) theme.type.title1 else theme.type.title2).text, fontWeight = FontWeight.Bold)
+                        if (message != null) Text(message, style = theme.type.callout.text, color = theme.colors.textSecondary)
+                    }
                 }
+                content()
             }
-            content()
         }
     }
 }

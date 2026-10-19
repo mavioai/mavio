@@ -64,6 +64,7 @@ import dev.mavio.ui.ChoiceRow
 import dev.mavio.ui.Group
 import dev.mavio.ui.MavioIcon
 import dev.mavio.ui.Pressable
+import dev.mavio.ui.PressableBox
 import dev.mavio.ui.R
 import dev.mavio.ui.RowDivider
 import dev.mavio.ui.Segmented
@@ -72,7 +73,6 @@ import dev.mavio.ui.SettingsField
 import dev.mavio.ui.SettingsList
 import dev.mavio.ui.StatusView
 import dev.mavio.ui.line
-import dev.mavio.ui.PressableBox
 import dev.mavio.ui.rowPadding
 import dev.mavio.ui.text
 import dev.mavio.ui.theme
@@ -82,6 +82,7 @@ import java.text.DateFormat
 import java.util.Date
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -222,33 +223,48 @@ fun ActivityPage(model: AppModel, serverId: String) {
     var failure by remember { mutableStateOf<String?>(null) }
     var minimum by rememberSaveable { mutableIntStateOf(Severity.SEVERITY_UNSPECIFIED_VALUE) }
     var limit by rememberSaveable { mutableIntStateOf(20) }
+    suspend fun loadSessions() {
+        attempt({ sessionsFailure = it }) {
+            sessions = model.client.call(serverId, Procedure.sessions("ListSessions"), listSessionsRequest { allUsers = true }, ListSessionsResponse::parseFrom).sessionsList
+            sessionsFailure = null
+        }
+    }
+    suspend fun loadActivities() {
+        attempt({ failure = it }) {
+            activities = model.client.call(
+                serverId,
+                Procedure.activity("ListActivities"),
+                listActivitiesRequest {
+                    minSeverityValue = minimum
+                    this.limit = limit
+                },
+                ListActivitiesResponse::parseFrom,
+            )
+            failure = null
+        }
+    }
     LaunchedEffect(serverId) {
         while (true) {
-            attempt({ sessionsFailure = it }) {
-                sessions = model.client.call(serverId, Procedure.sessions("ListSessions"), listSessionsRequest { allUsers = true }, ListSessionsResponse::parseFrom).sessionsList
-                sessionsFailure = null
-            }
+            loadSessions()
             delay(5_000)
         }
     }
     LaunchedEffect(serverId, minimum, limit) {
         while (true) {
-            attempt({ failure = it }) {
-                activities = model.client.call(
-                    serverId,
-                    Procedure.activity("ListActivities"),
-                    listActivitiesRequest {
-                        minSeverityValue = minimum
-                        this.limit = limit
-                    },
-                    ListActivitiesResponse::parseFrom,
-                )
-                failure = null
-            }
+            loadActivities()
             delay(30_000)
         }
     }
-    SettingsList(stringResource(R.string.settings_activity), stringResource(R.string.settings_activity_message)) {
+    SettingsList(
+        stringResource(R.string.settings_activity),
+        stringResource(R.string.settings_activity_message),
+        refresh = {
+            coroutineScope {
+                launch { loadSessions() }
+                launch { loadActivities() }
+            }
+        },
+    ) {
         item {
             Group(stringResource(R.string.activity_now_playing)) {
                 val playing = sessions.orEmpty().filter { it.hasNowPlaying() && it.nowPlaying.hasItem() }
@@ -487,7 +503,16 @@ fun TasksPage(model: AppModel, serverId: String) {
             loadJobs()
         }
     }
-    SettingsList(stringResource(R.string.settings_tasks), stringResource(R.string.tasks_message)) {
+    SettingsList(
+        stringResource(R.string.settings_tasks),
+        stringResource(R.string.tasks_message),
+        refresh = {
+            coroutineScope {
+                launch { loadTasks() }
+                launch { loadJobs() }
+            }
+        },
+    ) {
         val own = tasks.orEmpty().filter { it.pluginId.isEmpty() && shownKind(it.kind) }.sortedWith(compareBy(String.CASE_INSENSITIVE_ORDER) { it.name })
         when {
             tasks == null && failure == null -> item { StatusView(stringResource(R.string.state_loading)) }
@@ -621,7 +646,7 @@ fun LogsPage(model: AppModel, serverId: String) {
     var filter by rememberSaveable { mutableStateOf("") }
     var fetching by remember { mutableStateOf(false) }
     var reload by remember { mutableIntStateOf(0) }
-    LaunchedEffect(serverId, level, hours, reload) {
+    suspend fun load() {
         fetching = true
         attempt({ failure = it }) {
             records = model.client.call(
@@ -638,12 +663,13 @@ fun LogsPage(model: AppModel, serverId: String) {
         }
         fetching = false
     }
+    LaunchedEffect(serverId, level, hours, reload) { load() }
     val words = filter.lowercase().split(Regex("\\s+")).filter { it.isNotEmpty() }
     val shown = records.orEmpty().filter { r ->
         val text = (listOf(r.message) + r.attributesMap.flatMap { listOf(it.key, it.value) }).joinToString(" ").lowercase()
         words.all { text.contains(it) }
     }
-    SettingsList(stringResource(R.string.settings_logs), stringResource(R.string.logs_message)) {
+    SettingsList(stringResource(R.string.settings_logs), stringResource(R.string.logs_message), refresh = { load() }) {
         item {
             Column(verticalArrangement = Arrangement.spacedBy(MavioSpacing.s8)) {
                 Group {
@@ -759,7 +785,7 @@ fun BackupsPage(model: AppModel, serverId: String) {
             downloading = null
         }
     }
-    SettingsList(stringResource(R.string.settings_backups), stringResource(R.string.backups_message)) {
+    SettingsList(stringResource(R.string.settings_backups), stringResource(R.string.backups_message), refresh = { load() }) {
         item {
             Group(footer = stringResource(R.string.backups_restore_footer)) {
                 Row(
@@ -954,7 +980,7 @@ fun IssuesPage(model: AppModel, serverId: String) {
     // Again on coming back, for what changed on an issue's page.
     LaunchedEffect(serverId, filter) { load(0) }
     LaunchedEffect(serverId) { names.loadUsers(model, serverId) }
-    SettingsList(stringResource(R.string.settings_issues), stringResource(R.string.issues_intro)) {
+    SettingsList(stringResource(R.string.settings_issues), stringResource(R.string.issues_intro), refresh = { load(0) }) {
         item {
             Segmented(IssueFilter.entries.map { stringResource(it.title) }, filter.ordinal) {
                 filter = IssueFilter.entries[it]
@@ -1080,13 +1106,16 @@ fun IssueScreen(model: AppModel, route: AdminPage.IssuePage) {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val navigator = LocalAdmin.current
-    LaunchedEffect(serverId, route.id) {
+    suspend fun load() {
         attempt({ failure = it }) {
             val i = model.client.call(serverId, Procedure.issues("GetIssue"), getIssueRequest { id = route.id }, GetIssueResponse::parseFrom).issue
             issue = i
             failure = null
             names.item(i.itemId, model, serverId)
         }
+    }
+    LaunchedEffect(serverId, route.id) {
+        load()
         names.loadUsers(model, serverId)
     }
     fun perform(work: suspend () -> Issue) {
@@ -1102,7 +1131,7 @@ fun IssueScreen(model: AppModel, route: AdminPage.IssuePage) {
     val i = issue
     val title = i?.let { listOfNotNull(it.type.title()?.let { t -> stringResource(t) }, names.items[it.itemId]).joinToString(" · ") }
         ?: stringResource(R.string.issues_title)
-    SettingsList(title) {
+    SettingsList(title, refresh = { load() }) {
         if (i == null) {
             item { if (failure == null) StatusView(stringResource(R.string.state_loading)) else StatusView(failure!!, icon = R.drawable.ic_error) }
             return@SettingsList

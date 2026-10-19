@@ -91,6 +91,7 @@ import dev.mavio.ui.MIN_ITEM_STUDIOS
 import dev.mavio.ui.MavioButton
 import dev.mavio.ui.MavioIcon
 import dev.mavio.ui.ProgressBar
+import dev.mavio.ui.PullToRefresh
 import dev.mavio.ui.R
 import dev.mavio.ui.RatingCard
 import dev.mavio.ui.Shelf
@@ -105,6 +106,7 @@ import dev.mavio.ui.label
 import dev.mavio.ui.mediaFacts
 import dev.mavio.ui.minutesText
 import dev.mavio.ui.range
+import dev.mavio.ui.rememberReload
 import dev.mavio.ui.resolution
 import dev.mavio.ui.shownRole
 import dev.mavio.ui.sizeText
@@ -132,8 +134,8 @@ fun DetailsScreen(model: AppModel, serverId: String, itemId: String) {
     val revisions by model.revisions.collectAsStateWithLifecycle()
     var details by remember(serverId, itemId) { mutableStateOf<Details?>(null) }
     var failure by remember(serverId, itemId) { mutableStateOf<String?>(null) }
-    var attempt by remember { mutableIntStateOf(0) }
-    LaunchedEffect(serverId, itemId, revisions[serverId], attempt) {
+    val reload = rememberReload()
+    LaunchedEffect(serverId, itemId, revisions[serverId], reload.attempt) {
         try {
             details = model.client.details(serverId, itemId)
             failure = null
@@ -142,16 +144,17 @@ fun DetailsScreen(model: AppModel, serverId: String, itemId: String) {
         } catch (e: Exception) {
             if (details == null) failure = e.message ?: e.toString()
         }
+        reload.done()
     }
     val shown = details
     when {
-        shown != null -> DetailsContent(model, shown)
+        shown != null -> PullToRefresh(reload, top = LocalTopInset.current) { DetailsContent(model, shown) }
         failure != null -> StatusView(
             stringResource(R.string.state_error),
             Modifier.padding(top = LocalTopInset.current),
             icon = R.drawable.ic_error,
             message = failure,
-            action = stringResource(R.string.action_retry) to { attempt++ },
+            action = stringResource(R.string.action_retry) to reload::retry,
         )
         else -> Box(Modifier.fillMaxSize(), Alignment.Center) { CircularProgressIndicator() }
     }

@@ -2,6 +2,7 @@ package dev.mavio.ui
 
 import android.util.Base64
 import android.util.LruCache
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.State
@@ -11,7 +12,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import com.google.protobuf.MessageLite
 import dev.mavio.core.AppModel
 import dev.mavio.core.call
@@ -58,6 +62,11 @@ class DiscoverState(private val model: AppModel) {
         cache.remove(key(serverId, method, request))
     }
 
+    /** Forgets every answer of a server kept from before, so that a page pulled to refresh asks again. */
+    fun forget(serverId: String) {
+        cache.snapshot().keys.filter { it.startsWith("$serverId/") }.forEach(cache::remove)
+    }
+
     /** Calls a method of DiscoverService, answering from what was kept when it can. */
     suspend fun <T : MessageLite> call(serverId: String, method: String, request: MessageLite, parse: (ByteArray) -> T): T {
         peek<T>(serverId, method, request)?.let { return it }
@@ -92,7 +101,9 @@ val discoverLanguage: String get() = Locale.getDefault().language
 
 /**
  * A DiscoverService call's answer, null while it is on its way, at once
- * when it was kept from before.
+ * when it was kept from before; asked again as [attempt] changes, keeping
+ * the answer shown until the new one comes. Each answer ends [reload]'s
+ * pull, whose attempt it then asks by.
  */
 @Composable
 fun <T : MessageLite> discovered(
@@ -101,21 +112,49 @@ fun <T : MessageLite> discovered(
     request: MessageLite,
     parse: (ByteArray) -> T,
     attempt: Int = 0,
+    reload: Reload? = null,
 ): State<Result<T>?> {
     val discover = LocalDiscover.current
-    val initial = remember(serverId, method, request, attempt) { discover.peek<T>(serverId, method, request)?.let { Result.success(it) } }
-    return produceState(initial, serverId, method, request, attempt) {
-        // The state outlives its keys: a new request starts from its own answer, not the last one's.
-        value = initial
-        if (value?.isSuccess == true) return@produceState
-        value = try {
-            Result.success(discover.call(serverId, method, request, parse))
-        } catch (e: CancellationException) {
-            throw e
-        } catch (e: Exception) {
-            Result.failure(e)
+    val asked = reload?.attempt ?: attempt
+    val initial = remember(serverId, method, request, asked) { discover.peek<T>(serverId, method, request)?.let { Result.success(it) } }
+    // The call last asked, whose answer stays shown while it is asked again.
+    val last = remember { arrayOfNulls<Any>(1) }
+    return produceState(initial, serverId, method, request, asked) {
+        val call = Triple(serverId, method, request)
+        // The state outlives its keys: a new request starts from its own answer, not the last one's,
+        // and a failure gives way to the spinner as it is asked again.
+        if (initial != null || last[0] != call || value?.isSuccess != true) value = initial
+        last[0] = call
+        if (initial?.isSuccess != true) {
+            value = try {
+                Result.success(discover.call(serverId, method, request, parse))
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
         }
+        reload?.done()
     }
+}
+
+/**
+ * Pull to refresh of a Discover page read again by [reload], which first
+ * forgets the server's answers kept from before.
+ */
+@Composable
+fun DiscoverPullToRefresh(serverId: String, reload: Reload, modifier: Modifier = Modifier, top: Dp = 0.dp, content: @Composable BoxScope.() -> Unit) {
+    val discover = LocalDiscover.current
+    PullToRefresh(
+        reload.refreshing,
+        onRefresh = {
+            discover.forget(serverId)
+            reload.pull()
+        },
+        modifier,
+        top,
+        content = content,
+    )
 }
 
 /** A filter value chosen by its provider's ID, with its name to show. */

@@ -43,6 +43,7 @@ import dev.mavio.ui.discoverLanguage
 import dev.mavio.ui.discovered
 import dev.mavio.ui.line
 import dev.mavio.ui.longDayText
+import dev.mavio.ui.rememberReload
 import dev.mavio.ui.sized
 import dev.mavio.ui.statusLabel
 import dev.mavio.ui.text
@@ -64,7 +65,7 @@ import mavio.acquisition.v1.getPersonRequest
  */
 @Composable
 fun DiscoveredPersonScreen(route: Route.DiscoveredPerson) {
-    var attempt by remember { mutableIntStateOf(0) }
+    val reload = rememberReload()
     val result by discovered(
         route.serverId,
         "GetPerson",
@@ -75,9 +76,9 @@ fun DiscoveredPersonScreen(route: Route.DiscoveredPerson) {
             }
         },
         GetPersonResponse::parseFrom,
-        attempt,
+        reload = reload,
     )
-    Loaded(result, { !it.hasPerson() }, { attempt++ }) { r ->
+    Loaded(result, { !it.hasPerson() }, route.serverId, reload) { r ->
         val p = r.person
         var kinds by rememberSaveable { mutableIntStateOf(0) }
         var more by rememberSaveable { mutableStateOf(false) }
@@ -188,7 +189,7 @@ private fun LazyGridScope.personTitles(serverId: String, label: Int, list: List<
  */
 @Composable
 fun DiscoveredCollectionScreen(route: Route.DiscoveredCollection) {
-    var attempt by remember { mutableIntStateOf(0) }
+    val reload = rememberReload()
     val result by discovered(
         route.serverId,
         "GetCollection",
@@ -199,9 +200,9 @@ fun DiscoveredCollectionScreen(route: Route.DiscoveredCollection) {
             }
         },
         GetCollectionResponse::parseFrom,
-        attempt,
+        reload = reload,
     )
-    Loaded(result, { !it.hasCollection() }, { attempt++ }) { r ->
+    Loaded(result, { !it.hasCollection() }, route.serverId, reload) { r ->
         val c = r.collection
         val label = statusLabel(collectionStatus(c.partsList))
         // The wide layout's hero reaches the content's top and holds the overview.

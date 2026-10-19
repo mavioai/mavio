@@ -472,7 +472,7 @@ fun ApiKeysPage(model: AppModel, serverId: String) {
         }
     }
     val context = LocalContext.current
-    SettingsList(stringResource(R.string.settings_api_keys), stringResource(R.string.keys_message)) {
+    SettingsList(stringResource(R.string.settings_api_keys), stringResource(R.string.keys_message), refresh = { load() }) {
         item {
             Group(footer = stringResource(R.string.keys_create_footer)) {
                 Row(

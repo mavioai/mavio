@@ -199,7 +199,7 @@ fun StoragePage(model: AppModel, serverId: String) {
     var providers by remember { mutableStateOf<List<Provider>>(emptyList()) }
     val navigator = LocalAdmin.current
     val context = LocalContext.current
-    LaunchedEffect(serverId) {
+    suspend fun load() {
         coroutineScope {
             launch {
                 attempt({ disksFailure = it }) {
@@ -221,8 +221,9 @@ fun StoragePage(model: AppModel, serverId: String) {
             }
         }
     }
+    LaunchedEffect(serverId) { load() }
     val available = status?.available == true
-    SettingsList(stringResource(R.string.settings_storage), stringResource(R.string.storage_message)) {
+    SettingsList(stringResource(R.string.settings_storage), stringResource(R.string.storage_message), refresh = { load() }) {
         item {
             Group(stringResource(R.string.storage_disks), stringResource(R.string.storage_disks_footer)) {
                 disks.orEmpty().forEachIndexed { i, d ->
