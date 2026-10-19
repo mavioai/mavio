@@ -10,6 +10,7 @@
     <application
         android:icon="@mipmap/ic_launcher"
         android:roundIcon="@mipmap/ic_launcher"
+        android:name=".MavioApplication"
         android:banner="@drawable/banner"
         android:label="Mavio"
         android:supportsRtl="true"
