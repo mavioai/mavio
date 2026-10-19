@@ -57,6 +57,7 @@ function usageOf(u: AiUsage | undefined): string {
 
 function ConversationsList({ server, onStarted }: { server: ServerEntry; onStarted: (f: First) => void }) {
   const conversations = useAiConversations(server);
+  const { options } = useModelOptions(server);
   if (conversations.isError && isNoAiGateway(conversations.error))
     return (
       <Page title={t("settings.conversations")} message={t("conversations.message")}>
@@ -74,7 +75,7 @@ function ConversationsList({ server, onStarted }: { server: ServerEntry; onStart
             key={c.id}
             search={{ id: c.id }}
             label={c.title || t("conversations.untitled")}
-            detail={[c.model, c.updated && fromNow(timestampDate(c.updated)), usageOf(c.usage)].filter(Boolean).join(" · ")}
+            detail={[modelName(modelOf(options, c)), c.updated && fromNow(timestampDate(c.updated)), usageOf(c.usage)].filter(Boolean).join(" · ")}
           />
         ))}
         {conversations.isSuccess && conversations.data.length === 0 && (
@@ -110,7 +111,16 @@ function useModelOptions(server: ServerEntry): { options: ModelOption[]; loaded:
   return { options, loaded: models.isSuccess };
 }
 
-/** A field for a message, its button sending it at its bottom end. */
+/** A conversation's model as the picker lists it, else by its IDs, as for a model its provider no longer has. */
+function modelOf(options: ModelOption[], c: AgentSession): ModelOption {
+  const value = `${c.provider}/${c.model}`;
+  return options.find((o) => o.value === value) ?? { value, label: c.model, provider: c.provider, providerName: c.provider };
+}
+
+/** A model's name and its provider's, on one line. */
+const modelName = (m: ModelOption) => `${m.label} (${m.providerName})`;
+
+/** A field for a message, its button sending it in a column of its own at its end, at the bottom. */
 function Composer({
   value,
   onChange,
@@ -129,9 +139,9 @@ function Composer({
   disabled?: boolean;
 }) {
   return (
-    <div className="flex flex-col rounded-md border border-border bg-surface focus-within:border-focus">
+    <div className="flex items-end gap-2 rounded-md border border-border bg-surface p-1.5 ps-0 focus-within:border-focus">
       <textarea
-        className="min-h-16 w-full min-w-0 resize-none bg-transparent px-3 pt-2 type-callout text-on-background placeholder:text-text-tertiary focus:outline-none"
+        className="min-h-16 min-w-0 flex-1 resize-none self-stretch bg-transparent ps-3 pt-0.5 type-callout text-on-background placeholder:text-text-tertiary focus:outline-none"
         rows={2}
         aria-label={label}
         placeholder={label}
@@ -140,16 +150,14 @@ function Composer({
         onChange={(e) => onChange(e.target.value)}
         onKeyDown={sendOnEnter(onSend)}
       />
-      <div className="flex justify-end px-1.5 pb-1.5">
-        <button
-          type="button"
-          disabled={disabled || !value.trim() || busy}
-          onClick={onSend}
-          className="min-h-8 rounded-full bg-button px-3.5 type-footnote font-semibold text-on-button hover:opacity-85 disabled:opacity-40 desk:min-h-7"
-        >
-          {busy ? "…" : action}
-        </button>
-      </div>
+      <button
+        type="button"
+        disabled={disabled || !value.trim() || busy}
+        onClick={onSend}
+        className="min-h-8 shrink-0 rounded-full bg-button px-3.5 type-footnote font-semibold text-on-button hover:opacity-85 disabled:opacity-40 desk:min-h-7"
+      >
+        {busy ? "…" : action}
+      </button>
     </div>
   );
 }
@@ -279,13 +287,7 @@ function ConversationPage({ server, id, first, onFirstSent }: { server: ServerEn
         {conversation.isSuccess && <p className="type-callout text-text-secondary">{t("conversations.gone")}</p>}
       </Page>
     );
-  // The conversation's model as the picker lists it, else by its ID.
-  const model: ModelOption = options.find((o) => o.value === `${c.provider}/${c.model}`) ?? {
-    value: `${c.provider}/${c.model}`,
-    label: c.model,
-    provider: c.provider,
-    providerName: c.provider,
-  };
+  const model = modelOf(options, c);
   const submit = () => {
     const message = text.trim();
     if (!message || sending) return;
@@ -295,7 +297,7 @@ function ConversationPage({ server, id, first, onFirstSent }: { server: ServerEn
   return (
     <Page
       title={c.title || t("conversations.untitled")}
-      message={`${c.model} (${c.provider}) · ${usageOf(c.usage)}`}
+      message={`${modelName(model)} · ${usageOf(c.usage)}`}
       back={back}
     >
       {confirming && (
