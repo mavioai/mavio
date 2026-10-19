@@ -2,12 +2,15 @@
 // Jellyfin's SyncPlay does: a group plays one queue, waits while any member
 // buffers, and starts playing after a delay for the members' latency, so
 // that they all play the same position at the same time. Members learn of
-// every change through their event streams.
+// every change through their event streams; a member whose stream ends
+// stays in its group for OfflineGrace, which goes on without it meanwhile,
+// and catches up with the group when its stream returns.
 package syncplay
 
 import (
 	"errors"
 	"fmt"
+	"maps"
 	"slices"
 	"sync"
 	"time"
@@ -29,6 +32,12 @@ const (
 	// TimeSyncOffset is how far a member's report time may be from the
 	// server's before it is ignored as unsynchronized.
 	TimeSyncOffset = 2 * time.Second
+	// OfflineGrace is how long a member whose event stream ended stays in
+	// its group, for a device that reconnects.
+	OfflineGrace = time.Minute
+	// droppedFor is how long a device dropped from its group while
+	// offline is remembered, to tell it so when it returns.
+	droppedFor = 24 * time.Hour
 )
 
 // Errors of requests.
@@ -58,6 +67,9 @@ type Member struct {
 	DeviceName string
 	Buffering  bool
 	Ping       time.Duration
+	// Offline says the member's event stream ended; the group does not
+	// wait for it.
+	Offline bool
 }
 
 // Entry is an item of a group's queue.
@@ -88,11 +100,18 @@ type Manager struct {
 	mu        sync.Mutex
 	groups    map[core.ID]*group
 	bySession map[core.ID]*group
+	// leaving are the timers of offline members, which leave when they
+	// fire; dropped are the devices that left so, by when.
+	leaving map[core.ID]*time.Timer
+	dropped map[core.ID]time.Time
 }
 
 // New returns a manager sending updates through send.
 func New(send Sender) *Manager {
-	return &Manager{send: send, groups: map[core.ID]*group{}, bySession: map[core.ID]*group{}}
+	return &Manager{
+		send: send, groups: map[core.ID]*group{}, bySession: map[core.ID]*group{},
+		leaving: map[core.ID]*time.Timer{}, dropped: map[core.ID]time.Time{},
+	}
 }
 
 // Groups returns the groups.
@@ -165,14 +184,19 @@ func (m *Manager) Join(member Member, groupID core.ID) (*sessionv1.SyncPlayGroup
 
 // join adds a member that has to catch up with the group.
 func (m *Manager) join(g *group, member Member) {
-	now := time.Now()
-	member.Buffering = g.state != Idle
+	delete(m.dropped, member.Session)
 	g.members = append(g.members, &member)
 	m.bySession[member.Session] = g
+	m.catchUp(g, &member, time.Now())
+}
+
+// catchUp has the group wait for a member that joined or came back.
+func (m *Manager) catchUp(g *group, mb *Member, now time.Time) {
+	mb.Buffering = g.state != Idle
 	var cmd *sessionv1.SyncPlayCommand
 	switch g.state {
 	case Playing:
-		// The others wait for the newcomer.
+		// The others wait for the member.
 		g.position, g.positionTime = g.positionAt(now), now
 		g.state, g.resume = Waiting, true
 		cmd = g.command(sessionv1.SyncPlayCommandKind_SYNC_PLAY_COMMAND_KIND_PAUSE, now)
@@ -189,10 +213,71 @@ func (m *Manager) Leave(session core.ID) {
 	m.leave(session)
 }
 
+// Offline keeps a device whose event stream ended in its group for
+// OfflineGrace; the group stops waiting for it meanwhile.
+func (m *Manager) Offline(session core.ID) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	g := m.bySession[session]
+	if g == nil {
+		return
+	}
+	mb := g.member(session)
+	if mb.Offline {
+		return
+	}
+	mb.Offline = true
+	var t *time.Timer
+	t = time.AfterFunc(OfflineGrace, func() {
+		m.mu.Lock()
+		defer m.mu.Unlock()
+		if m.leaving[session] != t {
+			return
+		}
+		m.leave(session)
+		now := time.Now()
+		maps.DeleteFunc(m.dropped, func(_ core.ID, at time.Time) bool { return now.Sub(at) > droppedFor })
+		m.dropped[session] = now
+	})
+	m.leaving[session] = t
+	if g.state == Waiting && !g.buffering() {
+		m.settle(g, time.Now())
+	}
+}
+
+// Online tells a device whose event stream opened again what it missed:
+// a member that was offline catches up with its group, one still online
+// is sent the group, and one dropped while offline an empty update.
+func (m *Manager) Online(session core.ID) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	g := m.bySession[session]
+	if g == nil {
+		if _, ok := m.dropped[session]; ok {
+			delete(m.dropped, session)
+			m.send(session, &sessionv1.SyncPlayUpdate{})
+		}
+		return
+	}
+	mb := g.member(session)
+	if !mb.Offline {
+		m.send(session, sessionv1.SyncPlayUpdate_builder{Group: g.proto()}.Build())
+		return
+	}
+	m.leaving[session].Stop()
+	delete(m.leaving, session)
+	mb.Offline = false
+	m.catchUp(g, mb, time.Now())
+}
+
 func (m *Manager) leave(session core.ID) {
 	g := m.bySession[session]
 	if g == nil {
 		return
+	}
+	if t := m.leaving[session]; t != nil {
+		t.Stop()
+		delete(m.leaving, session)
 	}
 	delete(m.bySession, session)
 	g.members = slices.DeleteFunc(g.members, func(mb *Member) bool { return mb.Session == session })
@@ -220,8 +305,7 @@ func (m *Manager) Handle(session core.ID, r Request) error {
 	if g == nil {
 		return ErrNotInGroup
 	}
-	i := slices.IndexFunc(g.members, func(mb *Member) bool { return mb.Session == session })
-	return r(m, g, g.members[i], time.Now())
+	return r(m, g, g.member(session), time.Now())
 }
 
 // SetQueue plays items from an entry and position once all members are
@@ -408,8 +492,14 @@ func (m *Manager) play(g *group, now time.Time) {
 	m.broadcast(g, g.command(sessionv1.SyncPlayCommandKind_SYNC_PLAY_COMMAND_KIND_UNPAUSE, g.positionTime))
 }
 
+// buffering reports whether the group waits for any online member.
 func (g *group) buffering() bool {
-	return slices.ContainsFunc(g.members, func(mb *Member) bool { return mb.Buffering })
+	return slices.ContainsFunc(g.members, func(mb *Member) bool { return mb.Buffering && !mb.Offline })
+}
+
+// member returns a member of the group by its session.
+func (g *group) member(session core.ID) *Member {
+	return g.members[slices.IndexFunc(g.members, func(mb *Member) bool { return mb.Session == session })]
 }
 
 // positionAt is where the group is at t.

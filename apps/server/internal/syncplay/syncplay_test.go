@@ -170,3 +170,92 @@ func TestWatchTogether(t *testing.T) {
 		}
 	})
 }
+
+func TestOffline(t *testing.T) {
+	synctest.Test(t, func(t *testing.T) {
+		in := &inbox{updates: map[core.ID][]*sessionv1.SyncPlayUpdate{}}
+		m := New(in.send)
+		ann, bob := member("ann"), member("bob")
+		g := m.Create(ann, "Movie night")
+		if _, err := m.Join(bob, core.MustParseID(g.GetId())); err != nil {
+			t.Fatal(err)
+		}
+		handle := func(mb Member, r Request) {
+			t.Helper()
+			if err := m.Handle(mb.Session, r); err != nil {
+				t.Fatal(err)
+			}
+		}
+		state := func(u *sessionv1.SyncPlayUpdate) sessionv1.SyncPlayState { return u.GetGroup().GetState() }
+		const waiting, playing = sessionv1.SyncPlayState_SYNC_PLAY_STATE_WAITING, sessionv1.SyncPlayState_SYNC_PLAY_STATE_PLAYING
+		const unpause, pause = sessionv1.SyncPlayCommandKind_SYNC_PLAY_COMMAND_KIND_UNPAUSE, sessionv1.SyncPlayCommandKind_SYNC_PLAY_COMMAND_KIND_PAUSE
+
+		handle(ann, SetQueue([]core.ID{core.NewID()}, 0, 0))
+		entry := core.MustParseID(in.last(ann.Session).GetGroup().GetQueue()[0].GetId())
+		in.last(bob.Session)
+
+		// Ann is ready and Bob drops off while buffering: the group plays
+		// without him.
+		handle(ann, ReportState(entry, 0, time.Now(), false, true))
+		in.last(ann.Session)
+		m.Offline(bob.Session)
+		if u := in.last(ann.Session); state(u) != playing || u.GetCommand().GetKind() != unpause {
+			t.Errorf("Ann after Bob went offline = %v", u)
+		}
+		if got := m.Members(ann.Session); len(got) != 2 || !got[1].Offline {
+			t.Errorf("members = %+v, want Bob offline", got)
+		}
+
+		// Back within the grace, Bob is still a member and the group waits
+		// for him to catch up.
+		time.Sleep(OfflineGrace - time.Second)
+		m.Online(bob.Session)
+		if u := in.last(ann.Session); state(u) != waiting || u.GetCommand().GetKind() != pause {
+			t.Errorf("Ann after Bob came back = %v", u)
+		}
+		if u := in.last(bob.Session); state(u) != waiting || !u.GetGroup().GetMembers()[1].GetBuffering() {
+			t.Errorf("Bob after coming back = %v", u)
+		}
+		// His leaving timer is gone.
+		time.Sleep(2 * time.Second)
+		synctest.Wait()
+		if got := m.Members(bob.Session); len(got) != 2 || got[1].Offline {
+			t.Errorf("members = %+v, want Bob online", got)
+		}
+
+		// A stream replacing another is sent the group.
+		m.Online(ann.Session)
+		if u := in.last(ann.Session); state(u) != waiting || u.HasCommand() {
+			t.Errorf("Ann's new stream = %v", u)
+		}
+
+		// Away past the grace, Bob leaves, and is told so when he returns,
+		// once.
+		m.Offline(bob.Session)
+		time.Sleep(OfflineGrace)
+		synctest.Wait()
+		if got := m.Members(ann.Session); len(got) != 1 {
+			t.Errorf("members = %+v, want only Ann", got)
+		}
+		if u := in.last(ann.Session); state(u) != playing {
+			t.Errorf("Ann after Bob left = %v", u)
+		}
+		in.last(bob.Session)
+		m.Online(bob.Session)
+		if u := in.last(bob.Session); u == nil || u.HasGroup() {
+			t.Errorf("Bob's update on returning = %v, want leaving", u)
+		}
+		m.Online(bob.Session)
+		if u := in.last(bob.Session); u != nil {
+			t.Errorf("Bob's update on returning again = %v, want none", u)
+		}
+
+		// The last member leaving while offline ends the group.
+		m.Offline(ann.Session)
+		time.Sleep(OfflineGrace)
+		synctest.Wait()
+		if len(m.Groups()) != 0 {
+			t.Errorf("groups = %v, want none", m.Groups())
+		}
+	})
+}

@@ -27,12 +27,15 @@ type SyncPlayService struct {
 var _ sessionv1connect.SyncPlayServiceHandler = (*SyncPlayService)(nil)
 
 // NewSyncPlayService returns a SyncPlayService whose groups reach their
-// members through hub; devices going offline leave their group.
+// members through hub; devices going offline leave their group unless they
+// come back within syncplay.OfflineGrace, and are told what they missed
+// when they do.
 func NewSyncPlayService(store core.Store, hub *events.Hub) *SyncPlayService {
 	groups := syncplay.New(func(session core.ID, u *sessionv1.SyncPlayUpdate) {
 		hub.ToSession(session, sessionv1.Event_builder{SyncPlay: u}.Build())
 	})
-	hub.OnOffline(groups.Leave)
+	hub.OnOffline(groups.Offline)
+	hub.OnOnline(groups.Online)
 	return &SyncPlayService{store: store, hub: hub, groups: groups}
 }
 

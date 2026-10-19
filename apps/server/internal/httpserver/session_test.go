@@ -230,12 +230,27 @@ func TestSyncPlay(t *testing.T) {
 		t.Errorf("start commands differ: %v / %v", a, b)
 	}
 
-	// The phone going offline leaves the group.
+	// The phone dropping off stays in the group for a while; its new
+	// stream gets the group, which waits for it to catch up.
 	hangUp()
-	left := await(t, tv, "phone left", func(e *sessionv1.Event) bool { return isSync(e) && len(e.GetSyncPlay().GetGroup().GetMembers()) == 1 })
-	if left.GetSyncPlay().GetGroup().GetState() != sessionv1.SyncPlayState_SYNC_PLAY_STATE_PLAYING {
-		t.Errorf("group after the phone left = %v", left)
+	await(t, tv, "phone offline", (*sessionv1.Event).HasSessionsChanged)
+	if list, err := phoneSync.ListGroups(ctx, &sessionv1.ListGroupsRequest{}); err != nil || len(list.GetGroups()[0].GetMembers()) != 2 {
+		t.Fatalf("ListGroups while offline = %v, %v", list, err)
 	}
+	phoneBack := subscribe(t, url, phoneToken)
+	waiting := func(e *sessionv1.Event) bool {
+		return isSync(e) && e.GetSyncPlay().GetGroup().GetState() == sessionv1.SyncPlayState_SYNC_PLAY_STATE_WAITING
+	}
+	await(t, phoneBack, "phone back", waiting)
+	if paused := await(t, tv, "TV waits", waiting); paused.GetSyncPlay().GetCommand().GetKind() != sessionv1.SyncPlayCommandKind_SYNC_PLAY_COMMAND_KIND_PAUSE {
+		t.Errorf("TV while the phone catches up = %v", paused)
+	}
+
+	// Leaving, the phone is no longer in a group.
+	if _, err := phoneSync.LeaveGroup(ctx, &sessionv1.LeaveGroupRequest{}); err != nil {
+		t.Fatal(err)
+	}
+	await(t, tv, "phone left", func(e *sessionv1.Event) bool { return isSync(e) && len(e.GetSyncPlay().GetGroup().GetMembers()) == 1 })
 	_, err = phoneSync.Pause(ctx, &sessionv1.PauseRequest{})
 	wantCode(t, "pause outside a group", err, connect.CodeFailedPrecondition)
 }

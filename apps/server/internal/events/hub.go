@@ -68,14 +68,24 @@ type Hub struct {
 	removed map[core.ID]core.ID // item → library
 	// tasks are the running jobs of tasks, by job ID.
 	tasks map[core.ID]core.Job
-	// offline are told of sessions going offline.
-	offline []func(session core.ID)
+	// offline are told of sessions going offline, online of sessions
+	// opening a stream.
+	offline, online []func(session core.ID)
 }
 
 // OnOffline registers f to learn of sessions going offline.
 func (h *Hub) OnOffline(f func(session core.ID)) {
 	h.mu.Lock()
 	h.offline = append(h.offline, f)
+	h.mu.Unlock()
+}
+
+// OnOnline registers f to learn of sessions opening an event stream, a
+// first one or one replacing another; what f sends the session reaches
+// the new stream.
+func (h *Hub) OnOnline(f func(session core.ID)) {
+	h.mu.Lock()
+	h.online = append(h.online, f)
 	h.mu.Unlock()
 }
 
@@ -110,7 +120,8 @@ type Subscriber struct {
 func (s *Subscriber) Events() <-chan *sessionv1.Event { return s.ch }
 
 // Done is closed when the stream ends on the server's side: replaced by a
-// newer stream of the device, or too far behind.
+// newer stream of the device, or too far behind; its handler then
+// unsubscribes it.
 func (s *Subscriber) Done() <-chan struct{} { return s.done }
 
 func (s *Subscriber) close() { s.closeOnce.Do(func() { close(s.done) }) }
@@ -121,9 +132,13 @@ func (h *Hub) Subscribe(u core.User, session core.ID) *Subscriber {
 	h.mu.Lock()
 	old := h.subs[session]
 	h.subs[session] = s
+	online := slices.Clone(h.online)
 	h.mu.Unlock()
 	if old != nil {
 		old.close()
+	}
+	for _, f := range online {
+		f(session)
 	}
 	h.SessionsChanged(u.ID, session)
 	return s
@@ -188,7 +203,9 @@ func (h *Hub) subscribers(want func(*Subscriber) bool) []*Subscriber {
 	return out
 }
 
-// send queues an event on a stream, dropping a stream too far behind.
+// send queues an event on a stream, ending a stream too far behind. The
+// stream's handler unsubscribes it, so that the offline callbacks never run
+// within a sender, which may hold its own lock.
 func (h *Hub) send(s *Subscriber, e *sessionv1.Event) {
 	if !e.HasTime() {
 		e.SetTime(timestamppb.Now())
@@ -198,7 +215,7 @@ func (h *Hub) send(s *Subscriber, e *sessionv1.Event) {
 	case <-s.done:
 	default:
 		h.log.Warn("event stream too far behind; dropped", "session", s.SessionID)
-		h.Unsubscribe(s)
+		s.close()
 	}
 }
 
