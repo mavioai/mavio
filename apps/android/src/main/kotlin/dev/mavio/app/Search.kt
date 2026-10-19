@@ -16,10 +16,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -35,12 +38,9 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.mavio.core.AppModel
-import mavio.acquisition.v1.Discover.SearchTitlesResponse
-import mavio.acquisition.v1.searchTitlesRequest
 import dev.mavio.core.SearchResults
 import dev.mavio.design.MavioRadius
 import dev.mavio.design.MavioSpacing
-import dev.mavio.ui.CardPlaceholder
 import dev.mavio.ui.ItemCard
 import dev.mavio.ui.LocalDiscover
 import dev.mavio.ui.MavioIcon
@@ -52,6 +52,20 @@ import dev.mavio.ui.discovered
 import dev.mavio.ui.text
 import dev.mavio.ui.theme
 import dev.mavio.ui.titleKey
+import mavio.acquisition.v1.Discover.SearchTitlesResponse
+import mavio.acquisition.v1.searchTitlesRequest
+
+/**
+ * The last search's results, kept while the app runs so that coming back
+ * to Search from a result shows them without asking the servers again.
+ */
+class SearchCache {
+    /** The query searched, with its results; null while none was. */
+    var last by mutableStateOf<Pair<String, Result<List<SearchResults>>>?>(null)
+}
+
+/** Search's kept results. */
+val LocalSearch = compositionLocalOf<SearchCache> { error("no search") }
 
 /**
  * Search, as the web UI's phone layout (docs/clients.md §5.4): a field,
@@ -62,30 +76,29 @@ import dev.mavio.ui.titleKey
 fun SearchScreen(model: AppModel) {
     var text by rememberSaveable { mutableStateOf("") }
     var query by rememberSaveable { mutableStateOf("") }
-    val servers by model.servers.collectAsStateWithLifecycle()
     val signedIn by model.signedIn.collectAsStateWithLifecycle()
     val several = signedIn.size > 1
-    // The results of the query confirmed; null while they are on their way.
-    var results by remember { mutableStateOf<Result<List<SearchResults>>?>(null) }
-    LaunchedEffect(query) {
-        results = null
-        if (query.isNotEmpty()) results = runCatching { model.client.search(query) }
+    // Confirming the query searched again searches again.
+    var again by rememberSaveable { mutableIntStateOf(0) }
+    val cache = LocalSearch.current
+    // The results of the query confirmed, kept; null while they are on their way.
+    val results = cache.last?.takeIf { it.first == query }?.second
+    LaunchedEffect(query, again) {
+        if (query.isEmpty() || results != null) return@LaunchedEffect
+        cache.last = query to runCatching { model.client.search(query) }
     }
     // The titles the server that discovers finds, from Discover.
-    val discovery = LocalDiscover.current.discovery
+    val discover = LocalDiscover.current
+    val discovery = discover.discovery
+    val request = remember(query) {
+        searchTitlesRequest {
+            this.query = query
+            language = discoverLanguage
+            page = 1
+        }
+    }
     val found = if (discovery == null || query.isEmpty()) null else {
-        discovered(
-            discovery.serverId,
-            "SearchTitles",
-            remember(query) {
-                searchTitlesRequest {
-                    this.query = query
-                    language = discoverLanguage
-                    page = 1
-                }
-            },
-            SearchTitlesResponse::parseFrom,
-        ).value
+        discovered(discovery.serverId, "SearchTitles", request, SearchTitlesResponse::parseFrom, again).value
     }
     val titles = found?.getOrNull()?.titlesList.orEmpty().distinctBy(::titleKey)
     val focus = remember { FocusRequester() }
@@ -123,6 +136,11 @@ fun SearchScreen(model: AppModel) {
                     cursorBrush = SolidColor(colors.accent),
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                     keyboardActions = KeyboardActions(onSearch = {
+                        if (text.trim() == query && query.isNotEmpty()) {
+                            cache.last = null
+                            discovery?.let { discover.forget(it.serverId, "SearchTitles", request) }
+                            again++
+                        }
                         query = text.trim()
                         keyboard?.hide()
                     }),
@@ -148,21 +166,21 @@ fun SearchScreen(model: AppModel) {
             }
         }
         if (query.isEmpty()) return@LazyColumn
-        val result = results
-        val list = result?.getOrNull()
+        val list = results?.getOrNull().orEmpty()
+        val searching = results == null || (discovery != null && found == null)
+        val shown = list.any { it.cards.isNotEmpty() || it.error != null } || titles.isNotEmpty()
         when {
-            // Every server's shelf on its way.
-            result == null -> items(servers.filter { it.id in signedIn }, key = { "pending/${it.id}" }) { server ->
-                Shelf(if (several) server.name else stringResource(R.string.nav_search)) {
-                    items(6) { CardPlaceholder() }
-                }
-            }
-            list == null -> item {
+            results?.isFailure == true && titles.isEmpty() -> item {
                 StatusView(stringResource(R.string.state_error), Modifier.padding(top = MavioSpacing.s48), icon = R.drawable.ic_error)
             }
-            list.all { it.cards.isEmpty() && it.error == null } && titles.isEmpty() && (discovery == null || found != null) -> item {
+            // One spinner while nothing is drawn yet, and No Results once all answered with nothing.
+            !shown && searching -> item {
+                Box(Modifier.fillMaxWidth().padding(top = MavioSpacing.s48), Alignment.Center) { CircularProgressIndicator() }
+            }
+            !shown -> item {
                 StatusView(stringResource(R.string.search_no_results), Modifier.padding(top = MavioSpacing.s48), icon = R.drawable.ic_search)
             }
+            // A server's row shows once it answers with results, never while it searches.
             else -> items(list, key = { it.serverId }) { found ->
                 when {
                     found.error != null -> Row(
@@ -177,7 +195,7 @@ fun SearchScreen(model: AppModel) {
                             color = colors.textTertiary,
                         )
                     }
-                    found.cards.isNotEmpty() -> Shelf(if (several) found.serverName else stringResource(R.string.nav_search)) {
+                    found.cards.isNotEmpty() -> Shelf(if (several) found.serverName else stringResource(R.string.search_server)) {
                         items(found.cards, key = { "${it.serverId}/${it.itemId}" }) { card ->
                             ItemCard(card, Modifier.clickable { navigator.open(card) })
                         }

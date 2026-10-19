@@ -53,6 +53,11 @@ class DiscoverState(private val model: AppModel) {
     @Suppress("UNCHECKED_CAST")
     fun <T : MessageLite> peek(serverId: String, method: String, request: MessageLite): T? = cache.get(key(serverId, method, request)) as T?
 
+    /** Forgets a call's answer kept from before, so that it is asked again. */
+    fun forget(serverId: String, method: String, request: MessageLite) {
+        cache.remove(key(serverId, method, request))
+    }
+
     /** Calls a method of DiscoverService, answering from what was kept when it can. */
     suspend fun <T : MessageLite> call(serverId: String, method: String, request: MessageLite, parse: (ByteArray) -> T): T {
         peek<T>(serverId, method, request)?.let { return it }
@@ -98,8 +103,10 @@ fun <T : MessageLite> discovered(
     attempt: Int = 0,
 ): State<Result<T>?> {
     val discover = LocalDiscover.current
-    val initial = remember(serverId, method, request) { discover.peek<T>(serverId, method, request)?.let { Result.success(it) } }
+    val initial = remember(serverId, method, request, attempt) { discover.peek<T>(serverId, method, request)?.let { Result.success(it) } }
     return produceState(initial, serverId, method, request, attempt) {
+        // The state outlives its keys: a new request starts from its own answer, not the last one's.
+        value = initial
         if (value?.isSuccess == true) return@produceState
         value = try {
             Result.success(discover.call(serverId, method, request, parse))

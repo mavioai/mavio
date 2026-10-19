@@ -301,6 +301,7 @@ private fun Shell(model: AppModel) {
     var place by remember { mutableStateOf<Route>(Route.Home) }
     val signedIn by model.signedIn.collectAsStateWithLifecycle()
     val discover = remember { DiscoverState(model) }
+    val search = remember { SearchCache() }
     LaunchedEffect(signedIn) { discover.load(model.signedInServers.map { it.id }) }
     // Discover's tab shows while a server discovers.
     val tabs = Tab.entries.filter { it != Tab.Discover || discover.discovery != null }
@@ -378,6 +379,7 @@ private fun Shell(model: AppModel) {
                 LocalTheme provides theme.copy(layout = layout),
                 LocalNavigator provides navigator,
                 LocalDiscover provides discover,
+                LocalSearch provides search,
                 LocalHeaderBackdrop provides backdrop,
                 // A page opened from another keeps clear of Back above it.
                 LocalTopInset provides statusBar + if (backShown) BACK_ROW else MavioSpacing.s12,
@@ -446,6 +448,7 @@ private fun Shell(model: AppModel) {
             CompositionLocalProvider(
                 LocalNavigator provides navigator,
                 LocalDiscover provides discover,
+                LocalSearch provides search,
                 LocalHeaderBackdrop provides backdrop,
                 // The pages scroll under the header and the floating tab bar, which blur them.
                 LocalTopInset provides HEADER_HEIGHT + statusBar,

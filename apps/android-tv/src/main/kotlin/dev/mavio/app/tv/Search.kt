@@ -27,6 +27,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -54,7 +55,6 @@ import dev.mavio.core.RowContent
 import dev.mavio.core.SearchResults
 import dev.mavio.design.MavioRadius
 import dev.mavio.design.MavioSpacing
-import dev.mavio.ui.CardPlaceholder
 import dev.mavio.ui.Focusable
 import dev.mavio.ui.LocalDiscover
 import dev.mavio.ui.LocalTheme
@@ -231,7 +231,6 @@ private fun Suggestions(model: AppModel, page: Page.Search) {
 /** Each server's results in a grid under its name, or that it can't be reached. */
 @Composable
 private fun Results(model: AppModel, page: Page.Search) {
-    val servers by model.servers.collectAsStateWithLifecycle()
     val signedIn by model.signedIn.collectAsStateWithLifecycle()
     val several = signedIn.size > 1
     val pages = LocalPages.current
@@ -262,20 +261,23 @@ private fun Results(model: AppModel, page: Page.Search) {
         horizontalArrangement = Arrangement.spacedBy(theme.layout.gutter),
         verticalArrangement = Arrangement.spacedBy(MavioSpacing.s32),
     ) {
+        val searching = result == null || (discovery != null && found == null)
+        val shown = list.orEmpty().any { it.cards.isNotEmpty() || it.error != null } || titles.isNotEmpty()
         when {
-            result == null -> servers.filter { it.id in signedIn }.forEach { server ->
-                if (several) gridLine("pending/${server.id}") { ServerTitle(server.name) }
-                items(6) { CardPlaceholder() }
-            }
-            list == null -> gridLine("error") {
+            result?.isFailure == true && titles.isEmpty() -> gridLine("error") {
                 StatusView(stringResource(R.string.state_error), Modifier.padding(top = MavioSpacing.s48), icon = R.drawable.ic_error)
             }
-            list.all { it.cards.isEmpty() && it.error == null } && titles.isEmpty() && (discovery == null || found != null) -> gridLine("none") {
+            // One spinner while nothing is drawn yet, and No Results once all answered with nothing.
+            !shown && searching -> gridLine("searching") {
+                Box(Modifier.fillMaxWidth().padding(top = MavioSpacing.s80), Alignment.Center) { CircularProgressIndicator() }
+            }
+            !shown -> gridLine("none") {
                 StatusView(stringResource(R.string.search_no_results), Modifier.padding(top = MavioSpacing.s48), icon = R.drawable.ic_search)
             }
-            else -> list.forEach { found -> serverResults(found, several, page) { pages.open(it) } }
+            // A server's results show once it answers with some, never while it searches.
+            else -> list.orEmpty().forEach { found -> serverResults(found, several, page) { pages.open(it) } }
         }
-        if (discovery != null && list != null && titles.isNotEmpty()) {
+        if (discovery != null && titles.isNotEmpty()) {
             gridLine("discover") { ServerTitle(stringResource(R.string.search_discover)) }
             items(titles, key = { "discover/${titleKey(it)}" }) { t ->
                 TvTitleCard(t, Modifier.focusKey(page.focus, "discover/${titleKey(t)}"), fill = true) {
@@ -286,7 +288,7 @@ private fun Results(model: AppModel, page: Page.Search) {
     }
 }
 
-/** A server's results: its name when there are several, then its cards, or that it can't be reached. */
+/** A server's results: From the Server, or its name when there are several, then its cards, or that it can't be reached. */
 private fun LazyGridScope.serverResults(
     found: SearchResults,
     several: Boolean,
@@ -305,7 +307,7 @@ private fun LazyGridScope.serverResults(
             }
         }
         found.cards.isNotEmpty() -> {
-            if (several) gridLine("server/${found.serverId}") { ServerTitle(found.serverName) }
+            gridLine("server/${found.serverId}") { ServerTitle(if (several) found.serverName else stringResource(R.string.search_server)) }
             items(found.cards, key = { "${it.serverId}/${it.itemId}" }) { card ->
                 TvItemCard(card, Modifier.focusKey(page.focus, "${card.serverId}/${card.itemId}"), fill = true) { open(card) }
             }
