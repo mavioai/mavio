@@ -21,6 +21,7 @@
 * **Tabs**: Home, Libraries, Discover (where a server discovers) and Search in a pill centered at the top, on `color.surfaceRaised` at 60 %; the current tab is filled with `color.fillSelected`.
 * **Menu button**: three vertical dots in a round button of the tabs' glass, as large as the assistant's beside it, at the screen's right and centered on the tabs vertically, open the user menu (§5) as the button is pressed, never as focus moves from it; with focus it is white as the assistant's, and while its menu is open, focus in the menu, it is as without focus; the user's avatar and name head the menu rather than sit beside the tabs.
 * **Assistant button**: a microphone in a round button like the menu button, to its left, opens the assistant's panel ([Assistant §9](assistant.md#9-clients)); where the remote has a search or assistant key the app receives, that key opens it from any page.
+* **Group indicator**: while the device is in a SyncPlay group ([Clients §6.3.24](clients.md#6324-syncplay)), a button of the tabs' height before the assistant's names the group and its size, white with focus, and opens the group's dialog; the tabs' pages reach it by right from Search.
 * **Band**: once the page scrolls, a solid band of the background lies under the bar, so that content scrolled up passes under it rather than through it. It is not blurred, since a blurred edge looks poor on a large screen.
 * **Behind the bar**: Home's hero reaches the top of the screen, behind the bar; other pages start below it. A title's details, a discovered title, a library, a catalog and Search hide the bar (§6.2, §6.3, §6.4).
 * **Opening tabs**: on a tab's own page, moving focus to another tab opens it, as on tvOS. Deeper pages open a tab only when it is selected, so that moving up to the tabs does not leave the page. Search opens only when selected, from every page, since its page hides the tabs (§6.4).
@@ -69,7 +70,7 @@ The settings show the list of their sections — the account, the users to switc
 
 ## 7. Player
 
-The on-screen controller shows the title, the timeline, and a row of buttons for the next episode, the subtitles and the audio; it has no buttons to play, pause or seek, which the remote's keys do. The track and subtitle pickers open as a side panel.
+The on-screen controller shows the title, the timeline, and a row of buttons — the SyncPlay group's chip while the player follows one, the next episode, the subtitles and the audio; it has no buttons to play, pause or seek, which the remote's keys do. The track and subtitle pickers open as a side panel.
 
 * **Keys**: down shows the controller; left and right always seek by 10 seconds and show it; select pauses, showing the controller for as long as it is paused, and plays on, hiding it. During playback the controller hides once nothing is pressed for 3 seconds.
 * **Focus**: outside the controller's row nothing shows focus. Down while the controller shows moves focus into its row, where left and right move among the buttons and up leaves it. The side panel opens with focus on its current choice, and closing it returns focus to the button that opened it.

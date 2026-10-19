@@ -3,6 +3,7 @@
 // decoder extension, in build/ffmpeg, come from mavio-deps (tools/deps).
 plugins {
     alias(libs.plugins.android.library)
+    alias(libs.plugins.kotlin.compose)
 }
 
 // The extension is built for one Media3, the one the version catalog names.
@@ -36,6 +37,9 @@ dependencies {
     api(libs.media3.exoplayer)
     api(libs.media3.exoplayer.hls)
     api(libs.media3.session)
+    // Following a SyncPlay group, as the players compose it.
+    implementation(platform(libs.compose.bom))
+    implementation(libs.lifecycle.runtime.compose)
     compileOnly(libs.checkerframework.qual)
     androidTestImplementation(libs.androidx.test.runner)
     androidTestImplementation(libs.androidx.test.ext.junit)

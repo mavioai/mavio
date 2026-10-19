@@ -99,10 +99,13 @@ import dev.mavio.core.PlaybackSession
 import dev.mavio.core.Source
 import dev.mavio.core.SubtitleStream
 import dev.mavio.design.MavioSpacing
+import dev.mavio.player.GroupControls
 import dev.mavio.player.PlayerEngine
 import dev.mavio.player.chooseTracks
 import dev.mavio.player.createPlayer
 import dev.mavio.player.engineFor
+import dev.mavio.player.playing
+import dev.mavio.player.rememberGroupPlayer
 import dev.mavio.ui.Focusable
 import dev.mavio.ui.LocalPrefs
 import dev.mavio.ui.MavioIcon
@@ -208,8 +211,19 @@ fun PlayerPage(model: AppModel, page: Page.Player) {
     var engine by remember(p) { mutableStateOf(p?.engine) }
     var startMs by remember(p) { mutableLongStateOf(p?.info?.startPosition?.toMillis() ?: 0) }
     val position = remember(p) { Position().also { it.ms = startMs } }
-    val player = remember(p, engine) { p?.let { createPlayer(context, engine ?: it.engine, it.info, it.source, startMs, autoplay = true) } }
-    val playNext = next?.let { e -> { pages.replace(Page.Player(page.serverId, e.card.itemId, e.card.title, null, e.position)) } }
+    val player = remember(p, engine) {
+        // A group's member waits for the group to play.
+        val follows = model.syncPlay.joined.value.playing(page.serverId, page.itemId) != null
+        p?.let { createPlayer(context, engine ?: it.engine, it.info, it.source, startMs, autoplay = !follows) }
+    }
+    // The SyncPlay group playing the item, which the controller asks instead of the player.
+    val group = rememberGroupPlayer(model, page.serverId, page.itemId, player) { pages.back() }
+    val currentGroup by rememberUpdatedState(group)
+    val controls = remember(player) { player?.let { GroupControls(it) { currentGroup } } }
+    val playNext = when {
+        group != null && (group.hasNext || next != null) -> { { group.next(listOfNotNull(next?.card?.itemId)) } }
+        else -> next?.let { e -> { pages.replace(Page.Player(page.serverId, e.card.itemId, e.card.title, null, e.position)) } }
+    }
     val currentNext by rememberUpdatedState(playNext)
     DisposableEffect(p) {
         onDispose {
@@ -222,8 +236,12 @@ fun PlayerPage(model: AppModel, page: Page.Player) {
                 if (state == Player.STATE_ENDED && p != null && !position.ended) {
                     position.ended = true
                     model.finish(page.serverId, p.session, null)
-                    // The next episode plays only while the settings say so.
-                    currentNext?.takeIf { prefs.autoplayNext }?.invoke() ?: pages.back()
+                    val g = currentGroup
+                    when {
+                        g != null -> g.ended()
+                        // The next episode plays only while the settings say so.
+                        else -> currentNext?.takeIf { prefs.autoplayNext }?.invoke() ?: pages.back()
+                    }
                 }
             }
 
@@ -263,8 +281,8 @@ fun PlayerPage(model: AppModel, page: Page.Player) {
     // The system's media controls, the remote's media keys and the
     // assistant drive the player through its session; the next episode's
     // starts while this one's player goes, so each has an ID of its own.
-    DisposableEffect(player) {
-        val session = player?.let { MediaSession.Builder(context, it).setId(UUID.randomUUID().toString()).build() }
+    DisposableEffect(controls) {
+        val session = controls?.let { MediaSession.Builder(context, it).setId(UUID.randomUUID().toString()).build() }
         onDispose { session?.release() }
     }
 
@@ -280,7 +298,8 @@ fun PlayerPage(model: AppModel, page: Page.Player) {
         if (error != null) {
             Failure(error)
         } else if (player != null && p != null) {
-            Controller(player, page.title, p, selection.quality, options, playNext) { picked ->
+            val chip: (@Composable (onOpen: (Boolean) -> Unit) -> Unit)? = group?.let { g -> { onOpen -> GroupChip(model, page.serverId, g.group, onOpen) } }
+            Controller(controls ?: player, page.title, p, selection.quality, options, playNext, chip) { picked ->
                 resume = Duration.ofMillis(player.currentPosition)
                 // The quality stays this device's, as the web UI's.
                 prefs.quality = picked.quality
@@ -336,7 +355,8 @@ private fun heading(context: android.content.Context, details: Details): String?
 
 /**
  * The controller over the video (docs/tv.md §7): the title and the
- * timeline, and a row of the next episode, the subtitles and the audio.
+ * timeline, and a row of the SyncPlay group's chip while the player
+ * follows one, the next episode, the subtitles and the audio.
  * Down shows it; left and right seek by 10 seconds and show it; select
  * pauses, showing it while paused, and plays on, hiding it. It hides once
  * nothing is pressed for 3 seconds during playback. Down again moves focus
@@ -347,14 +367,25 @@ private fun heading(context: android.content.Context, details: Details): String?
  */
 @OptIn(UnstableApi::class)
 @Composable
-private fun Controller(player: Player, title: String, playback: Playback, quality: Quality, options: Options, playNext: (() -> Unit)?, onPick: (Selection) -> Unit) {
+private fun Controller(
+    player: Player,
+    title: String,
+    playback: Playback,
+    quality: Quality,
+    options: Options,
+    playNext: (() -> Unit)?,
+    chip: (@Composable (onOpen: (Boolean) -> Unit) -> Unit)?,
+    onPick: (Selection) -> Unit,
+) {
     val pages = LocalPages.current
     val playPause = rememberPlayPauseButtonState(player)
     val progress = rememberProgressStateWithTickInterval(player, 500, rememberCoroutineScope())
     var shown by remember { mutableStateOf(false) }
     var panel by options::panel
+    // The group's dialog, opened from the chip, keeps the controller that hosts it.
+    var held by remember { mutableStateOf(false) }
     // An open panel keeps the controller up, as the web UI's.
-    val visible = shown || panel != null
+    val visible = shown || panel != null || held
     // How far the timeline's top is from the screen's foot, the panel sitting above it, as the web UI's.
     var bottom by remember { mutableFloatStateOf(0f) }
     var timeline by remember { mutableFloatStateOf(0f) }
@@ -364,8 +395,8 @@ private fun Controller(player: Player, title: String, playback: Playback, qualit
     val idle = remember { FocusRequester() }
     val row = remember { FocusRequester() }
     val openers = remember { Panel.entries.associateWith { FocusRequester() } }
-    LaunchedEffect(shown, pressed, playPause.showPlay, panel) {
-        if (shown && !playPause.showPlay && panel == null) {
+    LaunchedEffect(shown, pressed, playPause.showPlay, panel, held) {
+        if (shown && !playPause.showPlay && panel == null && !held) {
             delay(CONTROLLER_TIMEOUT_MS)
             shown = false
         }
@@ -482,6 +513,7 @@ private fun Controller(player: Player, title: String, playback: Playback, qualit
                             horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s16),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
+                            chip?.invoke { held = it }
                             playNext?.let { TvButton(stringResource(R.string.player_next_episode), it, icon = R.drawable.ic_next_fill) }
                             if (playback.info.subtitles.isNotEmpty()) {
                                 val on = (playback.info.subtitleStreamIndex ?: -1) >= 0

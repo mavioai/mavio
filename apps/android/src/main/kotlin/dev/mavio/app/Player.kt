@@ -102,10 +102,13 @@ import dev.mavio.core.PlaybackOptions
 import dev.mavio.core.PlaybackSession
 import dev.mavio.core.Source
 import dev.mavio.core.SubtitleStream
+import dev.mavio.player.GroupControls
 import dev.mavio.player.PlayerEngine
 import dev.mavio.player.chooseTracks
 import dev.mavio.player.createPlayer
 import dev.mavio.player.engineFor
+import dev.mavio.player.playing
+import dev.mavio.player.rememberGroupPlayer
 import dev.mavio.ui.LocalPrefs
 import dev.mavio.ui.MavioIcon
 import dev.mavio.ui.Quality

@@ -203,6 +203,7 @@ internal fun TvVersionMenu(
 /** A dialog of the More menu. */
 private enum class ItemDialog(@StringRes val label: Int) {
     PlayOn(R.string.remote_play_on),
+    Together(R.string.syncplay_watch_together),
     Playlist(R.string.lists_add_to_playlist),
     Report(R.string.issues_report),
     Collection(R.string.lists_add_to_collection),
@@ -214,7 +215,7 @@ private enum class ItemDialog(@StringRes val label: Int) {
 /**
  * The More menu of an item's actions, as the web UI's (docs/tv.md §5): a
  * circle opening its menu above it, and the dialogs it opens: playing the
- * item on another device, adding it to a playlist, reporting a problem,
+ * item on another device, watching it together, adding it to a playlist, reporting a problem,
  * and for administrators adding it to a collection and refreshing its
  * metadata; a playlist, or a collection for administrators, renamed or
  * deleted.
@@ -234,7 +235,10 @@ internal fun TvMoreMenu(model: AppModel, details: Details, modifier: Modifier = 
     }
     val own = card.kind == CardKind.PLAYLIST || (card.kind == CardKind.COLLECTION && admin)
     val entries = buildList {
-        if (card.kind in playableKinds) add(ItemDialog.PlayOn)
+        if (card.kind in playableKinds) {
+            add(ItemDialog.PlayOn)
+            add(ItemDialog.Together)
+        }
         if (listable(card.kind)) add(ItemDialog.Playlist)
         if (card.kind in reportableKinds && mayReport) add(ItemDialog.Report)
         if (listable(card.kind) && admin) add(ItemDialog.Collection)
@@ -282,6 +286,7 @@ internal fun TvMoreMenu(model: AppModel, details: Details, modifier: Modifier = 
     }
     when (dialog) {
         ItemDialog.PlayOn -> PlayOnDialog(model, details, back)
+        ItemDialog.Together -> SyncPlayDialog(model, card.serverId, details, back)
         ItemDialog.Playlist -> AddDialog(model, card, collection = false, back)
         ItemDialog.Collection -> AddDialog(model, card, collection = true, back)
         ItemDialog.Report -> ReportDialog(model, card, back)
@@ -294,7 +299,7 @@ internal fun TvMoreMenu(model: AppModel, details: Details, modifier: Modifier = 
 
 /** A row of a dialog's list: its icon, title and detail, with what follows it. */
 @Composable
-private fun DialogRow(
+internal fun DialogRow(
     icon: Int,
     title: String,
     detail: String? = null,
@@ -317,13 +322,13 @@ private fun DialogRow(
 
 /** An error under a dialog's content. */
 @Composable
-private fun DialogFailure(text: String?) {
+internal fun DialogFailure(text: String?) {
     text?.let { Text(it, style = theme.type.callout.text, color = theme.colors.danger) }
 }
 
 /** A dialog's buttons at its end. */
 @Composable
-private fun DialogButtons(content: @Composable () -> Unit) {
+internal fun DialogButtons(content: @Composable () -> Unit) {
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s12, Alignment.End)) { content() }
 }
 

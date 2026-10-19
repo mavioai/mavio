@@ -151,6 +151,7 @@ private fun Shell(model: AppModel) {
     }
     // Back from a page returns to what opened it.
     BackHandler(top != null) { pages.back() }
+    FollowGroup(model, pages)
     // The administration's pages open over the settings; the television controls no other device.
     val admin = remember(pages) {
         object : AdminHost {
@@ -239,7 +240,8 @@ private fun scrolled(list: LazyListState): Boolean {
  * one filled, over a band of the background once the page scrolls; focus
  * entering the tabs goes to the current one, and down from them to the
  * page's first element, [page]. Search follows the tabs, opening only
- * when selected.
+ * when selected; at the end, the device's SyncPlay group while it is in
+ * one, and the menu button.
  */
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -287,12 +289,20 @@ private fun NavBar(
                 onChoose = onSearch,
             )
         }
-        MenuButton(
-            model,
-            menu,
-            Modifier.align(Alignment.CenterEnd).onFocusChanged { onOpenerFocus(it.hasFocus) }.focusProperties { down = page },
-            onSettings,
-        )
+        Row(
+            Modifier.align(Alignment.CenterEnd),
+            horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s16),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            // The device's group, while it is in one, before the menu button.
+            GroupIndicator(model, Modifier.focusProperties { down = page })
+            MenuButton(
+                model,
+                menu,
+                Modifier.onFocusChanged { onOpenerFocus(it.hasFocus) }.focusProperties { down = page },
+                onSettings,
+            )
+        }
     }
 }
 
