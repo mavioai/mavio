@@ -27,6 +27,9 @@ type fakeSubtitles struct {
 	assignments map[string]string
 	settings    *acquisitionv1.SubtitleSettings
 	next        int
+	// items are the items' subtitles; calls the changes asked of them.
+	items map[string][]*acquisitionv1.ItemSubtitle
+	calls []string
 }
 
 // fakeAI serves the models of a fake server's AI gateway.

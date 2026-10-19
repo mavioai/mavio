@@ -37,6 +37,7 @@ type detailsState struct {
 	more        moreState
 	allStudios  bool // the studios shown past minStudios
 	acquire     acquireState
+	subs        itemSubsState
 }
 
 // details builds an item's details, as the web UI's
@@ -85,6 +86,7 @@ func (a *App) details(c *ui.Context, r *ui.Route, server, id string) {
 					a.recommendations(c, info.value.item.GetItem())
 					a.about(c, st, d, info.value, credits)
 					a.acquisition(c, &st.acquire, server, info.value.item.GetItem())
+					a.itemSubtitles(c, &st.subs, server, info.value.item.GetItem())
 				} else {
 					a.facts(c, st, d)
 				}

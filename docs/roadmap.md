@@ -839,7 +839,7 @@ flowchart TD
   - [ ] Managing a title (its downloads, issues and the blocklist) and reporting issues; the services' logos beside the ratings and links; downloads, the assistant, and switching users with PINs
   - [x] The details' More menu, as the web UI's: Play On with the device's remote control, which the Devices settings open too; adding the item to a playlist or collection, and renaming or deleting one; and for administrators editing the metadata, identifying the item, refreshing it and choosing its images, from the providers or a file
   - [x] The details' download badge, genres, studios and keywords opening their items in the library, Request More for a series, and for administrators the acquisition section: monitoring, the quality profile, automatic and interactive searches grabbing a release, and the item's requests, downloads and history
-  - [ ] The details' rest, in every layout: Watch Together and carrying out what other devices send, which need the core's C ABI to pass on SyncPlay's updates and the devices' commands, with the player following a group; the More menu's dialogs checked on the television; and the subtitles section
+  - [ ] The details' rest, in every layout: Watch Together and carrying out what other devices send, which need the core's C ABI to pass on SyncPlay's updates and the devices' commands, with the player following a group; and the More menu's dialogs checked on the television
   - [ ] Tried on Windows and Linux; signed and notarized on macOS; the app's icon
 - [ ] The decision on a Jellyfin API compatibility shim
 

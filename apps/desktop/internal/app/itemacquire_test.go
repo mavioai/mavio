@@ -120,3 +120,64 @@ func TestDetailsAcquisition(t *testing.T) {
 		t.Errorf("details do not tell orbit is not wanted; texts = %q", h.tt.Texts())
 	}
 }
+
+func TestDetailsSubtitles(t *testing.T) {
+	h := newHarness(t, true, 1280, 3600)
+	server := h.core.s.Server.ID
+	subs := h.core.subtitles
+	calls := func() []string {
+		subs.mu.Lock()
+		defer subs.mu.Unlock()
+		return slices.Clone(subs.calls)
+	}
+	h.app.router.Push("/item/" + server + "/orbit")
+	h.settle()
+	for _, want := range []string{"Subtitles", "Subtitle Profile", "French", "French (Forced)", "Present", "Orbit.en.srt · SRT", "Embedded #3 · SUBRIP · Not counted", "Extract"} {
+		if !h.tt.HasText(want) {
+			t.Errorf("details have no %q; texts = %q", want, h.tt.Texts())
+		}
+	}
+	h.save(shots, "details-subtitles")
+
+	for _, step := range []struct {
+		clicks []string
+		want   string
+	}{
+		{[]string{"Extract"}, "extract 3"},
+		{[]string{"Sync", "Sync, English"}, "sync /media/Orbit/Orbit.en.srt "},
+		{[]string{"Delete", "Delete"}, "delete /media/Orbit/Orbit.en.srt"},
+	} {
+		for _, label := range step.clicks {
+			if err := h.tt.Click(label); err != nil {
+				t.Fatal(err)
+			}
+			h.settle()
+		}
+		if got := calls(); !slices.Contains(got, step.want) {
+			t.Errorf("calls = %q, want %q", got, step.want)
+		}
+	}
+	if h.tt.HasText("Orbit.en.srt · SRT") {
+		t.Errorf("the subtitle deleted still shows")
+	}
+
+	// The sidebar's Search comes first.
+	h.app.detailStates[key(server, "orbit")].subs.searching = true
+	h.settle()
+	for _, want := range []string{"Subtitles for The Long Orbit", "Orbit.2024.1080p.BluRay", "French (Forced) · 92% match · opensubtitles · ana · SRT", "Not matched: source", "podnapisi failed"} {
+		if !h.tt.HasText(want) {
+			t.Errorf("search has no %q; texts = %q", want, h.tt.Texts())
+		}
+	}
+	h.save(shots, "details-subtitle-search")
+	if err := h.tt.Click("Download"); err != nil {
+		t.Fatal(err)
+	}
+	h.settle()
+	if got, want := "download orbit opensubtitles/os-1 fr", calls(); !slices.Contains(want, got) {
+		t.Errorf("calls = %q, want %q", want, got)
+	}
+	if !h.tt.HasText("Downloaded") {
+		t.Errorf("the subtitle downloaded shows no Downloaded")
+	}
+}
