@@ -175,8 +175,9 @@ const allTabs: { to: "/" | "/libraries" | "/discover"; icon: IconName; label: ()
 
 /**
  * The phone's top, clear as iOS's: the wordmark, or Back on a page opened
- * from another, search and the assistant bare, and the user's avatar on a
- * circle of the tab bar's glass, opening the settings. Over a hero reaching
+ * from another, the assistant bare and, on the places alone, as the tab bar,
+ * search bare and the user's avatar on a circle of the tab bar's glass,
+ * opening the settings. Over a hero reaching
  * up under it they are white; once the page scrolls under it, glass that
  * fades out downward keeps them readable.
  */
@@ -184,6 +185,8 @@ function CompactHeader() {
   const account = useAccount();
   const link = usePlaceLink();
   const { scrolled, overHero } = useHeaderBackdrop();
+  // Search and the avatar are the places' alone, as the tab bar.
+  const place = isTabPlace(useLocation().pathname);
   return (
     <header className={`sticky top-0 z-20 flex h-13 items-center justify-between px-margin pt-[env(safe-area-inset-top)] ${overHero ? "text-white" : ""}`}>
       <div
@@ -192,17 +195,21 @@ function CompactHeader() {
       />
       <PhoneBack fallback={<Wordmark height={20} />} />
       <div className="flex items-center gap-1">
-        <Link to="/search" {...link("/search")} aria-label={t("nav.search")} className={`flex size-9 items-center justify-center rounded-full hover:bg-fill ${overHero ? "" : "data-[status=active]:text-accent-text data-place:text-accent-text"}`}>
-          {({ isActive }) => <Icon name="search" fill={isActive || link("/search")["data-place"]} size={22} />}
-        </Link>
+        {place && (
+          <Link to="/search" {...link("/search")} aria-label={t("nav.search")} className={`flex size-9 items-center justify-center rounded-full hover:bg-fill ${overHero ? "" : "data-[status=active]:text-accent-text data-place:text-accent-text"}`}>
+            {({ isActive }) => <Icon name="search" fill={isActive || link("/search")["data-place"]} size={22} />}
+          </Link>
+        )}
         <AssistantButton className="flex size-9 items-center justify-center rounded-full hover:bg-fill" />
-        <Link
-          to="/settings"
-          aria-label={t("nav.settings")}
-          className="ml-1 flex size-9 items-center justify-center rounded-full bg-[var(--tabbar-glass)] type-headline text-on-background shadow-[var(--tabbar-shadow)] backdrop-blur-[var(--tabbar-blur)] backdrop-saturate-[1.8]"
-        >
-          {[...account.name][0]?.toUpperCase()}
-        </Link>
+        {place && (
+          <Link
+            to="/settings"
+            aria-label={t("nav.settings")}
+            className="ml-1 flex size-9 items-center justify-center rounded-full bg-[var(--tabbar-glass)] type-headline text-on-background shadow-[var(--tabbar-shadow)] backdrop-blur-[var(--tabbar-blur)] backdrop-saturate-[1.8]"
+          >
+            {[...account.name][0]?.toUpperCase()}
+          </Link>
+        )}
       </div>
     </header>
   );
