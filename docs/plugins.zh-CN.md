@@ -178,7 +178,7 @@ manifest 在 `external_id_kinds` 中声明外部 ID 类型：键、显示名称�
 ### 8.15 AI 网关与智能体会话
 `AI_GATEWAY` 代表服务端访问 AI 模型提供商，使服务端的任何功能都不持有凭据。`AiGatewayService.ListAiProviders` 列出提供商及其认证方式（API key、OAuth 登录、登录是否为订阅登录，如 Claude Pro 或 ChatGPT Plus）、已保存的凭据与是否可用；`ListAiModels` 列出其模型，以及上下文窗口、推理、图片输入与价格。`SetAiApiKey` 保存或删除 key，`LogoutAi` 删除凭据。OAuth 登录在插件中运行：`StartAiLogin` 开始登录，同一时间只运行一个——新的登录会取消仍在运行的登录，因为有些登录（如 ChatGPT 的）监听固定的本地端口——`GetAiLogin` 返回登录展示的内容（登录页面、设备码、进度）、它询问的内容以及是否结束，`WatchAiLogin` 在每次变化时以流式传送同样的内容，直到登录结束，`AnswerAiLogin` 作答，例如在提供商的重定向无法到达插件时提交浏览器被重定向到的地址；客户端经由服务端跟随登录。`CompleteAi` 请求模型给出一个回答，请求给出 schema 时回答为符合它的 JSON，并返回用量与费用；`StreamAi` 随生成以流式传送回答的文本与推理，最后给出同样的响应。失败带有 Connect 错误码：值得重试的失败（限流、过载、网络）为 unavailable，没有可用凭据为 unauthenticated，提供商或模型未知为 not found，上下文溢出为 invalid argument。
 
-`AGENT_SESSION` 持久地保存与模型的会话（`AgentSessionService`）：以模型与指令创建，可列出、连同消息读取、以 `SendAgentMessage` 继续（其请求 ID 使重试成为同一条消息）或以 `StreamAgentMessage` 继续（随回答增长以流式传送目前为止的回答，最后给出回答），以及删除。每条消息与回答都在返回之前保存。
+`AGENT_SESSION` 持久地保存与模型的会话（`AgentSessionService`）：以模型与指令创建，可列出、连同消息读取、以 `SendAgentMessage` 继续（其请求 ID 使重试成为同一条消息）或以 `StreamAgentMessage` 继续（随回答增长以流式传送目前为止的回答，最后给出回答），以及删除。一个回答由其每次模型调用所说的话组成，各占一段：模型在调用工具前写下的文本位于下一次调用的文本之前，在流、回答与读取的消息中都是如此。每条消息与回答都在返回之前保存。
 
 助手的会话（[助手 §6](assistant.zh-CN.md#6-ai-路径)）还具有：
 * **远程工具**：会话创建时附上服务端工具的声明——名称、描述，以及参数与结果的 JSON Schema——由模型调用、服务端运行。`WatchAgentToolCalls` 向服务端以流式传送正在等待的调用，再传送每个新调用，带有其 ID、会话、所有者、工具与参数，无论调用来自模型还是代码模式脚本；`SubmitAgentToolResult` 以给模型的文本、结构化结果与是否失败回答一个调用。调用持久地等待，直到被回答或其会话被删除；插件重启后同一个调用以同一个 ID 再次列出，服务端根据它运行过的调用的记录回答，不再运行。

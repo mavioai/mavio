@@ -13,6 +13,7 @@ import {
 	type Conversation,
 	type ConversationId,
 	defineDoc,
+	type EntryId,
 	type Extension,
 	type Harness,
 	LiveDoc,
@@ -122,7 +123,7 @@ function message(m: Message | undefined): AgentMessage | undefined {
 	if (m?.role === "user") {
 		return create(AgentMessageSchema, { role: AiRole.USER, text: userText(m), time: timestampFromMs(m.timestamp) });
 	}
-	if (m?.role === "assistant" && m.stopReason === "stop") {
+	if (m?.role === "assistant" && (m.stopReason === "stop" || m.stopReason === "toolUse")) {
 		const t = text(m);
 		if (t !== "") return create(AgentMessageSchema, { role: AiRole.ASSISTANT, text: t, time: timestampFromMs(m.timestamp) });
 	}
@@ -142,12 +143,39 @@ async function messages(conversation: Conversation, max: number): Promise<AgentM
 			else if (entry.kind === addedKind) models = entry.model ?? [];
 			for (const m of [...models].reverse()) {
 				const shown = message(m);
-				if (shown) out.push(shown);
+				if (!shown) continue;
+				// What a run's model said before calling tools leads its next answer, as one message.
+				const newer = out.at(-1);
+				if (m.role === "assistant" && m.stopReason === "toolUse" && newer?.role === AiRole.ASSISTANT) newer.text = joined([shown.text, newer.text]);
+				else out.push(shown);
 			}
 		}
 		cursor = page.next;
 	} while (cursor !== undefined && out.length < max);
 	return out.slice(0, max).reverse();
+}
+
+/** joined puts together the texts of a run's answers, one paragraph each. */
+function joined(texts: readonly string[]): string {
+	return texts
+		.map((t) => t.trim())
+		.filter((t) => t !== "")
+		.join("\n\n");
+}
+
+/** answers returns what the model said after the user's entry, oldest first: the answers of a run's model calls. */
+async function answers(conversation: Conversation, after: EntryId): Promise<AssistantMessage[]> {
+	const out: AssistantMessage[] = [];
+	let cursor;
+	do {
+		const page = await conversation.entries({ minEntryId: (after + 1) as EntryId, order: "ascending" }, 200, cursor, BACKGROUND_CONTEXT);
+		for (const entry of page.items) {
+			const m = AssistantEntry.is(entry) ? entry.model?.[0] : undefined;
+			if (m?.role === "assistant" && message(m)) out.push(m);
+		}
+		cursor = page.next;
+	} while (cursor !== undefined);
+	return out;
 }
 
 /** What sessions runs with. */
@@ -226,7 +254,7 @@ export function sessions(o: SessionsOptions): Sessions {
 		return { conversation, submission };
 	};
 
-	/** answer returns the answer a submission settled with. */
+	/** answer returns the answer a submission settled with: what each of its run's model calls said. */
 	const answer = async (id: string, conversation: Conversation, settled: SettledSubmissionRecord): Promise<SendAgentMessageResponse> => {
 		await touch(id);
 		if (settled.type !== "input" || settled.status !== "done") {
@@ -236,8 +264,13 @@ export function sessions(o: SessionsOptions): Sessions {
 		const m = entry?.model?.[0];
 		if (m?.role !== "assistant") throw new ConnectError("the answer is missing", Code.Internal);
 		const a = m as AssistantMessage;
+		const said = await answers(conversation, settled.entry);
 		return create(SendAgentMessageResponseSchema, {
-			answer: create(AgentMessageSchema, { role: AiRole.ASSISTANT, text: text(a), time: timestampFromMs(a.timestamp) }),
+			answer: create(AgentMessageSchema, {
+				role: AiRole.ASSISTANT,
+				text: said.length > 0 ? joined(said.map(text)) : text(a),
+				time: timestampFromMs(a.timestamp),
+			}),
 			usage: usage(a.usage),
 		});
 	};
@@ -350,22 +383,37 @@ export function sessions(o: SessionsOptions): Sessions {
 			if (!msg) throw new ConnectError("message is required", Code.InvalidArgument);
 			const context = withAbortSignal(ctx.signal, BACKGROUND_CONTEXT);
 			const { conversation, submission } = await submit(msg, context);
-			// The run the submission started presents its answer in progress.
+			// The run the submission started presents its answer in progress,
+			// led by what its earlier model calls said before calling tools.
 			const watch = await harness.watchDoc(LiveDoc, conversationId(msg.sessionId), context);
 			let shown = "";
+			let before = "";
+			let rounds = false;
 			let pending: string | undefined;
 			let wake = () => {};
-			const show = (live: Readonly<LiveState> | null) => {
+			const show = async (live: Readonly<LiveState> | null) => {
+				if (live?.tools?.length) rounds = true;
 				const partial = live?.generation?.message;
-				const t = partial ? text(partial as AssistantMessage) : "";
-				if (t !== "" && t !== shown) {
+				let t = partial ? text(partial as AssistantMessage) : "";
+				if (t === "") return;
+				if (rounds) {
+					rounds = false;
+					const s = await submission.status(context);
+					if (s.type === "input" && s.entry !== undefined) before = joined((await answers(conversation, s.entry)).map(text));
+				}
+				if (before !== "") t = `${before}\n\n${t.trimStart()}`;
+				if (t !== shown) {
 					shown = pending = t;
 					wake();
 				}
 			};
 			if (watch) {
-				show(watch.value);
-				watch.start(async (live) => show(live));
+				// Updates are shown in turn, as a tool round's are read.
+				let shows = show(watch.value).catch(report);
+				watch.start(async (live) => {
+					shows = shows.then(() => show(live)).catch(report);
+					await shows;
+				});
 			}
 			let settled: { value: SendAgentMessageResponse } | { error: unknown } | undefined;
 			submission.wait(context).then(

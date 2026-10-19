@@ -6,7 +6,7 @@ import { DatabaseSync } from "node:sqlite";
 import { create } from "@bufbuild/protobuf";
 import { Code, ConnectError, createClient, createRouterTransport } from "@connectrpc/connect";
 import { createProvider, type OAuthAuth, type Provider } from "@earendil-works/pi-ai";
-import { fauxAssistantMessage, fauxProvider, fauxToolCall } from "@earendil-works/pi-ai/providers/faux";
+import { fauxAssistantMessage, fauxProvider, fauxText, fauxToolCall } from "@earendil-works/pi-ai/providers/faux";
 import {
 	AgentSessionService,
 	AiCredential,
@@ -369,6 +369,40 @@ describe("host tools", () => {
 		description: "Search the library.",
 		parametersJson: JSON.stringify({ type: "object", properties: { query: { type: "string" } }, required: ["query"] }),
 	};
+
+	test("answer with what every model call said", async () => {
+		const faux = fauxProvider({ tokenSize: { min: 1, max: 1 }, tokensPerSecond: 50 });
+		faux.setResponses([
+			fauxAssistantMessage([fauxText("Let me look."), fauxToolCall("search_library", { query: "inception" })], { stopReason: "toolUse" }),
+			fauxAssistantMessage("It is in your library."),
+		]);
+		const { agents } = await start([faux.provider]);
+		const { session } = await agents.createAgentSession({ provider: "faux", model: "faux-1", tools: [searchTool], owner: "u1" });
+		const watching = new AbortController();
+		const host = (async () => {
+			for await (const r of agents.watchAgentToolCalls({}, { signal: watching.signal })) {
+				await agents.submitAgentToolResult({ callId: r.call!.id, text: "Inception (2010)" });
+			}
+		})().catch(() => {});
+		const texts: string[] = [];
+		let done;
+		for await (const r of agents.streamAgentMessage({ message: { sessionId: session!.id, text: "Do I have Inception?" } })) {
+			if (r.event.case === "text") texts.push(r.event.value);
+			else if (r.event.case === "done") done = r.event.value;
+		}
+		watching.abort();
+		await host;
+		const want = "Let me look.\n\nIt is in your library.";
+		expect(done?.answer?.text).toBe(want);
+		// The second call's answer follows the first's.
+		expect(texts.some((t) => t.startsWith("Let me look.\n\nIt"))).toBe(true);
+		for (const t of texts) expect(want.startsWith(t)).toBe(true);
+		const got = await agents.getAgentSession({ id: session!.id });
+		expect(got.messages.map((m) => [m.role, m.text])).toEqual([
+			[AiRole.USER, "Do I have Inception?"],
+			[AiRole.ASSISTANT, want],
+		]);
+	});
 
 	test("are run by the host", async () => {
 		const faux = fauxProvider();
