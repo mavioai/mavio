@@ -65,6 +65,7 @@ import dev.mavio.ui.Artwork
 import dev.mavio.ui.ButtonKind
 import dev.mavio.ui.CatalogFilters
 import dev.mavio.ui.CatalogRow
+import dev.mavio.ui.Credit
 import dev.mavio.ui.LocalDiscover
 import dev.mavio.ui.MavioButton
 import dev.mavio.ui.MavioIcon
@@ -73,19 +74,22 @@ import dev.mavio.ui.R
 import dev.mavio.ui.Shelf
 import dev.mavio.ui.StatusView
 import dev.mavio.ui.blurAvailable
+import dev.mavio.ui.countryText
+import dev.mavio.ui.crewLabels
+import dev.mavio.ui.crewRank
+import dev.mavio.ui.dayText
 import dev.mavio.ui.discoverLanguage
 import dev.mavio.ui.discovered
 import dev.mavio.ui.languageName
 import dev.mavio.ui.minutesText
+import dev.mavio.ui.moneyText
+import dev.mavio.ui.productionStatus
+import dev.mavio.ui.seasonName
 import dev.mavio.ui.sized
 import dev.mavio.ui.statusLabel
 import dev.mavio.ui.text
 import dev.mavio.ui.theme
-import java.text.NumberFormat
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import java.time.format.FormatStyle
-import java.util.Currency
+import dev.mavio.ui.titleCredits
 import java.util.Locale
 import mavio.acquisition.v1.Discover.GetCollectionResponse
 import mavio.acquisition.v1.Discover.GetRatingsResponse
@@ -94,7 +98,6 @@ import mavio.acquisition.v1.Discover.GetTitleResponse
 import mavio.acquisition.v1.Discover.MediaStatus
 import mavio.acquisition.v1.Discover.SeasonStatus
 import mavio.acquisition.v1.Discover.Title
-import mavio.acquisition.v1.Discover.TitleCredit
 import mavio.acquisition.v1.Profile.MediaKind
 import mavio.acquisition.v1.getCollectionRequest
 import mavio.acquisition.v1.getRatingsRequest
@@ -145,19 +148,6 @@ fun TitleScreen(route: Route.Title) {
     var attempt by remember { mutableIntStateOf(0) }
     val result by discoveredTitle(route.serverId, route.mediaKind, route.tmdbId, attempt)
     Loaded(result, { !it.hasTitle() }, { attempt++ }) { TitleDetails(route.serverId, it.title) }
-}
-
-/** A date of the calendar as TMDB gives it, in the UI's language. */
-internal fun dayText(iso: String): String? = runCatching {
-    LocalDate.parse(iso.take(10)).format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM))
-}.getOrNull()
-
-/** An amount of US dollars, as TMDB gives budgets and revenues, or null when unknown. */
-private fun moneyText(dollars: Long): String? = dollars.takeIf { it > 0 }?.let {
-    NumberFormat.getCurrencyInstance(Locale.getDefault()).apply {
-        currency = Currency.getInstance("USD")
-        maximumFractionDigits = 0
-    }.format(it)
 }
 
 /** Opens the popular titles of a kind filtered alike; null without such a catalog. */
@@ -411,60 +401,6 @@ internal fun DiscoverHero(backdrop: String, poster: String, wide: WideHero, cont
 
 // Overview
 
-/** A credit of a discovered title. */
-internal data class Credit(val name: String, val photo: String?, val kind: CreditKind, val role: String, val order: Int, val tmdbId: Int) {
-    val isCast: Boolean get() = kind == CreditKind.CREDIT_KIND_ACTOR || kind == CreditKind.CREDIT_KIND_GUEST_STAR
-}
-
-/** A title's credits, each of the cast once. */
-internal fun titleCredits(credits: List<TitleCredit>): List<Credit> {
-    val seen = HashSet<String>()
-    return credits
-        .filter { c ->
-            val cast = c.kind == CreditKind.CREDIT_KIND_ACTOR || c.kind == CreditKind.CREDIT_KIND_GUEST_STAR
-            !cast || seen.add(c.externalIdsMap["tmdb"] ?: c.name)
-        }
-        .map { c ->
-            Credit(c.name, sized(c.imageUrl, 185), c.kind, c.role, c.order, c.externalIdsMap["tmdb"]?.toIntOrNull() ?: 0)
-        }
-}
-
-/** The crew's jobs, in the order the pages list them. */
-internal val crewLabels = listOf(
-    CreditKind.CREDIT_KIND_CREATOR to R.string.item_creators,
-    CreditKind.CREDIT_KIND_DIRECTOR to R.string.item_director,
-    CreditKind.CREDIT_KIND_WRITER to R.string.item_writers,
-    CreditKind.CREDIT_KIND_AUTHOR to R.string.credits_authors,
-    CreditKind.CREDIT_KIND_PRODUCER to R.string.item_producers,
-    CreditKind.CREDIT_KIND_COMPOSER to R.string.item_music,
-    CreditKind.CREDIT_KIND_CONDUCTOR to R.string.credits_conductors,
-    CreditKind.CREDIT_KIND_LYRICIST to R.string.credits_lyricists,
-    CreditKind.CREDIT_KIND_ARTIST to R.string.credits_artists,
-    CreditKind.CREDIT_KIND_NARRATOR to R.string.credits_narrators,
-    CreditKind.CREDIT_KIND_OTHER to R.string.credits_other,
-)
-
-/** The jobs Seerr shows first of a title's crew, in its order, after a series' creators. */
-private val crewJobs = listOf(
-    "Director", "Creator", "Screenplay", "Writer", "Original Music Composer", "Composer", "Editor", "Producer", "Co-Producer",
-    "Executive Producer", "Animation",
-)
-
-/** The job of a credit without a more specific one. */
-private val kindJobs = mapOf(
-    CreditKind.CREDIT_KIND_DIRECTOR to "Director",
-    CreditKind.CREDIT_KIND_CREATOR to "Creator",
-    CreditKind.CREDIT_KIND_WRITER to "Writer",
-    CreditKind.CREDIT_KIND_COMPOSER to "Composer",
-    CreditKind.CREDIT_KIND_PRODUCER to "Producer",
-)
-
-private fun crewRank(c: Credit): Int {
-    if (c.kind == CreditKind.CREDIT_KIND_CREATOR) return -1
-    val i = crewJobs.indexOf(c.role.ifEmpty { kindJobs[c.kind].orEmpty() })
-    return if (i < 0) crewJobs.size else i
-}
-
 /**
  * The tagline, the overview, the leading crew as Seerr's (six of them, a
  * series' creators first), the link to the whole crew, the keywords, and
@@ -629,27 +565,6 @@ private fun FactValue(text: String, onClick: (() -> Unit)? = null) {
         textAlign = TextAlign.End,
     )
 }
-
-/** The name of an ISO 3166-1 country in the UI's language, after its flag. */
-private fun countryText(code: String): String {
-    if (!Regex("^[A-Z]{2}$").matches(code)) return code
-    val flag = code.map { Character.toChars(0x1F1A5 + it.code).concatToString() }.joinToString("")
-    return "$flag ${Locale("", code).getDisplayCountry(Locale.getDefault()).ifEmpty { code }}"
-}
-
-@Composable
-private fun productionStatus(s: ProductionStatus): String? = when (s) {
-    ProductionStatus.PRODUCTION_STATUS_RUMORED -> R.string.discover_status_rumored
-    ProductionStatus.PRODUCTION_STATUS_PLANNED -> R.string.discover_status_planned
-    ProductionStatus.PRODUCTION_STATUS_IN_PRODUCTION -> R.string.discover_status_in_production
-    ProductionStatus.PRODUCTION_STATUS_POST_PRODUCTION -> R.string.discover_status_post_production
-    ProductionStatus.PRODUCTION_STATUS_RELEASED -> R.string.discover_status_released
-    ProductionStatus.PRODUCTION_STATUS_CANCELED -> R.string.discover_status_canceled
-    ProductionStatus.PRODUCTION_STATUS_PILOT -> R.string.discover_status_pilot
-    ProductionStatus.PRODUCTION_STATUS_RETURNING -> R.string.discover_status_returning
-    ProductionStatus.PRODUCTION_STATUS_ENDED -> R.string.discover_status_ended
-    else -> null
-}?.let { stringResource(it) }
 
 /**
  * A title's facts as Seerr's: the ratings, original title, status, dates,
@@ -883,10 +798,6 @@ private fun RatingLink(label: String, score: String, onClick: () -> Unit) {
 }
 
 // Seasons
-
-@Composable
-private fun seasonName(s: SeasonStatus): String =
-    if (s.seasonNumber == 0) stringResource(R.string.discover_specials) else stringResource(R.string.discover_season, s.seasonNumber.toString())
 
 /**
  * A series' seasons with what the server has of each, as Seerr lists them:
