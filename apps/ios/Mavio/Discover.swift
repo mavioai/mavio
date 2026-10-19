@@ -265,9 +265,8 @@ struct CatalogShelf: View {
                 }
             } else {
                 Shelf(query.title) {
-                    ForEach(0..<6, id: \.self) { _ in CardPlaceholder() }
+                    ForEach(0..<8, id: \.self) { _ in CardPlaceholder() }
                 }
-                .redacted(reason: .placeholder)
             }
         }
         .task(id: query) {

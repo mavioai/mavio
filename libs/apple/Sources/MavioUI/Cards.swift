@@ -24,7 +24,9 @@ public struct ArtworkView: View {
     public var body: some View {
         // The fill takes the size offered; an image of other proportions,
         // filling it, cannot grow it.
-        theme.colors.surfaceRaised.overlay {
+        // The fill of controls, which shows on the background of either
+        // theme, as the raised surface does not on the light one's.
+        theme.colors.fill.overlay {
             if let url, let parsed = URL(string: url) {
                 LazyImage(url: parsed, transaction: Transaction(animation: .easeOut(duration: MavioDuration.slow))) {
                     state in
@@ -225,7 +227,9 @@ public func isWide(_ card: Card) -> Bool {
     }
 }
 
-/// A square-ish placeholder of a card loading.
+/// A card loading, as the web UI's: its artwork's shape and a bar where
+/// its title will be, both of the fill artwork loads over, and as
+/// tall as the card, so that nothing moves when it arrives.
 public struct CardPlaceholder: View {
     private let wide: Bool
     @Environment(\.theme) private var theme
@@ -237,15 +241,23 @@ public struct CardPlaceholder: View {
 
     /// The placeholder.
     public var body: some View {
+        let width = wide ? theme.layout.thumbnail : theme.layout.poster
         VStack(alignment: .leading, spacing: MavioSpacing.s4) {
             RoundedRectangle(cornerRadius: MavioRadius.md)
-                .fill(theme.colors.surfaceRaised)
+                .fill(theme.colors.fill)
                 .aspectRatio(wide ? 16 / 9 : 2 / 3, contentMode: .fit)
-            RoundedRectangle(cornerRadius: MavioRadius.sm)
-                .fill(theme.colors.surfaceRaised)
-                .frame(width: 80, height: 12)
+            // The title's and the subtitle's lines, the title's a bar.
+            Text(" ").type(theme.type.headline)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .overlay(alignment: .leading) {
+                    RoundedRectangle(cornerRadius: MavioRadius.sm)
+                        .fill(theme.colors.fill)
+                        .frame(width: width * 0.75, height: 14)
+                }
+            Text(" ").type(theme.type.footnote)
         }
-        .frame(width: wide ? theme.layout.thumbnail : theme.layout.poster)
+        .frame(width: width)
+        .accessibilityHidden(true)
     }
 }
 

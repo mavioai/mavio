@@ -76,7 +76,7 @@ struct RowView: View {
             .padding(.vertical, MavioSpacing.s12)
         case .loading:
             Shelf(row.serverName ?? "") {
-                ForEach(0..<6, id: \.self) { _ in CardPlaceholder() }
+                ForEach(0..<8, id: \.self) { _ in CardPlaceholder() }
             }
             .redacted(reason: .placeholder)
         case let .items(cards):
