@@ -276,6 +276,10 @@ message Filter {
   bool favorite = 2;
   // Only items of this genre.
   string genre = 3;
+  // Only items with this keyword.
+  string tag = 4;
+  // Only items of this studio or network.
+  string studio = 5;
 }
 
 // An item's details; answered with Details.

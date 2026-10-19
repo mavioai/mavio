@@ -4451,6 +4451,8 @@ type Filter struct {
 	xxx_hidden_Played      bool                   `protobuf:"varint,1,opt,name=played"`
 	xxx_hidden_Favorite    bool                   `protobuf:"varint,2,opt,name=favorite"`
 	xxx_hidden_Genre       string                 `protobuf:"bytes,3,opt,name=genre"`
+	xxx_hidden_Tag         string                 `protobuf:"bytes,4,opt,name=tag"`
+	xxx_hidden_Studio      string                 `protobuf:"bytes,5,opt,name=studio"`
 	XXX_raceDetectHookData protoimpl.RaceDetectHookData
 	XXX_presence           [1]uint32
 	unknownFields          protoimpl.UnknownFields
@@ -4503,9 +4505,23 @@ func (x *Filter) GetGenre() string {
 	return ""
 }
 
+func (x *Filter) GetTag() string {
+	if x != nil {
+		return x.xxx_hidden_Tag
+	}
+	return ""
+}
+
+func (x *Filter) GetStudio() string {
+	if x != nil {
+		return x.xxx_hidden_Studio
+	}
+	return ""
+}
+
 func (x *Filter) SetPlayed(v bool) {
 	x.xxx_hidden_Played = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 3)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 5)
 }
 
 func (x *Filter) SetFavorite(v bool) {
@@ -4514,6 +4530,14 @@ func (x *Filter) SetFavorite(v bool) {
 
 func (x *Filter) SetGenre(v string) {
 	x.xxx_hidden_Genre = v
+}
+
+func (x *Filter) SetTag(v string) {
+	x.xxx_hidden_Tag = v
+}
+
+func (x *Filter) SetStudio(v string) {
+	x.xxx_hidden_Studio = v
 }
 
 func (x *Filter) HasPlayed() bool {
@@ -4537,6 +4561,10 @@ type Filter_builder struct {
 	Favorite bool
 	// Only items of this genre.
 	Genre string
+	// Only items with this keyword.
+	Tag string
+	// Only items of this studio or network.
+	Studio string
 }
 
 func (b0 Filter_builder) Build() *Filter {
@@ -4544,11 +4572,13 @@ func (b0 Filter_builder) Build() *Filter {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Played != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 3)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 5)
 		x.xxx_hidden_Played = *b.Played
 	}
 	x.xxx_hidden_Favorite = b.Favorite
 	x.xxx_hidden_Genre = b.Genre
+	x.xxx_hidden_Tag = b.Tag
+	x.xxx_hidden_Studio = b.Studio
 	return m0
 }
 
@@ -11444,11 +11474,13 @@ const file_mavio_capi_v1_capi_proto_rawDesc = "" +
 	"\x04sort\x18\x03 \x01(\x0e2\x13.mavio.capi.v1.SortR\x04sort\x12-\n" +
 	"\x06filter\x18\x04 \x01(\v2\x15.mavio.capi.v1.FilterR\x06filter\x12\x16\n" +
 	"\x06offset\x18\x05 \x01(\rR\x06offset\x12\x14\n" +
-	"\x05limit\x18\x06 \x01(\rR\x05limit\"Y\n" +
+	"\x05limit\x18\x06 \x01(\rR\x05limit\"\x83\x01\n" +
 	"\x06Filter\x12\x1d\n" +
 	"\x06played\x18\x01 \x01(\bB\x05\xaa\x01\x02\b\x01R\x06played\x12\x1a\n" +
 	"\bfavorite\x18\x02 \x01(\bR\bfavorite\x12\x14\n" +
-	"\x05genre\x18\x03 \x01(\tR\x05genre\"B\n" +
+	"\x05genre\x18\x03 \x01(\tR\x05genre\x12\x10\n" +
+	"\x03tag\x18\x04 \x01(\tR\x03tag\x12\x16\n" +
+	"\x06studio\x18\x05 \x01(\tR\x06studio\"B\n" +
 	"\n" +
 	"GetDetails\x12\x1b\n" +
 	"\tserver_id\x18\x01 \x01(\tR\bserverId\x12\x17\n" +

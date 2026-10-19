@@ -9784,6 +9784,14 @@ pub struct FilterView<'a> {
     ///
     /// Field 3: `genre`
     pub genre: &'a str,
+    /// Only items with this keyword.
+    ///
+    /// Field 4: `tag`
+    pub tag: &'a str,
+    /// Only items of this studio or network.
+    ///
+    /// Field 5: `studio`
+    pub studio: &'a str,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for FilterView<'a> {
@@ -9837,6 +9845,20 @@ impl<'a> ::buffa::MessageView<'a> for FilterView<'a> {
                 )?;
                 view.genre = ::buffa::types::borrow_str(&mut cur)?;
             }
+            4u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.tag = ::buffa::types::borrow_str(&mut cur)?;
+            }
+            5u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.studio = ::buffa::types::borrow_str(&mut cur)?;
+            }
             _ => {
                 ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
                 let span_len = before_tag.len() - cur.len();
@@ -9862,6 +9884,8 @@ impl<'a> ::buffa::MessageView<'a> for FilterView<'a> {
             played: self.played,
             favorite: self.favorite,
             genre: self.genre.to_string(),
+            tag: self.tag.to_string(),
+            studio: self.studio.to_string(),
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -9882,6 +9906,12 @@ impl<'a> ::buffa::ViewEncode<'a> for FilterView<'a> {
         if !self.genre.is_empty() {
             size += 1u64 + ::buffa::types::string_encoded_len(&self.genre) as u64;
         }
+        if !self.tag.is_empty() {
+            size += 1u64 + ::buffa::types::string_encoded_len(&self.tag) as u64;
+        }
+        if !self.studio.is_empty() {
+            size += 1u64 + ::buffa::types::string_encoded_len(&self.studio) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -9901,6 +9931,12 @@ impl<'a> ::buffa::ViewEncode<'a> for FilterView<'a> {
         }
         if !self.genre.is_empty() {
             ::buffa::types::put_string_field(3u32, &self.genre, buf);
+        }
+        if !self.tag.is_empty() {
+            ::buffa::types::put_string_field(4u32, &self.tag, buf);
+        }
+        if !self.studio.is_empty() {
+            ::buffa::types::put_string_field(5u32, &self.studio, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -10009,6 +10045,20 @@ impl FilterOwnedView {
     #[must_use]
     pub fn genre(&self) -> &'_ str {
         self.0.reborrow().genre
+    }
+    /// Only items with this keyword.
+    ///
+    /// Field 4: `tag`
+    #[must_use]
+    pub fn tag(&self) -> &'_ str {
+        self.0.reborrow().tag
+    }
+    /// Only items of this studio or network.
+    ///
+    /// Field 5: `studio`
+    #[must_use]
+    pub fn studio(&self) -> &'_ str {
+        self.0.reborrow().studio
     }
 }
 impl ::core::convert::From<::buffa::OwnedView<FilterView<'static>>> for FilterOwnedView {

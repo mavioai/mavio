@@ -303,7 +303,8 @@ pub(crate) fn filter(f: Option<&pb::Filter>) -> Filter {
         played: f.played,
         favorite: f.favorite,
         genre: Some(f.genre.clone()).filter(|g| !g.is_empty()),
-        ..Filter::default()
+        tag: Some(f.tag.clone()).filter(|t| !t.is_empty()),
+        studio: Some(f.studio.clone()).filter(|s| !s.is_empty()),
     }
 }
 

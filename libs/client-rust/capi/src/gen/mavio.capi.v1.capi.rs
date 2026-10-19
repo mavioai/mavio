@@ -5739,6 +5739,14 @@ pub struct Filter {
     ///
     /// Field 3: `genre`
     pub genre: ::buffa::alloc::string::String,
+    /// Only items with this keyword.
+    ///
+    /// Field 4: `tag`
+    pub tag: ::buffa::alloc::string::String,
+    /// Only items of this studio or network.
+    ///
+    /// Field 5: `studio`
+    pub studio: ::buffa::alloc::string::String,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -5748,6 +5756,8 @@ impl ::core::fmt::Debug for Filter {
             .field("played", &self.played)
             .field("favorite", &self.favorite)
             .field("genre", &self.genre)
+            .field("tag", &self.tag)
+            .field("studio", &self.studio)
             .finish()
     }
 }
@@ -5796,6 +5806,12 @@ impl ::buffa::Message for Filter {
         if !self.genre.is_empty() {
             size += 1u64 + ::buffa::types::string_encoded_len(&self.genre) as u64;
         }
+        if !self.tag.is_empty() {
+            size += 1u64 + ::buffa::types::string_encoded_len(&self.tag) as u64;
+        }
+        if !self.studio.is_empty() {
+            size += 1u64 + ::buffa::types::string_encoded_len(&self.studio) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -5814,6 +5830,12 @@ impl ::buffa::Message for Filter {
         }
         if !self.genre.is_empty() {
             ::buffa::types::put_string_field(3u32, &self.genre, buf);
+        }
+        if !self.tag.is_empty() {
+            ::buffa::types::put_string_field(4u32, &self.tag, buf);
+        }
+        if !self.studio.is_empty() {
+            ::buffa::types::put_string_field(5u32, &self.studio, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -5851,6 +5873,20 @@ impl ::buffa::Message for Filter {
                 )?;
                 ::buffa::types::merge_string(&mut self.genre, buf)?;
             }
+            4u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(&mut self.tag, buf)?;
+            }
+            5u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(&mut self.studio, buf)?;
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -5862,6 +5898,8 @@ impl ::buffa::Message for Filter {
         self.played = ::core::option::Option::None;
         self.favorite = false;
         self.genre.clear();
+        self.tag.clear();
+        self.studio.clear();
         self.__buffa_unknown_fields.clear();
     }
 }
