@@ -252,13 +252,15 @@ struct PlayerScreen: View {
             artwork = (details.card.thumb ?? details.card.poster).flatMap { URL(string: $0.url) }
             player.nowPlaying.next = next.map { episode in { play(episode) } }
         }
+        let local = model.server(request.serverId).map { isLocalAddress(address: $0.address) } ?? false
         do {
             let session = try await model.client.play(
                 serverId: request.serverId, itemId: request.itemId,
                 capabilities: DeviceProfile.capabilities(airPlay: airPlay),
                 options: PlaybackOptions(
                     mediaSourceId: source?.mediaSourceId ?? request.mediaSourceId, audioStreamIndex: audio,
-                    subtitleStreamIndex: subtitle, maxBitrate: quality.bitrate, startPosition: position, download: false
+                    subtitleStreamIndex: subtitle, maxBitrate: quality.bitrate(local: local), startPosition: position,
+                    download: false
                 ))
             let info = session.info()
             self.session = session
@@ -709,11 +711,12 @@ enum PlaybackQuality: String, CaseIterable {
     /// Where this device keeps it.
     static let key = "player.quality"
 
-    /// The bitrate it limits the stream to.
-    var bitrate: Int64 {
+    /// The bitrate it limits the stream to: Auto sends more from a server on
+    /// the local network than over the internet.
+    func bitrate(local: Bool) -> Int64 {
         switch self {
         case .original: 200_000_000
-        case .auto: 40_000_000
+        case .auto: local ? 100_000_000 : 40_000_000
         case .p1080: 10_000_000
         case .p720: 4_000_000
         case .p480: 1_500_000
