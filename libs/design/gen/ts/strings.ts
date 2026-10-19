@@ -475,6 +475,8 @@ export type MessageKey =
   | 'plugins.containerUnset'
   | 'plugins.containerManaged'
   | 'plugins.containerExternal'
+  | 'plugins.containerRequired'
+  | 'plugins.containerOptional'
   | 'plugins.containerUseGpu'
   | 'plugins.containerAddress'
   | 'plugins.containerPulling'
@@ -2404,6 +2406,8 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "plugins.containerUnset": "Not Set",
     "plugins.containerManaged": "Run by the Server",
     "plugins.containerExternal": "At an Address",
+    "plugins.containerRequired": "Required",
+    "plugins.containerOptional": "Optional",
     "plugins.containerUseGpu": "Use GPU",
     "plugins.containerAddress": "Address",
     "plugins.containerPulling": "Downloading",
@@ -4331,6 +4335,8 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "plugins.containerUnset": "未设置",
     "plugins.containerManaged": "由服务端运行",
     "plugins.containerExternal": "使用地址",
+    "plugins.containerRequired": "必需",
+    "plugins.containerOptional": "可选",
     "plugins.containerUseGpu": "使用 GPU",
     "plugins.containerAddress": "地址",
     "plugins.containerPulling": "正在下载",

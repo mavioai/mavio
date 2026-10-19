@@ -475,6 +475,8 @@
   "plugins.containerUnset": "未设置",
   "plugins.containerManaged": "由服务端运行",
   "plugins.containerExternal": "使用地址",
+  "plugins.containerRequired": "必需",
+  "plugins.containerOptional": "可选",
   "plugins.containerUseGpu": "使用 GPU",
   "plugins.containerAddress": "地址",
   "plugins.containerPulling": "正在下载",

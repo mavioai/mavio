@@ -485,6 +485,8 @@
     <string name="plugins_container_unset">未设置</string>
     <string name="plugins_container_managed">由服务端运行</string>
     <string name="plugins_container_external">使用地址</string>
+    <string name="plugins_container_required">必需</string>
+    <string name="plugins_container_optional">可选</string>
     <string name="plugins_container_use_gpu">使用 GPU</string>
     <string name="plugins_container_address">地址</string>
     <string name="plugins_container_pulling">正在下载</string>

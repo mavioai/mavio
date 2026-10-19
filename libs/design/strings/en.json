@@ -476,6 +476,8 @@
   "plugins.containerUnset": { "message": "Not Set", "description": "A container dependency nobody has chosen how to run." },
   "plugins.containerManaged": { "message": "Run by the Server", "description": "A container dependency the server runs on its container engine." },
   "plugins.containerExternal": { "message": "At an Address", "description": "A container dependency run elsewhere, reached at an address." },
+  "plugins.containerRequired": { "message": "Required", "description": "Tag of a container dependency the plugin cannot work without." },
+  "plugins.containerOptional": { "message": "Optional", "description": "Tag of a container dependency the plugin can work without." },
   "plugins.containerUseGpu": { "message": "Use GPU", "description": "Switch letting a container dependency the server runs use an NVIDIA GPU." },
   "plugins.containerAddress": { "message": "Address", "description": "Field of the address of a container dependency run elsewhere." },
   "plugins.containerPulling": { "message": "Downloading", "description": "State of a container dependency whose image is being downloaded." },

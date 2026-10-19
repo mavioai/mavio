@@ -621,7 +621,17 @@ function ContainerDependency({ server, id, c }: { server: ServerEntry; id: strin
     );
   return (
     <Group>
-      <Row label={d.name} detail={[d.description, st?.error ? `${state}: ${st.error}` : state].filter(Boolean).join(" · ")}>
+      <Row
+        label={
+          <span className="flex items-center gap-2">
+            {d.name}
+            <span className="rounded-full bg-fill px-2 py-0.5 type-footnote text-text-secondary">
+              {t(d.required ? "plugins.containerRequired" : "plugins.containerOptional")}
+            </span>
+          </span>
+        }
+        detail={[d.description, st?.error ? `${state}: ${st.error}` : state].filter(Boolean).join(" · ")}
+      >
         <Select
           value={String(chosen)}
           label={t("plugins.containerMode")}

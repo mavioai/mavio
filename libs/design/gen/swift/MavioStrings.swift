@@ -1533,6 +1533,12 @@ public enum MavioStrings {
     /// A container dependency run elsewhere, reached at an address.
     public static var pluginsContainerExternal: String { NSLocalizedString("plugins.containerExternal", bundle: .module, comment: "") }
 
+    /// Tag of a container dependency the plugin cannot work without.
+    public static var pluginsContainerRequired: String { NSLocalizedString("plugins.containerRequired", bundle: .module, comment: "") }
+
+    /// Tag of a container dependency the plugin can work without.
+    public static var pluginsContainerOptional: String { NSLocalizedString("plugins.containerOptional", bundle: .module, comment: "") }
+
     /// Switch letting a container dependency the server runs use an NVIDIA GPU.
     public static var pluginsContainerUseGpu: String { NSLocalizedString("plugins.containerUseGpu", bundle: .module, comment: "") }
 

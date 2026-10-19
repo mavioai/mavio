@@ -8569,6 +8569,42 @@
         }
       }
     },
+    "plugins.containerRequired": {
+      "comment": "Tag of a container dependency the plugin cannot work without.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Required"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "必需"
+          }
+        }
+      }
+    },
+    "plugins.containerOptional": {
+      "comment": "Tag of a container dependency the plugin can work without.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Optional"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "可选"
+          }
+        }
+      }
+    },
     "plugins.containerUseGpu": {
       "comment": "Switch letting a container dependency the server runs use an NVIDIA GPU.",
       "extractionState": "manual",

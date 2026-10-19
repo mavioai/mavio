@@ -960,6 +960,10 @@
     <string name="plugins_container_managed">Run by the Server</string>
     <!-- A container dependency run elsewhere, reached at an address. -->
     <string name="plugins_container_external">At an Address</string>
+    <!-- Tag of a container dependency the plugin cannot work without. -->
+    <string name="plugins_container_required">Required</string>
+    <!-- Tag of a container dependency the plugin can work without. -->
+    <string name="plugins_container_optional">Optional</string>
     <!-- Switch letting a container dependency the server runs use an NVIDIA GPU. -->
     <string name="plugins_container_use_gpu">Use GPU</string>
     <!-- Field of the address of a container dependency run elsewhere. -->
