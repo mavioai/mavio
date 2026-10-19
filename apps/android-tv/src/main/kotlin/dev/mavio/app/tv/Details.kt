@@ -199,8 +199,10 @@ private fun DetailsContent(model: AppModel, details: Details, page: Page.Details
     val card = details.card
     val pages = LocalPages.current
     val signedIn by model.signedIn.collectAsStateWithLifecycle()
-    // The files of this server; the first plays.
-    val source = details.sources.firstOrNull { it.serverId == card.serverId }
+    // The files of this server, then the same title on the user's other servers.
+    val own = details.sources.filter { it.serverId == card.serverId }
+    val copies = details.sources.filter { it.serverId != card.serverId }
+    val source = own.getOrNull(page.sourceIndex) ?: own.firstOrNull()
     val short = episodeShort()
     val next = when (card.kind) {
         CardKind.SERIES, CardKind.SEASON -> details.next?.let { e ->
@@ -212,7 +214,8 @@ private fun DetailsContent(model: AppModel, details: Details, page: Page.Details
     }
     val play = { n: NextUp, start: Duration? ->
         if (n.own && source != null) {
-            pages.play(source.serverId, source.itemId, card.title, source.mediaSourceId, start)
+            val here = source.itemId == card.itemId
+            pages.play(source.serverId, source.itemId, card.title, source.mediaSourceId, if (here) start else null)
         } else {
             pages.play(card.serverId, n.itemId, n.name, null, start)
         }
@@ -234,7 +237,7 @@ private fun DetailsContent(model: AppModel, details: Details, page: Page.Details
                     // Focus on the actions shows the page from its top.
                     Modifier.onFocusChanged { if (it.hasFocus) scope.launch { page.list.animateScrollToItem(0) } },
                 ) {
-                    Actions(model, details, next, focus, play)
+                    Actions(model, details, next, own, copies, source, { page.sourceIndex = own.indexOf(it) }, focus, play)
                 }
             }
             when (card.kind) {
@@ -431,7 +434,17 @@ private fun episodeShort(): (Episode) -> String? {
  * progress, the episode's name, the time left and when it would end.
  */
 @Composable
-private fun Actions(model: AppModel, details: Details, next: NextUp?, focus: FocusMemory, play: (NextUp, Duration?) -> Unit) {
+private fun Actions(
+    model: AppModel,
+    details: Details,
+    next: NextUp?,
+    own: List<Source>,
+    copies: List<Source>,
+    source: Source?,
+    onSource: (Source) -> Unit,
+    focus: FocusMemory,
+    play: (NextUp, Duration?) -> Unit,
+) {
     val card = details.card
     val pages = LocalPages.current
     val scope = rememberCoroutineScope()
@@ -483,6 +496,10 @@ private fun Actions(model: AppModel, details: Details, next: NextUp?, focus: Foc
                 played = !played
                 scope.launch { runCatching { model.setPlayed(card, played) }.onFailure { played = card.played } }
             }
+            if (!details.offline && (own.size > 1 || copies.isNotEmpty())) {
+                TvVersionMenu(details, own, copies, source, Modifier.focusKey(focus, "version"), onSource)
+            }
+            TvMoreMenu(model, details, Modifier.focusKey(focus, "more"))
         }
         if (next != null) Status(next)
     }

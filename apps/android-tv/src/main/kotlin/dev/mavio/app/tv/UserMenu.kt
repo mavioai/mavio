@@ -55,6 +55,7 @@ import dev.mavio.ui.MavioIcon
 import dev.mavio.ui.OnCanvas
 import dev.mavio.ui.R
 import dev.mavio.ui.focused
+import dev.mavio.ui.movesFocus
 import dev.mavio.ui.selectable
 import dev.mavio.ui.shakes
 import dev.mavio.ui.signedInAccount
@@ -383,6 +384,7 @@ fun TvPinPad(name: String, busy: Boolean, error: String?, enter: (String) -> Uni
         OnCanvas(canvas) {
             Column(
                 Modifier
+                    .movesFocus()
                     .clip(RoundedCornerShape(MavioRadius.xl))
                     .background(theme.colors.surfaceOverlay)
                     .padding(MavioSpacing.s40),

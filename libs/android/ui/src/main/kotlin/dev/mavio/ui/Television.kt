@@ -14,6 +14,7 @@ import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -28,6 +29,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
@@ -35,6 +37,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
@@ -46,18 +49,27 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import androidx.compose.ui.zIndex
 import dev.mavio.design.MavioRadius
 import dev.mavio.design.MavioSpacing
+import kotlinx.coroutines.launch
 
 // The television's canvas and focus (docs/tv.md §2, §4): the screen is
 // 1920 points wide, as on Apple TV and in the web UI's television mode, and
@@ -263,9 +275,8 @@ fun TvChoices(current: FocusRequester, modifier: Modifier = Modifier, content: @
 /**
  * A menu of choices over the page (docs/tv.md §5), [width] wide below what
  * it is placed in, [below] its top, at its left or as [alignment] places
- * it: frosted glass whose items fill with
- * `color.fill` with focus, the current one checked. It opens with focus on
- * the current choice; back closes it.
+ * it, its items' text as [label] gives it, the current one checked. It
+ * opens with focus on the current choice; back closes it.
  */
 @Composable
 fun <T> TvChoiceMenu(
@@ -278,21 +289,48 @@ fun <T> TvChoiceMenu(
     alignment: Alignment = Alignment.TopStart,
     onChoose: (T) -> Unit,
 ) {
-    val density = LocalDensity.current
     val chosen = remember { FocusRequester() }
+    TvMenu(chosen, width, alignment, below + MavioSpacing.s8, onDismiss) {
+        choices.forEach { c ->
+            TvMenuItem({ onChoose(c) }, if (c == current) Modifier.focusRequester(chosen) else Modifier) {
+                Text(label(c), Modifier.weight(1f), style = theme.type.headline.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                if (c == current) MavioIcon(R.drawable.ic_check, size = 24.dp, tint = theme.colors.accentText)
+            }
+        }
+    }
+}
+
+/**
+ * A menu over the page (docs/tv.md §5), [width] wide, frosted glass whose
+ * items ([TvMenuItem]) fill with `color.fill` with focus. It lies [offset]
+ * below the top of what it is placed in as [alignment] places it, or above
+ * its bottom when [alignment] is a bottom one and [offset] negative, and
+ * opens with focus on [initial]; back closes it.
+ */
+@Composable
+fun TvMenu(
+    initial: FocusRequester,
+    width: Dp,
+    alignment: Alignment,
+    offset: Dp,
+    onDismiss: () -> Unit,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    val density = LocalDensity.current
     LaunchedEffect(Unit) {
         withFrameNanos {}
-        runCatching { chosen.requestFocus() }
+        runCatching { initial.requestFocus(FocusDirection.Enter) }
     }
     Popup(
         alignment = alignment,
-        offset = with(density) { IntOffset(0, (below + MavioSpacing.s8).roundToPx()) },
+        offset = with(density) { IntOffset(0, offset.roundToPx()) },
         onDismissRequest = onDismiss,
         properties = PopupProperties(focusable = true),
     ) {
         OnCanvas(density) {
             Column(
                 Modifier
+                    .movesFocus()
                     .width(width)
                     .shadow(24.dp, RoundedCornerShape(MavioRadius.lg), ambientColor = theme.colors.tvFocusShadow, spotColor = theme.colors.tvFocusShadow)
                     .clip(RoundedCornerShape(MavioRadius.lg))
@@ -301,24 +339,100 @@ fun <T> TvChoiceMenu(
                     .border(1.dp, theme.colors.border, RoundedCornerShape(MavioRadius.lg))
                     .padding(MavioSpacing.s8),
                 verticalArrangement = Arrangement.spacedBy(2.dp),
+                content = content,
+            )
+        }
+    }
+}
+
+/** An item of a [TvMenu], filled with `color.fill` while it has focus. */
+@Composable
+fun TvMenuItem(onClick: () -> Unit, modifier: Modifier = Modifier, content: @Composable RowScope.() -> Unit) {
+    val state = remember { Focusable() }
+    val focused = state.focused()
+    Row(
+        modifier
+            .shakes()
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(MavioRadius.md))
+            .background(if (focused) theme.colors.fill else Color.Transparent)
+            .selectable(state, onClick)
+            .padding(horizontal = MavioSpacing.s16, vertical = MavioSpacing.s12),
+        horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s12),
+        verticalAlignment = Alignment.CenterVertically,
+        content = content,
+    )
+}
+
+/** A heading of a [TvMenu]'s items. */
+@Composable
+fun TvMenuLabel(text: String) {
+    Text(
+        text,
+        Modifier.padding(horizontal = MavioSpacing.s16, vertical = MavioSpacing.s8),
+        style = theme.type.callout.text,
+        fontWeight = FontWeight.SemiBold,
+        color = theme.colors.textSecondary,
+    )
+}
+
+/**
+ * A dialog of the television over the page, named by [title], as the web
+ * UI's: [width] wide, in `color.surfaceOverlay`, opening with focus on its
+ * first element; back closes it.
+ */
+@Composable
+fun TvDialog(title: String, onDismiss: () -> Unit, width: Dp = 640.dp, content: @Composable ColumnScope.() -> Unit) {
+    val canvas = LocalDensity.current
+    val first = remember { FocusRequester() }
+    LaunchedEffect(Unit) {
+        // The dialog's window takes focus a frame or two after it shows.
+        repeat(5) {
+            withFrameNanos {}
+            if (runCatching { first.requestFocus(FocusDirection.Enter) }.getOrDefault(false)) return@LaunchedEffect
+        }
+    }
+    Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
+        OnCanvas(canvas) {
+            Column(
+                Modifier
+                    .movesFocus()
+                    .width(width)
+                    .clip(RoundedCornerShape(MavioRadius.xl))
+                    .background(theme.colors.surfaceOverlay)
+                    .padding(MavioSpacing.s32)
+                    .focusRequester(first)
+                    .focusGroup(),
+                verticalArrangement = Arrangement.spacedBy(MavioSpacing.s16),
             ) {
-                choices.forEach { c ->
-                    val state = remember { Focusable() }
-                    val focused = state.focused()
-                    Row(
-                        (if (c == current) Modifier.focusRequester(chosen) else Modifier).shakes()
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(MavioRadius.md))
-                            .background(if (focused) theme.colors.fill else Color.Transparent)
-                            .selectable(state) { onChoose(c) }
-                            .padding(horizontal = MavioSpacing.s16, vertical = MavioSpacing.s12),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Text(label(c), Modifier.weight(1f), style = theme.type.headline.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                        if (c == current) MavioIcon(R.drawable.ic_check, size = 24.dp, tint = theme.colors.accentText)
-                    }
-                }
+                Text(title, style = theme.type.title2.text, fontWeight = FontWeight.Bold)
+                content()
             }
         }
+    }
+}
+
+/**
+ * Moves focus as the D-pad asks within what this modifies, shaking the
+ * focused element with [LocalFocusShake] where it cannot move (docs/tv.md
+ * §4); put on a window's root, as the app's, a menu's or a dialog's.
+ */
+@Composable
+fun Modifier.movesFocus(): Modifier {
+    val shake = LocalFocusShake.current ?: return this
+    val focusManager = LocalFocusManager.current
+    val scope = rememberCoroutineScope()
+    return onKeyEvent { e ->
+        val direction = when (e.key) {
+            Key.DirectionUp -> FocusDirection.Up
+            Key.DirectionDown -> FocusDirection.Down
+            Key.DirectionLeft -> FocusDirection.Left
+            Key.DirectionRight -> FocusDirection.Right
+            else -> null
+        }
+        // What the focused element and those around it leave.
+        if (direction == null || e.type != KeyEventType.KeyDown) return@onKeyEvent false
+        if (!focusManager.moveFocus(direction)) scope.launch { shake.shake() }
+        true
     }
 }

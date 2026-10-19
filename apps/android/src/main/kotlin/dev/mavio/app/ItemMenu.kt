@@ -40,13 +40,25 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import com.google.protobuf.duration
 import dev.mavio.core.AppModel
 import dev.mavio.core.Card
 import dev.mavio.core.CardKind
 import dev.mavio.core.Details
 import dev.mavio.core.DeviceSession
-import dev.mavio.core.call
+import dev.mavio.core.addToList
+import dev.mavio.core.createList
+import dev.mavio.core.deleteList
+import dev.mavio.core.identifiableKinds
+import dev.mavio.core.issueTypes
+import dev.mavio.core.itemLists
+import dev.mavio.core.itemRights
+import dev.mavio.core.listable
+import dev.mavio.core.playOn
+import dev.mavio.core.playableKinds
+import dev.mavio.core.refreshItem
+import dev.mavio.core.renameList
+import dev.mavio.core.reportIssue
+import dev.mavio.core.reportableKinds
 import dev.mavio.design.MavioSpacing
 import dev.mavio.ui.ButtonKind
 import dev.mavio.ui.CircleButton
@@ -58,53 +70,7 @@ import dev.mavio.ui.SettingsField
 import dev.mavio.ui.text
 import dev.mavio.ui.theme
 import kotlinx.coroutines.launch
-import mavio.acquisition.v1.IssueOuterClass.CreateIssueResponse
 import mavio.acquisition.v1.IssueOuterClass.IssueType
-import mavio.acquisition.v1.createIssueRequest
-import mavio.library.v1.Collection.AddToCollectionResponse
-import mavio.library.v1.Collection.CreateCollectionResponse
-import mavio.library.v1.Collection.DeleteCollectionResponse
-import mavio.library.v1.Collection.UpdateCollectionResponse
-import mavio.library.v1.ItemOuterClass.ItemKind
-import mavio.library.v1.ItemOuterClass.ListItemsResponse
-import mavio.library.v1.ItemOuterClass.SortField
-import mavio.library.v1.Metadata.RefreshItemResponse
-import mavio.library.v1.Playlist.AddToPlaylistResponse
-import mavio.library.v1.Playlist.CreatePlaylistResponse
-import mavio.library.v1.Playlist.DeletePlaylistResponse
-import mavio.library.v1.Playlist.ListPlaylistsResponse
-import mavio.library.v1.Playlist.UpdatePlaylistResponse
-import mavio.library.v1.addToCollectionRequest
-import mavio.library.v1.addToPlaylistRequest
-import mavio.library.v1.createCollectionRequest
-import mavio.library.v1.createPlaylistRequest
-import mavio.library.v1.deleteCollectionRequest
-import mavio.library.v1.deletePlaylistRequest
-import mavio.library.v1.listItemsRequest
-import mavio.library.v1.listPlaylistsRequest
-import mavio.library.v1.refreshItemRequest
-import mavio.library.v1.sortSpec
-import mavio.library.v1.updateCollectionRequest
-import mavio.library.v1.updatePlaylistRequest
-import mavio.session.v1.SessionOuterClass.SendCommandResponse
-import mavio.session.v1.command
-import mavio.session.v1.sendCommandRequest
-import mavio.user.v1.UserOuterClass.GetCurrentUserResponse
-import mavio.user.v1.getCurrentUserRequest
-
-/** Kinds a device plays, which Play On offers. */
-private val playable = setOf(CardKind.MOVIE, CardKind.EPISODE, CardKind.VIDEO, CardKind.MUSIC_VIDEO, CardKind.TRACK, CardKind.AUDIOBOOK)
-
-/** Kinds problems are reported with. */
-private val reportable = setOf(CardKind.MOVIE, CardKind.SERIES, CardKind.SEASON, CardKind.EPISODE)
-
-/** Kinds the providers identify. */
-private val identifiable = setOf(
-    CardKind.MOVIE, CardKind.SERIES, CardKind.ARTIST, CardKind.ALBUM, CardKind.MUSIC_VIDEO, CardKind.BOOK, CardKind.AUDIOBOOK,
-)
-
-/** Whether the item can go into a playlist or collection. */
-private fun listable(kind: CardKind) = kind != CardKind.PLAYLIST && kind != CardKind.COLLECTION && kind != CardKind.FOLDER
 
 /** A dialog of the More menu. */
 private enum class ItemDialog(@StringRes val label: Int) {
@@ -136,25 +102,23 @@ internal fun MoreMenu(model: AppModel, details: Details) {
     var admin by remember(card.serverId) { mutableStateOf(false) }
     var mayReport by remember(card.serverId) { mutableStateOf(false) }
     LaunchedEffect(card.serverId) {
-        runCatching {
-            model.client.call(card.serverId, Procedure.users("GetCurrentUser"), getCurrentUserRequest {}, GetCurrentUserResponse::parseFrom).user
-        }.onSuccess {
+        runCatching { model.itemRights(card.serverId) }.onSuccess {
             admin = it.admin
-            mayReport = it.admin || it.policy.reportIssues
+            mayReport = it.mayReport
         }
     }
     val own = card.kind == CardKind.PLAYLIST || (card.kind == CardKind.COLLECTION && admin)
     val entries = buildList {
-        if (card.kind in playable) {
+        if (card.kind in playableKinds) {
             add(ItemDialog.PlayOn)
             add(ItemDialog.Together)
         }
         if (listable(card.kind)) add(ItemDialog.Playlist)
-        if (card.kind in reportable && mayReport) add(ItemDialog.Report)
+        if (card.kind in reportableKinds && mayReport) add(ItemDialog.Report)
         if (listable(card.kind) && admin) add(ItemDialog.Collection)
         if (admin && card.kind != CardKind.PLAYLIST) {
             add(ItemDialog.Edit)
-            if (card.kind in identifiable) add(ItemDialog.Identify)
+            if (card.kind in identifiableKinds) add(ItemDialog.Identify)
             if (card.kind != CardKind.COLLECTION) add(ItemDialog.Refresh)
             add(ItemDialog.Images)
         }
@@ -281,22 +245,7 @@ private fun PlayOnSheet(model: AppModel, details: Details, onDismiss: () -> Unit
                 onClick = {
                     busy = true
                     scope.launch {
-                        runCatching {
-                            model.client.call(
-                                card.serverId,
-                                Procedure.sessions("SendCommand"),
-                                sendCommandRequest {
-                                    sessionId = d.id
-                                    command = command {
-                                        play = mavio.session.v1.play {
-                                            itemIds += card.itemId
-                                            position?.let { startPosition = duration { seconds = it.seconds } }
-                                        }
-                                    }
-                                },
-                                SendCommandResponse::parseFrom,
-                            )
-                        }.onSuccess { controlling = d.id }.onFailure { failure = it.reason }
+                        runCatching { model.playOn(card, d.id, position) }.onSuccess { controlling = d.id }.onFailure { failure = it.reason }
                         busy = false
                     }
                 },
@@ -321,21 +270,7 @@ private fun AddSheet(model: AppModel, card: Card, collection: Boolean, onDismiss
     var reload by remember { mutableIntStateOf(0) }
     val scope = rememberCoroutineScope()
     LaunchedEffect(reload) {
-        runCatching {
-            if (collection) {
-                model.client.call(
-                    serverId,
-                    Procedure.items("ListItems"),
-                    listItemsRequest {
-                        kinds += ItemKind.ITEM_KIND_COLLECTION
-                        sort += sortSpec { field = SortField.SORT_FIELD_NAME }
-                    },
-                    ListItemsResponse::parseFrom,
-                ).itemsList
-            } else {
-                model.client.call(serverId, Procedure.playlists("ListPlaylists"), listPlaylistsRequest {}, ListPlaylistsResponse::parseFrom).playlistsList
-            }
-        }.onSuccess { items -> lists = items.map { it.id to it.name } }.onFailure { failure = it.reason }
+        runCatching { model.itemLists(serverId, collection) }.onSuccess { items -> lists = items.map { it.id to it.name } }.onFailure { failure = it.reason }
     }
     fun run(block: suspend () -> Unit) {
         busy = true
@@ -357,29 +292,8 @@ private fun AddSheet(model: AppModel, card: Card, collection: Boolean, onDismiss
                 enabled = !busy,
                 onClick = {
                     run {
-                        if (collection) {
-                            model.client.call(
-                                serverId,
-                                Procedure.collections("AddToCollection"),
-                                addToCollectionRequest {
-                                    this.id = id
-                                    itemIds += card.itemId
-                                },
-                                AddToCollectionResponse::parseFrom,
-                            )
-                        } else {
-                            model.client.call(
-                                serverId,
-                                Procedure.playlists("AddToPlaylist"),
-                                addToPlaylistRequest {
-                                    this.id = id
-                                    itemIds += card.itemId
-                                },
-                                AddToPlaylistResponse::parseFrom,
-                            )
-                        }
+                        model.addToList(card, id, collection)
                         added = listName
-                        model.bump(serverId)
                     }
                 },
             ) { if (added == listName) MavioIcon(R.drawable.ic_check, size = 16.dp, tint = theme.colors.accent) }
@@ -395,31 +309,10 @@ private fun AddSheet(model: AppModel, card: Card, collection: Boolean, onDismiss
             MavioButton(stringResource(R.string.lists_create), {
                 val n = name.trim()
                 run {
-                    if (collection) {
-                        model.client.call(
-                            serverId,
-                            Procedure.collections("CreateCollection"),
-                            createCollectionRequest {
-                                this.name = n
-                                itemIds += card.itemId
-                            },
-                            CreateCollectionResponse::parseFrom,
-                        )
-                    } else {
-                        model.client.call(
-                            serverId,
-                            Procedure.playlists("CreatePlaylist"),
-                            createPlaylistRequest {
-                                this.name = n
-                                itemIds += card.itemId
-                            },
-                            CreatePlaylistResponse::parseFrom,
-                        )
-                    }
+                    model.createList(card, n, collection)
                     added = n
                     name = ""
                     reload++
-                    model.bump(serverId)
                 }
             }, kind = ButtonKind.Secondary, enabled = name.isNotBlank() && !busy)
         }
@@ -429,11 +322,8 @@ private fun AddSheet(model: AppModel, card: Card, collection: Boolean, onDismiss
 }
 
 /** The kinds of problems, as the report's choice names them. */
-private val issueTypes = listOf(
-    IssueType.ISSUE_TYPE_VIDEO to R.string.issues_video,
-    IssueType.ISSUE_TYPE_AUDIO to R.string.issues_audio,
-    IssueType.ISSUE_TYPE_SUBTITLES to R.string.issues_subtitles,
-    IssueType.ISSUE_TYPE_OTHER to R.string.issues_other,
+private val issueLabels = issueTypes.zip(
+    listOf(R.string.issues_video, R.string.issues_audio, R.string.issues_subtitles, R.string.issues_other),
 )
 
 /** Reports a problem with the item; a series' with a season and episode, then opens the issue. */
@@ -453,7 +343,7 @@ private fun ReportSheet(model: AppModel, card: Card, onDismiss: () -> Unit) {
     Sheet(stringResource(R.string.issues_report_title, card.title), onDismiss) {
         Text(stringResource(R.string.issues_type), style = theme.type.footnote.text, color = colors.textSecondary)
         FlowRow(horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s8), verticalArrangement = Arrangement.spacedBy(MavioSpacing.s8)) {
-            issueTypes.forEach { (t, label) ->
+            issueLabels.forEach { (t, label) ->
                 val active = t == type
                 Text(
                     stringResource(label),
@@ -496,22 +386,10 @@ private fun ReportSheet(model: AppModel, card: Card, onDismiss: () -> Unit) {
                 busy = true
                 scope.launch {
                     val s = if (series) season.toIntOrNull() ?: 0 else 0
-                    runCatching {
-                        model.client.call(
-                            card.serverId,
-                            Procedure.issues("CreateIssue"),
-                            createIssueRequest {
-                                itemId = card.itemId
-                                this.type = type
-                                seasonNumber = s
-                                episodeNumber = if (s > 0) episode.toIntOrNull() ?: 0 else 0
-                                this.message = message.trim()
-                            },
-                            CreateIssueResponse::parseFrom,
-                        )
-                    }.onSuccess {
+                    runCatching { model.reportIssue(card, type, s, episode.toIntOrNull() ?: 0, message.trim()) }
+.onSuccess {
                         onDismiss()
-                        if (it.hasIssue()) navigator.open(Route.IssuePage(card.serverId, it.issue.id))
+                        if (it != null) navigator.open(Route.IssuePage(card.serverId, it))
                     }.onFailure { failure = it.reason }
                     busy = false
                 }
@@ -543,20 +421,8 @@ private fun RefreshSheet(model: AppModel, card: Card, onDismiss: () -> Unit) {
             MavioButton(stringResource(if (busy) R.string.metadata_refreshing else R.string.metadata_refresh), {
                 busy = true
                 scope.launch {
-                    runCatching {
-                        model.client.call(
-                            card.serverId,
-                            Procedure.metadata("RefreshItem"),
-                            refreshItemRequest {
-                                id = card.itemId
-                                replaceMetadata = replace
-                            },
-                            RefreshItemResponse::parseFrom,
-                        )
-                    }.onSuccess {
-                        model.bump(card.serverId)
-                        onDismiss()
-                    }.onFailure { failure = it.reason }
+                    runCatching { model.refreshItem(card, replace) }
+                        .onSuccess { onDismiss() }.onFailure { failure = it.reason }
                     busy = false
                 }
             }, enabled = !busy)
@@ -580,32 +446,8 @@ private fun RenameSheet(model: AppModel, card: Card, onDismiss: () -> Unit) {
                 busy = true
                 scope.launch {
                     val n = name.trim()
-                    runCatching {
-                        if (card.kind == CardKind.PLAYLIST) {
-                            model.client.call(
-                                card.serverId,
-                                Procedure.playlists("UpdatePlaylist"),
-                                updatePlaylistRequest {
-                                    id = card.itemId
-                                    this.name = n
-                                },
-                                UpdatePlaylistResponse::parseFrom,
-                            )
-                        } else {
-                            model.client.call(
-                                card.serverId,
-                                Procedure.collections("UpdateCollection"),
-                                updateCollectionRequest {
-                                    id = card.itemId
-                                    this.name = n
-                                },
-                                UpdateCollectionResponse::parseFrom,
-                            )
-                        }
-                    }.onSuccess {
-                        model.bump(card.serverId)
-                        onDismiss()
-                    }.onFailure { failure = it.reason }
+                    runCatching { model.renameList(card, n) }
+                        .onSuccess { onDismiss() }.onFailure { failure = it.reason }
                     busy = false
                 }
             }, enabled = name.isNotBlank() && !busy)
@@ -625,21 +467,8 @@ private fun DeleteDialog(model: AppModel, card: Card, scope: kotlinx.coroutines.
         stringResource(R.string.lists_delete),
         onConfirm = {
             scope.launch {
-                runCatching {
-                    if (playlist) {
-                        model.client.call(card.serverId, Procedure.playlists("DeletePlaylist"), deletePlaylistRequest { id = card.itemId }, DeletePlaylistResponse::parseFrom)
-                    } else {
-                        model.client.call(
-                            card.serverId,
-                            Procedure.collections("DeleteCollection"),
-                            deleteCollectionRequest { id = card.itemId },
-                            DeleteCollectionResponse::parseFrom,
-                        )
-                    }
-                }.onSuccess {
-                    model.bump(card.serverId)
-                    navigator.back()
-                }.onFailure { android.widget.Toast.makeText(context, it.reason, android.widget.Toast.LENGTH_LONG).show() }
+                runCatching { model.deleteList(card) }
+                    .onSuccess { navigator.back() }.onFailure { android.widget.Toast.makeText(context, it.reason, android.widget.Toast.LENGTH_LONG).show() }
             }
         },
         onDismiss = onDismiss,

@@ -104,6 +104,7 @@ fun TvKeyboard(label: String, value: String, kind: FieldKind, onChange: (String)
         OnCanvas(canvas) {
             Column(
                 Modifier
+                    .movesFocus()
                     .width(if (number) 440.dp else 820.dp)
                     .clip(RoundedCornerShape(MavioRadius.xl))
                     .background(theme.colors.surfaceOverlay)

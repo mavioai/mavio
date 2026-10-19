@@ -3,10 +3,11 @@ package dev.mavio.app.tv
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
@@ -37,6 +38,9 @@ sealed class Page {
 
         /** The element that had focus. */
         val focus = FocusMemory()
+
+        /** Which of the server's versions plays. */
+        var sourceIndex by mutableIntStateOf(0)
     }
 
     /**

@@ -2,7 +2,6 @@ package dev.mavio.app.tv
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.layout.Arrangement
@@ -12,9 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -31,18 +28,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.key.Key
-import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
-import androidx.compose.ui.input.key.onKeyEvent
-import androidx.compose.ui.input.key.type
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -55,7 +46,7 @@ import dev.mavio.ui.LocalDiscover
 import dev.mavio.ui.LocalFocusShake
 import dev.mavio.ui.R
 import dev.mavio.ui.TvChoice
-import dev.mavio.ui.text
+import dev.mavio.ui.movesFocus
 import dev.mavio.ui.theme
 import kotlinx.coroutines.launch
 
@@ -87,25 +78,8 @@ private class TabState {
 fun Root(model: AppModel) {
     val state by model.signInState.collectAsStateWithLifecycle()
     val signedIn by model.signedIn.collectAsStateWithLifecycle()
-    val shake = remember { FocusShake() }
-    val focusManager = LocalFocusManager.current
-    val scope = rememberCoroutineScope()
-    Box(
-        Modifier.fillMaxSize().onKeyEvent { e ->
-            val direction = when (e.key) {
-                Key.DirectionUp -> FocusDirection.Up
-                Key.DirectionDown -> FocusDirection.Down
-                Key.DirectionLeft -> FocusDirection.Left
-                Key.DirectionRight -> FocusDirection.Right
-                else -> null
-            }
-            // What the focused element and those around it leave.
-            if (direction == null || e.type != KeyEventType.KeyDown) return@onKeyEvent false
-            if (!focusManager.moveFocus(direction)) scope.launch { shake.shake() }
-            true
-        },
-    ) {
-        CompositionLocalProvider(LocalFocusShake provides shake) {
+    CompositionLocalProvider(LocalFocusShake provides remember { FocusShake() }) {
+        Box(Modifier.fillMaxSize().movesFocus()) {
             if (state is SignInState.SignedOut && signedIn.isEmpty()) {
                 SignInScreen(model)
             } else {
