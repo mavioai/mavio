@@ -9,6 +9,7 @@ import (
 	"strings"
 	"sync"
 	"time"
+	"unicode"
 
 	"connectrpc.com/connect"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -293,6 +294,11 @@ func (s *Service) stream(ag pluginv1connect.AgentSessionServiceClient, conv, mes
 		if answer == "" {
 			answer = s.reply(ctx, lang, "failed", nil)
 		}
+	}
+	// The answer in progress may miss its last words, which only the done
+	// event has; the client is sent them too, so that it speaks them.
+	if more, ok := growth(shown, strings.TrimRightFunc(answer, unicode.IsSpace)); ok && more != "" {
+		at.emit(assistantv1.AskResponse_builder{Answer: &more}.Build())
 	}
 	done.SetAnswer(strings.TrimSpace(answer))
 }
