@@ -3,5 +3,6 @@
   "identifier": "dev.mavio.desktop",
   "version": "0.1.0",
   "copyright": "© 2026 Mavio",
-  "macos": { "minimumSystemVersion": "13.0" }
+  "icon": "icon/icon.png",
+  "macos": { "name": "MavioGO", "icon": "icon/AppIcon.icon", "minimumSystemVersion": "13.0" }
 }
