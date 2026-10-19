@@ -164,7 +164,7 @@ func (a *App) discoveredPersonHeader(c *ui.Context, p *acquisitionv1.Person) {
 					}
 				})
 			}
-			ui.Segmented(c, &st.kinds, style.T(c, "person.allKinds"), style.T(c, "person.movies"), style.T(c, "person.series")).Width(300)
+			segmented(c, &st.kinds, style.T(c, "person.allKinds"), style.T(c, "person.movies"), style.T(c, "person.series")).Width(300)
 		})
 	})
 }

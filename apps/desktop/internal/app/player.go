@@ -1023,7 +1023,7 @@ func (a *App) playerPanel(c *ui.Context, p *player) {
 		Material(glass.Blur{Radius: 40}).AlignItems(ui.Stretch).Children(func() {
 		ui.Column(c).Grow(1).MinHeight(0).Radius(18).Background(ui.RGBA(23, 23, 23, 0.75)).Border(1, white.Alpha(0.1)).
 			Children(func() {
-				seg := ui.Segmented(c, &selected, style.T(c, "player.audio"), style.T(c, "player.subtitles"), style.T(c, "player.quality"), style.T(c, "player.info")).
+				seg := segmented(c, &selected, style.T(c, "player.audio"), style.T(c, "player.subtitles"), style.T(c, "player.quality"), style.T(c, "player.info")).
 					Label(style.T(c, "player.options")).Margin(12)
 				if seg.Changed() {
 					p.panel = tabs[selected]

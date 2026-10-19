@@ -139,6 +139,16 @@ func TestPlayer(t *testing.T) {
 		}
 		h.save(shots, tab.name)
 	}
+	// The panel's segments show the pointing hand, as the web UI's.
+	if r, ok := h.tt.Find("Info"); !ok {
+		t.Errorf("no Info segment; texts = %q", h.tt.Texts())
+	} else {
+		h.tt.Move(r.X+r.W/2, r.Y+r.H/2)
+		h.tt.Frame()
+		if got := h.tt.Cursor(); got != ui.CursorPointer {
+			t.Errorf("cursor over a segment = %v, want = the pointing hand", got)
+		}
+	}
 	// A quality restarts the playback where it is.
 	if err := h.tt.Click("720p"); err != nil {
 		t.Fatal(err)

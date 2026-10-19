@@ -42,6 +42,36 @@ func errorMessage(c *ui.Context, err error) string {
 	return style.T(c, "state.error")
 }
 
+// segmented builds a segmented control as MyGo's ui.Segmented looks,
+// its segments showing the pointing hand under the pointer, as the web
+// UI's do.
+func segmented(c *ui.Context, selected *int, labels ...string) ui.Element {
+	t := c.Theme()
+	parts := ui.SegmentedBase(c, selected, len(labels))
+	g := parts.Track.AlignItems(ui.Stretch).Padding(t.Space(0.5)).Gap(t.Space(0.5)).Radius(t.Radius).
+		Background(t.Surface).Border(1, t.Border)
+	g.Children(func() {
+		for i, label := range labels {
+			s := parts.Segment(i).Padding(t.Space(1), t.Space(3)).Radius(max(t.Radius-t.Space(0.5), 0)).
+				TextColor(t.Text).Cursor(ui.CursorPointer)
+			switch {
+			case i == *selected:
+				chosen := t.Background
+				if t.Dark {
+					chosen = t.SurfacePressed
+				}
+				s.Background(chosen).Shadow(0, 1, 2, 0, ui.RGBA(0, 0, 0, 0.12))
+			case s.Pressed():
+				s.Background(t.SurfacePressed)
+			case s.Hovered():
+				s.Background(t.SurfaceHover)
+			}
+			s.Children(func() { ui.Text(c, label).SingleLine() })
+		}
+	})
+	return g
+}
+
 // secondaryButton builds a button on the fill color.
 func secondaryButton(c *ui.Context, icon, label string) ui.Element {
 	colors := style.Colors(c)

@@ -130,7 +130,7 @@ func sizeOf(b int64) string {
 func (a *App) downloadsSection(c *ui.Context) {
 	st := &a.settingsState.admin.downloads
 	sectionHeader(c, style.T(c, "settings.downloads"), style.T(c, "downloads.message"))
-	ui.Segmented(c, &st.tab, style.T(c, "downloads.queue"), style.T(c, "downloads.history"), style.T(c, "downloads.blocklist"), style.T(c, "downloads.import")).
+	segmented(c, &st.tab, style.T(c, "downloads.queue"), style.T(c, "downloads.history"), style.T(c, "downloads.blocklist"), style.T(c, "downloads.import")).
 		AlignSelf(ui.Start).Label(style.T(c, "settings.downloads"))
 	for i := range st.limits {
 		if st.limits[i] == 0 {

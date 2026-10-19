@@ -1220,7 +1220,7 @@ func (a *App) requestsPage(c *ui.Context, r *ui.Route) {
 				for i, f := range requestFilters {
 					labels[i] = style.T(c, f.label)
 				}
-				ui.Segmented(c, &l.filter, labels...)
+				segmented(c, &l.filter, labels...)
 			})
 			if !admin {
 				a.quotas(c, server)

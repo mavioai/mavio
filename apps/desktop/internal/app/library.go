@@ -55,7 +55,7 @@ func (a *App) library(c *ui.Context, r *ui.Route) {
 			a.tvPill(c, []string{style.T(c, "library.recommended"), style.T(c, "library.all")}, &st.tab)
 			return
 		}
-		ui.Segmented(c, &st.tab, style.T(c, "library.recommended"), style.T(c, "library.all")).Width(240)
+		segmented(c, &st.tab, style.T(c, "library.recommended"), style.T(c, "library.all")).Width(240)
 	}
 	if st.tab == 0 {
 		t := load(a, &st.recommended, key("recommended", server, id, a.generation), func(ctx context.Context) ([]*capiv1.Row, error) {
