@@ -401,8 +401,9 @@ export function sessions(o: SessionsOptions): Sessions {
 					const s = await submission.status(context);
 					if (s.type === "input" && s.entry !== undefined) before = joined((await answers(conversation, s.entry)).map(text));
 				}
-				if (before !== "") t = `${before}\n\n${t.trimStart()}`;
-				if (t !== shown) {
+				// Put together as the answer is, so that each text continues the last.
+				t = joined([before, t]);
+				if (t !== "" && t !== shown) {
 					shown = pending = t;
 					wake();
 				}

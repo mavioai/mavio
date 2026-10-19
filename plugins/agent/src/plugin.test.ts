@@ -373,7 +373,8 @@ describe("host tools", () => {
 	test("answer with what every model call said", async () => {
 		const faux = fauxProvider({ tokenSize: { min: 1, max: 1 }, tokensPerSecond: 50 });
 		faux.setResponses([
-			fauxAssistantMessage([fauxText("Let me look."), fauxToolCall("search_library", { query: "inception" })], { stopReason: "toolUse" }),
+			fauxAssistantMessage([fauxText("\n\nLet me look.\n\n"), fauxToolCall("search_library", { query: "inception" })], { stopReason: "toolUse" }),
+			fauxAssistantMessage([fauxText("Found it.\n\n"), fauxToolCall("search_library", { query: "inception 2010" })], { stopReason: "toolUse" }),
 			fauxAssistantMessage("It is in your library."),
 		]);
 		const { agents } = await start([faux.provider]);
@@ -392,10 +393,11 @@ describe("host tools", () => {
 		}
 		watching.abort();
 		await host;
-		const want = "Let me look.\n\nIt is in your library.";
+		const want = "Let me look.\n\nFound it.\n\nIt is in your library.";
 		expect(done?.answer?.text).toBe(want);
-		// The second call's answer follows the first's.
-		expect(texts.some((t) => t.startsWith("Let me look.\n\nIt"))).toBe(true);
+		for (const [i, t] of texts.entries()) if (i > 0) expect(t.startsWith(texts[i - 1]!)).toBe(true);
+		// Each call's answer follows the last's.
+		expect(texts.some((t) => t.startsWith("Let me look.\n\nFound it.\n\nIt"))).toBe(true);
 		for (const t of texts) expect(want.startsWith(t)).toBe(true);
 		const got = await agents.getAgentSession({ id: session!.id });
 		expect(got.messages.map((m) => [m.role, m.text])).toEqual([
