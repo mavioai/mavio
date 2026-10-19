@@ -29,7 +29,8 @@ function matches(o: ModelOption, query: string): boolean {
   return !q || [o.label, o.value, o.providerName ?? ""].some((s) => s.toLocaleLowerCase().includes(q));
 }
 
-function Model({ option }: { option: ModelOption }) {
+/** A model as the list's rows show it first: its provider's logo, its name and, smaller and quieter, its provider's name. */
+export function ModelLabel({ option }: { option: ModelOption }) {
   return (
     <>
       {option.provider && <ProviderLogo provider={option.provider} />}
@@ -94,7 +95,7 @@ export function ModelPicker({
         aria-label={label}
         className={`flex min-h-9 max-w-full min-w-0 items-center gap-2 rounded-md bg-fill ps-2.5 pe-2.5 text-start type-callout text-on-background hover:bg-fill-selected data-disabled:opacity-50 data-popup-open:bg-fill-selected desk:min-h-7 desk:gap-1.5 desk:ps-2 desk:pe-1.5 ${className ?? ""}`}
       >
-        {selected ? <Model option={selected} /> : <span className="min-w-0 truncate text-text-secondary">{labels.placeholder}</span>}
+        {selected ? <ModelLabel option={selected} /> : <span className="min-w-0 truncate text-text-secondary">{labels.placeholder}</span>}
         <Icon name="expand" size={14} className="ms-auto shrink-0 text-text-secondary" />
       </Combobox.Trigger>
       <Combobox.Portal>
@@ -143,7 +144,7 @@ function Rows({ list }: { list: React.RefObject<Virtualizer<HTMLDivElement, Elem
                 style={{ height: row.size, transform: `translateY(${row.start}px)` }}
               >
                 <span className="flex min-w-0 items-center gap-2">
-                  <Model option={o} />
+                  <ModelLabel option={o} />
                 </span>
                 {o.detail && <span className="truncate ps-6 type-caption font-normal text-text-tertiary">{o.detail}</span>}
               </Combobox.Item>

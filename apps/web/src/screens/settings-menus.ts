@@ -12,7 +12,7 @@ export type MenuId = "media" | "acquiring" | "extensions" | "maintenance";
 export const menuSections: Record<MenuId, readonly string[]> = {
   media: ["libraries", "storage", "transcoding"],
   acquiring: ["acquisition", "wanted", "downloads", "subtitles"],
-  extensions: ["plugins", "ai", "conversations"],
+  extensions: ["plugins", "ai"],
   maintenance: ["activity", "issues", "tasks", "logs", "backups"],
 };
 

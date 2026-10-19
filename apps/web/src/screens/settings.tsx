@@ -118,13 +118,13 @@ function lookOf(e: Entry) {
 const deviceSections: SectionId[] = ["appearance", "playback", "subtitles-audio", "assistant", "account", ...tools];
 
 /**
- * The groups: the advanced tools, for administrators; this device's
- * sections; and the server's, in the order a server is set up and kept:
+ * The groups: the advanced tools and the AI conversations of the server
+ * chosen, for administrators; this device's sections; and the server's, in the order a server is set up and kept:
  * the server and who reaches it, then the menus of its media, of acquiring
  * media, of what extends it, and of watching over and maintaining it.
  */
 const allGroups: { title: () => string; entries: Entry[]; server?: boolean; tools?: boolean }[] = [
-  { title: () => t("settings.advancedGroup"), entries: [...tools], tools: true },
+  { title: () => t("settings.advancedGroup"), entries: [...tools, "conversations"], tools: true },
   { title: () => t("settings.thisDevice"), entries: ["appearance", "playback", "subtitles-audio", "assistant"] },
   { title: () => t("settings.serverGroup"), entries: ["overview", "general", "users", "devices", "api-keys", "proxies", "media", "acquiring", "extensions", "maintenance"], server: true },
 ];

@@ -11,15 +11,17 @@ import {
   useAiConversationActions,
   useAiConversations,
   useAiModels,
+  useAiProviders,
   useAiSend,
 } from "@mavio/client-ts";
-import { type AgentSession, AiRole, type AiUsage } from "@mavio/proto/mavio/plugin/v1/ai_pb";
+import { type AgentSession, type AiModel, AiRole, type AiUsage } from "@mavio/proto/mavio/plugin/v1/ai_pb";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { type KeyboardEvent, useEffect, useRef, useState } from "react";
 
 import { locale, t } from "../../i18n.ts";
+import { modelDetail } from "../../ai-model.ts";
 import { Button, Group, Row } from "../../ui.tsx";
-import { Select } from "../../controls/select.tsx";
+import { ModelLabel, type ModelOption, ModelPicker } from "../../controls/model-picker.tsx";
 import type { SettingsSearch } from "../settings.tsx";
 import { BackLink, fromNow, Page, PageLink } from "./common.tsx";
 import { input } from "../../controls/styles.ts";
@@ -93,18 +95,75 @@ function sendOnEnter(send: () => void) {
   };
 }
 
-function NewConversation({ server, onStarted }: { server: ServerEntry; onStarted: (f: First) => void }) {
+/** The models of a server's providers as the model picker lists them, by `provider/model`. */
+function useModelOptions(server: ServerEntry): { options: ModelOption[]; loaded: boolean } {
   const models = useAiModels(server, true);
+  const providers = useAiProviders(server);
+  const names = new Map((providers.data ?? []).map((p) => [p.id, p.name]));
+  const options = (models.data ?? []).map((m: AiModel) => ({
+    value: `${m.provider}/${m.id}`,
+    label: m.name || m.id,
+    detail: modelDetail(m),
+    provider: m.provider,
+    providerName: names.get(m.provider) ?? m.provider,
+  }));
+  return { options, loaded: models.isSuccess };
+}
+
+/** A field for a message, its button sending it at its bottom end. */
+function Composer({
+  value,
+  onChange,
+  onSend,
+  label,
+  action,
+  busy,
+  disabled,
+}: {
+  value: string;
+  onChange: (text: string) => void;
+  onSend: () => void;
+  label: string;
+  action: string;
+  busy: boolean;
+  disabled?: boolean;
+}) {
+  return (
+    <div className="flex flex-col rounded-md border border-border bg-surface focus-within:border-focus">
+      <textarea
+        className="min-h-16 w-full min-w-0 resize-none bg-transparent px-3 pt-2 type-callout text-on-background placeholder:text-text-tertiary focus:outline-none"
+        rows={2}
+        aria-label={label}
+        placeholder={label}
+        maxLength={100000}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        onKeyDown={sendOnEnter(onSend)}
+      />
+      <div className="flex justify-end px-1.5 pb-1.5">
+        <button
+          type="button"
+          disabled={disabled || !value.trim() || busy}
+          onClick={onSend}
+          className="min-h-8 rounded-full bg-button px-3.5 type-footnote font-semibold text-on-button hover:opacity-85 disabled:opacity-40 desk:min-h-7"
+        >
+          {busy ? "…" : action}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function NewConversation({ server, onStarted }: { server: ServerEntry; onStarted: (f: First) => void }) {
+  const { options, loaded } = useModelOptions(server);
   const { create } = useAiConversationActions(server);
   const navigate = useNavigate();
   const cur = useSearch({ strict: false }) as SettingsSearch;
   const [model, setModel] = useState("");
   const [instructions, setInstructions] = useState("");
   const [text, setText] = useState("");
-  const options = (models.data ?? []).map((m) => ({ value: `${m.provider}/${m.id}`, label: `${m.name || m.id} (${m.provider})` }));
   const chosen = model || options[0]?.value || "";
-  const name = (models.data ?? []).find((m) => `${m.provider}/${m.id}` === chosen);
-  const placeholder = t("conversations.placeholder", { model: name?.name || name?.id || "" });
+  const placeholder = t("conversations.placeholder", { model: options.find((o) => o.value === chosen)?.label ?? "" });
   const start = () => {
     const message = text.trim();
     if (!chosen || !message || create.isPending) return;
@@ -119,7 +178,7 @@ function NewConversation({ server, onStarted }: { server: ServerEntry; onStarted
       },
     );
   };
-  if (models.isSuccess && options.length === 0)
+  if (loaded && options.length === 0)
     return (
       <Group title={t("conversations.new")}>
         <p className="px-4 py-3 type-callout text-text-secondary">{t("conversations.noModels")}</p>
@@ -128,7 +187,14 @@ function NewConversation({ server, onStarted }: { server: ServerEntry; onStarted
   return (
     <Group title={t("conversations.new")} footer={t("conversations.newFooter")}>
       <Row label={t("conversations.model")}>
-        <Select value={chosen} label={t("conversations.model")} options={options} onChange={setModel} />
+        <ModelPicker
+          value={chosen}
+          label={t("conversations.model")}
+          options={options}
+          className="w-full sm:w-72"
+          labels={{ placeholder: t("conversations.model"), search: t("nav.search"), empty: t("schema.noMatches") }}
+          onChange={setModel}
+        />
       </Row>
       <div className="flex flex-col gap-3 px-4 py-2.5">
         <textarea
@@ -139,33 +205,39 @@ function NewConversation({ server, onStarted }: { server: ServerEntry; onStarted
           value={instructions}
           onChange={(e) => setInstructions(e.target.value)}
         />
-        <textarea
-          className={`${input} min-h-20 py-2`}
-          aria-label={placeholder}
-          placeholder={placeholder}
-          maxLength={100000}
+        <Composer
           value={text}
-          onChange={(e) => setText(e.target.value)}
-          onKeyDown={sendOnEnter(start)}
+          onChange={setText}
+          onSend={start}
+          label={placeholder}
+          action={t("conversations.start")}
+          busy={create.isPending}
+          disabled={!chosen}
         />
-        <div className="flex flex-wrap items-center gap-3">
-          <Button disabled={!chosen || !text.trim() || create.isPending} onClick={start}>
-            {create.isPending ? "…" : t("conversations.start")}
-          </Button>
-          {create.isError && <span className="type-callout break-words text-danger">{errorMessage(create.error)}</span>}
-        </div>
+        {create.isError && <p className="type-callout break-words text-danger">{errorMessage(create.error)}</p>}
       </div>
     </Group>
   );
 }
 
-/** A message: the user's on the right, the model's on the left. */
-function Bubble({ user, who, text, pending }: { user: boolean; who: string; text: string; pending?: boolean }) {
+/**
+ * A message: the user's on the right, the model's on the left under the
+ * model as the model picker's rows show it; each short of the other side,
+ * so that the two stand apart.
+ */
+function Bubble({ who, text, pending }: { who?: ModelOption; text: string; pending?: boolean }) {
+  const user = !who;
   return (
-    <li className={`flex flex-col gap-1 ${user ? "items-end" : "items-start"}`}>
-      <span className="px-1 type-caption1 text-text-secondary">{who}</span>
+    <li className={`flex flex-col gap-1 ${user ? "items-end ps-[15%]" : "items-start pe-[15%]"}`}>
+      {who ? (
+        <span className="flex min-w-0 max-w-full items-center gap-2 px-1 type-callout">
+          <ModelLabel option={who} />
+        </span>
+      ) : (
+        <span className="px-1 type-caption text-text-tertiary">{t("conversations.you")}</span>
+      )}
       <div
-        className={`max-w-[min(100%,42rem)] rounded-lg px-3.5 py-2.5 type-body break-words whitespace-pre-wrap ${user ? "bg-button text-on-button" : "bg-surface"}`}
+        className={`max-w-[min(100%,42rem)] rounded-lg px-3 py-2 type-callout break-words whitespace-pre-wrap ${user ? "bg-button text-on-button" : "bg-surface"}`}
       >
         {text || (pending ? "…" : "")}
       </div>
@@ -177,6 +249,7 @@ function ConversationPage({ server, id, first, onFirstSent }: { server: ServerEn
   const conversation = useAiConversation(server, id);
   const { remove } = useAiConversationActions(server);
   const { exchange, send, retry, sending } = useAiSend(server, id);
+  const { options } = useModelOptions(server);
   const navigate = useNavigate();
   const cur = useSearch({ strict: false }) as SettingsSearch;
   const [text, setText] = useState("");
@@ -206,6 +279,13 @@ function ConversationPage({ server, id, first, onFirstSent }: { server: ServerEn
         {conversation.isSuccess && <p className="type-callout text-text-secondary">{t("conversations.gone")}</p>}
       </Page>
     );
+  // The conversation's model as the picker lists it, else by its ID.
+  const model: ModelOption = options.find((o) => o.value === `${c.provider}/${c.model}`) ?? {
+    value: `${c.provider}/${c.model}`,
+    label: c.model,
+    provider: c.provider,
+    providerName: c.provider,
+  };
   const submit = () => {
     const message = text.trim();
     if (!message || sending) return;
@@ -235,13 +315,13 @@ function ConversationPage({ server, id, first, onFirstSent }: { server: ServerEn
       {remove.isError && <p className="type-callout break-words text-danger">{errorMessage(remove.error)}</p>}
       <ul className="flex flex-col gap-4" aria-live="polite">
         {messages.map((m, i) => (
-          <Bubble key={i} user={m.role === AiRole.USER} who={m.role === AiRole.USER ? t("conversations.you") : c.model} text={m.text} />
+          <Bubble key={i} who={m.role === AiRole.USER ? undefined : model} text={m.text} />
         ))}
         {/* A failed message shows as the conversation kept it. */}
         {exchange && exchange.error === undefined && (
           <>
-            <Bubble user who={t("conversations.you")} text={exchange.text} />
-            <Bubble user={false} who={c.model} text={exchange.answer} pending />
+            <Bubble text={exchange.text} />
+            <Bubble who={model} text={exchange.answer} pending />
           </>
         )}
       </ul>
@@ -253,20 +333,15 @@ function ConversationPage({ server, id, first, onFirstSent }: { server: ServerEn
           </Button>
         </div>
       )}
-      <div ref={end} className="flex items-end gap-2">
-        <textarea
-          className={`${input} min-h-11 flex-1 py-2`}
-          rows={2}
-          aria-label={t("conversations.placeholder", { model: c.model })}
-          placeholder={t("conversations.placeholder", { model: c.model })}
-          maxLength={100000}
+      <div ref={end}>
+        <Composer
           value={text}
-          onChange={(e) => setText(e.target.value)}
-          onKeyDown={sendOnEnter(submit)}
+          onChange={setText}
+          onSend={submit}
+          label={t("conversations.placeholder", { model: model.label })}
+          action={t("conversations.send")}
+          busy={sending}
         />
-        <Button disabled={!text.trim() || sending} onClick={submit}>
-          {sending ? "…" : t("conversations.send")}
-        </Button>
       </div>
       <div>
         <Button variant="secondary" className="text-danger" onClick={() => setConfirming(true)}>
