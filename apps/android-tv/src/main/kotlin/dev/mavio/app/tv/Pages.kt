@@ -194,6 +194,9 @@ sealed class Page {
         val focus = FocusMemory()
     }
 
+    /** Connecting to a server and signing in to it, from the account (docs/tv.md §6.5). */
+    class AddServer : Page()
+
     /** An item's playback, from [start] when set. */
     class Player(val serverId: String, val itemId: String, val title: String, val mediaSourceId: String?, val start: Duration?) : Page()
 }
@@ -256,6 +259,11 @@ class Pages {
     /** Opens Search. */
     fun openSearch() {
         stack += Page.Search()
+    }
+
+    /** Opens connecting to a server. */
+    fun openAddServer() {
+        stack += Page.AddServer()
     }
 
     /** Opens the settings. */

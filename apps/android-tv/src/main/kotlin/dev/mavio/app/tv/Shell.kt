@@ -160,6 +160,7 @@ private fun Shell(model: AppModel) {
                 is Page.Search -> key(top) { SearchPage(model, top) }
                 is Page.Player -> key(top) { PlayerPage(model, top) }
                 is Page.Settings -> key(top) { SettingsPage(model, top) }
+                is Page.AddServer -> key(top) { SignInScreen(model, adding = true) { pages.back() } }
                 null -> {
                     Box(Modifier.fillMaxSize().onFocusChanged { inPage = it.hasFocus }) {
                         key(tab) {
