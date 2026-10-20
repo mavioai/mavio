@@ -19,7 +19,7 @@ export interface VoiceHandlers {
   closed(error?: string): void;
   /** The microphone's first audio came: what is said from now on is heard. */
   capturing?(): void;
-  /** The microphone gave nothing but silence, as a muted or virtual input does; device names it. */
+  /** Every microphone gave nothing but silence, as a muted or virtual input does; device names the first. */
   silent?(device: string): void;
 }
 
@@ -67,6 +67,23 @@ registerProcessor("mavio-capture", Capture);
 
 // How many of the microphone's 20 ms frames of digital silence tell it is silent.
 const silentFrames = 100;
+
+// The microphone that was heard after the browser's choice was silent, kept
+// for the next session: browsers can keep giving a site a virtual input, such
+// as a loopback device, whatever the system's choice.
+const microphoneKey = "mavio.assistant.microphone";
+
+function microphoneConstraints(deviceId?: ConstrainDOMString): MediaTrackConstraints {
+  return { deviceId, channelCount: 1, echoCancellation: true, noiseSuppression: true, autoGainControl: true };
+}
+
+function storedMicrophone(): string | undefined {
+  try {
+    return localStorage.getItem(microphoneKey) ?? undefined;
+  } catch {
+    return undefined;
+  }
+}
 
 /** How loud an analyser's signal is now, from 0 to about 1. */
 function loudness(a: AnalyserNode, buf: Float32Array<ArrayBuffer>): number {
@@ -158,6 +175,12 @@ export class VoiceSession {
   private captured = false;
   // 20 ms frames of the microphone's that were digital silence, until one was not.
   private zeros = 0;
+  // The microphones tried, by their group, and whether another is being opened.
+  private readonly tried = new Set<string>();
+  private switching = false;
+  private switched?: string;
+  private node?: AudioWorkletNode;
+  private source?: MediaStreamAudioSourceNode;
   // Whether the session said it is ready: one closed before failed.
   private ready = false;
   // Push to talk: whether the user talks, and what the socket was told.
@@ -168,7 +191,7 @@ export class VoiceSession {
   private readonly buf = new Float32Array(512);
 
   private constructor(
-    private readonly media: MediaStream,
+    private media: MediaStream,
     private readonly ctx: AudioContext,
     private readonly h: VoiceHandlers,
     /** The session listens only while the user holds to talk. */
@@ -187,7 +210,7 @@ export class VoiceSession {
     let media: MediaStream;
     try {
       [media] = await Promise.all([
-        navigator.mediaDevices.getUserMedia({ audio: { channelCount: 1, echoCancellation: true, noiseSuppression: true, autoGainControl: true } }),
+        navigator.mediaDevices.getUserMedia({ audio: microphoneConstraints(storedMicrophone() && { ideal: storedMicrophone() }) }),
         loaded,
       ]);
     } catch (err) {
@@ -198,13 +221,11 @@ export class VoiceSession {
     }
     const v = new VoiceSession(media, ctx, h);
     try {
-      const node = new AudioWorkletNode(ctx, "mavio-capture");
-      node.port.onmessage = (e: MessageEvent<ArrayBuffer>) => v.audio(e.data);
-      const source = ctx.createMediaStreamSource(media);
-      source.connect(node);
+      v.node = new AudioWorkletNode(ctx, "mavio-capture");
+      v.node.port.onmessage = (e: MessageEvent<ArrayBuffer>) => v.audio(e.data);
       v.input = ctx.createAnalyser();
       v.input.fftSize = 512;
-      source.connect(v.input);
+      v.listen(media);
     } catch (err) {
       v.release();
       throw err;
@@ -284,15 +305,67 @@ export class VoiceSession {
       this.captured = true;
       this.h.capturing?.();
     }
-    if (this.zeros >= 0) {
+    if (this.zeros >= 0 && !this.switching) {
       this.zeros = new Int16Array(pcm).some((x) => x !== 0) ? -1 : this.zeros + 1;
-      // A real microphone's noise is never all zeros for 2 s.
-      if (this.zeros === silentFrames) this.h.silent?.(this.media.getAudioTracks()[0]?.label ?? "");
+      if (this.zeros < 0 && this.switched !== undefined) {
+        try {
+          localStorage.setItem(microphoneKey, this.switched);
+        } catch {
+          // Only the next session's choice is lost.
+        }
+      }
+      // A real microphone's noise is never all zeros for 2 s: another is tried.
+      if (this.zeros === silentFrames) void this.another();
     }
     if (this.ws?.readyState === WebSocket.OPEN) this.ws.send(pcm);
     // The socket opens once the plugin has made the session's services,
     // which can take seconds: what the user says meanwhile is kept.
     else if (!this.ws || this.ws.readyState === WebSocket.CONNECTING) this.pending.push(pcm);
+  }
+
+  /** Captures a microphone's stream, in place of the one before. */
+  private listen(media: MediaStream) {
+    this.source?.disconnect();
+    if (media !== this.media) this.media.getTracks().forEach((t) => t.stop());
+    this.media = media;
+    const group = media.getAudioTracks()[0]?.getSettings().groupId;
+    if (group) this.tried.add(group);
+    this.source = this.ctx.createMediaStreamSource(media);
+    this.source.connect(this.node!);
+    this.source.connect(this.input!);
+  }
+
+  /** Opens another microphone than the silent ones, the system's own first; tells when none is left. */
+  private async another() {
+    const first = this.media.getAudioTracks()[0]?.label ?? "";
+    this.switching = true;
+    try {
+      const devices = (await navigator.mediaDevices.enumerateDevices()).filter((d) => d.kind === "audioinput" && !this.tried.has(d.groupId));
+      devices.sort((a, b) => Number(b.deviceId === "default") - Number(a.deviceId === "default"));
+      for (const d of devices) {
+        if (this.ended) return;
+        let media: MediaStream;
+        try {
+          media = await navigator.mediaDevices.getUserMedia({ audio: microphoneConstraints({ exact: d.deviceId }) });
+        } catch {
+          this.tried.add(d.groupId);
+          continue;
+        }
+        if (this.ended) {
+          media.getTracks().forEach((t) => t.stop());
+          return;
+        }
+        this.tried.add(d.groupId);
+        this.switched = d.deviceId;
+        this.zeros = 0;
+        this.listen(media);
+        return;
+      }
+      this.zeros = -1;
+      this.h.silent?.(this.tried.size > 1 ? "" : first);
+    } finally {
+      this.switching = false;
+    }
   }
 
   private message(data: ArrayBuffer | string) {
