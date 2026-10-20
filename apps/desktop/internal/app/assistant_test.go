@@ -39,8 +39,14 @@ func TestAssistant(t *testing.T) {
 	if p == nil || p.item != "orbit" {
 		t.Fatalf("the answer played %v, want = orbit", p)
 	}
-	has("playing", "Searched the library", "Playing The Long Orbit.")
+	has("playing", "You", "Searched the library", "Playing The Long Orbit.")
 	h.save(shots, "assistant-play")
+	// Each message has a bar copying it.
+	if err := h.tt.Click("Copy"); err != nil {
+		t.Fatal(err)
+	}
+	h.settle()
+	has("copied", "Copied")
 
 	// The fast path pauses the player with no request to the server.
 	asked := len(h.core.assistant.requests())

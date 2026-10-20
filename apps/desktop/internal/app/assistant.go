@@ -39,13 +39,19 @@ type assistantState struct {
 	win Window
 	// server is the server asked.
 	server string
-	// heard is the request, as the server understood it.
+	// heard is the request, as the server understood it, and heardAt
+	// when it was asked.
 	heard    string
+	heardAt  time.Time
 	working  bool
 	activity []toolLine
+	// answer is the answer, and answerAt when it was done.
 	answer   string
-	items    []*libraryv1.Item
-	choose   bool
+	answerAt time.Time
+	// copied is the message just copied, "heard" or "answer".
+	copied string
+	items  []*libraryv1.Item
+	choose bool
 	// waits tells that the answer waits for the user: a confirmation or
 	// results to choose from.
 	waits        bool
@@ -179,9 +185,9 @@ func (a *App) ask(lang string, req *assistantv1.AskRequest) {
 		state.SetResults(int32(len(st.items)))
 	}
 	st.open, st.server, st.working, st.waits = true, server, true, false
-	st.activity, st.answer, st.err, st.confirmation, st.lingering = nil, "", "", nil, 0
+	st.activity, st.answer, st.answerAt, st.err, st.confirmation, st.lingering = nil, "", time.Time{}, "", nil, 0
 	if text != "" {
-		st.heard = text
+		st.heard, st.heardAt = text, time.Now()
 	}
 	if text != "" || req.GetChoice() != "" {
 		st.items, st.choose = nil, false
@@ -274,7 +280,7 @@ func (a *App) replyLocal(ctx context.Context, run int, lang, fallback string, r 
 		if run != st.run {
 			return
 		}
-		st.working, st.answer = false, answer
+		st.working, st.answer, st.answerAt = false, answer, time.Now()
 		a.linger(run)
 	})
 }
@@ -322,7 +328,7 @@ func (a *App) askServer(ctx context.Context, run int, server string, req *assist
 		return
 	}
 	update(func() {
-		st.working = false
+		st.working, st.answerAt = false, time.Now()
 		switch {
 		case err != nil:
 			st.err = err.Error()
@@ -721,7 +727,7 @@ func (a *App) assistantPanel(c *ui.Context, win Window) {
 				}
 			})
 			ui.Scroll(c.Key("assistant-scroll")).Grow(1).Shrink(1).Children(func() {
-				ui.Column(c).Padding(12, 16).Gap(12).Children(func() { a.assistantBody(c, info, lang) })
+				ui.Column(c).Padding(12, 16).Gap(20).Children(func() { a.assistantBody(c, info, lang) })
 			})
 			ui.Box(c).Height(1).Background(style.Color(colors.Border))
 			a.assistantField(c, lang)
@@ -738,30 +744,46 @@ func (a *App) assistantBody(c *ui.Context, info *assistantv1.GetAssistantRespons
 		style.Text(ui.Text(c, style.T(c, "assistant.off")), style.Type(c).Callout).TextColor(style.Color(colors.TextSecondary))
 	}
 	if st.heard != "" {
-		style.Text(ui.Text(c, st.heard), style.Type(c).Title3).TextColor(style.Color(colors.TextPrimary))
-	}
-	if st.working && st.answer == "" {
-		style.Text(ui.Text(c, style.T(c, "assistant.working")), style.Type(c).Callout).TextColor(style.Color(colors.TextSecondary))
-	}
-	if len(st.activity) > 0 {
-		ui.Column(c).Gap(4).Children(func() {
-			for _, l := range st.activity {
-				icon, color := "pending", colors.TextSecondary
-				switch {
-				case l.failed:
-					icon, color = "error", colors.Danger
-				case l.done:
-					icon = "check"
-				}
-				ui.Row(c.Key(l.id)).Gap(8).AlignItems(ui.Center).Children(func() {
-					ui.Icon(c, style.Icon(icon, false)).Size(14, 14).TextColor(style.Color(color))
-					style.Text(ui.Text(c, l.summary), style.Type(c).Footnote).TextColor(style.Color(color))
-				})
-			}
+		// What the user said, in a bubble at the right under "You".
+		ui.Column(c.Key("heard")).Gap(4).AlignItems(ui.End).Padding(0, 0, 0, 64).Children(func() {
+			style.Text(ui.Text(c, style.T(c, "conversations.you")), style.Type(c).Caption).TextColor(style.Color(colors.TextTertiary)).Padding(0, 4)
+			bubble(c, st.heard, true)
+			a.messageBar(c, "heard", st.heard, st.heardAt)
 		})
 	}
-	if st.answer != "" {
-		style.Text(ui.Text(c, st.answer), style.Type(c).Body).TextColor(style.Color(colors.TextPrimary))
+	working := st.working && st.answer == ""
+	if working || len(st.activity) > 0 || st.answer != "" {
+		// The assistant's status, activity and answer, at the left under
+		// its name, the answer in a dashed bubble.
+		ui.Column(c.Key("answer")).Gap(4).AlignItems(ui.Start).Padding(0, 64, 0, 0).Children(func() {
+			style.Text(ui.Text(c, style.T(c, "assistant.title")), style.Type(c).Callout).TextColor(style.Color(colors.TextPrimary)).Padding(0, 4)
+			if working {
+				style.Text(ui.Text(c, style.T(c, "assistant.working")), style.Type(c).Callout).TextColor(style.Color(colors.TextSecondary)).Padding(0, 4)
+			}
+			if len(st.activity) > 0 {
+				ui.Column(c).Gap(4).Padding(0, 4).Children(func() {
+					for _, l := range st.activity {
+						icon, color := "pending", colors.TextSecondary
+						switch {
+						case l.failed:
+							icon, color = "error", colors.Danger
+						case l.done:
+							icon = "check"
+						}
+						ui.Row(c.Key(l.id)).Gap(8).AlignItems(ui.Center).Children(func() {
+							ui.Icon(c, style.Icon(icon, false)).Size(14, 14).TextColor(style.Color(color))
+							style.Text(ui.Text(c, l.summary), style.Type(c).Footnote).TextColor(style.Color(color))
+						})
+					}
+				})
+			}
+			if st.answer != "" {
+				bubble(c, st.answer, false)
+				if !st.answerAt.IsZero() {
+					a.messageBar(c, "answer", st.answer, st.answerAt)
+				}
+			}
+		})
 	}
 	if len(st.items) > 0 {
 		a.assistantItems(c)
@@ -773,10 +795,10 @@ func (a *App) assistantBody(c *ui.Context, info *assistantv1.GetAssistantRespons
 				answer := func(ok bool) {
 					a.ask(lang, assistantv1.AskRequest_builder{Answer: assistantv1.ConfirmationAnswer_builder{Id: new(cf.GetId()), Confirmed: new(ok)}.Build()}.Build())
 				}
-				if primaryPill(c, style.T(c, "assistant.confirm"), false) {
+				if confirmButton(c, style.T(c, "assistant.confirm"), true) {
 					answer(true)
 				}
-				if smallButton(c, style.T(c, "action.cancel"), false) {
+				if confirmButton(c, style.T(c, "action.cancel"), false) {
 					answer(false)
 				}
 			})
@@ -809,6 +831,81 @@ func (a *App) assistantBody(c *ui.Context, info *assistantv1.GetAssistantRespons
 			})
 		})
 	}
+}
+
+// bubble builds a message's bubble, as the web UI's: the user's and the
+// answer's alike, the answer's in a dashed border of the accent.
+func bubble(c *ui.Context, text string, user bool) {
+	colors := style.Colors(c)
+	b := ui.Box(c).MaxWidth(672).Padding(8, 12).Radius(design.RadiusLg).Background(style.Color(colors.Background))
+	if !user {
+		b.Border(1, style.Color(colors.Accent).Alpha(0.5)).BorderStyle(ui.BorderDashed)
+	}
+	b.Children(func() {
+		style.Text(ui.Text(c, text), style.Type(c).Callout).TextColor(style.Color(colors.TextPrimary)).Selectable()
+	})
+}
+
+// messageBar builds the bar under a message: a button copying it, then
+// its time, the date too when not today.
+func (a *App) messageBar(c *ui.Context, id, text string, at time.Time) {
+	st := &a.assistant
+	colors := style.Colors(c)
+	ui.Row(c.Key("bar-" + id)).Gap(2).AlignItems(ui.Center).Children(func() {
+		icon, label := "copy", style.T(c, "assistant.copyMessage")
+		if st.copied == id {
+			icon, label = "check", style.T(c, "assistant.copiedMessage")
+		}
+		b := ui.ButtonBase(c.Key("copy")).Size(28, 28).Radius(design.RadiusMd).Center().Label(label).Tooltip(label)
+		color := colors.TextTertiary
+		if b.Hovered() {
+			b.Background(style.Color(colors.Fill))
+			color = colors.TextPrimary
+		}
+		b.Children(func() {
+			ui.Icon(c, style.Icon(icon, false)).Size(16, 16).TextColor(style.Color(color))
+		})
+		if b.Clicked() {
+			c.WriteClipboard(text)
+			st.copied = id
+			time.AfterFunc(2*time.Second, func() {
+				a.opts.Update(func() {
+					if st.copied == id {
+						st.copied = ""
+					}
+				})
+			})
+		}
+		if at.IsZero() {
+			return
+		}
+		when := at.Local().Format("3:04 PM")
+		if y, m, d := at.Local().Date(); y != time.Now().Year() || m != time.Now().Month() || d != time.Now().Day() {
+			when = mediumDateTime(at)
+		}
+		style.Text(ui.Text(c, when), style.Type(c).Caption).TextColor(style.Color(colors.TextTertiary)).Padding(0, 4).Tooltip(mediumDateTime(at))
+	})
+}
+
+// confirmButton builds a button of a confirmation, as the web UI's: the
+// primary one the button's color, the other the fill.
+func confirmButton(c *ui.Context, label string, primary bool) bool {
+	colors := style.Colors(c)
+	b := ui.ButtonBase(c.Key("confirm-"+label)).MinHeight(28).Padding(0, 12).Radius(design.RadiusMd).Center().Label(label)
+	bg, fg := style.Color(colors.Fill), style.Color(colors.TextPrimary)
+	if primary {
+		bg, fg = style.Color(colors.Button), style.Color(colors.OnButton)
+	}
+	switch {
+	case primary && b.Hovered():
+		b.Opacity(0.85)
+	case b.Hovered():
+		bg = style.Color(colors.FillSelected)
+	}
+	b.Background(bg).Children(func() {
+		style.Text(ui.Text(c, label), style.Type(c).Headline).TextColor(fg)
+	})
+	return b.Clicked()
 }
 
 // assistantItems builds the results of an answer: to choose from,
@@ -861,7 +958,7 @@ func (a *App) assistantField(c *ui.Context, lang string) {
 	st := &a.assistant
 	colors := style.Colors(c)
 	ui.Row(c).Padding(10, 12).Gap(8).AlignItems(ui.Center).Children(func() {
-		label := style.T(c, "assistant.placeholder")
+		label := style.T(c, "assistant.messagePlaceholder")
 		f := ui.TextInputBase(c, &st.text).Grow(1).MinWidth(0).Height(40).Padding(0, 16).Radius(20).
 			Background(style.Color(colors.Fill)).Placeholder(label).Label(label).AutoFocus()
 		if f.Changed() {
