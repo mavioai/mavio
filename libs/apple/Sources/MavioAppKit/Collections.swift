@@ -45,6 +45,7 @@
         private let theme: Theme
         private var count = 0
         private var make: (@MainActor (Int) -> NSView)?
+        private var made: [Int: NSView] = [:]
         private var heightConstraint: NSLayoutConstraint!
         /// Room above and below the cards for one to grow with focus.
         private var room: CGFloat { theme.isTV ? 24 : 0 }
@@ -84,8 +85,8 @@
         public func show(count: Int, make: @escaping @MainActor (Int) -> NSView) {
             self.count = count
             self.make = make
-            if count > 0 {
-                let sample = make(0)
+            made = [:]
+            if count > 0, let sample = card(0) {
                 let size = sample.fittingSize
                 flow.itemSize = NSSize(width: ceil(size.width), height: ceil(size.height))
                 heightConstraint.constant = ceil(size.height) + room * 2
@@ -123,8 +124,18 @@
             _ collectionView: NSCollectionView, itemForRepresentedObjectAt indexPath: IndexPath
         ) -> NSCollectionViewItem {
             let item = collectionView.makeItem(withIdentifier: HostItem.identifier, for: indexPath)
-            if let host = item as? HostItem, let make { host.host(make(indexPath.item)) }
+            if let host = item as? HostItem, let view = card(indexPath.item) { host.host(view) }
             return item
+        }
+
+        /// The card at index, made once and kept while the row shows the
+        /// same cards, so that scrolling back does not make it again.
+        private func card(_ index: Int) -> NSView? {
+            if let view = made[index] { return view }
+            guard let make else { return nil }
+            let view = make(index)
+            made[index] = view
+            return view
         }
     }
 

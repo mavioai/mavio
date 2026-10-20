@@ -98,7 +98,9 @@
         }
     }
 
-    /// The places' stacks, each kept as the user moves among them.
+    /// The places' stacks, each kept as the user moves among them: in the
+    /// window, hidden while another shows, so that coming back to a place
+    /// does not lay its pages out anew.
     @MainActor
     final class PlacesController: NSViewController {
         private let context: MacContext
@@ -124,17 +126,19 @@
                 stacks[next]?.popToRoot()
                 return
             }
-            if let place, let shown = stacks[place] {
-                shown.view.removeFromSuperview()
-                shown.removeFromParent()
-            }
+            if let place { stacks[place]?.view.isHidden = true }
             place = next
-            let stack = stacks[next] ?? NavigationController(root: rootPage(next))
-            stack.keepsBelowTitleBar = true
-            stacks[next] = stack
-            addChild(stack)
-            view.addFilling(stack.view)
-            NotificationCenter.default.post(name: NavigationController.didChange, object: stack)
+            if let stack = stacks[next] {
+                stack.view.isHidden = false
+                (stack.top as? Reappearing)?.reappeared()
+            } else {
+                let stack = NavigationController(root: rootPage(next))
+                stack.keepsBelowTitleBar = true
+                stacks[next] = stack
+                addChild(stack)
+                view.addFilling(stack.view)
+            }
+            NotificationCenter.default.post(name: NavigationController.didChange, object: stacks[next])
         }
 
         func open(_ route: Route) {

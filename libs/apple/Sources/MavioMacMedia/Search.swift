@@ -12,7 +12,7 @@
     /// left, the search runs as it is typed, after a pause of 300 ms, and
     /// the right shows Home's rows while nothing is typed, then the results
     /// in grids.
-    final class SearchPage: Page, QuerySearching {
+    final class SearchPage: Page, QuerySearching, Reappearing {
         /// The query searched, empty before the first search.
         private var searched = ""
         /// The servers asked, and what each has answered.
@@ -40,6 +40,11 @@
 
         override func viewDidAppear() {
             super.viewDidAppear()
+            reappeared()
+        }
+
+        /// Puts the cursor in the page's own field, while nothing is searched.
+        func reappeared() {
             if !theme.isTV, searched.isEmpty, !fieldHolder.isHidden { view.window?.makeFirstResponder(field) }
         }
 

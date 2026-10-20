@@ -127,6 +127,14 @@
         }
     }
 
+    /// A page told when it shows again after its place was hidden, which
+    /// leaves it in the window rather than making it appear anew.
+    @MainActor
+    public protocol Reappearing {
+        /// Called as the page shows again.
+        func reappeared()
+    }
+
     /// A page whose top goes behind the window's title bar, as one led by
     /// a hero or a backdrop.
     @MainActor

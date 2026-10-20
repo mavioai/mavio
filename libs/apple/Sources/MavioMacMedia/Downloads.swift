@@ -4,7 +4,7 @@
 
     /// The items downloaded for offline playback, with the downloads going
     /// on: each plays its file, and its menu removes it or resumes it.
-    final class DownloadsPage: Page {
+    final class DownloadsPage: Page, Reappearing {
         private let page = ScrollPage([], spacing: 0, insets: .symmetric(vertical: MavioSpacing.s16))
         private var observer: Observer?
         private var shown: [DownloadEntry]?
@@ -19,6 +19,9 @@
             super.viewWillAppear()
             model.downloads.reload()
         }
+
+        /// Reloads the downloads as the place shows again.
+        func reappeared() { model.downloads.reload() }
 
         private func render() {
             let downloads = model.downloads
