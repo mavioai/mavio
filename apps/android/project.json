@@ -41,6 +41,9 @@
         {
           "dependentTasksOutputFiles": "**/*",
           "transitive": true
+        },
+        {
+          "env": "MAVIO_VERSION"
         }
       ],
       "cache": true,
@@ -79,6 +82,9 @@
         {
           "dependentTasksOutputFiles": "**/*",
           "transitive": true
+        },
+        {
+          "env": "MAVIO_VERSION"
         }
       ],
       "cache": true,

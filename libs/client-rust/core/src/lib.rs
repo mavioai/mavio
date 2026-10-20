@@ -46,9 +46,9 @@ pub use settings::{
 pub use store::{DownloadRecord, DownloadState, PendingProgress, ServerRecord, Store};
 pub use view::{Artwork, Card, CardKind, Row, RowContent, RowKind, TitleCard};
 
-/// The version of the core, which the apps show and send as their client
-/// version.
-pub const VERSION: &str = env!("CARGO_PKG_VERSION");
+/// The version of the core, which the apps show: a release's, else 0.0.0
+/// and the commit it was built at, else dev (build.rs).
+pub const VERSION: &str = env!("MAVIO_CORE_VERSION");
 
 #[cfg(test)]
 mod tests {
@@ -56,6 +56,21 @@ mod tests {
 
     #[test]
     fn version() {
-        assert_eq!(VERSION, "0.0.0", "got = {VERSION}, want = 0.0.0");
+        let built = option_env!("MAVIO_VERSION")
+            .filter(|v| !v.is_empty())
+            .map(|v| v.trim_start_matches('v'));
+        let ok = match built {
+            Some(release) => VERSION == release,
+            None => {
+                VERSION == "dev"
+                    || VERSION
+                        .strip_prefix("0.0.0-")
+                        .is_some_and(|r| r.len() == 12)
+            }
+        };
+        assert!(
+            ok,
+            "got = {VERSION}, want = a release's, 0.0.0-<commit> or dev"
+        );
     }
 }

@@ -7,6 +7,29 @@ plugins {
     alias(libs.plugins.android.test) apply false
 }
 
+// The version, as the server's and the core's: a release's from
+// $MAVIO_VERSION (v0.1.0 or 0.1.0), else 0.0.0 and the commit it is built
+// at, else dev. A release's code is x.y.z as x*10000+y*100+z, else the
+// number of commits.
+val release = providers.environmentVariable("MAVIO_VERSION").orNull?.removePrefix("v")?.takeIf { it.isNotEmpty() }
+
+fun git(vararg args: String): String? = runCatching {
+    providers.exec {
+        commandLine("git", *args)
+        isIgnoreExitValue = true
+    }.standardOutput.asText.get().trim()
+}.getOrNull()?.takeIf { it.isNotEmpty() }
+
+val mavioVersion: Pair<String, Int> = when {
+    release != null -> {
+        val (x, y, z) = requireNotNull(Regex("""(\d+)\.(\d+)\.(\d+)""").matchEntire(release)) { "MAVIO_VERSION $release is not x.y.z" }
+            .destructured.toList().map(String::toInt)
+        require(y < 100 && z < 100) { "MAVIO_VERSION $release has a part over 99" }
+        release to x * 10000 + y * 100 + z
+    }
+    else -> git("rev-parse", "--short=12", "HEAD")?.let { "0.0.0-$it" to (git("rev-list", "--count", "HEAD")?.toInt() ?: 1) } ?: ("dev" to 1)
+}
+
 android {
     namespace = "dev.mavio.app"
     compileSdk = 37
@@ -15,8 +38,8 @@ android {
         applicationId = "dev.mavio.app"
         minSdk = 26
         targetSdk = 37
-        versionCode = 1
-        versionName = "0.0.0"
+        versionCode = mavioVersion.second
+        versionName = mavioVersion.first
         // The ABIs the core is built for.
         ndk { abiFilters += listOf("arm64-v8a", "armeabi-v7a", "x86_64") }
         // The mavio.dev to sign a Mavio account in at; a development build
