@@ -191,18 +191,32 @@ func TestSynthesizeSettings(t *testing.T) {
 
 func TestContentType(t *testing.T) {
 	for _, c := range []struct {
-		audio []byte
-		want  string
+		header string
+		audio  []byte
+		format string
+		want   string
+		rate   int
 	}{
-		{[]byte("OggS\x00"), "audio/ogg"},
-		{[]byte("ID3\x04"), "audio/mpeg"},
-		{[]byte{0xff, 0xfb, 0x90}, "audio/mpeg"},
-		{[]byte{0xff, 0xf1, 0x50}, "audio/aac"},
-		{[]byte("fLaC"), "audio/flac"},
-		{[]byte("RIFF\x24\x00"), "audio/wav"},
+		{"audio/ogg", []byte("OggS\x00"), "", "audio/ogg", 0},
+		{"audio/mpeg", []byte{0, 0, 0xff, 0xff}, "", "audio/mpeg", 0},
+		{"audio/L16; rate=16000; channels=1", []byte("ID3"), "", "", 16000},
+		{"audio/pcm", []byte("OggS"), "", "", 24000},
+		{"", []byte("OggS\x00"), "", "audio/ogg", 0},
+		{"application/octet-stream", []byte("ID3\x04"), "", "audio/mpeg", 0},
+		{"", []byte{0xff, 0xfb, 0x90, 0x64}, "", "audio/mpeg", 0},
+		{"", []byte{0xff, 0xf1, 0x50, 0x80}, "", "audio/aac", 0},
+		{"", []byte("fLaC"), "", "audio/flac", 0},
+		{"", []byte("RIFF\x24\x00"), "", "audio/wav", 0},
+		{"", []byte("ID3\x04"), "pcm", "", 24000},
+		// Raw PCM, as OpenRouter's fish-audio/drama-3 answers without a
+		// format asked for, is not taken for frames.
+		{"application/octet-stream", []byte{0, 0, 0xff, 0xff}, "", "", 24000},
+		{"", []byte{0xff, 0xff, 0xff, 0xff}, "", "", 24000},
+		{"", []byte{0xfd, 0xff, 0xfb, 0xff}, "", "", 24000},
 	} {
-		if got := contentType(c.audio); got != c.want {
-			t.Errorf("contentType(%q) = %q, want = %q", c.audio, got, c.want)
+		got, rate := contentType(c.header, c.audio, c.format)
+		if got != c.want || rate != c.rate {
+			t.Errorf("contentType(%q, %q, %q) = %q, %d, want = %q, %d", c.header, c.audio, c.format, got, rate, c.want, c.rate)
 		}
 	}
 }

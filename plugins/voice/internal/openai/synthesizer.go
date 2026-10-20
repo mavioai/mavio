@@ -5,7 +5,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"mime"
 	"slices"
+	"strconv"
 	"strings"
 	"unicode"
 
@@ -122,30 +124,58 @@ func (s *Synthesizer) Synthesize(ctx context.Context, voice, text, _ string, spe
 	if err != nil {
 		return service.Speech{}, err
 	}
-	audio, err := s.c.do(ctx, "/audio/speech", "application/json", body)
+	audio, header, err := s.c.answer(ctx, "/audio/speech", "application/json", body)
 	if err != nil {
 		return service.Speech{}, err
 	}
-	if s.format == "pcm" {
+	ct, rate := contentType(header, audio, s.format)
+	if ct == "" {
 		// Raw samples go in a WAV file, which says what they are.
-		return service.Speech{Audio: service.WAVAt(audio, pcmRate), ContentType: "audio/wav"}, nil
+		return service.Speech{Audio: service.WAVAt(audio, rate), ContentType: "audio/wav"}, nil
 	}
-	return service.Speech{Audio: audio, ContentType: contentType(audio)}, nil
+	return service.Speech{Audio: audio, ContentType: ct}, nil
 }
 
-// contentType tells the encodings services answer in by their first bytes:
-// Opus comes in Ogg, whose pages start "OggS", AAC in ADTS frames; anything
-// else is taken for MP3.
-func contentType(audio []byte) string {
-	switch {
-	case bytes.HasPrefix(audio, []byte("OggS")):
-		return "audio/ogg"
-	case bytes.HasPrefix(audio, []byte("fLaC")):
-		return "audio/flac"
-	case bytes.HasPrefix(audio, []byte("RIFF")):
-		return "audio/wav"
-	case len(audio) > 1 && audio[0] == 0xff && audio[1]&0xf6 == 0xf0:
-		return "audio/aac"
+// contentType tells the encoding of speech by the content type the service
+// gives, else by its first bytes: Opus comes in Ogg, whose pages start
+// "OggS", AAC in ADTS frames, MP3 after an ID3 tag or in frames. Raw PCM,
+// asked for or not told by either, returns "" with its sample rate, the
+// API's 24 kHz unless the content type says another.
+func contentType(header string, audio []byte, format string) (string, int) {
+	media, params, _ := mime.ParseMediaType(header)
+	switch media {
+	case "audio/ogg", "audio/opus", "application/ogg":
+		return "audio/ogg", 0
+	case "audio/mpeg", "audio/mp3":
+		return "audio/mpeg", 0
+	case "audio/aac", "audio/x-aac":
+		return "audio/aac", 0
+	case "audio/flac", "audio/x-flac":
+		return "audio/flac", 0
+	case "audio/wav", "audio/x-wav", "audio/wave", "audio/vnd.wave":
+		return "audio/wav", 0
+	case "audio/pcm", "audio/l16", "audio/raw":
+		if rate, err := strconv.Atoi(params["rate"]); err == nil && rate > 0 {
+			return "", rate
+		}
+		return "", pcmRate
 	}
-	return "audio/mpeg"
+	switch {
+	case format == "pcm":
+	case bytes.HasPrefix(audio, []byte("OggS")):
+		return "audio/ogg", 0
+	case bytes.HasPrefix(audio, []byte("fLaC")):
+		return "audio/flac", 0
+	case bytes.HasPrefix(audio, []byte("RIFF")):
+		return "audio/wav", 0
+	case bytes.HasPrefix(audio, []byte("ID3")):
+		return "audio/mpeg", 0
+	case len(audio) > 2 && audio[0] == 0xff && audio[1]&0xf6 == 0xf0:
+		return "audio/aac", 0
+	case len(audio) > 2 && audio[0] == 0xff && audio[1]&0xe0 == 0xe0 && audio[1]&0x06 != 0 &&
+		audio[2]>>4 != 0 && audio[2]>>4 != 15 && audio[2]&0x0c != 0x0c:
+		// An MP3 frame's header: its layer, bitrate and sample rate are valid.
+		return "audio/mpeg", 0
+	}
+	return "", pcmRate
 }

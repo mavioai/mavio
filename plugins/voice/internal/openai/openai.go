@@ -71,9 +71,16 @@ func newClient(env service.Env, c connection, model string) (*client, error) {
 }
 
 func (c *client) do(ctx context.Context, path, contentType string, body []byte) ([]byte, error) {
+	data, _, err := c.answer(ctx, path, contentType, body)
+	return data, err
+}
+
+// answer posts a request to the API, returning the body of its answer
+// with its content type.
+func (c *client) answer(ctx context.Context, path, contentType string, body []byte) ([]byte, string, error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.base+path, bytes.NewReader(body))
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 	req.Header.Set("Content-Type", contentType)
 	if c.key != "" {
@@ -81,9 +88,10 @@ func (c *client) do(ctx context.Context, path, contentType string, body []byte) 
 	}
 	resp, err := c.http.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("%w: %w", service.ErrService, err)
+		return nil, "", fmt.Errorf("%w: %w", service.ErrService, err)
 	}
-	return service.Answer(resp)
+	data, err := service.Answer(resp)
+	return data, resp.Header.Get("Content-Type"), err
 }
 
 // form is a multipart form being written.
