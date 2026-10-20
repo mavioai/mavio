@@ -47,10 +47,10 @@ function TaskGroup({ server, title, tasks }: { server: ServerEntry; title: strin
     <Group title={title}>
       {tasks.map((task) => {
         const last = task.lastRun;
+        // A running task tells what it is doing, untranslated, and a run
+        // that succeeded what it did.
         const status = task.running
-          ? task.progress > 0
-            ? `${t("tasks.runningNow")} · ${Math.round(task.progress * 100)}%`
-            : t("tasks.runningNow")
+          ? [t("tasks.runningNow"), task.progress > 0 && `${Math.round(task.progress * 100)}%`, task.status].filter(Boolean).join(" · ")
           : last
             ? `${states[last.state].title()} ${ago(last.finishTime ?? last.runTime) ?? ""}`.trim()
             : t("tasks.neverRun");
@@ -76,6 +76,9 @@ function TaskGroup({ server, title, tasks }: { server: ServerEntry; title: strin
               </div>
               {last?.state === JobState.FAILED && last.lastError && !task.running && (
                 <div className="mt-0.5 type-footnote break-words text-danger">{last.lastError}</div>
+              )}
+              {last?.state === JobState.SUCCEEDED && last.result && !task.running && (
+                <div className="mt-0.5 type-footnote break-words text-text-secondary">{last.result}</div>
               )}
             </div>
             <Button
@@ -156,10 +159,12 @@ function JobRow({ job: j }: { job: Job }) {
             <span className="size-2 rounded-full" style={{ background: s.color }} />
             {s.title()}
           </span>
-          {j.progress !== undefined && <span>· {Math.floor(j.progress * 100)}%</span>}
+          {j.state === JobState.RUNNING && j.progress > 0 && <span>· {Math.floor(j.progress * 100)}%</span>}
+          {j.status && <span className="break-words">· {j.status}</span>}
           {when && <span>· {when}</span>}
           {j.attempts > 1 && <span>· {t("tasks.attempts", { attempts: j.attempts, max: j.maxAttempts })}</span>}
           {j.lastError && <span className="basis-full break-words text-danger">{j.lastError}</span>}
+          {j.state === JobState.SUCCEEDED && j.result && <span className="basis-full break-words">{j.result}</span>}
         </span>
       }
     />
