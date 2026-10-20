@@ -233,7 +233,7 @@ public struct SwitchUserSection: View {
 
 /// Asks for a user's four-digit PIN on a phone's keypad, as the web UI's;
 /// the fourth digit sends it, and a wrong one clears the dots.
-private struct PinPad: View {
+public struct PinPad: View {
     let name: String
     let busy: Bool
     let error: String?
@@ -242,7 +242,17 @@ private struct PinPad: View {
     @Environment(\.theme) private var theme
     @State private var pin = ""
 
-    var body: some View {
+    /// Asks name's PIN, giving it to enter, with the error of the last one
+    /// entered; cancel closes it.
+    public init(
+        name: String, busy: Bool, error: String?, enter: @escaping (String) -> Void,
+        cancel: @escaping () -> Void
+    ) {
+        (self.name, self.busy, self.error, self.enter, self.cancel) = (name, busy, error, enter, cancel)
+    }
+
+    /// The view's content.
+    public var body: some View {
         VStack(spacing: MavioSpacing.s20) {
             Avatar(name: name, size: 56)
             Text(MavioStrings.authEnterPin(name: name))

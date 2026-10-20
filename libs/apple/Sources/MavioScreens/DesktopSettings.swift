@@ -19,14 +19,16 @@
         let leave: () -> Void
         @Environment(AppModel.self) private var model
         @Environment(\.theme) private var theme
-        @State private var page = SettingsPage.appearance
+        @State private var page: SettingsPage
         @State private var serverId = ""
         /// Whether a server's user administers it, by the server and user.
         @State private var admin: [String: Bool] = [:]
 
-        /// The settings, leave returning Home.
-        public init(leave: @escaping () -> Void) {
+        /// The settings, on the account's page or the appearance's, leave
+        /// returning Home.
+        public init(account: Bool = false, leave: @escaping () -> Void) {
             self.leave = leave
+            _page = State(initialValue: account ? .account : .appearance)
         }
 
         /// The server whose sections the Server group shows.
