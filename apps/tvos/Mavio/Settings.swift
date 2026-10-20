@@ -3,42 +3,6 @@ import MavioKit
 import MavioUI
 import SwiftUI
 
-/// Where this device keeps its settings.
-enum DeviceSetting {
-    static let autoplayNext = "player.autoplayNext"
-}
-
-/// The quality the player asks the servers for.
-enum PlaybackQuality: String, CaseIterable {
-    case original, auto
-    case p1080 = "1080p"
-    case p720 = "720p"
-    case p480 = "480p"
-
-    /// Where this device keeps it.
-    static let key = "player.quality"
-
-    /// The bitrate it limits the stream to: Auto sends more from a server on
-    /// the local network than over the internet.
-    func bitrate(local: Bool) -> Int64 {
-        switch self {
-        case .original: 200_000_000
-        case .auto: local ? 100_000_000 : 40_000_000
-        case .p1080: 10_000_000
-        case .p720: 4_000_000
-        case .p480: 1_500_000
-        }
-    }
-
-    var label: String {
-        switch self {
-        case .original: MavioStrings.playerQualityOriginal
-        case .auto: MavioStrings.playerQualityAuto
-        default: rawValue
-        }
-    }
-}
-
 /// The settings (docs/tv.md §6.6): the list of their sections — the
 /// account, the users to switch to, this device's playback and the user's
 /// subtitles and audio, the Server group — each shown in its place when

@@ -702,37 +702,6 @@ enum PlayerPanel: CaseIterable, Identifiable {
     }
 }
 
-/// The most the server sends this device, as the web UI's qualities.
-enum PlaybackQuality: String, CaseIterable {
-    case original, auto
-    case p1080 = "1080p"
-    case p720 = "720p"
-    case p480 = "480p"
-
-    /// Where this device keeps it.
-    static let key = "player.quality"
-
-    /// The bitrate it limits the stream to: Auto sends more from a server on
-    /// the local network than over the internet.
-    func bitrate(local: Bool) -> Int64 {
-        switch self {
-        case .original: 200_000_000
-        case .auto: local ? 100_000_000 : 40_000_000
-        case .p1080: 10_000_000
-        case .p720: 4_000_000
-        case .p480: 1_500_000
-        }
-    }
-
-    var label: String {
-        switch self {
-        case .original: MavioStrings.playerQualityOriginal
-        case .auto: MavioStrings.playerQualityAuto
-        default: rawValue
-        }
-    }
-}
-
 /// The panel over the player's lower right: its tabs over the choices of
 /// the one shown, in glass.
 private struct PanelView<Content: View>: View {

@@ -102,8 +102,10 @@ extension ToolbarItemPlacement {
     public static var bottomOrSecondary: ToolbarItemPlacement {
         #if os(iOS)
             .bottomBar
-        #else
+        #elseif os(macOS)
             .secondaryAction
+        #else
+            .automatic
         #endif
     }
 }
@@ -114,8 +116,10 @@ extension SearchFieldPlacement {
     public static var pageField: SearchFieldPlacement {
         #if os(iOS)
             .navigationBarDrawer(displayMode: .always)
-        #else
+        #elseif os(macOS)
             .toolbar
+        #else
+            .automatic
         #endif
     }
 }

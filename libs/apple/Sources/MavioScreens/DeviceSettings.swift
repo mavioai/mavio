@@ -1,42 +1,19 @@
+import MavioKit
 import MavioUI
 import SwiftUI
 
-/// The theme the app takes on this device.
-enum Appearance: String, CaseIterable {
-    case system, light, dark
-
-    /// The color scheme it forces, if any.
-    var scheme: ColorScheme? {
-        switch self {
-        case .system: nil
-        case .light: .light
-        case .dark: .dark
-        }
-    }
-
-    var label: String {
-        switch self {
-        case .system: MavioStrings.settingsSystem
-        case .light: MavioStrings.settingsLight
-        case .dark: MavioStrings.settingsDark
-        }
-    }
-}
-
-/// The keys of this device's settings.
-enum DeviceSetting {
-    static let appearance = "appearance"
-    static let autoplayNext = "player.autoplayNext"
-}
-
 /// Appearance, as the web UI's: the theme as three pictures, and the
 /// language, which iOS sets for each app in the system's Settings.
-struct AppearanceView: View {
+public struct AppearanceView: View {
     @AppStorage(DeviceSetting.appearance) private var appearance = Appearance.system
     @Environment(\.theme) private var theme
     @Environment(\.openURL) private var openURL
 
-    var body: some View {
+    /// Appearance of this device.
+    public init() {}
+
+    /// The view's content.
+    public var body: some View {
         List {
             Section {
                 HStack(alignment: .top, spacing: MavioSpacing.s16) {
@@ -63,7 +40,7 @@ struct AppearanceView: View {
             }
             Section {
                 Button {
-                    if let url = URL(string: UIApplication.openSettingsURLString) { openURL(url) }
+                    if let url = URL(string: Self.languageSettings) { openURL(url) }
                 } label: {
                     LabeledContent(MavioStrings.settingsLanguage) {
                         HStack(spacing: MavioSpacing.s4) {
@@ -75,10 +52,20 @@ struct AppearanceView: View {
                 .tint(theme.colors.textPrimary)
             }
         }
-        .scrollContentBackground(.hidden)
+        .hiddenListBackground()
         .background(theme.colors.background)
         .navigationTitle(MavioStrings.settingsAppearance)
-        .navigationBarTitleDisplayMode(.inline)
+        .inlineTitle()
+    }
+
+    /// Where the system sets the app's language: its page of the Settings
+    /// app, or the Mac's Language & Region.
+    private static var languageSettings: String {
+        #if os(macOS)
+            "x-apple.systempreferences:com.apple.Localization-Settings.extension"
+        #else
+            UIApplication.openSettingsURLString
+        #endif
     }
 
     /// The language the app shows, in itself.
@@ -144,12 +131,16 @@ private struct ThemePreview: View {
 /// Playback, as the web UI's: the highest quality streamed to this device,
 /// which the player's panel also sets, and whether the next episode plays
 /// when one ends.
-struct PlaybackSettingsView: View {
+public struct PlaybackSettingsView: View {
     @AppStorage(PlaybackQuality.key) private var quality = PlaybackQuality.auto
     @AppStorage(DeviceSetting.autoplayNext) private var autoplayNext = true
     @Environment(\.theme) private var theme
 
-    var body: some View {
+    /// Playback on this device.
+    public init() {}
+
+    /// The view's content.
+    public var body: some View {
         List {
             Section {
                 Picker(MavioStrings.settingsMaxQuality, selection: $quality) {
@@ -162,9 +153,9 @@ struct PlaybackSettingsView: View {
             }
         }
         .tint(theme.colors.accent)
-        .scrollContentBackground(.hidden)
+        .hiddenListBackground()
         .background(theme.colors.background)
         .navigationTitle(MavioStrings.settingsPlayback)
-        .navigationBarTitleDisplayMode(.inline)
+        .inlineTitle()
     }
 }
