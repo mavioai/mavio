@@ -409,11 +409,14 @@ struct TasksView: View {
 
     private func taskRow(_ task: Mavio_System_V1_Task) -> some View {
         let last = task.hasLastRun ? task.lastRun : nil
+        // A running task tells what it is doing, untranslated, and a run
+        // that succeeded what it did.
         let status =
             task.running
-            ? task.progress > 0
-                ? "\(MavioStrings.tasksRunningNow) · \(Int((task.progress * 100).rounded()))%"
-                : MavioStrings.tasksRunningNow
+            ? [
+                MavioStrings.tasksRunningNow, task.progress > 0 ? "\(Int((task.progress * 100).rounded()))%" : "",
+                task.status,
+            ].filter { !$0.isEmpty }.joined(separator: " · ")
             : last.map { l in
                 [l.state.title, (l.finishTime.time ?? l.runTime.time).map(fromNow) ?? ""].filter { !$0.isEmpty }
                     .joined(separator: " ")
@@ -441,6 +444,9 @@ struct TasksView: View {
                 .type(theme.type.footnote).foregroundStyle(theme.colors.textSecondary)
                 if let last, last.state == .failed, !last.lastError.isEmpty, !task.running {
                     Text(last.lastError).type(theme.type.footnote).foregroundStyle(theme.colors.danger)
+                }
+                if let last, last.state == .succeeded, !last.result.isEmpty, !task.running {
+                    Text(last.result).type(theme.type.footnote).foregroundStyle(theme.colors.textSecondary)
                 }
             }
             Spacer(minLength: 0)
@@ -513,7 +519,8 @@ private struct JobRow: View {
                 Text(
                     ([job.state.title]
                         + [
-                            job.hasProgress ? "\(Int(job.progress * 100))%" : nil, when,
+                            job.state == .running && job.progress > 0 ? "\(Int(job.progress * 100))%" : nil,
+                            job.status.isEmpty ? nil : job.status, when,
                             job.attempts > 1
                                 ? MavioStrings.tasksAttempts(attempts: "\(job.attempts)", max: "\(job.maxAttempts)")
                                 : nil,
@@ -522,6 +529,9 @@ private struct JobRow: View {
             .type(theme.type.footnote).foregroundStyle(theme.colors.textSecondary)
             if !job.lastError.isEmpty {
                 Text(job.lastError).type(theme.type.footnote).foregroundStyle(theme.colors.danger)
+            }
+            if job.state == .succeeded, !job.result.isEmpty {
+                Text(job.result).type(theme.type.footnote).foregroundStyle(theme.colors.textSecondary)
             }
         }
     }
