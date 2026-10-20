@@ -47,7 +47,6 @@ struct RootView: View {
         .environment(router)
         .environment(discovery)
         .environment(\.theme, theme)
-        .environment(\.settingsPage) { AnyView(SettingsView()) }
         // Devices opens the remote control of another device.
         .environment(\.remoteControl) { server, sessionId in
             AnyView(RemoteView(server: server, sessionId: sessionId).presentationDetents([.medium, .large]))

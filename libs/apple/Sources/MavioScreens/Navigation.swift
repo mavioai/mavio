@@ -83,8 +83,6 @@ public final class Router {
 extension EnvironmentValues {
     /// How a `RouteLink` opens its page, when the stack opens it itself.
     @Entry public var openRoute: ((Route) -> Void)? = nil
-    /// The settings' page, which each app lays out its own way.
-    @Entry public var settingsPage: (@MainActor () -> AnyView)? = nil
 }
 
 /// A link to a page of the stack: a `NavigationLink`, or on the iPad a
@@ -124,7 +122,6 @@ extension RouteLink where Label == Text {
 /// The page of a route, as every stack opens it.
 public struct RouteDestination: View {
     let route: Route
-    @Environment(\.settingsPage) private var settings
 
     /// The page of route.
     public init(route: Route) { self.route = route }
@@ -142,7 +139,7 @@ public struct RouteDestination: View {
             case let .filteredLibrary(serverId, libraryId, filter):
                 FilteredLibraryView(serverId: serverId, libraryId: libraryId, filter: filter)
             case .search: SearchView()
-            case .settings: settings?()
+            case .settings: SettingsView()
             case .downloads: DownloadsView()
             case let .catalog(query): CatalogView(query: query)
             case let .title(serverId, kind, tmdbId):

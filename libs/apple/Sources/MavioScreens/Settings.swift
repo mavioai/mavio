@@ -1,6 +1,5 @@
 import MavioAdmin
 import MavioKit
-import MavioScreens
 import MavioUI
 import SwiftUI
 
@@ -8,7 +7,7 @@ import SwiftUI
 /// top right: the account's card, opening the account with its servers;
 /// this device's sections, with the downloads; the version; and signing
 /// out.
-struct SettingsView: View {
+public struct SettingsView: View {
     @Environment(AppModel.self) private var model
     @Environment(\.theme) private var theme
     @State private var serverId = ""
@@ -19,7 +18,11 @@ struct SettingsView: View {
         model.signedInServers.first { $0.id == serverId } ?? model.signedInServers.first
     }
 
-    var body: some View {
+    /// The settings.
+    public init() {}
+
+    /// The view's content.
+    public var body: some View {
         List {
             Section {
                 NavigationLink {
@@ -70,11 +73,11 @@ struct SettingsView: View {
                 .frame(maxWidth: .infinity)
             }
         }
-        .scrollContentBackground(.hidden)
+        .hiddenListBackground()
         .navigationTitle(MavioStrings.navSettings)
         // Large at the top left wherever it is opened from, centered small
         // in the bar once scrolled.
-        .navigationBarTitleDisplayMode(.large)
+        .largeTitle()
         .task(id: standalone?.userId) {
             if let server = standalone { switchable = await SwitchUserSection.load(model, server) }
         }
@@ -194,11 +197,13 @@ private struct AccountView: View {
                 AuthorizeDevice()
             }
         }
-        .scrollContentBackground(.hidden)
+        .hiddenListBackground()
         .background(theme.colors.background)
         .navigationTitle(MavioStrings.settingsAccount)
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar { EditButton() }
+        .inlineTitle()
+        #if os(iOS)
+            .toolbar { EditButton() }
+        #endif
         .task(id: standalone?.userId) {
             guard let server = standalone else { return }
             async let users = SwitchUserSection.load(model, server)
@@ -262,7 +267,7 @@ private struct AuthorizeDevice: View {
             }
             HStack {
                 TextField(MavioStrings.authQuickConnect, text: $code, prompt: Text("000000"))
-                    .keyboardType(.numberPad)
+                    .numberKeyboard()
                     .font(.system(.body, design: .monospaced))
                     .onChange(of: code) { _, new in
                         let digits = String(new.filter(\.isNumber).prefix(6))
