@@ -166,6 +166,20 @@ func (_c *JobCreate) SetNillableFinishedAt(v *time.Time) *JobCreate {
 	return _c
 }
 
+// SetResult sets the "result" field.
+func (_c *JobCreate) SetResult(v string) *JobCreate {
+	_c.mutation.SetResult(v)
+	return _c
+}
+
+// SetNillableResult sets the "result" field if the given value is not nil.
+func (_c *JobCreate) SetNillableResult(v *string) *JobCreate {
+	if v != nil {
+		_c.SetResult(*v)
+	}
+	return _c
+}
+
 // SetID sets the "id" field.
 func (_c *JobCreate) SetID(v core.ID) *JobCreate {
 	_c.mutation.SetID(v)
@@ -239,6 +253,10 @@ func (_c *JobCreate) defaults() {
 		v := job.DefaultCreatedAt()
 		_c.mutation.SetCreatedAt(v)
 	}
+	if _, ok := _c.mutation.Result(); !ok {
+		v := job.DefaultResult
+		_c.mutation.SetResult(v)
+	}
 	if _, ok := _c.mutation.ID(); !ok {
 		v := job.DefaultID()
 		_c.mutation.SetID(v)
@@ -276,6 +294,9 @@ func (_c *JobCreate) check() error {
 	}
 	if _, ok := _c.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Job.created_at"`)}
+	}
+	if _, ok := _c.mutation.Result(); !ok {
+		return &ValidationError{Name: "result", err: errors.New(`ent: missing required field "Job.result"`)}
 	}
 	return nil
 }
@@ -364,6 +385,10 @@ func (_c *JobCreate) createSpec() (*Job, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.FinishedAt(); ok {
 		_spec.SetField(job.FieldFinishedAt, field.TypeTime, value)
 		_node.FinishedAt = &value
+	}
+	if value, ok := _c.mutation.Result(); ok {
+		_spec.SetField(job.FieldResult, field.TypeString, value)
+		_node.Result = value
 	}
 	return _node, _spec
 }
@@ -594,6 +619,18 @@ func (u *JobUpsert) UpdateFinishedAt() *JobUpsert {
 // ClearFinishedAt clears the value of the "finished_at" field.
 func (u *JobUpsert) ClearFinishedAt() *JobUpsert {
 	u.SetNull(job.FieldFinishedAt)
+	return u
+}
+
+// SetResult sets the "result" field.
+func (u *JobUpsert) SetResult(v string) *JobUpsert {
+	u.Set(job.FieldResult, v)
+	return u
+}
+
+// UpdateResult sets the "result" field to the value that was provided on create.
+func (u *JobUpsert) UpdateResult() *JobUpsert {
+	u.SetExcluded(job.FieldResult)
 	return u
 }
 
@@ -855,6 +892,20 @@ func (u *JobUpsertOne) UpdateFinishedAt() *JobUpsertOne {
 func (u *JobUpsertOne) ClearFinishedAt() *JobUpsertOne {
 	return u.Update(func(s *JobUpsert) {
 		s.ClearFinishedAt()
+	})
+}
+
+// SetResult sets the "result" field.
+func (u *JobUpsertOne) SetResult(v string) *JobUpsertOne {
+	return u.Update(func(s *JobUpsert) {
+		s.SetResult(v)
+	})
+}
+
+// UpdateResult sets the "result" field to the value that was provided on create.
+func (u *JobUpsertOne) UpdateResult() *JobUpsertOne {
+	return u.Update(func(s *JobUpsert) {
+		s.UpdateResult()
 	})
 }
 
@@ -1283,6 +1334,20 @@ func (u *JobUpsertBulk) UpdateFinishedAt() *JobUpsertBulk {
 func (u *JobUpsertBulk) ClearFinishedAt() *JobUpsertBulk {
 	return u.Update(func(s *JobUpsert) {
 		s.ClearFinishedAt()
+	})
+}
+
+// SetResult sets the "result" field.
+func (u *JobUpsertBulk) SetResult(v string) *JobUpsertBulk {
+	return u.Update(func(s *JobUpsert) {
+		s.SetResult(v)
+	})
+}
+
+// UpdateResult sets the "result" field to the value that was provided on create.
+func (u *JobUpsertBulk) UpdateResult() *JobUpsertBulk {
+	return u.Update(func(s *JobUpsert) {
+		s.UpdateResult()
 	})
 }
 

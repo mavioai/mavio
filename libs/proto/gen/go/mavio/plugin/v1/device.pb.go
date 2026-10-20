@@ -1742,7 +1742,7 @@ const file_mavio_plugin_v1_device_proto_rawDesc = "" +
 	"\x1aPLAY_STATE_COMMAND_UNPAUSE\x10\x02\x12\x1b\n" +
 	"\x17PLAY_STATE_COMMAND_STOP\x10\x03\x12\x1b\n" +
 	"\x17PLAY_STATE_COMMAND_NEXT\x10\x04\x12\x1f\n" +
-	"\x1bPLAY_STATE_COMMAND_PREVIOUS\x10\x052\xe2\x04\n" +
+	"\x1bPLAY_STATE_COMMAND_PREVIOUS\x10\x052\xb6\x05\n" +
 	"\vHostService\x12U\n" +
 	"\n" +
 	"SetDevices\x12\".mavio.plugin.v1.SetDevicesRequest\x1a#.mavio.plugin.v1.SetDevicesResponse\x12c\n" +
@@ -1750,7 +1750,8 @@ const file_mavio_plugin_v1_device_proto_rawDesc = "" +
 	"\x0eListContainers\x12&.mavio.plugin.v1.ListContainersRequest\x1a'.mavio.plugin.v1.ListContainersResponse\"\x03\x90\x02\x01\x12]\n" +
 	"\vListProxies\x12#.mavio.plugin.v1.ListProxiesRequest\x1a$.mavio.plugin.v1.ListProxiesResponse\"\x03\x90\x02\x01\x12a\n" +
 	"\x0eSolveChallenge\x12&.mavio.plugin.v1.SolveChallengeRequest\x1a'.mavio.plugin.v1.SolveChallengeResponse\x12m\n" +
-	"\x12ReportTaskProgress\x12*.mavio.plugin.v1.ReportTaskProgressRequest\x1a+.mavio.plugin.v1.ReportTaskProgressResponse2s\n" +
+	"\x12ReportTaskProgress\x12*.mavio.plugin.v1.ReportTaskProgressRequest\x1a+.mavio.plugin.v1.ReportTaskProgressResponse\x12R\n" +
+	"\tStartTask\x12!.mavio.plugin.v1.StartTaskRequest\x1a\".mavio.plugin.v1.StartTaskResponse2s\n" +
 	"\x17DeviceControllerService\x12X\n" +
 	"\vSendCommand\x12#.mavio.plugin.v1.SendCommandRequest\x1a$.mavio.plugin.v1.SendCommandResponseB\xc5\x01\n" +
 	"\x13com.mavio.plugin.v1B\vDeviceProtoP\x01ZCgithub.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1;pluginv1\xa2\x02\x03MPX\xaa\x02\x0fMavio.Plugin.V1\xca\x02\x0fMavio\\Plugin\\V1\xe2\x02\x1bMavio\\Plugin\\V1\\GPBMetadata\xea\x02\x11Mavio::Plugin::V1b\beditionsp\xe8\a"
@@ -1778,10 +1779,12 @@ var file_mavio_plugin_v1_device_proto_goTypes = []any{
 	(*ListProxiesRequest)(nil),         // 17: mavio.plugin.v1.ListProxiesRequest
 	(*SolveChallengeRequest)(nil),      // 18: mavio.plugin.v1.SolveChallengeRequest
 	(*ReportTaskProgressRequest)(nil),  // 19: mavio.plugin.v1.ReportTaskProgressRequest
-	(*ListContainersResponse)(nil),     // 20: mavio.plugin.v1.ListContainersResponse
-	(*ListProxiesResponse)(nil),        // 21: mavio.plugin.v1.ListProxiesResponse
-	(*SolveChallengeResponse)(nil),     // 22: mavio.plugin.v1.SolveChallengeResponse
-	(*ReportTaskProgressResponse)(nil), // 23: mavio.plugin.v1.ReportTaskProgressResponse
+	(*StartTaskRequest)(nil),           // 20: mavio.plugin.v1.StartTaskRequest
+	(*ListContainersResponse)(nil),     // 21: mavio.plugin.v1.ListContainersResponse
+	(*ListProxiesResponse)(nil),        // 22: mavio.plugin.v1.ListProxiesResponse
+	(*SolveChallengeResponse)(nil),     // 23: mavio.plugin.v1.SolveChallengeResponse
+	(*ReportTaskProgressResponse)(nil), // 24: mavio.plugin.v1.ReportTaskProgressResponse
+	(*StartTaskResponse)(nil),          // 25: mavio.plugin.v1.StartTaskResponse
 }
 var file_mavio_plugin_v1_device_proto_depIdxs = []int32{
 	0,  // 0: mavio.plugin.v1.Device.commands:type_name -> mavio.plugin.v1.CommandKind
@@ -1802,16 +1805,18 @@ var file_mavio_plugin_v1_device_proto_depIdxs = []int32{
 	17, // 15: mavio.plugin.v1.HostService.ListProxies:input_type -> mavio.plugin.v1.ListProxiesRequest
 	18, // 16: mavio.plugin.v1.HostService.SolveChallenge:input_type -> mavio.plugin.v1.SolveChallengeRequest
 	19, // 17: mavio.plugin.v1.HostService.ReportTaskProgress:input_type -> mavio.plugin.v1.ReportTaskProgressRequest
-	11, // 18: mavio.plugin.v1.DeviceControllerService.SendCommand:input_type -> mavio.plugin.v1.SendCommandRequest
-	10, // 19: mavio.plugin.v1.HostService.SetDevices:output_type -> mavio.plugin.v1.SetDevicesResponse
-	14, // 20: mavio.plugin.v1.HostService.GetServerInfo:output_type -> mavio.plugin.v1.GetServerInfoResponse
-	20, // 21: mavio.plugin.v1.HostService.ListContainers:output_type -> mavio.plugin.v1.ListContainersResponse
-	21, // 22: mavio.plugin.v1.HostService.ListProxies:output_type -> mavio.plugin.v1.ListProxiesResponse
-	22, // 23: mavio.plugin.v1.HostService.SolveChallenge:output_type -> mavio.plugin.v1.SolveChallengeResponse
-	23, // 24: mavio.plugin.v1.HostService.ReportTaskProgress:output_type -> mavio.plugin.v1.ReportTaskProgressResponse
-	12, // 25: mavio.plugin.v1.DeviceControllerService.SendCommand:output_type -> mavio.plugin.v1.SendCommandResponse
-	19, // [19:26] is the sub-list for method output_type
-	12, // [12:19] is the sub-list for method input_type
+	20, // 18: mavio.plugin.v1.HostService.StartTask:input_type -> mavio.plugin.v1.StartTaskRequest
+	11, // 19: mavio.plugin.v1.DeviceControllerService.SendCommand:input_type -> mavio.plugin.v1.SendCommandRequest
+	10, // 20: mavio.plugin.v1.HostService.SetDevices:output_type -> mavio.plugin.v1.SetDevicesResponse
+	14, // 21: mavio.plugin.v1.HostService.GetServerInfo:output_type -> mavio.plugin.v1.GetServerInfoResponse
+	21, // 22: mavio.plugin.v1.HostService.ListContainers:output_type -> mavio.plugin.v1.ListContainersResponse
+	22, // 23: mavio.plugin.v1.HostService.ListProxies:output_type -> mavio.plugin.v1.ListProxiesResponse
+	23, // 24: mavio.plugin.v1.HostService.SolveChallenge:output_type -> mavio.plugin.v1.SolveChallengeResponse
+	24, // 25: mavio.plugin.v1.HostService.ReportTaskProgress:output_type -> mavio.plugin.v1.ReportTaskProgressResponse
+	25, // 26: mavio.plugin.v1.HostService.StartTask:output_type -> mavio.plugin.v1.StartTaskResponse
+	12, // 27: mavio.plugin.v1.DeviceControllerService.SendCommand:output_type -> mavio.plugin.v1.SendCommandResponse
+	20, // [20:28] is the sub-list for method output_type
+	12, // [12:20] is the sub-list for method input_type
 	12, // [12:12] is the sub-list for extension type_name
 	12, // [12:12] is the sub-list for extension extendee
 	0,  // [0:12] is the sub-list for field type_name

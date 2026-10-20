@@ -263,8 +263,8 @@ func (q observedJobs) Lease(ctx context.Context, owner string, kinds []string, t
 	return job, err
 }
 
-func (q observedJobs) Complete(ctx context.Context, id core.ID, owner string) error {
-	err := q.JobQueue.Complete(ctx, id, owner)
+func (q observedJobs) Complete(ctx context.Context, id core.ID, owner, result string) error {
+	err := q.JobQueue.Complete(ctx, id, owner, result)
 	if err == nil {
 		q.o.report(func() { q.o.hub.JobEnded(id, nil) })
 	}

@@ -26,4 +26,5 @@ type Job struct {
 	LastError      string
 	CreatedAt      time.Time
 	FinishedAt     sql.NullTime
+	Result         string
 }

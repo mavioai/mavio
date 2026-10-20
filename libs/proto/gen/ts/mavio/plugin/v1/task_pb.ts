@@ -13,7 +13,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file mavio/plugin/v1/task.proto.
  */
 export const file_mavio_plugin_v1_task: GenFile = /*@__PURE__*/
-  fileDesc("ChptYXZpby9wbHVnaW4vdjEvdGFzay5wcm90bxIPbWF2aW8ucGx1Z2luLnYxIo4BCgRUYXNrEgoKAmlkGAEgASgJEgwKBG5hbWUYAiABKAkSEwoLZGVzY3JpcHRpb24YAyABKAkSKwoIaW50ZXJ2YWwYBCABKAsyGS5nb29nbGUucHJvdG9idWYuRHVyYXRpb24SKgoHdGltZW91dBgFIAEoCzIZLmdvb2dsZS5wcm90b2J1Zi5EdXJhdGlvbiIhCg5SdW5UYXNrUmVxdWVzdBIPCgd0YXNrX2lkGAEgASgJIiIKD1J1blRhc2tSZXNwb25zZRIPCgdtZXNzYWdlGAEgASgJIl8KGVJlcG9ydFRhc2tQcm9ncmVzc1JlcXVlc3QSFwoHdGFza19pZBgBIAEoCUIGukgDyAEBEikKCHByb2dyZXNzGAIgASgBQhe6SBQSEhkAAAAAAADwPykAAAAAAAAAACIcChpSZXBvcnRUYXNrUHJvZ3Jlc3NSZXNwb25zZTJhChFUYXNrUnVubmVyU2VydmljZRJMCgdSdW5UYXNrEh8ubWF2aW8ucGx1Z2luLnYxLlJ1blRhc2tSZXF1ZXN0GiAubWF2aW8ucGx1Z2luLnYxLlJ1blRhc2tSZXNwb25zZULDAQoTY29tLm1hdmlvLnBsdWdpbi52MUIJVGFza1Byb3RvUAFaQ2dpdGh1Yi5jb20vbWF2aW9haS9tYXZpby9saWJzL3Byb3RvL2dlbi9nby9tYXZpby9wbHVnaW4vdjE7cGx1Z2ludjGiAgNNUFiqAg9NYXZpby5QbHVnaW4uVjHKAg9NYXZpb1xQbHVnaW5cVjHiAhtNYXZpb1xQbHVnaW5cVjFcR1BCTWV0YWRhdGHqAhFNYXZpbzo6UGx1Z2luOjpWMWIIZWRpdGlvbnNw6Ac", [file_buf_validate_validate, file_google_protobuf_duration]);
+  fileDesc("ChptYXZpby9wbHVnaW4vdjEvdGFzay5wcm90bxIPbWF2aW8ucGx1Z2luLnYxIo4BCgRUYXNrEgoKAmlkGAEgASgJEgwKBG5hbWUYAiABKAkSEwoLZGVzY3JpcHRpb24YAyABKAkSKwoIaW50ZXJ2YWwYBCABKAsyGS5nb29nbGUucHJvdG9idWYuRHVyYXRpb24SKgoHdGltZW91dBgFIAEoCzIZLmdvb2dsZS5wcm90b2J1Zi5EdXJhdGlvbiIhCg5SdW5UYXNrUmVxdWVzdBIPCgd0YXNrX2lkGAEgASgJIiIKD1J1blRhc2tSZXNwb25zZRIPCgdtZXNzYWdlGAEgASgJInkKGVJlcG9ydFRhc2tQcm9ncmVzc1JlcXVlc3QSFwoHdGFza19pZBgBIAEoCUIGukgDyAEBEikKCHByb2dyZXNzGAIgASgBQhe6SBQSEhkAAAAAAADwPykAAAAAAAAAABIYCgZzdGF0dXMYAyABKAlCCLpIBXIDGMgBIhwKGlJlcG9ydFRhc2tQcm9ncmVzc1Jlc3BvbnNlIisKEFN0YXJ0VGFza1JlcXVlc3QSFwoHdGFza19pZBgBIAEoCUIGukgDyAEBIhMKEVN0YXJ0VGFza1Jlc3BvbnNlMmEKEVRhc2tSdW5uZXJTZXJ2aWNlEkwKB1J1blRhc2sSHy5tYXZpby5wbHVnaW4udjEuUnVuVGFza1JlcXVlc3QaIC5tYXZpby5wbHVnaW4udjEuUnVuVGFza1Jlc3BvbnNlQsMBChNjb20ubWF2aW8ucGx1Z2luLnYxQglUYXNrUHJvdG9QAVpDZ2l0aHViLmNvbS9tYXZpb2FpL21hdmlvL2xpYnMvcHJvdG8vZ2VuL2dvL21hdmlvL3BsdWdpbi92MTtwbHVnaW52MaICA01QWKoCD01hdmlvLlBsdWdpbi5WMcoCD01hdmlvXFBsdWdpblxWMeICG01hdmlvXFBsdWdpblxWMVxHUEJNZXRhZGF0YeoCEU1hdmlvOjpQbHVnaW46OlYxYghlZGl0aW9uc3DoBw", [file_buf_validate_validate, file_google_protobuf_duration]);
 
 /**
  * Task is a task a plugin declares.
@@ -82,7 +82,10 @@ export const RunTaskRequestSchema: GenMessage<RunTaskRequest> = /*@__PURE__*/
  */
 export type RunTaskResponse = Message<"mavio.plugin.v1.RunTaskResponse"> & {
   /**
-   * Summary of what the run did, which the host logs.
+   * Summary of what the run did, which the host logs and shows as the
+   * result of its run; empty when there is nothing to tell. As it is not
+   * translated, it should name what the run did, such as the models it
+   * downloaded, rather than be a sentence.
    *
    * @generated from field: string message = 1;
    */
@@ -113,6 +116,15 @@ export type ReportTaskProgressRequest = Message<"mavio.plugin.v1.ReportTaskProgr
    * @generated from field: double progress = 2;
    */
   progress: number;
+
+  /**
+   * What the run is doing, shown with the progress, such as the model it
+   * downloads; at most 200 characters. As it is not translated, it should
+   * name things rather than be a sentence. Empty keeps none.
+   *
+   * @generated from field: string status = 3;
+   */
+  status: string;
 };
 
 /**
@@ -134,6 +146,38 @@ export type ReportTaskProgressResponse = Message<"mavio.plugin.v1.ReportTaskProg
  */
 export const ReportTaskProgressResponseSchema: GenMessage<ReportTaskProgressResponse> = /*@__PURE__*/
   messageDesc(file_mavio_plugin_v1_task, 4);
+
+/**
+ * @generated from message mavio.plugin.v1.StartTaskRequest
+ */
+export type StartTaskRequest = Message<"mavio.plugin.v1.StartTaskRequest"> & {
+  /**
+   * A task of the calling plugin's manifest.
+   *
+   * @generated from field: string task_id = 1;
+   */
+  taskId: string;
+};
+
+/**
+ * Describes the message mavio.plugin.v1.StartTaskRequest.
+ * Use `create(StartTaskRequestSchema)` to create a new message.
+ */
+export const StartTaskRequestSchema: GenMessage<StartTaskRequest> = /*@__PURE__*/
+  messageDesc(file_mavio_plugin_v1_task, 5);
+
+/**
+ * @generated from message mavio.plugin.v1.StartTaskResponse
+ */
+export type StartTaskResponse = Message<"mavio.plugin.v1.StartTaskResponse"> & {
+};
+
+/**
+ * Describes the message mavio.plugin.v1.StartTaskResponse.
+ * Use `create(StartTaskResponseSchema)` to create a new message.
+ */
+export const StartTaskResponseSchema: GenMessage<StartTaskResponse> = /*@__PURE__*/
+  messageDesc(file_mavio_plugin_v1_task, 6);
 
 /**
  * TaskRunnerService runs the tasks a plugin declares in its manifest. The

@@ -50,6 +50,12 @@ message Job {
   // The fraction done of a running job that tells it, 0 to 1, such as
   // the download of an image a plugin.container_pull job pulls.
   double progress = 12;
+  // What a running job is doing, as it tells, such as the model a
+  // plugin's task downloads.
+  string status = 13;
+  // Summary of what a succeeded job did, as it tells, such as the models a
+  // plugin's task downloaded; empty when it tells nothing.
+  string result = 14;
 }
 
 // Task is a recurring piece of work.
@@ -73,6 +79,8 @@ message Task {
   // The fraction done of its run in progress that tells it, 0 to 1, such
   // as a plugin's download of its models.
   double progress = 10;
+  // What its run in progress is doing, as it tells.
+  string status = 11;
 }
 
 message ListTasksRequest {}

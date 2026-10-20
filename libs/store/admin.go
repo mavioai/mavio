@@ -343,7 +343,7 @@ func (r jobs) List(ctx context.Context, q core.JobQuery) (core.Page[core.Job], e
 		out.Items[i] = core.Job{
 			ID: j.ID, Kind: j.Kind, Payload: j.Payload, UniqueKey: j.UniqueKey, State: core.JobState(j.State),
 			Priority: j.Priority, Attempts: j.Attempts, MaxAttempts: j.MaxAttempts, RunAt: j.RunAt.UTC(),
-			LeaseOwner: j.LeaseOwner, LastError: j.LastError, CreatedAt: j.CreatedAt.UTC(),
+			LeaseOwner: j.LeaseOwner, LastError: j.LastError, Result: j.Result, CreatedAt: j.CreatedAt.UTC(),
 		}
 		if j.LeaseExpiresAt != nil {
 			out.Items[i].LeaseExpiresAt = j.LeaseExpiresAt.UTC()

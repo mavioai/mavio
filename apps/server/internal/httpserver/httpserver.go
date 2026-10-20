@@ -219,6 +219,7 @@ func Handler(opts Options) (http.Handler, error) {
 	taskProgress, _ := opts.Plugins.(rpc.TaskProgress)
 	if taskProgress != nil {
 		progress = append(progress, taskProgress.JobProgress)
+		tasks.Status = taskProgress.JobStatus
 	}
 	tasks.Progress = func(id core.ID) (float64, bool) {
 		for _, p := range progress {

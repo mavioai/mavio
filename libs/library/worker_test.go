@@ -34,8 +34,9 @@ func TestWorker(t *testing.T) {
 	m := newMemStore()
 	ran := 0
 	w := &Worker{Queue: m.Jobs(), Owner: "w1", Handlers: map[string]Handler{
-		"ok": func(context.Context, core.Job) ([]core.Job, error) {
+		"ok": func(ctx context.Context, _ core.Job) ([]core.Job, error) {
 			ran++
+			SetResult(ctx, "did it")
 			// The follow-up shares the job's key, so it can only be
 			// enqueued once the job completed.
 			return []core.Job{{ID: core.NewID(), Kind: "later", UniqueKey: "ok", MaxAttempts: 1, RunAt: m.clock().Add(time.Hour)}}, nil
@@ -57,7 +58,7 @@ func TestWorker(t *testing.T) {
 	if ran, _ := w.RunOne(t.Context()); ran {
 		t.Error("ran a job that is not due")
 	}
-	if got := m.job(ok.ID); got.State != core.JobSucceeded || ran != 1 {
+	if got := m.job(ok.ID); got.State != core.JobSucceeded || got.Result != "did it" || ran != 1 {
 		t.Errorf("ok = %+v", got)
 	}
 	kinds := map[string]bool{}

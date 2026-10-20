@@ -67,150 +67,11 @@ public nonisolated enum Mavio_System_V1_JobState: SwiftProtobuf.Enum, Swift.Case
 }
 
 /// Job is a unit of background work.
-public nonisolated struct Mavio_System_V1_Job: Sendable {
+public nonisolated struct Mavio_System_V1_Job: @unchecked Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  public var id: String {
-    get {_id ?? String()}
-    set {_id = newValue}
-  }
-  /// Returns true if `id` has been explicitly set.
-  public var hasID: Bool {self._id != nil}
-  /// Clears the value of `id`. Subsequent reads from it will return its default value.
-  public mutating func clearID() {self._id = nil}
-
-  /// Such as "library.scan".
-  public var kind: String {
-    get {_kind ?? String()}
-    set {_kind = newValue}
-  }
-  /// Returns true if `kind` has been explicitly set.
-  public var hasKind: Bool {self._kind != nil}
-  /// Clears the value of `kind`. Subsequent reads from it will return its default value.
-  public mutating func clearKind() {self._kind = nil}
-
-  public var state: Mavio_System_V1_JobState {
-    get {_state ?? .unspecified}
-    set {_state = newValue}
-  }
-  /// Returns true if `state` has been explicitly set.
-  public var hasState: Bool {self._state != nil}
-  /// Clears the value of `state`. Subsequent reads from it will return its default value.
-  public mutating func clearState() {self._state = nil}
-
-  public var priority: Int32 {
-    get {_priority ?? 0}
-    set {_priority = newValue}
-  }
-  /// Returns true if `priority` has been explicitly set.
-  public var hasPriority: Bool {self._priority != nil}
-  /// Clears the value of `priority`. Subsequent reads from it will return its default value.
-  public mutating func clearPriority() {self._priority = nil}
-
-  public var attempts: Int32 {
-    get {_attempts ?? 0}
-    set {_attempts = newValue}
-  }
-  /// Returns true if `attempts` has been explicitly set.
-  public var hasAttempts: Bool {self._attempts != nil}
-  /// Clears the value of `attempts`. Subsequent reads from it will return its default value.
-  public mutating func clearAttempts() {self._attempts = nil}
-
-  public var maxAttempts: Int32 {
-    get {_maxAttempts ?? 0}
-    set {_maxAttempts = newValue}
-  }
-  /// Returns true if `maxAttempts` has been explicitly set.
-  public var hasMaxAttempts: Bool {self._maxAttempts != nil}
-  /// Clears the value of `maxAttempts`. Subsequent reads from it will return its default value.
-  public mutating func clearMaxAttempts() {self._maxAttempts = nil}
-
-  /// When it runs, or ran last.
-  public var runTime: SwiftProtobuf.Google_Protobuf_Timestamp {
-    get {_runTime ?? SwiftProtobuf.Google_Protobuf_Timestamp()}
-    set {_runTime = newValue}
-  }
-  /// Returns true if `runTime` has been explicitly set.
-  public var hasRunTime: Bool {self._runTime != nil}
-  /// Clears the value of `runTime`. Subsequent reads from it will return its default value.
-  public mutating func clearRunTime() {self._runTime = nil}
-
-  public var createTime: SwiftProtobuf.Google_Protobuf_Timestamp {
-    get {_createTime ?? SwiftProtobuf.Google_Protobuf_Timestamp()}
-    set {_createTime = newValue}
-  }
-  /// Returns true if `createTime` has been explicitly set.
-  public var hasCreateTime: Bool {self._createTime != nil}
-  /// Clears the value of `createTime`. Subsequent reads from it will return its default value.
-  public mutating func clearCreateTime() {self._createTime = nil}
-
-  public var finishTime: SwiftProtobuf.Google_Protobuf_Timestamp {
-    get {_finishTime ?? SwiftProtobuf.Google_Protobuf_Timestamp()}
-    set {_finishTime = newValue}
-  }
-  /// Returns true if `finishTime` has been explicitly set.
-  public var hasFinishTime: Bool {self._finishTime != nil}
-  /// Clears the value of `finishTime`. Subsequent reads from it will return its default value.
-  public mutating func clearFinishTime() {self._finishTime = nil}
-
-  public var lastError: String {
-    get {_lastError ?? String()}
-    set {_lastError = newValue}
-  }
-  /// Returns true if `lastError` has been explicitly set.
-  public var hasLastError: Bool {self._lastError != nil}
-  /// Clears the value of `lastError`. Subsequent reads from it will return its default value.
-  public mutating func clearLastError() {self._lastError = nil}
-
-  /// The kind-specific argument, as JSON.
-  public var payloadJson: String {
-    get {_payloadJson ?? String()}
-    set {_payloadJson = newValue}
-  }
-  /// Returns true if `payloadJson` has been explicitly set.
-  public var hasPayloadJson: Bool {self._payloadJson != nil}
-  /// Clears the value of `payloadJson`. Subsequent reads from it will return its default value.
-  public mutating func clearPayloadJson() {self._payloadJson = nil}
-
-  /// The fraction done of a running job that tells it, 0 to 1, such as
-  /// the download of an image a plugin.container_pull job pulls.
-  public var progress: Double {
-    get {_progress ?? 0}
-    set {_progress = newValue}
-  }
-  /// Returns true if `progress` has been explicitly set.
-  public var hasProgress: Bool {self._progress != nil}
-  /// Clears the value of `progress`. Subsequent reads from it will return its default value.
-  public mutating func clearProgress() {self._progress = nil}
-
-  public var unknownFields = SwiftProtobuf.UnknownStorage()
-
-  public init() {}
-
-  fileprivate var _id: String? = nil
-  fileprivate var _kind: String? = nil
-  fileprivate var _state: Mavio_System_V1_JobState? = nil
-  fileprivate var _priority: Int32? = nil
-  fileprivate var _attempts: Int32? = nil
-  fileprivate var _maxAttempts: Int32? = nil
-  fileprivate var _runTime: SwiftProtobuf.Google_Protobuf_Timestamp? = nil
-  fileprivate var _createTime: SwiftProtobuf.Google_Protobuf_Timestamp? = nil
-  fileprivate var _finishTime: SwiftProtobuf.Google_Protobuf_Timestamp? = nil
-  fileprivate var _lastError: String? = nil
-  fileprivate var _payloadJson: String? = nil
-  fileprivate var _progress: Double? = nil
-}
-
-/// Task is a recurring piece of work.
-public nonisolated struct Mavio_System_V1_Task: @unchecked Sendable {
-  // SwiftProtobuf.Message conformance is added in an extension below. See the
-  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
-  // methods supported on all messages.
-
-  /// Such as "library.scan:<library ID>", "jobs.cleanup" or
-  /// "plugin:<plugin ID>:<task ID>".
   public var id: String {
     get {_storage._id ?? String()}
     set {_uniqueStorage()._id = newValue}
@@ -220,25 +81,7 @@ public nonisolated struct Mavio_System_V1_Task: @unchecked Sendable {
   /// Clears the value of `id`. Subsequent reads from it will return its default value.
   public mutating func clearID() {_uniqueStorage()._id = nil}
 
-  public var name: String {
-    get {_storage._name ?? String()}
-    set {_uniqueStorage()._name = newValue}
-  }
-  /// Returns true if `name` has been explicitly set.
-  public var hasName: Bool {_storage._name != nil}
-  /// Clears the value of `name`. Subsequent reads from it will return its default value.
-  public mutating func clearName() {_uniqueStorage()._name = nil}
-
-  public var description_p: String {
-    get {_storage._description_p ?? String()}
-    set {_uniqueStorage()._description_p = newValue}
-  }
-  /// Returns true if `description_p` has been explicitly set.
-  public var hasDescription_p: Bool {_storage._description_p != nil}
-  /// Clears the value of `description_p`. Subsequent reads from it will return its default value.
-  public mutating func clearDescription_p() {_uniqueStorage()._description_p = nil}
-
-  /// The job kind it runs.
+  /// Such as "library.scan".
   public var kind: String {
     get {_storage._kind ?? String()}
     set {_uniqueStorage()._kind = newValue}
@@ -248,57 +91,91 @@ public nonisolated struct Mavio_System_V1_Task: @unchecked Sendable {
   /// Clears the value of `kind`. Subsequent reads from it will return its default value.
   public mutating func clearKind() {_uniqueStorage()._kind = nil}
 
-  /// Unset for tasks that run on demand only.
-  public var interval: SwiftProtobuf.Google_Protobuf_Duration {
-    get {_storage._interval ?? SwiftProtobuf.Google_Protobuf_Duration()}
-    set {_uniqueStorage()._interval = newValue}
+  public var state: Mavio_System_V1_JobState {
+    get {_storage._state ?? .unspecified}
+    set {_uniqueStorage()._state = newValue}
   }
-  /// Returns true if `interval` has been explicitly set.
-  public var hasInterval: Bool {_storage._interval != nil}
-  /// Clears the value of `interval`. Subsequent reads from it will return its default value.
-  public mutating func clearInterval() {_uniqueStorage()._interval = nil}
+  /// Returns true if `state` has been explicitly set.
+  public var hasState: Bool {_storage._state != nil}
+  /// Clears the value of `state`. Subsequent reads from it will return its default value.
+  public mutating func clearState() {_uniqueStorage()._state = nil}
 
-  /// Its last finished run; unset when it never ran.
-  public var lastRun: Mavio_System_V1_Job {
-    get {_storage._lastRun ?? Mavio_System_V1_Job()}
-    set {_uniqueStorage()._lastRun = newValue}
+  public var priority: Int32 {
+    get {_storage._priority ?? 0}
+    set {_uniqueStorage()._priority = newValue}
   }
-  /// Returns true if `lastRun` has been explicitly set.
-  public var hasLastRun: Bool {_storage._lastRun != nil}
-  /// Clears the value of `lastRun`. Subsequent reads from it will return its default value.
-  public mutating func clearLastRun() {_uniqueStorage()._lastRun = nil}
+  /// Returns true if `priority` has been explicitly set.
+  public var hasPriority: Bool {_storage._priority != nil}
+  /// Clears the value of `priority`. Subsequent reads from it will return its default value.
+  public mutating func clearPriority() {_uniqueStorage()._priority = nil}
 
-  /// When it runs next; unset when not scheduled.
-  public var nextRunTime: SwiftProtobuf.Google_Protobuf_Timestamp {
-    get {_storage._nextRunTime ?? SwiftProtobuf.Google_Protobuf_Timestamp()}
-    set {_uniqueStorage()._nextRunTime = newValue}
+  public var attempts: Int32 {
+    get {_storage._attempts ?? 0}
+    set {_uniqueStorage()._attempts = newValue}
   }
-  /// Returns true if `nextRunTime` has been explicitly set.
-  public var hasNextRunTime: Bool {_storage._nextRunTime != nil}
-  /// Clears the value of `nextRunTime`. Subsequent reads from it will return its default value.
-  public mutating func clearNextRunTime() {_uniqueStorage()._nextRunTime = nil}
+  /// Returns true if `attempts` has been explicitly set.
+  public var hasAttempts: Bool {_storage._attempts != nil}
+  /// Clears the value of `attempts`. Subsequent reads from it will return its default value.
+  public mutating func clearAttempts() {_uniqueStorage()._attempts = nil}
 
-  public var running: Bool {
-    get {_storage._running ?? false}
-    set {_uniqueStorage()._running = newValue}
+  public var maxAttempts: Int32 {
+    get {_storage._maxAttempts ?? 0}
+    set {_uniqueStorage()._maxAttempts = newValue}
   }
-  /// Returns true if `running` has been explicitly set.
-  public var hasRunning: Bool {_storage._running != nil}
-  /// Clears the value of `running`. Subsequent reads from it will return its default value.
-  public mutating func clearRunning() {_uniqueStorage()._running = nil}
+  /// Returns true if `maxAttempts` has been explicitly set.
+  public var hasMaxAttempts: Bool {_storage._maxAttempts != nil}
+  /// Clears the value of `maxAttempts`. Subsequent reads from it will return its default value.
+  public mutating func clearMaxAttempts() {_uniqueStorage()._maxAttempts = nil}
 
-  /// The plugin whose task it is; empty for the server's own.
-  public var pluginID: String {
-    get {_storage._pluginID ?? String()}
-    set {_uniqueStorage()._pluginID = newValue}
+  /// When it runs, or ran last.
+  public var runTime: SwiftProtobuf.Google_Protobuf_Timestamp {
+    get {_storage._runTime ?? SwiftProtobuf.Google_Protobuf_Timestamp()}
+    set {_uniqueStorage()._runTime = newValue}
   }
-  /// Returns true if `pluginID` has been explicitly set.
-  public var hasPluginID: Bool {_storage._pluginID != nil}
-  /// Clears the value of `pluginID`. Subsequent reads from it will return its default value.
-  public mutating func clearPluginID() {_uniqueStorage()._pluginID = nil}
+  /// Returns true if `runTime` has been explicitly set.
+  public var hasRunTime: Bool {_storage._runTime != nil}
+  /// Clears the value of `runTime`. Subsequent reads from it will return its default value.
+  public mutating func clearRunTime() {_uniqueStorage()._runTime = nil}
 
-  /// The fraction done of its run in progress that tells it, 0 to 1, such
-  /// as a plugin's download of its models.
+  public var createTime: SwiftProtobuf.Google_Protobuf_Timestamp {
+    get {_storage._createTime ?? SwiftProtobuf.Google_Protobuf_Timestamp()}
+    set {_uniqueStorage()._createTime = newValue}
+  }
+  /// Returns true if `createTime` has been explicitly set.
+  public var hasCreateTime: Bool {_storage._createTime != nil}
+  /// Clears the value of `createTime`. Subsequent reads from it will return its default value.
+  public mutating func clearCreateTime() {_uniqueStorage()._createTime = nil}
+
+  public var finishTime: SwiftProtobuf.Google_Protobuf_Timestamp {
+    get {_storage._finishTime ?? SwiftProtobuf.Google_Protobuf_Timestamp()}
+    set {_uniqueStorage()._finishTime = newValue}
+  }
+  /// Returns true if `finishTime` has been explicitly set.
+  public var hasFinishTime: Bool {_storage._finishTime != nil}
+  /// Clears the value of `finishTime`. Subsequent reads from it will return its default value.
+  public mutating func clearFinishTime() {_uniqueStorage()._finishTime = nil}
+
+  public var lastError: String {
+    get {_storage._lastError ?? String()}
+    set {_uniqueStorage()._lastError = newValue}
+  }
+  /// Returns true if `lastError` has been explicitly set.
+  public var hasLastError: Bool {_storage._lastError != nil}
+  /// Clears the value of `lastError`. Subsequent reads from it will return its default value.
+  public mutating func clearLastError() {_uniqueStorage()._lastError = nil}
+
+  /// The kind-specific argument, as JSON.
+  public var payloadJson: String {
+    get {_storage._payloadJson ?? String()}
+    set {_uniqueStorage()._payloadJson = newValue}
+  }
+  /// Returns true if `payloadJson` has been explicitly set.
+  public var hasPayloadJson: Bool {_storage._payloadJson != nil}
+  /// Clears the value of `payloadJson`. Subsequent reads from it will return its default value.
+  public mutating func clearPayloadJson() {_uniqueStorage()._payloadJson = nil}
+
+  /// The fraction done of a running job that tells it, 0 to 1, such as
+  /// the download of an image a plugin.container_pull job pulls.
   public var progress: Double {
     get {_storage._progress ?? 0}
     set {_uniqueStorage()._progress = newValue}
@@ -308,11 +185,165 @@ public nonisolated struct Mavio_System_V1_Task: @unchecked Sendable {
   /// Clears the value of `progress`. Subsequent reads from it will return its default value.
   public mutating func clearProgress() {_uniqueStorage()._progress = nil}
 
+  /// What a running job is doing, as it tells, such as the model a
+  /// plugin's task downloads.
+  public var status: String {
+    get {_storage._status ?? String()}
+    set {_uniqueStorage()._status = newValue}
+  }
+  /// Returns true if `status` has been explicitly set.
+  public var hasStatus: Bool {_storage._status != nil}
+  /// Clears the value of `status`. Subsequent reads from it will return its default value.
+  public mutating func clearStatus() {_uniqueStorage()._status = nil}
+
+  /// Summary of what a succeeded job did, as it tells, such as the models a
+  /// plugin's task downloaded; empty when it tells nothing.
+  public var result: String {
+    get {_storage._result ?? String()}
+    set {_uniqueStorage()._result = newValue}
+  }
+  /// Returns true if `result` has been explicitly set.
+  public var hasResult: Bool {_storage._result != nil}
+  /// Clears the value of `result`. Subsequent reads from it will return its default value.
+  public mutating func clearResult() {_uniqueStorage()._result = nil}
+
   public var unknownFields = SwiftProtobuf.UnknownStorage()
 
   public init() {}
 
   fileprivate var _storage = _StorageClass.defaultInstance
+}
+
+/// Task is a recurring piece of work.
+public nonisolated struct Mavio_System_V1_Task: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  /// Such as "library.scan:<library ID>", "jobs.cleanup" or
+  /// "plugin:<plugin ID>:<task ID>".
+  public var id: String {
+    get {_id ?? String()}
+    set {_id = newValue}
+  }
+  /// Returns true if `id` has been explicitly set.
+  public var hasID: Bool {self._id != nil}
+  /// Clears the value of `id`. Subsequent reads from it will return its default value.
+  public mutating func clearID() {self._id = nil}
+
+  public var name: String {
+    get {_name ?? String()}
+    set {_name = newValue}
+  }
+  /// Returns true if `name` has been explicitly set.
+  public var hasName: Bool {self._name != nil}
+  /// Clears the value of `name`. Subsequent reads from it will return its default value.
+  public mutating func clearName() {self._name = nil}
+
+  public var description_p: String {
+    get {_description_p ?? String()}
+    set {_description_p = newValue}
+  }
+  /// Returns true if `description_p` has been explicitly set.
+  public var hasDescription_p: Bool {self._description_p != nil}
+  /// Clears the value of `description_p`. Subsequent reads from it will return its default value.
+  public mutating func clearDescription_p() {self._description_p = nil}
+
+  /// The job kind it runs.
+  public var kind: String {
+    get {_kind ?? String()}
+    set {_kind = newValue}
+  }
+  /// Returns true if `kind` has been explicitly set.
+  public var hasKind: Bool {self._kind != nil}
+  /// Clears the value of `kind`. Subsequent reads from it will return its default value.
+  public mutating func clearKind() {self._kind = nil}
+
+  /// Unset for tasks that run on demand only.
+  public var interval: SwiftProtobuf.Google_Protobuf_Duration {
+    get {_interval ?? SwiftProtobuf.Google_Protobuf_Duration()}
+    set {_interval = newValue}
+  }
+  /// Returns true if `interval` has been explicitly set.
+  public var hasInterval: Bool {self._interval != nil}
+  /// Clears the value of `interval`. Subsequent reads from it will return its default value.
+  public mutating func clearInterval() {self._interval = nil}
+
+  /// Its last finished run; unset when it never ran.
+  public var lastRun: Mavio_System_V1_Job {
+    get {_lastRun ?? Mavio_System_V1_Job()}
+    set {_lastRun = newValue}
+  }
+  /// Returns true if `lastRun` has been explicitly set.
+  public var hasLastRun: Bool {self._lastRun != nil}
+  /// Clears the value of `lastRun`. Subsequent reads from it will return its default value.
+  public mutating func clearLastRun() {self._lastRun = nil}
+
+  /// When it runs next; unset when not scheduled.
+  public var nextRunTime: SwiftProtobuf.Google_Protobuf_Timestamp {
+    get {_nextRunTime ?? SwiftProtobuf.Google_Protobuf_Timestamp()}
+    set {_nextRunTime = newValue}
+  }
+  /// Returns true if `nextRunTime` has been explicitly set.
+  public var hasNextRunTime: Bool {self._nextRunTime != nil}
+  /// Clears the value of `nextRunTime`. Subsequent reads from it will return its default value.
+  public mutating func clearNextRunTime() {self._nextRunTime = nil}
+
+  public var running: Bool {
+    get {_running ?? false}
+    set {_running = newValue}
+  }
+  /// Returns true if `running` has been explicitly set.
+  public var hasRunning: Bool {self._running != nil}
+  /// Clears the value of `running`. Subsequent reads from it will return its default value.
+  public mutating func clearRunning() {self._running = nil}
+
+  /// The plugin whose task it is; empty for the server's own.
+  public var pluginID: String {
+    get {_pluginID ?? String()}
+    set {_pluginID = newValue}
+  }
+  /// Returns true if `pluginID` has been explicitly set.
+  public var hasPluginID: Bool {self._pluginID != nil}
+  /// Clears the value of `pluginID`. Subsequent reads from it will return its default value.
+  public mutating func clearPluginID() {self._pluginID = nil}
+
+  /// The fraction done of its run in progress that tells it, 0 to 1, such
+  /// as a plugin's download of its models.
+  public var progress: Double {
+    get {_progress ?? 0}
+    set {_progress = newValue}
+  }
+  /// Returns true if `progress` has been explicitly set.
+  public var hasProgress: Bool {self._progress != nil}
+  /// Clears the value of `progress`. Subsequent reads from it will return its default value.
+  public mutating func clearProgress() {self._progress = nil}
+
+  /// What its run in progress is doing, as it tells.
+  public var status: String {
+    get {_status ?? String()}
+    set {_status = newValue}
+  }
+  /// Returns true if `status` has been explicitly set.
+  public var hasStatus: Bool {self._status != nil}
+  /// Clears the value of `status`. Subsequent reads from it will return its default value.
+  public mutating func clearStatus() {self._status = nil}
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+
+  fileprivate var _id: String? = nil
+  fileprivate var _name: String? = nil
+  fileprivate var _description_p: String? = nil
+  fileprivate var _kind: String? = nil
+  fileprivate var _interval: SwiftProtobuf.Google_Protobuf_Duration? = nil
+  fileprivate var _lastRun: Mavio_System_V1_Job? = nil
+  fileprivate var _nextRunTime: SwiftProtobuf.Google_Protobuf_Timestamp? = nil
+  fileprivate var _running: Bool? = nil
+  fileprivate var _pluginID: String? = nil
+  fileprivate var _progress: Double? = nil
+  fileprivate var _status: String? = nil
 }
 
 public nonisolated struct Mavio_System_V1_ListTasksRequest: Sendable {
@@ -460,108 +491,23 @@ nonisolated extension Mavio_System_V1_JobState: SwiftProtobuf._ProtoNameProvidin
 
 nonisolated extension Mavio_System_V1_Job: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".Job"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}id\0\u{1}kind\0\u{1}state\0\u{1}priority\0\u{1}attempts\0\u{3}max_attempts\0\u{3}run_time\0\u{3}create_time\0\u{3}finish_time\0\u{3}last_error\0\u{3}payload_json\0\u{1}progress\0")
-
-  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
-    while let fieldNumber = try decoder.nextFieldNumber() {
-      // The use of inline closures is to circumvent an issue where the compiler
-      // allocates stack space for every case branch when no optimizations are
-      // enabled. https://github.com/apple/swift-protobuf/issues/1034
-      switch fieldNumber {
-      case 1: try { try decoder.decodeSingularStringField(value: &self._id) }()
-      case 2: try { try decoder.decodeSingularStringField(value: &self._kind) }()
-      case 3: try { try decoder.decodeSingularEnumField(value: &self._state) }()
-      case 4: try { try decoder.decodeSingularInt32Field(value: &self._priority) }()
-      case 5: try { try decoder.decodeSingularInt32Field(value: &self._attempts) }()
-      case 6: try { try decoder.decodeSingularInt32Field(value: &self._maxAttempts) }()
-      case 7: try { try decoder.decodeSingularMessageField(value: &self._runTime) }()
-      case 8: try { try decoder.decodeSingularMessageField(value: &self._createTime) }()
-      case 9: try { try decoder.decodeSingularMessageField(value: &self._finishTime) }()
-      case 10: try { try decoder.decodeSingularStringField(value: &self._lastError) }()
-      case 11: try { try decoder.decodeSingularStringField(value: &self._payloadJson) }()
-      case 12: try { try decoder.decodeSingularDoubleField(value: &self._progress) }()
-      default: break
-      }
-    }
-  }
-
-  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-    // The use of inline closures is to circumvent an issue where the compiler
-    // allocates stack space for every if/case branch local when no optimizations
-    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
-    // https://github.com/apple/swift-protobuf/issues/1182
-    try { if let v = self._id {
-      try visitor.visitSingularStringField(value: v, fieldNumber: 1)
-    } }()
-    try { if let v = self._kind {
-      try visitor.visitSingularStringField(value: v, fieldNumber: 2)
-    } }()
-    try { if let v = self._state {
-      try visitor.visitSingularEnumField(value: v, fieldNumber: 3)
-    } }()
-    try { if let v = self._priority {
-      try visitor.visitSingularInt32Field(value: v, fieldNumber: 4)
-    } }()
-    try { if let v = self._attempts {
-      try visitor.visitSingularInt32Field(value: v, fieldNumber: 5)
-    } }()
-    try { if let v = self._maxAttempts {
-      try visitor.visitSingularInt32Field(value: v, fieldNumber: 6)
-    } }()
-    try { if let v = self._runTime {
-      try visitor.visitSingularMessageField(value: v, fieldNumber: 7)
-    } }()
-    try { if let v = self._createTime {
-      try visitor.visitSingularMessageField(value: v, fieldNumber: 8)
-    } }()
-    try { if let v = self._finishTime {
-      try visitor.visitSingularMessageField(value: v, fieldNumber: 9)
-    } }()
-    try { if let v = self._lastError {
-      try visitor.visitSingularStringField(value: v, fieldNumber: 10)
-    } }()
-    try { if let v = self._payloadJson {
-      try visitor.visitSingularStringField(value: v, fieldNumber: 11)
-    } }()
-    try { if let v = self._progress {
-      try visitor.visitSingularDoubleField(value: v, fieldNumber: 12)
-    } }()
-    try unknownFields.traverse(visitor: &visitor)
-  }
-
-  public static func ==(lhs: Mavio_System_V1_Job, rhs: Mavio_System_V1_Job) -> Bool {
-    if lhs._id != rhs._id {return false}
-    if lhs._kind != rhs._kind {return false}
-    if lhs._state != rhs._state {return false}
-    if lhs._priority != rhs._priority {return false}
-    if lhs._attempts != rhs._attempts {return false}
-    if lhs._maxAttempts != rhs._maxAttempts {return false}
-    if lhs._runTime != rhs._runTime {return false}
-    if lhs._createTime != rhs._createTime {return false}
-    if lhs._finishTime != rhs._finishTime {return false}
-    if lhs._lastError != rhs._lastError {return false}
-    if lhs._payloadJson != rhs._payloadJson {return false}
-    if lhs._progress != rhs._progress {return false}
-    if lhs.unknownFields != rhs.unknownFields {return false}
-    return true
-  }
-}
-
-nonisolated extension Mavio_System_V1_Task: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  public static let protoMessageName: String = _protobuf_package + ".Task"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}id\0\u{1}name\0\u{1}description\0\u{1}kind\0\u{1}interval\0\u{3}last_run\0\u{3}next_run_time\0\u{1}running\0\u{3}plugin_id\0\u{1}progress\0")
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}id\0\u{1}kind\0\u{1}state\0\u{1}priority\0\u{1}attempts\0\u{3}max_attempts\0\u{3}run_time\0\u{3}create_time\0\u{3}finish_time\0\u{3}last_error\0\u{3}payload_json\0\u{1}progress\0\u{1}status\0\u{1}result\0")
 
   fileprivate class _StorageClass {
     var _id: String? = nil
-    var _name: String? = nil
-    var _description_p: String? = nil
     var _kind: String? = nil
-    var _interval: SwiftProtobuf.Google_Protobuf_Duration? = nil
-    var _lastRun: Mavio_System_V1_Job? = nil
-    var _nextRunTime: SwiftProtobuf.Google_Protobuf_Timestamp? = nil
-    var _running: Bool? = nil
-    var _pluginID: String? = nil
+    var _state: Mavio_System_V1_JobState? = nil
+    var _priority: Int32? = nil
+    var _attempts: Int32? = nil
+    var _maxAttempts: Int32? = nil
+    var _runTime: SwiftProtobuf.Google_Protobuf_Timestamp? = nil
+    var _createTime: SwiftProtobuf.Google_Protobuf_Timestamp? = nil
+    var _finishTime: SwiftProtobuf.Google_Protobuf_Timestamp? = nil
+    var _lastError: String? = nil
+    var _payloadJson: String? = nil
     var _progress: Double? = nil
+    var _status: String? = nil
+    var _result: String? = nil
 
       // This property is used as the initial default value for new instances of the type.
       // The type itself is protecting the reference to its storage via CoW semantics.
@@ -573,15 +519,19 @@ nonisolated extension Mavio_System_V1_Task: SwiftProtobuf.Message, SwiftProtobuf
 
     init(copying source: _StorageClass) {
       _id = source._id
-      _name = source._name
-      _description_p = source._description_p
       _kind = source._kind
-      _interval = source._interval
-      _lastRun = source._lastRun
-      _nextRunTime = source._nextRunTime
-      _running = source._running
-      _pluginID = source._pluginID
+      _state = source._state
+      _priority = source._priority
+      _attempts = source._attempts
+      _maxAttempts = source._maxAttempts
+      _runTime = source._runTime
+      _createTime = source._createTime
+      _finishTime = source._finishTime
+      _lastError = source._lastError
+      _payloadJson = source._payloadJson
       _progress = source._progress
+      _status = source._status
+      _result = source._result
     }
   }
 
@@ -601,15 +551,19 @@ nonisolated extension Mavio_System_V1_Task: SwiftProtobuf.Message, SwiftProtobuf
         // enabled. https://github.com/apple/swift-protobuf/issues/1034
         switch fieldNumber {
         case 1: try { try decoder.decodeSingularStringField(value: &_storage._id) }()
-        case 2: try { try decoder.decodeSingularStringField(value: &_storage._name) }()
-        case 3: try { try decoder.decodeSingularStringField(value: &_storage._description_p) }()
-        case 4: try { try decoder.decodeSingularStringField(value: &_storage._kind) }()
-        case 5: try { try decoder.decodeSingularMessageField(value: &_storage._interval) }()
-        case 6: try { try decoder.decodeSingularMessageField(value: &_storage._lastRun) }()
-        case 7: try { try decoder.decodeSingularMessageField(value: &_storage._nextRunTime) }()
-        case 8: try { try decoder.decodeSingularBoolField(value: &_storage._running) }()
-        case 9: try { try decoder.decodeSingularStringField(value: &_storage._pluginID) }()
-        case 10: try { try decoder.decodeSingularDoubleField(value: &_storage._progress) }()
+        case 2: try { try decoder.decodeSingularStringField(value: &_storage._kind) }()
+        case 3: try { try decoder.decodeSingularEnumField(value: &_storage._state) }()
+        case 4: try { try decoder.decodeSingularInt32Field(value: &_storage._priority) }()
+        case 5: try { try decoder.decodeSingularInt32Field(value: &_storage._attempts) }()
+        case 6: try { try decoder.decodeSingularInt32Field(value: &_storage._maxAttempts) }()
+        case 7: try { try decoder.decodeSingularMessageField(value: &_storage._runTime) }()
+        case 8: try { try decoder.decodeSingularMessageField(value: &_storage._createTime) }()
+        case 9: try { try decoder.decodeSingularMessageField(value: &_storage._finishTime) }()
+        case 10: try { try decoder.decodeSingularStringField(value: &_storage._lastError) }()
+        case 11: try { try decoder.decodeSingularStringField(value: &_storage._payloadJson) }()
+        case 12: try { try decoder.decodeSingularDoubleField(value: &_storage._progress) }()
+        case 13: try { try decoder.decodeSingularStringField(value: &_storage._status) }()
+        case 14: try { try decoder.decodeSingularStringField(value: &_storage._result) }()
         default: break
         }
       }
@@ -625,56 +579,156 @@ nonisolated extension Mavio_System_V1_Task: SwiftProtobuf.Message, SwiftProtobuf
       try { if let v = _storage._id {
         try visitor.visitSingularStringField(value: v, fieldNumber: 1)
       } }()
-      try { if let v = _storage._name {
+      try { if let v = _storage._kind {
         try visitor.visitSingularStringField(value: v, fieldNumber: 2)
       } }()
-      try { if let v = _storage._description_p {
-        try visitor.visitSingularStringField(value: v, fieldNumber: 3)
+      try { if let v = _storage._state {
+        try visitor.visitSingularEnumField(value: v, fieldNumber: 3)
       } }()
-      try { if let v = _storage._kind {
-        try visitor.visitSingularStringField(value: v, fieldNumber: 4)
+      try { if let v = _storage._priority {
+        try visitor.visitSingularInt32Field(value: v, fieldNumber: 4)
       } }()
-      try { if let v = _storage._interval {
-        try visitor.visitSingularMessageField(value: v, fieldNumber: 5)
+      try { if let v = _storage._attempts {
+        try visitor.visitSingularInt32Field(value: v, fieldNumber: 5)
       } }()
-      try { if let v = _storage._lastRun {
-        try visitor.visitSingularMessageField(value: v, fieldNumber: 6)
+      try { if let v = _storage._maxAttempts {
+        try visitor.visitSingularInt32Field(value: v, fieldNumber: 6)
       } }()
-      try { if let v = _storage._nextRunTime {
+      try { if let v = _storage._runTime {
         try visitor.visitSingularMessageField(value: v, fieldNumber: 7)
       } }()
-      try { if let v = _storage._running {
-        try visitor.visitSingularBoolField(value: v, fieldNumber: 8)
+      try { if let v = _storage._createTime {
+        try visitor.visitSingularMessageField(value: v, fieldNumber: 8)
       } }()
-      try { if let v = _storage._pluginID {
-        try visitor.visitSingularStringField(value: v, fieldNumber: 9)
+      try { if let v = _storage._finishTime {
+        try visitor.visitSingularMessageField(value: v, fieldNumber: 9)
+      } }()
+      try { if let v = _storage._lastError {
+        try visitor.visitSingularStringField(value: v, fieldNumber: 10)
+      } }()
+      try { if let v = _storage._payloadJson {
+        try visitor.visitSingularStringField(value: v, fieldNumber: 11)
       } }()
       try { if let v = _storage._progress {
-        try visitor.visitSingularDoubleField(value: v, fieldNumber: 10)
+        try visitor.visitSingularDoubleField(value: v, fieldNumber: 12)
+      } }()
+      try { if let v = _storage._status {
+        try visitor.visitSingularStringField(value: v, fieldNumber: 13)
+      } }()
+      try { if let v = _storage._result {
+        try visitor.visitSingularStringField(value: v, fieldNumber: 14)
       } }()
     }
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  public static func ==(lhs: Mavio_System_V1_Task, rhs: Mavio_System_V1_Task) -> Bool {
+  public static func ==(lhs: Mavio_System_V1_Job, rhs: Mavio_System_V1_Job) -> Bool {
     if lhs._storage !== rhs._storage {
       let storagesAreEqual: Bool = withExtendedLifetime((lhs._storage, rhs._storage)) { (_args: (_StorageClass, _StorageClass)) in
         let _storage = _args.0
         let rhs_storage = _args.1
         if _storage._id != rhs_storage._id {return false}
-        if _storage._name != rhs_storage._name {return false}
-        if _storage._description_p != rhs_storage._description_p {return false}
         if _storage._kind != rhs_storage._kind {return false}
-        if _storage._interval != rhs_storage._interval {return false}
-        if _storage._lastRun != rhs_storage._lastRun {return false}
-        if _storage._nextRunTime != rhs_storage._nextRunTime {return false}
-        if _storage._running != rhs_storage._running {return false}
-        if _storage._pluginID != rhs_storage._pluginID {return false}
+        if _storage._state != rhs_storage._state {return false}
+        if _storage._priority != rhs_storage._priority {return false}
+        if _storage._attempts != rhs_storage._attempts {return false}
+        if _storage._maxAttempts != rhs_storage._maxAttempts {return false}
+        if _storage._runTime != rhs_storage._runTime {return false}
+        if _storage._createTime != rhs_storage._createTime {return false}
+        if _storage._finishTime != rhs_storage._finishTime {return false}
+        if _storage._lastError != rhs_storage._lastError {return false}
+        if _storage._payloadJson != rhs_storage._payloadJson {return false}
         if _storage._progress != rhs_storage._progress {return false}
+        if _storage._status != rhs_storage._status {return false}
+        if _storage._result != rhs_storage._result {return false}
         return true
       }
       if !storagesAreEqual {return false}
     }
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Mavio_System_V1_Task: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".Task"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}id\0\u{1}name\0\u{1}description\0\u{1}kind\0\u{1}interval\0\u{3}last_run\0\u{3}next_run_time\0\u{1}running\0\u{3}plugin_id\0\u{1}progress\0\u{1}status\0")
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularStringField(value: &self._id) }()
+      case 2: try { try decoder.decodeSingularStringField(value: &self._name) }()
+      case 3: try { try decoder.decodeSingularStringField(value: &self._description_p) }()
+      case 4: try { try decoder.decodeSingularStringField(value: &self._kind) }()
+      case 5: try { try decoder.decodeSingularMessageField(value: &self._interval) }()
+      case 6: try { try decoder.decodeSingularMessageField(value: &self._lastRun) }()
+      case 7: try { try decoder.decodeSingularMessageField(value: &self._nextRunTime) }()
+      case 8: try { try decoder.decodeSingularBoolField(value: &self._running) }()
+      case 9: try { try decoder.decodeSingularStringField(value: &self._pluginID) }()
+      case 10: try { try decoder.decodeSingularDoubleField(value: &self._progress) }()
+      case 11: try { try decoder.decodeSingularStringField(value: &self._status) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    try { if let v = self._id {
+      try visitor.visitSingularStringField(value: v, fieldNumber: 1)
+    } }()
+    try { if let v = self._name {
+      try visitor.visitSingularStringField(value: v, fieldNumber: 2)
+    } }()
+    try { if let v = self._description_p {
+      try visitor.visitSingularStringField(value: v, fieldNumber: 3)
+    } }()
+    try { if let v = self._kind {
+      try visitor.visitSingularStringField(value: v, fieldNumber: 4)
+    } }()
+    try { if let v = self._interval {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 5)
+    } }()
+    try { if let v = self._lastRun {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 6)
+    } }()
+    try { if let v = self._nextRunTime {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 7)
+    } }()
+    try { if let v = self._running {
+      try visitor.visitSingularBoolField(value: v, fieldNumber: 8)
+    } }()
+    try { if let v = self._pluginID {
+      try visitor.visitSingularStringField(value: v, fieldNumber: 9)
+    } }()
+    try { if let v = self._progress {
+      try visitor.visitSingularDoubleField(value: v, fieldNumber: 10)
+    } }()
+    try { if let v = self._status {
+      try visitor.visitSingularStringField(value: v, fieldNumber: 11)
+    } }()
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Mavio_System_V1_Task, rhs: Mavio_System_V1_Task) -> Bool {
+    if lhs._id != rhs._id {return false}
+    if lhs._name != rhs._name {return false}
+    if lhs._description_p != rhs._description_p {return false}
+    if lhs._kind != rhs._kind {return false}
+    if lhs._interval != rhs._interval {return false}
+    if lhs._lastRun != rhs._lastRun {return false}
+    if lhs._nextRunTime != rhs._nextRunTime {return false}
+    if lhs._running != rhs._running {return false}
+    if lhs._pluginID != rhs._pluginID {return false}
+    if lhs._progress != rhs._progress {return false}
+    if lhs._status != rhs._status {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

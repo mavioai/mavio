@@ -88,6 +88,8 @@ type Job struct {
 	xxx_hidden_LastError   *string                `protobuf:"bytes,10,opt,name=last_error,json=lastError"`
 	xxx_hidden_PayloadJson *string                `protobuf:"bytes,11,opt,name=payload_json,json=payloadJson"`
 	xxx_hidden_Progress    float64                `protobuf:"fixed64,12,opt,name=progress"`
+	xxx_hidden_Status      *string                `protobuf:"bytes,13,opt,name=status"`
+	xxx_hidden_Result      *string                `protobuf:"bytes,14,opt,name=result"`
 	XXX_raceDetectHookData protoimpl.RaceDetectHookData
 	XXX_presence           [1]uint32
 	unknownFields          protoimpl.UnknownFields
@@ -217,34 +219,54 @@ func (x *Job) GetProgress() float64 {
 	return 0
 }
 
+func (x *Job) GetStatus() string {
+	if x != nil {
+		if x.xxx_hidden_Status != nil {
+			return *x.xxx_hidden_Status
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *Job) GetResult() string {
+	if x != nil {
+		if x.xxx_hidden_Result != nil {
+			return *x.xxx_hidden_Result
+		}
+		return ""
+	}
+	return ""
+}
+
 func (x *Job) SetId(v string) {
 	x.xxx_hidden_Id = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 12)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 14)
 }
 
 func (x *Job) SetKind(v string) {
 	x.xxx_hidden_Kind = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 12)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 14)
 }
 
 func (x *Job) SetState(v JobState) {
 	x.xxx_hidden_State = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 12)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 14)
 }
 
 func (x *Job) SetPriority(v int32) {
 	x.xxx_hidden_Priority = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 12)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 14)
 }
 
 func (x *Job) SetAttempts(v int32) {
 	x.xxx_hidden_Attempts = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 12)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 14)
 }
 
 func (x *Job) SetMaxAttempts(v int32) {
 	x.xxx_hidden_MaxAttempts = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 12)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 14)
 }
 
 func (x *Job) SetRunTime(v *timestamppb.Timestamp) {
@@ -261,17 +283,27 @@ func (x *Job) SetFinishTime(v *timestamppb.Timestamp) {
 
 func (x *Job) SetLastError(v string) {
 	x.xxx_hidden_LastError = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 12)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 14)
 }
 
 func (x *Job) SetPayloadJson(v string) {
 	x.xxx_hidden_PayloadJson = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 12)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 14)
 }
 
 func (x *Job) SetProgress(v float64) {
 	x.xxx_hidden_Progress = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 11, 12)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 11, 14)
+}
+
+func (x *Job) SetStatus(v string) {
+	x.xxx_hidden_Status = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 12, 14)
+}
+
+func (x *Job) SetResult(v string) {
+	x.xxx_hidden_Result = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 13, 14)
 }
 
 func (x *Job) HasId() bool {
@@ -358,6 +390,20 @@ func (x *Job) HasProgress() bool {
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 11)
 }
 
+func (x *Job) HasStatus() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 12)
+}
+
+func (x *Job) HasResult() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 13)
+}
+
 func (x *Job) ClearId() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_Id = nil
@@ -415,6 +461,16 @@ func (x *Job) ClearProgress() {
 	x.xxx_hidden_Progress = 0
 }
 
+func (x *Job) ClearStatus() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 12)
+	x.xxx_hidden_Status = nil
+}
+
+func (x *Job) ClearResult() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 13)
+	x.xxx_hidden_Result = nil
+}
+
 type Job_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
@@ -435,6 +491,12 @@ type Job_builder struct {
 	// The fraction done of a running job that tells it, 0 to 1, such as
 	// the download of an image a plugin.container_pull job pulls.
 	Progress *float64
+	// What a running job is doing, as it tells, such as the model a
+	// plugin's task downloads.
+	Status *string
+	// Summary of what a succeeded job did, as it tells, such as the models a
+	// plugin's task downloaded; empty when it tells nothing.
+	Result *string
 }
 
 func (b0 Job_builder) Build() *Job {
@@ -442,43 +504,51 @@ func (b0 Job_builder) Build() *Job {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Id != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 12)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 14)
 		x.xxx_hidden_Id = b.Id
 	}
 	if b.Kind != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 12)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 14)
 		x.xxx_hidden_Kind = b.Kind
 	}
 	if b.State != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 12)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 14)
 		x.xxx_hidden_State = *b.State
 	}
 	if b.Priority != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 12)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 14)
 		x.xxx_hidden_Priority = *b.Priority
 	}
 	if b.Attempts != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 12)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 14)
 		x.xxx_hidden_Attempts = *b.Attempts
 	}
 	if b.MaxAttempts != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 12)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 14)
 		x.xxx_hidden_MaxAttempts = *b.MaxAttempts
 	}
 	x.xxx_hidden_RunTime = b.RunTime
 	x.xxx_hidden_CreateTime = b.CreateTime
 	x.xxx_hidden_FinishTime = b.FinishTime
 	if b.LastError != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 12)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 14)
 		x.xxx_hidden_LastError = b.LastError
 	}
 	if b.PayloadJson != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 12)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 14)
 		x.xxx_hidden_PayloadJson = b.PayloadJson
 	}
 	if b.Progress != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 11, 12)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 11, 14)
 		x.xxx_hidden_Progress = *b.Progress
+	}
+	if b.Status != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 12, 14)
+		x.xxx_hidden_Status = b.Status
+	}
+	if b.Result != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 13, 14)
+		x.xxx_hidden_Result = b.Result
 	}
 	return m0
 }
@@ -496,6 +566,7 @@ type Task struct {
 	xxx_hidden_Running     bool                   `protobuf:"varint,8,opt,name=running"`
 	xxx_hidden_PluginId    *string                `protobuf:"bytes,9,opt,name=plugin_id,json=pluginId"`
 	xxx_hidden_Progress    float64                `protobuf:"fixed64,10,opt,name=progress"`
+	xxx_hidden_Status      *string                `protobuf:"bytes,11,opt,name=status"`
 	XXX_raceDetectHookData protoimpl.RaceDetectHookData
 	XXX_presence           [1]uint32
 	unknownFields          protoimpl.UnknownFields
@@ -612,24 +683,34 @@ func (x *Task) GetProgress() float64 {
 	return 0
 }
 
+func (x *Task) GetStatus() string {
+	if x != nil {
+		if x.xxx_hidden_Status != nil {
+			return *x.xxx_hidden_Status
+		}
+		return ""
+	}
+	return ""
+}
+
 func (x *Task) SetId(v string) {
 	x.xxx_hidden_Id = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 10)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 11)
 }
 
 func (x *Task) SetName(v string) {
 	x.xxx_hidden_Name = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 10)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 11)
 }
 
 func (x *Task) SetDescription(v string) {
 	x.xxx_hidden_Description = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 10)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 11)
 }
 
 func (x *Task) SetKind(v string) {
 	x.xxx_hidden_Kind = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 10)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 11)
 }
 
 func (x *Task) SetInterval(v *durationpb.Duration) {
@@ -646,17 +727,22 @@ func (x *Task) SetNextRunTime(v *timestamppb.Timestamp) {
 
 func (x *Task) SetRunning(v bool) {
 	x.xxx_hidden_Running = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 10)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 11)
 }
 
 func (x *Task) SetPluginId(v string) {
 	x.xxx_hidden_PluginId = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 8, 10)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 8, 11)
 }
 
 func (x *Task) SetProgress(v float64) {
 	x.xxx_hidden_Progress = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 10)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 11)
+}
+
+func (x *Task) SetStatus(v string) {
+	x.xxx_hidden_Status = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 11)
 }
 
 func (x *Task) HasId() bool {
@@ -729,6 +815,13 @@ func (x *Task) HasProgress() bool {
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 9)
 }
 
+func (x *Task) HasStatus() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 10)
+}
+
 func (x *Task) ClearId() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_Id = nil
@@ -776,6 +869,11 @@ func (x *Task) ClearProgress() {
 	x.xxx_hidden_Progress = 0
 }
 
+func (x *Task) ClearStatus() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 10)
+	x.xxx_hidden_Status = nil
+}
+
 type Task_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
@@ -798,6 +896,8 @@ type Task_builder struct {
 	// The fraction done of its run in progress that tells it, 0 to 1, such
 	// as a plugin's download of its models.
 	Progress *float64
+	// What its run in progress is doing, as it tells.
+	Status *string
 }
 
 func (b0 Task_builder) Build() *Task {
@@ -805,35 +905,39 @@ func (b0 Task_builder) Build() *Task {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Id != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 10)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 11)
 		x.xxx_hidden_Id = b.Id
 	}
 	if b.Name != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 10)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 11)
 		x.xxx_hidden_Name = b.Name
 	}
 	if b.Description != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 10)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 11)
 		x.xxx_hidden_Description = b.Description
 	}
 	if b.Kind != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 10)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 11)
 		x.xxx_hidden_Kind = b.Kind
 	}
 	x.xxx_hidden_Interval = b.Interval
 	x.xxx_hidden_LastRun = b.LastRun
 	x.xxx_hidden_NextRunTime = b.NextRunTime
 	if b.Running != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 10)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 11)
 		x.xxx_hidden_Running = *b.Running
 	}
 	if b.PluginId != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 8, 10)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 8, 11)
 		x.xxx_hidden_PluginId = b.PluginId
 	}
 	if b.Progress != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 10)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 11)
 		x.xxx_hidden_Progress = *b.Progress
+	}
+	if b.Status != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 11)
+		x.xxx_hidden_Status = b.Status
 	}
 	return m0
 }
@@ -1357,7 +1461,7 @@ var File_mavio_system_v1_task_proto protoreflect.FileDescriptor
 
 const file_mavio_system_v1_task_proto_rawDesc = "" +
 	"\n" +
-	"\x1amavio/system/v1/task.proto\x12\x0fmavio.system.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1egoogle/protobuf/duration.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xc4\x03\n" +
+	"\x1amavio/system/v1/task.proto\x12\x0fmavio.system.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1egoogle/protobuf/duration.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xf4\x03\n" +
 	"\x03Job\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04kind\x18\x02 \x01(\tR\x04kind\x12/\n" +
@@ -1374,7 +1478,9 @@ const file_mavio_system_v1_task_proto_rawDesc = "" +
 	"last_error\x18\n" +
 	" \x01(\tR\tlastError\x12!\n" +
 	"\fpayload_json\x18\v \x01(\tR\vpayloadJson\x12\x1a\n" +
-	"\bprogress\x18\f \x01(\x01R\bprogress\"\xdb\x02\n" +
+	"\bprogress\x18\f \x01(\x01R\bprogress\x12\x16\n" +
+	"\x06status\x18\r \x01(\tR\x06status\x12\x16\n" +
+	"\x06result\x18\x0e \x01(\tR\x06result\"\xf3\x02\n" +
 	"\x04Task\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12 \n" +
@@ -1386,7 +1492,8 @@ const file_mavio_system_v1_task_proto_rawDesc = "" +
 	"\arunning\x18\b \x01(\bR\arunning\x12\x1b\n" +
 	"\tplugin_id\x18\t \x01(\tR\bpluginId\x12\x1a\n" +
 	"\bprogress\x18\n" +
-	" \x01(\x01R\bprogress\"\x12\n" +
+	" \x01(\x01R\bprogress\x12\x16\n" +
+	"\x06status\x18\v \x01(\tR\x06status\"\x12\n" +
 	"\x10ListTasksRequest\"@\n" +
 	"\x11ListTasksResponse\x12+\n" +
 	"\x05tasks\x18\x01 \x03(\v2\x15.mavio.system.v1.TaskR\x05tasks\"(\n" +

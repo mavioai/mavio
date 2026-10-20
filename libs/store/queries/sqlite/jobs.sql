@@ -33,6 +33,6 @@ WHERE id = @id AND state = 'running' AND lease_owner = @owner;
 
 -- name: FinishJob :execrows
 UPDATE jobs
-SET state = @state, finished_at = @finished_at, run_at = @run_at, last_error = @last_error,
+SET state = @state, finished_at = @finished_at, run_at = @run_at, last_error = @last_error, result = @result,
     lease_owner = '', lease_expires_at = NULL
 WHERE id = @id AND state = 'running' AND lease_owner = @owner;

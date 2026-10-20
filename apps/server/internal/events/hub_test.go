@@ -145,7 +145,7 @@ func TestHub(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if err := db.Jobs().Complete(ctx, leased.ID, "test"); err != nil {
+		if err := db.Jobs().Complete(ctx, leased.ID, "test", ""); err != nil {
 			t.Fatal(err)
 		}
 		for _, want := range []sessionv1.JobState{sessionv1.JobState_JOB_STATE_RUNNING, sessionv1.JobState_JOB_STATE_SUCCEEDED} {

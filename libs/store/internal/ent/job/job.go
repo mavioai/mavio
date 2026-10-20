@@ -40,6 +40,8 @@ const (
 	FieldCreatedAt = "created_at"
 	// FieldFinishedAt holds the string denoting the finished_at field in the database.
 	FieldFinishedAt = "finished_at"
+	// FieldResult holds the string denoting the result field in the database.
+	FieldResult = "result"
 	// Table holds the table name of the job in the database.
 	Table = "jobs"
 )
@@ -60,6 +62,7 @@ var Columns = []string{
 	FieldLastError,
 	FieldCreatedAt,
 	FieldFinishedAt,
+	FieldResult,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -85,6 +88,8 @@ var (
 	DefaultLastError string
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
 	DefaultCreatedAt func() time.Time
+	// DefaultResult holds the default value on creation for the "result" field.
+	DefaultResult string
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() core.ID
 )
@@ -155,4 +160,9 @@ func ByCreatedAt(opts ...sql.OrderTermOption) OrderOption {
 // ByFinishedAt orders the results by the finished_at field.
 func ByFinishedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldFinishedAt, opts...).ToFunc()
+}
+
+// ByResult orders the results by the result field.
+func ByResult(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldResult, opts...).ToFunc()
 }

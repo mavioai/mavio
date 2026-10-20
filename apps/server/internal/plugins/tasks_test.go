@@ -2,8 +2,10 @@ package plugins_test
 
 import (
 	"encoding/json"
+	"errors"
 	"os"
 	"path/filepath"
+	"slices"
 	"testing"
 	"time"
 
@@ -71,6 +73,30 @@ func TestTasks(t *testing.T) {
 	// Runs of tasks that are gone are dropped.
 	if next, err := m.RunTask(ctx, plugins.TaskJob("dev.mavio.smoke", "gone", now, true)); err != nil || len(next) != 0 {
 		t.Errorf("run of a task that is gone = %v, %v", next, err)
+	}
+
+	// A plugin asks for a run of its own task, which is queued as a
+	// requested one.
+	if err := m.StartTask("dev.mavio.smoke", "gone"); !errors.Is(err, core.ErrNotFound) {
+		t.Errorf("StartTask of an undeclared task = %v, want ErrNotFound", err)
+	}
+	if err := m.StartTask("dev.mavio.smoke", "fail"); err != nil {
+		t.Fatalf("StartTask: %v", err)
+	}
+	for deadline := time.Now().Add(5 * time.Second); ; time.Sleep(10 * time.Millisecond) {
+		queued, err := s.Jobs().List(ctx, core.JobQuery{Kinds: []string{plugins.JobTask}})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if slices.ContainsFunc(queued.Items, func(j core.Job) bool {
+			var p plugins.TaskPayload
+			return json.Unmarshal(j.Payload, &p) == nil && p.Task == "fail" && !p.Scheduled
+		}) {
+			break
+		}
+		if time.Now().After(deadline) {
+			t.Fatalf("runs after StartTask = %+v, want one of fail", queued.Items)
+		}
 	}
 
 	// Uninstalling deletes the data folder.

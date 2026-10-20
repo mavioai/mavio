@@ -71,9 +71,9 @@ func (q *Queries) ExtendJob(ctx context.Context, arg ExtendJobParams) (int64, er
 
 const finishJob = `-- name: FinishJob :execrows
 UPDATE jobs
-SET state = ?1, finished_at = ?2, run_at = ?3, last_error = ?4,
+SET state = ?1, finished_at = ?2, run_at = ?3, last_error = ?4, result = ?5,
     lease_owner = '', lease_expires_at = NULL
-WHERE id = ?5 AND state = 'running' AND lease_owner = ?6
+WHERE id = ?6 AND state = 'running' AND lease_owner = ?7
 `
 
 type FinishJobParams struct {
@@ -81,6 +81,7 @@ type FinishJobParams struct {
 	FinishedAt sql.NullTime
 	RunAt      time.Time
 	LastError  string
+	Result     string
 	ID         core.ID
 	Owner      string
 }
@@ -91,6 +92,7 @@ func (q *Queries) FinishJob(ctx context.Context, arg FinishJobParams) (int64, er
 		arg.FinishedAt,
 		arg.RunAt,
 		arg.LastError,
+		arg.Result,
 		arg.ID,
 		arg.Owner,
 	)
@@ -101,7 +103,7 @@ func (q *Queries) FinishJob(ctx context.Context, arg FinishJobParams) (int64, er
 }
 
 const getLeasedJob = `-- name: GetLeasedJob :one
-SELECT id, kind, payload, unique_key, state, priority, attempts, max_attempts, run_at, lease_owner, lease_expires_at, last_error, created_at, finished_at FROM jobs WHERE id = ?1 AND state = 'running' AND lease_owner = ?2
+SELECT id, kind, payload, unique_key, state, priority, attempts, max_attempts, run_at, lease_owner, lease_expires_at, last_error, created_at, finished_at, result FROM jobs WHERE id = ?1 AND state = 'running' AND lease_owner = ?2
 `
 
 type GetLeasedJobParams struct {
@@ -127,6 +129,7 @@ func (q *Queries) GetLeasedJob(ctx context.Context, arg GetLeasedJobParams) (Job
 		&i.LastError,
 		&i.CreatedAt,
 		&i.FinishedAt,
+		&i.Result,
 	)
 	return i, err
 }
@@ -148,7 +151,7 @@ WHERE id = (
   ORDER BY j.priority DESC, j.run_at, j.id
   LIMIT 1
 )
-RETURNING id, kind, payload, unique_key, state, priority, attempts, max_attempts, run_at, lease_owner, lease_expires_at, last_error, created_at, finished_at
+RETURNING id, kind, payload, unique_key, state, priority, attempts, max_attempts, run_at, lease_owner, lease_expires_at, last_error, created_at, finished_at, result
 `
 
 type LeaseJobParams struct {
@@ -189,6 +192,7 @@ func (q *Queries) LeaseJob(ctx context.Context, arg LeaseJobParams) (Job, error)
 		&i.LastError,
 		&i.CreatedAt,
 		&i.FinishedAt,
+		&i.Result,
 	)
 	return i, err
 }

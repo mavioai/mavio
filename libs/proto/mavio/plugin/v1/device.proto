@@ -42,6 +42,13 @@ service HostService {
   // plugin's tasks has come, which the server shows as its job's progress;
   // a report of a task not running is ignored.
   rpc ReportTaskProgress(ReportTaskProgressRequest) returns (ReportTaskProgressResponse);
+  // StartTask queues a run of one of the calling plugin's tasks, as an
+  // administrator running it does, for work the plugin starts itself, such
+  // as downloading the models its configuration needs. It returns at once,
+  // even while the plugin is being configured: the run is queued once the
+  // plugin is ready, and joins a run already waiting. A task the plugin
+  // does not declare is not found.
+  rpc StartTask(StartTaskRequest) returns (StartTaskResponse);
 }
 
 // DeviceControllerService carries out the commands users send to a

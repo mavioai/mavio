@@ -25,13 +25,19 @@ type HostService struct {
 	Tasks TaskProgress
 }
 
-// TaskProgress keeps how far the runs of the plugins' tasks have come.
+// TaskProgress keeps how far the runs of the plugins' tasks have come, and
+// starts the runs plugins ask of them.
 type TaskProgress interface {
-	// ReportTaskProgress keeps a running task's progress, reporting
-	// whether it runs.
-	ReportTaskProgress(plugin, task string, progress float64) bool
+	// ReportTaskProgress keeps a running task's progress and status,
+	// reporting whether it runs.
+	ReportTaskProgress(plugin, task string, progress float64, status string) bool
 	// JobProgress returns the progress of the run a job is.
 	JobProgress(id core.ID) (float64, bool)
+	// JobStatus returns what the run a job is is doing.
+	JobStatus(id core.ID) (string, bool)
+	// StartTask asks for a run of a plugin's task, without waiting;
+	// core.ErrNotFound when the plugin declares no such task.
+	StartTask(plugin, task string) error
 }
 
 // ServerInfo is how the server is reached.
@@ -161,7 +167,26 @@ func (s *HostService) ReportTaskProgress(ctx context.Context, req *pluginv1.Repo
 		return nil, connect.NewError(connect.CodePermissionDenied, errors.New("only plugins have tasks"))
 	}
 	if s.Tasks != nil {
-		s.Tasks.ReportTaskProgress(p.Plugin, req.GetTaskId(), req.GetProgress())
+		s.Tasks.ReportTaskProgress(p.Plugin, req.GetTaskId(), req.GetProgress(), req.GetStatus())
 	}
 	return &pluginv1.ReportTaskProgressResponse{}, nil
+}
+
+// StartTask queues a run of one of the calling plugin's tasks, once the
+// plugin is ready.
+func (s *HostService) StartTask(ctx context.Context, req *pluginv1.StartTaskRequest) (*pluginv1.StartTaskResponse, error) {
+	p, err := principal(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if p.Plugin == "" {
+		return nil, connect.NewError(connect.CodePermissionDenied, errors.New("only plugins have tasks"))
+	}
+	if s.Tasks == nil {
+		return nil, connect.NewError(connect.CodeUnavailable, errors.New("the server runs no plugin tasks"))
+	}
+	if err := s.Tasks.StartTask(p.Plugin, req.GetTaskId()); err != nil {
+		return nil, connectError(ctx, err)
+	}
+	return &pluginv1.StartTaskResponse{}, nil
 }

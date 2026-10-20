@@ -19,6 +19,17 @@ import (
 // under the same key.
 type Handler func(ctx context.Context, job core.Job) ([]core.Job, error)
 
+type resultKey struct{}
+
+// SetResult records the summary of what the job a Handler runs did, which
+// the worker stores as the job's Result once it succeeds; the last call
+// wins. Outside a worker's job it does nothing.
+func SetResult(ctx context.Context, result string) {
+	if r, ok := ctx.Value(resultKey{}).(*string); ok {
+		*r = result
+	}
+}
+
 // Worker leases jobs from the queue and runs their handlers, extending the
 // lease while a job runs. A crashed worker's jobs return to the queue when
 // their leases expire.
@@ -108,7 +119,8 @@ func (w *Worker) RunOne(ctx context.Context) (bool, error) {
 			}
 		}
 	}()
-	next, runErr := w.run(jobCtx, job)
+	var result string
+	next, runErr := w.run(context.WithValue(jobCtx, resultKey{}, &result), job)
 	close(done)
 
 	if ctx.Err() != nil {
@@ -120,7 +132,7 @@ func (w *Worker) RunOne(ctx context.Context) (bool, error) {
 		if err := w.Queue.Fail(ctx, job.ID, w.Owner, runErr); err != nil {
 			return true, err
 		}
-	} else if err := w.Queue.Complete(ctx, job.ID, w.Owner); err != nil {
+	} else if err := w.Queue.Complete(ctx, job.ID, w.Owner, result); err != nil {
 		return true, err
 	}
 	for i := range next {

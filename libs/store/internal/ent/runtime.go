@@ -547,6 +547,10 @@ func init() {
 	jobDescCreatedAt := jobFields[12].Descriptor()
 	// job.DefaultCreatedAt holds the default value on creation for the created_at field.
 	job.DefaultCreatedAt = jobDescCreatedAt.Default.(func() time.Time)
+	// jobDescResult is the schema descriptor for result field.
+	jobDescResult := jobFields[14].Descriptor()
+	// job.DefaultResult holds the default value on creation for the result field.
+	job.DefaultResult = jobDescResult.Default.(string)
 	// jobDescID is the schema descriptor for id field.
 	jobDescID := jobFields[0].Descriptor()
 	// job.DefaultID holds the default value on creation for the id field.

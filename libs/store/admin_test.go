@@ -137,7 +137,7 @@ func TestJobListAndPurge(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if err := q.Complete(ctx, leased.ID, "w"); err != nil {
+		if err := q.Complete(ctx, leased.ID, "w", ""); err != nil {
 			t.Fatal(err)
 		}
 		page, err := q.List(ctx, core.JobQuery{Kinds: []string{"a"}})

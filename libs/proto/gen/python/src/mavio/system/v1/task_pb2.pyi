@@ -26,7 +26,7 @@ JOB_STATE_SUCCEEDED: JobState
 JOB_STATE_FAILED: JobState
 
 class Job(_message.Message):
-    __slots__ = ("id", "kind", "state", "priority", "attempts", "max_attempts", "run_time", "create_time", "finish_time", "last_error", "payload_json", "progress")
+    __slots__ = ("id", "kind", "state", "priority", "attempts", "max_attempts", "run_time", "create_time", "finish_time", "last_error", "payload_json", "progress", "status", "result")
     ID_FIELD_NUMBER: _ClassVar[int]
     KIND_FIELD_NUMBER: _ClassVar[int]
     STATE_FIELD_NUMBER: _ClassVar[int]
@@ -39,6 +39,8 @@ class Job(_message.Message):
     LAST_ERROR_FIELD_NUMBER: _ClassVar[int]
     PAYLOAD_JSON_FIELD_NUMBER: _ClassVar[int]
     PROGRESS_FIELD_NUMBER: _ClassVar[int]
+    STATUS_FIELD_NUMBER: _ClassVar[int]
+    RESULT_FIELD_NUMBER: _ClassVar[int]
     id: str
     kind: str
     state: JobState
@@ -51,10 +53,12 @@ class Job(_message.Message):
     last_error: str
     payload_json: str
     progress: float
-    def __init__(self, id: _Optional[str] = ..., kind: _Optional[str] = ..., state: _Optional[_Union[JobState, str]] = ..., priority: _Optional[int] = ..., attempts: _Optional[int] = ..., max_attempts: _Optional[int] = ..., run_time: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ..., create_time: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ..., finish_time: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ..., last_error: _Optional[str] = ..., payload_json: _Optional[str] = ..., progress: _Optional[float] = ...) -> None: ...
+    status: str
+    result: str
+    def __init__(self, id: _Optional[str] = ..., kind: _Optional[str] = ..., state: _Optional[_Union[JobState, str]] = ..., priority: _Optional[int] = ..., attempts: _Optional[int] = ..., max_attempts: _Optional[int] = ..., run_time: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ..., create_time: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ..., finish_time: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ..., last_error: _Optional[str] = ..., payload_json: _Optional[str] = ..., progress: _Optional[float] = ..., status: _Optional[str] = ..., result: _Optional[str] = ...) -> None: ...
 
 class Task(_message.Message):
-    __slots__ = ("id", "name", "description", "kind", "interval", "last_run", "next_run_time", "running", "plugin_id", "progress")
+    __slots__ = ("id", "name", "description", "kind", "interval", "last_run", "next_run_time", "running", "plugin_id", "progress", "status")
     ID_FIELD_NUMBER: _ClassVar[int]
     NAME_FIELD_NUMBER: _ClassVar[int]
     DESCRIPTION_FIELD_NUMBER: _ClassVar[int]
@@ -65,6 +69,7 @@ class Task(_message.Message):
     RUNNING_FIELD_NUMBER: _ClassVar[int]
     PLUGIN_ID_FIELD_NUMBER: _ClassVar[int]
     PROGRESS_FIELD_NUMBER: _ClassVar[int]
+    STATUS_FIELD_NUMBER: _ClassVar[int]
     id: str
     name: str
     description: str
@@ -75,7 +80,8 @@ class Task(_message.Message):
     running: bool
     plugin_id: str
     progress: float
-    def __init__(self, id: _Optional[str] = ..., name: _Optional[str] = ..., description: _Optional[str] = ..., kind: _Optional[str] = ..., interval: _Optional[_Union[datetime.timedelta, _duration_pb2.Duration, _Mapping]] = ..., last_run: _Optional[_Union[Job, _Mapping]] = ..., next_run_time: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ..., running: _Optional[bool] = ..., plugin_id: _Optional[str] = ..., progress: _Optional[float] = ...) -> None: ...
+    status: str
+    def __init__(self, id: _Optional[str] = ..., name: _Optional[str] = ..., description: _Optional[str] = ..., kind: _Optional[str] = ..., interval: _Optional[_Union[datetime.timedelta, _duration_pb2.Duration, _Mapping]] = ..., last_run: _Optional[_Union[Job, _Mapping]] = ..., next_run_time: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ..., running: _Optional[bool] = ..., plugin_id: _Optional[str] = ..., progress: _Optional[float] = ..., status: _Optional[str] = ...) -> None: ...
 
 class ListTasksRequest(_message.Message):
     __slots__ = ()

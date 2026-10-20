@@ -255,8 +255,9 @@ type JobQueue interface {
 	Lease(ctx context.Context, owner string, kinds []string, ttl time.Duration) (Job, error)
 	// Extend renews a lease held by owner.
 	Extend(ctx context.Context, id ID, owner string, ttl time.Duration) error
-	// Complete marks a leased job succeeded.
-	Complete(ctx context.Context, id ID, owner string) error
+	// Complete marks a leased job succeeded, with the summary of what it
+	// did (Job.Result), which may be empty.
+	Complete(ctx context.Context, id ID, owner, result string) error
 	// Fail records a failed attempt; the job is retried after RetryDelay
 	// until MaxAttempts is reached, then marked failed. A job queued with
 	// the same UniqueKey while it ran stands for its retry: it is marked

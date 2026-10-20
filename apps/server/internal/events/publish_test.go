@@ -125,7 +125,7 @@ func TestPublish(t *testing.T) {
 			t.Fatal(err)
 		}
 		if cause == nil {
-			err = db.Jobs().Complete(ctx, leased.ID, "test")
+			err = db.Jobs().Complete(ctx, leased.ID, "test", "")
 		} else {
 			err = db.Jobs().Fail(ctx, leased.ID, "test", cause)
 		}

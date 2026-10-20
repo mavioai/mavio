@@ -915,6 +915,7 @@ var (
 		{Name: "last_error", Type: field.TypeString, Size: 2147483647, Default: ""},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "finished_at", Type: field.TypeTime, Nullable: true},
+		{Name: "result", Type: field.TypeString, Size: 2147483647, Default: ""},
 	}
 	// JobsTable holds the schema information for the "jobs" table.
 	JobsTable = &schema.Table{

@@ -228,6 +228,20 @@ func (_u *JobUpdate) ClearFinishedAt() *JobUpdate {
 	return _u
 }
 
+// SetResult sets the "result" field.
+func (_u *JobUpdate) SetResult(v string) *JobUpdate {
+	_u.mutation.SetResult(v)
+	return _u
+}
+
+// SetNillableResult sets the "result" field if the given value is not nil.
+func (_u *JobUpdate) SetNillableResult(v *string) *JobUpdate {
+	if v != nil {
+		_u.SetResult(*v)
+	}
+	return _u
+}
+
 // Mutation returns the JobMutation object of the builder.
 func (_u *JobUpdate) Mutation() *JobMutation {
 	return _u.mutation
@@ -328,6 +342,9 @@ func (_u *JobUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if _u.mutation.FinishedAtCleared() {
 		_spec.ClearField(job.FieldFinishedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.Result(); ok {
+		_spec.SetField(job.FieldResult, field.TypeString, value)
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
@@ -550,6 +567,20 @@ func (_u *JobUpdateOne) ClearFinishedAt() *JobUpdateOne {
 	return _u
 }
 
+// SetResult sets the "result" field.
+func (_u *JobUpdateOne) SetResult(v string) *JobUpdateOne {
+	_u.mutation.SetResult(v)
+	return _u
+}
+
+// SetNillableResult sets the "result" field if the given value is not nil.
+func (_u *JobUpdateOne) SetNillableResult(v *string) *JobUpdateOne {
+	if v != nil {
+		_u.SetResult(*v)
+	}
+	return _u
+}
+
 // Mutation returns the JobMutation object of the builder.
 func (_u *JobUpdateOne) Mutation() *JobMutation {
 	return _u.mutation
@@ -680,6 +711,9 @@ func (_u *JobUpdateOne) sqlSave(ctx context.Context) (_node *Job, err error) {
 	}
 	if _u.mutation.FinishedAtCleared() {
 		_spec.ClearField(job.FieldFinishedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.Result(); ok {
+		_spec.SetField(job.FieldResult, field.TypeString, value)
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	_node = &Job{config: _u.config}

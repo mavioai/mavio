@@ -36,6 +36,7 @@ func (Job) Fields() []ent.Field {
 		field.Text("last_error").Default(""),
 		field.Time("created_at").Default(time.Now).Immutable(),
 		field.Time("finished_at").Optional().Nillable(),
+		field.Text("result").Default(""),
 	}
 }
 

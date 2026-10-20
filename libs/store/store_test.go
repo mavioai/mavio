@@ -815,16 +815,20 @@ func TestJobQueue(t *testing.T) {
 			t.Errorf("lease of several kinds = %+v, %v, want = the other job", j, err)
 		}
 
-		if err := q.Complete(ctx, high.ID, "intruder"); !errors.Is(err, core.ErrConflict) {
+		if err := q.Complete(ctx, high.ID, "intruder", ""); !errors.Is(err, core.ErrConflict) {
 			t.Errorf("complete by non-owner: %v, want ErrConflict", err)
 		}
 		if err := q.Extend(ctx, high.ID, "w1", time.Minute); err != nil {
 			t.Errorf("Extend: %v", err)
 		}
-		if err := q.Complete(ctx, high.ID, "w1"); err != nil {
+		if err := q.Complete(ctx, high.ID, "w1", "scanned 3 files"); err != nil {
 			t.Errorf("Complete: %v", err)
 		}
-		if err := q.Complete(ctx, high.ID, "w1"); !errors.Is(err, core.ErrConflict) {
+		done, err := q.List(ctx, core.JobQuery{States: []core.JobState{core.JobSucceeded}})
+		if err != nil || len(done.Items) != 1 || done.Items[0].ID != high.ID || done.Items[0].Result != "scanned 3 files" {
+			t.Errorf("succeeded jobs = %+v, %v, want = the completed job with its result", done.Items, err)
+		}
+		if err := q.Complete(ctx, high.ID, "w1", ""); !errors.Is(err, core.ErrConflict) {
 			t.Errorf("complete twice: %v, want ErrConflict", err)
 		}
 
@@ -887,7 +891,7 @@ func TestJobUniqueKeys(t *testing.T) {
 			t.Fatalf("lease while the key runs = %v, %v, want = ErrNotFound", j.ID, err)
 		}
 		// Once the first is done, the second is leased.
-		if err := q.Complete(ctx, first.ID, "w1"); err != nil {
+		if err := q.Complete(ctx, first.ID, "w1", ""); err != nil {
 			t.Fatal(err)
 		}
 		if j, err := lease("w2", time.Minute); err != nil || j.ID != second.ID {
@@ -897,7 +901,7 @@ func TestJobUniqueKeys(t *testing.T) {
 		// An expired lease is taken over before the pending job of its key,
 		// which waits until the job is done.
 		third, _ := enqueue("refresh:1")
-		if err := q.Complete(ctx, second.ID, "w2"); err != nil {
+		if err := q.Complete(ctx, second.ID, "w2", ""); err != nil {
 			t.Fatal(err)
 		}
 		if j, err := lease("crashed", 10*time.Millisecond); err != nil || j.ID != third.ID {
@@ -954,7 +958,7 @@ func TestJobRetriesAndExpiry(t *testing.T) {
 		if err != nil || j.ID != job.ID || j.Attempts != 2 {
 			t.Fatalf("re-lease after expiry = %+v, %v", j, err)
 		}
-		if err := q.Complete(ctx, job.ID, "crashed"); !errors.Is(err, core.ErrConflict) {
+		if err := q.Complete(ctx, job.ID, "crashed", ""); !errors.Is(err, core.ErrConflict) {
 			t.Errorf("stale owner completed the job: %v", err)
 		}
 

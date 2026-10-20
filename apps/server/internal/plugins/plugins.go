@@ -188,6 +188,8 @@ type Manager struct {
 
 	// runs holds the tasks' runs in progress.
 	runs taskRuns
+	// starts holds the runs the plugins asked of their tasks.
+	starts taskStarts
 }
 
 type entry struct {
@@ -218,6 +220,7 @@ func Open(ctx context.Context, cfg Config) (*Manager, error) {
 	}
 	// Event delivery outlives the request that installs a plugin.
 	m.ctx, m.cancel = context.WithCancel(context.WithoutCancel(ctx))
+	m.starts.wake = make(chan struct{}, 1)
 	m.opts = host.Options{
 		WASM:     wasm.Options{CacheDir: cfg.CacheDir, FetchClient: cfg.Fetch, AllowHost: cfg.allowHost, Logger: m.log},
 		Process:  process.Options{Track: cfg.Track, Logger: m.log},
@@ -255,6 +258,7 @@ func Open(ctx context.Context, cfg Config) (*Manager, error) {
 	if cfg.Dir == "" {
 		m.sort()
 		m.startWatching()
+		go m.queueStarts()
 		return m, nil
 	}
 	dirs, err := os.ReadDir(cfg.Dir)
@@ -278,6 +282,7 @@ func Open(ctx context.Context, cfg Config) (*Manager, error) {
 	}
 	m.sort()
 	m.startWatching()
+	go m.queueStarts()
 	return m, nil
 }
 
@@ -370,6 +375,7 @@ func (m *Manager) ready(ctx context.Context, e *entry) {
 	m.mu.Lock()
 	e.state = state
 	m.mu.Unlock()
+	m.wakeStarts()
 	m.scheduleTasks(ctx, e.manifest)
 	m.log.InfoContext(ctx, "plugin started", "plugin", e.manifest.GetId(), "version", e.manifest.GetVersion(),
 		"configured", state == Ready)
@@ -512,6 +518,7 @@ func (m *Manager) SetConfig(ctx context.Context, id, configJSON string) (Info, s
 	// successor reads the stored configuration when it starts.
 	if cur, err := m.find(id); err == nil && cur == e && e.plugin != nil {
 		e.state, e.err = Ready, nil
+		m.wakeStarts()
 	}
 	m.log.InfoContext(ctx, "plugin configured", "plugin", id)
 	return e.info(), configJSON, nil

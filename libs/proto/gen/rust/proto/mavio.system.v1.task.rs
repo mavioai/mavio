@@ -125,6 +125,16 @@ pub struct Job {
     ///
     /// Field 12: `progress`
     pub progress: ::core::option::Option<f64>,
+    /// What a running job is doing, as it tells, such as the model a
+    /// plugin's task downloads.
+    ///
+    /// Field 13: `status`
+    pub status: ::core::option::Option<::buffa::alloc::string::String>,
+    /// Summary of what a succeeded job did, as it tells, such as the models a
+    /// plugin's task downloaded; empty when it tells nothing.
+    ///
+    /// Field 14: `result`
+    pub result: ::core::option::Option<::buffa::alloc::string::String>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -143,6 +153,8 @@ impl ::core::fmt::Debug for Job {
             .field("last_error", &self.last_error)
             .field("payload_json", &self.payload_json)
             .field("progress", &self.progress)
+            .field("status", &self.status)
+            .field("result", &self.result)
             .finish()
     }
 }
@@ -226,6 +238,26 @@ impl Job {
         self.progress = Some(value);
         self
     }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::status`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_status(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.status = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::result`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_result(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.result = Some(value.into());
+        self
+    }
 }
 ::buffa::impl_default_instance!(Job);
 impl ::buffa::MessageName for Job {
@@ -298,6 +330,12 @@ impl ::buffa::Message for Job {
         if self.progress.is_some() {
             size += 1u64 + ::buffa::types::FIXED64_ENCODED_LEN as u64;
         }
+        if let Some(ref v) = self.status {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.result {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -358,6 +396,12 @@ impl ::buffa::Message for Job {
         }
         if let Some(v) = self.progress {
             ::buffa::types::put_double_field(12u32, v, buf);
+        }
+        if let Some(ref v) = self.status {
+            ::buffa::types::put_string_field(13u32, v, buf);
+        }
+        if let Some(ref v) = self.result {
+            ::buffa::types::put_string_field(14u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -494,6 +538,26 @@ impl ::buffa::Message for Job {
                     ::buffa::types::decode_double(buf)?,
                 );
             }
+            13u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self.status.get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            14u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self.result.get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -514,6 +578,8 @@ impl ::buffa::Message for Job {
         self.last_error = ::core::option::Option::None;
         self.payload_json = ::core::option::Option::None;
         self.progress = ::core::option::Option::None;
+        self.status = ::core::option::Option::None;
+        self.result = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }
@@ -571,6 +637,10 @@ pub struct Task {
     ///
     /// Field 10: `progress`
     pub progress: ::core::option::Option<f64>,
+    /// What its run in progress is doing, as it tells.
+    ///
+    /// Field 11: `status`
+    pub status: ::core::option::Option<::buffa::alloc::string::String>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -587,6 +657,7 @@ impl ::core::fmt::Debug for Task {
             .field("running", &self.running)
             .field("plugin_id", &self.plugin_id)
             .field("progress", &self.progress)
+            .field("status", &self.status)
             .finish()
     }
 }
@@ -659,6 +730,16 @@ impl Task {
         self.progress = Some(value);
         self
     }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::status`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_status(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.status = Some(value.into());
+        self
+    }
 }
 ::buffa::impl_default_instance!(Task);
 impl ::buffa::MessageName for Task {
@@ -725,6 +806,9 @@ impl ::buffa::Message for Task {
         if self.progress.is_some() {
             size += 1u64 + ::buffa::types::FIXED64_ENCODED_LEN as u64;
         }
+        if let Some(ref v) = self.status {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -779,6 +863,9 @@ impl ::buffa::Message for Task {
         }
         if let Some(v) = self.progress {
             ::buffa::types::put_double_field(10u32, v, buf);
+        }
+        if let Some(ref v) = self.status {
+            ::buffa::types::put_string_field(11u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -898,6 +985,16 @@ impl ::buffa::Message for Task {
                     ::buffa::types::decode_double(buf)?,
                 );
             }
+            11u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self.status.get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -916,6 +1013,7 @@ impl ::buffa::Message for Task {
         self.running = ::core::option::Option::None;
         self.plugin_id = ::core::option::Option::None;
         self.progress = ::core::option::Option::None;
+        self.status = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }

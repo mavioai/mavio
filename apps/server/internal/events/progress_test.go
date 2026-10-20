@@ -89,7 +89,7 @@ func TestScanProgress(t *testing.T) {
 			t.Fatal(err)
 		}
 		hub.ScanFolders(films.ID, 4, 4)
-		if err := db.Jobs().Complete(ctx, scan.ID, "test"); err != nil {
+		if err := db.Jobs().Complete(ctx, scan.ID, "test", ""); err != nil {
 			t.Fatal(err)
 		}
 		time.Sleep(progressInterval)
@@ -113,7 +113,7 @@ func TestScanProgress(t *testing.T) {
 			t.Errorf("half done = %v", p)
 		}
 		second := run(library.JobProbe)
-		if err := db.Jobs().Complete(ctx, second.ID, "test"); err != nil {
+		if err := db.Jobs().Complete(ctx, second.ID, "test", ""); err != nil {
 			t.Fatal(err)
 		}
 		if _, ended := progress(); !ended || hub.ScanProgress(films.ID) != nil {

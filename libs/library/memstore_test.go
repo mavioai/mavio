@@ -429,12 +429,12 @@ func (r memJobs) Extend(_ context.Context, id core.ID, owner string, ttl time.Du
 	return err
 }
 
-func (r memJobs) Complete(_ context.Context, id core.ID, owner string) error {
+func (r memJobs) Complete(_ context.Context, id core.ID, owner, result string) error {
 	r.m.mu.Lock()
 	defer r.m.mu.Unlock()
 	j, err := r.find(id, owner)
 	if err == nil {
-		j.State = core.JobSucceeded
+		j.State, j.Result = core.JobSucceeded, result
 	}
 	return err
 }

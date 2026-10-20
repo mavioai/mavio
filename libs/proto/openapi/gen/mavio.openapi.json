@@ -20728,6 +20728,16 @@
             "title": "progress",
             "format": "double",
             "description": "The fraction done of a running job that tells it, 0 to 1, such as\n the download of an image a plugin.container_pull job pulls."
+          },
+          "status": {
+            "type": "string",
+            "title": "status",
+            "description": "What a running job is doing, as it tells, such as the model a\n plugin's task downloads."
+          },
+          "result": {
+            "type": "string",
+            "title": "result",
+            "description": "Summary of what a succeeded job did, as it tells, such as the models a\n plugin's task downloaded; empty when it tells nothing."
           }
         },
         "title": "Job",
@@ -22562,6 +22572,11 @@
             "title": "progress",
             "format": "double",
             "description": "The fraction done of its run in progress that tells it, 0 to 1, such\n as a plugin's download of its models."
+          },
+          "status": {
+            "type": "string",
+            "title": "status",
+            "description": "What its run in progress is doing, as it tells."
           }
         },
         "title": "Task",

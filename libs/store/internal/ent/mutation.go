@@ -24524,6 +24524,7 @@ type JobMutation struct {
 	last_error       *string
 	created_at       *time.Time
 	finished_at      *time.Time
+	result           *string
 	clearedFields    map[string]struct{}
 	done             bool
 	oldValue         func(context.Context) (*Job, error)
@@ -25201,6 +25202,42 @@ func (m *JobMutation) ResetFinishedAt() {
 	delete(m.clearedFields, job.FieldFinishedAt)
 }
 
+// SetResult sets the "result" field.
+func (m *JobMutation) SetResult(s string) {
+	m.result = &s
+}
+
+// Result returns the value of the "result" field in the mutation.
+func (m *JobMutation) Result() (r string, exists bool) {
+	v := m.result
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldResult returns the old "result" field's value of the Job entity.
+// If the Job object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *JobMutation) OldResult(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldResult is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldResult requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldResult: %w", err)
+	}
+	return oldValue.Result, nil
+}
+
+// ResetResult resets all changes to the "result" field.
+func (m *JobMutation) ResetResult() {
+	m.result = nil
+}
+
 // Where appends a list predicates to the JobMutation builder.
 func (m *JobMutation) Where(ps ...predicate.Job) {
 	m.predicates = append(m.predicates, ps...)
@@ -25235,7 +25272,7 @@ func (m *JobMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *JobMutation) Fields() []string {
-	fields := make([]string, 0, 13)
+	fields := make([]string, 0, 14)
 	if m.kind != nil {
 		fields = append(fields, job.FieldKind)
 	}
@@ -25275,6 +25312,9 @@ func (m *JobMutation) Fields() []string {
 	if m.finished_at != nil {
 		fields = append(fields, job.FieldFinishedAt)
 	}
+	if m.result != nil {
+		fields = append(fields, job.FieldResult)
+	}
 	return fields
 }
 
@@ -25309,6 +25349,8 @@ func (m *JobMutation) Field(name string) (ent.Value, bool) {
 		return m.CreatedAt()
 	case job.FieldFinishedAt:
 		return m.FinishedAt()
+	case job.FieldResult:
+		return m.Result()
 	}
 	return nil, false
 }
@@ -25344,6 +25386,8 @@ func (m *JobMutation) OldField(ctx context.Context, name string) (ent.Value, err
 		return m.OldCreatedAt(ctx)
 	case job.FieldFinishedAt:
 		return m.OldFinishedAt(ctx)
+	case job.FieldResult:
+		return m.OldResult(ctx)
 	}
 	return nil, fmt.Errorf("unknown Job field %s", name)
 }
@@ -25443,6 +25487,13 @@ func (m *JobMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetFinishedAt(v)
+		return nil
+	case job.FieldResult:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetResult(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Job field %s", name)
@@ -25591,6 +25642,9 @@ func (m *JobMutation) ResetField(name string) error {
 		return nil
 	case job.FieldFinishedAt:
 		m.ResetFinishedAt()
+		return nil
+	case job.FieldResult:
+		m.ResetResult()
 		return nil
 	}
 	return fmt.Errorf("unknown Job field %s", name)

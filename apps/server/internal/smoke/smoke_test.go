@@ -139,7 +139,7 @@ func TestMetadataRefresh(t *testing.T) {
 				_ = s.Jobs().Fail(ctx, leased.ID, "worker-1", err)
 				t.Fatalf("refresh: %v", err)
 			}
-			if err := s.Jobs().Complete(ctx, leased.ID, "worker-1"); err != nil {
+			if err := s.Jobs().Complete(ctx, leased.ID, "worker-1", ""); err != nil {
 				t.Fatal(err)
 			}
 			if _, err := s.Jobs().Lease(ctx, "worker-1", []string{"metadata.refresh"}, time.Minute); !errors.Is(err, core.ErrNotFound) {

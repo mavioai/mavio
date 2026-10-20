@@ -616,6 +616,14 @@ pub use self::__buffa::view::ReportTaskProgressResponseView;
 #[doc(inline)]
 pub use self::__buffa::view::ReportTaskProgressResponseOwnedView;
 #[doc(inline)]
+pub use self::__buffa::view::StartTaskRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::StartTaskRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::StartTaskResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::StartTaskResponseOwnedView;
+#[doc(inline)]
 pub use self::__buffa::view::DeviceView;
 #[doc(inline)]
 pub use self::__buffa::view::DeviceOwnedView;

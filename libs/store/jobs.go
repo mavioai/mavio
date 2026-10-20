@@ -128,10 +128,11 @@ func (r jobs) Extend(ctx context.Context, id core.ID, owner string, ttl time.Dur
 	return leaseResult(n, err, "extend job "+id.String())
 }
 
-func (r jobs) Complete(ctx context.Context, id core.ID, owner string) error {
+func (r jobs) Complete(ctx context.Context, id core.ID, owner, result string) error {
 	now := time.Now()
 	n, err := r.queries().FinishJob(ctx, sqlcsqlite.FinishJobParams{
 		State:      string(core.JobSucceeded),
+		Result:     result,
 		FinishedAt: sql.NullTime{Time: now, Valid: true},
 		RunAt:      now,
 		ID:         id,
@@ -207,6 +208,7 @@ func toJob(j sqlcsqlite.Job) core.Job {
 		RunAt:       j.RunAt.UTC(),
 		LeaseOwner:  j.LeaseOwner,
 		LastError:   j.LastError,
+		Result:      j.Result,
 		CreatedAt:   j.CreatedAt.UTC(),
 	}
 	if j.LeaseExpiresAt.Valid {

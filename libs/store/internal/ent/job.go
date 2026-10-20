@@ -43,7 +43,9 @@ type Job struct {
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// FinishedAt holds the value of the "finished_at" field.
-	FinishedAt   *time.Time `json:"finished_at,omitempty"`
+	FinishedAt *time.Time `json:"finished_at,omitempty"`
+	// Result holds the value of the "result" field.
+	Result       string `json:"result,omitempty"`
 	selectValues sql.SelectValues
 }
 
@@ -58,7 +60,7 @@ func (*Job) scanValues(columns []string) ([]any, error) {
 			values[i] = new(core.ID)
 		case job.FieldPriority, job.FieldAttempts, job.FieldMaxAttempts:
 			values[i] = new(sql.NullInt64)
-		case job.FieldKind, job.FieldUniqueKey, job.FieldState, job.FieldLeaseOwner, job.FieldLastError:
+		case job.FieldKind, job.FieldUniqueKey, job.FieldState, job.FieldLeaseOwner, job.FieldLastError, job.FieldResult:
 			values[i] = new(sql.NullString)
 		case job.FieldRunAt, job.FieldLeaseExpiresAt, job.FieldCreatedAt, job.FieldFinishedAt:
 			values[i] = new(sql.NullTime)
@@ -163,6 +165,12 @@ func (_m *Job) assignValues(columns []string, values []any) error {
 				_m.FinishedAt = new(time.Time)
 				*_m.FinishedAt = value.Time
 			}
+		case job.FieldResult:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field result", values[i])
+			} else if value.Valid {
+				_m.Result = value.String
+			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -241,6 +249,9 @@ func (_m *Job) String() string {
 		builder.WriteString("finished_at=")
 		builder.WriteString(v.Format(time.ANSIC))
 	}
+	builder.WriteString(", ")
+	builder.WriteString("result=")
+	builder.WriteString(_m.Result)
 	builder.WriteByte(')')
 	return builder.String()
 }

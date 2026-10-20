@@ -36,13 +36,25 @@ class RunTaskResponse(_message.Message):
     def __init__(self, message: _Optional[str] = ...) -> None: ...
 
 class ReportTaskProgressRequest(_message.Message):
-    __slots__ = ("task_id", "progress")
+    __slots__ = ("task_id", "progress", "status")
     TASK_ID_FIELD_NUMBER: _ClassVar[int]
     PROGRESS_FIELD_NUMBER: _ClassVar[int]
+    STATUS_FIELD_NUMBER: _ClassVar[int]
     task_id: str
     progress: float
-    def __init__(self, task_id: _Optional[str] = ..., progress: _Optional[float] = ...) -> None: ...
+    status: str
+    def __init__(self, task_id: _Optional[str] = ..., progress: _Optional[float] = ..., status: _Optional[str] = ...) -> None: ...
 
 class ReportTaskProgressResponse(_message.Message):
+    __slots__ = ()
+    def __init__(self) -> None: ...
+
+class StartTaskRequest(_message.Message):
+    __slots__ = ("task_id",)
+    TASK_ID_FIELD_NUMBER: _ClassVar[int]
+    task_id: str
+    def __init__(self, task_id: _Optional[str] = ...) -> None: ...
+
+class StartTaskResponse(_message.Message):
     __slots__ = ()
     def __init__(self) -> None: ...

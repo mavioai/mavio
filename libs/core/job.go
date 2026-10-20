@@ -37,8 +37,12 @@ type Job struct {
 	LeaseOwner     string
 	LeaseExpiresAt time.Time
 	LastError      string
-	CreatedAt      time.Time
-	FinishedAt     *time.Time
+	// Result summarizes what a succeeded job did, as its handler tells,
+	// such as the models a plugin's task downloaded; empty when it tells
+	// nothing.
+	Result     string
+	CreatedAt  time.Time
+	FinishedAt *time.Time
 }
 
 // Validate checks the job's invariants for enqueueing.

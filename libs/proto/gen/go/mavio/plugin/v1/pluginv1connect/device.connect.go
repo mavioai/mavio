@@ -51,6 +51,8 @@ const (
 	// HostServiceReportTaskProgressProcedure is the fully-qualified name of the HostService's
 	// ReportTaskProgress RPC.
 	HostServiceReportTaskProgressProcedure = "/mavio.plugin.v1.HostService/ReportTaskProgress"
+	// HostServiceStartTaskProcedure is the fully-qualified name of the HostService's StartTask RPC.
+	HostServiceStartTaskProcedure = "/mavio.plugin.v1.HostService/StartTask"
 	// DeviceControllerServiceSendCommandProcedure is the fully-qualified name of the
 	// DeviceControllerService's SendCommand RPC.
 	DeviceControllerServiceSendCommandProcedure = "/mavio.plugin.v1.DeviceControllerService/SendCommand"
@@ -83,6 +85,13 @@ type HostServiceClient interface {
 	// plugin's tasks has come, which the server shows as its job's progress;
 	// a report of a task not running is ignored.
 	ReportTaskProgress(context.Context, *v1.ReportTaskProgressRequest) (*v1.ReportTaskProgressResponse, error)
+	// StartTask queues a run of one of the calling plugin's tasks, as an
+	// administrator running it does, for work the plugin starts itself, such
+	// as downloading the models its configuration needs. It returns at once,
+	// even while the plugin is being configured: the run is queued once the
+	// plugin is ready, and joins a run already waiting. A task the plugin
+	// does not declare is not found.
+	StartTask(context.Context, *v1.StartTaskRequest) (*v1.StartTaskResponse, error)
 }
 
 // NewHostServiceClient constructs a client for the mavio.plugin.v1.HostService service. By default,
@@ -135,6 +144,12 @@ func NewHostServiceClient(httpClient connect.HTTPClient, baseURL string, opts ..
 			connect.WithSchema(hostServiceMethods.ByName("ReportTaskProgress")),
 			connect.WithClientOptions(opts...),
 		),
+		startTask: connect.NewClient[v1.StartTaskRequest, v1.StartTaskResponse](
+			httpClient,
+			baseURL+HostServiceStartTaskProcedure,
+			connect.WithSchema(hostServiceMethods.ByName("StartTask")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
@@ -146,6 +161,7 @@ type hostServiceClient struct {
 	listProxies        *connect.Client[v1.ListProxiesRequest, v1.ListProxiesResponse]
 	solveChallenge     *connect.Client[v1.SolveChallengeRequest, v1.SolveChallengeResponse]
 	reportTaskProgress *connect.Client[v1.ReportTaskProgressRequest, v1.ReportTaskProgressResponse]
+	startTask          *connect.Client[v1.StartTaskRequest, v1.StartTaskResponse]
 }
 
 // SetDevices calls mavio.plugin.v1.HostService.SetDevices.
@@ -202,6 +218,15 @@ func (c *hostServiceClient) ReportTaskProgress(ctx context.Context, req *v1.Repo
 	return nil, err
 }
 
+// StartTask calls mavio.plugin.v1.HostService.StartTask.
+func (c *hostServiceClient) StartTask(ctx context.Context, req *v1.StartTaskRequest) (*v1.StartTaskResponse, error) {
+	response, err := c.startTask.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
 // HostServiceHandler is an implementation of the mavio.plugin.v1.HostService service.
 type HostServiceHandler interface {
 	// SetDevices replaces the remote devices of the calling plugin, which
@@ -229,6 +254,13 @@ type HostServiceHandler interface {
 	// plugin's tasks has come, which the server shows as its job's progress;
 	// a report of a task not running is ignored.
 	ReportTaskProgress(context.Context, *v1.ReportTaskProgressRequest) (*v1.ReportTaskProgressResponse, error)
+	// StartTask queues a run of one of the calling plugin's tasks, as an
+	// administrator running it does, for work the plugin starts itself, such
+	// as downloading the models its configuration needs. It returns at once,
+	// even while the plugin is being configured: the run is queued once the
+	// plugin is ready, and joins a run already waiting. A task the plugin
+	// does not declare is not found.
+	StartTask(context.Context, *v1.StartTaskRequest) (*v1.StartTaskResponse, error)
 }
 
 // NewHostServiceHandler builds an HTTP handler from the service implementation. It returns the path
@@ -277,6 +309,12 @@ func NewHostServiceHandler(svc HostServiceHandler, opts ...connect.HandlerOption
 		connect.WithSchema(hostServiceMethods.ByName("ReportTaskProgress")),
 		connect.WithHandlerOptions(opts...),
 	)
+	hostServiceStartTaskHandler := connect.NewUnaryHandlerSimple(
+		HostServiceStartTaskProcedure,
+		svc.StartTask,
+		connect.WithSchema(hostServiceMethods.ByName("StartTask")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/mavio.plugin.v1.HostService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case HostServiceSetDevicesProcedure:
@@ -291,6 +329,8 @@ func NewHostServiceHandler(svc HostServiceHandler, opts ...connect.HandlerOption
 			hostServiceSolveChallengeHandler.ServeHTTP(w, r)
 		case HostServiceReportTaskProgressProcedure:
 			hostServiceReportTaskProgressHandler.ServeHTTP(w, r)
+		case HostServiceStartTaskProcedure:
+			hostServiceStartTaskHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -322,6 +362,10 @@ func (UnimplementedHostServiceHandler) SolveChallenge(context.Context, *v1.Solve
 
 func (UnimplementedHostServiceHandler) ReportTaskProgress(context.Context, *v1.ReportTaskProgressRequest) (*v1.ReportTaskProgressResponse, error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.plugin.v1.HostService.ReportTaskProgress is not implemented"))
+}
+
+func (UnimplementedHostServiceHandler) StartTask(context.Context, *v1.StartTaskRequest) (*v1.StartTaskResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.plugin.v1.HostService.StartTask is not implemented"))
 }
 
 // DeviceControllerServiceClient is a client for the mavio.plugin.v1.DeviceControllerService

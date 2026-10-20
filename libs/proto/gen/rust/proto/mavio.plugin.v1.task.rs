@@ -361,7 +361,10 @@ impl ::buffa::ExtensionSet for RunTaskRequest {
 }
 #[derive(Clone, PartialEq, Default)]
 pub struct RunTaskResponse {
-    /// Summary of what the run did, which the host logs.
+    /// Summary of what the run did, which the host logs and shows as the
+    /// result of its run; empty when there is nothing to tell. As it is not
+    /// translated, it should name what the run did, such as the models it
+    /// downloaded, rather than be a sentence.
     ///
     /// Field 1: `message`
     pub message: ::core::option::Option<::buffa::alloc::string::String>,
@@ -482,6 +485,12 @@ pub struct ReportTaskProgressRequest {
     ///
     /// Field 2: `progress`
     pub progress: ::core::option::Option<f64>,
+    /// What the run is doing, shown with the progress, such as the model it
+    /// downloads; at most 200 characters. As it is not translated, it should
+    /// name things rather than be a sentence. Empty keeps none.
+    ///
+    /// Field 3: `status`
+    pub status: ::core::option::Option<::buffa::alloc::string::String>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -490,6 +499,7 @@ impl ::core::fmt::Debug for ReportTaskProgressRequest {
         f.debug_struct("ReportTaskProgressRequest")
             .field("task_id", &self.task_id)
             .field("progress", &self.progress)
+            .field("status", &self.status)
             .finish()
     }
 }
@@ -516,6 +526,16 @@ impl ReportTaskProgressRequest {
     ///Sets [`Self::progress`] to `Some(value)`, consuming and returning `self`.
     pub fn with_progress(mut self, value: f64) -> Self {
         self.progress = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::status`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_status(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.status = Some(value.into());
         self
     }
 }
@@ -545,6 +565,9 @@ impl ::buffa::Message for ReportTaskProgressRequest {
         if self.progress.is_some() {
             size += 1u64 + ::buffa::types::FIXED64_ENCODED_LEN as u64;
         }
+        if let Some(ref v) = self.status {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -560,6 +583,9 @@ impl ::buffa::Message for ReportTaskProgressRequest {
         }
         if let Some(v) = self.progress {
             ::buffa::types::put_double_field(2u32, v, buf);
+        }
+        if let Some(ref v) = self.status {
+            ::buffa::types::put_string_field(3u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -593,6 +619,16 @@ impl ::buffa::Message for ReportTaskProgressRequest {
                     ::buffa::types::decode_double(buf)?,
                 );
             }
+            3u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self.status.get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -603,6 +639,7 @@ impl ::buffa::Message for ReportTaskProgressRequest {
     fn clear(&mut self) {
         self.task_id = ::core::option::Option::None;
         self.progress = ::core::option::Option::None;
+        self.status = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }
@@ -688,6 +725,199 @@ impl ::buffa::Message for ReportTaskProgressResponse {
 }
 impl ::buffa::ExtensionSet for ReportTaskProgressResponse {
     const PROTO_FQN: &'static str = "mavio.plugin.v1.ReportTaskProgressResponse";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+#[derive(Clone, PartialEq, Default)]
+pub struct StartTaskRequest {
+    /// A task of the calling plugin's manifest.
+    ///
+    /// Field 1: `task_id`
+    pub task_id: ::core::option::Option<::buffa::alloc::string::String>,
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for StartTaskRequest {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("StartTaskRequest").field("task_id", &self.task_id).finish()
+    }
+}
+impl StartTaskRequest {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.plugin.v1.StartTaskRequest";
+}
+impl StartTaskRequest {
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::task_id`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_task_id(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.task_id = Some(value.into());
+        self
+    }
+}
+::buffa::impl_default_instance!(StartTaskRequest);
+impl ::buffa::MessageName for StartTaskRequest {
+    const PACKAGE: &'static str = "mavio.plugin.v1";
+    const NAME: &'static str = "StartTaskRequest";
+    const FULL_NAME: &'static str = "mavio.plugin.v1.StartTaskRequest";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.plugin.v1.StartTaskRequest";
+}
+impl ::buffa::Message for StartTaskRequest {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if let Some(ref v) = self.task_id {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if let Some(ref v) = self.task_id {
+            ::buffa::types::put_string_field(1u32, v, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self.task_id.get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.task_id = ::core::option::Option::None;
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for StartTaskRequest {
+    const PROTO_FQN: &'static str = "mavio.plugin.v1.StartTaskRequest";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+#[derive(Clone, PartialEq, Default)]
+pub struct StartTaskResponse {
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for StartTaskResponse {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("StartTaskResponse").finish()
+    }
+}
+impl StartTaskResponse {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.plugin.v1.StartTaskResponse";
+}
+::buffa::impl_default_instance!(StartTaskResponse);
+impl ::buffa::MessageName for StartTaskResponse {
+    const PACKAGE: &'static str = "mavio.plugin.v1";
+    const NAME: &'static str = "StartTaskResponse";
+    const FULL_NAME: &'static str = "mavio.plugin.v1.StartTaskResponse";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.plugin.v1.StartTaskResponse";
+}
+impl ::buffa::Message for StartTaskResponse {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for StartTaskResponse {
+    const PROTO_FQN: &'static str = "mavio.plugin.v1.StartTaskResponse";
     fn unknown_fields(&self) -> &::buffa::UnknownFields {
         &self.__buffa_unknown_fields
     }

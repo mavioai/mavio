@@ -100,7 +100,7 @@ manifest 在 `permissions.api` 中列出插件可以调用的服务：`<package>
 * **运行时**：进程插件通过其 socket 上的流式反向代理访问，代理在 `Mavio-Plugin-Token` 中出示插件的令牌，使请求保留自己的 `Authorization`。WASM 请求会被缓冲并受调用超时限制，每个方向至多 16 MiB；ABI 请求信封在请求体之后携带方法与查询字符串，旧的 guest 会忽略它们。
 
 ## 6. 任务与数据目录
-* **任务**：`TASK_RUNNER` 插件的 manifest 列出任务（ID、名称、说明、至少一分钟的间隔、超时）。它们以 `plugin:{plugin}:{task}` 出现在 `TaskService` 中，并带有插件 ID；它们作为 `plugin.task` 作业在单独的 worker 上运行，调用 `TaskRunnerService.RunTask`：自插件启动起按间隔运行，每次运行排入下一次；也可按需运行。任务的超时（至多六小时，未设置时为一小时）在该次调用中取代 WASM 的调用超时。插件未就绪时跳过定时运行；已不存在的任务的运行被丢弃。一次运行以 `HostService.ReportTaskProgress` 报告进度（0 到 1 的比例；未在运行的任务的报告被忽略），成为其作业的进度以及 `TaskService` 中任务的 `progress`，在任务页面上显示为百分比；Python SDK 的 `report_task_progress` 调用它。
+* **任务**：`TASK_RUNNER` 插件的 manifest 列出任务（ID、名称、说明、至少一分钟的间隔、超时）。它们以 `plugin:{plugin}:{task}` 出现在 `TaskService` 中，并带有插件 ID；它们作为 `plugin.task` 作业在单独的 worker 上运行，调用 `TaskRunnerService.RunTask`：自插件启动起按间隔运行，每次运行排入下一次；也可按需运行。任务的超时（至多六小时，未设置时为一小时）在该次调用中取代 WASM 的调用超时。插件未就绪时跳过定时运行；已不存在的任务的运行被丢弃。一次运行以 `HostService.ReportTaskProgress` 报告进度（0 到 1 的比例，以及其正在做什么的状态，如正在下载的文件；未在运行的任务的报告被忽略），成为其作业的进度与状态以及 `TaskService` 中任务的 `progress` 与 `status`，在任务页面上显示为百分比与状态；Python SDK 的 `report_task_progress` 调用它。`RunTaskResponse` 的 `message` 是这次运行的摘要（不翻译），保存为其作业的 `result` 并显示在任务下方。插件以 `HostService.StartTask`（Python SDK 的 `start_task`）请求运行自己的任务，使其自行开始的工作（如配置之后）出现在任务中：调用立即返回，主机在插件就绪后以管理员运行的方式排入一次运行，已有等待中的运行时并入其中，未声明的任务为 `NotFound`。
 * **数据目录**：每个插件有一个可写目录 `<home>/plugin-data/<id>`（`--plugin-data-dir`），升级时保留，纳入备份，卸载时删除。两种运行时都通过 `MAVIO_PLUGIN_DATA` 告知插件其路径（`guest.DataDir()`）；WASM 插件在 `/data` 看到它。
 * **宿主操作系统**：两种运行时都通过 `MAVIO_HOST_OS`（`guest.HostOS()`）告知宿主的操作系统及其版本，按 Servarr 应用在 User-Agent 中的写法小写，如 `ubuntu 22.04`：Linux 上取自 `/etc/*release` 的 `ID` 与 `VERSION_ID`，macOS 上取自系统版本属性列表，Windows 上取自 `RtlGetVersion`。
 * **设备 ID**：两种运行时都通过 `MAVIO_DEVICE_ID`（`guest.DeviceID()`，TypeScript 中为 `deviceId()`）给插件一个 UUID，代表本机面向那些区分安装的服务——如 OpenAI 的 agent host ID，agent 插件用 ChatGPT 登录时会发送它。它是由本机硬件 ID（Linux 的 `machine-id`、macOS 的 `IOPlatformUUID`、Windows 的 `MachineGuid`）推导出的第 5 版 UUID；在容器中或本机没有硬件 ID 时，改由服务器的 ID（首次启动时随 `$MAVIO_HOME` 生成）推导。这样它在重启、升级和重装之间保持不变，又不泄露硬件 ID。
@@ -198,7 +198,7 @@ manifest 在 `external_id_kinds` 中声明外部 ID 类型：键、显示名称�
 * **语音服务**是 Pipecat 的 STT 与 TTS 服务，即 Pipecat 团队维护、其依赖在插件发布的每个平台上都能以 wheel 安装且不需要 PyTorch 的那些服务（[助手 §8.7](assistant.zh-CN.md#87-识别与合成服务)）。
 * **Whisper** 运行在 speaches 上，即插件的容器依赖 `speaches`（§11）：使用其 CPU 镜像，或在容器引擎经 CDI 或 NVIDIA runtime 提供 NVIDIA GPU 时使用其 CUDA 镜像；其模型保存在容器的卷中。其服务 `speaches` 的识别器或转写器只有在设置了该依赖后才能启用，容器未运行时未就绪；其地址变化时服务端会重新配置插件。
 * **转写服务**直接调用 speaches 与 OpenAI 兼容的转写 API（请求 `verbose_json`），因为 Pipecat 的服务会丢弃分段的时间；一次一个视频。
-* **模型**：本地服务的模型由插件的 `download-models` 任务下载，Whisper 的经由 speaches 的模型 API，Kokoro 的与 Piper 的语音经由管理员为插件指定的代理（§12.1）下载到数据目录（`models/`），并报告进度（§6）；插件不接受配置其尚未下载的模型。
+* **模型**：本地服务的模型由插件的 `download-models` 任务下载，Whisper 的经由 speaches 的模型 API，Kokoro 的与 Piper 的语音经由管理员为插件指定的代理（§12.1）下载到数据目录（`models/`），并报告进度与正在下载的文件（§6）；缺少模型的配置会启动该任务（`StartTask`），插件不接受配置其尚未下载的模型。
 
 ### 8.17 质询求解器
 `CHALLENGE_SOLVER` 解答位于 Cloudflare 或 DDoS-Guard 之后的站点的质询（[架构 §17.2](architecture.zh-CN.md#172-质询求解器)）。`ChallengeSolverService.Solve` 接受 URL、方法（GET，或带表单正文及其内容类型的 POST）、求解时经由的代理与超时，返回通过质询的 cookie（名称、值、域、路径）、取得它们时的 user agent 以及解答它的求解器。其他插件从不直接调用它：它们以代理的 ID 调用 `HostService.SolveChallenge`，由服务端解析代理后依次交给就绪的求解插件；没有时答复 unavailable。由 `plugins/solvers` 以 FlareSolverr 提供（§12）。

@@ -36,7 +36,7 @@ func jobToProto(j *core.Job) *systemv1.Job {
 	out := systemv1.Job_builder{
 		Id: new(j.ID.String()), Kind: &j.Kind, State: new(jobStates[j.State]), Priority: new(int32(j.Priority)),
 		Attempts: new(int32(j.Attempts)), MaxAttempts: new(int32(j.MaxAttempts)), RunTime: timestamppb.New(j.RunAt),
-		CreateTime: timestamppb.New(j.CreatedAt), LastError: &j.LastError, PayloadJson: new(string(j.Payload)),
+		CreateTime: timestamppb.New(j.CreatedAt), LastError: &j.LastError, PayloadJson: new(string(j.Payload)), Result: &j.Result,
 	}.Build()
 	if j.FinishedAt != nil {
 		out.SetFinishTime(timestamppb.New(*j.FinishedAt))
@@ -59,6 +59,8 @@ type TaskService struct {
 	Requests bool
 	// Progress tells the fraction done of a running job; nil tells none.
 	Progress func(id core.ID) (float64, bool)
+	// Status tells what a running job is doing; nil tells nothing.
+	Status func(id core.ID) (string, bool)
 }
 
 var _ systemv1connect.TaskServiceHandler = (*TaskService)(nil)
@@ -227,6 +229,11 @@ func (s *TaskService) ListTasks(ctx context.Context, _ *systemv1.ListTasksReques
 						out[i].SetProgress(f)
 					}
 				}
+				if s.Status != nil {
+					if st, ok := s.Status(job.ID); ok {
+						out[i].SetStatus(st)
+					}
+				}
 			} else if next == nil || job.RunAt.Before(*next) {
 				next = &job.RunAt
 			}
@@ -323,6 +330,11 @@ func (s *TaskService) ListJobs(ctx context.Context, req *systemv1.ListJobsReques
 		if s.Progress != nil && page.Items[i].State == core.JobRunning {
 			if f, ok := s.Progress(page.Items[i].ID); ok {
 				out[i].SetProgress(f)
+			}
+		}
+		if s.Status != nil && page.Items[i].State == core.JobRunning {
+			if st, ok := s.Status(page.Items[i].ID); ok {
+				out[i].SetStatus(st)
 			}
 		}
 	}

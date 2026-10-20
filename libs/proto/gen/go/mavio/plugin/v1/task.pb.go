@@ -362,7 +362,10 @@ func (x *RunTaskResponse) ClearMessage() {
 type RunTaskResponse_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
-	// Summary of what the run did, which the host logs.
+	// Summary of what the run did, which the host logs and shows as the
+	// result of its run; empty when there is nothing to tell. As it is not
+	// translated, it should name what the run did, such as the models it
+	// downloaded, rather than be a sentence.
 	Message *string
 }
 
@@ -381,6 +384,7 @@ type ReportTaskProgressRequest struct {
 	state                  protoimpl.MessageState `protogen:"opaque.v1"`
 	xxx_hidden_TaskId      *string                `protobuf:"bytes,1,opt,name=task_id,json=taskId"`
 	xxx_hidden_Progress    float64                `protobuf:"fixed64,2,opt,name=progress"`
+	xxx_hidden_Status      *string                `protobuf:"bytes,3,opt,name=status"`
 	XXX_raceDetectHookData protoimpl.RaceDetectHookData
 	XXX_presence           [1]uint32
 	unknownFields          protoimpl.UnknownFields
@@ -429,14 +433,29 @@ func (x *ReportTaskProgressRequest) GetProgress() float64 {
 	return 0
 }
 
+func (x *ReportTaskProgressRequest) GetStatus() string {
+	if x != nil {
+		if x.xxx_hidden_Status != nil {
+			return *x.xxx_hidden_Status
+		}
+		return ""
+	}
+	return ""
+}
+
 func (x *ReportTaskProgressRequest) SetTaskId(v string) {
 	x.xxx_hidden_TaskId = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 2)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 3)
 }
 
 func (x *ReportTaskProgressRequest) SetProgress(v float64) {
 	x.xxx_hidden_Progress = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 2)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 3)
+}
+
+func (x *ReportTaskProgressRequest) SetStatus(v string) {
+	x.xxx_hidden_Status = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 3)
 }
 
 func (x *ReportTaskProgressRequest) HasTaskId() bool {
@@ -453,6 +472,13 @@ func (x *ReportTaskProgressRequest) HasProgress() bool {
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
 }
 
+func (x *ReportTaskProgressRequest) HasStatus() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 2)
+}
+
 func (x *ReportTaskProgressRequest) ClearTaskId() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_TaskId = nil
@@ -463,6 +489,11 @@ func (x *ReportTaskProgressRequest) ClearProgress() {
 	x.xxx_hidden_Progress = 0
 }
 
+func (x *ReportTaskProgressRequest) ClearStatus() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 2)
+	x.xxx_hidden_Status = nil
+}
+
 type ReportTaskProgressRequest_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
@@ -470,6 +501,10 @@ type ReportTaskProgressRequest_builder struct {
 	TaskId *string
 	// The fraction of the run done, 0 to 1.
 	Progress *float64
+	// What the run is doing, shown with the progress, such as the model it
+	// downloads; at most 200 characters. As it is not translated, it should
+	// name things rather than be a sentence. Empty keeps none.
+	Status *string
 }
 
 func (b0 ReportTaskProgressRequest_builder) Build() *ReportTaskProgressRequest {
@@ -477,12 +512,16 @@ func (b0 ReportTaskProgressRequest_builder) Build() *ReportTaskProgressRequest {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.TaskId != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 2)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 3)
 		x.xxx_hidden_TaskId = b.TaskId
 	}
 	if b.Progress != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 2)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 3)
 		x.xxx_hidden_Progress = *b.Progress
+	}
+	if b.Status != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 3)
+		x.xxx_hidden_Status = b.Status
 	}
 	return m0
 }
@@ -530,6 +569,128 @@ func (b0 ReportTaskProgressResponse_builder) Build() *ReportTaskProgressResponse
 	return m0
 }
 
+type StartTaskRequest struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_TaskId      *string                `protobuf:"bytes,1,opt,name=task_id,json=taskId"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *StartTaskRequest) Reset() {
+	*x = StartTaskRequest{}
+	mi := &file_mavio_plugin_v1_task_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *StartTaskRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*StartTaskRequest) ProtoMessage() {}
+
+func (x *StartTaskRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_plugin_v1_task_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *StartTaskRequest) GetTaskId() string {
+	if x != nil {
+		if x.xxx_hidden_TaskId != nil {
+			return *x.xxx_hidden_TaskId
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *StartTaskRequest) SetTaskId(v string) {
+	x.xxx_hidden_TaskId = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 1)
+}
+
+func (x *StartTaskRequest) HasTaskId() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *StartTaskRequest) ClearTaskId() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_TaskId = nil
+}
+
+type StartTaskRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	// A task of the calling plugin's manifest.
+	TaskId *string
+}
+
+func (b0 StartTaskRequest_builder) Build() *StartTaskRequest {
+	m0 := &StartTaskRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.TaskId != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 1)
+		x.xxx_hidden_TaskId = b.TaskId
+	}
+	return m0
+}
+
+type StartTaskResponse struct {
+	state         protoimpl.MessageState `protogen:"opaque.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *StartTaskResponse) Reset() {
+	*x = StartTaskResponse{}
+	mi := &file_mavio_plugin_v1_task_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *StartTaskResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*StartTaskResponse) ProtoMessage() {}
+
+func (x *StartTaskResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_plugin_v1_task_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+type StartTaskResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+}
+
+func (b0 StartTaskResponse_builder) Build() *StartTaskResponse {
+	m0 := &StartTaskResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	return m0
+}
+
 var File_mavio_plugin_v1_task_proto protoreflect.FileDescriptor
 
 const file_mavio_plugin_v1_task_proto_rawDesc = "" +
@@ -544,27 +705,33 @@ const file_mavio_plugin_v1_task_proto_rawDesc = "" +
 	"\x0eRunTaskRequest\x12\x17\n" +
 	"\atask_id\x18\x01 \x01(\tR\x06taskId\"+\n" +
 	"\x0fRunTaskResponse\x12\x18\n" +
-	"\amessage\x18\x01 \x01(\tR\amessage\"q\n" +
+	"\amessage\x18\x01 \x01(\tR\amessage\"\x93\x01\n" +
 	"\x19ReportTaskProgressRequest\x12\x1f\n" +
 	"\atask_id\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\x06taskId\x123\n" +
-	"\bprogress\x18\x02 \x01(\x01B\x17\xbaH\x14\x12\x12\x19\x00\x00\x00\x00\x00\x00\xf0?)\x00\x00\x00\x00\x00\x00\x00\x00R\bprogress\"\x1c\n" +
-	"\x1aReportTaskProgressResponse2a\n" +
+	"\bprogress\x18\x02 \x01(\x01B\x17\xbaH\x14\x12\x12\x19\x00\x00\x00\x00\x00\x00\xf0?)\x00\x00\x00\x00\x00\x00\x00\x00R\bprogress\x12 \n" +
+	"\x06status\x18\x03 \x01(\tB\b\xbaH\x05r\x03\x18\xc8\x01R\x06status\"\x1c\n" +
+	"\x1aReportTaskProgressResponse\"3\n" +
+	"\x10StartTaskRequest\x12\x1f\n" +
+	"\atask_id\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\x06taskId\"\x13\n" +
+	"\x11StartTaskResponse2a\n" +
 	"\x11TaskRunnerService\x12L\n" +
 	"\aRunTask\x12\x1f.mavio.plugin.v1.RunTaskRequest\x1a .mavio.plugin.v1.RunTaskResponseB\xc3\x01\n" +
 	"\x13com.mavio.plugin.v1B\tTaskProtoP\x01ZCgithub.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1;pluginv1\xa2\x02\x03MPX\xaa\x02\x0fMavio.Plugin.V1\xca\x02\x0fMavio\\Plugin\\V1\xe2\x02\x1bMavio\\Plugin\\V1\\GPBMetadata\xea\x02\x11Mavio::Plugin::V1b\beditionsp\xe8\a"
 
-var file_mavio_plugin_v1_task_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_mavio_plugin_v1_task_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_mavio_plugin_v1_task_proto_goTypes = []any{
 	(*Task)(nil),                       // 0: mavio.plugin.v1.Task
 	(*RunTaskRequest)(nil),             // 1: mavio.plugin.v1.RunTaskRequest
 	(*RunTaskResponse)(nil),            // 2: mavio.plugin.v1.RunTaskResponse
 	(*ReportTaskProgressRequest)(nil),  // 3: mavio.plugin.v1.ReportTaskProgressRequest
 	(*ReportTaskProgressResponse)(nil), // 4: mavio.plugin.v1.ReportTaskProgressResponse
-	(*durationpb.Duration)(nil),        // 5: google.protobuf.Duration
+	(*StartTaskRequest)(nil),           // 5: mavio.plugin.v1.StartTaskRequest
+	(*StartTaskResponse)(nil),          // 6: mavio.plugin.v1.StartTaskResponse
+	(*durationpb.Duration)(nil),        // 7: google.protobuf.Duration
 }
 var file_mavio_plugin_v1_task_proto_depIdxs = []int32{
-	5, // 0: mavio.plugin.v1.Task.interval:type_name -> google.protobuf.Duration
-	5, // 1: mavio.plugin.v1.Task.timeout:type_name -> google.protobuf.Duration
+	7, // 0: mavio.plugin.v1.Task.interval:type_name -> google.protobuf.Duration
+	7, // 1: mavio.plugin.v1.Task.timeout:type_name -> google.protobuf.Duration
 	1, // 2: mavio.plugin.v1.TaskRunnerService.RunTask:input_type -> mavio.plugin.v1.RunTaskRequest
 	2, // 3: mavio.plugin.v1.TaskRunnerService.RunTask:output_type -> mavio.plugin.v1.RunTaskResponse
 	3, // [3:4] is the sub-list for method output_type
@@ -585,7 +752,7 @@ func file_mavio_plugin_v1_task_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_mavio_plugin_v1_task_proto_rawDesc), len(file_mavio_plugin_v1_task_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   5,
+			NumMessages:   7,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

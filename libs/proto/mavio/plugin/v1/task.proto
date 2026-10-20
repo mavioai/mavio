@@ -30,7 +30,10 @@ message RunTaskRequest {
 }
 
 message RunTaskResponse {
-  // Summary of what the run did, which the host logs.
+  // Summary of what the run did, which the host logs and shows as the
+  // result of its run; empty when there is nothing to tell. As it is not
+  // translated, it should name what the run did, such as the models it
+  // downloaded, rather than be a sentence.
   string message = 1;
 }
 
@@ -42,6 +45,17 @@ message ReportTaskProgressRequest {
     gte: 0
     lte: 1
   }];
+  // What the run is doing, shown with the progress, such as the model it
+  // downloads; at most 200 characters. As it is not translated, it should
+  // name things rather than be a sentence. Empty keeps none.
+  string status = 3 [(buf.validate.field).string.max_len = 200];
 }
 
 message ReportTaskProgressResponse {}
+
+message StartTaskRequest {
+  // A task of the calling plugin's manifest.
+  string task_id = 1 [(buf.validate.field).required = true];
+}
+
+message StartTaskResponse {}

@@ -120,6 +120,11 @@ func FinishedAt(v time.Time) predicate.Job {
 	return predicate.Job(sql.FieldEQ(FieldFinishedAt, v))
 }
 
+// Result applies equality check predicate on the "result" field. It's identical to ResultEQ.
+func Result(v string) predicate.Job {
+	return predicate.Job(sql.FieldEQ(FieldResult, v))
+}
+
 // KindEQ applies the EQ predicate on the "kind" field.
 func KindEQ(v string) predicate.Job {
 	return predicate.Job(sql.FieldEQ(FieldKind, v))
@@ -793,6 +798,71 @@ func FinishedAtIsNil() predicate.Job {
 // FinishedAtNotNil applies the NotNil predicate on the "finished_at" field.
 func FinishedAtNotNil() predicate.Job {
 	return predicate.Job(sql.FieldNotNull(FieldFinishedAt))
+}
+
+// ResultEQ applies the EQ predicate on the "result" field.
+func ResultEQ(v string) predicate.Job {
+	return predicate.Job(sql.FieldEQ(FieldResult, v))
+}
+
+// ResultNEQ applies the NEQ predicate on the "result" field.
+func ResultNEQ(v string) predicate.Job {
+	return predicate.Job(sql.FieldNEQ(FieldResult, v))
+}
+
+// ResultIn applies the In predicate on the "result" field.
+func ResultIn(vs ...string) predicate.Job {
+	return predicate.Job(sql.FieldIn(FieldResult, vs...))
+}
+
+// ResultNotIn applies the NotIn predicate on the "result" field.
+func ResultNotIn(vs ...string) predicate.Job {
+	return predicate.Job(sql.FieldNotIn(FieldResult, vs...))
+}
+
+// ResultGT applies the GT predicate on the "result" field.
+func ResultGT(v string) predicate.Job {
+	return predicate.Job(sql.FieldGT(FieldResult, v))
+}
+
+// ResultGTE applies the GTE predicate on the "result" field.
+func ResultGTE(v string) predicate.Job {
+	return predicate.Job(sql.FieldGTE(FieldResult, v))
+}
+
+// ResultLT applies the LT predicate on the "result" field.
+func ResultLT(v string) predicate.Job {
+	return predicate.Job(sql.FieldLT(FieldResult, v))
+}
+
+// ResultLTE applies the LTE predicate on the "result" field.
+func ResultLTE(v string) predicate.Job {
+	return predicate.Job(sql.FieldLTE(FieldResult, v))
+}
+
+// ResultContains applies the Contains predicate on the "result" field.
+func ResultContains(v string) predicate.Job {
+	return predicate.Job(sql.FieldContains(FieldResult, v))
+}
+
+// ResultHasPrefix applies the HasPrefix predicate on the "result" field.
+func ResultHasPrefix(v string) predicate.Job {
+	return predicate.Job(sql.FieldHasPrefix(FieldResult, v))
+}
+
+// ResultHasSuffix applies the HasSuffix predicate on the "result" field.
+func ResultHasSuffix(v string) predicate.Job {
+	return predicate.Job(sql.FieldHasSuffix(FieldResult, v))
+}
+
+// ResultEqualFold applies the EqualFold predicate on the "result" field.
+func ResultEqualFold(v string) predicate.Job {
+	return predicate.Job(sql.FieldEqualFold(FieldResult, v))
+}
+
+// ResultContainsFold applies the ContainsFold predicate on the "result" field.
+func ResultContainsFold(v string) predicate.Job {
+	return predicate.Job(sql.FieldContainsFold(FieldResult, v))
 }
 
 // And groups predicates with the AND operator between them.

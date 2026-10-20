@@ -43,6 +43,16 @@ pub struct JobView<'a> {
     ///
     /// Field 12: `progress`
     pub progress: ::core::option::Option<f64>,
+    /// What a running job is doing, as it tells, such as the model a
+    /// plugin's task downloads.
+    ///
+    /// Field 13: `status`
+    pub status: ::core::option::Option<&'a str>,
+    /// Summary of what a succeeded job did, as it tells, such as the models a
+    /// plugin's task downloaded; empty when it tells nothing.
+    ///
+    /// Field 14: `result`
+    pub result: ::core::option::Option<&'a str>,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for JobView<'a> {
@@ -203,6 +213,20 @@ impl<'a> ::buffa::MessageView<'a> for JobView<'a> {
                 )?;
                 view.progress = Some(::buffa::types::decode_double(&mut cur)?);
             }
+            13u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.status = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
+            14u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.result = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
             _ => {
                 ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
                 let span_len = before_tag.len() - cur.len();
@@ -261,6 +285,8 @@ impl<'a> ::buffa::MessageView<'a> for JobView<'a> {
             last_error: self.last_error.map(|s| s.to_string()),
             payload_json: self.payload_json.map(|s| s.to_string()),
             progress: self.progress,
+            status: self.status.map(|s| s.to_string()),
+            result: self.result.map(|s| s.to_string()),
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -323,6 +349,12 @@ impl<'a> ::buffa::ViewEncode<'a> for JobView<'a> {
         if self.progress.is_some() {
             size += 1u64 + ::buffa::types::FIXED64_ENCODED_LEN as u64;
         }
+        if let Some(ref v) = self.status {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.result {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -384,6 +416,12 @@ impl<'a> ::buffa::ViewEncode<'a> for JobView<'a> {
         }
         if let Some(v) = self.progress {
             ::buffa::types::put_double_field(12u32, v, buf);
+        }
+        if let Some(ref v) = self.status {
+            ::buffa::types::put_string_field(13u32, v, buf);
+        }
+        if let Some(ref v) = self.result {
+            ::buffa::types::put_string_field(14u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -555,6 +593,22 @@ impl JobOwnedView {
     pub fn progress(&self) -> ::core::option::Option<f64> {
         self.0.reborrow().progress
     }
+    /// What a running job is doing, as it tells, such as the model a
+    /// plugin's task downloads.
+    ///
+    /// Field 13: `status`
+    #[must_use]
+    pub fn status(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().status
+    }
+    /// Summary of what a succeeded job did, as it tells, such as the models a
+    /// plugin's task downloaded; empty when it tells nothing.
+    ///
+    /// Field 14: `result`
+    #[must_use]
+    pub fn result(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().result
+    }
 }
 impl ::core::convert::From<::buffa::OwnedView<JobView<'static>>> for JobOwnedView {
     fn from(inner: ::buffa::OwnedView<JobView<'static>>) -> Self {
@@ -618,6 +672,10 @@ pub struct TaskView<'a> {
     ///
     /// Field 10: `progress`
     pub progress: ::core::option::Option<f64>,
+    /// What its run in progress is doing, as it tells.
+    ///
+    /// Field 11: `status`
+    pub status: ::core::option::Option<&'a str>,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for TaskView<'a> {
@@ -762,6 +820,13 @@ impl<'a> ::buffa::MessageView<'a> for TaskView<'a> {
                 )?;
                 view.progress = Some(::buffa::types::decode_double(&mut cur)?);
             }
+            11u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.status = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
             _ => {
                 ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
                 let span_len = before_tag.len() - cur.len();
@@ -818,6 +883,7 @@ impl<'a> ::buffa::MessageView<'a> for TaskView<'a> {
             running: self.running,
             plugin_id: self.plugin_id.map(|s| s.to_string()),
             progress: self.progress,
+            status: self.status.map(|s| s.to_string()),
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -874,6 +940,9 @@ impl<'a> ::buffa::ViewEncode<'a> for TaskView<'a> {
         if self.progress.is_some() {
             size += 1u64 + ::buffa::types::FIXED64_ENCODED_LEN as u64;
         }
+        if let Some(ref v) = self.status {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -929,6 +998,9 @@ impl<'a> ::buffa::ViewEncode<'a> for TaskView<'a> {
         }
         if let Some(v) = self.progress {
             ::buffa::types::put_double_field(10u32, v, buf);
+        }
+        if let Some(ref v) = self.status {
+            ::buffa::types::put_string_field(11u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -1092,6 +1164,13 @@ impl TaskOwnedView {
     #[must_use]
     pub fn progress(&self) -> ::core::option::Option<f64> {
         self.0.reborrow().progress
+    }
+    /// What its run in progress is doing, as it tells.
+    ///
+    /// Field 11: `status`
+    #[must_use]
+    pub fn status(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().status
     }
 }
 impl ::core::convert::From<::buffa::OwnedView<TaskView<'static>>> for TaskOwnedView {
