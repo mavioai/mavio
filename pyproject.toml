@@ -1,7 +1,8 @@
 # The uv workspace of the Python projects: process plugins written in Python
-# (plugins/pipecat). It is virtual: the root is not a package.
+# (plugins/pipecat), their SDK (libs/plugin/python) and the contracts' Python
+# messages (libs/proto/gen/python). It is virtual: the root is not a package.
 [tool.uv.workspace]
-members = ["plugins/pipecat"]
+members = ["libs/proto/gen/python", "libs/plugin/python", "plugins/pipecat"]
 
 [tool.ruff]
 line-length = 100
@@ -15,6 +16,9 @@ pythonVersion = "3.14"
 typeCheckingMode = "strict"
 # Pipecat's annotations leave type arguments out (asyncio.Task, dict).
 reportUnknownMemberType = false
+# The contracts' generated messages are checked as the workspace's source,
+# their stubs (.pyi) beside them.
+extraPaths = ["libs/proto/gen/python/src"]
 
 [tool.ruff.lint.isort]
-known-first-party = ["mavio_pipecat"]
+known-first-party = ["mavio", "mavio_pipecat", "mavio_plugin"]

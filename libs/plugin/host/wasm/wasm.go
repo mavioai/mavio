@@ -16,6 +16,7 @@ import (
 	"fmt"
 	"io"
 	"log/slog"
+	"net"
 	"net/http"
 	"net/url"
 	"os"
@@ -171,6 +172,12 @@ func Open(ctx context.Context, path string, m *pluginv1.Manifest, opts Options) 
 // HTTP returns the handler of the plugin's HTTP routes, or nil. Bodies
 // are buffered, up to abi.MaxHTTPBody each way.
 func (p *Plugin) HTTP() http.Handler { return p.routes }
+
+// Dial fails: WASM plugins have no socket.
+func (p *Plugin) Dial(context.Context) (net.Conn, error) { return nil, errors.ErrUnsupported }
+
+// Authorize does nothing: WASM plugins have no socket.
+func (p *Plugin) Authorize(http.Header) {}
 
 func (p *Plugin) setup(ctx context.Context, bin []byte) error {
 	if _, err := wasi_snapshot_preview1.Instantiate(ctx, p.runtime); err != nil {

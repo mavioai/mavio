@@ -1,0 +1,20 @@
+{
+  "name": "plugin-python",
+  "targets": {
+    "test": {
+      "command": "uv run --package mavio-plugin pytest libs/plugin/python",
+      "options": { "cwd": "{workspaceRoot}" },
+      "inputs": ["{projectRoot}/**/*", "{workspaceRoot}/pyproject.toml", "{workspaceRoot}/uv.lock"]
+    },
+    "lint": {
+      "command": "uv run --package mavio-plugin ruff check libs/plugin/python && uv run --package mavio-plugin ruff format --check libs/plugin/python && uv run --package mavio-plugin pyright libs/plugin/python",
+      "options": { "cwd": "{workspaceRoot}" },
+      "inputs": ["{projectRoot}/**/*", "{workspaceRoot}/pyproject.toml", "{workspaceRoot}/uv.lock"]
+    },
+    "tidy-check": {
+      "command": "uv lock --check",
+      "options": { "cwd": "{workspaceRoot}" },
+      "inputs": ["{projectRoot}/pyproject.toml", "{workspaceRoot}/pyproject.toml", "{workspaceRoot}/uv.lock"]
+    }
+  }
+}

@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -54,6 +55,13 @@ type Plugin interface {
 	Speech() pluginv1connect.SpeechToTextServiceClient
 	Voices() pluginv1connect.TextToSpeechServiceClient
 	ChallengeSolver() pluginv1connect.ChallengeSolverServiceClient
+	VoiceSessions() pluginv1connect.VoiceSessionServiceClient
+	// Dial connects to the plugin's socket once it serves, for the
+	// WebSockets the host opens on it, such as voice sessions'; Authorize
+	// adds the plugin's credentials to the request opening one. WASM
+	// plugins have no socket: Dial fails with errors.ErrUnsupported.
+	Dial(ctx context.Context) (net.Conn, error)
+	Authorize(h http.Header)
 	// HTTP returns the handler of the plugin's HTTP routes, or nil without
 	// CAPABILITY_HTTP_HANDLER; it expects paths relative to the routes' prefix.
 	HTTP() http.Handler

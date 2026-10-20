@@ -45,6 +45,7 @@ type Set struct {
 	speech    pluginv1connect.SpeechToTextServiceClient
 	voices    pluginv1connect.TextToSpeechServiceClient
 	solvers   pluginv1connect.ChallengeSolverServiceClient
+	sessions  pluginv1connect.VoiceSessionServiceClient
 }
 
 // New builds the clients for m over c.
@@ -136,6 +137,9 @@ func New(c connect.HTTPClient, baseURL string, m *pluginv1.Manifest, opts ...con
 	}
 	if manifest.HasCapability(m, pluginv1.Capability_CAPABILITY_TEXT_TO_SPEECH) {
 		s.voices = pluginv1connect.NewTextToSpeechServiceClient(c, baseURL, opts...)
+	}
+	if manifest.HasCapability(m, pluginv1.Capability_CAPABILITY_VOICE_SESSION) {
+		s.sessions = pluginv1connect.NewVoiceSessionServiceClient(c, baseURL, opts...)
 	}
 	if manifest.HasCapability(m, pluginv1.Capability_CAPABILITY_CHALLENGE_SOLVER) {
 		s.solvers = pluginv1connect.NewChallengeSolverServiceClient(c, baseURL, opts...)
@@ -240,3 +244,6 @@ func (s Set) Voices() pluginv1connect.TextToSpeechServiceClient { return s.voice
 
 // ChallengeSolver returns the ChallengeSolverService client, or nil.
 func (s Set) ChallengeSolver() pluginv1connect.ChallengeSolverServiceClient { return s.solvers }
+
+// VoiceSessions returns the VoiceSessionService client, or nil.
+func (s Set) VoiceSessions() pluginv1connect.VoiceSessionServiceClient { return s.sessions }

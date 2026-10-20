@@ -1,0 +1,21 @@
+[project]
+name = "mavio-plugin"
+version = "0.0.0"
+description = "The SDK of Mavio's process plugins written in Python"
+license = "GPL-3.0-only"
+requires-python = ">=3.14,<3.15"
+dependencies = ["mavio-proto", "hypercorn>=0.18", "httpx>=0.28"]
+
+[dependency-groups]
+dev = ["pytest>=8.4", "pytest-asyncio>=1.2", "ruff>=0.14", "pyright>=1.1.406"]
+
+[tool.uv.sources]
+mavio-proto = { workspace = true }
+
+[build-system]
+requires = ["uv_build>=0.9,<0.14"]
+build-backend = "uv_build"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]

@@ -252,6 +252,34 @@ func loopback(addr string) error {
 // streams both ways.
 func (p *Plugin) HTTP() http.Handler { return p.routes }
 
+// Dial connects to the plugin's socket, or its loopback address, once it
+// serves.
+func (p *Plugin) Dial(ctx context.Context) (net.Conn, error) {
+	p.mu.Lock()
+	ready, closing := p.ready, p.closing
+	p.mu.Unlock()
+	if closing {
+		return nil, errors.New("plugin closed")
+	}
+	select {
+	case <-ready:
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	}
+	p.mu.Lock()
+	addr := p.addr
+	p.mu.Unlock()
+	var d net.Dialer
+	if addr != "" {
+		return d.DialContext(ctx, "tcp", addr)
+	}
+	return d.DialContext(ctx, "unix", p.socket)
+}
+
+// Authorize adds the plugin's token to a request on a connection Dial
+// opened.
+func (p *Plugin) Authorize(h http.Header) { h.Set("Authorization", proc.AuthScheme+p.token) }
+
 type roundTripper func(*http.Request) (*http.Response, error)
 
 func (f roundTripper) RoundTrip(r *http.Request) (*http.Response, error) { return f(r) }
