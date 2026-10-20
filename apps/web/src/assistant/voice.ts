@@ -63,14 +63,32 @@ class Capture extends AudioWorkletProcessor {
 registerProcessor("mavio-capture", Capture);
 `;
 
+/** How loud an analyser's signal is now, from 0 to about 1. */
+function loudness(a: AnalyserNode, buf: Float32Array<ArrayBuffer>): number {
+  a.getFloatTimeDomainData(buf);
+  let sum = 0;
+  for (const v of buf) sum += v * v;
+  // Speech's RMS spans roughly 0.01 to 0.3: its square root spreads it out.
+  return Math.min(1, Math.sqrt(Math.sqrt(sum / buf.length)) * 1.5);
+}
+
 /** The answers' speech, played as it arrives, which an interrupt drops. */
 class Playback {
   /** The rate of the speech, from the session's ready event. */
   rate = 24000;
   private next = 0;
   private sources: { node: AudioBufferSourceNode; start: number; duration: number }[] = [];
+  /** Where the speech plays, through an analyser of its level. */
+  readonly out: GainNode;
+  readonly analyser: AnalyserNode;
 
-  constructor(private readonly ctx: AudioContext) {}
+  constructor(private readonly ctx: AudioContext) {
+    this.out = ctx.createGain();
+    this.out.connect(ctx.destination);
+    this.analyser = ctx.createAnalyser();
+    this.analyser.fftSize = 512;
+    this.out.connect(this.analyser);
+  }
 
   /** Plays 16-bit PCM after what was queued. */
   push(pcm: ArrayBuffer) {
@@ -81,11 +99,23 @@ class Playback {
     for (let i = 0; i < samples.length; i++) ch[i] = samples[i] / 0x8000;
     const node = this.ctx.createBufferSource();
     node.buffer = buffer;
-    node.connect(this.ctx.destination);
+    node.connect(this.out);
     const start = Math.max(this.next, this.ctx.currentTime);
     node.start(start);
     this.next = start + buffer.duration;
     this.sources.push({ node, start, duration: buffer.duration });
+  }
+
+  /** How much of the run's speech has played and has come, in milliseconds. */
+  progress(): { played: number; total: number } {
+    const now = this.ctx.currentTime;
+    let played = 0;
+    let total = 0;
+    for (const s of this.sources) {
+      played += Math.min(s.duration, Math.max(0, now - s.start));
+      total += s.duration;
+    }
+    return { played: played * 1000, total: total * 1000 };
   }
 
   /** A run starts: what it plays is counted from here. */
@@ -127,6 +157,8 @@ export class VoiceSession {
   private talking = false;
   private told = false;
   private readonly playback: Playback;
+  private input?: AnalyserNode;
+  private readonly buf = new Float32Array(512);
 
   private constructor(
     private readonly media: MediaStream,
@@ -161,7 +193,11 @@ export class VoiceSession {
     try {
       const node = new AudioWorkletNode(ctx, "mavio-capture");
       node.port.onmessage = (e: MessageEvent<ArrayBuffer>) => v.audio(e.data);
-      ctx.createMediaStreamSource(media).connect(node);
+      const source = ctx.createMediaStreamSource(media);
+      source.connect(node);
+      v.input = ctx.createAnalyser();
+      v.input.fftSize = 512;
+      source.connect(v.input);
     } catch (err) {
       v.release();
       throw err;
@@ -172,6 +208,21 @@ export class VoiceSession {
   /** Whether the session listens only while the user holds to talk. */
   get holdsToTalk(): boolean {
     return this.pushToTalk;
+  }
+
+  /** How loud the microphone is now, from 0 to about 1. */
+  inputLevel(): number {
+    return this.input && !this.ended ? loudness(this.input, this.buf) : 0;
+  }
+
+  /** How loud the answer's speech is now, from 0 to about 1. */
+  outputLevel(): number {
+    return this.ended ? 0 : loudness(this.playback.analyser, this.buf);
+  }
+
+  /** How much of the answer's speech has played and has come, in milliseconds. */
+  speech(): { played: number; total: number } {
+    return this.playback.progress();
   }
 
   /** Connects to the session's WebSocket, once its URL is known. */

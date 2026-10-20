@@ -1,13 +1,13 @@
-// The assistant's panel (docs/assistant.md §9.1, §9.2): over any page, the
-// player's included, it shows as the AI Conversations do the text heard as
-// it grows and the answer, each with buttons copying it and its time,
-// results to choose from and a pending confirmation, and takes typed
-// requests. The assistant button tapped starts a voice session (voice.ts)
-// and tapped again ends it; held, or a key held, it talks while held. A
-// typed request goes through the fast path (fast.ts) and else to the
-// server's Ask, or to the voice session when one runs; the page carries
-// out their client actions. It closes on its own a few seconds after an
-// answer with nothing to choose, or after the session ends.
+// The assistant over the page (docs/assistant.md §9.1, §9.2;
+// libs/design/components.md, Assistant): an orb floating on its own shows
+// the voice session's state, and cards beside it what the user said, the
+// answer with its words lit as they are spoken, the tools run, results to
+// choose from and a pending confirmation. The assistant button, or the orb,
+// tapped starts a voice session (voice.ts) and tapped again ends it; held,
+// or a key held, it talks while held. The page carries out the session's
+// client actions. It goes away on its own a few seconds after an answer
+// with nothing to choose, or after the session ends; and by a click outside
+// it, Escape, or the remote's Back.
 import { create, fromJson, isFieldSet, type JsonValue, type MessageInitShape, toJson } from "@bufbuild/protobuf";
 import { durationFromMs, durationMs } from "@bufbuild/protobuf/wkt";
 import {
@@ -40,12 +40,11 @@ import { createContext, type ReactNode, useCallback, useContext, useEffect, useM
 import { locale, t } from "../i18n.ts";
 import { Tip } from "../controls/tooltip.tsx";
 import { Icon } from "../icon.tsx";
-import { useShortcutsShown } from "../keys.ts";
 import { isTabPlace } from "../shell/places.ts";
 import { Artwork, subtitleOf } from "../ui.tsx";
 import { grammar, runLocal } from "./fast.ts";
+import { Orb, type OrbMode, orbSize } from "./orb.tsx";
 import { openPlayer } from "./player.ts";
-import { bubble, MessageBar } from "./message-bar.tsx";
 import { isDenied, microphoneAllowed, type VoiceEvent, VoiceSession } from "./voice.ts";
 
 /** The key held to talk, outside text fields. */
@@ -57,8 +56,11 @@ const speechLanguage = (typeof navigator === "undefined" ? [] : navigator.langua
 /** How long the button or key must be held to talk while held, rather than start a conversation. */
 const holdMs = 400;
 
-/** How long an answer with nothing to choose stays before the panel closes. */
+/** How long an answer with nothing to choose stays before the assistant goes away. */
 const lingerMs = 6000;
+
+/** How long the orb and cards take to fade out. */
+const leaveMs = 400;
 
 interface State {
   open: boolean;
@@ -78,19 +80,46 @@ interface State {
   answerAt?: Date;
   /** Whether the answer is being spoken. */
   speaking: boolean;
+  /** Whether the answer comes with speech, whose playing lights its words. */
+  voiced: boolean;
+  /** The user speaks: from user_started to user_stopped. */
+  userSpeaking: boolean;
+  /** The session listens only while held, and whether it is held. */
+  pushToTalk: boolean;
+  talking: boolean;
+  /** How many times the user barged in. */
+  interrupts: number;
+  /** The orb and cards fade out. */
+  leaving: boolean;
   items: Item[];
   choose: boolean;
   confirmation?: { id: string; text: string };
   error?: string;
 }
 
-const idle: State = { open: false, heard: "", listening: false, capturing: false, working: false, activity: [], answer: "", speaking: false, items: [], choose: false };
+const idle: State = {
+  open: false,
+  heard: "",
+  listening: false,
+  capturing: false,
+  working: false,
+  activity: [],
+  answer: "",
+  speaking: false,
+  voiced: false,
+  userSpeaking: false,
+  pushToTalk: false,
+  talking: false,
+  interrupts: 0,
+  leaving: false,
+  items: [],
+  choose: false,
+};
 
 interface Assistant {
   /** The server whose assistant answers, when it is on. */
   server?: ServerEntry;
   state: State;
-  open(): void;
   close(): void;
   /** The button or key went down. */
   press(): void;
@@ -125,7 +154,7 @@ function screenOf(pathname: string): string {
   return pathname.split("/")[1] ?? "";
 }
 
-/** Provides the assistant to the page, with its panel and the key held to talk. */
+/** Provides the assistant to the page, with its orb and cards and the key held to talk. */
 export function AssistantProvider({ children }: { children: ReactNode }) {
   const servers = useServersStore();
   const router = useRouter();
@@ -150,13 +179,18 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
   // The final transcripts of the user's turn, until its run starts.
   const turn = useRef("");
   const linger = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const leave = useRef<ReturnType<typeof setTimeout>>(undefined);
 
+  /** Ends the session, and the orb and cards fade out. */
   const close = useCallback(() => {
     clearTimeout(linger.current);
     running.current?.abort();
     session.current?.close();
     session.current = undefined;
-    setState(idle);
+    if (!latest.current.state.open) return;
+    setState((s) => ({ ...s, leaving: true, listening: false, speaking: false, userSpeaking: false }));
+    clearTimeout(leave.current);
+    leave.current = setTimeout(() => setState(idle), leaveMs);
   }, []);
 
   /** Carries out a client action; false when the page cannot. */
@@ -240,14 +274,14 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
     [router, set],
   );
 
-  /** Closes the panel a while after an answer with nothing left to do. */
+  /** Goes away a while after an answer with nothing left to do. */
   const lingerThenClose = useCallback(() => {
     clearTimeout(linger.current);
     linger.current = setTimeout(() => {
       const s = latest.current.state;
-      if (!s.listening && !s.working && !s.confirmation && !s.choose && !s.error) setState(idle);
+      if (!s.listening && !s.working && !s.confirmation && !s.choose && !s.error) close();
     }, lingerMs);
-  }, []);
+  }, [close]);
 
   /** What the page shows and plays, as the requests' context. */
   const askContext = useCallback((lang: string): AskContext => {
@@ -277,12 +311,15 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
       const { state: s, server: srv } = latest.current;
       if (!srv) return;
       clearTimeout(linger.current);
+      clearTimeout(leave.current);
       running.current?.abort();
       const abort = new AbortController();
       running.current = abort;
       const text = req.text?.trim() ?? "";
       set({
         open: true,
+        leaving: false,
+        voiced: !!session.current,
         heard: text || s.heard,
         heardAt: text ? new Date() : s.heardAt,
         working: true,
@@ -386,6 +423,13 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
       switch (e.type) {
         case "user_started":
           clearTimeout(linger.current);
+          set({ userSpeaking: true });
+          break;
+        case "user_stopped":
+          set({ userSpeaking: false });
+          break;
+        case "interrupt":
+          set((s) => ({ interrupts: s.interrupts + 1, speaking: false, userSpeaking: true }));
           break;
         case "transcript":
           if (e.final) turn.current = [turn.current, text.trim()].filter(Boolean).join(" ");
@@ -397,6 +441,8 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
             heard: text || s.heard,
             heardAt: new Date(),
             working: true,
+            userSpeaking: false,
+            voiced: false,
             activity: [],
             answer: "",
             answerAt: undefined,
@@ -438,7 +484,7 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
           }));
           break;
         case "bot_started":
-          set({ speaking: true });
+          set({ speaking: true, voiced: true });
           break;
         case "bot_stopped":
           set({ speaking: false });
@@ -465,9 +511,10 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
         }).then((r) => r.url),
         pushToTalk,
       );
+      set({ pushToTalk, talking: pushToTalk });
       if (pushToTalk) v.talk(true);
     },
-    [servers, askContext],
+    [servers, askContext, set],
   );
 
   /** Opens the microphone, and the voice session once it is known whether the user holds to talk. */
@@ -475,6 +522,7 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
     const { server: srv, info: inf } = latest.current;
     if (!srv) return;
     clearTimeout(linger.current);
+    clearTimeout(leave.current);
     running.current?.abort();
     if (!inf?.voice) {
       set({ open: true, error: t("assistant.noVoice") });
@@ -487,8 +535,14 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
     turn.current = "";
     set({
       open: true,
+      leaving: false,
       listening: true,
       capturing: false,
+      userSpeaking: false,
+      speaking: false,
+      voiced: false,
+      pushToTalk: false,
+      talking: false,
       heard: "",
       heardAt: undefined,
       answer: "",
@@ -503,7 +557,7 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
         closed: (error) => {
           if (session.current !== v) return;
           session.current = undefined;
-          set({ listening: false, capturing: false, speaking: false, working: false, ...(error ? { error } : {}) });
+          set({ listening: false, capturing: false, speaking: false, userSpeaking: false, working: false, ...(error ? { error } : {}) });
           if (!error) lingerThenClose();
         },
         capturing: () => set({ capturing: true }),
@@ -529,11 +583,13 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
     h.timer = setTimeout(() => {
       h.held = true;
       const s = session.current;
-      if (s?.holdsToTalk) s.talk(true);
-      else if (s) connect(true);
+      if (s?.holdsToTalk) {
+        s.talk(true);
+        set({ talking: true });
+      } else if (s) connect(true);
     }, holdMs);
     if (!v) void capture();
-  }, [close, capture, connect]);
+  }, [close, capture, connect, set]);
 
   const release = useCallback(() => {
     const h = hold.current;
@@ -541,11 +597,14 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
     if (!h) return;
     clearTimeout(h.timer);
     const v = session.current;
-    if (h.held) v?.talk(false);
+    if (h.held) {
+      v?.talk(false);
+      set({ talking: false });
+    }
     // A tap: a conversation starts, or a session held to talk ends.
     else if (v?.holdsToTalk) close();
     else if (v) connect(false);
-  }, [close, connect]);
+  }, [close, connect, set]);
 
   // The page's context goes to the session as it changes.
   useEffect(() => {
@@ -582,10 +641,6 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
     () => ({
       server: enabled ? server : undefined,
       state,
-      open: () => {
-        clearTimeout(linger.current);
-        set({ open: true });
-      },
       close,
       press,
       release,
@@ -602,133 +657,221 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
     if (state.choose) void request({ choice: item.id });
     else if (server) void router.navigate({ to: "/s/$serverId/item/$itemId", params: { serverId: server.id, itemId: item.id } });
   };
+  // The audio the orb follows: the playback's while the answer is spoken, else the microphone's.
+  const level = useCallback(() => {
+    const v = session.current;
+    if (!v) return 0;
+    return latest.current.state.speaking ? v.outputLevel() : v.inputLevel();
+  }, []);
+  const speech = useCallback(() => session.current?.speech(), []);
 
   return (
     <Context.Provider value={value}>
       {children}
       {state.open && server && (
-        <Panel
+        <Overlay
           server={server}
           state={state}
-          examples={info.data?.examples ?? []}
           off={info.isSuccess && !enabled}
+          level={level}
+          speech={speech}
           onClose={close}
-          onSend={send}
           onPress={press}
           onRelease={release}
           onConfirm={answerConfirmation}
           onChoose={choose}
-          onTouch={() => clearTimeout(linger.current)}
+          onHold={() => clearTimeout(linger.current)}
+          onLetGo={() => {
+            if (!session.current && !latest.current.state.working) lingerThenClose();
+          }}
         />
       )}
     </Context.Provider>
   );
 }
 
-function Panel({
+/** The orb's state, from the session's (libs/design/components.md, Assistant). */
+function orbMode(s: State): OrbMode {
+  if (s.leaving) return "ended";
+  if (s.error) return "error";
+  if (s.speaking) return "speaking";
+  if (s.userSpeaking) return "hearing";
+  if (s.working) return "thinking";
+  if (s.listening) {
+    if (!s.capturing) return "opening";
+    return s.pushToTalk && !s.talking ? "resting" : "idle";
+  }
+  return "resting";
+}
+
+function Overlay({
   server,
   state,
-  examples,
   off,
+  level,
+  speech,
   onClose,
-  onSend,
   onPress,
   onRelease,
   onConfirm,
   onChoose,
-  onTouch,
+  onHold,
+  onLetGo,
 }: {
   server: ServerEntry;
   state: State;
-  examples: string[];
   off: boolean;
+  level: () => number;
+  speech: () => { played: number; total: number } | undefined;
   onClose: () => void;
-  onSend: (text: string) => void;
   onPress: () => void;
   onRelease: () => void;
   onConfirm: (confirmed: boolean) => void;
   onChoose: (item: Item) => void;
-  onTouch: () => void;
+  onHold: () => void;
+  onLetGo: () => void;
 }) {
-  const [text, setText] = useState("");
-  const keyboard = useShortcutsShown();
-  const fresh = !state.heard && !state.answer && !state.listening && !state.working && !state.error && state.items.length === 0;
-  const status = state.speaking
-    ? t("assistant.speaking")
-    : state.working && !state.answer
-      ? t("assistant.working")
-      : state.listening
-        ? // Until the microphone opens, what is said is not heard.
-          state.capturing
-          ? t("assistant.listening")
-          : t("state.loading")
-        : undefined;
+  const mode = orbMode(state);
+  const status =
+    mode === "opening"
+      ? t("state.loading")
+      : mode === "idle" && !state.heard
+        ? t("assistant.listening")
+        : mode === "resting" && state.pushToTalk
+          ? t("assistant.shortcut", { key: talkKey.toUpperCase() })
+          : undefined;
   // Above the phone's tab bar where it shows.
   const tabs = isTabPlace(useLocation().pathname);
+  const lift = tabs ? 64 : 0;
+
+  // A click or tap outside the orb and cards, Escape, or the remote's Back
+  // (Backspace in TV mode outside a field) dismisses them.
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
-    addEventListener("keydown", onKey);
-    return () => removeEventListener("keydown", onKey);
+    const down = (e: PointerEvent) => {
+      const el = e.target as Element | null;
+      if (el?.closest("[data-assistant], [data-assistant-button]")) return;
+      // The press only dismisses: its click does not reach the page.
+      const swallow = (c: MouseEvent) => {
+        c.preventDefault();
+        c.stopPropagation();
+      };
+      addEventListener("click", swallow, { capture: true, once: true });
+      setTimeout(() => removeEventListener("click", swallow, { capture: true }), 600);
+      onClose();
+    };
+    const key = (e: KeyboardEvent) => {
+      const el = e.target as HTMLElement | null;
+      const typing = !!el && (el.isContentEditable || el instanceof HTMLTextAreaElement || el instanceof HTMLInputElement);
+      const back = e.key === "Escape" || (e.key === "Backspace" && "tv" in document.documentElement.dataset && !typing);
+      if (!back) return;
+      e.preventDefault();
+      e.stopPropagation();
+      onClose();
+    };
+    addEventListener("pointerdown", down, true);
+    addEventListener("keydown", key, true);
+    return () => {
+      removeEventListener("pointerdown", down, true);
+      removeEventListener("keydown", key, true);
+    };
   }, [onClose]);
+
+  const card =
+    "pointer-events-auto rounded-xl border border-border bg-[var(--assistant-card)] shadow-level3 backdrop-blur-[28px] backdrop-saturate-[1.6] animate-[assistant-rise_400ms_cubic-bezier(0.2,0.9,0.3,1.2)_both]";
   return (
     <div
       role="dialog"
       aria-label={t("assistant.title")}
-      data-assistant
-      onPointerDown={onTouch}
-      className={`fixed inset-x-3 ${tabs ? "bottom-[calc(72px+env(safe-area-inset-bottom))]" : "bottom-[calc(12px+env(safe-area-inset-bottom))]"} z-50 mx-auto flex max-h-[70vh] max-w-xl flex-col overflow-hidden rounded-[20px] border border-border bg-surface text-on-background shadow-level3 sm:bottom-6`}
+      className={`pointer-events-none fixed inset-0 z-50 transition-opacity duration-400 ${state.leaving ? "opacity-0" : ""}`}
     >
-      <header className="flex items-center gap-2 px-4 pt-3">
-        <Icon name="microphone" fill size={18} />
-        <h2 className="flex-1 type-headline">{t("assistant.title")}</h2>
+      <div
+        data-assistant
+        className="pointer-events-auto absolute bottom-[calc(var(--lift)+16px+env(safe-area-inset-bottom))] left-1/2 flex -translate-x-1/2 flex-col-reverse items-center gap-2 sm:top-3 sm:right-3 sm:bottom-auto sm:left-auto sm:translate-x-0 sm:flex-row-reverse"
+        style={{ "--lift": `${lift}px` } as React.CSSProperties}
+      >
         <button
           type="button"
-          aria-label={t("action.close")}
-          onClick={onClose}
-          className="flex size-8 items-center justify-center rounded-full bg-fill hover:bg-fill-selected"
+          aria-label={state.listening ? t("assistant.stopListening") : t("assistant.talk")}
+          onPointerDown={(e) => {
+            if (e.button !== 0) return;
+            e.preventDefault();
+            onPress();
+          }}
+          onPointerUp={onRelease}
+          onPointerCancel={onRelease}
+          onClick={(e) => {
+            // A keyboard's or a remote's press taps it.
+            if (e.detail === 0) (onPress(), onRelease());
+          }}
+          className={`rounded-full transition-transform duration-400 ${state.leaving ? "scale-40" : ""}`}
         >
-          <Icon name="close" size={16} />
+          <Orb mode={mode} level={level} interrupts={state.interrupts} />
         </button>
-      </header>
-      <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto px-4 py-3" aria-live="polite">
-        {off && <p className="type-callout text-text-secondary">{t("assistant.off")}</p>}
-        {state.heard && (
-          <div className="flex flex-col items-end gap-1 ps-[15%]">
-            <span className="px-1 type-caption text-text-tertiary">{t("conversations.you")}</span>
-            <p className={`${bubble(true, "bg-background")} ${state.listening ? "text-text-secondary" : ""}`}>{state.heard}</p>
-            {!state.listening && <MessageBar text={state.heard} at={state.heardAt} />}
+        {status && (
+          <span className="rounded-full border border-border bg-[var(--assistant-card)] px-3 py-1 type-footnote whitespace-nowrap backdrop-blur-xl">{status}</span>
+        )}
+      </div>
+      <div
+        data-assistant
+        aria-live="polite"
+        onPointerDown={onHold}
+        onPointerEnter={onHold}
+        onPointerLeave={onLetGo}
+        className="pointer-events-none absolute inset-x-1 bottom-[calc(var(--lift)+144px+env(safe-area-inset-bottom))] flex p-1 max-h-[calc(100dvh-200px)] flex-col-reverse gap-2 overflow-y-auto sm:top-[104px] sm:right-4 sm:bottom-auto sm:left-auto sm:max-h-[calc(100dvh-120px)] sm:w-[380px] sm:flex-col"
+        style={{ "--lift": `${lift}px` } as React.CSSProperties}
+      >
+        {off && <p className={`${card} px-4 py-3.5 type-body text-text-secondary`}>{t("assistant.off")}</p>}
+        {(state.heard || state.answer) && (
+          <div className={`${card} px-4 py-3.5 type-body`}>
+            {state.heard && (
+              <p className="text-text-secondary">
+                {state.heard}
+                {!state.userSpeaking && state.heardAt && <span className="ms-1 text-text-tertiary">›</span>}
+              </p>
+            )}
+            {state.answer && (
+              <Spoken
+                text={state.answer}
+                className={state.heard ? "mt-2.5" : ""}
+                live={state.voiced && (state.speaking || state.working || !state.answerAt)}
+                speech={speech}
+              />
+            )}
           </div>
         )}
-        {(status || state.activity.length > 0 || state.answer) && (
-          <div className="flex flex-col items-start gap-1 pe-[15%]">
-            <span className="px-1 type-callout">{t("assistant.title")}</span>
-            {status && <p className="px-1 type-callout text-text-secondary">{status}</p>}
-            {state.activity.length > 0 && (
-              <ul className="flex flex-col gap-1 px-1">
-                {state.activity.map((a) => (
-                  <li key={a.id} className={`flex items-center gap-2 type-footnote ${a.failed ? "text-danger" : "text-text-secondary"}`}>
-                    <Icon name={a.failed ? "error" : a.done ? "check" : "pending"} size={14} />
-                    {a.summary}
-                  </li>
-                ))}
-              </ul>
-            )}
-            {state.answer && <p className={bubble(false, "bg-background")}>{state.answer}</p>}
-            {state.answer && state.answerAt && (
-              <MessageBar text={state.answer} at={state.answerAt} />
-            )}
-          </div>
+        {state.activity.length > 0 && (
+          <ul className={`${card} flex flex-col gap-2 px-3.5 py-3`}>
+            {state.activity.map((a) => (
+              <li key={a.id} className="flex items-center gap-2.5 type-footnote text-text-secondary">
+                <span className="flex size-[26px] shrink-0 items-center justify-center rounded-sm bg-accent/16 text-accent">
+                  <Icon name="search" size={14} />
+                </span>
+                <span className="min-w-0 flex-1">{a.summary}</span>
+                {a.failed ? (
+                  <span className="text-danger">
+                    <Icon name="close" size={16} />
+                  </span>
+                ) : a.done ? (
+                  <span className="text-success">
+                    <Icon name="check" size={16} />
+                  </span>
+                ) : (
+                  <span className="size-4 animate-spin rounded-full border-2 border-fill border-t-accent" />
+                )}
+              </li>
+            ))}
+          </ul>
         )}
         {state.items.length > 0 && (
-          <ul className="flex flex-col divide-y divide-border overflow-hidden rounded-[14px] bg-background">
+          <ul className={`${card} flex flex-col gap-0.5 p-2.5`}>
             {state.items.map((item, i) => (
               <li key={item.id}>
-                <button type="button" onClick={() => onChoose(item)} className="flex w-full items-center gap-3 px-3 py-2 text-start hover:tint">
-                  {state.choose && <span className="w-5 shrink-0 text-center type-headline text-text-secondary">{i + 1}</span>}
-                  <Artwork src={artwork(server, item, ImageKind.PRIMARY, 80)?.url} alt="" className="aspect-[2/3] w-10 shrink-0 rounded-[6px]" />
+                <button type="button" onClick={() => onChoose(item)} className="flex w-full items-center gap-2.5 rounded-md p-1.5 text-start hover:bg-fill">
+                  {state.choose && <span className="w-4 shrink-0 text-center type-footnote font-semibold text-text-tertiary">{i + 1}</span>}
+                  <Artwork src={artwork(server, item, ImageKind.PRIMARY, 80)?.url} alt="" className="aspect-[2/3] w-[34px] shrink-0 rounded-[5px]" />
                   <span className="min-w-0 flex-1">
-                    <span className="block truncate type-headline">{item.name}</span>
-                    {subtitleOf(item) && <span className="block truncate type-footnote text-text-secondary">{subtitleOf(item)}</span>}
+                    <span className="block truncate type-callout font-medium">{item.name}</span>
+                    {subtitleOf(item) && <span className="block truncate type-caption text-text-secondary">{subtitleOf(item)}</span>}
                   </span>
                 </button>
               </li>
@@ -736,92 +879,75 @@ function Panel({
           </ul>
         )}
         {state.confirmation && (
-          <div className="flex flex-col gap-3 rounded-[14px] bg-background p-3">
+          <div className={`${card} flex flex-col gap-3 px-4 py-3.5`}>
             <p className="type-body">{state.confirmation.text}</p>
             <div className="flex gap-2">
-              <button type="button" onClick={() => onConfirm(true)} className="min-h-9 rounded-md bg-button px-4 type-headline desk:min-h-7 desk:px-3 text-on-button hover:opacity-85">
-                {t("assistant.confirm")}
-              </button>
-              <button type="button" onClick={() => onConfirm(false)} className="min-h-9 rounded-md bg-fill px-4 type-headline desk:min-h-7 desk:px-3 hover:bg-fill-selected">
+              <button type="button" onClick={() => onConfirm(false)} className="min-h-9 flex-1 rounded-md bg-fill type-callout hover:bg-fill-selected">
                 {t("action.cancel")}
               </button>
+              <button type="button" onClick={() => onConfirm(true)} className="min-h-9 flex-1 rounded-md bg-accent type-callout text-on-accent hover:opacity-90">
+                {t("assistant.confirm")}
+              </button>
             </div>
           </div>
         )}
-        {state.error && <p className="type-callout break-words text-danger">{state.error}</p>}
-        {fresh && examples.length > 0 && (
-          <div className="flex flex-col gap-2">
-            <p className="type-footnote text-text-secondary">{t("assistant.trySaying")}</p>
-            <div className="flex flex-wrap gap-2">
-              {examples.map((ex) => (
-                <button key={ex} type="button" onClick={() => onSend(ex)} className="rounded-full bg-fill px-3 py-1.5 type-callout hover:bg-fill-selected">
-                  {ex}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
+        {state.error && <p className={`${card} px-4 py-3.5 type-body break-words text-danger`}>{state.error}</p>}
       </div>
-      <form
-        className="flex items-center gap-2 border-t border-border px-3 py-2.5"
-        onSubmit={(e) => {
-          e.preventDefault();
-          if (!text.trim()) return;
-          onSend(text);
-          setText("");
-        }}
-      >
-        <TalkButton listening={state.listening} capturing={state.capturing} onPress={onPress} onRelease={onRelease} />
-        <input
-          value={text}
-          onChange={(e) => (setText(e.target.value), onTouch())}
-          placeholder={keyboard ? `${t("assistant.messagePlaceholder")} · ${t("assistant.shortcut", { key: talkKey.toUpperCase() })}` : t("assistant.messagePlaceholder")}
-          aria-label={t("assistant.messagePlaceholder")}
-          maxLength={2000}
-          className="min-h-10 min-w-0 flex-1 rounded-full bg-fill px-4 type-body placeholder:text-text-tertiary focus:outline-none"
-        />
-        <button
-          type="submit"
-          disabled={!text.trim()}
-          className="min-h-10 rounded-full bg-button px-4 type-headline text-on-button hover:opacity-85 disabled:opacity-40"
-        >
-          {t("assistant.send")}
-        </button>
-      </form>
     </div>
   );
 }
 
-/** The microphone button: held to talk while held, or tapped to start a conversation and again to end it. */
-function TalkButton({ listening, capturing, onPress, onRelease }: { listening: boolean; capturing: boolean; onPress: () => void; onRelease: () => void }) {
+// How long a character takes to say, roughly: the answer's words are lit by
+// these against how much of its speech has played.
+const cjk = /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}]/u;
+function sayMs(segment: string): number {
+  let ms = 0;
+  for (const ch of segment) ms += cjk.test(ch) ? 230 : /[\p{L}\p{N}]/u.test(ch) ? 62 : /[,.;:!?，。；：！？、]/u.test(ch) ? 180 : 0;
+  return ms;
+}
+
+/** The answer, its words lit as its speech plays; all lit when it is not spoken. */
+function Spoken({
+  text,
+  className,
+  live,
+  speech,
+}: {
+  text: string;
+  className: string;
+  live: boolean;
+  speech: () => { played: number; total: number } | undefined;
+}) {
+  const segments = useMemo(() => {
+    let at = 0;
+    return [...new Intl.Segmenter(locale, { granularity: "word" }).segment(text)].map((x) => ({ w: x.segment, at: (at += sayMs(x.segment)) }));
+  }, [text]);
+  const [played, setPlayed] = useState(0);
+  useEffect(() => {
+    if (!live) return;
+    let frame = 0;
+    const tick = () => {
+      // Lit words stay lit.
+      setPlayed((p) => Math.max(p, speech()?.played ?? 0));
+      frame = requestAnimationFrame(tick);
+    };
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+  }, [live, speech]);
   return (
-    <button
-      type="button"
-      aria-label={listening ? t("assistant.stopListening") : t("assistant.talk")}
-      aria-pressed={listening}
-      onPointerDown={(e) => {
-        e.preventDefault();
-        onPress();
-      }}
-      onPointerUp={onRelease}
-      onPointerCancel={onRelease}
-      onKeyDown={(e) => {
-        if ((e.key === " " || e.key === "Enter") && !e.repeat) {
-          e.preventDefault();
-          onPress();
-        }
-      }}
-      onKeyUp={(e) => (e.key === " " || e.key === "Enter") && onRelease()}
-      className={`flex size-10 shrink-0 items-center justify-center rounded-full transition ${listening ? `${capturing ? "animate-pulse " : ""}bg-danger text-white` : "bg-fill hover:bg-fill-selected"}`}
-    >
-      <Icon name="microphone" fill={listening} size={20} />
-    </button>
+    <p className={className}>
+      {segments.map((x, i) => (
+        <span key={i} className={`transition-colors duration-200 ${!live || x.at <= played + 120 ? "text-text-primary" : "text-text-tertiary"}`}>
+          {x.w}
+        </span>
+      ))}
+    </p>
   );
 }
 
 /**
  * The assistant button of the page's chrome, shown when the server's
- * assistant is on: it opens the panel and starts a voice session, held or tapped.
+ * assistant is on: it starts a voice session, held or tapped.
  */
 export function AssistantButton({
   className,
@@ -839,6 +965,7 @@ export function AssistantButton({
     <button
       type="button"
       aria-label={t("assistant.title")}
+      data-assistant-button
       title={tip ? undefined : t("assistant.title")}
       onPointerDown={(e) => {
         if (e.button !== 0) return;
@@ -848,8 +975,8 @@ export function AssistantButton({
       onPointerUp={a.release}
       onPointerCancel={a.release}
       onClick={(e) => {
-        // A keyboard's or a television remote's press opens the panel to type or talk.
-        if (e.detail === 0) a.open();
+        // A keyboard's or a remote's press taps it, starting a conversation.
+        if (e.detail === 0) (a.press(), a.release());
       }}
       className={className}
     >
