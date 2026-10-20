@@ -439,6 +439,55 @@ describe("host tools", () => {
 		expect((await agents.listAgentSessions({ owner: "u2" })).sessions).toEqual([]);
 	});
 
+	test("wait while a message steers the run", async () => {
+		const faux = fauxProvider();
+		const seen: string[] = [];
+		faux.setResponses([
+			fauxAssistantMessage([fauxToolCall("search_library", { query: "interstellar" })], { stopReason: "toolUse" }),
+			(context) => {
+				seen.push(...context.messages.filter((m) => m.role === "user").map((m) => (typeof m.content === "string" ? m.content : "")));
+				return fauxAssistantMessage("Inception it is.");
+			},
+		]);
+		const { agents } = await start([faux.provider]);
+		const { session } = await agents.createAgentSession({ provider: "faux", model: "faux-1", tools: [searchTool], owner: "u1" });
+		const id = session!.id;
+		expect(await code(agents.steerAgentMessage({ sessionId: id, text: "no" }))).toBe(Code.FailedPrecondition);
+		const watching = new AbortController();
+		const host = (async () => {
+			for await (const r of agents.watchAgentToolCalls({}, { signal: watching.signal })) {
+				// The user goes on speaking while the call runs.
+				await agents.steerAgentMessage({ sessionId: id, text: "no, Inception" });
+				await agents.submitAgentToolResult({ callId: r.call!.id, failed: true, text: "not done" });
+			}
+		})().catch(() => {});
+		const sent = await agents.sendAgentMessage({ sessionId: id, text: "Play Interstellar" });
+		watching.abort();
+		await host;
+		expect(sent.answer?.text).toBe("Inception it is.");
+		expect(seen).toEqual(["Play Interstellar", "no, Inception"]);
+	});
+
+	test("are abandoned when the run is aborted", async () => {
+		const faux = fauxProvider();
+		faux.setResponses([fauxAssistantMessage([fauxToolCall("search_library", { query: "inception" })], { stopReason: "toolUse" })]);
+		const { agents } = await start([faux.provider]);
+		const { session } = await agents.createAgentSession({ provider: "faux", model: "faux-1", tools: [searchTool], owner: "u1" });
+		const watching = new AbortController();
+		const host = (async () => {
+			for await (const _ of agents.watchAgentToolCalls({}, { signal: watching.signal })) {
+				await agents.abortAgentMessage({ sessionId: session!.id });
+			}
+		})().catch(() => {});
+		expect(await code(agents.sendAgentMessage({ sessionId: session!.id, text: "Do I have Inception?" }))).toBe(Code.Unavailable);
+		watching.abort();
+		await host;
+		// Nothing runs: the next message is answered.
+		faux.setResponses([fauxAssistantMessage("Yes.")]);
+		const sent = await agents.sendAgentMessage({ sessionId: session!.id, text: "Do I?" });
+		expect(sent.answer?.text).toBe("Yes.");
+	});
+
 	test("are called by scripts in code mode", async () => {
 		const faux = fauxProvider();
 		let result = "";

@@ -14,6 +14,22 @@ pub type OwnedAskRequestView = ::buffa::view::OwnedView<
 pub type OwnedAskResponseView = ::buffa::view::OwnedView<
     crate::proto::mavio::assistant::v1::__buffa::view::AskResponseView<'static>,
 >;
+///Shorthand for `OwnedView<SteerAskRequestView<'static>>`.
+pub type OwnedSteerAskRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::assistant::v1::__buffa::view::SteerAskRequestView<'static>,
+>;
+///Shorthand for `OwnedView<SteerAskResponseView<'static>>`.
+pub type OwnedSteerAskResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::assistant::v1::__buffa::view::SteerAskResponseView<'static>,
+>;
+///Shorthand for `OwnedView<AbortAskRequestView<'static>>`.
+pub type OwnedAbortAskRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::assistant::v1::__buffa::view::AbortAskRequestView<'static>,
+>;
+///Shorthand for `OwnedView<AbortAskResponseView<'static>>`.
+pub type OwnedAbortAskResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::assistant::v1::__buffa::view::AbortAskResponseView<'static>,
+>;
 ///Shorthand for `OwnedView<StartVoiceSessionRequestView<'static>>`.
 pub type OwnedStartVoiceSessionRequestView = ::buffa::view::OwnedView<
     crate::proto::mavio::assistant::v1::__buffa::view::StartVoiceSessionRequestView<
@@ -168,6 +184,74 @@ for crate::proto::mavio::assistant::v1::__buffa::view::AskResponseView<'_> {
 impl ::connectrpc::Encodable<crate::proto::mavio::assistant::v1::AskResponse>
 for ::buffa::view::OwnedView<
     crate::proto::mavio::assistant::v1::__buffa::view::AskResponseView<'static>,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::assistant::v1::SteerAskResponse>
+for crate::proto::mavio::assistant::v1::__buffa::view::SteerAskResponseView<'_> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::assistant::v1::SteerAskResponse>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::assistant::v1::__buffa::view::SteerAskResponseView<'static>,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::assistant::v1::AbortAskResponse>
+for crate::proto::mavio::assistant::v1::__buffa::view::AbortAskResponseView<'_> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::assistant::v1::AbortAskResponse>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::assistant::v1::__buffa::view::AbortAskResponseView<'static>,
 > {
     fn encode(
         &self,
@@ -582,6 +666,18 @@ pub const ASSISTANT_SERVICE_ASK_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::s
         ::connectrpc::StreamType::ServerStream,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
+/// Static [`Spec`](::connectrpc::Spec) for the `SteerAsk` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const ASSISTANT_SERVICE_STEER_ASK_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.assistant.v1.AssistantService/SteerAsk",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
+/// Static [`Spec`](::connectrpc::Spec) for the `AbortAsk` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const ASSISTANT_SERVICE_ABORT_ASK_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.assistant.v1.AssistantService/AbortAsk",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
 /// Static [`Spec`](::connectrpc::Spec) for the `StartVoiceSession` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
 pub const ASSISTANT_SERVICE_START_VOICE_SESSION_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
         "/mavio.assistant.v1.AssistantService/StartVoiceSession",
@@ -735,6 +831,55 @@ pub trait AssistantService: Send + Sync + 'static {
                     crate::proto::mavio::assistant::v1::AskResponse,
                 > + Send + use<Self>,
             >,
+        >,
+    > + Send;
+    /// SteerAsk adds what the user went on to say to a run in progress, which
+    /// drops the effects it holds and carries out the joined request; it
+    /// fails with failed_precondition when the run has ended.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn steer_ask<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::assistant::v1::SteerAskRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::assistant::v1::SteerAskResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// AbortAsk stops a run in progress, which ends cancelled; what was done
+    /// stays done.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn abort_ask<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::assistant::v1::AbortAskRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::assistant::v1::AbortAskResponse,
+            > + Send + use<'a, Self>,
         >,
     > + Send;
     /// StartVoiceSession opens a voice session for the device and returns
@@ -1040,6 +1185,64 @@ impl<S: AssistantService> AssistantServiceExt for S {
                 }),
             )
             .with_spec(ASSISTANT_SERVICE_ASK_SPEC)
+            .route_view(
+                ASSISTANT_SERVICE_SERVICE_NAME,
+                "SteerAsk",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::assistant::v1::__buffa::view::SteerAskRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::assistant::v1::SteerAskRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.steer_ask(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::assistant::v1::SteerAskResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(ASSISTANT_SERVICE_STEER_ASK_SPEC)
+            .route_view(
+                ASSISTANT_SERVICE_SERVICE_NAME,
+                "AbortAsk",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::assistant::v1::__buffa::view::AbortAskRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::assistant::v1::AbortAskRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.abort_ask(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::assistant::v1::AbortAskResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(ASSISTANT_SERVICE_ABORT_ASK_SPEC)
             .route_view(
                 ASSISTANT_SERVICE_SERVICE_NAME,
                 "StartVoiceSession",
@@ -1367,6 +1570,18 @@ impl<T: AssistantService> ::connectrpc::Dispatcher for AssistantServiceServer<T>
                         .with_spec(ASSISTANT_SERVICE_ASK_SPEC),
                 )
             }
+            "SteerAsk" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
+                        .with_spec(ASSISTANT_SERVICE_STEER_ASK_SPEC),
+                )
+            }
+            "AbortAsk" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
+                        .with_spec(ASSISTANT_SERVICE_ABORT_ASK_SPEC),
+                )
+            }
             "StartVoiceSession" => {
                 Some(
                     ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
@@ -1456,6 +1671,50 @@ impl<T: AssistantService> ::connectrpc::Dispatcher for AssistantServiceServer<T>
                         .await?
                         .encode::<
                             crate::proto::mavio::assistant::v1::GetAssistantResponse,
+                        >(format)
+                })
+            }
+            "SteerAsk" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::assistant::v1::SteerAskRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::assistant::v1::__buffa::view::SteerAskRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::assistant::v1::SteerAskRequest,
+                    >::from_parts(&req, &body);
+                    svc.steer_ask(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::assistant::v1::SteerAskResponse,
+                        >(format)
+                })
+            }
+            "AbortAsk" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::assistant::v1::AbortAskRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::assistant::v1::__buffa::view::AbortAskRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::assistant::v1::AbortAskRequest,
+                    >::from_parts(&req, &body);
+                    svc.abort_ask(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::assistant::v1::AbortAskResponse,
                         >(format)
                 })
             }
@@ -1889,6 +2148,96 @@ where
                 &self.transport,
                 &self.config,
                 ASSISTANT_SERVICE_ASK_SPEC.with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the SteerAsk RPC. Sends a request to /mavio.assistant.v1.AssistantService/SteerAsk.
+    pub async fn steer_ask(
+        &self,
+        request: crate::proto::mavio::assistant::v1::SteerAskRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::assistant::v1::__buffa::view::SteerAskResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.steer_ask_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the SteerAsk RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn steer_ask_with_options(
+        &self,
+        request: crate::proto::mavio::assistant::v1::SteerAskRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::assistant::v1::__buffa::view::SteerAskResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                ASSISTANT_SERVICE_STEER_ASK_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the AbortAsk RPC. Sends a request to /mavio.assistant.v1.AssistantService/AbortAsk.
+    pub async fn abort_ask(
+        &self,
+        request: crate::proto::mavio::assistant::v1::AbortAskRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::assistant::v1::__buffa::view::AbortAskResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.abort_ask_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the AbortAsk RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn abort_ask_with_options(
+        &self,
+        request: crate::proto::mavio::assistant::v1::AbortAskRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::assistant::v1::__buffa::view::AbortAskResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                ASSISTANT_SERVICE_ABORT_ASK_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
                 request,
                 options,
             )

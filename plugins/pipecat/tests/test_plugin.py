@@ -71,7 +71,7 @@ async def _open(sessions: Sessions, session_id: str, **kwargs: Any) -> str:
             session_id=session_id,
             session_token="token-" + session_id,
             context_json='{"screen": "home"}',
-            turns=voice_pb2.VoiceTurnSettings(commit_delay=Duration(nanos=100_000_000)),
+            turns=voice_pb2.VoiceTurnSettings(longest_pause=Duration(seconds=2)),
             **kwargs,
         ),
         _CTX,
@@ -103,9 +103,10 @@ async def test_session_asks_with_its_token(tmp_path: Path):
         while json.loads(ws.receive_text())["type"] != "answer":
             pass
     # The session's context is the server's until the client sends one.
-    assert asks["token-session1"].requests == [
-        {"text": "hi", "spoken": True, "context": {"screen": "home"}}
-    ]
+    requests = asks["token-session1"].requests
+    for r in requests:
+        r.pop("runId")
+    assert requests == [{"text": "hi", "spoken": True, "context": {"screen": "home"}}]
 
 
 async def test_dictation_asks_nothing(tmp_path: Path):
@@ -191,8 +192,8 @@ def test_turns_of_the_request():
         ),
     )
     t = Turns.of(request, {})
-    got = (t.mode, t.commit_delay, t.longest_pause, t.idle)
-    want = (voice_pb2.VOICE_MODE_PUSH_TO_TALK, 0.7, 2.0, 20.0)
+    got = (t.mode, t.longest_pause, t.idle)
+    want = (voice_pb2.VOICE_MODE_PUSH_TO_TALK, 2.0, 20.0)
     assert got == want, f"turns = {got}, want = {want}"
     assert (
         Turns.of(voice_pb2.OpenVoiceSessionRequest(), {}).mode == voice_pb2.VOICE_MODE_CONVERSATION

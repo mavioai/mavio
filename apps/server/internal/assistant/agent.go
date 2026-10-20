@@ -220,6 +220,16 @@ func (t *turn) askAI(text string) error {
 		t.finish(outcome{key: "failed"})
 		return nil
 	}
+	t.conv = conv
+	if r := t.steerable; r != nil {
+		// What steers the run from now on steers the model's.
+		r.mu.Lock()
+		r.conversation = conv
+		r.mu.Unlock()
+		if err := t.call.ctx.Err(); err != nil {
+			return err
+		}
+	}
 	// The turn outlives the request when a call waits for confirmation.
 	c := *t.call
 	c.ctx = context.WithoutCancel(t.call.ctx)

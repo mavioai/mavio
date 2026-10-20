@@ -628,7 +628,6 @@ func (b0 VoiceEngineInfo_builder) Build() *VoiceEngineInfo {
 // VoiceTurnSettings are the timings of a session's turns.
 type VoiceTurnSettings struct {
 	state                   protoimpl.MessageState `protogen:"opaque.v1"`
-	xxx_hidden_CommitDelay  *durationpb.Duration   `protobuf:"bytes,1,opt,name=commit_delay,json=commitDelay"`
 	xxx_hidden_LongestPause *durationpb.Duration   `protobuf:"bytes,2,opt,name=longest_pause,json=longestPause"`
 	xxx_hidden_Idle         *durationpb.Duration   `protobuf:"bytes,3,opt,name=idle"`
 	unknownFields           protoimpl.UnknownFields
@@ -660,13 +659,6 @@ func (x *VoiceTurnSettings) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-func (x *VoiceTurnSettings) GetCommitDelay() *durationpb.Duration {
-	if x != nil {
-		return x.xxx_hidden_CommitDelay
-	}
-	return nil
-}
-
 func (x *VoiceTurnSettings) GetLongestPause() *durationpb.Duration {
 	if x != nil {
 		return x.xxx_hidden_LongestPause
@@ -681,23 +673,12 @@ func (x *VoiceTurnSettings) GetIdle() *durationpb.Duration {
 	return nil
 }
 
-func (x *VoiceTurnSettings) SetCommitDelay(v *durationpb.Duration) {
-	x.xxx_hidden_CommitDelay = v
-}
-
 func (x *VoiceTurnSettings) SetLongestPause(v *durationpb.Duration) {
 	x.xxx_hidden_LongestPause = v
 }
 
 func (x *VoiceTurnSettings) SetIdle(v *durationpb.Duration) {
 	x.xxx_hidden_Idle = v
-}
-
-func (x *VoiceTurnSettings) HasCommitDelay() bool {
-	if x == nil {
-		return false
-	}
-	return x.xxx_hidden_CommitDelay != nil
 }
 
 func (x *VoiceTurnSettings) HasLongestPause() bool {
@@ -714,10 +695,6 @@ func (x *VoiceTurnSettings) HasIdle() bool {
 	return x.xxx_hidden_Idle != nil
 }
 
-func (x *VoiceTurnSettings) ClearCommitDelay() {
-	x.xxx_hidden_CommitDelay = nil
-}
-
 func (x *VoiceTurnSettings) ClearLongestPause() {
 	x.xxx_hidden_LongestPause = nil
 }
@@ -729,9 +706,6 @@ func (x *VoiceTurnSettings) ClearIdle() {
 type VoiceTurnSettings_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
-	// How long a turn stands, with the user silent, before what its answer
-	// changes is done.
-	CommitDelay *durationpb.Duration
 	// The longest pause in a turn the turn model reads as unfinished.
 	LongestPause *durationpb.Duration
 	// How long the user may stay silent after an answer before the session
@@ -743,7 +717,6 @@ func (b0 VoiceTurnSettings_builder) Build() *VoiceTurnSettings {
 	m0 := &VoiceTurnSettings{}
 	b, x := &b0, m0
 	_, _ = b, x
-	x.xxx_hidden_CommitDelay = b.CommitDelay
 	x.xxx_hidden_LongestPause = b.LongestPause
 	x.xxx_hidden_Idle = b.Idle
 	return m0
@@ -1297,11 +1270,10 @@ const file_mavio_plugin_v1_voice_proto_rawDesc = "" +
 	"\aenabled\x18\x04 \x01(\bR\aenabled\x12\x1c\n" +
 	"\tlanguages\x18\x05 \x03(\tR\tlanguages\x12\x14\n" +
 	"\x05hints\x18\x06 \x01(\bR\x05hints\x12\x14\n" +
-	"\x05ready\x18\a \x01(\bR\x05ready\"\xc0\x01\n" +
-	"\x11VoiceTurnSettings\x12<\n" +
-	"\fcommit_delay\x18\x01 \x01(\v2\x19.google.protobuf.DurationR\vcommitDelay\x12>\n" +
+	"\x05ready\x18\a \x01(\bR\x05ready\"\x96\x01\n" +
+	"\x11VoiceTurnSettings\x12>\n" +
 	"\rlongest_pause\x18\x02 \x01(\v2\x19.google.protobuf.DurationR\flongestPause\x12-\n" +
-	"\x04idle\x18\x03 \x01(\v2\x19.google.protobuf.DurationR\x04idle\"\xf8\x02\n" +
+	"\x04idle\x18\x03 \x01(\v2\x19.google.protobuf.DurationR\x04idleJ\x04\b\x01\x10\x02R\fcommit_delay\"\xf8\x02\n" +
 	"\x17OpenVoiceSessionRequest\x12;\n" +
 	"\n" +
 	"session_id\x18\x01 \x01(\tB\x1c\xbaH\x19r\x172\x15^[A-Za-z0-9_-]{8,64}$R\tsessionId\x12\x1a\n" +
@@ -1354,22 +1326,21 @@ var file_mavio_plugin_v1_voice_proto_depIdxs = []int32{
 	4,  // 1: mavio.plugin.v1.ListVoiceServicesResponse.recognizers:type_name -> mavio.plugin.v1.VoiceEngineInfo
 	4,  // 2: mavio.plugin.v1.ListVoiceServicesResponse.voices:type_name -> mavio.plugin.v1.VoiceEngineInfo
 	10, // 3: mavio.plugin.v1.VoiceServiceInfo.settings:type_name -> mavio.plugin.v1.SettingField
-	11, // 4: mavio.plugin.v1.VoiceTurnSettings.commit_delay:type_name -> google.protobuf.Duration
-	11, // 5: mavio.plugin.v1.VoiceTurnSettings.longest_pause:type_name -> google.protobuf.Duration
-	11, // 6: mavio.plugin.v1.VoiceTurnSettings.idle:type_name -> google.protobuf.Duration
-	0,  // 7: mavio.plugin.v1.OpenVoiceSessionRequest.mode:type_name -> mavio.plugin.v1.VoiceMode
-	5,  // 8: mavio.plugin.v1.OpenVoiceSessionRequest.turns:type_name -> mavio.plugin.v1.VoiceTurnSettings
-	1,  // 9: mavio.plugin.v1.VoiceSessionService.ListVoiceServices:input_type -> mavio.plugin.v1.ListVoiceServicesRequest
-	6,  // 10: mavio.plugin.v1.VoiceSessionService.OpenVoiceSession:input_type -> mavio.plugin.v1.OpenVoiceSessionRequest
-	8,  // 11: mavio.plugin.v1.VoiceSessionService.CloseVoiceSession:input_type -> mavio.plugin.v1.CloseVoiceSessionRequest
-	2,  // 12: mavio.plugin.v1.VoiceSessionService.ListVoiceServices:output_type -> mavio.plugin.v1.ListVoiceServicesResponse
-	7,  // 13: mavio.plugin.v1.VoiceSessionService.OpenVoiceSession:output_type -> mavio.plugin.v1.OpenVoiceSessionResponse
-	9,  // 14: mavio.plugin.v1.VoiceSessionService.CloseVoiceSession:output_type -> mavio.plugin.v1.CloseVoiceSessionResponse
-	12, // [12:15] is the sub-list for method output_type
-	9,  // [9:12] is the sub-list for method input_type
-	9,  // [9:9] is the sub-list for extension type_name
-	9,  // [9:9] is the sub-list for extension extendee
-	0,  // [0:9] is the sub-list for field type_name
+	11, // 4: mavio.plugin.v1.VoiceTurnSettings.longest_pause:type_name -> google.protobuf.Duration
+	11, // 5: mavio.plugin.v1.VoiceTurnSettings.idle:type_name -> google.protobuf.Duration
+	0,  // 6: mavio.plugin.v1.OpenVoiceSessionRequest.mode:type_name -> mavio.plugin.v1.VoiceMode
+	5,  // 7: mavio.plugin.v1.OpenVoiceSessionRequest.turns:type_name -> mavio.plugin.v1.VoiceTurnSettings
+	1,  // 8: mavio.plugin.v1.VoiceSessionService.ListVoiceServices:input_type -> mavio.plugin.v1.ListVoiceServicesRequest
+	6,  // 9: mavio.plugin.v1.VoiceSessionService.OpenVoiceSession:input_type -> mavio.plugin.v1.OpenVoiceSessionRequest
+	8,  // 10: mavio.plugin.v1.VoiceSessionService.CloseVoiceSession:input_type -> mavio.plugin.v1.CloseVoiceSessionRequest
+	2,  // 11: mavio.plugin.v1.VoiceSessionService.ListVoiceServices:output_type -> mavio.plugin.v1.ListVoiceServicesResponse
+	7,  // 12: mavio.plugin.v1.VoiceSessionService.OpenVoiceSession:output_type -> mavio.plugin.v1.OpenVoiceSessionResponse
+	9,  // 13: mavio.plugin.v1.VoiceSessionService.CloseVoiceSession:output_type -> mavio.plugin.v1.CloseVoiceSessionResponse
+	11, // [11:14] is the sub-list for method output_type
+	8,  // [8:11] is the sub-list for method input_type
+	8,  // [8:8] is the sub-list for extension type_name
+	8,  // [8:8] is the sub-list for extension extendee
+	0,  // [0:8] is the sub-list for field type_name
 }
 
 func init() { file_mavio_plugin_v1_voice_proto_init() }

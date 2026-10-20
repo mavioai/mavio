@@ -36,7 +36,7 @@ from pipecat.workers.runner import WorkerRunner
 
 from mavio.plugin.v1 import voice_pb2
 from mavio_pipecat.ask import Asker
-from mavio_pipecat.assistant import COMMIT_DELAY, MavioAssistant
+from mavio_pipecat.assistant import MavioAssistant
 from mavio_pipecat.events import SessionEvents
 from mavio_pipecat.serializer import INPUT_SAMPLE_RATE, OUTPUT_SAMPLE_RATE, MavioSerializer
 
@@ -58,7 +58,6 @@ class Turns:
     """How a session takes turns (docs/assistant.md §8.3)."""
 
     mode: int = voice_pb2.VOICE_MODE_CONVERSATION
-    commit_delay: float = COMMIT_DELAY
     longest_pause: float = LONGEST_PAUSE
     idle: float = SESSION_IDLE
     # The client's AskContext, which its context events replace.
@@ -77,7 +76,6 @@ class Turns:
 
         return cls(
             mode=request.mode or voice_pb2.VOICE_MODE_CONVERSATION,
-            commit_delay=seconds("commit_delay", COMMIT_DELAY),
             longest_pause=seconds("longest_pause", LONGEST_PAUSE),
             idle=seconds("idle", SESSION_IDLE),
             context=context,
@@ -164,7 +162,7 @@ async def run_session(
     processors += [services.stt, SessionEvents(), user_aggregator]
     if not dictation:
         processors += [
-            MavioAssistant(ask, commit_delay=turns.commit_delay, context=turns.context),
+            MavioAssistant(ask, context=turns.context),
             services.tts,
         ]
     processors += [transport.output(), assistant_aggregator]

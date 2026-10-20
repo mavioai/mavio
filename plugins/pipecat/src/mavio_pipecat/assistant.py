@@ -2,8 +2,9 @@
 of a Pipecat LLM service."""
 
 import asyncio
+import contextlib
 import itertools
-import time
+import uuid
 from typing import Any
 
 import httpx
@@ -25,19 +26,24 @@ from pipecat.processors.frame_processor import FrameDirection, FrameProcessor
 
 from mavio_pipecat.ask import Asker, AskError
 
-# How long the effects of an answer, its client actions, wait after the turn
-# ended: the user who goes on speaking within it steers the request, and the
-# effects are dropped (docs/assistant.md).
-COMMIT_DELAY = 0.7
 # How long the end of a run waits for more of its answer's speech once the
 # voice is silent.
 SPEECH_START_TIMEOUT = 3.0
 
 
 def trailing_user_text(context: LLMContext) -> str:
-    """The user's messages since the last answer, joined: a turn that
-    follows one not yet answered steers it, and the request is asked again
-    with both."""
+    """The user's messages since the last answer, joined: what a run that
+    starts asks."""
+    return " ".join(_user_texts(context))
+
+
+def last_user_text(context: LLMContext) -> str:
+    """The user's last message: what a turn steering a run adds."""
+    texts = _user_texts(context)
+    return texts[-1] if texts else ""
+
+
+def _user_texts(context: LLMContext) -> list[str]:
     texts: list[str] = []
     for message in reversed(context.get_messages()):
         if not isinstance(message, dict):
@@ -54,18 +60,20 @@ def trailing_user_text(context: LLMContext) -> str:
             )
         if isinstance(content, str) and content.strip():
             texts.append(content.strip())
-    return " ".join(reversed(texts))
+    return list(reversed(texts))
 
 
 class MavioAssistant(FrameProcessor):
     """Asks the server with each turn of the user and speaks the answer.
 
-    An LLMContextFrame from the user aggregator starts a request with the
-    turn; one that comes while a request runs cancels it and asks again with
-    both turns (the prototype's steer). An interruption, the user speaking
-    over the answer, cancels the request (abort). The answer's deltas go on
-    as LLM text for the TTS service, and the request's events go to the
-    client as transport messages, each run's with its ID.
+    An LLMContextFrame from the user aggregator starts a run with the turn;
+    one that comes while a run has not answered yet steers it (SteerAsk):
+    the user paused rather than ended, and the server drops the effects the
+    run held and carries out the joined request. An interruption, the user
+    speaking over the answer, aborts the run (AbortAsk), and the turn that
+    interrupted starts the next. The answer's deltas go on as LLM text for
+    the TTS service, and the run's events go to the client as transport
+    messages, each with the run's ID (docs/assistant.md §8.4).
 
     A run's end waits until its answer has been spoken, so that what
     relays the session knows the speech that came before it is the run's
@@ -76,7 +84,6 @@ class MavioAssistant(FrameProcessor):
         self,
         ask: Asker,
         *,
-        commit_delay: float = COMMIT_DELAY,
         context: dict[str, Any] | None = None,
         **kwargs: Any,
     ):
@@ -84,11 +91,16 @@ class MavioAssistant(FrameProcessor):
         replaces it."""
         super().__init__(**kwargs)
         self._ask = ask
-        self._commit_delay = commit_delay
         self._context: dict[str, Any] = context or {}
         self._ids = itertools.count(1)
+        # Run IDs are unique among the device's: the session's runs are
+        # named apart from another session's.
+        self._prefix = uuid.uuid4().hex[:12]
         self._run: asyncio.Task[None] | None = None
         self._run_id = ""
+        self._run_text = ""
+        # The run in progress has answered: a turn no longer steers it.
+        self._answered = False
         self._speaking = False
         # The end of a run whose answer is being spoken, and whether the
         # voice speaks.
@@ -101,13 +113,18 @@ class MavioAssistant(FrameProcessor):
         if isinstance(frame, LLMContextFrame):
             if frame.speculation:
                 return
+            if await self._steer(last_user_text(frame.context)):
+                return
             text = trailing_user_text(frame.context)
             await self._cancel(end_response=True)
             if text:
-                self._run = self.create_task(self._request(text, time.monotonic()), "ask")
+                self._run = self.create_task(self._request(text), "ask")
             return
         if isinstance(frame, InterruptionFrame):
-            await self._cancel(end_response=False)
+            # The user speaking before the answer may only pause: the turn
+            # steers the run when it ends.
+            if self._answered or self._run is None:
+                await self._cancel(end_response=False)
         elif isinstance(frame, InputTransportMessageFrame):
             await self._client_message(frame.message)
         elif isinstance(frame, BotStartedSpeakingFrame):
@@ -120,6 +137,24 @@ class MavioAssistant(FrameProcessor):
     async def cleanup(self) -> None:
         await self._cancel(end_response=False)
         await super().cleanup()
+
+    def _wire_id(self, run_id: str) -> str:
+        return f"{self._prefix}-{run_id}"
+
+    async def _steer(self, text: str) -> bool:
+        """Steers the run in progress with a turn; false when there is
+        none to steer, or it ended meanwhile."""
+        run = self._run
+        if run is None or run.done() or self._answered or not text:
+            return False
+        try:
+            await self._ask.steer(self._wire_id(self._run_id), text)
+        except (AskError, httpx.HTTPError) as e:
+            logger.info(f"voice session: steer: {e}")
+            return False
+        self._run_text = f"{self._run_text} {text}"
+        await self._event({"type": "run", "id": self._run_id, "text": self._run_text})
+        return True
 
     async def _end_pending(self) -> None:
         """Sends the end of the run whose answer was spoken."""
@@ -146,7 +181,7 @@ class MavioAssistant(FrameProcessor):
                 text = message.get("text")
                 if isinstance(text, str) and text.strip():
                     await self._cancel(end_response=True)
-                    self._run = self.create_task(self._request(text.strip(), time.monotonic()))
+                    self._run = self.create_task(self._request(text.strip()))
             case _:
                 pass
 
@@ -156,6 +191,9 @@ class MavioAssistant(FrameProcessor):
         await self._end_pending()
         run, self._run = self._run, None
         if run is not None and not run.done():
+            # The server aborts the model's run too; what was done stays.
+            with contextlib.suppress(AskError, httpx.HTTPError):
+                await self._ask.abort(self._wire_id(self._run_id))
             await self.cancel_task(run)
             await self._event({"type": "end", "id": self._run_id, "status": "cancelled"})
         if self._speaking:
@@ -166,10 +204,11 @@ class MavioAssistant(FrameProcessor):
     async def _event(self, event: dict[str, Any]) -> None:
         await self.push_frame(OutputTransportMessageUrgentFrame(message=event))
 
-    async def _request(self, text: str, turn_end: float) -> None:
+    async def _request(self, text: str) -> None:
         run_id = self._run_id = str(next(self._ids))
+        self._run_text, self._answered = text, False
         await self._event({"type": "run", "id": run_id, "text": text})
-        request: dict[str, Any] = {"text": text, "spoken": True}
+        request: dict[str, Any] = {"text": text, "spoken": True, "runId": self._wire_id(run_id)}
         if self._context:
             request["context"] = self._context
         answered = False
@@ -181,9 +220,7 @@ class MavioAssistant(FrameProcessor):
                 elif "tool" in response:
                     await self._event({"type": "tool", **response["tool"]})
                 elif "action" in response:
-                    wait = turn_end + self._commit_delay - time.monotonic()
-                    if wait > 0:
-                        await asyncio.sleep(wait)
+                    # The server held it for the commit delay.
                     await self._event({"type": "action", "action": response["action"]})
                 elif "confirmation" in response:
                     await self._event({"type": "confirm", **response["confirmation"]})
@@ -191,13 +228,14 @@ class MavioAssistant(FrameProcessor):
                     answered = True
                     await self._say(run_id, response["answer"])
                 elif "done" in response:
+                    self._answered = True
                     done = response["done"]
                     if not answered and done.get("answer"):
                         await self._say(run_id, done["answer"])
                     end = {
                         "type": "end",
                         "id": run_id,
-                        "status": "completed",
+                        "status": "cancelled" if done.get("cancelled") else "completed",
                         "conversation_id": done.get("conversationId", ""),
                         "answer": done.get("answer", ""),
                         "language": done.get("language", ""),
@@ -217,6 +255,7 @@ class MavioAssistant(FrameProcessor):
         await self.push_frame(LLMFullResponseEndFrame())
 
     async def _say(self, run_id: str, text: str) -> None:
+        self._answered = True
         if not self._speaking:
             self._speaking = True
             await self.push_frame(LLMFullResponseStartFrame())

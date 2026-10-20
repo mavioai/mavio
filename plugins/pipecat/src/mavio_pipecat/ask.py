@@ -8,7 +8,7 @@ from typing import Any, Protocol
 
 import httpx
 
-_ASK_PATH = "/mavio.assistant.v1.AssistantService/Ask"
+_SERVICE = "/mavio.assistant.v1.AssistantService/"
 # Connect's envelope: a flags byte and a big-endian length.
 _ENVELOPE = struct.Struct(">BI")
 _END_STREAM = 0x02
@@ -18,6 +18,10 @@ class Asker(Protocol):
     """What asks the server: AskClient, or a fake in tests."""
 
     def ask(self, request: dict[str, Any]) -> AsyncIterator[dict[str, Any]]: ...
+
+    async def steer(self, run_id: str, text: str) -> None: ...
+
+    async def abort(self, run_id: str) -> None: ...
 
     async def aclose(self) -> None: ...
 
@@ -31,7 +35,7 @@ class AskError(Exception):
 
 
 class AskClient:
-    """Calls Ask: as a user, with the user's access token as a bearer, run
+    """Calls Ask, SteerAsk and AbortAsk: as a user, with the user's access token as a bearer, run
     on its own; or through the host API with an http client of it and the
     session token in Mavio-Voice-Session, as the plugin
     (docs/assistant.md §8.4).
@@ -45,7 +49,7 @@ class AskClient:
         headers: dict[str, str] | None = None,
     ):
         """base_url empty, the http client's base URL is the server's."""
-        self._url = base_url.rstrip("/") + _ASK_PATH
+        self._url = base_url.rstrip("/") + _SERVICE
         self._headers = dict(headers or {})
         if token is not None:
             self._headers["Authorization"] = f"Bearer {token}"
@@ -67,7 +71,8 @@ class AskClient:
             **self._headers,
         }
         content = _ENVELOPE.pack(0, len(body)) + body
-        async with self._http.stream("POST", self._url, content=content, headers=headers) as r:
+        url = self._url + "Ask"
+        async with self._http.stream("POST", url, content=content, headers=headers) as r:
             if r.status_code != 200:
                 raw = await r.aread()
                 error: dict[str, Any] = {}
@@ -93,3 +98,23 @@ class AskClient:
                         return
                     yield message
         raise AskError("unavailable", "the stream ended without its end")
+
+    async def steer(self, run_id: str, text: str) -> None:
+        """Adds what the user went on to say to a run in progress; fails
+        with failed_precondition when the run has ended."""
+        await self._unary("SteerAsk", {"runId": run_id, "text": text})
+
+    async def abort(self, run_id: str) -> None:
+        """Stops a run in progress."""
+        await self._unary("AbortAsk", {"runId": run_id})
+
+    async def _unary(self, method: str, request: dict[str, Any]) -> None:
+        headers = {"Connect-Protocol-Version": "1", **self._headers}
+        r = await self._http.post(self._url + method, json=request, headers=headers)
+        if r.status_code != 200:
+            error: dict[str, Any] = {}
+            try:
+                error = r.json()
+            except json.JSONDecodeError:
+                pass
+            raise AskError(str(error.get("code", r.status_code)), error.get("message", ""))

@@ -125,7 +125,7 @@ func (s *Service) StartVoiceSession(ctx context.Context, req *assistantv1.StartV
 		SessionId: &v.id, Language: &lang, Mode: req.GetMode().Enum(), SessionToken: &v.token,
 		Recognizer: new(own(sp.Recognizer, vp.ID)), Voice: new(own(sp.Voice, vp.ID)),
 		Turns: pluginv1.VoiceTurnSettings_builder{
-			CommitDelay: durationpb.New(set.CommitDelay), LongestPause: durationpb.New(set.LongestPause), Idle: durationpb.New(set.SessionIdle),
+			LongestPause: durationpb.New(set.LongestPause), Idle: durationpb.New(set.SessionIdle),
 		}.Build(),
 	}.Build()
 	if set.Hints {

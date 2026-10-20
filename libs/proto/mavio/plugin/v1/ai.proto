@@ -368,6 +368,13 @@ service AgentSessionService {
   // StreamAgentMessage sends a message and streams the answer as the model
   // writes it, ending with the answer as SendAgentMessage returns it.
   rpc StreamAgentMessage(StreamAgentMessageRequest) returns (stream StreamAgentMessageResponse);
+  // SteerAgentMessage adds a message to the conversation's run in
+  // progress, which the model reads at the run's next boundary; it fails
+  // with failed_precondition when no run is in progress.
+  rpc SteerAgentMessage(SteerAgentMessageRequest) returns (SteerAgentMessageResponse);
+  // AbortAgentMessage aborts the conversation's run in progress, whose
+  // message fails; nothing when none is.
+  rpc AbortAgentMessage(AbortAgentMessageRequest) returns (AbortAgentMessageResponse);
   // DeleteAgentSession deletes a conversation.
   rpc DeleteAgentSession(DeleteAgentSessionRequest) returns (DeleteAgentSessionResponse);
   // AddAgentMessages adds messages and answers to a conversation without
@@ -538,6 +545,21 @@ message AddAgentMessagesRequest {
 }
 
 message AddAgentMessagesResponse {}
+
+message SteerAgentMessageRequest {
+  string session_id = 1 [(buf.validate.field).required = true];
+  string text = 2 [(buf.validate.field).required = true];
+  // Makes a retried message the same message instead of a second one.
+  string request_id = 3;
+}
+
+message SteerAgentMessageResponse {}
+
+message AbortAgentMessageRequest {
+  string session_id = 1 [(buf.validate.field).required = true];
+}
+
+message AbortAgentMessageResponse {}
 
 message EndAgentSessionRequest {
   string id = 1 [(buf.validate.field).required = true];

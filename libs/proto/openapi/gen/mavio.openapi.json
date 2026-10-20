@@ -8299,6 +8299,23 @@
         "additionalProperties": false,
         "description": "WantedSubtitles is a movie or episode lacking subtitles."
       },
+      "mavio.assistant.v1.AbortAskRequest": {
+        "type": "object",
+        "properties": {
+          "runId": {
+            "type": "string",
+            "title": "run_id",
+            "minLength": 1
+          }
+        },
+        "title": "AbortAskRequest",
+        "additionalProperties": false
+      },
+      "mavio.assistant.v1.AbortAskResponse": {
+        "type": "object",
+        "title": "AbortAskResponse",
+        "additionalProperties": false
+      },
       "mavio.assistant.v1.AskContext": {
         "type": "object",
         "properties": {
@@ -8453,6 +8470,12 @@
             },
             "title": "failed_actions",
             "description": "Client actions of the last answer the client could not carry out."
+          },
+          "runId": {
+            "type": "string",
+            "title": "run_id",
+            "maxLength": 100,
+            "description": "Names the run for SteerAsk and AbortAsk, unique among the device's\n runs in progress. A run with an ID holds its effects, the tools and\n client actions that change something, for the commit delay of the\n assistant settings, and drops them when steered (docs/assistant.md\n §8.4)."
           }
         },
         "title": "AskRequest",
@@ -9184,6 +9207,11 @@
             "type": "boolean",
             "title": "not_understood",
             "description": "The request was not understood: the answer lists what the assistant\n understands."
+          },
+          "cancelled": {
+            "type": "boolean",
+            "title": "cancelled",
+            "description": "The run was aborted."
           }
         },
         "title": "Done",
@@ -9503,6 +9531,30 @@
           }
         },
         "title": "StartVoiceSessionResponse",
+        "additionalProperties": false
+      },
+      "mavio.assistant.v1.SteerAskRequest": {
+        "type": "object",
+        "properties": {
+          "runId": {
+            "type": "string",
+            "title": "run_id",
+            "minLength": 1
+          },
+          "text": {
+            "type": "string",
+            "title": "text",
+            "maxLength": 2000,
+            "minLength": 1,
+            "description": "What the user went on to say."
+          }
+        },
+        "title": "SteerAskRequest",
+        "additionalProperties": false
+      },
+      "mavio.assistant.v1.SteerAskResponse": {
+        "type": "object",
+        "title": "SteerAskResponse",
         "additionalProperties": false
       },
       "mavio.assistant.v1.StreamsAction": {
@@ -24561,14 +24613,14 @@
         }
       }
     },
-    "/mavio.library.v1.CollectionService/AddToCollection": {
+    "/mavio.hub.v1.HubService/ListHubs": {
       "post": {
         "tags": [
-          "CollectionService"
+          "HubService"
         ],
-        "summary": "AddToCollection",
-        "description": "AddToCollection appends items not yet in the collection.",
-        "operationId": "mavio.library.v1.CollectionService.AddToCollection",
+        "summary": "ListHubs",
+        "description": "ListHubs lists the hubs of Home, or of a library's Recommended tab,\n with their first items.",
+        "operationId": "mavio.hub.v1.HubService.ListHubs",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -24593,7 +24645,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.AddToCollectionRequest"
+                "$ref": "#/components/schemas/mavio.hub.v1.ListHubsRequest"
               }
             }
           },
@@ -24615,7 +24667,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.AddToCollectionResponse"
+                  "$ref": "#/components/schemas/mavio.hub.v1.ListHubsResponse"
                 }
               }
             }
@@ -24623,13 +24675,14 @@
         }
       }
     },
-    "/mavio.session.v1.SyncPlayService/LeaveGroup": {
+    "/mavio.acquisition.v1.SubtitleService/SearchWantedSubtitles": {
       "post": {
         "tags": [
-          "SyncPlayService"
+          "SubtitleService"
         ],
-        "summary": "LeaveGroup",
-        "operationId": "mavio.session.v1.SyncPlayService.LeaveGroup",
+        "summary": "SearchWantedSubtitles",
+        "description": "SearchWantedSubtitles queues searches of the subtitles movies or\n episodes lack, which download the best subtitles found.",
+        "operationId": "mavio.acquisition.v1.SubtitleService.SearchWantedSubtitles",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -24654,7 +24707,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.session.v1.LeaveGroupRequest"
+                "$ref": "#/components/schemas/mavio.acquisition.v1.SearchWantedSubtitlesRequest"
               }
             }
           },
@@ -24676,7 +24729,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.session.v1.LeaveGroupResponse"
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.SearchWantedSubtitlesResponse"
                 }
               }
             }
@@ -29748,14 +29801,13 @@
         }
       }
     },
-    "/mavio.acquisition.v1.SubtitleService/SearchWantedSubtitles": {
+    "/mavio.library.v1.CollectionService/RemoveFromCollection": {
       "post": {
         "tags": [
-          "SubtitleService"
+          "CollectionService"
         ],
-        "summary": "SearchWantedSubtitles",
-        "description": "SearchWantedSubtitles queues searches of the subtitles movies or\n episodes lack, which download the best subtitles found.",
-        "operationId": "mavio.acquisition.v1.SubtitleService.SearchWantedSubtitles",
+        "summary": "RemoveFromCollection",
+        "operationId": "mavio.library.v1.CollectionService.RemoveFromCollection",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -29780,7 +29832,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.acquisition.v1.SearchWantedSubtitlesRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.RemoveFromCollectionRequest"
               }
             }
           },
@@ -29802,7 +29854,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.acquisition.v1.SearchWantedSubtitlesResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.RemoveFromCollectionResponse"
                 }
               }
             }
@@ -30491,14 +30543,13 @@
         }
       }
     },
-    "/mavio.acquisition.v1.WantedService/SetMonitored": {
+    "/mavio.library.v1.CollectionService/DeleteCollection": {
       "post": {
         "tags": [
-          "WantedService"
+          "CollectionService"
         ],
-        "summary": "SetMonitored",
-        "description": "SetMonitored monitors or unmonitors seasons and episodes, a season\n taking its episodes along, or applies a monitoring option to the\n seasons and episodes of wanted series, as Sonarr's season pass.",
-        "operationId": "mavio.acquisition.v1.WantedService.SetMonitored",
+        "summary": "DeleteCollection",
+        "operationId": "mavio.library.v1.CollectionService.DeleteCollection",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -30523,7 +30574,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.acquisition.v1.SetMonitoredRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.DeleteCollectionRequest"
               }
             }
           },
@@ -30545,7 +30596,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.acquisition.v1.SetMonitoredResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.DeleteCollectionResponse"
                 }
               }
             }
@@ -30670,6 +30721,68 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/mavio.acquisition.v1.UpdateWantedResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.assistant.v1.AssistantService/AbortAsk": {
+      "post": {
+        "tags": [
+          "AssistantService"
+        ],
+        "summary": "AbortAsk",
+        "description": "AbortAsk stops a run in progress, which ends cancelled; what was done\n stays done.",
+        "operationId": "mavio.assistant.v1.AssistantService.AbortAsk",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.assistant.v1.AbortAskRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.assistant.v1.AbortAskResponse"
                 }
               }
             }
@@ -31167,6 +31280,68 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/mavio.assistant.v1.StartVoiceSessionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.assistant.v1.AssistantService/SteerAsk": {
+      "post": {
+        "tags": [
+          "AssistantService"
+        ],
+        "summary": "SteerAsk",
+        "description": "SteerAsk adds what the user went on to say to a run in progress, which\n drops the effects it holds and carries out the joined request; it\n fails with failed_precondition when the run has ended.",
+        "operationId": "mavio.assistant.v1.AssistantService.SteerAsk",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.assistant.v1.SteerAskRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.assistant.v1.SteerAskResponse"
                 }
               }
             }
@@ -32910,14 +33085,14 @@
         }
       }
     },
-    "/mavio.hub.v1.HubService/ListHubs": {
+    "/mavio.acquisition.v1.DiscoverService/GetCollection": {
       "post": {
         "tags": [
-          "HubService"
+          "DiscoverService"
         ],
-        "summary": "ListHubs",
-        "description": "ListHubs lists the hubs of Home, or of a library's Recommended tab,\n with their first items.",
-        "operationId": "mavio.hub.v1.HubService.ListHubs",
+        "summary": "GetCollection",
+        "description": "GetCollection tells of a collection of movies by its TMDB ID with its\n parts marked as Discover's titles, as Seerr's collection page. It\n fails with NOT_FOUND when no discovery provider knows it.",
+        "operationId": "mavio.acquisition.v1.DiscoverService.GetCollection",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -32942,7 +33117,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.hub.v1.ListHubsRequest"
+                "$ref": "#/components/schemas/mavio.acquisition.v1.GetCollectionRequest"
               }
             }
           },
@@ -32964,7 +33139,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.hub.v1.ListHubsResponse"
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.GetCollectionResponse"
                 }
               }
             }
@@ -33034,14 +33209,14 @@
         }
       }
     },
-    "/mavio.acquisition.v1.DiscoverService/GetCollection": {
+    "/mavio.library.v1.CollectionService/AddToCollection": {
       "post": {
         "tags": [
-          "DiscoverService"
+          "CollectionService"
         ],
-        "summary": "GetCollection",
-        "description": "GetCollection tells of a collection of movies by its TMDB ID with its\n parts marked as Discover's titles, as Seerr's collection page. It\n fails with NOT_FOUND when no discovery provider knows it.",
-        "operationId": "mavio.acquisition.v1.DiscoverService.GetCollection",
+        "summary": "AddToCollection",
+        "description": "AddToCollection appends items not yet in the collection.",
+        "operationId": "mavio.library.v1.CollectionService.AddToCollection",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -33066,7 +33241,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.acquisition.v1.GetCollectionRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.AddToCollectionRequest"
               }
             }
           },
@@ -33088,7 +33263,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.acquisition.v1.GetCollectionResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.AddToCollectionResponse"
                 }
               }
             }
@@ -33157,13 +33332,14 @@
         }
       }
     },
-    "/mavio.session.v1.SyncPlayService/Pause": {
+    "/mavio.acquisition.v1.WantedService/SetMonitored": {
       "post": {
         "tags": [
-          "SyncPlayService"
+          "WantedService"
         ],
-        "summary": "Pause",
-        "operationId": "mavio.session.v1.SyncPlayService.Pause",
+        "summary": "SetMonitored",
+        "description": "SetMonitored monitors or unmonitors seasons and episodes, a season\n taking its episodes along, or applies a monitoring option to the\n seasons and episodes of wanted series, as Sonarr's season pass.",
+        "operationId": "mavio.acquisition.v1.WantedService.SetMonitored",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -33188,7 +33364,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.session.v1.PauseRequest"
+                "$ref": "#/components/schemas/mavio.acquisition.v1.SetMonitoredRequest"
               }
             }
           },
@@ -33210,7 +33386,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.session.v1.PauseResponse"
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.SetMonitoredResponse"
                 }
               }
             }
@@ -33280,14 +33456,13 @@
         }
       }
     },
-    "/mavio.system.v1.AiConversationService/GetAiConversation": {
+    "/mavio.library.v1.PlaylistService/CreatePlaylist": {
       "post": {
         "tags": [
-          "AiConversationService"
+          "PlaylistService"
         ],
-        "summary": "GetAiConversation",
-        "description": "GetAiConversation returns a conversation with its messages.",
-        "operationId": "mavio.system.v1.AiConversationService.GetAiConversation",
+        "summary": "CreatePlaylist",
+        "operationId": "mavio.library.v1.PlaylistService.CreatePlaylist",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -33312,7 +33487,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.system.v1.GetAiConversationRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.CreatePlaylistRequest"
               }
             }
           },
@@ -33334,7 +33509,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.system.v1.GetAiConversationResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.CreatePlaylistResponse"
                 }
               }
             }
@@ -34947,13 +35122,13 @@
         }
       }
     },
-    "/mavio.library.v1.PlaylistService/CreatePlaylist": {
+    "/mavio.library.v1.CollectionService/UpdateCollection": {
       "post": {
         "tags": [
-          "PlaylistService"
+          "CollectionService"
         ],
-        "summary": "CreatePlaylist",
-        "operationId": "mavio.library.v1.PlaylistService.CreatePlaylist",
+        "summary": "UpdateCollection",
+        "operationId": "mavio.library.v1.CollectionService.UpdateCollection",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -34978,7 +35153,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.CreatePlaylistRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.UpdateCollectionRequest"
               }
             }
           },
@@ -35000,7 +35175,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.CreatePlaylistResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.UpdateCollectionResponse"
                 }
               }
             }
@@ -36059,13 +36234,13 @@
         }
       }
     },
-    "/mavio.library.v1.CollectionService/RemoveFromCollection": {
+    "/mavio.session.v1.SyncPlayService/LeaveGroup": {
       "post": {
         "tags": [
-          "CollectionService"
+          "SyncPlayService"
         ],
-        "summary": "RemoveFromCollection",
-        "operationId": "mavio.library.v1.CollectionService.RemoveFromCollection",
+        "summary": "LeaveGroup",
+        "operationId": "mavio.session.v1.SyncPlayService.LeaveGroup",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -36090,7 +36265,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.RemoveFromCollectionRequest"
+                "$ref": "#/components/schemas/mavio.session.v1.LeaveGroupRequest"
               }
             }
           },
@@ -36112,7 +36287,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.RemoveFromCollectionResponse"
+                  "$ref": "#/components/schemas/mavio.session.v1.LeaveGroupResponse"
                 }
               }
             }
@@ -36243,13 +36418,13 @@
         }
       }
     },
-    "/mavio.library.v1.CollectionService/DeleteCollection": {
+    "/mavio.session.v1.SyncPlayService/Pause": {
       "post": {
         "tags": [
-          "CollectionService"
+          "SyncPlayService"
         ],
-        "summary": "DeleteCollection",
-        "operationId": "mavio.library.v1.CollectionService.DeleteCollection",
+        "summary": "Pause",
+        "operationId": "mavio.session.v1.SyncPlayService.Pause",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -36274,7 +36449,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.DeleteCollectionRequest"
+                "$ref": "#/components/schemas/mavio.session.v1.PauseRequest"
               }
             }
           },
@@ -36296,7 +36471,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.DeleteCollectionResponse"
+                  "$ref": "#/components/schemas/mavio.session.v1.PauseResponse"
                 }
               }
             }
@@ -37726,13 +37901,14 @@
         }
       }
     },
-    "/mavio.library.v1.CollectionService/UpdateCollection": {
+    "/mavio.system.v1.AiConversationService/GetAiConversation": {
       "post": {
         "tags": [
-          "CollectionService"
+          "AiConversationService"
         ],
-        "summary": "UpdateCollection",
-        "operationId": "mavio.library.v1.CollectionService.UpdateCollection",
+        "summary": "GetAiConversation",
+        "description": "GetAiConversation returns a conversation with its messages.",
+        "operationId": "mavio.system.v1.AiConversationService.GetAiConversation",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -37757,7 +37933,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.UpdateCollectionRequest"
+                "$ref": "#/components/schemas/mavio.system.v1.GetAiConversationRequest"
               }
             }
           },
@@ -37779,7 +37955,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.UpdateCollectionResponse"
+                  "$ref": "#/components/schemas/mavio.system.v1.GetAiConversationResponse"
                 }
               }
             }

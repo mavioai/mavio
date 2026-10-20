@@ -71,3 +71,29 @@ async def test_ask_errors():
             async for _ in client(handler).ask({"text": "hi"}):
                 pass
         assert e.value.code == want[name], f"{name}: got = {e.value.code}, want = {want[name]}"
+
+
+async def test_steer_and_abort():
+    requests: list[httpx.Request] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        requests.append(request)
+        if request.url.path.endswith("/AbortAsk"):
+            return httpx.Response(400, json={"code": "failed_precondition", "message": "ended"})
+        return httpx.Response(200, json={})
+
+    c = client(handler)
+    await c.steer("r1", "the matrix")
+    with pytest.raises(AskError) as e:
+        await c.abort("r1")
+    assert e.value.code == "failed_precondition"
+    got = [(r.url.path, json.loads(r.content), r.headers["authorization"]) for r in requests]
+    want = [
+        (
+            "/mavio.assistant.v1.AssistantService/SteerAsk",
+            {"runId": "r1", "text": "the matrix"},
+            "Bearer token",
+        ),
+        ("/mavio.assistant.v1.AssistantService/AbortAsk", {"runId": "r1"}, "Bearer token"),
+    ]
+    assert got == want, f"requests = {got}, want = {want}"

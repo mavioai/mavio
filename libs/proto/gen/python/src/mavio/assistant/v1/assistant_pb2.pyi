@@ -150,7 +150,7 @@ class VoiceEngine(_message.Message):
     def __init__(self, id: _Optional[str] = ..., name: _Optional[str] = ..., languages: _Optional[_Iterable[str]] = ..., ready: _Optional[bool] = ...) -> None: ...
 
 class AskRequest(_message.Message):
-    __slots__ = ("text", "intent", "context", "spoken", "answer", "choice", "failed_actions")
+    __slots__ = ("text", "intent", "context", "spoken", "answer", "choice", "failed_actions", "run_id")
     TEXT_FIELD_NUMBER: _ClassVar[int]
     INTENT_FIELD_NUMBER: _ClassVar[int]
     CONTEXT_FIELD_NUMBER: _ClassVar[int]
@@ -158,6 +158,7 @@ class AskRequest(_message.Message):
     ANSWER_FIELD_NUMBER: _ClassVar[int]
     CHOICE_FIELD_NUMBER: _ClassVar[int]
     FAILED_ACTIONS_FIELD_NUMBER: _ClassVar[int]
+    RUN_ID_FIELD_NUMBER: _ClassVar[int]
     text: str
     intent: _intent_pb2.Intent
     context: AskContext
@@ -165,7 +166,30 @@ class AskRequest(_message.Message):
     answer: ConfirmationAnswer
     choice: str
     failed_actions: _containers.RepeatedScalarFieldContainer[str]
-    def __init__(self, text: _Optional[str] = ..., intent: _Optional[_Union[_intent_pb2.Intent, _Mapping]] = ..., context: _Optional[_Union[AskContext, _Mapping]] = ..., spoken: _Optional[bool] = ..., answer: _Optional[_Union[ConfirmationAnswer, _Mapping]] = ..., choice: _Optional[str] = ..., failed_actions: _Optional[_Iterable[str]] = ...) -> None: ...
+    run_id: str
+    def __init__(self, text: _Optional[str] = ..., intent: _Optional[_Union[_intent_pb2.Intent, _Mapping]] = ..., context: _Optional[_Union[AskContext, _Mapping]] = ..., spoken: _Optional[bool] = ..., answer: _Optional[_Union[ConfirmationAnswer, _Mapping]] = ..., choice: _Optional[str] = ..., failed_actions: _Optional[_Iterable[str]] = ..., run_id: _Optional[str] = ...) -> None: ...
+
+class SteerAskRequest(_message.Message):
+    __slots__ = ("run_id", "text")
+    RUN_ID_FIELD_NUMBER: _ClassVar[int]
+    TEXT_FIELD_NUMBER: _ClassVar[int]
+    run_id: str
+    text: str
+    def __init__(self, run_id: _Optional[str] = ..., text: _Optional[str] = ...) -> None: ...
+
+class SteerAskResponse(_message.Message):
+    __slots__ = ()
+    def __init__(self) -> None: ...
+
+class AbortAskRequest(_message.Message):
+    __slots__ = ("run_id",)
+    RUN_ID_FIELD_NUMBER: _ClassVar[int]
+    run_id: str
+    def __init__(self, run_id: _Optional[str] = ...) -> None: ...
+
+class AbortAskResponse(_message.Message):
+    __slots__ = ()
+    def __init__(self) -> None: ...
 
 class AskContext(_message.Message):
     __slots__ = ("languages", "playing", "screen", "item_id", "library_id", "selected_item_ids", "time_zone")
@@ -330,20 +354,22 @@ class Confirmation(_message.Message):
     def __init__(self, id: _Optional[str] = ..., text: _Optional[str] = ...) -> None: ...
 
 class Done(_message.Message):
-    __slots__ = ("answer", "language", "conversation_id", "confirmation", "results", "not_understood")
+    __slots__ = ("answer", "language", "conversation_id", "confirmation", "results", "not_understood", "cancelled")
     ANSWER_FIELD_NUMBER: _ClassVar[int]
     LANGUAGE_FIELD_NUMBER: _ClassVar[int]
     CONVERSATION_ID_FIELD_NUMBER: _ClassVar[int]
     CONFIRMATION_FIELD_NUMBER: _ClassVar[int]
     RESULTS_FIELD_NUMBER: _ClassVar[int]
     NOT_UNDERSTOOD_FIELD_NUMBER: _ClassVar[int]
+    CANCELLED_FIELD_NUMBER: _ClassVar[int]
     answer: str
     language: str
     conversation_id: str
     confirmation: bool
     results: int
     not_understood: bool
-    def __init__(self, answer: _Optional[str] = ..., language: _Optional[str] = ..., conversation_id: _Optional[str] = ..., confirmation: _Optional[bool] = ..., results: _Optional[int] = ..., not_understood: _Optional[bool] = ...) -> None: ...
+    cancelled: bool
+    def __init__(self, answer: _Optional[str] = ..., language: _Optional[str] = ..., conversation_id: _Optional[str] = ..., confirmation: _Optional[bool] = ..., results: _Optional[int] = ..., not_understood: _Optional[bool] = ..., cancelled: _Optional[bool] = ...) -> None: ...
 
 class StartVoiceSessionRequest(_message.Message):
     __slots__ = ("language", "mode", "context")

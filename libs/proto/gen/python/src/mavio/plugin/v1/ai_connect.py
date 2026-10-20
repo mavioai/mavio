@@ -423,6 +423,12 @@ class AgentSessionService(Protocol):
     def stream_agent_message(self, request: mavio_dot_plugin_dot_v1_dot_ai__pb2.StreamAgentMessageRequest, ctx: RequestContext) -> AsyncIterator[mavio_dot_plugin_dot_v1_dot_ai__pb2.StreamAgentMessageResponse]:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
 
+    async def steer_agent_message(self, request: mavio_dot_plugin_dot_v1_dot_ai__pb2.SteerAgentMessageRequest, ctx: RequestContext) -> mavio_dot_plugin_dot_v1_dot_ai__pb2.SteerAgentMessageResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
+
+    async def abort_agent_message(self, request: mavio_dot_plugin_dot_v1_dot_ai__pb2.AbortAgentMessageRequest, ctx: RequestContext) -> mavio_dot_plugin_dot_v1_dot_ai__pb2.AbortAgentMessageResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
+
     async def delete_agent_session(self, request: mavio_dot_plugin_dot_v1_dot_ai__pb2.DeleteAgentSessionRequest, ctx: RequestContext) -> mavio_dot_plugin_dot_v1_dot_ai__pb2.DeleteAgentSessionResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
 
@@ -502,6 +508,26 @@ class AgentSessionServiceASGIApplication(ConnectASGIApplication[AgentSessionServ
                         idempotency_level=IdempotencyLevel.UNKNOWN,
                     ),
                     function=svc.stream_agent_message,
+                ),
+                "/mavio.plugin.v1.AgentSessionService/SteerAgentMessage": Endpoint.unary(
+                    method=MethodInfo(
+                        name="SteerAgentMessage",
+                        service_name="mavio.plugin.v1.AgentSessionService",
+                        input=mavio_dot_plugin_dot_v1_dot_ai__pb2.SteerAgentMessageRequest,
+                        output=mavio_dot_plugin_dot_v1_dot_ai__pb2.SteerAgentMessageResponse,
+                        idempotency_level=IdempotencyLevel.UNKNOWN,
+                    ),
+                    function=svc.steer_agent_message,
+                ),
+                "/mavio.plugin.v1.AgentSessionService/AbortAgentMessage": Endpoint.unary(
+                    method=MethodInfo(
+                        name="AbortAgentMessage",
+                        service_name="mavio.plugin.v1.AgentSessionService",
+                        input=mavio_dot_plugin_dot_v1_dot_ai__pb2.AbortAgentMessageRequest,
+                        output=mavio_dot_plugin_dot_v1_dot_ai__pb2.AbortAgentMessageResponse,
+                        idempotency_level=IdempotencyLevel.UNKNOWN,
+                    ),
+                    function=svc.abort_agent_message,
                 ),
                 "/mavio.plugin.v1.AgentSessionService/DeleteAgentSession": Endpoint.unary(
                     method=MethodInfo(
@@ -694,6 +720,46 @@ class AgentSessionServiceClient(ConnectClient):
                 service_name="mavio.plugin.v1.AgentSessionService",
                 input=mavio_dot_plugin_dot_v1_dot_ai__pb2.StreamAgentMessageRequest,
                 output=mavio_dot_plugin_dot_v1_dot_ai__pb2.StreamAgentMessageResponse,
+                idempotency_level=IdempotencyLevel.UNKNOWN,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+        )
+
+    async def steer_agent_message(
+        self,
+        request: mavio_dot_plugin_dot_v1_dot_ai__pb2.SteerAgentMessageRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+    ) -> mavio_dot_plugin_dot_v1_dot_ai__pb2.SteerAgentMessageResponse:
+        return await self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="SteerAgentMessage",
+                service_name="mavio.plugin.v1.AgentSessionService",
+                input=mavio_dot_plugin_dot_v1_dot_ai__pb2.SteerAgentMessageRequest,
+                output=mavio_dot_plugin_dot_v1_dot_ai__pb2.SteerAgentMessageResponse,
+                idempotency_level=IdempotencyLevel.UNKNOWN,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+        )
+
+    async def abort_agent_message(
+        self,
+        request: mavio_dot_plugin_dot_v1_dot_ai__pb2.AbortAgentMessageRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+    ) -> mavio_dot_plugin_dot_v1_dot_ai__pb2.AbortAgentMessageResponse:
+        return await self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="AbortAgentMessage",
+                service_name="mavio.plugin.v1.AgentSessionService",
+                input=mavio_dot_plugin_dot_v1_dot_ai__pb2.AbortAgentMessageRequest,
+                output=mavio_dot_plugin_dot_v1_dot_ai__pb2.AbortAgentMessageResponse,
                 idempotency_level=IdempotencyLevel.UNKNOWN,
             ),
             headers=headers,
@@ -1252,6 +1318,10 @@ class AgentSessionServiceSync(Protocol):
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
     def stream_agent_message(self, request: mavio_dot_plugin_dot_v1_dot_ai__pb2.StreamAgentMessageRequest, ctx: RequestContext) -> Iterator[mavio_dot_plugin_dot_v1_dot_ai__pb2.StreamAgentMessageResponse]:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
+    def steer_agent_message(self, request: mavio_dot_plugin_dot_v1_dot_ai__pb2.SteerAgentMessageRequest, ctx: RequestContext) -> mavio_dot_plugin_dot_v1_dot_ai__pb2.SteerAgentMessageResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
+    def abort_agent_message(self, request: mavio_dot_plugin_dot_v1_dot_ai__pb2.AbortAgentMessageRequest, ctx: RequestContext) -> mavio_dot_plugin_dot_v1_dot_ai__pb2.AbortAgentMessageResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
     def delete_agent_session(self, request: mavio_dot_plugin_dot_v1_dot_ai__pb2.DeleteAgentSessionRequest, ctx: RequestContext) -> mavio_dot_plugin_dot_v1_dot_ai__pb2.DeleteAgentSessionResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
     def add_agent_messages(self, request: mavio_dot_plugin_dot_v1_dot_ai__pb2.AddAgentMessagesRequest, ctx: RequestContext) -> mavio_dot_plugin_dot_v1_dot_ai__pb2.AddAgentMessagesResponse:
@@ -1323,6 +1393,26 @@ class AgentSessionServiceWSGIApplication(ConnectWSGIApplication):
                         idempotency_level=IdempotencyLevel.UNKNOWN,
                     ),
                     function=service.stream_agent_message,
+                ),
+                "/mavio.plugin.v1.AgentSessionService/SteerAgentMessage": EndpointSync.unary(
+                    method=MethodInfo(
+                        name="SteerAgentMessage",
+                        service_name="mavio.plugin.v1.AgentSessionService",
+                        input=mavio_dot_plugin_dot_v1_dot_ai__pb2.SteerAgentMessageRequest,
+                        output=mavio_dot_plugin_dot_v1_dot_ai__pb2.SteerAgentMessageResponse,
+                        idempotency_level=IdempotencyLevel.UNKNOWN,
+                    ),
+                    function=service.steer_agent_message,
+                ),
+                "/mavio.plugin.v1.AgentSessionService/AbortAgentMessage": EndpointSync.unary(
+                    method=MethodInfo(
+                        name="AbortAgentMessage",
+                        service_name="mavio.plugin.v1.AgentSessionService",
+                        input=mavio_dot_plugin_dot_v1_dot_ai__pb2.AbortAgentMessageRequest,
+                        output=mavio_dot_plugin_dot_v1_dot_ai__pb2.AbortAgentMessageResponse,
+                        idempotency_level=IdempotencyLevel.UNKNOWN,
+                    ),
+                    function=service.abort_agent_message,
                 ),
                 "/mavio.plugin.v1.AgentSessionService/DeleteAgentSession": EndpointSync.unary(
                     method=MethodInfo(
@@ -1515,6 +1605,46 @@ class AgentSessionServiceClientSync(ConnectClientSync):
                 service_name="mavio.plugin.v1.AgentSessionService",
                 input=mavio_dot_plugin_dot_v1_dot_ai__pb2.StreamAgentMessageRequest,
                 output=mavio_dot_plugin_dot_v1_dot_ai__pb2.StreamAgentMessageResponse,
+                idempotency_level=IdempotencyLevel.UNKNOWN,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+        )
+
+    def steer_agent_message(
+        self,
+        request: mavio_dot_plugin_dot_v1_dot_ai__pb2.SteerAgentMessageRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+    ) -> mavio_dot_plugin_dot_v1_dot_ai__pb2.SteerAgentMessageResponse:
+        return self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="SteerAgentMessage",
+                service_name="mavio.plugin.v1.AgentSessionService",
+                input=mavio_dot_plugin_dot_v1_dot_ai__pb2.SteerAgentMessageRequest,
+                output=mavio_dot_plugin_dot_v1_dot_ai__pb2.SteerAgentMessageResponse,
+                idempotency_level=IdempotencyLevel.UNKNOWN,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+        )
+
+    def abort_agent_message(
+        self,
+        request: mavio_dot_plugin_dot_v1_dot_ai__pb2.AbortAgentMessageRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+    ) -> mavio_dot_plugin_dot_v1_dot_ai__pb2.AbortAgentMessageResponse:
+        return self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="AbortAgentMessage",
+                service_name="mavio.plugin.v1.AgentSessionService",
+                input=mavio_dot_plugin_dot_v1_dot_ai__pb2.AbortAgentMessageRequest,
+                output=mavio_dot_plugin_dot_v1_dot_ai__pb2.AbortAgentMessageResponse,
                 idempotency_level=IdempotencyLevel.UNKNOWN,
             ),
             headers=headers,

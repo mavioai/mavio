@@ -23,6 +23,12 @@ class AssistantService(Protocol):
     def ask(self, request: mavio_dot_assistant_dot_v1_dot_assistant__pb2.AskRequest, ctx: RequestContext) -> AsyncIterator[mavio_dot_assistant_dot_v1_dot_assistant__pb2.AskResponse]:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
 
+    async def steer_ask(self, request: mavio_dot_assistant_dot_v1_dot_assistant__pb2.SteerAskRequest, ctx: RequestContext) -> mavio_dot_assistant_dot_v1_dot_assistant__pb2.SteerAskResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
+
+    async def abort_ask(self, request: mavio_dot_assistant_dot_v1_dot_assistant__pb2.AbortAskRequest, ctx: RequestContext) -> mavio_dot_assistant_dot_v1_dot_assistant__pb2.AbortAskResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
+
     async def start_voice_session(self, request: mavio_dot_assistant_dot_v1_dot_assistant__pb2.StartVoiceSessionRequest, ctx: RequestContext) -> mavio_dot_assistant_dot_v1_dot_assistant__pb2.StartVoiceSessionResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
 
@@ -75,6 +81,26 @@ class AssistantServiceASGIApplication(ConnectASGIApplication[AssistantService]):
                         idempotency_level=IdempotencyLevel.UNKNOWN,
                     ),
                     function=svc.ask,
+                ),
+                "/mavio.assistant.v1.AssistantService/SteerAsk": Endpoint.unary(
+                    method=MethodInfo(
+                        name="SteerAsk",
+                        service_name="mavio.assistant.v1.AssistantService",
+                        input=mavio_dot_assistant_dot_v1_dot_assistant__pb2.SteerAskRequest,
+                        output=mavio_dot_assistant_dot_v1_dot_assistant__pb2.SteerAskResponse,
+                        idempotency_level=IdempotencyLevel.UNKNOWN,
+                    ),
+                    function=svc.steer_ask,
+                ),
+                "/mavio.assistant.v1.AssistantService/AbortAsk": Endpoint.unary(
+                    method=MethodInfo(
+                        name="AbortAsk",
+                        service_name="mavio.assistant.v1.AssistantService",
+                        input=mavio_dot_assistant_dot_v1_dot_assistant__pb2.AbortAskRequest,
+                        output=mavio_dot_assistant_dot_v1_dot_assistant__pb2.AbortAskResponse,
+                        idempotency_level=IdempotencyLevel.UNKNOWN,
+                    ),
+                    function=svc.abort_ask,
                 ),
                 "/mavio.assistant.v1.AssistantService/StartVoiceSession": Endpoint.unary(
                     method=MethodInfo(
@@ -215,6 +241,46 @@ class AssistantServiceClient(ConnectClient):
                 service_name="mavio.assistant.v1.AssistantService",
                 input=mavio_dot_assistant_dot_v1_dot_assistant__pb2.AskRequest,
                 output=mavio_dot_assistant_dot_v1_dot_assistant__pb2.AskResponse,
+                idempotency_level=IdempotencyLevel.UNKNOWN,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+        )
+
+    async def steer_ask(
+        self,
+        request: mavio_dot_assistant_dot_v1_dot_assistant__pb2.SteerAskRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+    ) -> mavio_dot_assistant_dot_v1_dot_assistant__pb2.SteerAskResponse:
+        return await self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="SteerAsk",
+                service_name="mavio.assistant.v1.AssistantService",
+                input=mavio_dot_assistant_dot_v1_dot_assistant__pb2.SteerAskRequest,
+                output=mavio_dot_assistant_dot_v1_dot_assistant__pb2.SteerAskResponse,
+                idempotency_level=IdempotencyLevel.UNKNOWN,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+        )
+
+    async def abort_ask(
+        self,
+        request: mavio_dot_assistant_dot_v1_dot_assistant__pb2.AbortAskRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+    ) -> mavio_dot_assistant_dot_v1_dot_assistant__pb2.AbortAskResponse:
+        return await self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="AbortAsk",
+                service_name="mavio.assistant.v1.AssistantService",
+                input=mavio_dot_assistant_dot_v1_dot_assistant__pb2.AbortAskRequest,
+                output=mavio_dot_assistant_dot_v1_dot_assistant__pb2.AbortAskResponse,
                 idempotency_level=IdempotencyLevel.UNKNOWN,
             ),
             headers=headers,
@@ -415,6 +481,10 @@ class AssistantServiceSync(Protocol):
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
     def ask(self, request: mavio_dot_assistant_dot_v1_dot_assistant__pb2.AskRequest, ctx: RequestContext) -> Iterator[mavio_dot_assistant_dot_v1_dot_assistant__pb2.AskResponse]:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
+    def steer_ask(self, request: mavio_dot_assistant_dot_v1_dot_assistant__pb2.SteerAskRequest, ctx: RequestContext) -> mavio_dot_assistant_dot_v1_dot_assistant__pb2.SteerAskResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
+    def abort_ask(self, request: mavio_dot_assistant_dot_v1_dot_assistant__pb2.AbortAskRequest, ctx: RequestContext) -> mavio_dot_assistant_dot_v1_dot_assistant__pb2.AbortAskResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
     def start_voice_session(self, request: mavio_dot_assistant_dot_v1_dot_assistant__pb2.StartVoiceSessionRequest, ctx: RequestContext) -> mavio_dot_assistant_dot_v1_dot_assistant__pb2.StartVoiceSessionResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
     def list_assistant_conversations(self, request: mavio_dot_assistant_dot_v1_dot_assistant__pb2.ListAssistantConversationsRequest, ctx: RequestContext) -> mavio_dot_assistant_dot_v1_dot_assistant__pb2.ListAssistantConversationsResponse:
@@ -458,6 +528,26 @@ class AssistantServiceWSGIApplication(ConnectWSGIApplication):
                         idempotency_level=IdempotencyLevel.UNKNOWN,
                     ),
                     function=service.ask,
+                ),
+                "/mavio.assistant.v1.AssistantService/SteerAsk": EndpointSync.unary(
+                    method=MethodInfo(
+                        name="SteerAsk",
+                        service_name="mavio.assistant.v1.AssistantService",
+                        input=mavio_dot_assistant_dot_v1_dot_assistant__pb2.SteerAskRequest,
+                        output=mavio_dot_assistant_dot_v1_dot_assistant__pb2.SteerAskResponse,
+                        idempotency_level=IdempotencyLevel.UNKNOWN,
+                    ),
+                    function=service.steer_ask,
+                ),
+                "/mavio.assistant.v1.AssistantService/AbortAsk": EndpointSync.unary(
+                    method=MethodInfo(
+                        name="AbortAsk",
+                        service_name="mavio.assistant.v1.AssistantService",
+                        input=mavio_dot_assistant_dot_v1_dot_assistant__pb2.AbortAskRequest,
+                        output=mavio_dot_assistant_dot_v1_dot_assistant__pb2.AbortAskResponse,
+                        idempotency_level=IdempotencyLevel.UNKNOWN,
+                    ),
+                    function=service.abort_ask,
                 ),
                 "/mavio.assistant.v1.AssistantService/StartVoiceSession": EndpointSync.unary(
                     method=MethodInfo(
@@ -598,6 +688,46 @@ class AssistantServiceClientSync(ConnectClientSync):
                 service_name="mavio.assistant.v1.AssistantService",
                 input=mavio_dot_assistant_dot_v1_dot_assistant__pb2.AskRequest,
                 output=mavio_dot_assistant_dot_v1_dot_assistant__pb2.AskResponse,
+                idempotency_level=IdempotencyLevel.UNKNOWN,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+        )
+
+    def steer_ask(
+        self,
+        request: mavio_dot_assistant_dot_v1_dot_assistant__pb2.SteerAskRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+    ) -> mavio_dot_assistant_dot_v1_dot_assistant__pb2.SteerAskResponse:
+        return self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="SteerAsk",
+                service_name="mavio.assistant.v1.AssistantService",
+                input=mavio_dot_assistant_dot_v1_dot_assistant__pb2.SteerAskRequest,
+                output=mavio_dot_assistant_dot_v1_dot_assistant__pb2.SteerAskResponse,
+                idempotency_level=IdempotencyLevel.UNKNOWN,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+        )
+
+    def abort_ask(
+        self,
+        request: mavio_dot_assistant_dot_v1_dot_assistant__pb2.AbortAskRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+    ) -> mavio_dot_assistant_dot_v1_dot_assistant__pb2.AbortAskResponse:
+        return self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="AbortAsk",
+                service_name="mavio.assistant.v1.AssistantService",
+                input=mavio_dot_assistant_dot_v1_dot_assistant__pb2.AbortAskRequest,
+                output=mavio_dot_assistant_dot_v1_dot_assistant__pb2.AbortAskResponse,
                 idempotency_level=IdempotencyLevel.UNKNOWN,
             ),
             headers=headers,

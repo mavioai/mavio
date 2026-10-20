@@ -76,9 +76,9 @@ enum VoiceMode {
 
 // VoiceTurnSettings are the timings of a session's turns.
 message VoiceTurnSettings {
-  // How long a turn stands, with the user silent, before what its answer
-  // changes is done.
-  google.protobuf.Duration commit_delay = 1;
+  // The commit delay: the server holds the effects of runs itself.
+  reserved 1;
+  reserved commit_delay;
   // The longest pause in a turn the turn model reads as unfinished.
   google.protobuf.Duration longest_pause = 2;
   // How long the user may stay silent after an answer before the session

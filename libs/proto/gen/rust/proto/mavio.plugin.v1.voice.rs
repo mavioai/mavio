@@ -835,14 +835,6 @@ impl ::buffa::ExtensionSet for VoiceEngineInfo {
 /// VoiceTurnSettings are the timings of a session's turns.
 #[derive(Clone, PartialEq, Default)]
 pub struct VoiceTurnSettings {
-    /// How long a turn stands, with the user silent, before what its answer
-    /// changes is done.
-    ///
-    /// Field 1: `commit_delay`
-    pub commit_delay: ::buffa::MessageField<
-        ::buffa_types::google::protobuf::Duration,
-        ::buffa::Inline<::buffa_types::google::protobuf::Duration>,
-    >,
     /// The longest pause in a turn the turn model reads as unfinished.
     ///
     /// Field 2: `longest_pause`
@@ -864,7 +856,6 @@ pub struct VoiceTurnSettings {
 impl ::core::fmt::Debug for VoiceTurnSettings {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
         f.debug_struct("VoiceTurnSettings")
-            .field("commit_delay", &self.commit_delay)
             .field("longest_pause", &self.longest_pause)
             .field("idle", &self.idle)
             .finish()
@@ -897,14 +888,6 @@ impl ::buffa::Message for VoiceTurnSettings {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
         let mut size = 0u64;
-        if self.commit_delay.is_set() {
-            let __slot = __cache.reserve();
-            let inner_size = self.commit_delay.compute_size(__cache);
-            __cache.set(__slot, inner_size);
-            size
-                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
-                    + inner_size as u64;
-        }
         if self.longest_pause.is_set() {
             let __slot = __cache.reserve();
             let inner_size = self.longest_pause.compute_size(__cache);
@@ -931,14 +914,6 @@ impl ::buffa::Message for VoiceTurnSettings {
     ) {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
-        if self.commit_delay.is_set() {
-            ::buffa::types::put_len_delimited_header(
-                1u32,
-                u64::from(__cache.consume_next()),
-                buf,
-            );
-            self.commit_delay.write_to(__cache, buf);
-        }
         if self.longest_pause.is_set() {
             ::buffa::types::put_len_delimited_header(
                 2u32,
@@ -968,17 +943,6 @@ impl ::buffa::Message for VoiceTurnSettings {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
         match tag.field_number() {
-            1u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                ::buffa::Message::merge_length_delimited(
-                    self.commit_delay.get_or_insert_default(),
-                    buf,
-                    ctx,
-                )?;
-            }
             2u32 => {
                 ::buffa::encoding::check_wire_type(
                     tag,
@@ -1009,7 +973,6 @@ impl ::buffa::Message for VoiceTurnSettings {
         ::core::result::Result::Ok(())
     }
     fn clear(&mut self) {
-        self.commit_delay = ::buffa::MessageField::none();
         self.longest_pause = ::buffa::MessageField::none();
         self.idle = ::buffa::MessageField::none();
         self.__buffa_unknown_fields.clear();

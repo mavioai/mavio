@@ -1274,13 +1274,6 @@ impl ::buffa::HasMessageView for super::super::VoiceEngineInfo {
 /// VoiceTurnSettings are the timings of a session's turns.
 #[derive(Clone, Debug, Default)]
 pub struct VoiceTurnSettingsView<'a> {
-    /// How long a turn stands, with the user silent, before what its answer
-    /// changes is done.
-    ///
-    /// Field 1: `commit_delay`
-    pub commit_delay: ::buffa::MessageFieldView<
-        ::buffa_types::google::protobuf::__buffa::view::DurationView<'a>,
-    >,
     /// The longest pause in a turn the turn model reads as unfinished.
     ///
     /// Field 2: `longest_pause`
@@ -1326,27 +1319,6 @@ impl<'a> ::buffa::MessageView<'a> for VoiceTurnSettingsView<'a> {
         let view = self;
         let mut cur = cur;
         match tag.field_number() {
-            1u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                let __sub_ctx = ctx.descend()?;
-                let sub = ::buffa::types::borrow_bytes(&mut cur)?;
-                match view.commit_delay.as_mut() {
-                    Some(existing) => {
-                        ::buffa::MessageView::merge_into_view(existing, sub, __sub_ctx)?
-                    }
-                    None => {
-                        view.commit_delay = ::buffa::MessageFieldView::set(
-                            <::buffa_types::google::protobuf::__buffa::view::DurationView as ::buffa::MessageView>::decode_view_ctx(
-                                sub,
-                                __sub_ctx,
-                            )?,
-                        );
-                    }
-                }
-            }
             2u32 => {
                 ::buffa::encoding::check_wire_type(
                     tag,
@@ -1411,15 +1383,6 @@ impl<'a> ::buffa::MessageView<'a> for VoiceTurnSettingsView<'a> {
         use ::buffa::alloc::string::ToString as _;
         let _ = __buffa_src;
         ::core::result::Result::Ok(super::super::VoiceTurnSettings {
-            commit_delay: match self.commit_delay.as_option() {
-                Some(v) => {
-                    ::buffa::MessageField::<
-                        ::buffa_types::google::protobuf::Duration,
-                        ::buffa::Inline<::buffa_types::google::protobuf::Duration>,
-                    >::some(v.to_owned_from_source(__buffa_src)?)
-                }
-                None => ::buffa::MessageField::none(),
-            },
             longest_pause: match self.longest_pause.as_option() {
                 Some(v) => {
                     ::buffa::MessageField::<
@@ -1449,14 +1412,6 @@ impl<'a> ::buffa::ViewEncode<'a> for VoiceTurnSettingsView<'a> {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
         let mut size = 0u64;
-        if self.commit_delay.is_set() {
-            let __slot = __cache.reserve();
-            let inner_size = self.commit_delay.compute_size(__cache);
-            __cache.set(__slot, inner_size);
-            size
-                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
-                    + inner_size as u64;
-        }
         if self.longest_pause.is_set() {
             let __slot = __cache.reserve();
             let inner_size = self.longest_pause.compute_size(__cache);
@@ -1484,14 +1439,6 @@ impl<'a> ::buffa::ViewEncode<'a> for VoiceTurnSettingsView<'a> {
     ) {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
-        if self.commit_delay.is_set() {
-            ::buffa::types::put_len_delimited_header(
-                1u32,
-                u64::from(__cache.consume_next()),
-                buf,
-            );
-            self.commit_delay.write_to(__cache, buf);
-        }
         if self.longest_pause.is_set() {
             ::buffa::types::put_len_delimited_header(
                 2u32,
@@ -1602,18 +1549,6 @@ impl VoiceTurnSettingsOwnedView {
     #[must_use]
     pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
         self.0.into_bytes()
-    }
-    /// How long a turn stands, with the user silent, before what its answer
-    /// changes is done.
-    ///
-    /// Field 1: `commit_delay`
-    #[must_use]
-    pub fn commit_delay(
-        &self,
-    ) -> &::buffa::MessageFieldView<
-        ::buffa_types::google::protobuf::__buffa::view::DurationView<'_>,
-    > {
-        &self.0.reborrow().commit_delay
     }
     /// The longest pause in a turn the turn model reads as unfinished.
     ///

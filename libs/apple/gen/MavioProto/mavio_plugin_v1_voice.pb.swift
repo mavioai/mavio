@@ -230,17 +230,6 @@ public nonisolated struct Mavio_Plugin_V1_VoiceTurnSettings: Sendable {
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  /// How long a turn stands, with the user silent, before what its answer
-  /// changes is done.
-  public var commitDelay: SwiftProtobuf.Google_Protobuf_Duration {
-    get {_commitDelay ?? SwiftProtobuf.Google_Protobuf_Duration()}
-    set {_commitDelay = newValue}
-  }
-  /// Returns true if `commitDelay` has been explicitly set.
-  public var hasCommitDelay: Bool {self._commitDelay != nil}
-  /// Clears the value of `commitDelay`. Subsequent reads from it will return its default value.
-  public mutating func clearCommitDelay() {self._commitDelay = nil}
-
   /// The longest pause in a turn the turn model reads as unfinished.
   public var longestPause: SwiftProtobuf.Google_Protobuf_Duration {
     get {_longestPause ?? SwiftProtobuf.Google_Protobuf_Duration()}
@@ -266,7 +255,6 @@ public nonisolated struct Mavio_Plugin_V1_VoiceTurnSettings: Sendable {
 
   public init() {}
 
-  fileprivate var _commitDelay: SwiftProtobuf.Google_Protobuf_Duration? = nil
   fileprivate var _longestPause: SwiftProtobuf.Google_Protobuf_Duration? = nil
   fileprivate var _idle: SwiftProtobuf.Google_Protobuf_Duration? = nil
 }
@@ -609,7 +597,7 @@ nonisolated extension Mavio_Plugin_V1_VoiceEngineInfo: SwiftProtobuf.Message, Sw
 
 nonisolated extension Mavio_Plugin_V1_VoiceTurnSettings: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".VoiceTurnSettings"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}commit_delay\0\u{3}longest_pause\0\u{1}idle\0")
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{4}\u{2}longest_pause\0\u{1}idle\0\u{b}commit_delay\0\u{c}\u{1}\u{1}")
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -617,7 +605,6 @@ nonisolated extension Mavio_Plugin_V1_VoiceTurnSettings: SwiftProtobuf.Message, 
       // allocates stack space for every case branch when no optimizations are
       // enabled. https://github.com/apple/swift-protobuf/issues/1034
       switch fieldNumber {
-      case 1: try { try decoder.decodeSingularMessageField(value: &self._commitDelay) }()
       case 2: try { try decoder.decodeSingularMessageField(value: &self._longestPause) }()
       case 3: try { try decoder.decodeSingularMessageField(value: &self._idle) }()
       default: break
@@ -630,9 +617,6 @@ nonisolated extension Mavio_Plugin_V1_VoiceTurnSettings: SwiftProtobuf.Message, 
     // allocates stack space for every if/case branch local when no optimizations
     // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
     // https://github.com/apple/swift-protobuf/issues/1182
-    try { if let v = self._commitDelay {
-      try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
-    } }()
     try { if let v = self._longestPause {
       try visitor.visitSingularMessageField(value: v, fieldNumber: 2)
     } }()
@@ -643,7 +627,6 @@ nonisolated extension Mavio_Plugin_V1_VoiceTurnSettings: SwiftProtobuf.Message, 
   }
 
   public static func ==(lhs: Mavio_Plugin_V1_VoiceTurnSettings, rhs: Mavio_Plugin_V1_VoiceTurnSettings) -> Bool {
-    if lhs._commitDelay != rhs._commitDelay {return false}
     if lhs._longestPause != rhs._longestPause {return false}
     if lhs._idle != rhs._idle {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}

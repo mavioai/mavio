@@ -586,6 +586,30 @@ class AddAgentMessagesResponse(_message.Message):
     __slots__ = ()
     def __init__(self) -> None: ...
 
+class SteerAgentMessageRequest(_message.Message):
+    __slots__ = ("session_id", "text", "request_id")
+    SESSION_ID_FIELD_NUMBER: _ClassVar[int]
+    TEXT_FIELD_NUMBER: _ClassVar[int]
+    REQUEST_ID_FIELD_NUMBER: _ClassVar[int]
+    session_id: str
+    text: str
+    request_id: str
+    def __init__(self, session_id: _Optional[str] = ..., text: _Optional[str] = ..., request_id: _Optional[str] = ...) -> None: ...
+
+class SteerAgentMessageResponse(_message.Message):
+    __slots__ = ()
+    def __init__(self) -> None: ...
+
+class AbortAgentMessageRequest(_message.Message):
+    __slots__ = ("session_id",)
+    SESSION_ID_FIELD_NUMBER: _ClassVar[int]
+    session_id: str
+    def __init__(self, session_id: _Optional[str] = ...) -> None: ...
+
+class AbortAgentMessageResponse(_message.Message):
+    __slots__ = ()
+    def __init__(self) -> None: ...
+
 class EndAgentSessionRequest(_message.Message):
     __slots__ = ("id",)
     ID_FIELD_NUMBER: _ClassVar[int]

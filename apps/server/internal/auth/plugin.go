@@ -27,7 +27,11 @@ const (
 )
 
 // VoiceSessionProcedures are what a voice session's token may call.
-var VoiceSessionProcedures = []string{"mavio.assistant.v1.AssistantService/Ask"}
+var VoiceSessionProcedures = []string{
+	"mavio.assistant.v1.AssistantService/Ask",
+	"mavio.assistant.v1.AssistantService/SteerAsk",
+	"mavio.assistant.v1.AssistantService/AbortAsk",
+}
 
 // VoiceSession is what a voice session's token stands for.
 type VoiceSession struct {

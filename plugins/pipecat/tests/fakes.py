@@ -7,6 +7,8 @@ from typing import Any
 from pipecat.frames.frames import Frame, TTSAudioRawFrame
 from pipecat.services.tts_service import TTSService
 
+from mavio_pipecat.ask import AskError
+
 
 class FakeAsk:
     """Answers each request with the responses of its script, or with a
@@ -16,6 +18,10 @@ class FakeAsk:
     def __init__(self, *scripts: list[Any]):
         self.scripts = list(scripts)
         self.requests: list[dict[str, Any]] = []
+        self.steers: list[tuple[str, str]] = []
+        self.aborts: list[str] = []
+        # The runs in progress, which steer and abort.
+        self.running: set[str] = set()
 
     async def ask(self, request: dict[str, Any]):
         self.requests.append(request)
@@ -27,11 +33,24 @@ class FakeAsk:
                 {"done": {"answer": "Hello.", "language": "en", "conversationId": "c1"}},
             ]
         )
-        for item in script:
-            if isinstance(item, float):
-                await asyncio.sleep(item)
-            else:
-                yield item
+        run_id = request.get("runId", "")
+        self.running.add(run_id)
+        try:
+            for item in script:
+                if isinstance(item, float):
+                    await asyncio.sleep(item)
+                else:
+                    yield item
+        finally:
+            self.running.discard(run_id)
+
+    async def steer(self, run_id: str, text: str):
+        if run_id not in self.running:
+            raise AskError("failed_precondition", f"run {run_id} has ended")
+        self.steers.append((run_id, text))
+
+    async def abort(self, run_id: str):
+        self.aborts.append(run_id)
 
     async def aclose(self):
         pass

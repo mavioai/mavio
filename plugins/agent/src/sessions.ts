@@ -245,13 +245,24 @@ export function sessions(o: SessionsOptions): Sessions {
 		});
 	};
 
+	// The messages in progress by session, which SteerAgentMessage steers.
+	const running = new Map<string, number>();
 	const submit = async (req: SendAgentMessageRequest, context: Context) => {
 		const { conversation } = await open(req.sessionId);
 		const submission = await conversation.submit(
 			{ type: "input", content: req.text, ...(req.requestId !== "" ? { requestId: req.requestId } : {}) },
 			context,
 		);
-		return { conversation, submission };
+		running.set(req.sessionId, (running.get(req.sessionId) ?? 0) + 1);
+		let settled = false;
+		const settle = () => {
+			if (settled) return;
+			settled = true;
+			const n = (running.get(req.sessionId) ?? 1) - 1;
+			if (n > 0) running.set(req.sessionId, n);
+			else running.delete(req.sessionId);
+		};
+		return { conversation, submission, settle };
 	};
 
 	/** answer returns the answer a submission settled with: what each of its run's model calls said. */
@@ -374,15 +385,19 @@ export function sessions(o: SessionsOptions): Sessions {
 
 		async sendAgentMessage(req, ctx) {
 			const context = withAbortSignal(ctx.signal, BACKGROUND_CONTEXT);
-			const { conversation, submission } = await submit(req, context);
-			return answer(req.sessionId, conversation, await submission.wait(context));
+			const { conversation, submission, settle } = await submit(req, context);
+			try {
+				return await answer(req.sessionId, conversation, await submission.wait(context));
+			} finally {
+				settle();
+			}
 		},
 
 		async *streamAgentMessage(req, ctx) {
 			const msg = req.message;
 			if (!msg) throw new ConnectError("message is required", Code.InvalidArgument);
 			const context = withAbortSignal(ctx.signal, BACKGROUND_CONTEXT);
-			const { conversation, submission } = await submit(msg, context);
+			const { conversation, submission, settle } = await submit(msg, context);
 			// The run the submission started presents its answer in progress,
 			// led by what its earlier model calls said before calling tools.
 			const watch = await harness.watchDoc(LiveDoc, conversationId(msg.sessionId), context);
@@ -419,6 +434,7 @@ export function sessions(o: SessionsOptions): Sessions {
 			let settled: { value: SendAgentMessageResponse } | { error: unknown } | undefined;
 			submission.wait(context).then(
 				async (s) => {
+					settle();
 					try {
 						settled = { value: await answer(msg.sessionId, conversation, s) };
 					} catch (error) {
@@ -427,6 +443,7 @@ export function sessions(o: SessionsOptions): Sessions {
 					wake();
 				},
 				(error: unknown) => {
+					settle();
 					settled = { error };
 					wake();
 				},
@@ -449,6 +466,23 @@ export function sessions(o: SessionsOptions): Sessions {
 			}
 			if ("error" in settled) throw settled.error;
 			yield { event: { case: "done", value: settled.value } };
+		},
+
+		async steerAgentMessage(req, ctx) {
+			if (!running.has(req.sessionId)) throw new ConnectError(`no message of ${req.sessionId} is in progress`, Code.FailedPrecondition);
+			const { conversation } = await open(req.sessionId);
+			// Placed at the run's next boundary, it is part of the run's answer.
+			await conversation.submit(
+				{ type: "input", content: req.text, whenBusy: "steer", ...(req.requestId !== "" ? { requestId: req.requestId } : {}) },
+				withAbortSignal(ctx.signal, BACKGROUND_CONTEXT),
+			);
+			return {};
+		},
+
+		async abortAgentMessage(req, ctx) {
+			const { conversation } = await find(req.sessionId);
+			await conversation.abort(withAbortSignal(ctx.signal, BACKGROUND_CONTEXT));
+			return {};
 		},
 
 		async deleteAgentSession(req) {

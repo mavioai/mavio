@@ -83,6 +83,12 @@ const (
 	// AgentSessionServiceStreamAgentMessageProcedure is the fully-qualified name of the
 	// AgentSessionService's StreamAgentMessage RPC.
 	AgentSessionServiceStreamAgentMessageProcedure = "/mavio.plugin.v1.AgentSessionService/StreamAgentMessage"
+	// AgentSessionServiceSteerAgentMessageProcedure is the fully-qualified name of the
+	// AgentSessionService's SteerAgentMessage RPC.
+	AgentSessionServiceSteerAgentMessageProcedure = "/mavio.plugin.v1.AgentSessionService/SteerAgentMessage"
+	// AgentSessionServiceAbortAgentMessageProcedure is the fully-qualified name of the
+	// AgentSessionService's AbortAgentMessage RPC.
+	AgentSessionServiceAbortAgentMessageProcedure = "/mavio.plugin.v1.AgentSessionService/AbortAgentMessage"
 	// AgentSessionServiceDeleteAgentSessionProcedure is the fully-qualified name of the
 	// AgentSessionService's DeleteAgentSession RPC.
 	AgentSessionServiceDeleteAgentSessionProcedure = "/mavio.plugin.v1.AgentSessionService/DeleteAgentSession"
@@ -530,6 +536,13 @@ type AgentSessionServiceClient interface {
 	// StreamAgentMessage sends a message and streams the answer as the model
 	// writes it, ending with the answer as SendAgentMessage returns it.
 	StreamAgentMessage(context.Context, *v1.StreamAgentMessageRequest) (*connect.ServerStreamForClient[v1.StreamAgentMessageResponse], error)
+	// SteerAgentMessage adds a message to the conversation's run in
+	// progress, which the model reads at the run's next boundary; it fails
+	// with failed_precondition when no run is in progress.
+	SteerAgentMessage(context.Context, *v1.SteerAgentMessageRequest) (*v1.SteerAgentMessageResponse, error)
+	// AbortAgentMessage aborts the conversation's run in progress, whose
+	// message fails; nothing when none is.
+	AbortAgentMessage(context.Context, *v1.AbortAgentMessageRequest) (*v1.AbortAgentMessageResponse, error)
 	// DeleteAgentSession deletes a conversation.
 	DeleteAgentSession(context.Context, *v1.DeleteAgentSessionRequest) (*v1.DeleteAgentSessionResponse, error)
 	// AddAgentMessages adds messages and answers to a conversation without
@@ -597,6 +610,18 @@ func NewAgentSessionServiceClient(httpClient connect.HTTPClient, baseURL string,
 			connect.WithSchema(agentSessionServiceMethods.ByName("StreamAgentMessage")),
 			connect.WithClientOptions(opts...),
 		),
+		steerAgentMessage: connect.NewClient[v1.SteerAgentMessageRequest, v1.SteerAgentMessageResponse](
+			httpClient,
+			baseURL+AgentSessionServiceSteerAgentMessageProcedure,
+			connect.WithSchema(agentSessionServiceMethods.ByName("SteerAgentMessage")),
+			connect.WithClientOptions(opts...),
+		),
+		abortAgentMessage: connect.NewClient[v1.AbortAgentMessageRequest, v1.AbortAgentMessageResponse](
+			httpClient,
+			baseURL+AgentSessionServiceAbortAgentMessageProcedure,
+			connect.WithSchema(agentSessionServiceMethods.ByName("AbortAgentMessage")),
+			connect.WithClientOptions(opts...),
+		),
 		deleteAgentSession: connect.NewClient[v1.DeleteAgentSessionRequest, v1.DeleteAgentSessionResponse](
 			httpClient,
 			baseURL+AgentSessionServiceDeleteAgentSessionProcedure,
@@ -657,6 +682,8 @@ type agentSessionServiceClient struct {
 	getAgentSession       *connect.Client[v1.GetAgentSessionRequest, v1.GetAgentSessionResponse]
 	sendAgentMessage      *connect.Client[v1.SendAgentMessageRequest, v1.SendAgentMessageResponse]
 	streamAgentMessage    *connect.Client[v1.StreamAgentMessageRequest, v1.StreamAgentMessageResponse]
+	steerAgentMessage     *connect.Client[v1.SteerAgentMessageRequest, v1.SteerAgentMessageResponse]
+	abortAgentMessage     *connect.Client[v1.AbortAgentMessageRequest, v1.AbortAgentMessageResponse]
 	deleteAgentSession    *connect.Client[v1.DeleteAgentSessionRequest, v1.DeleteAgentSessionResponse]
 	addAgentMessages      *connect.Client[v1.AddAgentMessagesRequest, v1.AddAgentMessagesResponse]
 	endAgentSession       *connect.Client[v1.EndAgentSessionRequest, v1.EndAgentSessionResponse]
@@ -706,6 +733,24 @@ func (c *agentSessionServiceClient) SendAgentMessage(ctx context.Context, req *v
 // StreamAgentMessage calls mavio.plugin.v1.AgentSessionService.StreamAgentMessage.
 func (c *agentSessionServiceClient) StreamAgentMessage(ctx context.Context, req *v1.StreamAgentMessageRequest) (*connect.ServerStreamForClient[v1.StreamAgentMessageResponse], error) {
 	return c.streamAgentMessage.CallServerStream(ctx, connect.NewRequest(req))
+}
+
+// SteerAgentMessage calls mavio.plugin.v1.AgentSessionService.SteerAgentMessage.
+func (c *agentSessionServiceClient) SteerAgentMessage(ctx context.Context, req *v1.SteerAgentMessageRequest) (*v1.SteerAgentMessageResponse, error) {
+	response, err := c.steerAgentMessage.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
+// AbortAgentMessage calls mavio.plugin.v1.AgentSessionService.AbortAgentMessage.
+func (c *agentSessionServiceClient) AbortAgentMessage(ctx context.Context, req *v1.AbortAgentMessageRequest) (*v1.AbortAgentMessageResponse, error) {
+	response, err := c.abortAgentMessage.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
 }
 
 // DeleteAgentSession calls mavio.plugin.v1.AgentSessionService.DeleteAgentSession.
@@ -790,6 +835,13 @@ type AgentSessionServiceHandler interface {
 	// StreamAgentMessage sends a message and streams the answer as the model
 	// writes it, ending with the answer as SendAgentMessage returns it.
 	StreamAgentMessage(context.Context, *v1.StreamAgentMessageRequest, *connect.ServerStream[v1.StreamAgentMessageResponse]) error
+	// SteerAgentMessage adds a message to the conversation's run in
+	// progress, which the model reads at the run's next boundary; it fails
+	// with failed_precondition when no run is in progress.
+	SteerAgentMessage(context.Context, *v1.SteerAgentMessageRequest) (*v1.SteerAgentMessageResponse, error)
+	// AbortAgentMessage aborts the conversation's run in progress, whose
+	// message fails; nothing when none is.
+	AbortAgentMessage(context.Context, *v1.AbortAgentMessageRequest) (*v1.AbortAgentMessageResponse, error)
 	// DeleteAgentSession deletes a conversation.
 	DeleteAgentSession(context.Context, *v1.DeleteAgentSessionRequest) (*v1.DeleteAgentSessionResponse, error)
 	// AddAgentMessages adds messages and answers to a conversation without
@@ -851,6 +903,18 @@ func NewAgentSessionServiceHandler(svc AgentSessionServiceHandler, opts ...conne
 		AgentSessionServiceStreamAgentMessageProcedure,
 		svc.StreamAgentMessage,
 		connect.WithSchema(agentSessionServiceMethods.ByName("StreamAgentMessage")),
+		connect.WithHandlerOptions(opts...),
+	)
+	agentSessionServiceSteerAgentMessageHandler := connect.NewUnaryHandlerSimple(
+		AgentSessionServiceSteerAgentMessageProcedure,
+		svc.SteerAgentMessage,
+		connect.WithSchema(agentSessionServiceMethods.ByName("SteerAgentMessage")),
+		connect.WithHandlerOptions(opts...),
+	)
+	agentSessionServiceAbortAgentMessageHandler := connect.NewUnaryHandlerSimple(
+		AgentSessionServiceAbortAgentMessageProcedure,
+		svc.AbortAgentMessage,
+		connect.WithSchema(agentSessionServiceMethods.ByName("AbortAgentMessage")),
 		connect.WithHandlerOptions(opts...),
 	)
 	agentSessionServiceDeleteAgentSessionHandler := connect.NewUnaryHandlerSimple(
@@ -915,6 +979,10 @@ func NewAgentSessionServiceHandler(svc AgentSessionServiceHandler, opts ...conne
 			agentSessionServiceSendAgentMessageHandler.ServeHTTP(w, r)
 		case AgentSessionServiceStreamAgentMessageProcedure:
 			agentSessionServiceStreamAgentMessageHandler.ServeHTTP(w, r)
+		case AgentSessionServiceSteerAgentMessageProcedure:
+			agentSessionServiceSteerAgentMessageHandler.ServeHTTP(w, r)
+		case AgentSessionServiceAbortAgentMessageProcedure:
+			agentSessionServiceAbortAgentMessageHandler.ServeHTTP(w, r)
 		case AgentSessionServiceDeleteAgentSessionProcedure:
 			agentSessionServiceDeleteAgentSessionHandler.ServeHTTP(w, r)
 		case AgentSessionServiceAddAgentMessagesProcedure:
@@ -958,6 +1026,14 @@ func (UnimplementedAgentSessionServiceHandler) SendAgentMessage(context.Context,
 
 func (UnimplementedAgentSessionServiceHandler) StreamAgentMessage(context.Context, *v1.StreamAgentMessageRequest, *connect.ServerStream[v1.StreamAgentMessageResponse]) error {
 	return connect.NewError(connect.CodeUnimplemented, errors.New("mavio.plugin.v1.AgentSessionService.StreamAgentMessage is not implemented"))
+}
+
+func (UnimplementedAgentSessionServiceHandler) SteerAgentMessage(context.Context, *v1.SteerAgentMessageRequest) (*v1.SteerAgentMessageResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.plugin.v1.AgentSessionService.SteerAgentMessage is not implemented"))
+}
+
+func (UnimplementedAgentSessionServiceHandler) AbortAgentMessage(context.Context, *v1.AbortAgentMessageRequest) (*v1.AbortAgentMessageResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.plugin.v1.AgentSessionService.AbortAgentMessage is not implemented"))
 }
 
 func (UnimplementedAgentSessionServiceHandler) DeleteAgentSession(context.Context, *v1.DeleteAgentSessionRequest) (*v1.DeleteAgentSessionResponse, error) {

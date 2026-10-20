@@ -20,8 +20,8 @@ import (
 type fakeTranscriber struct {
 	lang string
 
-	mu         sync.Mutex
-	detections []string
+	mu          sync.Mutex
+	detections  []string
 	transcribed []string
 }
 

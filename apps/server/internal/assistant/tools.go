@@ -38,6 +38,18 @@ type call struct {
 	act func(*assistantv1.ClientAction)
 	// item is told of the item a call is about, for "it" later.
 	item func(id string)
+	// hold waits until the call's effects may happen; nil when they need
+	// not wait (docs/assistant.md §8.4).
+	hold func(context.Context) error
+}
+
+// commit waits until the call may change something: the tools and client
+// actions that do call it first.
+func (c *call) commit() error {
+	if c.hold == nil {
+		return nil
+	}
+	return c.hold(c.ctx)
 }
 
 // answerError is a failure the user is told of: the fast path speaks its
@@ -764,6 +776,9 @@ func (c *call) children(parent string, ks []libraryv1.ItemKind, n int32) ([]*lib
 }
 
 func (c *call) play(a playArgs) (any, error) {
+	if err := c.commit(); err != nil {
+		return nil, err
+	}
 	if len(a.ItemIDs) == 0 {
 		return nil, errors.New("item_ids is empty")
 	}
@@ -1090,6 +1105,9 @@ var playStates = map[string]sessionv1.PlayStateCommand{
 }
 
 func (c *call) control(a controlArgs) (any, error) {
+	if err := c.commit(); err != nil {
+		return nil, err
+	}
 	cmd, ok := controls[a.Command]
 	if !ok {
 		return nil, fmt.Errorf("unknown command %q", a.Command)
@@ -1147,6 +1165,9 @@ type streamsArgs struct {
 }
 
 func (c *call) setStreams(a streamsArgs) (any, error) {
+	if err := c.commit(); err != nil {
+		return nil, err
+	}
 	if c.act == nil {
 		return nil, failure("no_device", map[string]string{"device": "here"}, "streams change only on the requesting device")
 	}
@@ -1216,6 +1237,9 @@ type userDataArgs struct {
 }
 
 func (c *call) setUserData(a userDataArgs) (any, error) {
+	if err := c.commit(); err != nil {
+		return nil, err
+	}
 	req := userv1.UpdateUserDataRequest_builder{ItemId: &a.ItemID, Played: a.Played, Favorite: a.Favorite, Rating: a.Rating}.Build()
 	if _, err := c.s.cfg.Services.UserData.UpdateUserData(c.ctx, req); err != nil {
 		return nil, err
@@ -1233,6 +1257,9 @@ type playlistArgs struct {
 }
 
 func (c *call) addToPlaylist(a playlistArgs) (any, error) {
+	if err := c.commit(); err != nil {
+		return nil, err
+	}
 	pl := c.s.cfg.Services.Playlists
 	list, err := pl.ListPlaylists(c.ctx, libraryv1.ListPlaylistsRequest_builder{Limit: new(int32(1000))}.Build())
 	if err != nil {
@@ -1292,6 +1319,9 @@ func discoveredTitle(t *acquisitionv1.DiscoveredTitle) string {
 }
 
 func (c *call) requestTitle(a requestArgs) (any, error) {
+	if err := c.commit(); err != nil {
+		return nil, err
+	}
 	t, err := c.discover(a)
 	if err != nil {
 		return nil, err
@@ -1323,6 +1353,9 @@ var navigateTargets = map[string]assistantv1.NavigateTarget{
 }
 
 func (c *call) navigate(a navigateArgs) (any, error) {
+	if err := c.commit(); err != nil {
+		return nil, err
+	}
 	t, ok := navigateTargets[a.Target]
 	if !ok {
 		return nil, fmt.Errorf("unknown target %q", a.Target)

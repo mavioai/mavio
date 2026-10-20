@@ -161,8 +161,8 @@ func TestVoiceSessionRelays(t *testing.T) {
 	if open.GetRecognizer() != "whisper-1" || open.GetVoice() != "" {
 		t.Errorf("recognizer, voice = %q, %q, want = whisper-1, empty", open.GetRecognizer(), open.GetVoice())
 	}
-	if got, want := open.GetTurns().GetCommitDelay().AsDuration(), core.DefaultAssistantSettings().CommitDelay; got != want {
-		t.Errorf("commit delay = %v, want = %v", got, want)
+	if got, want := open.GetTurns().GetLongestPause().AsDuration(), core.DefaultAssistantSettings().LongestPause; got != want {
+		t.Errorf("longest pause = %v, want = %v", got, want)
 	}
 	if !strings.Contains(open.GetContextJson(), `"en"`) {
 		t.Errorf("context json = %s, want the client's context", open.GetContextJson())
@@ -233,16 +233,23 @@ func TestVoiceSessionKeepsSpeech(t *testing.T) {
 	for _, fr := range []frame{
 		text(`{"type":"ready","output_sample_rate":24000}`),
 		// Spoken whole.
-		text(`{"type":"run"}`), {websocket.BinaryFrame, speech},
+		text(`{"type":"run"}`),
+		{websocket.BinaryFrame, speech},
 		text(`{"type":"end","status":"completed","conversation_id":"c1","answer":"whole"}`),
 		// Interrupted after 50 ms, which the client says once the run ended.
-		text(`{"type":"run"}`), {websocket.BinaryFrame, speech}, text(`{"type":"interrupt"}`),
+		text(`{"type":"run"}`),
+		{websocket.BinaryFrame, speech},
+		text(`{"type":"interrupt"}`),
 		{websocket.BinaryFrame, speech},
 		text(`{"type":"end","status":"interrupted","conversation_id":"c1","answer":"cut"}`),
 		text(`{"type":"played","ms":50}`),
 		// Failed, and another's.
-		text(`{"type":"run"}`), {websocket.BinaryFrame, speech}, text(`{"type":"end","status":"failed","conversation_id":"c1","answer":"failed"}`),
-		text(`{"type":"run"}`), {websocket.BinaryFrame, speech}, text(`{"type":"end","status":"completed","conversation_id":"theirs","answer":"theirs"}`),
+		text(`{"type":"run"}`),
+		{websocket.BinaryFrame, speech},
+		text(`{"type":"end","status":"failed","conversation_id":"c1","answer":"failed"}`),
+		text(`{"type":"run"}`),
+		{websocket.BinaryFrame, speech},
+		text(`{"type":"end","status":"completed","conversation_id":"theirs","answer":"theirs"}`),
 	} {
 		if err := rawFrames.Send(c, fr); err != nil {
 			t.Fatal(err)

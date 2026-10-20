@@ -68,14 +68,12 @@ class VoiceEngineInfo(_message.Message):
     def __init__(self, id: _Optional[str] = ..., name: _Optional[str] = ..., service: _Optional[str] = ..., enabled: _Optional[bool] = ..., languages: _Optional[_Iterable[str]] = ..., hints: _Optional[bool] = ..., ready: _Optional[bool] = ...) -> None: ...
 
 class VoiceTurnSettings(_message.Message):
-    __slots__ = ("commit_delay", "longest_pause", "idle")
-    COMMIT_DELAY_FIELD_NUMBER: _ClassVar[int]
+    __slots__ = ("longest_pause", "idle")
     LONGEST_PAUSE_FIELD_NUMBER: _ClassVar[int]
     IDLE_FIELD_NUMBER: _ClassVar[int]
-    commit_delay: _duration_pb2.Duration
     longest_pause: _duration_pb2.Duration
     idle: _duration_pb2.Duration
-    def __init__(self, commit_delay: _Optional[_Union[datetime.timedelta, _duration_pb2.Duration, _Mapping]] = ..., longest_pause: _Optional[_Union[datetime.timedelta, _duration_pb2.Duration, _Mapping]] = ..., idle: _Optional[_Union[datetime.timedelta, _duration_pb2.Duration, _Mapping]] = ...) -> None: ...
+    def __init__(self, longest_pause: _Optional[_Union[datetime.timedelta, _duration_pb2.Duration, _Mapping]] = ..., idle: _Optional[_Union[datetime.timedelta, _duration_pb2.Duration, _Mapping]] = ...) -> None: ...
 
 class OpenVoiceSessionRequest(_message.Message):
     __slots__ = ("session_id", "language", "mode", "recognizer", "voice", "hints", "turns", "session_token", "context_json")

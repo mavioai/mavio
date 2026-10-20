@@ -136,6 +136,26 @@ pub type OwnedStreamAgentMessageResponseView = ::buffa::view::OwnedView<
         'static,
     >,
 >;
+///Shorthand for `OwnedView<SteerAgentMessageRequestView<'static>>`.
+pub type OwnedSteerAgentMessageRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::plugin::v1::__buffa::view::SteerAgentMessageRequestView<'static>,
+>;
+///Shorthand for `OwnedView<SteerAgentMessageResponseView<'static>>`.
+pub type OwnedSteerAgentMessageResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::plugin::v1::__buffa::view::SteerAgentMessageResponseView<
+        'static,
+    >,
+>;
+///Shorthand for `OwnedView<AbortAgentMessageRequestView<'static>>`.
+pub type OwnedAbortAgentMessageRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::plugin::v1::__buffa::view::AbortAgentMessageRequestView<'static>,
+>;
+///Shorthand for `OwnedView<AbortAgentMessageResponseView<'static>>`.
+pub type OwnedAbortAgentMessageResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::plugin::v1::__buffa::view::AbortAgentMessageResponseView<
+        'static,
+    >,
+>;
 ///Shorthand for `OwnedView<DeleteAgentSessionRequestView<'static>>`.
 pub type OwnedDeleteAgentSessionRequestView = ::buffa::view::OwnedView<
     crate::proto::mavio::plugin::v1::__buffa::view::DeleteAgentSessionRequestView<
@@ -744,6 +764,78 @@ for crate::proto::mavio::plugin::v1::__buffa::view::StreamAgentMessageResponseVi
 impl ::connectrpc::Encodable<crate::proto::mavio::plugin::v1::StreamAgentMessageResponse>
 for ::buffa::view::OwnedView<
     crate::proto::mavio::plugin::v1::__buffa::view::StreamAgentMessageResponseView<
+        'static,
+    >,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::plugin::v1::SteerAgentMessageResponse>
+for crate::proto::mavio::plugin::v1::__buffa::view::SteerAgentMessageResponseView<'_> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::plugin::v1::SteerAgentMessageResponse>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::plugin::v1::__buffa::view::SteerAgentMessageResponseView<
+        'static,
+    >,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::plugin::v1::AbortAgentMessageResponse>
+for crate::proto::mavio::plugin::v1::__buffa::view::AbortAgentMessageResponseView<'_> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::plugin::v1::AbortAgentMessageResponse>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::plugin::v1::__buffa::view::AbortAgentMessageResponseView<
         'static,
     >,
 > {
@@ -2836,6 +2928,18 @@ pub const AGENT_SESSION_SERVICE_STREAM_AGENT_MESSAGE_SPEC: ::connectrpc::Spec = 
         ::connectrpc::StreamType::ServerStream,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
+/// Static [`Spec`](::connectrpc::Spec) for the `SteerAgentMessage` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const AGENT_SESSION_SERVICE_STEER_AGENT_MESSAGE_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.plugin.v1.AgentSessionService/SteerAgentMessage",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
+/// Static [`Spec`](::connectrpc::Spec) for the `AbortAgentMessage` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const AGENT_SESSION_SERVICE_ABORT_AGENT_MESSAGE_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.plugin.v1.AgentSessionService/AbortAgentMessage",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
 /// Static [`Spec`](::connectrpc::Spec) for the `DeleteAgentSession` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
 pub const AGENT_SESSION_SERVICE_DELETE_AGENT_SESSION_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
         "/mavio.plugin.v1.AgentSessionService/DeleteAgentSession",
@@ -3051,6 +3155,55 @@ pub trait AgentSessionService: Send + Sync + 'static {
                     crate::proto::mavio::plugin::v1::StreamAgentMessageResponse,
                 > + Send + use<Self>,
             >,
+        >,
+    > + Send;
+    /// SteerAgentMessage adds a message to the conversation's run in
+    /// progress, which the model reads at the run's next boundary; it fails
+    /// with failed_precondition when no run is in progress.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn steer_agent_message<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::plugin::v1::SteerAgentMessageRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::plugin::v1::SteerAgentMessageResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// AbortAgentMessage aborts the conversation's run in progress, whose
+    /// message fails; nothing when none is.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn abort_agent_message<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::plugin::v1::AbortAgentMessageRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::plugin::v1::AbortAgentMessageResponse,
+            > + Send + use<'a, Self>,
         >,
     > + Send;
     /// DeleteAgentSession deletes a conversation.
@@ -3421,6 +3574,64 @@ impl<S: AgentSessionService> AgentSessionServiceExt for S {
             .with_spec(AGENT_SESSION_SERVICE_STREAM_AGENT_MESSAGE_SPEC)
             .route_view(
                 AGENT_SESSION_SERVICE_SERVICE_NAME,
+                "SteerAgentMessage",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::plugin::v1::__buffa::view::SteerAgentMessageRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::plugin::v1::SteerAgentMessageRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.steer_agent_message(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::plugin::v1::SteerAgentMessageResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(AGENT_SESSION_SERVICE_STEER_AGENT_MESSAGE_SPEC)
+            .route_view(
+                AGENT_SESSION_SERVICE_SERVICE_NAME,
+                "AbortAgentMessage",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::plugin::v1::__buffa::view::AbortAgentMessageRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::plugin::v1::AbortAgentMessageRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.abort_agent_message(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::plugin::v1::AbortAgentMessageResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(AGENT_SESSION_SERVICE_ABORT_AGENT_MESSAGE_SPEC)
+            .route_view(
+                AGENT_SESSION_SERVICE_SERVICE_NAME,
                 "DeleteAgentSession",
                 {
                     let svc = ::std::sync::Arc::clone(&self);
@@ -3736,6 +3947,18 @@ impl<T: AgentSessionService> ::connectrpc::Dispatcher for AgentSessionServiceSer
                         .with_spec(AGENT_SESSION_SERVICE_STREAM_AGENT_MESSAGE_SPEC),
                 )
             }
+            "SteerAgentMessage" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
+                        .with_spec(AGENT_SESSION_SERVICE_STEER_AGENT_MESSAGE_SPEC),
+                )
+            }
+            "AbortAgentMessage" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
+                        .with_spec(AGENT_SESSION_SERVICE_ABORT_AGENT_MESSAGE_SPEC),
+                )
+            }
             "DeleteAgentSession" => {
                 Some(
                     ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
@@ -3885,6 +4108,50 @@ impl<T: AgentSessionService> ::connectrpc::Dispatcher for AgentSessionServiceSer
                         .await?
                         .encode::<
                             crate::proto::mavio::plugin::v1::SendAgentMessageResponse,
+                        >(format)
+                })
+            }
+            "SteerAgentMessage" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::plugin::v1::SteerAgentMessageRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::plugin::v1::__buffa::view::SteerAgentMessageRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::plugin::v1::SteerAgentMessageRequest,
+                    >::from_parts(&req, &body);
+                    svc.steer_agent_message(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::plugin::v1::SteerAgentMessageResponse,
+                        >(format)
+                })
+            }
+            "AbortAgentMessage" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::plugin::v1::AbortAgentMessageRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::plugin::v1::__buffa::view::AbortAgentMessageRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::plugin::v1::AbortAgentMessageRequest,
+                    >::from_parts(&req, &body);
+                    svc.abort_agent_message(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::plugin::v1::AbortAgentMessageResponse,
                         >(format)
                 })
             }
@@ -4442,6 +4709,96 @@ where
                 &self.transport,
                 &self.config,
                 AGENT_SESSION_SERVICE_STREAM_AGENT_MESSAGE_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the SteerAgentMessage RPC. Sends a request to /mavio.plugin.v1.AgentSessionService/SteerAgentMessage.
+    pub async fn steer_agent_message(
+        &self,
+        request: crate::proto::mavio::plugin::v1::SteerAgentMessageRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::plugin::v1::__buffa::view::SteerAgentMessageResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.steer_agent_message_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the SteerAgentMessage RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn steer_agent_message_with_options(
+        &self,
+        request: crate::proto::mavio::plugin::v1::SteerAgentMessageRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::plugin::v1::__buffa::view::SteerAgentMessageResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                AGENT_SESSION_SERVICE_STEER_AGENT_MESSAGE_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the AbortAgentMessage RPC. Sends a request to /mavio.plugin.v1.AgentSessionService/AbortAgentMessage.
+    pub async fn abort_agent_message(
+        &self,
+        request: crate::proto::mavio::plugin::v1::AbortAgentMessageRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::plugin::v1::__buffa::view::AbortAgentMessageResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.abort_agent_message_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the AbortAgentMessage RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn abort_agent_message_with_options(
+        &self,
+        request: crate::proto::mavio::plugin::v1::AbortAgentMessageRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::plugin::v1::__buffa::view::AbortAgentMessageResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                AGENT_SESSION_SERVICE_ABORT_AGENT_MESSAGE_SPEC
                     .with_origin(::connectrpc::SpecOrigin::Client),
                 request,
                 options,

@@ -602,11 +602,98 @@ public nonisolated struct Mavio_Assistant_V1_AskRequest: @unchecked Sendable {
     set {_uniqueStorage()._failedActions = newValue}
   }
 
+  /// Names the run for SteerAsk and AbortAsk, unique among the device's
+  /// runs in progress. A run with an ID holds its effects, the tools and
+  /// client actions that change something, for the commit delay of the
+  /// assistant settings, and drops them when steered (docs/assistant.md
+  /// §8.4).
+  public var runID: String {
+    get {_storage._runID ?? String()}
+    set {_uniqueStorage()._runID = newValue}
+  }
+  /// Returns true if `runID` has been explicitly set.
+  public var hasRunID: Bool {_storage._runID != nil}
+  /// Clears the value of `runID`. Subsequent reads from it will return its default value.
+  public mutating func clearRunID() {_uniqueStorage()._runID = nil}
+
   public var unknownFields = SwiftProtobuf.UnknownStorage()
 
   public init() {}
 
   fileprivate var _storage = _StorageClass.defaultInstance
+}
+
+public nonisolated struct Mavio_Assistant_V1_SteerAskRequest: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  public var runID: String {
+    get {_runID ?? String()}
+    set {_runID = newValue}
+  }
+  /// Returns true if `runID` has been explicitly set.
+  public var hasRunID: Bool {self._runID != nil}
+  /// Clears the value of `runID`. Subsequent reads from it will return its default value.
+  public mutating func clearRunID() {self._runID = nil}
+
+  /// What the user went on to say.
+  public var text: String {
+    get {_text ?? String()}
+    set {_text = newValue}
+  }
+  /// Returns true if `text` has been explicitly set.
+  public var hasText: Bool {self._text != nil}
+  /// Clears the value of `text`. Subsequent reads from it will return its default value.
+  public mutating func clearText() {self._text = nil}
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+
+  fileprivate var _runID: String? = nil
+  fileprivate var _text: String? = nil
+}
+
+public nonisolated struct Mavio_Assistant_V1_SteerAskResponse: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+}
+
+public nonisolated struct Mavio_Assistant_V1_AbortAskRequest: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  public var runID: String {
+    get {_runID ?? String()}
+    set {_runID = newValue}
+  }
+  /// Returns true if `runID` has been explicitly set.
+  public var hasRunID: Bool {self._runID != nil}
+  /// Clears the value of `runID`. Subsequent reads from it will return its default value.
+  public mutating func clearRunID() {self._runID = nil}
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+
+  fileprivate var _runID: String? = nil
+}
+
+public nonisolated struct Mavio_Assistant_V1_AbortAskResponse: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
 }
 
 /// AskContext is where the request is made.
@@ -1389,6 +1476,16 @@ public nonisolated struct Mavio_Assistant_V1_Done: Sendable {
   /// Clears the value of `notUnderstood`. Subsequent reads from it will return its default value.
   public mutating func clearNotUnderstood() {self._notUnderstood = nil}
 
+  /// The run was aborted.
+  public var cancelled: Bool {
+    get {_cancelled ?? false}
+    set {_cancelled = newValue}
+  }
+  /// Returns true if `cancelled` has been explicitly set.
+  public var hasCancelled: Bool {self._cancelled != nil}
+  /// Clears the value of `cancelled`. Subsequent reads from it will return its default value.
+  public mutating func clearCancelled() {self._cancelled = nil}
+
   public var unknownFields = SwiftProtobuf.UnknownStorage()
 
   public init() {}
@@ -1399,6 +1496,7 @@ public nonisolated struct Mavio_Assistant_V1_Done: Sendable {
   fileprivate var _confirmation: Bool? = nil
   fileprivate var _results: Int32? = nil
   fileprivate var _notUnderstood: Bool? = nil
+  fileprivate var _cancelled: Bool? = nil
 }
 
 public nonisolated struct Mavio_Assistant_V1_StartVoiceSessionRequest: @unchecked Sendable {
@@ -2256,7 +2354,7 @@ nonisolated extension Mavio_Assistant_V1_VoiceEngine: SwiftProtobuf.Message, Swi
 
 nonisolated extension Mavio_Assistant_V1_AskRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".AskRequest"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}text\0\u{1}intent\0\u{1}context\0\u{1}spoken\0\u{1}answer\0\u{1}choice\0\u{3}failed_actions\0\u{b}speech_id\0\u{c}\u{8}\u{1}")
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}text\0\u{1}intent\0\u{1}context\0\u{1}spoken\0\u{1}answer\0\u{1}choice\0\u{3}failed_actions\0\u{4}\u{2}run_id\0\u{b}speech_id\0\u{c}\u{8}\u{1}")
 
   fileprivate class _StorageClass {
     var _text: String? = nil
@@ -2266,6 +2364,7 @@ nonisolated extension Mavio_Assistant_V1_AskRequest: SwiftProtobuf.Message, Swif
     var _answer: Mavio_Assistant_V1_ConfirmationAnswer? = nil
     var _choice: String? = nil
     var _failedActions: [String] = []
+    var _runID: String? = nil
 
       // This property is used as the initial default value for new instances of the type.
       // The type itself is protecting the reference to its storage via CoW semantics.
@@ -2283,6 +2382,7 @@ nonisolated extension Mavio_Assistant_V1_AskRequest: SwiftProtobuf.Message, Swif
       _answer = source._answer
       _choice = source._choice
       _failedActions = source._failedActions
+      _runID = source._runID
     }
   }
 
@@ -2308,6 +2408,7 @@ nonisolated extension Mavio_Assistant_V1_AskRequest: SwiftProtobuf.Message, Swif
         case 5: try { try decoder.decodeSingularMessageField(value: &_storage._answer) }()
         case 6: try { try decoder.decodeSingularStringField(value: &_storage._choice) }()
         case 7: try { try decoder.decodeRepeatedStringField(value: &_storage._failedActions) }()
+        case 9: try { try decoder.decodeSingularStringField(value: &_storage._runID) }()
         default: break
         }
       }
@@ -2341,6 +2442,9 @@ nonisolated extension Mavio_Assistant_V1_AskRequest: SwiftProtobuf.Message, Swif
       if !_storage._failedActions.isEmpty {
         try visitor.visitRepeatedStringField(value: _storage._failedActions, fieldNumber: 7)
       }
+      try { if let v = _storage._runID {
+        try visitor.visitSingularStringField(value: v, fieldNumber: 9)
+      } }()
     }
     try unknownFields.traverse(visitor: &visitor)
   }
@@ -2357,10 +2461,122 @@ nonisolated extension Mavio_Assistant_V1_AskRequest: SwiftProtobuf.Message, Swif
         if _storage._answer != rhs_storage._answer {return false}
         if _storage._choice != rhs_storage._choice {return false}
         if _storage._failedActions != rhs_storage._failedActions {return false}
+        if _storage._runID != rhs_storage._runID {return false}
         return true
       }
       if !storagesAreEqual {return false}
     }
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Mavio_Assistant_V1_SteerAskRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".SteerAskRequest"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}run_id\0\u{1}text\0")
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularStringField(value: &self._runID) }()
+      case 2: try { try decoder.decodeSingularStringField(value: &self._text) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    try { if let v = self._runID {
+      try visitor.visitSingularStringField(value: v, fieldNumber: 1)
+    } }()
+    try { if let v = self._text {
+      try visitor.visitSingularStringField(value: v, fieldNumber: 2)
+    } }()
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Mavio_Assistant_V1_SteerAskRequest, rhs: Mavio_Assistant_V1_SteerAskRequest) -> Bool {
+    if lhs._runID != rhs._runID {return false}
+    if lhs._text != rhs._text {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Mavio_Assistant_V1_SteerAskResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".SteerAskResponse"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap()
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    // Load everything into unknown fields
+    while try decoder.nextFieldNumber() != nil {}
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Mavio_Assistant_V1_SteerAskResponse, rhs: Mavio_Assistant_V1_SteerAskResponse) -> Bool {
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Mavio_Assistant_V1_AbortAskRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".AbortAskRequest"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}run_id\0")
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularStringField(value: &self._runID) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    try { if let v = self._runID {
+      try visitor.visitSingularStringField(value: v, fieldNumber: 1)
+    } }()
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Mavio_Assistant_V1_AbortAskRequest, rhs: Mavio_Assistant_V1_AbortAskRequest) -> Bool {
+    if lhs._runID != rhs._runID {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Mavio_Assistant_V1_AbortAskResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".AbortAskResponse"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap()
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    // Load everything into unknown fields
+    while try decoder.nextFieldNumber() != nil {}
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Mavio_Assistant_V1_AbortAskResponse, rhs: Mavio_Assistant_V1_AbortAskResponse) -> Bool {
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
@@ -3155,7 +3371,7 @@ nonisolated extension Mavio_Assistant_V1_Confirmation: SwiftProtobuf.Message, Sw
 
 nonisolated extension Mavio_Assistant_V1_Done: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".Done"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}answer\0\u{1}language\0\u{3}conversation_id\0\u{1}confirmation\0\u{1}results\0\u{3}not_understood\0")
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}answer\0\u{1}language\0\u{3}conversation_id\0\u{1}confirmation\0\u{1}results\0\u{3}not_understood\0\u{1}cancelled\0")
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -3169,6 +3385,7 @@ nonisolated extension Mavio_Assistant_V1_Done: SwiftProtobuf.Message, SwiftProto
       case 4: try { try decoder.decodeSingularBoolField(value: &self._confirmation) }()
       case 5: try { try decoder.decodeSingularInt32Field(value: &self._results) }()
       case 6: try { try decoder.decodeSingularBoolField(value: &self._notUnderstood) }()
+      case 7: try { try decoder.decodeSingularBoolField(value: &self._cancelled) }()
       default: break
       }
     }
@@ -3197,6 +3414,9 @@ nonisolated extension Mavio_Assistant_V1_Done: SwiftProtobuf.Message, SwiftProto
     try { if let v = self._notUnderstood {
       try visitor.visitSingularBoolField(value: v, fieldNumber: 6)
     } }()
+    try { if let v = self._cancelled {
+      try visitor.visitSingularBoolField(value: v, fieldNumber: 7)
+    } }()
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -3207,6 +3427,7 @@ nonisolated extension Mavio_Assistant_V1_Done: SwiftProtobuf.Message, SwiftProto
     if lhs._confirmation != rhs._confirmation {return false}
     if lhs._results != rhs._results {return false}
     if lhs._notUnderstood != rhs._notUnderstood {return false}
+    if lhs._cancelled != rhs._cancelled {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

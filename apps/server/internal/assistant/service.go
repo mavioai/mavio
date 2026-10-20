@@ -89,6 +89,8 @@ type Service struct {
 	calls map[string]callResult
 	// turns are the AI path's running turns by conversation.
 	turns map[string]*aiTurn
+	// runs are the runs a voice session can steer and abort.
+	runs  map[runKey]*run
 	voice voices
 	rec   *recorder
 	// keeping are the answers' speech being kept.
@@ -114,7 +116,7 @@ func New(cfg Config) *Service {
 	}
 	s := &Service{
 		cfg: cfg, log: cfg.Logger, now: cfg.Now,
-		dialogs: map[core.ID]*dialog{}, calls: map[string]callResult{}, turns: map[string]*aiTurn{},
+		dialogs: map[core.ID]*dialog{}, calls: map[string]callResult{}, turns: map[string]*aiTurn{}, runs: map[runKey]*run{},
 		voice: voices{byURL: map[string]*voiceSession{}, byToken: map[string]*voiceSession{}}, rec: newRecorder(cfg.SpeechDir, cfg.FFmpeg, cfg.Logger),
 	}
 	s.tool = map[string]*tool{}
@@ -191,8 +193,6 @@ func (s *Service) GetAssistant(ctx context.Context, req *assistantv1.GetAssistan
 	}
 	return resp, nil
 }
-
-
 
 // answerLanguage picks the language of answers: the grammar's when it matched,
 // else the context's first, else English.

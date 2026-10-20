@@ -432,6 +432,22 @@ pub use self::__buffa::view::AddAgentMessagesResponseView;
 #[doc(inline)]
 pub use self::__buffa::view::AddAgentMessagesResponseOwnedView;
 #[doc(inline)]
+pub use self::__buffa::view::SteerAgentMessageRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::SteerAgentMessageRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::SteerAgentMessageResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::SteerAgentMessageResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::AbortAgentMessageRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::AbortAgentMessageRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::AbortAgentMessageResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::AbortAgentMessageResponseOwnedView;
+#[doc(inline)]
 pub use self::__buffa::view::EndAgentSessionRequestView;
 #[doc(inline)]
 pub use self::__buffa::view::EndAgentSessionRequestOwnedView;

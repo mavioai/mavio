@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-var opus, aac, mp3, wavFormat = audioFormats[0], audioFormats[1], audioFormats[2], audioFormats[4]
+var opus, mp3, wavFormat = audioFormats[0], audioFormats[2], audioFormats[4]
 
 func TestRecorderKeepsSpeechWithItsAnswer(t *testing.T) {
 	dir := t.TempDir()

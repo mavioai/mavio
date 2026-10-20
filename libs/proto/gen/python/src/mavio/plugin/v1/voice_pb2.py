@@ -27,7 +27,7 @@ from google.protobuf import duration_pb2 as google_dot_protobuf_dot_duration__pb
 from mavio.plugin.v1 import settings_pb2 as mavio_dot_plugin_dot_v1_dot_settings__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1bmavio/plugin/v1/voice.proto\x12\x0fmavio.plugin.v1\x1a\x1b\x62uf/validate/validate.proto\x1a\x1egoogle/protobuf/duration.proto\x1a\x1emavio/plugin/v1/settings.proto\"\x1a\n\x18ListVoiceServicesRequest\"\xd8\x01\n\x19ListVoiceServicesResponse\x12=\n\x08services\x18\x01 \x03(\x0b\x32!.mavio.plugin.v1.VoiceServiceInfoR\x08services\x12\x42\n\x0brecognizers\x18\x02 \x03(\x0b\x32 .mavio.plugin.v1.VoiceEngineInfoR\x0brecognizers\x12\x38\n\x06voices\x18\x03 \x03(\x0b\x32 .mavio.plugin.v1.VoiceEngineInfoR\x06voices\"\xa4\x01\n\x10VoiceServiceInfo\x12\x12\n\x04name\x18\x01 \x01(\tR\x04name\x12!\n\x0c\x64isplay_name\x18\x02 \x01(\tR\x0b\x64isplayName\x12\x1e\n\nrecognizes\x18\x03 \x01(\x08R\nrecognizes\x12\x39\n\x08settings\x18\x04 \x03(\x0b\x32\x1d.mavio.plugin.v1.SettingFieldR\x08settings\"\xb3\x01\n\x0fVoiceEngineInfo\x12\x0e\n\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n\x04name\x18\x02 \x01(\tR\x04name\x12\x18\n\x07service\x18\x03 \x01(\tR\x07service\x12\x18\n\x07\x65nabled\x18\x04 \x01(\x08R\x07\x65nabled\x12\x1c\n\tlanguages\x18\x05 \x03(\tR\tlanguages\x12\x14\n\x05hints\x18\x06 \x01(\x08R\x05hints\x12\x14\n\x05ready\x18\x07 \x01(\x08R\x05ready\"\xc0\x01\n\x11VoiceTurnSettings\x12<\n\x0c\x63ommit_delay\x18\x01 \x01(\x0b\x32\x19.google.protobuf.DurationR\x0b\x63ommitDelay\x12>\n\rlongest_pause\x18\x02 \x01(\x0b\x32\x19.google.protobuf.DurationR\x0clongestPause\x12-\n\x04idle\x18\x03 \x01(\x0b\x32\x19.google.protobuf.DurationR\x04idle\"\xf8\x02\n\x17OpenVoiceSessionRequest\x12;\n\nsession_id\x18\x01 \x01(\tB\x1c\xbaH\x19r\x17\x32\x15^[A-Za-z0-9_-]{8,64}$R\tsessionId\x12\x1a\n\x08language\x18\x02 \x01(\tR\x08language\x12.\n\x04mode\x18\x03 \x01(\x0e\x32\x1a.mavio.plugin.v1.VoiceModeR\x04mode\x12\x1e\n\nrecognizer\x18\x04 \x01(\tR\nrecognizer\x12\x14\n\x05voice\x18\x05 \x01(\tR\x05voice\x12\x14\n\x05hints\x18\x06 \x03(\tR\x05hints\x12\x38\n\x05turns\x18\x07 \x01(\x0b\x32\".mavio.plugin.v1.VoiceTurnSettingsR\x05turns\x12+\n\rsession_token\x18\x08 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\x0csessionToken\x12!\n\x0c\x63ontext_json\x18\t \x01(\tR\x0b\x63ontextJson\".\n\x18OpenVoiceSessionResponse\x12\x12\n\x04path\x18\x01 \x01(\tR\x04path\"A\n\x18\x43loseVoiceSessionRequest\x12%\n\nsession_id\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\tsessionId\"\x1b\n\x19\x43loseVoiceSessionResponse*{\n\tVoiceMode\x12\x1a\n\x16VOICE_MODE_UNSPECIFIED\x10\x00\x12\x1b\n\x17VOICE_MODE_CONVERSATION\x10\x01\x12\x1b\n\x17VOICE_MODE_PUSH_TO_TALK\x10\x02\x12\x18\n\x14VOICE_MODE_DICTATION\x10\x03\x32\xdb\x02\n\x13VoiceSessionService\x12o\n\x11ListVoiceServices\x12).mavio.plugin.v1.ListVoiceServicesRequest\x1a*.mavio.plugin.v1.ListVoiceServicesResponse\"\x03\x90\x02\x01\x12g\n\x10OpenVoiceSession\x12(.mavio.plugin.v1.OpenVoiceSessionRequest\x1a).mavio.plugin.v1.OpenVoiceSessionResponse\x12j\n\x11\x43loseVoiceSession\x12).mavio.plugin.v1.CloseVoiceSessionRequest\x1a*.mavio.plugin.v1.CloseVoiceSessionResponseB\xc4\x01\n\x13\x63om.mavio.plugin.v1B\nVoiceProtoP\x01ZCgithub.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1;pluginv1\xa2\x02\x03MPX\xaa\x02\x0fMavio.Plugin.V1\xca\x02\x0fMavio\\Plugin\\V1\xe2\x02\x1bMavio\\Plugin\\V1\\GPBMetadata\xea\x02\x11Mavio::Plugin::V1b\x08\x65\x64itionsp\xe8\x07')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1bmavio/plugin/v1/voice.proto\x12\x0fmavio.plugin.v1\x1a\x1b\x62uf/validate/validate.proto\x1a\x1egoogle/protobuf/duration.proto\x1a\x1emavio/plugin/v1/settings.proto\"\x1a\n\x18ListVoiceServicesRequest\"\xd8\x01\n\x19ListVoiceServicesResponse\x12=\n\x08services\x18\x01 \x03(\x0b\x32!.mavio.plugin.v1.VoiceServiceInfoR\x08services\x12\x42\n\x0brecognizers\x18\x02 \x03(\x0b\x32 .mavio.plugin.v1.VoiceEngineInfoR\x0brecognizers\x12\x38\n\x06voices\x18\x03 \x03(\x0b\x32 .mavio.plugin.v1.VoiceEngineInfoR\x06voices\"\xa4\x01\n\x10VoiceServiceInfo\x12\x12\n\x04name\x18\x01 \x01(\tR\x04name\x12!\n\x0c\x64isplay_name\x18\x02 \x01(\tR\x0b\x64isplayName\x12\x1e\n\nrecognizes\x18\x03 \x01(\x08R\nrecognizes\x12\x39\n\x08settings\x18\x04 \x03(\x0b\x32\x1d.mavio.plugin.v1.SettingFieldR\x08settings\"\xb3\x01\n\x0fVoiceEngineInfo\x12\x0e\n\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n\x04name\x18\x02 \x01(\tR\x04name\x12\x18\n\x07service\x18\x03 \x01(\tR\x07service\x12\x18\n\x07\x65nabled\x18\x04 \x01(\x08R\x07\x65nabled\x12\x1c\n\tlanguages\x18\x05 \x03(\tR\tlanguages\x12\x14\n\x05hints\x18\x06 \x01(\x08R\x05hints\x12\x14\n\x05ready\x18\x07 \x01(\x08R\x05ready\"\x96\x01\n\x11VoiceTurnSettings\x12>\n\rlongest_pause\x18\x02 \x01(\x0b\x32\x19.google.protobuf.DurationR\x0clongestPause\x12-\n\x04idle\x18\x03 \x01(\x0b\x32\x19.google.protobuf.DurationR\x04idleJ\x04\x08\x01\x10\x02R\x0c\x63ommit_delay\"\xf8\x02\n\x17OpenVoiceSessionRequest\x12;\n\nsession_id\x18\x01 \x01(\tB\x1c\xbaH\x19r\x17\x32\x15^[A-Za-z0-9_-]{8,64}$R\tsessionId\x12\x1a\n\x08language\x18\x02 \x01(\tR\x08language\x12.\n\x04mode\x18\x03 \x01(\x0e\x32\x1a.mavio.plugin.v1.VoiceModeR\x04mode\x12\x1e\n\nrecognizer\x18\x04 \x01(\tR\nrecognizer\x12\x14\n\x05voice\x18\x05 \x01(\tR\x05voice\x12\x14\n\x05hints\x18\x06 \x03(\tR\x05hints\x12\x38\n\x05turns\x18\x07 \x01(\x0b\x32\".mavio.plugin.v1.VoiceTurnSettingsR\x05turns\x12+\n\rsession_token\x18\x08 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\x0csessionToken\x12!\n\x0c\x63ontext_json\x18\t \x01(\tR\x0b\x63ontextJson\".\n\x18OpenVoiceSessionResponse\x12\x12\n\x04path\x18\x01 \x01(\tR\x04path\"A\n\x18\x43loseVoiceSessionRequest\x12%\n\nsession_id\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\tsessionId\"\x1b\n\x19\x43loseVoiceSessionResponse*{\n\tVoiceMode\x12\x1a\n\x16VOICE_MODE_UNSPECIFIED\x10\x00\x12\x1b\n\x17VOICE_MODE_CONVERSATION\x10\x01\x12\x1b\n\x17VOICE_MODE_PUSH_TO_TALK\x10\x02\x12\x18\n\x14VOICE_MODE_DICTATION\x10\x03\x32\xdb\x02\n\x13VoiceSessionService\x12o\n\x11ListVoiceServices\x12).mavio.plugin.v1.ListVoiceServicesRequest\x1a*.mavio.plugin.v1.ListVoiceServicesResponse\"\x03\x90\x02\x01\x12g\n\x10OpenVoiceSession\x12(.mavio.plugin.v1.OpenVoiceSessionRequest\x1a).mavio.plugin.v1.OpenVoiceSessionResponse\x12j\n\x11\x43loseVoiceSession\x12).mavio.plugin.v1.CloseVoiceSessionRequest\x1a*.mavio.plugin.v1.CloseVoiceSessionResponseB\xc4\x01\n\x13\x63om.mavio.plugin.v1B\nVoiceProtoP\x01ZCgithub.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1;pluginv1\xa2\x02\x03MPX\xaa\x02\x0fMavio.Plugin.V1\xca\x02\x0fMavio\\Plugin\\V1\xe2\x02\x1bMavio\\Plugin\\V1\\GPBMetadata\xea\x02\x11Mavio::Plugin::V1b\x08\x65\x64itionsp\xe8\x07')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -43,8 +43,8 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_CLOSEVOICESESSIONREQUEST'].fields_by_name['session_id']._serialized_options = b'\272H\003\310\001\001'
   _globals['_VOICESESSIONSERVICE'].methods_by_name['ListVoiceServices']._loaded_options = None
   _globals['_VOICESESSIONSERVICE'].methods_by_name['ListVoiceServices']._serialized_options = b'\220\002\001'
-  _globals['_VOICEMODE']._serialized_start=1455
-  _globals['_VOICEMODE']._serialized_end=1578
+  _globals['_VOICEMODE']._serialized_start=1413
+  _globals['_VOICEMODE']._serialized_end=1536
   _globals['_LISTVOICESERVICESREQUEST']._serialized_start=141
   _globals['_LISTVOICESERVICESREQUEST']._serialized_end=167
   _globals['_LISTVOICESERVICESRESPONSE']._serialized_start=170
@@ -54,15 +54,15 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_VOICEENGINEINFO']._serialized_start=556
   _globals['_VOICEENGINEINFO']._serialized_end=735
   _globals['_VOICETURNSETTINGS']._serialized_start=738
-  _globals['_VOICETURNSETTINGS']._serialized_end=930
-  _globals['_OPENVOICESESSIONREQUEST']._serialized_start=933
-  _globals['_OPENVOICESESSIONREQUEST']._serialized_end=1309
-  _globals['_OPENVOICESESSIONRESPONSE']._serialized_start=1311
-  _globals['_OPENVOICESESSIONRESPONSE']._serialized_end=1357
-  _globals['_CLOSEVOICESESSIONREQUEST']._serialized_start=1359
-  _globals['_CLOSEVOICESESSIONREQUEST']._serialized_end=1424
-  _globals['_CLOSEVOICESESSIONRESPONSE']._serialized_start=1426
-  _globals['_CLOSEVOICESESSIONRESPONSE']._serialized_end=1453
-  _globals['_VOICESESSIONSERVICE']._serialized_start=1581
-  _globals['_VOICESESSIONSERVICE']._serialized_end=1928
+  _globals['_VOICETURNSETTINGS']._serialized_end=888
+  _globals['_OPENVOICESESSIONREQUEST']._serialized_start=891
+  _globals['_OPENVOICESESSIONREQUEST']._serialized_end=1267
+  _globals['_OPENVOICESESSIONRESPONSE']._serialized_start=1269
+  _globals['_OPENVOICESESSIONRESPONSE']._serialized_end=1315
+  _globals['_CLOSEVOICESESSIONREQUEST']._serialized_start=1317
+  _globals['_CLOSEVOICESESSIONREQUEST']._serialized_end=1382
+  _globals['_CLOSEVOICESESSIONRESPONSE']._serialized_start=1384
+  _globals['_CLOSEVOICESESSIONRESPONSE']._serialized_end=1411
+  _globals['_VOICESESSIONSERVICE']._serialized_start=1539
+  _globals['_VOICESESSIONSERVICE']._serialized_end=1886
 # @@protoc_insertion_point(module_scope)

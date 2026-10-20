@@ -74,6 +74,11 @@ type turn struct {
 	sendMu sync.Mutex
 	// remembered is a turn the fast path adds to the conversation itself.
 	remembered bool
+	// steerable is the run the turn is an attempt of; nil for a request
+	// without a run ID.
+	steerable *run
+	// conv is the conversation the AI path asked.
+	conv string
 }
 
 func (t *turn) emit(r *assistantv1.AskResponse) {
@@ -89,6 +94,9 @@ func (s *Service) Ask(ctx context.Context, req *assistantv1.AskRequest, stream *
 	p, set, err := s.caller(ctx)
 	if err != nil {
 		return err
+	}
+	if req.GetRunId() != "" {
+		return s.askRun(ctx, p, set, req, stream.Send)
 	}
 	t := s.newTurn(ctx, p, set, req, stream.Send)
 	if err := t.run(); err != nil {

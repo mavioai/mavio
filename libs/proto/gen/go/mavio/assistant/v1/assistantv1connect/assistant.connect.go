@@ -38,6 +38,12 @@ const (
 	AssistantServiceGetAssistantProcedure = "/mavio.assistant.v1.AssistantService/GetAssistant"
 	// AssistantServiceAskProcedure is the fully-qualified name of the AssistantService's Ask RPC.
 	AssistantServiceAskProcedure = "/mavio.assistant.v1.AssistantService/Ask"
+	// AssistantServiceSteerAskProcedure is the fully-qualified name of the AssistantService's SteerAsk
+	// RPC.
+	AssistantServiceSteerAskProcedure = "/mavio.assistant.v1.AssistantService/SteerAsk"
+	// AssistantServiceAbortAskProcedure is the fully-qualified name of the AssistantService's AbortAsk
+	// RPC.
+	AssistantServiceAbortAskProcedure = "/mavio.assistant.v1.AssistantService/AbortAsk"
 	// AssistantServiceStartVoiceSessionProcedure is the fully-qualified name of the AssistantService's
 	// StartVoiceSession RPC.
 	AssistantServiceStartVoiceSessionProcedure = "/mavio.assistant.v1.AssistantService/StartVoiceSession"
@@ -75,6 +81,13 @@ type AssistantServiceClient interface {
 	GetAssistant(context.Context, *v1.GetAssistantRequest) (*v1.GetAssistantResponse, error)
 	// Ask carries a request out and streams what happens, ending with Done.
 	Ask(context.Context, *v1.AskRequest) (*connect.ServerStreamForClient[v1.AskResponse], error)
+	// SteerAsk adds what the user went on to say to a run in progress, which
+	// drops the effects it holds and carries out the joined request; it
+	// fails with failed_precondition when the run has ended.
+	SteerAsk(context.Context, *v1.SteerAskRequest) (*v1.SteerAskResponse, error)
+	// AbortAsk stops a run in progress, which ends cancelled; what was done
+	// stays done.
+	AbortAsk(context.Context, *v1.AbortAskRequest) (*v1.AbortAskResponse, error)
 	// StartVoiceSession opens a voice session for the device and returns
 	// the WebSocket URL the client connects to within a minute; it fails
 	// with failed_precondition when no voice session plugin is ready.
@@ -124,6 +137,18 @@ func NewAssistantServiceClient(httpClient connect.HTTPClient, baseURL string, op
 			httpClient,
 			baseURL+AssistantServiceAskProcedure,
 			connect.WithSchema(assistantServiceMethods.ByName("Ask")),
+			connect.WithClientOptions(opts...),
+		),
+		steerAsk: connect.NewClient[v1.SteerAskRequest, v1.SteerAskResponse](
+			httpClient,
+			baseURL+AssistantServiceSteerAskProcedure,
+			connect.WithSchema(assistantServiceMethods.ByName("SteerAsk")),
+			connect.WithClientOptions(opts...),
+		),
+		abortAsk: connect.NewClient[v1.AbortAskRequest, v1.AbortAskResponse](
+			httpClient,
+			baseURL+AssistantServiceAbortAskProcedure,
+			connect.WithSchema(assistantServiceMethods.ByName("AbortAsk")),
 			connect.WithClientOptions(opts...),
 		),
 		startVoiceSession: connect.NewClient[v1.StartVoiceSessionRequest, v1.StartVoiceSessionResponse](
@@ -191,6 +216,8 @@ func NewAssistantServiceClient(httpClient connect.HTTPClient, baseURL string, op
 type assistantServiceClient struct {
 	getAssistant                *connect.Client[v1.GetAssistantRequest, v1.GetAssistantResponse]
 	ask                         *connect.Client[v1.AskRequest, v1.AskResponse]
+	steerAsk                    *connect.Client[v1.SteerAskRequest, v1.SteerAskResponse]
+	abortAsk                    *connect.Client[v1.AbortAskRequest, v1.AbortAskResponse]
 	startVoiceSession           *connect.Client[v1.StartVoiceSessionRequest, v1.StartVoiceSessionResponse]
 	listAssistantConversations  *connect.Client[v1.ListAssistantConversationsRequest, v1.ListAssistantConversationsResponse]
 	getAssistantConversation    *connect.Client[v1.GetAssistantConversationRequest, v1.GetAssistantConversationResponse]
@@ -214,6 +241,24 @@ func (c *assistantServiceClient) GetAssistant(ctx context.Context, req *v1.GetAs
 // Ask calls mavio.assistant.v1.AssistantService.Ask.
 func (c *assistantServiceClient) Ask(ctx context.Context, req *v1.AskRequest) (*connect.ServerStreamForClient[v1.AskResponse], error) {
 	return c.ask.CallServerStream(ctx, connect.NewRequest(req))
+}
+
+// SteerAsk calls mavio.assistant.v1.AssistantService.SteerAsk.
+func (c *assistantServiceClient) SteerAsk(ctx context.Context, req *v1.SteerAskRequest) (*v1.SteerAskResponse, error) {
+	response, err := c.steerAsk.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
+// AbortAsk calls mavio.assistant.v1.AssistantService.AbortAsk.
+func (c *assistantServiceClient) AbortAsk(ctx context.Context, req *v1.AbortAskRequest) (*v1.AbortAskResponse, error) {
+	response, err := c.abortAsk.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
 }
 
 // StartVoiceSession calls mavio.assistant.v1.AssistantService.StartVoiceSession.
@@ -306,6 +351,13 @@ type AssistantServiceHandler interface {
 	GetAssistant(context.Context, *v1.GetAssistantRequest) (*v1.GetAssistantResponse, error)
 	// Ask carries a request out and streams what happens, ending with Done.
 	Ask(context.Context, *v1.AskRequest, *connect.ServerStream[v1.AskResponse]) error
+	// SteerAsk adds what the user went on to say to a run in progress, which
+	// drops the effects it holds and carries out the joined request; it
+	// fails with failed_precondition when the run has ended.
+	SteerAsk(context.Context, *v1.SteerAskRequest) (*v1.SteerAskResponse, error)
+	// AbortAsk stops a run in progress, which ends cancelled; what was done
+	// stays done.
+	AbortAsk(context.Context, *v1.AbortAskRequest) (*v1.AbortAskResponse, error)
 	// StartVoiceSession opens a voice session for the device and returns
 	// the WebSocket URL the client connects to within a minute; it fails
 	// with failed_precondition when no voice session plugin is ready.
@@ -351,6 +403,18 @@ func NewAssistantServiceHandler(svc AssistantServiceHandler, opts ...connect.Han
 		AssistantServiceAskProcedure,
 		svc.Ask,
 		connect.WithSchema(assistantServiceMethods.ByName("Ask")),
+		connect.WithHandlerOptions(opts...),
+	)
+	assistantServiceSteerAskHandler := connect.NewUnaryHandlerSimple(
+		AssistantServiceSteerAskProcedure,
+		svc.SteerAsk,
+		connect.WithSchema(assistantServiceMethods.ByName("SteerAsk")),
+		connect.WithHandlerOptions(opts...),
+	)
+	assistantServiceAbortAskHandler := connect.NewUnaryHandlerSimple(
+		AssistantServiceAbortAskProcedure,
+		svc.AbortAsk,
+		connect.WithSchema(assistantServiceMethods.ByName("AbortAsk")),
 		connect.WithHandlerOptions(opts...),
 	)
 	assistantServiceStartVoiceSessionHandler := connect.NewUnaryHandlerSimple(
@@ -417,6 +481,10 @@ func NewAssistantServiceHandler(svc AssistantServiceHandler, opts ...connect.Han
 			assistantServiceGetAssistantHandler.ServeHTTP(w, r)
 		case AssistantServiceAskProcedure:
 			assistantServiceAskHandler.ServeHTTP(w, r)
+		case AssistantServiceSteerAskProcedure:
+			assistantServiceSteerAskHandler.ServeHTTP(w, r)
+		case AssistantServiceAbortAskProcedure:
+			assistantServiceAbortAskHandler.ServeHTTP(w, r)
 		case AssistantServiceStartVoiceSessionProcedure:
 			assistantServiceStartVoiceSessionHandler.ServeHTTP(w, r)
 		case AssistantServiceListAssistantConversationsProcedure:
@@ -450,6 +518,14 @@ func (UnimplementedAssistantServiceHandler) GetAssistant(context.Context, *v1.Ge
 
 func (UnimplementedAssistantServiceHandler) Ask(context.Context, *v1.AskRequest, *connect.ServerStream[v1.AskResponse]) error {
 	return connect.NewError(connect.CodeUnimplemented, errors.New("mavio.assistant.v1.AssistantService.Ask is not implemented"))
+}
+
+func (UnimplementedAssistantServiceHandler) SteerAsk(context.Context, *v1.SteerAskRequest) (*v1.SteerAskResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.assistant.v1.AssistantService.SteerAsk is not implemented"))
+}
+
+func (UnimplementedAssistantServiceHandler) AbortAsk(context.Context, *v1.AbortAskRequest) (*v1.AbortAskResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.assistant.v1.AssistantService.AbortAsk is not implemented"))
 }
 
 func (UnimplementedAssistantServiceHandler) StartVoiceSession(context.Context, *v1.StartVoiceSessionRequest) (*v1.StartVoiceSessionResponse, error) {

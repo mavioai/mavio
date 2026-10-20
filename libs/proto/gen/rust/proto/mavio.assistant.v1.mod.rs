@@ -56,6 +56,22 @@ pub use self::__buffa::view::AskRequestView;
 #[doc(inline)]
 pub use self::__buffa::view::AskRequestOwnedView;
 #[doc(inline)]
+pub use self::__buffa::view::SteerAskRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::SteerAskRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::SteerAskResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::SteerAskResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::AbortAskRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::AbortAskRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::AbortAskResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::AbortAskResponseOwnedView;
+#[doc(inline)]
 pub use self::__buffa::view::AskContextView;
 #[doc(inline)]
 pub use self::__buffa::view::AskContextOwnedView;

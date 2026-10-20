@@ -7253,6 +7253,315 @@ func (b0 AddAgentMessagesResponse_builder) Build() *AddAgentMessagesResponse {
 	return m0
 }
 
+type SteerAgentMessageRequest struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_SessionId   *string                `protobuf:"bytes,1,opt,name=session_id,json=sessionId"`
+	xxx_hidden_Text        *string                `protobuf:"bytes,2,opt,name=text"`
+	xxx_hidden_RequestId   *string                `protobuf:"bytes,3,opt,name=request_id,json=requestId"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *SteerAgentMessageRequest) Reset() {
+	*x = SteerAgentMessageRequest{}
+	mi := &file_mavio_plugin_v1_ai_proto_msgTypes[53]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SteerAgentMessageRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SteerAgentMessageRequest) ProtoMessage() {}
+
+func (x *SteerAgentMessageRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_plugin_v1_ai_proto_msgTypes[53]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *SteerAgentMessageRequest) GetSessionId() string {
+	if x != nil {
+		if x.xxx_hidden_SessionId != nil {
+			return *x.xxx_hidden_SessionId
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *SteerAgentMessageRequest) GetText() string {
+	if x != nil {
+		if x.xxx_hidden_Text != nil {
+			return *x.xxx_hidden_Text
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *SteerAgentMessageRequest) GetRequestId() string {
+	if x != nil {
+		if x.xxx_hidden_RequestId != nil {
+			return *x.xxx_hidden_RequestId
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *SteerAgentMessageRequest) SetSessionId(v string) {
+	x.xxx_hidden_SessionId = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 3)
+}
+
+func (x *SteerAgentMessageRequest) SetText(v string) {
+	x.xxx_hidden_Text = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 3)
+}
+
+func (x *SteerAgentMessageRequest) SetRequestId(v string) {
+	x.xxx_hidden_RequestId = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 3)
+}
+
+func (x *SteerAgentMessageRequest) HasSessionId() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *SteerAgentMessageRequest) HasText() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
+}
+
+func (x *SteerAgentMessageRequest) HasRequestId() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 2)
+}
+
+func (x *SteerAgentMessageRequest) ClearSessionId() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_SessionId = nil
+}
+
+func (x *SteerAgentMessageRequest) ClearText() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
+	x.xxx_hidden_Text = nil
+}
+
+func (x *SteerAgentMessageRequest) ClearRequestId() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 2)
+	x.xxx_hidden_RequestId = nil
+}
+
+type SteerAgentMessageRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	SessionId *string
+	Text      *string
+	// Makes a retried message the same message instead of a second one.
+	RequestId *string
+}
+
+func (b0 SteerAgentMessageRequest_builder) Build() *SteerAgentMessageRequest {
+	m0 := &SteerAgentMessageRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.SessionId != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 3)
+		x.xxx_hidden_SessionId = b.SessionId
+	}
+	if b.Text != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 3)
+		x.xxx_hidden_Text = b.Text
+	}
+	if b.RequestId != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 3)
+		x.xxx_hidden_RequestId = b.RequestId
+	}
+	return m0
+}
+
+type SteerAgentMessageResponse struct {
+	state         protoimpl.MessageState `protogen:"opaque.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SteerAgentMessageResponse) Reset() {
+	*x = SteerAgentMessageResponse{}
+	mi := &file_mavio_plugin_v1_ai_proto_msgTypes[54]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SteerAgentMessageResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SteerAgentMessageResponse) ProtoMessage() {}
+
+func (x *SteerAgentMessageResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_plugin_v1_ai_proto_msgTypes[54]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+type SteerAgentMessageResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+}
+
+func (b0 SteerAgentMessageResponse_builder) Build() *SteerAgentMessageResponse {
+	m0 := &SteerAgentMessageResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	return m0
+}
+
+type AbortAgentMessageRequest struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_SessionId   *string                `protobuf:"bytes,1,opt,name=session_id,json=sessionId"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *AbortAgentMessageRequest) Reset() {
+	*x = AbortAgentMessageRequest{}
+	mi := &file_mavio_plugin_v1_ai_proto_msgTypes[55]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AbortAgentMessageRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AbortAgentMessageRequest) ProtoMessage() {}
+
+func (x *AbortAgentMessageRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_plugin_v1_ai_proto_msgTypes[55]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *AbortAgentMessageRequest) GetSessionId() string {
+	if x != nil {
+		if x.xxx_hidden_SessionId != nil {
+			return *x.xxx_hidden_SessionId
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *AbortAgentMessageRequest) SetSessionId(v string) {
+	x.xxx_hidden_SessionId = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 1)
+}
+
+func (x *AbortAgentMessageRequest) HasSessionId() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *AbortAgentMessageRequest) ClearSessionId() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_SessionId = nil
+}
+
+type AbortAgentMessageRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	SessionId *string
+}
+
+func (b0 AbortAgentMessageRequest_builder) Build() *AbortAgentMessageRequest {
+	m0 := &AbortAgentMessageRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.SessionId != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 1)
+		x.xxx_hidden_SessionId = b.SessionId
+	}
+	return m0
+}
+
+type AbortAgentMessageResponse struct {
+	state         protoimpl.MessageState `protogen:"opaque.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AbortAgentMessageResponse) Reset() {
+	*x = AbortAgentMessageResponse{}
+	mi := &file_mavio_plugin_v1_ai_proto_msgTypes[56]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AbortAgentMessageResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AbortAgentMessageResponse) ProtoMessage() {}
+
+func (x *AbortAgentMessageResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_plugin_v1_ai_proto_msgTypes[56]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+type AbortAgentMessageResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+}
+
+func (b0 AbortAgentMessageResponse_builder) Build() *AbortAgentMessageResponse {
+	m0 := &AbortAgentMessageResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	return m0
+}
+
 type EndAgentSessionRequest struct {
 	state                  protoimpl.MessageState `protogen:"opaque.v1"`
 	xxx_hidden_Id          *string                `protobuf:"bytes,1,opt,name=id"`
@@ -7264,7 +7573,7 @@ type EndAgentSessionRequest struct {
 
 func (x *EndAgentSessionRequest) Reset() {
 	*x = EndAgentSessionRequest{}
-	mi := &file_mavio_plugin_v1_ai_proto_msgTypes[53]
+	mi := &file_mavio_plugin_v1_ai_proto_msgTypes[57]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -7276,7 +7585,7 @@ func (x *EndAgentSessionRequest) String() string {
 func (*EndAgentSessionRequest) ProtoMessage() {}
 
 func (x *EndAgentSessionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_plugin_v1_ai_proto_msgTypes[53]
+	mi := &file_mavio_plugin_v1_ai_proto_msgTypes[57]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -7339,7 +7648,7 @@ type EndAgentSessionResponse struct {
 
 func (x *EndAgentSessionResponse) Reset() {
 	*x = EndAgentSessionResponse{}
-	mi := &file_mavio_plugin_v1_ai_proto_msgTypes[54]
+	mi := &file_mavio_plugin_v1_ai_proto_msgTypes[58]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -7351,7 +7660,7 @@ func (x *EndAgentSessionResponse) String() string {
 func (*EndAgentSessionResponse) ProtoMessage() {}
 
 func (x *EndAgentSessionResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_plugin_v1_ai_proto_msgTypes[54]
+	mi := &file_mavio_plugin_v1_ai_proto_msgTypes[58]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -7382,7 +7691,7 @@ type WatchAgentToolCallsRequest struct {
 
 func (x *WatchAgentToolCallsRequest) Reset() {
 	*x = WatchAgentToolCallsRequest{}
-	mi := &file_mavio_plugin_v1_ai_proto_msgTypes[55]
+	mi := &file_mavio_plugin_v1_ai_proto_msgTypes[59]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -7394,7 +7703,7 @@ func (x *WatchAgentToolCallsRequest) String() string {
 func (*WatchAgentToolCallsRequest) ProtoMessage() {}
 
 func (x *WatchAgentToolCallsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_plugin_v1_ai_proto_msgTypes[55]
+	mi := &file_mavio_plugin_v1_ai_proto_msgTypes[59]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -7426,7 +7735,7 @@ type WatchAgentToolCallsResponse struct {
 
 func (x *WatchAgentToolCallsResponse) Reset() {
 	*x = WatchAgentToolCallsResponse{}
-	mi := &file_mavio_plugin_v1_ai_proto_msgTypes[56]
+	mi := &file_mavio_plugin_v1_ai_proto_msgTypes[60]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -7438,7 +7747,7 @@ func (x *WatchAgentToolCallsResponse) String() string {
 func (*WatchAgentToolCallsResponse) ProtoMessage() {}
 
 func (x *WatchAgentToolCallsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_plugin_v1_ai_proto_msgTypes[56]
+	mi := &file_mavio_plugin_v1_ai_proto_msgTypes[60]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -7499,7 +7808,7 @@ type SubmitAgentToolResultRequest struct {
 
 func (x *SubmitAgentToolResultRequest) Reset() {
 	*x = SubmitAgentToolResultRequest{}
-	mi := &file_mavio_plugin_v1_ai_proto_msgTypes[57]
+	mi := &file_mavio_plugin_v1_ai_proto_msgTypes[61]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -7511,7 +7820,7 @@ func (x *SubmitAgentToolResultRequest) String() string {
 func (*SubmitAgentToolResultRequest) ProtoMessage() {}
 
 func (x *SubmitAgentToolResultRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_plugin_v1_ai_proto_msgTypes[57]
+	mi := &file_mavio_plugin_v1_ai_proto_msgTypes[61]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -7670,7 +7979,7 @@ type SubmitAgentToolResultResponse struct {
 
 func (x *SubmitAgentToolResultResponse) Reset() {
 	*x = SubmitAgentToolResultResponse{}
-	mi := &file_mavio_plugin_v1_ai_proto_msgTypes[58]
+	mi := &file_mavio_plugin_v1_ai_proto_msgTypes[62]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -7682,7 +7991,7 @@ func (x *SubmitAgentToolResultResponse) String() string {
 func (*SubmitAgentToolResultResponse) ProtoMessage() {}
 
 func (x *SubmitAgentToolResultResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_plugin_v1_ai_proto_msgTypes[58]
+	mi := &file_mavio_plugin_v1_ai_proto_msgTypes[62]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -7716,7 +8025,7 @@ type ListAgentMemoriesRequest struct {
 
 func (x *ListAgentMemoriesRequest) Reset() {
 	*x = ListAgentMemoriesRequest{}
-	mi := &file_mavio_plugin_v1_ai_proto_msgTypes[59]
+	mi := &file_mavio_plugin_v1_ai_proto_msgTypes[63]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -7728,7 +8037,7 @@ func (x *ListAgentMemoriesRequest) String() string {
 func (*ListAgentMemoriesRequest) ProtoMessage() {}
 
 func (x *ListAgentMemoriesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_plugin_v1_ai_proto_msgTypes[59]
+	mi := &file_mavio_plugin_v1_ai_proto_msgTypes[63]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -7792,7 +8101,7 @@ type ListAgentMemoriesResponse struct {
 
 func (x *ListAgentMemoriesResponse) Reset() {
 	*x = ListAgentMemoriesResponse{}
-	mi := &file_mavio_plugin_v1_ai_proto_msgTypes[60]
+	mi := &file_mavio_plugin_v1_ai_proto_msgTypes[64]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -7804,7 +8113,7 @@ func (x *ListAgentMemoriesResponse) String() string {
 func (*ListAgentMemoriesResponse) ProtoMessage() {}
 
 func (x *ListAgentMemoriesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_plugin_v1_ai_proto_msgTypes[60]
+	mi := &file_mavio_plugin_v1_ai_proto_msgTypes[64]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -7855,7 +8164,7 @@ type PutAgentMemoryRequest struct {
 
 func (x *PutAgentMemoryRequest) Reset() {
 	*x = PutAgentMemoryRequest{}
-	mi := &file_mavio_plugin_v1_ai_proto_msgTypes[61]
+	mi := &file_mavio_plugin_v1_ai_proto_msgTypes[65]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -7867,7 +8176,7 @@ func (x *PutAgentMemoryRequest) String() string {
 func (*PutAgentMemoryRequest) ProtoMessage() {}
 
 func (x *PutAgentMemoryRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_plugin_v1_ai_proto_msgTypes[61]
+	mi := &file_mavio_plugin_v1_ai_proto_msgTypes[65]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -7996,7 +8305,7 @@ type PutAgentMemoryResponse struct {
 
 func (x *PutAgentMemoryResponse) Reset() {
 	*x = PutAgentMemoryResponse{}
-	mi := &file_mavio_plugin_v1_ai_proto_msgTypes[62]
+	mi := &file_mavio_plugin_v1_ai_proto_msgTypes[66]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -8008,7 +8317,7 @@ func (x *PutAgentMemoryResponse) String() string {
 func (*PutAgentMemoryResponse) ProtoMessage() {}
 
 func (x *PutAgentMemoryResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_plugin_v1_ai_proto_msgTypes[62]
+	mi := &file_mavio_plugin_v1_ai_proto_msgTypes[66]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -8067,7 +8376,7 @@ type DeleteAgentMemoriesRequest struct {
 
 func (x *DeleteAgentMemoriesRequest) Reset() {
 	*x = DeleteAgentMemoriesRequest{}
-	mi := &file_mavio_plugin_v1_ai_proto_msgTypes[63]
+	mi := &file_mavio_plugin_v1_ai_proto_msgTypes[67]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -8079,7 +8388,7 @@ func (x *DeleteAgentMemoriesRequest) String() string {
 func (*DeleteAgentMemoriesRequest) ProtoMessage() {}
 
 func (x *DeleteAgentMemoriesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_plugin_v1_ai_proto_msgTypes[63]
+	mi := &file_mavio_plugin_v1_ai_proto_msgTypes[67]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -8156,7 +8465,7 @@ type DeleteAgentMemoriesResponse struct {
 
 func (x *DeleteAgentMemoriesResponse) Reset() {
 	*x = DeleteAgentMemoriesResponse{}
-	mi := &file_mavio_plugin_v1_ai_proto_msgTypes[64]
+	mi := &file_mavio_plugin_v1_ai_proto_msgTypes[68]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -8168,7 +8477,7 @@ func (x *DeleteAgentMemoriesResponse) String() string {
 func (*DeleteAgentMemoriesResponse) ProtoMessage() {}
 
 func (x *DeleteAgentMemoriesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_plugin_v1_ai_proto_msgTypes[64]
+	mi := &file_mavio_plugin_v1_ai_proto_msgTypes[68]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -8427,7 +8736,18 @@ const file_mavio_plugin_v1_ai_proto_rawDesc = "" +
 	"\bmessages\x18\x02 \x03(\v2\x1d.mavio.plugin.v1.AgentMessageB\b\xbaH\x05\x92\x01\x02\b\x01R\bmessages\x12\x1d\n" +
 	"\n" +
 	"request_id\x18\x03 \x01(\tR\trequestId\"\x1a\n" +
-	"\x18AddAgentMessagesResponse\"0\n" +
+	"\x18AddAgentMessagesResponse\"|\n" +
+	"\x18SteerAgentMessageRequest\x12%\n" +
+	"\n" +
+	"session_id\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\tsessionId\x12\x1a\n" +
+	"\x04text\x18\x02 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\x04text\x12\x1d\n" +
+	"\n" +
+	"request_id\x18\x03 \x01(\tR\trequestId\"\x1b\n" +
+	"\x19SteerAgentMessageResponse\"A\n" +
+	"\x18AbortAgentMessageRequest\x12%\n" +
+	"\n" +
+	"session_id\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\tsessionId\"\x1b\n" +
+	"\x19AbortAgentMessageResponse\"0\n" +
 	"\x16EndAgentSessionRequest\x12\x16\n" +
 	"\x02id\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\x02id\"\x19\n" +
 	"\x17EndAgentSessionResponse\"\x1c\n" +
@@ -8497,13 +8817,15 @@ const file_mavio_plugin_v1_ai_proto_rawDesc = "" +
 	"\bLogoutAi\x12 .mavio.plugin.v1.LogoutAiRequest\x1a!.mavio.plugin.v1.LogoutAiResponse\x12U\n" +
 	"\n" +
 	"CompleteAi\x12\".mavio.plugin.v1.CompleteAiRequest\x1a#.mavio.plugin.v1.CompleteAiResponse\x12Q\n" +
-	"\bStreamAi\x12 .mavio.plugin.v1.StreamAiRequest\x1a!.mavio.plugin.v1.StreamAiResponse0\x012\xaf\v\n" +
+	"\bStreamAi\x12 .mavio.plugin.v1.StreamAiRequest\x1a!.mavio.plugin.v1.StreamAiResponse0\x012\x87\r\n" +
 	"\x13AgentSessionService\x12m\n" +
 	"\x12CreateAgentSession\x12*.mavio.plugin.v1.CreateAgentSessionRequest\x1a+.mavio.plugin.v1.CreateAgentSessionResponse\x12o\n" +
 	"\x11ListAgentSessions\x12).mavio.plugin.v1.ListAgentSessionsRequest\x1a*.mavio.plugin.v1.ListAgentSessionsResponse\"\x03\x90\x02\x01\x12i\n" +
 	"\x0fGetAgentSession\x12'.mavio.plugin.v1.GetAgentSessionRequest\x1a(.mavio.plugin.v1.GetAgentSessionResponse\"\x03\x90\x02\x01\x12g\n" +
 	"\x10SendAgentMessage\x12(.mavio.plugin.v1.SendAgentMessageRequest\x1a).mavio.plugin.v1.SendAgentMessageResponse\x12o\n" +
-	"\x12StreamAgentMessage\x12*.mavio.plugin.v1.StreamAgentMessageRequest\x1a+.mavio.plugin.v1.StreamAgentMessageResponse0\x01\x12m\n" +
+	"\x12StreamAgentMessage\x12*.mavio.plugin.v1.StreamAgentMessageRequest\x1a+.mavio.plugin.v1.StreamAgentMessageResponse0\x01\x12j\n" +
+	"\x11SteerAgentMessage\x12).mavio.plugin.v1.SteerAgentMessageRequest\x1a*.mavio.plugin.v1.SteerAgentMessageResponse\x12j\n" +
+	"\x11AbortAgentMessage\x12).mavio.plugin.v1.AbortAgentMessageRequest\x1a*.mavio.plugin.v1.AbortAgentMessageResponse\x12m\n" +
 	"\x12DeleteAgentSession\x12*.mavio.plugin.v1.DeleteAgentSessionRequest\x1a+.mavio.plugin.v1.DeleteAgentSessionResponse\x12g\n" +
 	"\x10AddAgentMessages\x12(.mavio.plugin.v1.AddAgentMessagesRequest\x1a).mavio.plugin.v1.AddAgentMessagesResponse\x12d\n" +
 	"\x0fEndAgentSession\x12'.mavio.plugin.v1.EndAgentSessionRequest\x1a(.mavio.plugin.v1.EndAgentSessionResponse\x12w\n" +
@@ -8515,7 +8837,7 @@ const file_mavio_plugin_v1_ai_proto_rawDesc = "" +
 	"\x13com.mavio.plugin.v1B\aAiProtoP\x01ZCgithub.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1;pluginv1\xa2\x02\x03MPX\xaa\x02\x0fMavio.Plugin.V1\xca\x02\x0fMavio\\Plugin\\V1\xe2\x02\x1bMavio\\Plugin\\V1\\GPBMetadata\xea\x02\x11Mavio::Plugin::V1b\beditionsp\xe8\a"
 
 var file_mavio_plugin_v1_ai_proto_enumTypes = make([]protoimpl.EnumInfo, 5)
-var file_mavio_plugin_v1_ai_proto_msgTypes = make([]protoimpl.MessageInfo, 67)
+var file_mavio_plugin_v1_ai_proto_msgTypes = make([]protoimpl.MessageInfo, 71)
 var file_mavio_plugin_v1_ai_proto_goTypes = []any{
 	(AiCredential)(0),                     // 0: mavio.plugin.v1.AiCredential
 	(AiLoginState)(0),                     // 1: mavio.plugin.v1.AiLoginState
@@ -8575,21 +8897,25 @@ var file_mavio_plugin_v1_ai_proto_goTypes = []any{
 	(*DeleteAgentSessionResponse)(nil),    // 55: mavio.plugin.v1.DeleteAgentSessionResponse
 	(*AddAgentMessagesRequest)(nil),       // 56: mavio.plugin.v1.AddAgentMessagesRequest
 	(*AddAgentMessagesResponse)(nil),      // 57: mavio.plugin.v1.AddAgentMessagesResponse
-	(*EndAgentSessionRequest)(nil),        // 58: mavio.plugin.v1.EndAgentSessionRequest
-	(*EndAgentSessionResponse)(nil),       // 59: mavio.plugin.v1.EndAgentSessionResponse
-	(*WatchAgentToolCallsRequest)(nil),    // 60: mavio.plugin.v1.WatchAgentToolCallsRequest
-	(*WatchAgentToolCallsResponse)(nil),   // 61: mavio.plugin.v1.WatchAgentToolCallsResponse
-	(*SubmitAgentToolResultRequest)(nil),  // 62: mavio.plugin.v1.SubmitAgentToolResultRequest
-	(*SubmitAgentToolResultResponse)(nil), // 63: mavio.plugin.v1.SubmitAgentToolResultResponse
-	(*ListAgentMemoriesRequest)(nil),      // 64: mavio.plugin.v1.ListAgentMemoriesRequest
-	(*ListAgentMemoriesResponse)(nil),     // 65: mavio.plugin.v1.ListAgentMemoriesResponse
-	(*PutAgentMemoryRequest)(nil),         // 66: mavio.plugin.v1.PutAgentMemoryRequest
-	(*PutAgentMemoryResponse)(nil),        // 67: mavio.plugin.v1.PutAgentMemoryResponse
-	(*DeleteAgentMemoriesRequest)(nil),    // 68: mavio.plugin.v1.DeleteAgentMemoriesRequest
-	(*DeleteAgentMemoriesResponse)(nil),   // 69: mavio.plugin.v1.DeleteAgentMemoriesResponse
-	nil,                                   // 70: mavio.plugin.v1.AgentSession.LabelsEntry
-	nil,                                   // 71: mavio.plugin.v1.CreateAgentSessionRequest.LabelsEntry
-	(*timestamppb.Timestamp)(nil),         // 72: google.protobuf.Timestamp
+	(*SteerAgentMessageRequest)(nil),      // 58: mavio.plugin.v1.SteerAgentMessageRequest
+	(*SteerAgentMessageResponse)(nil),     // 59: mavio.plugin.v1.SteerAgentMessageResponse
+	(*AbortAgentMessageRequest)(nil),      // 60: mavio.plugin.v1.AbortAgentMessageRequest
+	(*AbortAgentMessageResponse)(nil),     // 61: mavio.plugin.v1.AbortAgentMessageResponse
+	(*EndAgentSessionRequest)(nil),        // 62: mavio.plugin.v1.EndAgentSessionRequest
+	(*EndAgentSessionResponse)(nil),       // 63: mavio.plugin.v1.EndAgentSessionResponse
+	(*WatchAgentToolCallsRequest)(nil),    // 64: mavio.plugin.v1.WatchAgentToolCallsRequest
+	(*WatchAgentToolCallsResponse)(nil),   // 65: mavio.plugin.v1.WatchAgentToolCallsResponse
+	(*SubmitAgentToolResultRequest)(nil),  // 66: mavio.plugin.v1.SubmitAgentToolResultRequest
+	(*SubmitAgentToolResultResponse)(nil), // 67: mavio.plugin.v1.SubmitAgentToolResultResponse
+	(*ListAgentMemoriesRequest)(nil),      // 68: mavio.plugin.v1.ListAgentMemoriesRequest
+	(*ListAgentMemoriesResponse)(nil),     // 69: mavio.plugin.v1.ListAgentMemoriesResponse
+	(*PutAgentMemoryRequest)(nil),         // 70: mavio.plugin.v1.PutAgentMemoryRequest
+	(*PutAgentMemoryResponse)(nil),        // 71: mavio.plugin.v1.PutAgentMemoryResponse
+	(*DeleteAgentMemoriesRequest)(nil),    // 72: mavio.plugin.v1.DeleteAgentMemoriesRequest
+	(*DeleteAgentMemoriesResponse)(nil),   // 73: mavio.plugin.v1.DeleteAgentMemoriesResponse
+	nil,                                   // 74: mavio.plugin.v1.AgentSession.LabelsEntry
+	nil,                                   // 75: mavio.plugin.v1.CreateAgentSessionRequest.LabelsEntry
+	(*timestamppb.Timestamp)(nil),         // 76: google.protobuf.Timestamp
 }
 var file_mavio_plugin_v1_ai_proto_depIdxs = []int32{
 	7,  // 0: mavio.plugin.v1.ListAiProvidersResponse.providers:type_name -> mavio.plugin.v1.AiProvider
@@ -8614,18 +8940,18 @@ var file_mavio_plugin_v1_ai_proto_depIdxs = []int32{
 	38, // 19: mavio.plugin.v1.CompleteAiResponse.usage:type_name -> mavio.plugin.v1.AiUsage
 	33, // 20: mavio.plugin.v1.StreamAiRequest.completion:type_name -> mavio.plugin.v1.CompleteAiRequest
 	35, // 21: mavio.plugin.v1.StreamAiResponse.done:type_name -> mavio.plugin.v1.CompleteAiResponse
-	72, // 22: mavio.plugin.v1.AgentSession.created:type_name -> google.protobuf.Timestamp
-	72, // 23: mavio.plugin.v1.AgentSession.updated:type_name -> google.protobuf.Timestamp
+	76, // 22: mavio.plugin.v1.AgentSession.created:type_name -> google.protobuf.Timestamp
+	76, // 23: mavio.plugin.v1.AgentSession.updated:type_name -> google.protobuf.Timestamp
 	38, // 24: mavio.plugin.v1.AgentSession.usage:type_name -> mavio.plugin.v1.AiUsage
-	70, // 25: mavio.plugin.v1.AgentSession.labels:type_name -> mavio.plugin.v1.AgentSession.LabelsEntry
-	72, // 26: mavio.plugin.v1.AgentToolCall.create_time:type_name -> google.protobuf.Timestamp
-	72, // 27: mavio.plugin.v1.AgentMemory.create_time:type_name -> google.protobuf.Timestamp
-	72, // 28: mavio.plugin.v1.AgentMemory.update_time:type_name -> google.protobuf.Timestamp
-	72, // 29: mavio.plugin.v1.AgentMemory.use_time:type_name -> google.protobuf.Timestamp
+	74, // 25: mavio.plugin.v1.AgentSession.labels:type_name -> mavio.plugin.v1.AgentSession.LabelsEntry
+	76, // 26: mavio.plugin.v1.AgentToolCall.create_time:type_name -> google.protobuf.Timestamp
+	76, // 27: mavio.plugin.v1.AgentMemory.create_time:type_name -> google.protobuf.Timestamp
+	76, // 28: mavio.plugin.v1.AgentMemory.update_time:type_name -> google.protobuf.Timestamp
+	76, // 29: mavio.plugin.v1.AgentMemory.use_time:type_name -> google.protobuf.Timestamp
 	3,  // 30: mavio.plugin.v1.AgentMessage.role:type_name -> mavio.plugin.v1.AiRole
-	72, // 31: mavio.plugin.v1.AgentMessage.time:type_name -> google.protobuf.Timestamp
+	76, // 31: mavio.plugin.v1.AgentMessage.time:type_name -> google.protobuf.Timestamp
 	40, // 32: mavio.plugin.v1.CreateAgentSessionRequest.tools:type_name -> mavio.plugin.v1.AgentTool
-	71, // 33: mavio.plugin.v1.CreateAgentSessionRequest.labels:type_name -> mavio.plugin.v1.CreateAgentSessionRequest.LabelsEntry
+	75, // 33: mavio.plugin.v1.CreateAgentSessionRequest.labels:type_name -> mavio.plugin.v1.CreateAgentSessionRequest.LabelsEntry
 	39, // 34: mavio.plugin.v1.CreateAgentSessionResponse.session:type_name -> mavio.plugin.v1.AgentSession
 	39, // 35: mavio.plugin.v1.ListAgentSessionsResponse.sessions:type_name -> mavio.plugin.v1.AgentSession
 	39, // 36: mavio.plugin.v1.GetAgentSessionResponse.session:type_name -> mavio.plugin.v1.AgentSession
@@ -8654,40 +8980,44 @@ var file_mavio_plugin_v1_ai_proto_depIdxs = []int32{
 	48, // 59: mavio.plugin.v1.AgentSessionService.GetAgentSession:input_type -> mavio.plugin.v1.GetAgentSessionRequest
 	50, // 60: mavio.plugin.v1.AgentSessionService.SendAgentMessage:input_type -> mavio.plugin.v1.SendAgentMessageRequest
 	52, // 61: mavio.plugin.v1.AgentSessionService.StreamAgentMessage:input_type -> mavio.plugin.v1.StreamAgentMessageRequest
-	54, // 62: mavio.plugin.v1.AgentSessionService.DeleteAgentSession:input_type -> mavio.plugin.v1.DeleteAgentSessionRequest
-	56, // 63: mavio.plugin.v1.AgentSessionService.AddAgentMessages:input_type -> mavio.plugin.v1.AddAgentMessagesRequest
-	58, // 64: mavio.plugin.v1.AgentSessionService.EndAgentSession:input_type -> mavio.plugin.v1.EndAgentSessionRequest
-	60, // 65: mavio.plugin.v1.AgentSessionService.WatchAgentToolCalls:input_type -> mavio.plugin.v1.WatchAgentToolCallsRequest
-	62, // 66: mavio.plugin.v1.AgentSessionService.SubmitAgentToolResult:input_type -> mavio.plugin.v1.SubmitAgentToolResultRequest
-	64, // 67: mavio.plugin.v1.AgentSessionService.ListAgentMemories:input_type -> mavio.plugin.v1.ListAgentMemoriesRequest
-	66, // 68: mavio.plugin.v1.AgentSessionService.PutAgentMemory:input_type -> mavio.plugin.v1.PutAgentMemoryRequest
-	68, // 69: mavio.plugin.v1.AgentSessionService.DeleteAgentMemories:input_type -> mavio.plugin.v1.DeleteAgentMemoriesRequest
-	6,  // 70: mavio.plugin.v1.AiGatewayService.ListAiProviders:output_type -> mavio.plugin.v1.ListAiProvidersResponse
-	9,  // 71: mavio.plugin.v1.AiGatewayService.ListAiModels:output_type -> mavio.plugin.v1.ListAiModelsResponse
-	13, // 72: mavio.plugin.v1.AiGatewayService.SetAiApiKey:output_type -> mavio.plugin.v1.SetAiApiKeyResponse
-	15, // 73: mavio.plugin.v1.AiGatewayService.StartAiLogin:output_type -> mavio.plugin.v1.StartAiLoginResponse
-	17, // 74: mavio.plugin.v1.AiGatewayService.GetAiLogin:output_type -> mavio.plugin.v1.GetAiLoginResponse
-	26, // 75: mavio.plugin.v1.AiGatewayService.WatchAiLogin:output_type -> mavio.plugin.v1.WatchAiLoginResponse
-	28, // 76: mavio.plugin.v1.AiGatewayService.AnswerAiLogin:output_type -> mavio.plugin.v1.AnswerAiLoginResponse
-	30, // 77: mavio.plugin.v1.AiGatewayService.CancelAiLogin:output_type -> mavio.plugin.v1.CancelAiLoginResponse
-	32, // 78: mavio.plugin.v1.AiGatewayService.LogoutAi:output_type -> mavio.plugin.v1.LogoutAiResponse
-	35, // 79: mavio.plugin.v1.AiGatewayService.CompleteAi:output_type -> mavio.plugin.v1.CompleteAiResponse
-	37, // 80: mavio.plugin.v1.AiGatewayService.StreamAi:output_type -> mavio.plugin.v1.StreamAiResponse
-	45, // 81: mavio.plugin.v1.AgentSessionService.CreateAgentSession:output_type -> mavio.plugin.v1.CreateAgentSessionResponse
-	47, // 82: mavio.plugin.v1.AgentSessionService.ListAgentSessions:output_type -> mavio.plugin.v1.ListAgentSessionsResponse
-	49, // 83: mavio.plugin.v1.AgentSessionService.GetAgentSession:output_type -> mavio.plugin.v1.GetAgentSessionResponse
-	51, // 84: mavio.plugin.v1.AgentSessionService.SendAgentMessage:output_type -> mavio.plugin.v1.SendAgentMessageResponse
-	53, // 85: mavio.plugin.v1.AgentSessionService.StreamAgentMessage:output_type -> mavio.plugin.v1.StreamAgentMessageResponse
-	55, // 86: mavio.plugin.v1.AgentSessionService.DeleteAgentSession:output_type -> mavio.plugin.v1.DeleteAgentSessionResponse
-	57, // 87: mavio.plugin.v1.AgentSessionService.AddAgentMessages:output_type -> mavio.plugin.v1.AddAgentMessagesResponse
-	59, // 88: mavio.plugin.v1.AgentSessionService.EndAgentSession:output_type -> mavio.plugin.v1.EndAgentSessionResponse
-	61, // 89: mavio.plugin.v1.AgentSessionService.WatchAgentToolCalls:output_type -> mavio.plugin.v1.WatchAgentToolCallsResponse
-	63, // 90: mavio.plugin.v1.AgentSessionService.SubmitAgentToolResult:output_type -> mavio.plugin.v1.SubmitAgentToolResultResponse
-	65, // 91: mavio.plugin.v1.AgentSessionService.ListAgentMemories:output_type -> mavio.plugin.v1.ListAgentMemoriesResponse
-	67, // 92: mavio.plugin.v1.AgentSessionService.PutAgentMemory:output_type -> mavio.plugin.v1.PutAgentMemoryResponse
-	69, // 93: mavio.plugin.v1.AgentSessionService.DeleteAgentMemories:output_type -> mavio.plugin.v1.DeleteAgentMemoriesResponse
-	70, // [70:94] is the sub-list for method output_type
-	46, // [46:70] is the sub-list for method input_type
+	58, // 62: mavio.plugin.v1.AgentSessionService.SteerAgentMessage:input_type -> mavio.plugin.v1.SteerAgentMessageRequest
+	60, // 63: mavio.plugin.v1.AgentSessionService.AbortAgentMessage:input_type -> mavio.plugin.v1.AbortAgentMessageRequest
+	54, // 64: mavio.plugin.v1.AgentSessionService.DeleteAgentSession:input_type -> mavio.plugin.v1.DeleteAgentSessionRequest
+	56, // 65: mavio.plugin.v1.AgentSessionService.AddAgentMessages:input_type -> mavio.plugin.v1.AddAgentMessagesRequest
+	62, // 66: mavio.plugin.v1.AgentSessionService.EndAgentSession:input_type -> mavio.plugin.v1.EndAgentSessionRequest
+	64, // 67: mavio.plugin.v1.AgentSessionService.WatchAgentToolCalls:input_type -> mavio.plugin.v1.WatchAgentToolCallsRequest
+	66, // 68: mavio.plugin.v1.AgentSessionService.SubmitAgentToolResult:input_type -> mavio.plugin.v1.SubmitAgentToolResultRequest
+	68, // 69: mavio.plugin.v1.AgentSessionService.ListAgentMemories:input_type -> mavio.plugin.v1.ListAgentMemoriesRequest
+	70, // 70: mavio.plugin.v1.AgentSessionService.PutAgentMemory:input_type -> mavio.plugin.v1.PutAgentMemoryRequest
+	72, // 71: mavio.plugin.v1.AgentSessionService.DeleteAgentMemories:input_type -> mavio.plugin.v1.DeleteAgentMemoriesRequest
+	6,  // 72: mavio.plugin.v1.AiGatewayService.ListAiProviders:output_type -> mavio.plugin.v1.ListAiProvidersResponse
+	9,  // 73: mavio.plugin.v1.AiGatewayService.ListAiModels:output_type -> mavio.plugin.v1.ListAiModelsResponse
+	13, // 74: mavio.plugin.v1.AiGatewayService.SetAiApiKey:output_type -> mavio.plugin.v1.SetAiApiKeyResponse
+	15, // 75: mavio.plugin.v1.AiGatewayService.StartAiLogin:output_type -> mavio.plugin.v1.StartAiLoginResponse
+	17, // 76: mavio.plugin.v1.AiGatewayService.GetAiLogin:output_type -> mavio.plugin.v1.GetAiLoginResponse
+	26, // 77: mavio.plugin.v1.AiGatewayService.WatchAiLogin:output_type -> mavio.plugin.v1.WatchAiLoginResponse
+	28, // 78: mavio.plugin.v1.AiGatewayService.AnswerAiLogin:output_type -> mavio.plugin.v1.AnswerAiLoginResponse
+	30, // 79: mavio.plugin.v1.AiGatewayService.CancelAiLogin:output_type -> mavio.plugin.v1.CancelAiLoginResponse
+	32, // 80: mavio.plugin.v1.AiGatewayService.LogoutAi:output_type -> mavio.plugin.v1.LogoutAiResponse
+	35, // 81: mavio.plugin.v1.AiGatewayService.CompleteAi:output_type -> mavio.plugin.v1.CompleteAiResponse
+	37, // 82: mavio.plugin.v1.AiGatewayService.StreamAi:output_type -> mavio.plugin.v1.StreamAiResponse
+	45, // 83: mavio.plugin.v1.AgentSessionService.CreateAgentSession:output_type -> mavio.plugin.v1.CreateAgentSessionResponse
+	47, // 84: mavio.plugin.v1.AgentSessionService.ListAgentSessions:output_type -> mavio.plugin.v1.ListAgentSessionsResponse
+	49, // 85: mavio.plugin.v1.AgentSessionService.GetAgentSession:output_type -> mavio.plugin.v1.GetAgentSessionResponse
+	51, // 86: mavio.plugin.v1.AgentSessionService.SendAgentMessage:output_type -> mavio.plugin.v1.SendAgentMessageResponse
+	53, // 87: mavio.plugin.v1.AgentSessionService.StreamAgentMessage:output_type -> mavio.plugin.v1.StreamAgentMessageResponse
+	59, // 88: mavio.plugin.v1.AgentSessionService.SteerAgentMessage:output_type -> mavio.plugin.v1.SteerAgentMessageResponse
+	61, // 89: mavio.plugin.v1.AgentSessionService.AbortAgentMessage:output_type -> mavio.plugin.v1.AbortAgentMessageResponse
+	55, // 90: mavio.plugin.v1.AgentSessionService.DeleteAgentSession:output_type -> mavio.plugin.v1.DeleteAgentSessionResponse
+	57, // 91: mavio.plugin.v1.AgentSessionService.AddAgentMessages:output_type -> mavio.plugin.v1.AddAgentMessagesResponse
+	63, // 92: mavio.plugin.v1.AgentSessionService.EndAgentSession:output_type -> mavio.plugin.v1.EndAgentSessionResponse
+	65, // 93: mavio.plugin.v1.AgentSessionService.WatchAgentToolCalls:output_type -> mavio.plugin.v1.WatchAgentToolCallsResponse
+	67, // 94: mavio.plugin.v1.AgentSessionService.SubmitAgentToolResult:output_type -> mavio.plugin.v1.SubmitAgentToolResultResponse
+	69, // 95: mavio.plugin.v1.AgentSessionService.ListAgentMemories:output_type -> mavio.plugin.v1.ListAgentMemoriesResponse
+	71, // 96: mavio.plugin.v1.AgentSessionService.PutAgentMemory:output_type -> mavio.plugin.v1.PutAgentMemoryResponse
+	73, // 97: mavio.plugin.v1.AgentSessionService.DeleteAgentMemories:output_type -> mavio.plugin.v1.DeleteAgentMemoriesResponse
+	72, // [72:98] is the sub-list for method output_type
+	46, // [46:72] is the sub-list for method input_type
 	46, // [46:46] is the sub-list for extension type_name
 	46, // [46:46] is the sub-list for extension extendee
 	0,  // [0:46] is the sub-list for field type_name
@@ -8719,7 +9049,7 @@ func file_mavio_plugin_v1_ai_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_mavio_plugin_v1_ai_proto_rawDesc), len(file_mavio_plugin_v1_ai_proto_rawDesc)),
 			NumEnums:      5,
-			NumMessages:   67,
+			NumMessages:   71,
 			NumExtensions: 0,
 			NumServices:   2,
 		},
