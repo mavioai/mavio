@@ -1,4 +1,4 @@
-"""Fakes of the assistant and of a voice."""
+"""Fakes of the assistant, of a voice and of Whisper's container."""
 
 import asyncio
 from collections.abc import AsyncGenerator
@@ -8,6 +8,7 @@ from pipecat.frames.frames import Frame, TTSAudioRawFrame
 from pipecat.services.tts_service import TTSService
 
 from mavio_pipecat.ask import AskError
+from mavio_pipecat.speaches import Speaches, SpeachesError
 
 
 class FakeAsk:
@@ -64,3 +65,23 @@ class FakeTTS(TTSService):
 
     async def run_tts(self, text: str, context_id: str) -> AsyncGenerator[Frame | None]:
         yield TTSAudioRawFrame(b"\x00\x00" * 2400, self.sample_rate, 1, context_id=context_id)
+
+
+class FakeSpeaches(Speaches):
+    """Whisper's container at an address, holding the models given and
+    downloading others at once; failing them when fail is set."""
+
+    def __init__(self, *models: str, address: str = "http://whisper:8000", fail: bool = False):
+        super().__init__(address=address)
+        self.models = set(models)
+        self.downloaded: list[str] = []
+        self.fail = fail
+
+    def has(self, model: str) -> bool:
+        return bool(self.address) and model in self.models
+
+    async def download(self, model: str) -> None:
+        if self.fail:
+            raise SpeachesError(f"download {model}: 503")
+        self.downloaded.append(model)
+        self.models.add(model)

@@ -1,25 +1,83 @@
+import json
 from pathlib import Path
 
+import httpx
+import pytest
+from fakes import FakeSpeaches
+
 from mavio_pipecat.models import Models, kokoro_model, whisper_model
+from mavio_pipecat.speaches import Speaches, SpeachesError
+
+_TINY = "Systran/faster-whisper-tiny"
+
+
+def _kokoro(models: Models) -> None:
+    files = models.kokoro()
+    files.model.parent.mkdir(parents=True)
+    files.model.write_bytes(b"x")
+    files.voices.write_bytes(b"x")
 
 
 def test_ready(tmp_path: Path):
     models = Models(tmp_path)
     assert models.ready(None)
     assert not models.ready(kokoro_model())
-    assert not models.ready(whisper_model("tiny"))
+    assert not models.ready(whisper_model(_TINY)), "ready without its container"
     files = models.kokoro()
     files.model.parent.mkdir(parents=True)
     files.model.write_bytes(b"x")
     assert not models.ready(kokoro_model()), "ready with one of its two files"
     files.voices.write_bytes(b"x")
     assert models.ready(kokoro_model())
+    assert Models(tmp_path, FakeSpeaches(_TINY)).ready(whisper_model(_TINY))
 
 
 async def test_download_skips_what_is_ready(tmp_path: Path):
-    models = Models(tmp_path)
-    files = models.kokoro()
-    files.model.parent.mkdir(parents=True)
-    files.model.write_bytes(b"x")
-    files.voices.write_bytes(b"x")
-    assert await models.download([kokoro_model(), kokoro_model()]) == []
+    speaches = FakeSpeaches(_TINY)
+    models = Models(tmp_path, speaches)
+    _kokoro(models)
+    assert await models.download([kokoro_model(), kokoro_model(), whisper_model(_TINY)]) == []
+    assert speaches.downloaded == []
+
+
+async def test_download_asks_the_container(tmp_path: Path):
+    speaches = FakeSpeaches()
+    models = Models(tmp_path, speaches)
+    _kokoro(models)
+    got = await models.download([whisper_model(_TINY), kokoro_model()])
+    assert got == [f"whisper {_TINY}"], f"downloaded = {got}"
+    assert speaches.downloaded == [_TINY]
+
+
+async def test_a_failed_download_leaves_the_others(tmp_path: Path):
+    models = Models(tmp_path, FakeSpeaches(fail=True))
+    _kokoro(models)
+    with pytest.raises(ExceptionGroup) as e:
+        await models.download([whisper_model(_TINY), whisper_model("Systran/faster-whisper-base")])
+    assert len(e.value.exceptions) == 2
+
+
+async def test_refresh_reads_the_address():
+    asked: list[httpx.Request] = []
+    containers: list[dict[str, object]] = [
+        {"name": "other", "address": "http://other:1"},
+        {"name": "whisper", "address": "http://127.0.0.1:49153/", "state": "CONTAINER_STATE_READY"},
+    ]
+
+    def serve(request: httpx.Request) -> httpx.Response:
+        asked.append(request)
+        return httpx.Response(200, json={"containers": containers})
+
+    host = httpx.AsyncClient(base_url="http://host", transport=httpx.MockTransport(serve))
+    speaches = Speaches(host)
+    with pytest.raises(SpeachesError):
+        _ = speaches.base_url
+    await speaches.refresh()
+    assert asked[0].url.path == "/mavio.plugin.v1.HostService/ListContainers"
+    assert json.loads(asked[0].content) == {}
+    assert (speaches.base_url, speaches.state) == ("http://127.0.0.1:49153/v1", "ready")
+    containers[1] = {"name": "whisper", "state": "CONTAINER_STATE_UNAVAILABLE"}
+    await speaches.refresh()
+    assert not speaches.address and not speaches.has(_TINY)
+    with pytest.raises(SpeachesError, match="unavailable"):
+        _ = speaches.base_url

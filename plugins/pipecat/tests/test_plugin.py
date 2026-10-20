@@ -179,7 +179,9 @@ async def test_lists_the_configured_engines(tmp_path: Path):
 async def test_tasks_download_what_is_missing(tmp_path: Path):
     speech = _speech(tmp_path)
     missing = [str(r) for r in speech.missing()]
-    assert missing == ["whisper large-v3-turbo", "kokoro"], f"missing = {missing}"
+    assert missing == ["whisper deepdml/faster-whisper-large-v3-turbo-ct2", "kokoro"], (
+        f"missing = {missing}"
+    )
     with pytest.raises(ConnectError):
         await Tasks(speech).run_task(task_pb2.RunTaskRequest(task_id="nothing"), _CTX)
 

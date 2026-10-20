@@ -2,7 +2,7 @@
   "id": "dev.mavio.pipecat",
   "name": "Pipecat",
   "version": "0.1.0",
-  "description": "Voice sessions of the assistant on Pipecat, and subtitles transcribed from videos' audio: turns detected by Silero VAD and Smart Turn, recognized and spoken by local models (faster-whisper, Kokoro) or cloud services (OpenAI-compatible, Deepgram, Cartesia, ElevenLabs).",
+  "description": "Voice sessions of the assistant on Pipecat, and subtitles transcribed from videos' audio: turns detected by Silero VAD and Smart Turn, recognized and spoken by local models (Whisper on speaches, Kokoro) or cloud services (OpenAI-compatible, Deepgram, Cartesia, ElevenLabs).",
   "author": "Mavio",
   "homepage": "https://github.com/mavioai/mavio",
   "license": "GPL-3.0-only",
@@ -21,6 +21,26 @@
       "timeout": "21600s"
     }
   ],
-  "configSchema": "{\"$schema\":\"https://json-schema.org/draft/2020-12/schema\",\"type\":\"object\",\"properties\":{\"recognizers\":{\"title\":\"Recognizers\",\"type\":\"array\",\"description\":\"What hears the user in voice sessions\",\"items\":{\"type\":\"object\",\"required\":[\"id\",\"service\",\"name\"],\"properties\":{\"id\":{\"title\":\"ID\",\"type\":\"string\",\"format\":\"uuid\",\"readOnly\":true},\"service\":{\"title\":\"Service\",\"type\":\"string\",\"minLength\":1,\"description\":\"The recognition service\",\"x-mavio-options\":{\"source\":\"voice-recognizers\",\"settings\":\"settings\",\"name\":\"name\"}},\"name\":{\"title\":\"Name\",\"type\":\"string\",\"minLength\":1},\"enabled\":{\"title\":\"Enabled\",\"type\":\"boolean\",\"default\":true},\"settings\":{\"title\":\"Settings\",\"type\":\"object\",\"description\":\"The settings the service takes\"}},\"additionalProperties\":false}},\"voices\":{\"title\":\"Voices\",\"type\":\"array\",\"description\":\"What speaks the assistant's answers\",\"items\":{\"type\":\"object\",\"required\":[\"id\",\"service\",\"name\"],\"properties\":{\"id\":{\"title\":\"ID\",\"type\":\"string\",\"format\":\"uuid\",\"readOnly\":true},\"service\":{\"title\":\"Service\",\"type\":\"string\",\"minLength\":1,\"description\":\"The synthesis service\",\"x-mavio-options\":{\"source\":\"voice-synthesizers\",\"settings\":\"settings\",\"name\":\"name\"}},\"name\":{\"title\":\"Name\",\"type\":\"string\",\"minLength\":1},\"enabled\":{\"title\":\"Enabled\",\"type\":\"boolean\",\"default\":true},\"settings\":{\"title\":\"Settings\",\"type\":\"object\",\"description\":\"The settings the service takes\"}},\"additionalProperties\":false}},\"transcribers\":{\"title\":\"Transcribers\",\"type\":\"array\",\"description\":\"What transcribes the audio of videos into subtitles\",\"items\":{\"type\":\"object\",\"required\":[\"id\",\"service\",\"name\"],\"properties\":{\"id\":{\"title\":\"ID\",\"type\":\"string\",\"format\":\"uuid\",\"readOnly\":true},\"service\":{\"title\":\"Service\",\"type\":\"string\",\"minLength\":1,\"description\":\"The transcription service\",\"x-mavio-options\":{\"source\":\"transcription-services\",\"settings\":\"settings\",\"name\":\"name\"}},\"name\":{\"title\":\"Name\",\"type\":\"string\",\"minLength\":1},\"enabled\":{\"title\":\"Enabled\",\"type\":\"boolean\",\"default\":true},\"settings\":{\"title\":\"Settings\",\"type\":\"object\",\"description\":\"The settings the service takes\"}},\"additionalProperties\":false}}},\"additionalProperties\":false}",
+  "containers": [
+    {
+      "name": "whisper",
+      "description": "speaches, running the Whisper models of the recognizers and transcribers of the Whisper service, on an NVIDIA GPU when the container engine gives one",
+      "image": "ghcr.io/speaches-ai/speaches:0.9.0-rc.3-cpu@sha256:2163775b6df5e451a71200e8f675fed68dbd8ab184fc604453d549e486f22fd2",
+      "gpu": "GPU_SUPPORT_OPTIONAL",
+      "gpuImage": "ghcr.io/speaches-ai/speaches:0.9.0-rc.3-cuda-12.6.3@sha256:5c6206a349e90b9a6782342917e72f84fc7cb60e8afd540f6aa625831ac1fd0f",
+      "port": 8000,
+      "healthPath": "/health",
+      "env": {
+        "ENABLE_UI": "false",
+        "LOG_LEVEL": "info",
+        "STT_MODEL_TTL": "-1"
+      },
+      "volumes": {
+        "models": "/home/ubuntu/.cache/huggingface/hub"
+      },
+      "noProxyIpv4Only": true
+    }
+  ],
+  "configSchema": "{\"$schema\":\"https://json-schema.org/draft/2020-12/schema\",\"type\":\"object\",\"properties\":{\"recognizers\":{\"title\":\"Recognizers\",\"type\":\"array\",\"description\":\"What hears the user in voice sessions\",\"items\":{\"type\":\"object\",\"required\":[\"id\",\"service\",\"name\"],\"properties\":{\"id\":{\"title\":\"ID\",\"type\":\"string\",\"format\":\"uuid\",\"readOnly\":true},\"service\":{\"title\":\"Service\",\"type\":\"string\",\"minLength\":1,\"description\":\"The recognition service\",\"x-mavio-options\":{\"source\":\"voice-recognizers\",\"settings\":\"settings\",\"name\":\"name\"}},\"name\":{\"title\":\"Name\",\"type\":\"string\",\"minLength\":1},\"enabled\":{\"title\":\"Enabled\",\"type\":\"boolean\",\"default\":true,\"x-mavio-requires-container\":\"service\"},\"settings\":{\"title\":\"Settings\",\"type\":\"object\",\"description\":\"The settings the service takes\"}},\"additionalProperties\":false}},\"voices\":{\"title\":\"Voices\",\"type\":\"array\",\"description\":\"What speaks the assistant's answers\",\"items\":{\"type\":\"object\",\"required\":[\"id\",\"service\",\"name\"],\"properties\":{\"id\":{\"title\":\"ID\",\"type\":\"string\",\"format\":\"uuid\",\"readOnly\":true},\"service\":{\"title\":\"Service\",\"type\":\"string\",\"minLength\":1,\"description\":\"The synthesis service\",\"x-mavio-options\":{\"source\":\"voice-synthesizers\",\"settings\":\"settings\",\"name\":\"name\"}},\"name\":{\"title\":\"Name\",\"type\":\"string\",\"minLength\":1},\"enabled\":{\"title\":\"Enabled\",\"type\":\"boolean\",\"default\":true},\"settings\":{\"title\":\"Settings\",\"type\":\"object\",\"description\":\"The settings the service takes\"}},\"additionalProperties\":false}},\"transcribers\":{\"title\":\"Transcribers\",\"type\":\"array\",\"description\":\"What transcribes the audio of videos into subtitles\",\"items\":{\"type\":\"object\",\"required\":[\"id\",\"service\",\"name\"],\"properties\":{\"id\":{\"title\":\"ID\",\"type\":\"string\",\"format\":\"uuid\",\"readOnly\":true},\"service\":{\"title\":\"Service\",\"type\":\"string\",\"minLength\":1,\"description\":\"The transcription service\",\"x-mavio-options\":{\"source\":\"transcription-services\",\"settings\":\"settings\",\"name\":\"name\"}},\"name\":{\"title\":\"Name\",\"type\":\"string\",\"minLength\":1},\"enabled\":{\"title\":\"Enabled\",\"type\":\"boolean\",\"default\":true,\"x-mavio-requires-container\":\"service\"},\"settings\":{\"title\":\"Settings\",\"type\":\"object\",\"description\":\"The settings the service takes\"}},\"additionalProperties\":false}}},\"additionalProperties\":false}",
   "apiVersion": "1.0"
 }

@@ -11,7 +11,6 @@ session's token.
 import asyncio
 import contextlib
 import json
-import os
 import sys
 from collections.abc import Callable
 from pathlib import Path
@@ -32,6 +31,7 @@ from mavio_pipecat.config import Config, Engine, parse_config
 from mavio_pipecat.models import ModelRef, Models
 from mavio_pipecat.pipeline import Services, Turns, run_session
 from mavio_pipecat.services import Catalog, Service, Session
+from mavio_pipecat.speaches import Speaches
 from mavio_pipecat.transcribe import Transcription
 from mavio_plugin import ASGIApp, data_dir, host_client, load_manifest, serve
 
@@ -271,18 +271,17 @@ def create_app(sessions: Sessions) -> FastAPI:
 
 async def run(manifest_path: Path) -> None:
     root = Path(data_dir() or ".")
-    models = Models(root / "models")
-    speech = Speech(models)
     host = host_client()
+    speaches = Speaches(host)
+    models = Models(root / "models", speaches)
+    speech = Speech(models)
 
     def asker(token: str) -> Asker:
         return AskClient(http=host, headers={VOICE_SESSION_HEADER: token})
 
     sessions = Sessions(asker, speech)
     tasks = Tasks(speech)
-    tmp = root / "tmp"
-    tmp.mkdir(parents=True, exist_ok=True)
-    transcription = Transcription(host, models, lambda: speech.config, tmp=tmp)
+    transcription = Transcription(host, models, lambda: speech.config)
     downloading: set[asyncio.Task[list[str]]] = set()
 
     async def configure(config_json: str) -> None:
@@ -290,6 +289,9 @@ async def run(manifest_path: Path) -> None:
             speech.config = parse_config(config_json, speech.catalog)
         except (ValueError, TypeError) as e:
             raise ConnectError(Code.INVALID_ARGUMENT, f"configuration: {e}") from e
+        # The server configures the plugin again when Whisper's container
+        # starts or stops.
+        await speaches.refresh()
         # The models of new engines are downloaded at once; the task
         # retries what failed.
         task = asyncio.create_task(tasks.download())
@@ -310,7 +312,6 @@ async def run(manifest_path: Path) -> None:
     finally:
         for task in downloading:
             task.cancel()
-        transcription.close()
         await host.aclose()
 
 
@@ -326,9 +327,6 @@ def _logged(tasks: set[asyncio.Task[list[str]]]) -> Callable[[asyncio.Task[list[
 def main() -> None:
     # The host starts the plugin in its folder, beside its manifest.
     manifest = Path(sys.argv[1] if len(sys.argv) > 1 else "manifest.json")
-    # Hugging Face's cache is in the plugin's data folder.
-    if data_dir():
-        os.environ.setdefault("HF_HOME", str(Path(data_dir()) / "models" / "huggingface"))
     logger.remove()
     logger.add(sys.stderr, level="INFO")
     asyncio.run(run(manifest))

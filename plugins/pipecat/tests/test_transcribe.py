@@ -1,28 +1,26 @@
-import asyncio
 import json
-from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
-from types import SimpleNamespace
 from typing import Any, cast
 
 import httpx
 import pytest
 from connectrpc.errors import ConnectError
+from fakes import FakeSpeaches
 
 from mavio.plugin.v1 import speech_pb2
-from mavio_pipecat import transcribe
 from mavio_pipecat.config import parse_config
 from mavio_pipecat.models import Models
 from mavio_pipecat.transcribe import Transcription
 
 _CTX = cast(Any, None)
+_TINY = "Systran/faster-whisper-tiny"
 # Two seconds of audio.
 _PCM = bytes(2 * 16000 * 2)
 
 _CONFIG = json.dumps(
     {
         "transcribers": [
-            {"id": "w", "service": "whisper", "name": "Whisper", "settings": {"model": "tiny"}},
+            {"id": "w", "service": "whisper", "name": "Whisper", "settings": {"model": _TINY}},
             {"id": "o", "service": "openai", "name": "OpenAI", "settings": {"api_key": "k"}},
             {"id": "off", "service": "openai", "name": "Off", "enabled": False},
         ]
@@ -38,15 +36,15 @@ def _host(requests: list[httpx.Request]) -> httpx.AsyncClient:
     return httpx.AsyncClient(base_url="http://host", transport=httpx.MockTransport(serve))
 
 
-def _transcription(tmp_path: Path, cloud: httpx.MockTransport | None = None) -> Transcription:
+def _transcription(
+    tmp_path: Path, cloud: httpx.MockTransport | None = None, speaches: FakeSpeaches | None = None
+) -> Transcription:
     config = parse_config(_CONFIG)
     return Transcription(
         _host([]),
-        Models(tmp_path),
+        Models(tmp_path, speaches),
         lambda: config,
-        executor=lambda: cast(Any, ThreadPoolExecutor(max_workers=1)),
         cloud=(lambda: httpx.AsyncClient(transport=cloud)) if cloud else None,
-        tmp=tmp_path,
     )
 
 
@@ -112,37 +110,24 @@ async def test_openai_failures_carry_codes(tmp_path: Path):
     assert e.value.code.name == "NOT_FOUND"
 
 
-async def test_whisper_runs_in_the_worker(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
-    calls: list[dict[str, Any]] = []
+async def test_whisper_asks_its_container(tmp_path: Path):
+    asked: list[httpx.Request] = []
 
-    class FakeModel:
-        def transcribe(self, samples: Any, **kwargs: Any):
-            calls.append({"samples": len(samples), **kwargs})
-            segment = SimpleNamespace(start=0.0, end=1.5, text=" Hello ")
-            return iter([segment]), SimpleNamespace(language="en")
+    def serve(request: httpx.Request) -> httpx.Response:
+        asked.append(request)
+        language = "japanese" if b'name="language"' not in request.content else "english"
+        return httpx.Response(
+            200,
+            json={"language": language, "segments": [{"start": 0, "end": 1.5, "text": " Hello "}]},
+        )
 
-        def detect_language(self, samples: Any) -> tuple[str, float, list[Any]]:
-            calls.append({"samples": len(samples)})
-            return "ja", 0.9, []
-
-    def model(_path: str, _device: str) -> FakeModel:
-        return FakeModel()
-
-    def path(model: str) -> str:
-        return f"/models/{model}"
-
-    monkeypatch.setattr(transcribe, "_whisper_model", model)
-    t = _transcription(tmp_path)
-    monkeypatch.setattr(t, "_whisper_path", path)
+    t = _transcription(tmp_path, httpx.MockTransport(serve), FakeSpeaches(_TINY))
     response = await t.transcribe_speech(_request("w", language="en-US"), _CTX)
     assert (response.language, [s.text for s in response.segments]) == ("en", ["Hello"])
-    assert calls[0] == {
-        "samples": 32000,
-        "language": "en",
-        "task": "transcribe",
-        "vad_filter": True,
-        "word_timestamps": True,
-    }
+    assert str(asked[0].url) == "http://whisper:8000/v1/audio/transcriptions"
+    assert "authorization" not in asked[0].headers
+    for want in [_TINY.encode(), b'name="vad_filter"\r\n\r\ntrue', b'name="language"\r\n\r\nen']:
+        assert want in asked[0].content, f"the request lacks {want!r}"
     detected = await t.detect_speech_language(
         speech_pb2.DetectSpeechLanguageRequest(
             transcriber="w", audio=speech_pb2.SpeechAudio(url="/speech/audio/t")
@@ -150,13 +135,16 @@ async def test_whisper_runs_in_the_worker(tmp_path: Path, monkeypatch: pytest.Mo
         _CTX,
     )
     assert detected.language == "ja"
-    left = await asyncio.to_thread(lambda: list(tmp_path.glob("*.pcm")))
-    assert left == [], "the audio's files are left"
-    t.close()
+    await t.transcribe_speech(_request("w", translate=True), _CTX)
+    assert asked[-1].url.path == "/v1/audio/translations"
 
 
-async def test_missing_whisper_model_fails(tmp_path: Path):
-    t = _transcription(tmp_path)
+async def test_whisper_without_its_model_or_container_fails(tmp_path: Path):
+    t = _transcription(tmp_path, speaches=FakeSpeaches())
     with pytest.raises(ConnectError) as e:
         await t.transcribe_speech(_request("w"), _CTX)
     assert e.value.code.name == "FAILED_PRECONDITION"
+    t = _transcription(tmp_path, speaches=FakeSpeaches(_TINY, address=""))
+    with pytest.raises(ConnectError) as e:
+        await t.transcribe_speech(_request("w"), _CTX)
+    assert e.value.code.name == "UNAVAILABLE"

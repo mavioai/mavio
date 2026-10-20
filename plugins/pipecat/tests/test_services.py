@@ -1,6 +1,8 @@
 import json
 from pathlib import Path
 
+from fakes import FakeSpeaches
+from pipecat.services.openai.stt import OpenAISTTService
 from pipecat.services.stt_service import STTService
 from pipecat.services.tts_service import TTSService
 from pipecat.transcriptions.language import Language
@@ -16,13 +18,12 @@ from mavio_pipecat.services import (
     kokoro_language,
     pipecat_language,
 )
-from mavio_pipecat.whisper import WhisperRecognizer
 
 
 def test_every_service_makes_its_pipecat_service(tmp_path: Path):
     """Each service is made of its defaults and a key, without reaching
     it; Kokoro, whose model is not downloaded, is not made."""
-    models = Models(tmp_path)
+    models = Models(tmp_path, FakeSpeaches())
     session = Session(language="zh-CN", hints=("星际穿越", "Inception"))
     for service in RECOGNITION:
         assert service.make is not None
@@ -43,10 +44,20 @@ def test_whisper_takes_the_language_and_hints(tmp_path: Path):
     service = RECOGNITION[0]
     assert service.name == "whisper" and service.make is not None
     stt = service.make(
-        service.values({}), Session(language="zh-Hans", hints=("星际穿越",)), Models(tmp_path)
+        service.values({}),
+        Session(language="zh-Hans", hints=("星际穿越",)),
+        Models(tmp_path, FakeSpeaches()),
     )
-    assert isinstance(stt, WhisperRecognizer)
-    assert (stt._language, stt._prompt) == ("zh", "星际穿越")  # pyright: ignore[reportPrivateUsage]
+    assert isinstance(stt, OpenAISTTService)
+    settings = stt._settings  # pyright: ignore[reportPrivateUsage]
+    got = (str(stt._client.base_url), settings.model, settings.language, settings.prompt)  # pyright: ignore[reportPrivateUsage]
+    want = (
+        "http://whisper:8000/v1/",
+        "deepdml/faster-whisper-large-v3-turbo-ct2",
+        Language.ZH,
+        "星际穿越",
+    )
+    assert got == want, f"Whisper = {got}, want = {want}"
 
 
 def test_values_fill_the_defaults():
@@ -71,3 +82,19 @@ def test_setting_proto():
     assert p.type == settings_pb2.SETTING_FIELD_TYPE_SELECT
     assert (json.loads(p.default_json), p.secret) == ("tiny", True)
     assert [(json.loads(o.value_json), o.label) for o in p.options] == [("tiny", "Tiny")]
+
+
+def test_leaves_out_what_is_not_packaged(tmp_path: Path):
+    """resampy and numba are excluded from the plugin's dependencies, and
+    faster-whisper is not one: nothing imports them."""
+    import importlib
+    import sys
+
+    for module in ("mavio_pipecat.pipeline", "mavio_pipecat.plugin"):
+        importlib.import_module(module)
+    models = Models(tmp_path, FakeSpeaches())
+    for service in RECOGNITION:
+        assert service.make is not None
+        service.make(service.values({"api_key": "k"}), Session(), models)
+    imported = [m for m in ("resampy", "numba", "llvmlite", "faster_whisper") if m in sys.modules]
+    assert imported == [], f"imported = {imported}"

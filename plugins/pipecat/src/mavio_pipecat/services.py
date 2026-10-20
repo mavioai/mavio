@@ -108,25 +108,23 @@ def _api_key(label: str = "API key") -> Setting:
     return Setting("api_key", label, secret=True)
 
 
+# speaches' Whisper models, by their Hugging Face IDs.
 _WHISPER_MODELS = (
-    ("large-v3-turbo", "large-v3-turbo (1.6 GB)"),
-    ("large-v3", "large-v3 (3 GB)"),
-    ("medium", "medium (1.5 GB)"),
-    ("small", "small (480 MB)"),
-    ("base", "base (145 MB)"),
-    ("tiny", "tiny (75 MB)"),
+    ("deepdml/faster-whisper-large-v3-turbo-ct2", "large-v3-turbo (1.6 GB)"),
+    ("Systran/faster-whisper-large-v3", "large-v3 (3 GB)"),
+    ("Systran/faster-whisper-medium", "medium (1.5 GB)"),
+    ("Systran/faster-whisper-small", "small (480 MB)"),
+    ("Systran/faster-whisper-base", "base (145 MB)"),
+    ("Systran/faster-whisper-tiny", "tiny (75 MB)"),
 )
 
 WHISPER_SETTINGS = (
-    Setting("model", "Model", type="select", default="large-v3-turbo", options=_WHISPER_MODELS),
     Setting(
-        "device",
-        "Device",
-        "Where the model runs: a CUDA GPU when there is one, else the CPU",
+        "model",
+        "Model",
         type="select",
-        default="auto",
-        options=(("auto", "Automatic"), ("cpu", "CPU"), ("cuda", "CUDA")),
-        advanced=True,
+        default=_WHISPER_MODELS[0][0],
+        options=_WHISPER_MODELS,
     ),
 )
 
@@ -142,12 +140,9 @@ OPENAI_SETTINGS = (
 
 
 def _whisper_stt(settings: dict[str, Any], session: Session, models: Models) -> FrameProcessor:
-    from mavio_pipecat.whisper import WhisperRecognizer
-
-    return WhisperRecognizer(
-        models.whisper(settings["model"], settings["device"]),
-        language=session.language,
-        prompt=_prompt(session),
+    """Whisper on speaches, through its OpenAI-compatible API."""
+    return _openai_stt(
+        {"base_url": models.speaches.base_url, "model": settings["model"]}, session, models
     )
 
 
@@ -155,7 +150,8 @@ def _openai_stt(settings: dict[str, Any], session: Session, _models: Models) -> 
     from pipecat.services.openai.stt import OpenAISTTService
 
     return OpenAISTTService(
-        api_key=settings.get("api_key", ""),
+        # A client needs a key, which speaches takes any of.
+        api_key=settings.get("api_key") or "none",
         base_url=settings["base_url"],
         settings=OpenAISTTService.Settings(
             model=settings["model"],
@@ -204,7 +200,7 @@ def _elevenlabs_stt(settings: dict[str, Any], session: Session, _models: Models)
 RECOGNITION = (
     Service(
         "whisper",
-        "Whisper (faster-whisper)",
+        "Whisper (speaches)",
         WHISPER_SETTINGS,
         hints=True,
         make=_whisper_stt,
@@ -375,7 +371,7 @@ SYNTHESIS = (
 TRANSCRIPTION = (
     Service(
         "whisper",
-        "Whisper (faster-whisper)",
+        "Whisper (speaches)",
         WHISPER_SETTINGS,
         model=lambda s: whisper_model(s["model"]),
     ),
