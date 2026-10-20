@@ -117,7 +117,6 @@ enum class ServerSection(@StringRes val title: Int, @DrawableRes val icon: Int, 
     Transcoding(R.string.settings_transcoding, R.drawable.ic_quality_fill, Color(0xFFFF2D55)),
     Activity(R.string.settings_activity, R.drawable.ic_activity_fill, Color(0xFFFF2D55)),
     Issues(R.string.settings_issues, R.drawable.ic_error_fill, Color(0xFFFF9500), forAnyone = true),
-    Tasks(R.string.settings_tasks, R.drawable.ic_pending_fill, Color(0xFF5856D6)),
     Logs(R.string.settings_logs, R.drawable.ic_info_fill, Color(0xFF8E8E93)),
     Backups(R.string.settings_backups, R.drawable.ic_folder_fill, Color(0xFF5856D6)),
 }
@@ -129,7 +128,7 @@ enum class ServerMenu(@StringRes val title: Int, @DrawableRes val icon: Int, val
         R.string.settings_maintenance_menu,
         R.drawable.ic_admin_fill,
         Color(0xFF8E8E93),
-        listOf(ServerSection.Activity, ServerSection.Issues, ServerSection.Tasks, ServerSection.Logs, ServerSection.Backups),
+        listOf(ServerSection.Activity, ServerSection.Issues, ServerSection.Logs, ServerSection.Backups, ServerSection.ApiKeys),
     ),
 }
 
@@ -139,7 +138,6 @@ private val TOP: List<Any> = listOf(
     ServerSection.General,
     ServerSection.Users,
     ServerSection.Devices,
-    ServerSection.ApiKeys,
     ServerMenu.Media,
     ServerMenu.Maintenance,
 )
@@ -224,7 +222,6 @@ fun ServerSettingScreen(model: AppModel, route: AdminPage.ServerSetting) {
         ServerSection.Transcoding -> TranscodingPage(model, route.serverId)
         ServerSection.Activity -> ActivityPage(model, route.serverId)
         ServerSection.Issues -> IssuesPage(model, route.serverId)
-        ServerSection.Tasks -> TasksPage(model, route.serverId)
         ServerSection.Logs -> LogsPage(model, route.serverId)
         ServerSection.Backups -> BackupsPage(model, route.serverId)
     }

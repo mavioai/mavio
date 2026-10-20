@@ -1,11 +1,7 @@
 package dev.mavio.admin
 
 import android.content.Context
-import android.icu.text.MeasureFormat
-import android.icu.util.Measure
-import android.icu.util.MeasureUnit
 import android.net.Uri
-import android.text.format.DateUtils
 import android.text.format.Formatter
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -36,7 +32,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -44,7 +39,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
@@ -120,25 +114,16 @@ import mavio.system.v1.BackupOuterClass.ListBackupsResponse
 import mavio.system.v1.System.ListLogsResponse
 import mavio.system.v1.System.LogLevel
 import mavio.system.v1.System.LogRecord
-import mavio.system.v1.TaskOuterClass.Job
-import mavio.system.v1.TaskOuterClass.JobState
-import mavio.system.v1.TaskOuterClass.ListJobsResponse
-import mavio.system.v1.TaskOuterClass.ListTasksResponse
-import mavio.system.v1.TaskOuterClass.RunTaskResponse
-import mavio.system.v1.TaskOuterClass.Task
 import mavio.system.v1.createBackupRequest
 import mavio.system.v1.deleteBackupRequest
 import mavio.system.v1.listActivitiesRequest
 import mavio.system.v1.listBackupsRequest
-import mavio.system.v1.listJobsRequest
 import mavio.system.v1.listLogsRequest
-import mavio.system.v1.listTasksRequest
-import mavio.system.v1.runTaskRequest
 import mavio.user.v1.UserOuterClass.ListUsersResponse
 import mavio.user.v1.listUsersRequest
 
 // The settings' sections of watching over and keeping a server, as the web
-// UI's on a phone: Activity, Issues, Tasks, Logs and Backups
+// UI's on a phone: Activity, Issues, Logs and Backups
 // (docs/clients.md §6.3.6–§6.3.7, §6.3.14, §6.3.25).
 
 /** Calls a procedure, keeping its answer or why it failed; a cancellation passes through. */
@@ -390,238 +375,6 @@ private fun ActivityRow(a: Activity) {
         Dot(color, Modifier.padding(top = 8.dp))
         Lines(a.title, a.message, Modifier.weight(1f))
         if (a.hasTime()) Text(fromNow(a.time), style = theme.type.footnote.text, color = theme.colors.textSecondary)
-    }
-}
-
-// Tasks
-
-private fun JobState.color(): Color = when (this) {
-    JobState.JOB_STATE_RUNNING -> Color(0xFF007AFF)
-    JobState.JOB_STATE_SUCCEEDED -> Color(0xFF34C759)
-    JobState.JOB_STATE_FAILED -> Color(0xFFFF3B30)
-    else -> Color(0xFF8E8E93)
-}
-
-private fun JobState.title(): Int? = when (this) {
-    JobState.JOB_STATE_PENDING -> R.string.tasks_pending
-    JobState.JOB_STATE_RUNNING -> R.string.tasks_running
-    JobState.JOB_STATE_SUCCEEDED -> R.string.tasks_succeeded
-    JobState.JOB_STATE_FAILED -> R.string.tasks_failed
-    else -> null
-}
-
-/** The jobs shown, by their states. */
-private enum class JobFilter(val title: Int, val states: List<JobState>) {
-    All(R.string.tasks_jobs_all, emptyList()),
-    Active(R.string.tasks_jobs_active, listOf(JobState.JOB_STATE_PENDING, JobState.JOB_STATE_RUNNING)),
-    Failed(R.string.tasks_jobs_failed, listOf(JobState.JOB_STATE_FAILED)),
-    Succeeded(R.string.tasks_jobs_succeeded, listOf(JobState.JOB_STATE_SUCCEEDED)),
-}
-
-/**
- * Whether a task or job of a kind shows: those of acquiring media and of
- * plugins, which the app leaves out, do not (docs/clients.md §4.2).
- */
-private fun shownKind(kind: String) = listOf("acquisition.", "requests.", "subtitles.", "plugin.").none { kind.startsWith(it) }
-
-/** A length of time in its two largest units, as "1 day, 6 hr". */
-private fun lengthOf(locale: java.util.Locale, d: Duration): String {
-    var left = d.seconds
-    val units = listOf(86_400L to MeasureUnit.DAY, 3_600L to MeasureUnit.HOUR, 60L to MeasureUnit.MINUTE, 1L to MeasureUnit.SECOND)
-    val parts = units.mapNotNull { (size, unit) ->
-        val n = left / size
-        left %= size
-        if (n > 0) Measure(n, unit) else null
-    }.take(2).ifEmpty { listOf(Measure(0, MeasureUnit.SECOND)) }
-    return MeasureFormat.getInstance(locale, MeasureFormat.FormatWidth.SHORT).formatMeasures(*parts.toTypedArray())
-}
-
-/**
- * Tasks (docs/clients.md §6.3.7): the server's recurring tasks with how
- * often they run, how their last run went and when they run next, to run
- * now; and the jobs of its queue, filtered by state.
- */
-@Composable
-fun TasksPage(model: AppModel, serverId: String) {
-    var tasks by remember { mutableStateOf<List<Task>?>(null) }
-    var failure by remember { mutableStateOf<String?>(null) }
-    var jobs by remember { mutableStateOf<ListJobsResponse?>(null) }
-    var jobsFailure by remember { mutableStateOf<String?>(null) }
-    var filter by rememberSaveable { mutableStateOf(JobFilter.All) }
-    var limit by rememberSaveable { mutableIntStateOf(50) }
-    // A notice of running a task, kept until its next run finishes: by task, the notice and the run it followed.
-    val notices = remember { mutableStateMapOf<String, Pair<Notice, String>>() }
-    var starting by remember { mutableStateOf<String?>(null) }
-    val scope = rememberCoroutineScope()
-    suspend fun loadTasks() {
-        attempt({ failure = it }) {
-            tasks = model.client.call(serverId, Procedure.tasks("ListTasks"), listTasksRequest {}, ListTasksResponse::parseFrom).tasksList
-            failure = null
-        }
-    }
-    suspend fun loadJobs() {
-        attempt({ jobsFailure = it }) {
-            jobs = model.client.call(
-                serverId,
-                Procedure.tasks("ListJobs"),
-                listJobsRequest {
-                    states += filter.states
-                    this.limit = limit
-                },
-                ListJobsResponse::parseFrom,
-            )
-            jobsFailure = null
-        }
-    }
-    LaunchedEffect(serverId) {
-        while (true) {
-            loadTasks()
-            // Often while a task runs.
-            delay(if (tasks?.any { it.running } == true) 2_000 else 15_000)
-        }
-    }
-    LaunchedEffect(serverId, filter, limit) {
-        while (true) {
-            loadJobs()
-            delay(5_000)
-        }
-    }
-    fun run(task: Task) {
-        val last = if (task.hasLastRun()) task.lastRun.id else ""
-        starting = task.id
-        scope.launch {
-            try {
-                val r = model.client.call(serverId, Procedure.tasks("RunTask"), runTaskRequest { id = task.id }, RunTaskResponse::parseFrom)
-                notices[task.id] = Notice(if (r.enqueued) R.string.tasks_queued else R.string.tasks_already_queued) to last
-            } catch (e: CancellationException) {
-                throw e
-            } catch (e: Exception) {
-                notices[task.id] = Notice(text = e.reason) to last
-            }
-            starting = null
-            loadTasks()
-            loadJobs()
-        }
-    }
-    SettingsList(
-        stringResource(R.string.settings_tasks),
-        stringResource(R.string.tasks_message),
-        refresh = {
-            coroutineScope {
-                launch { loadTasks() }
-                launch { loadJobs() }
-            }
-        },
-    ) {
-        val own = tasks.orEmpty().filter { it.pluginId.isEmpty() && shownKind(it.kind) }.sortedWith(compareBy(String.CASE_INSENSITIVE_ORDER) { it.name })
-        when {
-            tasks == null && failure == null -> item { StatusView(stringResource(R.string.state_loading)) }
-            failure != null && tasks == null -> item { StatusView(failure!!, icon = R.drawable.ic_error) }
-            own.isNotEmpty() -> item {
-                Group(stringResource(R.string.tasks_server)) {
-                    own.forEachIndexed { i, t ->
-                        if (i > 0) RowDivider()
-                        TaskRow(t, notices, starting == t.id) { run(t) }
-                    }
-                }
-            }
-        }
-        item {
-            Group(
-                stringResource(R.string.tasks_jobs),
-                stringResource(R.string.tasks_jobs_footer),
-                action = { HeaderChoice(JobFilter.entries.map { it to stringResource(it.title) }, filter) { filter = it } },
-            ) {
-                val shown = jobs?.jobsList.orEmpty().filter { shownKind(it.kind) }
-                shown.forEachIndexed { i, j ->
-                    if (i > 0) RowDivider()
-                    JobRow(j)
-                }
-                when {
-                    jobsFailure != null -> Note(jobsFailure!!, failed = true)
-                    jobs != null && shown.isEmpty() -> Note(stringResource(R.string.tasks_no_jobs))
-                }
-                if ((jobs?.total ?: 0) > (jobs?.jobsCount ?: 0)) {
-                    RowDivider()
-                    ShowMore { limit += 100 }
-                }
-            }
-        }
-    }
-}
-
-/** What running a task did: a string's resource, or why it failed. */
-private data class Notice(val res: Int = 0, val text: String? = null)
-
-@Composable
-private fun TaskRow(task: Task, notices: SnapshotStateMap<String, Pair<Notice, String>>, starting: Boolean, onRun: () -> Unit) {
-    val last = if (task.hasLastRun()) task.lastRun else null
-    val status = when {
-        task.running -> stringResource(R.string.tasks_running_now)
-        last != null -> listOfNotNull(
-            last.state.title()?.let { stringResource(it) },
-            (if (last.hasFinishTime()) last.finishTime else if (last.hasRunTime()) last.runTime else null)?.let(::fromNow),
-        ).joinToString(" ")
-        else -> stringResource(R.string.tasks_never_run)
-    }
-    val notice = notices[task.id]?.takeIf { it.second == (last?.id ?: "") }?.first?.let { it.text ?: stringResource(it.res) }
-    val every = if (task.hasInterval()) stringResource(R.string.tasks_every, lengthOf(LocalLocale.current.platformLocale, task.interval)) else stringResource(R.string.tasks_on_demand)
-    val next = if (!task.running && task.hasNextRunTime()) stringResource(R.string.tasks_next, fromNow(task.nextRunTime)) else null
-    Row(
-        Modifier.fillMaxWidth().padding(horizontal = rowPadding, vertical = 10.dp),
-        horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s12),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            Text(task.name, style = theme.type.body.text)
-            if (task.description.isNotEmpty()) {
-                Text(task.description, style = theme.type.footnote.text, color = theme.colors.textSecondary)
-            }
-            Row(horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s4), verticalAlignment = Alignment.CenterVertically) {
-                Dot(if (task.running) JobState.JOB_STATE_RUNNING.color() else last?.state?.color() ?: theme.colors.fill)
-                Text(
-                    listOfNotNull(if (task.running) status else notice ?: status, every, next).joinToString(" · "),
-                    style = theme.type.footnote.text,
-                    color = theme.colors.textSecondary,
-                )
-            }
-            if (last != null && last.state == JobState.JOB_STATE_FAILED && last.lastError.isNotEmpty() && !task.running) {
-                Text(last.lastError, style = theme.type.footnote.text, color = theme.colors.danger)
-            }
-        }
-        SettingsButton(if (starting) "…" else stringResource(R.string.tasks_run), onRun, kind = ButtonKind.Secondary, enabled = !starting && !task.running)
-    }
-}
-
-@Composable
-private fun JobRow(job: Job) {
-    val time = when {
-        job.hasFinishTime() -> job.finishTime
-        job.hasRunTime() -> job.runTime
-        job.hasCreateTime() -> job.createTime
-        else -> null
-    }
-    val whenText = if (job.state == JobState.JOB_STATE_PENDING) {
-        if (job.hasRunTime()) stringResource(R.string.tasks_runs, fromNow(job.runTime)) else null
-    } else {
-        time?.let(::fromNow)
-    }
-    Column(Modifier.fillMaxWidth().padding(horizontal = rowPadding, vertical = 10.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-        Text(job.kind, style = theme.type.body.text)
-        Row(horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s4), verticalAlignment = Alignment.CenterVertically) {
-            Dot(job.state.color())
-            Text(
-                listOfNotNull(
-                    job.state.title()?.let { stringResource(it) },
-                    if (job.hasProgress()) "${(job.progress * 100).toInt()}%" else null,
-                    whenText,
-                    if (job.attempts > 1) stringResource(R.string.tasks_attempts, job.attempts.toString(), job.maxAttempts.toString()) else null,
-                ).joinToString(" · "),
-                style = theme.type.footnote.text,
-                color = theme.colors.textSecondary,
-            )
-        }
-        if (job.lastError.isNotEmpty()) Text(job.lastError, style = theme.type.footnote.text, color = theme.colors.danger)
     }
 }
 
