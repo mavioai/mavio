@@ -223,7 +223,8 @@
         /// Shows the page chosen anew, as another server's section too.
         private func showPage() {
             shownKey = "\(page)|\(state.key)"
-            detail.show(state.controller(page, context: context))
+            let page = page
+            detail.show(shownKey) { [state, context] in state.controller(page, context: context) }
         }
 
         override func cancelOperation(_ sender: Any?) {
@@ -232,9 +233,12 @@
     }
 
     /// The settings' detail: the page chosen in a stack of its own, under
-    /// the toolbar.
+    /// the toolbar. A page opened before is kept with what it read and
+    /// shows again at once, reading anew as it appears, so that moving
+    /// between the settings does not load each page from nothing.
     private final class SettingsDetail: NSViewController {
         private let theme: Theme
+        private var stacks: [String: NavigationController] = [:]
         private var stack: NavigationController?
 
         init(theme: Theme) {
@@ -251,16 +255,20 @@
             view = box
         }
 
-        /// Shows page, in a stack of its own.
-        func show(_ page: NSViewController) {
-            if let stack {
-                stack.view.removeFromSuperview()
-                stack.removeFromParent()
+        /// Shows the page kept under key, or the one make makes, in a stack
+        /// of its own.
+        func show(_ key: String, make: () -> NSViewController) {
+            stack?.view.removeFromSuperview()
+            let next: NavigationController
+            if let kept = stacks[key] {
+                next = kept
+            } else {
+                next = NavigationController(root: make())
+                stacks[key] = next
+                addChild(next)
+                next.view.translatesAutoresizingMaskIntoConstraints = false
             }
-            let next = NavigationController(root: page)
             stack = next
-            addChild(next)
-            next.view.translatesAutoresizingMaskIntoConstraints = false
             view.addSubview(next.view)
             NSLayoutConstraint.activate([
                 next.view.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
