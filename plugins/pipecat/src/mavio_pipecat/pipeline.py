@@ -153,6 +153,7 @@ class SessionLog(FrameProcessor):
         super().__init__(**kwargs)
         self._start = time.monotonic()
         self._audio = 0.0
+        self._peak = 0
         self._first: float | None = None
 
     def _log(self, what: str) -> None:
@@ -163,6 +164,8 @@ class SessionLog(FrameProcessor):
         await self.push_frame(frame, direction)
         if isinstance(frame, InputAudioRawFrame):
             self._audio += len(frame.audio) / (2 * frame.num_channels * frame.sample_rate)
+            if self._first is None or self._first > 0:
+                self._peak = max(self._peak, _peak(frame.audio))
             now = time.monotonic()
             if self._first is None:
                 self._first = now
@@ -170,7 +173,9 @@ class SessionLog(FrameProcessor):
             elif now - self._first >= 1 and self._first > 0:
                 # Audio held while the socket opened comes at once.
                 self._first = -1.0
-                self._log(f"{self._audio:.2f}s of audio in its first second")
+                # Its loudest sample tells a silent microphone from a quiet one.
+                db = 20 * math.log10(self._peak / 0x8000) if self._peak else -math.inf
+                self._log(f"{self._audio:.2f}s of audio in its first second, at most {db:.0f} dBFS")
             return
         match frame:
             case VADUserStartedSpeakingFrame():
@@ -185,6 +190,12 @@ class SessionLog(FrameProcessor):
                 self._log("the assistant speaks")
             case _:
                 pass
+
+
+def _peak(pcm: bytes) -> int:
+    """The largest magnitude of 16-bit PCM's samples."""
+    samples = memoryview(pcm).cast("h")
+    return max((abs(x) for x in samples), default=0)
 
 
 class PromptVAD(SileroVADAnalyzer):
