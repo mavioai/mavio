@@ -3863,6 +3863,10 @@
     <string name="assistant_no_microphone">The microphone can\'t be used: %s</string>
     <!-- Error of the assistant's panel when the browser or the user refuses the microphone. -->
     <string name="assistant_microphone_denied">Allow this site to use the microphone to talk, or type your request.</string>
+    <!-- Error of the assistant when the microphone gives only digital silence, as a muted or virtual input does; device names it. -->
+    <string name="assistant_silent_microphone">%s hears nothing. Choose another microphone in the browser\'s site settings or the system\'s sound settings.</string>
+    <!-- The microphone, in the assistant's errors when the browser does not name it. -->
+    <string name="assistant_microphone">The microphone</string>
     <!-- Note of the assistant's panel when the server's assistant is turned off. -->
     <string name="assistant_off">The assistant is off on this server.</string>
     <!-- Answer of the assistant when the page cannot carry out an action, such as controlling playback with nothing playing. -->

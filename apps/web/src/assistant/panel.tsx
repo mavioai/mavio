@@ -521,6 +521,7 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
           if (!error) lingerThenClose();
         },
         capturing: () => set({ capturing: true }),
+        silent: (device) => set({ error: t("assistant.silentMicrophone", { device: device || t("assistant.microphone") }) }),
       });
       session.current = v;
       // Let go before the microphone opened: a tap.

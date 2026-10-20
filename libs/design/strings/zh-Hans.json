@@ -1907,6 +1907,8 @@
   "assistant.insecure": "麦克风只能在安全（HTTPS）地址下使用；请改为输入请求。",
   "assistant.noMicrophone": "无法使用麦克风：{error}",
   "assistant.microphoneDenied": "请允许此网站使用麦克风以便说话，或改为输入请求。",
+  "assistant.silentMicrophone": "{device}没有任何声音。请在浏览器的网站设置或系统的声音设置中选择其他麦克风。",
+  "assistant.microphone": "麦克风",
   "assistant.off": "此服务器已关闭助手。",
   "assistant.cantDo": "此页面无法执行该操作。",
   "assistant.voice": "语音",

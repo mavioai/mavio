@@ -58,6 +58,9 @@ export function useDictation(server: ServerEntry | undefined, onText: (text: str
           if (current.current === v) current.current = undefined;
           setState({ listening: false, heard: "", error });
         },
+        silent(device) {
+          setState((s) => ({ ...s, error: t("assistant.silentMicrophone", { device: device || t("assistant.microphone") }) }));
+        },
       });
       current.current = v;
       v.connect(

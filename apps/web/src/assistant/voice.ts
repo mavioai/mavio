@@ -19,6 +19,8 @@ export interface VoiceHandlers {
   closed(error?: string): void;
   /** The microphone's first audio came: what is said from now on is heard. */
   capturing?(): void;
+  /** The microphone gave nothing but silence, as a muted or virtual input does; device names it. */
+  silent?(device: string): void;
 }
 
 /** Whether the page may open the microphone. */
@@ -62,6 +64,9 @@ class Capture extends AudioWorkletProcessor {
 }
 registerProcessor("mavio-capture", Capture);
 `;
+
+// How many of the microphone's 20 ms frames of digital silence tell it is silent.
+const silentFrames = 100;
 
 /** How loud an analyser's signal is now, from 0 to about 1. */
 function loudness(a: AnalyserNode, buf: Float32Array<ArrayBuffer>): number {
@@ -151,6 +156,8 @@ export class VoiceSession {
   private pending: ArrayBuffer[] = [];
   private ended = false;
   private captured = false;
+  // 20 ms frames of the microphone's that were digital silence, until one was not.
+  private zeros = 0;
   // Whether the session said it is ready: one closed before failed.
   private ready = false;
   // Push to talk: whether the user talks, and what the socket was told.
@@ -276,6 +283,11 @@ export class VoiceSession {
     if (!this.captured) {
       this.captured = true;
       this.h.capturing?.();
+    }
+    if (this.zeros >= 0) {
+      this.zeros = new Int16Array(pcm).some((x) => x !== 0) ? -1 : this.zeros + 1;
+      // A real microphone's noise is never all zeros for 2 s.
+      if (this.zeros === silentFrames) this.h.silent?.(this.media.getAudioTracks()[0]?.label ?? "");
     }
     if (this.ws?.readyState === WebSocket.OPEN) this.ws.send(pcm);
     // The socket opens once the plugin has made the session's services,

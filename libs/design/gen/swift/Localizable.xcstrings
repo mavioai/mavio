@@ -34543,6 +34543,42 @@
         }
       }
     },
+    "assistant.silentMicrophone": {
+      "comment": "Error of the assistant when the microphone gives only digital silence, as a muted or virtual input does; device names it.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ hears nothing. Choose another microphone in the browser's site settings or the system's sound settings."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@没有任何声音。请在浏览器的网站设置或系统的声音设置中选择其他麦克风。"
+          }
+        }
+      }
+    },
+    "assistant.microphone": {
+      "comment": "The microphone, in the assistant's errors when the browser does not name it.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The microphone"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "麦克风"
+          }
+        }
+      }
+    },
     "assistant.off": {
       "comment": "Note of the assistant's panel when the server's assistant is turned off.",
       "extractionState": "manual",

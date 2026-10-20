@@ -1896,6 +1896,8 @@ export type MessageKey =
   | 'assistant.insecure'
   | 'assistant.noMicrophone'
   | 'assistant.microphoneDenied'
+  | 'assistant.silentMicrophone'
+  | 'assistant.microphone'
   | 'assistant.off'
   | 'assistant.cantDo'
   | 'assistant.voice'
@@ -3876,6 +3878,8 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "assistant.insecure": "The microphone works only on a secure (HTTPS) address; type your request instead.",
     "assistant.noMicrophone": "The microphone can't be used: {error}",
     "assistant.microphoneDenied": "Allow this site to use the microphone to talk, or type your request.",
+    "assistant.silentMicrophone": "{device} hears nothing. Choose another microphone in the browser's site settings or the system's sound settings.",
+    "assistant.microphone": "The microphone",
     "assistant.off": "The assistant is off on this server.",
     "assistant.cantDo": "This page can't do that.",
     "assistant.voice": "Voice",
@@ -5854,6 +5858,8 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "assistant.insecure": "麦克风只能在安全（HTTPS）地址下使用；请改为输入请求。",
     "assistant.noMicrophone": "无法使用麦克风：{error}",
     "assistant.microphoneDenied": "请允许此网站使用麦克风以便说话，或改为输入请求。",
+    "assistant.silentMicrophone": "{device}没有任何声音。请在浏览器的网站设置或系统的声音设置中选择其他麦克风。",
+    "assistant.microphone": "麦克风",
     "assistant.off": "此服务器已关闭助手。",
     "assistant.cantDo": "此页面无法执行该操作。",
     "assistant.voice": "语音",

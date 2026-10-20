@@ -1908,6 +1908,8 @@
   "assistant.insecure": { "message": "The microphone works only on a secure (HTTPS) address; type your request instead.", "description": "Note of the assistant's panel when the page is served over plain HTTP." },
   "assistant.noMicrophone": { "message": "The microphone can't be used: {error}", "description": "Error of the assistant's panel when the microphone cannot be opened; error says why." },
   "assistant.microphoneDenied": { "message": "Allow this site to use the microphone to talk, or type your request.", "description": "Error of the assistant's panel when the browser or the user refuses the microphone." },
+  "assistant.silentMicrophone": { "message": "{device} hears nothing. Choose another microphone in the browser's site settings or the system's sound settings.", "description": "Error of the assistant when the microphone gives only digital silence, as a muted or virtual input does; device names it." },
+  "assistant.microphone": { "message": "The microphone", "description": "The microphone, in the assistant's errors when the browser does not name it." },
   "assistant.off": { "message": "The assistant is off on this server.", "description": "Note of the assistant's panel when the server's assistant is turned off." },
   "assistant.cantDo": { "message": "This page can't do that.", "description": "Answer of the assistant when the page cannot carry out an action, such as controlling playback with nothing playing." },
   "assistant.voice": { "message": "Voice", "description": "Setting: the voice reading answers aloud." },

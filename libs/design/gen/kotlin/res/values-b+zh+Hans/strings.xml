@@ -1943,6 +1943,8 @@
     <string name="assistant_insecure">麦克风只能在安全（HTTPS）地址下使用；请改为输入请求。</string>
     <string name="assistant_no_microphone">无法使用麦克风：%s</string>
     <string name="assistant_microphone_denied">请允许此网站使用麦克风以便说话，或改为输入请求。</string>
+    <string name="assistant_silent_microphone">%s没有任何声音。请在浏览器的网站设置或系统的声音设置中选择其他麦克风。</string>
+    <string name="assistant_microphone">麦克风</string>
     <string name="assistant_off">此服务器已关闭助手。</string>
     <string name="assistant_cant_do">此页面无法执行该操作。</string>
     <string name="assistant_voice">语音</string>

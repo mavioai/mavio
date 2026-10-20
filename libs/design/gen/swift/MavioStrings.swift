@@ -6079,6 +6079,14 @@ public enum MavioStrings {
     /// Error of the assistant's panel when the browser or the user refuses the microphone.
     public static var assistantMicrophoneDenied: String { NSLocalizedString("assistant.microphoneDenied", bundle: .module, comment: "") }
 
+    /// Error of the assistant when the microphone gives only digital silence, as a muted or virtual input does; device names it.
+    public static func assistantSilentMicrophone(device: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("assistant.silentMicrophone", bundle: .module, comment: ""), device)
+    }
+
+    /// The microphone, in the assistant's errors when the browser does not name it.
+    public static var assistantMicrophone: String { NSLocalizedString("assistant.microphone", bundle: .module, comment: "") }
+
     /// Note of the assistant's panel when the server's assistant is turned off.
     public static var assistantOff: String { NSLocalizedString("assistant.off", bundle: .module, comment: "") }
 
