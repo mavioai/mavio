@@ -16,6 +16,7 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import Any, cast
 
+import httpx
 from connectrpc.code import Code
 from connectrpc.errors import ConnectError
 from connectrpc.request import RequestContext
@@ -28,12 +29,19 @@ from mavio.plugin.v1.task_connect import TaskRunnerServiceASGIApplication
 from mavio.plugin.v1.voice_connect import VoiceSessionServiceASGIApplication
 from mavio_pipecat.ask import AskClient, Asker
 from mavio_pipecat.config import Config, Engine, parse_config
-from mavio_pipecat.models import ModelRef, Models
+from mavio_pipecat.models import ModelRef, Models, Progress
 from mavio_pipecat.pipeline import Services, Turns, run_session
 from mavio_pipecat.services import Catalog, Service, Session
 from mavio_pipecat.speaches import Speaches
 from mavio_pipecat.transcribe import Transcription
-from mavio_plugin import ASGIApp, data_dir, host_client, load_manifest, serve
+from mavio_plugin import (
+    ASGIApp,
+    data_dir,
+    host_client,
+    load_manifest,
+    report_task_progress,
+    serve,
+)
 
 # The prefix of the sessions' WebSockets on the plugin's socket.
 VOICE_PREFIX = "/_mavio/voice/"
@@ -241,18 +249,26 @@ class Sessions:
 class Tasks:
     """TaskRunnerService: the models' download."""
 
-    def __init__(self, speech: Speech):
+    def __init__(self, speech: Speech, host: httpx.AsyncClient | None = None):
         self._speech = speech
+        self._host = host
 
-    async def download(self) -> list[str]:
-        return await self._speech.models.download(await asyncio.to_thread(self._speech.missing))
+    async def download(self, progress: Progress | None = None) -> list[str]:
+        missing = await asyncio.to_thread(self._speech.missing)
+        return await self._speech.models.download(missing, progress)
+
+    async def _report(self, progress: float) -> None:
+        if self._host is not None and not await report_task_progress(
+            self._host, DOWNLOAD_TASK, progress
+        ):
+            logger.debug("the host took no progress of the download")
 
     async def run_task(
         self, request: task_pb2.RunTaskRequest, ctx: RequestContext[Any, Any]
     ) -> task_pb2.RunTaskResponse:
         if request.task_id != DOWNLOAD_TASK:
             raise ConnectError(Code.NOT_FOUND, f"no task {request.task_id!r}")
-        done = await self.download()
+        done = await self.download(self._report)
         return task_pb2.RunTaskResponse(
             message=f"downloaded {', '.join(done)}" if done else "every model is downloaded"
         )
@@ -280,7 +296,7 @@ async def run(manifest_path: Path) -> None:
         return AskClient(http=host, headers={VOICE_SESSION_HEADER: token})
 
     sessions = Sessions(asker, speech)
-    tasks = Tasks(speech)
+    tasks = Tasks(speech, host)
     transcription = Transcription(host, models, lambda: speech.config)
     downloading: set[asyncio.Task[list[str]]] = set()
 

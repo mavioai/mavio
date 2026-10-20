@@ -7,6 +7,7 @@ environment's HTTPS_PROXY names; an engine whose model is missing is not
 ready."""
 
 import asyncio
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -14,6 +15,9 @@ import httpx
 from loguru import logger
 
 from mavio_pipecat.speaches import Speaches
+
+# Progress is told the fraction of a download done, 0 to 1.
+type Progress = Callable[[float], Awaitable[None]]
 
 _KOKORO_RELEASE = "https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/"
 _KOKORO_FILES = ("kokoro-v1.0.onnx", "voices-v1.0.bin")
@@ -69,18 +73,27 @@ class Models:
         folder = self.root / "kokoro"
         return KokoroFiles(folder / _KOKORO_FILES[0], folder / _KOKORO_FILES[1])
 
-    async def download(self, refs: list[ModelRef]) -> list[str]:
+    async def download(self, refs: list[ModelRef], progress: Progress | None = None) -> list[str]:
         """Downloads the models missing, one at a time, returning those it
         downloaded; a download already running is waited for. One failing
-        leaves the others downloaded, and fails after them."""
+        leaves the others downloaded, and fails after them.
+
+        progress is told the fraction done, 0 to 1, by the models done and
+        the bytes of the one downloading where its size is known (Kokoro's;
+        speaches tells none of a Whisper model)."""
         done: list[str] = []
         failed: list[Exception] = []
-        for ref in dict.fromkeys(refs):
-            if await asyncio.to_thread(self.ready, ref):
-                continue
+        todo = [ref for ref in dict.fromkeys(refs) if not await asyncio.to_thread(self.ready, ref)]
+        report = progress or _ignore
+        for i, ref in enumerate(todo):
+            await report(i / len(todo))
+
+            async def part(f: float, i: int = i) -> None:
+                await report((i + f) / len(todo))
+
             task = self._downloading.get(ref)
             if task is None:
-                task = asyncio.create_task(self._download(ref))
+                task = asyncio.create_task(self._download(ref, part))
                 self._downloading[ref] = task
                 task.add_done_callback(lambda _t, ref=ref: self._downloading.pop(ref, None))
             try:
@@ -93,21 +106,31 @@ class Models:
             raise ExceptionGroup("downloading the models", failed)
         return done
 
-    async def _download(self, ref: ModelRef) -> None:
+    async def _download(self, ref: ModelRef, progress: Progress) -> None:
         logger.info(f"downloading the {ref} model")
         match ref.kind:
             case "whisper":
                 await self.speaches.download(ref.name)
             case "kokoro":
-                for name in _KOKORO_FILES:
-                    await _fetch(_KOKORO_RELEASE + name, self.root / "kokoro" / name)
+                n = len(_KOKORO_FILES)
+                for i, name in enumerate(_KOKORO_FILES):
+
+                    async def part(f: float, i: int = i) -> None:
+                        await progress((i + f) / n)
+
+                    await _fetch(_KOKORO_RELEASE + name, self.root / "kokoro" / name, part)
             case _:
                 raise ValueError(f"unknown model {ref}")
         logger.info(f"downloaded the {ref} model")
 
 
-async def _fetch(url: str, dest: Path) -> None:
-    """Downloads a file whole or not at all, logging its progress."""
+async def _ignore(_: float) -> None:
+    pass
+
+
+async def _fetch(url: str, dest: Path, progress: Progress = _ignore) -> None:
+    """Downloads a file whole or not at all, logging and reporting its
+    progress by the tenth."""
     if await asyncio.to_thread(dest.is_file):
         return
     await asyncio.to_thread(dest.parent.mkdir, parents=True, exist_ok=True)
@@ -126,4 +149,5 @@ async def _fetch(url: str, dest: Path) -> None:
                 if size and got * 10 // size > logged:
                     logged = got * 10 // size
                     logger.info(f"{dest.name}: {logged * 10}% of {size >> 20} MB")
+                    await progress(logged / 10)
     await asyncio.to_thread(part.rename, dest)

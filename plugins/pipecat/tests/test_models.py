@@ -49,6 +49,19 @@ async def test_download_asks_the_container(tmp_path: Path):
     assert speaches.downloaded == [_TINY]
 
 
+async def test_download_reports_progress(tmp_path: Path):
+    models = Models(tmp_path, FakeSpeaches())
+    _kokoro(models)
+    got: list[float] = []
+
+    async def progress(f: float) -> None:
+        got.append(f)
+
+    base = "Systran/faster-whisper-base"
+    await models.download([whisper_model(_TINY), kokoro_model(), whisper_model(base)], progress)
+    assert got == [0, 0.5], f"progress = {got}, want = [0, 0.5]"
+
+
 async def test_a_failed_download_leaves_the_others(tmp_path: Path):
     models = Models(tmp_path, FakeSpeaches(fail=True))
     _kokoro(models)

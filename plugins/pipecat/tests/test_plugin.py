@@ -2,9 +2,10 @@ import json
 from pathlib import Path
 from typing import Any, cast
 
+import httpx
 import pytest
 from connectrpc.errors import ConnectError
-from fakes import FakeAsk, FakeTTS
+from fakes import FakeAsk, FakeSpeaches, FakeTTS
 from fastapi.testclient import TestClient
 from google.protobuf.duration_pb2 import Duration
 from pipecat.frames.frames import (
@@ -22,7 +23,15 @@ from mavio_pipecat.ask import Asker
 from mavio_pipecat.config import parse_config
 from mavio_pipecat.models import Models
 from mavio_pipecat.pipeline import PushToTalk, Services, Turns
-from mavio_pipecat.plugin import VOICE_PREFIX, Sessions, Speech, Tasks, create_app, speaks
+from mavio_pipecat.plugin import (
+    DOWNLOAD_TASK,
+    VOICE_PREFIX,
+    Sessions,
+    Speech,
+    Tasks,
+    create_app,
+    speaks,
+)
 
 _CTX = cast(Any, None)
 
@@ -184,6 +193,31 @@ async def test_tasks_download_what_is_missing(tmp_path: Path):
     )
     with pytest.raises(ConnectError):
         await Tasks(speech).run_task(task_pb2.RunTaskRequest(task_id="nothing"), _CTX)
+
+
+async def test_tasks_report_their_progress(tmp_path: Path):
+    speech = Speech(Models(tmp_path, FakeSpeaches()))
+    speech.config = parse_config(_CONFIG)
+    files = speech.models.kokoro()
+    files.model.parent.mkdir(parents=True)
+    files.model.write_bytes(b"x")
+    files.voices.write_bytes(b"x")
+    reports: list[tuple[str, Any]] = []
+
+    def serve(request: httpx.Request) -> httpx.Response:
+        reports.append((request.url.path, json.loads(request.content)))
+        return httpx.Response(200, json={})
+
+    host = httpx.AsyncClient(base_url="http://host", transport=httpx.MockTransport(serve))
+    r = await Tasks(speech, host).run_task(task_pb2.RunTaskRequest(task_id=DOWNLOAD_TASK), _CTX)
+    assert r.message.startswith("downloaded whisper "), f"message = {r.message!r}"
+    want = [
+        (
+            "/mavio.plugin.v1.HostService/ReportTaskProgress",
+            {"taskId": DOWNLOAD_TASK, "progress": 0.0},
+        )
+    ]
+    assert reports == want, f"reports = {reports}, want = {want}"
 
 
 def test_turns_of_the_request():
