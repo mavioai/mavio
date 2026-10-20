@@ -6087,6 +6087,23 @@ public enum MavioStrings {
     /// The microphone, in the assistant's errors when the browser does not name it.
     public static var assistantMicrophone: String { NSLocalizedString("assistant.microphone", bundle: .module, comment: "") }
 
+    /// Setting: the microphone the assistant listens with in this browser.
+    public static var assistantMicrophoneChoice: String { NSLocalizedString("assistant.microphoneChoice", bundle: .module, comment: "") }
+
+    /// The system's own microphone, an option of the assistant's microphone setting.
+    public static var assistantSystemMicrophone: String { NSLocalizedString("assistant.systemMicrophone", bundle: .module, comment: "") }
+
+    /// A microphone the browser does not name, in the assistant's microphone setting; n is its place in the list.
+    public static func assistantUnnamedMicrophone(n: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("assistant.unnamedMicrophone", bundle: .module, comment: ""), n)
+    }
+
+    /// Button letting the browser name its microphones for the assistant's microphone setting, which asks for the microphone once.
+    public static var assistantShowMicrophones: String { NSLocalizedString("assistant.showMicrophones", bundle: .module, comment: "") }
+
+    /// Footer of the assistant's microphone setting.
+    public static var assistantMicrophoneFooter: String { NSLocalizedString("assistant.microphoneFooter", bundle: .module, comment: "") }
+
     /// Note of the assistant's panel when the server's assistant is turned off.
     public static var assistantOff: String { NSLocalizedString("assistant.off", bundle: .module, comment: "") }
 

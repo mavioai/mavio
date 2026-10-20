@@ -26,7 +26,7 @@ import {
   AssistantSpeechSchema,
   type VoiceEngine,
 } from "@mavio/proto/mavio/assistant/v1/assistant_pb";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { Checkbox, NumberField, Switch } from "../controls/inputs.tsx";
 import { Confirm } from "../controls/dialog.tsx";
@@ -39,6 +39,7 @@ import { locale, t } from "../i18n.ts";
 import { Button, Group, Row } from "../ui.tsx";
 import { useKeptSpeech } from "../assistant/kept-speech.ts";
 import { MessageBar } from "../assistant/message-bar.tsx";
+import { chooseMicrophone, chosenMicrophone, microphoneAllowed } from "../assistant/voice.ts";
 import { patched } from "./admin/common.tsx";
 
 const when = new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeStyle: "short" });
@@ -49,9 +50,73 @@ export function AssistantPrefs({ server }: { server?: ServerEntry }) {
   if (!server || !info.data?.enabled) return null;
   return (
     <>
+      {info.data.voice && microphoneAllowed() && <Microphone />}
       <Memories key={`m${server.id}`} server={server} on={info.data.memory} />
       {info.data.ai && <Conversations key={`c${server.id}`} server={server} />}
     </>
+  );
+}
+
+// The browser's own entries for the system's microphone, which "System
+// default" stands for.
+const systemIds = new Set(["default", "communications"]);
+
+/** The microphone voice sessions listen with in this browser. */
+function Microphone() {
+  const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
+  const [chosen, setChosen] = useState(chosenMicrophone);
+  const [failure, setFailure] = useState<string>();
+  const list = useCallback(async () => {
+    try {
+      setDevices((await navigator.mediaDevices.enumerateDevices()).filter((d) => d.kind === "audioinput"));
+    } catch (err) {
+      setFailure(errorMessage(err));
+    }
+  }, []);
+  useEffect(() => {
+    void list();
+    navigator.mediaDevices.addEventListener("devicechange", list);
+    return () => navigator.mediaDevices.removeEventListener("devicechange", list);
+  }, [list]);
+  // Browsers name their microphones only once the page may use one.
+  const named = devices.some((d) => d.label);
+  const allow = async () => {
+    try {
+      (await navigator.mediaDevices.getUserMedia({ audio: true })).getTracks().forEach((tr) => tr.stop());
+      await list();
+    } catch (err) {
+      setFailure(errorMessage(err));
+    }
+  };
+  const others = devices.filter((d) => !systemIds.has(d.deviceId));
+  const value = chosen && others.some((d) => d.deviceId === chosen) ? chosen : "";
+  return (
+    <Group footer={t("assistant.microphoneFooter")}>
+      <Row label={t("assistant.microphoneChoice")}>
+        {named ? (
+          <Select
+            value={value}
+            label={t("assistant.microphoneChoice")}
+            options={[
+              { value: "", label: t("assistant.systemMicrophone") },
+              ...others.map((d, i) => ({ value: d.deviceId, label: d.label || t("assistant.unnamedMicrophone", { n: i + 1 }) })),
+            ]}
+            onChange={(id) => {
+              // The system's own, where the browser lists it, is asked for
+              // exactly: a browser can rank its own choice above it.
+              const next = id || (devices.some((d) => d.deviceId === "default") ? "default" : undefined);
+              chooseMicrophone(next);
+              setChosen(next);
+            }}
+          />
+        ) : (
+          <Button variant="secondary" onClick={() => void allow()}>
+            {t("assistant.showMicrophones")}
+          </Button>
+        )}
+      </Row>
+      {failure && <p className="px-4 py-2 type-callout text-danger">{failure}</p>}
+    </Group>
   );
 }
 

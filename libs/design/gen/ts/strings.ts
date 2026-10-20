@@ -1898,6 +1898,11 @@ export type MessageKey =
   | 'assistant.microphoneDenied'
   | 'assistant.silentMicrophone'
   | 'assistant.microphone'
+  | 'assistant.microphoneChoice'
+  | 'assistant.systemMicrophone'
+  | 'assistant.unnamedMicrophone'
+  | 'assistant.showMicrophones'
+  | 'assistant.microphoneFooter'
   | 'assistant.off'
   | 'assistant.cantDo'
   | 'assistant.voice'
@@ -3880,6 +3885,11 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "assistant.microphoneDenied": "Allow this site to use the microphone to talk, or type your request.",
     "assistant.silentMicrophone": "{device} hears nothing. Choose another microphone in the browser's site settings or the system's sound settings.",
     "assistant.microphone": "The microphone",
+    "assistant.microphoneChoice": "Microphone",
+    "assistant.systemMicrophone": "System default",
+    "assistant.unnamedMicrophone": "Microphone {n}",
+    "assistant.showMicrophones": "Show microphones",
+    "assistant.microphoneFooter": "The microphone voice requests use in this browser. One that gives only silence, as a virtual input does, is replaced by another on its own.",
     "assistant.off": "The assistant is off on this server.",
     "assistant.cantDo": "This page can't do that.",
     "assistant.voice": "Voice",
@@ -5860,6 +5870,11 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "assistant.microphoneDenied": "请允许此网站使用麦克风以便说话，或改为输入请求。",
     "assistant.silentMicrophone": "{device}没有任何声音。请在浏览器的网站设置或系统的声音设置中选择其他麦克风。",
     "assistant.microphone": "麦克风",
+    "assistant.microphoneChoice": "麦克风",
+    "assistant.systemMicrophone": "系统默认",
+    "assistant.unnamedMicrophone": "麦克风 {n}",
+    "assistant.showMicrophones": "显示麦克风",
+    "assistant.microphoneFooter": "在此浏览器中语音请求所用的麦克风。只给出静音的麦克风（如虚拟输入）会被自动换成另一个。",
     "assistant.off": "此服务器已关闭助手。",
     "assistant.cantDo": "此页面无法执行该操作。",
     "assistant.voice": "语音",

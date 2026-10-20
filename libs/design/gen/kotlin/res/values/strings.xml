@@ -3867,6 +3867,16 @@
     <string name="assistant_silent_microphone">%s hears nothing. Choose another microphone in the browser\'s site settings or the system\'s sound settings.</string>
     <!-- The microphone, in the assistant's errors when the browser does not name it. -->
     <string name="assistant_microphone">The microphone</string>
+    <!-- Setting: the microphone the assistant listens with in this browser. -->
+    <string name="assistant_microphone_choice">Microphone</string>
+    <!-- The system's own microphone, an option of the assistant's microphone setting. -->
+    <string name="assistant_system_microphone">System default</string>
+    <!-- A microphone the browser does not name, in the assistant's microphone setting; n is its place in the list. -->
+    <string name="assistant_unnamed_microphone">Microphone %s</string>
+    <!-- Button letting the browser name its microphones for the assistant's microphone setting, which asks for the microphone once. -->
+    <string name="assistant_show_microphones">Show microphones</string>
+    <!-- Footer of the assistant's microphone setting. -->
+    <string name="assistant_microphone_footer">The microphone voice requests use in this browser. One that gives only silence, as a virtual input does, is replaced by another on its own.</string>
     <!-- Note of the assistant's panel when the server's assistant is turned off. -->
     <string name="assistant_off">The assistant is off on this server.</string>
     <!-- Answer of the assistant when the page cannot carry out an action, such as controlling playback with nothing playing. -->

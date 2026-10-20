@@ -34579,6 +34579,96 @@
         }
       }
     },
+    "assistant.microphoneChoice": {
+      "comment": "Setting: the microphone the assistant listens with in this browser.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Microphone"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "麦克风"
+          }
+        }
+      }
+    },
+    "assistant.systemMicrophone": {
+      "comment": "The system's own microphone, an option of the assistant's microphone setting.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "System default"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "系统默认"
+          }
+        }
+      }
+    },
+    "assistant.unnamedMicrophone": {
+      "comment": "A microphone the browser does not name, in the assistant's microphone setting; n is its place in the list.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Microphone %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "麦克风 %@"
+          }
+        }
+      }
+    },
+    "assistant.showMicrophones": {
+      "comment": "Button letting the browser name its microphones for the assistant's microphone setting, which asks for the microphone once.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show microphones"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "显示麦克风"
+          }
+        }
+      }
+    },
+    "assistant.microphoneFooter": {
+      "comment": "Footer of the assistant's microphone setting.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The microphone voice requests use in this browser. One that gives only silence, as a virtual input does, is replaced by another on its own."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在此浏览器中语音请求所用的麦克风。只给出静音的麦克风（如虚拟输入）会被自动换成另一个。"
+          }
+        }
+      }
+    },
     "assistant.off": {
       "comment": "Note of the assistant's panel when the server's assistant is turned off.",
       "extractionState": "manual",

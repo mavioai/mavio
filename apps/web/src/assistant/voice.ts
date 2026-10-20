@@ -68,9 +68,9 @@ registerProcessor("mavio-capture", Capture);
 // How many of the microphone's 20 ms frames of digital silence tell it is silent.
 const silentFrames = 100;
 
-// The microphone that was heard after the browser's choice was silent, kept
-// for the next session: browsers can keep giving a site a virtual input, such
-// as a loopback device, whatever the system's choice.
+// The microphone chosen in the settings, or heard after the browser's choice
+// was silent, kept for the next session: browsers can keep giving a site a
+// virtual input, such as a loopback device, whatever the system's choice.
 const microphoneKey = "mavio.assistant.microphone";
 
 function microphoneConstraints(deviceId?: ConstrainDOMString): MediaTrackConstraints {
@@ -89,6 +89,21 @@ async function openMicrophone(): Promise<MediaStream> {
     }
   }
   return navigator.mediaDevices.getUserMedia({ audio: microphoneConstraints() });
+}
+
+/** The microphone chosen in the settings or last heard, by its device ID; none is the browser's choice. */
+export function chosenMicrophone(): string | undefined {
+  return storedMicrophone();
+}
+
+/** Chooses the microphone sessions ask for; none leaves it to the browser. */
+export function chooseMicrophone(deviceId?: string) {
+  try {
+    if (deviceId) localStorage.setItem(microphoneKey, deviceId);
+    else localStorage.removeItem(microphoneKey);
+  } catch {
+    // Sessions keep the browser's choice.
+  }
 }
 
 function storedMicrophone(): string | undefined {
