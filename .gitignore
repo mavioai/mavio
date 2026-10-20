@@ -43,3 +43,9 @@ local.properties
 # Cloudflare Workers (apps/website)
 .cloudflare/
 .env.local
+
+# Python (the uv workspace of the root pyproject.toml)
+.venv/
+__pycache__/
+.pytest_cache/
+.ruff_cache/

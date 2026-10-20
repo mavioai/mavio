@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Voice session prototype</title>
+<style>
+  body { font: 15px/1.5 system-ui, sans-serif; margin: 24px auto; max-width: 760px; padding: 0 16px; }
+  fieldset { border: 1px solid #ccc; border-radius: 8px; margin: 0 0 12px; }
+  label { margin-right: 16px; }
+  button { font: inherit; padding: 6px 16px; }
+  #state { font-weight: 600; margin-left: 12px; }
+  #log { border: 1px solid #ccc; border-radius: 8px; height: 420px; overflow-y: auto; padding: 8px; font: 13px/1.4 ui-monospace, monospace; white-space: pre-wrap; }
+  .user { color: #0a58ca; } .bot { color: #198754; } .event { color: #6c757d; } .error { color: #dc3545; }
+  form { display: flex; gap: 8px; margin: 12px 0; } form input { flex: 1; font: inherit; padding: 6px; }
+</style>
+</head>
+<body>
+<h1>Voice session prototype</h1>
+<fieldset>
+  <legend>Capture</legend>
+  <label><input type="checkbox" id="aec" checked> echoCancellation</label>
+  <label><input type="checkbox" id="ns" checked> noiseSuppression</label>
+  <label><input type="checkbox" id="agc" checked> autoGainControl</label>
+</fieldset>
+<fieldset>
+  <legend>Playback</legend>
+  <label><input type="radio" name="route" value="context" checked> Web Audio destination</label>
+  <label><input type="radio" name="route" value="element"> &lt;audio&gt; element</label>
+</fieldset>
+<button id="start">Start</button><span id="state">idle</span>
+<form id="typed"><input id="text" placeholder="Or type a request" autocomplete="off"><button>Send</button></form>
+<div id="log"></div>
+<script type="module">
+const $ = (id) => document.getElementById(id);
+const log = (text, kind = "event") => {
+  const line = document.createElement("div");
+  line.className = kind;
+  line.textContent = `${new Date().toISOString().slice(11, 23)}  ${text}`;
+  $("log").append(line);
+  $("log").scrollTop = $("log").scrollHeight;
+};
+
+let session = null;
+
+async function start() {
+  const constraints = {
+    echoCancellation: $("aec").checked,
+    noiseSuppression: $("ns").checked,
+    autoGainControl: $("agc").checked,
+    channelCount: 1,
+  };
+  const stream = await navigator.mediaDevices.getUserMedia({ audio: constraints });
+  const track = stream.getAudioTracks()[0];
+  log(`track settings ${JSON.stringify(track.getSettings())}`);
+
+  const context = new AudioContext();
+  await context.audioWorklet.addModule("capture.js");
+  const source = context.createMediaStreamSource(stream);
+  const capture = new AudioWorkletNode(context, "capture");
+  source.connect(capture);
+
+  // The answer's speech plays through the context, straight to its
+  // destination or through an <audio> element.
+  let output = context.destination;
+  let element = null;
+  if (document.querySelector("input[name=route]:checked").value === "element") {
+    const destination = context.createMediaStreamDestination();
+    element = new Audio();
+    element.srcObject = destination.stream;
+    await element.play();
+    output = destination;
+  }
+
+  const socket = new WebSocket(new URL("voice", location.href.replace(/^http/, "ws")));
+  socket.binaryType = "arraybuffer";
+  capture.port.onmessage = (e) => { if (socket.readyState === WebSocket.OPEN) socket.send(e.data); };
+
+  let next = 0;
+  const playing = new Set();
+  let answer = "";
+
+  socket.onopen = () => {
+    $("state").textContent = "connected";
+    socket.send(JSON.stringify({
+      type: "context",
+      context: { languages: navigator.languages, timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone, screen: "home" },
+    }));
+  };
+  socket.onclose = () => { $("state").textContent = "closed"; stop(); };
+  socket.onmessage = (e) => {
+    if (e.data instanceof ArrayBuffer) {
+      const pcm = new Int16Array(e.data);
+      const buffer = context.createBuffer(1, pcm.length, 24000);
+      const samples = buffer.getChannelData(0);
+      for (let i = 0; i < pcm.length; i++) samples[i] = pcm[i] / 0x8000;
+      const node = context.createBufferSource();
+      node.buffer = buffer;
+      node.connect(output);
+      next = Math.max(next, context.currentTime);
+      node.start(next);
+      next += buffer.duration;
+      playing.add(node);
+      node.onended = () => playing.delete(node);
+      return;
+    }
+    const event = JSON.parse(e.data);
+    switch (event.type) {
+      case "transcript":
+        if (event.final) log(`you: ${event.text}${event.language ? ` [${event.language}]` : ""}`, "user");
+        break;
+      case "interrupt":
+        for (const node of playing) node.stop();
+        playing.clear();
+        next = 0;
+        log("interrupt");
+        break;
+      case "answer":
+        answer += event.text;
+        break;
+      case "end":
+        log(`assistant: ${answer || event.answer || ""}`, "bot");
+        answer = "";
+        break;
+      case "run":
+        answer = "";
+        log(`run: ${event.text}`);
+        break;
+      case "error":
+        log(`error ${event.code}: ${event.message}`, "error");
+        break;
+      case "user_started": case "user_stopped": case "bot_started": case "bot_stopped":
+        $("state").textContent = event.type.replace("_", " ");
+        log(event.type);
+        break;
+      default:
+        log(JSON.stringify(event));
+    }
+  };
+
+  session = { socket, stream, context, element };
+}
+
+function stop() {
+  if (!session) return;
+  const { socket, stream, context, element } = session;
+  session = null;
+  socket.close();
+  stream.getTracks().forEach((t) => t.stop());
+  element?.pause();
+  context.close();
+  $("start").textContent = "Start";
+}
+
+$("start").onclick = async () => {
+  if (session) { stop(); return; }
+  try {
+    await start();
+    $("start").textContent = "Stop";
+  } catch (e) {
+    log(String(e), "error");
+  }
+};
+
+$("typed").onsubmit = (e) => {
+  e.preventDefault();
+  const text = $("text").value.trim();
+  if (!text || !session) return;
+  session.socket.send(JSON.stringify({ type: "text", text }));
+  log(`you (typed): ${text}`, "user");
+  $("text").value = "";
+};
+</script>
+</body>
+</html>

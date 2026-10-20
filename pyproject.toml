@@ -1,0 +1,20 @@
+# The uv workspace of the Python projects: process plugins written in Python
+# (plugins/pipecat). It is virtual: the root is not a package.
+[tool.uv.workspace]
+members = ["plugins/pipecat"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py314"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "ASYNC", "RUF"]
+
+[tool.pyright]
+pythonVersion = "3.14"
+typeCheckingMode = "strict"
+# Pipecat's annotations leave type arguments out (asyncio.Task, dict).
+reportUnknownMemberType = false
+
+[tool.ruff.lint.isort]
+known-first-party = ["mavio_pipecat"]
