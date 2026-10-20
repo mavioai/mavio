@@ -68,6 +68,8 @@ interface State {
   heardAt?: Date;
   /** A voice session runs. */
   listening: boolean;
+  /** The microphone's audio has started coming, which takes it a moment to open. */
+  capturing: boolean;
   working: boolean;
   /** The summaries of the tools running or run. */
   activity: { id: string; summary: string; done: boolean; failed: boolean }[];
@@ -82,7 +84,7 @@ interface State {
   error?: string;
 }
 
-const idle: State = { open: false, heard: "", listening: false, working: false, activity: [], answer: "", speaking: false, items: [], choose: false };
+const idle: State = { open: false, heard: "", listening: false, capturing: false, working: false, activity: [], answer: "", speaking: false, items: [], choose: false };
 
 interface Assistant {
   /** The server whose assistant answers, when it is on. */
@@ -486,6 +488,7 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
     set({
       open: true,
       listening: true,
+      capturing: false,
       heard: "",
       heardAt: undefined,
       answer: "",
@@ -500,9 +503,10 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
         closed: (error) => {
           if (session.current !== v) return;
           session.current = undefined;
-          set({ listening: false, speaking: false, working: false, ...(error ? { error } : {}) });
+          set({ listening: false, capturing: false, speaking: false, working: false, ...(error ? { error } : {}) });
           if (!error) lingerThenClose();
         },
+        capturing: () => set({ capturing: true }),
       });
       session.current = v;
       // Let go before the microphone opened: a tap.
@@ -654,7 +658,10 @@ function Panel({
     : state.working && !state.answer
       ? t("assistant.working")
       : state.listening
-        ? t("assistant.listening")
+        ? // Until the microphone opens, what is said is not heard.
+          state.capturing
+          ? t("assistant.listening")
+          : t("state.loading")
         : undefined;
   // Above the phone's tab bar where it shows.
   const tabs = isTabPlace(useLocation().pathname);
@@ -764,7 +771,7 @@ function Panel({
           setText("");
         }}
       >
-        <TalkButton listening={state.listening} onPress={onPress} onRelease={onRelease} />
+        <TalkButton listening={state.listening} capturing={state.capturing} onPress={onPress} onRelease={onRelease} />
         <input
           value={text}
           onChange={(e) => (setText(e.target.value), onTouch())}
@@ -786,7 +793,7 @@ function Panel({
 }
 
 /** The microphone button: held to talk while held, or tapped to start a conversation and again to end it. */
-function TalkButton({ listening, onPress, onRelease }: { listening: boolean; onPress: () => void; onRelease: () => void }) {
+function TalkButton({ listening, capturing, onPress, onRelease }: { listening: boolean; capturing: boolean; onPress: () => void; onRelease: () => void }) {
   return (
     <button
       type="button"
@@ -805,7 +812,7 @@ function TalkButton({ listening, onPress, onRelease }: { listening: boolean; onP
         }
       }}
       onKeyUp={(e) => (e.key === " " || e.key === "Enter") && onRelease()}
-      className={`flex size-10 shrink-0 items-center justify-center rounded-full transition ${listening ? "animate-pulse bg-danger text-white" : "bg-fill hover:bg-fill-selected"}`}
+      className={`flex size-10 shrink-0 items-center justify-center rounded-full transition ${listening ? `${capturing ? "animate-pulse " : ""}bg-danger text-white` : "bg-fill hover:bg-fill-selected"}`}
     >
       <Icon name="microphone" fill={listening} size={20} />
     </button>

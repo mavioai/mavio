@@ -17,6 +17,8 @@ export interface VoiceHandlers {
   event(e: VoiceEvent): void;
   /** The session ended; error says why when it failed. */
   closed(error?: string): void;
+  /** The microphone's first audio came: what is said from now on is heard. */
+  capturing?(): void;
 }
 
 /** Whether the page may open the microphone. */
@@ -118,6 +120,7 @@ export class VoiceSession {
   private ws?: WebSocket;
   private pending: ArrayBuffer[] = [];
   private ended = false;
+  private captured = false;
   // Whether the session said it is ready: one closed before failed.
   private ready = false;
   // Push to talk: whether the user talks, and what the socket was told.
@@ -209,6 +212,10 @@ export class VoiceSession {
 
   private audio(pcm: ArrayBuffer) {
     if (this.ended) return;
+    if (!this.captured) {
+      this.captured = true;
+      this.h.capturing?.();
+    }
     if (this.ws?.readyState === WebSocket.OPEN) this.ws.send(pcm);
     // The socket opens once the plugin has made the session's services,
     // which can take seconds: what the user says meanwhile is kept.
