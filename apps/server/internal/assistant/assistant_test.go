@@ -3,10 +3,10 @@ package assistant
 import (
 	"context"
 	"errors"
+	"reflect"
 	"slices"
 	"strings"
 	"testing"
-	"time"
 
 	"connectrpc.com/connect"
 
@@ -74,7 +74,6 @@ func newTestService(t *testing.T, items ...*libraryv1.Item) *Service {
 	return New(Config{
 		Services: Services{Items: &fakeItems{items: items}},
 		Grammar:  grammar(t),
-		Key:      []byte("0123456789abcdef0123456789abcdef"),
 	})
 }
 
@@ -164,37 +163,18 @@ func TestAskChoosesAmongResults(t *testing.T) {
 	}
 }
 
-func TestListenToken(t *testing.T) {
-	now := time.Unix(1_800_000_000, 0)
-	s := New(Config{Key: []byte("key"), Now: func() time.Time { return now }})
-	tok := s.sign(listenToken{User: "u", Expires: now.Add(time.Minute).Unix(), Nonce: "n1"})
-	if got, err := s.verify(tok); err != nil || got.User != "u" {
-		t.Fatalf("verify = %v, %v, want = u, nil", got, err)
-	}
-	if _, err := s.verify(tok); err == nil {
-		t.Error("a token served twice")
-	}
-	if _, err := s.verify(strings.Replace(tok, ".", "x.", 1)); err == nil {
-		t.Error("a tampered token verified")
-	}
-	late := s.sign(listenToken{User: "u", Expires: now.Add(-time.Second).Unix(), Nonce: "n2"})
-	if _, err := s.verify(late); err == nil {
-		t.Error("an expired token verified")
-	}
-}
-
 func TestSettingsRoundTrip(t *testing.T) {
 	want := core.DefaultAssistantSettings()
 	want.Model = "ai/openai/gpt-5"
 	want.AIAccess = core.AssistantAccessSelected
 	want.AIUsers = []core.ID{core.NewID()}
-	want.Voices = map[string]string{"en": "voice/kokoro/af_heart"}
+	want.Speech = []core.AssistantSpeech{{Language: "en", Recognizer: "dev.mavio.pipecat/r1", Voice: "dev.mavio.pipecat/v1"}, {Language: "zh"}}
+	want.CommitDelay = 0
 	got, err := settingsFromProto(settingsToProto(want))
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got.Model != want.Model || got.AIAccess != want.AIAccess || !slices.Equal(got.AIUsers, want.AIUsers) ||
-		got.Voices["en"] != want.Voices["en"] || got.IdleTime != want.IdleTime || got.RetentionDays != want.RetentionDays {
+	if !reflect.DeepEqual(got, want) {
 		t.Errorf("settingsFromProto(settingsToProto(s)) = %+v, want = %+v", got, want)
 	}
 }

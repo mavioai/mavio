@@ -38,12 +38,6 @@ const (
 	AssistantServiceGetAssistantProcedure = "/mavio.assistant.v1.AssistantService/GetAssistant"
 	// AssistantServiceAskProcedure is the fully-qualified name of the AssistantService's Ask RPC.
 	AssistantServiceAskProcedure = "/mavio.assistant.v1.AssistantService/Ask"
-	// AssistantServiceGetAssistantHintsProcedure is the fully-qualified name of the AssistantService's
-	// GetAssistantHints RPC.
-	AssistantServiceGetAssistantHintsProcedure = "/mavio.assistant.v1.AssistantService/GetAssistantHints"
-	// AssistantServiceStartListeningProcedure is the fully-qualified name of the AssistantService's
-	// StartListening RPC.
-	AssistantServiceStartListeningProcedure = "/mavio.assistant.v1.AssistantService/StartListening"
 	// AssistantServiceStartVoiceSessionProcedure is the fully-qualified name of the AssistantService's
 	// StartVoiceSession RPC.
 	AssistantServiceStartVoiceSessionProcedure = "/mavio.assistant.v1.AssistantService/StartVoiceSession"
@@ -76,19 +70,11 @@ const (
 // AssistantServiceClient is a client for the mavio.assistant.v1.AssistantService service.
 type AssistantServiceClient interface {
 	// GetAssistant tells what the assistant can do for the user: whether it
-	// is on, whether the AI path and memory are available, the server's
-	// recognizers and voices, and examples of requests.
+	// is on, whether the AI path, memory and voice sessions are available,
+	// and examples of requests.
 	GetAssistant(context.Context, *v1.GetAssistantRequest) (*v1.GetAssistantResponse, error)
 	// Ask carries a request out and streams what happens, ending with Done.
 	Ask(context.Context, *v1.AskRequest) (*connect.ServerStreamForClient[v1.AskResponse], error)
-	// GetAssistantHints returns phrases recognizers are likely to hear from
-	// the user: titles being watched, recently added titles, people and
-	// the user's devices.
-	GetAssistantHints(context.Context, *v1.GetAssistantHintsRequest) (*v1.GetAssistantHintsResponse, error)
-	// StartListening returns the WebSocket URL the client streams speech to
-	// for the server's recognizer, signed for the session and valid for a
-	// minute.
-	StartListening(context.Context, *v1.StartListeningRequest) (*v1.StartListeningResponse, error)
 	// StartVoiceSession opens a voice session for the device and returns
 	// the WebSocket URL the client connects to within a minute; it fails
 	// with failed_precondition when no voice session plugin is ready.
@@ -138,19 +124,6 @@ func NewAssistantServiceClient(httpClient connect.HTTPClient, baseURL string, op
 			httpClient,
 			baseURL+AssistantServiceAskProcedure,
 			connect.WithSchema(assistantServiceMethods.ByName("Ask")),
-			connect.WithClientOptions(opts...),
-		),
-		getAssistantHints: connect.NewClient[v1.GetAssistantHintsRequest, v1.GetAssistantHintsResponse](
-			httpClient,
-			baseURL+AssistantServiceGetAssistantHintsProcedure,
-			connect.WithSchema(assistantServiceMethods.ByName("GetAssistantHints")),
-			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
-			connect.WithClientOptions(opts...),
-		),
-		startListening: connect.NewClient[v1.StartListeningRequest, v1.StartListeningResponse](
-			httpClient,
-			baseURL+AssistantServiceStartListeningProcedure,
-			connect.WithSchema(assistantServiceMethods.ByName("StartListening")),
 			connect.WithClientOptions(opts...),
 		),
 		startVoiceSession: connect.NewClient[v1.StartVoiceSessionRequest, v1.StartVoiceSessionResponse](
@@ -218,8 +191,6 @@ func NewAssistantServiceClient(httpClient connect.HTTPClient, baseURL string, op
 type assistantServiceClient struct {
 	getAssistant                *connect.Client[v1.GetAssistantRequest, v1.GetAssistantResponse]
 	ask                         *connect.Client[v1.AskRequest, v1.AskResponse]
-	getAssistantHints           *connect.Client[v1.GetAssistantHintsRequest, v1.GetAssistantHintsResponse]
-	startListening              *connect.Client[v1.StartListeningRequest, v1.StartListeningResponse]
 	startVoiceSession           *connect.Client[v1.StartVoiceSessionRequest, v1.StartVoiceSessionResponse]
 	listAssistantConversations  *connect.Client[v1.ListAssistantConversationsRequest, v1.ListAssistantConversationsResponse]
 	getAssistantConversation    *connect.Client[v1.GetAssistantConversationRequest, v1.GetAssistantConversationResponse]
@@ -243,24 +214,6 @@ func (c *assistantServiceClient) GetAssistant(ctx context.Context, req *v1.GetAs
 // Ask calls mavio.assistant.v1.AssistantService.Ask.
 func (c *assistantServiceClient) Ask(ctx context.Context, req *v1.AskRequest) (*connect.ServerStreamForClient[v1.AskResponse], error) {
 	return c.ask.CallServerStream(ctx, connect.NewRequest(req))
-}
-
-// GetAssistantHints calls mavio.assistant.v1.AssistantService.GetAssistantHints.
-func (c *assistantServiceClient) GetAssistantHints(ctx context.Context, req *v1.GetAssistantHintsRequest) (*v1.GetAssistantHintsResponse, error) {
-	response, err := c.getAssistantHints.CallUnary(ctx, connect.NewRequest(req))
-	if response != nil {
-		return response.Msg, err
-	}
-	return nil, err
-}
-
-// StartListening calls mavio.assistant.v1.AssistantService.StartListening.
-func (c *assistantServiceClient) StartListening(ctx context.Context, req *v1.StartListeningRequest) (*v1.StartListeningResponse, error) {
-	response, err := c.startListening.CallUnary(ctx, connect.NewRequest(req))
-	if response != nil {
-		return response.Msg, err
-	}
-	return nil, err
 }
 
 // StartVoiceSession calls mavio.assistant.v1.AssistantService.StartVoiceSession.
@@ -348,19 +301,11 @@ func (c *assistantServiceClient) UpdateAssistantSettings(ctx context.Context, re
 // AssistantServiceHandler is an implementation of the mavio.assistant.v1.AssistantService service.
 type AssistantServiceHandler interface {
 	// GetAssistant tells what the assistant can do for the user: whether it
-	// is on, whether the AI path and memory are available, the server's
-	// recognizers and voices, and examples of requests.
+	// is on, whether the AI path, memory and voice sessions are available,
+	// and examples of requests.
 	GetAssistant(context.Context, *v1.GetAssistantRequest) (*v1.GetAssistantResponse, error)
 	// Ask carries a request out and streams what happens, ending with Done.
 	Ask(context.Context, *v1.AskRequest, *connect.ServerStream[v1.AskResponse]) error
-	// GetAssistantHints returns phrases recognizers are likely to hear from
-	// the user: titles being watched, recently added titles, people and
-	// the user's devices.
-	GetAssistantHints(context.Context, *v1.GetAssistantHintsRequest) (*v1.GetAssistantHintsResponse, error)
-	// StartListening returns the WebSocket URL the client streams speech to
-	// for the server's recognizer, signed for the session and valid for a
-	// minute.
-	StartListening(context.Context, *v1.StartListeningRequest) (*v1.StartListeningResponse, error)
 	// StartVoiceSession opens a voice session for the device and returns
 	// the WebSocket URL the client connects to within a minute; it fails
 	// with failed_precondition when no voice session plugin is ready.
@@ -406,19 +351,6 @@ func NewAssistantServiceHandler(svc AssistantServiceHandler, opts ...connect.Han
 		AssistantServiceAskProcedure,
 		svc.Ask,
 		connect.WithSchema(assistantServiceMethods.ByName("Ask")),
-		connect.WithHandlerOptions(opts...),
-	)
-	assistantServiceGetAssistantHintsHandler := connect.NewUnaryHandlerSimple(
-		AssistantServiceGetAssistantHintsProcedure,
-		svc.GetAssistantHints,
-		connect.WithSchema(assistantServiceMethods.ByName("GetAssistantHints")),
-		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
-		connect.WithHandlerOptions(opts...),
-	)
-	assistantServiceStartListeningHandler := connect.NewUnaryHandlerSimple(
-		AssistantServiceStartListeningProcedure,
-		svc.StartListening,
-		connect.WithSchema(assistantServiceMethods.ByName("StartListening")),
 		connect.WithHandlerOptions(opts...),
 	)
 	assistantServiceStartVoiceSessionHandler := connect.NewUnaryHandlerSimple(
@@ -485,10 +417,6 @@ func NewAssistantServiceHandler(svc AssistantServiceHandler, opts ...connect.Han
 			assistantServiceGetAssistantHandler.ServeHTTP(w, r)
 		case AssistantServiceAskProcedure:
 			assistantServiceAskHandler.ServeHTTP(w, r)
-		case AssistantServiceGetAssistantHintsProcedure:
-			assistantServiceGetAssistantHintsHandler.ServeHTTP(w, r)
-		case AssistantServiceStartListeningProcedure:
-			assistantServiceStartListeningHandler.ServeHTTP(w, r)
 		case AssistantServiceStartVoiceSessionProcedure:
 			assistantServiceStartVoiceSessionHandler.ServeHTTP(w, r)
 		case AssistantServiceListAssistantConversationsProcedure:
@@ -522,14 +450,6 @@ func (UnimplementedAssistantServiceHandler) GetAssistant(context.Context, *v1.Ge
 
 func (UnimplementedAssistantServiceHandler) Ask(context.Context, *v1.AskRequest, *connect.ServerStream[v1.AskResponse]) error {
 	return connect.NewError(connect.CodeUnimplemented, errors.New("mavio.assistant.v1.AssistantService.Ask is not implemented"))
-}
-
-func (UnimplementedAssistantServiceHandler) GetAssistantHints(context.Context, *v1.GetAssistantHintsRequest) (*v1.GetAssistantHintsResponse, error) {
-	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.assistant.v1.AssistantService.GetAssistantHints is not implemented"))
-}
-
-func (UnimplementedAssistantServiceHandler) StartListening(context.Context, *v1.StartListeningRequest) (*v1.StartListeningResponse, error) {
-	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.assistant.v1.AssistantService.StartListening is not implemented"))
 }
 
 func (UnimplementedAssistantServiceHandler) StartVoiceSession(context.Context, *v1.StartVoiceSessionRequest) (*v1.StartVoiceSessionResponse, error) {

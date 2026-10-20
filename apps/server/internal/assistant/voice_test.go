@@ -1,6 +1,7 @@
 package assistant
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"net"
@@ -89,13 +90,31 @@ func (f *fakeVoicePlugin) plugin() VoicePlugin {
 	}
 }
 
-func newVoiceService(f *fakeVoicePlugin) (*Service, *httptest.Server) {
+// fakeConversations holds the conversations of signedIn the plugin names.
+type fakeConversations struct {
+	pluginv1connect.AgentSessionServiceClient
+}
+
+func (fakeConversations) GetAgentSession(_ context.Context, req *pluginv1.GetAgentSessionRequest) (*pluginv1.GetAgentSessionResponse, error) {
+	owner := signedIn.User.ID.String()
+	if req.GetId() == "theirs" {
+		owner = core.NewID().String()
+	}
+	return pluginv1.GetAgentSessionResponse_builder{Session: pluginv1.AgentSession_builder{
+		Id: new(req.GetId()), Owner: new(owner), Labels: map[string]string{assistantLabel: "1"},
+	}.Build()}.Build(), nil
+}
+
+func newVoiceService(t *testing.T, f *fakeVoicePlugin) (*Service, *httptest.Server) {
 	set := core.DefaultAssistantSettings()
 	set.Hints = false
-	set.Recognizer = "dev.mavio.pipecat/whisper-1"
-	set.Voices = map[string]string{"en": "other.plugin/v"}
+	set.Speech = []core.AssistantSpeech{{Language: "en", Recognizer: "dev.mavio.pipecat/whisper-1", Voice: "other.plugin/v"}}
 	s := New(Config{
-		Settings: func() core.AssistantSettings { return set },
+		Settings:  func() core.AssistantSettings { return set },
+		SpeechDir: t.TempDir(),
+		Agents: func() (pluginv1connect.AgentSessionServiceClient, bool) {
+			return fakeConversations{}, true
+		},
 		VoiceSessions: func() (VoicePlugin, bool) {
 			if f == nil {
 				return VoicePlugin{}, false
@@ -127,7 +146,7 @@ func dialVoiceURL(srv *httptest.Server, path string) (*websocket.Conn, error) {
 
 func TestVoiceSessionRelays(t *testing.T) {
 	f := newFakeVoicePlugin(t)
-	s, srv := newVoiceService(f)
+	s, srv := newVoiceService(t, f)
 	defer srv.Close()
 	resp := startVoice(t, s, signedIn)
 
@@ -142,8 +161,8 @@ func TestVoiceSessionRelays(t *testing.T) {
 	if open.GetRecognizer() != "whisper-1" || open.GetVoice() != "" {
 		t.Errorf("recognizer, voice = %q, %q, want = whisper-1, empty", open.GetRecognizer(), open.GetVoice())
 	}
-	if got := open.GetTurns().GetCommitDelay().AsDuration(); got != voiceCommitDelay {
-		t.Errorf("commit delay = %v, want = %v", got, voiceCommitDelay)
+	if got, want := open.GetTurns().GetCommitDelay().AsDuration(), core.DefaultAssistantSettings().CommitDelay; got != want {
+		t.Errorf("commit delay = %v, want = %v", got, want)
 	}
 	if !strings.Contains(open.GetContextJson(), `"en"`) {
 		t.Errorf("context json = %s, want the client's context", open.GetContextJson())
@@ -193,9 +212,79 @@ func TestVoiceSessionRelays(t *testing.T) {
 	}
 }
 
+// TestVoiceSessionKeepsSpeech keeps the answers' speech the relay carries
+// with their conversations, cut where the client stopped playing after an
+// interrupt. The plugin echoes, so what the client sends comes back as the
+// plugin's.
+func TestVoiceSessionKeepsSpeech(t *testing.T) {
+	f := newFakeVoicePlugin(t)
+	s, srv := newVoiceService(t, f)
+	defer srv.Close()
+	resp := startVoice(t, s, signedIn)
+	c, err := dialVoiceURL(srv, resp.GetUrl())
+	if err != nil {
+		t.Fatal(err)
+	}
+	speech := make([]byte, 4800)
+	for i := range speech {
+		speech[i] = byte(i)
+	}
+	text := func(s string) frame { return frame{websocket.TextFrame, []byte(s)} }
+	for _, fr := range []frame{
+		text(`{"type":"ready","output_sample_rate":24000}`),
+		// Spoken whole.
+		text(`{"type":"run"}`), {websocket.BinaryFrame, speech},
+		text(`{"type":"end","status":"completed","conversation_id":"c1","answer":"whole"}`),
+		// Interrupted after 50 ms, which the client says once the run ended.
+		text(`{"type":"run"}`), {websocket.BinaryFrame, speech}, text(`{"type":"interrupt"}`),
+		{websocket.BinaryFrame, speech},
+		text(`{"type":"end","status":"interrupted","conversation_id":"c1","answer":"cut"}`),
+		text(`{"type":"played","ms":50}`),
+		// Failed, and another's.
+		text(`{"type":"run"}`), {websocket.BinaryFrame, speech}, text(`{"type":"end","status":"failed","conversation_id":"c1","answer":"failed"}`),
+		text(`{"type":"run"}`), {websocket.BinaryFrame, speech}, text(`{"type":"end","status":"completed","conversation_id":"theirs","answer":"theirs"}`),
+	} {
+		if err := rawFrames.Send(c, fr); err != nil {
+			t.Fatal(err)
+		}
+		var got frame
+		if err := rawFrames.Receive(c, &got); err != nil {
+			t.Fatal(err)
+		}
+	}
+	_ = c.Close()
+	deadline := time.Now().Add(5 * time.Second)
+	for len(f.closedIDs()) == 0 && time.Now().Before(deadline) {
+		time.Sleep(10 * time.Millisecond)
+	}
+	s.keeping.Wait()
+
+	for _, tc := range []struct {
+		conversation, answer string
+		// want is the bytes of speech kept, -1 for none.
+		want int
+	}{
+		{"c1", "whole", len(speech)},
+		{"c1", "cut", 50 * 24 * 2},
+		{"c1", "failed", -1},
+		{"theirs", "theirs", -1},
+	} {
+		b, err := s.rec.read(tc.conversation, answerKey(tc.answer), wavFormat)
+		if tc.want < 0 {
+			if err == nil {
+				t.Errorf("speech of %q kept, want none", tc.answer)
+			}
+			continue
+		}
+		if err != nil || !bytes.Equal(b, wav(speech[:tc.want], 24000)) {
+			t.Errorf("speech of %q = %d bytes, %v; want = %d bytes of speech", tc.answer, len(b)-44, err, tc.want)
+		}
+	}
+}
+
 func TestVoiceSessionOnePerDevice(t *testing.T) {
 	f := newFakeVoicePlugin(t)
-	s, srv := newVoiceService(f)
+	s, srv := newVoiceService(t, f)
 	defer srv.Close()
 	first := startVoice(t, s, signedIn)
 	other := signedIn
@@ -214,7 +303,7 @@ func TestVoiceSessionOnePerDevice(t *testing.T) {
 }
 
 func TestVoiceSessionNeeds(t *testing.T) {
-	s, srv := newVoiceService(nil)
+	s, srv := newVoiceService(t, nil)
 	srv.Close()
 	for _, tc := range []struct {
 		name string

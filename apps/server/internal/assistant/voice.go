@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/rand"
 	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net"
@@ -35,10 +36,13 @@ const (
 	voiceMaxTime = time.Hour
 	// voiceCloseTimeout bounds closing a session in the plugin.
 	voiceCloseTimeout = 10 * time.Second
-	// The turn settings of sessions (§8.3, §8.4).
-	voiceCommitDelay  = 700 * time.Millisecond
-	voiceLongestPause = 3 * time.Second
-	voiceIdle         = 8 * time.Second
+	// voiceOutputRate is the rate of the answers' speech when the
+	// session's ready event gives none.
+	voiceOutputRate = 24000
+	// maxKeptSpeech bounds the speech of an answer that is kept.
+	maxKeptSpeech = 10 * time.Minute
+	// keepTimeout bounds encoding and keeping an answer's speech.
+	keepTimeout = time.Minute
 )
 
 // VoicePlugin is the plugin running voice sessions.
@@ -55,7 +59,9 @@ type VoicePlugin struct {
 type voiceSession struct {
 	id     string
 	plugin VoicePlugin
-	// device is the signed-in session of the user's device.
+	// user is the session's user on the device; device is the signed-in
+	// session of the user's device.
+	user   auth.Principal
 	device core.ID
 	// url is the token of the session's URL, token the session token the
 	// plugin asks the assistant with.
@@ -112,13 +118,14 @@ func (s *Service) StartVoiceSession(ctx context.Context, req *assistantv1.StartV
 		s.endVoice(v)
 	}
 
-	v := &voiceSession{id: newToken()[:32], plugin: vp, device: p.Session.ID, url: newToken(), token: newToken()}
+	v := &voiceSession{id: newToken()[:32], plugin: vp, user: p, device: p.Session.ID, url: newToken(), token: newToken()}
 	lang := req.GetLanguage()
+	sp := set.SpeechOf(lang)
 	open := pluginv1.OpenVoiceSessionRequest_builder{
 		SessionId: &v.id, Language: &lang, Mode: req.GetMode().Enum(), SessionToken: &v.token,
-		Recognizer: new(own(set.Recognizer, vp.ID)), Voice: new(own(voiceOf(set.Voices, lang), vp.ID)),
+		Recognizer: new(own(sp.Recognizer, vp.ID)), Voice: new(own(sp.Voice, vp.ID)),
 		Turns: pluginv1.VoiceTurnSettings_builder{
-			CommitDelay: durationpb.New(voiceCommitDelay), LongestPause: durationpb.New(voiceLongestPause), Idle: durationpb.New(voiceIdle),
+			CommitDelay: durationpb.New(set.CommitDelay), LongestPause: durationpb.New(set.LongestPause), Idle: durationpb.New(set.SessionIdle),
 		}.Build(),
 	}.Build()
 	if set.Hints {
@@ -169,15 +176,6 @@ func own(ref, plugin string) string {
 		return id
 	}
 	return ""
-}
-
-// voiceOf returns the default voice of a language or of its base.
-func voiceOf(voices map[string]string, lang string) string {
-	if v := voices[lang]; v != "" {
-		return v
-	}
-	base, _, _ := strings.Cut(lang, "-")
-	return voices[base]
 }
 
 // VoiceSession resolves a session token for the host API.
@@ -277,13 +275,15 @@ func (s *Service) VoiceHandler() http.Handler {
 			return
 		}
 		defer up.Close()
+		tap := &speechTap{s: s, v: v, rate: voiceOutputRate}
+		defer tap.close()
 		websocket.Server{
 			// The URL's token authenticates, so the origin need not be
 			// checked.
 			Handshake: func(*websocket.Config, *http.Request) error { return nil },
 			Handler: func(down *websocket.Conn) {
 				defer down.Close()
-				relay(ctx, down, up)
+				relay(ctx, down, up, tap.fromClient, tap.fromPlugin)
 			},
 		}.ServeHTTP(w, r)
 	})
@@ -315,8 +315,9 @@ func (s *Service) dialVoice(ctx context.Context, v *voiceSession) (*websocket.Co
 	return ws, nil
 }
 
-// relay copies messages both ways until either side ends or ctx does.
-func relay(ctx context.Context, a, b *websocket.Conn) {
+// relay copies messages both ways until either side ends or ctx does,
+// showing those from a to fromA and those from b to fromB.
+func relay(ctx context.Context, a, b *websocket.Conn, fromA, fromB func(frame)) {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 	stop := context.AfterFunc(ctx, func() {
@@ -325,19 +326,155 @@ func relay(ctx context.Context, a, b *websocket.Conn) {
 	})
 	defer stop()
 	var wg sync.WaitGroup
-	for _, c := range [][2]*websocket.Conn{{a, b}, {b, a}} {
+	for _, c := range []struct {
+		from, to *websocket.Conn
+		see      func(frame)
+	}{{a, b, fromA}, {b, a, fromB}} {
 		wg.Go(func() {
 			defer cancel()
 			for {
 				var f frame
-				if err := rawFrames.Receive(c[0], &f); err != nil {
+				if err := rawFrames.Receive(c.from, &f); err != nil {
 					return
 				}
-				if err := rawFrames.Send(c[1], f); err != nil {
+				if c.see != nil {
+					c.see(f)
+				}
+				if err := rawFrames.Send(c.to, f); err != nil {
 					return
 				}
 			}
 		})
 	}
 	wg.Wait()
+}
+
+// speechTap collects the answers' speech a session's relay carries, to keep
+// it with the answers in their conversations (§8.8): the audio from the
+// plugin between a run's start and its end, cut where the client says it
+// stopped playing after an interrupt.
+type speechTap struct {
+	s *Service
+	v *voiceSession
+
+	mu   sync.Mutex
+	rate int
+	// pcm is the speech of the run under way, or of the run ended that
+	// waits for what the client played.
+	pcm     []byte
+	running bool
+	// interrupted is set by an interrupt, until the next run; played is
+	// how much the client played then, in bytes, -1 until it says.
+	interrupted bool
+	played      int
+	// ended is the end of the run whose speech waits to be kept.
+	ended *runEnd
+}
+
+// runEnd is what keeping a run's speech needs of its end event.
+type runEnd struct {
+	conversation, answer string
+}
+
+// tapEvent is the fields of the session's events the tap reads (§8.6).
+type tapEvent struct {
+	Type             string  `json:"type"`
+	OutputSampleRate int     `json:"output_sample_rate"`
+	Status           string  `json:"status"`
+	ConversationID   string  `json:"conversation_id"`
+	Answer           string  `json:"answer"`
+	Ms               float64 `json:"ms"`
+}
+
+func (t *speechTap) fromPlugin(f frame) {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	if f.typ == websocket.BinaryFrame {
+		if t.running && !t.interrupted && len(t.pcm)+len(f.data) <= t.rate*2*int(maxKeptSpeech/time.Second) {
+			t.pcm = append(t.pcm, f.data...)
+		}
+		return
+	}
+	var e tapEvent
+	if json.Unmarshal(f.data, &e) != nil {
+		return
+	}
+	switch e.Type {
+	case "ready":
+		if e.OutputSampleRate > 0 {
+			t.rate = e.OutputSampleRate
+		}
+	case "run":
+		t.flush()
+		t.running, t.interrupted, t.played = true, false, -1
+	case "interrupt":
+		if t.running && !t.interrupted {
+			t.interrupted, t.played = true, -1
+		}
+	case "end":
+		if !t.running {
+			return
+		}
+		t.running = false
+		if e.Status == "failed" || e.ConversationID == "" {
+			t.pcm = nil
+			return
+		}
+		t.ended = &runEnd{conversation: e.ConversationID, answer: e.Answer}
+		if !t.interrupted || t.played >= 0 {
+			t.flush()
+		}
+	}
+}
+
+func (t *speechTap) fromClient(f frame) {
+	if f.typ != websocket.TextFrame {
+		return
+	}
+	var e tapEvent
+	if json.Unmarshal(f.data, &e) != nil || e.Type != "played" {
+		return
+	}
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	if !t.interrupted || t.played >= 0 {
+		return
+	}
+	t.played = max(0, int(e.Ms*float64(t.rate)/1000)*2)
+	if t.ended != nil {
+		t.flush()
+	}
+}
+
+// close keeps the speech of a run that ended, when the relay ends.
+func (t *speechTap) close() {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	t.flush()
+}
+
+// flush keeps the speech of the run that ended, cut at what the client
+// played, and forgets it; t.mu is held.
+func (t *speechTap) flush() {
+	pcm, end := t.pcm, t.ended
+	t.pcm, t.ended = nil, nil
+	if end == nil || len(pcm) == 0 {
+		return
+	}
+	if t.interrupted && t.played >= 0 && t.played < len(pcm) {
+		pcm = pcm[:t.played]
+	}
+	rate, s, user := t.rate, t.s, t.v.user
+	s.keeping.Go(func() {
+		ctx, cancel := context.WithTimeout(context.Background(), keepTimeout)
+		defer cancel()
+		// The plugin names the conversation: it must be the user's.
+		if _, _, _, err := s.own(auth.WithPrincipal(ctx, user), end.conversation); err != nil {
+			s.log.WarnContext(ctx, "assistant: keep speech of another's conversation", "conversation", end.conversation, "err", err)
+			return
+		}
+		if err := s.rec.keepPCM(ctx, end.conversation, end.answer, pcm, rate); err != nil {
+			s.log.WarnContext(ctx, "assistant: keep speech", "conversation", end.conversation, "err", err)
+		}
+	})
 }

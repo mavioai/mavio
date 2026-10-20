@@ -528,7 +528,6 @@ func (t *turn) remember(text string) {
 			t.s.log.WarnContext(ctx, "assistant: add messages", "err", err)
 			return
 		}
-		t.s.rec.bind(t.p.User.ID, t.req.GetSpeechId(), conv, answer, t.s.now())
 	}()
 }
 
@@ -542,13 +541,7 @@ func (s *Service) sweep(ctx context.Context) {
 			delete(s.calls, id)
 		}
 	}
-	for tok, exp := range s.listens {
-		if now.After(exp) {
-			delete(s.listens, tok)
-		}
-	}
 	s.mu.Unlock()
-	s.rec.forget(now)
 	if s.cfg.Agents == nil || s.cfg.Users == nil {
 		return
 	}
@@ -674,13 +667,11 @@ func (s *Service) GetAssistantConversation(ctx context.Context, req *assistantv1
 			}
 		}
 		user := m.GetRole() == pluginv1.AiRole_AI_ROLE_USER
-		var speech []string
-		if !user {
-			for _, i := range s.rec.parts(req.GetId(), text) {
-				speech = append(speech, KeptSpeechURL(req.GetId(), answerKey(text), i))
-			}
+		msg := assistantv1.AssistantMessage_builder{User: &user, Text: &text, Time: m.GetTime()}.Build()
+		if !user && s.rec.has(req.GetId(), text) {
+			msg.SetSpeechUrl(KeptSpeechURL(req.GetId(), text))
 		}
-		msgs = append(msgs, assistantv1.AssistantMessage_builder{User: &user, Text: &text, Time: m.GetTime(), Speech: speech}.Build())
+		msgs = append(msgs, msg)
 	}
 	return assistantv1.GetAssistantConversationResponse_builder{Conversation: conversationToProto(resp.GetSession()), Messages: msgs}.Build(), nil
 }

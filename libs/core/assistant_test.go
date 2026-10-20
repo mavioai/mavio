@@ -20,9 +20,15 @@ func TestAssistantSettingsValidate(t *testing.T) {
 		{"idle too short", func(s *AssistantSettings) { s.IdleTime = time.Second }, false},
 		{"idle too long", func(s *AssistantSettings) { s.IdleTime = 25 * time.Hour }, false},
 		{"retention", func(s *AssistantSettings) { s.RetentionDays = 0 }, false},
-		{"recognizer", func(s *AssistantSettings) { s.Recognizer = "whisper" }, false},
-		{"voice", func(s *AssistantSettings) { s.Voices = map[string]string{"en": "voice/openai/alloy"} }, true},
-		{"voice without plugin", func(s *AssistantSettings) { s.Voices = map[string]string{"en": "alloy"} }, false},
+		{"recognizer without plugin", func(s *AssistantSettings) { s.Speech = []AssistantSpeech{{Language: "en", Recognizer: "whisper"}} }, false},
+		{"speech", func(s *AssistantSettings) {
+			s.Speech = []AssistantSpeech{{Language: "en", Recognizer: "dev.mavio.pipecat/r1", Voice: "dev.mavio.pipecat/v1"}, {Language: "zh"}}
+		}, true},
+		{"voice without plugin", func(s *AssistantSettings) { s.Speech = []AssistantSpeech{{Language: "en", Voice: "alloy"}} }, false},
+		{"language twice", func(s *AssistantSettings) { s.Speech = []AssistantSpeech{{Language: "en"}, {Language: "EN"}} }, false},
+		{"long pause", func(s *AssistantSettings) { s.LongestPause = 11 * time.Second }, false},
+		{"commit delay", func(s *AssistantSettings) { s.CommitDelay = 0 }, true},
+		{"short idle", func(s *AssistantSettings) { s.SessionIdle = time.Second }, false},
 	} {
 		s := DefaultAssistantSettings()
 		c.edit(&s)
@@ -59,6 +65,15 @@ func TestAssistantSettingsAllowsAI(t *testing.T) {
 		c.edit(&s)
 		if got := s.AllowsAI(c.user); got != c.want {
 			t.Errorf("%s: AllowsAI() = %v, want = %v", c.name, got, c.want)
+		}
+	}
+}
+
+func TestAssistantSettingsSpeechOf(t *testing.T) {
+	s := AssistantSettings{Speech: []AssistantSpeech{{Language: "zh", Voice: "p/zh"}, {Language: "zh-TW", Voice: "p/tw"}, {Language: "en", Voice: "p/en"}}}
+	for _, c := range []struct{ lang, want string }{{"zh-TW", "p/tw"}, {"zh-CN", "p/zh"}, {"en-US", "p/en"}, {"ja", ""}} {
+		if got := s.SpeechOf(c.lang).Voice; got != c.want {
+			t.Errorf("SpeechOf(%q).Voice = %q, want = %q", c.lang, got, c.want)
 		}
 	}
 }

@@ -15,53 +15,52 @@ import (
 	pluginv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1"
 )
 
-// fakeRecognizer detects lang and recognizes a segment, recording what
+// fakeTranscriber detects lang and transcribes a segment, recording what
 // it is asked.
-type fakeRecognizer struct {
+type fakeTranscriber struct {
 	lang string
 
 	mu         sync.Mutex
 	detections []string
-	recognized []string
+	transcribed []string
 }
 
-func (f *fakeRecognizer) ListRecognizers(context.Context, *pluginv1.ListRecognizersRequest) (*pluginv1.ListRecognizersResponse, error) {
-	return &pluginv1.ListRecognizersResponse{}, nil
+func (f *fakeTranscriber) ListTranscribers(context.Context, *pluginv1.ListTranscribersRequest) (*pluginv1.ListTranscribersResponse, error) {
+	return &pluginv1.ListTranscribersResponse{}, nil
 }
 
-func (f *fakeRecognizer) RecognizeSpeech(_ context.Context, req *pluginv1.RecognizeSpeechRequest) (*pluginv1.RecognizeSpeechResponse, error) {
+func (f *fakeTranscriber) TranscribeSpeech(_ context.Context, req *pluginv1.TranscribeSpeechRequest) (*pluginv1.TranscribeSpeechResponse, error) {
 	f.mu.Lock()
 	defer f.mu.Unlock()
-	f.recognized = append(f.recognized, strings.Join([]string{
-		req.GetRecognizer(), req.GetAudio().GetUrl(), req.GetLanguage(), map[bool]string{true: "translate"}[req.GetTranslate()], req.GetName(),
+	f.transcribed = append(f.transcribed, strings.Join([]string{
+		req.GetTranscriber(), req.GetAudio().GetUrl(), req.GetLanguage(), map[bool]string{true: "translate"}[req.GetTranslate()], req.GetName(),
 	}, " "))
-	return pluginv1.RecognizeSpeechResponse_builder{Segments: []*pluginv1.SpeechSegment{
+	return pluginv1.TranscribeSpeechResponse_builder{Segments: []*pluginv1.SpeechSegment{
 		pluginv1.SpeechSegment_builder{Start: durationpb.New(time.Second), End: durationpb.New(2 * time.Second), Text: proto.String(" Hi ")}.Build(),
 	}}.Build(), nil
 }
 
-func (f *fakeRecognizer) DetectSpeechLanguage(_ context.Context, req *pluginv1.DetectSpeechLanguageRequest) (*pluginv1.DetectSpeechLanguageResponse, error) {
+func (f *fakeTranscriber) DetectSpeechLanguage(_ context.Context, req *pluginv1.DetectSpeechLanguageRequest) (*pluginv1.DetectSpeechLanguageResponse, error) {
 	f.mu.Lock()
 	defer f.mu.Unlock()
 	f.detections = append(f.detections, req.GetAudio().GetUrl()+" "+req.GetAudio().GetLimit().AsDuration().String())
 	return pluginv1.DetectSpeechLanguageResponse_builder{Language: proto.String(f.lang)}.Build(), nil
 }
 
-// whisperInfo describes a recognizer like whisper's.
-func whisperInfo(subtitles bool) *pluginv1.RecognizerInfo {
-	return pluginv1.RecognizerInfo_builder{
-		Name: proto.String("whisper"), DisplayName: proto.String("Whisper"), Enabled: proto.Bool(true),
-		Languages: []string{"en", "fr", "de", "jv", "gsw"}, Timestamps: proto.Bool(true), DetectsLanguage: proto.Bool(true),
-		Translates: proto.Bool(true), Subtitles: proto.Bool(subtitles),
+// whisperInfo describes a transcriber like whisper's.
+func whisperInfo() *pluginv1.TranscriberInfo {
+	return pluginv1.TranscriberInfo_builder{
+		Id: proto.String("whisper"), Name: proto.String("Whisper"), Service: proto.String("whisper"), Enabled: proto.Bool(true),
+		Ready: proto.Bool(true), Languages: []string{"en", "fr", "de", "jv", "gsw"}, Translates: proto.Bool(true),
 	}.Build()
 }
 
-func newTranscriber(f *fakeRecognizer, infos ...*pluginv1.RecognizerInfo) *transcriber {
-	r := &Runtime{Recognizers: func(context.Context) []speech.Recognizer {
-		var out []speech.Recognizer
+func newTranscriber(f *fakeTranscriber, infos ...*pluginv1.TranscriberInfo) *transcriber {
+	r := &Runtime{Transcribers: func(context.Context) []speech.Transcriber {
+		var out []speech.Transcriber
 		for _, info := range infos {
-			p := speech.RecognizerPlugin{ID: "dev.mavio.voice", Client: f}
-			out = append(out, speech.Recognizer{ID: p.ID + "/" + info.GetName(), Plugin: p, Info: info})
+			p := speech.Plugin{ID: "dev.mavio.pipecat", Client: f}
+			out = append(out, speech.Transcriber{ID: p.ID + "/" + info.GetId(), Plugin: p, Info: info})
 		}
 		return out
 	}}
@@ -132,8 +131,8 @@ func TestTranscriptionSearch(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			f := &fakeRecognizer{lang: c.detect}
-			tr := newTranscriber(f, whisperInfo(true), pluginv1.RecognizerInfo_builder{Name: proto.String("off"), Timestamps: proto.Bool(true)}.Build())
+			f := &fakeTranscriber{lang: c.detect}
+			tr := newTranscriber(f, whisperInfo())
 			req := pluginv1.SearchSubtitlesRequest_builder{
 				Video: pluginv1.SubtitleVideo_builder{
 					Kind: pluginv1.MediaKind_MEDIA_KIND_EPISODE.Enum(), AudioUrl: proto.String("http://mavio.host/subtitles/audio/tok"), AudioStreams: c.streams,
@@ -147,7 +146,7 @@ func TestTranscriptionSearch(t *testing.T) {
 			var got []string
 			for _, s := range resp.GetSubtitles() {
 				got = append(got, s.GetReleaseNames()...)
-				if s.GetProvider() != "dev.mavio.voice/whisper" || !slices.Equal(s.GetMatches(), []string{"series", "season", "episode"}) || s.GetFormat() != "srt" {
+				if s.GetProvider() != "dev.mavio.pipecat/whisper" || !slices.Equal(s.GetMatches(), []string{"series", "season", "episode"}) || s.GetFormat() != "srt" {
 					t.Errorf("subtitle = %v, want whisper's with an episode's matches", s)
 				}
 			}
@@ -166,8 +165,8 @@ func TestTranscriptionSearch(t *testing.T) {
 }
 
 func TestTranscriptionDownload(t *testing.T) {
-	f := &fakeRecognizer{}
-	tr := newTranscriber(f, whisperInfo(true))
+	f := &fakeTranscriber{}
+	tr := newTranscriber(f, whisperInfo())
 	v := pluginv1.SubtitleVideo_builder{
 		FileName: proto.String("Amélie (2001).mkv"), AudioUrl: proto.String("http://mavio.host/subtitles/audio/tok"),
 		AudioStreams: []*pluginv1.SubtitleAudioStream{spokenStream(0, "eng"), spokenStream(1, "fre")},
@@ -189,17 +188,13 @@ func TestTranscriptionDownload(t *testing.T) {
 		"whisper http://mavio.host/subtitles/audio/tok?stream=1 fr  Amélie (2001).mkv",
 		"whisper http://mavio.host/subtitles/audio/tok?stream=0 en  Amélie (2001).mkv",
 	}
-	if !slices.Equal(f.recognized, want) {
-		t.Errorf("recognized = %q, want = %q", f.recognized, want)
+	if !slices.Equal(f.transcribed, want) {
+		t.Errorf("transcribed = %q, want = %q", f.transcribed, want)
 	}
 
-	// Without audio, or recognizers allowed to, nothing is found.
+	// Without audio, nothing is found.
 	v.SetAudioUrl("")
 	if found, err := tr.SearchSubtitles(t.Context(), pluginv1.SearchSubtitlesRequest_builder{Video: v, Languages: wantedLanguages("fr")}.Build()); err != nil || len(found.GetSubtitles()) != 0 {
 		t.Errorf("SearchSubtitles without audio = %v, %v; want nothing", found, err)
-	}
-	off := newTranscriber(f, whisperInfo(false))
-	if list, err := off.ListSubtitleProviders(t.Context(), &pluginv1.ListSubtitleProvidersRequest{}); err != nil || len(list.GetProviders()) != 0 {
-		t.Errorf("ListSubtitleProviders without subtitles = %v, %v; want none", list, err)
 	}
 }

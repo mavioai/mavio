@@ -469,8 +469,8 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 		},
 		Subtitles: subFiles, Storages: storages, Class: pathClasses.Class, FFmpeg: ffmpegPath(cfg.FFmpeg),
 		Extracted: playbacks.ExtractedSubtitle, Activity: activityLog, Logger: log,
-		Recognizers: func(ctx context.Context) []speech.Recognizer {
-			return speech.Recognizers(ctx, plugs.Recognizers(), log)
+		Transcribers: func(ctx context.Context) []speech.Transcriber {
+			return speech.Transcribers(ctx, plugs.Transcribers(), log)
 		},
 	}
 	// Imports complete the requests of what they import; their scans
@@ -503,7 +503,7 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 			})
 			return s.Assistant, err
 		},
-		Grammar: grammar, Agents: plugs.AgentSessions, Recognizers: plugs.Recognizers, Voices: plugs.VoicePlugins,
+		Grammar: grammar, Agents: plugs.AgentSessions,
 		VoiceSessions: func() (assistant.VoicePlugin, bool) {
 			id, pl, ok := plugs.VoiceSessions()
 			if !ok {
@@ -511,7 +511,7 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 			}
 			return assistant.VoicePlugin{ID: id, Client: pl.VoiceSessions(), Dial: pl.Dial, Authorize: pl.Authorize}, true
 		},
-		ServerName: serverName, Key: key.Derive("assistant-listen"), SpeechDir: cfg.SpeechDir, FFmpeg: ffmpegPath(cfg.FFmpeg), Activity: activityLog, Logger: log,
+		ServerName: serverName, SpeechDir: cfg.SpeechDir, FFmpeg: ffmpegPath(cfg.FFmpeg), Activity: activityLog, Logger: log,
 	})
 	h, err := httpserver.Handler(httpserver.Options{
 		Assistant: helper,

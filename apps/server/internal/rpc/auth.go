@@ -85,7 +85,6 @@ var SessionBoundProcedures = []string{
 	userv1connect.UserServiceConfirmTotpProcedure,
 	sessionv1connect.EventServiceName,
 	sessionv1connect.SyncPlayServiceName,
-	assistantv1connect.AssistantServiceStartListeningProcedure,
 }
 
 // AuthService implements mavio.auth.v1.AuthService.

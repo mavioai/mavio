@@ -125,10 +125,8 @@ pub enum Capability {
     CAPABILITY_AGENT_SESSION = 27i32,
     /// Implements RatingsProviderService.
     CAPABILITY_RATINGS_PROVIDER = 28i32,
-    /// Implements SpeechToTextService.
+    /// Implements SpeechToTextService: transcribes videos into subtitles.
     CAPABILITY_SPEECH_TO_TEXT = 29i32,
-    /// Implements TextToSpeechService.
-    CAPABILITY_TEXT_TO_SPEECH = 30i32,
     /// Implements ChallengeSolverService.
     CAPABILITY_CHALLENGE_SOLVER = 31i32,
     /// Implements VoiceSessionService and serves its sessions' WebSockets.
@@ -225,9 +223,6 @@ impl Capability {
     ///Idiomatic alias for [`Self::CAPABILITY_SPEECH_TO_TEXT`]; `Debug` prints the variant name.
     #[allow(non_upper_case_globals)]
     pub const SpeechToText: Self = Self::CAPABILITY_SPEECH_TO_TEXT;
-    ///Idiomatic alias for [`Self::CAPABILITY_TEXT_TO_SPEECH`]; `Debug` prints the variant name.
-    #[allow(non_upper_case_globals)]
-    pub const TextToSpeech: Self = Self::CAPABILITY_TEXT_TO_SPEECH;
     ///Idiomatic alias for [`Self::CAPABILITY_CHALLENGE_SOLVER`]; `Debug` prints the variant name.
     #[allow(non_upper_case_globals)]
     pub const ChallengeSolver: Self = Self::CAPABILITY_CHALLENGE_SOLVER;
@@ -277,7 +272,6 @@ impl ::buffa::Enumeration for Capability {
             27i32 => ::core::option::Option::Some(Self::CAPABILITY_AGENT_SESSION),
             28i32 => ::core::option::Option::Some(Self::CAPABILITY_RATINGS_PROVIDER),
             29i32 => ::core::option::Option::Some(Self::CAPABILITY_SPEECH_TO_TEXT),
-            30i32 => ::core::option::Option::Some(Self::CAPABILITY_TEXT_TO_SPEECH),
             31i32 => ::core::option::Option::Some(Self::CAPABILITY_CHALLENGE_SOLVER),
             32i32 => ::core::option::Option::Some(Self::CAPABILITY_VOICE_SESSION),
             _ => ::core::option::Option::None,
@@ -322,7 +316,6 @@ impl ::buffa::Enumeration for Capability {
             Self::CAPABILITY_AGENT_SESSION => "CAPABILITY_AGENT_SESSION",
             Self::CAPABILITY_RATINGS_PROVIDER => "CAPABILITY_RATINGS_PROVIDER",
             Self::CAPABILITY_SPEECH_TO_TEXT => "CAPABILITY_SPEECH_TO_TEXT",
-            Self::CAPABILITY_TEXT_TO_SPEECH => "CAPABILITY_TEXT_TO_SPEECH",
             Self::CAPABILITY_CHALLENGE_SOLVER => "CAPABILITY_CHALLENGE_SOLVER",
             Self::CAPABILITY_VOICE_SESSION => "CAPABILITY_VOICE_SESSION",
         }
@@ -419,9 +412,6 @@ impl ::buffa::Enumeration for Capability {
             "CAPABILITY_SPEECH_TO_TEXT" => {
                 ::core::option::Option::Some(Self::CAPABILITY_SPEECH_TO_TEXT)
             }
-            "CAPABILITY_TEXT_TO_SPEECH" => {
-                ::core::option::Option::Some(Self::CAPABILITY_TEXT_TO_SPEECH)
-            }
             "CAPABILITY_CHALLENGE_SOLVER" => {
                 ::core::option::Option::Some(Self::CAPABILITY_CHALLENGE_SOLVER)
             }
@@ -463,7 +453,6 @@ impl ::buffa::Enumeration for Capability {
             Self::CAPABILITY_AGENT_SESSION,
             Self::CAPABILITY_RATINGS_PROVIDER,
             Self::CAPABILITY_SPEECH_TO_TEXT,
-            Self::CAPABILITY_TEXT_TO_SPEECH,
             Self::CAPABILITY_CHALLENGE_SOLVER,
             Self::CAPABILITY_VOICE_SESSION,
         ]

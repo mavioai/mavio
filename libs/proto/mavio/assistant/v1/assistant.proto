@@ -15,23 +15,13 @@ import "mavio/plugin/v1/voice.proto";
 // with the server's tools, always as the user making the request.
 service AssistantService {
   // GetAssistant tells what the assistant can do for the user: whether it
-  // is on, whether the AI path and memory are available, the server's
-  // recognizers and voices, and examples of requests.
+  // is on, whether the AI path, memory and voice sessions are available,
+  // and examples of requests.
   rpc GetAssistant(GetAssistantRequest) returns (GetAssistantResponse) {
     option idempotency_level = NO_SIDE_EFFECTS;
   }
   // Ask carries a request out and streams what happens, ending with Done.
   rpc Ask(AskRequest) returns (stream AskResponse);
-  // GetAssistantHints returns phrases recognizers are likely to hear from
-  // the user: titles being watched, recently added titles, people and
-  // the user's devices.
-  rpc GetAssistantHints(GetAssistantHintsRequest) returns (GetAssistantHintsResponse) {
-    option idempotency_level = NO_SIDE_EFFECTS;
-  }
-  // StartListening returns the WebSocket URL the client streams speech to
-  // for the server's recognizer, signed for the session and valid for a
-  // minute.
-  rpc StartListening(StartListeningRequest) returns (StartListeningResponse);
   // StartVoiceSession opens a voice session for the device and returns
   // the WebSocket URL the client connects to within a minute; it fails
   // with failed_precondition when no voice session plugin is ready.
@@ -93,15 +83,36 @@ message AssistantSettings {
     gte: 1
     lte: 3650
   }];
+  reserved 9, 10;
+  reserved recognizer, voices;
+
   // Whether the assistant remembers what users tell about themselves.
   bool memory = 8;
-  // The server's recognizer, "<plugin>/<recognizer>"; empty, the first
-  // ready one.
-  string recognizer = 9;
-  // The voices answers are spoken with by default, by language.
-  repeated AssistantVoiceChoice voices = 10;
-  // Whether recognizers are given the user's hints.
+  // Whether recognizers are given the user's hints: titles being watched,
+  // recently added titles, people and the user's devices.
   bool hints = 11;
+  // The recognizer and the voice of voice sessions by language; a
+  // language listed nowhere, nor its base, gets the plugin's first ready
+  // ones.
+  repeated AssistantSpeech speech = 12;
+  // The longest pause in a turn the turn model reads as unfinished,
+  // 0.5–10 seconds.
+  google.protobuf.Duration longest_pause = 13 [(buf.validate.field).duration = {
+    gte: {nanos: 500000000}
+    lte: {seconds: 10}
+  }];
+  // How long a turn stands, with the user silent, before what its answer
+  // changes is done, 0–3 seconds.
+  google.protobuf.Duration commit_delay = 14 [(buf.validate.field).duration = {
+    gte: {}
+    lte: {seconds: 3}
+  }];
+  // How long the user may stay silent after an answer before the voice
+  // session ends, 3–120 seconds.
+  google.protobuf.Duration session_idle = 15 [(buf.validate.field).duration = {
+    gte: {seconds: 3}
+    lte: {seconds: 120}
+  }];
 }
 
 // AssistantAccess is who may use the AI path.
@@ -115,12 +126,14 @@ enum AssistantAccess {
   ASSISTANT_ACCESS_SELECTED = 3;
 }
 
-// AssistantVoiceChoice is the voice of a language.
-message AssistantVoiceChoice {
+// AssistantSpeech is the recognizer and the voice of a language.
+message AssistantSpeech {
   // BCP 47, such as "en" or "zh-CN".
   string language = 1 [(buf.validate.field).string.min_len = 1];
-  // "<plugin>/<voice>".
-  string voice = 2 [(buf.validate.field).string.pattern = "^[^/]+/.+$"];
+  // "<plugin>/<recognizer>"; empty, the plugin's first ready one.
+  string recognizer = 2 [(buf.validate.field).string.pattern = "^([^/]+/.+)?$"];
+  // "<plugin>/<voice>"; empty, the plugin's first ready one.
+  string voice = 3 [(buf.validate.field).string.pattern = "^([^/]+/.+)?$"];
 }
 
 message GetAssistantRequest {
@@ -129,43 +142,38 @@ message GetAssistantRequest {
 }
 
 message GetAssistantResponse {
+  reserved 4 to 6;
+  reserved recognizers, voices, default_voices;
+
   // The assistant is on for the user.
   bool enabled = 1;
   // The user may use the AI path, and it is ready.
   bool ai = 2;
   // Memory is on.
   bool memory = 3;
-  // The server's recognizers, the default first.
-  repeated Recognizer recognizers = 4;
-  // The server's voices.
-  repeated Voice voices = 5;
-  // The voice of each language when the user chooses none.
-  repeated AssistantVoiceChoice default_voices = 6;
+  // Voice sessions can be started: a voice session plugin is ready.
+  bool voice = 9;
   // Examples of requests in the language asked for.
   repeated string examples = 7;
   // The languages the fast path understands, BCP 47.
   repeated string languages = 8;
 }
 
-// Recognizer is a speech recognizer of the server.
-message Recognizer {
-  // "<plugin>/<recognizer>".
+// VoiceEngine is a recognizer or a voice of the voice session plugin.
+message VoiceEngine {
+  // "<plugin>/<recognizer>" or "<plugin>/<voice>".
   string id = 1;
   string name = 2;
   // BCP 47; empty for any.
   repeated string languages = 3;
-}
-
-// Voice is a voice of the server.
-message Voice {
-  // "<plugin>/<voice>".
-  string id = 1;
-  string name = 2;
-  // BCP 47.
-  repeated string languages = 3;
+  // It can be used: enabled, and its model downloaded for a local one.
+  bool ready = 4;
 }
 
 message AskRequest {
+  reserved 8;
+  reserved speech_id;
+
   option (buf.validate.message).cel = {
     id: "ask.request"
     message: "text, intent, answer or choice is required"
@@ -185,10 +193,6 @@ message AskRequest {
   string choice = 6;
   // Client actions of the last answer the client could not carry out.
   repeated string failed_actions = 7;
-  // An ID the client makes for the answer's speech: the audio of the
-  // POST /assistant/speech requests naming it is kept with the answer in
-  // its conversation (docs/assistant.md §8.3).
-  string speech_id = 8 [(buf.validate.field).string.pattern = "^([A-Za-z0-9_-]{8,64})?$"];
 }
 
 // AskContext is where the request is made.
@@ -381,26 +385,6 @@ message Done {
   bool not_understood = 6;
 }
 
-message GetAssistantHintsRequest {}
-
-message GetAssistantHintsResponse {
-  repeated string phrases = 1;
-}
-
-message StartListeningRequest {
-  // The language spoken, BCP 47; empty, the recognizer detects it.
-  string language = 1;
-  // "<plugin>/<recognizer>"; empty, the settings'.
-  string recognizer = 2;
-}
-
-message StartListeningResponse {
-  // The WebSocket URL, relative to the server's base URL.
-  string url = 1;
-  string recognizer = 2;
-  google.protobuf.Timestamp expire_time = 3;
-}
-
 message StartVoiceSessionRequest {
   // The language spoken, BCP 47; empty, the recognizer detects it.
   string language = 1;
@@ -432,13 +416,17 @@ message AssistantConversation {
 
 // AssistantMessage is a request or an answer of a conversation.
 message AssistantMessage {
+  reserved 4;
+  reserved speech;
+
   // A request when true, else an answer.
   bool user = 1;
   string text = 2;
   google.protobuf.Timestamp time = 3;
-  // An answer's speech as it was spoken, a sentence a URL relative to the
-  // server's base URL, in order; none when none was kept.
-  repeated string speech = 4;
+  // The URL of an answer's speech as it was spoken, relative to the
+  // server's base URL; its formats query names the encodings the client
+  // plays ("opus", "aac", "mp3", "flac", "wav"). Empty when none was kept.
+  string speech_url = 5;
 }
 
 message ListAssistantConversationsRequest {}
@@ -502,6 +490,9 @@ message GetAssistantSettingsRequest {}
 
 message GetAssistantSettingsResponse {
   AssistantSettings settings = 1;
+  // The voice session plugin's recognizers and voices, to choose from.
+  repeated VoiceEngine recognizers = 2;
+  repeated VoiceEngine voices = 3;
 }
 
 message UpdateAssistantSettingsRequest {

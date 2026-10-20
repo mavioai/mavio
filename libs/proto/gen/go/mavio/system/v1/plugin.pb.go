@@ -852,9 +852,10 @@ type ListPluginConfigOptionsRequest_builder struct {
 	PluginId *string
 	// The source x-mavio-options names: "indexer-definitions" and
 	// "download-client-definitions", the definitions of the plugin's
-	// providers, "speech-recognizers" and "speech-synthesizers", the services
-	// of its speech providers, "subtitle-providers" and
-	// "subtitle-translators", those of its subtitle providers, or "download-clients", the clients of every
+	// providers; "voice-recognizers" and "voice-synthesizers", the services
+	// of its voice sessions; "transcription-services", those of its
+	// transcribers; "subtitle-providers" and "subtitle-translators", those
+	// of its subtitle providers; or "download-clients", the clients of every
 	// download client provider.
 	Source *string
 }

@@ -242,7 +242,7 @@ impl ::buffa::Enumeration for ContainerState {
     }
 }
 /// ContainerDependency is a service a plugin depends on that runs as a
-/// container image, such as whisper-asr-webservice. The server runs it on a
+/// container image, such as FlareSolverr. The server runs it on a
 /// container engine (managed) or reaches it at an address an administrator
 /// gives (external); the plugin sees only its address.
 #[derive(Clone, PartialEq, Default)]
@@ -258,7 +258,7 @@ pub struct ContainerDependency {
     /// Field 2: `description`
     pub description: ::core::option::Option<::buffa::alloc::string::String>,
     /// Image reference with its digest, e.g.
-    /// "onerahmet/openai-whisper-asr-webservice:v1.9.1@sha256:…".
+    /// "ghcr.io/flaresolverr/flaresolverr:v3.4.6@sha256:…".
     ///
     /// Field 3: `image`
     pub image: ::core::option::Option<::buffa::alloc::string::String>,

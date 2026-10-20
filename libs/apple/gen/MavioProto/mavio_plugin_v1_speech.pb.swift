@@ -8,11 +8,6 @@
 // For information on using the generated types, please see the documentation:
 //   https://github.com/apple/swift-protobuf/
 
-#if canImport(FoundationEssentials)
-import FoundationEssentials
-#else
-import Foundation
-#endif
 import SwiftProtobuf
 
 // If the compiler emits an error on this type, it is because this file
@@ -25,49 +20,7 @@ fileprivate nonisolated struct _GeneratedWithProtocGenSwiftVersion: SwiftProtobu
   typealias Version = _2
 }
 
-/// SpeechFormat is the encoding of synthesized audio; deprecated with
-/// SynthesizeSpeechRequest.format.
-public nonisolated enum Mavio_Plugin_V1_SpeechFormat: SwiftProtobuf.Enum, Swift.CaseIterable {
-  public typealias RawValue = Int
-  case unspecified // = 0
-
-  /// Opus in Ogg.
-  case oggOpus // = 1
-  case mp3 // = 2
-  case UNRECOGNIZED(Int)
-
-  public init() {
-    self = .unspecified
-  }
-
-  public init?(rawValue: Int) {
-    switch rawValue {
-    case 0: self = .unspecified
-    case 1: self = .oggOpus
-    case 2: self = .mp3
-    default: self = .UNRECOGNIZED(rawValue)
-    }
-  }
-
-  public var rawValue: Int {
-    switch self {
-    case .unspecified: return 0
-    case .oggOpus: return 1
-    case .mp3: return 2
-    case .UNRECOGNIZED(let i): return i
-    }
-  }
-
-  // The compiler won't synthesize support with the UNRECOGNIZED case.
-  public static let allCases: [Mavio_Plugin_V1_SpeechFormat] = [
-    .unspecified,
-    .oggOpus,
-    .mp3,
-  ]
-
-}
-
-public nonisolated struct Mavio_Plugin_V1_ListRecognizersRequest: Sendable {
+public nonisolated struct Mavio_Plugin_V1_ListTranscribersRequest: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -77,33 +30,28 @@ public nonisolated struct Mavio_Plugin_V1_ListRecognizersRequest: Sendable {
   public init() {}
 }
 
-public nonisolated struct Mavio_Plugin_V1_ListRecognizersResponse: Sendable {
+public nonisolated struct Mavio_Plugin_V1_ListTranscribersResponse: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  /// The recognizers configured, which recognize speech by their names.
-  public var recognizers: [Mavio_Plugin_V1_RecognizerInfo] = []
+  /// The services transcribers are configured from.
+  public var services: [Mavio_Plugin_V1_TranscriptionServiceInfo] = []
 
-  /// The services recognizers are configured from, with their settings
-  /// and what they can do. A plugin listing none has recognizers that are
-  /// their own services.
-  public var services: [Mavio_Plugin_V1_RecognizerInfo] = []
+  public var transcribers: [Mavio_Plugin_V1_TranscriberInfo] = []
 
   public var unknownFields = SwiftProtobuf.UnknownStorage()
 
   public init() {}
 }
 
-/// RecognizerInfo is a recognizer a plugin has configured, or a service
-/// it implements.
-public nonisolated struct Mavio_Plugin_V1_RecognizerInfo: Sendable {
+/// TranscriptionServiceInfo is a transcription service a plugin implements.
+public nonisolated struct Mavio_Plugin_V1_TranscriptionServiceInfo: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  /// Stable within the plugin: a recognizer's ID, or a service's name,
-  /// such as "whisper".
+  /// Stable within the plugin, such as "whisper".
   public var name: String {
     get {_name ?? String()}
     set {_name = newValue}
@@ -113,7 +61,6 @@ public nonisolated struct Mavio_Plugin_V1_RecognizerInfo: Sendable {
   /// Clears the value of `name`. Subsequent reads from it will return its default value.
   public mutating func clearName() {self._name = nil}
 
-  /// The name the administrator gave a recognizer, or a service's.
   public var displayName: String {
     get {_displayName ?? String()}
     set {_displayName = newValue}
@@ -123,8 +70,52 @@ public nonisolated struct Mavio_Plugin_V1_RecognizerInfo: Sendable {
   /// Clears the value of `displayName`. Subsequent reads from it will return its default value.
   public mutating func clearDisplayName() {self._displayName = nil}
 
-  /// A service's settings, which configure its recognizers.
+  /// The settings of the transcribers configured from it.
   public var settings: [Mavio_Plugin_V1_SettingField] = []
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+
+  fileprivate var _name: String? = nil
+  fileprivate var _displayName: String? = nil
+}
+
+/// TranscriberInfo is a transcriber a plugin has configured.
+public nonisolated struct Mavio_Plugin_V1_TranscriberInfo: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  /// The ID the server generated for it.
+  public var id: String {
+    get {_id ?? String()}
+    set {_id = newValue}
+  }
+  /// Returns true if `id` has been explicitly set.
+  public var hasID: Bool {self._id != nil}
+  /// Clears the value of `id`. Subsequent reads from it will return its default value.
+  public mutating func clearID() {self._id = nil}
+
+  /// The name the administrator gave it.
+  public var name: String {
+    get {_name ?? String()}
+    set {_name = newValue}
+  }
+  /// Returns true if `name` has been explicitly set.
+  public var hasName: Bool {self._name != nil}
+  /// Clears the value of `name`. Subsequent reads from it will return its default value.
+  public mutating func clearName() {self._name = nil}
+
+  /// The service it is configured from, a name among the services.
+  public var service: String {
+    get {_service ?? String()}
+    set {_service = newValue}
+  }
+  /// Returns true if `service` has been explicitly set.
+  public var hasService: Bool {self._service != nil}
+  /// Clears the value of `service`. Subsequent reads from it will return its default value.
+  public mutating func clearService() {self._service = nil}
 
   public var enabled: Bool {
     get {_enabled ?? false}
@@ -135,48 +126,18 @@ public nonisolated struct Mavio_Plugin_V1_RecognizerInfo: Sendable {
   /// Clears the value of `enabled`. Subsequent reads from it will return its default value.
   public mutating func clearEnabled() {self._enabled = nil}
 
-  /// The languages it recognizes, BCP 47; empty for any.
+  /// It can be used: its model is downloaded, for a local one.
+  public var ready: Bool {
+    get {_ready ?? false}
+    set {_ready = newValue}
+  }
+  /// Returns true if `ready` has been explicitly set.
+  public var hasReady: Bool {self._ready != nil}
+  /// Clears the value of `ready`. Subsequent reads from it will return its default value.
+  public mutating func clearReady() {self._ready = nil}
+
+  /// The languages it transcribes, BCP 47; empty for any.
   public var languages: [String] = []
-
-  /// It gives the times of what is said, which subtitles need.
-  public var timestamps: Bool {
-    get {_timestamps ?? false}
-    set {_timestamps = newValue}
-  }
-  /// Returns true if `timestamps` has been explicitly set.
-  public var hasTimestamps: Bool {self._timestamps != nil}
-  /// Clears the value of `timestamps`. Subsequent reads from it will return its default value.
-  public mutating func clearTimestamps() {self._timestamps = nil}
-
-  /// It recognizes audio whose language is not given.
-  public var detectsLanguage: Bool {
-    get {_detectsLanguage ?? false}
-    set {_detectsLanguage = newValue}
-  }
-  /// Returns true if `detectsLanguage` has been explicitly set.
-  public var hasDetectsLanguage: Bool {self._detectsLanguage != nil}
-  /// Clears the value of `detectsLanguage`. Subsequent reads from it will return its default value.
-  public mutating func clearDetectsLanguage() {self._detectsLanguage = nil}
-
-  /// It translates what is said into English.
-  public var translates: Bool {
-    get {_translates ?? false}
-    set {_translates = newValue}
-  }
-  /// Returns true if `translates` has been explicitly set.
-  public var hasTranslates: Bool {self._translates != nil}
-  /// Clears the value of `translates`. Subsequent reads from it will return its default value.
-  public mutating func clearTranslates() {self._translates = nil}
-
-  /// It takes phrases it is likely to hear.
-  public var hints: Bool {
-    get {_hints ?? false}
-    set {_hints = newValue}
-  }
-  /// Returns true if `hints` has been explicitly set.
-  public var hasHints: Bool {self._hints != nil}
-  /// Clears the value of `hints`. Subsequent reads from it will return its default value.
-  public mutating func clearHints() {self._hints = nil}
 
   /// The longest audio it takes at once; unset for any.
   public var maxDuration: SwiftProtobuf.Google_Protobuf_Duration {
@@ -188,72 +149,48 @@ public nonisolated struct Mavio_Plugin_V1_RecognizerInfo: Sendable {
   /// Clears the value of `maxDuration`. Subsequent reads from it will return its default value.
   public mutating func clearMaxDuration() {self._maxDuration = nil}
 
-  /// The administrator lets it transcribe videos into subtitles; with
-  /// timestamps only.
-  public var subtitles: Bool {
-    get {_subtitles ?? false}
-    set {_subtitles = newValue}
+  /// It translates what is said into English.
+  public var translates: Bool {
+    get {_translates ?? false}
+    set {_translates = newValue}
   }
-  /// Returns true if `subtitles` has been explicitly set.
-  public var hasSubtitles: Bool {self._subtitles != nil}
-  /// Clears the value of `subtitles`. Subsequent reads from it will return its default value.
-  public mutating func clearSubtitles() {self._subtitles = nil}
-
-  /// The service a recognizer is configured from, a name among the
-  /// services.
-  public var service: String {
-    get {_service ?? String()}
-    set {_service = newValue}
-  }
-  /// Returns true if `service` has been explicitly set.
-  public var hasService: Bool {self._service != nil}
-  /// Clears the value of `service`. Subsequent reads from it will return its default value.
-  public mutating func clearService() {self._service = nil}
+  /// Returns true if `translates` has been explicitly set.
+  public var hasTranslates: Bool {self._translates != nil}
+  /// Clears the value of `translates`. Subsequent reads from it will return its default value.
+  public mutating func clearTranslates() {self._translates = nil}
 
   public var unknownFields = SwiftProtobuf.UnknownStorage()
 
   public init() {}
 
+  fileprivate var _id: String? = nil
   fileprivate var _name: String? = nil
-  fileprivate var _displayName: String? = nil
-  fileprivate var _enabled: Bool? = nil
-  fileprivate var _timestamps: Bool? = nil
-  fileprivate var _detectsLanguage: Bool? = nil
-  fileprivate var _translates: Bool? = nil
-  fileprivate var _hints: Bool? = nil
-  fileprivate var _maxDuration: SwiftProtobuf.Google_Protobuf_Duration? = nil
-  fileprivate var _subtitles: Bool? = nil
   fileprivate var _service: String? = nil
+  fileprivate var _enabled: Bool? = nil
+  fileprivate var _ready: Bool? = nil
+  fileprivate var _maxDuration: SwiftProtobuf.Google_Protobuf_Duration? = nil
+  fileprivate var _translates: Bool? = nil
 }
 
-/// SpeechAudio is audio to recognize.
+/// SpeechAudio is audio to transcribe.
 public nonisolated struct Mavio_Plugin_V1_SpeechAudio: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  public var source: Mavio_Plugin_V1_SpeechAudio.OneOf_Source? = nil
-
-  /// 16 kHz mono 16-bit little-endian PCM.
-  public var pcm: Data {
-    get {
-      if case .pcm(let v)? = source {return v}
-      return Data()
-    }
-    set {source = .pcm(newValue)}
-  }
-
-  /// A URL of the host API serving the audio, which the plugin fetches
-  /// with the host's HTTP client, such as a stream of a video.
+  /// A URL of the host API serving the audio as 16 kHz mono 16-bit
+  /// little-endian PCM aligned with the start of the video, which the
+  /// plugin fetches with the host's HTTP client.
   public var url: String {
-    get {
-      if case .url(let v)? = source {return v}
-      return String()
-    }
-    set {source = .url(newValue)}
+    get {_url ?? String()}
+    set {_url = newValue}
   }
+  /// Returns true if `url` has been explicitly set.
+  public var hasURL: Bool {self._url != nil}
+  /// Clears the value of `url`. Subsequent reads from it will return its default value.
+  public mutating func clearURL() {self._url = nil}
 
-  /// Only the first seconds of a URL's audio; unset for all.
+  /// Only the first seconds of the audio; unset for all.
   public var limit: SwiftProtobuf.Google_Protobuf_Duration {
     get {_limit ?? SwiftProtobuf.Google_Protobuf_Duration()}
     set {_limit = newValue}
@@ -265,33 +202,25 @@ public nonisolated struct Mavio_Plugin_V1_SpeechAudio: Sendable {
 
   public var unknownFields = SwiftProtobuf.UnknownStorage()
 
-  public nonisolated enum OneOf_Source: Equatable, Sendable {
-    /// 16 kHz mono 16-bit little-endian PCM.
-    case pcm(Data)
-    /// A URL of the host API serving the audio, which the plugin fetches
-    /// with the host's HTTP client, such as a stream of a video.
-    case url(String)
-
-  }
-
   public init() {}
 
+  fileprivate var _url: String? = nil
   fileprivate var _limit: SwiftProtobuf.Google_Protobuf_Duration? = nil
 }
 
-public nonisolated struct Mavio_Plugin_V1_RecognizeSpeechRequest: Sendable {
+public nonisolated struct Mavio_Plugin_V1_TranscribeSpeechRequest: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  public var recognizer: String {
-    get {_recognizer ?? String()}
-    set {_recognizer = newValue}
+  public var transcriber: String {
+    get {_transcriber ?? String()}
+    set {_transcriber = newValue}
   }
-  /// Returns true if `recognizer` has been explicitly set.
-  public var hasRecognizer: Bool {self._recognizer != nil}
-  /// Clears the value of `recognizer`. Subsequent reads from it will return its default value.
-  public mutating func clearRecognizer() {self._recognizer = nil}
+  /// Returns true if `transcriber` has been explicitly set.
+  public var hasTranscriber: Bool {self._transcriber != nil}
+  /// Clears the value of `transcriber`. Subsequent reads from it will return its default value.
+  public mutating func clearTranscriber() {self._transcriber = nil}
 
   public var audio: Mavio_Plugin_V1_SpeechAudio {
     get {_audio ?? Mavio_Plugin_V1_SpeechAudio()}
@@ -302,7 +231,7 @@ public nonisolated struct Mavio_Plugin_V1_RecognizeSpeechRequest: Sendable {
   /// Clears the value of `audio`. Subsequent reads from it will return its default value.
   public mutating func clearAudio() {self._audio = nil}
 
-  /// The language spoken, BCP 47; empty, the recognizer detects it.
+  /// The language spoken, BCP 47; empty, the transcriber detects it.
   public var language: String {
     get {_language ?? String()}
     set {_language = newValue}
@@ -322,19 +251,6 @@ public nonisolated struct Mavio_Plugin_V1_RecognizeSpeechRequest: Sendable {
   /// Clears the value of `translate`. Subsequent reads from it will return its default value.
   public mutating func clearTranslate() {self._translate = nil}
 
-  /// Phrases the recognizer is likely to hear, such as titles.
-  public var hints: [String] = []
-
-  /// Gives the times of what is said.
-  public var timestamps: Bool {
-    get {_timestamps ?? false}
-    set {_timestamps = newValue}
-  }
-  /// Returns true if `timestamps` has been explicitly set.
-  public var hasTimestamps: Bool {self._timestamps != nil}
-  /// Clears the value of `timestamps`. Subsequent reads from it will return its default value.
-  public mutating func clearTimestamps() {self._timestamps = nil}
-
   /// What the audio is of, such as a video's file name, for the service's
   /// logs.
   public var name: String {
@@ -350,29 +266,19 @@ public nonisolated struct Mavio_Plugin_V1_RecognizeSpeechRequest: Sendable {
 
   public init() {}
 
-  fileprivate var _recognizer: String? = nil
+  fileprivate var _transcriber: String? = nil
   fileprivate var _audio: Mavio_Plugin_V1_SpeechAudio? = nil
   fileprivate var _language: String? = nil
   fileprivate var _translate: Bool? = nil
-  fileprivate var _timestamps: Bool? = nil
   fileprivate var _name: String? = nil
 }
 
-public nonisolated struct Mavio_Plugin_V1_RecognizeSpeechResponse: Sendable {
+public nonisolated struct Mavio_Plugin_V1_TranscribeSpeechResponse: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  public var text: String {
-    get {_text ?? String()}
-    set {_text = newValue}
-  }
-  /// Returns true if `text` has been explicitly set.
-  public var hasText: Bool {self._text != nil}
-  /// Clears the value of `text`. Subsequent reads from it will return its default value.
-  public mutating func clearText() {self._text = nil}
-
-  /// The language recognized, BCP 47.
+  /// The language transcribed, BCP 47.
   public var language: String {
     get {_language ?? String()}
     set {_language = newValue}
@@ -382,14 +288,12 @@ public nonisolated struct Mavio_Plugin_V1_RecognizeSpeechResponse: Sendable {
   /// Clears the value of `language`. Subsequent reads from it will return its default value.
   public mutating func clearLanguage() {self._language = nil}
 
-  /// What is said with its times, when they were asked for.
   public var segments: [Mavio_Plugin_V1_SpeechSegment] = []
 
   public var unknownFields = SwiftProtobuf.UnknownStorage()
 
   public init() {}
 
-  fileprivate var _text: String? = nil
   fileprivate var _language: String? = nil
 }
 
@@ -440,14 +344,14 @@ public nonisolated struct Mavio_Plugin_V1_DetectSpeechLanguageRequest: Sendable 
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  public var recognizer: String {
-    get {_recognizer ?? String()}
-    set {_recognizer = newValue}
+  public var transcriber: String {
+    get {_transcriber ?? String()}
+    set {_transcriber = newValue}
   }
-  /// Returns true if `recognizer` has been explicitly set.
-  public var hasRecognizer: Bool {self._recognizer != nil}
-  /// Clears the value of `recognizer`. Subsequent reads from it will return its default value.
-  public mutating func clearRecognizer() {self._recognizer = nil}
+  /// Returns true if `transcriber` has been explicitly set.
+  public var hasTranscriber: Bool {self._transcriber != nil}
+  /// Clears the value of `transcriber`. Subsequent reads from it will return its default value.
+  public mutating func clearTranscriber() {self._transcriber = nil}
 
   public var audio: Mavio_Plugin_V1_SpeechAudio {
     get {_audio ?? Mavio_Plugin_V1_SpeechAudio()}
@@ -462,7 +366,7 @@ public nonisolated struct Mavio_Plugin_V1_DetectSpeechLanguageRequest: Sendable 
 
   public init() {}
 
-  fileprivate var _recognizer: String? = nil
+  fileprivate var _transcriber: String? = nil
   fileprivate var _audio: Mavio_Plugin_V1_SpeechAudio? = nil
 }
 
@@ -488,242 +392,12 @@ public nonisolated struct Mavio_Plugin_V1_DetectSpeechLanguageResponse: Sendable
   fileprivate var _language: String? = nil
 }
 
-public nonisolated struct Mavio_Plugin_V1_ListVoicesRequest: Sendable {
-  // SwiftProtobuf.Message conformance is added in an extension below. See the
-  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
-  // methods supported on all messages.
-
-  public var unknownFields = SwiftProtobuf.UnknownStorage()
-
-  public init() {}
-}
-
-public nonisolated struct Mavio_Plugin_V1_ListVoicesResponse: Sendable {
-  // SwiftProtobuf.Message conformance is added in an extension below. See the
-  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
-  // methods supported on all messages.
-
-  public var voices: [Mavio_Plugin_V1_VoiceInfo] = []
-
-  /// The synthesizers configured, with their state.
-  public var synthesizers: [Mavio_Plugin_V1_SynthesizerInfo] = []
-
-  /// The services synthesizers are configured from, with their settings.
-  /// A plugin listing none has synthesizers that are their own services.
-  public var services: [Mavio_Plugin_V1_SynthesizerInfo] = []
-
-  public var unknownFields = SwiftProtobuf.UnknownStorage()
-
-  public init() {}
-}
-
-/// SynthesizerInfo is a synthesizer a plugin has configured, or a
-/// synthesis service it implements.
-public nonisolated struct Mavio_Plugin_V1_SynthesizerInfo: Sendable {
-  // SwiftProtobuf.Message conformance is added in an extension below. See the
-  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
-  // methods supported on all messages.
-
-  /// Stable within the plugin: a synthesizer's ID, or a service's name,
-  /// such as "openai".
-  public var name: String {
-    get {_name ?? String()}
-    set {_name = newValue}
-  }
-  /// Returns true if `name` has been explicitly set.
-  public var hasName: Bool {self._name != nil}
-  /// Clears the value of `name`. Subsequent reads from it will return its default value.
-  public mutating func clearName() {self._name = nil}
-
-  /// The name the administrator gave a synthesizer, or a service's.
-  public var displayName: String {
-    get {_displayName ?? String()}
-    set {_displayName = newValue}
-  }
-  /// Returns true if `displayName` has been explicitly set.
-  public var hasDisplayName: Bool {self._displayName != nil}
-  /// Clears the value of `displayName`. Subsequent reads from it will return its default value.
-  public mutating func clearDisplayName() {self._displayName = nil}
-
-  /// A service's settings, which configure its synthesizers.
-  public var settings: [Mavio_Plugin_V1_SettingField] = []
-
-  public var enabled: Bool {
-    get {_enabled ?? false}
-    set {_enabled = newValue}
-  }
-  /// Returns true if `enabled` has been explicitly set.
-  public var hasEnabled: Bool {self._enabled != nil}
-  /// Clears the value of `enabled`. Subsequent reads from it will return its default value.
-  public mutating func clearEnabled() {self._enabled = nil}
-
-  /// The service a synthesizer is configured from, a name among the
-  /// services.
-  public var service: String {
-    get {_service ?? String()}
-    set {_service = newValue}
-  }
-  /// Returns true if `service` has been explicitly set.
-  public var hasService: Bool {self._service != nil}
-  /// Clears the value of `service`. Subsequent reads from it will return its default value.
-  public mutating func clearService() {self._service = nil}
-
-  public var unknownFields = SwiftProtobuf.UnknownStorage()
-
-  public init() {}
-
-  fileprivate var _name: String? = nil
-  fileprivate var _displayName: String? = nil
-  fileprivate var _enabled: Bool? = nil
-  fileprivate var _service: String? = nil
-}
-
-/// VoiceInfo is a voice of a synthesizer.
-public nonisolated struct Mavio_Plugin_V1_VoiceInfo: Sendable {
-  // SwiftProtobuf.Message conformance is added in an extension below. See the
-  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
-  // methods supported on all messages.
-
-  /// "<synthesizer>/<voice>", stable within the plugin.
-  public var id: String {
-    get {_id ?? String()}
-    set {_id = newValue}
-  }
-  /// Returns true if `id` has been explicitly set.
-  public var hasID: Bool {self._id != nil}
-  /// Clears the value of `id`. Subsequent reads from it will return its default value.
-  public mutating func clearID() {self._id = nil}
-
-  public var name: String {
-    get {_name ?? String()}
-    set {_name = newValue}
-  }
-  /// Returns true if `name` has been explicitly set.
-  public var hasName: Bool {self._name != nil}
-  /// Clears the value of `name`. Subsequent reads from it will return its default value.
-  public mutating func clearName() {self._name = nil}
-
-  /// The languages it speaks, BCP 47; empty for any.
-  public var languages: [String] = []
-
-  public var unknownFields = SwiftProtobuf.UnknownStorage()
-
-  public init() {}
-
-  fileprivate var _id: String? = nil
-  fileprivate var _name: String? = nil
-}
-
-public nonisolated struct Mavio_Plugin_V1_SynthesizeSpeechRequest: Sendable {
-  // SwiftProtobuf.Message conformance is added in an extension below. See the
-  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
-  // methods supported on all messages.
-
-  public var voice: String {
-    get {_voice ?? String()}
-    set {_voice = newValue}
-  }
-  /// Returns true if `voice` has been explicitly set.
-  public var hasVoice: Bool {self._voice != nil}
-  /// Clears the value of `voice`. Subsequent reads from it will return its default value.
-  public mutating func clearVoice() {self._voice = nil}
-
-  public var text: String {
-    get {_text ?? String()}
-    set {_text = newValue}
-  }
-  /// Returns true if `text` has been explicitly set.
-  public var hasText: Bool {self._text != nil}
-  /// Clears the value of `text`. Subsequent reads from it will return its default value.
-  public mutating func clearText() {self._text = nil}
-
-  /// BCP 47.
-  public var language: String {
-    get {_language ?? String()}
-    set {_language = newValue}
-  }
-  /// Returns true if `language` has been explicitly set.
-  public var hasLanguage: Bool {self._language != nil}
-  /// Clears the value of `language`. Subsequent reads from it will return its default value.
-  public mutating func clearLanguage() {self._language = nil}
-
-  /// Deprecated: unset by the server, which converts the speech for clients
-  /// that do not play it; synthesizers speak in the encoding of their
-  /// settings.
-  ///
-  /// NOTE: This field was marked as deprecated in the .proto file.
-  public var format: Mavio_Plugin_V1_SpeechFormat {
-    get {_format ?? .unspecified}
-    set {_format = newValue}
-  }
-  /// Returns true if `format` has been explicitly set.
-  public var hasFormat: Bool {self._format != nil}
-  /// Clears the value of `format`. Subsequent reads from it will return its default value.
-  public mutating func clearFormat() {self._format = nil}
-
-  /// 0.25–4; 0 for 1.
-  public var speed: Double {
-    get {_speed ?? 0}
-    set {_speed = newValue}
-  }
-  /// Returns true if `speed` has been explicitly set.
-  public var hasSpeed: Bool {self._speed != nil}
-  /// Clears the value of `speed`. Subsequent reads from it will return its default value.
-  public mutating func clearSpeed() {self._speed = nil}
-
-  public var unknownFields = SwiftProtobuf.UnknownStorage()
-
-  public init() {}
-
-  fileprivate var _voice: String? = nil
-  fileprivate var _text: String? = nil
-  fileprivate var _language: String? = nil
-  fileprivate var _format: Mavio_Plugin_V1_SpeechFormat? = nil
-  fileprivate var _speed: Double? = nil
-}
-
-public nonisolated struct Mavio_Plugin_V1_SynthesizeSpeechResponse: Sendable {
-  // SwiftProtobuf.Message conformance is added in an extension below. See the
-  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
-  // methods supported on all messages.
-
-  public var audio: Data {
-    get {_audio ?? Data()}
-    set {_audio = newValue}
-  }
-  /// Returns true if `audio` has been explicitly set.
-  public var hasAudio: Bool {self._audio != nil}
-  /// Clears the value of `audio`. Subsequent reads from it will return its default value.
-  public mutating func clearAudio() {self._audio = nil}
-
-  /// Such as "audio/ogg" or "audio/mpeg".
-  public var contentType: String {
-    get {_contentType ?? String()}
-    set {_contentType = newValue}
-  }
-  /// Returns true if `contentType` has been explicitly set.
-  public var hasContentType: Bool {self._contentType != nil}
-  /// Clears the value of `contentType`. Subsequent reads from it will return its default value.
-  public mutating func clearContentType() {self._contentType = nil}
-
-  public var unknownFields = SwiftProtobuf.UnknownStorage()
-
-  public init() {}
-
-  fileprivate var _audio: Data? = nil
-  fileprivate var _contentType: String? = nil
-}
-
 // MARK: - Code below here is support for the SwiftProtobuf runtime.
 
 fileprivate nonisolated let _protobuf_package = "mavio.plugin.v1"
 
-nonisolated extension Mavio_Plugin_V1_SpeechFormat: SwiftProtobuf._ProtoNameProviding {
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{2}\0SPEECH_FORMAT_UNSPECIFIED\0\u{1}SPEECH_FORMAT_OGG_OPUS\0\u{1}SPEECH_FORMAT_MP3\0")
-}
-
-nonisolated extension Mavio_Plugin_V1_ListRecognizersRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  public static let protoMessageName: String = _protobuf_package + ".ListRecognizersRequest"
+nonisolated extension Mavio_Plugin_V1_ListTranscribersRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".ListTranscribersRequest"
   public static let _protobuf_nameMap = SwiftProtobuf._NameMap()
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -735,15 +409,15 @@ nonisolated extension Mavio_Plugin_V1_ListRecognizersRequest: SwiftProtobuf.Mess
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  public static func ==(lhs: Mavio_Plugin_V1_ListRecognizersRequest, rhs: Mavio_Plugin_V1_ListRecognizersRequest) -> Bool {
+  public static func ==(lhs: Mavio_Plugin_V1_ListTranscribersRequest, rhs: Mavio_Plugin_V1_ListTranscribersRequest) -> Bool {
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
 }
 
-nonisolated extension Mavio_Plugin_V1_ListRecognizersResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  public static let protoMessageName: String = _protobuf_package + ".ListRecognizersResponse"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}recognizers\0\u{1}services\0")
+nonisolated extension Mavio_Plugin_V1_ListTranscribersResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".ListTranscribersResponse"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}services\0\u{1}transcribers\0")
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -751,34 +425,34 @@ nonisolated extension Mavio_Plugin_V1_ListRecognizersResponse: SwiftProtobuf.Mes
       // allocates stack space for every case branch when no optimizations are
       // enabled. https://github.com/apple/swift-protobuf/issues/1034
       switch fieldNumber {
-      case 1: try { try decoder.decodeRepeatedMessageField(value: &self.recognizers) }()
-      case 2: try { try decoder.decodeRepeatedMessageField(value: &self.services) }()
+      case 1: try { try decoder.decodeRepeatedMessageField(value: &self.services) }()
+      case 2: try { try decoder.decodeRepeatedMessageField(value: &self.transcribers) }()
       default: break
       }
     }
   }
 
   public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-    if !self.recognizers.isEmpty {
-      try visitor.visitRepeatedMessageField(value: self.recognizers, fieldNumber: 1)
-    }
     if !self.services.isEmpty {
-      try visitor.visitRepeatedMessageField(value: self.services, fieldNumber: 2)
+      try visitor.visitRepeatedMessageField(value: self.services, fieldNumber: 1)
+    }
+    if !self.transcribers.isEmpty {
+      try visitor.visitRepeatedMessageField(value: self.transcribers, fieldNumber: 2)
     }
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  public static func ==(lhs: Mavio_Plugin_V1_ListRecognizersResponse, rhs: Mavio_Plugin_V1_ListRecognizersResponse) -> Bool {
-    if lhs.recognizers != rhs.recognizers {return false}
+  public static func ==(lhs: Mavio_Plugin_V1_ListTranscribersResponse, rhs: Mavio_Plugin_V1_ListTranscribersResponse) -> Bool {
     if lhs.services != rhs.services {return false}
+    if lhs.transcribers != rhs.transcribers {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
 }
 
-nonisolated extension Mavio_Plugin_V1_RecognizerInfo: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  public static let protoMessageName: String = _protobuf_package + ".RecognizerInfo"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}name\0\u{3}display_name\0\u{1}settings\0\u{1}enabled\0\u{1}languages\0\u{1}timestamps\0\u{3}detects_language\0\u{1}translates\0\u{1}hints\0\u{3}max_duration\0\u{1}subtitles\0\u{1}service\0")
+nonisolated extension Mavio_Plugin_V1_TranscriptionServiceInfo: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".TranscriptionServiceInfo"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}name\0\u{3}display_name\0\u{1}settings\0")
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -789,15 +463,6 @@ nonisolated extension Mavio_Plugin_V1_RecognizerInfo: SwiftProtobuf.Message, Swi
       case 1: try { try decoder.decodeSingularStringField(value: &self._name) }()
       case 2: try { try decoder.decodeSingularStringField(value: &self._displayName) }()
       case 3: try { try decoder.decodeRepeatedMessageField(value: &self.settings) }()
-      case 4: try { try decoder.decodeSingularBoolField(value: &self._enabled) }()
-      case 5: try { try decoder.decodeRepeatedStringField(value: &self.languages) }()
-      case 6: try { try decoder.decodeSingularBoolField(value: &self._timestamps) }()
-      case 7: try { try decoder.decodeSingularBoolField(value: &self._detectsLanguage) }()
-      case 8: try { try decoder.decodeSingularBoolField(value: &self._translates) }()
-      case 9: try { try decoder.decodeSingularBoolField(value: &self._hints) }()
-      case 10: try { try decoder.decodeSingularMessageField(value: &self._maxDuration) }()
-      case 11: try { try decoder.decodeSingularBoolField(value: &self._subtitles) }()
-      case 12: try { try decoder.decodeSingularStringField(value: &self._service) }()
       default: break
       }
     }
@@ -817,49 +482,82 @@ nonisolated extension Mavio_Plugin_V1_RecognizerInfo: SwiftProtobuf.Message, Swi
     if !self.settings.isEmpty {
       try visitor.visitRepeatedMessageField(value: self.settings, fieldNumber: 3)
     }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Mavio_Plugin_V1_TranscriptionServiceInfo, rhs: Mavio_Plugin_V1_TranscriptionServiceInfo) -> Bool {
+    if lhs._name != rhs._name {return false}
+    if lhs._displayName != rhs._displayName {return false}
+    if lhs.settings != rhs.settings {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Mavio_Plugin_V1_TranscriberInfo: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".TranscriberInfo"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}id\0\u{1}name\0\u{1}service\0\u{1}enabled\0\u{1}ready\0\u{1}languages\0\u{3}max_duration\0\u{1}translates\0")
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularStringField(value: &self._id) }()
+      case 2: try { try decoder.decodeSingularStringField(value: &self._name) }()
+      case 3: try { try decoder.decodeSingularStringField(value: &self._service) }()
+      case 4: try { try decoder.decodeSingularBoolField(value: &self._enabled) }()
+      case 5: try { try decoder.decodeSingularBoolField(value: &self._ready) }()
+      case 6: try { try decoder.decodeRepeatedStringField(value: &self.languages) }()
+      case 7: try { try decoder.decodeSingularMessageField(value: &self._maxDuration) }()
+      case 8: try { try decoder.decodeSingularBoolField(value: &self._translates) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    try { if let v = self._id {
+      try visitor.visitSingularStringField(value: v, fieldNumber: 1)
+    } }()
+    try { if let v = self._name {
+      try visitor.visitSingularStringField(value: v, fieldNumber: 2)
+    } }()
+    try { if let v = self._service {
+      try visitor.visitSingularStringField(value: v, fieldNumber: 3)
+    } }()
     try { if let v = self._enabled {
       try visitor.visitSingularBoolField(value: v, fieldNumber: 4)
     } }()
-    if !self.languages.isEmpty {
-      try visitor.visitRepeatedStringField(value: self.languages, fieldNumber: 5)
-    }
-    try { if let v = self._timestamps {
-      try visitor.visitSingularBoolField(value: v, fieldNumber: 6)
+    try { if let v = self._ready {
+      try visitor.visitSingularBoolField(value: v, fieldNumber: 5)
     } }()
-    try { if let v = self._detectsLanguage {
-      try visitor.visitSingularBoolField(value: v, fieldNumber: 7)
+    if !self.languages.isEmpty {
+      try visitor.visitRepeatedStringField(value: self.languages, fieldNumber: 6)
+    }
+    try { if let v = self._maxDuration {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 7)
     } }()
     try { if let v = self._translates {
       try visitor.visitSingularBoolField(value: v, fieldNumber: 8)
     } }()
-    try { if let v = self._hints {
-      try visitor.visitSingularBoolField(value: v, fieldNumber: 9)
-    } }()
-    try { if let v = self._maxDuration {
-      try visitor.visitSingularMessageField(value: v, fieldNumber: 10)
-    } }()
-    try { if let v = self._subtitles {
-      try visitor.visitSingularBoolField(value: v, fieldNumber: 11)
-    } }()
-    try { if let v = self._service {
-      try visitor.visitSingularStringField(value: v, fieldNumber: 12)
-    } }()
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  public static func ==(lhs: Mavio_Plugin_V1_RecognizerInfo, rhs: Mavio_Plugin_V1_RecognizerInfo) -> Bool {
+  public static func ==(lhs: Mavio_Plugin_V1_TranscriberInfo, rhs: Mavio_Plugin_V1_TranscriberInfo) -> Bool {
+    if lhs._id != rhs._id {return false}
     if lhs._name != rhs._name {return false}
-    if lhs._displayName != rhs._displayName {return false}
-    if lhs.settings != rhs.settings {return false}
-    if lhs._enabled != rhs._enabled {return false}
-    if lhs.languages != rhs.languages {return false}
-    if lhs._timestamps != rhs._timestamps {return false}
-    if lhs._detectsLanguage != rhs._detectsLanguage {return false}
-    if lhs._translates != rhs._translates {return false}
-    if lhs._hints != rhs._hints {return false}
-    if lhs._maxDuration != rhs._maxDuration {return false}
-    if lhs._subtitles != rhs._subtitles {return false}
     if lhs._service != rhs._service {return false}
+    if lhs._enabled != rhs._enabled {return false}
+    if lhs._ready != rhs._ready {return false}
+    if lhs.languages != rhs.languages {return false}
+    if lhs._maxDuration != rhs._maxDuration {return false}
+    if lhs._translates != rhs._translates {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
@@ -867,7 +565,7 @@ nonisolated extension Mavio_Plugin_V1_RecognizerInfo: SwiftProtobuf.Message, Swi
 
 nonisolated extension Mavio_Plugin_V1_SpeechAudio: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".SpeechAudio"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}pcm\0\u{1}url\0\u{1}limit\0")
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}url\0\u{1}limit\0")
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -875,23 +573,8 @@ nonisolated extension Mavio_Plugin_V1_SpeechAudio: SwiftProtobuf.Message, SwiftP
       // allocates stack space for every case branch when no optimizations are
       // enabled. https://github.com/apple/swift-protobuf/issues/1034
       switch fieldNumber {
-      case 1: try {
-        var v: Data?
-        try decoder.decodeSingularBytesField(value: &v)
-        if let v = v {
-          if self.source != nil {try decoder.handleConflictingOneOf()}
-          self.source = .pcm(v)
-        }
-      }()
-      case 2: try {
-        var v: String?
-        try decoder.decodeSingularStringField(value: &v)
-        if let v = v {
-          if self.source != nil {try decoder.handleConflictingOneOf()}
-          self.source = .url(v)
-        }
-      }()
-      case 3: try { try decoder.decodeSingularMessageField(value: &self._limit) }()
+      case 1: try { try decoder.decodeSingularStringField(value: &self._url) }()
+      case 2: try { try decoder.decodeSingularMessageField(value: &self._limit) }()
       default: break
       }
     }
@@ -902,34 +585,26 @@ nonisolated extension Mavio_Plugin_V1_SpeechAudio: SwiftProtobuf.Message, SwiftP
     // allocates stack space for every if/case branch local when no optimizations
     // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
     // https://github.com/apple/swift-protobuf/issues/1182
-    switch self.source {
-    case .pcm?: try {
-      guard case .pcm(let v)? = self.source else { preconditionFailure() }
-      try visitor.visitSingularBytesField(value: v, fieldNumber: 1)
-    }()
-    case .url?: try {
-      guard case .url(let v)? = self.source else { preconditionFailure() }
-      try visitor.visitSingularStringField(value: v, fieldNumber: 2)
-    }()
-    case nil: break
-    }
+    try { if let v = self._url {
+      try visitor.visitSingularStringField(value: v, fieldNumber: 1)
+    } }()
     try { if let v = self._limit {
-      try visitor.visitSingularMessageField(value: v, fieldNumber: 3)
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 2)
     } }()
     try unknownFields.traverse(visitor: &visitor)
   }
 
   public static func ==(lhs: Mavio_Plugin_V1_SpeechAudio, rhs: Mavio_Plugin_V1_SpeechAudio) -> Bool {
-    if lhs.source != rhs.source {return false}
+    if lhs._url != rhs._url {return false}
     if lhs._limit != rhs._limit {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
 }
 
-nonisolated extension Mavio_Plugin_V1_RecognizeSpeechRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  public static let protoMessageName: String = _protobuf_package + ".RecognizeSpeechRequest"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}recognizer\0\u{1}audio\0\u{1}language\0\u{1}translate\0\u{1}hints\0\u{1}timestamps\0\u{1}name\0")
+nonisolated extension Mavio_Plugin_V1_TranscribeSpeechRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".TranscribeSpeechRequest"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}transcriber\0\u{1}audio\0\u{1}language\0\u{1}translate\0\u{1}name\0")
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -937,13 +612,11 @@ nonisolated extension Mavio_Plugin_V1_RecognizeSpeechRequest: SwiftProtobuf.Mess
       // allocates stack space for every case branch when no optimizations are
       // enabled. https://github.com/apple/swift-protobuf/issues/1034
       switch fieldNumber {
-      case 1: try { try decoder.decodeSingularStringField(value: &self._recognizer) }()
+      case 1: try { try decoder.decodeSingularStringField(value: &self._transcriber) }()
       case 2: try { try decoder.decodeSingularMessageField(value: &self._audio) }()
       case 3: try { try decoder.decodeSingularStringField(value: &self._language) }()
       case 4: try { try decoder.decodeSingularBoolField(value: &self._translate) }()
-      case 5: try { try decoder.decodeRepeatedStringField(value: &self.hints) }()
-      case 6: try { try decoder.decodeSingularBoolField(value: &self._timestamps) }()
-      case 7: try { try decoder.decodeSingularStringField(value: &self._name) }()
+      case 5: try { try decoder.decodeSingularStringField(value: &self._name) }()
       default: break
       }
     }
@@ -954,7 +627,7 @@ nonisolated extension Mavio_Plugin_V1_RecognizeSpeechRequest: SwiftProtobuf.Mess
     // allocates stack space for every if/case branch local when no optimizations
     // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
     // https://github.com/apple/swift-protobuf/issues/1182
-    try { if let v = self._recognizer {
+    try { if let v = self._transcriber {
       try visitor.visitSingularStringField(value: v, fieldNumber: 1)
     } }()
     try { if let v = self._audio {
@@ -966,34 +639,26 @@ nonisolated extension Mavio_Plugin_V1_RecognizeSpeechRequest: SwiftProtobuf.Mess
     try { if let v = self._translate {
       try visitor.visitSingularBoolField(value: v, fieldNumber: 4)
     } }()
-    if !self.hints.isEmpty {
-      try visitor.visitRepeatedStringField(value: self.hints, fieldNumber: 5)
-    }
-    try { if let v = self._timestamps {
-      try visitor.visitSingularBoolField(value: v, fieldNumber: 6)
-    } }()
     try { if let v = self._name {
-      try visitor.visitSingularStringField(value: v, fieldNumber: 7)
+      try visitor.visitSingularStringField(value: v, fieldNumber: 5)
     } }()
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  public static func ==(lhs: Mavio_Plugin_V1_RecognizeSpeechRequest, rhs: Mavio_Plugin_V1_RecognizeSpeechRequest) -> Bool {
-    if lhs._recognizer != rhs._recognizer {return false}
+  public static func ==(lhs: Mavio_Plugin_V1_TranscribeSpeechRequest, rhs: Mavio_Plugin_V1_TranscribeSpeechRequest) -> Bool {
+    if lhs._transcriber != rhs._transcriber {return false}
     if lhs._audio != rhs._audio {return false}
     if lhs._language != rhs._language {return false}
     if lhs._translate != rhs._translate {return false}
-    if lhs.hints != rhs.hints {return false}
-    if lhs._timestamps != rhs._timestamps {return false}
     if lhs._name != rhs._name {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
 }
 
-nonisolated extension Mavio_Plugin_V1_RecognizeSpeechResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  public static let protoMessageName: String = _protobuf_package + ".RecognizeSpeechResponse"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}text\0\u{1}language\0\u{1}segments\0")
+nonisolated extension Mavio_Plugin_V1_TranscribeSpeechResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".TranscribeSpeechResponse"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}language\0\u{1}segments\0")
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -1001,9 +666,8 @@ nonisolated extension Mavio_Plugin_V1_RecognizeSpeechResponse: SwiftProtobuf.Mes
       // allocates stack space for every case branch when no optimizations are
       // enabled. https://github.com/apple/swift-protobuf/issues/1034
       switch fieldNumber {
-      case 1: try { try decoder.decodeSingularStringField(value: &self._text) }()
-      case 2: try { try decoder.decodeSingularStringField(value: &self._language) }()
-      case 3: try { try decoder.decodeRepeatedMessageField(value: &self.segments) }()
+      case 1: try { try decoder.decodeSingularStringField(value: &self._language) }()
+      case 2: try { try decoder.decodeRepeatedMessageField(value: &self.segments) }()
       default: break
       }
     }
@@ -1014,20 +678,16 @@ nonisolated extension Mavio_Plugin_V1_RecognizeSpeechResponse: SwiftProtobuf.Mes
     // allocates stack space for every if/case branch local when no optimizations
     // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
     // https://github.com/apple/swift-protobuf/issues/1182
-    try { if let v = self._text {
+    try { if let v = self._language {
       try visitor.visitSingularStringField(value: v, fieldNumber: 1)
     } }()
-    try { if let v = self._language {
-      try visitor.visitSingularStringField(value: v, fieldNumber: 2)
-    } }()
     if !self.segments.isEmpty {
-      try visitor.visitRepeatedMessageField(value: self.segments, fieldNumber: 3)
+      try visitor.visitRepeatedMessageField(value: self.segments, fieldNumber: 2)
     }
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  public static func ==(lhs: Mavio_Plugin_V1_RecognizeSpeechResponse, rhs: Mavio_Plugin_V1_RecognizeSpeechResponse) -> Bool {
-    if lhs._text != rhs._text {return false}
+  public static func ==(lhs: Mavio_Plugin_V1_TranscribeSpeechResponse, rhs: Mavio_Plugin_V1_TranscribeSpeechResponse) -> Bool {
     if lhs._language != rhs._language {return false}
     if lhs.segments != rhs.segments {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
@@ -1081,7 +741,7 @@ nonisolated extension Mavio_Plugin_V1_SpeechSegment: SwiftProtobuf.Message, Swif
 
 nonisolated extension Mavio_Plugin_V1_DetectSpeechLanguageRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".DetectSpeechLanguageRequest"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}recognizer\0\u{1}audio\0")
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}transcriber\0\u{1}audio\0")
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -1089,7 +749,7 @@ nonisolated extension Mavio_Plugin_V1_DetectSpeechLanguageRequest: SwiftProtobuf
       // allocates stack space for every case branch when no optimizations are
       // enabled. https://github.com/apple/swift-protobuf/issues/1034
       switch fieldNumber {
-      case 1: try { try decoder.decodeSingularStringField(value: &self._recognizer) }()
+      case 1: try { try decoder.decodeSingularStringField(value: &self._transcriber) }()
       case 2: try { try decoder.decodeSingularMessageField(value: &self._audio) }()
       default: break
       }
@@ -1101,7 +761,7 @@ nonisolated extension Mavio_Plugin_V1_DetectSpeechLanguageRequest: SwiftProtobuf
     // allocates stack space for every if/case branch local when no optimizations
     // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
     // https://github.com/apple/swift-protobuf/issues/1182
-    try { if let v = self._recognizer {
+    try { if let v = self._transcriber {
       try visitor.visitSingularStringField(value: v, fieldNumber: 1)
     } }()
     try { if let v = self._audio {
@@ -1111,7 +771,7 @@ nonisolated extension Mavio_Plugin_V1_DetectSpeechLanguageRequest: SwiftProtobuf
   }
 
   public static func ==(lhs: Mavio_Plugin_V1_DetectSpeechLanguageRequest, rhs: Mavio_Plugin_V1_DetectSpeechLanguageRequest) -> Bool {
-    if lhs._recognizer != rhs._recognizer {return false}
+    if lhs._transcriber != rhs._transcriber {return false}
     if lhs._audio != rhs._audio {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
@@ -1147,256 +807,6 @@ nonisolated extension Mavio_Plugin_V1_DetectSpeechLanguageResponse: SwiftProtobu
 
   public static func ==(lhs: Mavio_Plugin_V1_DetectSpeechLanguageResponse, rhs: Mavio_Plugin_V1_DetectSpeechLanguageResponse) -> Bool {
     if lhs._language != rhs._language {return false}
-    if lhs.unknownFields != rhs.unknownFields {return false}
-    return true
-  }
-}
-
-nonisolated extension Mavio_Plugin_V1_ListVoicesRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  public static let protoMessageName: String = _protobuf_package + ".ListVoicesRequest"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap()
-
-  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
-    // Load everything into unknown fields
-    while try decoder.nextFieldNumber() != nil {}
-  }
-
-  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-    try unknownFields.traverse(visitor: &visitor)
-  }
-
-  public static func ==(lhs: Mavio_Plugin_V1_ListVoicesRequest, rhs: Mavio_Plugin_V1_ListVoicesRequest) -> Bool {
-    if lhs.unknownFields != rhs.unknownFields {return false}
-    return true
-  }
-}
-
-nonisolated extension Mavio_Plugin_V1_ListVoicesResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  public static let protoMessageName: String = _protobuf_package + ".ListVoicesResponse"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}voices\0\u{1}synthesizers\0\u{1}services\0")
-
-  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
-    while let fieldNumber = try decoder.nextFieldNumber() {
-      // The use of inline closures is to circumvent an issue where the compiler
-      // allocates stack space for every case branch when no optimizations are
-      // enabled. https://github.com/apple/swift-protobuf/issues/1034
-      switch fieldNumber {
-      case 1: try { try decoder.decodeRepeatedMessageField(value: &self.voices) }()
-      case 2: try { try decoder.decodeRepeatedMessageField(value: &self.synthesizers) }()
-      case 3: try { try decoder.decodeRepeatedMessageField(value: &self.services) }()
-      default: break
-      }
-    }
-  }
-
-  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-    if !self.voices.isEmpty {
-      try visitor.visitRepeatedMessageField(value: self.voices, fieldNumber: 1)
-    }
-    if !self.synthesizers.isEmpty {
-      try visitor.visitRepeatedMessageField(value: self.synthesizers, fieldNumber: 2)
-    }
-    if !self.services.isEmpty {
-      try visitor.visitRepeatedMessageField(value: self.services, fieldNumber: 3)
-    }
-    try unknownFields.traverse(visitor: &visitor)
-  }
-
-  public static func ==(lhs: Mavio_Plugin_V1_ListVoicesResponse, rhs: Mavio_Plugin_V1_ListVoicesResponse) -> Bool {
-    if lhs.voices != rhs.voices {return false}
-    if lhs.synthesizers != rhs.synthesizers {return false}
-    if lhs.services != rhs.services {return false}
-    if lhs.unknownFields != rhs.unknownFields {return false}
-    return true
-  }
-}
-
-nonisolated extension Mavio_Plugin_V1_SynthesizerInfo: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  public static let protoMessageName: String = _protobuf_package + ".SynthesizerInfo"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}name\0\u{3}display_name\0\u{1}settings\0\u{1}enabled\0\u{1}service\0")
-
-  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
-    while let fieldNumber = try decoder.nextFieldNumber() {
-      // The use of inline closures is to circumvent an issue where the compiler
-      // allocates stack space for every case branch when no optimizations are
-      // enabled. https://github.com/apple/swift-protobuf/issues/1034
-      switch fieldNumber {
-      case 1: try { try decoder.decodeSingularStringField(value: &self._name) }()
-      case 2: try { try decoder.decodeSingularStringField(value: &self._displayName) }()
-      case 3: try { try decoder.decodeRepeatedMessageField(value: &self.settings) }()
-      case 4: try { try decoder.decodeSingularBoolField(value: &self._enabled) }()
-      case 5: try { try decoder.decodeSingularStringField(value: &self._service) }()
-      default: break
-      }
-    }
-  }
-
-  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-    // The use of inline closures is to circumvent an issue where the compiler
-    // allocates stack space for every if/case branch local when no optimizations
-    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
-    // https://github.com/apple/swift-protobuf/issues/1182
-    try { if let v = self._name {
-      try visitor.visitSingularStringField(value: v, fieldNumber: 1)
-    } }()
-    try { if let v = self._displayName {
-      try visitor.visitSingularStringField(value: v, fieldNumber: 2)
-    } }()
-    if !self.settings.isEmpty {
-      try visitor.visitRepeatedMessageField(value: self.settings, fieldNumber: 3)
-    }
-    try { if let v = self._enabled {
-      try visitor.visitSingularBoolField(value: v, fieldNumber: 4)
-    } }()
-    try { if let v = self._service {
-      try visitor.visitSingularStringField(value: v, fieldNumber: 5)
-    } }()
-    try unknownFields.traverse(visitor: &visitor)
-  }
-
-  public static func ==(lhs: Mavio_Plugin_V1_SynthesizerInfo, rhs: Mavio_Plugin_V1_SynthesizerInfo) -> Bool {
-    if lhs._name != rhs._name {return false}
-    if lhs._displayName != rhs._displayName {return false}
-    if lhs.settings != rhs.settings {return false}
-    if lhs._enabled != rhs._enabled {return false}
-    if lhs._service != rhs._service {return false}
-    if lhs.unknownFields != rhs.unknownFields {return false}
-    return true
-  }
-}
-
-nonisolated extension Mavio_Plugin_V1_VoiceInfo: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  public static let protoMessageName: String = _protobuf_package + ".VoiceInfo"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}id\0\u{1}name\0\u{1}languages\0")
-
-  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
-    while let fieldNumber = try decoder.nextFieldNumber() {
-      // The use of inline closures is to circumvent an issue where the compiler
-      // allocates stack space for every case branch when no optimizations are
-      // enabled. https://github.com/apple/swift-protobuf/issues/1034
-      switch fieldNumber {
-      case 1: try { try decoder.decodeSingularStringField(value: &self._id) }()
-      case 2: try { try decoder.decodeSingularStringField(value: &self._name) }()
-      case 3: try { try decoder.decodeRepeatedStringField(value: &self.languages) }()
-      default: break
-      }
-    }
-  }
-
-  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-    // The use of inline closures is to circumvent an issue where the compiler
-    // allocates stack space for every if/case branch local when no optimizations
-    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
-    // https://github.com/apple/swift-protobuf/issues/1182
-    try { if let v = self._id {
-      try visitor.visitSingularStringField(value: v, fieldNumber: 1)
-    } }()
-    try { if let v = self._name {
-      try visitor.visitSingularStringField(value: v, fieldNumber: 2)
-    } }()
-    if !self.languages.isEmpty {
-      try visitor.visitRepeatedStringField(value: self.languages, fieldNumber: 3)
-    }
-    try unknownFields.traverse(visitor: &visitor)
-  }
-
-  public static func ==(lhs: Mavio_Plugin_V1_VoiceInfo, rhs: Mavio_Plugin_V1_VoiceInfo) -> Bool {
-    if lhs._id != rhs._id {return false}
-    if lhs._name != rhs._name {return false}
-    if lhs.languages != rhs.languages {return false}
-    if lhs.unknownFields != rhs.unknownFields {return false}
-    return true
-  }
-}
-
-nonisolated extension Mavio_Plugin_V1_SynthesizeSpeechRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  public static let protoMessageName: String = _protobuf_package + ".SynthesizeSpeechRequest"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}voice\0\u{1}text\0\u{1}language\0\u{1}format\0\u{1}speed\0")
-
-  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
-    while let fieldNumber = try decoder.nextFieldNumber() {
-      // The use of inline closures is to circumvent an issue where the compiler
-      // allocates stack space for every case branch when no optimizations are
-      // enabled. https://github.com/apple/swift-protobuf/issues/1034
-      switch fieldNumber {
-      case 1: try { try decoder.decodeSingularStringField(value: &self._voice) }()
-      case 2: try { try decoder.decodeSingularStringField(value: &self._text) }()
-      case 3: try { try decoder.decodeSingularStringField(value: &self._language) }()
-      case 4: try { try decoder.decodeSingularEnumField(value: &self._format) }()
-      case 5: try { try decoder.decodeSingularDoubleField(value: &self._speed) }()
-      default: break
-      }
-    }
-  }
-
-  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-    // The use of inline closures is to circumvent an issue where the compiler
-    // allocates stack space for every if/case branch local when no optimizations
-    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
-    // https://github.com/apple/swift-protobuf/issues/1182
-    try { if let v = self._voice {
-      try visitor.visitSingularStringField(value: v, fieldNumber: 1)
-    } }()
-    try { if let v = self._text {
-      try visitor.visitSingularStringField(value: v, fieldNumber: 2)
-    } }()
-    try { if let v = self._language {
-      try visitor.visitSingularStringField(value: v, fieldNumber: 3)
-    } }()
-    try { if let v = self._format {
-      try visitor.visitSingularEnumField(value: v, fieldNumber: 4)
-    } }()
-    try { if let v = self._speed {
-      try visitor.visitSingularDoubleField(value: v, fieldNumber: 5)
-    } }()
-    try unknownFields.traverse(visitor: &visitor)
-  }
-
-  public static func ==(lhs: Mavio_Plugin_V1_SynthesizeSpeechRequest, rhs: Mavio_Plugin_V1_SynthesizeSpeechRequest) -> Bool {
-    if lhs._voice != rhs._voice {return false}
-    if lhs._text != rhs._text {return false}
-    if lhs._language != rhs._language {return false}
-    if lhs._format != rhs._format {return false}
-    if lhs._speed != rhs._speed {return false}
-    if lhs.unknownFields != rhs.unknownFields {return false}
-    return true
-  }
-}
-
-nonisolated extension Mavio_Plugin_V1_SynthesizeSpeechResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  public static let protoMessageName: String = _protobuf_package + ".SynthesizeSpeechResponse"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}audio\0\u{3}content_type\0")
-
-  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
-    while let fieldNumber = try decoder.nextFieldNumber() {
-      // The use of inline closures is to circumvent an issue where the compiler
-      // allocates stack space for every case branch when no optimizations are
-      // enabled. https://github.com/apple/swift-protobuf/issues/1034
-      switch fieldNumber {
-      case 1: try { try decoder.decodeSingularBytesField(value: &self._audio) }()
-      case 2: try { try decoder.decodeSingularStringField(value: &self._contentType) }()
-      default: break
-      }
-    }
-  }
-
-  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-    // The use of inline closures is to circumvent an issue where the compiler
-    // allocates stack space for every if/case branch local when no optimizations
-    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
-    // https://github.com/apple/swift-protobuf/issues/1182
-    try { if let v = self._audio {
-      try visitor.visitSingularBytesField(value: v, fieldNumber: 1)
-    } }()
-    try { if let v = self._contentType {
-      try visitor.visitSingularStringField(value: v, fieldNumber: 2)
-    } }()
-    try unknownFields.traverse(visitor: &visitor)
-  }
-
-  public static func ==(lhs: Mavio_Plugin_V1_SynthesizeSpeechResponse, rhs: Mavio_Plugin_V1_SynthesizeSpeechResponse) -> Bool {
-    if lhs._audio != rhs._audio {return false}
-    if lhs._contentType != rhs._contentType {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

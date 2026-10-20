@@ -22,73 +22,26 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-// SpeechFormat is the encoding of synthesized audio; deprecated with
-// SynthesizeSpeechRequest.format.
-type SpeechFormat int32
-
-const (
-	SpeechFormat_SPEECH_FORMAT_UNSPECIFIED SpeechFormat = 0
-	// Opus in Ogg.
-	SpeechFormat_SPEECH_FORMAT_OGG_OPUS SpeechFormat = 1
-	SpeechFormat_SPEECH_FORMAT_MP3      SpeechFormat = 2
-)
-
-// Enum value maps for SpeechFormat.
-var (
-	SpeechFormat_name = map[int32]string{
-		0: "SPEECH_FORMAT_UNSPECIFIED",
-		1: "SPEECH_FORMAT_OGG_OPUS",
-		2: "SPEECH_FORMAT_MP3",
-	}
-	SpeechFormat_value = map[string]int32{
-		"SPEECH_FORMAT_UNSPECIFIED": 0,
-		"SPEECH_FORMAT_OGG_OPUS":    1,
-		"SPEECH_FORMAT_MP3":         2,
-	}
-)
-
-func (x SpeechFormat) Enum() *SpeechFormat {
-	p := new(SpeechFormat)
-	*p = x
-	return p
-}
-
-func (x SpeechFormat) String() string {
-	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
-}
-
-func (SpeechFormat) Descriptor() protoreflect.EnumDescriptor {
-	return file_mavio_plugin_v1_speech_proto_enumTypes[0].Descriptor()
-}
-
-func (SpeechFormat) Type() protoreflect.EnumType {
-	return &file_mavio_plugin_v1_speech_proto_enumTypes[0]
-}
-
-func (x SpeechFormat) Number() protoreflect.EnumNumber {
-	return protoreflect.EnumNumber(x)
-}
-
-type ListRecognizersRequest struct {
+type ListTranscribersRequest struct {
 	state         protoimpl.MessageState `protogen:"opaque.v1"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *ListRecognizersRequest) Reset() {
-	*x = ListRecognizersRequest{}
+func (x *ListTranscribersRequest) Reset() {
+	*x = ListTranscribersRequest{}
 	mi := &file_mavio_plugin_v1_speech_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *ListRecognizersRequest) String() string {
+func (x *ListTranscribersRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ListRecognizersRequest) ProtoMessage() {}
+func (*ListTranscribersRequest) ProtoMessage() {}
 
-func (x *ListRecognizersRequest) ProtoReflect() protoreflect.Message {
+func (x *ListTranscribersRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_mavio_plugin_v1_speech_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -100,40 +53,40 @@ func (x *ListRecognizersRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-type ListRecognizersRequest_builder struct {
+type ListTranscribersRequest_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
 }
 
-func (b0 ListRecognizersRequest_builder) Build() *ListRecognizersRequest {
-	m0 := &ListRecognizersRequest{}
+func (b0 ListTranscribersRequest_builder) Build() *ListTranscribersRequest {
+	m0 := &ListTranscribersRequest{}
 	b, x := &b0, m0
 	_, _ = b, x
 	return m0
 }
 
-type ListRecognizersResponse struct {
-	state                  protoimpl.MessageState `protogen:"opaque.v1"`
-	xxx_hidden_Recognizers *[]*RecognizerInfo     `protobuf:"bytes,1,rep,name=recognizers"`
-	xxx_hidden_Services    *[]*RecognizerInfo     `protobuf:"bytes,2,rep,name=services"`
-	unknownFields          protoimpl.UnknownFields
-	sizeCache              protoimpl.SizeCache
+type ListTranscribersResponse struct {
+	state                   protoimpl.MessageState       `protogen:"opaque.v1"`
+	xxx_hidden_Services     *[]*TranscriptionServiceInfo `protobuf:"bytes,1,rep,name=services"`
+	xxx_hidden_Transcribers *[]*TranscriberInfo          `protobuf:"bytes,2,rep,name=transcribers"`
+	unknownFields           protoimpl.UnknownFields
+	sizeCache               protoimpl.SizeCache
 }
 
-func (x *ListRecognizersResponse) Reset() {
-	*x = ListRecognizersResponse{}
+func (x *ListTranscribersResponse) Reset() {
+	*x = ListTranscribersResponse{}
 	mi := &file_mavio_plugin_v1_speech_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *ListRecognizersResponse) String() string {
+func (x *ListTranscribersResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ListRecognizersResponse) ProtoMessage() {}
+func (*ListTranscribersResponse) ProtoMessage() {}
 
-func (x *ListRecognizersResponse) ProtoReflect() protoreflect.Message {
+func (x *ListTranscribersResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_mavio_plugin_v1_speech_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -145,16 +98,7 @@ func (x *ListRecognizersResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-func (x *ListRecognizersResponse) GetRecognizers() []*RecognizerInfo {
-	if x != nil {
-		if x.xxx_hidden_Recognizers != nil {
-			return *x.xxx_hidden_Recognizers
-		}
-	}
-	return nil
-}
-
-func (x *ListRecognizersResponse) GetServices() []*RecognizerInfo {
+func (x *ListTranscribersResponse) GetServices() []*TranscriptionServiceInfo {
 	if x != nil {
 		if x.xxx_hidden_Services != nil {
 			return *x.xxx_hidden_Services
@@ -163,70 +107,66 @@ func (x *ListRecognizersResponse) GetServices() []*RecognizerInfo {
 	return nil
 }
 
-func (x *ListRecognizersResponse) SetRecognizers(v []*RecognizerInfo) {
-	x.xxx_hidden_Recognizers = &v
+func (x *ListTranscribersResponse) GetTranscribers() []*TranscriberInfo {
+	if x != nil {
+		if x.xxx_hidden_Transcribers != nil {
+			return *x.xxx_hidden_Transcribers
+		}
+	}
+	return nil
 }
 
-func (x *ListRecognizersResponse) SetServices(v []*RecognizerInfo) {
+func (x *ListTranscribersResponse) SetServices(v []*TranscriptionServiceInfo) {
 	x.xxx_hidden_Services = &v
 }
 
-type ListRecognizersResponse_builder struct {
-	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
-
-	// The recognizers configured, which recognize speech by their names.
-	Recognizers []*RecognizerInfo
-	// The services recognizers are configured from, with their settings
-	// and what they can do. A plugin listing none has recognizers that are
-	// their own services.
-	Services []*RecognizerInfo
+func (x *ListTranscribersResponse) SetTranscribers(v []*TranscriberInfo) {
+	x.xxx_hidden_Transcribers = &v
 }
 
-func (b0 ListRecognizersResponse_builder) Build() *ListRecognizersResponse {
-	m0 := &ListRecognizersResponse{}
+type ListTranscribersResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	// The services transcribers are configured from.
+	Services     []*TranscriptionServiceInfo
+	Transcribers []*TranscriberInfo
+}
+
+func (b0 ListTranscribersResponse_builder) Build() *ListTranscribersResponse {
+	m0 := &ListTranscribersResponse{}
 	b, x := &b0, m0
 	_, _ = b, x
-	x.xxx_hidden_Recognizers = &b.Recognizers
 	x.xxx_hidden_Services = &b.Services
+	x.xxx_hidden_Transcribers = &b.Transcribers
 	return m0
 }
 
-// RecognizerInfo is a recognizer a plugin has configured, or a service
-// it implements.
-type RecognizerInfo struct {
-	state                      protoimpl.MessageState `protogen:"opaque.v1"`
-	xxx_hidden_Name            *string                `protobuf:"bytes,1,opt,name=name"`
-	xxx_hidden_DisplayName     *string                `protobuf:"bytes,2,opt,name=display_name,json=displayName"`
-	xxx_hidden_Settings        *[]*SettingField       `protobuf:"bytes,3,rep,name=settings"`
-	xxx_hidden_Enabled         bool                   `protobuf:"varint,4,opt,name=enabled"`
-	xxx_hidden_Languages       []string               `protobuf:"bytes,5,rep,name=languages"`
-	xxx_hidden_Timestamps      bool                   `protobuf:"varint,6,opt,name=timestamps"`
-	xxx_hidden_DetectsLanguage bool                   `protobuf:"varint,7,opt,name=detects_language,json=detectsLanguage"`
-	xxx_hidden_Translates      bool                   `protobuf:"varint,8,opt,name=translates"`
-	xxx_hidden_Hints           bool                   `protobuf:"varint,9,opt,name=hints"`
-	xxx_hidden_MaxDuration     *durationpb.Duration   `protobuf:"bytes,10,opt,name=max_duration,json=maxDuration"`
-	xxx_hidden_Subtitles       bool                   `protobuf:"varint,11,opt,name=subtitles"`
-	xxx_hidden_Service         *string                `protobuf:"bytes,12,opt,name=service"`
-	XXX_raceDetectHookData     protoimpl.RaceDetectHookData
-	XXX_presence               [1]uint32
-	unknownFields              protoimpl.UnknownFields
-	sizeCache                  protoimpl.SizeCache
+// TranscriptionServiceInfo is a transcription service a plugin implements.
+type TranscriptionServiceInfo struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Name        *string                `protobuf:"bytes,1,opt,name=name"`
+	xxx_hidden_DisplayName *string                `protobuf:"bytes,2,opt,name=display_name,json=displayName"`
+	xxx_hidden_Settings    *[]*SettingField       `protobuf:"bytes,3,rep,name=settings"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
 }
 
-func (x *RecognizerInfo) Reset() {
-	*x = RecognizerInfo{}
+func (x *TranscriptionServiceInfo) Reset() {
+	*x = TranscriptionServiceInfo{}
 	mi := &file_mavio_plugin_v1_speech_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *RecognizerInfo) String() string {
+func (x *TranscriptionServiceInfo) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*RecognizerInfo) ProtoMessage() {}
+func (*TranscriptionServiceInfo) ProtoMessage() {}
 
-func (x *RecognizerInfo) ProtoReflect() protoreflect.Message {
+func (x *TranscriptionServiceInfo) ProtoReflect() protoreflect.Message {
 	mi := &file_mavio_plugin_v1_speech_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -238,7 +178,7 @@ func (x *RecognizerInfo) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-func (x *RecognizerInfo) GetName() string {
+func (x *TranscriptionServiceInfo) GetName() string {
 	if x != nil {
 		if x.xxx_hidden_Name != nil {
 			return *x.xxx_hidden_Name
@@ -248,7 +188,7 @@ func (x *RecognizerInfo) GetName() string {
 	return ""
 }
 
-func (x *RecognizerInfo) GetDisplayName() string {
+func (x *TranscriptionServiceInfo) GetDisplayName() string {
 	if x != nil {
 		if x.xxx_hidden_DisplayName != nil {
 			return *x.xxx_hidden_DisplayName
@@ -258,7 +198,7 @@ func (x *RecognizerInfo) GetDisplayName() string {
 	return ""
 }
 
-func (x *RecognizerInfo) GetSettings() []*SettingField {
+func (x *TranscriptionServiceInfo) GetSettings() []*SettingField {
 	if x != nil {
 		if x.xxx_hidden_Settings != nil {
 			return *x.xxx_hidden_Settings
@@ -267,63 +207,133 @@ func (x *RecognizerInfo) GetSettings() []*SettingField {
 	return nil
 }
 
-func (x *RecognizerInfo) GetEnabled() bool {
-	if x != nil {
-		return x.xxx_hidden_Enabled
-	}
-	return false
+func (x *TranscriptionServiceInfo) SetName(v string) {
+	x.xxx_hidden_Name = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 3)
 }
 
-func (x *RecognizerInfo) GetLanguages() []string {
-	if x != nil {
-		return x.xxx_hidden_Languages
-	}
-	return nil
+func (x *TranscriptionServiceInfo) SetDisplayName(v string) {
+	x.xxx_hidden_DisplayName = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 3)
 }
 
-func (x *RecognizerInfo) GetTimestamps() bool {
-	if x != nil {
-		return x.xxx_hidden_Timestamps
-	}
-	return false
+func (x *TranscriptionServiceInfo) SetSettings(v []*SettingField) {
+	x.xxx_hidden_Settings = &v
 }
 
-func (x *RecognizerInfo) GetDetectsLanguage() bool {
-	if x != nil {
-		return x.xxx_hidden_DetectsLanguage
+func (x *TranscriptionServiceInfo) HasName() bool {
+	if x == nil {
+		return false
 	}
-	return false
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
 }
 
-func (x *RecognizerInfo) GetTranslates() bool {
-	if x != nil {
-		return x.xxx_hidden_Translates
+func (x *TranscriptionServiceInfo) HasDisplayName() bool {
+	if x == nil {
+		return false
 	}
-	return false
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
 }
 
-func (x *RecognizerInfo) GetHints() bool {
-	if x != nil {
-		return x.xxx_hidden_Hints
-	}
-	return false
+func (x *TranscriptionServiceInfo) ClearName() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_Name = nil
 }
 
-func (x *RecognizerInfo) GetMaxDuration() *durationpb.Duration {
-	if x != nil {
-		return x.xxx_hidden_MaxDuration
-	}
-	return nil
+func (x *TranscriptionServiceInfo) ClearDisplayName() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
+	x.xxx_hidden_DisplayName = nil
 }
 
-func (x *RecognizerInfo) GetSubtitles() bool {
-	if x != nil {
-		return x.xxx_hidden_Subtitles
-	}
-	return false
+type TranscriptionServiceInfo_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	// Stable within the plugin, such as "whisper".
+	Name        *string
+	DisplayName *string
+	// The settings of the transcribers configured from it.
+	Settings []*SettingField
 }
 
-func (x *RecognizerInfo) GetService() string {
+func (b0 TranscriptionServiceInfo_builder) Build() *TranscriptionServiceInfo {
+	m0 := &TranscriptionServiceInfo{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.Name != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 3)
+		x.xxx_hidden_Name = b.Name
+	}
+	if b.DisplayName != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 3)
+		x.xxx_hidden_DisplayName = b.DisplayName
+	}
+	x.xxx_hidden_Settings = &b.Settings
+	return m0
+}
+
+// TranscriberInfo is a transcriber a plugin has configured.
+type TranscriberInfo struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Id          *string                `protobuf:"bytes,1,opt,name=id"`
+	xxx_hidden_Name        *string                `protobuf:"bytes,2,opt,name=name"`
+	xxx_hidden_Service     *string                `protobuf:"bytes,3,opt,name=service"`
+	xxx_hidden_Enabled     bool                   `protobuf:"varint,4,opt,name=enabled"`
+	xxx_hidden_Ready       bool                   `protobuf:"varint,5,opt,name=ready"`
+	xxx_hidden_Languages   []string               `protobuf:"bytes,6,rep,name=languages"`
+	xxx_hidden_MaxDuration *durationpb.Duration   `protobuf:"bytes,7,opt,name=max_duration,json=maxDuration"`
+	xxx_hidden_Translates  bool                   `protobuf:"varint,8,opt,name=translates"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *TranscriberInfo) Reset() {
+	*x = TranscriberInfo{}
+	mi := &file_mavio_plugin_v1_speech_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *TranscriberInfo) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TranscriberInfo) ProtoMessage() {}
+
+func (x *TranscriberInfo) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_plugin_v1_speech_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *TranscriberInfo) GetId() string {
+	if x != nil {
+		if x.xxx_hidden_Id != nil {
+			return *x.xxx_hidden_Id
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *TranscriberInfo) GetName() string {
+	if x != nil {
+		if x.xxx_hidden_Name != nil {
+			return *x.xxx_hidden_Name
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *TranscriberInfo) GetService() string {
 	if x != nil {
 		if x.xxx_hidden_Service != nil {
 			return *x.xxx_hidden_Service
@@ -333,271 +343,229 @@ func (x *RecognizerInfo) GetService() string {
 	return ""
 }
 
-func (x *RecognizerInfo) SetName(v string) {
+func (x *TranscriberInfo) GetEnabled() bool {
+	if x != nil {
+		return x.xxx_hidden_Enabled
+	}
+	return false
+}
+
+func (x *TranscriberInfo) GetReady() bool {
+	if x != nil {
+		return x.xxx_hidden_Ready
+	}
+	return false
+}
+
+func (x *TranscriberInfo) GetLanguages() []string {
+	if x != nil {
+		return x.xxx_hidden_Languages
+	}
+	return nil
+}
+
+func (x *TranscriberInfo) GetMaxDuration() *durationpb.Duration {
+	if x != nil {
+		return x.xxx_hidden_MaxDuration
+	}
+	return nil
+}
+
+func (x *TranscriberInfo) GetTranslates() bool {
+	if x != nil {
+		return x.xxx_hidden_Translates
+	}
+	return false
+}
+
+func (x *TranscriberInfo) SetId(v string) {
+	x.xxx_hidden_Id = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 8)
+}
+
+func (x *TranscriberInfo) SetName(v string) {
 	x.xxx_hidden_Name = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 12)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 8)
 }
 
-func (x *RecognizerInfo) SetDisplayName(v string) {
-	x.xxx_hidden_DisplayName = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 12)
+func (x *TranscriberInfo) SetService(v string) {
+	x.xxx_hidden_Service = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 8)
 }
 
-func (x *RecognizerInfo) SetSettings(v []*SettingField) {
-	x.xxx_hidden_Settings = &v
-}
-
-func (x *RecognizerInfo) SetEnabled(v bool) {
+func (x *TranscriberInfo) SetEnabled(v bool) {
 	x.xxx_hidden_Enabled = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 12)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 8)
 }
 
-func (x *RecognizerInfo) SetLanguages(v []string) {
+func (x *TranscriberInfo) SetReady(v bool) {
+	x.xxx_hidden_Ready = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 8)
+}
+
+func (x *TranscriberInfo) SetLanguages(v []string) {
 	x.xxx_hidden_Languages = v
 }
 
-func (x *RecognizerInfo) SetTimestamps(v bool) {
-	x.xxx_hidden_Timestamps = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 12)
-}
-
-func (x *RecognizerInfo) SetDetectsLanguage(v bool) {
-	x.xxx_hidden_DetectsLanguage = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 12)
-}
-
-func (x *RecognizerInfo) SetTranslates(v bool) {
-	x.xxx_hidden_Translates = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 12)
-}
-
-func (x *RecognizerInfo) SetHints(v bool) {
-	x.xxx_hidden_Hints = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 8, 12)
-}
-
-func (x *RecognizerInfo) SetMaxDuration(v *durationpb.Duration) {
+func (x *TranscriberInfo) SetMaxDuration(v *durationpb.Duration) {
 	x.xxx_hidden_MaxDuration = v
 }
 
-func (x *RecognizerInfo) SetSubtitles(v bool) {
-	x.xxx_hidden_Subtitles = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 12)
+func (x *TranscriberInfo) SetTranslates(v bool) {
+	x.xxx_hidden_Translates = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 8)
 }
 
-func (x *RecognizerInfo) SetService(v string) {
-	x.xxx_hidden_Service = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 11, 12)
-}
-
-func (x *RecognizerInfo) HasName() bool {
+func (x *TranscriberInfo) HasId() bool {
 	if x == nil {
 		return false
 	}
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
 }
 
-func (x *RecognizerInfo) HasDisplayName() bool {
+func (x *TranscriberInfo) HasName() bool {
 	if x == nil {
 		return false
 	}
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
 }
 
-func (x *RecognizerInfo) HasEnabled() bool {
+func (x *TranscriberInfo) HasService() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 2)
+}
+
+func (x *TranscriberInfo) HasEnabled() bool {
 	if x == nil {
 		return false
 	}
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 3)
 }
 
-func (x *RecognizerInfo) HasTimestamps() bool {
+func (x *TranscriberInfo) HasReady() bool {
 	if x == nil {
 		return false
 	}
-	return protoimpl.X.Present(&(x.XXX_presence[0]), 5)
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 4)
 }
 
-func (x *RecognizerInfo) HasDetectsLanguage() bool {
-	if x == nil {
-		return false
-	}
-	return protoimpl.X.Present(&(x.XXX_presence[0]), 6)
-}
-
-func (x *RecognizerInfo) HasTranslates() bool {
-	if x == nil {
-		return false
-	}
-	return protoimpl.X.Present(&(x.XXX_presence[0]), 7)
-}
-
-func (x *RecognizerInfo) HasHints() bool {
-	if x == nil {
-		return false
-	}
-	return protoimpl.X.Present(&(x.XXX_presence[0]), 8)
-}
-
-func (x *RecognizerInfo) HasMaxDuration() bool {
+func (x *TranscriberInfo) HasMaxDuration() bool {
 	if x == nil {
 		return false
 	}
 	return x.xxx_hidden_MaxDuration != nil
 }
 
-func (x *RecognizerInfo) HasSubtitles() bool {
+func (x *TranscriberInfo) HasTranslates() bool {
 	if x == nil {
 		return false
 	}
-	return protoimpl.X.Present(&(x.XXX_presence[0]), 10)
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 7)
 }
 
-func (x *RecognizerInfo) HasService() bool {
-	if x == nil {
-		return false
-	}
-	return protoimpl.X.Present(&(x.XXX_presence[0]), 11)
-}
-
-func (x *RecognizerInfo) ClearName() {
+func (x *TranscriberInfo) ClearId() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_Id = nil
+}
+
+func (x *TranscriberInfo) ClearName() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
 	x.xxx_hidden_Name = nil
 }
 
-func (x *RecognizerInfo) ClearDisplayName() {
-	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
-	x.xxx_hidden_DisplayName = nil
+func (x *TranscriberInfo) ClearService() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 2)
+	x.xxx_hidden_Service = nil
 }
 
-func (x *RecognizerInfo) ClearEnabled() {
+func (x *TranscriberInfo) ClearEnabled() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 3)
 	x.xxx_hidden_Enabled = false
 }
 
-func (x *RecognizerInfo) ClearTimestamps() {
-	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 5)
-	x.xxx_hidden_Timestamps = false
+func (x *TranscriberInfo) ClearReady() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 4)
+	x.xxx_hidden_Ready = false
 }
 
-func (x *RecognizerInfo) ClearDetectsLanguage() {
-	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 6)
-	x.xxx_hidden_DetectsLanguage = false
+func (x *TranscriberInfo) ClearMaxDuration() {
+	x.xxx_hidden_MaxDuration = nil
 }
 
-func (x *RecognizerInfo) ClearTranslates() {
+func (x *TranscriberInfo) ClearTranslates() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 7)
 	x.xxx_hidden_Translates = false
 }
 
-func (x *RecognizerInfo) ClearHints() {
-	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 8)
-	x.xxx_hidden_Hints = false
-}
-
-func (x *RecognizerInfo) ClearMaxDuration() {
-	x.xxx_hidden_MaxDuration = nil
-}
-
-func (x *RecognizerInfo) ClearSubtitles() {
-	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 10)
-	x.xxx_hidden_Subtitles = false
-}
-
-func (x *RecognizerInfo) ClearService() {
-	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 11)
-	x.xxx_hidden_Service = nil
-}
-
-type RecognizerInfo_builder struct {
+type TranscriberInfo_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
-	// Stable within the plugin: a recognizer's ID, or a service's name,
-	// such as "whisper".
+	// The ID the server generated for it.
+	Id *string
+	// The name the administrator gave it.
 	Name *string
-	// The name the administrator gave a recognizer, or a service's.
-	DisplayName *string
-	// A service's settings, which configure its recognizers.
-	Settings []*SettingField
-	Enabled  *bool
-	// The languages it recognizes, BCP 47; empty for any.
+	// The service it is configured from, a name among the services.
+	Service *string
+	Enabled *bool
+	// It can be used: its model is downloaded, for a local one.
+	Ready *bool
+	// The languages it transcribes, BCP 47; empty for any.
 	Languages []string
-	// It gives the times of what is said, which subtitles need.
-	Timestamps *bool
-	// It recognizes audio whose language is not given.
-	DetectsLanguage *bool
-	// It translates what is said into English.
-	Translates *bool
-	// It takes phrases it is likely to hear.
-	Hints *bool
 	// The longest audio it takes at once; unset for any.
 	MaxDuration *durationpb.Duration
-	// The administrator lets it transcribe videos into subtitles; with
-	// timestamps only.
-	Subtitles *bool
-	// The service a recognizer is configured from, a name among the
-	// services.
-	Service *string
+	// It translates what is said into English.
+	Translates *bool
 }
 
-func (b0 RecognizerInfo_builder) Build() *RecognizerInfo {
-	m0 := &RecognizerInfo{}
+func (b0 TranscriberInfo_builder) Build() *TranscriberInfo {
+	m0 := &TranscriberInfo{}
 	b, x := &b0, m0
 	_, _ = b, x
+	if b.Id != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 8)
+		x.xxx_hidden_Id = b.Id
+	}
 	if b.Name != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 12)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 8)
 		x.xxx_hidden_Name = b.Name
 	}
-	if b.DisplayName != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 12)
-		x.xxx_hidden_DisplayName = b.DisplayName
+	if b.Service != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 8)
+		x.xxx_hidden_Service = b.Service
 	}
-	x.xxx_hidden_Settings = &b.Settings
 	if b.Enabled != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 12)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 8)
 		x.xxx_hidden_Enabled = *b.Enabled
 	}
+	if b.Ready != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 8)
+		x.xxx_hidden_Ready = *b.Ready
+	}
 	x.xxx_hidden_Languages = b.Languages
-	if b.Timestamps != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 12)
-		x.xxx_hidden_Timestamps = *b.Timestamps
-	}
-	if b.DetectsLanguage != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 12)
-		x.xxx_hidden_DetectsLanguage = *b.DetectsLanguage
-	}
-	if b.Translates != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 12)
-		x.xxx_hidden_Translates = *b.Translates
-	}
-	if b.Hints != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 8, 12)
-		x.xxx_hidden_Hints = *b.Hints
-	}
 	x.xxx_hidden_MaxDuration = b.MaxDuration
-	if b.Subtitles != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 12)
-		x.xxx_hidden_Subtitles = *b.Subtitles
-	}
-	if b.Service != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 11, 12)
-		x.xxx_hidden_Service = b.Service
+	if b.Translates != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 8)
+		x.xxx_hidden_Translates = *b.Translates
 	}
 	return m0
 }
 
-// SpeechAudio is audio to recognize.
+// SpeechAudio is audio to transcribe.
 type SpeechAudio struct {
-	state             protoimpl.MessageState `protogen:"opaque.v1"`
-	xxx_hidden_Source isSpeechAudio_Source   `protobuf_oneof:"source"`
-	xxx_hidden_Limit  *durationpb.Duration   `protobuf:"bytes,3,opt,name=limit"`
-	unknownFields     protoimpl.UnknownFields
-	sizeCache         protoimpl.SizeCache
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Url         *string                `protobuf:"bytes,1,opt,name=url"`
+	xxx_hidden_Limit       *durationpb.Duration   `protobuf:"bytes,2,opt,name=limit"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
 }
 
 func (x *SpeechAudio) Reset() {
 	*x = SpeechAudio{}
-	mi := &file_mavio_plugin_v1_speech_proto_msgTypes[3]
+	mi := &file_mavio_plugin_v1_speech_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -609,7 +577,7 @@ func (x *SpeechAudio) String() string {
 func (*SpeechAudio) ProtoMessage() {}
 
 func (x *SpeechAudio) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_plugin_v1_speech_proto_msgTypes[3]
+	mi := &file_mavio_plugin_v1_speech_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -620,20 +588,12 @@ func (x *SpeechAudio) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-func (x *SpeechAudio) GetPcm() []byte {
-	if x != nil {
-		if x, ok := x.xxx_hidden_Source.(*speechAudio_Pcm); ok {
-			return x.Pcm
-		}
-	}
-	return nil
-}
-
 func (x *SpeechAudio) GetUrl() string {
 	if x != nil {
-		if x, ok := x.xxx_hidden_Source.(*speechAudio_Url); ok {
-			return x.Url
+		if x.xxx_hidden_Url != nil {
+			return *x.xxx_hidden_Url
 		}
+		return ""
 	}
 	return ""
 }
@@ -645,42 +605,20 @@ func (x *SpeechAudio) GetLimit() *durationpb.Duration {
 	return nil
 }
 
-func (x *SpeechAudio) SetPcm(v []byte) {
-	if v == nil {
-		v = []byte{}
-	}
-	x.xxx_hidden_Source = &speechAudio_Pcm{v}
-}
-
 func (x *SpeechAudio) SetUrl(v string) {
-	x.xxx_hidden_Source = &speechAudio_Url{v}
+	x.xxx_hidden_Url = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 2)
 }
 
 func (x *SpeechAudio) SetLimit(v *durationpb.Duration) {
 	x.xxx_hidden_Limit = v
 }
 
-func (x *SpeechAudio) HasSource() bool {
-	if x == nil {
-		return false
-	}
-	return x.xxx_hidden_Source != nil
-}
-
-func (x *SpeechAudio) HasPcm() bool {
-	if x == nil {
-		return false
-	}
-	_, ok := x.xxx_hidden_Source.(*speechAudio_Pcm)
-	return ok
-}
-
 func (x *SpeechAudio) HasUrl() bool {
 	if x == nil {
 		return false
 	}
-	_, ok := x.xxx_hidden_Source.(*speechAudio_Url)
-	return ok
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
 }
 
 func (x *SpeechAudio) HasLimit() bool {
@@ -690,55 +628,23 @@ func (x *SpeechAudio) HasLimit() bool {
 	return x.xxx_hidden_Limit != nil
 }
 
-func (x *SpeechAudio) ClearSource() {
-	x.xxx_hidden_Source = nil
-}
-
-func (x *SpeechAudio) ClearPcm() {
-	if _, ok := x.xxx_hidden_Source.(*speechAudio_Pcm); ok {
-		x.xxx_hidden_Source = nil
-	}
-}
-
 func (x *SpeechAudio) ClearUrl() {
-	if _, ok := x.xxx_hidden_Source.(*speechAudio_Url); ok {
-		x.xxx_hidden_Source = nil
-	}
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_Url = nil
 }
 
 func (x *SpeechAudio) ClearLimit() {
 	x.xxx_hidden_Limit = nil
 }
 
-const SpeechAudio_Source_not_set_case case_SpeechAudio_Source = 0
-const SpeechAudio_Pcm_case case_SpeechAudio_Source = 1
-const SpeechAudio_Url_case case_SpeechAudio_Source = 2
-
-func (x *SpeechAudio) WhichSource() case_SpeechAudio_Source {
-	if x == nil {
-		return SpeechAudio_Source_not_set_case
-	}
-	switch x.xxx_hidden_Source.(type) {
-	case *speechAudio_Pcm:
-		return SpeechAudio_Pcm_case
-	case *speechAudio_Url:
-		return SpeechAudio_Url_case
-	default:
-		return SpeechAudio_Source_not_set_case
-	}
-}
-
 type SpeechAudio_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
-	// Fields of oneof xxx_hidden_Source:
-	// 16 kHz mono 16-bit little-endian PCM.
-	Pcm []byte
-	// A URL of the host API serving the audio, which the plugin fetches
-	// with the host's HTTP client, such as a stream of a video.
+	// A URL of the host API serving the audio as 16 kHz mono 16-bit
+	// little-endian PCM aligned with the start of the video, which the
+	// plugin fetches with the host's HTTP client.
 	Url *string
-	// -- end of xxx_hidden_Source
-	// Only the first seconds of a URL's audio; unset for all.
+	// Only the first seconds of the audio; unset for all.
 	Limit *durationpb.Duration
 }
 
@@ -746,75 +652,42 @@ func (b0 SpeechAudio_builder) Build() *SpeechAudio {
 	m0 := &SpeechAudio{}
 	b, x := &b0, m0
 	_, _ = b, x
-	if b.Pcm != nil {
-		x.xxx_hidden_Source = &speechAudio_Pcm{b.Pcm}
-	}
 	if b.Url != nil {
-		x.xxx_hidden_Source = &speechAudio_Url{*b.Url}
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 2)
+		x.xxx_hidden_Url = b.Url
 	}
 	x.xxx_hidden_Limit = b.Limit
 	return m0
 }
 
-type case_SpeechAudio_Source protoreflect.FieldNumber
-
-func (x case_SpeechAudio_Source) String() string {
-	md := file_mavio_plugin_v1_speech_proto_msgTypes[3].Descriptor()
-	if x == 0 {
-		return "not set"
-	}
-	return protoimpl.X.MessageFieldStringOf(md, protoreflect.FieldNumber(x))
-}
-
-type isSpeechAudio_Source interface {
-	isSpeechAudio_Source()
-}
-
-type speechAudio_Pcm struct {
-	// 16 kHz mono 16-bit little-endian PCM.
-	Pcm []byte `protobuf:"bytes,1,opt,name=pcm,oneof"`
-}
-
-type speechAudio_Url struct {
-	// A URL of the host API serving the audio, which the plugin fetches
-	// with the host's HTTP client, such as a stream of a video.
-	Url string `protobuf:"bytes,2,opt,name=url,oneof"`
-}
-
-func (*speechAudio_Pcm) isSpeechAudio_Source() {}
-
-func (*speechAudio_Url) isSpeechAudio_Source() {}
-
-type RecognizeSpeechRequest struct {
+type TranscribeSpeechRequest struct {
 	state                  protoimpl.MessageState `protogen:"opaque.v1"`
-	xxx_hidden_Recognizer  *string                `protobuf:"bytes,1,opt,name=recognizer"`
+	xxx_hidden_Transcriber *string                `protobuf:"bytes,1,opt,name=transcriber"`
 	xxx_hidden_Audio       *SpeechAudio           `protobuf:"bytes,2,opt,name=audio"`
 	xxx_hidden_Language    *string                `protobuf:"bytes,3,opt,name=language"`
 	xxx_hidden_Translate   bool                   `protobuf:"varint,4,opt,name=translate"`
-	xxx_hidden_Hints       []string               `protobuf:"bytes,5,rep,name=hints"`
-	xxx_hidden_Timestamps  bool                   `protobuf:"varint,6,opt,name=timestamps"`
-	xxx_hidden_Name        *string                `protobuf:"bytes,7,opt,name=name"`
+	xxx_hidden_Name        *string                `protobuf:"bytes,5,opt,name=name"`
 	XXX_raceDetectHookData protoimpl.RaceDetectHookData
 	XXX_presence           [1]uint32
 	unknownFields          protoimpl.UnknownFields
 	sizeCache              protoimpl.SizeCache
 }
 
-func (x *RecognizeSpeechRequest) Reset() {
-	*x = RecognizeSpeechRequest{}
-	mi := &file_mavio_plugin_v1_speech_proto_msgTypes[4]
+func (x *TranscribeSpeechRequest) Reset() {
+	*x = TranscribeSpeechRequest{}
+	mi := &file_mavio_plugin_v1_speech_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *RecognizeSpeechRequest) String() string {
+func (x *TranscribeSpeechRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*RecognizeSpeechRequest) ProtoMessage() {}
+func (*TranscribeSpeechRequest) ProtoMessage() {}
 
-func (x *RecognizeSpeechRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_plugin_v1_speech_proto_msgTypes[4]
+func (x *TranscribeSpeechRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_plugin_v1_speech_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -825,24 +698,24 @@ func (x *RecognizeSpeechRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-func (x *RecognizeSpeechRequest) GetRecognizer() string {
+func (x *TranscribeSpeechRequest) GetTranscriber() string {
 	if x != nil {
-		if x.xxx_hidden_Recognizer != nil {
-			return *x.xxx_hidden_Recognizer
+		if x.xxx_hidden_Transcriber != nil {
+			return *x.xxx_hidden_Transcriber
 		}
 		return ""
 	}
 	return ""
 }
 
-func (x *RecognizeSpeechRequest) GetAudio() *SpeechAudio {
+func (x *TranscribeSpeechRequest) GetAudio() *SpeechAudio {
 	if x != nil {
 		return x.xxx_hidden_Audio
 	}
 	return nil
 }
 
-func (x *RecognizeSpeechRequest) GetLanguage() string {
+func (x *TranscribeSpeechRequest) GetLanguage() string {
 	if x != nil {
 		if x.xxx_hidden_Language != nil {
 			return *x.xxx_hidden_Language
@@ -852,28 +725,14 @@ func (x *RecognizeSpeechRequest) GetLanguage() string {
 	return ""
 }
 
-func (x *RecognizeSpeechRequest) GetTranslate() bool {
+func (x *TranscribeSpeechRequest) GetTranslate() bool {
 	if x != nil {
 		return x.xxx_hidden_Translate
 	}
 	return false
 }
 
-func (x *RecognizeSpeechRequest) GetHints() []string {
-	if x != nil {
-		return x.xxx_hidden_Hints
-	}
-	return nil
-}
-
-func (x *RecognizeSpeechRequest) GetTimestamps() bool {
-	if x != nil {
-		return x.xxx_hidden_Timestamps
-	}
-	return false
-}
-
-func (x *RecognizeSpeechRequest) GetName() string {
+func (x *TranscribeSpeechRequest) GetName() string {
 	if x != nil {
 		if x.xxx_hidden_Name != nil {
 			return *x.xxx_hidden_Name
@@ -883,183 +742,152 @@ func (x *RecognizeSpeechRequest) GetName() string {
 	return ""
 }
 
-func (x *RecognizeSpeechRequest) SetRecognizer(v string) {
-	x.xxx_hidden_Recognizer = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 7)
+func (x *TranscribeSpeechRequest) SetTranscriber(v string) {
+	x.xxx_hidden_Transcriber = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 5)
 }
 
-func (x *RecognizeSpeechRequest) SetAudio(v *SpeechAudio) {
+func (x *TranscribeSpeechRequest) SetAudio(v *SpeechAudio) {
 	x.xxx_hidden_Audio = v
 }
 
-func (x *RecognizeSpeechRequest) SetLanguage(v string) {
+func (x *TranscribeSpeechRequest) SetLanguage(v string) {
 	x.xxx_hidden_Language = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 7)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 5)
 }
 
-func (x *RecognizeSpeechRequest) SetTranslate(v bool) {
+func (x *TranscribeSpeechRequest) SetTranslate(v bool) {
 	x.xxx_hidden_Translate = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 7)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 5)
 }
 
-func (x *RecognizeSpeechRequest) SetHints(v []string) {
-	x.xxx_hidden_Hints = v
-}
-
-func (x *RecognizeSpeechRequest) SetTimestamps(v bool) {
-	x.xxx_hidden_Timestamps = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 7)
-}
-
-func (x *RecognizeSpeechRequest) SetName(v string) {
+func (x *TranscribeSpeechRequest) SetName(v string) {
 	x.xxx_hidden_Name = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 7)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 5)
 }
 
-func (x *RecognizeSpeechRequest) HasRecognizer() bool {
+func (x *TranscribeSpeechRequest) HasTranscriber() bool {
 	if x == nil {
 		return false
 	}
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
 }
 
-func (x *RecognizeSpeechRequest) HasAudio() bool {
+func (x *TranscribeSpeechRequest) HasAudio() bool {
 	if x == nil {
 		return false
 	}
 	return x.xxx_hidden_Audio != nil
 }
 
-func (x *RecognizeSpeechRequest) HasLanguage() bool {
+func (x *TranscribeSpeechRequest) HasLanguage() bool {
 	if x == nil {
 		return false
 	}
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 2)
 }
 
-func (x *RecognizeSpeechRequest) HasTranslate() bool {
+func (x *TranscribeSpeechRequest) HasTranslate() bool {
 	if x == nil {
 		return false
 	}
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 3)
 }
 
-func (x *RecognizeSpeechRequest) HasTimestamps() bool {
+func (x *TranscribeSpeechRequest) HasName() bool {
 	if x == nil {
 		return false
 	}
-	return protoimpl.X.Present(&(x.XXX_presence[0]), 5)
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 4)
 }
 
-func (x *RecognizeSpeechRequest) HasName() bool {
-	if x == nil {
-		return false
-	}
-	return protoimpl.X.Present(&(x.XXX_presence[0]), 6)
-}
-
-func (x *RecognizeSpeechRequest) ClearRecognizer() {
+func (x *TranscribeSpeechRequest) ClearTranscriber() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
-	x.xxx_hidden_Recognizer = nil
+	x.xxx_hidden_Transcriber = nil
 }
 
-func (x *RecognizeSpeechRequest) ClearAudio() {
+func (x *TranscribeSpeechRequest) ClearAudio() {
 	x.xxx_hidden_Audio = nil
 }
 
-func (x *RecognizeSpeechRequest) ClearLanguage() {
+func (x *TranscribeSpeechRequest) ClearLanguage() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 2)
 	x.xxx_hidden_Language = nil
 }
 
-func (x *RecognizeSpeechRequest) ClearTranslate() {
+func (x *TranscribeSpeechRequest) ClearTranslate() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 3)
 	x.xxx_hidden_Translate = false
 }
 
-func (x *RecognizeSpeechRequest) ClearTimestamps() {
-	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 5)
-	x.xxx_hidden_Timestamps = false
-}
-
-func (x *RecognizeSpeechRequest) ClearName() {
-	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 6)
+func (x *TranscribeSpeechRequest) ClearName() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 4)
 	x.xxx_hidden_Name = nil
 }
 
-type RecognizeSpeechRequest_builder struct {
+type TranscribeSpeechRequest_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
-	Recognizer *string
-	Audio      *SpeechAudio
-	// The language spoken, BCP 47; empty, the recognizer detects it.
+	Transcriber *string
+	Audio       *SpeechAudio
+	// The language spoken, BCP 47; empty, the transcriber detects it.
 	Language *string
 	// Translates what is said into English.
 	Translate *bool
-	// Phrases the recognizer is likely to hear, such as titles.
-	Hints []string
-	// Gives the times of what is said.
-	Timestamps *bool
 	// What the audio is of, such as a video's file name, for the service's
 	// logs.
 	Name *string
 }
 
-func (b0 RecognizeSpeechRequest_builder) Build() *RecognizeSpeechRequest {
-	m0 := &RecognizeSpeechRequest{}
+func (b0 TranscribeSpeechRequest_builder) Build() *TranscribeSpeechRequest {
+	m0 := &TranscribeSpeechRequest{}
 	b, x := &b0, m0
 	_, _ = b, x
-	if b.Recognizer != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 7)
-		x.xxx_hidden_Recognizer = b.Recognizer
+	if b.Transcriber != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 5)
+		x.xxx_hidden_Transcriber = b.Transcriber
 	}
 	x.xxx_hidden_Audio = b.Audio
 	if b.Language != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 7)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 5)
 		x.xxx_hidden_Language = b.Language
 	}
 	if b.Translate != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 7)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 5)
 		x.xxx_hidden_Translate = *b.Translate
 	}
-	x.xxx_hidden_Hints = b.Hints
-	if b.Timestamps != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 7)
-		x.xxx_hidden_Timestamps = *b.Timestamps
-	}
 	if b.Name != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 7)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 5)
 		x.xxx_hidden_Name = b.Name
 	}
 	return m0
 }
 
-type RecognizeSpeechResponse struct {
+type TranscribeSpeechResponse struct {
 	state                  protoimpl.MessageState `protogen:"opaque.v1"`
-	xxx_hidden_Text        *string                `protobuf:"bytes,1,opt,name=text"`
-	xxx_hidden_Language    *string                `protobuf:"bytes,2,opt,name=language"`
-	xxx_hidden_Segments    *[]*SpeechSegment      `protobuf:"bytes,3,rep,name=segments"`
+	xxx_hidden_Language    *string                `protobuf:"bytes,1,opt,name=language"`
+	xxx_hidden_Segments    *[]*SpeechSegment      `protobuf:"bytes,2,rep,name=segments"`
 	XXX_raceDetectHookData protoimpl.RaceDetectHookData
 	XXX_presence           [1]uint32
 	unknownFields          protoimpl.UnknownFields
 	sizeCache              protoimpl.SizeCache
 }
 
-func (x *RecognizeSpeechResponse) Reset() {
-	*x = RecognizeSpeechResponse{}
-	mi := &file_mavio_plugin_v1_speech_proto_msgTypes[5]
+func (x *TranscribeSpeechResponse) Reset() {
+	*x = TranscribeSpeechResponse{}
+	mi := &file_mavio_plugin_v1_speech_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *RecognizeSpeechResponse) String() string {
+func (x *TranscribeSpeechResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*RecognizeSpeechResponse) ProtoMessage() {}
+func (*TranscribeSpeechResponse) ProtoMessage() {}
 
-func (x *RecognizeSpeechResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_plugin_v1_speech_proto_msgTypes[5]
+func (x *TranscribeSpeechResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_plugin_v1_speech_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1070,17 +898,7 @@ func (x *RecognizeSpeechResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-func (x *RecognizeSpeechResponse) GetText() string {
-	if x != nil {
-		if x.xxx_hidden_Text != nil {
-			return *x.xxx_hidden_Text
-		}
-		return ""
-	}
-	return ""
-}
-
-func (x *RecognizeSpeechResponse) GetLanguage() string {
+func (x *TranscribeSpeechResponse) GetLanguage() string {
 	if x != nil {
 		if x.xxx_hidden_Language != nil {
 			return *x.xxx_hidden_Language
@@ -1090,7 +908,7 @@ func (x *RecognizeSpeechResponse) GetLanguage() string {
 	return ""
 }
 
-func (x *RecognizeSpeechResponse) GetSegments() []*SpeechSegment {
+func (x *TranscribeSpeechResponse) GetSegments() []*SpeechSegment {
 	if x != nil {
 		if x.xxx_hidden_Segments != nil {
 			return *x.xxx_hidden_Segments
@@ -1099,64 +917,41 @@ func (x *RecognizeSpeechResponse) GetSegments() []*SpeechSegment {
 	return nil
 }
 
-func (x *RecognizeSpeechResponse) SetText(v string) {
-	x.xxx_hidden_Text = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 3)
-}
-
-func (x *RecognizeSpeechResponse) SetLanguage(v string) {
+func (x *TranscribeSpeechResponse) SetLanguage(v string) {
 	x.xxx_hidden_Language = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 3)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 2)
 }
 
-func (x *RecognizeSpeechResponse) SetSegments(v []*SpeechSegment) {
+func (x *TranscribeSpeechResponse) SetSegments(v []*SpeechSegment) {
 	x.xxx_hidden_Segments = &v
 }
 
-func (x *RecognizeSpeechResponse) HasText() bool {
+func (x *TranscribeSpeechResponse) HasLanguage() bool {
 	if x == nil {
 		return false
 	}
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
 }
 
-func (x *RecognizeSpeechResponse) HasLanguage() bool {
-	if x == nil {
-		return false
-	}
-	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
-}
-
-func (x *RecognizeSpeechResponse) ClearText() {
+func (x *TranscribeSpeechResponse) ClearLanguage() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
-	x.xxx_hidden_Text = nil
-}
-
-func (x *RecognizeSpeechResponse) ClearLanguage() {
-	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
 	x.xxx_hidden_Language = nil
 }
 
-type RecognizeSpeechResponse_builder struct {
+type TranscribeSpeechResponse_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
-	Text *string
-	// The language recognized, BCP 47.
+	// The language transcribed, BCP 47.
 	Language *string
-	// What is said with its times, when they were asked for.
 	Segments []*SpeechSegment
 }
 
-func (b0 RecognizeSpeechResponse_builder) Build() *RecognizeSpeechResponse {
-	m0 := &RecognizeSpeechResponse{}
+func (b0 TranscribeSpeechResponse_builder) Build() *TranscribeSpeechResponse {
+	m0 := &TranscribeSpeechResponse{}
 	b, x := &b0, m0
 	_, _ = b, x
-	if b.Text != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 3)
-		x.xxx_hidden_Text = b.Text
-	}
 	if b.Language != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 3)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 2)
 		x.xxx_hidden_Language = b.Language
 	}
 	x.xxx_hidden_Segments = &b.Segments
@@ -1177,7 +972,7 @@ type SpeechSegment struct {
 
 func (x *SpeechSegment) Reset() {
 	*x = SpeechSegment{}
-	mi := &file_mavio_plugin_v1_speech_proto_msgTypes[6]
+	mi := &file_mavio_plugin_v1_speech_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1189,7 +984,7 @@ func (x *SpeechSegment) String() string {
 func (*SpeechSegment) ProtoMessage() {}
 
 func (x *SpeechSegment) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_plugin_v1_speech_proto_msgTypes[6]
+	mi := &file_mavio_plugin_v1_speech_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1294,7 +1089,7 @@ func (b0 SpeechSegment_builder) Build() *SpeechSegment {
 
 type DetectSpeechLanguageRequest struct {
 	state                  protoimpl.MessageState `protogen:"opaque.v1"`
-	xxx_hidden_Recognizer  *string                `protobuf:"bytes,1,opt,name=recognizer"`
+	xxx_hidden_Transcriber *string                `protobuf:"bytes,1,opt,name=transcriber"`
 	xxx_hidden_Audio       *SpeechAudio           `protobuf:"bytes,2,opt,name=audio"`
 	XXX_raceDetectHookData protoimpl.RaceDetectHookData
 	XXX_presence           [1]uint32
@@ -1304,7 +1099,7 @@ type DetectSpeechLanguageRequest struct {
 
 func (x *DetectSpeechLanguageRequest) Reset() {
 	*x = DetectSpeechLanguageRequest{}
-	mi := &file_mavio_plugin_v1_speech_proto_msgTypes[7]
+	mi := &file_mavio_plugin_v1_speech_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1316,7 +1111,7 @@ func (x *DetectSpeechLanguageRequest) String() string {
 func (*DetectSpeechLanguageRequest) ProtoMessage() {}
 
 func (x *DetectSpeechLanguageRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_plugin_v1_speech_proto_msgTypes[7]
+	mi := &file_mavio_plugin_v1_speech_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1327,10 +1122,10 @@ func (x *DetectSpeechLanguageRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-func (x *DetectSpeechLanguageRequest) GetRecognizer() string {
+func (x *DetectSpeechLanguageRequest) GetTranscriber() string {
 	if x != nil {
-		if x.xxx_hidden_Recognizer != nil {
-			return *x.xxx_hidden_Recognizer
+		if x.xxx_hidden_Transcriber != nil {
+			return *x.xxx_hidden_Transcriber
 		}
 		return ""
 	}
@@ -1344,8 +1139,8 @@ func (x *DetectSpeechLanguageRequest) GetAudio() *SpeechAudio {
 	return nil
 }
 
-func (x *DetectSpeechLanguageRequest) SetRecognizer(v string) {
-	x.xxx_hidden_Recognizer = &v
+func (x *DetectSpeechLanguageRequest) SetTranscriber(v string) {
+	x.xxx_hidden_Transcriber = &v
 	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 2)
 }
 
@@ -1353,7 +1148,7 @@ func (x *DetectSpeechLanguageRequest) SetAudio(v *SpeechAudio) {
 	x.xxx_hidden_Audio = v
 }
 
-func (x *DetectSpeechLanguageRequest) HasRecognizer() bool {
+func (x *DetectSpeechLanguageRequest) HasTranscriber() bool {
 	if x == nil {
 		return false
 	}
@@ -1367,9 +1162,9 @@ func (x *DetectSpeechLanguageRequest) HasAudio() bool {
 	return x.xxx_hidden_Audio != nil
 }
 
-func (x *DetectSpeechLanguageRequest) ClearRecognizer() {
+func (x *DetectSpeechLanguageRequest) ClearTranscriber() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
-	x.xxx_hidden_Recognizer = nil
+	x.xxx_hidden_Transcriber = nil
 }
 
 func (x *DetectSpeechLanguageRequest) ClearAudio() {
@@ -1379,17 +1174,17 @@ func (x *DetectSpeechLanguageRequest) ClearAudio() {
 type DetectSpeechLanguageRequest_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
-	Recognizer *string
-	Audio      *SpeechAudio
+	Transcriber *string
+	Audio       *SpeechAudio
 }
 
 func (b0 DetectSpeechLanguageRequest_builder) Build() *DetectSpeechLanguageRequest {
 	m0 := &DetectSpeechLanguageRequest{}
 	b, x := &b0, m0
 	_, _ = b, x
-	if b.Recognizer != nil {
+	if b.Transcriber != nil {
 		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 2)
-		x.xxx_hidden_Recognizer = b.Recognizer
+		x.xxx_hidden_Transcriber = b.Transcriber
 	}
 	x.xxx_hidden_Audio = b.Audio
 	return m0
@@ -1406,7 +1201,7 @@ type DetectSpeechLanguageResponse struct {
 
 func (x *DetectSpeechLanguageResponse) Reset() {
 	*x = DetectSpeechLanguageResponse{}
-	mi := &file_mavio_plugin_v1_speech_proto_msgTypes[8]
+	mi := &file_mavio_plugin_v1_speech_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1418,7 +1213,7 @@ func (x *DetectSpeechLanguageResponse) String() string {
 func (*DetectSpeechLanguageResponse) ProtoMessage() {}
 
 func (x *DetectSpeechLanguageResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_plugin_v1_speech_proto_msgTypes[8]
+	mi := &file_mavio_plugin_v1_speech_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1474,950 +1269,94 @@ func (b0 DetectSpeechLanguageResponse_builder) Build() *DetectSpeechLanguageResp
 	return m0
 }
 
-type ListVoicesRequest struct {
-	state         protoimpl.MessageState `protogen:"opaque.v1"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *ListVoicesRequest) Reset() {
-	*x = ListVoicesRequest{}
-	mi := &file_mavio_plugin_v1_speech_proto_msgTypes[9]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ListVoicesRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ListVoicesRequest) ProtoMessage() {}
-
-func (x *ListVoicesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_plugin_v1_speech_proto_msgTypes[9]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-type ListVoicesRequest_builder struct {
-	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
-
-}
-
-func (b0 ListVoicesRequest_builder) Build() *ListVoicesRequest {
-	m0 := &ListVoicesRequest{}
-	b, x := &b0, m0
-	_, _ = b, x
-	return m0
-}
-
-type ListVoicesResponse struct {
-	state                   protoimpl.MessageState `protogen:"opaque.v1"`
-	xxx_hidden_Voices       *[]*VoiceInfo          `protobuf:"bytes,1,rep,name=voices"`
-	xxx_hidden_Synthesizers *[]*SynthesizerInfo    `protobuf:"bytes,2,rep,name=synthesizers"`
-	xxx_hidden_Services     *[]*SynthesizerInfo    `protobuf:"bytes,3,rep,name=services"`
-	unknownFields           protoimpl.UnknownFields
-	sizeCache               protoimpl.SizeCache
-}
-
-func (x *ListVoicesResponse) Reset() {
-	*x = ListVoicesResponse{}
-	mi := &file_mavio_plugin_v1_speech_proto_msgTypes[10]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ListVoicesResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ListVoicesResponse) ProtoMessage() {}
-
-func (x *ListVoicesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_plugin_v1_speech_proto_msgTypes[10]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-func (x *ListVoicesResponse) GetVoices() []*VoiceInfo {
-	if x != nil {
-		if x.xxx_hidden_Voices != nil {
-			return *x.xxx_hidden_Voices
-		}
-	}
-	return nil
-}
-
-func (x *ListVoicesResponse) GetSynthesizers() []*SynthesizerInfo {
-	if x != nil {
-		if x.xxx_hidden_Synthesizers != nil {
-			return *x.xxx_hidden_Synthesizers
-		}
-	}
-	return nil
-}
-
-func (x *ListVoicesResponse) GetServices() []*SynthesizerInfo {
-	if x != nil {
-		if x.xxx_hidden_Services != nil {
-			return *x.xxx_hidden_Services
-		}
-	}
-	return nil
-}
-
-func (x *ListVoicesResponse) SetVoices(v []*VoiceInfo) {
-	x.xxx_hidden_Voices = &v
-}
-
-func (x *ListVoicesResponse) SetSynthesizers(v []*SynthesizerInfo) {
-	x.xxx_hidden_Synthesizers = &v
-}
-
-func (x *ListVoicesResponse) SetServices(v []*SynthesizerInfo) {
-	x.xxx_hidden_Services = &v
-}
-
-type ListVoicesResponse_builder struct {
-	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
-
-	Voices []*VoiceInfo
-	// The synthesizers configured, with their state.
-	Synthesizers []*SynthesizerInfo
-	// The services synthesizers are configured from, with their settings.
-	// A plugin listing none has synthesizers that are their own services.
-	Services []*SynthesizerInfo
-}
-
-func (b0 ListVoicesResponse_builder) Build() *ListVoicesResponse {
-	m0 := &ListVoicesResponse{}
-	b, x := &b0, m0
-	_, _ = b, x
-	x.xxx_hidden_Voices = &b.Voices
-	x.xxx_hidden_Synthesizers = &b.Synthesizers
-	x.xxx_hidden_Services = &b.Services
-	return m0
-}
-
-// SynthesizerInfo is a synthesizer a plugin has configured, or a
-// synthesis service it implements.
-type SynthesizerInfo struct {
-	state                  protoimpl.MessageState `protogen:"opaque.v1"`
-	xxx_hidden_Name        *string                `protobuf:"bytes,1,opt,name=name"`
-	xxx_hidden_DisplayName *string                `protobuf:"bytes,2,opt,name=display_name,json=displayName"`
-	xxx_hidden_Settings    *[]*SettingField       `protobuf:"bytes,3,rep,name=settings"`
-	xxx_hidden_Enabled     bool                   `protobuf:"varint,4,opt,name=enabled"`
-	xxx_hidden_Service     *string                `protobuf:"bytes,5,opt,name=service"`
-	XXX_raceDetectHookData protoimpl.RaceDetectHookData
-	XXX_presence           [1]uint32
-	unknownFields          protoimpl.UnknownFields
-	sizeCache              protoimpl.SizeCache
-}
-
-func (x *SynthesizerInfo) Reset() {
-	*x = SynthesizerInfo{}
-	mi := &file_mavio_plugin_v1_speech_proto_msgTypes[11]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *SynthesizerInfo) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*SynthesizerInfo) ProtoMessage() {}
-
-func (x *SynthesizerInfo) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_plugin_v1_speech_proto_msgTypes[11]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-func (x *SynthesizerInfo) GetName() string {
-	if x != nil {
-		if x.xxx_hidden_Name != nil {
-			return *x.xxx_hidden_Name
-		}
-		return ""
-	}
-	return ""
-}
-
-func (x *SynthesizerInfo) GetDisplayName() string {
-	if x != nil {
-		if x.xxx_hidden_DisplayName != nil {
-			return *x.xxx_hidden_DisplayName
-		}
-		return ""
-	}
-	return ""
-}
-
-func (x *SynthesizerInfo) GetSettings() []*SettingField {
-	if x != nil {
-		if x.xxx_hidden_Settings != nil {
-			return *x.xxx_hidden_Settings
-		}
-	}
-	return nil
-}
-
-func (x *SynthesizerInfo) GetEnabled() bool {
-	if x != nil {
-		return x.xxx_hidden_Enabled
-	}
-	return false
-}
-
-func (x *SynthesizerInfo) GetService() string {
-	if x != nil {
-		if x.xxx_hidden_Service != nil {
-			return *x.xxx_hidden_Service
-		}
-		return ""
-	}
-	return ""
-}
-
-func (x *SynthesizerInfo) SetName(v string) {
-	x.xxx_hidden_Name = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 5)
-}
-
-func (x *SynthesizerInfo) SetDisplayName(v string) {
-	x.xxx_hidden_DisplayName = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 5)
-}
-
-func (x *SynthesizerInfo) SetSettings(v []*SettingField) {
-	x.xxx_hidden_Settings = &v
-}
-
-func (x *SynthesizerInfo) SetEnabled(v bool) {
-	x.xxx_hidden_Enabled = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 5)
-}
-
-func (x *SynthesizerInfo) SetService(v string) {
-	x.xxx_hidden_Service = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 5)
-}
-
-func (x *SynthesizerInfo) HasName() bool {
-	if x == nil {
-		return false
-	}
-	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
-}
-
-func (x *SynthesizerInfo) HasDisplayName() bool {
-	if x == nil {
-		return false
-	}
-	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
-}
-
-func (x *SynthesizerInfo) HasEnabled() bool {
-	if x == nil {
-		return false
-	}
-	return protoimpl.X.Present(&(x.XXX_presence[0]), 3)
-}
-
-func (x *SynthesizerInfo) HasService() bool {
-	if x == nil {
-		return false
-	}
-	return protoimpl.X.Present(&(x.XXX_presence[0]), 4)
-}
-
-func (x *SynthesizerInfo) ClearName() {
-	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
-	x.xxx_hidden_Name = nil
-}
-
-func (x *SynthesizerInfo) ClearDisplayName() {
-	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
-	x.xxx_hidden_DisplayName = nil
-}
-
-func (x *SynthesizerInfo) ClearEnabled() {
-	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 3)
-	x.xxx_hidden_Enabled = false
-}
-
-func (x *SynthesizerInfo) ClearService() {
-	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 4)
-	x.xxx_hidden_Service = nil
-}
-
-type SynthesizerInfo_builder struct {
-	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
-
-	// Stable within the plugin: a synthesizer's ID, or a service's name,
-	// such as "openai".
-	Name *string
-	// The name the administrator gave a synthesizer, or a service's.
-	DisplayName *string
-	// A service's settings, which configure its synthesizers.
-	Settings []*SettingField
-	Enabled  *bool
-	// The service a synthesizer is configured from, a name among the
-	// services.
-	Service *string
-}
-
-func (b0 SynthesizerInfo_builder) Build() *SynthesizerInfo {
-	m0 := &SynthesizerInfo{}
-	b, x := &b0, m0
-	_, _ = b, x
-	if b.Name != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 5)
-		x.xxx_hidden_Name = b.Name
-	}
-	if b.DisplayName != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 5)
-		x.xxx_hidden_DisplayName = b.DisplayName
-	}
-	x.xxx_hidden_Settings = &b.Settings
-	if b.Enabled != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 5)
-		x.xxx_hidden_Enabled = *b.Enabled
-	}
-	if b.Service != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 5)
-		x.xxx_hidden_Service = b.Service
-	}
-	return m0
-}
-
-// VoiceInfo is a voice of a synthesizer.
-type VoiceInfo struct {
-	state                  protoimpl.MessageState `protogen:"opaque.v1"`
-	xxx_hidden_Id          *string                `protobuf:"bytes,1,opt,name=id"`
-	xxx_hidden_Name        *string                `protobuf:"bytes,2,opt,name=name"`
-	xxx_hidden_Languages   []string               `protobuf:"bytes,3,rep,name=languages"`
-	XXX_raceDetectHookData protoimpl.RaceDetectHookData
-	XXX_presence           [1]uint32
-	unknownFields          protoimpl.UnknownFields
-	sizeCache              protoimpl.SizeCache
-}
-
-func (x *VoiceInfo) Reset() {
-	*x = VoiceInfo{}
-	mi := &file_mavio_plugin_v1_speech_proto_msgTypes[12]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *VoiceInfo) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*VoiceInfo) ProtoMessage() {}
-
-func (x *VoiceInfo) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_plugin_v1_speech_proto_msgTypes[12]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-func (x *VoiceInfo) GetId() string {
-	if x != nil {
-		if x.xxx_hidden_Id != nil {
-			return *x.xxx_hidden_Id
-		}
-		return ""
-	}
-	return ""
-}
-
-func (x *VoiceInfo) GetName() string {
-	if x != nil {
-		if x.xxx_hidden_Name != nil {
-			return *x.xxx_hidden_Name
-		}
-		return ""
-	}
-	return ""
-}
-
-func (x *VoiceInfo) GetLanguages() []string {
-	if x != nil {
-		return x.xxx_hidden_Languages
-	}
-	return nil
-}
-
-func (x *VoiceInfo) SetId(v string) {
-	x.xxx_hidden_Id = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 3)
-}
-
-func (x *VoiceInfo) SetName(v string) {
-	x.xxx_hidden_Name = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 3)
-}
-
-func (x *VoiceInfo) SetLanguages(v []string) {
-	x.xxx_hidden_Languages = v
-}
-
-func (x *VoiceInfo) HasId() bool {
-	if x == nil {
-		return false
-	}
-	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
-}
-
-func (x *VoiceInfo) HasName() bool {
-	if x == nil {
-		return false
-	}
-	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
-}
-
-func (x *VoiceInfo) ClearId() {
-	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
-	x.xxx_hidden_Id = nil
-}
-
-func (x *VoiceInfo) ClearName() {
-	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
-	x.xxx_hidden_Name = nil
-}
-
-type VoiceInfo_builder struct {
-	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
-
-	// "<synthesizer>/<voice>", stable within the plugin.
-	Id   *string
-	Name *string
-	// The languages it speaks, BCP 47; empty for any.
-	Languages []string
-}
-
-func (b0 VoiceInfo_builder) Build() *VoiceInfo {
-	m0 := &VoiceInfo{}
-	b, x := &b0, m0
-	_, _ = b, x
-	if b.Id != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 3)
-		x.xxx_hidden_Id = b.Id
-	}
-	if b.Name != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 3)
-		x.xxx_hidden_Name = b.Name
-	}
-	x.xxx_hidden_Languages = b.Languages
-	return m0
-}
-
-type SynthesizeSpeechRequest struct {
-	state                  protoimpl.MessageState `protogen:"opaque.v1"`
-	xxx_hidden_Voice       *string                `protobuf:"bytes,1,opt,name=voice"`
-	xxx_hidden_Text        *string                `protobuf:"bytes,2,opt,name=text"`
-	xxx_hidden_Language    *string                `protobuf:"bytes,3,opt,name=language"`
-	xxx_hidden_Format      SpeechFormat           `protobuf:"varint,4,opt,name=format,enum=mavio.plugin.v1.SpeechFormat"`
-	xxx_hidden_Speed       float64                `protobuf:"fixed64,5,opt,name=speed"`
-	XXX_raceDetectHookData protoimpl.RaceDetectHookData
-	XXX_presence           [1]uint32
-	unknownFields          protoimpl.UnknownFields
-	sizeCache              protoimpl.SizeCache
-}
-
-func (x *SynthesizeSpeechRequest) Reset() {
-	*x = SynthesizeSpeechRequest{}
-	mi := &file_mavio_plugin_v1_speech_proto_msgTypes[13]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *SynthesizeSpeechRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*SynthesizeSpeechRequest) ProtoMessage() {}
-
-func (x *SynthesizeSpeechRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_plugin_v1_speech_proto_msgTypes[13]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-func (x *SynthesizeSpeechRequest) GetVoice() string {
-	if x != nil {
-		if x.xxx_hidden_Voice != nil {
-			return *x.xxx_hidden_Voice
-		}
-		return ""
-	}
-	return ""
-}
-
-func (x *SynthesizeSpeechRequest) GetText() string {
-	if x != nil {
-		if x.xxx_hidden_Text != nil {
-			return *x.xxx_hidden_Text
-		}
-		return ""
-	}
-	return ""
-}
-
-func (x *SynthesizeSpeechRequest) GetLanguage() string {
-	if x != nil {
-		if x.xxx_hidden_Language != nil {
-			return *x.xxx_hidden_Language
-		}
-		return ""
-	}
-	return ""
-}
-
-// Deprecated: Marked as deprecated in mavio/plugin/v1/speech.proto.
-func (x *SynthesizeSpeechRequest) GetFormat() SpeechFormat {
-	if x != nil {
-		if protoimpl.X.Present(&(x.XXX_presence[0]), 3) {
-			return x.xxx_hidden_Format
-		}
-	}
-	return SpeechFormat_SPEECH_FORMAT_UNSPECIFIED
-}
-
-func (x *SynthesizeSpeechRequest) GetSpeed() float64 {
-	if x != nil {
-		return x.xxx_hidden_Speed
-	}
-	return 0
-}
-
-func (x *SynthesizeSpeechRequest) SetVoice(v string) {
-	x.xxx_hidden_Voice = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 5)
-}
-
-func (x *SynthesizeSpeechRequest) SetText(v string) {
-	x.xxx_hidden_Text = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 5)
-}
-
-func (x *SynthesizeSpeechRequest) SetLanguage(v string) {
-	x.xxx_hidden_Language = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 5)
-}
-
-// Deprecated: Marked as deprecated in mavio/plugin/v1/speech.proto.
-func (x *SynthesizeSpeechRequest) SetFormat(v SpeechFormat) {
-	x.xxx_hidden_Format = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 5)
-}
-
-func (x *SynthesizeSpeechRequest) SetSpeed(v float64) {
-	x.xxx_hidden_Speed = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 5)
-}
-
-func (x *SynthesizeSpeechRequest) HasVoice() bool {
-	if x == nil {
-		return false
-	}
-	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
-}
-
-func (x *SynthesizeSpeechRequest) HasText() bool {
-	if x == nil {
-		return false
-	}
-	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
-}
-
-func (x *SynthesizeSpeechRequest) HasLanguage() bool {
-	if x == nil {
-		return false
-	}
-	return protoimpl.X.Present(&(x.XXX_presence[0]), 2)
-}
-
-// Deprecated: Marked as deprecated in mavio/plugin/v1/speech.proto.
-func (x *SynthesizeSpeechRequest) HasFormat() bool {
-	if x == nil {
-		return false
-	}
-	return protoimpl.X.Present(&(x.XXX_presence[0]), 3)
-}
-
-func (x *SynthesizeSpeechRequest) HasSpeed() bool {
-	if x == nil {
-		return false
-	}
-	return protoimpl.X.Present(&(x.XXX_presence[0]), 4)
-}
-
-func (x *SynthesizeSpeechRequest) ClearVoice() {
-	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
-	x.xxx_hidden_Voice = nil
-}
-
-func (x *SynthesizeSpeechRequest) ClearText() {
-	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
-	x.xxx_hidden_Text = nil
-}
-
-func (x *SynthesizeSpeechRequest) ClearLanguage() {
-	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 2)
-	x.xxx_hidden_Language = nil
-}
-
-// Deprecated: Marked as deprecated in mavio/plugin/v1/speech.proto.
-func (x *SynthesizeSpeechRequest) ClearFormat() {
-	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 3)
-	x.xxx_hidden_Format = SpeechFormat_SPEECH_FORMAT_UNSPECIFIED
-}
-
-func (x *SynthesizeSpeechRequest) ClearSpeed() {
-	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 4)
-	x.xxx_hidden_Speed = 0
-}
-
-type SynthesizeSpeechRequest_builder struct {
-	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
-
-	Voice *string
-	Text  *string
-	// BCP 47.
-	Language *string
-	// Deprecated: unset by the server, which converts the speech for clients
-	// that do not play it; synthesizers speak in the encoding of their
-	// settings.
-	//
-	// Deprecated: Marked as deprecated in mavio/plugin/v1/speech.proto.
-	Format *SpeechFormat
-	// 0.25–4; 0 for 1.
-	Speed *float64
-}
-
-func (b0 SynthesizeSpeechRequest_builder) Build() *SynthesizeSpeechRequest {
-	m0 := &SynthesizeSpeechRequest{}
-	b, x := &b0, m0
-	_, _ = b, x
-	if b.Voice != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 5)
-		x.xxx_hidden_Voice = b.Voice
-	}
-	if b.Text != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 5)
-		x.xxx_hidden_Text = b.Text
-	}
-	if b.Language != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 5)
-		x.xxx_hidden_Language = b.Language
-	}
-	if b.Format != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 5)
-		x.xxx_hidden_Format = *b.Format
-	}
-	if b.Speed != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 5)
-		x.xxx_hidden_Speed = *b.Speed
-	}
-	return m0
-}
-
-type SynthesizeSpeechResponse struct {
-	state                  protoimpl.MessageState `protogen:"opaque.v1"`
-	xxx_hidden_Audio       []byte                 `protobuf:"bytes,1,opt,name=audio"`
-	xxx_hidden_ContentType *string                `protobuf:"bytes,2,opt,name=content_type,json=contentType"`
-	XXX_raceDetectHookData protoimpl.RaceDetectHookData
-	XXX_presence           [1]uint32
-	unknownFields          protoimpl.UnknownFields
-	sizeCache              protoimpl.SizeCache
-}
-
-func (x *SynthesizeSpeechResponse) Reset() {
-	*x = SynthesizeSpeechResponse{}
-	mi := &file_mavio_plugin_v1_speech_proto_msgTypes[14]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *SynthesizeSpeechResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*SynthesizeSpeechResponse) ProtoMessage() {}
-
-func (x *SynthesizeSpeechResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_plugin_v1_speech_proto_msgTypes[14]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-func (x *SynthesizeSpeechResponse) GetAudio() []byte {
-	if x != nil {
-		return x.xxx_hidden_Audio
-	}
-	return nil
-}
-
-func (x *SynthesizeSpeechResponse) GetContentType() string {
-	if x != nil {
-		if x.xxx_hidden_ContentType != nil {
-			return *x.xxx_hidden_ContentType
-		}
-		return ""
-	}
-	return ""
-}
-
-func (x *SynthesizeSpeechResponse) SetAudio(v []byte) {
-	if v == nil {
-		v = []byte{}
-	}
-	x.xxx_hidden_Audio = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 2)
-}
-
-func (x *SynthesizeSpeechResponse) SetContentType(v string) {
-	x.xxx_hidden_ContentType = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 2)
-}
-
-func (x *SynthesizeSpeechResponse) HasAudio() bool {
-	if x == nil {
-		return false
-	}
-	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
-}
-
-func (x *SynthesizeSpeechResponse) HasContentType() bool {
-	if x == nil {
-		return false
-	}
-	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
-}
-
-func (x *SynthesizeSpeechResponse) ClearAudio() {
-	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
-	x.xxx_hidden_Audio = nil
-}
-
-func (x *SynthesizeSpeechResponse) ClearContentType() {
-	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
-	x.xxx_hidden_ContentType = nil
-}
-
-type SynthesizeSpeechResponse_builder struct {
-	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
-
-	Audio []byte
-	// Such as "audio/ogg" or "audio/mpeg".
-	ContentType *string
-}
-
-func (b0 SynthesizeSpeechResponse_builder) Build() *SynthesizeSpeechResponse {
-	m0 := &SynthesizeSpeechResponse{}
-	b, x := &b0, m0
-	_, _ = b, x
-	if b.Audio != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 2)
-		x.xxx_hidden_Audio = b.Audio
-	}
-	if b.ContentType != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 2)
-		x.xxx_hidden_ContentType = b.ContentType
-	}
-	return m0
-}
-
 var File_mavio_plugin_v1_speech_proto protoreflect.FileDescriptor
 
 const file_mavio_plugin_v1_speech_proto_rawDesc = "" +
 	"\n" +
-	"\x1cmavio/plugin/v1/speech.proto\x12\x0fmavio.plugin.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1egoogle/protobuf/duration.proto\x1a\x1emavio/plugin/v1/settings.proto\"\x18\n" +
-	"\x16ListRecognizersRequest\"\x99\x01\n" +
-	"\x17ListRecognizersResponse\x12A\n" +
-	"\vrecognizers\x18\x01 \x03(\v2\x1f.mavio.plugin.v1.RecognizerInfoR\vrecognizers\x12;\n" +
-	"\bservices\x18\x02 \x03(\v2\x1f.mavio.plugin.v1.RecognizerInfoR\bservices\"\xb1\x03\n" +
-	"\x0eRecognizerInfo\x12\x12\n" +
+	"\x1cmavio/plugin/v1/speech.proto\x12\x0fmavio.plugin.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1egoogle/protobuf/duration.proto\x1a\x1emavio/plugin/v1/settings.proto\"\x19\n" +
+	"\x17ListTranscribersRequest\"\xa7\x01\n" +
+	"\x18ListTranscribersResponse\x12E\n" +
+	"\bservices\x18\x01 \x03(\v2).mavio.plugin.v1.TranscriptionServiceInfoR\bservices\x12D\n" +
+	"\ftranscribers\x18\x02 \x03(\v2 .mavio.plugin.v1.TranscriberInfoR\ftranscribers\"\x8c\x01\n" +
+	"\x18TranscriptionServiceInfo\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12!\n" +
 	"\fdisplay_name\x18\x02 \x01(\tR\vdisplayName\x129\n" +
-	"\bsettings\x18\x03 \x03(\v2\x1d.mavio.plugin.v1.SettingFieldR\bsettings\x12\x18\n" +
-	"\aenabled\x18\x04 \x01(\bR\aenabled\x12\x1c\n" +
-	"\tlanguages\x18\x05 \x03(\tR\tlanguages\x12\x1e\n" +
-	"\n" +
-	"timestamps\x18\x06 \x01(\bR\n" +
-	"timestamps\x12)\n" +
-	"\x10detects_language\x18\a \x01(\bR\x0fdetectsLanguage\x12\x1e\n" +
+	"\bsettings\x18\x03 \x03(\v2\x1d.mavio.plugin.v1.SettingFieldR\bsettings\"\xfb\x01\n" +
+	"\x0fTranscriberInfo\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12\x18\n" +
+	"\aservice\x18\x03 \x01(\tR\aservice\x12\x18\n" +
+	"\aenabled\x18\x04 \x01(\bR\aenabled\x12\x14\n" +
+	"\x05ready\x18\x05 \x01(\bR\x05ready\x12\x1c\n" +
+	"\tlanguages\x18\x06 \x03(\tR\tlanguages\x12<\n" +
+	"\fmax_duration\x18\a \x01(\v2\x19.google.protobuf.DurationR\vmaxDuration\x12\x1e\n" +
 	"\n" +
 	"translates\x18\b \x01(\bR\n" +
-	"translates\x12\x14\n" +
-	"\x05hints\x18\t \x01(\bR\x05hints\x12<\n" +
-	"\fmax_duration\x18\n" +
-	" \x01(\v2\x19.google.protobuf.DurationR\vmaxDuration\x12\x1c\n" +
-	"\tsubtitles\x18\v \x01(\bR\tsubtitles\x12\x18\n" +
-	"\aservice\x18\f \x01(\tR\aservice\"w\n" +
-	"\vSpeechAudio\x12\x12\n" +
-	"\x03pcm\x18\x01 \x01(\fH\x00R\x03pcm\x12\x12\n" +
-	"\x03url\x18\x02 \x01(\tH\x00R\x03url\x12/\n" +
-	"\x05limit\x18\x03 \x01(\v2\x19.google.protobuf.DurationR\x05limitB\x0f\n" +
-	"\x06source\x12\x05\xbaH\x02\b\x01\"\x81\x02\n" +
-	"\x16RecognizeSpeechRequest\x12'\n" +
-	"\n" +
-	"recognizer\x18\x01 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\n" +
-	"recognizer\x12:\n" +
+	"translates\"Y\n" +
+	"\vSpeechAudio\x12\x19\n" +
+	"\x03url\x18\x01 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x03url\x12/\n" +
+	"\x05limit\x18\x02 \x01(\v2\x19.google.protobuf.DurationR\x05limit\"\xce\x01\n" +
+	"\x17TranscribeSpeechRequest\x12)\n" +
+	"\vtranscriber\x18\x01 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\vtranscriber\x12:\n" +
 	"\x05audio\x18\x02 \x01(\v2\x1c.mavio.plugin.v1.SpeechAudioB\x06\xbaH\x03\xc8\x01\x01R\x05audio\x12\x1a\n" +
 	"\blanguage\x18\x03 \x01(\tR\blanguage\x12\x1c\n" +
-	"\ttranslate\x18\x04 \x01(\bR\ttranslate\x12\x14\n" +
-	"\x05hints\x18\x05 \x03(\tR\x05hints\x12\x1e\n" +
-	"\n" +
-	"timestamps\x18\x06 \x01(\bR\n" +
-	"timestamps\x12\x12\n" +
-	"\x04name\x18\a \x01(\tR\x04name\"\x85\x01\n" +
-	"\x17RecognizeSpeechResponse\x12\x12\n" +
-	"\x04text\x18\x01 \x01(\tR\x04text\x12\x1a\n" +
-	"\blanguage\x18\x02 \x01(\tR\blanguage\x12:\n" +
-	"\bsegments\x18\x03 \x03(\v2\x1e.mavio.plugin.v1.SpeechSegmentR\bsegments\"\x81\x01\n" +
+	"\ttranslate\x18\x04 \x01(\bR\ttranslate\x12\x12\n" +
+	"\x04name\x18\x05 \x01(\tR\x04name\"r\n" +
+	"\x18TranscribeSpeechResponse\x12\x1a\n" +
+	"\blanguage\x18\x01 \x01(\tR\blanguage\x12:\n" +
+	"\bsegments\x18\x02 \x03(\v2\x1e.mavio.plugin.v1.SpeechSegmentR\bsegments\"\x81\x01\n" +
 	"\rSpeechSegment\x12/\n" +
 	"\x05start\x18\x01 \x01(\v2\x19.google.protobuf.DurationR\x05start\x12+\n" +
 	"\x03end\x18\x02 \x01(\v2\x19.google.protobuf.DurationR\x03end\x12\x12\n" +
-	"\x04text\x18\x03 \x01(\tR\x04text\"\x82\x01\n" +
-	"\x1bDetectSpeechLanguageRequest\x12'\n" +
-	"\n" +
-	"recognizer\x18\x01 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\n" +
-	"recognizer\x12:\n" +
+	"\x04text\x18\x03 \x01(\tR\x04text\"\x84\x01\n" +
+	"\x1bDetectSpeechLanguageRequest\x12)\n" +
+	"\vtranscriber\x18\x01 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\vtranscriber\x12:\n" +
 	"\x05audio\x18\x02 \x01(\v2\x1c.mavio.plugin.v1.SpeechAudioB\x06\xbaH\x03\xc8\x01\x01R\x05audio\":\n" +
 	"\x1cDetectSpeechLanguageResponse\x12\x1a\n" +
-	"\blanguage\x18\x01 \x01(\tR\blanguage\"\x13\n" +
-	"\x11ListVoicesRequest\"\xcc\x01\n" +
-	"\x12ListVoicesResponse\x122\n" +
-	"\x06voices\x18\x01 \x03(\v2\x1a.mavio.plugin.v1.VoiceInfoR\x06voices\x12D\n" +
-	"\fsynthesizers\x18\x02 \x03(\v2 .mavio.plugin.v1.SynthesizerInfoR\fsynthesizers\x12<\n" +
-	"\bservices\x18\x03 \x03(\v2 .mavio.plugin.v1.SynthesizerInfoR\bservices\"\xb7\x01\n" +
-	"\x0fSynthesizerInfo\x12\x12\n" +
-	"\x04name\x18\x01 \x01(\tR\x04name\x12!\n" +
-	"\fdisplay_name\x18\x02 \x01(\tR\vdisplayName\x129\n" +
-	"\bsettings\x18\x03 \x03(\v2\x1d.mavio.plugin.v1.SettingFieldR\bsettings\x12\x18\n" +
-	"\aenabled\x18\x04 \x01(\bR\aenabled\x12\x18\n" +
-	"\aservice\x18\x05 \x01(\tR\aservice\"M\n" +
-	"\tVoiceInfo\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
-	"\x04name\x18\x02 \x01(\tR\x04name\x12\x1c\n" +
-	"\tlanguages\x18\x03 \x03(\tR\tlanguages\"\xe6\x01\n" +
-	"\x17SynthesizeSpeechRequest\x12\x1d\n" +
-	"\x05voice\x18\x01 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x05voice\x12\x1e\n" +
-	"\x04text\x18\x02 \x01(\tB\n" +
-	"\xbaH\ar\x05\x10\x01\x18\xa0\x1fR\x04text\x12\x1a\n" +
-	"\blanguage\x18\x03 \x01(\tR\blanguage\x12A\n" +
-	"\x06format\x18\x04 \x01(\x0e2\x1d.mavio.plugin.v1.SpeechFormatB\n" +
-	"\xbaH\x05\x82\x01\x02\x10\x01\x18\x01R\x06format\x12-\n" +
-	"\x05speed\x18\x05 \x01(\x01B\x17\xbaH\x14\x12\x12\x19\x00\x00\x00\x00\x00\x00\x10@)\x00\x00\x00\x00\x00\x00\x00\x00R\x05speed\"S\n" +
-	"\x18SynthesizeSpeechResponse\x12\x14\n" +
-	"\x05audio\x18\x01 \x01(\fR\x05audio\x12!\n" +
-	"\fcontent_type\x18\x02 \x01(\tR\vcontentType*`\n" +
-	"\fSpeechFormat\x12\x1d\n" +
-	"\x19SPEECH_FORMAT_UNSPECIFIED\x10\x00\x12\x1a\n" +
-	"\x16SPEECH_FORMAT_OGG_OPUS\x10\x01\x12\x15\n" +
-	"\x11SPEECH_FORMAT_MP3\x10\x022\xdb\x02\n" +
-	"\x13SpeechToTextService\x12i\n" +
-	"\x0fListRecognizers\x12'.mavio.plugin.v1.ListRecognizersRequest\x1a(.mavio.plugin.v1.ListRecognizersResponse\"\x03\x90\x02\x01\x12d\n" +
-	"\x0fRecognizeSpeech\x12'.mavio.plugin.v1.RecognizeSpeechRequest\x1a(.mavio.plugin.v1.RecognizeSpeechResponse\x12s\n" +
-	"\x14DetectSpeechLanguage\x12,.mavio.plugin.v1.DetectSpeechLanguageRequest\x1a-.mavio.plugin.v1.DetectSpeechLanguageResponse2\xda\x01\n" +
-	"\x13TextToSpeechService\x12Z\n" +
-	"\n" +
-	"ListVoices\x12\".mavio.plugin.v1.ListVoicesRequest\x1a#.mavio.plugin.v1.ListVoicesResponse\"\x03\x90\x02\x01\x12g\n" +
-	"\x10SynthesizeSpeech\x12(.mavio.plugin.v1.SynthesizeSpeechRequest\x1a).mavio.plugin.v1.SynthesizeSpeechResponseB\xc5\x01\n" +
+	"\blanguage\x18\x01 \x01(\tR\blanguage2\xe1\x02\n" +
+	"\x13SpeechToTextService\x12l\n" +
+	"\x10ListTranscribers\x12(.mavio.plugin.v1.ListTranscribersRequest\x1a).mavio.plugin.v1.ListTranscribersResponse\"\x03\x90\x02\x01\x12g\n" +
+	"\x10TranscribeSpeech\x12(.mavio.plugin.v1.TranscribeSpeechRequest\x1a).mavio.plugin.v1.TranscribeSpeechResponse\x12s\n" +
+	"\x14DetectSpeechLanguage\x12,.mavio.plugin.v1.DetectSpeechLanguageRequest\x1a-.mavio.plugin.v1.DetectSpeechLanguageResponseB\xc5\x01\n" +
 	"\x13com.mavio.plugin.v1B\vSpeechProtoP\x01ZCgithub.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1;pluginv1\xa2\x02\x03MPX\xaa\x02\x0fMavio.Plugin.V1\xca\x02\x0fMavio\\Plugin\\V1\xe2\x02\x1bMavio\\Plugin\\V1\\GPBMetadata\xea\x02\x11Mavio::Plugin::V1b\beditionsp\xe8\a"
 
-var file_mavio_plugin_v1_speech_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_mavio_plugin_v1_speech_proto_msgTypes = make([]protoimpl.MessageInfo, 15)
+var file_mavio_plugin_v1_speech_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
 var file_mavio_plugin_v1_speech_proto_goTypes = []any{
-	(SpeechFormat)(0),                    // 0: mavio.plugin.v1.SpeechFormat
-	(*ListRecognizersRequest)(nil),       // 1: mavio.plugin.v1.ListRecognizersRequest
-	(*ListRecognizersResponse)(nil),      // 2: mavio.plugin.v1.ListRecognizersResponse
-	(*RecognizerInfo)(nil),               // 3: mavio.plugin.v1.RecognizerInfo
+	(*ListTranscribersRequest)(nil),      // 0: mavio.plugin.v1.ListTranscribersRequest
+	(*ListTranscribersResponse)(nil),     // 1: mavio.plugin.v1.ListTranscribersResponse
+	(*TranscriptionServiceInfo)(nil),     // 2: mavio.plugin.v1.TranscriptionServiceInfo
+	(*TranscriberInfo)(nil),              // 3: mavio.plugin.v1.TranscriberInfo
 	(*SpeechAudio)(nil),                  // 4: mavio.plugin.v1.SpeechAudio
-	(*RecognizeSpeechRequest)(nil),       // 5: mavio.plugin.v1.RecognizeSpeechRequest
-	(*RecognizeSpeechResponse)(nil),      // 6: mavio.plugin.v1.RecognizeSpeechResponse
+	(*TranscribeSpeechRequest)(nil),      // 5: mavio.plugin.v1.TranscribeSpeechRequest
+	(*TranscribeSpeechResponse)(nil),     // 6: mavio.plugin.v1.TranscribeSpeechResponse
 	(*SpeechSegment)(nil),                // 7: mavio.plugin.v1.SpeechSegment
 	(*DetectSpeechLanguageRequest)(nil),  // 8: mavio.plugin.v1.DetectSpeechLanguageRequest
 	(*DetectSpeechLanguageResponse)(nil), // 9: mavio.plugin.v1.DetectSpeechLanguageResponse
-	(*ListVoicesRequest)(nil),            // 10: mavio.plugin.v1.ListVoicesRequest
-	(*ListVoicesResponse)(nil),           // 11: mavio.plugin.v1.ListVoicesResponse
-	(*SynthesizerInfo)(nil),              // 12: mavio.plugin.v1.SynthesizerInfo
-	(*VoiceInfo)(nil),                    // 13: mavio.plugin.v1.VoiceInfo
-	(*SynthesizeSpeechRequest)(nil),      // 14: mavio.plugin.v1.SynthesizeSpeechRequest
-	(*SynthesizeSpeechResponse)(nil),     // 15: mavio.plugin.v1.SynthesizeSpeechResponse
-	(*SettingField)(nil),                 // 16: mavio.plugin.v1.SettingField
-	(*durationpb.Duration)(nil),          // 17: google.protobuf.Duration
+	(*SettingField)(nil),                 // 10: mavio.plugin.v1.SettingField
+	(*durationpb.Duration)(nil),          // 11: google.protobuf.Duration
 }
 var file_mavio_plugin_v1_speech_proto_depIdxs = []int32{
-	3,  // 0: mavio.plugin.v1.ListRecognizersResponse.recognizers:type_name -> mavio.plugin.v1.RecognizerInfo
-	3,  // 1: mavio.plugin.v1.ListRecognizersResponse.services:type_name -> mavio.plugin.v1.RecognizerInfo
-	16, // 2: mavio.plugin.v1.RecognizerInfo.settings:type_name -> mavio.plugin.v1.SettingField
-	17, // 3: mavio.plugin.v1.RecognizerInfo.max_duration:type_name -> google.protobuf.Duration
-	17, // 4: mavio.plugin.v1.SpeechAudio.limit:type_name -> google.protobuf.Duration
-	4,  // 5: mavio.plugin.v1.RecognizeSpeechRequest.audio:type_name -> mavio.plugin.v1.SpeechAudio
-	7,  // 6: mavio.plugin.v1.RecognizeSpeechResponse.segments:type_name -> mavio.plugin.v1.SpeechSegment
-	17, // 7: mavio.plugin.v1.SpeechSegment.start:type_name -> google.protobuf.Duration
-	17, // 8: mavio.plugin.v1.SpeechSegment.end:type_name -> google.protobuf.Duration
+	2,  // 0: mavio.plugin.v1.ListTranscribersResponse.services:type_name -> mavio.plugin.v1.TranscriptionServiceInfo
+	3,  // 1: mavio.plugin.v1.ListTranscribersResponse.transcribers:type_name -> mavio.plugin.v1.TranscriberInfo
+	10, // 2: mavio.plugin.v1.TranscriptionServiceInfo.settings:type_name -> mavio.plugin.v1.SettingField
+	11, // 3: mavio.plugin.v1.TranscriberInfo.max_duration:type_name -> google.protobuf.Duration
+	11, // 4: mavio.plugin.v1.SpeechAudio.limit:type_name -> google.protobuf.Duration
+	4,  // 5: mavio.plugin.v1.TranscribeSpeechRequest.audio:type_name -> mavio.plugin.v1.SpeechAudio
+	7,  // 6: mavio.plugin.v1.TranscribeSpeechResponse.segments:type_name -> mavio.plugin.v1.SpeechSegment
+	11, // 7: mavio.plugin.v1.SpeechSegment.start:type_name -> google.protobuf.Duration
+	11, // 8: mavio.plugin.v1.SpeechSegment.end:type_name -> google.protobuf.Duration
 	4,  // 9: mavio.plugin.v1.DetectSpeechLanguageRequest.audio:type_name -> mavio.plugin.v1.SpeechAudio
-	13, // 10: mavio.plugin.v1.ListVoicesResponse.voices:type_name -> mavio.plugin.v1.VoiceInfo
-	12, // 11: mavio.plugin.v1.ListVoicesResponse.synthesizers:type_name -> mavio.plugin.v1.SynthesizerInfo
-	12, // 12: mavio.plugin.v1.ListVoicesResponse.services:type_name -> mavio.plugin.v1.SynthesizerInfo
-	16, // 13: mavio.plugin.v1.SynthesizerInfo.settings:type_name -> mavio.plugin.v1.SettingField
-	0,  // 14: mavio.plugin.v1.SynthesizeSpeechRequest.format:type_name -> mavio.plugin.v1.SpeechFormat
-	1,  // 15: mavio.plugin.v1.SpeechToTextService.ListRecognizers:input_type -> mavio.plugin.v1.ListRecognizersRequest
-	5,  // 16: mavio.plugin.v1.SpeechToTextService.RecognizeSpeech:input_type -> mavio.plugin.v1.RecognizeSpeechRequest
-	8,  // 17: mavio.plugin.v1.SpeechToTextService.DetectSpeechLanguage:input_type -> mavio.plugin.v1.DetectSpeechLanguageRequest
-	10, // 18: mavio.plugin.v1.TextToSpeechService.ListVoices:input_type -> mavio.plugin.v1.ListVoicesRequest
-	14, // 19: mavio.plugin.v1.TextToSpeechService.SynthesizeSpeech:input_type -> mavio.plugin.v1.SynthesizeSpeechRequest
-	2,  // 20: mavio.plugin.v1.SpeechToTextService.ListRecognizers:output_type -> mavio.plugin.v1.ListRecognizersResponse
-	6,  // 21: mavio.plugin.v1.SpeechToTextService.RecognizeSpeech:output_type -> mavio.plugin.v1.RecognizeSpeechResponse
-	9,  // 22: mavio.plugin.v1.SpeechToTextService.DetectSpeechLanguage:output_type -> mavio.plugin.v1.DetectSpeechLanguageResponse
-	11, // 23: mavio.plugin.v1.TextToSpeechService.ListVoices:output_type -> mavio.plugin.v1.ListVoicesResponse
-	15, // 24: mavio.plugin.v1.TextToSpeechService.SynthesizeSpeech:output_type -> mavio.plugin.v1.SynthesizeSpeechResponse
-	20, // [20:25] is the sub-list for method output_type
-	15, // [15:20] is the sub-list for method input_type
-	15, // [15:15] is the sub-list for extension type_name
-	15, // [15:15] is the sub-list for extension extendee
-	0,  // [0:15] is the sub-list for field type_name
+	0,  // 10: mavio.plugin.v1.SpeechToTextService.ListTranscribers:input_type -> mavio.plugin.v1.ListTranscribersRequest
+	5,  // 11: mavio.plugin.v1.SpeechToTextService.TranscribeSpeech:input_type -> mavio.plugin.v1.TranscribeSpeechRequest
+	8,  // 12: mavio.plugin.v1.SpeechToTextService.DetectSpeechLanguage:input_type -> mavio.plugin.v1.DetectSpeechLanguageRequest
+	1,  // 13: mavio.plugin.v1.SpeechToTextService.ListTranscribers:output_type -> mavio.plugin.v1.ListTranscribersResponse
+	6,  // 14: mavio.plugin.v1.SpeechToTextService.TranscribeSpeech:output_type -> mavio.plugin.v1.TranscribeSpeechResponse
+	9,  // 15: mavio.plugin.v1.SpeechToTextService.DetectSpeechLanguage:output_type -> mavio.plugin.v1.DetectSpeechLanguageResponse
+	13, // [13:16] is the sub-list for method output_type
+	10, // [10:13] is the sub-list for method input_type
+	10, // [10:10] is the sub-list for extension type_name
+	10, // [10:10] is the sub-list for extension extendee
+	0,  // [0:10] is the sub-list for field type_name
 }
 
 func init() { file_mavio_plugin_v1_speech_proto_init() }
@@ -2426,23 +1365,18 @@ func file_mavio_plugin_v1_speech_proto_init() {
 		return
 	}
 	file_mavio_plugin_v1_settings_proto_init()
-	file_mavio_plugin_v1_speech_proto_msgTypes[3].OneofWrappers = []any{
-		(*speechAudio_Pcm)(nil),
-		(*speechAudio_Url)(nil),
-	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_mavio_plugin_v1_speech_proto_rawDesc), len(file_mavio_plugin_v1_speech_proto_rawDesc)),
-			NumEnums:      1,
-			NumMessages:   15,
+			NumEnums:      0,
+			NumMessages:   10,
 			NumExtensions: 0,
-			NumServices:   2,
+			NumServices:   1,
 		},
 		GoTypes:           file_mavio_plugin_v1_speech_proto_goTypes,
 		DependencyIndexes: file_mavio_plugin_v1_speech_proto_depIdxs,
-		EnumInfos:         file_mavio_plugin_v1_speech_proto_enumTypes,
 		MessageInfos:      file_mavio_plugin_v1_speech_proto_msgTypes,
 	}.Build()
 	File_mavio_plugin_v1_speech_proto = out.File

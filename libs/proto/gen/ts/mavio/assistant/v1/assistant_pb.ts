@@ -21,7 +21,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file mavio/assistant/v1/assistant.proto.
  */
 export const file_mavio_assistant_v1_assistant: GenFile = /*@__PURE__*/
-  fileDesc("CiJtYXZpby9hc3Npc3RhbnQvdjEvYXNzaXN0YW50LnByb3RvEhJtYXZpby5hc3Npc3RhbnQudjEi+AIKEUFzc2lzdGFudFNldHRpbmdzEg8KB2VuYWJsZWQYASABKAgSJgoFbW9kZWwYAiABKAlCF7pIFHISMhBeKGFpL1teL10rLy4rKT8kEhEKCWNvZGVfbW9kZRgDIAEoCBJACglhaV9hY2Nlc3MYBCABKA4yIy5tYXZpby5hc3Npc3RhbnQudjEuQXNzaXN0YW50QWNjZXNzQgi6SAWCAQIQARIiCgthaV91c2VyX2lkcxgFIAMoCUINukgKkgEHIgVyA7ABARIgCgxpZGxlX21pbnV0ZXMYBiABKAVCCrpIBxoFGKALKAESIgoOcmV0ZW50aW9uX2RheXMYByABKAVCCrpIBxoFGMIcKAESDgoGbWVtb3J5GAggASgIEhIKCnJlY29nbml6ZXIYCSABKAkSOAoGdm9pY2VzGAogAygLMigubWF2aW8uYXNzaXN0YW50LnYxLkFzc2lzdGFudFZvaWNlQ2hvaWNlEg0KBWhpbnRzGAsgASgIIlMKFEFzc2lzdGFudFZvaWNlQ2hvaWNlEhkKCGxhbmd1YWdlGAEgASgJQge6SARyAhABEiAKBXZvaWNlGAIgASgJQhG6SA5yDDIKXlteL10rLy4rJCInChNHZXRBc3Npc3RhbnRSZXF1ZXN0EhAKCGxhbmd1YWdlGAEgASgJIooCChRHZXRBc3Npc3RhbnRSZXNwb25zZRIPCgdlbmFibGVkGAEgASgIEgoKAmFpGAIgASgIEg4KBm1lbW9yeRgDIAEoCBIzCgtyZWNvZ25pemVycxgEIAMoCzIeLm1hdmlvLmFzc2lzdGFudC52MS5SZWNvZ25pemVyEikKBnZvaWNlcxgFIAMoCzIZLm1hdmlvLmFzc2lzdGFudC52MS5Wb2ljZRJACg5kZWZhdWx0X3ZvaWNlcxgGIAMoCzIoLm1hdmlvLmFzc2lzdGFudC52MS5Bc3Npc3RhbnRWb2ljZUNob2ljZRIQCghleGFtcGxlcxgHIAMoCRIRCglsYW5ndWFnZXMYCCADKAkiOQoKUmVjb2duaXplchIKCgJpZBgBIAEoCRIMCgRuYW1lGAIgASgJEhEKCWxhbmd1YWdlcxgDIAMoCSI0CgVWb2ljZRIKCgJpZBgBIAEoCRIMCgRuYW1lGAIgASgJEhEKCWxhbmd1YWdlcxgDIAMoCSKzAwoKQXNrUmVxdWVzdBIWCgR0ZXh0GAEgASgJQgi6SAVyAxjQDxInCgZpbnRlbnQYAiABKAsyFy5tYXZpby5pbnRlbnQudjEuSW50ZW50Ei8KB2NvbnRleHQYAyABKAsyHi5tYXZpby5hc3Npc3RhbnQudjEuQXNrQ29udGV4dBIOCgZzcG9rZW4YBCABKAgSNgoGYW5zd2VyGAUgASgLMiYubWF2aW8uYXNzaXN0YW50LnYxLkNvbmZpcm1hdGlvbkFuc3dlchIOCgZjaG9pY2UYBiABKAkSFgoOZmFpbGVkX2FjdGlvbnMYByADKAkSMgoJc3BlZWNoX2lkGAggASgJQh+6SBxyGjIYXihbQS1aYS16MC05Xy1dezgsNjR9KT8kOo4BukiKARqHAQoLYXNrLnJlcXVlc3QSKnRleHQsIGludGVudCwgYW5zd2VyIG9yIGNob2ljZSBpcyByZXF1aXJlZBpMdGhpcy50ZXh0ICE9ICcnIHx8IGhhcyh0aGlzLmludGVudCkgfHwgaGFzKHRoaXMuYW5zd2VyKSB8fCB0aGlzLmNob2ljZSAhPSAnJyKzAQoKQXNrQ29udGV4dBIRCglsYW5ndWFnZXMYASADKAkSLwoHcGxheWluZxgCIAEoCzIeLm1hdmlvLmFzc2lzdGFudC52MS5Bc2tQbGF5aW5nEg4KBnNjcmVlbhgDIAEoCRIPCgdpdGVtX2lkGAQgASgJEhIKCmxpYnJhcnlfaWQYBSABKAkSGQoRc2VsZWN0ZWRfaXRlbV9pZHMYBiADKAkSEQoJdGltZV96b25lGAcgASgJIsMBCgpBc2tQbGF5aW5nEg8KB2l0ZW1faWQYASABKAkSKwoIcG9zaXRpb24YAiABKAsyGS5nb29nbGUucHJvdG9idWYuRHVyYXRpb24SDgoGcGF1c2VkGAMgASgIEg0KBXNwZWVkGAQgASgBEhoKEmF1ZGlvX3N0cmVhbV9pbmRleBgFIAEoBRIdChVzdWJ0aXRsZV9zdHJlYW1faW5kZXgYBiABKAUSDgoGdm9sdW1lGAcgASgFEg0KBW11dGVkGAggASgIIjwKEkNvbmZpcm1hdGlvbkFuc3dlchITCgJpZBgBIAEoCUIHukgEcgIQARIRCgljb25maXJtZWQYAiABKAgiqAIKC0Fza1Jlc3BvbnNlEjQKCnVuZGVyc3Rvb2QYASABKAsyHi5tYXZpby5hc3Npc3RhbnQudjEuVW5kZXJzdG9vZEgAEjAKBHRvb2wYAiABKAsyIC5tYXZpby5hc3Npc3RhbnQudjEuVG9vbEFjdGl2aXR5SAASMgoGYWN0aW9uGAMgASgLMiAubWF2aW8uYXNzaXN0YW50LnYxLkNsaWVudEFjdGlvbkgAEjgKDGNvbmZpcm1hdGlvbhgEIAEoCzIgLm1hdmlvLmFzc2lzdGFudC52MS5Db25maXJtYXRpb25IABIQCgZhbnN3ZXIYBSABKAlIABIoCgRkb25lGAYgASgLMhgubWF2aW8uYXNzaXN0YW50LnYxLkRvbmVIAEIHCgVldmVudCI2CgpVbmRlcnN0b29kEgwKBHRleHQYASABKAkSDgoGaW50ZW50GAIgASgJEgoKAmFpGAMgASgIIlcKDFRvb2xBY3Rpdml0eRIKCgJpZBgBIAEoCRIMCgR0b29sGAIgASgJEg8KB3N1bW1hcnkYAyABKAkSDAoEZG9uZRgEIAEoCBIOCgZmYWlsZWQYBSABKAgisQIKDENsaWVudEFjdGlvbhIKCgJpZBgBIAEoCRIuCgRwbGF5GAIgASgLMh4ubWF2aW8uYXNzaXN0YW50LnYxLlBsYXlBY3Rpb25IABI0Cgdjb250cm9sGAMgASgLMiEubWF2aW8uYXNzaXN0YW50LnYxLkNvbnRyb2xBY3Rpb25IABI0CgdzdHJlYW1zGAQgASgLMiEubWF2aW8uYXNzaXN0YW50LnYxLlN0cmVhbXNBY3Rpb25IABI2CghuYXZpZ2F0ZRgFIAEoCzIiLm1hdmlvLmFzc2lzdGFudC52MS5OYXZpZ2F0ZUFjdGlvbkgAEjkKCnNob3dfaXRlbXMYBiABKAsyIy5tYXZpby5hc3Npc3RhbnQudjEuU2hvd0l0ZW1zQWN0aW9uSABCBgoEa2luZCKhAQoKUGxheUFjdGlvbhIQCghpdGVtX2lkcxgBIAMoCRITCgtzdGFydF9pbmRleBgCIAEoBRIxCg5zdGFydF9wb3NpdGlvbhgDIAEoCzIZLmdvb2dsZS5wcm90b2J1Zi5EdXJhdGlvbhIaChJhdWRpb19zdHJlYW1faW5kZXgYBCABKAUSHQoVc3VidGl0bGVfc3RyZWFtX2luZGV4GAUgASgFImQKDUNvbnRyb2xBY3Rpb24SMwoHY29tbWFuZBgBIAEoDjIiLm1hdmlvLmFzc2lzdGFudC52MS5Db250cm9sQ29tbWFuZBINCgV2YWx1ZRgCIAEoARIPCgdzZWdtZW50GAMgASgJImMKDVN0cmVhbXNBY3Rpb24SGgoSYXVkaW9fc3RyZWFtX2luZGV4GAEgASgFEh0KFXN1YnRpdGxlX3N0cmVhbV9pbmRleBgCIAEoBRIXCg9zdWJ0aXRsZV9vZmZzZXQYAyABKAEiXwoOTmF2aWdhdGVBY3Rpb24SMgoGdGFyZ2V0GAEgASgOMiIubWF2aW8uYXNzaXN0YW50LnYxLk5hdmlnYXRlVGFyZ2V0EgoKAmlkGAIgASgJEg0KBXF1ZXJ5GAMgASgJIkgKD1Nob3dJdGVtc0FjdGlvbhIlCgVpdGVtcxgBIAMoCzIWLm1hdmlvLmxpYnJhcnkudjEuSXRlbRIOCgZjaG9vc2UYAiABKAgiKAoMQ29uZmlybWF0aW9uEgoKAmlkGAEgASgJEgwKBHRleHQYAiABKAkigAEKBERvbmUSDgoGYW5zd2VyGAEgASgJEhAKCGxhbmd1YWdlGAIgASgJEhcKD2NvbnZlcnNhdGlvbl9pZBgDIAEoCRIUCgxjb25maXJtYXRpb24YBCABKAgSDwoHcmVzdWx0cxgFIAEoBRIWCg5ub3RfdW5kZXJzdG9vZBgGIAEoCCIaChhHZXRBc3Npc3RhbnRIaW50c1JlcXVlc3QiLAoZR2V0QXNzaXN0YW50SGludHNSZXNwb25zZRIPCgdwaHJhc2VzGAEgAygJIj0KFVN0YXJ0TGlzdGVuaW5nUmVxdWVzdBIQCghsYW5ndWFnZRgBIAEoCRISCgpyZWNvZ25pemVyGAIgASgJImoKFlN0YXJ0TGlzdGVuaW5nUmVzcG9uc2USCwoDdXJsGAEgASgJEhIKCnJlY29nbml6ZXIYAiABKAkSLwoLZXhwaXJlX3RpbWUYAyABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wIocBChhTdGFydFZvaWNlU2Vzc2lvblJlcXVlc3QSEAoIbGFuZ3VhZ2UYASABKAkSKAoEbW9kZRgCIAEoDjIaLm1hdmlvLnBsdWdpbi52MS5Wb2ljZU1vZGUSLwoHY29udGV4dBgDIAEoCzIeLm1hdmlvLmFzc2lzdGFudC52MS5Bc2tDb250ZXh0Im0KGVN0YXJ0Vm9pY2VTZXNzaW9uUmVzcG9uc2USCwoDdXJsGAEgASgJEhIKCnNlc3Npb25faWQYAiABKAkSLwoLZXhwaXJlX3RpbWUYAyABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wItIBChVBc3Npc3RhbnRDb252ZXJzYXRpb24SCgoCaWQYASABKAkSDQoFdGl0bGUYAiABKAkSEwoLZGV2aWNlX25hbWUYAyABKAkSLwoLY3JlYXRlX3RpbWUYBCABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEi8KC3VwZGF0ZV90aW1lGAUgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBInCgV1c2FnZRgGIAEoCzIYLm1hdmlvLnBsdWdpbi52MS5BaVVzYWdlImgKEEFzc2lzdGFudE1lc3NhZ2USDAoEdXNlchgBIAEoCBIMCgR0ZXh0GAIgASgJEigKBHRpbWUYAyABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEg4KBnNwZWVjaBgEIAMoCSIjCiFMaXN0QXNzaXN0YW50Q29udmVyc2F0aW9uc1JlcXVlc3QiZgoiTGlzdEFzc2lzdGFudENvbnZlcnNhdGlvbnNSZXNwb25zZRJACg1jb252ZXJzYXRpb25zGAEgAygLMikubWF2aW8uYXNzaXN0YW50LnYxLkFzc2lzdGFudENvbnZlcnNhdGlvbiI2Ch9HZXRBc3Npc3RhbnRDb252ZXJzYXRpb25SZXF1ZXN0EhMKAmlkGAEgASgJQge6SARyAhABIpsBCiBHZXRBc3Npc3RhbnRDb252ZXJzYXRpb25SZXNwb25zZRI/Cgxjb252ZXJzYXRpb24YASABKAsyKS5tYXZpby5hc3Npc3RhbnQudjEuQXNzaXN0YW50Q29udmVyc2F0aW9uEjYKCG1lc3NhZ2VzGAIgAygLMiQubWF2aW8uYXNzaXN0YW50LnYxLkFzc2lzdGFudE1lc3NhZ2UiOQoiRGVsZXRlQXNzaXN0YW50Q29udmVyc2F0aW9uUmVxdWVzdBITCgJpZBgBIAEoCUIHukgEcgIQASIlCiNEZWxldGVBc3Npc3RhbnRDb252ZXJzYXRpb25SZXNwb25zZSK7AQoPQXNzaXN0YW50TWVtb3J5EgoKAmlkGAEgASgJEgwKBHRleHQYAiABKAkSLwoLY3JlYXRlX3RpbWUYAyABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEi8KC3VwZGF0ZV90aW1lGAQgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBIsCgh1c2VfdGltZRgFIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXAiHgocTGlzdEFzc2lzdGFudE1lbW9yaWVzUmVxdWVzdCJWCh1MaXN0QXNzaXN0YW50TWVtb3JpZXNSZXNwb25zZRI1CghtZW1vcmllcxgBIAMoCzIjLm1hdmlvLmFzc2lzdGFudC52MS5Bc3Npc3RhbnRNZW1vcnkiRAocVXBkYXRlQXNzaXN0YW50TWVtb3J5UmVxdWVzdBIKCgJpZBgBIAEoCRIYCgR0ZXh0GAIgASgJQgq6SAdyBRABGOgHIlQKHVVwZGF0ZUFzc2lzdGFudE1lbW9yeVJlc3BvbnNlEjMKBm1lbW9yeRgBIAEoCzIjLm1hdmlvLmFzc2lzdGFudC52MS5Bc3Npc3RhbnRNZW1vcnkiLQoeRGVsZXRlQXNzaXN0YW50TWVtb3JpZXNSZXF1ZXN0EgsKA2lkcxgBIAMoCSIhCh9EZWxldGVBc3Npc3RhbnRNZW1vcmllc1Jlc3BvbnNlIh0KG0dldEFzc2lzdGFudFNldHRpbmdzUmVxdWVzdCJXChxHZXRBc3Npc3RhbnRTZXR0aW5nc1Jlc3BvbnNlEjcKCHNldHRpbmdzGAEgASgLMiUubWF2aW8uYXNzaXN0YW50LnYxLkFzc2lzdGFudFNldHRpbmdzImEKHlVwZGF0ZUFzc2lzdGFudFNldHRpbmdzUmVxdWVzdBI/CghzZXR0aW5ncxgBIAEoCzIlLm1hdmlvLmFzc2lzdGFudC52MS5Bc3Npc3RhbnRTZXR0aW5nc0IGukgDyAEBIloKH1VwZGF0ZUFzc2lzdGFudFNldHRpbmdzUmVzcG9uc2USNwoIc2V0dGluZ3MYASABKAsyJS5tYXZpby5hc3Npc3RhbnQudjEuQXNzaXN0YW50U2V0dGluZ3MqkQEKD0Fzc2lzdGFudEFjY2VzcxIgChxBU1NJU1RBTlRfQUNDRVNTX1VOU1BFQ0lGSUVEEAASGAoUQVNTSVNUQU5UX0FDQ0VTU19BTEwQARIjCh9BU1NJU1RBTlRfQUNDRVNTX0FETUlOSVNUUkFUT1JTEAISHQoZQVNTSVNUQU5UX0FDQ0VTU19TRUxFQ1RFRBADKpgDCg5Db250cm9sQ29tbWFuZBIfChtDT05UUk9MX0NPTU1BTkRfVU5TUEVDSUZJRUQQABIZChVDT05UUk9MX0NPTU1BTkRfUEFVU0UQARIaChZDT05UUk9MX0NPTU1BTkRfUkVTVU1FEAISGAoUQ09OVFJPTF9DT01NQU5EX1NUT1AQAxIYChRDT05UUk9MX0NPTU1BTkRfU0VFSxAEEhsKF0NPTlRST0xfQ09NTUFORF9TRUVLX0JZEAUSGAoUQ09OVFJPTF9DT01NQU5EX1NLSVAQBhIYChRDT05UUk9MX0NPTU1BTkRfTkVYVBAHEhwKGENPTlRST0xfQ09NTUFORF9QUkVWSU9VUxAIEhkKFUNPTlRST0xfQ09NTUFORF9TUEVFRBAJEhoKFkNPTlRST0xfQ09NTUFORF9WT0xVTUUQChIYChRDT05UUk9MX0NPTU1BTkRfTVVURRALEhoKFkNPTlRST0xfQ09NTUFORF9VTk1VVEUQDBIeChpDT05UUk9MX0NPTU1BTkRfRlVMTFNDUkVFThANKtYBCg5OYXZpZ2F0ZVRhcmdldBIfChtOQVZJR0FURV9UQVJHRVRfVU5TUEVDSUZJRUQQABIYChROQVZJR0FURV9UQVJHRVRfSE9NRRABEhgKFE5BVklHQVRFX1RBUkdFVF9CQUNLEAISGAoUTkFWSUdBVEVfVEFSR0VUX0lURU0QAxIbChdOQVZJR0FURV9UQVJHRVRfTElCUkFSWRAEEhoKFk5BVklHQVRFX1RBUkdFVF9TRUFSQ0gQBRIcChhOQVZJR0FURV9UQVJHRVRfU0VUVElOR1MQBjLTDAoQQXNzaXN0YW50U2VydmljZRJmCgxHZXRBc3Npc3RhbnQSJy5tYXZpby5hc3Npc3RhbnQudjEuR2V0QXNzaXN0YW50UmVxdWVzdBooLm1hdmlvLmFzc2lzdGFudC52MS5HZXRBc3Npc3RhbnRSZXNwb25zZSIDkAIBEkgKA0FzaxIeLm1hdmlvLmFzc2lzdGFudC52MS5Bc2tSZXF1ZXN0Gh8ubWF2aW8uYXNzaXN0YW50LnYxLkFza1Jlc3BvbnNlMAESdQoRR2V0QXNzaXN0YW50SGludHMSLC5tYXZpby5hc3Npc3RhbnQudjEuR2V0QXNzaXN0YW50SGludHNSZXF1ZXN0Gi0ubWF2aW8uYXNzaXN0YW50LnYxLkdldEFzc2lzdGFudEhpbnRzUmVzcG9uc2UiA5ACARJnCg5TdGFydExpc3RlbmluZxIpLm1hdmlvLmFzc2lzdGFudC52MS5TdGFydExpc3RlbmluZ1JlcXVlc3QaKi5tYXZpby5hc3Npc3RhbnQudjEuU3RhcnRMaXN0ZW5pbmdSZXNwb25zZRJwChFTdGFydFZvaWNlU2Vzc2lvbhIsLm1hdmlvLmFzc2lzdGFudC52MS5TdGFydFZvaWNlU2Vzc2lvblJlcXVlc3QaLS5tYXZpby5hc3Npc3RhbnQudjEuU3RhcnRWb2ljZVNlc3Npb25SZXNwb25zZRKQAQoaTGlzdEFzc2lzdGFudENvbnZlcnNhdGlvbnMSNS5tYXZpby5hc3Npc3RhbnQudjEuTGlzdEFzc2lzdGFudENvbnZlcnNhdGlvbnNSZXF1ZXN0GjYubWF2aW8uYXNzaXN0YW50LnYxLkxpc3RBc3Npc3RhbnRDb252ZXJzYXRpb25zUmVzcG9uc2UiA5ACARKKAQoYR2V0QXNzaXN0YW50Q29udmVyc2F0aW9uEjMubWF2aW8uYXNzaXN0YW50LnYxLkdldEFzc2lzdGFudENvbnZlcnNhdGlvblJlcXVlc3QaNC5tYXZpby5hc3Npc3RhbnQudjEuR2V0QXNzaXN0YW50Q29udmVyc2F0aW9uUmVzcG9uc2UiA5ACARKOAQobRGVsZXRlQXNzaXN0YW50Q29udmVyc2F0aW9uEjYubWF2aW8uYXNzaXN0YW50LnYxLkRlbGV0ZUFzc2lzdGFudENvbnZlcnNhdGlvblJlcXVlc3QaNy5tYXZpby5hc3Npc3RhbnQudjEuRGVsZXRlQXNzaXN0YW50Q29udmVyc2F0aW9uUmVzcG9uc2USgQEKFUxpc3RBc3Npc3RhbnRNZW1vcmllcxIwLm1hdmlvLmFzc2lzdGFudC52MS5MaXN0QXNzaXN0YW50TWVtb3JpZXNSZXF1ZXN0GjEubWF2aW8uYXNzaXN0YW50LnYxLkxpc3RBc3Npc3RhbnRNZW1vcmllc1Jlc3BvbnNlIgOQAgESfAoVVXBkYXRlQXNzaXN0YW50TWVtb3J5EjAubWF2aW8uYXNzaXN0YW50LnYxLlVwZGF0ZUFzc2lzdGFudE1lbW9yeVJlcXVlc3QaMS5tYXZpby5hc3Npc3RhbnQudjEuVXBkYXRlQXNzaXN0YW50TWVtb3J5UmVzcG9uc2USggEKF0RlbGV0ZUFzc2lzdGFudE1lbW9yaWVzEjIubWF2aW8uYXNzaXN0YW50LnYxLkRlbGV0ZUFzc2lzdGFudE1lbW9yaWVzUmVxdWVzdBozLm1hdmlvLmFzc2lzdGFudC52MS5EZWxldGVBc3Npc3RhbnRNZW1vcmllc1Jlc3BvbnNlEn4KFEdldEFzc2lzdGFudFNldHRpbmdzEi8ubWF2aW8uYXNzaXN0YW50LnYxLkdldEFzc2lzdGFudFNldHRpbmdzUmVxdWVzdBowLm1hdmlvLmFzc2lzdGFudC52MS5HZXRBc3Npc3RhbnRTZXR0aW5nc1Jlc3BvbnNlIgOQAgESggEKF1VwZGF0ZUFzc2lzdGFudFNldHRpbmdzEjIubWF2aW8uYXNzaXN0YW50LnYxLlVwZGF0ZUFzc2lzdGFudFNldHRpbmdzUmVxdWVzdBozLm1hdmlvLmFzc2lzdGFudC52MS5VcGRhdGVBc3Npc3RhbnRTZXR0aW5nc1Jlc3BvbnNlQt0BChZjb20ubWF2aW8uYXNzaXN0YW50LnYxQg5Bc3Npc3RhbnRQcm90b1ABWklnaXRodWIuY29tL21hdmlvYWkvbWF2aW8vbGlicy9wcm90by9nZW4vZ28vbWF2aW8vYXNzaXN0YW50L3YxO2Fzc2lzdGFudHYxogIDTUFYqgISTWF2aW8uQXNzaXN0YW50LlYxygISTWF2aW9cQXNzaXN0YW50XFYx4gIeTWF2aW9cQXNzaXN0YW50XFYxXEdQQk1ldGFkYXRh6gIUTWF2aW86OkFzc2lzdGFudDo6VjFiCGVkaXRpb25zcOgH", [file_buf_validate_validate, file_google_protobuf_duration, file_google_protobuf_timestamp, file_mavio_intent_v1_intent, file_mavio_library_v1_item, file_mavio_plugin_v1_ai, file_mavio_plugin_v1_voice]);
+  fileDesc("CiJtYXZpby9hc3Npc3RhbnQvdjEvYXNzaXN0YW50LnByb3RvEhJtYXZpby5hc3Npc3RhbnQudjEixQQKEUFzc2lzdGFudFNldHRpbmdzEg8KB2VuYWJsZWQYASABKAgSJgoFbW9kZWwYAiABKAlCF7pIFHISMhBeKGFpL1teL10rLy4rKT8kEhEKCWNvZGVfbW9kZRgDIAEoCBJACglhaV9hY2Nlc3MYBCABKA4yIy5tYXZpby5hc3Npc3RhbnQudjEuQXNzaXN0YW50QWNjZXNzQgi6SAWCAQIQARIiCgthaV91c2VyX2lkcxgFIAMoCUINukgKkgEHIgVyA7ABARIgCgxpZGxlX21pbnV0ZXMYBiABKAVCCrpIBxoFGKALKAESIgoOcmV0ZW50aW9uX2RheXMYByABKAVCCrpIBxoFGMIcKAESDgoGbWVtb3J5GAggASgIEg0KBWhpbnRzGAsgASgIEjMKBnNwZWVjaBgMIAMoCzIjLm1hdmlvLmFzc2lzdGFudC52MS5Bc3Npc3RhbnRTcGVlY2gSRAoNbG9uZ2VzdF9wYXVzZRgNIAEoCzIZLmdvb2dsZS5wcm90b2J1Zi5EdXJhdGlvbkISukgPqgEMIgIICjIGEIDKte4BEj0KDGNvbW1pdF9kZWxheRgOIAEoCzIZLmdvb2dsZS5wcm90b2J1Zi5EdXJhdGlvbkIMukgJqgEGIgIIAzIAEj8KDHNlc3Npb25faWRsZRgPIAEoCzIZLmdvb2dsZS5wcm90b2J1Zi5EdXJhdGlvbkIOukgLqgEIIgIIeDICCANKBAgJEApKBAgKEAtSCnJlY29nbml6ZXJSBnZvaWNlcyJ7Cg9Bc3Npc3RhbnRTcGVlY2gSGQoIbGFuZ3VhZ2UYASABKAlCB7pIBHICEAESKAoKcmVjb2duaXplchgCIAEoCUIUukgRcg8yDV4oW14vXSsvLispPyQSIwoFdm9pY2UYAyABKAlCFLpIEXIPMg1eKFteL10rLy4rKT8kIicKE0dldEFzc2lzdGFudFJlcXVlc3QSEAoIbGFuZ3VhZ2UYASABKAkiogEKFEdldEFzc2lzdGFudFJlc3BvbnNlEg8KB2VuYWJsZWQYASABKAgSCgoCYWkYAiABKAgSDgoGbWVtb3J5GAMgASgIEg0KBXZvaWNlGAkgASgIEhAKCGV4YW1wbGVzGAcgAygJEhEKCWxhbmd1YWdlcxgIIAMoCUoECAQQB1ILcmVjb2duaXplcnNSBnZvaWNlc1IOZGVmYXVsdF92b2ljZXMiSQoLVm9pY2VFbmdpbmUSCgoCaWQYASABKAkSDAoEbmFtZRgCIAEoCRIRCglsYW5ndWFnZXMYAyADKAkSDQoFcmVhZHkYBCABKAgikAMKCkFza1JlcXVlc3QSFgoEdGV4dBgBIAEoCUIIukgFcgMY0A8SJwoGaW50ZW50GAIgASgLMhcubWF2aW8uaW50ZW50LnYxLkludGVudBIvCgdjb250ZXh0GAMgASgLMh4ubWF2aW8uYXNzaXN0YW50LnYxLkFza0NvbnRleHQSDgoGc3Bva2VuGAQgASgIEjYKBmFuc3dlchgFIAEoCzImLm1hdmlvLmFzc2lzdGFudC52MS5Db25maXJtYXRpb25BbnN3ZXISDgoGY2hvaWNlGAYgASgJEhYKDmZhaWxlZF9hY3Rpb25zGAcgAygJOo4BukiKARqHAQoLYXNrLnJlcXVlc3QSKnRleHQsIGludGVudCwgYW5zd2VyIG9yIGNob2ljZSBpcyByZXF1aXJlZBpMdGhpcy50ZXh0ICE9ICcnIHx8IGhhcyh0aGlzLmludGVudCkgfHwgaGFzKHRoaXMuYW5zd2VyKSB8fCB0aGlzLmNob2ljZSAhPSAnJ0oECAgQCVIJc3BlZWNoX2lkIrMBCgpBc2tDb250ZXh0EhEKCWxhbmd1YWdlcxgBIAMoCRIvCgdwbGF5aW5nGAIgASgLMh4ubWF2aW8uYXNzaXN0YW50LnYxLkFza1BsYXlpbmcSDgoGc2NyZWVuGAMgASgJEg8KB2l0ZW1faWQYBCABKAkSEgoKbGlicmFyeV9pZBgFIAEoCRIZChFzZWxlY3RlZF9pdGVtX2lkcxgGIAMoCRIRCgl0aW1lX3pvbmUYByABKAkiwwEKCkFza1BsYXlpbmcSDwoHaXRlbV9pZBgBIAEoCRIrCghwb3NpdGlvbhgCIAEoCzIZLmdvb2dsZS5wcm90b2J1Zi5EdXJhdGlvbhIOCgZwYXVzZWQYAyABKAgSDQoFc3BlZWQYBCABKAESGgoSYXVkaW9fc3RyZWFtX2luZGV4GAUgASgFEh0KFXN1YnRpdGxlX3N0cmVhbV9pbmRleBgGIAEoBRIOCgZ2b2x1bWUYByABKAUSDQoFbXV0ZWQYCCABKAgiPAoSQ29uZmlybWF0aW9uQW5zd2VyEhMKAmlkGAEgASgJQge6SARyAhABEhEKCWNvbmZpcm1lZBgCIAEoCCKoAgoLQXNrUmVzcG9uc2USNAoKdW5kZXJzdG9vZBgBIAEoCzIeLm1hdmlvLmFzc2lzdGFudC52MS5VbmRlcnN0b29kSAASMAoEdG9vbBgCIAEoCzIgLm1hdmlvLmFzc2lzdGFudC52MS5Ub29sQWN0aXZpdHlIABIyCgZhY3Rpb24YAyABKAsyIC5tYXZpby5hc3Npc3RhbnQudjEuQ2xpZW50QWN0aW9uSAASOAoMY29uZmlybWF0aW9uGAQgASgLMiAubWF2aW8uYXNzaXN0YW50LnYxLkNvbmZpcm1hdGlvbkgAEhAKBmFuc3dlchgFIAEoCUgAEigKBGRvbmUYBiABKAsyGC5tYXZpby5hc3Npc3RhbnQudjEuRG9uZUgAQgcKBWV2ZW50IjYKClVuZGVyc3Rvb2QSDAoEdGV4dBgBIAEoCRIOCgZpbnRlbnQYAiABKAkSCgoCYWkYAyABKAgiVwoMVG9vbEFjdGl2aXR5EgoKAmlkGAEgASgJEgwKBHRvb2wYAiABKAkSDwoHc3VtbWFyeRgDIAEoCRIMCgRkb25lGAQgASgIEg4KBmZhaWxlZBgFIAEoCCKxAgoMQ2xpZW50QWN0aW9uEgoKAmlkGAEgASgJEi4KBHBsYXkYAiABKAsyHi5tYXZpby5hc3Npc3RhbnQudjEuUGxheUFjdGlvbkgAEjQKB2NvbnRyb2wYAyABKAsyIS5tYXZpby5hc3Npc3RhbnQudjEuQ29udHJvbEFjdGlvbkgAEjQKB3N0cmVhbXMYBCABKAsyIS5tYXZpby5hc3Npc3RhbnQudjEuU3RyZWFtc0FjdGlvbkgAEjYKCG5hdmlnYXRlGAUgASgLMiIubWF2aW8uYXNzaXN0YW50LnYxLk5hdmlnYXRlQWN0aW9uSAASOQoKc2hvd19pdGVtcxgGIAEoCzIjLm1hdmlvLmFzc2lzdGFudC52MS5TaG93SXRlbXNBY3Rpb25IAEIGCgRraW5kIqEBCgpQbGF5QWN0aW9uEhAKCGl0ZW1faWRzGAEgAygJEhMKC3N0YXJ0X2luZGV4GAIgASgFEjEKDnN0YXJ0X3Bvc2l0aW9uGAMgASgLMhkuZ29vZ2xlLnByb3RvYnVmLkR1cmF0aW9uEhoKEmF1ZGlvX3N0cmVhbV9pbmRleBgEIAEoBRIdChVzdWJ0aXRsZV9zdHJlYW1faW5kZXgYBSABKAUiZAoNQ29udHJvbEFjdGlvbhIzCgdjb21tYW5kGAEgASgOMiIubWF2aW8uYXNzaXN0YW50LnYxLkNvbnRyb2xDb21tYW5kEg0KBXZhbHVlGAIgASgBEg8KB3NlZ21lbnQYAyABKAkiYwoNU3RyZWFtc0FjdGlvbhIaChJhdWRpb19zdHJlYW1faW5kZXgYASABKAUSHQoVc3VidGl0bGVfc3RyZWFtX2luZGV4GAIgASgFEhcKD3N1YnRpdGxlX29mZnNldBgDIAEoASJfCg5OYXZpZ2F0ZUFjdGlvbhIyCgZ0YXJnZXQYASABKA4yIi5tYXZpby5hc3Npc3RhbnQudjEuTmF2aWdhdGVUYXJnZXQSCgoCaWQYAiABKAkSDQoFcXVlcnkYAyABKAkiSAoPU2hvd0l0ZW1zQWN0aW9uEiUKBWl0ZW1zGAEgAygLMhYubWF2aW8ubGlicmFyeS52MS5JdGVtEg4KBmNob29zZRgCIAEoCCIoCgxDb25maXJtYXRpb24SCgoCaWQYASABKAkSDAoEdGV4dBgCIAEoCSKAAQoERG9uZRIOCgZhbnN3ZXIYASABKAkSEAoIbGFuZ3VhZ2UYAiABKAkSFwoPY29udmVyc2F0aW9uX2lkGAMgASgJEhQKDGNvbmZpcm1hdGlvbhgEIAEoCBIPCgdyZXN1bHRzGAUgASgFEhYKDm5vdF91bmRlcnN0b29kGAYgASgIIocBChhTdGFydFZvaWNlU2Vzc2lvblJlcXVlc3QSEAoIbGFuZ3VhZ2UYASABKAkSKAoEbW9kZRgCIAEoDjIaLm1hdmlvLnBsdWdpbi52MS5Wb2ljZU1vZGUSLwoHY29udGV4dBgDIAEoCzIeLm1hdmlvLmFzc2lzdGFudC52MS5Bc2tDb250ZXh0Im0KGVN0YXJ0Vm9pY2VTZXNzaW9uUmVzcG9uc2USCwoDdXJsGAEgASgJEhIKCnNlc3Npb25faWQYAiABKAkSLwoLZXhwaXJlX3RpbWUYAyABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wItIBChVBc3Npc3RhbnRDb252ZXJzYXRpb24SCgoCaWQYASABKAkSDQoFdGl0bGUYAiABKAkSEwoLZGV2aWNlX25hbWUYAyABKAkSLwoLY3JlYXRlX3RpbWUYBCABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEi8KC3VwZGF0ZV90aW1lGAUgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBInCgV1c2FnZRgGIAEoCzIYLm1hdmlvLnBsdWdpbi52MS5BaVVzYWdlInoKEEFzc2lzdGFudE1lc3NhZ2USDAoEdXNlchgBIAEoCBIMCgR0ZXh0GAIgASgJEigKBHRpbWUYAyABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEhIKCnNwZWVjaF91cmwYBSABKAlKBAgEEAVSBnNwZWVjaCIjCiFMaXN0QXNzaXN0YW50Q29udmVyc2F0aW9uc1JlcXVlc3QiZgoiTGlzdEFzc2lzdGFudENvbnZlcnNhdGlvbnNSZXNwb25zZRJACg1jb252ZXJzYXRpb25zGAEgAygLMikubWF2aW8uYXNzaXN0YW50LnYxLkFzc2lzdGFudENvbnZlcnNhdGlvbiI2Ch9HZXRBc3Npc3RhbnRDb252ZXJzYXRpb25SZXF1ZXN0EhMKAmlkGAEgASgJQge6SARyAhABIpsBCiBHZXRBc3Npc3RhbnRDb252ZXJzYXRpb25SZXNwb25zZRI/Cgxjb252ZXJzYXRpb24YASABKAsyKS5tYXZpby5hc3Npc3RhbnQudjEuQXNzaXN0YW50Q29udmVyc2F0aW9uEjYKCG1lc3NhZ2VzGAIgAygLMiQubWF2aW8uYXNzaXN0YW50LnYxLkFzc2lzdGFudE1lc3NhZ2UiOQoiRGVsZXRlQXNzaXN0YW50Q29udmVyc2F0aW9uUmVxdWVzdBITCgJpZBgBIAEoCUIHukgEcgIQASIlCiNEZWxldGVBc3Npc3RhbnRDb252ZXJzYXRpb25SZXNwb25zZSK7AQoPQXNzaXN0YW50TWVtb3J5EgoKAmlkGAEgASgJEgwKBHRleHQYAiABKAkSLwoLY3JlYXRlX3RpbWUYAyABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEi8KC3VwZGF0ZV90aW1lGAQgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBIsCgh1c2VfdGltZRgFIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXAiHgocTGlzdEFzc2lzdGFudE1lbW9yaWVzUmVxdWVzdCJWCh1MaXN0QXNzaXN0YW50TWVtb3JpZXNSZXNwb25zZRI1CghtZW1vcmllcxgBIAMoCzIjLm1hdmlvLmFzc2lzdGFudC52MS5Bc3Npc3RhbnRNZW1vcnkiRAocVXBkYXRlQXNzaXN0YW50TWVtb3J5UmVxdWVzdBIKCgJpZBgBIAEoCRIYCgR0ZXh0GAIgASgJQgq6SAdyBRABGOgHIlQKHVVwZGF0ZUFzc2lzdGFudE1lbW9yeVJlc3BvbnNlEjMKBm1lbW9yeRgBIAEoCzIjLm1hdmlvLmFzc2lzdGFudC52MS5Bc3Npc3RhbnRNZW1vcnkiLQoeRGVsZXRlQXNzaXN0YW50TWVtb3JpZXNSZXF1ZXN0EgsKA2lkcxgBIAMoCSIhCh9EZWxldGVBc3Npc3RhbnRNZW1vcmllc1Jlc3BvbnNlIh0KG0dldEFzc2lzdGFudFNldHRpbmdzUmVxdWVzdCK+AQocR2V0QXNzaXN0YW50U2V0dGluZ3NSZXNwb25zZRI3CghzZXR0aW5ncxgBIAEoCzIlLm1hdmlvLmFzc2lzdGFudC52MS5Bc3Npc3RhbnRTZXR0aW5ncxI0CgtyZWNvZ25pemVycxgCIAMoCzIfLm1hdmlvLmFzc2lzdGFudC52MS5Wb2ljZUVuZ2luZRIvCgZ2b2ljZXMYAyADKAsyHy5tYXZpby5hc3Npc3RhbnQudjEuVm9pY2VFbmdpbmUiYQoeVXBkYXRlQXNzaXN0YW50U2V0dGluZ3NSZXF1ZXN0Ej8KCHNldHRpbmdzGAEgASgLMiUubWF2aW8uYXNzaXN0YW50LnYxLkFzc2lzdGFudFNldHRpbmdzQga6SAPIAQEiWgofVXBkYXRlQXNzaXN0YW50U2V0dGluZ3NSZXNwb25zZRI3CghzZXR0aW5ncxgBIAEoCzIlLm1hdmlvLmFzc2lzdGFudC52MS5Bc3Npc3RhbnRTZXR0aW5ncyqRAQoPQXNzaXN0YW50QWNjZXNzEiAKHEFTU0lTVEFOVF9BQ0NFU1NfVU5TUEVDSUZJRUQQABIYChRBU1NJU1RBTlRfQUNDRVNTX0FMTBABEiMKH0FTU0lTVEFOVF9BQ0NFU1NfQURNSU5JU1RSQVRPUlMQAhIdChlBU1NJU1RBTlRfQUNDRVNTX1NFTEVDVEVEEAMqmAMKDkNvbnRyb2xDb21tYW5kEh8KG0NPTlRST0xfQ09NTUFORF9VTlNQRUNJRklFRBAAEhkKFUNPTlRST0xfQ09NTUFORF9QQVVTRRABEhoKFkNPTlRST0xfQ09NTUFORF9SRVNVTUUQAhIYChRDT05UUk9MX0NPTU1BTkRfU1RPUBADEhgKFENPTlRST0xfQ09NTUFORF9TRUVLEAQSGwoXQ09OVFJPTF9DT01NQU5EX1NFRUtfQlkQBRIYChRDT05UUk9MX0NPTU1BTkRfU0tJUBAGEhgKFENPTlRST0xfQ09NTUFORF9ORVhUEAcSHAoYQ09OVFJPTF9DT01NQU5EX1BSRVZJT1VTEAgSGQoVQ09OVFJPTF9DT01NQU5EX1NQRUVEEAkSGgoWQ09OVFJPTF9DT01NQU5EX1ZPTFVNRRAKEhgKFENPTlRST0xfQ09NTUFORF9NVVRFEAsSGgoWQ09OVFJPTF9DT01NQU5EX1VOTVVURRAMEh4KGkNPTlRST0xfQ09NTUFORF9GVUxMU0NSRUVOEA0q1gEKDk5hdmlnYXRlVGFyZ2V0Eh8KG05BVklHQVRFX1RBUkdFVF9VTlNQRUNJRklFRBAAEhgKFE5BVklHQVRFX1RBUkdFVF9IT01FEAESGAoUTkFWSUdBVEVfVEFSR0VUX0JBQ0sQAhIYChROQVZJR0FURV9UQVJHRVRfSVRFTRADEhsKF05BVklHQVRFX1RBUkdFVF9MSUJSQVJZEAQSGgoWTkFWSUdBVEVfVEFSR0VUX1NFQVJDSBAFEhwKGE5BVklHQVRFX1RBUkdFVF9TRVRUSU5HUxAGMvMKChBBc3Npc3RhbnRTZXJ2aWNlEmYKDEdldEFzc2lzdGFudBInLm1hdmlvLmFzc2lzdGFudC52MS5HZXRBc3Npc3RhbnRSZXF1ZXN0GigubWF2aW8uYXNzaXN0YW50LnYxLkdldEFzc2lzdGFudFJlc3BvbnNlIgOQAgESSAoDQXNrEh4ubWF2aW8uYXNzaXN0YW50LnYxLkFza1JlcXVlc3QaHy5tYXZpby5hc3Npc3RhbnQudjEuQXNrUmVzcG9uc2UwARJwChFTdGFydFZvaWNlU2Vzc2lvbhIsLm1hdmlvLmFzc2lzdGFudC52MS5TdGFydFZvaWNlU2Vzc2lvblJlcXVlc3QaLS5tYXZpby5hc3Npc3RhbnQudjEuU3RhcnRWb2ljZVNlc3Npb25SZXNwb25zZRKQAQoaTGlzdEFzc2lzdGFudENvbnZlcnNhdGlvbnMSNS5tYXZpby5hc3Npc3RhbnQudjEuTGlzdEFzc2lzdGFudENvbnZlcnNhdGlvbnNSZXF1ZXN0GjYubWF2aW8uYXNzaXN0YW50LnYxLkxpc3RBc3Npc3RhbnRDb252ZXJzYXRpb25zUmVzcG9uc2UiA5ACARKKAQoYR2V0QXNzaXN0YW50Q29udmVyc2F0aW9uEjMubWF2aW8uYXNzaXN0YW50LnYxLkdldEFzc2lzdGFudENvbnZlcnNhdGlvblJlcXVlc3QaNC5tYXZpby5hc3Npc3RhbnQudjEuR2V0QXNzaXN0YW50Q29udmVyc2F0aW9uUmVzcG9uc2UiA5ACARKOAQobRGVsZXRlQXNzaXN0YW50Q29udmVyc2F0aW9uEjYubWF2aW8uYXNzaXN0YW50LnYxLkRlbGV0ZUFzc2lzdGFudENvbnZlcnNhdGlvblJlcXVlc3QaNy5tYXZpby5hc3Npc3RhbnQudjEuRGVsZXRlQXNzaXN0YW50Q29udmVyc2F0aW9uUmVzcG9uc2USgQEKFUxpc3RBc3Npc3RhbnRNZW1vcmllcxIwLm1hdmlvLmFzc2lzdGFudC52MS5MaXN0QXNzaXN0YW50TWVtb3JpZXNSZXF1ZXN0GjEubWF2aW8uYXNzaXN0YW50LnYxLkxpc3RBc3Npc3RhbnRNZW1vcmllc1Jlc3BvbnNlIgOQAgESfAoVVXBkYXRlQXNzaXN0YW50TWVtb3J5EjAubWF2aW8uYXNzaXN0YW50LnYxLlVwZGF0ZUFzc2lzdGFudE1lbW9yeVJlcXVlc3QaMS5tYXZpby5hc3Npc3RhbnQudjEuVXBkYXRlQXNzaXN0YW50TWVtb3J5UmVzcG9uc2USggEKF0RlbGV0ZUFzc2lzdGFudE1lbW9yaWVzEjIubWF2aW8uYXNzaXN0YW50LnYxLkRlbGV0ZUFzc2lzdGFudE1lbW9yaWVzUmVxdWVzdBozLm1hdmlvLmFzc2lzdGFudC52MS5EZWxldGVBc3Npc3RhbnRNZW1vcmllc1Jlc3BvbnNlEn4KFEdldEFzc2lzdGFudFNldHRpbmdzEi8ubWF2aW8uYXNzaXN0YW50LnYxLkdldEFzc2lzdGFudFNldHRpbmdzUmVxdWVzdBowLm1hdmlvLmFzc2lzdGFudC52MS5HZXRBc3Npc3RhbnRTZXR0aW5nc1Jlc3BvbnNlIgOQAgESggEKF1VwZGF0ZUFzc2lzdGFudFNldHRpbmdzEjIubWF2aW8uYXNzaXN0YW50LnYxLlVwZGF0ZUFzc2lzdGFudFNldHRpbmdzUmVxdWVzdBozLm1hdmlvLmFzc2lzdGFudC52MS5VcGRhdGVBc3Npc3RhbnRTZXR0aW5nc1Jlc3BvbnNlQt0BChZjb20ubWF2aW8uYXNzaXN0YW50LnYxQg5Bc3Npc3RhbnRQcm90b1ABWklnaXRodWIuY29tL21hdmlvYWkvbWF2aW8vbGlicy9wcm90by9nZW4vZ28vbWF2aW8vYXNzaXN0YW50L3YxO2Fzc2lzdGFudHYxogIDTUFYqgISTWF2aW8uQXNzaXN0YW50LlYxygISTWF2aW9cQXNzaXN0YW50XFYx4gIeTWF2aW9cQXNzaXN0YW50XFYxXEdQQk1ldGFkYXRh6gIUTWF2aW86OkFzc2lzdGFudDo6VjFiCGVkaXRpb25zcOgH", [file_buf_validate_validate, file_google_protobuf_duration, file_google_protobuf_timestamp, file_mavio_intent_v1_intent, file_mavio_library_v1_item, file_mavio_plugin_v1_ai, file_mavio_plugin_v1_voice]);
 
 /**
  * AssistantSettings are the server's assistant settings.
@@ -90,26 +90,45 @@ export type AssistantSettings = Message<"mavio.assistant.v1.AssistantSettings"> 
   memory: boolean;
 
   /**
-   * The server's recognizer, "<plugin>/<recognizer>"; empty, the first
-   * ready one.
-   *
-   * @generated from field: string recognizer = 9;
-   */
-  recognizer: string;
-
-  /**
-   * The voices answers are spoken with by default, by language.
-   *
-   * @generated from field: repeated mavio.assistant.v1.AssistantVoiceChoice voices = 10;
-   */
-  voices: AssistantVoiceChoice[];
-
-  /**
-   * Whether recognizers are given the user's hints.
+   * Whether recognizers are given the user's hints: titles being watched,
+   * recently added titles, people and the user's devices.
    *
    * @generated from field: bool hints = 11;
    */
   hints: boolean;
+
+  /**
+   * The recognizer and the voice of voice sessions by language; a
+   * language listed nowhere, nor its base, gets the plugin's first ready
+   * ones.
+   *
+   * @generated from field: repeated mavio.assistant.v1.AssistantSpeech speech = 12;
+   */
+  speech: AssistantSpeech[];
+
+  /**
+   * The longest pause in a turn the turn model reads as unfinished,
+   * 0.5–10 seconds.
+   *
+   * @generated from field: google.protobuf.Duration longest_pause = 13;
+   */
+  longestPause?: Duration | undefined;
+
+  /**
+   * How long a turn stands, with the user silent, before what its answer
+   * changes is done, 0–3 seconds.
+   *
+   * @generated from field: google.protobuf.Duration commit_delay = 14;
+   */
+  commitDelay?: Duration | undefined;
+
+  /**
+   * How long the user may stay silent after an answer before the voice
+   * session ends, 3–120 seconds.
+   *
+   * @generated from field: google.protobuf.Duration session_idle = 15;
+   */
+  sessionIdle?: Duration | undefined;
 };
 
 /**
@@ -120,11 +139,11 @@ export const AssistantSettingsSchema: GenMessage<AssistantSettings> = /*@__PURE_
   messageDesc(file_mavio_assistant_v1_assistant, 0);
 
 /**
- * AssistantVoiceChoice is the voice of a language.
+ * AssistantSpeech is the recognizer and the voice of a language.
  *
- * @generated from message mavio.assistant.v1.AssistantVoiceChoice
+ * @generated from message mavio.assistant.v1.AssistantSpeech
  */
-export type AssistantVoiceChoice = Message<"mavio.assistant.v1.AssistantVoiceChoice"> & {
+export type AssistantSpeech = Message<"mavio.assistant.v1.AssistantSpeech"> & {
   /**
    * BCP 47, such as "en" or "zh-CN".
    *
@@ -133,18 +152,25 @@ export type AssistantVoiceChoice = Message<"mavio.assistant.v1.AssistantVoiceCho
   language: string;
 
   /**
-   * "<plugin>/<voice>".
+   * "<plugin>/<recognizer>"; empty, the plugin's first ready one.
    *
-   * @generated from field: string voice = 2;
+   * @generated from field: string recognizer = 2;
+   */
+  recognizer: string;
+
+  /**
+   * "<plugin>/<voice>"; empty, the plugin's first ready one.
+   *
+   * @generated from field: string voice = 3;
    */
   voice: string;
 };
 
 /**
- * Describes the message mavio.assistant.v1.AssistantVoiceChoice.
- * Use `create(AssistantVoiceChoiceSchema)` to create a new message.
+ * Describes the message mavio.assistant.v1.AssistantSpeech.
+ * Use `create(AssistantSpeechSchema)` to create a new message.
  */
-export const AssistantVoiceChoiceSchema: GenMessage<AssistantVoiceChoice> = /*@__PURE__*/
+export const AssistantSpeechSchema: GenMessage<AssistantSpeech> = /*@__PURE__*/
   messageDesc(file_mavio_assistant_v1_assistant, 1);
 
 /**
@@ -192,25 +218,11 @@ export type GetAssistantResponse = Message<"mavio.assistant.v1.GetAssistantRespo
   memory: boolean;
 
   /**
-   * The server's recognizers, the default first.
+   * Voice sessions can be started: a voice session plugin is ready.
    *
-   * @generated from field: repeated mavio.assistant.v1.Recognizer recognizers = 4;
+   * @generated from field: bool voice = 9;
    */
-  recognizers: Recognizer[];
-
-  /**
-   * The server's voices.
-   *
-   * @generated from field: repeated mavio.assistant.v1.Voice voices = 5;
-   */
-  voices: Voice[];
-
-  /**
-   * The voice of each language when the user chooses none.
-   *
-   * @generated from field: repeated mavio.assistant.v1.AssistantVoiceChoice default_voices = 6;
-   */
-  defaultVoices: AssistantVoiceChoice[];
+  voice: boolean;
 
   /**
    * Examples of requests in the language asked for.
@@ -235,13 +247,13 @@ export const GetAssistantResponseSchema: GenMessage<GetAssistantResponse> = /*@_
   messageDesc(file_mavio_assistant_v1_assistant, 3);
 
 /**
- * Recognizer is a speech recognizer of the server.
+ * VoiceEngine is a recognizer or a voice of the voice session plugin.
  *
- * @generated from message mavio.assistant.v1.Recognizer
+ * @generated from message mavio.assistant.v1.VoiceEngine
  */
-export type Recognizer = Message<"mavio.assistant.v1.Recognizer"> & {
+export type VoiceEngine = Message<"mavio.assistant.v1.VoiceEngine"> & {
   /**
-   * "<plugin>/<recognizer>".
+   * "<plugin>/<recognizer>" or "<plugin>/<voice>".
    *
    * @generated from field: string id = 1;
    */
@@ -258,47 +270,21 @@ export type Recognizer = Message<"mavio.assistant.v1.Recognizer"> & {
    * @generated from field: repeated string languages = 3;
    */
   languages: string[];
+
+  /**
+   * It can be used: enabled, and its model downloaded for a local one.
+   *
+   * @generated from field: bool ready = 4;
+   */
+  ready: boolean;
 };
 
 /**
- * Describes the message mavio.assistant.v1.Recognizer.
- * Use `create(RecognizerSchema)` to create a new message.
+ * Describes the message mavio.assistant.v1.VoiceEngine.
+ * Use `create(VoiceEngineSchema)` to create a new message.
  */
-export const RecognizerSchema: GenMessage<Recognizer> = /*@__PURE__*/
+export const VoiceEngineSchema: GenMessage<VoiceEngine> = /*@__PURE__*/
   messageDesc(file_mavio_assistant_v1_assistant, 4);
-
-/**
- * Voice is a voice of the server.
- *
- * @generated from message mavio.assistant.v1.Voice
- */
-export type Voice = Message<"mavio.assistant.v1.Voice"> & {
-  /**
-   * "<plugin>/<voice>".
-   *
-   * @generated from field: string id = 1;
-   */
-  id: string;
-
-  /**
-   * @generated from field: string name = 2;
-   */
-  name: string;
-
-  /**
-   * BCP 47.
-   *
-   * @generated from field: repeated string languages = 3;
-   */
-  languages: string[];
-};
-
-/**
- * Describes the message mavio.assistant.v1.Voice.
- * Use `create(VoiceSchema)` to create a new message.
- */
-export const VoiceSchema: GenMessage<Voice> = /*@__PURE__*/
-  messageDesc(file_mavio_assistant_v1_assistant, 5);
 
 /**
  * @generated from message mavio.assistant.v1.AskRequest
@@ -351,15 +337,6 @@ export type AskRequest = Message<"mavio.assistant.v1.AskRequest"> & {
    * @generated from field: repeated string failed_actions = 7;
    */
   failedActions: string[];
-
-  /**
-   * An ID the client makes for the answer's speech: the audio of the
-   * POST /assistant/speech requests naming it is kept with the answer in
-   * its conversation (docs/assistant.md §8.3).
-   *
-   * @generated from field: string speech_id = 8;
-   */
-  speechId: string;
 };
 
 /**
@@ -367,7 +344,7 @@ export type AskRequest = Message<"mavio.assistant.v1.AskRequest"> & {
  * Use `create(AskRequestSchema)` to create a new message.
  */
 export const AskRequestSchema: GenMessage<AskRequest> = /*@__PURE__*/
-  messageDesc(file_mavio_assistant_v1_assistant, 6);
+  messageDesc(file_mavio_assistant_v1_assistant, 5);
 
 /**
  * AskContext is where the request is made.
@@ -430,7 +407,7 @@ export type AskContext = Message<"mavio.assistant.v1.AskContext"> & {
  * Use `create(AskContextSchema)` to create a new message.
  */
 export const AskContextSchema: GenMessage<AskContext> = /*@__PURE__*/
-  messageDesc(file_mavio_assistant_v1_assistant, 7);
+  messageDesc(file_mavio_assistant_v1_assistant, 6);
 
 /**
  * AskPlaying is what the requesting device plays.
@@ -488,7 +465,7 @@ export type AskPlaying = Message<"mavio.assistant.v1.AskPlaying"> & {
  * Use `create(AskPlayingSchema)` to create a new message.
  */
 export const AskPlayingSchema: GenMessage<AskPlaying> = /*@__PURE__*/
-  messageDesc(file_mavio_assistant_v1_assistant, 8);
+  messageDesc(file_mavio_assistant_v1_assistant, 7);
 
 /**
  * ConfirmationAnswer answers a pending confirmation.
@@ -512,7 +489,7 @@ export type ConfirmationAnswer = Message<"mavio.assistant.v1.ConfirmationAnswer"
  * Use `create(ConfirmationAnswerSchema)` to create a new message.
  */
 export const ConfirmationAnswerSchema: GenMessage<ConfirmationAnswer> = /*@__PURE__*/
-  messageDesc(file_mavio_assistant_v1_assistant, 9);
+  messageDesc(file_mavio_assistant_v1_assistant, 8);
 
 /**
  * @generated from message mavio.assistant.v1.AskResponse
@@ -577,7 +554,7 @@ export type AskResponse = Message<"mavio.assistant.v1.AskResponse"> & {
  * Use `create(AskResponseSchema)` to create a new message.
  */
 export const AskResponseSchema: GenMessage<AskResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_assistant_v1_assistant, 10);
+  messageDesc(file_mavio_assistant_v1_assistant, 9);
 
 /**
  * Understood is what a request was understood as.
@@ -612,7 +589,7 @@ export type Understood = Message<"mavio.assistant.v1.Understood"> & {
  * Use `create(UnderstoodSchema)` to create a new message.
  */
 export const UnderstoodSchema: GenMessage<Understood> = /*@__PURE__*/
-  messageDesc(file_mavio_assistant_v1_assistant, 11);
+  messageDesc(file_mavio_assistant_v1_assistant, 10);
 
 /**
  * ToolActivity is a tool running for the request.
@@ -655,7 +632,7 @@ export type ToolActivity = Message<"mavio.assistant.v1.ToolActivity"> & {
  * Use `create(ToolActivitySchema)` to create a new message.
  */
 export const ToolActivitySchema: GenMessage<ToolActivity> = /*@__PURE__*/
-  messageDesc(file_mavio_assistant_v1_assistant, 12);
+  messageDesc(file_mavio_assistant_v1_assistant, 11);
 
 /**
  * ClientAction is something the requesting client does.
@@ -711,7 +688,7 @@ export type ClientAction = Message<"mavio.assistant.v1.ClientAction"> & {
  * Use `create(ClientActionSchema)` to create a new message.
  */
 export const ClientActionSchema: GenMessage<ClientAction> = /*@__PURE__*/
-  messageDesc(file_mavio_assistant_v1_assistant, 13);
+  messageDesc(file_mavio_assistant_v1_assistant, 12);
 
 /**
  * PlayAction plays items, as a queue.
@@ -757,7 +734,7 @@ export type PlayAction = Message<"mavio.assistant.v1.PlayAction"> & {
  * Use `create(PlayActionSchema)` to create a new message.
  */
 export const PlayActionSchema: GenMessage<PlayAction> = /*@__PURE__*/
-  messageDesc(file_mavio_assistant_v1_assistant, 14);
+  messageDesc(file_mavio_assistant_v1_assistant, 13);
 
 /**
  * ControlAction changes the playback.
@@ -791,7 +768,7 @@ export type ControlAction = Message<"mavio.assistant.v1.ControlAction"> & {
  * Use `create(ControlActionSchema)` to create a new message.
  */
 export const ControlActionSchema: GenMessage<ControlAction> = /*@__PURE__*/
-  messageDesc(file_mavio_assistant_v1_assistant, 15);
+  messageDesc(file_mavio_assistant_v1_assistant, 14);
 
 /**
  * StreamsAction changes the streams played; unset fields stay.
@@ -824,7 +801,7 @@ export type StreamsAction = Message<"mavio.assistant.v1.StreamsAction"> & {
  * Use `create(StreamsActionSchema)` to create a new message.
  */
 export const StreamsActionSchema: GenMessage<StreamsAction> = /*@__PURE__*/
-  messageDesc(file_mavio_assistant_v1_assistant, 16);
+  messageDesc(file_mavio_assistant_v1_assistant, 15);
 
 /**
  * NavigateAction opens a screen.
@@ -857,7 +834,7 @@ export type NavigateAction = Message<"mavio.assistant.v1.NavigateAction"> & {
  * Use `create(NavigateActionSchema)` to create a new message.
  */
 export const NavigateActionSchema: GenMessage<NavigateAction> = /*@__PURE__*/
-  messageDesc(file_mavio_assistant_v1_assistant, 17);
+  messageDesc(file_mavio_assistant_v1_assistant, 16);
 
 /**
  * ShowItemsAction shows items, to choose from when choose is set.
@@ -881,7 +858,7 @@ export type ShowItemsAction = Message<"mavio.assistant.v1.ShowItemsAction"> & {
  * Use `create(ShowItemsActionSchema)` to create a new message.
  */
 export const ShowItemsActionSchema: GenMessage<ShowItemsAction> = /*@__PURE__*/
-  messageDesc(file_mavio_assistant_v1_assistant, 18);
+  messageDesc(file_mavio_assistant_v1_assistant, 17);
 
 /**
  * Confirmation asks the user to confirm an action.
@@ -907,7 +884,7 @@ export type Confirmation = Message<"mavio.assistant.v1.Confirmation"> & {
  * Use `create(ConfirmationSchema)` to create a new message.
  */
 export const ConfirmationSchema: GenMessage<Confirmation> = /*@__PURE__*/
-  messageDesc(file_mavio_assistant_v1_assistant, 19);
+  messageDesc(file_mavio_assistant_v1_assistant, 18);
 
 /**
  * Done ends a request.
@@ -964,92 +941,7 @@ export type Done = Message<"mavio.assistant.v1.Done"> & {
  * Use `create(DoneSchema)` to create a new message.
  */
 export const DoneSchema: GenMessage<Done> = /*@__PURE__*/
-  messageDesc(file_mavio_assistant_v1_assistant, 20);
-
-/**
- * @generated from message mavio.assistant.v1.GetAssistantHintsRequest
- */
-export type GetAssistantHintsRequest = Message<"mavio.assistant.v1.GetAssistantHintsRequest"> & {
-};
-
-/**
- * Describes the message mavio.assistant.v1.GetAssistantHintsRequest.
- * Use `create(GetAssistantHintsRequestSchema)` to create a new message.
- */
-export const GetAssistantHintsRequestSchema: GenMessage<GetAssistantHintsRequest> = /*@__PURE__*/
-  messageDesc(file_mavio_assistant_v1_assistant, 21);
-
-/**
- * @generated from message mavio.assistant.v1.GetAssistantHintsResponse
- */
-export type GetAssistantHintsResponse = Message<"mavio.assistant.v1.GetAssistantHintsResponse"> & {
-  /**
-   * @generated from field: repeated string phrases = 1;
-   */
-  phrases: string[];
-};
-
-/**
- * Describes the message mavio.assistant.v1.GetAssistantHintsResponse.
- * Use `create(GetAssistantHintsResponseSchema)` to create a new message.
- */
-export const GetAssistantHintsResponseSchema: GenMessage<GetAssistantHintsResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_assistant_v1_assistant, 22);
-
-/**
- * @generated from message mavio.assistant.v1.StartListeningRequest
- */
-export type StartListeningRequest = Message<"mavio.assistant.v1.StartListeningRequest"> & {
-  /**
-   * The language spoken, BCP 47; empty, the recognizer detects it.
-   *
-   * @generated from field: string language = 1;
-   */
-  language: string;
-
-  /**
-   * "<plugin>/<recognizer>"; empty, the settings'.
-   *
-   * @generated from field: string recognizer = 2;
-   */
-  recognizer: string;
-};
-
-/**
- * Describes the message mavio.assistant.v1.StartListeningRequest.
- * Use `create(StartListeningRequestSchema)` to create a new message.
- */
-export const StartListeningRequestSchema: GenMessage<StartListeningRequest> = /*@__PURE__*/
-  messageDesc(file_mavio_assistant_v1_assistant, 23);
-
-/**
- * @generated from message mavio.assistant.v1.StartListeningResponse
- */
-export type StartListeningResponse = Message<"mavio.assistant.v1.StartListeningResponse"> & {
-  /**
-   * The WebSocket URL, relative to the server's base URL.
-   *
-   * @generated from field: string url = 1;
-   */
-  url: string;
-
-  /**
-   * @generated from field: string recognizer = 2;
-   */
-  recognizer: string;
-
-  /**
-   * @generated from field: google.protobuf.Timestamp expire_time = 3;
-   */
-  expireTime?: Timestamp | undefined;
-};
-
-/**
- * Describes the message mavio.assistant.v1.StartListeningResponse.
- * Use `create(StartListeningResponseSchema)` to create a new message.
- */
-export const StartListeningResponseSchema: GenMessage<StartListeningResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_assistant_v1_assistant, 24);
+  messageDesc(file_mavio_assistant_v1_assistant, 19);
 
 /**
  * @generated from message mavio.assistant.v1.StartVoiceSessionRequest
@@ -1081,7 +973,7 @@ export type StartVoiceSessionRequest = Message<"mavio.assistant.v1.StartVoiceSes
  * Use `create(StartVoiceSessionRequestSchema)` to create a new message.
  */
 export const StartVoiceSessionRequestSchema: GenMessage<StartVoiceSessionRequest> = /*@__PURE__*/
-  messageDesc(file_mavio_assistant_v1_assistant, 25);
+  messageDesc(file_mavio_assistant_v1_assistant, 20);
 
 /**
  * @generated from message mavio.assistant.v1.StartVoiceSessionResponse
@@ -1110,7 +1002,7 @@ export type StartVoiceSessionResponse = Message<"mavio.assistant.v1.StartVoiceSe
  * Use `create(StartVoiceSessionResponseSchema)` to create a new message.
  */
 export const StartVoiceSessionResponseSchema: GenMessage<StartVoiceSessionResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_assistant_v1_assistant, 26);
+  messageDesc(file_mavio_assistant_v1_assistant, 21);
 
 /**
  * AssistantConversation is one of a user's conversations with the
@@ -1159,7 +1051,7 @@ export type AssistantConversation = Message<"mavio.assistant.v1.AssistantConvers
  * Use `create(AssistantConversationSchema)` to create a new message.
  */
 export const AssistantConversationSchema: GenMessage<AssistantConversation> = /*@__PURE__*/
-  messageDesc(file_mavio_assistant_v1_assistant, 27);
+  messageDesc(file_mavio_assistant_v1_assistant, 22);
 
 /**
  * AssistantMessage is a request or an answer of a conversation.
@@ -1185,12 +1077,13 @@ export type AssistantMessage = Message<"mavio.assistant.v1.AssistantMessage"> & 
   time?: Timestamp | undefined;
 
   /**
-   * An answer's speech as it was spoken, a sentence a URL relative to the
-   * server's base URL, in order; none when none was kept.
+   * The URL of an answer's speech as it was spoken, relative to the
+   * server's base URL; its formats query names the encodings the client
+   * plays ("opus", "aac", "mp3", "flac", "wav"). Empty when none was kept.
    *
-   * @generated from field: repeated string speech = 4;
+   * @generated from field: string speech_url = 5;
    */
-  speech: string[];
+  speechUrl: string;
 };
 
 /**
@@ -1198,7 +1091,7 @@ export type AssistantMessage = Message<"mavio.assistant.v1.AssistantMessage"> & 
  * Use `create(AssistantMessageSchema)` to create a new message.
  */
 export const AssistantMessageSchema: GenMessage<AssistantMessage> = /*@__PURE__*/
-  messageDesc(file_mavio_assistant_v1_assistant, 28);
+  messageDesc(file_mavio_assistant_v1_assistant, 23);
 
 /**
  * @generated from message mavio.assistant.v1.ListAssistantConversationsRequest
@@ -1211,7 +1104,7 @@ export type ListAssistantConversationsRequest = Message<"mavio.assistant.v1.List
  * Use `create(ListAssistantConversationsRequestSchema)` to create a new message.
  */
 export const ListAssistantConversationsRequestSchema: GenMessage<ListAssistantConversationsRequest> = /*@__PURE__*/
-  messageDesc(file_mavio_assistant_v1_assistant, 29);
+  messageDesc(file_mavio_assistant_v1_assistant, 24);
 
 /**
  * @generated from message mavio.assistant.v1.ListAssistantConversationsResponse
@@ -1228,7 +1121,7 @@ export type ListAssistantConversationsResponse = Message<"mavio.assistant.v1.Lis
  * Use `create(ListAssistantConversationsResponseSchema)` to create a new message.
  */
 export const ListAssistantConversationsResponseSchema: GenMessage<ListAssistantConversationsResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_assistant_v1_assistant, 30);
+  messageDesc(file_mavio_assistant_v1_assistant, 25);
 
 /**
  * @generated from message mavio.assistant.v1.GetAssistantConversationRequest
@@ -1245,7 +1138,7 @@ export type GetAssistantConversationRequest = Message<"mavio.assistant.v1.GetAss
  * Use `create(GetAssistantConversationRequestSchema)` to create a new message.
  */
 export const GetAssistantConversationRequestSchema: GenMessage<GetAssistantConversationRequest> = /*@__PURE__*/
-  messageDesc(file_mavio_assistant_v1_assistant, 31);
+  messageDesc(file_mavio_assistant_v1_assistant, 26);
 
 /**
  * @generated from message mavio.assistant.v1.GetAssistantConversationResponse
@@ -1267,7 +1160,7 @@ export type GetAssistantConversationResponse = Message<"mavio.assistant.v1.GetAs
  * Use `create(GetAssistantConversationResponseSchema)` to create a new message.
  */
 export const GetAssistantConversationResponseSchema: GenMessage<GetAssistantConversationResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_assistant_v1_assistant, 32);
+  messageDesc(file_mavio_assistant_v1_assistant, 27);
 
 /**
  * @generated from message mavio.assistant.v1.DeleteAssistantConversationRequest
@@ -1284,7 +1177,7 @@ export type DeleteAssistantConversationRequest = Message<"mavio.assistant.v1.Del
  * Use `create(DeleteAssistantConversationRequestSchema)` to create a new message.
  */
 export const DeleteAssistantConversationRequestSchema: GenMessage<DeleteAssistantConversationRequest> = /*@__PURE__*/
-  messageDesc(file_mavio_assistant_v1_assistant, 33);
+  messageDesc(file_mavio_assistant_v1_assistant, 28);
 
 /**
  * @generated from message mavio.assistant.v1.DeleteAssistantConversationResponse
@@ -1297,7 +1190,7 @@ export type DeleteAssistantConversationResponse = Message<"mavio.assistant.v1.De
  * Use `create(DeleteAssistantConversationResponseSchema)` to create a new message.
  */
 export const DeleteAssistantConversationResponseSchema: GenMessage<DeleteAssistantConversationResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_assistant_v1_assistant, 34);
+  messageDesc(file_mavio_assistant_v1_assistant, 29);
 
 /**
  * AssistantMemory is something the assistant remembers about a user.
@@ -1338,7 +1231,7 @@ export type AssistantMemory = Message<"mavio.assistant.v1.AssistantMemory"> & {
  * Use `create(AssistantMemorySchema)` to create a new message.
  */
 export const AssistantMemorySchema: GenMessage<AssistantMemory> = /*@__PURE__*/
-  messageDesc(file_mavio_assistant_v1_assistant, 35);
+  messageDesc(file_mavio_assistant_v1_assistant, 30);
 
 /**
  * @generated from message mavio.assistant.v1.ListAssistantMemoriesRequest
@@ -1351,7 +1244,7 @@ export type ListAssistantMemoriesRequest = Message<"mavio.assistant.v1.ListAssis
  * Use `create(ListAssistantMemoriesRequestSchema)` to create a new message.
  */
 export const ListAssistantMemoriesRequestSchema: GenMessage<ListAssistantMemoriesRequest> = /*@__PURE__*/
-  messageDesc(file_mavio_assistant_v1_assistant, 36);
+  messageDesc(file_mavio_assistant_v1_assistant, 31);
 
 /**
  * @generated from message mavio.assistant.v1.ListAssistantMemoriesResponse
@@ -1368,7 +1261,7 @@ export type ListAssistantMemoriesResponse = Message<"mavio.assistant.v1.ListAssi
  * Use `create(ListAssistantMemoriesResponseSchema)` to create a new message.
  */
 export const ListAssistantMemoriesResponseSchema: GenMessage<ListAssistantMemoriesResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_assistant_v1_assistant, 37);
+  messageDesc(file_mavio_assistant_v1_assistant, 32);
 
 /**
  * @generated from message mavio.assistant.v1.UpdateAssistantMemoryRequest
@@ -1392,7 +1285,7 @@ export type UpdateAssistantMemoryRequest = Message<"mavio.assistant.v1.UpdateAss
  * Use `create(UpdateAssistantMemoryRequestSchema)` to create a new message.
  */
 export const UpdateAssistantMemoryRequestSchema: GenMessage<UpdateAssistantMemoryRequest> = /*@__PURE__*/
-  messageDesc(file_mavio_assistant_v1_assistant, 38);
+  messageDesc(file_mavio_assistant_v1_assistant, 33);
 
 /**
  * @generated from message mavio.assistant.v1.UpdateAssistantMemoryResponse
@@ -1409,7 +1302,7 @@ export type UpdateAssistantMemoryResponse = Message<"mavio.assistant.v1.UpdateAs
  * Use `create(UpdateAssistantMemoryResponseSchema)` to create a new message.
  */
 export const UpdateAssistantMemoryResponseSchema: GenMessage<UpdateAssistantMemoryResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_assistant_v1_assistant, 39);
+  messageDesc(file_mavio_assistant_v1_assistant, 34);
 
 /**
  * @generated from message mavio.assistant.v1.DeleteAssistantMemoriesRequest
@@ -1428,7 +1321,7 @@ export type DeleteAssistantMemoriesRequest = Message<"mavio.assistant.v1.DeleteA
  * Use `create(DeleteAssistantMemoriesRequestSchema)` to create a new message.
  */
 export const DeleteAssistantMemoriesRequestSchema: GenMessage<DeleteAssistantMemoriesRequest> = /*@__PURE__*/
-  messageDesc(file_mavio_assistant_v1_assistant, 40);
+  messageDesc(file_mavio_assistant_v1_assistant, 35);
 
 /**
  * @generated from message mavio.assistant.v1.DeleteAssistantMemoriesResponse
@@ -1441,7 +1334,7 @@ export type DeleteAssistantMemoriesResponse = Message<"mavio.assistant.v1.Delete
  * Use `create(DeleteAssistantMemoriesResponseSchema)` to create a new message.
  */
 export const DeleteAssistantMemoriesResponseSchema: GenMessage<DeleteAssistantMemoriesResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_assistant_v1_assistant, 41);
+  messageDesc(file_mavio_assistant_v1_assistant, 36);
 
 /**
  * @generated from message mavio.assistant.v1.GetAssistantSettingsRequest
@@ -1454,7 +1347,7 @@ export type GetAssistantSettingsRequest = Message<"mavio.assistant.v1.GetAssista
  * Use `create(GetAssistantSettingsRequestSchema)` to create a new message.
  */
 export const GetAssistantSettingsRequestSchema: GenMessage<GetAssistantSettingsRequest> = /*@__PURE__*/
-  messageDesc(file_mavio_assistant_v1_assistant, 42);
+  messageDesc(file_mavio_assistant_v1_assistant, 37);
 
 /**
  * @generated from message mavio.assistant.v1.GetAssistantSettingsResponse
@@ -1464,6 +1357,18 @@ export type GetAssistantSettingsResponse = Message<"mavio.assistant.v1.GetAssist
    * @generated from field: mavio.assistant.v1.AssistantSettings settings = 1;
    */
   settings?: AssistantSettings | undefined;
+
+  /**
+   * The voice session plugin's recognizers and voices, to choose from.
+   *
+   * @generated from field: repeated mavio.assistant.v1.VoiceEngine recognizers = 2;
+   */
+  recognizers: VoiceEngine[];
+
+  /**
+   * @generated from field: repeated mavio.assistant.v1.VoiceEngine voices = 3;
+   */
+  voices: VoiceEngine[];
 };
 
 /**
@@ -1471,7 +1376,7 @@ export type GetAssistantSettingsResponse = Message<"mavio.assistant.v1.GetAssist
  * Use `create(GetAssistantSettingsResponseSchema)` to create a new message.
  */
 export const GetAssistantSettingsResponseSchema: GenMessage<GetAssistantSettingsResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_assistant_v1_assistant, 43);
+  messageDesc(file_mavio_assistant_v1_assistant, 38);
 
 /**
  * @generated from message mavio.assistant.v1.UpdateAssistantSettingsRequest
@@ -1488,7 +1393,7 @@ export type UpdateAssistantSettingsRequest = Message<"mavio.assistant.v1.UpdateA
  * Use `create(UpdateAssistantSettingsRequestSchema)` to create a new message.
  */
 export const UpdateAssistantSettingsRequestSchema: GenMessage<UpdateAssistantSettingsRequest> = /*@__PURE__*/
-  messageDesc(file_mavio_assistant_v1_assistant, 44);
+  messageDesc(file_mavio_assistant_v1_assistant, 39);
 
 /**
  * @generated from message mavio.assistant.v1.UpdateAssistantSettingsResponse
@@ -1505,7 +1410,7 @@ export type UpdateAssistantSettingsResponse = Message<"mavio.assistant.v1.Update
  * Use `create(UpdateAssistantSettingsResponseSchema)` to create a new message.
  */
 export const UpdateAssistantSettingsResponseSchema: GenMessage<UpdateAssistantSettingsResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_assistant_v1_assistant, 45);
+  messageDesc(file_mavio_assistant_v1_assistant, 40);
 
 /**
  * AssistantAccess is who may use the AI path.
@@ -1687,8 +1592,8 @@ export const NavigateTargetSchema: GenEnum<NavigateTarget> = /*@__PURE__*/
 export const AssistantService: GenService<{
   /**
    * GetAssistant tells what the assistant can do for the user: whether it
-   * is on, whether the AI path and memory are available, the server's
-   * recognizers and voices, and examples of requests.
+   * is on, whether the AI path, memory and voice sessions are available,
+   * and examples of requests.
    *
    * @generated from rpc mavio.assistant.v1.AssistantService.GetAssistant
    */
@@ -1706,30 +1611,6 @@ export const AssistantService: GenService<{
     methodKind: "server_streaming";
     input: typeof AskRequestSchema;
     output: typeof AskResponseSchema;
-  },
-  /**
-   * GetAssistantHints returns phrases recognizers are likely to hear from
-   * the user: titles being watched, recently added titles, people and
-   * the user's devices.
-   *
-   * @generated from rpc mavio.assistant.v1.AssistantService.GetAssistantHints
-   */
-  getAssistantHints: {
-    methodKind: "unary";
-    input: typeof GetAssistantHintsRequestSchema;
-    output: typeof GetAssistantHintsResponseSchema;
-  },
-  /**
-   * StartListening returns the WebSocket URL the client streams speech to
-   * for the server's recognizer, signed for the session and valid for a
-   * minute.
-   *
-   * @generated from rpc mavio.assistant.v1.AssistantService.StartListening
-   */
-  startListening: {
-    methodKind: "unary";
-    input: typeof StartListeningRequestSchema;
-    output: typeof StartListeningResponseSchema;
   },
   /**
    * StartVoiceSession opens a voice session for the device and returns

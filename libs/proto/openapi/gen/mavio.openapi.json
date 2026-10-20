@@ -8453,12 +8453,6 @@
             },
             "title": "failed_actions",
             "description": "Client actions of the last answer the client could not carry out."
-          },
-          "speechId": {
-            "type": "string",
-            "title": "speech_id",
-            "pattern": "^([A-Za-z0-9_-]{8,64})?$",
-            "description": "An ID the client makes for the answer's speech: the audio of the\n POST /assistant/speech requests naming it is kept with the answer in\n its conversation (docs/assistant.md §8.3)."
           }
         },
         "title": "AskRequest",
@@ -8750,13 +8744,10 @@
             ],
             "title": "time"
           },
-          "speech": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "title": "speech",
-            "description": "An answer's speech as it was spoken, a sentence a URL relative to the\n server's base URL, in order; none when none was kept."
+          "speechUrl": {
+            "type": "string",
+            "title": "speech_url",
+            "description": "The URL of an answer's speech as it was spoken, relative to the\n server's base URL; its formats query names the encodings the client\n plays (\"opus\", \"aac\", \"mp3\", \"flac\", \"wav\"). Empty when none was kept."
           }
         },
         "title": "AssistantMessage",
@@ -8821,30 +8812,52 @@
             "title": "memory",
             "description": "Whether the assistant remembers what users tell about themselves."
           },
-          "recognizer": {
-            "type": "string",
-            "title": "recognizer",
-            "description": "The server's recognizer, \"\u003cplugin\u003e/\u003crecognizer\u003e\"; empty, the first\n ready one."
-          },
-          "voices": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/mavio.assistant.v1.AssistantVoiceChoice"
-            },
-            "title": "voices",
-            "description": "The voices answers are spoken with by default, by language."
-          },
           "hints": {
             "type": "boolean",
             "title": "hints",
-            "description": "Whether recognizers are given the user's hints."
+            "description": "Whether recognizers are given the user's hints: titles being watched,\n recently added titles, people and the user's devices."
+          },
+          "speech": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/mavio.assistant.v1.AssistantSpeech"
+            },
+            "title": "speech",
+            "description": "The recognizer and the voice of voice sessions by language; a\n language listed nowhere, nor its base, gets the plugin's first ready\n ones."
+          },
+          "longestPause": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/google.protobuf.Duration"
+              }
+            ],
+            "title": "longest_pause",
+            "description": "The longest pause in a turn the turn model reads as unfinished,\n 0.5–10 seconds.\nduration.gte = 500ms\nduration.lte = 10s\n"
+          },
+          "commitDelay": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/google.protobuf.Duration"
+              }
+            ],
+            "title": "commit_delay",
+            "description": "How long a turn stands, with the user silent, before what its answer\n changes is done, 0–3 seconds.\nduration.gte = 0s\nduration.lte = 3s\n"
+          },
+          "sessionIdle": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/google.protobuf.Duration"
+              }
+            ],
+            "title": "session_idle",
+            "description": "How long the user may stay silent after an answer before the voice\n session ends, 3–120 seconds.\nduration.gte = 3s\nduration.lte = 2m0s\n"
           }
         },
         "title": "AssistantSettings",
         "additionalProperties": false,
         "description": "AssistantSettings are the server's assistant settings."
       },
-      "mavio.assistant.v1.AssistantVoiceChoice": {
+      "mavio.assistant.v1.AssistantSpeech": {
         "type": "object",
         "properties": {
           "language": {
@@ -8853,16 +8866,22 @@
             "minLength": 1,
             "description": "BCP 47, such as \"en\" or \"zh-CN\"."
           },
+          "recognizer": {
+            "type": "string",
+            "title": "recognizer",
+            "pattern": "^([^/]+/.+)?$",
+            "description": "\"\u003cplugin\u003e/\u003crecognizer\u003e\"; empty, the plugin's first ready one."
+          },
           "voice": {
             "type": "string",
             "title": "voice",
-            "pattern": "^[^/]+/.+$",
-            "description": "\"\u003cplugin\u003e/\u003cvoice\u003e\"."
+            "pattern": "^([^/]+/.+)?$",
+            "description": "\"\u003cplugin\u003e/\u003cvoice\u003e\"; empty, the plugin's first ready one."
           }
         },
-        "title": "AssistantVoiceChoice",
+        "title": "AssistantSpeech",
         "additionalProperties": false,
-        "description": "AssistantVoiceChoice is the voice of a language."
+        "description": "AssistantSpeech is the recognizer and the voice of a language."
       },
       "mavio.assistant.v1.ClientAction": {
         "type": "object",
@@ -9205,25 +9224,6 @@
         "title": "GetAssistantConversationResponse",
         "additionalProperties": false
       },
-      "mavio.assistant.v1.GetAssistantHintsRequest": {
-        "type": "object",
-        "title": "GetAssistantHintsRequest",
-        "additionalProperties": false
-      },
-      "mavio.assistant.v1.GetAssistantHintsResponse": {
-        "type": "object",
-        "properties": {
-          "phrases": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "title": "phrases"
-          }
-        },
-        "title": "GetAssistantHintsResponse",
-        "additionalProperties": false
-      },
       "mavio.assistant.v1.GetAssistantRequest": {
         "type": "object",
         "properties": {
@@ -9254,29 +9254,10 @@
             "title": "memory",
             "description": "Memory is on."
           },
-          "recognizers": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/mavio.assistant.v1.Recognizer"
-            },
-            "title": "recognizers",
-            "description": "The server's recognizers, the default first."
-          },
-          "voices": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/mavio.assistant.v1.Voice"
-            },
-            "title": "voices",
-            "description": "The server's voices."
-          },
-          "defaultVoices": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/mavio.assistant.v1.AssistantVoiceChoice"
-            },
-            "title": "default_voices",
-            "description": "The voice of each language when the user chooses none."
+          "voice": {
+            "type": "boolean",
+            "title": "voice",
+            "description": "Voice sessions can be started: a voice session plugin is ready."
           },
           "examples": {
             "type": "array",
@@ -9313,6 +9294,21 @@
               }
             ],
             "title": "settings"
+          },
+          "recognizers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/mavio.assistant.v1.VoiceEngine"
+            },
+            "title": "recognizers",
+            "description": "The voice session plugin's recognizers and voices, to choose from."
+          },
+          "voices": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/mavio.assistant.v1.VoiceEngine"
+            },
+            "title": "voices"
           }
         },
         "title": "GetAssistantSettingsResponse",
@@ -9437,31 +9433,6 @@
         "additionalProperties": false,
         "description": "PlayAction plays items, as a queue."
       },
-      "mavio.assistant.v1.Recognizer": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "title": "id",
-            "description": "\"\u003cplugin\u003e/\u003crecognizer\u003e\"."
-          },
-          "name": {
-            "type": "string",
-            "title": "name"
-          },
-          "languages": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "title": "languages",
-            "description": "BCP 47; empty for any."
-          }
-        },
-        "title": "Recognizer",
-        "additionalProperties": false,
-        "description": "Recognizer is a speech recognizer of the server."
-      },
       "mavio.assistant.v1.ShowItemsAction": {
         "type": "object",
         "properties": {
@@ -9480,47 +9451,6 @@
         "title": "ShowItemsAction",
         "additionalProperties": false,
         "description": "ShowItemsAction shows items, to choose from when choose is set."
-      },
-      "mavio.assistant.v1.StartListeningRequest": {
-        "type": "object",
-        "properties": {
-          "language": {
-            "type": "string",
-            "title": "language",
-            "description": "The language spoken, BCP 47; empty, the recognizer detects it."
-          },
-          "recognizer": {
-            "type": "string",
-            "title": "recognizer",
-            "description": "\"\u003cplugin\u003e/\u003crecognizer\u003e\"; empty, the settings'."
-          }
-        },
-        "title": "StartListeningRequest",
-        "additionalProperties": false
-      },
-      "mavio.assistant.v1.StartListeningResponse": {
-        "type": "object",
-        "properties": {
-          "url": {
-            "type": "string",
-            "title": "url",
-            "description": "The WebSocket URL, relative to the server's base URL."
-          },
-          "recognizer": {
-            "type": "string",
-            "title": "recognizer"
-          },
-          "expireTime": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/google.protobuf.Timestamp"
-              }
-            ],
-            "title": "expire_time"
-          }
-        },
-        "title": "StartListeningResponse",
-        "additionalProperties": false
       },
       "mavio.assistant.v1.StartVoiceSessionRequest": {
         "type": "object",
@@ -9719,13 +9649,13 @@
         "title": "UpdateAssistantSettingsResponse",
         "additionalProperties": false
       },
-      "mavio.assistant.v1.Voice": {
+      "mavio.assistant.v1.VoiceEngine": {
         "type": "object",
         "properties": {
           "id": {
             "type": "string",
             "title": "id",
-            "description": "\"\u003cplugin\u003e/\u003cvoice\u003e\"."
+            "description": "\"\u003cplugin\u003e/\u003crecognizer\u003e\" or \"\u003cplugin\u003e/\u003cvoice\u003e\"."
           },
           "name": {
             "type": "string",
@@ -9737,12 +9667,17 @@
               "type": "string"
             },
             "title": "languages",
-            "description": "BCP 47."
+            "description": "BCP 47; empty for any."
+          },
+          "ready": {
+            "type": "boolean",
+            "title": "ready",
+            "description": "It can be used: enabled, and its model downloaded for a local one."
           }
         },
-        "title": "Voice",
+        "title": "VoiceEngine",
         "additionalProperties": false,
-        "description": "Voice is a voice of the server."
+        "description": "VoiceEngine is a recognizer or a voice of the voice session plugin."
       },
       "mavio.auth.v1.AcceptInvitationRequest": {
         "type": "object",
@@ -16727,7 +16662,6 @@
           "CAPABILITY_AGENT_SESSION",
           "CAPABILITY_RATINGS_PROVIDER",
           "CAPABILITY_SPEECH_TO_TEXT",
-          "CAPABILITY_TEXT_TO_SPEECH",
           "CAPABILITY_CHALLENGE_SOLVER",
           "CAPABILITY_VOICE_SESSION"
         ]
@@ -16780,7 +16714,7 @@
           "image": {
             "type": "string",
             "title": "image",
-            "description": "Image reference with its digest, e.g.\n \"onerahmet/openai-whisper-asr-webservice:v1.9.1@sha256:…\"."
+            "description": "Image reference with its digest, e.g.\n \"ghcr.io/flaresolverr/flaresolverr:v3.4.6@sha256:…\"."
           },
           "port": {
             "type": "integer",
@@ -16866,7 +16800,7 @@
         },
         "title": "ContainerDependency",
         "additionalProperties": false,
-        "description": "ContainerDependency is a service a plugin depends on that runs as a\n container image, such as whisper-asr-webservice. The server runs it on a\n container engine (managed) or reaches it at an address an administrator\n gives (external); the plugin sees only its address."
+        "description": "ContainerDependency is a service a plugin depends on that runs as a\n container image, such as FlareSolverr. The server runs it on a\n container engine (managed) or reaches it at an address an administrator\n gives (external); the plugin sees only its address."
       },
       "mavio.plugin.v1.ContainerMode": {
         "type": "string",
@@ -21227,7 +21161,7 @@
           "source": {
             "type": "string",
             "title": "source",
-            "description": "The source x-mavio-options names: \"indexer-definitions\" and\n \"download-client-definitions\", the definitions of the plugin's\n providers, \"speech-recognizers\" and \"speech-synthesizers\", the services\n of its speech providers, \"subtitle-providers\" and\n \"subtitle-translators\", those of its subtitle providers, or \"download-clients\", the clients of every\n download client provider."
+            "description": "The source x-mavio-options names: \"indexer-definitions\" and\n \"download-client-definitions\", the definitions of the plugin's\n providers; \"voice-recognizers\" and \"voice-synthesizers\", the services\n of its voice sessions; \"transcription-services\", those of its\n transcribers; \"subtitle-providers\" and \"subtitle-translators\", those\n of its subtitle providers; or \"download-clients\", the clients of every\n download client provider."
           }
         },
         "title": "ListPluginConfigOptionsRequest",
@@ -24627,14 +24561,14 @@
         }
       }
     },
-    "/mavio.hub.v1.HubService/ListHubs": {
+    "/mavio.library.v1.CollectionService/AddToCollection": {
       "post": {
         "tags": [
-          "HubService"
+          "CollectionService"
         ],
-        "summary": "ListHubs",
-        "description": "ListHubs lists the hubs of Home, or of a library's Recommended tab,\n with their first items.",
-        "operationId": "mavio.hub.v1.HubService.ListHubs",
+        "summary": "AddToCollection",
+        "description": "AddToCollection appends items not yet in the collection.",
+        "operationId": "mavio.library.v1.CollectionService.AddToCollection",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -24659,7 +24593,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.hub.v1.ListHubsRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.AddToCollectionRequest"
               }
             }
           },
@@ -24681,7 +24615,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.hub.v1.ListHubsResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.AddToCollectionResponse"
                 }
               }
             }
@@ -24689,14 +24623,13 @@
         }
       }
     },
-    "/mavio.acquisition.v1.SubtitleService/SearchWantedSubtitles": {
+    "/mavio.session.v1.SyncPlayService/LeaveGroup": {
       "post": {
         "tags": [
-          "SubtitleService"
+          "SyncPlayService"
         ],
-        "summary": "SearchWantedSubtitles",
-        "description": "SearchWantedSubtitles queues searches of the subtitles movies or\n episodes lack, which download the best subtitles found.",
-        "operationId": "mavio.acquisition.v1.SubtitleService.SearchWantedSubtitles",
+        "summary": "LeaveGroup",
+        "operationId": "mavio.session.v1.SyncPlayService.LeaveGroup",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -24721,7 +24654,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.acquisition.v1.SearchWantedSubtitlesRequest"
+                "$ref": "#/components/schemas/mavio.session.v1.LeaveGroupRequest"
               }
             }
           },
@@ -24743,7 +24676,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.acquisition.v1.SearchWantedSubtitlesResponse"
+                  "$ref": "#/components/schemas/mavio.session.v1.LeaveGroupResponse"
                 }
               }
             }
@@ -29815,13 +29748,14 @@
         }
       }
     },
-    "/mavio.library.v1.CollectionService/RemoveFromCollection": {
+    "/mavio.acquisition.v1.SubtitleService/SearchWantedSubtitles": {
       "post": {
         "tags": [
-          "CollectionService"
+          "SubtitleService"
         ],
-        "summary": "RemoveFromCollection",
-        "operationId": "mavio.library.v1.CollectionService.RemoveFromCollection",
+        "summary": "SearchWantedSubtitles",
+        "description": "SearchWantedSubtitles queues searches of the subtitles movies or\n episodes lack, which download the best subtitles found.",
+        "operationId": "mavio.acquisition.v1.SubtitleService.SearchWantedSubtitles",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -29846,7 +29780,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.RemoveFromCollectionRequest"
+                "$ref": "#/components/schemas/mavio.acquisition.v1.SearchWantedSubtitlesRequest"
               }
             }
           },
@@ -29868,7 +29802,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.RemoveFromCollectionResponse"
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.SearchWantedSubtitlesResponse"
                 }
               }
             }
@@ -30557,13 +30491,14 @@
         }
       }
     },
-    "/mavio.library.v1.CollectionService/DeleteCollection": {
+    "/mavio.acquisition.v1.WantedService/SetMonitored": {
       "post": {
         "tags": [
-          "CollectionService"
+          "WantedService"
         ],
-        "summary": "DeleteCollection",
-        "operationId": "mavio.library.v1.CollectionService.DeleteCollection",
+        "summary": "SetMonitored",
+        "description": "SetMonitored monitors or unmonitors seasons and episodes, a season\n taking its episodes along, or applies a monitoring option to the\n seasons and episodes of wanted series, as Sonarr's season pass.",
+        "operationId": "mavio.acquisition.v1.WantedService.SetMonitored",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -30588,7 +30523,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.DeleteCollectionRequest"
+                "$ref": "#/components/schemas/mavio.acquisition.v1.SetMonitoredRequest"
               }
             }
           },
@@ -30610,7 +30545,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.DeleteCollectionResponse"
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.SetMonitoredResponse"
                 }
               }
             }
@@ -30873,7 +30808,7 @@
           "AssistantService"
         ],
         "summary": "GetAssistant",
-        "description": "GetAssistant tells what the assistant can do for the user: whether it\n is on, whether the AI path and memory are available, the server's\n recognizers and voices, and examples of requests.",
+        "description": "GetAssistant tells what the assistant can do for the user: whether it\n is on, whether the AI path, memory and voice sessions are available,\n and examples of requests.",
         "operationId": "mavio.assistant.v1.AssistantService.GetAssistant",
         "parameters": [
           {
@@ -30984,68 +30919,6 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/mavio.assistant.v1.GetAssistantConversationResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/mavio.assistant.v1.AssistantService/GetAssistantHints": {
-      "post": {
-        "tags": [
-          "AssistantService"
-        ],
-        "summary": "GetAssistantHints",
-        "description": "GetAssistantHints returns phrases recognizers are likely to hear from\n the user: titles being watched, recently added titles, people and\n the user's devices.",
-        "operationId": "mavio.assistant.v1.AssistantService.GetAssistantHints",
-        "parameters": [
-          {
-            "name": "Connect-Protocol-Version",
-            "in": "header",
-            "description": "Define the version of the Connect protocol",
-            "schema": {
-              "$ref": "#/components/schemas/connect-protocol-version"
-            },
-            "example": 1
-          },
-          {
-            "name": "Connect-Timeout-Ms",
-            "in": "header",
-            "description": "Define the timeout, in ms",
-            "schema": {
-              "$ref": "#/components/schemas/connect-timeout-header"
-            },
-            "example": 1000
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/mavio.assistant.v1.GetAssistantHintsRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "default": {
-            "description": "Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/connect.error"
-                }
-              }
-            }
-          },
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/mavio.assistant.v1.GetAssistantHintsResponse"
                 }
               }
             }
@@ -31232,68 +31105,6 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/mavio.assistant.v1.ListAssistantMemoriesResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/mavio.assistant.v1.AssistantService/StartListening": {
-      "post": {
-        "tags": [
-          "AssistantService"
-        ],
-        "summary": "StartListening",
-        "description": "StartListening returns the WebSocket URL the client streams speech to\n for the server's recognizer, signed for the session and valid for a\n minute.",
-        "operationId": "mavio.assistant.v1.AssistantService.StartListening",
-        "parameters": [
-          {
-            "name": "Connect-Protocol-Version",
-            "in": "header",
-            "description": "Define the version of the Connect protocol",
-            "schema": {
-              "$ref": "#/components/schemas/connect-protocol-version"
-            },
-            "example": 1
-          },
-          {
-            "name": "Connect-Timeout-Ms",
-            "in": "header",
-            "description": "Define the timeout, in ms",
-            "schema": {
-              "$ref": "#/components/schemas/connect-timeout-header"
-            },
-            "example": 1000
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/mavio.assistant.v1.StartListeningRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "default": {
-            "description": "Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/connect.error"
-                }
-              }
-            }
-          },
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/mavio.assistant.v1.StartListeningResponse"
                 }
               }
             }
@@ -33099,14 +32910,14 @@
         }
       }
     },
-    "/mavio.acquisition.v1.DiscoverService/GetCollection": {
+    "/mavio.hub.v1.HubService/ListHubs": {
       "post": {
         "tags": [
-          "DiscoverService"
+          "HubService"
         ],
-        "summary": "GetCollection",
-        "description": "GetCollection tells of a collection of movies by its TMDB ID with its\n parts marked as Discover's titles, as Seerr's collection page. It\n fails with NOT_FOUND when no discovery provider knows it.",
-        "operationId": "mavio.acquisition.v1.DiscoverService.GetCollection",
+        "summary": "ListHubs",
+        "description": "ListHubs lists the hubs of Home, or of a library's Recommended tab,\n with their first items.",
+        "operationId": "mavio.hub.v1.HubService.ListHubs",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -33131,7 +32942,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.acquisition.v1.GetCollectionRequest"
+                "$ref": "#/components/schemas/mavio.hub.v1.ListHubsRequest"
               }
             }
           },
@@ -33153,7 +32964,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.acquisition.v1.GetCollectionResponse"
+                  "$ref": "#/components/schemas/mavio.hub.v1.ListHubsResponse"
                 }
               }
             }
@@ -33223,14 +33034,14 @@
         }
       }
     },
-    "/mavio.library.v1.CollectionService/AddToCollection": {
+    "/mavio.acquisition.v1.DiscoverService/GetCollection": {
       "post": {
         "tags": [
-          "CollectionService"
+          "DiscoverService"
         ],
-        "summary": "AddToCollection",
-        "description": "AddToCollection appends items not yet in the collection.",
-        "operationId": "mavio.library.v1.CollectionService.AddToCollection",
+        "summary": "GetCollection",
+        "description": "GetCollection tells of a collection of movies by its TMDB ID with its\n parts marked as Discover's titles, as Seerr's collection page. It\n fails with NOT_FOUND when no discovery provider knows it.",
+        "operationId": "mavio.acquisition.v1.DiscoverService.GetCollection",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -33255,7 +33066,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.AddToCollectionRequest"
+                "$ref": "#/components/schemas/mavio.acquisition.v1.GetCollectionRequest"
               }
             }
           },
@@ -33277,7 +33088,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.AddToCollectionResponse"
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.GetCollectionResponse"
                 }
               }
             }
@@ -33346,14 +33157,13 @@
         }
       }
     },
-    "/mavio.acquisition.v1.WantedService/SetMonitored": {
+    "/mavio.session.v1.SyncPlayService/Pause": {
       "post": {
         "tags": [
-          "WantedService"
+          "SyncPlayService"
         ],
-        "summary": "SetMonitored",
-        "description": "SetMonitored monitors or unmonitors seasons and episodes, a season\n taking its episodes along, or applies a monitoring option to the\n seasons and episodes of wanted series, as Sonarr's season pass.",
-        "operationId": "mavio.acquisition.v1.WantedService.SetMonitored",
+        "summary": "Pause",
+        "operationId": "mavio.session.v1.SyncPlayService.Pause",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -33378,7 +33188,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.acquisition.v1.SetMonitoredRequest"
+                "$ref": "#/components/schemas/mavio.session.v1.PauseRequest"
               }
             }
           },
@@ -33400,7 +33210,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.acquisition.v1.SetMonitoredResponse"
+                  "$ref": "#/components/schemas/mavio.session.v1.PauseResponse"
                 }
               }
             }
@@ -33470,13 +33280,14 @@
         }
       }
     },
-    "/mavio.library.v1.PlaylistService/CreatePlaylist": {
+    "/mavio.system.v1.AiConversationService/GetAiConversation": {
       "post": {
         "tags": [
-          "PlaylistService"
+          "AiConversationService"
         ],
-        "summary": "CreatePlaylist",
-        "operationId": "mavio.library.v1.PlaylistService.CreatePlaylist",
+        "summary": "GetAiConversation",
+        "description": "GetAiConversation returns a conversation with its messages.",
+        "operationId": "mavio.system.v1.AiConversationService.GetAiConversation",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -33501,7 +33312,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.CreatePlaylistRequest"
+                "$ref": "#/components/schemas/mavio.system.v1.GetAiConversationRequest"
               }
             }
           },
@@ -33523,7 +33334,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.CreatePlaylistResponse"
+                  "$ref": "#/components/schemas/mavio.system.v1.GetAiConversationResponse"
                 }
               }
             }
@@ -35136,13 +34947,13 @@
         }
       }
     },
-    "/mavio.library.v1.CollectionService/UpdateCollection": {
+    "/mavio.library.v1.PlaylistService/CreatePlaylist": {
       "post": {
         "tags": [
-          "CollectionService"
+          "PlaylistService"
         ],
-        "summary": "UpdateCollection",
-        "operationId": "mavio.library.v1.CollectionService.UpdateCollection",
+        "summary": "CreatePlaylist",
+        "operationId": "mavio.library.v1.PlaylistService.CreatePlaylist",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -35167,7 +34978,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.UpdateCollectionRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.CreatePlaylistRequest"
               }
             }
           },
@@ -35189,7 +35000,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.UpdateCollectionResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.CreatePlaylistResponse"
                 }
               }
             }
@@ -36248,13 +36059,13 @@
         }
       }
     },
-    "/mavio.session.v1.SyncPlayService/LeaveGroup": {
+    "/mavio.library.v1.CollectionService/RemoveFromCollection": {
       "post": {
         "tags": [
-          "SyncPlayService"
+          "CollectionService"
         ],
-        "summary": "LeaveGroup",
-        "operationId": "mavio.session.v1.SyncPlayService.LeaveGroup",
+        "summary": "RemoveFromCollection",
+        "operationId": "mavio.library.v1.CollectionService.RemoveFromCollection",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -36279,7 +36090,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.session.v1.LeaveGroupRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.RemoveFromCollectionRequest"
               }
             }
           },
@@ -36301,7 +36112,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.session.v1.LeaveGroupResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.RemoveFromCollectionResponse"
                 }
               }
             }
@@ -36432,13 +36243,13 @@
         }
       }
     },
-    "/mavio.session.v1.SyncPlayService/Pause": {
+    "/mavio.library.v1.CollectionService/DeleteCollection": {
       "post": {
         "tags": [
-          "SyncPlayService"
+          "CollectionService"
         ],
-        "summary": "Pause",
-        "operationId": "mavio.session.v1.SyncPlayService.Pause",
+        "summary": "DeleteCollection",
+        "operationId": "mavio.library.v1.CollectionService.DeleteCollection",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -36463,7 +36274,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.session.v1.PauseRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.DeleteCollectionRequest"
               }
             }
           },
@@ -36485,7 +36296,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.session.v1.PauseResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.DeleteCollectionResponse"
                 }
               }
             }
@@ -37915,14 +37726,13 @@
         }
       }
     },
-    "/mavio.system.v1.AiConversationService/GetAiConversation": {
+    "/mavio.library.v1.CollectionService/UpdateCollection": {
       "post": {
         "tags": [
-          "AiConversationService"
+          "CollectionService"
         ],
-        "summary": "GetAiConversation",
-        "description": "GetAiConversation returns a conversation with its messages.",
-        "operationId": "mavio.system.v1.AiConversationService.GetAiConversation",
+        "summary": "UpdateCollection",
+        "operationId": "mavio.library.v1.CollectionService.UpdateCollection",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -37947,7 +37757,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.system.v1.GetAiConversationRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.UpdateCollectionRequest"
               }
             }
           },
@@ -37969,7 +37779,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.system.v1.GetAiConversationResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.UpdateCollectionResponse"
                 }
               }
             }

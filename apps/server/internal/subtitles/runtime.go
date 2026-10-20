@@ -96,9 +96,9 @@ type Runtime struct {
 	// AI returns the AI gateway plugin's client, whose models translate
 	// as "ai/<provider>/<model>"; nil returns none.
 	AI func() (pluginv1connect.AiGatewayServiceClient, bool)
-	// Recognizers returns the speech recognizers, those the administrator
-	// lets transcribe subtitles among them; nil returns none.
-	Recognizers func(ctx context.Context) []speech.Recognizer
+	// Transcribers returns the transcribers of the SPEECH_TO_TEXT plugins;
+	// nil returns none.
+	Transcribers func(ctx context.Context) []speech.Transcriber
 	// Activity records downloads; nil records none.
 	Activity Activity
 	Now      func() time.Time
@@ -114,7 +114,7 @@ type Runtime struct {
 	audioGrants map[string]*audioGrant
 	audioTokens map[string]string
 
-	// detected are the languages recognizers detected, by recognizer and
+	// detected are the languages transcribers detected, by transcriber and
 	// audio URL.
 	detectedMu sync.Mutex
 	detected   map[string]string
@@ -147,13 +147,13 @@ func (r *Runtime) settings() core.SubtitleSettings {
 }
 
 // providers returns the subtitle provider plugins, and the transcription
-// source last when recognizers are wired.
+// source last when transcribers are wired.
 func (r *Runtime) providers() []Provider {
 	var out []Provider
 	if r.Providers != nil {
 		out = r.Providers()
 	}
-	if r.Recognizers != nil {
+	if r.Transcribers != nil {
 		out = append(out[:len(out):len(out)], Provider{ID: TranscriptionID, Client: &transcriber{r}})
 	}
 	return out

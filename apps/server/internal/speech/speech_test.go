@@ -1,10 +1,13 @@
 package speech
 
 import (
-	"errors"
+	"context"
+	"log/slog"
+	"slices"
 	"testing"
 
 	pluginv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1"
+	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1/pluginv1connect"
 )
 
 func TestSpeaks(t *testing.T) {
@@ -25,31 +28,28 @@ func TestSpeaks(t *testing.T) {
 	}
 }
 
-func TestPick(t *testing.T) {
-	recognizer := func(id string, timestamps bool, langs ...string) Recognizer {
-		return Recognizer{ID: id, Info: pluginv1.RecognizerInfo_builder{Languages: langs, Timestamps: &timestamps}.Build()}
+// fakePlugin lists transcribers.
+type fakePlugin struct {
+	pluginv1connect.SpeechToTextServiceClient
+	list []*pluginv1.TranscriberInfo
+}
+
+func (f fakePlugin) ListTranscribers(context.Context, *pluginv1.ListTranscribersRequest) (*pluginv1.ListTranscribersResponse, error) {
+	return pluginv1.ListTranscribersResponse_builder{Transcribers: f.list}.Build(), nil
+}
+
+func TestTranscribers(t *testing.T) {
+	info := func(id string, enabled, ready bool) *pluginv1.TranscriberInfo {
+		return pluginv1.TranscriberInfo_builder{Id: &id, Enabled: &enabled, Ready: &ready}.Build()
 	}
-	list := []Recognizer{
-		recognizer("a/en", false, "en"),
-		recognizer("b/any", true),
+	p := Plugin{ID: "dev.mavio.pipecat", Client: fakePlugin{list: []*pluginv1.TranscriberInfo{
+		info("t1", true, true), info("off", false, true), info("missing", true, false), info("t2", true, true),
+	}}}
+	var got []string
+	for _, tr := range Transcribers(t.Context(), []Plugin{p}, slog.Default()) {
+		got = append(got, tr.ID)
 	}
-	timestamps := func(i *pluginv1.RecognizerInfo) bool { return i.GetTimestamps() }
-	for _, tc := range []struct {
-		id, language string
-		need         func(*pluginv1.RecognizerInfo) bool
-		want         string
-		err          bool
-	}{
-		{"", "en", nil, "a/en", false},
-		{"", "ja", nil, "b/any", false},
-		{"", "en", timestamps, "b/any", false},
-		{"a/en", "en", nil, "a/en", false},
-		{"a/en", "ja", nil, "", true},
-		{"c/none", "", nil, "", true},
-	} {
-		got, err := Pick(list, tc.id, tc.language, tc.need)
-		if got.ID != tc.want || (err != nil) != tc.err || (err != nil && !errors.Is(err, ErrNone)) {
-			t.Errorf("Pick(%q, %q) = %q, %v, want = %q, error %v", tc.id, tc.language, got.ID, err, tc.want, tc.err)
-		}
+	if want := []string{"dev.mavio.pipecat/t1", "dev.mavio.pipecat/t2"}; !slices.Equal(got, want) {
+		t.Errorf("Transcribers = %q, want = %q", got, want)
 	}
 }

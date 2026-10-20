@@ -19,9 +19,9 @@ import (
 )
 
 // TranscriptionID is the ID of the subtitle source transcribing videos'
-// audio with the speech recognizers the administrator lets transcribe
-// subtitles, as Bazarr's Whisper provider: its subtitles are those of
-// providers "transcription/<recognizer>".
+// audio with the transcribers of the SPEECH_TO_TEXT plugins, as Bazarr's
+// Whisper provider: its subtitles are those of providers
+// "transcription/<plugin>/<transcriber>".
 const TranscriptionID = "transcription"
 
 const (
@@ -54,27 +54,21 @@ type transcription struct {
 	Stream int `json:"stream"`
 }
 
-// recognizers returns the recognizers that transcribe subtitles.
-func (tr *transcriber) recognizers(ctx context.Context) []speech.Recognizer {
-	if tr.r.Recognizers == nil {
+// transcribers returns the transcribers.
+func (tr *transcriber) transcribers(ctx context.Context) []speech.Transcriber {
+	if tr.r.Transcribers == nil {
 		return nil
 	}
-	var out []speech.Recognizer
-	for _, rec := range tr.r.Recognizers(ctx) {
-		if rec.Info.GetSubtitles() && rec.Info.GetTimestamps() {
-			out = append(out, rec)
-		}
-	}
-	return out
+	return tr.r.Transcribers(ctx)
 }
 
 // ListSubtitleProviders implements SubtitleProviderServiceClient: a
-// provider per recognizer.
+// provider per transcriber.
 func (tr *transcriber) ListSubtitleProviders(ctx context.Context, _ *pluginv1.ListSubtitleProvidersRequest) (*pluginv1.ListSubtitleProvidersResponse, error) {
 	var out []*pluginv1.SubtitleProviderInfo
-	for _, rec := range tr.recognizers(ctx) {
+	for _, rec := range tr.transcribers(ctx) {
 		out = append(out, pluginv1.SubtitleProviderInfo_builder{
-			Name: proto.String(rec.ID), DisplayName: proto.String(rec.Info.GetDisplayName()), Enabled: proto.Bool(true),
+			Name: proto.String(rec.ID), DisplayName: proto.String(rec.Info.GetName()), Enabled: proto.Bool(true),
 			Languages: rec.Info.GetLanguages(), Movies: proto.Bool(true), Episodes: proto.Bool(true),
 		}.Build())
 	}
@@ -82,7 +76,7 @@ func (tr *transcriber) ListSubtitleProviders(ctx context.Context, _ *pluginv1.Li
 }
 
 // SearchSubtitles implements SubtitleProviderServiceClient: a subtitle
-// per recognizer and language the audio can be transcribed or translated
+// per transcriber and language the audio can be transcribed or translated
 // to.
 func (tr *transcriber) SearchSubtitles(ctx context.Context, req *pluginv1.SearchSubtitlesRequest) (*pluginv1.SearchSubtitlesResponse, error) {
 	v := req.GetVideo()
@@ -94,11 +88,11 @@ func (tr *transcriber) SearchSubtitles(ctx context.Context, req *pluginv1.Search
 	if v.GetKind() == pluginv1.MediaKind_MEDIA_KIND_EPISODE {
 		matches = []string{"series", "season", "episode"}
 	}
-	for _, rec := range tr.recognizers(ctx) {
+	for _, rec := range tr.transcribers(ctx) {
 		for _, l := range req.GetLanguages() {
 			t, err := tr.query(ctx, rec, v, l.GetLanguage())
 			if err != nil {
-				tr.r.logger().WarnContext(ctx, "transcription search", "recognizer", rec.ID, "err", err)
+				tr.r.logger().WarnContext(ctx, "transcription search", "transcriber", rec.ID, "err", err)
 				resp.SetFailures(append(resp.GetFailures(), pluginv1.SubtitleProviderFailure_builder{
 					Provider: proto.String(rec.ID), Message: proto.String(err.Error()),
 				}.Build()))
@@ -131,9 +125,9 @@ func spoken(code string) string {
 	return t
 }
 
-// query decides how a recognizer transcribes a video into a language, as
+// query decides how a transcriber transcribes a video into a language, as
 // Bazarr's Whisper provider; nil when it does not.
-func (tr *transcriber) query(ctx context.Context, rec speech.Recognizer, v *pluginv1.SubtitleVideo, target string) (*transcription, error) {
+func (tr *transcriber) query(ctx context.Context, rec speech.Transcriber, v *pluginv1.SubtitleVideo, target string) (*transcription, error) {
 	info := rec.Info
 	if !speech.Speaks(info.GetLanguages(), target) {
 		return nil, nil
@@ -163,15 +157,12 @@ func (tr *transcriber) query(ctx context.Context, rec speech.Recognizer, v *plug
 		})
 	}
 	if detect {
-		if !info.GetDetectsLanguage() {
-			return nil, nil
-		}
 		detected, err := tr.r.detect(ctx, rec, v.GetAudioUrl())
 		if err != nil {
 			return nil, err
 		}
 		if detected == "" {
-			tr.r.logger().InfoContext(ctx, "language detection failed", "recognizer", rec.ID, "file", v.GetFileName())
+			tr.r.logger().InfoContext(ctx, "language detection failed", "transcriber", rec.ID, "file", v.GetFileName())
 			return nil, nil
 		}
 		t.Audio, t.Task, t.Stream = detected, "transcribe", 0
@@ -189,9 +180,9 @@ func (tr *transcriber) query(ctx context.Context, rec speech.Recognizer, v *plug
 }
 
 // detect returns the language of a video's first audio stream as a
-// recognizer detects it from its first 30 seconds; "" when it cannot be.
-// Detections are kept by recognizer and audio.
-func (r *Runtime) detect(ctx context.Context, rec speech.Recognizer, audioURL string) (string, error) {
+// transcriber detects it from its first 30 seconds; "" when it cannot be.
+// Detections are kept by transcriber and audio.
+func (r *Runtime) detect(ctx context.Context, rec speech.Transcriber, audioURL string) (string, error) {
 	key := rec.ID + "\x00" + audioURL
 	r.detectedMu.Lock()
 	lang, ok := r.detected[key]
@@ -225,7 +216,7 @@ func streamURL(audioURL string, stream int, d time.Duration) string {
 }
 
 // DownloadSubtitle implements SubtitleProviderServiceClient: the
-// recognizer transcribes the audio stream, as SubRip.
+// transcriber transcribes the audio stream, as SubRip.
 func (tr *transcriber) DownloadSubtitle(ctx context.Context, req *pluginv1.DownloadSubtitleRequest) (*pluginv1.DownloadSubtitleResponse, error) {
 	var t transcription
 	if err := json.Unmarshal([]byte(req.GetId()), &t); err != nil {
@@ -235,22 +226,22 @@ func (tr *transcriber) DownloadSubtitle(ctx context.Context, req *pluginv1.Downl
 	if v.GetAudioUrl() == "" {
 		return nil, fmt.Errorf("%w: the video's audio is not served", ErrUnavailable)
 	}
-	i := slices.IndexFunc(tr.recognizers(ctx), func(rec speech.Recognizer) bool { return rec.ID == req.GetProvider() })
+	list := tr.transcribers(ctx)
+	i := slices.IndexFunc(list, func(rec speech.Transcriber) bool { return rec.ID == req.GetProvider() })
 	if i < 0 {
-		return nil, fmt.Errorf("%w: recognizer %s does not transcribe subtitles", ErrUnavailable, req.GetProvider())
+		return nil, fmt.Errorf("%w: no transcriber %s", ErrUnavailable, req.GetProvider())
 	}
-	rec := tr.recognizers(ctx)[i]
+	rec := list[i]
 	start := tr.r.now()
-	tr.r.logger().InfoContext(ctx, "transcription starting", "recognizer", rec.ID, "task", t.Task, "file", v.GetFileName())
-	resp, err := rec.Recognize(ctx, pluginv1.RecognizeSpeechRequest_builder{
+	tr.r.logger().InfoContext(ctx, "transcription starting", "transcriber", rec.ID, "task", t.Task, "file", v.GetFileName())
+	resp, err := rec.Transcribe(ctx, pluginv1.TranscribeSpeechRequest_builder{
 		Audio:    pluginv1.SpeechAudio_builder{Url: proto.String(streamURL(v.GetAudioUrl(), t.Stream, 0))}.Build(),
-		Language: proto.String(t.Audio), Translate: proto.Bool(t.Task == "translate"), Timestamps: proto.Bool(true),
-		Name: proto.String(v.GetFileName()),
+		Language: proto.String(t.Audio), Translate: proto.Bool(t.Task == "translate"), Name: proto.String(v.GetFileName()),
 	}.Build())
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", rec.ID, err)
 	}
-	tr.r.logger().InfoContext(ctx, "transcription completed", "recognizer", rec.ID, "took", tr.r.now().Sub(start).Round(time.Second), "file", v.GetFileName())
+	tr.r.logger().InfoContext(ctx, "transcription completed", "transcriber", rec.ID, "took", tr.r.now().Sub(start).Round(time.Second), "file", v.GetFileName())
 	var cues []subtitle.Cue
 	for _, s := range resp.GetSegments() {
 		if text := strings.TrimSpace(s.GetText()); text != "" {

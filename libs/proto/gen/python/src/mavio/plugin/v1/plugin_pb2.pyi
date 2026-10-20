@@ -48,7 +48,6 @@ class Capability(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     CAPABILITY_AGENT_SESSION: _ClassVar[Capability]
     CAPABILITY_RATINGS_PROVIDER: _ClassVar[Capability]
     CAPABILITY_SPEECH_TO_TEXT: _ClassVar[Capability]
-    CAPABILITY_TEXT_TO_SPEECH: _ClassVar[Capability]
     CAPABILITY_CHALLENGE_SOLVER: _ClassVar[Capability]
     CAPABILITY_VOICE_SESSION: _ClassVar[Capability]
 
@@ -96,7 +95,6 @@ CAPABILITY_AI_GATEWAY: Capability
 CAPABILITY_AGENT_SESSION: Capability
 CAPABILITY_RATINGS_PROVIDER: Capability
 CAPABILITY_SPEECH_TO_TEXT: Capability
-CAPABILITY_TEXT_TO_SPEECH: Capability
 CAPABILITY_CHALLENGE_SOLVER: Capability
 CAPABILITY_VOICE_SESSION: Capability
 CATEGORY_UNSPECIFIED: Category

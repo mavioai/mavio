@@ -68,37 +68,32 @@ func (m *Manager) Definitions(ctx context.Context, id, source string) ([]ConfigO
 				SettingsSchema: SettingsSchema(d.GetFields()),
 			})
 		}
-	case manifest.OptionsSpeechRecognizers:
+	case manifest.OptionsVoiceRecognizers, manifest.OptionsVoiceSynthesizers:
+		if !manifest.HasCapability(man, pluginv1.Capability_CAPABILITY_VOICE_SESSION) || pl.VoiceSessions() == nil {
+			return nil, fmt.Errorf("%w: plugin %s runs no voice sessions", core.ErrInvalid, id)
+		}
+		resp, err := pl.VoiceSessions().ListVoiceServices(ctx, &pluginv1.ListVoiceServicesRequest{})
+		if err != nil {
+			return nil, fmt.Errorf("list the voice services of plugin %s: %w", id, err)
+		}
+		// Recognizers are configured from the services that recognize
+		// speech, voices from those that synthesize it.
+		recognizers := source == manifest.OptionsVoiceRecognizers
+		for _, sv := range resp.GetServices() {
+			if sv.GetRecognizes() == recognizers {
+				out = append(out, ConfigOption{Value: sv.GetName(), Name: cmp.Or(sv.GetDisplayName(), sv.GetName()), SettingsSchema: SettingsSchema(sv.GetSettings())})
+			}
+		}
+	case manifest.OptionsTranscriptionServices:
 		if !manifest.HasCapability(man, pluginv1.Capability_CAPABILITY_SPEECH_TO_TEXT) || pl.Speech() == nil {
-			return nil, fmt.Errorf("%w: plugin %s provides no recognizers", core.ErrInvalid, id)
+			return nil, fmt.Errorf("%w: plugin %s provides no transcription", core.ErrInvalid, id)
 		}
-		resp, err := pl.Speech().ListRecognizers(ctx, &pluginv1.ListRecognizersRequest{})
+		resp, err := pl.Speech().ListTranscribers(ctx, &pluginv1.ListTranscribersRequest{})
 		if err != nil {
-			return nil, fmt.Errorf("list the recognizers of plugin %s: %w", id, err)
+			return nil, fmt.Errorf("list the transcription services of plugin %s: %w", id, err)
 		}
-		// A plugin lists the services its recognizers are configured from,
-		// else recognizers that are their own.
-		list := resp.GetServices()
-		if len(list) == 0 {
-			list = resp.GetRecognizers()
-		}
-		for _, r := range list {
-			out = append(out, ConfigOption{Value: r.GetName(), Name: cmp.Or(r.GetDisplayName(), r.GetName()), SettingsSchema: SettingsSchema(r.GetSettings())})
-		}
-	case manifest.OptionsSpeechSynthesizers:
-		if !manifest.HasCapability(man, pluginv1.Capability_CAPABILITY_TEXT_TO_SPEECH) || pl.Voices() == nil {
-			return nil, fmt.Errorf("%w: plugin %s provides no synthesizers", core.ErrInvalid, id)
-		}
-		resp, err := pl.Voices().ListVoices(ctx, &pluginv1.ListVoicesRequest{})
-		if err != nil {
-			return nil, fmt.Errorf("list the synthesizers of plugin %s: %w", id, err)
-		}
-		list := resp.GetServices()
-		if len(list) == 0 {
-			list = resp.GetSynthesizers()
-		}
-		for _, s := range list {
-			out = append(out, ConfigOption{Value: s.GetName(), Name: cmp.Or(s.GetDisplayName(), s.GetName()), SettingsSchema: SettingsSchema(s.GetSettings())})
+		for _, sv := range resp.GetServices() {
+			out = append(out, ConfigOption{Value: sv.GetName(), Name: cmp.Or(sv.GetDisplayName(), sv.GetName()), SettingsSchema: SettingsSchema(sv.GetSettings())})
 		}
 	case manifest.OptionsSubtitleProviders:
 		if !manifest.HasCapability(man, pluginv1.Capability_CAPABILITY_SUBTITLE_PROVIDER) || pl.Subtitles() == nil {

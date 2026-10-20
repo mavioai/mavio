@@ -23,12 +23,6 @@ class AssistantService(Protocol):
     def ask(self, request: mavio_dot_assistant_dot_v1_dot_assistant__pb2.AskRequest, ctx: RequestContext) -> AsyncIterator[mavio_dot_assistant_dot_v1_dot_assistant__pb2.AskResponse]:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
 
-    async def get_assistant_hints(self, request: mavio_dot_assistant_dot_v1_dot_assistant__pb2.GetAssistantHintsRequest, ctx: RequestContext) -> mavio_dot_assistant_dot_v1_dot_assistant__pb2.GetAssistantHintsResponse:
-        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
-
-    async def start_listening(self, request: mavio_dot_assistant_dot_v1_dot_assistant__pb2.StartListeningRequest, ctx: RequestContext) -> mavio_dot_assistant_dot_v1_dot_assistant__pb2.StartListeningResponse:
-        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
-
     async def start_voice_session(self, request: mavio_dot_assistant_dot_v1_dot_assistant__pb2.StartVoiceSessionRequest, ctx: RequestContext) -> mavio_dot_assistant_dot_v1_dot_assistant__pb2.StartVoiceSessionResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
 
@@ -81,26 +75,6 @@ class AssistantServiceASGIApplication(ConnectASGIApplication[AssistantService]):
                         idempotency_level=IdempotencyLevel.UNKNOWN,
                     ),
                     function=svc.ask,
-                ),
-                "/mavio.assistant.v1.AssistantService/GetAssistantHints": Endpoint.unary(
-                    method=MethodInfo(
-                        name="GetAssistantHints",
-                        service_name="mavio.assistant.v1.AssistantService",
-                        input=mavio_dot_assistant_dot_v1_dot_assistant__pb2.GetAssistantHintsRequest,
-                        output=mavio_dot_assistant_dot_v1_dot_assistant__pb2.GetAssistantHintsResponse,
-                        idempotency_level=IdempotencyLevel.NO_SIDE_EFFECTS,
-                    ),
-                    function=svc.get_assistant_hints,
-                ),
-                "/mavio.assistant.v1.AssistantService/StartListening": Endpoint.unary(
-                    method=MethodInfo(
-                        name="StartListening",
-                        service_name="mavio.assistant.v1.AssistantService",
-                        input=mavio_dot_assistant_dot_v1_dot_assistant__pb2.StartListeningRequest,
-                        output=mavio_dot_assistant_dot_v1_dot_assistant__pb2.StartListeningResponse,
-                        idempotency_level=IdempotencyLevel.UNKNOWN,
-                    ),
-                    function=svc.start_listening,
                 ),
                 "/mavio.assistant.v1.AssistantService/StartVoiceSession": Endpoint.unary(
                     method=MethodInfo(
@@ -241,48 +215,6 @@ class AssistantServiceClient(ConnectClient):
                 service_name="mavio.assistant.v1.AssistantService",
                 input=mavio_dot_assistant_dot_v1_dot_assistant__pb2.AskRequest,
                 output=mavio_dot_assistant_dot_v1_dot_assistant__pb2.AskResponse,
-                idempotency_level=IdempotencyLevel.UNKNOWN,
-            ),
-            headers=headers,
-            timeout_ms=timeout_ms,
-        )
-
-    async def get_assistant_hints(
-        self,
-        request: mavio_dot_assistant_dot_v1_dot_assistant__pb2.GetAssistantHintsRequest,
-        *,
-        headers: Headers | Mapping[str, str] | None = None,
-        timeout_ms: int | None = None,
-        use_get: bool = False,
-    ) -> mavio_dot_assistant_dot_v1_dot_assistant__pb2.GetAssistantHintsResponse:
-        return await self.execute_unary(
-            request=request,
-            method=MethodInfo(
-                name="GetAssistantHints",
-                service_name="mavio.assistant.v1.AssistantService",
-                input=mavio_dot_assistant_dot_v1_dot_assistant__pb2.GetAssistantHintsRequest,
-                output=mavio_dot_assistant_dot_v1_dot_assistant__pb2.GetAssistantHintsResponse,
-                idempotency_level=IdempotencyLevel.NO_SIDE_EFFECTS,
-            ),
-            headers=headers,
-            timeout_ms=timeout_ms,
-            use_get=use_get,
-        )
-
-    async def start_listening(
-        self,
-        request: mavio_dot_assistant_dot_v1_dot_assistant__pb2.StartListeningRequest,
-        *,
-        headers: Headers | Mapping[str, str] | None = None,
-        timeout_ms: int | None = None,
-    ) -> mavio_dot_assistant_dot_v1_dot_assistant__pb2.StartListeningResponse:
-        return await self.execute_unary(
-            request=request,
-            method=MethodInfo(
-                name="StartListening",
-                service_name="mavio.assistant.v1.AssistantService",
-                input=mavio_dot_assistant_dot_v1_dot_assistant__pb2.StartListeningRequest,
-                output=mavio_dot_assistant_dot_v1_dot_assistant__pb2.StartListeningResponse,
                 idempotency_level=IdempotencyLevel.UNKNOWN,
             ),
             headers=headers,
@@ -483,10 +415,6 @@ class AssistantServiceSync(Protocol):
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
     def ask(self, request: mavio_dot_assistant_dot_v1_dot_assistant__pb2.AskRequest, ctx: RequestContext) -> Iterator[mavio_dot_assistant_dot_v1_dot_assistant__pb2.AskResponse]:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
-    def get_assistant_hints(self, request: mavio_dot_assistant_dot_v1_dot_assistant__pb2.GetAssistantHintsRequest, ctx: RequestContext) -> mavio_dot_assistant_dot_v1_dot_assistant__pb2.GetAssistantHintsResponse:
-        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
-    def start_listening(self, request: mavio_dot_assistant_dot_v1_dot_assistant__pb2.StartListeningRequest, ctx: RequestContext) -> mavio_dot_assistant_dot_v1_dot_assistant__pb2.StartListeningResponse:
-        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
     def start_voice_session(self, request: mavio_dot_assistant_dot_v1_dot_assistant__pb2.StartVoiceSessionRequest, ctx: RequestContext) -> mavio_dot_assistant_dot_v1_dot_assistant__pb2.StartVoiceSessionResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
     def list_assistant_conversations(self, request: mavio_dot_assistant_dot_v1_dot_assistant__pb2.ListAssistantConversationsRequest, ctx: RequestContext) -> mavio_dot_assistant_dot_v1_dot_assistant__pb2.ListAssistantConversationsResponse:
@@ -530,26 +458,6 @@ class AssistantServiceWSGIApplication(ConnectWSGIApplication):
                         idempotency_level=IdempotencyLevel.UNKNOWN,
                     ),
                     function=service.ask,
-                ),
-                "/mavio.assistant.v1.AssistantService/GetAssistantHints": EndpointSync.unary(
-                    method=MethodInfo(
-                        name="GetAssistantHints",
-                        service_name="mavio.assistant.v1.AssistantService",
-                        input=mavio_dot_assistant_dot_v1_dot_assistant__pb2.GetAssistantHintsRequest,
-                        output=mavio_dot_assistant_dot_v1_dot_assistant__pb2.GetAssistantHintsResponse,
-                        idempotency_level=IdempotencyLevel.NO_SIDE_EFFECTS,
-                    ),
-                    function=service.get_assistant_hints,
-                ),
-                "/mavio.assistant.v1.AssistantService/StartListening": EndpointSync.unary(
-                    method=MethodInfo(
-                        name="StartListening",
-                        service_name="mavio.assistant.v1.AssistantService",
-                        input=mavio_dot_assistant_dot_v1_dot_assistant__pb2.StartListeningRequest,
-                        output=mavio_dot_assistant_dot_v1_dot_assistant__pb2.StartListeningResponse,
-                        idempotency_level=IdempotencyLevel.UNKNOWN,
-                    ),
-                    function=service.start_listening,
                 ),
                 "/mavio.assistant.v1.AssistantService/StartVoiceSession": EndpointSync.unary(
                     method=MethodInfo(
@@ -690,48 +598,6 @@ class AssistantServiceClientSync(ConnectClientSync):
                 service_name="mavio.assistant.v1.AssistantService",
                 input=mavio_dot_assistant_dot_v1_dot_assistant__pb2.AskRequest,
                 output=mavio_dot_assistant_dot_v1_dot_assistant__pb2.AskResponse,
-                idempotency_level=IdempotencyLevel.UNKNOWN,
-            ),
-            headers=headers,
-            timeout_ms=timeout_ms,
-        )
-
-    def get_assistant_hints(
-        self,
-        request: mavio_dot_assistant_dot_v1_dot_assistant__pb2.GetAssistantHintsRequest,
-        *,
-        headers: Headers | Mapping[str, str] | None = None,
-        timeout_ms: int | None = None,
-        use_get: bool = False,
-    ) -> mavio_dot_assistant_dot_v1_dot_assistant__pb2.GetAssistantHintsResponse:
-        return self.execute_unary(
-            request=request,
-            method=MethodInfo(
-                name="GetAssistantHints",
-                service_name="mavio.assistant.v1.AssistantService",
-                input=mavio_dot_assistant_dot_v1_dot_assistant__pb2.GetAssistantHintsRequest,
-                output=mavio_dot_assistant_dot_v1_dot_assistant__pb2.GetAssistantHintsResponse,
-                idempotency_level=IdempotencyLevel.NO_SIDE_EFFECTS,
-            ),
-            headers=headers,
-            timeout_ms=timeout_ms,
-            use_get=use_get,
-        )
-
-    def start_listening(
-        self,
-        request: mavio_dot_assistant_dot_v1_dot_assistant__pb2.StartListeningRequest,
-        *,
-        headers: Headers | Mapping[str, str] | None = None,
-        timeout_ms: int | None = None,
-    ) -> mavio_dot_assistant_dot_v1_dot_assistant__pb2.StartListeningResponse:
-        return self.execute_unary(
-            request=request,
-            method=MethodInfo(
-                name="StartListening",
-                service_name="mavio.assistant.v1.AssistantService",
-                input=mavio_dot_assistant_dot_v1_dot_assistant__pb2.StartListeningRequest,
-                output=mavio_dot_assistant_dot_v1_dot_assistant__pb2.StartListeningResponse,
                 idempotency_level=IdempotencyLevel.UNKNOWN,
             ),
             headers=headers,

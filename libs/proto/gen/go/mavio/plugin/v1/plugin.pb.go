@@ -135,10 +135,8 @@ const (
 	Capability_CAPABILITY_AGENT_SESSION Capability = 27
 	// Implements RatingsProviderService.
 	Capability_CAPABILITY_RATINGS_PROVIDER Capability = 28
-	// Implements SpeechToTextService.
+	// Implements SpeechToTextService: transcribes videos into subtitles.
 	Capability_CAPABILITY_SPEECH_TO_TEXT Capability = 29
-	// Implements TextToSpeechService.
-	Capability_CAPABILITY_TEXT_TO_SPEECH Capability = 30
 	// Implements ChallengeSolverService.
 	Capability_CAPABILITY_CHALLENGE_SOLVER Capability = 31
 	// Implements VoiceSessionService and serves its sessions' WebSockets.
@@ -178,7 +176,6 @@ var (
 		27: "CAPABILITY_AGENT_SESSION",
 		28: "CAPABILITY_RATINGS_PROVIDER",
 		29: "CAPABILITY_SPEECH_TO_TEXT",
-		30: "CAPABILITY_TEXT_TO_SPEECH",
 		31: "CAPABILITY_CHALLENGE_SOLVER",
 		32: "CAPABILITY_VOICE_SESSION",
 	}
@@ -213,7 +210,6 @@ var (
 		"CAPABILITY_AGENT_SESSION":            27,
 		"CAPABILITY_RATINGS_PROVIDER":         28,
 		"CAPABILITY_SPEECH_TO_TEXT":           29,
-		"CAPABILITY_TEXT_TO_SPEECH":           30,
 		"CAPABILITY_CHALLENGE_SOLVER":         31,
 		"CAPABILITY_VOICE_SESSION":            32,
 	}
@@ -1712,7 +1708,7 @@ const file_mavio_plugin_v1_plugin_proto_rawDesc = "" +
 	"\aRuntime\x12\x17\n" +
 	"\x13RUNTIME_UNSPECIFIED\x10\x00\x12\x10\n" +
 	"\fRUNTIME_WASM\x10\x01\x12\x13\n" +
-	"\x0fRUNTIME_PROCESS\x10\x02*\xb0\b\n" +
+	"\x0fRUNTIME_PROCESS\x10\x02*\xb2\b\n" +
 	"\n" +
 	"Capability\x12\x1a\n" +
 	"\x16CAPABILITY_UNSPECIFIED\x10\x00\x12 \n" +
@@ -1745,10 +1741,9 @@ const file_mavio_plugin_v1_plugin_proto_rawDesc = "" +
 	"\x15CAPABILITY_AI_GATEWAY\x10\x1a\x12\x1c\n" +
 	"\x18CAPABILITY_AGENT_SESSION\x10\x1b\x12\x1f\n" +
 	"\x1bCAPABILITY_RATINGS_PROVIDER\x10\x1c\x12\x1d\n" +
-	"\x19CAPABILITY_SPEECH_TO_TEXT\x10\x1d\x12\x1d\n" +
-	"\x19CAPABILITY_TEXT_TO_SPEECH\x10\x1e\x12\x1f\n" +
+	"\x19CAPABILITY_SPEECH_TO_TEXT\x10\x1d\x12\x1f\n" +
 	"\x1bCAPABILITY_CHALLENGE_SOLVER\x10\x1f\x12\x1c\n" +
-	"\x18CAPABILITY_VOICE_SESSION\x10 *\xe0\x01\n" +
+	"\x18CAPABILITY_VOICE_SESSION\x10 \"\x04\b\x1e\x10\x1e*\x19CAPABILITY_TEXT_TO_SPEECH*\xe0\x01\n" +
 	"\bCategory\x12\x18\n" +
 	"\x14CATEGORY_UNSPECIFIED\x10\x00\x12\x15\n" +
 	"\x11CATEGORY_METADATA\x10\x01\x12\x16\n" +

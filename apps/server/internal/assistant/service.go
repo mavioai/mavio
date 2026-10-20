@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"log/slog"
-	"slices"
 	"strings"
 	"sync"
 	"time"
@@ -14,7 +13,6 @@ import (
 	"github.com/mavioai/mavio/apps/server/internal/activity"
 	"github.com/mavioai/mavio/apps/server/internal/assistant/intent"
 	"github.com/mavioai/mavio/apps/server/internal/auth"
-	"github.com/mavioai/mavio/apps/server/internal/speech"
 	"github.com/mavioai/mavio/libs/core"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/acquisition/v1/acquisitionv1connect"
 	assistantv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/assistant/v1"
@@ -59,22 +57,16 @@ type Config struct {
 	// Agents returns the plugin keeping conversations with models; nil
 	// has none.
 	Agents func() (pluginv1connect.AgentSessionServiceClient, bool)
-	// Recognizers and Voices return the started speech plugins; nil have
-	// none.
-	Recognizers func() []speech.RecognizerPlugin
-	Voices      func() []speech.VoicePlugin
 	// VoiceSessions returns the ready plugin running voice sessions; nil
 	// has none.
 	VoiceSessions func() (VoicePlugin, bool)
 	// ServerName names the server to the model.
 	ServerName func() string
-	// Key signs the listening URLs.
-	Key []byte
 	// SpeechDir holds the speech of answers kept with their conversations;
 	// empty keeps none.
 	SpeechDir string
-	// FFmpeg converts speech for clients that do not play the
-	// synthesizer's encoding; empty converts none.
+	// FFmpeg encodes the speech kept, and converts it for clients that do
+	// not play Opus; empty keeps it as WAV and converts none.
 	FFmpeg string
 	// Activity records what the assistant does; nil records nothing.
 	Activity *activity.Log
@@ -97,11 +89,10 @@ type Service struct {
 	calls map[string]callResult
 	// turns are the AI path's running turns by conversation.
 	turns map[string]*aiTurn
-	// listens are the listening tokens used, until they expire.
-	listens map[string]time.Time
-	voice   voices
-	vad     vadLoader
-	rec     *recorder
+	voice voices
+	rec   *recorder
+	// keeping are the answers' speech being kept.
+	keeping sync.WaitGroup
 }
 
 var _ assistantv1connect.AssistantServiceHandler = (*Service)(nil)
@@ -124,7 +115,7 @@ func New(cfg Config) *Service {
 	s := &Service{
 		cfg: cfg, log: cfg.Logger, now: cfg.Now,
 		dialogs: map[core.ID]*dialog{}, calls: map[string]callResult{}, turns: map[string]*aiTurn{},
-		listens: map[string]time.Time{}, voice: voices{byURL: map[string]*voiceSession{}, byToken: map[string]*voiceSession{}}, rec: newRecorder(cfg.SpeechDir, cfg.Logger),
+		voice: voices{byURL: map[string]*voiceSession{}, byToken: map[string]*voiceSession{}}, rec: newRecorder(cfg.SpeechDir, cfg.FFmpeg, cfg.Logger),
 	}
 	s.tool = map[string]*tool{}
 	for _, t := range tools() {
@@ -186,21 +177,10 @@ func (s *Service) GetAssistant(ctx context.Context, req *assistantv1.GetAssistan
 	_, ai := s.agents(set, &p.User)
 	resp.SetAi(ai)
 	resp.SetMemory(ai && set.Memory)
-	var recognizers []*assistantv1.Recognizer
-	for _, r := range s.recognizers(ctx) {
-		recognizers = append(recognizers, assistantv1.Recognizer_builder{
-			Id: new(r.ID), Name: new(r.Info.GetDisplayName()), Languages: r.Info.GetLanguages(),
-		}.Build())
+	if s.cfg.VoiceSessions != nil {
+		_, voice := s.cfg.VoiceSessions()
+		resp.SetVoice(voice)
 	}
-	resp.SetRecognizers(recognizers)
-	var voices []*assistantv1.Voice
-	for _, v := range s.voices(ctx) {
-		voices = append(voices, assistantv1.Voice_builder{
-			Id: new(v.ID), Name: new(v.Info.GetName()), Languages: v.Info.GetLanguages(),
-		}.Build())
-	}
-	resp.SetVoices(voices)
-	resp.SetDefaultVoices(voiceChoices(set.Voices))
 	if g := s.cfg.Grammar; g != nil {
 		if ex, err := g.Examples(ctx, intentv1.ExamplesRequest_builder{Language: new(req.GetLanguage())}.Build()); err == nil {
 			resp.SetExamples(ex.GetExamples())
@@ -212,32 +192,7 @@ func (s *Service) GetAssistant(ctx context.Context, req *assistantv1.GetAssistan
 	return resp, nil
 }
 
-func (s *Service) recognizers(ctx context.Context) []speech.Recognizer {
-	if s.cfg.Recognizers == nil {
-		return nil
-	}
-	return speech.Recognizers(ctx, s.cfg.Recognizers(), s.log)
-}
 
-func (s *Service) voices(ctx context.Context) []speech.Voice {
-	if s.cfg.Voices == nil {
-		return nil
-	}
-	return speech.Voices(ctx, s.cfg.Voices(), s.log)
-}
-
-func voiceChoices(m map[string]string) []*assistantv1.AssistantVoiceChoice {
-	langs := make([]string, 0, len(m))
-	for l := range m {
-		langs = append(langs, l)
-	}
-	slices.Sort(langs)
-	out := make([]*assistantv1.AssistantVoiceChoice, 0, len(langs))
-	for _, l := range langs {
-		out = append(out, assistantv1.AssistantVoiceChoice_builder{Language: new(l), Voice: new(m[l])}.Build())
-	}
-	return out
-}
 
 // answerLanguage picks the language of answers: the grammar's when it matched,
 // else the context's first, else English.

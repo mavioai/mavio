@@ -154,11 +154,8 @@ public nonisolated enum Mavio_Plugin_V1_Capability: SwiftProtobuf.Enum, Swift.Ca
   /// Implements RatingsProviderService.
   case ratingsProvider // = 28
 
-  /// Implements SpeechToTextService.
+  /// Implements SpeechToTextService: transcribes videos into subtitles.
   case speechToText // = 29
-
-  /// Implements TextToSpeechService.
-  case textToSpeech // = 30
 
   /// Implements ChallengeSolverService.
   case challengeSolver // = 31
@@ -203,7 +200,6 @@ public nonisolated enum Mavio_Plugin_V1_Capability: SwiftProtobuf.Enum, Swift.Ca
     case 27: self = .agentSession
     case 28: self = .ratingsProvider
     case 29: self = .speechToText
-    case 30: self = .textToSpeech
     case 31: self = .challengeSolver
     case 32: self = .voiceSession
     default: self = .UNRECOGNIZED(rawValue)
@@ -242,7 +238,6 @@ public nonisolated enum Mavio_Plugin_V1_Capability: SwiftProtobuf.Enum, Swift.Ca
     case .agentSession: return 27
     case .ratingsProvider: return 28
     case .speechToText: return 29
-    case .textToSpeech: return 30
     case .challengeSolver: return 31
     case .voiceSession: return 32
     case .UNRECOGNIZED(let i): return i
@@ -281,7 +276,6 @@ public nonisolated enum Mavio_Plugin_V1_Capability: SwiftProtobuf.Enum, Swift.Ca
     .agentSession,
     .ratingsProvider,
     .speechToText,
-    .textToSpeech,
     .challengeSolver,
     .voiceSession,
   ]
@@ -767,7 +761,7 @@ nonisolated extension Mavio_Plugin_V1_Runtime: SwiftProtobuf._ProtoNameProviding
 }
 
 nonisolated extension Mavio_Plugin_V1_Capability: SwiftProtobuf._ProtoNameProviding {
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{2}\0CAPABILITY_UNSPECIFIED\0\u{1}CAPABILITY_METADATA_PROVIDER\0\u{1}CAPABILITY_AUTH_PROVIDER\0\u{1}CAPABILITY_NOTIFIER\0\u{1}CAPABILITY_SUBTITLE_PROVIDER\0\u{1}CAPABILITY_SEGMENT_PROVIDER\0\u{1}CAPABILITY_TASK_RUNNER\0\u{1}CAPABILITY_EVENT_CONSUMER\0\u{1}CAPABILITY_HTTP_HANDLER\0\u{1}CAPABILITY_DEVICE_CONTROLLER\0\u{1}CAPABILITY_IMAGE_PROVIDER\0\u{1}CAPABILITY_LOCAL_METADATA\0\u{1}CAPABILITY_METADATA_SAVER\0\u{1}CAPABILITY_METADATA_PROCESSOR\0\u{1}CAPABILITY_LYRICS_PROVIDER\0\u{1}CAPABILITY_RESOLVER\0\u{1}CAPABILITY_INTRO_PROVIDER\0\u{1}CAPABILITY_IMAGE_GENERATOR\0\u{1}CAPABILITY_MEDIA_SOURCE_PROVIDER\0\u{1}CAPABILITY_PASSWORD_RESET\0\u{1}CAPABILITY_EPISODE_LIST_PROVIDER\0\u{1}CAPABILITY_DISCOVERY_PROVIDER\0\u{1}CAPABILITY_SCENE_MAPPING_PROVIDER\0\u{1}CAPABILITY_INDEXER_PROVIDER\0\u{1}CAPABILITY_DOWNLOAD_CLIENT_PROVIDER\0\u{1}CAPABILITY_SUBTITLE_TRANSLATOR\0\u{1}CAPABILITY_AI_GATEWAY\0\u{1}CAPABILITY_AGENT_SESSION\0\u{1}CAPABILITY_RATINGS_PROVIDER\0\u{1}CAPABILITY_SPEECH_TO_TEXT\0\u{1}CAPABILITY_TEXT_TO_SPEECH\0\u{1}CAPABILITY_CHALLENGE_SOLVER\0\u{1}CAPABILITY_VOICE_SESSION\0")
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{2}\0CAPABILITY_UNSPECIFIED\0\u{1}CAPABILITY_METADATA_PROVIDER\0\u{1}CAPABILITY_AUTH_PROVIDER\0\u{1}CAPABILITY_NOTIFIER\0\u{1}CAPABILITY_SUBTITLE_PROVIDER\0\u{1}CAPABILITY_SEGMENT_PROVIDER\0\u{1}CAPABILITY_TASK_RUNNER\0\u{1}CAPABILITY_EVENT_CONSUMER\0\u{1}CAPABILITY_HTTP_HANDLER\0\u{1}CAPABILITY_DEVICE_CONTROLLER\0\u{1}CAPABILITY_IMAGE_PROVIDER\0\u{1}CAPABILITY_LOCAL_METADATA\0\u{1}CAPABILITY_METADATA_SAVER\0\u{1}CAPABILITY_METADATA_PROCESSOR\0\u{1}CAPABILITY_LYRICS_PROVIDER\0\u{1}CAPABILITY_RESOLVER\0\u{1}CAPABILITY_INTRO_PROVIDER\0\u{1}CAPABILITY_IMAGE_GENERATOR\0\u{1}CAPABILITY_MEDIA_SOURCE_PROVIDER\0\u{1}CAPABILITY_PASSWORD_RESET\0\u{1}CAPABILITY_EPISODE_LIST_PROVIDER\0\u{1}CAPABILITY_DISCOVERY_PROVIDER\0\u{1}CAPABILITY_SCENE_MAPPING_PROVIDER\0\u{1}CAPABILITY_INDEXER_PROVIDER\0\u{1}CAPABILITY_DOWNLOAD_CLIENT_PROVIDER\0\u{1}CAPABILITY_SUBTITLE_TRANSLATOR\0\u{1}CAPABILITY_AI_GATEWAY\0\u{1}CAPABILITY_AGENT_SESSION\0\u{1}CAPABILITY_RATINGS_PROVIDER\0\u{1}CAPABILITY_SPEECH_TO_TEXT\0\u{2}\u{2}CAPABILITY_CHALLENGE_SOLVER\0\u{1}CAPABILITY_VOICE_SESSION\0")
 }
 
 nonisolated extension Mavio_Plugin_V1_Category: SwiftProtobuf._ProtoNameProviding {

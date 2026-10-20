@@ -214,18 +214,20 @@ func (x NavigateTarget) Number() protoreflect.EnumNumber {
 
 // AssistantSettings are the server's assistant settings.
 type AssistantSettings struct {
-	state                    protoimpl.MessageState   `protogen:"opaque.v1"`
-	xxx_hidden_Enabled       bool                     `protobuf:"varint,1,opt,name=enabled"`
-	xxx_hidden_Model         *string                  `protobuf:"bytes,2,opt,name=model"`
-	xxx_hidden_CodeMode      bool                     `protobuf:"varint,3,opt,name=code_mode,json=codeMode"`
-	xxx_hidden_AiAccess      AssistantAccess          `protobuf:"varint,4,opt,name=ai_access,json=aiAccess,enum=mavio.assistant.v1.AssistantAccess"`
-	xxx_hidden_AiUserIds     []string                 `protobuf:"bytes,5,rep,name=ai_user_ids,json=aiUserIds"`
-	xxx_hidden_IdleMinutes   int32                    `protobuf:"varint,6,opt,name=idle_minutes,json=idleMinutes"`
-	xxx_hidden_RetentionDays int32                    `protobuf:"varint,7,opt,name=retention_days,json=retentionDays"`
-	xxx_hidden_Memory        bool                     `protobuf:"varint,8,opt,name=memory"`
-	xxx_hidden_Recognizer    *string                  `protobuf:"bytes,9,opt,name=recognizer"`
-	xxx_hidden_Voices        *[]*AssistantVoiceChoice `protobuf:"bytes,10,rep,name=voices"`
-	xxx_hidden_Hints         bool                     `protobuf:"varint,11,opt,name=hints"`
+	state                    protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Enabled       bool                   `protobuf:"varint,1,opt,name=enabled"`
+	xxx_hidden_Model         *string                `protobuf:"bytes,2,opt,name=model"`
+	xxx_hidden_CodeMode      bool                   `protobuf:"varint,3,opt,name=code_mode,json=codeMode"`
+	xxx_hidden_AiAccess      AssistantAccess        `protobuf:"varint,4,opt,name=ai_access,json=aiAccess,enum=mavio.assistant.v1.AssistantAccess"`
+	xxx_hidden_AiUserIds     []string               `protobuf:"bytes,5,rep,name=ai_user_ids,json=aiUserIds"`
+	xxx_hidden_IdleMinutes   int32                  `protobuf:"varint,6,opt,name=idle_minutes,json=idleMinutes"`
+	xxx_hidden_RetentionDays int32                  `protobuf:"varint,7,opt,name=retention_days,json=retentionDays"`
+	xxx_hidden_Memory        bool                   `protobuf:"varint,8,opt,name=memory"`
+	xxx_hidden_Hints         bool                   `protobuf:"varint,11,opt,name=hints"`
+	xxx_hidden_Speech        *[]*AssistantSpeech    `protobuf:"bytes,12,rep,name=speech"`
+	xxx_hidden_LongestPause  *durationpb.Duration   `protobuf:"bytes,13,opt,name=longest_pause,json=longestPause"`
+	xxx_hidden_CommitDelay   *durationpb.Duration   `protobuf:"bytes,14,opt,name=commit_delay,json=commitDelay"`
+	xxx_hidden_SessionIdle   *durationpb.Duration   `protobuf:"bytes,15,opt,name=session_idle,json=sessionIdle"`
 	XXX_raceDetectHookData   protoimpl.RaceDetectHookData
 	XXX_presence             [1]uint32
 	unknownFields            protoimpl.UnknownFields
@@ -318,25 +320,6 @@ func (x *AssistantSettings) GetMemory() bool {
 	return false
 }
 
-func (x *AssistantSettings) GetRecognizer() string {
-	if x != nil {
-		if x.xxx_hidden_Recognizer != nil {
-			return *x.xxx_hidden_Recognizer
-		}
-		return ""
-	}
-	return ""
-}
-
-func (x *AssistantSettings) GetVoices() []*AssistantVoiceChoice {
-	if x != nil {
-		if x.xxx_hidden_Voices != nil {
-			return *x.xxx_hidden_Voices
-		}
-	}
-	return nil
-}
-
 func (x *AssistantSettings) GetHints() bool {
 	if x != nil {
 		return x.xxx_hidden_Hints
@@ -344,24 +327,54 @@ func (x *AssistantSettings) GetHints() bool {
 	return false
 }
 
+func (x *AssistantSettings) GetSpeech() []*AssistantSpeech {
+	if x != nil {
+		if x.xxx_hidden_Speech != nil {
+			return *x.xxx_hidden_Speech
+		}
+	}
+	return nil
+}
+
+func (x *AssistantSettings) GetLongestPause() *durationpb.Duration {
+	if x != nil {
+		return x.xxx_hidden_LongestPause
+	}
+	return nil
+}
+
+func (x *AssistantSettings) GetCommitDelay() *durationpb.Duration {
+	if x != nil {
+		return x.xxx_hidden_CommitDelay
+	}
+	return nil
+}
+
+func (x *AssistantSettings) GetSessionIdle() *durationpb.Duration {
+	if x != nil {
+		return x.xxx_hidden_SessionIdle
+	}
+	return nil
+}
+
 func (x *AssistantSettings) SetEnabled(v bool) {
 	x.xxx_hidden_Enabled = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 11)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 13)
 }
 
 func (x *AssistantSettings) SetModel(v string) {
 	x.xxx_hidden_Model = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 11)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 13)
 }
 
 func (x *AssistantSettings) SetCodeMode(v bool) {
 	x.xxx_hidden_CodeMode = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 11)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 13)
 }
 
 func (x *AssistantSettings) SetAiAccess(v AssistantAccess) {
 	x.xxx_hidden_AiAccess = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 11)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 13)
 }
 
 func (x *AssistantSettings) SetAiUserIds(v []string) {
@@ -370,31 +383,38 @@ func (x *AssistantSettings) SetAiUserIds(v []string) {
 
 func (x *AssistantSettings) SetIdleMinutes(v int32) {
 	x.xxx_hidden_IdleMinutes = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 11)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 13)
 }
 
 func (x *AssistantSettings) SetRetentionDays(v int32) {
 	x.xxx_hidden_RetentionDays = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 11)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 13)
 }
 
 func (x *AssistantSettings) SetMemory(v bool) {
 	x.xxx_hidden_Memory = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 11)
-}
-
-func (x *AssistantSettings) SetRecognizer(v string) {
-	x.xxx_hidden_Recognizer = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 8, 11)
-}
-
-func (x *AssistantSettings) SetVoices(v []*AssistantVoiceChoice) {
-	x.xxx_hidden_Voices = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 13)
 }
 
 func (x *AssistantSettings) SetHints(v bool) {
 	x.xxx_hidden_Hints = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 11)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 8, 13)
+}
+
+func (x *AssistantSettings) SetSpeech(v []*AssistantSpeech) {
+	x.xxx_hidden_Speech = &v
+}
+
+func (x *AssistantSettings) SetLongestPause(v *durationpb.Duration) {
+	x.xxx_hidden_LongestPause = v
+}
+
+func (x *AssistantSettings) SetCommitDelay(v *durationpb.Duration) {
+	x.xxx_hidden_CommitDelay = v
+}
+
+func (x *AssistantSettings) SetSessionIdle(v *durationpb.Duration) {
+	x.xxx_hidden_SessionIdle = v
 }
 
 func (x *AssistantSettings) HasEnabled() bool {
@@ -446,18 +466,32 @@ func (x *AssistantSettings) HasMemory() bool {
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 7)
 }
 
-func (x *AssistantSettings) HasRecognizer() bool {
+func (x *AssistantSettings) HasHints() bool {
 	if x == nil {
 		return false
 	}
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 8)
 }
 
-func (x *AssistantSettings) HasHints() bool {
+func (x *AssistantSettings) HasLongestPause() bool {
 	if x == nil {
 		return false
 	}
-	return protoimpl.X.Present(&(x.XXX_presence[0]), 10)
+	return x.xxx_hidden_LongestPause != nil
+}
+
+func (x *AssistantSettings) HasCommitDelay() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_CommitDelay != nil
+}
+
+func (x *AssistantSettings) HasSessionIdle() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_SessionIdle != nil
 }
 
 func (x *AssistantSettings) ClearEnabled() {
@@ -495,14 +529,21 @@ func (x *AssistantSettings) ClearMemory() {
 	x.xxx_hidden_Memory = false
 }
 
-func (x *AssistantSettings) ClearRecognizer() {
+func (x *AssistantSettings) ClearHints() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 8)
-	x.xxx_hidden_Recognizer = nil
+	x.xxx_hidden_Hints = false
 }
 
-func (x *AssistantSettings) ClearHints() {
-	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 10)
-	x.xxx_hidden_Hints = false
+func (x *AssistantSettings) ClearLongestPause() {
+	x.xxx_hidden_LongestPause = nil
+}
+
+func (x *AssistantSettings) ClearCommitDelay() {
+	x.xxx_hidden_CommitDelay = nil
+}
+
+func (x *AssistantSettings) ClearSessionIdle() {
+	x.xxx_hidden_SessionIdle = nil
 }
 
 type AssistantSettings_builder struct {
@@ -528,13 +569,22 @@ type AssistantSettings_builder struct {
 	RetentionDays *int32
 	// Whether the assistant remembers what users tell about themselves.
 	Memory *bool
-	// The server's recognizer, "<plugin>/<recognizer>"; empty, the first
-	// ready one.
-	Recognizer *string
-	// The voices answers are spoken with by default, by language.
-	Voices []*AssistantVoiceChoice
-	// Whether recognizers are given the user's hints.
+	// Whether recognizers are given the user's hints: titles being watched,
+	// recently added titles, people and the user's devices.
 	Hints *bool
+	// The recognizer and the voice of voice sessions by language; a
+	// language listed nowhere, nor its base, gets the plugin's first ready
+	// ones.
+	Speech []*AssistantSpeech
+	// The longest pause in a turn the turn model reads as unfinished,
+	// 0.5–10 seconds.
+	LongestPause *durationpb.Duration
+	// How long a turn stands, with the user silent, before what its answer
+	// changes is done, 0–3 seconds.
+	CommitDelay *durationpb.Duration
+	// How long the user may stay silent after an answer before the voice
+	// session ends, 3–120 seconds.
+	SessionIdle *durationpb.Duration
 }
 
 func (b0 AssistantSettings_builder) Build() *AssistantSettings {
@@ -542,71 +592,71 @@ func (b0 AssistantSettings_builder) Build() *AssistantSettings {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Enabled != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 11)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 13)
 		x.xxx_hidden_Enabled = *b.Enabled
 	}
 	if b.Model != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 11)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 13)
 		x.xxx_hidden_Model = b.Model
 	}
 	if b.CodeMode != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 11)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 13)
 		x.xxx_hidden_CodeMode = *b.CodeMode
 	}
 	if b.AiAccess != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 11)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 13)
 		x.xxx_hidden_AiAccess = *b.AiAccess
 	}
 	x.xxx_hidden_AiUserIds = b.AiUserIds
 	if b.IdleMinutes != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 11)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 13)
 		x.xxx_hidden_IdleMinutes = *b.IdleMinutes
 	}
 	if b.RetentionDays != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 11)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 13)
 		x.xxx_hidden_RetentionDays = *b.RetentionDays
 	}
 	if b.Memory != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 11)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 13)
 		x.xxx_hidden_Memory = *b.Memory
 	}
-	if b.Recognizer != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 8, 11)
-		x.xxx_hidden_Recognizer = b.Recognizer
-	}
-	x.xxx_hidden_Voices = &b.Voices
 	if b.Hints != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 11)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 8, 13)
 		x.xxx_hidden_Hints = *b.Hints
 	}
+	x.xxx_hidden_Speech = &b.Speech
+	x.xxx_hidden_LongestPause = b.LongestPause
+	x.xxx_hidden_CommitDelay = b.CommitDelay
+	x.xxx_hidden_SessionIdle = b.SessionIdle
 	return m0
 }
 
-// AssistantVoiceChoice is the voice of a language.
-type AssistantVoiceChoice struct {
+// AssistantSpeech is the recognizer and the voice of a language.
+type AssistantSpeech struct {
 	state                  protoimpl.MessageState `protogen:"opaque.v1"`
 	xxx_hidden_Language    *string                `protobuf:"bytes,1,opt,name=language"`
-	xxx_hidden_Voice       *string                `protobuf:"bytes,2,opt,name=voice"`
+	xxx_hidden_Recognizer  *string                `protobuf:"bytes,2,opt,name=recognizer"`
+	xxx_hidden_Voice       *string                `protobuf:"bytes,3,opt,name=voice"`
 	XXX_raceDetectHookData protoimpl.RaceDetectHookData
 	XXX_presence           [1]uint32
 	unknownFields          protoimpl.UnknownFields
 	sizeCache              protoimpl.SizeCache
 }
 
-func (x *AssistantVoiceChoice) Reset() {
-	*x = AssistantVoiceChoice{}
+func (x *AssistantSpeech) Reset() {
+	*x = AssistantSpeech{}
 	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *AssistantVoiceChoice) String() string {
+func (x *AssistantSpeech) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*AssistantVoiceChoice) ProtoMessage() {}
+func (*AssistantSpeech) ProtoMessage() {}
 
-func (x *AssistantVoiceChoice) ProtoReflect() protoreflect.Message {
+func (x *AssistantSpeech) ProtoReflect() protoreflect.Message {
 	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -618,7 +668,7 @@ func (x *AssistantVoiceChoice) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-func (x *AssistantVoiceChoice) GetLanguage() string {
+func (x *AssistantSpeech) GetLanguage() string {
 	if x != nil {
 		if x.xxx_hidden_Language != nil {
 			return *x.xxx_hidden_Language
@@ -628,7 +678,17 @@ func (x *AssistantVoiceChoice) GetLanguage() string {
 	return ""
 }
 
-func (x *AssistantVoiceChoice) GetVoice() string {
+func (x *AssistantSpeech) GetRecognizer() string {
+	if x != nil {
+		if x.xxx_hidden_Recognizer != nil {
+			return *x.xxx_hidden_Recognizer
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *AssistantSpeech) GetVoice() string {
 	if x != nil {
 		if x.xxx_hidden_Voice != nil {
 			return *x.xxx_hidden_Voice
@@ -638,59 +698,82 @@ func (x *AssistantVoiceChoice) GetVoice() string {
 	return ""
 }
 
-func (x *AssistantVoiceChoice) SetLanguage(v string) {
+func (x *AssistantSpeech) SetLanguage(v string) {
 	x.xxx_hidden_Language = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 2)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 3)
 }
 
-func (x *AssistantVoiceChoice) SetVoice(v string) {
+func (x *AssistantSpeech) SetRecognizer(v string) {
+	x.xxx_hidden_Recognizer = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 3)
+}
+
+func (x *AssistantSpeech) SetVoice(v string) {
 	x.xxx_hidden_Voice = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 2)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 3)
 }
 
-func (x *AssistantVoiceChoice) HasLanguage() bool {
+func (x *AssistantSpeech) HasLanguage() bool {
 	if x == nil {
 		return false
 	}
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
 }
 
-func (x *AssistantVoiceChoice) HasVoice() bool {
+func (x *AssistantSpeech) HasRecognizer() bool {
 	if x == nil {
 		return false
 	}
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
 }
 
-func (x *AssistantVoiceChoice) ClearLanguage() {
+func (x *AssistantSpeech) HasVoice() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 2)
+}
+
+func (x *AssistantSpeech) ClearLanguage() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_Language = nil
 }
 
-func (x *AssistantVoiceChoice) ClearVoice() {
+func (x *AssistantSpeech) ClearRecognizer() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
+	x.xxx_hidden_Recognizer = nil
+}
+
+func (x *AssistantSpeech) ClearVoice() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 2)
 	x.xxx_hidden_Voice = nil
 }
 
-type AssistantVoiceChoice_builder struct {
+type AssistantSpeech_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
 	// BCP 47, such as "en" or "zh-CN".
 	Language *string
-	// "<plugin>/<voice>".
+	// "<plugin>/<recognizer>"; empty, the plugin's first ready one.
+	Recognizer *string
+	// "<plugin>/<voice>"; empty, the plugin's first ready one.
 	Voice *string
 }
 
-func (b0 AssistantVoiceChoice_builder) Build() *AssistantVoiceChoice {
-	m0 := &AssistantVoiceChoice{}
+func (b0 AssistantSpeech_builder) Build() *AssistantSpeech {
+	m0 := &AssistantSpeech{}
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Language != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 2)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 3)
 		x.xxx_hidden_Language = b.Language
 	}
+	if b.Recognizer != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 3)
+		x.xxx_hidden_Recognizer = b.Recognizer
+	}
 	if b.Voice != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 2)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 3)
 		x.xxx_hidden_Voice = b.Voice
 	}
 	return m0
@@ -776,19 +859,17 @@ func (b0 GetAssistantRequest_builder) Build() *GetAssistantRequest {
 }
 
 type GetAssistantResponse struct {
-	state                    protoimpl.MessageState   `protogen:"opaque.v1"`
-	xxx_hidden_Enabled       bool                     `protobuf:"varint,1,opt,name=enabled"`
-	xxx_hidden_Ai            bool                     `protobuf:"varint,2,opt,name=ai"`
-	xxx_hidden_Memory        bool                     `protobuf:"varint,3,opt,name=memory"`
-	xxx_hidden_Recognizers   *[]*Recognizer           `protobuf:"bytes,4,rep,name=recognizers"`
-	xxx_hidden_Voices        *[]*Voice                `protobuf:"bytes,5,rep,name=voices"`
-	xxx_hidden_DefaultVoices *[]*AssistantVoiceChoice `protobuf:"bytes,6,rep,name=default_voices,json=defaultVoices"`
-	xxx_hidden_Examples      []string                 `protobuf:"bytes,7,rep,name=examples"`
-	xxx_hidden_Languages     []string                 `protobuf:"bytes,8,rep,name=languages"`
-	XXX_raceDetectHookData   protoimpl.RaceDetectHookData
-	XXX_presence             [1]uint32
-	unknownFields            protoimpl.UnknownFields
-	sizeCache                protoimpl.SizeCache
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Enabled     bool                   `protobuf:"varint,1,opt,name=enabled"`
+	xxx_hidden_Ai          bool                   `protobuf:"varint,2,opt,name=ai"`
+	xxx_hidden_Memory      bool                   `protobuf:"varint,3,opt,name=memory"`
+	xxx_hidden_Voice       bool                   `protobuf:"varint,9,opt,name=voice"`
+	xxx_hidden_Examples    []string               `protobuf:"bytes,7,rep,name=examples"`
+	xxx_hidden_Languages   []string               `protobuf:"bytes,8,rep,name=languages"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
 }
 
 func (x *GetAssistantResponse) Reset() {
@@ -837,31 +918,11 @@ func (x *GetAssistantResponse) GetMemory() bool {
 	return false
 }
 
-func (x *GetAssistantResponse) GetRecognizers() []*Recognizer {
+func (x *GetAssistantResponse) GetVoice() bool {
 	if x != nil {
-		if x.xxx_hidden_Recognizers != nil {
-			return *x.xxx_hidden_Recognizers
-		}
+		return x.xxx_hidden_Voice
 	}
-	return nil
-}
-
-func (x *GetAssistantResponse) GetVoices() []*Voice {
-	if x != nil {
-		if x.xxx_hidden_Voices != nil {
-			return *x.xxx_hidden_Voices
-		}
-	}
-	return nil
-}
-
-func (x *GetAssistantResponse) GetDefaultVoices() []*AssistantVoiceChoice {
-	if x != nil {
-		if x.xxx_hidden_DefaultVoices != nil {
-			return *x.xxx_hidden_DefaultVoices
-		}
-	}
-	return nil
+	return false
 }
 
 func (x *GetAssistantResponse) GetExamples() []string {
@@ -880,29 +941,22 @@ func (x *GetAssistantResponse) GetLanguages() []string {
 
 func (x *GetAssistantResponse) SetEnabled(v bool) {
 	x.xxx_hidden_Enabled = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 8)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 6)
 }
 
 func (x *GetAssistantResponse) SetAi(v bool) {
 	x.xxx_hidden_Ai = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 8)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 6)
 }
 
 func (x *GetAssistantResponse) SetMemory(v bool) {
 	x.xxx_hidden_Memory = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 8)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 6)
 }
 
-func (x *GetAssistantResponse) SetRecognizers(v []*Recognizer) {
-	x.xxx_hidden_Recognizers = &v
-}
-
-func (x *GetAssistantResponse) SetVoices(v []*Voice) {
-	x.xxx_hidden_Voices = &v
-}
-
-func (x *GetAssistantResponse) SetDefaultVoices(v []*AssistantVoiceChoice) {
-	x.xxx_hidden_DefaultVoices = &v
+func (x *GetAssistantResponse) SetVoice(v bool) {
+	x.xxx_hidden_Voice = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 6)
 }
 
 func (x *GetAssistantResponse) SetExamples(v []string) {
@@ -934,6 +988,13 @@ func (x *GetAssistantResponse) HasMemory() bool {
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 2)
 }
 
+func (x *GetAssistantResponse) HasVoice() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 3)
+}
+
 func (x *GetAssistantResponse) ClearEnabled() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_Enabled = false
@@ -949,6 +1010,11 @@ func (x *GetAssistantResponse) ClearMemory() {
 	x.xxx_hidden_Memory = false
 }
 
+func (x *GetAssistantResponse) ClearVoice() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 3)
+	x.xxx_hidden_Voice = false
+}
+
 type GetAssistantResponse_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
@@ -958,12 +1024,8 @@ type GetAssistantResponse_builder struct {
 	Ai *bool
 	// Memory is on.
 	Memory *bool
-	// The server's recognizers, the default first.
-	Recognizers []*Recognizer
-	// The server's voices.
-	Voices []*Voice
-	// The voice of each language when the user chooses none.
-	DefaultVoices []*AssistantVoiceChoice
+	// Voice sessions can be started: a voice session plugin is ready.
+	Voice *bool
 	// Examples of requests in the language asked for.
 	Examples []string
 	// The languages the fast path understands, BCP 47.
@@ -975,51 +1037,53 @@ func (b0 GetAssistantResponse_builder) Build() *GetAssistantResponse {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Enabled != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 8)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 6)
 		x.xxx_hidden_Enabled = *b.Enabled
 	}
 	if b.Ai != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 8)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 6)
 		x.xxx_hidden_Ai = *b.Ai
 	}
 	if b.Memory != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 8)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 6)
 		x.xxx_hidden_Memory = *b.Memory
 	}
-	x.xxx_hidden_Recognizers = &b.Recognizers
-	x.xxx_hidden_Voices = &b.Voices
-	x.xxx_hidden_DefaultVoices = &b.DefaultVoices
+	if b.Voice != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 6)
+		x.xxx_hidden_Voice = *b.Voice
+	}
 	x.xxx_hidden_Examples = b.Examples
 	x.xxx_hidden_Languages = b.Languages
 	return m0
 }
 
-// Recognizer is a speech recognizer of the server.
-type Recognizer struct {
+// VoiceEngine is a recognizer or a voice of the voice session plugin.
+type VoiceEngine struct {
 	state                  protoimpl.MessageState `protogen:"opaque.v1"`
 	xxx_hidden_Id          *string                `protobuf:"bytes,1,opt,name=id"`
 	xxx_hidden_Name        *string                `protobuf:"bytes,2,opt,name=name"`
 	xxx_hidden_Languages   []string               `protobuf:"bytes,3,rep,name=languages"`
+	xxx_hidden_Ready       bool                   `protobuf:"varint,4,opt,name=ready"`
 	XXX_raceDetectHookData protoimpl.RaceDetectHookData
 	XXX_presence           [1]uint32
 	unknownFields          protoimpl.UnknownFields
 	sizeCache              protoimpl.SizeCache
 }
 
-func (x *Recognizer) Reset() {
-	*x = Recognizer{}
+func (x *VoiceEngine) Reset() {
+	*x = VoiceEngine{}
 	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *Recognizer) String() string {
+func (x *VoiceEngine) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*Recognizer) ProtoMessage() {}
+func (*VoiceEngine) ProtoMessage() {}
 
-func (x *Recognizer) ProtoReflect() protoreflect.Message {
+func (x *VoiceEngine) ProtoReflect() protoreflect.Message {
 	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -1031,7 +1095,7 @@ func (x *Recognizer) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-func (x *Recognizer) GetId() string {
+func (x *VoiceEngine) GetId() string {
 	if x != nil {
 		if x.xxx_hidden_Id != nil {
 			return *x.xxx_hidden_Id
@@ -1041,7 +1105,7 @@ func (x *Recognizer) GetId() string {
 	return ""
 }
 
-func (x *Recognizer) GetName() string {
+func (x *VoiceEngine) GetName() string {
 	if x != nil {
 		if x.xxx_hidden_Name != nil {
 			return *x.xxx_hidden_Name
@@ -1051,202 +1115,104 @@ func (x *Recognizer) GetName() string {
 	return ""
 }
 
-func (x *Recognizer) GetLanguages() []string {
+func (x *VoiceEngine) GetLanguages() []string {
 	if x != nil {
 		return x.xxx_hidden_Languages
 	}
 	return nil
 }
 
-func (x *Recognizer) SetId(v string) {
+func (x *VoiceEngine) GetReady() bool {
+	if x != nil {
+		return x.xxx_hidden_Ready
+	}
+	return false
+}
+
+func (x *VoiceEngine) SetId(v string) {
 	x.xxx_hidden_Id = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 3)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 4)
 }
 
-func (x *Recognizer) SetName(v string) {
+func (x *VoiceEngine) SetName(v string) {
 	x.xxx_hidden_Name = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 3)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 4)
 }
 
-func (x *Recognizer) SetLanguages(v []string) {
+func (x *VoiceEngine) SetLanguages(v []string) {
 	x.xxx_hidden_Languages = v
 }
 
-func (x *Recognizer) HasId() bool {
+func (x *VoiceEngine) SetReady(v bool) {
+	x.xxx_hidden_Ready = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 4)
+}
+
+func (x *VoiceEngine) HasId() bool {
 	if x == nil {
 		return false
 	}
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
 }
 
-func (x *Recognizer) HasName() bool {
+func (x *VoiceEngine) HasName() bool {
 	if x == nil {
 		return false
 	}
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
 }
 
-func (x *Recognizer) ClearId() {
+func (x *VoiceEngine) HasReady() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 3)
+}
+
+func (x *VoiceEngine) ClearId() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_Id = nil
 }
 
-func (x *Recognizer) ClearName() {
+func (x *VoiceEngine) ClearName() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
 	x.xxx_hidden_Name = nil
 }
 
-type Recognizer_builder struct {
+func (x *VoiceEngine) ClearReady() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 3)
+	x.xxx_hidden_Ready = false
+}
+
+type VoiceEngine_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
-	// "<plugin>/<recognizer>".
+	// "<plugin>/<recognizer>" or "<plugin>/<voice>".
 	Id   *string
 	Name *string
 	// BCP 47; empty for any.
 	Languages []string
+	// It can be used: enabled, and its model downloaded for a local one.
+	Ready *bool
 }
 
-func (b0 Recognizer_builder) Build() *Recognizer {
-	m0 := &Recognizer{}
+func (b0 VoiceEngine_builder) Build() *VoiceEngine {
+	m0 := &VoiceEngine{}
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Id != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 3)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 4)
 		x.xxx_hidden_Id = b.Id
 	}
 	if b.Name != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 3)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 4)
 		x.xxx_hidden_Name = b.Name
 	}
 	x.xxx_hidden_Languages = b.Languages
-	return m0
-}
-
-// Voice is a voice of the server.
-type Voice struct {
-	state                  protoimpl.MessageState `protogen:"opaque.v1"`
-	xxx_hidden_Id          *string                `protobuf:"bytes,1,opt,name=id"`
-	xxx_hidden_Name        *string                `protobuf:"bytes,2,opt,name=name"`
-	xxx_hidden_Languages   []string               `protobuf:"bytes,3,rep,name=languages"`
-	XXX_raceDetectHookData protoimpl.RaceDetectHookData
-	XXX_presence           [1]uint32
-	unknownFields          protoimpl.UnknownFields
-	sizeCache              protoimpl.SizeCache
-}
-
-func (x *Voice) Reset() {
-	*x = Voice{}
-	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[5]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *Voice) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*Voice) ProtoMessage() {}
-
-func (x *Voice) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[5]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
+	if b.Ready != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 4)
+		x.xxx_hidden_Ready = *b.Ready
 	}
-	return mi.MessageOf(x)
-}
-
-func (x *Voice) GetId() string {
-	if x != nil {
-		if x.xxx_hidden_Id != nil {
-			return *x.xxx_hidden_Id
-		}
-		return ""
-	}
-	return ""
-}
-
-func (x *Voice) GetName() string {
-	if x != nil {
-		if x.xxx_hidden_Name != nil {
-			return *x.xxx_hidden_Name
-		}
-		return ""
-	}
-	return ""
-}
-
-func (x *Voice) GetLanguages() []string {
-	if x != nil {
-		return x.xxx_hidden_Languages
-	}
-	return nil
-}
-
-func (x *Voice) SetId(v string) {
-	x.xxx_hidden_Id = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 3)
-}
-
-func (x *Voice) SetName(v string) {
-	x.xxx_hidden_Name = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 3)
-}
-
-func (x *Voice) SetLanguages(v []string) {
-	x.xxx_hidden_Languages = v
-}
-
-func (x *Voice) HasId() bool {
-	if x == nil {
-		return false
-	}
-	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
-}
-
-func (x *Voice) HasName() bool {
-	if x == nil {
-		return false
-	}
-	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
-}
-
-func (x *Voice) ClearId() {
-	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
-	x.xxx_hidden_Id = nil
-}
-
-func (x *Voice) ClearName() {
-	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
-	x.xxx_hidden_Name = nil
-}
-
-type Voice_builder struct {
-	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
-
-	// "<plugin>/<voice>".
-	Id   *string
-	Name *string
-	// BCP 47.
-	Languages []string
-}
-
-func (b0 Voice_builder) Build() *Voice {
-	m0 := &Voice{}
-	b, x := &b0, m0
-	_, _ = b, x
-	if b.Id != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 3)
-		x.xxx_hidden_Id = b.Id
-	}
-	if b.Name != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 3)
-		x.xxx_hidden_Name = b.Name
-	}
-	x.xxx_hidden_Languages = b.Languages
 	return m0
 }
 
@@ -1259,7 +1225,6 @@ type AskRequest struct {
 	xxx_hidden_Answer        *ConfirmationAnswer    `protobuf:"bytes,5,opt,name=answer"`
 	xxx_hidden_Choice        *string                `protobuf:"bytes,6,opt,name=choice"`
 	xxx_hidden_FailedActions []string               `protobuf:"bytes,7,rep,name=failed_actions,json=failedActions"`
-	xxx_hidden_SpeechId      *string                `protobuf:"bytes,8,opt,name=speech_id,json=speechId"`
 	XXX_raceDetectHookData   protoimpl.RaceDetectHookData
 	XXX_presence             [1]uint32
 	unknownFields            protoimpl.UnknownFields
@@ -1268,7 +1233,7 @@ type AskRequest struct {
 
 func (x *AskRequest) Reset() {
 	*x = AskRequest{}
-	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[6]
+	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1280,7 +1245,7 @@ func (x *AskRequest) String() string {
 func (*AskRequest) ProtoMessage() {}
 
 func (x *AskRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[6]
+	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1346,19 +1311,9 @@ func (x *AskRequest) GetFailedActions() []string {
 	return nil
 }
 
-func (x *AskRequest) GetSpeechId() string {
-	if x != nil {
-		if x.xxx_hidden_SpeechId != nil {
-			return *x.xxx_hidden_SpeechId
-		}
-		return ""
-	}
-	return ""
-}
-
 func (x *AskRequest) SetText(v string) {
 	x.xxx_hidden_Text = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 8)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 7)
 }
 
 func (x *AskRequest) SetIntent(v *v1.Intent) {
@@ -1371,7 +1326,7 @@ func (x *AskRequest) SetContext(v *AskContext) {
 
 func (x *AskRequest) SetSpoken(v bool) {
 	x.xxx_hidden_Spoken = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 8)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 7)
 }
 
 func (x *AskRequest) SetAnswer(v *ConfirmationAnswer) {
@@ -1380,16 +1335,11 @@ func (x *AskRequest) SetAnswer(v *ConfirmationAnswer) {
 
 func (x *AskRequest) SetChoice(v string) {
 	x.xxx_hidden_Choice = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 8)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 7)
 }
 
 func (x *AskRequest) SetFailedActions(v []string) {
 	x.xxx_hidden_FailedActions = v
-}
-
-func (x *AskRequest) SetSpeechId(v string) {
-	x.xxx_hidden_SpeechId = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 8)
 }
 
 func (x *AskRequest) HasText() bool {
@@ -1434,13 +1384,6 @@ func (x *AskRequest) HasChoice() bool {
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 5)
 }
 
-func (x *AskRequest) HasSpeechId() bool {
-	if x == nil {
-		return false
-	}
-	return protoimpl.X.Present(&(x.XXX_presence[0]), 7)
-}
-
 func (x *AskRequest) ClearText() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_Text = nil
@@ -1468,11 +1411,6 @@ func (x *AskRequest) ClearChoice() {
 	x.xxx_hidden_Choice = nil
 }
 
-func (x *AskRequest) ClearSpeechId() {
-	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 7)
-	x.xxx_hidden_SpeechId = nil
-}
-
 type AskRequest_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
@@ -1490,10 +1428,6 @@ type AskRequest_builder struct {
 	Choice *string
 	// Client actions of the last answer the client could not carry out.
 	FailedActions []string
-	// An ID the client makes for the answer's speech: the audio of the
-	// POST /assistant/speech requests naming it is kept with the answer in
-	// its conversation (docs/assistant.md §8.3).
-	SpeechId *string
 }
 
 func (b0 AskRequest_builder) Build() *AskRequest {
@@ -1501,25 +1435,21 @@ func (b0 AskRequest_builder) Build() *AskRequest {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Text != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 8)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 7)
 		x.xxx_hidden_Text = b.Text
 	}
 	x.xxx_hidden_Intent = b.Intent
 	x.xxx_hidden_Context = b.Context
 	if b.Spoken != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 8)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 7)
 		x.xxx_hidden_Spoken = *b.Spoken
 	}
 	x.xxx_hidden_Answer = b.Answer
 	if b.Choice != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 8)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 7)
 		x.xxx_hidden_Choice = b.Choice
 	}
 	x.xxx_hidden_FailedActions = b.FailedActions
-	if b.SpeechId != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 8)
-		x.xxx_hidden_SpeechId = b.SpeechId
-	}
 	return m0
 }
 
@@ -1541,7 +1471,7 @@ type AskContext struct {
 
 func (x *AskContext) Reset() {
 	*x = AskContext{}
-	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[7]
+	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1553,7 +1483,7 @@ func (x *AskContext) String() string {
 func (*AskContext) ProtoMessage() {}
 
 func (x *AskContext) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[7]
+	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1781,7 +1711,7 @@ type AskPlaying struct {
 
 func (x *AskPlaying) Reset() {
 	*x = AskPlaying{}
-	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[8]
+	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1793,7 +1723,7 @@ func (x *AskPlaying) String() string {
 func (*AskPlaying) ProtoMessage() {}
 
 func (x *AskPlaying) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[8]
+	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2061,7 +1991,7 @@ type ConfirmationAnswer struct {
 
 func (x *ConfirmationAnswer) Reset() {
 	*x = ConfirmationAnswer{}
-	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[9]
+	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2073,7 +2003,7 @@ func (x *ConfirmationAnswer) String() string {
 func (*ConfirmationAnswer) ProtoMessage() {}
 
 func (x *ConfirmationAnswer) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[9]
+	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2166,7 +2096,7 @@ type AskResponse struct {
 
 func (x *AskResponse) Reset() {
 	*x = AskResponse{}
-	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[10]
+	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2178,7 +2108,7 @@ func (x *AskResponse) String() string {
 func (*AskResponse) ProtoMessage() {}
 
 func (x *AskResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[10]
+	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2459,7 +2389,7 @@ func (b0 AskResponse_builder) Build() *AskResponse {
 type case_AskResponse_Event protoreflect.FieldNumber
 
 func (x case_AskResponse_Event) String() string {
-	md := file_mavio_assistant_v1_assistant_proto_msgTypes[10].Descriptor()
+	md := file_mavio_assistant_v1_assistant_proto_msgTypes[9].Descriptor()
 	if x == 0 {
 		return "not set"
 	}
@@ -2526,7 +2456,7 @@ type Understood struct {
 
 func (x *Understood) Reset() {
 	*x = Understood{}
-	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[11]
+	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2538,7 +2468,7 @@ func (x *Understood) String() string {
 func (*Understood) ProtoMessage() {}
 
 func (x *Understood) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[11]
+	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2673,7 +2603,7 @@ type ToolActivity struct {
 
 func (x *ToolActivity) Reset() {
 	*x = ToolActivity{}
-	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[12]
+	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2685,7 +2615,7 @@ func (x *ToolActivity) String() string {
 func (*ToolActivity) ProtoMessage() {}
 
 func (x *ToolActivity) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[12]
+	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2877,7 +2807,7 @@ type ClientAction struct {
 
 func (x *ClientAction) Reset() {
 	*x = ClientAction{}
-	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[13]
+	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2889,7 +2819,7 @@ func (x *ClientAction) String() string {
 func (*ClientAction) ProtoMessage() {}
 
 func (x *ClientAction) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[13]
+	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3163,7 +3093,7 @@ func (b0 ClientAction_builder) Build() *ClientAction {
 type case_ClientAction_Kind protoreflect.FieldNumber
 
 func (x case_ClientAction_Kind) String() string {
-	md := file_mavio_assistant_v1_assistant_proto_msgTypes[13].Descriptor()
+	md := file_mavio_assistant_v1_assistant_proto_msgTypes[12].Descriptor()
 	if x == 0 {
 		return "not set"
 	}
@@ -3220,7 +3150,7 @@ type PlayAction struct {
 
 func (x *PlayAction) Reset() {
 	*x = PlayAction{}
-	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[14]
+	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3232,7 +3162,7 @@ func (x *PlayAction) String() string {
 func (*PlayAction) ProtoMessage() {}
 
 func (x *PlayAction) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[14]
+	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3397,7 +3327,7 @@ type ControlAction struct {
 
 func (x *ControlAction) Reset() {
 	*x = ControlAction{}
-	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[15]
+	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3409,7 +3339,7 @@ func (x *ControlAction) String() string {
 func (*ControlAction) ProtoMessage() {}
 
 func (x *ControlAction) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[15]
+	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3541,7 +3471,7 @@ type StreamsAction struct {
 
 func (x *StreamsAction) Reset() {
 	*x = StreamsAction{}
-	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[16]
+	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3553,7 +3483,7 @@ func (x *StreamsAction) String() string {
 func (*StreamsAction) ProtoMessage() {}
 
 func (x *StreamsAction) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[16]
+	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3679,7 +3609,7 @@ type NavigateAction struct {
 
 func (x *NavigateAction) Reset() {
 	*x = NavigateAction{}
-	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[17]
+	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3691,7 +3621,7 @@ func (x *NavigateAction) String() string {
 func (*NavigateAction) ProtoMessage() {}
 
 func (x *NavigateAction) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[17]
+	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3824,7 +3754,7 @@ type ShowItemsAction struct {
 
 func (x *ShowItemsAction) Reset() {
 	*x = ShowItemsAction{}
-	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[18]
+	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3836,7 +3766,7 @@ func (x *ShowItemsAction) String() string {
 func (*ShowItemsAction) ProtoMessage() {}
 
 func (x *ShowItemsAction) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[18]
+	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3916,7 +3846,7 @@ type Confirmation struct {
 
 func (x *Confirmation) Reset() {
 	*x = Confirmation{}
-	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[19]
+	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3928,7 +3858,7 @@ func (x *Confirmation) String() string {
 func (*Confirmation) ProtoMessage() {}
 
 func (x *Confirmation) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[19]
+	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4033,7 +3963,7 @@ type Done struct {
 
 func (x *Done) Reset() {
 	*x = Done{}
-	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[20]
+	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4045,7 +3975,7 @@ func (x *Done) String() string {
 func (*Done) ProtoMessage() {}
 
 func (x *Done) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[20]
+	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4258,356 +4188,6 @@ func (b0 Done_builder) Build() *Done {
 	return m0
 }
 
-type GetAssistantHintsRequest struct {
-	state         protoimpl.MessageState `protogen:"opaque.v1"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetAssistantHintsRequest) Reset() {
-	*x = GetAssistantHintsRequest{}
-	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[21]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetAssistantHintsRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetAssistantHintsRequest) ProtoMessage() {}
-
-func (x *GetAssistantHintsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[21]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-type GetAssistantHintsRequest_builder struct {
-	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
-
-}
-
-func (b0 GetAssistantHintsRequest_builder) Build() *GetAssistantHintsRequest {
-	m0 := &GetAssistantHintsRequest{}
-	b, x := &b0, m0
-	_, _ = b, x
-	return m0
-}
-
-type GetAssistantHintsResponse struct {
-	state              protoimpl.MessageState `protogen:"opaque.v1"`
-	xxx_hidden_Phrases []string               `protobuf:"bytes,1,rep,name=phrases"`
-	unknownFields      protoimpl.UnknownFields
-	sizeCache          protoimpl.SizeCache
-}
-
-func (x *GetAssistantHintsResponse) Reset() {
-	*x = GetAssistantHintsResponse{}
-	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[22]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetAssistantHintsResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetAssistantHintsResponse) ProtoMessage() {}
-
-func (x *GetAssistantHintsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[22]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-func (x *GetAssistantHintsResponse) GetPhrases() []string {
-	if x != nil {
-		return x.xxx_hidden_Phrases
-	}
-	return nil
-}
-
-func (x *GetAssistantHintsResponse) SetPhrases(v []string) {
-	x.xxx_hidden_Phrases = v
-}
-
-type GetAssistantHintsResponse_builder struct {
-	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
-
-	Phrases []string
-}
-
-func (b0 GetAssistantHintsResponse_builder) Build() *GetAssistantHintsResponse {
-	m0 := &GetAssistantHintsResponse{}
-	b, x := &b0, m0
-	_, _ = b, x
-	x.xxx_hidden_Phrases = b.Phrases
-	return m0
-}
-
-type StartListeningRequest struct {
-	state                  protoimpl.MessageState `protogen:"opaque.v1"`
-	xxx_hidden_Language    *string                `protobuf:"bytes,1,opt,name=language"`
-	xxx_hidden_Recognizer  *string                `protobuf:"bytes,2,opt,name=recognizer"`
-	XXX_raceDetectHookData protoimpl.RaceDetectHookData
-	XXX_presence           [1]uint32
-	unknownFields          protoimpl.UnknownFields
-	sizeCache              protoimpl.SizeCache
-}
-
-func (x *StartListeningRequest) Reset() {
-	*x = StartListeningRequest{}
-	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[23]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *StartListeningRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*StartListeningRequest) ProtoMessage() {}
-
-func (x *StartListeningRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[23]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-func (x *StartListeningRequest) GetLanguage() string {
-	if x != nil {
-		if x.xxx_hidden_Language != nil {
-			return *x.xxx_hidden_Language
-		}
-		return ""
-	}
-	return ""
-}
-
-func (x *StartListeningRequest) GetRecognizer() string {
-	if x != nil {
-		if x.xxx_hidden_Recognizer != nil {
-			return *x.xxx_hidden_Recognizer
-		}
-		return ""
-	}
-	return ""
-}
-
-func (x *StartListeningRequest) SetLanguage(v string) {
-	x.xxx_hidden_Language = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 2)
-}
-
-func (x *StartListeningRequest) SetRecognizer(v string) {
-	x.xxx_hidden_Recognizer = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 2)
-}
-
-func (x *StartListeningRequest) HasLanguage() bool {
-	if x == nil {
-		return false
-	}
-	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
-}
-
-func (x *StartListeningRequest) HasRecognizer() bool {
-	if x == nil {
-		return false
-	}
-	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
-}
-
-func (x *StartListeningRequest) ClearLanguage() {
-	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
-	x.xxx_hidden_Language = nil
-}
-
-func (x *StartListeningRequest) ClearRecognizer() {
-	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
-	x.xxx_hidden_Recognizer = nil
-}
-
-type StartListeningRequest_builder struct {
-	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
-
-	// The language spoken, BCP 47; empty, the recognizer detects it.
-	Language *string
-	// "<plugin>/<recognizer>"; empty, the settings'.
-	Recognizer *string
-}
-
-func (b0 StartListeningRequest_builder) Build() *StartListeningRequest {
-	m0 := &StartListeningRequest{}
-	b, x := &b0, m0
-	_, _ = b, x
-	if b.Language != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 2)
-		x.xxx_hidden_Language = b.Language
-	}
-	if b.Recognizer != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 2)
-		x.xxx_hidden_Recognizer = b.Recognizer
-	}
-	return m0
-}
-
-type StartListeningResponse struct {
-	state                  protoimpl.MessageState `protogen:"opaque.v1"`
-	xxx_hidden_Url         *string                `protobuf:"bytes,1,opt,name=url"`
-	xxx_hidden_Recognizer  *string                `protobuf:"bytes,2,opt,name=recognizer"`
-	xxx_hidden_ExpireTime  *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=expire_time,json=expireTime"`
-	XXX_raceDetectHookData protoimpl.RaceDetectHookData
-	XXX_presence           [1]uint32
-	unknownFields          protoimpl.UnknownFields
-	sizeCache              protoimpl.SizeCache
-}
-
-func (x *StartListeningResponse) Reset() {
-	*x = StartListeningResponse{}
-	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[24]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *StartListeningResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*StartListeningResponse) ProtoMessage() {}
-
-func (x *StartListeningResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[24]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-func (x *StartListeningResponse) GetUrl() string {
-	if x != nil {
-		if x.xxx_hidden_Url != nil {
-			return *x.xxx_hidden_Url
-		}
-		return ""
-	}
-	return ""
-}
-
-func (x *StartListeningResponse) GetRecognizer() string {
-	if x != nil {
-		if x.xxx_hidden_Recognizer != nil {
-			return *x.xxx_hidden_Recognizer
-		}
-		return ""
-	}
-	return ""
-}
-
-func (x *StartListeningResponse) GetExpireTime() *timestamppb.Timestamp {
-	if x != nil {
-		return x.xxx_hidden_ExpireTime
-	}
-	return nil
-}
-
-func (x *StartListeningResponse) SetUrl(v string) {
-	x.xxx_hidden_Url = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 3)
-}
-
-func (x *StartListeningResponse) SetRecognizer(v string) {
-	x.xxx_hidden_Recognizer = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 3)
-}
-
-func (x *StartListeningResponse) SetExpireTime(v *timestamppb.Timestamp) {
-	x.xxx_hidden_ExpireTime = v
-}
-
-func (x *StartListeningResponse) HasUrl() bool {
-	if x == nil {
-		return false
-	}
-	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
-}
-
-func (x *StartListeningResponse) HasRecognizer() bool {
-	if x == nil {
-		return false
-	}
-	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
-}
-
-func (x *StartListeningResponse) HasExpireTime() bool {
-	if x == nil {
-		return false
-	}
-	return x.xxx_hidden_ExpireTime != nil
-}
-
-func (x *StartListeningResponse) ClearUrl() {
-	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
-	x.xxx_hidden_Url = nil
-}
-
-func (x *StartListeningResponse) ClearRecognizer() {
-	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
-	x.xxx_hidden_Recognizer = nil
-}
-
-func (x *StartListeningResponse) ClearExpireTime() {
-	x.xxx_hidden_ExpireTime = nil
-}
-
-type StartListeningResponse_builder struct {
-	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
-
-	// The WebSocket URL, relative to the server's base URL.
-	Url        *string
-	Recognizer *string
-	ExpireTime *timestamppb.Timestamp
-}
-
-func (b0 StartListeningResponse_builder) Build() *StartListeningResponse {
-	m0 := &StartListeningResponse{}
-	b, x := &b0, m0
-	_, _ = b, x
-	if b.Url != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 3)
-		x.xxx_hidden_Url = b.Url
-	}
-	if b.Recognizer != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 3)
-		x.xxx_hidden_Recognizer = b.Recognizer
-	}
-	x.xxx_hidden_ExpireTime = b.ExpireTime
-	return m0
-}
-
 type StartVoiceSessionRequest struct {
 	state                  protoimpl.MessageState `protogen:"opaque.v1"`
 	xxx_hidden_Language    *string                `protobuf:"bytes,1,opt,name=language"`
@@ -4621,7 +4201,7 @@ type StartVoiceSessionRequest struct {
 
 func (x *StartVoiceSessionRequest) Reset() {
 	*x = StartVoiceSessionRequest{}
-	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[25]
+	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4633,7 +4213,7 @@ func (x *StartVoiceSessionRequest) String() string {
 func (*StartVoiceSessionRequest) ProtoMessage() {}
 
 func (x *StartVoiceSessionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[25]
+	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4759,7 +4339,7 @@ type StartVoiceSessionResponse struct {
 
 func (x *StartVoiceSessionResponse) Reset() {
 	*x = StartVoiceSessionResponse{}
-	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[26]
+	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4771,7 +4351,7 @@ func (x *StartVoiceSessionResponse) String() string {
 func (*StartVoiceSessionResponse) ProtoMessage() {}
 
 func (x *StartVoiceSessionResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[26]
+	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4901,7 +4481,7 @@ type AssistantConversation struct {
 
 func (x *AssistantConversation) Reset() {
 	*x = AssistantConversation{}
-	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[27]
+	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4913,7 +4493,7 @@ func (x *AssistantConversation) String() string {
 func (*AssistantConversation) ProtoMessage() {}
 
 func (x *AssistantConversation) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[27]
+	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5112,7 +4692,7 @@ type AssistantMessage struct {
 	xxx_hidden_User        bool                   `protobuf:"varint,1,opt,name=user"`
 	xxx_hidden_Text        *string                `protobuf:"bytes,2,opt,name=text"`
 	xxx_hidden_Time        *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=time"`
-	xxx_hidden_Speech      []string               `protobuf:"bytes,4,rep,name=speech"`
+	xxx_hidden_SpeechUrl   *string                `protobuf:"bytes,5,opt,name=speech_url,json=speechUrl"`
 	XXX_raceDetectHookData protoimpl.RaceDetectHookData
 	XXX_presence           [1]uint32
 	unknownFields          protoimpl.UnknownFields
@@ -5121,7 +4701,7 @@ type AssistantMessage struct {
 
 func (x *AssistantMessage) Reset() {
 	*x = AssistantMessage{}
-	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[28]
+	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5133,7 +4713,7 @@ func (x *AssistantMessage) String() string {
 func (*AssistantMessage) ProtoMessage() {}
 
 func (x *AssistantMessage) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[28]
+	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5168,11 +4748,14 @@ func (x *AssistantMessage) GetTime() *timestamppb.Timestamp {
 	return nil
 }
 
-func (x *AssistantMessage) GetSpeech() []string {
+func (x *AssistantMessage) GetSpeechUrl() string {
 	if x != nil {
-		return x.xxx_hidden_Speech
+		if x.xxx_hidden_SpeechUrl != nil {
+			return *x.xxx_hidden_SpeechUrl
+		}
+		return ""
 	}
-	return nil
+	return ""
 }
 
 func (x *AssistantMessage) SetUser(v bool) {
@@ -5189,8 +4772,9 @@ func (x *AssistantMessage) SetTime(v *timestamppb.Timestamp) {
 	x.xxx_hidden_Time = v
 }
 
-func (x *AssistantMessage) SetSpeech(v []string) {
-	x.xxx_hidden_Speech = v
+func (x *AssistantMessage) SetSpeechUrl(v string) {
+	x.xxx_hidden_SpeechUrl = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 4)
 }
 
 func (x *AssistantMessage) HasUser() bool {
@@ -5214,6 +4798,13 @@ func (x *AssistantMessage) HasTime() bool {
 	return x.xxx_hidden_Time != nil
 }
 
+func (x *AssistantMessage) HasSpeechUrl() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 3)
+}
+
 func (x *AssistantMessage) ClearUser() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_User = false
@@ -5228,6 +4819,11 @@ func (x *AssistantMessage) ClearTime() {
 	x.xxx_hidden_Time = nil
 }
 
+func (x *AssistantMessage) ClearSpeechUrl() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 3)
+	x.xxx_hidden_SpeechUrl = nil
+}
+
 type AssistantMessage_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
@@ -5235,9 +4831,10 @@ type AssistantMessage_builder struct {
 	User *bool
 	Text *string
 	Time *timestamppb.Timestamp
-	// An answer's speech as it was spoken, a sentence a URL relative to the
-	// server's base URL, in order; none when none was kept.
-	Speech []string
+	// The URL of an answer's speech as it was spoken, relative to the
+	// server's base URL; its formats query names the encodings the client
+	// plays ("opus", "aac", "mp3", "flac", "wav"). Empty when none was kept.
+	SpeechUrl *string
 }
 
 func (b0 AssistantMessage_builder) Build() *AssistantMessage {
@@ -5253,7 +4850,10 @@ func (b0 AssistantMessage_builder) Build() *AssistantMessage {
 		x.xxx_hidden_Text = b.Text
 	}
 	x.xxx_hidden_Time = b.Time
-	x.xxx_hidden_Speech = b.Speech
+	if b.SpeechUrl != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 4)
+		x.xxx_hidden_SpeechUrl = b.SpeechUrl
+	}
 	return m0
 }
 
@@ -5265,7 +4865,7 @@ type ListAssistantConversationsRequest struct {
 
 func (x *ListAssistantConversationsRequest) Reset() {
 	*x = ListAssistantConversationsRequest{}
-	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[29]
+	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5277,7 +4877,7 @@ func (x *ListAssistantConversationsRequest) String() string {
 func (*ListAssistantConversationsRequest) ProtoMessage() {}
 
 func (x *ListAssistantConversationsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[29]
+	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5309,7 +4909,7 @@ type ListAssistantConversationsResponse struct {
 
 func (x *ListAssistantConversationsResponse) Reset() {
 	*x = ListAssistantConversationsResponse{}
-	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[30]
+	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5321,7 +4921,7 @@ func (x *ListAssistantConversationsResponse) String() string {
 func (*ListAssistantConversationsResponse) ProtoMessage() {}
 
 func (x *ListAssistantConversationsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[30]
+	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5370,7 +4970,7 @@ type GetAssistantConversationRequest struct {
 
 func (x *GetAssistantConversationRequest) Reset() {
 	*x = GetAssistantConversationRequest{}
-	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[31]
+	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5382,7 +4982,7 @@ func (x *GetAssistantConversationRequest) String() string {
 func (*GetAssistantConversationRequest) ProtoMessage() {}
 
 func (x *GetAssistantConversationRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[31]
+	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5447,7 +5047,7 @@ type GetAssistantConversationResponse struct {
 
 func (x *GetAssistantConversationResponse) Reset() {
 	*x = GetAssistantConversationResponse{}
-	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[32]
+	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[27]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5459,7 +5059,7 @@ func (x *GetAssistantConversationResponse) String() string {
 func (*GetAssistantConversationResponse) ProtoMessage() {}
 
 func (x *GetAssistantConversationResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[32]
+	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[27]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5532,7 +5132,7 @@ type DeleteAssistantConversationRequest struct {
 
 func (x *DeleteAssistantConversationRequest) Reset() {
 	*x = DeleteAssistantConversationRequest{}
-	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[33]
+	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[28]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5544,7 +5144,7 @@ func (x *DeleteAssistantConversationRequest) String() string {
 func (*DeleteAssistantConversationRequest) ProtoMessage() {}
 
 func (x *DeleteAssistantConversationRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[33]
+	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[28]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5607,7 +5207,7 @@ type DeleteAssistantConversationResponse struct {
 
 func (x *DeleteAssistantConversationResponse) Reset() {
 	*x = DeleteAssistantConversationResponse{}
-	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[34]
+	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[29]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5619,7 +5219,7 @@ func (x *DeleteAssistantConversationResponse) String() string {
 func (*DeleteAssistantConversationResponse) ProtoMessage() {}
 
 func (x *DeleteAssistantConversationResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[34]
+	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[29]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5658,7 +5258,7 @@ type AssistantMemory struct {
 
 func (x *AssistantMemory) Reset() {
 	*x = AssistantMemory{}
-	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[35]
+	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[30]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5670,7 +5270,7 @@ func (x *AssistantMemory) String() string {
 func (*AssistantMemory) ProtoMessage() {}
 
 func (x *AssistantMemory) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[35]
+	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[30]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5838,7 +5438,7 @@ type ListAssistantMemoriesRequest struct {
 
 func (x *ListAssistantMemoriesRequest) Reset() {
 	*x = ListAssistantMemoriesRequest{}
-	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[36]
+	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[31]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5850,7 +5450,7 @@ func (x *ListAssistantMemoriesRequest) String() string {
 func (*ListAssistantMemoriesRequest) ProtoMessage() {}
 
 func (x *ListAssistantMemoriesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[36]
+	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[31]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5882,7 +5482,7 @@ type ListAssistantMemoriesResponse struct {
 
 func (x *ListAssistantMemoriesResponse) Reset() {
 	*x = ListAssistantMemoriesResponse{}
-	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[37]
+	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[32]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5894,7 +5494,7 @@ func (x *ListAssistantMemoriesResponse) String() string {
 func (*ListAssistantMemoriesResponse) ProtoMessage() {}
 
 func (x *ListAssistantMemoriesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[37]
+	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[32]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5944,7 +5544,7 @@ type UpdateAssistantMemoryRequest struct {
 
 func (x *UpdateAssistantMemoryRequest) Reset() {
 	*x = UpdateAssistantMemoryRequest{}
-	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[38]
+	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[33]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5956,7 +5556,7 @@ func (x *UpdateAssistantMemoryRequest) String() string {
 func (*UpdateAssistantMemoryRequest) ProtoMessage() {}
 
 func (x *UpdateAssistantMemoryRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[38]
+	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[33]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6053,7 +5653,7 @@ type UpdateAssistantMemoryResponse struct {
 
 func (x *UpdateAssistantMemoryResponse) Reset() {
 	*x = UpdateAssistantMemoryResponse{}
-	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[39]
+	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[34]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6065,7 +5665,7 @@ func (x *UpdateAssistantMemoryResponse) String() string {
 func (*UpdateAssistantMemoryResponse) ProtoMessage() {}
 
 func (x *UpdateAssistantMemoryResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[39]
+	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[34]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6121,7 +5721,7 @@ type DeleteAssistantMemoriesRequest struct {
 
 func (x *DeleteAssistantMemoriesRequest) Reset() {
 	*x = DeleteAssistantMemoriesRequest{}
-	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[40]
+	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[35]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6133,7 +5733,7 @@ func (x *DeleteAssistantMemoriesRequest) String() string {
 func (*DeleteAssistantMemoriesRequest) ProtoMessage() {}
 
 func (x *DeleteAssistantMemoriesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[40]
+	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[35]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6178,7 +5778,7 @@ type DeleteAssistantMemoriesResponse struct {
 
 func (x *DeleteAssistantMemoriesResponse) Reset() {
 	*x = DeleteAssistantMemoriesResponse{}
-	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[41]
+	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[36]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6190,7 +5790,7 @@ func (x *DeleteAssistantMemoriesResponse) String() string {
 func (*DeleteAssistantMemoriesResponse) ProtoMessage() {}
 
 func (x *DeleteAssistantMemoriesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[41]
+	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[36]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6221,7 +5821,7 @@ type GetAssistantSettingsRequest struct {
 
 func (x *GetAssistantSettingsRequest) Reset() {
 	*x = GetAssistantSettingsRequest{}
-	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[42]
+	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[37]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6233,7 +5833,7 @@ func (x *GetAssistantSettingsRequest) String() string {
 func (*GetAssistantSettingsRequest) ProtoMessage() {}
 
 func (x *GetAssistantSettingsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[42]
+	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[37]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6257,15 +5857,17 @@ func (b0 GetAssistantSettingsRequest_builder) Build() *GetAssistantSettingsReque
 }
 
 type GetAssistantSettingsResponse struct {
-	state               protoimpl.MessageState `protogen:"opaque.v1"`
-	xxx_hidden_Settings *AssistantSettings     `protobuf:"bytes,1,opt,name=settings"`
-	unknownFields       protoimpl.UnknownFields
-	sizeCache           protoimpl.SizeCache
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Settings    *AssistantSettings     `protobuf:"bytes,1,opt,name=settings"`
+	xxx_hidden_Recognizers *[]*VoiceEngine        `protobuf:"bytes,2,rep,name=recognizers"`
+	xxx_hidden_Voices      *[]*VoiceEngine        `protobuf:"bytes,3,rep,name=voices"`
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
 }
 
 func (x *GetAssistantSettingsResponse) Reset() {
 	*x = GetAssistantSettingsResponse{}
-	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[43]
+	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[38]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6277,7 +5879,7 @@ func (x *GetAssistantSettingsResponse) String() string {
 func (*GetAssistantSettingsResponse) ProtoMessage() {}
 
 func (x *GetAssistantSettingsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[43]
+	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[38]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6295,8 +5897,34 @@ func (x *GetAssistantSettingsResponse) GetSettings() *AssistantSettings {
 	return nil
 }
 
+func (x *GetAssistantSettingsResponse) GetRecognizers() []*VoiceEngine {
+	if x != nil {
+		if x.xxx_hidden_Recognizers != nil {
+			return *x.xxx_hidden_Recognizers
+		}
+	}
+	return nil
+}
+
+func (x *GetAssistantSettingsResponse) GetVoices() []*VoiceEngine {
+	if x != nil {
+		if x.xxx_hidden_Voices != nil {
+			return *x.xxx_hidden_Voices
+		}
+	}
+	return nil
+}
+
 func (x *GetAssistantSettingsResponse) SetSettings(v *AssistantSettings) {
 	x.xxx_hidden_Settings = v
+}
+
+func (x *GetAssistantSettingsResponse) SetRecognizers(v []*VoiceEngine) {
+	x.xxx_hidden_Recognizers = &v
+}
+
+func (x *GetAssistantSettingsResponse) SetVoices(v []*VoiceEngine) {
+	x.xxx_hidden_Voices = &v
 }
 
 func (x *GetAssistantSettingsResponse) HasSettings() bool {
@@ -6314,6 +5942,9 @@ type GetAssistantSettingsResponse_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
 	Settings *AssistantSettings
+	// The voice session plugin's recognizers and voices, to choose from.
+	Recognizers []*VoiceEngine
+	Voices      []*VoiceEngine
 }
 
 func (b0 GetAssistantSettingsResponse_builder) Build() *GetAssistantSettingsResponse {
@@ -6321,6 +5952,8 @@ func (b0 GetAssistantSettingsResponse_builder) Build() *GetAssistantSettingsResp
 	b, x := &b0, m0
 	_, _ = b, x
 	x.xxx_hidden_Settings = b.Settings
+	x.xxx_hidden_Recognizers = &b.Recognizers
+	x.xxx_hidden_Voices = &b.Voices
 	return m0
 }
 
@@ -6333,7 +5966,7 @@ type UpdateAssistantSettingsRequest struct {
 
 func (x *UpdateAssistantSettingsRequest) Reset() {
 	*x = UpdateAssistantSettingsRequest{}
-	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[44]
+	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[39]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6345,7 +5978,7 @@ func (x *UpdateAssistantSettingsRequest) String() string {
 func (*UpdateAssistantSettingsRequest) ProtoMessage() {}
 
 func (x *UpdateAssistantSettingsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[44]
+	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[39]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6401,7 +6034,7 @@ type UpdateAssistantSettingsResponse struct {
 
 func (x *UpdateAssistantSettingsResponse) Reset() {
 	*x = UpdateAssistantSettingsResponse{}
-	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[45]
+	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[40]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6413,7 +6046,7 @@ func (x *UpdateAssistantSettingsResponse) String() string {
 func (*UpdateAssistantSettingsResponse) ProtoMessage() {}
 
 func (x *UpdateAssistantSettingsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[45]
+	mi := &file_mavio_assistant_v1_assistant_proto_msgTypes[40]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6464,7 +6097,7 @@ var File_mavio_assistant_v1_assistant_proto protoreflect.FileDescriptor
 
 const file_mavio_assistant_v1_assistant_proto_rawDesc = "" +
 	"\n" +
-	"\"mavio/assistant/v1/assistant.proto\x12\x12mavio.assistant.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1egoogle/protobuf/duration.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1cmavio/intent/v1/intent.proto\x1a\x1bmavio/library/v1/item.proto\x1a\x18mavio/plugin/v1/ai.proto\x1a\x1bmavio/plugin/v1/voice.proto\"\xe6\x03\n" +
+	"\"mavio/assistant/v1/assistant.proto\x12\x12mavio.assistant.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1egoogle/protobuf/duration.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1cmavio/intent/v1/intent.proto\x1a\x1bmavio/library/v1/item.proto\x1a\x18mavio/plugin/v1/ai.proto\x1a\x1bmavio/plugin/v1/voice.proto\"\xcf\x05\n" +
 	"\x11AssistantSettings\x12\x18\n" +
 	"\aenabled\x18\x01 \x01(\bR\aenabled\x12-\n" +
 	"\x05model\x18\x02 \x01(\tB\x17\xbaH\x14r\x122\x10^(ai/[^/]+/.+)?$R\x05model\x12\x1b\n" +
@@ -6476,37 +6109,36 @@ const file_mavio_assistant_v1_assistant_proto_rawDesc = "" +
 	"\xbaH\a\x1a\x05\x18\xa0\v(\x01R\vidleMinutes\x121\n" +
 	"\x0eretention_days\x18\a \x01(\x05B\n" +
 	"\xbaH\a\x1a\x05\x18\xc2\x1c(\x01R\rretentionDays\x12\x16\n" +
-	"\x06memory\x18\b \x01(\bR\x06memory\x12\x1e\n" +
+	"\x06memory\x18\b \x01(\bR\x06memory\x12\x14\n" +
+	"\x05hints\x18\v \x01(\bR\x05hints\x12;\n" +
+	"\x06speech\x18\f \x03(\v2#.mavio.assistant.v1.AssistantSpeechR\x06speech\x12R\n" +
+	"\rlongest_pause\x18\r \x01(\v2\x19.google.protobuf.DurationB\x12\xbaH\x0f\xaa\x01\f\"\x02\b\n" +
+	"2\x06\x10\x80ʵ\xee\x01R\flongestPause\x12J\n" +
+	"\fcommit_delay\x18\x0e \x01(\v2\x19.google.protobuf.DurationB\f\xbaH\t\xaa\x01\x06\"\x02\b\x032\x00R\vcommitDelay\x12L\n" +
+	"\fsession_idle\x18\x0f \x01(\v2\x19.google.protobuf.DurationB\x0e\xbaH\v\xaa\x01\b\"\x02\bx2\x02\b\x03R\vsessionIdleJ\x04\b\t\x10\n" +
+	"J\x04\b\n" +
+	"\x10\vR\n" +
+	"recognizerR\x06voices\"\x98\x01\n" +
+	"\x0fAssistantSpeech\x12#\n" +
+	"\blanguage\x18\x01 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\blanguage\x124\n" +
 	"\n" +
-	"recognizer\x18\t \x01(\tR\n" +
-	"recognizer\x12@\n" +
-	"\x06voices\x18\n" +
-	" \x03(\v2(.mavio.assistant.v1.AssistantVoiceChoiceR\x06voices\x12\x14\n" +
-	"\x05hints\x18\v \x01(\bR\x05hints\"d\n" +
-	"\x14AssistantVoiceChoice\x12#\n" +
-	"\blanguage\x18\x01 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\blanguage\x12'\n" +
-	"\x05voice\x18\x02 \x01(\tB\x11\xbaH\x0er\f2\n" +
-	"^[^/]+/.+$R\x05voice\"1\n" +
+	"recognizer\x18\x02 \x01(\tB\x14\xbaH\x11r\x0f2\r^([^/]+/.+)?$R\n" +
+	"recognizer\x12*\n" +
+	"\x05voice\x18\x03 \x01(\tB\x14\xbaH\x11r\x0f2\r^([^/]+/.+)?$R\x05voice\"1\n" +
 	"\x13GetAssistantRequest\x12\x1a\n" +
-	"\blanguage\x18\x01 \x01(\tR\blanguage\"\xd8\x02\n" +
+	"\blanguage\x18\x01 \x01(\tR\blanguage\"\xd3\x01\n" +
 	"\x14GetAssistantResponse\x12\x18\n" +
 	"\aenabled\x18\x01 \x01(\bR\aenabled\x12\x0e\n" +
 	"\x02ai\x18\x02 \x01(\bR\x02ai\x12\x16\n" +
-	"\x06memory\x18\x03 \x01(\bR\x06memory\x12@\n" +
-	"\vrecognizers\x18\x04 \x03(\v2\x1e.mavio.assistant.v1.RecognizerR\vrecognizers\x121\n" +
-	"\x06voices\x18\x05 \x03(\v2\x19.mavio.assistant.v1.VoiceR\x06voices\x12O\n" +
-	"\x0edefault_voices\x18\x06 \x03(\v2(.mavio.assistant.v1.AssistantVoiceChoiceR\rdefaultVoices\x12\x1a\n" +
+	"\x06memory\x18\x03 \x01(\bR\x06memory\x12\x14\n" +
+	"\x05voice\x18\t \x01(\bR\x05voice\x12\x1a\n" +
 	"\bexamples\x18\a \x03(\tR\bexamples\x12\x1c\n" +
-	"\tlanguages\x18\b \x03(\tR\tlanguages\"N\n" +
-	"\n" +
-	"Recognizer\x12\x0e\n" +
+	"\tlanguages\x18\b \x03(\tR\tlanguagesJ\x04\b\x04\x10\aR\vrecognizersR\x06voicesR\x0edefault_voices\"e\n" +
+	"\vVoiceEngine\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x1c\n" +
-	"\tlanguages\x18\x03 \x03(\tR\tlanguages\"I\n" +
-	"\x05Voice\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
-	"\x04name\x18\x02 \x01(\tR\x04name\x12\x1c\n" +
-	"\tlanguages\x18\x03 \x03(\tR\tlanguages\"\xfb\x03\n" +
+	"\tlanguages\x18\x03 \x03(\tR\tlanguages\x12\x14\n" +
+	"\x05ready\x18\x04 \x01(\bR\x05ready\"\xce\x03\n" +
 	"\n" +
 	"AskRequest\x12\x1c\n" +
 	"\x04text\x18\x01 \x01(\tB\b\xbaH\x05r\x03\x18\xd0\x0fR\x04text\x12/\n" +
@@ -6515,9 +6147,8 @@ const file_mavio_assistant_v1_assistant_proto_rawDesc = "" +
 	"\x06spoken\x18\x04 \x01(\bR\x06spoken\x12>\n" +
 	"\x06answer\x18\x05 \x01(\v2&.mavio.assistant.v1.ConfirmationAnswerR\x06answer\x12\x16\n" +
 	"\x06choice\x18\x06 \x01(\tR\x06choice\x12%\n" +
-	"\x0efailed_actions\x18\a \x03(\tR\rfailedActions\x12<\n" +
-	"\tspeech_id\x18\b \x01(\tB\x1f\xbaH\x1cr\x1a2\x18^([A-Za-z0-9_-]{8,64})?$R\bspeechId:\x8e\x01\xbaH\x8a\x01\x1a\x87\x01\n" +
-	"\vask.request\x12*text, intent, answer or choice is required\x1aLthis.text != '' || has(this.intent) || has(this.answer) || this.choice != ''\"\xfd\x01\n" +
+	"\x0efailed_actions\x18\a \x03(\tR\rfailedActions:\x8e\x01\xbaH\x8a\x01\x1a\x87\x01\n" +
+	"\vask.request\x12*text, intent, answer or choice is required\x1aLthis.text != '' || has(this.intent) || has(this.answer) || this.choice != ''J\x04\b\b\x10\tR\tspeech_id\"\xfd\x01\n" +
 	"\n" +
 	"AskContext\x12\x1c\n" +
 	"\tlanguages\x18\x01 \x03(\tR\tlanguages\x128\n" +
@@ -6603,22 +6234,7 @@ const file_mavio_assistant_v1_assistant_proto_rawDesc = "" +
 	"\x0fconversation_id\x18\x03 \x01(\tR\x0econversationId\x12\"\n" +
 	"\fconfirmation\x18\x04 \x01(\bR\fconfirmation\x12\x18\n" +
 	"\aresults\x18\x05 \x01(\x05R\aresults\x12%\n" +
-	"\x0enot_understood\x18\x06 \x01(\bR\rnotUnderstood\"\x1a\n" +
-	"\x18GetAssistantHintsRequest\"5\n" +
-	"\x19GetAssistantHintsResponse\x12\x18\n" +
-	"\aphrases\x18\x01 \x03(\tR\aphrases\"S\n" +
-	"\x15StartListeningRequest\x12\x1a\n" +
-	"\blanguage\x18\x01 \x01(\tR\blanguage\x12\x1e\n" +
-	"\n" +
-	"recognizer\x18\x02 \x01(\tR\n" +
-	"recognizer\"\x87\x01\n" +
-	"\x16StartListeningResponse\x12\x10\n" +
-	"\x03url\x18\x01 \x01(\tR\x03url\x12\x1e\n" +
-	"\n" +
-	"recognizer\x18\x02 \x01(\tR\n" +
-	"recognizer\x12;\n" +
-	"\vexpire_time\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\n" +
-	"expireTime\"\xa0\x01\n" +
+	"\x0enot_understood\x18\x06 \x01(\bR\rnotUnderstood\"\xa0\x01\n" +
 	"\x18StartVoiceSessionRequest\x12\x1a\n" +
 	"\blanguage\x18\x01 \x01(\tR\blanguage\x12.\n" +
 	"\x04mode\x18\x02 \x01(\x0e2\x1a.mavio.plugin.v1.VoiceModeR\x04mode\x128\n" +
@@ -6638,12 +6254,13 @@ const file_mavio_assistant_v1_assistant_proto_rawDesc = "" +
 	"createTime\x12;\n" +
 	"\vupdate_time\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\n" +
 	"updateTime\x12.\n" +
-	"\x05usage\x18\x06 \x01(\v2\x18.mavio.plugin.v1.AiUsageR\x05usage\"\x82\x01\n" +
+	"\x05usage\x18\x06 \x01(\v2\x18.mavio.plugin.v1.AiUsageR\x05usage\"\x97\x01\n" +
 	"\x10AssistantMessage\x12\x12\n" +
 	"\x04user\x18\x01 \x01(\bR\x04user\x12\x12\n" +
 	"\x04text\x18\x02 \x01(\tR\x04text\x12.\n" +
-	"\x04time\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\x04time\x12\x16\n" +
-	"\x06speech\x18\x04 \x03(\tR\x06speech\"#\n" +
+	"\x04time\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\x04time\x12\x1d\n" +
+	"\n" +
+	"speech_url\x18\x05 \x01(\tR\tspeechUrlJ\x04\b\x04\x10\x05R\x06speech\"#\n" +
 	"!ListAssistantConversationsRequest\"u\n" +
 	"\"ListAssistantConversationsResponse\x12O\n" +
 	"\rconversations\x18\x01 \x03(\v2).mavio.assistant.v1.AssistantConversationR\rconversations\":\n" +
@@ -6675,9 +6292,11 @@ const file_mavio_assistant_v1_assistant_proto_rawDesc = "" +
 	"\x1eDeleteAssistantMemoriesRequest\x12\x10\n" +
 	"\x03ids\x18\x01 \x03(\tR\x03ids\"!\n" +
 	"\x1fDeleteAssistantMemoriesResponse\"\x1d\n" +
-	"\x1bGetAssistantSettingsRequest\"a\n" +
+	"\x1bGetAssistantSettingsRequest\"\xdd\x01\n" +
 	"\x1cGetAssistantSettingsResponse\x12A\n" +
-	"\bsettings\x18\x01 \x01(\v2%.mavio.assistant.v1.AssistantSettingsR\bsettings\"k\n" +
+	"\bsettings\x18\x01 \x01(\v2%.mavio.assistant.v1.AssistantSettingsR\bsettings\x12A\n" +
+	"\vrecognizers\x18\x02 \x03(\v2\x1f.mavio.assistant.v1.VoiceEngineR\vrecognizers\x127\n" +
+	"\x06voices\x18\x03 \x03(\v2\x1f.mavio.assistant.v1.VoiceEngineR\x06voices\"k\n" +
 	"\x1eUpdateAssistantSettingsRequest\x12I\n" +
 	"\bsettings\x18\x01 \x01(\v2%.mavio.assistant.v1.AssistantSettingsB\x06\xbaH\x03\xc8\x01\x01R\bsettings\"d\n" +
 	"\x1fUpdateAssistantSettingsResponse\x12A\n" +
@@ -6710,12 +6329,11 @@ const file_mavio_assistant_v1_assistant_proto_rawDesc = "" +
 	"\x14NAVIGATE_TARGET_ITEM\x10\x03\x12\x1b\n" +
 	"\x17NAVIGATE_TARGET_LIBRARY\x10\x04\x12\x1a\n" +
 	"\x16NAVIGATE_TARGET_SEARCH\x10\x05\x12\x1c\n" +
-	"\x18NAVIGATE_TARGET_SETTINGS\x10\x062\xd3\f\n" +
+	"\x18NAVIGATE_TARGET_SETTINGS\x10\x062\xf3\n" +
+	"\n" +
 	"\x10AssistantService\x12f\n" +
 	"\fGetAssistant\x12'.mavio.assistant.v1.GetAssistantRequest\x1a(.mavio.assistant.v1.GetAssistantResponse\"\x03\x90\x02\x01\x12H\n" +
-	"\x03Ask\x12\x1e.mavio.assistant.v1.AskRequest\x1a\x1f.mavio.assistant.v1.AskResponse0\x01\x12u\n" +
-	"\x11GetAssistantHints\x12,.mavio.assistant.v1.GetAssistantHintsRequest\x1a-.mavio.assistant.v1.GetAssistantHintsResponse\"\x03\x90\x02\x01\x12g\n" +
-	"\x0eStartListening\x12).mavio.assistant.v1.StartListeningRequest\x1a*.mavio.assistant.v1.StartListeningResponse\x12p\n" +
+	"\x03Ask\x12\x1e.mavio.assistant.v1.AskRequest\x1a\x1f.mavio.assistant.v1.AskResponse0\x01\x12p\n" +
 	"\x11StartVoiceSession\x12,.mavio.assistant.v1.StartVoiceSessionRequest\x1a-.mavio.assistant.v1.StartVoiceSessionResponse\x12\x90\x01\n" +
 	"\x1aListAssistantConversations\x125.mavio.assistant.v1.ListAssistantConversationsRequest\x1a6.mavio.assistant.v1.ListAssistantConversationsResponse\"\x03\x90\x02\x01\x12\x8a\x01\n" +
 	"\x18GetAssistantConversation\x123.mavio.assistant.v1.GetAssistantConversationRequest\x1a4.mavio.assistant.v1.GetAssistantConversationResponse\"\x03\x90\x02\x01\x12\x8e\x01\n" +
@@ -6728,139 +6346,131 @@ const file_mavio_assistant_v1_assistant_proto_rawDesc = "" +
 	"\x16com.mavio.assistant.v1B\x0eAssistantProtoP\x01ZIgithub.com/mavioai/mavio/libs/proto/gen/go/mavio/assistant/v1;assistantv1\xa2\x02\x03MAX\xaa\x02\x12Mavio.Assistant.V1\xca\x02\x12Mavio\\Assistant\\V1\xe2\x02\x1eMavio\\Assistant\\V1\\GPBMetadata\xea\x02\x14Mavio::Assistant::V1b\beditionsp\xe8\a"
 
 var file_mavio_assistant_v1_assistant_proto_enumTypes = make([]protoimpl.EnumInfo, 3)
-var file_mavio_assistant_v1_assistant_proto_msgTypes = make([]protoimpl.MessageInfo, 46)
+var file_mavio_assistant_v1_assistant_proto_msgTypes = make([]protoimpl.MessageInfo, 41)
 var file_mavio_assistant_v1_assistant_proto_goTypes = []any{
 	(AssistantAccess)(0),                        // 0: mavio.assistant.v1.AssistantAccess
 	(ControlCommand)(0),                         // 1: mavio.assistant.v1.ControlCommand
 	(NavigateTarget)(0),                         // 2: mavio.assistant.v1.NavigateTarget
 	(*AssistantSettings)(nil),                   // 3: mavio.assistant.v1.AssistantSettings
-	(*AssistantVoiceChoice)(nil),                // 4: mavio.assistant.v1.AssistantVoiceChoice
+	(*AssistantSpeech)(nil),                     // 4: mavio.assistant.v1.AssistantSpeech
 	(*GetAssistantRequest)(nil),                 // 5: mavio.assistant.v1.GetAssistantRequest
 	(*GetAssistantResponse)(nil),                // 6: mavio.assistant.v1.GetAssistantResponse
-	(*Recognizer)(nil),                          // 7: mavio.assistant.v1.Recognizer
-	(*Voice)(nil),                               // 8: mavio.assistant.v1.Voice
-	(*AskRequest)(nil),                          // 9: mavio.assistant.v1.AskRequest
-	(*AskContext)(nil),                          // 10: mavio.assistant.v1.AskContext
-	(*AskPlaying)(nil),                          // 11: mavio.assistant.v1.AskPlaying
-	(*ConfirmationAnswer)(nil),                  // 12: mavio.assistant.v1.ConfirmationAnswer
-	(*AskResponse)(nil),                         // 13: mavio.assistant.v1.AskResponse
-	(*Understood)(nil),                          // 14: mavio.assistant.v1.Understood
-	(*ToolActivity)(nil),                        // 15: mavio.assistant.v1.ToolActivity
-	(*ClientAction)(nil),                        // 16: mavio.assistant.v1.ClientAction
-	(*PlayAction)(nil),                          // 17: mavio.assistant.v1.PlayAction
-	(*ControlAction)(nil),                       // 18: mavio.assistant.v1.ControlAction
-	(*StreamsAction)(nil),                       // 19: mavio.assistant.v1.StreamsAction
-	(*NavigateAction)(nil),                      // 20: mavio.assistant.v1.NavigateAction
-	(*ShowItemsAction)(nil),                     // 21: mavio.assistant.v1.ShowItemsAction
-	(*Confirmation)(nil),                        // 22: mavio.assistant.v1.Confirmation
-	(*Done)(nil),                                // 23: mavio.assistant.v1.Done
-	(*GetAssistantHintsRequest)(nil),            // 24: mavio.assistant.v1.GetAssistantHintsRequest
-	(*GetAssistantHintsResponse)(nil),           // 25: mavio.assistant.v1.GetAssistantHintsResponse
-	(*StartListeningRequest)(nil),               // 26: mavio.assistant.v1.StartListeningRequest
-	(*StartListeningResponse)(nil),              // 27: mavio.assistant.v1.StartListeningResponse
-	(*StartVoiceSessionRequest)(nil),            // 28: mavio.assistant.v1.StartVoiceSessionRequest
-	(*StartVoiceSessionResponse)(nil),           // 29: mavio.assistant.v1.StartVoiceSessionResponse
-	(*AssistantConversation)(nil),               // 30: mavio.assistant.v1.AssistantConversation
-	(*AssistantMessage)(nil),                    // 31: mavio.assistant.v1.AssistantMessage
-	(*ListAssistantConversationsRequest)(nil),   // 32: mavio.assistant.v1.ListAssistantConversationsRequest
-	(*ListAssistantConversationsResponse)(nil),  // 33: mavio.assistant.v1.ListAssistantConversationsResponse
-	(*GetAssistantConversationRequest)(nil),     // 34: mavio.assistant.v1.GetAssistantConversationRequest
-	(*GetAssistantConversationResponse)(nil),    // 35: mavio.assistant.v1.GetAssistantConversationResponse
-	(*DeleteAssistantConversationRequest)(nil),  // 36: mavio.assistant.v1.DeleteAssistantConversationRequest
-	(*DeleteAssistantConversationResponse)(nil), // 37: mavio.assistant.v1.DeleteAssistantConversationResponse
-	(*AssistantMemory)(nil),                     // 38: mavio.assistant.v1.AssistantMemory
-	(*ListAssistantMemoriesRequest)(nil),        // 39: mavio.assistant.v1.ListAssistantMemoriesRequest
-	(*ListAssistantMemoriesResponse)(nil),       // 40: mavio.assistant.v1.ListAssistantMemoriesResponse
-	(*UpdateAssistantMemoryRequest)(nil),        // 41: mavio.assistant.v1.UpdateAssistantMemoryRequest
-	(*UpdateAssistantMemoryResponse)(nil),       // 42: mavio.assistant.v1.UpdateAssistantMemoryResponse
-	(*DeleteAssistantMemoriesRequest)(nil),      // 43: mavio.assistant.v1.DeleteAssistantMemoriesRequest
-	(*DeleteAssistantMemoriesResponse)(nil),     // 44: mavio.assistant.v1.DeleteAssistantMemoriesResponse
-	(*GetAssistantSettingsRequest)(nil),         // 45: mavio.assistant.v1.GetAssistantSettingsRequest
-	(*GetAssistantSettingsResponse)(nil),        // 46: mavio.assistant.v1.GetAssistantSettingsResponse
-	(*UpdateAssistantSettingsRequest)(nil),      // 47: mavio.assistant.v1.UpdateAssistantSettingsRequest
-	(*UpdateAssistantSettingsResponse)(nil),     // 48: mavio.assistant.v1.UpdateAssistantSettingsResponse
-	(*v1.Intent)(nil),                           // 49: mavio.intent.v1.Intent
-	(*durationpb.Duration)(nil),                 // 50: google.protobuf.Duration
-	(*v11.Item)(nil),                            // 51: mavio.library.v1.Item
-	(*timestamppb.Timestamp)(nil),               // 52: google.protobuf.Timestamp
-	(v12.VoiceMode)(0),                          // 53: mavio.plugin.v1.VoiceMode
-	(*v12.AiUsage)(nil),                         // 54: mavio.plugin.v1.AiUsage
+	(*VoiceEngine)(nil),                         // 7: mavio.assistant.v1.VoiceEngine
+	(*AskRequest)(nil),                          // 8: mavio.assistant.v1.AskRequest
+	(*AskContext)(nil),                          // 9: mavio.assistant.v1.AskContext
+	(*AskPlaying)(nil),                          // 10: mavio.assistant.v1.AskPlaying
+	(*ConfirmationAnswer)(nil),                  // 11: mavio.assistant.v1.ConfirmationAnswer
+	(*AskResponse)(nil),                         // 12: mavio.assistant.v1.AskResponse
+	(*Understood)(nil),                          // 13: mavio.assistant.v1.Understood
+	(*ToolActivity)(nil),                        // 14: mavio.assistant.v1.ToolActivity
+	(*ClientAction)(nil),                        // 15: mavio.assistant.v1.ClientAction
+	(*PlayAction)(nil),                          // 16: mavio.assistant.v1.PlayAction
+	(*ControlAction)(nil),                       // 17: mavio.assistant.v1.ControlAction
+	(*StreamsAction)(nil),                       // 18: mavio.assistant.v1.StreamsAction
+	(*NavigateAction)(nil),                      // 19: mavio.assistant.v1.NavigateAction
+	(*ShowItemsAction)(nil),                     // 20: mavio.assistant.v1.ShowItemsAction
+	(*Confirmation)(nil),                        // 21: mavio.assistant.v1.Confirmation
+	(*Done)(nil),                                // 22: mavio.assistant.v1.Done
+	(*StartVoiceSessionRequest)(nil),            // 23: mavio.assistant.v1.StartVoiceSessionRequest
+	(*StartVoiceSessionResponse)(nil),           // 24: mavio.assistant.v1.StartVoiceSessionResponse
+	(*AssistantConversation)(nil),               // 25: mavio.assistant.v1.AssistantConversation
+	(*AssistantMessage)(nil),                    // 26: mavio.assistant.v1.AssistantMessage
+	(*ListAssistantConversationsRequest)(nil),   // 27: mavio.assistant.v1.ListAssistantConversationsRequest
+	(*ListAssistantConversationsResponse)(nil),  // 28: mavio.assistant.v1.ListAssistantConversationsResponse
+	(*GetAssistantConversationRequest)(nil),     // 29: mavio.assistant.v1.GetAssistantConversationRequest
+	(*GetAssistantConversationResponse)(nil),    // 30: mavio.assistant.v1.GetAssistantConversationResponse
+	(*DeleteAssistantConversationRequest)(nil),  // 31: mavio.assistant.v1.DeleteAssistantConversationRequest
+	(*DeleteAssistantConversationResponse)(nil), // 32: mavio.assistant.v1.DeleteAssistantConversationResponse
+	(*AssistantMemory)(nil),                     // 33: mavio.assistant.v1.AssistantMemory
+	(*ListAssistantMemoriesRequest)(nil),        // 34: mavio.assistant.v1.ListAssistantMemoriesRequest
+	(*ListAssistantMemoriesResponse)(nil),       // 35: mavio.assistant.v1.ListAssistantMemoriesResponse
+	(*UpdateAssistantMemoryRequest)(nil),        // 36: mavio.assistant.v1.UpdateAssistantMemoryRequest
+	(*UpdateAssistantMemoryResponse)(nil),       // 37: mavio.assistant.v1.UpdateAssistantMemoryResponse
+	(*DeleteAssistantMemoriesRequest)(nil),      // 38: mavio.assistant.v1.DeleteAssistantMemoriesRequest
+	(*DeleteAssistantMemoriesResponse)(nil),     // 39: mavio.assistant.v1.DeleteAssistantMemoriesResponse
+	(*GetAssistantSettingsRequest)(nil),         // 40: mavio.assistant.v1.GetAssistantSettingsRequest
+	(*GetAssistantSettingsResponse)(nil),        // 41: mavio.assistant.v1.GetAssistantSettingsResponse
+	(*UpdateAssistantSettingsRequest)(nil),      // 42: mavio.assistant.v1.UpdateAssistantSettingsRequest
+	(*UpdateAssistantSettingsResponse)(nil),     // 43: mavio.assistant.v1.UpdateAssistantSettingsResponse
+	(*durationpb.Duration)(nil),                 // 44: google.protobuf.Duration
+	(*v1.Intent)(nil),                           // 45: mavio.intent.v1.Intent
+	(*v11.Item)(nil),                            // 46: mavio.library.v1.Item
+	(v12.VoiceMode)(0),                          // 47: mavio.plugin.v1.VoiceMode
+	(*timestamppb.Timestamp)(nil),               // 48: google.protobuf.Timestamp
+	(*v12.AiUsage)(nil),                         // 49: mavio.plugin.v1.AiUsage
 }
 var file_mavio_assistant_v1_assistant_proto_depIdxs = []int32{
 	0,  // 0: mavio.assistant.v1.AssistantSettings.ai_access:type_name -> mavio.assistant.v1.AssistantAccess
-	4,  // 1: mavio.assistant.v1.AssistantSettings.voices:type_name -> mavio.assistant.v1.AssistantVoiceChoice
-	7,  // 2: mavio.assistant.v1.GetAssistantResponse.recognizers:type_name -> mavio.assistant.v1.Recognizer
-	8,  // 3: mavio.assistant.v1.GetAssistantResponse.voices:type_name -> mavio.assistant.v1.Voice
-	4,  // 4: mavio.assistant.v1.GetAssistantResponse.default_voices:type_name -> mavio.assistant.v1.AssistantVoiceChoice
-	49, // 5: mavio.assistant.v1.AskRequest.intent:type_name -> mavio.intent.v1.Intent
-	10, // 6: mavio.assistant.v1.AskRequest.context:type_name -> mavio.assistant.v1.AskContext
-	12, // 7: mavio.assistant.v1.AskRequest.answer:type_name -> mavio.assistant.v1.ConfirmationAnswer
-	11, // 8: mavio.assistant.v1.AskContext.playing:type_name -> mavio.assistant.v1.AskPlaying
-	50, // 9: mavio.assistant.v1.AskPlaying.position:type_name -> google.protobuf.Duration
-	14, // 10: mavio.assistant.v1.AskResponse.understood:type_name -> mavio.assistant.v1.Understood
-	15, // 11: mavio.assistant.v1.AskResponse.tool:type_name -> mavio.assistant.v1.ToolActivity
-	16, // 12: mavio.assistant.v1.AskResponse.action:type_name -> mavio.assistant.v1.ClientAction
-	22, // 13: mavio.assistant.v1.AskResponse.confirmation:type_name -> mavio.assistant.v1.Confirmation
-	23, // 14: mavio.assistant.v1.AskResponse.done:type_name -> mavio.assistant.v1.Done
-	17, // 15: mavio.assistant.v1.ClientAction.play:type_name -> mavio.assistant.v1.PlayAction
-	18, // 16: mavio.assistant.v1.ClientAction.control:type_name -> mavio.assistant.v1.ControlAction
-	19, // 17: mavio.assistant.v1.ClientAction.streams:type_name -> mavio.assistant.v1.StreamsAction
-	20, // 18: mavio.assistant.v1.ClientAction.navigate:type_name -> mavio.assistant.v1.NavigateAction
-	21, // 19: mavio.assistant.v1.ClientAction.show_items:type_name -> mavio.assistant.v1.ShowItemsAction
-	50, // 20: mavio.assistant.v1.PlayAction.start_position:type_name -> google.protobuf.Duration
+	4,  // 1: mavio.assistant.v1.AssistantSettings.speech:type_name -> mavio.assistant.v1.AssistantSpeech
+	44, // 2: mavio.assistant.v1.AssistantSettings.longest_pause:type_name -> google.protobuf.Duration
+	44, // 3: mavio.assistant.v1.AssistantSettings.commit_delay:type_name -> google.protobuf.Duration
+	44, // 4: mavio.assistant.v1.AssistantSettings.session_idle:type_name -> google.protobuf.Duration
+	45, // 5: mavio.assistant.v1.AskRequest.intent:type_name -> mavio.intent.v1.Intent
+	9,  // 6: mavio.assistant.v1.AskRequest.context:type_name -> mavio.assistant.v1.AskContext
+	11, // 7: mavio.assistant.v1.AskRequest.answer:type_name -> mavio.assistant.v1.ConfirmationAnswer
+	10, // 8: mavio.assistant.v1.AskContext.playing:type_name -> mavio.assistant.v1.AskPlaying
+	44, // 9: mavio.assistant.v1.AskPlaying.position:type_name -> google.protobuf.Duration
+	13, // 10: mavio.assistant.v1.AskResponse.understood:type_name -> mavio.assistant.v1.Understood
+	14, // 11: mavio.assistant.v1.AskResponse.tool:type_name -> mavio.assistant.v1.ToolActivity
+	15, // 12: mavio.assistant.v1.AskResponse.action:type_name -> mavio.assistant.v1.ClientAction
+	21, // 13: mavio.assistant.v1.AskResponse.confirmation:type_name -> mavio.assistant.v1.Confirmation
+	22, // 14: mavio.assistant.v1.AskResponse.done:type_name -> mavio.assistant.v1.Done
+	16, // 15: mavio.assistant.v1.ClientAction.play:type_name -> mavio.assistant.v1.PlayAction
+	17, // 16: mavio.assistant.v1.ClientAction.control:type_name -> mavio.assistant.v1.ControlAction
+	18, // 17: mavio.assistant.v1.ClientAction.streams:type_name -> mavio.assistant.v1.StreamsAction
+	19, // 18: mavio.assistant.v1.ClientAction.navigate:type_name -> mavio.assistant.v1.NavigateAction
+	20, // 19: mavio.assistant.v1.ClientAction.show_items:type_name -> mavio.assistant.v1.ShowItemsAction
+	44, // 20: mavio.assistant.v1.PlayAction.start_position:type_name -> google.protobuf.Duration
 	1,  // 21: mavio.assistant.v1.ControlAction.command:type_name -> mavio.assistant.v1.ControlCommand
 	2,  // 22: mavio.assistant.v1.NavigateAction.target:type_name -> mavio.assistant.v1.NavigateTarget
-	51, // 23: mavio.assistant.v1.ShowItemsAction.items:type_name -> mavio.library.v1.Item
-	52, // 24: mavio.assistant.v1.StartListeningResponse.expire_time:type_name -> google.protobuf.Timestamp
-	53, // 25: mavio.assistant.v1.StartVoiceSessionRequest.mode:type_name -> mavio.plugin.v1.VoiceMode
-	10, // 26: mavio.assistant.v1.StartVoiceSessionRequest.context:type_name -> mavio.assistant.v1.AskContext
-	52, // 27: mavio.assistant.v1.StartVoiceSessionResponse.expire_time:type_name -> google.protobuf.Timestamp
-	52, // 28: mavio.assistant.v1.AssistantConversation.create_time:type_name -> google.protobuf.Timestamp
-	52, // 29: mavio.assistant.v1.AssistantConversation.update_time:type_name -> google.protobuf.Timestamp
-	54, // 30: mavio.assistant.v1.AssistantConversation.usage:type_name -> mavio.plugin.v1.AiUsage
-	52, // 31: mavio.assistant.v1.AssistantMessage.time:type_name -> google.protobuf.Timestamp
-	30, // 32: mavio.assistant.v1.ListAssistantConversationsResponse.conversations:type_name -> mavio.assistant.v1.AssistantConversation
-	30, // 33: mavio.assistant.v1.GetAssistantConversationResponse.conversation:type_name -> mavio.assistant.v1.AssistantConversation
-	31, // 34: mavio.assistant.v1.GetAssistantConversationResponse.messages:type_name -> mavio.assistant.v1.AssistantMessage
-	52, // 35: mavio.assistant.v1.AssistantMemory.create_time:type_name -> google.protobuf.Timestamp
-	52, // 36: mavio.assistant.v1.AssistantMemory.update_time:type_name -> google.protobuf.Timestamp
-	52, // 37: mavio.assistant.v1.AssistantMemory.use_time:type_name -> google.protobuf.Timestamp
-	38, // 38: mavio.assistant.v1.ListAssistantMemoriesResponse.memories:type_name -> mavio.assistant.v1.AssistantMemory
-	38, // 39: mavio.assistant.v1.UpdateAssistantMemoryResponse.memory:type_name -> mavio.assistant.v1.AssistantMemory
-	3,  // 40: mavio.assistant.v1.GetAssistantSettingsResponse.settings:type_name -> mavio.assistant.v1.AssistantSettings
-	3,  // 41: mavio.assistant.v1.UpdateAssistantSettingsRequest.settings:type_name -> mavio.assistant.v1.AssistantSettings
-	3,  // 42: mavio.assistant.v1.UpdateAssistantSettingsResponse.settings:type_name -> mavio.assistant.v1.AssistantSettings
-	5,  // 43: mavio.assistant.v1.AssistantService.GetAssistant:input_type -> mavio.assistant.v1.GetAssistantRequest
-	9,  // 44: mavio.assistant.v1.AssistantService.Ask:input_type -> mavio.assistant.v1.AskRequest
-	24, // 45: mavio.assistant.v1.AssistantService.GetAssistantHints:input_type -> mavio.assistant.v1.GetAssistantHintsRequest
-	26, // 46: mavio.assistant.v1.AssistantService.StartListening:input_type -> mavio.assistant.v1.StartListeningRequest
-	28, // 47: mavio.assistant.v1.AssistantService.StartVoiceSession:input_type -> mavio.assistant.v1.StartVoiceSessionRequest
-	32, // 48: mavio.assistant.v1.AssistantService.ListAssistantConversations:input_type -> mavio.assistant.v1.ListAssistantConversationsRequest
-	34, // 49: mavio.assistant.v1.AssistantService.GetAssistantConversation:input_type -> mavio.assistant.v1.GetAssistantConversationRequest
-	36, // 50: mavio.assistant.v1.AssistantService.DeleteAssistantConversation:input_type -> mavio.assistant.v1.DeleteAssistantConversationRequest
-	39, // 51: mavio.assistant.v1.AssistantService.ListAssistantMemories:input_type -> mavio.assistant.v1.ListAssistantMemoriesRequest
-	41, // 52: mavio.assistant.v1.AssistantService.UpdateAssistantMemory:input_type -> mavio.assistant.v1.UpdateAssistantMemoryRequest
-	43, // 53: mavio.assistant.v1.AssistantService.DeleteAssistantMemories:input_type -> mavio.assistant.v1.DeleteAssistantMemoriesRequest
-	45, // 54: mavio.assistant.v1.AssistantService.GetAssistantSettings:input_type -> mavio.assistant.v1.GetAssistantSettingsRequest
-	47, // 55: mavio.assistant.v1.AssistantService.UpdateAssistantSettings:input_type -> mavio.assistant.v1.UpdateAssistantSettingsRequest
-	6,  // 56: mavio.assistant.v1.AssistantService.GetAssistant:output_type -> mavio.assistant.v1.GetAssistantResponse
-	13, // 57: mavio.assistant.v1.AssistantService.Ask:output_type -> mavio.assistant.v1.AskResponse
-	25, // 58: mavio.assistant.v1.AssistantService.GetAssistantHints:output_type -> mavio.assistant.v1.GetAssistantHintsResponse
-	27, // 59: mavio.assistant.v1.AssistantService.StartListening:output_type -> mavio.assistant.v1.StartListeningResponse
-	29, // 60: mavio.assistant.v1.AssistantService.StartVoiceSession:output_type -> mavio.assistant.v1.StartVoiceSessionResponse
-	33, // 61: mavio.assistant.v1.AssistantService.ListAssistantConversations:output_type -> mavio.assistant.v1.ListAssistantConversationsResponse
-	35, // 62: mavio.assistant.v1.AssistantService.GetAssistantConversation:output_type -> mavio.assistant.v1.GetAssistantConversationResponse
-	37, // 63: mavio.assistant.v1.AssistantService.DeleteAssistantConversation:output_type -> mavio.assistant.v1.DeleteAssistantConversationResponse
-	40, // 64: mavio.assistant.v1.AssistantService.ListAssistantMemories:output_type -> mavio.assistant.v1.ListAssistantMemoriesResponse
-	42, // 65: mavio.assistant.v1.AssistantService.UpdateAssistantMemory:output_type -> mavio.assistant.v1.UpdateAssistantMemoryResponse
-	44, // 66: mavio.assistant.v1.AssistantService.DeleteAssistantMemories:output_type -> mavio.assistant.v1.DeleteAssistantMemoriesResponse
-	46, // 67: mavio.assistant.v1.AssistantService.GetAssistantSettings:output_type -> mavio.assistant.v1.GetAssistantSettingsResponse
-	48, // 68: mavio.assistant.v1.AssistantService.UpdateAssistantSettings:output_type -> mavio.assistant.v1.UpdateAssistantSettingsResponse
-	56, // [56:69] is the sub-list for method output_type
-	43, // [43:56] is the sub-list for method input_type
-	43, // [43:43] is the sub-list for extension type_name
-	43, // [43:43] is the sub-list for extension extendee
-	0,  // [0:43] is the sub-list for field type_name
+	46, // 23: mavio.assistant.v1.ShowItemsAction.items:type_name -> mavio.library.v1.Item
+	47, // 24: mavio.assistant.v1.StartVoiceSessionRequest.mode:type_name -> mavio.plugin.v1.VoiceMode
+	9,  // 25: mavio.assistant.v1.StartVoiceSessionRequest.context:type_name -> mavio.assistant.v1.AskContext
+	48, // 26: mavio.assistant.v1.StartVoiceSessionResponse.expire_time:type_name -> google.protobuf.Timestamp
+	48, // 27: mavio.assistant.v1.AssistantConversation.create_time:type_name -> google.protobuf.Timestamp
+	48, // 28: mavio.assistant.v1.AssistantConversation.update_time:type_name -> google.protobuf.Timestamp
+	49, // 29: mavio.assistant.v1.AssistantConversation.usage:type_name -> mavio.plugin.v1.AiUsage
+	48, // 30: mavio.assistant.v1.AssistantMessage.time:type_name -> google.protobuf.Timestamp
+	25, // 31: mavio.assistant.v1.ListAssistantConversationsResponse.conversations:type_name -> mavio.assistant.v1.AssistantConversation
+	25, // 32: mavio.assistant.v1.GetAssistantConversationResponse.conversation:type_name -> mavio.assistant.v1.AssistantConversation
+	26, // 33: mavio.assistant.v1.GetAssistantConversationResponse.messages:type_name -> mavio.assistant.v1.AssistantMessage
+	48, // 34: mavio.assistant.v1.AssistantMemory.create_time:type_name -> google.protobuf.Timestamp
+	48, // 35: mavio.assistant.v1.AssistantMemory.update_time:type_name -> google.protobuf.Timestamp
+	48, // 36: mavio.assistant.v1.AssistantMemory.use_time:type_name -> google.protobuf.Timestamp
+	33, // 37: mavio.assistant.v1.ListAssistantMemoriesResponse.memories:type_name -> mavio.assistant.v1.AssistantMemory
+	33, // 38: mavio.assistant.v1.UpdateAssistantMemoryResponse.memory:type_name -> mavio.assistant.v1.AssistantMemory
+	3,  // 39: mavio.assistant.v1.GetAssistantSettingsResponse.settings:type_name -> mavio.assistant.v1.AssistantSettings
+	7,  // 40: mavio.assistant.v1.GetAssistantSettingsResponse.recognizers:type_name -> mavio.assistant.v1.VoiceEngine
+	7,  // 41: mavio.assistant.v1.GetAssistantSettingsResponse.voices:type_name -> mavio.assistant.v1.VoiceEngine
+	3,  // 42: mavio.assistant.v1.UpdateAssistantSettingsRequest.settings:type_name -> mavio.assistant.v1.AssistantSettings
+	3,  // 43: mavio.assistant.v1.UpdateAssistantSettingsResponse.settings:type_name -> mavio.assistant.v1.AssistantSettings
+	5,  // 44: mavio.assistant.v1.AssistantService.GetAssistant:input_type -> mavio.assistant.v1.GetAssistantRequest
+	8,  // 45: mavio.assistant.v1.AssistantService.Ask:input_type -> mavio.assistant.v1.AskRequest
+	23, // 46: mavio.assistant.v1.AssistantService.StartVoiceSession:input_type -> mavio.assistant.v1.StartVoiceSessionRequest
+	27, // 47: mavio.assistant.v1.AssistantService.ListAssistantConversations:input_type -> mavio.assistant.v1.ListAssistantConversationsRequest
+	29, // 48: mavio.assistant.v1.AssistantService.GetAssistantConversation:input_type -> mavio.assistant.v1.GetAssistantConversationRequest
+	31, // 49: mavio.assistant.v1.AssistantService.DeleteAssistantConversation:input_type -> mavio.assistant.v1.DeleteAssistantConversationRequest
+	34, // 50: mavio.assistant.v1.AssistantService.ListAssistantMemories:input_type -> mavio.assistant.v1.ListAssistantMemoriesRequest
+	36, // 51: mavio.assistant.v1.AssistantService.UpdateAssistantMemory:input_type -> mavio.assistant.v1.UpdateAssistantMemoryRequest
+	38, // 52: mavio.assistant.v1.AssistantService.DeleteAssistantMemories:input_type -> mavio.assistant.v1.DeleteAssistantMemoriesRequest
+	40, // 53: mavio.assistant.v1.AssistantService.GetAssistantSettings:input_type -> mavio.assistant.v1.GetAssistantSettingsRequest
+	42, // 54: mavio.assistant.v1.AssistantService.UpdateAssistantSettings:input_type -> mavio.assistant.v1.UpdateAssistantSettingsRequest
+	6,  // 55: mavio.assistant.v1.AssistantService.GetAssistant:output_type -> mavio.assistant.v1.GetAssistantResponse
+	12, // 56: mavio.assistant.v1.AssistantService.Ask:output_type -> mavio.assistant.v1.AskResponse
+	24, // 57: mavio.assistant.v1.AssistantService.StartVoiceSession:output_type -> mavio.assistant.v1.StartVoiceSessionResponse
+	28, // 58: mavio.assistant.v1.AssistantService.ListAssistantConversations:output_type -> mavio.assistant.v1.ListAssistantConversationsResponse
+	30, // 59: mavio.assistant.v1.AssistantService.GetAssistantConversation:output_type -> mavio.assistant.v1.GetAssistantConversationResponse
+	32, // 60: mavio.assistant.v1.AssistantService.DeleteAssistantConversation:output_type -> mavio.assistant.v1.DeleteAssistantConversationResponse
+	35, // 61: mavio.assistant.v1.AssistantService.ListAssistantMemories:output_type -> mavio.assistant.v1.ListAssistantMemoriesResponse
+	37, // 62: mavio.assistant.v1.AssistantService.UpdateAssistantMemory:output_type -> mavio.assistant.v1.UpdateAssistantMemoryResponse
+	39, // 63: mavio.assistant.v1.AssistantService.DeleteAssistantMemories:output_type -> mavio.assistant.v1.DeleteAssistantMemoriesResponse
+	41, // 64: mavio.assistant.v1.AssistantService.GetAssistantSettings:output_type -> mavio.assistant.v1.GetAssistantSettingsResponse
+	43, // 65: mavio.assistant.v1.AssistantService.UpdateAssistantSettings:output_type -> mavio.assistant.v1.UpdateAssistantSettingsResponse
+	55, // [55:66] is the sub-list for method output_type
+	44, // [44:55] is the sub-list for method input_type
+	44, // [44:44] is the sub-list for extension type_name
+	44, // [44:44] is the sub-list for extension extendee
+	0,  // [0:44] is the sub-list for field type_name
 }
 
 func init() { file_mavio_assistant_v1_assistant_proto_init() }
@@ -6868,7 +6478,7 @@ func file_mavio_assistant_v1_assistant_proto_init() {
 	if File_mavio_assistant_v1_assistant_proto != nil {
 		return
 	}
-	file_mavio_assistant_v1_assistant_proto_msgTypes[10].OneofWrappers = []any{
+	file_mavio_assistant_v1_assistant_proto_msgTypes[9].OneofWrappers = []any{
 		(*askResponse_Understood)(nil),
 		(*askResponse_Tool)(nil),
 		(*askResponse_Action)(nil),
@@ -6876,7 +6486,7 @@ func file_mavio_assistant_v1_assistant_proto_init() {
 		(*askResponse_Answer)(nil),
 		(*askResponse_Done)(nil),
 	}
-	file_mavio_assistant_v1_assistant_proto_msgTypes[13].OneofWrappers = []any{
+	file_mavio_assistant_v1_assistant_proto_msgTypes[12].OneofWrappers = []any{
 		(*clientAction_Play)(nil),
 		(*clientAction_Control)(nil),
 		(*clientAction_Streams)(nil),
@@ -6889,7 +6499,7 @@ func file_mavio_assistant_v1_assistant_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_mavio_assistant_v1_assistant_proto_rawDesc), len(file_mavio_assistant_v1_assistant_proto_rawDesc)),
 			NumEnums:      3,
-			NumMessages:   46,
+			NumMessages:   41,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

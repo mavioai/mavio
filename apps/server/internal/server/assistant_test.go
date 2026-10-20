@@ -3,7 +3,6 @@ package server_test
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -15,7 +14,6 @@ import (
 	"testing"
 	"time"
 
-	"golang.org/x/net/websocket"
 	"google.golang.org/protobuf/types/known/durationpb"
 
 	acquisitionv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/acquisition/v1"
@@ -24,7 +22,6 @@ import (
 	libraryv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/library/v1"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/library/v1/libraryv1connect"
 	systemv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/system/v1"
-	"github.com/mavioai/mavio/tools/fixtures"
 )
 
 // assistantRoutes are the answers of the services for the assistant
@@ -91,91 +88,6 @@ func understoodByAI(events []*assistantv1.AskResponse) bool {
 	return false
 }
 
-// fakeASR is a whisper-asr-webservice hearing English and recognizing
-// what it is told to, recording what it was asked.
-type fakeASR struct {
-	*httptest.Server
-
-	mu    sync.Mutex
-	text  string
-	tasks []string
-}
-
-func newFakeASR(t *testing.T) *fakeASR {
-	f := &fakeASR{}
-	f.Server = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		file, _, err := r.FormFile("audio_file")
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
-		_, _ = io.Copy(io.Discard, file)
-		f.mu.Lock()
-		defer f.mu.Unlock()
-		switch r.URL.Path {
-		case "/detect-language":
-			_, _ = io.WriteString(w, `{"language_code":"en","detected_language":"english"}`)
-		case "/asr":
-			f.tasks = append(f.tasks, r.URL.Query().Get("task"))
-			text, _ := json.Marshal(f.text)
-			fmt.Fprintf(w, `{"text":%s,"language":"en","segments":[{"start":1,"end":2,"text":%s}]}`, text, text)
-		default:
-			http.NotFound(w, r)
-		}
-	}))
-	t.Cleanup(f.Close)
-	return f
-}
-
-func (f *fakeASR) say(text string) {
-	f.mu.Lock()
-	f.text = text
-	f.mu.Unlock()
-}
-
-// listen speaks a recording to the assistant's server recognizer, as
-// 16 kHz PCM sent in pieces, and returns what it heard.
-func (s *acquisitionServer) listen(wav string) string {
-	t := s.t
-	t.Helper()
-	pcm := filepath.Join(t.TempDir(), "speech.pcm")
-	run(t, s.ffmpeg, "-loglevel", "error", "-i", wav, "-f", "s16le", "-ac", "1", "-ar", "16000", pcm)
-	audio, err := os.ReadFile(pcm)
-	if err != nil {
-		t.Fatal(err)
-	}
-	started, err := s.assistant().StartListening(t.Context(), assistantv1.StartListeningRequest_builder{Language: new("en")}.Build())
-	if err != nil {
-		t.Fatalf("StartListening: %v", err)
-	}
-	conn, err := websocket.Dial("ws"+strings.TrimPrefix(s.url, "http")+started.GetUrl(), "", s.url)
-	if err != nil {
-		t.Fatalf("dial %s: %v", started.GetUrl(), err)
-	}
-	defer conn.Close()
-	// The server ends the utterance itself after a second of silence, and
-	// stops reading.
-	go func() {
-		for chunk := range slices.Chunk(audio, 3200) {
-			if websocket.Message.Send(conn, chunk) != nil {
-				return
-			}
-		}
-		_ = websocket.Message.Send(conn, "end")
-	}()
-	var heard struct {
-		Text, Language, Error string
-		Final                 bool
-	}
-	if err := websocket.JSON.Receive(conn, &heard); err != nil {
-		t.Fatalf("receive: %v", err)
-	}
-	if heard.Error != "" || !heard.Final {
-		t.Fatalf("heard %+v, want the final text", heard)
-	}
-	return heard.Text
-}
-
 // streamIndex returns the index of an item's stream of a kind in a
 // language, by its first letters.
 func (s *acquisitionServer) streamIndex(itemID string, kind libraryv1.StreamKind, language string) int32 {
@@ -238,22 +150,17 @@ func (s *acquisitionServer) movie(libraryID string) *libraryv1.Item {
 }
 
 // TestAssistant runs the assistant's fast path through the API, without
-// an AI gateway plugin, with the voice plugin against a fake
-// whisper-asr-webservice on the loopback interface (P29's done
-// criteria): English and Chinese requests pause, seek and switch the
-// subtitles of the requesting device; a film named by a homophone of its
-// Chinese name plays; a request of a title is canceled, another is
-// confirmed by voice; the recognizer that listened transcribes an
-// episode's subtitles.
+// an AI gateway plugin (P29's done criteria): English and Chinese
+// requests pause, seek and switch the subtitles of the requesting device;
+// a film named by a homophone of its Chinese name plays; a request of a
+// title is canceled, another is confirmed by what was said.
 func TestAssistant(t *testing.T) {
 	t.Parallel()
-	speechWAV := fixtures.Require(t, "speech.wav")
-	s := startAcquisition(t, assistantRoutes(t), false, voicePlugin)
-	ctx := t.Context()
+	s := startAcquisition(t, assistantRoutes(t), false)
 	a := s.assistant()
 
-	// A film with English and Chinese subtitles, and an episode.
-	movies, shows := t.TempDir(), t.TempDir()
+	// A film with English and Chinese subtitles.
+	movies := t.TempDir()
 	srt := func(text string) string {
 		path := filepath.Join(t.TempDir(), "sub.srt")
 		if err := os.WriteFile(path, []byte("1\n00:00:01,000 --> 00:00:03,000\n"+text+"\n"), 0o644); err != nil {
@@ -270,29 +177,8 @@ func TestAssistant(t *testing.T) {
 		"-map", "0", "-map", "1", "-map", "2", "-c", "copy", "-c:s", "srt",
 		"-metadata:s:s:0", "language=eng", "-metadata:s:s:1", "language=chi", film)
 	settled(t, film)
-	episodeDir := filepath.Join(shows, "Breaking Bad", "Season 01")
-	if err := os.MkdirAll(episodeDir, 0o755); err != nil {
-		t.Fatal(err)
-	}
-	if err := os.Rename(s.video("320x240", 20), filepath.Join(episodeDir, "Breaking Bad S01E01.mkv")); err != nil {
-		t.Fatal(err)
-	}
 	movieLib := s.library("Movies", libraryv1.LibraryKind_LIBRARY_KIND_MOVIES, movies)
-	showLib := s.library("Shows", libraryv1.LibraryKind_LIBRARY_KIND_SHOWS, shows)
 	movie := s.movie(movieLib)
-
-	// whisper is the server's recognizer, and transcribes subtitles.
-	asr := newFakeASR(t)
-	if _, err := s.pluginAdmin.SetPluginConfig(ctx, systemv1.SetPluginConfigRequest_builder{
-		PluginId:   new("dev.mavio.voice"),
-		ConfigJson: new(`{"recognizers": [{"name": "whisper", "enabled": true, "settings": {"endpoint": "` + asr.URL + `", "subtitles": true}}]}`),
-	}.Build()); err != nil {
-		t.Fatalf("SetPluginConfig: %v", err)
-	}
-	waitFor(t, "whisper recognizing", func() bool {
-		got, err := a.GetAssistant(ctx, &assistantv1.GetAssistantRequest{})
-		return err == nil && len(got.GetRecognizers()) > 0
-	})
 
 	// 1. The device plays the film without subtitles.
 	english := s.streamIndex(movie.GetId(), libraryv1.StreamKind_STREAM_KIND_SUBTITLE, "en")
@@ -352,70 +238,18 @@ func TestAssistant(t *testing.T) {
 		t.Errorf("requests after canceling = %q, want = none", got)
 	}
 
-	// 4. Another is confirmed by voice: the recognizer hears the recording.
+	// 4. Another is confirmed by what was said.
 	events = ask(t, a, assistantv1.AskRequest_builder{Text: new("request The Matrix"), Context: home("en")}.Build())
 	if !done(events).GetConfirmation() {
 		t.Fatalf("request The Matrix answered %v, want = a confirmation", events)
 	}
-	asr.say("Yes.")
-	heard := s.listen(speechWAV)
-	if heard != "Yes." {
-		t.Fatalf("heard %q, want = Yes.", heard)
-	}
-	d := done(ask(t, a, assistantv1.AskRequest_builder{Text: new(heard), Spoken: new(true), Context: home("en")}.Build()))
+	d := done(ask(t, a, assistantv1.AskRequest_builder{Text: new("Yes."), Spoken: new(true), Context: home("en")}.Build()))
 	if d.GetConfirmation() || !strings.Contains(d.GetAnswer(), "The Matrix") {
 		t.Errorf("Yes. answered %v, want = The Matrix requested", d)
 	}
 	if got := s.requested(); !slices.Equal(got, []string{"The Matrix"}) {
 		t.Errorf("requests = %q, want = The Matrix", got)
 	}
-
-	// 5. The same recognizer transcribes the episode's subtitles.
-	var episode *libraryv1.Item
-	waitFor(t, "the episode", func() bool {
-		eps := s.inLibrary(showLib, libraryv1.ItemKind_ITEM_KIND_EPISODE)
-		if len(eps) == 1 {
-			episode = eps[0]
-		}
-		return episode != nil
-	})
-	waitFor(t, "whisper transcribing subtitles", func() bool {
-		resp, err := s.subtitles.ListSubtitleProviders(ctx, &acquisitionv1.ListSubtitleProvidersRequest{})
-		if err != nil {
-			return false
-		}
-		return slices.ContainsFunc(resp.GetProviders(), func(p *acquisitionv1.SubtitleProviderState) bool {
-			return p.GetId() == transcriptionID && p.GetEnabled()
-		})
-	})
-	asr.say("Say my name.")
-	en := acquisitionv1.SubtitleLanguageSpec_builder{Language: new("en")}.Build()
-	found, err := s.subtitles.SearchItemSubtitles(ctx, acquisitionv1.SearchItemSubtitlesRequest_builder{
-		ItemId: new(episode.GetId()), Languages: []*acquisitionv1.SubtitleLanguageSpec{en},
-	}.Build())
-	if err != nil {
-		t.Fatalf("SearchItemSubtitles: %v", err)
-	}
-	i := slices.IndexFunc(found.GetSubtitles(), func(sub *acquisitionv1.ScoredSubtitle) bool { return sub.GetProvider() == transcriptionID })
-	if i < 0 {
-		t.Fatalf("subtitles found = %v, want = whisper's transcription", found.GetSubtitles())
-	}
-	transcribed := found.GetSubtitles()[i]
-	saved, err := s.subtitles.DownloadItemSubtitle(ctx, acquisitionv1.DownloadItemSubtitleRequest_builder{
-		ItemId: new(episode.GetId()), Provider: new(transcribed.GetProvider()), SubtitleId: new(transcribed.GetSubtitleId()),
-		Language: transcribed.GetLanguage(),
-	}.Build())
-	if err != nil {
-		t.Fatalf("DownloadItemSubtitle: %v", err)
-	}
-	if data, err := os.ReadFile(saved.GetPath()); err != nil || !strings.Contains(string(data), "Say my name.") {
-		t.Errorf("transcription = %q, %v; want = whisper's", data, err)
-	}
-	asr.mu.Lock()
-	if !slices.Equal(asr.tasks, []string{"transcribe", "transcribe"}) {
-		t.Errorf("whisper was asked to %q, want = transcribe the recording, then the episode", asr.tasks)
-	}
-	asr.mu.Unlock()
 }
 
 // modelCall is a call of a tool a fake model makes.

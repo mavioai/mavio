@@ -76,7 +76,7 @@ NAVIGATE_TARGET_SEARCH: NavigateTarget
 NAVIGATE_TARGET_SETTINGS: NavigateTarget
 
 class AssistantSettings(_message.Message):
-    __slots__ = ("enabled", "model", "code_mode", "ai_access", "ai_user_ids", "idle_minutes", "retention_days", "memory", "recognizer", "voices", "hints")
+    __slots__ = ("enabled", "model", "code_mode", "ai_access", "ai_user_ids", "idle_minutes", "retention_days", "memory", "hints", "speech", "longest_pause", "commit_delay", "session_idle")
     ENABLED_FIELD_NUMBER: _ClassVar[int]
     MODEL_FIELD_NUMBER: _ClassVar[int]
     CODE_MODE_FIELD_NUMBER: _ClassVar[int]
@@ -85,9 +85,11 @@ class AssistantSettings(_message.Message):
     IDLE_MINUTES_FIELD_NUMBER: _ClassVar[int]
     RETENTION_DAYS_FIELD_NUMBER: _ClassVar[int]
     MEMORY_FIELD_NUMBER: _ClassVar[int]
-    RECOGNIZER_FIELD_NUMBER: _ClassVar[int]
-    VOICES_FIELD_NUMBER: _ClassVar[int]
     HINTS_FIELD_NUMBER: _ClassVar[int]
+    SPEECH_FIELD_NUMBER: _ClassVar[int]
+    LONGEST_PAUSE_FIELD_NUMBER: _ClassVar[int]
+    COMMIT_DELAY_FIELD_NUMBER: _ClassVar[int]
+    SESSION_IDLE_FIELD_NUMBER: _ClassVar[int]
     enabled: bool
     model: str
     code_mode: bool
@@ -96,18 +98,22 @@ class AssistantSettings(_message.Message):
     idle_minutes: int
     retention_days: int
     memory: bool
-    recognizer: str
-    voices: _containers.RepeatedCompositeFieldContainer[AssistantVoiceChoice]
     hints: bool
-    def __init__(self, enabled: _Optional[bool] = ..., model: _Optional[str] = ..., code_mode: _Optional[bool] = ..., ai_access: _Optional[_Union[AssistantAccess, str]] = ..., ai_user_ids: _Optional[_Iterable[str]] = ..., idle_minutes: _Optional[int] = ..., retention_days: _Optional[int] = ..., memory: _Optional[bool] = ..., recognizer: _Optional[str] = ..., voices: _Optional[_Iterable[_Union[AssistantVoiceChoice, _Mapping]]] = ..., hints: _Optional[bool] = ...) -> None: ...
+    speech: _containers.RepeatedCompositeFieldContainer[AssistantSpeech]
+    longest_pause: _duration_pb2.Duration
+    commit_delay: _duration_pb2.Duration
+    session_idle: _duration_pb2.Duration
+    def __init__(self, enabled: _Optional[bool] = ..., model: _Optional[str] = ..., code_mode: _Optional[bool] = ..., ai_access: _Optional[_Union[AssistantAccess, str]] = ..., ai_user_ids: _Optional[_Iterable[str]] = ..., idle_minutes: _Optional[int] = ..., retention_days: _Optional[int] = ..., memory: _Optional[bool] = ..., hints: _Optional[bool] = ..., speech: _Optional[_Iterable[_Union[AssistantSpeech, _Mapping]]] = ..., longest_pause: _Optional[_Union[datetime.timedelta, _duration_pb2.Duration, _Mapping]] = ..., commit_delay: _Optional[_Union[datetime.timedelta, _duration_pb2.Duration, _Mapping]] = ..., session_idle: _Optional[_Union[datetime.timedelta, _duration_pb2.Duration, _Mapping]] = ...) -> None: ...
 
-class AssistantVoiceChoice(_message.Message):
-    __slots__ = ("language", "voice")
+class AssistantSpeech(_message.Message):
+    __slots__ = ("language", "recognizer", "voice")
     LANGUAGE_FIELD_NUMBER: _ClassVar[int]
+    RECOGNIZER_FIELD_NUMBER: _ClassVar[int]
     VOICE_FIELD_NUMBER: _ClassVar[int]
     language: str
+    recognizer: str
     voice: str
-    def __init__(self, language: _Optional[str] = ..., voice: _Optional[str] = ...) -> None: ...
+    def __init__(self, language: _Optional[str] = ..., recognizer: _Optional[str] = ..., voice: _Optional[str] = ...) -> None: ...
 
 class GetAssistantRequest(_message.Message):
     __slots__ = ("language",)
@@ -116,47 +122,35 @@ class GetAssistantRequest(_message.Message):
     def __init__(self, language: _Optional[str] = ...) -> None: ...
 
 class GetAssistantResponse(_message.Message):
-    __slots__ = ("enabled", "ai", "memory", "recognizers", "voices", "default_voices", "examples", "languages")
+    __slots__ = ("enabled", "ai", "memory", "voice", "examples", "languages")
     ENABLED_FIELD_NUMBER: _ClassVar[int]
     AI_FIELD_NUMBER: _ClassVar[int]
     MEMORY_FIELD_NUMBER: _ClassVar[int]
-    RECOGNIZERS_FIELD_NUMBER: _ClassVar[int]
-    VOICES_FIELD_NUMBER: _ClassVar[int]
-    DEFAULT_VOICES_FIELD_NUMBER: _ClassVar[int]
+    VOICE_FIELD_NUMBER: _ClassVar[int]
     EXAMPLES_FIELD_NUMBER: _ClassVar[int]
     LANGUAGES_FIELD_NUMBER: _ClassVar[int]
     enabled: bool
     ai: bool
     memory: bool
-    recognizers: _containers.RepeatedCompositeFieldContainer[Recognizer]
-    voices: _containers.RepeatedCompositeFieldContainer[Voice]
-    default_voices: _containers.RepeatedCompositeFieldContainer[AssistantVoiceChoice]
+    voice: bool
     examples: _containers.RepeatedScalarFieldContainer[str]
     languages: _containers.RepeatedScalarFieldContainer[str]
-    def __init__(self, enabled: _Optional[bool] = ..., ai: _Optional[bool] = ..., memory: _Optional[bool] = ..., recognizers: _Optional[_Iterable[_Union[Recognizer, _Mapping]]] = ..., voices: _Optional[_Iterable[_Union[Voice, _Mapping]]] = ..., default_voices: _Optional[_Iterable[_Union[AssistantVoiceChoice, _Mapping]]] = ..., examples: _Optional[_Iterable[str]] = ..., languages: _Optional[_Iterable[str]] = ...) -> None: ...
+    def __init__(self, enabled: _Optional[bool] = ..., ai: _Optional[bool] = ..., memory: _Optional[bool] = ..., voice: _Optional[bool] = ..., examples: _Optional[_Iterable[str]] = ..., languages: _Optional[_Iterable[str]] = ...) -> None: ...
 
-class Recognizer(_message.Message):
-    __slots__ = ("id", "name", "languages")
+class VoiceEngine(_message.Message):
+    __slots__ = ("id", "name", "languages", "ready")
     ID_FIELD_NUMBER: _ClassVar[int]
     NAME_FIELD_NUMBER: _ClassVar[int]
     LANGUAGES_FIELD_NUMBER: _ClassVar[int]
+    READY_FIELD_NUMBER: _ClassVar[int]
     id: str
     name: str
     languages: _containers.RepeatedScalarFieldContainer[str]
-    def __init__(self, id: _Optional[str] = ..., name: _Optional[str] = ..., languages: _Optional[_Iterable[str]] = ...) -> None: ...
-
-class Voice(_message.Message):
-    __slots__ = ("id", "name", "languages")
-    ID_FIELD_NUMBER: _ClassVar[int]
-    NAME_FIELD_NUMBER: _ClassVar[int]
-    LANGUAGES_FIELD_NUMBER: _ClassVar[int]
-    id: str
-    name: str
-    languages: _containers.RepeatedScalarFieldContainer[str]
-    def __init__(self, id: _Optional[str] = ..., name: _Optional[str] = ..., languages: _Optional[_Iterable[str]] = ...) -> None: ...
+    ready: bool
+    def __init__(self, id: _Optional[str] = ..., name: _Optional[str] = ..., languages: _Optional[_Iterable[str]] = ..., ready: _Optional[bool] = ...) -> None: ...
 
 class AskRequest(_message.Message):
-    __slots__ = ("text", "intent", "context", "spoken", "answer", "choice", "failed_actions", "speech_id")
+    __slots__ = ("text", "intent", "context", "spoken", "answer", "choice", "failed_actions")
     TEXT_FIELD_NUMBER: _ClassVar[int]
     INTENT_FIELD_NUMBER: _ClassVar[int]
     CONTEXT_FIELD_NUMBER: _ClassVar[int]
@@ -164,7 +158,6 @@ class AskRequest(_message.Message):
     ANSWER_FIELD_NUMBER: _ClassVar[int]
     CHOICE_FIELD_NUMBER: _ClassVar[int]
     FAILED_ACTIONS_FIELD_NUMBER: _ClassVar[int]
-    SPEECH_ID_FIELD_NUMBER: _ClassVar[int]
     text: str
     intent: _intent_pb2.Intent
     context: AskContext
@@ -172,8 +165,7 @@ class AskRequest(_message.Message):
     answer: ConfirmationAnswer
     choice: str
     failed_actions: _containers.RepeatedScalarFieldContainer[str]
-    speech_id: str
-    def __init__(self, text: _Optional[str] = ..., intent: _Optional[_Union[_intent_pb2.Intent, _Mapping]] = ..., context: _Optional[_Union[AskContext, _Mapping]] = ..., spoken: _Optional[bool] = ..., answer: _Optional[_Union[ConfirmationAnswer, _Mapping]] = ..., choice: _Optional[str] = ..., failed_actions: _Optional[_Iterable[str]] = ..., speech_id: _Optional[str] = ...) -> None: ...
+    def __init__(self, text: _Optional[str] = ..., intent: _Optional[_Union[_intent_pb2.Intent, _Mapping]] = ..., context: _Optional[_Union[AskContext, _Mapping]] = ..., spoken: _Optional[bool] = ..., answer: _Optional[_Union[ConfirmationAnswer, _Mapping]] = ..., choice: _Optional[str] = ..., failed_actions: _Optional[_Iterable[str]] = ...) -> None: ...
 
 class AskContext(_message.Message):
     __slots__ = ("languages", "playing", "screen", "item_id", "library_id", "selected_item_ids", "time_zone")
@@ -353,34 +345,6 @@ class Done(_message.Message):
     not_understood: bool
     def __init__(self, answer: _Optional[str] = ..., language: _Optional[str] = ..., conversation_id: _Optional[str] = ..., confirmation: _Optional[bool] = ..., results: _Optional[int] = ..., not_understood: _Optional[bool] = ...) -> None: ...
 
-class GetAssistantHintsRequest(_message.Message):
-    __slots__ = ()
-    def __init__(self) -> None: ...
-
-class GetAssistantHintsResponse(_message.Message):
-    __slots__ = ("phrases",)
-    PHRASES_FIELD_NUMBER: _ClassVar[int]
-    phrases: _containers.RepeatedScalarFieldContainer[str]
-    def __init__(self, phrases: _Optional[_Iterable[str]] = ...) -> None: ...
-
-class StartListeningRequest(_message.Message):
-    __slots__ = ("language", "recognizer")
-    LANGUAGE_FIELD_NUMBER: _ClassVar[int]
-    RECOGNIZER_FIELD_NUMBER: _ClassVar[int]
-    language: str
-    recognizer: str
-    def __init__(self, language: _Optional[str] = ..., recognizer: _Optional[str] = ...) -> None: ...
-
-class StartListeningResponse(_message.Message):
-    __slots__ = ("url", "recognizer", "expire_time")
-    URL_FIELD_NUMBER: _ClassVar[int]
-    RECOGNIZER_FIELD_NUMBER: _ClassVar[int]
-    EXPIRE_TIME_FIELD_NUMBER: _ClassVar[int]
-    url: str
-    recognizer: str
-    expire_time: _timestamp_pb2.Timestamp
-    def __init__(self, url: _Optional[str] = ..., recognizer: _Optional[str] = ..., expire_time: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ...) -> None: ...
-
 class StartVoiceSessionRequest(_message.Message):
     __slots__ = ("language", "mode", "context")
     LANGUAGE_FIELD_NUMBER: _ClassVar[int]
@@ -418,16 +382,16 @@ class AssistantConversation(_message.Message):
     def __init__(self, id: _Optional[str] = ..., title: _Optional[str] = ..., device_name: _Optional[str] = ..., create_time: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ..., update_time: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ..., usage: _Optional[_Union[_ai_pb2.AiUsage, _Mapping]] = ...) -> None: ...
 
 class AssistantMessage(_message.Message):
-    __slots__ = ("user", "text", "time", "speech")
+    __slots__ = ("user", "text", "time", "speech_url")
     USER_FIELD_NUMBER: _ClassVar[int]
     TEXT_FIELD_NUMBER: _ClassVar[int]
     TIME_FIELD_NUMBER: _ClassVar[int]
-    SPEECH_FIELD_NUMBER: _ClassVar[int]
+    SPEECH_URL_FIELD_NUMBER: _ClassVar[int]
     user: bool
     text: str
     time: _timestamp_pb2.Timestamp
-    speech: _containers.RepeatedScalarFieldContainer[str]
-    def __init__(self, user: _Optional[bool] = ..., text: _Optional[str] = ..., time: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ..., speech: _Optional[_Iterable[str]] = ...) -> None: ...
+    speech_url: str
+    def __init__(self, user: _Optional[bool] = ..., text: _Optional[str] = ..., time: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ..., speech_url: _Optional[str] = ...) -> None: ...
 
 class ListAssistantConversationsRequest(_message.Message):
     __slots__ = ()
@@ -516,10 +480,14 @@ class GetAssistantSettingsRequest(_message.Message):
     def __init__(self) -> None: ...
 
 class GetAssistantSettingsResponse(_message.Message):
-    __slots__ = ("settings",)
+    __slots__ = ("settings", "recognizers", "voices")
     SETTINGS_FIELD_NUMBER: _ClassVar[int]
+    RECOGNIZERS_FIELD_NUMBER: _ClassVar[int]
+    VOICES_FIELD_NUMBER: _ClassVar[int]
     settings: AssistantSettings
-    def __init__(self, settings: _Optional[_Union[AssistantSettings, _Mapping]] = ...) -> None: ...
+    recognizers: _containers.RepeatedCompositeFieldContainer[VoiceEngine]
+    voices: _containers.RepeatedCompositeFieldContainer[VoiceEngine]
+    def __init__(self, settings: _Optional[_Union[AssistantSettings, _Mapping]] = ..., recognizers: _Optional[_Iterable[_Union[VoiceEngine, _Mapping]]] = ..., voices: _Optional[_Iterable[_Union[VoiceEngine, _Mapping]]] = ...) -> None: ...
 
 class UpdateAssistantSettingsRequest(_message.Message):
     __slots__ = ("settings",)

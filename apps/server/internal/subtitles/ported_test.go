@@ -211,7 +211,7 @@ func TestPortedEmbedded(t *testing.T) {
 }
 
 func TestPortedWhisper(t *testing.T) {
-	const ffprobe = "the server encodes audio for recognizers with its own ffmpeg; recognizers take PCM, never an ffprobe path"
+	const ffprobe = "the server encodes audio for transcribers with its own ffmpeg; transcribers take PCM, never an ffprobe path"
 	portedCases(t, "whisperai.json", ported{skip: map[string]string{
 		"test_ffprobe_path_uses_provided_value":          ffprobe,
 		"test_ffprobe_path_falls_back_when_not_provided": ffprobe,

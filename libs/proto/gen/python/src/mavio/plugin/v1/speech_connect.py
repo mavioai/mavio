@@ -17,10 +17,10 @@ import mavio.plugin.v1.speech_pb2 as mavio_dot_plugin_dot_v1_dot_speech__pb2
 
 
 class SpeechToTextService(Protocol):
-    async def list_recognizers(self, request: mavio_dot_plugin_dot_v1_dot_speech__pb2.ListRecognizersRequest, ctx: RequestContext) -> mavio_dot_plugin_dot_v1_dot_speech__pb2.ListRecognizersResponse:
+    async def list_transcribers(self, request: mavio_dot_plugin_dot_v1_dot_speech__pb2.ListTranscribersRequest, ctx: RequestContext) -> mavio_dot_plugin_dot_v1_dot_speech__pb2.ListTranscribersResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
 
-    async def recognize_speech(self, request: mavio_dot_plugin_dot_v1_dot_speech__pb2.RecognizeSpeechRequest, ctx: RequestContext) -> mavio_dot_plugin_dot_v1_dot_speech__pb2.RecognizeSpeechResponse:
+    async def transcribe_speech(self, request: mavio_dot_plugin_dot_v1_dot_speech__pb2.TranscribeSpeechRequest, ctx: RequestContext) -> mavio_dot_plugin_dot_v1_dot_speech__pb2.TranscribeSpeechResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
 
     async def detect_speech_language(self, request: mavio_dot_plugin_dot_v1_dot_speech__pb2.DetectSpeechLanguageRequest, ctx: RequestContext) -> mavio_dot_plugin_dot_v1_dot_speech__pb2.DetectSpeechLanguageResponse:
@@ -32,25 +32,25 @@ class SpeechToTextServiceASGIApplication(ConnectASGIApplication[SpeechToTextServ
         super().__init__(
             service=service,
             endpoints=lambda svc: {
-                "/mavio.plugin.v1.SpeechToTextService/ListRecognizers": Endpoint.unary(
+                "/mavio.plugin.v1.SpeechToTextService/ListTranscribers": Endpoint.unary(
                     method=MethodInfo(
-                        name="ListRecognizers",
+                        name="ListTranscribers",
                         service_name="mavio.plugin.v1.SpeechToTextService",
-                        input=mavio_dot_plugin_dot_v1_dot_speech__pb2.ListRecognizersRequest,
-                        output=mavio_dot_plugin_dot_v1_dot_speech__pb2.ListRecognizersResponse,
+                        input=mavio_dot_plugin_dot_v1_dot_speech__pb2.ListTranscribersRequest,
+                        output=mavio_dot_plugin_dot_v1_dot_speech__pb2.ListTranscribersResponse,
                         idempotency_level=IdempotencyLevel.NO_SIDE_EFFECTS,
                     ),
-                    function=svc.list_recognizers,
+                    function=svc.list_transcribers,
                 ),
-                "/mavio.plugin.v1.SpeechToTextService/RecognizeSpeech": Endpoint.unary(
+                "/mavio.plugin.v1.SpeechToTextService/TranscribeSpeech": Endpoint.unary(
                     method=MethodInfo(
-                        name="RecognizeSpeech",
+                        name="TranscribeSpeech",
                         service_name="mavio.plugin.v1.SpeechToTextService",
-                        input=mavio_dot_plugin_dot_v1_dot_speech__pb2.RecognizeSpeechRequest,
-                        output=mavio_dot_plugin_dot_v1_dot_speech__pb2.RecognizeSpeechResponse,
+                        input=mavio_dot_plugin_dot_v1_dot_speech__pb2.TranscribeSpeechRequest,
+                        output=mavio_dot_plugin_dot_v1_dot_speech__pb2.TranscribeSpeechResponse,
                         idempotency_level=IdempotencyLevel.UNKNOWN,
                     ),
-                    function=svc.recognize_speech,
+                    function=svc.transcribe_speech,
                 ),
                 "/mavio.plugin.v1.SpeechToTextService/DetectSpeechLanguage": Endpoint.unary(
                     method=MethodInfo(
@@ -75,21 +75,21 @@ class SpeechToTextServiceASGIApplication(ConnectASGIApplication[SpeechToTextServ
 
 
 class SpeechToTextServiceClient(ConnectClient):
-    async def list_recognizers(
+    async def list_transcribers(
         self,
-        request: mavio_dot_plugin_dot_v1_dot_speech__pb2.ListRecognizersRequest,
+        request: mavio_dot_plugin_dot_v1_dot_speech__pb2.ListTranscribersRequest,
         *,
         headers: Headers | Mapping[str, str] | None = None,
         timeout_ms: int | None = None,
         use_get: bool = False,
-    ) -> mavio_dot_plugin_dot_v1_dot_speech__pb2.ListRecognizersResponse:
+    ) -> mavio_dot_plugin_dot_v1_dot_speech__pb2.ListTranscribersResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
-                name="ListRecognizers",
+                name="ListTranscribers",
                 service_name="mavio.plugin.v1.SpeechToTextService",
-                input=mavio_dot_plugin_dot_v1_dot_speech__pb2.ListRecognizersRequest,
-                output=mavio_dot_plugin_dot_v1_dot_speech__pb2.ListRecognizersResponse,
+                input=mavio_dot_plugin_dot_v1_dot_speech__pb2.ListTranscribersRequest,
+                output=mavio_dot_plugin_dot_v1_dot_speech__pb2.ListTranscribersResponse,
                 idempotency_level=IdempotencyLevel.NO_SIDE_EFFECTS,
             ),
             headers=headers,
@@ -97,20 +97,20 @@ class SpeechToTextServiceClient(ConnectClient):
             use_get=use_get,
         )
 
-    async def recognize_speech(
+    async def transcribe_speech(
         self,
-        request: mavio_dot_plugin_dot_v1_dot_speech__pb2.RecognizeSpeechRequest,
+        request: mavio_dot_plugin_dot_v1_dot_speech__pb2.TranscribeSpeechRequest,
         *,
         headers: Headers | Mapping[str, str] | None = None,
         timeout_ms: int | None = None,
-    ) -> mavio_dot_plugin_dot_v1_dot_speech__pb2.RecognizeSpeechResponse:
+    ) -> mavio_dot_plugin_dot_v1_dot_speech__pb2.TranscribeSpeechResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
-                name="RecognizeSpeech",
+                name="TranscribeSpeech",
                 service_name="mavio.plugin.v1.SpeechToTextService",
-                input=mavio_dot_plugin_dot_v1_dot_speech__pb2.RecognizeSpeechRequest,
-                output=mavio_dot_plugin_dot_v1_dot_speech__pb2.RecognizeSpeechResponse,
+                input=mavio_dot_plugin_dot_v1_dot_speech__pb2.TranscribeSpeechRequest,
+                output=mavio_dot_plugin_dot_v1_dot_speech__pb2.TranscribeSpeechResponse,
                 idempotency_level=IdempotencyLevel.UNKNOWN,
             ),
             headers=headers,
@@ -138,100 +138,10 @@ class SpeechToTextServiceClient(ConnectClient):
         )
 
 
-
-class TextToSpeechService(Protocol):
-    async def list_voices(self, request: mavio_dot_plugin_dot_v1_dot_speech__pb2.ListVoicesRequest, ctx: RequestContext) -> mavio_dot_plugin_dot_v1_dot_speech__pb2.ListVoicesResponse:
-        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
-
-    async def synthesize_speech(self, request: mavio_dot_plugin_dot_v1_dot_speech__pb2.SynthesizeSpeechRequest, ctx: RequestContext) -> mavio_dot_plugin_dot_v1_dot_speech__pb2.SynthesizeSpeechResponse:
-        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
-
-
-class TextToSpeechServiceASGIApplication(ConnectASGIApplication[TextToSpeechService]):
-    def __init__(self, service: TextToSpeechService | AsyncGenerator[TextToSpeechService], *, interceptors: Iterable[Interceptor]=(), read_max_bytes: int | None = None, compressions: Iterable[Compression] | None = None) -> None:
-        super().__init__(
-            service=service,
-            endpoints=lambda svc: {
-                "/mavio.plugin.v1.TextToSpeechService/ListVoices": Endpoint.unary(
-                    method=MethodInfo(
-                        name="ListVoices",
-                        service_name="mavio.plugin.v1.TextToSpeechService",
-                        input=mavio_dot_plugin_dot_v1_dot_speech__pb2.ListVoicesRequest,
-                        output=mavio_dot_plugin_dot_v1_dot_speech__pb2.ListVoicesResponse,
-                        idempotency_level=IdempotencyLevel.NO_SIDE_EFFECTS,
-                    ),
-                    function=svc.list_voices,
-                ),
-                "/mavio.plugin.v1.TextToSpeechService/SynthesizeSpeech": Endpoint.unary(
-                    method=MethodInfo(
-                        name="SynthesizeSpeech",
-                        service_name="mavio.plugin.v1.TextToSpeechService",
-                        input=mavio_dot_plugin_dot_v1_dot_speech__pb2.SynthesizeSpeechRequest,
-                        output=mavio_dot_plugin_dot_v1_dot_speech__pb2.SynthesizeSpeechResponse,
-                        idempotency_level=IdempotencyLevel.UNKNOWN,
-                    ),
-                    function=svc.synthesize_speech,
-                ),
-            },
-            interceptors=interceptors,
-            read_max_bytes=read_max_bytes,
-            compressions=compressions,
-        )
-
-    @property
-    def path(self) -> str:
-        """Returns the URL path to mount the application to when serving multiple applications."""
-        return "/mavio.plugin.v1.TextToSpeechService"
-
-
-class TextToSpeechServiceClient(ConnectClient):
-    async def list_voices(
-        self,
-        request: mavio_dot_plugin_dot_v1_dot_speech__pb2.ListVoicesRequest,
-        *,
-        headers: Headers | Mapping[str, str] | None = None,
-        timeout_ms: int | None = None,
-        use_get: bool = False,
-    ) -> mavio_dot_plugin_dot_v1_dot_speech__pb2.ListVoicesResponse:
-        return await self.execute_unary(
-            request=request,
-            method=MethodInfo(
-                name="ListVoices",
-                service_name="mavio.plugin.v1.TextToSpeechService",
-                input=mavio_dot_plugin_dot_v1_dot_speech__pb2.ListVoicesRequest,
-                output=mavio_dot_plugin_dot_v1_dot_speech__pb2.ListVoicesResponse,
-                idempotency_level=IdempotencyLevel.NO_SIDE_EFFECTS,
-            ),
-            headers=headers,
-            timeout_ms=timeout_ms,
-            use_get=use_get,
-        )
-
-    async def synthesize_speech(
-        self,
-        request: mavio_dot_plugin_dot_v1_dot_speech__pb2.SynthesizeSpeechRequest,
-        *,
-        headers: Headers | Mapping[str, str] | None = None,
-        timeout_ms: int | None = None,
-    ) -> mavio_dot_plugin_dot_v1_dot_speech__pb2.SynthesizeSpeechResponse:
-        return await self.execute_unary(
-            request=request,
-            method=MethodInfo(
-                name="SynthesizeSpeech",
-                service_name="mavio.plugin.v1.TextToSpeechService",
-                input=mavio_dot_plugin_dot_v1_dot_speech__pb2.SynthesizeSpeechRequest,
-                output=mavio_dot_plugin_dot_v1_dot_speech__pb2.SynthesizeSpeechResponse,
-                idempotency_level=IdempotencyLevel.UNKNOWN,
-            ),
-            headers=headers,
-            timeout_ms=timeout_ms,
-        )
-
-
 class SpeechToTextServiceSync(Protocol):
-    def list_recognizers(self, request: mavio_dot_plugin_dot_v1_dot_speech__pb2.ListRecognizersRequest, ctx: RequestContext) -> mavio_dot_plugin_dot_v1_dot_speech__pb2.ListRecognizersResponse:
+    def list_transcribers(self, request: mavio_dot_plugin_dot_v1_dot_speech__pb2.ListTranscribersRequest, ctx: RequestContext) -> mavio_dot_plugin_dot_v1_dot_speech__pb2.ListTranscribersResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
-    def recognize_speech(self, request: mavio_dot_plugin_dot_v1_dot_speech__pb2.RecognizeSpeechRequest, ctx: RequestContext) -> mavio_dot_plugin_dot_v1_dot_speech__pb2.RecognizeSpeechResponse:
+    def transcribe_speech(self, request: mavio_dot_plugin_dot_v1_dot_speech__pb2.TranscribeSpeechRequest, ctx: RequestContext) -> mavio_dot_plugin_dot_v1_dot_speech__pb2.TranscribeSpeechResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
     def detect_speech_language(self, request: mavio_dot_plugin_dot_v1_dot_speech__pb2.DetectSpeechLanguageRequest, ctx: RequestContext) -> mavio_dot_plugin_dot_v1_dot_speech__pb2.DetectSpeechLanguageResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
@@ -241,25 +151,25 @@ class SpeechToTextServiceWSGIApplication(ConnectWSGIApplication):
     def __init__(self, service: SpeechToTextServiceSync, interceptors: Iterable[InterceptorSync]=(), read_max_bytes: int | None = None, compressions: Iterable[Compression] | None = None) -> None:
         super().__init__(
             endpoints={
-                "/mavio.plugin.v1.SpeechToTextService/ListRecognizers": EndpointSync.unary(
+                "/mavio.plugin.v1.SpeechToTextService/ListTranscribers": EndpointSync.unary(
                     method=MethodInfo(
-                        name="ListRecognizers",
+                        name="ListTranscribers",
                         service_name="mavio.plugin.v1.SpeechToTextService",
-                        input=mavio_dot_plugin_dot_v1_dot_speech__pb2.ListRecognizersRequest,
-                        output=mavio_dot_plugin_dot_v1_dot_speech__pb2.ListRecognizersResponse,
+                        input=mavio_dot_plugin_dot_v1_dot_speech__pb2.ListTranscribersRequest,
+                        output=mavio_dot_plugin_dot_v1_dot_speech__pb2.ListTranscribersResponse,
                         idempotency_level=IdempotencyLevel.NO_SIDE_EFFECTS,
                     ),
-                    function=service.list_recognizers,
+                    function=service.list_transcribers,
                 ),
-                "/mavio.plugin.v1.SpeechToTextService/RecognizeSpeech": EndpointSync.unary(
+                "/mavio.plugin.v1.SpeechToTextService/TranscribeSpeech": EndpointSync.unary(
                     method=MethodInfo(
-                        name="RecognizeSpeech",
+                        name="TranscribeSpeech",
                         service_name="mavio.plugin.v1.SpeechToTextService",
-                        input=mavio_dot_plugin_dot_v1_dot_speech__pb2.RecognizeSpeechRequest,
-                        output=mavio_dot_plugin_dot_v1_dot_speech__pb2.RecognizeSpeechResponse,
+                        input=mavio_dot_plugin_dot_v1_dot_speech__pb2.TranscribeSpeechRequest,
+                        output=mavio_dot_plugin_dot_v1_dot_speech__pb2.TranscribeSpeechResponse,
                         idempotency_level=IdempotencyLevel.UNKNOWN,
                     ),
-                    function=service.recognize_speech,
+                    function=service.transcribe_speech,
                 ),
                 "/mavio.plugin.v1.SpeechToTextService/DetectSpeechLanguage": EndpointSync.unary(
                     method=MethodInfo(
@@ -284,21 +194,21 @@ class SpeechToTextServiceWSGIApplication(ConnectWSGIApplication):
 
 
 class SpeechToTextServiceClientSync(ConnectClientSync):
-    def list_recognizers(
+    def list_transcribers(
         self,
-        request: mavio_dot_plugin_dot_v1_dot_speech__pb2.ListRecognizersRequest,
+        request: mavio_dot_plugin_dot_v1_dot_speech__pb2.ListTranscribersRequest,
         *,
         headers: Headers | Mapping[str, str] | None = None,
         timeout_ms: int | None = None,
         use_get: bool = False,
-    ) -> mavio_dot_plugin_dot_v1_dot_speech__pb2.ListRecognizersResponse:
+    ) -> mavio_dot_plugin_dot_v1_dot_speech__pb2.ListTranscribersResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
-                name="ListRecognizers",
+                name="ListTranscribers",
                 service_name="mavio.plugin.v1.SpeechToTextService",
-                input=mavio_dot_plugin_dot_v1_dot_speech__pb2.ListRecognizersRequest,
-                output=mavio_dot_plugin_dot_v1_dot_speech__pb2.ListRecognizersResponse,
+                input=mavio_dot_plugin_dot_v1_dot_speech__pb2.ListTranscribersRequest,
+                output=mavio_dot_plugin_dot_v1_dot_speech__pb2.ListTranscribersResponse,
                 idempotency_level=IdempotencyLevel.NO_SIDE_EFFECTS,
             ),
             headers=headers,
@@ -306,20 +216,20 @@ class SpeechToTextServiceClientSync(ConnectClientSync):
             use_get=use_get,
         )
 
-    def recognize_speech(
+    def transcribe_speech(
         self,
-        request: mavio_dot_plugin_dot_v1_dot_speech__pb2.RecognizeSpeechRequest,
+        request: mavio_dot_plugin_dot_v1_dot_speech__pb2.TranscribeSpeechRequest,
         *,
         headers: Headers | Mapping[str, str] | None = None,
         timeout_ms: int | None = None,
-    ) -> mavio_dot_plugin_dot_v1_dot_speech__pb2.RecognizeSpeechResponse:
+    ) -> mavio_dot_plugin_dot_v1_dot_speech__pb2.TranscribeSpeechResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
-                name="RecognizeSpeech",
+                name="TranscribeSpeech",
                 service_name="mavio.plugin.v1.SpeechToTextService",
-                input=mavio_dot_plugin_dot_v1_dot_speech__pb2.RecognizeSpeechRequest,
-                output=mavio_dot_plugin_dot_v1_dot_speech__pb2.RecognizeSpeechResponse,
+                input=mavio_dot_plugin_dot_v1_dot_speech__pb2.TranscribeSpeechRequest,
+                output=mavio_dot_plugin_dot_v1_dot_speech__pb2.TranscribeSpeechResponse,
                 idempotency_level=IdempotencyLevel.UNKNOWN,
             ),
             headers=headers,
@@ -340,92 +250,6 @@ class SpeechToTextServiceClientSync(ConnectClientSync):
                 service_name="mavio.plugin.v1.SpeechToTextService",
                 input=mavio_dot_plugin_dot_v1_dot_speech__pb2.DetectSpeechLanguageRequest,
                 output=mavio_dot_plugin_dot_v1_dot_speech__pb2.DetectSpeechLanguageResponse,
-                idempotency_level=IdempotencyLevel.UNKNOWN,
-            ),
-            headers=headers,
-            timeout_ms=timeout_ms,
-        )
-
-class TextToSpeechServiceSync(Protocol):
-    def list_voices(self, request: mavio_dot_plugin_dot_v1_dot_speech__pb2.ListVoicesRequest, ctx: RequestContext) -> mavio_dot_plugin_dot_v1_dot_speech__pb2.ListVoicesResponse:
-        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
-    def synthesize_speech(self, request: mavio_dot_plugin_dot_v1_dot_speech__pb2.SynthesizeSpeechRequest, ctx: RequestContext) -> mavio_dot_plugin_dot_v1_dot_speech__pb2.SynthesizeSpeechResponse:
-        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
-
-
-class TextToSpeechServiceWSGIApplication(ConnectWSGIApplication):
-    def __init__(self, service: TextToSpeechServiceSync, interceptors: Iterable[InterceptorSync]=(), read_max_bytes: int | None = None, compressions: Iterable[Compression] | None = None) -> None:
-        super().__init__(
-            endpoints={
-                "/mavio.plugin.v1.TextToSpeechService/ListVoices": EndpointSync.unary(
-                    method=MethodInfo(
-                        name="ListVoices",
-                        service_name="mavio.plugin.v1.TextToSpeechService",
-                        input=mavio_dot_plugin_dot_v1_dot_speech__pb2.ListVoicesRequest,
-                        output=mavio_dot_plugin_dot_v1_dot_speech__pb2.ListVoicesResponse,
-                        idempotency_level=IdempotencyLevel.NO_SIDE_EFFECTS,
-                    ),
-                    function=service.list_voices,
-                ),
-                "/mavio.plugin.v1.TextToSpeechService/SynthesizeSpeech": EndpointSync.unary(
-                    method=MethodInfo(
-                        name="SynthesizeSpeech",
-                        service_name="mavio.plugin.v1.TextToSpeechService",
-                        input=mavio_dot_plugin_dot_v1_dot_speech__pb2.SynthesizeSpeechRequest,
-                        output=mavio_dot_plugin_dot_v1_dot_speech__pb2.SynthesizeSpeechResponse,
-                        idempotency_level=IdempotencyLevel.UNKNOWN,
-                    ),
-                    function=service.synthesize_speech,
-                ),
-            },
-            interceptors=interceptors,
-            read_max_bytes=read_max_bytes,
-            compressions=compressions,
-        )
-
-    @property
-    def path(self) -> str:
-        """Returns the URL path to mount the application to when serving multiple applications."""
-        return "/mavio.plugin.v1.TextToSpeechService"
-
-
-class TextToSpeechServiceClientSync(ConnectClientSync):
-    def list_voices(
-        self,
-        request: mavio_dot_plugin_dot_v1_dot_speech__pb2.ListVoicesRequest,
-        *,
-        headers: Headers | Mapping[str, str] | None = None,
-        timeout_ms: int | None = None,
-        use_get: bool = False,
-    ) -> mavio_dot_plugin_dot_v1_dot_speech__pb2.ListVoicesResponse:
-        return self.execute_unary(
-            request=request,
-            method=MethodInfo(
-                name="ListVoices",
-                service_name="mavio.plugin.v1.TextToSpeechService",
-                input=mavio_dot_plugin_dot_v1_dot_speech__pb2.ListVoicesRequest,
-                output=mavio_dot_plugin_dot_v1_dot_speech__pb2.ListVoicesResponse,
-                idempotency_level=IdempotencyLevel.NO_SIDE_EFFECTS,
-            ),
-            headers=headers,
-            timeout_ms=timeout_ms,
-            use_get=use_get,
-        )
-
-    def synthesize_speech(
-        self,
-        request: mavio_dot_plugin_dot_v1_dot_speech__pb2.SynthesizeSpeechRequest,
-        *,
-        headers: Headers | Mapping[str, str] | None = None,
-        timeout_ms: int | None = None,
-    ) -> mavio_dot_plugin_dot_v1_dot_speech__pb2.SynthesizeSpeechResponse:
-        return self.execute_unary(
-            request=request,
-            method=MethodInfo(
-                name="SynthesizeSpeech",
-                service_name="mavio.plugin.v1.TextToSpeechService",
-                input=mavio_dot_plugin_dot_v1_dot_speech__pb2.SynthesizeSpeechRequest,
-                output=mavio_dot_plugin_dot_v1_dot_speech__pb2.SynthesizeSpeechResponse,
                 idempotency_level=IdempotencyLevel.UNKNOWN,
             ),
             headers=headers,

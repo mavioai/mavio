@@ -2,8 +2,8 @@
 // @generated from file mavio/plugin/v1/speech.proto (package mavio.plugin.v1, edition 2023)
 /* eslint-disable */
 
-import type { GenEnum, GenFile, GenMessage, GenService } from "@bufbuild/protobuf/codegenv2";
-import { enumDesc, fileDesc, messageDesc, serviceDesc } from "@bufbuild/protobuf/codegenv2";
+import type { GenFile, GenMessage, GenService } from "@bufbuild/protobuf/codegenv2";
+import { fileDesc, messageDesc, serviceDesc } from "@bufbuild/protobuf/codegenv2";
 import { file_buf_validate_validate } from "../../../buf/validate/validate_pb";
 import type { Duration } from "@bufbuild/protobuf/wkt";
 import { file_google_protobuf_duration } from "@bufbuild/protobuf/wkt";
@@ -15,77 +15,104 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file mavio/plugin/v1/speech.proto.
  */
 export const file_mavio_plugin_v1_speech: GenFile = /*@__PURE__*/
-  fileDesc("ChxtYXZpby9wbHVnaW4vdjEvc3BlZWNoLnByb3RvEg9tYXZpby5wbHVnaW4udjEiGAoWTGlzdFJlY29nbml6ZXJzUmVxdWVzdCKCAQoXTGlzdFJlY29nbml6ZXJzUmVzcG9uc2USNAoLcmVjb2duaXplcnMYASADKAsyHy5tYXZpby5wbHVnaW4udjEuUmVjb2duaXplckluZm8SMQoIc2VydmljZXMYAiADKAsyHy5tYXZpby5wbHVnaW4udjEuUmVjb2duaXplckluZm8irwIKDlJlY29nbml6ZXJJbmZvEgwKBG5hbWUYASABKAkSFAoMZGlzcGxheV9uYW1lGAIgASgJEi8KCHNldHRpbmdzGAMgAygLMh0ubWF2aW8ucGx1Z2luLnYxLlNldHRpbmdGaWVsZBIPCgdlbmFibGVkGAQgASgIEhEKCWxhbmd1YWdlcxgFIAMoCRISCgp0aW1lc3RhbXBzGAYgASgIEhgKEGRldGVjdHNfbGFuZ3VhZ2UYByABKAgSEgoKdHJhbnNsYXRlcxgIIAEoCBINCgVoaW50cxgJIAEoCBIvCgxtYXhfZHVyYXRpb24YCiABKAsyGS5nb29nbGUucHJvdG9idWYuRHVyYXRpb24SEQoJc3VidGl0bGVzGAsgASgIEg8KB3NlcnZpY2UYDCABKAkiZgoLU3BlZWNoQXVkaW8SDQoDcGNtGAEgASgMSAASDQoDdXJsGAIgASgJSAASKAoFbGltaXQYAyABKAsyGS5nb29nbGUucHJvdG9idWYuRHVyYXRpb25CDwoGc291cmNlEgW6SAIIASLAAQoWUmVjb2duaXplU3BlZWNoUmVxdWVzdBIbCgpyZWNvZ25pemVyGAEgASgJQge6SARyAhABEjMKBWF1ZGlvGAIgASgLMhwubWF2aW8ucGx1Z2luLnYxLlNwZWVjaEF1ZGlvQga6SAPIAQESEAoIbGFuZ3VhZ2UYAyABKAkSEQoJdHJhbnNsYXRlGAQgASgIEg0KBWhpbnRzGAUgAygJEhIKCnRpbWVzdGFtcHMYBiABKAgSDAoEbmFtZRgHIAEoCSJrChdSZWNvZ25pemVTcGVlY2hSZXNwb25zZRIMCgR0ZXh0GAEgASgJEhAKCGxhbmd1YWdlGAIgASgJEjAKCHNlZ21lbnRzGAMgAygLMh4ubWF2aW8ucGx1Z2luLnYxLlNwZWVjaFNlZ21lbnQibwoNU3BlZWNoU2VnbWVudBIoCgVzdGFydBgBIAEoCzIZLmdvb2dsZS5wcm90b2J1Zi5EdXJhdGlvbhImCgNlbmQYAiABKAsyGS5nb29nbGUucHJvdG9idWYuRHVyYXRpb24SDAoEdGV4dBgDIAEoCSJvChtEZXRlY3RTcGVlY2hMYW5ndWFnZVJlcXVlc3QSGwoKcmVjb2duaXplchgBIAEoCUIHukgEcgIQARIzCgVhdWRpbxgCIAEoCzIcLm1hdmlvLnBsdWdpbi52MS5TcGVlY2hBdWRpb0IGukgDyAEBIjAKHERldGVjdFNwZWVjaExhbmd1YWdlUmVzcG9uc2USEAoIbGFuZ3VhZ2UYASABKAkiEwoRTGlzdFZvaWNlc1JlcXVlc3QirAEKEkxpc3RWb2ljZXNSZXNwb25zZRIqCgZ2b2ljZXMYASADKAsyGi5tYXZpby5wbHVnaW4udjEuVm9pY2VJbmZvEjYKDHN5bnRoZXNpemVycxgCIAMoCzIgLm1hdmlvLnBsdWdpbi52MS5TeW50aGVzaXplckluZm8SMgoIc2VydmljZXMYAyADKAsyIC5tYXZpby5wbHVnaW4udjEuU3ludGhlc2l6ZXJJbmZvIogBCg9TeW50aGVzaXplckluZm8SDAoEbmFtZRgBIAEoCRIUCgxkaXNwbGF5X25hbWUYAiABKAkSLwoIc2V0dGluZ3MYAyADKAsyHS5tYXZpby5wbHVnaW4udjEuU2V0dGluZ0ZpZWxkEg8KB2VuYWJsZWQYBCABKAgSDwoHc2VydmljZRgFIAEoCSI4CglWb2ljZUluZm8SCgoCaWQYASABKAkSDAoEbmFtZRgCIAEoCRIRCglsYW5ndWFnZXMYAyADKAkiwAEKF1N5bnRoZXNpemVTcGVlY2hSZXF1ZXN0EhYKBXZvaWNlGAEgASgJQge6SARyAhABEhgKBHRleHQYAiABKAlCCrpIB3IFEAEYoB8SEAoIbGFuZ3VhZ2UYAyABKAkSOQoGZm9ybWF0GAQgASgOMh0ubWF2aW8ucGx1Z2luLnYxLlNwZWVjaEZvcm1hdEIKGAG6SAWCAQIQARImCgVzcGVlZBgFIAEoAUIXukgUEhIZAAAAAAAAEEApAAAAAAAAAAAiPwoYU3ludGhlc2l6ZVNwZWVjaFJlc3BvbnNlEg0KBWF1ZGlvGAEgASgMEhQKDGNvbnRlbnRfdHlwZRgCIAEoCSpgCgxTcGVlY2hGb3JtYXQSHQoZU1BFRUNIX0ZPUk1BVF9VTlNQRUNJRklFRBAAEhoKFlNQRUVDSF9GT1JNQVRfT0dHX09QVVMQARIVChFTUEVFQ0hfRk9STUFUX01QMxACMtsCChNTcGVlY2hUb1RleHRTZXJ2aWNlEmkKD0xpc3RSZWNvZ25pemVycxInLm1hdmlvLnBsdWdpbi52MS5MaXN0UmVjb2duaXplcnNSZXF1ZXN0GigubWF2aW8ucGx1Z2luLnYxLkxpc3RSZWNvZ25pemVyc1Jlc3BvbnNlIgOQAgESZAoPUmVjb2duaXplU3BlZWNoEicubWF2aW8ucGx1Z2luLnYxLlJlY29nbml6ZVNwZWVjaFJlcXVlc3QaKC5tYXZpby5wbHVnaW4udjEuUmVjb2duaXplU3BlZWNoUmVzcG9uc2UScwoURGV0ZWN0U3BlZWNoTGFuZ3VhZ2USLC5tYXZpby5wbHVnaW4udjEuRGV0ZWN0U3BlZWNoTGFuZ3VhZ2VSZXF1ZXN0Gi0ubWF2aW8ucGx1Z2luLnYxLkRldGVjdFNwZWVjaExhbmd1YWdlUmVzcG9uc2Uy2gEKE1RleHRUb1NwZWVjaFNlcnZpY2USWgoKTGlzdFZvaWNlcxIiLm1hdmlvLnBsdWdpbi52MS5MaXN0Vm9pY2VzUmVxdWVzdBojLm1hdmlvLnBsdWdpbi52MS5MaXN0Vm9pY2VzUmVzcG9uc2UiA5ACARJnChBTeW50aGVzaXplU3BlZWNoEigubWF2aW8ucGx1Z2luLnYxLlN5bnRoZXNpemVTcGVlY2hSZXF1ZXN0GikubWF2aW8ucGx1Z2luLnYxLlN5bnRoZXNpemVTcGVlY2hSZXNwb25zZULFAQoTY29tLm1hdmlvLnBsdWdpbi52MUILU3BlZWNoUHJvdG9QAVpDZ2l0aHViLmNvbS9tYXZpb2FpL21hdmlvL2xpYnMvcHJvdG8vZ2VuL2dvL21hdmlvL3BsdWdpbi92MTtwbHVnaW52MaICA01QWKoCD01hdmlvLlBsdWdpbi5WMcoCD01hdmlvXFBsdWdpblxWMeICG01hdmlvXFBsdWdpblxWMVxHUEJNZXRhZGF0YeoCEU1hdmlvOjpQbHVnaW46OlYxYghlZGl0aW9uc3DoBw", [file_buf_validate_validate, file_google_protobuf_duration, file_mavio_plugin_v1_settings]);
+  fileDesc("ChxtYXZpby9wbHVnaW4vdjEvc3BlZWNoLnByb3RvEg9tYXZpby5wbHVnaW4udjEiGQoXTGlzdFRyYW5zY3JpYmVyc1JlcXVlc3QijwEKGExpc3RUcmFuc2NyaWJlcnNSZXNwb25zZRI7CghzZXJ2aWNlcxgBIAMoCzIpLm1hdmlvLnBsdWdpbi52MS5UcmFuc2NyaXB0aW9uU2VydmljZUluZm8SNgoMdHJhbnNjcmliZXJzGAIgAygLMiAubWF2aW8ucGx1Z2luLnYxLlRyYW5zY3JpYmVySW5mbyJvChhUcmFuc2NyaXB0aW9uU2VydmljZUluZm8SDAoEbmFtZRgBIAEoCRIUCgxkaXNwbGF5X25hbWUYAiABKAkSLwoIc2V0dGluZ3MYAyADKAsyHS5tYXZpby5wbHVnaW4udjEuU2V0dGluZ0ZpZWxkIrQBCg9UcmFuc2NyaWJlckluZm8SCgoCaWQYASABKAkSDAoEbmFtZRgCIAEoCRIPCgdzZXJ2aWNlGAMgASgJEg8KB2VuYWJsZWQYBCABKAgSDQoFcmVhZHkYBSABKAgSEQoJbGFuZ3VhZ2VzGAYgAygJEi8KDG1heF9kdXJhdGlvbhgHIAEoCzIZLmdvb2dsZS5wcm90b2J1Zi5EdXJhdGlvbhISCgp0cmFuc2xhdGVzGAggASgIIk0KC1NwZWVjaEF1ZGlvEhQKA3VybBgBIAEoCUIHukgEcgIQARIoCgVsaW1pdBgCIAEoCzIZLmdvb2dsZS5wcm90b2J1Zi5EdXJhdGlvbiKfAQoXVHJhbnNjcmliZVNwZWVjaFJlcXVlc3QSHAoLdHJhbnNjcmliZXIYASABKAlCB7pIBHICEAESMwoFYXVkaW8YAiABKAsyHC5tYXZpby5wbHVnaW4udjEuU3BlZWNoQXVkaW9CBrpIA8gBARIQCghsYW5ndWFnZRgDIAEoCRIRCgl0cmFuc2xhdGUYBCABKAgSDAoEbmFtZRgFIAEoCSJeChhUcmFuc2NyaWJlU3BlZWNoUmVzcG9uc2USEAoIbGFuZ3VhZ2UYASABKAkSMAoIc2VnbWVudHMYAiADKAsyHi5tYXZpby5wbHVnaW4udjEuU3BlZWNoU2VnbWVudCJvCg1TcGVlY2hTZWdtZW50EigKBXN0YXJ0GAEgASgLMhkuZ29vZ2xlLnByb3RvYnVmLkR1cmF0aW9uEiYKA2VuZBgCIAEoCzIZLmdvb2dsZS5wcm90b2J1Zi5EdXJhdGlvbhIMCgR0ZXh0GAMgASgJInAKG0RldGVjdFNwZWVjaExhbmd1YWdlUmVxdWVzdBIcCgt0cmFuc2NyaWJlchgBIAEoCUIHukgEcgIQARIzCgVhdWRpbxgCIAEoCzIcLm1hdmlvLnBsdWdpbi52MS5TcGVlY2hBdWRpb0IGukgDyAEBIjAKHERldGVjdFNwZWVjaExhbmd1YWdlUmVzcG9uc2USEAoIbGFuZ3VhZ2UYASABKAky4QIKE1NwZWVjaFRvVGV4dFNlcnZpY2USbAoQTGlzdFRyYW5zY3JpYmVycxIoLm1hdmlvLnBsdWdpbi52MS5MaXN0VHJhbnNjcmliZXJzUmVxdWVzdBopLm1hdmlvLnBsdWdpbi52MS5MaXN0VHJhbnNjcmliZXJzUmVzcG9uc2UiA5ACARJnChBUcmFuc2NyaWJlU3BlZWNoEigubWF2aW8ucGx1Z2luLnYxLlRyYW5zY3JpYmVTcGVlY2hSZXF1ZXN0GikubWF2aW8ucGx1Z2luLnYxLlRyYW5zY3JpYmVTcGVlY2hSZXNwb25zZRJzChREZXRlY3RTcGVlY2hMYW5ndWFnZRIsLm1hdmlvLnBsdWdpbi52MS5EZXRlY3RTcGVlY2hMYW5ndWFnZVJlcXVlc3QaLS5tYXZpby5wbHVnaW4udjEuRGV0ZWN0U3BlZWNoTGFuZ3VhZ2VSZXNwb25zZULFAQoTY29tLm1hdmlvLnBsdWdpbi52MUILU3BlZWNoUHJvdG9QAVpDZ2l0aHViLmNvbS9tYXZpb2FpL21hdmlvL2xpYnMvcHJvdG8vZ2VuL2dvL21hdmlvL3BsdWdpbi92MTtwbHVnaW52MaICA01QWKoCD01hdmlvLlBsdWdpbi5WMcoCD01hdmlvXFBsdWdpblxWMeICG01hdmlvXFBsdWdpblxWMVxHUEJNZXRhZGF0YeoCEU1hdmlvOjpQbHVnaW46OlYxYghlZGl0aW9uc3DoBw", [file_buf_validate_validate, file_google_protobuf_duration, file_mavio_plugin_v1_settings]);
 
 /**
- * @generated from message mavio.plugin.v1.ListRecognizersRequest
+ * @generated from message mavio.plugin.v1.ListTranscribersRequest
  */
-export type ListRecognizersRequest = Message<"mavio.plugin.v1.ListRecognizersRequest"> & {
+export type ListTranscribersRequest = Message<"mavio.plugin.v1.ListTranscribersRequest"> & {
 };
 
 /**
- * Describes the message mavio.plugin.v1.ListRecognizersRequest.
- * Use `create(ListRecognizersRequestSchema)` to create a new message.
+ * Describes the message mavio.plugin.v1.ListTranscribersRequest.
+ * Use `create(ListTranscribersRequestSchema)` to create a new message.
  */
-export const ListRecognizersRequestSchema: GenMessage<ListRecognizersRequest> = /*@__PURE__*/
+export const ListTranscribersRequestSchema: GenMessage<ListTranscribersRequest> = /*@__PURE__*/
   messageDesc(file_mavio_plugin_v1_speech, 0);
 
 /**
- * @generated from message mavio.plugin.v1.ListRecognizersResponse
+ * @generated from message mavio.plugin.v1.ListTranscribersResponse
  */
-export type ListRecognizersResponse = Message<"mavio.plugin.v1.ListRecognizersResponse"> & {
+export type ListTranscribersResponse = Message<"mavio.plugin.v1.ListTranscribersResponse"> & {
   /**
-   * The recognizers configured, which recognize speech by their names.
+   * The services transcribers are configured from.
    *
-   * @generated from field: repeated mavio.plugin.v1.RecognizerInfo recognizers = 1;
+   * @generated from field: repeated mavio.plugin.v1.TranscriptionServiceInfo services = 1;
    */
-  recognizers: RecognizerInfo[];
+  services: TranscriptionServiceInfo[];
 
   /**
-   * The services recognizers are configured from, with their settings
-   * and what they can do. A plugin listing none has recognizers that are
-   * their own services.
-   *
-   * @generated from field: repeated mavio.plugin.v1.RecognizerInfo services = 2;
+   * @generated from field: repeated mavio.plugin.v1.TranscriberInfo transcribers = 2;
    */
-  services: RecognizerInfo[];
+  transcribers: TranscriberInfo[];
 };
 
 /**
- * Describes the message mavio.plugin.v1.ListRecognizersResponse.
- * Use `create(ListRecognizersResponseSchema)` to create a new message.
+ * Describes the message mavio.plugin.v1.ListTranscribersResponse.
+ * Use `create(ListTranscribersResponseSchema)` to create a new message.
  */
-export const ListRecognizersResponseSchema: GenMessage<ListRecognizersResponse> = /*@__PURE__*/
+export const ListTranscribersResponseSchema: GenMessage<ListTranscribersResponse> = /*@__PURE__*/
   messageDesc(file_mavio_plugin_v1_speech, 1);
 
 /**
- * RecognizerInfo is a recognizer a plugin has configured, or a service
- * it implements.
+ * TranscriptionServiceInfo is a transcription service a plugin implements.
  *
- * @generated from message mavio.plugin.v1.RecognizerInfo
+ * @generated from message mavio.plugin.v1.TranscriptionServiceInfo
  */
-export type RecognizerInfo = Message<"mavio.plugin.v1.RecognizerInfo"> & {
+export type TranscriptionServiceInfo = Message<"mavio.plugin.v1.TranscriptionServiceInfo"> & {
   /**
-   * Stable within the plugin: a recognizer's ID, or a service's name,
-   * such as "whisper".
+   * Stable within the plugin, such as "whisper".
    *
    * @generated from field: string name = 1;
    */
   name: string;
 
   /**
-   * The name the administrator gave a recognizer, or a service's.
-   *
    * @generated from field: string display_name = 2;
    */
   displayName: string;
 
   /**
-   * A service's settings, which configure its recognizers.
+   * The settings of the transcribers configured from it.
    *
    * @generated from field: repeated mavio.plugin.v1.SettingField settings = 3;
    */
   settings: SettingField[];
+};
+
+/**
+ * Describes the message mavio.plugin.v1.TranscriptionServiceInfo.
+ * Use `create(TranscriptionServiceInfoSchema)` to create a new message.
+ */
+export const TranscriptionServiceInfoSchema: GenMessage<TranscriptionServiceInfo> = /*@__PURE__*/
+  messageDesc(file_mavio_plugin_v1_speech, 2);
+
+/**
+ * TranscriberInfo is a transcriber a plugin has configured.
+ *
+ * @generated from message mavio.plugin.v1.TranscriberInfo
+ */
+export type TranscriberInfo = Message<"mavio.plugin.v1.TranscriberInfo"> & {
+  /**
+   * The ID the server generated for it.
+   *
+   * @generated from field: string id = 1;
+   */
+  id: string;
+
+  /**
+   * The name the administrator gave it.
+   *
+   * @generated from field: string name = 2;
+   */
+  name: string;
+
+  /**
+   * The service it is configured from, a name among the services.
+   *
+   * @generated from field: string service = 3;
+   */
+  service: string;
 
   /**
    * @generated from field: bool enabled = 4;
@@ -93,25 +120,25 @@ export type RecognizerInfo = Message<"mavio.plugin.v1.RecognizerInfo"> & {
   enabled: boolean;
 
   /**
-   * The languages it recognizes, BCP 47; empty for any.
+   * It can be used: its model is downloaded, for a local one.
    *
-   * @generated from field: repeated string languages = 5;
+   * @generated from field: bool ready = 5;
+   */
+  ready: boolean;
+
+  /**
+   * The languages it transcribes, BCP 47; empty for any.
+   *
+   * @generated from field: repeated string languages = 6;
    */
   languages: string[];
 
   /**
-   * It gives the times of what is said, which subtitles need.
+   * The longest audio it takes at once; unset for any.
    *
-   * @generated from field: bool timestamps = 6;
+   * @generated from field: google.protobuf.Duration max_duration = 7;
    */
-  timestamps: boolean;
-
-  /**
-   * It recognizes audio whose language is not given.
-   *
-   * @generated from field: bool detects_language = 7;
-   */
-  detectsLanguage: boolean;
+  maxDuration?: Duration | undefined;
 
   /**
    * It translates what is said into English.
@@ -119,77 +146,34 @@ export type RecognizerInfo = Message<"mavio.plugin.v1.RecognizerInfo"> & {
    * @generated from field: bool translates = 8;
    */
   translates: boolean;
-
-  /**
-   * It takes phrases it is likely to hear.
-   *
-   * @generated from field: bool hints = 9;
-   */
-  hints: boolean;
-
-  /**
-   * The longest audio it takes at once; unset for any.
-   *
-   * @generated from field: google.protobuf.Duration max_duration = 10;
-   */
-  maxDuration?: Duration | undefined;
-
-  /**
-   * The administrator lets it transcribe videos into subtitles; with
-   * timestamps only.
-   *
-   * @generated from field: bool subtitles = 11;
-   */
-  subtitles: boolean;
-
-  /**
-   * The service a recognizer is configured from, a name among the
-   * services.
-   *
-   * @generated from field: string service = 12;
-   */
-  service: string;
 };
 
 /**
- * Describes the message mavio.plugin.v1.RecognizerInfo.
- * Use `create(RecognizerInfoSchema)` to create a new message.
+ * Describes the message mavio.plugin.v1.TranscriberInfo.
+ * Use `create(TranscriberInfoSchema)` to create a new message.
  */
-export const RecognizerInfoSchema: GenMessage<RecognizerInfo> = /*@__PURE__*/
-  messageDesc(file_mavio_plugin_v1_speech, 2);
+export const TranscriberInfoSchema: GenMessage<TranscriberInfo> = /*@__PURE__*/
+  messageDesc(file_mavio_plugin_v1_speech, 3);
 
 /**
- * SpeechAudio is audio to recognize.
+ * SpeechAudio is audio to transcribe.
  *
  * @generated from message mavio.plugin.v1.SpeechAudio
  */
 export type SpeechAudio = Message<"mavio.plugin.v1.SpeechAudio"> & {
   /**
-   * @generated from oneof mavio.plugin.v1.SpeechAudio.source
+   * A URL of the host API serving the audio as 16 kHz mono 16-bit
+   * little-endian PCM aligned with the start of the video, which the
+   * plugin fetches with the host's HTTP client.
+   *
+   * @generated from field: string url = 1;
    */
-  source: {
-    /**
-     * 16 kHz mono 16-bit little-endian PCM.
-     *
-     * @generated from field: bytes pcm = 1;
-     */
-    value: Uint8Array;
-    case: "pcm";
-  } | {
-    /**
-     * A URL of the host API serving the audio, which the plugin fetches
-     * with the host's HTTP client, such as a stream of a video.
-     *
-     * @generated from field: string url = 2;
-     */
-    value: string;
-    case: "url";
-  } | { case: undefined; value?: undefined };
+  url: string;
 
   /**
-   * Only the first seconds of a URL's audio; unset for all.
+   * Only the first seconds of the audio; unset for all.
    *
-   * @generated from field: google.protobuf.Duration limit = 3;
+   * @generated from field: google.protobuf.Duration limit = 2;
    */
   limit?: Duration | undefined;
 };
@@ -199,16 +183,16 @@ export type SpeechAudio = Message<"mavio.plugin.v1.SpeechAudio"> & {
  * Use `create(SpeechAudioSchema)` to create a new message.
  */
 export const SpeechAudioSchema: GenMessage<SpeechAudio> = /*@__PURE__*/
-  messageDesc(file_mavio_plugin_v1_speech, 3);
+  messageDesc(file_mavio_plugin_v1_speech, 4);
 
 /**
- * @generated from message mavio.plugin.v1.RecognizeSpeechRequest
+ * @generated from message mavio.plugin.v1.TranscribeSpeechRequest
  */
-export type RecognizeSpeechRequest = Message<"mavio.plugin.v1.RecognizeSpeechRequest"> & {
+export type TranscribeSpeechRequest = Message<"mavio.plugin.v1.TranscribeSpeechRequest"> & {
   /**
-   * @generated from field: string recognizer = 1;
+   * @generated from field: string transcriber = 1;
    */
-  recognizer: string;
+  transcriber: string;
 
   /**
    * @generated from field: mavio.plugin.v1.SpeechAudio audio = 2;
@@ -216,7 +200,7 @@ export type RecognizeSpeechRequest = Message<"mavio.plugin.v1.RecognizeSpeechReq
   audio?: SpeechAudio | undefined;
 
   /**
-   * The language spoken, BCP 47; empty, the recognizer detects it.
+   * The language spoken, BCP 47; empty, the transcriber detects it.
    *
    * @generated from field: string language = 3;
    */
@@ -230,65 +214,44 @@ export type RecognizeSpeechRequest = Message<"mavio.plugin.v1.RecognizeSpeechReq
   translate: boolean;
 
   /**
-   * Phrases the recognizer is likely to hear, such as titles.
-   *
-   * @generated from field: repeated string hints = 5;
-   */
-  hints: string[];
-
-  /**
-   * Gives the times of what is said.
-   *
-   * @generated from field: bool timestamps = 6;
-   */
-  timestamps: boolean;
-
-  /**
    * What the audio is of, such as a video's file name, for the service's
    * logs.
    *
-   * @generated from field: string name = 7;
+   * @generated from field: string name = 5;
    */
   name: string;
 };
 
 /**
- * Describes the message mavio.plugin.v1.RecognizeSpeechRequest.
- * Use `create(RecognizeSpeechRequestSchema)` to create a new message.
+ * Describes the message mavio.plugin.v1.TranscribeSpeechRequest.
+ * Use `create(TranscribeSpeechRequestSchema)` to create a new message.
  */
-export const RecognizeSpeechRequestSchema: GenMessage<RecognizeSpeechRequest> = /*@__PURE__*/
-  messageDesc(file_mavio_plugin_v1_speech, 4);
+export const TranscribeSpeechRequestSchema: GenMessage<TranscribeSpeechRequest> = /*@__PURE__*/
+  messageDesc(file_mavio_plugin_v1_speech, 5);
 
 /**
- * @generated from message mavio.plugin.v1.RecognizeSpeechResponse
+ * @generated from message mavio.plugin.v1.TranscribeSpeechResponse
  */
-export type RecognizeSpeechResponse = Message<"mavio.plugin.v1.RecognizeSpeechResponse"> & {
+export type TranscribeSpeechResponse = Message<"mavio.plugin.v1.TranscribeSpeechResponse"> & {
   /**
-   * @generated from field: string text = 1;
-   */
-  text: string;
-
-  /**
-   * The language recognized, BCP 47.
+   * The language transcribed, BCP 47.
    *
-   * @generated from field: string language = 2;
+   * @generated from field: string language = 1;
    */
   language: string;
 
   /**
-   * What is said with its times, when they were asked for.
-   *
-   * @generated from field: repeated mavio.plugin.v1.SpeechSegment segments = 3;
+   * @generated from field: repeated mavio.plugin.v1.SpeechSegment segments = 2;
    */
   segments: SpeechSegment[];
 };
 
 /**
- * Describes the message mavio.plugin.v1.RecognizeSpeechResponse.
- * Use `create(RecognizeSpeechResponseSchema)` to create a new message.
+ * Describes the message mavio.plugin.v1.TranscribeSpeechResponse.
+ * Use `create(TranscribeSpeechResponseSchema)` to create a new message.
  */
-export const RecognizeSpeechResponseSchema: GenMessage<RecognizeSpeechResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_plugin_v1_speech, 5);
+export const TranscribeSpeechResponseSchema: GenMessage<TranscribeSpeechResponse> = /*@__PURE__*/
+  messageDesc(file_mavio_plugin_v1_speech, 6);
 
 /**
  * SpeechSegment is something said, with its times.
@@ -317,16 +280,16 @@ export type SpeechSegment = Message<"mavio.plugin.v1.SpeechSegment"> & {
  * Use `create(SpeechSegmentSchema)` to create a new message.
  */
 export const SpeechSegmentSchema: GenMessage<SpeechSegment> = /*@__PURE__*/
-  messageDesc(file_mavio_plugin_v1_speech, 6);
+  messageDesc(file_mavio_plugin_v1_speech, 7);
 
 /**
  * @generated from message mavio.plugin.v1.DetectSpeechLanguageRequest
  */
 export type DetectSpeechLanguageRequest = Message<"mavio.plugin.v1.DetectSpeechLanguageRequest"> & {
   /**
-   * @generated from field: string recognizer = 1;
+   * @generated from field: string transcriber = 1;
    */
-  recognizer: string;
+  transcriber: string;
 
   /**
    * @generated from field: mavio.plugin.v1.SpeechAudio audio = 2;
@@ -339,7 +302,7 @@ export type DetectSpeechLanguageRequest = Message<"mavio.plugin.v1.DetectSpeechL
  * Use `create(DetectSpeechLanguageRequestSchema)` to create a new message.
  */
 export const DetectSpeechLanguageRequestSchema: GenMessage<DetectSpeechLanguageRequest> = /*@__PURE__*/
-  messageDesc(file_mavio_plugin_v1_speech, 7);
+  messageDesc(file_mavio_plugin_v1_speech, 8);
 
 /**
  * @generated from message mavio.plugin.v1.DetectSpeechLanguageResponse
@@ -358,270 +321,42 @@ export type DetectSpeechLanguageResponse = Message<"mavio.plugin.v1.DetectSpeech
  * Use `create(DetectSpeechLanguageResponseSchema)` to create a new message.
  */
 export const DetectSpeechLanguageResponseSchema: GenMessage<DetectSpeechLanguageResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_plugin_v1_speech, 8);
-
-/**
- * @generated from message mavio.plugin.v1.ListVoicesRequest
- */
-export type ListVoicesRequest = Message<"mavio.plugin.v1.ListVoicesRequest"> & {
-};
-
-/**
- * Describes the message mavio.plugin.v1.ListVoicesRequest.
- * Use `create(ListVoicesRequestSchema)` to create a new message.
- */
-export const ListVoicesRequestSchema: GenMessage<ListVoicesRequest> = /*@__PURE__*/
   messageDesc(file_mavio_plugin_v1_speech, 9);
 
 /**
- * @generated from message mavio.plugin.v1.ListVoicesResponse
- */
-export type ListVoicesResponse = Message<"mavio.plugin.v1.ListVoicesResponse"> & {
-  /**
-   * @generated from field: repeated mavio.plugin.v1.VoiceInfo voices = 1;
-   */
-  voices: VoiceInfo[];
-
-  /**
-   * The synthesizers configured, with their state.
-   *
-   * @generated from field: repeated mavio.plugin.v1.SynthesizerInfo synthesizers = 2;
-   */
-  synthesizers: SynthesizerInfo[];
-
-  /**
-   * The services synthesizers are configured from, with their settings.
-   * A plugin listing none has synthesizers that are their own services.
-   *
-   * @generated from field: repeated mavio.plugin.v1.SynthesizerInfo services = 3;
-   */
-  services: SynthesizerInfo[];
-};
-
-/**
- * Describes the message mavio.plugin.v1.ListVoicesResponse.
- * Use `create(ListVoicesResponseSchema)` to create a new message.
- */
-export const ListVoicesResponseSchema: GenMessage<ListVoicesResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_plugin_v1_speech, 10);
-
-/**
- * SynthesizerInfo is a synthesizer a plugin has configured, or a
- * synthesis service it implements.
- *
- * @generated from message mavio.plugin.v1.SynthesizerInfo
- */
-export type SynthesizerInfo = Message<"mavio.plugin.v1.SynthesizerInfo"> & {
-  /**
-   * Stable within the plugin: a synthesizer's ID, or a service's name,
-   * such as "openai".
-   *
-   * @generated from field: string name = 1;
-   */
-  name: string;
-
-  /**
-   * The name the administrator gave a synthesizer, or a service's.
-   *
-   * @generated from field: string display_name = 2;
-   */
-  displayName: string;
-
-  /**
-   * A service's settings, which configure its synthesizers.
-   *
-   * @generated from field: repeated mavio.plugin.v1.SettingField settings = 3;
-   */
-  settings: SettingField[];
-
-  /**
-   * @generated from field: bool enabled = 4;
-   */
-  enabled: boolean;
-
-  /**
-   * The service a synthesizer is configured from, a name among the
-   * services.
-   *
-   * @generated from field: string service = 5;
-   */
-  service: string;
-};
-
-/**
- * Describes the message mavio.plugin.v1.SynthesizerInfo.
- * Use `create(SynthesizerInfoSchema)` to create a new message.
- */
-export const SynthesizerInfoSchema: GenMessage<SynthesizerInfo> = /*@__PURE__*/
-  messageDesc(file_mavio_plugin_v1_speech, 11);
-
-/**
- * VoiceInfo is a voice of a synthesizer.
- *
- * @generated from message mavio.plugin.v1.VoiceInfo
- */
-export type VoiceInfo = Message<"mavio.plugin.v1.VoiceInfo"> & {
-  /**
-   * "<synthesizer>/<voice>", stable within the plugin.
-   *
-   * @generated from field: string id = 1;
-   */
-  id: string;
-
-  /**
-   * @generated from field: string name = 2;
-   */
-  name: string;
-
-  /**
-   * The languages it speaks, BCP 47; empty for any.
-   *
-   * @generated from field: repeated string languages = 3;
-   */
-  languages: string[];
-};
-
-/**
- * Describes the message mavio.plugin.v1.VoiceInfo.
- * Use `create(VoiceInfoSchema)` to create a new message.
- */
-export const VoiceInfoSchema: GenMessage<VoiceInfo> = /*@__PURE__*/
-  messageDesc(file_mavio_plugin_v1_speech, 12);
-
-/**
- * @generated from message mavio.plugin.v1.SynthesizeSpeechRequest
- */
-export type SynthesizeSpeechRequest = Message<"mavio.plugin.v1.SynthesizeSpeechRequest"> & {
-  /**
-   * @generated from field: string voice = 1;
-   */
-  voice: string;
-
-  /**
-   * @generated from field: string text = 2;
-   */
-  text: string;
-
-  /**
-   * BCP 47.
-   *
-   * @generated from field: string language = 3;
-   */
-  language: string;
-
-  /**
-   * Deprecated: unset by the server, which converts the speech for clients
-   * that do not play it; synthesizers speak in the encoding of their
-   * settings.
-   *
-   * @generated from field: mavio.plugin.v1.SpeechFormat format = 4 [deprecated = true];
-   * @deprecated
-   */
-  format: SpeechFormat;
-
-  /**
-   * 0.25–4; 0 for 1.
-   *
-   * @generated from field: double speed = 5;
-   */
-  speed: number;
-};
-
-/**
- * Describes the message mavio.plugin.v1.SynthesizeSpeechRequest.
- * Use `create(SynthesizeSpeechRequestSchema)` to create a new message.
- */
-export const SynthesizeSpeechRequestSchema: GenMessage<SynthesizeSpeechRequest> = /*@__PURE__*/
-  messageDesc(file_mavio_plugin_v1_speech, 13);
-
-/**
- * @generated from message mavio.plugin.v1.SynthesizeSpeechResponse
- */
-export type SynthesizeSpeechResponse = Message<"mavio.plugin.v1.SynthesizeSpeechResponse"> & {
-  /**
-   * @generated from field: bytes audio = 1;
-   */
-  audio: Uint8Array;
-
-  /**
-   * Such as "audio/ogg" or "audio/mpeg".
-   *
-   * @generated from field: string content_type = 2;
-   */
-  contentType: string;
-};
-
-/**
- * Describes the message mavio.plugin.v1.SynthesizeSpeechResponse.
- * Use `create(SynthesizeSpeechResponseSchema)` to create a new message.
- */
-export const SynthesizeSpeechResponseSchema: GenMessage<SynthesizeSpeechResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_plugin_v1_speech, 14);
-
-/**
- * SpeechFormat is the encoding of synthesized audio; deprecated with
- * SynthesizeSpeechRequest.format.
- *
- * @generated from enum mavio.plugin.v1.SpeechFormat
- */
-export enum SpeechFormat {
-  /**
-   * @generated from enum value: SPEECH_FORMAT_UNSPECIFIED = 0;
-   */
-  UNSPECIFIED = 0,
-
-  /**
-   * Opus in Ogg.
-   *
-   * @generated from enum value: SPEECH_FORMAT_OGG_OPUS = 1;
-   */
-  OGG_OPUS = 1,
-
-  /**
-   * @generated from enum value: SPEECH_FORMAT_MP3 = 2;
-   */
-  MP3 = 2,
-}
-
-/**
- * Describes the enum mavio.plugin.v1.SpeechFormat.
- */
-export const SpeechFormatSchema: GenEnum<SpeechFormat> = /*@__PURE__*/
-  enumDesc(file_mavio_plugin_v1_speech, 0);
-
-/**
- * SpeechToTextService recognizes speech with the recognition services a
- * plugin implements: what users say to the assistant, and the audio of
- * videos transcribed into subtitles.
+ * SpeechToTextService transcribes the audio of videos into subtitles with
+ * the transcription services a plugin implements (docs/architecture.md
+ * §14.5). What users say to the assistant is heard by voice sessions
+ * (VoiceSessionService).
  *
  * @generated from service mavio.plugin.v1.SpeechToTextService
  */
 export const SpeechToTextService: GenService<{
   /**
-   * ListRecognizers lists the recognition services the plugin implements,
-   * with their settings, and the recognizers configured from them, with
-   * their state.
+   * ListTranscribers lists the transcription services the plugin
+   * implements, with their settings, and the transcribers configured from
+   * them, with their state.
    *
-   * @generated from rpc mavio.plugin.v1.SpeechToTextService.ListRecognizers
+   * @generated from rpc mavio.plugin.v1.SpeechToTextService.ListTranscribers
    */
-  listRecognizers: {
+  listTranscribers: {
     methodKind: "unary";
-    input: typeof ListRecognizersRequestSchema;
-    output: typeof ListRecognizersResponseSchema;
+    input: typeof ListTranscribersRequestSchema;
+    output: typeof ListTranscribersResponseSchema;
   },
   /**
-   * RecognizeSpeech recognizes the speech of audio.
+   * TranscribeSpeech transcribes audio into segments with their times.
    *
-   * @generated from rpc mavio.plugin.v1.SpeechToTextService.RecognizeSpeech
+   * @generated from rpc mavio.plugin.v1.SpeechToTextService.TranscribeSpeech
    */
-  recognizeSpeech: {
+  transcribeSpeech: {
     methodKind: "unary";
-    input: typeof RecognizeSpeechRequestSchema;
-    output: typeof RecognizeSpeechResponseSchema;
+    input: typeof TranscribeSpeechRequestSchema;
+    output: typeof TranscribeSpeechResponseSchema;
   },
   /**
-   * DetectSpeechLanguage tells the language spoken in audio; recognizers
-   * with detects_language only.
+   * DetectSpeechLanguage tells the language spoken in the first 30
+   * seconds of audio.
    *
    * @generated from rpc mavio.plugin.v1.SpeechToTextService.DetectSpeechLanguage
    */
@@ -632,34 +367,4 @@ export const SpeechToTextService: GenService<{
   },
 }> = /*@__PURE__*/
   serviceDesc(file_mavio_plugin_v1_speech, 0);
-
-/**
- * TextToSpeechService speaks text with the voices of the synthesis
- * services a plugin implements.
- *
- * @generated from service mavio.plugin.v1.TextToSpeechService
- */
-export const TextToSpeechService: GenService<{
-  /**
-   * ListVoices lists the plugin's voices.
-   *
-   * @generated from rpc mavio.plugin.v1.TextToSpeechService.ListVoices
-   */
-  listVoices: {
-    methodKind: "unary";
-    input: typeof ListVoicesRequestSchema;
-    output: typeof ListVoicesResponseSchema;
-  },
-  /**
-   * SynthesizeSpeech speaks text.
-   *
-   * @generated from rpc mavio.plugin.v1.TextToSpeechService.SynthesizeSpeech
-   */
-  synthesizeSpeech: {
-    methodKind: "unary";
-    input: typeof SynthesizeSpeechRequestSchema;
-    output: typeof SynthesizeSpeechResponseSchema;
-  },
-}> = /*@__PURE__*/
-  serviceDesc(file_mavio_plugin_v1_speech, 1);
 

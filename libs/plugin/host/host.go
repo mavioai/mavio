@@ -53,7 +53,6 @@ type Plugin interface {
 	Agents() pluginv1connect.AgentSessionServiceClient
 	Ratings() pluginv1connect.RatingsProviderServiceClient
 	Speech() pluginv1connect.SpeechToTextServiceClient
-	Voices() pluginv1connect.TextToSpeechServiceClient
 	ChallengeSolver() pluginv1connect.ChallengeSolverServiceClient
 	VoiceSessions() pluginv1connect.VoiceSessionServiceClient
 	// Dial connects to the plugin's socket once it serves, for the

@@ -401,19 +401,41 @@ pub struct AssistantSettings {
     ///
     /// Field 8: `memory`
     pub memory: ::core::option::Option<bool>,
-    /// The server's recognizer, "\<plugin\>/\<recognizer\>"; empty, the first
-    /// ready one.
-    ///
-    /// Field 9: `recognizer`
-    pub recognizer: ::core::option::Option<::buffa::alloc::string::String>,
-    /// The voices answers are spoken with by default, by language.
-    ///
-    /// Field 10: `voices`
-    pub voices: ::buffa::alloc::vec::Vec<AssistantVoiceChoice>,
-    /// Whether recognizers are given the user's hints.
+    /// Whether recognizers are given the user's hints: titles being watched,
+    /// recently added titles, people and the user's devices.
     ///
     /// Field 11: `hints`
     pub hints: ::core::option::Option<bool>,
+    /// The recognizer and the voice of voice sessions by language; a
+    /// language listed nowhere, nor its base, gets the plugin's first ready
+    /// ones.
+    ///
+    /// Field 12: `speech`
+    pub speech: ::buffa::alloc::vec::Vec<AssistantSpeech>,
+    /// The longest pause in a turn the turn model reads as unfinished,
+    /// 0.5–10 seconds.
+    ///
+    /// Field 13: `longest_pause`
+    pub longest_pause: ::buffa::MessageField<
+        ::buffa_types::google::protobuf::Duration,
+        ::buffa::Inline<::buffa_types::google::protobuf::Duration>,
+    >,
+    /// How long a turn stands, with the user silent, before what its answer
+    /// changes is done, 0–3 seconds.
+    ///
+    /// Field 14: `commit_delay`
+    pub commit_delay: ::buffa::MessageField<
+        ::buffa_types::google::protobuf::Duration,
+        ::buffa::Inline<::buffa_types::google::protobuf::Duration>,
+    >,
+    /// How long the user may stay silent after an answer before the voice
+    /// session ends, 3–120 seconds.
+    ///
+    /// Field 15: `session_idle`
+    pub session_idle: ::buffa::MessageField<
+        ::buffa_types::google::protobuf::Duration,
+        ::buffa::Inline<::buffa_types::google::protobuf::Duration>,
+    >,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -428,9 +450,11 @@ impl ::core::fmt::Debug for AssistantSettings {
             .field("idle_minutes", &self.idle_minutes)
             .field("retention_days", &self.retention_days)
             .field("memory", &self.memory)
-            .field("recognizer", &self.recognizer)
-            .field("voices", &self.voices)
             .field("hints", &self.hints)
+            .field("speech", &self.speech)
+            .field("longest_pause", &self.longest_pause)
+            .field("commit_delay", &self.commit_delay)
+            .field("session_idle", &self.session_idle)
             .finish()
     }
 }
@@ -499,16 +523,6 @@ impl AssistantSettings {
     }
     #[must_use = "with_* setters return `self` by value; assign or chain the result"]
     #[inline]
-    ///Sets [`Self::recognizer`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_recognizer(
-        mut self,
-        value: impl Into<::buffa::alloc::string::String>,
-    ) -> Self {
-        self.recognizer = Some(value.into());
-        self
-    }
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
     ///Sets [`Self::hints`] to `Some(value)`, consuming and returning `self`.
     pub fn with_hints(mut self, value: bool) -> Self {
         self.hints = Some(value);
@@ -559,10 +573,10 @@ impl ::buffa::Message for AssistantSettings {
         if self.memory.is_some() {
             size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
         }
-        if let Some(ref v) = self.recognizer {
-            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        if self.hints.is_some() {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
         }
-        for v in &self.voices {
+        for v in &self.speech {
             let __slot = __cache.reserve();
             let inner_size = v.compute_size(__cache);
             __cache.set(__slot, inner_size);
@@ -570,8 +584,29 @@ impl ::buffa::Message for AssistantSettings {
                 += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
                     + inner_size as u64;
         }
-        if self.hints.is_some() {
-            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        if self.longest_pause.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.longest_pause.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        if self.commit_delay.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.commit_delay.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        if self.session_idle.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.session_idle.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
         }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
@@ -607,19 +642,40 @@ impl ::buffa::Message for AssistantSettings {
         if let Some(v) = self.memory {
             ::buffa::types::put_bool_field(8u32, v, buf);
         }
-        if let Some(ref v) = self.recognizer {
-            ::buffa::types::put_string_field(9u32, v, buf);
+        if let Some(v) = self.hints {
+            ::buffa::types::put_bool_field(11u32, v, buf);
         }
-        for v in &self.voices {
+        for v in &self.speech {
             ::buffa::types::put_len_delimited_header(
-                10u32,
+                12u32,
                 u64::from(__cache.consume_next()),
                 buf,
             );
             v.write_to(__cache, buf);
         }
-        if let Some(v) = self.hints {
-            ::buffa::types::put_bool_field(11u32, v, buf);
+        if self.longest_pause.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                13u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.longest_pause.write_to(__cache, buf);
+        }
+        if self.commit_delay.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                14u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.commit_delay.write_to(__cache, buf);
+        }
+        if self.session_idle.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                15u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.session_idle.write_to(__cache, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -709,19 +765,16 @@ impl ::buffa::Message for AssistantSettings {
                     ::buffa::types::decode_bool(buf)?,
                 );
             }
-            9u32 => {
+            11u32 => {
                 ::buffa::encoding::check_wire_type(
                     tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
+                    ::buffa::encoding::WireType::Varint,
                 )?;
-                ::buffa::types::merge_string(
-                    self
-                        .recognizer
-                        .get_or_insert_with(::buffa::alloc::string::String::new),
-                    buf,
-                )?;
+                self.hints = ::core::option::Option::Some(
+                    ::buffa::types::decode_bool(buf)?,
+                );
             }
-            10u32 => {
+            12u32 => {
                 ::buffa::encoding::check_wire_type(
                     tag,
                     ::buffa::encoding::WireType::LengthDelimited,
@@ -731,16 +784,40 @@ impl ::buffa::Message for AssistantSettings {
                     ::buffa::__private::element_footprint(&elem),
                 )?;
                 ::buffa::Message::merge_length_delimited(&mut elem, buf, ctx)?;
-                self.voices.push(elem);
+                self.speech.push(elem);
             }
-            11u32 => {
+            13u32 => {
                 ::buffa::encoding::check_wire_type(
                     tag,
-                    ::buffa::encoding::WireType::Varint,
+                    ::buffa::encoding::WireType::LengthDelimited,
                 )?;
-                self.hints = ::core::option::Option::Some(
-                    ::buffa::types::decode_bool(buf)?,
-                );
+                ::buffa::Message::merge_length_delimited(
+                    self.longest_pause.get_or_insert_default(),
+                    buf,
+                    ctx,
+                )?;
+            }
+            14u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::Message::merge_length_delimited(
+                    self.commit_delay.get_or_insert_default(),
+                    buf,
+                    ctx,
+                )?;
+            }
+            15u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::Message::merge_length_delimited(
+                    self.session_idle.get_or_insert_default(),
+                    buf,
+                    ctx,
+                )?;
             }
             _ => {
                 self.__buffa_unknown_fields
@@ -758,9 +835,11 @@ impl ::buffa::Message for AssistantSettings {
         self.idle_minutes = ::core::option::Option::None;
         self.retention_days = ::core::option::Option::None;
         self.memory = ::core::option::Option::None;
-        self.recognizer = ::core::option::Option::None;
-        self.voices.clear();
         self.hints = ::core::option::Option::None;
+        self.speech.clear();
+        self.longest_pause = ::buffa::MessageField::none();
+        self.commit_delay = ::buffa::MessageField::none();
+        self.session_idle = ::buffa::MessageField::none();
         self.__buffa_unknown_fields.clear();
     }
 }
@@ -773,36 +852,41 @@ impl ::buffa::ExtensionSet for AssistantSettings {
         &mut self.__buffa_unknown_fields
     }
 }
-/// AssistantVoiceChoice is the voice of a language.
+/// AssistantSpeech is the recognizer and the voice of a language.
 #[derive(Clone, PartialEq, Default)]
-pub struct AssistantVoiceChoice {
+pub struct AssistantSpeech {
     /// BCP 47, such as "en" or "zh-CN".
     ///
     /// Field 1: `language`
     pub language: ::core::option::Option<::buffa::alloc::string::String>,
-    /// "\<plugin\>/\<voice\>".
+    /// "\<plugin\>/\<recognizer\>"; empty, the plugin's first ready one.
     ///
-    /// Field 2: `voice`
+    /// Field 2: `recognizer`
+    pub recognizer: ::core::option::Option<::buffa::alloc::string::String>,
+    /// "\<plugin\>/\<voice\>"; empty, the plugin's first ready one.
+    ///
+    /// Field 3: `voice`
     pub voice: ::core::option::Option<::buffa::alloc::string::String>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
-impl ::core::fmt::Debug for AssistantVoiceChoice {
+impl ::core::fmt::Debug for AssistantSpeech {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-        f.debug_struct("AssistantVoiceChoice")
+        f.debug_struct("AssistantSpeech")
             .field("language", &self.language)
+            .field("recognizer", &self.recognizer)
             .field("voice", &self.voice)
             .finish()
     }
 }
-impl AssistantVoiceChoice {
+impl AssistantSpeech {
     /// Protobuf type URL for this message, for use with `Any::pack` and
     /// `Any::unpack_if`.
     ///
     /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
-    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.assistant.v1.AssistantVoiceChoice";
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.assistant.v1.AssistantSpeech";
 }
-impl AssistantVoiceChoice {
+impl AssistantSpeech {
     #[must_use = "with_* setters return `self` by value; assign or chain the result"]
     #[inline]
     ///Sets [`Self::language`] to `Some(value)`, consuming and returning `self`.
@@ -811,6 +895,16 @@ impl AssistantVoiceChoice {
         value: impl Into<::buffa::alloc::string::String>,
     ) -> Self {
         self.language = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::recognizer`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_recognizer(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.recognizer = Some(value.into());
         self
     }
     #[must_use = "with_* setters return `self` by value; assign or chain the result"]
@@ -824,14 +918,14 @@ impl AssistantVoiceChoice {
         self
     }
 }
-::buffa::impl_default_instance!(AssistantVoiceChoice);
-impl ::buffa::MessageName for AssistantVoiceChoice {
+::buffa::impl_default_instance!(AssistantSpeech);
+impl ::buffa::MessageName for AssistantSpeech {
     const PACKAGE: &'static str = "mavio.assistant.v1";
-    const NAME: &'static str = "AssistantVoiceChoice";
-    const FULL_NAME: &'static str = "mavio.assistant.v1.AssistantVoiceChoice";
-    const TYPE_URL: &'static str = "type.googleapis.com/mavio.assistant.v1.AssistantVoiceChoice";
+    const NAME: &'static str = "AssistantSpeech";
+    const FULL_NAME: &'static str = "mavio.assistant.v1.AssistantSpeech";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.assistant.v1.AssistantSpeech";
 }
-impl ::buffa::Message for AssistantVoiceChoice {
+impl ::buffa::Message for AssistantSpeech {
     /// Returns the total encoded size in bytes.
     ///
     /// Accumulates in `u64` (which cannot overflow for in-memory
@@ -845,6 +939,9 @@ impl ::buffa::Message for AssistantVoiceChoice {
         use ::buffa::Enumeration as _;
         let mut size = 0u64;
         if let Some(ref v) = self.language {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.recognizer {
             size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
         if let Some(ref v) = self.voice {
@@ -863,8 +960,11 @@ impl ::buffa::Message for AssistantVoiceChoice {
         if let Some(ref v) = self.language {
             ::buffa::types::put_string_field(1u32, v, buf);
         }
-        if let Some(ref v) = self.voice {
+        if let Some(ref v) = self.recognizer {
             ::buffa::types::put_string_field(2u32, v, buf);
+        }
+        if let Some(ref v) = self.voice {
+            ::buffa::types::put_string_field(3u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -897,6 +997,18 @@ impl ::buffa::Message for AssistantVoiceChoice {
                     ::buffa::encoding::WireType::LengthDelimited,
                 )?;
                 ::buffa::types::merge_string(
+                    self
+                        .recognizer
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            3u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
                     self.voice.get_or_insert_with(::buffa::alloc::string::String::new),
                     buf,
                 )?;
@@ -910,12 +1022,13 @@ impl ::buffa::Message for AssistantVoiceChoice {
     }
     fn clear(&mut self) {
         self.language = ::core::option::Option::None;
+        self.recognizer = ::core::option::Option::None;
         self.voice = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }
-impl ::buffa::ExtensionSet for AssistantVoiceChoice {
-    const PROTO_FQN: &'static str = "mavio.assistant.v1.AssistantVoiceChoice";
+impl ::buffa::ExtensionSet for AssistantSpeech {
+    const PROTO_FQN: &'static str = "mavio.assistant.v1.AssistantSpeech";
     fn unknown_fields(&self) -> &::buffa::UnknownFields {
         &self.__buffa_unknown_fields
     }
@@ -1052,18 +1165,10 @@ pub struct GetAssistantResponse {
     ///
     /// Field 3: `memory`
     pub memory: ::core::option::Option<bool>,
-    /// The server's recognizers, the default first.
+    /// Voice sessions can be started: a voice session plugin is ready.
     ///
-    /// Field 4: `recognizers`
-    pub recognizers: ::buffa::alloc::vec::Vec<Recognizer>,
-    /// The server's voices.
-    ///
-    /// Field 5: `voices`
-    pub voices: ::buffa::alloc::vec::Vec<Voice>,
-    /// The voice of each language when the user chooses none.
-    ///
-    /// Field 6: `default_voices`
-    pub default_voices: ::buffa::alloc::vec::Vec<AssistantVoiceChoice>,
+    /// Field 9: `voice`
+    pub voice: ::core::option::Option<bool>,
     /// Examples of requests in the language asked for.
     ///
     /// Field 7: `examples`
@@ -1081,9 +1186,7 @@ impl ::core::fmt::Debug for GetAssistantResponse {
             .field("enabled", &self.enabled)
             .field("ai", &self.ai)
             .field("memory", &self.memory)
-            .field("recognizers", &self.recognizers)
-            .field("voices", &self.voices)
-            .field("default_voices", &self.default_voices)
+            .field("voice", &self.voice)
             .field("examples", &self.examples)
             .field("languages", &self.languages)
             .finish()
@@ -1118,6 +1221,13 @@ impl GetAssistantResponse {
         self.memory = Some(value);
         self
     }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::voice`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_voice(mut self, value: bool) -> Self {
+        self.voice = Some(value);
+        self
+    }
 }
 ::buffa::impl_default_instance!(GetAssistantResponse);
 impl ::buffa::MessageName for GetAssistantResponse {
@@ -1135,7 +1245,7 @@ impl ::buffa::Message for GetAssistantResponse {
     /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
     /// points reject, never a silently wrapped size.
     #[allow(clippy::let_and_return)]
-    fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
         let mut size = 0u64;
@@ -1148,42 +1258,21 @@ impl ::buffa::Message for GetAssistantResponse {
         if self.memory.is_some() {
             size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
         }
-        for v in &self.recognizers {
-            let __slot = __cache.reserve();
-            let inner_size = v.compute_size(__cache);
-            __cache.set(__slot, inner_size);
-            size
-                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
-                    + inner_size as u64;
-        }
-        for v in &self.voices {
-            let __slot = __cache.reserve();
-            let inner_size = v.compute_size(__cache);
-            __cache.set(__slot, inner_size);
-            size
-                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
-                    + inner_size as u64;
-        }
-        for v in &self.default_voices {
-            let __slot = __cache.reserve();
-            let inner_size = v.compute_size(__cache);
-            __cache.set(__slot, inner_size);
-            size
-                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
-                    + inner_size as u64;
-        }
         for v in &self.examples {
             size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
         for v in &self.languages {
             size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
+        if self.voice.is_some() {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
     fn write_to(
         &self,
-        __cache: &mut ::buffa::SizeCache,
+        _cache: &mut ::buffa::SizeCache,
         buf: &mut impl ::buffa::EncodeSink,
     ) {
         #[allow(unused_imports)]
@@ -1197,35 +1286,14 @@ impl ::buffa::Message for GetAssistantResponse {
         if let Some(v) = self.memory {
             ::buffa::types::put_bool_field(3u32, v, buf);
         }
-        for v in &self.recognizers {
-            ::buffa::types::put_len_delimited_header(
-                4u32,
-                u64::from(__cache.consume_next()),
-                buf,
-            );
-            v.write_to(__cache, buf);
-        }
-        for v in &self.voices {
-            ::buffa::types::put_len_delimited_header(
-                5u32,
-                u64::from(__cache.consume_next()),
-                buf,
-            );
-            v.write_to(__cache, buf);
-        }
-        for v in &self.default_voices {
-            ::buffa::types::put_len_delimited_header(
-                6u32,
-                u64::from(__cache.consume_next()),
-                buf,
-            );
-            v.write_to(__cache, buf);
-        }
         for v in &self.examples {
             ::buffa::types::put_string_field(7u32, v, buf);
         }
         for v in &self.languages {
             ::buffa::types::put_string_field(8u32, v, buf);
+        }
+        if let Some(v) = self.voice {
+            ::buffa::types::put_bool_field(9u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -1267,42 +1335,6 @@ impl ::buffa::Message for GetAssistantResponse {
                     ::buffa::types::decode_bool(buf)?,
                 );
             }
-            4u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                let mut elem = ::core::default::Default::default();
-                ctx.register_element_memory(
-                    ::buffa::__private::element_footprint(&elem),
-                )?;
-                ::buffa::Message::merge_length_delimited(&mut elem, buf, ctx)?;
-                self.recognizers.push(elem);
-            }
-            5u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                let mut elem = ::core::default::Default::default();
-                ctx.register_element_memory(
-                    ::buffa::__private::element_footprint(&elem),
-                )?;
-                ::buffa::Message::merge_length_delimited(&mut elem, buf, ctx)?;
-                self.voices.push(elem);
-            }
-            6u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                let mut elem = ::core::default::Default::default();
-                ctx.register_element_memory(
-                    ::buffa::__private::element_footprint(&elem),
-                )?;
-                ::buffa::Message::merge_length_delimited(&mut elem, buf, ctx)?;
-                self.default_voices.push(elem);
-            }
             7u32 => {
                 ::buffa::encoding::check_wire_type(
                     tag,
@@ -1325,6 +1357,15 @@ impl ::buffa::Message for GetAssistantResponse {
                 )?;
                 self.languages.push(__elem);
             }
+            9u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.voice = ::core::option::Option::Some(
+                    ::buffa::types::decode_bool(buf)?,
+                );
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -1336,11 +1377,9 @@ impl ::buffa::Message for GetAssistantResponse {
         self.enabled = ::core::option::Option::None;
         self.ai = ::core::option::Option::None;
         self.memory = ::core::option::Option::None;
-        self.recognizers.clear();
-        self.voices.clear();
-        self.default_voices.clear();
         self.examples.clear();
         self.languages.clear();
+        self.voice = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }
@@ -1353,10 +1392,10 @@ impl ::buffa::ExtensionSet for GetAssistantResponse {
         &mut self.__buffa_unknown_fields
     }
 }
-/// Recognizer is a speech recognizer of the server.
+/// VoiceEngine is a recognizer or a voice of the voice session plugin.
 #[derive(Clone, PartialEq, Default)]
-pub struct Recognizer {
-    /// "\<plugin\>/\<recognizer\>".
+pub struct VoiceEngine {
+    /// "\<plugin\>/\<recognizer\>" or "\<plugin\>/\<voice\>".
     ///
     /// Field 1: `id`
     pub id: ::core::option::Option<::buffa::alloc::string::String>,
@@ -1366,26 +1405,31 @@ pub struct Recognizer {
     ///
     /// Field 3: `languages`
     pub languages: ::buffa::alloc::vec::Vec<::buffa::alloc::string::String>,
+    /// It can be used: enabled, and its model downloaded for a local one.
+    ///
+    /// Field 4: `ready`
+    pub ready: ::core::option::Option<bool>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
-impl ::core::fmt::Debug for Recognizer {
+impl ::core::fmt::Debug for VoiceEngine {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-        f.debug_struct("Recognizer")
+        f.debug_struct("VoiceEngine")
             .field("id", &self.id)
             .field("name", &self.name)
             .field("languages", &self.languages)
+            .field("ready", &self.ready)
             .finish()
     }
 }
-impl Recognizer {
+impl VoiceEngine {
     /// Protobuf type URL for this message, for use with `Any::pack` and
     /// `Any::unpack_if`.
     ///
     /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
-    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.assistant.v1.Recognizer";
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.assistant.v1.VoiceEngine";
 }
-impl Recognizer {
+impl VoiceEngine {
     #[must_use = "with_* setters return `self` by value; assign or chain the result"]
     #[inline]
     ///Sets [`Self::id`] to `Some(value)`, consuming and returning `self`.
@@ -1403,15 +1447,22 @@ impl Recognizer {
         self.name = Some(value.into());
         self
     }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::ready`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_ready(mut self, value: bool) -> Self {
+        self.ready = Some(value);
+        self
+    }
 }
-::buffa::impl_default_instance!(Recognizer);
-impl ::buffa::MessageName for Recognizer {
+::buffa::impl_default_instance!(VoiceEngine);
+impl ::buffa::MessageName for VoiceEngine {
     const PACKAGE: &'static str = "mavio.assistant.v1";
-    const NAME: &'static str = "Recognizer";
-    const FULL_NAME: &'static str = "mavio.assistant.v1.Recognizer";
-    const TYPE_URL: &'static str = "type.googleapis.com/mavio.assistant.v1.Recognizer";
+    const NAME: &'static str = "VoiceEngine";
+    const FULL_NAME: &'static str = "mavio.assistant.v1.VoiceEngine";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.assistant.v1.VoiceEngine";
 }
-impl ::buffa::Message for Recognizer {
+impl ::buffa::Message for VoiceEngine {
     /// Returns the total encoded size in bytes.
     ///
     /// Accumulates in `u64` (which cannot overflow for in-memory
@@ -1433,6 +1484,9 @@ impl ::buffa::Message for Recognizer {
         for v in &self.languages {
             size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
+        if self.ready.is_some() {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -1451,6 +1505,9 @@ impl ::buffa::Message for Recognizer {
         }
         for v in &self.languages {
             ::buffa::types::put_string_field(3u32, v, buf);
+        }
+        if let Some(v) = self.ready {
+            ::buffa::types::put_bool_field(4u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -1496,171 +1553,14 @@ impl ::buffa::Message for Recognizer {
                 )?;
                 self.languages.push(__elem);
             }
-            _ => {
-                self.__buffa_unknown_fields
-                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
-            }
-        }
-        ::core::result::Result::Ok(())
-    }
-    fn clear(&mut self) {
-        self.id = ::core::option::Option::None;
-        self.name = ::core::option::Option::None;
-        self.languages.clear();
-        self.__buffa_unknown_fields.clear();
-    }
-}
-impl ::buffa::ExtensionSet for Recognizer {
-    const PROTO_FQN: &'static str = "mavio.assistant.v1.Recognizer";
-    fn unknown_fields(&self) -> &::buffa::UnknownFields {
-        &self.__buffa_unknown_fields
-    }
-    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
-        &mut self.__buffa_unknown_fields
-    }
-}
-/// Voice is a voice of the server.
-#[derive(Clone, PartialEq, Default)]
-pub struct Voice {
-    /// "\<plugin\>/\<voice\>".
-    ///
-    /// Field 1: `id`
-    pub id: ::core::option::Option<::buffa::alloc::string::String>,
-    /// Field 2: `name`
-    pub name: ::core::option::Option<::buffa::alloc::string::String>,
-    /// BCP 47.
-    ///
-    /// Field 3: `languages`
-    pub languages: ::buffa::alloc::vec::Vec<::buffa::alloc::string::String>,
-    #[doc(hidden)]
-    pub __buffa_unknown_fields: ::buffa::UnknownFields,
-}
-impl ::core::fmt::Debug for Voice {
-    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-        f.debug_struct("Voice")
-            .field("id", &self.id)
-            .field("name", &self.name)
-            .field("languages", &self.languages)
-            .finish()
-    }
-}
-impl Voice {
-    /// Protobuf type URL for this message, for use with `Any::pack` and
-    /// `Any::unpack_if`.
-    ///
-    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
-    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.assistant.v1.Voice";
-}
-impl Voice {
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::id`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_id(mut self, value: impl Into<::buffa::alloc::string::String>) -> Self {
-        self.id = Some(value.into());
-        self
-    }
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::name`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_name(
-        mut self,
-        value: impl Into<::buffa::alloc::string::String>,
-    ) -> Self {
-        self.name = Some(value.into());
-        self
-    }
-}
-::buffa::impl_default_instance!(Voice);
-impl ::buffa::MessageName for Voice {
-    const PACKAGE: &'static str = "mavio.assistant.v1";
-    const NAME: &'static str = "Voice";
-    const FULL_NAME: &'static str = "mavio.assistant.v1.Voice";
-    const TYPE_URL: &'static str = "type.googleapis.com/mavio.assistant.v1.Voice";
-}
-impl ::buffa::Message for Voice {
-    /// Returns the total encoded size in bytes.
-    ///
-    /// Accumulates in `u64` (which cannot overflow for in-memory
-    /// data) and saturates to `u32` at return, so a message whose
-    /// encoded size exceeds the 2 GiB protobuf limit yields a value
-    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
-    /// points reject, never a silently wrapped size.
-    #[allow(clippy::let_and_return)]
-    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
-        #[allow(unused_imports)]
-        use ::buffa::Enumeration as _;
-        let mut size = 0u64;
-        if let Some(ref v) = self.id {
-            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
-        if let Some(ref v) = self.name {
-            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
-        for v in &self.languages {
-            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
-        size += self.__buffa_unknown_fields.encoded_len() as u64;
-        ::buffa::saturate_size(size)
-    }
-    fn write_to(
-        &self,
-        _cache: &mut ::buffa::SizeCache,
-        buf: &mut impl ::buffa::EncodeSink,
-    ) {
-        #[allow(unused_imports)]
-        use ::buffa::Enumeration as _;
-        if let Some(ref v) = self.id {
-            ::buffa::types::put_string_field(1u32, v, buf);
-        }
-        if let Some(ref v) = self.name {
-            ::buffa::types::put_string_field(2u32, v, buf);
-        }
-        for v in &self.languages {
-            ::buffa::types::put_string_field(3u32, v, buf);
-        }
-        self.__buffa_unknown_fields.write_to(buf);
-    }
-    fn merge_field(
-        &mut self,
-        tag: ::buffa::encoding::Tag,
-        buf: &mut impl ::buffa::bytes::Buf,
-        ctx: ::buffa::DecodeContext<'_>,
-    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
-        #[allow(unused_imports)]
-        use ::buffa::bytes::Buf as _;
-        #[allow(unused_imports)]
-        use ::buffa::Enumeration as _;
-        match tag.field_number() {
-            1u32 => {
+            4u32 => {
                 ::buffa::encoding::check_wire_type(
                     tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
+                    ::buffa::encoding::WireType::Varint,
                 )?;
-                ::buffa::types::merge_string(
-                    self.id.get_or_insert_with(::buffa::alloc::string::String::new),
-                    buf,
-                )?;
-            }
-            2u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                ::buffa::types::merge_string(
-                    self.name.get_or_insert_with(::buffa::alloc::string::String::new),
-                    buf,
-                )?;
-            }
-            3u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                let __elem = ::buffa::types::decode_string(buf)?;
-                ctx.register_element_memory(
-                    ::buffa::__private::element_footprint(&__elem),
-                )?;
-                self.languages.push(__elem);
+                self.ready = ::core::option::Option::Some(
+                    ::buffa::types::decode_bool(buf)?,
+                );
             }
             _ => {
                 self.__buffa_unknown_fields
@@ -1673,11 +1573,12 @@ impl ::buffa::Message for Voice {
         self.id = ::core::option::Option::None;
         self.name = ::core::option::Option::None;
         self.languages.clear();
+        self.ready = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }
-impl ::buffa::ExtensionSet for Voice {
-    const PROTO_FQN: &'static str = "mavio.assistant.v1.Voice";
+impl ::buffa::ExtensionSet for VoiceEngine {
+    const PROTO_FQN: &'static str = "mavio.assistant.v1.VoiceEngine";
     fn unknown_fields(&self) -> &::buffa::UnknownFields {
         &self.__buffa_unknown_fields
     }
@@ -1720,12 +1621,6 @@ pub struct AskRequest {
     ///
     /// Field 7: `failed_actions`
     pub failed_actions: ::buffa::alloc::vec::Vec<::buffa::alloc::string::String>,
-    /// An ID the client makes for the answer's speech: the audio of the
-    /// POST /assistant/speech requests naming it is kept with the answer in
-    /// its conversation (docs/assistant.md §8.3).
-    ///
-    /// Field 8: `speech_id`
-    pub speech_id: ::core::option::Option<::buffa::alloc::string::String>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -1739,7 +1634,6 @@ impl ::core::fmt::Debug for AskRequest {
             .field("answer", &self.answer)
             .field("choice", &self.choice)
             .field("failed_actions", &self.failed_actions)
-            .field("speech_id", &self.speech_id)
             .finish()
     }
 }
@@ -1776,16 +1670,6 @@ impl AskRequest {
         value: impl Into<::buffa::alloc::string::String>,
     ) -> Self {
         self.choice = Some(value.into());
-        self
-    }
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::speech_id`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_speech_id(
-        mut self,
-        value: impl Into<::buffa::alloc::string::String>,
-    ) -> Self {
-        self.speech_id = Some(value.into());
         self
     }
 }
@@ -1845,9 +1729,6 @@ impl ::buffa::Message for AskRequest {
         for v in &self.failed_actions {
             size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
-        if let Some(ref v) = self.speech_id {
-            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -1893,9 +1774,6 @@ impl ::buffa::Message for AskRequest {
         }
         for v in &self.failed_actions {
             ::buffa::types::put_string_field(7u32, v, buf);
-        }
-        if let Some(ref v) = self.speech_id {
-            ::buffa::types::put_string_field(8u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -1983,18 +1861,6 @@ impl ::buffa::Message for AskRequest {
                 )?;
                 self.failed_actions.push(__elem);
             }
-            8u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                ::buffa::types::merge_string(
-                    self
-                        .speech_id
-                        .get_or_insert_with(::buffa::alloc::string::String::new),
-                    buf,
-                )?;
-            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -2010,7 +1876,6 @@ impl ::buffa::Message for AskRequest {
         self.answer = ::buffa::MessageField::none();
         self.choice = ::core::option::Option::None;
         self.failed_actions.clear();
-        self.speech_id = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }
@@ -5066,517 +4931,6 @@ impl ::buffa::ExtensionSet for Done {
     }
 }
 #[derive(Clone, PartialEq, Default)]
-pub struct GetAssistantHintsRequest {
-    #[doc(hidden)]
-    pub __buffa_unknown_fields: ::buffa::UnknownFields,
-}
-impl ::core::fmt::Debug for GetAssistantHintsRequest {
-    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-        f.debug_struct("GetAssistantHintsRequest").finish()
-    }
-}
-impl GetAssistantHintsRequest {
-    /// Protobuf type URL for this message, for use with `Any::pack` and
-    /// `Any::unpack_if`.
-    ///
-    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
-    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.assistant.v1.GetAssistantHintsRequest";
-}
-::buffa::impl_default_instance!(GetAssistantHintsRequest);
-impl ::buffa::MessageName for GetAssistantHintsRequest {
-    const PACKAGE: &'static str = "mavio.assistant.v1";
-    const NAME: &'static str = "GetAssistantHintsRequest";
-    const FULL_NAME: &'static str = "mavio.assistant.v1.GetAssistantHintsRequest";
-    const TYPE_URL: &'static str = "type.googleapis.com/mavio.assistant.v1.GetAssistantHintsRequest";
-}
-impl ::buffa::Message for GetAssistantHintsRequest {
-    /// Returns the total encoded size in bytes.
-    ///
-    /// Accumulates in `u64` (which cannot overflow for in-memory
-    /// data) and saturates to `u32` at return, so a message whose
-    /// encoded size exceeds the 2 GiB protobuf limit yields a value
-    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
-    /// points reject, never a silently wrapped size.
-    #[allow(clippy::let_and_return)]
-    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
-        #[allow(unused_imports)]
-        use ::buffa::Enumeration as _;
-        let mut size = 0u64;
-        size += self.__buffa_unknown_fields.encoded_len() as u64;
-        ::buffa::saturate_size(size)
-    }
-    fn write_to(
-        &self,
-        _cache: &mut ::buffa::SizeCache,
-        buf: &mut impl ::buffa::EncodeSink,
-    ) {
-        #[allow(unused_imports)]
-        use ::buffa::Enumeration as _;
-        self.__buffa_unknown_fields.write_to(buf);
-    }
-    fn merge_field(
-        &mut self,
-        tag: ::buffa::encoding::Tag,
-        buf: &mut impl ::buffa::bytes::Buf,
-        ctx: ::buffa::DecodeContext<'_>,
-    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
-        #[allow(unused_imports)]
-        use ::buffa::bytes::Buf as _;
-        #[allow(unused_imports)]
-        use ::buffa::Enumeration as _;
-        match tag.field_number() {
-            _ => {
-                self.__buffa_unknown_fields
-                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
-            }
-        }
-        ::core::result::Result::Ok(())
-    }
-    fn clear(&mut self) {
-        self.__buffa_unknown_fields.clear();
-    }
-}
-impl ::buffa::ExtensionSet for GetAssistantHintsRequest {
-    const PROTO_FQN: &'static str = "mavio.assistant.v1.GetAssistantHintsRequest";
-    fn unknown_fields(&self) -> &::buffa::UnknownFields {
-        &self.__buffa_unknown_fields
-    }
-    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
-        &mut self.__buffa_unknown_fields
-    }
-}
-#[derive(Clone, PartialEq, Default)]
-pub struct GetAssistantHintsResponse {
-    /// Field 1: `phrases`
-    pub phrases: ::buffa::alloc::vec::Vec<::buffa::alloc::string::String>,
-    #[doc(hidden)]
-    pub __buffa_unknown_fields: ::buffa::UnknownFields,
-}
-impl ::core::fmt::Debug for GetAssistantHintsResponse {
-    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-        f.debug_struct("GetAssistantHintsResponse")
-            .field("phrases", &self.phrases)
-            .finish()
-    }
-}
-impl GetAssistantHintsResponse {
-    /// Protobuf type URL for this message, for use with `Any::pack` and
-    /// `Any::unpack_if`.
-    ///
-    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
-    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.assistant.v1.GetAssistantHintsResponse";
-}
-::buffa::impl_default_instance!(GetAssistantHintsResponse);
-impl ::buffa::MessageName for GetAssistantHintsResponse {
-    const PACKAGE: &'static str = "mavio.assistant.v1";
-    const NAME: &'static str = "GetAssistantHintsResponse";
-    const FULL_NAME: &'static str = "mavio.assistant.v1.GetAssistantHintsResponse";
-    const TYPE_URL: &'static str = "type.googleapis.com/mavio.assistant.v1.GetAssistantHintsResponse";
-}
-impl ::buffa::Message for GetAssistantHintsResponse {
-    /// Returns the total encoded size in bytes.
-    ///
-    /// Accumulates in `u64` (which cannot overflow for in-memory
-    /// data) and saturates to `u32` at return, so a message whose
-    /// encoded size exceeds the 2 GiB protobuf limit yields a value
-    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
-    /// points reject, never a silently wrapped size.
-    #[allow(clippy::let_and_return)]
-    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
-        #[allow(unused_imports)]
-        use ::buffa::Enumeration as _;
-        let mut size = 0u64;
-        for v in &self.phrases {
-            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
-        size += self.__buffa_unknown_fields.encoded_len() as u64;
-        ::buffa::saturate_size(size)
-    }
-    fn write_to(
-        &self,
-        _cache: &mut ::buffa::SizeCache,
-        buf: &mut impl ::buffa::EncodeSink,
-    ) {
-        #[allow(unused_imports)]
-        use ::buffa::Enumeration as _;
-        for v in &self.phrases {
-            ::buffa::types::put_string_field(1u32, v, buf);
-        }
-        self.__buffa_unknown_fields.write_to(buf);
-    }
-    fn merge_field(
-        &mut self,
-        tag: ::buffa::encoding::Tag,
-        buf: &mut impl ::buffa::bytes::Buf,
-        ctx: ::buffa::DecodeContext<'_>,
-    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
-        #[allow(unused_imports)]
-        use ::buffa::bytes::Buf as _;
-        #[allow(unused_imports)]
-        use ::buffa::Enumeration as _;
-        match tag.field_number() {
-            1u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                let __elem = ::buffa::types::decode_string(buf)?;
-                ctx.register_element_memory(
-                    ::buffa::__private::element_footprint(&__elem),
-                )?;
-                self.phrases.push(__elem);
-            }
-            _ => {
-                self.__buffa_unknown_fields
-                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
-            }
-        }
-        ::core::result::Result::Ok(())
-    }
-    fn clear(&mut self) {
-        self.phrases.clear();
-        self.__buffa_unknown_fields.clear();
-    }
-}
-impl ::buffa::ExtensionSet for GetAssistantHintsResponse {
-    const PROTO_FQN: &'static str = "mavio.assistant.v1.GetAssistantHintsResponse";
-    fn unknown_fields(&self) -> &::buffa::UnknownFields {
-        &self.__buffa_unknown_fields
-    }
-    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
-        &mut self.__buffa_unknown_fields
-    }
-}
-#[derive(Clone, PartialEq, Default)]
-pub struct StartListeningRequest {
-    /// The language spoken, BCP 47; empty, the recognizer detects it.
-    ///
-    /// Field 1: `language`
-    pub language: ::core::option::Option<::buffa::alloc::string::String>,
-    /// "\<plugin\>/\<recognizer\>"; empty, the settings'.
-    ///
-    /// Field 2: `recognizer`
-    pub recognizer: ::core::option::Option<::buffa::alloc::string::String>,
-    #[doc(hidden)]
-    pub __buffa_unknown_fields: ::buffa::UnknownFields,
-}
-impl ::core::fmt::Debug for StartListeningRequest {
-    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-        f.debug_struct("StartListeningRequest")
-            .field("language", &self.language)
-            .field("recognizer", &self.recognizer)
-            .finish()
-    }
-}
-impl StartListeningRequest {
-    /// Protobuf type URL for this message, for use with `Any::pack` and
-    /// `Any::unpack_if`.
-    ///
-    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
-    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.assistant.v1.StartListeningRequest";
-}
-impl StartListeningRequest {
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::language`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_language(
-        mut self,
-        value: impl Into<::buffa::alloc::string::String>,
-    ) -> Self {
-        self.language = Some(value.into());
-        self
-    }
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::recognizer`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_recognizer(
-        mut self,
-        value: impl Into<::buffa::alloc::string::String>,
-    ) -> Self {
-        self.recognizer = Some(value.into());
-        self
-    }
-}
-::buffa::impl_default_instance!(StartListeningRequest);
-impl ::buffa::MessageName for StartListeningRequest {
-    const PACKAGE: &'static str = "mavio.assistant.v1";
-    const NAME: &'static str = "StartListeningRequest";
-    const FULL_NAME: &'static str = "mavio.assistant.v1.StartListeningRequest";
-    const TYPE_URL: &'static str = "type.googleapis.com/mavio.assistant.v1.StartListeningRequest";
-}
-impl ::buffa::Message for StartListeningRequest {
-    /// Returns the total encoded size in bytes.
-    ///
-    /// Accumulates in `u64` (which cannot overflow for in-memory
-    /// data) and saturates to `u32` at return, so a message whose
-    /// encoded size exceeds the 2 GiB protobuf limit yields a value
-    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
-    /// points reject, never a silently wrapped size.
-    #[allow(clippy::let_and_return)]
-    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
-        #[allow(unused_imports)]
-        use ::buffa::Enumeration as _;
-        let mut size = 0u64;
-        if let Some(ref v) = self.language {
-            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
-        if let Some(ref v) = self.recognizer {
-            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
-        size += self.__buffa_unknown_fields.encoded_len() as u64;
-        ::buffa::saturate_size(size)
-    }
-    fn write_to(
-        &self,
-        _cache: &mut ::buffa::SizeCache,
-        buf: &mut impl ::buffa::EncodeSink,
-    ) {
-        #[allow(unused_imports)]
-        use ::buffa::Enumeration as _;
-        if let Some(ref v) = self.language {
-            ::buffa::types::put_string_field(1u32, v, buf);
-        }
-        if let Some(ref v) = self.recognizer {
-            ::buffa::types::put_string_field(2u32, v, buf);
-        }
-        self.__buffa_unknown_fields.write_to(buf);
-    }
-    fn merge_field(
-        &mut self,
-        tag: ::buffa::encoding::Tag,
-        buf: &mut impl ::buffa::bytes::Buf,
-        ctx: ::buffa::DecodeContext<'_>,
-    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
-        #[allow(unused_imports)]
-        use ::buffa::bytes::Buf as _;
-        #[allow(unused_imports)]
-        use ::buffa::Enumeration as _;
-        match tag.field_number() {
-            1u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                ::buffa::types::merge_string(
-                    self
-                        .language
-                        .get_or_insert_with(::buffa::alloc::string::String::new),
-                    buf,
-                )?;
-            }
-            2u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                ::buffa::types::merge_string(
-                    self
-                        .recognizer
-                        .get_or_insert_with(::buffa::alloc::string::String::new),
-                    buf,
-                )?;
-            }
-            _ => {
-                self.__buffa_unknown_fields
-                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
-            }
-        }
-        ::core::result::Result::Ok(())
-    }
-    fn clear(&mut self) {
-        self.language = ::core::option::Option::None;
-        self.recognizer = ::core::option::Option::None;
-        self.__buffa_unknown_fields.clear();
-    }
-}
-impl ::buffa::ExtensionSet for StartListeningRequest {
-    const PROTO_FQN: &'static str = "mavio.assistant.v1.StartListeningRequest";
-    fn unknown_fields(&self) -> &::buffa::UnknownFields {
-        &self.__buffa_unknown_fields
-    }
-    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
-        &mut self.__buffa_unknown_fields
-    }
-}
-#[derive(Clone, PartialEq, Default)]
-pub struct StartListeningResponse {
-    /// The WebSocket URL, relative to the server's base URL.
-    ///
-    /// Field 1: `url`
-    pub url: ::core::option::Option<::buffa::alloc::string::String>,
-    /// Field 2: `recognizer`
-    pub recognizer: ::core::option::Option<::buffa::alloc::string::String>,
-    /// Field 3: `expire_time`
-    pub expire_time: ::buffa::MessageField<
-        ::buffa_types::google::protobuf::Timestamp,
-        ::buffa::Inline<::buffa_types::google::protobuf::Timestamp>,
-    >,
-    #[doc(hidden)]
-    pub __buffa_unknown_fields: ::buffa::UnknownFields,
-}
-impl ::core::fmt::Debug for StartListeningResponse {
-    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-        f.debug_struct("StartListeningResponse")
-            .field("url", &self.url)
-            .field("recognizer", &self.recognizer)
-            .field("expire_time", &self.expire_time)
-            .finish()
-    }
-}
-impl StartListeningResponse {
-    /// Protobuf type URL for this message, for use with `Any::pack` and
-    /// `Any::unpack_if`.
-    ///
-    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
-    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.assistant.v1.StartListeningResponse";
-}
-impl StartListeningResponse {
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::url`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_url(mut self, value: impl Into<::buffa::alloc::string::String>) -> Self {
-        self.url = Some(value.into());
-        self
-    }
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::recognizer`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_recognizer(
-        mut self,
-        value: impl Into<::buffa::alloc::string::String>,
-    ) -> Self {
-        self.recognizer = Some(value.into());
-        self
-    }
-}
-::buffa::impl_default_instance!(StartListeningResponse);
-impl ::buffa::MessageName for StartListeningResponse {
-    const PACKAGE: &'static str = "mavio.assistant.v1";
-    const NAME: &'static str = "StartListeningResponse";
-    const FULL_NAME: &'static str = "mavio.assistant.v1.StartListeningResponse";
-    const TYPE_URL: &'static str = "type.googleapis.com/mavio.assistant.v1.StartListeningResponse";
-}
-impl ::buffa::Message for StartListeningResponse {
-    /// Returns the total encoded size in bytes.
-    ///
-    /// Accumulates in `u64` (which cannot overflow for in-memory
-    /// data) and saturates to `u32` at return, so a message whose
-    /// encoded size exceeds the 2 GiB protobuf limit yields a value
-    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
-    /// points reject, never a silently wrapped size.
-    #[allow(clippy::let_and_return)]
-    fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
-        #[allow(unused_imports)]
-        use ::buffa::Enumeration as _;
-        let mut size = 0u64;
-        if let Some(ref v) = self.url {
-            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
-        if let Some(ref v) = self.recognizer {
-            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
-        if self.expire_time.is_set() {
-            let __slot = __cache.reserve();
-            let inner_size = self.expire_time.compute_size(__cache);
-            __cache.set(__slot, inner_size);
-            size
-                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
-                    + inner_size as u64;
-        }
-        size += self.__buffa_unknown_fields.encoded_len() as u64;
-        ::buffa::saturate_size(size)
-    }
-    fn write_to(
-        &self,
-        __cache: &mut ::buffa::SizeCache,
-        buf: &mut impl ::buffa::EncodeSink,
-    ) {
-        #[allow(unused_imports)]
-        use ::buffa::Enumeration as _;
-        if let Some(ref v) = self.url {
-            ::buffa::types::put_string_field(1u32, v, buf);
-        }
-        if let Some(ref v) = self.recognizer {
-            ::buffa::types::put_string_field(2u32, v, buf);
-        }
-        if self.expire_time.is_set() {
-            ::buffa::types::put_len_delimited_header(
-                3u32,
-                u64::from(__cache.consume_next()),
-                buf,
-            );
-            self.expire_time.write_to(__cache, buf);
-        }
-        self.__buffa_unknown_fields.write_to(buf);
-    }
-    fn merge_field(
-        &mut self,
-        tag: ::buffa::encoding::Tag,
-        buf: &mut impl ::buffa::bytes::Buf,
-        ctx: ::buffa::DecodeContext<'_>,
-    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
-        #[allow(unused_imports)]
-        use ::buffa::bytes::Buf as _;
-        #[allow(unused_imports)]
-        use ::buffa::Enumeration as _;
-        match tag.field_number() {
-            1u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                ::buffa::types::merge_string(
-                    self.url.get_or_insert_with(::buffa::alloc::string::String::new),
-                    buf,
-                )?;
-            }
-            2u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                ::buffa::types::merge_string(
-                    self
-                        .recognizer
-                        .get_or_insert_with(::buffa::alloc::string::String::new),
-                    buf,
-                )?;
-            }
-            3u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                ::buffa::Message::merge_length_delimited(
-                    self.expire_time.get_or_insert_default(),
-                    buf,
-                    ctx,
-                )?;
-            }
-            _ => {
-                self.__buffa_unknown_fields
-                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
-            }
-        }
-        ::core::result::Result::Ok(())
-    }
-    fn clear(&mut self) {
-        self.url = ::core::option::Option::None;
-        self.recognizer = ::core::option::Option::None;
-        self.expire_time = ::buffa::MessageField::none();
-        self.__buffa_unknown_fields.clear();
-    }
-}
-impl ::buffa::ExtensionSet for StartListeningResponse {
-    const PROTO_FQN: &'static str = "mavio.assistant.v1.StartListeningResponse";
-    fn unknown_fields(&self) -> &::buffa::UnknownFields {
-        &self.__buffa_unknown_fields
-    }
-    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
-        &mut self.__buffa_unknown_fields
-    }
-}
-#[derive(Clone, PartialEq, Default)]
 pub struct StartVoiceSessionRequest {
     /// The language spoken, BCP 47; empty, the recognizer detects it.
     ///
@@ -6230,11 +5584,12 @@ pub struct AssistantMessage {
         ::buffa_types::google::protobuf::Timestamp,
         ::buffa::Inline<::buffa_types::google::protobuf::Timestamp>,
     >,
-    /// An answer's speech as it was spoken, a sentence a URL relative to the
-    /// server's base URL, in order; none when none was kept.
+    /// The URL of an answer's speech as it was spoken, relative to the
+    /// server's base URL; its formats query names the encodings the client
+    /// plays ("opus", "aac", "mp3", "flac", "wav"). Empty when none was kept.
     ///
-    /// Field 4: `speech`
-    pub speech: ::buffa::alloc::vec::Vec<::buffa::alloc::string::String>,
+    /// Field 5: `speech_url`
+    pub speech_url: ::core::option::Option<::buffa::alloc::string::String>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -6244,7 +5599,7 @@ impl ::core::fmt::Debug for AssistantMessage {
             .field("user", &self.user)
             .field("text", &self.text)
             .field("time", &self.time)
-            .field("speech", &self.speech)
+            .field("speech_url", &self.speech_url)
             .finish()
     }
 }
@@ -6271,6 +5626,16 @@ impl AssistantMessage {
         value: impl Into<::buffa::alloc::string::String>,
     ) -> Self {
         self.text = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::speech_url`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_speech_url(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.speech_url = Some(value.into());
         self
     }
 }
@@ -6308,7 +5673,7 @@ impl ::buffa::Message for AssistantMessage {
                 += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
                     + inner_size as u64;
         }
-        for v in &self.speech {
+        if let Some(ref v) = self.speech_url {
             size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
@@ -6335,8 +5700,8 @@ impl ::buffa::Message for AssistantMessage {
             );
             self.time.write_to(__cache, buf);
         }
-        for v in &self.speech {
-            ::buffa::types::put_string_field(4u32, v, buf);
+        if let Some(ref v) = self.speech_url {
+            ::buffa::types::put_string_field(5u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -6381,16 +5746,17 @@ impl ::buffa::Message for AssistantMessage {
                     ctx,
                 )?;
             }
-            4u32 => {
+            5u32 => {
                 ::buffa::encoding::check_wire_type(
                     tag,
                     ::buffa::encoding::WireType::LengthDelimited,
                 )?;
-                let __elem = ::buffa::types::decode_string(buf)?;
-                ctx.register_element_memory(
-                    ::buffa::__private::element_footprint(&__elem),
+                ::buffa::types::merge_string(
+                    self
+                        .speech_url
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
                 )?;
-                self.speech.push(__elem);
             }
             _ => {
                 self.__buffa_unknown_fields
@@ -6403,7 +5769,7 @@ impl ::buffa::Message for AssistantMessage {
         self.user = ::core::option::Option::None;
         self.text = ::core::option::Option::None;
         self.time = ::buffa::MessageField::none();
-        self.speech.clear();
+        self.speech_url = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }
@@ -8015,6 +7381,12 @@ pub struct GetAssistantSettingsResponse {
         AssistantSettings,
         ::buffa::Inline<AssistantSettings>,
     >,
+    /// The voice session plugin's recognizers and voices, to choose from.
+    ///
+    /// Field 2: `recognizers`
+    pub recognizers: ::buffa::alloc::vec::Vec<VoiceEngine>,
+    /// Field 3: `voices`
+    pub voices: ::buffa::alloc::vec::Vec<VoiceEngine>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -8022,6 +7394,8 @@ impl ::core::fmt::Debug for GetAssistantSettingsResponse {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
         f.debug_struct("GetAssistantSettingsResponse")
             .field("settings", &self.settings)
+            .field("recognizers", &self.recognizers)
+            .field("voices", &self.voices)
             .finish()
     }
 }
@@ -8060,6 +7434,22 @@ impl ::buffa::Message for GetAssistantSettingsResponse {
                 += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
                     + inner_size as u64;
         }
+        for v in &self.recognizers {
+            let __slot = __cache.reserve();
+            let inner_size = v.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        for v in &self.voices {
+            let __slot = __cache.reserve();
+            let inner_size = v.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -8077,6 +7467,22 @@ impl ::buffa::Message for GetAssistantSettingsResponse {
                 buf,
             );
             self.settings.write_to(__cache, buf);
+        }
+        for v in &self.recognizers {
+            ::buffa::types::put_len_delimited_header(
+                2u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            v.write_to(__cache, buf);
+        }
+        for v in &self.voices {
+            ::buffa::types::put_len_delimited_header(
+                3u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            v.write_to(__cache, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -8102,6 +7508,30 @@ impl ::buffa::Message for GetAssistantSettingsResponse {
                     ctx,
                 )?;
             }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let mut elem = ::core::default::Default::default();
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&elem),
+                )?;
+                ::buffa::Message::merge_length_delimited(&mut elem, buf, ctx)?;
+                self.recognizers.push(elem);
+            }
+            3u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let mut elem = ::core::default::Default::default();
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&elem),
+                )?;
+                ::buffa::Message::merge_length_delimited(&mut elem, buf, ctx)?;
+                self.voices.push(elem);
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -8111,6 +7541,8 @@ impl ::buffa::Message for GetAssistantSettingsResponse {
     }
     fn clear(&mut self) {
         self.settings = ::buffa::MessageField::none();
+        self.recognizers.clear();
+        self.voices.clear();
         self.__buffa_unknown_fields.clear();
     }
 }

@@ -82,7 +82,6 @@ pub mod __buffa {
             use super::*;
             include!("mavio.plugin.v1.ai.__view_oneof.rs");
             include!("mavio.plugin.v1.device.__view_oneof.rs");
-            include!("mavio.plugin.v1.speech.__view_oneof.rs");
         }
     }
     pub mod oneof {
@@ -90,7 +89,6 @@ pub mod __buffa {
         use super::*;
         include!("mavio.plugin.v1.ai.__oneof.rs");
         include!("mavio.plugin.v1.device.__oneof.rs");
-        include!("mavio.plugin.v1.speech.__oneof.rs");
     }
 }
 #[doc(inline)]
@@ -1066,29 +1064,33 @@ pub use self::__buffa::view::GetSegmentsResponseView;
 #[doc(inline)]
 pub use self::__buffa::view::GetSegmentsResponseOwnedView;
 #[doc(inline)]
-pub use self::__buffa::view::ListRecognizersRequestView;
+pub use self::__buffa::view::ListTranscribersRequestView;
 #[doc(inline)]
-pub use self::__buffa::view::ListRecognizersRequestOwnedView;
+pub use self::__buffa::view::ListTranscribersRequestOwnedView;
 #[doc(inline)]
-pub use self::__buffa::view::ListRecognizersResponseView;
+pub use self::__buffa::view::ListTranscribersResponseView;
 #[doc(inline)]
-pub use self::__buffa::view::ListRecognizersResponseOwnedView;
+pub use self::__buffa::view::ListTranscribersResponseOwnedView;
 #[doc(inline)]
-pub use self::__buffa::view::RecognizerInfoView;
+pub use self::__buffa::view::TranscriptionServiceInfoView;
 #[doc(inline)]
-pub use self::__buffa::view::RecognizerInfoOwnedView;
+pub use self::__buffa::view::TranscriptionServiceInfoOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::TranscriberInfoView;
+#[doc(inline)]
+pub use self::__buffa::view::TranscriberInfoOwnedView;
 #[doc(inline)]
 pub use self::__buffa::view::SpeechAudioView;
 #[doc(inline)]
 pub use self::__buffa::view::SpeechAudioOwnedView;
 #[doc(inline)]
-pub use self::__buffa::view::RecognizeSpeechRequestView;
+pub use self::__buffa::view::TranscribeSpeechRequestView;
 #[doc(inline)]
-pub use self::__buffa::view::RecognizeSpeechRequestOwnedView;
+pub use self::__buffa::view::TranscribeSpeechRequestOwnedView;
 #[doc(inline)]
-pub use self::__buffa::view::RecognizeSpeechResponseView;
+pub use self::__buffa::view::TranscribeSpeechResponseView;
 #[doc(inline)]
-pub use self::__buffa::view::RecognizeSpeechResponseOwnedView;
+pub use self::__buffa::view::TranscribeSpeechResponseOwnedView;
 #[doc(inline)]
 pub use self::__buffa::view::SpeechSegmentView;
 #[doc(inline)]
@@ -1101,30 +1103,6 @@ pub use self::__buffa::view::DetectSpeechLanguageRequestOwnedView;
 pub use self::__buffa::view::DetectSpeechLanguageResponseView;
 #[doc(inline)]
 pub use self::__buffa::view::DetectSpeechLanguageResponseOwnedView;
-#[doc(inline)]
-pub use self::__buffa::view::ListVoicesRequestView;
-#[doc(inline)]
-pub use self::__buffa::view::ListVoicesRequestOwnedView;
-#[doc(inline)]
-pub use self::__buffa::view::ListVoicesResponseView;
-#[doc(inline)]
-pub use self::__buffa::view::ListVoicesResponseOwnedView;
-#[doc(inline)]
-pub use self::__buffa::view::SynthesizerInfoView;
-#[doc(inline)]
-pub use self::__buffa::view::SynthesizerInfoOwnedView;
-#[doc(inline)]
-pub use self::__buffa::view::VoiceInfoView;
-#[doc(inline)]
-pub use self::__buffa::view::VoiceInfoOwnedView;
-#[doc(inline)]
-pub use self::__buffa::view::SynthesizeSpeechRequestView;
-#[doc(inline)]
-pub use self::__buffa::view::SynthesizeSpeechRequestOwnedView;
-#[doc(inline)]
-pub use self::__buffa::view::SynthesizeSpeechResponseView;
-#[doc(inline)]
-pub use self::__buffa::view::SynthesizeSpeechResponseOwnedView;
 #[doc(inline)]
 pub use self::__buffa::view::ListSubtitleProvidersRequestView;
 #[doc(inline)]

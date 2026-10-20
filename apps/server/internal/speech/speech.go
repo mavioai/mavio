@@ -2,8 +2,6 @@ package speech
 
 import (
 	"context"
-	"errors"
-	"fmt"
 	"log/slog"
 	"strings"
 
@@ -11,81 +9,40 @@ import (
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1/pluginv1connect"
 )
 
-// RecognizerPlugin is a started SPEECH_TO_TEXT plugin.
-type RecognizerPlugin struct {
+// Plugin is a started SPEECH_TO_TEXT plugin.
+type Plugin struct {
 	ID     string
 	Client pluginv1connect.SpeechToTextServiceClient
 }
 
-// VoicePlugin is a started TEXT_TO_SPEECH plugin.
-type VoicePlugin struct {
+// Transcriber is an enabled and ready transcriber of a plugin.
+type Transcriber struct {
+	// ID is "<plugin>/<transcriber>".
 	ID     string
-	Client pluginv1connect.TextToSpeechServiceClient
+	Plugin Plugin
+	Info   *pluginv1.TranscriberInfo
 }
 
-// Recognizer is an enabled recognizer of a plugin.
-type Recognizer struct {
-	// ID is "<plugin>/<name>".
-	ID     string
-	Plugin RecognizerPlugin
-	Info   *pluginv1.RecognizerInfo
-}
-
-// Voice is a voice of an enabled synthesizer.
-type Voice struct {
-	// ID is "<plugin>/<synthesizer>/<voice>".
-	ID     string
-	Plugin VoicePlugin
-	Info   *pluginv1.VoiceInfo
-}
-
-// ErrNone is a request no recognizer or voice can serve.
-var ErrNone = errors.New("no recognizer or voice can serve it")
-
-// Recognizers lists the enabled recognizers of plugins, in their order;
-// plugins that fail to list them are logged and left out.
-func Recognizers(ctx context.Context, plugins []RecognizerPlugin, log *slog.Logger) []Recognizer {
-	var out []Recognizer
+// Transcribers lists the enabled and ready transcribers of plugins, in
+// their order; plugins that fail to list them are logged and left out.
+func Transcribers(ctx context.Context, plugins []Plugin, log *slog.Logger) []Transcriber {
+	var out []Transcriber
 	for _, p := range plugins {
-		resp, err := p.Client.ListRecognizers(ctx, &pluginv1.ListRecognizersRequest{})
+		resp, err := p.Client.ListTranscribers(ctx, &pluginv1.ListTranscribersRequest{})
 		if err != nil {
-			log.WarnContext(ctx, "list recognizers", "plugin", p.ID, "err", err)
+			log.WarnContext(ctx, "list transcribers", "plugin", p.ID, "err", err)
 			continue
 		}
-		for _, r := range resp.GetRecognizers() {
-			if r.GetEnabled() {
-				out = append(out, Recognizer{ID: p.ID + "/" + r.GetName(), Plugin: p, Info: r})
+		for _, t := range resp.GetTranscribers() {
+			if t.GetEnabled() && t.GetReady() {
+				out = append(out, Transcriber{ID: p.ID + "/" + t.GetId(), Plugin: p, Info: t})
 			}
 		}
 	}
 	return out
 }
 
-// Voices lists the voices of plugins' enabled synthesizers.
-func Voices(ctx context.Context, plugins []VoicePlugin, log *slog.Logger) []Voice {
-	var out []Voice
-	for _, p := range plugins {
-		resp, err := p.Client.ListVoices(ctx, &pluginv1.ListVoicesRequest{})
-		if err != nil {
-			log.WarnContext(ctx, "list voices", "plugin", p.ID, "err", err)
-			continue
-		}
-		enabled := map[string]bool{}
-		for _, s := range resp.GetSynthesizers() {
-			enabled[s.GetName()] = s.GetEnabled()
-		}
-		for _, v := range resp.GetVoices() {
-			synth, _, _ := strings.Cut(v.GetId(), "/")
-			if on, known := enabled[synth]; known && !on {
-				continue
-			}
-			out = append(out, Voice{ID: p.ID + "/" + v.GetId(), Plugin: p, Info: v})
-		}
-	}
-	return out
-}
-
-// Speaks reports whether a recognizer or voice of languages takes a BCP 47
+// Speaks reports whether a transcriber of languages takes a BCP 47
 // language: any when it lists none, else one of the same base language.
 func Speaks(languages []string, language string) bool {
 	if len(languages) == 0 || language == "" {
@@ -107,46 +64,16 @@ func Base(tag string) string {
 	return strings.ToLower(b)
 }
 
-// Pick returns the recognizer of id, or with id empty the first for the
-// language that suits need, or ErrNone.
-func Pick(list []Recognizer, id, language string, need func(*pluginv1.RecognizerInfo) bool) (Recognizer, error) {
-	for _, r := range list {
-		if id != "" && r.ID != id {
-			continue
-		}
-		if !Speaks(r.Info.GetLanguages(), language) || (need != nil && !need(r.Info)) {
-			if id != "" {
-				return Recognizer{}, fmt.Errorf("%w: recognizer %s does not take %q", ErrNone, id, language)
-			}
-			continue
-		}
-		return r, nil
-	}
-	if id != "" {
-		return Recognizer{}, fmt.Errorf("%w: no recognizer %s", ErrNone, id)
-	}
-	return Recognizer{}, ErrNone
-}
-
-// Recognize recognizes audio with a recognizer.
-func (r Recognizer) Recognize(ctx context.Context, req *pluginv1.RecognizeSpeechRequest) (*pluginv1.RecognizeSpeechResponse, error) {
-	_, name, _ := strings.Cut(r.ID, "/")
-	req.SetRecognizer(name)
-	return r.Plugin.Client.RecognizeSpeech(ctx, req)
+// Transcribe transcribes audio with a transcriber.
+func (t Transcriber) Transcribe(ctx context.Context, req *pluginv1.TranscribeSpeechRequest) (*pluginv1.TranscribeSpeechResponse, error) {
+	req.SetTranscriber(t.Info.GetId())
+	return t.Plugin.Client.TranscribeSpeech(ctx, req)
 }
 
 // DetectLanguage tells the language spoken in audio.
-func (r Recognizer) DetectLanguage(ctx context.Context, audio *pluginv1.SpeechAudio) (string, error) {
-	_, name, _ := strings.Cut(r.ID, "/")
-	resp, err := r.Plugin.Client.DetectSpeechLanguage(ctx, pluginv1.DetectSpeechLanguageRequest_builder{Recognizer: &name, Audio: audio}.Build())
-	return resp.GetLanguage(), err
-}
-
-// Synthesize speaks text with a voice, in the encoding of the
-// synthesizer's settings.
-func (v Voice) Synthesize(ctx context.Context, text, language string) (*pluginv1.SynthesizeSpeechResponse, error) {
-	_, id, _ := strings.Cut(v.ID, "/")
-	return v.Plugin.Client.SynthesizeSpeech(ctx, pluginv1.SynthesizeSpeechRequest_builder{
-		Voice: &id, Text: &text, Language: &language,
+func (t Transcriber) DetectLanguage(ctx context.Context, audio *pluginv1.SpeechAudio) (string, error) {
+	resp, err := t.Plugin.Client.DetectSpeechLanguage(ctx, pluginv1.DetectSpeechLanguageRequest_builder{
+		Transcriber: new(t.Info.GetId()), Audio: audio,
 	}.Build())
+	return resp.GetLanguage(), err
 }

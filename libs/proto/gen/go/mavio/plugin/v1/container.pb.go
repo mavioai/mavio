@@ -177,7 +177,7 @@ func (x ContainerState) Number() protoreflect.EnumNumber {
 }
 
 // ContainerDependency is a service a plugin depends on that runs as a
-// container image, such as whisper-asr-webservice. The server runs it on a
+// container image, such as FlareSolverr. The server runs it on a
 // container engine (managed) or reaches it at an address an administrator
 // gives (external); the plugin sees only its address.
 type ContainerDependency struct {
@@ -601,7 +601,7 @@ type ContainerDependency_builder struct {
 	// What it is for, shown to administrators.
 	Description *string
 	// Image reference with its digest, e.g.
-	// "onerahmet/openai-whisper-asr-webservice:v1.9.1@sha256:…".
+	// "ghcr.io/flaresolverr/flaresolverr:v3.4.6@sha256:…".
 	Image *string
 	// TCP port the service listens on in the container.
 	Port *uint32

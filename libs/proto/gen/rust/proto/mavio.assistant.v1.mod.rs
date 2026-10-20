@@ -36,9 +36,9 @@ pub use self::__buffa::view::AssistantSettingsView;
 #[doc(inline)]
 pub use self::__buffa::view::AssistantSettingsOwnedView;
 #[doc(inline)]
-pub use self::__buffa::view::AssistantVoiceChoiceView;
+pub use self::__buffa::view::AssistantSpeechView;
 #[doc(inline)]
-pub use self::__buffa::view::AssistantVoiceChoiceOwnedView;
+pub use self::__buffa::view::AssistantSpeechOwnedView;
 #[doc(inline)]
 pub use self::__buffa::view::GetAssistantRequestView;
 #[doc(inline)]
@@ -48,13 +48,9 @@ pub use self::__buffa::view::GetAssistantResponseView;
 #[doc(inline)]
 pub use self::__buffa::view::GetAssistantResponseOwnedView;
 #[doc(inline)]
-pub use self::__buffa::view::RecognizerView;
+pub use self::__buffa::view::VoiceEngineView;
 #[doc(inline)]
-pub use self::__buffa::view::RecognizerOwnedView;
-#[doc(inline)]
-pub use self::__buffa::view::VoiceView;
-#[doc(inline)]
-pub use self::__buffa::view::VoiceOwnedView;
+pub use self::__buffa::view::VoiceEngineOwnedView;
 #[doc(inline)]
 pub use self::__buffa::view::AskRequestView;
 #[doc(inline)]
@@ -115,22 +111,6 @@ pub use self::__buffa::view::ConfirmationOwnedView;
 pub use self::__buffa::view::DoneView;
 #[doc(inline)]
 pub use self::__buffa::view::DoneOwnedView;
-#[doc(inline)]
-pub use self::__buffa::view::GetAssistantHintsRequestView;
-#[doc(inline)]
-pub use self::__buffa::view::GetAssistantHintsRequestOwnedView;
-#[doc(inline)]
-pub use self::__buffa::view::GetAssistantHintsResponseView;
-#[doc(inline)]
-pub use self::__buffa::view::GetAssistantHintsResponseOwnedView;
-#[doc(inline)]
-pub use self::__buffa::view::StartListeningRequestView;
-#[doc(inline)]
-pub use self::__buffa::view::StartListeningRequestOwnedView;
-#[doc(inline)]
-pub use self::__buffa::view::StartListeningResponseView;
-#[doc(inline)]
-pub use self::__buffa::view::StartListeningResponseOwnedView;
 #[doc(inline)]
 pub use self::__buffa::view::StartVoiceSessionRequestView;
 #[doc(inline)]

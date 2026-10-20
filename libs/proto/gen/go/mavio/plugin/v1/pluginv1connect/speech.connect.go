@@ -23,8 +23,6 @@ const _ = connect.IsAtLeastVersion1_13_0
 const (
 	// SpeechToTextServiceName is the fully-qualified name of the SpeechToTextService service.
 	SpeechToTextServiceName = "mavio.plugin.v1.SpeechToTextService"
-	// TextToSpeechServiceName is the fully-qualified name of the TextToSpeechService service.
-	TextToSpeechServiceName = "mavio.plugin.v1.TextToSpeechService"
 )
 
 // These constants are the fully-qualified names of the RPCs defined in this package. They're
@@ -35,33 +33,27 @@ const (
 // reflection-formatted method names, remove the leading slash and convert the remaining slash to a
 // period.
 const (
-	// SpeechToTextServiceListRecognizersProcedure is the fully-qualified name of the
-	// SpeechToTextService's ListRecognizers RPC.
-	SpeechToTextServiceListRecognizersProcedure = "/mavio.plugin.v1.SpeechToTextService/ListRecognizers"
-	// SpeechToTextServiceRecognizeSpeechProcedure is the fully-qualified name of the
-	// SpeechToTextService's RecognizeSpeech RPC.
-	SpeechToTextServiceRecognizeSpeechProcedure = "/mavio.plugin.v1.SpeechToTextService/RecognizeSpeech"
+	// SpeechToTextServiceListTranscribersProcedure is the fully-qualified name of the
+	// SpeechToTextService's ListTranscribers RPC.
+	SpeechToTextServiceListTranscribersProcedure = "/mavio.plugin.v1.SpeechToTextService/ListTranscribers"
+	// SpeechToTextServiceTranscribeSpeechProcedure is the fully-qualified name of the
+	// SpeechToTextService's TranscribeSpeech RPC.
+	SpeechToTextServiceTranscribeSpeechProcedure = "/mavio.plugin.v1.SpeechToTextService/TranscribeSpeech"
 	// SpeechToTextServiceDetectSpeechLanguageProcedure is the fully-qualified name of the
 	// SpeechToTextService's DetectSpeechLanguage RPC.
 	SpeechToTextServiceDetectSpeechLanguageProcedure = "/mavio.plugin.v1.SpeechToTextService/DetectSpeechLanguage"
-	// TextToSpeechServiceListVoicesProcedure is the fully-qualified name of the TextToSpeechService's
-	// ListVoices RPC.
-	TextToSpeechServiceListVoicesProcedure = "/mavio.plugin.v1.TextToSpeechService/ListVoices"
-	// TextToSpeechServiceSynthesizeSpeechProcedure is the fully-qualified name of the
-	// TextToSpeechService's SynthesizeSpeech RPC.
-	TextToSpeechServiceSynthesizeSpeechProcedure = "/mavio.plugin.v1.TextToSpeechService/SynthesizeSpeech"
 )
 
 // SpeechToTextServiceClient is a client for the mavio.plugin.v1.SpeechToTextService service.
 type SpeechToTextServiceClient interface {
-	// ListRecognizers lists the recognition services the plugin implements,
-	// with their settings, and the recognizers configured from them, with
-	// their state.
-	ListRecognizers(context.Context, *v1.ListRecognizersRequest) (*v1.ListRecognizersResponse, error)
-	// RecognizeSpeech recognizes the speech of audio.
-	RecognizeSpeech(context.Context, *v1.RecognizeSpeechRequest) (*v1.RecognizeSpeechResponse, error)
-	// DetectSpeechLanguage tells the language spoken in audio; recognizers
-	// with detects_language only.
+	// ListTranscribers lists the transcription services the plugin
+	// implements, with their settings, and the transcribers configured from
+	// them, with their state.
+	ListTranscribers(context.Context, *v1.ListTranscribersRequest) (*v1.ListTranscribersResponse, error)
+	// TranscribeSpeech transcribes audio into segments with their times.
+	TranscribeSpeech(context.Context, *v1.TranscribeSpeechRequest) (*v1.TranscribeSpeechResponse, error)
+	// DetectSpeechLanguage tells the language spoken in the first 30
+	// seconds of audio.
 	DetectSpeechLanguage(context.Context, *v1.DetectSpeechLanguageRequest) (*v1.DetectSpeechLanguageResponse, error)
 }
 
@@ -76,17 +68,17 @@ func NewSpeechToTextServiceClient(httpClient connect.HTTPClient, baseURL string,
 	baseURL = strings.TrimRight(baseURL, "/")
 	speechToTextServiceMethods := v1.File_mavio_plugin_v1_speech_proto.Services().ByName("SpeechToTextService").Methods()
 	return &speechToTextServiceClient{
-		listRecognizers: connect.NewClient[v1.ListRecognizersRequest, v1.ListRecognizersResponse](
+		listTranscribers: connect.NewClient[v1.ListTranscribersRequest, v1.ListTranscribersResponse](
 			httpClient,
-			baseURL+SpeechToTextServiceListRecognizersProcedure,
-			connect.WithSchema(speechToTextServiceMethods.ByName("ListRecognizers")),
+			baseURL+SpeechToTextServiceListTranscribersProcedure,
+			connect.WithSchema(speechToTextServiceMethods.ByName("ListTranscribers")),
 			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
 			connect.WithClientOptions(opts...),
 		),
-		recognizeSpeech: connect.NewClient[v1.RecognizeSpeechRequest, v1.RecognizeSpeechResponse](
+		transcribeSpeech: connect.NewClient[v1.TranscribeSpeechRequest, v1.TranscribeSpeechResponse](
 			httpClient,
-			baseURL+SpeechToTextServiceRecognizeSpeechProcedure,
-			connect.WithSchema(speechToTextServiceMethods.ByName("RecognizeSpeech")),
+			baseURL+SpeechToTextServiceTranscribeSpeechProcedure,
+			connect.WithSchema(speechToTextServiceMethods.ByName("TranscribeSpeech")),
 			connect.WithClientOptions(opts...),
 		),
 		detectSpeechLanguage: connect.NewClient[v1.DetectSpeechLanguageRequest, v1.DetectSpeechLanguageResponse](
@@ -100,23 +92,23 @@ func NewSpeechToTextServiceClient(httpClient connect.HTTPClient, baseURL string,
 
 // speechToTextServiceClient implements SpeechToTextServiceClient.
 type speechToTextServiceClient struct {
-	listRecognizers      *connect.Client[v1.ListRecognizersRequest, v1.ListRecognizersResponse]
-	recognizeSpeech      *connect.Client[v1.RecognizeSpeechRequest, v1.RecognizeSpeechResponse]
+	listTranscribers     *connect.Client[v1.ListTranscribersRequest, v1.ListTranscribersResponse]
+	transcribeSpeech     *connect.Client[v1.TranscribeSpeechRequest, v1.TranscribeSpeechResponse]
 	detectSpeechLanguage *connect.Client[v1.DetectSpeechLanguageRequest, v1.DetectSpeechLanguageResponse]
 }
 
-// ListRecognizers calls mavio.plugin.v1.SpeechToTextService.ListRecognizers.
-func (c *speechToTextServiceClient) ListRecognizers(ctx context.Context, req *v1.ListRecognizersRequest) (*v1.ListRecognizersResponse, error) {
-	response, err := c.listRecognizers.CallUnary(ctx, connect.NewRequest(req))
+// ListTranscribers calls mavio.plugin.v1.SpeechToTextService.ListTranscribers.
+func (c *speechToTextServiceClient) ListTranscribers(ctx context.Context, req *v1.ListTranscribersRequest) (*v1.ListTranscribersResponse, error) {
+	response, err := c.listTranscribers.CallUnary(ctx, connect.NewRequest(req))
 	if response != nil {
 		return response.Msg, err
 	}
 	return nil, err
 }
 
-// RecognizeSpeech calls mavio.plugin.v1.SpeechToTextService.RecognizeSpeech.
-func (c *speechToTextServiceClient) RecognizeSpeech(ctx context.Context, req *v1.RecognizeSpeechRequest) (*v1.RecognizeSpeechResponse, error) {
-	response, err := c.recognizeSpeech.CallUnary(ctx, connect.NewRequest(req))
+// TranscribeSpeech calls mavio.plugin.v1.SpeechToTextService.TranscribeSpeech.
+func (c *speechToTextServiceClient) TranscribeSpeech(ctx context.Context, req *v1.TranscribeSpeechRequest) (*v1.TranscribeSpeechResponse, error) {
+	response, err := c.transcribeSpeech.CallUnary(ctx, connect.NewRequest(req))
 	if response != nil {
 		return response.Msg, err
 	}
@@ -135,14 +127,14 @@ func (c *speechToTextServiceClient) DetectSpeechLanguage(ctx context.Context, re
 // SpeechToTextServiceHandler is an implementation of the mavio.plugin.v1.SpeechToTextService
 // service.
 type SpeechToTextServiceHandler interface {
-	// ListRecognizers lists the recognition services the plugin implements,
-	// with their settings, and the recognizers configured from them, with
-	// their state.
-	ListRecognizers(context.Context, *v1.ListRecognizersRequest) (*v1.ListRecognizersResponse, error)
-	// RecognizeSpeech recognizes the speech of audio.
-	RecognizeSpeech(context.Context, *v1.RecognizeSpeechRequest) (*v1.RecognizeSpeechResponse, error)
-	// DetectSpeechLanguage tells the language spoken in audio; recognizers
-	// with detects_language only.
+	// ListTranscribers lists the transcription services the plugin
+	// implements, with their settings, and the transcribers configured from
+	// them, with their state.
+	ListTranscribers(context.Context, *v1.ListTranscribersRequest) (*v1.ListTranscribersResponse, error)
+	// TranscribeSpeech transcribes audio into segments with their times.
+	TranscribeSpeech(context.Context, *v1.TranscribeSpeechRequest) (*v1.TranscribeSpeechResponse, error)
+	// DetectSpeechLanguage tells the language spoken in the first 30
+	// seconds of audio.
 	DetectSpeechLanguage(context.Context, *v1.DetectSpeechLanguageRequest) (*v1.DetectSpeechLanguageResponse, error)
 }
 
@@ -153,17 +145,17 @@ type SpeechToTextServiceHandler interface {
 // and JSON codecs. They also support gzip compression.
 func NewSpeechToTextServiceHandler(svc SpeechToTextServiceHandler, opts ...connect.HandlerOption) (string, http.Handler) {
 	speechToTextServiceMethods := v1.File_mavio_plugin_v1_speech_proto.Services().ByName("SpeechToTextService").Methods()
-	speechToTextServiceListRecognizersHandler := connect.NewUnaryHandlerSimple(
-		SpeechToTextServiceListRecognizersProcedure,
-		svc.ListRecognizers,
-		connect.WithSchema(speechToTextServiceMethods.ByName("ListRecognizers")),
+	speechToTextServiceListTranscribersHandler := connect.NewUnaryHandlerSimple(
+		SpeechToTextServiceListTranscribersProcedure,
+		svc.ListTranscribers,
+		connect.WithSchema(speechToTextServiceMethods.ByName("ListTranscribers")),
 		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
 		connect.WithHandlerOptions(opts...),
 	)
-	speechToTextServiceRecognizeSpeechHandler := connect.NewUnaryHandlerSimple(
-		SpeechToTextServiceRecognizeSpeechProcedure,
-		svc.RecognizeSpeech,
-		connect.WithSchema(speechToTextServiceMethods.ByName("RecognizeSpeech")),
+	speechToTextServiceTranscribeSpeechHandler := connect.NewUnaryHandlerSimple(
+		SpeechToTextServiceTranscribeSpeechProcedure,
+		svc.TranscribeSpeech,
+		connect.WithSchema(speechToTextServiceMethods.ByName("TranscribeSpeech")),
 		connect.WithHandlerOptions(opts...),
 	)
 	speechToTextServiceDetectSpeechLanguageHandler := connect.NewUnaryHandlerSimple(
@@ -174,10 +166,10 @@ func NewSpeechToTextServiceHandler(svc SpeechToTextServiceHandler, opts ...conne
 	)
 	return "/mavio.plugin.v1.SpeechToTextService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
-		case SpeechToTextServiceListRecognizersProcedure:
-			speechToTextServiceListRecognizersHandler.ServeHTTP(w, r)
-		case SpeechToTextServiceRecognizeSpeechProcedure:
-			speechToTextServiceRecognizeSpeechHandler.ServeHTTP(w, r)
+		case SpeechToTextServiceListTranscribersProcedure:
+			speechToTextServiceListTranscribersHandler.ServeHTTP(w, r)
+		case SpeechToTextServiceTranscribeSpeechProcedure:
+			speechToTextServiceTranscribeSpeechHandler.ServeHTTP(w, r)
 		case SpeechToTextServiceDetectSpeechLanguageProcedure:
 			speechToTextServiceDetectSpeechLanguageHandler.ServeHTTP(w, r)
 		default:
@@ -189,125 +181,14 @@ func NewSpeechToTextServiceHandler(svc SpeechToTextServiceHandler, opts ...conne
 // UnimplementedSpeechToTextServiceHandler returns CodeUnimplemented from all methods.
 type UnimplementedSpeechToTextServiceHandler struct{}
 
-func (UnimplementedSpeechToTextServiceHandler) ListRecognizers(context.Context, *v1.ListRecognizersRequest) (*v1.ListRecognizersResponse, error) {
-	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.plugin.v1.SpeechToTextService.ListRecognizers is not implemented"))
+func (UnimplementedSpeechToTextServiceHandler) ListTranscribers(context.Context, *v1.ListTranscribersRequest) (*v1.ListTranscribersResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.plugin.v1.SpeechToTextService.ListTranscribers is not implemented"))
 }
 
-func (UnimplementedSpeechToTextServiceHandler) RecognizeSpeech(context.Context, *v1.RecognizeSpeechRequest) (*v1.RecognizeSpeechResponse, error) {
-	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.plugin.v1.SpeechToTextService.RecognizeSpeech is not implemented"))
+func (UnimplementedSpeechToTextServiceHandler) TranscribeSpeech(context.Context, *v1.TranscribeSpeechRequest) (*v1.TranscribeSpeechResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.plugin.v1.SpeechToTextService.TranscribeSpeech is not implemented"))
 }
 
 func (UnimplementedSpeechToTextServiceHandler) DetectSpeechLanguage(context.Context, *v1.DetectSpeechLanguageRequest) (*v1.DetectSpeechLanguageResponse, error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.plugin.v1.SpeechToTextService.DetectSpeechLanguage is not implemented"))
-}
-
-// TextToSpeechServiceClient is a client for the mavio.plugin.v1.TextToSpeechService service.
-type TextToSpeechServiceClient interface {
-	// ListVoices lists the plugin's voices.
-	ListVoices(context.Context, *v1.ListVoicesRequest) (*v1.ListVoicesResponse, error)
-	// SynthesizeSpeech speaks text.
-	SynthesizeSpeech(context.Context, *v1.SynthesizeSpeechRequest) (*v1.SynthesizeSpeechResponse, error)
-}
-
-// NewTextToSpeechServiceClient constructs a client for the mavio.plugin.v1.TextToSpeechService
-// service. By default, it uses the Connect protocol with the binary Protobuf Codec, asks for
-// gzipped responses, and sends uncompressed requests. To use the gRPC or gRPC-Web protocols, supply
-// the connect.WithGRPC() or connect.WithGRPCWeb() options.
-//
-// The URL supplied here should be the base URL for the Connect or gRPC server (for example,
-// http://api.acme.com or https://acme.com/grpc).
-func NewTextToSpeechServiceClient(httpClient connect.HTTPClient, baseURL string, opts ...connect.ClientOption) TextToSpeechServiceClient {
-	baseURL = strings.TrimRight(baseURL, "/")
-	textToSpeechServiceMethods := v1.File_mavio_plugin_v1_speech_proto.Services().ByName("TextToSpeechService").Methods()
-	return &textToSpeechServiceClient{
-		listVoices: connect.NewClient[v1.ListVoicesRequest, v1.ListVoicesResponse](
-			httpClient,
-			baseURL+TextToSpeechServiceListVoicesProcedure,
-			connect.WithSchema(textToSpeechServiceMethods.ByName("ListVoices")),
-			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
-			connect.WithClientOptions(opts...),
-		),
-		synthesizeSpeech: connect.NewClient[v1.SynthesizeSpeechRequest, v1.SynthesizeSpeechResponse](
-			httpClient,
-			baseURL+TextToSpeechServiceSynthesizeSpeechProcedure,
-			connect.WithSchema(textToSpeechServiceMethods.ByName("SynthesizeSpeech")),
-			connect.WithClientOptions(opts...),
-		),
-	}
-}
-
-// textToSpeechServiceClient implements TextToSpeechServiceClient.
-type textToSpeechServiceClient struct {
-	listVoices       *connect.Client[v1.ListVoicesRequest, v1.ListVoicesResponse]
-	synthesizeSpeech *connect.Client[v1.SynthesizeSpeechRequest, v1.SynthesizeSpeechResponse]
-}
-
-// ListVoices calls mavio.plugin.v1.TextToSpeechService.ListVoices.
-func (c *textToSpeechServiceClient) ListVoices(ctx context.Context, req *v1.ListVoicesRequest) (*v1.ListVoicesResponse, error) {
-	response, err := c.listVoices.CallUnary(ctx, connect.NewRequest(req))
-	if response != nil {
-		return response.Msg, err
-	}
-	return nil, err
-}
-
-// SynthesizeSpeech calls mavio.plugin.v1.TextToSpeechService.SynthesizeSpeech.
-func (c *textToSpeechServiceClient) SynthesizeSpeech(ctx context.Context, req *v1.SynthesizeSpeechRequest) (*v1.SynthesizeSpeechResponse, error) {
-	response, err := c.synthesizeSpeech.CallUnary(ctx, connect.NewRequest(req))
-	if response != nil {
-		return response.Msg, err
-	}
-	return nil, err
-}
-
-// TextToSpeechServiceHandler is an implementation of the mavio.plugin.v1.TextToSpeechService
-// service.
-type TextToSpeechServiceHandler interface {
-	// ListVoices lists the plugin's voices.
-	ListVoices(context.Context, *v1.ListVoicesRequest) (*v1.ListVoicesResponse, error)
-	// SynthesizeSpeech speaks text.
-	SynthesizeSpeech(context.Context, *v1.SynthesizeSpeechRequest) (*v1.SynthesizeSpeechResponse, error)
-}
-
-// NewTextToSpeechServiceHandler builds an HTTP handler from the service implementation. It returns
-// the path on which to mount the handler and the handler itself.
-//
-// By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf
-// and JSON codecs. They also support gzip compression.
-func NewTextToSpeechServiceHandler(svc TextToSpeechServiceHandler, opts ...connect.HandlerOption) (string, http.Handler) {
-	textToSpeechServiceMethods := v1.File_mavio_plugin_v1_speech_proto.Services().ByName("TextToSpeechService").Methods()
-	textToSpeechServiceListVoicesHandler := connect.NewUnaryHandlerSimple(
-		TextToSpeechServiceListVoicesProcedure,
-		svc.ListVoices,
-		connect.WithSchema(textToSpeechServiceMethods.ByName("ListVoices")),
-		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
-		connect.WithHandlerOptions(opts...),
-	)
-	textToSpeechServiceSynthesizeSpeechHandler := connect.NewUnaryHandlerSimple(
-		TextToSpeechServiceSynthesizeSpeechProcedure,
-		svc.SynthesizeSpeech,
-		connect.WithSchema(textToSpeechServiceMethods.ByName("SynthesizeSpeech")),
-		connect.WithHandlerOptions(opts...),
-	)
-	return "/mavio.plugin.v1.TextToSpeechService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		switch r.URL.Path {
-		case TextToSpeechServiceListVoicesProcedure:
-			textToSpeechServiceListVoicesHandler.ServeHTTP(w, r)
-		case TextToSpeechServiceSynthesizeSpeechProcedure:
-			textToSpeechServiceSynthesizeSpeechHandler.ServeHTTP(w, r)
-		default:
-			http.NotFound(w, r)
-		}
-	})
-}
-
-// UnimplementedTextToSpeechServiceHandler returns CodeUnimplemented from all methods.
-type UnimplementedTextToSpeechServiceHandler struct{}
-
-func (UnimplementedTextToSpeechServiceHandler) ListVoices(context.Context, *v1.ListVoicesRequest) (*v1.ListVoicesResponse, error) {
-	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.plugin.v1.TextToSpeechService.ListVoices is not implemented"))
-}
-
-func (UnimplementedTextToSpeechServiceHandler) SynthesizeSpeech(context.Context, *v1.SynthesizeSpeechRequest) (*v1.SynthesizeSpeechResponse, error) {
-	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.plugin.v1.TextToSpeechService.SynthesizeSpeech is not implemented"))
 }

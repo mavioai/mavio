@@ -2,11 +2,11 @@
 // source: mavio/plugin/v1/speech.proto
 
 #[derive(Clone, Debug, Default)]
-pub struct ListRecognizersRequestView<'a> {
+pub struct ListTranscribersRequestView<'a> {
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
-impl<'a> ::buffa::MessageView<'a> for ListRecognizersRequestView<'a> {
-    type Owned = super::super::ListRecognizersRequest;
+impl<'a> ::buffa::MessageView<'a> for ListTranscribersRequestView<'a> {
+    type Owned = super::super::ListTranscribersRequest;
     fn decode_view(buf: &'a [u8]) -> ::core::result::Result<Self, ::buffa::DecodeError> {
         let __limit = ::core::cell::Cell::new(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT);
         let __elem = ::core::cell::Cell::new(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT);
@@ -46,7 +46,7 @@ impl<'a> ::buffa::MessageView<'a> for ListRecognizersRequestView<'a> {
     fn to_owned_message(
         &self,
     ) -> ::core::result::Result<
-        super::super::ListRecognizersRequest,
+        super::super::ListTranscribersRequest,
         ::buffa::DecodeError,
     > {
         self.to_owned_from_source(None)
@@ -56,19 +56,19 @@ impl<'a> ::buffa::MessageView<'a> for ListRecognizersRequestView<'a> {
         &self,
         __buffa_src: ::core::option::Option<&::buffa::bytes::Bytes>,
     ) -> ::core::result::Result<
-        super::super::ListRecognizersRequest,
+        super::super::ListTranscribersRequest,
         ::buffa::DecodeError,
     > {
         #[allow(unused_imports)]
         use ::buffa::alloc::string::ToString as _;
         let _ = __buffa_src;
-        ::core::result::Result::Ok(super::super::ListRecognizersRequest {
+        ::core::result::Result::Ok(super::super::ListTranscribersRequest {
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
     }
 }
-impl<'a> ::buffa::ViewEncode<'a> for ListRecognizersRequestView<'a> {
+impl<'a> ::buffa::ViewEncode<'a> for ListTranscribersRequestView<'a> {
     #[allow(clippy::needless_borrow, clippy::let_and_return)]
     fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
         #[allow(unused_imports)]
@@ -88,24 +88,24 @@ impl<'a> ::buffa::ViewEncode<'a> for ListRecognizersRequestView<'a> {
         self.__buffa_unknown_fields.write_to(buf);
     }
 }
-impl<'a> ::buffa::MessageName for ListRecognizersRequestView<'a> {
+impl<'a> ::buffa::MessageName for ListTranscribersRequestView<'a> {
     const PACKAGE: &'static str = "mavio.plugin.v1";
-    const NAME: &'static str = "ListRecognizersRequest";
-    const FULL_NAME: &'static str = "mavio.plugin.v1.ListRecognizersRequest";
-    const TYPE_URL: &'static str = "type.googleapis.com/mavio.plugin.v1.ListRecognizersRequest";
+    const NAME: &'static str = "ListTranscribersRequest";
+    const FULL_NAME: &'static str = "mavio.plugin.v1.ListTranscribersRequest";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.plugin.v1.ListTranscribersRequest";
 }
-::buffa::impl_default_view_instance!(ListRecognizersRequestView);
-::buffa::impl_view_reborrow!(ListRecognizersRequestView);
-/** Self-contained, `'static` owned view of a `ListRecognizersRequest` message.
+::buffa::impl_default_view_instance!(ListTranscribersRequestView);
+::buffa::impl_view_reborrow!(ListTranscribersRequestView);
+/** Self-contained, `'static` owned view of a `ListTranscribersRequest` message.
 
- Wraps [`::buffa::OwnedView`]`<`[`ListRecognizersRequestView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
+ Wraps [`::buffa::OwnedView`]`<`[`ListTranscribersRequestView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
 
- Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`ListRecognizersRequestView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
+ Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`ListTranscribersRequestView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
 #[derive(Clone, Debug)]
-pub struct ListRecognizersRequestOwnedView(
-    ::buffa::OwnedView<ListRecognizersRequestView<'static>>,
+pub struct ListTranscribersRequestOwnedView(
+    ::buffa::OwnedView<ListTranscribersRequestView<'static>>,
 );
-impl ListRecognizersRequestOwnedView {
+impl ListTranscribersRequestOwnedView {
     /// Decode an owned view from a [`::buffa::bytes::Bytes`] buffer.
     ///
     /// The view borrows directly from the buffer's data; the buffer is
@@ -119,7 +119,7 @@ impl ListRecognizersRequestOwnedView {
         bytes: ::buffa::bytes::Bytes,
     ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
         ::core::result::Result::Ok(
-            ListRecognizersRequestOwnedView(::buffa::OwnedView::decode(bytes)?),
+            ListTranscribersRequestOwnedView(::buffa::OwnedView::decode(bytes)?),
         )
     }
     /// Decode with custom [`::buffa::DecodeOptions`] (recursion limit,
@@ -134,7 +134,7 @@ impl ListRecognizersRequestOwnedView {
         opts: &::buffa::DecodeOptions,
     ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
         ::core::result::Result::Ok(
-            ListRecognizersRequestOwnedView(
+            ListTranscribersRequestOwnedView(
                 ::buffa::OwnedView::decode_with_options(bytes, opts)?,
             ),
         )
@@ -148,15 +148,15 @@ impl ListRecognizersRequestOwnedView {
     /// another [`::buffa::DecodeError`] if the re-encoded bytes are
     /// somehow invalid (should not happen for well-formed messages).
     pub fn from_owned(
-        msg: &super::super::ListRecognizersRequest,
+        msg: &super::super::ListTranscribersRequest,
     ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
         ::core::result::Result::Ok(
-            ListRecognizersRequestOwnedView(::buffa::OwnedView::from_owned(msg)?),
+            ListTranscribersRequestOwnedView(::buffa::OwnedView::from_owned(msg)?),
         )
     }
-    /// Borrow the full [`ListRecognizersRequestView`] with its lifetime tied to `&self`.
+    /// Borrow the full [`ListTranscribersRequestView`] with its lifetime tied to `&self`.
     #[must_use]
-    pub fn view(&self) -> &ListRecognizersRequestView<'_> {
+    pub fn view(&self) -> &ListTranscribersRequestView<'_> {
         self.0.reborrow()
     }
     /// Convert to the owned message type.
@@ -167,7 +167,7 @@ impl ListRecognizersRequestOwnedView {
     /// whose contract also governs handles converted from a raw
     /// [`::buffa::OwnedView`].
     #[must_use]
-    pub fn to_owned_message(&self) -> super::super::ListRecognizersRequest {
+    pub fn to_owned_message(&self) -> super::super::ListTranscribersRequest {
         self.0.to_owned_message()
     }
     /// The underlying bytes buffer.
@@ -181,50 +181,46 @@ impl ListRecognizersRequestOwnedView {
         self.0.into_bytes()
     }
 }
-impl ::core::convert::From<::buffa::OwnedView<ListRecognizersRequestView<'static>>>
-for ListRecognizersRequestOwnedView {
-    fn from(inner: ::buffa::OwnedView<ListRecognizersRequestView<'static>>) -> Self {
-        ListRecognizersRequestOwnedView(inner)
+impl ::core::convert::From<::buffa::OwnedView<ListTranscribersRequestView<'static>>>
+for ListTranscribersRequestOwnedView {
+    fn from(inner: ::buffa::OwnedView<ListTranscribersRequestView<'static>>) -> Self {
+        ListTranscribersRequestOwnedView(inner)
     }
 }
-impl ::core::convert::From<ListRecognizersRequestOwnedView>
-for ::buffa::OwnedView<ListRecognizersRequestView<'static>> {
-    fn from(wrapper: ListRecognizersRequestOwnedView) -> Self {
+impl ::core::convert::From<ListTranscribersRequestOwnedView>
+for ::buffa::OwnedView<ListTranscribersRequestView<'static>> {
+    fn from(wrapper: ListTranscribersRequestOwnedView) -> Self {
         wrapper.0
     }
 }
-impl ::core::convert::AsRef<::buffa::OwnedView<ListRecognizersRequestView<'static>>>
-for ListRecognizersRequestOwnedView {
-    fn as_ref(&self) -> &::buffa::OwnedView<ListRecognizersRequestView<'static>> {
+impl ::core::convert::AsRef<::buffa::OwnedView<ListTranscribersRequestView<'static>>>
+for ListTranscribersRequestOwnedView {
+    fn as_ref(&self) -> &::buffa::OwnedView<ListTranscribersRequestView<'static>> {
         &self.0
     }
 }
-impl ::buffa::HasMessageView for super::super::ListRecognizersRequest {
-    type View<'a> = ListRecognizersRequestView<'a>;
-    type ViewHandle = ListRecognizersRequestOwnedView;
+impl ::buffa::HasMessageView for super::super::ListTranscribersRequest {
+    type View<'a> = ListTranscribersRequestView<'a>;
+    type ViewHandle = ListTranscribersRequestOwnedView;
 }
 #[derive(Clone, Debug, Default)]
-pub struct ListRecognizersResponseView<'a> {
-    /// The recognizers configured, which recognize speech by their names.
+pub struct ListTranscribersResponseView<'a> {
+    /// The services transcribers are configured from.
     ///
-    /// Field 1: `recognizers`
-    pub recognizers: ::buffa::RepeatedView<
-        'a,
-        super::super::__buffa::view::RecognizerInfoView<'a>,
-    >,
-    /// The services recognizers are configured from, with their settings
-    /// and what they can do. A plugin listing none has recognizers that are
-    /// their own services.
-    ///
-    /// Field 2: `services`
+    /// Field 1: `services`
     pub services: ::buffa::RepeatedView<
         'a,
-        super::super::__buffa::view::RecognizerInfoView<'a>,
+        super::super::__buffa::view::TranscriptionServiceInfoView<'a>,
+    >,
+    /// Field 2: `transcribers`
+    pub transcribers: ::buffa::RepeatedView<
+        'a,
+        super::super::__buffa::view::TranscriberInfoView<'a>,
     >,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
-impl<'a> ::buffa::MessageView<'a> for ListRecognizersResponseView<'a> {
-    type Owned = super::super::ListRecognizersResponse;
+impl<'a> ::buffa::MessageView<'a> for ListTranscribersResponseView<'a> {
+    type Owned = super::super::ListTranscribersResponse;
     fn decode_view(buf: &'a [u8]) -> ::core::result::Result<Self, ::buffa::DecodeError> {
         let __limit = ::core::cell::Cell::new(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT);
         let __elem = ::core::cell::Cell::new(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT);
@@ -262,12 +258,12 @@ impl<'a> ::buffa::MessageView<'a> for ListRecognizersResponseView<'a> {
                 let sub = ::buffa::types::borrow_bytes(&mut cur)?;
                 ctx.register_element_memory(
                     ::core::mem::size_of::<
-                        super::super::__buffa::view::RecognizerInfoView,
+                        super::super::__buffa::view::TranscriptionServiceInfoView,
                     >(),
                 )?;
-                view.recognizers
+                view.services
                     .push(
-                        <super::super::__buffa::view::RecognizerInfoView as ::buffa::MessageView>::decode_view_ctx(
+                        <super::super::__buffa::view::TranscriptionServiceInfoView as ::buffa::MessageView>::decode_view_ctx(
                             sub,
                             __sub_ctx,
                         )?,
@@ -282,12 +278,12 @@ impl<'a> ::buffa::MessageView<'a> for ListRecognizersResponseView<'a> {
                 let sub = ::buffa::types::borrow_bytes(&mut cur)?;
                 ctx.register_element_memory(
                     ::core::mem::size_of::<
-                        super::super::__buffa::view::RecognizerInfoView,
+                        super::super::__buffa::view::TranscriberInfoView,
                     >(),
                 )?;
-                view.services
+                view.transcribers
                     .push(
-                        <super::super::__buffa::view::RecognizerInfoView as ::buffa::MessageView>::decode_view_ctx(
+                        <super::super::__buffa::view::TranscriberInfoView as ::buffa::MessageView>::decode_view_ctx(
                             sub,
                             __sub_ctx,
                         )?,
@@ -304,7 +300,7 @@ impl<'a> ::buffa::MessageView<'a> for ListRecognizersResponseView<'a> {
     fn to_owned_message(
         &self,
     ) -> ::core::result::Result<
-        super::super::ListRecognizersResponse,
+        super::super::ListTranscribersResponse,
         ::buffa::DecodeError,
     > {
         self.to_owned_from_source(None)
@@ -314,20 +310,20 @@ impl<'a> ::buffa::MessageView<'a> for ListRecognizersResponseView<'a> {
         &self,
         __buffa_src: ::core::option::Option<&::buffa::bytes::Bytes>,
     ) -> ::core::result::Result<
-        super::super::ListRecognizersResponse,
+        super::super::ListTranscribersResponse,
         ::buffa::DecodeError,
     > {
         #[allow(unused_imports)]
         use ::buffa::alloc::string::ToString as _;
         let _ = __buffa_src;
-        ::core::result::Result::Ok(super::super::ListRecognizersResponse {
-            recognizers: self
-                .recognizers
+        ::core::result::Result::Ok(super::super::ListTranscribersResponse {
+            services: self
+                .services
                 .iter()
                 .map(|v| v.to_owned_from_source(__buffa_src))
                 .collect::<::core::result::Result<_, ::buffa::DecodeError>>()?,
-            services: self
-                .services
+            transcribers: self
+                .transcribers
                 .iter()
                 .map(|v| v.to_owned_from_source(__buffa_src))
                 .collect::<::core::result::Result<_, ::buffa::DecodeError>>()?,
@@ -336,13 +332,13 @@ impl<'a> ::buffa::MessageView<'a> for ListRecognizersResponseView<'a> {
         })
     }
 }
-impl<'a> ::buffa::ViewEncode<'a> for ListRecognizersResponseView<'a> {
+impl<'a> ::buffa::ViewEncode<'a> for ListTranscribersResponseView<'a> {
     #[allow(clippy::needless_borrow, clippy::let_and_return)]
     fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
         let mut size = 0u64;
-        for v in &self.recognizers {
+        for v in &self.services {
             let __slot = __cache.reserve();
             let inner_size = v.compute_size(__cache);
             __cache.set(__slot, inner_size);
@@ -350,7 +346,7 @@ impl<'a> ::buffa::ViewEncode<'a> for ListRecognizersResponseView<'a> {
                 += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
                     + inner_size as u64;
         }
-        for v in &self.services {
+        for v in &self.transcribers {
             let __slot = __cache.reserve();
             let inner_size = v.compute_size(__cache);
             __cache.set(__slot, inner_size);
@@ -369,7 +365,7 @@ impl<'a> ::buffa::ViewEncode<'a> for ListRecognizersResponseView<'a> {
     ) {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
-        for v in &self.recognizers {
+        for v in &self.services {
             ::buffa::types::put_len_delimited_header(
                 1u32,
                 u64::from(__cache.consume_next()),
@@ -377,7 +373,7 @@ impl<'a> ::buffa::ViewEncode<'a> for ListRecognizersResponseView<'a> {
             );
             v.write_to(__cache, buf);
         }
-        for v in &self.services {
+        for v in &self.transcribers {
             ::buffa::types::put_len_delimited_header(
                 2u32,
                 u64::from(__cache.consume_next()),
@@ -388,24 +384,24 @@ impl<'a> ::buffa::ViewEncode<'a> for ListRecognizersResponseView<'a> {
         self.__buffa_unknown_fields.write_to(buf);
     }
 }
-impl<'a> ::buffa::MessageName for ListRecognizersResponseView<'a> {
+impl<'a> ::buffa::MessageName for ListTranscribersResponseView<'a> {
     const PACKAGE: &'static str = "mavio.plugin.v1";
-    const NAME: &'static str = "ListRecognizersResponse";
-    const FULL_NAME: &'static str = "mavio.plugin.v1.ListRecognizersResponse";
-    const TYPE_URL: &'static str = "type.googleapis.com/mavio.plugin.v1.ListRecognizersResponse";
+    const NAME: &'static str = "ListTranscribersResponse";
+    const FULL_NAME: &'static str = "mavio.plugin.v1.ListTranscribersResponse";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.plugin.v1.ListTranscribersResponse";
 }
-::buffa::impl_default_view_instance!(ListRecognizersResponseView);
-::buffa::impl_view_reborrow!(ListRecognizersResponseView);
-/** Self-contained, `'static` owned view of a `ListRecognizersResponse` message.
+::buffa::impl_default_view_instance!(ListTranscribersResponseView);
+::buffa::impl_view_reborrow!(ListTranscribersResponseView);
+/** Self-contained, `'static` owned view of a `ListTranscribersResponse` message.
 
- Wraps [`::buffa::OwnedView`]`<`[`ListRecognizersResponseView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
+ Wraps [`::buffa::OwnedView`]`<`[`ListTranscribersResponseView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
 
- Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`ListRecognizersResponseView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
+ Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`ListTranscribersResponseView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
 #[derive(Clone, Debug)]
-pub struct ListRecognizersResponseOwnedView(
-    ::buffa::OwnedView<ListRecognizersResponseView<'static>>,
+pub struct ListTranscribersResponseOwnedView(
+    ::buffa::OwnedView<ListTranscribersResponseView<'static>>,
 );
-impl ListRecognizersResponseOwnedView {
+impl ListTranscribersResponseOwnedView {
     /// Decode an owned view from a [`::buffa::bytes::Bytes`] buffer.
     ///
     /// The view borrows directly from the buffer's data; the buffer is
@@ -419,7 +415,7 @@ impl ListRecognizersResponseOwnedView {
         bytes: ::buffa::bytes::Bytes,
     ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
         ::core::result::Result::Ok(
-            ListRecognizersResponseOwnedView(::buffa::OwnedView::decode(bytes)?),
+            ListTranscribersResponseOwnedView(::buffa::OwnedView::decode(bytes)?),
         )
     }
     /// Decode with custom [`::buffa::DecodeOptions`] (recursion limit,
@@ -434,7 +430,7 @@ impl ListRecognizersResponseOwnedView {
         opts: &::buffa::DecodeOptions,
     ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
         ::core::result::Result::Ok(
-            ListRecognizersResponseOwnedView(
+            ListTranscribersResponseOwnedView(
                 ::buffa::OwnedView::decode_with_options(bytes, opts)?,
             ),
         )
@@ -448,15 +444,15 @@ impl ListRecognizersResponseOwnedView {
     /// another [`::buffa::DecodeError`] if the re-encoded bytes are
     /// somehow invalid (should not happen for well-formed messages).
     pub fn from_owned(
-        msg: &super::super::ListRecognizersResponse,
+        msg: &super::super::ListTranscribersResponse,
     ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
         ::core::result::Result::Ok(
-            ListRecognizersResponseOwnedView(::buffa::OwnedView::from_owned(msg)?),
+            ListTranscribersResponseOwnedView(::buffa::OwnedView::from_owned(msg)?),
         )
     }
-    /// Borrow the full [`ListRecognizersResponseView`] with its lifetime tied to `&self`.
+    /// Borrow the full [`ListTranscribersResponseView`] with its lifetime tied to `&self`.
     #[must_use]
-    pub fn view(&self) -> &ListRecognizersResponseView<'_> {
+    pub fn view(&self) -> &ListTranscribersResponseView<'_> {
         self.0.reborrow()
     }
     /// Convert to the owned message type.
@@ -467,7 +463,7 @@ impl ListRecognizersResponseOwnedView {
     /// whose contract also governs handles converted from a raw
     /// [`::buffa::OwnedView`].
     #[must_use]
-    pub fn to_owned_message(&self) -> super::super::ListRecognizersResponse {
+    pub fn to_owned_message(&self) -> super::super::ListTranscribersResponse {
         self.0.to_owned_message()
     }
     /// The underlying bytes buffer.
@@ -480,117 +476,71 @@ impl ListRecognizersResponseOwnedView {
     pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
         self.0.into_bytes()
     }
-    /// The recognizers configured, which recognize speech by their names.
+    /// The services transcribers are configured from.
     ///
-    /// Field 1: `recognizers`
-    #[must_use]
-    pub fn recognizers(
-        &self,
-    ) -> &::buffa::RepeatedView<
-        '_,
-        super::super::__buffa::view::RecognizerInfoView<'_>,
-    > {
-        &self.0.reborrow().recognizers
-    }
-    /// The services recognizers are configured from, with their settings
-    /// and what they can do. A plugin listing none has recognizers that are
-    /// their own services.
-    ///
-    /// Field 2: `services`
+    /// Field 1: `services`
     #[must_use]
     pub fn services(
         &self,
     ) -> &::buffa::RepeatedView<
         '_,
-        super::super::__buffa::view::RecognizerInfoView<'_>,
+        super::super::__buffa::view::TranscriptionServiceInfoView<'_>,
     > {
         &self.0.reborrow().services
     }
-}
-impl ::core::convert::From<::buffa::OwnedView<ListRecognizersResponseView<'static>>>
-for ListRecognizersResponseOwnedView {
-    fn from(inner: ::buffa::OwnedView<ListRecognizersResponseView<'static>>) -> Self {
-        ListRecognizersResponseOwnedView(inner)
+    /// Field 2: `transcribers`
+    #[must_use]
+    pub fn transcribers(
+        &self,
+    ) -> &::buffa::RepeatedView<
+        '_,
+        super::super::__buffa::view::TranscriberInfoView<'_>,
+    > {
+        &self.0.reborrow().transcribers
     }
 }
-impl ::core::convert::From<ListRecognizersResponseOwnedView>
-for ::buffa::OwnedView<ListRecognizersResponseView<'static>> {
-    fn from(wrapper: ListRecognizersResponseOwnedView) -> Self {
+impl ::core::convert::From<::buffa::OwnedView<ListTranscribersResponseView<'static>>>
+for ListTranscribersResponseOwnedView {
+    fn from(inner: ::buffa::OwnedView<ListTranscribersResponseView<'static>>) -> Self {
+        ListTranscribersResponseOwnedView(inner)
+    }
+}
+impl ::core::convert::From<ListTranscribersResponseOwnedView>
+for ::buffa::OwnedView<ListTranscribersResponseView<'static>> {
+    fn from(wrapper: ListTranscribersResponseOwnedView) -> Self {
         wrapper.0
     }
 }
-impl ::core::convert::AsRef<::buffa::OwnedView<ListRecognizersResponseView<'static>>>
-for ListRecognizersResponseOwnedView {
-    fn as_ref(&self) -> &::buffa::OwnedView<ListRecognizersResponseView<'static>> {
+impl ::core::convert::AsRef<::buffa::OwnedView<ListTranscribersResponseView<'static>>>
+for ListTranscribersResponseOwnedView {
+    fn as_ref(&self) -> &::buffa::OwnedView<ListTranscribersResponseView<'static>> {
         &self.0
     }
 }
-impl ::buffa::HasMessageView for super::super::ListRecognizersResponse {
-    type View<'a> = ListRecognizersResponseView<'a>;
-    type ViewHandle = ListRecognizersResponseOwnedView;
+impl ::buffa::HasMessageView for super::super::ListTranscribersResponse {
+    type View<'a> = ListTranscribersResponseView<'a>;
+    type ViewHandle = ListTranscribersResponseOwnedView;
 }
-/// RecognizerInfo is a recognizer a plugin has configured, or a service
-/// it implements.
+/// TranscriptionServiceInfo is a transcription service a plugin implements.
 #[derive(Clone, Debug, Default)]
-pub struct RecognizerInfoView<'a> {
-    /// Stable within the plugin: a recognizer's ID, or a service's name,
-    /// such as "whisper".
+pub struct TranscriptionServiceInfoView<'a> {
+    /// Stable within the plugin, such as "whisper".
     ///
     /// Field 1: `name`
     pub name: ::core::option::Option<&'a str>,
-    /// The name the administrator gave a recognizer, or a service's.
-    ///
     /// Field 2: `display_name`
     pub display_name: ::core::option::Option<&'a str>,
-    /// A service's settings, which configure its recognizers.
+    /// The settings of the transcribers configured from it.
     ///
     /// Field 3: `settings`
     pub settings: ::buffa::RepeatedView<
         'a,
         super::super::__buffa::view::SettingFieldView<'a>,
     >,
-    /// Field 4: `enabled`
-    pub enabled: ::core::option::Option<bool>,
-    /// The languages it recognizes, BCP 47; empty for any.
-    ///
-    /// Field 5: `languages`
-    pub languages: ::buffa::RepeatedView<'a, &'a str>,
-    /// It gives the times of what is said, which subtitles need.
-    ///
-    /// Field 6: `timestamps`
-    pub timestamps: ::core::option::Option<bool>,
-    /// It recognizes audio whose language is not given.
-    ///
-    /// Field 7: `detects_language`
-    pub detects_language: ::core::option::Option<bool>,
-    /// It translates what is said into English.
-    ///
-    /// Field 8: `translates`
-    pub translates: ::core::option::Option<bool>,
-    /// It takes phrases it is likely to hear.
-    ///
-    /// Field 9: `hints`
-    pub hints: ::core::option::Option<bool>,
-    /// The longest audio it takes at once; unset for any.
-    ///
-    /// Field 10: `max_duration`
-    pub max_duration: ::buffa::MessageFieldView<
-        ::buffa_types::google::protobuf::__buffa::view::DurationView<'a>,
-    >,
-    /// The administrator lets it transcribe videos into subtitles; with
-    /// timestamps only.
-    ///
-    /// Field 11: `subtitles`
-    pub subtitles: ::core::option::Option<bool>,
-    /// The service a recognizer is configured from, a name among the
-    /// services.
-    ///
-    /// Field 12: `service`
-    pub service: ::core::option::Option<&'a str>,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
-impl<'a> ::buffa::MessageView<'a> for RecognizerInfoView<'a> {
-    type Owned = super::super::RecognizerInfo;
+impl<'a> ::buffa::MessageView<'a> for TranscriptionServiceInfoView<'a> {
+    type Owned = super::super::TranscriptionServiceInfo;
     fn decode_view(buf: &'a [u8]) -> ::core::result::Result<Self, ::buffa::DecodeError> {
         let __limit = ::core::cell::Cell::new(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT);
         let __elem = ::core::cell::Cell::new(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT);
@@ -633,76 +583,6 @@ impl<'a> ::buffa::MessageView<'a> for RecognizerInfoView<'a> {
                 )?;
                 view.display_name = Some(::buffa::types::borrow_str(&mut cur)?);
             }
-            4u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                view.enabled = Some(::buffa::types::decode_bool(&mut cur)?);
-            }
-            6u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                view.timestamps = Some(::buffa::types::decode_bool(&mut cur)?);
-            }
-            7u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                view.detects_language = Some(::buffa::types::decode_bool(&mut cur)?);
-            }
-            8u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                view.translates = Some(::buffa::types::decode_bool(&mut cur)?);
-            }
-            9u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                view.hints = Some(::buffa::types::decode_bool(&mut cur)?);
-            }
-            10u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                let __sub_ctx = ctx.descend()?;
-                let sub = ::buffa::types::borrow_bytes(&mut cur)?;
-                match view.max_duration.as_mut() {
-                    Some(existing) => {
-                        ::buffa::MessageView::merge_into_view(existing, sub, __sub_ctx)?
-                    }
-                    None => {
-                        view.max_duration = ::buffa::MessageFieldView::set(
-                            <::buffa_types::google::protobuf::__buffa::view::DurationView as ::buffa::MessageView>::decode_view_ctx(
-                                sub,
-                                __sub_ctx,
-                            )?,
-                        );
-                    }
-                }
-            }
-            11u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                view.subtitles = Some(::buffa::types::decode_bool(&mut cur)?);
-            }
-            12u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                view.service = Some(::buffa::types::borrow_str(&mut cur)?);
-            }
             3u32 => {
                 ::buffa::encoding::check_wire_type(
                     tag,
@@ -723,17 +603,6 @@ impl<'a> ::buffa::MessageView<'a> for RecognizerInfoView<'a> {
                         )?,
                     );
             }
-            5u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                let __elem = ::buffa::types::borrow_str(&mut cur)?;
-                ctx.register_element_memory(
-                    ::buffa::__private::element_footprint(&__elem),
-                )?;
-                view.languages.push(__elem);
-            }
             _ => {
                 ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
                 let span_len = before_tag.len() - cur.len();
@@ -744,18 +613,24 @@ impl<'a> ::buffa::MessageView<'a> for RecognizerInfoView<'a> {
     }
     fn to_owned_message(
         &self,
-    ) -> ::core::result::Result<super::super::RecognizerInfo, ::buffa::DecodeError> {
+    ) -> ::core::result::Result<
+        super::super::TranscriptionServiceInfo,
+        ::buffa::DecodeError,
+    > {
         self.to_owned_from_source(None)
     }
     #[allow(clippy::useless_conversion, clippy::needless_update)]
     fn to_owned_from_source(
         &self,
         __buffa_src: ::core::option::Option<&::buffa::bytes::Bytes>,
-    ) -> ::core::result::Result<super::super::RecognizerInfo, ::buffa::DecodeError> {
+    ) -> ::core::result::Result<
+        super::super::TranscriptionServiceInfo,
+        ::buffa::DecodeError,
+    > {
         #[allow(unused_imports)]
         use ::buffa::alloc::string::ToString as _;
         let _ = __buffa_src;
-        ::core::result::Result::Ok(super::super::RecognizerInfo {
+        ::core::result::Result::Ok(super::super::TranscriptionServiceInfo {
             name: self.name.map(|s| s.to_string()),
             display_name: self.display_name.map(|s| s.to_string()),
             settings: self
@@ -763,29 +638,12 @@ impl<'a> ::buffa::MessageView<'a> for RecognizerInfoView<'a> {
                 .iter()
                 .map(|v| v.to_owned_from_source(__buffa_src))
                 .collect::<::core::result::Result<_, ::buffa::DecodeError>>()?,
-            enabled: self.enabled,
-            languages: self.languages.iter().map(|s| s.to_string()).collect(),
-            timestamps: self.timestamps,
-            detects_language: self.detects_language,
-            translates: self.translates,
-            hints: self.hints,
-            max_duration: match self.max_duration.as_option() {
-                Some(v) => {
-                    ::buffa::MessageField::<
-                        ::buffa_types::google::protobuf::Duration,
-                        ::buffa::Inline<::buffa_types::google::protobuf::Duration>,
-                    >::some(v.to_owned_from_source(__buffa_src)?)
-                }
-                None => ::buffa::MessageField::none(),
-            },
-            subtitles: self.subtitles,
-            service: self.service.map(|s| s.to_string()),
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
     }
 }
-impl<'a> ::buffa::ViewEncode<'a> for RecognizerInfoView<'a> {
+impl<'a> ::buffa::ViewEncode<'a> for TranscriptionServiceInfoView<'a> {
     #[allow(clippy::needless_borrow, clippy::let_and_return)]
     fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
         #[allow(unused_imports)]
@@ -804,38 +662,6 @@ impl<'a> ::buffa::ViewEncode<'a> for RecognizerInfoView<'a> {
             size
                 += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
                     + inner_size as u64;
-        }
-        if self.enabled.is_some() {
-            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
-        }
-        for v in &self.languages {
-            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
-        if self.timestamps.is_some() {
-            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
-        }
-        if self.detects_language.is_some() {
-            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
-        }
-        if self.translates.is_some() {
-            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
-        }
-        if self.hints.is_some() {
-            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
-        }
-        if self.max_duration.is_set() {
-            let __slot = __cache.reserve();
-            let inner_size = self.max_duration.compute_size(__cache);
-            __cache.set(__slot, inner_size);
-            size
-                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
-                    + inner_size as u64;
-        }
-        if self.subtitles.is_some() {
-            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
-        }
-        if let Some(ref v) = self.service {
-            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
@@ -862,57 +688,27 @@ impl<'a> ::buffa::ViewEncode<'a> for RecognizerInfoView<'a> {
             );
             v.write_to(__cache, buf);
         }
-        if let Some(v) = self.enabled {
-            ::buffa::types::put_bool_field(4u32, v, buf);
-        }
-        for v in &self.languages {
-            ::buffa::types::put_string_field(5u32, v, buf);
-        }
-        if let Some(v) = self.timestamps {
-            ::buffa::types::put_bool_field(6u32, v, buf);
-        }
-        if let Some(v) = self.detects_language {
-            ::buffa::types::put_bool_field(7u32, v, buf);
-        }
-        if let Some(v) = self.translates {
-            ::buffa::types::put_bool_field(8u32, v, buf);
-        }
-        if let Some(v) = self.hints {
-            ::buffa::types::put_bool_field(9u32, v, buf);
-        }
-        if self.max_duration.is_set() {
-            ::buffa::types::put_len_delimited_header(
-                10u32,
-                u64::from(__cache.consume_next()),
-                buf,
-            );
-            self.max_duration.write_to(__cache, buf);
-        }
-        if let Some(v) = self.subtitles {
-            ::buffa::types::put_bool_field(11u32, v, buf);
-        }
-        if let Some(ref v) = self.service {
-            ::buffa::types::put_string_field(12u32, v, buf);
-        }
         self.__buffa_unknown_fields.write_to(buf);
     }
 }
-impl<'a> ::buffa::MessageName for RecognizerInfoView<'a> {
+impl<'a> ::buffa::MessageName for TranscriptionServiceInfoView<'a> {
     const PACKAGE: &'static str = "mavio.plugin.v1";
-    const NAME: &'static str = "RecognizerInfo";
-    const FULL_NAME: &'static str = "mavio.plugin.v1.RecognizerInfo";
-    const TYPE_URL: &'static str = "type.googleapis.com/mavio.plugin.v1.RecognizerInfo";
+    const NAME: &'static str = "TranscriptionServiceInfo";
+    const FULL_NAME: &'static str = "mavio.plugin.v1.TranscriptionServiceInfo";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.plugin.v1.TranscriptionServiceInfo";
 }
-::buffa::impl_default_view_instance!(RecognizerInfoView);
-::buffa::impl_view_reborrow!(RecognizerInfoView);
-/** Self-contained, `'static` owned view of a `RecognizerInfo` message.
+::buffa::impl_default_view_instance!(TranscriptionServiceInfoView);
+::buffa::impl_view_reborrow!(TranscriptionServiceInfoView);
+/** Self-contained, `'static` owned view of a `TranscriptionServiceInfo` message.
 
- Wraps [`::buffa::OwnedView`]`<`[`RecognizerInfoView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
+ Wraps [`::buffa::OwnedView`]`<`[`TranscriptionServiceInfoView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
 
- Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`RecognizerInfoView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
+ Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`TranscriptionServiceInfoView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
 #[derive(Clone, Debug)]
-pub struct RecognizerInfoOwnedView(::buffa::OwnedView<RecognizerInfoView<'static>>);
-impl RecognizerInfoOwnedView {
+pub struct TranscriptionServiceInfoOwnedView(
+    ::buffa::OwnedView<TranscriptionServiceInfoView<'static>>,
+);
+impl TranscriptionServiceInfoOwnedView {
     /// Decode an owned view from a [`::buffa::bytes::Bytes`] buffer.
     ///
     /// The view borrows directly from the buffer's data; the buffer is
@@ -926,7 +722,7 @@ impl RecognizerInfoOwnedView {
         bytes: ::buffa::bytes::Bytes,
     ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
         ::core::result::Result::Ok(
-            RecognizerInfoOwnedView(::buffa::OwnedView::decode(bytes)?),
+            TranscriptionServiceInfoOwnedView(::buffa::OwnedView::decode(bytes)?),
         )
     }
     /// Decode with custom [`::buffa::DecodeOptions`] (recursion limit,
@@ -941,7 +737,7 @@ impl RecognizerInfoOwnedView {
         opts: &::buffa::DecodeOptions,
     ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
         ::core::result::Result::Ok(
-            RecognizerInfoOwnedView(
+            TranscriptionServiceInfoOwnedView(
                 ::buffa::OwnedView::decode_with_options(bytes, opts)?,
             ),
         )
@@ -955,15 +751,15 @@ impl RecognizerInfoOwnedView {
     /// another [`::buffa::DecodeError`] if the re-encoded bytes are
     /// somehow invalid (should not happen for well-formed messages).
     pub fn from_owned(
-        msg: &super::super::RecognizerInfo,
+        msg: &super::super::TranscriptionServiceInfo,
     ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
         ::core::result::Result::Ok(
-            RecognizerInfoOwnedView(::buffa::OwnedView::from_owned(msg)?),
+            TranscriptionServiceInfoOwnedView(::buffa::OwnedView::from_owned(msg)?),
         )
     }
-    /// Borrow the full [`RecognizerInfoView`] with its lifetime tied to `&self`.
+    /// Borrow the full [`TranscriptionServiceInfoView`] with its lifetime tied to `&self`.
     #[must_use]
-    pub fn view(&self) -> &RecognizerInfoView<'_> {
+    pub fn view(&self) -> &TranscriptionServiceInfoView<'_> {
         self.0.reborrow()
     }
     /// Convert to the owned message type.
@@ -974,7 +770,7 @@ impl RecognizerInfoOwnedView {
     /// whose contract also governs handles converted from a raw
     /// [`::buffa::OwnedView`].
     #[must_use]
-    pub fn to_owned_message(&self) -> super::super::RecognizerInfo {
+    pub fn to_owned_message(&self) -> super::super::TranscriptionServiceInfo {
         self.0.to_owned_message()
     }
     /// The underlying bytes buffer.
@@ -987,22 +783,19 @@ impl RecognizerInfoOwnedView {
     pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
         self.0.into_bytes()
     }
-    /// Stable within the plugin: a recognizer's ID, or a service's name,
-    /// such as "whisper".
+    /// Stable within the plugin, such as "whisper".
     ///
     /// Field 1: `name`
     #[must_use]
     pub fn name(&self) -> ::core::option::Option<&'_ str> {
         self.0.reborrow().name
     }
-    /// The name the administrator gave a recognizer, or a service's.
-    ///
     /// Field 2: `display_name`
     #[must_use]
     pub fn display_name(&self) -> ::core::option::Option<&'_ str> {
         self.0.reborrow().display_name
     }
-    /// A service's settings, which configure its recognizers.
+    /// The settings of the transcribers configured from it.
     ///
     /// Field 3: `settings`
     #[must_use]
@@ -1011,49 +804,424 @@ impl RecognizerInfoOwnedView {
     ) -> &::buffa::RepeatedView<'_, super::super::__buffa::view::SettingFieldView<'_>> {
         &self.0.reborrow().settings
     }
+}
+impl ::core::convert::From<::buffa::OwnedView<TranscriptionServiceInfoView<'static>>>
+for TranscriptionServiceInfoOwnedView {
+    fn from(inner: ::buffa::OwnedView<TranscriptionServiceInfoView<'static>>) -> Self {
+        TranscriptionServiceInfoOwnedView(inner)
+    }
+}
+impl ::core::convert::From<TranscriptionServiceInfoOwnedView>
+for ::buffa::OwnedView<TranscriptionServiceInfoView<'static>> {
+    fn from(wrapper: TranscriptionServiceInfoOwnedView) -> Self {
+        wrapper.0
+    }
+}
+impl ::core::convert::AsRef<::buffa::OwnedView<TranscriptionServiceInfoView<'static>>>
+for TranscriptionServiceInfoOwnedView {
+    fn as_ref(&self) -> &::buffa::OwnedView<TranscriptionServiceInfoView<'static>> {
+        &self.0
+    }
+}
+impl ::buffa::HasMessageView for super::super::TranscriptionServiceInfo {
+    type View<'a> = TranscriptionServiceInfoView<'a>;
+    type ViewHandle = TranscriptionServiceInfoOwnedView;
+}
+/// TranscriberInfo is a transcriber a plugin has configured.
+#[derive(Clone, Debug, Default)]
+pub struct TranscriberInfoView<'a> {
+    /// The ID the server generated for it.
+    ///
+    /// Field 1: `id`
+    pub id: ::core::option::Option<&'a str>,
+    /// The name the administrator gave it.
+    ///
+    /// Field 2: `name`
+    pub name: ::core::option::Option<&'a str>,
+    /// The service it is configured from, a name among the services.
+    ///
+    /// Field 3: `service`
+    pub service: ::core::option::Option<&'a str>,
+    /// Field 4: `enabled`
+    pub enabled: ::core::option::Option<bool>,
+    /// It can be used: its model is downloaded, for a local one.
+    ///
+    /// Field 5: `ready`
+    pub ready: ::core::option::Option<bool>,
+    /// The languages it transcribes, BCP 47; empty for any.
+    ///
+    /// Field 6: `languages`
+    pub languages: ::buffa::RepeatedView<'a, &'a str>,
+    /// The longest audio it takes at once; unset for any.
+    ///
+    /// Field 7: `max_duration`
+    pub max_duration: ::buffa::MessageFieldView<
+        ::buffa_types::google::protobuf::__buffa::view::DurationView<'a>,
+    >,
+    /// It translates what is said into English.
+    ///
+    /// Field 8: `translates`
+    pub translates: ::core::option::Option<bool>,
+    pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
+}
+impl<'a> ::buffa::MessageView<'a> for TranscriberInfoView<'a> {
+    type Owned = super::super::TranscriberInfo;
+    fn decode_view(buf: &'a [u8]) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        let __limit = ::core::cell::Cell::new(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT);
+        let __elem = ::core::cell::Cell::new(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT);
+        <Self as ::buffa::MessageView>::decode_view_ctx(
+            buf,
+            ::buffa::DecodeContext::new(::buffa::RECURSION_LIMIT, &__limit)
+                .with_element_memory(&__elem),
+        )
+    }
+    fn decode_view_with_ctx(
+        buf: &'a [u8],
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        <Self as ::buffa::MessageView>::decode_view_ctx(buf, ctx)
+    }
+    #[inline]
+    fn merge_view_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        cur: &'a [u8],
+        before_tag: &'a [u8],
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<&'a [u8], ::buffa::DecodeError> {
+        let _ = ctx;
+        #[allow(unused_variables)]
+        let view = self;
+        let mut cur = cur;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.id = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.name = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
+            3u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.service = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
+            4u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.enabled = Some(::buffa::types::decode_bool(&mut cur)?);
+            }
+            5u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.ready = Some(::buffa::types::decode_bool(&mut cur)?);
+            }
+            7u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __sub_ctx = ctx.descend()?;
+                let sub = ::buffa::types::borrow_bytes(&mut cur)?;
+                match view.max_duration.as_mut() {
+                    Some(existing) => {
+                        ::buffa::MessageView::merge_into_view(existing, sub, __sub_ctx)?
+                    }
+                    None => {
+                        view.max_duration = ::buffa::MessageFieldView::set(
+                            <::buffa_types::google::protobuf::__buffa::view::DurationView as ::buffa::MessageView>::decode_view_ctx(
+                                sub,
+                                __sub_ctx,
+                            )?,
+                        );
+                    }
+                }
+            }
+            8u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.translates = Some(::buffa::types::decode_bool(&mut cur)?);
+            }
+            6u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __elem = ::buffa::types::borrow_str(&mut cur)?;
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&__elem),
+                )?;
+                view.languages.push(__elem);
+            }
+            _ => {
+                ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
+                let span_len = before_tag.len() - cur.len();
+                view.__buffa_unknown_fields.push_record(before_tag, span_len, ctx)?;
+            }
+        }
+        ::core::result::Result::Ok(cur)
+    }
+    fn to_owned_message(
+        &self,
+    ) -> ::core::result::Result<super::super::TranscriberInfo, ::buffa::DecodeError> {
+        self.to_owned_from_source(None)
+    }
+    #[allow(clippy::useless_conversion, clippy::needless_update)]
+    fn to_owned_from_source(
+        &self,
+        __buffa_src: ::core::option::Option<&::buffa::bytes::Bytes>,
+    ) -> ::core::result::Result<super::super::TranscriberInfo, ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::alloc::string::ToString as _;
+        let _ = __buffa_src;
+        ::core::result::Result::Ok(super::super::TranscriberInfo {
+            id: self.id.map(|s| s.to_string()),
+            name: self.name.map(|s| s.to_string()),
+            service: self.service.map(|s| s.to_string()),
+            enabled: self.enabled,
+            ready: self.ready,
+            languages: self.languages.iter().map(|s| s.to_string()).collect(),
+            max_duration: match self.max_duration.as_option() {
+                Some(v) => {
+                    ::buffa::MessageField::<
+                        ::buffa_types::google::protobuf::Duration,
+                        ::buffa::Inline<::buffa_types::google::protobuf::Duration>,
+                    >::some(v.to_owned_from_source(__buffa_src)?)
+                }
+                None => ::buffa::MessageField::none(),
+            },
+            translates: self.translates,
+            __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
+            ..::core::default::Default::default()
+        })
+    }
+}
+impl<'a> ::buffa::ViewEncode<'a> for TranscriberInfoView<'a> {
+    #[allow(clippy::needless_borrow, clippy::let_and_return)]
+    fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if let Some(ref v) = self.id {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.name {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.service {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if self.enabled.is_some() {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
+        if self.ready.is_some() {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
+        for v in &self.languages {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if self.max_duration.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.max_duration.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        if self.translates.is_some() {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    #[allow(clippy::needless_borrow)]
+    fn write_to(
+        &self,
+        __cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if let Some(ref v) = self.id {
+            ::buffa::types::put_string_field(1u32, v, buf);
+        }
+        if let Some(ref v) = self.name {
+            ::buffa::types::put_string_field(2u32, v, buf);
+        }
+        if let Some(ref v) = self.service {
+            ::buffa::types::put_string_field(3u32, v, buf);
+        }
+        if let Some(v) = self.enabled {
+            ::buffa::types::put_bool_field(4u32, v, buf);
+        }
+        if let Some(v) = self.ready {
+            ::buffa::types::put_bool_field(5u32, v, buf);
+        }
+        for v in &self.languages {
+            ::buffa::types::put_string_field(6u32, v, buf);
+        }
+        if self.max_duration.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                7u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.max_duration.write_to(__cache, buf);
+        }
+        if let Some(v) = self.translates {
+            ::buffa::types::put_bool_field(8u32, v, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+}
+impl<'a> ::buffa::MessageName for TranscriberInfoView<'a> {
+    const PACKAGE: &'static str = "mavio.plugin.v1";
+    const NAME: &'static str = "TranscriberInfo";
+    const FULL_NAME: &'static str = "mavio.plugin.v1.TranscriberInfo";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.plugin.v1.TranscriberInfo";
+}
+::buffa::impl_default_view_instance!(TranscriberInfoView);
+::buffa::impl_view_reborrow!(TranscriberInfoView);
+/** Self-contained, `'static` owned view of a `TranscriberInfo` message.
+
+ Wraps [`::buffa::OwnedView`]`<`[`TranscriberInfoView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
+
+ Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`TranscriberInfoView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
+#[derive(Clone, Debug)]
+pub struct TranscriberInfoOwnedView(::buffa::OwnedView<TranscriberInfoView<'static>>);
+impl TranscriberInfoOwnedView {
+    /// Decode an owned view from a [`::buffa::bytes::Bytes`] buffer.
+    ///
+    /// The view borrows directly from the buffer's data; the buffer is
+    /// retained inside the returned handle.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError`] if the buffer contains invalid
+    /// protobuf data.
+    pub fn decode(
+        bytes: ::buffa::bytes::Bytes,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            TranscriberInfoOwnedView(::buffa::OwnedView::decode(bytes)?),
+        )
+    }
+    /// Decode with custom [`::buffa::DecodeOptions`] (recursion limit,
+    /// max message size).
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError`] if the buffer is invalid or
+    /// exceeds the configured limits.
+    pub fn decode_with_options(
+        bytes: ::buffa::bytes::Bytes,
+        opts: &::buffa::DecodeOptions,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            TranscriberInfoOwnedView(
+                ::buffa::OwnedView::decode_with_options(bytes, opts)?,
+            ),
+        )
+    }
+    /// Build from an owned message via an encode → decode round-trip.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError::MessageTooLarge`] if the
+    /// message's encoded size exceeds the 2 GiB protobuf limit, or
+    /// another [`::buffa::DecodeError`] if the re-encoded bytes are
+    /// somehow invalid (should not happen for well-formed messages).
+    pub fn from_owned(
+        msg: &super::super::TranscriberInfo,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            TranscriberInfoOwnedView(::buffa::OwnedView::from_owned(msg)?),
+        )
+    }
+    /// Borrow the full [`TranscriberInfoView`] with its lifetime tied to `&self`.
+    #[must_use]
+    pub fn view(&self) -> &TranscriberInfoView<'_> {
+        self.0.reborrow()
+    }
+    /// Convert to the owned message type.
+    ///
+    /// Infallible: this type's constructors wire-decode their
+    /// buffer, and a view produced by wire decoding always
+    /// converts. Delegates to [`::buffa::OwnedView::to_owned_message`],
+    /// whose contract also governs handles converted from a raw
+    /// [`::buffa::OwnedView`].
+    #[must_use]
+    pub fn to_owned_message(&self) -> super::super::TranscriberInfo {
+        self.0.to_owned_message()
+    }
+    /// The underlying bytes buffer.
+    #[must_use]
+    pub fn bytes(&self) -> &::buffa::bytes::Bytes {
+        self.0.bytes()
+    }
+    /// Consume the handle, returning the underlying bytes buffer.
+    #[must_use]
+    pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
+        self.0.into_bytes()
+    }
+    /// The ID the server generated for it.
+    ///
+    /// Field 1: `id`
+    #[must_use]
+    pub fn id(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().id
+    }
+    /// The name the administrator gave it.
+    ///
+    /// Field 2: `name`
+    #[must_use]
+    pub fn name(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().name
+    }
+    /// The service it is configured from, a name among the services.
+    ///
+    /// Field 3: `service`
+    #[must_use]
+    pub fn service(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().service
+    }
     /// Field 4: `enabled`
     #[must_use]
     pub fn enabled(&self) -> ::core::option::Option<bool> {
         self.0.reborrow().enabled
     }
-    /// The languages it recognizes, BCP 47; empty for any.
+    /// It can be used: its model is downloaded, for a local one.
     ///
-    /// Field 5: `languages`
+    /// Field 5: `ready`
+    #[must_use]
+    pub fn ready(&self) -> ::core::option::Option<bool> {
+        self.0.reborrow().ready
+    }
+    /// The languages it transcribes, BCP 47; empty for any.
+    ///
+    /// Field 6: `languages`
     #[must_use]
     pub fn languages(&self) -> &::buffa::RepeatedView<'_, &'_ str> {
         &self.0.reborrow().languages
     }
-    /// It gives the times of what is said, which subtitles need.
-    ///
-    /// Field 6: `timestamps`
-    #[must_use]
-    pub fn timestamps(&self) -> ::core::option::Option<bool> {
-        self.0.reborrow().timestamps
-    }
-    /// It recognizes audio whose language is not given.
-    ///
-    /// Field 7: `detects_language`
-    #[must_use]
-    pub fn detects_language(&self) -> ::core::option::Option<bool> {
-        self.0.reborrow().detects_language
-    }
-    /// It translates what is said into English.
-    ///
-    /// Field 8: `translates`
-    #[must_use]
-    pub fn translates(&self) -> ::core::option::Option<bool> {
-        self.0.reborrow().translates
-    }
-    /// It takes phrases it is likely to hear.
-    ///
-    /// Field 9: `hints`
-    #[must_use]
-    pub fn hints(&self) -> ::core::option::Option<bool> {
-        self.0.reborrow().hints
-    }
     /// The longest audio it takes at once; unset for any.
     ///
-    /// Field 10: `max_duration`
+    /// Field 7: `max_duration`
     #[must_use]
     pub fn max_duration(
         &self,
@@ -1062,56 +1230,50 @@ impl RecognizerInfoOwnedView {
     > {
         &self.0.reborrow().max_duration
     }
-    /// The administrator lets it transcribe videos into subtitles; with
-    /// timestamps only.
+    /// It translates what is said into English.
     ///
-    /// Field 11: `subtitles`
+    /// Field 8: `translates`
     #[must_use]
-    pub fn subtitles(&self) -> ::core::option::Option<bool> {
-        self.0.reborrow().subtitles
-    }
-    /// The service a recognizer is configured from, a name among the
-    /// services.
-    ///
-    /// Field 12: `service`
-    #[must_use]
-    pub fn service(&self) -> ::core::option::Option<&'_ str> {
-        self.0.reborrow().service
+    pub fn translates(&self) -> ::core::option::Option<bool> {
+        self.0.reborrow().translates
     }
 }
-impl ::core::convert::From<::buffa::OwnedView<RecognizerInfoView<'static>>>
-for RecognizerInfoOwnedView {
-    fn from(inner: ::buffa::OwnedView<RecognizerInfoView<'static>>) -> Self {
-        RecognizerInfoOwnedView(inner)
+impl ::core::convert::From<::buffa::OwnedView<TranscriberInfoView<'static>>>
+for TranscriberInfoOwnedView {
+    fn from(inner: ::buffa::OwnedView<TranscriberInfoView<'static>>) -> Self {
+        TranscriberInfoOwnedView(inner)
     }
 }
-impl ::core::convert::From<RecognizerInfoOwnedView>
-for ::buffa::OwnedView<RecognizerInfoView<'static>> {
-    fn from(wrapper: RecognizerInfoOwnedView) -> Self {
+impl ::core::convert::From<TranscriberInfoOwnedView>
+for ::buffa::OwnedView<TranscriberInfoView<'static>> {
+    fn from(wrapper: TranscriberInfoOwnedView) -> Self {
         wrapper.0
     }
 }
-impl ::core::convert::AsRef<::buffa::OwnedView<RecognizerInfoView<'static>>>
-for RecognizerInfoOwnedView {
-    fn as_ref(&self) -> &::buffa::OwnedView<RecognizerInfoView<'static>> {
+impl ::core::convert::AsRef<::buffa::OwnedView<TranscriberInfoView<'static>>>
+for TranscriberInfoOwnedView {
+    fn as_ref(&self) -> &::buffa::OwnedView<TranscriberInfoView<'static>> {
         &self.0
     }
 }
-impl ::buffa::HasMessageView for super::super::RecognizerInfo {
-    type View<'a> = RecognizerInfoView<'a>;
-    type ViewHandle = RecognizerInfoOwnedView;
+impl ::buffa::HasMessageView for super::super::TranscriberInfo {
+    type View<'a> = TranscriberInfoView<'a>;
+    type ViewHandle = TranscriberInfoOwnedView;
 }
-/// SpeechAudio is audio to recognize.
+/// SpeechAudio is audio to transcribe.
 #[derive(Clone, Debug, Default)]
 pub struct SpeechAudioView<'a> {
-    /// Only the first seconds of a URL's audio; unset for all.
+    /// A URL of the host API serving the audio as 16 kHz mono 16-bit
+    /// little-endian PCM aligned with the start of the video, which the
+    /// plugin fetches with the host's HTTP client.
     ///
-    /// Field 3: `limit`
+    /// Field 1: `url`
+    pub url: ::core::option::Option<&'a str>,
+    /// Only the first seconds of the audio; unset for all.
+    ///
+    /// Field 2: `limit`
     pub limit: ::buffa::MessageFieldView<
         ::buffa_types::google::protobuf::__buffa::view::DurationView<'a>,
-    >,
-    pub source: ::core::option::Option<
-        super::super::__buffa::view::oneof::speech_audio::Source<'a>,
     >,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
@@ -1145,7 +1307,14 @@ impl<'a> ::buffa::MessageView<'a> for SpeechAudioView<'a> {
         let view = self;
         let mut cur = cur;
         match tag.field_number() {
-            3u32 => {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.url = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
+            2u32 => {
                 ::buffa::encoding::check_wire_type(
                     tag,
                     ::buffa::encoding::WireType::LengthDelimited,
@@ -1165,28 +1334,6 @@ impl<'a> ::buffa::MessageView<'a> for SpeechAudioView<'a> {
                         );
                     }
                 }
-            }
-            1u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                view.source = Some(
-                    super::super::__buffa::view::oneof::speech_audio::Source::Pcm(
-                        ::buffa::types::borrow_bytes(&mut cur)?,
-                    ),
-                );
-            }
-            2u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                view.source = Some(
-                    super::super::__buffa::view::oneof::speech_audio::Source::Url(
-                        ::buffa::types::borrow_str(&mut cur)?,
-                    ),
-                );
             }
             _ => {
                 ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
@@ -1210,6 +1357,7 @@ impl<'a> ::buffa::MessageView<'a> for SpeechAudioView<'a> {
         use ::buffa::alloc::string::ToString as _;
         let _ = __buffa_src;
         ::core::result::Result::Ok(super::super::SpeechAudio {
+            url: self.url.map(|s| s.to_string()),
             limit: match self.limit.as_option() {
                 Some(v) => {
                     ::buffa::MessageField::<
@@ -1219,21 +1367,6 @@ impl<'a> ::buffa::MessageView<'a> for SpeechAudioView<'a> {
                 }
                 None => ::buffa::MessageField::none(),
             },
-            source: self
-                .source
-                .as_ref()
-                .map(|v| match v {
-                    super::super::__buffa::view::oneof::speech_audio::Source::Pcm(v) => {
-                        super::super::__buffa::oneof::speech_audio::Source::Pcm(
-                            (v).to_vec(),
-                        )
-                    }
-                    super::super::__buffa::view::oneof::speech_audio::Source::Url(v) => {
-                        super::super::__buffa::oneof::speech_audio::Source::Url(
-                            v.to_string(),
-                        )
-                    }
-                }),
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -1245,15 +1378,8 @@ impl<'a> ::buffa::ViewEncode<'a> for SpeechAudioView<'a> {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
         let mut size = 0u64;
-        if let ::core::option::Option::Some(ref v) = self.source {
-            match v {
-                super::super::__buffa::view::oneof::speech_audio::Source::Pcm(x) => {
-                    size += 1u64 + ::buffa::types::bytes_encoded_len(x) as u64;
-                }
-                super::super::__buffa::view::oneof::speech_audio::Source::Url(x) => {
-                    size += 1u64 + ::buffa::types::string_encoded_len(x) as u64;
-                }
-            }
+        if let Some(ref v) = self.url {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
         if self.limit.is_set() {
             let __slot = __cache.reserve();
@@ -1274,19 +1400,12 @@ impl<'a> ::buffa::ViewEncode<'a> for SpeechAudioView<'a> {
     ) {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
-        if let ::core::option::Option::Some(ref v) = self.source {
-            match v {
-                super::super::__buffa::view::oneof::speech_audio::Source::Pcm(x) => {
-                    ::buffa::types::put_shared_bytes_field(1u32, x, buf);
-                }
-                super::super::__buffa::view::oneof::speech_audio::Source::Url(x) => {
-                    ::buffa::types::put_string_field(2u32, x, buf);
-                }
-            }
+        if let Some(ref v) = self.url {
+            ::buffa::types::put_string_field(1u32, v, buf);
         }
         if self.limit.is_set() {
             ::buffa::types::put_len_delimited_header(
-                3u32,
+                2u32,
                 u64::from(__cache.consume_next()),
                 buf,
             );
@@ -1383,9 +1502,18 @@ impl SpeechAudioOwnedView {
     pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
         self.0.into_bytes()
     }
-    /// Only the first seconds of a URL's audio; unset for all.
+    /// A URL of the host API serving the audio as 16 kHz mono 16-bit
+    /// little-endian PCM aligned with the start of the video, which the
+    /// plugin fetches with the host's HTTP client.
     ///
-    /// Field 3: `limit`
+    /// Field 1: `url`
+    #[must_use]
+    pub fn url(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().url
+    }
+    /// Only the first seconds of the audio; unset for all.
+    ///
+    /// Field 2: `limit`
     #[must_use]
     pub fn limit(
         &self,
@@ -1393,15 +1521,6 @@ impl SpeechAudioOwnedView {
         ::buffa_types::google::protobuf::__buffa::view::DurationView<'_>,
     > {
         &self.0.reborrow().limit
-    }
-    /// Oneof `source`.
-    #[must_use]
-    pub fn source(
-        &self,
-    ) -> ::core::option::Option<
-        &super::super::__buffa::view::oneof::speech_audio::Source<'_>,
-    > {
-        self.0.reborrow().source.as_ref()
     }
 }
 impl ::core::convert::From<::buffa::OwnedView<SpeechAudioView<'static>>>
@@ -1427,14 +1546,14 @@ impl ::buffa::HasMessageView for super::super::SpeechAudio {
     type ViewHandle = SpeechAudioOwnedView;
 }
 #[derive(Clone, Debug, Default)]
-pub struct RecognizeSpeechRequestView<'a> {
-    /// Field 1: `recognizer`
-    pub recognizer: ::core::option::Option<&'a str>,
+pub struct TranscribeSpeechRequestView<'a> {
+    /// Field 1: `transcriber`
+    pub transcriber: ::core::option::Option<&'a str>,
     /// Field 2: `audio`
     pub audio: ::buffa::MessageFieldView<
         super::super::__buffa::view::SpeechAudioView<'a>,
     >,
-    /// The language spoken, BCP 47; empty, the recognizer detects it.
+    /// The language spoken, BCP 47; empty, the transcriber detects it.
     ///
     /// Field 3: `language`
     pub language: ::core::option::Option<&'a str>,
@@ -1442,23 +1561,15 @@ pub struct RecognizeSpeechRequestView<'a> {
     ///
     /// Field 4: `translate`
     pub translate: ::core::option::Option<bool>,
-    /// Phrases the recognizer is likely to hear, such as titles.
-    ///
-    /// Field 5: `hints`
-    pub hints: ::buffa::RepeatedView<'a, &'a str>,
-    /// Gives the times of what is said.
-    ///
-    /// Field 6: `timestamps`
-    pub timestamps: ::core::option::Option<bool>,
     /// What the audio is of, such as a video's file name, for the service's
     /// logs.
     ///
-    /// Field 7: `name`
+    /// Field 5: `name`
     pub name: ::core::option::Option<&'a str>,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
-impl<'a> ::buffa::MessageView<'a> for RecognizeSpeechRequestView<'a> {
-    type Owned = super::super::RecognizeSpeechRequest;
+impl<'a> ::buffa::MessageView<'a> for TranscribeSpeechRequestView<'a> {
+    type Owned = super::super::TranscribeSpeechRequest;
     fn decode_view(buf: &'a [u8]) -> ::core::result::Result<Self, ::buffa::DecodeError> {
         let __limit = ::core::cell::Cell::new(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT);
         let __elem = ::core::cell::Cell::new(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT);
@@ -1492,7 +1603,7 @@ impl<'a> ::buffa::MessageView<'a> for RecognizeSpeechRequestView<'a> {
                     tag,
                     ::buffa::encoding::WireType::LengthDelimited,
                 )?;
-                view.recognizer = Some(::buffa::types::borrow_str(&mut cur)?);
+                view.transcriber = Some(::buffa::types::borrow_str(&mut cur)?);
             }
             2u32 => {
                 ::buffa::encoding::check_wire_type(
@@ -1529,30 +1640,12 @@ impl<'a> ::buffa::MessageView<'a> for RecognizeSpeechRequestView<'a> {
                 )?;
                 view.translate = Some(::buffa::types::decode_bool(&mut cur)?);
             }
-            6u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                view.timestamps = Some(::buffa::types::decode_bool(&mut cur)?);
-            }
-            7u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                view.name = Some(::buffa::types::borrow_str(&mut cur)?);
-            }
             5u32 => {
                 ::buffa::encoding::check_wire_type(
                     tag,
                     ::buffa::encoding::WireType::LengthDelimited,
                 )?;
-                let __elem = ::buffa::types::borrow_str(&mut cur)?;
-                ctx.register_element_memory(
-                    ::buffa::__private::element_footprint(&__elem),
-                )?;
-                view.hints.push(__elem);
+                view.name = Some(::buffa::types::borrow_str(&mut cur)?);
             }
             _ => {
                 ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
@@ -1565,7 +1658,7 @@ impl<'a> ::buffa::MessageView<'a> for RecognizeSpeechRequestView<'a> {
     fn to_owned_message(
         &self,
     ) -> ::core::result::Result<
-        super::super::RecognizeSpeechRequest,
+        super::super::TranscribeSpeechRequest,
         ::buffa::DecodeError,
     > {
         self.to_owned_from_source(None)
@@ -1575,14 +1668,14 @@ impl<'a> ::buffa::MessageView<'a> for RecognizeSpeechRequestView<'a> {
         &self,
         __buffa_src: ::core::option::Option<&::buffa::bytes::Bytes>,
     ) -> ::core::result::Result<
-        super::super::RecognizeSpeechRequest,
+        super::super::TranscribeSpeechRequest,
         ::buffa::DecodeError,
     > {
         #[allow(unused_imports)]
         use ::buffa::alloc::string::ToString as _;
         let _ = __buffa_src;
-        ::core::result::Result::Ok(super::super::RecognizeSpeechRequest {
-            recognizer: self.recognizer.map(|s| s.to_string()),
+        ::core::result::Result::Ok(super::super::TranscribeSpeechRequest {
+            transcriber: self.transcriber.map(|s| s.to_string()),
             audio: match self.audio.as_option() {
                 Some(v) => {
                     ::buffa::MessageField::<
@@ -1594,21 +1687,19 @@ impl<'a> ::buffa::MessageView<'a> for RecognizeSpeechRequestView<'a> {
             },
             language: self.language.map(|s| s.to_string()),
             translate: self.translate,
-            hints: self.hints.iter().map(|s| s.to_string()).collect(),
-            timestamps: self.timestamps,
             name: self.name.map(|s| s.to_string()),
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
     }
 }
-impl<'a> ::buffa::ViewEncode<'a> for RecognizeSpeechRequestView<'a> {
+impl<'a> ::buffa::ViewEncode<'a> for TranscribeSpeechRequestView<'a> {
     #[allow(clippy::needless_borrow, clippy::let_and_return)]
     fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
         let mut size = 0u64;
-        if let Some(ref v) = self.recognizer {
+        if let Some(ref v) = self.transcriber {
             size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
         if self.audio.is_set() {
@@ -1625,12 +1716,6 @@ impl<'a> ::buffa::ViewEncode<'a> for RecognizeSpeechRequestView<'a> {
         if self.translate.is_some() {
             size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
         }
-        for v in &self.hints {
-            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
-        if self.timestamps.is_some() {
-            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
-        }
         if let Some(ref v) = self.name {
             size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
@@ -1645,7 +1730,7 @@ impl<'a> ::buffa::ViewEncode<'a> for RecognizeSpeechRequestView<'a> {
     ) {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
-        if let Some(ref v) = self.recognizer {
+        if let Some(ref v) = self.transcriber {
             ::buffa::types::put_string_field(1u32, v, buf);
         }
         if self.audio.is_set() {
@@ -1662,36 +1747,30 @@ impl<'a> ::buffa::ViewEncode<'a> for RecognizeSpeechRequestView<'a> {
         if let Some(v) = self.translate {
             ::buffa::types::put_bool_field(4u32, v, buf);
         }
-        for v in &self.hints {
-            ::buffa::types::put_string_field(5u32, v, buf);
-        }
-        if let Some(v) = self.timestamps {
-            ::buffa::types::put_bool_field(6u32, v, buf);
-        }
         if let Some(ref v) = self.name {
-            ::buffa::types::put_string_field(7u32, v, buf);
+            ::buffa::types::put_string_field(5u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
 }
-impl<'a> ::buffa::MessageName for RecognizeSpeechRequestView<'a> {
+impl<'a> ::buffa::MessageName for TranscribeSpeechRequestView<'a> {
     const PACKAGE: &'static str = "mavio.plugin.v1";
-    const NAME: &'static str = "RecognizeSpeechRequest";
-    const FULL_NAME: &'static str = "mavio.plugin.v1.RecognizeSpeechRequest";
-    const TYPE_URL: &'static str = "type.googleapis.com/mavio.plugin.v1.RecognizeSpeechRequest";
+    const NAME: &'static str = "TranscribeSpeechRequest";
+    const FULL_NAME: &'static str = "mavio.plugin.v1.TranscribeSpeechRequest";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.plugin.v1.TranscribeSpeechRequest";
 }
-::buffa::impl_default_view_instance!(RecognizeSpeechRequestView);
-::buffa::impl_view_reborrow!(RecognizeSpeechRequestView);
-/** Self-contained, `'static` owned view of a `RecognizeSpeechRequest` message.
+::buffa::impl_default_view_instance!(TranscribeSpeechRequestView);
+::buffa::impl_view_reborrow!(TranscribeSpeechRequestView);
+/** Self-contained, `'static` owned view of a `TranscribeSpeechRequest` message.
 
- Wraps [`::buffa::OwnedView`]`<`[`RecognizeSpeechRequestView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
+ Wraps [`::buffa::OwnedView`]`<`[`TranscribeSpeechRequestView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
 
- Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`RecognizeSpeechRequestView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
+ Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`TranscribeSpeechRequestView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
 #[derive(Clone, Debug)]
-pub struct RecognizeSpeechRequestOwnedView(
-    ::buffa::OwnedView<RecognizeSpeechRequestView<'static>>,
+pub struct TranscribeSpeechRequestOwnedView(
+    ::buffa::OwnedView<TranscribeSpeechRequestView<'static>>,
 );
-impl RecognizeSpeechRequestOwnedView {
+impl TranscribeSpeechRequestOwnedView {
     /// Decode an owned view from a [`::buffa::bytes::Bytes`] buffer.
     ///
     /// The view borrows directly from the buffer's data; the buffer is
@@ -1705,7 +1784,7 @@ impl RecognizeSpeechRequestOwnedView {
         bytes: ::buffa::bytes::Bytes,
     ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
         ::core::result::Result::Ok(
-            RecognizeSpeechRequestOwnedView(::buffa::OwnedView::decode(bytes)?),
+            TranscribeSpeechRequestOwnedView(::buffa::OwnedView::decode(bytes)?),
         )
     }
     /// Decode with custom [`::buffa::DecodeOptions`] (recursion limit,
@@ -1720,7 +1799,7 @@ impl RecognizeSpeechRequestOwnedView {
         opts: &::buffa::DecodeOptions,
     ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
         ::core::result::Result::Ok(
-            RecognizeSpeechRequestOwnedView(
+            TranscribeSpeechRequestOwnedView(
                 ::buffa::OwnedView::decode_with_options(bytes, opts)?,
             ),
         )
@@ -1734,15 +1813,15 @@ impl RecognizeSpeechRequestOwnedView {
     /// another [`::buffa::DecodeError`] if the re-encoded bytes are
     /// somehow invalid (should not happen for well-formed messages).
     pub fn from_owned(
-        msg: &super::super::RecognizeSpeechRequest,
+        msg: &super::super::TranscribeSpeechRequest,
     ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
         ::core::result::Result::Ok(
-            RecognizeSpeechRequestOwnedView(::buffa::OwnedView::from_owned(msg)?),
+            TranscribeSpeechRequestOwnedView(::buffa::OwnedView::from_owned(msg)?),
         )
     }
-    /// Borrow the full [`RecognizeSpeechRequestView`] with its lifetime tied to `&self`.
+    /// Borrow the full [`TranscribeSpeechRequestView`] with its lifetime tied to `&self`.
     #[must_use]
-    pub fn view(&self) -> &RecognizeSpeechRequestView<'_> {
+    pub fn view(&self) -> &TranscribeSpeechRequestView<'_> {
         self.0.reborrow()
     }
     /// Convert to the owned message type.
@@ -1753,7 +1832,7 @@ impl RecognizeSpeechRequestOwnedView {
     /// whose contract also governs handles converted from a raw
     /// [`::buffa::OwnedView`].
     #[must_use]
-    pub fn to_owned_message(&self) -> super::super::RecognizeSpeechRequest {
+    pub fn to_owned_message(&self) -> super::super::TranscribeSpeechRequest {
         self.0.to_owned_message()
     }
     /// The underlying bytes buffer.
@@ -1766,10 +1845,10 @@ impl RecognizeSpeechRequestOwnedView {
     pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
         self.0.into_bytes()
     }
-    /// Field 1: `recognizer`
+    /// Field 1: `transcriber`
     #[must_use]
-    pub fn recognizer(&self) -> ::core::option::Option<&'_ str> {
-        self.0.reborrow().recognizer
+    pub fn transcriber(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().transcriber
     }
     /// Field 2: `audio`
     #[must_use]
@@ -1778,7 +1857,7 @@ impl RecognizeSpeechRequestOwnedView {
     ) -> &::buffa::MessageFieldView<super::super::__buffa::view::SpeechAudioView<'_>> {
         &self.0.reborrow().audio
     }
-    /// The language spoken, BCP 47; empty, the recognizer detects it.
+    /// The language spoken, BCP 47; empty, the transcriber detects it.
     ///
     /// Field 3: `language`
     #[must_use]
@@ -1792,70 +1871,52 @@ impl RecognizeSpeechRequestOwnedView {
     pub fn translate(&self) -> ::core::option::Option<bool> {
         self.0.reborrow().translate
     }
-    /// Phrases the recognizer is likely to hear, such as titles.
-    ///
-    /// Field 5: `hints`
-    #[must_use]
-    pub fn hints(&self) -> &::buffa::RepeatedView<'_, &'_ str> {
-        &self.0.reborrow().hints
-    }
-    /// Gives the times of what is said.
-    ///
-    /// Field 6: `timestamps`
-    #[must_use]
-    pub fn timestamps(&self) -> ::core::option::Option<bool> {
-        self.0.reborrow().timestamps
-    }
     /// What the audio is of, such as a video's file name, for the service's
     /// logs.
     ///
-    /// Field 7: `name`
+    /// Field 5: `name`
     #[must_use]
     pub fn name(&self) -> ::core::option::Option<&'_ str> {
         self.0.reborrow().name
     }
 }
-impl ::core::convert::From<::buffa::OwnedView<RecognizeSpeechRequestView<'static>>>
-for RecognizeSpeechRequestOwnedView {
-    fn from(inner: ::buffa::OwnedView<RecognizeSpeechRequestView<'static>>) -> Self {
-        RecognizeSpeechRequestOwnedView(inner)
+impl ::core::convert::From<::buffa::OwnedView<TranscribeSpeechRequestView<'static>>>
+for TranscribeSpeechRequestOwnedView {
+    fn from(inner: ::buffa::OwnedView<TranscribeSpeechRequestView<'static>>) -> Self {
+        TranscribeSpeechRequestOwnedView(inner)
     }
 }
-impl ::core::convert::From<RecognizeSpeechRequestOwnedView>
-for ::buffa::OwnedView<RecognizeSpeechRequestView<'static>> {
-    fn from(wrapper: RecognizeSpeechRequestOwnedView) -> Self {
+impl ::core::convert::From<TranscribeSpeechRequestOwnedView>
+for ::buffa::OwnedView<TranscribeSpeechRequestView<'static>> {
+    fn from(wrapper: TranscribeSpeechRequestOwnedView) -> Self {
         wrapper.0
     }
 }
-impl ::core::convert::AsRef<::buffa::OwnedView<RecognizeSpeechRequestView<'static>>>
-for RecognizeSpeechRequestOwnedView {
-    fn as_ref(&self) -> &::buffa::OwnedView<RecognizeSpeechRequestView<'static>> {
+impl ::core::convert::AsRef<::buffa::OwnedView<TranscribeSpeechRequestView<'static>>>
+for TranscribeSpeechRequestOwnedView {
+    fn as_ref(&self) -> &::buffa::OwnedView<TranscribeSpeechRequestView<'static>> {
         &self.0
     }
 }
-impl ::buffa::HasMessageView for super::super::RecognizeSpeechRequest {
-    type View<'a> = RecognizeSpeechRequestView<'a>;
-    type ViewHandle = RecognizeSpeechRequestOwnedView;
+impl ::buffa::HasMessageView for super::super::TranscribeSpeechRequest {
+    type View<'a> = TranscribeSpeechRequestView<'a>;
+    type ViewHandle = TranscribeSpeechRequestOwnedView;
 }
 #[derive(Clone, Debug, Default)]
-pub struct RecognizeSpeechResponseView<'a> {
-    /// Field 1: `text`
-    pub text: ::core::option::Option<&'a str>,
-    /// The language recognized, BCP 47.
+pub struct TranscribeSpeechResponseView<'a> {
+    /// The language transcribed, BCP 47.
     ///
-    /// Field 2: `language`
+    /// Field 1: `language`
     pub language: ::core::option::Option<&'a str>,
-    /// What is said with its times, when they were asked for.
-    ///
-    /// Field 3: `segments`
+    /// Field 2: `segments`
     pub segments: ::buffa::RepeatedView<
         'a,
         super::super::__buffa::view::SpeechSegmentView<'a>,
     >,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
-impl<'a> ::buffa::MessageView<'a> for RecognizeSpeechResponseView<'a> {
-    type Owned = super::super::RecognizeSpeechResponse;
+impl<'a> ::buffa::MessageView<'a> for TranscribeSpeechResponseView<'a> {
+    type Owned = super::super::TranscribeSpeechResponse;
     fn decode_view(buf: &'a [u8]) -> ::core::result::Result<Self, ::buffa::DecodeError> {
         let __limit = ::core::cell::Cell::new(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT);
         let __elem = ::core::cell::Cell::new(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT);
@@ -1889,16 +1950,9 @@ impl<'a> ::buffa::MessageView<'a> for RecognizeSpeechResponseView<'a> {
                     tag,
                     ::buffa::encoding::WireType::LengthDelimited,
                 )?;
-                view.text = Some(::buffa::types::borrow_str(&mut cur)?);
-            }
-            2u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
                 view.language = Some(::buffa::types::borrow_str(&mut cur)?);
             }
-            3u32 => {
+            2u32 => {
                 ::buffa::encoding::check_wire_type(
                     tag,
                     ::buffa::encoding::WireType::LengthDelimited,
@@ -1929,7 +1983,7 @@ impl<'a> ::buffa::MessageView<'a> for RecognizeSpeechResponseView<'a> {
     fn to_owned_message(
         &self,
     ) -> ::core::result::Result<
-        super::super::RecognizeSpeechResponse,
+        super::super::TranscribeSpeechResponse,
         ::buffa::DecodeError,
     > {
         self.to_owned_from_source(None)
@@ -1939,14 +1993,13 @@ impl<'a> ::buffa::MessageView<'a> for RecognizeSpeechResponseView<'a> {
         &self,
         __buffa_src: ::core::option::Option<&::buffa::bytes::Bytes>,
     ) -> ::core::result::Result<
-        super::super::RecognizeSpeechResponse,
+        super::super::TranscribeSpeechResponse,
         ::buffa::DecodeError,
     > {
         #[allow(unused_imports)]
         use ::buffa::alloc::string::ToString as _;
         let _ = __buffa_src;
-        ::core::result::Result::Ok(super::super::RecognizeSpeechResponse {
-            text: self.text.map(|s| s.to_string()),
+        ::core::result::Result::Ok(super::super::TranscribeSpeechResponse {
             language: self.language.map(|s| s.to_string()),
             segments: self
                 .segments
@@ -1958,15 +2011,12 @@ impl<'a> ::buffa::MessageView<'a> for RecognizeSpeechResponseView<'a> {
         })
     }
 }
-impl<'a> ::buffa::ViewEncode<'a> for RecognizeSpeechResponseView<'a> {
+impl<'a> ::buffa::ViewEncode<'a> for TranscribeSpeechResponseView<'a> {
     #[allow(clippy::needless_borrow, clippy::let_and_return)]
     fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
         let mut size = 0u64;
-        if let Some(ref v) = self.text {
-            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
         if let Some(ref v) = self.language {
             size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
@@ -1989,15 +2039,12 @@ impl<'a> ::buffa::ViewEncode<'a> for RecognizeSpeechResponseView<'a> {
     ) {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
-        if let Some(ref v) = self.text {
-            ::buffa::types::put_string_field(1u32, v, buf);
-        }
         if let Some(ref v) = self.language {
-            ::buffa::types::put_string_field(2u32, v, buf);
+            ::buffa::types::put_string_field(1u32, v, buf);
         }
         for v in &self.segments {
             ::buffa::types::put_len_delimited_header(
-                3u32,
+                2u32,
                 u64::from(__cache.consume_next()),
                 buf,
             );
@@ -2006,24 +2053,24 @@ impl<'a> ::buffa::ViewEncode<'a> for RecognizeSpeechResponseView<'a> {
         self.__buffa_unknown_fields.write_to(buf);
     }
 }
-impl<'a> ::buffa::MessageName for RecognizeSpeechResponseView<'a> {
+impl<'a> ::buffa::MessageName for TranscribeSpeechResponseView<'a> {
     const PACKAGE: &'static str = "mavio.plugin.v1";
-    const NAME: &'static str = "RecognizeSpeechResponse";
-    const FULL_NAME: &'static str = "mavio.plugin.v1.RecognizeSpeechResponse";
-    const TYPE_URL: &'static str = "type.googleapis.com/mavio.plugin.v1.RecognizeSpeechResponse";
+    const NAME: &'static str = "TranscribeSpeechResponse";
+    const FULL_NAME: &'static str = "mavio.plugin.v1.TranscribeSpeechResponse";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.plugin.v1.TranscribeSpeechResponse";
 }
-::buffa::impl_default_view_instance!(RecognizeSpeechResponseView);
-::buffa::impl_view_reborrow!(RecognizeSpeechResponseView);
-/** Self-contained, `'static` owned view of a `RecognizeSpeechResponse` message.
+::buffa::impl_default_view_instance!(TranscribeSpeechResponseView);
+::buffa::impl_view_reborrow!(TranscribeSpeechResponseView);
+/** Self-contained, `'static` owned view of a `TranscribeSpeechResponse` message.
 
- Wraps [`::buffa::OwnedView`]`<`[`RecognizeSpeechResponseView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
+ Wraps [`::buffa::OwnedView`]`<`[`TranscribeSpeechResponseView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
 
- Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`RecognizeSpeechResponseView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
+ Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`TranscribeSpeechResponseView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
 #[derive(Clone, Debug)]
-pub struct RecognizeSpeechResponseOwnedView(
-    ::buffa::OwnedView<RecognizeSpeechResponseView<'static>>,
+pub struct TranscribeSpeechResponseOwnedView(
+    ::buffa::OwnedView<TranscribeSpeechResponseView<'static>>,
 );
-impl RecognizeSpeechResponseOwnedView {
+impl TranscribeSpeechResponseOwnedView {
     /// Decode an owned view from a [`::buffa::bytes::Bytes`] buffer.
     ///
     /// The view borrows directly from the buffer's data; the buffer is
@@ -2037,7 +2084,7 @@ impl RecognizeSpeechResponseOwnedView {
         bytes: ::buffa::bytes::Bytes,
     ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
         ::core::result::Result::Ok(
-            RecognizeSpeechResponseOwnedView(::buffa::OwnedView::decode(bytes)?),
+            TranscribeSpeechResponseOwnedView(::buffa::OwnedView::decode(bytes)?),
         )
     }
     /// Decode with custom [`::buffa::DecodeOptions`] (recursion limit,
@@ -2052,7 +2099,7 @@ impl RecognizeSpeechResponseOwnedView {
         opts: &::buffa::DecodeOptions,
     ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
         ::core::result::Result::Ok(
-            RecognizeSpeechResponseOwnedView(
+            TranscribeSpeechResponseOwnedView(
                 ::buffa::OwnedView::decode_with_options(bytes, opts)?,
             ),
         )
@@ -2066,15 +2113,15 @@ impl RecognizeSpeechResponseOwnedView {
     /// another [`::buffa::DecodeError`] if the re-encoded bytes are
     /// somehow invalid (should not happen for well-formed messages).
     pub fn from_owned(
-        msg: &super::super::RecognizeSpeechResponse,
+        msg: &super::super::TranscribeSpeechResponse,
     ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
         ::core::result::Result::Ok(
-            RecognizeSpeechResponseOwnedView(::buffa::OwnedView::from_owned(msg)?),
+            TranscribeSpeechResponseOwnedView(::buffa::OwnedView::from_owned(msg)?),
         )
     }
-    /// Borrow the full [`RecognizeSpeechResponseView`] with its lifetime tied to `&self`.
+    /// Borrow the full [`TranscribeSpeechResponseView`] with its lifetime tied to `&self`.
     #[must_use]
-    pub fn view(&self) -> &RecognizeSpeechResponseView<'_> {
+    pub fn view(&self) -> &TranscribeSpeechResponseView<'_> {
         self.0.reborrow()
     }
     /// Convert to the owned message type.
@@ -2085,7 +2132,7 @@ impl RecognizeSpeechResponseOwnedView {
     /// whose contract also governs handles converted from a raw
     /// [`::buffa::OwnedView`].
     #[must_use]
-    pub fn to_owned_message(&self) -> super::super::RecognizeSpeechResponse {
+    pub fn to_owned_message(&self) -> super::super::TranscribeSpeechResponse {
         self.0.to_owned_message()
     }
     /// The underlying bytes buffer.
@@ -2098,21 +2145,14 @@ impl RecognizeSpeechResponseOwnedView {
     pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
         self.0.into_bytes()
     }
-    /// Field 1: `text`
-    #[must_use]
-    pub fn text(&self) -> ::core::option::Option<&'_ str> {
-        self.0.reborrow().text
-    }
-    /// The language recognized, BCP 47.
+    /// The language transcribed, BCP 47.
     ///
-    /// Field 2: `language`
+    /// Field 1: `language`
     #[must_use]
     pub fn language(&self) -> ::core::option::Option<&'_ str> {
         self.0.reborrow().language
     }
-    /// What is said with its times, when they were asked for.
-    ///
-    /// Field 3: `segments`
+    /// Field 2: `segments`
     #[must_use]
     pub fn segments(
         &self,
@@ -2120,27 +2160,27 @@ impl RecognizeSpeechResponseOwnedView {
         &self.0.reborrow().segments
     }
 }
-impl ::core::convert::From<::buffa::OwnedView<RecognizeSpeechResponseView<'static>>>
-for RecognizeSpeechResponseOwnedView {
-    fn from(inner: ::buffa::OwnedView<RecognizeSpeechResponseView<'static>>) -> Self {
-        RecognizeSpeechResponseOwnedView(inner)
+impl ::core::convert::From<::buffa::OwnedView<TranscribeSpeechResponseView<'static>>>
+for TranscribeSpeechResponseOwnedView {
+    fn from(inner: ::buffa::OwnedView<TranscribeSpeechResponseView<'static>>) -> Self {
+        TranscribeSpeechResponseOwnedView(inner)
     }
 }
-impl ::core::convert::From<RecognizeSpeechResponseOwnedView>
-for ::buffa::OwnedView<RecognizeSpeechResponseView<'static>> {
-    fn from(wrapper: RecognizeSpeechResponseOwnedView) -> Self {
+impl ::core::convert::From<TranscribeSpeechResponseOwnedView>
+for ::buffa::OwnedView<TranscribeSpeechResponseView<'static>> {
+    fn from(wrapper: TranscribeSpeechResponseOwnedView) -> Self {
         wrapper.0
     }
 }
-impl ::core::convert::AsRef<::buffa::OwnedView<RecognizeSpeechResponseView<'static>>>
-for RecognizeSpeechResponseOwnedView {
-    fn as_ref(&self) -> &::buffa::OwnedView<RecognizeSpeechResponseView<'static>> {
+impl ::core::convert::AsRef<::buffa::OwnedView<TranscribeSpeechResponseView<'static>>>
+for TranscribeSpeechResponseOwnedView {
+    fn as_ref(&self) -> &::buffa::OwnedView<TranscribeSpeechResponseView<'static>> {
         &self.0
     }
 }
-impl ::buffa::HasMessageView for super::super::RecognizeSpeechResponse {
-    type View<'a> = RecognizeSpeechResponseView<'a>;
-    type ViewHandle = RecognizeSpeechResponseOwnedView;
+impl ::buffa::HasMessageView for super::super::TranscribeSpeechResponse {
+    type View<'a> = TranscribeSpeechResponseView<'a>;
+    type ViewHandle = TranscribeSpeechResponseOwnedView;
 }
 /// SpeechSegment is something said, with its times.
 #[derive(Clone, Debug, Default)]
@@ -2476,8 +2516,8 @@ impl ::buffa::HasMessageView for super::super::SpeechSegment {
 }
 #[derive(Clone, Debug, Default)]
 pub struct DetectSpeechLanguageRequestView<'a> {
-    /// Field 1: `recognizer`
-    pub recognizer: ::core::option::Option<&'a str>,
+    /// Field 1: `transcriber`
+    pub transcriber: ::core::option::Option<&'a str>,
     /// Field 2: `audio`
     pub audio: ::buffa::MessageFieldView<
         super::super::__buffa::view::SpeechAudioView<'a>,
@@ -2519,7 +2559,7 @@ impl<'a> ::buffa::MessageView<'a> for DetectSpeechLanguageRequestView<'a> {
                     tag,
                     ::buffa::encoding::WireType::LengthDelimited,
                 )?;
-                view.recognizer = Some(::buffa::types::borrow_str(&mut cur)?);
+                view.transcriber = Some(::buffa::types::borrow_str(&mut cur)?);
             }
             2u32 => {
                 ::buffa::encoding::check_wire_type(
@@ -2570,7 +2610,7 @@ impl<'a> ::buffa::MessageView<'a> for DetectSpeechLanguageRequestView<'a> {
         use ::buffa::alloc::string::ToString as _;
         let _ = __buffa_src;
         ::core::result::Result::Ok(super::super::DetectSpeechLanguageRequest {
-            recognizer: self.recognizer.map(|s| s.to_string()),
+            transcriber: self.transcriber.map(|s| s.to_string()),
             audio: match self.audio.as_option() {
                 Some(v) => {
                     ::buffa::MessageField::<
@@ -2591,7 +2631,7 @@ impl<'a> ::buffa::ViewEncode<'a> for DetectSpeechLanguageRequestView<'a> {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
         let mut size = 0u64;
-        if let Some(ref v) = self.recognizer {
+        if let Some(ref v) = self.transcriber {
             size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
         if self.audio.is_set() {
@@ -2613,7 +2653,7 @@ impl<'a> ::buffa::ViewEncode<'a> for DetectSpeechLanguageRequestView<'a> {
     ) {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
-        if let Some(ref v) = self.recognizer {
+        if let Some(ref v) = self.transcriber {
             ::buffa::types::put_string_field(1u32, v, buf);
         }
         if self.audio.is_set() {
@@ -2719,10 +2759,10 @@ impl DetectSpeechLanguageRequestOwnedView {
     pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
         self.0.into_bytes()
     }
-    /// Field 1: `recognizer`
+    /// Field 1: `transcriber`
     #[must_use]
-    pub fn recognizer(&self) -> ::core::option::Option<&'_ str> {
-        self.0.reborrow().recognizer
+    pub fn transcriber(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().transcriber
     }
     /// Field 2: `audio`
     #[must_use]
@@ -2985,1765 +3025,4 @@ impl ::core::convert::AsRef<
 impl ::buffa::HasMessageView for super::super::DetectSpeechLanguageResponse {
     type View<'a> = DetectSpeechLanguageResponseView<'a>;
     type ViewHandle = DetectSpeechLanguageResponseOwnedView;
-}
-#[derive(Clone, Debug, Default)]
-pub struct ListVoicesRequestView<'a> {
-    pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
-}
-impl<'a> ::buffa::MessageView<'a> for ListVoicesRequestView<'a> {
-    type Owned = super::super::ListVoicesRequest;
-    fn decode_view(buf: &'a [u8]) -> ::core::result::Result<Self, ::buffa::DecodeError> {
-        let __limit = ::core::cell::Cell::new(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT);
-        let __elem = ::core::cell::Cell::new(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT);
-        <Self as ::buffa::MessageView>::decode_view_ctx(
-            buf,
-            ::buffa::DecodeContext::new(::buffa::RECURSION_LIMIT, &__limit)
-                .with_element_memory(&__elem),
-        )
-    }
-    fn decode_view_with_ctx(
-        buf: &'a [u8],
-        ctx: ::buffa::DecodeContext<'_>,
-    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
-        <Self as ::buffa::MessageView>::decode_view_ctx(buf, ctx)
-    }
-    #[inline]
-    fn merge_view_field(
-        &mut self,
-        tag: ::buffa::encoding::Tag,
-        cur: &'a [u8],
-        before_tag: &'a [u8],
-        ctx: ::buffa::DecodeContext<'_>,
-    ) -> ::core::result::Result<&'a [u8], ::buffa::DecodeError> {
-        let _ = ctx;
-        #[allow(unused_variables)]
-        let view = self;
-        let mut cur = cur;
-        match tag.field_number() {
-            _ => {
-                ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
-                let span_len = before_tag.len() - cur.len();
-                view.__buffa_unknown_fields.push_record(before_tag, span_len, ctx)?;
-            }
-        }
-        ::core::result::Result::Ok(cur)
-    }
-    fn to_owned_message(
-        &self,
-    ) -> ::core::result::Result<super::super::ListVoicesRequest, ::buffa::DecodeError> {
-        self.to_owned_from_source(None)
-    }
-    #[allow(clippy::useless_conversion, clippy::needless_update)]
-    fn to_owned_from_source(
-        &self,
-        __buffa_src: ::core::option::Option<&::buffa::bytes::Bytes>,
-    ) -> ::core::result::Result<super::super::ListVoicesRequest, ::buffa::DecodeError> {
-        #[allow(unused_imports)]
-        use ::buffa::alloc::string::ToString as _;
-        let _ = __buffa_src;
-        ::core::result::Result::Ok(super::super::ListVoicesRequest {
-            __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
-            ..::core::default::Default::default()
-        })
-    }
-}
-impl<'a> ::buffa::ViewEncode<'a> for ListVoicesRequestView<'a> {
-    #[allow(clippy::needless_borrow, clippy::let_and_return)]
-    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
-        #[allow(unused_imports)]
-        use ::buffa::Enumeration as _;
-        let mut size = 0u64;
-        size += self.__buffa_unknown_fields.encoded_len() as u64;
-        ::buffa::saturate_size(size)
-    }
-    #[allow(clippy::needless_borrow)]
-    fn write_to(
-        &self,
-        _cache: &mut ::buffa::SizeCache,
-        buf: &mut impl ::buffa::EncodeSink,
-    ) {
-        #[allow(unused_imports)]
-        use ::buffa::Enumeration as _;
-        self.__buffa_unknown_fields.write_to(buf);
-    }
-}
-impl<'a> ::buffa::MessageName for ListVoicesRequestView<'a> {
-    const PACKAGE: &'static str = "mavio.plugin.v1";
-    const NAME: &'static str = "ListVoicesRequest";
-    const FULL_NAME: &'static str = "mavio.plugin.v1.ListVoicesRequest";
-    const TYPE_URL: &'static str = "type.googleapis.com/mavio.plugin.v1.ListVoicesRequest";
-}
-::buffa::impl_default_view_instance!(ListVoicesRequestView);
-::buffa::impl_view_reborrow!(ListVoicesRequestView);
-/** Self-contained, `'static` owned view of a `ListVoicesRequest` message.
-
- Wraps [`::buffa::OwnedView`]`<`[`ListVoicesRequestView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
-
- Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`ListVoicesRequestView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
-#[derive(Clone, Debug)]
-pub struct ListVoicesRequestOwnedView(
-    ::buffa::OwnedView<ListVoicesRequestView<'static>>,
-);
-impl ListVoicesRequestOwnedView {
-    /// Decode an owned view from a [`::buffa::bytes::Bytes`] buffer.
-    ///
-    /// The view borrows directly from the buffer's data; the buffer is
-    /// retained inside the returned handle.
-    ///
-    /// # Errors
-    ///
-    /// Returns [`::buffa::DecodeError`] if the buffer contains invalid
-    /// protobuf data.
-    pub fn decode(
-        bytes: ::buffa::bytes::Bytes,
-    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
-        ::core::result::Result::Ok(
-            ListVoicesRequestOwnedView(::buffa::OwnedView::decode(bytes)?),
-        )
-    }
-    /// Decode with custom [`::buffa::DecodeOptions`] (recursion limit,
-    /// max message size).
-    ///
-    /// # Errors
-    ///
-    /// Returns [`::buffa::DecodeError`] if the buffer is invalid or
-    /// exceeds the configured limits.
-    pub fn decode_with_options(
-        bytes: ::buffa::bytes::Bytes,
-        opts: &::buffa::DecodeOptions,
-    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
-        ::core::result::Result::Ok(
-            ListVoicesRequestOwnedView(
-                ::buffa::OwnedView::decode_with_options(bytes, opts)?,
-            ),
-        )
-    }
-    /// Build from an owned message via an encode → decode round-trip.
-    ///
-    /// # Errors
-    ///
-    /// Returns [`::buffa::DecodeError::MessageTooLarge`] if the
-    /// message's encoded size exceeds the 2 GiB protobuf limit, or
-    /// another [`::buffa::DecodeError`] if the re-encoded bytes are
-    /// somehow invalid (should not happen for well-formed messages).
-    pub fn from_owned(
-        msg: &super::super::ListVoicesRequest,
-    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
-        ::core::result::Result::Ok(
-            ListVoicesRequestOwnedView(::buffa::OwnedView::from_owned(msg)?),
-        )
-    }
-    /// Borrow the full [`ListVoicesRequestView`] with its lifetime tied to `&self`.
-    #[must_use]
-    pub fn view(&self) -> &ListVoicesRequestView<'_> {
-        self.0.reborrow()
-    }
-    /// Convert to the owned message type.
-    ///
-    /// Infallible: this type's constructors wire-decode their
-    /// buffer, and a view produced by wire decoding always
-    /// converts. Delegates to [`::buffa::OwnedView::to_owned_message`],
-    /// whose contract also governs handles converted from a raw
-    /// [`::buffa::OwnedView`].
-    #[must_use]
-    pub fn to_owned_message(&self) -> super::super::ListVoicesRequest {
-        self.0.to_owned_message()
-    }
-    /// The underlying bytes buffer.
-    #[must_use]
-    pub fn bytes(&self) -> &::buffa::bytes::Bytes {
-        self.0.bytes()
-    }
-    /// Consume the handle, returning the underlying bytes buffer.
-    #[must_use]
-    pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
-        self.0.into_bytes()
-    }
-}
-impl ::core::convert::From<::buffa::OwnedView<ListVoicesRequestView<'static>>>
-for ListVoicesRequestOwnedView {
-    fn from(inner: ::buffa::OwnedView<ListVoicesRequestView<'static>>) -> Self {
-        ListVoicesRequestOwnedView(inner)
-    }
-}
-impl ::core::convert::From<ListVoicesRequestOwnedView>
-for ::buffa::OwnedView<ListVoicesRequestView<'static>> {
-    fn from(wrapper: ListVoicesRequestOwnedView) -> Self {
-        wrapper.0
-    }
-}
-impl ::core::convert::AsRef<::buffa::OwnedView<ListVoicesRequestView<'static>>>
-for ListVoicesRequestOwnedView {
-    fn as_ref(&self) -> &::buffa::OwnedView<ListVoicesRequestView<'static>> {
-        &self.0
-    }
-}
-impl ::buffa::HasMessageView for super::super::ListVoicesRequest {
-    type View<'a> = ListVoicesRequestView<'a>;
-    type ViewHandle = ListVoicesRequestOwnedView;
-}
-#[derive(Clone, Debug, Default)]
-pub struct ListVoicesResponseView<'a> {
-    /// Field 1: `voices`
-    pub voices: ::buffa::RepeatedView<
-        'a,
-        super::super::__buffa::view::VoiceInfoView<'a>,
-    >,
-    /// The synthesizers configured, with their state.
-    ///
-    /// Field 2: `synthesizers`
-    pub synthesizers: ::buffa::RepeatedView<
-        'a,
-        super::super::__buffa::view::SynthesizerInfoView<'a>,
-    >,
-    /// The services synthesizers are configured from, with their settings.
-    /// A plugin listing none has synthesizers that are their own services.
-    ///
-    /// Field 3: `services`
-    pub services: ::buffa::RepeatedView<
-        'a,
-        super::super::__buffa::view::SynthesizerInfoView<'a>,
-    >,
-    pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
-}
-impl<'a> ::buffa::MessageView<'a> for ListVoicesResponseView<'a> {
-    type Owned = super::super::ListVoicesResponse;
-    fn decode_view(buf: &'a [u8]) -> ::core::result::Result<Self, ::buffa::DecodeError> {
-        let __limit = ::core::cell::Cell::new(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT);
-        let __elem = ::core::cell::Cell::new(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT);
-        <Self as ::buffa::MessageView>::decode_view_ctx(
-            buf,
-            ::buffa::DecodeContext::new(::buffa::RECURSION_LIMIT, &__limit)
-                .with_element_memory(&__elem),
-        )
-    }
-    fn decode_view_with_ctx(
-        buf: &'a [u8],
-        ctx: ::buffa::DecodeContext<'_>,
-    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
-        <Self as ::buffa::MessageView>::decode_view_ctx(buf, ctx)
-    }
-    #[inline]
-    fn merge_view_field(
-        &mut self,
-        tag: ::buffa::encoding::Tag,
-        cur: &'a [u8],
-        before_tag: &'a [u8],
-        ctx: ::buffa::DecodeContext<'_>,
-    ) -> ::core::result::Result<&'a [u8], ::buffa::DecodeError> {
-        let _ = ctx;
-        #[allow(unused_variables)]
-        let view = self;
-        let mut cur = cur;
-        match tag.field_number() {
-            1u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                let __sub_ctx = ctx.descend()?;
-                let sub = ::buffa::types::borrow_bytes(&mut cur)?;
-                ctx.register_element_memory(
-                    ::core::mem::size_of::<super::super::__buffa::view::VoiceInfoView>(),
-                )?;
-                view.voices
-                    .push(
-                        <super::super::__buffa::view::VoiceInfoView as ::buffa::MessageView>::decode_view_ctx(
-                            sub,
-                            __sub_ctx,
-                        )?,
-                    );
-            }
-            2u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                let __sub_ctx = ctx.descend()?;
-                let sub = ::buffa::types::borrow_bytes(&mut cur)?;
-                ctx.register_element_memory(
-                    ::core::mem::size_of::<
-                        super::super::__buffa::view::SynthesizerInfoView,
-                    >(),
-                )?;
-                view.synthesizers
-                    .push(
-                        <super::super::__buffa::view::SynthesizerInfoView as ::buffa::MessageView>::decode_view_ctx(
-                            sub,
-                            __sub_ctx,
-                        )?,
-                    );
-            }
-            3u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                let __sub_ctx = ctx.descend()?;
-                let sub = ::buffa::types::borrow_bytes(&mut cur)?;
-                ctx.register_element_memory(
-                    ::core::mem::size_of::<
-                        super::super::__buffa::view::SynthesizerInfoView,
-                    >(),
-                )?;
-                view.services
-                    .push(
-                        <super::super::__buffa::view::SynthesizerInfoView as ::buffa::MessageView>::decode_view_ctx(
-                            sub,
-                            __sub_ctx,
-                        )?,
-                    );
-            }
-            _ => {
-                ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
-                let span_len = before_tag.len() - cur.len();
-                view.__buffa_unknown_fields.push_record(before_tag, span_len, ctx)?;
-            }
-        }
-        ::core::result::Result::Ok(cur)
-    }
-    fn to_owned_message(
-        &self,
-    ) -> ::core::result::Result<super::super::ListVoicesResponse, ::buffa::DecodeError> {
-        self.to_owned_from_source(None)
-    }
-    #[allow(clippy::useless_conversion, clippy::needless_update)]
-    fn to_owned_from_source(
-        &self,
-        __buffa_src: ::core::option::Option<&::buffa::bytes::Bytes>,
-    ) -> ::core::result::Result<super::super::ListVoicesResponse, ::buffa::DecodeError> {
-        #[allow(unused_imports)]
-        use ::buffa::alloc::string::ToString as _;
-        let _ = __buffa_src;
-        ::core::result::Result::Ok(super::super::ListVoicesResponse {
-            voices: self
-                .voices
-                .iter()
-                .map(|v| v.to_owned_from_source(__buffa_src))
-                .collect::<::core::result::Result<_, ::buffa::DecodeError>>()?,
-            synthesizers: self
-                .synthesizers
-                .iter()
-                .map(|v| v.to_owned_from_source(__buffa_src))
-                .collect::<::core::result::Result<_, ::buffa::DecodeError>>()?,
-            services: self
-                .services
-                .iter()
-                .map(|v| v.to_owned_from_source(__buffa_src))
-                .collect::<::core::result::Result<_, ::buffa::DecodeError>>()?,
-            __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
-            ..::core::default::Default::default()
-        })
-    }
-}
-impl<'a> ::buffa::ViewEncode<'a> for ListVoicesResponseView<'a> {
-    #[allow(clippy::needless_borrow, clippy::let_and_return)]
-    fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
-        #[allow(unused_imports)]
-        use ::buffa::Enumeration as _;
-        let mut size = 0u64;
-        for v in &self.voices {
-            let __slot = __cache.reserve();
-            let inner_size = v.compute_size(__cache);
-            __cache.set(__slot, inner_size);
-            size
-                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
-                    + inner_size as u64;
-        }
-        for v in &self.synthesizers {
-            let __slot = __cache.reserve();
-            let inner_size = v.compute_size(__cache);
-            __cache.set(__slot, inner_size);
-            size
-                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
-                    + inner_size as u64;
-        }
-        for v in &self.services {
-            let __slot = __cache.reserve();
-            let inner_size = v.compute_size(__cache);
-            __cache.set(__slot, inner_size);
-            size
-                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
-                    + inner_size as u64;
-        }
-        size += self.__buffa_unknown_fields.encoded_len() as u64;
-        ::buffa::saturate_size(size)
-    }
-    #[allow(clippy::needless_borrow)]
-    fn write_to(
-        &self,
-        __cache: &mut ::buffa::SizeCache,
-        buf: &mut impl ::buffa::EncodeSink,
-    ) {
-        #[allow(unused_imports)]
-        use ::buffa::Enumeration as _;
-        for v in &self.voices {
-            ::buffa::types::put_len_delimited_header(
-                1u32,
-                u64::from(__cache.consume_next()),
-                buf,
-            );
-            v.write_to(__cache, buf);
-        }
-        for v in &self.synthesizers {
-            ::buffa::types::put_len_delimited_header(
-                2u32,
-                u64::from(__cache.consume_next()),
-                buf,
-            );
-            v.write_to(__cache, buf);
-        }
-        for v in &self.services {
-            ::buffa::types::put_len_delimited_header(
-                3u32,
-                u64::from(__cache.consume_next()),
-                buf,
-            );
-            v.write_to(__cache, buf);
-        }
-        self.__buffa_unknown_fields.write_to(buf);
-    }
-}
-impl<'a> ::buffa::MessageName for ListVoicesResponseView<'a> {
-    const PACKAGE: &'static str = "mavio.plugin.v1";
-    const NAME: &'static str = "ListVoicesResponse";
-    const FULL_NAME: &'static str = "mavio.plugin.v1.ListVoicesResponse";
-    const TYPE_URL: &'static str = "type.googleapis.com/mavio.plugin.v1.ListVoicesResponse";
-}
-::buffa::impl_default_view_instance!(ListVoicesResponseView);
-::buffa::impl_view_reborrow!(ListVoicesResponseView);
-/** Self-contained, `'static` owned view of a `ListVoicesResponse` message.
-
- Wraps [`::buffa::OwnedView`]`<`[`ListVoicesResponseView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
-
- Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`ListVoicesResponseView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
-#[derive(Clone, Debug)]
-pub struct ListVoicesResponseOwnedView(
-    ::buffa::OwnedView<ListVoicesResponseView<'static>>,
-);
-impl ListVoicesResponseOwnedView {
-    /// Decode an owned view from a [`::buffa::bytes::Bytes`] buffer.
-    ///
-    /// The view borrows directly from the buffer's data; the buffer is
-    /// retained inside the returned handle.
-    ///
-    /// # Errors
-    ///
-    /// Returns [`::buffa::DecodeError`] if the buffer contains invalid
-    /// protobuf data.
-    pub fn decode(
-        bytes: ::buffa::bytes::Bytes,
-    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
-        ::core::result::Result::Ok(
-            ListVoicesResponseOwnedView(::buffa::OwnedView::decode(bytes)?),
-        )
-    }
-    /// Decode with custom [`::buffa::DecodeOptions`] (recursion limit,
-    /// max message size).
-    ///
-    /// # Errors
-    ///
-    /// Returns [`::buffa::DecodeError`] if the buffer is invalid or
-    /// exceeds the configured limits.
-    pub fn decode_with_options(
-        bytes: ::buffa::bytes::Bytes,
-        opts: &::buffa::DecodeOptions,
-    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
-        ::core::result::Result::Ok(
-            ListVoicesResponseOwnedView(
-                ::buffa::OwnedView::decode_with_options(bytes, opts)?,
-            ),
-        )
-    }
-    /// Build from an owned message via an encode → decode round-trip.
-    ///
-    /// # Errors
-    ///
-    /// Returns [`::buffa::DecodeError::MessageTooLarge`] if the
-    /// message's encoded size exceeds the 2 GiB protobuf limit, or
-    /// another [`::buffa::DecodeError`] if the re-encoded bytes are
-    /// somehow invalid (should not happen for well-formed messages).
-    pub fn from_owned(
-        msg: &super::super::ListVoicesResponse,
-    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
-        ::core::result::Result::Ok(
-            ListVoicesResponseOwnedView(::buffa::OwnedView::from_owned(msg)?),
-        )
-    }
-    /// Borrow the full [`ListVoicesResponseView`] with its lifetime tied to `&self`.
-    #[must_use]
-    pub fn view(&self) -> &ListVoicesResponseView<'_> {
-        self.0.reborrow()
-    }
-    /// Convert to the owned message type.
-    ///
-    /// Infallible: this type's constructors wire-decode their
-    /// buffer, and a view produced by wire decoding always
-    /// converts. Delegates to [`::buffa::OwnedView::to_owned_message`],
-    /// whose contract also governs handles converted from a raw
-    /// [`::buffa::OwnedView`].
-    #[must_use]
-    pub fn to_owned_message(&self) -> super::super::ListVoicesResponse {
-        self.0.to_owned_message()
-    }
-    /// The underlying bytes buffer.
-    #[must_use]
-    pub fn bytes(&self) -> &::buffa::bytes::Bytes {
-        self.0.bytes()
-    }
-    /// Consume the handle, returning the underlying bytes buffer.
-    #[must_use]
-    pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
-        self.0.into_bytes()
-    }
-    /// Field 1: `voices`
-    #[must_use]
-    pub fn voices(
-        &self,
-    ) -> &::buffa::RepeatedView<'_, super::super::__buffa::view::VoiceInfoView<'_>> {
-        &self.0.reborrow().voices
-    }
-    /// The synthesizers configured, with their state.
-    ///
-    /// Field 2: `synthesizers`
-    #[must_use]
-    pub fn synthesizers(
-        &self,
-    ) -> &::buffa::RepeatedView<
-        '_,
-        super::super::__buffa::view::SynthesizerInfoView<'_>,
-    > {
-        &self.0.reborrow().synthesizers
-    }
-    /// The services synthesizers are configured from, with their settings.
-    /// A plugin listing none has synthesizers that are their own services.
-    ///
-    /// Field 3: `services`
-    #[must_use]
-    pub fn services(
-        &self,
-    ) -> &::buffa::RepeatedView<
-        '_,
-        super::super::__buffa::view::SynthesizerInfoView<'_>,
-    > {
-        &self.0.reborrow().services
-    }
-}
-impl ::core::convert::From<::buffa::OwnedView<ListVoicesResponseView<'static>>>
-for ListVoicesResponseOwnedView {
-    fn from(inner: ::buffa::OwnedView<ListVoicesResponseView<'static>>) -> Self {
-        ListVoicesResponseOwnedView(inner)
-    }
-}
-impl ::core::convert::From<ListVoicesResponseOwnedView>
-for ::buffa::OwnedView<ListVoicesResponseView<'static>> {
-    fn from(wrapper: ListVoicesResponseOwnedView) -> Self {
-        wrapper.0
-    }
-}
-impl ::core::convert::AsRef<::buffa::OwnedView<ListVoicesResponseView<'static>>>
-for ListVoicesResponseOwnedView {
-    fn as_ref(&self) -> &::buffa::OwnedView<ListVoicesResponseView<'static>> {
-        &self.0
-    }
-}
-impl ::buffa::HasMessageView for super::super::ListVoicesResponse {
-    type View<'a> = ListVoicesResponseView<'a>;
-    type ViewHandle = ListVoicesResponseOwnedView;
-}
-/// SynthesizerInfo is a synthesizer a plugin has configured, or a
-/// synthesis service it implements.
-#[derive(Clone, Debug, Default)]
-pub struct SynthesizerInfoView<'a> {
-    /// Stable within the plugin: a synthesizer's ID, or a service's name,
-    /// such as "openai".
-    ///
-    /// Field 1: `name`
-    pub name: ::core::option::Option<&'a str>,
-    /// The name the administrator gave a synthesizer, or a service's.
-    ///
-    /// Field 2: `display_name`
-    pub display_name: ::core::option::Option<&'a str>,
-    /// A service's settings, which configure its synthesizers.
-    ///
-    /// Field 3: `settings`
-    pub settings: ::buffa::RepeatedView<
-        'a,
-        super::super::__buffa::view::SettingFieldView<'a>,
-    >,
-    /// Field 4: `enabled`
-    pub enabled: ::core::option::Option<bool>,
-    /// The service a synthesizer is configured from, a name among the
-    /// services.
-    ///
-    /// Field 5: `service`
-    pub service: ::core::option::Option<&'a str>,
-    pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
-}
-impl<'a> ::buffa::MessageView<'a> for SynthesizerInfoView<'a> {
-    type Owned = super::super::SynthesizerInfo;
-    fn decode_view(buf: &'a [u8]) -> ::core::result::Result<Self, ::buffa::DecodeError> {
-        let __limit = ::core::cell::Cell::new(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT);
-        let __elem = ::core::cell::Cell::new(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT);
-        <Self as ::buffa::MessageView>::decode_view_ctx(
-            buf,
-            ::buffa::DecodeContext::new(::buffa::RECURSION_LIMIT, &__limit)
-                .with_element_memory(&__elem),
-        )
-    }
-    fn decode_view_with_ctx(
-        buf: &'a [u8],
-        ctx: ::buffa::DecodeContext<'_>,
-    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
-        <Self as ::buffa::MessageView>::decode_view_ctx(buf, ctx)
-    }
-    #[inline]
-    fn merge_view_field(
-        &mut self,
-        tag: ::buffa::encoding::Tag,
-        cur: &'a [u8],
-        before_tag: &'a [u8],
-        ctx: ::buffa::DecodeContext<'_>,
-    ) -> ::core::result::Result<&'a [u8], ::buffa::DecodeError> {
-        let _ = ctx;
-        #[allow(unused_variables)]
-        let view = self;
-        let mut cur = cur;
-        match tag.field_number() {
-            1u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                view.name = Some(::buffa::types::borrow_str(&mut cur)?);
-            }
-            2u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                view.display_name = Some(::buffa::types::borrow_str(&mut cur)?);
-            }
-            4u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                view.enabled = Some(::buffa::types::decode_bool(&mut cur)?);
-            }
-            5u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                view.service = Some(::buffa::types::borrow_str(&mut cur)?);
-            }
-            3u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                let __sub_ctx = ctx.descend()?;
-                let sub = ::buffa::types::borrow_bytes(&mut cur)?;
-                ctx.register_element_memory(
-                    ::core::mem::size_of::<
-                        super::super::__buffa::view::SettingFieldView,
-                    >(),
-                )?;
-                view.settings
-                    .push(
-                        <super::super::__buffa::view::SettingFieldView as ::buffa::MessageView>::decode_view_ctx(
-                            sub,
-                            __sub_ctx,
-                        )?,
-                    );
-            }
-            _ => {
-                ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
-                let span_len = before_tag.len() - cur.len();
-                view.__buffa_unknown_fields.push_record(before_tag, span_len, ctx)?;
-            }
-        }
-        ::core::result::Result::Ok(cur)
-    }
-    fn to_owned_message(
-        &self,
-    ) -> ::core::result::Result<super::super::SynthesizerInfo, ::buffa::DecodeError> {
-        self.to_owned_from_source(None)
-    }
-    #[allow(clippy::useless_conversion, clippy::needless_update)]
-    fn to_owned_from_source(
-        &self,
-        __buffa_src: ::core::option::Option<&::buffa::bytes::Bytes>,
-    ) -> ::core::result::Result<super::super::SynthesizerInfo, ::buffa::DecodeError> {
-        #[allow(unused_imports)]
-        use ::buffa::alloc::string::ToString as _;
-        let _ = __buffa_src;
-        ::core::result::Result::Ok(super::super::SynthesizerInfo {
-            name: self.name.map(|s| s.to_string()),
-            display_name: self.display_name.map(|s| s.to_string()),
-            settings: self
-                .settings
-                .iter()
-                .map(|v| v.to_owned_from_source(__buffa_src))
-                .collect::<::core::result::Result<_, ::buffa::DecodeError>>()?,
-            enabled: self.enabled,
-            service: self.service.map(|s| s.to_string()),
-            __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
-            ..::core::default::Default::default()
-        })
-    }
-}
-impl<'a> ::buffa::ViewEncode<'a> for SynthesizerInfoView<'a> {
-    #[allow(clippy::needless_borrow, clippy::let_and_return)]
-    fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
-        #[allow(unused_imports)]
-        use ::buffa::Enumeration as _;
-        let mut size = 0u64;
-        if let Some(ref v) = self.name {
-            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
-        if let Some(ref v) = self.display_name {
-            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
-        for v in &self.settings {
-            let __slot = __cache.reserve();
-            let inner_size = v.compute_size(__cache);
-            __cache.set(__slot, inner_size);
-            size
-                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
-                    + inner_size as u64;
-        }
-        if self.enabled.is_some() {
-            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
-        }
-        if let Some(ref v) = self.service {
-            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
-        size += self.__buffa_unknown_fields.encoded_len() as u64;
-        ::buffa::saturate_size(size)
-    }
-    #[allow(clippy::needless_borrow)]
-    fn write_to(
-        &self,
-        __cache: &mut ::buffa::SizeCache,
-        buf: &mut impl ::buffa::EncodeSink,
-    ) {
-        #[allow(unused_imports)]
-        use ::buffa::Enumeration as _;
-        if let Some(ref v) = self.name {
-            ::buffa::types::put_string_field(1u32, v, buf);
-        }
-        if let Some(ref v) = self.display_name {
-            ::buffa::types::put_string_field(2u32, v, buf);
-        }
-        for v in &self.settings {
-            ::buffa::types::put_len_delimited_header(
-                3u32,
-                u64::from(__cache.consume_next()),
-                buf,
-            );
-            v.write_to(__cache, buf);
-        }
-        if let Some(v) = self.enabled {
-            ::buffa::types::put_bool_field(4u32, v, buf);
-        }
-        if let Some(ref v) = self.service {
-            ::buffa::types::put_string_field(5u32, v, buf);
-        }
-        self.__buffa_unknown_fields.write_to(buf);
-    }
-}
-impl<'a> ::buffa::MessageName for SynthesizerInfoView<'a> {
-    const PACKAGE: &'static str = "mavio.plugin.v1";
-    const NAME: &'static str = "SynthesizerInfo";
-    const FULL_NAME: &'static str = "mavio.plugin.v1.SynthesizerInfo";
-    const TYPE_URL: &'static str = "type.googleapis.com/mavio.plugin.v1.SynthesizerInfo";
-}
-::buffa::impl_default_view_instance!(SynthesizerInfoView);
-::buffa::impl_view_reborrow!(SynthesizerInfoView);
-/** Self-contained, `'static` owned view of a `SynthesizerInfo` message.
-
- Wraps [`::buffa::OwnedView`]`<`[`SynthesizerInfoView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
-
- Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`SynthesizerInfoView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
-#[derive(Clone, Debug)]
-pub struct SynthesizerInfoOwnedView(::buffa::OwnedView<SynthesizerInfoView<'static>>);
-impl SynthesizerInfoOwnedView {
-    /// Decode an owned view from a [`::buffa::bytes::Bytes`] buffer.
-    ///
-    /// The view borrows directly from the buffer's data; the buffer is
-    /// retained inside the returned handle.
-    ///
-    /// # Errors
-    ///
-    /// Returns [`::buffa::DecodeError`] if the buffer contains invalid
-    /// protobuf data.
-    pub fn decode(
-        bytes: ::buffa::bytes::Bytes,
-    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
-        ::core::result::Result::Ok(
-            SynthesizerInfoOwnedView(::buffa::OwnedView::decode(bytes)?),
-        )
-    }
-    /// Decode with custom [`::buffa::DecodeOptions`] (recursion limit,
-    /// max message size).
-    ///
-    /// # Errors
-    ///
-    /// Returns [`::buffa::DecodeError`] if the buffer is invalid or
-    /// exceeds the configured limits.
-    pub fn decode_with_options(
-        bytes: ::buffa::bytes::Bytes,
-        opts: &::buffa::DecodeOptions,
-    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
-        ::core::result::Result::Ok(
-            SynthesizerInfoOwnedView(
-                ::buffa::OwnedView::decode_with_options(bytes, opts)?,
-            ),
-        )
-    }
-    /// Build from an owned message via an encode → decode round-trip.
-    ///
-    /// # Errors
-    ///
-    /// Returns [`::buffa::DecodeError::MessageTooLarge`] if the
-    /// message's encoded size exceeds the 2 GiB protobuf limit, or
-    /// another [`::buffa::DecodeError`] if the re-encoded bytes are
-    /// somehow invalid (should not happen for well-formed messages).
-    pub fn from_owned(
-        msg: &super::super::SynthesizerInfo,
-    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
-        ::core::result::Result::Ok(
-            SynthesizerInfoOwnedView(::buffa::OwnedView::from_owned(msg)?),
-        )
-    }
-    /// Borrow the full [`SynthesizerInfoView`] with its lifetime tied to `&self`.
-    #[must_use]
-    pub fn view(&self) -> &SynthesizerInfoView<'_> {
-        self.0.reborrow()
-    }
-    /// Convert to the owned message type.
-    ///
-    /// Infallible: this type's constructors wire-decode their
-    /// buffer, and a view produced by wire decoding always
-    /// converts. Delegates to [`::buffa::OwnedView::to_owned_message`],
-    /// whose contract also governs handles converted from a raw
-    /// [`::buffa::OwnedView`].
-    #[must_use]
-    pub fn to_owned_message(&self) -> super::super::SynthesizerInfo {
-        self.0.to_owned_message()
-    }
-    /// The underlying bytes buffer.
-    #[must_use]
-    pub fn bytes(&self) -> &::buffa::bytes::Bytes {
-        self.0.bytes()
-    }
-    /// Consume the handle, returning the underlying bytes buffer.
-    #[must_use]
-    pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
-        self.0.into_bytes()
-    }
-    /// Stable within the plugin: a synthesizer's ID, or a service's name,
-    /// such as "openai".
-    ///
-    /// Field 1: `name`
-    #[must_use]
-    pub fn name(&self) -> ::core::option::Option<&'_ str> {
-        self.0.reborrow().name
-    }
-    /// The name the administrator gave a synthesizer, or a service's.
-    ///
-    /// Field 2: `display_name`
-    #[must_use]
-    pub fn display_name(&self) -> ::core::option::Option<&'_ str> {
-        self.0.reborrow().display_name
-    }
-    /// A service's settings, which configure its synthesizers.
-    ///
-    /// Field 3: `settings`
-    #[must_use]
-    pub fn settings(
-        &self,
-    ) -> &::buffa::RepeatedView<'_, super::super::__buffa::view::SettingFieldView<'_>> {
-        &self.0.reborrow().settings
-    }
-    /// Field 4: `enabled`
-    #[must_use]
-    pub fn enabled(&self) -> ::core::option::Option<bool> {
-        self.0.reborrow().enabled
-    }
-    /// The service a synthesizer is configured from, a name among the
-    /// services.
-    ///
-    /// Field 5: `service`
-    #[must_use]
-    pub fn service(&self) -> ::core::option::Option<&'_ str> {
-        self.0.reborrow().service
-    }
-}
-impl ::core::convert::From<::buffa::OwnedView<SynthesizerInfoView<'static>>>
-for SynthesizerInfoOwnedView {
-    fn from(inner: ::buffa::OwnedView<SynthesizerInfoView<'static>>) -> Self {
-        SynthesizerInfoOwnedView(inner)
-    }
-}
-impl ::core::convert::From<SynthesizerInfoOwnedView>
-for ::buffa::OwnedView<SynthesizerInfoView<'static>> {
-    fn from(wrapper: SynthesizerInfoOwnedView) -> Self {
-        wrapper.0
-    }
-}
-impl ::core::convert::AsRef<::buffa::OwnedView<SynthesizerInfoView<'static>>>
-for SynthesizerInfoOwnedView {
-    fn as_ref(&self) -> &::buffa::OwnedView<SynthesizerInfoView<'static>> {
-        &self.0
-    }
-}
-impl ::buffa::HasMessageView for super::super::SynthesizerInfo {
-    type View<'a> = SynthesizerInfoView<'a>;
-    type ViewHandle = SynthesizerInfoOwnedView;
-}
-/// VoiceInfo is a voice of a synthesizer.
-#[derive(Clone, Debug, Default)]
-pub struct VoiceInfoView<'a> {
-    /// "\<synthesizer\>/\<voice\>", stable within the plugin.
-    ///
-    /// Field 1: `id`
-    pub id: ::core::option::Option<&'a str>,
-    /// Field 2: `name`
-    pub name: ::core::option::Option<&'a str>,
-    /// The languages it speaks, BCP 47; empty for any.
-    ///
-    /// Field 3: `languages`
-    pub languages: ::buffa::RepeatedView<'a, &'a str>,
-    pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
-}
-impl<'a> ::buffa::MessageView<'a> for VoiceInfoView<'a> {
-    type Owned = super::super::VoiceInfo;
-    fn decode_view(buf: &'a [u8]) -> ::core::result::Result<Self, ::buffa::DecodeError> {
-        let __limit = ::core::cell::Cell::new(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT);
-        let __elem = ::core::cell::Cell::new(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT);
-        <Self as ::buffa::MessageView>::decode_view_ctx(
-            buf,
-            ::buffa::DecodeContext::new(::buffa::RECURSION_LIMIT, &__limit)
-                .with_element_memory(&__elem),
-        )
-    }
-    fn decode_view_with_ctx(
-        buf: &'a [u8],
-        ctx: ::buffa::DecodeContext<'_>,
-    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
-        <Self as ::buffa::MessageView>::decode_view_ctx(buf, ctx)
-    }
-    #[inline]
-    fn merge_view_field(
-        &mut self,
-        tag: ::buffa::encoding::Tag,
-        cur: &'a [u8],
-        before_tag: &'a [u8],
-        ctx: ::buffa::DecodeContext<'_>,
-    ) -> ::core::result::Result<&'a [u8], ::buffa::DecodeError> {
-        let _ = ctx;
-        #[allow(unused_variables)]
-        let view = self;
-        let mut cur = cur;
-        match tag.field_number() {
-            1u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                view.id = Some(::buffa::types::borrow_str(&mut cur)?);
-            }
-            2u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                view.name = Some(::buffa::types::borrow_str(&mut cur)?);
-            }
-            3u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                let __elem = ::buffa::types::borrow_str(&mut cur)?;
-                ctx.register_element_memory(
-                    ::buffa::__private::element_footprint(&__elem),
-                )?;
-                view.languages.push(__elem);
-            }
-            _ => {
-                ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
-                let span_len = before_tag.len() - cur.len();
-                view.__buffa_unknown_fields.push_record(before_tag, span_len, ctx)?;
-            }
-        }
-        ::core::result::Result::Ok(cur)
-    }
-    fn to_owned_message(
-        &self,
-    ) -> ::core::result::Result<super::super::VoiceInfo, ::buffa::DecodeError> {
-        self.to_owned_from_source(None)
-    }
-    #[allow(clippy::useless_conversion, clippy::needless_update)]
-    fn to_owned_from_source(
-        &self,
-        __buffa_src: ::core::option::Option<&::buffa::bytes::Bytes>,
-    ) -> ::core::result::Result<super::super::VoiceInfo, ::buffa::DecodeError> {
-        #[allow(unused_imports)]
-        use ::buffa::alloc::string::ToString as _;
-        let _ = __buffa_src;
-        ::core::result::Result::Ok(super::super::VoiceInfo {
-            id: self.id.map(|s| s.to_string()),
-            name: self.name.map(|s| s.to_string()),
-            languages: self.languages.iter().map(|s| s.to_string()).collect(),
-            __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
-            ..::core::default::Default::default()
-        })
-    }
-}
-impl<'a> ::buffa::ViewEncode<'a> for VoiceInfoView<'a> {
-    #[allow(clippy::needless_borrow, clippy::let_and_return)]
-    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
-        #[allow(unused_imports)]
-        use ::buffa::Enumeration as _;
-        let mut size = 0u64;
-        if let Some(ref v) = self.id {
-            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
-        if let Some(ref v) = self.name {
-            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
-        for v in &self.languages {
-            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
-        size += self.__buffa_unknown_fields.encoded_len() as u64;
-        ::buffa::saturate_size(size)
-    }
-    #[allow(clippy::needless_borrow)]
-    fn write_to(
-        &self,
-        _cache: &mut ::buffa::SizeCache,
-        buf: &mut impl ::buffa::EncodeSink,
-    ) {
-        #[allow(unused_imports)]
-        use ::buffa::Enumeration as _;
-        if let Some(ref v) = self.id {
-            ::buffa::types::put_string_field(1u32, v, buf);
-        }
-        if let Some(ref v) = self.name {
-            ::buffa::types::put_string_field(2u32, v, buf);
-        }
-        for v in &self.languages {
-            ::buffa::types::put_string_field(3u32, v, buf);
-        }
-        self.__buffa_unknown_fields.write_to(buf);
-    }
-}
-impl<'a> ::buffa::MessageName for VoiceInfoView<'a> {
-    const PACKAGE: &'static str = "mavio.plugin.v1";
-    const NAME: &'static str = "VoiceInfo";
-    const FULL_NAME: &'static str = "mavio.plugin.v1.VoiceInfo";
-    const TYPE_URL: &'static str = "type.googleapis.com/mavio.plugin.v1.VoiceInfo";
-}
-::buffa::impl_default_view_instance!(VoiceInfoView);
-::buffa::impl_view_reborrow!(VoiceInfoView);
-/** Self-contained, `'static` owned view of a `VoiceInfo` message.
-
- Wraps [`::buffa::OwnedView`]`<`[`VoiceInfoView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
-
- Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`VoiceInfoView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
-#[derive(Clone, Debug)]
-pub struct VoiceInfoOwnedView(::buffa::OwnedView<VoiceInfoView<'static>>);
-impl VoiceInfoOwnedView {
-    /// Decode an owned view from a [`::buffa::bytes::Bytes`] buffer.
-    ///
-    /// The view borrows directly from the buffer's data; the buffer is
-    /// retained inside the returned handle.
-    ///
-    /// # Errors
-    ///
-    /// Returns [`::buffa::DecodeError`] if the buffer contains invalid
-    /// protobuf data.
-    pub fn decode(
-        bytes: ::buffa::bytes::Bytes,
-    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
-        ::core::result::Result::Ok(
-            VoiceInfoOwnedView(::buffa::OwnedView::decode(bytes)?),
-        )
-    }
-    /// Decode with custom [`::buffa::DecodeOptions`] (recursion limit,
-    /// max message size).
-    ///
-    /// # Errors
-    ///
-    /// Returns [`::buffa::DecodeError`] if the buffer is invalid or
-    /// exceeds the configured limits.
-    pub fn decode_with_options(
-        bytes: ::buffa::bytes::Bytes,
-        opts: &::buffa::DecodeOptions,
-    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
-        ::core::result::Result::Ok(
-            VoiceInfoOwnedView(::buffa::OwnedView::decode_with_options(bytes, opts)?),
-        )
-    }
-    /// Build from an owned message via an encode → decode round-trip.
-    ///
-    /// # Errors
-    ///
-    /// Returns [`::buffa::DecodeError::MessageTooLarge`] if the
-    /// message's encoded size exceeds the 2 GiB protobuf limit, or
-    /// another [`::buffa::DecodeError`] if the re-encoded bytes are
-    /// somehow invalid (should not happen for well-formed messages).
-    pub fn from_owned(
-        msg: &super::super::VoiceInfo,
-    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
-        ::core::result::Result::Ok(
-            VoiceInfoOwnedView(::buffa::OwnedView::from_owned(msg)?),
-        )
-    }
-    /// Borrow the full [`VoiceInfoView`] with its lifetime tied to `&self`.
-    #[must_use]
-    pub fn view(&self) -> &VoiceInfoView<'_> {
-        self.0.reborrow()
-    }
-    /// Convert to the owned message type.
-    ///
-    /// Infallible: this type's constructors wire-decode their
-    /// buffer, and a view produced by wire decoding always
-    /// converts. Delegates to [`::buffa::OwnedView::to_owned_message`],
-    /// whose contract also governs handles converted from a raw
-    /// [`::buffa::OwnedView`].
-    #[must_use]
-    pub fn to_owned_message(&self) -> super::super::VoiceInfo {
-        self.0.to_owned_message()
-    }
-    /// The underlying bytes buffer.
-    #[must_use]
-    pub fn bytes(&self) -> &::buffa::bytes::Bytes {
-        self.0.bytes()
-    }
-    /// Consume the handle, returning the underlying bytes buffer.
-    #[must_use]
-    pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
-        self.0.into_bytes()
-    }
-    /// "\<synthesizer\>/\<voice\>", stable within the plugin.
-    ///
-    /// Field 1: `id`
-    #[must_use]
-    pub fn id(&self) -> ::core::option::Option<&'_ str> {
-        self.0.reborrow().id
-    }
-    /// Field 2: `name`
-    #[must_use]
-    pub fn name(&self) -> ::core::option::Option<&'_ str> {
-        self.0.reborrow().name
-    }
-    /// The languages it speaks, BCP 47; empty for any.
-    ///
-    /// Field 3: `languages`
-    #[must_use]
-    pub fn languages(&self) -> &::buffa::RepeatedView<'_, &'_ str> {
-        &self.0.reborrow().languages
-    }
-}
-impl ::core::convert::From<::buffa::OwnedView<VoiceInfoView<'static>>>
-for VoiceInfoOwnedView {
-    fn from(inner: ::buffa::OwnedView<VoiceInfoView<'static>>) -> Self {
-        VoiceInfoOwnedView(inner)
-    }
-}
-impl ::core::convert::From<VoiceInfoOwnedView>
-for ::buffa::OwnedView<VoiceInfoView<'static>> {
-    fn from(wrapper: VoiceInfoOwnedView) -> Self {
-        wrapper.0
-    }
-}
-impl ::core::convert::AsRef<::buffa::OwnedView<VoiceInfoView<'static>>>
-for VoiceInfoOwnedView {
-    fn as_ref(&self) -> &::buffa::OwnedView<VoiceInfoView<'static>> {
-        &self.0
-    }
-}
-impl ::buffa::HasMessageView for super::super::VoiceInfo {
-    type View<'a> = VoiceInfoView<'a>;
-    type ViewHandle = VoiceInfoOwnedView;
-}
-#[derive(Clone, Debug, Default)]
-pub struct SynthesizeSpeechRequestView<'a> {
-    /// Field 1: `voice`
-    pub voice: ::core::option::Option<&'a str>,
-    /// Field 2: `text`
-    pub text: ::core::option::Option<&'a str>,
-    /// BCP 47.
-    ///
-    /// Field 3: `language`
-    pub language: ::core::option::Option<&'a str>,
-    /// Deprecated: unset by the server, which converts the speech for clients
-    /// that do not play it; synthesizers speak in the encoding of their
-    /// settings.
-    ///
-    /// Field 4: `format`
-    pub format: ::core::option::Option<::buffa::EnumValue<super::super::SpeechFormat>>,
-    /// 0.25–4; 0 for 1.
-    ///
-    /// Field 5: `speed`
-    pub speed: ::core::option::Option<f64>,
-    pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
-}
-impl<'a> ::buffa::MessageView<'a> for SynthesizeSpeechRequestView<'a> {
-    type Owned = super::super::SynthesizeSpeechRequest;
-    fn decode_view(buf: &'a [u8]) -> ::core::result::Result<Self, ::buffa::DecodeError> {
-        let __limit = ::core::cell::Cell::new(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT);
-        let __elem = ::core::cell::Cell::new(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT);
-        <Self as ::buffa::MessageView>::decode_view_ctx(
-            buf,
-            ::buffa::DecodeContext::new(::buffa::RECURSION_LIMIT, &__limit)
-                .with_element_memory(&__elem),
-        )
-    }
-    fn decode_view_with_ctx(
-        buf: &'a [u8],
-        ctx: ::buffa::DecodeContext<'_>,
-    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
-        <Self as ::buffa::MessageView>::decode_view_ctx(buf, ctx)
-    }
-    #[inline]
-    fn merge_view_field(
-        &mut self,
-        tag: ::buffa::encoding::Tag,
-        cur: &'a [u8],
-        before_tag: &'a [u8],
-        ctx: ::buffa::DecodeContext<'_>,
-    ) -> ::core::result::Result<&'a [u8], ::buffa::DecodeError> {
-        let _ = ctx;
-        #[allow(unused_variables)]
-        let view = self;
-        let mut cur = cur;
-        match tag.field_number() {
-            1u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                view.voice = Some(::buffa::types::borrow_str(&mut cur)?);
-            }
-            2u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                view.text = Some(::buffa::types::borrow_str(&mut cur)?);
-            }
-            3u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                view.language = Some(::buffa::types::borrow_str(&mut cur)?);
-            }
-            4u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                view.format = Some(
-                    ::buffa::EnumValue::from(::buffa::types::decode_int32(&mut cur)?),
-                );
-            }
-            5u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Fixed64,
-                )?;
-                view.speed = Some(::buffa::types::decode_double(&mut cur)?);
-            }
-            _ => {
-                ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
-                let span_len = before_tag.len() - cur.len();
-                view.__buffa_unknown_fields.push_record(before_tag, span_len, ctx)?;
-            }
-        }
-        ::core::result::Result::Ok(cur)
-    }
-    fn to_owned_message(
-        &self,
-    ) -> ::core::result::Result<
-        super::super::SynthesizeSpeechRequest,
-        ::buffa::DecodeError,
-    > {
-        self.to_owned_from_source(None)
-    }
-    #[allow(clippy::useless_conversion, clippy::needless_update)]
-    fn to_owned_from_source(
-        &self,
-        __buffa_src: ::core::option::Option<&::buffa::bytes::Bytes>,
-    ) -> ::core::result::Result<
-        super::super::SynthesizeSpeechRequest,
-        ::buffa::DecodeError,
-    > {
-        #[allow(unused_imports)]
-        use ::buffa::alloc::string::ToString as _;
-        let _ = __buffa_src;
-        ::core::result::Result::Ok(super::super::SynthesizeSpeechRequest {
-            voice: self.voice.map(|s| s.to_string()),
-            text: self.text.map(|s| s.to_string()),
-            language: self.language.map(|s| s.to_string()),
-            format: self.format,
-            speed: self.speed,
-            __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
-            ..::core::default::Default::default()
-        })
-    }
-}
-impl<'a> ::buffa::ViewEncode<'a> for SynthesizeSpeechRequestView<'a> {
-    #[allow(clippy::needless_borrow, clippy::let_and_return)]
-    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
-        #[allow(unused_imports)]
-        use ::buffa::Enumeration as _;
-        let mut size = 0u64;
-        if let Some(ref v) = self.voice {
-            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
-        if let Some(ref v) = self.text {
-            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
-        if let Some(ref v) = self.language {
-            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
-        if let Some(ref v) = self.format {
-            size += 1u64 + ::buffa::types::int32_encoded_len(v.to_i32()) as u64;
-        }
-        if self.speed.is_some() {
-            size += 1u64 + ::buffa::types::FIXED64_ENCODED_LEN as u64;
-        }
-        size += self.__buffa_unknown_fields.encoded_len() as u64;
-        ::buffa::saturate_size(size)
-    }
-    #[allow(clippy::needless_borrow)]
-    fn write_to(
-        &self,
-        _cache: &mut ::buffa::SizeCache,
-        buf: &mut impl ::buffa::EncodeSink,
-    ) {
-        #[allow(unused_imports)]
-        use ::buffa::Enumeration as _;
-        if let Some(ref v) = self.voice {
-            ::buffa::types::put_string_field(1u32, v, buf);
-        }
-        if let Some(ref v) = self.text {
-            ::buffa::types::put_string_field(2u32, v, buf);
-        }
-        if let Some(ref v) = self.language {
-            ::buffa::types::put_string_field(3u32, v, buf);
-        }
-        if let Some(ref v) = self.format {
-            ::buffa::types::put_int32_field(4u32, v.to_i32(), buf);
-        }
-        if let Some(v) = self.speed {
-            ::buffa::types::put_double_field(5u32, v, buf);
-        }
-        self.__buffa_unknown_fields.write_to(buf);
-    }
-}
-impl<'a> ::buffa::MessageName for SynthesizeSpeechRequestView<'a> {
-    const PACKAGE: &'static str = "mavio.plugin.v1";
-    const NAME: &'static str = "SynthesizeSpeechRequest";
-    const FULL_NAME: &'static str = "mavio.plugin.v1.SynthesizeSpeechRequest";
-    const TYPE_URL: &'static str = "type.googleapis.com/mavio.plugin.v1.SynthesizeSpeechRequest";
-}
-::buffa::impl_default_view_instance!(SynthesizeSpeechRequestView);
-::buffa::impl_view_reborrow!(SynthesizeSpeechRequestView);
-/** Self-contained, `'static` owned view of a `SynthesizeSpeechRequest` message.
-
- Wraps [`::buffa::OwnedView`]`<`[`SynthesizeSpeechRequestView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
-
- Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`SynthesizeSpeechRequestView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
-#[derive(Clone, Debug)]
-pub struct SynthesizeSpeechRequestOwnedView(
-    ::buffa::OwnedView<SynthesizeSpeechRequestView<'static>>,
-);
-impl SynthesizeSpeechRequestOwnedView {
-    /// Decode an owned view from a [`::buffa::bytes::Bytes`] buffer.
-    ///
-    /// The view borrows directly from the buffer's data; the buffer is
-    /// retained inside the returned handle.
-    ///
-    /// # Errors
-    ///
-    /// Returns [`::buffa::DecodeError`] if the buffer contains invalid
-    /// protobuf data.
-    pub fn decode(
-        bytes: ::buffa::bytes::Bytes,
-    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
-        ::core::result::Result::Ok(
-            SynthesizeSpeechRequestOwnedView(::buffa::OwnedView::decode(bytes)?),
-        )
-    }
-    /// Decode with custom [`::buffa::DecodeOptions`] (recursion limit,
-    /// max message size).
-    ///
-    /// # Errors
-    ///
-    /// Returns [`::buffa::DecodeError`] if the buffer is invalid or
-    /// exceeds the configured limits.
-    pub fn decode_with_options(
-        bytes: ::buffa::bytes::Bytes,
-        opts: &::buffa::DecodeOptions,
-    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
-        ::core::result::Result::Ok(
-            SynthesizeSpeechRequestOwnedView(
-                ::buffa::OwnedView::decode_with_options(bytes, opts)?,
-            ),
-        )
-    }
-    /// Build from an owned message via an encode → decode round-trip.
-    ///
-    /// # Errors
-    ///
-    /// Returns [`::buffa::DecodeError::MessageTooLarge`] if the
-    /// message's encoded size exceeds the 2 GiB protobuf limit, or
-    /// another [`::buffa::DecodeError`] if the re-encoded bytes are
-    /// somehow invalid (should not happen for well-formed messages).
-    pub fn from_owned(
-        msg: &super::super::SynthesizeSpeechRequest,
-    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
-        ::core::result::Result::Ok(
-            SynthesizeSpeechRequestOwnedView(::buffa::OwnedView::from_owned(msg)?),
-        )
-    }
-    /// Borrow the full [`SynthesizeSpeechRequestView`] with its lifetime tied to `&self`.
-    #[must_use]
-    pub fn view(&self) -> &SynthesizeSpeechRequestView<'_> {
-        self.0.reborrow()
-    }
-    /// Convert to the owned message type.
-    ///
-    /// Infallible: this type's constructors wire-decode their
-    /// buffer, and a view produced by wire decoding always
-    /// converts. Delegates to [`::buffa::OwnedView::to_owned_message`],
-    /// whose contract also governs handles converted from a raw
-    /// [`::buffa::OwnedView`].
-    #[must_use]
-    pub fn to_owned_message(&self) -> super::super::SynthesizeSpeechRequest {
-        self.0.to_owned_message()
-    }
-    /// The underlying bytes buffer.
-    #[must_use]
-    pub fn bytes(&self) -> &::buffa::bytes::Bytes {
-        self.0.bytes()
-    }
-    /// Consume the handle, returning the underlying bytes buffer.
-    #[must_use]
-    pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
-        self.0.into_bytes()
-    }
-    /// Field 1: `voice`
-    #[must_use]
-    pub fn voice(&self) -> ::core::option::Option<&'_ str> {
-        self.0.reborrow().voice
-    }
-    /// Field 2: `text`
-    #[must_use]
-    pub fn text(&self) -> ::core::option::Option<&'_ str> {
-        self.0.reborrow().text
-    }
-    /// BCP 47.
-    ///
-    /// Field 3: `language`
-    #[must_use]
-    pub fn language(&self) -> ::core::option::Option<&'_ str> {
-        self.0.reborrow().language
-    }
-    /// Deprecated: unset by the server, which converts the speech for clients
-    /// that do not play it; synthesizers speak in the encoding of their
-    /// settings.
-    ///
-    /// Field 4: `format`
-    #[must_use]
-    pub fn format(
-        &self,
-    ) -> ::core::option::Option<::buffa::EnumValue<super::super::SpeechFormat>> {
-        self.0.reborrow().format
-    }
-    /// 0.25–4; 0 for 1.
-    ///
-    /// Field 5: `speed`
-    #[must_use]
-    pub fn speed(&self) -> ::core::option::Option<f64> {
-        self.0.reborrow().speed
-    }
-}
-impl ::core::convert::From<::buffa::OwnedView<SynthesizeSpeechRequestView<'static>>>
-for SynthesizeSpeechRequestOwnedView {
-    fn from(inner: ::buffa::OwnedView<SynthesizeSpeechRequestView<'static>>) -> Self {
-        SynthesizeSpeechRequestOwnedView(inner)
-    }
-}
-impl ::core::convert::From<SynthesizeSpeechRequestOwnedView>
-for ::buffa::OwnedView<SynthesizeSpeechRequestView<'static>> {
-    fn from(wrapper: SynthesizeSpeechRequestOwnedView) -> Self {
-        wrapper.0
-    }
-}
-impl ::core::convert::AsRef<::buffa::OwnedView<SynthesizeSpeechRequestView<'static>>>
-for SynthesizeSpeechRequestOwnedView {
-    fn as_ref(&self) -> &::buffa::OwnedView<SynthesizeSpeechRequestView<'static>> {
-        &self.0
-    }
-}
-impl ::buffa::HasMessageView for super::super::SynthesizeSpeechRequest {
-    type View<'a> = SynthesizeSpeechRequestView<'a>;
-    type ViewHandle = SynthesizeSpeechRequestOwnedView;
-}
-#[derive(Clone, Debug, Default)]
-pub struct SynthesizeSpeechResponseView<'a> {
-    /// Field 1: `audio`
-    pub audio: ::core::option::Option<&'a [u8]>,
-    /// Such as "audio/ogg" or "audio/mpeg".
-    ///
-    /// Field 2: `content_type`
-    pub content_type: ::core::option::Option<&'a str>,
-    pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
-}
-impl<'a> ::buffa::MessageView<'a> for SynthesizeSpeechResponseView<'a> {
-    type Owned = super::super::SynthesizeSpeechResponse;
-    fn decode_view(buf: &'a [u8]) -> ::core::result::Result<Self, ::buffa::DecodeError> {
-        let __limit = ::core::cell::Cell::new(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT);
-        let __elem = ::core::cell::Cell::new(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT);
-        <Self as ::buffa::MessageView>::decode_view_ctx(
-            buf,
-            ::buffa::DecodeContext::new(::buffa::RECURSION_LIMIT, &__limit)
-                .with_element_memory(&__elem),
-        )
-    }
-    fn decode_view_with_ctx(
-        buf: &'a [u8],
-        ctx: ::buffa::DecodeContext<'_>,
-    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
-        <Self as ::buffa::MessageView>::decode_view_ctx(buf, ctx)
-    }
-    #[inline]
-    fn merge_view_field(
-        &mut self,
-        tag: ::buffa::encoding::Tag,
-        cur: &'a [u8],
-        before_tag: &'a [u8],
-        ctx: ::buffa::DecodeContext<'_>,
-    ) -> ::core::result::Result<&'a [u8], ::buffa::DecodeError> {
-        let _ = ctx;
-        #[allow(unused_variables)]
-        let view = self;
-        let mut cur = cur;
-        match tag.field_number() {
-            1u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                view.audio = Some(::buffa::types::borrow_bytes(&mut cur)?);
-            }
-            2u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                view.content_type = Some(::buffa::types::borrow_str(&mut cur)?);
-            }
-            _ => {
-                ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
-                let span_len = before_tag.len() - cur.len();
-                view.__buffa_unknown_fields.push_record(before_tag, span_len, ctx)?;
-            }
-        }
-        ::core::result::Result::Ok(cur)
-    }
-    fn to_owned_message(
-        &self,
-    ) -> ::core::result::Result<
-        super::super::SynthesizeSpeechResponse,
-        ::buffa::DecodeError,
-    > {
-        self.to_owned_from_source(None)
-    }
-    #[allow(clippy::useless_conversion, clippy::needless_update)]
-    fn to_owned_from_source(
-        &self,
-        __buffa_src: ::core::option::Option<&::buffa::bytes::Bytes>,
-    ) -> ::core::result::Result<
-        super::super::SynthesizeSpeechResponse,
-        ::buffa::DecodeError,
-    > {
-        #[allow(unused_imports)]
-        use ::buffa::alloc::string::ToString as _;
-        let _ = __buffa_src;
-        ::core::result::Result::Ok(super::super::SynthesizeSpeechResponse {
-            audio: self.audio.map(|b| (b).to_vec()),
-            content_type: self.content_type.map(|s| s.to_string()),
-            __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
-            ..::core::default::Default::default()
-        })
-    }
-}
-impl<'a> ::buffa::ViewEncode<'a> for SynthesizeSpeechResponseView<'a> {
-    #[allow(clippy::needless_borrow, clippy::let_and_return)]
-    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
-        #[allow(unused_imports)]
-        use ::buffa::Enumeration as _;
-        let mut size = 0u64;
-        if let Some(ref v) = self.audio {
-            size += 1u64 + ::buffa::types::bytes_encoded_len(v) as u64;
-        }
-        if let Some(ref v) = self.content_type {
-            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
-        size += self.__buffa_unknown_fields.encoded_len() as u64;
-        ::buffa::saturate_size(size)
-    }
-    #[allow(clippy::needless_borrow)]
-    fn write_to(
-        &self,
-        _cache: &mut ::buffa::SizeCache,
-        buf: &mut impl ::buffa::EncodeSink,
-    ) {
-        #[allow(unused_imports)]
-        use ::buffa::Enumeration as _;
-        if let Some(ref v) = self.audio {
-            ::buffa::types::put_shared_bytes_field(1u32, v, buf);
-        }
-        if let Some(ref v) = self.content_type {
-            ::buffa::types::put_string_field(2u32, v, buf);
-        }
-        self.__buffa_unknown_fields.write_to(buf);
-    }
-}
-impl<'a> ::buffa::MessageName for SynthesizeSpeechResponseView<'a> {
-    const PACKAGE: &'static str = "mavio.plugin.v1";
-    const NAME: &'static str = "SynthesizeSpeechResponse";
-    const FULL_NAME: &'static str = "mavio.plugin.v1.SynthesizeSpeechResponse";
-    const TYPE_URL: &'static str = "type.googleapis.com/mavio.plugin.v1.SynthesizeSpeechResponse";
-}
-::buffa::impl_default_view_instance!(SynthesizeSpeechResponseView);
-::buffa::impl_view_reborrow!(SynthesizeSpeechResponseView);
-/** Self-contained, `'static` owned view of a `SynthesizeSpeechResponse` message.
-
- Wraps [`::buffa::OwnedView`]`<`[`SynthesizeSpeechResponseView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
-
- Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`SynthesizeSpeechResponseView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
-#[derive(Clone, Debug)]
-pub struct SynthesizeSpeechResponseOwnedView(
-    ::buffa::OwnedView<SynthesizeSpeechResponseView<'static>>,
-);
-impl SynthesizeSpeechResponseOwnedView {
-    /// Decode an owned view from a [`::buffa::bytes::Bytes`] buffer.
-    ///
-    /// The view borrows directly from the buffer's data; the buffer is
-    /// retained inside the returned handle.
-    ///
-    /// # Errors
-    ///
-    /// Returns [`::buffa::DecodeError`] if the buffer contains invalid
-    /// protobuf data.
-    pub fn decode(
-        bytes: ::buffa::bytes::Bytes,
-    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
-        ::core::result::Result::Ok(
-            SynthesizeSpeechResponseOwnedView(::buffa::OwnedView::decode(bytes)?),
-        )
-    }
-    /// Decode with custom [`::buffa::DecodeOptions`] (recursion limit,
-    /// max message size).
-    ///
-    /// # Errors
-    ///
-    /// Returns [`::buffa::DecodeError`] if the buffer is invalid or
-    /// exceeds the configured limits.
-    pub fn decode_with_options(
-        bytes: ::buffa::bytes::Bytes,
-        opts: &::buffa::DecodeOptions,
-    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
-        ::core::result::Result::Ok(
-            SynthesizeSpeechResponseOwnedView(
-                ::buffa::OwnedView::decode_with_options(bytes, opts)?,
-            ),
-        )
-    }
-    /// Build from an owned message via an encode → decode round-trip.
-    ///
-    /// # Errors
-    ///
-    /// Returns [`::buffa::DecodeError::MessageTooLarge`] if the
-    /// message's encoded size exceeds the 2 GiB protobuf limit, or
-    /// another [`::buffa::DecodeError`] if the re-encoded bytes are
-    /// somehow invalid (should not happen for well-formed messages).
-    pub fn from_owned(
-        msg: &super::super::SynthesizeSpeechResponse,
-    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
-        ::core::result::Result::Ok(
-            SynthesizeSpeechResponseOwnedView(::buffa::OwnedView::from_owned(msg)?),
-        )
-    }
-    /// Borrow the full [`SynthesizeSpeechResponseView`] with its lifetime tied to `&self`.
-    #[must_use]
-    pub fn view(&self) -> &SynthesizeSpeechResponseView<'_> {
-        self.0.reborrow()
-    }
-    /// Convert to the owned message type.
-    ///
-    /// Infallible: this type's constructors wire-decode their
-    /// buffer, and a view produced by wire decoding always
-    /// converts. Delegates to [`::buffa::OwnedView::to_owned_message`],
-    /// whose contract also governs handles converted from a raw
-    /// [`::buffa::OwnedView`].
-    #[must_use]
-    pub fn to_owned_message(&self) -> super::super::SynthesizeSpeechResponse {
-        self.0.to_owned_message()
-    }
-    /// The underlying bytes buffer.
-    #[must_use]
-    pub fn bytes(&self) -> &::buffa::bytes::Bytes {
-        self.0.bytes()
-    }
-    /// Consume the handle, returning the underlying bytes buffer.
-    #[must_use]
-    pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
-        self.0.into_bytes()
-    }
-    /// Field 1: `audio`
-    #[must_use]
-    pub fn audio(&self) -> ::core::option::Option<&'_ [u8]> {
-        self.0.reborrow().audio
-    }
-    /// Such as "audio/ogg" or "audio/mpeg".
-    ///
-    /// Field 2: `content_type`
-    #[must_use]
-    pub fn content_type(&self) -> ::core::option::Option<&'_ str> {
-        self.0.reborrow().content_type
-    }
-}
-impl ::core::convert::From<::buffa::OwnedView<SynthesizeSpeechResponseView<'static>>>
-for SynthesizeSpeechResponseOwnedView {
-    fn from(inner: ::buffa::OwnedView<SynthesizeSpeechResponseView<'static>>) -> Self {
-        SynthesizeSpeechResponseOwnedView(inner)
-    }
-}
-impl ::core::convert::From<SynthesizeSpeechResponseOwnedView>
-for ::buffa::OwnedView<SynthesizeSpeechResponseView<'static>> {
-    fn from(wrapper: SynthesizeSpeechResponseOwnedView) -> Self {
-        wrapper.0
-    }
-}
-impl ::core::convert::AsRef<::buffa::OwnedView<SynthesizeSpeechResponseView<'static>>>
-for SynthesizeSpeechResponseOwnedView {
-    fn as_ref(&self) -> &::buffa::OwnedView<SynthesizeSpeechResponseView<'static>> {
-        &self.0
-    }
-}
-impl ::buffa::HasMessageView for super::super::SynthesizeSpeechResponse {
-    type View<'a> = SynthesizeSpeechResponseView<'a>;
-    type ViewHandle = SynthesizeSpeechResponseOwnedView;
 }

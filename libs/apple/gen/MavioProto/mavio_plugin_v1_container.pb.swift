@@ -173,7 +173,7 @@ public nonisolated enum Mavio_Plugin_V1_ContainerState: SwiftProtobuf.Enum, Swif
 }
 
 /// ContainerDependency is a service a plugin depends on that runs as a
-/// container image, such as whisper-asr-webservice. The server runs it on a
+/// container image, such as FlareSolverr. The server runs it on a
 /// container engine (managed) or reaches it at an address an administrator
 /// gives (external); the plugin sees only its address.
 public nonisolated struct Mavio_Plugin_V1_ContainerDependency: Sendable {
@@ -204,7 +204,7 @@ public nonisolated struct Mavio_Plugin_V1_ContainerDependency: Sendable {
   public mutating func clearDescription_p() {self._description_p = nil}
 
   /// Image reference with its digest, e.g.
-  /// "onerahmet/openai-whisper-asr-webservice:v1.9.1@sha256:…".
+  /// "ghcr.io/flaresolverr/flaresolverr:v3.4.6@sha256:…".
   public var image: String {
     get {_image ?? String()}
     set {_image = newValue}

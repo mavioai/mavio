@@ -94,9 +94,6 @@ func (s *Service) Ask(ctx context.Context, req *assistantv1.AskRequest, stream *
 	if err := t.run(); err != nil {
 		return err
 	}
-	if conv := t.done.GetConversationId(); !t.remembered && conv != "" {
-		s.rec.bind(p.User.ID, req.GetSpeechId(), conv, t.done.GetAnswer(), s.now())
-	}
 	t.emit(assistantv1.AskResponse_builder{Done: t.done}.Build())
 	return nil
 }

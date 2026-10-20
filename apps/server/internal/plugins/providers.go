@@ -536,27 +536,14 @@ func (m *Manager) VoiceSessions() (string, host.Plugin, bool) {
 	return "", nil, false
 }
 
-// Recognizers returns the started SPEECH_TO_TEXT plugins, by ID.
-func (m *Manager) Recognizers() []speech.RecognizerPlugin {
+// Transcribers returns the started SPEECH_TO_TEXT plugins, by ID.
+func (m *Manager) Transcribers() []speech.Plugin {
 	ids := m.withCapability(pluginv1.Capability_CAPABILITY_SPEECH_TO_TEXT)
 	slices.Sort(ids)
-	var out []speech.RecognizerPlugin
+	var out []speech.Plugin
 	for _, id := range ids {
 		if pl, ok := m.running(id); ok && pl.Speech() != nil {
-			out = append(out, speech.RecognizerPlugin{ID: id, Client: pl.Speech()})
-		}
-	}
-	return out
-}
-
-// VoicePlugins returns the started TEXT_TO_SPEECH plugins, by ID.
-func (m *Manager) VoicePlugins() []speech.VoicePlugin {
-	ids := m.withCapability(pluginv1.Capability_CAPABILITY_TEXT_TO_SPEECH)
-	slices.Sort(ids)
-	var out []speech.VoicePlugin
-	for _, id := range ids {
-		if pl, ok := m.running(id); ok && pl.Voices() != nil {
-			out = append(out, speech.VoicePlugin{ID: id, Client: pl.Voices()})
+			out = append(out, speech.Plugin{ID: id, Client: pl.Speech()})
 		}
 	}
 	return out

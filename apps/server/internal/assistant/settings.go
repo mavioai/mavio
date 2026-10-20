@@ -1,17 +1,20 @@
 package assistant
 
 import (
+	"cmp"
 	"context"
 	"errors"
 	"slices"
 	"time"
 
 	"connectrpc.com/connect"
+	"google.golang.org/protobuf/types/known/durationpb"
 
 	"github.com/mavioai/mavio/apps/server/internal/auth"
 	"github.com/mavioai/mavio/libs/core"
 	assistantv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/assistant/v1"
 	libraryv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/library/v1"
+	pluginv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1"
 )
 
 var accesses = map[core.AssistantAccess]assistantv1.AssistantAccess{
@@ -28,15 +31,25 @@ func settingsToProto(s core.AssistantSettings) *assistantv1.AssistantSettings {
 	return assistantv1.AssistantSettings_builder{
 		Enabled: &s.Enabled, Model: &s.Model, CodeMode: &s.CodeMode, AiAccess: new(accesses[s.AIAccess]), AiUserIds: users,
 		IdleMinutes: new(int32(s.IdleTime / time.Minute)), RetentionDays: new(int32(s.RetentionDays)), Memory: &s.Memory,
-		Recognizer: &s.Recognizer, Voices: voiceChoices(s.Voices), Hints: &s.Hints,
+		Hints: &s.Hints, Speech: speechToProto(s.Speech), LongestPause: durationpb.New(s.LongestPause),
+		CommitDelay: durationpb.New(s.CommitDelay), SessionIdle: durationpb.New(s.SessionIdle),
 	}.Build()
+}
+
+func speechToProto(list []core.AssistantSpeech) []*assistantv1.AssistantSpeech {
+	out := make([]*assistantv1.AssistantSpeech, 0, len(list))
+	for _, sp := range list {
+		out = append(out, assistantv1.AssistantSpeech_builder{Language: &sp.Language, Recognizer: &sp.Recognizer, Voice: &sp.Voice}.Build())
+	}
+	return out
 }
 
 func settingsFromProto(p *assistantv1.AssistantSettings) (core.AssistantSettings, error) {
 	s := core.AssistantSettings{
 		Enabled: p.GetEnabled(), Model: p.GetModel(), CodeMode: p.GetCodeMode(),
 		IdleTime: time.Duration(p.GetIdleMinutes()) * time.Minute, RetentionDays: int(p.GetRetentionDays()),
-		Memory: p.GetMemory(), Recognizer: p.GetRecognizer(), Hints: p.GetHints(),
+		Memory: p.GetMemory(), Hints: p.GetHints(), LongestPause: p.GetLongestPause().AsDuration(),
+		CommitDelay: p.GetCommitDelay().AsDuration(), SessionIdle: p.GetSessionIdle().AsDuration(),
 	}
 	for k, v := range accesses {
 		if v == p.GetAiAccess() {
@@ -50,11 +63,8 @@ func settingsFromProto(p *assistantv1.AssistantSettings) (core.AssistantSettings
 		}
 		s.AIUsers = append(s.AIUsers, id)
 	}
-	if vs := p.GetVoices(); len(vs) > 0 {
-		s.Voices = map[string]string{}
-		for _, v := range vs {
-			s.Voices[v.GetLanguage()] = v.GetVoice()
-		}
+	for _, sp := range p.GetSpeech() {
+		s.Speech = append(s.Speech, core.AssistantSpeech{Language: sp.GetLanguage(), Recognizer: sp.GetRecognizer(), Voice: sp.GetVoice()})
 	}
 	return s, nil
 }
@@ -75,7 +85,35 @@ func (s *Service) GetAssistantSettings(ctx context.Context, _ *assistantv1.GetAs
 	if _, err := admin(ctx); err != nil {
 		return nil, err
 	}
-	return assistantv1.GetAssistantSettingsResponse_builder{Settings: settingsToProto(s.cfg.Settings())}.Build(), nil
+	resp := assistantv1.GetAssistantSettingsResponse_builder{Settings: settingsToProto(s.cfg.Settings())}.Build()
+	if s.cfg.VoiceSessions == nil {
+		return resp, nil
+	}
+	vp, ok := s.cfg.VoiceSessions()
+	if !ok {
+		return resp, nil
+	}
+	list, err := vp.Client.ListVoiceServices(ctx, &pluginv1.ListVoiceServicesRequest{})
+	if err != nil {
+		s.log.WarnContext(ctx, "assistant: list voice services", "plugin", vp.ID, "err", err)
+		return resp, nil
+	}
+	resp.SetRecognizers(voiceEngines(vp.ID, list.GetRecognizers()))
+	resp.SetVoices(voiceEngines(vp.ID, list.GetVoices()))
+	return resp, nil
+}
+
+// voiceEngines returns the enabled recognizers or voices of a plugin.
+func voiceEngines(plugin string, list []*pluginv1.VoiceEngineInfo) []*assistantv1.VoiceEngine {
+	var out []*assistantv1.VoiceEngine
+	for _, e := range list {
+		if e.GetEnabled() {
+			out = append(out, assistantv1.VoiceEngine_builder{
+				Id: new(plugin + "/" + e.GetId()), Name: new(cmp.Or(e.GetName(), e.GetId())), Languages: e.GetLanguages(), Ready: new(e.GetReady()),
+			}.Build())
+		}
+	}
+	return out
 }
 
 // UpdateAssistantSettings replaces the server's assistant settings.
@@ -102,20 +140,6 @@ func (s *Service) UpdateAssistantSettings(ctx context.Context, req *assistantv1.
 		s.cfg.Activity.Record(ctx, core.Activity{Type: "settings.updated", UserID: p.User.ID, Title: p.User.Name + " changed the assistant settings"})
 	}
 	return assistantv1.UpdateAssistantSettingsResponse_builder{Settings: settingsToProto(set)}.Build(), nil
-}
-
-// GetAssistantHints returns phrases recognizers are likely to hear.
-func (s *Service) GetAssistantHints(ctx context.Context, _ *assistantv1.GetAssistantHintsRequest) (*assistantv1.GetAssistantHintsResponse, error) {
-	p, set, err := s.caller(ctx)
-	if err != nil {
-		return nil, err
-	}
-	resp := &assistantv1.GetAssistantHintsResponse{}
-	if !set.Hints {
-		return resp, nil
-	}
-	resp.SetPhrases(s.hints(ctx, p))
-	return resp, nil
 }
 
 // hints lists titles being watched, recently added titles and their
