@@ -104,3 +104,25 @@ func TestSettings(t *testing.T) {
 		t.Errorf("path = %q, want = %q", got, want)
 	}
 }
+
+// TestSettingsNotAdmin checks that one who does not administer the server
+// finds the issues, the only section of the maintenance's menu left, in
+// the server's group.
+func TestSettingsNotAdmin(t *testing.T) {
+	h := newHarness(t, true, 1280, 1000)
+	h.core.notAdmin = true
+	h.app.router.Push("/settings/issues")
+	h.settle()
+	texts := h.tt.Texts()
+	if !slices.Contains(texts, "Issues") || !slices.Contains(texts, "1 issue") {
+		t.Errorf("no issues; texts = %q", texts)
+	}
+	for _, no := range []string{"Monitoring & Maintenance", "Backups", "Overview"} {
+		if slices.Contains(texts, no) {
+			t.Errorf("shows %q; texts = %q", no, texts)
+		}
+	}
+	if got := settingsParent("/settings/issues", false); got != "/settings" {
+		t.Errorf("settingsParent = %q, want = %q", got, "/settings")
+	}
+}

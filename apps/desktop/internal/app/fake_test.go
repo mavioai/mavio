@@ -93,11 +93,13 @@ type fakeCore struct {
 	offline        []*storagev1.OfflineClient
 	answers        []string
 	searchErr      error // when set, what searching a server fails with
+	notAdmin       bool  // whether the user signed in does not administer the server
 	acq            *fakeAcquisition
 	wanted         *fakeWanted
 	downloads      *fakeDownloads
 	subtitles      *fakeSubtitles
 	issues         *fakeIssues
+	backups        *fakeBackups
 	assistant      *fakeAssistant
 	playlists      []*fakeList
 	collections    map[string]*fakeList

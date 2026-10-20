@@ -86,7 +86,7 @@ func (u *fakeUsers) GetCurrentUser(context.Context, *userv1.GetCurrentUserReques
 	defer u.f.mu.Unlock()
 	r := u.f.record()
 	return userv1.GetCurrentUserResponse_builder{User: userv1.User_builder{
-		Id: new(r.GetUserId()), Name: new(r.GetUserName()), Admin: new(true), PlaybackPreferences: u.f.prefs,
+		Id: new(r.GetUserId()), Name: new(r.GetUserName()), Admin: new(!u.f.notAdmin), PlaybackPreferences: u.f.prefs,
 	}.Build()}.Build(), nil
 }
 

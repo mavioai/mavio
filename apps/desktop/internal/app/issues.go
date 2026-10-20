@@ -29,6 +29,13 @@ type issuesState struct {
 	deleting, busy   bool
 	err              error
 
+	// The settings' Issues: the statuses shown, among issueFilters, how
+	// many, and the names of the issues' items, by server and item.
+	filter int
+	limit  int
+	all    task[*acquisitionv1.ListIssuesResponse]
+	names  map[string]*task[string]
+
 	// The report's dialog, of an item.
 	reporting       bool
 	item            *libraryv1.Item
@@ -158,17 +165,20 @@ func (a *App) issueList(c *ui.Context, server string, issues []*acquisitionv1.Is
 			if k > 0 {
 				g.divider()
 			}
-			a.issueRow(c, server, i, item)
+			a.issueRow(c, server, i, item, false)
 		}
 	})
 }
 
-// issueRow builds an issue in a list: its kind and numbers, what it says,
-// who reported it, when it last changed and its status; it opens the
-// issue's dialog.
-func (a *App) issueRow(c *ui.Context, server string, i *acquisitionv1.Issue, item string) {
+// issueRow builds an issue in a list: its item when showItem, its kind
+// and numbers, what it says, who reported it, when it last changed and
+// its status; it opens the issue's dialog.
+func (a *App) issueRow(c *ui.Context, server string, i *acquisitionv1.Issue, item string, showItem bool) {
 	colors := style.Colors(c)
 	label := joinDetail(issueTypeName(c, i.GetType()), issueNumbers(c, i))
+	if showItem {
+		label = joinDetail(item, label)
+	}
 	var first string
 	if cs := i.GetComments(); len(cs) > 0 {
 		first = strings.ReplaceAll(cs[0].GetMessage(), "\n", " ")
@@ -571,4 +581,76 @@ func titleItem(title *acquisitionv1.Title) *libraryv1.Item {
 		kind = libraryv1.ItemKind_ITEM_KIND_SERIES
 	}
 	return libraryv1.Item_builder{Id: new(title.GetItemId()), Name: new(title.GetName()), Kind: &kind}.Build()
+}
+
+// issueFilters are the statuses the settings' Issues show, with their names.
+var issueFilters = []struct {
+	label    string
+	statuses []acquisitionv1.IssueStatus
+}{
+	{"issues.open", []acquisitionv1.IssueStatus{acquisitionv1.IssueStatus_ISSUE_STATUS_OPEN}},
+	{"issues.resolved", []acquisitionv1.IssueStatus{acquisitionv1.IssueStatus_ISSUE_STATUS_RESOLVED}},
+	{"issues.all", nil},
+}
+
+// issuesSection builds the settings' Issues, as the web UI's: the issues
+// reported on the server chosen, the user's own or everyone's for
+// administrators, by status, each with its item and opening its dialog.
+func (a *App) issuesSection(c *ui.Context) {
+	st := &a.issues
+	server := a.chosenServer().GetId()
+	sectionHeader(c, style.T(c, "settings.issues"), style.T(c, "issues.intro"))
+	filters := make([]string, len(issueFilters))
+	for i, f := range issueFilters {
+		filters[i] = style.T(c, f.label)
+	}
+	if choose(c.Key("filter"), style.T(c, "issues.filter"), &st.filter, filters) {
+		st.limit = 0
+	}
+	limit := max(st.limit, 50)
+	statuses := issueFilters[st.filter].statuses
+	t := adminTask(a, &st.all, "all-issues", func(ctx context.Context, s string) (*acquisitionv1.ListIssuesResponse, error) {
+		return a.issueService(s).ListIssues(ctx, acquisitionv1.ListIssuesRequest_builder{Statuses: statuses, Limit: new(int32(limit))}.Build())
+	}, st.filter, limit, st.reload)
+	footer := ""
+	if t.loaded && t.err == nil {
+		footer = style.T(c, "issues.count", "count", int(t.value.GetTotal()))
+	}
+	issues := t.value.GetIssues()
+	group(c, "all-issues", "", footer, func(g *settingsGroup) {
+		switch {
+		case t.err != nil:
+			g.note(errorMessage(c, t.err), true)
+		case t.loaded && len(issues) == 0:
+			g.note(style.T(c, "issues.none"), false)
+		}
+		for k, i := range issues {
+			if k > 0 {
+				g.divider()
+			}
+			a.issueRow(c, server, i, a.issueItemName(server, i.GetItemId()), true)
+		}
+		if int(t.value.GetTotal()) > len(issues) && g.more(style.T(c, "activity.showMore")) {
+			st.limit = limit + 50
+		}
+	})
+	a.issueDialogs(c, server)
+}
+
+// issueItemName loads the name of an issue's item.
+func (a *App) issueItemName(server, item string) string {
+	st := &a.issues
+	if st.names == nil {
+		st.names = map[string]*task[string]{}
+	}
+	k := key(server, item)
+	t := st.names[k]
+	if t == nil {
+		t = &task[string]{}
+		st.names[k] = t
+	}
+	return load(a, t, key("issue-item", server, item, a.generation), func(ctx context.Context) (string, error) {
+		res, err := a.itemService(server).GetItem(ctx, libraryv1.GetItemRequest_builder{Id: &item}.Build())
+		return res.GetItem().GetName(), err
+	}).value
 }

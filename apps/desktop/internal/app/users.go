@@ -273,8 +273,9 @@ func (a *App) backTo(c *ui.Context, label, path string) {
 	if tv {
 		steps = append(steps, step{style.T(c, "nav.settings"), "/settings"})
 	}
+	admin, _ := a.admin()
 	for _, m := range settingsMenus {
-		if slices.Contains(m.sections, id) {
+		if slices.Contains(m.sections, id) && len(shownSections(m.sections, admin)) > 1 {
 			s := step{label: style.T(c, m.title)}
 			if tv {
 				s.path = "/settings/" + m.id

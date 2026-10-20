@@ -293,7 +293,7 @@ func TestSettingsDepth(t *testing.T) {
 		if tc.depth < 0 {
 			continue
 		}
-		if got := settingsParent(tc.loc); got != tc.parent {
+		if got := settingsParent(tc.loc, true); got != tc.parent {
 			t.Errorf("settingsParent(%q) = %q, want = %q", tc.loc, got, tc.parent)
 		}
 	}

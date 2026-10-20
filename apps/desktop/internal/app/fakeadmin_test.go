@@ -52,6 +52,8 @@ func (f *fakeCore) handleAdmin(mux *http.ServeMux) {
 	mux.Handle(systemv1connect.NewPluginManagementServiceHandler(fakePlugins{}))
 	mux.Handle(authv1connect.NewAuthServiceHandler(&fakeAuth{f: f}))
 	mux.Handle(systemv1connect.NewProxyServiceHandler(&fakeProxies{f: f}))
+	f.backups = newFakeBackups()
+	mux.Handle(systemv1connect.NewBackupServiceHandler(f.backups))
 	f.handleAcquisition(mux)
 	f.libraries = fakeLibraryList()
 	f.serverSettings = fakeServerSettings()

@@ -40,12 +40,17 @@ func (a *App) tvSettings(c *ui.Context, r *ui.Route, id string) {
 	ui.Scroll(c.Key(key)).Fill().Children(func() {
 		ui.Column(c).Padding(64, style.Layout(c).Margin, 48).AlignItems(ui.Center).Children(func() {
 			ui.Column(c).FillWidth().MaxWidth(768).Gap(28).Children(func() {
-				if m, ok := menuOf(id); ok && admin && len(m.sections) > 1 {
-					a.tvMenuList(c, m)
-					return
-				}
 				if m, ok := menuOf(id); ok {
+					ids := shownSections(m.sections, admin)
+					if len(ids) > 1 {
+						m.sections = ids
+						a.tvMenuList(c, m)
+						return
+					}
 					id = m.sections[0]
+					if len(ids) == 1 {
+						id = ids[0]
+					}
 				}
 				if id == "" {
 					a.tvSettingsList(c)
@@ -84,14 +89,15 @@ func (a *App) tvSettingsList(c *ui.Context) {
 			}
 			for _, id := range g.entries {
 				if m, ok := menuOf(id); ok {
-					if !admin {
-						continue
-					}
-					if len(m.sections) > 1 {
+					ids := shownSections(m.sections, admin)
+					if len(ids) > 1 {
 						a.tvEntryRow(gr, m.id, m.icon, m.color, m.title)
 						continue
 					}
-					id = m.sections[0]
+					if len(ids) == 0 {
+						continue
+					}
+					id = ids[0]
 				}
 				s, _ := sectionOf(id)
 				if s.admin && !admin {
@@ -229,8 +235,9 @@ func settingsDepth(loc string) int {
 
 // settingsParent returns the page the page at loc lies in: a nested page's
 // page, a page within a section's section, a section's menu or their list,
-// a menu's list.
-func settingsParent(loc string) string {
+// a menu's list. A menu left with one section of those shown to the
+// user, an administrator or not, is that section.
+func settingsParent(loc string, admin bool) string {
 	path, query, _ := strings.Cut(loc, "?")
 	q, _ := url.ParseQuery(query)
 	switch settingsDepth(loc) {
@@ -251,7 +258,7 @@ func settingsParent(loc string) string {
 	case 2:
 		id := strings.TrimPrefix(path, "/settings/")
 		for _, m := range settingsMenus {
-			if len(m.sections) > 1 && slices.Contains(m.sections, id) {
+			if len(shownSections(m.sections, admin)) > 1 && slices.Contains(m.sections, id) {
 				return "/settings/" + m.id
 			}
 		}
@@ -278,5 +285,6 @@ func (a *App) settingsBack() {
 		a.replace("/home")
 		return
 	}
-	a.replace(settingsParent(loc))
+	admin, _ := a.admin()
+	a.replace(settingsParent(loc, admin))
 }

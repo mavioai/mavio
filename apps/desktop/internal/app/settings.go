@@ -57,6 +57,8 @@ var settingsSections = []settingsSection{
 	{id: "transcoding", icon: "quality", color: ui.RGB(0xFF, 0x2D, 0x55), title: "settings.transcoding", admin: true},
 	{id: "activity", icon: "activity", color: ui.RGB(0xFF, 0x2D, 0x55), title: "settings.activity", admin: true},
 	{id: "tasks", icon: "pending", color: ui.RGB(0x58, 0x56, 0xD6), title: "settings.tasks", admin: true},
+	{id: "issues", icon: "error", color: ui.RGB(0xFF, 0x95, 0x00), title: "settings.issues"},
+	{id: "backups", icon: "folder", color: ui.RGB(0x58, 0x56, 0xD6), title: "settings.backups", admin: true},
 	{id: "logs", icon: "info", color: ui.RGB(0x8E, 0x8E, 0x93), title: "settings.logs", admin: true},
 	{id: "appearance", icon: "appearance", color: ui.RGB(0x5E, 0x5C, 0xE6), title: "settings.appearance"},
 	{id: "playback", icon: "play", color: ui.RGB(0xFF, 0x3B, 0x30), title: "settings.playback"},
@@ -86,7 +88,7 @@ type settingsMenu struct {
 var settingsMenus = []settingsMenu{
 	{id: "media", icon: "movies", color: ui.RGB(0xFF, 0x9F, 0x0A), title: "settings.mediaMenu", sections: []string{"libraries", "storage", "transcoding"}},
 	{id: "acquiring", icon: "cloud", color: ui.RGB(0x30, 0xD1, 0x58), title: "settings.acquisitionMenu", sections: []string{"acquisition", "wanted", "downloads", "subtitles"}},
-	{id: "maintenance", icon: "admin", color: ui.RGB(0x8E, 0x8E, 0x93), title: "settings.maintenanceMenu", sections: []string{"activity", "tasks", "logs", "api-keys"}},
+	{id: "maintenance", icon: "admin", color: ui.RGB(0x8E, 0x8E, 0x93), title: "settings.maintenanceMenu", sections: []string{"activity", "issues", "tasks", "logs", "backups", "api-keys"}},
 }
 
 // settingsGroups are the sidebar's groups: this device's sections, then
@@ -106,6 +108,19 @@ func menuOf(id string) (settingsMenu, bool) {
 		return settingsMenu{}, false
 	}
 	return settingsMenus[i], true
+}
+
+// shownSections returns the sections of ids shown to the user, an
+// administrator or not. A menu left with one is that section, and one
+// left with none is not shown, as on the web UI.
+func shownSections(ids []string, admin bool) []string {
+	var out []string
+	for _, id := range ids {
+		if s, _ := sectionOf(id); !s.admin || admin {
+			out = append(out, id)
+		}
+	}
+	return out
 }
 
 // admin reports whether the user administers the server chosen; known
@@ -259,14 +274,18 @@ func (a *App) settingsSidebar(c *ui.Context, current string) {
 				var sections []string
 				var menus []settingsMenu
 				for _, id := range g.entries {
-					if m, ok := menuOf(id); ok {
-						if admin {
-							menus = append(menus, m)
-						}
+					m, ok := menuOf(id)
+					if !ok {
+						sections = append(sections, shownSections([]string{id}, admin)...)
 						continue
 					}
-					if s, _ := sectionOf(id); !s.admin || admin {
-						sections = append(sections, id)
+					switch ids := shownSections(m.sections, admin); len(ids) {
+					case 0:
+					case 1:
+						sections = append(sections, ids...)
+					default:
+						m.sections = ids
+						menus = append(menus, m)
 					}
 				}
 				ui.Column(c.Key(g.title)).Gap(2).Children(func() {
@@ -432,6 +451,10 @@ func (a *App) settingsSection(c *ui.Context, r *ui.Route, id string) {
 		a.tasksSection(c)
 	case "logs":
 		a.logsSection(c)
+	case "issues":
+		a.issuesSection(c)
+	case "backups":
+		a.backupsSection(c)
 	}
 }
 

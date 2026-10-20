@@ -39,6 +39,7 @@ type adminState struct {
 	acquisition acquisitionState
 	wanted      wantedState
 	downloads   downloadsState
+	backups     backupsState
 	subtitles   subtitlesState
 	libraries   librariesState
 	libs        task[[]*libraryv1.Library]

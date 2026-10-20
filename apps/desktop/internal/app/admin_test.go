@@ -80,4 +80,20 @@ func TestAdmin(t *testing.T) {
 	h.app.settingsState.admin.logFilter = ""
 	h.tt.Frame()
 	h.save(shots, "settings-logs")
+
+	open("Issues")
+	// Open issues by default, each naming its item.
+	want("Issues", "The Long Orbit · Subtitles", "1 issue")
+	h.save(shots, "settings-issues")
+
+	open("Backups")
+	want("mavio-20261019-120000.zip", "1 day ago · 3 MB · Mavio 0.9.0")
+	open("Back Up")
+	want("mavio-20261020-090000.zip")
+	if err := h.tt.Click("Delete"); err != nil {
+		t.Fatalf("click Delete: %v; texts = %q", err, h.tt.Texts())
+	}
+	h.settle()
+	want("Delete mavio-20261020-090000.zip?")
+	h.save(shots, "settings-backups")
 }
