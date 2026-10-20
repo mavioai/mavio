@@ -44,6 +44,17 @@ plugins:
     strategy: all
     opt:
       - filter=services
+  # Python for the Python plugin SDK (libs/plugin/python) and plugins/pipecat:
+  # protobuf's messages and their stubs, built into protoc, and
+  # connect-python's services, in the package of gen/python.
+  - protoc_builtin: python
+    out: gen/python/src
+    include_imports: true
+  - protoc_builtin: pyi
+    out: gen/python/src
+    include_imports: true
+  - local: ["uv", "run", "--frozen", "--package", "mavio-proto", "protoc-gen-connect-python"]
+    out: gen/python/src
   # One OpenAPI document of the Connect services the server serves, without
   # the plugin contracts, embedded by package openapi and served at
   # /api/spec.json. It runs by version rather than as a tool of this module, so

@@ -1,0 +1,120 @@
+edition = "2023";
+
+package mavio.plugin.v1;
+
+import "buf/validate/validate.proto";
+import "google/protobuf/duration.proto";
+import "mavio/plugin/v1/settings.proto";
+
+// VoiceSessionService runs the assistant's voice sessions: a pipeline per
+// session that hears the user's turns, asks the assistant with them and
+// speaks the answers (docs/assistant.md §8). The server opens each session
+// and relays the client's WebSocket to the session's on the plugin's
+// socket.
+service VoiceSessionService {
+  // ListVoiceServices lists the recognition and synthesis services the
+  // plugin implements, and the recognizers and voices configured from
+  // them.
+  rpc ListVoiceServices(ListVoiceServicesRequest) returns (ListVoiceServicesResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // OpenVoiceSession prepares a session, which starts when the server
+  // connects to its WebSocket.
+  rpc OpenVoiceSession(OpenVoiceSessionRequest) returns (OpenVoiceSessionResponse);
+  // CloseVoiceSession ends a session, closing its WebSocket.
+  rpc CloseVoiceSession(CloseVoiceSessionRequest) returns (CloseVoiceSessionResponse);
+}
+
+message ListVoiceServicesRequest {}
+
+message ListVoiceServicesResponse {
+  // The services recognizers and voices are configured from.
+  repeated VoiceServiceInfo services = 1;
+  repeated VoiceEngineInfo recognizers = 2;
+  repeated VoiceEngineInfo voices = 3;
+}
+
+// VoiceServiceInfo is a recognition or synthesis service a plugin
+// implements.
+message VoiceServiceInfo {
+  // Stable within the plugin, such as "whisper".
+  string name = 1;
+  string display_name = 2;
+  // It recognizes speech; else it synthesizes it.
+  bool recognizes = 3;
+  // The settings of the recognizers or voices configured from it.
+  repeated SettingField settings = 4;
+}
+
+// VoiceEngineInfo is a recognizer or a voice a plugin has configured.
+message VoiceEngineInfo {
+  // The ID the server generated for it.
+  string id = 1;
+  // The name the administrator gave it.
+  string name = 2;
+  // The service it is configured from, a name among the services.
+  string service = 3;
+  bool enabled = 4;
+  // The languages it recognizes or speaks, BCP 47; empty for any.
+  repeated string languages = 5;
+  // It takes phrases it is likely to hear; recognizers only.
+  bool hints = 6;
+  // It can be used: its model is downloaded, for a local one.
+  bool ready = 7;
+}
+
+// VoiceMode is how a session listens (docs/assistant.md §8.3).
+enum VoiceMode {
+  VOICE_MODE_UNSPECIFIED = 0;
+  // Hands-free between answers, with barge-in.
+  VOICE_MODE_CONVERSATION = 1;
+  // While the client's button is held, between ptt_start and ptt_end.
+  VOICE_MODE_PUSH_TO_TALK = 2;
+  // Final transcripts only: nothing is asked or spoken.
+  VOICE_MODE_DICTATION = 3;
+}
+
+// VoiceTurnSettings are the timings of a session's turns.
+message VoiceTurnSettings {
+  // How long a turn stands, with the user silent, before what its answer
+  // changes is done.
+  google.protobuf.Duration commit_delay = 1;
+  // The longest pause in a turn the turn model reads as unfinished.
+  google.protobuf.Duration longest_pause = 2;
+  // How long the user may stay silent after an answer before the session
+  // ends.
+  google.protobuf.Duration idle = 3;
+}
+
+message OpenVoiceSessionRequest {
+  string session_id = 1 [(buf.validate.field).string.pattern = "^[A-Za-z0-9_-]{8,64}$"];
+  // The user's language, BCP 47; empty, the recognizer detects it.
+  string language = 2;
+  VoiceMode mode = 3;
+  // The recognizer's and the voice's IDs; empty, the plugin's first ready
+  // ones.
+  string recognizer = 4;
+  string voice = 5;
+  // Phrases the recognizer is likely to hear: titles being watched,
+  // recently added titles, people, the user's devices.
+  repeated string hints = 6;
+  VoiceTurnSettings turns = 7;
+  // The token the session's requests to the assistant carry, in the
+  // Mavio-Voice-Session header of the host API: it acts as the session's
+  // user on its device for Ask alone, until the session ends.
+  string session_token = 8 [(buf.validate.field).required = true];
+  // The client's AskContext when the session started, as its JSON.
+  string context_json = 9;
+}
+
+message OpenVoiceSessionResponse {
+  // The path of the session's WebSocket on the plugin's socket, under
+  // /_mavio/voice/.
+  string path = 1;
+}
+
+message CloseVoiceSessionRequest {
+  string session_id = 1 [(buf.validate.field).required = true];
+}
+
+message CloseVoiceSessionResponse {}

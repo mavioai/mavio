@@ -9,6 +9,9 @@ bun = "1.4.3"
 python = "3.14.8"
 uv = "0.13.1"
 buf = "1.73.0"
+# protoc for the Python messages of libs/proto (buf's protoc_builtin), the
+# version of the protobuf runtime in uv.lock.
+protoc = "33.6"
 golangci-lint = "2.14.0"
 sqlc = "1.31.1"
 # The Android apps and libs/android.

@@ -36,6 +36,18 @@ pub type OwnedStartListeningResponseView = ::buffa::view::OwnedView<
         'static,
     >,
 >;
+///Shorthand for `OwnedView<StartVoiceSessionRequestView<'static>>`.
+pub type OwnedStartVoiceSessionRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::assistant::v1::__buffa::view::StartVoiceSessionRequestView<
+        'static,
+    >,
+>;
+///Shorthand for `OwnedView<StartVoiceSessionResponseView<'static>>`.
+pub type OwnedStartVoiceSessionResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::assistant::v1::__buffa::view::StartVoiceSessionResponseView<
+        'static,
+    >,
+>;
 ///Shorthand for `OwnedView<ListAssistantConversationsRequestView<'static>>`.
 pub type OwnedListAssistantConversationsRequestView = ::buffa::view::OwnedView<
     crate::proto::mavio::assistant::v1::__buffa::view::ListAssistantConversationsRequestView<
@@ -254,6 +266,48 @@ for crate::proto::mavio::assistant::v1::__buffa::view::StartListeningResponseVie
 impl ::connectrpc::Encodable<crate::proto::mavio::assistant::v1::StartListeningResponse>
 for ::buffa::view::OwnedView<
     crate::proto::mavio::assistant::v1::__buffa::view::StartListeningResponseView<
+        'static,
+    >,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
+impl ::connectrpc::Encodable<
+    crate::proto::mavio::assistant::v1::StartVoiceSessionResponse,
+>
+for crate::proto::mavio::assistant::v1::__buffa::view::StartVoiceSessionResponseView<
+    '_,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<
+    crate::proto::mavio::assistant::v1::StartVoiceSessionResponse,
+>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::assistant::v1::__buffa::view::StartVoiceSessionResponseView<
         'static,
     >,
 > {
@@ -640,6 +694,12 @@ pub const ASSISTANT_SERVICE_START_LISTENING_SPEC: ::connectrpc::Spec = ::connect
         ::connectrpc::StreamType::Unary,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
+/// Static [`Spec`](::connectrpc::Spec) for the `StartVoiceSession` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const ASSISTANT_SERVICE_START_VOICE_SESSION_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.assistant.v1.AssistantService/StartVoiceSession",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
 /// Static [`Spec`](::connectrpc::Spec) for the `ListAssistantConversations` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
 pub const ASSISTANT_SERVICE_LIST_ASSISTANT_CONVERSATIONS_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
         "/mavio.assistant.v1.AssistantService/ListAssistantConversations",
@@ -836,6 +896,31 @@ pub trait AssistantService: Send + Sync + 'static {
         Output = ::connectrpc::ServiceResult<
             impl ::connectrpc::Encodable<
                 crate::proto::mavio::assistant::v1::StartListeningResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// StartVoiceSession opens a voice session for the device and returns
+    /// the WebSocket URL the client connects to within a minute; it fails
+    /// with failed_precondition when no voice session plugin is ready.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn start_voice_session<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::assistant::v1::StartVoiceSessionRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::assistant::v1::StartVoiceSessionResponse,
             > + Send + use<'a, Self>,
         >,
     > + Send;
@@ -1175,6 +1260,35 @@ impl<S: AssistantService> AssistantServiceExt for S {
                 },
             )
             .with_spec(ASSISTANT_SERVICE_START_LISTENING_SPEC)
+            .route_view(
+                ASSISTANT_SERVICE_SERVICE_NAME,
+                "StartVoiceSession",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::assistant::v1::__buffa::view::StartVoiceSessionRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::assistant::v1::StartVoiceSessionRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.start_voice_session(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::assistant::v1::StartVoiceSessionResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(ASSISTANT_SERVICE_START_VOICE_SESSION_SPEC)
             .route_view_idempotent(
                 ASSISTANT_SERVICE_SERVICE_NAME,
                 "ListAssistantConversations",
@@ -1485,6 +1599,12 @@ impl<T: AssistantService> ::connectrpc::Dispatcher for AssistantServiceServer<T>
                         .with_spec(ASSISTANT_SERVICE_START_LISTENING_SPEC),
                 )
             }
+            "StartVoiceSession" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
+                        .with_spec(ASSISTANT_SERVICE_START_VOICE_SESSION_SPEC),
+                )
+            }
             "ListAssistantConversations" => {
                 Some(
                     ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(true)
@@ -1612,6 +1732,28 @@ impl<T: AssistantService> ::connectrpc::Dispatcher for AssistantServiceServer<T>
                         .await?
                         .encode::<
                             crate::proto::mavio::assistant::v1::StartListeningResponse,
+                        >(format)
+                })
+            }
+            "StartVoiceSession" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::assistant::v1::StartVoiceSessionRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::assistant::v1::__buffa::view::StartVoiceSessionRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::assistant::v1::StartVoiceSessionRequest,
+                    >::from_parts(&req, &body);
+                    svc.start_voice_session(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::assistant::v1::StartVoiceSessionResponse,
                         >(format)
                 })
             }
@@ -2112,6 +2254,51 @@ where
                 &self.transport,
                 &self.config,
                 ASSISTANT_SERVICE_START_LISTENING_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the StartVoiceSession RPC. Sends a request to /mavio.assistant.v1.AssistantService/StartVoiceSession.
+    pub async fn start_voice_session(
+        &self,
+        request: crate::proto::mavio::assistant::v1::StartVoiceSessionRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::assistant::v1::__buffa::view::StartVoiceSessionResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.start_voice_session_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the StartVoiceSession RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn start_voice_session_with_options(
+        &self,
+        request: crate::proto::mavio::assistant::v1::StartVoiceSessionRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::assistant::v1::__buffa::view::StartVoiceSessionResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                ASSISTANT_SERVICE_START_VOICE_SESSION_SPEC
                     .with_origin(::connectrpc::SpecOrigin::Client),
                 request,
                 options,

@@ -4,11 +4,12 @@ include!("mavio.plugin.v1.metadata.rs");
 include!("mavio.plugin.v1.discovery.rs");
 include!("mavio.plugin.v1.ratings.rs");
 include!("mavio.plugin.v1.ai.rs");
+include!("mavio.plugin.v1.settings.rs");
+include!("mavio.plugin.v1.voice.rs");
 include!("mavio.plugin.v1.proxy.rs");
 include!("mavio.plugin.v1.challenge.rs");
 include!("mavio.plugin.v1.container.rs");
 include!("mavio.plugin.v1.device.rs");
-include!("mavio.plugin.v1.settings.rs");
 include!("mavio.plugin.v1.indexer.rs");
 include!("mavio.plugin.v1.download_client.rs");
 include!("mavio.plugin.v1.episode_list.rs");
@@ -50,11 +51,12 @@ pub mod __buffa {
         include!("mavio.plugin.v1.discovery.__view.rs");
         include!("mavio.plugin.v1.ratings.__view.rs");
         include!("mavio.plugin.v1.ai.__view.rs");
+        include!("mavio.plugin.v1.settings.__view.rs");
+        include!("mavio.plugin.v1.voice.__view.rs");
         include!("mavio.plugin.v1.proxy.__view.rs");
         include!("mavio.plugin.v1.challenge.__view.rs");
         include!("mavio.plugin.v1.container.__view.rs");
         include!("mavio.plugin.v1.device.__view.rs");
-        include!("mavio.plugin.v1.settings.__view.rs");
         include!("mavio.plugin.v1.indexer.__view.rs");
         include!("mavio.plugin.v1.download_client.__view.rs");
         include!("mavio.plugin.v1.episode_list.__view.rs");
@@ -480,6 +482,50 @@ pub use self::__buffa::view::DeleteAgentMemoriesResponseView;
 #[doc(inline)]
 pub use self::__buffa::view::DeleteAgentMemoriesResponseOwnedView;
 #[doc(inline)]
+pub use self::__buffa::view::SettingFieldView;
+#[doc(inline)]
+pub use self::__buffa::view::SettingFieldOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::SettingFieldOptionView;
+#[doc(inline)]
+pub use self::__buffa::view::SettingFieldOptionOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ListVoiceServicesRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::ListVoiceServicesRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ListVoiceServicesResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::ListVoiceServicesResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::VoiceServiceInfoView;
+#[doc(inline)]
+pub use self::__buffa::view::VoiceServiceInfoOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::VoiceEngineInfoView;
+#[doc(inline)]
+pub use self::__buffa::view::VoiceEngineInfoOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::VoiceTurnSettingsView;
+#[doc(inline)]
+pub use self::__buffa::view::VoiceTurnSettingsOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::OpenVoiceSessionRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::OpenVoiceSessionRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::OpenVoiceSessionResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::OpenVoiceSessionResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::CloseVoiceSessionRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::CloseVoiceSessionRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::CloseVoiceSessionResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::CloseVoiceSessionResponseOwnedView;
+#[doc(inline)]
 pub use self::__buffa::view::ProxyView;
 #[doc(inline)]
 pub use self::__buffa::view::ProxyOwnedView;
@@ -587,14 +633,6 @@ pub use self::__buffa::view::GetServerInfoRequestOwnedView;
 pub use self::__buffa::view::GetServerInfoResponseView;
 #[doc(inline)]
 pub use self::__buffa::view::GetServerInfoResponseOwnedView;
-#[doc(inline)]
-pub use self::__buffa::view::SettingFieldView;
-#[doc(inline)]
-pub use self::__buffa::view::SettingFieldOwnedView;
-#[doc(inline)]
-pub use self::__buffa::view::SettingFieldOptionView;
-#[doc(inline)]
-pub use self::__buffa::view::SettingFieldOptionOwnedView;
 #[doc(inline)]
 pub use self::__buffa::view::ListDefinitionsRequestView;
 #[doc(inline)]

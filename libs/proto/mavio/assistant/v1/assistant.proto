@@ -8,6 +8,7 @@ import "google/protobuf/timestamp.proto";
 import "mavio/intent/v1/intent.proto";
 import "mavio/library/v1/item.proto";
 import "mavio/plugin/v1/ai.proto";
+import "mavio/plugin/v1/voice.proto";
 
 // AssistantService carries out users' spoken and typed requests (the
 // assistant document): the fast path's intents, else the AI path's model
@@ -31,6 +32,10 @@ service AssistantService {
   // for the server's recognizer, signed for the session and valid for a
   // minute.
   rpc StartListening(StartListeningRequest) returns (StartListeningResponse);
+  // StartVoiceSession opens a voice session for the device and returns
+  // the WebSocket URL the client connects to within a minute; it fails
+  // with failed_precondition when no voice session plugin is ready.
+  rpc StartVoiceSession(StartVoiceSessionRequest) returns (StartVoiceSessionResponse);
   // ListAssistantConversations lists the user's conversations, newest
   // first.
   rpc ListAssistantConversations(ListAssistantConversationsRequest) returns (ListAssistantConversationsResponse) {
@@ -393,6 +398,22 @@ message StartListeningResponse {
   // The WebSocket URL, relative to the server's base URL.
   string url = 1;
   string recognizer = 2;
+  google.protobuf.Timestamp expire_time = 3;
+}
+
+message StartVoiceSessionRequest {
+  // The language spoken, BCP 47; empty, the recognizer detects it.
+  string language = 1;
+  mavio.plugin.v1.VoiceMode mode = 2;
+  // Where the session starts; the client sends its changes as context
+  // events.
+  AskContext context = 3;
+}
+
+message StartVoiceSessionResponse {
+  // The WebSocket URL, relative to the server's base URL.
+  string url = 1;
+  string session_id = 2;
   google.protobuf.Timestamp expire_time = 3;
 }
 

@@ -1495,6 +1495,90 @@ public nonisolated struct Mavio_Assistant_V1_StartListeningResponse: Sendable {
   fileprivate var _expireTime: SwiftProtobuf.Google_Protobuf_Timestamp? = nil
 }
 
+public nonisolated struct Mavio_Assistant_V1_StartVoiceSessionRequest: @unchecked Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  /// The language spoken, BCP 47; empty, the recognizer detects it.
+  public var language: String {
+    get {_storage._language ?? String()}
+    set {_uniqueStorage()._language = newValue}
+  }
+  /// Returns true if `language` has been explicitly set.
+  public var hasLanguage: Bool {_storage._language != nil}
+  /// Clears the value of `language`. Subsequent reads from it will return its default value.
+  public mutating func clearLanguage() {_uniqueStorage()._language = nil}
+
+  public var mode: Mavio_Plugin_V1_VoiceMode {
+    get {_storage._mode ?? .unspecified}
+    set {_uniqueStorage()._mode = newValue}
+  }
+  /// Returns true if `mode` has been explicitly set.
+  public var hasMode: Bool {_storage._mode != nil}
+  /// Clears the value of `mode`. Subsequent reads from it will return its default value.
+  public mutating func clearMode() {_uniqueStorage()._mode = nil}
+
+  /// Where the session starts; the client sends its changes as context
+  /// events.
+  public var context: Mavio_Assistant_V1_AskContext {
+    get {_storage._context ?? Mavio_Assistant_V1_AskContext()}
+    set {_uniqueStorage()._context = newValue}
+  }
+  /// Returns true if `context` has been explicitly set.
+  public var hasContext: Bool {_storage._context != nil}
+  /// Clears the value of `context`. Subsequent reads from it will return its default value.
+  public mutating func clearContext() {_uniqueStorage()._context = nil}
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+
+  fileprivate var _storage = _StorageClass.defaultInstance
+}
+
+public nonisolated struct Mavio_Assistant_V1_StartVoiceSessionResponse: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  /// The WebSocket URL, relative to the server's base URL.
+  public var url: String {
+    get {_url ?? String()}
+    set {_url = newValue}
+  }
+  /// Returns true if `url` has been explicitly set.
+  public var hasURL: Bool {self._url != nil}
+  /// Clears the value of `url`. Subsequent reads from it will return its default value.
+  public mutating func clearURL() {self._url = nil}
+
+  public var sessionID: String {
+    get {_sessionID ?? String()}
+    set {_sessionID = newValue}
+  }
+  /// Returns true if `sessionID` has been explicitly set.
+  public var hasSessionID: Bool {self._sessionID != nil}
+  /// Clears the value of `sessionID`. Subsequent reads from it will return its default value.
+  public mutating func clearSessionID() {self._sessionID = nil}
+
+  public var expireTime: SwiftProtobuf.Google_Protobuf_Timestamp {
+    get {_expireTime ?? SwiftProtobuf.Google_Protobuf_Timestamp()}
+    set {_expireTime = newValue}
+  }
+  /// Returns true if `expireTime` has been explicitly set.
+  public var hasExpireTime: Bool {self._expireTime != nil}
+  /// Clears the value of `expireTime`. Subsequent reads from it will return its default value.
+  public mutating func clearExpireTime() {self._expireTime = nil}
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+
+  fileprivate var _url: String? = nil
+  fileprivate var _sessionID: String? = nil
+  fileprivate var _expireTime: SwiftProtobuf.Google_Protobuf_Timestamp? = nil
+}
+
 /// AssistantConversation is one of a user's conversations with the
 /// assistant.
 public nonisolated struct Mavio_Assistant_V1_AssistantConversation: Sendable {
@@ -3369,6 +3453,134 @@ nonisolated extension Mavio_Assistant_V1_StartListeningResponse: SwiftProtobuf.M
   public static func ==(lhs: Mavio_Assistant_V1_StartListeningResponse, rhs: Mavio_Assistant_V1_StartListeningResponse) -> Bool {
     if lhs._url != rhs._url {return false}
     if lhs._recognizer != rhs._recognizer {return false}
+    if lhs._expireTime != rhs._expireTime {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Mavio_Assistant_V1_StartVoiceSessionRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".StartVoiceSessionRequest"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}language\0\u{1}mode\0\u{1}context\0")
+
+  fileprivate class _StorageClass {
+    var _language: String? = nil
+    var _mode: Mavio_Plugin_V1_VoiceMode? = nil
+    var _context: Mavio_Assistant_V1_AskContext? = nil
+
+      // This property is used as the initial default value for new instances of the type.
+      // The type itself is protecting the reference to its storage via CoW semantics.
+      // This will force a copy to be made of this reference when the first mutation occurs;
+      // hence, it is safe to mark this as `nonisolated(unsafe)`.
+      static nonisolated(unsafe) let defaultInstance = _StorageClass()
+
+    private init() {}
+
+    init(copying source: _StorageClass) {
+      _language = source._language
+      _mode = source._mode
+      _context = source._context
+    }
+  }
+
+  fileprivate mutating func _uniqueStorage() -> _StorageClass {
+    if !isKnownUniquelyReferenced(&_storage) {
+      _storage = _StorageClass(copying: _storage)
+    }
+    return _storage
+  }
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    _ = _uniqueStorage()
+    try withExtendedLifetime(_storage) { (_storage: _StorageClass) in
+      while let fieldNumber = try decoder.nextFieldNumber() {
+        // The use of inline closures is to circumvent an issue where the compiler
+        // allocates stack space for every case branch when no optimizations are
+        // enabled. https://github.com/apple/swift-protobuf/issues/1034
+        switch fieldNumber {
+        case 1: try { try decoder.decodeSingularStringField(value: &_storage._language) }()
+        case 2: try { try decoder.decodeSingularEnumField(value: &_storage._mode) }()
+        case 3: try { try decoder.decodeSingularMessageField(value: &_storage._context) }()
+        default: break
+        }
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    try withExtendedLifetime(_storage) { (_storage: _StorageClass) in
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every if/case branch local when no optimizations
+      // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+      // https://github.com/apple/swift-protobuf/issues/1182
+      try { if let v = _storage._language {
+        try visitor.visitSingularStringField(value: v, fieldNumber: 1)
+      } }()
+      try { if let v = _storage._mode {
+        try visitor.visitSingularEnumField(value: v, fieldNumber: 2)
+      } }()
+      try { if let v = _storage._context {
+        try visitor.visitSingularMessageField(value: v, fieldNumber: 3)
+      } }()
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Mavio_Assistant_V1_StartVoiceSessionRequest, rhs: Mavio_Assistant_V1_StartVoiceSessionRequest) -> Bool {
+    if lhs._storage !== rhs._storage {
+      let storagesAreEqual: Bool = withExtendedLifetime((lhs._storage, rhs._storage)) { (_args: (_StorageClass, _StorageClass)) in
+        let _storage = _args.0
+        let rhs_storage = _args.1
+        if _storage._language != rhs_storage._language {return false}
+        if _storage._mode != rhs_storage._mode {return false}
+        if _storage._context != rhs_storage._context {return false}
+        return true
+      }
+      if !storagesAreEqual {return false}
+    }
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Mavio_Assistant_V1_StartVoiceSessionResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".StartVoiceSessionResponse"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}url\0\u{3}session_id\0\u{3}expire_time\0")
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularStringField(value: &self._url) }()
+      case 2: try { try decoder.decodeSingularStringField(value: &self._sessionID) }()
+      case 3: try { try decoder.decodeSingularMessageField(value: &self._expireTime) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    try { if let v = self._url {
+      try visitor.visitSingularStringField(value: v, fieldNumber: 1)
+    } }()
+    try { if let v = self._sessionID {
+      try visitor.visitSingularStringField(value: v, fieldNumber: 2)
+    } }()
+    try { if let v = self._expireTime {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 3)
+    } }()
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Mavio_Assistant_V1_StartVoiceSessionResponse, rhs: Mavio_Assistant_V1_StartVoiceSessionResponse) -> Bool {
+    if lhs._url != rhs._url {return false}
+    if lhs._sessionID != rhs._sessionID {return false}
     if lhs._expireTime != rhs._expireTime {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true

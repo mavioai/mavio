@@ -132,6 +132,14 @@ pub use self::__buffa::view::StartListeningResponseView;
 #[doc(inline)]
 pub use self::__buffa::view::StartListeningResponseOwnedView;
 #[doc(inline)]
+pub use self::__buffa::view::StartVoiceSessionRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::StartVoiceSessionRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::StartVoiceSessionResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::StartVoiceSessionResponseOwnedView;
+#[doc(inline)]
 pub use self::__buffa::view::AssistantConversationView;
 #[doc(inline)]
 pub use self::__buffa::view::AssistantConversationOwnedView;

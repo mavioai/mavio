@@ -44,6 +44,9 @@ const (
 	// AssistantServiceStartListeningProcedure is the fully-qualified name of the AssistantService's
 	// StartListening RPC.
 	AssistantServiceStartListeningProcedure = "/mavio.assistant.v1.AssistantService/StartListening"
+	// AssistantServiceStartVoiceSessionProcedure is the fully-qualified name of the AssistantService's
+	// StartVoiceSession RPC.
+	AssistantServiceStartVoiceSessionProcedure = "/mavio.assistant.v1.AssistantService/StartVoiceSession"
 	// AssistantServiceListAssistantConversationsProcedure is the fully-qualified name of the
 	// AssistantService's ListAssistantConversations RPC.
 	AssistantServiceListAssistantConversationsProcedure = "/mavio.assistant.v1.AssistantService/ListAssistantConversations"
@@ -86,6 +89,10 @@ type AssistantServiceClient interface {
 	// for the server's recognizer, signed for the session and valid for a
 	// minute.
 	StartListening(context.Context, *v1.StartListeningRequest) (*v1.StartListeningResponse, error)
+	// StartVoiceSession opens a voice session for the device and returns
+	// the WebSocket URL the client connects to within a minute; it fails
+	// with failed_precondition when no voice session plugin is ready.
+	StartVoiceSession(context.Context, *v1.StartVoiceSessionRequest) (*v1.StartVoiceSessionResponse, error)
 	// ListAssistantConversations lists the user's conversations, newest
 	// first.
 	ListAssistantConversations(context.Context, *v1.ListAssistantConversationsRequest) (*v1.ListAssistantConversationsResponse, error)
@@ -144,6 +151,12 @@ func NewAssistantServiceClient(httpClient connect.HTTPClient, baseURL string, op
 			httpClient,
 			baseURL+AssistantServiceStartListeningProcedure,
 			connect.WithSchema(assistantServiceMethods.ByName("StartListening")),
+			connect.WithClientOptions(opts...),
+		),
+		startVoiceSession: connect.NewClient[v1.StartVoiceSessionRequest, v1.StartVoiceSessionResponse](
+			httpClient,
+			baseURL+AssistantServiceStartVoiceSessionProcedure,
+			connect.WithSchema(assistantServiceMethods.ByName("StartVoiceSession")),
 			connect.WithClientOptions(opts...),
 		),
 		listAssistantConversations: connect.NewClient[v1.ListAssistantConversationsRequest, v1.ListAssistantConversationsResponse](
@@ -207,6 +220,7 @@ type assistantServiceClient struct {
 	ask                         *connect.Client[v1.AskRequest, v1.AskResponse]
 	getAssistantHints           *connect.Client[v1.GetAssistantHintsRequest, v1.GetAssistantHintsResponse]
 	startListening              *connect.Client[v1.StartListeningRequest, v1.StartListeningResponse]
+	startVoiceSession           *connect.Client[v1.StartVoiceSessionRequest, v1.StartVoiceSessionResponse]
 	listAssistantConversations  *connect.Client[v1.ListAssistantConversationsRequest, v1.ListAssistantConversationsResponse]
 	getAssistantConversation    *connect.Client[v1.GetAssistantConversationRequest, v1.GetAssistantConversationResponse]
 	deleteAssistantConversation *connect.Client[v1.DeleteAssistantConversationRequest, v1.DeleteAssistantConversationResponse]
@@ -243,6 +257,15 @@ func (c *assistantServiceClient) GetAssistantHints(ctx context.Context, req *v1.
 // StartListening calls mavio.assistant.v1.AssistantService.StartListening.
 func (c *assistantServiceClient) StartListening(ctx context.Context, req *v1.StartListeningRequest) (*v1.StartListeningResponse, error) {
 	response, err := c.startListening.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
+// StartVoiceSession calls mavio.assistant.v1.AssistantService.StartVoiceSession.
+func (c *assistantServiceClient) StartVoiceSession(ctx context.Context, req *v1.StartVoiceSessionRequest) (*v1.StartVoiceSessionResponse, error) {
+	response, err := c.startVoiceSession.CallUnary(ctx, connect.NewRequest(req))
 	if response != nil {
 		return response.Msg, err
 	}
@@ -338,6 +361,10 @@ type AssistantServiceHandler interface {
 	// for the server's recognizer, signed for the session and valid for a
 	// minute.
 	StartListening(context.Context, *v1.StartListeningRequest) (*v1.StartListeningResponse, error)
+	// StartVoiceSession opens a voice session for the device and returns
+	// the WebSocket URL the client connects to within a minute; it fails
+	// with failed_precondition when no voice session plugin is ready.
+	StartVoiceSession(context.Context, *v1.StartVoiceSessionRequest) (*v1.StartVoiceSessionResponse, error)
 	// ListAssistantConversations lists the user's conversations, newest
 	// first.
 	ListAssistantConversations(context.Context, *v1.ListAssistantConversationsRequest) (*v1.ListAssistantConversationsResponse, error)
@@ -392,6 +419,12 @@ func NewAssistantServiceHandler(svc AssistantServiceHandler, opts ...connect.Han
 		AssistantServiceStartListeningProcedure,
 		svc.StartListening,
 		connect.WithSchema(assistantServiceMethods.ByName("StartListening")),
+		connect.WithHandlerOptions(opts...),
+	)
+	assistantServiceStartVoiceSessionHandler := connect.NewUnaryHandlerSimple(
+		AssistantServiceStartVoiceSessionProcedure,
+		svc.StartVoiceSession,
+		connect.WithSchema(assistantServiceMethods.ByName("StartVoiceSession")),
 		connect.WithHandlerOptions(opts...),
 	)
 	assistantServiceListAssistantConversationsHandler := connect.NewUnaryHandlerSimple(
@@ -456,6 +489,8 @@ func NewAssistantServiceHandler(svc AssistantServiceHandler, opts ...connect.Han
 			assistantServiceGetAssistantHintsHandler.ServeHTTP(w, r)
 		case AssistantServiceStartListeningProcedure:
 			assistantServiceStartListeningHandler.ServeHTTP(w, r)
+		case AssistantServiceStartVoiceSessionProcedure:
+			assistantServiceStartVoiceSessionHandler.ServeHTTP(w, r)
 		case AssistantServiceListAssistantConversationsProcedure:
 			assistantServiceListAssistantConversationsHandler.ServeHTTP(w, r)
 		case AssistantServiceGetAssistantConversationProcedure:
@@ -495,6 +530,10 @@ func (UnimplementedAssistantServiceHandler) GetAssistantHints(context.Context, *
 
 func (UnimplementedAssistantServiceHandler) StartListening(context.Context, *v1.StartListeningRequest) (*v1.StartListeningResponse, error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.assistant.v1.AssistantService.StartListening is not implemented"))
+}
+
+func (UnimplementedAssistantServiceHandler) StartVoiceSession(context.Context, *v1.StartVoiceSessionRequest) (*v1.StartVoiceSessionResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.assistant.v1.AssistantService.StartVoiceSession is not implemented"))
 }
 
 func (UnimplementedAssistantServiceHandler) ListAssistantConversations(context.Context, *v1.ListAssistantConversationsRequest) (*v1.ListAssistantConversationsResponse, error) {
