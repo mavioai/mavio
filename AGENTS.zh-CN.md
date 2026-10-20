@@ -126,7 +126,7 @@ pnpm nx show projects                              # 列出项目（名称 = 目
 
 ## Python 约定
 - Python 只用于需要其生态的子进程插件（`plugins/pipecat`）及其 SDK（`libs/plugin/python`）；服务端与各库仍用 Go。Python 与 uv 由 `mise.toml` 锁定，每个 Python 项目都是根目录 `pyproject.toml` 的 uv workspace 成员，锁定在 `uv.lock` 中。
-- 在项目中用 `uv add` 添加依赖；依赖必须在插件发布的每个平台上都能以 wheel 安装（`--only-binary :all:`），且许可证与 GPL-3.0 兼容。
+- 在项目中用 `uv add` 添加依赖；依赖必须在插件发布的每个平台上都能以 wheel 安装（`--only-binary`），无 wheel 的纯 Python 包除外，项目将其列在 `[tool.mavio] sdists` 中；且许可证与 GPL-3.0 兼容。
 - ruff 负责格式化与检查，pyright 以 strict 模式检查类型；全程使用 asyncio，不阻塞事件循环（CPU 密集的工作放在工作进程或线程中）。
 - 使用 `libs/proto/gen/python` 的消息与 connect-python 存根；不要手写它们。
 

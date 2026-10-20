@@ -126,7 +126,7 @@ Every Go project has these inferred Nx targets: `build` (`CGO_ENABLED=0`), `test
 
 ## Python Conventions
 - Python is used only for process plugins that need its ecosystem (`plugins/pipecat`) and their SDK (`libs/plugin/python`); the server and libraries stay Go. Python and uv are pinned in `mise.toml`, and every Python project is a member of the uv workspace of the root `pyproject.toml`, locked in `uv.lock`.
-- Add dependencies with `uv add` in the project; they must install as wheels on every platform the plugin ships for (`--only-binary :all:`) and have GPL-3.0-compatible licenses.
+- Add dependencies with `uv add` in the project; they must install as wheels on every platform the plugin ships for (`--only-binary`), except pure-Python packages without wheels, which the project lists in `[tool.mavio] sdists`, and have GPL-3.0-compatible licenses.
 - ruff formats and lints, pyright checks types in strict mode; asyncio throughout, with nothing blocking the event loop (CPU-bound work in a worker process or thread).
 - Use the messages and connect-python stubs of `libs/proto/gen/python`; never hand-write them.
 

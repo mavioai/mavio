@@ -1052,13 +1052,18 @@ flowchart TD
 - [ ] A prototype of `plugins/pipecat` before the rest: one pipeline over the server's relay with faster-whisper, Kokoro and an OpenAI-compatible service, Smart Turn on Chinese and English recordings, steer and barge-in, the web UI's echo cancellation in Chrome, Safari and Firefox, and the package's size and wheels on each platform
 - [x] The uv workspace, the Python messages of `libs/proto` and the Python SDK: `serve` on Hypercorn, `host_client`
 - [ ] `tools/nx-uv` in place of the Python projects' `project.json`, and `internal/testplugin` ported to the Python SDK
-- [ ] `VOICE_SESSION` and `SPEECH_TO_TEXT` in `libs/proto` in place of the first speech path's contracts; `plugins/voice` and its whisper dependency deleted
-- [ ] `plugins/pipecat`: the pipeline, the protocol's serializer, the Mavio assistant service, the bundled services and their settings, model downloads, the transcription worker
+- [x] `VOICE_SESSION` and `SPEECH_TO_TEXT` in `libs/proto` in place of the first speech path's contracts; `plugins/voice` and its whisper dependency deleted
+- [x] `plugins/pipecat`: the pipeline, the protocol's serializer, the Mavio assistant service, the bundled services and their settings, model downloads, the transcription worker
 - [x] The server: `StartVoiceSession`, the relay and session tokens (`Mavio-Voice-Session`, `Ask` alone until `SteerAsk` and `AbortAsk` exist)
-- [ ] The server: `SteerAsk` and `AbortAsk` with held effects, kept speech from the relay
-- [ ] The session's turn settings (longest pause, commit delay, idle time) in the assistant settings, in place of the server's constants; the session ending after the idle time, and the modes `push_to_talk` and `dictation`, in the pipeline; the recognizer and voice of the language and the user's hints taken by the pipeline
-- [ ] Steering and aborting in `AGENT_SESSION` and `plugins/agent`, on pi-durable's steer queue and conversation aborts
-- [ ] Packaging `plugins/pipecat` in `tools/plugindist` for the platforms its wheels cover, and seeding it in the container image
+- [x] The server: `SteerAsk` and `AbortAsk` with held effects, kept speech from the relay
+- [x] The session's turn settings (longest pause, commit delay, idle time) in the assistant settings, in place of the server's constants; the session ending after the idle time, and the modes `push_to_talk` and `dictation`, in the pipeline; the recognizer and voice of the language and the user's hints taken by the pipeline
+- [x] Steering and aborting in `AGENT_SESSION` and `plugins/agent`, on pi-durable's steer queue and conversation aborts
+- [x] Packaging `plugins/pipecat` in `tools/plugindist` for the platforms its wheels cover, and seeding it in the container image
+- [ ] The end-to-end voice test of **Done when**, through the built `plugins/pipecat` with fake services: a steered recording, barge-in aborting the run and the answer's speech kept; its faster-whisper transcriber on an episode, in place of the transcription coverage the server's tests lost with `plugins/voice`; and a test of the AI path dropping the held calls of a steered run
+- [ ] Barge-in once a couple of words are recognized rather than at the start of speech, so that a cough does not abort the answer
+- [ ] More of Pipecat's services bundled: Azure, Google, AssemblyAI, Soniox, Speechmatics, Piper, and MLX Whisper on macOS; the users' hints passed to Cartesia and ElevenLabs
+- [ ] The progress of `download_models` shown as a task's
+- [ ] Packages of `plugins/pipecat` for Windows (a launcher of its own, and ctranslate2's wheels on arm64) and macOS on amd64 (llvmlite has no wheels)
 - [ ] Later: SmallWebRTC as a transport beside the WebSocket, for weak networks, with TURN on mavio.dev for servers reached through the relay and UDP ports in the container image
 - [ ] Later: Opus for the answer's speech on the WebSocket
 - [ ] The web player: the subtitle offset and queues of several items, which the assistant's actions ask for and the player cannot yet carry out; V listed with the player's shortcuts

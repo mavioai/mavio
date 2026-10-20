@@ -72,7 +72,7 @@ Nx 只做编排与缓存：每个 Go 模块仍然可以独立地 `go build` / `g
 
 `plugins/agent` 是由 Bun（`mise.toml` 锁定的版本）运行的 TypeScript 子进程插件：它有 `typecheck`、`test`（`bun test`）、`build`（`bun build --compile`：为本平台生成一个可执行文件，与其清单一起放在 `dist/plugin` 中，即服务端可以启动的插件目录；`bun scripts/build.ts linux/arm64 <目录>` 构建其他平台的，放入另一个目录）。可执行文件自带 Bun 运行时，因此服务端无需为它安装任何东西；Bun 原样运行 `node:http2`、`node:sqlite` 与 npm 包。其依赖与 Web UI 的一样来自 pnpm workspace；没有任何东西需要其安装脚本的包在 `pnpm-workspace.yaml` 的 `allowBuilds` 中被拒绝。
 
-`tools/nx-uv` 为 uv workspace 的每个成员生成 `test`（`uv run --frozen pytest`）、`lint`（`ruff check`、`ruff format --check` 与 `pyright`）与 `tidy-check`（`uv lock --check`）；`plugins/pipecat` 另有 `build`，它在 `dist/plugin` 中为本平台组装插件目录——其清单、本地化文件、一个 python-build-standalone 的 CPython、由 `uv pip install --target` 按锁文件安装的依赖及其启动器——并像 `plugins/pipecat/scripts/build.py linux/arm64 <目录>` 那样接受其他平台，因为 uv 能安装任何平台的 wheel（`--python-platform`、`--only-binary :all:`）；它为每个依赖都有 wheel 的平台打包（[架构 §12](architecture.zh-CN.md#12-分发)）。
+`tools/nx-uv` 为 uv workspace 的每个成员生成 `test`（`uv run --frozen pytest`）、`lint`（`ruff check`、`ruff format --check` 与 `pyright`）与 `tidy-check`（`uv lock --check`）；`plugins/pipecat` 另有 `build`，它在 `dist/plugin` 中为本平台组装插件目录——其清单、本地化文件、一个 python-build-standalone 的 CPython、由 `uv pip install --target` 按锁文件安装的依赖及其启动器——由 `tools/plugindist` 构建（`go run ./cmd/plugindist -python ../../plugins/pipecat [-platform linux/arm64] [-folder <目录>]`），也可为其他平台构建，因为 uv 能安装任何平台的 wheel（`--python-platform`，除项目在 `[tool.mavio] sdists` 中列出的无 wheel 纯 Python 包外，其余包均 `--only-binary`）；它为每个依赖都有 wheel 的平台打包，即 amd64 与 arm64 上的 Linux 和 arm64 上的 macOS，其他平台跳过（[架构 §12](architecture.zh-CN.md#12-分发)）。
 
 `libs/client-rust/capi` 既是 Cargo workspace 的 crate，又是 Go 模块，即 C ABI 的 Go 绑定；作为位于 Cargo workspace 目录中的 Go 项目，它是 Nx 项目 `capi`，Nx 把其中的文件算作它自己的，因此 `client-rust` 的 Cargo 目标在输入中列出它的 Rust 源码（`libs/client-rust/project.json`）。其 `test` 在 `client-rust:build` 之后以 `CGO_ENABLED=0` 运行（与应用的构建方式一致），从 `target/debug` 加载该库；`generate` 为 `libs/client-rust/proto` 中 C ABI 的消息运行 `buf generate`，把 Go 写入 `gen/`、Rust 写入 `src/gen/`（均提交入库），`buf-lint` 检查这些消息。
 
@@ -165,7 +165,7 @@ go build -o plugin .                                                     # 子�
 
 Python 子进程插件使用 Python SDK（`mavio-plugin`），由其 `build` 目标构建（§2.2）。
 
-插件目录包含 `manifest.json`、`plugin.wasm` 或 `plugin`（Windows 上为 `plugin.exe`；Python 插件则为其启动器，旁边是其 `python/` 与 `site-packages/`），以及可选的 `locales/<BCP 47 标签>.json`，即以英文为键的清单字符串译文（[架构 §7.5](architecture.zh-CN.md#75-服务端中的插件)）。
+插件目录包含 `manifest.json`、`plugin.wasm` 或 `plugin`（Windows 上为 `plugin.exe`；Python 插件则为其启动器，旁边是在 `site-packages` 中包含其依赖的 `python/`），以及可选的 `locales/<BCP 47 标签>.json`，即以英文为键的清单字符串译文（[架构 §7.5](architecture.zh-CN.md#75-服务端中的插件)）。
 
 ### 4.4 设计系统
 `pnpm nx run design:generate` 运行 `libs/design/build/build.js`，把设计系统（[客户端 §6](clients.zh-CN.md#6-设计系统)）的源文件编译到 `libs/design/gen`：
@@ -238,7 +238,7 @@ CI 中的工具链同样来自 `mise.toml`（`jdx/mise-action`）；**media** �
 
 服务端的发布二进制用 `VERSION=v0.1.0 pnpm nx run server:dist` 构建；镜像在仓库根目录用 `docker buildx build -f apps/server/Dockerfile --build-arg VERSION=v0.1.0 --platform linux/amd64,linux/arm64 .` 构建。Dockerfile 锁定与 `mise.toml` 相同的 jellyfin-ffmpeg 版本，并记录其两个 Linux 便携版的 SHA-256 摘要；升级 jellyfin-ffmpeg 时需同时修改这两个文件，两处锁定不一致时一个测试（`apps/server/internal/buildinfo`）会失败。镜像在 `/usr/local/bin/rclone` 内置 `mise.toml` 锁定的 mavioai/rclone 发布版本的 Linux 构建，并按相同的 SHA-256 摘要校验，同一测试比对两处锁定。fork 的发布版本是其 `mavio` 分支上的标签 `v<rclone 版本>-mavio`，该分支在 rclone 发布版本之上只有一个提交；推送标签会运行 fork 的 `mavio release` 工作流，它不启用 cgo，为 Linux、macOS 与 Windows 的 amd64 和 arm64 交叉编译 rclone，并把 zip 与 `SHA256SUMS.txt` 附加到该标签的发布中。升级时需同时修改两个文件中的版本与摘要。镜像还会构建 DLNA、索引器、下载客户端、字幕与智能体插件，并将它们放在插件种子目录 `/usr/lib/mavio/plugins` 中；智能体插件用 `mise.toml` 锁定的 Bun 版本编译，同一测试比较二者。
 
-第一方插件由 `tools/plugindist` 依据其清单打包：`plugins/` 中的每个插件按清单中的版本打成包含其 `manifest.json`、译文与可执行文件的目录 zip 包，进程插件每个服务端平台一个，WASM 插件所有平台共用一个；并生成列出它们及其名称、简介及其译文、作者、主页、分类与 SHA-256 摘要的 `catalog.json`；缺少分类的插件使其失败。第一方插件翻译为客户端字符串所用的语言：`tools/plugindist` 的测试检查其配置 schema 的每个属性都有标题，且其 `locales/zh-Hans.json` 翻译了清单中的每个字符串。`pnpm nx run plugindist:dist` 把全部插件构建到 `tools/plugindist/dist/`，URL 相对于目录，与发布的形式一致；`-platforms` 限定平台。
+第一方插件由 `tools/plugindist` 依据其清单打包：`plugins/` 中的每个插件按清单中的版本打成包含其 `manifest.json`、译文与可执行文件的目录 zip 包，进程插件每个服务端平台一个（Python 插件为其完整目录，含 python-build-standalone 的 CPython 及其依赖，限其依赖有 wheel 的平台），WASM 插件所有平台共用一个；并生成列出它们及其名称、简介及其译文、作者、主页、分类与 SHA-256 摘要的 `catalog.json`；缺少分类的插件使其失败。第一方插件翻译为客户端字符串所用的语言：`tools/plugindist` 的测试检查其配置 schema 的每个属性都有标题，且其 `locales/zh-Hans.json` 翻译了清单中的每个字符串。`pnpm nx run plugindist:dist` 把全部插件构建到 `tools/plugindist/dist/`，URL 相对于目录，与发布的形式一致；`-platforms` 限定平台。
 
 官方插件目录是 mavioai/plugins 仓库最新发布版本的 `catalog.json`，也是服务端 `plugin-catalog` 设置的默认值；其发布版本包含 `plugindist:dist` 从 Mavio 某个发布版本的源码构建的包。开发用服务端则用 `pnpm nx run plugindist:catalog` 为本平台把插件构建到各插件的 `dist/`，并写入 `plugins/catalog.json`（Git 忽略），其中的包是 file URL；以 `--plugin-catalog ../../plugins/catalog.json` 启动的服务端从中安装插件。
 
