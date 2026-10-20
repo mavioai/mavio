@@ -73,9 +73,13 @@ class Models:
         self._downloading: dict[ModelRef, asyncio.Task[None]] = {}
 
     def ready(self, ref: ModelRef | None) -> bool:
-        """Whether a model is downloaded, blocking; no model is."""
+        """Whether a model is downloaded, blocking; no model is. One
+        downloading is not, though speaches lists a Whisper model as soon as
+        its download starts."""
         if ref is None:
             return True
+        if ref in self._downloading:
+            return False
         match ref.kind:
             case "whisper":
                 return self.speaches.has(ref.name)

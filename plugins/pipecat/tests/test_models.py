@@ -1,3 +1,4 @@
+import asyncio
 import json
 from pathlib import Path
 
@@ -73,6 +74,23 @@ async def test_download_asks_the_container(tmp_path: Path):
     got = await models.download([whisper_model(_TINY), kokoro_model()])
     assert got == [f"whisper {_TINY}"], f"downloaded = {got}"
     assert speaches.downloaded == [_TINY]
+
+
+async def test_a_model_downloading_is_not_ready(tmp_path: Path):
+    release = asyncio.Event()
+
+    class Slow(FakeSpeaches):
+        async def download(self, model: str) -> None:
+            self.models.add(model)
+            await release.wait()
+
+    models = Models(tmp_path, Slow())
+    task = asyncio.create_task(models.download([whisper_model(_TINY)]))
+    await asyncio.sleep(0)
+    assert not models.ready(whisper_model(_TINY)), "ready while downloading"
+    release.set()
+    await task
+    assert models.ready(whisper_model(_TINY)), "not ready once downloaded"
 
 
 async def test_download_reports_progress(tmp_path: Path):
