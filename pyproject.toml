@@ -19,6 +19,8 @@ reportUnknownMemberType = false
 # The contracts' generated messages are checked as the workspace's source,
 # their stubs (.pyi) beside them.
 extraPaths = ["libs/proto/gen/python/src"]
+# Plugins built into dist/ hold their Python and dependencies.
+exclude = ["**/node_modules", "**/__pycache__", "**/.*", "**/dist"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["mavio", "mavio_pipecat", "mavio_plugin"]
