@@ -1,5 +1,6 @@
 """A voice session's pipeline on a WebSocket (docs/assistant.md §8.2)."""
 
+import re
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
 from typing import Any
@@ -10,12 +11,16 @@ from pipecat.audio.turn.smart_turn.base_smart_turn import SmartTurnParams
 from pipecat.audio.turn.smart_turn.local_smart_turn_v3 import LocalSmartTurnAnalyzerV3
 from pipecat.audio.vad.silero import SileroVADAnalyzer
 from pipecat.frames.frames import (
+    BotStartedSpeakingFrame,
+    BotStoppedSpeakingFrame,
     Frame,
     InputAudioRawFrame,
     InputTransportMessageFrame,
+    InterimTranscriptionFrame,
     OutputTransportMessageUrgentFrame,
     ProposedUserStartedSpeakingFrame,
     ProposedUserStoppedSpeakingFrame,
+    TranscriptionFrame,
 )
 from pipecat.pipeline.pipeline import Pipeline
 from pipecat.pipeline.worker import PipelineParams, PipelineWorker
@@ -29,7 +34,12 @@ from pipecat.transports.websocket.fastapi import (
     FastAPIWebsocketParams,
     FastAPIWebsocketTransport,
 )
-from pipecat.turns.user_start import ExternalUserTurnStartStrategy
+from pipecat.turns.types import ProcessFrameResult
+from pipecat.turns.user_start import (
+    ExternalUserTurnStartStrategy,
+    MinWordsUserTurnStartStrategy,
+    VADUserTurnStartStrategy,
+)
 from pipecat.turns.user_stop import ExternalUserTurnStopStrategy, TurnAnalyzerUserTurnStopStrategy
 from pipecat.turns.user_turn_strategies import UserTurnStrategies
 from pipecat.workers.runner import WorkerRunner
@@ -43,6 +53,19 @@ from mavio_pipecat.serializer import INPUT_SAMPLE_RATE, OUTPUT_SAMPLE_RATE, Mavi
 # The defaults of the turn settings (docs/assistant.md §10).
 LONGEST_PAUSE = 3.0
 SESSION_IDLE = 8.0
+# The words recognized that interrupt the assistant speaking.
+BARGE_IN_WORDS = 2
+
+# Han, kana and their marks: each character is a word of languages
+# written without spaces.
+_CJK = re.compile(r"[\u3005\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff]")
+
+
+def words(text: str) -> int:
+    """The words of a transcript: those between spaces, each Chinese or
+    Japanese character counting as one."""
+    cjk = len(_CJK.findall(text))
+    return cjk + len(_CJK.sub(" ", text).split())
 
 
 @dataclass
@@ -113,15 +136,56 @@ class PushToTalk(FrameProcessor):
         await self.push_frame(frame, direction)
 
 
+class QuietVADStart(VADUserTurnStartStrategy):
+    """VAD starts the user's turn while the assistant is silent; while it
+    speaks, BargeIn does."""
+
+    def __init__(self, **kwargs: Any):
+        super().__init__(**kwargs)
+        self._speaking = False
+
+    async def process_frame(self, frame: Frame) -> ProcessFrameResult:
+        if isinstance(frame, BotStartedSpeakingFrame):
+            self._speaking = True
+        elif isinstance(frame, BotStoppedSpeakingFrame):
+            self._speaking = False
+        elif self._speaking:
+            return ProcessFrameResult.CONTINUE
+        return await super().process_frame(frame)
+
+
+class BargeIn(MinWordsUserTurnStartStrategy):
+    """Starts the user's turn while the assistant speaks once BARGE_IN_WORDS
+    words are recognized, so that a cough, "mm" or the assistant's own echo
+    does not interrupt it; what is recognized short of them is dropped. The
+    words are counted as words does."""
+
+    def __init__(self, **kwargs: Any):
+        super().__init__(min_words=BARGE_IN_WORDS, **kwargs)
+
+    async def _handle_transcription(
+        self, frame: TranscriptionFrame | InterimTranscriptionFrame
+    ) -> ProcessFrameResult:
+        if words(frame.text) >= (self._min_words if self._bot_speaking else 1):
+            await self.trigger_user_turn_started()
+            return ProcessFrameResult.STOP
+        await self.trigger_reset_aggregation()
+        return ProcessFrameResult.CONTINUE
+
+
 def _strategies(turns: Turns) -> UserTurnStrategies:
     if turns.mode == voice_pb2.VOICE_MODE_PUSH_TO_TALK:
         return UserTurnStrategies(
             start=[ExternalUserTurnStartStrategy()], stop=[ExternalUserTurnStopStrategy()]
         )
-    # VAD or a transcript starts the user's turn; Smart Turn ends it, or
-    # the longest pause does.
+    # VAD or a transcript starts the user's turn, only the words of one
+    # while the assistant speaks; Smart Turn ends it, or the longest pause
+    # does.
     analyzer = LocalSmartTurnAnalyzerV3(params=SmartTurnParams(stop_secs=turns.longest_pause))
-    return UserTurnStrategies(stop=[TurnAnalyzerUserTurnStopStrategy(turn_analyzer=analyzer)])
+    return UserTurnStrategies(
+        start=[QuietVADStart(), BargeIn()],
+        stop=[TurnAnalyzerUserTurnStopStrategy(turn_analyzer=analyzer)],
+    )
 
 
 async def run_session(
