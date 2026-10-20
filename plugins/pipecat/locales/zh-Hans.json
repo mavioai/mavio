@@ -25,12 +25,12 @@
   "API key": "API 密钥",
   "Voice": "语音",
   "The voice's ID": "语音的 ID",
-  "A Kokoro voice, named after its language: af_heart, bf_emma, zf_xiaobei, jf_alpha…": "Kokoro 语音，名称以其语言开头：af_heart、bf_emma、zf_xiaobei、jf_alpha…",
+  "Kokoro voices, separated by commas, named after their language: af_heart, bf_emma, zf_xiaobei, jf_alpha…; a session speaks with the first of its language": "Kokoro 声音，以逗号分隔，名称以其语言开头：af_heart、bf_emma、zf_xiaobei、jf_alpha…；会话使用第一个说其语言的声音",
   "OpenAI-compatible": "OpenAI 兼容",
   "Only the ink-2 models take the users' hints": "只有 ink-2 模型接受用户的提示词",
   "Service account key": "服务账号密钥",
   "The JSON key of a Google Cloud service account": "Google Cloud 服务账号的 JSON 密钥",
   "Location": "位置",
-  "A Piper voice, named after its language: en_US-lessac-medium, zh_CN-huayan-medium, de_DE-thorsten-medium…": "Piper 语音，名称以其语言开头：en_US-lessac-medium、zh_CN-huayan-medium、de_DE-thorsten-medium…",
+  "Piper voices, separated by commas, named after their language: en_US-lessac-medium, zh_CN-huayan-medium, de_DE-thorsten-medium…; each is downloaded, and a session speaks with the first of its language": "Piper 声音，以逗号分隔，名称以其语言开头：en_US-lessac-medium、zh_CN-huayan-medium、de_DE-thorsten-medium…；每个都会下载，会话使用第一个说其语言的声音",
   "A Chirp 3 HD voice, named after its language: en-US-Chirp3-HD-Charon, cmn-CN-Chirp3-HD-Aoede…": "Chirp 3 HD 语音，名称以其语言开头：en-US-Chirp3-HD-Charon、cmn-CN-Chirp3-HD-Aoede…"
 }
