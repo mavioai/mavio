@@ -1,6 +1,8 @@
 """A voice session's pipeline on a WebSocket (docs/assistant.md §8.2)."""
 
+import math
 import re
+import time
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
 from typing import Any
@@ -10,6 +12,7 @@ from loguru import logger
 from pipecat.audio.turn.smart_turn.base_smart_turn import SmartTurnParams
 from pipecat.audio.turn.smart_turn.local_smart_turn_v3 import LocalSmartTurnAnalyzerV3
 from pipecat.audio.vad.silero import SileroVADAnalyzer
+from pipecat.audio.volume import VOLUME_WINDOW_SECS
 from pipecat.frames.frames import (
     BotStartedSpeakingFrame,
     BotStoppedSpeakingFrame,
@@ -21,6 +24,10 @@ from pipecat.frames.frames import (
     ProposedUserStartedSpeakingFrame,
     ProposedUserStoppedSpeakingFrame,
     TranscriptionFrame,
+    UserStartedSpeakingFrame,
+    UserStoppedSpeakingFrame,
+    VADUserStartedSpeakingFrame,
+    VADUserStoppedSpeakingFrame,
 )
 from pipecat.pipeline.pipeline import Pipeline
 from pipecat.pipeline.worker import PipelineParams, PipelineWorker
@@ -136,6 +143,77 @@ class PushToTalk(FrameProcessor):
         await self.push_frame(frame, direction)
 
 
+class SessionLog(FrameProcessor):
+    """Logs when the session's audio comes and what the VAD, the turns and
+    the assistant's speech do, in seconds since the session started, which
+    tell where a turn waits. It sits after the input transport, where the
+    microphone's audio passes downstream and the others upstream."""
+
+    def __init__(self, **kwargs: Any):
+        super().__init__(**kwargs)
+        self._start = time.monotonic()
+        self._audio = 0.0
+        self._first: float | None = None
+
+    def _log(self, what: str) -> None:
+        logger.info(f"voice session at {time.monotonic() - self._start:.2f}s: {what}")
+
+    async def process_frame(self, frame: Frame, direction: FrameDirection) -> None:
+        await super().process_frame(frame, direction)
+        await self.push_frame(frame, direction)
+        if isinstance(frame, InputAudioRawFrame):
+            self._audio += len(frame.audio) / (2 * frame.num_channels * frame.sample_rate)
+            now = time.monotonic()
+            if self._first is None:
+                self._first = now
+                self._log("the first audio")
+            elif now - self._first >= 1 and self._first > 0:
+                # Audio held while the socket opened comes at once.
+                self._first = -1.0
+                self._log(f"{self._audio:.2f}s of audio in its first second")
+            return
+        match frame:
+            case VADUserStartedSpeakingFrame():
+                self._log("the VAD hears speech")
+            case VADUserStoppedSpeakingFrame():
+                self._log("the VAD hears silence")
+            case UserStartedSpeakingFrame():
+                self._log("the user's turn starts")
+            case UserStoppedSpeakingFrame():
+                self._log("the user's turn ends")
+            case BotStartedSpeakingFrame():
+                self._log("the assistant speaks")
+            case _:
+                pass
+
+
+class PromptVAD(SileroVADAnalyzer):
+    """Silero VAD that hears speech from a session's first audio. Pipecat
+    measures the volume only once its window holds 400 ms of audio, and
+    smooths it up from nothing, so that with the start's 0.2 s no speech is
+    heard in about the first 0.85 s: what a user says as the session opens,
+    held while its socket opened, was lost. The window starts full of
+    silence, and the smoothing from the first volume measured."""
+
+    def __init__(self, **kwargs: Any):
+        super().__init__(**kwargs)
+        self._measured = False
+
+    def set_sample_rate(self, sample_rate: int) -> None:
+        super().set_sample_rate(sample_rate)
+        silence = bytes(math.ceil(VOLUME_WINDOW_SECS * self.sample_rate) * 2)
+        self._volume_tracker.update(silence, self.sample_rate)
+
+    def _get_smoothed_volume(self, audio: bytes) -> float:
+        if not self._measured:
+            self._measured = True
+            self._volume_tracker.update(audio, self.sample_rate)
+            self._prev_volume = self._volume_tracker.volume
+            return self._prev_volume
+        self._prev_volume = super()._get_smoothed_volume(audio)
+        return self._prev_volume
+
+
 class QuietVADStart(VADUserTurnStartStrategy):
     """VAD starts the user's turn while the assistant is silent; while it
     speaks, BargeIn does."""
@@ -215,12 +293,12 @@ async def run_session(
     user_aggregator, assistant_aggregator = LLMContextAggregatorPair(
         LLMContext(),
         user_params=LLMUserAggregatorParams(
-            vad_analyzer=SileroVADAnalyzer(),
+            vad_analyzer=PromptVAD(),
             user_turn_strategies=_strategies(turns),
             user_idle_timeout=0 if dictation else turns.idle,
         ),
     )
-    processors: list[FrameProcessor] = [transport.input()]
+    processors: list[FrameProcessor] = [transport.input(), SessionLog()]
     if turns.mode == voice_pb2.VOICE_MODE_PUSH_TO_TALK:
         processors.append(PushToTalk())
     processors += [services.stt, SessionEvents(), user_aggregator]

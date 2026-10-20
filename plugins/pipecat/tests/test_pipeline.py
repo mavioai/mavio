@@ -69,3 +69,20 @@ async def test_barge_in_takes_two_words_while_the_assistant_speaks():
         [BotStartedSpeakingFrame(), _said("mm"), _said("嗯"), _said("停下", interim=True)],
     )
     assert got == ["reset", "reset", "started"], f"while speaking, got = {got}"
+
+
+def test_the_vad_measures_the_volume_of_a_sessions_first_audio():
+    import array
+    import math
+
+    from mavio_pipecat.pipeline import PromptVAD
+
+    # 64 ms of a tone at about -30 dBFS, as loud as speech.
+    tone = array.array(
+        "h", (int(1000 * math.sin(2 * math.pi * 300 * i / 16000)) for i in range(1024))
+    ).tobytes()
+    vad = PromptVAD()
+    vad.set_sample_rate(16000)
+    got = [vad._get_smoothed_volume(tone[i : i + 1024]) for i in (0, 1024)]  # pyright: ignore[reportPrivateUsage]
+    min_volume = vad.params.min_volume
+    assert all(v >= min_volume for v in got), f"volumes = {got}, want >= {min_volume}"
