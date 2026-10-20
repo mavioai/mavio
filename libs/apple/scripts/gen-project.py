@@ -58,6 +58,11 @@ PLATFORMS = {
             "ENABLE_USER_SELECTED_FILES": "readonly",
             "INFOPLIST_KEY_LSApplicationCategoryType": '"public.app-category.entertainment"',
             "INFOPLIST_KEY_NSPrincipalClass": "NSApplication",
+            # As on the iPhone: plain HTTP on the local network, links of the
+            # app's scheme, and the development mavio.dev a debug build signs
+            # in at.
+            "INFOPLIST_FILE": "Info.plist",
+            "INFOPLIST_KEY_NSLocalNetworkUsageDescription": '"Mavio finds and connects to media servers on your network."',
             "LD_RUNPATH_SEARCH_PATHS": '"$(inherited) @executable_path/../Frameworks"',
         },
     },

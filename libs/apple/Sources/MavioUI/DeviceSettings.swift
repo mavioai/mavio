@@ -30,6 +30,9 @@ public enum DeviceSetting {
     public static let appearance = "appearance"
     /// Whether the next episode plays when one ends.
     public static let autoplayNext = "player.autoplayNext"
+    /// Whether each video plays in a window of its own, on the Mac, rather
+    /// than in place of what plays in the player's window.
+    public static let playerWindows = "player.windows"
 }
 
 /// The most the server sends this device, as the web UI's qualities.
