@@ -343,8 +343,9 @@ function PluginPage({ server, id }: { server: ServerEntry; id: string }) {
       <BackToList />
       <header className="flex flex-wrap items-center gap-4">
         <CategoryTile category={e.category} size={64} />
-        <div className="min-w-0 flex-1">
-          <h2 className="type-title1">{e.name}</h2>
+        {/* A plugin whose manifest cannot be read is named by its long ID: the buttons wrap below rather than squeeze it. */}
+        <div className="min-w-48 flex-1">
+          <h2 className="type-title1 wrap-anywhere">{e.name}</h2>
           {e.author && <p className="type-body text-text-secondary">{t("plugins.by", { author: e.author })}</p>}
         </div>
         <div className="flex flex-wrap items-center gap-3">
@@ -386,21 +387,14 @@ function PluginPage({ server, id }: { server: ServerEntry; id: string }) {
         </div>
       </header>
       {confirming && (
-        <Group>
-          <Row label={t("plugins.uninstallTitle", { name: e.name })} detail={t("plugins.uninstallMessage")}>
-            <Button variant="plain" onClick={() => setConfirming(false)}>
-              {t("action.cancel")}
-            </Button>
-            <Button
-              variant="secondary"
-              className="text-danger"
-              disabled={actions.uninstall.isPending}
-              onClick={() => actions.uninstall.mutate(id, { onSettled: () => setConfirming(false) })}
-            >
-              {t("plugins.uninstall")}
-            </Button>
-          </Row>
-        </Group>
+        <Confirm
+          title={t("plugins.uninstallTitle", { name: e.name })}
+          message={t("plugins.uninstallMessage")}
+          action={t("plugins.uninstall")}
+          busy={actions.uninstall.isPending}
+          onCancel={() => setConfirming(false)}
+          onConfirm={() => actions.uninstall.mutate(id, { onSettled: () => setConfirming(false) })}
+        />
       )}
       {failure && <p className="type-callout text-danger">{errorMessage(failure)}</p>}
       {e.description && <p className="type-body">{e.description}</p>}
