@@ -63,7 +63,7 @@ struct SubtitlesAudioView: View {
                 ProgressView()
             } else if saved != nil {
                 Button(MavioStrings.actionSave, action: save)
-                    .disabled(!changed || Self.languages(audio) == nil || Self.languages(subtitles) == nil)
+                    .disabled(!changed || languageCodes(audio) == nil || languageCodes(subtitles) == nil)
             }
         }
         // Coming back from the mode's list keeps what was typed.
@@ -79,15 +79,15 @@ struct SubtitlesAudioView: View {
                 .textInputAutocapitalization(.never)
                 .autocorrectionDisabled()
                 .foregroundStyle(
-                    Self.languages(text.wrappedValue) == nil ? theme.colors.danger : theme.colors.textPrimary)
+                    languageCodes(text.wrappedValue) == nil ? theme.colors.danger : theme.colors.textPrimary)
         }
         .padding(.vertical, 2)
     }
 
     private var changed: Bool {
         guard let saved else { return false }
-        return Self.languages(audio) != saved.audioLanguages
-            || Self.languages(subtitles) != saved.subtitleLanguages || mode != saved.subtitleMode
+        return languageCodes(audio) != saved.audioLanguages
+            || languageCodes(subtitles) != saved.subtitleLanguages || mode != saved.subtitleMode
     }
 
     private func load() async {
@@ -108,7 +108,7 @@ struct SubtitlesAudioView: View {
     }
 
     private func save() {
-        guard var prefs = saved, let a = Self.languages(audio), let s = Self.languages(subtitles) else { return }
+        guard var prefs = saved, let a = languageCodes(audio), let s = languageCodes(subtitles) else { return }
         prefs.audioLanguages = a
         prefs.subtitleLanguages = s
         prefs.subtitleMode = mode
@@ -124,15 +124,6 @@ struct SubtitlesAudioView: View {
                 failure = (error as? CoreError)?.reason ?? error.localizedDescription
             }
         }
-    }
-
-    /// Three-letter codes from a field: lowercase, separated by commas or
-    /// spaces; nil when one is not three letters.
-    static func languages(_ s: String) -> [String]? {
-        let list = s.lowercased()
-            .split(whereSeparator: { $0.isWhitespace || ",，、".contains($0) })
-            .map(String.init)
-        return list.allSatisfy { $0.count == 3 && $0.allSatisfy { ("a"..."z").contains($0) } } ? list : nil
     }
 }
 

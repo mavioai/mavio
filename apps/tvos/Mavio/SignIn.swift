@@ -4,14 +4,18 @@ import SwiftUI
 
 /// Signing in (docs/tv.md §6.5): a Mavio account with a code entered at
 /// mavio.dev/link; without one, a server by its address, typed or found
-/// nearby, with Quick Connect first, or a user's name and password.
+/// nearby, with Quick Connect first, or a user's name and password. Adding
+/// a server starts at its address, and closes once signed in or on back.
 struct SignInView: View {
+    var adding = false
+
     private enum Step: Hashable {
         case link, address, credentials, quickConnect, setUp
     }
 
     @Environment(AppModel.self) private var model
     @Environment(\.theme) private var theme
+    @Environment(\.dismiss) private var dismiss
     @State private var step = Step.link
     @State private var history: [Step] = []
     @State private var info: ServerInfo?
@@ -44,7 +48,8 @@ struct SignInView: View {
         .padding(theme.layout.margin)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .disabled(busy)
-        .onExitCommand(perform: history.isEmpty ? nil : { back() })
+        .onExitCommand(perform: history.isEmpty ? (adding ? { dismiss() } : nil) : { back() })
+        .onAppear { if adding { step = .address } }
         .task { found = (try? await model.client.discover(wait: 2)) ?? [] }
         .task(id: quickConnect.map(ObjectIdentifier.init)) { await pollQuickConnect() }
         .task(id: step == .link ? linkAttempt : nil) { if step == .link { await runLink() } }
@@ -245,6 +250,7 @@ struct SignInView: View {
         await run {
             try await model.signIn(
                 address: info.address, name: name.trimmingCharacters(in: .whitespaces), password: password)
+            if adding { dismiss() }
         }
     }
 
@@ -262,7 +268,10 @@ struct SignInView: View {
             try? await Task.sleep(for: .seconds(3))
             guard !Task.isCancelled else { return }
             do {
-                if try await model.pollQuickConnect(request) != nil { return }
+                if try await model.pollQuickConnect(request) != nil {
+                    if adding { dismiss() }
+                    return
+                }
             } catch {
                 self.error = error.reason
                 return

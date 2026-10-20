@@ -141,11 +141,12 @@ struct RootView: View {
         .onOpenURL { router.open($0) }
         #if DEBUG
             // A debug build opens a link given at launch (`-open <url>`),
-            // with no remote to confirm it.
+            // with no remote to confirm it, or the settings (`-settings YES`).
             .task {
                 if let link = UserDefaults.standard.string(forKey: "open"), let url = URL(string: link) {
                     router.open(url)
                 }
+                if UserDefaults.standard.bool(forKey: "settings") { router.settings = true }
             }
             // Or a tab (`-tab discover`), once the bar shows it.
             .onChange(of: discovery.server?.id, initial: true) {

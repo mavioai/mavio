@@ -438,3 +438,12 @@ extension Mavio_Plugin_V1_ProductionStatus {
 public func minutesText(_ seconds: TimeInterval) -> String {
     Duration.seconds((seconds / 60).rounded() * 60).formatted(.units(allowed: [.hours, .minutes], width: .narrow))
 }
+
+/// Three-letter language codes from a field: lowercase, separated by commas
+/// or spaces; nil when one is not three letters.
+public func languageCodes(_ s: String) -> [String]? {
+    let list = s.lowercased()
+        .split(whereSeparator: { $0.isWhitespace || ",，、".contains($0) })
+        .map(String.init)
+    return list.allSatisfy { $0.count == 3 && $0.allSatisfy { ("a"..."z").contains($0) } } ? list : nil
+}
