@@ -214,39 +214,58 @@ function draw(now) {
     if (stack) stack.style.opacity = String(1 - gone);
     const red = orbMode === "error" ? Math.max(0, 1 - t / 1.4) : 0;
     g.clearRect(0, 0, W, W);
-    // Added up, the colors burn to white at the core, which glows on a dark
-    // page and washes out on a light one: there they are laid over each
-    // other, deeper, so that the core keeps its color.
+    // A sphere of glass with colored light flowing inside it. On a dark page
+    // the colors add up, glowing white at the core and a little around the
+    // sphere; on a light one they are deeper and laid over each other, so
+    // that the core keeps its color and the edge stays crisp.
     const light = document.documentElement.dataset.theme === "light";
-    g.globalCompositeOperation = light ? "source-over" : "lighter";
     const shrink = 1 - cur_.flash * .35;
-    if (light) {
-      // On a light page soft edges read as a smudge: the blobs are clipped
-      // to a crisp sphere, a ring while thinking, over a wash of the blue.
-      const edge = base * (cur_.size + cur_.lv * .45) * shrink * .92;
-      g.save();
-      g.beginPath();
-      g.arc(R, R, edge, 0, Math.PI * 2);
-      if (cur_.ring > .02) g.arc(R, R, edge * .5 * cur_.ring, 0, Math.PI * 2, true);
-      g.clip("evenodd");
-      g.fillStyle = `rgba(${blobs[2].l},${.55 * cur_.bright})`;
-      g.fillRect(0, 0, W, W);
-    }
-    blobs.forEach((b, i) => {
+    const edge = base * (cur_.size + cur_.lv * .45) * shrink * .92;
+    const lights = (alpha) => blobs.forEach((b) => {
       const a = phase * b.sp * 2 + b.ph;
       const orbit = base * (cur_.spread * (1 - cur_.ring) + cur_.ring * .55 + cur_.lv * .25) * shrink;
       const x = R + Math.cos(a) * orbit, y = R + Math.sin(a * (1 + .3 * (1 - cur_.ring))) * orbit;
       const rad = base * (cur_.size + cur_.lv * .45) * shrink;
       const col = (light ? b.l : b.c).map((v, j) => Math.round(v + ([255, 70, 80][j] - v) * red));
       const grd = g.createRadialGradient(x, y, 0, x, y, rad);
-      // On a light page a long soft tail reads as a smudge: the blobs keep
-      // their color further out and end in a short falloff.
-      grd.addColorStop(0, `rgba(${col},${.9 * cur_.bright})`);
-      grd.addColorStop(.55, `rgba(${col},${(light ? .5 : .35) * cur_.bright})`);
+      grd.addColorStop(0, `rgba(${col},${.9 * alpha * cur_.bright})`);
+      grd.addColorStop(.55, `rgba(${col},${(light ? .5 : .35) * alpha * cur_.bright})`);
       grd.addColorStop(1, `rgba(${col},0)`);
       g.fillStyle = grd; g.fillRect(0, 0, W, W);
     });
-    if (light) g.restore();
+    const at = (x, y, r0, r1, stops) => {
+      const grd = g.createRadialGradient(x, y, r0, x, y, r1);
+      for (const [o, c] of stops) grd.addColorStop(o, c);
+      g.fillStyle = grd; g.fillRect(-2 * W, -2 * W, 4 * W, 4 * W);
+    };
+    // The glow around the sphere, on a dark page.
+    if (!light) {
+      g.globalCompositeOperation = "lighter";
+      lights(.3);
+    }
+    g.save();
+    g.beginPath();
+    g.arc(R, R, edge, 0, Math.PI * 2);
+    if (cur_.ring > .02) g.arc(R, R, edge * .5 * cur_.ring, 0, Math.PI * 2, true);
+    g.clip("evenodd");
+    // The body: a wash of the blue, deep on a dark page.
+    g.globalCompositeOperation = "source-over";
+    g.fillStyle = light ? `rgba(${blobs[2].l},${.55 * cur_.bright})` : `rgba(18,14,58,${.85 * cur_.bright})`;
+    g.fillRect(0, 0, W, W);
+    g.globalCompositeOperation = light ? "source-over" : "lighter";
+    lights(1);
+    g.globalCompositeOperation = "source-over";
+    // Depth: darker toward the lower edge, as light falls from above.
+    at(R - edge * .25, R - edge * .3, edge * .2, edge * 1.3, [[0, "rgba(10,8,40,0)"], [.7, "rgba(10,8,40,0)"], [1, `rgba(10,8,40,${light ? .28 : .45})`]]);
+    // The rim: light caught along the edge, inside the glass.
+    at(R, R, edge * .78, edge, [[0, "rgba(255,255,255,0)"], [.8, `rgba(255,255,255,${light ? .1 : .06})`], [1, `rgba(255,255,255,${light ? .45 : .32})`]]);
+    // The highlight: a soft reflection at the top left.
+    g.save();
+    g.translate(R - edge * .32, R - edge * .46);
+    g.scale(1, .62);
+    at(0, 0, 0, edge * .5, [[0, `rgba(255,255,255,${light ? .7 : .55})`], [.45, `rgba(255,255,255,${light ? .25 : .18})`], [1, "rgba(255,255,255,0)"]]);
+    g.restore();
+    g.restore();
     if (cur_.flash > 0) {
       const grd = g.createRadialGradient(R, R, 0, R, R, base * .9);
       grd.addColorStop(0, `rgba(255,255,255,${.8 * cur_.flash})`); grd.addColorStop(1, "rgba(255,255,255,0)");
