@@ -34,7 +34,6 @@ use (
 	./plugins/scraper-tmdb
 	./plugins/solvers
 	./plugins/subtitles
-	./plugins/voice
 	./tools/fixtures
 	./tools/plugindist
 	./tools/testport
