@@ -1,6 +1,7 @@
 import asyncio
 import io
 import json
+import os
 import shutil
 import tempfile
 from collections.abc import AsyncIterator
@@ -43,6 +44,9 @@ async def plugin(monkeypatch: pytest.MonkeyPatch) -> AsyncIterator[_Running]:
     sock = str(folder / "plugin.sock")
     monkeypatch.setenv(ENV_SOCKET, sock)
     monkeypatch.setenv(ENV_TOKEN, TOKEN)
+    # As the server sets it for a plugin reaching sites through its gateway.
+    monkeypatch.setenv("NO_PROXY", "localhost,::1,10.0.0.0/8,fc00::/7,.local")
+    monkeypatch.setenv("HTTPS_PROXY", "http://127.0.0.1:1")
     stdout = io.StringIO()
     configured: list[str] = []
 
@@ -135,3 +139,11 @@ async def test_shutdown(plugin: _Running) -> None:
     )
     assert r.status_code == 200
     await asyncio.wait_for(plugin.task, 10)
+
+
+async def test_no_proxy_without_ipv6_blocks(plugin: _Running) -> None:
+    got = os.environ["NO_PROXY"]
+    want = "localhost,::1,10.0.0.0/8,.local"
+    assert got == want, f"NO_PROXY = {got!r}, want = {want!r}"
+    # httpx makes a client from the environment.
+    httpx.Client().close()

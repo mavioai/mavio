@@ -3,6 +3,7 @@
 import asyncio
 import contextlib
 import hmac
+import ipaddress
 import json
 import os
 import signal
@@ -229,6 +230,23 @@ def _listen(path: str) -> tuple[socket.socket, str | None]:
     return sock, address
 
 
+def _without_ipv6_blocks(no_proxy: str) -> str:
+    """Leaves the IPv6 blocks, such as fc00::/7, out of a NO_PROXY list.
+
+    httpx fails to make any client from the environment when NO_PROXY holds
+    one; single addresses such as ::1 stay. The server's proxy gateway
+    reaches the local network directly anyway.
+    """
+
+    def block6(host: str) -> bool:
+        try:
+            return "/" in host and ipaddress.ip_network(host.strip(), strict=False).version == 6
+        except ValueError:
+            return False
+
+    return ",".join(h for h in no_proxy.split(",") if not block6(h))
+
+
 def _watch_lifeline(stdin: TextIO, stop: asyncio.Event) -> None:
     """Stops the plugin when stdin ends, read in a thread on every
     platform."""
@@ -262,6 +280,9 @@ async def serve(
     serves the plugin's HTTP routes, and mounts serve the paths starting
     with their keys, such as "/_mavio/voice/".
     """
+    for key in ("NO_PROXY", "no_proxy"):
+        if key in os.environ:
+            os.environ[key] = _without_ipv6_blocks(os.environ[key])
     path = os.environ.get(ENV_SOCKET, "")
     token = os.environ.get(ENV_TOKEN, "")
     if not path or not token:
