@@ -122,6 +122,7 @@ const appNames: Record<string, string> = {
   "dev.mavio.app": "Mavio for Android",
   "dev.mavio.ios": "Mavio for iPhone and iPad",
   "dev.mavio.macos": "Mavio for Mac",
+  "dev.mavio.tvos": "Mavio for Apple TV",
 };
 
 /**
