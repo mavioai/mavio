@@ -109,7 +109,7 @@ mavio/
 │   ├── rclone/                  # [Go] rclone rcd：rc 客户端、远端上的存储、媒体代理、rcd 托管
 │   ├── containers/              # (P30) [Go] 容器引擎：检测、Engine API 客户端、插件的容器依赖
 │   ├── client-ts/               # [TS] Web UI 的 connect-es 客户端与 Query hooks（见 clients.zh-CN.md）
-│   ├── intent/                  # [Rust] 助手的语法：客户端共用的一份解析器，以 WASM 形式也供 Web UI 与服务端使用（见 assistant.zh-CN.md）
+│   ├── intent/                  # [Rust] 助手的语法：客户端共用的一份解析器，以 WASM 形式也供服务端使用（见 assistant.zh-CN.md）
 │   ├── client-rust/             # [Rust] 原生客户端的共享核心（见 clients.zh-CN.md）
 │   ├── apple/                   # [Swift] Apple 各应用的共享代码（见 clients.zh-CN.md）
 │   ├── android/                 # [Kotlin] Android 各应用的共享代码（见 clients.zh-CN.md）

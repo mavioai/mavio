@@ -43,7 +43,7 @@ flowchart LR
 
 | 部分 | 位置 | 内容 |
 | :--- | :--- | :--- |
-| 意图解析器 | `libs/intent`（Rust） | 各语言的语法，数字、时长与序数的规范化，对话状态；原生客户端链接它，Web UI 与服务端（在 wazero 上）运行同一个 WASM 模块（§4.3） |
+| 意图解析器 | `libs/intent`（Rust） | 各语言的语法，数字、时长与序数的规范化，对话状态；原生客户端链接它，服务端在 wazero 上运行其 WASM 模块（§4.3） |
 | 助手服务 | `apps/server/internal/assistant`，`mavio.assistant.v1.AssistantService` | 请求及其引导与中止、服务端的快速路径、槽位解析、工具、会话、语音会话及其转发、保留的语音 |
 | AI 路径 | `AGENT_SESSION`（[插件 §8.15](plugins.zh-CN.md#815-ai-网关与智能体会话)），`plugins/agent` | 以服务端工具为远程工具的模型、代码模式、记忆 |
 | 语音 | `VOICE_SESSION`（[插件 §8.16](plugins.zh-CN.md#816-语音会话与转写)），`plugins/pipecat` | 基于 Pipecat 的语音管线：语音活动、轮次检测、识别与合成服务、打断，以及作为其智能体的助手（§8） |
@@ -85,8 +85,8 @@ flowchart LR
 
 ### 4.3 一份实现，三处运行
 * `libs/intent` 是一个不依赖 I/O 的 Rust crate。原生客户端经由 `libs/client-rust` 链接它（UniFFI 与 C ABI 暴露 `parse_intent`）。
-* 它还构建为一个没有导入项的 WASM 模块（`wasm32-unknown-unknown`），导出其内存、内存分配、`intent_parse`、`intent_reply`、`intent_examples` 与 `intent_languages`，请求与回答都是 `mavio.intent.v1` 的 protobuf 消息（`ParseIntentRequest`、`Intent`）；每次调用把回答的地址与长度打包在一个 64 位整数中返回。Web UI 通过 `libs/client-ts`（`Grammar`）实例化它，服务端像运行 WASM 插件那样在 wazero 上运行同一个文件，因此语法永远不会有第二份实现。
-* 模块由 Nx 构建（`intent:wasm`），不提交到仓库；服务端的 `build` 嵌入它，Web 的 `build` 打包它，就像服务端嵌入 Web UI 一样。
+* 它还构建为一个没有导入项的 WASM 模块（`wasm32-unknown-unknown`），导出其内存、内存分配、`intent_parse`、`intent_reply`、`intent_examples` 与 `intent_languages`，请求与回答都是 `mavio.intent.v1` 的 protobuf 消息（`ParseIntentRequest`、`Intent`）；每次调用把回答的地址与长度打包在一个 64 位整数中返回。服务端像运行 WASM 插件那样在 wazero 上运行它，因此语法永远不会有第二份实现；`libs/client-ts`（`Grammar`）在其测试中实例化它。
+* 模块由 Nx 构建（`intent:wasm`），不提交到仓库；服务端的 `build` 嵌入它，就像服务端嵌入 Web UI 一样。
 
 ### 4.4 服务端的槽位
 * **作品与人物**在用户的媒体库中解析：按名称、原名、别名与排序名匹配，容忍识别错误；中文名称还按拼音匹配，使识别器选错同音字时仍能找到作品。有季的作品按其编号解析季与集（[领域模型 §4.3](domain.zh-CN.md#43-层级)）。
@@ -245,7 +245,6 @@ WebSocket 承载二进制音频帧（§8.5）与 JSON 事件 `{"type": …}`，�
 * **采集与播放**：`AudioWorklet` 把已消除回声的麦克风音频重采样为 16 kHz PCM 发往 WebSocket；回答的 PCM 通过同一个 `AudioContext` 播放，浏览器的回声消除去除的正是它的输出。保留的语音以 `canPlayType` 表明浏览器能播放的编码播放。
 * **打开**：按下时即创建 `AudioContext`（因此它可以播放），并在麦克风打开的同时加载 worklet。会话的 WebSocket 要等插件创建好会话的服务才打开，在此之前用户说的话会被保留，打开后再发送。光球旁的胶囊在麦克风的第一段音频到达前显示正在加载（通常几百毫秒，偶尔一两秒），此后显示正在聆听，因为在此之前说的话不会被采集。
 * **输入**：助手按钮位于侧边栏（其标题栏，或收起时搜索之后）、紧凑标题栏、电视的顶栏与播放器控制器中，在服务端的助手开启时显示；在文本框之外按住 V 说话；手机上的入口是紧凑标题栏与播放器中的按钮。按下光球本身也会开始或结束会话，按住说话与按钮相同。电视模式下，该按钮和其他按钮一样可获得焦点，返回键先关闭助手再返回。
-* **快速路径**在 `Ask` 之前为打字的请求运行随 UI 打包的语法 WASM 模块：回到首页、返回与打开设置，以及播放器打开时的暂停、继续、停止、跳转、从头播放、倍速、音量、静音、全屏与关闭字幕，并以语法的回复作答。
 
 ### 9.3 Apple（`apps/ios`、`apps/macos`、`apps/tvos`）
 * **iPhone、iPad 与 Mac**：语音会话由一个开启语音处理的 `AVAudioEngine` 采集与播放，音频会话的模式为 `voiceChat`；以及 App Intents，使 Siri、快捷指令与聚焦搜索经由 `Ask` 在 Mavio 中播放作品与控制播放。

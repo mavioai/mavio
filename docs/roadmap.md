@@ -1036,9 +1036,9 @@ flowchart TD
   - [ ] The account's calls in the UniFFI bindings, and the Apple and Android apps' sign-in
 
 ### P29 Assistant
-**Scope**: the assistant of [Assistant](assistant.md): the grammar of `libs/intent` on its three hosts; `AssistantService` with the tools, slot resolution, confirmation and client actions; remote tools, code mode, rolling conversations and memory in `AGENT_SESSION`; voice sessions in `plugins/pipecat`, a Python process plugin on Pipecat providing `VOICE_SESSION` and, for subtitles, `SPEECH_TO_TEXT`, relayed by the server with session tokens, steered and aborted; the clients, the web UI first.
+**Scope**: the assistant of [Assistant](assistant.md): the grammar of `libs/intent` on its hosts; `AssistantService` with the tools, slot resolution, confirmation and client actions; remote tools, code mode, rolling conversations and memory in `AGENT_SESSION`; voice sessions in `plugins/pipecat`, a Python process plugin on Pipecat providing `VOICE_SESSION` and, for subtitles, `SPEECH_TO_TEXT`, relayed by the server with session tokens, steered and aborted; the clients, the web UI first.
 
-- The fast path: `libs/intent`, its grammars, cases and WASM build, run by the clients, the web UI and the server
+- The fast path: `libs/intent`, its grammars, cases and WASM build, run by the native clients and the server
 - `AssistantService`, the tools and the client actions; the assistant settings
 - The AI path: remote tools, code mode, conversations and memory in `plugins/agent`
 - Python plugins: the uv workspace, `tools/nx-uv`, `libs/proto/gen/python`, the Python SDK `libs/plugin/python`, packaging with python-build-standalone in `tools/plugindist` and the container image
@@ -1058,7 +1058,7 @@ flowchart TD
 - [x] Rolling conversations and memory: idle time and days, retention, `EndAgentSession` and consolidation, the memory RPCs and `recall`
 - [x] The first speech path, replaced by `plugins/pipecat` below: `SPEECH_TO_TEXT` and `TEXT_TO_SPEECH`, `plugins/voice` with whisper-asr-webservice and the OpenAI-compatible APIs, `StartListening` with Silero VAD ending utterances, `/assistant/speech` and `GetAssistantHints`, and the web UI's `SpeechRecognition`, `speechSynthesis` and server voices
 - [x] Subtitle transcription as the server's source over the recognizers: `audio_url` and `audio_streams` of `SubtitleVideo` reserved, `/subtitles/audio` replaced by `/speech/audio`, and P26's end-to-end test moved to it
-- [x] The web UI: the panel, capture by `AudioWorklet`, the fast path in the browser, the Assistant settings and the assistant's part of the AI settings
+- [x] The web UI: the panel, capture by `AudioWorklet`, the Assistant settings and the assistant's part of the AI settings
 - [x] The end-to-end test of **Done when** through the API: `TestAssistant` (the fast path, listening and transcription) and `TestAssistantAI` (code mode, a call interrupted by a restart, memory)
 - [ ] The web UI's part of **Done when**: a spoken request plays a title
 - [x] `read_subtitles`, the tool reading an item's subtitle up to the position the user has reached

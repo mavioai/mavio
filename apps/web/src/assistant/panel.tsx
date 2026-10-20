@@ -31,7 +31,6 @@ import {
   PlayActionSchema,
   StreamsActionSchema,
 } from "@mavio/proto/mavio/assistant/v1/assistant_pb";
-import type { Intent } from "@mavio/proto/mavio/intent/v1/intent_pb";
 import { ImageKind, type Item } from "@mavio/proto/mavio/library/v1/item_pb";
 import { VoiceMode } from "@mavio/proto/mavio/plugin/v1/voice_pb";
 import { useLocation, useParams, useRouter } from "@tanstack/react-router";
@@ -42,7 +41,6 @@ import { Tip } from "../controls/tooltip.tsx";
 import { Icon } from "../icon.tsx";
 import { isTabPlace } from "../shell/places.ts";
 import { Artwork, subtitleOf } from "../ui.tsx";
-import { grammar, runLocal } from "./fast.ts";
 import { Orb, type OrbMode, orbSize } from "./orb.tsx";
 import { openPlayer } from "./player.ts";
 import { isDenied, microphoneAllowed, type VoiceEvent, VoiceSession } from "./voice.ts";
@@ -125,7 +123,6 @@ interface Assistant {
   press(): void;
   /** The button or key went up. */
   release(): void;
-  send(text: string): void;
 }
 
 const Context = createContext<Assistant | undefined>(undefined);
@@ -306,54 +303,29 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
+  /** Answers a confirmation or chooses a result by click or tap, through Ask. */
   const request = useCallback(
-    async (req: MessageInitShape<typeof AskRequestSchema>) => {
-      const { state: s, server: srv } = latest.current;
+    async (req: Pick<MessageInitShape<typeof AskRequestSchema>, "answer" | "choice">) => {
+      const { server: srv } = latest.current;
       if (!srv) return;
       clearTimeout(linger.current);
       clearTimeout(leave.current);
       running.current?.abort();
       const abort = new AbortController();
       running.current = abort;
-      const text = req.text?.trim() ?? "";
       set({
         open: true,
         leaving: false,
-        voiced: !!session.current,
-        heard: text || s.heard,
-        heardAt: text ? new Date() : s.heardAt,
+        voiced: false,
         working: true,
         activity: [],
         answer: "",
         answerAt: undefined,
         error: undefined,
         confirmation: undefined,
-        ...(req.choice || text ? { items: [], choose: false } : {}),
+        ...(req.choice ? { items: [], choose: false } : {}),
       });
       const lang = speechLanguage;
-
-      // The fast path: a command for this page is carried out here.
-      let intent: Intent | undefined;
-      const g = text ? await grammar() : undefined;
-      if (g && text) {
-        intent = g.parse({
-          text,
-          languages: [lang, locale],
-          state: { confirmation: !!s.confirmation, results: s.choose ? s.items.length : 0, playing: !!openPlayer() },
-        })[0];
-        const reply = intent && runLocal(g, intent, {
-          home: () => void router.navigate({ to: "/" }),
-          back: () => router.history.back(),
-          settings: () => void router.navigate({ to: "/settings" }),
-        });
-        if (intent && reply) {
-          const answer = g.reply(intent.language || lang, reply.key, reply.args);
-          set({ working: false, answer, answerAt: new Date() });
-          lingerThenClose();
-          return;
-        }
-      }
-
       const context = askContext(lang);
       // Whether the answer waits for the user: a confirmation, or results to choose from.
       let waits = false;
@@ -361,7 +333,7 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
         const events = ask(
           servers,
           srv,
-          { ...req, text, intent, context, failedActions: failed.current.splice(0) },
+          { ...req, context, failedActions: failed.current.splice(0) },
           abort.signal,
         );
         for await (const e of events) {
@@ -400,19 +372,7 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
         set({ working: false, error: errorMessage(err) });
       }
     },
-    [servers, router, set, perform, askContext, lingerThenClose],
-  );
-
-  /** A typed request: to the voice session when one runs, so that its answer is spoken, else to Ask. */
-  const send = useCallback(
-    (text: string) => {
-      const v = session.current;
-      if (!v) return void request({ text });
-      turn.current = text;
-      set({ heard: text, heardAt: new Date() });
-      v.send({ type: "text", text });
-    },
-    [request, set],
+    [servers, set, perform, askContext, lingerThenClose],
   );
 
   /** Carries out what the voice session tells (§8.6). */
@@ -644,9 +604,8 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
       close,
       press,
       release,
-      send,
     }),
-    [enabled, server, state, set, close, press, release, send],
+    [enabled, server, state, close, press, release],
   );
 
   const answerConfirmation = (confirmed: boolean) => {

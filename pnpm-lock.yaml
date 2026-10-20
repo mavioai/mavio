@@ -187,9 +187,6 @@ importers:
       '@mavio/design':
         specifier: workspace:*
         version: link:../../libs/design
-      '@mavio/intent':
-        specifier: workspace:*
-        version: link:../../libs/intent
       '@mavio/proto':
         specifier: workspace:*
         version: link:../../libs/proto

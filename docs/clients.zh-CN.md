@@ -427,6 +427,6 @@ mavio/
 │   │   └── proto/               # C ABI 的消息（mavio.capi.v1）
 │   ├── apple/                   # [Swift] MavioKit、MavioPlayer、MavioUI、MavioScreens、MavioAdmin
 │   ├── android/                 # [Kotlin] core、player、ui、admin
-│   ├── intent/                  # [Rust] 助手的语法；为 Web UI 与服务端构建 WASM
+│   ├── intent/                  # [Rust] 助手的语法；为服务端构建 WASM
 │   └── design/                  # tokens、图标、组件、字符串；gen/{ts,swift,kotlin,go}
 ```

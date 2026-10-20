@@ -109,7 +109,7 @@ mavio/
 │   ├── rclone/                  # [Go] rclone rcd: rc client, storage on remotes, media proxy, rcd supervision
 │   ├── containers/              # (P30) [Go] Container engines: detection, Engine API client, plugins' container dependencies
 │   ├── client-ts/               # [TS] connect-es client and Query hooks of the web UI (see clients.md)
-│   ├── intent/                  # [Rust] The assistant's grammar: one parser for the clients and, as WASM, the web UI and the server (see assistant.md)
+│   ├── intent/                  # [Rust] The assistant's grammar: one parser for the clients and, as WASM, the server (see assistant.md)
 │   ├── client-rust/             # [Rust] Shared core of the native clients (see clients.md)
 │   ├── apple/                   # [Swift] Code shared by the Apple apps (see clients.md)
 │   ├── android/                 # [Kotlin] Code shared by the Android apps (see clients.md)

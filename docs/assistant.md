@@ -43,7 +43,7 @@ flowchart LR
 
 | Part | Where | What |
 | :--- | :--- | :--- |
-| Intent parser | `libs/intent` (Rust) | The grammar of each language, normalization of numbers, durations and ordinals, the dialog state; linked by the native clients, run as one WASM module by the web UI and by the server on wazero (§4.3) |
+| Intent parser | `libs/intent` (Rust) | The grammar of each language, normalization of numbers, durations and ordinals, the dialog state; linked by the native clients, run as a WASM module by the server on wazero (§4.3) |
 | Assistant service | `apps/server/internal/assistant`, `mavio.assistant.v1.AssistantService` | Requests and their steering and aborting, the server's fast path, slot resolution, the tools, conversations, voice sessions and their relay, kept speech |
 | AI path | `AGENT_SESSION` ([Plugins §8.15](plugins.md#815-ai-gateway-and-agent-sessions)), `plugins/agent` | The model with the server's tools as remote tools, code mode, memory |
 | Voice | `VOICE_SESSION` ([Plugins §8.16](plugins.md#816-voice-sessions-and-transcription)), `plugins/pipecat` | The voice pipeline on Pipecat: voice activity, turn detection, recognition and synthesis services, barge-in, and the assistant as its agent (§8) |
@@ -85,8 +85,8 @@ flowchart LR
 
 ### 4.3 One Implementation, Three Hosts
 * `libs/intent` is a Rust crate with no dependencies on I/O. The native clients link it through `libs/client-rust` (UniFFI and the C ABI expose `parse_intent`).
-* It also builds as one WASM module (`wasm32-unknown-unknown`) with no imports, exporting its memory, allocation, `intent_parse`, `intent_reply`, `intent_examples` and `intent_languages`, whose requests and answers are protobuf messages of `mavio.intent.v1` (`ParseIntentRequest`, `Intent`); a call returns the answer's address and length packed in one 64-bit integer. The web UI instantiates it through `libs/client-ts` (`Grammar`), and the server runs the same file on wazero, as it runs WASM plugins, so the grammar never has a second implementation.
-* The module is built by Nx (`intent:wasm`) and is not committed; the server's `build` embeds it and the web's `build` bundles it, as the server embeds the web UI.
+* It also builds as one WASM module (`wasm32-unknown-unknown`) with no imports, exporting its memory, allocation, `intent_parse`, `intent_reply`, `intent_examples` and `intent_languages`, whose requests and answers are protobuf messages of `mavio.intent.v1` (`ParseIntentRequest`, `Intent`); a call returns the answer's address and length packed in one 64-bit integer. The server runs it on wazero, as it runs WASM plugins, so the grammar never has a second implementation; `libs/client-ts` (`Grammar`) instantiates it in its tests.
+* The module is built by Nx (`intent:wasm`) and is not committed; the server's `build` embeds it, as the server embeds the web UI.
 
 ### 4.4 Slots on the Server
 * **Titles and people** are resolved against the user's libraries: by name, original name, alternative titles and sort name, tolerant of recognition errors; Chinese names also by their pinyin, so that a homophone the recognizer chose still finds the title. A title with seasons resolves season and episode by its numbering ([Domain Model §4.3](domain.md#43-hierarchies)).
@@ -245,7 +245,6 @@ Transcribing subtitles is not a voice session: Pipecat's recognition services jo
 * **Capture and playback**: an `AudioWorklet` resamples the echo-cancelled microphone to 16 kHz PCM for the WebSocket; the answer's PCM plays through the same `AudioContext`, whose output is what the browser's echo cancellation removes. Kept speech plays in the encodings `canPlayType` says the browser plays.
 * **Opening**: the press makes the `AudioContext`, which may then play, and loads the worklet while the microphone opens. What the user says before the session's WebSocket opens, which waits for the plugin to make the session's services, is held and sent once it does. The orb's pill says it is loading until the microphone's first audio comes, a few hundred milliseconds and now and then a second or two, and that it listens from then on, since what is said earlier is not captured.
 * **Input**: the assistant button in the sidebar (its header, or the rail after search), the compact header, the television's top bar and the player's controller, shown when the server's assistant is on; and V held to talk outside text fields; on phones the compact header's button and the player's are the way in. Pressing the orb itself starts or ends a session, held to talk as the button. In television mode the button is focusable like any other, and Back dismisses the assistant before it goes back.
-* **The fast path** runs the grammar's WASM module, bundled with the UI, before `Ask` for typed requests: going home, back and to the settings, and, while the player is open, pausing, resuming, stopping, seeking, restarting, speed, volume, mute, full screen and subtitles off, answered with the grammar's replies.
 
 ### 9.3 Apple (`apps/ios`, `apps/macos`, `apps/tvos`)
 * **iPhone, iPad and Mac**: voice sessions captured and played by one `AVAudioEngine` with voice processing on, in an audio session of mode `voiceChat`; App Intents, so that Siri, Shortcuts and Spotlight play titles and control playback in Mavio through `Ask`.

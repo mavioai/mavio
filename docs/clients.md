@@ -427,6 +427,6 @@ mavio/
 │   │   └── proto/               # Messages of the C ABI (mavio.capi.v1)
 │   ├── apple/                   # [Swift] MavioKit, MavioPlayer, MavioUI, MavioScreens, MavioAdmin
 │   ├── android/                 # [Kotlin] core, player, ui, admin
-│   ├── intent/                  # [Rust] The assistant's grammar; WASM for the web UI and the server
+│   ├── intent/                  # [Rust] The assistant's grammar; WASM for the server
 │   └── design/                  # Tokens, icons, components, strings; gen/{ts,swift,kotlin,go}
 ```

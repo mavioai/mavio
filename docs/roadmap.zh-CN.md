@@ -1036,9 +1036,9 @@ flowchart TD
   - [ ] UniFFI 绑定中的账户调用，以及 Apple、Android 应用的登录
 
 ### P29 助手
-**范围**：[助手](assistant.zh-CN.md)所述的助手：`libs/intent` 的语法及其三处运行；`AssistantService` 及工具、槽位解析、确认与客户端动作；`AGENT_SESSION` 中的远程工具、代码模式、滚动会话与记忆；`plugins/pipecat` 中的语音会话，它是基于 Pipecat 的 Python 子进程插件，提供 `VOICE_SESSION` 以及用于字幕的 `SPEECH_TO_TEXT`，由服务端凭会话令牌中继，可被引导与中止；各客户端，Web UI 最先。
+**范围**：[助手](assistant.zh-CN.md)所述的助手：`libs/intent` 的语法及其各处运行；`AssistantService` 及工具、槽位解析、确认与客户端动作；`AGENT_SESSION` 中的远程工具、代码模式、滚动会话与记忆；`plugins/pipecat` 中的语音会话，它是基于 Pipecat 的 Python 子进程插件，提供 `VOICE_SESSION` 以及用于字幕的 `SPEECH_TO_TEXT`，由服务端凭会话令牌中继，可被引导与中止；各客户端，Web UI 最先。
 
-- 快速路径：`libs/intent`、其语法、用例与 WASM 构建，由客户端、Web UI 与服务端运行
+- 快速路径：`libs/intent`、其语法、用例与 WASM 构建，由原生客户端与服务端运行
 - `AssistantService`、工具与客户端动作；助手设置
 - AI 路径：`plugins/agent` 中的远程工具、代码模式、会话与记忆
 - Python 插件：uv workspace、`tools/nx-uv`、`libs/proto/gen/python`、Python SDK `libs/plugin/python`、在 `tools/plugindist` 与容器镜像中以 python-build-standalone 打包
@@ -1058,7 +1058,7 @@ flowchart TD
 - [x] 滚动会话与记忆：空闲时间与跨天、保留期、`EndAgentSession` 与整理、记忆 RPC 与 `recall`
 - [x] 第一条语音路径，已由下文的 `plugins/pipecat` 取代：`SPEECH_TO_TEXT` 与 `TEXT_TO_SPEECH`，带 whisper-asr-webservice 与 OpenAI 兼容 API 的 `plugins/voice`，以 Silero VAD 结束语音的 `StartListening`，`/assistant/speech` 与 `GetAssistantHints`，以及 Web UI 的 `SpeechRecognition`、`speechSynthesis` 与服务端语音
 - [x] 字幕转写作为服务端基于识别器的来源：`SubtitleVideo` 的 `audio_url` 与 `audio_streams` 保留编号，`/subtitles/audio` 改为 `/speech/audio`，P26 的端到端测试随之迁移
-- [x] Web UI：面板、`AudioWorklet` 采集、浏览器中的快速路径、“助手”设置以及 AI 设置中的助手部分
+- [x] Web UI：面板、`AudioWorklet` 采集、“助手”设置以及 AI 设置中的助手部分
 - [x] **完成标准**中经由 API 的端到端测试：`TestAssistant`（快速路径、收听与转写）与 `TestAssistantAI`（代码模式、被重启中断的调用、记忆）
 - [ ] **完成标准**中 Web UI 的部分：一个说出的请求播放一部作品
 - [x] `read_subtitles`：读取条目字幕直到用户已看到的位置的工具
