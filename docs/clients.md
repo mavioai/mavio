@@ -17,7 +17,7 @@ Each app is built for one interaction model — touch, the television remote, th
 | `apps/web` | React + Vite + TanStack Router / Query + Base UI + Tailwind CSS, embedded in the server with `//go:embed` | Browsers |
 | `apps/ios` | Swift, SwiftUI (UIKit where SwiftUI falls short) | iPhone and iPad, one universal app |
 | `apps/tvos` | Swift, SwiftUI and UIKit | Apple TV |
-| `apps/macos` | Swift, AppKit (SwiftUI where it fits) | Mac |
+| `apps/macos` | Swift, AppKit | Mac |
 | `apps/android` | Kotlin, Jetpack Compose | Android phones, tablets and foldables |
 | `apps/android-tv` | Kotlin, Compose for TV | Android TV and Google TV |
 | `apps/desktop` | Go, [MyGo](https://github.com/egoist/mygo) native UI, libmpv | macOS, Windows and Linux |
@@ -26,7 +26,7 @@ Each app is built for one interaction model — touch, the television remote, th
 | :--- | :--- | :--- |
 | `libs/client-ts` | TypeScript: Connect client (`connect-es`) and TanStack Query hooks | `apps/web` |
 | `libs/client-rust` | Rust: servers, sign-in, events, offline store, playback reporting, downloads | Every native app: through UniFFI from Swift and Kotlin, through a C ABI from Go |
-| `libs/apple` | Swift packages: the core's Swift API and app services, the player, shared SwiftUI components | `apps/ios`, `apps/tvos`, `apps/macos` |
+| `libs/apple` | Swift packages: the core's Swift API and app services, the player, shared SwiftUI components for iPhone, iPad and Apple TV, AppKit components and screens for the Mac | `apps/ios`, `apps/tvos`, `apps/macos` |
 | `libs/android` | Kotlin modules: the core's Kotlin API and app services, the player, shared Compose components and the server settings' screens | `apps/android`, `apps/android-tv` |
 | `libs/design` | Design tokens (DTCG JSON), icons, the logo, component specifications and strings, compiled for every client | Every client |
 
@@ -103,13 +103,15 @@ The server owns every decision that depends on the library, the user or other de
 * **Assistant**: the first client of [Assistant](assistant.md) (§9.2 there): the grammar of `libs/intent` as WASM through `libs/client-ts`, the microphone on secure pages only, captured with the browser's echo cancellation into voice sessions through the server, and the answers' speech they stream.
 
 ### 4.2 Apple (`apps/ios`, `apps/tvos`, `apps/macos`, `libs/apple`)
-* **One app per interaction model.** iPhone and iPad are one universal app, as the App Store expects, with layouts of their own on iPad: the tab bar at the top, multiple columns, several windows, Stage Manager, the pointer and hardware keyboards. Apple TV is its own app, built around the focus engine and the remote at ten feet, with the Top Shelf. The Mac is its own app in AppKit, the toolkit that gives a player full control of windows, the menu bar, full screen, the trackpad and several players at once.
+* **One app per interaction model.** iPhone and iPad are one universal app, as the App Store expects, with layouts of their own on iPad: the tab bar at the top, multiple columns, several windows, Stage Manager, the pointer and hardware keyboards. Apple TV is its own app, built around the focus engine and the remote at ten feet, with the Top Shelf. The Mac is its own app in AppKit alone, without SwiftUI, the toolkit that gives a player full control of windows, the menu bar, full screen, the trackpad and several players at once: its pages are view controllers, its grids and rows `NSCollectionView`, its forms `NSStackView`s.
 * **`libs/apple`**, Swift packages shared by the three apps:
   * `MavioKit`: the core's Swift API with the app services above it — accounts, capability probing, downloads with a background `URLSession`, Now Playing (`MPNowPlayingInfoCenter`, `MPRemoteCommandCenter`) — and the messages of the server's API, `MavioProto`, generated with [swift-protobuf](https://github.com/apple/swift-protobuf) (Apache-2.0): the screens the core does not model, the settings, call the server's API with them through the core (`callServer`), as the desktop app does (§4.4);
   * `MavioPlayer`: one player interface with two engines, and Picture in Picture;
   * `MavioUI`: SwiftUI components each app composes in its own way (artwork, posters, rows), and the design tokens; artwork is loaded and cached by [Nuke](https://github.com/kean/Nuke)'s `LazyImage` (MIT);
-  * `MavioScreens`: the screens the iPhone and iPad app and the Mac app share — Home, the libraries, search, the details, Discover, a person, the downloads, signing in and the user's settings — with their routes, each app composing them in a shell of its own;
-  * `MavioAdmin`: the settings' Server group, the server's sections and their administration, shared by the three apps, leaving out on each what its platform lacks (saving files on Apple TV).
+  * `MavioCommon`: what the apps share without a toolkit — the routes, the device's settings, the server's sections, Discover's and the cards' labels, and the image cache;
+  * `MavioScreens`: the screens of the iPhone and iPad app — Home, the libraries, search, the details, Discover, a person, the downloads, signing in and the user's settings — with their routes;
+  * `MavioAdmin`: the settings' Server group, the server's sections and their administration, shared by the iPhone and iPad app and the Apple TV app, leaving out on each what its platform lacks (saving files on Apple TV);
+  * the Mac's, in AppKit: `MavioAppKit`, the components over the design tokens (cards, rows, forms as the web UI's settings, pills, the navigation stack, and television mode's focus engine); `MavioMac`, the context and base of its pages; a target for each area of pages — `MavioMacMedia`, `MavioMacDiscover`, `MavioMacSettings`, `MavioMacServer`, `MavioMacAcquisition`, `MavioMacPlugins` and `MavioMacPlayer` — which reach one another's pages only through the routes; and `MavioMacApp`, the windows, the sidebar, television mode's tabs and the user's menu, which wires the areas together.
 * **Player engines**, in order of preference: AVPlayer, then AetherEngine, then the server's processing.
   * **Capabilities**: the app declares in `direct_play` the profiles AVPlayer plays and those AetherEngine plays. The server therefore plays a source directly whenever either engine can, and remuxes or transcodes it only when neither can.
   * **Choice**: a source played directly goes to AVPlayer when AVPlayer plays it as it is, else to AetherEngine; what the server remuxes or transcodes is HLS, which goes to AVPlayer, unless the subtitles chosen come as a file of their own, which AetherEngine draws over the HLS it plays.
@@ -160,7 +162,7 @@ The server owns every decision that depends on the library, the user or other de
 ## 5. Shared Core (`libs/client-rust`)
 
 ### 5.1 Responsibilities
-* **Servers and sign-in**: several servers signed in at once (§5.4), discovery, sign-in with a password or Quick Connect, and the sessions ([Accounts §5.2–§5.3](accounts.md#5-keys-and-tokens)): the device key and each server's session (its ID, access token and expiry) are kept by the app in the platform's secure storage (Keychain, Android Keystore, Windows Credential Manager, the Secret Service) through an interface the app implements — a development build of the desktop app, signed anew each build, keeps them in a file of its data directory instead, moving them there from the secure storage once — and the core's transport refreshes an access token by signing the server's nonce before it expires, or once the server rejects it.
+* **Servers and sign-in**: several servers signed in at once (§5.4), discovery, sign-in with a password or Quick Connect, and the sessions ([Accounts §5.2–§5.3](accounts.md#5-keys-and-tokens)): the device key and each server's session (its ID, access token and expiry) are kept by the app in the platform's secure storage (Keychain, Android Keystore, Windows Credential Manager, the Secret Service) through an interface the app implements — a development build of the desktop app or the Mac app, signed anew each build, keeps them in a file of its data directory instead (the desktop app moving them there from the secure storage once, the Mac app never reading the Keychain) — and the core's transport refreshes an access token by signing the server's nonce before it expires, or once the server rejects it.
 * **Connect client**: [connect-rust](https://github.com/connectrpc/connect-rust) over HTTP/1.1 and HTTP/2, with the messages and clients generated from `libs/proto` into `libs/proto/gen/rust` and included by the crate `mavio-api`.
 * **Event stream**: one `EventService` stream per server, reconnected with backoff, its events dispatched to the app.
 * **Offline store**: SQLite (`rusqlite`, bundled SQLite) with the items last browsed, so that the app starts on cached content, the downloaded items, and the progress reports made offline, sent once the server is reachable.
@@ -425,7 +427,7 @@ mavio/
 │   │   ├── uniffi/              # UniFFI exports for Swift and Kotlin
 │   │   ├── capi/                # C ABI for Go, and its Go binding (a Go module)
 │   │   └── proto/               # Messages of the C ABI (mavio.capi.v1)
-│   ├── apple/                   # [Swift] MavioKit, MavioPlayer, MavioUI, MavioScreens, MavioAdmin
+│   ├── apple/                   # [Swift] MavioKit, MavioPlayer, MavioCommon, MavioUI, MavioScreens, MavioAdmin, MavioAppKit, MavioMac*
 │   ├── android/                 # [Kotlin] core, player, ui, admin
 │   ├── intent/                  # [Rust] The assistant's grammar; WASM for the server
 │   └── design/                  # Tokens, icons, components, strings; gen/{ts,swift,kotlin,go}

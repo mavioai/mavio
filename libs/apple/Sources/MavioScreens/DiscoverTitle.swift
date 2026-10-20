@@ -2,14 +2,6 @@ import MavioKit
 import MavioUI
 import SwiftUI
 
-/// The locale of TMDB's pages, as "en-US".
-private var webLocale: String {
-    (MavioStrings.bundle.preferredLocalizations.first ?? "en").replacingOccurrences(of: "_", with: "-")
-}
-
-/// A movie's minutes, as "1h 52m".
-private func minutes(_ n: Int32) -> String { minutesText(TimeInterval(n) * 60) }
-
 /// A discovered title (docs/clients.md §6.3.2), as Seerr's page, without
 /// requests but on the Mac.
 struct TitleView: View {
@@ -58,10 +50,6 @@ private struct TitleContent: View {
     @Environment(\.openURL) private var openURL
     @State private var ratings: [Rating] = []
     @State private var refreshes = 0
-    #if os(macOS)
-        /// The user signed in, whose role the requests' actions follow.
-        @State private var user: Mavio_User_V1_User?
-    #endif
 
     private var phone: Bool { sizeClass != .regular }
     private var series: Bool { title.mediaKind == .series }
@@ -96,17 +84,8 @@ private struct TitleContent: View {
         .navigationTitle(title.name)
         .modifier(HeroChrome(title: title.name, phone: phone))
         .task(id: title.tmdbID) {
-            var r = Mavio_Acquisition_V1_GetRatingsRequest()
-            r.mediaKind = title.mediaKind
-            r.tmdbID = title.tmdbID
-            ratings =
-                (try? await model.client.call(
-                    serverId, Procedure.discover("GetRatings"), r, as: Mavio_Acquisition_V1_GetRatingsResponse.self))?
-                .ratings ?? []
+            ratings = (try? await model.ratings(serverId, title.mediaKind, title.tmdbID)) ?? []
         }
-        #if os(macOS)
-            .task(id: serverId) { user = await RequestsAPI.currentUser(model, serverId) }
-        #endif
     }
 
     // MARK: Header
@@ -174,21 +153,10 @@ private struct TitleContent: View {
     }
 
     /// As Seerr's: the year, kind, rating and runtime, then the genres.
-    private var facts: [String] {
-        [
-            title.year > 0 ? String(title.year) : nil,
-            series ? MavioStrings.discoverSeries : MavioStrings.discoverMovie,
-            title.officialRating.isEmpty ? nil : title.officialRating,
-            title.runtimeMinutes > 0 ? minutes(title.runtimeMinutes) : nil,
-        ].compactMap(\.self)
-    }
+    private var facts: [String] { titleHeaderFacts(title) }
 
     private var headerText: some View {
-        let genres =
-            title.genreRefs.isEmpty
-            ? title.genres.map { NamedValue(id: "", name: $0) }
-            : title.genreRefs.map { NamedValue(id: $0.id, name: $0.name) }
-        let shown = Array(genres.prefix(3))
+        let shown = Array(titleGenres(title).prefix(3))
         return VStack(alignment: .leading, spacing: MavioSpacing.s12) {
             Text(title.name)
                 .font(.system(size: phone ? 34 : 52, weight: .bold))
@@ -212,20 +180,10 @@ private struct TitleContent: View {
                         .background(.white.opacity(0.2), in: .rect(cornerRadius: 4))
                         .padding(.leading, MavioSpacing.s12)
                 }
-                #if os(macOS)
-                    if user?.admin == true, !title.itemID.isEmpty {
-                        RequestsDownloadBadge(serverId: serverId, itemId: title.itemID)
-                    }
-                #endif
             }
             .type(theme.type.callout)
             .foregroundStyle(.white.opacity(0.8))
-            #if os(macOS)
-                RequestsTitleActions(serverId: serverId, title: title, user: user, reload: reload) { actions }
-                    .padding(.top, MavioSpacing.s4)
-            #else
-                actions.padding(.top, MavioSpacing.s4)
-            #endif
+            actions.padding(.top, MavioSpacing.s4)
         }
     }
 
@@ -340,20 +298,10 @@ private struct OverviewLeading: View {
     @Environment(\.theme) private var theme
 
     /// Six of the crew, a series' creators first, then by the jobs Seerr shows first.
-    private var crew: [TitleCredit] {
-        Array(
-            title.credits.enumerated()
-                .filter { !$0.element.isCast }
-                .sorted { (crewRank($0.element), $0.offset) < (crewRank($1.element), $1.offset) }
-                .map(\.element)
-                .prefix(6))
-    }
+    private var crew: [TitleCredit] { leadingCrew(title) }
 
     var body: some View {
-        let keywords =
-            title.keywordRefs.isEmpty
-            ? title.keywords.map { NamedValue(id: "", name: $0) }
-            : title.keywordRefs.map { NamedValue(id: $0.id, name: $0.name) }
+        let keywords = titleKeywords(title)
         VStack(alignment: .leading, spacing: MavioSpacing.s16) {
             if !title.tagline.isEmpty {
                 Text(title.tagline).type(theme.type.title3).fontWeight(.regular).italic()
@@ -369,7 +317,7 @@ private struct OverviewLeading: View {
                 ) {
                     ForEach(Array(crew.enumerated()), id: \.offset) { _, c in
                         VStack(alignment: .leading, spacing: 0) {
-                            Text(c.kind.job == .other && !c.role.isEmpty ? c.role : c.kind.job.label)
+                            Text(c.jobLabel)
                                 .type(theme.type.headline)
                             let name = Text(c.name).type(theme.type.callout)
                                 .foregroundStyle(theme.colors.textSecondary).lineLimit(1)
@@ -471,12 +419,6 @@ private struct CollectionCard: View {
     }
 }
 
-/// A fact's value: plain, or opening the popular titles alike.
-private struct FactValue: Hashable {
-    let text: String
-    var query: CatalogQuery?
-}
-
 /// The facts of a discovered title in a bordered box, as Seerr's: the
 /// ratings, then a fact a row, the services streaming it and the links
 /// elsewhere.
@@ -488,85 +430,10 @@ private struct TitleFacts: View {
     @Environment(\.theme) private var theme
     @State private var allStudios = false
 
-    private static let minStudios = 5
     private var series: Bool { title.mediaKind == .series }
 
     private var rows: [(String, [FactValue])] {
-        let plain = { (s: String?) -> [FactValue] in s.map { [FactValue(text: $0)] } ?? [] }
-        var rows: [(String, [FactValue])] = []
-        if !title.originalTitle.isEmpty, title.originalLanguage != discoverLanguage {
-            rows.append((MavioStrings.itemOriginalTitle, plain(title.originalTitle)))
-        }
-        rows.append((MavioStrings.itemStatus, plain(title.productionStatus.text)))
-        let releases =
-            series
-            ? []
-            : [
-                dayText(title.theatricalReleaseDate).map {
-                    "\(MavioStrings.discoverTheatricalRelease)  \(unbroken($0))"
-                },
-                dayText(title.digitalReleaseDate).map { "\(MavioStrings.itemDigitalRelease)  \(unbroken($0))" },
-                dayText(title.physicalReleaseDate).map { "\(MavioStrings.itemPhysicalRelease)  \(unbroken($0))" },
-            ].compactMap(\.self)
-        if !releases.isEmpty {
-            rows.append(
-                (
-                    releases.count == 1 ? MavioStrings.discoverReleaseDate : MavioStrings.discoverReleaseDates,
-                    releases.map { FactValue(text: $0) }
-                ))
-        } else {
-            rows.append(
-                (series ? MavioStrings.itemFirstAired : MavioStrings.itemReleased, plain(dayText(title.premiereDate))))
-        }
-        if series, title.productionStatus == .ended {
-            rows.append((MavioStrings.itemLastAired, plain(dayText(title.endDate))))
-        }
-        if series { rows.append((MavioStrings.itemNextAirDate, plain(dayText(title.nextAirDate)))) }
-        if title.runtimeMinutes > 0 {
-            rows.append(
-                (
-                    series ? MavioStrings.discoverEpisodeRuntime : MavioStrings.itemRuntime,
-                    plain(minutes(title.runtimeMinutes))
-                ))
-        }
-        rows.append((MavioStrings.itemRevenue, plain(moneyText(title.revenue))))
-        rows.append((MavioStrings.itemBudget, plain(moneyText(title.budget))))
-        if !title.originalLanguage.isEmpty {
-            let name = languageText(title.originalLanguage)
-            rows.append(
-                (
-                    MavioStrings.itemOriginalLanguage,
-                    [
-                        FactValue(
-                            text: name,
-                            query: discovery.alike(serverId, title.mediaKind, name) {
-                                $0.originalLanguage = title.originalLanguage
-                            })
-                    ]
-                ))
-        }
-        let countries =
-            title.productionCountries.isEmpty ? title.productionLocations : title.productionCountries.map(countryText)
-        rows.append((MavioStrings.itemCountry, countries.map { FactValue(text: $0) }))
-        let studios =
-            title.studioRefs.isEmpty
-            ? title.studios.map { NamedValue(id: "", name: $0) }
-            : title.studioRefs.map { NamedValue(id: $0.id, name: $0.name) }
-        let shown = allStudios ? studios : Array(studios.prefix(Self.minStudios))
-        rows.append(
-            (
-                series ? MavioStrings.itemNetworks : MavioStrings.itemStudio,
-                shown.map { s in
-                    FactValue(
-                        text: s.name,
-                        query: s.id.isEmpty
-                            ? nil
-                            : discovery.alike(serverId, title.mediaKind, s.name) {
-                                if series { $0.networks = [s] } else { $0.studios = [s] }
-                            })
-                }
-            ))
-        return rows.filter { !$0.1.isEmpty }
+        titleFactRows(title, serverId: serverId, discovery: discovery, allStudios: allStudios)
     }
 
     var body: some View {
@@ -590,9 +457,7 @@ private struct TitleFacts: View {
                                 Text(v.text)
                             }
                         }
-                        if label == (series ? MavioStrings.itemNetworks : MavioStrings.itemStudio),
-                            max(title.studioRefs.count, title.studios.count) > Self.minStudios
-                        {
+                        if label == studiosLabel(title), hasMoreStudios(title) {
                             Button {
                                 withAnimation { allStudios.toggle() }
                             } label: {
@@ -628,11 +493,6 @@ private struct TitleFacts: View {
         }
         .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(theme.colors.border))
     }
-
-    /// A date kept on one line.
-    private func unbroken(_ s: String) -> String {
-        s.replacingOccurrences(of: " ", with: "\u{00A0}")
-    }
 }
 
 /// The services streaming a title, by their logos.
@@ -662,9 +522,6 @@ struct WatchProviders: View {
     }
 }
 
-/// Rotten Tomatoes' least fresh score, and least upright audience score.
-private let freshScore = 60.0
-
 /// A title's ratings as Seerr's: Rotten Tomatoes' and IMDb's, then TMDB's
 /// score when given, each opening its page.
 struct TitleRatings: View {
@@ -676,44 +533,12 @@ struct TitleRatings: View {
     @Environment(\.theme) private var theme
 
     /// The ratings shown, in Seerr's order.
-    static func shown(_ ratings: [Rating]) -> [Rating] {
-        let order: [Mavio_Plugin_V1_RatingSource] = [.rottenTomatoesCritics, .rottenTomatoesAudience, .imdb]
-        return order.compactMap { source in ratings.first { $0.source == source } }
-    }
+    static func shown(_ ratings: [Rating]) -> [Rating] { shownRatings(ratings) }
 
     var body: some View {
-        let shown = Self.shown(ratings)
         Flow(spacing: MavioSpacing.s16, lineSpacing: MavioSpacing.s4) {
-            ForEach(shown, id: \.source) { r in
-                let fresh = r.score >= freshScore
-                let (logo, label, value): (String, String, String) =
-                    switch r.source {
-                    case .imdb:
-                        (
-                            "imdb",
-                            MavioStrings.discoverImdbScore(
-                                votes: r.votes.formatted(
-                                    .number.notation(.compactName).precision(.fractionLength(0...1)))),
-                            r.score.formatted(.number.precision(.fractionLength(1)))
-                        )
-                    case .rottenTomatoesCritics:
-                        (
-                            fresh ? "rt-fresh" : "rt-rotten",
-                            r.certified ? MavioStrings.discoverTomatometerCertified : MavioStrings.discoverTomatometer,
-                            "\(Int(r.score.rounded()))%"
-                        )
-                    default:
-                        (
-                            fresh ? "rt-aud-fresh" : "rt-aud-rotten", MavioStrings.discoverAudienceScore,
-                            "\(Int(r.score.rounded()))%"
-                        )
-                    }
-                rating(logo, label, value, URL(string: r.url), height: 20)
-            }
-            if let score {
-                rating(
-                    "tmdb-wide", MavioStrings.discoverTmdbScore, "\(Int((score * 10).rounded()))%",
-                    URL(string: tmdbURL(kind, tmdbId)), height: 16)
+            ForEach(ratingMarks(kind: kind, tmdbId: tmdbId, ratings: ratings, score: score), id: \.self) { m in
+                rating(m.logo, m.label, m.value, m.url, height: m.height)
             }
         }
         .frame(maxWidth: .infinity, alignment: alignment)
@@ -736,57 +561,10 @@ struct TitleRatings: View {
     }
 }
 
-/// A title's page on TMDB, in the app's language.
-private func tmdbURL(_ kind: MediaKind, _ tmdbId: Int32) -> String {
-    "https://www.themoviedb.org/\(kind == .series ? "tv" : "movie")/\(tmdbId)?language=\(webLocale)"
-}
-
-/// A link to a title or person elsewhere, with the site's logo.
-struct ExternalLink: Hashable {
-    let name: String
-    let url: URL
-    /// The logo, by `Image.service`.
-    let logo: String
-    /// The logo's width, as Seerr's.
-    let width: CGFloat
-}
-
-/// The logos linking a title elsewhere, as Seerr's, Rotten Tomatoes' once
-/// its ratings tell its page.
-private func titleLinks(_ title: TitleInfo, _ ratings: [Rating]) -> [ExternalLink] {
-    titleLinks(
-        kind: title.mediaKind, tmdbId: title.tmdbID, imdb: title.externalIds["imdb"] ?? "",
-        tvdb: title.externalIds["tvdb"] ?? (title.tvdbID > 0 ? String(title.tvdbID) : ""), ratings: ratings)
-}
-
-/// The logos linking a title elsewhere by its IDs.
-func titleLinks(kind: MediaKind, tmdbId: Int32, imdb: String, tvdb: String, ratings: [Rating]) -> [ExternalLink] {
-    let series = kind == .series
-    let rt = ratings.first { $0.source != .imdb && !$0.url.isEmpty }?.url
-    let links: [(String, String?, String, CGFloat)] = [
-        ("TMDB", tmdbURL(kind, tmdbId), "tmdb", 32),
-        ("TVDB", series && !tvdb.isEmpty ? "https://www.thetvdb.com/dereferrer/series/\(tvdb)" : nil, "tvdb", 36),
-        ("IMDb", imdb.isEmpty ? nil : "https://www.imdb.com/title/\(imdb)", "imdb", 32),
-        ("Rotten Tomatoes", rt, "rt", 56),
-        ("Trakt", imdb.isEmpty ? nil : "https://trakt.tv/\(series ? "shows" : "movies")/\(imdb)", "trakt", 32),
-        (
-            "Simkl",
-            imdb.isEmpty
-                ? nil
-                : "https://api.simkl.com/redirect?to=Simkl&imdb=\(imdb.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? imdb)",
-            "simkl", 32
-        ),
-        ("Letterboxd", series ? nil : "https://letterboxd.com/tmdb/\(tmdbId)", "letterboxd", 32),
-    ]
-    return links.compactMap { name, url, logo, width in
-        url.flatMap(URL.init(string:)).map { ExternalLink(name: name, url: $0, logo: logo, width: width) }
-    }
-}
-
 /// The logos linking a title or person elsewhere, as Seerr's, faint;
 /// first, Mavio's opening its item when the server has it.
 struct ExternalLinks: View {
-    let links: [ExternalLink]
+    let links: [TitleLink]
     var item: Route?
     var alignment: HorizontalAlignment = .center
     @Environment(\.theme) private var theme
@@ -824,9 +602,7 @@ private struct DiscoveredSeasons: View {
     @Environment(\.theme) private var theme
 
     var body: some View {
-        let ordered = seasons.sorted {
-            ($0.seasonNumber == 0 ? 1 : 0, -$0.seasonNumber) < ($1.seasonNumber == 0 ? 1 : 0, -$1.seasonNumber)
-        }
+        let ordered = seasonOrder(seasons)
         VStack(alignment: .leading, spacing: MavioSpacing.s8) {
             Text(MavioStrings.itemSeasons).type(theme.type.title3)
             ForEach(ordered, id: \.seasonNumber) { s in
@@ -854,12 +630,8 @@ private struct DiscoveredSeason: View {
                 withAnimation { open.toggle() }
             } label: {
                 HStack(spacing: MavioSpacing.s12) {
-                    Text(
-                        season.seasonNumber == 0
-                            ? MavioStrings.discoverSpecials
-                            : MavioStrings.discoverSeason(number: String(season.seasonNumber))
-                    )
-                    .type(theme.type.headline).lineLimit(1)
+                    Text(seasonName(season.seasonNumber))
+                        .type(theme.type.headline).lineLimit(1)
                     Spacer(minLength: 0)
                     if season.episodeCount > 0 {
                         Text(MavioStrings.itemEpisodeCount(count: Int(season.episodeCount)))
@@ -923,15 +695,8 @@ private struct DiscoveredSeason: View {
         }
         .task {
             guard episodes == nil else { return }
-            var r = Mavio_Acquisition_V1_GetSeasonRequest()
-            r.tmdbID = tmdbId
-            r.seasonNumber = season.seasonNumber
-            r.language = discoverLanguage
             do {
-                episodes =
-                    try await model.client.call(
-                        serverId, Procedure.discover("GetSeason"), r, as: Mavio_Acquisition_V1_GetSeasonResponse.self
-                    ).episodes
+                episodes = try await model.season(serverId, tmdbId, season.seasonNumber)
             } catch {
                 failed = !(error is CancellationError)
             }

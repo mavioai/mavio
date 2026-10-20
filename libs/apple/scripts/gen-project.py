@@ -49,11 +49,17 @@ PLATFORMS = {
     },
     "macos": {
         "sdk": "macosx", "deployment": ("MACOSX_DEPLOYMENT_TARGET", "15.0"),
-        "products": ["MavioAdmin", "MavioKit", "MavioPlayer", "MavioScreens", "MavioUI"],
+        "products": ["MavioMacApp"],
         "target": {
             "SUPPORTED_PLATFORMS": "macosx",
+            # The iPhone's icon on the Mac's grid: the mark on white in a
+            # rounded square with its shadow (libs/design/brand).
+            "ASSETCATALOG_COMPILER_APPICON_NAME": "AppIcon",
             "ENABLE_APP_SANDBOX": "YES",
             "ENABLE_HARDENED_RUNTIME": "YES",
+            # Signing in in the browser comes back to a listener on a
+            # loopback address.
+            "ENABLE_INCOMING_NETWORK_CONNECTIONS": "YES",
             "ENABLE_OUTGOING_NETWORK_CONNECTIONS": "YES",
             "ENABLE_USER_SELECTED_FILES": "readonly",
             "INFOPLIST_KEY_LSApplicationCategoryType": '"public.app-category.entertainment"',

@@ -83,4 +83,5 @@
 | Apple TV | tvOS 焦点引擎 | `apps/tvos` |
 | Android TV 与 Google TV | Compose for TV 焦点 | `apps/android-tv` |
 | Web UI | 自己的焦点移动（§4），根元素的 `data-tv` 把 tokens 切换为 `tv` 取值 | `apps/web/src/shell/tv.tsx`、`apps/web/src/shell/spatial.ts`、`apps/web/src/shell/back.ts`、`apps/web/src/styles.css` |
-| Mac 与桌面 | 各应用的电视模式，方向键即方向键 | `apps/macos`、`apps/desktop` |
+| Mac | 以 AppKit 实现自己的焦点移动（§4），方向键即遥控器方向键，主题取 `tv` tokens | `libs/apple/Sources/MavioAppKit/Focus.swift`、`libs/apple/Sources/MavioMacApp/TVShell.swift` |
+| 桌面 | 应用的电视模式，方向键即遥控器方向键 | `apps/desktop` |

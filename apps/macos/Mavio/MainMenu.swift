@@ -1,8 +1,9 @@
 import AppKit
-import MavioUI
+import MavioMacApp
 
 /// The menu bar: the app's menu with the settings, File, Edit for the
-/// fields, View with the sidebar, search and full screen, Window and Help.
+/// fields, View with search, back, the sidebar, television mode and full
+/// screen, Window and Help.
 @MainActor
 enum MainMenu {
     static func make(target: AppDelegate) -> NSMenu {
@@ -78,11 +79,18 @@ enum MainMenu {
         let search = menu.addItem(
             withTitle: MavioStrings.navSearch, action: #selector(AppDelegate.showSearch), keyEquivalent: "f")
         search.target = target
+        let back = menu.addItem(
+            withTitle: MavioStrings.actionBack, action: #selector(AppDelegate.goBack), keyEquivalent: "[")
+        back.target = target
         menu.addItem(.separator())
         menu.addItem(
             withTitle: MavioStrings.menuToggleSidebar, action: #selector(NSSplitViewController.toggleSidebar(_:)),
             keyEquivalent: "s"
         ).keyEquivalentModifierMask = [.command, .control]
+        let tv = menu.addItem(
+            withTitle: MavioStrings.menuTvMode, action: #selector(AppDelegate.toggleTVMode), keyEquivalent: "t")
+        tv.keyEquivalentModifierMask = [.command, .control]
+        tv.target = target
         menu.addItem(
             withTitle: MavioStrings.menuFullScreen, action: #selector(NSWindow.toggleFullScreen(_:)),
             keyEquivalent: "f"

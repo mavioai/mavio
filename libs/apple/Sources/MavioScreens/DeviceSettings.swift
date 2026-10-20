@@ -134,7 +134,6 @@ private struct ThemePreview: View {
 public struct PlaybackSettingsView: View {
     @AppStorage(PlaybackQuality.key) private var quality = PlaybackQuality.auto
     @AppStorage(DeviceSetting.autoplayNext) private var autoplayNext = true
-    @AppStorage(DeviceSetting.playerWindows) private var playerWindows = false
     @Environment(\.theme) private var theme
 
     /// Playback on this device.
@@ -149,12 +148,6 @@ public struct PlaybackSettingsView: View {
                 }
                 .tint(theme.colors.textSecondary)
                 Toggle(MavioStrings.settingsAutoplayNext, isOn: $autoplayNext)
-                #if os(macOS)
-                    Toggle(isOn: $playerWindows) {
-                        Text(MavioStrings.settingsPlayerWindows)
-                        Text(MavioStrings.settingsPlayerWindowsMessage)
-                    }
-                #endif
             } footer: {
                 Text(MavioStrings.settingsAppearanceMessage)
             }

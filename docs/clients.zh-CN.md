@@ -17,7 +17,7 @@
 | `apps/web` | React + Vite + TanStack Router / Query + Base UI + Tailwind CSS，以 `//go:embed` 内嵌进服务端 | 浏览器 |
 | `apps/ios` | Swift、SwiftUI（SwiftUI 不足处用 UIKit） | iPhone 与 iPad，一个通用应用 |
 | `apps/tvos` | Swift、SwiftUI 与 UIKit | Apple TV |
-| `apps/macos` | Swift、AppKit（合适处用 SwiftUI） | Mac |
+| `apps/macos` | Swift、AppKit | Mac |
 | `apps/android` | Kotlin、Jetpack Compose | Android 手机、平板与折叠屏 |
 | `apps/android-tv` | Kotlin、Compose for TV | Android TV 与 Google TV |
 | `apps/desktop` | Go、[MyGo](https://github.com/egoist/mygo) 原生 UI、libmpv | macOS、Windows 与 Linux |
@@ -26,7 +26,7 @@
 | :--- | :--- | :--- |
 | `libs/client-ts` | TypeScript：Connect 客户端（`connect-es`）与 TanStack Query hooks | `apps/web` |
 | `libs/client-rust` | Rust：服务器、登录、事件、离线存储、播放上报、下载 | 所有原生应用：Swift 与 Kotlin 经 UniFFI，Go 经 C ABI |
-| `libs/apple` | Swift 包：核心的 Swift API 与应用服务、播放器、共享的 SwiftUI 组件 | `apps/ios`、`apps/tvos`、`apps/macos` |
+| `libs/apple` | Swift 包：核心的 Swift API 与应用服务、播放器、iPhone、iPad 与 Apple TV 共享的 SwiftUI 组件，Mac 的 AppKit 组件与页面 | `apps/ios`、`apps/tvos`、`apps/macos` |
 | `libs/android` | Kotlin 模块：核心的 Kotlin API 与应用服务、播放器、共享的 Compose 组件与服务器设置的页面 | `apps/android`、`apps/android-tv` |
 | `libs/design` | 设计 tokens（DTCG JSON）、图标、标志、组件规范与字符串，为每个客户端编译 | 所有客户端 |
 
@@ -103,13 +103,15 @@ flowchart LR
 * **助手**：[助手](assistant.zh-CN.md)最先实现的客户端（见该文档 §9.2）：经由 `libs/client-ts` 以 WASM 运行 `libs/intent` 的语法，只在安全页面使用麦克风，以浏览器的回声消除采集声音，经由服务端送入语音会话，并播放回答流式传来的语音。
 
 ### 4.2 Apple（`apps/ios`、`apps/tvos`、`apps/macos`、`libs/apple`）
-* **每种交互模型一个应用。** iPhone 与 iPad 按 App Store 的惯例是一个通用应用，iPad 上有自己的布局：顶部的标签栏、多栏、多窗口、台前调度、指针与硬件键盘。Apple TV 是独立应用，围绕焦点引擎与十英尺距离的遥控器构建，并提供 Top Shelf。Mac 是以 AppKit 编写的独立应用，AppKit 让播放器能完全掌控窗口、菜单栏、全屏、触控板以及同时打开多个播放器。
+* **每种交互模型一个应用。** iPhone 与 iPad 按 App Store 的惯例是一个通用应用，iPad 上有自己的布局：顶部的标签栏、多栏、多窗口、台前调度、指针与硬件键盘。Apple TV 是独立应用，围绕焦点引擎与十英尺距离的遥控器构建，并提供 Top Shelf。Mac 是只以 AppKit 编写、不用 SwiftUI 的独立应用，AppKit 让播放器能完全掌控窗口、菜单栏、全屏、触控板以及同时打开多个播放器：其页面是视图控制器，网格与行是 `NSCollectionView`，表单是 `NSStackView`。
 * **`libs/apple`**，三个应用共享的 Swift 包：
   * `MavioKit`：核心的 Swift API 及其上的应用服务——账户、能力探测、以后台 `URLSession` 下载、正在播放（`MPNowPlayingInfoCenter`、`MPRemoteCommandCenter`）——以及服务器 API 的消息 `MavioProto`，由 [swift-protobuf](https://github.com/apple/swift-protobuf)（Apache-2.0）生成：核心不建模的界面，即设置，用它们经由核心（`callServer`）调用服务器的 API，与桌面应用一致（§4.4）；
   * `MavioPlayer`：一个播放器接口、两个引擎，以及画中画；
   * `MavioUI`：各应用以各自方式组合的 SwiftUI 组件（图片、海报、行），以及设计 tokens；图片由 [Nuke](https://github.com/kean/Nuke) 的 `LazyImage`（MIT）加载与缓存；
-  * `MavioScreens`：iPhone 与 iPad 应用和 Mac 应用共享的页面——首页、媒体库、搜索、详情、发现、人物、下载、登录与用户的设置——及其路由，各应用以自己的外壳组合它们；
-  * `MavioAdmin`：设置中的“服务器”分组，即服务器的各部分及其管理，由三个应用共享，在各平台上省去该平台不具备的功能（Apple TV 上的保存文件）。
+  * `MavioCommon`：各应用共享、与界面框架无关的部分——路由、设备的设置、服务器的各部分、发现与卡片的标签，以及图片缓存；
+  * `MavioScreens`：iPhone 与 iPad 应用的页面——首页、媒体库、搜索、详情、发现、人物、下载、登录与用户的设置——及其路由；
+  * `MavioAdmin`：设置中的“服务器”分组，即服务器的各部分及其管理，由 iPhone 与 iPad 应用和 Apple TV 应用共享，在各平台上省去该平台不具备的功能（Apple TV 上的保存文件）；
+  * Mac 的 AppKit 部分：`MavioAppKit`，基于设计 tokens 的组件（卡片、行、与 Web UI 设置一致的表单、胶囊标签、导航栈，以及电视模式的焦点引擎）；`MavioMac`，其页面的上下文与基类；每个页面领域一个 target——`MavioMacMedia`、`MavioMacDiscover`、`MavioMacSettings`、`MavioMacServer`、`MavioMacAcquisition`、`MavioMacPlugins` 与 `MavioMacPlayer`——彼此只经由路由打开对方的页面；以及 `MavioMacApp`，即窗口、边栏、电视模式的标签与用户菜单，并把各领域连接起来。
 * **播放引擎**，优先顺序为：AVPlayer，其次 AetherEngine，最后由服务端处理。
   * **能力**：应用在 `direct_play` 中声明 AVPlayer 能播放的配置与 AetherEngine 能播放的配置。因此只要任一引擎能播放，服务端就直接播放该源；两者都不能播放时才重封装或转码。
   * **选择**：直接播放的源，AVPlayer 能原样播放时交给 AVPlayer，否则交给 AetherEngine；服务端重封装或转码的结果是 HLS，交给 AVPlayer；但所选字幕是单独的文件时交给 AetherEngine，由它在所播放的 HLS 上绘制字幕。
@@ -160,7 +162,7 @@ flowchart LR
 ## 5. 共享核心（`libs/client-rust`）
 
 ### 5.1 职责
-* **服务器与登录**：同时登录多台服务器（§5.4），支持发现、以密码或 Quick Connect 登录，以及会话（[账户 §5.2–§5.3](accounts.zh-CN.md#5-密钥与令牌)）：设备密钥与每个服务端的会话（其 ID、访问令牌与过期时间）由应用通过它实现的接口保存在平台的安全存储中（Keychain、Android Keystore、Windows 凭据管理器、Secret Service）——桌面应用的开发构建每次都重新签名，因而改存于其数据目录中的一个文件，并一次性从安全存储迁移过去——核心的传输层在访问令牌过期前或被服务端拒绝后，以签名服务端的随机数为其续期。
+* **服务器与登录**：同时登录多台服务器（§5.4），支持发现、以密码或 Quick Connect 登录，以及会话（[账户 §5.2–§5.3](accounts.zh-CN.md#5-密钥与令牌)）：设备密钥与每个服务端的会话（其 ID、访问令牌与过期时间）由应用通过它实现的接口保存在平台的安全存储中（Keychain、Android Keystore、Windows 凭据管理器、Secret Service）——桌面应用与 Mac 应用的开发构建每次都重新签名，因而改存于其数据目录中的一个文件（桌面应用一次性从安全存储迁移过去，Mac 应用则从不读取 Keychain）——核心的传输层在访问令牌过期前或被服务端拒绝后，以签名服务端的随机数为其续期。
 * **Connect 客户端**：[connect-rust](https://github.com/connectrpc/connect-rust)，基于 HTTP/1.1 与 HTTP/2，消息与客户端从 `libs/proto` 生成到 `libs/proto/gen/rust`，由 crate `mavio-api` 包含。
 * **事件流**：每台服务器一条 `EventService` 流，以退避重连，事件分发给应用。
 * **离线存储**：SQLite（`rusqlite`，内置 SQLite），保存最近浏览的条目以便应用以缓存内容启动、已下载的条目，以及离线时产生的进度上报，待服务器可达后发送。
@@ -425,7 +427,7 @@ mavio/
 │   │   ├── uniffi/              # 面向 Swift 与 Kotlin 的 UniFFI 导出
 │   │   ├── capi/                # 面向 Go 的 C ABI 及其 Go 绑定（Go 模块）
 │   │   └── proto/               # C ABI 的消息（mavio.capi.v1）
-│   ├── apple/                   # [Swift] MavioKit、MavioPlayer、MavioUI、MavioScreens、MavioAdmin
+│   ├── apple/                   # [Swift] MavioKit、MavioPlayer、MavioCommon、MavioUI、MavioScreens、MavioAdmin、MavioAppKit、MavioMac*
 │   ├── android/                 # [Kotlin] core、player、ui、admin
 │   ├── intent/                  # [Rust] 助手的语法；为服务端构建 WASM
 │   └── design/                  # tokens、图标、组件、字符串；gen/{ts,swift,kotlin,go}

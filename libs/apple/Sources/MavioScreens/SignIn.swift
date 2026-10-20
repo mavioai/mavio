@@ -137,11 +137,7 @@ public struct SignInView: View {
 
     /// Whether the steps are a card on the wall of posters, as in the web
     /// UI's desktop layout, which the Mac always has.
-    #if os(macOS)
-        private static let carded = true
-    #else
-        private static let carded = false
-    #endif
+    private static let carded = false
 
     /// The card of a wide window, centered on the wall of posters, as the
     /// web UI's: the first step, or another with its back link.
@@ -421,11 +417,7 @@ public struct SignInView: View {
     }
 
     /// The client ID of this app at mavio.dev.
-    #if os(macOS)
-        private static let clientId = "dev.mavio.macos"
-    #else
-        private static let clientId = "dev.mavio.ios"
-    #endif
+    private static let clientId = "dev.mavio.ios"
 
     /// The API of the mavio.dev the server belongs to, or the one this build
     /// signs in at (`MAVIO_DEV_API`).

@@ -57,18 +57,8 @@ struct DiscoveredPersonView: View {
             phone
             ? AnyLayout(VStackLayout(alignment: .center, spacing: MavioSpacing.s24))
             : AnyLayout(HStackLayout(alignment: .top, spacing: MavioSpacing.s24))
-        let facts = [
-            dayText(p.birthday).map { MavioStrings.personBorn(date: $0, age: String(age(p.birthday, p.deathday))) },
-            p.placeOfBirth.isEmpty ? nil : p.placeOfBirth,
-            dayText(p.deathday).map { MavioStrings.personDied(date: $0) },
-        ].compactMap(\.self)
-        var links: [ExternalLink] = []
-        if let id = p.externalIds["tmdb"], let url = URL(string: "https://www.themoviedb.org/person/\(id)") {
-            links.append(ExternalLink(name: "TMDB", url: url, logo: "tmdb", width: 32))
-        }
-        if let id = p.externalIds["imdb"], let url = URL(string: "https://www.imdb.com/name/\(id)") {
-            links.append(ExternalLink(name: "IMDb", url: url, logo: "imdb", width: 32))
-        }
+        let facts = personFacts(p)
+        let links = personLinks(p)
         return layout {
             ArtworkView(sized(p.imageURL, 342), title: p.name, icon: "profile")
                 .frame(width: phone ? 144 : 176, height: phone ? 144 : 176)
@@ -133,28 +123,13 @@ struct DiscoveredPersonView: View {
     }
 
     private func load() async {
-        var r = Mavio_Acquisition_V1_GetPersonRequest()
-        r.tmdbID = tmdbId
-        r.language = discoverLanguage
         do {
-            person =
-                try await model.client.call(
-                    serverId, Procedure.discover("GetPerson"), r, as: Mavio_Acquisition_V1_GetPersonResponse.self
-                ).person
+            person = try await model.discoveredPerson(serverId, tmdbId)
             failure = nil
         } catch is CancellationError {
         } catch {
             if person == nil { failure = error.reason }
         }
-    }
-
-    /// Whole years between two calendar dates, the second today when empty.
-    private func age(_ from: String, _ to: String) -> Int {
-        let parse = { (s: String) in try? Date(s + "T00:00:00Z", strategy: .iso8601) }
-        guard let a = parse(from) else { return 0 }
-        var utc = Calendar(identifier: .gregorian)
-        utc.timeZone = .gmt
-        return utc.dateComponents([.year], from: a, to: parse(to) ?? .now).year ?? 0
     }
 }
 
@@ -242,11 +217,6 @@ struct DiscoveredCollectionView: View {
                         Text(c.name).font(.system(size: phone ? 34 : 52, weight: .bold))
                         Text(facts.joined(separator: " · ")).type(theme.type.callout).foregroundStyle(
                             .white.opacity(0.8))
-                        #if os(macOS)
-                            RequestsCollectionActions(
-                                serverId: serverId, tmdbId: tmdbId, collection: c,
-                                blocked: status(c.parts) == .blocklisted, reload: { await load() })
-                        #endif
                     }
                     .foregroundStyle(.white)
                     .frame(maxWidth: 640, alignment: .leading)
@@ -262,16 +232,7 @@ struct DiscoveredCollectionView: View {
     /// What the server has of a collection, as Seerr marks it: available
     /// when it has every movie, partially available when some, requested
     /// when every other movie is requested, blocklisted when every movie is.
-    private func status(_ parts: [DiscoveredTitle]) -> MediaStatus {
-        guard !parts.isEmpty else { return .unspecified }
-        if parts.allSatisfy({ $0.status == .blocklisted }) { return .blocklisted }
-        if parts.allSatisfy({ $0.status == .available }) { return .available }
-        if parts.contains(where: { $0.status == .available || $0.status == .partiallyAvailable }) {
-            return .partiallyAvailable
-        }
-        if parts.allSatisfy({ $0.status == .requested || $0.status == .wanted }) { return .requested }
-        return .unspecified
-    }
+    private func status(_ parts: [DiscoveredTitle]) -> MediaStatus { collectionStatus(parts) }
 
     private func load() async {
         do {

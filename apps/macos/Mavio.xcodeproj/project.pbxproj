@@ -8,11 +8,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		E1905A717B0B10523EE70EC2 /* MavioAdmin in Frameworks */ = {isa = PBXBuildFile; productRef = A27F56CC5383D60CA1F8F603 /* MavioAdmin */; };
-		0DAF8A1DE0E8E2EB4D53C215 /* MavioKit in Frameworks */ = {isa = PBXBuildFile; productRef = 69CFF62CEAE53F1248E9C787 /* MavioKit */; };
-		36803D8C66BC2B412C438C9C /* MavioPlayer in Frameworks */ = {isa = PBXBuildFile; productRef = 1710AB05C2C82CE8B15F6CD3 /* MavioPlayer */; };
-		6F086CC9507BDDE4A9E5B811 /* MavioScreens in Frameworks */ = {isa = PBXBuildFile; productRef = B539AFAC022B74E332F1D346 /* MavioScreens */; };
-		19D69702ED7EFADF864E7186 /* MavioUI in Frameworks */ = {isa = PBXBuildFile; productRef = 0BE966A350FF3A99D76737D2 /* MavioUI */; };
+		AF66BAFCCA52EA9ED751FD1F /* MavioMacApp in Frameworks */ = {isa = PBXBuildFile; productRef = 7C6BB19FEB4331DCFCA2B8BD /* MavioMacApp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -32,11 +28,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E1905A717B0B10523EE70EC2 /* MavioAdmin in Frameworks */,
-				0DAF8A1DE0E8E2EB4D53C215 /* MavioKit in Frameworks */,
-				36803D8C66BC2B412C438C9C /* MavioPlayer in Frameworks */,
-				6F086CC9507BDDE4A9E5B811 /* MavioScreens in Frameworks */,
-				19D69702ED7EFADF864E7186 /* MavioUI in Frameworks */,
+				AF66BAFCCA52EA9ED751FD1F /* MavioMacApp in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -79,11 +71,7 @@
 			);
 			name = Mavio;
 			packageProductDependencies = (
-				A27F56CC5383D60CA1F8F603 /* MavioAdmin */,
-				69CFF62CEAE53F1248E9C787 /* MavioKit */,
-				1710AB05C2C82CE8B15F6CD3 /* MavioPlayer */,
-				B539AFAC022B74E332F1D346 /* MavioScreens */,
-				0BE966A350FF3A99D76737D2 /* MavioUI */,
+				7C6BB19FEB4331DCFCA2B8BD /* MavioMacApp */,
 			);
 			productName = Mavio;
 			productReference = B815150C1FFCC4E6F34AEB62 /* Mavio.app */;
@@ -186,10 +174,12 @@
 		FA604C6CA0282CBD0FDD1E56 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_INCOMING_NETWORK_CONNECTIONS = YES;
 				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
@@ -211,10 +201,12 @@
 		6BEF7D86EE2B078907C6FE28 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_INCOMING_NETWORK_CONNECTIONS = YES;
 				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
@@ -264,25 +256,9 @@
 /* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		A27F56CC5383D60CA1F8F603 /* MavioAdmin */ = {
+		7C6BB19FEB4331DCFCA2B8BD /* MavioMacApp */ = {
 			isa = XCSwiftPackageProductDependency;
-			productName = MavioAdmin;
-		};
-		69CFF62CEAE53F1248E9C787 /* MavioKit */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = MavioKit;
-		};
-		1710AB05C2C82CE8B15F6CD3 /* MavioPlayer */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = MavioPlayer;
-		};
-		B539AFAC022B74E332F1D346 /* MavioScreens */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = MavioScreens;
-		};
-		0BE966A350FF3A99D76737D2 /* MavioUI */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = MavioUI;
+			productName = MavioMacApp;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

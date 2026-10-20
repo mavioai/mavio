@@ -1,4 +1,4 @@
-The service logos of Services.xcassets are Seerr's (src/assets/rt_*.svg, src/assets/tmdb_logo.svg and src/assets/services/*.svg), under its license:
+The service logos of MavioCommon/Resources/Services.xcassets are Seerr's (src/assets/rt_*.svg, src/assets/tmdb_logo.svg and src/assets/services/*.svg), under its license:
 
 MIT License
 

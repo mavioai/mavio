@@ -83,4 +83,5 @@ The on-screen controller shows the title, the timeline, and a row of buttons —
 | Apple TV | The tvOS focus engine | `apps/tvos` |
 | Android TV and Google TV | Compose for TV focus | `apps/android-tv` |
 | Web UI | Its own focus movement (§4), with the root element's `data-tv` switching the tokens to their `tv` values | `apps/web/src/shell/tv.tsx`, `apps/web/src/shell/spatial.ts`, `apps/web/src/shell/back.ts`, `apps/web/src/styles.css` |
-| Mac and desktop | The television mode of each app, with the arrow keys as the D-pad | `apps/macos`, `apps/desktop` |
+| Mac | Its own focus movement (§4) in AppKit, with the arrow keys as the D-pad and the theme's `tv` tokens | `libs/apple/Sources/MavioAppKit/Focus.swift`, `libs/apple/Sources/MavioMacApp/TVShell.swift` |
+| Desktop | The television mode of the app, with the arrow keys as the D-pad | `apps/desktop` |

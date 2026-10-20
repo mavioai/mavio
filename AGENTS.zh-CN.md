@@ -55,8 +55,8 @@ apps/website/         mavio.dev：账户、访问记录、Home、向服务端推
 apps/relay/           供无法直接访问的服务端使用的中转：按 SNI 透传 TLS（自 P28 起）
 apps/dns/             mavio.site 的名称服务器：由地址计算的名称、ACME 质询（自 P28 起）
 libs/client-ts/       Web UI 的 Connect 客户端与 TanStack Query hooks
-apps/{ios,tvos,macos}/  Apple 各应用（SwiftUI）；其 Xcode 工程由 libs/apple/scripts/gen-project.py 生成
-libs/apple/           Apple 各应用共享的 Swift 包：MavioKit、MavioPlayer、MavioUI、MavioScreens、MavioAdmin，以及核心的 XCFramework
+apps/{ios,tvos,macos}/  Apple 各应用（iPhone、iPad 与 Apple TV 用 SwiftUI，Mac 用 AppKit）；其 Xcode 工程由 libs/apple/scripts/gen-project.py 生成
+libs/apple/           Apple 各应用共享的 Swift 包：MavioKit、MavioPlayer、MavioCommon、MavioUI、MavioScreens、MavioAdmin，Mac 的 MavioAppKit 与 MavioMac* 各 target，以及核心的 XCFramework
 apps/android{,-tv}/   Android 各应用（Compose、Compose for TV），引入 libs/android 的 Gradle 构建
 libs/android/         Android 各应用共享的 Gradle 模块：core、player、ui、admin
 libs/client-rust/     客户端的 Rust 共享核心（Cargo workspace；api 为生成的消息与客户端；capi 为 C ABI 及其 Go 绑定）

@@ -73,8 +73,9 @@ public final class AppModel {
     @ObservationIgnored private let relay: Relay
     @ObservationIgnored private var homeTask: Task<Void, Never>?
 
-    /// The core with its store in directory, Application Support by default.
-    public init(directory: URL? = nil) throws {
+    /// The core with its store in directory, Application Support by default,
+    /// and its secrets in tokens, the Keychain by default.
+    public init(directory: URL? = nil, tokens: (any SecureTokens)? = nil) throws {
         let (stream, continuation) = AsyncStream<Push>.makeStream()
         let relay = Relay(continuation)
         let dir = directory ?? URL.applicationSupportDirectory.appending(path: "Mavio", directoryHint: .isDirectory)
@@ -84,7 +85,7 @@ public final class AppModel {
         client = try Client(
             databasePath: dir.appending(path: "core.sqlite").path(percentEncoded: false),
             device: Self.device(),
-            tokens: KeychainTokens(),
+            tokens: tokens ?? KeychainTokens(),
             listener: relay
         )
         downloads = Downloads(client: client, folder: downloadsFolder)

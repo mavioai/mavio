@@ -1,5 +1,6 @@
 /// SwiftUI components each app composes in its own way, drawn with the
 /// design tokens.
+@_exported import MavioCommon
 @_exported import MavioDesign
 import SwiftUI
 

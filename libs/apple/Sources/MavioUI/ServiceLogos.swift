@@ -6,6 +6,6 @@ extension Image {
     /// "rt-fresh", "rt-rotten", "rt-aud-fresh", "rt-aud-rotten", "trakt",
     /// "simkl" or "letterboxd".
     public static func service(_ name: String) -> Image {
-        Image(name, bundle: .module)
+        Image(name, bundle: ServiceLogos.bundle)
     }
 }

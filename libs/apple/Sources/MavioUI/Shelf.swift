@@ -82,28 +82,3 @@ public struct StatusView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
-
-/// The title of a row of Home or of a library's Recommended tab, named by
-/// its kind, library and seed.
-public func rowTitle(_ row: Row) -> String {
-    let library = row.libraryName ?? ""
-    let seed = row.seedName ?? ""
-    switch row.kind {
-    case .continueWatching: return MavioStrings.homeContinueWatching
-    case .availableRequests: return MavioStrings.homeAvailableRequests
-    case .recentlyAdded: return MavioStrings.homeLatest(library: library)
-    case .recentlyReleased: return MavioStrings.homeRecentlyReleased(library: library)
-    case .recentlyAired: return MavioStrings.homeRecentlyAired(library: library)
-    case .topRated: return MavioStrings.homeTopRated(library: library)
-    case .topUnplayed: return MavioStrings.homeTopUnplayed(library: library)
-    case .startWatching: return MavioStrings.homeStartWatching(library: library)
-    case .rediscover: return MavioStrings.homeRediscover(library: library)
-    case .becauseYouWatched: return MavioStrings.homeBecauseYouWatched(title: seed)
-    case .becauseYouLike: return MavioStrings.homeBecauseYouLike(title: seed)
-    case .moreInGenre: return MavioStrings.homeMoreInGenre(genre: seed)
-    case .starring: return MavioStrings.homeStarring(name: seed)
-    case .directedBy: return MavioStrings.homeDirectedBy(name: seed)
-    case .trending: return MavioStrings.homeTrending
-    case .server: return row.serverName ?? ""
-    }
-}

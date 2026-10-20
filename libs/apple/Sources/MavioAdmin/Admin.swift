@@ -102,61 +102,9 @@ public struct ServerGroup: View {
     }
 }
 
-/// An entry of the Server group: a section, or a menu of them.
-public enum ServerEntry: Hashable {
-    case section(ServerSection)
-    case menu(ServerMenu)
-
-    /// The entries the user sees: an administrator's all, others' the
-    /// sections any user has; a menu left with one section is that section.
-    public static func shown(admin: Bool) -> [ServerEntry] {
-        #if os(macOS)
-            // The Mac, not in the App Store, keeps acquiring media, the AI
-            // providers, the plugins and the proxies.
-            let top: [ServerEntry] = [
-                .section(.overview), .section(.general), .section(.users), .section(.devices), .menu(.media),
-                .section(.acquisition), .section(.wanted), .section(.downloads), .section(.subtitles), .section(.ai),
-                .section(.plugins), .section(.proxies), .menu(.maintenance),
-            ]
-        #else
-            let top: [ServerEntry] = [
-                .section(.overview), .section(.general), .section(.users), .section(.devices), .menu(.media),
-                .menu(.maintenance),
-            ]
-        #endif
-        return top.compactMap { entry in
-            switch entry {
-            case .section(let s): return s.forAnyone || admin ? entry : nil
-            case .menu(let m):
-                let sections = m.sections(admin: admin)
-                return sections.count > 1 ? entry : sections.first.map(ServerEntry.section)
-            }
-        }
-    }
-
-    /// The title.
-    public var title: String {
-        switch self {
-        case .section(let s): s.title
-        case .menu(let m): m.title
-        }
-    }
-
-    /// The icon's name.
-    public var icon: String {
-        switch self {
-        case .section(let s): s.icon
-        case .menu(let m): m.icon
-        }
-    }
-
+extension ServerEntry {
     /// The color of the icon's tile.
-    public var color: Color {
-        switch self {
-        case .section(let s): s.color
-        case .menu(let m): m.color
-        }
-    }
+    public var color: Color { Color(hex: tint) }
 
     /// The page, of the server's.
     @MainActor @ViewBuilder public func view(_ server: ServerRecord) -> some View {
@@ -167,43 +115,9 @@ public enum ServerEntry: Hashable {
     }
 }
 
-/// A menu of the Server group's second level.
-public enum ServerMenu: Hashable {
-    case media, maintenance
-
-    /// The menu's sections the user sees.
-    public func sections(admin: Bool) -> [ServerSection] {
-        let all: [ServerSection] =
-            switch self {
-            case .media: [.libraries, .storage, .transcoding]
-            case .maintenance: [.activity, .issues, .tasks, .logs, .backups, .apiKeys]
-            }
-        return all.filter { admin || $0.forAnyone }
-    }
-
-    /// The title.
-    public var title: String {
-        switch self {
-        case .media: MavioStrings.settingsMediaMenu
-        case .maintenance: MavioStrings.settingsMaintenanceMenu
-        }
-    }
-
-    /// The icon's name.
-    public var icon: String {
-        switch self {
-        case .media: "movies"
-        case .maintenance: "admin"
-        }
-    }
-
+extension ServerMenu {
     /// The color of the icon's tile.
-    public var color: Color {
-        switch self {
-        case .media: Color(hex: 0xFF9F0A)
-        case .maintenance: Color(hex: 0x8E8E93)
-        }
-    }
+    public var color: Color { Color(hex: tint) }
 }
 
 /// A menu's page: its sections, as the Server group lists its own.
@@ -231,96 +145,9 @@ private struct ServerMenuView: View {
     }
 }
 
-/// A section of the Server group.
-public enum ServerSection: Hashable {
-    case overview, general, users, devices, apiKeys, libraries, storage, transcoding, activity, issues, tasks, logs,
-        backups
-    /// The sections only the Mac shows, which the App Store does not
-    /// accept (docs/clients.md §4.2): acquiring media, the AI providers
-    /// and conversations, the plugins, the proxies and the indexer search.
-    case acquisition, wanted, downloads, subtitles, ai, plugins, proxies, conversations, indexerSearch
-
-    /// Whether users who do not administer the server see it.
-    public var forAnyone: Bool { self == .devices || self == .issues }
-
-    /// The title.
-    public var title: String {
-        switch self {
-        case .overview: MavioStrings.settingsOverview
-        case .general: MavioStrings.settingsGeneral
-        case .users: MavioStrings.settingsUsers
-        case .apiKeys: MavioStrings.settingsApiKeys
-        case .libraries: MavioStrings.settingsLibraries
-        case .storage: MavioStrings.settingsStorage
-        case .transcoding: MavioStrings.settingsTranscoding
-        case .devices: MavioStrings.settingsDevices
-        case .activity: MavioStrings.settingsActivity
-        case .issues: MavioStrings.settingsIssues
-        case .tasks: MavioStrings.settingsTasks
-        case .logs: MavioStrings.settingsLogs
-        case .backups: MavioStrings.settingsBackups
-        case .acquisition: MavioStrings.settingsAcquisition
-        case .wanted: MavioStrings.settingsWanted
-        case .downloads: MavioStrings.settingsDownloads
-        case .subtitles: MavioStrings.settingsSubtitles
-        case .ai: MavioStrings.settingsAi
-        case .plugins: MavioStrings.settingsPlugins
-        case .proxies: MavioStrings.settingsProxies
-        case .conversations: MavioStrings.settingsConversations
-        case .indexerSearch: MavioStrings.indexersTitle
-        }
-    }
-
-    /// The icon's name.
-    public var icon: String {
-        switch self {
-        case .overview: "server"
-        case .general: "settings"
-        case .users: "users"
-        case .apiKeys: "lock"
-        case .libraries: "folder"
-        case .storage: "server"
-        case .transcoding: "quality"
-        case .devices: "devices"
-        case .activity: "activity"
-        case .issues: "error"
-        case .tasks: "pending"
-        case .logs: "info"
-        case .backups: "folder"
-        case .acquisition, .downloads: "downloads"
-        case .wanted: "pending"
-        case .subtitles: "subtitles"
-        case .ai: "key"
-        case .plugins: "plugins"
-        case .proxies: "network"
-        case .conversations: "info"
-        case .indexerSearch: "indexers"
-        }
-    }
-
+extension ServerSection {
     /// The color of the icon's tile.
-    public var color: Color {
-        switch self {
-        case .overview, .general, .logs: Color(hex: 0x8E8E93)
-        case .apiKeys: Color(hex: 0x636366)
-        case .users: Color(hex: 0xFF9500)
-        case .libraries: Color(hex: 0x007AFF)
-        case .storage: Color(hex: 0x30B0C7)
-        case .transcoding: Color(hex: 0xFF2D55)
-        case .devices: Color(hex: 0x32ADE6)
-        case .activity: Color(hex: 0xFF2D55)
-        case .issues: Color(hex: 0xFF9500)
-        case .tasks, .backups: Color(hex: 0x5856D6)
-        case .acquisition, .downloads: Color(hex: 0x34C759)
-        case .wanted: Color(hex: 0xFF3B30)
-        case .subtitles: Color(hex: 0xFF9500)
-        case .ai: Color(hex: 0xBF5AF2)
-        case .plugins: Color(hex: 0xAF52DE)
-        case .proxies: Color(hex: 0x30B0C7)
-        case .conversations: Color(hex: 0x5E5CE6)
-        case .indexerSearch: Color(hex: 0x0A84FF)
-        }
-    }
+    public var color: Color { Color(hex: tint) }
 
     /// The page, of the server's.
     @MainActor @ViewBuilder public func view(_ server: ServerRecord) -> some View {
@@ -338,34 +165,11 @@ public enum ServerSection: Hashable {
         case .tasks: TasksView(server: server)
         case .logs: LogsView(server: server)
         case .backups: BackupsView(server: server)
-        #if os(macOS)
-            case .acquisition: AcquisitionView(server: server)
-            case .wanted: WantedView(server: server)
-            case .downloads: DownloadsAdminView(server: server)
-            case .subtitles: SubtitlesAdminView(server: server)
-            case .ai: AiView(server: server)
-            case .plugins: PluginsView(server: server)
-            case .proxies: ProxiesView(server: server)
-            case .conversations: ConversationsView(server: server)
-            case .indexerSearch: IndexerSearchView(server: server)
-        #else
-            case .acquisition, .wanted, .downloads, .subtitles, .ai, .plugins, .proxies, .conversations,
-                .indexerSearch:
-                EmptyView()
-        #endif
+        case .acquisition, .wanted, .downloads, .subtitles, .ai, .plugins, .proxies, .conversations,
+            .indexerSearch:
+            EmptyView()
         }
     }
-}
-
-/// When something happened or will, relative to now, as "5 minutes ago".
-func fromNow(_ date: Date) -> String {
-    date.formatted(.relative(presentation: .named))
-}
-
-/// A length of time, as "1 hr, 30 min".
-func lengthOf(_ seconds: TimeInterval) -> String {
-    Duration.seconds(seconds).formatted(
-        .units(allowed: [.days, .hours, .minutes, .seconds], width: .abbreviated, maximumUnitCount: 2))
 }
 
 // MARK: Overview

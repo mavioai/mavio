@@ -91,23 +91,6 @@ public struct FittedImage<Fallback: View>: View {
     }
 }
 
-extension CardKind {
-    /// The icon on the placeholder of this kind's artwork.
-    public var icon: String {
-        switch self {
-        case .series, .season, .episode: "shows"
-        case .artist, .album, .track, .musicVideo: "music"
-        case .audiobook, .book: "books"
-        case .photoAlbum, .photo: "photos"
-        case .video: "homeVideos"
-        case .folder: "folder"
-        case .collection: "collections"
-        case .playlist: "playlists"
-        default: "movies"
-        }
-    }
-}
-
 /// The overlays of a card's artwork: watched progress, the played check and
 /// the time left.
 struct CardOverlays: View {
@@ -147,12 +130,6 @@ struct CardOverlays: View {
             }
         }
     }
-}
-
-/// The minutes left of a card begun, rounded up.
-public func minutesLeft(_ card: Card) -> Int? {
-    guard let runtime = card.runtime, let progress = card.progress else { return nil }
-    return max(1, Int((runtime * Double(1 - progress) / 60).rounded(.up)))
 }
 
 /// A 2:3 card of a movie, series, season or collection.
@@ -211,19 +188,6 @@ public struct ThumbCard: View {
         }
         .frame(width: width)
         .contentShape(.rect)
-    }
-}
-
-/// The subtitle line of a card: its own subtitle, else its year.
-func subtitle(_ card: Card) -> String? {
-    card.subtitle ?? card.year.map(String.init)
-}
-
-/// Whether a card shows as a 16:9 thumbnail rather than a poster.
-public func isWide(_ card: Card) -> Bool {
-    switch card.kind {
-    case .episode, .video, .musicVideo, .photo: true
-    default: false
     }
 }
 

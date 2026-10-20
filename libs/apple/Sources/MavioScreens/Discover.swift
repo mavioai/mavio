@@ -36,25 +36,6 @@ public struct DiscoverView: View {
             }
         }
         .navigationTitle(MavioStrings.navDiscover)
-        #if os(macOS)
-            // The requests, which the App Store apps leave out.
-            .toolbar {
-                if let server = discovery.server {
-                    ToolbarItem(placement: .trailingBar) {
-                        NavigationLink {
-                            RequestsView(serverId: server.id)
-                        } label: {
-                            Label {
-                                Text(MavioStrings.requestsTitle)
-                            } icon: {
-                                Icon("pending", size: 16)
-                            }
-                            .labelStyle(.titleAndIcon)
-                        }
-                    }
-                }
-            }
-        #endif
     }
 
     private static func query(_ server: ServerRecord, _ row: CatalogRow) -> CatalogQuery {

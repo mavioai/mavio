@@ -2,10 +2,6 @@ import MavioKit
 import MavioUI
 import SwiftUI
 
-/// The country of the streaming services until another is chosen, the one
-/// with the most of them.
-private let defaultRegion = "US"
-
 /// A catalog's filters and sorts (docs/clients.md §6.3.28), as the web UI's
 /// dialog: the order of its titles and the filters it takes — genres,
 /// studios, keywords and streaming services by their values, the original
@@ -25,7 +21,7 @@ struct CatalogFiltersSheet: View {
     }
 
     private var mediaKind: MediaKind { f.kind == .unspecified ? .movie : f.kind }
-    private var region: String { f.watchRegion.isEmpty ? defaultRegion : f.watchRegion }
+    private var region: String { f.watchRegion.isEmpty ? defaultWatchRegion : f.watchRegion }
     private func takes(_ filter: Mavio_Plugin_V1_DiscoverFilter) -> Bool { catalog.filters.contains(filter) }
 
     var body: some View {
@@ -130,14 +126,15 @@ struct CatalogFiltersSheet: View {
                             f.watchRegion = $0
                             f.watchProviders = []
                         }),
-                    options: Localized.countries)
+                    options: DiscoverLocales.countries)
             }
         }
     }
 
     private var language: some View {
         FilterSection(title: MavioStrings.discoverOriginalLanguage) {
-            MenuPicker(selection: $f.originalLanguage, options: [("", MavioStrings.discoverAny)] + Localized.languages)
+            MenuPicker(
+                selection: $f.originalLanguage, options: [("", MavioStrings.discoverAny)] + DiscoverLocales.languages)
         }
     }
 
@@ -159,36 +156,7 @@ struct CatalogFiltersSheet: View {
         }
     }
 
-    private func sortName(_ sort: Mavio_Plugin_V1_DiscoverSort) -> String {
-        switch sort {
-        case .popularity: MavioStrings.discoverSortPopularity
-        case .releaseDate: MavioStrings.discoverSortReleaseDate
-        case .rating: MavioStrings.discoverSortRating
-        case .voteCount: MavioStrings.discoverSortVotes
-        case .title: MavioStrings.discoverSortTitle
-        default: MavioStrings.discoverSortDefault
-        }
-    }
-}
-
-/// The languages and countries to choose from, by their codes, named in the
-/// app's language.
-private enum Localized {
-    private static let locale = Locale(identifier: MavioStrings.bundle.preferredLocalizations.first ?? "en")
-
-    /// ISO 639-1 languages.
-    static let languages: [(String, String)] = Locale.LanguageCode.isoLanguageCodes
-        .map(\.identifier)
-        .filter { $0.count == 2 }
-        .compactMap { code in locale.localizedString(forLanguageCode: code).map { (code, $0) } }
-        .sorted { $0.1.localizedCompare($1.1) == .orderedAscending }
-
-    /// ISO 3166-1 countries.
-    static let countries: [(String, String)] = Locale.Region.isoRegions
-        .map(\.identifier)
-        .filter { $0.count == 2 && $0.allSatisfy(\.isLetter) }
-        .compactMap { code in locale.localizedString(forRegionCode: code).map { (code, $0) } }
-        .sorted { $0.1.localizedCompare($1.1) == .orderedAscending }
+    private func sortName(_ sort: Mavio_Plugin_V1_DiscoverSort) -> String { discoverSortName(sort) }
 }
 
 /// A heading over a filter's controls.
@@ -284,24 +252,6 @@ private struct Chip: View {
     }
 }
 
-/// Asks a catalog's provider for a filter's values.
-@MainActor
-private func filterValues(
-    _ model: AppModel, serverId: String, catalog: String, filter: Mavio_Plugin_V1_DiscoverFilter,
-    mediaKind: MediaKind, query: String = "", region: String = ""
-) async throws -> [Mavio_Plugin_V1_FilterValue] {
-    var r = Mavio_Acquisition_V1_ListFilterValuesRequest()
-    r.catalog = catalog
-    r.filter = filter
-    r.mediaKind = mediaKind
-    r.query = query
-    r.language = discoverLanguage
-    r.region = region
-    let response: Mavio_Acquisition_V1_ListFilterValuesResponse = try await model.client.call(
-        serverId, Procedure.discover("ListFilterValues"), r)
-    return response.values
-}
-
 /// Values listed whole, as genres and streaming services are, to pick
 /// from; with a control choosing them, as the country of streaming
 /// services, the section shows even when none is listed.
@@ -344,9 +294,9 @@ private struct ListedValues<Control: View>: View {
             .task(id: region) {
                 values = nil
                 values =
-                    (try? await filterValues(
-                        model, serverId: serverId, catalog: catalog, filter: filter, mediaKind: mediaKind,
-                        region: region)) ?? []
+                    (try? await model.filterValues(
+                        serverId: serverId, catalog: catalog, filter: filter, mediaKind: mediaKind, region: region))
+                    ?? []
             }
         }
     }
@@ -421,8 +371,8 @@ private struct SearchedValues: View {
             }
             do {
                 try await Task.sleep(for: .milliseconds(300))
-                found = try await filterValues(
-                    model, serverId: serverId, catalog: catalog, filter: filter, mediaKind: mediaKind, query: query)
+                found = try await model.filterValues(
+                    serverId: serverId, catalog: catalog, filter: filter, mediaKind: mediaKind, query: query)
             } catch is CancellationError {
             } catch {
                 found = []

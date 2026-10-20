@@ -11,6 +11,9 @@ let package = Package(
     platforms: [.iOS(.v18), .tvOS(.v18), .macOS(.v15)],
     products: [
         .library(name: "MavioAdmin", targets: ["MavioAdmin"]),
+        .library(name: "MavioAppKit", targets: ["MavioAppKit"]),
+        .library(name: "MavioMacApp", targets: ["MavioMacApp"]),
+        .library(name: "MavioCommon", targets: ["MavioCommon"]),
         .library(name: "MavioKit", targets: ["MavioKit"]),
         .library(name: "MavioPlayer", targets: ["MavioPlayer"]),
         .library(name: "MavioScreens", targets: ["MavioScreens"]),
@@ -49,12 +52,18 @@ let package = Package(
                 .product(name: "Nuke", package: "Nuke"),
             ]
         ),
+        // What every app's screens share apart from their toolkit: the
+        // devices' settings, Discover's state, the labels of the server's
+        // values, the settings' sections and the cache of images.
+        .target(
+            name: "MavioCommon",
+            dependencies: [
+                "MavioKit", .product(name: "MavioDesign", package: "design"), .product(name: "Nuke", package: "Nuke"),
+            ]
+        ),
         .target(
             name: "MavioUI",
-            dependencies: [
-                "MavioKit", .product(name: "MavioDesign", package: "design"),
-                .product(name: "NukeUI", package: "Nuke"),
-            ],
+            dependencies: ["MavioCommon", .product(name: "NukeUI", package: "Nuke")],
             // The logos of the sites a title's ratings and links come from.
             resources: [.process("Resources")]
         ),
@@ -64,6 +73,39 @@ let package = Package(
         // The screens the iPhone and iPad app and the Mac app share, which
         // each composes in its own shell.
         .target(name: "MavioScreens", dependencies: ["MavioAdmin"]),
+        // The Mac app's components in AppKit, drawn with the design tokens:
+        // artwork, buttons, cards, shelves and grids, pages, navigation,
+        // forms, and the focus of television mode.
+        .target(
+            name: "MavioAppKit",
+            dependencies: ["MavioCommon", "MavioPlayer", .product(name: "Nuke", package: "Nuke")]
+        ),
+        // What the Mac app's pages share: their context, the page they
+        // derive from, and the rows and cards of a server's items.
+        .target(name: "MavioMac", dependencies: ["MavioAppKit"]),
+        // The Mac app's pages in AppKit, by area: an item's details, the
+        // libraries, Home, search and downloads; Discover and requests;
+        // signing in and the settings of the user and the device; a
+        // server's settings; acquiring media; the AI providers,
+        // conversations and the plugins; the player.
+        .target(name: "MavioMacMedia", dependencies: ["MavioMac"]),
+        .target(name: "MavioMacDiscover", dependencies: ["MavioMac"]),
+        .target(name: "MavioMacSettings", dependencies: ["MavioMac"]),
+        .target(name: "MavioMacServer", dependencies: ["MavioMac"]),
+        .target(name: "MavioMacAcquisition", dependencies: ["MavioMac"]),
+        .target(name: "MavioMacPlugins", dependencies: ["MavioMac"]),
+        // The Mac app's player window: the controls over the picture.
+        .target(name: "MavioMacPlayer", dependencies: ["MavioMac"]),
+        // The Mac app's shell: the main window's sidebar and places, the
+        // user's menu, television mode, and the page of every route and
+        // section.
+        .target(
+            name: "MavioMacApp",
+            dependencies: [
+                "MavioMacMedia", "MavioMacDiscover", "MavioMacSettings", "MavioMacServer", "MavioMacAcquisition",
+                "MavioMacPlugins", "MavioMacPlayer",
+            ]
+        ),
         .testTarget(name: "MavioKitTests", dependencies: ["MavioKit"]),
         .testTarget(name: "MavioPlayerTests", dependencies: ["MavioPlayer"]),
         // The snapshot tests (docs/clients.md §6.8), which draw on the iOS

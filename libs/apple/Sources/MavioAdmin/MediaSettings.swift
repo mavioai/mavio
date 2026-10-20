@@ -152,18 +152,9 @@ struct ManagedLibrariesView: View {
             NavigationLink {
                 ManagedLibraryView(server: server, library: library, changed: reload)
             } label: {
-                #if os(macOS)
-                    // On the desktop's cards, the row's clear ground.
-                    Color.clear.contentShape(.rect)
-                #else
-                    EmptyView()
-                #endif
+                EmptyView()
             }
-            #if os(macOS)
-                .buttonStyle(.plain)
-            #else
-                .opacity(0)
-            #endif
+            .opacity(0)
         }
     }
 

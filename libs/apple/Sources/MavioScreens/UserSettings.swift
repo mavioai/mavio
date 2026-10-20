@@ -193,7 +193,7 @@ public struct SwitchUserSection: View {
     /// The users a server's session can switch to.
     /// The users of server to switch to.
     public static func load(_ model: AppModel, _ server: ServerRecord) async -> [SwitchableUser] {
-        (try? await model.client.switchableUsers(serverId: server.id)) ?? []
+        await model.switchableUsers(server)
     }
 
     private func member(_ user: SwitchableUser) -> some View {
@@ -528,7 +528,7 @@ public struct SecuritySections: View {
     /// How the user signs in to a server.
     /// The user's sign-in and security on server.
     public static func load(_ model: AppModel, _ server: ServerRecord) async -> AccountSecurity? {
-        try? await model.client.security(serverId: server.id)
+        await model.accountSecurity(server)
     }
 
     /// Runs a change, then reads the user's security again.

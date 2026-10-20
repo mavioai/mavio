@@ -1,4 +1,5 @@
-// Writes gen/swift: MavioTokens.swift (SwiftUI), Icons.xcassets,
+// Writes gen/swift: MavioTokens.swift (SwiftUI), MavioTokensAppKit.swift
+// (AppKit, for the Mac app), Icons.xcassets,
 // Localizable.xcstrings and MavioStrings.swift, its typed accessors, for
 // the Apple apps.
 import { HEADER, num, pascal, write } from './util.js';
@@ -77,6 +78,101 @@ public struct MavioEasing: Sendable {
 ${constants('MavioEasings', 'The easing curves of motion.', t.easing, 'MavioEasing', ([x1, y1, x2, y2]) => `MavioEasing(x1: ${num(x1)}, y1: ${num(y1)}, x2: ${num(x2)}, y2: ${num(y2)})`)}
 
 ${struct('MavioLayout', 'The layout values of a form factor, in points (focusScale is a factor).', Object.keys(t.layout.phone), 'CGFloat', mapValues(t.layout, (l) => mapValues(l, num)))}
+`;
+}
+
+const NS_WEIGHTS = { 400: '.regular', 500: '.medium', 600: '.semibold', 700: '.bold' };
+
+function nsColor({ r, g, b, a }) {
+  return `NSColor(srgbRed: ${num(r / 255)}, green: ${num(g / 255)}, blue: ${num(b / 255)}, alpha: ${num(a)})`;
+}
+
+// The tokens in AppKit's types, for the Mac app, which draws with AppKit:
+// each theme's colors, the colors following the appearance, the type
+// scales with NSFont's weights, the shadows and the easing curves.
+function tokensAppKit(t) {
+  const fields = Object.keys(t.themes.dark);
+  const typeStyle = (s) =>
+    `MavioFontStyle(size: ${s.size}, lineHeight: ${s.lineHeight}, weight: ${NS_WEIGHTS[s.weight]}, tracking: ${num(s.tracking)})`;
+  const shadow = (s) => `MavioNSShadow(color: ${nsColor(s.color)}, x: ${s.x}, y: ${s.y}, blur: ${s.blur}, spread: ${s.spread})`;
+  const dynamic = fields.map((f) => `        ${f}: .dynamic(light: light.${f}, dark: dark.${f})`).join(',\n');
+  return `${HEADER('//')}
+#if os(macOS)
+    import AppKit
+
+${struct('MavioNSColors', 'The semantic colors of a theme, in AppKit.', fields, 'NSColor', mapValues(t.themes, (c) => mapValues(c, nsColor)))
+  .split('\n')
+  .map((l) => (l ? '    ' + l : l))
+  .join('\n')}
+
+    extension MavioNSColors {
+        /// The colors following the appearance they are drawn in: the light
+        /// theme's in Aqua, the dark theme's in Dark Aqua.
+        public static let system = MavioNSColors(
+${dynamic.replace(/^/gm, '    ')}
+        )
+    }
+
+    extension NSColor {
+        /// A color that is light in Aqua and dark in Dark Aqua.
+        static func dynamic(light: NSColor, dark: NSColor) -> NSColor {
+            NSColor(name: nil) { appearance in
+                appearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua ? dark : light
+            }
+        }
+    }
+
+    /// A style of the type scale, in AppKit; the family is the system font.
+    public struct MavioFontStyle: Sendable {
+        public let size: CGFloat
+        public let lineHeight: CGFloat
+        public let weight: NSFont.Weight
+        public let tracking: CGFloat
+
+        /// A style of size and weight, lineHeight high, tracking apart.
+        public init(size: CGFloat, lineHeight: CGFloat, weight: NSFont.Weight, tracking: CGFloat = 0) {
+            (self.size, self.lineHeight, self.weight, self.tracking) = (size, lineHeight, weight, tracking)
+        }
+
+        /// The system font in this style.
+        public var font: NSFont { .systemFont(ofSize: size, weight: weight) }
+    }
+
+${struct('MavioFonts', 'A type scale in AppKit: standard, desktop for the Mac, tv for television mode.', Object.keys(t.typography.standard), 'MavioFontStyle', mapValues(t.typography, (s) => mapValues(s, typeStyle)))
+  .split('\n')
+  .map((l) => (l ? '    ' + l : l))
+  .join('\n')}
+
+    /// A shadow, in points, in AppKit.
+    public struct MavioNSShadow: @unchecked Sendable {
+        public let color: NSColor
+        public let x: CGFloat
+        public let y: CGFloat
+        public let blur: CGFloat
+        public let spread: CGFloat
+
+        /// A shadow of color, offset by x and y and blurred.
+        public init(color: NSColor, x: CGFloat, y: CGFloat, blur: CGFloat, spread: CGFloat) {
+            self.color = color
+            self.x = x
+            self.y = y
+            self.blur = blur
+            self.spread = spread
+        }
+    }
+
+    /// The shadows of raised surfaces, in AppKit.
+    public enum MavioNSElevation {
+${Object.entries(t.elevation).map(([k, v]) => `        public static let ${k} = ${shadow(v)}`).join('\n')}
+    }
+
+    extension MavioEasing {
+        /// The curve as a timing function, for Core Animation.
+        public var timingFunction: CAMediaTimingFunction {
+            CAMediaTimingFunction(controlPoints: Float(x1), Float(y1), Float(x2), Float(y2))
+        }
+    }
+#endif
 `;
 }
 
@@ -179,6 +275,7 @@ function stringsSwift(s) {
 
 export function emitSwift(tokens, icons, strings) {
   write('gen/swift/MavioTokens.swift', tokensSwift(tokens));
+  write('gen/swift/MavioTokensAppKit.swift', tokensAppKit(tokens));
   emitIcons(icons);
   write('gen/swift/Localizable.xcstrings', xcstrings(strings));
   write('gen/swift/MavioStrings.swift', stringsSwift(strings));
