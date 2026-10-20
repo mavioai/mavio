@@ -47,6 +47,11 @@ service PluginManagementService {
   // configuration, or starts it again; the server remembers it across
   // restarts and upgrades.
   rpc SetPluginEnabled(SetPluginEnabledRequest) returns (SetPluginEnabledResponse);
+  // RestartPlugin stops a plugin and starts it again with its
+  // configuration, as after an upgrade: a plugin under development with
+  // what was built into its folder. A failed plugin is started again; a
+  // disabled one is left alone.
+  rpc RestartPlugin(RestartPluginRequest) returns (RestartPluginResponse);
   // GetContainerRuntime tells whether a container engine is available to
   // run plugins' container dependencies, detecting it again when asked.
   rpc GetContainerRuntime(GetContainerRuntimeRequest) returns (GetContainerRuntimeResponse) {
@@ -99,6 +104,11 @@ message Plugin {
   // empty for none. The hosts of this machine and of the local network are
   // reached directly.
   string proxy = 4;
+  // The folder a plugin under development runs from in place, which the
+  // server's --plugin-dev names, restarting it when its files change;
+  // empty for an installed plugin, which takes no catalog version and
+  // cannot be uninstalled while this one takes its place.
+  string dev_folder = 5;
 }
 
 message ListPluginsRequest {}
@@ -213,6 +223,14 @@ message SetPluginEnabledRequest {
 }
 
 message SetPluginEnabledResponse {
+  Plugin plugin = 1;
+}
+
+message RestartPluginRequest {
+  string plugin_id = 1 [(buf.validate.field).required = true];
+}
+
+message RestartPluginResponse {
   Plugin plugin = 1;
 }
 

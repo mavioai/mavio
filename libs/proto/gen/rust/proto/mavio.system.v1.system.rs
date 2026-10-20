@@ -7162,6 +7162,11 @@ pub struct ListLogsRequest {
     ///
     /// Field 3: `limit`
     pub limit: ::core::option::Option<i32>,
+    /// Keeps only the records of a plugin: what it writes to its output and
+    /// what the server logs of it.
+    ///
+    /// Field 4: `plugin_id`
+    pub plugin_id: ::core::option::Option<::buffa::alloc::string::String>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -7171,6 +7176,7 @@ impl ::core::fmt::Debug for ListLogsRequest {
             .field("min_level", &self.min_level)
             .field("max_age", &self.max_age)
             .field("limit", &self.limit)
+            .field("plugin_id", &self.plugin_id)
             .finish()
     }
 }
@@ -7197,6 +7203,16 @@ impl ListLogsRequest {
     ///Sets [`Self::limit`] to `Some(value)`, consuming and returning `self`.
     pub fn with_limit(mut self, value: i32) -> Self {
         self.limit = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::plugin_id`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_plugin_id(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.plugin_id = Some(value.into());
         self
     }
 }
@@ -7234,6 +7250,9 @@ impl ::buffa::Message for ListLogsRequest {
         if let Some(v) = self.limit {
             size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
         }
+        if let Some(ref v) = self.plugin_id {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -7257,6 +7276,9 @@ impl ::buffa::Message for ListLogsRequest {
         }
         if let Some(v) = self.limit {
             ::buffa::types::put_int32_field(3u32, v, buf);
+        }
+        if let Some(ref v) = self.plugin_id {
+            ::buffa::types::put_string_field(4u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -7300,6 +7322,18 @@ impl ::buffa::Message for ListLogsRequest {
                     ::buffa::types::decode_int32(buf)?,
                 );
             }
+            4u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .plugin_id
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -7311,6 +7345,7 @@ impl ::buffa::Message for ListLogsRequest {
         self.min_level = ::core::option::Option::None;
         self.max_age = ::buffa::MessageField::none();
         self.limit = ::core::option::Option::None;
+        self.plugin_id = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }

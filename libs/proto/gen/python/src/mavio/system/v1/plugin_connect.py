@@ -41,6 +41,9 @@ class PluginManagementService(Protocol):
     async def set_plugin_enabled(self, request: mavio_dot_system_dot_v1_dot_plugin__pb2.SetPluginEnabledRequest, ctx: RequestContext) -> mavio_dot_system_dot_v1_dot_plugin__pb2.SetPluginEnabledResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
 
+    async def restart_plugin(self, request: mavio_dot_system_dot_v1_dot_plugin__pb2.RestartPluginRequest, ctx: RequestContext) -> mavio_dot_system_dot_v1_dot_plugin__pb2.RestartPluginResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
+
     async def get_container_runtime(self, request: mavio_dot_system_dot_v1_dot_plugin__pb2.GetContainerRuntimeRequest, ctx: RequestContext) -> mavio_dot_system_dot_v1_dot_plugin__pb2.GetContainerRuntimeResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
 
@@ -141,6 +144,16 @@ class PluginManagementServiceASGIApplication(ConnectASGIApplication[PluginManage
                         idempotency_level=IdempotencyLevel.UNKNOWN,
                     ),
                     function=svc.set_plugin_enabled,
+                ),
+                "/mavio.system.v1.PluginManagementService/RestartPlugin": Endpoint.unary(
+                    method=MethodInfo(
+                        name="RestartPlugin",
+                        service_name="mavio.system.v1.PluginManagementService",
+                        input=mavio_dot_system_dot_v1_dot_plugin__pb2.RestartPluginRequest,
+                        output=mavio_dot_system_dot_v1_dot_plugin__pb2.RestartPluginResponse,
+                        idempotency_level=IdempotencyLevel.UNKNOWN,
+                    ),
+                    function=svc.restart_plugin,
                 ),
                 "/mavio.system.v1.PluginManagementService/GetContainerRuntime": Endpoint.unary(
                     method=MethodInfo(
@@ -373,6 +386,26 @@ class PluginManagementServiceClient(ConnectClient):
             timeout_ms=timeout_ms,
         )
 
+    async def restart_plugin(
+        self,
+        request: mavio_dot_system_dot_v1_dot_plugin__pb2.RestartPluginRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+    ) -> mavio_dot_system_dot_v1_dot_plugin__pb2.RestartPluginResponse:
+        return await self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="RestartPlugin",
+                service_name="mavio.system.v1.PluginManagementService",
+                input=mavio_dot_system_dot_v1_dot_plugin__pb2.RestartPluginRequest,
+                output=mavio_dot_system_dot_v1_dot_plugin__pb2.RestartPluginResponse,
+                idempotency_level=IdempotencyLevel.UNKNOWN,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+        )
+
     async def get_container_runtime(
         self,
         request: mavio_dot_system_dot_v1_dot_plugin__pb2.GetContainerRuntimeRequest,
@@ -497,6 +530,8 @@ class PluginManagementServiceSync(Protocol):
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
     def set_plugin_enabled(self, request: mavio_dot_system_dot_v1_dot_plugin__pb2.SetPluginEnabledRequest, ctx: RequestContext) -> mavio_dot_system_dot_v1_dot_plugin__pb2.SetPluginEnabledResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
+    def restart_plugin(self, request: mavio_dot_system_dot_v1_dot_plugin__pb2.RestartPluginRequest, ctx: RequestContext) -> mavio_dot_system_dot_v1_dot_plugin__pb2.RestartPluginResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
     def get_container_runtime(self, request: mavio_dot_system_dot_v1_dot_plugin__pb2.GetContainerRuntimeRequest, ctx: RequestContext) -> mavio_dot_system_dot_v1_dot_plugin__pb2.GetContainerRuntimeResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
     def list_plugin_containers(self, request: mavio_dot_system_dot_v1_dot_plugin__pb2.ListPluginContainersRequest, ctx: RequestContext) -> mavio_dot_system_dot_v1_dot_plugin__pb2.ListPluginContainersResponse:
@@ -592,6 +627,16 @@ class PluginManagementServiceWSGIApplication(ConnectWSGIApplication):
                         idempotency_level=IdempotencyLevel.UNKNOWN,
                     ),
                     function=service.set_plugin_enabled,
+                ),
+                "/mavio.system.v1.PluginManagementService/RestartPlugin": EndpointSync.unary(
+                    method=MethodInfo(
+                        name="RestartPlugin",
+                        service_name="mavio.system.v1.PluginManagementService",
+                        input=mavio_dot_system_dot_v1_dot_plugin__pb2.RestartPluginRequest,
+                        output=mavio_dot_system_dot_v1_dot_plugin__pb2.RestartPluginResponse,
+                        idempotency_level=IdempotencyLevel.UNKNOWN,
+                    ),
+                    function=service.restart_plugin,
                 ),
                 "/mavio.system.v1.PluginManagementService/GetContainerRuntime": EndpointSync.unary(
                     method=MethodInfo(
@@ -818,6 +863,26 @@ class PluginManagementServiceClientSync(ConnectClientSync):
                 service_name="mavio.system.v1.PluginManagementService",
                 input=mavio_dot_system_dot_v1_dot_plugin__pb2.SetPluginEnabledRequest,
                 output=mavio_dot_system_dot_v1_dot_plugin__pb2.SetPluginEnabledResponse,
+                idempotency_level=IdempotencyLevel.UNKNOWN,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+        )
+
+    def restart_plugin(
+        self,
+        request: mavio_dot_system_dot_v1_dot_plugin__pb2.RestartPluginRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+    ) -> mavio_dot_system_dot_v1_dot_plugin__pb2.RestartPluginResponse:
+        return self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="RestartPlugin",
+                service_name="mavio.system.v1.PluginManagementService",
+                input=mavio_dot_system_dot_v1_dot_plugin__pb2.RestartPluginRequest,
+                output=mavio_dot_system_dot_v1_dot_plugin__pb2.RestartPluginResponse,
                 idempotency_level=IdempotencyLevel.UNKNOWN,
             ),
             headers=headers,

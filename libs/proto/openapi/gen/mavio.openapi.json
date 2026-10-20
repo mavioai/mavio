@@ -21126,6 +21126,11 @@
             "minimum": 0,
             "format": "int32",
             "description": "1–1000; unset means 200."
+          },
+          "pluginId": {
+            "type": "string",
+            "title": "plugin_id",
+            "description": "Keeps only the records of a plugin: what it writes to its output and\n what the server logs of it."
           }
         },
         "title": "ListLogsRequest",
@@ -21674,6 +21679,11 @@
             "type": "string",
             "title": "proxy",
             "description": "For a WASM or process plugin, the proxy it reaches sites through: the\n ID of one of the server's proxies, \"system\" for the system proxy, or\n empty for none. The hosts of this machine and of the local network are\n reached directly."
+          },
+          "devFolder": {
+            "type": "string",
+            "title": "dev_folder",
+            "description": "The folder a plugin under development runs from in place, which the\n server's --plugin-dev names, restarting it when its files change;\n empty for an installed plugin, which takes no catalog version and\n cannot be uninstalled while this one takes its place."
           }
         },
         "title": "Plugin",
@@ -22027,6 +22037,35 @@
         "title": "RequestSettings",
         "additionalProperties": false,
         "description": "RequestSettings are the defaults of users' requests and where approved\n requests are acquired."
+      },
+      "mavio.system.v1.RestartPluginRequest": {
+        "type": "object",
+        "properties": {
+          "pluginId": {
+            "type": "string",
+            "title": "plugin_id"
+          }
+        },
+        "title": "RestartPluginRequest",
+        "required": [
+          "pluginId"
+        ],
+        "additionalProperties": false
+      },
+      "mavio.system.v1.RestartPluginResponse": {
+        "type": "object",
+        "properties": {
+          "plugin": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.system.v1.Plugin"
+              }
+            ],
+            "title": "plugin"
+          }
+        },
+        "title": "RestartPluginResponse",
+        "additionalProperties": false
       },
       "mavio.system.v1.RunTaskRequest": {
         "type": "object",
@@ -24681,14 +24720,14 @@
         }
       }
     },
-    "/mavio.acquisition.v1.SubtitleService/SearchWantedSubtitles": {
+    "/mavio.library.v1.ItemService/GetLyrics": {
       "post": {
         "tags": [
-          "SubtitleService"
+          "ItemService"
         ],
-        "summary": "SearchWantedSubtitles",
-        "description": "SearchWantedSubtitles queues searches of the subtitles movies or\n episodes lack, which download the best subtitles found.",
-        "operationId": "mavio.acquisition.v1.SubtitleService.SearchWantedSubtitles",
+        "summary": "GetLyrics",
+        "description": "GetLyrics returns the lyrics of a track, read from the lyric file\n beside it (.elrc, .lrc or .txt).",
+        "operationId": "mavio.library.v1.ItemService.GetLyrics",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -24713,7 +24752,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.acquisition.v1.SearchWantedSubtitlesRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.GetLyricsRequest"
               }
             }
           },
@@ -24735,7 +24774,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.acquisition.v1.SearchWantedSubtitlesResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.GetLyricsResponse"
                 }
               }
             }
@@ -29807,13 +29846,14 @@
         }
       }
     },
-    "/mavio.library.v1.CollectionService/RemoveFromCollection": {
+    "/mavio.acquisition.v1.SubtitleService/SearchWantedSubtitles": {
       "post": {
         "tags": [
-          "CollectionService"
+          "SubtitleService"
         ],
-        "summary": "RemoveFromCollection",
-        "operationId": "mavio.library.v1.CollectionService.RemoveFromCollection",
+        "summary": "SearchWantedSubtitles",
+        "description": "SearchWantedSubtitles queues searches of the subtitles movies or\n episodes lack, which download the best subtitles found.",
+        "operationId": "mavio.acquisition.v1.SubtitleService.SearchWantedSubtitles",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -29838,7 +29878,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.RemoveFromCollectionRequest"
+                "$ref": "#/components/schemas/mavio.acquisition.v1.SearchWantedSubtitlesRequest"
               }
             }
           },
@@ -29860,7 +29900,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.RemoveFromCollectionResponse"
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.SearchWantedSubtitlesResponse"
                 }
               }
             }
@@ -30549,13 +30589,14 @@
         }
       }
     },
-    "/mavio.library.v1.CollectionService/DeleteCollection": {
+    "/mavio.acquisition.v1.WantedService/SetMonitored": {
       "post": {
         "tags": [
-          "CollectionService"
+          "WantedService"
         ],
-        "summary": "DeleteCollection",
-        "operationId": "mavio.library.v1.CollectionService.DeleteCollection",
+        "summary": "SetMonitored",
+        "description": "SetMonitored monitors or unmonitors seasons and episodes, a season\n taking its episodes along, or applies a monitoring option to the\n seasons and episodes of wanted series, as Sonarr's season pass.",
+        "operationId": "mavio.acquisition.v1.WantedService.SetMonitored",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -30580,7 +30621,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.DeleteCollectionRequest"
+                "$ref": "#/components/schemas/mavio.acquisition.v1.SetMonitoredRequest"
               }
             }
           },
@@ -30602,7 +30643,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.DeleteCollectionResponse"
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.SetMonitoredResponse"
                 }
               }
             }
@@ -33338,14 +33379,13 @@
         }
       }
     },
-    "/mavio.acquisition.v1.WantedService/SetMonitored": {
+    "/mavio.library.v1.LibraryService/ListLibraries": {
       "post": {
         "tags": [
-          "WantedService"
+          "LibraryService"
         ],
-        "summary": "SetMonitored",
-        "description": "SetMonitored monitors or unmonitors seasons and episodes, a season\n taking its episodes along, or applies a monitoring option to the\n seasons and episodes of wanted series, as Sonarr's season pass.",
-        "operationId": "mavio.acquisition.v1.WantedService.SetMonitored",
+        "summary": "ListLibraries",
+        "operationId": "mavio.library.v1.LibraryService.ListLibraries",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -33370,7 +33410,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.acquisition.v1.SetMonitoredRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.ListLibrariesRequest"
               }
             }
           },
@@ -33392,7 +33432,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.acquisition.v1.SetMonitoredResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.ListLibrariesResponse"
                 }
               }
             }
@@ -33462,13 +33502,14 @@
         }
       }
     },
-    "/mavio.library.v1.PlaylistService/CreatePlaylist": {
+    "/mavio.system.v1.AiProviderService/ListAiModels": {
       "post": {
         "tags": [
-          "PlaylistService"
+          "AiProviderService"
         ],
-        "summary": "CreatePlaylist",
-        "operationId": "mavio.library.v1.PlaylistService.CreatePlaylist",
+        "summary": "ListAiModels",
+        "description": "ListAiModels lists the providers' models.",
+        "operationId": "mavio.system.v1.AiProviderService.ListAiModels",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -33493,7 +33534,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.CreatePlaylistRequest"
+                "$ref": "#/components/schemas/mavio.system.v1.ListAiModelsRequest"
               }
             }
           },
@@ -33515,7 +33556,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.CreatePlaylistResponse"
+                  "$ref": "#/components/schemas/mavio.system.v1.ListAiModelsResponse"
                 }
               }
             }
@@ -33584,14 +33625,13 @@
         }
       }
     },
-    "/mavio.library.v1.ItemService/GetLyrics": {
+    "/mavio.library.v1.CollectionService/RemoveFromCollection": {
       "post": {
         "tags": [
-          "ItemService"
+          "CollectionService"
         ],
-        "summary": "GetLyrics",
-        "description": "GetLyrics returns the lyrics of a track, read from the lyric file\n beside it (.elrc, .lrc or .txt).",
-        "operationId": "mavio.library.v1.ItemService.GetLyrics",
+        "summary": "RemoveFromCollection",
+        "operationId": "mavio.library.v1.CollectionService.RemoveFromCollection",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -33616,7 +33656,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.GetLyricsRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.RemoveFromCollectionRequest"
               }
             }
           },
@@ -33638,7 +33678,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.GetLyricsResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.RemoveFromCollectionResponse"
                 }
               }
             }
@@ -34262,13 +34302,13 @@
         }
       }
     },
-    "/mavio.library.v1.LibraryService/ListLibraries": {
+    "/mavio.library.v1.CollectionService/DeleteCollection": {
       "post": {
         "tags": [
-          "LibraryService"
+          "CollectionService"
         ],
-        "summary": "ListLibraries",
-        "operationId": "mavio.library.v1.LibraryService.ListLibraries",
+        "summary": "DeleteCollection",
+        "operationId": "mavio.library.v1.CollectionService.DeleteCollection",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -34293,7 +34333,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.ListLibrariesRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.DeleteCollectionRequest"
               }
             }
           },
@@ -34315,7 +34355,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.ListLibrariesResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.DeleteCollectionResponse"
                 }
               }
             }
@@ -35128,13 +35168,13 @@
         }
       }
     },
-    "/mavio.library.v1.CollectionService/UpdateCollection": {
+    "/mavio.library.v1.PlaylistService/CreatePlaylist": {
       "post": {
         "tags": [
-          "CollectionService"
+          "PlaylistService"
         ],
-        "summary": "UpdateCollection",
-        "operationId": "mavio.library.v1.CollectionService.UpdateCollection",
+        "summary": "CreatePlaylist",
+        "operationId": "mavio.library.v1.PlaylistService.CreatePlaylist",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -35159,7 +35199,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.UpdateCollectionRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.CreatePlaylistRequest"
               }
             }
           },
@@ -35181,7 +35221,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.UpdateCollectionResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.CreatePlaylistResponse"
                 }
               }
             }
@@ -38218,14 +38258,13 @@
         }
       }
     },
-    "/mavio.system.v1.AiProviderService/ListAiModels": {
+    "/mavio.library.v1.CollectionService/UpdateCollection": {
       "post": {
         "tags": [
-          "AiProviderService"
+          "CollectionService"
         ],
-        "summary": "ListAiModels",
-        "description": "ListAiModels lists the providers' models.",
-        "operationId": "mavio.system.v1.AiProviderService.ListAiModels",
+        "summary": "UpdateCollection",
+        "operationId": "mavio.library.v1.CollectionService.UpdateCollection",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -38250,7 +38289,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.system.v1.ListAiModelsRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.UpdateCollectionRequest"
               }
             }
           },
@@ -38272,7 +38311,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.system.v1.ListAiModelsResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.UpdateCollectionResponse"
                 }
               }
             }
@@ -39384,6 +39423,68 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/mavio.system.v1.ListPluginsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.system.v1.PluginManagementService/RestartPlugin": {
+      "post": {
+        "tags": [
+          "PluginManagementService"
+        ],
+        "summary": "RestartPlugin",
+        "description": "RestartPlugin stops a plugin and starts it again with its\n configuration, as after an upgrade: a plugin under development with\n what was built into its folder. A failed plugin is started again; a\n disabled one is left alone.",
+        "operationId": "mavio.system.v1.PluginManagementService.RestartPlugin",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.system.v1.RestartPluginRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.system.v1.RestartPluginResponse"
                 }
               }
             }

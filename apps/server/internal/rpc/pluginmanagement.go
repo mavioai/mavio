@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"path/filepath"
 	"slices"
 
 	"connectrpc.com/connect"
@@ -76,6 +77,7 @@ type PluginManager interface {
 	Install(ctx context.Context, id, version string) (plugins.Info, error)
 	Uninstall(ctx context.Context, id string) error
 	SetEnabled(ctx context.Context, id string, enabled bool) (plugins.Info, error)
+	Restart(ctx context.Context, id string) error
 	// AIGateway returns the ready AI gateway plugin.
 	AIGateway() (string, pluginv1connect.AiGatewayServiceClient, bool)
 	// AgentSessions returns the ready plugin keeping conversations with models.
@@ -201,6 +203,27 @@ func (s *PluginManagementService) SetPluginEnabled(ctx context.Context, req *sys
 	}
 	plugin := s.pluginChanged(ctx, info, kind, verb)
 	return systemv1.SetPluginEnabledResponse_builder{Plugin: plugin}.Build(), nil
+}
+
+// RestartPlugin stops a plugin and starts it again.
+func (s *PluginManagementService) RestartPlugin(ctx context.Context, req *systemv1.RestartPluginRequest) (*systemv1.RestartPluginResponse, error) {
+	if _, err := admin(ctx); err != nil {
+		return nil, err
+	}
+	id := req.GetPluginId()
+	if s.Plugins == nil {
+		return nil, connectError(ctx, fmt.Errorf("plugin %s: %w", id, core.ErrNotFound))
+	}
+	// A plugin that fails to start again is told as failed.
+	if err := s.Plugins.Restart(ctx, id); errors.Is(err, core.ErrNotFound) {
+		return nil, connectError(ctx, err)
+	}
+	i := slices.IndexFunc(s.Plugins.Plugins(), func(p plugins.Info) bool { return p.Manifest.GetId() == id })
+	if i < 0 {
+		return nil, connectError(ctx, fmt.Errorf("plugin %s: %w", id, core.ErrNotFound))
+	}
+	plugin := s.pluginChanged(ctx, s.Plugins.Plugins()[i], "plugin.restarted", "restarted")
+	return systemv1.RestartPluginResponse_builder{Plugin: plugin}.Build(), nil
 }
 
 // ListPlugins lists the plugins of the plugin folder.
@@ -439,6 +462,9 @@ func pluginToProto(p plugins.Info, wanted []language.Tag) *systemv1.Plugin {
 	out := systemv1.Plugin_builder{Manifest: man, State: new(pluginStates[p.State])}.Build()
 	if p.Err != nil {
 		out.SetError(p.Err.Error())
+	}
+	if p.DevFolder != "" {
+		out.SetDevFolder(filepath.ToSlash(p.DevFolder))
 	}
 	return out
 }

@@ -9519,6 +9519,11 @@ pub struct ListLogsRequestView<'a> {
     ///
     /// Field 3: `limit`
     pub limit: ::core::option::Option<i32>,
+    /// Keeps only the records of a plugin: what it writes to its output and
+    /// what the server logs of it.
+    ///
+    /// Field 4: `plugin_id`
+    pub plugin_id: ::core::option::Option<&'a str>,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for ListLogsRequestView<'a> {
@@ -9588,6 +9593,13 @@ impl<'a> ::buffa::MessageView<'a> for ListLogsRequestView<'a> {
                 )?;
                 view.limit = Some(::buffa::types::decode_int32(&mut cur)?);
             }
+            4u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.plugin_id = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
             _ => {
                 ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
                 let span_len = before_tag.len() - cur.len();
@@ -9621,6 +9633,7 @@ impl<'a> ::buffa::MessageView<'a> for ListLogsRequestView<'a> {
                 None => ::buffa::MessageField::none(),
             },
             limit: self.limit,
+            plugin_id: self.plugin_id.map(|s| s.to_string()),
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -9646,6 +9659,9 @@ impl<'a> ::buffa::ViewEncode<'a> for ListLogsRequestView<'a> {
         if let Some(v) = self.limit {
             size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
         }
+        if let Some(ref v) = self.plugin_id {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -9670,6 +9686,9 @@ impl<'a> ::buffa::ViewEncode<'a> for ListLogsRequestView<'a> {
         }
         if let Some(v) = self.limit {
             ::buffa::types::put_int32_field(3u32, v, buf);
+        }
+        if let Some(ref v) = self.plugin_id {
+            ::buffa::types::put_string_field(4u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -9790,6 +9809,14 @@ impl ListLogsRequestOwnedView {
     #[must_use]
     pub fn limit(&self) -> ::core::option::Option<i32> {
         self.0.reborrow().limit
+    }
+    /// Keeps only the records of a plugin: what it writes to its output and
+    /// what the server logs of it.
+    ///
+    /// Field 4: `plugin_id`
+    #[must_use]
+    pub fn plugin_id(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().plugin_id
     }
 }
 impl ::core::convert::From<::buffa::OwnedView<ListLogsRequestView<'static>>>

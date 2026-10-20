@@ -7741,6 +7741,114 @@
         }
       }
     },
+    "plugins.development": {
+      "comment": "Mark of a plugin under development, which the server runs in place from its folder.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In development"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "开发中"
+          }
+        }
+      }
+    },
+    "plugins.devFolder": {
+      "comment": "The folder a plugin under development runs from.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Development folder"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "开发目录"
+          }
+        }
+      }
+    },
+    "plugins.devFolderDetail": {
+      "comment": "Note under the development folder of a plugin.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The server restarts it when what is built into this folder changes."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此目录中构建出的内容变化时，服务端会重新启动它。"
+          }
+        }
+      }
+    },
+    "plugins.restart": {
+      "comment": "Button stopping a plugin and starting it again; one under development with what was built.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restart"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重新启动"
+          }
+        }
+      }
+    },
+    "plugins.logs": {
+      "comment": "Title of a plugin's recent log records.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Logs"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "日志"
+          }
+        }
+      }
+    },
+    "plugins.logsFooter": {
+      "comment": "Footer of a plugin's log records.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "What the plugin writes and what the server logs of it, newest first, refreshed every few seconds."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "插件输出的内容以及服务端关于它的日志，最新的在前，每隔几秒刷新。"
+          }
+        }
+      }
+    },
     "plugins.uninstall": {
       "comment": "Button uninstalling a plugin.",
       "extractionState": "manual",

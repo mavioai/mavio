@@ -27,16 +27,18 @@ PLUGIN_STATE_FAILED: PluginState
 PLUGIN_STATE_DISABLED: PluginState
 
 class Plugin(_message.Message):
-    __slots__ = ("manifest", "state", "error", "proxy")
+    __slots__ = ("manifest", "state", "error", "proxy", "dev_folder")
     MANIFEST_FIELD_NUMBER: _ClassVar[int]
     STATE_FIELD_NUMBER: _ClassVar[int]
     ERROR_FIELD_NUMBER: _ClassVar[int]
     PROXY_FIELD_NUMBER: _ClassVar[int]
+    DEV_FOLDER_FIELD_NUMBER: _ClassVar[int]
     manifest: _plugin_pb2.Manifest
     state: PluginState
     error: str
     proxy: str
-    def __init__(self, manifest: _Optional[_Union[_plugin_pb2.Manifest, _Mapping]] = ..., state: _Optional[_Union[PluginState, str]] = ..., error: _Optional[str] = ..., proxy: _Optional[str] = ...) -> None: ...
+    dev_folder: str
+    def __init__(self, manifest: _Optional[_Union[_plugin_pb2.Manifest, _Mapping]] = ..., state: _Optional[_Union[PluginState, str]] = ..., error: _Optional[str] = ..., proxy: _Optional[str] = ..., dev_folder: _Optional[str] = ...) -> None: ...
 
 class ListPluginsRequest(_message.Message):
     __slots__ = ()
@@ -181,6 +183,18 @@ class SetPluginEnabledRequest(_message.Message):
     def __init__(self, plugin_id: _Optional[str] = ..., enabled: _Optional[bool] = ...) -> None: ...
 
 class SetPluginEnabledResponse(_message.Message):
+    __slots__ = ("plugin",)
+    PLUGIN_FIELD_NUMBER: _ClassVar[int]
+    plugin: Plugin
+    def __init__(self, plugin: _Optional[_Union[Plugin, _Mapping]] = ...) -> None: ...
+
+class RestartPluginRequest(_message.Message):
+    __slots__ = ("plugin_id",)
+    PLUGIN_ID_FIELD_NUMBER: _ClassVar[int]
+    plugin_id: str
+    def __init__(self, plugin_id: _Optional[str] = ...) -> None: ...
+
+class RestartPluginResponse(_message.Message):
     __slots__ = ("plugin",)
     PLUGIN_FIELD_NUMBER: _ClassVar[int]
     plugin: Plugin

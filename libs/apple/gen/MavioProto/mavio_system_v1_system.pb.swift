@@ -2137,6 +2137,17 @@ public nonisolated struct Mavio_System_V1_ListLogsRequest: Sendable {
   /// Clears the value of `limit`. Subsequent reads from it will return its default value.
   public mutating func clearLimit() {self._limit = nil}
 
+  /// Keeps only the records of a plugin: what it writes to its output and
+  /// what the server logs of it.
+  public var pluginID: String {
+    get {_pluginID ?? String()}
+    set {_pluginID = newValue}
+  }
+  /// Returns true if `pluginID` has been explicitly set.
+  public var hasPluginID: Bool {self._pluginID != nil}
+  /// Clears the value of `pluginID`. Subsequent reads from it will return its default value.
+  public mutating func clearPluginID() {self._pluginID = nil}
+
   public var unknownFields = SwiftProtobuf.UnknownStorage()
 
   public init() {}
@@ -2144,6 +2155,7 @@ public nonisolated struct Mavio_System_V1_ListLogsRequest: Sendable {
   fileprivate var _minLevel: Mavio_System_V1_LogLevel? = nil
   fileprivate var _maxAge: SwiftProtobuf.Google_Protobuf_Duration? = nil
   fileprivate var _limit: Int32? = nil
+  fileprivate var _pluginID: String? = nil
 }
 
 public nonisolated struct Mavio_System_V1_ListLogsResponse: Sendable {
@@ -3902,7 +3914,7 @@ nonisolated extension Mavio_System_V1_LogRecord: SwiftProtobuf.Message, SwiftPro
 
 nonisolated extension Mavio_System_V1_ListLogsRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".ListLogsRequest"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}min_level\0\u{3}max_age\0\u{1}limit\0")
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}min_level\0\u{3}max_age\0\u{1}limit\0\u{3}plugin_id\0")
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -3913,6 +3925,7 @@ nonisolated extension Mavio_System_V1_ListLogsRequest: SwiftProtobuf.Message, Sw
       case 1: try { try decoder.decodeSingularEnumField(value: &self._minLevel) }()
       case 2: try { try decoder.decodeSingularMessageField(value: &self._maxAge) }()
       case 3: try { try decoder.decodeSingularInt32Field(value: &self._limit) }()
+      case 4: try { try decoder.decodeSingularStringField(value: &self._pluginID) }()
       default: break
       }
     }
@@ -3932,6 +3945,9 @@ nonisolated extension Mavio_System_V1_ListLogsRequest: SwiftProtobuf.Message, Sw
     try { if let v = self._limit {
       try visitor.visitSingularInt32Field(value: v, fieldNumber: 3)
     } }()
+    try { if let v = self._pluginID {
+      try visitor.visitSingularStringField(value: v, fieldNumber: 4)
+    } }()
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -3939,6 +3955,7 @@ nonisolated extension Mavio_System_V1_ListLogsRequest: SwiftProtobuf.Message, Sw
     if lhs._minLevel != rhs._minLevel {return false}
     if lhs._maxAge != rhs._maxAge {return false}
     if lhs._limit != rhs._limit {return false}
+    if lhs._pluginID != rhs._pluginID {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

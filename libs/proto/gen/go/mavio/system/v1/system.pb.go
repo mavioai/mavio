@@ -5936,6 +5936,7 @@ type ListLogsRequest struct {
 	xxx_hidden_MinLevel    LogLevel               `protobuf:"varint,1,opt,name=min_level,json=minLevel,enum=mavio.system.v1.LogLevel"`
 	xxx_hidden_MaxAge      *durationpb.Duration   `protobuf:"bytes,2,opt,name=max_age,json=maxAge"`
 	xxx_hidden_Limit       int32                  `protobuf:"varint,3,opt,name=limit"`
+	xxx_hidden_PluginId    *string                `protobuf:"bytes,4,opt,name=plugin_id,json=pluginId"`
 	XXX_raceDetectHookData protoimpl.RaceDetectHookData
 	XXX_presence           [1]uint32
 	unknownFields          protoimpl.UnknownFields
@@ -5990,9 +5991,19 @@ func (x *ListLogsRequest) GetLimit() int32 {
 	return 0
 }
 
+func (x *ListLogsRequest) GetPluginId() string {
+	if x != nil {
+		if x.xxx_hidden_PluginId != nil {
+			return *x.xxx_hidden_PluginId
+		}
+		return ""
+	}
+	return ""
+}
+
 func (x *ListLogsRequest) SetMinLevel(v LogLevel) {
 	x.xxx_hidden_MinLevel = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 3)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 4)
 }
 
 func (x *ListLogsRequest) SetMaxAge(v *durationpb.Duration) {
@@ -6001,7 +6012,12 @@ func (x *ListLogsRequest) SetMaxAge(v *durationpb.Duration) {
 
 func (x *ListLogsRequest) SetLimit(v int32) {
 	x.xxx_hidden_Limit = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 3)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 4)
+}
+
+func (x *ListLogsRequest) SetPluginId(v string) {
+	x.xxx_hidden_PluginId = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 4)
 }
 
 func (x *ListLogsRequest) HasMinLevel() bool {
@@ -6025,6 +6041,13 @@ func (x *ListLogsRequest) HasLimit() bool {
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 2)
 }
 
+func (x *ListLogsRequest) HasPluginId() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 3)
+}
+
 func (x *ListLogsRequest) ClearMinLevel() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_MinLevel = LogLevel_LOG_LEVEL_UNSPECIFIED
@@ -6039,6 +6062,11 @@ func (x *ListLogsRequest) ClearLimit() {
 	x.xxx_hidden_Limit = 0
 }
 
+func (x *ListLogsRequest) ClearPluginId() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 3)
+	x.xxx_hidden_PluginId = nil
+}
+
 type ListLogsRequest_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
@@ -6048,6 +6076,9 @@ type ListLogsRequest_builder struct {
 	MaxAge *durationpb.Duration
 	// 1–1000; unset means 200.
 	Limit *int32
+	// Keeps only the records of a plugin: what it writes to its output and
+	// what the server logs of it.
+	PluginId *string
 }
 
 func (b0 ListLogsRequest_builder) Build() *ListLogsRequest {
@@ -6055,13 +6086,17 @@ func (b0 ListLogsRequest_builder) Build() *ListLogsRequest {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.MinLevel != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 3)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 4)
 		x.xxx_hidden_MinLevel = *b.MinLevel
 	}
 	x.xxx_hidden_MaxAge = b.MaxAge
 	if b.Limit != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 3)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 4)
 		x.xxx_hidden_Limit = *b.Limit
+	}
+	if b.PluginId != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 4)
+		x.xxx_hidden_PluginId = b.PluginId
 	}
 	return m0
 }
@@ -6332,12 +6367,13 @@ const file_mavio_system_v1_system_proto_rawDesc = "" +
 	"attributes\x1a=\n" +
 	"\x0fAttributesEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xa9\x01\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xc6\x01\n" +
 	"\x0fListLogsRequest\x12@\n" +
 	"\tmin_level\x18\x01 \x01(\x0e2\x19.mavio.system.v1.LogLevelB\b\xbaH\x05\x82\x01\x02\x10\x01R\bminLevel\x122\n" +
 	"\amax_age\x18\x02 \x01(\v2\x19.google.protobuf.DurationR\x06maxAge\x12 \n" +
 	"\x05limit\x18\x03 \x01(\x05B\n" +
-	"\xbaH\a\x1a\x05\x18\xe8\a(\x00R\x05limit\"H\n" +
+	"\xbaH\a\x1a\x05\x18\xe8\a(\x00R\x05limit\x12\x1b\n" +
+	"\tplugin_id\x18\x04 \x01(\tR\bpluginId\"H\n" +
 	"\x10ListLogsResponse\x124\n" +
 	"\arecords\x18\x01 \x03(\v2\x1a.mavio.system.v1.LogRecordR\arecords*\xa5\x01\n" +
 	"\x14HardwareAcceleration\x12%\n" +

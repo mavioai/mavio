@@ -231,6 +231,9 @@ func (m *Manager) Install(ctx context.Context, id, version string) (Info, error)
 	}
 	m.install.Lock()
 	defer m.install.Unlock()
+	if err := m.refuseDev(id); err != nil {
+		return Info{}, err
+	}
 	catalog, err := m.Catalog(ctx)
 	if err != nil {
 		return Info{}, connect.NewError(connect.CodeUnavailable, err)
@@ -445,6 +448,9 @@ func (m *Manager) put(e *entry) {
 func (m *Manager) Uninstall(ctx context.Context, id string) error {
 	m.install.Lock()
 	defer m.install.Unlock()
+	if err := m.refuseDev(id); err != nil {
+		return err
+	}
 	m.setConfig.Lock()
 	defer m.setConfig.Unlock()
 	m.mu.Lock()
@@ -466,7 +472,7 @@ func (m *Manager) Uninstall(ctx context.Context, id string) error {
 	if m.cfg.Containers != nil {
 		m.cfg.Containers.PluginRemoved(ctx, id)
 	}
-	errs = append(errs, os.RemoveAll(filepath.Join(m.cfg.Dir, e.folder)), m.store.PluginConfigs().Delete(ctx, id),
+	errs = append(errs, os.RemoveAll(m.dir(e)), m.store.PluginConfigs().Delete(ctx, id),
 		m.store.PluginContainers().Delete(ctx, id, ""), m.forgetDisabled(ctx, id))
 	if m.cfg.DataDir != "" {
 		errs = append(errs, os.RemoveAll(host.DataDir(m.cfg.DataDir, id)))

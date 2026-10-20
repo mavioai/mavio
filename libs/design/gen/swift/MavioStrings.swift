@@ -1387,6 +1387,24 @@ public enum MavioStrings {
         String.localizedStringWithFormat(NSLocalizedString("plugins.update", bundle: .module, comment: ""), version)
     }
 
+    /// Mark of a plugin under development, which the server runs in place from its folder.
+    public static var pluginsDevelopment: String { NSLocalizedString("plugins.development", bundle: .module, comment: "") }
+
+    /// The folder a plugin under development runs from.
+    public static var pluginsDevFolder: String { NSLocalizedString("plugins.devFolder", bundle: .module, comment: "") }
+
+    /// Note under the development folder of a plugin.
+    public static var pluginsDevFolderDetail: String { NSLocalizedString("plugins.devFolderDetail", bundle: .module, comment: "") }
+
+    /// Button stopping a plugin and starting it again; one under development with what was built.
+    public static var pluginsRestart: String { NSLocalizedString("plugins.restart", bundle: .module, comment: "") }
+
+    /// Title of a plugin's recent log records.
+    public static var pluginsLogs: String { NSLocalizedString("plugins.logs", bundle: .module, comment: "") }
+
+    /// Footer of a plugin's log records.
+    public static var pluginsLogsFooter: String { NSLocalizedString("plugins.logsFooter", bundle: .module, comment: "") }
+
     /// Button uninstalling a plugin.
     public static var pluginsUninstall: String { NSLocalizedString("plugins.uninstall", bundle: .module, comment: "") }
 

@@ -57,6 +57,9 @@ const (
 	// PluginManagementServiceSetPluginEnabledProcedure is the fully-qualified name of the
 	// PluginManagementService's SetPluginEnabled RPC.
 	PluginManagementServiceSetPluginEnabledProcedure = "/mavio.system.v1.PluginManagementService/SetPluginEnabled"
+	// PluginManagementServiceRestartPluginProcedure is the fully-qualified name of the
+	// PluginManagementService's RestartPlugin RPC.
+	PluginManagementServiceRestartPluginProcedure = "/mavio.system.v1.PluginManagementService/RestartPlugin"
 	// PluginManagementServiceGetContainerRuntimeProcedure is the fully-qualified name of the
 	// PluginManagementService's GetContainerRuntime RPC.
 	PluginManagementServiceGetContainerRuntimeProcedure = "/mavio.system.v1.PluginManagementService/GetContainerRuntime"
@@ -106,6 +109,11 @@ type PluginManagementServiceClient interface {
 	// configuration, or starts it again; the server remembers it across
 	// restarts and upgrades.
 	SetPluginEnabled(context.Context, *v1.SetPluginEnabledRequest) (*v1.SetPluginEnabledResponse, error)
+	// RestartPlugin stops a plugin and starts it again with its
+	// configuration, as after an upgrade: a plugin under development with
+	// what was built into its folder. A failed plugin is started again; a
+	// disabled one is left alone.
+	RestartPlugin(context.Context, *v1.RestartPluginRequest) (*v1.RestartPluginResponse, error)
 	// GetContainerRuntime tells whether a container engine is available to
 	// run plugins' container dependencies, detecting it again when asked.
 	GetContainerRuntime(context.Context, *v1.GetContainerRuntimeRequest) (*v1.GetContainerRuntimeResponse, error)
@@ -187,6 +195,12 @@ func NewPluginManagementServiceClient(httpClient connect.HTTPClient, baseURL str
 			connect.WithSchema(pluginManagementServiceMethods.ByName("SetPluginEnabled")),
 			connect.WithClientOptions(opts...),
 		),
+		restartPlugin: connect.NewClient[v1.RestartPluginRequest, v1.RestartPluginResponse](
+			httpClient,
+			baseURL+PluginManagementServiceRestartPluginProcedure,
+			connect.WithSchema(pluginManagementServiceMethods.ByName("RestartPlugin")),
+			connect.WithClientOptions(opts...),
+		),
 		getContainerRuntime: connect.NewClient[v1.GetContainerRuntimeRequest, v1.GetContainerRuntimeResponse](
 			httpClient,
 			baseURL+PluginManagementServiceGetContainerRuntimeProcedure,
@@ -233,6 +247,7 @@ type pluginManagementServiceClient struct {
 	installPlugin           *connect.Client[v1.InstallPluginRequest, v1.InstallPluginResponse]
 	uninstallPlugin         *connect.Client[v1.UninstallPluginRequest, v1.UninstallPluginResponse]
 	setPluginEnabled        *connect.Client[v1.SetPluginEnabledRequest, v1.SetPluginEnabledResponse]
+	restartPlugin           *connect.Client[v1.RestartPluginRequest, v1.RestartPluginResponse]
 	getContainerRuntime     *connect.Client[v1.GetContainerRuntimeRequest, v1.GetContainerRuntimeResponse]
 	listPluginContainers    *connect.Client[v1.ListPluginContainersRequest, v1.ListPluginContainersResponse]
 	setPluginContainer      *connect.Client[v1.SetPluginContainerRequest, v1.SetPluginContainerResponse]
@@ -306,6 +321,15 @@ func (c *pluginManagementServiceClient) UninstallPlugin(ctx context.Context, req
 // SetPluginEnabled calls mavio.system.v1.PluginManagementService.SetPluginEnabled.
 func (c *pluginManagementServiceClient) SetPluginEnabled(ctx context.Context, req *v1.SetPluginEnabledRequest) (*v1.SetPluginEnabledResponse, error) {
 	response, err := c.setPluginEnabled.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
+// RestartPlugin calls mavio.system.v1.PluginManagementService.RestartPlugin.
+func (c *pluginManagementServiceClient) RestartPlugin(ctx context.Context, req *v1.RestartPluginRequest) (*v1.RestartPluginResponse, error) {
+	response, err := c.restartPlugin.CallUnary(ctx, connect.NewRequest(req))
 	if response != nil {
 		return response.Msg, err
 	}
@@ -389,6 +413,11 @@ type PluginManagementServiceHandler interface {
 	// configuration, or starts it again; the server remembers it across
 	// restarts and upgrades.
 	SetPluginEnabled(context.Context, *v1.SetPluginEnabledRequest) (*v1.SetPluginEnabledResponse, error)
+	// RestartPlugin stops a plugin and starts it again with its
+	// configuration, as after an upgrade: a plugin under development with
+	// what was built into its folder. A failed plugin is started again; a
+	// disabled one is left alone.
+	RestartPlugin(context.Context, *v1.RestartPluginRequest) (*v1.RestartPluginResponse, error)
 	// GetContainerRuntime tells whether a container engine is available to
 	// run plugins' container dependencies, detecting it again when asked.
 	GetContainerRuntime(context.Context, *v1.GetContainerRuntimeRequest) (*v1.GetContainerRuntimeResponse, error)
@@ -466,6 +495,12 @@ func NewPluginManagementServiceHandler(svc PluginManagementServiceHandler, opts 
 		connect.WithSchema(pluginManagementServiceMethods.ByName("SetPluginEnabled")),
 		connect.WithHandlerOptions(opts...),
 	)
+	pluginManagementServiceRestartPluginHandler := connect.NewUnaryHandlerSimple(
+		PluginManagementServiceRestartPluginProcedure,
+		svc.RestartPlugin,
+		connect.WithSchema(pluginManagementServiceMethods.ByName("RestartPlugin")),
+		connect.WithHandlerOptions(opts...),
+	)
 	pluginManagementServiceGetContainerRuntimeHandler := connect.NewUnaryHandlerSimple(
 		PluginManagementServiceGetContainerRuntimeProcedure,
 		svc.GetContainerRuntime,
@@ -517,6 +552,8 @@ func NewPluginManagementServiceHandler(svc PluginManagementServiceHandler, opts 
 			pluginManagementServiceUninstallPluginHandler.ServeHTTP(w, r)
 		case PluginManagementServiceSetPluginEnabledProcedure:
 			pluginManagementServiceSetPluginEnabledHandler.ServeHTTP(w, r)
+		case PluginManagementServiceRestartPluginProcedure:
+			pluginManagementServiceRestartPluginHandler.ServeHTTP(w, r)
 		case PluginManagementServiceGetContainerRuntimeProcedure:
 			pluginManagementServiceGetContainerRuntimeHandler.ServeHTTP(w, r)
 		case PluginManagementServiceListPluginContainersProcedure:
@@ -566,6 +603,10 @@ func (UnimplementedPluginManagementServiceHandler) UninstallPlugin(context.Conte
 
 func (UnimplementedPluginManagementServiceHandler) SetPluginEnabled(context.Context, *v1.SetPluginEnabledRequest) (*v1.SetPluginEnabledResponse, error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.system.v1.PluginManagementService.SetPluginEnabled is not implemented"))
+}
+
+func (UnimplementedPluginManagementServiceHandler) RestartPlugin(context.Context, *v1.RestartPluginRequest) (*v1.RestartPluginResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.system.v1.PluginManagementService.RestartPlugin is not implemented"))
 }
 
 func (UnimplementedPluginManagementServiceHandler) GetContainerRuntime(context.Context, *v1.GetContainerRuntimeRequest) (*v1.GetContainerRuntimeResponse, error) {

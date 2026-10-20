@@ -38,9 +38,10 @@ func (r *Ring) add(rec Record) {
 	r.full = r.full || r.next == 0
 }
 
-// Records returns the kept records at least as severe as min and no older
-// than since, newest first, at most limit.
-func (r *Ring) Records(min slog.Level, since time.Time, limit int) []Record {
+// Records returns the kept records at least as severe as min, no older
+// than since and of the plugin unless it is empty, newest first, at most
+// limit.
+func (r *Ring) Records(min slog.Level, since time.Time, plugin string, limit int) []Record {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	n := r.next
@@ -50,7 +51,7 @@ func (r *Ring) Records(min slog.Level, since time.Time, limit int) []Record {
 	var out []Record
 	for i := 1; i <= n && len(out) < limit; i++ {
 		rec := r.records[(r.next-i+len(r.records))%len(r.records)]
-		if rec.Level >= min && !rec.Time.Before(since) {
+		if rec.Level >= min && !rec.Time.Before(since) && (plugin == "" || rec.Attributes["plugin"] == plugin) {
 			out = append(out, rec)
 		}
 	}

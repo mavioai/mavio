@@ -505,6 +505,9 @@ message ListLogsRequest {
     gte: 0
     lte: 1000
   }];
+  // Keeps only the records of a plugin: what it writes to its output and
+  // what the server logs of it.
+  string plugin_id = 4;
 }
 
 message ListLogsResponse {

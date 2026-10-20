@@ -148,6 +148,14 @@ pub use self::__buffa::view::SetPluginEnabledResponseView;
 #[doc(inline)]
 pub use self::__buffa::view::SetPluginEnabledResponseOwnedView;
 #[doc(inline)]
+pub use self::__buffa::view::RestartPluginRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::RestartPluginRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::RestartPluginResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::RestartPluginResponseOwnedView;
+#[doc(inline)]
 pub use self::__buffa::view::ContainerRuntimeView;
 #[doc(inline)]
 pub use self::__buffa::view::ContainerRuntimeOwnedView;

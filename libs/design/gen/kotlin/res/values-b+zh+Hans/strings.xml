@@ -439,6 +439,12 @@
     <string name="plugins_disabling">正在停止插件…</string>
     <string name="plugins_install">安装</string>
     <string name="plugins_update">更新到 %s</string>
+    <string name="plugins_development">开发中</string>
+    <string name="plugins_dev_folder">开发目录</string>
+    <string name="plugins_dev_folder_detail">此目录中构建出的内容变化时，服务端会重新启动它。</string>
+    <string name="plugins_restart">重新启动</string>
+    <string name="plugins_logs">日志</string>
+    <string name="plugins_logs_footer">插件输出的内容以及服务端关于它的日志，最新的在前，每隔几秒刷新。</string>
     <string name="plugins_uninstall">卸载</string>
     <string name="plugins_uninstall_title">卸载 %s？</string>
     <string name="plugins_uninstall_message">其配置与数据将被删除。</string>

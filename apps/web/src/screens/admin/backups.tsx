@@ -83,7 +83,7 @@ function BackupRow({ server, backup }: { server: ServerEntry; backup: Backup }) 
   );
 }
 
-const levelNames = (): Record<number, string> => ({
+export const levelNames = (): Record<number, string> => ({
   [LogLevel.DEBUG]: t("logs.debug"),
   [LogLevel.INFO]: t("logs.info"),
   [LogLevel.WARN]: t("logs.warn"),
@@ -153,7 +153,8 @@ export function LogsSection({ server }: { server: ServerEntry }) {
   );
 }
 
-function LogRow({ record, level }: { record: LogRecord; level: string }) {
+/** A log record: its time, level, message and attributes. */
+export function LogRow({ record, level }: { record: LogRecord; level: string }) {
   const attrs = Object.entries(record.attributes).toSorted(([a], [b]) => a.localeCompare(b));
   return (
     <div className="flex flex-col gap-0.5 px-4 py-2">

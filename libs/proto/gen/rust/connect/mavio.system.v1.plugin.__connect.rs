@@ -70,6 +70,14 @@ pub type OwnedSetPluginEnabledRequestView = ::buffa::view::OwnedView<
 pub type OwnedSetPluginEnabledResponseView = ::buffa::view::OwnedView<
     crate::proto::mavio::system::v1::__buffa::view::SetPluginEnabledResponseView<'static>,
 >;
+///Shorthand for `OwnedView<RestartPluginRequestView<'static>>`.
+pub type OwnedRestartPluginRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::system::v1::__buffa::view::RestartPluginRequestView<'static>,
+>;
+///Shorthand for `OwnedView<RestartPluginResponseView<'static>>`.
+pub type OwnedRestartPluginResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::system::v1::__buffa::view::RestartPluginResponseView<'static>,
+>;
 ///Shorthand for `OwnedView<GetContainerRuntimeRequestView<'static>>`.
 pub type OwnedGetContainerRuntimeRequestView = ::buffa::view::OwnedView<
     crate::proto::mavio::system::v1::__buffa::view::GetContainerRuntimeRequestView<
@@ -404,6 +412,40 @@ for ::buffa::view::OwnedView<
         )
     }
 }
+impl ::connectrpc::Encodable<crate::proto::mavio::system::v1::RestartPluginResponse>
+for crate::proto::mavio::system::v1::__buffa::view::RestartPluginResponseView<'_> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::system::v1::RestartPluginResponse>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::system::v1::__buffa::view::RestartPluginResponseView<'static>,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
 impl ::connectrpc::Encodable<
     crate::proto::mavio::system::v1::GetContainerRuntimeResponse,
 >
@@ -637,6 +679,12 @@ pub const PLUGIN_MANAGEMENT_SERVICE_UNINSTALL_PLUGIN_SPEC: ::connectrpc::Spec = 
 /// Static [`Spec`](::connectrpc::Spec) for the `SetPluginEnabled` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
 pub const PLUGIN_MANAGEMENT_SERVICE_SET_PLUGIN_ENABLED_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
         "/mavio.system.v1.PluginManagementService/SetPluginEnabled",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
+/// Static [`Spec`](::connectrpc::Spec) for the `RestartPlugin` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const PLUGIN_MANAGEMENT_SERVICE_RESTART_PLUGIN_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.system.v1.PluginManagementService/RestartPlugin",
         ::connectrpc::StreamType::Unary,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
@@ -916,6 +964,32 @@ pub trait PluginManagementService: Send + Sync + 'static {
         Output = ::connectrpc::ServiceResult<
             impl ::connectrpc::Encodable<
                 crate::proto::mavio::system::v1::SetPluginEnabledResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// RestartPlugin stops a plugin and starts it again with its
+    /// configuration, as after an upgrade: a plugin under development with
+    /// what was built into its folder. A failed plugin is started again; a
+    /// disabled one is left alone.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn restart_plugin<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::system::v1::RestartPluginRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::system::v1::RestartPluginResponse,
             > + Send + use<'a, Self>,
         >,
     > + Send;
@@ -1304,6 +1378,35 @@ impl<S: PluginManagementService> PluginManagementServiceExt for S {
                 },
             )
             .with_spec(PLUGIN_MANAGEMENT_SERVICE_SET_PLUGIN_ENABLED_SPEC)
+            .route_view(
+                PLUGIN_MANAGEMENT_SERVICE_SERVICE_NAME,
+                "RestartPlugin",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::system::v1::__buffa::view::RestartPluginRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::system::v1::RestartPluginRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.restart_plugin(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::system::v1::RestartPluginResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(PLUGIN_MANAGEMENT_SERVICE_RESTART_PLUGIN_SPEC)
             .route_view_idempotent(
                 PLUGIN_MANAGEMENT_SERVICE_SERVICE_NAME,
                 "GetContainerRuntime",
@@ -1556,6 +1659,12 @@ for PluginManagementServiceServer<T> {
                         .with_spec(PLUGIN_MANAGEMENT_SERVICE_SET_PLUGIN_ENABLED_SPEC),
                 )
             }
+            "RestartPlugin" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
+                        .with_spec(PLUGIN_MANAGEMENT_SERVICE_RESTART_PLUGIN_SPEC),
+                )
+            }
             "GetContainerRuntime" => {
                 Some(
                     ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(true)
@@ -1775,6 +1884,28 @@ for PluginManagementServiceServer<T> {
                         .await?
                         .encode::<
                             crate::proto::mavio::system::v1::SetPluginEnabledResponse,
+                        >(format)
+                })
+            }
+            "RestartPlugin" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::system::v1::RestartPluginRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::system::v1::__buffa::view::RestartPluginRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::system::v1::RestartPluginRequest,
+                    >::from_parts(&req, &body);
+                    svc.restart_plugin(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::system::v1::RestartPluginResponse,
                         >(format)
                 })
             }
@@ -2373,6 +2504,51 @@ where
                 &self.transport,
                 &self.config,
                 PLUGIN_MANAGEMENT_SERVICE_SET_PLUGIN_ENABLED_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the RestartPlugin RPC. Sends a request to /mavio.system.v1.PluginManagementService/RestartPlugin.
+    pub async fn restart_plugin(
+        &self,
+        request: crate::proto::mavio::system::v1::RestartPluginRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::system::v1::__buffa::view::RestartPluginResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.restart_plugin_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the RestartPlugin RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn restart_plugin_with_options(
+        &self,
+        request: crate::proto::mavio::system::v1::RestartPluginRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::system::v1::__buffa::view::RestartPluginResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                PLUGIN_MANAGEMENT_SERVICE_RESTART_PLUGIN_SPEC
                     .with_origin(::connectrpc::SpecOrigin::Client),
                 request,
                 options,

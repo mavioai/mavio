@@ -868,6 +868,18 @@
     <string name="plugins_install">Install</string>
     <!-- Button updating a plugin; version is the newest. -->
     <string name="plugins_update">Update to %s</string>
+    <!-- Mark of a plugin under development, which the server runs in place from its folder. -->
+    <string name="plugins_development">In development</string>
+    <!-- The folder a plugin under development runs from. -->
+    <string name="plugins_dev_folder">Development folder</string>
+    <!-- Note under the development folder of a plugin. -->
+    <string name="plugins_dev_folder_detail">The server restarts it when what is built into this folder changes.</string>
+    <!-- Button stopping a plugin and starting it again; one under development with what was built. -->
+    <string name="plugins_restart">Restart</string>
+    <!-- Title of a plugin's recent log records. -->
+    <string name="plugins_logs">Logs</string>
+    <!-- Footer of a plugin's log records. -->
+    <string name="plugins_logs_footer">What the plugin writes and what the server logs of it, newest first, refreshed every few seconds.</string>
     <!-- Button uninstalling a plugin. -->
     <string name="plugins_uninstall">Uninstall</string>
     <!-- Title of the confirmation of uninstalling a plugin; name is the plugin's. -->

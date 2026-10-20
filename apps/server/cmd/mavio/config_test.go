@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"slices"
 	"strings"
 	"testing"
 
@@ -97,7 +98,8 @@ func TestLoadPrecedence(t *testing.T) {
 	t.Setenv("MAVIO_HOME", home)
 	t.Setenv("MAVIO_METADATA_DIR", "env-art")
 	t.Setenv("MAVIO_ADDR", ":9100")
-	o, err := run(t, home, toml, "--addr", ":9200", "--cache-dir", "cache", "--plugin-catalog", "plugins/catalog.json")
+	o, err := run(t, home, toml, "--addr", ":9200", "--cache-dir", "cache", "--plugin-catalog", "plugins/catalog.json",
+		"--plugin-dev", "plugins/smoke"+string(filepath.ListSeparator)+filepath.Join(elsewhere, "pipecat"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -120,6 +122,9 @@ func TestLoadPrecedence(t *testing.T) {
 	if !cfg.Dev {
 		t.Error("dev = false, want true from the file")
 	}
+	if want := []string{filepath.Join(work, "plugins", "smoke"), filepath.Join(elsewhere, "pipecat")}; !slices.Equal(cfg.PluginDev, want) {
+		t.Errorf("plugin-dev = %q, want %q", cfg.PluginDev, want)
+	}
 	if _, err := os.Stat(filepath.Join(elsewhere, "db")); err != nil {
 		t.Errorf("database folder not created: %v", err)
 	}
@@ -137,6 +142,7 @@ func TestLoadRejects(t *testing.T) {
 		{"relative database", `database = "sqlite:mavio.db"`},
 		{"home-relative folder", `cache-dir = "~/cache"`},
 		{"relative catalog", `plugin-catalog = "plugins/catalog.json"`},
+		{"relative development plugin", `plugin-dev = "plugins/smoke"`},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			home := t.TempDir()

@@ -14,6 +14,7 @@ import {
   usePluginConfig,
   usePluginConfigOptions,
   usePluginContainers,
+  usePluginLogs,
   usePlugins,
   useProxies,
 } from "@mavio/client-ts";
@@ -38,6 +39,7 @@ import { Select } from "../controls/select.tsx";
 import type { SettingsSearch } from "./settings.tsx";
 import { proxyChoices, proxyDirect } from "./admin/proxies.tsx";
 import { BackLink, SectionTrail, TitleAccessory } from "./admin/common.tsx";
+import { levelNames, LogRow } from "./admin/backups.tsx";
 import { Confirm } from "../controls/dialog.tsx";
 import { Tip } from "../controls/tooltip.tsx";
 import { useUnsavedGuard } from "../controls/unsaved.tsx";
@@ -248,7 +250,7 @@ function Badge({ entry: e }: { entry: Entry }) {
   const tone = state === PluginState.FAILED ? "text-danger" : state === PluginState.READY ? "text-[#34C759]" : "text-text-secondary";
   return (
     <span className="flex flex-wrap items-center gap-x-2">
-      {mark(t("plugins.installed"), "text-text-secondary")}
+      {e.installed.devFolder ? mark(t("plugins.development"), "text-accent-text") : mark(t("plugins.installed"), "text-text-secondary")}
       {mark(states[state](), tone)}
       {updateOf(e) && mark(t("plugins.updateAvailable"), "text-on-background")}
     </span>
@@ -304,10 +306,12 @@ function PluginPage({ server, id }: { server: ServerEntry; id: string }) {
   }
   const m = e.installed?.manifest;
   const newest = e.offered?.versions[0]?.version;
-  const update = updateOf(e);
+  const dev = e.installed?.devFolder ?? "";
+  // A plugin under development takes no catalog version.
+  const update = dev ? undefined : updateOf(e);
   const enabled = e.installed?.state !== PluginState.DISABLED;
   const toggling = actions.setEnabled.isPending;
-  const failure = [actions.install, actions.uninstall, actions.setEnabled].find((x) => x.isError)?.error;
+  const failure = [actions.install, actions.uninstall, actions.setEnabled, actions.restart].find((x) => x.isError)?.error;
   const installing = (version?: string) =>
     actions.install.isPending && actions.install.variables?.id === id && actions.install.variables.version === version;
   const info: [string, ReactNode][] = [];
@@ -315,6 +319,7 @@ function PluginPage({ server, id }: { server: ServerEntry; id: string }) {
     const state = states[e.installed.state]();
     info.push([t("plugins.state"), e.installed.state === PluginState.FAILED && e.installed.error ? `${state}: ${e.installed.error}` : state]);
     if (m?.version) info.push([t("plugins.version"), m.version]);
+    if (dev) info.push([t("plugins.devFolder"), <span key="dev" className="font-mono break-all">{dev}</span>]);
   }
   if (newest) info.push([t("plugins.latestVersion"), newest]);
   info.push([t("plugins.category"), categories[e.category].title()]);
@@ -366,9 +371,16 @@ function PluginPage({ server, id }: { server: ServerEntry; id: string }) {
                   />
                 </span>
               </Tip>
-              <Button variant="secondary" className="text-danger" onClick={() => setConfirming(true)}>
-                {t("plugins.uninstall")}
-              </Button>
+              {enabled && (
+                <Button variant="secondary" disabled={actions.restart.isPending} onClick={() => actions.restart.mutate(id)}>
+                  {actions.restart.isPending ? "…" : t("plugins.restart")}
+                </Button>
+              )}
+              {!dev && (
+                <Button variant="secondary" className="text-danger" onClick={() => setConfirming(true)}>
+                  {t("plugins.uninstall")}
+                </Button>
+              )}
             </>
           )}
         </div>
@@ -407,7 +419,8 @@ function PluginPage({ server, id }: { server: ServerEntry; id: string }) {
           </div>
         ))}
       </Group>
-      {e.offered && e.offered.versions.length > 0 && (
+      {e.installed && <PluginLogs server={server} id={id} dev={dev} />}
+      {!dev && e.offered && e.offered.versions.length > 0 && (
         <Group title={t("plugins.versions")}>
           {e.offered.versions.map((v) => (
             <Row
@@ -429,6 +442,23 @@ function PluginPage({ server, id }: { server: ServerEntry; id: string }) {
         </Group>
       )}
     </div>
+  );
+}
+
+/** A plugin's recent log records, newest first; under development, with where it runs from. */
+function PluginLogs({ server, id, dev }: { server: ServerEntry; id: string; dev: string }) {
+  const logs = usePluginLogs(server, id);
+  const names = levelNames();
+  return (
+    <Group title={t("plugins.logs")} footer={dev ? `${t("plugins.logsFooter")} ${t("plugins.devFolderDetail")}` : t("plugins.logsFooter")}>
+      <div className="max-h-96 overflow-y-auto">
+        {(logs.data ?? []).map((r, i) => (
+          <LogRow key={i} record={r} level={names[r.level] ?? ""} />
+        ))}
+        {logs.isSuccess && logs.data.length === 0 && <p className="px-4 py-3 type-callout text-text-secondary">{t("logs.none")}</p>}
+        {logs.isError && <p className="px-4 py-3 type-callout break-words text-danger">{errorMessage(logs.error)}</p>}
+      </div>
+    </Group>
   );
 }
 

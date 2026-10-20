@@ -25,13 +25,28 @@ export function useAdminServers(): ServerEntry[] {
   });
 }
 
-/** The plugins of a server's plugin folder. */
+/**
+ * The plugins of a server's plugin folder, and those under development,
+ * which are fetched again every few seconds while there are any, since the
+ * server restarts them when they are built.
+ */
 export function usePlugins(server: ServerEntry | undefined) {
   const servers = useServersStore();
   return useQuery({
     queryKey: serverKey(server?.id ?? "", "plugins", "installed"),
     queryFn: async () => (await servers.client(PluginManagementService, server!).listPlugins({})).plugins,
     enabled: !!server,
+    refetchInterval: (q) => (q.state.data?.some((p) => p.devFolder) ? 2000 : false),
+  });
+}
+
+/** The server's recent log records of a plugin, newest first, fetched again every few seconds. */
+export function usePluginLogs(server: ServerEntry, id: string) {
+  const servers = useServersStore();
+  return useQuery({
+    queryKey: serverKey(server.id, "logs", "plugin", id),
+    queryFn: async () => (await servers.client(SystemService, server).listLogs({ pluginId: id, limit: 200 })).records,
+    refetchInterval: 3000,
   });
 }
 
@@ -130,6 +145,8 @@ export function usePluginActions(server: ServerEntry) {
       mutationFn: ({ id, enabled }: { id: string; enabled: boolean }) => client().setPluginEnabled({ pluginId: id, enabled }),
       onSettled,
     }),
+    /** Stops a plugin and starts it again, as after an upgrade; one under development with what was built. */
+    restart: useMutation({ mutationFn: (id: string) => client().restartPlugin({ pluginId: id }), onSettled }),
     /** Sets a plugin's configuration, JSON its schema accepts; the response holds the configuration stored. */
     configure: useMutation({
       mutationFn: ({ id, config }: { id: string; config: string }) => client().setPluginConfig({ pluginId: id, configJson: config }),

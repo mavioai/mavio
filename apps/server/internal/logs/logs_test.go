@@ -17,7 +17,7 @@ func TestRing(t *testing.T) {
 	log.Warn("two")
 	log.Error("three")
 	log.Info("four")
-	got := ring.Records(slog.LevelInfo, time.Time{}, 10)
+	got := ring.Records(slog.LevelInfo, time.Time{}, "", 10)
 	var msgs []string
 	for _, r := range got {
 		msgs = append(msgs, r.Message)
@@ -25,7 +25,7 @@ func TestRing(t *testing.T) {
 	if strings.Join(msgs, ",") != "four,three,two" {
 		t.Errorf("records = %v, want = four,three,two", msgs)
 	}
-	if got := ring.Records(slog.LevelError, time.Time{}, 10); len(got) != 1 || got[0].Message != "three" {
+	if got := ring.Records(slog.LevelError, time.Time{}, "", 10); len(got) != 1 || got[0].Message != "three" {
 		t.Errorf("errors = %+v", got)
 	}
 	// Only warnings and errors reach the server's log.
@@ -34,7 +34,11 @@ func TestRing(t *testing.T) {
 	}
 	ring = NewRing(5)
 	slog.New(ring.Handler(slog.DiscardHandler, slog.LevelInfo)).With("plugin", "tmdb").WithGroup("req").Info("one", "n", 1)
-	if a := ring.Records(slog.LevelInfo, time.Time{}, 1)[0].Attributes; a["plugin"] != "tmdb" || a["req.n"] != "1" {
+	if a := ring.Records(slog.LevelInfo, time.Time{}, "", 1)[0].Attributes; a["plugin"] != "tmdb" || a["req.n"] != "1" {
 		t.Errorf("attributes = %v", a)
+	}
+	slog.New(ring.Handler(slog.DiscardHandler, slog.LevelInfo)).Info("two")
+	if got := ring.Records(slog.LevelInfo, time.Time{}, "tmdb", 10); len(got) != 1 || got[0].Message != "one" {
+		t.Errorf("records of tmdb = %v, want = [one]", got)
 	}
 }

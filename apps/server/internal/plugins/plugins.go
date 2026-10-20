@@ -59,6 +59,9 @@ type Info struct {
 	State   State
 	// Err is why the plugin failed.
 	Err error
+	// DevFolder is the folder a plugin under development runs from, in
+	// place (Config.Dev); empty for an installed plugin.
+	DevFolder string
 }
 
 // Config configures a Manager.
@@ -66,6 +69,14 @@ type Config struct {
 	// Dir holds one folder per plugin, with its manifest.json; empty means
 	// no plugins, and none can be installed.
 	Dir string
+	// Dev are the plugins under development, run in place from their
+	// folders and restarted when their files change: a plugin's project,
+	// whose development folder dist/dev its dev target builds, or a plugin
+	// folder. Each takes the place of an installed plugin of its ID.
+	Dev []string
+	// DevPoll is how often the development folders are checked for
+	// changes; zero means every half second.
+	DevPoll time.Duration
 	// CacheDir keeps compiled WASM modules across restarts; empty keeps
 	// them in memory.
 	CacheDir string
@@ -180,8 +191,10 @@ type Manager struct {
 }
 
 type entry struct {
-	// folder is the plugin's folder in the plugin folder.
+	// folder is the plugin's folder in the plugin folder, or for a plugin
+	// under development the absolute path of its project or folder.
 	folder   string
+	dev      bool
 	manifest *pluginv1.Manifest
 	locales  manifest.Locales
 	plugin   host.Plugin // nil when it failed to start
@@ -228,30 +241,43 @@ func Open(ctx context.Context, cfg Config) (*Manager, error) {
 			}, cfg.HostAPI)
 		}
 	}
-	if cfg.Dir == "" {
-		return m, nil
-	}
-	dirs, err := os.ReadDir(cfg.Dir)
-	if err != nil {
-		return nil, fmt.Errorf("plugin folder: %w", err)
-	}
 	seen := map[string]bool{}
-	for _, d := range dirs {
-		// Folders of installations in progress start with a dot.
-		if !d.IsDir() || strings.HasPrefix(d.Name(), ".") {
-			continue
-		}
-		if _, err := os.Stat(filepath.Join(cfg.Dir, d.Name(), manifest.File)); err != nil {
-			continue
-		}
-		e := m.launch(ctx, d.Name(), seen)
+	add := func(e *entry) {
 		if !cfg.ConfigureLater {
 			m.ready(ctx, e)
 		}
 		seen[e.manifest.GetId()] = true
 		m.plugins = append(m.plugins, e)
 	}
+	for _, p := range cfg.Dev {
+		add(m.launch(ctx, p, seen))
+	}
+	if cfg.Dir == "" {
+		m.sort()
+		m.startWatching()
+		return m, nil
+	}
+	dirs, err := os.ReadDir(cfg.Dir)
+	if err != nil {
+		return nil, fmt.Errorf("plugin folder: %w", err)
+	}
+	for _, d := range dirs {
+		// Folders of installations in progress start with a dot.
+		if !d.IsDir() || strings.HasPrefix(d.Name(), ".") {
+			continue
+		}
+		dir := filepath.Join(cfg.Dir, d.Name())
+		if _, err := os.Stat(filepath.Join(dir, manifest.File)); err != nil {
+			continue
+		}
+		if mf, err := manifest.Load(dir); err == nil && m.isDev(mf.GetId()) {
+			m.log.InfoContext(ctx, "installed plugin left for its development folder", "plugin", mf.GetId())
+			continue
+		}
+		add(m.launch(ctx, d.Name(), seen))
+	}
 	m.sort()
+	m.startWatching()
 	return m, nil
 }
 
@@ -291,11 +317,12 @@ func (m *Manager) ConfigureStarted(ctx context.Context) {
 	}
 }
 
-// launch starts the plugin in a folder of the plugin folder, unless it is
-// disabled, leaving it Starting; seen are the IDs other folders hold.
+// launch starts the plugin in a folder of the plugin folder, or a plugin
+// under development by the absolute path of its project or folder, unless
+// it is disabled, leaving it Starting; seen are the IDs other folders hold.
 func (m *Manager) launch(ctx context.Context, folder string, seen map[string]bool) *entry {
-	dir := filepath.Join(m.cfg.Dir, folder)
-	e := &entry{folder: folder, revision: m.revisions.Add(1)}
+	e := &entry{folder: folder, dev: filepath.IsAbs(folder), revision: m.revisions.Add(1)}
+	dir := m.dir(e)
 	e.manifest, e.err = manifest.Load(dir)
 	var localesErr error
 	if e.err == nil {
@@ -303,7 +330,7 @@ func (m *Manager) launch(ctx context.Context, folder string, seen map[string]boo
 	}
 	switch {
 	case e.err != nil:
-		e.manifest = pluginv1.Manifest_builder{Id: new(folder)}.Build()
+		e.manifest = pluginv1.Manifest_builder{Id: new(filepath.Base(folder))}.Build()
 	case seen[e.manifest.GetId()]:
 		e.err = fmt.Errorf("another folder holds plugin %s", e.manifest.GetId())
 	case m.isDisabled(e.manifest.GetId()):
@@ -392,7 +419,11 @@ func (m *Manager) Plugins() []Info {
 }
 
 func (e *entry) info() Info {
-	return Info{Manifest: e.manifest, Locales: e.locales, State: e.state, Err: e.err}
+	info := Info{Manifest: e.manifest, Locales: e.locales, State: e.state, Err: e.err}
+	if e.dev {
+		info.DevFolder = devFolder(e.folder)
+	}
+	return info
 }
 
 func (m *Manager) find(id string) (*entry, error) {

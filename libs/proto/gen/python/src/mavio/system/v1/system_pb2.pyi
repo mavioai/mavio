@@ -499,14 +499,16 @@ class LogRecord(_message.Message):
     def __init__(self, time: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ..., level: _Optional[_Union[LogLevel, str]] = ..., message: _Optional[str] = ..., attributes: _Optional[_Mapping[str, str]] = ...) -> None: ...
 
 class ListLogsRequest(_message.Message):
-    __slots__ = ("min_level", "max_age", "limit")
+    __slots__ = ("min_level", "max_age", "limit", "plugin_id")
     MIN_LEVEL_FIELD_NUMBER: _ClassVar[int]
     MAX_AGE_FIELD_NUMBER: _ClassVar[int]
     LIMIT_FIELD_NUMBER: _ClassVar[int]
+    PLUGIN_ID_FIELD_NUMBER: _ClassVar[int]
     min_level: LogLevel
     max_age: _duration_pb2.Duration
     limit: int
-    def __init__(self, min_level: _Optional[_Union[LogLevel, str]] = ..., max_age: _Optional[_Union[datetime.timedelta, _duration_pb2.Duration, _Mapping]] = ..., limit: _Optional[int] = ...) -> None: ...
+    plugin_id: str
+    def __init__(self, min_level: _Optional[_Union[LogLevel, str]] = ..., max_age: _Optional[_Union[datetime.timedelta, _duration_pb2.Duration, _Mapping]] = ..., limit: _Optional[int] = ..., plugin_id: _Optional[str] = ...) -> None: ...
 
 class ListLogsResponse(_message.Message):
     __slots__ = ("records",)

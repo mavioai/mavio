@@ -125,6 +125,19 @@ public nonisolated struct Mavio_System_V1_Plugin: Sendable {
   /// Clears the value of `proxy`. Subsequent reads from it will return its default value.
   public mutating func clearProxy() {self._proxy = nil}
 
+  /// The folder a plugin under development runs from in place, which the
+  /// server's --plugin-dev names, restarting it when its files change;
+  /// empty for an installed plugin, which takes no catalog version and
+  /// cannot be uninstalled while this one takes its place.
+  public var devFolder: String {
+    get {_devFolder ?? String()}
+    set {_devFolder = newValue}
+  }
+  /// Returns true if `devFolder` has been explicitly set.
+  public var hasDevFolder: Bool {self._devFolder != nil}
+  /// Clears the value of `devFolder`. Subsequent reads from it will return its default value.
+  public mutating func clearDevFolder() {self._devFolder = nil}
+
   public var unknownFields = SwiftProtobuf.UnknownStorage()
 
   public init() {}
@@ -133,6 +146,7 @@ public nonisolated struct Mavio_System_V1_Plugin: Sendable {
   fileprivate var _state: Mavio_System_V1_PluginState? = nil
   fileprivate var _error: String? = nil
   fileprivate var _proxy: String? = nil
+  fileprivate var _devFolder: String? = nil
 }
 
 public nonisolated struct Mavio_System_V1_ListPluginsRequest: Sendable {
@@ -683,6 +697,48 @@ public nonisolated struct Mavio_System_V1_SetPluginEnabledResponse: Sendable {
   fileprivate var _plugin: Mavio_System_V1_Plugin? = nil
 }
 
+public nonisolated struct Mavio_System_V1_RestartPluginRequest: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  public var pluginID: String {
+    get {_pluginID ?? String()}
+    set {_pluginID = newValue}
+  }
+  /// Returns true if `pluginID` has been explicitly set.
+  public var hasPluginID: Bool {self._pluginID != nil}
+  /// Clears the value of `pluginID`. Subsequent reads from it will return its default value.
+  public mutating func clearPluginID() {self._pluginID = nil}
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+
+  fileprivate var _pluginID: String? = nil
+}
+
+public nonisolated struct Mavio_System_V1_RestartPluginResponse: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  public var plugin: Mavio_System_V1_Plugin {
+    get {_plugin ?? Mavio_System_V1_Plugin()}
+    set {_plugin = newValue}
+  }
+  /// Returns true if `plugin` has been explicitly set.
+  public var hasPlugin: Bool {self._plugin != nil}
+  /// Clears the value of `plugin`. Subsequent reads from it will return its default value.
+  public mutating func clearPlugin() {self._plugin = nil}
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+
+  fileprivate var _plugin: Mavio_System_V1_Plugin? = nil
+}
+
 /// ContainerRuntime is the container engine the server found.
 public nonisolated struct Mavio_System_V1_ContainerRuntime: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
@@ -1207,7 +1263,7 @@ nonisolated extension Mavio_System_V1_PluginState: SwiftProtobuf._ProtoNameProvi
 
 nonisolated extension Mavio_System_V1_Plugin: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".Plugin"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}manifest\0\u{1}state\0\u{1}error\0\u{1}proxy\0")
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}manifest\0\u{1}state\0\u{1}error\0\u{1}proxy\0\u{3}dev_folder\0")
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -1219,6 +1275,7 @@ nonisolated extension Mavio_System_V1_Plugin: SwiftProtobuf.Message, SwiftProtob
       case 2: try { try decoder.decodeSingularEnumField(value: &self._state) }()
       case 3: try { try decoder.decodeSingularStringField(value: &self._error) }()
       case 4: try { try decoder.decodeSingularStringField(value: &self._proxy) }()
+      case 5: try { try decoder.decodeSingularStringField(value: &self._devFolder) }()
       default: break
       }
     }
@@ -1241,6 +1298,9 @@ nonisolated extension Mavio_System_V1_Plugin: SwiftProtobuf.Message, SwiftProtob
     try { if let v = self._proxy {
       try visitor.visitSingularStringField(value: v, fieldNumber: 4)
     } }()
+    try { if let v = self._devFolder {
+      try visitor.visitSingularStringField(value: v, fieldNumber: 5)
+    } }()
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -1249,6 +1309,7 @@ nonisolated extension Mavio_System_V1_Plugin: SwiftProtobuf.Message, SwiftProtob
     if lhs._state != rhs._state {return false}
     if lhs._error != rhs._error {return false}
     if lhs._proxy != rhs._proxy {return false}
+    if lhs._devFolder != rhs._devFolder {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
@@ -1937,6 +1998,74 @@ nonisolated extension Mavio_System_V1_SetPluginEnabledResponse: SwiftProtobuf.Me
   }
 
   public static func ==(lhs: Mavio_System_V1_SetPluginEnabledResponse, rhs: Mavio_System_V1_SetPluginEnabledResponse) -> Bool {
+    if lhs._plugin != rhs._plugin {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Mavio_System_V1_RestartPluginRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".RestartPluginRequest"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}plugin_id\0")
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularStringField(value: &self._pluginID) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    try { if let v = self._pluginID {
+      try visitor.visitSingularStringField(value: v, fieldNumber: 1)
+    } }()
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Mavio_System_V1_RestartPluginRequest, rhs: Mavio_System_V1_RestartPluginRequest) -> Bool {
+    if lhs._pluginID != rhs._pluginID {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Mavio_System_V1_RestartPluginResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".RestartPluginResponse"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}plugin\0")
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularMessageField(value: &self._plugin) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    try { if let v = self._plugin {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
+    } }()
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Mavio_System_V1_RestartPluginResponse, rhs: Mavio_System_V1_RestartPluginResponse) -> Bool {
     if lhs._plugin != rhs._plugin {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true

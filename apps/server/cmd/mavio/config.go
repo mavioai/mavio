@@ -82,6 +82,7 @@ var settings = []setting{
 	}},
 	{key: "plugin-dir", path: true, usage: "directory holding one folder per plugin; empty runs none", def: under("plugins")},
 	{key: "plugin-seed-dir", path: true, usage: "directory of plugin folders installed into plugin-dir once, such as those a container image ships; empty seeds none", def: constant("")},
+	{key: "plugin-dev", usage: "plugins under development, run in place and restarted when their files change: a plugin's project, whose dist/dev its dev target builds, or a plugin folder, several separated as in PATH", def: constant("")},
 	{key: "plugin-data-dir", path: true, usage: "directory holding the plugins' data folders", def: under("plugin-data")},
 	{key: "container-endpoint", usage: "container engine the plugins' container dependencies run on: unix:///path, npipe:////./pipe/name or tcp:// on the loopback interface; empty uses DOCKER_HOST, else the first usual Docker or Podman socket that answers", def: constant("")},
 	{key: "container-prefix", usage: "prefix of the names of the containers, volumes and network the server creates, which a second server on the same engine changes: lowercase letters, digits and hyphens", def: constant(containers.DefaultPrefix)},
@@ -230,6 +231,22 @@ func load(flags *pflag.FlagSet) (options, error) {
 		}
 		if s.key == "plugin-catalog" {
 			isPath = !strings.Contains(value, "://")
+		}
+		if s.key == "plugin-dev" {
+			for p := range strings.SplitSeq(value, string(filepath.ListSeparator)) {
+				if p == "" {
+					continue
+				}
+				if fromFile(s.key) && !filepath.IsAbs(p) {
+					return options{}, fmt.Errorf("%s: %s %q is not an absolute path", v.ConfigFileUsed(), s.key, p)
+				}
+				abs, err := filepath.Abs(p)
+				if err != nil {
+					return options{}, fmt.Errorf("%s: %w", s.key, err)
+				}
+				cfg.PluginDev = append(cfg.PluginDev, abs)
+			}
+			continue
 		}
 		if isPath && file != "" {
 			if fromFile(s.key) && !filepath.IsAbs(file) {

@@ -429,6 +429,12 @@ export type MessageKey =
   | 'plugins.disabling'
   | 'plugins.install'
   | 'plugins.update'
+  | 'plugins.development'
+  | 'plugins.devFolder'
+  | 'plugins.devFolderDetail'
+  | 'plugins.restart'
+  | 'plugins.logs'
+  | 'plugins.logsFooter'
   | 'plugins.uninstall'
   | 'plugins.uninstallTitle'
   | 'plugins.uninstallMessage'
@@ -2367,6 +2373,12 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "plugins.disabling": "Stopping the plugin…",
     "plugins.install": "Install",
     "plugins.update": "Update to {version}",
+    "plugins.development": "In development",
+    "plugins.devFolder": "Development folder",
+    "plugins.devFolderDetail": "The server restarts it when what is built into this folder changes.",
+    "plugins.restart": "Restart",
+    "plugins.logs": "Logs",
+    "plugins.logsFooter": "What the plugin writes and what the server logs of it, newest first, refreshed every few seconds.",
     "plugins.uninstall": "Uninstall",
     "plugins.uninstallTitle": "Uninstall {name}?",
     "plugins.uninstallMessage": "Its configuration and data are deleted.",
@@ -4303,6 +4315,12 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "plugins.disabling": "正在停止插件…",
     "plugins.install": "安装",
     "plugins.update": "更新到 {version}",
+    "plugins.development": "开发中",
+    "plugins.devFolder": "开发目录",
+    "plugins.devFolderDetail": "此目录中构建出的内容变化时，服务端会重新启动它。",
+    "plugins.restart": "重新启动",
+    "plugins.logs": "日志",
+    "plugins.logsFooter": "插件输出的内容以及服务端关于它的日志，最新的在前，每隔几秒刷新。",
     "plugins.uninstall": "卸载",
     "plugins.uninstallTitle": "卸载 {name}？",
     "plugins.uninstallMessage": "其配置与数据将被删除。",

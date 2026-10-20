@@ -440,7 +440,7 @@ func (s *SystemService) ListLogs(ctx context.Context, req *systemv1.ListLogsRequ
 		limit = 200
 	}
 	var out []*systemv1.LogRecord
-	for _, r := range s.Logs.Records(min, since, limit) {
+	for _, r := range s.Logs.Records(min, since, req.GetPluginId(), limit) {
 		out = append(out, systemv1.LogRecord_builder{
 			Time: timestamppb.New(r.Time), Level: new(levelToProto(r.Level)), Message: &r.Message, Attributes: r.Attributes,
 		}.Build())

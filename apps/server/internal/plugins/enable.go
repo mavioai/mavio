@@ -64,26 +64,33 @@ func (m *Manager) SetEnabled(ctx context.Context, id string, enabled bool) (Info
 	return info, nil
 }
 
-// Restart stops a running plugin and starts it again, as after an
-// upgrade, for it to start with what Config.Env returns now; it does
-// nothing for a plugin that does not run.
+// Restart stops a plugin and starts it again, as after an upgrade, for it
+// to start with what Config.Env returns now, or with what was built into
+// its development folder; a plugin that failed is started again too. It
+// does nothing for a disabled plugin.
 func (m *Manager) Restart(ctx context.Context, id string) error {
 	m.install.Lock()
 	defer m.install.Unlock()
 	m.mu.Lock()
 	e, err := m.find(id)
-	if err != nil || e.plugin == nil {
+	if err != nil || e.state == Disabled {
 		m.mu.Unlock()
 		return err
 	}
 	p := e.plugin
 	e.plugin = nil
 	m.mu.Unlock()
-	m.dropDevices(ctx, id)
-	if err := p.Close(ctx); err != nil {
-		m.log.WarnContext(ctx, "stop plugin", "plugin", id, "err", err)
+	if p != nil {
+		m.dropDevices(ctx, id)
+		if err := p.Close(ctx); err != nil {
+			m.log.WarnContext(ctx, "stop plugin", "plugin", id, "err", err)
+		}
 	}
 	n := m.start(ctx, e.folder, m.otherIDs(id))
+	m.mu.Lock()
+	// A development folder's manifest may name another ID now.
+	m.plugins = slices.DeleteFunc(m.plugins, func(o *entry) bool { return o == e })
+	m.mu.Unlock()
 	m.put(n)
 	m.log.InfoContext(ctx, "plugin restarted", "plugin", id)
 	return n.err
