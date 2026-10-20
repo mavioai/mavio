@@ -37,7 +37,7 @@ Or as a container, with media mounted under `/media`:
 
 ```bash
 docker buildx build -f apps/server/Dockerfile -t mavio --load .
-docker run -p 8686:8686 -v mavio-config:/config -v mavio-cache:/cache -v /path/to/media:/media:ro mavio
+docker run -p 8686:8686 -v mavio:/home/mavio/.mavio -v /path/to/media:/media:ro mavio
 ```
 
 ## License

@@ -124,27 +124,28 @@ FROM debian:trixie-slim
 RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates curl tzdata \
 	&& rm -rf /var/lib/apt/lists/* \
 	&& groupadd --system --gid 1000 mavio \
-	&& useradd --system --uid 1000 --gid mavio --home-dir /config mavio \
-	&& mkdir -p /config /cache /media && chown -R mavio:mavio /config /cache
+	&& useradd --system --uid 1000 --gid mavio --home-dir /home/mavio mavio \
+	&& mkdir -p /home/mavio/.mavio /media && chown -R mavio:mavio /home/mavio
 COPY --from=ffmpeg /out/ /usr/lib/jellyfin-ffmpeg/
 COPY --from=server /out/mavio /usr/local/bin/mavio
-# Run as the rcd of libraries on rclone remotes; its config is /config/rclone/rclone.conf.
+# Run as the rcd of libraries on rclone remotes; its config is ~/.mavio/rclone/rclone.conf.
 COPY --from=rclone /out/rclone /usr/local/bin/rclone
-# The plugins the image ships, installed into /config/plugins on the first start.
+# The plugins the image ships, installed into ~/.mavio/plugins on the first start.
 COPY --from=server /out/plugins/ /usr/lib/mavio/plugins/
 COPY --from=agent /out/plugins/ /usr/lib/mavio/plugins/
 COPY --from=pipecat /out/plugins/ /usr/lib/mavio/plugins/
 USER mavio
-# /config is Mavio's home: config.toml, the database, plugins, chosen artwork and backups; /cache
-# holds images, compiled plugins and transcodes. Mount media libraries under /media.
-ENV MAVIO_HOME=/config MAVIO_CACHE_DIR=/cache MAVIO_PLUGIN_SEED_DIR=/usr/lib/mavio/plugins \
+# Mavio's home is ~/.mavio, /home/mavio/.mavio, as outside a container: config.toml, the database,
+# plugins, chosen artwork, backups and, in cache/, images, compiled plugins and transcodes. Mount
+# media libraries under /media.
+ENV HOME=/home/mavio MAVIO_PLUGIN_SEED_DIR=/usr/lib/mavio/plugins \
 	MAVIO_FFMPEG=/usr/lib/jellyfin-ffmpeg/ffmpeg MAVIO_FFPROBE=/usr/lib/jellyfin-ffmpeg/ffprobe
-VOLUME ["/config", "/cache"]
+VOLUME ["/home/mavio/.mavio"]
 # 1900/udp is DLNA's SSDP; its multicast reaches devices only with the host's network (--network host).
 EXPOSE 8686 7359/udp 1900/udp
 HEALTHCHECK --interval=30s --timeout=5s --start-period=30s \
 	CMD curl -fsS -H 'Content-Type: application/json' -d '{}' \
 		http://127.0.0.1:8686/mavio.system.v1.SystemService/GetHealth || exit 1
 # Arguments after the image name are flags, e.g. `docker run … mavio:dev --database postgres://…`;
-# they and `-e MAVIO_…` variables override the settings above and those of /config/config.toml.
+# they and `-e MAVIO_…` variables override the settings above and those of ~/.mavio/config.toml.
 ENTRYPOINT ["mavio"]
