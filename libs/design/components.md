@@ -113,3 +113,33 @@ The empty, error, offline and loading states of a screen or list.
 * **Anatomy**: an icon (48 pt, `color.textTertiary`: `error`, `offline`), a title (`typography.title3`: `state.empty`, `state.error`, `state.offline`), an optional message (`typography.body`, `color.textSecondary`) and an optional action (`action.retry`).
 * **Loading**: placeholders of the content (see States) where its shape is known, as a shelf's cards; else, as a page on its way, the activity indicator, centered in the space the page is given: eight spokes in a circle of 28 pt, `color.textTertiary`, fading from 20% to full opacity around it and turning a spoke a step, once in 0.9 s, still for reduced motion. It appears 0.4 s after loading starts, so that what comes quickly shows nothing first. No server's name or address stands for content still loading. The first screen shows the app's logo.
 * **Offline**: downloaded items stay listed under the view.
+
+## Assistant
+
+The voice assistant ([Assistant §9](../../docs/assistant.md#9-clients)): an orb floating on its own over the page, and cards beside it of what the user said, what the assistant answers and what it does. There is no dialog, header, close button or text field: the assistant is spoken to. [`prototypes/assistant.html`](prototypes/assistant.html) draws every state of the orb and every card in both themes, on a desktop and a phone.
+
+* **Layout**: on desktops, tablets and television the orb floats at the top right, 84 pt, and the cards stack below it, 380 pt wide and `spacing.sm` apart, the newest at the bottom; on phones the orb floats at the bottom center and the cards stack above it, as wide as the screen less `spacing.sm` at each side, the newest at the top. A status pill (`typography.footnote` on the cards' material, `radius.full`) beside the orb says what it awaits, "Loading…", "Listening…" or how to talk, and is hidden otherwise. The page behind stays as it is and usable once the assistant is dismissed.
+* **Orb**: three blurred blobs, magenta, cyan and blue, each a radial gradient orbiting the center at its own speed, with no border or background. In the dark theme their colors add up and glow white at the core; in the light theme they are deeper (magenta `#EB28A0`, cyan `#00AAEB`, blue `#5A46F5`) and laid over each other, with a soft shadow of the blue under them, so that the core keeps its color. Four values drive it, eased toward each state's in about 0.15 s: size, spread (how far the blobs orbit apart), speed and brightness; a level of the audio (the microphone's when the user speaks, the playback's when the assistant does) swells it and spreads the blobs. Reduced motion keeps the orb still at each state's size and brightness.
+* **States**: the orb shows the voice session's state, from its events ([Assistant §8.6](../../docs/assistant.md#86-protocol)):
+
+| State | When | The orb |
+| :--- | :--- | :--- |
+| Opening | From the press until the microphone's first audio | Small and dim, breathing slowly; the pill says loading |
+| Listening | Audio comes and the user is silent: before and after `ready`, and after an answer | Full size, the colors flowing slowly, breathing lightly; the pill says listening |
+| User speaking | `user_started` → `user_stopped`, `transcript` growing meanwhile | Swells and shrinks with the microphone's level, the colors spreading out |
+| Pausing | The user falls silent but the turn is not over (no `user_stopped` yet) | Draws in and turns slowly |
+| Thinking | `user_stopped` or `run` → `bot_started`, with `tool` meanwhile | Gathers into a ring spinning fast |
+| Speaking | `bot_started` → `bot_stopped` | Rises and falls with the playback's level |
+| Interrupted | `interrupt` | Contracts with a white flash, then turns to User speaking |
+| Not listening | Push to talk released, or the session ended while cards remain | Full size and color, flowing very slowly, not breathing; the pill says how to talk |
+| Error | `error`, or the session cannot be reached | Shakes once and flushes red, then turns to Not listening |
+| Ended | The session closes or idles out with nothing to choose or confirm | Shrinks and fades out with the cards |
+
+* **Cards**: of the cards' material — `color.surfaceOverlay` at 72% in the dark theme and white at 74% in the light, over a blur of the page, with a 1 pt `color.border`, `radius.xl` and `elevation.level3` — rising into place over `duration.slow` with `easing.emphasized`:
+  * **Talk**: what the user said, then the answer, both `typography.body`. What the user said is `color.textSecondary`, growing with `transcript`, and once final ends with a chevron "›" in `color.textTertiary`; the answer's words start in `color.textTertiary` and turn `color.textPrimary` as they are spoken, paced by the playback (all at once when nothing is spoken).
+  * **Tools**: a row for each `tool`: a 26 pt `radius.sm` tile of the tool's icon in `color.accent` on the accent at 16%, its summary (`typography.footnote`, `color.textSecondary`), and an activity indicator while it runs, then a check in `color.success` or a cross in `color.danger`.
+  * **Results**: the items to choose from, numbered so that the user can say "the second", each a row of its number (`color.textTertiary`), poster and title with its year; choosing one by voice, click or tap acts on it.
+  * **Confirmation**: the question, and Cancel and Confirm (`color.accent`) side by side, answerable by voice as well.
+  * **Error**: the message in `color.danger`'s text.
+  The cards of a turn replace the previous turn's; Results and Confirmation stay until answered.
+* **Dismissal**: on its own, a few seconds after the session ends or after an answer with nothing to choose or confirm (the Ended state), held while the pointer is over a card or a card is touched; by a click or tap anywhere outside the orb and the cards; by Escape, the remote's Back or Android's back. Each ends the session, and the orb and cards fade out together over `duration.slow`.

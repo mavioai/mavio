@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Assistant Orb</title>
+<style>
+  :root { --bg: #0e0f12; --page: #16181d; --card: rgba(40, 42, 50, 0.72); --card-border: rgba(255,255,255,0.08); --text: #f2f3f5; --text2: rgba(242,243,245,0.62); --text3: rgba(242,243,245,0.36); --accent: #5ea4ff; --danger: #ff6b6b; --ok: #5fd38d; --line: rgba(255,255,255,0.06); --chip: rgba(255,255,255,0.07); --skel: rgba(255,255,255,0.06); --poster-a: #2a3140; --poster-b: #1d2028; --shadow: rgba(0,0,0,0.35); --tool: rgba(94,164,255,0.16); --hover: rgba(255,255,255,0.06); --btn: rgba(255,255,255,0.1); color-scheme: dark; }
+  :root[data-theme="light"] { --bg: #e9e9ee; --page: #f5f5f7; --card: rgba(255, 255, 255, 0.74); --card-border: rgba(0,0,0,0.06); --text: #1d1d1f; --text2: rgba(29,29,31,0.6); --text3: rgba(29,29,31,0.36); --accent: #0a74e8; --danger: #d63b3b; --ok: #1f9d55; --line: rgba(0,0,0,0.07); --chip: rgba(0,0,0,0.05); --skel: rgba(0,0,0,0.06); --poster-a: #d9dce3; --poster-b: #c9cdd6; --shadow: rgba(0,0,0,0.12); --tool: rgba(10,116,232,0.12); --hover: rgba(0,0,0,0.05); --btn: rgba(0,0,0,0.06); color-scheme: light; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.5 -apple-system, system-ui, sans-serif; }
+  .bar { display: flex; flex-wrap: wrap; gap: 6px; padding: 12px 20px; border-bottom: 1px solid var(--line); align-items: center; }
+  .bar span { color: var(--text3); font-size: 12px; margin: 0 4px 0 10px; }
+  .bar span:first-child { margin-left: 0; }
+  .bar button { background: var(--chip); color: var(--text); border: 1px solid var(--line); border-radius: 999px; padding: 5px 12px; font: inherit; font-size: 13px; cursor: pointer; }
+  .bar button.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .event { padding: 8px 20px; font-size: 13px; color: var(--text2); min-height: 36px; }
+  .event code { color: var(--accent); font-size: 12px; }
+  .stage { display: flex; gap: 32px; padding: 8px 20px 32px; flex-wrap: wrap; justify-content: center; }
+  .label { color: var(--text3); font-size: 12px; margin: 0 0 8px; }
+  .desk { position: relative; width: 900px; max-width: 100%; height: 600px; border-radius: 14px; overflow: hidden; background: var(--page); border: 1px solid var(--line); }
+  .fakepage { position: absolute; inset: 0; padding: 22px 26px; display: grid; grid-template-columns: 170px 1fr; gap: 24px; }
+  .side div { height: 12px; border-radius: 6px; background: var(--skel); margin: 14px 0; }
+  .posters { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; align-content: start; }
+  .posters div { aspect-ratio: 2/3; border-radius: 8px; background: linear-gradient(160deg, var(--poster-a), var(--poster-b)); }
+  .phone { position: relative; width: 340px; height: 600px; border-radius: 36px; overflow: hidden; background: var(--page); border: 1px solid var(--line); }
+  .phone .posters { grid-template-columns: repeat(3, 1fr); padding: 60px 16px; }
+  .stack { position: absolute; top: 100px; right: 16px; width: 380px; display: flex; flex-direction: column; gap: 10px; }
+  .phone .stack { top: auto; bottom: 120px; left: 10px; right: 10px; width: auto; flex-direction: column-reverse; }
+  .card { background: var(--card); border: 1px solid var(--card-border); border-radius: 20px; backdrop-filter: blur(28px) saturate(1.6); -webkit-backdrop-filter: blur(28px) saturate(1.6); box-shadow: 0 12px 40px var(--shadow); padding: 14px 16px; animation: rise .35s cubic-bezier(.2,.9,.3,1.2) both; }
+  @keyframes rise { from { opacity: 0; transform: translateY(-8px) scale(.97); } }
+  .phone .card { animation-name: riseUp; }
+  @keyframes riseUp { from { opacity: 0; transform: translateY(8px) scale(.97); } }
+  .orb { position: absolute; top: 12px; right: 8px; display: flex; align-items: center; gap: 8px; flex-direction: row-reverse; }
+  .orb canvas { width: 84px; height: 84px; flex: none; cursor: pointer; transition: opacity .4s; }
+  .orb .st { color: var(--text); font-size: 13px; padding: 5px 11px; border-radius: 999px; background: var(--card); border: 1px solid var(--card-border); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); white-space: nowrap; }
+  .orb .st:empty { display: none; }
+  :root[data-theme="light"] .orb canvas { filter: drop-shadow(0 6px 16px rgba(90, 70, 245, 0.28)); }
+  .icon { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; color: var(--text2); flex: none; cursor: pointer; background: var(--card); border: 1px solid var(--card-border); backdrop-filter: blur(20px); }
+  .icon svg { width: 16px; height: 16px; }
+  .phone .orb { top: auto; right: auto; bottom: 18px; left: 50%; transform: translateX(-50%); }
+  .phone .orb .st { position: absolute; bottom: 92px; left: 50%; transform: translateX(-50%); }
+  .text { font-size: 16px; line-height: 1.55; }
+  .you { color: var(--text2); cursor: pointer; }
+  .you .chev { display: inline-block; margin-left: 4px; color: var(--text3); }
+  .you.partial .chev { display: none; }
+  .ans { margin-top: 10px; }
+  .ans .w { color: var(--text3); transition: color .18s; }
+  .ans .w.said { color: var(--text); }
+  .tools { display: flex; flex-direction: column; gap: 8px; padding: 12px 14px; }
+  .tool { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--text2); }
+  .tool .ti { width: 26px; height: 26px; border-radius: 8px; display: grid; place-items: center; background: var(--tool); color: var(--accent); flex: none; }
+  .tool .ti svg { width: 14px; height: 14px; }
+  .tool .name { flex: 1; }
+  .tool .s { width: 16px; height: 16px; flex: none; }
+  .spin { border: 2px solid var(--btn); border-top-color: var(--accent); border-radius: 50%; animation: spin .8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .tool.done .s { color: var(--ok); }
+  .results { padding: 10px; display: flex; flex-direction: column; gap: 2px; }
+  .res { display: flex; gap: 10px; align-items: center; padding: 6px; border-radius: 12px; cursor: pointer; }
+  .res:hover { background: var(--hover); }
+  .res .n { width: 16px; text-align: center; color: var(--text3); font-weight: 600; font-size: 13px; }
+  .res .p { width: 34px; aspect-ratio: 2/3; border-radius: 5px; flex: none; }
+  .res b { display: block; font-weight: 500; font-size: 14px; }
+  .res small { color: var(--text2); font-size: 12px; }
+  .confirm .btns { display: flex; gap: 8px; }
+  .confirm button { flex: 1; border: 0; border-radius: 12px; padding: 8px; font: inherit; font-size: 14px; cursor: pointer; background: var(--btn); color: var(--text); }
+  .confirm button.p { background: var(--accent); color: #fff; }
+  .notes { max-width: 1280px; margin: 0 auto; padding: 0 20px 40px; color: var(--text2); font-size: 13px; }
+  .notes table { width: 100%; border-collapse: collapse; }
+  .notes th, .notes td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  .notes th { color: var(--text3); font-weight: 500; font-size: 12px; }
+  .notes td:first-child { color: var(--text); white-space: nowrap; }
+  .notes code { color: var(--accent); font-size: 12px; }
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="event" id="event"></div>
+<div class="stage">
+  <div><p class="label">Desktop: the orb floats on its own at the top right, the cards below it</p><div class="desk"><div class="fakepage"><div class="side"><div></div><div></div><div></div><div></div><div></div></div><div class="posters">
+    <div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div></div><div class="stack" id="desk"></div><div class="orb" id="desk-orb"></div></div></div>
+  <div><p class="label">Phone: the orb floats on its own at the bottom center, the cards above it</p><div class="phone"><div class="posters"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div><div class="stack" id="phone"></div><div class="orb" id="phone-orb"></div></div></div>
+</div>
+<div class="notes"><table id="dismiss" style="margin-bottom:20px"><tr><th>Dismissing (no close button)</th><th>How</th></tr>
+  <tr><td>On its own</td><td>A few seconds after the session ends, or after an answer, with nothing to choose or confirm (the Ended state). Touching a card holds it while touched.</td></tr>
+  <tr><td>Click or tap outside</td><td>Anywhere on the page outside the orb and the cards: the session ends and they fade out. Try it on the pages above.</td></tr>
+  <tr><td>Esc, Back</td><td>Esc on a keyboard, the remote's Back, or Android's back: the session ends and they fade out.</td></tr>
+</table><table id="notes"><tr><th>Orb state</th><th>When (the session's Pipecat events)</th><th>The orb</th></tr></table></div>
+<script>
+const ICON = {
+  search: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4-4"/></svg>',
+  check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg>',
+};
+const said = "Play that Nolan space movie";
+const answer = "I found three Nolan movies. You stopped Interstellar at 1 hour 20 minutes. Resume from there?";
+const toolsRunning = [["search", "Search \"Nolan space\"", 1], ["search", "Read Interstellar's progress", 0]];
+const toolsDone = [["search", "Search \"Nolan space\"", 1], ["search", "Read Interstellar's progress", 1]];
+// Orb states, from the session's events (docs/assistant.md §8.6).
+const ORB = {
+  opening:  { name: "Opening", when: "From the press until the microphone's first audio (on the client)", look: "Small and dim, breathing slowly: nothing is heard yet", status: "Loading…" },
+  idle:     { name: "Listening", when: "Audio comes and the user is silent: before and after <code>ready</code>, and after an answer, awaiting the next turn", look: "Full size, the three colors flowing slowly, breathing lightly", status: "Listening…", card: { you: "" } },
+  hearing:  { name: "User speaking", when: "<code>user_started</code> → <code>user_stopped</code>, <code>transcript</code> growing meanwhile", look: "Swells and shrinks with the microphone's level, the colors spreading out", card: { you: said, partial: true } },
+  pausing:  { name: "Pausing", when: "The VAD hears silence and Smart Turn finds the user unfinished (no <code>user_stopped</code> yet)", look: "Draws in and turns slowly, waiting for the user to go on", card: { you: "Play that Nolan", partial: true } },
+  thinking: { name: "Thinking", when: "<code>user_stopped</code> / <code>run</code> → <code>bot_started</code>, with <code>tool</code> meanwhile", look: "Gathers into a ring spinning fast", status: "", card: { you: said, tools: toolsRunning } },
+  speaking: { name: "Speaking", when: "<code>bot_started</code> → <code>bot_stopped</code>; the <code>answer</code>'s words light up as they are played", look: "Rises and falls with the playback's level", card: { you: said, tools: toolsDone, answer, sync: true } },
+  interrupt:{ name: "Interrupted", when: "<code>interrupt</code> (the user barges in, at least two words)", look: "Contracts with a white flash, then turns to User speaking", card: { you: "No, another one", partial: true } },
+  resting:  { name: "Not listening", when: "Push to talk released (after <code>ptt_end</code>), and after the session ended while cards remain", look: "Full size and color, flowing very slowly and not breathing: it does not listen", status: "Hold V to talk", card: { you: said, tools: toolsDone, answer, done: true } },
+  error:    { name: "Error", when: "<code>error</code>, or the voice session cannot be reached", look: "Shakes once and flushes red briefly, then turns to Not listening", status: "", card: { you: said, error: "The voice service can't be reached. Try again later." } },
+  ended:    { name: "Ended", when: "The session closes or idles out with nothing to choose or confirm", look: "Shrinks and fades out, the cards with it", status: "", card: { you: said, tools: toolsDone, answer, done: true } },
+};
+const SCENE = {
+  choose:  { name: "Results to choose", orb: "idle", status: "Say a number or tap one", card: { you: "Nolan movies", answer: "There are three. Which one?", done: true, results: [["Interstellar", "2014 · 2 h 49 min", "#3b4d7a"], ["Inception", "2010 · 2 h 28 min", "#5b3b3b"], ["Tenet", "2020 · 2 h 30 min", "#2f4f4a"]] } },
+  confirm: { name: "Confirmation", orb: "idle", status: "Waiting for you to confirm", card: { you: "Turn the living room TV all the way up", answer: "Set the volume of \"Living room TV\" to 100?", done: true, confirm: true } },
+};
+let cur = "speaking", orbMode = "speaking", t0 = performance.now(), dismissed = false;
+
+const bar = document.getElementById("bar");
+bar.innerHTML = `<span>Orb states</span>` + Object.entries(ORB).map(([k, v]) => `<button data-k="${k}">${v.name}</button>`).join("") +
+  `<span>Cards</span>` + Object.entries(SCENE).map(([k, v]) => `<button data-k="${k}">${v.name}</button>`).join("") +
+  `<span>Theme</span><button data-theme="dark">Dark</button><button data-theme="light">Light</button>`;
+bar.onclick = (e) => {
+  const { k, theme } = e.target.dataset ?? {};
+  if (k) select(k);
+  if (theme) setTheme(theme);
+};
+function setTheme(th) {
+  document.documentElement.dataset.theme = th;
+  bar.querySelectorAll("[data-theme]").forEach((b) => b.classList.toggle("on", b.dataset.theme === th));
+}
+setTheme(matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");
+document.getElementById("notes").innerHTML += Object.values(ORB).map((o) => `<tr><td>${o.name}</td><td>${o.when}</td><td>${o.look}</td></tr>`).join("");
+
+function card(cls, html) { return `<div class="card ${cls}">${html}</div>`; }
+function select(k) {
+  cur = k; t0 = performance.now(); dismissed = false;
+  bar.querySelectorAll("[data-k]").forEach((b) => b.classList.toggle("on", b.dataset.k === k));
+  const o = ORB[k], sc = SCENE[k];
+  orbMode = o ? k : sc.orb;
+  const c = (o ?? sc).card ?? {};
+  const status = (o ?? sc).status ?? "";
+  document.getElementById("event").innerHTML = o ? `When: ${o.when}` : "";
+  for (const id of ["desk", "phone"]) {
+    const orb = document.getElementById(id + "-orb");
+    orb.innerHTML = `<canvas data-orb width="168" height="168" title="Tap to start a conversation, hold to talk"></canvas><div class="st">${status}</div>`;
+    let h = "";
+    if (c.you !== undefined && (c.you || c.answer)) {
+      const ans = c.answer ? `<div class="ans" data-ans="${c.sync ? 1 : 0}">${c.answer.split(/(?<= )/).map((ch) => `<span class="w${c.sync ? "" : " said"}">${ch}</span>`).join("")}</div>` : "";
+      h += card("talk text", (c.you ? `<div class="you ${c.partial ? "partial" : ""}" title="What was heard">${c.you}<span class="chev">›</span></div>` : "") + ans);
+    }
+    if (c.tools) h += card("tools", c.tools.map(([i, n, d]) => `<div class="tool ${d ? "done" : ""}"><div class="ti">${ICON[i]}</div><div class="name">${n}</div><div class="s ${d ? "" : "spin"}">${d ? ICON.check : ""}</div></div>`).join(""));
+    if (c.results) h += card("results", c.results.map(([n, m, col], i) => `<div class="res"><div class="n">${i + 1}</div><div class="p" style="background:linear-gradient(160deg,${col},#15171c)"></div><div><b>${n}</b><small>${m}</small></div></div>`).join(""));
+    if (c.confirm) h += card("confirm", `<div class="btns"><button class="p">Confirm</button><button>Cancel</button></div>`);
+    if (c.error) h += card("", `<div style="color:var(--danger);font-size:14px">${c.error}</div>`);
+    document.getElementById(id).innerHTML = h;
+  }
+}
+select("speaking");
+
+// Clicking the page outside the orb and the cards, or Esc, dismisses.
+function dismiss() { if (cur !== "ended" || !dismissed) { select("ended"); dismissed = true; } }
+for (const id of ["desk", "phone"]) {
+  const box = document.getElementById(id).closest(".desk, .phone");
+  box.addEventListener("click", (e) => { if (!e.target.closest(".card, .orb")) dismiss(); });
+}
+addEventListener("keydown", (e) => e.key === "Escape" && dismiss());
+
+// Three colored blobs mixed additively, each orbiting the center; their
+// spread, size, speed and brightness follow the state and the audio level.
+const blobs = [
+  { c: [255, 70, 190], l: [235, 40, 160], sp: .9, ph: 0 },
+  { c: [40, 220, 255], l: [0, 170, 235], sp: -1.15, ph: 2.1 },
+  { c: [100, 90, 255], l: [90, 70, 245], sp: .7, ph: 4.2 },
+];
+const P = {
+  opening:  { size: .55, spread: .12, speed: .35, bright: .45, gray: 0 },
+  idle:     { size: .78, spread: .2, speed: .6, bright: .85, gray: 0 },
+  hearing:  { size: .8, spread: .22, speed: 1.1, bright: 1, gray: 0 },
+  pausing:  { size: .7, spread: .16, speed: .5, bright: .8, gray: 0 },
+  thinking: { size: .62, spread: .4, speed: 3.4, bright: .95, gray: 0, ring: true },
+  speaking: { size: .8, spread: .2, speed: 1.2, bright: 1, gray: 0 },
+  interrupt:{ size: .8, spread: .22, speed: 1.1, bright: 1, gray: 0 },
+  resting:  { size: .76, spread: .16, speed: .18, bright: .85, gray: 0 },
+  error:    { size: .76, spread: .16, speed: .18, bright: .85, gray: 0 },
+  ended:    { size: .76, spread: .16, speed: .18, bright: .85, gray: 0 },
+};
+const cur_ = { size: .78, spread: .2, speed: 1, bright: 1, gray: 0, ring: 0, lv: 0, flash: 0 };
+function level(now) {
+  const t = (now - t0) / 1000;
+  if (orbMode === "hearing" || (orbMode === "interrupt" && t > .45)) return .3 + .55 * Math.abs(Math.sin(t * 5.3) * Math.sin(t * 2.1 + 1));
+  if (orbMode === "speaking") return .25 + .55 * Math.abs(Math.sin(t * 7.1) * Math.sin(t * 3.3));
+  if (orbMode === "idle") return .05 + .04 * Math.sin(t * 1.6);
+  if (orbMode === "opening") return .03 + .03 * Math.sin(t * 2.2);
+  return 0;
+}
+let phase = 0, last = performance.now();
+function draw(now) {
+  const dt = Math.min(.05, (now - last) / 1000); last = now;
+  const p = P[orbMode], t = (now - t0) / 1000;
+  const k = 1 - Math.exp(-dt * 6);
+  for (const f of ["size", "spread", "speed", "bright", "gray"]) cur_[f] += (p[f] - cur_[f]) * k;
+  cur_.ring += ((p.ring ? 1 : 0) - cur_.ring) * k;
+  cur_.lv += (level(now) - cur_.lv) * (1 - Math.exp(-dt * 14));
+  cur_.flash = orbMode === "interrupt" ? Math.max(0, 1 - t / .45) : 0;
+  phase += dt * cur_.speed;
+  for (const cv of document.querySelectorAll("canvas[data-orb]")) {
+    const g = cv.getContext("2d"), W = cv.width, R = W / 2, base = R * .58;
+    // An error shakes the orb once and tints it red; the end shrinks it away with the cards.
+    const shake = orbMode === "error" && t < .6 ? Math.sin(t * 40) * 6 * (1 - t / .6) : 0;
+    const gone = dismissed ? Math.min(1, t / .4) : orbMode === "ended" ? Math.min(1, Math.max(0, (t - 1.2) / .5)) : 0;
+    cv.style.transform = `translateX(${shake}px) scale(${1 - gone * .6})`;
+    cv.style.opacity = String(1 - gone);
+    const stack = cv.closest(".desk, .phone")?.querySelector(".stack");
+    if (stack) stack.style.opacity = String(1 - gone);
+    const red = orbMode === "error" ? Math.max(0, 1 - t / 1.4) : 0;
+    g.clearRect(0, 0, W, W);
+    // Added up, the colors burn to white at the core, which glows on a dark
+    // page and washes out on a light one: there they are laid over each
+    // other, deeper, so that the core keeps its color.
+    const light = document.documentElement.dataset.theme === "light";
+    g.globalCompositeOperation = light ? "source-over" : "lighter";
+    const shrink = 1 - cur_.flash * .35;
+    blobs.forEach((b, i) => {
+      const a = phase * b.sp * 2 + b.ph;
+      const orbit = base * (cur_.spread * (1 - cur_.ring) + cur_.ring * .55 + cur_.lv * .25) * shrink;
+      const x = R + Math.cos(a) * orbit, y = R + Math.sin(a * (1 + .3 * (1 - cur_.ring))) * orbit;
+      const rad = base * (cur_.size + cur_.lv * .45) * shrink;
+      const col = (light ? b.l : b.c).map((v, j) => Math.round(v + ([255, 70, 80][j] - v) * red));
+      const grd = g.createRadialGradient(x, y, 0, x, y, rad);
+      grd.addColorStop(0, `rgba(${col},${.9 * cur_.bright})`);
+      grd.addColorStop(.55, `rgba(${col},${(light ? .5 : .35) * cur_.bright})`);
+      grd.addColorStop(1, `rgba(${col},0)`);
+      g.fillStyle = grd; g.fillRect(0, 0, W, W);
+    });
+    if (cur_.flash > 0) {
+      const grd = g.createRadialGradient(R, R, 0, R, R, base * .9);
+      grd.addColorStop(0, `rgba(255,255,255,${.8 * cur_.flash})`); grd.addColorStop(1, "rgba(255,255,255,0)");
+      g.fillStyle = grd; g.fillRect(0, 0, W, W);
+    }
+    g.globalCompositeOperation = "source-over";
+  }
+  if (cur === "speaking") {
+    const n = Math.floor((now - t0) / 320);
+    document.querySelectorAll('[data-ans="1"]').forEach((a) => [...a.children].forEach((w, i) => w.classList.toggle("said", i < n)));
+    if (n > answer.split(" ").length + 8) t0 = now;
+  }
+  if ((orbMode === "interrupt" && t > 4) || (orbMode === "error" && t > 3) || (orbMode === "ended" && t > 3.5 && !dismissed)) t0 = now;
+  requestAnimationFrame(draw);
+}
+requestAnimationFrame(draw);
+</script>
+</body>
+</html>
