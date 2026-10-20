@@ -260,20 +260,50 @@ func dangerButton(c *ui.Context, label string, disabled bool) bool {
 	return b.Clicked() && !disabled
 }
 
-// backTo builds the link back to a section.
+// backTo builds the trail of a page within a section up to it, as the
+// web UI's breadcrumb: the menu holding the section, then the section's
+// page at path as a link; on the television the settings and the menu
+// are links too.
 func (a *App) backTo(c *ui.Context, label, path string) {
 	colors := style.Colors(c)
-	b := ui.ButtonBase(c).AlignSelf(ui.Start).Gap(4).AlignItems(ui.Center).Label(label)
-	b.Children(func() {
-		ui.Icon(c, style.Icon("back", false)).Size(16, 16).TextColor(style.Color(colors.AccentText))
-		t := style.Text(ui.Text(c, label), style.Type(c).Callout).FontWeight(600).TextColor(style.Color(colors.AccentText))
-		if b.Hovered() {
-			t.Underline()
+	tv := style.TV(c)
+	id, _, _ := strings.Cut(strings.TrimPrefix(path, "/settings/"), "?")
+	type step struct{ label, path string }
+	var steps []step
+	if tv {
+		steps = append(steps, step{style.T(c, "nav.settings"), "/settings"})
+	}
+	for _, m := range settingsMenus {
+		if slices.Contains(m.sections, id) {
+			s := step{label: style.T(c, m.title)}
+			if tv {
+				s.path = "/settings/" + m.id
+			}
+			steps = append(steps, s)
+		}
+	}
+	steps = append(steps, step{label, path})
+	ui.Row(c).AlignSelf(ui.Start).Gap(4).AlignItems(ui.Center).Wrap().Children(func() {
+		for i, s := range steps {
+			if i > 0 {
+				ui.Icon(c.Key(key("chevron", i)), style.Icon("forward", false)).Size(12, 12).TextColor(style.Color(colors.TextTertiary))
+			}
+			if s.path == "" {
+				style.Text(ui.Text(c.Key(key("step", i)), s.label), style.Type(c).Callout).TextColor(style.Color(colors.TextSecondary))
+				continue
+			}
+			b := ui.ButtonBase(c.Key(key("step", i))).Label(s.label)
+			b.Children(func() {
+				t := style.Text(ui.Text(c, s.label), style.Type(c).Callout).TextColor(style.Color(colors.AccentText))
+				if a.tvFocus(c, b, false) || b.Hovered() {
+					t.Underline()
+				}
+			})
+			if b.Clicked() {
+				a.router.Push(s.path)
+			}
 		}
 	})
-	if b.Clicked() {
-		a.router.Push(path)
-	}
 }
 
 func badges(c *ui.Context, u *userv1.User) {

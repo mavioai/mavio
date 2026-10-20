@@ -73,8 +73,9 @@ func sectionOf(id string) (settingsSection, bool) {
 	return settingsSections[i], true
 }
 
-// settingsMenu is a menu of the server's settings: a second level holding
-// the sections of one concern.
+// settingsMenu is a menu of the server's settings, holding the sections
+// of one concern: a group of the sidebar, a second level on the
+// television.
 type settingsMenu struct {
 	id, icon string
 	color    ui.Color
@@ -85,7 +86,7 @@ type settingsMenu struct {
 var settingsMenus = []settingsMenu{
 	{id: "media", icon: "movies", color: ui.RGB(0xFF, 0x9F, 0x0A), title: "settings.mediaMenu", sections: []string{"libraries", "storage", "transcoding"}},
 	{id: "acquiring", icon: "cloud", color: ui.RGB(0x30, 0xD1, 0x58), title: "settings.acquisitionMenu", sections: []string{"acquisition", "wanted", "downloads", "subtitles"}},
-	{id: "maintenance", icon: "admin", color: ui.RGB(0x8E, 0x8E, 0x93), title: "settings.maintenanceMenu", sections: []string{"activity", "tasks", "logs"}},
+	{id: "maintenance", icon: "admin", color: ui.RGB(0x8E, 0x8E, 0x93), title: "settings.maintenanceMenu", sections: []string{"activity", "tasks", "logs", "api-keys"}},
 }
 
 // settingsGroups are the sidebar's groups: this device's sections, then
@@ -96,7 +97,7 @@ var settingsGroups = []struct {
 	server  bool
 }{
 	{"settings.thisDevice", []string{"appearance", "playback", "subtitles-audio"}, false},
-	{"settings.serverGroup", []string{"overview", "general", "users", "devices", "api-keys", "proxies", "media", "acquiring", "maintenance"}, true},
+	{"settings.serverGroup", []string{"overview", "general", "users", "devices", "media", "acquiring", "proxies", "maintenance"}, true},
 }
 
 func menuOf(id string) (settingsMenu, bool) {
@@ -124,9 +125,6 @@ type settingsState struct {
 	server string
 	// users are the user signed in to each server.
 	users map[string]*task[*userv1.User]
-	// open tells which menus of the sidebar are open, when not the one
-	// holding the section shown.
-	open  map[string]bool
 	admin adminState
 
 	languages languagesForm
@@ -251,38 +249,53 @@ func (a *App) settingsSidebar(c *ui.Context, current string) {
 			style.Text(ui.Text(c, style.T(c, "nav.settings")), style.Type(c).Title1).TextColor(style.Color(colors.TextPrimary)).Padding(0, 4)
 			a.accountCard(c, current == "account")
 			server := a.chosenServer()
+			admin, _ := a.admin()
 			for _, g := range settingsGroups {
 				if g.server && server == nil {
 					continue
 				}
+				// The menus are flat on the desktop: each is a group of
+				// its own after the server's, its sections listed in it.
+				var sections []string
+				var menus []settingsMenu
+				for _, id := range g.entries {
+					if m, ok := menuOf(id); ok {
+						if admin {
+							menus = append(menus, m)
+						}
+						continue
+					}
+					if s, _ := sectionOf(id); !s.admin || admin {
+						sections = append(sections, id)
+					}
+				}
 				ui.Column(c.Key(g.title)).Gap(2).Children(func() {
-					style.Text(ui.Text(c, style.T(c, g.title)), style.Type(c).Caption).FontWeight(600).TextColor(style.Color(colors.TextTertiary)).Padding(0, 8, 4)
+					sidebarHeading(c, style.T(c, g.title))
 					if g.server && a.account != nil && len(a.servers) > 1 {
 						a.serverChoice(c)
 					}
-					admin, _ := a.admin()
-					for _, id := range g.entries {
-						if m, ok := menuOf(id); ok {
-							if !admin {
-								continue
-							}
-							if len(m.sections) == 1 {
-								id = m.sections[0]
-							} else {
-								a.sidebarMenu(c, m, current)
-								continue
-							}
-						}
+					for _, id := range sections {
 						s, _ := sectionOf(id)
-						if s.admin && !admin {
-							continue
-						}
 						a.sidebarLink(c, s, s.id == current)
 					}
 				})
+				for _, m := range menus {
+					ui.Column(c.Key(m.id)).Gap(2).Children(func() {
+						sidebarHeading(c, style.T(c, m.title))
+						for _, id := range m.sections {
+							s, _ := sectionOf(id)
+							a.sidebarLink(c, s, s.id == current)
+						}
+					})
+				}
 			}
 		})
 	})
+}
+
+// sidebarHeading builds the heading of a group in the sidebar.
+func sidebarHeading(c *ui.Context, title string) {
+	style.Text(ui.Text(c, title), style.Type(c).Caption).FontWeight(600).TextColor(style.Color(style.Colors(c).TextTertiary)).Padding(0, 8, 4)
 }
 
 // serverChoice builds the choice of the server whose settings are shown.
@@ -317,50 +330,6 @@ func (a *App) sidebarLink(c *ui.Context, s settingsSection, selected bool) {
 	if b.Clicked() && !selected {
 		a.replace("/settings/" + s.id)
 	}
-}
-
-// sidebarMenu builds a menu in the sidebar, opening in place to its
-// sections: open while it holds the section shown, until closed, and
-// marked while closed over it.
-func (a *App) sidebarMenu(c *ui.Context, m settingsMenu, current string) {
-	colors := style.Colors(c)
-	st := &a.settingsState
-	within := slices.Contains(m.sections, current)
-	open, set := st.open[m.id]
-	if !set {
-		open = within
-	}
-	ui.Column(c.Key(m.id)).Gap(2).Children(func() {
-		b := ui.ButtonBase(c).Height(40).Padding(0, 8).Gap(12).Radius(10).AlignItems(ui.Center).Label(style.T(c, m.title))
-		switch {
-		case within && !open:
-			b.Background(style.Color(colors.FillSelected))
-		case b.Hovered():
-			b.Background(style.Color(colors.Fill))
-		}
-		b.Children(func() {
-			sectionTile(c, m.icon, m.color)
-			style.Text(ui.Text(c, style.T(c, m.title)), style.Type(c).Body).TextColor(style.Color(colors.TextPrimary)).SingleLine().Grow(1)
-			chevron := ui.Icon(c, style.Icon("expand", false)).Size(16, 16).TextColor(style.Color(colors.TextTertiary))
-			if !open {
-				chevron.Rotate(-90)
-			}
-		})
-		if b.Clicked() {
-			if st.open == nil {
-				st.open = map[string]bool{}
-			}
-			st.open[m.id] = !open
-		}
-		if open {
-			ui.Column(c).Gap(2).Padding(0, 0, 0, 24).Children(func() {
-				for _, id := range m.sections {
-					s, _ := sectionOf(id)
-					a.sidebarLink(c, s, s.id == current)
-				}
-			})
-		}
-	})
 }
 
 // sectionTile builds a section's icon on its colored tile.

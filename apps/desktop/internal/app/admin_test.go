@@ -7,7 +7,7 @@ import (
 )
 
 func TestAdmin(t *testing.T) {
-	h := newHarness(t, true, 1280, 900)
+	h := newHarness(t, true, 1280, 1200)
 	h.tt.Key(ui.Cmd, ui.KeyComma)
 	h.settle()
 	open := func(label string) {
@@ -34,7 +34,6 @@ func TestAdmin(t *testing.T) {
 	want("Anna", "Guest", "Kids", "Admin", "Managed", "Disabled", "Never signed in")
 	h.save(shots, "settings-users")
 
-	open("Media")
 	open("Libraries")
 	want("Movies", "Movies · 2 folders", "TV Shows · 1 folder")
 	open("Scan")
@@ -44,8 +43,6 @@ func TestAdmin(t *testing.T) {
 	want("Scan started")
 	h.save(shots, "settings-libraries")
 
-	open("Media") // closes it, so that the sidebar fits Logs
-	open("Monitoring & Maintenance")
 	open("Activity")
 	want("Now Playing", "The Long Orbit", "Anna · Living Room TV · Mavio for Android TV", "Direct Play", "47:12 / 2:04:00",
 		"Metadata could not be fetched", "40 minutes ago", "Show More")
