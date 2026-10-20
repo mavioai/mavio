@@ -31,7 +31,7 @@ Mavio 是以 Go 为服务端核心的自托管媒体服务器，借鉴 Jellyfin 
 ```text
 apps/server/          Go 服务端：cmd/mavio、装配、Connect 服务实现（internal/）
 libs/proto/           契约：*.proto、buf 配置、gen/go（生成代码，已提交）
-libs/plugin/          插件 SDK 与宿主运行时（对外发布）
+libs/plugin/          插件 SDK 与宿主运行时（对外发布）；TypeScript SDK 在 ts/，Python SDK 在 python/
 libs/core/            领域模型与端口接口，只依赖标准库
 libs/store/           ent + sqlc + Atlas，SQLite 与 PostgreSQL
 libs/naming/          文件名解析（纯函数）
@@ -47,7 +47,7 @@ libs/rclone/          rclone rcd：rc 客户端、远端上的存储、媒体代
 libs/containers/      容器引擎：检测、Engine API 客户端、插件的容器依赖（P30 起）
 plugins/<name>/       插件（默认编译为 wasip1 WASM）
 plugins/agent/        AI 网关与智能体会话：由 Bun 编译的 TypeScript 子进程插件（pi-ai、pi-durable）
-plugins/voice/        语音识别与合成服务（包括 Whisper）：Go 子进程插件（P29 起）
+plugins/pipecat/      基于 Pipecat 的语音会话与用 faster-whisper 的字幕转写：Python 子进程插件（P29 起）
 plugins/solvers/      质询求解器，以容器依赖运行 FlareSolverr：Go 子进程插件（P31 起）
 libs/intent/          助手的 Rust 语法：由 libs/client-rust 链接，并构建为 WASM（intent:wasm）供 Web UI 与服务端使用（P29 起）
 apps/web/             Web UI（React + Vite），构建到 apps/server/internal/webui/dist，由服务端内嵌
@@ -63,6 +63,7 @@ libs/client-rust/     客户端的 Rust 共享核心（Cargo workspace；api 为
 libs/design/          客户端的设计系统：tokens、图标、标志、AI 提供商图标、字符串、组件规范；gen/ 为每个客户端生成
 tools/nx-go/          本地 Nx 插件：把每个 go.mod 推断为 Nx 项目并生成依赖图
 tools/nx-cargo/       本地 Nx 插件：把每个 Cargo workspace 推断为 Nx 项目
+tools/nx-uv/          本地 Nx 插件：把 uv workspace（根目录 pyproject.toml）的每个成员推断为 Nx 项目
 tools/{fixtures,testport}/  测试媒体生成、测试用例移植
 tools/plugindist/     第一方插件及其目录的打包
 tools/deps/           客户端预构建原生库（来自 mavio-deps）的锁定及其下载
@@ -72,7 +73,7 @@ tools/deps/           客户端预构建原生库（来自 mavio-deps）的锁�
 
 ## 环境与常用命令
 
-工具版本由 `mise.toml` 锁定（go、node、pnpm、bun、buf、golangci-lint、sqlc、java、gradle、jellyfin-ffmpeg）。
+工具版本由 `mise.toml` 锁定（go、node、pnpm、bun、python、uv、buf、golangci-lint、sqlc、java、gradle、jellyfin-ffmpeg）。
 
 ```bash
 mise install            # 安装锁定版本的工具链
@@ -90,7 +91,7 @@ pnpm nx show projects                              # 列出项目（名称 = 目
 
 `pnpm nx` 在 `mise exec` 下运行 Nx，因此即使 shell 没有激活 mise，各目标也使用锁定版本的工具。每个 Go 模块也能脱离 Nx 直接使用，同样经由 mise 运行：`cd libs/naming && mise exec -- go test ./...`。
 
-每个 Go 项目都有这些推断出来的 Nx 目标：`build`（`CGO_ENABLED=0`）、`test`、`bench`、`lint`、`tidy-check`（`GOWORK=off go mod tidy -diff`）。`libs/proto` 另有 `generate` 和 `buf-lint`；它生成 Go、TypeScript（`gen/ts`，即 npm 包 `@mavio/proto`）与 Rust（`gen/rust`，由 `libs/client-rust/api` 包含）。`capi`（`libs/client-rust/capi`，核心 C ABI 的 Go 绑定）同样有这两个目标，用于 `libs/client-rust/proto` 中 C ABI 的消息，其 `test` 在 `client-rust:build` 之后运行。每个 Cargo workspace 有 `build`、`test`、`bench` 与 `lint`（`cargo fmt --check` 加上 `-D warnings` 的 clippy）；`libs/intent` 另有 `wasm`（语法的 WASM 模块，输出到 `libs/intent/dist` 与 `apps/server/internal/assistant/intent/dist`），服务端与 Web UI 的 `build` 以及 `libs/client-ts` 的 `test` 依赖它。`libs/proto`、`libs/design`、`libs/plugin`、`libs/client-ts` 与 `apps/web` 有 `typecheck`（TypeScript），`libs/client-ts` 有 `test`（Vitest），`libs/plugin` 有 `test-ts`（Vitest，在其 Go `test` 之前运行），`plugins/agent`（Bun 上的 TypeScript）有 `typecheck`、`test`（`bun test`）、`build`（`dist/plugin` 中的 Bun 可执行文件），`tools/plugindist` 有 `dist`（为所有平台构建全部第一方插件及其目录到 `tools/plugindist/dist`）与 `catalog`（为本平台构建，写入供开发用服务端使用的 `plugins/catalog.json`），`apps/web` 有 `build`（Vite），服务端的 `build` 与 `dist` 依赖它，`libs/design` 还有 `generate`（`pnpm nx run design:generate`，其 `gen/` 提交入库）与 `gallery`。`apps/web` 有 `snapshot`（Playwright 运行在其容器镜像中，需要 Docker）；每个客户端的 `snapshot-record` 录制其快照测试的参考图（[docs/clients.zh-CN.md](docs/clients.zh-CN.md) §6.8）。Apple 各项目（标签 `platform:apple`）只在 macOS 上构建：`libs/apple` 有 `core`（把共享核心构建为 `build/MavioCoreFFI.xcframework`）、`ass`（从 mavio-deps 获取 libass 到 `build/Libass.xcframework`）、`generate`（把 `libs/proto` 的 Swift 消息生成到 `gen/MavioProto`，提交入库）、`build` 与 `test`（SwiftPM）、`lint`（`swift format`）以及 `snapshot`（在 iOS 模拟器上运行快照测试）；`apps/ios`、`apps/tvos` 与 `apps/macos` 有 `build`（不签名的 `xcodebuild`，iPhone 应用为模拟器的钥匙串以临时签名构建）、`lint` 与 `generate`（其提交入库的 Xcode 工程）。Android 各项目（标签 `platform:android`，需设置 `ANDROID_HOME`）运行 Gradle：`libs/android`（Nx 名称 `android-lib`）有 `core`（把共享核心构建到 `core/build/rust`）、`mpv`（从 mavio-deps 获取 libmpv 到 `player/build/mpv`）、`ffmpeg`（从 mavio-deps 获取 Media3 的 FFmpeg 扩展到 `player/build/ffmpeg`）、`build`、`test`（单元测试）、`snapshot`（比对 `ui` 的快照）与 `lint`（Android lint）；`apps/android` 与 `apps/android-tv` 有 `build`、`release`（以 R8 缩减的发布构建，带有其 `baselineprofile` 模块生成的基准配置文件）与 `lint`。详见 [docs/development.zh-CN.md](docs/development.zh-CN.md) §2。
+每个 Go 项目都有这些推断出来的 Nx 目标：`build`（`CGO_ENABLED=0`）、`test`、`bench`、`lint`、`tidy-check`（`GOWORK=off go mod tidy -diff`）。`libs/proto` 另有 `generate` 和 `buf-lint`；它生成 Go、TypeScript（`gen/ts`，即 npm 包 `@mavio/proto`）、Rust（`gen/rust`，由 `libs/client-rust/api` 包含）与 Python（`gen/python`，即 uv 包 `mavio-proto`）。`capi`（`libs/client-rust/capi`，核心 C ABI 的 Go 绑定）同样有这两个目标，用于 `libs/client-rust/proto` 中 C ABI 的消息，其 `test` 在 `client-rust:build` 之后运行。每个 Cargo workspace 有 `build`、`test`、`bench` 与 `lint`（`cargo fmt --check` 加上 `-D warnings` 的 clippy）；`libs/intent` 另有 `wasm`（语法的 WASM 模块，输出到 `libs/intent/dist` 与 `apps/server/internal/assistant/intent/dist`），服务端与 Web UI 的 `build` 以及 `libs/client-ts` 的 `test` 依赖它。`libs/proto`、`libs/design`、`libs/plugin`、`libs/client-ts` 与 `apps/web` 有 `typecheck`（TypeScript），`libs/client-ts` 有 `test`（Vitest），`libs/plugin` 有 `test-ts`（Vitest，在其 Go `test` 之前运行），`plugins/agent`（Bun 上的 TypeScript）有 `typecheck`、`test`（`bun test`）、`build`（`dist/plugin` 中的 Bun 可执行文件），uv workspace 的每个成员（`libs/plugin/python`、`plugins/pipecat`）有 `test`（pytest）、`lint`（ruff 与 pyright）与 `tidy-check`（`uv lock --check`），`plugins/pipecat` 有 `build`（`dist/plugin` 中带 python-build-standalone 及其依赖的插件目录），`tools/plugindist` 有 `dist`（为所有平台构建全部第一方插件及其目录到 `tools/plugindist/dist`）与 `catalog`（为本平台构建，写入供开发用服务端使用的 `plugins/catalog.json`），`apps/web` 有 `build`（Vite），服务端的 `build` 与 `dist` 依赖它，`libs/design` 还有 `generate`（`pnpm nx run design:generate`，其 `gen/` 提交入库）与 `gallery`。`apps/web` 有 `snapshot`（Playwright 运行在其容器镜像中，需要 Docker）；每个客户端的 `snapshot-record` 录制其快照测试的参考图（[docs/clients.zh-CN.md](docs/clients.zh-CN.md) §6.8）。Apple 各项目（标签 `platform:apple`）只在 macOS 上构建：`libs/apple` 有 `core`（把共享核心构建为 `build/MavioCoreFFI.xcframework`）、`ass`（从 mavio-deps 获取 libass 到 `build/Libass.xcframework`）、`generate`（把 `libs/proto` 的 Swift 消息生成到 `gen/MavioProto`，提交入库）、`build` 与 `test`（SwiftPM）、`lint`（`swift format`）以及 `snapshot`（在 iOS 模拟器上运行快照测试）；`apps/ios`、`apps/tvos` 与 `apps/macos` 有 `build`（不签名的 `xcodebuild`，iPhone 应用为模拟器的钥匙串以临时签名构建）、`lint` 与 `generate`（其提交入库的 Xcode 工程）。Android 各项目（标签 `platform:android`，需设置 `ANDROID_HOME`）运行 Gradle：`libs/android`（Nx 名称 `android-lib`）有 `core`（把共享核心构建到 `core/build/rust`）、`mpv`（从 mavio-deps 获取 libmpv 到 `player/build/mpv`）、`ffmpeg`（从 mavio-deps 获取 Media3 的 FFmpeg 扩展到 `player/build/ffmpeg`）、`build`、`test`（单元测试）、`snapshot`（比对 `ui` 的快照）与 `lint`（Android lint）；`apps/android` 与 `apps/android-tv` 有 `build`、`release`（以 R8 缩减的发布构建，带有其 `baselineprofile` 模块生成的基准配置文件）与 `lint`。详见 [docs/development.zh-CN.md](docs/development.zh-CN.md) §2。
 
 ## Go 约定
 
@@ -122,6 +123,12 @@ pnpm nx show projects                              # 列出项目（名称 = 目
 - 服务端记录或比较的路径以 `/` 分隔（`filepath.ToSlash`），用 `path` 处理；只在操作系统的边界用 `filepath.FromSlash` 转换，测试路径由 `filepath.ToSlash(t.TempDir())` 构造（开发指南 §5.1）。
 - 优先使用现代标准库特性：`iter.Seq` 流水线、`slices`/`maps`、`net/http` 路由模式、`http.Protocols`（h2c）。
 - 每个包都有包注释（`doc.go`）；导出标识符都要有文档注释。
+
+## Python 约定
+- Python 只用于需要其生态的子进程插件（`plugins/pipecat`）及其 SDK（`libs/plugin/python`）；服务端与各库仍用 Go。Python 与 uv 由 `mise.toml` 锁定，每个 Python 项目都是根目录 `pyproject.toml` 的 uv workspace 成员，锁定在 `uv.lock` 中。
+- 在项目中用 `uv add` 添加依赖；依赖必须在插件发布的每个平台上都能以 wheel 安装（`--only-binary :all:`），且许可证与 GPL-3.0 兼容。
+- ruff 负责格式化与检查，pyright 以 strict 模式检查类型；全程使用 asyncio，不阻塞事件循环（CPU 密集的工作放在工作进程或线程中）。
+- 使用 `libs/proto/gen/python` 的消息与 connect-python 存根；不要手写它们。
 
 ## Protobuf / Connect 约定
 - 契约源文件在 `libs/proto/mavio/<domain>/v1/`，使用 `edition = "2023"`；包名为 `mavio.<domain>.v1`。

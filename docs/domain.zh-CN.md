@@ -360,7 +360,7 @@ erDiagram
 * `Requests`：新用户获得的权限、默认配额，以及通过的请求去向（§13.6）。
 * `Metadata`（`MetadataSettings`）：服务端元数据的 `PreferredLanguage`（ISO 639-1）与 `Country`（ISO 3166-1），如 Jellyfin 的 `PreferredMetadataLanguage` 与 `MetadataCountryCode`；未设置自身语言与国家的媒体库与条目按它们取元数据，请求与发现以该语言命名作品，按该国家分级。默认为 `en` 与 `US`。
 * `Subtitles`：如何搜索、选择、保存与同步字幕（§14.3）。
-* `Assistant`（`AssistantSettings`）：助手是否开启；AI 路径的 `Model`（`ai/<提供商>/<模型>`，为空时只有快速路径）、是否使用 `CodeMode`，以及谁可以使用它（`AIAccess`：`all`、`administrators`，或 `selected` 时 `AIUsers` 中的用户，由 `AllowsAI` 判断）；请求开始新对话前对话可闲置的 `IdleTime`（一分钟到一天，30 分钟）与对话保留的 `RetentionDays`（1–3650，30）；`Memory` 是否开启；服务端的 `Recognizer`（`<插件>/<识别器>`，为空时为第一个就绪的识别器）、按语言的默认 `Voices`（`<插件>/<语音>`），以及是否把用户的 `Hints` 交给识别器（[助手 §10](assistant.zh-CN.md#10-设置与隐私)）。
+* `Assistant`（`AssistantSettings`）：助手是否开启；AI 路径的 `Model`（`ai/<提供商>/<模型>`，为空时只有快速路径）、是否使用 `CodeMode`，以及谁可以使用它（`AIAccess`：`all`、`administrators`，或 `selected` 时 `AIUsers` 中的用户，由 `AllowsAI` 判断）；请求开始新对话前对话可闲置的 `IdleTime`（一分钟到一天，30 分钟）与对话保留的 `RetentionDays`（1–3650，30）；`Memory` 是否开启；语音会话按语言的 `Recognizers` 与 `Voices`（`<插件>/<识别器>`、`<插件>/<语音>`，某语言未设置时为第一个就绪的），是否把用户的 `Hints` 交给识别器，一个轮次最长的 `Pause`（0.5–10 秒，3）、延迟执行的效果之前的 `CommitDelay`（0–3 秒，0.7）以及会话的 `SessionIdle` 时间（3–60 秒，8）（[助手 §10](assistant.zh-CN.md#10-设置与隐私)）。
 * `Validate` 检查已知取值与范围。
 
 `AccountSettings` 与它们分开保存，位于设置键 `accounts` 下：服务端登录用户的 `Mode`，即 `standalone` 或 `mavio.dev`（[账户 §2](accounts.zh-CN.md#2-服务端模式)），在服务端的安装向导选择之前为空。在 mavio.dev 模式下，`Administrator` 是认领该服务端的 Mavio 账户，未认领时为空（由 `Claimed` 判断），`Cursor` 是服务端已应用的来自 mavio.dev 的最后一项变更；其他模式的服务端两者皆无。

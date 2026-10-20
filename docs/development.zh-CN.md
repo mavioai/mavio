@@ -18,6 +18,7 @@
 | golangci-lint | Go 代码检查与格式检查 |
 | sqlc | 生成 `libs/store` 中的方言专属查询代码 |
 | protoc-gen-buffa、protoc-gen-buffa-packaging、protoc-gen-connect-rust | `libs/proto` 的 Rust 代码生成，取自其发布构建 |
+| python + uv | Python 子进程插件（`plugins/pipecat`）与 Python SDK（`libs/plugin/python`），位于根目录 `pyproject.toml` 的 uv workspace 中；uv 也获取与它们一起打包的 python-build-standalone 构建 |
 | java（Temurin）+ gradle | Android 各应用与 `libs/android` |
 | jellyfin-ffmpeg | 媒体管线、测试媒体生成与集成测试（`PATH` 上的 `ffmpeg` / `ffprobe`） |
 | rclone（mavioai/rclone） | rclone 远端上的媒体库及其集成测试（`PATH` 上的 `rclone`），取自 fork 的发布构建 |
@@ -44,7 +45,8 @@ Go 是服务端主语言；未来还会加入以 TypeScript（Web UI）、Swift�
 * Nx 对 Vite / React 有官方插件；Cargo、Gradle 与 `xcodebuild` 通过各自的目标运行；
 * Go 项目由仓库内的本地 Nx 插件 `tools/nx-go` 推断：每个 `go.mod` 自动成为一个项目，并根据 `go.mod` 中的仓库内 `require` 生成依赖图；
 * Cargo workspace 由本地 Nx 插件 `tools/nx-cargo` 推断：每个含 `[workspace]` 表的 `Cargo.toml` 成为一个项目，依赖其 `[workspace.metadata.nx]` 的 `implicitDependencies` 所列的项目（`libs/client-rust` 列出 `proto`，它包含后者生成的 Rust 代码）；
-* 用 tags 表达边界：`type:app|lib|plugin`、`lang:go|ts|rust|swift|kotlin`、`scope:server|client|shared`。TS 侧由 `@nx/enforce-module-boundaries` 约束，Go 侧由 depguard 约束（§5）。
+* Python 项目由本地 Nx 插件 `tools/nx-uv` 推断：uv workspace 的每个成员成为一个项目，依赖其 `pyproject.toml` 所需的 workspace 成员，以及提供其所导入生成的 Python 代码的 `proto`；
+* 用 tags 表达边界：`type:app|lib|plugin`、`lang:go|ts|rust|python|swift|kotlin`、`scope:server|client|shared`。TS 侧由 `@nx/enforce-module-boundaries` 约束，Go 侧由 depguard 约束（§5）。
 
 Nx 只做编排与缓存：每个 Go 模块仍然可以独立地 `go build` / `go test`。
 
@@ -68,6 +70,8 @@ Nx 只做编排与缓存：每个 Go 模块仍然可以独立地 `go build` / `g
 `package.json` 的脚本同样是目标：`libs/proto` 与 `libs/design` 有 `typecheck`（`tsc -p tsconfig.json`，TypeScript 7），`libs/design` 还有 `generate`（§4.4）。同时含 `go.mod` 与 `package.json` 的目录（如 `libs/design`）是一个项目，具有两者的目标。`libs/plugin` 也是如此：其 TypeScript SDK `@mavio/plugin` 有 `typecheck` 与 `test-ts`（Vitest），其 Go 的 `test` 依赖后者，因为名为 `test` 的脚本会取代推断出的目标。
 
 `plugins/agent` 是由 Bun（`mise.toml` 锁定的版本）运行的 TypeScript 子进程插件：它有 `typecheck`、`test`（`bun test`）、`build`（`bun build --compile`：为本平台生成一个可执行文件，与其清单一起放在 `dist/plugin` 中，即服务端可以启动的插件目录；`bun scripts/build.ts linux/arm64 <目录>` 构建其他平台的，放入另一个目录）。可执行文件自带 Bun 运行时，因此服务端无需为它安装任何东西；Bun 原样运行 `node:http2`、`node:sqlite` 与 npm 包。其依赖与 Web UI 的一样来自 pnpm workspace；没有任何东西需要其安装脚本的包在 `pnpm-workspace.yaml` 的 `allowBuilds` 中被拒绝。
+
+`tools/nx-uv` 为 uv workspace 的每个成员生成 `test`（`uv run --frozen pytest`）、`lint`（`ruff check`、`ruff format --check` 与 `pyright`）与 `tidy-check`（`uv lock --check`）；`plugins/pipecat` 另有 `build`，它在 `dist/plugin` 中为本平台组装插件目录——其清单、本地化文件、一个 python-build-standalone 的 CPython、由 `uv pip install --target` 按锁文件安装的依赖及其启动器——并像 `plugins/pipecat/scripts/build.py linux/arm64 <目录>` 那样接受其他平台，因为 uv 能安装任何平台的 wheel（`--python-platform`、`--only-binary :all:`）；它为每个依赖都有 wheel 的平台打包（[架构 §12](architecture.zh-CN.md#12-分发)）。
 
 `libs/client-rust/capi` 既是 Cargo workspace 的 crate，又是 Go 模块，即 C ABI 的 Go 绑定；作为位于 Cargo workspace 目录中的 Go 项目，它是 Nx 项目 `capi`，Nx 把其中的文件算作它自己的，因此 `client-rust` 的 Cargo 目标在输入中列出它的 Rust 源码（`libs/client-rust/project.json`）。其 `test` 在 `client-rust:build` 之后以 `CGO_ENABLED=0` 运行（与应用的构建方式一致），从 `target/debug` 加载该库；`generate` 为 `libs/client-rust/proto` 中 C ABI 的消息运行 `buf generate`，把 Go 写入 `gen/`、Rust 写入 `src/gen/`（均提交入库），`buf-lint` 检查这些消息。
 
@@ -132,6 +136,7 @@ GOWORK=off go mod tidy
 * `buf generate`（配置见 `libs/proto/buf.gen.yaml`）以 `default_api_level=API_OPAQUE` 运行 `protoc-gen-go`（通过 Getter/Setter 访问字段），以 `simple` 运行 `protoc-gen-connect-go`（handler 直接收发消息）。managed 模式把 `go_package` 设置在 `github.com/mavioai/mavio/libs/proto/gen/go` 之下。
 * 同一次运行还生成 `libs/proto/openapi/gen/mavio.openapi.json`，即服务端所提供服务的 OpenAPI 文档，由 `protoc-gen-connect-openapi` 合并 `openapi/base.yaml`（说明、Bearer 认证、普通 HTTP 媒体路由）。它通过 `go run` 以 `buf.gen.yaml` 中固定的版本运行，使其依赖不进入第三方插件所导入的 go.mod；`openapi` 包嵌入该文档，文档与 `gen/` 一样提交。
 * 同一次运行还用 `protoc-gen-es` 把 TypeScript 生成到 `gen/ts`（protobuf-es 消息，以及 connect-es 使用的服务描述；`libs/proto` 同时是导出它们的 npm 包 `@mavio/proto`），用 `protoc-gen-buffa`（消息，在 `gen/rust/proto`）与 `protoc-gen-connect-rust`（客户端，在 `gen/rust/connect`）把 Rust 生成到 `gen/rust`，每棵树的 `mod.rs` 由 `protoc-gen-buffa-packaging` 生成。`libs/client-rust` 的 crate `mavio-api` 包含这两棵 Rust 树。
+* 同一次运行还用 `protoc-gen-python` 与 `protoc-gen-pyi`（buf 托管的 protobuf 官方远程插件）以及 `protoc-gen-connect-python` 把 Python 生成到 `gen/python`，即 uv workspace 的包 `mavio-proto`，由 Python SDK 与插件导入。
 * 修改 `.proto` 后运行 `pnpm nx run proto:generate`，并**提交生成的 `gen/` 代码**。不要手动编辑 `gen/` 下的文件。
 * `buf lint` 使用 STANDARD 规则，`buf breaking` 使用 FILE 规则。已发布的字段编号不得复用；破坏性变更放入新的 `v2` 包。
 * 只读 RPC 标注 `option idempotency_level = NO_SIDE_EFFECTS;`。
@@ -157,7 +162,9 @@ GOOS=wasip1 GOARCH=wasm go build -buildmode=c-shared -o plugin.wasm .   # WASM �
 go build -o plugin .                                                     # 子进程运行时
 ```
 
-插件目录包含 `manifest.json`、`plugin.wasm` 或 `plugin`（Windows 上为 `plugin.exe`），以及可选的 `locales/<BCP 47 标签>.json`，即以英文为键的清单字符串译文（[架构 §7.5](architecture.zh-CN.md#75-服务端中的插件)）。
+Python 子进程插件使用 Python SDK（`mavio-plugin`），由其 `build` 目标构建（§2.2）。
+
+插件目录包含 `manifest.json`、`plugin.wasm` 或 `plugin`（Windows 上为 `plugin.exe`；Python 插件则为其启动器，旁边是其 `python/` 与 `site-packages/`），以及可选的 `locales/<BCP 47 标签>.json`，即以英文为键的清单字符串译文（[架构 §7.5](architecture.zh-CN.md#75-服务端中的插件)）。
 
 ### 4.4 设计系统
 `pnpm nx run design:generate` 运行 `libs/design/build/build.js`，把设计系统（[客户端 §6](clients.zh-CN.md#6-设计系统)）的源文件编译到 `libs/design/gen`：
@@ -182,6 +189,8 @@ go build -o plugin .                                                     # 子�
 ---
 
 ## 5. 代码质量
+
+Python 遵循根目录 `pyproject.toml` 中 ruff 与 pyright 的设置：Python 3.12，ruff 的格式化器及其 `E`、`F`、`I`、`B`、`UP`、`ASYNC` 与 `RUF` 规则，strict 模式的 pyright，全程使用 asyncio 且不在事件循环上做阻塞调用，使用 `libs/proto/gen/python` 的消息与存根，而非手写的。
 
 `.golangci.yml`（golangci-lint v2）作用于所有 Go 模块：
 * **检查器**：`standard` 集合，外加 `depguard`、`errorlint`、`misspell`、`nolintlint`、`unconvert`、`usestdlibvars`；生成代码不参与检查。

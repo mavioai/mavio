@@ -170,7 +170,7 @@ manifest 在 `external_id_kinds` 中声明外部 ID 类型：键、显示名称�
 ### 8.13 字幕提供者
 `SUBTITLE_PROVIDER` 为字幕获取（[架构 §14](architecture.zh-CN.md#14-字幕获取libsacquiresubtitles)）服务，如 Bazarr 的提供者为其服务。`SubtitleProviderService.ListSubtitleProviders` 列出插件实现的提供者及各自的设置（标出机密项）、是否启用、是否被限流及限流到何时；`SearchSubtitles` 接受视频的描述（名称、别名、ID、季、集与绝对集数、年份、release 名称及其来源、发布组、分辨率、编码、版本与流媒体服务、帧率、文件名、大小与 OpenSubtitles 哈希）与多种语言及其 forced 与听障要求，返回带提供者、release 名称、语言、标记以及提供者判定匹配的属性的候选，由服务端评分；`DownloadSubtitle` 返回其中之一，已从压缩包中取出。失败带有类型（请求过多、下载额度、服务不可用、认证、配置、应阻止的字幕），插件据此限流该提供者。`plugins/subtitles` 以进程插件提供它：其站点位于登录、cookie、Cloudflare 与验证码之后，有的自托管在管理员给出的地址，且它在数据目录中保存会话、限流状态与验证码服务的账号。
 
-字幕提供者不读取音频：从视频音频转写的字幕来自服务端的转写来源，使用 `SPEECH_TO_TEXT` 插件的识别器（§8.16，[架构 §14.5](architecture.zh-CN.md#145-翻译与转写)）。
+字幕提供者不读取音频：从视频音频转写的字幕来自服务端的转写来源，使用 `SPEECH_TO_TEXT` 插件的转写器（§8.16，[架构 §14.5](architecture.zh-CN.md#145-翻译与转写)）。
 
 ### 8.14 字幕翻译器
 `SUBTITLE_TRANSLATOR` 如 Lingarr 一样以翻译服务翻译字幕（[架构 §14.5](architecture.zh-CN.md#145-翻译与转写)）。`SubtitleTranslatorService.ListSubtitleTranslators` 列出插件实现的翻译器及其设置、是否启用、每次接受多少字幕条、是否保留 SubRip 标记以及可翻译的源语言与目标语言（BCP 47，为空表示任意），服务端据此排列翻译器链；`TranslateSubtitleLines` 接受翻译器、源语言与目标语言、字幕条的文字（纯文本，或对保留标记的翻译器为 SubRip 中的形式）以及电影或剧集的描述，返回同样数量的译文（空译文保留原字幕条）及署名。服务端解析字幕、分批发送字幕条并写出译文。`plugins/subtitles` 实现了 Lingarr 的翻译服务：DeepL（以账户密钥调用其 API，每次请求五十条，以 `:fx` 结尾的密钥使用免费 API）与 LibreTranslate（服务器 URL 及可选密钥，每次请求 25 条），二者的语言由服务列出并保留一天；以及如 Lingarr 所用的 GTranslate 库那样无需密钥访问的 Google 翻译（其浏览器扩展的端点，带请求令牌）、Bing Translator（其页面的端点，使用页面的凭据，每小时重新读取）、Microsoft Translator（其 Android 应用的 API，请求按该应用的方式签名）与 Yandex.Translate（其 Android 应用的 API），每次请求一条、同时四条、每批二十条，语言为 Lingarr 为它们列出的语言。语言按 BCP 47 匹配到服务的代码（`zh` 为 `zh-Hans`，`pt` 为 `pt-BR`）。限速与服务不可用如实报告，由服务端重试；被拒的密钥、用尽的配额与服务缺少的语言不重试，任何一条失败则其所在批次失败。
@@ -178,7 +178,7 @@ manifest 在 `external_id_kinds` 中声明外部 ID 类型：键、显示名称�
 ### 8.15 AI 网关与智能体会话
 `AI_GATEWAY` 代表服务端访问 AI 模型提供商，使服务端的任何功能都不持有凭据。`AiGatewayService.ListAiProviders` 列出提供商及其认证方式（API key、OAuth 登录、登录是否为订阅登录，如 Claude Pro 或 ChatGPT Plus）、已保存的凭据与是否可用；`ListAiModels` 列出其模型，以及上下文窗口、推理、图片输入与价格。`SetAiApiKey` 保存或删除 key，`LogoutAi` 删除凭据。OAuth 登录在插件中运行：`StartAiLogin` 开始登录，同一时间只运行一个——新的登录会取消仍在运行的登录，因为有些登录（如 ChatGPT 的）监听固定的本地端口——`GetAiLogin` 返回登录展示的内容（登录页面、设备码、进度）、它询问的内容以及是否结束，`WatchAiLogin` 在每次变化时以流式传送同样的内容，直到登录结束，`AnswerAiLogin` 作答，例如在提供商的重定向无法到达插件时提交浏览器被重定向到的地址；客户端经由服务端跟随登录。`CompleteAi` 请求模型给出一个回答，请求给出 schema 时回答为符合它的 JSON，并返回用量与费用；`StreamAi` 随生成以流式传送回答的文本与推理，最后给出同样的响应。失败带有 Connect 错误码：值得重试的失败（限流、过载、网络）为 unavailable，没有可用凭据为 unauthenticated，提供商或模型未知为 not found，上下文溢出为 invalid argument。
 
-`AGENT_SESSION` 持久地保存与模型的会话（`AgentSessionService`）：以模型与指令创建，可列出、连同消息读取、以 `SendAgentMessage` 继续（其请求 ID 使重试成为同一条消息）或以 `StreamAgentMessage` 继续（随回答增长以流式传送目前为止的回答，最后给出回答），以及删除。一个回答由其每次模型调用所说的话组成，各占一段：模型在调用工具前写下的文本位于下一次调用的文本之前，在流、回答与读取的消息中都是如此。每条消息与回答都在返回之前保存。
+`AGENT_SESSION` 持久地保存与模型的会话（`AgentSessionService`）：以模型与指令创建，可列出、连同消息读取、以 `SendAgentMessage` 继续（其请求 ID 使重试成为同一条消息）或以 `StreamAgentMessage` 继续（随回答增长以流式传送目前为止的回答，最后给出回答），以及删除。回答进行中以引导（steer）方式发送的消息被放在回答的下一个边界——其工具调用之后、再次询问模型之前——而不是等回答结束；`AbortAgentMessage` 中止正在进行的回答，该回答以取消结束，已完成的工具调用保留。一个回答由其每次模型调用所说的话组成，各占一段：模型在调用工具前写下的文本位于下一次调用的文本之前，在流、回答与读取的消息中都是如此。每条消息与回答都在返回之前保存。
 
 助手的会话（[助手 §6](assistant.zh-CN.md#6-ai-路径)）还具有：
 * **远程工具**：会话创建时附上服务端工具的声明——名称、描述，以及参数与结果的 JSON Schema——由模型调用、服务端运行。`WatchAgentToolCalls` 向服务端以流式传送正在等待的调用，再传送每个新调用，带有其 ID、会话、所有者、工具与参数，无论调用来自模型还是代码模式脚本；`SubmitAgentToolResult` 以给模型的文本、结构化结果与是否失败回答一个调用。调用持久地等待，直到被回答或其会话被删除；插件重启后同一个调用以同一个 ID 再次列出，服务端根据它运行过的调用的记录回答，不再运行。
@@ -188,12 +188,16 @@ manifest 在 `external_id_kinds` 中声明外部 ID 类型：键、显示名称�
 
 `plugins/agent` 以 Bun 编译的 TypeScript 子进程插件提供这两项能力，基于 [pi-ai](https://github.com/earendil-works/pi) 与 pi-durable：pi-ai 支持的所有提供商，带 API key、OAuth 登录（包括订阅登录；客户端提示风险并交由管理员决定）以及其配置添加的、由 OpenAI 兼容 API（如 Ollama 的）提供的提供商；凭据保存在其数据目录中（`credentials.json`，只有服务端的用户可读），会话保存在那里的 SQLite 数据库中，因此进行中的回答在重启后继续。pi-durable 永久保留对话的条目：插件记录已删除的会话（`deleted-sessions.json`），在下次启动、打开数据库之前删除它们的对话，连同它们拥有的对话及其文档。按 schema 的回答经由模型调用的工具给出，提供商支持时使用约束采样。远程工具是声明为可安全重放的 pi-durable 工具，它们把调用交给服务端，并在任务文档中等待结果；代码模式是 pi-durable 的代码模式扩展及其 QuickJS 沙箱；记忆是以记忆键为键的 pi-durable 文档族，`recall` 用 pi-durable 的 BM25 搜索检索它们，删除一个键的记忆会连同其会话的文档一起清除。
 
-### 8.16 语音识别与合成
-`SPEECH_TO_TEXT` 为助手识别语音（[助手 §8](assistant.zh-CN.md#8-语音)），并转写字幕（[架构 §14.5](architecture.zh-CN.md#145-翻译与转写)）。`SpeechToTextService.ListRecognizers` 列出插件实现的识别服务，每个都有名称、显示名称与设置，以及由它们配置出的识别器，每个都有 ID、管理员给它的名称、所属服务、是否启用、语言（BCP 47）、可接受的最长音频，是否给出时间戳、是否检测语言、是否翻译为英语、是否接受提示，以及管理员是否允许它转写字幕。`RecognizeSpeech` 识别放在请求中的音频（16 kHz 单声道 16 位 PCM），或从宿主 API 的 URL（`/speech/audio/{token}`，与视频开头对齐的 PCM；参数 `stream` 选择音频流，`seconds` 只取开头若干秒）读取的音频；结果为文本，或按要求为带时间的分段；可指定语言或检测语言，可转写或翻译为英语，可附带提示。`DetectSpeechLanguage` 检测前 30 秒的语言。失败带有 Connect 错误码，与 AI 网关相同。
+### 8.16 语音会话与转写
+`VOICE_SESSION` 运行助手的语音会话（[助手 §8](assistant.zh-CN.md#8-语音)）。`VoiceSessionService.ListVoiceServices` 列出插件实现的识别与合成服务，每个都有名称、显示名称与设置，以及由它们配置出的识别器与语音，每个都有 ID、管理员给它的名称、所属服务、是否启用、语言（BCP 47）、是否接受提示以及是否就绪（对本地服务而言即其模型已下载）。`OpenVoiceSession` 准备一个会话——其 ID、用户的语言、模式、识别器与语音、提示、轮次设置以及会话令牌——并返回其 WebSocket 在插件 socket 上的路径，服务端连接该路径，转接客户端的 WebSocket（[助手 §8.6](assistant.zh-CN.md#86-协议)）；`CloseVoiceSession` 结束会话。该 WebSocket 位于插件 socket 上 `/plugins/{id}/` 不路由的保留路径之下（§5），因此只有服务端能访问它。会话令牌让插件可以在宿主 API 上以会话用户的身份、在其设备上调用 `AssistantService.Ask`、`SteerAsk` 与 `AbortAsk`，仅限该会话，直到会话结束；插件无需 `act_as_users`。
 
-`TEXT_TO_SPEECH` 朗读助手的回答。`TextToSpeechService.ListVoices` 列出插件实现的合成服务及其设置，由它们配置出的合成器及其 ID、名称、所属服务与是否启用，以及已启用合成器的语音（`<合成器 ID>/<voice>`），每个都有名称（启用的合成器多于一个时，前面加上合成器的名称）与语言；`SynthesizeSpeech` 以请求指定的语速、按其合成器设置中的编码返回用某个语音朗读一段文本的语音，并带上内容类型；客户端无法播放时由服务端转换（[助手 §8.3](assistant.zh-CN.md#83-合成)），请求的 `format` 已弃用且不再设置。
+`SPEECH_TO_TEXT` 转写字幕（[架构 §14.5](architecture.zh-CN.md#145-翻译与转写)）。`SpeechToTextService.ListTranscribers` 列出插件实现的转写服务及其设置，以及由它们配置出的转写器及其 ID、名称、所属服务、是否启用与就绪、语言、可接受的最长音频以及是否翻译为英语。`TranscribeSpeech` 把从宿主 API 的 URL（`/speech/audio/{token}`，与视频开头对齐的 16 kHz 单声道 16 位 PCM；参数 `stream` 选择音频流，`seconds` 只取开头若干秒）读取的音频转写为带时间的分段；可指定语言或检测语言，可转写或翻译为英语。`DetectSpeechLanguage` 检测前 30 秒的语言。失败带有 Connect 错误码，与 AI 网关相同。
 
-`plugins/voice` 以 Go 子进程插件提供这两项能力：其设置配置识别器与合成器，每个都有服务端生成的 ID、从插件实现的服务中选取的服务（来源为 `speech-recognizers` 与 `speech-synthesizers` 的 `x-mavio-options`，列出这些服务）、管理员给它的名称、是否启用，以及其服务自己的设置，如地址、key（机密项）与模型——识别有 whisper-asr-webservice 与 OpenAI 兼容的转写 API，合成有 OpenAI 兼容的语音 API——因此同一种服务可以配置多次；服务端以插件的 ID 加上它们自己的 ID 来命名它们。whisper-asr-webservice 是从 `plugins/subtitles` 移来的 Bazarr Whisper 提供者，连同其语言映射、两个超时设置与测试用例；每段话一次性交给服务。OpenAI 兼容服务的设置是 Mavio 对它们的需要，而非 API 的每个参数：只在转录字幕与检测语言时，且设置表明模型以 `verbose_json` 回答时，才向转录 API 请求带分段与语言的 `verbose_json`，其余情况（如助手）请求普通 JSON；语音 API 接受该 API 的音频格式之一（MP3、Opus、AAC、FLAC、WAV 与 PCM，不选时由服务决定；其音频按服务给出的内容类型判断，否则按开头判断为 Ogg、FLAC、WAV、AAC 或 MP3；原始 PCM——所请求的，或两者都无法判断时的音频——放进 WAV 文件，除非内容类型给出其他采样率，否则为 24 kHz）与说话方式的指令（用于接受指令的模型）。
+`plugins/pipecat` 以基于 [Pipecat](https://github.com/pipecat-ai/pipecat) 的 Python 子进程插件提供这两项能力，用 Python SDK 构建（[架构 §7.4](architecture.zh-CN.md#74-插件-sdk-结构)）：
+* **设置**：`recognizers`、`voices` 与 `transcribers`，每个都有服务端生成的 ID、从插件实现的服务中选取的服务（来源为 `voice-recognizers`、`voice-synthesizers` 与 `transcription-services` 的 `x-mavio-options`，列出这些服务）、管理员给它的名称、是否启用，以及其服务的设置——Mavio 对它的需要，如 key（机密项）、模型、音色、区域或地址——因此同一种服务可以配置多次，服务端以插件的 ID 加上各自的 ID 来命名它们。
+* **语音服务**是 Pipecat 的 STT 与 TTS 服务，即 Pipecat 团队维护、其依赖在插件发布的每个平台上都能以 wheel 安装且不需要 PyTorch 的那些服务（[助手 §8.7](assistant.zh-CN.md#87-识别与合成服务)）。
+* **转写服务**直接调用 faster-whisper 与 OpenAI 兼容的转写 API（请求 `verbose_json`），因为 Pipecat 的服务会丢弃分段的时间；它们在插件的一个工作进程中运行，线程数有上限，一次一个视频。
+* **模型**：本地服务的模型由插件的 `download_models` 任务下载到数据目录（`models/`，Hugging Face 的缓存经 `HF_HOME` 也放在那里），经由管理员为插件指定的代理（§12.1），并报告进度；插件不接受配置其尚未下载的模型。
 
 ### 8.17 质询求解器
 `CHALLENGE_SOLVER` 解答位于 Cloudflare 或 DDoS-Guard 之后的站点的质询（[架构 §17.2](architecture.zh-CN.md#172-质询求解器)）。`ChallengeSolverService.Solve` 接受 URL、方法（GET，或带表单正文及其内容类型的 POST）、求解时经由的代理与超时，返回通过质询的 cookie（名称、值、域、路径）、取得它们时的 user agent 以及解答它的求解器。其他插件从不直接调用它：它们以代理的 ID 调用 `HostService.SolveChallenge`，由服务端解析代理后依次交给就绪的求解插件；没有时答复 unavailable。由 `plugins/solvers` 以 FlareSolverr 提供（§12）。
@@ -207,7 +211,7 @@ manifest 在 `external_id_kinds` 中声明外部 ID 类型：键、显示名称�
 | 解析器 | 可以 | 不可以 |
 | 长任务 | 至多任务超时 | 不限 |
 | 容器依赖 | 支持；其地址加入 `http_hosts` | 支持 |
-| 服务端结束时 | 随之结束 | 读到 stdin 结尾时停止（`MAVIO_PLUGIN_LIFELINE=stdin`），Go 与 TypeScript SDK 均如此 |
+| 服务端结束时 | 随之结束 | 读到 stdin 结尾时停止（`MAVIO_PLUGIN_LIFELINE=stdin`），Go、TypeScript 与 Python SDK 均如此 |
 
 ## 10. DLNA（`plugins/dlna`）
 DLNA 是第一方进程插件：它需要 UDP 组播（WASM 没有 socket）和长期运行的监听。它为服务端支持的每个平台构建，并打包进容器镜像（§10.6）。
@@ -234,7 +238,7 @@ DLNA 是第一方进程插件：它需要 UDP 组播（WASM 没有 socket）和�
 `tools/plugindist` 与其他第一方插件一起，为 Linux、macOS 与 Windows 的 amd64 和 arm64 构建插件，并把每个平台打成包含 `manifest.json`、其译文与可执行文件的目录 zip 包（[开发指南 §7](development.zh-CN.md#7-发布与版本)）。容器镜像在其插件种子目录中附带该插件（架构文档 §12）；SSDP 组播只能到达使用宿主网络的容器。
 
 ## 11. 容器依赖
-插件可以依赖以容器镜像运行的服务，例如 whisper-asr-webservice。插件在清单中声明该服务；由服务端在容器引擎上运行它，或由管理员运行它并给出地址（[架构 §16](architecture.zh-CN.md#16-容器依赖libscontainers)）。插件只看到地址，因此两种方式下插件的行为相同；没有容器引擎的管理员也可以让插件指向以其他方式运行的服务。
+插件可以依赖以容器镜像运行的服务，例如 FlareSolverr。插件在清单中声明该服务；由服务端在容器引擎上运行它，或由管理员运行它并给出地址（[架构 §16](architecture.zh-CN.md#16-容器依赖libscontainers)）。插件只看到地址，因此两种方式下插件的行为相同；没有容器引擎的管理员也可以让插件指向以其他方式运行的服务。
 
 ### 11.1 声明
 清单的 `containers` 列出依赖，每个依赖包含：
@@ -248,7 +252,7 @@ DLNA 是第一方进程插件：它需要 UDP 组播（WASM 没有 socket）和�
 * `host_access`：服务是否以名称 `host.docker.internal` 访问服务器宿主机上的服务：Docker 把它映射到宿主机（`host-gateway`），Docker Desktop 与 Podman 自行提供该名称。在 Linux 上，宿主机上的服务须监听回环接口之外的接口才能被访问。
 * `direct`：托管容器是否只直连访问站点，用于每个请求都带有代理的服务，例如 FlareSolverr：服务器不为它提供代理选择，也不给其容器设置代理（§12.1）。
 * `no_proxy_ipv4_only`：托管容器的 `NO_PROXY` 是否只列出 IPv4 网段，用于 HTTP 库处理不了 IPv6 网段的服务，例如遇到 `fc00::/7` 的 Python httpx；`::1` 这样的单个地址保留。
-* `required`：插件是否离不开它。可选依赖（例如与插件的 OpenAI 兼容识别器并列的 whisper-asr-webservice）在管理员选择之前保持 `unset`。
+* `required`：插件是否离不开它。可选依赖在管理员选择之前保持 `unset`。
 
 安装或升级插件时显示其依赖及镜像，管理员随插件一并批准；升级带来新的镜像 digest 时，插件启动时替换托管容器。
 
@@ -260,9 +264,6 @@ DLNA 是第一方进程插件：它需要 UDP 组播（WASM 没有 socket）和�
 ### 11.3 管理
 * `PluginManagementService.GetContainerRuntime` 说明是否有可用的容器引擎，以及它是否为容器提供 NVIDIA GPU，客户端只在提供时才给出 GPU 选项，`ListPluginContainers` 列出插件的依赖及运行它们的命令，`SetPluginContainer` 把某个依赖设为托管，或设为外部并给出地址。
 * 客户端标明每个依赖是必需还是可选；有引擎时提供托管；否则提供命令（`docker run` 与一个 Compose 服务），并预填它们对应的地址（[架构 §16.4](architecture.zh-CN.md#164-外部依赖)）。
-
-### 11.4 `plugins/voice`
-whisper-asr-webservice 是第一个被声明的依赖，名为 `whisper`：其 CPU 镜像，`GPU_SUPPORT_OPTIONAL` 并以其 GPU 镜像为 `gpu_image`，端口 9000 并以 `/docs` 作健康检查，faster-whisper 的 `small` 模型，模型缓存放在一个卷中，并声明 `no_proxy_ipv4_only`，因为它的 httpx 处理不了 IPv6 网段。插件被配置时通过 `HostService.ListContainers` 读取其依赖的地址；`whisper` 有地址时，插件的 `whisper` 识别器用它代替其 `endpoint` 设置。
 
 ## 12. 代理与 `plugins/solvers`
 

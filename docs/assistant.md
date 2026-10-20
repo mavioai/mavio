@@ -2,54 +2,63 @@
 
 > English | [简体中文](assistant.zh-CN.md)
 
-> The assistant of Mavio's clients: spoken or typed requests such as "play the next episode of Severance", "subtitles two seconds earlier" or "the Nolan films I haven't finished, best rated first, on the living room TV", carried out as the user. Simple commands are understood by a grammar on every platform and on the server, with no AI model; anything else goes to a model through the AI gateway with the server's tools. Speech is recognized and synthesized on the device where it can be, else by the server's speech plugins. Related: [Architecture](architecture.md) · [Plugins](plugins.md) · [Clients](clients.md) · [Television](tv.md) · [Roadmap](roadmap.md)
+> The assistant of Mavio's clients: spoken or typed requests such as "play the next episode of Severance", "subtitles two seconds earlier" or "the Nolan films I haven't finished, best rated first, on the living room TV", carried out as the user. Simple commands are understood by a grammar on every platform and on the server, with no AI model; anything else goes to a model through the AI gateway with the server's tools. Spoken requests are voice sessions: the client streams the microphone to the server, which relays it to `plugins/pipecat`, a Pipecat pipeline that detects turns, recognizes, asks the assistant and speaks the answer, barge-in included. Related: [Architecture](architecture.md) · [Plugins](plugins.md) · [Clients](clients.md) · [Television](tv.md) · [Roadmap](roadmap.md)
 
 ## 1. Principles
 
 * **Two paths, one set of actions.** The fast path (a grammar, §4) and the AI path (a model, §6) end in the same tools (§5), implemented once in the server; a command understood by the grammar does exactly what the model would do with it.
 * **Useful without AI.** A server with no AI gateway plugin, or a user without the AI path, still controls playback, finds and plays titles, switches subtitles and audio, and navigates by voice. The fast path is designed as a product of its own, not as a cache in front of the model.
-* **The device first, the server as fallback** — for recognition, synthesis and understanding alike. Audio leaves the device only when the device cannot recognize it; the grammar runs on the device and again on the server for requests that arrive as text.
-* **The server decides and acts; the client listens, speaks and plays.** Library queries, other devices, permissions and conversations are the server's; the microphone, the speaker, the screen and the client's own player are the client's.
+* **One voice pipeline, through the server.** Speech is recognized, its turns detected and answers spoken by one pipeline, `plugins/pipecat` (§8), never by the device's recognizers and voices, so that every client hears and speaks alike and turn-taking, barge-in and echo handling are built once. Clients reach it only through the server, which authenticates, relays and records; they use none of Pipecat's client SDKs. The grammar still runs on the device for typed requests, and on the server for everything else.
+* **The server decides and acts; the client captures, plays and shows.** Library queries, other devices, permissions and conversations are the server's; the microphone, the speaker, the screen and the client's own player are the client's.
 * **As the user, never more.** Every tool runs as the user who spoke, under the user's library access, parental limits and permissions; the assistant reaches nothing the user could not reach through the UI.
-* **Push to talk.** Listening starts with a button or key and ends when it is released or the speech ends; there is no wake word and no listening in the background.
+* **Listening only in a session the user opened.** A voice session starts with the assistant button or key and ends when the user closes it or stays silent; there is no wake word and no listening in the background.
+* **Voice is optional.** A server without `plugins/pipecat` has a typed assistant; the voice assistant needs that plugin and nothing else.
 * **Remember only what the server does not know.** Watch history, ratings, favorites and stream preferences are read through tools when needed; memory (§7.2) keeps only what the user says about themselves.
 
 ## 2. Overview
 
 ```mermaid
 flowchart LR
-    Mic["Microphone"] --> ASR{"Recognition<br/>device or server"}
-    ASR -->|"text"| Fast["Fast path<br/>libs/intent"]
+    Mic["Microphone<br/>echo cancelled"] -->|"PCM"| Relay
+    Typed["Typed text"] --> Fast["Fast path<br/>libs/intent"]
     Fast -->|"local intent"| Local["Client's own player<br/>and navigation"]
-    Fast -->|"intent or text"| Ask["AssistantService.Ask"]
+    Fast -->|"intent or text"| Ask
     subgraph Server["Server (apps/server/internal/assistant)"]
-        Ask --> SFast["Fast path again<br/>for text without an intent"]
+        Relay["Voice relay<br/>/assistant/voice/{token}"]
+        Ask["AssistantService.Ask<br/>Steer, Abort"] --> SFast["Fast path<br/>for text without an intent"]
         SFast -->|"matched"| Tools["Tools"]
         SFast -->|"not matched"| Agent["AGENT_SESSION<br/>remote tools, code mode, memory"]
         Agent -->|"tool calls"| Tools
         Tools --> Services["The server's services<br/>as the user"]
     end
-    Ask -->|"events: actions, answer"| Client["Client"]
-    Client --> TTS{"Synthesis<br/>device or server"} --> Speaker["Speaker"]
+    subgraph Pipecat["plugins/pipecat (VOICE_SESSION)"]
+        Pipe["VAD, Smart Turn, STT<br/>→ Mavio assistant service<br/>→ TTS"]
+    end
+    Relay <-->|"audio and events"| Pipe
+    Pipe -->|"Ask, Steer, Abort<br/>with the session token"| Ask
+    Relay -->|"answer audio, events"| Client["Client"]
+    Ask -->|"events: actions, answer"| Client
+    Client --> Speaker["Speaker"]
 ```
 
 | Part | Where | What |
 | :--- | :--- | :--- |
 | Intent parser | `libs/intent` (Rust) | The grammar of each language, normalization of numbers, durations and ordinals, the dialog state; linked by the native clients, run as one WASM module by the web UI and by the server on wazero (§4.3) |
-| Assistant service | `apps/server/internal/assistant`, `mavio.assistant.v1.AssistantService` | Requests, the server's fast path, slot resolution, the tools, conversations, the listening and speech routes |
+| Assistant service | `apps/server/internal/assistant`, `mavio.assistant.v1.AssistantService` | Requests and their steering and aborting, the server's fast path, slot resolution, the tools, conversations, voice sessions and their relay, kept speech |
 | AI path | `AGENT_SESSION` ([Plugins §8.15](plugins.md#815-ai-gateway-and-agent-sessions)), `plugins/agent` | The model with the server's tools as remote tools, code mode, memory |
-| Speech | `SPEECH_TO_TEXT` and `TEXT_TO_SPEECH` ([Plugins §8.16](plugins.md#816-speech-recognition-and-synthesis)), `plugins/voice` | Recognition and synthesis services; the same recognizers transcribe subtitles ([Architecture §14.5](architecture.md#145-translation-and-transcription)) |
-| Clients | Every client ([Clients](clients.md)) | Push to talk, the device's recognizer and voices, the assistant's panel, the client actions, the system assistants (§9) |
+| Voice | `VOICE_SESSION` ([Plugins §8.16](plugins.md#816-voice-sessions-and-transcription)), `plugins/pipecat` | The voice pipeline on Pipecat: voice activity, turn detection, recognition and synthesis services, barge-in, and the assistant as its agent (§8) |
+| Transcription | `SPEECH_TO_TEXT` ([Plugins §8.16](plugins.md#816-voice-sessions-and-transcription)), `plugins/pipecat` | Subtitles transcribed from a video's audio with timestamps ([Architecture §14.5](architecture.md#145-translation-and-transcription)), apart from the voice pipeline |
+| Clients | Every client ([Clients](clients.md)) | The voice session's capture and playback with the platform's echo cancellation, the assistant's panel, the client actions, the system assistants (§9) |
 
 ## 3. A Request
 
-1. **Listening**: the user holds the assistant button or key (§9). The client recognizes the speech itself where its recognizer is usable for the language, else streams it to the server (§8.2); partial text shows as it comes.
-2. **The client's fast path**: the final text is parsed by `libs/intent` with the client's dialog state (§4.2). An intent about the client itself — its player (pause, seek, subtitles, volume) or navigation without a target to resolve — is carried out at once, with no request.
-3. **`Ask`**: anything else is sent to `AssistantService.Ask` with the text, the intent when the grammar matched, and the context: the device's session, what it plays and where, the screen and the item shown or selected, and the UI's language. Typed requests and the system assistants' (§9.6) arrive the same way.
+1. **Input**: the user speaks in a voice session (§8) or types in the assistant's panel (§9). In a voice session, the pipeline detects the end of the user's turn, recognizes it — partial text shows as it comes — and asks the assistant with the turn's text, as the user, through the session's token (§8.4). Typed text and the system assistants' requests (§9.6) go to the client's fast path first.
+2. **The client's fast path**, for typed text only: the text is parsed by `libs/intent` with the client's dialog state (§4.2). An intent about the client itself — its player (pause, seek, subtitles, volume) or navigation without a target to resolve — is carried out at once, with no request.
+3. **`Ask`**: anything else is sent to `AssistantService.Ask` with the text, the intent when the grammar matched, and the context: the device's session, what it plays and where, the screen and the item shown or selected, and the UI's language. A voice session's turns carry the context the client last sent in the session.
 4. **The server's fast path**: text without an intent is parsed on the server by the same module. A matched intent has its slots resolved (§4.4) and becomes one tool call (§5).
 5. **The AI path**: text the grammar did not match, or an intent asking for what only a model can do, goes to the user's conversation (§7.1) when the AI path is available to the user (§10), else the server answers with suggestions (§4.5).
 6. **Events**: `Ask` streams what happens: the intent understood, each tool as it runs with a short summary, client actions (§5.2), a confirmation to ask for (§5.3), the answer's text as it grows, and the end with the conversation's ID.
-7. **Answer**: the client carries out the client actions, shows the answer and the results, and speaks the answer sentence by sentence (§8.3) when the request was spoken and the user lets it.
+7. **Answer**: the client carries out the client actions and shows the answer and the results; in a voice session the pipeline speaks the answer as its text grows, and the client plays it (§8.5).
 8. **Recording**: the request and its answer are added to the user's conversation, by the fast path too, so that a later request can refer to them ("who directs it?").
 
 ## 4. Fast Path (`libs/intent`)
@@ -153,73 +162,112 @@ For models that write code well, a conversation also offers pi-durable's code mo
 * **Using**: memories are in the instructions while they fit a budget (2,000 tokens); beyond it the instructions hold the most used and the rest are found with `recall`, which searches them with pi-durable's BM25 search.
 * **Control**: users list, edit and delete their memories in the client's settings, and can turn memory off; deleting a user deletes their memories and conversations. Managed users have memories of their own, which only they and the administrator who manages them see.
 
-## 8. Speech
+## 8. Voice
 
-### 8.1 Recognition
-* **The device's recognizer first**, where it runs on the device for the language: Apple's speech framework, Android's on-device recognizer. The client gives it the hints of `GetAssistantHints` where it takes contextual phrases: titles being watched, recently added titles, people and the user's devices.
-* **The server's recognizer** (§8.2) when the device's cannot recognize the language, needs a network service the user has not allowed, or is missing — the web UI's in most browsers (§9.2) and the desktop app's.
-* The user chooses the order in the client's settings; a recognizer that fails falls back to the other.
+### 8.1 Voice Sessions
+* A **voice session** is one spoken exchange, of one or many turns, between a user on a device and the assistant. `AssistantService.StartVoiceSession` opens one with the device's session, the language, the mode (§8.3), the audio the client plays (§8.5) and the client's context; it fails with `failed_precondition` when no `VOICE_SESSION` plugin is ready. It returns a WebSocket URL on the server, `/assistant/voice/{token}`, which the client connects to within a minute.
+* The server then opens the session in the plugin ([Plugins §8.16](plugins.md#816-voice-sessions-and-transcription)) with what the pipeline needs: the recognizer and voice of the language (§10), the turn settings, the user's hints (titles being watched, recently added titles, people, the user's devices) and the session token (§8.4). It relays the client's WebSocket to the plugin's, both ways, unchanged; the plugin is reached only by the server, on its socket.
+* A session ends when the client closes it, when the user stays silent for the settings' idle time after the last answer (8 seconds), after an hour, or when the plugin stops; the server then revokes its token. One device has at most one session; a new one ends the old.
 
-### 8.2 Listening on the Server
-* `AssistantService.StartListening` returns a WebSocket URL signed for the session, valid for a minute, with the recognizer chosen (the settings', else the first ready `SPEECH_TO_TEXT` recognizer) and the language.
-* The client sends 16 kHz mono 16-bit PCM in binary frames and the text `end` when the user releases the key; without a release, the utterance ends after a second of silence detected by Silero VAD (`libs/media/vad`), and it lasts at most 30 seconds. The server then gives the utterance to the recognizer with the user's hints, when the recognizer takes them and the settings allow, and sends back the final text and its language as JSON; a recognizer that has not answered within a minute ends the utterance with the error `recognition timed out`, which the clients show as a timeout.
-* What the user says is never stored.
+### 8.2 The Pipeline (`plugins/pipecat`)
+The plugin builds one Pipecat pipeline per session:
 
-### 8.3 Synthesis
-* **The device's voices first**: the browser's `speechSynthesis`, `AVSpeechSynthesizer`, Android's `TextToSpeech`, with a voice of the answer's language.
-* **Server voices** (`TEXT_TO_SPEECH`) when the user chooses one, or when the device has no voice for the language: `POST /assistant/speech` with the text, the voice and the language returns the audio with its content type. The synthesizer speaks in the encoding of its settings; the client names the encodings it plays — `opus` (in Ogg), `aac` (in ADTS), `mp3`, `flac` and `wav` — and when the synthesizer's is not among them the server converts it with ffmpeg to the most balanced of them, Opus first, then AAC, MP3 and the lossless ones. A client naming none gets the synthesizer's.
-* Answers are spoken a sentence at a time as the text arrives, so speech starts before the answer ends; speaking stops when the user talks or presses the button again.
-* **Kept speech**: what server voices speak is kept with the answer in its conversation. The client names an ID of its own for the answer's speech in `AskRequest.speech_id` and, with each sentence's place, in its `POST /assistant/speech` requests; the server holds the sentences in memory until the answer's conversation is known, for at most ten minutes, then writes each to a file in the speech folder (`speech-dir`, `speech/` in the server's home), in a folder per conversation holding a folder per answer named after its text, so that an answer spoken again replaces its speech. A sentence converted is kept in both encodings. `GetAssistantConversation` lists each answer's sentences as URLs, which serve the conversation's user alone, with a `formats` query naming the encodings the client plays: a sentence kept in one of them is served as it is, else it is converted as above and kept in that encoding too, for the next time; deleting a conversation, by the user or after the retention, deletes its speech. What the device's voices speak is not kept.
+```text
+WebSocket in (16 kHz PCM, events)
+ → Silero VAD
+ → STT service of the recognizer
+ → user turn processor: start and stop strategies (§8.3)
+ → Mavio assistant service: Ask, Steer, Abort (§8.4)
+ → sentence aggregator
+ → TTS service of the voice
+ → WebSocket out (PCM, events)
+```
 
-### 8.4 Speech Plugins
-`SPEECH_TO_TEXT` and `TEXT_TO_SPEECH` ([Plugins §8.16](plugins.md#816-speech-recognition-and-synthesis)) are provided by `plugins/voice`, a Go process plugin whose recognizers and synthesizers the administrator enables and configures in its settings; the server names a recognizer `<plugin>/<recognizer>` and a voice `<plugin>/<synthesizer>/<voice>`:
-* recognition: whisper-asr-webservice, and the OpenAI-compatible transcription API (OpenAI, Groq, speaches with faster-whisper, and other servers serving it);
-* synthesis: the OpenAI-compatible speech API (OpenAI, speaches with Kokoro or Piper), with the voices its settings list.
+* **Transport**: Pipecat's FastAPI WebSocket transport with a serializer of Mavio's protocol (§8.6), not RTVI. Its output paces the answer's audio as a real-time device would, so that Pipecat knows what was spoken when the user interrupts.
+* **Services**: the recognizer's and the voice's Pipecat services, configured in the plugin's settings (§8.7); a segmented recognizer, such as Whisper or the OpenAI transcription API, is given each utterance the VAD delimits, a streaming one the audio as it comes.
+* **No LLM service.** The pipeline's agent is the assistant itself, reached through `Ask`, so that the fast path, the tools, permissions, conversations and memory stay the server's and spoken and typed requests take the same paths. Pipecat's LLM services, context aggregators and speech-to-speech models are not used.
 
-Each recognizer tells its languages and longest audio, and whether it gives timestamps, detects the language, translates to English and takes hints; the server uses each only for what it can do.
+### 8.3 Turns
+* **Start**: Silero VAD (0.2 seconds of speech) starts the user's turn. While the assistant speaks, a turn starts only after at least two recognized words, so that a cough, "mm" or the assistant's own echo does not interrupt it.
+* **End**: after 0.2 seconds of silence, Smart Turn v3 — a model of 8 MB run on the CPU in 10–65 ms, bundled with Pipecat, for 23 languages including Chinese — reads the last 8 seconds of the turn's audio and says whether the user has finished. A finished turn ends at once; an unfinished one waits until the user speaks again or for the settings' longest pause (3 seconds).
+* **Modes**: `conversation`, the default, listens hands-free between answers, with barge-in, until the session ends (§8.1); `push_to_talk` listens while the button or key is held, the client sending `ptt_start` and `ptt_end` (§8.6), and the release ends the turn, for television remotes and noisy rooms; `dictation` sends the final transcripts of its turns and asks and speaks nothing, for the text fields the user dictates into ([Clients §6.3.26](clients.md#6326-ai-conversations)).
+* **Barge-in**: a turn starting while the assistant speaks interrupts it: the pipeline stops speaking, the client drops the audio it holds (`interrupt`), and the run of the answer is aborted (§8.4).
 
-### 8.5 Subtitles
-Transcribing subtitles uses the same recognizers ([Architecture §14.5](architecture.md#145-translation-and-transcription)): a recognizer with timestamps that the administrator lets transcribe subtitles (its `subtitles` setting) transcribes a video's audio into a subtitle, so that any service configured for the assistant also transcribes subtitles, and Whisper is one of them rather than a subtitle provider of its own. The server's subtitle source `transcription` offers the subtitles of providers `transcription/<recognizer>`.
+### 8.4 The Assistant as the Pipeline's Agent
+The Mavio assistant service is a Pipecat `AIService` modeled on Pipecat's OpenClaw gateway: it handles only frames of its own, so the rest of the pipeline decides how text becomes speech.
+* **Run**: each finished turn sends its text to `AssistantService.Ask` as a run, one at a time per session. The run's events come back as frames: started, the answer's text as it grows, client actions, a confirmation, and exactly one end — completed, cancelled or failed.
+* **Session token**: the server gives the plugin a token for each session, which acts as the session's user on the session's device for `Ask`, `SteerAsk` and `AbortAsk` of that session alone, until the session ends. The plugin calls them on the host API with that token and needs no permission to act as users.
+* **Steer**: a user who goes on speaking after a turn ended, before the answer is spoken, has not been interrupted but has paused. The new turn's text steers the run (`SteerAsk`): a fast-path run is parsed again with the joined text, and an AI-path run gets it as a steering message, which pi-durable places at the run's next boundary ([Plugins §8.15](plugins.md#815-ai-gateway-and-agent-sessions)).
+* **Held effects**: tools and client actions that change something — `play`, `control`, `set_streams`, `set_user_data`, `add_to_playlist`, `request_title`, navigation — are held until the turn has stood for the settings' commit delay (0.7 seconds) with the user silent; tools that only read run at once. A steered run drops what it held and calls again, so "play Interstellar… no, Inception" plays only Inception.
+* **Abort**: barge-in after the answer started, or the session ending, aborts the run (`AbortAsk`): the fast path stops, the AI path aborts its conversation's run in pi-durable, and the run ends cancelled. What was done stays done; the interrupting turn is a new run.
+* **Confirmation** (§5.3): the pipeline speaks the sentence and the user's next turn answers it, as the grammar's dialog intents ("yes", "cancel"), or the panel's buttons do.
+
+### 8.5 Audio and Echo
+* **Up**: 16 kHz mono 16-bit PCM in binary frames of 20 ms. The client captures it with the platform's echo cancellation, noise suppression and gain control on, so that the assistant does not hear itself; the plugin needs no echo cancellation of its own, and no WebRTC.
+* **Down**: the answer's speech as 16-bit PCM in binary frames, at the rate the session's `ready` event gives (24 kHz).
+* **Platforms** (§9): the browser's `getUserMedia` constraints `echoCancellation`, `noiseSuppression` and `autoGainControl`; on Apple, `AVAudioEngine` with voice processing on its input node, which cancels the echo of what the engine plays; on Android, `AudioRecord` from `VOICE_COMMUNICATION` with `AcousticEchoCanceler` and `NoiseSuppressor`, playing through an `AudioTrack` with `USAGE_VOICE_COMMUNICATION`.
+
+### 8.6 Protocol
+The WebSocket carries binary audio frames (§8.5) and JSON events, `{"type": …}`, the same between the client and the server and between the server and the plugin:
+
+| Direction | Events |
+| :--- | :--- |
+| Client → | `ptt_start`, `ptt_end` (push to talk); `context` (the screen, the item shown, what plays, when it changes); `text` (a typed turn in the session); `played` (the answer's audio the client has played, by answer ID, after an `interrupt`); `close` |
+| → Client | `ready` (session ID, the rates of the audio); `user_started`, `user_stopped`; `transcript` (partial or final text, language); `interrupt` (drop the audio held); `run` (run ID), `intent`, `tool`, `action` (a client action, §5.2), `confirm`, `answer` (the answer's text as it grows, with its ID); `bot_started`, `bot_stopped`; `end` (completed, cancelled or failed, with the conversation's ID); `error` |
+
+The relay reads only `answer`, `end` and the answer's audio, to keep speech (§8.8).
+
+### 8.7 Recognition and Synthesis Services
+* The plugin's settings configure **recognizers** and **voices** from the Pipecat services it bundles, each with an ID the server generates, its service, a name the administrator gives it, whether it is enabled, and its service's settings — key (a secret), model, voice, region or address — of which the plugin declares what Mavio needs, not every parameter of the service. A service may be configured more than once, as two OpenAI-compatible servers.
+* **Bundled** are the services the Pipecat team maintains whose dependencies install as wheels on every platform the plugin ships for, without PyTorch: Whisper through faster-whisper, Kokoro and Piper on the server's CPU, MLX Whisper on Apple silicon; and the cloud services such as OpenAI and OpenAI-compatible servers (speaches, Groq), Deepgram, AssemblyAI, Azure, Google, ElevenLabs, Cartesia, Soniox and Speechmatics. Community packages, and services needing PyTorch or a vendor's SDK under a licence of its own, are not bundled.
+* **Local models** — Whisper's from Hugging Face, Kokoro's and Piper's from their releases — are downloaded into the plugin's data folder by a plugin task, through the server's proxy, when an administrator chooses them, with its progress; a recognizer or voice whose model is missing is not ready. Whisper's sizes run from tiny (75 MB) to large-v3 (3 GB), with large-v3-turbo (1.6 GB) between.
+* **Hints** go to the services that take them: Deepgram's key terms, the prompts of Whisper and the OpenAI transcription API, the phrases of Azure and Google.
+* **Ready**: `ListVoiceServices` lists the services, the recognizers and voices configured, with their languages, and whether each is ready, so that the assistant settings offer them (§10).
+
+### 8.8 Kept Speech
+The server keeps what the assistant spoke with the answer in its conversation: it collects each answer's audio as it relays it, cut where the client was interrupted, and when the answer ends encodes it with ffmpeg as Opus, in a file of the speech folder (`speech-dir`, `speech/` in the server's home), in a folder per conversation holding a file per answer. `GetAssistantConversation` lists each answer's speech as a URL, which serves the conversation's user alone, with a `formats` query naming the encodings the client plays — `opus` (in Ogg), `aac` (in ADTS), `mp3`, `flac` and `wav`; speech kept in none of them is converted by ffmpeg to the most balanced, Opus first, then AAC, MP3 and the lossless ones, and kept in that encoding too. Deleting a conversation, by the user or after the retention, deletes its speech. What the user said is never kept.
+
+### 8.9 Subtitles
+Transcribing subtitles is not a voice session: Pipecat's recognition services join an utterance's segments and drop their times. `plugins/pipecat` provides `SPEECH_TO_TEXT` with **transcribers** of its own ([Architecture §14.5](architecture.md#145-translation-and-transcription)): faster-whisper called directly, with segments, word times, language detection and its VAD filter, on the models the voice pipeline downloads too; and the OpenAI-compatible transcription API answering `verbose_json`. Transcription runs in a worker process of the plugin with a bounded number of threads, one video at a time, so that voice sessions keep their latency while a film is transcribed. The server's subtitle source `transcription` offers the subtitles of providers `transcription/<transcriber>`.
 
 ## 9. Clients
 
 ### 9.1 Common to Every Client
-* **The assistant's panel** opens over any screen, the player included: the text heard as it grows, the answer, results as cards to choose from, and a pending confirmation with Confirm and Cancel; it takes typed requests too. It closes on its own a few seconds after an answer with nothing to choose.
-* **Push to talk** with the assistant button: held to talk, or tapped to talk until the speech ends.
-* **Settings**: whether answers are spoken, the voice, the order of recognizers, memory and its list, and the conversations; the server's assistant settings are in its AI settings for administrators ([Clients §6.3.13](clients.md#6313-ai)).
-* **The client's fast path** runs before `Ask` (§3), so that player commands take effect with no request and no network.
+* **The assistant's panel** opens over any screen, the player included: the text heard as it grows, the answer, results as cards to choose from, and a pending confirmation with Confirm and Cancel; it takes typed requests too. In a voice session it shows whether the assistant listens, thinks or speaks; it closes on its own a few seconds after the session ends with nothing to choose.
+* **Voice sessions** (§8): the assistant button tapped starts a conversation, held talks while held (push to talk); tapped again, it ends the session. Clients capture and play with the platform's echo cancellation (§8.5), drop the audio they hold on `interrupt`, and carry out `action` events as `Ask`'s client actions. Without a ready `VOICE_SESSION` plugin the button opens the panel for typed requests.
+* **Settings**: memory and its list, and the conversations; the server's assistant settings are in its AI settings for administrators ([Clients §6.3.13](clients.md#6313-ai)).
+* **The client's fast path** runs before `Ask` for typed requests (§3), so that player commands take effect with no request and no network.
 
 ### 9.2 Web (`apps/web`), First
 * **Microphone**: `getUserMedia`, which browsers grant only to secure pages — a server's HTTPS address (its `mavio.site` certificate, [Accounts](accounts.md)), app.mavio.dev or `localhost`. Over plain HTTP the panel takes typed requests only and says why.
-* **Recognition**: the server's when a `SPEECH_TO_TEXT` plugin is ready, else the browser's `SpeechRecognition` where it exists, which most browsers run on their maker's servers; the user may put the browser's first. Audio is captured by an `AudioWorklet` that resamples it to 16 kHz PCM for the WebSocket.
-* **Synthesis**: `speechSynthesis`, or server voices played from the speech route a sentence at a time; the encodings named to the server are those `canPlayType` says the browser plays.
+* **Capture and playback**: an `AudioWorklet` resamples the echo-cancelled microphone to 16 kHz PCM for the WebSocket; the answer's PCM plays through the same `AudioContext`, whose output is what the browser's echo cancellation removes. Kept speech plays in the encodings `canPlayType` says the browser plays.
 * **Input**: the assistant button in the sidebar (its header, or the rail after search), the compact header, the television's top bar and the player's controller, shown when the server's assistant is on; and V held to talk outside text fields. In television mode the button is focusable like any other.
-* **The fast path** runs the grammar's WASM module, bundled with the UI, before `Ask`: going home, back and to the settings, and, while the player is open, pausing, resuming, stopping, seeking, restarting, speed, volume, mute, full screen and subtitles off, answered with the grammar's replies.
+* **The fast path** runs the grammar's WASM module, bundled with the UI, before `Ask` for typed requests: going home, back and to the settings, and, while the player is open, pausing, resuming, stopping, seeking, restarting, speed, volume, mute, full screen and subtitles off, answered with the grammar's replies.
 
 ### 9.3 Apple (`apps/ios`, `apps/macos`, `apps/tvos`)
-* **iPhone, iPad and Mac**: the speech framework's on-device recognition with the hints as contextual strings, `AVSpeechSynthesizer`, and App Intents, so that Siri, Shortcuts and Spotlight play titles and control playback in Mavio through `Ask`.
-* **Apple TV**: the Siri Remote's microphone belongs to the system, so the assistant's field takes the system's dictation; App Intents serve Siri where tvOS offers them.
+* **iPhone, iPad and Mac**: voice sessions captured and played by one `AVAudioEngine` with voice processing on, in an audio session of mode `voiceChat`; App Intents, so that Siri, Shortcuts and Spotlight play titles and control playback in Mavio through `Ask`.
+* **Apple TV**: the Siri Remote's microphone belongs to the system, so the assistant's field takes the system's dictation as typed text; App Intents serve Siri where tvOS offers them.
 
 ### 9.4 Android (`apps/android`, `apps/android-tv`)
-* **Phones and tablets**: `SpeechRecognizer`, on device where available, with the hints as biasing strings, and `TextToSpeech`.
-* **Android TV and Google TV**: the remote's microphone through `SpeechRecognizer` in the assistant's panel, opened by the remote's search or assistant key while the app is in front; the system's voice search reaches the app through its search intents and `MediaSession`'s play-from-search, which go through `Ask`.
+* **Phones and tablets**: voice sessions captured by `AudioRecord` from `VOICE_COMMUNICATION` with `AcousticEchoCanceler` and `NoiseSuppressor`, played by `AudioTrack` with `USAGE_VOICE_COMMUNICATION`.
+* **Android TV and Google TV**: push to talk with the remote's microphone, captured by `AudioRecord` while the remote's search or assistant key is held with the app in front; the system's voice search reaches the app through its search intents and `MediaSession`'s play-from-search, which go through `Ask`.
 
 ### 9.5 Desktop (`apps/desktop`)
-The server's recognizer and voices, with the microphone captured by the platform's audio API; without a speech plugin, typed requests only.
+Voice sessions with the microphone captured by the platform's audio API with its echo cancellation; without a `VOICE_SESSION` plugin, typed requests only.
 
 ### 9.6 System Assistants
-Requests from Siri, Shortcuts, Android's voice search and play-from-search arrive at the app as text or as a title to play; the app sends them to `Ask` as its own requests are, so that they take the same paths.
+Requests from Siri, Shortcuts, Android's voice search and play-from-search arrive at the app as text or as a title to play; the app sends them to `Ask` as its own typed requests are, so that they take the same paths.
 
 ## 10. Settings and Privacy
 
-* **The server's assistant settings**: whether the assistant is on, its model (`ai/<provider>/<model>`) and whether code mode is used with it, which users may use the AI path, the idle time and retention of conversations, whether memory is on, the recognizer and the default voice of each language, and whether hints are sent to recognizers.
-* **The user's settings** (§9.1) are kept on the device, the voice and the order of recognizers per device.
-* **Privacy**: what the user says is never stored, and leaves the device only for the server's recognizer and, through it, the service the administrator configured. Requests and answers are stored only in conversations, with the speech of answers that server voices spoke (§8.3), deleted after the retention time or by the user; memories are visible to the user and deleted with them. The AI path's tokens and cost are counted per conversation and shown with it.
+* **The server's assistant settings**: whether the assistant is on, its model (`ai/<provider>/<model>`) and whether code mode is used with it, which users may use the AI path, the idle time and retention of conversations, whether memory is on; and for voice, the recognizer and the voice of each language (`<plugin>/<recognizer>`, `<plugin>/<voice>`), whether recognizers get the users' hints, the longest pause of a turn, the commit delay and the idle time of a session (§8.3, §8.4, §8.1).
+* **Privacy**: what the user says is never stored; it leaves the server only for the recognition service the administrator configured, and never when that service runs in the plugin, as Whisper does. Requests and answers are stored only in conversations, with the speech of the answers (§8.8), deleted after the retention time or by the user; memories are visible to the user and deleted with them. The AI path's tokens and cost are counted per conversation and shown with it.
 
 ## 11. Testing
 
 * The fast path's cases on its three hosts (§4.6); the slot resolver against a seeded library, with names misrecognized as homophones.
-* The tools through `Ask` with fake devices, as the remote control's tests do; confirmation, cancellation and expiry.
-* An end-to-end test with the built `plugins/agent` and a model served by a fake OpenAI-compatible API on the loopback interface: a request the grammar does not match becomes tool calls run as the user, one through code mode, and a tool call interrupted by restarting the plugin is answered once.
-* Listening and speech with `plugins/voice` and fake whisper-asr-webservice, OpenAI-compatible and streaming services; subtitle transcription as in [Architecture §14.5](architecture.md#145-translation-and-transcription).
+* The tools through `Ask` with fake devices, as the remote control's tests do; confirmation, cancellation and expiry; `SteerAsk` with held effects dropped, and `AbortAsk`.
+* An end-to-end test with the built `plugins/agent` and a model served by a fake OpenAI-compatible API on the loopback interface: a request the grammar does not match becomes tool calls run as the user, one through code mode, a run steered and a run aborted, and a tool call interrupted by restarting the plugin is answered once.
+* `plugins/pipecat`'s pipeline under pytest with Pipecat's test utilities, its recognition and synthesis services faked: turns ending on Smart Turn and on the longest pause, steer within the commit delay, barge-in aborting the run, push to talk, and the protocol's serializer; Smart Turn and Silero against recorded speech fixtures ([Testing](testing.md)).
+* The relay with a fake plugin: tokens, the session's end and revocation, kept speech cut at an interruption; subtitle transcription as in [Architecture §14.5](architecture.md#145-translation-and-transcription).
 * Each client's panel in its snapshot tests ([Clients §6.8](clients.md#68-galleries-and-visual-review)).

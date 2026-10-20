@@ -31,7 +31,7 @@ Current phases: **P6 server assembly and distribution**, **P16 acquisition data 
 ```text
 apps/server/          Go server: cmd/mavio, wiring, Connect service implementations (internal/)
 libs/proto/           Contracts: *.proto, buf config, gen/go (generated code, committed)
-libs/plugin/          Plugin SDK and host runtimes (published)
+libs/plugin/          Plugin SDK and host runtimes (published); TypeScript SDK in ts/, Python SDK in python/
 libs/core/            Domain model and port interfaces; standard library only
 libs/store/           ent + sqlc + Atlas, SQLite and PostgreSQL
 libs/naming/          File name parsing (pure functions)
@@ -47,7 +47,7 @@ libs/rclone/          rclone rcd: rc client, storage on remotes, media proxy, rc
 libs/containers/      Container engines: detection, Engine API client, plugins' container dependencies (from P30)
 plugins/<name>/       Plugins (built as wasip1 WASM by default)
 plugins/agent/        AI gateway and agent sessions: a TypeScript process plugin compiled by Bun (pi-ai, pi-durable)
-plugins/voice/        Speech recognition and synthesis services, Whisper among them: a Go process plugin (from P29)
+plugins/pipecat/      Voice sessions on Pipecat and subtitle transcription with faster-whisper: a Python process plugin (from P29)
 plugins/solvers/      Challenge solvers, FlareSolverr as a container dependency: a Go process plugin (from P31)
 libs/intent/          The assistant's grammar in Rust: linked by libs/client-rust, built as WASM (intent:wasm) for the web UI and the server (from P29)
 apps/web/             Web UI (React + Vite), built into apps/server/internal/webui/dist and embedded by the server
@@ -63,6 +63,7 @@ libs/client-rust/     Shared Rust core of the clients (Cargo workspace; api = ge
 libs/design/          Design system of the clients: tokens, icons, the logo, the AI providers' logos, strings, component specifications; gen/ for every client
 tools/nx-go/          Local Nx plugin: infers an Nx project from every go.mod and builds the dependency graph
 tools/nx-cargo/       Local Nx plugin: infers an Nx project from every Cargo workspace
+tools/nx-uv/          Local Nx plugin: infers an Nx project from every member of the uv workspace (root pyproject.toml)
 tools/{fixtures,testport}/  Test media generation, test case porting
 tools/plugindist/     Packaging of the first-party plugins and their catalog
 tools/deps/           The pins of the clients' prebuilt native libraries from mavio-deps, and their download
@@ -72,7 +73,7 @@ Libraries under `libs/` are named by domain; a single library can be both a Go m
 
 ## Environment and Common Commands
 
-Tool versions are pinned in `mise.toml` (go, node, pnpm, bun, buf, golangci-lint, sqlc, java, gradle, jellyfin-ffmpeg).
+Tool versions are pinned in `mise.toml` (go, node, pnpm, bun, python, uv, buf, golangci-lint, sqlc, java, gradle, jellyfin-ffmpeg).
 
 ```bash
 mise install            # Install the pinned toolchain
@@ -90,7 +91,7 @@ pnpm nx show projects                              # List projects (name = direc
 
 `pnpm nx` runs Nx under `mise exec`, so targets use the pinned tools even in a shell that does not activate mise. Every Go module also works without Nx, run under mise the same way: `cd libs/naming && mise exec -- go test ./...`.
 
-Every Go project has these inferred Nx targets: `build` (`CGO_ENABLED=0`), `test`, `bench`, `lint`, `tidy-check` (`GOWORK=off go mod tidy -diff`). `libs/proto` additionally has `generate` and `buf-lint`; it generates Go, TypeScript (`gen/ts`, the npm package `@mavio/proto`) and Rust (`gen/rust`, included by `libs/client-rust/api`). `capi` (`libs/client-rust/capi`, the Go binding of the core's C ABI) has them too, for the C ABI's messages in `libs/client-rust/proto`, and its `test` runs after `client-rust:build`. Every Cargo workspace has `build`, `test`, `bench` and `lint` (`cargo fmt --check` + clippy with `-D warnings`); `libs/intent` also has `wasm` (the grammar's WASM module, into `libs/intent/dist` and `apps/server/internal/assistant/intent/dist`), on which the server's and the web UI's `build` and `libs/client-ts`'s `test` depend. `libs/proto`, `libs/design`, `libs/plugin`, `libs/client-ts` and `apps/web` have `typecheck` (TypeScript), `libs/client-ts` has `test` (Vitest), `libs/plugin` has `test-ts` (Vitest, run before its Go `test`), `plugins/agent` (TypeScript on Bun) has `typecheck`, `test` (`bun test`), `build` (a Bun executable in `dist/plugin`), `tools/plugindist` has `dist` (every first-party plugin for every platform, and their catalog, in `tools/plugindist/dist`) and `catalog` (for this platform, into `plugins/catalog.json` for a development server), `apps/web` has `build` (Vite), on which the server's `build` and `dist` depend, and `libs/design` has `generate` (`pnpm nx run design:generate`, whose `gen/` is committed) and `gallery`. `apps/web` has `snapshot` (Playwright in its container image, with Docker); every client's `snapshot-record` records the references of its snapshot tests ([docs/clients.md](docs/clients.md) §6.8). The Apple projects (tag `platform:apple`) build only on macOS: `libs/apple` has `core` (builds the shared core into `build/MavioCoreFFI.xcframework`), `ass` (fetches libass from mavio-deps into `build/Libass.xcframework`), `generate` (the Swift messages of `libs/proto` into `gen/MavioProto`, committed), `build` and `test` (SwiftPM), `lint` (`swift format`) and `snapshot` (the snapshot tests on the iOS simulator); `apps/ios`, `apps/tvos` and `apps/macos` have `build` (unsigned `xcodebuild`, the iPhone app's signed ad hoc for the simulator's Keychain), `lint` and `generate` (their committed Xcode projects). The Android projects (tag `platform:android`, with `ANDROID_HOME` set) run Gradle: `libs/android` (Nx name `android-lib`) has `core` (builds the shared core for Android into `core/build/rust`), `mpv` (fetches libmpv from mavio-deps into `player/build/mpv`), `ffmpeg` (fetches Media3's FFmpeg extension from mavio-deps into `player/build/ffmpeg`), `build`, `test` (unit tests), `snapshot` (compares the snapshots of `ui`) and `lint` (Android lint); `apps/android` and `apps/android-tv` have `build`, `release` (an R8-shrunk release build, with the baseline profile their `baselineprofile` module generates) and `lint`. See [docs/development.md](docs/development.md) §2.
+Every Go project has these inferred Nx targets: `build` (`CGO_ENABLED=0`), `test`, `bench`, `lint`, `tidy-check` (`GOWORK=off go mod tidy -diff`). `libs/proto` additionally has `generate` and `buf-lint`; it generates Go, TypeScript (`gen/ts`, the npm package `@mavio/proto`), Rust (`gen/rust`, included by `libs/client-rust/api`) and Python (`gen/python`, the uv package `mavio-proto`). `capi` (`libs/client-rust/capi`, the Go binding of the core's C ABI) has them too, for the C ABI's messages in `libs/client-rust/proto`, and its `test` runs after `client-rust:build`. Every Cargo workspace has `build`, `test`, `bench` and `lint` (`cargo fmt --check` + clippy with `-D warnings`); `libs/intent` also has `wasm` (the grammar's WASM module, into `libs/intent/dist` and `apps/server/internal/assistant/intent/dist`), on which the server's and the web UI's `build` and `libs/client-ts`'s `test` depend. `libs/proto`, `libs/design`, `libs/plugin`, `libs/client-ts` and `apps/web` have `typecheck` (TypeScript), `libs/client-ts` has `test` (Vitest), `libs/plugin` has `test-ts` (Vitest, run before its Go `test`), `plugins/agent` (TypeScript on Bun) has `typecheck`, `test` (`bun test`), `build` (a Bun executable in `dist/plugin`), every member of the uv workspace (`libs/plugin/python`, `plugins/pipecat`) has `test` (pytest), `lint` (ruff and pyright) and `tidy-check` (`uv lock --check`), and `plugins/pipecat` has `build` (a plugin folder with python-build-standalone and its dependencies in `dist/plugin`), `tools/plugindist` has `dist` (every first-party plugin for every platform, and their catalog, in `tools/plugindist/dist`) and `catalog` (for this platform, into `plugins/catalog.json` for a development server), `apps/web` has `build` (Vite), on which the server's `build` and `dist` depend, and `libs/design` has `generate` (`pnpm nx run design:generate`, whose `gen/` is committed) and `gallery`. `apps/web` has `snapshot` (Playwright in its container image, with Docker); every client's `snapshot-record` records the references of its snapshot tests ([docs/clients.md](docs/clients.md) §6.8). The Apple projects (tag `platform:apple`) build only on macOS: `libs/apple` has `core` (builds the shared core into `build/MavioCoreFFI.xcframework`), `ass` (fetches libass from mavio-deps into `build/Libass.xcframework`), `generate` (the Swift messages of `libs/proto` into `gen/MavioProto`, committed), `build` and `test` (SwiftPM), `lint` (`swift format`) and `snapshot` (the snapshot tests on the iOS simulator); `apps/ios`, `apps/tvos` and `apps/macos` have `build` (unsigned `xcodebuild`, the iPhone app's signed ad hoc for the simulator's Keychain), `lint` and `generate` (their committed Xcode projects). The Android projects (tag `platform:android`, with `ANDROID_HOME` set) run Gradle: `libs/android` (Nx name `android-lib`) has `core` (builds the shared core for Android into `core/build/rust`), `mpv` (fetches libmpv from mavio-deps into `player/build/mpv`), `ffmpeg` (fetches Media3's FFmpeg extension from mavio-deps into `player/build/ffmpeg`), `build`, `test` (unit tests), `snapshot` (compares the snapshots of `ui`) and `lint` (Android lint); `apps/android` and `apps/android-tv` have `build`, `release` (an R8-shrunk release build, with the baseline profile their `baselineprofile` module generates) and `lint`. See [docs/development.md](docs/development.md) §2.
 
 ## Go Conventions
 
@@ -122,6 +123,12 @@ Every Go project has these inferred Nx targets: `build` (`CGO_ENABLED=0`), `test
 - Paths the server records or compares are slash-separated (`filepath.ToSlash`) and handled with `path`; convert with `filepath.FromSlash` only at the operating system's boundary, and build test paths from `filepath.ToSlash(t.TempDir())` (development guide §5.1).
 - Prefer modern standard library features: `iter.Seq` pipelines, `slices`/`maps`, `net/http` routing patterns, `http.Protocols` (h2c).
 - Every package has a package comment (`doc.go`); every exported identifier has a doc comment.
+
+## Python Conventions
+- Python is used only for process plugins that need its ecosystem (`plugins/pipecat`) and their SDK (`libs/plugin/python`); the server and libraries stay Go. Python and uv are pinned in `mise.toml`, and every Python project is a member of the uv workspace of the root `pyproject.toml`, locked in `uv.lock`.
+- Add dependencies with `uv add` in the project; they must install as wheels on every platform the plugin ships for (`--only-binary :all:`) and have GPL-3.0-compatible licenses.
+- ruff formats and lints, pyright checks types in strict mode; asyncio throughout, with nothing blocking the event loop (CPU-bound work in a worker process or thread).
+- Use the messages and connect-python stubs of `libs/proto/gen/python`; never hand-write them.
 
 ## Protobuf / Connect Conventions
 - Contract sources live in `libs/proto/mavio/<domain>/v1/` and use `edition = "2023"`; the package name is `mavio.<domain>.v1`.

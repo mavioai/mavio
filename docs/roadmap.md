@@ -47,7 +47,7 @@ flowchart TD
     P25["P25 Storage backends and rclone<br/>storage port, libs/rclone, rcd, offline downloads"]
     P26["P26 Subtitle acquisition<br/>libs/acquire/subtitles, plugins/subtitles, porting Bazarr"]
     P27["P27 AI gateway and subtitle translation<br/>plugins/agent, porting Lingarr"]
-    P29["P29 Assistant<br/>libs/intent, AssistantService, plugins/voice, remote tools and memory"]
+    P29["P29 Assistant<br/>libs/intent, AssistantService, plugins/pipecat, remote tools and memory"]
     P30["P30 Container dependencies<br/>libs/containers, engine detection, managed and external dependencies of plugins"]
     P31["P31 Proxies and challenge solving<br/>the server's proxies, CHALLENGE_SOLVER, plugins/solvers with FlareSolverr"]
     P28["P28 Accounts<br/>mavio.dev and standalone modes, library access, managed users, user switching, Homes, friends, device-bound tokens; mavio.dev, relay, DNS and certificates"]
@@ -1022,15 +1022,16 @@ flowchart TD
   - [ ] The account's calls in the UniFFI bindings, and the Apple and Android apps' sign-in
 
 ### P29 Assistant
-**Scope**: the assistant of [Assistant](assistant.md): the grammar of `libs/intent` on its three hosts; `AssistantService` with the tools, slot resolution, confirmation and client actions; remote tools, code mode, rolling conversations and memory in `AGENT_SESSION`; `plugins/voice` with `SPEECH_TO_TEXT` and `TEXT_TO_SPEECH`, Whisper moved into it and subtitles transcribed by its recognizers; the clients, the web UI first.
+**Scope**: the assistant of [Assistant](assistant.md): the grammar of `libs/intent` on its three hosts; `AssistantService` with the tools, slot resolution, confirmation and client actions; remote tools, code mode, rolling conversations and memory in `AGENT_SESSION`; voice sessions in `plugins/pipecat`, a Python process plugin on Pipecat providing `VOICE_SESSION` and, for subtitles, `SPEECH_TO_TEXT`, relayed by the server with session tokens, steered and aborted; the clients, the web UI first.
 
 - The fast path: `libs/intent`, its grammars, cases and WASM build, run by the clients, the web UI and the server
 - `AssistantService`, the tools and the client actions; the assistant settings
 - The AI path: remote tools, code mode, conversations and memory in `plugins/agent`
-- Speech: `plugins/voice`, listening and speech routes, subtitle transcription over its recognizers
+- Python plugins: the uv workspace, `tools/nx-uv`, `libs/proto/gen/python`, the Python SDK `libs/plugin/python`, packaging with python-build-standalone in `tools/plugindist` and the container image
+- Voice: `plugins/pipecat` with its pipeline, services and models, `StartVoiceSession`, the relay and session tokens, `SteerAsk` and `AbortAsk` with held effects, steering and aborting in `AGENT_SESSION`, kept speech; subtitle transcription by its transcribers
 - The clients' assistant: the web UI, then the Apple, Android and desktop apps
 
-**Done when**: an end-to-end test through the API: with no AI gateway plugin, requests in Chinese and English pause, seek and switch the subtitles of a fake device, play a title named by a homophone of its name, and a request requiring confirmation is confirmed and another canceled by voice; with the built `plugins/agent` and a model served by a fake OpenAI-compatible API on the loopback interface, a request the grammar does not match runs tools as the user through code mode, a tool call interrupted by restarting the plugin is run once, and a memory learned in one conversation is used in the next; listening through the built `plugins/voice` with a fake whisper-asr-webservice gives the text of a recording, and the same recognizer transcribes an episode's subtitles; in the web UI, a spoken request plays a title.
+**Done when**: an end-to-end test through the API: with no AI gateway plugin, requests in Chinese and English pause, seek and switch the subtitles of a fake device, play a title named by a homophone of its name, and a request requiring confirmation is confirmed and another canceled by voice; with the built `plugins/agent` and a model served by a fake OpenAI-compatible API on the loopback interface, a request the grammar does not match runs tools as the user through code mode, a tool call interrupted by restarting the plugin is run once, and a memory learned in one conversation is used in the next; a voice session through the built `plugins/pipecat`, with fake recognition and synthesis services on the loopback interface, takes a recording paused mid-sentence as one steered request, is interrupted by barge-in with its run aborted, and keeps the answer's speech; its faster-whisper transcriber, on the tiny model, transcribes an episode's subtitles; in the web UI, a spoken request plays a title.
 
 **Progress**:
 - [x] `mavio.intent.v1` (`Intent`, `ParseIntentRequest`) and `mavio.assistant.v1` (`AssistantService`) in `libs/proto`
@@ -1041,31 +1042,38 @@ flowchart TD
 - [x] Code mode's QuickJS sandbox checked in the built Bun executable on macOS (arm64), by `TestAssistantAI`
 - [ ] The same on Linux and Windows
 - [x] Rolling conversations and memory: idle time and days, retention, `EndAgentSession` and consolidation, the memory RPCs and `recall`
-- [x] `SPEECH_TO_TEXT` and `TEXT_TO_SPEECH` in `libs/proto`; `plugins/voice` with whisper-asr-webservice, moved from `plugins/subtitles` with its test cases, and the OpenAI-compatible transcription and speech APIs
+- [x] The first speech path, replaced by `plugins/pipecat` below: `SPEECH_TO_TEXT` and `TEXT_TO_SPEECH`, `plugins/voice` with whisper-asr-webservice and the OpenAI-compatible APIs, `StartListening` with Silero VAD ending utterances, `/assistant/speech` and `GetAssistantHints`, and the web UI's `SpeechRecognition`, `speechSynthesis` and server voices
 - [x] Subtitle transcription as the server's source over the recognizers: `audio_url` and `audio_streams` of `SubtitleVideo` reserved, `/subtitles/audio` replaced by `/speech/audio`, and P26's end-to-end test moved to it
-- [x] Listening and speech: `StartListening`, the WebSocket with Silero VAD ending utterances, `/assistant/speech`, `GetAssistantHints`
-- [x] The web UI: the panel, push to talk, capture by `AudioWorklet`, the browser's `SpeechRecognition` and `speechSynthesis`, server voices, the fast path in the browser, the Assistant settings and the assistant's part of the AI settings
+- [x] The web UI: the panel, capture by `AudioWorklet`, the fast path in the browser, the Assistant settings and the assistant's part of the AI settings
 - [x] The end-to-end test of **Done when** through the API: `TestAssistant` (the fast path, listening and transcription) and `TestAssistantAI` (code mode, a call interrupted by a restart, memory)
 - [ ] The web UI's part of **Done when**: a spoken request plays a title
 - [x] `read_subtitles`, the tool reading an item's subtitle up to the position the user has reached
 - [ ] Deciding which tools require confirmation beyond `request_title`
-- [ ] Streaming recognition: a bidirectional `StreamSpeech` giving partial text as the user speaks, and the streaming services reached over their WebSockets
+- [ ] A prototype of `plugins/pipecat` before the rest: one pipeline over the server's relay with faster-whisper, Kokoro and an OpenAI-compatible service, Smart Turn on Chinese and English recordings, steer and barge-in, the web UI's echo cancellation in Chrome, Safari and Firefox, and the package's size and wheels on each platform
+- [ ] The uv workspace, `tools/nx-uv`, the Python messages of `libs/proto` and the Python SDK, with `internal/testplugin` ported to it
+- [ ] `VOICE_SESSION` and `SPEECH_TO_TEXT` in `libs/proto` in place of the first speech path's contracts; `plugins/voice` and its whisper dependency deleted
+- [ ] `plugins/pipecat`: the pipeline, the protocol's serializer, the Mavio assistant service, the bundled services and their settings, model downloads, the transcription worker
+- [ ] The server: `StartVoiceSession`, the relay and session tokens, `SteerAsk` and `AbortAsk` with held effects, kept speech from the relay
+- [ ] Steering and aborting in `AGENT_SESSION` and `plugins/agent`, on pi-durable's steer queue and conversation aborts
+- [ ] Packaging `plugins/pipecat` in `tools/plugindist` for the platforms its wheels cover, and seeding it in the container image
+- [ ] Later: SmallWebRTC as a transport beside the WebSocket, for weak networks, with TURN on mavio.dev for servers reached through the relay and UDP ports in the container image
+- [ ] Later: Opus for the answer's speech on the WebSocket
 - [ ] The web player: the subtitle offset and queues of several items, which the assistant's actions ask for and the player cannot yet carry out; V listed with the player's shortcuts
-- [ ] More speech services in `plugins/voice`: Deepgram, Azure Speech, Google Cloud, Volcengine, Alibaba Cloud, ElevenLabs
-- [ ] The Apple apps: on-device recognition with hints, `AVSpeechSynthesizer`, App Intents; dictation on tvOS
-- [ ] The Android apps: `SpeechRecognizer` with hints, `TextToSpeech`, search intents and play-from-search on Android TV
-- [ ] The desktop app: the server's recognizer and voices
+- [ ] Services Pipecat lacks for Chinese, Volcengine and Alibaba Cloud, as services of `plugins/pipecat`
+- [ ] The Apple apps: voice sessions with `AVAudioEngine`'s voice processing, App Intents; dictation on tvOS
+- [ ] The Android apps: voice sessions with `VOICE_COMMUNICATION` and its echo canceler, push to talk on Android TV, search intents and play-from-search
+- [ ] The desktop app: voice sessions
 - [ ] More languages in the grammar
 - [ ] Later: converting speech in the server's process, through pure-Go bindings of FFmpeg's libraries loaded with purego, rather than an ffmpeg child process
 
 ### P30 Container Dependencies
-**Scope**: the container dependencies of [Architecture §16](architecture.md#16-container-dependencies-libscontainers) and [Plugins §11](plugins.md#11-container-dependencies): `libs/containers` with engine detection and the Engine API client; the manifest's `containers`, `PluginContainer` and the management and host RPCs; managed dependencies on Linux, the server on the host first, then in a container; external dependencies with their commands; `plugins/voice` declaring whisper-asr-webservice; the web UI.
+**Scope**: the container dependencies of [Architecture §16](architecture.md#16-container-dependencies-libscontainers) and [Plugins §11](plugins.md#11-container-dependencies): `libs/containers` with engine detection and the Engine API client; the manifest's `containers`, `PluginContainer` and the management and host RPCs; managed dependencies on Linux, the server on the host first, then in a container; external dependencies with their commands; the first dependency declared; the web UI.
 
 - `libs/containers`: endpoints, checks, the client over Unix sockets, named pipes and loopback TCP
 - The manifest's `containers` in `mavio.plugin.v1`, `PluginContainer` in `libs/core` and `libs/store`, `GetContainerRuntime`, `ListPluginContainers`, `SetPluginContainer`, `HostService.ListContainers`
 - Managed dependencies: pulls as jobs, names and labels, the `mavio` network, health checks and restarts, reconciliation, removal on uninstall
 - External dependencies: health checks, the `docker run` and Compose commands with their GPU variants
-- `plugins/voice` declaring whisper-asr-webservice; the web UI's dependencies in the plugin's page
+- The first dependency declared, and the web UI's dependencies in the plugin's page
 
 **Done when**: an end-to-end test on Linux with Docker (skipped without it): a test plugin declaring a small HTTP image gets a managed dependency ready at the address its `ListContainers` returns, from a server on the host and from a server in a container with the socket mounted; the container is replaced when the declared digest changes, restarted after it is killed, and removed with its volume when the plugin is uninstalled; with no engine, the same dependency made external at the address of a container started by its generated `docker run` command becomes ready.
 
@@ -1076,7 +1084,7 @@ flowchart TD
   - [x] Pulls as `plugin.container_pull` jobs on a worker of their own, their progress in `TaskService.ListJobs` and in the dependency's status, both shown in the web UI
 - [x] Managed dependencies, the server in a container: the server's container joins the `mavio` network and dependencies are reached by name without published ports; tested against the in-memory engine
 - [x] External dependencies and commands, and dependencies' addresses in WASM plugins' `http_hosts`: `containers.RunCommands` builds the `docker run` command and the Compose file, with and without a GPU, returned as `PluginContainer.commands` and `gpu_commands`; a WASM plugin may fetch the hosts of its dependencies' addresses
-- [x] `plugins/voice` and the web UI: the voice plugin declares whisper-asr-webservice as `whisper` and its recognizer, renamed `whisper`, uses the dependency's address; the plugin's page in the web UI sets how each dependency runs and shows its state and commands
+- [x] The first dependency and the web UI: `plugins/voice` declared whisper-asr-webservice, deleted with that plugin in P29, `plugins/solvers` FlareSolverr since; the plugin's page in the web UI sets how each dependency runs and shows its state and commands
 - [ ] The end-to-end test of **Done when**
 - [ ] Docker Desktop on macOS and Windows, and Podman, checked by hand
 
@@ -1130,6 +1138,8 @@ flowchart TD
 | Code mode in the Bun executable | pi-durable's code mode runs scripts in quickjs-wasi, a WASM module, which must load inside `plugins/agent`'s Bun executable on every platform | Checked on macOS (arm64) by `TestAssistantAI`, which runs the built executable; Linux and Windows still to check; until it loads, conversations offer the tools directly only |
 | Microphones in browsers | `getUserMedia` works only on secure pages, so a standalone server reached over plain HTTP on the local network cannot record in the web UI | Servers' HTTPS addresses (P28); typed requests elsewhere |
 | Recognizing titles | Recognizers misspell titles and names, Chinese ones as homophones | Hints to recognizers that take them; pinyin and tolerant matching in slot resolution (P29) |
+| The size of `plugins/pipecat` | Python with Pipecat, ONNX Runtime, numba and faster-whisper weighs about 400 MB per platform before models, and some platforms may lack a wheel | One package per platform its wheels cover; models downloaded only when chosen; measured by the prototype (P29) |
+| Echo cancellation in browsers | Browsers cancel the echo of what a page plays through Web Audio unevenly, Firefox the least surely | Checked by the prototype (P29); push to talk where it falls short |
 | The container engine's socket | Access to Docker's socket is root on the host, so a server that has it, and any flaw in what it lets plugins declare, is as powerful | The server is given the socket only by an administrator; declarations are fixed in the manifest and approved on installation; no privileged mode, host namespaces, devices or bind mounts; external dependencies need no socket (P30) |
 | Container engines differ | Docker, rootless Docker, Docker Desktop and Podman differ in their sockets, networks and GPU support | Engine API 1.41 at least; the tests run on Docker on Linux, the others checked by hand (P30) |
 | The Siri Remote's microphone | tvOS gives apps no recording from the Siri Remote | Dictation in the assistant's field; App Intents |

@@ -47,7 +47,7 @@ flowchart TD
     P25["P25 存储后端与 rclone<br/>存储端口、libs/rclone、rcd、离线下载"]
     P26["P26 字幕获取<br/>libs/acquire/subtitles、plugins/subtitles，移植 Bazarr"]
     P27["P27 AI 网关与字幕翻译<br/>plugins/agent，移植 Lingarr"]
-    P29["P29 助手<br/>libs/intent、AssistantService、plugins/voice、远程工具与记忆"]
+    P29["P29 助手<br/>libs/intent、AssistantService、plugins/pipecat、远程工具与记忆"]
     P30["P30 容器依赖<br/>libs/containers、引擎检测、插件的托管与外部依赖"]
     P31["P31 代理与质询求解<br/>服务端的代理、CHALLENGE_SOLVER、带 FlareSolverr 的 plugins/solvers"]
     P28["P28 账户<br/>mavio.dev 模式与独立模式、媒体库访问、托管用户、用户切换、Home、好友、绑定设备的令牌；mavio.dev、中转、DNS 与证书"]
@@ -1022,15 +1022,16 @@ flowchart TD
   - [ ] UniFFI 绑定中的账户调用，以及 Apple、Android 应用的登录
 
 ### P29 助手
-**范围**：[助手](assistant.zh-CN.md)所述的助手：`libs/intent` 的语法及其三处运行；`AssistantService` 及工具、槽位解析、确认与客户端动作；`AGENT_SESSION` 中的远程工具、代码模式、滚动会话与记忆；带 `SPEECH_TO_TEXT` 与 `TEXT_TO_SPEECH` 的 `plugins/voice`，Whisper 并入其中，字幕由其识别器转写；各客户端，Web UI 最先。
+**范围**：[助手](assistant.zh-CN.md)所述的助手：`libs/intent` 的语法及其三处运行；`AssistantService` 及工具、槽位解析、确认与客户端动作；`AGENT_SESSION` 中的远程工具、代码模式、滚动会话与记忆；`plugins/pipecat` 中的语音会话，它是基于 Pipecat 的 Python 子进程插件，提供 `VOICE_SESSION` 以及用于字幕的 `SPEECH_TO_TEXT`，由服务端凭会话令牌中继，可被引导与中止；各客户端，Web UI 最先。
 
 - 快速路径：`libs/intent`、其语法、用例与 WASM 构建，由客户端、Web UI 与服务端运行
 - `AssistantService`、工具与客户端动作；助手设置
 - AI 路径：`plugins/agent` 中的远程工具、代码模式、会话与记忆
-- 语音：`plugins/voice`、收听与语音路由、基于其识别器的字幕转写
+- Python 插件：uv workspace、`tools/nx-uv`、`libs/proto/gen/python`、Python SDK `libs/plugin/python`、在 `tools/plugindist` 与容器镜像中以 python-build-standalone 打包
+- 语音：`plugins/pipecat` 及其管线、服务与模型，`StartVoiceSession`，中继与会话令牌，带暂缓效果的 `SteerAsk` 与 `AbortAsk`，`AGENT_SESSION` 中的引导与中止，保留的语音；由其转写器进行的字幕转写
 - 各客户端的助手：先 Web UI，再 Apple、Android 与桌面应用
 
-**完成标准**：一个经由 API 的端到端测试：没有 AI 网关插件时，中英文请求暂停假设备、跳转并切换其字幕，播放以名称的同音字说出的作品，一个需要确认的请求以语音确认、另一个以语音取消；使用构建好的 `plugins/agent` 与回环接口上的假 OpenAI 兼容 API 提供的模型时，语法未匹配的请求经由代码模式以用户身份运行工具，重启插件时被中断的工具调用只运行一次，在一个会话中学到的记忆在下一个会话中被使用；通过构建好的 `plugins/voice` 与假 whisper-asr-webservice 收听，得到一段录音的文本，同一个识别器转写一集的字幕；在 Web UI 中，一个说出的请求播放一部作品。
+**完成标准**：一个经由 API 的端到端测试：没有 AI 网关插件时，中英文请求暂停假设备、跳转并切换其字幕，播放以名称的同音字说出的作品，一个需要确认的请求以语音确认、另一个以语音取消；使用构建好的 `plugins/agent` 与回环接口上的假 OpenAI 兼容 API 提供的模型时，语法未匹配的请求经由代码模式以用户身份运行工具，重启插件时被中断的工具调用只运行一次，在一个会话中学到的记忆在下一个会话中被使用；经由构建好的 `plugins/pipecat` 的语音会话，在回环接口上使用假的识别与合成服务，把一段在句中停顿的录音当作一个被引导的请求，被打断打断并中止其运行，并保留回答的语音；其 faster-whisper 转写器以 tiny 模型转写一集的字幕；在 Web UI 中，一个说出的请求播放一部作品。
 
 **进展**：
 - [x] `libs/proto` 中的 `mavio.intent.v1`（`Intent`、`ParseIntentRequest`）与 `mavio.assistant.v1`（`AssistantService`）
@@ -1041,31 +1042,38 @@ flowchart TD
 - [x] 在 macOS（arm64）构建好的 Bun 可执行文件中验证代码模式的 QuickJS 沙箱，由 `TestAssistantAI` 验证
 - [ ] 在 Linux 与 Windows 上同样验证
 - [x] 滚动会话与记忆：空闲时间与跨天、保留期、`EndAgentSession` 与整理、记忆 RPC 与 `recall`
-- [x] `libs/proto` 中的 `SPEECH_TO_TEXT` 与 `TEXT_TO_SPEECH`；`plugins/voice`，包括从 `plugins/subtitles` 连同测试用例移来的 whisper-asr-webservice，以及 OpenAI 兼容的转写与语音 API
+- [x] 第一条语音路径，已由下文的 `plugins/pipecat` 取代：`SPEECH_TO_TEXT` 与 `TEXT_TO_SPEECH`，带 whisper-asr-webservice 与 OpenAI 兼容 API 的 `plugins/voice`，以 Silero VAD 结束语音的 `StartListening`，`/assistant/speech` 与 `GetAssistantHints`，以及 Web UI 的 `SpeechRecognition`、`speechSynthesis` 与服务端语音
 - [x] 字幕转写作为服务端基于识别器的来源：`SubtitleVideo` 的 `audio_url` 与 `audio_streams` 保留编号，`/subtitles/audio` 改为 `/speech/audio`，P26 的端到端测试随之迁移
-- [x] 收听与语音：`StartListening`、以 Silero VAD 结束语音的 WebSocket、`/assistant/speech`、`GetAssistantHints`
-- [x] Web UI：面板、按住说话、`AudioWorklet` 采集、浏览器的 `SpeechRecognition` 与 `speechSynthesis`、服务端语音、浏览器中的快速路径、“助手”设置以及 AI 设置中的助手部分
+- [x] Web UI：面板、`AudioWorklet` 采集、浏览器中的快速路径、“助手”设置以及 AI 设置中的助手部分
 - [x] **完成标准**中经由 API 的端到端测试：`TestAssistant`（快速路径、收听与转写）与 `TestAssistantAI`（代码模式、被重启中断的调用、记忆）
 - [ ] **完成标准**中 Web UI 的部分：一个说出的请求播放一部作品
 - [x] `read_subtitles`：读取条目字幕直到用户已看到的位置的工具
 - [ ] 决定 `request_title` 之外还有哪些工具需要确认
-- [ ] 流式识别：双向的 `StreamSpeech` 在用户说话时给出部分文本，并经由 WebSocket 连接流式服务
+- [ ] 先做 `plugins/pipecat` 的原型：经由服务端中继、使用 faster-whisper、Kokoro 与一个 OpenAI 兼容服务的一条管线，在中英文录音上测试 Smart Turn，引导与打断，Web UI 在 Chrome、Safari 与 Firefox 中的回声消除，以及包的大小与各平台的 wheel
+- [ ] uv workspace、`tools/nx-uv`、`libs/proto` 的 Python 消息与 Python SDK，并把 `internal/testplugin` 移植到它上面
+- [ ] `libs/proto` 中以 `VOICE_SESSION` 与 `SPEECH_TO_TEXT` 取代第一条语音路径的契约；删除 `plugins/voice` 及其 whisper 依赖
+- [ ] `plugins/pipecat`：管线、协议的序列化器、Mavio 助手服务、内置的服务及其设置、模型下载、转写工作进程
+- [ ] 服务端：`StartVoiceSession`、中继与会话令牌、带暂缓效果的 `SteerAsk` 与 `AbortAsk`、来自中继的保留语音
+- [ ] `AGENT_SESSION` 与 `plugins/agent` 中的引导与中止，基于 pi-durable 的引导队列与会话中止
+- [ ] 在 `tools/plugindist` 中为其 wheel 覆盖的平台打包 `plugins/pipecat`，并预置到容器镜像中
+- [ ] 以后：在 WebSocket 之外加入 SmallWebRTC 作为传输，用于弱网，并为经由中转访问的服务端在 mavio.dev 上提供 TURN，在容器镜像中开放 UDP 端口
+- [ ] 以后：WebSocket 上回答的语音使用 Opus
 - [ ] Web 播放器：助手的动作会要求、而播放器尚不能执行的字幕偏移与多个条目的队列；在播放器的快捷键中列出 V
-- [ ] `plugins/voice` 中更多的语音服务：Deepgram、Azure Speech、Google Cloud、火山引擎、阿里云、ElevenLabs
-- [ ] Apple 应用：带提示的设备端识别、`AVSpeechSynthesizer`、App Intents；tvOS 上的听写
-- [ ] Android 应用：带提示的 `SpeechRecognizer`、`TextToSpeech`、Android TV 上的搜索 intent 与按搜索播放
-- [ ] 桌面应用：服务端的识别器与语音
+- [ ] Pipecat 缺少的中文服务：火山引擎与阿里云，作为 `plugins/pipecat` 的服务
+- [ ] Apple 应用：使用 `AVAudioEngine` 语音处理的语音会话、App Intents；tvOS 上的听写
+- [ ] Android 应用：使用 `VOICE_COMMUNICATION` 及其回声消除器的语音会话、Android TV 上的按住说话、搜索 intent 与按搜索播放
+- [ ] 桌面应用：语音会话
 - [ ] 语法支持更多语言
 - [ ] 以后：在服务端进程内转换语音，通过以 purego 加载的 FFmpeg 库的纯 Go 绑定，而非 ffmpeg 子进程
 
 ### P30 容器依赖
-**范围**：[架构 §16](architecture.zh-CN.md#16-容器依赖libscontainers) 与[插件 §11](plugins.zh-CN.md#11-容器依赖) 的容器依赖：带引擎检测与 Engine API 客户端的 `libs/containers`；清单的 `containers`、`PluginContainer` 以及管理与宿主 RPC；Linux 上的托管依赖，先是运行在宿主机上的服务端，再是运行在容器中的服务端；带命令的外部依赖；`plugins/voice` 声明 whisper-asr-webservice；Web UI。
+**范围**：[架构 §16](architecture.zh-CN.md#16-容器依赖libscontainers) 与[插件 §11](plugins.zh-CN.md#11-容器依赖) 的容器依赖：带引擎检测与 Engine API 客户端的 `libs/containers`；清单的 `containers`、`PluginContainer` 以及管理与宿主 RPC；Linux 上的托管依赖，先是运行在宿主机上的服务端，再是运行在容器中的服务端；带命令的外部依赖；声明的第一个依赖；Web UI。
 
 - `libs/containers`：端点、检查、经 Unix socket、命名管道与回环 TCP 的客户端
 - `mavio.plugin.v1` 中清单的 `containers`，`libs/core` 与 `libs/store` 中的 `PluginContainer`，`GetContainerRuntime`、`ListPluginContainers`、`SetPluginContainer`、`HostService.ListContainers`
 - 托管依赖：作为任务的镜像拉取、名称与标签、`mavio` 网络、健康检查与重启、对账、卸载时删除
 - 外部依赖：健康检查，`docker run` 与 Compose 命令及其 GPU 变体
-- `plugins/voice` 声明 whisper-asr-webservice；Web UI 在插件页面中展示依赖
+- 声明的第一个依赖，以及 Web UI 在插件页面中展示依赖
 
 **完成标准**：在装有 Docker 的 Linux 上的端到端测试（没有 Docker 时跳过）：声明一个小型 HTTP 镜像的测试插件，在其 `ListContainers` 返回的地址上得到一个就绪的托管依赖，服务端分别运行在宿主机上与挂载了 socket 的容器中；声明的 digest 改变时容器被替换，被杀死后被重启，插件卸载时连同其卷被删除；没有引擎时，同一依赖设为外部、地址指向由生成的 `docker run` 命令启动的容器，随后变为就绪。
 
@@ -1076,7 +1084,7 @@ flowchart TD
   - [x] 以 `plugin.container_pull` 任务在独立的工作者上拉取镜像，其进度显示在 `TaskService.ListJobs` 与依赖的状态中，Web UI 均有显示
 - [x] 托管依赖，服务端在容器中：服务端的容器加入 `mavio` 网络，依赖按名称访问而不发布端口；针对内存中的引擎测试
 - [x] 外部依赖与命令，以及 WASM 插件 `http_hosts` 中依赖的地址：`containers.RunCommands` 生成带与不带 GPU 的 `docker run` 命令与 Compose 文件，作为 `PluginContainer.commands` 与 `gpu_commands` 返回；WASM 插件可以访问其依赖地址的主机
-- [x] `plugins/voice` 与 Web UI：语音插件把 whisper-asr-webservice 声明为 `whisper`，其识别器改名为 `whisper` 并使用该依赖的地址；Web UI 的插件页面设置每个依赖的运行方式，并显示其状态与命令
+- [x] 第一个依赖与 Web UI：`plugins/voice` 曾声明 whisper-asr-webservice，已在 P29 中随该插件删除，此后由 `plugins/solvers` 声明 FlareSolverr；Web UI 的插件页面设置每个依赖的运行方式，并显示其状态与命令
 - [ ] **完成标准**中的端到端测试
 - [ ] macOS 与 Windows 上的 Docker Desktop，以及 Podman，手工检查
 
@@ -1130,6 +1138,8 @@ flowchart TD
 | Bun 可执行文件中的代码模式 | pi-durable 的代码模式在 quickjs-wasi（一个 WASM 模块）中运行脚本，它必须能在各平台 `plugins/agent` 的 Bun 可执行文件中加载 | 已由运行构建好的可执行文件的 `TestAssistantAI` 在 macOS（arm64）上验证；Linux 与 Windows 仍待验证；能加载之前，会话只直接提供工具 |
 | 浏览器中的麦克风 | `getUserMedia` 只在安全页面可用，因此在局域网上通过普通 HTTP 访问的独立服务端无法在 Web UI 中录音 | 服务端的 HTTPS 地址（P28）；其他情况下打字输入 |
 | 识别作品名称 | 识别器会写错作品与人物的名称，中文常写成同音字 | 向接受提示的识别器提供提示；槽位解析中的拼音与容错匹配（P29） |
+| `plugins/pipecat` 的大小 | 带 Pipecat、ONNX Runtime、numba 与 faster-whisper 的 Python 在每个平台上约 400 MB（不含模型），且某些平台可能缺少 wheel | 为其 wheel 覆盖的每个平台各打一个包；模型只在选用时下载；由原型实测（P29） |
+| 浏览器中的回声消除 | 浏览器对页面经由 Web Audio 播放的声音的回声消除参差不齐，Firefox 最不可靠 | 由原型检查（P29）；不足之处改用按住说话 |
 | 容器引擎的 socket | 能访问 Docker 的 socket 即等于宿主机的 root，因此拥有它的服务端，以及它允许插件声明的内容中的任何漏洞，都具有同等权力 | 只有管理员才能把 socket 交给服务端；声明固定在清单中，安装时批准；不允许特权模式、宿主机命名空间、设备或绑定挂载；外部依赖不需要 socket（P30） |
 | 容器引擎之间的差异 | Docker、rootless Docker、Docker Desktop 与 Podman 的 socket、网络与 GPU 支持各不相同 | 至少 Engine API 1.41；测试在 Linux 上的 Docker 运行，其他手工检查（P30） |
 | Siri Remote 的麦克风 | tvOS 不允许应用从 Siri Remote 录音 | 助手输入框中的听写；App Intents |

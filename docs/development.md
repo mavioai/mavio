@@ -18,6 +18,7 @@ Tool versions are pinned in `mise.toml`:
 | golangci-lint | Go linting and formatting checks |
 | sqlc | Dialect-specific query code in `libs/store` |
 | protoc-gen-buffa, protoc-gen-buffa-packaging, protoc-gen-connect-rust | Rust code generation of `libs/proto`, from their release builds |
+| python + uv | Python process plugins (`plugins/pipecat`) and the Python SDK (`libs/plugin/python`), in the uv workspace of the root `pyproject.toml`; uv also fetches the python-build-standalone builds packaged with them |
 | java (Temurin) + gradle | The Android apps and `libs/android` |
 | jellyfin-ffmpeg | The media pipeline, test media generation and the integration tests (`ffmpeg` / `ffprobe` on `PATH`) |
 | rclone (mavioai/rclone) | Libraries on rclone remotes and their integration tests (`rclone` on `PATH`), from the fork's release builds |
@@ -44,7 +45,8 @@ Go is the main server language; later the [clients](clients.md) join it in TypeS
 * Nx has official plugins for Vite / React; Cargo, Gradle and `xcodebuild` run through targets of their own;
 * Go projects are inferred by the in-repo local Nx plugin `tools/nx-go`: every `go.mod` automatically becomes a project, and the dependency graph is derived from in-repo `require` directives in `go.mod`;
 * Cargo workspaces are inferred by the local Nx plugin `tools/nx-cargo`: every `Cargo.toml` with a `[workspace]` table becomes a project, depending on the projects its `[workspace.metadata.nx]` lists in `implicitDependencies` (`libs/client-rust` lists `proto`, whose generated Rust it includes);
-* Boundaries are expressed with tags: `type:app|lib|plugin`, `lang:go|ts|rust|swift|kotlin`, `scope:server|client|shared`. The TS side is constrained by `@nx/enforce-module-boundaries`, the Go side by depguard (§5).
+* Python projects are inferred by the local Nx plugin `tools/nx-uv`: every member of the uv workspace becomes a project, depending on the workspace members its `pyproject.toml` requires and on `proto` for the generated Python it imports;
+* Boundaries are expressed with tags: `type:app|lib|plugin`, `lang:go|ts|rust|python|swift|kotlin`, `scope:server|client|shared`. The TS side is constrained by `@nx/enforce-module-boundaries`, the Go side by depguard (§5).
 
 Nx only orchestrates and caches: every Go module still works on its own with `go build` / `go test`.
 
@@ -68,6 +70,8 @@ A project overrides a default target with a `project.json` next to its `go.mod`;
 The scripts of a `package.json` are targets too: `libs/proto` and `libs/design` have `typecheck` (`tsc -p tsconfig.json`, TypeScript 7), and `libs/design` has `generate` (§4.4). A directory with both a `go.mod` and a `package.json`, such as `libs/design`, is one project with the targets of both. `libs/plugin` is one too: its TypeScript SDK `@mavio/plugin` has `typecheck` and `test-ts` (Vitest), on which its Go `test` depends, since a script named `test` would replace the inferred one.
 
 `plugins/agent` is a TypeScript process plugin run by Bun, the version `mise.toml` pins: it has `typecheck`, `test` (`bun test`), `build` (`bun build --compile`: one executable for this platform, beside its manifest in `dist/plugin`, a plugin folder the server can start; `bun scripts/build.ts linux/arm64 <folder>` builds another platform's, into another folder). The executable carries Bun's runtime, so the server needs nothing installed for it; Bun runs `node:http2`, `node:sqlite` and the npm packages unchanged. Its dependencies come from the pnpm workspace, as the web UI's do; packages whose install scripts nothing needs are refused in `allowBuilds` of `pnpm-workspace.yaml`.
+
+`tools/nx-uv` gives every member of the uv workspace `test` (`uv run --frozen pytest`), `lint` (`ruff check`, `ruff format --check` and `pyright`) and `tidy-check` (`uv lock --check`); `plugins/pipecat` adds `build`, which assembles a plugin folder for this platform in `dist/plugin` — its manifest, locales, a python-build-standalone CPython, its dependencies installed by `uv pip install --target` from the lock and its launcher — and takes another platform as `plugins/pipecat/scripts/build.py linux/arm64 <folder>` does, since uv installs any platform's wheels (`--python-platform`, `--only-binary :all:`); it packages for the platforms whose wheels every dependency has ([Architecture §12](architecture.md#12-distribution)).
 
 `libs/client-rust/capi` is a crate of the Cargo workspace and a Go module, the C ABI's Go binding; as a Go project in the Cargo workspace's directory, it is the Nx project `capi`, whose files Nx counts as its own, so the Cargo targets of `client-rust` name its Rust sources among their inputs (`libs/client-rust/project.json`). Its `test` runs after `client-rust:build` with `CGO_ENABLED=0`, as the app builds, and loads the library from `target/debug`; `generate` runs `buf generate` for the C ABI's messages in `libs/client-rust/proto`, writing Go into `gen/` and Rust into `src/gen/` (both committed), and `buf-lint` checks them.
 
@@ -132,6 +136,7 @@ The new edge must respect the dependency direction in [Architecture §3.2](archi
 * `buf generate` (configured in `libs/proto/buf.gen.yaml`) runs `protoc-gen-go` with `default_api_level=API_OPAQUE` (fields accessed through getters/setters) and `protoc-gen-connect-go` with `simple` (handlers take and return messages directly). Managed mode sets `go_package` under `github.com/mavioai/mavio/libs/proto/gen/go`.
 * The same run generates `libs/proto/openapi/gen/mavio.openapi.json`, the OpenAPI document of the services the server serves, with `protoc-gen-connect-openapi` merging `openapi/base.yaml` (description, bearer authentication, the plain HTTP media routes). It runs through `go run` at a version pinned in `buf.gen.yaml`, so that its dependencies stay out of the go.mod third-party plugins import; package `openapi` embeds the document, which is committed like `gen/`.
 * The same run generates TypeScript into `gen/ts` with `protoc-gen-es` (protobuf-es messages and the service descriptors connect-es uses; `libs/proto` is also the npm package `@mavio/proto`, exporting them), and Rust into `gen/rust` with `protoc-gen-buffa` (messages, in `gen/rust/proto`) and `protoc-gen-connect-rust` (clients, in `gen/rust/connect`), each tree given its `mod.rs` files by `protoc-gen-buffa-packaging`. The crate `mavio-api` of `libs/client-rust` includes the Rust trees.
+* The same run generates Python into `gen/python` with `protoc-gen-python` and `protoc-gen-pyi` (buf's remote plugins of protobuf's own) and `protoc-gen-connect-python`, the package `mavio-proto` of the uv workspace, which the Python SDK and plugins import.
 * After changing a `.proto`, run `pnpm nx run proto:generate` and **commit the generated `gen/` code**. Never edit files under `gen/` by hand.
 * `buf lint` uses the STANDARD rules and `buf breaking` the FILE rules. Published field numbers must never be reused; breaking changes go into a new `v2` package.
 * Read-only RPCs are annotated with `option idempotency_level = NO_SIDE_EFFECTS;`.
@@ -157,7 +162,9 @@ GOOS=wasip1 GOARCH=wasm go build -buildmode=c-shared -o plugin.wasm .   # WASM r
 go build -o plugin .                                                     # process runtime
 ```
 
-A plugin directory holds `manifest.json`, `plugin.wasm` or `plugin` (`plugin.exe` on Windows), and optionally `locales/<BCP 47 tag>.json`, the translations of the manifest's strings keyed by the English ([Architecture §7.5](architecture.md#75-plugins-in-the-server)).
+Python process plugins use the Python SDK (`mavio-plugin`) and are built by their `build` target (§2.2).
+
+A plugin directory holds `manifest.json`, `plugin.wasm` or `plugin` (`plugin.exe` on Windows; for a Python plugin, its launcher beside its `python/` and `site-packages/`), and optionally `locales/<BCP 47 tag>.json`, the translations of the manifest's strings keyed by the English ([Architecture §7.5](architecture.md#75-plugins-in-the-server)).
 
 ### 4.4 Design System
 `pnpm nx run design:generate` runs `libs/design/build/build.js`, which compiles the sources of the design system ([Clients §6](clients.md#6-design-system)) into `libs/design/gen`:
@@ -182,6 +189,8 @@ A plugin directory holds `manifest.json`, `plugin.wasm` or `plugin` (`plugin.exe
 ---
 
 ## 5. Code Quality
+
+Python follows the root `pyproject.toml`'s ruff and pyright settings: Python 3.12, ruff's formatter and its `E`, `F`, `I`, `B`, `UP`, `ASYNC` and `RUF` rules, pyright in strict mode, asyncio throughout with no blocking call on the event loop, and the messages and stubs of `libs/proto/gen/python`, never hand-written ones.
 
 `.golangci.yml` (golangci-lint v2) applies to every Go module:
 * **Linters**: the `standard` set plus `depguard`, `errorlint`, `misspell`, `nolintlint`, `unconvert`, `usestdlibvars`; generated code is excluded.

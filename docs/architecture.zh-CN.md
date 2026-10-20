@@ -12,7 +12,7 @@
 
 ### 1.1 目标
 * **轻量高效**：低常驻内存、快速冷启动、高扫描吞吐与低首分片延迟来自现代技术栈本身——无运行时虚拟机的原生 Go 单二进制、以 WASM 沙箱代替重量级隔离、ffmpeg 硬件管线。
-* **单二进制交付**：服务端为 `CGO_ENABLED=0` 的单一 Go 二进制；唯一必需的外部运行时依赖是 `jellyfin-ffmpeg`；位于云存储上的媒体库另需 `rclone`（§9.2）。
+* **单二进制交付**：服务端为 `CGO_ENABLED=0` 的单一 Go 二进制；唯一必需的外部运行时依赖是 `jellyfin-ffmpeg`；位于云存储上的媒体库另需 `rclone`（§9.2）。需要其他运行时的可选功能以自带该运行时的子进程插件交付，如语音助手的 `plugins/pipecat` 自带 Python（§7.4）。
 * **强类型契约**：对内对外统一使用 Protobuf + Connect-RPC，未来的客户端（[客户端](clients.zh-CN.md)）直接从契约生成 SDK。
 * **插件隔离**：插件不进入宿主地址空间，WASM（wazero）沙箱与独立子进程（UDS）两种运行时共享同一套契约。
 * **多数据库**：SQLite 与 PostgreSQL 均为一等公民。
@@ -47,6 +47,7 @@ Mavio 采用 **GPL-3.0**（`GPL-3.0-only`）。GPL-3.0 与 Apache-2.0 兼容，�
 | 图像 | **纯 Go + wazero WASM 编解码器 + ffmpeg** | 见 §6 |
 | 流媒体 | **HLS + fMP4（CMAF）**；直放走 HTTP Range | hls.js / Media3 / AVPlayer 均原生支持 |
 | 插件 | **wazero WASM + 子进程（统一 UDS）** | 见 §7 |
+| 语音 | **Pipecat**（Python，BSD-2），以及在 ONNX Runtime 上运行的 Silero VAD 与 Smart Turn v3 | 语音助手在 `plugins/pipecat` 中的管线，这是一个由 **uv** 管理、随 python-build-standalone 发布的 Python 子进程插件；见[助手 §8](assistant.zh-CN.md#8-语音) |
 | 文件名规则 | **Jellyfin 的命名规则，基于 `dlclark/regexp2`** | 规则使用 .NET 正则（环视、原子组），`regexp2` 可原样执行；每次匹配限时一秒 |
 | 并发 | `errgroup.SetLimit` + `iter.Seq` | |
 | 变更检测 | **全量对账扫描**（定时、启动时、手动 / API 触发），以目录 mtime 剪枝 | 见 §9 |
@@ -78,6 +79,8 @@ mavio/
 ├── package.json
 ├── pnpm-workspace.yaml
 ├── mise.toml
+├── pyproject.toml               # uv 工作区：libs/plugin/python、plugins/pipecat
+├── uv.lock
 │
 ├── apps/
 │   ├── server/                  # [Go] 服务端：cmd/mavio、依赖装配、配置、Connect 服务实现
@@ -90,8 +93,8 @@ mavio/
 │   └── dns/                     # (P28) [Go] mavio.site 的名称服务器（见 mavio-dev.zh-CN.md）
 │
 ├── libs/
-│   ├── proto/                   # [Go + TS] 契约：*.proto 源文件、buf 配置、生成的 Go/TS 代码
-│   ├── plugin/                  # [Go + TS] 插件 SDK 与宿主运行时（wasm + 子进程）；子进程插件的 TS SDK
+│   ├── proto/                   # [Go + TS + Python] 契约：*.proto 源文件、buf 配置、生成的 Go/TS/Rust/Python 代码
+│   ├── plugin/                  # [Go + TS + Python] 插件 SDK 与宿主运行时（wasm + 子进程）；子进程插件的 TS 与 Python SDK
 │   ├── core/                    # [Go] 领域模型与仓储端口（见 domain.zh-CN.md）；不依赖任何基础设施
 │   ├── store/                   # [Go] ent schema、sqlc 查询、Atlas 迁移、仓储实现
 │   ├── naming/                  # [Go] 文件名 / 目录名解析
@@ -124,13 +127,14 @@ mavio/
 │   ├── indexers/                # [Go → 子进程] 索引器：Newznab、Torznab、Cardigann、Prowlarr 的站点
 │   ├── download-clients/        # [Go → 子进程] 下载客户端：qBittorrent、Transmission、SABnzbd、NZBGet 等
 │   ├── agent/                   # [TS → 子进程，Bun] AI 网关（pi-ai）与智能体会话（pi-durable）
-│   ├── voice/                   # [Go → 子进程] 语音识别与合成服务：Whisper、OpenAI 兼容 API 等
+│   ├── pipecat/                 # [Python → 子进程] 基于 Pipecat 的语音会话，以 faster-whisper 转写字幕
 │   ├── solvers/                 # （P31）[Go → 子进程] 质询求解器：以容器依赖运行的 FlareSolverr
 │   ├── notifier-webhook/        # [Go → wasm] Webhook 通知
 │   └── auth-ldap/               # [Go → 子进程] LDAP 认证（需要原生 TCP 长连接）
 │
 ├── tools/
 │   ├── nx-go/                   # 本地 Nx 插件：把 go.mod 推断为项目，并生成依赖图
+│   ├── nx-uv/                   # 本地 Nx 插件：把 uv 工作区的成员推断为项目
 │   ├── fixtures/                # 用 ffmpeg lavfi 确定性生成测试媒体（HDR10、隔行扫描、多音轨、多字幕）
 │   └── testport/                # 从 Jellyfin C# 测试中提取用例并生成 testdata 的一次性工具
 │
@@ -151,6 +155,7 @@ apps/server ──▶ streaming ──▶ media ──▶ core
      └──────▶ plugin ──▶ proto
 
 plugins/* ──▶ plugin ──▶ proto
+plugins/pipecat ──▶ plugin/python ──▶ proto/gen/python
 ```
 * `core` 不依赖任何其他库；`naming`、`subtitle`、`release` 是纯函数库。
 * 第一方插件也可以使用纯函数库：字幕插件用 `release` 解析发布名。
@@ -280,7 +285,7 @@ WAL 模式、`synchronous=NORMAL`、`busy_timeout`、外键开启。单连接的
 | 分发形态 | 单个 `.wasm` 文件，一次构建跨所有平台 | 每个平台一个二进制 |
 | 隔离方式 | 内存沙箱；能力完全由宿主授予 | 操作系统进程隔离；可配合 cgroup / rlimit |
 | 调用开销 | 进程内函数调用 + 一次内存拷贝 | 一次 UDS 往返 |
-| 编写语言 | Go（`GOOS=wasip1` + `go:wasmexport`）、TinyGo、Rust 等 | 任何能实现 Connect / gRPC 服务的语言 |
+| 编写语言 | Go（`GOOS=wasip1` + `go:wasmexport`）、TinyGo、Rust 等 | 任何能实现 Connect / gRPC 服务的语言；提供 Go、TypeScript 与 Python 的 SDK |
 
 两种运行时都实现 `libs/proto/mavio/plugin/v1` 中定义的同一组服务（`MetadataProvider`、`AuthProvider`、`Notifier`……）。宿主侧通过统一的 `plugin.Host` 接口调用，不感知插件具体跑在哪种运行时。
 
@@ -299,7 +304,7 @@ WAL 模式、`synchronous=NORMAL`、`busy_timeout`、外键开启。单连接的
 ### 7.3 子进程运行时
 * **统一使用 Unix Domain Socket**：Linux / macOS 原生支持，Windows 10 1803 起支持 `AF_UNIX`。socket 位于一个权限为 0700 的私有目录中，放在较短的基础路径下，因为 socket 路径长度限制在 100 字节左右。
 * **握手**：宿主通过 `MAVIO_PLUGIN_SOCKET` / `MAVIO_PLUGIN_TOKEN` 传入 socket 路径与一次性 token。插件开始监听后在 stdout 输出一行 JSON（`{"mavio_plugin":1,"plugin_id":…}`）；宿主检查协议版本与插件 ID。此后每个请求都以 `Authorization: Bearer …` 携带 token。宿主 API 在同一目录中的第二个 socket（`MAVIO_HOST_SOCKET`）上提供，要求相同的 token。
-* **Loopback TCP**：在 Windows 上没有 Unix socket 的运行时（如 Node 与 Bun）改为在 loopback TCP 地址上提供服务，并在握手的 `address`（`127.0.0.1:port`）中给出，宿主检查它是 loopback 地址后连接；在 Windows 上宿主也在 loopback 地址 `MAVIO_HOST_ADDRESS` 上提供宿主 API。那里的请求与 socket 上一样携带 token。
+* **Loopback TCP**：在 Windows 上没有 Unix socket 的运行时（如 Node、Bun 与 Python 的 asyncio）改为在 loopback TCP 地址上提供服务，并在握手的 `address`（`127.0.0.1:port`）中给出，宿主检查它是 loopback 地址后连接；在 Windows 上宿主也在 loopback 地址 `MAVIO_HOST_ADDRESS` 上提供宿主 API。那里的请求与 socket 上一样携带 token。
 * **通信**：在 socket 上跑 Connect（HTTP/2 h2c），直接复用 `libs/proto` 生成的 handler / client。
 * **监督**：stdout 与 stderr 转发到宿主日志；定期调用 `Health` RPC（连续三次失败即结束进程）；进程退出后，监督者以指数退避（1 秒起翻倍，最长一分钟）重启插件，期间的调用会等待插件恢复。
 * **关闭**：`Close` 先发送 `Shutdown` RPC（插件侧 SDK 随后退出），然后 SIGTERM，最后 SIGKILL。在 Linux 上，宿主进程意外退出时内核也会结束插件（`Pdeathsig`）。在所有系统上，插件的 stdin 都是一条生命线：宿主持有管道的写端，并传入 `MAVIO_PLUGIN_LIFELINE=stdin`；宿主无论以何种方式结束，内核都会关闭写端，插件读到文件结尾后如同收到 SIGTERM 一样停止。
@@ -318,13 +323,14 @@ libs/plugin/
 │   └── process/     # Serve：监听 socket、认证、握手、收到 Shutdown 后退出
 ├── internal/        # abi（WASM 信封）、proc（子进程协议）、clients、testplugin
 ├── schema/          # （后期）由 Go 结构体生成配置表单用的 JSON Schema
-└── ts/              # @mavio/plugin：TypeScript 子进程插件的 serve、hostTransport、dataDir、hostOS
+├── ts/              # @mavio/plugin：TypeScript 子进程插件的 serve、hostTransport、dataDir、hostOS
+└── python/          # mavio-plugin：Python 子进程插件的 serve、host_client、data_dir
 ```
-插件在 `init` 中用 `guest.Handle(pluginv1connect.New…ServiceHandler(impl))` 注册 handler；`wasip1` 构建导入 `guest/wasm`，原生构建调用 `process.Serve`。`internal/testplugin` 是同时为两种运行时构建的完整示例。TypeScript（Node 或 Bun）编写的子进程插件使用 `@mavio/plugin`：`serve` 注册来自 `@mavio/proto` 的 Connect 服务，监听 socket（Windows 上为回环 TCP），认证、打印握手行，收到 `Shutdown` 后返回；`hostTransport` 是访问宿主 API 的 Connect transport。
+插件在 `init` 中用 `guest.Handle(pluginv1connect.New…ServiceHandler(impl))` 注册 handler；`wasip1` 构建导入 `guest/wasm`，原生构建调用 `process.Serve`。`internal/testplugin` 是同时为两种运行时构建的完整示例。TypeScript（Node 或 Bun）编写的子进程插件使用 `@mavio/plugin`：`serve` 注册来自 `@mavio/proto` 的 Connect 服务，监听 socket（Windows 上为回环 TCP），认证、打印握手行，收到 `Shutdown` 后返回；`hostTransport` 是访问宿主 API 的 Connect transport。Python 编写的子进程插件使用 `mavio-plugin`（`libs/plugin/python`，uv 工作区的成员），以及 `libs/proto` 生成到 `gen/python` 的消息与 connect-python 桩代码：`serve` 把其 Connect 服务与 HTTP 路由挂载为一个 ASGI 应用，由 Hypercorn 在 socket 上提供服务（h2c；Windows 上为回环 TCP），检查 token、打印握手行、应答 `Health`，在 `Shutdown` 之后或 lifeline 结束时返回；`host_client` 经宿主 socket 用 httpx 访问宿主 API；日志写到 stderr。Python 插件以一个目录发布，其中包含其清单、python-build-standalone 的 CPython、由 uv 按工作区的锁文件为目标平台安装的依赖（`uv pip install --target … --python-platform … --only-binary :all:`，因此一台机器即可打包所有平台），以及清单指定为可执行文件的启动器。
 
 ### 7.5 服务端中的插件
 * **插件目录**：服务端通过 `libs/plugin/host` 启动插件目录（`--plugin-dir`）中每个含有 `manifest.json` 的文件夹。无法读取的文件夹、重复的插件 ID 或启动失败的插件会被报告为失败并跳过，服务端照常运行。在此之前，种子目录（`--plugin-seed-dir`，例如容器镜像附带的插件）中的插件会被复制到插件目录，每个只复制一次：插件目录中的标记文件记录已播种的插件，因此被卸载或升级的插件保持原样，插件目录中已有的插件不会被复制。
-* **配置**：管理员设置的配置按插件 ID 保存（[领域模型](domain.zh-CN.md) §10），通过 `PluginManagementService.SetPluginConfig` 设置：先按清单的 `config_schema` 校验，再通过 `Configure` RPC 下发，插件接受后才保存，无需重启。启动时，主机 API 开始服务后，每个插件会重新收到已保存的配置，因为插件在配置时可能调用它。校验之前，服务器为 schema 标有 `"format": "uuid", "readOnly": true` 而配置中缺失或为空的属性生成 UUIDv7——插件无法改写自己的配置——并返回保存的配置。schema 带有 `x-mavio-options` 的属性从服务器通过 `ListPluginConfigOptions` 列出的来源取值：插件的索引器或下载客户端提供者的定义，其语音提供者的识别器与合成器，其字幕提供者的字幕站点与翻译器，服务器发送发布的全部下载客户端，或服务端的代理（§17.1）；每个选项带有名称、描述、标签（协议、隐私、语言）及其设置的 JSON Schema，由 schema 的 `settings` 同级属性保存，而 `name` 同级属性默认取选项的名称；插件自身的选项及其设置与其清单一样，由其语言文件翻译。schema 带有 `"x-mavio-requires-container": "<同级属性>"` 的开关需要该同级属性所指的容器依赖（§16）：该依赖未设置时，客户端将开关显示为关闭且不能开启，保存的值保持不变。
+* **配置**：管理员设置的配置按插件 ID 保存（[领域模型](domain.zh-CN.md) §10），通过 `PluginManagementService.SetPluginConfig` 设置：先按清单的 `config_schema` 校验，再通过 `Configure` RPC 下发，插件接受后才保存，无需重启。启动时，主机 API 开始服务后，每个插件会重新收到已保存的配置，因为插件在配置时可能调用它。校验之前，服务器为 schema 标有 `"format": "uuid", "readOnly": true` 而配置中缺失或为空的属性生成 UUIDv7——插件无法改写自己的配置——并返回保存的配置。schema 带有 `x-mavio-options` 的属性从服务器通过 `ListPluginConfigOptions` 列出的来源取值：插件的索引器或下载客户端提供者的定义，其语音提供者的识别、合成与转写服务，其字幕提供者的字幕站点与翻译器，服务器发送发布的全部下载客户端，或服务端的代理（§17.1）；每个选项带有名称、描述、标签（协议、隐私、语言）及其设置的 JSON Schema，由 schema 的 `settings` 同级属性保存，而 `name` 同级属性默认取选项的名称；插件自身的选项及其设置与其清单一样，由其语言文件翻译。schema 带有 `"x-mavio-requires-container": "<同级属性>"` 的开关需要该同级属性所指的容器依赖（§16）：该依赖未设置时，客户端将开关显示为关闭且不能开启，保存的值保持不变。
 * **状态**：插件以其配置运行、或其 schema 接受空配置时为就绪；在等待其 schema 所要求的配置时为未配置；无法启动或拒绝已保存的配置时为失败；被管理员停用时为已停用。`SystemService.ListPlugins` 连同清单一起报告这些状态。
 * **翻译**：插件的 `locales` 文件夹中每种语言一个 JSON 文件，以其 BCP 47 标签命名（`zh-Hans.json`），把清单中的每个英文字符串映射为其译文。服务端随清单读取它们；无法读取的文件使插件失败。`ListPlugins`、`InstallPlugin`、`SetPluginEnabled` 与 `SetPluginConfig` 返回的插件、`ListPluginContainers` 与 `SetPluginContainer` 返回的依赖，以及 `TaskService` 中插件的任务，使用请求的 `Accept-Language` 在插件的语言中匹配到的语言（`zh-CN` 读取 `zh-Hans`）：插件的名称与简介、任务的名称与说明、外部 ID 类型的名称、容器依赖的说明，以及配置 schema 的标题与说明，schema 的成员保持原有顺序。没有译文的字符串，以及插件没有的语言，保持英文；`PluginChanged` 事件由使用各种语言的管理员读取，携带未翻译的字符串。
 * **元数据提供者**：每个已启动的元数据插件都是媒体库刷新的提供者；未就绪时它不提供任何信息，因此之后才配置的插件会参与下一次刷新。只提供图片的提供者（如 fanart.tv）凭靠前的提供者找到的 ID 查找图片，靠后的提供者能看到这些 ID。
@@ -491,7 +497,7 @@ Mavio 通过**全量对账扫描**发现媒体库变更，本地磁盘与网络�
 
 * **服务端二进制**：`pnpm nx run server:dist` 以 `CGO_ENABLED=0` 和 `-trimpath` 将 `cmd/mavio` 交叉编译为 Linux、macOS、Windows 的 amd64 与 arm64 版本，输出到 `apps/server/dist/`；设置了 `$VERSION` 时将其写入 `internal/buildinfo`。所有二进制均为静态链接。每个平台的二进制与 Mavio 的 rclone 分支放在一起，即 `mise.toml` 锁定版本中该平台的构建，按其 SHA-256 摘要校验，位于 `apps/server/dist/mavio-<os>-<arch>/`，Windows 打包为 `.zip`，其余为 `.tar.gz`；下载的 rclone 保存在 `~/.cache/mavio-dist`（`MAVIO_DIST_CACHE`）。
 * **容器镜像**（`apps/server/Dockerfile`，从仓库根目录构建）：服务端在构建机自身平台上交叉编译，因此构建 linux/amd64 与 linux/arm64 镜像时 Go 部分无需模拟。镜像在 `/usr/lib/jellyfin-ffmpeg` 内置 jellyfin-ffmpeg 便携版，即 `mise.toml` 锁定的版本，并按 GitHub 为该发布文件给出的 SHA-256 摘要校验；基础镜像为 Debian slim，附带 CA 证书与时区数据；镜像还在 `/usr/local/bin/rclone` 内置 Mavio 的 rclone fork，即 `mise.toml` 锁定的发布版本的 Linux 构建，并按其 SHA-256 摘要校验，服务端将其作为 rcd 运行（§9.2），配置位于 `/config/rclone/rclone.conf`。
-* **镜像布局**：服务端以 `mavio` 用户（uid 与 gid 均为 1000）在 8686 端口运行，并在 UDP 7359 端口应答局域网发现；主目录为 `/config`（`config.toml`、SQLite 数据库、插件目录、选定的图片与备份），图片、编译后的插件与转码文件位于 `/cache`，媒体库挂载在 `/media` 下。镜像通过 `MAVIO_*` 环境变量设定这些路径与 jellyfin-ffmpeg 的可执行文件，镜像名之后的参数与 `-e` 传入的变量可覆盖它们。DLNA 插件随服务端一起构建，并从 `/usr/lib/mavio/plugins` 播种；它在 UDP 1900 端口上的 SSDP 只有在 `--network host` 下才能到达容器。索引器、下载客户端、字幕与智能体插件同样从此播种，智能体插件由 Bun 为镜像的平台编译；未配置索引器时第一个只每日拉取 Cardigann 定义，未配置客户端、提供者或凭据时其他插件什么也不做。健康检查调用 `SystemService.GetHealth`。默认不挂载引擎的 socket；挂载后（`-v /var/run/docker.sock:/var/run/docker.sock`，并把 socket 的用户组加给服务端的用户），服务端可在自身容器旁运行插件的容器依赖（§16.2）。
+* **镜像布局**：服务端以 `mavio` 用户（uid 与 gid 均为 1000）在 8686 端口运行，并在 UDP 7359 端口应答局域网发现；主目录为 `/config`（`config.toml`、SQLite 数据库、插件目录、选定的图片与备份），图片、编译后的插件与转码文件位于 `/cache`，媒体库挂载在 `/media` 下。镜像通过 `MAVIO_*` 环境变量设定这些路径与 jellyfin-ffmpeg 的可执行文件，镜像名之后的参数与 `-e` 传入的变量可覆盖它们。DLNA 插件随服务端一起构建，并从 `/usr/lib/mavio/plugins` 播种；它在 UDP 1900 端口上的 SSDP 只有在 `--network host` 下才能到达容器。索引器、下载客户端、字幕、智能体与 pipecat 插件同样从此播种，智能体插件由 Bun 为镜像的平台编译，pipecat 插件连同其 Python 为镜像的平台打包（约 400 MB，不含模型，模型在管理员选择时下载）；未配置索引器时第一个只每日拉取 Cardigann 定义，未配置客户端、提供者或凭据时其他插件什么也不做。健康检查调用 `SystemService.GetHealth`。默认不挂载引擎的 socket；挂载后（`-v /var/run/docker.sock:/var/run/docker.sock`，并把 socket 的用户组加给服务端的用户），服务端可在自身容器旁运行插件的容器依赖（§16.2）。
 
 ---
 
@@ -569,7 +575,7 @@ Mavio 为电影与单集查找缺少的字幕，即 Bazarr 在 Sonarr 与 Radarr
 | 提供者、翻译器 | `plugins/subtitles`（进程）、`SUBTITLE_PROVIDER`、`SUBTITLE_TRANSLATOR` | `subliminal_patch/providers`、`pitcher.py`、`get_providers.py` 的限流、`subtitles/tools/translate` |
 | 修正、编码、语言识别 | `libs/subtitle` | subzero、字符集检测、`guess_language` |
 | 时间轴同步 | `libs/media/subsync`，语音由以 Go 运行的 Silero VAD 检测（`libs/media/vad`） | ffsubsync 及其 Silero 检测器 |
-| 转写 | `libs/acquire/subtitles`（转写什么）、`apps/server/internal/subtitles`（转写来源）、`SPEECH_TO_TEXT` 插件的识别器（`plugins/voice`） | `subliminal_patch/providers/whisperai.py` |
+| 转写 | `libs/acquire/subtitles`（转写什么）、`apps/server/internal/subtitles`（转写来源）、`SPEECH_TO_TEXT` 插件的转写器（`plugins/pipecat`） | `subliminal_patch/providers/whisperai.py` |
 
 * **以服务端自己的数据代替 Bazarr 的同步。** 电影、剧集与单集是服务端的条目；文件来自的 release 是其入库所记录的抓取（Bazarr 的 `sceneName` 与历史 refiner），否则是文件名；release 名称由 `libs/release` 解析，代替 guessit；编码、分辨率与音轨语言来自已保存的 probe 结果。Bazarr 的 Sonarr 与 Radarr 同步、路径映射、Plex 与 Jellyfin 刷新、Apprise、调度器、备份与公告，分别对应入库与扫描、条目的流、活动日志与通知插件、`TaskService` 以及 P11。
 * **规则与网络分开**，如资源获取（§13）：配置、决策、历史与阻止列表属于服务端；与字幕站点通信、随站点变化的部分在插件中，从插件目录升级，无需发布服务端。
@@ -604,22 +610,22 @@ Mavio 为电影与单集查找缺少的字幕，即 Bazarr 在 Sonarr 与 Radarr
   * **校对**（`subtitles.proofread`）让一个 AI 模型（指定的，否则为第一个翻译该文件的）把每条译文与其来源比较，并以其修正替换。字幕条数（不计署名条）相同时按顺序与源字幕条配对，否则按精确时间，再否则与重叠至少较短者一半时长的源字幕条配对，因此翻译后经过同步或编辑的文件仍能校对；记录中注明修改的条数。
   * **自动化**（`subtitles.translate_wanted` 定时任务，启用时每隔设定间隔运行）为电影与单集翻译缺少的字幕：从上次停下处起轮流选取，每次至多设置中的数量，仅限文件足够旧的，依据其已有的第一个源语言字幕：外挂文件优先于内嵌文字字幕流，从不用 forced 字幕，非听障字幕优先于听障字幕。同一条目与语言已有待处理或正在运行的翻译时不再排队。
   * **统计**（`GetSubtitleTranslationStatistics`）汇总各记录：文件数、字幕条数、字符数、令牌数与费用，按翻译器、语言对与媒体类型分组，以及最近每天的文件数。
-* **转写**遵循 Bazarr 的 Whisper 提供者，但由 `SPEECH_TO_TEXT` 插件的识别器（[插件 §8.16](plugins.zh-CN.md#816-语音识别与合成)）代替一个单独的提供者，因此为助手配置的每个语音服务（[助手 §8.5](assistant.zh-CN.md#85-字幕)）也能转写字幕。服务端的转写来源与字幕提供者一起参与搜索，位于媒体库的提供者顺序中，使用字幕设置在给出时间戳的识别器中选定的那个；它为每个它能生成的缺少语言提供一条字幕，评分与 Bazarr 给 Whisper 的相同（只匹配剧集、季与集，或标题），因此只在没有更好的提供者字幕时被选中。它把音频转写为其本身的语言，或在识别器支持翻译时翻译为英语，从不译为其他语言，也不经过翻译器。音频的语言取自音频流的标签，按 Bazarr 的方式映射；没有标签的流或标签含义不明（`und`、`mul`、`zxx` 等）时，识别器从第一条音频流的前 30 秒检测，检测结果按文件保存；有多条音频流时，转写与字幕语言相同的那条。这些选择是 `libs/acquire/subtitles` 的纯函数。识别器从宿主 API（`/speech/audio/{token}`，与视频开头对齐的 16 kHz 单声道 PCM）读取音频，以带时间的分段应答，由服务端写成 SubRip。
+* **转写**遵循 Bazarr 的 Whisper 提供者，但由 `SPEECH_TO_TEXT` 插件的转写器（[插件 §8.16](plugins.zh-CN.md#816-语音会话与转写)）代替一个单独的提供者：`plugins/pipecat` 自己以下载到其数据目录的模型运行 faster-whisper，或请求 OpenAI 兼容的转写 API，在与其语音会话分开的工作进程中进行（[助手 §8.9](assistant.zh-CN.md#89-字幕)），因此不需要 whisper 容器。服务端的转写来源与字幕提供者一起参与搜索，位于媒体库的提供者顺序中，使用字幕设置选定的转写器；它为每个它能生成的缺少语言提供一条字幕，评分与 Bazarr 给 Whisper 的相同（只匹配剧集、季与集，或标题），因此只在没有更好的提供者字幕时被选中。它把音频转写为其本身的语言，或在转写器支持翻译时翻译为英语，从不译为其他语言，也不经过翻译器。音频的语言取自音频流的标签，按 Bazarr 的方式映射；没有标签的流或标签含义不明（`und`、`mul`、`zxx` 等）时，转写器从第一条音频流的前 30 秒检测，检测结果按文件保存；有多条音频流时，转写与字幕语言相同的那条。这些选择是 `libs/acquire/subtitles` 的纯函数。转写器从宿主 API（`/speech/audio/{token}`，与视频开头对齐的 16 kHz 单声道 PCM）读取音频，以带时间的分段应答，由服务端写成 SubRip。
 
 ## 15. 助手（apps/server/internal/assistant）
 
 助手的规格见[助手](assistant.zh-CN.md)。在服务端：
-* **`AssistantService`**（`mavio.assistant.v1`）接收文本请求（客户端的语法匹配时附带意图），并以流式传送发生的一切；它列出、读取与删除用户的会话与记忆，为识别器提供提示，并为收听用的 WebSocket 签名。语音路由是普通 HTTP：`/assistant/listen/{token}`（WebSocket）与 `/assistant/speech`。
+* **`AssistantService`**（`mavio.assistant.v1`）接收文本请求（客户端的语法匹配时附带意图），并以流式传送发生的一切；`SteerAsk` 与 `AbortAsk` 引导与中止一次运行；它列出、读取与删除用户的会话与记忆，并开启语音会话。语音转接是普通 HTTP：`/assistant/voice/{token}`（WebSocket），保留的语音位于 `/assistant/speech/` 之下。
 * **快速路径**像运行 WASM 插件那样在 wazero 上运行 `libs/intent` 的 WASM 模块，并在用户的媒体库中解析其槽位。
 * **工具**以用户身份调用服务端自己的服务；对发出请求的设备通过客户端动作执行，对其他设备通过 `SessionService.SendCommand` 执行。
 * **AI 路径**经由 `AGENT_SESSION` 插件（[插件 §8.15](plugins.zh-CN.md#815-ai-网关与智能体会话)）：服务端监听其工具调用并运行，按调用 ID 把结果保留一天，并记录每个会话的用户与设备。
-* **语音**经由 `SPEECH_TO_TEXT` 与 `TEXT_TO_SPEECH` 插件（[插件 §8.16](plugins.zh-CN.md#816-语音识别与合成)）；一段话的结束由 Silero VAD（`libs/media/vad`）检测，音频从不保存。
+* **语音**经由 `VOICE_SESSION` 插件（[插件 §8.16](plugins.zh-CN.md#816-语音会话与转写)）：服务端在其中开启每个会话，带一个会话令牌，该令牌仅在该会话的运行中代表用户；服务端把客户端的 WebSocket 转接到插件的 socket，并在转接时保留回答的语音；用户说的话从不保存。
 
 ---
 
 ## 16. 容器依赖（libs/containers）
 
-有些插件使用的服务最适合以容器镜像运行，例如 `plugins/voice` 的 whisper-asr-webservice。插件在清单中声明这些服务（[插件 §11](plugins.zh-CN.md#11-容器依赖)），服务端让每个服务在某个地址上可用：要么在它能访问的容器引擎上运行该服务（托管），要么使用管理员给出的地址（外部），并为后者显示运行它的命令。插件始终只看到地址；Mavio 的任何部分都不要求有容器引擎。
+有些插件使用的服务最适合以容器镜像运行，例如 `plugins/solvers` 的 FlareSolverr。插件在清单中声明这些服务（[插件 §11](plugins.zh-CN.md#11-容器依赖)），服务端让每个服务在某个地址上可用：要么在它能访问的容器引擎上运行该服务（托管），要么使用管理员给出的地址（外部），并为后者显示运行它的命令。插件始终只看到地址；Mavio 的任何部分都不要求有容器引擎。
 
 ### 16.1 引擎检测
 * **端点**：`--container-endpoint`（`MAVIO_CONTAINER_ENDPOINT`），否则 `DOCKER_HOST`，否则以下第一个有应答的：`/var/run/docker.sock`、`$XDG_RUNTIME_DIR/docker.sock`（rootless Docker）、`~/.docker/run/docker.sock`（macOS 上的 Docker Desktop）、`$XDG_RUNTIME_DIR/podman/podman.sock`、`/run/podman/podman.sock`，Windows 上为命名管道 `//./pipe/docker_engine`。接受 `unix://`、`npipe://` 与 `tcp://` 端点；`tcp://` 端点必须是回环地址。
