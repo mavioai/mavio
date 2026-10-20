@@ -30,6 +30,7 @@ public struct SignInView: View {
     @Environment(AppModel.self) private var model
     @Environment(\.dismiss) private var dismiss
     @Environment(\.theme) private var theme
+    @Environment(\.colorScheme) private var scheme
     @Environment(\.openURL) private var openURL
     @Environment(\.webAuthenticationSession) private var webAuthenticationSession
     @State private var step = Step.welcome
@@ -53,14 +54,16 @@ public struct SignInView: View {
     public var body: some View {
         ZStack {
             theme.colors.background.ignoresSafeArea()
-            if step == .welcome {
+            if Self.carded {
+                card
+            } else if step == .welcome {
                 welcome
             } else {
                 page
             }
         }
         .overlay(alignment: .topLeading) {
-            if adding && history.isEmpty {
+            if adding && history.isEmpty && !Self.carded {
                 Button(MavioStrings.actionCancel) { dismiss() }
                     .type(theme.type.body)
                     .foregroundStyle(theme.colors.accentText)
@@ -82,26 +85,11 @@ public struct SignInView: View {
     private var welcome: some View {
         GeometryReader { geo in
             ScrollView {
-                VStack(alignment: .leading, spacing: MavioSpacing.s12) {
-                    Wordmark(height: 40).padding(.bottom, MavioSpacing.s4)
-                    Text(info.map { MavioStrings.authSignInTo(server: $0.name) } ?? MavioStrings.authWelcome)
-                        .modifier(Title())
-                    if info != nil {
-                        Text(MavioStrings.authModeMavioDevMessage).modifier(BodyText())
-                    }
-                    Spacer().frame(height: MavioSpacing.s4)
-                    if let error { ErrorLine(error) }
-                    Action(MavioStrings.authSignInWithMavio) { Task { await browserSignIn() } }
-                    Action(MavioStrings.authUseLinkCode, icon: "devices", primary: false) { go(.link) }
-                    if info == nil {
-                        Or()
-                        Action(MavioStrings.authConnectToServer, icon: "server", primary: false) { go(.address) }
-                    }
-                }
-                .frame(maxWidth: 420, alignment: .leading)
-                .padding(.horizontal, MavioSpacing.s24)
-                .padding(.bottom, MavioSpacing.s24)
-                .frame(maxWidth: .infinity, minHeight: geo.size.height, alignment: .bottom)
+                welcomeSteps(alignment: .leading)
+                    .frame(maxWidth: 420, alignment: .leading)
+                    .padding(.horizontal, MavioSpacing.s24)
+                    .padding(.bottom, MavioSpacing.s24)
+                    .frame(maxWidth: .infinity, minHeight: geo.size.height, alignment: .bottom)
             }
             .scrollBounceBehavior(.basedOnSize)
             .background(alignment: .top) {
@@ -116,34 +104,115 @@ public struct SignInView: View {
     /// the background.
     private var page: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 22) {
-                if !history.isEmpty {
-                    Button(action: back) {
-                        HStack(spacing: 2) {
-                            Icon("back", size: 22)
-                            Text(MavioStrings.actionBack)
-                        }
-                        .font(.system(size: 17))
-                        .foregroundStyle(theme.colors.accentText)
-                    }
-                    .padding(.leading, -4)
-                }
-                switch step {
-                case .welcome: EmptyView()
-                case .link: linkStep
-                case .address: addressStep
-                case .credentials: credentialsStep
-                case .quickConnect: quickConnectStep
-                case .setUp: setUpStep
-                }
-            }
-            .frame(maxWidth: 420, alignment: .leading)
-            .padding(.horizontal, MavioSpacing.s20)
-            .padding(.top, adding && history.isEmpty ? 56 : MavioSpacing.s16)
-            .padding(.bottom, 40)
-            .frame(maxWidth: .infinity)
+            steps
+                .frame(maxWidth: 420, alignment: .leading)
+                .padding(.horizontal, MavioSpacing.s20)
+                .padding(.top, adding && history.isEmpty ? 56 : MavioSpacing.s16)
+                .padding(.bottom, 40)
+                .frame(maxWidth: .infinity)
         }
         .scrollDismissesKeyboard(.interactively)
+    }
+
+    /// The first step's content: the wordmark, the welcome and the ways in.
+    private func welcomeSteps(alignment: HorizontalAlignment) -> some View {
+        VStack(alignment: alignment, spacing: MavioSpacing.s12) {
+            Wordmark(height: 40).padding(.bottom, MavioSpacing.s4)
+            Text(info.map { MavioStrings.authSignInTo(server: $0.name) } ?? MavioStrings.authWelcome)
+                .modifier(Title())
+            if info != nil {
+                Text(MavioStrings.authModeMavioDevMessage).modifier(BodyText())
+            }
+            Spacer().frame(height: MavioSpacing.s4)
+            if let error { ErrorLine(error) }
+            Action(MavioStrings.authSignInWithMavio) { Task { await browserSignIn() } }
+            Action(MavioStrings.authUseLinkCode, icon: "devices", primary: false) { go(.link) }
+            if info == nil {
+                Or()
+                Action(MavioStrings.authConnectToServer, icon: "server", primary: false) { go(.address) }
+            }
+        }
+        .multilineTextAlignment(alignment == .center ? .center : .leading)
+    }
+
+    /// Whether the steps are a card on the wall of posters, as in the web
+    /// UI's desktop layout, which the Mac always has.
+    #if os(macOS)
+        private static let carded = true
+    #else
+        private static let carded = false
+    #endif
+
+    /// The card of a wide window, centered on the wall of posters, as the
+    /// web UI's: the first step, or another with its back link.
+    private var card: some View {
+        GeometryReader { geo in
+            ScrollView {
+                Group {
+                    if step == .welcome {
+                        welcomeSteps(alignment: .center)
+                    } else {
+                        steps
+                    }
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.horizontal, 40)
+                .padding(.top, 40)
+                .padding(.bottom, 34)
+                .frame(maxWidth: 460)
+                .background(.ultraThinMaterial, in: .rect(cornerRadius: 26))
+                .background(
+                    (scheme == .dark ? Color(white: 0.11).opacity(0.82) : Color.white.opacity(0.84)),
+                    in: .rect(cornerRadius: 26)
+                )
+                .overlay {
+                    RoundedRectangle(cornerRadius: 26)
+                        .strokeBorder(scheme == .dark ? Color(white: 0.33).opacity(0.5) : Color.black.opacity(0.08))
+                }
+                .shadow(color: .black.opacity(scheme == .dark ? 0.5 : 0.14), radius: 40, y: 30)
+                .overlay(alignment: .topLeading) {
+                    if adding && history.isEmpty {
+                        Button(MavioStrings.actionCancel) { dismiss() }
+                            .buttonStyle(.plain)
+                            .foregroundStyle(theme.colors.accentText)
+                            .padding(MavioSpacing.s16)
+                    }
+                }
+                .padding(theme.layout.margin)
+                .frame(maxWidth: .infinity, minHeight: geo.size.height)
+            }
+            .scrollBounceBehavior(.basedOnSize)
+            .background {
+                PosterWall(card: true)
+                    .frame(width: geo.size.width, height: geo.size.height + geo.safeAreaInsets.top)
+                    .ignoresSafeArea()
+            }
+        }
+    }
+
+    /// The other steps: a back link, the step's title and its content.
+    private var steps: some View {
+        VStack(alignment: .leading, spacing: 22) {
+            if !history.isEmpty {
+                Button(action: back) {
+                    HStack(spacing: 2) {
+                        Icon("back", size: 22)
+                        Text(MavioStrings.actionBack)
+                    }
+                    .font(.system(size: 17))
+                    .foregroundStyle(theme.colors.accentText)
+                }
+                .padding(.leading, -4)
+            }
+            switch step {
+            case .welcome: EmptyView()
+            case .link: linkStep
+            case .address: addressStep
+            case .credentials: credentialsStep
+            case .quickConnect: quickConnectStep
+            case .setUp: setUpStep
+            }
+        }
     }
 
     // MARK: Steps
@@ -352,7 +421,11 @@ public struct SignInView: View {
     }
 
     /// The client ID of this app at mavio.dev.
-    private static let clientId = "dev.mavio.ios"
+    #if os(macOS)
+        private static let clientId = "dev.mavio.macos"
+    #else
+        private static let clientId = "dev.mavio.ios"
+    #endif
 
     /// The API of the mavio.dev the server belongs to, or the one this build
     /// signs in at (`MAVIO_DEV_API`).
