@@ -14,6 +14,7 @@ mod events;
 #[cfg(test)]
 mod fake;
 mod home;
+mod language;
 mod reporting;
 mod servers;
 mod session;
@@ -36,6 +37,7 @@ pub use downloads::{Downloads, Transfer};
 pub use error::{Error, Result};
 pub use events::{Backoff, EventSink, StreamState, spawn as stream_events};
 pub use home::{Content, Entry, Hubs, Section, ServerHubs, Trending, Version, merge as merge_home};
+pub use language::set_languages;
 pub use reporting::{Playback, PlaybackOptions, REPORT_INTERVAL, Reporter, Session};
 pub use servers::{AccountMode, DeviceInfo, QuickConnect, ServerInfo, Servers, TokenStore};
 pub use session::Transport;

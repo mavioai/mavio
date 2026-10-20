@@ -237,6 +237,8 @@ impl ClientTransport for Transport {
         request: Request<ClientBody>,
     ) -> BoxFuture<'static, std::result::Result<Response<Self::ResponseBody>, Self::Error>> {
         let http = self.http.clone();
+        let mut request = request;
+        crate::language::ask(&mut request);
         let Some(session) = self.session.clone() else {
             return http.send(request);
         };

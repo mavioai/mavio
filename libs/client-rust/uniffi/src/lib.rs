@@ -47,6 +47,14 @@ pub fn is_local_address(address: String) -> bool {
     mavio_core::is_local_address(&address)
 }
 
+/// Sets the languages the app is shown in, most wanted first, as BCP 47
+/// tags such as `zh-Hans`: every call asks the servers for them, which
+/// translate what they name in them, such as the plugins.
+#[uniffi::export]
+pub fn set_languages(tags: Vec<String>) {
+    mavio_core::set_languages(&tags);
+}
+
 /// The runtime of the core's tasks.
 fn runtime() -> &'static Runtime {
     static RUNTIME: OnceLock<Runtime> = OnceLock::new();

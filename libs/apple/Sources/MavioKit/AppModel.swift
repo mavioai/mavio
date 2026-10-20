@@ -82,6 +82,9 @@ public final class AppModel {
         downloadsFolder = dir.appending(path: "Downloads", directoryHint: .isDirectory)
         try FileManager.default.createDirectory(at: downloadsFolder, withIntermediateDirectories: true)
         self.relay = relay
+        // The servers name what they translate, as the plugins, in the
+        // languages the app's strings are chosen from.
+        setLanguages(tags: Locale.preferredLanguages)
         client = try Client(
             databasePath: dir.appending(path: "core.sqlite").path(percentEncoded: false),
             device: Self.device(),
