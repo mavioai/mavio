@@ -69,8 +69,8 @@ class Session:
 class Service:
     """A service recognizers, voices or transcribers are configured from.
 
-    make makes a session's Pipecat service of an engine's settings; model
-    tells the local model an engine's settings need, if any; languages
+    make makes a session's Pipecat service of an engine's settings; models
+    tells the local models an engine's settings need, if any; languages
     tells the languages an engine speaks or recognizes, empty for any.
     """
 
@@ -79,7 +79,7 @@ class Service:
     settings: tuple[Setting, ...] = ()
     hints: bool = False
     make: Callable[[dict[str, Any], Session, Models], FrameProcessor] | None = None
-    model: Callable[[dict[str, Any]], ModelRef | None] = lambda _settings: None
+    models: Callable[[dict[str, Any]], tuple[ModelRef, ...]] = lambda _settings: ()
     languages: Callable[[dict[str, Any]], list[str]] = lambda _settings: []
 
     def values(self, settings: dict[str, Any]) -> dict[str, Any]:
@@ -284,7 +284,7 @@ RECOGNITION = (
         WHISPER_SETTINGS,
         hints=True,
         make=_whisper_stt,
-        model=lambda s: whisper_model(s["model"]),
+        models=lambda s: (whisper_model(s["model"]),),
     ),
     Service(
         "openai",
@@ -371,17 +371,48 @@ def kokoro_language(voice: str) -> str:
     return _KOKORO_LANGUAGES.get(voice[:1], "")
 
 
+def voices(value: Any) -> list[str]:
+    """The voices of a voice setting, which lists one or more, separated by
+    commas."""
+    return [v.strip() for v in str(value or "").split(",") if v.strip()]
+
+
+def voice_languages(value: Any, language_of: Callable[[str], str]) -> list[str]:
+    """The languages the voices of a voice setting speak."""
+    return list(dict.fromkeys(lang for v in voices(value) if (lang := language_of(v))))
+
+
+def pick_voice(value: Any, language_of: Callable[[str], str], language: str) -> str:
+    """The voice of a voice setting for a session's language: the first
+    speaking the language, by its whole tag, else by its primary language,
+    else the first voice."""
+    listed = voices(value)
+    tag = language.lower()
+    if tag:
+        for whole in (True, False):
+            for v in listed:
+                lang = language_of(v).lower()
+                if lang == tag if whole else lang.split("-")[0] == tag.split("-")[0]:
+                    return v
+    return listed[0] if listed else ""
+
+
+# One Kokoro voice of each language: the model holds them all.
+_KOKORO_VOICES = (
+    "af_heart, bf_emma, zf_xiaobei, jf_alpha, ef_dora, ff_siwis, hf_alpha, if_sara, pf_dora"
+)
+
+
 def _kokoro_tts(settings: dict[str, Any], session: Session, models: Models) -> FrameProcessor:
     from pipecat.services.kokoro.tts import KokoroTTSService
 
     files = models.kokoro()
-    language = pipecat_language(kokoro_language(settings["voice"]) or session.language)
+    voice = pick_voice(settings["voice"], kokoro_language, session.language)
+    language = pipecat_language(kokoro_language(voice) or session.language)
     return KokoroTTSService(
         model_path=str(files.model),
         voices_path=str(files.voices),
-        settings=KokoroTTSService.Settings(
-            voice=settings["voice"], language=language or Language.EN
-        ),
+        settings=KokoroTTSService.Settings(voice=voice, language=language or Language.EN),
     )
 
 
@@ -440,7 +471,7 @@ def piper_language(voice: str) -> str:
 def _piper_tts(settings: dict[str, Any], session: Session, models: Models) -> FrameProcessor:
     from pipecat.services.piper.tts import PiperTTSService
 
-    voice = settings["voice"]
+    voice = pick_voice(settings["voice"], piper_language, session.language)
     return PiperTTSService(
         download_dir=models.piper(voice).parent,
         settings=PiperTTSService.Settings(voice=voice),
@@ -488,15 +519,16 @@ SYNTHESIS = (
         (
             Setting(
                 "voice",
-                "Voice",
-                "A Kokoro voice, named after its language: "
-                "af_heart, bf_emma, zf_xiaobei, jf_alpha…",
-                default="af_heart",
+                "Voices",
+                "Kokoro voices, separated by commas, named after their language: "
+                "af_heart, bf_emma, zf_xiaobei, jf_alpha…; a session speaks with "
+                "the first of its language",
+                default=_KOKORO_VOICES,
             ),
         ),
         make=_kokoro_tts,
-        model=lambda _s: kokoro_model(),
-        languages=lambda s: [kokoro_language(s["voice"])] if kokoro_language(s["voice"]) else [],
+        models=lambda _s: (kokoro_model(),),
+        languages=lambda s: voice_languages(s["voice"], kokoro_language),
     ),
     Service(
         "openai",
@@ -540,15 +572,16 @@ SYNTHESIS = (
         (
             Setting(
                 "voice",
-                "Voice",
-                "A Piper voice, named after its language: "
-                "en_US-lessac-medium, zh_CN-huayan-medium, de_DE-thorsten-medium…",
+                "Voices",
+                "Piper voices, separated by commas, named after their language: "
+                "en_US-lessac-medium, zh_CN-huayan-medium, de_DE-thorsten-medium…; "
+                "each is downloaded, and a session speaks with the first of its language",
                 default="en_US-lessac-medium",
             ),
         ),
         make=_piper_tts,
-        model=lambda s: piper_model(s["voice"]),
-        languages=lambda s: [piper_language(s["voice"])] if piper_language(s["voice"]) else [],
+        models=lambda s: tuple(piper_model(v) for v in voices(s["voice"])),
+        languages=lambda s: voice_languages(s["voice"], piper_language),
     ),
     Service(
         "soniox",
@@ -583,7 +616,7 @@ TRANSCRIPTION = (
         CONTAINER,
         "Speaches",
         WHISPER_SETTINGS,
-        model=lambda s: whisper_model(s["model"]),
+        models=lambda s: (whisper_model(s["model"]),),
     ),
     Service(
         "openai",

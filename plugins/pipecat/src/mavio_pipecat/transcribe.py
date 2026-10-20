@@ -81,8 +81,8 @@ class Transcription:
 
     def _ready(self, engine: Engine) -> bool:
         service = self._catalog.transcription.get(engine.service)
-        return service is not None and self._models.ready(
-            service.model(service.values(engine.settings))
+        return service is not None and all(
+            self._models.ready(m) for m in service.models(service.values(engine.settings))
         )
 
     async def list_transcribers(

@@ -73,9 +73,9 @@ class Speech:
     def _service(self, engine: Engine, kind: dict[str, Service]) -> Service:
         return kind[engine.service]
 
-    def model(self, engine: Engine, kind: dict[str, Service]) -> ModelRef | None:
+    def engine_models(self, engine: Engine, kind: dict[str, Service]) -> tuple[ModelRef, ...]:
         service = self._service(engine, kind)
-        return service.model(service.values(engine.settings))
+        return service.models(service.values(engine.settings))
 
     def info(self, engine: Engine, kind: dict[str, Service]) -> voice_pb2.VoiceEngineInfo:
         service = self._service(engine, kind)
@@ -87,7 +87,7 @@ class Speech:
             enabled=engine.enabled,
             languages=service.languages(values),
             hints=service.hints,
-            ready=self.models.ready(service.model(values)),
+            ready=all(self.models.ready(m) for m in service.models(values)),
         )
 
     def pick(
@@ -111,11 +111,21 @@ class Speech:
         """The models of the enabled engines not downloaded."""
         c, cat = self.config, self.catalog
         refs = [
-            *(self.model(e, cat.recognition) for e in c.recognizers if e.enabled),
-            *(self.model(e, cat.synthesis) for e in c.voices if e.enabled),
-            *(self.model(e, cat.transcription) for e in c.transcribers if e.enabled),
+            *(
+                m
+                for e in c.recognizers
+                if e.enabled
+                for m in self.engine_models(e, cat.recognition)
+            ),
+            *(m for e in c.voices if e.enabled for m in self.engine_models(e, cat.synthesis)),
+            *(
+                m
+                for e in c.transcribers
+                if e.enabled
+                for m in self.engine_models(e, cat.transcription)
+            ),
         ]
-        return [r for r in dict.fromkeys(refs) if r is not None and not self.models.ready(r)]
+        return [r for r in dict.fromkeys(refs) if not self.models.ready(r)]
 
 
 class Sessions:

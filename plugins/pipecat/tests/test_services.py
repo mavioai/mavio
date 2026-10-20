@@ -10,7 +10,7 @@ from pipecat.services.tts_service import TTSService
 from pipecat.transcriptions.language import Language
 
 from mavio.plugin.v1 import settings_pb2
-from mavio_pipecat.models import Models
+from mavio_pipecat.models import Models, kokoro_model, piper_model
 from mavio_pipecat.services import (
     RECOGNITION,
     SYNTHESIS,
@@ -19,8 +19,11 @@ from mavio_pipecat.services import (
     Setting,
     google_language,
     kokoro_language,
+    pick_voice,
     pipecat_language,
     piper_language,
+    voice_languages,
+    voices,
 )
 
 
@@ -36,7 +39,7 @@ def test_every_service_makes_its_pipecat_service(tmp_path: Path):
         assert isinstance(stt, STTService), f"{service.name} made {stt!r}"
     for service in SYNTHESIS:
         assert service.make is not None
-        if not models.ready(service.model(service.values({}))):
+        if not all(models.ready(m) for m in service.models(service.values({}))):
             assert service.name in ("kokoro", "piper"), f"{service.name} needs a model"
             continue
         tts = service.make(service.values({**keys, "voice": "v"}), session, models)
@@ -81,6 +84,36 @@ def test_languages():
     assert got == ["zh-CN", "en-GB", ""], f"Piper's = {got}"
     got = [google_language(v) for v in ["cmn-CN-Chirp3-HD-Aoede", "en-US-Chirp3-HD-Charon", "v"]]
     assert got == ["zh-CN", "en-US", ""], f"Google's = {got}"
+
+
+def test_a_voice_setting_lists_voices_of_languages():
+    value = "af_heart, bf_emma ,zf_xiaobei,"
+    assert voices(value) == ["af_heart", "bf_emma", "zf_xiaobei"]
+    got = voice_languages(value, kokoro_language)
+    assert got == ["en-US", "en-GB", "zh"], f"languages = {got}"
+    cases = [
+        ("zh-CN", "zf_xiaobei"),
+        ("en-GB", "bf_emma"),
+        ("en-AU", "af_heart"),
+        ("ja", "af_heart"),
+        ("", "af_heart"),
+    ]
+    for language, want in cases:
+        got = pick_voice(value, kokoro_language, language)
+        assert got == want, f"voice for {language!r} = {got!r}, want = {want!r}"
+    assert pick_voice("", kokoro_language, "zh") == ""
+
+
+def test_kokoro_and_piper_speak_the_languages_of_their_voices():
+    kokoro, piper = (next(s for s in SYNTHESIS if s.name == n) for n in ("kokoro", "piper"))
+    got = kokoro.languages(kokoro.values({}))
+    assert "zh" in got and "en-US" in got, f"Kokoro's default languages = {got}"
+    assert kokoro.models(kokoro.values({})) == (kokoro_model(),)
+    two = piper.values({"voice": "en_US-lessac-medium, zh_CN-huayan-medium"})
+    assert piper.languages(two) == ["en-US", "zh-CN"]
+    got = piper.models(two)
+    want = (piper_model("en_US-lessac-medium"), piper_model("zh_CN-huayan-medium"))
+    assert got == want, f"Piper's models = {got}, want = {want}"
 
 
 def test_hints_go_to_the_services_that_take_them(tmp_path: Path):
