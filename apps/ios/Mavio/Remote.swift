@@ -1,3 +1,4 @@
+import MavioAdmin
 import MavioKit
 import MavioUI
 import SwiftUI
@@ -44,7 +45,7 @@ struct RemoteView: View {
             .overlay { if device == nil && failure == nil { ProgressView() } }
             .scrollContentBackground(.hidden)
             .background(theme.colors.background)
-            .navigationTitle(device.map(Self.name) ?? MavioStrings.remoteTitle)
+            .navigationTitle(device.map(\.shownName) ?? MavioStrings.remoteTitle)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
@@ -205,11 +206,6 @@ struct RemoteView: View {
         } catch {
             failure = (error as? CoreError)?.reason ?? error.localizedDescription
         }
-    }
-
-    /// A device's name, else its client's.
-    static func name(_ d: DeviceSession) -> String {
-        d.deviceName.isEmpty ? (d.client.isEmpty ? "—" : d.client) : d.deviceName
     }
 
     private static func clock(_ seconds: TimeInterval) -> String {

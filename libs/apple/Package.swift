@@ -10,6 +10,7 @@ let package = Package(
     defaultLocalization: "en",
     platforms: [.iOS(.v18), .tvOS(.v18), .macOS(.v15)],
     products: [
+        .library(name: "MavioAdmin", targets: ["MavioAdmin"]),
         .library(name: "MavioKit", targets: ["MavioKit"]),
         .library(name: "MavioPlayer", targets: ["MavioPlayer"]),
         .library(name: "MavioUI", targets: ["MavioUI"]),
@@ -56,6 +57,9 @@ let package = Package(
             // The logos of the sites a title's ratings and links come from.
             resources: [.process("Resources")]
         ),
+        // The settings of a server, which the apps show to its users and
+        // administrators.
+        .target(name: "MavioAdmin", dependencies: ["MavioUI"]),
         .testTarget(name: "MavioKitTests", dependencies: ["MavioKit"]),
         .testTarget(name: "MavioPlayerTests", dependencies: ["MavioPlayer"]),
         // The snapshot tests (docs/clients.md §6.8), which draw on the iOS

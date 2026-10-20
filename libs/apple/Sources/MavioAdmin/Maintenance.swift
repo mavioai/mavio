@@ -32,9 +32,9 @@ extension View {
 
     /// A settings page's list: on the background, with an inline title.
     fileprivate func settingsPage(_ title: String) -> some View {
-        scrollContentBackground(.hidden)
+        hiddenListBackground()
             .navigationTitle(title)
-            .navigationBarTitleDisplayMode(.inline)
+            .inlineTitle()
     }
 }
 
@@ -113,7 +113,7 @@ struct ActivityView: View {
         .settingsPage(MavioStrings.settingsActivity)
         .background(theme.colors.background)
         .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
+            ToolbarItem(placement: .trailingBar) {
                 Menu {
                     Picker(MavioStrings.activityActivityShown, selection: $minimum) {
                         Text(MavioStrings.activityActivityAll).tag(Mavio_System_V1_Severity.unspecified)
@@ -565,7 +565,7 @@ struct LogsView: View {
         .background(theme.colors.background)
         .searchable(text: $filter, prompt: MavioStrings.logsFilter)
         .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
+            ToolbarItem(placement: .trailingBar) {
                 Menu {
                     Picker(MavioStrings.logsLevel, selection: $level) {
                         ForEach(Self.levels, id: \.self) { Text(Self.name($0)).tag($0) }
@@ -638,7 +638,7 @@ private struct LogRow: View {
                     .foregroundStyle(theme.colors.textSecondary)
             }
         }
-        .textSelection(.enabled)
+        .selectable()
     }
 
     private var color: Color {
@@ -704,26 +704,30 @@ struct BackupsView: View {
                             .type(theme.type.footnote).foregroundStyle(theme.colors.textSecondary)
                         }
                         Spacer(minLength: 0)
-                        Button {
-                            download(b)
-                        } label: {
-                            if downloading == b.name {
-                                ProgressView()
-                            } else {
-                                Icon("downloads")
+                        if canSaveFiles {
+                            Button {
+                                download(b)
+                            } label: {
+                                if downloading == b.name {
+                                    ProgressView()
+                                } else {
+                                    Icon("downloads")
+                                }
                             }
+                            .buttonStyle(.borderless)
+                            .disabled(downloading != nil)
+                            .accessibilityLabel(MavioStrings.backupsDownload)
                         }
-                        .buttonStyle(.borderless)
-                        .disabled(downloading != nil)
-                        .accessibilityLabel(MavioStrings.backupsDownload)
                     }
-                    .swipeActions {
+                    .rowActions {
                         // Not destructive: the row stays until deleting it is confirmed.
                         Button(MavioStrings.backupsRemove) { confirm(b) }
                             .tint(theme.colors.danger)
                     }
                     .contextMenu {
-                        Button(MavioStrings.backupsDownload) { download(b) }
+                        if canSaveFiles {
+                            Button(MavioStrings.backupsDownload) { download(b) }
+                        }
                         Button(MavioStrings.backupsRemove, role: .destructive) { confirm(b) }
                     }
                 }
@@ -746,9 +750,7 @@ struct BackupsView: View {
         } message: {
             Text(MavioStrings.backupsRemoveMessage)
         }
-        .fileMover(isPresented: Binding(get: { saving != nil }, set: { if !$0 { saving = nil } }), file: saving) { _ in
-            saving = nil
-        }
+        .savesFile($saving)
         .task { await load() }
         .pullToRefresh { await load() }
     }
@@ -1075,7 +1077,7 @@ struct IssueView: View {
                                     .joined(separator: " · ")
                             )
                             .type(theme.type.footnote).foregroundStyle(theme.colors.textSecondary)
-                            Text(c.message).textSelection(.enabled)
+                            Text(c.message).selectable()
                         }
                     }
                 }
@@ -1193,7 +1195,7 @@ struct IssueView: View {
 /// Reports a problem with a movie, series, season or episode: its kind, for
 /// a series the season and episode, 0 for all, and what is wrong; the issue
 /// opens once reported.
-struct ReportIssueView: View {
+public struct ReportIssueView: View {
     let server: ServerRecord
     let itemId: String
     let name: String
@@ -1214,7 +1216,13 @@ struct ReportIssueView: View {
 
     private static let types: [Mavio_Acquisition_V1_IssueType] = [.video, .audio, .subtitles, .other]
 
-    var body: some View {
+    /// Reports an issue with an item, a series' with its season and episode.
+    public init(server: ServerRecord, itemId: String, name: String, series: Bool, reported: @escaping () -> Void) {
+        (self.server, self.itemId, self.name, self.series, self.reported) = (server, itemId, name, series, reported)
+    }
+
+    /// The view's content.
+    public var body: some View {
         NavigationStack {
             Group {
                 if let created {
@@ -1254,12 +1262,10 @@ struct ReportIssueView: View {
             }
             if series {
                 Section {
-                    Stepper(value: $season, in: 0...999) {
-                        LabeledContent(MavioStrings.issuesSeason, value: String(season))
-                    }
-                    Stepper(value: $episode, in: 0...9999) {
-                        LabeledContent(MavioStrings.issuesEpisode, value: String(season == 0 ? 0 : episode))
-                    }
+                    NumberStepper(MavioStrings.issuesSeason, value: $season, in: 0...999)
+                    NumberStepper(
+                        MavioStrings.issuesEpisode, value: $episode, in: 0...9999, shown: season == 0 ? 0 : nil
+                    )
                     .disabled(season == 0)
                 } footer: {
                     Text(MavioStrings.issuesAllNumbers)
@@ -1300,7 +1306,7 @@ struct ReportIssueView: View {
 }
 
 /// An item's open issues the user may see, on its details; each opens.
-struct ItemIssues: View {
+public struct ItemIssues: View {
     let server: ServerRecord
     let itemId: String
     /// Changes when an issue was reported, to read them again.
@@ -1311,7 +1317,13 @@ struct ItemIssues: View {
     @State private var names = IssueNames()
     @State private var open: String?
 
-    var body: some View {
+    /// The issues of an item, read again as version changes.
+    public init(server: ServerRecord, itemId: String, version: Int) {
+        (self.server, self.itemId, self.version) = (server, itemId, version)
+    }
+
+    /// The view's content.
+    public var body: some View {
         // A stack even when empty, as the task reading the issues needs a view.
         VStack(alignment: .leading, spacing: 0) {
             if !issues.isEmpty {
@@ -1367,5 +1379,37 @@ struct ItemIssues: View {
         else { return }
         issues = r.issues
         await names.loadUsers(model, server)
+    }
+}
+
+/// A number to step through, as a stepper, or on Apple TV, which has none,
+/// a field of digits.
+private struct NumberStepper: View {
+    let title: String
+    @Binding var value: Int
+    let range: ClosedRange<Int>
+    /// The number shown in place of value.
+    var shown: Int?
+
+    init(_ title: String, value: Binding<Int>, in range: ClosedRange<Int>, shown: Int? = nil) {
+        (self.title, _value, self.range, self.shown) = (title, value, range, shown)
+    }
+
+    var body: some View {
+        #if os(tvOS)
+            LabeledContent(title) {
+                TextField(
+                    title,
+                    text: Binding(
+                        get: { String(shown ?? value) },
+                        set: { value = min(max(Int($0.filter(\.isNumber)) ?? 0, range.lowerBound), range.upperBound) })
+                )
+                .numberKeyboard()
+            }
+        #else
+            Stepper(value: $value, in: range) {
+                LabeledContent(title, value: String(shown ?? value))
+            }
+        #endif
     }
 }

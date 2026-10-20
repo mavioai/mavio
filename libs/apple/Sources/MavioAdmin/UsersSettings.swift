@@ -66,10 +66,10 @@ struct UsersView: View {
             }
         }
         .scrollDismissesKeyboard(.interactively)
-        .scrollContentBackground(.hidden)
+        .hiddenListBackground()
         .background(theme.colors.background)
         .navigationTitle(MavioStrings.settingsUsers)
-        .navigationBarTitleDisplayMode(.inline)
+        .inlineTitle()
         .task { await load() }
         .pullToRefresh { await load() }
     }
@@ -215,10 +215,10 @@ private struct NewUserView: View {
             }
         }
         .scrollDismissesKeyboard(.interactively)
-        .scrollContentBackground(.hidden)
+        .hiddenListBackground()
         .background(theme.colors.background)
         .navigationTitle(MavioStrings.usersAdd)
-        .navigationBarTitleDisplayMode(.inline)
+        .inlineTitle()
         .toolbar {
             if saving {
                 ProgressView()
@@ -229,7 +229,7 @@ private struct NewUserView: View {
     }
 
     private func create() {
-        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+        endEditing()
         saving = true
         failure = nil
         Task {
@@ -261,7 +261,7 @@ private struct PinField: View {
 
     var body: some View {
         TextField("0000", text: $pin)
-            .keyboardType(.numberPad)
+            .numberKeyboard()
             .multilineTextAlignment(.trailing)
             .frame(maxWidth: 80)
             .onChange(of: pin) {
@@ -438,10 +438,10 @@ private struct UserView: View {
             }
         }
         .scrollDismissesKeyboard(.interactively)
-        .scrollContentBackground(.hidden)
+        .hiddenListBackground()
         .background(theme.colors.background)
         .navigationTitle(user.name)
-        .navigationBarTitleDisplayMode(.inline)
+        .inlineTitle()
         .toolbar {
             if saving {
                 ProgressView()
@@ -499,9 +499,9 @@ private struct UserView: View {
         VStack(alignment: .leading, spacing: MavioSpacing.s8) {
             RowLabel(label: label, detail: detail)
             TextField(label, text: text)
-                .textInputAutocapitalization(.never)
+                .noCapitals()
                 .autocorrectionDisabled()
-                .textFieldStyle(.roundedBorder)
+                .borderedField()
                 .disabled(!standalone)
         }
     }
@@ -545,7 +545,7 @@ private struct UserView: View {
     }
 
     private func save() {
-        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+        endEditing()
         saving = true
         failure = nil
         Task {
@@ -612,7 +612,7 @@ private struct SignInsSection: View {
                     HStack {
                         SecureField(MavioStrings.authPassword, text: $password)
                             .textContentType(.newPassword)
-                            .textFieldStyle(.roundedBorder)
+                            .borderedField()
                         Button(MavioStrings.usersSet) { setPassword() }
                             .buttonStyle(.bordered)
                             .disabled(password.isEmpty || busy)
@@ -637,7 +637,7 @@ private struct SignInsSection: View {
                     RowLabel(
                         label: MavioStrings.usersInviteManaged, detail: link ?? MavioStrings.usersInviteManagedDetail
                     )
-                    .textSelection(.enabled)
+                    .selectable()
                     if let link {
                         CopyLinkButton(link: link)
                     } else {
@@ -681,7 +681,7 @@ private struct SignInsSection: View {
 
     /// Runs a change of the user's sign-ins, then reloads the user.
     private func run(_ done: String?, _ action: @escaping () async throws -> Void) {
-        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+        endEditing()
         busy = true
         failure = nil
         Task {
@@ -773,17 +773,20 @@ private struct CopyLinkButton: View {
     @State private var copied = false
 
     var body: some View {
-        HStack {
-            Button(copied ? MavioStrings.usersCopied : MavioStrings.usersCopyLink) {
-                UIPasteboard.general.string = link
-                copied = true
+        // Apple TV has neither a clipboard nor sharing: the link shows.
+        #if !os(tvOS)
+            HStack {
+                Button(copied ? MavioStrings.usersCopied : MavioStrings.usersCopyLink) {
+                    copyToClipboard(link)
+                    copied = true
+                }
+                .buttonStyle(.bordered)
+                if let url = URL(string: link) {
+                    ShareLink(item: url) { Image(systemName: "square.and.arrow.up") }
+                        .buttonStyle(.bordered)
+                }
             }
-            .buttonStyle(.bordered)
-            if let url = URL(string: link) {
-                ShareLink(item: url) { Image(systemName: "square.and.arrow.up") }
-                    .buttonStyle(.bordered)
-            }
-        }
+        #endif
     }
 }
 
@@ -818,7 +821,7 @@ private struct InvitationsSections: View {
         Section {
             if let link {
                 VStack(alignment: .leading, spacing: MavioSpacing.s8) {
-                    RowLabel(label: MavioStrings.usersLinkMade, detail: link).textSelection(.enabled)
+                    RowLabel(label: MavioStrings.usersLinkMade, detail: link).selectable()
                     CopyLinkButton(link: link)
                 }
             }

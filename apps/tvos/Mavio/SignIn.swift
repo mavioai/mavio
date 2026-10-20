@@ -360,8 +360,3 @@ struct ErrorLine: View {
         Text(text).type(theme.type.body).foregroundStyle(theme.colors.danger)
     }
 }
-
-extension Error {
-    /// What happened, as the server or the core told it.
-    var reason: String { (self as? CoreError)?.reason ?? localizedDescription }
-}

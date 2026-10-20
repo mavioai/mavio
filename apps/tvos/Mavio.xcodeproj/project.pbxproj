@@ -8,6 +8,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0ADFDC8C6CFE6E1BC21579AD /* MavioAdmin in Frameworks */ = {isa = PBXBuildFile; productRef = FEF9BFE9BFA345D8EBC0FDCE /* MavioAdmin */; };
 		BD1F73831A1E68036682E539 /* MavioKit in Frameworks */ = {isa = PBXBuildFile; productRef = 0668BFF65AE43E119995D145 /* MavioKit */; };
 		11AD12A77E4BB00F0DEE2D7B /* MavioPlayer in Frameworks */ = {isa = PBXBuildFile; productRef = 687C4571271414558C8E058F /* MavioPlayer */; };
 		197D781A416212103099E0F6 /* MavioUI in Frameworks */ = {isa = PBXBuildFile; productRef = CD489BBB75D4EC66599810CE /* MavioUI */; };
@@ -30,6 +31,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0ADFDC8C6CFE6E1BC21579AD /* MavioAdmin in Frameworks */,
 				BD1F73831A1E68036682E539 /* MavioKit in Frameworks */,
 				11AD12A77E4BB00F0DEE2D7B /* MavioPlayer in Frameworks */,
 				197D781A416212103099E0F6 /* MavioUI in Frameworks */,
@@ -75,6 +77,7 @@
 			);
 			name = Mavio;
 			packageProductDependencies = (
+				FEF9BFE9BFA345D8EBC0FDCE /* MavioAdmin */,
 				0668BFF65AE43E119995D145 /* MavioKit */,
 				687C4571271414558C8E058F /* MavioPlayer */,
 				CD489BBB75D4EC66599810CE /* MavioUI */,
@@ -252,6 +255,10 @@
 /* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		FEF9BFE9BFA345D8EBC0FDCE /* MavioAdmin */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = MavioAdmin;
+		};
 		0668BFF65AE43E119995D145 /* MavioKit */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = MavioKit;

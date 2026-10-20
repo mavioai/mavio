@@ -1,3 +1,4 @@
+import MavioAdmin
 import MavioKit
 import MavioUI
 import SwiftUI
@@ -108,6 +109,10 @@ struct RootView: View {
         .environment(router)
         .environment(discovery)
         .environment(\.theme, theme)
+        // Devices opens the remote control of another device.
+        .environment(\.remoteControl) { server, sessionId in
+            AnyView(RemoteView(server: server, sessionId: sessionId).presentationDetents([.medium, .large]))
+        }
         // The accent marks only progress, selection, links and switches;
         // buttons take the label color or `color.button`.
         .tint(MavioColors.dark.accent)
@@ -362,30 +367,5 @@ extension ToolbarContent {
         } else {
             self
         }
-    }
-}
-
-/// Pulling a page down reads it again, the spinner showing until action
-/// ends, with a tap of the haptics as the pull lets it start.
-private struct PullToRefresh: ViewModifier {
-    let action: @MainActor () async -> Void
-    @State private var pulls = 0
-
-    func body(content: Content) -> some View {
-        content
-            .refreshable {
-                pulls += 1
-                await action()
-            }
-            .sensoryFeedback(.impact(weight: .medium), trigger: pulls)
-    }
-}
-
-extension View {
-    /// Reads the page again when it is pulled down, the spinner showing
-    /// until action ends, with a tap of the haptics; every page that can be
-    /// read again takes it rather than `refreshable`.
-    func pullToRefresh(_ action: @escaping @MainActor () async -> Void) -> some View {
-        modifier(PullToRefresh(action: action))
     }
 }

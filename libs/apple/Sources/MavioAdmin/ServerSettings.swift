@@ -49,7 +49,7 @@ struct NumberRow: View {
                 label, value: $value,
                 format: .number.precision(.fractionLength(0...(decimals ? 2 : 0))).grouping(.never)
             )
-            .keyboardType(decimals ? .decimalPad : .numberPad)
+            .numberKeyboard(decimals: decimals)
             .multilineTextAlignment(.trailing)
             .frame(width: 80)
             .foregroundStyle(range.contains(value) ? theme.colors.textPrimary : theme.colors.danger)
@@ -67,7 +67,7 @@ struct TextRow: View {
     var body: some View {
         FormRow(label: label, detail: detail) {
             TextField(label, text: $text, prompt: prompt.map { Text($0) })
-                .textInputAutocapitalization(.never)
+                .noCapitals()
                 .autocorrectionDisabled()
                 .multilineTextAlignment(.trailing)
                 .frame(maxWidth: 170)
@@ -249,10 +249,10 @@ struct GeneralView: View {
             }
         }
         .scrollDismissesKeyboard(.interactively)
-        .scrollContentBackground(.hidden)
+        .hiddenListBackground()
         .background(theme.colors.background)
         .navigationTitle(MavioStrings.settingsGeneral)
-        .navigationBarTitleDisplayMode(.inline)
+        .inlineTitle()
         .toolbar {
             if editor?.saving == true {
                 ProgressView()
@@ -273,14 +273,14 @@ struct GeneralView: View {
             } label: {
                 RowLabel(label: MavioStrings.generalLanguage, detail: MavioStrings.generalLanguageDetail)
             }
-            .pickerStyle(.navigationLink)
+            .listPicker()
             Picker(selection: $draft.country) {
                 Text(MavioStrings.generalCountryDefault).tag("")
                 ForEach(choices(countries, draft.country), id: \.code) { Text($0.name).tag($0.code) }
             } label: {
                 RowLabel(label: MavioStrings.generalCountry, detail: MavioStrings.generalCountryDetail)
             }
-            .pickerStyle(.navigationLink)
+            .listPicker()
         }
         Section(MavioStrings.generalSignIn) {
             NumberRow(
@@ -399,10 +399,10 @@ struct TranscodingView: View {
             }
         }
         .scrollDismissesKeyboard(.interactively)
-        .scrollContentBackground(.hidden)
+        .hiddenListBackground()
         .background(theme.colors.background)
         .navigationTitle(MavioStrings.settingsTranscoding)
-        .navigationBarTitleDisplayMode(.inline)
+        .inlineTitle()
         .toolbar {
             if editor?.saving == true {
                 ProgressView()
@@ -455,7 +455,7 @@ struct TranscodingView: View {
             } label: {
                 RowLabel(label: MavioStrings.transcodingPreset, detail: MavioStrings.transcodingPresetDetail)
             }
-            .pickerStyle(.navigationLink)
+            .listPicker()
             NumberRow(
                 label: MavioStrings.transcodingAvcCrf, detail: MavioStrings.transcodingCrfDetail,
                 value: $draft.h264Crf.double, range: 0...51)
@@ -590,13 +590,15 @@ struct ApiKeysView: View {
                 Section {
                     Text(made.token)
                         .font(.system(.callout, design: .monospaced))
-                        .textSelection(.enabled)
+                        .selectable()
                     HStack {
-                        Button(copied ? MavioStrings.usersCopied : MavioStrings.keysCopy) {
-                            UIPasteboard.general.string = made.token
-                            copied = true
+                        if canCopy {
+                            Button(copied ? MavioStrings.usersCopied : MavioStrings.keysCopy) {
+                                copyToClipboard(made.token)
+                                copied = true
+                            }
+                            .buttonStyle(.bordered)
                         }
-                        .buttonStyle(.bordered)
                         Spacer()
                         Button(MavioStrings.keysDone) { self.made = nil }
                             .buttonStyle(.borderless)
@@ -614,7 +616,7 @@ struct ApiKeysView: View {
                         Text(detail(key))
                             .type(theme.type.footnote).foregroundStyle(theme.colors.textSecondary)
                     }
-                    .swipeActions {
+                    .rowActions {
                         Button(MavioStrings.keysRevoke) { confirm(key) }
                             .tint(theme.colors.danger)
                     }
@@ -630,10 +632,10 @@ struct ApiKeysView: View {
             }
         }
         .scrollDismissesKeyboard(.interactively)
-        .scrollContentBackground(.hidden)
+        .hiddenListBackground()
         .background(theme.colors.background)
         .navigationTitle(MavioStrings.settingsApiKeys)
-        .navigationBarTitleDisplayMode(.inline)
+        .inlineTitle()
         .confirmationDialog(
             MavioStrings.keysRevokeTitle(name: revoking?.name ?? ""), isPresented: $confirming,
             titleVisibility: .visible

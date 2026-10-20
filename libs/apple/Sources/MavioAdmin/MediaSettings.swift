@@ -96,10 +96,10 @@ struct ManagedLibrariesView: View {
                 Text(failure).foregroundStyle(theme.colors.danger)
             }
         }
-        .scrollContentBackground(.hidden)
+        .hiddenListBackground()
         .background(theme.colors.background)
         .navigationTitle(MavioStrings.settingsLibraries)
-        .navigationBarTitleDisplayMode(.inline)
+        .inlineTitle()
         .task { await load() }
         .pullToRefresh { await load() }
         .onChange(of: scanningLibraries) { before, now in
@@ -346,12 +346,12 @@ private struct ManagedLibraryView: View {
                     Text(MavioStrings.librariesServerDefault).tag("")
                     ForEach(choices(languages, draft.language), id: \.code) { Text($0.name).tag($0.code) }
                 }
-                .pickerStyle(.navigationLink)
+                .listPicker()
                 Picker(MavioStrings.librariesCountry, selection: $draft.country) {
                     Text(MavioStrings.librariesServerDefault).tag("")
                     ForEach(choices(countries, draft.country), id: \.code) { Text($0.name).tag($0.code) }
                 }
-                .pickerStyle(.navigationLink)
+                .listPicker()
                 toggle(
                     $draft.saveLocalMetadata, MavioStrings.librariesSaveLocalMetadata,
                     MavioStrings.librariesSaveLocalMetadataDetail)
@@ -418,10 +418,10 @@ private struct ManagedLibraryView: View {
             }
         }
         .scrollDismissesKeyboard(.interactively)
-        .scrollContentBackground(.hidden)
+        .hiddenListBackground()
         .background(theme.colors.background)
         .navigationTitle(library?.name ?? MavioStrings.librariesAdd)
-        .navigationBarTitleDisplayMode(.inline)
+        .inlineTitle()
         .toolbar {
             if saving {
                 ProgressView()
@@ -452,7 +452,7 @@ private struct ManagedLibraryView: View {
             ForEach(draft.paths, id: \.self) { path in
                 VStack(alignment: .leading, spacing: MavioSpacing.s4) {
                     HStack(alignment: .firstTextBaseline) {
-                        Text(path).textSelection(.enabled)
+                        Text(path).selectable()
                         Spacer(minLength: MavioSpacing.s8)
                         Button {
                             draft.paths.removeAll { $0 == path }
@@ -471,7 +471,7 @@ private struct ManagedLibraryView: View {
                     .type(theme.type.callout)
                     .foregroundStyle(theme.colors.textSecondary)
                 }
-                .swipeActions {
+                .rowActions(menu: true) {
                     Button(MavioStrings.librariesRemoveFolder, role: .destructive) {
                         draft.paths.removeAll { $0 == path }
                     }
@@ -479,7 +479,7 @@ private struct ManagedLibraryView: View {
             }
             HStack(spacing: MavioSpacing.s12) {
                 TextField(MavioStrings.librariesFolderPath, text: $typed)
-                    .textInputAutocapitalization(.never)
+                    .noCapitals()
                     .autocorrectionDisabled()
                     .onSubmit(addTyped)
                     .submitLabel(.done)
@@ -532,7 +532,7 @@ private struct ManagedLibraryView: View {
 
     private func save() {
         // A field still being typed in would change the draft once saved.
-        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+        endEditing()
         saving = true
         failure = nil
         Task {
@@ -643,10 +643,10 @@ private struct FolderPicker: View {
                 }
             }
         }
-        .scrollContentBackground(.hidden)
+        .hiddenListBackground()
         .background(theme.colors.background)
         .navigationTitle(MavioStrings.librariesBrowse)
-        .navigationBarTitleDisplayMode(.inline)
+        .inlineTitle()
         .toolbar {
             Button(MavioStrings.librariesChooseFolder) {
                 choose(here)

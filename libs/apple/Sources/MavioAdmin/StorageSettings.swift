@@ -92,10 +92,10 @@ struct StorageView: View {
                 }
             }
         }
-        .scrollContentBackground(.hidden)
+        .hiddenListBackground()
         .background(theme.colors.background)
         .navigationTitle(MavioStrings.settingsStorage)
-        .navigationBarTitleDisplayMode(.inline)
+        .inlineTitle()
         .task { await load() }
         .pullToRefresh { await load() }
     }
@@ -415,9 +415,9 @@ private struct OptionControl: View {
                         TextField(o.name, text: $value, prompt: Text(placeholder ?? o.defaultValue))
                     }
                 }
-                .textInputAutocapitalization(.never)
+                .noCapitals()
                 .autocorrectionDisabled()
-                .textFieldStyle(.roundedBorder)
+                .borderedField()
                 if !examples.isEmpty && !o.password {
                     Menu {
                         ForEach(examples, id: \.value) { e in
@@ -558,7 +558,7 @@ private struct NewRemoteView: View {
                         Text("\(kindName(providers, p.name)) (\(p.name))").tag(p.name)
                     }
                 }
-                .pickerStyle(.navigationLink)
+                .listPicker()
                 .onChange(of: type) { values = [:] }
             }
             if let provider {
@@ -569,10 +569,10 @@ private struct NewRemoteView: View {
             }
         }
         .scrollDismissesKeyboard(.interactively)
-        .scrollContentBackground(.hidden)
+        .hiddenListBackground()
         .background(theme.colors.background)
         .navigationTitle(MavioStrings.storageNew)
-        .navigationBarTitleDisplayMode(.inline)
+        .inlineTitle()
         .toolbar {
             if saving {
                 ProgressView()
@@ -600,7 +600,7 @@ private struct NewRemoteView: View {
 
     private func create() {
         guard let provider else { return }
-        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+        endEditing()
         saving = true
         failure = nil
         Task {
@@ -734,10 +734,10 @@ private struct StorageRemoteView: View {
             }
         }
         .scrollDismissesKeyboard(.interactively)
-        .scrollContentBackground(.hidden)
+        .hiddenListBackground()
         .background(theme.colors.background)
         .navigationTitle(name)
-        .navigationBarTitleDisplayMode(.inline)
+        .inlineTitle()
         .toolbar {
             if saving {
                 ProgressView()
@@ -767,7 +767,7 @@ private struct StorageRemoteView: View {
     }
 
     private func update(_ parameters: [String: String], notice done: String) {
-        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+        endEditing()
         saving = true
         failure = nil
         Task {
@@ -833,7 +833,7 @@ private struct RemoteFolders: View {
     var body: some View {
         let here = path.isEmpty ? root : path
         Section {
-            Text(here).type(theme.type.callout).foregroundStyle(theme.colors.textSecondary).textSelection(.enabled)
+            Text(here).type(theme.type.callout).foregroundStyle(theme.colors.textSecondary).selectable()
             if here != root {
                 Button {
                     path = here.contains("/") ? String(here[..<here.lastIndex(of: "/")!]) : root
@@ -1001,7 +1001,7 @@ private struct RemoteQuestionView: View {
                         }
                     } else {
                         let help = o.help.trimmingCharacters(in: .whitespacesAndNewlines)
-                        if !help.isEmpty { Text(help).textSelection(.enabled) }
+                        if !help.isEmpty { Text(help).selectable() }
                     }
                     if !confirm {
                         OptionControl(option: o, value: $answer, provider: "")
@@ -1031,10 +1031,10 @@ private struct RemoteQuestionView: View {
             }
         }
         .scrollDismissesKeyboard(.interactively)
-        .scrollContentBackground(.hidden)
+        .hiddenListBackground()
         .background(theme.colors.background)
         .navigationTitle(name)
-        .navigationBarTitleDisplayMode(.inline)
+        .inlineTitle()
         .navigationBarBackButtonHidden(pending || waiting)
         // Each answer waits for the last; a code waiting to be scanned is
         // answered yes again every few seconds.
@@ -1046,7 +1046,7 @@ private struct RemoteQuestionView: View {
     }
 
     private func send(_ value: String) {
-        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+        endEditing()
         pending = true
         failure = nil
         let drawn = drawn

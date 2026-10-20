@@ -334,3 +334,8 @@ extension CoreError {
         }
     }
 }
+
+extension Error {
+    /// What happened, as the server or the core told it.
+    public var reason: String { (self as? CoreError)?.reason ?? localizedDescription }
+}

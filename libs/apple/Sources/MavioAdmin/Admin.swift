@@ -8,7 +8,7 @@ import SwiftUI
 /// administrators' with the devices signed in as the user among them, and
 /// the menus of a second level. The sections the App Store does not accept
 /// are left out (docs/clients.md §4.2).
-struct ServerGroup: View {
+public struct ServerGroup: View {
     let server: ServerRecord
     @Binding var serverId: String
     @Environment(AppModel.self) private var model
@@ -19,7 +19,53 @@ struct ServerGroup: View {
 
     private var key: String { "\(server.id)/\(server.userId)" }
 
-    var body: some View {
+    /// The group of a server, choosing among those signed in to by serverId.
+    public init(server: ServerRecord, serverId: Binding<String>) {
+        self.server = server
+        _serverId = serverId
+    }
+
+    /// The view's content.
+    public var body: some View {
+        #if os(tvOS)
+            tvBody
+        #else
+            listBody
+        #endif
+    }
+
+    #if os(tvOS)
+        /// On Apple TV, the group's heading and rows in the settings' column,
+        /// styled by the page around it.
+        private var tvBody: some View {
+            Group {
+                Text(MavioStrings.settingsServerGroup).type(theme.type.title3)
+                    .foregroundStyle(theme.colors.textSecondary)
+                    .padding(.top, MavioSpacing.s32)
+                if model.signedInServers.count > 1 {
+                    Picker(MavioStrings.authServer, selection: Binding(get: { server.id }, set: { serverId = $0 })) {
+                        ForEach(model.signedInServers, id: \.id) { Text($0.name).tag($0.id) }
+                    }
+                    .pickerStyle(.menu)
+                }
+                ForEach(ServerEntry.shown(admin: admin[key] == true), id: \.self) { entry in
+                    NavigationLink {
+                        entry.view(server)
+                    } label: {
+                        HStack(spacing: MavioSpacing.s16) {
+                            Icon(entry.icon, size: 32)
+                            Text(entry.title).type(theme.type.headline)
+                            Spacer()
+                        }
+                        .padding(.vertical, MavioSpacing.s12)
+                    }
+                }
+            }
+            .task(id: key) { await loadAdmin() }
+        }
+    #endif
+
+    private var listBody: some View {
         Section {
             if model.signedInServers.count > 1 {
                 Picker(MavioStrings.authServer, selection: Binding(get: { server.id }, set: { serverId = $0 })) {
@@ -151,10 +197,10 @@ private struct ServerMenuView: View {
                 }
             }
         }
-        .scrollContentBackground(.hidden)
+        .hiddenListBackground()
         .background(theme.colors.background)
         .navigationTitle(menu.title)
-        .navigationBarTitleDisplayMode(.inline)
+        .inlineTitle()
     }
 }
 
@@ -321,10 +367,10 @@ struct OverviewView: View {
                 Text(MavioStrings.overviewLoadFooter)
             }
         }
-        .scrollContentBackground(.hidden)
+        .hiddenListBackground()
         .background(theme.colors.background)
         .navigationTitle(MavioStrings.settingsOverview)
-        .navigationBarTitleDisplayMode(.inline)
+        .inlineTitle()
         .pullToRefresh {
             await loadInfo()
             await loadSamples()
@@ -339,7 +385,7 @@ struct OverviewView: View {
     }
 
     private func fact(_ label: String, _ value: String) -> some View {
-        LabeledContent(label) { Text(value).textSelection(.enabled) }
+        LabeledContent(label) { Text(value).selectable() }
     }
 
     private func loadInfo() async {
@@ -392,11 +438,6 @@ struct OverviewView: View {
         ]
         .filter { !$0.isEmpty }.joined(separator: " · ")
     }
-}
-
-extension Error {
-    /// What went wrong, as the server or the core told it.
-    var reason: String { (self as? CoreError)?.reason ?? localizedDescription }
 }
 
 /// The cards of the load of the server's computer: its CPU, memory, disks

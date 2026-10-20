@@ -14,7 +14,7 @@ import sys
 PLATFORMS = {
     "ios": {
         "sdk": "iphoneos", "deployment": ("IPHONEOS_DEPLOYMENT_TARGET", "18.0"),
-        "products": ["MavioKit", "MavioPlayer", "MavioUI"],
+        "products": ["MavioAdmin", "MavioKit", "MavioPlayer", "MavioUI"],
         "target": {
             "TARGETED_DEVICE_FAMILY": '"1,2"',
             # The mark on white, black, or gray for a tinted home screen
@@ -34,7 +34,7 @@ PLATFORMS = {
     },
     "tvos": {
         "sdk": "appletvos", "deployment": ("TVOS_DEPLOYMENT_TARGET", "18.0"),
-        "products": ["MavioKit", "MavioPlayer", "MavioUI"],
+        "products": ["MavioAdmin", "MavioKit", "MavioPlayer", "MavioUI"],
         "target": {
             "TARGETED_DEVICE_FAMILY": "3",
             "SUPPORTED_PLATFORMS": '"appletvos appletvsimulator"',
@@ -49,7 +49,7 @@ PLATFORMS = {
     },
     "macos": {
         "sdk": "macosx", "deployment": ("MACOSX_DEPLOYMENT_TARGET", "15.0"),
-        "products": ["MavioKit", "MavioPlayer", "MavioUI"],
+        "products": ["MavioAdmin", "MavioKit", "MavioPlayer", "MavioUI"],
         "target": {
             "SUPPORTED_PLATFORMS": "macosx",
             "ENABLE_APP_SANDBOX": "YES",
