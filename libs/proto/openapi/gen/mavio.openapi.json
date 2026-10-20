@@ -22517,6 +22517,12 @@
             "type": "string",
             "title": "plugin_id",
             "description": "The plugin whose task it is; empty for the server's own."
+          },
+          "progress": {
+            "type": "number",
+            "title": "progress",
+            "format": "double",
+            "description": "The fraction done of its run in progress that tells it, 0 to 1, such\n as a plugin's download of its models."
           }
         },
         "title": "Task",

@@ -48,6 +48,9 @@ const (
 	// HostServiceSolveChallengeProcedure is the fully-qualified name of the HostService's
 	// SolveChallenge RPC.
 	HostServiceSolveChallengeProcedure = "/mavio.plugin.v1.HostService/SolveChallenge"
+	// HostServiceReportTaskProgressProcedure is the fully-qualified name of the HostService's
+	// ReportTaskProgress RPC.
+	HostServiceReportTaskProgressProcedure = "/mavio.plugin.v1.HostService/ReportTaskProgress"
 	// DeviceControllerServiceSendCommandProcedure is the fully-qualified name of the
 	// DeviceControllerService's SendCommand RPC.
 	DeviceControllerServiceSendCommandProcedure = "/mavio.plugin.v1.DeviceControllerService/SendCommand"
@@ -76,6 +79,10 @@ type HostServiceClient interface {
 	// CHALLENGE_SOLVER plugins in turn, through the proxy proxy_id names; it
 	// is unavailable when there is none, and not found for an unknown proxy.
 	SolveChallenge(context.Context, *v1.SolveChallengeRequest) (*v1.SolveChallengeResponse, error)
+	// ReportTaskProgress tells how far the run of one of the calling
+	// plugin's tasks has come, which the server shows as its job's progress;
+	// a report of a task not running is ignored.
+	ReportTaskProgress(context.Context, *v1.ReportTaskProgressRequest) (*v1.ReportTaskProgressResponse, error)
 }
 
 // NewHostServiceClient constructs a client for the mavio.plugin.v1.HostService service. By default,
@@ -122,16 +129,23 @@ func NewHostServiceClient(httpClient connect.HTTPClient, baseURL string, opts ..
 			connect.WithSchema(hostServiceMethods.ByName("SolveChallenge")),
 			connect.WithClientOptions(opts...),
 		),
+		reportTaskProgress: connect.NewClient[v1.ReportTaskProgressRequest, v1.ReportTaskProgressResponse](
+			httpClient,
+			baseURL+HostServiceReportTaskProgressProcedure,
+			connect.WithSchema(hostServiceMethods.ByName("ReportTaskProgress")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
 // hostServiceClient implements HostServiceClient.
 type hostServiceClient struct {
-	setDevices     *connect.Client[v1.SetDevicesRequest, v1.SetDevicesResponse]
-	getServerInfo  *connect.Client[v1.GetServerInfoRequest, v1.GetServerInfoResponse]
-	listContainers *connect.Client[v1.ListContainersRequest, v1.ListContainersResponse]
-	listProxies    *connect.Client[v1.ListProxiesRequest, v1.ListProxiesResponse]
-	solveChallenge *connect.Client[v1.SolveChallengeRequest, v1.SolveChallengeResponse]
+	setDevices         *connect.Client[v1.SetDevicesRequest, v1.SetDevicesResponse]
+	getServerInfo      *connect.Client[v1.GetServerInfoRequest, v1.GetServerInfoResponse]
+	listContainers     *connect.Client[v1.ListContainersRequest, v1.ListContainersResponse]
+	listProxies        *connect.Client[v1.ListProxiesRequest, v1.ListProxiesResponse]
+	solveChallenge     *connect.Client[v1.SolveChallengeRequest, v1.SolveChallengeResponse]
+	reportTaskProgress *connect.Client[v1.ReportTaskProgressRequest, v1.ReportTaskProgressResponse]
 }
 
 // SetDevices calls mavio.plugin.v1.HostService.SetDevices.
@@ -179,6 +193,15 @@ func (c *hostServiceClient) SolveChallenge(ctx context.Context, req *v1.SolveCha
 	return nil, err
 }
 
+// ReportTaskProgress calls mavio.plugin.v1.HostService.ReportTaskProgress.
+func (c *hostServiceClient) ReportTaskProgress(ctx context.Context, req *v1.ReportTaskProgressRequest) (*v1.ReportTaskProgressResponse, error) {
+	response, err := c.reportTaskProgress.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
 // HostServiceHandler is an implementation of the mavio.plugin.v1.HostService service.
 type HostServiceHandler interface {
 	// SetDevices replaces the remote devices of the calling plugin, which
@@ -202,6 +225,10 @@ type HostServiceHandler interface {
 	// CHALLENGE_SOLVER plugins in turn, through the proxy proxy_id names; it
 	// is unavailable when there is none, and not found for an unknown proxy.
 	SolveChallenge(context.Context, *v1.SolveChallengeRequest) (*v1.SolveChallengeResponse, error)
+	// ReportTaskProgress tells how far the run of one of the calling
+	// plugin's tasks has come, which the server shows as its job's progress;
+	// a report of a task not running is ignored.
+	ReportTaskProgress(context.Context, *v1.ReportTaskProgressRequest) (*v1.ReportTaskProgressResponse, error)
 }
 
 // NewHostServiceHandler builds an HTTP handler from the service implementation. It returns the path
@@ -244,6 +271,12 @@ func NewHostServiceHandler(svc HostServiceHandler, opts ...connect.HandlerOption
 		connect.WithSchema(hostServiceMethods.ByName("SolveChallenge")),
 		connect.WithHandlerOptions(opts...),
 	)
+	hostServiceReportTaskProgressHandler := connect.NewUnaryHandlerSimple(
+		HostServiceReportTaskProgressProcedure,
+		svc.ReportTaskProgress,
+		connect.WithSchema(hostServiceMethods.ByName("ReportTaskProgress")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/mavio.plugin.v1.HostService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case HostServiceSetDevicesProcedure:
@@ -256,6 +289,8 @@ func NewHostServiceHandler(svc HostServiceHandler, opts ...connect.HandlerOption
 			hostServiceListProxiesHandler.ServeHTTP(w, r)
 		case HostServiceSolveChallengeProcedure:
 			hostServiceSolveChallengeHandler.ServeHTTP(w, r)
+		case HostServiceReportTaskProgressProcedure:
+			hostServiceReportTaskProgressHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -283,6 +318,10 @@ func (UnimplementedHostServiceHandler) ListProxies(context.Context, *v1.ListProx
 
 func (UnimplementedHostServiceHandler) SolveChallenge(context.Context, *v1.SolveChallengeRequest) (*v1.SolveChallengeResponse, error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.plugin.v1.HostService.SolveChallenge is not implemented"))
+}
+
+func (UnimplementedHostServiceHandler) ReportTaskProgress(context.Context, *v1.ReportTaskProgressRequest) (*v1.ReportTaskProgressResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.plugin.v1.HostService.ReportTaskProgress is not implemented"))
 }
 
 // DeviceControllerServiceClient is a client for the mavio.plugin.v1.DeviceControllerService

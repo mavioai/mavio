@@ -7,6 +7,7 @@
 package pluginv1
 
 import (
+	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	durationpb "google.golang.org/protobuf/types/known/durationpb"
@@ -376,11 +377,164 @@ func (b0 RunTaskResponse_builder) Build() *RunTaskResponse {
 	return m0
 }
 
+type ReportTaskProgressRequest struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_TaskId      *string                `protobuf:"bytes,1,opt,name=task_id,json=taskId"`
+	xxx_hidden_Progress    float64                `protobuf:"fixed64,2,opt,name=progress"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *ReportTaskProgressRequest) Reset() {
+	*x = ReportTaskProgressRequest{}
+	mi := &file_mavio_plugin_v1_task_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ReportTaskProgressRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ReportTaskProgressRequest) ProtoMessage() {}
+
+func (x *ReportTaskProgressRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_plugin_v1_task_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *ReportTaskProgressRequest) GetTaskId() string {
+	if x != nil {
+		if x.xxx_hidden_TaskId != nil {
+			return *x.xxx_hidden_TaskId
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *ReportTaskProgressRequest) GetProgress() float64 {
+	if x != nil {
+		return x.xxx_hidden_Progress
+	}
+	return 0
+}
+
+func (x *ReportTaskProgressRequest) SetTaskId(v string) {
+	x.xxx_hidden_TaskId = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 2)
+}
+
+func (x *ReportTaskProgressRequest) SetProgress(v float64) {
+	x.xxx_hidden_Progress = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 2)
+}
+
+func (x *ReportTaskProgressRequest) HasTaskId() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *ReportTaskProgressRequest) HasProgress() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
+}
+
+func (x *ReportTaskProgressRequest) ClearTaskId() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_TaskId = nil
+}
+
+func (x *ReportTaskProgressRequest) ClearProgress() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
+	x.xxx_hidden_Progress = 0
+}
+
+type ReportTaskProgressRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	// The task of the calling plugin running.
+	TaskId *string
+	// The fraction of the run done, 0 to 1.
+	Progress *float64
+}
+
+func (b0 ReportTaskProgressRequest_builder) Build() *ReportTaskProgressRequest {
+	m0 := &ReportTaskProgressRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.TaskId != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 2)
+		x.xxx_hidden_TaskId = b.TaskId
+	}
+	if b.Progress != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 2)
+		x.xxx_hidden_Progress = *b.Progress
+	}
+	return m0
+}
+
+type ReportTaskProgressResponse struct {
+	state         protoimpl.MessageState `protogen:"opaque.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ReportTaskProgressResponse) Reset() {
+	*x = ReportTaskProgressResponse{}
+	mi := &file_mavio_plugin_v1_task_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ReportTaskProgressResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ReportTaskProgressResponse) ProtoMessage() {}
+
+func (x *ReportTaskProgressResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_plugin_v1_task_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+type ReportTaskProgressResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+}
+
+func (b0 ReportTaskProgressResponse_builder) Build() *ReportTaskProgressResponse {
+	m0 := &ReportTaskProgressResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	return m0
+}
+
 var File_mavio_plugin_v1_task_proto protoreflect.FileDescriptor
 
 const file_mavio_plugin_v1_task_proto_rawDesc = "" +
 	"\n" +
-	"\x1amavio/plugin/v1/task.proto\x12\x0fmavio.plugin.v1\x1a\x1egoogle/protobuf/duration.proto\"\xb8\x01\n" +
+	"\x1amavio/plugin/v1/task.proto\x12\x0fmavio.plugin.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1egoogle/protobuf/duration.proto\"\xb8\x01\n" +
 	"\x04Task\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12 \n" +
@@ -390,21 +544,27 @@ const file_mavio_plugin_v1_task_proto_rawDesc = "" +
 	"\x0eRunTaskRequest\x12\x17\n" +
 	"\atask_id\x18\x01 \x01(\tR\x06taskId\"+\n" +
 	"\x0fRunTaskResponse\x12\x18\n" +
-	"\amessage\x18\x01 \x01(\tR\amessage2a\n" +
+	"\amessage\x18\x01 \x01(\tR\amessage\"q\n" +
+	"\x19ReportTaskProgressRequest\x12\x1f\n" +
+	"\atask_id\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\x06taskId\x123\n" +
+	"\bprogress\x18\x02 \x01(\x01B\x17\xbaH\x14\x12\x12\x19\x00\x00\x00\x00\x00\x00\xf0?)\x00\x00\x00\x00\x00\x00\x00\x00R\bprogress\"\x1c\n" +
+	"\x1aReportTaskProgressResponse2a\n" +
 	"\x11TaskRunnerService\x12L\n" +
 	"\aRunTask\x12\x1f.mavio.plugin.v1.RunTaskRequest\x1a .mavio.plugin.v1.RunTaskResponseB\xc3\x01\n" +
 	"\x13com.mavio.plugin.v1B\tTaskProtoP\x01ZCgithub.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1;pluginv1\xa2\x02\x03MPX\xaa\x02\x0fMavio.Plugin.V1\xca\x02\x0fMavio\\Plugin\\V1\xe2\x02\x1bMavio\\Plugin\\V1\\GPBMetadata\xea\x02\x11Mavio::Plugin::V1b\beditionsp\xe8\a"
 
-var file_mavio_plugin_v1_task_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
+var file_mavio_plugin_v1_task_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
 var file_mavio_plugin_v1_task_proto_goTypes = []any{
-	(*Task)(nil),                // 0: mavio.plugin.v1.Task
-	(*RunTaskRequest)(nil),      // 1: mavio.plugin.v1.RunTaskRequest
-	(*RunTaskResponse)(nil),     // 2: mavio.plugin.v1.RunTaskResponse
-	(*durationpb.Duration)(nil), // 3: google.protobuf.Duration
+	(*Task)(nil),                       // 0: mavio.plugin.v1.Task
+	(*RunTaskRequest)(nil),             // 1: mavio.plugin.v1.RunTaskRequest
+	(*RunTaskResponse)(nil),            // 2: mavio.plugin.v1.RunTaskResponse
+	(*ReportTaskProgressRequest)(nil),  // 3: mavio.plugin.v1.ReportTaskProgressRequest
+	(*ReportTaskProgressResponse)(nil), // 4: mavio.plugin.v1.ReportTaskProgressResponse
+	(*durationpb.Duration)(nil),        // 5: google.protobuf.Duration
 }
 var file_mavio_plugin_v1_task_proto_depIdxs = []int32{
-	3, // 0: mavio.plugin.v1.Task.interval:type_name -> google.protobuf.Duration
-	3, // 1: mavio.plugin.v1.Task.timeout:type_name -> google.protobuf.Duration
+	5, // 0: mavio.plugin.v1.Task.interval:type_name -> google.protobuf.Duration
+	5, // 1: mavio.plugin.v1.Task.timeout:type_name -> google.protobuf.Duration
 	1, // 2: mavio.plugin.v1.TaskRunnerService.RunTask:input_type -> mavio.plugin.v1.RunTaskRequest
 	2, // 3: mavio.plugin.v1.TaskRunnerService.RunTask:output_type -> mavio.plugin.v1.RunTaskResponse
 	3, // [3:4] is the sub-list for method output_type
@@ -425,7 +585,7 @@ func file_mavio_plugin_v1_task_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_mavio_plugin_v1_task_proto_rawDesc), len(file_mavio_plugin_v1_task_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   3,
+			NumMessages:   5,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

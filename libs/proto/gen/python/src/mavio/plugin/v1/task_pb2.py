@@ -22,10 +22,11 @@ _runtime_version.ValidateProtobufRuntimeVersion(
 _sym_db = _symbol_database.Default()
 
 
+from buf.validate import validate_pb2 as buf_dot_validate_dot_validate__pb2
 from google.protobuf import duration_pb2 as google_dot_protobuf_dot_duration__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1amavio/plugin/v1/task.proto\x12\x0fmavio.plugin.v1\x1a\x1egoogle/protobuf/duration.proto\"\xb8\x01\n\x04Task\x12\x0e\n\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n\x04name\x18\x02 \x01(\tR\x04name\x12 \n\x0b\x64\x65scription\x18\x03 \x01(\tR\x0b\x64\x65scription\x12\x35\n\x08interval\x18\x04 \x01(\x0b\x32\x19.google.protobuf.DurationR\x08interval\x12\x33\n\x07timeout\x18\x05 \x01(\x0b\x32\x19.google.protobuf.DurationR\x07timeout\")\n\x0eRunTaskRequest\x12\x17\n\x07task_id\x18\x01 \x01(\tR\x06taskId\"+\n\x0fRunTaskResponse\x12\x18\n\x07message\x18\x01 \x01(\tR\x07message2a\n\x11TaskRunnerService\x12L\n\x07RunTask\x12\x1f.mavio.plugin.v1.RunTaskRequest\x1a .mavio.plugin.v1.RunTaskResponseB\xc3\x01\n\x13\x63om.mavio.plugin.v1B\tTaskProtoP\x01ZCgithub.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1;pluginv1\xa2\x02\x03MPX\xaa\x02\x0fMavio.Plugin.V1\xca\x02\x0fMavio\\Plugin\\V1\xe2\x02\x1bMavio\\Plugin\\V1\\GPBMetadata\xea\x02\x11Mavio::Plugin::V1b\x08\x65\x64itionsp\xe8\x07')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1amavio/plugin/v1/task.proto\x12\x0fmavio.plugin.v1\x1a\x1b\x62uf/validate/validate.proto\x1a\x1egoogle/protobuf/duration.proto\"\xb8\x01\n\x04Task\x12\x0e\n\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n\x04name\x18\x02 \x01(\tR\x04name\x12 \n\x0b\x64\x65scription\x18\x03 \x01(\tR\x0b\x64\x65scription\x12\x35\n\x08interval\x18\x04 \x01(\x0b\x32\x19.google.protobuf.DurationR\x08interval\x12\x33\n\x07timeout\x18\x05 \x01(\x0b\x32\x19.google.protobuf.DurationR\x07timeout\")\n\x0eRunTaskRequest\x12\x17\n\x07task_id\x18\x01 \x01(\tR\x06taskId\"+\n\x0fRunTaskResponse\x12\x18\n\x07message\x18\x01 \x01(\tR\x07message\"q\n\x19ReportTaskProgressRequest\x12\x1f\n\x07task_id\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\x06taskId\x12\x33\n\x08progress\x18\x02 \x01(\x01\x42\x17\xbaH\x14\x12\x12\x19\x00\x00\x00\x00\x00\x00\xf0?)\x00\x00\x00\x00\x00\x00\x00\x00R\x08progress\"\x1c\n\x1aReportTaskProgressResponse2a\n\x11TaskRunnerService\x12L\n\x07RunTask\x12\x1f.mavio.plugin.v1.RunTaskRequest\x1a .mavio.plugin.v1.RunTaskResponseB\xc3\x01\n\x13\x63om.mavio.plugin.v1B\tTaskProtoP\x01ZCgithub.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1;pluginv1\xa2\x02\x03MPX\xaa\x02\x0fMavio.Plugin.V1\xca\x02\x0fMavio\\Plugin\\V1\xe2\x02\x1bMavio\\Plugin\\V1\\GPBMetadata\xea\x02\x11Mavio::Plugin::V1b\x08\x65\x64itionsp\xe8\x07')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -33,12 +34,20 @@ _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'mavio.plugin.v1.task_pb2', 
 if not _descriptor._USE_C_DESCRIPTORS:
   _globals['DESCRIPTOR']._loaded_options = None
   _globals['DESCRIPTOR']._serialized_options = b'\n\023com.mavio.plugin.v1B\tTaskProtoP\001ZCgithub.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1;pluginv1\242\002\003MPX\252\002\017Mavio.Plugin.V1\312\002\017Mavio\\Plugin\\V1\342\002\033Mavio\\Plugin\\V1\\GPBMetadata\352\002\021Mavio::Plugin::V1'
-  _globals['_TASK']._serialized_start=80
-  _globals['_TASK']._serialized_end=264
-  _globals['_RUNTASKREQUEST']._serialized_start=266
-  _globals['_RUNTASKREQUEST']._serialized_end=307
-  _globals['_RUNTASKRESPONSE']._serialized_start=309
-  _globals['_RUNTASKRESPONSE']._serialized_end=352
-  _globals['_TASKRUNNERSERVICE']._serialized_start=354
-  _globals['_TASKRUNNERSERVICE']._serialized_end=451
+  _globals['_REPORTTASKPROGRESSREQUEST'].fields_by_name['task_id']._loaded_options = None
+  _globals['_REPORTTASKPROGRESSREQUEST'].fields_by_name['task_id']._serialized_options = b'\272H\003\310\001\001'
+  _globals['_REPORTTASKPROGRESSREQUEST'].fields_by_name['progress']._loaded_options = None
+  _globals['_REPORTTASKPROGRESSREQUEST'].fields_by_name['progress']._serialized_options = b'\272H\024\022\022\031\000\000\000\000\000\000\360?)\000\000\000\000\000\000\000\000'
+  _globals['_TASK']._serialized_start=109
+  _globals['_TASK']._serialized_end=293
+  _globals['_RUNTASKREQUEST']._serialized_start=295
+  _globals['_RUNTASKREQUEST']._serialized_end=336
+  _globals['_RUNTASKRESPONSE']._serialized_start=338
+  _globals['_RUNTASKRESPONSE']._serialized_end=381
+  _globals['_REPORTTASKPROGRESSREQUEST']._serialized_start=383
+  _globals['_REPORTTASKPROGRESSREQUEST']._serialized_end=496
+  _globals['_REPORTTASKPROGRESSRESPONSE']._serialized_start=498
+  _globals['_REPORTTASKPROGRESSRESPONSE']._serialized_end=526
+  _globals['_TASKRUNNERSERVICE']._serialized_start=528
+  _globals['_TASKRUNNERSERVICE']._serialized_end=625
 # @@protoc_insertion_point(module_scope)

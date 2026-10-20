@@ -297,6 +297,17 @@ public nonisolated struct Mavio_System_V1_Task: @unchecked Sendable {
   /// Clears the value of `pluginID`. Subsequent reads from it will return its default value.
   public mutating func clearPluginID() {_uniqueStorage()._pluginID = nil}
 
+  /// The fraction done of its run in progress that tells it, 0 to 1, such
+  /// as a plugin's download of its models.
+  public var progress: Double {
+    get {_storage._progress ?? 0}
+    set {_uniqueStorage()._progress = newValue}
+  }
+  /// Returns true if `progress` has been explicitly set.
+  public var hasProgress: Bool {_storage._progress != nil}
+  /// Clears the value of `progress`. Subsequent reads from it will return its default value.
+  public mutating func clearProgress() {_uniqueStorage()._progress = nil}
+
   public var unknownFields = SwiftProtobuf.UnknownStorage()
 
   public init() {}
@@ -538,7 +549,7 @@ nonisolated extension Mavio_System_V1_Job: SwiftProtobuf.Message, SwiftProtobuf.
 
 nonisolated extension Mavio_System_V1_Task: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".Task"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}id\0\u{1}name\0\u{1}description\0\u{1}kind\0\u{1}interval\0\u{3}last_run\0\u{3}next_run_time\0\u{1}running\0\u{3}plugin_id\0")
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}id\0\u{1}name\0\u{1}description\0\u{1}kind\0\u{1}interval\0\u{3}last_run\0\u{3}next_run_time\0\u{1}running\0\u{3}plugin_id\0\u{1}progress\0")
 
   fileprivate class _StorageClass {
     var _id: String? = nil
@@ -550,6 +561,7 @@ nonisolated extension Mavio_System_V1_Task: SwiftProtobuf.Message, SwiftProtobuf
     var _nextRunTime: SwiftProtobuf.Google_Protobuf_Timestamp? = nil
     var _running: Bool? = nil
     var _pluginID: String? = nil
+    var _progress: Double? = nil
 
       // This property is used as the initial default value for new instances of the type.
       // The type itself is protecting the reference to its storage via CoW semantics.
@@ -569,6 +581,7 @@ nonisolated extension Mavio_System_V1_Task: SwiftProtobuf.Message, SwiftProtobuf
       _nextRunTime = source._nextRunTime
       _running = source._running
       _pluginID = source._pluginID
+      _progress = source._progress
     }
   }
 
@@ -596,6 +609,7 @@ nonisolated extension Mavio_System_V1_Task: SwiftProtobuf.Message, SwiftProtobuf
         case 7: try { try decoder.decodeSingularMessageField(value: &_storage._nextRunTime) }()
         case 8: try { try decoder.decodeSingularBoolField(value: &_storage._running) }()
         case 9: try { try decoder.decodeSingularStringField(value: &_storage._pluginID) }()
+        case 10: try { try decoder.decodeSingularDoubleField(value: &_storage._progress) }()
         default: break
         }
       }
@@ -635,6 +649,9 @@ nonisolated extension Mavio_System_V1_Task: SwiftProtobuf.Message, SwiftProtobuf
       try { if let v = _storage._pluginID {
         try visitor.visitSingularStringField(value: v, fieldNumber: 9)
       } }()
+      try { if let v = _storage._progress {
+        try visitor.visitSingularDoubleField(value: v, fieldNumber: 10)
+      } }()
     }
     try unknownFields.traverse(visitor: &visitor)
   }
@@ -653,6 +670,7 @@ nonisolated extension Mavio_System_V1_Task: SwiftProtobuf.Message, SwiftProtobuf
         if _storage._nextRunTime != rhs_storage._nextRunTime {return false}
         if _storage._running != rhs_storage._running {return false}
         if _storage._pluginID != rhs_storage._pluginID {return false}
+        if _storage._progress != rhs_storage._progress {return false}
         return true
       }
       if !storagesAreEqual {return false}

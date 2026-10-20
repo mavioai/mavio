@@ -495,6 +495,7 @@ type Task struct {
 	xxx_hidden_NextRunTime *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=next_run_time,json=nextRunTime"`
 	xxx_hidden_Running     bool                   `protobuf:"varint,8,opt,name=running"`
 	xxx_hidden_PluginId    *string                `protobuf:"bytes,9,opt,name=plugin_id,json=pluginId"`
+	xxx_hidden_Progress    float64                `protobuf:"fixed64,10,opt,name=progress"`
 	XXX_raceDetectHookData protoimpl.RaceDetectHookData
 	XXX_presence           [1]uint32
 	unknownFields          protoimpl.UnknownFields
@@ -604,24 +605,31 @@ func (x *Task) GetPluginId() string {
 	return ""
 }
 
+func (x *Task) GetProgress() float64 {
+	if x != nil {
+		return x.xxx_hidden_Progress
+	}
+	return 0
+}
+
 func (x *Task) SetId(v string) {
 	x.xxx_hidden_Id = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 9)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 10)
 }
 
 func (x *Task) SetName(v string) {
 	x.xxx_hidden_Name = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 9)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 10)
 }
 
 func (x *Task) SetDescription(v string) {
 	x.xxx_hidden_Description = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 9)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 10)
 }
 
 func (x *Task) SetKind(v string) {
 	x.xxx_hidden_Kind = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 9)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 10)
 }
 
 func (x *Task) SetInterval(v *durationpb.Duration) {
@@ -638,12 +646,17 @@ func (x *Task) SetNextRunTime(v *timestamppb.Timestamp) {
 
 func (x *Task) SetRunning(v bool) {
 	x.xxx_hidden_Running = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 9)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 10)
 }
 
 func (x *Task) SetPluginId(v string) {
 	x.xxx_hidden_PluginId = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 8, 9)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 8, 10)
+}
+
+func (x *Task) SetProgress(v float64) {
+	x.xxx_hidden_Progress = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 10)
 }
 
 func (x *Task) HasId() bool {
@@ -709,6 +722,13 @@ func (x *Task) HasPluginId() bool {
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 8)
 }
 
+func (x *Task) HasProgress() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 9)
+}
+
 func (x *Task) ClearId() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_Id = nil
@@ -751,6 +771,11 @@ func (x *Task) ClearPluginId() {
 	x.xxx_hidden_PluginId = nil
 }
 
+func (x *Task) ClearProgress() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 9)
+	x.xxx_hidden_Progress = 0
+}
+
 type Task_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
@@ -770,6 +795,9 @@ type Task_builder struct {
 	Running     *bool
 	// The plugin whose task it is; empty for the server's own.
 	PluginId *string
+	// The fraction done of its run in progress that tells it, 0 to 1, such
+	// as a plugin's download of its models.
+	Progress *float64
 }
 
 func (b0 Task_builder) Build() *Task {
@@ -777,31 +805,35 @@ func (b0 Task_builder) Build() *Task {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Id != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 9)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 10)
 		x.xxx_hidden_Id = b.Id
 	}
 	if b.Name != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 9)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 10)
 		x.xxx_hidden_Name = b.Name
 	}
 	if b.Description != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 9)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 10)
 		x.xxx_hidden_Description = b.Description
 	}
 	if b.Kind != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 9)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 10)
 		x.xxx_hidden_Kind = b.Kind
 	}
 	x.xxx_hidden_Interval = b.Interval
 	x.xxx_hidden_LastRun = b.LastRun
 	x.xxx_hidden_NextRunTime = b.NextRunTime
 	if b.Running != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 9)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 10)
 		x.xxx_hidden_Running = *b.Running
 	}
 	if b.PluginId != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 8, 9)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 8, 10)
 		x.xxx_hidden_PluginId = b.PluginId
+	}
+	if b.Progress != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 10)
+		x.xxx_hidden_Progress = *b.Progress
 	}
 	return m0
 }
@@ -1342,7 +1374,7 @@ const file_mavio_system_v1_task_proto_rawDesc = "" +
 	"last_error\x18\n" +
 	" \x01(\tR\tlastError\x12!\n" +
 	"\fpayload_json\x18\v \x01(\tR\vpayloadJson\x12\x1a\n" +
-	"\bprogress\x18\f \x01(\x01R\bprogress\"\xbf\x02\n" +
+	"\bprogress\x18\f \x01(\x01R\bprogress\"\xdb\x02\n" +
 	"\x04Task\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12 \n" +
@@ -1352,7 +1384,9 @@ const file_mavio_system_v1_task_proto_rawDesc = "" +
 	"\blast_run\x18\x06 \x01(\v2\x14.mavio.system.v1.JobR\alastRun\x12>\n" +
 	"\rnext_run_time\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\vnextRunTime\x12\x18\n" +
 	"\arunning\x18\b \x01(\bR\arunning\x12\x1b\n" +
-	"\tplugin_id\x18\t \x01(\tR\bpluginId\"\x12\n" +
+	"\tplugin_id\x18\t \x01(\tR\bpluginId\x12\x1a\n" +
+	"\bprogress\x18\n" +
+	" \x01(\x01R\bprogress\"\x12\n" +
 	"\x10ListTasksRequest\"@\n" +
 	"\x11ListTasksResponse\x12+\n" +
 	"\x05tasks\x18\x01 \x03(\v2\x15.mavio.system.v1.TaskR\x05tasks\"(\n" +

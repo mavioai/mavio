@@ -100,7 +100,7 @@ manifest 在 `permissions.api` 中列出插件可以调用的服务：`<package>
 * **运行时**：进程插件通过其 socket 上的流式反向代理访问，代理在 `Mavio-Plugin-Token` 中出示插件的令牌，使请求保留自己的 `Authorization`。WASM 请求会被缓冲并受调用超时限制，每个方向至多 16 MiB；ABI 请求信封在请求体之后携带方法与查询字符串，旧的 guest 会忽略它们。
 
 ## 6. 任务与数据目录
-* **任务**：`TASK_RUNNER` 插件的 manifest 列出任务（ID、名称、说明、至少一分钟的间隔、超时）。它们以 `plugin:{plugin}:{task}` 出现在 `TaskService` 中，并带有插件 ID；它们作为 `plugin.task` 作业在单独的 worker 上运行，调用 `TaskRunnerService.RunTask`：自插件启动起按间隔运行，每次运行排入下一次；也可按需运行。任务的超时（至多六小时，未设置时为一小时）在该次调用中取代 WASM 的调用超时。插件未就绪时跳过定时运行；已不存在的任务的运行被丢弃。
+* **任务**：`TASK_RUNNER` 插件的 manifest 列出任务（ID、名称、说明、至少一分钟的间隔、超时）。它们以 `plugin:{plugin}:{task}` 出现在 `TaskService` 中，并带有插件 ID；它们作为 `plugin.task` 作业在单独的 worker 上运行，调用 `TaskRunnerService.RunTask`：自插件启动起按间隔运行，每次运行排入下一次；也可按需运行。任务的超时（至多六小时，未设置时为一小时）在该次调用中取代 WASM 的调用超时。插件未就绪时跳过定时运行；已不存在的任务的运行被丢弃。一次运行以 `HostService.ReportTaskProgress` 报告进度（0 到 1 的比例；未在运行的任务的报告被忽略），成为其作业的进度以及 `TaskService` 中任务的 `progress`，在任务页面上显示为百分比；Python SDK 的 `report_task_progress` 调用它。
 * **数据目录**：每个插件有一个可写目录 `<home>/plugin-data/<id>`（`--plugin-data-dir`），升级时保留，纳入备份，卸载时删除。两种运行时都通过 `MAVIO_PLUGIN_DATA` 告知插件其路径（`guest.DataDir()`）；WASM 插件在 `/data` 看到它。
 * **宿主操作系统**：两种运行时都通过 `MAVIO_HOST_OS`（`guest.HostOS()`）告知宿主的操作系统及其版本，按 Servarr 应用在 User-Agent 中的写法小写，如 `ubuntu 22.04`：Linux 上取自 `/etc/*release` 的 `ID` 与 `VERSION_ID`，macOS 上取自系统版本属性列表，Windows 上取自 `RtlGetVersion`。
 * **设备 ID**：两种运行时都通过 `MAVIO_DEVICE_ID`（`guest.DeviceID()`，TypeScript 中为 `deviceId()`）给插件一个 UUID，代表本机面向那些区分安装的服务——如 OpenAI 的 agent host ID，agent 插件用 ChatGPT 登录时会发送它。它是由本机硬件 ID（Linux 的 `machine-id`、macOS 的 `IOPlatformUUID`、Windows 的 `MachineGuid`）推导出的第 5 版 UUID；在容器中或本机没有硬件 ID 时，改由服务器的 ID（首次启动时随 `$MAVIO_HOME` 生成）推导。这样它在重启、升级和重装之间保持不变，又不泄露硬件 ID。

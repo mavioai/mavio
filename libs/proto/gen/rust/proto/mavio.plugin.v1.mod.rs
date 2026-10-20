@@ -9,6 +9,7 @@ include!("mavio.plugin.v1.voice.rs");
 include!("mavio.plugin.v1.proxy.rs");
 include!("mavio.plugin.v1.challenge.rs");
 include!("mavio.plugin.v1.container.rs");
+include!("mavio.plugin.v1.task.rs");
 include!("mavio.plugin.v1.device.rs");
 include!("mavio.plugin.v1.indexer.rs");
 include!("mavio.plugin.v1.download_client.rs");
@@ -22,7 +23,6 @@ include!("mavio.plugin.v1.local.rs");
 include!("mavio.plugin.v1.lyrics.rs");
 include!("mavio.plugin.v1.media_source.rs");
 include!("mavio.plugin.v1.password_reset.rs");
-include!("mavio.plugin.v1.task.rs");
 include!("mavio.plugin.v1.plugin.rs");
 include!("mavio.plugin.v1.processor.rs");
 include!("mavio.plugin.v1.resolver.rs");
@@ -56,6 +56,7 @@ pub mod __buffa {
         include!("mavio.plugin.v1.proxy.__view.rs");
         include!("mavio.plugin.v1.challenge.__view.rs");
         include!("mavio.plugin.v1.container.__view.rs");
+        include!("mavio.plugin.v1.task.__view.rs");
         include!("mavio.plugin.v1.device.__view.rs");
         include!("mavio.plugin.v1.indexer.__view.rs");
         include!("mavio.plugin.v1.download_client.__view.rs");
@@ -69,7 +70,6 @@ pub mod __buffa {
         include!("mavio.plugin.v1.lyrics.__view.rs");
         include!("mavio.plugin.v1.media_source.__view.rs");
         include!("mavio.plugin.v1.password_reset.__view.rs");
-        include!("mavio.plugin.v1.task.__view.rs");
         include!("mavio.plugin.v1.plugin.__view.rs");
         include!("mavio.plugin.v1.processor.__view.rs");
         include!("mavio.plugin.v1.resolver.__view.rs");
@@ -596,6 +596,26 @@ pub use self::__buffa::view::ListContainersResponseView;
 #[doc(inline)]
 pub use self::__buffa::view::ListContainersResponseOwnedView;
 #[doc(inline)]
+pub use self::__buffa::view::TaskView;
+#[doc(inline)]
+pub use self::__buffa::view::TaskOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::RunTaskRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::RunTaskRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::RunTaskResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::RunTaskResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ReportTaskProgressRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::ReportTaskProgressRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ReportTaskProgressResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::ReportTaskProgressResponseOwnedView;
+#[doc(inline)]
 pub use self::__buffa::view::DeviceView;
 #[doc(inline)]
 pub use self::__buffa::view::DeviceOwnedView;
@@ -931,18 +951,6 @@ pub use self::__buffa::view::StartResetRequestOwnedView;
 pub use self::__buffa::view::StartResetResponseView;
 #[doc(inline)]
 pub use self::__buffa::view::StartResetResponseOwnedView;
-#[doc(inline)]
-pub use self::__buffa::view::TaskView;
-#[doc(inline)]
-pub use self::__buffa::view::TaskOwnedView;
-#[doc(inline)]
-pub use self::__buffa::view::RunTaskRequestView;
-#[doc(inline)]
-pub use self::__buffa::view::RunTaskRequestOwnedView;
-#[doc(inline)]
-pub use self::__buffa::view::RunTaskResponseView;
-#[doc(inline)]
-pub use self::__buffa::view::RunTaskResponseOwnedView;
 #[doc(inline)]
 pub use self::__buffa::view::ManifestView;
 #[doc(inline)]

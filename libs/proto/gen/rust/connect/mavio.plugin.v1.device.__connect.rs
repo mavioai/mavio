@@ -38,6 +38,18 @@ pub type OwnedSolveChallengeRequestView = ::buffa::view::OwnedView<
 pub type OwnedSolveChallengeResponseView = ::buffa::view::OwnedView<
     crate::proto::mavio::plugin::v1::__buffa::view::SolveChallengeResponseView<'static>,
 >;
+///Shorthand for `OwnedView<ReportTaskProgressRequestView<'static>>`.
+pub type OwnedReportTaskProgressRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::plugin::v1::__buffa::view::ReportTaskProgressRequestView<
+        'static,
+    >,
+>;
+///Shorthand for `OwnedView<ReportTaskProgressResponseView<'static>>`.
+pub type OwnedReportTaskProgressResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::plugin::v1::__buffa::view::ReportTaskProgressResponseView<
+        'static,
+    >,
+>;
 ///Shorthand for `OwnedView<SendCommandRequestView<'static>>`.
 pub type OwnedSendCommandRequestView = ::buffa::view::OwnedView<
     crate::proto::mavio::plugin::v1::__buffa::view::SendCommandRequestView<'static>,
@@ -216,6 +228,42 @@ for ::buffa::view::OwnedView<
         )
     }
 }
+impl ::connectrpc::Encodable<crate::proto::mavio::plugin::v1::ReportTaskProgressResponse>
+for crate::proto::mavio::plugin::v1::__buffa::view::ReportTaskProgressResponseView<'_> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::plugin::v1::ReportTaskProgressResponse>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::plugin::v1::__buffa::view::ReportTaskProgressResponseView<
+        'static,
+    >,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
 impl ::connectrpc::Encodable<crate::proto::mavio::plugin::v1::SendCommandResponse>
 for crate::proto::mavio::plugin::v1::__buffa::view::SendCommandResponseView<'_> {
     fn encode(
@@ -279,6 +327,12 @@ pub const HOST_SERVICE_LIST_PROXIES_SPEC: ::connectrpc::Spec = ::connectrpc::Spe
 /// Static [`Spec`](::connectrpc::Spec) for the `SolveChallenge` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
 pub const HOST_SERVICE_SOLVE_CHALLENGE_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
         "/mavio.plugin.v1.HostService/SolveChallenge",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
+/// Static [`Spec`](::connectrpc::Spec) for the `ReportTaskProgress` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const HOST_SERVICE_REPORT_TASK_PROGRESS_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.plugin.v1.HostService/ReportTaskProgress",
         ::connectrpc::StreamType::Unary,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
@@ -460,6 +514,31 @@ pub trait HostService: Send + Sync + 'static {
             > + Send + use<'a, Self>,
         >,
     > + Send;
+    /// ReportTaskProgress tells how far the run of one of the calling
+    /// plugin's tasks has come, which the server shows as its job's progress;
+    /// a report of a task not running is ignored.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn report_task_progress<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::plugin::v1::ReportTaskProgressRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::plugin::v1::ReportTaskProgressResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
 }
 /// Extension trait for registering a service implementation with a Router.
 ///
@@ -637,6 +716,35 @@ impl<S: HostService> HostServiceExt for S {
                 },
             )
             .with_spec(HOST_SERVICE_SOLVE_CHALLENGE_SPEC)
+            .route_view(
+                HOST_SERVICE_SERVICE_NAME,
+                "ReportTaskProgress",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::plugin::v1::__buffa::view::ReportTaskProgressRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::plugin::v1::ReportTaskProgressRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.report_task_progress(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::plugin::v1::ReportTaskProgressResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(HOST_SERVICE_REPORT_TASK_PROGRESS_SPEC)
     }
 }
 /// Type-inference marker used by [`Router::add_service`](::connectrpc::Router::add_service).
@@ -719,6 +827,12 @@ impl<T: HostService> ::connectrpc::Dispatcher for HostServiceServer<T> {
                 Some(
                     ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
                         .with_spec(HOST_SERVICE_SOLVE_CHALLENGE_SPEC),
+                )
+            }
+            "ReportTaskProgress" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
+                        .with_spec(HOST_SERVICE_REPORT_TASK_PROGRESS_SPEC),
                 )
             }
             _ => None,
@@ -843,6 +957,28 @@ impl<T: HostService> ::connectrpc::Dispatcher for HostServiceServer<T> {
                         .await?
                         .encode::<
                             crate::proto::mavio::plugin::v1::SolveChallengeResponse,
+                        >(format)
+                })
+            }
+            "ReportTaskProgress" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::plugin::v1::ReportTaskProgressRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::plugin::v1::__buffa::view::ReportTaskProgressRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::plugin::v1::ReportTaskProgressRequest,
+                    >::from_parts(&req, &body);
+                    svc.report_task_progress(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::plugin::v1::ReportTaskProgressResponse,
                         >(format)
                 })
             }
@@ -1193,6 +1329,51 @@ where
                 &self.transport,
                 &self.config,
                 HOST_SERVICE_SOLVE_CHALLENGE_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the ReportTaskProgress RPC. Sends a request to /mavio.plugin.v1.HostService/ReportTaskProgress.
+    pub async fn report_task_progress(
+        &self,
+        request: crate::proto::mavio::plugin::v1::ReportTaskProgressRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::plugin::v1::__buffa::view::ReportTaskProgressResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.report_task_progress_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the ReportTaskProgress RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn report_task_progress_with_options(
+        &self,
+        request: crate::proto::mavio::plugin::v1::ReportTaskProgressRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::plugin::v1::__buffa::view::ReportTaskProgressResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                HOST_SERVICE_REPORT_TASK_PROGRESS_SPEC
                     .with_origin(::connectrpc::SpecOrigin::Client),
                 request,
                 options,

@@ -4,6 +4,7 @@
 
 import type { GenFile, GenMessage, GenService } from "@bufbuild/protobuf/codegenv2";
 import { fileDesc, messageDesc, serviceDesc } from "@bufbuild/protobuf/codegenv2";
+import { file_buf_validate_validate } from "../../../buf/validate/validate_pb";
 import type { Duration } from "@bufbuild/protobuf/wkt";
 import { file_google_protobuf_duration } from "@bufbuild/protobuf/wkt";
 import type { Message } from "@bufbuild/protobuf";
@@ -12,7 +13,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file mavio/plugin/v1/task.proto.
  */
 export const file_mavio_plugin_v1_task: GenFile = /*@__PURE__*/
-  fileDesc("ChptYXZpby9wbHVnaW4vdjEvdGFzay5wcm90bxIPbWF2aW8ucGx1Z2luLnYxIo4BCgRUYXNrEgoKAmlkGAEgASgJEgwKBG5hbWUYAiABKAkSEwoLZGVzY3JpcHRpb24YAyABKAkSKwoIaW50ZXJ2YWwYBCABKAsyGS5nb29nbGUucHJvdG9idWYuRHVyYXRpb24SKgoHdGltZW91dBgFIAEoCzIZLmdvb2dsZS5wcm90b2J1Zi5EdXJhdGlvbiIhCg5SdW5UYXNrUmVxdWVzdBIPCgd0YXNrX2lkGAEgASgJIiIKD1J1blRhc2tSZXNwb25zZRIPCgdtZXNzYWdlGAEgASgJMmEKEVRhc2tSdW5uZXJTZXJ2aWNlEkwKB1J1blRhc2sSHy5tYXZpby5wbHVnaW4udjEuUnVuVGFza1JlcXVlc3QaIC5tYXZpby5wbHVnaW4udjEuUnVuVGFza1Jlc3BvbnNlQsMBChNjb20ubWF2aW8ucGx1Z2luLnYxQglUYXNrUHJvdG9QAVpDZ2l0aHViLmNvbS9tYXZpb2FpL21hdmlvL2xpYnMvcHJvdG8vZ2VuL2dvL21hdmlvL3BsdWdpbi92MTtwbHVnaW52MaICA01QWKoCD01hdmlvLlBsdWdpbi5WMcoCD01hdmlvXFBsdWdpblxWMeICG01hdmlvXFBsdWdpblxWMVxHUEJNZXRhZGF0YeoCEU1hdmlvOjpQbHVnaW46OlYxYghlZGl0aW9uc3DoBw", [file_google_protobuf_duration]);
+  fileDesc("ChptYXZpby9wbHVnaW4vdjEvdGFzay5wcm90bxIPbWF2aW8ucGx1Z2luLnYxIo4BCgRUYXNrEgoKAmlkGAEgASgJEgwKBG5hbWUYAiABKAkSEwoLZGVzY3JpcHRpb24YAyABKAkSKwoIaW50ZXJ2YWwYBCABKAsyGS5nb29nbGUucHJvdG9idWYuRHVyYXRpb24SKgoHdGltZW91dBgFIAEoCzIZLmdvb2dsZS5wcm90b2J1Zi5EdXJhdGlvbiIhCg5SdW5UYXNrUmVxdWVzdBIPCgd0YXNrX2lkGAEgASgJIiIKD1J1blRhc2tSZXNwb25zZRIPCgdtZXNzYWdlGAEgASgJIl8KGVJlcG9ydFRhc2tQcm9ncmVzc1JlcXVlc3QSFwoHdGFza19pZBgBIAEoCUIGukgDyAEBEikKCHByb2dyZXNzGAIgASgBQhe6SBQSEhkAAAAAAADwPykAAAAAAAAAACIcChpSZXBvcnRUYXNrUHJvZ3Jlc3NSZXNwb25zZTJhChFUYXNrUnVubmVyU2VydmljZRJMCgdSdW5UYXNrEh8ubWF2aW8ucGx1Z2luLnYxLlJ1blRhc2tSZXF1ZXN0GiAubWF2aW8ucGx1Z2luLnYxLlJ1blRhc2tSZXNwb25zZULDAQoTY29tLm1hdmlvLnBsdWdpbi52MUIJVGFza1Byb3RvUAFaQ2dpdGh1Yi5jb20vbWF2aW9haS9tYXZpby9saWJzL3Byb3RvL2dlbi9nby9tYXZpby9wbHVnaW4vdjE7cGx1Z2ludjGiAgNNUFiqAg9NYXZpby5QbHVnaW4uVjHKAg9NYXZpb1xQbHVnaW5cVjHiAhtNYXZpb1xQbHVnaW5cVjFcR1BCTWV0YWRhdGHqAhFNYXZpbzo6UGx1Z2luOjpWMWIIZWRpdGlvbnNw6Ac", [file_buf_validate_validate, file_google_protobuf_duration]);
 
 /**
  * Task is a task a plugin declares.
@@ -94,6 +95,45 @@ export type RunTaskResponse = Message<"mavio.plugin.v1.RunTaskResponse"> & {
  */
 export const RunTaskResponseSchema: GenMessage<RunTaskResponse> = /*@__PURE__*/
   messageDesc(file_mavio_plugin_v1_task, 2);
+
+/**
+ * @generated from message mavio.plugin.v1.ReportTaskProgressRequest
+ */
+export type ReportTaskProgressRequest = Message<"mavio.plugin.v1.ReportTaskProgressRequest"> & {
+  /**
+   * The task of the calling plugin running.
+   *
+   * @generated from field: string task_id = 1;
+   */
+  taskId: string;
+
+  /**
+   * The fraction of the run done, 0 to 1.
+   *
+   * @generated from field: double progress = 2;
+   */
+  progress: number;
+};
+
+/**
+ * Describes the message mavio.plugin.v1.ReportTaskProgressRequest.
+ * Use `create(ReportTaskProgressRequestSchema)` to create a new message.
+ */
+export const ReportTaskProgressRequestSchema: GenMessage<ReportTaskProgressRequest> = /*@__PURE__*/
+  messageDesc(file_mavio_plugin_v1_task, 3);
+
+/**
+ * @generated from message mavio.plugin.v1.ReportTaskProgressResponse
+ */
+export type ReportTaskProgressResponse = Message<"mavio.plugin.v1.ReportTaskProgressResponse"> & {
+};
+
+/**
+ * Describes the message mavio.plugin.v1.ReportTaskProgressResponse.
+ * Use `create(ReportTaskProgressResponseSchema)` to create a new message.
+ */
+export const ReportTaskProgressResponseSchema: GenMessage<ReportTaskProgressResponse> = /*@__PURE__*/
+  messageDesc(file_mavio_plugin_v1_task, 4);
 
 /**
  * TaskRunnerService runs the tasks a plugin declares in its manifest. The

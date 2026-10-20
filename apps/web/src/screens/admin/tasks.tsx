@@ -48,7 +48,9 @@ function TaskGroup({ server, title, tasks }: { server: ServerEntry; title: strin
       {tasks.map((task) => {
         const last = task.lastRun;
         const status = task.running
-          ? t("tasks.runningNow")
+          ? task.progress > 0
+            ? `${t("tasks.runningNow")} · ${Math.round(task.progress * 100)}%`
+            : t("tasks.runningNow")
           : last
             ? `${states[last.state].title()} ${ago(last.finishTime ?? last.runTime) ?? ""}`.trim()
             : t("tasks.neverRun");

@@ -70,6 +70,9 @@ message Task {
   bool running = 8;
   // The plugin whose task it is; empty for the server's own.
   string plugin_id = 9;
+  // The fraction done of its run in progress that tells it, 0 to 1, such
+  // as a plugin's download of its models.
+  double progress = 10;
 }
 
 message ListTasksRequest {}

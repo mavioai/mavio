@@ -26,9 +26,10 @@ from google.protobuf import duration_pb2 as google_dot_protobuf_dot_duration__pb
 from mavio.plugin.v1 import challenge_pb2 as mavio_dot_plugin_dot_v1_dot_challenge__pb2
 from mavio.plugin.v1 import container_pb2 as mavio_dot_plugin_dot_v1_dot_container__pb2
 from mavio.plugin.v1 import proxy_pb2 as mavio_dot_plugin_dot_v1_dot_proxy__pb2
+from mavio.plugin.v1 import task_pb2 as mavio_dot_plugin_dot_v1_dot_task__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1cmavio/plugin/v1/device.proto\x12\x0fmavio.plugin.v1\x1a\x1egoogle/protobuf/duration.proto\x1a\x1fmavio/plugin/v1/challenge.proto\x1a\x1fmavio/plugin/v1/container.proto\x1a\x1bmavio/plugin/v1/proxy.proto\"\x80\x01\n\x06\x44\x65vice\x12\x0e\n\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n\x04name\x18\x02 \x01(\tR\x04name\x12\x18\n\x07product\x18\x03 \x01(\tR\x07product\x12\x38\n\x08\x63ommands\x18\x04 \x03(\x0e\x32\x1c.mavio.plugin.v1.CommandKindR\x08\x63ommands\"\x95\x02\n\x07\x43ommand\x12+\n\x04play\x18\x01 \x01(\x0b\x32\x15.mavio.plugin.v1.PlayH\x00R\x04play\x12;\n\nplay_state\x18\x02 \x01(\x0b\x32\x1a.mavio.plugin.v1.PlayStateH\x00R\tplayState\x12+\n\x04seek\x18\x03 \x01(\x0b\x32\x15.mavio.plugin.v1.SeekH\x00R\x04seek\x12\x38\n\x07message\x18\x04 \x01(\x0b\x32\x1c.mavio.plugin.v1.ShowMessageH\x00R\x07message\x12\x31\n\x06volume\x18\x05 \x01(\x0b\x32\x17.mavio.plugin.v1.VolumeH\x00R\x06volumeB\x06\n\x04kind\"\x84\x01\n\x04Play\x12\x19\n\x08item_ids\x18\x01 \x03(\tR\x07itemIds\x12\x1f\n\x0bstart_index\x18\x02 \x01(\x05R\nstartIndex\x12@\n\x0estart_position\x18\x03 \x01(\x0b\x32\x19.google.protobuf.DurationR\rstartPosition\"H\n\tPlayState\x12;\n\x07\x63ommand\x18\x01 \x01(\x0e\x32!.mavio.plugin.v1.PlayStateCommandR\x07\x63ommand\"=\n\x04Seek\x12\x35\n\x08position\x18\x01 \x01(\x0b\x32\x19.google.protobuf.DurationR\x08position\"V\n\x0bShowMessage\x12\x12\n\x04text\x18\x01 \x01(\tR\x04text\x12\x33\n\x07timeout\x18\x02 \x01(\x0b\x32\x19.google.protobuf.DurationR\x07timeout\"4\n\x06Volume\x12\x14\n\x05level\x18\x01 \x01(\x05R\x05level\x12\x14\n\x05muted\x18\x02 \x01(\x08R\x05muted\"F\n\x11SetDevicesRequest\x12\x31\n\x07\x64\x65vices\x18\x01 \x03(\x0b\x32\x17.mavio.plugin.v1.DeviceR\x07\x64\x65vices\"\x14\n\x12SetDevicesResponse\"\xba\x01\n\x12SendCommandRequest\x12\x1b\n\tdevice_id\x18\x01 \x01(\tR\x08\x64\x65viceId\x12\x1d\n\nsession_id\x18\x02 \x01(\tR\tsessionId\x12\x17\n\x07user_id\x18\x03 \x01(\tR\x06userId\x12\x1b\n\tuser_name\x18\x04 \x01(\tR\x08userName\x12\x32\n\x07\x63ommand\x18\x05 \x01(\x0b\x32\x18.mavio.plugin.v1.CommandR\x07\x63ommand\"\x15\n\x13SendCommandResponse\"\x16\n\x14GetServerInfoRequest\"\xa9\x01\n\x15GetServerInfoResponse\x12\x1f\n\x0bserver_name\x18\x01 \x01(\tR\nserverName\x12\x18\n\x07version\x18\x02 \x01(\tR\x07version\x12\x1b\n\thttp_port\x18\x03 \x01(\x05R\x08httpPort\x12\x1d\n\nhttps_port\x18\x04 \x01(\x05R\thttpsPort\x12\x19\n\x08\x62\x61se_url\x18\x05 \x01(\tR\x07\x62\x61seUrl*\xa9\x01\n\x0b\x43ommandKind\x12\x1c\n\x18\x43OMMAND_KIND_UNSPECIFIED\x10\x00\x12\x15\n\x11\x43OMMAND_KIND_PLAY\x10\x01\x12\x1b\n\x17\x43OMMAND_KIND_PLAY_STATE\x10\x02\x12\x15\n\x11\x43OMMAND_KIND_SEEK\x10\x03\x12\x18\n\x14\x43OMMAND_KIND_MESSAGE\x10\x04\x12\x17\n\x13\x43OMMAND_KIND_VOLUME\x10\x05*\xcf\x01\n\x10PlayStateCommand\x12\"\n\x1ePLAY_STATE_COMMAND_UNSPECIFIED\x10\x00\x12\x1c\n\x18PLAY_STATE_COMMAND_PAUSE\x10\x01\x12\x1e\n\x1aPLAY_STATE_COMMAND_UNPAUSE\x10\x02\x12\x1b\n\x17PLAY_STATE_COMMAND_STOP\x10\x03\x12\x1b\n\x17PLAY_STATE_COMMAND_NEXT\x10\x04\x12\x1f\n\x1bPLAY_STATE_COMMAND_PREVIOUS\x10\x05\x32\xf3\x03\n\x0bHostService\x12U\n\nSetDevices\x12\".mavio.plugin.v1.SetDevicesRequest\x1a#.mavio.plugin.v1.SetDevicesResponse\x12\x63\n\rGetServerInfo\x12%.mavio.plugin.v1.GetServerInfoRequest\x1a&.mavio.plugin.v1.GetServerInfoResponse\"\x03\x90\x02\x01\x12\x66\n\x0eListContainers\x12&.mavio.plugin.v1.ListContainersRequest\x1a\'.mavio.plugin.v1.ListContainersResponse\"\x03\x90\x02\x01\x12]\n\x0bListProxies\x12#.mavio.plugin.v1.ListProxiesRequest\x1a$.mavio.plugin.v1.ListProxiesResponse\"\x03\x90\x02\x01\x12\x61\n\x0eSolveChallenge\x12&.mavio.plugin.v1.SolveChallengeRequest\x1a\'.mavio.plugin.v1.SolveChallengeResponse2s\n\x17\x44\x65viceControllerService\x12X\n\x0bSendCommand\x12#.mavio.plugin.v1.SendCommandRequest\x1a$.mavio.plugin.v1.SendCommandResponseB\xc5\x01\n\x13\x63om.mavio.plugin.v1B\x0b\x44\x65viceProtoP\x01ZCgithub.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1;pluginv1\xa2\x02\x03MPX\xaa\x02\x0fMavio.Plugin.V1\xca\x02\x0fMavio\\Plugin\\V1\xe2\x02\x1bMavio\\Plugin\\V1\\GPBMetadata\xea\x02\x11Mavio::Plugin::V1b\x08\x65\x64itionsp\xe8\x07')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1cmavio/plugin/v1/device.proto\x12\x0fmavio.plugin.v1\x1a\x1egoogle/protobuf/duration.proto\x1a\x1fmavio/plugin/v1/challenge.proto\x1a\x1fmavio/plugin/v1/container.proto\x1a\x1bmavio/plugin/v1/proxy.proto\x1a\x1amavio/plugin/v1/task.proto\"\x80\x01\n\x06\x44\x65vice\x12\x0e\n\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n\x04name\x18\x02 \x01(\tR\x04name\x12\x18\n\x07product\x18\x03 \x01(\tR\x07product\x12\x38\n\x08\x63ommands\x18\x04 \x03(\x0e\x32\x1c.mavio.plugin.v1.CommandKindR\x08\x63ommands\"\x95\x02\n\x07\x43ommand\x12+\n\x04play\x18\x01 \x01(\x0b\x32\x15.mavio.plugin.v1.PlayH\x00R\x04play\x12;\n\nplay_state\x18\x02 \x01(\x0b\x32\x1a.mavio.plugin.v1.PlayStateH\x00R\tplayState\x12+\n\x04seek\x18\x03 \x01(\x0b\x32\x15.mavio.plugin.v1.SeekH\x00R\x04seek\x12\x38\n\x07message\x18\x04 \x01(\x0b\x32\x1c.mavio.plugin.v1.ShowMessageH\x00R\x07message\x12\x31\n\x06volume\x18\x05 \x01(\x0b\x32\x17.mavio.plugin.v1.VolumeH\x00R\x06volumeB\x06\n\x04kind\"\x84\x01\n\x04Play\x12\x19\n\x08item_ids\x18\x01 \x03(\tR\x07itemIds\x12\x1f\n\x0bstart_index\x18\x02 \x01(\x05R\nstartIndex\x12@\n\x0estart_position\x18\x03 \x01(\x0b\x32\x19.google.protobuf.DurationR\rstartPosition\"H\n\tPlayState\x12;\n\x07\x63ommand\x18\x01 \x01(\x0e\x32!.mavio.plugin.v1.PlayStateCommandR\x07\x63ommand\"=\n\x04Seek\x12\x35\n\x08position\x18\x01 \x01(\x0b\x32\x19.google.protobuf.DurationR\x08position\"V\n\x0bShowMessage\x12\x12\n\x04text\x18\x01 \x01(\tR\x04text\x12\x33\n\x07timeout\x18\x02 \x01(\x0b\x32\x19.google.protobuf.DurationR\x07timeout\"4\n\x06Volume\x12\x14\n\x05level\x18\x01 \x01(\x05R\x05level\x12\x14\n\x05muted\x18\x02 \x01(\x08R\x05muted\"F\n\x11SetDevicesRequest\x12\x31\n\x07\x64\x65vices\x18\x01 \x03(\x0b\x32\x17.mavio.plugin.v1.DeviceR\x07\x64\x65vices\"\x14\n\x12SetDevicesResponse\"\xba\x01\n\x12SendCommandRequest\x12\x1b\n\tdevice_id\x18\x01 \x01(\tR\x08\x64\x65viceId\x12\x1d\n\nsession_id\x18\x02 \x01(\tR\tsessionId\x12\x17\n\x07user_id\x18\x03 \x01(\tR\x06userId\x12\x1b\n\tuser_name\x18\x04 \x01(\tR\x08userName\x12\x32\n\x07\x63ommand\x18\x05 \x01(\x0b\x32\x18.mavio.plugin.v1.CommandR\x07\x63ommand\"\x15\n\x13SendCommandResponse\"\x16\n\x14GetServerInfoRequest\"\xa9\x01\n\x15GetServerInfoResponse\x12\x1f\n\x0bserver_name\x18\x01 \x01(\tR\nserverName\x12\x18\n\x07version\x18\x02 \x01(\tR\x07version\x12\x1b\n\thttp_port\x18\x03 \x01(\x05R\x08httpPort\x12\x1d\n\nhttps_port\x18\x04 \x01(\x05R\thttpsPort\x12\x19\n\x08\x62\x61se_url\x18\x05 \x01(\tR\x07\x62\x61seUrl*\xa9\x01\n\x0b\x43ommandKind\x12\x1c\n\x18\x43OMMAND_KIND_UNSPECIFIED\x10\x00\x12\x15\n\x11\x43OMMAND_KIND_PLAY\x10\x01\x12\x1b\n\x17\x43OMMAND_KIND_PLAY_STATE\x10\x02\x12\x15\n\x11\x43OMMAND_KIND_SEEK\x10\x03\x12\x18\n\x14\x43OMMAND_KIND_MESSAGE\x10\x04\x12\x17\n\x13\x43OMMAND_KIND_VOLUME\x10\x05*\xcf\x01\n\x10PlayStateCommand\x12\"\n\x1ePLAY_STATE_COMMAND_UNSPECIFIED\x10\x00\x12\x1c\n\x18PLAY_STATE_COMMAND_PAUSE\x10\x01\x12\x1e\n\x1aPLAY_STATE_COMMAND_UNPAUSE\x10\x02\x12\x1b\n\x17PLAY_STATE_COMMAND_STOP\x10\x03\x12\x1b\n\x17PLAY_STATE_COMMAND_NEXT\x10\x04\x12\x1f\n\x1bPLAY_STATE_COMMAND_PREVIOUS\x10\x05\x32\xe2\x04\n\x0bHostService\x12U\n\nSetDevices\x12\".mavio.plugin.v1.SetDevicesRequest\x1a#.mavio.plugin.v1.SetDevicesResponse\x12\x63\n\rGetServerInfo\x12%.mavio.plugin.v1.GetServerInfoRequest\x1a&.mavio.plugin.v1.GetServerInfoResponse\"\x03\x90\x02\x01\x12\x66\n\x0eListContainers\x12&.mavio.plugin.v1.ListContainersRequest\x1a\'.mavio.plugin.v1.ListContainersResponse\"\x03\x90\x02\x01\x12]\n\x0bListProxies\x12#.mavio.plugin.v1.ListProxiesRequest\x1a$.mavio.plugin.v1.ListProxiesResponse\"\x03\x90\x02\x01\x12\x61\n\x0eSolveChallenge\x12&.mavio.plugin.v1.SolveChallengeRequest\x1a\'.mavio.plugin.v1.SolveChallengeResponse\x12m\n\x12ReportTaskProgress\x12*.mavio.plugin.v1.ReportTaskProgressRequest\x1a+.mavio.plugin.v1.ReportTaskProgressResponse2s\n\x17\x44\x65viceControllerService\x12X\n\x0bSendCommand\x12#.mavio.plugin.v1.SendCommandRequest\x1a$.mavio.plugin.v1.SendCommandResponseB\xc5\x01\n\x13\x63om.mavio.plugin.v1B\x0b\x44\x65viceProtoP\x01ZCgithub.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1;pluginv1\xa2\x02\x03MPX\xaa\x02\x0fMavio.Plugin.V1\xca\x02\x0fMavio\\Plugin\\V1\xe2\x02\x1bMavio\\Plugin\\V1\\GPBMetadata\xea\x02\x11Mavio::Plugin::V1b\x08\x65\x64itionsp\xe8\x07')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -42,38 +43,38 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_HOSTSERVICE'].methods_by_name['ListContainers']._serialized_options = b'\220\002\001'
   _globals['_HOSTSERVICE'].methods_by_name['ListProxies']._loaded_options = None
   _globals['_HOSTSERVICE'].methods_by_name['ListProxies']._serialized_options = b'\220\002\001'
-  _globals['_COMMANDKIND']._serialized_start=1504
-  _globals['_COMMANDKIND']._serialized_end=1673
-  _globals['_PLAYSTATECOMMAND']._serialized_start=1676
-  _globals['_PLAYSTATECOMMAND']._serialized_end=1883
-  _globals['_DEVICE']._serialized_start=177
-  _globals['_DEVICE']._serialized_end=305
-  _globals['_COMMAND']._serialized_start=308
-  _globals['_COMMAND']._serialized_end=585
-  _globals['_PLAY']._serialized_start=588
-  _globals['_PLAY']._serialized_end=720
-  _globals['_PLAYSTATE']._serialized_start=722
-  _globals['_PLAYSTATE']._serialized_end=794
-  _globals['_SEEK']._serialized_start=796
-  _globals['_SEEK']._serialized_end=857
-  _globals['_SHOWMESSAGE']._serialized_start=859
-  _globals['_SHOWMESSAGE']._serialized_end=945
-  _globals['_VOLUME']._serialized_start=947
-  _globals['_VOLUME']._serialized_end=999
-  _globals['_SETDEVICESREQUEST']._serialized_start=1001
-  _globals['_SETDEVICESREQUEST']._serialized_end=1071
-  _globals['_SETDEVICESRESPONSE']._serialized_start=1073
-  _globals['_SETDEVICESRESPONSE']._serialized_end=1093
-  _globals['_SENDCOMMANDREQUEST']._serialized_start=1096
-  _globals['_SENDCOMMANDREQUEST']._serialized_end=1282
-  _globals['_SENDCOMMANDRESPONSE']._serialized_start=1284
-  _globals['_SENDCOMMANDRESPONSE']._serialized_end=1305
-  _globals['_GETSERVERINFOREQUEST']._serialized_start=1307
-  _globals['_GETSERVERINFOREQUEST']._serialized_end=1329
-  _globals['_GETSERVERINFORESPONSE']._serialized_start=1332
-  _globals['_GETSERVERINFORESPONSE']._serialized_end=1501
-  _globals['_HOSTSERVICE']._serialized_start=1886
-  _globals['_HOSTSERVICE']._serialized_end=2385
-  _globals['_DEVICECONTROLLERSERVICE']._serialized_start=2387
-  _globals['_DEVICECONTROLLERSERVICE']._serialized_end=2502
+  _globals['_COMMANDKIND']._serialized_start=1532
+  _globals['_COMMANDKIND']._serialized_end=1701
+  _globals['_PLAYSTATECOMMAND']._serialized_start=1704
+  _globals['_PLAYSTATECOMMAND']._serialized_end=1911
+  _globals['_DEVICE']._serialized_start=205
+  _globals['_DEVICE']._serialized_end=333
+  _globals['_COMMAND']._serialized_start=336
+  _globals['_COMMAND']._serialized_end=613
+  _globals['_PLAY']._serialized_start=616
+  _globals['_PLAY']._serialized_end=748
+  _globals['_PLAYSTATE']._serialized_start=750
+  _globals['_PLAYSTATE']._serialized_end=822
+  _globals['_SEEK']._serialized_start=824
+  _globals['_SEEK']._serialized_end=885
+  _globals['_SHOWMESSAGE']._serialized_start=887
+  _globals['_SHOWMESSAGE']._serialized_end=973
+  _globals['_VOLUME']._serialized_start=975
+  _globals['_VOLUME']._serialized_end=1027
+  _globals['_SETDEVICESREQUEST']._serialized_start=1029
+  _globals['_SETDEVICESREQUEST']._serialized_end=1099
+  _globals['_SETDEVICESRESPONSE']._serialized_start=1101
+  _globals['_SETDEVICESRESPONSE']._serialized_end=1121
+  _globals['_SENDCOMMANDREQUEST']._serialized_start=1124
+  _globals['_SENDCOMMANDREQUEST']._serialized_end=1310
+  _globals['_SENDCOMMANDRESPONSE']._serialized_start=1312
+  _globals['_SENDCOMMANDRESPONSE']._serialized_end=1333
+  _globals['_GETSERVERINFOREQUEST']._serialized_start=1335
+  _globals['_GETSERVERINFOREQUEST']._serialized_end=1357
+  _globals['_GETSERVERINFORESPONSE']._serialized_start=1360
+  _globals['_GETSERVERINFORESPONSE']._serialized_end=1529
+  _globals['_HOSTSERVICE']._serialized_start=1914
+  _globals['_HOSTSERVICE']._serialized_end=2524
+  _globals['_DEVICECONTROLLERSERVICE']._serialized_start=2526
+  _globals['_DEVICECONTROLLERSERVICE']._serialized_end=2641
 # @@protoc_insertion_point(module_scope)

@@ -128,6 +128,49 @@ public nonisolated struct Mavio_Plugin_V1_RunTaskResponse: Sendable {
   fileprivate var _message: String? = nil
 }
 
+public nonisolated struct Mavio_Plugin_V1_ReportTaskProgressRequest: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  /// The task of the calling plugin running.
+  public var taskID: String {
+    get {_taskID ?? String()}
+    set {_taskID = newValue}
+  }
+  /// Returns true if `taskID` has been explicitly set.
+  public var hasTaskID: Bool {self._taskID != nil}
+  /// Clears the value of `taskID`. Subsequent reads from it will return its default value.
+  public mutating func clearTaskID() {self._taskID = nil}
+
+  /// The fraction of the run done, 0 to 1.
+  public var progress: Double {
+    get {_progress ?? 0}
+    set {_progress = newValue}
+  }
+  /// Returns true if `progress` has been explicitly set.
+  public var hasProgress: Bool {self._progress != nil}
+  /// Clears the value of `progress`. Subsequent reads from it will return its default value.
+  public mutating func clearProgress() {self._progress = nil}
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+
+  fileprivate var _taskID: String? = nil
+  fileprivate var _progress: Double? = nil
+}
+
+public nonisolated struct Mavio_Plugin_V1_ReportTaskProgressResponse: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+}
+
 // MARK: - Code below here is support for the SwiftProtobuf runtime.
 
 fileprivate nonisolated let _protobuf_package = "mavio.plugin.v1"
@@ -249,6 +292,64 @@ nonisolated extension Mavio_Plugin_V1_RunTaskResponse: SwiftProtobuf.Message, Sw
 
   public static func ==(lhs: Mavio_Plugin_V1_RunTaskResponse, rhs: Mavio_Plugin_V1_RunTaskResponse) -> Bool {
     if lhs._message != rhs._message {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Mavio_Plugin_V1_ReportTaskProgressRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".ReportTaskProgressRequest"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}task_id\0\u{1}progress\0")
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularStringField(value: &self._taskID) }()
+      case 2: try { try decoder.decodeSingularDoubleField(value: &self._progress) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    try { if let v = self._taskID {
+      try visitor.visitSingularStringField(value: v, fieldNumber: 1)
+    } }()
+    try { if let v = self._progress {
+      try visitor.visitSingularDoubleField(value: v, fieldNumber: 2)
+    } }()
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Mavio_Plugin_V1_ReportTaskProgressRequest, rhs: Mavio_Plugin_V1_ReportTaskProgressRequest) -> Bool {
+    if lhs._taskID != rhs._taskID {return false}
+    if lhs._progress != rhs._progress {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Mavio_Plugin_V1_ReportTaskProgressResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".ReportTaskProgressResponse"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap()
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    // Load everything into unknown fields
+    while try decoder.nextFieldNumber() != nil {}
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Mavio_Plugin_V1_ReportTaskProgressResponse, rhs: Mavio_Plugin_V1_ReportTaskProgressResponse) -> Bool {
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

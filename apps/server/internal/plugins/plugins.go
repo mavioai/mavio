@@ -174,6 +174,9 @@ type Manager struct {
 
 	// revisions numbers the plugins' starts and configurations.
 	revisions atomic.Uint64
+
+	// runs holds the tasks' runs in progress.
+	runs taskRuns
 }
 
 type entry struct {

@@ -7,6 +7,7 @@ import (
 	"connectrpc.com/connect"
 
 	"github.com/mavioai/mavio/apps/server/internal/proxies"
+	"github.com/mavioai/mavio/libs/core"
 	pluginv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1/pluginv1connect"
 )
@@ -20,6 +21,17 @@ type HostService struct {
 	// Proxies gives plugins the server's proxies and solves challenges;
 	// nil keeps none.
 	Proxies *proxies.Service
+	// Tasks keeps how far the plugins' tasks have come; nil keeps nothing.
+	Tasks TaskProgress
+}
+
+// TaskProgress keeps how far the runs of the plugins' tasks have come.
+type TaskProgress interface {
+	// ReportTaskProgress keeps a running task's progress, reporting
+	// whether it runs.
+	ReportTaskProgress(plugin, task string, progress float64) bool
+	// JobProgress returns the progress of the run a job is.
+	JobProgress(id core.ID) (float64, bool)
 }
 
 // ServerInfo is how the server is reached.
@@ -136,4 +148,20 @@ func (s *HostService) SolveChallenge(ctx context.Context, req *pluginv1.SolveCha
 		return nil, connectError(ctx, err)
 	}
 	return pluginv1.SolveChallengeResponse_builder{Solution: sol}.Build(), nil
+}
+
+// ReportTaskProgress keeps how far the run of one of the calling plugin's
+// tasks has come; a report of a task not running is ignored.
+func (s *HostService) ReportTaskProgress(ctx context.Context, req *pluginv1.ReportTaskProgressRequest) (*pluginv1.ReportTaskProgressResponse, error) {
+	p, err := principal(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if p.Plugin == "" {
+		return nil, connect.NewError(connect.CodePermissionDenied, errors.New("only plugins have tasks"))
+	}
+	if s.Tasks != nil {
+		s.Tasks.ReportTaskProgress(p.Plugin, req.GetTaskId(), req.GetProgress())
+	}
+	return &pluginv1.ReportTaskProgressResponse{}, nil
 }

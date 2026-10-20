@@ -566,6 +566,11 @@ pub struct Task {
     ///
     /// Field 9: `plugin_id`
     pub plugin_id: ::core::option::Option<::buffa::alloc::string::String>,
+    /// The fraction done of its run in progress that tells it, 0 to 1, such
+    /// as a plugin's download of its models.
+    ///
+    /// Field 10: `progress`
+    pub progress: ::core::option::Option<f64>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -581,6 +586,7 @@ impl ::core::fmt::Debug for Task {
             .field("next_run_time", &self.next_run_time)
             .field("running", &self.running)
             .field("plugin_id", &self.plugin_id)
+            .field("progress", &self.progress)
             .finish()
     }
 }
@@ -646,6 +652,13 @@ impl Task {
         self.plugin_id = Some(value.into());
         self
     }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::progress`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_progress(mut self, value: f64) -> Self {
+        self.progress = Some(value);
+        self
+    }
 }
 ::buffa::impl_default_instance!(Task);
 impl ::buffa::MessageName for Task {
@@ -709,6 +722,9 @@ impl ::buffa::Message for Task {
         if let Some(ref v) = self.plugin_id {
             size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
+        if self.progress.is_some() {
+            size += 1u64 + ::buffa::types::FIXED64_ENCODED_LEN as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -760,6 +776,9 @@ impl ::buffa::Message for Task {
         }
         if let Some(ref v) = self.plugin_id {
             ::buffa::types::put_string_field(9u32, v, buf);
+        }
+        if let Some(v) = self.progress {
+            ::buffa::types::put_double_field(10u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -870,6 +889,15 @@ impl ::buffa::Message for Task {
                     buf,
                 )?;
             }
+            10u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Fixed64,
+                )?;
+                self.progress = ::core::option::Option::Some(
+                    ::buffa::types::decode_double(buf)?,
+                );
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -887,6 +915,7 @@ impl ::buffa::Message for Task {
         self.next_run_time = ::buffa::MessageField::none();
         self.running = ::core::option::Option::None;
         self.plugin_id = ::core::option::Option::None;
+        self.progress = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }

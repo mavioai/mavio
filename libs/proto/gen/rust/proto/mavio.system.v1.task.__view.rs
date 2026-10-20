@@ -613,6 +613,11 @@ pub struct TaskView<'a> {
     ///
     /// Field 9: `plugin_id`
     pub plugin_id: ::core::option::Option<&'a str>,
+    /// The fraction done of its run in progress that tells it, 0 to 1, such
+    /// as a plugin's download of its models.
+    ///
+    /// Field 10: `progress`
+    pub progress: ::core::option::Option<f64>,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for TaskView<'a> {
@@ -750,6 +755,13 @@ impl<'a> ::buffa::MessageView<'a> for TaskView<'a> {
                 )?;
                 view.plugin_id = Some(::buffa::types::borrow_str(&mut cur)?);
             }
+            10u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Fixed64,
+                )?;
+                view.progress = Some(::buffa::types::decode_double(&mut cur)?);
+            }
             _ => {
                 ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
                 let span_len = before_tag.len() - cur.len();
@@ -805,6 +817,7 @@ impl<'a> ::buffa::MessageView<'a> for TaskView<'a> {
             },
             running: self.running,
             plugin_id: self.plugin_id.map(|s| s.to_string()),
+            progress: self.progress,
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -858,6 +871,9 @@ impl<'a> ::buffa::ViewEncode<'a> for TaskView<'a> {
         if let Some(ref v) = self.plugin_id {
             size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
+        if self.progress.is_some() {
+            size += 1u64 + ::buffa::types::FIXED64_ENCODED_LEN as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -910,6 +926,9 @@ impl<'a> ::buffa::ViewEncode<'a> for TaskView<'a> {
         }
         if let Some(ref v) = self.plugin_id {
             ::buffa::types::put_string_field(9u32, v, buf);
+        }
+        if let Some(v) = self.progress {
+            ::buffa::types::put_double_field(10u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -1065,6 +1084,14 @@ impl TaskOwnedView {
     #[must_use]
     pub fn plugin_id(&self) -> ::core::option::Option<&'_ str> {
         self.0.reborrow().plugin_id
+    }
+    /// The fraction done of its run in progress that tells it, 0 to 1, such
+    /// as a plugin's download of its models.
+    ///
+    /// Field 10: `progress`
+    #[must_use]
+    pub fn progress(&self) -> ::core::option::Option<f64> {
+        self.0.reborrow().progress
     }
 }
 impl ::core::convert::From<::buffa::OwnedView<TaskView<'static>>> for TaskOwnedView {

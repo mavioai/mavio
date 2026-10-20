@@ -211,8 +211,22 @@ func Handler(opts Options) (http.Handler, error) {
 	}
 	// Acquisition jobs run only where the server runs their worker.
 	tasks.Acquisition = opts.Acquisition
+	// Jobs pulling images and plugins' tasks tell how far they have come.
+	var progress []func(core.ID) (float64, bool)
 	if opts.Containers != nil {
-		tasks.Progress = opts.Containers.JobProgress
+		progress = append(progress, opts.Containers.JobProgress)
+	}
+	taskProgress, _ := opts.Plugins.(rpc.TaskProgress)
+	if taskProgress != nil {
+		progress = append(progress, taskProgress.JobProgress)
+	}
+	tasks.Progress = func(id core.ID) (float64, bool) {
+		for _, p := range progress {
+			if f, ok := p(id); ok {
+				return f, true
+			}
+		}
+		return 0, false
 	}
 	tasks.Requests = opts.Requests != nil
 	tasks.Subtitles = opts.SubtitleRuntime
@@ -275,7 +289,7 @@ func Handler(opts Options) (http.Handler, error) {
 	// Plugins reach the host service through the host API; others are
 	// turned away.
 	hostService := rpc.NewHostService(opts.Devices, opts.ServerInfo, opts.Containers)
-	hostService.Proxies = opts.Proxies
+	hostService.Proxies, hostService.Tasks = opts.Proxies, taskProgress
 	mux.Handle(pluginv1connect.NewHostServiceHandler(hostService, interceptors))
 	mux.Handle(systemv1connect.NewProxyServiceHandler(&rpc.ProxyService{Proxies: opts.Proxies, Activity: opts.Activity}, interceptors))
 	mux.Handle(sessionv1connect.NewSyncPlayServiceHandler(rpc.NewSyncPlayService(opts.Store, opts.Hub), interceptors))

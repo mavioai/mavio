@@ -27,7 +27,7 @@ from google.protobuf import duration_pb2 as google_dot_protobuf_dot_duration__pb
 from google.protobuf import timestamp_pb2 as google_dot_protobuf_dot_timestamp__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1amavio/system/v1/task.proto\x12\x0fmavio.system.v1\x1a\x1b\x62uf/validate/validate.proto\x1a\x1egoogle/protobuf/duration.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xc4\x03\n\x03Job\x12\x0e\n\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n\x04kind\x18\x02 \x01(\tR\x04kind\x12/\n\x05state\x18\x03 \x01(\x0e\x32\x19.mavio.system.v1.JobStateR\x05state\x12\x1a\n\x08priority\x18\x04 \x01(\x05R\x08priority\x12\x1a\n\x08\x61ttempts\x18\x05 \x01(\x05R\x08\x61ttempts\x12!\n\x0cmax_attempts\x18\x06 \x01(\x05R\x0bmaxAttempts\x12\x35\n\x08run_time\x18\x07 \x01(\x0b\x32\x1a.google.protobuf.TimestampR\x07runTime\x12;\n\x0b\x63reate_time\x18\x08 \x01(\x0b\x32\x1a.google.protobuf.TimestampR\ncreateTime\x12;\n\x0b\x66inish_time\x18\t \x01(\x0b\x32\x1a.google.protobuf.TimestampR\nfinishTime\x12\x1d\n\nlast_error\x18\n \x01(\tR\tlastError\x12!\n\x0cpayload_json\x18\x0b \x01(\tR\x0bpayloadJson\x12\x1a\n\x08progress\x18\x0c \x01(\x01R\x08progress\"\xbf\x02\n\x04Task\x12\x0e\n\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n\x04name\x18\x02 \x01(\tR\x04name\x12 \n\x0b\x64\x65scription\x18\x03 \x01(\tR\x0b\x64\x65scription\x12\x12\n\x04kind\x18\x04 \x01(\tR\x04kind\x12\x35\n\x08interval\x18\x05 \x01(\x0b\x32\x19.google.protobuf.DurationR\x08interval\x12/\n\x08last_run\x18\x06 \x01(\x0b\x32\x14.mavio.system.v1.JobR\x07lastRun\x12>\n\rnext_run_time\x18\x07 \x01(\x0b\x32\x1a.google.protobuf.TimestampR\x0bnextRunTime\x12\x18\n\x07running\x18\x08 \x01(\x08R\x07running\x12\x1b\n\tplugin_id\x18\t \x01(\tR\x08pluginId\"\x12\n\x10ListTasksRequest\"@\n\x11ListTasksResponse\x12+\n\x05tasks\x18\x01 \x03(\x0b\x32\x15.mavio.system.v1.TaskR\x05tasks\"(\n\x0eRunTaskRequest\x12\x16\n\x02id\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\x02id\"D\n\x0fRunTaskResponse\x12\x15\n\x06job_id\x18\x01 \x01(\tR\x05jobId\x12\x1a\n\x08\x65nqueued\x18\x02 \x01(\x08R\x08\x65nqueued\"\xae\x01\n\x0fListJobsRequest\x12\x14\n\x05kinds\x18\x01 \x03(\tR\x05kinds\x12\x42\n\x06states\x18\x02 \x03(\x0e\x32\x19.mavio.system.v1.JobStateB\x0f\xbaH\x0c\x92\x01\t\"\x07\x82\x01\x04\x10\x01 \x00R\x06states\x12 \n\x05limit\x18\x03 \x01(\x05\x42\n\xbaH\x07\x1a\x05\x18\xe8\x07(\x00R\x05limit\x12\x1f\n\x06offset\x18\x04 \x01(\x05\x42\x07\xbaH\x04\x1a\x02(\x00R\x06offset\"R\n\x10ListJobsResponse\x12(\n\x04jobs\x18\x01 \x03(\x0b\x32\x14.mavio.system.v1.JobR\x04jobs\x12\x14\n\x05total\x18\x02 \x01(\x05R\x05total*\x82\x01\n\x08JobState\x12\x19\n\x15JOB_STATE_UNSPECIFIED\x10\x00\x12\x15\n\x11JOB_STATE_PENDING\x10\x01\x12\x15\n\x11JOB_STATE_RUNNING\x10\x02\x12\x17\n\x13JOB_STATE_SUCCEEDED\x10\x03\x12\x14\n\x10JOB_STATE_FAILED\x10\x04\x32\x8a\x02\n\x0bTaskService\x12W\n\tListTasks\x12!.mavio.system.v1.ListTasksRequest\x1a\".mavio.system.v1.ListTasksResponse\"\x03\x90\x02\x01\x12L\n\x07RunTask\x12\x1f.mavio.system.v1.RunTaskRequest\x1a .mavio.system.v1.RunTaskResponse\x12T\n\x08ListJobs\x12 .mavio.system.v1.ListJobsRequest\x1a!.mavio.system.v1.ListJobsResponse\"\x03\x90\x02\x01\x42\xc3\x01\n\x13\x63om.mavio.system.v1B\tTaskProtoP\x01ZCgithub.com/mavioai/mavio/libs/proto/gen/go/mavio/system/v1;systemv1\xa2\x02\x03MSX\xaa\x02\x0fMavio.System.V1\xca\x02\x0fMavio\\System\\V1\xe2\x02\x1bMavio\\System\\V1\\GPBMetadata\xea\x02\x11Mavio::System::V1b\x08\x65\x64itionsp\xe8\x07')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1amavio/system/v1/task.proto\x12\x0fmavio.system.v1\x1a\x1b\x62uf/validate/validate.proto\x1a\x1egoogle/protobuf/duration.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xc4\x03\n\x03Job\x12\x0e\n\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n\x04kind\x18\x02 \x01(\tR\x04kind\x12/\n\x05state\x18\x03 \x01(\x0e\x32\x19.mavio.system.v1.JobStateR\x05state\x12\x1a\n\x08priority\x18\x04 \x01(\x05R\x08priority\x12\x1a\n\x08\x61ttempts\x18\x05 \x01(\x05R\x08\x61ttempts\x12!\n\x0cmax_attempts\x18\x06 \x01(\x05R\x0bmaxAttempts\x12\x35\n\x08run_time\x18\x07 \x01(\x0b\x32\x1a.google.protobuf.TimestampR\x07runTime\x12;\n\x0b\x63reate_time\x18\x08 \x01(\x0b\x32\x1a.google.protobuf.TimestampR\ncreateTime\x12;\n\x0b\x66inish_time\x18\t \x01(\x0b\x32\x1a.google.protobuf.TimestampR\nfinishTime\x12\x1d\n\nlast_error\x18\n \x01(\tR\tlastError\x12!\n\x0cpayload_json\x18\x0b \x01(\tR\x0bpayloadJson\x12\x1a\n\x08progress\x18\x0c \x01(\x01R\x08progress\"\xdb\x02\n\x04Task\x12\x0e\n\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n\x04name\x18\x02 \x01(\tR\x04name\x12 \n\x0b\x64\x65scription\x18\x03 \x01(\tR\x0b\x64\x65scription\x12\x12\n\x04kind\x18\x04 \x01(\tR\x04kind\x12\x35\n\x08interval\x18\x05 \x01(\x0b\x32\x19.google.protobuf.DurationR\x08interval\x12/\n\x08last_run\x18\x06 \x01(\x0b\x32\x14.mavio.system.v1.JobR\x07lastRun\x12>\n\rnext_run_time\x18\x07 \x01(\x0b\x32\x1a.google.protobuf.TimestampR\x0bnextRunTime\x12\x18\n\x07running\x18\x08 \x01(\x08R\x07running\x12\x1b\n\tplugin_id\x18\t \x01(\tR\x08pluginId\x12\x1a\n\x08progress\x18\n \x01(\x01R\x08progress\"\x12\n\x10ListTasksRequest\"@\n\x11ListTasksResponse\x12+\n\x05tasks\x18\x01 \x03(\x0b\x32\x15.mavio.system.v1.TaskR\x05tasks\"(\n\x0eRunTaskRequest\x12\x16\n\x02id\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\x02id\"D\n\x0fRunTaskResponse\x12\x15\n\x06job_id\x18\x01 \x01(\tR\x05jobId\x12\x1a\n\x08\x65nqueued\x18\x02 \x01(\x08R\x08\x65nqueued\"\xae\x01\n\x0fListJobsRequest\x12\x14\n\x05kinds\x18\x01 \x03(\tR\x05kinds\x12\x42\n\x06states\x18\x02 \x03(\x0e\x32\x19.mavio.system.v1.JobStateB\x0f\xbaH\x0c\x92\x01\t\"\x07\x82\x01\x04\x10\x01 \x00R\x06states\x12 \n\x05limit\x18\x03 \x01(\x05\x42\n\xbaH\x07\x1a\x05\x18\xe8\x07(\x00R\x05limit\x12\x1f\n\x06offset\x18\x04 \x01(\x05\x42\x07\xbaH\x04\x1a\x02(\x00R\x06offset\"R\n\x10ListJobsResponse\x12(\n\x04jobs\x18\x01 \x03(\x0b\x32\x14.mavio.system.v1.JobR\x04jobs\x12\x14\n\x05total\x18\x02 \x01(\x05R\x05total*\x82\x01\n\x08JobState\x12\x19\n\x15JOB_STATE_UNSPECIFIED\x10\x00\x12\x15\n\x11JOB_STATE_PENDING\x10\x01\x12\x15\n\x11JOB_STATE_RUNNING\x10\x02\x12\x17\n\x13JOB_STATE_SUCCEEDED\x10\x03\x12\x14\n\x10JOB_STATE_FAILED\x10\x04\x32\x8a\x02\n\x0bTaskService\x12W\n\tListTasks\x12!.mavio.system.v1.ListTasksRequest\x1a\".mavio.system.v1.ListTasksResponse\"\x03\x90\x02\x01\x12L\n\x07RunTask\x12\x1f.mavio.system.v1.RunTaskRequest\x1a .mavio.system.v1.RunTaskResponse\x12T\n\x08ListJobs\x12 .mavio.system.v1.ListJobsRequest\x1a!.mavio.system.v1.ListJobsResponse\"\x03\x90\x02\x01\x42\xc3\x01\n\x13\x63om.mavio.system.v1B\tTaskProtoP\x01ZCgithub.com/mavioai/mavio/libs/proto/gen/go/mavio/system/v1;systemv1\xa2\x02\x03MSX\xaa\x02\x0fMavio.System.V1\xca\x02\x0fMavio\\System\\V1\xe2\x02\x1bMavio\\System\\V1\\GPBMetadata\xea\x02\x11Mavio::System::V1b\x08\x65\x64itionsp\xe8\x07')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -47,24 +47,24 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_TASKSERVICE'].methods_by_name['ListTasks']._serialized_options = b'\220\002\001'
   _globals['_TASKSERVICE'].methods_by_name['ListJobs']._loaded_options = None
   _globals['_TASKSERVICE'].methods_by_name['ListJobs']._serialized_options = b'\220\002\001'
-  _globals['_JOBSTATE']._serialized_start=1378
-  _globals['_JOBSTATE']._serialized_end=1508
+  _globals['_JOBSTATE']._serialized_start=1406
+  _globals['_JOBSTATE']._serialized_end=1536
   _globals['_JOB']._serialized_start=142
   _globals['_JOB']._serialized_end=594
   _globals['_TASK']._serialized_start=597
-  _globals['_TASK']._serialized_end=916
-  _globals['_LISTTASKSREQUEST']._serialized_start=918
-  _globals['_LISTTASKSREQUEST']._serialized_end=936
-  _globals['_LISTTASKSRESPONSE']._serialized_start=938
-  _globals['_LISTTASKSRESPONSE']._serialized_end=1002
-  _globals['_RUNTASKREQUEST']._serialized_start=1004
-  _globals['_RUNTASKREQUEST']._serialized_end=1044
-  _globals['_RUNTASKRESPONSE']._serialized_start=1046
-  _globals['_RUNTASKRESPONSE']._serialized_end=1114
-  _globals['_LISTJOBSREQUEST']._serialized_start=1117
-  _globals['_LISTJOBSREQUEST']._serialized_end=1291
-  _globals['_LISTJOBSRESPONSE']._serialized_start=1293
-  _globals['_LISTJOBSRESPONSE']._serialized_end=1375
-  _globals['_TASKSERVICE']._serialized_start=1511
-  _globals['_TASKSERVICE']._serialized_end=1777
+  _globals['_TASK']._serialized_end=944
+  _globals['_LISTTASKSREQUEST']._serialized_start=946
+  _globals['_LISTTASKSREQUEST']._serialized_end=964
+  _globals['_LISTTASKSRESPONSE']._serialized_start=966
+  _globals['_LISTTASKSRESPONSE']._serialized_end=1030
+  _globals['_RUNTASKREQUEST']._serialized_start=1032
+  _globals['_RUNTASKREQUEST']._serialized_end=1072
+  _globals['_RUNTASKRESPONSE']._serialized_start=1074
+  _globals['_RUNTASKRESPONSE']._serialized_end=1142
+  _globals['_LISTJOBSREQUEST']._serialized_start=1145
+  _globals['_LISTJOBSREQUEST']._serialized_end=1319
+  _globals['_LISTJOBSRESPONSE']._serialized_start=1321
+  _globals['_LISTJOBSRESPONSE']._serialized_end=1403
+  _globals['_TASKSERVICE']._serialized_start=1539
+  _globals['_TASKSERVICE']._serialized_end=1805
 # @@protoc_insertion_point(module_scope)

@@ -1,5 +1,6 @@
 import datetime
 
+from buf.validate import validate_pb2 as _validate_pb2
 from google.protobuf import duration_pb2 as _duration_pb2
 from google.protobuf import descriptor as _descriptor
 from google.protobuf import message as _message
@@ -33,3 +34,15 @@ class RunTaskResponse(_message.Message):
     MESSAGE_FIELD_NUMBER: _ClassVar[int]
     message: str
     def __init__(self, message: _Optional[str] = ...) -> None: ...
+
+class ReportTaskProgressRequest(_message.Message):
+    __slots__ = ("task_id", "progress")
+    TASK_ID_FIELD_NUMBER: _ClassVar[int]
+    PROGRESS_FIELD_NUMBER: _ClassVar[int]
+    task_id: str
+    progress: float
+    def __init__(self, task_id: _Optional[str] = ..., progress: _Optional[float] = ...) -> None: ...
+
+class ReportTaskProgressResponse(_message.Message):
+    __slots__ = ()
+    def __init__(self) -> None: ...

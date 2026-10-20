@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"slices"
+	"sync"
 	"time"
 
 	"github.com/mavioai/mavio/libs/core"
@@ -121,7 +122,9 @@ func (m *Manager) RunTask(ctx context.Context, job core.Job) ([]core.Job, error)
 	defer cancel()
 	req := &pluginv1.RunTaskRequest{}
 	req.SetTaskId(p.Task)
+	m.runs.start(p.Plugin, p.Task, job.ID)
 	resp, err := plugin.Tasks().RunTask(ctx, req)
+	m.runs.end(p.Plugin, p.Task)
 	attrs := map[string]string{"task": TaskID(p.Plugin, p.Task), "plugin": p.Plugin}
 	if err != nil {
 		err = fmt.Errorf("plugin %s task %s: %w", p.Plugin, p.Task, err)
@@ -133,4 +136,50 @@ func (m *Manager) RunTask(ctx context.Context, job core.Job) ([]core.Job, error)
 	m.log.InfoContext(ctx, "plugin task done", "plugin", p.Plugin, "task", p.Task, "message", resp.GetMessage())
 	m.cfg.Activity.Publish(core.Activity{Type: "task.completed", Title: t.GetName() + " completed", Message: resp.GetMessage(), Attributes: attrs})
 	return next, nil
+}
+
+// taskRuns are the runs of the plugins' tasks in progress, by plugin and
+// task, and how far each has come.
+type taskRuns struct {
+	mu       sync.Mutex
+	jobs     map[[2]string]core.ID
+	progress map[core.ID]float64
+}
+
+func (r *taskRuns) start(plugin, task string, job core.ID) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	if r.jobs == nil {
+		r.jobs, r.progress = map[[2]string]core.ID{}, map[core.ID]float64{}
+	}
+	r.jobs[[2]string{plugin, task}] = job
+}
+
+func (r *taskRuns) end(plugin, task string) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	key := [2]string{plugin, task}
+	delete(r.progress, r.jobs[key])
+	delete(r.jobs, key)
+}
+
+// ReportTaskProgress keeps how far the run of a plugin's task has come, a
+// fraction from 0 to 1; it reports whether the task is running.
+func (m *Manager) ReportTaskProgress(plugin, task string, progress float64) bool {
+	m.runs.mu.Lock()
+	defer m.runs.mu.Unlock()
+	job, ok := m.runs.jobs[[2]string{plugin, task}]
+	if ok {
+		m.runs.progress[job] = min(max(progress, 0), 1)
+	}
+	return ok
+}
+
+// JobProgress returns the fraction done of a running JobTask job, as its
+// plugin last reported it.
+func (m *Manager) JobProgress(id core.ID) (float64, bool) {
+	m.runs.mu.Lock()
+	defer m.runs.mu.Unlock()
+	f, ok := m.runs.progress[id]
+	return f, ok
 }

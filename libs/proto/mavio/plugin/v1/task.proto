@@ -2,6 +2,7 @@ edition = "2023";
 
 package mavio.plugin.v1;
 
+import "buf/validate/validate.proto";
 import "google/protobuf/duration.proto";
 
 // TaskRunnerService runs the tasks a plugin declares in its manifest. The
@@ -32,3 +33,15 @@ message RunTaskResponse {
   // Summary of what the run did, which the host logs.
   string message = 1;
 }
+
+message ReportTaskProgressRequest {
+  // The task of the calling plugin running.
+  string task_id = 1 [(buf.validate.field).required = true];
+  // The fraction of the run done, 0 to 1.
+  double progress = 2 [(buf.validate.field).double = {
+    gte: 0
+    lte: 1
+  }];
+}
+
+message ReportTaskProgressResponse {}

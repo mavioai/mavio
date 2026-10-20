@@ -34,3 +34,23 @@ def host_client(
         # take.
         timeout=timeout or httpx.Timeout(10, read=None),
     )
+
+
+_REPORT_TASK_PROGRESS = "/mavio.plugin.v1.HostService/ReportTaskProgress"
+
+
+async def report_task_progress(host: httpx.AsyncClient, task_id: str, progress: float) -> bool:
+    """Tells the host the fraction done, 0 to 1, of the plugin's task
+    running, which it shows as its job's progress; the host ignores a
+    report of a task not running. It returns whether the host answered,
+    for a plugin to log, never failing the run."""
+    progress = min(max(progress, 0.0), 1.0)
+    try:
+        r = await host.post(
+            _REPORT_TASK_PROGRESS,
+            json={"taskId": task_id, "progress": progress},
+            headers={"Content-Type": "application/json"},
+        )
+    except httpx.HTTPError:
+        return False
+    return r.status_code == 200

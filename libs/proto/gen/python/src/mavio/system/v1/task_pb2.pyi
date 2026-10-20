@@ -54,7 +54,7 @@ class Job(_message.Message):
     def __init__(self, id: _Optional[str] = ..., kind: _Optional[str] = ..., state: _Optional[_Union[JobState, str]] = ..., priority: _Optional[int] = ..., attempts: _Optional[int] = ..., max_attempts: _Optional[int] = ..., run_time: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ..., create_time: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ..., finish_time: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ..., last_error: _Optional[str] = ..., payload_json: _Optional[str] = ..., progress: _Optional[float] = ...) -> None: ...
 
 class Task(_message.Message):
-    __slots__ = ("id", "name", "description", "kind", "interval", "last_run", "next_run_time", "running", "plugin_id")
+    __slots__ = ("id", "name", "description", "kind", "interval", "last_run", "next_run_time", "running", "plugin_id", "progress")
     ID_FIELD_NUMBER: _ClassVar[int]
     NAME_FIELD_NUMBER: _ClassVar[int]
     DESCRIPTION_FIELD_NUMBER: _ClassVar[int]
@@ -64,6 +64,7 @@ class Task(_message.Message):
     NEXT_RUN_TIME_FIELD_NUMBER: _ClassVar[int]
     RUNNING_FIELD_NUMBER: _ClassVar[int]
     PLUGIN_ID_FIELD_NUMBER: _ClassVar[int]
+    PROGRESS_FIELD_NUMBER: _ClassVar[int]
     id: str
     name: str
     description: str
@@ -73,7 +74,8 @@ class Task(_message.Message):
     next_run_time: _timestamp_pb2.Timestamp
     running: bool
     plugin_id: str
-    def __init__(self, id: _Optional[str] = ..., name: _Optional[str] = ..., description: _Optional[str] = ..., kind: _Optional[str] = ..., interval: _Optional[_Union[datetime.timedelta, _duration_pb2.Duration, _Mapping]] = ..., last_run: _Optional[_Union[Job, _Mapping]] = ..., next_run_time: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ..., running: _Optional[bool] = ..., plugin_id: _Optional[str] = ...) -> None: ...
+    progress: float
+    def __init__(self, id: _Optional[str] = ..., name: _Optional[str] = ..., description: _Optional[str] = ..., kind: _Optional[str] = ..., interval: _Optional[_Union[datetime.timedelta, _duration_pb2.Duration, _Mapping]] = ..., last_run: _Optional[_Union[Job, _Mapping]] = ..., next_run_time: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ..., running: _Optional[bool] = ..., plugin_id: _Optional[str] = ..., progress: _Optional[float] = ...) -> None: ...
 
 class ListTasksRequest(_message.Message):
     __slots__ = ()

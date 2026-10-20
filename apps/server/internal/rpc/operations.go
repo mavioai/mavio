@@ -222,6 +222,11 @@ func (s *TaskService) ListTasks(ctx context.Context, _ *systemv1.ListTasksReques
 			}
 			if job.State == core.JobRunning {
 				out[i].SetRunning(true)
+				if s.Progress != nil {
+					if f, ok := s.Progress(job.ID); ok {
+						out[i].SetProgress(f)
+					}
+				}
 			} else if next == nil || job.RunAt.Before(*next) {
 				next = &job.RunAt
 			}

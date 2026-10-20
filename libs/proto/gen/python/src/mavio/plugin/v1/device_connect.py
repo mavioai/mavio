@@ -17,6 +17,7 @@ import mavio.plugin.v1.challenge_pb2 as mavio_dot_plugin_dot_v1_dot_challenge__p
 import mavio.plugin.v1.container_pb2 as mavio_dot_plugin_dot_v1_dot_container__pb2
 import mavio.plugin.v1.device_pb2 as mavio_dot_plugin_dot_v1_dot_device__pb2
 import mavio.plugin.v1.proxy_pb2 as mavio_dot_plugin_dot_v1_dot_proxy__pb2
+import mavio.plugin.v1.task_pb2 as mavio_dot_plugin_dot_v1_dot_task__pb2
 
 
 class HostService(Protocol):
@@ -33,6 +34,9 @@ class HostService(Protocol):
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
 
     async def solve_challenge(self, request: mavio_dot_plugin_dot_v1_dot_challenge__pb2.SolveChallengeRequest, ctx: RequestContext) -> mavio_dot_plugin_dot_v1_dot_challenge__pb2.SolveChallengeResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
+
+    async def report_task_progress(self, request: mavio_dot_plugin_dot_v1_dot_task__pb2.ReportTaskProgressRequest, ctx: RequestContext) -> mavio_dot_plugin_dot_v1_dot_task__pb2.ReportTaskProgressResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
 
 
@@ -90,6 +94,16 @@ class HostServiceASGIApplication(ConnectASGIApplication[HostService]):
                         idempotency_level=IdempotencyLevel.UNKNOWN,
                     ),
                     function=svc.solve_challenge,
+                ),
+                "/mavio.plugin.v1.HostService/ReportTaskProgress": Endpoint.unary(
+                    method=MethodInfo(
+                        name="ReportTaskProgress",
+                        service_name="mavio.plugin.v1.HostService",
+                        input=mavio_dot_plugin_dot_v1_dot_task__pb2.ReportTaskProgressRequest,
+                        output=mavio_dot_plugin_dot_v1_dot_task__pb2.ReportTaskProgressResponse,
+                        idempotency_level=IdempotencyLevel.UNKNOWN,
+                    ),
+                    function=svc.report_task_progress,
                 ),
             },
             interceptors=interceptors,
@@ -210,6 +224,26 @@ class HostServiceClient(ConnectClient):
             timeout_ms=timeout_ms,
         )
 
+    async def report_task_progress(
+        self,
+        request: mavio_dot_plugin_dot_v1_dot_task__pb2.ReportTaskProgressRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+    ) -> mavio_dot_plugin_dot_v1_dot_task__pb2.ReportTaskProgressResponse:
+        return await self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="ReportTaskProgress",
+                service_name="mavio.plugin.v1.HostService",
+                input=mavio_dot_plugin_dot_v1_dot_task__pb2.ReportTaskProgressRequest,
+                output=mavio_dot_plugin_dot_v1_dot_task__pb2.ReportTaskProgressResponse,
+                idempotency_level=IdempotencyLevel.UNKNOWN,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+        )
+
 
 
 class DeviceControllerService(Protocol):
@@ -277,6 +311,8 @@ class HostServiceSync(Protocol):
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
     def solve_challenge(self, request: mavio_dot_plugin_dot_v1_dot_challenge__pb2.SolveChallengeRequest, ctx: RequestContext) -> mavio_dot_plugin_dot_v1_dot_challenge__pb2.SolveChallengeResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
+    def report_task_progress(self, request: mavio_dot_plugin_dot_v1_dot_task__pb2.ReportTaskProgressRequest, ctx: RequestContext) -> mavio_dot_plugin_dot_v1_dot_task__pb2.ReportTaskProgressResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
 
 
 class HostServiceWSGIApplication(ConnectWSGIApplication):
@@ -332,6 +368,16 @@ class HostServiceWSGIApplication(ConnectWSGIApplication):
                         idempotency_level=IdempotencyLevel.UNKNOWN,
                     ),
                     function=service.solve_challenge,
+                ),
+                "/mavio.plugin.v1.HostService/ReportTaskProgress": EndpointSync.unary(
+                    method=MethodInfo(
+                        name="ReportTaskProgress",
+                        service_name="mavio.plugin.v1.HostService",
+                        input=mavio_dot_plugin_dot_v1_dot_task__pb2.ReportTaskProgressRequest,
+                        output=mavio_dot_plugin_dot_v1_dot_task__pb2.ReportTaskProgressResponse,
+                        idempotency_level=IdempotencyLevel.UNKNOWN,
+                    ),
+                    function=service.report_task_progress,
                 ),
             },
             interceptors=interceptors,
@@ -446,6 +492,26 @@ class HostServiceClientSync(ConnectClientSync):
                 service_name="mavio.plugin.v1.HostService",
                 input=mavio_dot_plugin_dot_v1_dot_challenge__pb2.SolveChallengeRequest,
                 output=mavio_dot_plugin_dot_v1_dot_challenge__pb2.SolveChallengeResponse,
+                idempotency_level=IdempotencyLevel.UNKNOWN,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+        )
+
+    def report_task_progress(
+        self,
+        request: mavio_dot_plugin_dot_v1_dot_task__pb2.ReportTaskProgressRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+    ) -> mavio_dot_plugin_dot_v1_dot_task__pb2.ReportTaskProgressResponse:
+        return self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="ReportTaskProgress",
+                service_name="mavio.plugin.v1.HostService",
+                input=mavio_dot_plugin_dot_v1_dot_task__pb2.ReportTaskProgressRequest,
+                output=mavio_dot_plugin_dot_v1_dot_task__pb2.ReportTaskProgressResponse,
                 idempotency_level=IdempotencyLevel.UNKNOWN,
             ),
             headers=headers,

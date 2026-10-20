@@ -6,6 +6,7 @@ import "google/protobuf/duration.proto";
 import "mavio/plugin/v1/challenge.proto";
 import "mavio/plugin/v1/container.proto";
 import "mavio/plugin/v1/proxy.proto";
+import "mavio/plugin/v1/task.proto";
 
 // HostService is what the server offers plugins besides its public API,
 // through the host API. Every plugin may call it.
@@ -37,6 +38,10 @@ service HostService {
   // CHALLENGE_SOLVER plugins in turn, through the proxy proxy_id names; it
   // is unavailable when there is none, and not found for an unknown proxy.
   rpc SolveChallenge(SolveChallengeRequest) returns (SolveChallengeResponse);
+  // ReportTaskProgress tells how far the run of one of the calling
+  // plugin's tasks has come, which the server shows as its job's progress;
+  // a report of a task not running is ignored.
+  rpc ReportTaskProgress(ReportTaskProgressRequest) returns (ReportTaskProgressResponse);
 }
 
 // DeviceControllerService carries out the commands users send to a

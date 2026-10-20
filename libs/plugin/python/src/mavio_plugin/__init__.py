@@ -6,10 +6,11 @@ mounts as one ASGI application, served by Hypercorn on the socket the host
 gives (h2c and HTTP/1.1 with WebSockets; on Windows on loopback TCP). It
 checks the host's token, prints the handshake line, answers PluginService
 and returns after Shutdown, a termination signal, or the end of stdin when
-the host makes it a lifeline. host_client reaches the host API.
+the host makes it a lifeline. host_client reaches the host API, and
+report_task_progress tells it how far a task run is.
 """
 
-from mavio_plugin.host import host_client
+from mavio_plugin.host import host_client, report_task_progress
 from mavio_plugin.serve import (
     ENV_DATA,
     ENV_DEVICE_ID,
@@ -50,5 +51,6 @@ __all__ = [
     "host_os",
     "load_manifest",
     "loopback",
+    "report_task_progress",
     "serve",
 ]
