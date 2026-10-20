@@ -85,8 +85,8 @@ def test_setting_proto():
 
 
 def test_leaves_out_what_is_not_packaged(tmp_path: Path):
-    """resampy and numba are excluded from the plugin's dependencies, and
-    faster-whisper is not one: nothing imports them."""
+    """resampy, numba and sympy are excluded from the plugin's
+    dependencies, and faster-whisper is not one: nothing imports them."""
     import importlib
     import sys
 
@@ -96,5 +96,7 @@ def test_leaves_out_what_is_not_packaged(tmp_path: Path):
     for service in RECOGNITION:
         assert service.make is not None
         service.make(service.values({"api_key": "k"}), Session(), models)
-    imported = [m for m in ("resampy", "numba", "llvmlite", "faster_whisper") if m in sys.modules]
+    imported = [
+        m for m in ("resampy", "numba", "llvmlite", "sympy", "faster_whisper") if m in sys.modules
+    ]
     assert imported == [], f"imported = {imported}"

@@ -4,6 +4,12 @@
 [tool.uv.workspace]
 members = ["libs/proto/gen/python", "libs/plugin/python", "plugins/pipecat"]
 
+[tool.uv]
+# Pipecat requires resampy, and numba for it, for a resampler the plugins
+# never use (they resample with soxr), numba's llvmlite alone 180 MB; and
+# onnxruntime sympy, for a tool inferring models' shapes.
+exclude-dependencies = ["resampy", "numba", "sympy"]
+
 [tool.ruff]
 line-length = 100
 target-version = "py314"
