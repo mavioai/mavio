@@ -115,6 +115,7 @@ func (b0 ListRecognizersRequest_builder) Build() *ListRecognizersRequest {
 type ListRecognizersResponse struct {
 	state                  protoimpl.MessageState `protogen:"opaque.v1"`
 	xxx_hidden_Recognizers *[]*RecognizerInfo     `protobuf:"bytes,1,rep,name=recognizers"`
+	xxx_hidden_Services    *[]*RecognizerInfo     `protobuf:"bytes,2,rep,name=services"`
 	unknownFields          protoimpl.UnknownFields
 	sizeCache              protoimpl.SizeCache
 }
@@ -153,14 +154,32 @@ func (x *ListRecognizersResponse) GetRecognizers() []*RecognizerInfo {
 	return nil
 }
 
+func (x *ListRecognizersResponse) GetServices() []*RecognizerInfo {
+	if x != nil {
+		if x.xxx_hidden_Services != nil {
+			return *x.xxx_hidden_Services
+		}
+	}
+	return nil
+}
+
 func (x *ListRecognizersResponse) SetRecognizers(v []*RecognizerInfo) {
 	x.xxx_hidden_Recognizers = &v
+}
+
+func (x *ListRecognizersResponse) SetServices(v []*RecognizerInfo) {
+	x.xxx_hidden_Services = &v
 }
 
 type ListRecognizersResponse_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
+	// The recognizers configured, which recognize speech by their names.
 	Recognizers []*RecognizerInfo
+	// The services recognizers are configured from, with their settings
+	// and what they can do. A plugin listing none has recognizers that are
+	// their own services.
+	Services []*RecognizerInfo
 }
 
 func (b0 ListRecognizersResponse_builder) Build() *ListRecognizersResponse {
@@ -168,10 +187,12 @@ func (b0 ListRecognizersResponse_builder) Build() *ListRecognizersResponse {
 	b, x := &b0, m0
 	_, _ = b, x
 	x.xxx_hidden_Recognizers = &b.Recognizers
+	x.xxx_hidden_Services = &b.Services
 	return m0
 }
 
-// RecognizerInfo is a recognizer a plugin implements.
+// RecognizerInfo is a recognizer a plugin has configured, or a service
+// it implements.
 type RecognizerInfo struct {
 	state                      protoimpl.MessageState `protogen:"opaque.v1"`
 	xxx_hidden_Name            *string                `protobuf:"bytes,1,opt,name=name"`
@@ -185,6 +206,7 @@ type RecognizerInfo struct {
 	xxx_hidden_Hints           bool                   `protobuf:"varint,9,opt,name=hints"`
 	xxx_hidden_MaxDuration     *durationpb.Duration   `protobuf:"bytes,10,opt,name=max_duration,json=maxDuration"`
 	xxx_hidden_Subtitles       bool                   `protobuf:"varint,11,opt,name=subtitles"`
+	xxx_hidden_Service         *string                `protobuf:"bytes,12,opt,name=service"`
 	XXX_raceDetectHookData     protoimpl.RaceDetectHookData
 	XXX_presence               [1]uint32
 	unknownFields              protoimpl.UnknownFields
@@ -301,14 +323,24 @@ func (x *RecognizerInfo) GetSubtitles() bool {
 	return false
 }
 
+func (x *RecognizerInfo) GetService() string {
+	if x != nil {
+		if x.xxx_hidden_Service != nil {
+			return *x.xxx_hidden_Service
+		}
+		return ""
+	}
+	return ""
+}
+
 func (x *RecognizerInfo) SetName(v string) {
 	x.xxx_hidden_Name = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 11)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 12)
 }
 
 func (x *RecognizerInfo) SetDisplayName(v string) {
 	x.xxx_hidden_DisplayName = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 11)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 12)
 }
 
 func (x *RecognizerInfo) SetSettings(v []*SettingField) {
@@ -317,7 +349,7 @@ func (x *RecognizerInfo) SetSettings(v []*SettingField) {
 
 func (x *RecognizerInfo) SetEnabled(v bool) {
 	x.xxx_hidden_Enabled = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 11)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 12)
 }
 
 func (x *RecognizerInfo) SetLanguages(v []string) {
@@ -326,22 +358,22 @@ func (x *RecognizerInfo) SetLanguages(v []string) {
 
 func (x *RecognizerInfo) SetTimestamps(v bool) {
 	x.xxx_hidden_Timestamps = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 11)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 12)
 }
 
 func (x *RecognizerInfo) SetDetectsLanguage(v bool) {
 	x.xxx_hidden_DetectsLanguage = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 11)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 12)
 }
 
 func (x *RecognizerInfo) SetTranslates(v bool) {
 	x.xxx_hidden_Translates = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 11)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 12)
 }
 
 func (x *RecognizerInfo) SetHints(v bool) {
 	x.xxx_hidden_Hints = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 8, 11)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 8, 12)
 }
 
 func (x *RecognizerInfo) SetMaxDuration(v *durationpb.Duration) {
@@ -350,7 +382,12 @@ func (x *RecognizerInfo) SetMaxDuration(v *durationpb.Duration) {
 
 func (x *RecognizerInfo) SetSubtitles(v bool) {
 	x.xxx_hidden_Subtitles = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 11)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 12)
+}
+
+func (x *RecognizerInfo) SetService(v string) {
+	x.xxx_hidden_Service = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 11, 12)
 }
 
 func (x *RecognizerInfo) HasName() bool {
@@ -416,6 +453,13 @@ func (x *RecognizerInfo) HasSubtitles() bool {
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 10)
 }
 
+func (x *RecognizerInfo) HasService() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 11)
+}
+
 func (x *RecognizerInfo) ClearName() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_Name = nil
@@ -460,13 +504,20 @@ func (x *RecognizerInfo) ClearSubtitles() {
 	x.xxx_hidden_Subtitles = false
 }
 
+func (x *RecognizerInfo) ClearService() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 11)
+	x.xxx_hidden_Service = nil
+}
+
 type RecognizerInfo_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
-	// Stable within the plugin, such as "whisper".
-	Name        *string
+	// Stable within the plugin: a recognizer's ID, or a service's name,
+	// such as "whisper".
+	Name *string
+	// The name the administrator gave a recognizer, or a service's.
 	DisplayName *string
-	// The recognizer's settings, under its name in the plugin's settings.
+	// A service's settings, which configure its recognizers.
 	Settings []*SettingField
 	Enabled  *bool
 	// The languages it recognizes, BCP 47; empty for any.
@@ -484,6 +535,9 @@ type RecognizerInfo_builder struct {
 	// The administrator lets it transcribe videos into subtitles; with
 	// timestamps only.
 	Subtitles *bool
+	// The service a recognizer is configured from, a name among the
+	// services.
+	Service *string
 }
 
 func (b0 RecognizerInfo_builder) Build() *RecognizerInfo {
@@ -491,39 +545,43 @@ func (b0 RecognizerInfo_builder) Build() *RecognizerInfo {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Name != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 11)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 12)
 		x.xxx_hidden_Name = b.Name
 	}
 	if b.DisplayName != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 11)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 12)
 		x.xxx_hidden_DisplayName = b.DisplayName
 	}
 	x.xxx_hidden_Settings = &b.Settings
 	if b.Enabled != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 11)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 12)
 		x.xxx_hidden_Enabled = *b.Enabled
 	}
 	x.xxx_hidden_Languages = b.Languages
 	if b.Timestamps != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 11)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 12)
 		x.xxx_hidden_Timestamps = *b.Timestamps
 	}
 	if b.DetectsLanguage != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 11)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 12)
 		x.xxx_hidden_DetectsLanguage = *b.DetectsLanguage
 	}
 	if b.Translates != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 11)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 12)
 		x.xxx_hidden_Translates = *b.Translates
 	}
 	if b.Hints != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 8, 11)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 8, 12)
 		x.xxx_hidden_Hints = *b.Hints
 	}
 	x.xxx_hidden_MaxDuration = b.MaxDuration
 	if b.Subtitles != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 11)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 12)
 		x.xxx_hidden_Subtitles = *b.Subtitles
+	}
+	if b.Service != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 11, 12)
+		x.xxx_hidden_Service = b.Service
 	}
 	return m0
 }
@@ -1463,6 +1521,7 @@ type ListVoicesResponse struct {
 	state                   protoimpl.MessageState `protogen:"opaque.v1"`
 	xxx_hidden_Voices       *[]*VoiceInfo          `protobuf:"bytes,1,rep,name=voices"`
 	xxx_hidden_Synthesizers *[]*SynthesizerInfo    `protobuf:"bytes,2,rep,name=synthesizers"`
+	xxx_hidden_Services     *[]*SynthesizerInfo    `protobuf:"bytes,3,rep,name=services"`
 	unknownFields           protoimpl.UnknownFields
 	sizeCache               protoimpl.SizeCache
 }
@@ -1510,6 +1569,15 @@ func (x *ListVoicesResponse) GetSynthesizers() []*SynthesizerInfo {
 	return nil
 }
 
+func (x *ListVoicesResponse) GetServices() []*SynthesizerInfo {
+	if x != nil {
+		if x.xxx_hidden_Services != nil {
+			return *x.xxx_hidden_Services
+		}
+	}
+	return nil
+}
+
 func (x *ListVoicesResponse) SetVoices(v []*VoiceInfo) {
 	x.xxx_hidden_Voices = &v
 }
@@ -1518,12 +1586,19 @@ func (x *ListVoicesResponse) SetSynthesizers(v []*SynthesizerInfo) {
 	x.xxx_hidden_Synthesizers = &v
 }
 
+func (x *ListVoicesResponse) SetServices(v []*SynthesizerInfo) {
+	x.xxx_hidden_Services = &v
+}
+
 type ListVoicesResponse_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
 	Voices []*VoiceInfo
-	// The synthesizers, with their settings and state.
+	// The synthesizers configured, with their state.
 	Synthesizers []*SynthesizerInfo
+	// The services synthesizers are configured from, with their settings.
+	// A plugin listing none has synthesizers that are their own services.
+	Services []*SynthesizerInfo
 }
 
 func (b0 ListVoicesResponse_builder) Build() *ListVoicesResponse {
@@ -1532,16 +1607,19 @@ func (b0 ListVoicesResponse_builder) Build() *ListVoicesResponse {
 	_, _ = b, x
 	x.xxx_hidden_Voices = &b.Voices
 	x.xxx_hidden_Synthesizers = &b.Synthesizers
+	x.xxx_hidden_Services = &b.Services
 	return m0
 }
 
-// SynthesizerInfo is a synthesis service a plugin implements.
+// SynthesizerInfo is a synthesizer a plugin has configured, or a
+// synthesis service it implements.
 type SynthesizerInfo struct {
 	state                  protoimpl.MessageState `protogen:"opaque.v1"`
 	xxx_hidden_Name        *string                `protobuf:"bytes,1,opt,name=name"`
 	xxx_hidden_DisplayName *string                `protobuf:"bytes,2,opt,name=display_name,json=displayName"`
 	xxx_hidden_Settings    *[]*SettingField       `protobuf:"bytes,3,rep,name=settings"`
 	xxx_hidden_Enabled     bool                   `protobuf:"varint,4,opt,name=enabled"`
+	xxx_hidden_Service     *string                `protobuf:"bytes,5,opt,name=service"`
 	XXX_raceDetectHookData protoimpl.RaceDetectHookData
 	XXX_presence           [1]uint32
 	unknownFields          protoimpl.UnknownFields
@@ -1609,14 +1687,24 @@ func (x *SynthesizerInfo) GetEnabled() bool {
 	return false
 }
 
+func (x *SynthesizerInfo) GetService() string {
+	if x != nil {
+		if x.xxx_hidden_Service != nil {
+			return *x.xxx_hidden_Service
+		}
+		return ""
+	}
+	return ""
+}
+
 func (x *SynthesizerInfo) SetName(v string) {
 	x.xxx_hidden_Name = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 4)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 5)
 }
 
 func (x *SynthesizerInfo) SetDisplayName(v string) {
 	x.xxx_hidden_DisplayName = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 4)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 5)
 }
 
 func (x *SynthesizerInfo) SetSettings(v []*SettingField) {
@@ -1625,7 +1713,12 @@ func (x *SynthesizerInfo) SetSettings(v []*SettingField) {
 
 func (x *SynthesizerInfo) SetEnabled(v bool) {
 	x.xxx_hidden_Enabled = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 4)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 5)
+}
+
+func (x *SynthesizerInfo) SetService(v string) {
+	x.xxx_hidden_Service = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 5)
 }
 
 func (x *SynthesizerInfo) HasName() bool {
@@ -1649,6 +1742,13 @@ func (x *SynthesizerInfo) HasEnabled() bool {
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 3)
 }
 
+func (x *SynthesizerInfo) HasService() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 4)
+}
+
 func (x *SynthesizerInfo) ClearName() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_Name = nil
@@ -1664,15 +1764,25 @@ func (x *SynthesizerInfo) ClearEnabled() {
 	x.xxx_hidden_Enabled = false
 }
 
+func (x *SynthesizerInfo) ClearService() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 4)
+	x.xxx_hidden_Service = nil
+}
+
 type SynthesizerInfo_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
-	// Stable within the plugin, such as "openai".
-	Name        *string
+	// Stable within the plugin: a synthesizer's ID, or a service's name,
+	// such as "openai".
+	Name *string
+	// The name the administrator gave a synthesizer, or a service's.
 	DisplayName *string
-	// The service's settings, under its name in the plugin's settings.
+	// A service's settings, which configure its synthesizers.
 	Settings []*SettingField
 	Enabled  *bool
+	// The service a synthesizer is configured from, a name among the
+	// services.
+	Service *string
 }
 
 func (b0 SynthesizerInfo_builder) Build() *SynthesizerInfo {
@@ -1680,17 +1790,21 @@ func (b0 SynthesizerInfo_builder) Build() *SynthesizerInfo {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Name != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 4)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 5)
 		x.xxx_hidden_Name = b.Name
 	}
 	if b.DisplayName != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 4)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 5)
 		x.xxx_hidden_DisplayName = b.DisplayName
 	}
 	x.xxx_hidden_Settings = &b.Settings
 	if b.Enabled != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 4)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 5)
 		x.xxx_hidden_Enabled = *b.Enabled
+	}
+	if b.Service != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 5)
+		x.xxx_hidden_Service = b.Service
 	}
 	return m0
 }
@@ -2157,9 +2271,10 @@ var File_mavio_plugin_v1_speech_proto protoreflect.FileDescriptor
 const file_mavio_plugin_v1_speech_proto_rawDesc = "" +
 	"\n" +
 	"\x1cmavio/plugin/v1/speech.proto\x12\x0fmavio.plugin.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1egoogle/protobuf/duration.proto\x1a\x1emavio/plugin/v1/settings.proto\"\x18\n" +
-	"\x16ListRecognizersRequest\"\\\n" +
+	"\x16ListRecognizersRequest\"\x99\x01\n" +
 	"\x17ListRecognizersResponse\x12A\n" +
-	"\vrecognizers\x18\x01 \x03(\v2\x1f.mavio.plugin.v1.RecognizerInfoR\vrecognizers\"\x97\x03\n" +
+	"\vrecognizers\x18\x01 \x03(\v2\x1f.mavio.plugin.v1.RecognizerInfoR\vrecognizers\x12;\n" +
+	"\bservices\x18\x02 \x03(\v2\x1f.mavio.plugin.v1.RecognizerInfoR\bservices\"\xb1\x03\n" +
 	"\x0eRecognizerInfo\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12!\n" +
 	"\fdisplay_name\x18\x02 \x01(\tR\vdisplayName\x129\n" +
@@ -2176,7 +2291,8 @@ const file_mavio_plugin_v1_speech_proto_rawDesc = "" +
 	"\x05hints\x18\t \x01(\bR\x05hints\x12<\n" +
 	"\fmax_duration\x18\n" +
 	" \x01(\v2\x19.google.protobuf.DurationR\vmaxDuration\x12\x1c\n" +
-	"\tsubtitles\x18\v \x01(\bR\tsubtitles\"w\n" +
+	"\tsubtitles\x18\v \x01(\bR\tsubtitles\x12\x18\n" +
+	"\aservice\x18\f \x01(\tR\aservice\"w\n" +
 	"\vSpeechAudio\x12\x12\n" +
 	"\x03pcm\x18\x01 \x01(\fH\x00R\x03pcm\x12\x12\n" +
 	"\x03url\x18\x02 \x01(\tH\x00R\x03url\x12/\n" +
@@ -2209,15 +2325,17 @@ const file_mavio_plugin_v1_speech_proto_rawDesc = "" +
 	"\x05audio\x18\x02 \x01(\v2\x1c.mavio.plugin.v1.SpeechAudioB\x06\xbaH\x03\xc8\x01\x01R\x05audio\":\n" +
 	"\x1cDetectSpeechLanguageResponse\x12\x1a\n" +
 	"\blanguage\x18\x01 \x01(\tR\blanguage\"\x13\n" +
-	"\x11ListVoicesRequest\"\x8e\x01\n" +
+	"\x11ListVoicesRequest\"\xcc\x01\n" +
 	"\x12ListVoicesResponse\x122\n" +
 	"\x06voices\x18\x01 \x03(\v2\x1a.mavio.plugin.v1.VoiceInfoR\x06voices\x12D\n" +
-	"\fsynthesizers\x18\x02 \x03(\v2 .mavio.plugin.v1.SynthesizerInfoR\fsynthesizers\"\x9d\x01\n" +
+	"\fsynthesizers\x18\x02 \x03(\v2 .mavio.plugin.v1.SynthesizerInfoR\fsynthesizers\x12<\n" +
+	"\bservices\x18\x03 \x03(\v2 .mavio.plugin.v1.SynthesizerInfoR\bservices\"\xb7\x01\n" +
 	"\x0fSynthesizerInfo\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12!\n" +
 	"\fdisplay_name\x18\x02 \x01(\tR\vdisplayName\x129\n" +
 	"\bsettings\x18\x03 \x03(\v2\x1d.mavio.plugin.v1.SettingFieldR\bsettings\x12\x18\n" +
-	"\aenabled\x18\x04 \x01(\bR\aenabled\"M\n" +
+	"\aenabled\x18\x04 \x01(\bR\aenabled\x12\x18\n" +
+	"\aservice\x18\x05 \x01(\tR\aservice\"M\n" +
 	"\tVoiceInfo\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x1c\n" +
@@ -2271,33 +2389,35 @@ var file_mavio_plugin_v1_speech_proto_goTypes = []any{
 }
 var file_mavio_plugin_v1_speech_proto_depIdxs = []int32{
 	3,  // 0: mavio.plugin.v1.ListRecognizersResponse.recognizers:type_name -> mavio.plugin.v1.RecognizerInfo
-	16, // 1: mavio.plugin.v1.RecognizerInfo.settings:type_name -> mavio.plugin.v1.SettingField
-	17, // 2: mavio.plugin.v1.RecognizerInfo.max_duration:type_name -> google.protobuf.Duration
-	17, // 3: mavio.plugin.v1.SpeechAudio.limit:type_name -> google.protobuf.Duration
-	4,  // 4: mavio.plugin.v1.RecognizeSpeechRequest.audio:type_name -> mavio.plugin.v1.SpeechAudio
-	7,  // 5: mavio.plugin.v1.RecognizeSpeechResponse.segments:type_name -> mavio.plugin.v1.SpeechSegment
-	17, // 6: mavio.plugin.v1.SpeechSegment.start:type_name -> google.protobuf.Duration
-	17, // 7: mavio.plugin.v1.SpeechSegment.end:type_name -> google.protobuf.Duration
-	4,  // 8: mavio.plugin.v1.DetectSpeechLanguageRequest.audio:type_name -> mavio.plugin.v1.SpeechAudio
-	13, // 9: mavio.plugin.v1.ListVoicesResponse.voices:type_name -> mavio.plugin.v1.VoiceInfo
-	12, // 10: mavio.plugin.v1.ListVoicesResponse.synthesizers:type_name -> mavio.plugin.v1.SynthesizerInfo
-	16, // 11: mavio.plugin.v1.SynthesizerInfo.settings:type_name -> mavio.plugin.v1.SettingField
-	0,  // 12: mavio.plugin.v1.SynthesizeSpeechRequest.format:type_name -> mavio.plugin.v1.SpeechFormat
-	1,  // 13: mavio.plugin.v1.SpeechToTextService.ListRecognizers:input_type -> mavio.plugin.v1.ListRecognizersRequest
-	5,  // 14: mavio.plugin.v1.SpeechToTextService.RecognizeSpeech:input_type -> mavio.plugin.v1.RecognizeSpeechRequest
-	8,  // 15: mavio.plugin.v1.SpeechToTextService.DetectSpeechLanguage:input_type -> mavio.plugin.v1.DetectSpeechLanguageRequest
-	10, // 16: mavio.plugin.v1.TextToSpeechService.ListVoices:input_type -> mavio.plugin.v1.ListVoicesRequest
-	14, // 17: mavio.plugin.v1.TextToSpeechService.SynthesizeSpeech:input_type -> mavio.plugin.v1.SynthesizeSpeechRequest
-	2,  // 18: mavio.plugin.v1.SpeechToTextService.ListRecognizers:output_type -> mavio.plugin.v1.ListRecognizersResponse
-	6,  // 19: mavio.plugin.v1.SpeechToTextService.RecognizeSpeech:output_type -> mavio.plugin.v1.RecognizeSpeechResponse
-	9,  // 20: mavio.plugin.v1.SpeechToTextService.DetectSpeechLanguage:output_type -> mavio.plugin.v1.DetectSpeechLanguageResponse
-	11, // 21: mavio.plugin.v1.TextToSpeechService.ListVoices:output_type -> mavio.plugin.v1.ListVoicesResponse
-	15, // 22: mavio.plugin.v1.TextToSpeechService.SynthesizeSpeech:output_type -> mavio.plugin.v1.SynthesizeSpeechResponse
-	18, // [18:23] is the sub-list for method output_type
-	13, // [13:18] is the sub-list for method input_type
-	13, // [13:13] is the sub-list for extension type_name
-	13, // [13:13] is the sub-list for extension extendee
-	0,  // [0:13] is the sub-list for field type_name
+	3,  // 1: mavio.plugin.v1.ListRecognizersResponse.services:type_name -> mavio.plugin.v1.RecognizerInfo
+	16, // 2: mavio.plugin.v1.RecognizerInfo.settings:type_name -> mavio.plugin.v1.SettingField
+	17, // 3: mavio.plugin.v1.RecognizerInfo.max_duration:type_name -> google.protobuf.Duration
+	17, // 4: mavio.plugin.v1.SpeechAudio.limit:type_name -> google.protobuf.Duration
+	4,  // 5: mavio.plugin.v1.RecognizeSpeechRequest.audio:type_name -> mavio.plugin.v1.SpeechAudio
+	7,  // 6: mavio.plugin.v1.RecognizeSpeechResponse.segments:type_name -> mavio.plugin.v1.SpeechSegment
+	17, // 7: mavio.plugin.v1.SpeechSegment.start:type_name -> google.protobuf.Duration
+	17, // 8: mavio.plugin.v1.SpeechSegment.end:type_name -> google.protobuf.Duration
+	4,  // 9: mavio.plugin.v1.DetectSpeechLanguageRequest.audio:type_name -> mavio.plugin.v1.SpeechAudio
+	13, // 10: mavio.plugin.v1.ListVoicesResponse.voices:type_name -> mavio.plugin.v1.VoiceInfo
+	12, // 11: mavio.plugin.v1.ListVoicesResponse.synthesizers:type_name -> mavio.plugin.v1.SynthesizerInfo
+	12, // 12: mavio.plugin.v1.ListVoicesResponse.services:type_name -> mavio.plugin.v1.SynthesizerInfo
+	16, // 13: mavio.plugin.v1.SynthesizerInfo.settings:type_name -> mavio.plugin.v1.SettingField
+	0,  // 14: mavio.plugin.v1.SynthesizeSpeechRequest.format:type_name -> mavio.plugin.v1.SpeechFormat
+	1,  // 15: mavio.plugin.v1.SpeechToTextService.ListRecognizers:input_type -> mavio.plugin.v1.ListRecognizersRequest
+	5,  // 16: mavio.plugin.v1.SpeechToTextService.RecognizeSpeech:input_type -> mavio.plugin.v1.RecognizeSpeechRequest
+	8,  // 17: mavio.plugin.v1.SpeechToTextService.DetectSpeechLanguage:input_type -> mavio.plugin.v1.DetectSpeechLanguageRequest
+	10, // 18: mavio.plugin.v1.TextToSpeechService.ListVoices:input_type -> mavio.plugin.v1.ListVoicesRequest
+	14, // 19: mavio.plugin.v1.TextToSpeechService.SynthesizeSpeech:input_type -> mavio.plugin.v1.SynthesizeSpeechRequest
+	2,  // 20: mavio.plugin.v1.SpeechToTextService.ListRecognizers:output_type -> mavio.plugin.v1.ListRecognizersResponse
+	6,  // 21: mavio.plugin.v1.SpeechToTextService.RecognizeSpeech:output_type -> mavio.plugin.v1.RecognizeSpeechResponse
+	9,  // 22: mavio.plugin.v1.SpeechToTextService.DetectSpeechLanguage:output_type -> mavio.plugin.v1.DetectSpeechLanguageResponse
+	11, // 23: mavio.plugin.v1.TextToSpeechService.ListVoices:output_type -> mavio.plugin.v1.ListVoicesResponse
+	15, // 24: mavio.plugin.v1.TextToSpeechService.SynthesizeSpeech:output_type -> mavio.plugin.v1.SynthesizeSpeechResponse
+	20, // [20:25] is the sub-list for method output_type
+	15, // [15:20] is the sub-list for method input_type
+	15, // [15:15] is the sub-list for extension type_name
+	15, // [15:15] is the sub-list for extension extendee
+	0,  // [0:15] is the sub-list for field type_name
 }
 
 func init() { file_mavio_plugin_v1_speech_proto_init() }

@@ -76,7 +76,13 @@ func (m *Manager) Definitions(ctx context.Context, id, source string) ([]ConfigO
 		if err != nil {
 			return nil, fmt.Errorf("list the recognizers of plugin %s: %w", id, err)
 		}
-		for _, r := range resp.GetRecognizers() {
+		// A plugin lists the services its recognizers are configured from,
+		// else recognizers that are their own.
+		list := resp.GetServices()
+		if len(list) == 0 {
+			list = resp.GetRecognizers()
+		}
+		for _, r := range list {
 			out = append(out, ConfigOption{Value: r.GetName(), Name: cmp.Or(r.GetDisplayName(), r.GetName()), SettingsSchema: SettingsSchema(r.GetSettings())})
 		}
 	case manifest.OptionsSpeechSynthesizers:
@@ -87,7 +93,11 @@ func (m *Manager) Definitions(ctx context.Context, id, source string) ([]ConfigO
 		if err != nil {
 			return nil, fmt.Errorf("list the synthesizers of plugin %s: %w", id, err)
 		}
-		for _, s := range resp.GetSynthesizers() {
+		list := resp.GetServices()
+		if len(list) == 0 {
+			list = resp.GetSynthesizers()
+		}
+		for _, s := range list {
 			out = append(out, ConfigOption{Value: s.GetName(), Name: cmp.Or(s.GetDisplayName(), s.GetName()), SettingsSchema: SettingsSchema(s.GetSettings())})
 		}
 	case manifest.OptionsSubtitleProviders:

@@ -82,20 +82,28 @@ public nonisolated struct Mavio_Plugin_V1_ListRecognizersResponse: Sendable {
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
+  /// The recognizers configured, which recognize speech by their names.
   public var recognizers: [Mavio_Plugin_V1_RecognizerInfo] = []
+
+  /// The services recognizers are configured from, with their settings
+  /// and what they can do. A plugin listing none has recognizers that are
+  /// their own services.
+  public var services: [Mavio_Plugin_V1_RecognizerInfo] = []
 
   public var unknownFields = SwiftProtobuf.UnknownStorage()
 
   public init() {}
 }
 
-/// RecognizerInfo is a recognizer a plugin implements.
+/// RecognizerInfo is a recognizer a plugin has configured, or a service
+/// it implements.
 public nonisolated struct Mavio_Plugin_V1_RecognizerInfo: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  /// Stable within the plugin, such as "whisper".
+  /// Stable within the plugin: a recognizer's ID, or a service's name,
+  /// such as "whisper".
   public var name: String {
     get {_name ?? String()}
     set {_name = newValue}
@@ -105,6 +113,7 @@ public nonisolated struct Mavio_Plugin_V1_RecognizerInfo: Sendable {
   /// Clears the value of `name`. Subsequent reads from it will return its default value.
   public mutating func clearName() {self._name = nil}
 
+  /// The name the administrator gave a recognizer, or a service's.
   public var displayName: String {
     get {_displayName ?? String()}
     set {_displayName = newValue}
@@ -114,7 +123,7 @@ public nonisolated struct Mavio_Plugin_V1_RecognizerInfo: Sendable {
   /// Clears the value of `displayName`. Subsequent reads from it will return its default value.
   public mutating func clearDisplayName() {self._displayName = nil}
 
-  /// The recognizer's settings, under its name in the plugin's settings.
+  /// A service's settings, which configure its recognizers.
   public var settings: [Mavio_Plugin_V1_SettingField] = []
 
   public var enabled: Bool {
@@ -190,6 +199,17 @@ public nonisolated struct Mavio_Plugin_V1_RecognizerInfo: Sendable {
   /// Clears the value of `subtitles`. Subsequent reads from it will return its default value.
   public mutating func clearSubtitles() {self._subtitles = nil}
 
+  /// The service a recognizer is configured from, a name among the
+  /// services.
+  public var service: String {
+    get {_service ?? String()}
+    set {_service = newValue}
+  }
+  /// Returns true if `service` has been explicitly set.
+  public var hasService: Bool {self._service != nil}
+  /// Clears the value of `service`. Subsequent reads from it will return its default value.
+  public mutating func clearService() {self._service = nil}
+
   public var unknownFields = SwiftProtobuf.UnknownStorage()
 
   public init() {}
@@ -203,6 +223,7 @@ public nonisolated struct Mavio_Plugin_V1_RecognizerInfo: Sendable {
   fileprivate var _hints: Bool? = nil
   fileprivate var _maxDuration: SwiftProtobuf.Google_Protobuf_Duration? = nil
   fileprivate var _subtitles: Bool? = nil
+  fileprivate var _service: String? = nil
 }
 
 /// SpeechAudio is audio to recognize.
@@ -484,21 +505,27 @@ public nonisolated struct Mavio_Plugin_V1_ListVoicesResponse: Sendable {
 
   public var voices: [Mavio_Plugin_V1_VoiceInfo] = []
 
-  /// The synthesizers, with their settings and state.
+  /// The synthesizers configured, with their state.
   public var synthesizers: [Mavio_Plugin_V1_SynthesizerInfo] = []
+
+  /// The services synthesizers are configured from, with their settings.
+  /// A plugin listing none has synthesizers that are their own services.
+  public var services: [Mavio_Plugin_V1_SynthesizerInfo] = []
 
   public var unknownFields = SwiftProtobuf.UnknownStorage()
 
   public init() {}
 }
 
-/// SynthesizerInfo is a synthesis service a plugin implements.
+/// SynthesizerInfo is a synthesizer a plugin has configured, or a
+/// synthesis service it implements.
 public nonisolated struct Mavio_Plugin_V1_SynthesizerInfo: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  /// Stable within the plugin, such as "openai".
+  /// Stable within the plugin: a synthesizer's ID, or a service's name,
+  /// such as "openai".
   public var name: String {
     get {_name ?? String()}
     set {_name = newValue}
@@ -508,6 +535,7 @@ public nonisolated struct Mavio_Plugin_V1_SynthesizerInfo: Sendable {
   /// Clears the value of `name`. Subsequent reads from it will return its default value.
   public mutating func clearName() {self._name = nil}
 
+  /// The name the administrator gave a synthesizer, or a service's.
   public var displayName: String {
     get {_displayName ?? String()}
     set {_displayName = newValue}
@@ -517,7 +545,7 @@ public nonisolated struct Mavio_Plugin_V1_SynthesizerInfo: Sendable {
   /// Clears the value of `displayName`. Subsequent reads from it will return its default value.
   public mutating func clearDisplayName() {self._displayName = nil}
 
-  /// The service's settings, under its name in the plugin's settings.
+  /// A service's settings, which configure its synthesizers.
   public var settings: [Mavio_Plugin_V1_SettingField] = []
 
   public var enabled: Bool {
@@ -529,6 +557,17 @@ public nonisolated struct Mavio_Plugin_V1_SynthesizerInfo: Sendable {
   /// Clears the value of `enabled`. Subsequent reads from it will return its default value.
   public mutating func clearEnabled() {self._enabled = nil}
 
+  /// The service a synthesizer is configured from, a name among the
+  /// services.
+  public var service: String {
+    get {_service ?? String()}
+    set {_service = newValue}
+  }
+  /// Returns true if `service` has been explicitly set.
+  public var hasService: Bool {self._service != nil}
+  /// Clears the value of `service`. Subsequent reads from it will return its default value.
+  public mutating func clearService() {self._service = nil}
+
   public var unknownFields = SwiftProtobuf.UnknownStorage()
 
   public init() {}
@@ -536,6 +575,7 @@ public nonisolated struct Mavio_Plugin_V1_SynthesizerInfo: Sendable {
   fileprivate var _name: String? = nil
   fileprivate var _displayName: String? = nil
   fileprivate var _enabled: Bool? = nil
+  fileprivate var _service: String? = nil
 }
 
 /// VoiceInfo is a voice of a synthesizer.
@@ -703,7 +743,7 @@ nonisolated extension Mavio_Plugin_V1_ListRecognizersRequest: SwiftProtobuf.Mess
 
 nonisolated extension Mavio_Plugin_V1_ListRecognizersResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".ListRecognizersResponse"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}recognizers\0")
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}recognizers\0\u{1}services\0")
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -712,6 +752,7 @@ nonisolated extension Mavio_Plugin_V1_ListRecognizersResponse: SwiftProtobuf.Mes
       // enabled. https://github.com/apple/swift-protobuf/issues/1034
       switch fieldNumber {
       case 1: try { try decoder.decodeRepeatedMessageField(value: &self.recognizers) }()
+      case 2: try { try decoder.decodeRepeatedMessageField(value: &self.services) }()
       default: break
       }
     }
@@ -721,11 +762,15 @@ nonisolated extension Mavio_Plugin_V1_ListRecognizersResponse: SwiftProtobuf.Mes
     if !self.recognizers.isEmpty {
       try visitor.visitRepeatedMessageField(value: self.recognizers, fieldNumber: 1)
     }
+    if !self.services.isEmpty {
+      try visitor.visitRepeatedMessageField(value: self.services, fieldNumber: 2)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
   public static func ==(lhs: Mavio_Plugin_V1_ListRecognizersResponse, rhs: Mavio_Plugin_V1_ListRecognizersResponse) -> Bool {
     if lhs.recognizers != rhs.recognizers {return false}
+    if lhs.services != rhs.services {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
@@ -733,7 +778,7 @@ nonisolated extension Mavio_Plugin_V1_ListRecognizersResponse: SwiftProtobuf.Mes
 
 nonisolated extension Mavio_Plugin_V1_RecognizerInfo: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".RecognizerInfo"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}name\0\u{3}display_name\0\u{1}settings\0\u{1}enabled\0\u{1}languages\0\u{1}timestamps\0\u{3}detects_language\0\u{1}translates\0\u{1}hints\0\u{3}max_duration\0\u{1}subtitles\0")
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}name\0\u{3}display_name\0\u{1}settings\0\u{1}enabled\0\u{1}languages\0\u{1}timestamps\0\u{3}detects_language\0\u{1}translates\0\u{1}hints\0\u{3}max_duration\0\u{1}subtitles\0\u{1}service\0")
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -752,6 +797,7 @@ nonisolated extension Mavio_Plugin_V1_RecognizerInfo: SwiftProtobuf.Message, Swi
       case 9: try { try decoder.decodeSingularBoolField(value: &self._hints) }()
       case 10: try { try decoder.decodeSingularMessageField(value: &self._maxDuration) }()
       case 11: try { try decoder.decodeSingularBoolField(value: &self._subtitles) }()
+      case 12: try { try decoder.decodeSingularStringField(value: &self._service) }()
       default: break
       }
     }
@@ -795,6 +841,9 @@ nonisolated extension Mavio_Plugin_V1_RecognizerInfo: SwiftProtobuf.Message, Swi
     try { if let v = self._subtitles {
       try visitor.visitSingularBoolField(value: v, fieldNumber: 11)
     } }()
+    try { if let v = self._service {
+      try visitor.visitSingularStringField(value: v, fieldNumber: 12)
+    } }()
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -810,6 +859,7 @@ nonisolated extension Mavio_Plugin_V1_RecognizerInfo: SwiftProtobuf.Message, Swi
     if lhs._hints != rhs._hints {return false}
     if lhs._maxDuration != rhs._maxDuration {return false}
     if lhs._subtitles != rhs._subtitles {return false}
+    if lhs._service != rhs._service {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
@@ -1123,7 +1173,7 @@ nonisolated extension Mavio_Plugin_V1_ListVoicesRequest: SwiftProtobuf.Message, 
 
 nonisolated extension Mavio_Plugin_V1_ListVoicesResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".ListVoicesResponse"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}voices\0\u{1}synthesizers\0")
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}voices\0\u{1}synthesizers\0\u{1}services\0")
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -1133,6 +1183,7 @@ nonisolated extension Mavio_Plugin_V1_ListVoicesResponse: SwiftProtobuf.Message,
       switch fieldNumber {
       case 1: try { try decoder.decodeRepeatedMessageField(value: &self.voices) }()
       case 2: try { try decoder.decodeRepeatedMessageField(value: &self.synthesizers) }()
+      case 3: try { try decoder.decodeRepeatedMessageField(value: &self.services) }()
       default: break
       }
     }
@@ -1145,12 +1196,16 @@ nonisolated extension Mavio_Plugin_V1_ListVoicesResponse: SwiftProtobuf.Message,
     if !self.synthesizers.isEmpty {
       try visitor.visitRepeatedMessageField(value: self.synthesizers, fieldNumber: 2)
     }
+    if !self.services.isEmpty {
+      try visitor.visitRepeatedMessageField(value: self.services, fieldNumber: 3)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
   public static func ==(lhs: Mavio_Plugin_V1_ListVoicesResponse, rhs: Mavio_Plugin_V1_ListVoicesResponse) -> Bool {
     if lhs.voices != rhs.voices {return false}
     if lhs.synthesizers != rhs.synthesizers {return false}
+    if lhs.services != rhs.services {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
@@ -1158,7 +1213,7 @@ nonisolated extension Mavio_Plugin_V1_ListVoicesResponse: SwiftProtobuf.Message,
 
 nonisolated extension Mavio_Plugin_V1_SynthesizerInfo: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".SynthesizerInfo"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}name\0\u{3}display_name\0\u{1}settings\0\u{1}enabled\0")
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}name\0\u{3}display_name\0\u{1}settings\0\u{1}enabled\0\u{1}service\0")
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -1170,6 +1225,7 @@ nonisolated extension Mavio_Plugin_V1_SynthesizerInfo: SwiftProtobuf.Message, Sw
       case 2: try { try decoder.decodeSingularStringField(value: &self._displayName) }()
       case 3: try { try decoder.decodeRepeatedMessageField(value: &self.settings) }()
       case 4: try { try decoder.decodeSingularBoolField(value: &self._enabled) }()
+      case 5: try { try decoder.decodeSingularStringField(value: &self._service) }()
       default: break
       }
     }
@@ -1192,6 +1248,9 @@ nonisolated extension Mavio_Plugin_V1_SynthesizerInfo: SwiftProtobuf.Message, Sw
     try { if let v = self._enabled {
       try visitor.visitSingularBoolField(value: v, fieldNumber: 4)
     } }()
+    try { if let v = self._service {
+      try visitor.visitSingularStringField(value: v, fieldNumber: 5)
+    } }()
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -1200,6 +1259,7 @@ nonisolated extension Mavio_Plugin_V1_SynthesizerInfo: SwiftProtobuf.Message, Sw
     if lhs._displayName != rhs._displayName {return false}
     if lhs.settings != rhs.settings {return false}
     if lhs._enabled != rhs._enabled {return false}
+    if lhs._service != rhs._service {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

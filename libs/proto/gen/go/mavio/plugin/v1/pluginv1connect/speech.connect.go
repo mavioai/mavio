@@ -54,8 +54,9 @@ const (
 
 // SpeechToTextServiceClient is a client for the mavio.plugin.v1.SpeechToTextService service.
 type SpeechToTextServiceClient interface {
-	// ListRecognizers lists the recognizers the plugin implements, with
-	// their settings and state.
+	// ListRecognizers lists the recognition services the plugin implements,
+	// with their settings, and the recognizers configured from them, with
+	// their state.
 	ListRecognizers(context.Context, *v1.ListRecognizersRequest) (*v1.ListRecognizersResponse, error)
 	// RecognizeSpeech recognizes the speech of audio.
 	RecognizeSpeech(context.Context, *v1.RecognizeSpeechRequest) (*v1.RecognizeSpeechResponse, error)
@@ -134,8 +135,9 @@ func (c *speechToTextServiceClient) DetectSpeechLanguage(ctx context.Context, re
 // SpeechToTextServiceHandler is an implementation of the mavio.plugin.v1.SpeechToTextService
 // service.
 type SpeechToTextServiceHandler interface {
-	// ListRecognizers lists the recognizers the plugin implements, with
-	// their settings and state.
+	// ListRecognizers lists the recognition services the plugin implements,
+	// with their settings, and the recognizers configured from them, with
+	// their state.
 	ListRecognizers(context.Context, *v1.ListRecognizersRequest) (*v1.ListRecognizersResponse, error)
 	// RecognizeSpeech recognizes the speech of audio.
 	RecognizeSpeech(context.Context, *v1.RecognizeSpeechRequest) (*v1.RecognizeSpeechResponse, error)

@@ -205,8 +205,19 @@ impl ::buffa::HasMessageView for super::super::ListRecognizersRequest {
 }
 #[derive(Clone, Debug, Default)]
 pub struct ListRecognizersResponseView<'a> {
+    /// The recognizers configured, which recognize speech by their names.
+    ///
     /// Field 1: `recognizers`
     pub recognizers: ::buffa::RepeatedView<
+        'a,
+        super::super::__buffa::view::RecognizerInfoView<'a>,
+    >,
+    /// The services recognizers are configured from, with their settings
+    /// and what they can do. A plugin listing none has recognizers that are
+    /// their own services.
+    ///
+    /// Field 2: `services`
+    pub services: ::buffa::RepeatedView<
         'a,
         super::super::__buffa::view::RecognizerInfoView<'a>,
     >,
@@ -262,6 +273,26 @@ impl<'a> ::buffa::MessageView<'a> for ListRecognizersResponseView<'a> {
                         )?,
                     );
             }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __sub_ctx = ctx.descend()?;
+                let sub = ::buffa::types::borrow_bytes(&mut cur)?;
+                ctx.register_element_memory(
+                    ::core::mem::size_of::<
+                        super::super::__buffa::view::RecognizerInfoView,
+                    >(),
+                )?;
+                view.services
+                    .push(
+                        <super::super::__buffa::view::RecognizerInfoView as ::buffa::MessageView>::decode_view_ctx(
+                            sub,
+                            __sub_ctx,
+                        )?,
+                    );
+            }
             _ => {
                 ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
                 let span_len = before_tag.len() - cur.len();
@@ -295,6 +326,11 @@ impl<'a> ::buffa::MessageView<'a> for ListRecognizersResponseView<'a> {
                 .iter()
                 .map(|v| v.to_owned_from_source(__buffa_src))
                 .collect::<::core::result::Result<_, ::buffa::DecodeError>>()?,
+            services: self
+                .services
+                .iter()
+                .map(|v| v.to_owned_from_source(__buffa_src))
+                .collect::<::core::result::Result<_, ::buffa::DecodeError>>()?,
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -307,6 +343,14 @@ impl<'a> ::buffa::ViewEncode<'a> for ListRecognizersResponseView<'a> {
         use ::buffa::Enumeration as _;
         let mut size = 0u64;
         for v in &self.recognizers {
+            let __slot = __cache.reserve();
+            let inner_size = v.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        for v in &self.services {
             let __slot = __cache.reserve();
             let inner_size = v.compute_size(__cache);
             __cache.set(__slot, inner_size);
@@ -328,6 +372,14 @@ impl<'a> ::buffa::ViewEncode<'a> for ListRecognizersResponseView<'a> {
         for v in &self.recognizers {
             ::buffa::types::put_len_delimited_header(
                 1u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            v.write_to(__cache, buf);
+        }
+        for v in &self.services {
+            ::buffa::types::put_len_delimited_header(
+                2u32,
                 u64::from(__cache.consume_next()),
                 buf,
             );
@@ -428,6 +480,8 @@ impl ListRecognizersResponseOwnedView {
     pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
         self.0.into_bytes()
     }
+    /// The recognizers configured, which recognize speech by their names.
+    ///
     /// Field 1: `recognizers`
     #[must_use]
     pub fn recognizers(
@@ -437,6 +491,20 @@ impl ListRecognizersResponseOwnedView {
         super::super::__buffa::view::RecognizerInfoView<'_>,
     > {
         &self.0.reborrow().recognizers
+    }
+    /// The services recognizers are configured from, with their settings
+    /// and what they can do. A plugin listing none has recognizers that are
+    /// their own services.
+    ///
+    /// Field 2: `services`
+    #[must_use]
+    pub fn services(
+        &self,
+    ) -> &::buffa::RepeatedView<
+        '_,
+        super::super::__buffa::view::RecognizerInfoView<'_>,
+    > {
+        &self.0.reborrow().services
     }
 }
 impl ::core::convert::From<::buffa::OwnedView<ListRecognizersResponseView<'static>>>
@@ -461,16 +529,20 @@ impl ::buffa::HasMessageView for super::super::ListRecognizersResponse {
     type View<'a> = ListRecognizersResponseView<'a>;
     type ViewHandle = ListRecognizersResponseOwnedView;
 }
-/// RecognizerInfo is a recognizer a plugin implements.
+/// RecognizerInfo is a recognizer a plugin has configured, or a service
+/// it implements.
 #[derive(Clone, Debug, Default)]
 pub struct RecognizerInfoView<'a> {
-    /// Stable within the plugin, such as "whisper".
+    /// Stable within the plugin: a recognizer's ID, or a service's name,
+    /// such as "whisper".
     ///
     /// Field 1: `name`
     pub name: ::core::option::Option<&'a str>,
+    /// The name the administrator gave a recognizer, or a service's.
+    ///
     /// Field 2: `display_name`
     pub display_name: ::core::option::Option<&'a str>,
-    /// The recognizer's settings, under its name in the plugin's settings.
+    /// A service's settings, which configure its recognizers.
     ///
     /// Field 3: `settings`
     pub settings: ::buffa::RepeatedView<
@@ -510,6 +582,11 @@ pub struct RecognizerInfoView<'a> {
     ///
     /// Field 11: `subtitles`
     pub subtitles: ::core::option::Option<bool>,
+    /// The service a recognizer is configured from, a name among the
+    /// services.
+    ///
+    /// Field 12: `service`
+    pub service: ::core::option::Option<&'a str>,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for RecognizerInfoView<'a> {
@@ -619,6 +696,13 @@ impl<'a> ::buffa::MessageView<'a> for RecognizerInfoView<'a> {
                 )?;
                 view.subtitles = Some(::buffa::types::decode_bool(&mut cur)?);
             }
+            12u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.service = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
             3u32 => {
                 ::buffa::encoding::check_wire_type(
                     tag,
@@ -695,6 +779,7 @@ impl<'a> ::buffa::MessageView<'a> for RecognizerInfoView<'a> {
                 None => ::buffa::MessageField::none(),
             },
             subtitles: self.subtitles,
+            service: self.service.map(|s| s.to_string()),
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -749,6 +834,9 @@ impl<'a> ::buffa::ViewEncode<'a> for RecognizerInfoView<'a> {
         if self.subtitles.is_some() {
             size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
         }
+        if let Some(ref v) = self.service {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -802,6 +890,9 @@ impl<'a> ::buffa::ViewEncode<'a> for RecognizerInfoView<'a> {
         }
         if let Some(v) = self.subtitles {
             ::buffa::types::put_bool_field(11u32, v, buf);
+        }
+        if let Some(ref v) = self.service {
+            ::buffa::types::put_string_field(12u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -896,19 +987,22 @@ impl RecognizerInfoOwnedView {
     pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
         self.0.into_bytes()
     }
-    /// Stable within the plugin, such as "whisper".
+    /// Stable within the plugin: a recognizer's ID, or a service's name,
+    /// such as "whisper".
     ///
     /// Field 1: `name`
     #[must_use]
     pub fn name(&self) -> ::core::option::Option<&'_ str> {
         self.0.reborrow().name
     }
+    /// The name the administrator gave a recognizer, or a service's.
+    ///
     /// Field 2: `display_name`
     #[must_use]
     pub fn display_name(&self) -> ::core::option::Option<&'_ str> {
         self.0.reborrow().display_name
     }
-    /// The recognizer's settings, under its name in the plugin's settings.
+    /// A service's settings, which configure its recognizers.
     ///
     /// Field 3: `settings`
     #[must_use]
@@ -975,6 +1069,14 @@ impl RecognizerInfoOwnedView {
     #[must_use]
     pub fn subtitles(&self) -> ::core::option::Option<bool> {
         self.0.reborrow().subtitles
+    }
+    /// The service a recognizer is configured from, a name among the
+    /// services.
+    ///
+    /// Field 12: `service`
+    #[must_use]
+    pub fn service(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().service
     }
 }
 impl ::core::convert::From<::buffa::OwnedView<RecognizerInfoView<'static>>>
@@ -3087,10 +3189,18 @@ pub struct ListVoicesResponseView<'a> {
         'a,
         super::super::__buffa::view::VoiceInfoView<'a>,
     >,
-    /// The synthesizers, with their settings and state.
+    /// The synthesizers configured, with their state.
     ///
     /// Field 2: `synthesizers`
     pub synthesizers: ::buffa::RepeatedView<
+        'a,
+        super::super::__buffa::view::SynthesizerInfoView<'a>,
+    >,
+    /// The services synthesizers are configured from, with their settings.
+    /// A plugin listing none has synthesizers that are their own services.
+    ///
+    /// Field 3: `services`
+    pub services: ::buffa::RepeatedView<
         'a,
         super::super::__buffa::view::SynthesizerInfoView<'a>,
     >,
@@ -3164,6 +3274,26 @@ impl<'a> ::buffa::MessageView<'a> for ListVoicesResponseView<'a> {
                         )?,
                     );
             }
+            3u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __sub_ctx = ctx.descend()?;
+                let sub = ::buffa::types::borrow_bytes(&mut cur)?;
+                ctx.register_element_memory(
+                    ::core::mem::size_of::<
+                        super::super::__buffa::view::SynthesizerInfoView,
+                    >(),
+                )?;
+                view.services
+                    .push(
+                        <super::super::__buffa::view::SynthesizerInfoView as ::buffa::MessageView>::decode_view_ctx(
+                            sub,
+                            __sub_ctx,
+                        )?,
+                    );
+            }
             _ => {
                 ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
                 let span_len = before_tag.len() - cur.len();
@@ -3196,6 +3326,11 @@ impl<'a> ::buffa::MessageView<'a> for ListVoicesResponseView<'a> {
                 .iter()
                 .map(|v| v.to_owned_from_source(__buffa_src))
                 .collect::<::core::result::Result<_, ::buffa::DecodeError>>()?,
+            services: self
+                .services
+                .iter()
+                .map(|v| v.to_owned_from_source(__buffa_src))
+                .collect::<::core::result::Result<_, ::buffa::DecodeError>>()?,
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -3216,6 +3351,14 @@ impl<'a> ::buffa::ViewEncode<'a> for ListVoicesResponseView<'a> {
                     + inner_size as u64;
         }
         for v in &self.synthesizers {
+            let __slot = __cache.reserve();
+            let inner_size = v.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        for v in &self.services {
             let __slot = __cache.reserve();
             let inner_size = v.compute_size(__cache);
             __cache.set(__slot, inner_size);
@@ -3245,6 +3388,14 @@ impl<'a> ::buffa::ViewEncode<'a> for ListVoicesResponseView<'a> {
         for v in &self.synthesizers {
             ::buffa::types::put_len_delimited_header(
                 2u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            v.write_to(__cache, buf);
+        }
+        for v in &self.services {
+            ::buffa::types::put_len_delimited_header(
+                3u32,
                 u64::from(__cache.consume_next()),
                 buf,
             );
@@ -3352,7 +3503,7 @@ impl ListVoicesResponseOwnedView {
     ) -> &::buffa::RepeatedView<'_, super::super::__buffa::view::VoiceInfoView<'_>> {
         &self.0.reborrow().voices
     }
-    /// The synthesizers, with their settings and state.
+    /// The synthesizers configured, with their state.
     ///
     /// Field 2: `synthesizers`
     #[must_use]
@@ -3363,6 +3514,19 @@ impl ListVoicesResponseOwnedView {
         super::super::__buffa::view::SynthesizerInfoView<'_>,
     > {
         &self.0.reborrow().synthesizers
+    }
+    /// The services synthesizers are configured from, with their settings.
+    /// A plugin listing none has synthesizers that are their own services.
+    ///
+    /// Field 3: `services`
+    #[must_use]
+    pub fn services(
+        &self,
+    ) -> &::buffa::RepeatedView<
+        '_,
+        super::super::__buffa::view::SynthesizerInfoView<'_>,
+    > {
+        &self.0.reborrow().services
     }
 }
 impl ::core::convert::From<::buffa::OwnedView<ListVoicesResponseView<'static>>>
@@ -3387,16 +3551,20 @@ impl ::buffa::HasMessageView for super::super::ListVoicesResponse {
     type View<'a> = ListVoicesResponseView<'a>;
     type ViewHandle = ListVoicesResponseOwnedView;
 }
-/// SynthesizerInfo is a synthesis service a plugin implements.
+/// SynthesizerInfo is a synthesizer a plugin has configured, or a
+/// synthesis service it implements.
 #[derive(Clone, Debug, Default)]
 pub struct SynthesizerInfoView<'a> {
-    /// Stable within the plugin, such as "openai".
+    /// Stable within the plugin: a synthesizer's ID, or a service's name,
+    /// such as "openai".
     ///
     /// Field 1: `name`
     pub name: ::core::option::Option<&'a str>,
+    /// The name the administrator gave a synthesizer, or a service's.
+    ///
     /// Field 2: `display_name`
     pub display_name: ::core::option::Option<&'a str>,
-    /// The service's settings, under its name in the plugin's settings.
+    /// A service's settings, which configure its synthesizers.
     ///
     /// Field 3: `settings`
     pub settings: ::buffa::RepeatedView<
@@ -3405,6 +3573,11 @@ pub struct SynthesizerInfoView<'a> {
     >,
     /// Field 4: `enabled`
     pub enabled: ::core::option::Option<bool>,
+    /// The service a synthesizer is configured from, a name among the
+    /// services.
+    ///
+    /// Field 5: `service`
+    pub service: ::core::option::Option<&'a str>,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for SynthesizerInfoView<'a> {
@@ -3458,6 +3631,13 @@ impl<'a> ::buffa::MessageView<'a> for SynthesizerInfoView<'a> {
                 )?;
                 view.enabled = Some(::buffa::types::decode_bool(&mut cur)?);
             }
+            5u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.service = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
             3u32 => {
                 ::buffa::encoding::check_wire_type(
                     tag,
@@ -3508,6 +3688,7 @@ impl<'a> ::buffa::MessageView<'a> for SynthesizerInfoView<'a> {
                 .map(|v| v.to_owned_from_source(__buffa_src))
                 .collect::<::core::result::Result<_, ::buffa::DecodeError>>()?,
             enabled: self.enabled,
+            service: self.service.map(|s| s.to_string()),
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -3536,6 +3717,9 @@ impl<'a> ::buffa::ViewEncode<'a> for SynthesizerInfoView<'a> {
         if self.enabled.is_some() {
             size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
         }
+        if let Some(ref v) = self.service {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -3563,6 +3747,9 @@ impl<'a> ::buffa::ViewEncode<'a> for SynthesizerInfoView<'a> {
         }
         if let Some(v) = self.enabled {
             ::buffa::types::put_bool_field(4u32, v, buf);
+        }
+        if let Some(ref v) = self.service {
+            ::buffa::types::put_string_field(5u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -3657,19 +3844,22 @@ impl SynthesizerInfoOwnedView {
     pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
         self.0.into_bytes()
     }
-    /// Stable within the plugin, such as "openai".
+    /// Stable within the plugin: a synthesizer's ID, or a service's name,
+    /// such as "openai".
     ///
     /// Field 1: `name`
     #[must_use]
     pub fn name(&self) -> ::core::option::Option<&'_ str> {
         self.0.reborrow().name
     }
+    /// The name the administrator gave a synthesizer, or a service's.
+    ///
     /// Field 2: `display_name`
     #[must_use]
     pub fn display_name(&self) -> ::core::option::Option<&'_ str> {
         self.0.reborrow().display_name
     }
-    /// The service's settings, under its name in the plugin's settings.
+    /// A service's settings, which configure its synthesizers.
     ///
     /// Field 3: `settings`
     #[must_use]
@@ -3682,6 +3872,14 @@ impl SynthesizerInfoOwnedView {
     #[must_use]
     pub fn enabled(&self) -> ::core::option::Option<bool> {
         self.0.reborrow().enabled
+    }
+    /// The service a synthesizer is configured from, a name among the
+    /// services.
+    ///
+    /// Field 5: `service`
+    #[must_use]
+    pub fn service(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().service
     }
 }
 impl ::core::convert::From<::buffa::OwnedView<SynthesizerInfoView<'static>>>

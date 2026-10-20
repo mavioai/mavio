@@ -71,9 +71,9 @@ func TestPlugin(t *testing.T) {
 		_, err := p.Configure(ctx, pluginv1.ConfigureRequest_builder{ConfigJson: proto.String(c)}.Build())
 		return err
 	}
-	if err := configure(`{"recognizers":[{"name":"whisper","enabled":true,"settings":{"endpoint":"http://127.0.0.1:1","subtitles":true}},
-		{"name":"openai","enabled":false}],
-		"synthesizers":[{"name":"openai","enabled":true,"settings":{"base_url":"` + srv.URL + `/v1","voices":"nova"}}]}`); err != nil {
+	if err := configure(`{"recognizers":[{"id":"whisper","service":"whisper","enabled":true,"settings":{"endpoint":"http://127.0.0.1:1","subtitles":true}},
+		{"id":"openai","service":"openai","enabled":false}],
+		"synthesizers":[{"id":"openai","service":"openai","enabled":true,"settings":{"base_url":"` + srv.URL + `/v1","voices":"nova"}}]}`); err != nil {
 		t.Fatal(err)
 	}
 
@@ -82,13 +82,23 @@ func TestPlugin(t *testing.T) {
 		t.Fatal(err)
 	}
 	var got []string
-	for _, r := range list.GetRecognizers() {
+	for _, r := range list.GetServices() {
 		names := []string{}
 		for _, s := range r.GetSettings() {
 			names = append(names, s.GetName())
 		}
+		if r.GetName() == "whisper" && !strings.Contains(strings.Join(names, ","), "subtitles") {
+			t.Errorf("whisper service = %v, want a subtitles setting", r)
+		}
 		got = append(got, r.GetName())
-		if r.GetName() == "whisper" && (!r.GetEnabled() || !r.GetSubtitles() || !r.GetTimestamps() || !strings.Contains(strings.Join(names, ","), "subtitles")) {
+	}
+	if strings.Join(got, ",") != "whisper,openai" {
+		t.Errorf("services = %q", got)
+	}
+	got = nil
+	for _, r := range list.GetRecognizers() {
+		got = append(got, r.GetName())
+		if r.GetName() == "whisper" && (!r.GetEnabled() || !r.GetSubtitles() || !r.GetTimestamps() || r.GetService() != "whisper") {
 			t.Errorf("whisper = %v, want enabled for subtitles", r)
 		}
 		if r.GetName() == "openai" && (r.GetEnabled() || r.GetSubtitles()) {
@@ -135,7 +145,34 @@ func TestPlugin(t *testing.T) {
 		t.Errorf("SynthesizeSpeech = %v, %v", speech, err)
 	}
 
-	for _, c := range []string{`{"recognizers":[{"name":"vosk"}]}`, `{"recognizers":[{"name":"openai"},{"name":"openai"}]}`, `{`} {
+	// A service configured twice, under names the administrator gives.
+	if err := configure(`{"synthesizers":[
+		{"id":"a","service":"openai","name":"Kokoro","enabled":true,"settings":{"base_url":"` + srv.URL + `/v1","voices":"nova"}},
+		{"id":"b","service":"openai","name":" ","enabled":true,"settings":{"base_url":"` + srv.URL + `/v1","voices":"echo"}}]}`); err != nil {
+		t.Fatal(err)
+	}
+	voices, err = p.ListVoices(ctx, &pluginv1.ListVoicesRequest{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	got = nil
+	for _, s := range voices.GetSynthesizers() {
+		got = append(got, s.GetName()+"="+s.GetDisplayName()+"/"+s.GetService())
+	}
+	for _, v := range voices.GetVoices() {
+		got = append(got, v.GetId()+"="+v.GetName())
+	}
+	if want := "a=Kokoro/openai,b=OpenAI-compatible speech/openai,a/nova=Kokoro · Nova,b/echo=OpenAI-compatible speech · Echo"; strings.Join(got, ",") != want {
+		t.Errorf("ListVoices = %q, want = %q", got, want)
+	}
+	if _, err := p.SynthesizeSpeech(ctx, pluginv1.SynthesizeSpeechRequest_builder{Voice: proto.String("b/echo"), Text: proto.String("Bonjour.")}.Build()); err != nil {
+		t.Errorf("SynthesizeSpeech(b/echo): %v", err)
+	}
+
+	for _, c := range []string{
+		`{"recognizers":[{"id":"a","service":"vosk"}]}`, `{"recognizers":[{"service":"openai"}]}`,
+		`{"recognizers":[{"id":"a","service":"openai"},{"id":"a","service":"whisper"}]}`, `{`,
+	} {
 		if err := configure(c); connect.CodeOf(err) != connect.CodeInvalidArgument {
 			t.Errorf("Configure(%s): err = %v, want InvalidArgument", c, err)
 		}

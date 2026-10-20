@@ -293,8 +293,9 @@ pub const SPEECH_TO_TEXT_SERVICE_DETECT_SPEECH_LANGUAGE_SPEC: ::connectrpc::Spec
 /// example` doc.
 #[allow(clippy::type_complexity)]
 pub trait SpeechToTextService: Send + Sync + 'static {
-    /// ListRecognizers lists the recognizers the plugin implements, with
-    /// their settings and state.
+    /// ListRecognizers lists the recognition services the plugin implements,
+    /// with their settings, and the recognizers configured from them, with
+    /// their state.
     ///
     /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
     ///

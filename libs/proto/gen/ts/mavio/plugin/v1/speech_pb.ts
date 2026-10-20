@@ -15,7 +15,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file mavio/plugin/v1/speech.proto.
  */
 export const file_mavio_plugin_v1_speech: GenFile = /*@__PURE__*/
-  fileDesc("ChxtYXZpby9wbHVnaW4vdjEvc3BlZWNoLnByb3RvEg9tYXZpby5wbHVnaW4udjEiGAoWTGlzdFJlY29nbml6ZXJzUmVxdWVzdCJPChdMaXN0UmVjb2duaXplcnNSZXNwb25zZRI0CgtyZWNvZ25pemVycxgBIAMoCzIfLm1hdmlvLnBsdWdpbi52MS5SZWNvZ25pemVySW5mbyKeAgoOUmVjb2duaXplckluZm8SDAoEbmFtZRgBIAEoCRIUCgxkaXNwbGF5X25hbWUYAiABKAkSLwoIc2V0dGluZ3MYAyADKAsyHS5tYXZpby5wbHVnaW4udjEuU2V0dGluZ0ZpZWxkEg8KB2VuYWJsZWQYBCABKAgSEQoJbGFuZ3VhZ2VzGAUgAygJEhIKCnRpbWVzdGFtcHMYBiABKAgSGAoQZGV0ZWN0c19sYW5ndWFnZRgHIAEoCBISCgp0cmFuc2xhdGVzGAggASgIEg0KBWhpbnRzGAkgASgIEi8KDG1heF9kdXJhdGlvbhgKIAEoCzIZLmdvb2dsZS5wcm90b2J1Zi5EdXJhdGlvbhIRCglzdWJ0aXRsZXMYCyABKAgiZgoLU3BlZWNoQXVkaW8SDQoDcGNtGAEgASgMSAASDQoDdXJsGAIgASgJSAASKAoFbGltaXQYAyABKAsyGS5nb29nbGUucHJvdG9idWYuRHVyYXRpb25CDwoGc291cmNlEgW6SAIIASLAAQoWUmVjb2duaXplU3BlZWNoUmVxdWVzdBIbCgpyZWNvZ25pemVyGAEgASgJQge6SARyAhABEjMKBWF1ZGlvGAIgASgLMhwubWF2aW8ucGx1Z2luLnYxLlNwZWVjaEF1ZGlvQga6SAPIAQESEAoIbGFuZ3VhZ2UYAyABKAkSEQoJdHJhbnNsYXRlGAQgASgIEg0KBWhpbnRzGAUgAygJEhIKCnRpbWVzdGFtcHMYBiABKAgSDAoEbmFtZRgHIAEoCSJrChdSZWNvZ25pemVTcGVlY2hSZXNwb25zZRIMCgR0ZXh0GAEgASgJEhAKCGxhbmd1YWdlGAIgASgJEjAKCHNlZ21lbnRzGAMgAygLMh4ubWF2aW8ucGx1Z2luLnYxLlNwZWVjaFNlZ21lbnQibwoNU3BlZWNoU2VnbWVudBIoCgVzdGFydBgBIAEoCzIZLmdvb2dsZS5wcm90b2J1Zi5EdXJhdGlvbhImCgNlbmQYAiABKAsyGS5nb29nbGUucHJvdG9idWYuRHVyYXRpb24SDAoEdGV4dBgDIAEoCSJvChtEZXRlY3RTcGVlY2hMYW5ndWFnZVJlcXVlc3QSGwoKcmVjb2duaXplchgBIAEoCUIHukgEcgIQARIzCgVhdWRpbxgCIAEoCzIcLm1hdmlvLnBsdWdpbi52MS5TcGVlY2hBdWRpb0IGukgDyAEBIjAKHERldGVjdFNwZWVjaExhbmd1YWdlUmVzcG9uc2USEAoIbGFuZ3VhZ2UYASABKAkiEwoRTGlzdFZvaWNlc1JlcXVlc3QieAoSTGlzdFZvaWNlc1Jlc3BvbnNlEioKBnZvaWNlcxgBIAMoCzIaLm1hdmlvLnBsdWdpbi52MS5Wb2ljZUluZm8SNgoMc3ludGhlc2l6ZXJzGAIgAygLMiAubWF2aW8ucGx1Z2luLnYxLlN5bnRoZXNpemVySW5mbyJ3Cg9TeW50aGVzaXplckluZm8SDAoEbmFtZRgBIAEoCRIUCgxkaXNwbGF5X25hbWUYAiABKAkSLwoIc2V0dGluZ3MYAyADKAsyHS5tYXZpby5wbHVnaW4udjEuU2V0dGluZ0ZpZWxkEg8KB2VuYWJsZWQYBCABKAgiOAoJVm9pY2VJbmZvEgoKAmlkGAEgASgJEgwKBG5hbWUYAiABKAkSEQoJbGFuZ3VhZ2VzGAMgAygJIsABChdTeW50aGVzaXplU3BlZWNoUmVxdWVzdBIWCgV2b2ljZRgBIAEoCUIHukgEcgIQARIYCgR0ZXh0GAIgASgJQgq6SAdyBRABGKAfEhAKCGxhbmd1YWdlGAMgASgJEjkKBmZvcm1hdBgEIAEoDjIdLm1hdmlvLnBsdWdpbi52MS5TcGVlY2hGb3JtYXRCChgBukgFggECEAESJgoFc3BlZWQYBSABKAFCF7pIFBISGQAAAAAAABBAKQAAAAAAAAAAIj8KGFN5bnRoZXNpemVTcGVlY2hSZXNwb25zZRINCgVhdWRpbxgBIAEoDBIUCgxjb250ZW50X3R5cGUYAiABKAkqYAoMU3BlZWNoRm9ybWF0Eh0KGVNQRUVDSF9GT1JNQVRfVU5TUEVDSUZJRUQQABIaChZTUEVFQ0hfRk9STUFUX09HR19PUFVTEAESFQoRU1BFRUNIX0ZPUk1BVF9NUDMQAjLbAgoTU3BlZWNoVG9UZXh0U2VydmljZRJpCg9MaXN0UmVjb2duaXplcnMSJy5tYXZpby5wbHVnaW4udjEuTGlzdFJlY29nbml6ZXJzUmVxdWVzdBooLm1hdmlvLnBsdWdpbi52MS5MaXN0UmVjb2duaXplcnNSZXNwb25zZSIDkAIBEmQKD1JlY29nbml6ZVNwZWVjaBInLm1hdmlvLnBsdWdpbi52MS5SZWNvZ25pemVTcGVlY2hSZXF1ZXN0GigubWF2aW8ucGx1Z2luLnYxLlJlY29nbml6ZVNwZWVjaFJlc3BvbnNlEnMKFERldGVjdFNwZWVjaExhbmd1YWdlEiwubWF2aW8ucGx1Z2luLnYxLkRldGVjdFNwZWVjaExhbmd1YWdlUmVxdWVzdBotLm1hdmlvLnBsdWdpbi52MS5EZXRlY3RTcGVlY2hMYW5ndWFnZVJlc3BvbnNlMtoBChNUZXh0VG9TcGVlY2hTZXJ2aWNlEloKCkxpc3RWb2ljZXMSIi5tYXZpby5wbHVnaW4udjEuTGlzdFZvaWNlc1JlcXVlc3QaIy5tYXZpby5wbHVnaW4udjEuTGlzdFZvaWNlc1Jlc3BvbnNlIgOQAgESZwoQU3ludGhlc2l6ZVNwZWVjaBIoLm1hdmlvLnBsdWdpbi52MS5TeW50aGVzaXplU3BlZWNoUmVxdWVzdBopLm1hdmlvLnBsdWdpbi52MS5TeW50aGVzaXplU3BlZWNoUmVzcG9uc2VCxQEKE2NvbS5tYXZpby5wbHVnaW4udjFCC1NwZWVjaFByb3RvUAFaQ2dpdGh1Yi5jb20vbWF2aW9haS9tYXZpby9saWJzL3Byb3RvL2dlbi9nby9tYXZpby9wbHVnaW4vdjE7cGx1Z2ludjGiAgNNUFiqAg9NYXZpby5QbHVnaW4uVjHKAg9NYXZpb1xQbHVnaW5cVjHiAhtNYXZpb1xQbHVnaW5cVjFcR1BCTWV0YWRhdGHqAhFNYXZpbzo6UGx1Z2luOjpWMWIIZWRpdGlvbnNw6Ac", [file_buf_validate_validate, file_google_protobuf_duration, file_mavio_plugin_v1_settings]);
+  fileDesc("ChxtYXZpby9wbHVnaW4vdjEvc3BlZWNoLnByb3RvEg9tYXZpby5wbHVnaW4udjEiGAoWTGlzdFJlY29nbml6ZXJzUmVxdWVzdCKCAQoXTGlzdFJlY29nbml6ZXJzUmVzcG9uc2USNAoLcmVjb2duaXplcnMYASADKAsyHy5tYXZpby5wbHVnaW4udjEuUmVjb2duaXplckluZm8SMQoIc2VydmljZXMYAiADKAsyHy5tYXZpby5wbHVnaW4udjEuUmVjb2duaXplckluZm8irwIKDlJlY29nbml6ZXJJbmZvEgwKBG5hbWUYASABKAkSFAoMZGlzcGxheV9uYW1lGAIgASgJEi8KCHNldHRpbmdzGAMgAygLMh0ubWF2aW8ucGx1Z2luLnYxLlNldHRpbmdGaWVsZBIPCgdlbmFibGVkGAQgASgIEhEKCWxhbmd1YWdlcxgFIAMoCRISCgp0aW1lc3RhbXBzGAYgASgIEhgKEGRldGVjdHNfbGFuZ3VhZ2UYByABKAgSEgoKdHJhbnNsYXRlcxgIIAEoCBINCgVoaW50cxgJIAEoCBIvCgxtYXhfZHVyYXRpb24YCiABKAsyGS5nb29nbGUucHJvdG9idWYuRHVyYXRpb24SEQoJc3VidGl0bGVzGAsgASgIEg8KB3NlcnZpY2UYDCABKAkiZgoLU3BlZWNoQXVkaW8SDQoDcGNtGAEgASgMSAASDQoDdXJsGAIgASgJSAASKAoFbGltaXQYAyABKAsyGS5nb29nbGUucHJvdG9idWYuRHVyYXRpb25CDwoGc291cmNlEgW6SAIIASLAAQoWUmVjb2duaXplU3BlZWNoUmVxdWVzdBIbCgpyZWNvZ25pemVyGAEgASgJQge6SARyAhABEjMKBWF1ZGlvGAIgASgLMhwubWF2aW8ucGx1Z2luLnYxLlNwZWVjaEF1ZGlvQga6SAPIAQESEAoIbGFuZ3VhZ2UYAyABKAkSEQoJdHJhbnNsYXRlGAQgASgIEg0KBWhpbnRzGAUgAygJEhIKCnRpbWVzdGFtcHMYBiABKAgSDAoEbmFtZRgHIAEoCSJrChdSZWNvZ25pemVTcGVlY2hSZXNwb25zZRIMCgR0ZXh0GAEgASgJEhAKCGxhbmd1YWdlGAIgASgJEjAKCHNlZ21lbnRzGAMgAygLMh4ubWF2aW8ucGx1Z2luLnYxLlNwZWVjaFNlZ21lbnQibwoNU3BlZWNoU2VnbWVudBIoCgVzdGFydBgBIAEoCzIZLmdvb2dsZS5wcm90b2J1Zi5EdXJhdGlvbhImCgNlbmQYAiABKAsyGS5nb29nbGUucHJvdG9idWYuRHVyYXRpb24SDAoEdGV4dBgDIAEoCSJvChtEZXRlY3RTcGVlY2hMYW5ndWFnZVJlcXVlc3QSGwoKcmVjb2duaXplchgBIAEoCUIHukgEcgIQARIzCgVhdWRpbxgCIAEoCzIcLm1hdmlvLnBsdWdpbi52MS5TcGVlY2hBdWRpb0IGukgDyAEBIjAKHERldGVjdFNwZWVjaExhbmd1YWdlUmVzcG9uc2USEAoIbGFuZ3VhZ2UYASABKAkiEwoRTGlzdFZvaWNlc1JlcXVlc3QirAEKEkxpc3RWb2ljZXNSZXNwb25zZRIqCgZ2b2ljZXMYASADKAsyGi5tYXZpby5wbHVnaW4udjEuVm9pY2VJbmZvEjYKDHN5bnRoZXNpemVycxgCIAMoCzIgLm1hdmlvLnBsdWdpbi52MS5TeW50aGVzaXplckluZm8SMgoIc2VydmljZXMYAyADKAsyIC5tYXZpby5wbHVnaW4udjEuU3ludGhlc2l6ZXJJbmZvIogBCg9TeW50aGVzaXplckluZm8SDAoEbmFtZRgBIAEoCRIUCgxkaXNwbGF5X25hbWUYAiABKAkSLwoIc2V0dGluZ3MYAyADKAsyHS5tYXZpby5wbHVnaW4udjEuU2V0dGluZ0ZpZWxkEg8KB2VuYWJsZWQYBCABKAgSDwoHc2VydmljZRgFIAEoCSI4CglWb2ljZUluZm8SCgoCaWQYASABKAkSDAoEbmFtZRgCIAEoCRIRCglsYW5ndWFnZXMYAyADKAkiwAEKF1N5bnRoZXNpemVTcGVlY2hSZXF1ZXN0EhYKBXZvaWNlGAEgASgJQge6SARyAhABEhgKBHRleHQYAiABKAlCCrpIB3IFEAEYoB8SEAoIbGFuZ3VhZ2UYAyABKAkSOQoGZm9ybWF0GAQgASgOMh0ubWF2aW8ucGx1Z2luLnYxLlNwZWVjaEZvcm1hdEIKGAG6SAWCAQIQARImCgVzcGVlZBgFIAEoAUIXukgUEhIZAAAAAAAAEEApAAAAAAAAAAAiPwoYU3ludGhlc2l6ZVNwZWVjaFJlc3BvbnNlEg0KBWF1ZGlvGAEgASgMEhQKDGNvbnRlbnRfdHlwZRgCIAEoCSpgCgxTcGVlY2hGb3JtYXQSHQoZU1BFRUNIX0ZPUk1BVF9VTlNQRUNJRklFRBAAEhoKFlNQRUVDSF9GT1JNQVRfT0dHX09QVVMQARIVChFTUEVFQ0hfRk9STUFUX01QMxACMtsCChNTcGVlY2hUb1RleHRTZXJ2aWNlEmkKD0xpc3RSZWNvZ25pemVycxInLm1hdmlvLnBsdWdpbi52MS5MaXN0UmVjb2duaXplcnNSZXF1ZXN0GigubWF2aW8ucGx1Z2luLnYxLkxpc3RSZWNvZ25pemVyc1Jlc3BvbnNlIgOQAgESZAoPUmVjb2duaXplU3BlZWNoEicubWF2aW8ucGx1Z2luLnYxLlJlY29nbml6ZVNwZWVjaFJlcXVlc3QaKC5tYXZpby5wbHVnaW4udjEuUmVjb2duaXplU3BlZWNoUmVzcG9uc2UScwoURGV0ZWN0U3BlZWNoTGFuZ3VhZ2USLC5tYXZpby5wbHVnaW4udjEuRGV0ZWN0U3BlZWNoTGFuZ3VhZ2VSZXF1ZXN0Gi0ubWF2aW8ucGx1Z2luLnYxLkRldGVjdFNwZWVjaExhbmd1YWdlUmVzcG9uc2Uy2gEKE1RleHRUb1NwZWVjaFNlcnZpY2USWgoKTGlzdFZvaWNlcxIiLm1hdmlvLnBsdWdpbi52MS5MaXN0Vm9pY2VzUmVxdWVzdBojLm1hdmlvLnBsdWdpbi52MS5MaXN0Vm9pY2VzUmVzcG9uc2UiA5ACARJnChBTeW50aGVzaXplU3BlZWNoEigubWF2aW8ucGx1Z2luLnYxLlN5bnRoZXNpemVTcGVlY2hSZXF1ZXN0GikubWF2aW8ucGx1Z2luLnYxLlN5bnRoZXNpemVTcGVlY2hSZXNwb25zZULFAQoTY29tLm1hdmlvLnBsdWdpbi52MUILU3BlZWNoUHJvdG9QAVpDZ2l0aHViLmNvbS9tYXZpb2FpL21hdmlvL2xpYnMvcHJvdG8vZ2VuL2dvL21hdmlvL3BsdWdpbi92MTtwbHVnaW52MaICA01QWKoCD01hdmlvLlBsdWdpbi5WMcoCD01hdmlvXFBsdWdpblxWMeICG01hdmlvXFBsdWdpblxWMVxHUEJNZXRhZGF0YeoCEU1hdmlvOjpQbHVnaW46OlYxYghlZGl0aW9uc3DoBw", [file_buf_validate_validate, file_google_protobuf_duration, file_mavio_plugin_v1_settings]);
 
 /**
  * @generated from message mavio.plugin.v1.ListRecognizersRequest
@@ -35,9 +35,20 @@ export const ListRecognizersRequestSchema: GenMessage<ListRecognizersRequest> = 
  */
 export type ListRecognizersResponse = Message<"mavio.plugin.v1.ListRecognizersResponse"> & {
   /**
+   * The recognizers configured, which recognize speech by their names.
+   *
    * @generated from field: repeated mavio.plugin.v1.RecognizerInfo recognizers = 1;
    */
   recognizers: RecognizerInfo[];
+
+  /**
+   * The services recognizers are configured from, with their settings
+   * and what they can do. A plugin listing none has recognizers that are
+   * their own services.
+   *
+   * @generated from field: repeated mavio.plugin.v1.RecognizerInfo services = 2;
+   */
+  services: RecognizerInfo[];
 };
 
 /**
@@ -48,25 +59,29 @@ export const ListRecognizersResponseSchema: GenMessage<ListRecognizersResponse> 
   messageDesc(file_mavio_plugin_v1_speech, 1);
 
 /**
- * RecognizerInfo is a recognizer a plugin implements.
+ * RecognizerInfo is a recognizer a plugin has configured, or a service
+ * it implements.
  *
  * @generated from message mavio.plugin.v1.RecognizerInfo
  */
 export type RecognizerInfo = Message<"mavio.plugin.v1.RecognizerInfo"> & {
   /**
-   * Stable within the plugin, such as "whisper".
+   * Stable within the plugin: a recognizer's ID, or a service's name,
+   * such as "whisper".
    *
    * @generated from field: string name = 1;
    */
   name: string;
 
   /**
+   * The name the administrator gave a recognizer, or a service's.
+   *
    * @generated from field: string display_name = 2;
    */
   displayName: string;
 
   /**
-   * The recognizer's settings, under its name in the plugin's settings.
+   * A service's settings, which configure its recognizers.
    *
    * @generated from field: repeated mavio.plugin.v1.SettingField settings = 3;
    */
@@ -126,6 +141,14 @@ export type RecognizerInfo = Message<"mavio.plugin.v1.RecognizerInfo"> & {
    * @generated from field: bool subtitles = 11;
    */
   subtitles: boolean;
+
+  /**
+   * The service a recognizer is configured from, a name among the
+   * services.
+   *
+   * @generated from field: string service = 12;
+   */
+  service: string;
 };
 
 /**
@@ -360,11 +383,19 @@ export type ListVoicesResponse = Message<"mavio.plugin.v1.ListVoicesResponse"> &
   voices: VoiceInfo[];
 
   /**
-   * The synthesizers, with their settings and state.
+   * The synthesizers configured, with their state.
    *
    * @generated from field: repeated mavio.plugin.v1.SynthesizerInfo synthesizers = 2;
    */
   synthesizers: SynthesizerInfo[];
+
+  /**
+   * The services synthesizers are configured from, with their settings.
+   * A plugin listing none has synthesizers that are their own services.
+   *
+   * @generated from field: repeated mavio.plugin.v1.SynthesizerInfo services = 3;
+   */
+  services: SynthesizerInfo[];
 };
 
 /**
@@ -375,25 +406,29 @@ export const ListVoicesResponseSchema: GenMessage<ListVoicesResponse> = /*@__PUR
   messageDesc(file_mavio_plugin_v1_speech, 10);
 
 /**
- * SynthesizerInfo is a synthesis service a plugin implements.
+ * SynthesizerInfo is a synthesizer a plugin has configured, or a
+ * synthesis service it implements.
  *
  * @generated from message mavio.plugin.v1.SynthesizerInfo
  */
 export type SynthesizerInfo = Message<"mavio.plugin.v1.SynthesizerInfo"> & {
   /**
-   * Stable within the plugin, such as "openai".
+   * Stable within the plugin: a synthesizer's ID, or a service's name,
+   * such as "openai".
    *
    * @generated from field: string name = 1;
    */
   name: string;
 
   /**
+   * The name the administrator gave a synthesizer, or a service's.
+   *
    * @generated from field: string display_name = 2;
    */
   displayName: string;
 
   /**
-   * The service's settings, under its name in the plugin's settings.
+   * A service's settings, which configure its synthesizers.
    *
    * @generated from field: repeated mavio.plugin.v1.SettingField settings = 3;
    */
@@ -403,6 +438,14 @@ export type SynthesizerInfo = Message<"mavio.plugin.v1.SynthesizerInfo"> & {
    * @generated from field: bool enabled = 4;
    */
   enabled: boolean;
+
+  /**
+   * The service a synthesizer is configured from, a name among the
+   * services.
+   *
+   * @generated from field: string service = 5;
+   */
+  service: string;
 };
 
 /**
@@ -555,8 +598,9 @@ export const SpeechFormatSchema: GenEnum<SpeechFormat> = /*@__PURE__*/
  */
 export const SpeechToTextService: GenService<{
   /**
-   * ListRecognizers lists the recognizers the plugin implements, with
-   * their settings and state.
+   * ListRecognizers lists the recognition services the plugin implements,
+   * with their settings, and the recognizers configured from them, with
+   * their state.
    *
    * @generated from rpc mavio.plugin.v1.SpeechToTextService.ListRecognizers
    */

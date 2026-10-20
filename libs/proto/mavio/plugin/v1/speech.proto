@@ -10,8 +10,9 @@ import "mavio/plugin/v1/settings.proto";
 // plugin implements: what users say to the assistant, and the audio of
 // videos transcribed into subtitles.
 service SpeechToTextService {
-  // ListRecognizers lists the recognizers the plugin implements, with
-  // their settings and state.
+  // ListRecognizers lists the recognition services the plugin implements,
+  // with their settings, and the recognizers configured from them, with
+  // their state.
   rpc ListRecognizers(ListRecognizersRequest) returns (ListRecognizersResponse) {
     option idempotency_level = NO_SIDE_EFFECTS;
   }
@@ -25,15 +26,23 @@ service SpeechToTextService {
 message ListRecognizersRequest {}
 
 message ListRecognizersResponse {
+  // The recognizers configured, which recognize speech by their names.
   repeated RecognizerInfo recognizers = 1;
+  // The services recognizers are configured from, with their settings
+  // and what they can do. A plugin listing none has recognizers that are
+  // their own services.
+  repeated RecognizerInfo services = 2;
 }
 
-// RecognizerInfo is a recognizer a plugin implements.
+// RecognizerInfo is a recognizer a plugin has configured, or a service
+// it implements.
 message RecognizerInfo {
-  // Stable within the plugin, such as "whisper".
+  // Stable within the plugin: a recognizer's ID, or a service's name,
+  // such as "whisper".
   string name = 1;
+  // The name the administrator gave a recognizer, or a service's.
   string display_name = 2;
-  // The recognizer's settings, under its name in the plugin's settings.
+  // A service's settings, which configure its recognizers.
   repeated SettingField settings = 3;
   bool enabled = 4;
   // The languages it recognizes, BCP 47; empty for any.
@@ -51,6 +60,9 @@ message RecognizerInfo {
   // The administrator lets it transcribe videos into subtitles; with
   // timestamps only.
   bool subtitles = 11;
+  // The service a recognizer is configured from, a name among the
+  // services.
+  string service = 12;
 }
 
 // SpeechAudio is audio to recognize.
@@ -123,18 +135,27 @@ message ListVoicesRequest {}
 
 message ListVoicesResponse {
   repeated VoiceInfo voices = 1;
-  // The synthesizers, with their settings and state.
+  // The synthesizers configured, with their state.
   repeated SynthesizerInfo synthesizers = 2;
+  // The services synthesizers are configured from, with their settings.
+  // A plugin listing none has synthesizers that are their own services.
+  repeated SynthesizerInfo services = 3;
 }
 
-// SynthesizerInfo is a synthesis service a plugin implements.
+// SynthesizerInfo is a synthesizer a plugin has configured, or a
+// synthesis service it implements.
 message SynthesizerInfo {
-  // Stable within the plugin, such as "openai".
+  // Stable within the plugin: a synthesizer's ID, or a service's name,
+  // such as "openai".
   string name = 1;
+  // The name the administrator gave a synthesizer, or a service's.
   string display_name = 2;
-  // The service's settings, under its name in the plugin's settings.
+  // A service's settings, which configure its synthesizers.
   repeated SettingField settings = 3;
   bool enabled = 4;
+  // The service a synthesizer is configured from, a name among the
+  // services.
+  string service = 5;
 }
 
 // VoiceInfo is a voice of a synthesizer.

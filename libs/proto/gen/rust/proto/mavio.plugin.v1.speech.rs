@@ -149,8 +149,16 @@ impl ::buffa::ExtensionSet for ListRecognizersRequest {
 }
 #[derive(Clone, PartialEq, Default)]
 pub struct ListRecognizersResponse {
+    /// The recognizers configured, which recognize speech by their names.
+    ///
     /// Field 1: `recognizers`
     pub recognizers: ::buffa::alloc::vec::Vec<RecognizerInfo>,
+    /// The services recognizers are configured from, with their settings
+    /// and what they can do. A plugin listing none has recognizers that are
+    /// their own services.
+    ///
+    /// Field 2: `services`
+    pub services: ::buffa::alloc::vec::Vec<RecognizerInfo>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -158,6 +166,7 @@ impl ::core::fmt::Debug for ListRecognizersResponse {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
         f.debug_struct("ListRecognizersResponse")
             .field("recognizers", &self.recognizers)
+            .field("services", &self.services)
             .finish()
     }
 }
@@ -196,6 +205,14 @@ impl ::buffa::Message for ListRecognizersResponse {
                 += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
                     + inner_size as u64;
         }
+        for v in &self.services {
+            let __slot = __cache.reserve();
+            let inner_size = v.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -209,6 +226,14 @@ impl ::buffa::Message for ListRecognizersResponse {
         for v in &self.recognizers {
             ::buffa::types::put_len_delimited_header(
                 1u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            v.write_to(__cache, buf);
+        }
+        for v in &self.services {
+            ::buffa::types::put_len_delimited_header(
+                2u32,
                 u64::from(__cache.consume_next()),
                 buf,
             );
@@ -239,6 +264,18 @@ impl ::buffa::Message for ListRecognizersResponse {
                 ::buffa::Message::merge_length_delimited(&mut elem, buf, ctx)?;
                 self.recognizers.push(elem);
             }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let mut elem = ::core::default::Default::default();
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&elem),
+                )?;
+                ::buffa::Message::merge_length_delimited(&mut elem, buf, ctx)?;
+                self.services.push(elem);
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -248,6 +285,7 @@ impl ::buffa::Message for ListRecognizersResponse {
     }
     fn clear(&mut self) {
         self.recognizers.clear();
+        self.services.clear();
         self.__buffa_unknown_fields.clear();
     }
 }
@@ -260,16 +298,20 @@ impl ::buffa::ExtensionSet for ListRecognizersResponse {
         &mut self.__buffa_unknown_fields
     }
 }
-/// RecognizerInfo is a recognizer a plugin implements.
+/// RecognizerInfo is a recognizer a plugin has configured, or a service
+/// it implements.
 #[derive(Clone, PartialEq, Default)]
 pub struct RecognizerInfo {
-    /// Stable within the plugin, such as "whisper".
+    /// Stable within the plugin: a recognizer's ID, or a service's name,
+    /// such as "whisper".
     ///
     /// Field 1: `name`
     pub name: ::core::option::Option<::buffa::alloc::string::String>,
+    /// The name the administrator gave a recognizer, or a service's.
+    ///
     /// Field 2: `display_name`
     pub display_name: ::core::option::Option<::buffa::alloc::string::String>,
-    /// The recognizer's settings, under its name in the plugin's settings.
+    /// A service's settings, which configure its recognizers.
     ///
     /// Field 3: `settings`
     pub settings: ::buffa::alloc::vec::Vec<SettingField>,
@@ -307,6 +349,11 @@ pub struct RecognizerInfo {
     ///
     /// Field 11: `subtitles`
     pub subtitles: ::core::option::Option<bool>,
+    /// The service a recognizer is configured from, a name among the
+    /// services.
+    ///
+    /// Field 12: `service`
+    pub service: ::core::option::Option<::buffa::alloc::string::String>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -324,6 +371,7 @@ impl ::core::fmt::Debug for RecognizerInfo {
             .field("hints", &self.hints)
             .field("max_duration", &self.max_duration)
             .field("subtitles", &self.subtitles)
+            .field("service", &self.service)
             .finish()
     }
 }
@@ -397,6 +445,16 @@ impl RecognizerInfo {
         self.subtitles = Some(value);
         self
     }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::service`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_service(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.service = Some(value.into());
+        self
+    }
 }
 ::buffa::impl_default_instance!(RecognizerInfo);
 impl ::buffa::MessageName for RecognizerInfo {
@@ -461,6 +519,9 @@ impl ::buffa::Message for RecognizerInfo {
         if self.subtitles.is_some() {
             size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
         }
+        if let Some(ref v) = self.service {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -513,6 +574,9 @@ impl ::buffa::Message for RecognizerInfo {
         }
         if let Some(v) = self.subtitles {
             ::buffa::types::put_bool_field(11u32, v, buf);
+        }
+        if let Some(ref v) = self.service {
+            ::buffa::types::put_string_field(12u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -637,6 +701,16 @@ impl ::buffa::Message for RecognizerInfo {
                     ::buffa::types::decode_bool(buf)?,
                 );
             }
+            12u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self.service.get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -656,6 +730,7 @@ impl ::buffa::Message for RecognizerInfo {
         self.hints = ::core::option::Option::None;
         self.max_duration = ::buffa::MessageField::none();
         self.subtitles = ::core::option::Option::None;
+        self.service = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }
@@ -1841,10 +1916,15 @@ impl ::buffa::ExtensionSet for ListVoicesRequest {
 pub struct ListVoicesResponse {
     /// Field 1: `voices`
     pub voices: ::buffa::alloc::vec::Vec<VoiceInfo>,
-    /// The synthesizers, with their settings and state.
+    /// The synthesizers configured, with their state.
     ///
     /// Field 2: `synthesizers`
     pub synthesizers: ::buffa::alloc::vec::Vec<SynthesizerInfo>,
+    /// The services synthesizers are configured from, with their settings.
+    /// A plugin listing none has synthesizers that are their own services.
+    ///
+    /// Field 3: `services`
+    pub services: ::buffa::alloc::vec::Vec<SynthesizerInfo>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -1853,6 +1933,7 @@ impl ::core::fmt::Debug for ListVoicesResponse {
         f.debug_struct("ListVoicesResponse")
             .field("voices", &self.voices)
             .field("synthesizers", &self.synthesizers)
+            .field("services", &self.services)
             .finish()
     }
 }
@@ -1899,6 +1980,14 @@ impl ::buffa::Message for ListVoicesResponse {
                 += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
                     + inner_size as u64;
         }
+        for v in &self.services {
+            let __slot = __cache.reserve();
+            let inner_size = v.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -1920,6 +2009,14 @@ impl ::buffa::Message for ListVoicesResponse {
         for v in &self.synthesizers {
             ::buffa::types::put_len_delimited_header(
                 2u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            v.write_to(__cache, buf);
+        }
+        for v in &self.services {
+            ::buffa::types::put_len_delimited_header(
+                3u32,
                 u64::from(__cache.consume_next()),
                 buf,
             );
@@ -1962,6 +2059,18 @@ impl ::buffa::Message for ListVoicesResponse {
                 ::buffa::Message::merge_length_delimited(&mut elem, buf, ctx)?;
                 self.synthesizers.push(elem);
             }
+            3u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let mut elem = ::core::default::Default::default();
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&elem),
+                )?;
+                ::buffa::Message::merge_length_delimited(&mut elem, buf, ctx)?;
+                self.services.push(elem);
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -1972,6 +2081,7 @@ impl ::buffa::Message for ListVoicesResponse {
     fn clear(&mut self) {
         self.voices.clear();
         self.synthesizers.clear();
+        self.services.clear();
         self.__buffa_unknown_fields.clear();
     }
 }
@@ -1984,21 +2094,30 @@ impl ::buffa::ExtensionSet for ListVoicesResponse {
         &mut self.__buffa_unknown_fields
     }
 }
-/// SynthesizerInfo is a synthesis service a plugin implements.
+/// SynthesizerInfo is a synthesizer a plugin has configured, or a
+/// synthesis service it implements.
 #[derive(Clone, PartialEq, Default)]
 pub struct SynthesizerInfo {
-    /// Stable within the plugin, such as "openai".
+    /// Stable within the plugin: a synthesizer's ID, or a service's name,
+    /// such as "openai".
     ///
     /// Field 1: `name`
     pub name: ::core::option::Option<::buffa::alloc::string::String>,
+    /// The name the administrator gave a synthesizer, or a service's.
+    ///
     /// Field 2: `display_name`
     pub display_name: ::core::option::Option<::buffa::alloc::string::String>,
-    /// The service's settings, under its name in the plugin's settings.
+    /// A service's settings, which configure its synthesizers.
     ///
     /// Field 3: `settings`
     pub settings: ::buffa::alloc::vec::Vec<SettingField>,
     /// Field 4: `enabled`
     pub enabled: ::core::option::Option<bool>,
+    /// The service a synthesizer is configured from, a name among the
+    /// services.
+    ///
+    /// Field 5: `service`
+    pub service: ::core::option::Option<::buffa::alloc::string::String>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -2009,6 +2128,7 @@ impl ::core::fmt::Debug for SynthesizerInfo {
             .field("display_name", &self.display_name)
             .field("settings", &self.settings)
             .field("enabled", &self.enabled)
+            .field("service", &self.service)
             .finish()
     }
 }
@@ -2045,6 +2165,16 @@ impl SynthesizerInfo {
     ///Sets [`Self::enabled`] to `Some(value)`, consuming and returning `self`.
     pub fn with_enabled(mut self, value: bool) -> Self {
         self.enabled = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::service`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_service(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.service = Some(value.into());
         self
     }
 }
@@ -2085,6 +2215,9 @@ impl ::buffa::Message for SynthesizerInfo {
         if self.enabled.is_some() {
             size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
         }
+        if let Some(ref v) = self.service {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -2111,6 +2244,9 @@ impl ::buffa::Message for SynthesizerInfo {
         }
         if let Some(v) = self.enabled {
             ::buffa::types::put_bool_field(4u32, v, buf);
+        }
+        if let Some(ref v) = self.service {
+            ::buffa::types::put_string_field(5u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -2168,6 +2304,16 @@ impl ::buffa::Message for SynthesizerInfo {
                     ::buffa::types::decode_bool(buf)?,
                 );
             }
+            5u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self.service.get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -2180,6 +2326,7 @@ impl ::buffa::Message for SynthesizerInfo {
         self.display_name = ::core::option::Option::None;
         self.settings.clear();
         self.enabled = ::core::option::Option::None;
+        self.service = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }
