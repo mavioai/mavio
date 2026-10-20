@@ -6,7 +6,7 @@ each makes its Pipecat service."""
 import json
 from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, cast
 
 from pipecat.processors.frame_processor import FrameProcessor
 from pipecat.transcriptions.language import Language
@@ -14,6 +14,7 @@ from pipecat.transcriptions.language import Language
 from mavio.plugin.v1 import settings_pb2
 from mavio_pipecat.models import ModelRef, Models, kokoro_model, piper_model, whisper_model
 from mavio_pipecat.speaches import CONTAINER
+from mavio_pipecat.voices import KOKORO_VOICES, PIPER_VOICES
 
 # The longest list of hints a service is given.
 MAX_HINTS = 100
@@ -26,7 +27,7 @@ class Setting:
     name: str
     label: str
     help: str = ""
-    # "text", "number", "select" or "checkbox".
+    # "text", "number", "select", "multi_select" or "checkbox".
     type: str = "text"
     default: Any = None
     options: tuple[tuple[Any, str], ...] = ()
@@ -38,6 +39,7 @@ class Setting:
             "text": settings_pb2.SETTING_FIELD_TYPE_TEXT,
             "number": settings_pb2.SETTING_FIELD_TYPE_NUMBER,
             "select": settings_pb2.SETTING_FIELD_TYPE_SELECT,
+            "multi_select": settings_pb2.SETTING_FIELD_TYPE_MULTI_SELECT,
             "checkbox": settings_pb2.SETTING_FIELD_TYPE_CHECKBOX,
         }
         return settings_pb2.SettingField(
@@ -372,9 +374,9 @@ def kokoro_language(voice: str) -> str:
 
 
 def voices(value: Any) -> list[str]:
-    """The voices of a voice setting, which lists one or more, separated by
-    commas."""
-    return [v.strip() for v in str(value or "").split(",") if v.strip()]
+    """The voices of a voice setting: a list of one or more, or one."""
+    listed = cast(list[Any], value) if isinstance(value, list) else [value]
+    return [s for v in listed if (s := str(v or "").strip())]
 
 
 def voice_languages(value: Any, language_of: Callable[[str], str]) -> list[str]:
@@ -398,9 +400,17 @@ def pick_voice(value: Any, language_of: Callable[[str], str], language: str) -> 
 
 
 # One Kokoro voice of each language: the model holds them all.
-_KOKORO_VOICES = (
-    "af_heart, bf_emma, zf_xiaobei, jf_alpha, ef_dora, ff_siwis, hf_alpha, if_sara, pf_dora"
-)
+_KOKORO_DEFAULT = [
+    "af_heart",
+    "bf_emma",
+    "zf_xiaobei",
+    "jf_alpha",
+    "ef_dora",
+    "ff_siwis",
+    "hf_alpha",
+    "if_sara",
+    "pf_dora",
+]
 
 
 def _kokoro_tts(settings: dict[str, Any], session: Session, models: Models) -> FrameProcessor:
@@ -520,10 +530,12 @@ SYNTHESIS = (
             Setting(
                 "voice",
                 "Voices",
-                "Kokoro voices, separated by commas, named after their language: "
-                "af_heart, bf_emma, zf_xiaobei, jf_alpha…; a session speaks with "
-                "the first of its language",
-                default=_KOKORO_VOICES,
+                "Kokoro voices, named after their language: af_heart American "
+                "English, bf_emma British, zf_xiaobei Mandarin, jf_alpha Japanese…; "
+                "a session speaks with the first of its language",
+                type="multi_select",
+                default=_KOKORO_DEFAULT,
+                options=tuple((v, v) for v in KOKORO_VOICES),
             ),
         ),
         make=_kokoro_tts,
@@ -573,10 +585,12 @@ SYNTHESIS = (
             Setting(
                 "voice",
                 "Voices",
-                "Piper voices, separated by commas, named after their language: "
-                "en_US-lessac-medium, zh_CN-huayan-medium, de_DE-thorsten-medium…; "
-                "each is downloaded, and a session speaks with the first of its language",
-                default="en_US-lessac-medium",
+                "Piper voices, named after their language: en_US-lessac-medium, "
+                "zh_CN-huayan-medium, de_DE-thorsten-medium…; each is downloaded, "
+                "and a session speaks with the first of its language",
+                type="multi_select",
+                default=["en_US-lessac-medium"],
+                options=tuple((v, f"{v} ({mb} MB)") for v, mb in PIPER_VOICES),
             ),
         ),
         make=_piper_tts,

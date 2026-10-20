@@ -87,8 +87,9 @@ def test_languages():
 
 
 def test_a_voice_setting_lists_voices_of_languages():
-    value = "af_heart, bf_emma ,zf_xiaobei,"
+    value = ["af_heart", " bf_emma", "zf_xiaobei", ""]
     assert voices(value) == ["af_heart", "bf_emma", "zf_xiaobei"]
+    assert voices("af_heart") == ["af_heart"]
     got = voice_languages(value, kokoro_language)
     assert got == ["en-US", "en-GB", "zh"], f"languages = {got}"
     cases = [
@@ -109,7 +110,9 @@ def test_kokoro_and_piper_speak_the_languages_of_their_voices():
     got = kokoro.languages(kokoro.values({}))
     assert "zh" in got and "en-US" in got, f"Kokoro's default languages = {got}"
     assert kokoro.models(kokoro.values({})) == (kokoro_model(),)
-    two = piper.values({"voice": "en_US-lessac-medium, zh_CN-huayan-medium"})
+    voice = next(s for s in piper.settings if s.name == "voice")
+    assert ("zh_CN-huayan-medium", "zh_CN-huayan-medium (60 MB)") in voice.options
+    two = piper.values({"voice": ["en_US-lessac-medium", "zh_CN-huayan-medium"]})
     assert piper.languages(two) == ["en-US", "zh-CN"]
     got = piper.models(two)
     want = (piper_model("en_US-lessac-medium"), piper_model("zh_CN-huayan-medium"))
