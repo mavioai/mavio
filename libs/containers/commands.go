@@ -38,9 +38,7 @@ func RunCommands(n Names, d Dependency, onHost bool) Commands {
 	} else {
 		args = append(args, "--network", "<network>")
 	}
-	if d.GPU {
-		args = append(args, "--gpus", "all")
-	}
+	args = append(args, d.GPU.flags()...)
 	if d.HostAccess {
 		args = append(args, "--add-host", hostGateway)
 	}
@@ -84,7 +82,7 @@ func RunCommands(n Names, d Dependency, onHost bool) Commands {
 	if len(volumes) > 0 {
 		fmt.Fprintf(&b, "    volumes: [%s]\n", joinQuoted(volumes))
 	}
-	if d.Memory > 0 || d.CPUs > 0 || d.GPU {
+	if d.Memory > 0 || d.CPUs > 0 || d.GPU != NoGPU {
 		b.WriteString("    deploy:\n      resources:\n")
 		if d.Memory > 0 || d.CPUs > 0 {
 			b.WriteString("        limits:\n")
@@ -95,8 +93,8 @@ func RunCommands(n Names, d Dependency, onHost bool) Commands {
 				fmt.Fprintf(&b, "          cpus: %q\n", strconv.FormatFloat(d.CPUs, 'f', -1, 64))
 			}
 		}
-		if d.GPU {
-			b.WriteString("        reservations:\n          devices:\n            - driver: nvidia\n              count: all\n              capabilities: [gpu]\n")
+		if d.GPU != NoGPU {
+			b.WriteString("        reservations:\n          devices:\n" + d.GPU.compose())
 		}
 	}
 	if len(d.Volumes) > 0 {
@@ -126,9 +124,7 @@ func (c ContainerSpec) DockerRun() string {
 	if c.Port > 0 && c.PublishLoopback {
 		args = append(args, "-p", "127.0.0.1::"+strconv.Itoa(c.Port))
 	}
-	if c.GPU {
-		args = append(args, "--gpus", "all")
-	}
+	args = append(args, c.GPU.flags()...)
 	if c.HostGateway {
 		args = append(args, "--add-host", hostGateway)
 	}

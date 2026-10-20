@@ -31,9 +31,10 @@ type Runtime struct {
 	APIVersion string
 	// Rootless reports an engine running without root.
 	Rootless bool
-	// GPU reports an engine giving containers NVIDIA GPUs: it has the
-	// NVIDIA Container Toolkit's runtime, or a CDI NVIDIA device.
-	GPU bool
+	// GPU is how the engine gives containers NVIDIA GPUs: through a CDI
+	// NVIDIA device, else the NVIDIA Container Toolkit's runtime; NoGPU
+	// when it gives none.
+	GPU GPU
 	// InContainer reports that the server runs in a container.
 	InContainer bool
 	// Self is the server's own container, when it runs in one the
@@ -107,16 +108,21 @@ type info struct {
 	}
 }
 
-// gpu reports whether the engine gives containers NVIDIA GPUs.
-func (i info) gpu() bool {
+// gpu tells how the engine gives containers NVIDIA GPUs: CDI where the
+// engine found an NVIDIA device, which needs no runtime of its own, else
+// the NVIDIA runtime.
+func (i info) gpu() GPU {
+	if slices.ContainsFunc(i.DiscoveredDevices, func(d struct{ Source, ID string }) bool {
+		return d.Source == "cdi" && strings.HasPrefix(d.ID, "nvidia.com/gpu")
+	}) {
+		return GPUCDI
+	}
 	for name := range i.Runtimes {
 		if strings.Contains(name, "nvidia") {
-			return true
+			return GPURuntime
 		}
 	}
-	return slices.ContainsFunc(i.DiscoveredDevices, func(d struct{ Source, ID string }) bool {
-		return d.Source == "cdi" && strings.HasPrefix(d.ID, "nvidia.com/gpu")
-	})
+	return NoGPU
 }
 
 // probe pings an engine, negotiates its API version and reads its info.

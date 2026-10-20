@@ -469,7 +469,7 @@ func (s *PluginManagementService) GetContainerRuntime(ctx context.Context, req *
 	out.SetApiVersion(rt.APIVersion)
 	out.SetRootless(rt.Rootless)
 	out.SetOnHost(rt.OnHost())
-	out.SetGpu(rt.GPU)
+	out.SetGpu(rt.GPU != containers.NoGPU)
 	return systemv1.GetContainerRuntimeResponse_builder{Runtime: out}.Build(), nil
 }
 

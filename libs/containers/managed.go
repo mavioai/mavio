@@ -91,7 +91,7 @@ type Dependency struct {
 	Volumes map[string]string
 	Memory  int64
 	CPUs    float64
-	GPU     bool
+	GPU     GPU
 	// HostAccess is whether the service reaches the host by the name
 	// HostName.
 	HostAccess bool

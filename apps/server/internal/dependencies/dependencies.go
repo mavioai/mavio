@@ -308,10 +308,11 @@ func (s *Service) runPlugin(ctx context.Context, m *pluginv1.Manifest) error {
 // resolve is Resolve, with the environment of the dependency's proxy.
 func (s *Service) resolve(ctx context.Context, m *pluginv1.Manifest, spec *pluginv1.ContainerDependency, c core.PluginContainer) containers.Dependency {
 	// One that may use a GPU runs without on an engine giving it none.
-	if rt, _ := s.Runtime(ctx, false); !rt.GPU && spec.GetGpu() == pluginv1.GpuSupport_GPU_SUPPORT_OPTIONAL {
+	rt, _ := s.Runtime(ctx, false)
+	if rt.GPU == containers.NoGPU && spec.GetGpu() == pluginv1.GpuSupport_GPU_SUPPORT_OPTIONAL {
 		c.UseGPU = false
 	}
-	d := Resolve(s.cfg.Names, spec, c)
+	d := Resolve(s.cfg.Names, spec, c, gpuAccess(rt))
 	if s.cfg.ProxyEnv != nil && !spec.GetDirect() {
 		d.ProxyEnv = s.cfg.ProxyEnv(ctx, m, c)
 	}
@@ -442,13 +443,27 @@ func (s *Service) Reconcile(ctx context.Context) error {
 	return errors.Join(errs...)
 }
 
-// Resolve returns a managed dependency as it runs: its image, with a GPU
-// when it may use one, and its environment with its secrets and its own
-// address, http://<container>:<port> on the network it joins.
-func Resolve(names containers.Names, spec *pluginv1.ContainerDependency, c core.PluginContainer) containers.Dependency {
-	gpu := c.UseGPU && spec.GetGpu() != pluginv1.GpuSupport_GPU_SUPPORT_UNSPECIFIED
+// gpuAccess is how an engine gives containers GPUs: as it was detected,
+// else through the NVIDIA runtime, which commands run elsewhere and an
+// engine's error then tell of.
+func gpuAccess(rt containers.Runtime) containers.GPU {
+	if rt.GPU == containers.NoGPU {
+		return containers.GPURuntime
+	}
+	return rt.GPU
+}
+
+// Resolve returns a managed dependency as it runs: its image, with the
+// GPUs access gives when it may use one, and its environment with its
+// secrets and its own address, http://<container>:<port> on the network it
+// joins.
+func Resolve(names containers.Names, spec *pluginv1.ContainerDependency, c core.PluginContainer, access containers.GPU) containers.Dependency {
+	gpu := containers.NoGPU
+	if c.UseGPU && spec.GetGpu() != pluginv1.GpuSupport_GPU_SUPPORT_UNSPECIFIED {
+		gpu = access
+	}
 	image := spec.GetImage()
-	if gpu && spec.GetGpuImage() != "" {
+	if gpu != containers.NoGPU && spec.GetGpuImage() != "" {
 		image = spec.GetGpuImage()
 	}
 	pairs := []string{"${address}", "http://" + names.Container(c.PluginID, c.Name) + ":" + strconv.Itoa(int(spec.GetPort()))}
@@ -504,7 +519,7 @@ func (s *Service) List(ctx context.Context, pluginID string) ([]Dependency, erro
 			c = unset(pluginID, spec.GetName())
 		}
 		out[i] = Dependency{Spec: spec, Kept: c, Status: s.status(ctx, spec, c)}
-		out[i].Commands, out[i].GPUCommands = s.commands(spec, c, rt.OnHost())
+		out[i].Commands, out[i].GPUCommands = s.commands(spec, c, rt)
 		out[i].Command = s.command(ctx, m, spec, c)
 	}
 	return out, nil
@@ -530,16 +545,17 @@ func unset(pluginID, name string) core.PluginContainer {
 }
 
 // commands returns the commands running a dependency without and with a
-// GPU, nil for the variants it cannot run as.
-func (s *Service) commands(spec *pluginv1.ContainerDependency, c core.PluginContainer, onHost bool) (plain, gpu *containers.Commands) {
+// GPU, given as the engine gives them, nil for the variants it cannot run
+// as.
+func (s *Service) commands(spec *pluginv1.ContainerDependency, c core.PluginContainer, rt containers.Runtime) (plain, gpu *containers.Commands) {
 	if spec.GetGpu() != pluginv1.GpuSupport_GPU_SUPPORT_REQUIRED {
 		c.UseGPU = false
-		cmds := containers.RunCommands(s.cfg.Names, Resolve(s.cfg.Names, spec, c), onHost)
+		cmds := containers.RunCommands(s.cfg.Names, Resolve(s.cfg.Names, spec, c, containers.NoGPU), rt.OnHost())
 		plain = &cmds
 	}
 	if spec.GetGpu() != pluginv1.GpuSupport_GPU_SUPPORT_UNSPECIFIED {
 		c.UseGPU = true
-		cmds := containers.RunCommands(s.cfg.Names, Resolve(s.cfg.Names, spec, c), onHost)
+		cmds := containers.RunCommands(s.cfg.Names, Resolve(s.cfg.Names, spec, c, gpuAccess(rt)), rt.OnHost())
 		gpu = &cmds
 	}
 	return plain, gpu
@@ -595,7 +611,7 @@ func (s *Service) Set(ctx context.Context, pluginID, name string, mode core.Cont
 		if sup, err = s.supervisor(ctx); err != nil {
 			return Dependency{}, err
 		}
-		if rt, _ := s.Runtime(ctx, false); !rt.GPU && spec.GetGpu() == pluginv1.GpuSupport_GPU_SUPPORT_REQUIRED {
+		if rt, _ := s.Runtime(ctx, false); rt.GPU == containers.NoGPU && spec.GetGpu() == pluginv1.GpuSupport_GPU_SUPPORT_REQUIRED {
 			return Dependency{}, fmt.Errorf("%w: container %s of plugin %s needs an NVIDIA GPU, which the container engine gives none of", core.ErrInvalid, name, pluginID)
 		}
 	}

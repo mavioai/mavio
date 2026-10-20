@@ -249,12 +249,16 @@ func TestDetectGPU(t *testing.T) {
 	tests := []struct {
 		name string
 		info map[string]any
-		want bool
+		want GPU
 	}{
-		{"none", map[string]any{"Runtimes": map[string]any{"runc": map[string]any{"path": "runc"}}}, false},
-		{"nvidia runtime", map[string]any{"Runtimes": map[string]any{"runc": map[string]any{}, "nvidia": map[string]any{"path": "nvidia-container-runtime"}}}, true},
-		{"cdi device", map[string]any{"DiscoveredDevices": []any{map[string]any{"Source": "cdi", "ID": "nvidia.com/gpu=all"}}}, true},
-		{"other cdi device", map[string]any{"DiscoveredDevices": []any{map[string]any{"Source": "cdi", "ID": "vendor.com/device=0"}}}, false},
+		{"none", map[string]any{"Runtimes": map[string]any{"runc": map[string]any{"path": "runc"}}}, NoGPU},
+		{"nvidia runtime", map[string]any{"Runtimes": map[string]any{"runc": map[string]any{}, "nvidia": map[string]any{"path": "nvidia-container-runtime"}}}, GPURuntime},
+		{"cdi device", map[string]any{"DiscoveredDevices": []any{map[string]any{"Source": "cdi", "ID": "nvidia.com/gpu=all"}}}, GPUCDI},
+		{"cdi device and runtime", map[string]any{
+			"Runtimes":          map[string]any{"nvidia": map[string]any{"path": "nvidia-container-runtime"}},
+			"DiscoveredDevices": []any{map[string]any{"Source": "cdi", "ID": "nvidia.com/gpu=0"}},
+		}, GPUCDI},
+		{"other cdi device", map[string]any{"DiscoveredDevices": []any{map[string]any{"Source": "cdi", "ID": "vendor.com/device=0"}}}, NoGPU},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -346,7 +350,7 @@ func TestCreateContainer(t *testing.T) {
 	id, err := c.CreateContainer(t.Context(), ContainerSpec{
 		Name: "mavio-voice-whisper", Image: "busybox@sha256:abc", Cmd: []string{"serve"}, Env: []string{"A=1"},
 		Labels: labels, Port: 9000, PublishLoopback: true, Network: "mavio", Aliases: []string{"whisper"},
-		Volumes: map[string]string{"mavio-voice-whisper-cache": "/root/.cache"}, Memory: 1 << 30, CPUs: 1.5, GPU: true,
+		Volumes: map[string]string{"mavio-voice-whisper-cache": "/root/.cache"}, Memory: 1 << 30, CPUs: 1.5, GPU: GPURuntime,
 		HostGateway: true,
 	})
 	if err != nil || id != "c1" {

@@ -45,7 +45,15 @@ func (f *fakePlugins) Reconfigure(context.Context, string) error {
 // GPUs, for a server on the host.
 func onHost(ctx context.Context) (containers.Runtime, error) {
 	rt, err := withoutGPU(ctx)
-	rt.GPU = true
+	rt.GPU = containers.GPURuntime
+	return rt, err
+}
+
+// withCDI detects an engine with a client that reaches nothing, giving
+// GPUs as CDI devices, for a server on the host.
+func withCDI(ctx context.Context) (containers.Runtime, error) {
+	rt, err := withoutGPU(ctx)
+	rt.GPU = containers.GPUCDI
 	return rt, err
 }
 
@@ -301,7 +309,7 @@ func TestManaged(t *testing.T) {
 		t.Errorf("address = %q, want the published port", got)
 	}
 	spec, running, _ := engine.Spec("mavio-voice-whisper")
-	if !running || !slices.Equal(spec.Env, []string{"API_KEY=" + secret}) || !spec.GPU ||
+	if !running || !slices.Equal(spec.Env, []string{"API_KEY=" + secret}) || spec.GPU != containers.GPURuntime ||
 		spec.Image != "whisper:1-gpu"+testDigest || spec.Labels[containers.LabelServer] != "server-1" {
 		t.Errorf("container = %+v, running %v, want the GPU image with the secret", spec, running)
 	}
@@ -326,7 +334,7 @@ func TestManaged(t *testing.T) {
 	eventually(t, "whisper ready again", func() bool {
 		return state("whisper").GetState() == pluginv1.ContainerState_CONTAINER_STATE_READY
 	})
-	if spec, _, _ := engine.Spec("mavio-voice-whisper"); spec.GPU || spec.Image != "whisper:1"+testDigest {
+	if spec, _, _ := engine.Spec("mavio-voice-whisper"); spec.GPU != containers.NoGPU || spec.Image != "whisper:1"+testDigest {
 		t.Errorf("container = %+v, want the CPU image", spec)
 	}
 	s.PluginStopped(ctx, pluginID)
@@ -466,6 +474,35 @@ func TestPullAbandoned(t *testing.T) {
 	})
 }
 
+func TestManagedWithCDI(t *testing.T) {
+	engine := containerstest.New()
+	s, plugs, _ := newService(t, func(c *dependencies.Config) {
+		c.Detect = withCDI
+		c.Engine = func(containers.Runtime) containers.Engine { return engine }
+		c.Poll = 5 * time.Millisecond
+		c.Probe = func(context.Context, string, string) error { return nil }
+	})
+	ctx := t.Context()
+	if _, err := s.Set(ctx, pluginID, "whisper", core.ContainerManaged, "", true, nil); err != nil {
+		t.Fatal(err)
+	}
+	s.PluginStarted(ctx, plugs.manifest)
+	eventually(t, "whisper running", func() bool {
+		_, running, _ := engine.Spec("mavio-voice-whisper")
+		return running
+	})
+	if spec, _, _ := engine.Spec("mavio-voice-whisper"); spec.GPU != containers.GPUCDI || spec.Image != "whisper:1-gpu"+testDigest {
+		t.Errorf("container = %+v, want the GPU image with CDI devices", spec)
+	}
+	deps, err := s.List(ctx, pluginID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if g := deps[0].GPUCommands; g == nil || !strings.Contains(g.DockerRun, "--device nvidia.com/gpu=all") {
+		t.Errorf("GPU commands = %+v, want CDI devices", g)
+	}
+}
+
 func TestManagedWithoutGPU(t *testing.T) {
 	engine := containerstest.New()
 	s, plugs, _ := newService(t, func(c *dependencies.Config) {
@@ -483,7 +520,7 @@ func TestManagedWithoutGPU(t *testing.T) {
 		_, running, _ := engine.Spec("mavio-voice-whisper")
 		return running
 	})
-	if spec, _, _ := engine.Spec("mavio-voice-whisper"); spec.GPU || spec.Image != "whisper:1"+testDigest {
+	if spec, _, _ := engine.Spec("mavio-voice-whisper"); spec.GPU != containers.NoGPU || spec.Image != "whisper:1"+testDigest {
 		t.Errorf("container = %+v, want the CPU image without a GPU", spec)
 	}
 

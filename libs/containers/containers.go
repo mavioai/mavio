@@ -40,8 +40,8 @@ type ContainerSpec struct {
 	// CPUs; 0 for none.
 	Memory int64
 	CPUs   float64
-	// GPU gives the container every NVIDIA GPU.
-	GPU bool
+	// GPU is how the container is given every NVIDIA GPU; NoGPU for none.
+	GPU GPU
 	// HostGateway maps HostName to the host, as Docker's host-gateway.
 	HostGateway bool
 }
@@ -81,8 +81,60 @@ type volumeOptions struct {
 }
 
 type deviceRequest struct {
-	Count        int
-	Capabilities [][]string
+	Driver       string     `json:",omitempty"`
+	Count        int        `json:",omitempty"`
+	DeviceIDs    []string   `json:",omitempty"`
+	Capabilities [][]string `json:",omitempty"`
+}
+
+// GPU is how a container is given NVIDIA GPUs.
+type GPU int
+
+const (
+	// NoGPU gives it none.
+	NoGPU GPU = iota
+	// GPURuntime asks the NVIDIA Container Toolkit's runtime for every
+	// GPU, as docker run --gpus all does.
+	GPURuntime
+	// GPUCDI asks for the CDI device of every NVIDIA GPU, as docker run
+	// --device nvidia.com/gpu=all does, on an engine with CDI enabled.
+	GPUCDI
+)
+
+// cdiGPUs is the CDI device of every NVIDIA GPU.
+const cdiGPUs = "nvidia.com/gpu=all"
+
+// request is the engine's device request of the GPUs.
+func (g GPU) request() []deviceRequest {
+	switch g {
+	case GPURuntime:
+		return []deviceRequest{{Count: -1, Capabilities: [][]string{{"gpu"}}}}
+	case GPUCDI:
+		return []deviceRequest{{Driver: "cdi", DeviceIDs: []string{cdiGPUs}}}
+	}
+	return nil
+}
+
+// flags are docker run's flags of the GPUs.
+func (g GPU) flags() []string {
+	switch g {
+	case GPURuntime:
+		return []string{"--gpus", "all"}
+	case GPUCDI:
+		return []string{"--device", cdiGPUs}
+	}
+	return nil
+}
+
+// compose is a Compose file's device reservation of the GPUs.
+func (g GPU) compose() string {
+	switch g {
+	case GPURuntime:
+		return "            - driver: nvidia\n              count: all\n              capabilities: [gpu]\n"
+	case GPUCDI:
+		return "            - driver: cdi\n              device_ids: [" + strconv.Quote(cdiGPUs) + "]\n              capabilities: [gpu]\n"
+	}
+	return ""
 }
 
 type networkingConfig struct {
@@ -178,9 +230,7 @@ func (c *Client) CreateContainer(ctx context.Context, s ContainerSpec) (string, 
 	}
 	body.HostConfig.Memory = s.Memory
 	body.HostConfig.NanoCPUs = int64(s.CPUs * 1e9)
-	if s.GPU {
-		body.HostConfig.DeviceRequests = []deviceRequest{{Count: -1, Capabilities: [][]string{{"gpu"}}}}
-	}
+	body.HostConfig.DeviceRequests = s.GPU.request()
 	if s.HostGateway {
 		body.HostConfig.ExtraHosts = []string{hostGateway}
 	}

@@ -248,7 +248,7 @@ DLNA 是第一方进程插件：它需要 UDP 组播（WASM 没有 socket）和�
 * `port`：服务在容器内监听的端口；`health_path`：服务就绪时返回 2xx 的 HTTP 路径，未设置时以端口可连接为准。
 * `command`、`env`：参数与环境变量。值 `${secret:<key>}` 是服务端为该依赖生成一次的随机密钥；`${address}` 是其他容器访问该依赖自己时的地址 `http://mavio-<plugin>-<name>:<port>`。
 * `volumes`：按卷名给出的挂载路径，例如 `{"cache": "/root/.cache"}`。
-* `gpu`：不设置表示不用，或 `GPU_SUPPORT_OPTIONAL`、`GPU_SUPPORT_REQUIRED`（NVIDIA），以及 `gpu_image`：使用 GPU 时若为另一个镜像，则为该镜像，同样带 digest；`memory_mib` 与 `cpus`：托管容器的限制。
+* `gpu`：不设置表示不用，或 `GPU_SUPPORT_OPTIONAL`、`GPU_SUPPORT_REQUIRED`（NVIDIA），以及 `gpu_image`：使用 GPU 时若为另一个镜像，则为该镜像，同样带 digest；服务端按引擎提供的方式为它提供 GPU，经 NVIDIA 运行时或 CDI 设备（架构文档 §16），因此为两者发布的同一个镜像（如 CUDA 镜像）只需声明一次；`memory_mib` 与 `cpus`：托管容器的限制。
 * `host_access`：服务是否以名称 `host.docker.internal` 访问服务器宿主机上的服务：Docker 把它映射到宿主机（`host-gateway`），Docker Desktop 与 Podman 自行提供该名称。在 Linux 上，宿主机上的服务须监听回环接口之外的接口才能被访问。
 * `direct`：托管容器是否只直连访问站点，用于每个请求都带有代理的服务，例如 FlareSolverr：服务器不为它提供代理选择，也不给其容器设置代理（§12.1）。
 * `no_proxy_ipv4_only`：托管容器的 `NO_PROXY` 是否只列出 IPv4 网段，用于 HTTP 库处理不了 IPv6 网段的服务，例如遇到 `fc00::/7` 的 Python httpx；`::1` 这样的单个地址保留。
