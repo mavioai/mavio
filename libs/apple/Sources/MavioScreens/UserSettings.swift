@@ -31,7 +31,7 @@ public struct SubtitlesAudioView: View {
 
     /// The view's content.
     public var body: some View {
-        List {
+        SettingsList {
             if saved != nil {
                 Section {
                     field(MavioStrings.settingsAudioLanguages, text: $audio).focused($editing, equals: 0)
@@ -80,6 +80,7 @@ public struct SubtitlesAudioView: View {
                 .type(theme.type.footnote)
                 .foregroundStyle(theme.colors.textSecondary)
             TextField(label, text: text, prompt: Text("chi, eng"))
+                .fieldLabelHidden()
                 .noCapitals()
                 .autocorrectionDisabled()
                 .foregroundStyle(
@@ -423,6 +424,7 @@ public struct SecuritySections: View {
                     Link(MavioStrings.authOpenAuthenticator, destination: uri)
                 }
                 TextField(MavioStrings.authTotpCode, text: $code, prompt: Text("000000"))
+                    .fieldLabelHidden()
                     .numberKeyboard()
                     .textContentType(.oneTimeCode)
                     .font(.system(.body, design: .monospaced))

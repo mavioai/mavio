@@ -86,7 +86,7 @@ struct ActivityView: View {
     @State private var limit: Int32 = 20
 
     var body: some View {
-        List {
+        SettingsList {
             Section(MavioStrings.activityNowPlaying) {
                 let playing = (sessions ?? []).filter { $0.hasNowPlaying && $0.nowPlaying.hasItem }
                 ForEach(playing, id: \.id) { PlayingRow(session: $0) }
@@ -355,7 +355,7 @@ struct TasksView: View {
         }
         let own = (tasks ?? []).filter { $0.pluginID.isEmpty && Self.shown($0.kind) }.sorted(by: byName)
         let shownJobs = (jobs?.jobs ?? []).filter { Self.shown($0.kind) }
-        List {
+        SettingsList {
             if let failure {
                 Note(text: failure, failed: true)
             }
@@ -559,7 +559,7 @@ struct LogsView: View {
             let text = ([r.message] + r.attributes.flatMap { [$0.key, $0.value] }).joined(separator: " ").lowercased()
             return words.allSatisfy { text.contains($0) }
         }
-        List {
+        SettingsList {
             Section {
                 ForEach(Array(shown.enumerated()), id: \.offset) { LogRow(record: $0.element) }
                 if let failure {
@@ -680,7 +680,7 @@ struct BackupsView: View {
     @State private var saving: URL?
 
     var body: some View {
-        List {
+        SettingsList {
             Section {
                 HStack(spacing: MavioSpacing.s12) {
                     VStack(alignment: .leading, spacing: 2) {
@@ -934,7 +934,7 @@ struct IssuesView: View {
     private static let page: Int32 = 50
 
     var body: some View {
-        List {
+        SettingsList {
             Section {
                 Picker(MavioStrings.issuesFilter, selection: $filter) {
                     ForEach(Filter.allCases, id: \.self) { Text($0.title).tag($0) }
@@ -954,6 +954,7 @@ struct IssuesView: View {
                     } label: {
                         IssueRow(issue: issue, item: names.items[issue.itemID], by: names.user(issue.createdBy, server))
                     }
+                    .rowLink()
                     .task { await names.item(issue.itemID, model, server) }
                     .onAppear {
                         if issue.id == issues?.last?.id, let issues, issues.count < total {
@@ -1067,7 +1068,7 @@ struct IssueView: View {
     @State private var deleting = false
 
     var body: some View {
-        List {
+        SettingsList {
             if let i = issue {
                 Section {
                     HStack(spacing: MavioSpacing.s8) {

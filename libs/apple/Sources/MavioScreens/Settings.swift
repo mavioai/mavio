@@ -23,13 +23,14 @@ public struct SettingsView: View {
 
     /// The view's content.
     public var body: some View {
-        List {
+        SettingsList {
             Section {
                 NavigationLink {
                     AccountView()
                 } label: {
                     AccountCard()
                 }
+                .rowLink()
             }
             if let server = standalone {
                 SwitchUserSection(server: server, users: switchable)
@@ -40,21 +41,25 @@ public struct SettingsView: View {
                 } label: {
                     EntryLabel(MavioStrings.settingsAppearance, icon: "appearance", color: Color(hex: 0x5E5CE6))
                 }
+                .rowLink()
                 NavigationLink {
                     PlaybackSettingsView()
                 } label: {
                     EntryLabel(MavioStrings.settingsPlayback, icon: "play", color: Color(hex: 0xFF3B30))
                 }
+                .rowLink()
                 if !model.signedInServers.isEmpty {
                     NavigationLink {
                         SubtitlesAudioView()
                     } label: {
                         EntryLabel(MavioStrings.settingsSubtitlesAudio, icon: "subtitles", color: Color(hex: 0x34C759))
                     }
+                    .rowLink()
                 }
                 NavigationLink(value: Route.downloads) {
                     EntryLabel(MavioStrings.navDownloads, icon: "downloads", color: Color(hex: 0x0A84FF))
                 }
+                .rowLink()
             }
             if let server = chosen {
                 ServerGroup(server: server, serverId: $serverId)
@@ -91,7 +96,7 @@ public struct SettingsView: View {
 
 /// The user's card: the Mavio account, or the user of the server signed in
 /// to.
-private struct AccountCard: View {
+struct AccountCard: View {
     @Environment(AppModel.self) private var model
     @Environment(\.theme) private var theme
 
@@ -115,7 +120,7 @@ private struct AccountCard: View {
 /// The account: the Mavio account with its page at mavio.dev, or the user
 /// of the server; the servers in the user's order, which orders Home;
 /// and authorizing a device with Quick Connect.
-private struct AccountView: View {
+struct AccountView: View {
     @Environment(AppModel.self) private var model
     @Environment(Router.self) private var router
     @Environment(\.theme) private var theme
@@ -128,7 +133,7 @@ private struct AccountView: View {
     }
 
     var body: some View {
-        List {
+        SettingsList {
             if let account = model.account {
                 Section {
                     HStack(spacing: MavioSpacing.s12) {
@@ -267,6 +272,7 @@ private struct AuthorizeDevice: View {
             }
             HStack {
                 TextField(MavioStrings.authQuickConnect, text: $code, prompt: Text("000000"))
+                    .fieldLabelHidden()
                     .numberKeyboard()
                     .font(.system(.body, design: .monospaced))
                     .onChange(of: code) { _, new in

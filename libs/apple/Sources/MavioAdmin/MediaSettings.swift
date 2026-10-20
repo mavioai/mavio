@@ -72,7 +72,7 @@ struct ManagedLibrariesView: View {
     @State private var scanning: Set<String> = []
 
     var body: some View {
-        List {
+        SettingsList {
             Section {
                 Text(MavioStrings.librariesMessage).type(theme.type.callout).foregroundStyle(theme.colors.textSecondary)
                     .listRowBackground(Color.clear)
@@ -88,6 +88,7 @@ struct ManagedLibrariesView: View {
                     } label: {
                         Label(MavioStrings.librariesAdd, systemImage: "plus")
                     }
+                    .rowLink()
                 }
             } else if failure == nil {
                 ProgressView().frame(maxWidth: .infinity).listRowBackground(Color.clear)
@@ -151,9 +152,18 @@ struct ManagedLibrariesView: View {
             NavigationLink {
                 ManagedLibraryView(server: server, library: library, changed: reload)
             } label: {
-                EmptyView()
+                #if os(macOS)
+                    // On the desktop's cards, the row's clear ground.
+                    Color.clear.contentShape(.rect)
+                #else
+                    EmptyView()
+                #endif
             }
-            .opacity(0)
+            #if os(macOS)
+                .buttonStyle(.plain)
+            #else
+                .opacity(0)
+            #endif
         }
     }
 
@@ -325,7 +335,7 @@ private struct ManagedLibraryView: View {
 
     var body: some View {
         let k = LibraryKindStyle.of(draft.kind)
-        List {
+        SettingsList {
             Section {
                 TextRow(label: MavioStrings.librariesName, text: $draft.name)
                 Picker(MavioStrings.librariesKind, selection: $draft.kind) {
@@ -479,6 +489,7 @@ private struct ManagedLibraryView: View {
             }
             HStack(spacing: MavioSpacing.s12) {
                 TextField(MavioStrings.librariesFolderPath, text: $typed)
+                    .fieldLabelHidden()
                     .noCapitals()
                     .autocorrectionDisabled()
                     .onSubmit(addTyped)
@@ -492,6 +503,7 @@ private struct ManagedLibraryView: View {
             } label: {
                 Label(MavioStrings.librariesBrowse, systemImage: "folder")
             }
+            .rowLink()
         } header: {
             Text(MavioStrings.librariesFolders)
         } footer: {
@@ -607,7 +619,7 @@ private struct FolderPicker: View {
     private var remote: Bool { path.hasPrefix("rclone:") }
 
     var body: some View {
-        List {
+        SettingsList {
             Section {
                 HStack(spacing: MavioSpacing.s12) {
                     Text(here.isEmpty ? MavioStrings.librariesRoots : here)

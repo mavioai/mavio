@@ -14,7 +14,7 @@ public struct AppearanceView: View {
 
     /// The view's content.
     public var body: some View {
-        List {
+        SettingsList {
             Section {
                 HStack(alignment: .top, spacing: MavioSpacing.s16) {
                     ForEach(Appearance.allCases, id: \.self) { option in
@@ -142,7 +142,7 @@ public struct PlaybackSettingsView: View {
 
     /// The view's content.
     public var body: some View {
-        List {
+        SettingsList {
             Section {
                 Picker(MavioStrings.settingsMaxQuality, selection: $quality) {
                     ForEach(PlaybackQuality.allCases, id: \.self) { Text($0.label).tag($0) }

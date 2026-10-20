@@ -11,6 +11,16 @@ import SwiftUI
 // no such thing.
 
 extension View {
+    /// A text field without its label beside it, on the desktop's forms,
+    /// where a row already names it.
+    public func fieldLabelHidden() -> some View {
+        #if os(macOS)
+            labelsHidden()
+        #else
+            self
+        #endif
+    }
+
     /// The navigation title small in the bar, where the bar has sizes.
     public func inlineTitle() -> some View {
         #if os(iOS)

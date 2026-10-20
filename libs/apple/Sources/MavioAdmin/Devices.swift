@@ -19,7 +19,7 @@ public struct DevicesView: View {
 
     /// The view's content.
     public var body: some View {
-        List {
+        SettingsList {
             Section {
                 ForEach(devices ?? [], id: \.id) { device in
                     HStack(spacing: MavioSpacing.s12) {

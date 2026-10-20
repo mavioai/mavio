@@ -23,7 +23,7 @@ struct StorageView: View {
     private var available: Bool { status?.available ?? false }
 
     var body: some View {
-        List {
+        SettingsList {
             Section {
                 Text(MavioStrings.storageMessage).type(theme.type.callout).foregroundStyle(theme.colors.textSecondary)
                     .listRowBackground(Color.clear)
@@ -49,6 +49,7 @@ struct StorageView: View {
                         } label: {
                             RemoteRow(server: server, remote: remote, kind: kindName(providers, remote.type))
                         }
+                        .rowLink()
                     }
                     if remotes?.isEmpty == true {
                         Text(MavioStrings.storageNoRemotes).foregroundStyle(theme.colors.textSecondary)
@@ -59,6 +60,7 @@ struct StorageView: View {
                     } label: {
                         Label(MavioStrings.storageAdd, systemImage: "plus")
                     }
+                    .rowLink()
                 } header: {
                     Text(MavioStrings.storageRemotes)
                 } footer: {
@@ -413,6 +415,7 @@ private struct OptionControl: View {
                             .textContentType(.newPassword)
                     } else {
                         TextField(o.name, text: $value, prompt: Text(placeholder ?? o.defaultValue))
+                            .fieldLabelHidden()
                     }
                 }
                 .noCapitals()
@@ -546,7 +549,7 @@ private struct NewRemoteView: View {
     }
 
     private var form: some View {
-        List {
+        SettingsList {
             Section {
                 TextRow(
                     label: MavioStrings.storageName,
@@ -682,7 +685,7 @@ private struct StorageRemoteView: View {
     }
 
     private var page: some View {
-        List {
+        SettingsList {
             if let remote {
                 Section {
                 } header: {
@@ -984,7 +987,7 @@ private struct RemoteQuestionView: View {
     }
 
     var body: some View {
-        List {
+        SettingsList {
             Section {
                 Text(MavioStrings.storageQuestionMessage).type(theme.type.callout)
                     .foregroundStyle(theme.colors.textSecondary)

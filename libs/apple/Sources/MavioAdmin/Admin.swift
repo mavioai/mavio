@@ -59,6 +59,7 @@ public struct ServerGroup: View {
                         }
                         .padding(.vertical, MavioSpacing.s12)
                     }
+                    .rowLink()
                 }
             }
             .task(id: key) { await loadAdmin() }
@@ -79,6 +80,7 @@ public struct ServerGroup: View {
                 } label: {
                     EntryLabel(entry.title, icon: entry.icon, color: entry.color)
                 }
+                .rowLink()
             }
         } header: {
             Text(MavioStrings.settingsServerGroup)
@@ -87,21 +89,27 @@ public struct ServerGroup: View {
     }
 
     private func loadAdmin() async {
+        if let known = await Self.administers(model, server) { admin[key] = known }
+    }
+
+    /// Whether the user signed in to server administers it, nil if the
+    /// server does not say.
+    public static func administers(_ model: AppModel, _ server: ServerRecord) async -> Bool? {
         let response = try? await model.client.call(
             server.id, Procedure.users("GetCurrentUser"), Mavio_User_V1_GetCurrentUserRequest(),
             as: Mavio_User_V1_GetCurrentUserResponse.self)
-        if let response { admin[key] = response.user.admin }
+        return response?.user.admin
     }
 }
 
 /// An entry of the Server group: a section, or a menu of them.
-enum ServerEntry: Hashable {
+public enum ServerEntry: Hashable {
     case section(ServerSection)
     case menu(ServerMenu)
 
     /// The entries the user sees: an administrator's all, others' the
     /// sections any user has; a menu left with one section is that section.
-    static func shown(admin: Bool) -> [ServerEntry] {
+    public static func shown(admin: Bool) -> [ServerEntry] {
         let top: [ServerEntry] = [
             .section(.overview), .section(.general), .section(.users), .section(.devices), .menu(.media),
             .menu(.maintenance),
@@ -116,28 +124,32 @@ enum ServerEntry: Hashable {
         }
     }
 
-    var title: String {
+    /// The title.
+    public var title: String {
         switch self {
         case .section(let s): s.title
         case .menu(let m): m.title
         }
     }
 
-    var icon: String {
+    /// The icon's name.
+    public var icon: String {
         switch self {
         case .section(let s): s.icon
         case .menu(let m): m.icon
         }
     }
 
-    var color: Color {
+    /// The color of the icon's tile.
+    public var color: Color {
         switch self {
         case .section(let s): s.color
         case .menu(let m): m.color
         }
     }
 
-    @MainActor @ViewBuilder func view(_ server: ServerRecord) -> some View {
+    /// The page, of the server's.
+    @MainActor @ViewBuilder public func view(_ server: ServerRecord) -> some View {
         switch self {
         case .section(let s): s.view(server)
         case .menu(let m): ServerMenuView(menu: m, server: server)
@@ -146,10 +158,11 @@ enum ServerEntry: Hashable {
 }
 
 /// A menu of the Server group's second level.
-enum ServerMenu: Hashable {
+public enum ServerMenu: Hashable {
     case media, maintenance
 
-    func sections(admin: Bool) -> [ServerSection] {
+    /// The menu's sections the user sees.
+    public func sections(admin: Bool) -> [ServerSection] {
         let all: [ServerSection] =
             switch self {
             case .media: [.libraries, .storage, .transcoding]
@@ -158,21 +171,24 @@ enum ServerMenu: Hashable {
         return all.filter { admin || $0.forAnyone }
     }
 
-    var title: String {
+    /// The title.
+    public var title: String {
         switch self {
         case .media: MavioStrings.settingsMediaMenu
         case .maintenance: MavioStrings.settingsMaintenanceMenu
         }
     }
 
-    var icon: String {
+    /// The icon's name.
+    public var icon: String {
         switch self {
         case .media: "movies"
         case .maintenance: "admin"
         }
     }
 
-    var color: Color {
+    /// The color of the icon's tile.
+    public var color: Color {
         switch self {
         case .media: Color(hex: 0xFF9F0A)
         case .maintenance: Color(hex: 0x8E8E93)
@@ -187,7 +203,7 @@ private struct ServerMenuView: View {
     @Environment(\.theme) private var theme
 
     var body: some View {
-        List {
+        SettingsList {
             // Only an administrator sees a menu: one section is shown alone.
             ForEach(menu.sections(admin: true), id: \.self) { section in
                 NavigationLink {
@@ -195,6 +211,7 @@ private struct ServerMenuView: View {
                 } label: {
                     EntryLabel(section.title, icon: section.icon, color: section.color)
                 }
+                .rowLink()
             }
         }
         .hiddenListBackground()
@@ -205,14 +222,15 @@ private struct ServerMenuView: View {
 }
 
 /// A section of the Server group.
-enum ServerSection: Hashable {
+public enum ServerSection: Hashable {
     case overview, general, users, devices, apiKeys, libraries, storage, transcoding, activity, issues, tasks, logs,
         backups
 
     /// Whether users who do not administer the server see it.
-    var forAnyone: Bool { self == .devices || self == .issues }
+    public var forAnyone: Bool { self == .devices || self == .issues }
 
-    var title: String {
+    /// The title.
+    public var title: String {
         switch self {
         case .overview: MavioStrings.settingsOverview
         case .general: MavioStrings.settingsGeneral
@@ -230,7 +248,8 @@ enum ServerSection: Hashable {
         }
     }
 
-    var icon: String {
+    /// The icon's name.
+    public var icon: String {
         switch self {
         case .overview: "server"
         case .general: "settings"
@@ -248,7 +267,8 @@ enum ServerSection: Hashable {
         }
     }
 
-    var color: Color {
+    /// The color of the icon's tile.
+    public var color: Color {
         switch self {
         case .overview, .general, .logs: Color(hex: 0x8E8E93)
         case .apiKeys: Color(hex: 0x636366)
@@ -263,7 +283,8 @@ enum ServerSection: Hashable {
         }
     }
 
-    @MainActor @ViewBuilder func view(_ server: ServerRecord) -> some View {
+    /// The page, of the server's.
+    @MainActor @ViewBuilder public func view(_ server: ServerRecord) -> some View {
         switch self {
         case .overview: OverviewView(server: server)
         case .general: GeneralView(server: server)
@@ -310,7 +331,7 @@ struct OverviewView: View {
     @State private var loadFailure: String?
 
     var body: some View {
-        List {
+        SettingsList {
             Section(MavioStrings.overviewServer) {
                 LabeledContent(MavioStrings.overviewStatus) {
                     HStack(spacing: MavioSpacing.s8) {

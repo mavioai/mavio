@@ -18,7 +18,7 @@ struct UsersView: View {
     @State private var standalone = false
 
     var body: some View {
-        List {
+        SettingsList {
             if let users {
                 Section {
                     Text(standalone ? MavioStrings.usersMessage : MavioStrings.usersMessageMavioDev)
@@ -46,6 +46,7 @@ struct UsersView: View {
                                 }
                             }
                         }
+                        .rowLink()
                     }
                     if standalone {
                         NavigationLink {
@@ -53,6 +54,7 @@ struct UsersView: View {
                         } label: {
                             Label(MavioStrings.usersAdd, systemImage: "plus")
                         }
+                        .rowLink()
                     }
                 }
             } else if failure == nil {
@@ -183,7 +185,7 @@ private struct NewUserView: View {
     }
 
     private var form: some View {
-        List {
+        SettingsList {
             Section {
                 Picker(MavioStrings.usersKind, selection: $managed) {
                     Text(MavioStrings.usersMember).tag(false)
@@ -261,6 +263,7 @@ private struct PinField: View {
 
     var body: some View {
         TextField("0000", text: $pin)
+            .fieldLabelHidden()
             .numberKeyboard()
             .multilineTextAlignment(.trailing)
             .frame(maxWidth: 80)
@@ -368,7 +371,7 @@ private struct UserView: View {
     private static let adult: Int32 = 1000
 
     var body: some View {
-        List {
+        SettingsList {
             Section {
                 // The account's name, state and access are mavio.dev's in its mode.
                 if standalone {
@@ -499,6 +502,7 @@ private struct UserView: View {
         VStack(alignment: .leading, spacing: MavioSpacing.s8) {
             RowLabel(label: label, detail: detail)
             TextField(label, text: text)
+                .fieldLabelHidden()
                 .noCapitals()
                 .autocorrectionDisabled()
                 .borderedField()

@@ -49,6 +49,7 @@ struct NumberRow: View {
                 label, value: $value,
                 format: .number.precision(.fractionLength(0...(decimals ? 2 : 0))).grouping(.never)
             )
+            .fieldLabelHidden()
             .numberKeyboard(decimals: decimals)
             .multilineTextAlignment(.trailing)
             .frame(width: 80)
@@ -67,6 +68,7 @@ struct TextRow: View {
     var body: some View {
         FormRow(label: label, detail: detail) {
             TextField(label, text: $text, prompt: prompt.map { Text($0) })
+                .fieldLabelHidden()
                 .noCapitals()
                 .autocorrectionDisabled()
                 .multilineTextAlignment(.trailing)
@@ -238,7 +240,7 @@ struct GeneralView: View {
     }
 
     var body: some View {
-        List {
+        SettingsList {
             if let saved = editor?.saved {
                 form(saved.settings)
             } else if editor?.failure == nil {
@@ -388,7 +390,7 @@ struct TranscodingView: View {
     private static let deinterlacers = ["yadif", "bwdif"]
 
     var body: some View {
-        List {
+        SettingsList {
             if let saved = editor?.saved {
                 form(saved)
             } else if editor?.failure == nil {
@@ -565,7 +567,7 @@ struct ApiKeysView: View {
     @FocusState private var naming: Bool
 
     var body: some View {
-        List {
+        SettingsList {
             Section {
                 Text(MavioStrings.keysMessage).type(theme.type.callout).foregroundStyle(theme.colors.textSecondary)
                     .listRowBackground(Color.clear)
@@ -573,6 +575,7 @@ struct ApiKeysView: View {
             Section {
                 HStack(spacing: MavioSpacing.s12) {
                     TextField(MavioStrings.keysName, text: $name)
+                        .fieldLabelHidden()
                         .focused($naming)
                         .onSubmit(create)
                         .submitLabel(.done)

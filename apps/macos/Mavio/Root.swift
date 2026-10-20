@@ -58,6 +58,9 @@ struct RootView: View {
         Group {
             if case .signedOut = model.signInState {
                 SignInView()
+            } else if shell.place == .settings {
+                // The settings beside their own sidebar, which returns Home.
+                DesktopSettingsView { shell.place = .home }
             } else {
                 split
             }
@@ -118,7 +121,7 @@ private struct PlaceStack: View {
         case .home: HomeView()
         case .discover: DiscoverView()
         case .downloads: RouteDestination(route: .downloads)
-        case .settings: SettingsView()
+        case .settings: EmptyView()
         case let .library(library): RouteDestination(route: .library(library))
         }
     }
