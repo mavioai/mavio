@@ -613,6 +613,15 @@ message Card {
   int64 runtime_ms = 12;
   // The same title on the user's other servers.
   repeated Version versions = 13;
+  // The first backdrop, which Home's hero shows.
+  Artwork backdrop = 14;
+  // The logo, the title drawn.
+  Artwork logo = 15;
+  // What it is about.
+  string overview = 16;
+  repeated string genres = 17;
+  // Its parental rating, as "PG-13".
+  string official_rating = 18;
 }
 
 // A title discovery offers, which no server or only some have.

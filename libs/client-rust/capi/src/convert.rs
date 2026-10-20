@@ -84,6 +84,11 @@ pub(crate) fn card(c: Card) -> pb::Card {
         favorite: c.favorite,
         runtime_ms: c.runtime.map(millis).unwrap_or_default(),
         versions: c.versions.into_iter().map(version).collect(),
+        backdrop: c.backdrop.map(artwork).into(),
+        logo: c.logo.map(artwork).into(),
+        overview: c.overview.unwrap_or_default(),
+        genres: c.genres,
+        official_rating: c.official_rating.unwrap_or_default(),
         ..Default::default()
     }
 }

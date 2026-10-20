@@ -3,8 +3,10 @@ package app
 import (
 	"fmt"
 	"os"
+	"slices"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/egoist/mygo/ui"
 
@@ -102,6 +104,45 @@ func TestHome(t *testing.T) {
 	h.tt.SetDark(true)
 	h.settle()
 	h.save(shots, "home-dark")
+}
+
+func TestHomeHero(t *testing.T) {
+	h := newHarness(t, true, 1280, 800)
+	// The titles come from Home's rows, Continue Watching aside, each with
+	// the row's title above it.
+	for i := range 5 {
+		if h.tt.HasText("A crew drifts beyond the last station.") {
+			break
+		}
+		h.app.homeState.heroAt = i
+		h.settle()
+	}
+	for _, want := range []string{"A crew drifts beyond the last station.", "PG-13", "Science Fiction · Drama", "Details"} {
+		if !slices.ContainsFunc(h.tt.Texts(), func(s string) bool { return strings.Contains(s, want) }) {
+			t.Errorf("hero has no %q; texts = %q", want, h.tt.Texts())
+		}
+	}
+	if slices.Contains(h.tt.Texts(), "Thriller") {
+		t.Errorf("hero shows a third genre")
+	}
+	h.save(shots, "home-hero")
+
+	// The pointer over the hero pauses it; away, the next title follows.
+	at := h.app.homeState.heroAt
+	h.tt.Move(640, 300)
+	h.tt.Frame()
+	h.tt.Advance(20 * time.Second)
+	h.settle()
+	if got := h.app.homeState.heroAt; got != at {
+		t.Errorf("paused hero moved from %d to %d", at, got)
+	}
+	h.tt.Move(640, 700)
+	h.tt.Frame()
+	h.tt.Advance(10 * time.Second)
+	h.settle()
+	if got := h.app.homeState.heroAt; got == at {
+		t.Errorf("hero stayed at %d", got)
+	}
 }
 
 func TestScreens(t *testing.T) {

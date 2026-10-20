@@ -6,6 +6,7 @@ import (
 	"net/url"
 	"slices"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/egoist/mygo/ui"
@@ -18,7 +19,7 @@ import (
 )
 
 // heroInterval is how long the hero shows each title.
-const heroInterval = 8 * time.Second
+const heroInterval = 9 * time.Second
 
 // heroTitles is how many titles the hero shows at most.
 const heroTitles = 5
@@ -31,9 +32,13 @@ type homeState struct {
 	err     error
 	loading bool
 	started time.Time // when it started loading
-	// heroStart is when the hero began, heroPick the title the user chose.
-	heroStart time.Time
-	heroPick  int
+	// heroAt is the title the hero shows and heroSince when it began, or
+	// how long it had shown while the pointer was over the hero, which
+	// pauses it.
+	heroAt     int
+	heroSince  time.Time
+	heroShown  time.Duration
+	heroPaused bool
 }
 
 // loadHome loads Home again when the servers' content changed.
@@ -83,7 +88,7 @@ func (a *App) home(c *ui.Context) {
 	}
 	ui.Scroll(c).TrackScroll(a.pageScroll(a.pagePath)).Fill().Children(func() {
 		ui.Column(c).Gap(32).Padding(0, 0, 40).Children(func() {
-			if hero := heroCards(h.rows); len(hero) > 0 {
+			if hero := heroEntries(c, h.rows); len(hero) > 0 {
 				a.hero(c, hero)
 			} else {
 				header(c, style.T(c, "nav.home"))
@@ -95,67 +100,142 @@ func (a *App) home(c *ui.Context) {
 	})
 }
 
-// heroCards returns the latest films and shows with wide artwork.
-func heroCards(rows []*capiv1.Row) []*capiv1.Card {
-	var cards []*capiv1.Card
+// heroEntry is a title the hero shows, and the line above it: the title
+// of the row it comes from.
+type heroEntry struct {
+	card    *capiv1.Card
+	eyebrow string
+}
+
+// heroKinds are the kinds the hero shows.
+var heroKinds = []capiv1.CardKind{
+	capiv1.CardKind_CARD_KIND_MOVIE, capiv1.CardKind_CARD_KIND_SERIES,
+	capiv1.CardKind_CARD_KIND_VIDEO, capiv1.CardKind_CARD_KIND_MUSIC_VIDEO,
+}
+
+// heroEntries returns up to five titles with backdrops from Home's rows,
+// Continue Watching aside, as the web UI's.
+func heroEntries(c *ui.Context, rows []*capiv1.Row) []heroEntry {
+	var out []heroEntry
+	seen := map[string]bool{}
 	for _, r := range rows {
-		if r.GetKind() != capiv1.RowKind_ROW_KIND_RECENTLY_ADDED {
+		if r.GetKind() == capiv1.RowKind_ROW_KIND_CONTINUE_WATCHING || !r.HasItems() {
 			continue
 		}
 		for _, card := range r.GetItems().GetCards() {
-			k := card.GetKind()
-			if (k == capiv1.CardKind_CARD_KIND_MOVIE || k == capiv1.CardKind_CARD_KIND_SERIES) && card.GetThumb().GetUrl() != "" {
-				cards = append(cards, card)
-				if len(cards) == heroTitles {
-					return cards
-				}
+			k := key(card.GetServerId(), card.GetItemId())
+			if seen[k] || !slices.Contains(heroKinds, card.GetKind()) || card.GetBackdrop().GetUrl() == "" {
+				continue
+			}
+			seen[k] = true
+			out = append(out, heroEntry{card, rowTitle(c, r)})
+			if len(out) == heroTitles {
+				return out
 			}
 		}
 	}
-	return cards
+	return out
 }
 
-// hero builds the titles at the top of Home, one after another.
-func (a *App) hero(c *ui.Context, cards []*capiv1.Card) {
+// hero builds the titles at the top of Home, one after another, as the
+// web UI's: each with the row it comes from, its logo or title, its
+// facts, overview and the buttons to play it and open its details. The
+// pointer over it pauses it.
+func (a *App) hero(c *ui.Context, entries []heroEntry) {
 	h := &a.homeState
 	now := c.Now()
-	if h.heroStart.IsZero() {
-		h.heroStart = now
+	if h.heroSince.IsZero() {
+		h.heroSince = now
 	}
-	i := (h.heroPick + int(now.Sub(h.heroStart)/heroInterval)) % len(cards)
-	c.After(heroInterval - now.Sub(h.heroStart)%heroInterval)
-	card := cards[i]
+	shown := h.heroShown
+	if !h.heroPaused {
+		shown += now.Sub(h.heroSince)
+	}
+	if len(entries) > 1 && !h.heroPaused {
+		if shown >= heroInterval {
+			h.heroAt, h.heroSince, h.heroShown, shown = h.heroAt+1, now, 0, 0
+		}
+		c.After(heroInterval - shown)
+	}
+	at := h.heroAt % len(entries)
+	card, eyebrow := entries[at].card, entries[at].eyebrow
 	_, wh := c.Size()
-	height := min(max(wh*0.62, 360), 620)
 	tv := style.TV(c)
+	height := float32(470)
 	if tv {
 		// On the television, 78 % of the screen, behind the bar (docs/tv.md §6.1).
 		height = wh * 0.78
 	}
 	white := ui.RGB(255, 255, 255)
-	ui.Box(c).FillWidth().Height(height).Clip().Background(style.Color(design.DarkColors.SurfaceRaised)).DragWindow().Children(func() {
+	frame := ui.Box(c).FillWidth().Height(height).Clip().Background(style.Color(design.DarkColors.SurfaceRaised)).DragWindow()
+	if paused := frame.Hovered() && !tv; paused != h.heroPaused {
+		if paused {
+			h.heroShown = shown
+		}
+		h.heroPaused, h.heroSince = paused, now
+	}
+	frame.Children(func() {
 		w, _ := c.Size()
-		if bitmap := a.opts.Images.Get(card.GetThumb().GetUrl(), w, scale); bitmap != nil {
+		if bitmap := a.opts.Images.Get(card.GetBackdrop().GetUrl(), w, scale); bitmap != nil {
 			ui.Image(c.Key(card.GetItemId()), bitmap).Absolute().Top(0).Left(0).Right(0).Bottom(0).Fit(ui.Cover)
 		}
 		ui.Box(c).Absolute().Top(0).Left(0).Right(0).Bottom(0).LinearGradient(ui.LinearGradient{
-			Angle: 50,
-			Stops: []ui.GradientStop{{At: 0, Color: ui.RGBA(0, 0, 0, 0.85)}, {At: 0.55, Color: ui.RGBA(0, 0, 0, 0.25)}, {At: 1, Color: ui.RGBA(0, 0, 0, 0)}},
+			Angle: 90,
+			Stops: []ui.GradientStop{{At: 0, Color: ui.RGBA(0, 0, 0, 0.78)}, {At: 0.45, Color: ui.RGBA(0, 0, 0, 0.35)}, {At: 0.75, Color: ui.RGBA(0, 0, 0, 0)}},
 		})
-		maxWidth := float32(560)
+		ui.Box(c).Absolute().Top(0).Left(0).Right(0).Bottom(0).LinearGradient(ui.LinearGradient{
+			Angle: 0,
+			Stops: []ui.GradientStop{{At: 0, Color: ui.RGBA(0, 0, 0, 0.55)}, {At: 0.45, Color: ui.RGBA(0, 0, 0, 0)}},
+		})
+		text := ui.Column(c).Absolute().Left(40).Bottom(40).MaxWidth(560).Gap(12)
 		if tv {
-			maxWidth = 960
+			text.Left(style.Layout(c).Margin).Bottom(wh * 0.14).MaxWidth(860)
 		}
-		ui.Column(c).Absolute().Left(style.Layout(c).Margin).Bottom(56).MaxWidth(maxWidth).Gap(10).Children(func() {
-			title := style.Text(ui.Text(c, card.GetTitle()), style.Type(c).Display).TextColor(white).MaxLines(2)
-			if tv {
-				title.FontSize(72).LineHeight(1.1)
+		text.Children(func() {
+			style.Text(ui.Text(c, strings.ToUpper(eyebrow)), style.Type(c).Footnote).FontWeight(600).LetterSpacing(0.4).TextColor(white.Alpha(0.75)).SingleLine()
+			logo := false
+			if u := card.GetLogo().GetUrl(); u != "" {
+				logoH := float32(96)
+				if tv {
+					logoH = 160
+				}
+				if bitmap := a.opts.Images.Get(u, 600, scale); bitmap != nil {
+					ui.Image(c, bitmap).MaxWidth(448).MaxHeight(logoH).Fit(ui.Contain).AlignSelf(ui.Start).Label(card.GetTitle())
+					logo = true
+				}
 			}
-			if facts := cardFacts(c, card); facts != "" {
-				style.Text(ui.Text(c, facts), style.Type(c).Callout).TextColor(white.Alpha(0.85)).SingleLine()
+			if !logo {
+				size := float32(52)
+				if tv {
+					size = 72
+				}
+				style.Text(ui.Text(c, card.GetTitle()), style.Type(c).Display).FontSize(size).FontWeight(700).LineHeight(1.05).TextColor(white).MaxLines(2)
+			}
+			facts := []string{}
+			if card.GetYear() > 0 {
+				facts = append(facts, strconv.Itoa(int(card.GetYear())))
+			}
+			if r := card.GetRuntimeMs(); r > 0 {
+				facts = append(facts, runtime(time.Duration(r)*time.Millisecond))
+			}
+			facts = append(facts, card.GetGenres()[:min(2, len(card.GetGenres()))]...)
+			if len(facts) > 0 || card.GetOfficialRating() != "" {
+				ui.Row(c).Gap(8).AlignItems(ui.Center).Wrap().Children(func() {
+					if len(facts) > 0 {
+						style.Text(ui.Text(c, strings.Join(facts, " · ")), style.Type(c).Callout).TextColor(white.Alpha(0.8))
+					}
+					if rating := card.GetOfficialRating(); rating != "" {
+						ui.Box(c).Padding(0, 6).Radius(4).Border(1, white.Alpha(0.5)).Children(func() {
+							style.Text(ui.Text(c, rating), style.Type(c).Caption).TextColor(white.Alpha(0.9))
+						})
+					}
+				})
+			}
+			if o := card.GetOverview(); o != "" {
+				style.Text(ui.Text(c, o), style.Type(c).Body).TextColor(white.Alpha(0.85)).MaxLines(3)
 			}
 			ui.Row(c).Gap(12).Margin(8, 0, 0).Children(func() {
-				if card.GetKind() == capiv1.CardKind_CARD_KIND_MOVIE {
+				if card.GetKind() != capiv1.CardKind_CARD_KIND_SERIES {
 					label := style.T(c, "item.play")
 					if card.HasProgress() && card.GetProgress() > 0 {
 						label = style.T(c, "item.resume")
@@ -169,17 +249,26 @@ func (a *App) hero(c *ui.Context, cards []*capiv1.Card) {
 				}
 			})
 		})
-		ui.Row(c).Absolute().Right(style.Layout(c).Margin).Bottom(24).Gap(8).Children(func() {
-			for j := range cards {
-				dot := ui.ButtonBase(c.Key(j)).Size(8, 8).Radius(4).Background(white.Alpha(0.4)).Label(cards[j].GetTitle())
-				if j == i {
-					dot.Background(white)
-				}
-				if dot.Clicked() {
-					h.heroPick, h.heroStart = j, now
-				}
+		if len(entries) > 1 {
+			dots := ui.Row(c).Absolute().Right(32).Bottom(32).Gap(6).AlignItems(ui.Center)
+			if tv {
+				dots.Right(style.Layout(c).Margin).Bottom(wh * 0.14)
 			}
-		})
+			dots.Children(func() {
+				for j, e := range entries {
+					dot := ui.ButtonBase(c.Key(j)).Size(6, 6).Radius(3).Background(white.Alpha(0.45)).Label(e.card.GetTitle())
+					switch {
+					case j == at:
+						dot.Width(20).Background(white)
+					case dot.Hovered():
+						dot.Background(white.Alpha(0.7))
+					}
+					if dot.Clicked() {
+						h.heroAt, h.heroSince, h.heroShown = j, now, 0
+					}
+				}
+			})
+		}
 	})
 }
 
@@ -211,18 +300,6 @@ func (a *App) heroButton(c *ui.Context, icon, label string, primary bool) ui.Ele
 		style.Text(ui.Text(c, label), style.Type(c).Headline).TextColor(fg).SingleLine()
 	})
 	return b
-}
-
-// cardFacts returns a card's facts: the year and the runtime.
-func cardFacts(c *ui.Context, card *capiv1.Card) string {
-	var facts []string
-	if card.GetYear() > 0 {
-		facts = append(facts, fmt.Sprint(card.GetYear()))
-	}
-	if card.GetRuntimeMs() > 0 {
-		facts = append(facts, runtime(time.Duration(card.GetRuntimeMs())*time.Millisecond))
-	}
-	return joinFacts(facts)
 }
 
 // runtime returns a length as "1h 52m" or "48m".

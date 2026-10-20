@@ -7966,24 +7966,29 @@ func (b0 Version_builder) Build() *Version {
 
 // An item as a card in a row or grid.
 type Card struct {
-	state                  protoimpl.MessageState `protogen:"opaque.v1"`
-	xxx_hidden_ServerId    string                 `protobuf:"bytes,1,opt,name=server_id,json=serverId"`
-	xxx_hidden_ItemId      string                 `protobuf:"bytes,2,opt,name=item_id,json=itemId"`
-	xxx_hidden_Kind        CardKind               `protobuf:"varint,3,opt,name=kind,enum=mavio.capi.v1.CardKind"`
-	xxx_hidden_Title       string                 `protobuf:"bytes,4,opt,name=title"`
-	xxx_hidden_Subtitle    string                 `protobuf:"bytes,5,opt,name=subtitle"`
-	xxx_hidden_Year        int32                  `protobuf:"varint,6,opt,name=year"`
-	xxx_hidden_Poster      *Artwork               `protobuf:"bytes,7,opt,name=poster"`
-	xxx_hidden_Thumb       *Artwork               `protobuf:"bytes,8,opt,name=thumb"`
-	xxx_hidden_Progress    float32                `protobuf:"fixed32,9,opt,name=progress"`
-	xxx_hidden_Played      bool                   `protobuf:"varint,10,opt,name=played"`
-	xxx_hidden_Favorite    bool                   `protobuf:"varint,11,opt,name=favorite"`
-	xxx_hidden_RuntimeMs   int64                  `protobuf:"varint,12,opt,name=runtime_ms,json=runtimeMs"`
-	xxx_hidden_Versions    *[]*Version            `protobuf:"bytes,13,rep,name=versions"`
-	XXX_raceDetectHookData protoimpl.RaceDetectHookData
-	XXX_presence           [1]uint32
-	unknownFields          protoimpl.UnknownFields
-	sizeCache              protoimpl.SizeCache
+	state                     protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_ServerId       string                 `protobuf:"bytes,1,opt,name=server_id,json=serverId"`
+	xxx_hidden_ItemId         string                 `protobuf:"bytes,2,opt,name=item_id,json=itemId"`
+	xxx_hidden_Kind           CardKind               `protobuf:"varint,3,opt,name=kind,enum=mavio.capi.v1.CardKind"`
+	xxx_hidden_Title          string                 `protobuf:"bytes,4,opt,name=title"`
+	xxx_hidden_Subtitle       string                 `protobuf:"bytes,5,opt,name=subtitle"`
+	xxx_hidden_Year           int32                  `protobuf:"varint,6,opt,name=year"`
+	xxx_hidden_Poster         *Artwork               `protobuf:"bytes,7,opt,name=poster"`
+	xxx_hidden_Thumb          *Artwork               `protobuf:"bytes,8,opt,name=thumb"`
+	xxx_hidden_Progress       float32                `protobuf:"fixed32,9,opt,name=progress"`
+	xxx_hidden_Played         bool                   `protobuf:"varint,10,opt,name=played"`
+	xxx_hidden_Favorite       bool                   `protobuf:"varint,11,opt,name=favorite"`
+	xxx_hidden_RuntimeMs      int64                  `protobuf:"varint,12,opt,name=runtime_ms,json=runtimeMs"`
+	xxx_hidden_Versions       *[]*Version            `protobuf:"bytes,13,rep,name=versions"`
+	xxx_hidden_Backdrop       *Artwork               `protobuf:"bytes,14,opt,name=backdrop"`
+	xxx_hidden_Logo           *Artwork               `protobuf:"bytes,15,opt,name=logo"`
+	xxx_hidden_Overview       string                 `protobuf:"bytes,16,opt,name=overview"`
+	xxx_hidden_Genres         []string               `protobuf:"bytes,17,rep,name=genres"`
+	xxx_hidden_OfficialRating string                 `protobuf:"bytes,18,opt,name=official_rating,json=officialRating"`
+	XXX_raceDetectHookData    protoimpl.RaceDetectHookData
+	XXX_presence              [1]uint32
+	unknownFields             protoimpl.UnknownFields
+	sizeCache                 protoimpl.SizeCache
 }
 
 func (x *Card) Reset() {
@@ -8104,6 +8109,41 @@ func (x *Card) GetVersions() []*Version {
 	return nil
 }
 
+func (x *Card) GetBackdrop() *Artwork {
+	if x != nil {
+		return x.xxx_hidden_Backdrop
+	}
+	return nil
+}
+
+func (x *Card) GetLogo() *Artwork {
+	if x != nil {
+		return x.xxx_hidden_Logo
+	}
+	return nil
+}
+
+func (x *Card) GetOverview() string {
+	if x != nil {
+		return x.xxx_hidden_Overview
+	}
+	return ""
+}
+
+func (x *Card) GetGenres() []string {
+	if x != nil {
+		return x.xxx_hidden_Genres
+	}
+	return nil
+}
+
+func (x *Card) GetOfficialRating() string {
+	if x != nil {
+		return x.xxx_hidden_OfficialRating
+	}
+	return ""
+}
+
 func (x *Card) SetServerId(v string) {
 	x.xxx_hidden_ServerId = v
 }
@@ -8138,7 +8178,7 @@ func (x *Card) SetThumb(v *Artwork) {
 
 func (x *Card) SetProgress(v float32) {
 	x.xxx_hidden_Progress = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 8, 13)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 8, 18)
 }
 
 func (x *Card) SetPlayed(v bool) {
@@ -8155,6 +8195,26 @@ func (x *Card) SetRuntimeMs(v int64) {
 
 func (x *Card) SetVersions(v []*Version) {
 	x.xxx_hidden_Versions = &v
+}
+
+func (x *Card) SetBackdrop(v *Artwork) {
+	x.xxx_hidden_Backdrop = v
+}
+
+func (x *Card) SetLogo(v *Artwork) {
+	x.xxx_hidden_Logo = v
+}
+
+func (x *Card) SetOverview(v string) {
+	x.xxx_hidden_Overview = v
+}
+
+func (x *Card) SetGenres(v []string) {
+	x.xxx_hidden_Genres = v
+}
+
+func (x *Card) SetOfficialRating(v string) {
+	x.xxx_hidden_OfficialRating = v
 }
 
 func (x *Card) HasPoster() bool {
@@ -8178,6 +8238,20 @@ func (x *Card) HasProgress() bool {
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 8)
 }
 
+func (x *Card) HasBackdrop() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_Backdrop != nil
+}
+
+func (x *Card) HasLogo() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_Logo != nil
+}
+
 func (x *Card) ClearPoster() {
 	x.xxx_hidden_Poster = nil
 }
@@ -8189,6 +8263,14 @@ func (x *Card) ClearThumb() {
 func (x *Card) ClearProgress() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 8)
 	x.xxx_hidden_Progress = 0
+}
+
+func (x *Card) ClearBackdrop() {
+	x.xxx_hidden_Backdrop = nil
+}
+
+func (x *Card) ClearLogo() {
+	x.xxx_hidden_Logo = nil
 }
 
 type Card_builder struct {
@@ -8216,6 +8298,15 @@ type Card_builder struct {
 	RuntimeMs int64
 	// The same title on the user's other servers.
 	Versions []*Version
+	// The first backdrop, which Home's hero shows.
+	Backdrop *Artwork
+	// The logo, the title drawn.
+	Logo *Artwork
+	// What it is about.
+	Overview string
+	Genres   []string
+	// Its parental rating, as "PG-13".
+	OfficialRating string
 }
 
 func (b0 Card_builder) Build() *Card {
@@ -8231,13 +8322,18 @@ func (b0 Card_builder) Build() *Card {
 	x.xxx_hidden_Poster = b.Poster
 	x.xxx_hidden_Thumb = b.Thumb
 	if b.Progress != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 8, 13)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 8, 18)
 		x.xxx_hidden_Progress = *b.Progress
 	}
 	x.xxx_hidden_Played = b.Played
 	x.xxx_hidden_Favorite = b.Favorite
 	x.xxx_hidden_RuntimeMs = b.RuntimeMs
 	x.xxx_hidden_Versions = &b.Versions
+	x.xxx_hidden_Backdrop = b.Backdrop
+	x.xxx_hidden_Logo = b.Logo
+	x.xxx_hidden_Overview = b.Overview
+	x.xxx_hidden_Genres = b.Genres
+	x.xxx_hidden_OfficialRating = b.OfficialRating
 	return m0
 }
 
@@ -12025,7 +12121,7 @@ const file_mavio_capi_v1_capi_proto_rawDesc = "" +
 	"\bblurhash\x18\x03 \x01(\tR\bblurhash\"?\n" +
 	"\aVersion\x12\x1b\n" +
 	"\tserver_id\x18\x01 \x01(\tR\bserverId\x12\x17\n" +
-	"\aitem_id\x18\x02 \x01(\tR\x06itemId\"\xb7\x03\n" +
+	"\aitem_id\x18\x02 \x01(\tR\x06itemId\"\xf4\x04\n" +
 	"\x04Card\x12\x1b\n" +
 	"\tserver_id\x18\x01 \x01(\tR\bserverId\x12\x17\n" +
 	"\aitem_id\x18\x02 \x01(\tR\x06itemId\x12+\n" +
@@ -12041,7 +12137,12 @@ const file_mavio_capi_v1_capi_proto_rawDesc = "" +
 	"\bfavorite\x18\v \x01(\bR\bfavorite\x12\x1d\n" +
 	"\n" +
 	"runtime_ms\x18\f \x01(\x03R\truntimeMs\x122\n" +
-	"\bversions\x18\r \x03(\v2\x16.mavio.capi.v1.VersionR\bversions\"\xad\x03\n" +
+	"\bversions\x18\r \x03(\v2\x16.mavio.capi.v1.VersionR\bversions\x122\n" +
+	"\bbackdrop\x18\x0e \x01(\v2\x16.mavio.capi.v1.ArtworkR\bbackdrop\x12*\n" +
+	"\x04logo\x18\x0f \x01(\v2\x16.mavio.capi.v1.ArtworkR\x04logo\x12\x1a\n" +
+	"\boverview\x18\x10 \x01(\tR\boverview\x12\x16\n" +
+	"\x06genres\x18\x11 \x03(\tR\x06genres\x12'\n" +
+	"\x0fofficial_rating\x18\x12 \x01(\tR\x0eofficialRating\"\xad\x03\n" +
 	"\tTitleCard\x12\x14\n" +
 	"\x05movie\x18\x01 \x01(\bR\x05movie\x12\x14\n" +
 	"\x05title\x18\x02 \x01(\tR\x05title\x12\x12\n" +
@@ -12450,46 +12551,48 @@ var file_mavio_capi_v1_capi_proto_depIdxs = []int32{
 	66,  // 70: mavio.capi.v1.Card.poster:type_name -> mavio.capi.v1.Artwork
 	66,  // 71: mavio.capi.v1.Card.thumb:type_name -> mavio.capi.v1.Artwork
 	67,  // 72: mavio.capi.v1.Card.versions:type_name -> mavio.capi.v1.Version
-	97,  // 73: mavio.capi.v1.TitleCard.external_ids:type_name -> mavio.capi.v1.TitleCard.ExternalIdsEntry
-	67,  // 74: mavio.capi.v1.TitleCard.available:type_name -> mavio.capi.v1.Version
-	3,   // 75: mavio.capi.v1.Row.kind:type_name -> mavio.capi.v1.RowKind
-	71,  // 76: mavio.capi.v1.Row.items:type_name -> mavio.capi.v1.Cards
-	72,  // 77: mavio.capi.v1.Row.titles:type_name -> mavio.capi.v1.TitleCards
-	73,  // 78: mavio.capi.v1.Row.loading:type_name -> mavio.capi.v1.Loading
-	68,  // 79: mavio.capi.v1.Cards.cards:type_name -> mavio.capi.v1.Card
-	69,  // 80: mavio.capi.v1.TitleCards.titles:type_name -> mavio.capi.v1.TitleCard
-	70,  // 81: mavio.capi.v1.Rows.rows:type_name -> mavio.capi.v1.Row
-	68,  // 82: mavio.capi.v1.Page.cards:type_name -> mavio.capi.v1.Card
-	4,   // 83: mavio.capi.v1.Library.kind:type_name -> mavio.capi.v1.LibraryType
-	76,  // 84: mavio.capi.v1.Libraries.libraries:type_name -> mavio.capi.v1.Library
-	66,  // 85: mavio.capi.v1.Credit.photo:type_name -> mavio.capi.v1.Artwork
-	80,  // 86: mavio.capi.v1.Source.audio:type_name -> mavio.capi.v1.AudioStream
-	68,  // 87: mavio.capi.v1.Details.card:type_name -> mavio.capi.v1.Card
-	66,  // 88: mavio.capi.v1.Details.backdrop:type_name -> mavio.capi.v1.Artwork
-	66,  // 89: mavio.capi.v1.Details.logo:type_name -> mavio.capi.v1.Artwork
-	78,  // 90: mavio.capi.v1.Details.credits:type_name -> mavio.capi.v1.Credit
-	79,  // 91: mavio.capi.v1.Details.sources:type_name -> mavio.capi.v1.Source
-	68,  // 92: mavio.capi.v1.Details.children:type_name -> mavio.capi.v1.Card
-	68,  // 93: mavio.capi.v1.Details.similar:type_name -> mavio.capi.v1.Card
-	83,  // 94: mavio.capi.v1.SearchResults.servers:type_name -> mavio.capi.v1.ServerResults
-	68,  // 95: mavio.capi.v1.ServerResults.cards:type_name -> mavio.capi.v1.Card
-	5,   // 96: mavio.capi.v1.Playback.kind:type_name -> mavio.capi.v1.PlayKind
-	85,  // 97: mavio.capi.v1.Playback.subtitles:type_name -> mavio.capi.v1.SubtitleTrack
-	88,  // 98: mavio.capi.v1.Event.state:type_name -> mavio.capi.v1.StreamState
-	89,  // 99: mavio.capi.v1.Event.connected:type_name -> mavio.capi.v1.Connected
-	90,  // 100: mavio.capi.v1.Event.library_changed:type_name -> mavio.capi.v1.LibraryChanged
-	91,  // 101: mavio.capi.v1.Event.user_data_changed:type_name -> mavio.capi.v1.UserDataChanged
-	92,  // 102: mavio.capi.v1.Event.sessions_changed:type_name -> mavio.capi.v1.SessionsChanged
-	95,  // 103: mavio.capi.v1.Event.token_changed:type_name -> mavio.capi.v1.TokenChanged
-	87,  // 104: mavio.capi.v1.Event.servers_changed:type_name -> mavio.capi.v1.ServersChanged
-	93,  // 105: mavio.capi.v1.Event.scan_progress_changed:type_name -> mavio.capi.v1.ScanProgressChanged
-	7,   // 106: mavio.capi.v1.StreamState.state:type_name -> mavio.capi.v1.StreamState.State
-	94,  // 107: mavio.capi.v1.ScanProgressChanged.progress:type_name -> mavio.capi.v1.ScanProgress
-	108, // [108:108] is the sub-list for method output_type
-	108, // [108:108] is the sub-list for method input_type
-	108, // [108:108] is the sub-list for extension type_name
-	108, // [108:108] is the sub-list for extension extendee
-	0,   // [0:108] is the sub-list for field type_name
+	66,  // 73: mavio.capi.v1.Card.backdrop:type_name -> mavio.capi.v1.Artwork
+	66,  // 74: mavio.capi.v1.Card.logo:type_name -> mavio.capi.v1.Artwork
+	97,  // 75: mavio.capi.v1.TitleCard.external_ids:type_name -> mavio.capi.v1.TitleCard.ExternalIdsEntry
+	67,  // 76: mavio.capi.v1.TitleCard.available:type_name -> mavio.capi.v1.Version
+	3,   // 77: mavio.capi.v1.Row.kind:type_name -> mavio.capi.v1.RowKind
+	71,  // 78: mavio.capi.v1.Row.items:type_name -> mavio.capi.v1.Cards
+	72,  // 79: mavio.capi.v1.Row.titles:type_name -> mavio.capi.v1.TitleCards
+	73,  // 80: mavio.capi.v1.Row.loading:type_name -> mavio.capi.v1.Loading
+	68,  // 81: mavio.capi.v1.Cards.cards:type_name -> mavio.capi.v1.Card
+	69,  // 82: mavio.capi.v1.TitleCards.titles:type_name -> mavio.capi.v1.TitleCard
+	70,  // 83: mavio.capi.v1.Rows.rows:type_name -> mavio.capi.v1.Row
+	68,  // 84: mavio.capi.v1.Page.cards:type_name -> mavio.capi.v1.Card
+	4,   // 85: mavio.capi.v1.Library.kind:type_name -> mavio.capi.v1.LibraryType
+	76,  // 86: mavio.capi.v1.Libraries.libraries:type_name -> mavio.capi.v1.Library
+	66,  // 87: mavio.capi.v1.Credit.photo:type_name -> mavio.capi.v1.Artwork
+	80,  // 88: mavio.capi.v1.Source.audio:type_name -> mavio.capi.v1.AudioStream
+	68,  // 89: mavio.capi.v1.Details.card:type_name -> mavio.capi.v1.Card
+	66,  // 90: mavio.capi.v1.Details.backdrop:type_name -> mavio.capi.v1.Artwork
+	66,  // 91: mavio.capi.v1.Details.logo:type_name -> mavio.capi.v1.Artwork
+	78,  // 92: mavio.capi.v1.Details.credits:type_name -> mavio.capi.v1.Credit
+	79,  // 93: mavio.capi.v1.Details.sources:type_name -> mavio.capi.v1.Source
+	68,  // 94: mavio.capi.v1.Details.children:type_name -> mavio.capi.v1.Card
+	68,  // 95: mavio.capi.v1.Details.similar:type_name -> mavio.capi.v1.Card
+	83,  // 96: mavio.capi.v1.SearchResults.servers:type_name -> mavio.capi.v1.ServerResults
+	68,  // 97: mavio.capi.v1.ServerResults.cards:type_name -> mavio.capi.v1.Card
+	5,   // 98: mavio.capi.v1.Playback.kind:type_name -> mavio.capi.v1.PlayKind
+	85,  // 99: mavio.capi.v1.Playback.subtitles:type_name -> mavio.capi.v1.SubtitleTrack
+	88,  // 100: mavio.capi.v1.Event.state:type_name -> mavio.capi.v1.StreamState
+	89,  // 101: mavio.capi.v1.Event.connected:type_name -> mavio.capi.v1.Connected
+	90,  // 102: mavio.capi.v1.Event.library_changed:type_name -> mavio.capi.v1.LibraryChanged
+	91,  // 103: mavio.capi.v1.Event.user_data_changed:type_name -> mavio.capi.v1.UserDataChanged
+	92,  // 104: mavio.capi.v1.Event.sessions_changed:type_name -> mavio.capi.v1.SessionsChanged
+	95,  // 105: mavio.capi.v1.Event.token_changed:type_name -> mavio.capi.v1.TokenChanged
+	87,  // 106: mavio.capi.v1.Event.servers_changed:type_name -> mavio.capi.v1.ServersChanged
+	93,  // 107: mavio.capi.v1.Event.scan_progress_changed:type_name -> mavio.capi.v1.ScanProgressChanged
+	7,   // 108: mavio.capi.v1.StreamState.state:type_name -> mavio.capi.v1.StreamState.State
+	94,  // 109: mavio.capi.v1.ScanProgressChanged.progress:type_name -> mavio.capi.v1.ScanProgress
+	110, // [110:110] is the sub-list for method output_type
+	110, // [110:110] is the sub-list for method input_type
+	110, // [110:110] is the sub-list for extension type_name
+	110, // [110:110] is the sub-list for extension extendee
+	0,   // [0:110] is the sub-list for field type_name
 }
 
 func init() { file_mavio_capi_v1_capi_proto_init() }

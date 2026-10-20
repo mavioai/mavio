@@ -10519,6 +10519,24 @@ pub struct Card {
     ///
     /// Field 13: `versions`
     pub versions: ::buffa::alloc::vec::Vec<Version>,
+    /// The first backdrop, which Home's hero shows.
+    ///
+    /// Field 14: `backdrop`
+    pub backdrop: ::buffa::MessageField<Artwork, ::buffa::Inline<Artwork>>,
+    /// The logo, the title drawn.
+    ///
+    /// Field 15: `logo`
+    pub logo: ::buffa::MessageField<Artwork, ::buffa::Inline<Artwork>>,
+    /// What it is about.
+    ///
+    /// Field 16: `overview`
+    pub overview: ::buffa::alloc::string::String,
+    /// Field 17: `genres`
+    pub genres: ::buffa::alloc::vec::Vec<::buffa::alloc::string::String>,
+    /// Its parental rating, as "PG-13".
+    ///
+    /// Field 18: `official_rating`
+    pub official_rating: ::buffa::alloc::string::String,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -10538,6 +10556,11 @@ impl ::core::fmt::Debug for Card {
             .field("favorite", &self.favorite)
             .field("runtime_ms", &self.runtime_ms)
             .field("versions", &self.versions)
+            .field("backdrop", &self.backdrop)
+            .field("logo", &self.logo)
+            .field("overview", &self.overview)
+            .field("genres", &self.genres)
+            .field("official_rating", &self.official_rating)
             .finish()
     }
 }
@@ -10634,6 +10657,33 @@ impl ::buffa::Message for Card {
                 += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
                     + inner_size as u64;
         }
+        if self.backdrop.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.backdrop.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        if self.logo.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.logo.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        if !self.overview.is_empty() {
+            size += 2u64 + ::buffa::types::string_encoded_len(&self.overview) as u64;
+        }
+        for v in &self.genres {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if !self.official_rating.is_empty() {
+            size
+                += 2u64
+                    + ::buffa::types::string_encoded_len(&self.official_rating) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -10700,6 +10750,31 @@ impl ::buffa::Message for Card {
                 buf,
             );
             v.write_to(__cache, buf);
+        }
+        if self.backdrop.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                14u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.backdrop.write_to(__cache, buf);
+        }
+        if self.logo.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                15u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.logo.write_to(__cache, buf);
+        }
+        if !self.overview.is_empty() {
+            ::buffa::types::put_string_field(16u32, &self.overview, buf);
+        }
+        for v in &self.genres {
+            ::buffa::types::put_string_field(17u32, v, buf);
+        }
+        if !self.official_rating.is_empty() {
+            ::buffa::types::put_string_field(18u32, &self.official_rating, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -10820,6 +10895,53 @@ impl ::buffa::Message for Card {
                 ::buffa::Message::merge_length_delimited(&mut elem, buf, ctx)?;
                 self.versions.push(elem);
             }
+            14u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::Message::merge_length_delimited(
+                    self.backdrop.get_or_insert_default(),
+                    buf,
+                    ctx,
+                )?;
+            }
+            15u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::Message::merge_length_delimited(
+                    self.logo.get_or_insert_default(),
+                    buf,
+                    ctx,
+                )?;
+            }
+            16u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(&mut self.overview, buf)?;
+            }
+            17u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __elem = ::buffa::types::decode_string(buf)?;
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&__elem),
+                )?;
+                self.genres.push(__elem);
+            }
+            18u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(&mut self.official_rating, buf)?;
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -10841,6 +10963,11 @@ impl ::buffa::Message for Card {
         self.favorite = false;
         self.runtime_ms = 0i64;
         self.versions.clear();
+        self.backdrop = ::buffa::MessageField::none();
+        self.logo = ::buffa::MessageField::none();
+        self.overview.clear();
+        self.genres.clear();
+        self.official_rating.clear();
         self.__buffa_unknown_fields.clear();
     }
 }

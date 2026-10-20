@@ -139,6 +139,12 @@ func (f *fakeCore) card(id string, progressMinutes int, played bool) *capiv1.Car
 		Poster: f.artwork(id + "-poster"), Thumb: f.artwork(id + "-thumb"),
 		RuntimeMs: int64(it.RuntimeMinutes) * 60000, Played: played,
 	}
+	if it.Kind == "movie" || it.Kind == "series" {
+		b.Backdrop = f.artwork(id + "-backdrop")
+	}
+	if id == "lantern" {
+		b.Overview, b.OfficialRating, b.Genres = "A crew drifts beyond the last station.", "PG-13", []string{"Science Fiction", "Drama", "Thriller"}
+	}
 	if it.Kind == "episode" {
 		b.Subtitle = fmt.Sprintf("%s · S%d:E%d", f.s.Items[it.Series].Name, it.Season, it.Episode)
 	}
@@ -335,7 +341,7 @@ func artworkServer(t testing.TB) *httptest.Server {
 			h = (h*31 + int(c)) % len(artworkColors)
 		}
 		width, height := 200, 300
-		if strings.HasSuffix(id, "-thumb") {
+		if strings.HasSuffix(id, "-thumb") || strings.HasSuffix(id, "-backdrop") {
 			width, height = 320, 180
 		}
 		img := image.NewRGBA(image.Rect(0, 0, width, height))
