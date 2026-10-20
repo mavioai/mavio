@@ -1854,18 +1854,9 @@ export type MessageKey =
   | 'assistant.insecure'
   | 'assistant.noMicrophone'
   | 'assistant.microphoneDenied'
-  | 'assistant.recognitionTimedOut'
-  | 'assistant.noRecognizer'
   | 'assistant.off'
   | 'assistant.cantDo'
-  | 'assistant.speakAnswers'
-  | 'assistant.speakAnswersDetail'
   | 'assistant.voice'
-  | 'assistant.deviceVoice'
-  | 'assistant.recognition'
-  | 'assistant.serverFirst'
-  | 'assistant.deviceFirst'
-  | 'assistant.recognitionFooter'
   | 'assistant.memory'
   | 'assistant.memoryFooter'
   | 'assistant.memoryOff'
@@ -1903,11 +1894,15 @@ export type MessageKey =
   | 'assistant.firstReady'
   | 'assistant.hints'
   | 'assistant.hintsDetail'
-  | 'assistant.defaultVoices'
-  | 'assistant.defaultVoicesFooter'
+  | 'assistant.noVoice'
+  | 'assistant.speaking'
+  | 'assistant.speech'
+  | 'assistant.speechFooter'
+  | 'assistant.addLanguage'
+  | 'assistant.longestPause'
+  | 'assistant.commitDelay'
+  | 'assistant.sessionIdle'
   | 'assistant.language'
-  | 'assistant.addVoice'
-  | 'assistant.noSpeech'
   | 'assistant.saved'
   | 'settings.advancedGroup'
   | 'settings.pin'
@@ -3797,18 +3792,9 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "assistant.insecure": "The microphone works only on a secure (HTTPS) address; type your request instead.",
     "assistant.noMicrophone": "The microphone can't be used: {error}",
     "assistant.microphoneDenied": "Allow this site to use the microphone to talk, or type your request.",
-    "assistant.recognitionTimedOut": "Speech recognition took longer than a minute. Try again, or type your request.",
-    "assistant.noRecognizer": "Neither the server nor this browser recognizes speech; type your request instead.",
     "assistant.off": "The assistant is off on this server.",
     "assistant.cantDo": "This page can't do that.",
-    "assistant.speakAnswers": "Speak Answers",
-    "assistant.speakAnswersDetail": "Answers to spoken requests are read aloud",
     "assistant.voice": "Voice",
-    "assistant.deviceVoice": "This device's voice",
-    "assistant.recognition": "Speech Recognition",
-    "assistant.serverFirst": "Server first",
-    "assistant.deviceFirst": "This device first",
-    "assistant.recognitionFooter": "Most browsers recognize speech on their maker's servers; the server's recognizer sends audio only to the service its administrator chose.",
     "assistant.memory": "Memory",
     "assistant.memoryFooter": "What you tell the assistant about yourself, kept on the server for its AI.",
     "assistant.memoryOff": "Memory is off on this server.",
@@ -3846,11 +3832,15 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "assistant.firstReady": "First ready",
     "assistant.hints": "Send Hints",
     "assistant.hintsDetail": "Titles, names and devices help the recognizer",
-    "assistant.defaultVoices": "Default Voices",
-    "assistant.defaultVoicesFooter": "Clients that speak with the server's voices use these unless the user picks one.",
+    "assistant.noVoice": "Voice isn't set up on this server; type your request instead.",
+    "assistant.speaking": "Speaking…",
+    "assistant.speech": "Speech",
+    "assistant.speechFooter": "The recognizer and voice of each language; a language not listed, or left empty, uses the first ready one.",
+    "assistant.addLanguage": "Add Language",
+    "assistant.longestPause": "Longest Pause (Seconds)",
+    "assistant.commitDelay": "Wait Before Acting (Seconds)",
+    "assistant.sessionIdle": "End Session After (Seconds)",
     "assistant.language": "Language",
-    "assistant.addVoice": "Add Voice",
-    "assistant.noSpeech": "No speech plugin is ready: requests are typed, or recognized by the browser.",
     "assistant.saved": "Saved.",
     "settings.advancedGroup": "Advanced",
     "settings.pin": "Pin to Sidebar",
@@ -5738,18 +5728,9 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "assistant.insecure": "麦克风只能在安全（HTTPS）地址下使用；请改为输入请求。",
     "assistant.noMicrophone": "无法使用麦克风：{error}",
     "assistant.microphoneDenied": "请允许此网站使用麦克风以便说话，或改为输入请求。",
-    "assistant.recognitionTimedOut": "语音识别超过一分钟仍未完成。请重试，或改为输入请求。",
-    "assistant.noRecognizer": "服务器和此浏览器都无法识别语音；请改为输入请求。",
     "assistant.off": "此服务器已关闭助手。",
     "assistant.cantDo": "此页面无法执行该操作。",
-    "assistant.speakAnswers": "朗读回答",
-    "assistant.speakAnswersDetail": "朗读语音请求的回答",
     "assistant.voice": "语音",
-    "assistant.deviceVoice": "此设备的语音",
-    "assistant.recognition": "语音识别",
-    "assistant.serverFirst": "优先使用服务器",
-    "assistant.deviceFirst": "优先使用此设备",
-    "assistant.recognitionFooter": "大多数浏览器在其厂商的服务器上识别语音；服务器的识别器只把音频发送给管理员选择的服务。",
     "assistant.memory": "记忆",
     "assistant.memoryFooter": "你告诉助手的关于你自己的事，保存在服务器上供其 AI 使用。",
     "assistant.memoryOff": "此服务器已关闭记忆。",
@@ -5787,11 +5768,15 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "assistant.firstReady": "第一个可用的",
     "assistant.hints": "发送提示",
     "assistant.hintsDetail": "标题、名称和设备有助于识别",
-    "assistant.defaultVoices": "默认语音",
-    "assistant.defaultVoicesFooter": "使用服务器语音的客户端会采用这些语音，除非用户另选。",
+    "assistant.noVoice": "此服务器未设置语音；请改为输入请求。",
+    "assistant.speaking": "正在说话…",
+    "assistant.speech": "语音",
+    "assistant.speechFooter": "每种语言的识别器和语音；未列出或留空的语言使用第一个就绪的。",
+    "assistant.addLanguage": "添加语言",
+    "assistant.longestPause": "最长停顿（秒）",
+    "assistant.commitDelay": "执行前等待（秒）",
+    "assistant.sessionIdle": "静默多久后结束会话（秒）",
     "assistant.language": "语言",
-    "assistant.addVoice": "添加语音",
-    "assistant.noSpeech": "没有可用的语音插件：请求需要输入，或由浏览器识别。",
     "assistant.saved": "已保存。",
     "settings.advancedGroup": "高级功能",
     "settings.pin": "固定到侧边栏",

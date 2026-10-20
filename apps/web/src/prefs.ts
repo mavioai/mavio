@@ -1,5 +1,5 @@
 // The settings of this browser (docs/clients.md §6.1, §6.3): appearance, TV
-// mode, the sidebar, playback and the assistant. They are kept in localStorage, which may
+// mode, the sidebar and playback. They are kept in localStorage, which may
 // be unavailable; the defaults apply then.
 import { breakpoints } from "@mavio/design/tokens";
 import { useSyncExternalStore } from "react";
@@ -44,18 +44,12 @@ export interface Prefs {
   sidebarWidth?: number;
   quality: Quality;
   autoplayNext: boolean;
-  /** Whether the assistant speaks its answers to spoken requests. */
-  assistantSpeak: boolean;
-  /** The voice speaking them: a server voice's ID, or "" for the browser's. */
-  assistantVoice: string;
-  /** Which recognizer the assistant tries first: the server's or the browser's. */
-  assistantRecognition: "server" | "device";
   /** The advanced tools pinned to the sidebar's Features group, in the order pinned. */
   pinned: string[];
 }
 
 const key = prefsKey;
-const defaults: Prefs = { appearance: "system", language: "system", tv: false, sidebar: true, quality: "auto", autoplayNext: true, assistantSpeak: true, assistantVoice: "", assistantRecognition: "server", pinned: [] };
+const defaults: Prefs = { appearance: "system", language: "system", tv: false, sidebar: true, quality: "auto", autoplayNext: true, pinned: [] };
 
 function read(): Prefs {
   try {

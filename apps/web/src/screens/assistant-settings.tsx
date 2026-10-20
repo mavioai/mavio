@@ -1,9 +1,9 @@
-// The assistant's settings (docs/assistant.md §9.1, §10): this browser's —
-// whether answers are spoken, the voice and which recognizer goes first —
-// with the user's memories and conversations on the server; and, in the
-// AI settings, the server's for its administrators.
+// The assistant's settings (docs/assistant.md §9.1, §10): the user's
+// memories and conversations on the server; and, in the AI settings, the
+// server's for its administrators, with the recognizer and voice of each
+// language and the timing of turns.
 import { clone, create, equals } from "@bufbuild/protobuf";
-import { timestampDate } from "@bufbuild/protobuf/wkt";
+import { type Duration, durationFromMs, durationMs, timestampDate } from "@bufbuild/protobuf/wkt";
 import {
   errorMessage,
   type ServerEntry,
@@ -22,8 +22,9 @@ import {
   AssistantAccess,
   type AssistantSettings,
   AssistantSettingsSchema,
-  type AssistantVoiceChoice,
-  AssistantVoiceChoiceSchema,
+  type AssistantSpeech,
+  AssistantSpeechSchema,
+  type VoiceEngine,
 } from "@mavio/proto/mavio/assistant/v1/assistant_pb";
 import { useState } from "react";
 
@@ -35,60 +36,21 @@ import { modelDetail } from "../ai-model.ts";
 import { input } from "../controls/styles.ts";
 import { useUnsavedGuard } from "../controls/unsaved.tsx";
 import { locale, t } from "../i18n.ts";
-import { setPrefs, usePrefs } from "../prefs.ts";
 import { Button, Group, Row } from "../ui.tsx";
-import { browserRecognizes } from "../assistant/listen.ts";
 import { useKeptSpeech } from "../assistant/kept-speech.ts";
 import { MessageBar } from "../assistant/message-bar.tsx";
 import { patched } from "./admin/common.tsx";
 
 const when = new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeStyle: "short" });
 
-/** This browser's assistant settings, and the user's memories and conversations on a server. */
+/** The user's memories and conversations on a server. */
 export function AssistantPrefs({ server }: { server?: ServerEntry }) {
-  const prefs = usePrefs();
   const info = useAssistant(server, locale);
-  const voices = info.data?.voices ?? [];
-  const speech = (info.data?.recognizers.length ?? 0) > 0 || browserRecognizes();
+  if (!server || !info.data?.enabled) return null;
   return (
     <>
-      <Group>
-        <Row label={t("assistant.speakAnswers")} detail={t("assistant.speakAnswersDetail")}>
-          <Switch on={prefs.assistantSpeak} label={t("assistant.speakAnswers")} onChange={(assistantSpeak) => setPrefs({ assistantSpeak })} />
-        </Row>
-        <Row label={t("assistant.voice")}>
-          <Select
-            value={voices.some((v) => v.id === prefs.assistantVoice) ? prefs.assistantVoice : ""}
-            label={t("assistant.voice")}
-            disabled={!prefs.assistantSpeak}
-            options={[{ value: "", label: t("assistant.deviceVoice") }, ...voices.map((v) => ({ value: v.id, label: v.name || v.id }))]}
-            onChange={(assistantVoice) => setPrefs({ assistantVoice })}
-          />
-        </Row>
-      </Group>
-      <Group footer={t("assistant.recognitionFooter")}>
-        {speech ? (
-          <Row label={t("assistant.recognition")}>
-            <Select
-              value={prefs.assistantRecognition}
-              label={t("assistant.recognition")}
-              options={[
-                { value: "server" as const, label: t("assistant.serverFirst") },
-                { value: "device" as const, label: t("assistant.deviceFirst") },
-              ]}
-              onChange={(assistantRecognition) => setPrefs({ assistantRecognition })}
-            />
-          </Row>
-        ) : (
-          <Row label={t("assistant.recognition")} detail={t("assistant.noSpeech")} wrap />
-        )}
-      </Group>
-      {server && info.data?.enabled && (
-        <>
-          <Memories key={`m${server.id}`} server={server} on={info.data.memory} />
-          {info.data.ai && <Conversations key={`c${server.id}`} server={server} />}
-        </>
-      )}
+      <Memories key={`m${server.id}`} server={server} on={info.data.memory} />
+      {info.data.ai && <Conversations key={`c${server.id}`} server={server} />}
     </>
   );
 }
@@ -192,7 +154,7 @@ function Messages({ server, id, onDelete }: { server: ServerEntry; id: string; o
             text={m.text}
             at={m.time && timestampDate(m.time)}
             playing={playing.at === String(i)}
-            onPlay={m.speech.length > 0 ? () => playing.toggle(String(i), m.speech) : undefined}
+            onPlay={m.speechUrl ? () => playing.toggle(String(i), m.speechUrl) : undefined}
           />
         </div>
       ))}
@@ -208,25 +170,44 @@ function Messages({ server, id, onDelete }: { server: ServerEntry; id: string; o
 export function AssistantServerSettings({ server }: { server: ServerEntry }) {
   const settings = useAssistantSettings(server);
   if (settings.isError) return <p className="type-callout text-danger">{errorMessage(settings.error)}</p>;
-  return settings.data ? <ServerForm server={server} settings={settings.data} /> : null;
+  const d = settings.data;
+  return d?.settings ? <ServerForm server={server} settings={d.settings} recognizers={d.recognizers} voices={d.voices} /> : null;
 }
 
-function ServerForm({ server, settings }: { server: ServerEntry; settings: AssistantSettings }) {
+/** Seconds of a duration, for a field; undefined when unset. */
+const seconds = (d: Duration | undefined) => (d ? durationMs(d) / 1000 : undefined);
+
+/** A duration of seconds from a field; unset when empty, for the default. */
+const ofSeconds = (v: number | undefined) => (v === undefined ? undefined : durationFromMs(Math.round(v * 1000)));
+
+function ServerForm({
+  server,
+  settings,
+  recognizers,
+  voices,
+}: {
+  server: ServerEntry;
+  settings: AssistantSettings;
+  recognizers: VoiceEngine[];
+  voices: VoiceEngine[];
+}) {
   const update = useUpdateAssistantSettings(server);
   const models = useAiModels(server, true);
   const providers = useAiProviders(server);
   const providerNames = new Map((providers.data ?? []).map((p) => [p.id, p.name]));
   const users = useUsers(server);
-  const info = useAssistant(server, locale);
   const [draft, setDraft] = useState(() => clone(AssistantSettingsSchema, settings));
   const [notice, setNotice] = useState<string>();
   const set = (patch: Partial<AssistantSettings>) => (setDraft((d) => patched(AssistantSettingsSchema, d, patch)), setNotice(undefined));
   const changed = !equals(AssistantSettingsSchema, draft, settings);
   const guard = useUnsavedGuard(changed);
   const save = () => update.mutate(draft, { onSuccess: () => setNotice(t("assistant.saved")) });
-  const voices = info.data?.voices ?? [];
-  const setVoice = (i: number, v: Partial<AssistantVoiceChoice>) =>
-    set({ voices: draft.voices.map((x, j) => (j === i ? create(AssistantVoiceChoiceSchema, { ...x, ...v }) : x)) });
+  const setSpeech = (i: number, v: Partial<AssistantSpeech>) =>
+    set({ speech: draft.speech.map((x, j) => (j === i ? create(AssistantSpeechSchema, { ...x, ...v }) : x)) });
+  const choices = (engines: VoiceEngine[]) => [
+    { value: "", label: t("assistant.firstReady") },
+    ...engines.map((e) => ({ value: e.id, label: e.name || e.id })),
+  ];
   const off = !draft.enabled;
   return (
     <>
@@ -293,52 +274,89 @@ function ServerForm({ server, settings }: { server: ServerEntry; settings: Assis
         <Row label={t("assistant.serverMemory")} detail={t("assistant.serverMemoryDetail")}>
           <Switch on={draft.memory} label={t("assistant.serverMemory")} disabled={off} onChange={(memory) => set({ memory })} />
         </Row>
-        <Row label={t("assistant.recognizer")}>
-          <Select
-            value={draft.recognizer}
-            label={t("assistant.recognizer")}
-            disabled={off}
-            options={[{ value: "", label: t("assistant.firstReady") }, ...(info.data?.recognizers ?? []).map((r) => ({ value: r.id, label: r.name || r.id }))]}
-            onChange={(recognizer) => set({ recognizer })}
-          />
-        </Row>
         <Row label={t("assistant.hints")} detail={t("assistant.hintsDetail")}>
           <Switch on={draft.hints} label={t("assistant.hints")} disabled={off} onChange={(hints) => set({ hints })} />
         </Row>
       </Group>
-      {voices.length > 0 && (
-        <Group title={t("assistant.defaultVoices")} footer={t("assistant.defaultVoicesFooter")}>
-          {draft.voices.map((v, i) => (
-            <div key={i} className="flex flex-wrap items-center gap-2 px-4 py-2.5">
-              <input
-                value={v.language}
-                onChange={(e) => setVoice(i, { language: e.target.value.trim() })}
-                placeholder="en"
-                aria-label={t("assistant.language")}
-                className={`${input} w-24`}
-              />
-              <Select
-                value={v.voice}
-                label={t("assistant.voice")}
-                options={voices.map((x) => ({ value: x.id, label: x.name || x.id }))}
-                onChange={(voice) => setVoice(i, { voice })}
-                className="min-w-0 flex-1"
-              />
-              <Button variant="plain" className="text-danger" onClick={() => set({ voices: draft.voices.filter((_, j) => j !== i) })}>
-                {t("action.delete")}
-              </Button>
-            </div>
-          ))}
-          <div className="px-4 py-2.5">
-            <Button
-              variant="secondary"
-              onClick={() => set({ voices: [...draft.voices, create(AssistantVoiceChoiceSchema, { language: locale.split("-")[0], voice: voices[0].id })] })}
-            >
-              {t("assistant.addVoice")}
+      <Group title={t("assistant.speech")} footer={t("assistant.speechFooter")}>
+        {draft.speech.map((v, i) => (
+          <div key={i} className="flex flex-wrap items-center gap-2 px-4 py-2.5">
+            <input
+              value={v.language}
+              onChange={(e) => setSpeech(i, { language: e.target.value.trim() })}
+              placeholder="en"
+              aria-label={t("assistant.language")}
+              disabled={off}
+              className={`${input} w-24`}
+            />
+            <Select
+              value={v.recognizer}
+              label={t("assistant.recognizer")}
+              disabled={off}
+              options={choices(recognizers)}
+              onChange={(recognizer) => setSpeech(i, { recognizer })}
+              className="min-w-0 flex-1"
+            />
+            <Select
+              value={v.voice}
+              label={t("assistant.voice")}
+              disabled={off}
+              options={choices(voices)}
+              onChange={(voice) => setSpeech(i, { voice })}
+              className="min-w-0 flex-1"
+            />
+            <Button variant="plain" className="text-danger" onClick={() => set({ speech: draft.speech.filter((_, j) => j !== i) })}>
+              {t("action.delete")}
             </Button>
           </div>
-        </Group>
-      )}
+        ))}
+        <div className="px-4 py-2.5">
+          <Button
+            variant="secondary"
+            disabled={off}
+            onClick={() => set({ speech: [...draft.speech, create(AssistantSpeechSchema, { language: locale.split("-")[0] })] })}
+          >
+            {t("assistant.addLanguage")}
+          </Button>
+        </div>
+        <Row label={t("assistant.longestPause")}>
+          <NumberField
+            value={seconds(draft.longestPause)}
+            placeholder="3"
+            min={0.5}
+            max={10}
+            step={0.5}
+            integer={false}
+            disabled={off}
+            label={t("assistant.longestPause")}
+            onChange={(v) => set({ longestPause: ofSeconds(v) })}
+          />
+        </Row>
+        <Row label={t("assistant.commitDelay")}>
+          <NumberField
+            value={seconds(draft.commitDelay)}
+            placeholder="0.7"
+            min={0}
+            max={3}
+            step={0.1}
+            integer={false}
+            disabled={off}
+            label={t("assistant.commitDelay")}
+            onChange={(v) => set({ commitDelay: ofSeconds(v) })}
+          />
+        </Row>
+        <Row label={t("assistant.sessionIdle")}>
+          <NumberField
+            value={seconds(draft.sessionIdle)}
+            placeholder="8"
+            min={3}
+            max={120}
+            disabled={off}
+            label={t("assistant.sessionIdle")}
+            onChange={(v) => set({ sessionIdle: ofSeconds(v) })}
+          />
+        </Row>
+      </Group>
       <div className="flex flex-wrap items-center gap-3">
         <Button disabled={!changed || update.isPending} onClick={save}>
           {update.isPending ? "…" : t("action.save")}

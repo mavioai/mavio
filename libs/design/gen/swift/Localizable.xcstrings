@@ -33751,42 +33751,6 @@
         }
       }
     },
-    "assistant.recognitionTimedOut": {
-      "comment": "Error of the assistant's panel when the server's speech recognizer does not answer within a minute.",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Speech recognition took longer than a minute. Try again, or type your request."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "语音识别超过一分钟仍未完成。请重试，或改为输入请求。"
-          }
-        }
-      }
-    },
-    "assistant.noRecognizer": {
-      "comment": "Note of the assistant's panel when no recognizer can be used.",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Neither the server nor this browser recognizes speech; type your request instead."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "服务器和此浏览器都无法识别语音；请改为输入请求。"
-          }
-        }
-      }
-    },
     "assistant.off": {
       "comment": "Note of the assistant's panel when the server's assistant is turned off.",
       "extractionState": "manual",
@@ -33823,42 +33787,6 @@
         }
       }
     },
-    "assistant.speakAnswers": {
-      "comment": "Setting: whether answers to spoken requests are read aloud.",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Speak Answers"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "朗读回答"
-          }
-        }
-      }
-    },
-    "assistant.speakAnswersDetail": {
-      "comment": "Detail of the Speak Answers setting.",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Answers to spoken requests are read aloud"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "朗读语音请求的回答"
-          }
-        }
-      }
-    },
     "assistant.voice": {
       "comment": "Setting: the voice reading answers aloud.",
       "extractionState": "manual",
@@ -33873,96 +33801,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "语音"
-          }
-        }
-      }
-    },
-    "assistant.deviceVoice": {
-      "comment": "Option of the Voice setting: the device's own voice for the answer's language.",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "This device's voice"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "此设备的语音"
-          }
-        }
-      }
-    },
-    "assistant.recognition": {
-      "comment": "Setting: which recognizer is tried first.",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Speech Recognition"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "语音识别"
-          }
-        }
-      }
-    },
-    "assistant.serverFirst": {
-      "comment": "Option of the Speech Recognition setting: the server's recognizer, then the device's.",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Server first"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "优先使用服务器"
-          }
-        }
-      }
-    },
-    "assistant.deviceFirst": {
-      "comment": "Option of the Speech Recognition setting: the device's recognizer, then the server's.",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "This device first"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "优先使用此设备"
-          }
-        }
-      }
-    },
-    "assistant.recognitionFooter": {
-      "comment": "Footer of the Speech Recognition setting.",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Most browsers recognize speech on their maker's servers; the server's recognizer sends audio only to the service its administrator chose."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "大多数浏览器在其厂商的服务器上识别语音；服务器的识别器只把音频发送给管理员选择的服务。"
           }
         }
       }
@@ -34633,38 +34471,146 @@
         }
       }
     },
-    "assistant.defaultVoices": {
-      "comment": "Group of the server's default voice for each language.",
+    "assistant.noVoice": {
+      "comment": "Note of the assistant's panel when the server has no voice session plugin ready.",
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Default Voices"
+            "value": "Voice isn't set up on this server; type your request instead."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "默认语音"
+            "value": "此服务器未设置语音；请改为输入请求。"
           }
         }
       }
     },
-    "assistant.defaultVoicesFooter": {
-      "comment": "Footer of the default voices.",
+    "assistant.speaking": {
+      "comment": "Status of the assistant's panel while it speaks its answer.",
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Clients that speak with the server's voices use these unless the user picks one."
+            "value": "Speaking…"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "使用服务器语音的客户端会采用这些语音，除非用户另选。"
+            "value": "正在说话…"
+          }
+        }
+      }
+    },
+    "assistant.speech": {
+      "comment": "Group of the server's assistant settings: the recognizer and voice of each language, and the timing of turns.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Speech"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "语音"
+          }
+        }
+      }
+    },
+    "assistant.speechFooter": {
+      "comment": "Footer of the server's speech settings.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The recognizer and voice of each language; a language not listed, or left empty, uses the first ready one."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每种语言的识别器和语音；未列出或留空的语言使用第一个就绪的。"
+          }
+        }
+      }
+    },
+    "assistant.addLanguage": {
+      "comment": "Button adding the recognizer and voice of a language.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add Language"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "添加语言"
+          }
+        }
+      }
+    },
+    "assistant.longestPause": {
+      "comment": "Setting: how long the user may pause mid-sentence before the turn ends.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Longest Pause (Seconds)"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最长停顿（秒）"
+          }
+        }
+      }
+    },
+    "assistant.commitDelay": {
+      "comment": "Setting: how long a turn stands, the user silent, before what the answer changes is done.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wait Before Acting (Seconds)"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "执行前等待（秒）"
+          }
+        }
+      }
+    },
+    "assistant.sessionIdle": {
+      "comment": "Setting: the seconds of silence after an answer that end a voice session.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "End Session After (Seconds)"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "静默多久后结束会话（秒）"
           }
         }
       }
@@ -34683,42 +34629,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "语言"
-          }
-        }
-      }
-    },
-    "assistant.addVoice": {
-      "comment": "Button adding a default voice for a language.",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Add Voice"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "添加语音"
-          }
-        }
-      }
-    },
-    "assistant.noSpeech": {
-      "comment": "Row of the assistant's settings when no speech plugin runs.",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "No speech plugin is ready: requests are typed, or recognized by the browser."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "没有可用的语音插件：请求需要输入，或由浏览器识别。"
           }
         }
       }

@@ -203,12 +203,9 @@ export { type ClockSample, clockSample, groupPositionAt, syncClock, useSyncPlayG
 export { useCurrentUser, useIssue, useIssueActions, useIssues } from "./issues.ts";
 export {
   ask,
-  type Heard,
   keptSpeech,
-  Sentences,
-  speakWithServer,
   speechFormats,
-  startListening,
+  startVoiceSession,
   useAssistant,
   useAssistantActions,
   useAssistantConversation,

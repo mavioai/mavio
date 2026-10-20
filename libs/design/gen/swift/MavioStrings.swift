@@ -5947,41 +5947,14 @@ public enum MavioStrings {
     /// Error of the assistant's panel when the browser or the user refuses the microphone.
     public static var assistantMicrophoneDenied: String { NSLocalizedString("assistant.microphoneDenied", bundle: .module, comment: "") }
 
-    /// Error of the assistant's panel when the server's speech recognizer does not answer within a minute.
-    public static var assistantRecognitionTimedOut: String { NSLocalizedString("assistant.recognitionTimedOut", bundle: .module, comment: "") }
-
-    /// Note of the assistant's panel when no recognizer can be used.
-    public static var assistantNoRecognizer: String { NSLocalizedString("assistant.noRecognizer", bundle: .module, comment: "") }
-
     /// Note of the assistant's panel when the server's assistant is turned off.
     public static var assistantOff: String { NSLocalizedString("assistant.off", bundle: .module, comment: "") }
 
     /// Answer of the assistant when the page cannot carry out an action, such as controlling playback with nothing playing.
     public static var assistantCantDo: String { NSLocalizedString("assistant.cantDo", bundle: .module, comment: "") }
 
-    /// Setting: whether answers to spoken requests are read aloud.
-    public static var assistantSpeakAnswers: String { NSLocalizedString("assistant.speakAnswers", bundle: .module, comment: "") }
-
-    /// Detail of the Speak Answers setting.
-    public static var assistantSpeakAnswersDetail: String { NSLocalizedString("assistant.speakAnswersDetail", bundle: .module, comment: "") }
-
     /// Setting: the voice reading answers aloud.
     public static var assistantVoice: String { NSLocalizedString("assistant.voice", bundle: .module, comment: "") }
-
-    /// Option of the Voice setting: the device's own voice for the answer's language.
-    public static var assistantDeviceVoice: String { NSLocalizedString("assistant.deviceVoice", bundle: .module, comment: "") }
-
-    /// Setting: which recognizer is tried first.
-    public static var assistantRecognition: String { NSLocalizedString("assistant.recognition", bundle: .module, comment: "") }
-
-    /// Option of the Speech Recognition setting: the server's recognizer, then the device's.
-    public static var assistantServerFirst: String { NSLocalizedString("assistant.serverFirst", bundle: .module, comment: "") }
-
-    /// Option of the Speech Recognition setting: the device's recognizer, then the server's.
-    public static var assistantDeviceFirst: String { NSLocalizedString("assistant.deviceFirst", bundle: .module, comment: "") }
-
-    /// Footer of the Speech Recognition setting.
-    public static var assistantRecognitionFooter: String { NSLocalizedString("assistant.recognitionFooter", bundle: .module, comment: "") }
 
     /// Group of the assistant's settings listing what it remembers about the user.
     public static var assistantMemory: String { NSLocalizedString("assistant.memory", bundle: .module, comment: "") }
@@ -6094,20 +6067,32 @@ public enum MavioStrings {
     /// Detail of the Send Hints setting.
     public static var assistantHintsDetail: String { NSLocalizedString("assistant.hintsDetail", bundle: .module, comment: "") }
 
-    /// Group of the server's default voice for each language.
-    public static var assistantDefaultVoices: String { NSLocalizedString("assistant.defaultVoices", bundle: .module, comment: "") }
+    /// Note of the assistant's panel when the server has no voice session plugin ready.
+    public static var assistantNoVoice: String { NSLocalizedString("assistant.noVoice", bundle: .module, comment: "") }
 
-    /// Footer of the default voices.
-    public static var assistantDefaultVoicesFooter: String { NSLocalizedString("assistant.defaultVoicesFooter", bundle: .module, comment: "") }
+    /// Status of the assistant's panel while it speaks its answer.
+    public static var assistantSpeaking: String { NSLocalizedString("assistant.speaking", bundle: .module, comment: "") }
+
+    /// Group of the server's assistant settings: the recognizer and voice of each language, and the timing of turns.
+    public static var assistantSpeech: String { NSLocalizedString("assistant.speech", bundle: .module, comment: "") }
+
+    /// Footer of the server's speech settings.
+    public static var assistantSpeechFooter: String { NSLocalizedString("assistant.speechFooter", bundle: .module, comment: "") }
+
+    /// Button adding the recognizer and voice of a language.
+    public static var assistantAddLanguage: String { NSLocalizedString("assistant.addLanguage", bundle: .module, comment: "") }
+
+    /// Setting: how long the user may pause mid-sentence before the turn ends.
+    public static var assistantLongestPause: String { NSLocalizedString("assistant.longestPause", bundle: .module, comment: "") }
+
+    /// Setting: how long a turn stands, the user silent, before what the answer changes is done.
+    public static var assistantCommitDelay: String { NSLocalizedString("assistant.commitDelay", bundle: .module, comment: "") }
+
+    /// Setting: the seconds of silence after an answer that end a voice session.
+    public static var assistantSessionIdle: String { NSLocalizedString("assistant.sessionIdle", bundle: .module, comment: "") }
 
     /// Field of a default voice: its language, as a code such as en or zh-CN.
     public static var assistantLanguage: String { NSLocalizedString("assistant.language", bundle: .module, comment: "") }
-
-    /// Button adding a default voice for a language.
-    public static var assistantAddVoice: String { NSLocalizedString("assistant.addVoice", bundle: .module, comment: "") }
-
-    /// Row of the assistant's settings when no speech plugin runs.
-    public static var assistantNoSpeech: String { NSLocalizedString("assistant.noSpeech", bundle: .module, comment: "") }
 
     /// Notice after the assistant's settings are saved.
     public static var assistantSaved: String { NSLocalizedString("assistant.saved", bundle: .module, comment: "") }

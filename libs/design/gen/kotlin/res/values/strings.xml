@@ -3779,30 +3779,12 @@
     <string name="assistant_no_microphone">The microphone can\'t be used: %s</string>
     <!-- Error of the assistant's panel when the browser or the user refuses the microphone. -->
     <string name="assistant_microphone_denied">Allow this site to use the microphone to talk, or type your request.</string>
-    <!-- Error of the assistant's panel when the server's speech recognizer does not answer within a minute. -->
-    <string name="assistant_recognition_timed_out">Speech recognition took longer than a minute. Try again, or type your request.</string>
-    <!-- Note of the assistant's panel when no recognizer can be used. -->
-    <string name="assistant_no_recognizer">Neither the server nor this browser recognizes speech; type your request instead.</string>
     <!-- Note of the assistant's panel when the server's assistant is turned off. -->
     <string name="assistant_off">The assistant is off on this server.</string>
     <!-- Answer of the assistant when the page cannot carry out an action, such as controlling playback with nothing playing. -->
     <string name="assistant_cant_do">This page can\'t do that.</string>
-    <!-- Setting: whether answers to spoken requests are read aloud. -->
-    <string name="assistant_speak_answers">Speak Answers</string>
-    <!-- Detail of the Speak Answers setting. -->
-    <string name="assistant_speak_answers_detail">Answers to spoken requests are read aloud</string>
     <!-- Setting: the voice reading answers aloud. -->
     <string name="assistant_voice">Voice</string>
-    <!-- Option of the Voice setting: the device's own voice for the answer's language. -->
-    <string name="assistant_device_voice">This device\'s voice</string>
-    <!-- Setting: which recognizer is tried first. -->
-    <string name="assistant_recognition">Speech Recognition</string>
-    <!-- Option of the Speech Recognition setting: the server's recognizer, then the device's. -->
-    <string name="assistant_server_first">Server first</string>
-    <!-- Option of the Speech Recognition setting: the device's recognizer, then the server's. -->
-    <string name="assistant_device_first">This device first</string>
-    <!-- Footer of the Speech Recognition setting. -->
-    <string name="assistant_recognition_footer">Most browsers recognize speech on their maker\'s servers; the server\'s recognizer sends audio only to the service its administrator chose.</string>
     <!-- Group of the assistant's settings listing what it remembers about the user. -->
     <string name="assistant_memory">Memory</string>
     <!-- Footer of the assistant's memory. -->
@@ -3877,16 +3859,24 @@
     <string name="assistant_hints">Send Hints</string>
     <!-- Detail of the Send Hints setting. -->
     <string name="assistant_hints_detail">Titles, names and devices help the recognizer</string>
-    <!-- Group of the server's default voice for each language. -->
-    <string name="assistant_default_voices">Default Voices</string>
-    <!-- Footer of the default voices. -->
-    <string name="assistant_default_voices_footer">Clients that speak with the server\'s voices use these unless the user picks one.</string>
+    <!-- Note of the assistant's panel when the server has no voice session plugin ready. -->
+    <string name="assistant_no_voice">Voice isn\'t set up on this server; type your request instead.</string>
+    <!-- Status of the assistant's panel while it speaks its answer. -->
+    <string name="assistant_speaking">Speaking…</string>
+    <!-- Group of the server's assistant settings: the recognizer and voice of each language, and the timing of turns. -->
+    <string name="assistant_speech">Speech</string>
+    <!-- Footer of the server's speech settings. -->
+    <string name="assistant_speech_footer">The recognizer and voice of each language; a language not listed, or left empty, uses the first ready one.</string>
+    <!-- Button adding the recognizer and voice of a language. -->
+    <string name="assistant_add_language">Add Language</string>
+    <!-- Setting: how long the user may pause mid-sentence before the turn ends. -->
+    <string name="assistant_longest_pause">Longest Pause (Seconds)</string>
+    <!-- Setting: how long a turn stands, the user silent, before what the answer changes is done. -->
+    <string name="assistant_commit_delay">Wait Before Acting (Seconds)</string>
+    <!-- Setting: the seconds of silence after an answer that end a voice session. -->
+    <string name="assistant_session_idle">End Session After (Seconds)</string>
     <!-- Field of a default voice: its language, as a code such as en or zh-CN. -->
     <string name="assistant_language">Language</string>
-    <!-- Button adding a default voice for a language. -->
-    <string name="assistant_add_voice">Add Voice</string>
-    <!-- Row of the assistant's settings when no speech plugin runs. -->
-    <string name="assistant_no_speech">No speech plugin is ready: requests are typed, or recognized by the browser.</string>
     <!-- Notice after the assistant's settings are saved. -->
     <string name="assistant_saved">Saved.</string>
     <!-- Group of the settings' advanced tools, which can be pinned to the sidebar. -->

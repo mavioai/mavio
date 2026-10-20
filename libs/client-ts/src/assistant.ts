@@ -1,7 +1,7 @@
 // The assistant (docs/assistant.md): what a server's assistant can do, its
-// requests with their events as they stream, listening through the
-// server's recognizer and speaking with its voices; the user's
-// conversations and memories, and the server's assistant settings.
+// requests with their events as they stream, voice sessions and the speech
+// kept of their answers; the user's conversations and memories, and the
+// server's assistant settings.
 import { create, type MessageInitShape } from "@bufbuild/protobuf";
 import {
   type AskRequest,
@@ -9,6 +9,7 @@ import {
   type AskResponse,
   type AssistantSettings,
   AssistantService,
+  type StartVoiceSessionRequestSchema,
 } from "@mavio/proto/mavio/assistant/v1/assistant_pb";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
@@ -18,7 +19,7 @@ import type { ServerEntry, Servers } from "./servers.ts";
 
 /**
  * What a server's assistant can do for the user, in a language: whether it
- * is on, the AI path, memory, the recognizers and voices, and examples.
+ * is on, the AI path, memory, voice sessions, and examples.
  */
 export function useAssistant(server: ServerEntry | undefined, language: string) {
   const servers = useServersStore();
@@ -41,27 +42,16 @@ export function ask(
 }
 
 /**
- * Starts listening through the server's recognizer (§8.2): the WebSocket
- * URL to send 16 kHz mono 16-bit PCM to, signed for a minute, and the
- * recognizer chosen.
+ * Starts a voice session (§8.1): the WebSocket URL to connect to within a
+ * minute, and the session's ID.
  */
-export async function startListening(
+export async function startVoiceSession(
   servers: Servers,
   server: ServerEntry,
-  language: string,
-  recognizer = "",
-): Promise<{ url: string; recognizer: string }> {
-  const r = await servers.client(AssistantService, server).startListening({ language, recognizer });
-  return { url: urlOf(server, r.url).replace(/^http/, "ws"), recognizer: r.recognizer };
-}
-
-/** What the listening route sends back. */
-export interface Heard {
-  text?: string;
-  language?: string;
-  /** The utterance ended: nothing more is sent. */
-  final?: boolean;
-  error?: string;
+  req: MessageInitShape<typeof StartVoiceSessionRequestSchema>,
+): Promise<{ url: string; sessionId: string }> {
+  const r = await servers.client(AssistantService, server).startVoiceSession(req);
+  return { url: urlOf(server, r.url).replace(/^http/, "ws"), sessionId: r.sessionId };
 }
 
 const speechTypes: [format: string, type: string][] = [
@@ -73,7 +63,7 @@ const speechTypes: [format: string, type: string][] = [
 ];
 
 /**
- * The encodings of speech this browser plays (§8.3), which the server
+ * The encodings of speech this browser plays (§8.8), which the server
  * converts speech in another to; none outside a browser, which the server
  * takes for playing anything.
  */
@@ -84,34 +74,8 @@ export function speechFormats(): string[] {
 }
 
 /**
- * Speaks a text with a server voice (§8.3): its audio, in the
- * synthesizer's encoding, else the most balanced of the formats played,
- * this browser's unless given. An empty voice is the settings' for the
- * language. A sentence of an answer names the request's speechId and its
- * index in the answer, so that the server keeps it with the answer.
- */
-export async function speakWithServer(
-  servers: Servers,
-  server: ServerEntry,
-  speech: { text: string; language: string; voice?: string; formats?: string[]; speechId?: string; index?: number },
-  signal?: AbortSignal,
-): Promise<Blob> {
-  const token = await servers.token(server.id);
-  const { speechId, ...rest } = speech;
-  const res = await fetch(urlOf(server, "assistant/speech"), {
-    method: "POST",
-    headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-    body: JSON.stringify({ voice: "", formats: speechFormats(), ...rest, ...(speechId ? { speech_id: speechId } : {}) }),
-    signal,
-  });
-  if (!res.ok) throw new Error((await res.text()).trim() || res.statusText);
-  return await res.blob();
-}
-
-/**
- * A sentence of an answer's kept speech, from its URL in
- * AssistantMessage.speech, in an encoding of the formats played, this
- * browser's unless given.
+ * An answer's kept speech (§8.8), from AssistantMessage.speech_url, in an
+ * encoding of the formats played, this browser's unless given.
  */
 export async function keptSpeech(
   servers: Servers,
@@ -170,12 +134,12 @@ export function useAssistantActions(server: ServerEntry) {
   };
 }
 
-/** The server's assistant settings, for administrators. */
+/** The server's assistant settings, for administrators, with the recognizers and voices to choose from. */
 export function useAssistantSettings(server: ServerEntry) {
   const servers = useServersStore();
   return useQuery({
     queryKey: serverKey(server.id, "assistant", "settings"),
-    queryFn: async () => (await servers.client(AssistantService, server).getAssistantSettings({})).settings,
+    queryFn: () => servers.client(AssistantService, server).getAssistantSettings({}),
   });
 }
 
@@ -187,37 +151,4 @@ export function useUpdateAssistantSettings(server: ServerEntry) {
     mutationFn: (settings: AssistantSettings) => servers.client(AssistantService, server).updateAssistantSettings({ settings }),
     onSuccess: () => qc.invalidateQueries({ queryKey: serverKey(server.id, "assistant") }),
   });
-}
-
-// Where a sentence ends: its punctuation, then a space or the end of the
-// text; CJK's full stops need no space.
-const sentenceEnd = /[.!?…](?=\s)|[。！？]/g;
-
-/**
- * Cuts an answer into sentences as its text arrives, so that speaking
- * starts before it ends (§8.3): push gives the sentences the text added
- * completes, and end the rest.
- */
-export class Sentences {
-  private text = "";
-
-  push(more: string): string[] {
-    this.text += more;
-    const out: string[] = [];
-    let start = 0;
-    for (const m of this.text.matchAll(sentenceEnd)) {
-      const end = m.index + m[0].length;
-      const s = this.text.slice(start, end).trim();
-      if (s) out.push(s);
-      start = end;
-    }
-    this.text = this.text.slice(start);
-    return out;
-  }
-
-  end(): string[] {
-    const s = this.text.trim();
-    this.text = "";
-    return s ? [s] : [];
-  }
 }

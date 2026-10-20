@@ -1,9 +1,9 @@
 // Playing the speech the server kept of the assistant's answers
-// (docs/assistant.md §8.3): only those files, never a voice speaking again.
+// (docs/assistant.md §8.8): only those files, never a voice speaking again.
 import { keptSpeech, type ServerEntry, useServersStore } from "@mavio/client-ts";
 import { useEffect, useRef, useState } from "react";
 
-/** Plays the kept speech of an answer, a sentence after another, one answer at a time. */
+/** Plays the kept speech of an answer, one answer at a time. */
 export function useKeptSpeech(server: ServerEntry) {
   const servers = useServersStore();
   const [at, setAt] = useState<string>();
@@ -15,7 +15,8 @@ export function useKeptSpeech(server: ServerEntry) {
     setAt(undefined);
   };
   useEffect(() => stop, []);
-  const toggle = (key: string, urls: string[]) => {
+  /** Plays the speech at url as the answer key, or stops it when it plays. */
+  const toggle = (key: string, url: string) => {
     const again = at === key;
     stop();
     if (again) return;
@@ -23,20 +24,16 @@ export function useKeptSpeech(server: ServerEntry) {
     run.current = r;
     setAt(key);
     void (async () => {
-      // Each sentence is fetched while the one before plays.
-      let next = keptSpeech(servers, server, urls[0], r.abort.signal);
-      for (let j = 0; j < urls.length && !r.abort.signal.aborted; j++) {
-        const blob = await next.catch(() => undefined);
-        if (j + 1 < urls.length) next = keptSpeech(servers, server, urls[j + 1], r.abort.signal);
-        if (!blob || r.abort.signal.aborted) continue;
-        const url = URL.createObjectURL(blob);
-        const audio = new Audio(url);
+      const blob = await keptSpeech(servers, server, url, r.abort.signal).catch(() => undefined);
+      if (blob && !r.abort.signal.aborted) {
+        const src = URL.createObjectURL(blob);
+        const audio = new Audio(src);
         r.audio = audio;
         await new Promise<void>((resolve) => {
           audio.onended = audio.onerror = audio.onpause = () => resolve();
           audio.play().catch(() => resolve());
         });
-        URL.revokeObjectURL(url);
+        URL.revokeObjectURL(src);
       }
       if (run.current === r) {
         run.current = undefined;

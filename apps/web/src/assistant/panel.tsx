@@ -1,29 +1,31 @@
 // The assistant's panel (docs/assistant.md §9.1, §9.2): over any page, the
 // player's included, it shows as the AI Conversations do the text heard as
-// it grows and the answer, each with buttons copying it and, the answer
-// server voices said, playing that again, and its time,
+// it grows and the answer, each with buttons copying it and its time,
 // results to choose from and a pending confirmation, and takes typed
-// requests. The assistant button and a key held talk; a request goes
-// through the fast path (fast.ts) and else to the server's Ask, whose
-// client actions the page carries out. It closes on its own a few seconds
-// after an answer with nothing to choose.
-import { create, isFieldSet, type MessageInitShape } from "@bufbuild/protobuf";
+// requests. The assistant button tapped starts a voice session (voice.ts)
+// and tapped again ends it; held, or a key held, it talks while held. A
+// typed request goes through the fast path (fast.ts) and else to the
+// server's Ask, or to the voice session when one runs; the page carries
+// out their client actions. It closes on its own a few seconds after an
+// answer with nothing to choose, or after the session ends.
+import { create, fromJson, isFieldSet, type JsonValue, type MessageInitShape, toJson } from "@bufbuild/protobuf";
 import { durationFromMs, durationMs } from "@bufbuild/protobuf/wkt";
 import {
   artwork,
   ask,
   errorMessage,
-  Sentences,
   type ServerEntry,
-  startListening,
+  startVoiceSession,
   useAssistant,
   useServersStore,
   useSignedIn,
 } from "@mavio/client-ts";
 import {
+  type AskContext,
   AskContextSchema,
   type AskRequestSchema,
   type ClientAction,
+  ClientActionSchema,
   ControlCommand,
   NavigateTarget,
   PlayActionSchema,
@@ -31,21 +33,20 @@ import {
 } from "@mavio/proto/mavio/assistant/v1/assistant_pb";
 import type { Intent } from "@mavio/proto/mavio/intent/v1/intent_pb";
 import { ImageKind, type Item } from "@mavio/proto/mavio/library/v1/item_pb";
+import { VoiceMode } from "@mavio/proto/mavio/plugin/v1/voice_pb";
 import { useLocation, useParams, useRouter } from "@tanstack/react-router";
 import { createContext, type ReactNode, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 
 import { locale, t } from "../i18n.ts";
 import { Tip } from "../controls/tooltip.tsx";
 import { Icon } from "../icon.tsx";
-import { usePrefs } from "../prefs.ts";
 import { useShortcutsShown } from "../keys.ts";
 import { isTabPlace } from "../shell/places.ts";
 import { Artwork, subtitleOf } from "../ui.tsx";
 import { grammar, runLocal } from "./fast.ts";
-import { browserRecognizes, denied, isDenied, type Listening, listenInBrowser, listenOnServer, microphoneAllowed, timedOut } from "./listen.ts";
 import { openPlayer } from "./player.ts";
 import { bubble, MessageBar } from "./message-bar.tsx";
-import { Speaker } from "./speak.ts";
+import { isDenied, microphoneAllowed, type VoiceEvent, VoiceSession } from "./voice.ts";
 
 /** The key held to talk, outside text fields. */
 export const talkKey = "v";
@@ -53,7 +54,7 @@ export const talkKey = "v";
 /** The language spoken to the assistant: the browser's of the UI's language, else the UI's. */
 const speechLanguage = (typeof navigator === "undefined" ? [] : navigator.languages).find((l) => l.split("-")[0] === locale.split("-")[0]) ?? locale;
 
-/** How long a held button or key must be held to end the speech as it is let go. */
+/** How long the button or key must be held to talk while held, rather than start a conversation. */
 const holdMs = 400;
 
 /** How long an answer with nothing to choose stays before the panel closes. */
@@ -65,6 +66,7 @@ interface State {
   heard: string;
   /** When it was said, once said. */
   heardAt?: Date;
+  /** A voice session runs. */
   listening: boolean;
   working: boolean;
   /** The summaries of the tools running or run. */
@@ -72,16 +74,15 @@ interface State {
   answer: string;
   /** When the answer ended. */
   answerAt?: Date;
-  /** Whether the answer is being spoken, and whether server voices said it, to play again. */
+  /** Whether the answer is being spoken. */
   speaking: boolean;
-  replayable: boolean;
   items: Item[];
   choose: boolean;
   confirmation?: { id: string; text: string };
   error?: string;
 }
 
-const idle: State = { open: false, heard: "", listening: false, working: false, activity: [], answer: "", speaking: false, replayable: false, items: [], choose: false };
+const idle: State = { open: false, heard: "", listening: false, working: false, activity: [], answer: "", speaking: false, items: [], choose: false };
 
 interface Assistant {
   /** The server whose assistant answers, when it is on. */
@@ -89,7 +90,7 @@ interface Assistant {
   state: State;
   open(): void;
   close(): void;
-  /** Starts listening, as the button or key goes down. */
+  /** The button or key went down. */
   press(): void;
   /** The button or key went up. */
   release(): void;
@@ -130,36 +131,31 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
   const params = useParams({ strict: false }) as { itemId?: string; libraryId?: string };
   const server = useAssistantServer();
   const info = useAssistant(server, locale);
-  const prefs = usePrefs();
   const enabled = !!info.data?.enabled;
   const [state, setState] = useState<State>(idle);
   const set = useCallback((patch: Partial<State> | ((s: State) => Partial<State>)) => setState((s) => ({ ...s, ...(typeof patch === "function" ? patch(s) : patch) })), []);
 
   // What the next request needs: the latest state and context, the actions
   // the last answer could not carry out, and what runs now.
-  const latest = useRef({ state, pathname, params, server, prefs, info: info.data });
-  latest.current = { state, pathname, params, server, prefs, info: info.data };
+  const latest = useRef({ state, pathname, params, server, info: info.data });
+  latest.current = { state, pathname, params, server, info: info.data };
   const failed = useRef<string[]>([]);
   const running = useRef<AbortController>(undefined);
-  const listening = useRef<Listening>(undefined);
-  const speaker = useRef<Speaker>(undefined);
-  const pressedAt = useRef(0);
+  const session = useRef<VoiceSession>(undefined);
+  // The button or key held: a timer that turns the press into talking
+  // while held, and whether it did.
+  const hold = useRef<{ timer?: ReturnType<typeof setTimeout>; held: boolean }>(undefined);
+  // The final transcripts of the user's turn, until its run starts.
+  const turn = useRef("");
   const linger = useRef<ReturnType<typeof setTimeout>>(undefined);
-
-  const stopSpeaking = useCallback(() => {
-    speaker.current?.stop();
-    speaker.current = undefined;
-    set({ speaking: false, replayable: false });
-  }, [set]);
 
   const close = useCallback(() => {
     clearTimeout(linger.current);
     running.current?.abort();
-    listening.current?.cancel();
-    listening.current = undefined;
-    stopSpeaking();
+    session.current?.close();
+    session.current = undefined;
     setState(idle);
-  }, [stopSpeaking]);
+  }, []);
 
   /** Carries out a client action; false when the page cannot. */
   const perform = useCallback(
@@ -251,33 +247,32 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
     }, lingerMs);
   }, []);
 
-  /** Speaks sentences of an answer, when the request was spoken and the user lets answers be spoken. */
-  const speakerFor = useCallback(
-    (spoken: boolean): Speaker | undefined => {
-      const { prefs: pr, server: srv, info: inf } = latest.current;
-      stopSpeaking();
-      if (!spoken || !pr.assistantSpeak) return undefined;
-      const sp: Speaker = new Speaker(
-        pr.assistantVoice,
-        srv && inf ? { servers, server: srv, languages: inf.voices.flatMap((v) => v.languages) } : undefined,
-        (speaking) => speaker.current === sp && set({ speaking, replayable: sp.replayable }),
-      );
-      speaker.current = sp;
-      return sp;
-    },
-    [servers, set, stopSpeaking],
-  );
-
-  /** Stops speaking the answer, or plays again what the server's voices said of it, which the server keeps. */
-  const toggleSpeaking = useCallback(() => {
-    const sp = speaker.current;
-    if (sp?.speaking) sp.stop();
-    else sp?.again();
+  /** What the page shows and plays, as the requests' context. */
+  const askContext = useCallback((lang: string): AskContext => {
+    const { pathname: path, params: ps } = latest.current;
+    const p = openPlayer()?.state();
+    return create(AskContextSchema, {
+      languages: [...new Set([lang, speechLanguage, locale])],
+      screen: screenOf(path),
+      itemId: ps.itemId ?? "",
+      libraryId: ps.libraryId ?? "",
+      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      playing: p && {
+        itemId: p.itemId,
+        position: durationFromMs(Math.round(p.position * 1000)),
+        paused: p.paused,
+        speed: p.speed,
+        audioStreamIndex: p.audioStreamIndex,
+        subtitleStreamIndex: p.subtitleStreamIndex,
+        volume: p.volume,
+        muted: p.muted,
+      },
+    });
   }, []);
 
   const request = useCallback(
-    async (req: MessageInitShape<typeof AskRequestSchema>, spoken: boolean, heardLanguage = "") => {
-      const { state: s, pathname: path, params: ps, server: srv } = latest.current;
+    async (req: MessageInitShape<typeof AskRequestSchema>) => {
+      const { state: s, server: srv } = latest.current;
       if (!srv) return;
       clearTimeout(linger.current);
       running.current?.abort();
@@ -296,8 +291,7 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
         confirmation: undefined,
         ...(req.choice || text ? { items: [], choose: false } : {}),
       });
-      const voice = speakerFor(spoken);
-      const lang = heardLanguage || speechLanguage;
+      const lang = speechLanguage;
 
       // The fast path: a command for this page is carried out here.
       let intent: Intent | undefined;
@@ -316,39 +310,19 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
         if (intent && reply) {
           const answer = g.reply(intent.language || lang, reply.key, reply.args);
           set({ working: false, answer, answerAt: new Date() });
-          voice?.say(answer, intent.language || lang);
           lingerThenClose();
           return;
         }
       }
 
-      const p = openPlayer()?.state();
-      const context = create(AskContextSchema, {
-        languages: [...new Set([lang, speechLanguage, locale])],
-        screen: screenOf(path),
-        itemId: ps.itemId ?? "",
-        libraryId: ps.libraryId ?? "",
-        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-        playing: p && {
-          itemId: p.itemId,
-          position: durationFromMs(Math.round(p.position * 1000)),
-          paused: p.paused,
-          speed: p.speed,
-          audioStreamIndex: p.audioStreamIndex,
-          subtitleStreamIndex: p.subtitleStreamIndex,
-          volume: p.volume,
-          muted: p.muted,
-        },
-      });
-      const sentences = new Sentences();
-      let answerLang = lang;
+      const context = askContext(lang);
       // Whether the answer waits for the user: a confirmation, or results to choose from.
       let waits = false;
       try {
         const events = ask(
           servers,
           srv,
-          { ...req, text, intent, context, spoken, failedActions: failed.current.splice(0), speechId: voice?.speechId ?? "" },
+          { ...req, text, intent, context, failedActions: failed.current.splice(0) },
           abort.signal,
         );
         for await (const e of events) {
@@ -371,15 +345,11 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
             case "confirmation":
               waits = true;
               set({ confirmation: { id: ev.value.id, text: ev.value.text } });
-              voice?.say(ev.value.text, answerLang);
               break;
             case "answer":
               set((st) => ({ answer: st.answer + ev.value }));
-              for (const sentence of sentences.push(ev.value)) voice?.say(sentence, answerLang);
               break;
             case "done":
-              answerLang = ev.value.language || answerLang;
-              for (const sentence of sentences.end()) voice?.say(sentence, answerLang);
               set((st) => ({ answer: ev.value.answer || st.answer }));
               break;
           }
@@ -391,29 +361,128 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
         set({ working: false, error: errorMessage(err) });
       }
     },
-    [servers, router, set, perform, speakerFor, lingerThenClose],
+    [servers, router, set, perform, askContext, lingerThenClose],
   );
 
-  const send = useCallback((text: string) => void request({ text }, false), [request]);
+  /** A typed request: to the voice session when one runs, so that its answer is spoken, else to Ask. */
+  const send = useCallback(
+    (text: string) => {
+      const v = session.current;
+      if (!v) return void request({ text });
+      turn.current = text;
+      set({ heard: text, heardAt: new Date() });
+      v.send({ type: "text", text });
+    },
+    [request, set],
+  );
 
-  const listen = useCallback(async () => {
-    const { server: srv, info: inf, prefs: pr } = latest.current;
-    if (!srv || listening.current) return;
+  /** Carries out what the voice session tells (§8.6). */
+  const onVoice = useCallback(
+    (e: VoiceEvent) => {
+      const srv = latest.current.server;
+      const text = typeof e.text === "string" ? e.text : "";
+      switch (e.type) {
+        case "user_started":
+          clearTimeout(linger.current);
+          break;
+        case "transcript":
+          if (e.final) turn.current = [turn.current, text.trim()].filter(Boolean).join(" ");
+          set({ heard: e.final ? turn.current : [turn.current, text.trim()].filter(Boolean).join(" "), heardAt: undefined });
+          break;
+        case "run":
+          turn.current = "";
+          set((s) => ({
+            heard: text || s.heard,
+            heardAt: new Date(),
+            working: true,
+            activity: [],
+            answer: "",
+            answerAt: undefined,
+            error: undefined,
+            confirmation: undefined,
+            ...(s.choose ? {} : { items: [] }),
+          }));
+          break;
+        case "intent":
+          if (text) set({ heard: text });
+          break;
+        case "tool": {
+          const tool = { id: String(e.id ?? ""), summary: String(e.summary ?? ""), done: !!e.done, failed: !!e.failed };
+          set((st) => ({ activity: [...st.activity.filter((x) => x.id !== tool.id), tool] }));
+          break;
+        }
+        case "action": {
+          let a: ClientAction;
+          try {
+            a = fromJson(ClientActionSchema, e.action as JsonValue, { ignoreUnknownFields: true });
+          } catch {
+            break;
+          }
+          if (srv) perform(a, srv);
+          break;
+        }
+        case "confirm":
+          set({ confirmation: { id: String(e.id ?? ""), text } });
+          break;
+        case "answer":
+          set((st) => ({ answer: st.answer + text }));
+          break;
+        case "end":
+          set((st) => ({
+            working: false,
+            answer: typeof e.answer === "string" && e.answer ? e.answer : st.answer,
+            answerAt: new Date(),
+            error: e.status === "failed" && !st.answer ? t("assistant.cantDo") : st.error,
+          }));
+          break;
+        case "bot_started":
+          set({ speaking: true });
+          break;
+        case "bot_stopped":
+          set({ speaking: false });
+          break;
+        case "error":
+          set({ working: false, error: typeof e.message === "string" && e.message ? e.message : String(e.code ?? "") });
+          break;
+      }
+    },
+    [set, perform],
+  );
+
+  /** Starts the session on the server: a conversation, or talking while held. */
+  const connect = useCallback(
+    (pushToTalk: boolean) => {
+      const v = session.current;
+      const srv = latest.current.server;
+      if (!v || !srv) return;
+      v.connect(
+        startVoiceSession(servers, srv, {
+          language: speechLanguage,
+          mode: pushToTalk ? VoiceMode.PUSH_TO_TALK : VoiceMode.CONVERSATION,
+          context: askContext(speechLanguage),
+        }).then((r) => r.url),
+        pushToTalk,
+      );
+      if (pushToTalk) v.talk(true);
+    },
+    [servers, askContext],
+  );
+
+  /** Opens the microphone, and the voice session once it is known whether the user holds to talk. */
+  const capture = useCallback(async () => {
+    const { server: srv, info: inf } = latest.current;
+    if (!srv) return;
     clearTimeout(linger.current);
-    stopSpeaking();
     running.current?.abort();
+    if (!inf?.voice) {
+      set({ open: true, error: t("assistant.noVoice") });
+      return;
+    }
     if (!microphoneAllowed()) {
       set({ open: true, error: t("assistant.insecure") });
       return;
     }
-    const onServer = !!inf?.recognizers.length;
-    const order = (pr.assistantRecognition === "device" ? ["device", "server"] : ["server", "device"]).filter((r) =>
-      r === "server" ? onServer : browserRecognizes(),
-    );
-    if (order.length === 0) {
-      set({ open: true, error: t("assistant.noRecognizer") });
-      return;
-    }
+    turn.current = "";
     set({
       open: true,
       listening: true,
@@ -425,52 +494,59 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
       error: undefined,
       ...(latest.current.state.choose ? {} : { items: [] }),
     });
-    const hearing = {
-      partial: (text: string) => set({ heard: text }),
-      final: (text: string, language: string) => {
-        listening.current = undefined;
-        set({ listening: false, heard: text });
-        if (text) void request({ text }, true, language);
-        else lingerThenClose();
-      },
-      error: (message: string) => {
-        listening.current = undefined;
-        set({
-          listening: false,
-          error: message === denied ? t("assistant.microphoneDenied") : message === timedOut ? t("assistant.recognitionTimedOut") : message,
-        });
-      },
-    };
-    for (const r of order) {
-      try {
-        listening.current =
-          r === "server"
-            ? await listenOnServer(async () => (await startListening(servers, srv, speechLanguage)).url, hearing)
-            : listenInBrowser(speechLanguage, hearing);
-        return;
-      } catch (err) {
-        // A recognizer that fails falls back to the other.
-        if (r === order.at(-1))
-          set({ listening: false, error: isDenied(err) ? t("assistant.microphoneDenied") : t("assistant.noMicrophone", { error: errorMessage(err) }) });
-      }
+    try {
+      const v = await VoiceSession.capture({
+        event: onVoice,
+        closed: (error) => {
+          if (session.current !== v) return;
+          session.current = undefined;
+          set({ listening: false, speaking: false, working: false, ...(error ? { error } : {}) });
+          if (!error) lingerThenClose();
+        },
+      });
+      session.current = v;
+      // Let go before the microphone opened: a tap.
+      if (!hold.current) connect(false);
+      else if (hold.current.held) connect(true);
+    } catch (err) {
+      set({ listening: false, error: isDenied(err) ? t("assistant.microphoneDenied") : t("assistant.noMicrophone", { error: errorMessage(err) }) });
     }
-  }, [servers, set, stopSpeaking, request, lingerThenClose]);
+  }, [set, onVoice, lingerThenClose, connect]);
 
   const press = useCallback(() => {
-    // Pressing again while listening ends the speech; while speaking, stops it.
-    if (listening.current) {
-      listening.current.stop();
+    const v = session.current;
+    // A conversation ends when pressed again.
+    if (v && !v.holdsToTalk) {
+      close();
       return;
     }
-    pressedAt.current = Date.now();
-    void listen();
-  }, [listen]);
+    const h: { timer?: ReturnType<typeof setTimeout>; held: boolean } = { held: false };
+    hold.current = h;
+    h.timer = setTimeout(() => {
+      h.held = true;
+      const s = session.current;
+      if (s?.holdsToTalk) s.talk(true);
+      else if (s) connect(true);
+    }, holdMs);
+    if (!v) void capture();
+  }, [close, capture, connect]);
 
   const release = useCallback(() => {
-    // A tap listens until the speech ends; a hold until it is let go.
-    if (pressedAt.current && Date.now() - pressedAt.current >= holdMs) listening.current?.stop();
-    pressedAt.current = 0;
-  }, []);
+    const h = hold.current;
+    hold.current = undefined;
+    if (!h) return;
+    clearTimeout(h.timer);
+    const v = session.current;
+    if (h.held) v?.talk(false);
+    // A tap: a conversation starts, or a session held to talk ends.
+    else if (v?.holdsToTalk) close();
+    else if (v) connect(false);
+  }, [close, connect]);
+
+  // The page's context goes to the session as it changes.
+  useEffect(() => {
+    session.current?.send({ type: "context", context: toJson(AskContextSchema, askContext(speechLanguage)) });
+  }, [pathname, params.itemId, params.libraryId, askContext]);
 
   // The key held to talk, outside text fields.
   useEffect(() => {
@@ -516,10 +592,10 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
 
   const answerConfirmation = (confirmed: boolean) => {
     const c = state.confirmation;
-    if (c) void request({ answer: { id: c.id, confirmed } }, false);
+    if (c) void request({ answer: { id: c.id, confirmed } });
   };
   const choose = (item: Item) => {
-    if (state.choose) void request({ choice: item.id }, false);
+    if (state.choose) void request({ choice: item.id });
     else if (server) void router.navigate({ to: "/s/$serverId/item/$itemId", params: { serverId: server.id, itemId: item.id } });
   };
 
@@ -539,7 +615,6 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
           onConfirm={answerConfirmation}
           onChoose={choose}
           onTouch={() => clearTimeout(linger.current)}
-          onPlay={toggleSpeaking}
         />
       )}
     </Context.Provider>
@@ -558,7 +633,6 @@ function Panel({
   onConfirm,
   onChoose,
   onTouch,
-  onPlay,
 }: {
   server: ServerEntry;
   state: State;
@@ -571,12 +645,17 @@ function Panel({
   onConfirm: (confirmed: boolean) => void;
   onChoose: (item: Item) => void;
   onTouch: () => void;
-  onPlay: () => void;
 }) {
   const [text, setText] = useState("");
   const keyboard = useShortcutsShown();
   const fresh = !state.heard && !state.answer && !state.listening && !state.working && !state.error && state.items.length === 0;
-  const status = state.listening ? t("assistant.listening") : state.working && !state.answer ? t("assistant.working") : undefined;
+  const status = state.speaking
+    ? t("assistant.speaking")
+    : state.working && !state.answer
+      ? t("assistant.working")
+      : state.listening
+        ? t("assistant.listening")
+        : undefined;
   // Above the phone's tab bar where it shows.
   const tabs = isTabPlace(useLocation().pathname);
   useEffect(() => {
@@ -629,7 +708,7 @@ function Panel({
             )}
             {state.answer && <p className={bubble(false, "bg-background")}>{state.answer}</p>}
             {state.answer && state.answerAt && (
-              <MessageBar text={state.answer} at={state.answerAt} playing={state.speaking} onPlay={state.replayable ? onPlay : undefined} />
+              <MessageBar text={state.answer} at={state.answerAt} />
             )}
           </div>
         )}
@@ -706,7 +785,7 @@ function Panel({
   );
 }
 
-/** The microphone button: held to talk, or tapped to talk until the speech ends. */
+/** The microphone button: held to talk while held, or tapped to start a conversation and again to end it. */
 function TalkButton({ listening, onPress, onRelease }: { listening: boolean; onPress: () => void; onRelease: () => void }) {
   return (
     <button
@@ -735,7 +814,7 @@ function TalkButton({ listening, onPress, onRelease }: { listening: boolean; onP
 
 /**
  * The assistant button of the page's chrome, shown when the server's
- * assistant is on: it opens the panel and listens, held or tapped.
+ * assistant is on: it opens the panel and starts a voice session, held or tapped.
  */
 export function AssistantButton({
   className,

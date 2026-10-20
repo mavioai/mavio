@@ -366,8 +366,8 @@ interface Said {
   text: string;
   pending?: boolean;
   at?: Date;
-  /** The URLs of the speech the server kept of an answer of the assistant's. */
-  speech?: string[];
+  /** The URL of the speech the server kept of an answer of the assistant's. */
+  speech?: string;
 }
 
 /** The messages, only those scrolled into view drawn (TanStack Virtual), the page scrolling them. */
@@ -403,7 +403,7 @@ function Messages({ server, said }: { server: ServerEntry; said: Said[] }) {
             pending={m.pending}
             at={m.at}
             playing={playing.at === m.key}
-            onPlay={m.speech?.length ? () => playing.toggle(m.key, m.speech!) : undefined}
+            onPlay={m.speech ? () => playing.toggle(m.key, m.speech!) : undefined}
           />
         );
       })}
@@ -415,7 +415,7 @@ function ConversationPage({ server, id, first, onFirstSent }: { server: ServerEn
   const conversation = useAiConversation(server, id);
   // An assistant's conversation of the user's has the speech kept of its answers.
   const assistant = useAssistantConversation(server, id);
-  const speech = new Map((assistant.data?.messages ?? []).filter((m) => !m.user && m.speech.length > 0).map((m) => [m.text, m.speech]));
+  const speech = new Map((assistant.data?.messages ?? []).filter((m) => !m.user && m.speechUrl).map((m) => [m.text, m.speechUrl]));
   const { remove } = useAiConversationActions(server);
   const { exchange, send, retry, sending } = useAiSend(server, id);
   const { options } = useModelOptions(server);
