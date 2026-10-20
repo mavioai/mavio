@@ -381,6 +381,8 @@ flowchart TD
 - [x] 解析器、片头提供者、图片生成器、媒体源提供者、密码重置
 - [x] 按媒体库的提供者顺序
 - [x] 端到端测试（使用真实 ffmpeg 的 `apps/server/internal/server/capabilities_test.go` 与 `plugins_test.go`），覆盖两种运行时
+- [x] 开发插件（[插件平台 §13](plugins.zh-CN.md#13-开发插件)）：`--plugin-dev` 原地运行项目，文件夹变化时及 `RestartPlugin` 重启；`dev` 目标在源码变化时重新构建；插件页面显示各插件的日志
+- [ ] 调试开发中的插件（为进程插件附加调试器、编辑器的启动配置）：待 Mavio 的 CLI 出现后再决定
 
 ### P14 DLNA
 **范围**：`plugins/dlna`，第一方进程插件（[插件平台 §10](plugins.zh-CN.md#10-dlnapluginsdlna)）：媒体服务器（SSDP、ContentDirectory、ConnectionManager、带 DLNA 头的媒体）、推送播放（发现渲染器、AVTransport 与 RenderingControl）、设备 profile；为服务端的每个平台构建，打包为目录插件包并内置于容器镜像。

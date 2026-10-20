@@ -276,3 +276,17 @@ A first-party process plugin providing `CHALLENGE_SOLVER` with FlareSolverr, dec
 
 ### 12.3 Indexers and Subtitle Providers
 Each indexer of `plugins/indexers` has a `proxy`, one of the server's proxies, the system proxy by default and none when empty, which the addresses of this machine and of the local network bypass, as Prowlarr's; an indexer whose proxy no longer exists is left out with that error. `plugins/subtitles` has one `proxy` for every provider, the system proxy by default, and the hosts reached directly (`exclude`, by default `localhost` and `127.0.0.1`); a proxy that no longer exists fails its configuration. Both solve challenges through `HostService.SolveChallenge` with the proxy they use, keeping the cookies and user agent per host; without a solver plugin the challenge is left as it is, and the indexer or provider fails as blocked by Cloudflare.
+
+## 13. Developing Plugins
+
+### 13.1 Running in Place
+`--plugin-dev` (`MAVIO_PLUGIN_DEV`, `plugin-dev` in config.toml, where its paths must be absolute) names plugin projects, separated as `PATH` is, which the server runs where they are: no package, copy or version check. A project whose folder has a `manifest.json` but no `plugin`, `plugin.exe` or `plugin.wasm` runs from its `dist/dev`, where a plugin's Nx `dev` target builds it; any other folder runs as it is. A development plugin is started before the plugin folder's, whose plugin of the same ID is left as it is and not started; it cannot be installed, upgraded or uninstalled (`FailedPrecondition`), and `Plugin.dev_folder` gives its folder, where clients show it as in development.
+
+### 13.2 Restarting
+The server looks at each development folder every 500 ms, and once a change has stayed the same for one look it restarts the plugin, which takes the manifest's ID, configuration and capabilities anew; a folder that cannot be started leaves the plugin failed, and the next change starts it again. `PluginManagementService.RestartPlugin` restarts any plugin that is not disabled, a failed one included, as an administrator asks; a start that fails returns the plugin in the failed state with its error.
+
+### 13.3 Builds
+`pnpm nx run <plugin>:dev` (`plugindist -dev`, continuous and never cached) builds the plugin for this platform into a temporary folder, which replaces `dist/dev` whole once it is done, then builds again whenever its sources change: the project's, and those of the in-repo modules and packages it depends on (a Go module's relative `replace`s, a Bun plugin's `workspace:` packages, the uv workspace's members). A failed build leaves `dist/dev` as it was. A Python plugin's `dist/dev` holds its manifest and a launcher running the uv workspace's environment, so that a change of its sources is one of the folder's by the build's time it writes; Windows has no Python launcher. `-once` builds once.
+
+### 13.4 Logs
+The server's log ring keeps, with each record a plugin writes (its process's stderr at info, stdout at debug, and a WASM plugin's log), the plugin's ID; `ListLogsRequest.plugin_id` lists only those. A plugin's screen in the web UI shows its latest records, refreshed every three seconds, and refreshes the plugins every two seconds while one is in development.

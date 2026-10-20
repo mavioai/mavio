@@ -242,6 +242,8 @@ The first-party plugins are packaged by `tools/plugindist`, from their manifests
 
 The official catalog is the `catalog.json` of the latest release of the mavioai/plugins repository, which the server's `plugin-catalog` setting defaults to; its releases hold the packages `plugindist:dist` builds from the source of a Mavio release. For a development server, `pnpm nx run plugindist:catalog` builds the plugins for this platform into each plugin's `dist/` and writes `plugins/catalog.json` (ignored by Git), whose packages are file URLs; the server started with `--plugin-catalog ../../plugins/catalog.json` installs from it.
 
+While a plugin is developed, `pnpm nx run <plugin>:dev` builds it for this platform into its `dist/dev`, and again whenever its sources or those of the in-repo modules it depends on change; a server started with `--plugin-dev <absolute path of plugins/<name>>` (several separated as `PATH` is) runs it from there in place of an installed one and restarts it once the folder changes, and its screen in the web UI has a Restart button and its logs ([Plugins §13](plugins.md#13-developing-plugins)).
+
 Release builds of `scraper-tmdb` set `MAVIO_TMDB_KEY` to Mavio's own TMDB API key, which `pnpm nx run scraper-tmdb:build` builds into the plugin as the key used once TMDB rejects Radarr's token ([Architecture §13.2](architecture.md#132-data-sources-and-numbering)); the key is never committed.
 
 ---

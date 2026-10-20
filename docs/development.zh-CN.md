@@ -242,6 +242,8 @@ CI 中的工具链同样来自 `mise.toml`（`jdx/mise-action`）；**media** �
 
 官方插件目录是 mavioai/plugins 仓库最新发布版本的 `catalog.json`，也是服务端 `plugin-catalog` 设置的默认值；其发布版本包含 `plugindist:dist` 从 Mavio 某个发布版本的源码构建的包。开发用服务端则用 `pnpm nx run plugindist:catalog` 为本平台把插件构建到各插件的 `dist/`，并写入 `plugins/catalog.json`（Git 忽略），其中的包是 file URL；以 `--plugin-catalog ../../plugins/catalog.json` 启动的服务端从中安装插件。
 
+开发插件时，`pnpm nx run <plugin>:dev` 为本平台把插件构建到其 `dist/dev`，并在其源码或其所依赖的仓库内模块的源码变化时再次构建；以 `--plugin-dev <plugins/<name> 的绝对路径>`（多个时按 `PATH` 的方式分隔）启动的服务端从这里运行它，取代已安装的同一插件，并在文件夹变化后重启它；Web UI 中它的页面有重启按钮并显示其日志（[插件平台 §13](plugins.zh-CN.md#13-开发插件)）。
+
 `scraper-tmdb` 的发布构建把 `MAVIO_TMDB_KEY` 设为 Mavio 自己的 TMDB API 密钥，`pnpm nx run scraper-tmdb:build` 把它编入插件，作为 TMDB 拒绝 Radarr 令牌后使用的密钥（[架构 §13.2](architecture.zh-CN.md#132-数据源与编号)）；该密钥从不提交。
 
 ---

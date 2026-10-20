@@ -381,6 +381,8 @@ flowchart TD
 - [x] Resolvers, intro providers, image generators, media source providers, password reset
 - [x] Provider order per library
 - [x] End-to-end test (`apps/server/internal/server/capabilities_test.go` with real ffmpeg, `plugins_test.go`), in both runtimes
+- [x] Developing plugins ([Plugins §13](plugins.md#13-developing-plugins)): projects run in place by `--plugin-dev`, restarted when their folder changes and by `RestartPlugin`; `dev` targets rebuilding on source changes; each plugin's logs on its screen
+- [ ] Debugging plugins under development (a debugger attached to a process plugin, launch configurations for editors): decided once Mavio's CLI exists
 
 ### P14 DLNA
 **Scope**: `plugins/dlna`, a first-party process plugin ([Plugins §10](plugins.md#10-dlna-pluginsdlna)): media server (SSDP, ContentDirectory, ConnectionManager, media with DLNA headers), Play To (renderer discovery, AVTransport and RenderingControl), device profiles; built for every server platform, packaged for a catalog and bundled in the container image.

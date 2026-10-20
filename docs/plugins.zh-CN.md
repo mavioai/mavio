@@ -276,3 +276,17 @@ DLNA 是第一方进程插件：它需要 UDP 组播（WASM 没有 socket）和�
 
 ### 12.3 索引器与字幕提供者
 `plugins/indexers` 的每个索引器有一个 `proxy`，取服务端的一个代理，默认为系统代理，为空则不用代理，本机与局域网的地址不经代理，与 Prowlarr 相同；代理已不存在的索引器会带着该错误被排除。`plugins/subtitles` 的所有提供者共用一个 `proxy`，默认为系统代理，并有直连的主机（`exclude`，默认 `localhost` 与 `127.0.0.1`）；代理已不存在时其配置失败。两者都以所用代理调用 `HostService.SolveChallenge` 解答质询，并按主机保留 cookie 与 user agent；没有求解插件时质询保持原样，索引器或提供者以被 Cloudflare 拦截而失败。
+
+## 13. 开发插件
+
+### 13.1 原地运行
+`--plugin-dev`（`MAVIO_PLUGIN_DEV`，或 config.toml 中的 `plugin-dev`，其中的路径必须是绝对路径）列出插件项目，分隔方式与 `PATH` 相同，服务端在其原处运行它们：不打包、不复制、不检查版本。文件夹中有 `manifest.json` 却没有 `plugin`、`plugin.exe` 或 `plugin.wasm` 的项目从其 `dist/dev` 运行，插件的 Nx `dev` 目标把插件构建到这里；其他文件夹按原样运行。开发中的插件先于插件目录中的插件启动，插件目录中同 ID 的插件保持原样、不被启动；开发中的插件不能安装、升级或卸载（`FailedPrecondition`），`Plugin.dev_folder` 给出其文件夹，客户端据此将其显示为开发中。
+
+### 13.2 重启
+服务端每 500 ms 查看一次每个开发文件夹，变化在一次查看间保持不变后即重启插件，重新读取清单的 ID、配置与能力；无法启动的文件夹使插件处于失败状态，下次变化时再次启动。`PluginManagementService.RestartPlugin` 按管理员的要求重启任何未禁用的插件，包括失败的插件；启动失败时返回处于失败状态的插件及其错误。
+
+### 13.3 构建
+`pnpm nx run <plugin>:dev`（`plugindist -dev`，持续运行且从不缓存）为本平台把插件构建到临时文件夹，完成后整体替换 `dist/dev`，此后每当其源码变化时再次构建：项目自身的源码，以及它所依赖的仓库内模块与包的源码（Go 模块的相对 `replace`、Bun 插件的 `workspace:` 包、uv 工作区的成员）。构建失败时 `dist/dev` 保持原样。Python 插件的 `dist/dev` 包含其清单和一个运行 uv 工作区环境的启动脚本，构建时写入的构建时间使其源码的变化成为该文件夹的变化；Windows 没有 Python 启动脚本。`-once` 只构建一次。
+
+### 13.4 日志
+服务端的日志环形缓冲为插件写下的每条记录（其进程的 stderr 记为 info，stdout 记为 debug，以及 WASM 插件的日志）保存插件 ID；`ListLogsRequest.plugin_id` 只列出这些记录。Web UI 中插件的页面显示其最新记录，每三秒刷新一次；有插件处于开发中时，每两秒刷新一次插件列表。
