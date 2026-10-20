@@ -33,7 +33,8 @@
       "env": {
         "ENABLE_UI": "false",
         "LOG_LEVEL": "info",
-        "STT_MODEL_TTL": "-1"
+        "STT_MODEL_TTL": "-1",
+        "WHISPER__COMPUTE_TYPE": "int8"
       },
       "volumes": {
         "models": "/home/ubuntu/.cache/huggingface/hub"

@@ -76,6 +76,7 @@ class FakeSpeaches(Speaches):
         super().__init__(address=address)
         self.models = set(models)
         self.downloaded: list[str] = []
+        self.loaded: list[str] = []
         self.fail = fail
 
     def has(self, model: str) -> bool:
@@ -86,6 +87,9 @@ class FakeSpeaches(Speaches):
             raise SpeachesError(f"download {model}: 503")
         self.downloaded.append(model)
         self.models.add(model)
+
+    async def load(self, model: str) -> None:
+        self.loaded.append(model)
 
 
 def google_credentials() -> str:

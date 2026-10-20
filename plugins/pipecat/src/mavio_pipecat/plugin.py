@@ -32,7 +32,7 @@ from mavio_pipecat.config import Config, Engine, parse_config
 from mavio_pipecat.models import ModelRef, Models, Progress
 from mavio_pipecat.pipeline import Services, Turns, run_session
 from mavio_pipecat.services import Catalog, Service, Session
-from mavio_pipecat.speaches import Speaches
+from mavio_pipecat.speaches import Speaches, SpeachesError
 from mavio_pipecat.transcribe import Transcription
 from mavio_plugin import (
     ASGIApp,
@@ -126,6 +126,25 @@ class Speech:
             ),
         ]
         return [r for r in dict.fromkeys(refs) if not self.models.ready(r)]
+
+    async def warm(self) -> None:
+        """Loads the Whisper models of the enabled recognizers that are
+        downloaded into speaches' memory, so that a session's first
+        utterance waits for no loading."""
+        refs = dict.fromkeys(
+            m
+            for e in self.config.recognizers
+            if e.enabled
+            for m in self.engine_models(e, self.catalog.recognition)
+            if m.kind == "whisper"
+        )
+        for ref in refs:
+            if not await asyncio.to_thread(self.models.ready, ref):
+                continue
+            try:
+                await self.models.speaches.load(ref.name)
+            except SpeachesError as e:
+                logger.warning(f"{e}")
 
 
 class Sessions:
@@ -266,7 +285,9 @@ class Tasks:
 
     async def download(self, progress: Progress | None = None) -> list[str]:
         missing = await asyncio.to_thread(self._speech.missing)
-        return await self._speech.models.download(missing, progress)
+        done = await self._speech.models.download(missing, progress)
+        await self._speech.warm()
+        return done
 
     async def _report(self, progress: float, status: str) -> None:
         if self._host is not None and not await report_task_progress(
@@ -309,6 +330,8 @@ async def run(manifest_path: Path) -> None:
     sessions = Sessions(asker, speech)
     tasks = Tasks(speech, host)
     transcription = Transcription(host, models, lambda: speech.config)
+    # The loading of the recognizers' models, not awaited by configure.
+    warming: set[asyncio.Task[None]] = set()
 
     async def configure(config_json: str) -> None:
         try:
@@ -323,6 +346,8 @@ async def run(manifest_path: Path) -> None:
         # tasks; a run retries what failed.
         if await asyncio.to_thread(speech.missing) and not await start_task(host, DOWNLOAD_TASK):
             logger.warning("the host queued no download of the models")
+        warming.add(task := asyncio.create_task(speech.warm()))
+        task.add_done_callback(warming.discard)
 
     try:
         await serve(

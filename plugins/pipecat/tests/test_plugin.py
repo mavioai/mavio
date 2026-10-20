@@ -195,6 +195,17 @@ async def test_tasks_download_what_is_missing(tmp_path: Path):
         await Tasks(speech).run_task(task_pb2.RunTaskRequest(task_id="nothing"), _CTX)
 
 
+async def test_warm_loads_the_downloaded_whisper_models(tmp_path: Path):
+    whisper = "deepdml/faster-whisper-large-v3-turbo-ct2"
+    speaches = FakeSpeaches()
+    speech = Speech(Models(tmp_path, speaches))
+    speech.config = parse_config(_CONFIG)
+    await speech.warm()
+    assert speaches.loaded == [], f"loaded = {speaches.loaded}, want = []"
+    await Tasks(speech).download()
+    assert speaches.loaded == [whisper], f"loaded = {speaches.loaded}, want = {[whisper]}"
+
+
 async def test_tasks_report_their_progress(tmp_path: Path):
     speech = Speech(Models(tmp_path, FakeSpeaches()))
     speech.config = parse_config(_CONFIG)

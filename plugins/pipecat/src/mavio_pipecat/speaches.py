@@ -90,3 +90,16 @@ class Speaches:
             raise SpeachesError(f"download {model}: {e}") from e
         if r.status_code not in (200, 201):
             raise SpeachesError(f"download {model}: {r.status_code} {r.text[:200]}")
+
+    async def load(self, model: str) -> None:
+        """Loads a downloaded model into memory, which speaches otherwise
+        does on its first transcription, keeping it there; on a CPU that
+        takes a large model several seconds."""
+        try:
+            async with httpx.AsyncClient(timeout=httpx.Timeout(30, read=None)) as http:
+                r = await http.post(f"{self.address}/api/ps/{quote(model, safe='/')}")
+        except httpx.HTTPError as e:
+            raise SpeachesError(f"load {model}: {e}") from e
+        # 409: loaded already.
+        if r.status_code not in (200, 201, 409):
+            raise SpeachesError(f"load {model}: {r.status_code} {r.text[:200]}")
