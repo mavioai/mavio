@@ -127,7 +127,7 @@ mavio/
 │   ├── indexers/                # [Go → 子进程] 索引器：Newznab、Torznab、Cardigann、Prowlarr 的站点
 │   ├── download-clients/        # [Go → 子进程] 下载客户端：qBittorrent、Transmission、SABnzbd、NZBGet 等
 │   ├── agent/                   # [TS → 子进程，Bun] AI 网关（pi-ai）与智能体会话（pi-durable）
-│   ├── pipecat/                 # [Python → 子进程] 基于 Pipecat 的语音会话，以 faster-whisper 转写字幕
+│   ├── pipecat/                 # [Python → 子进程] 基于 Pipecat 的语音会话，在 Whisper 的容器上转写字幕
 │   ├── solvers/                 # （P31）[Go → 子进程] 质询求解器：以容器依赖运行的 FlareSolverr
 │   ├── notifier-webhook/        # [Go → wasm] Webhook 通知
 │   └── auth-ldap/               # [Go → 子进程] LDAP 认证（需要原生 TCP 长连接）
@@ -610,7 +610,7 @@ Mavio 为电影与单集查找缺少的字幕，即 Bazarr 在 Sonarr 与 Radarr
   * **校对**（`subtitles.proofread`）让一个 AI 模型（指定的，否则为第一个翻译该文件的）把每条译文与其来源比较，并以其修正替换。字幕条数（不计署名条）相同时按顺序与源字幕条配对，否则按精确时间，再否则与重叠至少较短者一半时长的源字幕条配对，因此翻译后经过同步或编辑的文件仍能校对；记录中注明修改的条数。
   * **自动化**（`subtitles.translate_wanted` 定时任务，启用时每隔设定间隔运行）为电影与单集翻译缺少的字幕：从上次停下处起轮流选取，每次至多设置中的数量，仅限文件足够旧的，依据其已有的第一个源语言字幕：外挂文件优先于内嵌文字字幕流，从不用 forced 字幕，非听障字幕优先于听障字幕。同一条目与语言已有待处理或正在运行的翻译时不再排队。
   * **统计**（`GetSubtitleTranslationStatistics`）汇总各记录：文件数、字幕条数、字符数、令牌数与费用，按翻译器、语言对与媒体类型分组，以及最近每天的文件数。
-* **转写**遵循 Bazarr 的 Whisper 提供者，但由 `SPEECH_TO_TEXT` 插件的转写器（[插件 §8.16](plugins.zh-CN.md#816-语音会话与转写)）代替一个单独的提供者：`plugins/pipecat` 自己以下载到其数据目录的模型运行 faster-whisper，或请求 OpenAI 兼容的转写 API，在与其语音会话分开的工作进程中进行（[助手 §8.9](assistant.zh-CN.md#89-字幕)），因此不需要 whisper 容器。服务端的转写来源与字幕提供者一起参与搜索，位于媒体库的提供者顺序中，使用字幕设置选定的转写器；它为每个它能生成的缺少语言提供一条字幕，评分与 Bazarr 给 Whisper 的相同（只匹配剧集、季与集，或标题），因此只在没有更好的提供者字幕时被选中。它把音频转写为其本身的语言，或在转写器支持翻译时翻译为英语，从不译为其他语言，也不经过翻译器。音频的语言取自音频流的标签，按 Bazarr 的方式映射；没有标签的流或标签含义不明（`und`、`mul`、`zxx` 等）时，转写器从第一条音频流的前 30 秒检测，检测结果按文件保存；有多条音频流时，转写与字幕语言相同的那条。这些选择是 `libs/acquire/subtitles` 的纯函数。转写器从宿主 API（`/speech/audio/{token}`，与视频开头对齐的 16 kHz 单声道 PCM）读取音频，以带时间的分段应答，由服务端写成 SubRip。
+* **转写**遵循 Bazarr 的 Whisper 提供者，但由 `SPEECH_TO_TEXT` 插件的转写器（[插件 §8.16](plugins.zh-CN.md#816-语音会话与转写)）代替一个单独的提供者：`plugins/pipecat` 请求运行在 speaches 上的 Whisper，即其容器依赖（§16），容器引擎提供 GPU 时运行在 GPU 上，或请求 OpenAI 兼容的转写 API（[助手 §8.9](assistant.zh-CN.md#89-字幕)）。服务端的转写来源与字幕提供者一起参与搜索，位于媒体库的提供者顺序中，使用字幕设置选定的转写器；它为每个它能生成的缺少语言提供一条字幕，评分与 Bazarr 给 Whisper 的相同（只匹配剧集、季与集，或标题），因此只在没有更好的提供者字幕时被选中。它把音频转写为其本身的语言，或在转写器支持翻译时翻译为英语，从不译为其他语言，也不经过翻译器。音频的语言取自音频流的标签，按 Bazarr 的方式映射；没有标签的流或标签含义不明（`und`、`mul`、`zxx` 等）时，转写器从第一条音频流的前 30 秒检测，检测结果按文件保存；有多条音频流时，转写与字幕语言相同的那条。这些选择是 `libs/acquire/subtitles` 的纯函数。转写器从宿主 API（`/speech/audio/{token}`，与视频开头对齐的 16 kHz 单声道 PCM）读取音频，以带时间的分段应答，由服务端写成 SubRip。
 
 ## 15. 助手（apps/server/internal/assistant）
 

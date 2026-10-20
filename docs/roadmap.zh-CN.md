@@ -1059,11 +1059,14 @@ flowchart TD
 - [x] 会话的轮次设置（最长停顿、提交延迟、空闲时间）放入助手设置，取代服务端的常量；管线在空闲时间后结束会话，支持 `push_to_talk` 与 `dictation` 模式；管线采用该语言的识别器与语音以及用户的提示
 - [x] `AGENT_SESSION` 与 `plugins/agent` 中的引导与中止，基于 pi-durable 的引导队列与会话中止
 - [x] 在 `tools/plugindist` 中为其 wheel 覆盖的平台打包 `plugins/pipecat`，并预置到容器镜像中
-- [ ] **完成标准**中语音的端到端测试：经由构建好的 `plugins/pipecat` 与伪造的服务，一段被引导的录音、插话中止运行、保留回答的语音；其 faster-whisper 转写器转写一集，以补回服务端测试随 `plugins/voice` 失去的转写覆盖；以及 AI 路径丢弃被引导运行所暂缓调用的测试
-- [ ] 识别出几个词后才算插话，而非一开始说话即算，以免一声咳嗽中止回答
+- [ ] **完成标准**中语音的端到端测试：经由构建好的 `plugins/pipecat` 与伪造的服务，一段被引导的录音、插话中止运行、保留回答的语音；其 Whisper 转写器以伪造的 speaches 转写一集，以补回服务端测试随 `plugins/voice` 失去的转写覆盖；以及 AI 路径丢弃被引导运行所暂缓调用的测试
+- [x] 运行在 speaches 上的 Whisper，即带 CPU 与 CUDA 镜像的容器依赖 `whisper`，取代插件中的 faster-whisper；容器引擎的 GPU 经 CDI 或 NVIDIA runtime 提供
+- [x] 精简包：在 uv workspace 中排除 resampy、numba 与 sympy，去掉 pip 与 CPython 的测试（每个平台 265–340 MB）
+- [x] 识别出两个词后才算插话，而非一开始说话即算，每个中文或日文字算一个词，以免一声咳嗽中止回答
 - [ ] 内置更多 Pipecat 服务：Azure、Google、AssemblyAI、Soniox、Speechmatics、Piper，以及 macOS 上的 MLX Whisper；把用户的提示词传给 Cartesia 与 ElevenLabs
-- [ ] 以任务进度显示 `download_models` 的进度
-- [ ] `plugins/pipecat` 在 Windows（需自己的启动器，arm64 上还需 ctranslate2 的 wheel）与 amd64 上的 macOS（llvmlite 没有 wheel）的包
+- [x] 以任务进度显示 `download-models` 的进度：`HostService.ReportTaskProgress`，按模型与 Kokoro 的字节数
+- [x] `plugins/pipecat` 在 Windows x64 上的包，带 Go 启动器；Intel 的 macOS 没有包（ONNX Runtime 没有其 wheel），Arm 的 Windows 也没有（loudness、sentencex 与 soxr 没有其 wheel）
+- [ ] 在 Windows 上运行 Windows 的包
 - [ ] 以后：在 WebSocket 之外加入 SmallWebRTC 作为传输，用于弱网，并为经由中转访问的服务端在 mavio.dev 上提供 TURN，在容器镜像中开放 UDP 端口
 - [ ] 以后：WebSocket 上回答的语音使用 Opus
 - [ ] Web 播放器：助手的动作会要求、而播放器尚不能执行的字幕偏移与多个条目的队列；在播放器的快捷键中列出 V
@@ -1146,7 +1149,7 @@ flowchart TD
 | Bun 可执行文件中的代码模式 | pi-durable 的代码模式在 quickjs-wasi（一个 WASM 模块）中运行脚本，它必须能在各平台 `plugins/agent` 的 Bun 可执行文件中加载 | 已由运行构建好的可执行文件的 `TestAssistantAI` 在 macOS（arm64）上验证；Linux 与 Windows 仍待验证；能加载之前，会话只直接提供工具 |
 | 浏览器中的麦克风 | `getUserMedia` 只在安全页面可用，因此在局域网上通过普通 HTTP 访问的独立服务端无法在 Web UI 中录音 | 服务端的 HTTPS 地址（P28）；其他情况下打字输入 |
 | 识别作品名称 | 识别器会写错作品与人物的名称，中文常写成同音字 | 向接受提示的识别器提供提示；槽位解析中的拼音与容错匹配（P29） |
-| `plugins/pipecat` 的大小 | 带 Pipecat、numba、PyAV、ONNX Runtime 与 faster-whisper 的 Python 在每个平台上为 600–900 MB（不含模型），原型按内置服务实测：Apple 芯片的 macOS 595 MB、Windows x64 631 MB、Linux arm64 770 MB、Linux x64 888 MB；Intel 的 macOS 与 Arm 的 Windows 缺少 wheel | 为其 wheel 覆盖的每个平台各打一个包：Apple 芯片的 macOS、Linux x64 与 arm64、Windows x64；模型只在选用时下载 |
+| `plugins/pipecat` 的大小 | 带 Pipecat、PyAV 与 ONNX Runtime 的 Python 在每个平台上为 250–340 MB（不含模型）：Apple 芯片的 macOS 265 MB、Windows x64 248 MB、Linux arm64 310 MB、Linux x64 337 MB；Intel 的 macOS 与 Arm 的 Windows 缺少 wheel | Whisper 放在其容器中，排除 numba、sympy 与 resampy；为其 wheel 覆盖的每个平台各打一个包：Apple 芯片的 macOS、Linux x64 与 arm64、Windows x64；模型只在选用时下载 |
 | 浏览器中的回声消除 | 浏览器对页面经由 Web Audio 播放的声音的回声消除参差不齐，Firefox 最不可靠 | 由原型检查（P29）；不足之处改用按住说话 |
 | 容器引擎的 socket | 能访问 Docker 的 socket 即等于宿主机的 root，因此拥有它的服务端，以及它允许插件声明的内容中的任何漏洞，都具有同等权力 | 只有管理员才能把 socket 交给服务端；声明固定在清单中，安装时批准；不允许特权模式、宿主机命名空间、设备或绑定挂载；外部依赖不需要 socket（P30） |
 | 容器引擎之间的差异 | Docker、rootless Docker、Docker Desktop 与 Podman 的 socket、网络与 GPU 支持各不相同 | 至少 Engine API 1.41；测试在 Linux 上的 Docker 运行，其他手工检查（P30） |

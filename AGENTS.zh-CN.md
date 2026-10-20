@@ -47,7 +47,7 @@ libs/rclone/          rclone rcd：rc 客户端、远端上的存储、媒体代
 libs/containers/      容器引擎：检测、Engine API 客户端、插件的容器依赖（P30 起）
 plugins/<name>/       插件（默认编译为 wasip1 WASM）
 plugins/agent/        AI 网关与智能体会话：由 Bun 编译的 TypeScript 子进程插件（pi-ai、pi-durable）
-plugins/pipecat/      基于 Pipecat 的语音会话与用 faster-whisper 的字幕转写：Python 子进程插件（P29 起）
+plugins/pipecat/      基于 Pipecat 的语音会话与在 Whisper 的 speaches 容器上的字幕转写：Python 子进程插件（P29 起）
 plugins/solvers/      质询求解器，以容器依赖运行 FlareSolverr：Go 子进程插件（P31 起）
 libs/intent/          助手的 Rust 语法：由 libs/client-rust 链接，并构建为 WASM（intent:wasm）供 Web UI 与服务端使用（P29 起）
 apps/web/             Web UI（React + Vite），构建到 apps/server/internal/webui/dist，由服务端内嵌

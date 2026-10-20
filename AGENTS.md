@@ -47,7 +47,7 @@ libs/rclone/          rclone rcd: rc client, storage on remotes, media proxy, rc
 libs/containers/      Container engines: detection, Engine API client, plugins' container dependencies (from P30)
 plugins/<name>/       Plugins (built as wasip1 WASM by default)
 plugins/agent/        AI gateway and agent sessions: a TypeScript process plugin compiled by Bun (pi-ai, pi-durable)
-plugins/pipecat/      Voice sessions on Pipecat and subtitle transcription with faster-whisper: a Python process plugin (from P29)
+plugins/pipecat/      Voice sessions on Pipecat and subtitle transcription on Whisper's speaches container: a Python process plugin (from P29)
 plugins/solvers/      Challenge solvers, FlareSolverr as a container dependency: a Go process plugin (from P31)
 libs/intent/          The assistant's grammar in Rust: linked by libs/client-rust, built as WASM (intent:wasm) for the web UI and the server (from P29)
 apps/web/             Web UI (React + Vite), built into apps/server/internal/webui/dist and embedded by the server

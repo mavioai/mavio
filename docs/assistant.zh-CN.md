@@ -188,7 +188,7 @@ WebSocket 输入（16 kHz PCM、事件）
 * **没有 LLM 服务。** 管线的智能体就是助手本身，通过 `Ask` 到达，使快速路径、工具、权限、会话与记忆仍归服务端，说出与打字的请求走同样的路径。不使用 Pipecat 的 LLM 服务、上下文聚合器与语音到语音模型。
 
 ### 8.3 轮次
-* **开始**：Silero VAD（0.2 秒的语音）开始用户的一轮。助手说话时，至少识别出两个词才开始一轮，使咳嗽、“嗯”或助手自己的回声不会打断它。
+* **开始**：Silero VAD（0.2 秒的语音）开始用户的一轮。助手说话时，至少识别出两个词才开始一轮（包括中间转写，每个中文或日文字算一个词），使咳嗽、“嗯”或助手自己的回声不会打断它。
 * **结束**：静音 0.2 秒后，Smart Turn v3——一个 8 MB 的模型，在 CPU 上运行 10–65 毫秒，随 Pipecat 附带，支持包括中文在内的 23 种语言——读取这一轮最后 8 秒的音频，判断用户是否说完。说完的一轮立即结束；没说完的则等到用户再次开口，或等到设置的最长停顿（3 秒）。
 * **模式**：`conversation` 为默认模式，在回答之间免手持收听并支持打断，直到会话结束（§8.1）；`push_to_talk` 在按住按钮或按键时收听，客户端发送 `ptt_start` 与 `ptt_end`（§8.6），松开即结束这一轮，用于电视遥控器与嘈杂的房间；`dictation` 只发送各轮的最终转写文本，不询问也不朗读，用于用户口述输入的文本框（[客户端 §6.3.26](clients.zh-CN.md#6326-ai-对话)）。
 * **打断**：助手说话时开始的一轮会打断它：管线停止朗读，客户端丢弃它持有的音频（`interrupt`），回答的运行被中止（§8.4）。
@@ -219,8 +219,8 @@ WebSocket 承载二进制音频帧（§8.5）与 JSON 事件 `{"type": …}`，�
 
 ### 8.7 识别与合成服务
 * 插件的设置从它附带的 Pipecat 服务中配置**识别器**与**语音**，每个都有服务端生成的 ID、其服务、管理员起的名称、是否启用，以及其服务的设置——密钥（机密）、模型、音色、区域或地址——插件只声明 Mavio 需要的设置，而不是服务的每个参数。同一服务可以配置多次，如两台 OpenAI 兼容服务器。
-* **附带的**是 Pipecat 团队维护、其依赖在插件发布的每个平台上都能以 wheel 安装且不需要 PyTorch 的服务：在服务端 CPU 上运行的 faster-whisper 版 Whisper、Kokoro 与 Piper，Apple 芯片上的 MLX Whisper；以及云服务，如 OpenAI 与 OpenAI 兼容服务器（speaches、Groq）、Deepgram、AssemblyAI、Azure、Google、ElevenLabs、Cartesia、Soniox 与 Speechmatics。社区包，以及需要 PyTorch 或采用自有许可证的厂商 SDK 的服务，不予附带。
-* **本地模型**——Whisper 的来自 Hugging Face，Kokoro 与 Piper 的来自其发布——在管理员选用时由插件任务经服务端的代理下载到插件的数据目录，并显示进度；模型缺失的识别器或语音未就绪。Whisper 的大小从 tiny（75 MB）到 large-v3（3 GB），中间有 large-v3-turbo（1.6 GB）。
+* **附带的**是 Pipecat 团队维护、其依赖在插件发布的每个平台上都能以 wheel 安装且不需要 PyTorch 的服务：运行在插件的容器依赖 speaches 上的 Whisper，容器引擎提供 NVIDIA GPU 时使用 GPU；在服务端 CPU 上运行的 Kokoro 与 Piper；以及云服务，如 OpenAI 与 OpenAI 兼容服务器（speaches、Groq）、Deepgram、AssemblyAI、Azure、Google、ElevenLabs、Cartesia、Soniox 与 Speechmatics。社区包，以及需要 PyTorch 或采用自有许可证的厂商 SDK 的服务，不予附带。
+* **本地模型**——Whisper 的经由 speaches 的模型 API 从 Hugging Face 下载到其容器的卷中，Kokoro 与 Piper 的经服务端的代理从其发布下载到插件的数据目录——在管理员选用时由插件任务下载，并按已完成的模型数及已知大小者的字节数显示进度；模型缺失的识别器或语音未就绪。Whisper 的大小从 tiny（75 MB）到 large-v3（3 GB），中间有 large-v3-turbo（1.6 GB）。
 * **提示**交给接受它们的服务：Deepgram 的关键词、Whisper 与 OpenAI 转写 API 的提示、Azure 与 Google 的短语。
 * **就绪**：`ListVoiceServices` 列出各服务、已配置的识别器与语音及其语言，以及各自是否就绪，供助手设置选用（§10）。
 
@@ -228,7 +228,7 @@ WebSocket 承载二进制音频帧（§8.5）与 JSON 事件 `{"type": …}`，�
 服务端把助手朗读的内容随回答保存在其会话中：它在转发时收集每个回答的音频，在客户端被打断处截断，回答结束时用 ffmpeg 编码为 Opus，存为语音目录（`speech-dir`，即服务端主目录中的 `speech/`）中的文件：每个会话一个目录，其中每个回答一个文件。`GetAssistantConversation` 以 URL 列出每个回答的语音，只向会话的用户提供，请求时以 `formats` 查询参数列出客户端能播放的编码——`opus`（Ogg 封装）、`aac`（ADTS 封装）、`mp3`、`flac` 与 `wav`；保存的语音不是其中任何一种编码时，由 ffmpeg 转换为其中最均衡的一种：Opus 优先，其次 AAC、MP3，最后是无损编码，并把该编码也保存下来。会话被删除时（由用户删除或超过保留期），其语音一并删除。用户所说的话从不保存。
 
 ### 8.9 字幕
-字幕转写不是语音会话：Pipecat 的识别服务会拼接一段话的各个片段并丢弃其时间。`plugins/pipecat` 以自己的**转写器**提供 `SPEECH_TO_TEXT`（[架构 §14.5](architecture.zh-CN.md#145-翻译与转写)）：直接调用的 faster-whisper，带片段、词级时间、语言检测与其 VAD 过滤，使用语音管线同样下载的模型；以及以 `verbose_json` 作答的 OpenAI 兼容转写 API。转写在插件的一个工作进程中运行，线程数有上限，一次一个视频，使转写一部电影时语音会话仍保持其延迟。服务端的字幕来源 `transcription` 提供名为 `transcription/<transcriber>` 的提供者的字幕。
+字幕转写不是语音会话：Pipecat 的识别服务会拼接一段话的各个片段并丢弃其时间。`plugins/pipecat` 以自己的**转写器**提供 `SPEECH_TO_TEXT`（[架构 §14.5](architecture.zh-CN.md#145-翻译与转写)）：经由 speaches 转写 API 的 Whisper，带片段、语言检测与其 VAD 过滤，使用语音管线同样使用的模型；以及以 `verbose_json` 作答的 OpenAI 兼容转写 API。转写在 Whisper 的容器中运行，一次一个视频，使转写一部电影时插件的语音会话仍保持其延迟。服务端的字幕来源 `transcription` 提供名为 `transcription/<transcriber>` 的提供者的字幕。
 
 ## 9. 客户端
 
@@ -261,7 +261,7 @@ WebSocket 承载二进制音频帧（§8.5）与 JSON 事件 `{"type": …}`，�
 ## 10. 设置与隐私
 
 * **服务端的助手设置**：是否开启助手、使用的模型（`ai/<provider>/<model>`）以及是否与之搭配代码模式、哪些用户可以使用 AI 路径、会话的空闲时间与保留期、是否开启记忆；语音方面，各语言的识别器与语音（`<plugin>/<recognizer>`、`<plugin>/<voice>`）、识别器是否接收用户的提示、一轮的最长停顿、提交延迟与会话的空闲时间（§8.3、§8.4、§8.1）。
-* **隐私**：用户所说的话从不保存；它只为管理员配置的识别服务离开服务端，而该服务在插件中运行时（如 Whisper）则根本不离开。请求与回答只保存在会话中，连同回答的语音（§8.8），在保留期后或由用户删除；记忆对用户可见，并随用户一起删除。AI 路径的 token 用量与费用按会话统计，并随会话显示。
+* **隐私**：用户所说的话从不保存；它只为管理员配置的识别服务离开服务端，而该服务在服务端运行时（如在其容器中的 Whisper）则根本不离开。请求与回答只保存在会话中，连同回答的语音（§8.8），在保留期后或由用户删除；记忆对用户可见，并随用户一起删除。AI 路径的 token 用量与费用按会话统计，并随会话显示。
 
 ## 11. 测试
 
