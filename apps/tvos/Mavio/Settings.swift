@@ -1,3 +1,4 @@
+import MavioAdmin
 import MavioKit
 import MavioUI
 import SwiftUI
@@ -40,16 +41,22 @@ enum PlaybackQuality: String, CaseIterable {
 
 /// The settings (docs/tv.md §6.6): the list of their sections — the
 /// account, the users to switch to, this device's playback and the user's
-/// subtitles and audio — each shown in its place when selected, then the
-/// version and signing out.
+/// subtitles and audio, the Server group — each shown in its place when
+/// selected, then the version and signing out.
 struct SettingsView: View {
     @Environment(AppModel.self) private var model
     @Environment(\.theme) private var theme
     @State private var switchable: [SwitchableUser] = []
+    @State private var serverId = ""
 
     /// The server a device without a Mavio account signs in to.
     private var standalone: ServerRecord? {
         model.account == nil ? model.signedInServers.first : nil
+    }
+
+    /// The server whose settings the Server group shows.
+    private var chosen: ServerRecord? {
+        model.signedInServers.first { $0.id == serverId } ?? model.signedInServers.first
     }
 
     var body: some View {
@@ -77,6 +84,10 @@ struct SettingsView: View {
                     EntryLabel(MavioStrings.settingsSubtitlesAudio, icon: "subtitles")
                 }
                 .buttonStyle(RowButtonStyle())
+            }
+            if let server = chosen {
+                ServerGroup(server: server, serverId: $serverId)
+                    .buttonStyle(RowButtonStyle())
             }
             Text(
                 verbatim:
