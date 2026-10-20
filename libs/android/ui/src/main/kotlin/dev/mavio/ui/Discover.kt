@@ -4,6 +4,7 @@ import android.util.Base64
 import android.util.LruCache
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.compositionLocalOf
@@ -16,8 +17,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.protobuf.MessageLite
 import dev.mavio.core.AppModel
+import dev.mavio.core.StreamState
 import dev.mavio.core.call
 import java.io.Serializable
 import java.util.Locale
@@ -74,23 +77,47 @@ class DiscoverState(private val model: AppModel) {
             .also { cache.put(key(serverId, method, request), it) }
     }
 
-    /** Asks the servers for their catalogs, the first with any discovering. */
+    /**
+     * Asks the servers for their catalogs, the first with any discovering. A
+     * server that cannot be reached keeps Discover as it was, rather than
+     * taken for one that does not discover; it is asked again once reached.
+     */
     suspend fun load(serverIds: List<String>) {
         val found = coroutineScope {
             serverIds.map { id ->
                 async {
                     runCatching {
-                        call(id, "ListCatalogs", listCatalogsRequest { language = discoverLanguage }, ListCatalogsResponse::parseFrom)
-                    }.getOrNull()?.catalogsList.orEmpty()
+                        call(id, "ListCatalogs", listCatalogsRequest { language = discoverLanguage }, ListCatalogsResponse::parseFrom).catalogsList
+                    }.getOrNull()
                 }
             }.awaitAll()
         }
-        discovery = serverIds.zip(found).firstOrNull { it.second.isNotEmpty() }?.let { Discovery(it.first, it.second) }
+        val first = serverIds.zip(found).firstOrNull { !it.second.isNullOrEmpty() }
+        val kept = discovery
+        if (first != null) {
+            discovery = Discovery(first.first, first.second!!)
+        } else if (found.none { it == null } || kept == null || kept.serverId !in serverIds) {
+            discovery = null
+        }
     }
 
     private companion object {
         const val CACHE_SIZE = 200
     }
+}
+
+/**
+ * Discover's state, its servers asked as the servers signed in to change
+ * and as each is reached again.
+ */
+@Composable
+fun rememberDiscover(model: AppModel): DiscoverState {
+    val discover = remember { DiscoverState(model) }
+    val signedIn by model.signedIn.collectAsStateWithLifecycle()
+    val states by model.states.collectAsStateWithLifecycle()
+    val online = signedIn.filter { states[it] is StreamState.Online }.toSet()
+    LaunchedEffect(signedIn, online) { discover.load(model.signedInServers.map { it.id }) }
+    return discover
 }
 
 /** Discover's calls and its server. */

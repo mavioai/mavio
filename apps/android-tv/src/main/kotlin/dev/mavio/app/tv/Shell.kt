@@ -48,7 +48,6 @@ import dev.mavio.admin.LocalAdmin
 import dev.mavio.core.AppModel
 import dev.mavio.core.SignInState
 import dev.mavio.design.MavioSpacing
-import dev.mavio.ui.DiscoverState
 import dev.mavio.ui.FocusShake
 import dev.mavio.ui.LocalDiscover
 import dev.mavio.ui.LocalFocusShake
@@ -56,6 +55,7 @@ import dev.mavio.ui.R
 import dev.mavio.ui.RecallingFocus
 import dev.mavio.ui.TvChoice
 import dev.mavio.ui.movesFocus
+import dev.mavio.ui.rememberDiscover
 import dev.mavio.ui.theme
 import kotlinx.coroutines.launch
 
@@ -92,8 +92,7 @@ fun Root(model: AppModel) {
             if (state is SignInState.SignedOut && signedIn.isEmpty()) {
                 SignInScreen(model)
             } else {
-                val discover = remember { DiscoverState(model) }
-                LaunchedEffect(signedIn) { discover.load(model.signedInServers.map { it.id }) }
+                val discover = rememberDiscover(model)
                 CompositionLocalProvider(LocalDiscover provides discover) { Shell(model) }
             }
         }
