@@ -17,7 +17,7 @@ export interface VoiceHandlers {
   event(e: VoiceEvent): void;
   /** The session ended; error says why when it failed. */
   closed(error?: string): void;
-  /** The microphone's first audio came: what is said from now on is heard. */
+  /** The microphone's first audio other than digital silence came: what is said from now on is heard. */
   capturing?(): void;
   /** Every microphone gave nothing but silence, as a muted or virtual input does; device names the first. */
   silent?(device: string): void;
@@ -75,6 +75,20 @@ const microphoneKey = "mavio.assistant.microphone";
 
 function microphoneConstraints(deviceId?: ConstrainDOMString): MediaTrackConstraints {
   return { deviceId, channelCount: 1, echoCancellation: true, noiseSuppression: true, autoGainControl: true };
+}
+
+/** Opens the microphone heard before, asked for exactly since browsers rank their own choice above an ideal one, else the browser's choice. */
+async function openMicrophone(): Promise<MediaStream> {
+  const stored = storedMicrophone();
+  if (stored) {
+    try {
+      return await navigator.mediaDevices.getUserMedia({ audio: microphoneConstraints({ exact: stored }) });
+    } catch (err) {
+      // A refusal is the browser's choice's too; a microphone gone is not.
+      if (err instanceof DOMException && err.name === "NotAllowedError") throw err;
+    }
+  }
+  return navigator.mediaDevices.getUserMedia({ audio: microphoneConstraints() });
 }
 
 function storedMicrophone(): string | undefined {
@@ -210,7 +224,7 @@ export class VoiceSession {
     let media: MediaStream;
     try {
       [media] = await Promise.all([
-        navigator.mediaDevices.getUserMedia({ audio: microphoneConstraints(storedMicrophone() && { ideal: storedMicrophone() }) }),
+        openMicrophone(),
         loaded,
       ]);
     } catch (err) {
@@ -301,12 +315,14 @@ export class VoiceSession {
 
   private audio(pcm: ArrayBuffer) {
     if (this.ended) return;
-    if (!this.captured) {
+    const heard = new Int16Array(pcm).some((x) => x !== 0);
+    // Listening is told once the microphone gives more than digital silence.
+    if (!this.captured && heard) {
       this.captured = true;
       this.h.capturing?.();
     }
     if (this.zeros >= 0 && !this.switching) {
-      this.zeros = new Int16Array(pcm).some((x) => x !== 0) ? -1 : this.zeros + 1;
+      this.zeros = heard ? -1 : this.zeros + 1;
       if (this.zeros < 0 && this.switched !== undefined) {
         try {
           localStorage.setItem(microphoneKey, this.switched);
