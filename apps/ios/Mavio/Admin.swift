@@ -70,8 +70,7 @@ enum ServerEntry: Hashable {
     /// sections any user has; a menu left with one section is that section.
     static func shown(admin: Bool) -> [ServerEntry] {
         let top: [ServerEntry] = [
-            .section(.overview), .section(.general), .section(.users), .section(.devices), .section(.apiKeys),
-            .menu(.media),
+            .section(.overview), .section(.general), .section(.users), .section(.devices), .menu(.media),
             .menu(.maintenance),
         ]
         return top.compactMap { entry in
@@ -121,7 +120,7 @@ enum ServerMenu: Hashable {
         let all: [ServerSection] =
             switch self {
             case .media: [.libraries, .storage, .transcoding]
-            case .maintenance: [.activity, .issues, .tasks, .logs, .backups]
+            case .maintenance: [.activity, .issues, .tasks, .logs, .backups, .apiKeys]
             }
         return all.filter { admin || $0.forAnyone }
     }

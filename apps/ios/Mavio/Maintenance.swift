@@ -411,7 +411,9 @@ struct TasksView: View {
         let last = task.hasLastRun ? task.lastRun : nil
         let status =
             task.running
-            ? MavioStrings.tasksRunningNow
+            ? task.progress > 0
+                ? "\(MavioStrings.tasksRunningNow) · \(Int((task.progress * 100).rounded()))%"
+                : MavioStrings.tasksRunningNow
             : last.map { l in
                 [l.state.title, (l.finishTime.time ?? l.runTime.time).map(fromNow) ?? ""].filter { !$0.isEmpty }
                     .joined(separator: " ")
