@@ -330,6 +330,14 @@ impl mavio_core::Listener for Listener {
     }
 }
 
+/// Receives the responses of a server-streaming call, such as the
+/// assistant's answers. The app implements it.
+#[uniffi::export(with_foreign)]
+pub trait StreamListener: Send + Sync {
+    /// A response, encoded as protobuf.
+    fn message(&self, body: Vec<u8>);
+}
+
 /// Receives Home as it fills in. The app implements it.
 #[uniffi::export(with_foreign)]
 pub trait HomeListener: Send + Sync {
@@ -805,6 +813,26 @@ impl Client {
             .call(|c| async move { c.call(&server_id, &procedure, request).await })
             .await?;
         Ok(ServerResponse { body, base_url })
+    }
+
+    /// Calls a server-streaming procedure of a server signed in to as its
+    /// session, as `call_server` a unary one, giving listener each response
+    /// as it comes; answers with the base URL it reached the server at once
+    /// the stream ends. Cancelling the call ends the stream.
+    pub async fn call_server_stream(
+        &self,
+        server_id: String,
+        procedure: String,
+        request: Vec<u8>,
+        listener: Arc<dyn StreamListener>,
+    ) -> Result<String> {
+        self.call(|c| async move {
+            c.call_stream(&server_id, &procedure, request, |body| {
+                listener.message(body)
+            })
+            .await
+        })
+        .await
     }
 
     /// A request of a server's plain HTTP path signed in to as its session,
