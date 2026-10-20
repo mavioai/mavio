@@ -1,0 +1,16 @@
+{
+  "id": "dev.mavio.pipecat",
+  "name": "Pipecat",
+  "version": "0.1.0",
+  "description": "Voice sessions of the assistant on Pipecat: turns detected by Silero VAD and Smart Turn, recognized by faster-whisper or an OpenAI-compatible service, answered by the assistant and spoken by Kokoro or an OpenAI-compatible service.",
+  "author": "Mavio",
+  "homepage": "https://github.com/mavioai/mavio",
+  "license": "GPL-3.0-only",
+  "runtime": "RUNTIME_PROCESS",
+  "category": "CATEGORY_AI",
+  "capabilities": [
+    "CAPABILITY_VOICE_SESSION"
+  ],
+  "configSchema": "{\"$schema\":\"https://json-schema.org/draft/2020-12/schema\",\"type\":\"object\",\"properties\":{\"stt\":{\"title\":\"Recognition\",\"type\":\"string\",\"enum\":[\"whisper\",\"openai\"],\"default\":\"whisper\",\"description\":\"faster-whisper on this machine, or an OpenAI-compatible transcription API\"},\"whisper_model\":{\"title\":\"Whisper model\",\"type\":\"string\",\"default\":\"deepdml/faster-whisper-large-v3-turbo-ct2\"},\"tts\":{\"title\":\"Synthesis\",\"type\":\"string\",\"enum\":[\"kokoro\",\"openai\"],\"default\":\"kokoro\",\"description\":\"Kokoro on this machine, or an OpenAI-compatible speech API\"},\"openai_base_url\":{\"title\":\"OpenAI-compatible base URL\",\"type\":\"string\",\"format\":\"uri\",\"default\":\"https://api.openai.com/v1\"},\"openai_api_key\":{\"title\":\"OpenAI-compatible API key\",\"type\":\"string\"},\"openai_stt_model\":{\"title\":\"Transcription model\",\"type\":\"string\",\"default\":\"gpt-4o-transcribe\"},\"openai_tts_model\":{\"title\":\"Speech model\",\"type\":\"string\",\"default\":\"gpt-4o-mini-tts\"},\"openai_voice\":{\"title\":\"Voice\",\"type\":\"string\",\"default\":\"alloy\"}},\"additionalProperties\":false}",
+  "apiVersion": "1.0"
+}

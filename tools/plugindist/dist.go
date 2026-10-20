@@ -15,6 +15,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"slices"
 	"strings"
@@ -141,6 +142,14 @@ func Dist(ctx context.Context, o Options) (string, error) {
 			jobs = append(jobs, job{plugin: i})
 			continue
 		}
+		if python(s) {
+			// Until Python plugins are packaged with python-build-standalone,
+			// only a development catalog has them, for this platform.
+			if o.Out == "" && runtime.GOOS != "windows" && slices.Contains(o.Platforms, runtime.GOOS+"/"+runtime.GOARCH) {
+				jobs = append(jobs, job{i, runtime.GOOS, runtime.GOARCH})
+			}
+			continue
+		}
 		for _, p := range o.Platforms {
 			goos, arch, ok := strings.Cut(p, "/")
 			if !ok || !slices.Contains(Platforms, p) {
@@ -193,6 +202,8 @@ func Dist(ctx context.Context, o Options) (string, error) {
 		p := &catalog.Plugins[j.plugin]
 		p.Versions = append(p.Versions, versions[i])
 	}
+	// Plugins packaged for none of the platforms are not offered.
+	catalog.Plugins = slices.DeleteFunc(catalog.Plugins, func(p Plugin) bool { return len(p.Versions) == 0 })
 	data, err := json.MarshalIndent(catalog, "", "  ")
 	if err != nil {
 		return "", err
@@ -226,8 +237,10 @@ func pack(ctx context.Context, o Options, s source, goos, arch string) (Version,
 	case exists(filepath.Join(s.dir, "package.json")):
 		// A TypeScript plugin compiled by Bun into the folder.
 		err = run(ctx, s.dir, nil, "bun", "scripts/build.ts", goos+"/"+arch, folder)
+	case python(s):
+		err = devLauncher(s.dir, filepath.Join(folder, exe))
 	default:
-		err = errors.New("neither a WASM, Go nor Bun plugin")
+		err = errors.New("neither a WASM, Go, Bun nor Python plugin")
 	}
 	if err != nil {
 		return Version{}, err
@@ -263,6 +276,49 @@ func pack(ctx context.Context, o Options, s source, goos, arch string) (Version,
 		v.URL = fileURL(abs)
 	}
 	return v, nil
+}
+
+// python reports whether a plugin is a Python process plugin, a member of
+// the uv workspace.
+func python(s source) bool {
+	return s.manifest.GetRuntime() == pluginv1.Runtime_RUNTIME_PROCESS && exists(filepath.Join(s.dir, "pyproject.toml"))
+}
+
+// projectName matches the name of a pyproject.toml's project.
+var projectName = regexp.MustCompile(`(?m)^name\s*=\s*"([^"]+)"`)
+
+// devLauncher writes a launcher running a Python plugin from the uv
+// workspace's environment, by the script its project names after itself:
+// a development server's, which runs only on this machine.
+func devLauncher(dir, exe string) error {
+	data, err := os.ReadFile(filepath.Join(dir, "pyproject.toml"))
+	if err != nil {
+		return err
+	}
+	m := projectName.FindSubmatch(data)
+	if m == nil {
+		return errors.New("pyproject.toml names no project")
+	}
+	root, err := filepath.Abs(dir)
+	if err != nil {
+		return err
+	}
+	for !exists(filepath.Join(root, "uv.lock")) {
+		parent := filepath.Dir(root)
+		if parent == root {
+			return errors.New("no uv workspace holds the plugin")
+		}
+		root = parent
+	}
+	script := filepath.Join(root, ".venv", "bin", string(m[1]))
+	if !exists(script) {
+		return fmt.Errorf("%s is missing; run uv sync --all-packages", script)
+	}
+	if err := os.MkdirAll(filepath.Dir(exe), 0o755); err != nil {
+		return err
+	}
+	launcher := "#!/bin/sh\n# Runs the plugin from the uv workspace, for a development server.\nexec '" + script + "' \"$@\"\n"
+	return os.WriteFile(exe, []byte(launcher), 0o755)
 }
 
 // zipFolder zips the plugin's manifest and translations, and the

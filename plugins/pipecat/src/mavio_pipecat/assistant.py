@@ -69,15 +69,17 @@ class MavioAssistant(FrameProcessor):
         *,
         commit_delay: float = COMMIT_DELAY,
         speech_settings: Callable[[str], Frame | None] | None = None,
+        context: dict[str, Any] | None = None,
         **kwargs: Any,
     ):
         """speech_settings gives the frame that sets the TTS service for
-        the language of a turn, such as its voice; None leaves it."""
+        the language of a turn, such as its voice; None leaves it. context
+        is the client's AskContext, until a context event replaces it."""
         super().__init__(**kwargs)
         self._ask = ask
         self._commit_delay = commit_delay
         self._speech_settings = speech_settings
-        self._context: dict[str, Any] = {}
+        self._context: dict[str, Any] = context or {}
         self._run: asyncio.Task[None] | None = None
         self._speaking = False
 

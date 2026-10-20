@@ -38,7 +38,7 @@ def test_typed_request_is_answered_with_speech():
     ask = FakeAsk()
     app = create_app(ask, lambda: Services(IdentityFilter(), FakeTTS(), lambda _text: None))
     with TestClient(app) as client, client.websocket_connect("/voice") as ws:
-        assert json.loads(ws.receive_text()) == {"type": "ready"}
+        assert json.loads(ws.receive_text())["type"] == "ready"
         ws.send_text(json.dumps({"type": "context", "context": {"screen": "home"}}))
         ws.send_text(json.dumps({"type": "text", "text": "hi"}))
         events: list[str] = []

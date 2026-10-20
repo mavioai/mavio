@@ -75,7 +75,7 @@ def main() -> None:
         openai_tts_model=args.openai_tts_model,
         openai_voice=args.openai_voice,
     )
-    app = create_app(AskClient(args.server, token), lambda: Services.of(speech))
+    app = create_app(AskClient(args.server, token=token), lambda: Services.of(speech))
     uvicorn.run(app, host=args.host, port=args.port)
 
 

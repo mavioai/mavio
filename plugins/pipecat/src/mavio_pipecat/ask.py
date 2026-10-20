@@ -31,19 +31,31 @@ class AskError(Exception):
 
 
 class AskClient:
-    """Calls Ask as a user, with a bearer token.
-
-    The prototype holds the user's access token; the plugin will hold a
-    session token the server issues for the session (docs/assistant.md).
+    """Calls Ask: as a user, with the user's access token as a bearer, run
+    on its own; or through the host API with an http client of it and the
+    session token in Mavio-Voice-Session, as the plugin
+    (docs/assistant.md §8.4).
     """
 
-    def __init__(self, base_url: str, token: str, http: httpx.AsyncClient | None = None):
+    def __init__(
+        self,
+        base_url: str = "",
+        token: str | None = None,
+        http: httpx.AsyncClient | None = None,
+        headers: dict[str, str] | None = None,
+    ):
+        """base_url empty, the http client's base URL is the server's."""
         self._url = base_url.rstrip("/") + _ASK_PATH
-        self._token = token
+        self._headers = dict(headers or {})
+        if token is not None:
+            self._headers["Authorization"] = f"Bearer {token}"
+        # A client given is the caller's to close.
+        self._owned = http is None
         self._http = http or httpx.AsyncClient(timeout=httpx.Timeout(10, read=None))
 
     async def aclose(self) -> None:
-        await self._http.aclose()
+        if self._owned:
+            await self._http.aclose()
 
     async def ask(self, request: dict[str, Any]) -> AsyncIterator[dict[str, Any]]:
         """Sends an AskRequest, in its JSON form, and yields the
@@ -52,7 +64,7 @@ class AskClient:
         headers = {
             "Content-Type": "application/connect+json",
             "Connect-Protocol-Version": "1",
-            "Authorization": f"Bearer {self._token}",
+            **self._headers,
         }
         content = _ENVELOPE.pack(0, len(body)) + body
         async with self._http.stream("POST", self._url, content=content, headers=headers) as r:

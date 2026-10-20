@@ -1,0 +1,14 @@
+{
+  "Pipecat": "Pipecat",
+  "Voice sessions of the assistant on Pipecat: turns detected by Silero VAD and Smart Turn, recognized by faster-whisper or an OpenAI-compatible service, answered by the assistant and spoken by Kokoro or an OpenAI-compatible service.": "基于 Pipecat 的助手语音会话：由 Silero VAD 与 Smart Turn 检测轮次，由 faster-whisper 或 OpenAI 兼容服务识别，由助手回答，并由 Kokoro 或 OpenAI 兼容服务朗读。",
+  "Recognition": "识别",
+  "faster-whisper on this machine, or an OpenAI-compatible transcription API": "本机上的 faster-whisper，或 OpenAI 兼容的转写 API",
+  "Whisper model": "Whisper 模型",
+  "Synthesis": "合成",
+  "Kokoro on this machine, or an OpenAI-compatible speech API": "本机上的 Kokoro，或 OpenAI 兼容的语音 API",
+  "OpenAI-compatible base URL": "OpenAI 兼容的基础 URL",
+  "OpenAI-compatible API key": "OpenAI 兼容的 API 密钥",
+  "Transcription model": "转写模型",
+  "Speech model": "语音模型",
+  "Voice": "语音"
+}

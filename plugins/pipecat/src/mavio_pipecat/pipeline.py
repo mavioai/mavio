@@ -3,6 +3,7 @@
 import re
 from collections.abc import Callable
 from dataclasses import dataclass, field
+from typing import Any
 
 from fastapi import WebSocket
 from loguru import logger
@@ -24,7 +25,7 @@ from pipecat.transports.websocket.fastapi import (
 from pipecat.workers.runner import WorkerRunner
 
 from mavio_pipecat.ask import Asker
-from mavio_pipecat.assistant import MavioAssistant
+from mavio_pipecat.assistant import COMMIT_DELAY, MavioAssistant
 from mavio_pipecat.events import SessionEvents
 from mavio_pipecat.serializer import INPUT_SAMPLE_RATE, OUTPUT_SAMPLE_RATE, MavioSerializer
 
@@ -129,8 +130,20 @@ class Services:
         return cls(_stt(speech), tts, speech_settings)
 
 
-async def run_session(websocket: WebSocket, ask: Asker, services: Services) -> None:
-    """Runs a session on an accepted WebSocket until the client leaves."""
+async def run_session(
+    websocket: WebSocket,
+    ask: Asker,
+    services: Services,
+    *,
+    session_id: str = "",
+    context: dict[str, Any] | None = None,
+    commit_delay: float = COMMIT_DELAY,
+) -> None:
+    """Runs a session on an accepted WebSocket until the client leaves.
+
+    context is the client's AskContext when the session started, which its
+    context events replace; commit_delay is how long a turn stands before
+    its answer's effects are done."""
     transport = FastAPIWebsocketTransport(
         websocket=websocket,
         params=FastAPIWebsocketParams(
@@ -142,11 +155,11 @@ async def run_session(websocket: WebSocket, ask: Asker, services: Services) -> N
             serializer=MavioSerializer(),
         ),
     )
-    context = LLMContext()
+    llm_context = LLMContext()
     # The default turn strategies: VAD or a transcript starts the user's
     # turn, Smart Turn v3 ends it.
     user_aggregator, assistant_aggregator = LLMContextAggregatorPair(
-        context, user_params=LLMUserAggregatorParams(vad_analyzer=SileroVADAnalyzer())
+        llm_context, user_params=LLMUserAggregatorParams(vad_analyzer=SileroVADAnalyzer())
     )
     pipeline = Pipeline(
         [
@@ -154,7 +167,12 @@ async def run_session(websocket: WebSocket, ask: Asker, services: Services) -> N
             services.stt,
             SessionEvents(),
             user_aggregator,
-            MavioAssistant(ask, speech_settings=services.speech_settings),
+            MavioAssistant(
+                ask,
+                commit_delay=commit_delay,
+                speech_settings=services.speech_settings,
+                context=context,
+            ),
             services.tts,
             transport.output(),
             assistant_aggregator,
@@ -175,7 +193,14 @@ async def run_session(websocket: WebSocket, ask: Asker, services: Services) -> N
 
     @transport.event_handler("on_client_connected")
     async def on_client_connected(_transport: object, _client: object) -> None:
-        await worker.queue_frame(OutputTransportMessageUrgentFrame(message={"type": "ready"}))
+        ready = {
+            "type": "ready",
+            "input_sample_rate": INPUT_SAMPLE_RATE,
+            "output_sample_rate": OUTPUT_SAMPLE_RATE,
+        }
+        if session_id:
+            ready["session_id"] = session_id
+        await worker.queue_frame(OutputTransportMessageUrgentFrame(message=ready))
 
     @transport.event_handler("on_client_disconnected")
     async def on_client_disconnected(_transport: object, _client: object) -> None:
