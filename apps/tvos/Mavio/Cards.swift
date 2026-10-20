@@ -109,10 +109,10 @@ struct RowView: View {
                     CardLink(card: card, wide: wide, width: wide ? theme.layout.thumbnail : theme.layout.poster)
                 }
             }
-        case .titles:
-            // Discovered titles open in Discover, which Apple TV does not
-            // have yet.
-            EmptyView()
+        case let .titles(titles):
+            CardRow(title: title) {
+                ForEach(titles, id: \.self) { TitleCardLink(title: $0, serverId: row.serverId) }
+            }
         }
     }
 
@@ -143,5 +143,47 @@ struct CardRow<Content: View>: View {
             .padding(.vertical, -MavioSpacing.s32)
         }
         .focusSection()
+    }
+}
+
+/// A title of a row from outside the libraries: the item when a server has
+/// it, else the discovered title, else only its poster.
+private struct TitleCardLink: View {
+    let title: TitleCard
+    let serverId: String?
+    @Environment(\.theme) private var theme
+
+    var body: some View {
+        if let copy = title.available.first {
+            NavigationLink(value: Route.item(serverId: copy.serverId, itemId: copy.itemId)) { poster }
+                .buttonStyle(CardButtonStyle())
+        } else if let serverId, let tmdbId = title.externalIds["tmdb"].flatMap({ Int32($0) }) {
+            NavigationLink(value: Route.title(serverId: serverId, kind: title.movie ? .movie : .series, tmdbId: tmdbId))
+            {
+                poster
+            }
+            .buttonStyle(CardButtonStyle())
+        } else {
+            Button {
+            } label: {
+                poster
+            }
+            .buttonStyle(CardButtonStyle())
+        }
+    }
+
+    private var poster: some View {
+        VStack(alignment: .leading, spacing: MavioSpacing.s12) {
+            ArtworkView(title.posterUrl, title: title.title)
+                .aspectRatio(2 / 3, contentMode: .fit)
+                .focusRing()
+            VStack(alignment: .leading, spacing: MavioSpacing.s2) {
+                Text(title.title).type(theme.type.headline).foregroundStyle(theme.colors.textPrimary)
+                Text(title.year.map(String.init) ?? " ").type(theme.type.footnote)
+                    .foregroundStyle(theme.colors.textSecondary)
+            }
+            .lineLimit(1)
+        }
+        .frame(width: theme.layout.poster)
     }
 }

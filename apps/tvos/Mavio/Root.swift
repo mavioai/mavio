@@ -12,6 +12,16 @@ enum Route: Hashable {
     case person(serverId: String, personId: String)
     /// An item's whole cast and crew, or its crew alone.
     case credits(serverId: String, itemId: String, crew: Bool)
+    /// All the titles of a catalog of Discover.
+    case catalog(CatalogQuery)
+    /// A discovered title.
+    case title(serverId: String, kind: MediaKind, tmdbId: Int32)
+    /// A discovered title's whole cast and crew, or its crew alone.
+    case titleCredits(serverId: String, kind: MediaKind, tmdbId: Int32, crew: Bool)
+    /// A discovered person.
+    case discoveredPerson(serverId: String, tmdbId: Int32)
+    /// A discovered collection.
+    case discoveredCollection(serverId: String, tmdbId: Int32)
 }
 
 /// An item to play, which the root presents the player for.
@@ -28,12 +38,13 @@ struct PlayRequest: Identifiable, Hashable {
 
 /// The top-level destinations, in the navigation bar's pill.
 enum Tab: Hashable, CaseIterable {
-    case home, libraries, search
+    case home, libraries, discover, search
 
     var title: String {
         switch self {
         case .home: MavioStrings.navHome
         case .libraries: MavioStrings.navLibraries
+        case .discover: MavioStrings.navDiscover
         case .search: MavioStrings.navSearch
         }
     }
@@ -75,6 +86,17 @@ final class Router {
             paths[.home] = [.person(serverId: serverId, personId: itemId)]
         case "play":
             playing = PlayRequest(serverId: serverId, itemId: itemId, title: "")
+        #if DEBUG
+            // A discovered title, `mavio://title/<server>/movie-155`, for
+            // the debug build's `-open`.
+            case "title":
+                let pair = itemId.split(separator: "-")
+                guard pair.count == 2, let tmdbId = Int32(pair[1]) else { return }
+                (settings, playing, tab) = (false, nil, .home)
+                paths[.home] = [
+                    .title(serverId: serverId, kind: pair[0] == "series" ? .series : .movie, tmdbId: tmdbId)
+                ]
+        #endif
         default:
             break
         }
@@ -93,6 +115,7 @@ struct RootView: View {
     @Environment(AppModel.self) private var model
     @Environment(\.scenePhase) private var phase
     @State private var router = Router()
+    @State private var discovery = Discovery()
 
     private let theme = Theme(colors: .dark, layout: .tv, type: .tv)
 
@@ -106,6 +129,8 @@ struct RootView: View {
         }
         .environment(\.theme, theme)
         .environment(router)
+        .environment(discovery)
+        .task(id: Discovery.key(model)) { await discovery.load(model) }
         .background(theme.colors.tvBackground.ignoresSafeArea())
         .preferredColorScheme(.dark)
         .fullScreenCover(item: Bindable(router).playing) { request in
@@ -120,6 +145,18 @@ struct RootView: View {
             .task {
                 if let link = UserDefaults.standard.string(forKey: "open"), let url = URL(string: link) {
                     router.open(url)
+                }
+            }
+            // Or a tab (`-tab discover`), once the bar shows it.
+            .onChange(of: discovery.server?.id, initial: true) {
+                if let name = UserDefaults.standard.string(forKey: "tab"),
+                    let tab = Tab.allCases.first(where: { "\($0)" == name }),
+                    tab != .discover || discovery.server != nil
+                {
+                    Task {
+                        try? await Task.sleep(for: .seconds(1))
+                        router.tab = tab
+                    }
                 }
             }
         #endif
@@ -172,6 +209,7 @@ private struct Tabs: View {
             switch router.tab {
             case .home: stack(.home) { HomeView() }
             case .libraries: stack(.libraries) { LibrariesView() }
+            case .discover: stack(.discover) { DiscoverView() }
             case .search: stack(.search) { SearchView() }
             }
         }
@@ -196,13 +234,17 @@ enum BarFocus: Hashable {
 private struct NavBar: View {
     @Environment(Router.self) private var router
     @Environment(AppModel.self) private var model
+    @Environment(Discovery.self) private var discovery
     @Environment(\.theme) private var theme
     var focus: FocusState<BarFocus?>.Binding
+
+    /// The tabs shown: Discover only once a server discovers.
+    private var tabs: [Tab] { Tab.allCases.filter { $0 != .discover || discovery.server != nil } }
 
     var body: some View {
         ZStack {
             HStack(spacing: MavioSpacing.s4) {
-                ForEach(Tab.allCases, id: \.self) { tab in
+                ForEach(tabs, id: \.self) { tab in
                     Button {
                         router.tab = tab
                     } label: {
@@ -254,6 +296,13 @@ extension View {
             case let .library(library): LibraryView(library: library)
             case let .person(serverId, personId): PersonView(serverId: serverId, personId: personId)
             case let .credits(serverId, itemId, crew): CreditsView(serverId: serverId, itemId: itemId, crew: crew)
+            case let .catalog(query): CatalogView(query: query)
+            case let .title(serverId, kind, tmdbId): TitleView(serverId: serverId, kind: kind, tmdbId: tmdbId)
+            case let .titleCredits(serverId, kind, tmdbId, crew):
+                TitleCreditsView(serverId: serverId, kind: kind, tmdbId: tmdbId, crew: crew)
+            case let .discoveredPerson(serverId, tmdbId): DiscoveredPersonView(serverId: serverId, tmdbId: tmdbId)
+            case let .discoveredCollection(serverId, tmdbId):
+                DiscoveredCollectionView(serverId: serverId, tmdbId: tmdbId)
             }
         }
     }

@@ -17,6 +17,10 @@ struct TVPersonCard: View {
         self.role = role
     }
 
+    init(name: String, photo: String?, role: String?) {
+        (self.name, self.photo, self.role) = (name, photo, role)
+    }
+
     var body: some View {
         VStack(spacing: MavioSpacing.s12) {
             ArtworkView(photo, title: name, icon: "profile")

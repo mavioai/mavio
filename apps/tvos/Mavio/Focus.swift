@@ -193,3 +193,31 @@ private struct PersonFocus<Label: View>: View {
             .animation(focusAnimation, value: focused)
     }
 }
+
+/// A small pill, as a genre, keyword or fact opening the titles alike: of
+/// `color.fill`, white with black content with focus.
+struct ChipButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        ChipFocus(label: configuration.label)
+    }
+}
+
+private struct ChipFocus<Label: View>: View {
+    let label: Label
+    @Environment(\.isFocused) private var focused
+    @Environment(\.theme) private var theme
+
+    var body: some View {
+        label
+            .type(theme.type.callout)
+            .foregroundStyle(focused ? .black : theme.colors.textPrimary)
+            .padding(.horizontal, MavioSpacing.s16)
+            .padding(.vertical, MavioSpacing.s8)
+            .background {
+                Capsule().fill(focused ? .white : theme.colors.fill)
+                    .shadow(color: focused ? theme.colors.tvFocusShadow : .clear, radius: 16, y: 12)
+            }
+            .scaleEffect(focused ? theme.layout.focusScale : 1)
+            .animation(focusAnimation, value: focused)
+    }
+}
