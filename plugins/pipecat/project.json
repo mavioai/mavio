@@ -1,6 +1,21 @@
 {
   "name": "pipecat",
   "targets": {
+    "build": {
+      "command": "go run ./cmd/plugindist -python ../../plugins/pipecat",
+      "options": { "cwd": "{workspaceRoot}/tools/plugindist" },
+      "inputs": [
+        "{projectRoot}/**/*",
+        "!{projectRoot}/dist/**/*",
+        "{workspaceRoot}/pyproject.toml",
+        "{workspaceRoot}/uv.lock",
+        "{workspaceRoot}/.python-version",
+        "{workspaceRoot}/libs/plugin/python/**/*",
+        "{workspaceRoot}/libs/proto/gen/python/**/*",
+        "{workspaceRoot}/tools/plugindist/**/*.go"
+      ],
+      "outputs": ["{projectRoot}/dist/plugin"]
+    },
     "test": {
       "command": "uv run --package mavio-pipecat pytest plugins/pipecat",
       "options": { "cwd": "{workspaceRoot}" },

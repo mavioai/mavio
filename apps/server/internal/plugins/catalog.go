@@ -36,7 +36,7 @@ import (
 // Limits of downloads.
 const (
 	maxCatalog = 10 << 20
-	maxPackage = 200 << 20
+	maxPackage = 1 << 30
 )
 
 // OfficialCatalog is the catalog of the first-party plugins: the

@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 #
 # The Mavio server with jellyfin-ffmpeg's portable build and Mavio's fork of
-# rclone, the versions mise.toml pins. Build from the repository root, for one
+# rclone, the versions mise.toml pins, and the plugins it seeds. Build from the repository root, for one
 # or more platforms:
 #
 #   docker buildx build -f apps/server/Dockerfile --platform linux/amd64,linux/arm64 .
@@ -15,6 +15,9 @@ ARG BUN_VERSION=1.4.3
 ARG RUST_VERSION=1.99.0
 ARG JELLYFIN_FFMPEG_VERSION=8.1.3-1
 ARG RCLONE_VERSION=1.75.2-mavio
+ARG UV_VERSION=0.13.1
+
+FROM --platform=$BUILDPLATFORM ghcr.io/astral-sh/uv:${UV_VERSION} AS uv
 
 # The assistant's grammar as WASM, which the web UI bundles and the server embeds;
 # rustup installs the toolchain libs/intent/rust-toolchain.toml pins.
@@ -46,6 +49,18 @@ RUN --mount=type=cache,target=/root/.local/share/pnpm/store \
 	&& pnpm install --frozen-lockfile --filter @mavio/plugin-agent... \
 	&& cd plugins/agent && bun scripts/build.ts linux/$TARGETARCH \
 	&& mkdir -p /out/plugins && mv dist/plugin /out/plugins/agent
+
+# The pipecat plugin, a Python process plugin with python-build-standalone and its
+# dependencies' wheels for the target platform.
+FROM --platform=$BUILDPLATFORM golang:${GO_VERSION}-trixie AS pipecat
+ARG TARGETARCH
+WORKDIR /src
+COPY --from=uv /uv /usr/local/bin/uv
+COPY . .
+RUN --mount=type=cache,target=/go/pkg/mod --mount=type=cache,target=/root/.cache/go-build \
+	--mount=type=cache,target=/root/.cache/uv \
+	cd tools/plugindist && go run ./cmd/plugindist -python ../../plugins/pipecat \
+	-platform linux/$TARGETARCH -folder /out/plugins/pipecat
 
 FROM --platform=$BUILDPLATFORM golang:${GO_VERSION}-trixie AS server
 ARG TARGETOS TARGETARCH VERSION
@@ -118,6 +133,7 @@ COPY --from=rclone /out/rclone /usr/local/bin/rclone
 # The plugins the image ships, installed into /config/plugins on the first start.
 COPY --from=server /out/plugins/ /usr/lib/mavio/plugins/
 COPY --from=agent /out/plugins/ /usr/lib/mavio/plugins/
+COPY --from=pipecat /out/plugins/ /usr/lib/mavio/plugins/
 USER mavio
 # /config is Mavio's home: config.toml, the database, plugins, chosen artwork and backups; /cache
 # holds images, compiled plugins and transcodes. Mount media libraries under /media.

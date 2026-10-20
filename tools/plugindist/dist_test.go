@@ -2,9 +2,12 @@ package plugindist
 
 import (
 	"archive/zip"
+	"bytes"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -209,5 +212,59 @@ func TestDistWithoutCategory(t *testing.T) {
 	plugin(t, plugins, "none", "RUNTIME_WASM", "CATEGORY_UNSPECIFIED")
 	if _, err := Dist(t.Context(), Options{Plugins: plugins}); err == nil || !strings.Contains(err.Error(), "no category") {
 		t.Errorf("Dist of a plugin without a category: %v, want an error", err)
+	}
+}
+
+func TestZipFolderHoldsWhatWasBuilt(t *testing.T) {
+	dir := filepath.ToSlash(t.TempDir())
+	src, folder := filepath.Join(dir, "src"), filepath.Join(dir, "folder")
+	files := map[string]string{
+		filepath.Join(src, "manifest.json"):              "{}",
+		filepath.Join(folder, "manifest.json"):           "copied",
+		filepath.Join(folder, "plugin"):                  "#!/bin/sh",
+		filepath.Join(folder, "python/bin/python3.14"):   "elf",
+		filepath.Join(folder, "python/lib/site/a.py"):    "a",
+		filepath.Join(folder, "locales", "zh-Hans.json"): "{}",
+	}
+	for f, data := range files {
+		if err := os.MkdirAll(filepath.Dir(f), 0o755); err != nil {
+			t.Fatal(err)
+		}
+		mode := os.FileMode(0o644)
+		if strings.Contains(f, "plugin") || strings.Contains(f, "bin") {
+			mode = 0o755
+		}
+		if err := os.WriteFile(f, []byte(data), mode); err != nil {
+			t.Fatal(err)
+		}
+	}
+	var buf bytes.Buffer
+	if err := zipFolder(&buf, src, folder, time.Now()); err != nil {
+		t.Fatal(err)
+	}
+	zr, err := zip.NewReader(bytes.NewReader(buf.Bytes()), int64(buf.Len()))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var got []string
+	for _, f := range zr.File {
+		got = append(got, fmt.Sprintf("%s %v", f.Name, f.Mode()&0o111 != 0))
+	}
+	want := []string{"manifest.json false", "plugin true", "python/bin/python3.14 true", "python/lib/site/a.py false"}
+	if !slices.Equal(got, want) {
+		t.Errorf("files = %q, want = %q", got, want)
+	}
+
+	if err := os.Symlink("python3.14", filepath.Join(folder, "python/bin/python3")); err != nil {
+		t.Skip("no symbolic links:", err)
+	}
+	if err := zipFolder(io.Discard, src, folder, time.Now()); err == nil {
+		t.Error("zipFolder of a symbolic link succeeded, want an error")
+	}
+	if err := removeLinks(folder); err != nil {
+		t.Fatal(err)
+	}
+	if err := zipFolder(io.Discard, src, folder, time.Now()); err != nil {
+		t.Errorf("zipFolder after removeLinks = %v", err)
 	}
 }

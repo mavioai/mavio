@@ -84,6 +84,17 @@ func TestBunPins(t *testing.T) {
 	}
 }
 
+// TestUVPins checks that the Dockerfile packages the pipecat plugin with
+// the uv mise.toml pins.
+func TestUVPins(t *testing.T) {
+	dockerfile, mise := pins(t)
+	version := regexp.MustCompile(`ARG UV_VERSION=(\S+)`).FindSubmatch(dockerfile)
+	pinned := regexp.MustCompile(`(?m)^uv = "([^"]+)"`).FindSubmatch(mise)
+	if version == nil || pinned == nil || string(version[1]) != string(pinned[1]) {
+		t.Errorf("uv versions: Dockerfile %q, mise.toml %q", version, pinned)
+	}
+}
+
 // pins reads the Dockerfile and mise.toml.
 func pins(t *testing.T) (dockerfile, mise []byte) {
 	t.Helper()

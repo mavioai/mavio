@@ -2,7 +2,6 @@ package plugindist
 
 import (
 	"archive/zip"
-	"bytes"
 	"cmp"
 	"context"
 	"crypto/sha256"
@@ -10,6 +9,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"io/fs"
 	"net/url"
 	"os"
@@ -143,10 +143,15 @@ func Dist(ctx context.Context, o Options) (string, error) {
 			continue
 		}
 		if python(s) {
-			// Until Python plugins are packaged with python-build-standalone,
-			// only a development catalog has them, for this platform.
-			if o.Out == "" && runtime.GOOS != "windows" && slices.Contains(o.Platforms, runtime.GOOS+"/"+runtime.GOARCH) {
-				jobs = append(jobs, job{i, runtime.GOOS, runtime.GOARCH})
+			// A development catalog runs Python plugins from the uv workspace,
+			// on this platform; a release packages them for the platforms
+			// their wheels cover.
+			for _, p := range o.Platforms {
+				goos, arch, _ := strings.Cut(p, "/")
+				_, packaged := pythonTargets[p]
+				if o.Out == "" && goos != "windows" && p == runtime.GOOS+"/"+runtime.GOARCH || o.Out != "" && packaged {
+					jobs = append(jobs, job{i, goos, arch})
+				}
 			}
 			continue
 		}
@@ -237,8 +242,10 @@ func pack(ctx context.Context, o Options, s source, goos, arch string) (Version,
 	case exists(filepath.Join(s.dir, "package.json")):
 		// A TypeScript plugin compiled by Bun into the folder.
 		err = run(ctx, s.dir, nil, "bun", "scripts/build.ts", goos+"/"+arch, folder)
-	case python(s):
+	case python(s) && o.Out == "":
 		err = devLauncher(s.dir, filepath.Join(folder, exe))
+	case python(s):
+		err = BuildPython(ctx, s.dir, goos, arch, folder)
 	default:
 		err = errors.New("neither a WASM, Go, Bun nor Python plugin")
 	}
@@ -252,21 +259,25 @@ func pack(ctx context.Context, o Options, s source, goos, arch string) (Version,
 	}
 	name += ".zip"
 	dir := cmp.Or(o.Out, filepath.Join(s.dir, "dist"))
-	data, err := zipFolder(s.dir, folder, exe, o.Now)
-	if err != nil {
-		return Version{}, err
-	}
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		return Version{}, err
 	}
 	file := filepath.Join(dir, name)
-	if err := os.WriteFile(file, data, 0o644); err != nil {
+	f, err := os.Create(file)
+	if err != nil {
 		return Version{}, err
 	}
-	sum := sha256.Sum256(data)
+	sum := sha256.New()
+	err = zipFolder(io.MultiWriter(f, sum), s.dir, folder, o.Now)
+	if cerr := f.Close(); err == nil {
+		err = cerr
+	}
+	if err != nil {
+		return Version{}, err
+	}
 	v := Version{
 		Version: m.GetVersion(), APIVersion: m.GetApiVersion(), Runtime: m.GetRuntime().String(),
-		OS: goos, Arch: arch, URL: name, SHA256: hex.EncodeToString(sum[:]), ReleaseTime: o.Now,
+		OS: goos, Arch: arch, URL: name, SHA256: hex.EncodeToString(sum.Sum(nil)), ReleaseTime: o.Now,
 	}
 	if o.Out == "" {
 		abs, err := filepath.Abs(file)
@@ -299,16 +310,9 @@ func devLauncher(dir, exe string) error {
 	if m == nil {
 		return errors.New("pyproject.toml names no project")
 	}
-	root, err := filepath.Abs(dir)
+	root, err := workspaceRoot(dir)
 	if err != nil {
 		return err
-	}
-	for !exists(filepath.Join(root, "uv.lock")) {
-		parent := filepath.Dir(root)
-		if parent == root {
-			return errors.New("no uv workspace holds the plugin")
-		}
-		root = parent
 	}
 	script := filepath.Join(root, ".venv", "bin", string(m[1]))
 	if !exists(script) {
@@ -321,9 +325,10 @@ func devLauncher(dir, exe string) error {
 	return os.WriteFile(exe, []byte(launcher), 0o755)
 }
 
-// zipFolder zips the plugin's manifest and translations, and the
-// executable exe of folder.
-func zipFolder(src, folder, exe string, modified time.Time) ([]byte, error) {
+// zipFolder zips the plugin's manifest and translations, and what was
+// built into folder: the plugin's executable, and the files beside it,
+// whose executables stay executable.
+func zipFolder(w io.Writer, src, folder string, modified time.Time) error {
 	type file struct {
 		path, name string
 		mode       fs.FileMode
@@ -331,34 +336,61 @@ func zipFolder(src, folder, exe string, modified time.Time) ([]byte, error) {
 	files := []file{{filepath.Join(src, manifest.File), manifest.File, 0o644}}
 	locales, err := filepath.Glob(filepath.Join(src, manifest.LocalesDir, "*.json"))
 	if err != nil {
-		return nil, err
+		return err
 	}
 	slices.Sort(locales)
 	for _, l := range locales {
 		files = append(files, file{l, manifest.LocalesDir + "/" + filepath.Base(l), 0o644})
 	}
-	files = append(files, file{filepath.Join(folder, exe), exe, 0o755})
-	var buf bytes.Buffer
-	zw := zip.NewWriter(&buf)
-	for _, f := range files {
-		data, err := os.ReadFile(f.path)
-		if err != nil {
-			return nil, err
+	// WalkDir walks in lexical order, so packages are reproducible.
+	err = filepath.WalkDir(folder, func(p string, d fs.DirEntry, err error) error {
+		if err != nil || d.IsDir() {
+			return err
 		}
+		name, err := filepath.Rel(folder, p)
+		if err != nil {
+			return err
+		}
+		name = filepath.ToSlash(name)
+		if name == manifest.File || strings.HasPrefix(name, manifest.LocalesDir+"/") {
+			return nil
+		}
+		if !d.Type().IsRegular() {
+			return fmt.Errorf("%s is not a regular file", name)
+		}
+		info, err := d.Info()
+		if err != nil {
+			return err
+		}
+		mode := fs.FileMode(0o644)
+		if info.Mode()&0o111 != 0 || slices.Contains([]string{"plugin", "plugin.exe", "plugin.wasm"}, name) {
+			mode = 0o755
+		}
+		files = append(files, file{p, name, mode})
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+	zw := zip.NewWriter(w)
+	for _, f := range files {
 		h := &zip.FileHeader{Name: f.name, Method: zip.Deflate, Modified: modified}
 		h.SetMode(f.mode)
 		w, err := zw.CreateHeader(h)
 		if err != nil {
-			return nil, err
+			return err
 		}
-		if _, err := w.Write(data); err != nil {
-			return nil, err
+		r, err := os.Open(f.path)
+		if err != nil {
+			return err
+		}
+		_, err = io.Copy(w, r)
+		r.Close()
+		if err != nil {
+			return err
 		}
 	}
-	if err := zw.Close(); err != nil {
-		return nil, err
-	}
-	return buf.Bytes(), nil
+	return zw.Close()
 }
 
 // run runs a command in dir with env added to this process's.
