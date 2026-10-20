@@ -32,6 +32,8 @@ struct PlayRequest: Identifiable, Hashable {
     var itemId: String
     /// The title, shown while loading.
     var title: String
+    /// The version to play; unset lets the server choose.
+    var mediaSourceId: String?
     /// Where to start, in seconds; unset starts where the server says.
     var start: TimeInterval?
 }

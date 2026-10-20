@@ -1,3 +1,4 @@
+import MavioAdmin
 import MavioKit
 import MavioUI
 import SwiftUI
@@ -46,10 +47,23 @@ private struct DetailsContent: View {
     @Environment(Router.self) private var router
     @Environment(\.theme) private var theme
     @State private var season: String?
+    @State private var sourceIndex = 0
+    /// Whether the user may report problems on the server: administrators,
+    /// and users allowed to.
+    @State private var mayReport = false
+    @State private var reporting = false
     @FocusState private var playFocused: Bool
 
     private var card: Card { details.card }
+    /// The files of this server.
     private var own: [Source] { details.sources.filter { $0.serverId == card.serverId } }
+    /// The same title on the user's other servers.
+    private var copies: [Source] { details.sources.filter { $0.serverId != card.serverId } }
+    /// The version to play.
+    private var source: Source? { own.indices.contains(sourceIndex) ? own[sourceIndex] : own.first }
+    /// The trailer among the extras; a trailer elsewhere would open a web
+    /// page, which Apple TV does not (§1).
+    private var trailer: Extra? { details.extras.first { $0.kind == .trailer } }
 
     /// What the primary action plays: the item, or a series' or season's
     /// episode to watch next.
@@ -83,6 +97,22 @@ private struct DetailsContent: View {
         }
         .ignoresSafeArea()
         .defaultFocus($playFocused, true)
+        .fullScreenCover(isPresented: $reporting) {
+            if let server = model.server(card.serverId) {
+                ReportIssueView(
+                    server: server, itemId: card.itemId, name: card.title, series: card.kind == .series
+                ) {}
+            }
+        }
+        .task(id: card.serverId) { await loadMayReport() }
+    }
+
+    private func loadMayReport() async {
+        guard !details.offline else { return }
+        let response = try? await model.client.call(
+            card.serverId, Procedure.users("GetCurrentUser"), Mavio_User_V1_GetCurrentUserRequest(),
+            as: Mavio_User_V1_GetCurrentUserResponse.self)
+        if let user = response?.user { mayReport = user.admin || user.policy.reportIssues }
     }
 
     // MARK: Header
@@ -159,6 +189,15 @@ private struct DetailsContent: View {
                     }
                 }
             }
+            if let trailer {
+                Button {
+                    router.play(
+                        PlayRequest(
+                            serverId: trailer.card.serverId, itemId: trailer.card.itemId, title: trailer.card.title))
+                } label: {
+                    Icon("movies", size: 28).accessibilityLabel(MavioStrings.itemTrailer)
+                }
+            }
             Button {
                 Task { try? await model.setFavorite(card, !card.favorite) }
             } label: {
@@ -170,9 +209,58 @@ private struct DetailsContent: View {
                 Icon("played", fill: card.played, size: 28)
                     .accessibilityLabel(card.played ? MavioStrings.itemMarkUnplayed : MavioStrings.itemMarkPlayed)
             }
+            if own.count > 1 || !copies.isEmpty { versionMenu }
+            if mayReport, [.movie, .series, .season, .episode].contains(card.kind) {
+                Menu {
+                    Button(MavioStrings.issuesReport) { reporting = true }
+                } label: {
+                    Icon("more", size: 28).accessibilityLabel(MavioStrings.listsMore)
+                }
+            }
         }
         .buttonStyle(TVButtonStyle())
         .focusSection()
+    }
+
+    /// The version to play, checked, then the same title on the user's
+    /// other servers, opening it there.
+    private var versionMenu: some View {
+        Menu {
+            if own.count > 1 {
+                Section(MavioStrings.itemVersions) {
+                    ForEach(own.indices, id: \.self) { i in
+                        Button {
+                            sourceIndex = i
+                        } label: {
+                            if i == sourceIndex {
+                                Label(own[i].versionName, systemImage: "checkmark")
+                            } else {
+                                Text(own[i].versionName)
+                            }
+                            Text(versionDetails(own[i]))
+                        }
+                    }
+                }
+            }
+            Section {
+                ForEach(copies, id: \.self) { copy in
+                    NavigationLink(value: Route.item(serverId: copy.serverId, itemId: copy.itemId)) {
+                        Text(MavioStrings.itemOnServer(server: copy.serverName))
+                    }
+                }
+            }
+        } label: {
+            HStack(spacing: MavioSpacing.s8) {
+                Text(source?.versionName ?? details.serverName)
+                Icon("expand", size: 20)
+            }
+            .accessibilityLabel(MavioStrings.itemVersion)
+        }
+        .menuOrder(.fixed)
+    }
+
+    private func versionDetails(_ s: Source) -> String {
+        [s.resolution, s.range, s.surround, s.format, s.sizeText].compactMap(\.self).joined(separator: " · ")
     }
 
     // MARK: Rows
@@ -237,8 +325,16 @@ private struct DetailsContent: View {
         play(e.card.itemId, e.card.title, start: (e.position ?? 0) > 0 && !e.card.played ? e.position : 0)
     }
 
+    /// Plays the item in the version chosen, or an episode.
     private func play(_ itemId: String, _ title: String, start: TimeInterval?) {
-        router.play(PlayRequest(serverId: card.serverId, itemId: itemId, title: title, start: start))
+        if itemId == card.itemId, let source {
+            router.play(
+                PlayRequest(
+                    serverId: source.serverId, itemId: source.itemId, title: title,
+                    mediaSourceId: source.mediaSourceId, start: start))
+        } else {
+            router.play(PlayRequest(serverId: card.serverId, itemId: itemId, title: title, start: start))
+        }
     }
 
     private func short(_ e: Episode) -> String? {

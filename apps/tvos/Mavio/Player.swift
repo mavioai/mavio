@@ -312,7 +312,7 @@ struct PlayerScreen: View {
                 series = [details.series?.name, number].compactMap(\.self).joined(separator: " · ")
             }
             sources = details.sources.filter { $0.serverId == request.serverId && $0.itemId == request.itemId }
-            source = sources.first
+            source = sources.first { $0.mediaSourceId == request.mediaSourceId } ?? sources.first
             artwork = (details.card.thumb ?? details.card.poster).flatMap { URL(string: $0.url) }
             player.nowPlaying.next = next.map { episode in { play(episode) } }
         }
