@@ -1,7 +1,7 @@
 """The local models of the bundled services (docs/plugins.md §8.16):
 Whisper's in the volume of its container, speaches, which downloads them
-from Hugging Face, and Kokoro's in the plugin's data folder, from its
-releases. They are downloaded by the plugin's download-models task,
+from Hugging Face, and Kokoro's and Piper's in the plugin's data
+folder, from their releases. They are downloaded by the plugin's download-models task,
 Kokoro's through the proxy the administrator gives the plugin, which the
 environment's HTTPS_PROXY names; an engine whose model is missing is not
 ready."""
@@ -21,11 +21,12 @@ type Progress = Callable[[float], Awaitable[None]]
 
 _KOKORO_RELEASE = "https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/"
 _KOKORO_FILES = ("kokoro-v1.0.onnx", "voices-v1.0.bin")
+_PIPER_VOICES = "https://huggingface.co/rhasspy/piper-voices/resolve/main/"
 
 
 @dataclass(frozen=True)
 class ModelRef:
-    """A local model: Whisper's of an ID, or Kokoro's."""
+    """A local model: Whisper's of an ID, Kokoro's, or Piper's of a voice."""
 
     kind: str
     name: str = ""
@@ -40,6 +41,20 @@ def whisper_model(name: str) -> ModelRef:
 
 def kokoro_model() -> ModelRef:
     return ModelRef("kokoro")
+
+
+def piper_model(voice: str) -> ModelRef:
+    return ModelRef("piper", voice)
+
+
+def piper_voice_url(voice: str) -> str:
+    """The base URL of a Piper voice's files, by its name, such as
+    "en_US-lessac-medium": its language, name and quality."""
+    parts = voice.split("-")
+    if len(parts) < 3 or "_" not in parts[0] or any(not p for p in parts):
+        raise ValueError(f"not a Piper voice: {voice!r}")
+    lang, name, quality = parts[0], "-".join(parts[1:-1]), parts[-1]
+    return f"{_PIPER_VOICES}{lang.split('_')[0]}/{lang}/{name}/{quality}/{voice}"
 
 
 @dataclass(frozen=True)
@@ -66,12 +81,19 @@ class Models:
             case "kokoro":
                 files = self.kokoro()
                 return files.model.is_file() and files.voices.is_file()
+            case "piper":
+                model = self.piper(ref.name)
+                return model.is_file() and model.with_suffix(".onnx.json").is_file()
             case _:
                 return False
 
     def kokoro(self) -> KokoroFiles:
         folder = self.root / "kokoro"
         return KokoroFiles(folder / _KOKORO_FILES[0], folder / _KOKORO_FILES[1])
+
+    def piper(self, voice: str) -> Path:
+        """The model of a Piper voice, its configuration beside it."""
+        return self.root / "piper" / (voice + ".onnx")
 
     async def download(self, refs: list[ModelRef], progress: Progress | None = None) -> list[str]:
         """Downloads the models missing, one at a time, returning those it
@@ -119,6 +141,12 @@ class Models:
                         await progress((i + f) / n)
 
                     await _fetch(_KOKORO_RELEASE + name, self.root / "kokoro" / name, part)
+            case "piper":
+                url, model = piper_voice_url(ref.name), self.piper(ref.name)
+                # The configuration is small; the model, tens of MB, tells
+                # the progress.
+                await _fetch(url + ".onnx.json", model.with_suffix(".onnx.json"))
+                await _fetch(url + ".onnx", model, progress)
             case _:
                 raise ValueError(f"unknown model {ref}")
         logger.info(f"downloaded the {ref} model")

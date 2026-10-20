@@ -198,7 +198,7 @@ manifest 在 `external_id_kinds` 中声明外部 ID 类型：键、显示名称�
 * **语音服务**是 Pipecat 的 STT 与 TTS 服务，即 Pipecat 团队维护、其依赖在插件发布的每个平台上都能以 wheel 安装且不需要 PyTorch 的那些服务（[助手 §8.7](assistant.zh-CN.md#87-识别与合成服务)）。
 * **Whisper** 运行在 speaches 上，即插件的容器依赖 `whisper`（§11）：使用其 CPU 镜像，或在容器引擎经 CDI 或 NVIDIA runtime 提供 NVIDIA GPU 时使用其 CUDA 镜像；其模型保存在容器的卷中。Whisper 服务的识别器或转写器只有在设置了该依赖后才能启用，容器未运行时未就绪；其地址变化时服务端会重新配置插件。
 * **转写服务**直接调用 speaches 与 OpenAI 兼容的转写 API（请求 `verbose_json`），因为 Pipecat 的服务会丢弃分段的时间；一次一个视频。
-* **模型**：本地服务的模型由插件的 `download-models` 任务下载，Whisper 的经由 speaches 的模型 API，Kokoro 的经由管理员为插件指定的代理（§12.1）下载到数据目录（`models/`），并报告进度（§6）；插件不接受配置其尚未下载的模型。
+* **模型**：本地服务的模型由插件的 `download-models` 任务下载，Whisper 的经由 speaches 的模型 API，Kokoro 的与 Piper 的语音经由管理员为插件指定的代理（§12.1）下载到数据目录（`models/`），并报告进度（§6）；插件不接受配置其尚未下载的模型。
 
 ### 8.17 质询求解器
 `CHALLENGE_SOLVER` 解答位于 Cloudflare 或 DDoS-Guard 之后的站点的质询（[架构 §17.2](architecture.zh-CN.md#172-质询求解器)）。`ChallengeSolverService.Solve` 接受 URL、方法（GET，或带表单正文及其内容类型的 POST）、求解时经由的代理与超时，返回通过质询的 cookie（名称、值、域、路径）、取得它们时的 user agent 以及解答它的求解器。其他插件从不直接调用它：它们以代理的 ID 调用 `HostService.SolveChallenge`，由服务端解析代理后依次交给就绪的求解插件；没有时答复 unavailable。由 `plugins/solvers` 以 FlareSolverr 提供（§12）。

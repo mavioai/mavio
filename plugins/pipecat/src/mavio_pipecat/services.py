@@ -12,7 +12,7 @@ from pipecat.processors.frame_processor import FrameProcessor
 from pipecat.transcriptions.language import Language
 
 from mavio.plugin.v1 import settings_pb2
-from mavio_pipecat.models import ModelRef, Models, kokoro_model, whisper_model
+from mavio_pipecat.models import ModelRef, Models, kokoro_model, piper_model, whisper_model
 
 # The longest list of hints a service is given.
 MAX_HINTS = 100
@@ -108,6 +108,17 @@ def _api_key(label: str = "API key") -> Setting:
     return Setting("api_key", label, secret=True)
 
 
+_GOOGLE_SETTINGS = (
+    Setting(
+        "credentials",
+        "Service account key",
+        "The JSON key of a Google Cloud service account",
+        secret=True,
+    ),
+    Setting("location", "Location", default="global", advanced=True),
+)
+
+
 # speaches' Whisper models, by their Hugging Face IDs.
 _WHISPER_MODELS = (
     ("deepdml/faster-whisper-large-v3-turbo-ct2", "large-v3-turbo (1.6 GB)"),
@@ -178,10 +189,15 @@ def _deepgram_stt(settings: dict[str, Any], session: Session, _models: Models) -
 def _cartesia_stt(settings: dict[str, Any], session: Session, _models: Models) -> FrameProcessor:
     from pipecat.services.cartesia.stt import CartesiaSTTService
 
+    model = settings["model"]
+    # Only the ink-2 and ink-preview models take key terms.
+    hints = model.startswith(("ink-2", "ink-preview")) and session.hints
     return CartesiaSTTService(
         api_key=settings.get("api_key", ""),
         settings=CartesiaSTTService.Settings(
-            model=settings["model"], language=pipecat_language(session.language)
+            model=model,
+            language=pipecat_language(session.language),
+            keyterm=list(session.hints[:MAX_HINTS]) if hints else None,
         ),
     )
 
@@ -193,6 +209,69 @@ def _elevenlabs_stt(settings: dict[str, Any], session: Session, _models: Models)
         api_key=settings.get("api_key", ""),
         settings=ElevenLabsRealtimeSTTService.Settings(
             model=settings["model"], language=pipecat_language(session.language)
+        ),
+    )
+
+
+def _assemblyai_stt(settings: dict[str, Any], session: Session, _models: Models) -> FrameProcessor:
+    from pipecat.services.assemblyai.stt import AssemblyAISTTService
+
+    return AssemblyAISTTService(
+        api_key=settings.get("api_key", ""),
+        settings=AssemblyAISTTService.Settings(
+            model=settings["model"],
+            language=pipecat_language(session.language),
+            keyterms_prompt=list(session.hints[:MAX_HINTS]) or None,
+        ),
+    )
+
+
+def _soniox_stt(settings: dict[str, Any], session: Session, _models: Models) -> FrameProcessor:
+    from pipecat.services.soniox.stt import SonioxContextObject, SonioxSTTService
+
+    language = pipecat_language(session.language)
+    hints = list(session.hints[:MAX_HINTS])
+    return SonioxSTTService(
+        api_key=settings.get("api_key", ""),
+        settings=SonioxSTTService.Settings(
+            model=settings["model"],
+            language_hints=[language] if language else None,
+            context=SonioxContextObject(terms=hints) if hints else None,
+        ),
+    )
+
+
+def _speechmatics_stt(
+    settings: dict[str, Any], session: Session, _models: Models
+) -> FrameProcessor:
+    from pipecat.services.speechmatics.stt import SpeechmaticsSTTService
+
+    return SpeechmaticsSTTService(
+        api_key=settings.get("api_key", ""),
+        settings=SpeechmaticsSTTService.Settings(
+            language=pipecat_language(session.language) or Language.EN,
+            additional_vocab=[
+                SpeechmaticsSTTService.AdditionalVocabEntry(content=h)
+                for h in session.hints[:MAX_HINTS]
+            ],
+        ),
+    )
+
+
+def _google_stt(settings: dict[str, Any], session: Session, _models: Models) -> FrameProcessor:
+    from pipecat.services.google.stt import GoogleSTTService
+
+    language = pipecat_language(session.language)
+    hints = session.hints[:MAX_HINTS]
+    return GoogleSTTService(
+        credentials=settings.get("credentials", ""),
+        location=settings["location"],
+        settings=GoogleSTTService.Settings(
+            model=settings["model"],
+            languages=[language] if language else [Language.EN_US],
+            adaptation={"phrase_sets": [{"phrases": [{"value": h} for h in hints]}]}
+            if hints
+            else None,
         ),
     )
 
@@ -223,7 +302,16 @@ RECOGNITION = (
     Service(
         "cartesia",
         "Cartesia",
-        (_api_key(), Setting("model", "Model", default="ink-whisper")),
+        (
+            _api_key(),
+            Setting(
+                "model",
+                "Model",
+                "Only the ink-2 models take the users' hints",
+                default="ink-whisper",
+            ),
+        ),
+        hints=True,
         make=_cartesia_stt,
     ),
     Service(
@@ -231,6 +319,34 @@ RECOGNITION = (
         "ElevenLabs",
         (_api_key(), Setting("model", "Model", default="scribe_v2_realtime")),
         make=_elevenlabs_stt,
+    ),
+    Service(
+        "assemblyai",
+        "AssemblyAI",
+        (_api_key(), Setting("model", "Model", default="universal-3-6-pro")),
+        hints=True,
+        make=_assemblyai_stt,
+    ),
+    Service(
+        "soniox",
+        "Soniox",
+        (_api_key(), Setting("model", "Model", default="stt-rt-v5")),
+        hints=True,
+        make=_soniox_stt,
+    ),
+    Service(
+        "speechmatics",
+        "Speechmatics",
+        (_api_key(),),
+        hints=True,
+        make=_speechmatics_stt,
+    ),
+    Service(
+        "google",
+        "Google Cloud",
+        (*_GOOGLE_SETTINGS, Setting("model", "Model", default="latest_long")),
+        hints=True,
+        make=_google_stt,
     ),
 )
 
@@ -313,6 +429,57 @@ def _elevenlabs_tts(settings: dict[str, Any], session: Session, _models: Models)
     )
 
 
+def piper_language(voice: str) -> str:
+    """The language a Piper voice speaks, by its name: "zh_CN-huayan-medium"
+    speaks zh-CN; empty when it names none."""
+    lang = voice.split("-")[0]
+    return lang.replace("_", "-") if "_" in lang else ""
+
+
+def _piper_tts(settings: dict[str, Any], session: Session, models: Models) -> FrameProcessor:
+    from pipecat.services.piper.tts import PiperTTSService
+
+    voice = settings["voice"]
+    return PiperTTSService(
+        download_dir=models.piper(voice).parent,
+        settings=PiperTTSService.Settings(voice=voice),
+    )
+
+
+def _soniox_tts(settings: dict[str, Any], session: Session, _models: Models) -> FrameProcessor:
+    from pipecat.services.soniox.tts import SonioxTTSService
+
+    return SonioxTTSService(
+        api_key=settings.get("api_key", ""),
+        settings=SonioxTTSService.Settings(
+            model=settings["model"],
+            voice=settings["voice"],
+            language=pipecat_language(session.language),
+        ),
+    )
+
+
+def google_language(voice: str) -> str:
+    """The language a Google voice speaks, by its name: "cmn-CN-Chirp3-HD-
+    Aoede" speaks Mandarin, zh-CN; empty when it names none."""
+    parts = voice.split("-")
+    if len(parts) <= 2:
+        return ""
+    return ("zh" if parts[0] == "cmn" else parts[0]) + "-" + parts[1]
+
+
+def _google_tts(settings: dict[str, Any], session: Session, _models: Models) -> FrameProcessor:
+    from pipecat.services.google.tts import GoogleTTSService
+
+    voice = settings["voice"]
+    language = pipecat_language(google_language(voice)) or pipecat_language(session.language)
+    return GoogleTTSService(
+        credentials=settings.get("credentials", ""),
+        location=settings["location"],
+        settings=GoogleTTSService.Settings(voice=voice, language=language or Language.EN_US),
+    )
+
+
 SYNTHESIS = (
     Service(
         "kokoro",
@@ -365,6 +532,48 @@ SYNTHESIS = (
             Setting("voice", "Voice", "The voice's ID"),
         ),
         make=_elevenlabs_tts,
+    ),
+    Service(
+        "piper",
+        "Piper",
+        (
+            Setting(
+                "voice",
+                "Voice",
+                "A Piper voice, named after its language: "
+                "en_US-lessac-medium, zh_CN-huayan-medium, de_DE-thorsten-medium…",
+                default="en_US-lessac-medium",
+            ),
+        ),
+        make=_piper_tts,
+        model=lambda s: piper_model(s["voice"]),
+        languages=lambda s: [piper_language(s["voice"])] if piper_language(s["voice"]) else [],
+    ),
+    Service(
+        "soniox",
+        "Soniox",
+        (
+            _api_key(),
+            Setting("model", "Model", default="tts-rt-v2"),
+            Setting("voice", "Voice", default="Bryce"),
+        ),
+        make=_soniox_tts,
+    ),
+    Service(
+        "google",
+        "Google Cloud",
+        (
+            *_GOOGLE_SETTINGS,
+            Setting(
+                "voice",
+                "Voice",
+                "A Chirp 3 HD voice, named after its language: "
+                "en-US-Chirp3-HD-Charon, cmn-CN-Chirp3-HD-Aoede…",
+                default="en-US-Chirp3-HD-Charon",
+            ),
+        ),
+        make=_google_tts,
+        languages=lambda s: [google_language(s["voice"])] if google_language(s["voice"]) else [],
     ),
 )
 

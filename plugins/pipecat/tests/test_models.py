@@ -5,7 +5,13 @@ import httpx
 import pytest
 from fakes import FakeSpeaches
 
-from mavio_pipecat.models import Models, kokoro_model, whisper_model
+from mavio_pipecat.models import (
+    Models,
+    kokoro_model,
+    piper_model,
+    piper_voice_url,
+    whisper_model,
+)
 from mavio_pipecat.speaches import Speaches, SpeachesError
 
 _TINY = "Systran/faster-whisper-tiny"
@@ -30,6 +36,26 @@ def test_ready(tmp_path: Path):
     files.voices.write_bytes(b"x")
     assert models.ready(kokoro_model())
     assert Models(tmp_path, FakeSpeaches(_TINY)).ready(whisper_model(_TINY))
+
+
+def test_piper_voices(tmp_path: Path):
+    models = Models(tmp_path)
+    voice = "zh_CN-huayan-medium"
+    assert not models.ready(piper_model(voice))
+    model = models.piper(voice)
+    model.parent.mkdir(parents=True)
+    model.write_bytes(b"x")
+    assert not models.ready(piper_model(voice)), "ready without its configuration"
+    model.with_suffix(".onnx.json").write_text("{}")
+    assert models.ready(piper_model(voice))
+    got = piper_voice_url("en_US-hfc_female-medium")
+    want = (
+        "https://huggingface.co/rhasspy/piper-voices/resolve/main/"
+        "en/en_US/hfc_female/medium/en_US-hfc_female-medium"
+    )
+    assert got == want, f"URL = {got}, want = {want}"
+    with pytest.raises(ValueError):
+        piper_voice_url("lessac")
 
 
 async def test_download_skips_what_is_ready(tmp_path: Path):

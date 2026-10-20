@@ -2,7 +2,7 @@
   "id": "dev.mavio.pipecat",
   "name": "Pipecat",
   "version": "0.1.0",
-  "description": "Voice sessions of the assistant on Pipecat, and subtitles transcribed from videos' audio: turns detected by Silero VAD and Smart Turn, recognized and spoken by local models (Whisper on speaches, Kokoro) or cloud services (OpenAI-compatible, Deepgram, Cartesia, ElevenLabs).",
+  "description": "Voice sessions of the assistant on Pipecat, and subtitles transcribed from videos' audio: turns detected by Silero VAD and Smart Turn, recognized and spoken by local models (Whisper on speaches, Kokoro, Piper) or cloud services (OpenAI-compatible, Deepgram, Cartesia, ElevenLabs, AssemblyAI, Soniox, Speechmatics, Google Cloud).",
   "author": "Mavio",
   "homepage": "https://github.com/mavioai/mavio",
   "license": "GPL-3.0-only",

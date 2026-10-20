@@ -1,6 +1,7 @@
 """Fakes of the assistant, of a voice and of Whisper's container."""
 
 import asyncio
+import json
 from collections.abc import AsyncGenerator
 from typing import Any
 
@@ -85,3 +86,28 @@ class FakeSpeaches(Speaches):
             raise SpeachesError(f"download {model}: 503")
         self.downloaded.append(model)
         self.models.add(model)
+
+
+def google_credentials() -> str:
+    """The JSON key of a made-up Google Cloud service account, which the
+    Google services parse without reaching Google."""
+    from cryptography.hazmat.primitives import serialization
+    from cryptography.hazmat.primitives.asymmetric import rsa
+
+    key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+    pem = key.private_bytes(
+        serialization.Encoding.PEM,
+        serialization.PrivateFormat.PKCS8,
+        serialization.NoEncryption(),
+    ).decode()
+    return json.dumps(
+        {
+            "type": "service_account",
+            "project_id": "mavio-test",
+            "private_key_id": "1",
+            "private_key": pem,
+            "client_email": "test@mavio-test.iam.gserviceaccount.com",
+            "client_id": "1",
+            "token_uri": "https://oauth2.googleapis.com/token",
+        }
+    )

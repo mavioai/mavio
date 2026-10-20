@@ -219,9 +219,9 @@ WebSocket 承载二进制音频帧（§8.5）与 JSON 事件 `{"type": …}`，�
 
 ### 8.7 识别与合成服务
 * 插件的设置从它附带的 Pipecat 服务中配置**识别器**与**语音**，每个都有服务端生成的 ID、其服务、管理员起的名称、是否启用，以及其服务的设置——密钥（机密）、模型、音色、区域或地址——插件只声明 Mavio 需要的设置，而不是服务的每个参数。同一服务可以配置多次，如两台 OpenAI 兼容服务器。
-* **附带的**是 Pipecat 团队维护、其依赖在插件发布的每个平台上都能以 wheel 安装且不需要 PyTorch 的服务：运行在插件的容器依赖 speaches 上的 Whisper，容器引擎提供 NVIDIA GPU 时使用 GPU；在服务端 CPU 上运行的 Kokoro 与 Piper；以及云服务，如 OpenAI 与 OpenAI 兼容服务器（speaches、Groq）、Deepgram、AssemblyAI、Azure、Google、ElevenLabs、Cartesia、Soniox 与 Speechmatics。社区包，以及需要 PyTorch 或采用自有许可证的厂商 SDK 的服务，不予附带。
+* **附带的**是 Pipecat 团队维护、其依赖在插件发布的每个平台上都能以 wheel 安装且不需要 PyTorch 的服务：运行在插件的容器依赖 speaches 上的 Whisper，容器引擎提供 NVIDIA GPU 时使用 GPU；在服务端 CPU 上运行的 Kokoro 与 Piper；以及云服务，如 OpenAI 与 OpenAI 兼容服务器（speaches、Groq）、Deepgram、AssemblyAI、Google Cloud、ElevenLabs、Cartesia、Soniox 与 Speechmatics。社区包，以及需要 PyTorch 或采用自有许可证的厂商 SDK 的服务，不予附带。
 * **本地模型**——Whisper 的经由 speaches 的模型 API 从 Hugging Face 下载到其容器的卷中，Kokoro 与 Piper 的经服务端的代理从其发布下载到插件的数据目录——在管理员选用时由插件任务下载，并按已完成的模型数及已知大小者的字节数显示进度；模型缺失的识别器或语音未就绪。Whisper 的大小从 tiny（75 MB）到 large-v3（3 GB），中间有 large-v3-turbo（1.6 GB）。
-* **提示**交给接受它们的服务：Deepgram 的关键词、Whisper 与 OpenAI 转写 API 的提示、Azure 与 Google 的短语。
+* **提示**交给接受它们的服务：Deepgram、AssemblyAI 与 Cartesia 的 ink-2 模型的关键词，Soniox 的上下文术语，Speechmatics 的附加词汇，Google 的短语集，以及 Whisper 与 OpenAI 转写 API 的提示。
 * **就绪**：`ListVoiceServices` 列出各服务、已配置的识别器与语音及其语言，以及各自是否就绪，供助手设置选用（§10）。
 
 ### 8.8 保留的语音

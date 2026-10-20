@@ -1,6 +1,6 @@
 {
   "Pipecat": "Pipecat",
-  "Voice sessions of the assistant on Pipecat, and subtitles transcribed from videos' audio: turns detected by Silero VAD and Smart Turn, recognized and spoken by local models (Whisper on speaches, Kokoro) or cloud services (OpenAI-compatible, Deepgram, Cartesia, ElevenLabs).": "基于 Pipecat 的助手语音会话，以及从视频音频转写的字幕：由 Silero VAD 与 Smart Turn 检测轮次，由本地模型（speaches 上的 Whisper、Kokoro）或云服务（OpenAI 兼容、Deepgram、Cartesia、ElevenLabs）识别与朗读。",
+  "Voice sessions of the assistant on Pipecat, and subtitles transcribed from videos' audio: turns detected by Silero VAD and Smart Turn, recognized and spoken by local models (Whisper on speaches, Kokoro, Piper) or cloud services (OpenAI-compatible, Deepgram, Cartesia, ElevenLabs, AssemblyAI, Soniox, Speechmatics, Google Cloud).": "基于 Pipecat 的助手语音会话，以及从视频音频转写的字幕：由 Silero VAD 与 Smart Turn 检测轮次，由本地模型（speaches 上的 Whisper、Kokoro、Piper）或云服务（OpenAI 兼容、Deepgram、Cartesia、ElevenLabs、AssemblyAI、Soniox、Speechmatics、Google Cloud）识别与朗读。",
   "Download models": "下载模型",
   "Downloads the local models the recognizers, voices and transcribers use": "下载识别器、语音与转写器所用的本地模型",
   "speaches, running the Whisper models of the recognizers and transcribers of the Whisper service, on an NVIDIA GPU when the container engine gives one": "speaches，运行 Whisper 服务的识别器与转写器所用的 Whisper 模型；容器引擎提供 NVIDIA GPU 时在 GPU 上运行",
@@ -26,5 +26,11 @@
   "Voice": "语音",
   "The voice's ID": "语音的 ID",
   "A Kokoro voice, named after its language: af_heart, bf_emma, zf_xiaobei, jf_alpha…": "Kokoro 语音，名称以其语言开头：af_heart、bf_emma、zf_xiaobei、jf_alpha…",
-  "OpenAI-compatible": "OpenAI 兼容"
+  "OpenAI-compatible": "OpenAI 兼容",
+  "Only the ink-2 models take the users' hints": "只有 ink-2 模型接受用户的提示词",
+  "Service account key": "服务账号密钥",
+  "The JSON key of a Google Cloud service account": "Google Cloud 服务账号的 JSON 密钥",
+  "Location": "位置",
+  "A Piper voice, named after its language: en_US-lessac-medium, zh_CN-huayan-medium, de_DE-thorsten-medium…": "Piper 语音，名称以其语言开头：en_US-lessac-medium、zh_CN-huayan-medium、de_DE-thorsten-medium…",
+  "A Chirp 3 HD voice, named after its language: en-US-Chirp3-HD-Charon, cmn-CN-Chirp3-HD-Aoede…": "Chirp 3 HD 语音，名称以其语言开头：en-US-Chirp3-HD-Charon、cmn-CN-Chirp3-HD-Aoede…"
 }
