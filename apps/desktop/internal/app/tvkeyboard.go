@@ -195,7 +195,7 @@ func tvKey(c *ui.Context, key, label string, primary, first bool) ui.Element {
 	}
 	bg, fg := style.Color(colors.Fill), style.Color(colors.TextPrimary)
 	if primary {
-		bg, fg = style.Color(colors.Accent), style.Color(colors.OnAccent)
+		bg, fg = style.Color(colors.Button), style.Color(colors.OnButton)
 	}
 	if b.Focused() {
 		bg, fg = ui.RGB(255, 255, 255), ui.RGB(0, 0, 0)

@@ -1108,8 +1108,7 @@ func (a *App) audioTab(c *ui.Context, p *player) {
 			case tvLit(c, b):
 				color = ui.RGB(0, 0, 0)
 			case on:
-				b.Background(white)
-				color = ui.RGB(0, 0, 0)
+				b.Background(white.Alpha(0.3))
 			case b.Hovered():
 				b.Background(white.Alpha(0.2))
 			}

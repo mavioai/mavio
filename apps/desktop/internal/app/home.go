@@ -187,14 +187,20 @@ func (a *App) hero(c *ui.Context, cards []*capiv1.Card) {
 // primary, else translucent. On the television it is 64 points high, and
 // white belongs to focus alone (docs/tv.md §4).
 func (a *App) heroButton(c *ui.Context, icon, label string, primary bool) ui.Element {
-	b := ui.ButtonBase(c.Key(icon)).Height(40).Padding(0, 20).Gap(8).Radius(20).AlignItems(ui.Center).Label(label)
+	b := ui.ButtonBase(c.Key(icon)).Height(44).Padding(0, 24).Gap(8).Radius(10).AlignItems(ui.Center).Label(label)
 	if style.TV(c) {
-		b.Height(64).Padding(0, 32).Gap(12).Radius(32)
+		b.Height(64).Padding(0, 40).Gap(12).Radius(10)
 		primary = a.tvFocus(c, b, false)
 	}
 	fg, bg := ui.RGB(0, 0, 0), ui.RGB(255, 255, 255)
 	if !primary {
-		fg, bg = ui.RGB(255, 255, 255), ui.RGBA(255, 255, 255, 0.22)
+		fg, bg = ui.RGB(255, 255, 255), ui.RGBA(255, 255, 255, 0.2)
+	}
+	if b.Hovered() && !style.TV(c) {
+		bg = ui.RGBA(255, 255, 255, 0.9)
+		if !primary {
+			bg = ui.RGBA(255, 255, 255, 0.3)
+		}
 	}
 	b.Background(bg)
 	if b.Pressed() {

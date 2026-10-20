@@ -184,9 +184,9 @@ func (a *App) tvPill(c *ui.Context, labels []string, current *int) {
 	})
 }
 
-// tvDots builds the user menu's button: three vertical dots, bare, and in
-// the tabs' glass with focus or while its menu is open; white with focus
-// (docs/tv.md §3, §5).
+// tvDots builds the user menu's button: three vertical dots in the tabs'
+// glass, as the assistant's button; white with focus, which it shows not
+// while its menu is open (docs/tv.md §3, §5).
 func (a *App) tvDots(c *ui.Context) {
 	if len(a.servers) == 0 {
 		return
@@ -198,16 +198,15 @@ func (a *App) tvDots(c *ui.Context) {
 	a.focus.dots = len(a.focus.items)
 	focused := a.tvFocus(c, b, false) && !a.userMenuOpen
 	fg := style.Color(colors.TextSecondary)
-	switch {
-	case focused:
+	if focused {
 		b.Background(ui.RGB(255, 255, 255))
 		fg = ui.RGB(0, 0, 0)
-	case a.userMenuOpen:
+	} else {
 		b.Material(glass.Blur{Radius: 30})
 	}
 	b.Children(func() {
 		inner := ui.Box(c).Size(48, 48).Radius(design.RadiusFull).Center()
-		if !focused && a.userMenuOpen {
+		if !focused {
 			inner.Background(style.Color(colors.SurfaceRaised).Alpha(0.6))
 		}
 		inner.Children(func() {

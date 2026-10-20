@@ -330,7 +330,7 @@ func (a *App) sidebarSearch(c *ui.Context) {
 
 func (a *App) sidebarRow(c *ui.Context, it navItem, selected bool) {
 	colors := style.Colors(c)
-	row := ui.ButtonBase(c).Height(32).Padding(0, 8).Gap(10).Radius(design.RadiusMd).AlignItems(ui.Center).Label(it.label)
+	row := ui.ButtonBase(c).MinHeight(36).Padding(0, 10).Gap(10).Radius(10).AlignItems(ui.Center).Label(it.label)
 	switch {
 	case selected:
 		row.Background(style.Color(colors.FillSelected))
@@ -341,8 +341,11 @@ func (a *App) sidebarRow(c *ui.Context, it navItem, selected bool) {
 		row.Opacity(0.8)
 	}
 	row.Children(func() {
-		ui.Icon(c, style.Icon(it.icon, selected)).Size(18, 18).TextColor(style.Color(colors.Accent))
-		style.Text(ui.Text(c, it.label), style.Type(c).Callout).TextColor(style.Color(colors.TextPrimary)).SingleLine().Grow(1)
+		ui.Icon(c, style.Icon(it.icon, selected)).Size(20, 20).TextColor(style.Color(colors.TextPrimary))
+		t := style.Text(ui.Text(c, it.label), style.Type(c).Callout).TextColor(style.Color(colors.TextPrimary)).SingleLine().Grow(1)
+		if selected {
+			t.FontWeight(600)
+		}
 	})
 	if row.Clicked() {
 		a.openPlace(it.path)
@@ -366,7 +369,7 @@ func (a *App) rail(c *ui.Context, medium bool) {
 			}
 		})
 		ui.Scroll(c).Grow(1).Children(func() {
-			ui.Column(c).Padding(0, 8, 8).Gap(4).AlignItems(ui.Stretch).Children(func() {
+			ui.Column(c).Padding(0, 8, 8).Gap(8).AlignItems(ui.Center).Children(func() {
 				items := top
 				for _, s := range sections {
 					items = append(items, s.items...)
@@ -376,7 +379,7 @@ func (a *App) rail(c *ui.Context, medium bool) {
 						ui.Box(c).Height(1).Margin(4, 12).Background(style.Color(colors.Border))
 					}
 					selected := a.places.current == it.path
-					cell := ui.ButtonBase(c.Key(it.path)).Padding(8, 4).Gap(4).Radius(design.RadiusMd).Column().AlignItems(ui.Center).Label(it.label).Tooltip(it.label)
+					cell := ui.ButtonBase(c.Key(it.path)).Size(36, 36).Radius(10).Center().Label(it.label).Tooltip(it.label)
 					switch {
 					case selected:
 						cell.Background(style.Color(colors.FillSelected))
@@ -384,14 +387,13 @@ func (a *App) rail(c *ui.Context, medium bool) {
 						cell.Background(style.Color(colors.Fill))
 					}
 					cell.Children(func() {
-						ui.Icon(c, style.Icon(it.icon, selected)).Size(22, 22).TextColor(style.Color(colors.Accent))
-						style.Text(ui.Text(c, it.label), style.Type(c).Caption).TextColor(style.Color(colors.TextPrimary)).SingleLine().MaxWidth(style.Layout(c).Rail - 24)
+						ui.Icon(c, style.Icon(it.icon, selected)).Size(20, 20).TextColor(style.Color(colors.TextPrimary))
 					})
 					if cell.Clicked() {
 						a.openPlace(it.path)
 					}
 					if it.path == "/search" {
-						ui.Row(c).Justify(ui.Center).Children(func() { a.assistantButton(c, nil, 40) })
+						ui.Row(c).Justify(ui.Center).Children(func() { a.assistantButton(c, nil, 36) })
 					}
 				}
 			})

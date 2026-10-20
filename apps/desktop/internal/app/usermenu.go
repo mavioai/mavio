@@ -142,6 +142,9 @@ func (a *App) themeSwitch(c *ui.Context) {
 			chosen := a.Appearance() == it.appearance
 			label := style.T(c, it.key)
 			b := ui.ButtonBase(c).Size(28, 28).Radius(design.RadiusFull).Center().Label(label).Tooltip(label).Selected(chosen)
+			if style.TV(c) {
+				b.Size(36, 36)
+			}
 			color := colors.TextSecondary
 			if a.tvFocus(c, b, chosen) {
 				b.Background(ui.RGB(255, 255, 255))

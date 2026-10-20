@@ -407,7 +407,7 @@ func statusMark(c *ui.Context, s acquisitionv1.MediaStatus) {
 	if !available && !waiting {
 		return
 	}
-	icon, bg := "check", style.Color(colors.Accent)
+	icon, bg := "check", style.Color(colors.Success)
 	if waiting {
 		icon, bg = "pending", style.Color(colors.Scrim)
 	}
@@ -1175,7 +1175,7 @@ var requestStatuses = map[acquisitionv1.RequestStatus]struct {
 		return style.Color(k.Fill), style.Color(k.TextPrimary)
 	}},
 	acquisitionv1.RequestStatus_REQUEST_STATUS_APPROVED: {"requests.approved", func(k *design.Colors) (ui.Color, ui.Color) {
-		return style.Color(k.Accent), style.Color(k.OnAccent)
+		return style.Color(k.Button), style.Color(k.OnButton)
 	}},
 	acquisitionv1.RequestStatus_REQUEST_STATUS_COMPLETED: {"requests.available", func(*design.Colors) (ui.Color, ui.Color) {
 		return ui.RGB(0x34, 0xC7, 0x59), ui.RGB(255, 255, 255)
