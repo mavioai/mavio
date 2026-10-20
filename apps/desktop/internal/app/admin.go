@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"maps"
+	"math"
 	"slices"
 	"strings"
 	"time"
@@ -492,7 +493,15 @@ func (a *App) taskGroup(c *ui.Context, k, title string, tasks []*systemv1.Task) 
 			color := style.Color(colors.Fill)
 			switch {
 			case task.GetRunning():
-				status, color = style.T(c, "tasks.runningNow"), jobStates[systemv1.JobState_JOB_STATE_RUNNING].color
+				// A running task tells what it is doing, untranslated.
+				parts := []string{style.T(c, "tasks.runningNow")}
+				if p := task.GetProgress(); p > 0 {
+					parts = append(parts, fmt.Sprintf("%d%%", int(math.Round(p*100))))
+				}
+				if s := task.GetStatus(); s != "" {
+					parts = append(parts, s)
+				}
+				status, color = strings.Join(parts, " · "), jobStates[systemv1.JobState_JOB_STATE_RUNNING].color
 			case last != nil:
 				s := jobStates[last.GetState()]
 				status, color = strings.TrimSpace(style.T(c, s.title)+" "+ago(c, cmp.Or(last.GetFinishTime(), last.GetRunTime()))), s.color
@@ -521,6 +530,10 @@ func (a *App) taskGroup(c *ui.Context, k, title string, tasks []*systemv1.Task) 
 					})
 					if last.GetState() == systemv1.JobState_JOB_STATE_FAILED && last.GetLastError() != "" && !task.GetRunning() {
 						style.Text(ui.Text(c, last.GetLastError()), style.Type(c).Footnote).TextColor(style.Color(colors.Danger)).Selectable()
+					}
+					// A run that succeeded tells what it did.
+					if last.GetState() == systemv1.JobState_JOB_STATE_SUCCEEDED && last.GetResult() != "" && !task.GetRunning() {
+						style.Text(ui.Text(c, last.GetResult()), style.Type(c).Footnote).TextColor(style.Color(colors.TextSecondary)).Selectable()
 					}
 				})
 				id := task.GetId()
@@ -582,8 +595,12 @@ func (a *App) jobs(c *ui.Context) {
 				when = ago(c, cmp.Or(j.GetRunTime(), j.GetCreateTime()))
 			}
 			parts := []string{style.T(c, s.title)}
-			if j.HasProgress() {
+			// Progress shows only while the job runs.
+			if j.GetState() == systemv1.JobState_JOB_STATE_RUNNING && j.GetProgress() > 0 {
 				parts = append(parts, fmt.Sprintf("%d%%", int(j.GetProgress()*100)))
+			}
+			if j.GetStatus() != "" {
+				parts = append(parts, j.GetStatus())
 			}
 			if when != "" {
 				parts = append(parts, when)
@@ -600,6 +617,9 @@ func (a *App) jobs(c *ui.Context) {
 				})
 				if j.GetLastError() != "" {
 					style.Text(ui.Text(c, j.GetLastError()), style.Type(c).Footnote).TextColor(style.Color(colors.Danger)).Selectable()
+				}
+				if j.GetState() == systemv1.JobState_JOB_STATE_SUCCEEDED && j.GetResult() != "" {
+					style.Text(ui.Text(c, j.GetResult()), style.Type(c).Footnote).TextColor(style.Color(colors.TextSecondary)).Selectable()
 				}
 			})
 		}

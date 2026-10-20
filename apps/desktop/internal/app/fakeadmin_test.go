@@ -93,12 +93,12 @@ func (t *fakeTasks) ListTasks(context.Context, *systemv1.ListTasksRequest) (*sys
 		systemv1.Task_builder{
 			Id: new("library.scan"), Name: new("Scan Media Libraries"), Description: new("Finds new, changed and removed media in every library."),
 			Interval: durationpb.New(12 * time.Hour), NextRunTime: timestamppb.New(time.Now().Add(3*time.Hour + 10*time.Minute)),
-			LastRun: systemv1.Job_builder{State: new(systemv1.JobState_JOB_STATE_SUCCEEDED), FinishTime: tsAgo(2 * time.Hour)}.Build(),
+			LastRun: systemv1.Job_builder{State: new(systemv1.JobState_JOB_STATE_SUCCEEDED), FinishTime: tsAgo(2 * time.Hour), Result: new("3 items added")}.Build(),
 		}.Build(),
 		systemv1.Task_builder{
 			Id: new("trickplay"), Name: new("Extract Trickplay Images"), Description: new("Makes the scrubbing previews of videos."),
-			Interval: durationpb.New(24 * time.Hour), Running: new(t.f.taskRuns > 0),
-			LastRun: systemv1.Job_builder{State: new(systemv1.JobState_JOB_STATE_FAILED), FinishTime: tsAgo(5 * time.Hour), LastError: new("ffmpeg exited with status 1")}.Build(),
+			Interval: durationpb.New(24 * time.Hour), Running: new(t.f.taskRuns > 0), Progress: new(0.25), Status: new("Extracting Orbit"),
+			LastRun: systemv1.Job_builder{State: new(systemv1.JobState_JOB_STATE_FAILED), Progress: new(0.3), FinishTime: tsAgo(5 * time.Hour), LastError: new("ffmpeg exited with status 1")}.Build(),
 		}.Build(),
 		systemv1.Task_builder{Id: new("cache.clean"), Name: new("Clean the Cache"), Description: new("Removes old images and transcodes.")}.Build(),
 		systemv1.Task_builder{
@@ -117,9 +117,9 @@ func (t *fakeTasks) RunTask(context.Context, *systemv1.RunTaskRequest) (*systemv
 
 func (t *fakeTasks) ListJobs(context.Context, *systemv1.ListJobsRequest) (*systemv1.ListJobsResponse, error) {
 	jobs := []*systemv1.Job{
-		systemv1.Job_builder{Id: new("j1"), Kind: new("library.scan"), State: new(systemv1.JobState_JOB_STATE_RUNNING), Progress: new(0.42), RunTime: tsAgo(time.Minute), Attempts: new(int32(1)), MaxAttempts: new(int32(3))}.Build(),
-		systemv1.Job_builder{Id: new("j2"), Kind: new("trickplay.extract"), State: new(systemv1.JobState_JOB_STATE_FAILED), FinishTime: tsAgo(5 * time.Hour), LastError: new("ffmpeg exited with status 1"), Attempts: new(int32(3)), MaxAttempts: new(int32(3))}.Build(),
-		systemv1.Job_builder{Id: new("j3"), Kind: new("metadata.refresh"), State: new(systemv1.JobState_JOB_STATE_SUCCEEDED), FinishTime: tsAgo(2 * time.Hour), Attempts: new(int32(1)), MaxAttempts: new(int32(3))}.Build(),
+		systemv1.Job_builder{Id: new("j1"), Kind: new("library.scan"), State: new(systemv1.JobState_JOB_STATE_RUNNING), Progress: new(0.42), Status: new("Scanning Movies"), RunTime: tsAgo(time.Minute), Attempts: new(int32(1)), MaxAttempts: new(int32(3))}.Build(),
+		systemv1.Job_builder{Id: new("j2"), Kind: new("trickplay.extract"), State: new(systemv1.JobState_JOB_STATE_FAILED), Progress: new(0.3), FinishTime: tsAgo(5 * time.Hour), LastError: new("ffmpeg exited with status 1"), Attempts: new(int32(3)), MaxAttempts: new(int32(3))}.Build(),
+		systemv1.Job_builder{Id: new("j3"), Kind: new("metadata.refresh"), State: new(systemv1.JobState_JOB_STATE_SUCCEEDED), FinishTime: tsAgo(2 * time.Hour), Result: new("12 items refreshed"), Attempts: new(int32(1)), MaxAttempts: new(int32(3))}.Build(),
 	}
 	return systemv1.ListJobsResponse_builder{Jobs: jobs, Total: new(int32(len(jobs)))}.Build(), nil
 }

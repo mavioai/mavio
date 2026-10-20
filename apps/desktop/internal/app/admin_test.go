@@ -57,6 +57,19 @@ func TestAdmin(t *testing.T) {
 	if h.core.taskRuns != 1 {
 		t.Errorf("task runs = %d, want = 1", h.core.taskRuns)
 	}
+	// A running task tells what it is doing, a run that succeeded what it
+	// did; a job's progress shows only while it runs.
+	want("3 items added", "Scanning Movies", "12 items refreshed")
+	for range 10 {
+		if h.tt.HasText("Running · 25% · Extracting Orbit") {
+			break
+		}
+		h.settle()
+	}
+	want("Running · 25% · Extracting Orbit")
+	if h.tt.HasText("30%") {
+		t.Errorf("a failed job shows its progress")
+	}
 	h.save(shots, "settings-tasks")
 
 	open("Logs")
