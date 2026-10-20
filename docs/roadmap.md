@@ -1056,6 +1056,7 @@ flowchart TD
 - [ ] The Android apps: `SpeechRecognizer` with hints, `TextToSpeech`, search intents and play-from-search on Android TV
 - [ ] The desktop app: the server's recognizer and voices
 - [ ] More languages in the grammar
+- [ ] Later: converting speech in the server's process, through pure-Go bindings of FFmpeg's libraries loaded with purego, rather than an ffmpeg child process
 
 ### P30 Container Dependencies
 **Scope**: the container dependencies of [Architecture §16](architecture.md#16-container-dependencies-libscontainers) and [Plugins §11](plugins.md#11-container-dependencies): `libs/containers` with engine detection and the Engine API client; the manifest's `containers`, `PluginContainer` and the management and host RPCs; managed dependencies on Linux, the server on the host first, then in a container; external dependencies with their commands; `plugins/voice` declaring whisper-asr-webservice; the web UI.

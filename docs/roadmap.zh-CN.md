@@ -1056,6 +1056,7 @@ flowchart TD
 - [ ] Android 应用：带提示的 `SpeechRecognizer`、`TextToSpeech`、Android TV 上的搜索 intent 与按搜索播放
 - [ ] 桌面应用：服务端的识别器与语音
 - [ ] 语法支持更多语言
+- [ ] 以后：在服务端进程内转换语音，通过以 purego 加载的 FFmpeg 库的纯 Go 绑定，而非 ffmpeg 子进程
 
 ### P30 容器依赖
 **范围**：[架构 §16](architecture.zh-CN.md#16-容器依赖libscontainers) 与[插件 §11](plugins.zh-CN.md#11-容器依赖) 的容器依赖：带引擎检测与 Engine API 客户端的 `libs/containers`；清单的 `containers`、`PluginContainer` 以及管理与宿主 RPC；Linux 上的托管依赖，先是运行在宿主机上的服务端，再是运行在容器中的服务端；带命令的外部依赖；`plugins/voice` 声明 whisper-asr-webservice；Web UI。
