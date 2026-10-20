@@ -90,6 +90,11 @@
                     heightAnchor.constraint(greaterThanOrEqualToConstant: padded ? height : 20),
                     heightAnchor.constraint(greaterThanOrEqualTo: stack.heightAnchor),
                 ])
+                // No taller than that unless what holds it says so: a
+                // column with room to give does not stretch it.
+                let snug = heightAnchor.constraint(equalTo: stack.heightAnchor)
+                snug.priority = .defaultLow + 1
+                snug.isActive = true
             }
             titleLabel.setContentCompressionResistancePriority(.defaultHigh, for: .horizontal)
             setAccessibilityElement(true)
