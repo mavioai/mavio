@@ -190,7 +190,7 @@ A plugin directory holds `manifest.json`, `plugin.wasm` or `plugin` (`plugin.exe
 
 ## 5. Code Quality
 
-Python follows the root `pyproject.toml`'s ruff and pyright settings: Python 3.12, ruff's formatter and its `E`, `F`, `I`, `B`, `UP`, `ASYNC` and `RUF` rules, pyright in strict mode, asyncio throughout with no blocking call on the event loop, and the messages and stubs of `libs/proto/gen/python`, never hand-written ones.
+Python follows the root `pyproject.toml`'s ruff and pyright settings: Python 3.14, the newest whose wheels every dependency has on every platform, ruff's formatter and its `E`, `F`, `I`, `B`, `UP`, `ASYNC` and `RUF` rules, pyright in strict mode, asyncio throughout with no blocking call on the event loop, and the messages and stubs of `libs/proto/gen/python`, never hand-written ones.
 
 `.golangci.yml` (golangci-lint v2) applies to every Go module:
 * **Linters**: the `standard` set plus `depguard`, `errorlint`, `misspell`, `nolintlint`, `unconvert`, `usestdlibvars`; generated code is excluded.

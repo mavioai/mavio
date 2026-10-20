@@ -190,7 +190,7 @@ Python 子进程插件使用 Python SDK（`mavio-plugin`），由其 `build` 目
 
 ## 5. 代码质量
 
-Python 遵循根目录 `pyproject.toml` 中 ruff 与 pyright 的设置：Python 3.12，ruff 的格式化器及其 `E`、`F`、`I`、`B`、`UP`、`ASYNC` 与 `RUF` 规则，strict 模式的 pyright，全程使用 asyncio 且不在事件循环上做阻塞调用，使用 `libs/proto/gen/python` 的消息与存根，而非手写的。
+Python 遵循根目录 `pyproject.toml` 中 ruff 与 pyright 的设置：Python 3.14（所有依赖在每个平台上都有其 wheel 的最新版本），ruff 的格式化器及其 `E`、`F`、`I`、`B`、`UP`、`ASYNC` 与 `RUF` 规则，strict 模式的 pyright，全程使用 asyncio 且不在事件循环上做阻塞调用，使用 `libs/proto/gen/python` 的消息与存根，而非手写的。
 
 `.golangci.yml`（golangci-lint v2）作用于所有 Go 模块：
 * **检查器**：`standard` 集合，外加 `depguard`、`errorlint`、`misspell`、`nolintlint`、`unconvert`、`usestdlibvars`；生成代码不参与检查。
