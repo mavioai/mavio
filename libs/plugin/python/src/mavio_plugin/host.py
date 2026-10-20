@@ -37,20 +37,35 @@ def host_client(
 
 
 _REPORT_TASK_PROGRESS = "/mavio.plugin.v1.HostService/ReportTaskProgress"
+_START_TASK = "/mavio.plugin.v1.HostService/StartTask"
 
 
-async def report_task_progress(host: httpx.AsyncClient, task_id: str, progress: float) -> bool:
+async def report_task_progress(
+    host: httpx.AsyncClient, task_id: str, progress: float, status: str = ""
+) -> bool:
     """Tells the host the fraction done, 0 to 1, of the plugin's task
-    running, which it shows as its job's progress; the host ignores a
-    report of a task not running. It returns whether the host answered,
-    for a plugin to log, never failing the run."""
-    progress = min(max(progress, 0.0), 1.0)
+    running, which it shows as its job's progress, and what the run is
+    doing, such as the file it downloads; an empty status clears the last.
+    The host ignores a report of a task not running. It returns whether the
+    host answered, for a plugin to log, never failing the run."""
+    body: dict[str, object] = {"taskId": task_id, "progress": min(max(progress, 0.0), 1.0)}
+    if status:
+        body["status"] = status[:200]
+    return await _post(host, _REPORT_TASK_PROGRESS, body)
+
+
+async def start_task(host: httpx.AsyncClient, task_id: str) -> bool:
+    """Asks the host for a run of one of the plugin's tasks, which it queues
+    as an administrator's run once the plugin is ready, joining a run
+    waiting: work the plugin starts itself, such as after its
+    configuration, shows in the tasks. It returns whether the host took the
+    request, for a plugin to log; it never waits for the run."""
+    return await _post(host, _START_TASK, {"taskId": task_id})
+
+
+async def _post(host: httpx.AsyncClient, procedure: str, body: dict[str, object]) -> bool:
     try:
-        r = await host.post(
-            _REPORT_TASK_PROGRESS,
-            json={"taskId": task_id, "progress": progress},
-            headers={"Content-Type": "application/json"},
-        )
+        r = await host.post(procedure, json=body, headers={"Content-Type": "application/json"})
     except httpx.HTTPError:
         return False
     return r.status_code == 200

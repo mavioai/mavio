@@ -41,6 +41,7 @@ from mavio_plugin import (
     load_manifest,
     report_task_progress,
     serve,
+    start_task,
 )
 
 # The prefix of the sessions' WebSockets on the plugin's socket.
@@ -257,9 +258,9 @@ class Tasks:
         missing = await asyncio.to_thread(self._speech.missing)
         return await self._speech.models.download(missing, progress)
 
-    async def _report(self, progress: float) -> None:
+    async def _report(self, progress: float, status: str) -> None:
         if self._host is not None and not await report_task_progress(
-            self._host, DOWNLOAD_TASK, progress
+            self._host, DOWNLOAD_TASK, progress, status
         ):
             logger.debug("the host took no progress of the download")
 
@@ -269,9 +270,9 @@ class Tasks:
         if request.task_id != DOWNLOAD_TASK:
             raise ConnectError(Code.NOT_FOUND, f"no task {request.task_id!r}")
         done = await self.download(self._report)
-        return task_pb2.RunTaskResponse(
-            message=f"downloaded {', '.join(done)}" if done else "every model is downloaded"
-        )
+        # The summary names the models, untranslated; nothing downloaded
+        # needs none.
+        return task_pb2.RunTaskResponse(message=", ".join(done))
 
 
 def create_app(sessions: Sessions) -> FastAPI:
@@ -298,7 +299,6 @@ async def run(manifest_path: Path) -> None:
     sessions = Sessions(asker, speech)
     tasks = Tasks(speech, host)
     transcription = Transcription(host, models, lambda: speech.config)
-    downloading: set[asyncio.Task[list[str]]] = set()
 
     async def configure(config_json: str) -> None:
         try:
@@ -308,11 +308,11 @@ async def run(manifest_path: Path) -> None:
         # The server configures the plugin again when Whisper's container
         # starts or stops.
         await speaches.refresh()
-        # The models of new engines are downloaded at once; the task
-        # retries what failed.
-        task = asyncio.create_task(tasks.download())
-        downloading.add(task)
-        task.add_done_callback(_logged(downloading))
+        # The models of new engines are downloaded at once, by a run of the
+        # task the host queues once the plugin is ready, which shows in its
+        # tasks; a run retries what failed.
+        if await asyncio.to_thread(speech.missing) and not await start_task(host, DOWNLOAD_TASK):
+            logger.warning("the host queued no download of the models")
 
     try:
         await serve(
@@ -326,18 +326,7 @@ async def run(manifest_path: Path) -> None:
             mounts={VOICE_PREFIX: cast(ASGIApp, create_app(sessions))},
         )
     finally:
-        for task in downloading:
-            task.cancel()
         await host.aclose()
-
-
-def _logged(tasks: set[asyncio.Task[list[str]]]) -> Callable[[asyncio.Task[list[str]]], None]:
-    def done(task: asyncio.Task[list[str]]) -> None:
-        tasks.discard(task)
-        if not task.cancelled() and task.exception() is not None:
-            logger.warning(f"downloading the models: {task.exception()}")
-
-    return done
 
 
 def main() -> None:

@@ -210,11 +210,12 @@ async def test_tasks_report_their_progress(tmp_path: Path):
 
     host = httpx.AsyncClient(base_url="http://host", transport=httpx.MockTransport(serve))
     r = await Tasks(speech, host).run_task(task_pb2.RunTaskRequest(task_id=DOWNLOAD_TASK), _CTX)
-    assert r.message.startswith("downloaded whisper "), f"message = {r.message!r}"
+    whisper = "whisper deepdml/faster-whisper-large-v3-turbo-ct2"
+    assert r.message == whisper, f"message = {r.message!r}, want = {whisper!r}"
     want = [
         (
             "/mavio.plugin.v1.HostService/ReportTaskProgress",
-            {"taskId": DOWNLOAD_TASK, "progress": 0.0},
+            {"taskId": DOWNLOAD_TASK, "progress": 0.0, "status": whisper},
         )
     ]
     assert reports == want, f"reports = {reports}, want = {want}"
