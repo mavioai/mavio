@@ -1082,7 +1082,7 @@ flowchart TD
 - [ ] The web player: the subtitle offset and queues of several items, which the assistant's actions ask for and the player cannot yet carry out; V listed with the player's shortcuts
 - [ ] Services Pipecat lacks for Chinese, Volcengine and Alibaba Cloud, as services of `plugins/pipecat`
 - [ ] The Apple apps: voice sessions with `AVAudioEngine`'s voice processing, App Intents; dictation on tvOS
-- [ ] The Android apps: voice sessions with `VOICE_COMMUNICATION` and its echo canceler, push to talk on Android TV, search intents and play-from-search
+- [ ] The Android apps: voice sessions with `VOICE_COMMUNICATION` and its echo canceler, the audio captured from the start kept until the session's WebSocket opens and then sent in order, as the web UI's, push to talk on Android TV, search intents and play-from-search
 - [ ] The desktop app: voice sessions
 - [ ] More languages in the grammar
 - [ ] Later: converting speech in the server's process, through pure-Go bindings of FFmpeg's libraries loaded with purego, rather than an ffmpeg child process

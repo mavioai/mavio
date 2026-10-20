@@ -1082,7 +1082,7 @@ flowchart TD
 - [ ] Web 播放器：助手的动作会要求、而播放器尚不能执行的字幕偏移与多个条目的队列；在播放器的快捷键中列出 V
 - [ ] Pipecat 缺少的中文服务：火山引擎与阿里云，作为 `plugins/pipecat` 的服务
 - [ ] Apple 应用：使用 `AVAudioEngine` 语音处理的语音会话、App Intents；tvOS 上的听写
-- [ ] Android 应用：使用 `VOICE_COMMUNICATION` 及其回声消除器的语音会话、Android TV 上的按住说话、搜索 intent 与按搜索播放
+- [ ] Android 应用：使用 `VOICE_COMMUNICATION` 及其回声消除器的语音会话（与 Web UI 一致，从开始采集起的音频保留至会话的 WebSocket 打开后按顺序发送）、Android TV 上的按住说话、搜索 intent 与按搜索播放
 - [ ] 桌面应用：语音会话
 - [ ] 语法支持更多语言
 - [ ] 以后：在服务端进程内转换语音，通过以 purego 加载的 FFmpeg 库的纯 Go 绑定，而非 ffmpeg 子进程
