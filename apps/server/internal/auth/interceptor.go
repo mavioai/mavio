@@ -51,6 +51,7 @@ type Interceptor struct {
 	userBound    map[string]bool
 	sessionBound map[string]bool
 	media        *MediaURLs
+	voice        func(token string) (VoiceSession, bool)
 	now          func() time.Time
 }
 

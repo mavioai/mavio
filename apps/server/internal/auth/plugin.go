@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"slices"
 	"strings"
 
 	"connectrpc.com/connect"
@@ -19,7 +20,22 @@ const (
 	// DeviceHeader names the device of a device controller a request
 	// acting as a user acts as.
 	DeviceHeader = "Mavio-Device"
+	// VoiceSessionHeader carries the token of a voice session the plugin
+	// runs: the request acts as the session's user on its device, for the
+	// procedures of VoiceSessionProcedures alone (docs/assistant.md §8.4).
+	VoiceSessionHeader = "Mavio-Voice-Session"
 )
+
+// VoiceSessionProcedures are what a voice session's token may call.
+var VoiceSessionProcedures = []string{"mavio.assistant.v1.AssistantService/Ask"}
+
+// VoiceSession is what a voice session's token stands for.
+type VoiceSession struct {
+	// Plugin is the ID of the plugin running the session.
+	Plugin string
+	// Session is the device's signed-in session.
+	Session core.ID
+}
 
 // Plugin is what a running plugin may do through the host API.
 type Plugin struct {
@@ -86,6 +102,14 @@ func (i *Interceptor) RequireSession(procedures ...string) *Interceptor {
 	return i
 }
 
+// VoiceSessions has the interceptor resolve the tokens of voice sessions,
+// which plugins' host API requests carry in VoiceSessionHeader, with
+// resolve.
+func (i *Interceptor) VoiceSessions(resolve func(token string) (VoiceSession, bool)) *Interceptor {
+	i.voice = resolve
+	return i
+}
+
 func bound(set map[string]bool, procedure string) bool {
 	procedure = strings.TrimPrefix(procedure, "/")
 	service, _, _ := strings.Cut(procedure, "/")
@@ -94,6 +118,9 @@ func bound(set map[string]bool, procedure string) bool {
 
 // authenticatePlugin authorizes a host API request of plugin g.
 func (i *Interceptor) authenticatePlugin(ctx context.Context, g Plugin, procedure string, readOnly bool, h http.Header) (Principal, error) {
+	if token := h.Get(VoiceSessionHeader); token != "" {
+		return i.authenticateVoice(ctx, g, procedure, token)
+	}
 	if !g.Allows(procedure, readOnly) {
 		return Principal{}, connect.NewError(connect.CodePermissionDenied,
 			fmt.Errorf("plugin %s may not call %s; add its service to permissions.api", g.ID, procedure))
@@ -148,4 +175,36 @@ func (i *Interceptor) ResolveRequest(r *http.Request, procedure string) (Princip
 		return Principal{}, connect.NewError(connect.CodeUnauthenticated, errors.New("missing bearer token"))
 	}
 	return i.Resolve(r.Context(), token)
+}
+
+// authenticateVoice authorizes a host API request of plugin g carrying a
+// voice session's token: it acts as the session's user on its device,
+// whatever the plugin's scopes, for VoiceSessionProcedures alone.
+func (i *Interceptor) authenticateVoice(ctx context.Context, g Plugin, procedure, token string) (Principal, error) {
+	invalid := connect.NewError(connect.CodeUnauthenticated, errors.New("invalid or ended voice session"))
+	var v VoiceSession
+	ok := i.voice != nil
+	if ok {
+		v, ok = i.voice(token)
+	}
+	if !ok || v.Plugin != g.ID {
+		return Principal{}, invalid
+	}
+	if !slices.Contains(VoiceSessionProcedures, strings.TrimPrefix(procedure, "/")) {
+		return Principal{}, connect.NewError(connect.CodePermissionDenied,
+			fmt.Errorf("a voice session may not call %s", procedure))
+	}
+	sess, err := i.store.AuthSessions().Get(ctx, v.Session)
+	if errors.Is(err, core.ErrNotFound) {
+		return Principal{}, invalid
+	} else if err != nil {
+		return Principal{}, fmt.Errorf("look up session: %w", err)
+	}
+	user, err := i.store.Users().Get(ctx, sess.UserID)
+	if errors.Is(err, core.ErrNotFound) || err == nil && user.Disabled {
+		return Principal{}, invalid
+	} else if err != nil {
+		return Principal{}, fmt.Errorf("look up user: %w", err)
+	}
+	return Principal{User: user, Session: sess, Plugin: g.ID}, nil
 }

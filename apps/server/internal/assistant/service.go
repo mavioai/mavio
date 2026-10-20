@@ -63,6 +63,9 @@ type Config struct {
 	// none.
 	Recognizers func() []speech.RecognizerPlugin
 	Voices      func() []speech.VoicePlugin
+	// VoiceSessions returns the ready plugin running voice sessions; nil
+	// has none.
+	VoiceSessions func() (VoicePlugin, bool)
 	// ServerName names the server to the model.
 	ServerName func() string
 	// Key signs the listening URLs.
@@ -96,6 +99,7 @@ type Service struct {
 	turns map[string]*aiTurn
 	// listens are the listening tokens used, until they expire.
 	listens map[string]time.Time
+	voice   voices
 	vad     vadLoader
 	rec     *recorder
 }
@@ -120,7 +124,7 @@ func New(cfg Config) *Service {
 	s := &Service{
 		cfg: cfg, log: cfg.Logger, now: cfg.Now,
 		dialogs: map[core.ID]*dialog{}, calls: map[string]callResult{}, turns: map[string]*aiTurn{},
-		listens: map[string]time.Time{}, rec: newRecorder(cfg.SpeechDir, cfg.Logger),
+		listens: map[string]time.Time{}, voice: voices{byURL: map[string]*voiceSession{}, byToken: map[string]*voiceSession{}}, rec: newRecorder(cfg.SpeechDir, cfg.Logger),
 	}
 	s.tool = map[string]*tool{}
 	for _, t := range tools() {
@@ -130,8 +134,9 @@ func New(cfg Config) *Service {
 }
 
 // Run watches the model's tool calls and deletes conversations past their
-// retention, until ctx ends.
+// retention, until ctx ends, when it ends the voice sessions.
 func (s *Service) Run(ctx context.Context) {
+	defer s.endVoices()
 	go s.watchCalls(ctx)
 	t := time.NewTicker(time.Hour)
 	defer t.Stop()

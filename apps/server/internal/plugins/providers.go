@@ -20,6 +20,7 @@ import (
 	"github.com/mavioai/mavio/libs/core"
 	"github.com/mavioai/mavio/libs/library"
 	"github.com/mavioai/mavio/libs/metadata"
+	"github.com/mavioai/mavio/libs/plugin/host"
 	"github.com/mavioai/mavio/libs/plugin/manifest"
 	pluginv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1/pluginv1connect"
@@ -520,6 +521,19 @@ func (m *Manager) AgentSessions() (pluginv1connect.AgentSessionServiceClient, bo
 		}
 	}
 	return nil, false
+}
+
+// VoiceSessions returns the ready plugin running voice sessions, the first
+// by ID when several are, or false when none is.
+func (m *Manager) VoiceSessions() (string, host.Plugin, bool) {
+	ids := m.withCapability(pluginv1.Capability_CAPABILITY_VOICE_SESSION)
+	slices.Sort(ids)
+	for _, id := range ids {
+		if pl, ok := m.running(id); ok && pl.VoiceSessions() != nil {
+			return id, pl, true
+		}
+	}
+	return "", nil, false
 }
 
 // Recognizers returns the started SPEECH_TO_TEXT plugins, by ID.

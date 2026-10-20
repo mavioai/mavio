@@ -323,6 +323,10 @@ func Handler(opts Options) (http.Handler, error) {
 		// The listening URL's token authenticates; speech authenticates as
 		// the assistant's RPCs do.
 		mux.Handle("GET "+assistant.ListenPath, a.ListenHandler())
+		// So does a voice session's; its token acts as its user for the
+		// plugin running it.
+		mux.Handle("GET "+assistant.VoicePath, a.VoiceHandler())
+		authn.VoiceSessions(a.VoiceSession)
 		mux.Handle("POST "+assistant.SpeechPath, a.SpeechHandler(func(r *http.Request) (auth.Principal, error) {
 			return authn.ResolveRequest(r, assistantv1connect.AssistantServiceAskProcedure)
 		}))

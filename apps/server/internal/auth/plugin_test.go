@@ -139,3 +139,61 @@ func TestPluginOnly(t *testing.T) {
 		}
 	}
 }
+
+func TestVoiceSessionRequests(t *testing.T) {
+	ctx := t.Context()
+	s, err := store.Open(ctx, "sqlite:"+filepath.Join(t.TempDir(), "mavio.db"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = s.Close() })
+	u := core.User{Name: "alice", Kind: core.UserMember}
+	if err := s.Users().Create(ctx, &u); err != nil {
+		t.Fatal(err)
+	}
+	sess := core.AuthSession{ID: core.NewID(), UserID: u.ID, DeviceKey: make([]byte, 32), DeviceID: "phone"}
+	if err := s.AuthSessions().Create(ctx, &sess); err != nil {
+		t.Fatal(err)
+	}
+	gone := core.NewID()
+	i := NewInterceptor(s, NewAccessTokens(make([]byte, 32))).VoiceSessions(func(token string) (VoiceSession, bool) {
+		switch token {
+		case "live":
+			return VoiceSession{Plugin: "dev.mavio.pipecat", Session: sess.ID}, true
+		case "signed-out":
+			return VoiceSession{Plugin: "dev.mavio.pipecat", Session: gone}, true
+		}
+		return VoiceSession{}, false
+	})
+	// The plugin's scopes cover nothing: the token alone authorizes.
+	none := func(string, bool) bool { return false }
+	const ask = "/mavio.assistant.v1.AssistantService/Ask"
+	for _, tc := range []struct {
+		name, plugin, procedure, token string
+		want                           connect.Code
+	}{
+		{"ask", "dev.mavio.pipecat", ask, "live", 0},
+		{"another procedure", "dev.mavio.pipecat", "/mavio.library.v1.ItemService/GetItem", "live", connect.CodePermissionDenied},
+		{"another plugin", "org.example.p", ask, "live", connect.CodeUnauthenticated},
+		{"ended session", "dev.mavio.pipecat", ask, "ended", connect.CodeUnauthenticated},
+		{"signed-out device", "dev.mavio.pipecat", ask, "signed-out", connect.CodeUnauthenticated},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			h := http.Header{}
+			h.Set(VoiceSessionHeader, tc.token)
+			p, err := i.authenticatePlugin(ctx, Plugin{ID: tc.plugin, Allows: none}, tc.procedure, false, h)
+			if tc.want != 0 {
+				if connect.CodeOf(err) != tc.want {
+					t.Errorf("err = %v, want = %v", err, tc.want)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatal(err)
+			}
+			if p.User.ID != u.ID || p.Session.ID != sess.ID || p.Plugin != tc.plugin {
+				t.Errorf("principal = %+v, want alice on her phone through the plugin", p)
+			}
+		})
+	}
+}

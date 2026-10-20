@@ -504,6 +504,13 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 			return s.Assistant, err
 		},
 		Grammar: grammar, Agents: plugs.AgentSessions, Recognizers: plugs.Recognizers, Voices: plugs.VoicePlugins,
+		VoiceSessions: func() (assistant.VoicePlugin, bool) {
+			id, pl, ok := plugs.VoiceSessions()
+			if !ok {
+				return assistant.VoicePlugin{}, false
+			}
+			return assistant.VoicePlugin{ID: id, Client: pl.VoiceSessions(), Dial: pl.Dial, Authorize: pl.Authorize}, true
+		},
 		ServerName: serverName, Key: key.Derive("assistant-listen"), SpeechDir: cfg.SpeechDir, FFmpeg: ffmpegPath(cfg.FFmpeg), Activity: activityLog, Logger: log,
 	})
 	h, err := httpserver.Handler(httpserver.Options{
