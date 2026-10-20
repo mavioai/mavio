@@ -1138,7 +1138,7 @@ flowchart TD
 | Bun 可执行文件中的代码模式 | pi-durable 的代码模式在 quickjs-wasi（一个 WASM 模块）中运行脚本，它必须能在各平台 `plugins/agent` 的 Bun 可执行文件中加载 | 已由运行构建好的可执行文件的 `TestAssistantAI` 在 macOS（arm64）上验证；Linux 与 Windows 仍待验证；能加载之前，会话只直接提供工具 |
 | 浏览器中的麦克风 | `getUserMedia` 只在安全页面可用，因此在局域网上通过普通 HTTP 访问的独立服务端无法在 Web UI 中录音 | 服务端的 HTTPS 地址（P28）；其他情况下打字输入 |
 | 识别作品名称 | 识别器会写错作品与人物的名称，中文常写成同音字 | 向接受提示的识别器提供提示；槽位解析中的拼音与容错匹配（P29） |
-| `plugins/pipecat` 的大小 | 带 Pipecat、ONNX Runtime、numba 与 faster-whisper 的 Python 在每个平台上约 400 MB（不含模型），且某些平台可能缺少 wheel | 为其 wheel 覆盖的每个平台各打一个包；模型只在选用时下载；由原型实测（P29） |
+| `plugins/pipecat` 的大小 | 带 Pipecat、numba、PyAV、ONNX Runtime 与 faster-whisper 的 Python 在每个平台上为 600–900 MB（不含模型），原型按内置服务实测：Apple 芯片的 macOS 595 MB、Windows x64 631 MB、Linux arm64 770 MB、Linux x64 888 MB；Intel 的 macOS 与 Arm 的 Windows 缺少 wheel | 为其 wheel 覆盖的每个平台各打一个包：Apple 芯片的 macOS、Linux x64 与 arm64、Windows x64；模型只在选用时下载 |
 | 浏览器中的回声消除 | 浏览器对页面经由 Web Audio 播放的声音的回声消除参差不齐，Firefox 最不可靠 | 由原型检查（P29）；不足之处改用按住说话 |
 | 容器引擎的 socket | 能访问 Docker 的 socket 即等于宿主机的 root，因此拥有它的服务端，以及它允许插件声明的内容中的任何漏洞，都具有同等权力 | 只有管理员才能把 socket 交给服务端；声明固定在清单中，安装时批准；不允许特权模式、宿主机命名空间、设备或绑定挂载；外部依赖不需要 socket（P30） |
 | 容器引擎之间的差异 | Docker、rootless Docker、Docker Desktop 与 Podman 的 socket、网络与 GPU 支持各不相同 | 至少 Engine API 1.41；测试在 Linux 上的 Docker 运行，其他手工检查（P30） |
