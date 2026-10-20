@@ -283,8 +283,10 @@ type speechRequest struct {
 	// Voice is "<plugin>/<synthesizer>/<voice>"; empty picks the
 	// settings' voice for the language, else the first.
 	Voice string `json:"voice"`
-	// Format is "mp3" or "opus" (Opus in Ogg, the default).
-	Format string `json:"format"`
+	// Formats are the encodings the client plays, such as "opus" (in
+	// Ogg), "aac" (in ADTS) and "mp3"; speech in another is converted to
+	// the most balanced of them. None is taken to play anything.
+	Formats []string `json:"formats"`
 	// SpeechID is the AskRequest's speech_id, and Index the sentence's
 	// place in its answer: the audio is kept with the answer.
 	SpeechID string `json:"speech_id"`
@@ -317,27 +319,39 @@ func (s *Service) SpeechHandler(resolve func(r *http.Request) (auth.Principal, e
 			http.Error(w, "no voice speaks "+req.Language, http.StatusPreconditionFailed)
 			return
 		}
-		format := pluginv1.SpeechFormat_SPEECH_FORMAT_OGG_OPUS
-		if req.Format == "mp3" {
-			format = pluginv1.SpeechFormat_SPEECH_FORMAT_MP3
-		}
-		resp, err := v.Synthesize(r.Context(), req.Text, req.Language, format)
+		resp, err := v.Synthesize(r.Context(), req.Text, req.Language)
 		if err != nil {
 			s.log.WarnContext(r.Context(), "assistant: synthesize", "err", err)
 			http.Error(w, "synthesis failed", http.StatusBadGateway)
 			return
 		}
-		ct := resp.GetContentType()
-		if ct == "" {
-			ct = map[bool]string{true: "audio/mpeg", false: "audio/ogg"}[req.Format == "mp3"]
+		audio, ct := resp.GetAudio(), resp.GetContentType()
+		from, known := formatOf(ct, audio)
+		if !known {
+			// Speech Mavio does not know goes as it came, kept with nothing.
+			w.Header().Set("Content-Type", ct)
+			w.Header().Set("Cache-Control", "no-store")
+			_, _ = w.Write(audio)
+			return
 		}
+		formats := formatList(strings.Join(req.Formats, ","))
 		if req.SpeechID != "" {
-			media, _, _ := strings.Cut(ct, ";")
-			s.rec.add(p.User.ID, req.SpeechID, req.Index, strings.TrimSpace(media), resp.GetAudio(), s.now())
+			s.rec.add(p.User.ID, req.SpeechID, req.Index, from, audio, s.now())
 		}
-		w.Header().Set("Content-Type", ct)
+		to := speechTarget(from, formats)
+		if to.name != from.name {
+			if audio, err = convert(r.Context(), s.cfg.FFmpeg, audio, to); err != nil {
+				s.log.WarnContext(r.Context(), "assistant: convert speech", "err", err)
+				http.Error(w, "the speech could not be converted", http.StatusBadGateway)
+				return
+			}
+			if req.SpeechID != "" {
+				s.rec.add(p.User.ID, req.SpeechID, req.Index, to, audio, s.now())
+			}
+		}
+		w.Header().Set("Content-Type", to.contentType)
 		w.Header().Set("Cache-Control", "no-store")
-		_, _ = w.Write(resp.GetAudio())
+		_, _ = w.Write(audio)
 	})
 }
 

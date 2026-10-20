@@ -22,7 +22,8 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-// SpeechFormat is the encoding of synthesized audio.
+// SpeechFormat is the encoding of synthesized audio; deprecated with
+// SynthesizeSpeechRequest.format.
 type SpeechFormat int32
 
 const (
@@ -1890,6 +1891,7 @@ func (x *SynthesizeSpeechRequest) GetLanguage() string {
 	return ""
 }
 
+// Deprecated: Marked as deprecated in mavio/plugin/v1/speech.proto.
 func (x *SynthesizeSpeechRequest) GetFormat() SpeechFormat {
 	if x != nil {
 		if protoimpl.X.Present(&(x.XXX_presence[0]), 3) {
@@ -1921,6 +1923,7 @@ func (x *SynthesizeSpeechRequest) SetLanguage(v string) {
 	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 5)
 }
 
+// Deprecated: Marked as deprecated in mavio/plugin/v1/speech.proto.
 func (x *SynthesizeSpeechRequest) SetFormat(v SpeechFormat) {
 	x.xxx_hidden_Format = v
 	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 5)
@@ -1952,6 +1955,7 @@ func (x *SynthesizeSpeechRequest) HasLanguage() bool {
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 2)
 }
 
+// Deprecated: Marked as deprecated in mavio/plugin/v1/speech.proto.
 func (x *SynthesizeSpeechRequest) HasFormat() bool {
 	if x == nil {
 		return false
@@ -1981,6 +1985,7 @@ func (x *SynthesizeSpeechRequest) ClearLanguage() {
 	x.xxx_hidden_Language = nil
 }
 
+// Deprecated: Marked as deprecated in mavio/plugin/v1/speech.proto.
 func (x *SynthesizeSpeechRequest) ClearFormat() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 3)
 	x.xxx_hidden_Format = SpeechFormat_SPEECH_FORMAT_UNSPECIFIED
@@ -1998,7 +2003,12 @@ type SynthesizeSpeechRequest_builder struct {
 	Text  *string
 	// BCP 47.
 	Language *string
-	Format   *SpeechFormat
+	// Deprecated: unset by the server, which converts the speech for clients
+	// that do not play it; synthesizers speak in the encoding of their
+	// settings.
+	//
+	// Deprecated: Marked as deprecated in mavio/plugin/v1/speech.proto.
+	Format *SpeechFormat
 	// 0.25–4; 0 for 1.
 	Speed *float64
 }
@@ -2211,13 +2221,14 @@ const file_mavio_plugin_v1_speech_proto_rawDesc = "" +
 	"\tVoiceInfo\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x1c\n" +
-	"\tlanguages\x18\x03 \x03(\tR\tlanguages\"\xe4\x01\n" +
+	"\tlanguages\x18\x03 \x03(\tR\tlanguages\"\xe6\x01\n" +
 	"\x17SynthesizeSpeechRequest\x12\x1d\n" +
 	"\x05voice\x18\x01 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x05voice\x12\x1e\n" +
 	"\x04text\x18\x02 \x01(\tB\n" +
 	"\xbaH\ar\x05\x10\x01\x18\xa0\x1fR\x04text\x12\x1a\n" +
-	"\blanguage\x18\x03 \x01(\tR\blanguage\x12?\n" +
-	"\x06format\x18\x04 \x01(\x0e2\x1d.mavio.plugin.v1.SpeechFormatB\b\xbaH\x05\x82\x01\x02\x10\x01R\x06format\x12-\n" +
+	"\blanguage\x18\x03 \x01(\tR\blanguage\x12A\n" +
+	"\x06format\x18\x04 \x01(\x0e2\x1d.mavio.plugin.v1.SpeechFormatB\n" +
+	"\xbaH\x05\x82\x01\x02\x10\x01\x18\x01R\x06format\x12-\n" +
 	"\x05speed\x18\x05 \x01(\x01B\x17\xbaH\x14\x12\x12\x19\x00\x00\x00\x00\x00\x00\x10@)\x00\x00\x00\x00\x00\x00\x00\x00R\x05speed\"S\n" +
 	"\x18SynthesizeSpeechResponse\x12\x14\n" +
 	"\x05audio\x18\x01 \x01(\fR\x05audio\x12!\n" +

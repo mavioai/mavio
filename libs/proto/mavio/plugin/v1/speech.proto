@@ -146,7 +146,8 @@ message VoiceInfo {
   repeated string languages = 3;
 }
 
-// SpeechFormat is the encoding of synthesized audio.
+// SpeechFormat is the encoding of synthesized audio; deprecated with
+// SynthesizeSpeechRequest.format.
 enum SpeechFormat {
   SPEECH_FORMAT_UNSPECIFIED = 0;
   // Opus in Ogg.
@@ -162,7 +163,13 @@ message SynthesizeSpeechRequest {
   }];
   // BCP 47.
   string language = 3;
-  SpeechFormat format = 4 [(buf.validate.field).enum.defined_only = true];
+  // Deprecated: unset by the server, which converts the speech for clients
+  // that do not play it; synthesizers speak in the encoding of their
+  // settings.
+  SpeechFormat format = 4 [
+    deprecated = true,
+    (buf.validate.field).enum.defined_only = true
+  ];
   // 0.25–4; 0 for 1.
   double speed = 5 [(buf.validate.field).double = {
     gte: 0

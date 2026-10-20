@@ -504,7 +504,7 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 			return s.Assistant, err
 		},
 		Grammar: grammar, Agents: plugs.AgentSessions, Recognizers: plugs.Recognizers, Voices: plugs.VoicePlugins,
-		ServerName: serverName, Key: key.Derive("assistant-listen"), SpeechDir: cfg.SpeechDir, Activity: activityLog, Logger: log,
+		ServerName: serverName, Key: key.Derive("assistant-listen"), SpeechDir: cfg.SpeechDir, FFmpeg: ffmpegPath(cfg.FFmpeg), Activity: activityLog, Logger: log,
 	})
 	h, err := httpserver.Handler(httpserver.Options{
 		Assistant: helper,

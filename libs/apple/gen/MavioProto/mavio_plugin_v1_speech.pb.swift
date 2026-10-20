@@ -25,7 +25,8 @@ fileprivate nonisolated struct _GeneratedWithProtocGenSwiftVersion: SwiftProtobu
   typealias Version = _2
 }
 
-/// SpeechFormat is the encoding of synthesized audio.
+/// SpeechFormat is the encoding of synthesized audio; deprecated with
+/// SynthesizeSpeechRequest.format.
 public nonisolated enum Mavio_Plugin_V1_SpeechFormat: SwiftProtobuf.Enum, Swift.CaseIterable {
   public typealias RawValue = Int
   case unspecified // = 0
@@ -606,6 +607,11 @@ public nonisolated struct Mavio_Plugin_V1_SynthesizeSpeechRequest: Sendable {
   /// Clears the value of `language`. Subsequent reads from it will return its default value.
   public mutating func clearLanguage() {self._language = nil}
 
+  /// Deprecated: unset by the server, which converts the speech for clients
+  /// that do not play it; synthesizers speak in the encoding of their
+  /// settings.
+  ///
+  /// NOTE: This field was marked as deprecated in the .proto file.
   public var format: Mavio_Plugin_V1_SpeechFormat {
     get {_format ?? .unspecified}
     set {_format = newValue}

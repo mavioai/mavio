@@ -142,10 +142,11 @@ func (r Recognizer) DetectLanguage(ctx context.Context, audio *pluginv1.SpeechAu
 	return resp.GetLanguage(), err
 }
 
-// Synthesize speaks text with a voice.
-func (v Voice) Synthesize(ctx context.Context, text, language string, format pluginv1.SpeechFormat) (*pluginv1.SynthesizeSpeechResponse, error) {
+// Synthesize speaks text with a voice, in the encoding of the
+// synthesizer's settings.
+func (v Voice) Synthesize(ctx context.Context, text, language string) (*pluginv1.SynthesizeSpeechResponse, error) {
 	_, id, _ := strings.Cut(v.ID, "/")
 	return v.Plugin.Client.SynthesizeSpeech(ctx, pluginv1.SynthesizeSpeechRequest_builder{
-		Voice: &id, Text: &text, Language: &language, Format: &format,
+		Voice: &id, Text: &text, Language: &language,
 	}.Build())
 }

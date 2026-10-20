@@ -26,7 +26,7 @@ func SynthesizerDefinition() service.SynthesizerDef {
 			Type: service.Text, Default: defaultVoices,
 		},
 		service.Setting{
-			Name: "format", Label: "Audio format", Help: "None leaves it to the service, MP3 for OpenAI's; Opus is smaller, for the services that make it.",
+			Name: "format", Label: "Audio format", Help: "None leaves it to the service, MP3 for OpenAI's; Opus is smaller, for the services that make it. The server converts it for clients that cannot play it.",
 			Type: service.Select, Options: []service.Option{{Value: "opus", Label: "Opus"}, {Value: "mp3", Label: "MP3"}},
 		},
 		service.Setting{
@@ -94,7 +94,7 @@ func (s *Synthesizer) Voices() []service.Voice { return s.voices }
 
 // Synthesize implements service.Synthesizer: in the format of the
 // settings, else the service's, MP3 for OpenAI's.
-func (s *Synthesizer) Synthesize(ctx context.Context, voice, text, _ string, _ service.Format, speed float64) (service.Speech, error) {
+func (s *Synthesizer) Synthesize(ctx context.Context, voice, text, _ string, speed float64) (service.Speech, error) {
 	req := map[string]any{"model": s.c.model, "input": text, "voice": voice}
 	if s.format != "" {
 		req["response_format"] = s.format
@@ -113,11 +113,22 @@ func (s *Synthesizer) Synthesize(ctx context.Context, voice, text, _ string, _ s
 	if err != nil {
 		return service.Speech{}, err
 	}
-	// Opus comes in Ogg, whose pages start "OggS"; anything else is taken
-	// for MP3.
-	contentType := "audio/mpeg"
-	if bytes.HasPrefix(audio, []byte("OggS")) {
-		contentType = "audio/ogg"
+	return service.Speech{Audio: audio, ContentType: contentType(audio)}, nil
+}
+
+// contentType tells the encodings services answer in by their first bytes:
+// Opus comes in Ogg, whose pages start "OggS", AAC in ADTS frames; anything
+// else is taken for MP3.
+func contentType(audio []byte) string {
+	switch {
+	case bytes.HasPrefix(audio, []byte("OggS")):
+		return "audio/ogg"
+	case bytes.HasPrefix(audio, []byte("fLaC")):
+		return "audio/flac"
+	case bytes.HasPrefix(audio, []byte("RIFF")):
+		return "audio/wav"
+	case len(audio) > 1 && audio[0] == 0xff && audio[1]&0xf6 == 0xf0:
+		return "audio/aac"
 	}
-	return service.Speech{Audio: audio, ContentType: contentType}, nil
+	return "audio/mpeg"
 }

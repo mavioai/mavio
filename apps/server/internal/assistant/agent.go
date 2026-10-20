@@ -676,8 +676,8 @@ func (s *Service) GetAssistantConversation(ctx context.Context, req *assistantv1
 		user := m.GetRole() == pluginv1.AiRole_AI_ROLE_USER
 		var speech []string
 		if !user {
-			for _, name := range s.rec.parts(req.GetId(), text) {
-				speech = append(speech, KeptSpeechURL(req.GetId(), answerKey(text), name))
+			for _, i := range s.rec.parts(req.GetId(), text) {
+				speech = append(speech, KeptSpeechURL(req.GetId(), answerKey(text), i))
 			}
 		}
 		msgs = append(msgs, assistantv1.AssistantMessage_builder{User: &user, Text: &text, Time: m.GetTime(), Speech: speech}.Build())

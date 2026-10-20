@@ -120,15 +120,6 @@ type Voice struct {
 	Languages []string
 }
 
-// Format is the encoding of synthesized audio.
-type Format int
-
-// The encodings.
-const (
-	OggOpus Format = iota
-	MP3
-)
-
 // Speech is synthesized audio.
 type Speech struct {
 	Audio       []byte
@@ -138,8 +129,9 @@ type Speech struct {
 // Synthesizer is a configured synthesis service.
 type Synthesizer interface {
 	Voices() []Voice
-	// Synthesize speaks text with a voice; speed 0 is 1.
-	Synthesize(ctx context.Context, voice, text, language string, format Format, speed float64) (Speech, error)
+	// Synthesize speaks text with a voice, in the encoding of the
+	// settings; speed 0 is 1.
+	Synthesize(ctx context.Context, voice, text, language string, speed float64) (Speech, error)
 }
 
 // SynthesizerDef is a synthesis service the plugin implements.

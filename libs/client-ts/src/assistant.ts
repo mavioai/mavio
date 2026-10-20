@@ -64,16 +64,36 @@ export interface Heard {
   error?: string;
 }
 
+const speechTypes: [format: string, type: string][] = [
+  ["opus", 'audio/ogg; codecs="opus"'],
+  ["aac", "audio/aac"],
+  ["mp3", "audio/mpeg"],
+  ["flac", "audio/flac"],
+  ["wav", "audio/wav"],
+];
+
 /**
- * Speaks a text with a server voice (§8.3): its audio, Opus in Ogg unless
- * MP3 is asked for. An empty voice is the settings' for the language. A
- * sentence of an answer names the request's speechId and its index in the
- * answer, so that the server keeps it with the answer.
+ * The encodings of speech this browser plays (§8.3), which the server
+ * converts speech in another to; none outside a browser, which the server
+ * takes for playing anything.
+ */
+export function speechFormats(): string[] {
+  if (typeof document === "undefined") return [];
+  const audio = document.createElement("audio");
+  return speechTypes.filter(([, type]) => audio.canPlayType(type) !== "").map(([format]) => format);
+}
+
+/**
+ * Speaks a text with a server voice (§8.3): its audio, in the
+ * synthesizer's encoding, else the most balanced of the formats played,
+ * this browser's unless given. An empty voice is the settings' for the
+ * language. A sentence of an answer names the request's speechId and its
+ * index in the answer, so that the server keeps it with the answer.
  */
 export async function speakWithServer(
   servers: Servers,
   server: ServerEntry,
-  speech: { text: string; language: string; voice?: string; format?: "opus" | "mp3"; speechId?: string; index?: number },
+  speech: { text: string; language: string; voice?: string; formats?: string[]; speechId?: string; index?: number },
   signal?: AbortSignal,
 ): Promise<Blob> {
   const token = await servers.token(server.id);
@@ -81,17 +101,28 @@ export async function speakWithServer(
   const res = await fetch(urlOf(server, "assistant/speech"), {
     method: "POST",
     headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-    body: JSON.stringify({ voice: "", format: "opus", ...rest, ...(speechId ? { speech_id: speechId } : {}) }),
+    body: JSON.stringify({ voice: "", formats: speechFormats(), ...rest, ...(speechId ? { speech_id: speechId } : {}) }),
     signal,
   });
   if (!res.ok) throw new Error((await res.text()).trim() || res.statusText);
   return await res.blob();
 }
 
-/** A sentence of an answer's kept speech, from its URL in AssistantMessage.speech. */
-export async function keptSpeech(servers: Servers, server: ServerEntry, url: string, signal?: AbortSignal): Promise<Blob> {
+/**
+ * A sentence of an answer's kept speech, from its URL in
+ * AssistantMessage.speech, in an encoding of the formats played, this
+ * browser's unless given.
+ */
+export async function keptSpeech(
+  servers: Servers,
+  server: ServerEntry,
+  url: string,
+  signal?: AbortSignal,
+  formats: string[] = speechFormats(),
+): Promise<Blob> {
   const token = await servers.token(server.id);
-  const res = await fetch(urlOf(server, url), { headers: token ? { Authorization: `Bearer ${token}` } : {}, signal });
+  const query = formats.length ? `${url.includes("?") ? "&" : "?"}formats=${formats.join(",")}` : "";
+  const res = await fetch(urlOf(server, url + query), { headers: token ? { Authorization: `Bearer ${token}` } : {}, signal });
   if (!res.ok) throw new Error((await res.text()).trim() || res.statusText);
   return await res.blob();
 }

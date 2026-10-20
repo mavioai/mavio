@@ -143,7 +143,7 @@ func TestSynthesize(t *testing.T) {
 	if v := s.Voices(); len(v) != 2 || v[0].ID != "af_heart" || v[0].Name != "Af_heart" {
 		t.Errorf("voices = %+v", v)
 	}
-	speech, err := s.Synthesize(t.Context(), "bf_emma", "Hello.", "en", service.MP3, 1.5)
+	speech, err := s.Synthesize(t.Context(), "bf_emma", "Hello.", "en", 1.5)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -161,7 +161,7 @@ func TestSynthesizeSettings(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	speech, err := s.Synthesize(t.Context(), "v", "Hello.", "en", service.OggOpus, 0)
+	speech, err := s.Synthesize(t.Context(), "v", "Hello.", "en", 0)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -169,10 +169,28 @@ func TestSynthesizeSettings(t *testing.T) {
 		t.Errorf("request = %v; want MP3 with the instructions", f.speech)
 	}
 	f.mp3 = true
-	if speech, err = s.Synthesize(t.Context(), "v", "Hello.", "en", service.OggOpus, 0); err != nil || speech.ContentType != "audio/mpeg" {
+	if speech, err = s.Synthesize(t.Context(), "v", "Hello.", "en", 0); err != nil || speech.ContentType != "audio/mpeg" {
 		t.Errorf("speech = %+v, %v; want MP3", speech, err)
 	}
 	if _, err := NewSynthesizer(service.Env{}, json.RawMessage(`{"base_url":"`+base+`","format":"wav"}`)); err == nil {
 		t.Error("NewSynthesizer with WAV: err = nil, want one")
+	}
+}
+
+func TestContentType(t *testing.T) {
+	for _, c := range []struct {
+		audio []byte
+		want  string
+	}{
+		{[]byte("OggS\x00"), "audio/ogg"},
+		{[]byte("ID3\x04"), "audio/mpeg"},
+		{[]byte{0xff, 0xfb, 0x90}, "audio/mpeg"},
+		{[]byte{0xff, 0xf1, 0x50}, "audio/aac"},
+		{[]byte("fLaC"), "audio/flac"},
+		{[]byte("RIFF\x24\x00"), "audio/wav"},
+	} {
+		if got := contentType(c.audio); got != c.want {
+			t.Errorf("contentType(%q) = %q, want = %q", c.audio, got, c.want)
+		}
 	}
 }

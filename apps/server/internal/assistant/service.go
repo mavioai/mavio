@@ -70,6 +70,9 @@ type Config struct {
 	// SpeechDir holds the speech of answers kept with their conversations;
 	// empty keeps none.
 	SpeechDir string
+	// FFmpeg converts speech for clients that do not play the
+	// synthesizer's encoding; empty converts none.
+	FFmpeg string
 	// Activity records what the assistant does; nil records nothing.
 	Activity *activity.Log
 	Logger   *slog.Logger

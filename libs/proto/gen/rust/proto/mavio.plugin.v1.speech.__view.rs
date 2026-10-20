@@ -3984,6 +3984,10 @@ pub struct SynthesizeSpeechRequestView<'a> {
     ///
     /// Field 3: `language`
     pub language: ::core::option::Option<&'a str>,
+    /// Deprecated: unset by the server, which converts the speech for clients
+    /// that do not play it; synthesizers speak in the encoding of their
+    /// settings.
+    ///
     /// Field 4: `format`
     pub format: ::core::option::Option<::buffa::EnumValue<super::super::SpeechFormat>>,
     /// 0.25–4; 0 for 1.
@@ -4256,6 +4260,10 @@ impl SynthesizeSpeechRequestOwnedView {
     pub fn language(&self) -> ::core::option::Option<&'_ str> {
         self.0.reborrow().language
     }
+    /// Deprecated: unset by the server, which converts the speech for clients
+    /// that do not play it; synthesizers speak in the encoding of their
+    /// settings.
+    ///
     /// Field 4: `format`
     #[must_use]
     pub fn format(

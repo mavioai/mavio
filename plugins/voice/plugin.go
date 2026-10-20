@@ -383,11 +383,7 @@ func (p *plugin) SynthesizeSpeech(ctx context.Context, req *pluginv1.SynthesizeS
 	case s.err != nil:
 		return nil, connect.NewError(connect.CodeFailedPrecondition, fmt.Errorf("synthesizer %q: %w", name, s.err))
 	}
-	format := service.OggOpus
-	if req.GetFormat() == pluginv1.SpeechFormat_SPEECH_FORMAT_MP3 {
-		format = service.MP3
-	}
-	speech, err := s.s.Synthesize(ctx, voice, req.GetText(), req.GetLanguage(), format, req.GetSpeed())
+	speech, err := s.s.Synthesize(ctx, voice, req.GetText(), req.GetLanguage(), req.GetSpeed())
 	if err != nil {
 		return nil, serviceError(err)
 	}

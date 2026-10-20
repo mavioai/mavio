@@ -1,11 +1,11 @@
 package assistant
 
 import (
-	"cmp"
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"io"
 	"io/fs"
 	"log/slog"
 	"net/http"
@@ -38,13 +38,18 @@ var (
 	// after.
 	conversationIDs = regexp.MustCompile(`^[A-Za-z0-9_-]{1,64}$`)
 	answerKeys      = regexp.MustCompile(`^[0-9a-f]{32}$`)
-	partNames       = regexp.MustCompile(`^([0-9]{1,2})\.(ogg|mp3)$`)
+	partNames       = regexp.MustCompile(`^([0-9]{1,2})\.(ogg|aac|mp3|flac|wav)$`)
+	// partIndexes are the sentences in URLs, which name their encoding
+	// in URLs made before speech was converted.
+	partIndexes = regexp.MustCompile(`^([0-9]{1,2})(?:\.[a-z0-9]+)?$`)
 )
 
 // recorder keeps the speech of answers with their conversations
 // (docs/assistant.md §8.3): a folder per conversation holding a folder per
-// answer, named after its text, which holds a file per sentence. The speech
-// of an answer waits in memory until its conversation is known.
+// answer, named after its text, which holds a file per sentence and
+// encoding: the synthesizer's, and those it was converted to for clients
+// that do not play it. The speech of an answer waits in memory until its
+// conversation is known.
 type recorder struct {
 	root *os.Root
 	log  *slog.Logger
@@ -58,7 +63,7 @@ type recording struct {
 	user core.ID
 	// dir is the answer's folder once its conversation is known.
 	dir   string
-	parts map[int]part
+	parts map[int][]part
 	at    time.Time
 }
 
@@ -93,10 +98,9 @@ func answerKey(text string) string {
 	return hex.EncodeToString(sum[:16])
 }
 
-// add keeps a sentence of the answer of a speech ID.
-func (r *recorder) add(user core.ID, id string, index int, contentType string, audio []byte, now time.Time) {
-	ext := map[string]string{"audio/ogg": "ogg", "audio/mpeg": "mp3"}[contentType]
-	if r.root == nil || !speechIDs.MatchString(id) || index < 0 || index >= maxParts || ext == "" {
+// add keeps a sentence of the answer of a speech ID in an encoding.
+func (r *recorder) add(user core.ID, id string, index int, f audioFormat, audio []byte, now time.Time) {
+	if r.root == nil || !speechIDs.MatchString(id) || index < 0 || index >= maxParts {
 		return
 	}
 	r.mu.Lock()
@@ -107,10 +111,10 @@ func (r *recorder) add(user core.ID, id string, index int, contentType string, a
 		return
 	}
 	if rec.dir == "" {
-		rec.parts[index] = part{ext, audio}
+		rec.parts[index] = append(rec.parts[index], part{f.ext, audio})
 		return
 	}
-	r.write(rec.dir, index, part{ext, audio})
+	r.write(rec.dir, index, part{f.ext, audio})
 }
 
 // bind gives the speech of an ID its answer in a conversation, replacing
@@ -129,8 +133,10 @@ func (r *recorder) bind(user core.ID, id, conversation, answer string, now time.
 	if err := r.root.RemoveAll(rec.dir); err != nil {
 		r.log.Warn("assistant: replace speech", "err", err)
 	}
-	for i, p := range rec.parts {
-		r.write(rec.dir, i, p)
+	for i, ps := range rec.parts {
+		for _, p := range ps {
+			r.write(rec.dir, i, p)
+		}
 	}
 	rec.parts = nil
 }
@@ -140,7 +146,7 @@ func (r *recorder) bind(user core.ID, id, conversation, answer string, now time.
 func (r *recorder) recording(user core.ID, id string, now time.Time) *recording {
 	rec, ok := r.open[id]
 	if !ok {
-		rec = &recording{user: user, parts: map[int]part{}, at: now}
+		rec = &recording{user: user, parts: map[int][]part{}, at: now}
 		r.open[id] = rec
 	}
 	if rec.user != user {
@@ -149,10 +155,16 @@ func (r *recorder) recording(user core.ID, id string, now time.Time) *recording 
 	return rec
 }
 
+// write keeps a file of a sentence, whole or not at all: it is written
+// aside and renamed.
 func (r *recorder) write(dir string, index int, p part) {
+	name := path.Join(dir, fmt.Sprintf("%d.%s", index, p.ext))
 	err := r.root.MkdirAll(dir, 0o750)
 	if err == nil {
-		err = r.root.WriteFile(path.Join(dir, fmt.Sprintf("%d.%s", index, p.ext)), p.audio, 0o640)
+		err = r.root.WriteFile(name+".part", p.audio, 0o640)
+	}
+	if err == nil {
+		err = r.root.Rename(name+".part", name)
 	}
 	if err != nil {
 		r.log.Warn("assistant: keep speech", "err", err)
@@ -168,13 +180,38 @@ func (r *recorder) expire(now time.Time) {
 	}
 }
 
-// parts returns the names of the files of an answer's speech, in order.
-func (r *recorder) parts(conversation, answer string) []string {
-	if r.root == nil || !conversationIDs.MatchString(conversation) {
+// parts returns the sentences of an answer's speech, in order.
+func (r *recorder) parts(conversation, answer string) []int {
+	var out []int
+	for name := range r.files(conversation, answerKey(answer)) {
+		if m := partNames.FindStringSubmatch(name); m != nil {
+			i, _ := strconv.Atoi(m[1])
+			out = append(out, i)
+		}
+	}
+	slices.Sort(out)
+	return slices.Compact(out)
+}
+
+// encodings returns the encodings a sentence of an answer's speech is
+// kept in, the most balanced first.
+func (r *recorder) encodings(conversation, answer string, index int) []audioFormat {
+	files := r.files(conversation, answer)
+	var out []audioFormat
+	for _, f := range audioFormats {
+		if files[fmt.Sprintf("%d.%s", index, f.ext)] {
+			out = append(out, f)
+		}
+	}
+	return out
+}
+
+// files returns the names of the files of an answer's speech, by its key.
+func (r *recorder) files(conversation, answer string) map[string]bool {
+	if r.root == nil || !conversationIDs.MatchString(conversation) || !answerKeys.MatchString(answer) {
 		return nil
 	}
-	dir := path.Join(conversation, answerKey(answer))
-	f, err := r.root.Open(dir)
+	f, err := r.root.Open(path.Join(conversation, answer))
 	if err != nil {
 		return nil
 	}
@@ -183,36 +220,39 @@ func (r *recorder) parts(conversation, answer string) []string {
 	if err != nil {
 		return nil
 	}
-	type named struct {
-		index int
-		name  string
-	}
-	var out []named
+	out := map[string]bool{}
 	for _, e := range entries {
-		if m := partNames.FindStringSubmatch(e.Name()); m != nil {
-			i, _ := strconv.Atoi(m[1])
-			out = append(out, named{i, e.Name()})
+		if partNames.MatchString(e.Name()) {
+			out[e.Name()] = true
 		}
 	}
-	slices.SortFunc(out, func(a, b named) int { return cmp.Compare(a.index, b.index) })
-	names := make([]string, len(out))
-	for i, n := range out {
-		names[i] = n.name
-	}
-	return names
+	return out
 }
 
-// file opens a sentence of an answer's speech, with its content type.
-func (r *recorder) file(conversation, answer, name string) (*os.File, string, error) {
-	m := partNames.FindStringSubmatch(name)
-	if r.root == nil || !conversationIDs.MatchString(conversation) || !answerKeys.MatchString(answer) || m == nil {
-		return nil, "", fs.ErrNotExist
+// file opens a sentence of an answer's speech in an encoding.
+func (r *recorder) file(conversation, answer string, index int, f audioFormat) (*os.File, error) {
+	if r.root == nil || !conversationIDs.MatchString(conversation) || !answerKeys.MatchString(answer) {
+		return nil, fs.ErrNotExist
 	}
-	f, err := r.root.Open(path.Join(conversation, answer, name))
+	return r.root.Open(path.Join(conversation, answer, fmt.Sprintf("%d.%s", index, f.ext)))
+}
+
+// read reads a sentence of an answer's speech in an encoding.
+func (r *recorder) read(conversation, answer string, index int, f audioFormat) ([]byte, error) {
+	file, err := r.file(conversation, answer, index, f)
 	if err != nil {
-		return nil, "", err
+		return nil, err
 	}
-	return f, map[string]string{"ogg": "audio/ogg", "mp3": "audio/mpeg"}[m[2]], nil
+	defer func() { _ = file.Close() }()
+	return io.ReadAll(file)
+}
+
+// keep keeps a sentence of an answer's speech converted to an encoding.
+func (r *recorder) keep(conversation, answer string, index int, f audioFormat, audio []byte) {
+	if r.root == nil || !conversationIDs.MatchString(conversation) || !answerKeys.MatchString(answer) {
+		return
+	}
+	r.write(path.Join(conversation, answer), index, part{f.ext, audio})
 }
 
 // remove deletes the speech of a conversation.
@@ -263,12 +303,14 @@ const KeptSpeechPath = "/assistant/conversations/{conversation}/speech/{answer}/
 
 // KeptSpeechURL is the URL of a sentence of an answer's kept speech,
 // relative to the server's base URL.
-func KeptSpeechURL(conversation, answer, part string) string {
-	return "assistant/conversations/" + url.PathEscape(conversation) + "/speech/" + answer + "/" + part
+func KeptSpeechURL(conversation, answer string, index int) string {
+	return "assistant/conversations/" + url.PathEscape(conversation) + "/speech/" + answer + "/" + strconv.Itoa(index)
 }
 
-// KeptSpeechHandler serves KeptSpeechPath to the conversation's user;
-// resolve authenticates the request.
+// KeptSpeechHandler serves KeptSpeechPath to the conversation's user, in
+// an encoding the query's formats name (§8.3): one it is kept in, else
+// the most balanced it is converted to and kept in from then on; resolve
+// authenticates the request.
 func (s *Service) KeptSpeechHandler(resolve func(r *http.Request) (auth.Principal, error)) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		p, err := resolve(r)
@@ -276,24 +318,64 @@ func (s *Service) KeptSpeechHandler(resolve func(r *http.Request) (auth.Principa
 			http.Error(w, err.Error(), http.StatusUnauthorized)
 			return
 		}
-		conv := r.PathValue("conversation")
+		conv, answer := r.PathValue("conversation"), r.PathValue("answer")
 		if _, _, _, err := s.own(auth.WithPrincipal(r.Context(), p), conv); err != nil {
 			http.NotFound(w, r)
 			return
 		}
-		f, ct, err := s.rec.file(conv, r.PathValue("answer"), r.PathValue("part"))
-		if err != nil {
+		m := partIndexes.FindStringSubmatch(r.PathValue("part"))
+		if m == nil {
 			http.NotFound(w, r)
 			return
 		}
-		defer func() { _ = f.Close() }()
-		info, err := f.Stat()
-		if err != nil {
+		index, _ := strconv.Atoi(m[1])
+		kept := s.rec.encodings(conv, answer, index)
+		if len(kept) == 0 {
 			http.NotFound(w, r)
 			return
 		}
-		w.Header().Set("Content-Type", ct)
+		formats := formatList(r.URL.Query().Get("formats"))
+		if i := slices.IndexFunc(kept, func(f audioFormat) bool { return plays(formats, f) }); i >= 0 {
+			f, err := s.rec.file(conv, answer, index, kept[i])
+			if err != nil {
+				http.NotFound(w, r)
+				return
+			}
+			defer func() { _ = f.Close() }()
+			info, err := f.Stat()
+			if err != nil {
+				http.NotFound(w, r)
+				return
+			}
+			w.Header().Set("Content-Type", kept[i].contentType)
+			w.Header().Set("Cache-Control", "private, no-cache")
+			http.ServeContent(w, r, "", info.ModTime(), f)
+			return
+		}
+		to := speechTarget(kept[0], formats)
+		audio, err := s.rec.read(conv, answer, index, kept[0])
+		if err == nil {
+			audio, err = convert(r.Context(), s.cfg.FFmpeg, audio, to)
+		}
+		if err != nil {
+			s.log.WarnContext(r.Context(), "assistant: convert kept speech", "err", err)
+			http.Error(w, "the speech could not be converted", http.StatusBadGateway)
+			return
+		}
+		s.rec.keep(conv, answer, index, to, audio)
+		w.Header().Set("Content-Type", to.contentType)
 		w.Header().Set("Cache-Control", "private, no-cache")
-		http.ServeContent(w, r, "", info.ModTime(), f)
+		_, _ = w.Write(audio)
 	})
+}
+
+// formatList parses the formats a client plays, separated by commas.
+func formatList(s string) []string {
+	var out []string
+	for f := range strings.SplitSeq(s, ",") {
+		if f = strings.ToLower(strings.TrimSpace(f)); f != "" {
+			out = append(out, f)
+		}
+	}
+	return out
 }

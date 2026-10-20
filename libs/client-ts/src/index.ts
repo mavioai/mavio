@@ -207,6 +207,7 @@ export {
   keptSpeech,
   Sentences,
   speakWithServer,
+  speechFormats,
   startListening,
   useAssistant,
   useAssistantActions,
