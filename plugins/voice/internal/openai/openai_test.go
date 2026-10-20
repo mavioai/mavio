@@ -25,6 +25,8 @@ type fakeAPI struct {
 	sizes  []int
 	fields []string
 	speech map[string]any
+	// mp3 answers speech in MP3 rather than Ogg.
+	mp3 bool
 }
 
 func (f *fakeAPI) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -51,6 +53,10 @@ func (f *fakeAPI) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		_, _ = io.WriteString(w, `{"text":" Bonjour.","language":"french","segments":[{"start":0.5,"end":0.9,"text":" Bonjour."}]}`)
 	case "/v1/audio/speech":
 		_ = json.NewDecoder(r.Body).Decode(&f.speech)
+		if f.mp3 {
+			_, _ = io.WriteString(w, "ID3")
+			return
+		}
 		_, _ = io.WriteString(w, "OggS")
 	default:
 		http.NotFound(w, r)
@@ -141,15 +147,11 @@ func TestSynthesize(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if speech.ContentType != "audio/mpeg" || string(speech.Audio) != "OggS" {
-		t.Errorf("speech = %+v", speech)
+	if speech.ContentType != "audio/ogg" || string(speech.Audio) != "OggS" {
+		t.Errorf("speech = %+v, want Ogg, as it starts", speech)
 	}
-	if f.speech["model"] != "kokoro" || f.speech["voice"] != "bf_emma" || f.speech["response_format"] != "mp3" || f.speech["speed"] != 1.5 {
-		t.Errorf("request = %v", f.speech)
-	}
-	f.speech = nil
-	if _, err := s.Synthesize(t.Context(), "af_heart", "Hello.", "en", service.OggOpus, 0); err != nil || f.speech["response_format"] != "opus" || f.speech["speed"] != nil {
-		t.Errorf("Opus request = %v, %v", f.speech, err)
+	if _, ok := f.speech["response_format"]; ok || f.speech["model"] != "kokoro" || f.speech["voice"] != "bf_emma" || f.speech["speed"] != 1.5 {
+		t.Errorf("request = %v, want no format", f.speech)
 	}
 }
 
@@ -163,8 +165,12 @@ func TestSynthesizeSettings(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if speech.ContentType != "audio/mpeg" || f.speech["response_format"] != "mp3" || f.speech["instructions"] != "Warm." {
-		t.Errorf("speech = %s, request = %v; want MP3 with the instructions", speech.ContentType, f.speech)
+	if f.speech["response_format"] != "mp3" || f.speech["instructions"] != "Warm." {
+		t.Errorf("request = %v; want MP3 with the instructions", f.speech)
+	}
+	f.mp3 = true
+	if speech, err = s.Synthesize(t.Context(), "v", "Hello.", "en", service.OggOpus, 0); err != nil || speech.ContentType != "audio/mpeg" {
+		t.Errorf("speech = %+v, %v; want MP3", speech, err)
 	}
 	if _, err := NewSynthesizer(service.Env{}, json.RawMessage(`{"base_url":"`+base+`","format":"wav"}`)); err == nil {
 		t.Error("NewSynthesizer with WAV: err = nil, want one")

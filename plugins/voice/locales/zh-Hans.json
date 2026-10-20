@@ -30,7 +30,7 @@
   "Voices": "语音",
   "The voices the model speaks with, separated by commas, such as af_heart for Kokoro.": "模型所用的语音，以逗号分隔，如 Kokoro 的 af_heart。",
   "Audio format": "音频格式",
-  "None asks for what the client plays, Opus unless it asks for MP3; MP3 for services without Opus, such as OpenRouter's.": "不选时按客户端所播放的格式请求，除非客户端要 MP3，否则为 Opus；不支持 Opus 的服务（如 OpenRouter 的）请选 MP3。",
+  "None leaves it to the service, MP3 for OpenAI's; Opus is smaller, for the services that make it.": "不选时由服务决定，OpenAI 的为 MP3；Opus 更小，用于能生成它的服务。",
   "Opus": "Opus",
   "MP3": "MP3",
   "Instructions": "指令",

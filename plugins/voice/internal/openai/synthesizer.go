@@ -1,6 +1,7 @@
 package openai
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -25,7 +26,7 @@ func SynthesizerDefinition() service.SynthesizerDef {
 			Type: service.Text, Default: defaultVoices,
 		},
 		service.Setting{
-			Name: "format", Label: "Audio format", Help: "None asks for what the client plays, Opus unless it asks for MP3; MP3 for services without Opus, such as OpenRouter's.",
+			Name: "format", Label: "Audio format", Help: "None leaves it to the service, MP3 for OpenAI's; Opus is smaller, for the services that make it.",
 			Type: service.Select, Options: []service.Option{{Value: "opus", Label: "Opus"}, {Value: "mp3", Label: "MP3"}},
 		},
 		service.Setting{
@@ -82,8 +83,8 @@ func title(s string) string {
 type Synthesizer struct {
 	c      *client
 	voices []service.Voice
-	// format is the encoding always asked for, opus or mp3; empty asks
-	// for the one requested.
+	// format is the encoding asked for, opus or mp3; empty asks for none,
+	// leaving it to the service.
 	format       string
 	instructions string
 }
@@ -92,18 +93,12 @@ type Synthesizer struct {
 func (s *Synthesizer) Voices() []service.Voice { return s.voices }
 
 // Synthesize implements service.Synthesizer: in the format of the
-// settings, else the one asked for.
-func (s *Synthesizer) Synthesize(ctx context.Context, voice, text, _ string, format service.Format, speed float64) (service.Speech, error) {
-	encoding := s.format
-	if encoding == "" {
-		encoding = map[service.Format]string{service.OggOpus: "opus", service.MP3: "mp3"}[format]
+// settings, else the service's, MP3 for OpenAI's.
+func (s *Synthesizer) Synthesize(ctx context.Context, voice, text, _ string, _ service.Format, speed float64) (service.Speech, error) {
+	req := map[string]any{"model": s.c.model, "input": text, "voice": voice}
+	if s.format != "" {
+		req["response_format"] = s.format
 	}
-	return s.synthesize(ctx, voice, text, encoding, speed)
-}
-
-// synthesize asks the service for speech in an encoding, opus or mp3.
-func (s *Synthesizer) synthesize(ctx context.Context, voice, text, encoding string, speed float64) (service.Speech, error) {
-	req := map[string]any{"model": s.c.model, "input": text, "voice": voice, "response_format": encoding}
 	if s.instructions != "" {
 		req["instructions"] = s.instructions
 	}
@@ -118,9 +113,11 @@ func (s *Synthesizer) synthesize(ctx context.Context, voice, text, encoding stri
 	if err != nil {
 		return service.Speech{}, err
 	}
-	contentType := "audio/ogg"
-	if encoding == "mp3" {
-		contentType = "audio/mpeg"
+	// Opus comes in Ogg, whose pages start "OggS"; anything else is taken
+	// for MP3.
+	contentType := "audio/mpeg"
+	if bytes.HasPrefix(audio, []byte("OggS")) {
+		contentType = "audio/ogg"
 	}
 	return service.Speech{Audio: audio, ContentType: contentType}, nil
 }
