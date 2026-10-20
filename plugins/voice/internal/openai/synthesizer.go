@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"slices"
 	"strings"
 	"unicode"
 
@@ -15,7 +16,19 @@ const (
 	defaultSpeechModel = "gpt-4o-mini-tts"
 	// defaultVoices are OpenAI's voices.
 	defaultVoices = "alloy, ash, ballad, coral, echo, fable, nova, onyx, sage, shimmer, verse"
+	// pcmRate is the sample rate of the API's PCM.
+	pcmRate = 24000
 )
+
+// formats are the API's audio formats.
+var formats = []service.Option{
+	{Value: "mp3", Label: "MP3"},
+	{Value: "opus", Label: "Opus"},
+	{Value: "aac", Label: "AAC"},
+	{Value: "flac", Label: "FLAC"},
+	{Value: "wav", Label: "WAV"},
+	{Value: "pcm", Label: "PCM"},
+}
 
 // SynthesizerDefinition returns the synthesizer's definition.
 func SynthesizerDefinition() service.SynthesizerDef {
@@ -26,8 +39,8 @@ func SynthesizerDefinition() service.SynthesizerDef {
 			Type: service.Text, Default: defaultVoices,
 		},
 		service.Setting{
-			Name: "format", Label: "Audio format", Help: "None leaves it to the service, MP3 for OpenAI's; Opus is smaller, for the services that make it. The server converts it for clients that cannot play it.",
-			Type: service.Select, Options: []service.Option{{Value: "opus", Label: "Opus"}, {Value: "mp3", Label: "MP3"}},
+			Name: "format", Label: "Audio format", Help: "One the service makes; none leaves it to the service, MP3 for OpenAI's. Opus is the smallest; WAV and PCM are the quickest to make, and large. The server converts it for clients that cannot play it.",
+			Type: service.Select, Options: formats,
 		},
 		service.Setting{
 			Name: "instructions", Label: "Instructions", Help: "How to speak, such as \"warm and unhurried\", for models that take them, such as gpt-4o-mini-tts.",
@@ -58,7 +71,7 @@ func NewSynthesizer(env service.Env, raw json.RawMessage) (service.Synthesizer, 
 	if s.Voices != nil {
 		list = *s.Voices
 	}
-	if s.Format != "" && s.Format != "opus" && s.Format != "mp3" {
+	if s.Format != "" && !slices.ContainsFunc(formats, func(o service.Option) bool { return o.Value == s.Format }) {
 		return nil, fmt.Errorf("%w: audio format %q", service.ErrConfig, s.Format)
 	}
 	out := &Synthesizer{c: c, format: s.Format, instructions: strings.TrimSpace(s.Instructions)}
@@ -83,8 +96,8 @@ func title(s string) string {
 type Synthesizer struct {
 	c      *client
 	voices []service.Voice
-	// format is the encoding asked for, opus or mp3; empty asks for none,
-	// leaving it to the service.
+	// format is the audio format asked for; empty asks for none, leaving
+	// it to the service.
 	format       string
 	instructions string
 }
@@ -112,6 +125,10 @@ func (s *Synthesizer) Synthesize(ctx context.Context, voice, text, _ string, spe
 	audio, err := s.c.do(ctx, "/audio/speech", "application/json", body)
 	if err != nil {
 		return service.Speech{}, err
+	}
+	if s.format == "pcm" {
+		// Raw samples go in a WAV file, which says what they are.
+		return service.Speech{Audio: service.WAVAt(audio, pcmRate), ContentType: "audio/wav"}, nil
 	}
 	return service.Speech{Audio: audio, ContentType: contentType(audio)}, nil
 }

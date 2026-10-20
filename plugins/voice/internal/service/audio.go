@@ -43,7 +43,10 @@ func Duration(pcm []byte) time.Duration {
 }
 
 // WAV wraps PCM in a WAV file.
-func WAV(pcm []byte) []byte {
+func WAV(pcm []byte) []byte { return WAVAt(pcm, SampleRate) }
+
+// WAVAt wraps mono 16-bit PCM of a sample rate in a WAV file.
+func WAVAt(pcm []byte, rate int) []byte {
 	out := make([]byte, 44, 44+len(pcm))
 	copy(out[0:], "RIFF")
 	binary.LittleEndian.PutUint32(out[4:], uint32(36+len(pcm)))
@@ -51,8 +54,8 @@ func WAV(pcm []byte) []byte {
 	binary.LittleEndian.PutUint32(out[16:], 16)
 	binary.LittleEndian.PutUint16(out[20:], 1) // PCM
 	binary.LittleEndian.PutUint16(out[22:], 1) // mono
-	binary.LittleEndian.PutUint32(out[24:], SampleRate)
-	binary.LittleEndian.PutUint32(out[28:], BytesPerSecond)
+	binary.LittleEndian.PutUint32(out[24:], uint32(rate))
+	binary.LittleEndian.PutUint32(out[28:], uint32(rate*2))
 	binary.LittleEndian.PutUint16(out[32:], 2)
 	binary.LittleEndian.PutUint16(out[34:], 16)
 	copy(out[36:], "data")

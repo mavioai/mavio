@@ -3,6 +3,7 @@ package openai
 import (
 	"bytes"
 	"context"
+	"encoding/binary"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -172,8 +173,19 @@ func TestSynthesizeSettings(t *testing.T) {
 	if speech, err = s.Synthesize(t.Context(), "v", "Hello.", "en", 0); err != nil || speech.ContentType != "audio/mpeg" {
 		t.Errorf("speech = %+v, %v; want MP3", speech, err)
 	}
-	if _, err := NewSynthesizer(service.Env{}, json.RawMessage(`{"base_url":"`+base+`","format":"wav"}`)); err == nil {
-		t.Error("NewSynthesizer with WAV: err = nil, want one")
+	if _, err := NewSynthesizer(service.Env{}, json.RawMessage(`{"base_url":"`+base+`","format":"ogg"}`)); err == nil {
+		t.Error("NewSynthesizer with ogg: err = nil, want one")
+	}
+	// PCM comes back as WAV of the API's 24 kHz.
+	s, err = NewSynthesizer(service.Env{}, json.RawMessage(`{"base_url":"`+base+`","api_key":"key","voices":"v","format":"pcm"}`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	f.mp3 = false
+	speech, err = s.Synthesize(t.Context(), "v", "Hello.", "en", 0)
+	if err != nil || f.speech["response_format"] != "pcm" || speech.ContentType != "audio/wav" ||
+		string(speech.Audio[:4]) != "RIFF" || binary.LittleEndian.Uint32(speech.Audio[24:]) != 24000 || string(speech.Audio[44:]) != "OggS" {
+		t.Errorf("PCM speech = %q as %s, %v; want the samples in WAV at 24 kHz", speech.Audio, speech.ContentType, err)
 	}
 }
 
