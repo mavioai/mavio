@@ -15,6 +15,7 @@
 | go | 服务端、库、插件 |
 | node + pnpm | Nx、`protoc-gen-es`，以及后续的 TS 应用 |
 | buf | Protobuf 的 lint、格式化、破坏性变更检查与代码生成 |
+| protoc | 其内置的 Python 生成器，由 `buf generate` 为 `libs/proto/gen/python` 运行 |
 | golangci-lint | Go 代码检查与格式检查 |
 | sqlc | 生成 `libs/store` 中的方言专属查询代码 |
 | protoc-gen-buffa、protoc-gen-buffa-packaging、protoc-gen-connect-rust | `libs/proto` 的 Rust 代码生成，取自其发布构建 |
@@ -136,7 +137,7 @@ GOWORK=off go mod tidy
 * `buf generate`（配置见 `libs/proto/buf.gen.yaml`）以 `default_api_level=API_OPAQUE` 运行 `protoc-gen-go`（通过 Getter/Setter 访问字段），以 `simple` 运行 `protoc-gen-connect-go`（handler 直接收发消息）。managed 模式把 `go_package` 设置在 `github.com/mavioai/mavio/libs/proto/gen/go` 之下。
 * 同一次运行还生成 `libs/proto/openapi/gen/mavio.openapi.json`，即服务端所提供服务的 OpenAPI 文档，由 `protoc-gen-connect-openapi` 合并 `openapi/base.yaml`（说明、Bearer 认证、普通 HTTP 媒体路由）。它通过 `go run` 以 `buf.gen.yaml` 中固定的版本运行，使其依赖不进入第三方插件所导入的 go.mod；`openapi` 包嵌入该文档，文档与 `gen/` 一样提交。
 * 同一次运行还用 `protoc-gen-es` 把 TypeScript 生成到 `gen/ts`（protobuf-es 消息，以及 connect-es 使用的服务描述；`libs/proto` 同时是导出它们的 npm 包 `@mavio/proto`），用 `protoc-gen-buffa`（消息，在 `gen/rust/proto`）与 `protoc-gen-connect-rust`（客户端，在 `gen/rust/connect`）把 Rust 生成到 `gen/rust`，每棵树的 `mod.rs` 由 `protoc-gen-buffa-packaging` 生成。`libs/client-rust` 的 crate `mavio-api` 包含这两棵 Rust 树。
-* 同一次运行还用 `protoc-gen-python` 与 `protoc-gen-pyi`（buf 托管的 protobuf 官方远程插件）以及 `protoc-gen-connect-python` 把 Python 生成到 `gen/python`，即 uv workspace 的包 `mavio-proto`，由 Python SDK 与插件导入。
+* 同一次运行还用 protoc 内置的 `python` 与 `pyi` 生成器（protoc 由 mise 固定在 `mavio-proto` 所需 protobuf 运行时的版本）以及 `protoc-gen-connect-python`（由 `uv run` 从 `mavio-proto` 的开发依赖组运行，版本与其 connect-python 一致）把 Python 生成到 `gen/python`，即 uv workspace 的包 `mavio-proto`，由 Python SDK 与插件导入。
 * 修改 `.proto` 后运行 `pnpm nx run proto:generate`，并**提交生成的 `gen/` 代码**。不要手动编辑 `gen/` 下的文件。
 * `buf lint` 使用 STANDARD 规则，`buf breaking` 使用 FILE 规则。已发布的字段编号不得复用；破坏性变更放入新的 `v2` 包。
 * 只读 RPC 标注 `option idempotency_level = NO_SIDE_EFFECTS;`。

@@ -15,6 +15,7 @@ Tool versions are pinned in `mise.toml`:
 | go | Server, libraries, plugins |
 | node + pnpm | Nx, `protoc-gen-es`, and later the TS applications |
 | buf | Protobuf lint, format, breaking-change checks and code generation |
+| protoc | Its built-in Python generators, which `buf generate` runs for `libs/proto/gen/python` |
 | golangci-lint | Go linting and formatting checks |
 | sqlc | Dialect-specific query code in `libs/store` |
 | protoc-gen-buffa, protoc-gen-buffa-packaging, protoc-gen-connect-rust | Rust code generation of `libs/proto`, from their release builds |
@@ -136,7 +137,7 @@ The new edge must respect the dependency direction in [Architecture §3.2](archi
 * `buf generate` (configured in `libs/proto/buf.gen.yaml`) runs `protoc-gen-go` with `default_api_level=API_OPAQUE` (fields accessed through getters/setters) and `protoc-gen-connect-go` with `simple` (handlers take and return messages directly). Managed mode sets `go_package` under `github.com/mavioai/mavio/libs/proto/gen/go`.
 * The same run generates `libs/proto/openapi/gen/mavio.openapi.json`, the OpenAPI document of the services the server serves, with `protoc-gen-connect-openapi` merging `openapi/base.yaml` (description, bearer authentication, the plain HTTP media routes). It runs through `go run` at a version pinned in `buf.gen.yaml`, so that its dependencies stay out of the go.mod third-party plugins import; package `openapi` embeds the document, which is committed like `gen/`.
 * The same run generates TypeScript into `gen/ts` with `protoc-gen-es` (protobuf-es messages and the service descriptors connect-es uses; `libs/proto` is also the npm package `@mavio/proto`, exporting them), and Rust into `gen/rust` with `protoc-gen-buffa` (messages, in `gen/rust/proto`) and `protoc-gen-connect-rust` (clients, in `gen/rust/connect`), each tree given its `mod.rs` files by `protoc-gen-buffa-packaging`. The crate `mavio-api` of `libs/client-rust` includes the Rust trees.
-* The same run generates Python into `gen/python` with `protoc-gen-python` and `protoc-gen-pyi` (buf's remote plugins of protobuf's own) and `protoc-gen-connect-python`, the package `mavio-proto` of the uv workspace, which the Python SDK and plugins import.
+* The same run generates Python into `gen/python` with protoc's built-in `python` and `pyi` generators (protoc pinned by mise to the version of the protobuf runtime `mavio-proto` requires) and `protoc-gen-connect-python` (run by `uv run` from the development group of `mavio-proto`, at the version of its connect-python), the package `mavio-proto` of the uv workspace, which the Python SDK and plugins import.
 * After changing a `.proto`, run `pnpm nx run proto:generate` and **commit the generated `gen/` code**. Never edit files under `gen/` by hand.
 * `buf lint` uses the STANDARD rules and `buf breaking` the FILE rules. Published field numbers must never be reused; breaking changes go into a new `v2` package.
 * Read-only RPCs are annotated with `option idempotency_level = NO_SIDE_EFFECTS;`.

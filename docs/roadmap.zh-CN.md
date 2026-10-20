@@ -1050,10 +1050,13 @@ flowchart TD
 - [x] `read_subtitles`：读取条目字幕直到用户已看到的位置的工具
 - [ ] 决定 `request_title` 之外还有哪些工具需要确认
 - [ ] 先做 `plugins/pipecat` 的原型：经由服务端中继、使用 faster-whisper、Kokoro 与一个 OpenAI 兼容服务的一条管线，在中英文录音上测试 Smart Turn，引导与打断，Web UI 在 Chrome、Safari 与 Firefox 中的回声消除，以及包的大小与各平台的 wheel
-- [ ] uv workspace、`tools/nx-uv`、`libs/proto` 的 Python 消息与 Python SDK，并把 `internal/testplugin` 移植到它上面
+- [x] uv workspace、`libs/proto` 的 Python 消息与 Python SDK：基于 Hypercorn 的 `serve`、`host_client`
+- [ ] 以 `tools/nx-uv` 取代 Python 项目的 `project.json`，并把 `internal/testplugin` 移植到 Python SDK 上
 - [ ] `libs/proto` 中以 `VOICE_SESSION` 与 `SPEECH_TO_TEXT` 取代第一条语音路径的契约；删除 `plugins/voice` 及其 whisper 依赖
 - [ ] `plugins/pipecat`：管线、协议的序列化器、Mavio 助手服务、内置的服务及其设置、模型下载、转写工作进程
-- [ ] 服务端：`StartVoiceSession`、中继与会话令牌、带暂缓效果的 `SteerAsk` 与 `AbortAsk`、来自中继的保留语音
+- [x] 服务端：`StartVoiceSession`、中继与会话令牌（`Mavio-Voice-Session`，在 `SteerAsk` 与 `AbortAsk` 出现之前仅限 `Ask`）
+- [ ] 服务端：带暂缓效果的 `SteerAsk` 与 `AbortAsk`、来自中继的保留语音
+- [ ] 会话的轮次设置（最长停顿、提交延迟、空闲时间）放入助手设置，取代服务端的常量；管线在空闲时间后结束会话，支持 `push_to_talk` 与 `dictation` 模式；管线采用该语言的识别器与语音以及用户的提示
 - [ ] `AGENT_SESSION` 与 `plugins/agent` 中的引导与中止，基于 pi-durable 的引导队列与会话中止
 - [ ] 在 `tools/plugindist` 中为其 wheel 覆盖的平台打包 `plugins/pipecat`，并预置到容器镜像中
 - [ ] 以后：在 WebSocket 之外加入 SmallWebRTC 作为传输，用于弱网，并为经由中转访问的服务端在 mavio.dev 上提供 TURN，在容器镜像中开放 UDP 端口
