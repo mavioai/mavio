@@ -6,7 +6,7 @@ import SwiftUI
 /// Controls another of the user's devices, as the web UI's remote: what it
 /// plays with its position, the playback's buttons, the volume, and a
 /// message to show on it.
-struct RemoteView: View {
+public struct RemoteView: View {
     let server: ServerRecord
     let sessionId: String
     @Environment(AppModel.self) private var model
@@ -22,7 +22,11 @@ struct RemoteView: View {
     /// How often what the device plays is read again.
     private static let refresh = Duration.seconds(2)
 
-    var body: some View {
+    /// The remote of a device's session on a server.
+    public init(server: ServerRecord, sessionId: String) { (self.server, self.sessionId) = (server, sessionId) }
+
+    /// The view's content.
+    public var body: some View {
         NavigationStack {
             List {
                 if let device {
@@ -43,10 +47,10 @@ struct RemoteView: View {
                 }
             }
             .overlay { if device == nil && failure == nil { ProgressView() } }
-            .scrollContentBackground(.hidden)
+            .hiddenListBackground()
             .background(theme.colors.background)
             .navigationTitle(device.map(\.shownName) ?? MavioStrings.remoteTitle)
-            .navigationBarTitleDisplayMode(.inline)
+            .inlineTitle()
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
                     Button(MavioStrings.actionDone) { dismiss() }

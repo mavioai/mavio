@@ -13,6 +13,7 @@ let package = Package(
         .library(name: "MavioAdmin", targets: ["MavioAdmin"]),
         .library(name: "MavioKit", targets: ["MavioKit"]),
         .library(name: "MavioPlayer", targets: ["MavioPlayer"]),
+        .library(name: "MavioScreens", targets: ["MavioScreens"]),
         .library(name: "MavioUI", targets: ["MavioUI"]),
     ],
     dependencies: [
@@ -60,6 +61,9 @@ let package = Package(
         // The settings of a server, which the apps show to its users and
         // administrators.
         .target(name: "MavioAdmin", dependencies: ["MavioUI"]),
+        // The screens the iPhone and iPad app and the Mac app share, which
+        // each composes in its own shell.
+        .target(name: "MavioScreens", dependencies: ["MavioAdmin"]),
         .testTarget(name: "MavioKitTests", dependencies: ["MavioKit"]),
         .testTarget(name: "MavioPlayerTests", dependencies: ["MavioPlayer"]),
         // The snapshot tests (docs/clients.md §6.8), which draw on the iOS

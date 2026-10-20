@@ -962,7 +962,7 @@ struct TitleCreditsView: View {
             }
         }
         .navigationTitle(crew ? MavioStrings.creditsFullCrew : MavioStrings.itemCast)
-        .navigationBarTitleDisplayMode(.large)
+        .largeTitle()
         .task { await load() }
     }
 

@@ -3,16 +3,18 @@ import MavioUI
 import SwiftUI
 
 /// A title Home's hero shows, and the line above it: the row it is from.
-struct HeroEntry: Identifiable {
-    let card: Card
+public struct HeroEntry: Identifiable {
+    /// The item.
+    public let card: Card
     let eyebrow: String
-    var id: String { "\(card.serverId)/\(card.itemId)" }
+    /// The server and item.
+    public var id: String { "\(card.serverId)/\(card.itemId)" }
 
     private static let kinds: Set<CardKind> = [.movie, .series, .video, .musicVideo]
 
     /// Up to five titles with backdrops from Home's rows, Continue Watching
     /// aside, as the web UI's.
-    static func from(_ rows: [Row]) -> [HeroEntry] {
+    public static func from(_ rows: [Row]) -> [HeroEntry] {
         var out: [HeroEntry] = []
         var seen: Set<String> = []
         for row in rows where row.kind != .continueWatching {
@@ -306,35 +308,46 @@ struct HeroChrome: ViewModifier {
     @State private var inset: CGFloat = 0
 
     func body(content: Content) -> some View {
-        content
-            .environment(\.heroInset, phone ? inset : 0)
-            .ignoresSafeArea(edges: reachesTop ? .top : [])
-            .onGeometryChange(for: CGFloat.self) {
-                $0.safeAreaInsets.top
-            } action: {
-                inset = $0
-            }
-            .onScrollGeometryChange(for: Bool.self) { geo in
-                geo.contentOffset.y + geo.contentInsets.top > geo.containerSize.height * 0.5
-            } action: { _, now in
-                withAnimation(.easeOut(duration: MavioDuration.fast)) { past = now }
-            }
-            // The refresh control of a page reaching the top is under the
-            // status bar, the hero covering it below; it is moved down
-            // below the bar, over the hero, where a page without a hero
-            // shows it.
-            .background {
-                if reachesTop { RefreshBelowBar(inset: inset) }
-            }
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .principal) {
-                    Text(title).type(theme.type.headline).lineLimit(1).opacity(past ? 1 : 0)
-                }
-            }
-            .modifier(HeroBarGlass(phone: phone, past: past))
-            .toolbarColorScheme(past ? nil : .dark, for: .navigationBar)
+        #if os(iOS)
+            ios(content)
+        #else
+            // On the Mac the hero sits below the window's toolbar.
+            content
+        #endif
     }
+
+    #if os(iOS)
+        private func ios(_ content: Content) -> some View {
+            content
+                .environment(\.heroInset, phone ? inset : 0)
+                .ignoresSafeArea(edges: reachesTop ? .top : [])
+                .onGeometryChange(for: CGFloat.self) {
+                    $0.safeAreaInsets.top
+                } action: {
+                    inset = $0
+                }
+                .onScrollGeometryChange(for: Bool.self) { geo in
+                    geo.contentOffset.y + geo.contentInsets.top > geo.containerSize.height * 0.5
+                } action: { _, now in
+                    withAnimation(.easeOut(duration: MavioDuration.fast)) { past = now }
+                }
+                // The refresh control of a page reaching the top is under the
+                // status bar, the hero covering it below; it is moved down
+                // below the bar, over the hero, where a page without a hero
+                // shows it.
+                .background {
+                    if reachesTop { RefreshBelowBar(inset: inset) }
+                }
+                .inlineTitle()
+                .toolbar {
+                    ToolbarItem(placement: .principal) {
+                        Text(title).type(theme.type.headline).lineLimit(1).opacity(past ? 1 : 0)
+                    }
+                }
+                .modifier(HeroBarGlass(phone: phone, past: past))
+                .toolbarColorScheme(past ? nil : .dark, for: .navigationBar)
+        }
+    #endif
 
     /// Whether the hero reaches the top, under the bars: on an iPad, and
     /// from iOS 26, whose bars are of clear glass, on a phone too.
@@ -350,76 +363,78 @@ extension EnvironmentValues {
     @Entry var heroInset: CGFloat = 0
 }
 
-/// The navigation bar's glass: on iOS 26 none over the hero, the bar's
-/// buttons of Liquid Glass on the hero's colors, and the bar's own once the
-/// hero is scrolled past; before it, on a phone always a thin material
-/// through which the hero's colors show.
-private struct HeroBarGlass: ViewModifier {
-    let phone: Bool
-    let past: Bool
+#if os(iOS)
+    /// The navigation bar's glass: on iOS 26 none over the hero, the bar's
+    /// buttons of Liquid Glass on the hero's colors, and the bar's own once the
+    /// hero is scrolled past; before it, on a phone always a thin material
+    /// through which the hero's colors show.
+    private struct HeroBarGlass: ViewModifier {
+        let phone: Bool
+        let past: Bool
 
-    func body(content: Content) -> some View {
-        if #available(iOS 26, *) {
-            content
-                .toolbarBackground(past ? .visible : .hidden, for: .navigationBar)
-                .scrollEdgeEffectHidden(!past, for: .top)
-        } else {
-            content.toolbarBackground(phone || past ? .visible : .hidden, for: .navigationBar)
-        }
-    }
-}
-
-/// Moves the refresh control of the scroll view beside it down by inset,
-/// below the bars, drawn over the scroll view's content.
-private struct RefreshBelowBar: UIViewRepresentable {
-    let inset: CGFloat
-
-    func makeUIView(context: Context) -> Probe { Probe() }
-
-    func updateUIView(_ probe: Probe, context: Context) {
-        probe.inset = inset
-        probe.apply()
-    }
-
-    final class Probe: UIView {
-        var inset: CGFloat = 0
-        private weak var control: UIRefreshControl?
-
-        override func didMoveToWindow() {
-            super.didMoveToWindow()
-            apply()
-        }
-
-        override func layoutSubviews() {
-            super.layoutSubviews()
-            apply()
-        }
-
-        func apply() {
-            if control == nil { control = find() }
-            guard let control else { return }
-            control.layer.zPosition = 1
-            control.clipsToBounds = false
-            control.layer.sublayerTransform = CATransform3DMakeTranslation(0, inset, 0)
-        }
-
-        /// The refresh control of the nearest scroll view among the
-        /// probe's ancestors' descendants.
-        private func find() -> UIRefreshControl? {
-            var view = superview
-            while let ancestor = view {
-                if let control = Self.control(in: ancestor) { return control }
-                view = ancestor.superview
+        func body(content: Content) -> some View {
+            if #available(iOS 26, *) {
+                content
+                    .toolbarBackground(past ? .visible : .hidden, for: .navigationBar)
+                    .scrollEdgeEffectHidden(!past, for: .top)
+            } else {
+                content.toolbarBackground(phone || past ? .visible : .hidden, for: .navigationBar)
             }
-            return nil
-        }
-
-        private static func control(in view: UIView) -> UIRefreshControl? {
-            if let scroll = view as? UIScrollView, let control = scroll.refreshControl { return control }
-            for subview in view.subviews {
-                if let control = control(in: subview) { return control }
-            }
-            return nil
         }
     }
-}
+
+    /// Moves the refresh control of the scroll view beside it down by inset,
+    /// below the bars, drawn over the scroll view's content.
+    private struct RefreshBelowBar: UIViewRepresentable {
+        let inset: CGFloat
+
+        func makeUIView(context: Context) -> Probe { Probe() }
+
+        func updateUIView(_ probe: Probe, context: Context) {
+            probe.inset = inset
+            probe.apply()
+        }
+
+        final class Probe: UIView {
+            var inset: CGFloat = 0
+            private weak var control: UIRefreshControl?
+
+            override func didMoveToWindow() {
+                super.didMoveToWindow()
+                apply()
+            }
+
+            override func layoutSubviews() {
+                super.layoutSubviews()
+                apply()
+            }
+
+            func apply() {
+                if control == nil { control = find() }
+                guard let control else { return }
+                control.layer.zPosition = 1
+                control.clipsToBounds = false
+                control.layer.sublayerTransform = CATransform3DMakeTranslation(0, inset, 0)
+            }
+
+            /// The refresh control of the nearest scroll view among the
+            /// probe's ancestors' descendants.
+            private func find() -> UIRefreshControl? {
+                var view = superview
+                while let ancestor = view {
+                    if let control = Self.control(in: ancestor) { return control }
+                    view = ancestor.superview
+                }
+                return nil
+            }
+
+            private static func control(in view: UIView) -> UIRefreshControl? {
+                if let scroll = view as? UIScrollView, let control = scroll.refreshControl { return control }
+                for subview in view.subviews {
+                    if let control = control(in: subview) { return control }
+                }
+                return nil
+            }
+        }
+    }
+#endif

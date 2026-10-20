@@ -5,7 +5,7 @@ import SwiftUI
 /// Subtitles and Audio, as the web UI's: the user's languages and when
 /// subtitles show, read from the first server signed in to and saved to
 /// each of them.
-struct SubtitlesAudioView: View {
+public struct SubtitlesAudioView: View {
     @Environment(AppModel.self) private var model
     @Environment(\.theme) private var theme
     @State private var saved: PlaybackPreferences?
@@ -26,7 +26,11 @@ struct SubtitlesAudioView: View {
         (.never, MavioStrings.settingsSubtitleModeNone),
     ]
 
-    var body: some View {
+    /// The user's subtitles and audio.
+    public init() {}
+
+    /// The view's content.
+    public var body: some View {
         List {
             if saved != nil {
                 Section {
@@ -41,7 +45,7 @@ struct SubtitlesAudioView: View {
                     Picker(MavioStrings.settingsSubtitleMode, selection: $mode) {
                         ForEach(Self.modes, id: \.0) { Text($0.1).tag($0.0) }
                     }
-                    .pickerStyle(.navigationLink)
+                    .listPicker()
                 }
             } else if failure == nil {
                 ProgressView().frame(maxWidth: .infinity)
@@ -53,11 +57,11 @@ struct SubtitlesAudioView: View {
                     .foregroundStyle(theme.colors.danger)
             }
         }
-        .scrollContentBackground(.hidden)
+        .hiddenListBackground()
         .scrollDismissesKeyboard(.interactively)
         .background(theme.colors.background)
         .navigationTitle(MavioStrings.settingsSubtitlesAudio)
-        .navigationBarTitleDisplayMode(.inline)
+        .inlineTitle()
         .toolbar {
             if saving {
                 ProgressView()
@@ -76,7 +80,7 @@ struct SubtitlesAudioView: View {
                 .type(theme.type.footnote)
                 .foregroundStyle(theme.colors.textSecondary)
             TextField(label, text: text, prompt: Text("chi, eng"))
-                .textInputAutocapitalization(.never)
+                .noCapitals()
                 .autocorrectionDisabled()
                 .foregroundStyle(
                     languageCodes(text.wrappedValue) == nil ? theme.colors.danger : theme.colors.textPrimary)
@@ -130,7 +134,7 @@ struct SubtitlesAudioView: View {
 /// The users of a standalone server as avatars, to switch to with their
 /// PIN, as the web UI's account settings show them. The list loads them
 /// with `load`: a section of no rows is no view, whose task would not run.
-struct SwitchUserSection: View {
+public struct SwitchUserSection: View {
     let server: ServerRecord
     let users: [SwitchableUser]
     @Environment(AppModel.self) private var model
@@ -139,7 +143,11 @@ struct SwitchUserSection: View {
     @State private var busy = false
     @State private var failure: String?
 
-    var body: some View {
+    /// Switching among users on server.
+    public init(server: ServerRecord, users: [SwitchableUser]) { (self.server, self.users) = (server, users) }
+
+    /// The view's content.
+    public var body: some View {
         Group {
             // Switching needs someone else to switch to.
             if users.count > 1 {
@@ -182,7 +190,8 @@ struct SwitchUserSection: View {
     }
 
     /// The users a server's session can switch to.
-    static func load(_ model: AppModel, _ server: ServerRecord) async -> [SwitchableUser] {
+    /// The users of server to switch to.
+    public static func load(_ model: AppModel, _ server: ServerRecord) async -> [SwitchableUser] {
         (try? await model.client.switchableUsers(serverId: server.id)) ?? []
     }
 
@@ -302,7 +311,7 @@ private struct PinPad: View {
 /// password, the passkeys, the authenticator app and the PIN; a managed
 /// user has none of them. The list loads them with `load`, as the
 /// switchable users.
-struct SecuritySections: View {
+public struct SecuritySections: View {
     let server: ServerRecord
     @Binding var security: AccountSecurity?
     @Environment(AppModel.self) private var model
@@ -319,7 +328,14 @@ struct SecuritySections: View {
 
     private enum Editing { case password, pin }
 
-    var body: some View {
+    /// The sign-in and security of the user on server.
+    public init(server: ServerRecord, security: Binding<AccountSecurity?>) {
+        self.server = server
+        _security = security
+    }
+
+    /// The view's content.
+    public var body: some View {
         Group {
             if let security, !security.managed {
                 Section {
@@ -407,7 +423,7 @@ struct SecuritySections: View {
                     Link(MavioStrings.authOpenAuthenticator, destination: uri)
                 }
                 TextField(MavioStrings.authTotpCode, text: $code, prompt: Text("000000"))
-                    .keyboardType(.numberPad)
+                    .numberKeyboard()
                     .textContentType(.oneTimeCode)
                     .font(.system(.body, design: .monospaced))
                     .onChange(of: code) { _, new in
@@ -451,7 +467,7 @@ struct SecuritySections: View {
             }
             if editing == .pin {
                 SecureField(MavioStrings.authPin, text: $pin)
-                    .keyboardType(.numberPad)
+                    .numberKeyboard()
                     .textContentType(.newPassword)
                     .onChange(of: pin) { _, new in
                         let digits = String(new.filter(\.isNumber).prefix(4))
@@ -498,7 +514,8 @@ struct SecuritySections: View {
     }
 
     /// How the user signs in to a server.
-    static func load(_ model: AppModel, _ server: ServerRecord) async -> AccountSecurity? {
+    /// The user's sign-in and security on server.
+    public static func load(_ model: AppModel, _ server: ServerRecord) async -> AccountSecurity? {
         try? await model.client.security(serverId: server.id)
     }
 

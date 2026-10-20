@@ -3,14 +3,18 @@ import MavioUI
 import SwiftUI
 
 /// Discover: a row of each catalog of the first server that discovers.
-struct DiscoverView: View {
+public struct DiscoverView: View {
     @Environment(AppModel.self) private var model
     @Environment(Discovery.self) private var discovery
     @Environment(\.theme) private var theme
     /// The rows' first pages read again by the last pull.
     @State private var refreshed: [CatalogQuery: Mavio_Acquisition_V1_DiscoverResponse] = [:]
 
-    var body: some View {
+    /// Discover of the first server that discovers.
+    public init() {}
+
+    /// The view's content.
+    public var body: some View {
         Group {
             if let server = discovery.server {
                 ScrollView {
@@ -168,7 +172,7 @@ struct CatalogView: View {
         .navigationTitle(query.title)
         .toolbar {
             if filterable != nil {
-                ToolbarItem(placement: .topBarTrailing) {
+                ToolbarItem(placement: .trailingBar) {
                     let n = current.filterCount
                     Button {
                         filtering = true

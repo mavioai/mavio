@@ -4,12 +4,16 @@ import SwiftUI
 
 /// Home: the rows of every server, merged as Plex does (docs/clients.md
 /// §6.3.1), each server's drawn as it arrives in its fixed place.
-struct HomeView: View {
+public struct HomeView: View {
     @Environment(AppModel.self) private var model
     @Environment(\.theme) private var theme
     @State private var hero: String?
 
-    var body: some View {
+    /// Home of every server signed in to.
+    public init() {}
+
+    /// The view's content.
+    public var body: some View {
         let entries = HeroEntry.from(model.home)
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 0) {
@@ -52,7 +56,7 @@ private struct HomeChrome: ViewModifier {
         if hero {
             content.modifier(HeroChrome(title: MavioStrings.navHome, phone: sizeClass != .regular))
         } else if loading {
-            content.navigationBarTitleDisplayMode(.inline).toolbar(removing: .title)
+            content.inlineTitle().toolbar(removing: .title)
         } else {
             content
         }

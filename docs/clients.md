@@ -108,6 +108,7 @@ The server owns every decision that depends on the library, the user or other de
   * `MavioKit`: the core's Swift API with the app services above it — accounts, capability probing, downloads with a background `URLSession`, Now Playing (`MPNowPlayingInfoCenter`, `MPRemoteCommandCenter`) — and the messages of the server's API, `MavioProto`, generated with [swift-protobuf](https://github.com/apple/swift-protobuf) (Apache-2.0): the screens the core does not model, the settings, call the server's API with them through the core (`callServer`), as the desktop app does (§4.4);
   * `MavioPlayer`: one player interface with two engines, and Picture in Picture;
   * `MavioUI`: SwiftUI components each app composes in its own way (artwork, posters, rows), and the design tokens; artwork is loaded and cached by [Nuke](https://github.com/kean/Nuke)'s `LazyImage` (MIT);
+  * `MavioScreens`: the screens the iPhone and iPad app and the Mac app share — Home, the libraries, search, the details, Discover, a person, the downloads, signing in and the user's settings — with their routes, each app composing them in a shell of its own;
   * `MavioAdmin`: the settings' Server group, the server's sections and their administration, shared by the three apps, leaving out on each what its platform lacks (saving files on Apple TV).
 * **Player engines**, in order of preference: AVPlayer, then AetherEngine, then the server's processing.
   * **Capabilities**: the app declares in `direct_play` the profiles AVPlayer plays and those AetherEngine plays. The server therefore plays a source directly whenever either engine can, and remuxes or transcodes it only when neither can.
@@ -423,7 +424,7 @@ mavio/
 │   │   ├── uniffi/              # UniFFI exports for Swift and Kotlin
 │   │   ├── capi/                # C ABI for Go, and its Go binding (a Go module)
 │   │   └── proto/               # Messages of the C ABI (mavio.capi.v1)
-│   ├── apple/                   # [Swift] MavioKit, MavioPlayer, MavioUI, MavioAdmin
+│   ├── apple/                   # [Swift] MavioKit, MavioPlayer, MavioUI, MavioScreens, MavioAdmin
 │   ├── android/                 # [Kotlin] core, player, ui, admin
 │   ├── intent/                  # [Rust] The assistant's grammar; WASM for the web UI and the server
 │   └── design/                  # Tokens, icons, components, strings; gen/{ts,swift,kotlin,go}

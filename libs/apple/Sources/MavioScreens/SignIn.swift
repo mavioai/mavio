@@ -24,7 +24,7 @@ private enum Step: Equatable {
 /// or a server's address, then its users' name and password or Quick
 /// Connect. A server in mavio.dev mode goes back to the Mavio account, at
 /// its mavio.dev.
-struct SignInView: View {
+public struct SignInView: View {
     /// Whether a server is added to those signed in to, in a sheet.
     var adding = false
     @Environment(AppModel.self) private var model
@@ -46,7 +46,11 @@ struct SignInView: View {
     @State private var error: String?
     @State private var busy = false
 
-    var body: some View {
+    /// Signing in, or adding a server when adding.
+    public init(adding: Bool = false) { self.adding = adding }
+
+    /// The view's content.
+    public var body: some View {
         ZStack {
             theme.colors.background.ignoresSafeArea()
             if step == .welcome {
@@ -165,9 +169,8 @@ struct SignInView: View {
         FieldGroup {
             FieldRow(label: MavioStrings.authServer) {
                 TextField(text: $address, prompt: Text(verbatim: "http://192.168.1.5:8686")) { EmptyView() }
-                    .textContentType(.URL)
-                    .keyboardType(.URL)
-                    .textInputAutocapitalization(.never)
+                    .addressField()
+                    .noCapitals()
                     .autocorrectionDisabled()
                     .submitLabel(.go)
                     .onSubmit { Task { await probe(address) } }
@@ -221,7 +224,7 @@ struct SignInView: View {
                 FieldRow(label: MavioStrings.authUsername) {
                     TextField(text: $name) { EmptyView() }
                         .textContentType(.username)
-                        .textInputAutocapitalization(.never)
+                        .noCapitals()
                         .autocorrectionDisabled()
                         .submitLabel(.next)
                 }
@@ -513,7 +516,11 @@ private struct Or: View {
 
 /// The sign-in's separators and grouped rows, as the web UI's.
 private enum Separator {
-    static let color = Color(uiColor: .separator)
+    #if os(macOS)
+        static let color = Color(nsColor: .separatorColor)
+    #else
+        static let color = Color(uiColor: .separator)
+    #endif
     static let group = Color(.sRGB, red: 118 / 255, green: 118 / 255, blue: 128 / 255, opacity: 1)
 }
 

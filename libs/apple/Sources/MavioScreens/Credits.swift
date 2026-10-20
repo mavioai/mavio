@@ -40,7 +40,7 @@ struct CreditsView: View {
             }
         }
         .navigationTitle(crew ? MavioStrings.creditsFullCrew : MavioStrings.itemCast)
-        .navigationBarTitleDisplayMode(.large)
+        .largeTitle()
         .task(id: model.revision(serverId)) { await load() }
     }
 

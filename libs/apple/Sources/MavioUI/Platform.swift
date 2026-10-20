@@ -20,6 +20,26 @@ extension View {
         #endif
     }
 
+    /// The navigation title large at the top of the page, where the bar
+    /// has sizes.
+    public func largeTitle() -> some View {
+        #if os(iOS)
+            navigationBarTitleDisplayMode(.large)
+        #else
+            self
+        #endif
+    }
+
+    /// A field of a web address: the keyboard and suggestions for one, where
+    /// there are.
+    public func addressField() -> some View {
+        #if os(macOS)
+            self
+        #else
+            textContentType(.URL).keyboardType(.URL)
+        #endif
+    }
+
     /// A list or form without its background, the page's showing, where a
     /// list has one to hide.
     public func hiddenListBackground() -> some View {
@@ -72,6 +92,30 @@ extension ToolbarItemPlacement {
             .topBarTrailing
         #else
             .primaryAction
+        #endif
+    }
+}
+
+extension ToolbarItemPlacement {
+    /// The bar at the bottom of a sheet, or beside its other buttons where
+    /// it has none.
+    public static var bottomOrSecondary: ToolbarItemPlacement {
+        #if os(iOS)
+            .bottomBar
+        #else
+            .secondaryAction
+        #endif
+    }
+}
+
+extension SearchFieldPlacement {
+    /// Search's field always shown: under the navigation bar's title, or in
+    /// the window's toolbar.
+    public static var pageField: SearchFieldPlacement {
+        #if os(iOS)
+            .navigationBarDrawer(displayMode: .always)
+        #else
+            .toolbar
         #endif
     }
 }

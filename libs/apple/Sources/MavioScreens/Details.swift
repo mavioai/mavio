@@ -786,7 +786,7 @@ private struct OverviewSheet: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
             .navigationTitle(details.card.title)
-            .navigationBarTitleDisplayMode(.inline)
+            .inlineTitle()
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
                     Button(MavioStrings.actionDone) { dismiss() }

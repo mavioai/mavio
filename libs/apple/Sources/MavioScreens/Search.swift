@@ -6,7 +6,7 @@ import SwiftUI
 /// §6.3.28): a row of each server's results as it answers, in the order of
 /// the servers, then the titles the server that discovers finds, to
 /// request. A search runs when it is confirmed with Return.
-struct SearchView: View {
+public struct SearchView: View {
     @Environment(AppModel.self) private var model
     @Environment(Discovery.self) private var discovery
     @Environment(\.theme) private var theme
@@ -28,7 +28,11 @@ struct SearchView: View {
     @State private var titlesAnswered: DiscoverSearch?
     @FocusState private var focused: Bool
 
-    var body: some View {
+    /// Search across the servers.
+    public init() {}
+
+    /// The view's content.
+    public var body: some View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 0) {
                 if !searched.isEmpty {
@@ -56,7 +60,7 @@ struct SearchView: View {
         }
         .navigationTitle(MavioStrings.navSearch)
         .searchable(
-            text: $query, placement: .navigationBarDrawer(displayMode: .always), prompt: MavioStrings.searchPlaceholder
+            text: $query, placement: .pageField, prompt: MavioStrings.searchPlaceholder
         )
         // Typing keeps the title in place, instead of the bar sliding up
         // over it and back.

@@ -3,13 +3,17 @@ import MavioUI
 import SwiftUI
 
 /// The libraries of every server the user is signed in to, by server.
-struct LibrariesView: View {
+public struct LibrariesView: View {
     @Environment(AppModel.self) private var model
     @Environment(\.theme) private var theme
     @State private var libraries: [String: Libraries] = [:]
     @State private var failed: [String: String] = [:]
 
-    var body: some View {
+    /// Every server's libraries.
+    public init() {}
+
+    /// The view's content.
+    public var body: some View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: MavioSpacing.s24) {
                 ForEach(model.signedInServers, id: \.id) { server in

@@ -42,7 +42,7 @@ struct PersonView: View {
             }
         }
         .navigationTitle(person?.name ?? "")
-        .navigationBarTitleDisplayMode(.inline)
+        .inlineTitle()
         .task(id: model.revision(serverId)) { await load() }
     }
 

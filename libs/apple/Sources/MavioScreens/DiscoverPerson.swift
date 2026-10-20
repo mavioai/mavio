@@ -47,7 +47,7 @@ struct DiscoveredPersonView: View {
             }
         }
         .navigationTitle(person?.name ?? "")
-        .navigationBarTitleDisplayMode(.inline)
+        .inlineTitle()
         .task { await load() }
     }
 

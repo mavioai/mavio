@@ -11,6 +11,7 @@
 		E1905A717B0B10523EE70EC2 /* MavioAdmin in Frameworks */ = {isa = PBXBuildFile; productRef = A27F56CC5383D60CA1F8F603 /* MavioAdmin */; };
 		0DAF8A1DE0E8E2EB4D53C215 /* MavioKit in Frameworks */ = {isa = PBXBuildFile; productRef = 69CFF62CEAE53F1248E9C787 /* MavioKit */; };
 		36803D8C66BC2B412C438C9C /* MavioPlayer in Frameworks */ = {isa = PBXBuildFile; productRef = 1710AB05C2C82CE8B15F6CD3 /* MavioPlayer */; };
+		6F086CC9507BDDE4A9E5B811 /* MavioScreens in Frameworks */ = {isa = PBXBuildFile; productRef = B539AFAC022B74E332F1D346 /* MavioScreens */; };
 		19D69702ED7EFADF864E7186 /* MavioUI in Frameworks */ = {isa = PBXBuildFile; productRef = 0BE966A350FF3A99D76737D2 /* MavioUI */; };
 /* End PBXBuildFile section */
 
@@ -34,6 +35,7 @@
 				E1905A717B0B10523EE70EC2 /* MavioAdmin in Frameworks */,
 				0DAF8A1DE0E8E2EB4D53C215 /* MavioKit in Frameworks */,
 				36803D8C66BC2B412C438C9C /* MavioPlayer in Frameworks */,
+				6F086CC9507BDDE4A9E5B811 /* MavioScreens in Frameworks */,
 				19D69702ED7EFADF864E7186 /* MavioUI in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -80,6 +82,7 @@
 				A27F56CC5383D60CA1F8F603 /* MavioAdmin */,
 				69CFF62CEAE53F1248E9C787 /* MavioKit */,
 				1710AB05C2C82CE8B15F6CD3 /* MavioPlayer */,
+				B539AFAC022B74E332F1D346 /* MavioScreens */,
 				0BE966A350FF3A99D76737D2 /* MavioUI */,
 			);
 			productName = Mavio;
@@ -268,6 +271,10 @@
 		1710AB05C2C82CE8B15F6CD3 /* MavioPlayer */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = MavioPlayer;
+		};
+		B539AFAC022B74E332F1D346 /* MavioScreens */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = MavioScreens;
 		};
 		0BE966A350FF3A99D76737D2 /* MavioUI */ = {
 			isa = XCSwiftPackageProductDependency;

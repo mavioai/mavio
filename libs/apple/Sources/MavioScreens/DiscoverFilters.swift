@@ -73,7 +73,7 @@ struct CatalogFiltersSheet: View {
             .scrollDismissesKeyboard(.interactively)
             .background(theme.colors.background)
             .navigationTitle(MavioStrings.discoverFilters)
-            .navigationBarTitleDisplayMode(.inline)
+            .inlineTitle()
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button(MavioStrings.actionCancel) { dismiss() }
@@ -84,7 +84,7 @@ struct CatalogFiltersSheet: View {
                         dismiss()
                     }
                 }
-                ToolbarItem(placement: .bottomBar) {
+                ToolbarItem(placement: .bottomOrSecondary) {
                     Button(MavioStrings.discoverReset) { f = f.unfiltered }
                         .disabled(f == f.unfiltered)
                 }
@@ -245,7 +245,7 @@ private struct NumberField: View {
                 get: { value > 0 ? String(value) : "" },
                 set: { value = Swift.min(Int($0.filter(\.isNumber).prefix(7)) ?? 0, max) })
         )
-        .keyboardType(.numberPad)
+        .numberKeyboard()
         .type(theme.type.body)
         .padding(.horizontal, 14)
         .frame(width: 120, height: 40)
@@ -393,7 +393,7 @@ private struct SearchedValues: View {
             }
             if searchable {
                 TextField(MavioStrings.discoverSearchValues(filter: title), text: $text)
-                    .textInputAutocapitalization(.never)
+                    .noCapitals()
                     .autocorrectionDisabled()
                     .type(theme.type.body)
                     .padding(.horizontal, 14)
