@@ -165,3 +165,31 @@ private struct RowFocus<Label: View>: View {
             .animation(focusAnimation, value: focused)
     }
 }
+
+/// A person of the cast or crew: white with black content, its corners
+/// rounded, over a shadow with focus (§4).
+struct PersonButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        PersonFocus(label: configuration.label, pressed: configuration.isPressed)
+    }
+}
+
+private struct PersonFocus<Label: View>: View {
+    let label: Label
+    let pressed: Bool
+    @Environment(\.isFocused) private var focused
+    @Environment(\.theme) private var theme
+
+    var body: some View {
+        label
+            .environment(\.cardFocused, focused)
+            .padding(MavioSpacing.s16)
+            .background {
+                RoundedRectangle(cornerRadius: MavioRadius.lg)
+                    .fill(focused ? .white : .clear)
+                    .shadow(color: focused ? theme.colors.tvFocusShadow : .clear, radius: 16, y: 12)
+            }
+            .scaleEffect(focused && !pressed ? theme.layout.focusScale : 1)
+            .animation(focusAnimation, value: focused)
+    }
+}

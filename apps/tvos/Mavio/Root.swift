@@ -8,6 +8,10 @@ enum Route: Hashable {
     case item(serverId: String, itemId: String)
     /// A library, on its Recommended tab.
     case library(LibraryEntry)
+    /// A person's page.
+    case person(serverId: String, personId: String)
+    /// An item's whole cast and crew, or its crew alone.
+    case credits(serverId: String, itemId: String, crew: Bool)
 }
 
 /// An item to play, which the root presents the player for.
@@ -56,7 +60,8 @@ final class Router {
     }
 
     /// Opens a link of the app, as the Top Shelf's: `mavio://item/<server>/<item>`
-    /// shows an item's details on Home, `mavio://play/<server>/<item>` plays it.
+    /// shows an item's details on Home, `mavio://person/<server>/<person>` a
+    /// person's page, and `mavio://play/<server>/<item>` plays it.
     func open(_ url: URL) {
         let parts = url.pathComponents.filter { $0 != "/" }
         guard url.scheme == "mavio", parts.count == 2 else { return }
@@ -65,6 +70,9 @@ final class Router {
         case "item":
             (settings, playing, tab) = (false, nil, .home)
             paths[.home] = [.item(serverId: serverId, itemId: itemId)]
+        case "person":
+            (settings, playing, tab) = (false, nil, .home)
+            paths[.home] = [.person(serverId: serverId, personId: itemId)]
         case "play":
             playing = PlayRequest(serverId: serverId, itemId: itemId, title: "")
         default:
@@ -244,6 +252,8 @@ extension View {
             switch route {
             case let .item(serverId, itemId): DetailsView(serverId: serverId, itemId: itemId)
             case let .library(library): LibraryView(library: library)
+            case let .person(serverId, personId): PersonView(serverId: serverId, personId: personId)
+            case let .credits(serverId, itemId, crew): CreditsView(serverId: serverId, itemId: itemId, crew: crew)
             }
         }
     }

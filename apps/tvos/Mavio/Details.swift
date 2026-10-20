@@ -222,14 +222,12 @@ private struct DetailsContent: View {
     private var cast: some View {
         CardRow(title: MavioStrings.itemCast) {
             ForEach(details.credits.filter(\.cast), id: \.self) { credit in
-                Button {
-                } label: {
-                    PersonCard(credit, role: credit.shownRole)
-                        .scaleEffect(1.6)
-                        .frame(width: 180, height: 260)
-                }
-                .buttonStyle(CardButtonStyle())
+                PersonLink(serverId: card.serverId, credit: credit, role: credit.shownRole)
             }
+            NavigationLink(value: Route.credits(serverId: card.serverId, itemId: card.itemId, crew: false)) {
+                SeeAll()
+            }
+            .buttonStyle(PersonButtonStyle())
         }
     }
 
