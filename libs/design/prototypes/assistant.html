@@ -255,9 +255,8 @@ function draw(now) {
     g.globalCompositeOperation = light ? "source-over" : "lighter";
     lights(1);
     g.globalCompositeOperation = "source-over";
-    // Depth: a little darker toward the lower right, fading out before the
-    // edge so that nothing outlines the sphere.
-    at(R - edge * .35, R - edge * .4, edge * .2, edge * 1.5, [[0, "rgba(10,8,40,0)"], [.6, "rgba(10,8,40,0)"], [1, `rgba(10,8,40,${light ? .16 : .3})`]]);
+    // Depth: darker toward the lower edge, as light falls from above.
+    at(R - edge * .25, R - edge * .3, edge * .2, edge * 1.3, [[0, "rgba(10,8,40,0)"], [.7, "rgba(10,8,40,0)"], [1, `rgba(10,8,40,${light ? .28 : .45})`]]);
     // The highlight: a soft reflection at the top left.
     g.save();
     g.translate(R - edge * .32, R - edge * .46);
