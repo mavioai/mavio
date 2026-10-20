@@ -43,7 +43,21 @@ function goTargets(root, workspaceRoot) {
       inputs: ['{projectRoot}/**/*.proto', '{projectRoot}/buf.yaml'],
     });
   }
+  if (root.startsWith('plugins/') && existsSync(join(workspaceRoot, root, 'manifest.json'))) {
+    targets.dev = devTarget(root);
+  }
   return targets;
+}
+
+// devTarget builds a plugin into its dist/dev, which a server run with
+// --plugin-dev runs in place, and builds it again when its sources change.
+function devTarget(root) {
+  return {
+    executor: 'nx:run-commands',
+    options: { command: `go run ./cmd/plugindist -dev ../../${root}`, cwd: 'tools/plugindist' },
+    cache: false,
+    continuous: true,
+  };
 }
 
 const createNodesFn = async (configFiles, _options, context) =>

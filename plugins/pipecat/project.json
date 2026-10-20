@@ -16,6 +16,12 @@
       ],
       "outputs": ["{projectRoot}/dist/plugin"]
     },
+    "dev": {
+      "command": "go run ./cmd/plugindist -dev ../../plugins/pipecat",
+      "options": { "cwd": "{workspaceRoot}/tools/plugindist" },
+      "cache": false,
+      "continuous": true
+    },
     "test": {
       "command": "uv run --package mavio-pipecat pytest plugins/pipecat",
       "options": { "cwd": "{workspaceRoot}" },

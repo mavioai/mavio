@@ -100,21 +100,30 @@ func sources(dir string) ([]source, error) {
 	}
 	var srcs []source
 	for _, p := range paths {
-		m, err := manifest.Load(filepath.Dir(p))
+		s, err := load(filepath.Dir(p))
 		if err != nil {
-			return nil, fmt.Errorf("%s: %w", p, err)
+			return nil, err
 		}
-		if m.GetCategory() == pluginv1.Category_CATEGORY_UNSPECIFIED {
-			return nil, fmt.Errorf("%s: no category", p)
-		}
-		locales, err := manifest.LoadLocales(filepath.Dir(p))
-		if err != nil {
-			return nil, fmt.Errorf("%s: %w", filepath.Dir(p), err)
-		}
-		srcs = append(srcs, source{filepath.Dir(p), m, locales})
+		srcs = append(srcs, s)
 	}
 	slices.SortFunc(srcs, func(a, b source) int { return cmp.Compare(a.manifest.GetId(), b.manifest.GetId()) })
 	return srcs, nil
+}
+
+// load reads a plugin's manifest and translations.
+func load(dir string) (source, error) {
+	m, err := manifest.Load(dir)
+	if err != nil {
+		return source{}, fmt.Errorf("%s: %w", dir, err)
+	}
+	if m.GetCategory() == pluginv1.Category_CATEGORY_UNSPECIFIED {
+		return source{}, fmt.Errorf("%s: no category", dir)
+	}
+	locales, err := manifest.LoadLocales(dir)
+	if err != nil {
+		return source{}, fmt.Errorf("%s: %w", dir, err)
+	}
+	return source{dir, m, locales}, nil
 }
 
 // Dist packages the plugins and writes their catalog, returning its path.
@@ -227,29 +236,7 @@ func pack(ctx context.Context, o Options, s source, goos, arch string) (Version,
 	}
 	defer os.RemoveAll(tmp)
 	folder := filepath.Join(tmp, "plugin")
-	exe := "plugin"
-	if goos == "windows" {
-		exe = "plugin.exe"
-	}
-	switch {
-	case m.GetRuntime() == pluginv1.Runtime_RUNTIME_WASM:
-		exe = "plugin.wasm"
-		err = run(ctx, s.dir, []string{"GOOS=wasip1", "GOARCH=wasm", "CGO_ENABLED=0"},
-			"go", "build", "-trimpath", "-ldflags=-s -w", "-buildmode=c-shared", "-o", filepath.Join(folder, exe), ".")
-	case exists(filepath.Join(s.dir, "go.mod")):
-		err = run(ctx, s.dir, []string{"GOOS=" + goos, "GOARCH=" + arch, "CGO_ENABLED=0"},
-			"go", "build", "-trimpath", "-ldflags=-s -w -X main.Version="+m.GetVersion(), "-o", filepath.Join(folder, exe), ".")
-	case exists(filepath.Join(s.dir, "package.json")):
-		// A TypeScript plugin compiled by Bun into the folder.
-		err = run(ctx, s.dir, nil, "bun", "scripts/build.ts", goos+"/"+arch, folder)
-	case python(s) && o.Out == "":
-		err = devLauncher(s.dir, filepath.Join(folder, exe))
-	case python(s):
-		err = BuildPython(ctx, s.dir, goos, arch, folder)
-	default:
-		err = errors.New("neither a WASM, Go, Bun nor Python plugin")
-	}
-	if err != nil {
+	if err := build(ctx, s, goos, arch, folder, o.Out == ""); err != nil {
 		return Version{}, err
 	}
 
@@ -413,4 +400,36 @@ func exists(path string) bool {
 // Windows.
 func fileURL(abs string) string {
 	return (&url.URL{Scheme: "file", Path: "/" + strings.TrimPrefix(filepath.ToSlash(abs), "/")}).String()
+}
+
+// build builds a plugin into folder, for goos and arch unless it is a WASM
+// plugin; dev runs a Python plugin from the uv workspace instead of
+// packaging it.
+func build(ctx context.Context, s source, goos, arch, folder string, dev bool) error {
+	m := s.manifest
+	exe := "plugin"
+	if goos == "windows" {
+		exe = "plugin.exe"
+	}
+	switch {
+	case m.GetRuntime() == pluginv1.Runtime_RUNTIME_WASM:
+		exe = "plugin.wasm"
+		return run(ctx, s.dir, []string{"GOOS=wasip1", "GOARCH=wasm", "CGO_ENABLED=0"},
+			"go", "build", "-trimpath", "-ldflags=-s -w", "-buildmode=c-shared", "-o", filepath.Join(folder, exe), ".")
+	case exists(filepath.Join(s.dir, "go.mod")):
+		return run(ctx, s.dir, []string{"GOOS=" + goos, "GOARCH=" + arch, "CGO_ENABLED=0"},
+			"go", "build", "-trimpath", "-ldflags=-s -w -X main.Version="+m.GetVersion(), "-o", filepath.Join(folder, exe), ".")
+	case exists(filepath.Join(s.dir, "package.json")):
+		// A TypeScript plugin compiled by Bun into the folder.
+		return run(ctx, s.dir, nil, "bun", "scripts/build.ts", goos+"/"+arch, folder)
+	case python(s) && dev:
+		if goos == "windows" {
+			return errors.New("python plugins run from the uv workspace only on macOS and Linux")
+		}
+		return devLauncher(s.dir, filepath.Join(folder, exe))
+	case python(s):
+		return BuildPython(ctx, s.dir, goos, arch, folder)
+	default:
+		return errors.New("neither a WASM, Go, Bun nor Python plugin")
+	}
 }

@@ -273,6 +273,11 @@ func PythonFolder(ctx context.Context, dir, goos, arch, folder string) error {
 	if err := BuildPython(ctx, dir, goos, arch, folder); err != nil {
 		return err
 	}
+	return copyManifest(dir, folder)
+}
+
+// copyManifest copies a plugin's manifest and translations into a folder.
+func copyManifest(dir, folder string) error {
 	files, err := filepath.Glob(filepath.Join(dir, manifest.LocalesDir, "*.json"))
 	if err != nil {
 		return err

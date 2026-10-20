@@ -35,6 +35,14 @@
         "outputs": [
           "{projectRoot}/dist/plugin"
         ]
+      },
+      "dev": {
+        "command": "go run ./cmd/plugindist -dev ../../plugins/agent",
+        "options": {
+          "cwd": "{workspaceRoot}/tools/plugindist"
+        },
+        "cache": false,
+        "continuous": true
       }
     }
   }
