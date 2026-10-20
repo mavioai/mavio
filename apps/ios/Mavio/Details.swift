@@ -737,11 +737,6 @@ extension NextUp {
     }
 }
 
-/// A length of time, as "1h 52m".
-func minutesText(_ seconds: TimeInterval) -> String {
-    Duration.seconds((seconds / 60).rounded() * 60).formatted(.units(allowed: [.hours, .minutes], width: .narrow))
-}
-
 /// The overview, three lines long with More opening it whole in place.
 private struct InlineOverview: View {
     let text: String

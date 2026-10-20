@@ -52,7 +52,9 @@ let package = Package(
             dependencies: [
                 "MavioKit", .product(name: "MavioDesign", package: "design"),
                 .product(name: "NukeUI", package: "Nuke"),
-            ]
+            ],
+            // The logos of the sites a title's ratings and links come from.
+            resources: [.process("Resources")]
         ),
         .testTarget(name: "MavioKitTests", dependencies: ["MavioKit"]),
         .testTarget(name: "MavioPlayerTests", dependencies: ["MavioPlayer"]),

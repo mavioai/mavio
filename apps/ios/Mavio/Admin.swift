@@ -2,19 +2,6 @@ import MavioKit
 import MavioUI
 import SwiftUI
 
-/// The paths of the server's procedures the settings call.
-enum Procedure {
-    static func system(_ method: String) -> String { "/mavio.system.v1.SystemService/\(method)" }
-    static func plugins(_ method: String) -> String { "/mavio.system.v1.PluginManagementService/\(method)" }
-    static func users(_ method: String) -> String { "/mavio.user.v1.UserService/\(method)" }
-    static func activity(_ method: String) -> String { "/mavio.system.v1.ActivityService/\(method)" }
-    static func tasks(_ method: String) -> String { "/mavio.system.v1.TaskService/\(method)" }
-    static func backups(_ method: String) -> String { "/mavio.system.v1.BackupService/\(method)" }
-    static func sessions(_ method: String) -> String { "/mavio.session.v1.SessionService/\(method)" }
-    static func issues(_ method: String) -> String { "/mavio.acquisition.v1.IssueService/\(method)" }
-    static func items(_ method: String) -> String { "/mavio.library.v1.ItemService/\(method)" }
-}
-
 /// The settings' Server group, as the web UI's on a phone (docs/clients.md
 /// §6.3): the picker of the servers signed in to, then the sections of the
 /// server chosen, in the order a server is set up and kept — its
@@ -246,16 +233,6 @@ enum ServerSection: Hashable {
         case .logs: LogsView(server: server)
         case .backups: BackupsView(server: server)
         }
-    }
-}
-
-extension AppModel {
-    /// Calls a procedure of a server as its session.
-    func call<Response: SwiftProtobuf.Message>(
-        _ server: ServerRecord, _ procedure: String, _ request: some SwiftProtobuf.Message,
-        as _: Response.Type = Response.self
-    ) async throws -> Response {
-        try await client.call(server.id, procedure, request, as: Response.self)
     }
 }
 

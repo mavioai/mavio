@@ -2,11 +2,6 @@ import MavioKit
 import MavioUI
 import SwiftUI
 
-extension Procedure {
-    static func localization(_ method: String) -> String { "/mavio.system.v1.LocalizationService/\(method)" }
-    static func auth(_ method: String) -> String { "/mavio.auth.v1.AuthService/\(method)" }
-}
-
 /// A row of a settings form: its label and what it means, then its control.
 struct FormRow<Control: View>: View {
     let label: String

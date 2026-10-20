@@ -2,11 +2,6 @@ import MavioKit
 import MavioUI
 import SwiftUI
 
-extension Procedure {
-    static func libraries(_ method: String) -> String { "/mavio.library.v1.LibraryService/\(method)" }
-    static func storage(_ method: String) -> String { "/mavio.storage.v1.StorageService/\(method)" }
-}
-
 // MARK: Libraries
 
 /// A kind of library as the settings show it: its name, icon and color.

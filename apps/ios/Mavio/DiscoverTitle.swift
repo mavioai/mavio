@@ -2,113 +2,6 @@ import MavioKit
 import MavioUI
 import SwiftUI
 
-typealias TitleInfo = Mavio_Acquisition_V1_Title
-typealias TitleCredit = Mavio_Acquisition_V1_TitleCredit
-typealias Rating = Mavio_Plugin_V1_Rating
-
-extension AppModel {
-    /// A movie or series by its TMDB ID, with what the server has of it.
-    func title(_ serverId: String, _ kind: MediaKind, _ tmdbId: Int32) async throws -> TitleInfo {
-        var r = Mavio_Acquisition_V1_GetTitleRequest()
-        r.mediaKind = kind
-        r.tmdbID = tmdbId
-        r.language = discoverLanguage
-        let response = try await client.call(
-            serverId, Procedure.discover("GetTitle"), r, as: Mavio_Acquisition_V1_GetTitleResponse.self)
-        return response.title
-    }
-}
-
-extension Discovery {
-    /// The popular titles of a kind filtered alike a title, titled by the
-    /// value; nil without such a catalog.
-    func alike(_ serverId: String, _ kind: MediaKind, _ name: String, _ fill: (inout CatalogQuery) -> Void)
-        -> CatalogQuery?
-    {
-        guard let popular = popular(kind) else { return nil }
-        var query = CatalogQuery(serverId: serverId, catalog: popular.id, kind: kind, title: name)
-        fill(&query)
-        return query
-    }
-}
-
-extension Mavio_Library_V1_CreditKind {
-    /// The job, as an item's credits name it.
-    var job: CreditJob {
-        switch self {
-        case .actor: .actor
-        case .guestStar: .guestStar
-        case .director: .director
-        case .writer: .writer
-        case .producer: .producer
-        case .creator: .creator
-        case .composer: .composer
-        case .conductor: .conductor
-        case .lyricist: .lyricist
-        case .artist: .artist
-        case .author: .author
-        case .narrator: .narrator
-        default: .other
-        }
-    }
-}
-
-extension TitleCredit {
-    /// Their TMDB ID, which opens their page; 0 when unknown.
-    var tmdbId: Int32 { Int32(externalIds["tmdb"] ?? "") ?? 0 }
-    /// Whether they act.
-    var isCast: Bool { kind.job.isCast }
-    /// What a card says they did: the character played, else the job.
-    var shownRole: String? {
-        if isCast { return role.isEmpty ? nil : role }
-        return kind.job == .other && !role.isEmpty ? role : kind.job.label
-    }
-}
-
-/// The jobs Seerr shows first of a title's crew, in its order, after a
-/// series' creators.
-private let crewJobs = [
-    "Director", "Creator", "Screenplay", "Writer", "Original Music Composer", "Composer", "Editor", "Producer",
-    "Co-Producer", "Executive Producer", "Animation",
-]
-
-/// Where a credit stands among the leading crew.
-private func crewRank(_ c: TitleCredit) -> Int {
-    if c.kind == .creator { return -1 }
-    let kindJob =
-        switch c.kind {
-        case .director: "Director"
-        case .writer: "Writer"
-        case .composer: "Composer"
-        case .producer: "Producer"
-        default: ""
-        }
-    let job = c.role.isEmpty ? kindJob : c.role
-    return crewJobs.firstIndex(of: job) ?? crewJobs.count
-}
-
-/// An ISO 8601 calendar date, as "Nov 2, 2026"; nil when empty.
-func dayText(_ iso: String) -> String? {
-    guard !iso.isEmpty, let date = try? Date(iso + "T00:00:00Z", strategy: .iso8601) else { return nil }
-    return date.formatted(Date.FormatStyle(date: .abbreviated, time: .omitted, timeZone: .gmt))
-}
-
-/// An amount of US dollars; nil when 0, which stands for unknown.
-func moneyText(_ dollars: Int64) -> String? {
-    dollars > 0 ? dollars.formatted(.currency(code: "USD").precision(.fractionLength(0))) : nil
-}
-
-/// The name of an ISO 639-1 language in the app's language.
-func languageText(_ code: String) -> String {
-    Locale.current.localizedString(forLanguageCode: code) ?? code
-}
-
-/// The name of an ISO 3166-1 country in the app's language, after its flag.
-func countryText(_ code: String) -> String {
-    let flag = code.unicodeScalars.compactMap { Unicode.Scalar(0x1F1A5 + $0.value) }.map(String.init).joined()
-    return "\(flag) \(Locale.current.localizedString(forRegionCode: code) ?? code)"
-}
-
 /// The locale of TMDB's pages, as "en-US".
 private var webLocale: String {
     (MavioStrings.bundle.preferredLocalizations.first ?? "en").replacingOccurrences(of: "_", with: "-")
@@ -561,18 +454,6 @@ private struct CollectionCard: View {
     }
 }
 
-extension AppModel {
-    /// A collection of movies by its TMDB ID.
-    func collection(_ serverId: String, _ tmdbId: Int32) async throws -> Mavio_Acquisition_V1_Collection {
-        var r = Mavio_Acquisition_V1_GetCollectionRequest()
-        r.tmdbCollectionID = tmdbId
-        r.language = discoverLanguage
-        return try await client.call(
-            serverId, Procedure.discover("GetCollection"), r, as: Mavio_Acquisition_V1_GetCollectionResponse.self
-        ).collection
-    }
-}
-
 /// A fact's value: plain, or opening the popular titles alike.
 private struct FactValue: Hashable {
     let text: String
@@ -737,24 +618,6 @@ private struct TitleFacts: View {
     }
 }
 
-extension Mavio_Plugin_V1_ProductionStatus {
-    /// The status's name; nil when unknown.
-    var text: String? {
-        switch self {
-        case .rumored: MavioStrings.discoverStatusRumored
-        case .planned: MavioStrings.discoverStatusPlanned
-        case .inProduction: MavioStrings.discoverStatusInProduction
-        case .postProduction: MavioStrings.discoverStatusPostProduction
-        case .released: MavioStrings.discoverStatusReleased
-        case .canceled: MavioStrings.discoverStatusCanceled
-        case .pilot: MavioStrings.discoverStatusPilot
-        case .returning: MavioStrings.discoverStatusReturning
-        case .ended: MavioStrings.discoverStatusEnded
-        default: nil
-        }
-    }
-}
-
 /// The services streaming a title, by their logos.
 struct WatchProviders: View {
     let providers: [Mavio_Plugin_V1_WatchProvider]
@@ -843,7 +706,7 @@ struct TitleRatings: View {
         -> some View
     {
         let content = HStack(spacing: 6) {
-            Image(logo).resizable().scaledToFit().frame(height: height)
+            Image.service(logo).resizable().scaledToFit().frame(height: height)
             Text(value).type(theme.type.callout).fontWeight(.semibold).foregroundStyle(theme.colors.textPrimary)
         }
         .accessibilityElement(children: .ignore)
@@ -865,7 +728,7 @@ private func tmdbURL(_ kind: MediaKind, _ tmdbId: Int32) -> String {
 struct ExternalLink: Hashable {
     let name: String
     let url: URL
-    /// The logo in Services.xcassets.
+    /// The logo, by `Image.service`.
     let logo: String
     /// The logo's width, as Seerr's.
     let width: CGFloat
@@ -922,7 +785,7 @@ struct ExternalLinks: View {
             }
             ForEach(links, id: \.self) { l in
                 Link(destination: l.url) {
-                    Image(l.logo).resizable().scaledToFit().frame(width: l.width, height: 24)
+                    Image.service(l.logo).resizable().scaledToFit().frame(width: l.width, height: 24)
                         .foregroundStyle(theme.colors.textPrimary)
                 }
                 .accessibilityLabel(l.name)
