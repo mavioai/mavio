@@ -55,6 +55,7 @@ import dev.mavio.core.AppModel
 import dev.mavio.core.ServerRecord
 import dev.mavio.core.StreamState
 import dev.mavio.design.MavioSpacing
+import dev.mavio.ui.AboutSettings
 import dev.mavio.ui.AccountCard
 import dev.mavio.ui.Appearance
 import dev.mavio.ui.ButtonKind
@@ -72,7 +73,6 @@ import dev.mavio.ui.RowDivider
 import dev.mavio.ui.SettingsField
 import dev.mavio.ui.SettingsList
 import dev.mavio.ui.SubtitlesAudioSettings
-import dev.mavio.ui.ValueRow
 import dev.mavio.ui.signedInAccount
 import dev.mavio.ui.signedInServers
 import dev.mavio.ui.text
@@ -86,12 +86,13 @@ enum class SettingsPage {
     Appearance,
     Playback,
     SubtitlesAudio,
+    About,
 }
 
 /**
  * The settings, as the web UI's on a phone: the account's card, opening
- * the account with its servers; this device's sections; the versions; and
- * signing out.
+ * the account with its servers; this device's sections; About, with the
+ * versions; and signing out.
  */
 @Composable
 fun SettingsScreen(model: AppModel) {
@@ -99,7 +100,6 @@ fun SettingsScreen(model: AppModel) {
     val servers = signedInServers(model)
     val navigator = LocalNavigator.current
     val scope = rememberCoroutineScope()
-    val context = LocalContext.current
     val standalone = servers.firstOrNull()?.takeIf { signedInAccount(model) == null }
     SettingsList(stringResource(R.string.nav_settings), large = true) {
         item {
@@ -128,10 +128,9 @@ fun SettingsScreen(model: AppModel) {
         serverGroup(model, servers)
         item {
             Group {
-                val app = remember { context.packageManager.getPackageInfo(context.packageName, 0).versionName.orEmpty() }
-                ValueRow("Mavio", app)
-                RowDivider()
-                ValueRow("Core", dev.mavio.core.version)
+                EntryRow(stringResource(R.string.settings_about), R.drawable.ic_info_fill, Color(0xFF8E8E93)) {
+                    navigator.open(Route.Setting(SettingsPage.About))
+                }
             }
         }
         item {
@@ -156,6 +155,7 @@ fun SettingsPageScreen(model: AppModel, page: SettingsPage) {
         SettingsPage.Appearance -> AppearancePage()
         SettingsPage.Playback -> PlaybackSettings()
         SettingsPage.SubtitlesAudio -> SubtitlesAudioSettings(model)
+        SettingsPage.About -> AboutSettings(model)
     }
 }
 

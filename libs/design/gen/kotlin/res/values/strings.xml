@@ -756,6 +756,34 @@
     <string name="menu_help">Help</string>
     <!-- Group of the settings that only affect this device. -->
     <string name="settings_this_device">This Device</string>
+    <!-- Settings section of the app's and the device's facts, such as their versions. -->
+    <string name="settings_about">About</string>
+    <!-- Group of the About section's facts about the app. -->
+    <string name="about_app">App</string>
+    <!-- The app's name, as the servers know it. -->
+    <string name="about_app_name">App Name</string>
+    <!-- The app's version: a release's, else 0.0.0 and the commit it was built at. -->
+    <string name="about_client_version">Client Version</string>
+    <!-- The version of the clients' shared core in the app. -->
+    <string name="about_core_version">Core Version</string>
+    <!-- The app's license. -->
+    <string name="about_license">License</string>
+    <!-- Group of the About section's facts about the device. -->
+    <string name="about_device">Device</string>
+    <!-- The device's name, as the servers know it. -->
+    <string name="about_device_name">Device Name</string>
+    <!-- The device's ID, as the servers know it. -->
+    <string name="about_device_id">Device ID</string>
+    <!-- Footer of the About section's device group. -->
+    <string name="about_device_footer">The servers know this device by its name and ID.</string>
+    <!-- The device's manufacturer. -->
+    <string name="about_manufacturer">Manufacturer</string>
+    <!-- The device's model. -->
+    <string name="about_model">Model</string>
+    <!-- The version of the device's operating system. -->
+    <string name="about_system">System Version</string>
+    <!-- The processor architecture the app runs on. -->
+    <string name="about_architecture">Architecture</string>
     <!-- Settings section of the color theme and TV mode. -->
     <string name="settings_appearance">Appearance</string>
     <!-- Explanation under the Appearance title. -->

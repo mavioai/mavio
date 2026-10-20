@@ -32,6 +32,9 @@ class AppModel(context: Context, clientName: String) {
     /** The core. */
     val client: Client
 
+    /** This device as the servers know it. */
+    val device: DeviceInfo = device(context, clientName)
+
     private val _servers = MutableStateFlow<List<ServerRecord>>(emptyList())
 
     /** The servers, in the user's order. */
@@ -83,7 +86,7 @@ class AppModel(context: Context, clientName: String) {
         downloadsFolder = dir.resolve("Downloads").apply { mkdirs() }
         client = Client(
             dir.resolve("core.sqlite").path,
-            device(context, clientName),
+            device,
             KeystoreTokens(context),
             relay,
         )

@@ -371,6 +371,20 @@ export type MessageKey =
   | 'menu.bringAllToFront'
   | 'menu.help'
   | 'settings.thisDevice'
+  | 'settings.about'
+  | 'about.app'
+  | 'about.appName'
+  | 'about.clientVersion'
+  | 'about.coreVersion'
+  | 'about.license'
+  | 'about.device'
+  | 'about.deviceName'
+  | 'about.deviceId'
+  | 'about.deviceFooter'
+  | 'about.manufacturer'
+  | 'about.model'
+  | 'about.system'
+  | 'about.architecture'
   | 'settings.appearance'
   | 'settings.appearanceMessage'
   | 'settings.system'
@@ -2337,6 +2351,20 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "menu.bringAllToFront": "Bring All to Front",
     "menu.help": "Help",
     "settings.thisDevice": "This Device",
+    "settings.about": "About",
+    "about.app": "App",
+    "about.appName": "App Name",
+    "about.clientVersion": "Client Version",
+    "about.coreVersion": "Core Version",
+    "about.license": "License",
+    "about.device": "Device",
+    "about.deviceName": "Device Name",
+    "about.deviceId": "Device ID",
+    "about.deviceFooter": "The servers know this device by its name and ID.",
+    "about.manufacturer": "Manufacturer",
+    "about.model": "Model",
+    "about.system": "System Version",
+    "about.architecture": "Architecture",
     "settings.appearance": "Appearance",
     "settings.appearanceMessage": "Only affects this device.",
     "settings.system": "System",
@@ -4301,6 +4329,20 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "menu.bringAllToFront": "前置全部窗口",
     "menu.help": "帮助",
     "settings.thisDevice": "这台设备",
+    "settings.about": "关于",
+    "about.app": "应用",
+    "about.appName": "应用名称",
+    "about.clientVersion": "客户端版本",
+    "about.coreVersion": "Core 版本",
+    "about.license": "许可证",
+    "about.device": "设备",
+    "about.deviceName": "设备名称",
+    "about.deviceId": "设备 ID",
+    "about.deviceFooter": "服务器以这个名称和 ID 识别这台设备。",
+    "about.manufacturer": "制造商",
+    "about.model": "型号",
+    "about.system": "系统版本",
+    "about.architecture": "架构",
     "settings.appearance": "外观",
     "settings.appearanceMessage": "只影响这台设备。",
     "settings.system": "跟随系统",

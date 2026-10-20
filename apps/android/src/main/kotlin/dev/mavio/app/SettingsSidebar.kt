@@ -56,8 +56,8 @@ import mavio.user.v1.UserOuterClass.GetCurrentUserResponse
 import mavio.user.v1.getCurrentUserRequest
 
 // The settings' own sidebar in the wide layout (docs/clients.md §6.3), as
-// the web UI's: Home, the title, the account's card, This Device and the
-// Server group, whose menus open in place while they hold the section
+// the web UI's: Home, the title, the account's card, This Device, the
+// Server group and About, whose menus open in place while they hold the section
 // shown. The section shows beside it.
 
 /** The section the wide layout shows when the settings open. */
@@ -136,6 +136,7 @@ internal fun SettingsSidebar(model: AppModel, section: Route?, modifier: Modifie
                 }
             }
         }
+        Link(R.string.settings_about, R.drawable.ic_info_fill, Color(0xFF8E8E93), Route.Setting(SettingsPage.About), section, onSelect)
     }
 }
 

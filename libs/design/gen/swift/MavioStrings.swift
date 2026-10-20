@@ -1211,6 +1211,48 @@ public enum MavioStrings {
     /// Group of the settings that only affect this device.
     public static var settingsThisDevice: String { NSLocalizedString("settings.thisDevice", bundle: .module, comment: "") }
 
+    /// Settings section of the app's and the device's facts, such as their versions.
+    public static var settingsAbout: String { NSLocalizedString("settings.about", bundle: .module, comment: "") }
+
+    /// Group of the About section's facts about the app.
+    public static var aboutApp: String { NSLocalizedString("about.app", bundle: .module, comment: "") }
+
+    /// The app's name, as the servers know it.
+    public static var aboutAppName: String { NSLocalizedString("about.appName", bundle: .module, comment: "") }
+
+    /// The app's version: a release's, else 0.0.0 and the commit it was built at.
+    public static var aboutClientVersion: String { NSLocalizedString("about.clientVersion", bundle: .module, comment: "") }
+
+    /// The version of the clients' shared core in the app.
+    public static var aboutCoreVersion: String { NSLocalizedString("about.coreVersion", bundle: .module, comment: "") }
+
+    /// The app's license.
+    public static var aboutLicense: String { NSLocalizedString("about.license", bundle: .module, comment: "") }
+
+    /// Group of the About section's facts about the device.
+    public static var aboutDevice: String { NSLocalizedString("about.device", bundle: .module, comment: "") }
+
+    /// The device's name, as the servers know it.
+    public static var aboutDeviceName: String { NSLocalizedString("about.deviceName", bundle: .module, comment: "") }
+
+    /// The device's ID, as the servers know it.
+    public static var aboutDeviceId: String { NSLocalizedString("about.deviceId", bundle: .module, comment: "") }
+
+    /// Footer of the About section's device group.
+    public static var aboutDeviceFooter: String { NSLocalizedString("about.deviceFooter", bundle: .module, comment: "") }
+
+    /// The device's manufacturer.
+    public static var aboutManufacturer: String { NSLocalizedString("about.manufacturer", bundle: .module, comment: "") }
+
+    /// The device's model.
+    public static var aboutModel: String { NSLocalizedString("about.model", bundle: .module, comment: "") }
+
+    /// The version of the device's operating system.
+    public static var aboutSystem: String { NSLocalizedString("about.system", bundle: .module, comment: "") }
+
+    /// The processor architecture the app runs on.
+    public static var aboutArchitecture: String { NSLocalizedString("about.architecture", bundle: .module, comment: "") }
+
     /// Settings section of the color theme and TV mode.
     public static var settingsAppearance: String { NSLocalizedString("settings.appearance", bundle: .module, comment: "") }
 

@@ -31,7 +31,6 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
@@ -45,6 +44,7 @@ import dev.mavio.core.ServerRecord
 import dev.mavio.core.StreamState
 import dev.mavio.design.MavioRadius
 import dev.mavio.design.MavioSpacing
+import dev.mavio.ui.AboutSettings
 import dev.mavio.ui.AccountCard
 import dev.mavio.ui.Avatar
 import dev.mavio.ui.ButtonKind
@@ -65,7 +65,6 @@ import dev.mavio.ui.SettingsList
 import dev.mavio.ui.SubtitlesAudioSettings
 import dev.mavio.ui.TvMenu
 import dev.mavio.ui.TvMenuItem
-import dev.mavio.ui.ValueRow
 import dev.mavio.ui.signedInAccount
 import dev.mavio.ui.signedInServers
 import dev.mavio.ui.text
@@ -78,6 +77,7 @@ enum class SettingsSection {
     Account,
     Playback,
     SubtitlesAudio,
+    About,
 }
 
 /**
@@ -95,13 +95,14 @@ fun SettingsPage(model: AppModel, page: Page.Settings) {
         SettingsSection.Account -> AccountSection(model)
         SettingsSection.Playback -> PlaybackSettings()
         SettingsSection.SubtitlesAudio -> SubtitlesAudioSettings(model)
+        SettingsSection.About -> AboutSettings(model)
     }
 }
 
 /**
  * The list: the user's card, opening the account; the users to switch to
- * on a standalone server; this device's sections; the versions; and signing
- * out. It opens with focus on its first element, or the entry a section
+ * on a standalone server; this device's sections; About, with the
+ * versions; and signing out. It opens with focus on its first element, or the entry a section
  * was opened from.
  */
 @Composable
@@ -110,7 +111,6 @@ private fun SettingsListPage(model: AppModel, page: Page.Settings) {
     val switching = rememberUserSwitching(model)
     val servers = signedInServers(model)
     val scope = rememberCoroutineScope()
-    val context = LocalContext.current
     val focus = page.focus
     val first = focus.of("account")
     LaunchedEffect(switching.server?.id, switching.server?.userId) { switching.load() }
@@ -164,10 +164,12 @@ private fun SettingsListPage(model: AppModel, page: Page.Settings) {
         serverGroup(model, servers, page.admins) { Modifier.focusKey(focus, it) }
         item {
             Group {
-                val app = remember { context.packageManager.getPackageInfo(context.packageName, 0).versionName.orEmpty() }
-                ValueRow("Mavio", app)
-                RowDivider()
-                ValueRow("Core", dev.mavio.core.version)
+                EntryRow(
+                    stringResource(R.string.settings_about),
+                    R.drawable.ic_info_fill,
+                    Color(0xFF8E8E93),
+                    Modifier.focusKey(focus, "about"),
+                ) { open(SettingsSection.About) }
             }
         }
         item {
