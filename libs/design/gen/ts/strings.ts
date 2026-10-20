@@ -348,6 +348,28 @@ export type MessageKey =
   | 'menu.standardMode'
   | 'menu.fullScreen'
   | 'menu.exitFullScreen'
+  | 'menu.about'
+  | 'menu.services'
+  | 'menu.hide'
+  | 'menu.hideOthers'
+  | 'menu.showAll'
+  | 'menu.quit'
+  | 'menu.file'
+  | 'menu.close'
+  | 'menu.edit'
+  | 'menu.undo'
+  | 'menu.redo'
+  | 'menu.cut'
+  | 'menu.copy'
+  | 'menu.paste'
+  | 'menu.selectAll'
+  | 'menu.view'
+  | 'menu.toggleSidebar'
+  | 'menu.window'
+  | 'menu.minimize'
+  | 'menu.zoom'
+  | 'menu.bringAllToFront'
+  | 'menu.help'
   | 'settings.thisDevice'
   | 'settings.appearance'
   | 'settings.appearanceMessage'
@@ -2292,6 +2314,28 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "menu.standardMode": "Switch to Standard Mode",
     "menu.fullScreen": "Full Screen",
     "menu.exitFullScreen": "Exit Full Screen",
+    "menu.about": "About Mavio",
+    "menu.services": "Services",
+    "menu.hide": "Hide Mavio",
+    "menu.hideOthers": "Hide Others",
+    "menu.showAll": "Show All",
+    "menu.quit": "Quit Mavio",
+    "menu.file": "File",
+    "menu.close": "Close Window",
+    "menu.edit": "Edit",
+    "menu.undo": "Undo",
+    "menu.redo": "Redo",
+    "menu.cut": "Cut",
+    "menu.copy": "Copy",
+    "menu.paste": "Paste",
+    "menu.selectAll": "Select All",
+    "menu.view": "View",
+    "menu.toggleSidebar": "Show or Hide Sidebar",
+    "menu.window": "Window",
+    "menu.minimize": "Minimize",
+    "menu.zoom": "Zoom",
+    "menu.bringAllToFront": "Bring All to Front",
+    "menu.help": "Help",
     "settings.thisDevice": "This Device",
     "settings.appearance": "Appearance",
     "settings.appearanceMessage": "Only affects this device.",
@@ -4234,6 +4278,28 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "menu.standardMode": "切换到普通模式",
     "menu.fullScreen": "全屏",
     "menu.exitFullScreen": "退出全屏",
+    "menu.about": "关于 Mavio",
+    "menu.services": "服务",
+    "menu.hide": "隐藏 Mavio",
+    "menu.hideOthers": "隐藏其他",
+    "menu.showAll": "全部显示",
+    "menu.quit": "退出 Mavio",
+    "menu.file": "文件",
+    "menu.close": "关闭窗口",
+    "menu.edit": "编辑",
+    "menu.undo": "撤销",
+    "menu.redo": "重做",
+    "menu.cut": "剪切",
+    "menu.copy": "拷贝",
+    "menu.paste": "粘贴",
+    "menu.selectAll": "全选",
+    "menu.view": "显示",
+    "menu.toggleSidebar": "显示或隐藏边栏",
+    "menu.window": "窗口",
+    "menu.minimize": "最小化",
+    "menu.zoom": "缩放",
+    "menu.bringAllToFront": "前置全部窗口",
+    "menu.help": "帮助",
     "settings.thisDevice": "这台设备",
     "settings.appearance": "外观",
     "settings.appearanceMessage": "只影响这台设备。",

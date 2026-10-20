@@ -710,6 +710,50 @@
     <string name="menu_full_screen">Full Screen</string>
     <!-- User menu item in TV mode leaving full screen. -->
     <string name="menu_exit_full_screen">Exit Full Screen</string>
+    <!-- The Mac's app menu item showing the app's version. -->
+    <string name="menu_about">About Mavio</string>
+    <!-- The Mac's app menu submenu of the system's services. -->
+    <string name="menu_services">Services</string>
+    <!-- The Mac's app menu item hiding the app. -->
+    <string name="menu_hide">Hide Mavio</string>
+    <!-- The Mac's app menu item hiding the other apps. -->
+    <string name="menu_hide_others">Hide Others</string>
+    <!-- The Mac's app menu item showing every app. -->
+    <string name="menu_show_all">Show All</string>
+    <!-- The Mac's app menu item quitting the app. -->
+    <string name="menu_quit">Quit Mavio</string>
+    <!-- The Mac's File menu. -->
+    <string name="menu_file">File</string>
+    <!-- The Mac's File menu item closing the window. -->
+    <string name="menu_close">Close Window</string>
+    <!-- The Mac's Edit menu. -->
+    <string name="menu_edit">Edit</string>
+    <!-- The Mac's Edit menu item undoing typing. -->
+    <string name="menu_undo">Undo</string>
+    <!-- The Mac's Edit menu item redoing typing. -->
+    <string name="menu_redo">Redo</string>
+    <!-- The Mac's Edit menu item cutting the selection. -->
+    <string name="menu_cut">Cut</string>
+    <!-- The Mac's Edit menu item copying the selection. -->
+    <string name="menu_copy">Copy</string>
+    <!-- The Mac's Edit menu item pasting. -->
+    <string name="menu_paste">Paste</string>
+    <!-- The Mac's Edit menu item selecting all of a field. -->
+    <string name="menu_select_all">Select All</string>
+    <!-- The Mac's View menu. -->
+    <string name="menu_view">View</string>
+    <!-- The Mac's View menu item showing or hiding the sidebar. -->
+    <string name="menu_toggle_sidebar">Show or Hide Sidebar</string>
+    <!-- The Mac's Window menu. -->
+    <string name="menu_window">Window</string>
+    <!-- The Mac's Window menu item minimizing the window. -->
+    <string name="menu_minimize">Minimize</string>
+    <!-- The Mac's Window menu item zooming the window. -->
+    <string name="menu_zoom">Zoom</string>
+    <!-- The Mac's Window menu item bringing the app's windows to the front. -->
+    <string name="menu_bring_all_to_front">Bring All to Front</string>
+    <!-- The Mac's Help menu. -->
+    <string name="menu_help">Help</string>
     <!-- Group of the settings that only affect this device. -->
     <string name="settings_this_device">This Device</string>
     <!-- Settings section of the color theme and TV mode. -->

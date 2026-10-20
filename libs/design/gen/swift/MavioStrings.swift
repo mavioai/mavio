@@ -1142,6 +1142,72 @@ public enum MavioStrings {
     /// User menu item in TV mode leaving full screen.
     public static var menuExitFullScreen: String { NSLocalizedString("menu.exitFullScreen", bundle: .module, comment: "") }
 
+    /// The Mac's app menu item showing the app's version.
+    public static var menuAbout: String { NSLocalizedString("menu.about", bundle: .module, comment: "") }
+
+    /// The Mac's app menu submenu of the system's services.
+    public static var menuServices: String { NSLocalizedString("menu.services", bundle: .module, comment: "") }
+
+    /// The Mac's app menu item hiding the app.
+    public static var menuHide: String { NSLocalizedString("menu.hide", bundle: .module, comment: "") }
+
+    /// The Mac's app menu item hiding the other apps.
+    public static var menuHideOthers: String { NSLocalizedString("menu.hideOthers", bundle: .module, comment: "") }
+
+    /// The Mac's app menu item showing every app.
+    public static var menuShowAll: String { NSLocalizedString("menu.showAll", bundle: .module, comment: "") }
+
+    /// The Mac's app menu item quitting the app.
+    public static var menuQuit: String { NSLocalizedString("menu.quit", bundle: .module, comment: "") }
+
+    /// The Mac's File menu.
+    public static var menuFile: String { NSLocalizedString("menu.file", bundle: .module, comment: "") }
+
+    /// The Mac's File menu item closing the window.
+    public static var menuClose: String { NSLocalizedString("menu.close", bundle: .module, comment: "") }
+
+    /// The Mac's Edit menu.
+    public static var menuEdit: String { NSLocalizedString("menu.edit", bundle: .module, comment: "") }
+
+    /// The Mac's Edit menu item undoing typing.
+    public static var menuUndo: String { NSLocalizedString("menu.undo", bundle: .module, comment: "") }
+
+    /// The Mac's Edit menu item redoing typing.
+    public static var menuRedo: String { NSLocalizedString("menu.redo", bundle: .module, comment: "") }
+
+    /// The Mac's Edit menu item cutting the selection.
+    public static var menuCut: String { NSLocalizedString("menu.cut", bundle: .module, comment: "") }
+
+    /// The Mac's Edit menu item copying the selection.
+    public static var menuCopy: String { NSLocalizedString("menu.copy", bundle: .module, comment: "") }
+
+    /// The Mac's Edit menu item pasting.
+    public static var menuPaste: String { NSLocalizedString("menu.paste", bundle: .module, comment: "") }
+
+    /// The Mac's Edit menu item selecting all of a field.
+    public static var menuSelectAll: String { NSLocalizedString("menu.selectAll", bundle: .module, comment: "") }
+
+    /// The Mac's View menu.
+    public static var menuView: String { NSLocalizedString("menu.view", bundle: .module, comment: "") }
+
+    /// The Mac's View menu item showing or hiding the sidebar.
+    public static var menuToggleSidebar: String { NSLocalizedString("menu.toggleSidebar", bundle: .module, comment: "") }
+
+    /// The Mac's Window menu.
+    public static var menuWindow: String { NSLocalizedString("menu.window", bundle: .module, comment: "") }
+
+    /// The Mac's Window menu item minimizing the window.
+    public static var menuMinimize: String { NSLocalizedString("menu.minimize", bundle: .module, comment: "") }
+
+    /// The Mac's Window menu item zooming the window.
+    public static var menuZoom: String { NSLocalizedString("menu.zoom", bundle: .module, comment: "") }
+
+    /// The Mac's Window menu item bringing the app's windows to the front.
+    public static var menuBringAllToFront: String { NSLocalizedString("menu.bringAllToFront", bundle: .module, comment: "") }
+
+    /// The Mac's Help menu.
+    public static var menuHelp: String { NSLocalizedString("menu.help", bundle: .module, comment: "") }
+
     /// Group of the settings that only affect this device.
     public static var settingsThisDevice: String { NSLocalizedString("settings.thisDevice", bundle: .module, comment: "") }
 
@@ -1177,6 +1243,12 @@ public enum MavioStrings {
 
     /// Setting that starts the next episode when one ends.
     public static var settingsAutoplayNext: String { NSLocalizedString("settings.autoplayNext", bundle: .module, comment: "") }
+
+    /// Setting that opens a new player window for each video played, so that several play at once.
+    public static var settingsPlayerWindows: String { NSLocalizedString("settings.playerWindows", bundle: .module, comment: "") }
+
+    /// Line under the setting of a window for each video.
+    public static var settingsPlayerWindowsMessage: String { NSLocalizedString("settings.playerWindowsMessage", bundle: .module, comment: "") }
 
     /// Settings section of the preferred audio and subtitles.
     public static var settingsSubtitlesAudio: String { NSLocalizedString("settings.subtitlesAudio", bundle: .module, comment: "") }
