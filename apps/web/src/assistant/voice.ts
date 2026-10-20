@@ -140,15 +140,25 @@ export class VoiceSession {
 
   /** Opens the microphone; fails when it is refused or missing. */
   static async capture(h: VoiceHandlers): Promise<VoiceSession> {
-    const media = await navigator.mediaDevices.getUserMedia({
-      audio: { channelCount: 1, echoCancellation: true, noiseSuppression: true, autoGainControl: true },
-    });
+    // The audio context is made in the press that opens the session, which
+    // lets it play, and readied while the microphone opens.
     const ctx = new AudioContext();
+    const url = URL.createObjectURL(new Blob([worklet], { type: "text/javascript" }));
+    const loaded = ctx.audioWorklet.addModule(url);
+    let media: MediaStream;
+    try {
+      [media] = await Promise.all([
+        navigator.mediaDevices.getUserMedia({ audio: { channelCount: 1, echoCancellation: true, noiseSuppression: true, autoGainControl: true } }),
+        loaded,
+      ]);
+    } catch (err) {
+      void ctx.close().catch(() => {});
+      throw err;
+    } finally {
+      URL.revokeObjectURL(url);
+    }
     const v = new VoiceSession(media, ctx, h);
     try {
-      const url = URL.createObjectURL(new Blob([worklet], { type: "text/javascript" }));
-      await ctx.audioWorklet.addModule(url);
-      URL.revokeObjectURL(url);
       const node = new AudioWorkletNode(ctx, "mavio-capture");
       node.port.onmessage = (e: MessageEvent<ArrayBuffer>) => v.audio(e.data);
       ctx.createMediaStreamSource(media).connect(node);
