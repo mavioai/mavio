@@ -35,7 +35,7 @@
   .orb canvas { width: 84px; height: 84px; flex: none; cursor: pointer; transition: opacity .4s; }
   .orb .st { color: var(--text); font-size: 13px; padding: 5px 11px; border-radius: 999px; background: var(--card); border: 1px solid var(--card-border); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); white-space: nowrap; }
   .orb .st:empty { display: none; }
-  :root[data-theme="light"] .orb canvas { filter: drop-shadow(0 6px 16px rgba(90, 70, 245, 0.28)); }
+  :root[data-theme="light"] .orb canvas { filter: drop-shadow(0 3px 6px rgba(90, 70, 245, 0.22)); }
   .icon { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; color: var(--text2); flex: none; cursor: pointer; background: var(--card); border: 1px solid var(--card-border); backdrop-filter: blur(20px); }
   .icon svg { width: 16px; height: 16px; }
   .phone .orb { top: auto; right: auto; bottom: 18px; left: 50%; transform: translateX(-50%); }
@@ -220,6 +220,18 @@ function draw(now) {
     const light = document.documentElement.dataset.theme === "light";
     g.globalCompositeOperation = light ? "source-over" : "lighter";
     const shrink = 1 - cur_.flash * .35;
+    if (light) {
+      // On a light page soft edges read as a smudge: the blobs are clipped
+      // to a crisp sphere, a ring while thinking, over a wash of the blue.
+      const edge = base * (cur_.size + cur_.lv * .45) * shrink * .92;
+      g.save();
+      g.beginPath();
+      g.arc(R, R, edge, 0, Math.PI * 2);
+      if (cur_.ring > .02) g.arc(R, R, edge * .5 * cur_.ring, 0, Math.PI * 2, true);
+      g.clip("evenodd");
+      g.fillStyle = `rgba(${blobs[2].l},${.55 * cur_.bright})`;
+      g.fillRect(0, 0, W, W);
+    }
     blobs.forEach((b, i) => {
       const a = phase * b.sp * 2 + b.ph;
       const orbit = base * (cur_.spread * (1 - cur_.ring) + cur_.ring * .55 + cur_.lv * .25) * shrink;
@@ -227,11 +239,14 @@ function draw(now) {
       const rad = base * (cur_.size + cur_.lv * .45) * shrink;
       const col = (light ? b.l : b.c).map((v, j) => Math.round(v + ([255, 70, 80][j] - v) * red));
       const grd = g.createRadialGradient(x, y, 0, x, y, rad);
+      // On a light page a long soft tail reads as a smudge: the blobs keep
+      // their color further out and end in a short falloff.
       grd.addColorStop(0, `rgba(${col},${.9 * cur_.bright})`);
       grd.addColorStop(.55, `rgba(${col},${(light ? .5 : .35) * cur_.bright})`);
       grd.addColorStop(1, `rgba(${col},0)`);
       g.fillStyle = grd; g.fillRect(0, 0, W, W);
     });
+    if (light) g.restore();
     if (cur_.flash > 0) {
       const grd = g.createRadialGradient(R, R, 0, R, R, base * .9);
       grd.addColorStop(0, `rgba(255,255,255,${.8 * cur_.flash})`); grd.addColorStop(1, "rgba(255,255,255,0)");
