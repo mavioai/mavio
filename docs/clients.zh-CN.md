@@ -122,6 +122,7 @@ flowchart LR
 * **字幕**：HLS 流以 WebVTT rendition 承载文本字幕，由 AVPlayer 自行显示。使用 AetherEngine 时，`MavioPlayer` 在画面而不是屏幕的范围内排布 cue，使字幕在任何宽高比与方向下都位于视频之上。
 * **画中画**：只用公开且被 App Store 允许的 `AVPictureInPictureController`。AVPlayer 直接支持，AetherEngine 经由其 `AVPlayerLayer` 或 `AVSampleBufferDisplayLayer` 内容源接入。tvOS 不显示样本缓冲显示层的画中画，因此 AetherEngine 在软件路径上播放时进入画中画，改由 AVPlayer 重新开始播放，由服务端处理该源。
 * **iPhone 与 iPad 应用不包含的功能**，即 App Store 不接受或可能不接受的：取得——索引器与下载客户端、画质配置、自定义格式与规则、想要清单、下载客户端的队列、条目的取得以及索引器搜索（§6.3.11、§6.3.16–§6.3.18、§6.3.31）——字幕设置及为条目搜索字幕提供者（§6.3.12、§6.3.21）、代理与挑战求解（§6.3.30）、探索的请求、插件（§6.3.3）、AI（其提供者与助理的设置）以及用户的 AI 对话（§6.3.13、§6.3.26）；随之还有概览中的插件容器，以及任务中取得、请求、字幕与插件的任务和作业。它也不在浏览器中打开其中任何一项；其余设置与 Web UI 一致。
+* **Mac 应用保留全部功能**，因为它不经 App Store 分发：设置采用 Web UI 的桌面布局，位于自己的边栏旁；边栏可返回首页，并平铺列出（各带一个彩色图块）账户、“高级功能”分组（索引搜索与 AI 对话，仅服务器管理员可见）、“这台设备”，以及所选服务器的各部分，其菜单的各部分就地展开；所选部分是由 Web UI 的分组构成的页面，最宽 900 点；发现页也有与 Web UI 一致的请求。核心不建模的流，例如 AI 对话的回答，经由核心的服务端流式调用送达页面。
 
 ### 4.3 Android（`apps/android`、`apps/android-tv`、`libs/android`）
 * **每种交互模型一个应用。** 手机、平板与折叠屏共用一个以 Compose 编写、采用自适应布局的应用；Android TV 与 Google TV 有自己的 Compose for TV 应用，围绕方向键焦点构建，并提供主屏上的 Watch Next 与频道。两者以同一应用 ID `dev.mavio.app` 作为同一个 Play 商店条目发布，TV 应用面向 TV 设备类型；两者都支持 Android 8.0（API 26）及以上。
