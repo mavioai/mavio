@@ -40,6 +40,10 @@ PLATFORMS = {
             "SUPPORTED_PLATFORMS": '"appletvos appletvsimulator"',
             "INFOPLIST_KEY_UILaunchScreen_Generation": "YES",
             "INFOPLIST_KEY_UIUserInterfaceStyle": "Automatic",
+            # As on the iPhone: plain HTTP on the local network, and the
+            # development mavio.dev a debug build signs in at.
+            "INFOPLIST_FILE": "Info.plist",
+            "INFOPLIST_KEY_NSLocalNetworkUsageDescription": '"Mavio finds and connects to media servers on your network."',
             "LD_RUNPATH_SEARCH_PATHS": '"$(inherited) @executable_path/Frameworks"',
         },
     },

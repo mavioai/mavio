@@ -1,0 +1,268 @@
+import MavioKit
+import MavioUI
+import SwiftUI
+
+/// A screen below the top-level destinations.
+enum Route: Hashable {
+    /// An item's details.
+    case item(serverId: String, itemId: String)
+    /// A library, on its Recommended tab.
+    case library(LibraryEntry)
+}
+
+/// An item to play, which the root presents the player for.
+struct PlayRequest: Identifiable, Hashable {
+    let id = UUID()
+    /// The server and item.
+    var serverId: String
+    var itemId: String
+    /// The title, shown while loading.
+    var title: String
+    /// Where to start, in seconds; unset starts where the server says.
+    var start: TimeInterval?
+}
+
+/// The top-level destinations, in the navigation bar's pill.
+enum Tab: Hashable, CaseIterable {
+    case home, libraries, search
+
+    var title: String {
+        switch self {
+        case .home: MavioStrings.navHome
+        case .libraries: MavioStrings.navLibraries
+        case .search: MavioStrings.navSearch
+        }
+    }
+}
+
+/// What the screens present over the tabs, and the pages each tab pushed.
+@MainActor
+@Observable
+final class Router {
+    /// The current tab.
+    var tab: Tab = .home
+    /// The pages each tab pushed.
+    var paths: [Tab: [Route]] = [:]
+    /// Whether the current tab's page scrolled, which puts a band under the bar.
+    var scrolled = false
+    /// Whether the settings show over the tabs.
+    var settings = false
+    /// The playback the player shows.
+    var playing: PlayRequest?
+
+    /// Plays an item.
+    func play(_ request: PlayRequest) {
+        playing = request
+    }
+
+    /// Opens a link of the app, as the Top Shelf's: `mavio://item/<server>/<item>`
+    /// shows an item's details on Home, `mavio://play/<server>/<item>` plays it.
+    func open(_ url: URL) {
+        let parts = url.pathComponents.filter { $0 != "/" }
+        guard url.scheme == "mavio", parts.count == 2 else { return }
+        let (serverId, itemId) = (parts[0], parts[1])
+        switch url.host() {
+        case "item":
+            (settings, playing, tab) = (false, nil, .home)
+            paths[.home] = [.item(serverId: serverId, itemId: itemId)]
+        case "play":
+            playing = PlayRequest(serverId: serverId, itemId: itemId, title: "")
+        default:
+            break
+        }
+    }
+
+    /// The pages of a tab, bound for its navigation stack.
+    func path(_ tab: Tab) -> Binding<[Route]> {
+        Binding(get: { self.paths[tab] ?? [] }, set: { self.paths[tab] = $0 })
+    }
+}
+
+/// The sign-in screen until a server is added, then the destinations under
+/// the navigation bar, on the dark background the television starts on
+/// (docs/tv.md §2, §3).
+struct RootView: View {
+    @Environment(AppModel.self) private var model
+    @Environment(\.scenePhase) private var phase
+    @State private var router = Router()
+
+    private let theme = Theme(colors: .dark, layout: .tv, type: .tv)
+
+    var body: some View {
+        Group {
+            if model.signInState == .signedOut && model.signedIn.isEmpty {
+                SignInView()
+            } else {
+                Tabs()
+            }
+        }
+        .environment(\.theme, theme)
+        .environment(router)
+        .background(theme.colors.tvBackground.ignoresSafeArea())
+        .preferredColorScheme(.dark)
+        .fullScreenCover(item: Bindable(router).playing) { request in
+            PlayerScreen(request: request)
+                .environment(\.theme, theme)
+                .environment(model)
+        }
+        .onOpenURL { router.open($0) }
+        #if DEBUG
+            // A debug build opens a link given at launch (`-open <url>`),
+            // with no remote to confirm it.
+            .task {
+                if let link = UserDefaults.standard.string(forKey: "open"), let url = URL(string: link) {
+                    router.open(url)
+                }
+            }
+        #endif
+        .onChange(of: phase, initial: true) { _, phase in
+            switch phase {
+            case .active: model.start()
+            case .background: model.stop()
+            default: break
+            }
+        }
+    }
+}
+
+/// The tabs' pages under the navigation bar, which deeper pages hide.
+private struct Tabs: View {
+    @Environment(Router.self) private var router
+    @Environment(\.theme) private var theme
+    @FocusState private var focus: BarFocus?
+
+    var body: some View {
+        // Deeper pages and Search hide the bar (§3, §6.4).
+        let deeper = !(router.paths[router.tab] ?? []).isEmpty || router.settings || router.tab == .search
+        ZStack(alignment: .top) {
+            page
+                .focusSection()
+                // Back on a tab's page moves focus up to its tab (§4).
+                .onExitCommand(perform: exit(deeper: deeper))
+            if !deeper {
+                NavBar(focus: $focus)
+                    .onExitCommand(perform: router.tab == .home ? nil : { focus = .tab(.home) })
+            }
+        }
+        .ignoresSafeArea()
+    }
+
+    /// What back does on the page: on a tab's page, focus moves up to its
+    /// tab; Search and the settings return to Home; deeper pages pop.
+    private func exit(deeper: Bool) -> (() -> Void)? {
+        if router.settings { return { router.settings = false } }
+        if router.tab == .search && (router.paths[.search] ?? []).isEmpty {
+            return { router.tab = .home }
+        }
+        return deeper ? nil : { focus = .tab(router.tab) }
+    }
+
+    @ViewBuilder private var page: some View {
+        if router.settings {
+            NavigationStack { SettingsView() }
+        } else {
+            switch router.tab {
+            case .home: stack(.home) { HomeView() }
+            case .libraries: stack(.libraries) { LibrariesView() }
+            case .search: stack(.search) { SearchView() }
+            }
+        }
+    }
+
+    private func stack(_ tab: Tab, @ViewBuilder root: () -> some View) -> some View {
+        NavigationStack(path: router.path(tab)) {
+            root().destinations()
+        }
+        .id(tab)
+    }
+}
+
+/// What has focus in the navigation bar.
+enum BarFocus: Hashable {
+    case tab(Tab)
+    case menu
+}
+
+/// The tabs in a pill centered at the top and the menu button at the right;
+/// focus on a tab opens it, as on tvOS (§3).
+private struct NavBar: View {
+    @Environment(Router.self) private var router
+    @Environment(AppModel.self) private var model
+    @Environment(\.theme) private var theme
+    var focus: FocusState<BarFocus?>.Binding
+
+    var body: some View {
+        ZStack {
+            HStack(spacing: MavioSpacing.s4) {
+                ForEach(Tab.allCases, id: \.self) { tab in
+                    Button {
+                        router.tab = tab
+                    } label: {
+                        Text(tab.title)
+                    }
+                    .buttonStyle(TabButtonStyle(selected: router.tab == tab))
+                    .focused(focus, equals: .tab(tab))
+                }
+            }
+            .padding(MavioSpacing.s4)
+            .background(theme.colors.surfaceRaised.opacity(0.6), in: .capsule)
+            .focusSection()
+            .defaultFocus(focus, .tab(router.tab))
+            HStack {
+                Spacer()
+                Menu {
+                    Button(MavioStrings.navSettings) { router.settings = true }
+                    Button(MavioStrings.authSignOut, role: .destructive) {
+                        Task { try? await model.signOut() }
+                    }
+                } label: {
+                    Icon("moreVertical", size: 32).frame(width: 72, height: 72)
+                }
+                .buttonStyle(RoundButtonStyle())
+                .focused(focus, equals: .menu)
+            }
+        }
+        .padding(.horizontal, theme.layout.margin)
+        .padding(.top, 48)
+        .padding(.bottom, MavioSpacing.s24)
+        .background {
+            if router.scrolled { theme.colors.tvBackground.ignoresSafeArea() }
+        }
+        .onChange(of: focus.wrappedValue) { _, focused in
+            if case let .tab(tab) = focused, tab != .search { router.tab = tab }
+        }
+    }
+}
+
+/// The height the navigation bar takes, below which pages other than Home start.
+let navBarHeight: CGFloat = 150
+
+extension View {
+    /// The screens a stack of the tabs pushes.
+    func destinations() -> some View {
+        navigationDestination(for: Route.self) { route in
+            switch route {
+            case let .item(serverId, itemId): DetailsView(serverId: serverId, itemId: itemId)
+            case let .library(library): LibraryView(library: library)
+            }
+        }
+    }
+
+    /// Tells the bar whether the page scrolled, for the band under it.
+    func reportsScroll() -> some View {
+        modifier(ReportsScroll())
+    }
+}
+
+private struct ReportsScroll: ViewModifier {
+    @Environment(Router.self) private var router
+
+    func body(content: Content) -> some View {
+        content.onScrollGeometryChange(for: Bool.self) {
+            $0.contentOffset.y + $0.contentInsets.top > 1
+        } action: {
+            _, scrolled in
+            router.scrolled = scrolled
+        }
+    }
+}
