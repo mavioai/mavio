@@ -53,6 +53,7 @@ type adminState struct {
 	jobFilter     int
 	jobLimit      int
 	logs          task[[]*systemv1.LogRecord]
+	overview      overviewState
 	logLevel      int
 	logPeriod     int
 	logFilter     string
@@ -254,7 +255,31 @@ func (a *App) overviewSection(c *ui.Context) {
 			g.row(f[0], "", nil, func() {
 				style.Text(ui.Text(c, f[1]), style.Type(c).Callout).TextColor(style.Color(colors.TextSecondary)).TextAlign(ui.End).MaxWidth(480).Selectable()
 			})
+			if f[0] == style.T(c, "overview.ffmpeg") {
+				a.containerEngineRow(g)
+			}
 		}
+	})
+	a.loadGroup(c)
+	a.containersGroup(c)
+}
+
+// containerEngineRow adds the container engine the server found, with its
+// endpoint, or why it found none.
+func (a *App) containerEngineRow(g *settingsGroup) {
+	c := g.c
+	colors := style.Colors(c)
+	engine, endpoint := a.containerEngine(c)
+	if engine == "" {
+		return
+	}
+	g.row(style.T(c, "overview.containerEngine"), "", nil, func() {
+		ui.Column(c).AlignItems(ui.End).MaxWidth(480).Children(func() {
+			style.Text(ui.Text(c, engine), style.Type(c).Callout).TextColor(style.Color(colors.TextSecondary)).TextAlign(ui.End).Selectable()
+			if endpoint != "" {
+				style.Text(ui.Text(c, endpoint), style.Type(c).Footnote).TextColor(style.Color(colors.TextSecondary)).TextAlign(ui.End).Selectable()
+			}
+		})
 	})
 }
 

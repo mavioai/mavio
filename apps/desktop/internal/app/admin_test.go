@@ -27,7 +27,12 @@ func TestAdmin(t *testing.T) {
 	}
 
 	open("Overview")
-	want("Running", "0.9.0", "linux/amd64", "SQLite", "7.1.2-Jellyfin", "1 day 2 hr")
+	want("Running", "0.9.0", "linux/amd64", "SQLite", "7.1.2-Jellyfin", "1 day 2 hr",
+		"Docker 27.3.1 · API 1.47", "unix:///var/run/docker.sock",
+		"25", "15%", "10%", "5%", "15", "GB", "of 16 GB", "High", "1.2", "available of 2 TB", "2.5", "MB/s", "120 kB/s",
+		"cache", "For TMDB · Ready")
+	open("Start Command")
+	want("docker run -d --name mavio-cache redis:7")
 	h.save(shots, "settings-overview")
 
 	open("Users")

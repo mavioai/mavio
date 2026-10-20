@@ -604,9 +604,11 @@ func (a *App) issuesSection(c *ui.Context) {
 	for i, f := range issueFilters {
 		filters[i] = style.T(c, f.label)
 	}
-	if choose(c.Key("filter"), style.T(c, "issues.filter"), &st.filter, filters) {
-		st.limit = 0
-	}
+	ui.Row(c).Children(func() {
+		if choose(c.Key("filter"), style.T(c, "issues.filter"), &st.filter, filters) {
+			st.limit = 0
+		}
+	})
 	limit := max(st.limit, 50)
 	statuses := issueFilters[st.filter].statuses
 	t := adminTask(a, &st.all, "all-issues", func(ctx context.Context, s string) (*acquisitionv1.ListIssuesResponse, error) {
