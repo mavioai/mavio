@@ -9,14 +9,16 @@ import (
 
 	authv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/auth/v1"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/auth/v1/authv1connect"
-	pluginv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1"
 	systemv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/system/v1"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/system/v1/systemv1connect"
 )
 
-// fakePlugins serves the server's plugins: one that resets passwords.
+// fakePlugins serves the server's plugins: one that resets passwords and
+// TMDB, whose catalog offers a newer version, and those its catalog
+// offers.
 type fakePlugins struct {
 	systemv1connect.UnimplementedPluginManagementServiceHandler
+	f *fakeCore
 }
 
 // fakeAuth serves the server's API keys.
@@ -62,15 +64,6 @@ func (s *fakeSystem) UpdateServerSettings(_ context.Context, r *systemv1.UpdateS
 	defer s.f.mu.Unlock()
 	s.f.serverSettings = proto.CloneOf(r.GetSettings())
 	return systemv1.UpdateServerSettingsResponse_builder{Settings: proto.CloneOf(s.f.serverSettings)}.Build(), nil
-}
-
-func (fakePlugins) ListPlugins(context.Context, *systemv1.ListPluginsRequest) (*systemv1.ListPluginsResponse, error) {
-	return systemv1.ListPluginsResponse_builder{Plugins: []*systemv1.Plugin{
-		systemv1.Plugin_builder{Manifest: pluginv1.Manifest_builder{
-			Id: new("dev.mavio.mail"), Name: new("Mail"), Capabilities: []pluginv1.Capability{pluginv1.Capability_CAPABILITY_PASSWORD_RESET},
-		}.Build()}.Build(),
-		systemv1.Plugin_builder{Manifest: pluginv1.Manifest_builder{Id: new("dev.mavio.tmdb"), Name: new("TMDB")}.Build()}.Build(),
-	}}.Build(), nil
 }
 
 func (s *fakeAuth) ListApiKeys(context.Context, *authv1.ListApiKeysRequest) (*authv1.ListApiKeysResponse, error) {

@@ -36,7 +36,7 @@ func (a *App) tvSettings(c *ui.Context, r *ui.Route, id string) {
 	r.Title(style.T(c, "nav.settings"))
 	r.Page().Background(style.Color(style.Colors(c).Background))
 	admin, _ := a.admin()
-	key := id + r.Query("user") + r.Query("library") + r.Query("remote") + r.Query("acquisition") + r.Query("subtitles") + r.Query("id")
+	key := subpageKey(id, r)
 	ui.Scroll(c.Key(key)).Fill().Children(func() {
 		ui.Column(c).Padding(64, style.Layout(c).Margin, 48).AlignItems(ui.Center).Children(func() {
 			ui.Column(c).FillWidth().MaxWidth(768).Gap(28).Children(func() {
@@ -195,7 +195,18 @@ func (a *App) tvEntryRow(g *settingsGroup, id, icon string, color ui.Color, titl
 
 // settingsSubpages are the parameters naming a page within a section of
 // the settings, as a user or a library.
-var settingsSubpages = []string{"user", "library", "remote", "acquisition", "subtitles", "id"}
+var settingsSubpages = []string{"user", "library", "remote", "acquisition", "subtitles", "id", "plugin", "catalogs"}
+
+// subpageKey returns the key of a section's page, which scrolls on its
+// own: the section's ID and its subpage's parameters.
+func subpageKey(id string, r *ui.Route) string {
+	var b strings.Builder
+	b.WriteString(id)
+	for _, k := range settingsSubpages {
+		b.WriteString("/" + r.Query(k))
+	}
+	return b.String()
+}
 
 // settingsNested are the pages within a page within a section, by the
 // page they lie in.

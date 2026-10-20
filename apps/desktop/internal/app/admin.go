@@ -40,6 +40,7 @@ type adminState struct {
 	wanted      wantedState
 	downloads   downloadsState
 	backups     backupsState
+	plugins     pluginsState
 	subtitles   subtitlesState
 	libraries   librariesState
 	libs        task[[]*libraryv1.Library]
@@ -690,7 +691,6 @@ func logColor(c *ui.Context, l systemv1.LogLevel) ui.Color {
 }
 
 func (a *App) logsSection(c *ui.Context) {
-	colors := style.Colors(c)
 	st := &a.settingsState.admin
 	sectionHeader(c, style.T(c, "settings.logs"), style.T(c, "logs.message"))
 	if st.logLevel == 0 && st.logPeriod == 0 && st.logs.key == "" {
@@ -749,29 +749,36 @@ func (a *App) logsSection(c *ui.Context) {
 			g.note(style.T(c, "logs.none"), false)
 		}
 		for i, r := range shown {
-			g.divider()
-			ui.Column(c.Key(i)).Padding(8, 16).Gap(2).Children(func() {
-				ui.Row(c).Gap(8).AlignItems(ui.End).Children(func() {
-					if r.HasTime() {
-						style.Text(ui.Text(c, r.GetTime().AsTime().Local().Format("1/2/06, 3:04:05 PM")), style.Type(c).Footnote).TextColor(style.Color(colors.TextSecondary))
-					}
-					name := ""
-					for _, l := range logLevels {
-						if l.level == r.GetLevel() {
-							name = style.T(c, l.label)
-						}
-					}
-					style.Text(ui.Text(c, name), style.Type(c).Footnote).FontWeight(600).TextColor(logColor(c, r.GetLevel()))
-				})
-				style.Text(ui.Text(c, r.GetMessage()), style.Type(c).Callout).TextColor(style.Color(colors.TextPrimary)).Selectable()
-				if attrs := r.GetAttributes(); len(attrs) > 0 {
-					var parts []string
-					for _, k := range slices.Sorted(maps.Keys(attrs)) {
-						parts = append(parts, k+"="+attrs[k])
-					}
-					style.Text(ui.Text(c, strings.Join(parts, "   ")), style.Type(c).Caption).Font("SF Mono, Menlo, monospace").TextColor(style.Color(colors.TextSecondary)).Selectable()
+			logRow(g, i, r)
+		}
+	})
+}
+
+// logRow adds a log record to g: its time, level, message and attributes.
+func logRow(g *settingsGroup, i int, r *systemv1.LogRecord) {
+	c := g.c
+	colors := style.Colors(c)
+	g.divider()
+	ui.Column(c.Key(i)).Padding(8, 16).Gap(2).Children(func() {
+		ui.Row(c).Gap(8).AlignItems(ui.End).Children(func() {
+			if r.HasTime() {
+				style.Text(ui.Text(c, r.GetTime().AsTime().Local().Format("1/2/06, 3:04:05 PM")), style.Type(c).Footnote).TextColor(style.Color(colors.TextSecondary))
+			}
+			name := ""
+			for _, l := range logLevels {
+				if l.level == r.GetLevel() {
+					name = style.T(c, l.label)
 				}
-			})
+			}
+			style.Text(ui.Text(c, name), style.Type(c).Footnote).FontWeight(600).TextColor(logColor(c, r.GetLevel()))
+		})
+		style.Text(ui.Text(c, r.GetMessage()), style.Type(c).Callout).TextColor(style.Color(colors.TextPrimary)).Selectable()
+		if attrs := r.GetAttributes(); len(attrs) > 0 {
+			var parts []string
+			for _, k := range slices.Sorted(maps.Keys(attrs)) {
+				parts = append(parts, k+"="+attrs[k])
+			}
+			style.Text(ui.Text(c, strings.Join(parts, "   ")), style.Type(c).Caption).Font("SF Mono, Menlo, monospace").TextColor(style.Color(colors.TextSecondary)).Selectable()
 		}
 	})
 }

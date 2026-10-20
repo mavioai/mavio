@@ -26,7 +26,7 @@ func (s *fakeSystem) GetSystemLoad(context.Context, *systemv1.GetSystemLoadReque
 
 // ListContainers serves the TMDB plugin's container, ready, which failed
 // once.
-func (fakePlugins) ListContainers(context.Context, *systemv1.ListContainersRequest) (*systemv1.ListContainersResponse, error) {
+func (*fakePlugins) ListContainers(context.Context, *systemv1.ListContainersRequest) (*systemv1.ListContainersResponse, error) {
 	return systemv1.ListContainersResponse_builder{Containers: []*systemv1.PluginContainer{systemv1.PluginContainer_builder{
 		PluginId:   new("dev.mavio.tmdb"),
 		Dependency: pluginv1.ContainerDependency_builder{Name: new("cache")}.Build(),
@@ -38,7 +38,7 @@ func (fakePlugins) ListContainers(context.Context, *systemv1.ListContainersReque
 	}.Build()}}.Build(), nil
 }
 
-func (fakePlugins) GetContainerRuntime(context.Context, *systemv1.GetContainerRuntimeRequest) (*systemv1.GetContainerRuntimeResponse, error) {
+func (*fakePlugins) GetContainerRuntime(context.Context, *systemv1.GetContainerRuntimeRequest) (*systemv1.GetContainerRuntimeResponse, error) {
 	return systemv1.GetContainerRuntimeResponse_builder{Runtime: systemv1.ContainerRuntime_builder{
 		Available: new(true), Engine: new("docker"), Version: new("27.3.1"), ApiVersion: new("1.47"), Endpoint: new("unix:///var/run/docker.sock"),
 	}.Build()}.Build(), nil

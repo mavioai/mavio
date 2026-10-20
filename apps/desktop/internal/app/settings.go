@@ -47,6 +47,7 @@ var settingsSections = []settingsSection{
 	{id: "general", icon: "settings", color: ui.RGB(0x8E, 0x8E, 0x93), title: "settings.general", admin: true},
 	{id: "users", icon: "users", color: ui.RGB(0xFF, 0x95, 0x00), title: "settings.users", admin: true},
 	{id: "api-keys", icon: "lock", color: ui.RGB(0x63, 0x63, 0x66), title: "settings.apiKeys", admin: true},
+	{id: "plugins", icon: "plugins", color: ui.RGB(0xAF, 0x52, 0xDE), title: "settings.plugins", admin: true},
 	{id: "proxies", icon: "network", color: ui.RGB(0x30, 0xB0, 0xC7), title: "settings.proxies", admin: true},
 	{id: "libraries", icon: "folder", color: ui.RGB(0x00, 0x7A, 0xFF), title: "settings.libraries", admin: true},
 	{id: "storage", icon: "server", color: ui.RGB(0x30, 0xB0, 0xC7), title: "settings.storage", admin: true},
@@ -99,7 +100,7 @@ var settingsGroups = []struct {
 	server  bool
 }{
 	{"settings.thisDevice", []string{"appearance", "playback", "subtitles-audio"}, false},
-	{"settings.serverGroup", []string{"overview", "general", "users", "devices", "media", "acquiring", "proxies", "maintenance"}, true},
+	{"settings.serverGroup", []string{"overview", "general", "users", "devices", "media", "acquiring", "plugins", "proxies", "maintenance"}, true},
 }
 
 func menuOf(id string) (settingsMenu, bool) {
@@ -230,7 +231,7 @@ func (a *App) settings(c *ui.Context, r *ui.Route) {
 		ui.Column(c).Grow(1).MinWidth(0).Background(style.Color(colors.Background)).Children(func() {
 			r.View(c, func(r *ui.Route) {
 				r.Page().Background(style.Color(colors.Background))
-				ui.Scroll(c.Key(id + r.Query("user") + r.Query("library") + r.Query("remote") + r.Query("acquisition") + r.Query("subtitles") + r.Query("id"))).Fill().Children(func() {
+				ui.Scroll(c.Key(subpageKey(id, r))).Fill().Children(func() {
 					top := max(c.TitleBar().Height, 12)
 					ui.Column(c).Padding(top+28, 56, 40).AlignItems(ui.Center).Children(func() {
 						ui.Column(c).FillWidth().MaxWidth(900).Gap(28).Children(func() { a.settingsSection(c, r, id) })
@@ -431,6 +432,8 @@ func (a *App) settingsSection(c *ui.Context, r *ui.Route, id string) {
 		a.apiKeysSection(c)
 	case "transcoding":
 		a.transcodingSection(c)
+	case "plugins":
+		a.pluginsSection(c, r)
 	case "proxies":
 		a.proxiesSection(c)
 	case "libraries":

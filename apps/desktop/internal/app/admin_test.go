@@ -101,4 +101,22 @@ func TestAdmin(t *testing.T) {
 	h.settle()
 	want("Delete mavio-20261020-090000.zip?")
 	h.save(shots, "settings-backups")
+	h.tt.Key(0, ui.KeyEscape)
+	h.settle()
+
+	// The catalog's plugins, TMDB installed with an update.
+	open("Plugins")
+	want("OpenSubtitles", "Subtitles from OpenSubtitles.com.", "2.0.0", "TMDB", "Metadata · 1.0.0", "Update available")
+	h.save(shots, "settings-plugins")
+	open("TMDB")
+	want("By Mavio", "Update to 1.1.0", "Configuration", "API key", "Language", "Default (en)",
+		"Use cache", "Set up the container dependency cache below to turn this on.", "cache", "Caches responses", "Not Set",
+		"Information", "https://plugins.mavio.test/catalog.json", "GPL-3.0", "Versions", "1.1.0")
+	h.save(shots, "settings-plugin")
+	open("Update to 1.1.0")
+	if got := h.core.plugins.installed[1].GetManifest().GetVersion(); got != "1.1.0" {
+		t.Errorf("TMDB's version = %q, want = 1.1.0", got)
+	}
+	open("Uninstall")
+	want("Uninstall TMDB?")
 }
