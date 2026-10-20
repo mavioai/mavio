@@ -112,7 +112,7 @@ class Playback {
 
 /**
  * A voice session from the client's side: capture starts at once and is
- * held until connect gives the session's WebSocket URL.
+ * held until the session's WebSocket opens.
  */
 export class VoiceSession {
   private ws?: WebSocket;
@@ -210,7 +210,9 @@ export class VoiceSession {
   private audio(pcm: ArrayBuffer) {
     if (this.ended) return;
     if (this.ws?.readyState === WebSocket.OPEN) this.ws.send(pcm);
-    else if (!this.ws) this.pending.push(pcm);
+    // The socket opens once the plugin has made the session's services,
+    // which can take seconds: what the user says meanwhile is kept.
+    else if (!this.ws || this.ws.readyState === WebSocket.CONNECTING) this.pending.push(pcm);
   }
 
   private message(data: ArrayBuffer | string) {
