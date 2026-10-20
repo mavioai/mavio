@@ -280,7 +280,7 @@ def _google_stt(settings: dict[str, Any], session: Session, _models: Models) -> 
 RECOGNITION = (
     Service(
         CONTAINER,
-        "Whisper (speaches)",
+        "Speaches",
         WHISPER_SETTINGS,
         hints=True,
         make=_whisper_stt,
@@ -581,7 +581,7 @@ SYNTHESIS = (
 TRANSCRIPTION = (
     Service(
         CONTAINER,
-        "Whisper (speaches)",
+        "Speaches",
         WHISPER_SETTINGS,
         model=lambda s: whisper_model(s["model"]),
     ),
