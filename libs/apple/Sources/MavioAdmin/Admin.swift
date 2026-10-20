@@ -110,10 +110,20 @@ public enum ServerEntry: Hashable {
     /// The entries the user sees: an administrator's all, others' the
     /// sections any user has; a menu left with one section is that section.
     public static func shown(admin: Bool) -> [ServerEntry] {
-        let top: [ServerEntry] = [
-            .section(.overview), .section(.general), .section(.users), .section(.devices), .menu(.media),
-            .menu(.maintenance),
-        ]
+        #if os(macOS)
+            // The Mac, not in the App Store, keeps acquiring media, the AI
+            // providers, the plugins and the proxies.
+            let top: [ServerEntry] = [
+                .section(.overview), .section(.general), .section(.users), .section(.devices), .menu(.media),
+                .section(.acquisition), .section(.wanted), .section(.downloads), .section(.subtitles), .section(.ai),
+                .section(.plugins), .section(.proxies), .menu(.maintenance),
+            ]
+        #else
+            let top: [ServerEntry] = [
+                .section(.overview), .section(.general), .section(.users), .section(.devices), .menu(.media),
+                .menu(.maintenance),
+            ]
+        #endif
         return top.compactMap { entry in
             switch entry {
             case .section(let s): return s.forAnyone || admin ? entry : nil
@@ -225,6 +235,10 @@ private struct ServerMenuView: View {
 public enum ServerSection: Hashable {
     case overview, general, users, devices, apiKeys, libraries, storage, transcoding, activity, issues, tasks, logs,
         backups
+    /// The sections only the Mac shows, which the App Store does not
+    /// accept (docs/clients.md §4.2): acquiring media, the AI providers
+    /// and conversations, the plugins, the proxies and the indexer search.
+    case acquisition, wanted, downloads, subtitles, ai, plugins, proxies, conversations, indexerSearch
 
     /// Whether users who do not administer the server see it.
     public var forAnyone: Bool { self == .devices || self == .issues }
@@ -245,6 +259,15 @@ public enum ServerSection: Hashable {
         case .tasks: MavioStrings.settingsTasks
         case .logs: MavioStrings.settingsLogs
         case .backups: MavioStrings.settingsBackups
+        case .acquisition: MavioStrings.settingsAcquisition
+        case .wanted: MavioStrings.settingsWanted
+        case .downloads: MavioStrings.settingsDownloads
+        case .subtitles: MavioStrings.settingsSubtitles
+        case .ai: MavioStrings.settingsAi
+        case .plugins: MavioStrings.settingsPlugins
+        case .proxies: MavioStrings.settingsProxies
+        case .conversations: MavioStrings.settingsConversations
+        case .indexerSearch: MavioStrings.indexersTitle
         }
     }
 
@@ -264,6 +287,14 @@ public enum ServerSection: Hashable {
         case .tasks: "pending"
         case .logs: "info"
         case .backups: "folder"
+        case .acquisition, .downloads: "downloads"
+        case .wanted: "pending"
+        case .subtitles: "subtitles"
+        case .ai: "key"
+        case .plugins: "plugins"
+        case .proxies: "network"
+        case .conversations: "info"
+        case .indexerSearch: "indexers"
         }
     }
 
@@ -280,6 +311,14 @@ public enum ServerSection: Hashable {
         case .activity: Color(hex: 0xFF2D55)
         case .issues: Color(hex: 0xFF9500)
         case .tasks, .backups: Color(hex: 0x5856D6)
+        case .acquisition, .downloads: Color(hex: 0x34C759)
+        case .wanted: Color(hex: 0xFF3B30)
+        case .subtitles: Color(hex: 0xFF9500)
+        case .ai: Color(hex: 0xBF5AF2)
+        case .plugins: Color(hex: 0xAF52DE)
+        case .proxies: Color(hex: 0x30B0C7)
+        case .conversations: Color(hex: 0x5E5CE6)
+        case .indexerSearch: Color(hex: 0x0A84FF)
         }
     }
 
@@ -299,6 +338,21 @@ public enum ServerSection: Hashable {
         case .tasks: TasksView(server: server)
         case .logs: LogsView(server: server)
         case .backups: BackupsView(server: server)
+        #if os(macOS)
+            case .acquisition: AcquisitionView(server: server)
+            case .wanted: WantedView(server: server)
+            case .downloads: DownloadsAdminView(server: server)
+            case .subtitles: SubtitlesAdminView(server: server)
+            case .ai: AiView(server: server)
+            case .plugins: PluginsView(server: server)
+            case .proxies: ProxiesView(server: server)
+            case .conversations: ConversationsView(server: server)
+            case .indexerSearch: IndexerSearchView(server: server)
+        #else
+            case .acquisition, .wanted, .downloads, .subtitles, .ai, .plugins, .proxies, .conversations,
+                .indexerSearch:
+                EmptyView()
+        #endif
         }
     }
 }
@@ -669,5 +723,33 @@ private struct Dots: View {
         }
         .aspectRatio(CGFloat(Self.columns) / CGFloat(Self.rows), contentMode: .fit)
         .accessibilityHidden(true)
+    }
+}
+
+extension EnvironmentValues {
+    /// The details of an item of a server's, by its ID, which the settings'
+    /// rows naming an item open; nil where the app opens none.
+    @Entry public var itemPage: (@MainActor (ServerRecord, String) -> AnyView)?
+}
+
+/// A row's name of an item of a server's, opening its details where the app
+/// has them, as the web UI's links to an item.
+struct ItemLink<Label: View>: View {
+    let server: ServerRecord
+    let itemId: String
+    @ViewBuilder let label: Label
+    @Environment(\.itemPage) private var itemPage
+
+    var body: some View {
+        if !itemId.isEmpty, let itemPage {
+            NavigationLink {
+                itemPage(server, itemId)
+            } label: {
+                label
+            }
+            .buttonStyle(.plain)
+        } else {
+            label
+        }
     }
 }

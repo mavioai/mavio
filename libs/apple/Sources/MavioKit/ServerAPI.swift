@@ -13,6 +13,53 @@ extension Client {
             serverId: serverId, procedure: procedure, request: try request.serializedBytes())
         return try Response(serializedBytes: response.body)
     }
+
+    /// Calls a server-streaming procedure of a server signed in to as its
+    /// session, as `call` a unary one: its responses as they come, until
+    /// the stream ends; ending the iteration cancels the call.
+    public func callStream<Response: SwiftProtobuf.Message>(
+        _ serverId: String, _ procedure: String, _ request: some SwiftProtobuf.Message,
+        as _: Response.Type = Response.self
+    ) -> AsyncThrowingStream<Response, any Error> {
+        let body: Data
+        do {
+            body = try request.serializedBytes()
+        } catch {
+            return AsyncThrowingStream { $0.finish(throwing: error) }
+        }
+        return AsyncThrowingStream { continuation in
+            let listener = StreamMessages { data in
+                do {
+                    continuation.yield(try Response(serializedBytes: data))
+                } catch {
+                    continuation.finish(throwing: error)
+                }
+            }
+            let task = Task {
+                do {
+                    _ = try await callServerStream(
+                        serverId: serverId, procedure: procedure, request: body, listener: listener)
+                    continuation.finish()
+                } catch {
+                    continuation.finish(throwing: error)
+                }
+            }
+            continuation.onTermination = { _ in task.cancel() }
+        }
+    }
+}
+
+/// Receives a streaming call's responses on the core's threads.
+private final class StreamMessages: StreamListener {
+    let receive: @Sendable (Data) -> Void
+
+    init(_ receive: @escaping @Sendable (Data) -> Void) {
+        self.receive = receive
+    }
+
+    func message(body: Data) {
+        receive(body)
+    }
 }
 
 extension Google_Protobuf_Timestamp {
@@ -53,6 +100,28 @@ public enum Procedure {
     public static func auth(_ method: String) -> String { "/mavio.auth.v1.AuthService/\(method)" }
     /// The path of a method of `mavio.acquisition.v1.DiscoverService`.
     public static func discover(_ method: String) -> String { "/mavio.acquisition.v1.DiscoverService/\(method)" }
+    /// The path of a method of `mavio.acquisition.v1.ProfileService`.
+    public static func profiles(_ method: String) -> String { "/mavio.acquisition.v1.ProfileService/\(method)" }
+    /// The path of a method of `mavio.acquisition.v1.ReleaseService`.
+    public static func releases(_ method: String) -> String { "/mavio.acquisition.v1.ReleaseService/\(method)" }
+    /// The path of a method of `mavio.acquisition.v1.DownloadService`.
+    public static func downloads(_ method: String) -> String { "/mavio.acquisition.v1.DownloadService/\(method)" }
+    /// The path of a method of `mavio.acquisition.v1.WantedService`.
+    public static func wanted(_ method: String) -> String { "/mavio.acquisition.v1.WantedService/\(method)" }
+    /// The path of a method of `mavio.acquisition.v1.SubtitleService`.
+    public static func subtitles(_ method: String) -> String { "/mavio.acquisition.v1.SubtitleService/\(method)" }
+    /// The path of a method of `mavio.acquisition.v1.RequestService`.
+    public static func requests(_ method: String) -> String { "/mavio.acquisition.v1.RequestService/\(method)" }
+    /// The path of a method of `mavio.system.v1.AiProviderService`.
+    public static func aiProviders(_ method: String) -> String { "/mavio.system.v1.AiProviderService/\(method)" }
+    /// The path of a method of `mavio.system.v1.AiConversationService`.
+    public static func aiConversations(_ method: String) -> String {
+        "/mavio.system.v1.AiConversationService/\(method)"
+    }
+    /// The path of a method of `mavio.system.v1.ProxyService`.
+    public static func proxies(_ method: String) -> String { "/mavio.system.v1.ProxyService/\(method)" }
+    /// The path of a method of `mavio.assistant.v1.AssistantService`.
+    public static func assistant(_ method: String) -> String { "/mavio.assistant.v1.AssistantService/\(method)" }
 }
 
 extension AppModel {

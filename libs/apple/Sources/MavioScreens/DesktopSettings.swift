@@ -44,6 +44,11 @@
                 NavigationStack {
                     detail
                         .environment(\.pageTitle, title)
+                        .environment(\.itemPage) { server, itemId in
+                            AnyView(
+                                RouteDestination(route: .item(serverId: server.id, itemId: itemId))
+                                    .background(theme.colors.background))
+                        }
                         .toolbar(removing: .title)
                         .background(theme.colors.background)
                         .navigationDestination(for: Route.self) { route in
@@ -66,6 +71,14 @@
             List(selection: Binding(get: { page }, set: { if let new = $0 { page = new } })) {
                 Section {
                     AccountCard().padding(.leading, MavioSpacing.s4).tag(SettingsPage.account)
+                }
+                // The advanced tools and the AI conversations, for the
+                // server's administrators.
+                if admin[key] == true {
+                    Section(MavioStrings.settingsAdvancedGroup) {
+                        row(.indexerSearch)
+                        row(.conversations)
+                    }
                 }
                 Section(MavioStrings.settingsThisDevice) {
                     row(.appearance, MavioStrings.settingsAppearance, "appearance", Color(hex: 0x5E5CE6))
@@ -96,24 +109,25 @@
             .listStyle(.sidebar)
             // Rows apart, as the web UI's.
             .environment(\.defaultMinListRowHeight, 32)
-            .safeAreaInset(edge: .top, spacing: 0) {
-                VStack(alignment: .leading, spacing: MavioSpacing.s8) {
-                    Button(action: leave) {
-                        Label {
-                            Text(MavioStrings.navHome)
-                        } icon: {
-                            Icon("back", size: 16)
+            .modifier(
+                TopBar {
+                    VStack(alignment: .leading, spacing: MavioSpacing.s8) {
+                        Button(action: leave) {
+                            Label {
+                                Text(MavioStrings.navHome)
+                            } icon: {
+                                Icon("back", size: 16)
+                            }
                         }
+                        .buttonStyle(.plain)
+                        .foregroundStyle(theme.colors.accent)
+                        .keyboardShortcut(.escape, modifiers: [])
+                        Text(MavioStrings.navSettings).type(theme.type.title1)
                     }
-                    .buttonStyle(.plain)
-                    .foregroundStyle(theme.colors.accent)
-                    .keyboardShortcut(.escape, modifiers: [])
-                    Text(MavioStrings.navSettings).type(theme.type.title1)
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal, MavioSpacing.s24)
-                .padding(.bottom, MavioSpacing.s8)
-            }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, MavioSpacing.s24)
+                    .padding(.bottom, MavioSpacing.s8)
+                })
         }
 
         private func row(_ page: SettingsPage, _ title: String, _ icon: String, _ color: Color) -> some View {
@@ -166,6 +180,22 @@
             case .subtitlesAudio: SubtitlesAudioView()
             case .server(let section):
                 if let server = chosen { section.view(server) }
+            }
+        }
+    }
+
+    /// A bar over a scroll view's top that the rows scroll under, blurred as
+    /// the system's bars where it can, else on the window's background.
+    private struct TopBar<Bar: View>: ViewModifier {
+        @ViewBuilder let bar: Bar
+
+        func body(content: Content) -> some View {
+            if #available(macOS 26, *) {
+                content.safeAreaBar(edge: .top, spacing: 0) { bar }
+            } else {
+                content.safeAreaInset(edge: .top, spacing: 0) {
+                    bar.background(.background)
+                }
             }
         }
     }

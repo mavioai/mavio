@@ -11,7 +11,7 @@ private var webLocale: String {
 private func minutes(_ n: Int32) -> String { minutesText(TimeInterval(n) * 60) }
 
 /// A discovered title (docs/clients.md §6.3.2), as Seerr's page, without
-/// requests.
+/// requests but on the Mac.
 struct TitleView: View {
     let serverId: String
     let kind: MediaKind
@@ -58,6 +58,10 @@ private struct TitleContent: View {
     @Environment(\.openURL) private var openURL
     @State private var ratings: [Rating] = []
     @State private var refreshes = 0
+    #if os(macOS)
+        /// The user signed in, whose role the requests' actions follow.
+        @State private var user: Mavio_User_V1_User?
+    #endif
 
     private var phone: Bool { sizeClass != .regular }
     private var series: Bool { title.mediaKind == .series }
@@ -100,6 +104,9 @@ private struct TitleContent: View {
                     serverId, Procedure.discover("GetRatings"), r, as: Mavio_Acquisition_V1_GetRatingsResponse.self))?
                 .ratings ?? []
         }
+        #if os(macOS)
+            .task(id: serverId) { user = await RequestsAPI.currentUser(model, serverId) }
+        #endif
     }
 
     // MARK: Header
@@ -205,10 +212,20 @@ private struct TitleContent: View {
                         .background(.white.opacity(0.2), in: .rect(cornerRadius: 4))
                         .padding(.leading, MavioSpacing.s12)
                 }
+                #if os(macOS)
+                    if user?.admin == true, !title.itemID.isEmpty {
+                        RequestsDownloadBadge(serverId: serverId, itemId: title.itemID)
+                    }
+                #endif
             }
             .type(theme.type.callout)
             .foregroundStyle(.white.opacity(0.8))
-            actions.padding(.top, MavioSpacing.s4)
+            #if os(macOS)
+                RequestsTitleActions(serverId: serverId, title: title, user: user, reload: reload) { actions }
+                    .padding(.top, MavioSpacing.s4)
+            #else
+                actions.padding(.top, MavioSpacing.s4)
+            #endif
         }
     }
 

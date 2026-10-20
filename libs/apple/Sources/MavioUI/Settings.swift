@@ -58,12 +58,15 @@ extension Color {
 /// on the desktop a form of grouped cards, as the web UI's sections in a
 /// wide window, its switches and choices at the end of their rows.
 public struct SettingsList<Content: View>: View {
+    let message: String?
     let content: Content
     @Environment(\.pageTitle) private var pageTitle
     @Environment(\.theme) private var theme
 
-    /// A page of the sections content holds.
-    public init(@ViewBuilder content: () -> Content) {
+    /// A page of the sections content holds, and the message that says
+    /// what the page is for, as the web UI's under a page's title.
+    public init(message: String? = nil, @ViewBuilder content: () -> Content) {
+        self.message = message
         self.content = content()
     }
 
@@ -74,14 +77,32 @@ public struct SettingsList<Content: View>: View {
                 if let title = pageTitle {
                     Section {
                     } header: {
-                        Text(title).type(theme.type.title1).foregroundStyle(theme.colors.textPrimary)
+                        VStack(alignment: .leading, spacing: MavioSpacing.s4) {
+                            Text(title).type(theme.type.title1).foregroundStyle(theme.colors.textPrimary)
+                            if let message {
+                                Text(message).type(theme.type.body).foregroundStyle(theme.colors.textSecondary)
+                            }
+                        }
+                    }
+                } else if let message {
+                    Section {
+                    } footer: {
+                        Text(message)
                     }
                 }
                 content
             }
             .formStyle(CardFormStyle())
         #else
-            List { content }
+            List {
+                if let message {
+                    Section {
+                    } footer: {
+                        Text(message)
+                    }
+                }
+                content
+            }
         #endif
     }
 }

@@ -242,6 +242,11 @@ struct DiscoveredCollectionView: View {
                         Text(c.name).font(.system(size: phone ? 34 : 52, weight: .bold))
                         Text(facts.joined(separator: " · ")).type(theme.type.callout).foregroundStyle(
                             .white.opacity(0.8))
+                        #if os(macOS)
+                            RequestsCollectionActions(
+                                serverId: serverId, tmdbId: tmdbId, collection: c,
+                                blocked: status(c.parts) == .blocklisted, reload: { await load() })
+                        #endif
                     }
                     .foregroundStyle(.white)
                     .frame(maxWidth: 640, alignment: .leading)
