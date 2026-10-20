@@ -1060,7 +1060,7 @@ flowchart TD
 - [x] `AGENT_SESSION` 与 `plugins/agent` 中的引导与中止，基于 pi-durable 的引导队列与会话中止
 - [x] 在 `tools/plugindist` 中为其 wheel 覆盖的平台打包 `plugins/pipecat`，并预置到容器镜像中
 - [ ] **完成标准**中语音的端到端测试：经由构建好的 `plugins/pipecat` 与伪造的服务，一段被引导的录音、插话中止运行、保留回答的语音；其 Whisper 转写器以伪造的 speaches 转写一集，以补回服务端测试随 `plugins/voice` 失去的转写覆盖；以及 AI 路径丢弃被引导运行所暂缓调用的测试
-- [x] 运行在 speaches 上的 Whisper，即带 CPU 与 CUDA 镜像的容器依赖 `whisper`，取代插件中的 faster-whisper；容器引擎的 GPU 经 CDI 或 NVIDIA runtime 提供
+- [x] 运行在 speaches 上的 Whisper，即带 CPU 与 CUDA 镜像的容器依赖 `speaches`，取代插件中的 faster-whisper；容器引擎的 GPU 经 CDI 或 NVIDIA runtime 提供
 - [x] 精简包：在 uv workspace 中排除 resampy、numba 与 sympy，去掉 pip 与 CPython 的测试（每个平台 265–340 MB）
 - [x] 识别出两个词后才算插话，而非一开始说话即算，每个中文或日文字算一个词，以免一声咳嗽中止回答
 - [x] 内置更多 Pipecat 服务：识别的 AssemblyAI、Soniox、Speechmatics 与 Google Cloud，朗读的 Piper、Soniox 与 Google Cloud；把用户的提示词传给 Cartesia 的 ink-2 模型（ElevenLabs 不接受提示词）。采用微软许可证的 Azure SDK 与需要 PyTorch 的 MLX Whisper 不予内置

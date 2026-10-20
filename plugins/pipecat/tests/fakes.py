@@ -72,7 +72,7 @@ class FakeSpeaches(Speaches):
     """Whisper's container at an address, holding the models given and
     downloading others at once; failing them when fail is set."""
 
-    def __init__(self, *models: str, address: str = "http://whisper:8000", fail: bool = False):
+    def __init__(self, *models: str, address: str = "http://speaches:8000", fail: bool = False):
         super().__init__(address=address)
         self.models = set(models)
         self.downloaded: list[str] = []

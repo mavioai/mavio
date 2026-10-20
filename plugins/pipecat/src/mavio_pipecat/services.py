@@ -13,6 +13,7 @@ from pipecat.transcriptions.language import Language
 
 from mavio.plugin.v1 import settings_pb2
 from mavio_pipecat.models import ModelRef, Models, kokoro_model, piper_model, whisper_model
+from mavio_pipecat.speaches import CONTAINER
 
 # The longest list of hints a service is given.
 MAX_HINTS = 100
@@ -278,7 +279,7 @@ def _google_stt(settings: dict[str, Any], session: Session, _models: Models) -> 
 
 RECOGNITION = (
     Service(
-        "whisper",
+        CONTAINER,
         "Whisper (speaches)",
         WHISPER_SETTINGS,
         hints=True,
@@ -579,7 +580,7 @@ SYNTHESIS = (
 
 TRANSCRIPTION = (
     Service(
-        "whisper",
+        CONTAINER,
         "Whisper (speaches)",
         WHISPER_SETTINGS,
         model=lambda s: whisper_model(s["model"]),

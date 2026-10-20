@@ -42,12 +42,12 @@ def test_every_service_makes_its_pipecat_service(tmp_path: Path):
         tts = service.make(service.values({**keys, "voice": "v"}), session, models)
         assert isinstance(tts, TTSService), f"{service.name} made {tts!r}"
     names = [s.name for s in TRANSCRIPTION]
-    assert names == ["whisper", "openai"], f"transcription services = {names}"
+    assert names == ["speaches", "openai"], f"transcription services = {names}"
 
 
 def test_whisper_takes_the_language_and_hints(tmp_path: Path):
     service = RECOGNITION[0]
-    assert service.name == "whisper" and service.make is not None
+    assert service.name == "speaches" and service.make is not None
     stt = service.make(
         service.values({}),
         Session(language="zh-Hans", hints=("星际穿越",)),
@@ -57,7 +57,7 @@ def test_whisper_takes_the_language_and_hints(tmp_path: Path):
     settings = stt._settings  # pyright: ignore[reportPrivateUsage]
     got = (str(stt._client.base_url), settings.model, settings.language, settings.prompt)  # pyright: ignore[reportPrivateUsage]
     want = (
-        "http://whisper:8000/v1/",
+        "http://speaches:8000/v1/",
         "deepdml/faster-whisper-large-v3-turbo-ct2",
         Language.ZH,
         "星际穿越",

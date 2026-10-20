@@ -100,7 +100,11 @@ async def test_refresh_reads_the_address():
     asked: list[httpx.Request] = []
     containers: list[dict[str, object]] = [
         {"name": "other", "address": "http://other:1"},
-        {"name": "whisper", "address": "http://127.0.0.1:49153/", "state": "CONTAINER_STATE_READY"},
+        {
+            "name": "speaches",
+            "address": "http://127.0.0.1:49153/",
+            "state": "CONTAINER_STATE_READY",
+        },
     ]
 
     def serve(request: httpx.Request) -> httpx.Response:
@@ -115,7 +119,7 @@ async def test_refresh_reads_the_address():
     assert asked[0].url.path == "/mavio.plugin.v1.HostService/ListContainers"
     assert json.loads(asked[0].content) == {}
     assert (speaches.base_url, speaches.state) == ("http://127.0.0.1:49153/v1", "ready")
-    containers[1] = {"name": "whisper", "state": "CONTAINER_STATE_UNAVAILABLE"}
+    containers[1] = {"name": "speaches", "state": "CONTAINER_STATE_UNAVAILABLE"}
     await speaches.refresh()
     assert not speaches.address and not speaches.has(_TINY)
     with pytest.raises(SpeachesError, match="unavailable"):

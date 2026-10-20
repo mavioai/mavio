@@ -1,5 +1,5 @@
 """Whisper on speaches (docs/plugins.md §8.16): the plugin's container
-dependency "whisper", which the server runs on a container engine with a
+dependency "speaches", which the server runs on a container engine with a
 GPU when it gives one, or an administrator elsewhere. The recognizers and
 transcribers of the Whisper service call its OpenAI-compatible API; its
 models, in its own volume, are downloaded through its models API."""
@@ -13,9 +13,10 @@ from loguru import logger
 
 from mavio.plugin.v1 import container_pb2
 
-# The container dependency's name in the manifest, the same as the
-# service's, which the settings' x-mavio-requires-container follows.
-CONTAINER = "whisper"
+# The container dependency's name in the manifest, the same as the ID of
+# the service of its Whisper models, which the settings'
+# x-mavio-requires-container follows.
+CONTAINER = "speaches"
 _LIST_CONTAINERS = "/mavio.plugin.v1.HostService/ListContainers"
 
 
@@ -24,7 +25,7 @@ class SpeachesError(Exception):
 
 
 class Speaches:
-    """The address of the whisper container, as the host last told it, and
+    """The address of the speaches container, as the host last told it, and
     its models.
 
     host is the host API's client; the server configures the plugin again

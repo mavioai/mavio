@@ -1060,7 +1060,7 @@ flowchart TD
 - [x] Steering and aborting in `AGENT_SESSION` and `plugins/agent`, on pi-durable's steer queue and conversation aborts
 - [x] Packaging `plugins/pipecat` in `tools/plugindist` for the platforms its wheels cover, and seeding it in the container image
 - [ ] The end-to-end voice test of **Done when**, through the built `plugins/pipecat` with fake services: a steered recording, barge-in aborting the run and the answer's speech kept; its Whisper transcriber on an episode with a fake speaches, in place of the transcription coverage the server's tests lost with `plugins/voice`; and a test of the AI path dropping the held calls of a steered run
-- [x] Whisper on speaches, the container dependency `whisper` with its CPU and CUDA images, in place of faster-whisper in the plugin; the container engine's GPU given by CDI or the NVIDIA runtime
+- [x] Whisper on speaches, the container dependency `speaches` with its CPU and CUDA images, in place of faster-whisper in the plugin; the container engine's GPU given by CDI or the NVIDIA runtime
 - [x] Packages slimmed: resampy, numba and sympy excluded from the uv workspace, pip and CPython's tests left out (265–340 MB per platform)
 - [x] Barge-in once two words are recognized rather than at the start of speech, each Chinese or Japanese character a word, so that a cough does not abort the answer
 - [x] More of Pipecat's services bundled: AssemblyAI, Soniox, Speechmatics and Google Cloud recognizing, Piper, Soniox and Google Cloud speaking; the users' hints passed to Cartesia's ink-2 models (ElevenLabs takes none). Azure's SDK, under Microsoft's licence, and MLX Whisper, needing PyTorch, are not bundled

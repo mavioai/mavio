@@ -20,7 +20,7 @@ _PCM = bytes(2 * 16000 * 2)
 _CONFIG = json.dumps(
     {
         "transcribers": [
-            {"id": "w", "service": "whisper", "name": "Whisper", "settings": {"model": _TINY}},
+            {"id": "w", "service": "speaches", "name": "Whisper", "settings": {"model": _TINY}},
             {"id": "o", "service": "openai", "name": "OpenAI", "settings": {"api_key": "k"}},
             {"id": "off", "service": "openai", "name": "Off", "enabled": False},
         ]
@@ -59,12 +59,12 @@ async def test_lists_the_transcribers(tmp_path: Path):
     response = await t.list_transcribers(speech_pb2.ListTranscribersRequest(), _CTX)
     got = [(x.id, x.service, x.enabled, x.ready) for x in response.transcribers]
     want = [
-        ("w", "whisper", True, False),
+        ("w", "speaches", True, False),
         ("o", "openai", True, True),
         ("off", "openai", False, True),
     ]
     assert got == want, f"transcribers = {got}, want = {want}"
-    assert [s.name for s in response.services] == ["whisper", "openai"]
+    assert [s.name for s in response.services] == ["speaches", "openai"]
 
 
 async def test_openai_asks_for_verbose_json(tmp_path: Path):
@@ -124,7 +124,7 @@ async def test_whisper_asks_its_container(tmp_path: Path):
     t = _transcription(tmp_path, httpx.MockTransport(serve), FakeSpeaches(_TINY))
     response = await t.transcribe_speech(_request("w", language="en-US"), _CTX)
     assert (response.language, [s.text for s in response.segments]) == ("en", ["Hello"])
-    assert str(asked[0].url) == "http://whisper:8000/v1/audio/transcriptions"
+    assert str(asked[0].url) == "http://speaches:8000/v1/audio/transcriptions"
     assert "authorization" not in asked[0].headers
     for want in [_TINY.encode(), b'name="vad_filter"\r\n\r\ntrue', b'name="language"\r\n\r\nen']:
         assert want in asked[0].content, f"the request lacks {want!r}"

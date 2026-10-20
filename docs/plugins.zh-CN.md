@@ -196,7 +196,7 @@ manifest 在 `external_id_kinds` 中声明外部 ID 类型：键、显示名称�
 `plugins/pipecat` 以基于 [Pipecat](https://github.com/pipecat-ai/pipecat) 的 Python 子进程插件提供这两项能力，用 Python SDK 构建（[架构 §7.4](architecture.zh-CN.md#74-插件-sdk-结构)）：
 * **设置**：`recognizers`、`voices` 与 `transcribers`，每个都有服务端生成的 ID、从插件实现的服务中选取的服务（来源为 `voice-recognizers`、`voice-synthesizers` 与 `transcription-services` 的 `x-mavio-options`，列出这些服务）、管理员给它的名称、是否启用，以及其服务的设置——Mavio 对它的需要，如 key（机密项）、模型、音色、区域或地址——因此同一种服务可以配置多次，服务端以插件的 ID 加上各自的 ID 来命名它们。
 * **语音服务**是 Pipecat 的 STT 与 TTS 服务，即 Pipecat 团队维护、其依赖在插件发布的每个平台上都能以 wheel 安装且不需要 PyTorch 的那些服务（[助手 §8.7](assistant.zh-CN.md#87-识别与合成服务)）。
-* **Whisper** 运行在 speaches 上，即插件的容器依赖 `whisper`（§11）：使用其 CPU 镜像，或在容器引擎经 CDI 或 NVIDIA runtime 提供 NVIDIA GPU 时使用其 CUDA 镜像；其模型保存在容器的卷中。Whisper 服务的识别器或转写器只有在设置了该依赖后才能启用，容器未运行时未就绪；其地址变化时服务端会重新配置插件。
+* **Whisper** 运行在 speaches 上，即插件的容器依赖 `speaches`（§11）：使用其 CPU 镜像，或在容器引擎经 CDI 或 NVIDIA runtime 提供 NVIDIA GPU 时使用其 CUDA 镜像；其模型保存在容器的卷中。其服务 `speaches` 的识别器或转写器只有在设置了该依赖后才能启用，容器未运行时未就绪；其地址变化时服务端会重新配置插件。
 * **转写服务**直接调用 speaches 与 OpenAI 兼容的转写 API（请求 `verbose_json`），因为 Pipecat 的服务会丢弃分段的时间；一次一个视频。
 * **模型**：本地服务的模型由插件的 `download-models` 任务下载，Whisper 的经由 speaches 的模型 API，Kokoro 的与 Piper 的语音经由管理员为插件指定的代理（§12.1）下载到数据目录（`models/`），并报告进度（§6）；插件不接受配置其尚未下载的模型。
 

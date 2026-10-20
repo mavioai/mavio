@@ -23,7 +23,7 @@
   ],
   "containers": [
     {
-      "name": "whisper",
+      "name": "speaches",
       "description": "speaches, running the Whisper models of the recognizers and transcribers of the Whisper service, on an NVIDIA GPU when the container engine gives one",
       "image": "ghcr.io/speaches-ai/speaches:0.9.0-rc.3-cpu@sha256:2163775b6df5e451a71200e8f675fed68dbd8ab184fc604453d549e486f22fd2",
       "gpu": "GPU_SUPPORT_OPTIONAL",

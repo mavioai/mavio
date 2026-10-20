@@ -22,7 +22,7 @@ from mavio_pipecat.config import Config, Engine
 from mavio_pipecat.languages import tag_of, whisper_code
 from mavio_pipecat.models import Models
 from mavio_pipecat.services import Catalog
-from mavio_pipecat.speaches import SpeachesError
+from mavio_pipecat.speaches import CONTAINER, SpeachesError
 
 # The audio's rate and sample size.
 _RATE = 16000
@@ -164,7 +164,7 @@ class Transcription:
     async def _settings(self, engine: Engine, settings: dict[str, Any]) -> dict[str, Any]:
         """The OpenAI-compatible settings of an engine: Whisper's are its
         container's, once its model is downloaded."""
-        if engine.service != "whisper":
+        if engine.service != CONTAINER:
             return settings
         speaches = self._models.speaches
         try:

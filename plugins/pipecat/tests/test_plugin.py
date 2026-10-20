@@ -40,7 +40,7 @@ _CONFIG = json.dumps(
         "recognizers": [
             {"id": "r-off", "service": "openai", "name": "Off", "enabled": False},
             {"id": "r1", "service": "openai", "name": "OpenAI", "settings": {"api_key": "k"}},
-            {"id": "r2", "service": "whisper", "name": "Whisper"},
+            {"id": "r2", "service": "speaches", "name": "Whisper"},
         ],
         "voices": [
             {
@@ -173,13 +173,13 @@ async def test_lists_the_configured_engines(tmp_path: Path):
         ("r-off", "openai", False, True, True),
         ("r1", "openai", True, True, True),
         # Its model is not downloaded.
-        ("r2", "whisper", True, False, True),
+        ("r2", "speaches", True, False, True),
     ]
     assert got == want, f"recognizers = {got}, want = {want}"
     voices = [(v.id, list(v.languages), v.ready) for v in response.voices]
     assert voices == [("v-zh", ["zh"], False), ("v-en", [], True)], f"voices = {voices}"
     recognizes = {(s.name, s.recognizes) for s in response.services}
-    assert ("whisper", True) in recognizes and ("kokoro", False) in recognizes
+    assert ("speaches", True) in recognizes and ("kokoro", False) in recognizes
     openai = next(s for s in response.services if s.name == "openai" and s.recognizes)
     secret = [f.name for f in openai.settings if f.secret]
     assert secret == ["api_key"], f"secret settings = {secret}"
