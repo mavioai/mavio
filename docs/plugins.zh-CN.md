@@ -191,9 +191,9 @@ manifest 在 `external_id_kinds` 中声明外部 ID 类型：键、显示名称�
 ### 8.16 语音识别与合成
 `SPEECH_TO_TEXT` 为助手识别语音（[助手 §8](assistant.zh-CN.md#8-语音)），并转写字幕（[架构 §14.5](architecture.zh-CN.md#145-翻译与转写)）。`SpeechToTextService.ListRecognizers` 列出插件实现的识别器，每个都有名称、显示名称、设置、是否启用、语言（BCP 47）、可接受的最长音频，是否给出时间戳、是否检测语言、是否翻译为英语、是否接受提示，以及管理员是否允许它转写字幕。`RecognizeSpeech` 识别放在请求中的音频（16 kHz 单声道 16 位 PCM），或从宿主 API 的 URL（`/speech/audio/{token}`，与视频开头对齐的 PCM；参数 `stream` 选择音频流，`seconds` 只取开头若干秒）读取的音频；结果为文本，或按要求为带时间的分段；可指定语言或检测语言，可转写或翻译为英语，可附带提示。`DetectSpeechLanguage` 检测前 30 秒的语言。失败带有 Connect 错误码，与 AI 网关相同。
 
-`TEXT_TO_SPEECH` 朗读助手的回答。`TextToSpeechService.ListVoices` 列出插件的合成器及其设置与是否启用，以及已启用合成器的语音（`<synthesizer>/<voice>`），每个都有名称与语言；`SynthesizeSpeech` 以请求指定的语速与格式（Ogg 封装的 Opus，或 MP3）返回用某个语音朗读一段文本的语音，服务不接受 Opus 时返回 MP3。
+`TEXT_TO_SPEECH` 朗读助手的回答。`TextToSpeechService.ListVoices` 列出插件的合成器及其设置与是否启用，以及已启用合成器的语音（`<synthesizer>/<voice>`），每个都有名称与语言；`SynthesizeSpeech` 以请求指定的语速与格式（Ogg 封装的 Opus，或 MP3）返回用某个语音朗读一段文本的语音，除非合成器的设置固定了格式。
 
-`plugins/voice` 以 Go 子进程插件提供这两项能力：其设置启用并配置每个识别器与合成器，从它实现的服务中选取（来源为 `speech-recognizers` 与 `speech-synthesizers` 的 `x-mavio-options`），带有该种服务自己的设置，如地址、key（机密项）与模型——识别有 whisper-asr-webservice 与 OpenAI 兼容的转写 API，合成有 OpenAI 兼容的语音 API——服务端以插件的 ID 加上它们自己的名称来命名它们。whisper-asr-webservice 是从 `plugins/subtitles` 移来的 Bazarr Whisper 提供者，连同其语言映射、两个超时设置与测试用例；每段话一次性交给服务。
+`plugins/voice` 以 Go 子进程插件提供这两项能力：其设置启用并配置每个识别器与合成器，从它实现的服务中选取（来源为 `speech-recognizers` 与 `speech-synthesizers` 的 `x-mavio-options`），带有该种服务自己的设置，如地址、key（机密项）与模型——识别有 whisper-asr-webservice 与 OpenAI 兼容的转写 API，合成有 OpenAI 兼容的语音 API——服务端以插件的 ID 加上它们自己的名称来命名它们。whisper-asr-webservice 是从 `plugins/subtitles` 移来的 Bazarr Whisper 提供者，连同其语言映射、两个超时设置与测试用例；每段话一次性交给服务。OpenAI 兼容服务的设置是 Mavio 对它们的需要，而非 API 的每个参数：只在转录字幕与检测语言时，且设置表明模型以 `verbose_json` 回答时，才向转录 API 请求带分段与语言的 `verbose_json`，其余情况（如助手）请求普通 JSON；语音 API 接受音频格式（Opus 或 MP3，不选时由客户端决定）与说话方式的指令（用于接受指令的模型）。
 
 ### 8.17 质询求解器
 `CHALLENGE_SOLVER` 解答位于 Cloudflare 或 DDoS-Guard 之后的站点的质询（[架构 §17.2](architecture.zh-CN.md#172-质询求解器)）。`ChallengeSolverService.Solve` 接受 URL、方法（GET，或带表单正文及其内容类型的 POST）、求解时经由的代理与超时，返回通过质询的 cookie（名称、值、域、路径）、取得它们时的 user agent 以及解答它的求解器。其他插件从不直接调用它：它们以代理的 ID 调用 `HostService.SolveChallenge`，由服务端解析代理后依次交给就绪的求解插件；没有时答复 unavailable。由 `plugins/solvers` 以 FlareSolverr 提供（§12）。

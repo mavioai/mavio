@@ -20,7 +20,14 @@ const (
 	Password
 	Number
 	Checkbox
+	// Select is one of the setting's options, or none.
+	Select
 )
+
+// Option is a choice of a select.
+type Option struct {
+	Value, Label string
+}
 
 // Setting is a setting a recognizer or synthesizer takes.
 type Setting struct {
@@ -28,6 +35,8 @@ type Setting struct {
 	Type              SettingType
 	Default           any
 	Advanced          bool
+	// Options are a select's choices.
+	Options []Option
 }
 
 // Env is what a recognizer or synthesizer is made with.

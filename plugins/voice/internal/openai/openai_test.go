@@ -25,8 +25,6 @@ type fakeAPI struct {
 	sizes  []int
 	fields []string
 	speech map[string]any
-	// noOpus rejects Opus, as OpenRouter does.
-	noOpus bool
 }
 
 func (f *fakeAPI) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -53,10 +51,6 @@ func (f *fakeAPI) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		_, _ = io.WriteString(w, `{"text":" Bonjour.","language":"french","segments":[{"start":0.5,"end":0.9,"text":" Bonjour."}]}`)
 	case "/v1/audio/speech":
 		_ = json.NewDecoder(r.Body).Decode(&f.speech)
-		if f.noOpus && f.speech["response_format"] == "opus" {
-			http.Error(w, `{"error":"expected one of mp3, pcm"}`, http.StatusBadRequest)
-			return
-		}
 		_, _ = io.WriteString(w, "OggS")
 	default:
 		http.NotFound(w, r)
@@ -102,8 +96,16 @@ func TestRecognize(t *testing.T) {
 
 	f.sizes, f.fields = nil, nil
 	res, err = r.Recognize(t.Context(), service.Request{Audio: pcm(time.Second), Translate: true})
-	if err != nil || res.Language != "en" || res.Segments != nil || f.fields[0] != "/v1/audio/translations whisper-1   verbose_json" {
-		t.Errorf("translation = %+v, %v, sent %q; want English without segments", res, err, f.fields)
+	if err != nil || res.Language != "en" || res.Segments != nil || f.fields[0] != "/v1/audio/translations whisper-1   json" {
+		t.Errorf("translation = %+v, %v, sent %q; want English without segments, asked for in plain JSON", res, err, f.fields)
+	}
+
+	// Without times, as the assistant asks, plain JSON is asked for and the
+	// language is the one asked for.
+	f.sizes, f.fields = nil, nil
+	res, err = r.Recognize(t.Context(), service.Request{Audio: pcm(time.Second), Language: "fr"})
+	if err != nil || res.Language != "fr" || res.Segments != nil || f.fields[0] != "/v1/audio/transcriptions whisper-1 fr  json" {
+		t.Errorf("recognition without times = %+v, %v, sent %q; want French in plain JSON", res, err, f.fields)
 	}
 
 	f.sizes = nil
@@ -151,23 +153,20 @@ func TestSynthesize(t *testing.T) {
 	}
 }
 
-func TestSynthesizeWithoutOpus(t *testing.T) {
+func TestSynthesizeSettings(t *testing.T) {
 	f, base := newAPI(t)
-	f.noOpus = true
-	s, err := NewSynthesizer(service.Env{}, json.RawMessage(`{"base_url":"`+base+`","api_key":"key","model":"fish-audio/drama-3","voices":"v"}`))
+	s, err := NewSynthesizer(service.Env{}, json.RawMessage(`{"base_url":"`+base+`","api_key":"key","model":"fish-audio/drama-3","voices":"v","format":"mp3","instructions":" Warm. "}`))
 	if err != nil {
 		t.Fatal(err)
 	}
-	for i := range 2 {
-		speech, err := s.Synthesize(t.Context(), "v", "Hello.", "en", service.OggOpus, 0)
-		if err != nil {
-			t.Fatalf("speech %d: %v", i, err)
-		}
-		if speech.ContentType != "audio/mpeg" || f.speech["response_format"] != "mp3" {
-			t.Errorf("speech %d: got = %s, %v, want = audio/mpeg, mp3", i, speech.ContentType, f.speech["response_format"])
-		}
+	speech, err := s.Synthesize(t.Context(), "v", "Hello.", "en", service.OggOpus, 0)
+	if err != nil {
+		t.Fatal(err)
 	}
-	if !s.(*Synthesizer).mp3Only.Load() {
-		t.Errorf("mp3Only = false, want = true")
+	if speech.ContentType != "audio/mpeg" || f.speech["response_format"] != "mp3" || f.speech["instructions"] != "Warm." {
+		t.Errorf("speech = %s, request = %v; want MP3 with the instructions", speech.ContentType, f.speech)
+	}
+	if _, err := NewSynthesizer(service.Env{}, json.RawMessage(`{"base_url":"`+base+`","format":"wav"}`)); err == nil {
+		t.Error("NewSynthesizer with WAV: err = nil, want one")
 	}
 }

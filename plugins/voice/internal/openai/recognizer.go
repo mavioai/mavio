@@ -24,7 +24,7 @@ const (
 func RecognizerDefinition() service.RecognizerDef {
 	s := connectionSettings(defaultRecognitionModel, "Such as whisper-1, gpt-4o-transcribe, whisper-large-v3 or Systran/faster-whisper-large-v3.")
 	s = append(s,
-		service.Setting{Name: "timestamps", Label: "Times of what is said", Help: "The model answers verbose_json with segments, as whisper-1 and Whisper servers do; needed to transcribe subtitles.", Type: service.Checkbox, Default: true},
+		service.Setting{Name: "timestamps", Label: "Times of what is said", Help: "The model answers verbose_json with segments and the language, as whisper-1 and Whisper servers do; asked for only to transcribe subtitles and detect languages, needed for both.", Type: service.Checkbox, Default: true},
 		service.Setting{Name: "translates", Label: "Translation to English", Help: "The server translates speech to English, as OpenAI's whisper-1 does.", Type: service.Checkbox, Default: true},
 	)
 	return service.RecognizerDef{
@@ -102,7 +102,7 @@ func (r *Recognizer) Recognize(ctx context.Context, req service.Request) (servic
 	var texts []string
 	for at := 0; at < len(pcm); at += size {
 		part := pcm[at:min(at+size, len(pcm))]
-		t, err := r.send(ctx, part, req)
+		t, err := r.send(ctx, part, req, req.Timestamps)
 		if err != nil {
 			return service.Result{}, err
 		}
@@ -134,8 +134,9 @@ func seconds(s float64) time.Duration {
 	return time.Duration(s * float64(time.Second)).Round(time.Millisecond)
 }
 
-// send recognizes a piece of the audio.
-func (r *Recognizer) send(ctx context.Context, pcm []byte, req service.Request) (transcription, error) {
+// send recognizes a piece of the audio, asking for its segments and
+// language when verbose and the model tells them; plain JSON is lighter.
+func (r *Recognizer) send(ctx context.Context, pcm []byte, req service.Request, verbose bool) (transcription, error) {
 	f := newForm()
 	f.file("file", "audio.wav", service.WAV(pcm))
 	f.field("model", r.c.model)
@@ -150,7 +151,7 @@ func (r *Recognizer) send(ctx context.Context, pcm []byte, req service.Request) 
 		f.field("language", code)
 	}
 	f.field("prompt", strings.Join(req.Hints, ", "))
-	if r.timestamps {
+	if verbose && r.timestamps {
 		f.field("response_format", "verbose_json")
 		if !req.Translate {
 			f.field("timestamp_granularities[]", "segment")
@@ -180,7 +181,7 @@ func (r *Recognizer) DetectLanguage(ctx context.Context, audio service.Audio) (s
 	if err != nil {
 		return "", fmt.Errorf("audio: %w", err)
 	}
-	t, err := r.send(ctx, pcm, service.Request{})
+	t, err := r.send(ctx, pcm, service.Request{}, true)
 	if err != nil {
 		return "", err
 	}

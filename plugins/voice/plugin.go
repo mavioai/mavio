@@ -409,6 +409,14 @@ func settingFields(settings []service.Setting) []*pluginv1.SettingField {
 			f.SetType(pluginv1.SettingFieldType_SETTING_FIELD_TYPE_NUMBER)
 		case service.Checkbox:
 			f.SetType(pluginv1.SettingFieldType_SETTING_FIELD_TYPE_CHECKBOX)
+		case service.Select:
+			f.SetType(pluginv1.SettingFieldType_SETTING_FIELD_TYPE_SELECT)
+			var opts []*pluginv1.SettingFieldOption
+			for _, o := range s.Options {
+				data, _ := json.Marshal(o.Value)
+				opts = append(opts, pluginv1.SettingFieldOption_builder{ValueJson: proto.String(string(data)), Label: proto.String(o.Label)}.Build())
+			}
+			f.SetOptions(opts)
 		}
 		if s.Default != nil {
 			if data, err := json.Marshal(s.Default); err == nil {

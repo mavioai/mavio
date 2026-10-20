@@ -3,10 +3,8 @@ package openai
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"strings"
-	"sync/atomic"
 	"unicode"
 
 	"github.com/mavioai/mavio/plugins/voice/internal/service"
@@ -21,16 +19,28 @@ const (
 // SynthesizerDefinition returns the synthesizer's definition.
 func SynthesizerDefinition() service.SynthesizerDef {
 	s := connectionSettings(defaultSpeechModel, "Such as gpt-4o-mini-tts, tts-1, or speaches-ai/Kokoro-82M-v1.0-ONNX.")
-	s = append(s, service.Setting{
-		Name: "voices", Label: "Voices", Help: "The voices the model speaks with, separated by commas, such as af_heart for Kokoro.",
-		Type: service.Text, Default: defaultVoices,
-	})
+	s = append(s,
+		service.Setting{
+			Name: "voices", Label: "Voices", Help: "The voices the model speaks with, separated by commas, such as af_heart for Kokoro.",
+			Type: service.Text, Default: defaultVoices,
+		},
+		service.Setting{
+			Name: "format", Label: "Audio format", Help: "None asks for what the client plays, Opus unless it asks for MP3; MP3 for services without Opus, such as OpenRouter's.",
+			Type: service.Select, Options: []service.Option{{Value: "opus", Label: "Opus"}, {Value: "mp3", Label: "MP3"}},
+		},
+		service.Setting{
+			Name: "instructions", Label: "Instructions", Help: "How to speak, such as \"warm and unhurried\", for models that take them, such as gpt-4o-mini-tts.",
+			Type: service.Text,
+		},
+	)
 	return service.SynthesizerDef{Name: Name, DisplayName: "OpenAI-compatible speech", Settings: s, New: NewSynthesizer}
 }
 
 type synthesizerSettings struct {
 	connection
-	Voices *string `json:"voices"`
+	Voices       *string `json:"voices"`
+	Format       string  `json:"format"`
+	Instructions string  `json:"instructions"`
 }
 
 // NewSynthesizer makes the synthesizer from its settings.
@@ -47,7 +57,10 @@ func NewSynthesizer(env service.Env, raw json.RawMessage) (service.Synthesizer, 
 	if s.Voices != nil {
 		list = *s.Voices
 	}
-	out := &Synthesizer{c: c}
+	if s.Format != "" && s.Format != "opus" && s.Format != "mp3" {
+		return nil, fmt.Errorf("%w: audio format %q", service.ErrConfig, s.Format)
+	}
+	out := &Synthesizer{c: c, format: s.Format, instructions: strings.TrimSpace(s.Instructions)}
 	for v := range strings.SplitSeq(list, ",") {
 		if v = strings.TrimSpace(v); v != "" {
 			out.voices = append(out.voices, service.Voice{ID: v, Name: title(v)})
@@ -69,36 +82,31 @@ func title(s string) string {
 type Synthesizer struct {
 	c      *client
 	voices []service.Voice
-	// mp3Only is a service that rejected Opus, as OpenRouter's do: it is
-	// asked for MP3, which every client plays too.
-	mp3Only atomic.Bool
+	// format is the encoding always asked for, opus or mp3; empty asks
+	// for the one requested.
+	format       string
+	instructions string
 }
 
 // Voices implements service.Synthesizer; they speak any language.
 func (s *Synthesizer) Voices() []service.Voice { return s.voices }
 
-// Synthesize implements service.Synthesizer: Opus in Ogg unless MP3 is
-// asked for or the service takes no Opus.
+// Synthesize implements service.Synthesizer: in the format of the
+// settings, else the one asked for.
 func (s *Synthesizer) Synthesize(ctx context.Context, voice, text, _ string, format service.Format, speed float64) (service.Speech, error) {
-	if format == service.OggOpus && !s.mp3Only.Load() {
-		speech, err := s.synthesize(ctx, voice, text, "opus", speed)
-		if !errors.Is(err, service.ErrRejected) {
-			return speech, err
-		}
-		// The service may take no Opus; MP3 tells.
-		speech, err2 := s.synthesize(ctx, voice, text, "mp3", speed)
-		if err2 != nil {
-			return service.Speech{}, err
-		}
-		s.mp3Only.Store(true)
-		return speech, nil
+	encoding := s.format
+	if encoding == "" {
+		encoding = map[service.Format]string{service.OggOpus: "opus", service.MP3: "mp3"}[format]
 	}
-	return s.synthesize(ctx, voice, text, "mp3", speed)
+	return s.synthesize(ctx, voice, text, encoding, speed)
 }
 
 // synthesize asks the service for speech in an encoding, opus or mp3.
 func (s *Synthesizer) synthesize(ctx context.Context, voice, text, encoding string, speed float64) (service.Speech, error) {
 	req := map[string]any{"model": s.c.model, "input": text, "voice": voice, "response_format": encoding}
+	if s.instructions != "" {
+		req["instructions"] = s.instructions
+	}
 	if speed > 0 {
 		req["speed"] = speed
 	}
