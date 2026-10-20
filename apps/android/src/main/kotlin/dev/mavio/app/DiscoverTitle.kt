@@ -905,7 +905,7 @@ private fun SeasonEpisodes(serverId: String, tmdbId: Int, seasonNumber: Int) {
 // People
 
 /**
- * A credited person: their photo, else their initials, their name, and
+ * A credited person: their photo, else the placeholder of missing artwork, their name, and
  * under it a label, such as the character they play or their job,
  * opening their discovered page.
  */
@@ -917,14 +917,7 @@ internal fun CreditTile(serverId: String, c: Credit, label: String, modifier: Mo
         modifier.then(if (c.tmdbId > 0) Modifier.clickable { navigator.open(Route.DiscoveredPerson(serverId, c.tmdbId)) } else Modifier),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Box(Modifier.size(96.dp).clip(CircleShape).background(colors.surfaceRaised), Alignment.Center) {
-            Text(
-                c.name.split(" ").filter { it.isNotEmpty() }.take(2).joinToString("") { it.take(1) },
-                style = theme.type.title3.text,
-                color = colors.textSecondary,
-            )
-            c.photo?.let { Artwork(it, Modifier.fillMaxSize(), icon = R.drawable.ic_profile, contentDescription = c.name) }
-        }
+        Artwork(c.photo, Modifier.size(96.dp).clip(CircleShape), icon = R.drawable.ic_profile, contentDescription = c.name)
         Spacer(Modifier.height(MavioSpacing.s8))
         Text(c.name, style = theme.type.callout.text, maxLines = 2, textAlign = TextAlign.Center)
         if (label.isNotEmpty()) {

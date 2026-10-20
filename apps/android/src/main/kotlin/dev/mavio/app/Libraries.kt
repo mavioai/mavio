@@ -169,7 +169,7 @@ private fun LibraryRow(libraries: List<LibraryEntry?>, onOpen: (LibraryEntry) ->
                         ) {
                             val shape = RoundedCornerShape(MavioRadius.md)
                             if (library == null) {
-                                Box(Modifier.fillMaxWidth().aspectRatio(16f / 9f).background(theme.colors.surfaceRaised, shape))
+                                Box(Modifier.fillMaxWidth().aspectRatio(16f / 9f).background(theme.colors.fill, shape))
                             } else {
                                 Artwork(
                                     library.imageUrl,

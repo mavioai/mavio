@@ -185,7 +185,7 @@ private fun LibraryLine(libraries: List<LibraryEntry?>, serverId: String, focus:
         libraries.forEachIndexed { i, library ->
             val shape = RoundedCornerShape(MavioRadius.md)
             if (library == null) {
-                Box(Modifier.weight(1f).aspectRatio(16f / 9f).background(theme.colors.surfaceRaised, shape))
+                Box(Modifier.weight(1f).aspectRatio(16f / 9f).background(theme.colors.fill, shape))
                 return@forEachIndexed
             }
             val state = remember { Focusable() }

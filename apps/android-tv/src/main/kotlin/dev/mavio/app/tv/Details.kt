@@ -690,17 +690,12 @@ internal fun PersonCard(credit: CreditEntry, modifier: Modifier) {
     val state = remember { Focusable() }
     val focused = state.focused()
     Column(modifier.shakes().width(180.dp).focusCard(focused).selectable(state) {}, horizontalAlignment = Alignment.CenterHorizontally) {
-        Box(
-            Modifier
-                .focusArtwork(focused, 80.dp)
-                .size(160.dp)
-                .clip(CircleShape)
-                .background(theme.colors.surfaceRaised),
-            Alignment.Center,
-        ) {
-            Text(initials(credit.name), style = theme.type.title2.text, color = theme.colors.textSecondary)
-            credit.photo?.let { Artwork(it.url, Modifier.fillMaxSize(), contentDescription = credit.name) }
-        }
+        Artwork(
+            credit.photo?.url,
+            Modifier.focusArtwork(focused, 80.dp).size(160.dp).clip(CircleShape),
+            icon = R.drawable.ic_profile,
+            contentDescription = credit.name,
+        )
         Spacer(Modifier.height(MavioSpacing.s12))
         Text(credit.name, style = theme.type.headline.text, maxLines = 1, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center)
         credit.role?.let {
@@ -709,8 +704,6 @@ internal fun PersonCard(credit: CreditEntry, modifier: Modifier) {
     }
 }
 
-private fun initials(name: String): String =
-    name.split(" ").filter { it.isNotEmpty() }.take(2).joinToString("") { it.take(1) }
 
 /** The cast's last card, opening the whole cast and crew: an arrow in a circle over See All. */
 @Composable
@@ -723,7 +716,7 @@ internal fun CastAllCard(modifier: Modifier, onClick: () -> Unit) {
                 .focusArtwork(focused, 80.dp)
                 .size(160.dp)
                 .clip(CircleShape)
-                .background(theme.colors.surfaceRaised),
+                .background(theme.colors.fill),
             Alignment.Center,
         ) {
             MavioIcon(R.drawable.ic_forward, size = 40.dp)

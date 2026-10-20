@@ -805,21 +805,12 @@ internal fun CreditCard(credit: Credit, modifier: Modifier, onClick: () -> Unit)
     val state = remember { Focusable() }
     val focused = state.focused()
     Column(modifier.shakes().width(180.dp).focusCard(focused).selectable(state) { if (credit.tmdbId > 0) onClick() }, horizontalAlignment = Alignment.CenterHorizontally) {
-        Box(
-            Modifier
-                .focusArtwork(focused, 80.dp)
-                .size(160.dp)
-                .clip(CircleShape)
-                .background(theme.colors.surfaceRaised),
-            Alignment.Center,
-        ) {
-            Text(
-                credit.name.split(" ").filter { it.isNotEmpty() }.take(2).joinToString("") { it.take(1) },
-                style = theme.type.title2.text,
-                color = theme.colors.textSecondary,
-            )
-            credit.photo?.let { Artwork(it, Modifier.fillMaxSize(), contentDescription = credit.name) }
-        }
+        Artwork(
+            credit.photo,
+            Modifier.focusArtwork(focused, 80.dp).size(160.dp).clip(CircleShape),
+            icon = R.drawable.ic_profile,
+            contentDescription = credit.name,
+        )
         Spacer(Modifier.height(MavioSpacing.s12))
         Text(credit.name, style = theme.type.headline.text, maxLines = 1, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center)
         if (credit.role.isNotEmpty()) {

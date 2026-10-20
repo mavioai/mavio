@@ -176,7 +176,7 @@ fun TvCatalogShelf(
 
 /**
  * The card ending a row, in place of the link beside its title on other
- * layouts: a poster of `color.surfaceRaised` with the forward arrow and
+ * layouts: a poster of `color.fill` with the forward arrow and
  * See All.
  */
 @Composable
@@ -190,7 +190,7 @@ fun SeeAllCard(modifier: Modifier = Modifier, onClick: () -> Unit) {
                 .fillMaxWidth()
                 .aspectRatio(2f / 3f)
                 .clip(RoundedCornerShape(MavioRadius.md))
-                .background(theme.colors.surfaceRaised),
+                .background(theme.colors.fill),
             verticalArrangement = Arrangement.spacedBy(MavioSpacing.s12, Alignment.CenterVertically),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {

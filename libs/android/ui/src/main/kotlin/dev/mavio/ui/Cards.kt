@@ -89,7 +89,7 @@ fun Artwork(
 ) {
     var failed by remember(url) { mutableStateOf(false) }
     val colors = theme.colors
-    Box(modifier.background(colors.surfaceRaised)) {
+    Box(modifier.background(colors.fill)) {
         if (url == null || failed) {
             Box(
                 Modifier
@@ -235,7 +235,7 @@ fun CardPlaceholder(shape: CardShape = CardShape.Poster) {
                 .fillMaxWidth()
                 .aspectRatio(shape.aspect)
                 .clip(RoundedCornerShape(MavioRadius.md))
-                .background(colors.surfaceRaised),
+                .background(colors.fill),
         )
         Spacer(Modifier.height(MavioSpacing.s8))
         Box(
@@ -243,7 +243,7 @@ fun CardPlaceholder(shape: CardShape = CardShape.Poster) {
                 .fillMaxWidth(0.75f)
                 .height(16.dp)
                 .clip(RoundedCornerShape(MavioRadius.xs))
-                .background(colors.surfaceRaised),
+                .background(colors.fill),
         )
     }
 }
@@ -254,16 +254,7 @@ fun PersonCard(credit: CreditEntry, modifier: Modifier = Modifier) {
     val colors = theme.colors
     val type = theme.type
     Column(modifier.width(100.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-        Box(
-            Modifier
-                .size(88.dp)
-                .clip(CircleShape)
-                .background(colors.surfaceRaised),
-            Alignment.Center,
-        ) {
-            Text(initials(credit.name), style = type.title3.text, color = colors.textSecondary)
-            credit.photo?.let { Artwork(it.url, Modifier.fillMaxSize(), contentDescription = credit.name) }
-        }
+        Artwork(credit.photo?.url, Modifier.size(88.dp).clip(CircleShape), icon = R.drawable.ic_profile, contentDescription = credit.name)
         Spacer(Modifier.height(MavioSpacing.s4))
         Text(credit.name, style = type.callout.text, maxLines = 2, textAlign = TextAlign.Center)
         credit.role?.let {
@@ -271,9 +262,6 @@ fun PersonCard(credit: CreditEntry, modifier: Modifier = Modifier) {
         }
     }
 }
-
-private fun initials(name: String): String =
-    name.split(" ").filter { it.isNotEmpty() }.take(2).joinToString("") { it.take(1) }
 
 /** The first letter of a name in a circle. */
 @Composable
