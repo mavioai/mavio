@@ -421,6 +421,10 @@ function Property({
       const list = Array.isArray(value) ? value : [];
       const itemType = typeOf(items);
       if (itemType === "object" && items.properties) return below(<ObjectList schema={items} value={list} onChange={onChange} />);
+      if ((choices(items)?.length ?? 0) > tagsAbove)
+        return below(
+          <TagSet schema={items} label={labelOf(name, s)} value={list.length ? list : Array.isArray(s.default) ? s.default : []} onChange={(v) => onChange(v.length ? v : undefined)} />,
+        );
       if (choices(items)) return below(<EnumSet schema={items} value={list} onChange={(v) => onChange(v.length ? v : undefined)} />);
       if (itemType === "string" || itemType === "integer" || itemType === "number")
         return below(<Lines label={labelOf(name, s)} numeric={itemType !== "string"} value={list} onChange={(v) => onChange(v.length ? v : undefined)} />);
@@ -516,6 +520,57 @@ function EnumSet({ schema: s, value, onChange }: { schema: Schema; value: Json[]
           {o.label}
         </Checkbox>
       ))}
+    </div>
+  );
+}
+
+/** How many options a multiple choice shows as checkboxes; more are tags. */
+const tagsAbove = 8;
+
+/**
+ * Values chosen among many, in their order, as tags: each removed by its
+ * button, but the last, and the others added from a picker. Unset, it shows
+ * the default the plugin takes.
+ */
+function TagSet({ schema: s, label, value, onChange }: { schema: Schema; label: string; value: Json[]; onChange: (v: Json[]) => void }) {
+  const options = choices(s) ?? [];
+  const key = (v: unknown) => JSON.stringify(v);
+  const title = (v: Json) => options.find((o) => key(o.value) === key(v))?.label ?? String(v);
+  const rest = options.filter((o) => !value.some((v) => key(v) === key(o.value)));
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      {value.map((v) => (
+        <span key={key(v)} className="inline-flex min-h-7 items-center gap-1 rounded-full bg-fill ps-2.5 pe-1 type-footnote text-on-background">
+          {title(v)}
+          {value.length > 1 && (
+            <button
+              type="button"
+              aria-label={`${t("schema.remove")} ${title(v)}`}
+              className="flex size-5 items-center justify-center rounded-full text-text-secondary hover:bg-fill-selected hover:text-on-background"
+              onClick={() => onChange(value.filter((x) => key(x) !== key(v)))}
+            >
+              <Icon name="close" size={12} />
+            </button>
+          )}
+        </span>
+      ))}
+      <Picker
+        label={label}
+        value={undefined}
+        options={rest.map((o) => ({ value: key(o.value), label: o.label }))}
+        labels={{
+          placeholder: t("schema.add"),
+          search: t("nav.search"),
+          empty: t("schema.noMatches"),
+          all: t("schema.all"),
+          count: (count) => t("schema.matches", { count }),
+          first: (shown, count) => t("schema.matchesFirst", { shown, count }),
+        }}
+        onChange={(k) => {
+          const o = rest.find((o) => key(o.value) === k);
+          if (o) onChange([...value, o.value as Json]);
+        }}
+      />
     </div>
   );
 }
