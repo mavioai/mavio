@@ -372,6 +372,22 @@ wheels = [
 ]
 
 [[package]]
+name = "deepgram-sdk"
+version = "7.13.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "httpx" },
+    { name = "pydantic" },
+    { name = "pydantic-core" },
+    { name = "typing-extensions" },
+    { name = "websockets" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/20/32/02856581cc8c50c48392530b2a6fe52e052218e0581ba3bf4983efe70da8/deepgram_sdk-7.13.0.tar.gz", hash = "sha256:e7e5a3bcf261cbd1f2ee8987adcdd21acce6268bf5904dc943fefe4b9577a8ef", size = 252676, upload-time = "2026-10-12T08:49:45.268Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/0a/27/a1f6c03d9243f996bf67ae872c796c49fcfb066dd3c2338b5d3b68f9c6ea/deepgram_sdk-7.13.0-py3-none-any.whl", hash = "sha256:dff3ed7929bef4c2dc6d87003d8fa7994501e52a41212416b4a81258da76f415", size = 660444, upload-time = "2026-10-12T08:49:43.944Z" },
+]
+
+[[package]]
 name = "dlinfo"
 version = "2.0.0"
 source = { registry = "https://pypi.org/simple" }
@@ -823,7 +839,7 @@ dependencies = [
     { name = "httpx" },
     { name = "mavio-plugin" },
     { name = "mavio-proto" },
-    { name = "pipecat-ai", extra = ["kokoro", "openai", "websocket", "whisper"] },
+    { name = "pipecat-ai", extra = ["deepgram", "kokoro", "openai", "websocket", "whisper"] },
     { name = "uvicorn" },
 ]
 
@@ -840,7 +856,7 @@ requires-dist = [
     { name = "httpx", specifier = ">=0.28" },
     { name = "mavio-plugin", editable = "libs/plugin/python" },
     { name = "mavio-proto", editable = "libs/proto/gen/python" },
-    { name = "pipecat-ai", extras = ["websocket", "whisper", "kokoro", "openai"], specifier = "==1.13.0" },
+    { name = "pipecat-ai", extras = ["websocket", "whisper", "kokoro", "openai", "deepgram"], specifier = "==1.13.0" },
     { name = "uvicorn", specifier = ">=0.37" },
 ]
 
@@ -1178,6 +1194,9 @@ wheels = [
 ]
 
 [package.optional-dependencies]
+deepgram = [
+    { name = "deepgram-sdk" },
+]
 kokoro = [
     { name = "kokoro-onnx" },
     { name = "requests" },

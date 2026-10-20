@@ -1,8 +1,10 @@
-import asyncio
 from collections.abc import Sequence
 from typing import Any, cast
 
+from fakes import FakeAsk
 from pipecat.frames.frames import (
+    BotStartedSpeakingFrame,
+    BotStoppedSpeakingFrame,
     Frame,
     InterruptionFrame,
     LLMContextFrame,
@@ -12,29 +14,10 @@ from pipecat.frames.frames import (
     OutputTransportMessageUrgentFrame,
 )
 from pipecat.processors.aggregators.llm_context import LLMContext, LLMContextMessage
+from pipecat.processors.frame_processor import FrameDirection
 from pipecat.tests.utils import SleepFrame, run_test
 
 from mavio_pipecat.assistant import MavioAssistant, trailing_user_text
-
-
-class FakeAsk:
-    """Answers each request with the responses of its script; a script
-    item that is a float sleeps that long."""
-
-    def __init__(self, *scripts: list[Any]):
-        self.scripts = list(scripts)
-        self.requests: list[dict[str, Any]] = []
-
-    async def ask(self, request: dict[str, Any]):
-        self.requests.append(request)
-        for item in self.scripts.pop(0):
-            if isinstance(item, float):
-                await asyncio.sleep(item)
-            else:
-                yield item
-
-    async def aclose(self):
-        pass
 
 
 def context(*messages: tuple[str, str]) -> LLMContextFrame:
@@ -43,8 +26,12 @@ def context(*messages: tuple[str, str]) -> LLMContextFrame:
     )
 
 
+def messages(frames: Sequence[Frame]) -> list[dict[str, Any]]:
+    return [f.message for f in frames if isinstance(f, OutputTransportMessageUrgentFrame)]
+
+
 def events(frames: Sequence[Frame]) -> list[str]:
-    return [f.message["type"] for f in frames if isinstance(f, OutputTransportMessageUrgentFrame)]
+    return [m["type"] for m in messages(frames)]
 
 
 def speech(frames: Sequence[Frame]) -> list[str]:
@@ -79,16 +66,55 @@ async def test_answer_is_spoken():
             {"understood": {"text": "hi", "ai": True}},
             {"answer": "Hel"},
             {"answer": "lo"},
-            {"done": {"answer": "Hello", "language": "en"}},
+            {"done": {"answer": "Hello", "language": "en", "conversationId": "c1"}},
         ]
     )
+    assistant = MavioAssistant(ask, commit_delay=0)
+    down, _ = await run_test(
+        assistant,
+        frames_to_send=[context(("user", "hi")), SleepFrame(0.2)],
+    )
+    assert ask.requests == [{"text": "hi", "spoken": True}], f"got = {ask.requests}"
+    # The run's end waits for its speech, or for the session to end.
+    want = ["run", "intent", "answer", "answer", "end"]
+    assert events(down) == want, f"got = {events(down)}"
+    assert speech(down) == ["start", "Hel", "lo", "end"], f"got = {speech(down)}"
+    ids = {m.get("id") for m in messages(down) if m["type"] in ("run", "answer")}
+    assert ids == {"1"}, f"run IDs = {ids}, want = {{'1'}}"
+
+
+async def test_end_follows_the_speech():
+    ask = FakeAsk([{"answer": "Hello"}, {"done": {"answer": "Hello", "conversationId": "c1"}}])
+    down, _ = await run_test(
+        MavioAssistant(ask, commit_delay=0),
+        frames_to_send=[
+            context(("user", "hi")),
+            SleepFrame(0.1),
+            BotStartedSpeakingFrame(),
+            BotStoppedSpeakingFrame(),
+        ],
+        frames_to_send_direction=FrameDirection.DOWNSTREAM,
+    )
+    end = messages(down)[-1]
+    want = {
+        "type": "end",
+        "id": "1",
+        "status": "completed",
+        "conversation_id": "c1",
+        "answer": "Hello",
+        "language": "",
+    }
+    assert end == want, f"end = {end}, want = {want}"
+
+
+async def test_unspoken_end_is_sent():
+    ask = FakeAsk([{"done": {"conversationId": "c1"}}])
     down, _ = await run_test(
         MavioAssistant(ask, commit_delay=0),
         frames_to_send=[context(("user", "hi")), SleepFrame(0.2)],
     )
-    assert ask.requests == [{"text": "hi", "spoken": True}], f"got = {ask.requests}"
-    assert events(down) == ["run", "intent", "answer", "answer", "end"], f"got = {events(down)}"
-    assert speech(down) == ["start", "Hel", "lo", "end"], f"got = {speech(down)}"
+    end = messages(down)[-1]
+    assert (end["type"], end["status"]) == ("end", "completed"), f"got = {end}"
 
 
 async def test_fast_path_answer_is_in_done():
@@ -117,6 +143,8 @@ async def test_next_turn_steers():
     texts = [r["text"] for r in ask.requests]
     assert texts == ["play", "play the matrix"], f"got = {texts}"
     assert speech(down) == ["start", "Playing The Matrix.", "end"], f"got = {speech(down)}"
+    ends = [(m["id"], m["status"]) for m in messages(down) if m["type"] == "end"]
+    assert ends[0] == ("1", "cancelled"), f"ends = {ends}, want the first run cancelled"
 
 
 async def test_interruption_aborts_and_drops_held_actions():
@@ -136,7 +164,8 @@ async def test_interruption_aborts_and_drops_held_actions():
             SleepFrame(0.6),
         ],
     )
-    assert events(down) == ["run", "answer"], f"got = {events(down)}"
+    assert events(down) == ["run", "answer", "end"], f"got = {events(down)}"
+    assert messages(down)[-1]["status"] == "cancelled"
     # The TTS service and the assistant aggregator end the interrupted
     # response themselves.
     assert speech(down) == ["start", "Playing"], f"got = {speech(down)}"
@@ -150,4 +179,7 @@ async def test_actions_wait_for_the_commit_delay():
         MavioAssistant(ask, commit_delay=0.3),
         frames_to_send=[context(("user", "pause")), SleepFrame(0.1)],
     )
-    assert events(down) == ["run"], f"before the delay: got = {events(down)}"
+    # The session ended before the delay: the run is cancelled, its
+    # action dropped.
+    assert events(down) == ["run", "end"], f"before the delay: got = {events(down)}"
+    assert messages(down)[-1]["status"] == "cancelled"

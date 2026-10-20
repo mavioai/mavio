@@ -1,19 +1,19 @@
-"""The plugin: voice sessions on Pipecat (VOICE_SESSION), which the server
-opens and relays (docs/plugins.md §8.16).
+"""The plugin: voice sessions (VOICE_SESSION), which the server opens and
+relays, and subtitle transcription (SPEECH_TO_TEXT), on Pipecat
+(docs/plugins.md §8.16).
 
 The server opens a session with OpenVoiceSession and connects to its
 WebSocket, under /_mavio/voice/ on the plugin's socket, relaying the
 client's; the session asks the assistant through the host API with the
-session's token. The prototype configures one recognizer and one voice
-from its settings.
+session's token.
 """
 
 import asyncio
 import contextlib
 import json
+import os
 import sys
 from collections.abc import Callable
-from dataclasses import fields
 from pathlib import Path
 from typing import Any, cast
 
@@ -23,81 +23,159 @@ from connectrpc.request import RequestContext
 from fastapi import FastAPI, WebSocket
 from loguru import logger
 
-from mavio.plugin.v1 import voice_pb2
+from mavio.plugin.v1 import task_pb2, voice_pb2
+from mavio.plugin.v1.speech_connect import SpeechToTextServiceASGIApplication
+from mavio.plugin.v1.task_connect import TaskRunnerServiceASGIApplication
 from mavio.plugin.v1.voice_connect import VoiceSessionServiceASGIApplication
 from mavio_pipecat.ask import AskClient, Asker
-from mavio_pipecat.pipeline import Services, Speech, run_session
-from mavio_plugin import ASGIApp, host_client, load_manifest, serve
+from mavio_pipecat.config import Config, Engine, parse_config
+from mavio_pipecat.models import ModelRef, Models
+from mavio_pipecat.pipeline import Services, Turns, run_session
+from mavio_pipecat.services import Catalog, Service, Session
+from mavio_pipecat.transcribe import Transcription
+from mavio_plugin import ASGIApp, data_dir, host_client, load_manifest, serve
 
 # The prefix of the sessions' WebSockets on the plugin's socket.
 VOICE_PREFIX = "/_mavio/voice/"
 # The header of the session token on the host API.
 VOICE_SESSION_HEADER = "Mavio-Voice-Session"
-
-_SERVICES = [
-    voice_pb2.VoiceServiceInfo(name="whisper", display_name="Whisper", recognizes=True),
-    voice_pb2.VoiceServiceInfo(
-        name="openai-stt", display_name="OpenAI-compatible transcription", recognizes=True
-    ),
-    voice_pb2.VoiceServiceInfo(name="kokoro", display_name="Kokoro"),
-    voice_pb2.VoiceServiceInfo(name="openai-tts", display_name="OpenAI-compatible speech"),
-]
-# The services of the settings' stt and tts.
-_RECOGNIZERS = {"whisper": "whisper", "openai": "openai-stt"}
-_VOICES = {"kokoro": "kokoro", "openai": "openai-tts"}
+# The task downloading the models.
+DOWNLOAD_TASK = "download-models"
 
 
-def speech_of(config_json: str) -> Speech:
-    """The prototype's settings: Speech's fields, by name."""
-    config = cast(dict[str, Any], json.loads(config_json or "{}"))
-    names = {f.name for f in fields(Speech) if f.type is str}
-    given = {k: v for k, v in config.items() if k in names and isinstance(v, str)}
-    speech = Speech(**cast(dict[str, Any], given))
-    if speech.stt not in _RECOGNIZERS or speech.tts not in _VOICES:
-        raise ValueError(f"unknown services {speech.stt!r}, {speech.tts!r}")
-    return speech
+def speaks(languages: list[str], language: str) -> bool:
+    """Whether an engine of languages takes a BCP 47 language: any when it
+    lists none, else one of the same primary language."""
+    if not languages or not language:
+        return True
+    base = language.split("-")[0].lower()
+    return any(lang.split("-")[0].lower() == base for lang in languages)
+
+
+class Speech:
+    """The configured engines, the services they are made from and their
+    models."""
+
+    def __init__(self, models: Models, catalog: Catalog | None = None):
+        self.models = models
+        self.catalog = catalog or Catalog()
+        self.config = Config()
+
+    def _service(self, engine: Engine, kind: dict[str, Service]) -> Service:
+        return kind[engine.service]
+
+    def model(self, engine: Engine, kind: dict[str, Service]) -> ModelRef | None:
+        service = self._service(engine, kind)
+        return service.model(service.values(engine.settings))
+
+    def info(self, engine: Engine, kind: dict[str, Service]) -> voice_pb2.VoiceEngineInfo:
+        service = self._service(engine, kind)
+        values = service.values(engine.settings)
+        return voice_pb2.VoiceEngineInfo(
+            id=engine.id,
+            name=engine.name or service.display_name,
+            service=engine.service,
+            enabled=engine.enabled,
+            languages=service.languages(values),
+            hints=service.hints,
+            ready=self.models.ready(service.model(values)),
+        )
+
+    def pick(
+        self, engines: tuple[Engine, ...], kind: dict[str, Service], id: str, language: str
+    ) -> tuple[Engine, Service]:
+        """The engine of an ID, else the first enabled and ready one
+        speaking the language."""
+        for e in engines:
+            if not e.enabled or (id and e.id != id):
+                continue
+            info = self.info(e, kind)
+            if info.ready and (id or speaks(list(info.languages), language)):
+                return e, self._service(e, kind)
+        what = "recognizer" if kind is self.catalog.recognition else "voice"
+        raise ConnectError(
+            Code.FAILED_PRECONDITION,
+            f"no {what} {id!r} is ready" if id else f"no {what} is ready for {language!r}",
+        )
+
+    def missing(self) -> list[ModelRef]:
+        """The models of the enabled engines not downloaded."""
+        c, cat = self.config, self.catalog
+        refs = [
+            *(self.model(e, cat.recognition) for e in c.recognizers if e.enabled),
+            *(self.model(e, cat.synthesis) for e in c.voices if e.enabled),
+            *(self.model(e, cat.transcription) for e in c.transcribers if e.enabled),
+        ]
+        return [r for r in dict.fromkeys(refs) if r is not None and not self.models.ready(r)]
 
 
 class Sessions:
     """The sessions the server opened, and their WebSockets.
 
     asker makes the client asking the assistant with a session token;
-    services makes the services of each session.
+    services makes the recognizer and voice of an opened session, by
+    default from the configured engines.
     """
 
     def __init__(
         self,
         asker: Callable[[str], Asker],
-        services: Callable[[], Services],
+        speech: Speech,
+        services: Callable[[voice_pb2.OpenVoiceSessionRequest], Services] | None = None,
     ):
         self._asker = asker
-        self._services = services
-        self.speech = Speech()
+        self.speech = speech
+        self._services = services or self.services_of
         self._opened: dict[str, voice_pb2.OpenVoiceSessionRequest] = {}
         self._running: dict[str, asyncio.Task[None]] = {}
+
+    def services_of(self, request: voice_pb2.OpenVoiceSessionRequest) -> Services:
+        s, cat = self.speech, self.speech.catalog
+        language = request.language
+        recognizer, stt = s.pick(
+            s.config.recognizers, cat.recognition, request.recognizer, language
+        )
+        voice, tts = s.pick(s.config.voices, cat.synthesis, request.voice, language)
+        session = Session(language=language, hints=tuple(request.hints) if stt.hints else ())
+        assert stt.make is not None and tts.make is not None
+        return Services(
+            stt.make(stt.values(recognizer.settings), session, s.models),
+            tts.make(tts.values(voice.settings), session, s.models),
+        )
 
     # VoiceSessionService.
 
     async def list_voice_services(
         self,
         request: voice_pb2.ListVoiceServicesRequest,
-        ctx: RequestContext[
-            voice_pb2.ListVoiceServicesRequest, voice_pb2.ListVoiceServicesResponse
-        ],
+        ctx: RequestContext[Any, Any],
     ) -> voice_pb2.ListVoiceServicesResponse:
-        s = self.speech
+        s, cat = self.speech, self.speech.catalog
+
+        def services(
+            kind: dict[str, Service], recognizes: bool
+        ) -> list[voice_pb2.VoiceServiceInfo]:
+            return [
+                voice_pb2.VoiceServiceInfo(
+                    name=v.name,
+                    display_name=v.display_name,
+                    recognizes=recognizes,
+                    settings=[f.proto() for f in v.settings],
+                )
+                for v in kind.values()
+            ]
+
+        def engines() -> tuple[list[voice_pb2.VoiceEngineInfo], list[voice_pb2.VoiceEngineInfo]]:
+            return (
+                [s.info(e, cat.recognition) for e in s.config.recognizers],
+                [s.info(e, cat.synthesis) for e in s.config.voices],
+            )
+
+        recognizers, voices = await asyncio.to_thread(engines)
         return voice_pb2.ListVoiceServicesResponse(
-            services=_SERVICES,
-            recognizers=[
-                voice_pb2.VoiceEngineInfo(
-                    id=s.stt, name=s.stt, service=_RECOGNIZERS[s.stt], enabled=True, ready=True
-                )
-            ],
-            voices=[
-                voice_pb2.VoiceEngineInfo(
-                    id=s.tts, name=s.tts, service=_VOICES[s.tts], enabled=True, ready=True
-                )
-            ],
+            services=services(cat.recognition, True) + services(cat.synthesis, False),
+            recognizers=recognizers,
+            voices=voices,
         )
 
     async def open_voice_session(
@@ -113,9 +191,7 @@ class Sessions:
     async def close_voice_session(
         self,
         request: voice_pb2.CloseVoiceSessionRequest,
-        ctx: RequestContext[
-            voice_pb2.CloseVoiceSessionRequest, voice_pb2.CloseVoiceSessionResponse
-        ],
+        ctx: RequestContext[Any, Any],
     ) -> voice_pb2.CloseVoiceSessionResponse:
         self._opened.pop(request.session_id, None)
         task = self._running.get(request.session_id)
@@ -131,31 +207,55 @@ class Sessions:
         if opened is None or session_id in self._running:
             await websocket.close(code=1008)
             return
+        try:
+            services = await asyncio.to_thread(self._services, opened)
+        except ConnectError as e:
+            logger.warning(f"voice session {session_id}: {e.message}")
+            await websocket.accept()
+            await websocket.send_text(
+                json.dumps({"type": "error", "code": "unavailable", "message": e.message})
+            )
+            await websocket.close(code=1011)
+            return
         await websocket.accept()
         ask = self._asker(opened.session_token)
-        context: dict[str, Any] | None = None
+        context: dict[str, Any] = {}
         if opened.context_json:
             with contextlib.suppress(json.JSONDecodeError):
                 context = json.loads(opened.context_json)
-        commit_delay = (
-            opened.turns.commit_delay.ToTimedelta().total_seconds()
-            if opened.turns.HasField("commit_delay")
-            else None
-        )
         task = asyncio.current_task()
         assert task is not None
         self._running[session_id] = task
         try:
-            kwargs: dict[str, Any] = {"session_id": session_id, "context": context}
-            if commit_delay is not None:
-                kwargs["commit_delay"] = commit_delay
-            await run_session(websocket, ask, self._services(), **kwargs)
+            await run_session(
+                websocket, ask, services, Turns.of(opened, context), session_id=session_id
+            )
         except asyncio.CancelledError:
             logger.info(f"voice session {session_id}: closed")
         finally:
             self._running.pop(session_id, None)
             self._opened.pop(session_id, None)
             await ask.aclose()
+
+
+class Tasks:
+    """TaskRunnerService: the models' download."""
+
+    def __init__(self, speech: Speech):
+        self._speech = speech
+
+    async def download(self) -> list[str]:
+        return await self._speech.models.download(await asyncio.to_thread(self._speech.missing))
+
+    async def run_task(
+        self, request: task_pb2.RunTaskRequest, ctx: RequestContext[Any, Any]
+    ) -> task_pb2.RunTaskResponse:
+        if request.task_id != DOWNLOAD_TASK:
+            raise ConnectError(Code.NOT_FOUND, f"no task {request.task_id!r}")
+        done = await self.download()
+        return task_pb2.RunTaskResponse(
+            message=f"downloaded {', '.join(done)}" if done else "every model is downloaded"
+        )
 
 
 def create_app(sessions: Sessions) -> FastAPI:
@@ -170,33 +270,65 @@ def create_app(sessions: Sessions) -> FastAPI:
 
 
 async def run(manifest_path: Path) -> None:
+    root = Path(data_dir() or ".")
+    models = Models(root / "models")
+    speech = Speech(models)
     host = host_client()
 
     def asker(token: str) -> Asker:
         return AskClient(http=host, headers={VOICE_SESSION_HEADER: token})
 
-    sessions = Sessions(asker, lambda: Services.of(sessions.speech))
+    sessions = Sessions(asker, speech)
+    tasks = Tasks(speech)
+    tmp = root / "tmp"
+    tmp.mkdir(parents=True, exist_ok=True)
+    transcription = Transcription(host, models, lambda: speech.config, tmp=tmp)
+    downloading: set[asyncio.Task[list[str]]] = set()
 
     async def configure(config_json: str) -> None:
         try:
-            sessions.speech = speech_of(config_json)
+            speech.config = parse_config(config_json, speech.catalog)
         except (ValueError, TypeError) as e:
             raise ConnectError(Code.INVALID_ARGUMENT, f"configuration: {e}") from e
+        # The models of new engines are downloaded at once; the task
+        # retries what failed.
+        task = asyncio.create_task(tasks.download())
+        downloading.add(task)
+        task.add_done_callback(_logged(downloading))
 
     try:
         await serve(
             load_manifest(manifest_path),
-            [VoiceSessionServiceASGIApplication(sessions)],
+            [
+                VoiceSessionServiceASGIApplication(sessions),
+                SpeechToTextServiceASGIApplication(transcription),
+                TaskRunnerServiceASGIApplication(tasks),
+            ],
             configure=configure,
             mounts={VOICE_PREFIX: cast(ASGIApp, create_app(sessions))},
         )
     finally:
+        for task in downloading:
+            task.cancel()
+        transcription.close()
         await host.aclose()
+
+
+def _logged(tasks: set[asyncio.Task[list[str]]]) -> Callable[[asyncio.Task[list[str]]], None]:
+    def done(task: asyncio.Task[list[str]]) -> None:
+        tasks.discard(task)
+        if not task.cancelled() and task.exception() is not None:
+            logger.warning(f"downloading the models: {task.exception()}")
+
+    return done
 
 
 def main() -> None:
     # The host starts the plugin in its folder, beside its manifest.
     manifest = Path(sys.argv[1] if len(sys.argv) > 1 else "manifest.json")
+    # Hugging Face's cache is in the plugin's data folder.
+    if data_dir():
+        os.environ.setdefault("HF_HOME", str(Path(data_dir()) / "models" / "huggingface"))
     logger.remove()
     logger.add(sys.stderr, level="INFO")
     asyncio.run(run(manifest))
