@@ -37,6 +37,7 @@ import dev.mavio.core.AppModel
 import dev.mavio.core.call
 import dev.mavio.core.instant
 import dev.mavio.design.MavioSpacing
+import dev.mavio.ui.ConfirmDialog
 import dev.mavio.ui.Avatar
 import dev.mavio.ui.ButtonKind
 import dev.mavio.ui.Chevron

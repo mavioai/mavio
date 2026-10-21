@@ -51,6 +51,7 @@ import dev.mavio.core.ServerRecord
 import dev.mavio.core.call
 import dev.mavio.core.instant
 import dev.mavio.design.MavioSpacing
+import dev.mavio.ui.ConfirmDialog
 import dev.mavio.ui.ButtonKind
 import dev.mavio.ui.Chevron
 import dev.mavio.ui.ChoiceMenuBox

@@ -48,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import dev.mavio.core.AppModel
 import dev.mavio.core.call
 import dev.mavio.design.MavioSpacing
+import dev.mavio.ui.ConfirmDialog
 import dev.mavio.ui.ButtonKind
 import dev.mavio.ui.Chevron
 import dev.mavio.ui.ChoiceMenuBox
