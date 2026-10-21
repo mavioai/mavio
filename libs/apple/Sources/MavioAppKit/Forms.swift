@@ -77,10 +77,16 @@
         private let rowStack: NSStackView
         private let theme: Theme
         private let footerLabel: NSTextField
+        private let flush: Bool
 
-        /// A section of rows with a heading and a footer, either optional.
-        public init(_ header: String? = nil, footer: String? = nil, rows: [NSView] = [], theme: Theme = .desktop) {
+        /// A section of rows with a heading and a footer, either optional;
+        /// the lines between its rows reach its leading edge when flush.
+        public init(
+            _ header: String? = nil, footer: String? = nil, rows: [NSView] = [], flush: Bool = false,
+            theme: Theme = .desktop
+        ) {
             self.theme = theme
+            self.flush = flush
             card = Box(fill: theme.isTV ? nil : theme.colors.surface, radius: theme.isTV ? 0 : 14)
             rowStack = .vertical([], spacing: theme.isTV ? MavioSpacing.s8 : 0)
             card.addFilling(rowStack)
@@ -131,7 +137,8 @@
                     line.size(height: 1)
                     let holder = NSView()
                     holder.translatesAutoresizingMaskIntoConstraints = false
-                    holder.addFilling(line, insets: NSEdgeInsets(top: 0, left: MavioSpacing.s16, bottom: 0, right: 0))
+                    holder.addFilling(
+                        line, insets: NSEdgeInsets(top: 0, left: flush ? 0 : MavioSpacing.s16, bottom: 0, right: 0))
                     rowStack.addArrangedSubview(holder)
                     holder.widthAnchor.constraint(equalTo: rowStack.widthAnchor).isActive = true
                 }

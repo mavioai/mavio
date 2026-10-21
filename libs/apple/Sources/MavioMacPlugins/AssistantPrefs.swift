@@ -176,10 +176,7 @@
             }
             let list = memories ?? []
             var rows: [NSView] = list.map { m in
-                let forget = MavioButton(MavioStrings.assistantForget, kind: .destructive, theme: theme) {
-                    [weak self] in self?.forget([m.id])
-                }
-                forget.isEnabled = !busy
+                let forget = more(MavioStrings.assistantForget) { [weak self] in self?.forget([m.id]) }
                 return FormRow(
                     m.text,
                     subtitle: m.hasUpdateTime ? m.updateTime.date.formatted(date: .abbreviated, time: .shortened) : nil,
@@ -190,7 +187,7 @@
             var bar: [NSView] = [newMemory, rememberButton]
             if !list.isEmpty {
                 bar.append(
-                    MavioButton(MavioStrings.assistantForgetAll, kind: .destructive, theme: theme) { [weak self] in
+                    more(MavioStrings.assistantForgetAll) { [weak self] in
                         guard let self else { return }
                         confirm(
                             MavioStrings.assistantForgetAllConfirm, message: nil,
@@ -206,6 +203,28 @@
                 MavioStrings.assistantMemory, footer: MavioStrings.assistantMemoryFooter, rows: rows, theme: theme)
         }
 
+        /// A button of three dots opening a menu of one destructive item,
+        /// titled title, doing run.
+        private func more(_ title: String, run: @escaping @MainActor () -> Void) -> NSView {
+            let button = MavioButton(icon: "moreVertical", kind: .plain, theme: theme)
+            button.setAccessibilityLabel(MavioStrings.itemMore)
+            button.toolTip = MavioStrings.itemMore
+            button.isEnabled = !busy
+            button.onPress = { [weak button, theme] in
+                guard let button else { return }
+                let menu = NSMenu()
+                let item = MenuAction(title, run: run)
+                item.attributedTitle = NSAttributedString(
+                    string: title,
+                    attributes: [.foregroundColor: theme.colors.danger, .font: NSFont.menuFont(ofSize: 0)])
+                menu.addItem(item)
+                menu.popUp(
+                    positioning: nil, at: NSPoint(x: 0, y: button.isFlipped ? button.bounds.height + 4 : -4), in: button
+                )
+            }
+            return button
+        }
+
         private func conversationsSection() -> NSView {
             var rows: [NSView] = []
             for c in conversations ?? [] {
@@ -217,8 +236,14 @@
                     c.title.isEmpty ? when : c.title, subtitle: detail.isEmpty ? nil : detail, theme: theme
                 ) { [weak self] in self?.toggle(c.id) }
                 row.setAccessibilityExpanded(shown == c.id)
-                rows.append(row)
-                if shown == c.id { rows.append(messagesRow(c.id)) }
+                guard shown == c.id else {
+                    rows.append(row)
+                    continue
+                }
+                // The conversation opened and its messages are one item.
+                let item = NSStackView.vertical([row, messagesRow(c.id)], spacing: 0)
+                for v in item.arrangedSubviews { v.widthAnchor.constraint(equalTo: item.widthAnchor).isActive = true }
+                rows.append(item)
             }
             if conversations?.isEmpty == true {
                 rows.append(FormRow(MavioStrings.assistantNoConversations, theme: theme))
@@ -228,7 +253,7 @@
             }
             return FormSection(
                 MavioStrings.assistantConversations, footer: MavioStrings.assistantConversationsFooter, rows: rows,
-                theme: theme)
+                flush: true, theme: theme)
         }
 
         /// A conversation's messages, with room above them, and deleting it.
@@ -240,7 +265,22 @@
                     onPlay: m.speechURL.isEmpty ? nil : { [weak self] in self?.kept?.toggle(key, url: m.speechURL) },
                     theme: theme)
             }
-            if messages == nil, messagesFailure == nil { views.append(LoadingView()) }
+            if messages == nil, messagesFailure == nil {
+                let spinner = NSProgressIndicator()
+                spinner.style = .spinning
+                spinner.controlSize = .small
+                spinner.startAnimation(nil)
+                let loading = NSView()
+                loading.translatesAutoresizingMaskIntoConstraints = false
+                loading.addSubview(spinner)
+                spinner.translatesAutoresizingMaskIntoConstraints = false
+                NSLayoutConstraint.activate([
+                    spinner.centerXAnchor.constraint(equalTo: loading.centerXAnchor),
+                    spinner.centerYAnchor.constraint(equalTo: loading.centerYAnchor),
+                    loading.heightAnchor.constraint(equalToConstant: 32),
+                ])
+                views.append(loading)
+            }
             if let messagesFailure {
                 views.append(note(messagesFailure, theme.fonts.callout, theme.colors.danger, selectable: true))
             }
@@ -250,7 +290,7 @@
             delete.isEnabled = !busy
             views.append(delete)
             let column = NSStackView.vertical(views, spacing: MavioSpacing.s16)
-            for v in views where v is AssistantBubble {
+            for v in views where !(v is MavioButton) {
                 v.widthAnchor.constraint(equalTo: column.widthAnchor).isActive = true
             }
             let holder = NSView()
