@@ -396,6 +396,9 @@
         init(theme: Theme) {
             super.init(fill: theme.colors.fill, radius: 999)
             let stack = NSStackView.horizontal([], spacing: 2)
+            // The capsule is as wide as its buttons, the user's name
+            // taking the rest of the row.
+            stack.setHuggingPriority(.required, for: .horizontal)
             addFilling(stack, insets: .all(2))
             for choice in Appearance.allCases {
                 let button = AppearanceButton(choice, theme: theme) { [weak self] in self?.refresh() }

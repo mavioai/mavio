@@ -371,8 +371,8 @@
                 if state.choosesServer { next.append(.picker) }
                 next.append(contentsOf: state.serverPages.map { .page($0) })
             }
-            // About ends the settings, after room as a group's.
-            next.append(.header(""))
+            // About ends the settings, in a group of its own.
+            next.append(.header(MavioStrings.settingsAbout))
             next.append(.page(.about))
             rows = next
             updating = true
@@ -602,7 +602,7 @@
                 }
                 sections.append(FormSection(MavioStrings.settingsServerGroup, rows: rows, theme: theme))
             }
-            sections.append(FormSection(rows: [pageRow(.about)], theme: theme))
+            sections.append(FormSection(MavioStrings.settingsAbout, rows: [pageRow(.about)], theme: theme))
             form.setSections(sections)
             show(form)
             FocusEngine.active(for: view)?.schedule()
