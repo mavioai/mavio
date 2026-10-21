@@ -768,7 +768,7 @@ function Overlay({
           <Orb mode={mode} level={level} interrupts={state.interrupts} />
         </button>
         {status && (
-          <span className="rounded-full border border-border bg-[var(--assistant-card)] px-3 py-1 type-footnote whitespace-nowrap backdrop-blur-xl">{status}</span>
+          <span className="-mb-4 rounded-full border border-border bg-[var(--assistant-card)] px-3 py-1 sm:mb-0 type-footnote whitespace-nowrap backdrop-blur-xl">{status}</span>
         )}
       </div>
       <div
@@ -777,7 +777,7 @@ function Overlay({
         onPointerDown={onHold}
         onPointerEnter={onHold}
         onPointerLeave={onLetGo}
-        className="pointer-events-none absolute inset-x-1 bottom-[calc(var(--lift)+144px+env(safe-area-inset-bottom))] flex p-1 max-h-[calc(100dvh-200px)] flex-col-reverse gap-2 overflow-y-auto sm:top-[104px] sm:right-4 sm:bottom-auto sm:left-auto sm:max-h-[calc(100dvh-120px)] sm:w-[380px] sm:flex-col"
+        className="pointer-events-none absolute inset-x-1 bottom-[calc(var(--lift)+124px+env(safe-area-inset-bottom))] flex p-1 max-h-[calc(100dvh-200px)] flex-col-reverse gap-2 overflow-y-auto sm:top-[80px] sm:right-4 sm:bottom-auto sm:left-auto sm:max-h-[calc(100dvh-96px)] sm:w-[380px] sm:flex-col"
         style={{ "--lift": `${lift}px` } as React.CSSProperties}
       >
         {off && <p className={`${card} px-4 py-3.5 type-body text-text-secondary`}>{t("assistant.off")}</p>}
