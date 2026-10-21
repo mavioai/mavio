@@ -9,6 +9,7 @@ require (
 	github.com/mavioai/mavio/libs/client-rust/capi v0.0.0-00010101000000-000000000000
 	github.com/mavioai/mavio/libs/design v0.0.0
 	github.com/mavioai/mavio/libs/proto v0.0.0
+	golang.org/x/net v0.59.0
 	golang.org/x/text v0.43.0
 	google.golang.org/protobuf v1.36.12
 	rsc.io/qr v0.2.0

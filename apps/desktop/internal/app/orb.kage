@@ -1,0 +1,99 @@
+// The assistant's orb (libs/design/components.md, Assistant), as the web
+// UI's canvas draws it: a sphere of glass, a ring while thinking, with
+// three colored lights inside it, each a radial gradient; over them the
+// glass, darker toward the lower edge, light bounced along the bottom and
+// a soft reflection at the top left. On a dark page the lights add up and
+// glow around the sphere; on a light one they lie over each other, with a
+// shadow under the sphere.
+
+// Center and Edge are the sphere's center and radius, Hole the ring's
+// inner radius, in DIPs from the rectangle's corner.
+var Center vec2
+var Edge float
+var Hole float
+
+// B0 to B2 are the lights' centers and radii, C0 to C2 their colors.
+var B0 vec3
+var B1 vec3
+var B2 vec3
+var C0 vec3
+var C1 vec3
+var C2 vec3
+
+// Body is the sphere's color under the lights, not premultiplied.
+var Body vec4
+
+// Bright is the lights' brightness, Glow theirs around the sphere, Light
+// 1 on a light page, Flash an interrupt's flash and Base the orb's size.
+var Bright float
+var Glow float
+var Light float
+var Flash float
+var Base float
+
+func blob(p vec2, b vec3, c vec3, alpha float) vec4 {
+	t := clamp(distance(p, b.xy)/max(b.z, 0.001), 0, 1)
+	a0 := min(1, 0.9*alpha*Bright)
+	a1 := mix(0.35, 0.5, Light) * alpha * Bright
+	a := mix(mix(a0, a1, t/0.55), mix(a1, 0, (t-0.55)/0.45), step(0.55, t))
+	return vec4(c*a, a)
+}
+
+func over(d vec4, s vec4) vec4 {
+	return s + d*(1-s.a)
+}
+
+func add(d vec4, s vec4) vec4 {
+	return min(d+s, vec4(1, 1, 1, 1))
+}
+
+func lights(s vec4, p vec2, alpha float) vec4 {
+	if Light > 0.5 {
+		return over(over(over(s, blob(p, B0, C0, alpha)), blob(p, B1, C1, alpha)), blob(p, B2, C2, alpha))
+	}
+	return add(add(add(s, blob(p, B0, C0, alpha)), blob(p, B1, C1, alpha)), blob(p, B2, C2, alpha))
+}
+
+func gray(a float) vec4 {
+	return vec4(a, a, a, a)
+}
+
+func Fragment(dst vec4, pos vec2) vec4 {
+	p := pos
+	d := distance(p, Center)
+	e := Edge
+	col := vec4(0, 0, 0, 0)
+	if Light > 0.5 {
+		// A tight dark shadow and a wider one of the blue.
+		s1 := 0.22 * (1 - smoothstep(e-3, e+3, distance(p, Center+vec2(0, 2))))
+		s2 := 0.42 * (1 - smoothstep(e-14, e+18, distance(p, Center+vec2(0, 10))))
+		col = over(vec4(vec3(90, 70, 245)/255*s2, s2), vec4(vec3(20, 12, 80)/255*s1, s1))
+	} else {
+		col = lights(col, p, Glow)
+	}
+	aa := 0.75
+	inside := smoothstep(e+aa, e-aa, d)
+	if Hole > 0 {
+		inside *= smoothstep(Hole-aa, Hole+aa, d)
+	}
+	s := lights(vec4(Body.rgb*Body.a, Body.a), p, 1)
+	// Depth, darker toward the lower edge.
+	t := clamp((distance(p, Center-e*vec2(0.25, 0.3))-e*0.2)/(e*1.1), 0, 1)
+	da := mix(0.45, 0.42, Light) * clamp((t-0.7)/0.3, 0, 1)
+	s = over(s, vec4(vec3(10, 8, 40)/255*da, da))
+	// Light bounced through the glass along the bottom.
+	bt := clamp(distance(p, Center+e*vec2(0.1, 0.78))/(e*0.55), 0, 1)
+	s = over(s, gray(mix(0.12, 0.22, Light)*(1-bt)))
+	// A soft reflection at the top left.
+	q := p - (Center + e*vec2(-0.32, -0.46))
+	q = vec2(q.x, q.y/0.62)
+	rt := clamp(length(q)/(e*0.5), 0, 1)
+	r0 := mix(0.55, 0.9, Light)
+	r1 := mix(0.18, 0.38, Light)
+	s = over(s, gray(mix(mix(r0, r1, rt/0.35), mix(r1, 0, (rt-0.35)/0.65), step(0.35, rt))))
+	col = over(col, s*inside)
+	if Flash > 0 {
+		col = over(col, gray(0.8*Flash*(1-clamp(d/(Base*0.9), 0, 1))))
+	}
+	return col
+}

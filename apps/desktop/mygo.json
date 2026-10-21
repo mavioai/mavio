@@ -4,5 +4,13 @@
   "version": "0.1.0",
   "copyright": "© 2026 Mavio",
   "icon": "icon/icon.png",
-  "macos": { "name": "MavioGO", "icon": "icon/AppIcon.icon", "minimumSystemVersion": "13.0" }
+  "macos": {
+    "name": "MavioGO",
+    "icon": "icon/AppIcon.icon",
+    "minimumSystemVersion": "13.0",
+    "infoPlist": {
+      "NSMicrophoneUsageDescription": "Mavio listens to you through the microphone while you talk to the assistant."
+    },
+    "entitlements": "entitlements.plist"
+  }
 }

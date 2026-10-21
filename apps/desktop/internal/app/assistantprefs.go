@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -12,13 +13,16 @@ import (
 	assistantv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/assistant/v1"
 
 	"github.com/mavioai/mavio/apps/desktop/internal/style"
+	"github.com/mavioai/mavio/apps/desktop/internal/voice"
 )
 
 // assistantPrefsState is the state of this device's Assistant section
-// (docs/assistant.md §9.1): what the assistant of the server chosen
-// remembers about the user, and the user's conversations with it.
+// (docs/assistant.md §9.1): the microphone voice sessions listen with,
+// what the assistant of the server chosen remembers about the user, and
+// the user's conversations with it.
 type assistantPrefsState struct {
 	info          task[*assistantv1.GetAssistantResponse]
+	microphones   task[[]voice.Microphone]
 	memories      task[[]*assistantv1.AssistantMemory]
 	conversations task[[]*assistantv1.AssistantConversation]
 	conversation  task[*assistantv1.GetAssistantConversationResponse]
@@ -35,9 +39,9 @@ type assistantPrefsState struct {
 }
 
 // assistantPrefs builds this device's Assistant section, as the web UI's:
-// the assistant's memories of the user, and the user's conversations with
-// it, on the server chosen. A voice session's microphone is the system's,
-// which the desktop app has no voice sessions to choose for.
+// the microphone voice sessions listen with where the server has them, the
+// assistant's memories of the user, and the user's conversations with it,
+// on the server chosen.
 func (a *App) assistantPrefs(c *ui.Context) {
 	st := &a.settingsState.assistant
 	sectionHeader(c, style.T(c, "assistant.title"), style.T(c, "assistant.settingsMessage"))
@@ -61,10 +65,41 @@ func (a *App) assistantPrefs(c *ui.Context) {
 		})
 		return
 	}
+	if info.value.GetVoice() && a.voiceOn() {
+		a.assistantMicrophone(c)
+	}
 	a.assistantMemories(c, server, info.value.GetAi(), info.value.GetMemory())
 	if info.value.GetAi() {
 		a.assistantConversations(c, server)
 	}
+}
+
+// assistantMicrophone builds the choice of the microphone voice sessions
+// listen with: the system's default, or one of the others.
+func (a *App) assistantMicrophone(c *ui.Context) {
+	st := &a.settingsState.assistant
+	audio := a.opts.Voice
+	mics := load(a, &st.microphones, key("microphones", a.generation), func(context.Context) ([]voice.Microphone, error) {
+		return audio.Microphones()
+	})
+	group(c, "microphone", "", style.T(c, "assistant.deviceMicrophoneFooter"), func(g *settingsGroup) {
+		g.row(style.T(c, "assistant.microphoneChoice"), "", nil, func() {
+			labels := []string{style.T(c, "assistant.systemMicrophone")}
+			ids := []string{""}
+			for _, m := range mics.value {
+				labels, ids = append(labels, m.Name), append(ids, m.ID)
+			}
+			// One chosen that is gone is the system's until it is back.
+			i := max(0, slices.Index(ids, a.prefs.Microphone))
+			if choose(c, style.T(c, "assistant.microphoneChoice"), &i, labels) {
+				a.prefs.Microphone = ids[i]
+				a.savePreferences()
+			}
+		})
+		if mics.err != nil {
+			g.note(errorMessage(c, mics.err), true)
+		}
+	})
 }
 
 // assistantChange runs a change of the memories or conversations, which

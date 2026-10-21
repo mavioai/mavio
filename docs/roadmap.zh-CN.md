@@ -1095,7 +1095,8 @@ flowchart TD
 - [ ] Apple 应用的其余部分：App Shortcut「与 Mavio 对话」和 App Intents；Apple TV 上用连续互通设备选择器连接 iPhone 或 iPad 作为麦克风，并在 Apple TV 上检查语音会话与听写
 - [x] Android 应用：使用 `VOICE_COMMUNICATION` 及其回声消除器的语音会话（与 Web UI 一致，从开始采集起的音频保留至会话的 WebSocket 打开后按顺序发送）；光球与卡片；页眉、电视导航栏与播放器中的助手按钮；Android TV 上以遥控器的搜索键和助手键按住说话；启动器快捷方式、快捷设置图块与语音搜索的 intent
 - [ ] Android 应用的其余部分：在手机和电视上以说话检验语音会话；`MediaSession` 的按搜索播放；助手设置的记忆与对话
-- [ ] 桌面应用：语音会话，以及 AI 对话消息框的听写、播放助手保留的语音回答；那里的消息与 Web UI 一样按 Enter 发送，而不是 ⌘↩，这需要 MyGo 的多行输入框支持提交
+- [x] macOS 上的桌面应用：语音会话经 purego 由 AudioToolbox 的语音处理 I/O 单元采集并消除回声，或在助手设置中选择麦克风时由 HAL 单元采集；从一开始采集的音频保留到会话的 WebSocket 打开；光球由 Kage 着色器绘制，卡片同 Web UI，回答的字词随朗读点亮；标题栏、电视导航栏与播放器控件中的助手按钮可轻点或按住，光球亦然，轻点 V 键
+- [ ] 桌面应用的其余部分：在 Mac 上说话检验一次语音会话；Windows 与 Linux 的采集，它们保留文字面板；按住 V 说话，这需要 MyGo 把按键的松开交给快捷键；卡片出现时的上升动画；AI 对话消息框的听写、播放助手保留的语音回答；那里的消息与 Web UI 一样按 Enter 发送，而不是 ⌘↩，这需要 MyGo 的多行输入框支持提交
 - [ ] 语法支持更多语言
 - [ ] 以后：在服务端进程内转换语音，通过以 purego 加载的 FFmpeg 库的纯 Go 绑定，而非 ffmpeg 子进程
 

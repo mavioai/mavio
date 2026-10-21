@@ -18,6 +18,7 @@ import (
 	"github.com/mavioai/mavio/apps/desktop/internal/images"
 	"github.com/mavioai/mavio/apps/desktop/internal/mpv"
 	"github.com/mavioai/mavio/apps/desktop/internal/style"
+	"github.com/mavioai/mavio/apps/desktop/internal/voice"
 )
 
 // Core is the shared core, as capi.Client calls it.
@@ -79,6 +80,9 @@ type Options struct {
 	// NextWindow brings the app's next window to the front, the one
 	// before when back.
 	NextWindow func(back bool)
+	// Voice is the audio of the assistant's voice sessions; nil where the
+	// platform has no capture, whose assistant takes typed requests.
+	Voice voice.Audio
 }
 
 // phase is where the app is: starting, signing in, or showing the
@@ -113,6 +117,9 @@ type preferences struct {
 	// Pinned are the advanced tools pinned to the sidebar's Features
 	// group, in the order pinned.
 	Pinned []string `json:"pinned,omitempty"`
+	// Microphone is the ID of the microphone voice sessions capture,
+	// empty for the system's default input.
+	Microphone string `json:"microphone,omitempty"`
 }
 
 // App is the app's state, owned by the main thread.

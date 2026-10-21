@@ -28,10 +28,11 @@ import (
 // the panel closes.
 const lingerTime = 6 * time.Second
 
-// assistantState is the state of the assistant's panel (docs/assistant.md
-// §9.1): over any page, the player's included, it shows the request, the
-// answer, results to choose from and a pending confirmation, and takes
-// typed requests; the desktop has no speech yet.
+// assistantState is the state of the assistant (docs/assistant.md §9.1):
+// over any page, the player's included, it shows the request, the answer,
+// results to choose from and a pending confirmation. Where the app has
+// voice sessions it is the orb and cards of a voice session
+// (assistantvoice.go); elsewhere a panel taking typed requests.
 type assistantState struct {
 	info task[*assistantv1.GetAssistantResponse]
 	open bool
@@ -69,6 +70,38 @@ type assistantState struct {
 	// lingering is the request whose answer closes the panel once it has
 	// lingered.
 	lingering int
+
+	// The voice session (docs/assistant.md §9.1), where the app has voice
+	// (Options.Voice), and its state, as the web UI's.
+	voice *voiceSession
+	// listening: a session runs; capturing: its microphone's audio came.
+	listening, capturing bool
+	// speaking: the answer is spoken; voiced: it comes with speech.
+	speaking, voiced bool
+	// userSpeaking: from user_started to user_stopped.
+	userSpeaking bool
+	// pushToTalk: the session listens only while held; talking: it is.
+	pushToTalk, talking bool
+	// interrupts counts the user's barge-ins, each flashing the orb.
+	interrupts int
+	// leaving: the orb and cards fade out.
+	leaving bool
+	// turn is the final transcripts of the user's turn, until its run.
+	turn string
+	// hold is the press of the button or the orb, down the key of the one
+	// the pointer pressed last frame.
+	hold *assistantHold
+	down string
+	// hovered: the pointer is over the cards, which holds them.
+	hovered bool
+	// ticking: the view is built again in a moment.
+	ticking bool
+	// sentPath is the page whose context the session was told.
+	sentPath string
+	// opening counts the microphones opened, of which the latest's
+	// events count; leave counts the fades.
+	opening, leave int
+	orb            orbState
 }
 
 // toolLine is a tool the assistant runs or ran, with its summary.
@@ -129,13 +162,43 @@ func (a *App) openAssistant(win Window) {
 	st.open, st.win, st.lingering = true, win, 0
 }
 
-// closeAssistant closes the panel, stopping what runs.
+// closeAssistant closes the panel, stopping what runs; the orb and cards
+// fade out first.
 func (a *App) closeAssistant() {
 	st := &a.assistant
 	if st.cancel != nil {
 		st.cancel()
 	}
-	*st = assistantState{info: st.info, failed: st.failed, run: st.run + 1}
+	if st.hold != nil {
+		st.hold.timer.Stop()
+		st.hold = nil
+	}
+	st.opening++
+	if v := st.voice; v != nil {
+		st.voice = nil
+		v.close()
+	}
+	reset := func() {
+		*st = assistantState{info: st.info, failed: st.failed, run: st.run + 1, opening: st.opening + 1, leave: st.leave + 1}
+	}
+	if !a.voiceOn() || !st.open {
+		reset()
+		return
+	}
+	if st.leaving {
+		return
+	}
+	st.run++
+	st.leave++
+	leave := st.leave
+	st.leaving, st.listening, st.speaking, st.userSpeaking, st.lingering = true, false, false, false, 0
+	time.AfterFunc(leaveTime, func() {
+		a.opts.Update(func() {
+			if st.leave == leave {
+				reset()
+			}
+		})
+	})
 }
 
 // screenOf names the screen a path shows, as AskContext does.
@@ -184,7 +247,11 @@ func (a *App) ask(lang string, req *assistantv1.AskRequest) {
 	if st.choose {
 		state.SetResults(int32(len(st.items)))
 	}
-	st.open, st.server, st.working, st.waits = true, server, true, false
+	st.open, st.server, st.working, st.waits, st.voiced = true, server, true, false, false
+	if st.leaving {
+		st.leaving = false
+		st.leave++
+	}
 	st.activity, st.answer, st.answerAt, st.err, st.confirmation, st.lingering = nil, "", time.Time{}, "", nil, 0
 	if text != "" {
 		st.heard, st.heardAt = text, time.Now()
@@ -384,7 +451,7 @@ func (a *App) linger(run int) {
 	st.lingering = run
 	time.AfterFunc(lingerTime, func() {
 		a.opts.Update(func() {
-			if st.lingering == run && st.run == run && !st.working && st.confirmation == nil && !st.choose && st.err == "" {
+			if st.lingering == run && st.run == run && !st.listening && !st.working && st.confirmation == nil && !st.choose && st.err == "" {
 				a.closeAssistant()
 			}
 		})
@@ -678,11 +745,23 @@ func (a *App) assistantButton(c *ui.Context, win Window, size float32) {
 		b.Background(style.Color(colors.Fill))
 	}
 	b.Children(func() {
-		ui.Icon(c, style.Icon("microphone", a.assistant.open)).Size(18, 18).TextColor(style.Color(colors.TextSecondary))
+		ui.Icon(c, style.Icon("microphone", a.assistantActive())).Size(18, 18).TextColor(style.Color(colors.TextSecondary))
 	})
-	if b.Clicked() {
+	switch {
+	case a.voiceOn():
+		a.voicePress(c, b, "button", win)
+	case b.Clicked():
 		a.openAssistant(win)
 	}
+}
+
+// assistantActive reports whether the assistant listens, or its panel is
+// open where the app has no voice.
+func (a *App) assistantActive() bool {
+	if a.voiceOn() {
+		return a.assistant.listening
+	}
+	return a.assistant.open
 }
 
 // assistantPanel builds the assistant's panel over the window win, nil
@@ -691,6 +770,22 @@ func (a *App) assistantButton(c *ui.Context, win Window, size float32) {
 // field to type a request in.
 func (a *App) assistantPanel(c *ui.Context, win Window) {
 	st := &a.assistant
+	if a.voiceOn() {
+		// V taps the assistant outside text fields.
+		if win == nil && c.Shortcut(0, ui.KeyV) && a.assistantOn(c) {
+			a.tapAssistant(win, c.Locale())
+		}
+		if !st.open || st.win != win {
+			return
+		}
+		// The page's context goes to the session as it changes.
+		if path := a.router.Path(); path != st.sentPath {
+			st.sentPath = path
+			a.voiceContext(c.Locale())
+		}
+		a.voiceOverlay(c, win)
+		return
+	}
 	if !st.open || st.win != win {
 		return
 	}
@@ -1008,10 +1103,13 @@ func (a *App) tvAssistantButton(c *ui.Context) {
 			fg = ui.RGB(0, 0, 0)
 		}
 		inner.Children(func() {
-			ui.Icon(c, style.Icon("microphone", a.assistant.open)).Size(26, 26).TextColor(fg)
+			ui.Icon(c, style.Icon("microphone", a.assistantActive())).Size(26, 26).TextColor(fg)
 		})
 	})
-	if b.Clicked() {
+	switch {
+	case a.voiceOn():
+		a.voicePress(c, b, "tv-button", nil)
+	case b.Clicked():
 		a.openAssistant(nil)
 	}
 }

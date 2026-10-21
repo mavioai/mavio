@@ -259,7 +259,9 @@ Transcribing subtitles is not a voice session: Pipecat's recognition services jo
 * **Android TV and Google TV**: push to talk with the remote's microphone, captured by `AudioRecord` while the remote's search or assistant key is held with the app in front, from `VOICE_RECOGNITION` or the plain microphone where `VOICE_COMMUNICATION` has none. A remote's microphone gives audio only while its own key is held: a microphone giving none at first is told and taken back once it does, the gaps are sent as silence so that the session ends the turn, a microphone that stops, as one the TV's own assistant takes, is opened again, and a remote's microphone key the system leaves unmapped (a Xiaomi remote's) starts a conversation; the system's voice search reaches the app through its search intents and `MediaSession`'s play-from-search, which go through `Ask`.
 
 ### 9.5 Desktop (`apps/desktop`)
-Voice sessions with the microphone captured by the platform's audio API with its echo cancellation.
+* **macOS**: voice sessions captured and played by AudioToolbox's voice processing I/O unit, which cancels the echo of the answer's speech, loaded through purego with no CGO; a microphone other than the system's default, chosen in the Assistant settings, is captured by a HAL unit of its own without that processing, the speech played by the default output. The app asks for the microphone through `AVCaptureDevice`.
+* **Ways in**: the assistant button in the header, the television bar and the player's controls, and the orb, tapped or held as in §9.1; V tapped starts or ends a conversation. The orb and cards are as the web UI's, the orb drawn by a Kage shader.
+* **Windows and Linux**: no capture yet; the assistant there is a panel taking typed requests.
 
 ### 9.6 System Assistants
 Requests from Siri, Shortcuts, Android's voice search and play-from-search arrive at the app as text or as a title to play; the app sends them to `Ask` as its own typed requests are, so that they take the same paths.

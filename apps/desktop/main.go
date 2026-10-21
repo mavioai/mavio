@@ -31,6 +31,7 @@ import (
 	"github.com/mavioai/mavio/apps/desktop/internal/images"
 	"github.com/mavioai/mavio/apps/desktop/internal/mpv"
 	"github.com/mavioai/mavio/apps/desktop/internal/secrets"
+	"github.com/mavioai/mavio/apps/desktop/internal/voice"
 )
 
 func main() {
@@ -191,6 +192,7 @@ func run() error {
 			return newVideo(in, mpvLibrary, changed)
 		},
 		KeepAwake: func(reason string) func() { return mygo.Power.KeepAwake(reason, true) },
+		Voice:     voice.System(),
 		ToggleFullScreen: func() {
 			if win != nil {
 				win.ToggleFullScreen()

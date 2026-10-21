@@ -156,6 +156,7 @@ flowchart LR
   * **Linux**：mpv 的 OpenGL render API 绘制到 MyGo 表面之下、位于其 `GtkOverlay` 中的 `GtkGLArea`，X11 与 Wayland 相同；HDR 色调映射为 SDR。
 * **播放**：应用把 FFmpeg 能解封装、mpv 能解码的每种容器与编解码器声明为直接播放，超出所选画质的以 fMP4 封装、H.264 或 HEVC 的 HLS 播放；mpv 接收文件内的字幕与独立文件的字幕（`sub-add`）。应用按文件中的索引（`ff-index`）选中服务端选定的音频与字幕。控制器与 Web UI 相同（§6.5）——顶栏、进度条，以及含音频与倍速、字幕及其偏移、画质、播放方式的侧面板——更换轨道或画质时从当前位置重新播放。每秒及暂停时上报进度；关闭播放器时在当前位置停止播放，播放到结尾时不带位置停止，并依次播放同季中其后的各集。
 * **系统集成**：macOS 上的「正在播放」与远程命令、Windows 上的 System Media Transport Controls 与 Linux 上的 MPRIS，同时提供媒体键；播放期间由 MyGo 的电源 API 保持屏幕常亮。
+* **语音**：在 macOS 上，由 purego 加载的 AudioToolbox 采集与播放助手的语音会话，其语音处理 I/O 单元消除回声（[助手](assistant.zh-CN.md) §9.5）；Windows 与 Linux 尚无采集。
 * **打包与更新**：使用 MyGo 提供的能力——应用包与经过公证的磁盘映像、Windows 安装程序、Debian 包与 Linux 安装脚本、代码签名，以及带增量更新的签名自动更新。
 
 ---

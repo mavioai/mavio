@@ -35,6 +35,9 @@ type fakeAssistant struct {
 	memories []*assistantv1.AssistantMemory
 	convs    []*assistantv1.AssistantConversation
 	prefs    bool
+	// voiceURL is where the voice sessions are; voices their requests.
+	voiceURL string
+	voices   []*assistantv1.StartVoiceSessionRequest
 }
 
 func (a *fakeAssistant) requests() []*assistantv1.AskRequest {
@@ -45,8 +48,21 @@ func (a *fakeAssistant) requests() []*assistantv1.AskRequest {
 
 func (a *fakeAssistant) GetAssistant(context.Context, *assistantv1.GetAssistantRequest) (*assistantv1.GetAssistantResponse, error) {
 	return assistantv1.GetAssistantResponse_builder{
-		Enabled: new(true), Ai: new(true), Memory: new(true), Examples: []string{"Play The Long Orbit", "Space films"},
+		Enabled: new(true), Ai: new(true), Memory: new(true), Voice: new(true), Examples: []string{"Play The Long Orbit", "Space films"},
 	}.Build(), nil
+}
+
+func (a *fakeAssistant) StartVoiceSession(_ context.Context, req *assistantv1.StartVoiceSessionRequest) (*assistantv1.StartVoiceSessionResponse, error) {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	a.voices = append(a.voices, req)
+	return assistantv1.StartVoiceSessionResponse_builder{Url: new(a.voiceURL)}.Build(), nil
+}
+
+func (a *fakeAssistant) voiceRequests() []*assistantv1.StartVoiceSessionRequest {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	return append([]*assistantv1.StartVoiceSessionRequest(nil), a.voices...)
 }
 
 func (a *fakeAssistant) Ask(_ context.Context, req *assistantv1.AskRequest, stream *connect.ServerStream[assistantv1.AskResponse]) error {
