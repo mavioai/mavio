@@ -3879,6 +3879,8 @@
     <string name="assistant_unnamed_microphone">Microphone %s</string>
     <!-- Button letting the browser name its microphones for the assistant's microphone setting, which asks for the microphone once. -->
     <string name="assistant_show_microphones">Show microphones</string>
+    <!-- Footer of the assistant's microphone setting in an app, whose voice processing listens only to the system's default input. -->
+    <string name="assistant_device_microphone_footer">The microphone voice requests use on this device. System default is the input chosen in the system\'s sound settings, whose echo and noise are removed; another chosen here is heard without that.</string>
     <!-- Footer of the assistant's microphone setting. -->
     <string name="assistant_microphone_footer">The microphone voice requests use in this browser. One that gives only silence, as a virtual input does, is replaced by another on its own.</string>
     <!-- Row of the Assistant settings when the server's assistant is off. -->

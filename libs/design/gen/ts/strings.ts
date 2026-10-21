@@ -1904,6 +1904,7 @@ export type MessageKey =
   | 'assistant.systemMicrophone'
   | 'assistant.unnamedMicrophone'
   | 'assistant.showMicrophones'
+  | 'assistant.deviceMicrophoneFooter'
   | 'assistant.microphoneFooter'
   | 'assistant.off'
   | 'assistant.cantDo'
@@ -3895,6 +3896,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "assistant.systemMicrophone": "System default",
     "assistant.unnamedMicrophone": "Microphone {n}",
     "assistant.showMicrophones": "Show microphones",
+    "assistant.deviceMicrophoneFooter": "The microphone voice requests use on this device. System default is the input chosen in the system's sound settings, whose echo and noise are removed; another chosen here is heard without that.",
     "assistant.microphoneFooter": "The microphone voice requests use in this browser. One that gives only silence, as a virtual input does, is replaced by another on its own.",
     "assistant.off": "The assistant is off on this server.",
     "assistant.cantDo": "This page can't do that.",
@@ -5884,6 +5886,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "assistant.systemMicrophone": "系统默认",
     "assistant.unnamedMicrophone": "麦克风 {n}",
     "assistant.showMicrophones": "显示麦克风",
+    "assistant.deviceMicrophoneFooter": "语音请求在此设备上所用的麦克风。系统默认即系统声音设置中选择的输入，会消除回声和噪声；在这里选择其他麦克风时则不会。",
     "assistant.microphoneFooter": "在此浏览器中语音请求所用的麦克风。只给出静音的麦克风（如虚拟输入）会被自动换成另一个。",
     "assistant.off": "此服务器未开启助手。",
     "assistant.cantDo": "此页面无法执行该操作。",

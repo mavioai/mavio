@@ -3,12 +3,18 @@
     import Foundation
     import os
 
+    #if os(macOS)
+        import CoreAudio
+    #endif
+
     /// A voice session from the client's side (docs/assistant.md §8, §9.3):
     /// one `AVAudioEngine` with voice processing on captures the microphone,
     /// echo cancelled, resampled to 16 kHz mono 16-bit PCM and sent in 20 ms
     /// frames on the session's WebSocket, and plays the answer's PCM, whose
     /// echo the voice processing removes. Capture starts at once, and what is
-    /// captured is held until the WebSocket opens.
+    /// captured is held until the WebSocket opens. On the Mac, voice
+    /// processing listens only to the system's default input: a microphone
+    /// chosen in the settings is captured by an engine of its own without it.
     @MainActor
     public final class VoiceSession {
         /// What a session tells as it goes.
@@ -53,6 +59,9 @@
 
         private let handlers: Handlers
         private let engine = AVAudioEngine()
+        /// The engine capturing the microphone chosen on the Mac, apart
+        /// from the one playing.
+        private var listener: AVAudioEngine?
         private let player = AVAudioPlayerNode()
         private let capture: Capture
         private let output = Meter()
@@ -116,9 +125,15 @@
             }
             // Voice processing takes up to a second or more to start: off the
             // main thread, the orb shows at once, loading meanwhile.
+            #if os(macOS)
+                let device = Microphones.chosenDevice()
+                if device != nil { session.listener = AVAudioEngine() }
+            #else
+                let device: UInt32? = nil
+            #endif
             let parts = Engine(
-                engine: session.engine, player: session.player, capture: capture, output: session.output,
-                format: session.format)
+                engine: session.engine, listener: session.listener, device: device, player: session.player,
+                capture: capture, output: session.output, format: session.format)
             do {
                 try await withCheckedThrowingContinuation { (done: CheckedContinuation<Void, Error>) in
                     DispatchQueue.global(qos: .userInitiated).async {
@@ -141,6 +156,8 @@
         /// the main thread before the session uses them.
         private struct Engine: @unchecked Sendable {
             let engine: AVAudioEngine
+            let listener: AVAudioEngine?
+            let device: UInt32?
             let player: AVAudioPlayerNode
             let capture: Capture
             let output: Meter
@@ -152,10 +169,18 @@
             // The output's unit made first: voice processing enabled before
             // it exists, the engine cannot start it (-10875).
             _ = engine.mainMixerNode
-            let input = engine.inputNode
-            // Voice processing cancels the echo of what the engine plays,
-            // and suppresses noise and controls the gain.
-            try input.setVoiceProcessingEnabled(true)
+            let input: AVAudioInputNode
+            if let listener = e.listener {
+                input = listener.inputNode
+                #if os(macOS)
+                    if let device = e.device { try Microphones.use(device, on: input) }
+                #endif
+            } else {
+                input = engine.inputNode
+                // Voice processing cancels the echo of what the engine
+                // plays, and suppresses noise and controls the gain.
+                try input.setVoiceProcessingEnabled(true)
+            }
             let inFormat = input.outputFormat(forBus: 0)
             guard inFormat.sampleRate > 0, inFormat.channelCount > 0 else {
                 throw Failure.unavailable("no microphone")
@@ -173,6 +198,10 @@
             }
             engine.prepare()
             try engine.start()
+            if let listener = e.listener {
+                listener.prepare()
+                try listener.start()
+            }
             e.player.play()
         }
 
@@ -285,7 +314,7 @@
                 // A real microphone's noise is never all zeros for 2 s.
                 if zeros == Self.silentFrames {
                     zeros = -1
-                    handlers.silent(Self.microphoneName())
+                    handlers.silent(microphoneName())
                 }
             }
             // The socket opens once the plugin has made the session's
@@ -298,9 +327,14 @@
             }
         }
 
-        private static func microphoneName() -> String {
+        private func microphoneName() -> String {
             #if os(macOS)
-                AVCaptureDevice.default(for: .audio)?.localizedName ?? ""
+                if listener != nil, let id = Microphones.chosen,
+                    let m = Microphones.all().first(where: { $0.id == id })
+                {
+                    return m.name
+                }
+                return AVCaptureDevice.default(for: .audio)?.localizedName ?? ""
             #else
                 AVAudioSession.sharedInstance().currentRoute.inputs.first?.portName ?? ""
             #endif
@@ -388,7 +422,8 @@
         }
 
         private func release() {
-            engine.inputNode.removeTap(onBus: 0)
+            (listener ?? engine).inputNode.removeTap(onBus: 0)
+            listener?.stop()
             player.removeTap(onBus: 0)
             player.stop()
             engine.stop()
@@ -419,6 +454,74 @@
             if !ended { release() }
         }
     }
+
+    #if os(macOS)
+        /// The Mac's microphones voice sessions can listen with, and the one
+        /// chosen in the Assistant settings (docs/assistant.md §9.3); none
+        /// chosen, or one gone, is the system's default input.
+        public enum Microphones {
+            /// A microphone: its Core Audio UID and its name.
+            public struct Microphone: Equatable, Sendable {
+                /// The device's UID, which stays as it is reconnected.
+                public let id: String
+                /// The name the system gives it.
+                public let name: String
+            }
+
+            private static let key = "mavio.assistant.microphone"
+
+            /// The microphones connected now.
+            public static func all() -> [Microphone] {
+                AVCaptureDevice.DiscoverySession(
+                    deviceTypes: [.microphone, .external], mediaType: .audio, position: .unspecified
+                ).devices.map { Microphone(id: $0.uniqueID, name: $0.localizedName) }
+            }
+
+            /// The microphone chosen, by its UID; nil for the system's
+            /// default.
+            public static var chosen: String? {
+                get { UserDefaults.standard.string(forKey: key) }
+                set {
+                    if let newValue {
+                        UserDefaults.standard.set(newValue, forKey: key)
+                    } else {
+                        UserDefaults.standard.removeObject(forKey: key)
+                    }
+                }
+            }
+
+            /// The Core Audio device of the microphone chosen, while it is
+            /// connected.
+            static func chosenDevice() -> AudioDeviceID? {
+                guard let uid = chosen else { return nil }
+                var address = AudioObjectPropertyAddress(
+                    mSelector: kAudioHardwarePropertyTranslateUIDToDevice, mScope: kAudioObjectPropertyScopeGlobal,
+                    mElement: kAudioObjectPropertyElementMain)
+                var id = AudioDeviceID(0)
+                var size = UInt32(MemoryLayout<AudioDeviceID>.size)
+                let name = uid as CFString
+                let status = withUnsafePointer(to: name) { p in
+                    AudioObjectGetPropertyData(
+                        AudioObjectID(kAudioObjectSystemObject), &address, UInt32(MemoryLayout<CFString>.size), p,
+                        &size, &id)
+                }
+                return status == noErr && id != kAudioObjectUnknown ? id : nil
+            }
+
+            /// Makes input capture device.
+            nonisolated static func use(_ device: AudioDeviceID, on input: AVAudioInputNode) throws {
+                guard let unit = input.audioUnit else { throw VoiceSession.Failure.unavailable("no microphone") }
+                var id = device
+                let status = AudioUnitSetProperty(
+                    unit, kAudioOutputUnitProperty_CurrentDevice, kAudioUnitScope_Global, 0, &id,
+                    UInt32(MemoryLayout<AudioDeviceID>.size))
+                guard status == noErr else {
+                    throw VoiceSession.Failure.unavailable(
+                        NSError(domain: NSOSStatusErrorDomain, code: Int(status)).localizedDescription)
+                }
+            }
+        }
+    #endif
 
     /// How loud speech is, from 0 to about 1: its RMS of roughly 0.01 to
     /// 0.3 spread out by its square root.

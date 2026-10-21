@@ -1916,6 +1916,7 @@
   "assistant.systemMicrophone": { "message": "System default", "description": "The system's own microphone, an option of the assistant's microphone setting." },
   "assistant.unnamedMicrophone": { "message": "Microphone {n}", "description": "A microphone the browser does not name, in the assistant's microphone setting; n is its place in the list." },
   "assistant.showMicrophones": { "message": "Show microphones", "description": "Button letting the browser name its microphones for the assistant's microphone setting, which asks for the microphone once." },
+  "assistant.deviceMicrophoneFooter": { "message": "The microphone voice requests use on this device. System default is the input chosen in the system's sound settings, whose echo and noise are removed; another chosen here is heard without that.", "description": "Footer of the assistant's microphone setting in an app, whose voice processing listens only to the system's default input." },
   "assistant.microphoneFooter": { "message": "The microphone voice requests use in this browser. One that gives only silence, as a virtual input does, is replaced by another on its own.", "description": "Footer of the assistant's microphone setting." },
   "assistant.off": { "message": "The assistant is off on this server.", "description": "Note of the assistant's panel when the server's assistant is turned off." },
   "assistant.cantDo": { "message": "This page can't do that.", "description": "Answer of the assistant when the page cannot carry out an action, such as controlling playback with nothing playing." },

@@ -37,6 +37,12 @@
             section, _, context in PendingPage(context: context, name: section.title)
         }
 
+        /// The Assistant settings of the user on a server, which the shell
+        /// sets.
+        public var assistantPage: @MainActor (ServerRecord?, MacContext) -> NSViewController = { _, context in
+            PendingPage(context: context, name: MavioStrings.assistantTitle)
+        }
+
         /// Whether the sidebar shows a search field, which the Search page
         /// then does not; posts `sidebarSearchesDidChange` as it changes.
         public var sidebarSearches = false {
@@ -68,6 +74,7 @@
             context.openRemote = openRemote
             context.page = page
             context.sectionPage = sectionPage
+            context.assistantPage = assistantPage
             return context
         }
 

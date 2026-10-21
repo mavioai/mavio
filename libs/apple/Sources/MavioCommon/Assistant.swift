@@ -641,7 +641,7 @@ public final class Assistant {
         }
 
         /// The session's WebSocket URL, from the path the server gives.
-        private static func socketURL(_ path: String, server: ServerRecord) -> URL? {
+        public static func socketURL(_ path: String, server: ServerRecord) -> URL? {
             var text = path
             if !path.hasPrefix("http") && !path.hasPrefix("ws") {
                 var base = server.address

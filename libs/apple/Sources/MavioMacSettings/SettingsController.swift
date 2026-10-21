@@ -4,7 +4,7 @@
 
     /// A page of the settings.
     enum SettingsPage: Hashable {
-        case account, appearance, playback, subtitlesAudio
+        case account, appearance, playback, subtitlesAudio, assistant
         case server(ServerSection)
         case about
 
@@ -15,6 +15,7 @@
             case .appearance: MavioStrings.settingsAppearance
             case .playback: MavioStrings.settingsPlayback
             case .subtitlesAudio: MavioStrings.settingsSubtitlesAudio
+            case .assistant: MavioStrings.assistantTitle
             case .server(let section): section.title
             case .about: MavioStrings.settingsAbout
             }
@@ -27,6 +28,7 @@
             case .appearance: "appearance"
             case .playback: "play"
             case .subtitlesAudio: "subtitles"
+            case .assistant: "microphone"
             case .server(let section): section.icon
             case .about: "info"
             }
@@ -39,6 +41,7 @@
             case .appearance: NSColor(hex: 0x5E5CE6)
             case .playback: NSColor(hex: 0xFF3B30)
             case .subtitlesAudio: NSColor(hex: 0x34C759)
+            case .assistant: NSColor(hex: 0xFF2D55)
             case .server(let section): NSColor(hex: section.tint)
             case .about: NSColor(hex: 0x8E8E93)
             }
@@ -78,15 +81,15 @@
         /// Whether the user administers the chosen server.
         var isAdmin: Bool { admin[key] == true }
 
-        /// The pages of this device: Subtitles and Audio needs a server.
+        /// The pages of this device: Subtitles and Audio and the assistant
+        /// need a server.
         var devicePages: [SettingsPage] {
-            [.appearance, .playback] + (model.signedInServers.isEmpty ? [] : [.subtitlesAudio])
+            [.appearance, .playback] + (model.signedInServers.isEmpty ? [] : [.subtitlesAudio, .assistant])
         }
 
-        /// The advanced tools and the AI conversations, for the server's
-        /// administrators.
+        /// The advanced tools, for the server's administrators.
         var advancedPages: [SettingsPage] {
-            isAdmin ? [.server(.indexerSearch), .server(.conversations)] : []
+            isAdmin ? [.server(.indexerSearch)] : []
         }
 
         /// The Server group's entries the user sees.
@@ -141,6 +144,7 @@
             case .appearance: AppearancePage(context: context)
             case .playback: PlaybackPage(context: context)
             case .subtitlesAudio: SubtitlesAudioPage(context: context)
+            case .assistant: context.assistantPage(chosen, context)
             case .about: AboutPage(context: context)
             case .server(let section):
                 if let server = chosen {

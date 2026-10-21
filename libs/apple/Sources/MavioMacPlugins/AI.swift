@@ -6,11 +6,13 @@
     /// settings of the server; the providers of the AI gateway plugin added,
     /// each with where its credential comes from, and the others to add; a
     /// provider's page with its API key, its OAuth login followed step by
-    /// step, signing out, and its models.
+    /// step, signing out, and its models; and at their end the
+    /// administrators' conversations with the models (§6.3.26).
     final class AIPage: Page {
         private let server: ServerRecord
         private lazy var form = FormPage(title: MavioStrings.settingsAi, message: MavioStrings.aiMessage, theme: theme)
         private lazy var assistant = AssistantSettings(server: server, page: self)
+        private lazy var conversations = AIConversations(server: server, page: self)
         private let providersHolder = NSStackView.vertical([], spacing: MavioSpacing.s32)
         private var providers: [Mavio_Plugin_V1_AiProvider]?
         private var models: [Mavio_Plugin_V1_AiModel] = []
@@ -31,9 +33,11 @@
             title = MavioStrings.settingsAi
             form.add(assistant.view)
             form.add(providersHolder)
+            form.add(conversations.view)
             show(form)
             render()
             assistant.load()
+            conversations.load()
             reload()
         }
 

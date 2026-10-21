@@ -6107,6 +6107,9 @@ public enum MavioStrings {
     /// Button letting the browser name its microphones for the assistant's microphone setting, which asks for the microphone once.
     public static var assistantShowMicrophones: String { NSLocalizedString("assistant.showMicrophones", bundle: .module, comment: "") }
 
+    /// Footer of the assistant's microphone setting in an app, whose voice processing listens only to the system's default input.
+    public static var assistantDeviceMicrophoneFooter: String { NSLocalizedString("assistant.deviceMicrophoneFooter", bundle: .module, comment: "") }
+
     /// Footer of the assistant's microphone setting.
     public static var assistantMicrophoneFooter: String { NSLocalizedString("assistant.microphoneFooter", bundle: .module, comment: "") }
 

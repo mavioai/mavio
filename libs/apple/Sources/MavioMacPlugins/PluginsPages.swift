@@ -12,9 +12,13 @@
             switch section {
             case .ai: AIPage(context: context, server: server)
             case .plugins: PluginsPage(context: context, server: server)
-            case .conversations: ConversationsPage(context: context, server: server)
             default: nil
             }
+        }
+
+        /// The Assistant settings of the user on server.
+        public static func assistant(server: ServerRecord?, context: MacContext) -> NSViewController {
+            AssistantPrefsPage(context: context, server: server)
         }
     }
 #endif

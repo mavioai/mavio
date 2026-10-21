@@ -249,6 +249,7 @@ WebSocket 承载二进制音频帧（§8.5）与 JSON 事件 `{"type": …}`，�
 
 ### 9.3 Apple（`apps/ios`、`apps/macos`、`apps/tvos`）
 * **iPhone、iPad 与 Mac**：语音会话由一个开启语音处理的 `AVAudioEngine` 采集与播放，音频会话的模式为 `voiceChat`；以及 App Intents，使 Siri、快捷指令与聚焦搜索经由 `Ask` 在 Mavio 中播放作品与控制播放。
+* **Mac 上的麦克风**：语音处理只聆听系统默认输入，因此助手设置中的麦克风以“系统默认”居首，默认输入以语音处理采集；在那里选择的其他麦克风由一个设为该设备、不开启语音处理的单独 `AVAudioEngine` 采集，回答仍经由前一个播放。
 * **iPhone 与 iPad 的入口**：标题栏与播放器控制中的助手按钮，按 §9.1 轻点或按住；以及一个 App Shortcut“与 Mavio 对话”，打开应用并开始语音会话，使操作按钮、控制中心与锁定屏幕的控件以及 Siri 都能开始会话。
 * **Apple TV**：Siri Remote 的麦克风属于系统，因此助手按钮直接打开系统的听写，不显示输入框，听写返回的内容作为一个请求发给 `Ask`，并像语音会话一样以光球与卡片显示；tvOS 提供 App Intents 的地方，由 App Intents 响应 Siri。
 

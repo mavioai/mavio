@@ -12,6 +12,7 @@
         /// The sections, to place in the page's column.
         let view = NSStackView.vertical([], spacing: MavioSpacing.s32)
         private let server: ServerRecord
+        private weak var page: Page?
         private let model: AppModel
         private let theme: Theme
         private var saved: Mavio_Assistant_V1_GetAssistantSettingsResponse?
@@ -39,6 +40,7 @@
         /// The settings of server, read and saved as page's model does.
         init(server: ServerRecord, page: Page) {
             self.server = server
+            self.page = page
             model = page.model
             theme = page.theme
         }
@@ -174,6 +176,16 @@
 
         private func speechSection(_ saved: Mavio_Assistant_V1_GetAssistantSettingsResponse) -> NSView {
             var rows: [NSView] = draft.speech.indices.map { speechRow($0, saved) }
+            if saved.recognizers.isEmpty, saved.voices.isEmpty {
+                rows.append(
+                    pageLinkRow(
+                        icon: "plugins", color: NSColor(hex: 0xAF52DE), label: MavioStrings.assistantNoVoicePlugin,
+                        detail: MavioStrings.aiNoGatewayDetail, theme: theme
+                    ) { [weak self] in
+                        guard let self, let page else { return }
+                        page.push(PluginsPage(context: page.context, server: server))
+                    })
+            }
             let add = FormRow.action(MavioStrings.assistantAddLanguage, theme: theme) { [weak self] in
                 guard let self, !self.off else { return }
                 var speech = Mavio_Assistant_V1_AssistantSpeech()

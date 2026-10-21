@@ -1915,6 +1915,7 @@
   "assistant.systemMicrophone": "系统默认",
   "assistant.unnamedMicrophone": "麦克风 {n}",
   "assistant.showMicrophones": "显示麦克风",
+  "assistant.deviceMicrophoneFooter": "语音请求在此设备上所用的麦克风。系统默认即系统声音设置中选择的输入，会消除回声和噪声；在这里选择其他麦克风时则不会。",
   "assistant.microphoneFooter": "在此浏览器中语音请求所用的麦克风。只给出静音的麦克风（如虚拟输入）会被自动换成另一个。",
   "assistant.off": "此服务器已关闭助手。",
   "assistant.cantDo": "此页面无法执行该操作。",

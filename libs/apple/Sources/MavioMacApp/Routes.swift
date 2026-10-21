@@ -53,6 +53,7 @@
         static func wire(_ context: MacContext) {
             context.page = page
             context.sectionPage = section
+            context.assistantPage = { server, context in PluginsPages.assistant(server: server, context: context) }
         }
     }
 #endif

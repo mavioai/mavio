@@ -1951,6 +1951,7 @@
     <string name="assistant_system_microphone">系统默认</string>
     <string name="assistant_unnamed_microphone">麦克风 %s</string>
     <string name="assistant_show_microphones">显示麦克风</string>
+    <string name="assistant_device_microphone_footer">语音请求在此设备上所用的麦克风。系统默认即系统声音设置中选择的输入，会消除回声和噪声；在这里选择其他麦克风时则不会。</string>
     <string name="assistant_microphone_footer">在此浏览器中语音请求所用的麦克风。只给出静音的麦克风（如虚拟输入）会被自动换成另一个。</string>
     <string name="assistant_off">此服务器未开启助手。</string>
     <string name="assistant_cant_do">此页面无法执行该操作。</string>

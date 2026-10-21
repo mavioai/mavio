@@ -249,6 +249,7 @@ Transcribing subtitles is not a voice session: Pipecat's recognition services jo
 
 ### 9.3 Apple (`apps/ios`, `apps/macos`, `apps/tvos`)
 * **iPhone, iPad and Mac**: voice sessions captured and played by one `AVAudioEngine` with voice processing on, in an audio session of mode `voiceChat`; App Intents, so that Siri, Shortcuts and Spotlight play titles and control playback in Mavio through `Ask`.
+* **Microphone on the Mac**: voice processing listens only to the system's default input, so the Assistant settings' microphone, System default first, keeps the default captured with voice processing; another chosen there is captured by an `AVAudioEngine` of its own, with no voice processing, set to that device, while the answer plays through the first.
 * **Ways in on iPhone and iPad**: the assistant button in the header and in the player's controls, tapped or held as in §9.1; and an App Shortcut, Talk to Mavio, which opens the app with a voice session started, so that the Action Button, a control of Control Center and the Lock Screen, and Siri start one.
 * **Apple TV**: the Siri Remote's microphone belongs to the system, so the assistant button opens the system's dictation at once, with no field shown, and what it returns goes to `Ask` as one request, shown with the orb and cards as a voice session's; App Intents serve Siri where tvOS offers them.
 
