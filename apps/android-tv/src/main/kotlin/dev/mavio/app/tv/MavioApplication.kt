@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.pm.ApplicationInfo
 import android.system.Os
 import dev.mavio.core.AppModel
+import dev.mavio.ui.Assistant
 import dev.mavio.ui.Prefs
 import dev.mavio.ui.installImages
 
@@ -15,6 +16,9 @@ class MavioApplication : Application() {
 
     /** This device's settings. */
     val prefs by lazy { Prefs(this) }
+
+    /** The assistant over the app. */
+    val assistant by lazy { Assistant(model, this) }
 
     override fun onCreate() {
         super.onCreate()

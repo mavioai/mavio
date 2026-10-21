@@ -14,6 +14,7 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -48,16 +49,24 @@ import dev.mavio.admin.LocalAdmin
 import dev.mavio.core.AppModel
 import dev.mavio.core.SignInState
 import dev.mavio.design.MavioSpacing
+import dev.mavio.ui.AssistantHost
+import dev.mavio.ui.AssistantOverlay
+import dev.mavio.ui.AssistantScreen
 import dev.mavio.ui.FocusShake
+import dev.mavio.ui.LocalAssistant
 import dev.mavio.ui.LocalDiscover
 import dev.mavio.ui.LocalFocusShake
 import dev.mavio.ui.R
 import dev.mavio.ui.RecallingFocus
+import dev.mavio.ui.TvAssistantButton
 import dev.mavio.ui.TvChoice
 import dev.mavio.ui.movesFocus
 import dev.mavio.ui.rememberDiscover
 import dev.mavio.ui.theme
 import kotlinx.coroutines.launch
+import mavio.assistant.v1.Assistant.NavigateAction
+import mavio.assistant.v1.Assistant.NavigateTarget
+import mavio.assistant.v1.Assistant.PlayAction
 
 /** The tabs of the navigation bar (docs/tv.md §3). */
 enum class Tab(val title: Int) {
@@ -154,6 +163,71 @@ private fun Shell(model: AppModel) {
     // Back from a page returns to what opened it.
     BackHandler(top != null) { pages.back() }
     FollowGroup(model, pages)
+    // The assistant learns what shows, and opens and plays what it asks.
+    val assistant = LocalAssistant.current
+    DisposableEffect(assistant, pages) {
+        val host = object : AssistantHost {
+            override val screen get() = assistantScreen(pages.top, chosen)
+
+            override fun play(action: PlayAction, serverId: String): Boolean {
+                val ids = action.itemIdsList
+                if (ids.isEmpty()) return false
+                val start = if (action.hasStartPosition()) java.time.Duration.ofSeconds(action.startPosition.seconds, action.startPosition.nanos.toLong()) else null
+                val page = Page.Player(serverId, ids.getOrElse(action.startIndex) { ids[0] }, "", null, start)
+                if (pages.top is Page.Player) pages.replace(page) else pages.play(page.serverId, page.itemId, page.title, start = start)
+                return true
+            }
+
+            override fun navigate(action: NavigateAction, serverId: String): Boolean {
+                // A page opens in the player's place.
+                val closing = { if (pages.top is Page.Player) pages.back() }
+                when (action.target) {
+                    NavigateTarget.NAVIGATE_TARGET_HOME -> {
+                        while (pages.top != null) pages.back()
+                        chosen = Tab.Home
+                    }
+                    NavigateTarget.NAVIGATE_TARGET_BACK -> {
+                        if (pages.top == null) return false
+                        pages.back()
+                    }
+                    NavigateTarget.NAVIGATE_TARGET_ITEM -> {
+                        if (action.id.isEmpty()) return false
+                        closing()
+                        pages.openItem(serverId, action.id)
+                    }
+                    NavigateTarget.NAVIGATE_TARGET_LIBRARY -> {
+                        if (action.id.isEmpty()) return false
+                        closing()
+                        // The library opens under its name.
+                        scope.launch {
+                            val library = runCatching { model.client.libraries(serverId).libraries.firstOrNull { it.id == action.id } }.getOrNull()
+                            if (library != null) pages.openLibrary(serverId, library.id, library.name)
+                        }
+                    }
+                    NavigateTarget.NAVIGATE_TARGET_SEARCH -> {
+                        closing()
+                        (pages.top as? Page.Search)?.let {
+                            it.text = action.query
+                            it.query = action.query
+                        } ?: pages.openSearch(action.query)
+                    }
+                    NavigateTarget.NAVIGATE_TARGET_SETTINGS -> {
+                        closing()
+                        if (pages.top !is Page.Settings) pages.openSettings()
+                    }
+                    else -> return false
+                }
+                return true
+            }
+        }
+        assistant?.host = host
+        onDispose { if (assistant?.host === host) assistant.host = null }
+    }
+    val servers by model.signedIn.collectAsStateWithLifecycle()
+    LaunchedEffect(assistant, top, tab, servers) {
+        assistant?.refresh()
+        assistant?.contextChanged()
+    }
     // The administration's pages open over the settings; the television controls no other device.
     val admin = remember(pages) {
         object : AdminHost {
@@ -233,8 +307,26 @@ private fun Shell(model: AppModel) {
                     }
                 }
             }
+            assistant?.let { AssistantOverlay(it) }
         }
     }
+}
+
+/** The screen a page or the tab under it shows, as the assistant's requests name it. */
+private fun assistantScreen(page: Page?, tab: Tab): AssistantScreen = when (page) {
+    null -> when (tab) {
+        Tab.Home -> AssistantScreen("home")
+        Tab.Libraries -> AssistantScreen("libraries")
+        Tab.Discover -> AssistantScreen("discover")
+    }
+    is Page.Details -> AssistantScreen("item", page.serverId, page.itemId)
+    is Page.Credits -> AssistantScreen("item", page.serverId, page.itemId)
+    is Page.Metadata -> AssistantScreen("item", page.serverId, page.itemId)
+    is Page.Library -> AssistantScreen("library", page.serverId, libraryId = page.libraryId)
+    is Page.Search -> AssistantScreen("search")
+    is Page.Settings, is Page.Admin, is Page.AddServer -> AssistantScreen("settings")
+    is Page.Catalog, is Page.Title, is Page.Person, is Page.TitleCredits, is Page.Collection -> AssistantScreen("discover")
+    is Page.Player -> AssistantScreen("player", page.serverId, page.itemId)
 }
 
 /** Whether a page has scrolled from its top. */
@@ -250,7 +342,7 @@ private fun scrolled(list: LazyListState): Boolean {
  * entering the tabs goes to the current one, and down from them to the
  * page's first element, [page]. Search follows the tabs, opening only
  * when selected; at the end, the device's SyncPlay group while it is in
- * one, and the menu button.
+ * one, the assistant's button while the server's is on, and the menu button.
  */
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -305,6 +397,8 @@ private fun NavBar(
         ) {
             // The device's group, while it is in one, before the menu button.
             GroupIndicator(model, Modifier.focusProperties { down = page })
+            // The assistant, while the server's is on.
+            LocalAssistant.current?.let { TvAssistantButton(it, 64.dp, Modifier.focusProperties { down = page }) }
             MenuButton(
                 model,
                 menu,

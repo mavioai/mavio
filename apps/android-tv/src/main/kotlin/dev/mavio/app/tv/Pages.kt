@@ -278,9 +278,12 @@ class Pages {
         stack += Page.Collection(serverId, tmdbId)
     }
 
-    /** Opens Search. */
-    fun openSearch() {
-        stack += Page.Search()
+    /** Opens Search, searching [query] when it is set. */
+    fun openSearch(query: String = "") {
+        stack += Page.Search().apply {
+            text = query
+            this.query = query
+        }
     }
 
     /** Opens connecting to a server. */
