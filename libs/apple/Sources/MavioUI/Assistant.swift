@@ -71,7 +71,9 @@
                 }
             }
             .opacity(assistant.leaving ? 0 : 1)
-            .animation(.easeOut(duration: MavioDuration.slow), value: assistant.leaving)
+            // Only the leaving fades: once gone, the orb is put back as it
+            // was without being seen.
+            .animation(assistant.leaving ? .easeOut(duration: MavioDuration.slow) : nil, value: assistant.leaving)
             .accessibilityElement(children: .contain)
             .accessibilityLabel(MavioStrings.assistantTitle)
         }
@@ -227,7 +229,7 @@
             .frame(width: OrbRenderer.size, height: OrbRenderer.size)
             .contentShape(.circle)
             .scaleEffect(assistant.leaving ? 0.4 : 1)
-            .animation(.easeOut(duration: MavioDuration.slow), value: assistant.leaving)
+            .animation(assistant.leaving ? .easeOut(duration: MavioDuration.slow) : nil, value: assistant.leaving)
             .gesture(
                 DragGesture(minimumDistance: 0)
                     .onChanged { _ in

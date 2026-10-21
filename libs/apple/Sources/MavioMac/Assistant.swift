@@ -117,6 +117,8 @@
         private var segments: [(text: String, at: Double)] = []
         private var lit = -1
         private var played = 0.0
+        /// When the orb began to leave.
+        private var leftAt: CFTimeInterval?
         private var observer: Observer?
         private var monitor: Any?
         private var shownLeaving = false
@@ -145,9 +147,10 @@
             pill.addFilling(pillLabel, insets: NSEdgeInsets(top: 4, left: 12, bottom: 4, right: 12))
 
             for v in [orbHolder, pill, cards] as [NSView] { addSubview(v) }
-            let guide = safeAreaLayoutGuide
             NSLayoutConstraint.activate([
-                orbHolder.topAnchor.constraint(equalTo: guide.topAnchor, constant: MavioSpacing.s12),
+                // At the window's top, over its transparent title bar, as the web
+                // UI's at the page's.
+                orbHolder.topAnchor.constraint(equalTo: topAnchor, constant: MavioSpacing.s12),
                 orbHolder.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -MavioSpacing.s12),
                 pill.trailingAnchor.constraint(equalTo: orbHolder.leadingAnchor, constant: -MavioSpacing.s8),
                 pill.centerYAnchor.constraint(equalTo: orbHolder.centerYAnchor),
@@ -246,9 +249,14 @@
             pillLabel.stringValue = status ?? ""
             if a.leaving != shownLeaving {
                 shownLeaving = a.leaving
-                NSAnimationContext.runAnimationGroup { ctx in
-                    ctx.duration = MavioDuration.slow
-                    animator().alphaValue = a.leaving ? 0 : 1
+                if a.leaving {
+                    NSAnimationContext.runAnimationGroup { ctx in
+                        ctx.duration = MavioDuration.slow
+                        animator().alphaValue = 0
+                    }
+                } else {
+                    // Shown again at once, not faded back in once gone.
+                    alphaValue = 1
                 }
             }
             buildCards()
@@ -412,9 +420,20 @@
             if !assistant.answerLive && !assistant.answer.isEmpty && played.isFinite { played = .infinity }
             if assistant.answer.isEmpty { played = 0 }
             light()
-            let scale: CGFloat = assistant.leaving ? 0.4 : 1
+            // Leaving, it shrinks about its center over the fade, as the web
+            // UI's.
+            let now = CACurrentMediaTime()
+            if assistant.leaving {
+                if leftAt == nil { leftAt = now }
+            } else if assistant.open {
+                leftAt = nil
+            }
+            let t = leftAt.map { min(1, (now - $0) / MavioDuration.slow) } ?? 0
+            let scale = 1 - 0.6 * (1 - pow(1 - t, 3))
+            let c = CGPoint(x: orbHolder.bounds.midX, y: orbHolder.bounds.midY)
             orbHolder.layer?.setAffineTransform(
-                CGAffineTransform(translationX: orb.offset, y: 0).scaledBy(x: scale, y: scale))
+                CGAffineTransform(translationX: c.x + orb.offset, y: c.y).scaledBy(x: scale, y: scale)
+                    .translatedBy(x: -c.x, y: -c.y))
         }
     }
 

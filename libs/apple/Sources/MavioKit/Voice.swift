@@ -111,8 +111,25 @@
             #if os(iOS)
                 session.previous = previous
             #endif
+            capture.deliver = { [weak session] pcm in
+                DispatchQueue.main.async { MainActor.assumeIsolated { session?.audio(pcm) } }
+            }
+            // Voice processing takes up to a second or more to start: off the
+            // main thread, the orb shows at once, loading meanwhile.
+            let parts = Engine(
+                engine: session.engine, player: session.player, capture: capture, output: session.output,
+                format: session.format)
             do {
-                try session.start()
+                try await withCheckedThrowingContinuation { (done: CheckedContinuation<Void, Error>) in
+                    DispatchQueue.global(qos: .userInitiated).async {
+                        do {
+                            try Self.start(parts)
+                            done.resume()
+                        } catch {
+                            done.resume(throwing: error)
+                        }
+                    }
+                }
             } catch {
                 session.release()
                 throw Failure.unavailable(error.localizedDescription)
@@ -120,7 +137,18 @@
             return session
         }
 
-        private func start() throws {
+        /// The engine and what it plays and measures, set up together off
+        /// the main thread before the session uses them.
+        private struct Engine: @unchecked Sendable {
+            let engine: AVAudioEngine
+            let player: AVAudioPlayerNode
+            let capture: Capture
+            let output: Meter
+            let format: AVAudioFormat
+        }
+
+        nonisolated private static func start(_ e: Engine) throws {
+            let engine = e.engine
             // The output's unit made first: voice processing enabled before
             // it exists, the engine cannot start it (-10875).
             _ = engine.mainMixerNode
@@ -132,21 +160,20 @@
             guard inFormat.sampleRate > 0, inFormat.channelCount > 0 else {
                 throw Failure.unavailable("no microphone")
             }
-            try capture.prepare(from: inFormat)
-            capture.deliver = { [weak self] pcm in
-                DispatchQueue.main.async { MainActor.assumeIsolated { self?.audio(pcm) } }
-            }
-            input.installTap(onBus: 0, bufferSize: 1024, format: inFormat) { @Sendable [capture] buffer, _ in
+            try e.capture.prepare(from: inFormat)
+            input.installTap(onBus: 0, bufferSize: 1024, format: inFormat) {
+                @Sendable [capture = e.capture] buffer, _ in
                 capture.take(buffer)
             }
-            engine.attach(player)
-            engine.connect(player, to: engine.mainMixerNode, format: format)
-            player.installTap(onBus: 0, bufferSize: 1024, format: format) { @Sendable [output] buffer, _ in
+            engine.attach(e.player)
+            engine.connect(e.player, to: engine.mainMixerNode, format: e.format)
+            e.player.installTap(onBus: 0, bufferSize: 1024, format: e.format) {
+                @Sendable [output = e.output] buffer, _ in
                 output.measure(buffer)
             }
             engine.prepare()
             try engine.start()
-            player.play()
+            e.player.play()
         }
 
         /// How loud the microphone is now, from 0 to about 1.
