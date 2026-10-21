@@ -191,9 +191,10 @@ function Conversations({ server }: { server: ServerEntry }) {
       {list.map((c) => (
         <div key={c.id} className="flex flex-col">
           <button type="button" className="text-start hover:tint" onClick={() => setShown(shown === c.id ? undefined : c.id)} aria-expanded={shown === c.id}>
+            {/* The assistant's conversations have no titles: they go by when they were, and where. */}
             <Row
-              label={c.title || "…"}
-              detail={[c.deviceName, c.updateTime && when.format(timestampDate(c.updateTime))].filter(Boolean).join(" · ")}
+              label={c.title || (c.updateTime && when.format(timestampDate(c.updateTime))) || ""}
+              detail={[c.deviceName, c.title && c.updateTime && when.format(timestampDate(c.updateTime))].filter(Boolean).join(" · ")}
             />
           </button>
           {shown === c.id && (

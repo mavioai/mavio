@@ -3751,6 +3751,8 @@
     <string name="conversations_none">No conversations yet.</string>
     <!-- Title of a conversation without one. -->
     <string name="conversations_untitled">Untitled</string>
+    <!-- Title of a conversation with the assistant, which has none of its own. -->
+    <string name="conversations_assistant">Assistant conversation</string>
     <!-- What a conversation used: tokens and cost in US dollars. -->
     <string name="conversations_usage">%1$s tokens in, %2$s out · %3$s</string>
     <!-- Button sending a message. -->

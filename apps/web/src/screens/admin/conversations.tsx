@@ -16,6 +16,7 @@ import {
   useAiModels,
   useAiProviders,
   useAiSend,
+  useUsers,
 } from "@mavio/client-ts";
 import { type AgentSession, type AiModel, AiRole, type AiUsage } from "@mavio/proto/mavio/plugin/v1/ai_pb";
 import { useNavigate, useSearch } from "@tanstack/react-router";
@@ -46,6 +47,16 @@ export interface First {
 const dollars = new Intl.NumberFormat(locale, { style: "currency", currency: "USD", maximumSignificantDigits: 3 });
 const count = new Intl.NumberFormat(locale);
 
+/** Whether a conversation is one of the assistant's: the server labels them so. */
+function isAssistant(c: AgentSession): boolean {
+  return !!c.labels["mavio.assistant"];
+}
+
+/** A conversation's title; the assistant's have none, and are named so. */
+function titleOf(c: AgentSession): string {
+  return c.title || (isAssistant(c) ? t("conversations.assistant") : t("conversations.untitled"));
+}
+
 function usageOf(u: AiUsage | undefined): string {
   return t("conversations.usage", {
     input: count.format(u?.inputTokens ?? 0n),
@@ -58,6 +69,8 @@ function usageOf(u: AiUsage | undefined): string {
 export function Conversations({ server, onStarted }: { server: ServerEntry; onStarted: (f: First) => void }) {
   const conversations = useAiConversations(server);
   const { options } = useModelOptions(server);
+  const users = useUsers(server);
+  const names = new Map((users.data ?? []).map((u) => [u.id, u.name]));
   if (conversations.isError && isNoAiGateway(conversations.error))
     return (
       <Group title={t("settings.conversations")} footer={t("conversations.noPluginFooter")}>
@@ -72,8 +85,17 @@ export function Conversations({ server, onStarted }: { server: ServerEntry; onSt
           <PageLink
             key={c.id}
             search={{ conversation: c.id }}
-            label={c.title || t("conversations.untitled")}
-            detail={[modelName(modelOf(options, c)), c.updated && fromNow(timestampDate(c.updated)), usageOf(c.usage)].filter(Boolean).join(" · ")}
+            label={titleOf(c)}
+            detail={[
+              // An assistant's conversation says whose it is, and where it started.
+              isAssistant(c) && names.get(c.owner),
+              isAssistant(c) && c.labels.device,
+              modelName(modelOf(options, c)),
+              c.updated && fromNow(timestampDate(c.updated)),
+              usageOf(c.usage),
+            ]
+              .filter(Boolean)
+              .join(" · ")}
           />
         ))}
         {conversations.isSuccess && conversations.data.length === 0 && (
@@ -447,8 +469,8 @@ export function ConversationPage({ server, id, first, onFirstSent }: { server: S
   };
   return (
     <Page
-      title={c.title || t("conversations.untitled")}
-      documentTitle={`${t("settings.conversations")} · ${c.title || t("conversations.untitled")}`}
+      title={titleOf(c)}
+      documentTitle={`${t("settings.conversations")} · ${titleOf(c)}`}
       message={`${modelName(model)} · ${usageOf(c.usage)}`}
       back={back}
     >

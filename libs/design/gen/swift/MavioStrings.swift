@@ -5908,6 +5908,9 @@ public enum MavioStrings {
     /// Title of a conversation without one.
     public static var conversationsUntitled: String { NSLocalizedString("conversations.untitled", bundle: .module, comment: "") }
 
+    /// Title of a conversation with the assistant, which has none of its own.
+    public static var conversationsAssistant: String { NSLocalizedString("conversations.assistant", bundle: .module, comment: "") }
+
     /// What a conversation used: tokens and cost in US dollars.
     public static func conversationsUsage(input: String, output: String, cost: String) -> String {
         String.localizedStringWithFormat(NSLocalizedString("conversations.usage", bundle: .module, comment: ""), input, output, cost)

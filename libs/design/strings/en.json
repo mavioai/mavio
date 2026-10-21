@@ -1855,6 +1855,7 @@
   "conversations.list": { "message": "Conversations", "description": "Title of the list of conversations." },
   "conversations.none": { "message": "No conversations yet.", "description": "Empty state of the conversations." },
   "conversations.untitled": { "message": "Untitled", "description": "Title of a conversation without one." },
+  "conversations.assistant": { "message": "Assistant conversation", "description": "Title of a conversation with the assistant, which has none of its own." },
   "conversations.usage": { "message": "{input} tokens in, {output} out · {cost}", "description": "What a conversation used: tokens and cost in US dollars." },
   "conversations.send": { "message": "Send", "description": "Button sending a message." },
   "conversations.dictate": { "message": "Dictate", "description": "Button of an AI conversation's message field that listens to the microphone and writes what is said into the field." },

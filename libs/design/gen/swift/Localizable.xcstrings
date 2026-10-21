@@ -33553,6 +33553,24 @@
         }
       }
     },
+    "conversations.assistant": {
+      "comment": "Title of a conversation with the assistant, which has none of its own.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Assistant conversation"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "助手对话"
+          }
+        }
+      }
+    },
     "conversations.usage": {
       "comment": "What a conversation used: tokens and cost in US dollars.",
       "extractionState": "manual",

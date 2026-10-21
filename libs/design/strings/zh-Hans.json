@@ -1854,6 +1854,7 @@
   "conversations.list": "对话",
   "conversations.none": "还没有对话。",
   "conversations.untitled": "未命名",
+  "conversations.assistant": "助手对话",
   "conversations.usage": "输入 {input} 个词元，输出 {output} 个 · {cost}",
   "conversations.send": "发送",
   "conversations.dictate": "语音输入",
