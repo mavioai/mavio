@@ -251,6 +251,162 @@
         }
     }
 
+    /// Rows one under another that the page around them scrolls, made only
+    /// as they come near the page's view and dropped once far from it, as
+    /// the web UI's virtual lists: for lists too long to make whole, as a
+    /// season's episodes. A row not yet made counts as tall as the rows
+    /// made so far are on average; one made keeps the height it measured,
+    /// by its key, and the page keeps still as rows above its view change
+    /// height.
+    public final class LazyRows: FlippedView {
+        private let estimate: CGFloat
+        private let spacing: CGFloat
+        private var keys: [String] = []
+        private var make: (@MainActor (Int) -> NSView)?
+        private var heights: [String: CGFloat] = [:]
+        private var made: [String: NSView] = [:]
+        private var width: CGFloat = 0
+        private var height: CGFloat = 0
+        private var pending = false
+        private weak var clip: NSClipView?
+        /// How far beyond the page's view rows are made.
+        private static let overscan: CGFloat = 600
+
+        /// Rows estimate tall until made, spacing apart.
+        public init(estimate: CGFloat, spacing: CGFloat = 0) {
+            self.estimate = estimate
+            self.spacing = spacing
+            super.init(frame: .zero)
+            translatesAutoresizingMaskIntoConstraints = false
+        }
+
+        /// Unavailable: the view is made in code.
+        @available(*, unavailable)
+        public required init?(coder: NSCoder) { fatalError() }
+
+        isolated deinit { NotificationCenter.default.removeObserver(self) }
+
+        /// Shows a row for each key, made by make from its index; rows of
+        /// keys shown before are made again, keeping their heights.
+        public func show(keys: [String], make: @escaping @MainActor (Int) -> NSView) {
+            made.values.forEach { $0.removeFromSuperview() }
+            made = [:]
+            self.keys = keys
+            self.make = make
+            let kept = Set(keys)
+            heights = heights.filter { kept.contains($0.key) }
+            update()
+        }
+
+        /// Forgets the height of the row of key, measured again as it is
+        /// made.
+        public func invalidate(_ key: String) { heights[key] = nil }
+
+        override public var intrinsicContentSize: NSSize {
+            NSSize(width: NSView.noIntrinsicMetric, height: height)
+        }
+
+        override public func viewDidMoveToWindow() {
+            super.viewDidMoveToWindow()
+            NotificationCenter.default.removeObserver(self, name: NSView.boundsDidChangeNotification, object: nil)
+            clip = enclosingScrollView?.contentView
+            if let clip {
+                clip.postsBoundsChangedNotifications = true
+                NotificationCenter.default.addObserver(
+                    self, selector: #selector(scrolled), name: NSView.boundsDidChangeNotification, object: clip)
+            }
+            schedule()
+        }
+
+        override public func layout() {
+            super.layout()
+            if bounds.width != width {
+                // Rows wrap anew at another width.
+                width = bounds.width
+                heights = [:]
+                made.values.forEach { $0.removeFromSuperview() }
+                made = [:]
+            }
+            schedule()
+        }
+
+        @objc private func scrolled() { update() }
+
+        /// Updates once the layout under way ends.
+        private func schedule() {
+            guard !pending else { return }
+            pending = true
+            DispatchQueue.main.async { [weak self] in
+                self?.pending = false
+                self?.update()
+            }
+        }
+
+        private func update() {
+            guard let make, width > 0 else { return setHeight(totalHeight()) }
+            let view = visibleRect
+            let near =
+                view.isEmpty ? NSRect.zero : view.insetBy(dx: 0, dy: -Self.overscan)
+            var y: CGFloat = 0
+            var shift: CGFloat = 0
+            var keep = Set<String>()
+            for (i, key) in keys.enumerated() {
+                var h = heights[key] ?? average
+                if !near.isEmpty, y + h >= near.minY, y <= near.maxY {
+                    keep.insert(key)
+                    let row: NSView
+                    if let existing = made[key] {
+                        row = existing
+                    } else {
+                        row = make(i)
+                        row.translatesAutoresizingMaskIntoConstraints = true
+                        addSubview(row)
+                        made[key] = row
+                    }
+                    if heights[key] == nil {
+                        let measured = row.fittingSize(width: width)
+                        // A row above the view changing height moves what
+                        // the view shows: the page scrolls by as much.
+                        if y + h <= view.minY { shift += measured - h }
+                        heights[key] = measured
+                        h = measured
+                    }
+                    row.frame = NSRect(x: 0, y: y, width: width, height: h)
+                }
+                y += h + spacing
+            }
+            for (key, row) in made where !keep.contains(key) {
+                row.removeFromSuperview()
+                made[key] = nil
+            }
+            setHeight(keys.isEmpty ? 0 : y - spacing)
+            if shift != 0, let clip, let scroll = enclosingScrollView {
+                superview?.layoutSubtreeIfNeeded()
+                var origin = clip.bounds.origin
+                origin.y += clip.isFlipped ? shift : -shift
+                clip.setBoundsOrigin(origin)
+                scroll.reflectScrolledClipView(clip)
+            }
+        }
+
+        /// The height of a row not yet measured.
+        private var average: CGFloat {
+            heights.isEmpty ? estimate : heights.values.reduce(0, +) / CGFloat(heights.count)
+        }
+
+        private func totalHeight() -> CGFloat {
+            guard !keys.isEmpty else { return 0 }
+            let average = average
+            return keys.reduce(0) { $0 + (heights[$1] ?? average) } + spacing * CGFloat(keys.count - 1)
+        }
+
+        private func setHeight(_ h: CGFloat) {
+            guard h != height else { return }
+            height = h
+            invalidateIntrinsicContentSize()
+        }
+    }
+
     extension NSView {
         /// The height the view takes at a width.
         func fittingSize(width: CGFloat) -> CGFloat {

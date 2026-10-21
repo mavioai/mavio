@@ -25,6 +25,7 @@
         private var messages: [Mavio_Assistant_V1_AssistantMessage]?
         private var messagesFailure: String?
         private var busy = false
+        private let messageRows = LazyRows(estimate: 72, spacing: MavioSpacing.s16)
         private var tasks: [Task<Void, Never>] = []
         private var observers: [NSObjectProtocol] = []
         private lazy var kept: KeptSpeech? = server.map { server in
@@ -258,12 +259,20 @@
 
         /// A conversation's messages, with room above them, and deleting it.
         private func messagesRow(_ id: String) -> NSView {
-            var views: [NSView] = (messages ?? []).enumerated().map { i, m in
-                let key = String(i)
-                return AssistantBubble(
-                    m, playing: kept?.at == key,
-                    onPlay: m.speechURL.isEmpty ? nil : { [weak self] in self?.kept?.toggle(key, url: m.speechURL) },
-                    theme: theme)
+            var views: [NSView] = []
+            if let messages {
+                // Only the messages near the page's view are made.
+                messageRows.show(keys: messages.indices.map { "\(id)/\($0)" }) { [weak self] i in
+                    guard let self else { return NSView() }
+                    let m = messages[i]
+                    let key = String(i)
+                    return AssistantBubble(
+                        m, playing: kept?.at == key,
+                        onPlay: m.speechURL.isEmpty
+                            ? nil : { [weak self] in self?.kept?.toggle(key, url: m.speechURL) },
+                        theme: theme)
+                }
+                views.append(messageRows)
             }
             if messages == nil, messagesFailure == nil {
                 let spinner = NSProgressIndicator()

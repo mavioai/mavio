@@ -85,8 +85,18 @@
         /// A season's episodes, one under another (libs/design/components.md,
         /// Episode Row).
         private func episodeList(_ episodes: [Episode], current: String?) -> NSView {
-            var rows: [NSView] = [page.margined(page.heading(MavioStrings.itemEpisodes), bottom: MavioSpacing.s8)]
-            for e in episodes { rows.append(episodeRow(e, current: e.card.itemId == current)) }
+            // Only the rows near the page's view are made, a season having
+            // up to hundreds of episodes.
+            let list = LazyRows(estimate: 160)
+            let details = details
+            list.show(keys: episodes.map(\.card.itemId)) { [weak page] i in
+                guard let page else { return NSView() }
+                return DetailsSections(page: page, details: details)
+                    .episodeRow(episodes[i], current: episodes[i].card.itemId == current)
+            }
+            let rows: [NSView] = [
+                page.margined(page.heading(MavioStrings.itemEpisodes), bottom: MavioSpacing.s8), list,
+            ]
             let stack = NSStackView.vertical(rows, spacing: 0)
             for v in rows { v.widthAnchor.constraint(equalTo: stack.widthAnchor).isActive = true }
             return inset(stack, .symmetric(vertical: MavioSpacing.s8))

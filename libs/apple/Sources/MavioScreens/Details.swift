@@ -928,7 +928,8 @@ private struct EpisodeList: View {
 
     var body: some View {
         if !episodes.isEmpty {
-            VStack(alignment: .leading, spacing: 0) {
+            // Lazy: a season may have hundreds of episodes.
+            LazyVStack(alignment: .leading, spacing: 0) {
                 Text(MavioStrings.itemEpisodes).type(theme.type.title3)
                     .padding(.horizontal, theme.layout.margin)
                     .padding(.bottom, MavioSpacing.s8)

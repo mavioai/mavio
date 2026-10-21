@@ -104,7 +104,7 @@ flowchart LR
 * **助手**：[助手](assistant.zh-CN.md)最先实现的客户端（见该文档 §9.2）：经由 `libs/client-ts` 以 WASM 运行 `libs/intent` 的语法，只在安全页面使用麦克风，以浏览器的回声消除采集声音，经由服务端送入语音会话，并播放回答流式传来的语音。
 
 ### 4.2 Apple（`apps/ios`、`apps/tvos`、`apps/macos`、`libs/apple`）
-* **每种交互模型一个应用。** iPhone 与 iPad 按 App Store 的惯例是一个通用应用，iPad 上有自己的布局：顶部的标签栏、多栏、多窗口、台前调度、指针与硬件键盘。Apple TV 是独立应用，围绕焦点引擎与十英尺距离的遥控器构建，并提供 Top Shelf。Mac 是只以 AppKit 编写、不用 SwiftUI 的独立应用，AppKit 让播放器能完全掌控窗口、菜单栏、全屏、触控板以及同时打开多个播放器：其页面是视图控制器，网格与行是 `NSCollectionView`，表单是 `NSStackView`。
+* **每种交互模型一个应用。** iPhone 与 iPad 按 App Store 的惯例是一个通用应用，iPad 上有自己的布局：顶部的标签栏、多栏、多窗口、台前调度、指针与硬件键盘。Apple TV 是独立应用，围绕焦点引擎与十英尺距离的遥控器构建，并提供 Top Shelf。Mac 是只以 AppKit 编写、不用 SwiftUI 的独立应用，AppKit 让播放器能完全掌控窗口、菜单栏、全屏、触控板以及同时打开多个播放器：其页面是视图控制器，网格与行是 `NSCollectionView`，表单是 `NSStackView`，随页面一起滚动的长列表（季的剧集、助手设置中对话的消息）只创建靠近页面可见区域的行，如同 web UI 的虚拟列表；iPhone、iPad 与 Apple TV 的长列表以 SwiftUI 的惰性栈与网格以及 `List` 按需创建。
 * **`libs/apple`**，三个应用共享的 Swift 包：
   * `MavioKit`：核心的 Swift API 及其上的应用服务——账户、能力探测、以后台 `URLSession` 下载、正在播放（`MPNowPlayingInfoCenter`、`MPRemoteCommandCenter`）——以及服务器 API 的消息 `MavioProto`，由 [swift-protobuf](https://github.com/apple/swift-protobuf)（Apache-2.0）生成：核心不建模的界面，即设置，用它们经由核心（`callServer`）调用服务器的 API，与桌面应用一致（§4.4）；
   * `MavioPlayer`：一个播放器接口、两个引擎，以及画中画；
