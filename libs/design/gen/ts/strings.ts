@@ -1910,6 +1910,8 @@ export type MessageKey =
   | 'assistant.voice'
   | 'assistant.memory'
   | 'assistant.memoryFooter'
+  | 'assistant.memoryNoAi'
+  | 'assistant.noVoicePlugin'
   | 'assistant.memoryOff'
   | 'assistant.noMemories'
   | 'assistant.newMemory'
@@ -3899,6 +3901,8 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "assistant.voice": "Voice",
     "assistant.memory": "Memory",
     "assistant.memoryFooter": "What you tell the assistant about yourself, kept on the server for its AI.",
+    "assistant.memoryNoAi": "Memory needs the assistant's AI, which this server doesn't give you.",
+    "assistant.noVoicePlugin": "No voice plugin",
     "assistant.memoryOff": "Memory is off on this server.",
     "assistant.noMemories": "Nothing remembered yet.",
     "assistant.newMemory": "Something to remember",
@@ -3934,7 +3938,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "assistant.firstReady": "First ready",
     "assistant.hints": "Send Hints",
     "assistant.hintsDetail": "Titles, names and devices help the recognizer",
-    "assistant.noVoice": "Voice isn't set up on this server; type your request instead.",
+    "assistant.noVoice": "Voice isn't set up on this server: it needs a voice plugin.",
     "assistant.speaking": "Speaking…",
     "assistant.speech": "Speech",
     "assistant.speechFooter": "The recognizer and voice of each language; a language not listed, or left empty, uses the first ready one.",
@@ -5881,11 +5885,13 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "assistant.unnamedMicrophone": "麦克风 {n}",
     "assistant.showMicrophones": "显示麦克风",
     "assistant.microphoneFooter": "在此浏览器中语音请求所用的麦克风。只给出静音的麦克风（如虚拟输入）会被自动换成另一个。",
-    "assistant.off": "此服务器已关闭助手。",
+    "assistant.off": "此服务器未开启助手。",
     "assistant.cantDo": "此页面无法执行该操作。",
     "assistant.voice": "语音",
     "assistant.memory": "记忆",
     "assistant.memoryFooter": "你告诉助手的关于你自己的事，保存在服务器上供其 AI 使用。",
+    "assistant.memoryNoAi": "记忆需要助手的 AI，此服务器未向你提供。",
+    "assistant.noVoicePlugin": "没有语音插件",
     "assistant.memoryOff": "此服务器已关闭记忆。",
     "assistant.noMemories": "还没有记住任何内容。",
     "assistant.newMemory": "要记住的事",
@@ -5921,7 +5927,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "assistant.firstReady": "第一个可用的",
     "assistant.hints": "发送提示",
     "assistant.hintsDetail": "标题、名称和设备有助于识别",
-    "assistant.noVoice": "此服务器未设置语音；请改为输入请求。",
+    "assistant.noVoice": "此服务器未设置语音，需要语音插件。",
     "assistant.speaking": "正在说话…",
     "assistant.speech": "语音",
     "assistant.speechFooter": "每种语言的识别器和语音；未列出或留空的语言使用第一个就绪的。",

@@ -34706,7 +34706,7 @@
       }
     },
     "assistant.off": {
-      "comment": "Note of the assistant's panel when the server's assistant is turned off.",
+      "comment": "Row of the Assistant settings when the server's assistant is off.",
       "extractionState": "manual",
       "localizations": {
         "en": {
@@ -34718,7 +34718,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "此服务器已关闭助手。"
+            "value": "此服务器未开启助手。"
           }
         }
       }
@@ -34791,6 +34791,42 @@
           "stringUnit": {
             "state": "translated",
             "value": "你告诉助手的关于你自己的事，保存在服务器上供其 AI 使用。"
+          }
+        }
+      }
+    },
+    "assistant.memoryNoAi": {
+      "comment": "Row of the assistant's memory when the user has no AI on the server: no model, no access, or no AI agent plugin.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Memory needs the assistant's AI, which this server doesn't give you."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "记忆需要助手的 AI，此服务器未向你提供。"
+          }
+        }
+      }
+    },
+    "assistant.noVoicePlugin": {
+      "comment": "Row of the server's speech settings when no voice session plugin runs, linking to Plugins.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No voice plugin"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有语音插件"
           }
         }
       }
@@ -35432,13 +35468,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Voice isn't set up on this server; type your request instead."
+            "value": "Voice isn't set up on this server: it needs a voice plugin."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "此服务器未设置语音；请改为输入请求。"
+            "value": "此服务器未设置语音，需要语音插件。"
           }
         }
       }

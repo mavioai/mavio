@@ -6110,7 +6110,7 @@ public enum MavioStrings {
     /// Footer of the assistant's microphone setting.
     public static var assistantMicrophoneFooter: String { NSLocalizedString("assistant.microphoneFooter", bundle: .module, comment: "") }
 
-    /// Note of the assistant's panel when the server's assistant is turned off.
+    /// Row of the Assistant settings when the server's assistant is off.
     public static var assistantOff: String { NSLocalizedString("assistant.off", bundle: .module, comment: "") }
 
     /// Answer of the assistant when the page cannot carry out an action, such as controlling playback with nothing playing.
@@ -6124,6 +6124,12 @@ public enum MavioStrings {
 
     /// Footer of the assistant's memory.
     public static var assistantMemoryFooter: String { NSLocalizedString("assistant.memoryFooter", bundle: .module, comment: "") }
+
+    /// Row of the assistant's memory when the user has no AI on the server: no model, no access, or no AI agent plugin.
+    public static var assistantMemoryNoAi: String { NSLocalizedString("assistant.memoryNoAi", bundle: .module, comment: "") }
+
+    /// Row of the server's speech settings when no voice session plugin runs, linking to Plugins.
+    public static var assistantNoVoicePlugin: String { NSLocalizedString("assistant.noVoicePlugin", bundle: .module, comment: "") }
 
     /// Row of the assistant's memory when the server keeps none.
     public static var assistantMemoryOff: String { NSLocalizedString("assistant.memoryOff", bundle: .module, comment: "") }

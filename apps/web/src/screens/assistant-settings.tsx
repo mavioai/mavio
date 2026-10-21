@@ -40,18 +40,24 @@ import { Button, Group, Row } from "../ui.tsx";
 import { useKeptSpeech } from "../assistant/kept-speech.ts";
 import { MessageBar } from "../assistant/message-bar.tsx";
 import { chooseMicrophone, chosenMicrophone, microphoneAllowed } from "../assistant/voice.ts";
-import { patched } from "./admin/common.tsx";
+import { PageLink, patched } from "./admin/common.tsx";
 
 const when = new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeStyle: "short" });
 
 /** The user's memories and conversations on a server. */
 export function AssistantPrefs({ server }: { server?: ServerEntry }) {
   const info = useAssistant(server, locale);
-  if (!server || !info.data?.enabled) return null;
+  if (!server || !info.data) return null;
+  if (!info.data.enabled)
+    return (
+      <Group>
+        <Row label={t("assistant.off")} />
+      </Group>
+    );
   return (
     <>
       {info.data.voice && microphoneAllowed() && <Microphone />}
-      <Memories key={`m${server.id}`} server={server} on={info.data.memory} />
+      <Memories key={`m${server.id}`} server={server} ai={info.data.ai} on={info.data.memory} />
       {info.data.ai && <Conversations key={`c${server.id}`} server={server} />}
     </>
   );
@@ -120,7 +126,7 @@ function Microphone() {
   );
 }
 
-function Memories({ server, on }: { server: ServerEntry; on: boolean }) {
+function Memories({ server, ai, on }: { server: ServerEntry; ai: boolean; on: boolean }) {
   const memories = useAssistantMemories(server);
   const actions = useAssistantActions(server);
   const [text, setText] = useState("");
@@ -130,7 +136,7 @@ function Memories({ server, on }: { server: ServerEntry; on: boolean }) {
   if (!on)
     return (
       <Group title={t("assistant.memory")}>
-        <Row label={t("assistant.memoryOff")} />
+        <Row label={t(ai ? "assistant.memoryOff" : "assistant.memoryNoAi")} />
       </Group>
     );
   return (
@@ -376,6 +382,9 @@ function ServerForm({
             </Button>
           </div>
         ))}
+        {recognizers.length === 0 && voices.length === 0 && (
+          <PageLink search={{}} section="plugins" icon="plugins" color="#AF52DE" label={t("assistant.noVoicePlugin")} detail={t("ai.noGatewayDetail")} />
+        )}
         <div className="px-4 py-2.5">
           <Button
             variant="secondary"

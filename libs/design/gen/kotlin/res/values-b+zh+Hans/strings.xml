@@ -1952,11 +1952,13 @@
     <string name="assistant_unnamed_microphone">麦克风 %s</string>
     <string name="assistant_show_microphones">显示麦克风</string>
     <string name="assistant_microphone_footer">在此浏览器中语音请求所用的麦克风。只给出静音的麦克风（如虚拟输入）会被自动换成另一个。</string>
-    <string name="assistant_off">此服务器已关闭助手。</string>
+    <string name="assistant_off">此服务器未开启助手。</string>
     <string name="assistant_cant_do">此页面无法执行该操作。</string>
     <string name="assistant_voice">语音</string>
     <string name="assistant_memory">记忆</string>
     <string name="assistant_memory_footer">你告诉助手的关于你自己的事，保存在服务器上供其 AI 使用。</string>
+    <string name="assistant_memory_no_ai">记忆需要助手的 AI，此服务器未向你提供。</string>
+    <string name="assistant_no_voice_plugin">没有语音插件</string>
     <string name="assistant_memory_off">此服务器已关闭记忆。</string>
     <string name="assistant_no_memories">还没有记住任何内容。</string>
     <string name="assistant_new_memory">要记住的事</string>
@@ -1992,7 +1994,7 @@
     <string name="assistant_first_ready">第一个可用的</string>
     <string name="assistant_hints">发送提示</string>
     <string name="assistant_hints_detail">标题、名称和设备有助于识别</string>
-    <string name="assistant_no_voice">此服务器未设置语音；请改为输入请求。</string>
+    <string name="assistant_no_voice">此服务器未设置语音，需要语音插件。</string>
     <string name="assistant_speaking">正在说话…</string>
     <string name="assistant_speech">语音</string>
     <string name="assistant_speech_footer">每种语言的识别器和语音；未列出或留空的语言使用第一个就绪的。</string>

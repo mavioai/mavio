@@ -3881,7 +3881,7 @@
     <string name="assistant_show_microphones">Show microphones</string>
     <!-- Footer of the assistant's microphone setting. -->
     <string name="assistant_microphone_footer">The microphone voice requests use in this browser. One that gives only silence, as a virtual input does, is replaced by another on its own.</string>
-    <!-- Note of the assistant's panel when the server's assistant is turned off. -->
+    <!-- Row of the Assistant settings when the server's assistant is off. -->
     <string name="assistant_off">The assistant is off on this server.</string>
     <!-- Answer of the assistant when the page cannot carry out an action, such as controlling playback with nothing playing. -->
     <string name="assistant_cant_do">This page can\'t do that.</string>
@@ -3891,6 +3891,10 @@
     <string name="assistant_memory">Memory</string>
     <!-- Footer of the assistant's memory. -->
     <string name="assistant_memory_footer">What you tell the assistant about yourself, kept on the server for its AI.</string>
+    <!-- Row of the assistant's memory when the user has no AI on the server: no model, no access, or no AI agent plugin. -->
+    <string name="assistant_memory_no_ai">Memory needs the assistant\'s AI, which this server doesn\'t give you.</string>
+    <!-- Row of the server's speech settings when no voice session plugin runs, linking to Plugins. -->
+    <string name="assistant_no_voice_plugin">No voice plugin</string>
     <!-- Row of the assistant's memory when the server keeps none. -->
     <string name="assistant_memory_off">Memory is off on this server.</string>
     <!-- Row of the assistant's memory when it is empty. -->
@@ -3962,7 +3966,7 @@
     <!-- Detail of the Send Hints setting. -->
     <string name="assistant_hints_detail">Titles, names and devices help the recognizer</string>
     <!-- Note of the assistant's panel when the server has no voice session plugin ready. -->
-    <string name="assistant_no_voice">Voice isn\'t set up on this server; type your request instead.</string>
+    <string name="assistant_no_voice">Voice isn\'t set up on this server: it needs a voice plugin.</string>
     <!-- Status of the assistant's panel while it speaks its answer. -->
     <string name="assistant_speaking">Speaking…</string>
     <!-- Group of the server's assistant settings: the recognizer and voice of each language, and the timing of turns. -->
