@@ -12,6 +12,8 @@ from pipecat.frames.frames import (
     LLMFullResponseStartFrame,
     LLMTextFrame,
     OutputTransportMessageUrgentFrame,
+    UserStartedSpeakingFrame,
+    UserStoppedSpeakingFrame,
 )
 from pipecat.processors.aggregators.llm_context import LLMContext, LLMContextMessage
 from pipecat.processors.frame_processor import FrameDirection
@@ -195,3 +197,95 @@ async def test_aborted_run_ends_cancelled():
     )
     end = messages(down)[-1]
     assert (end["type"], end["status"]) == ("end", "cancelled"), f"got = {end}"
+
+
+async def test_answer_while_the_user_goes_on_is_dropped():
+    # The answer comes while the user speaks again: it is not spoken over
+    # them, and the turn asks what they went on to say.
+    ask = FakeAsk(
+        [
+            0.1,
+            {"answer": "Ha, thanks!"},
+            {"done": {"answer": "Ha, thanks!", "conversationId": "c1"}},
+        ],
+        [{"answer": "I can't check the weather."}, {"done": {"conversationId": "c1"}}],
+    )
+    down, _ = await run_test(
+        MavioAssistant(ask),
+        frames_to_send=[
+            context(("user", "you're fun")),
+            SleepFrame(0.05),
+            UserStartedSpeakingFrame(),
+            InterruptionFrame(),
+            SleepFrame(0.2),
+            UserStoppedSpeakingFrame(),
+            context(("user", "you're fun"), ("user", "how's the weather")),
+            SleepFrame(0.2),
+        ],
+    )
+    assert [r["text"] for r in ask.requests] == ["you're fun", "how's the weather"], (
+        f"requests = {ask.requests}"
+    )
+    assert ask.steers == [], f"steers = {ask.steers}"
+    assert speech(down) == ["start", "I can't check the weather.", "end"], f"got = {speech(down)}"
+    got = [
+        (m["type"], m.get("id"), m.get("status"))
+        for m in messages(down)
+        if m["type"] in ("run", "answer", "end")
+    ]
+    want = [
+        ("run", "1", None),
+        ("end", "1", "cancelled"),
+        ("run", "2", None),
+        ("answer", "2", None),
+        ("end", "2", "completed"),
+    ]
+    assert got == want, f"events = {got}, want = {want}"
+
+
+async def test_answer_held_through_a_wordless_turn_is_spoken():
+    ask = FakeAsk([0.1, {"answer": "Hello"}, {"done": {"answer": "Hello", "conversationId": "c1"}}])
+    down, _ = await run_test(
+        MavioAssistant(ask),
+        frames_to_send=[
+            context(("user", "hi")),
+            SleepFrame(0.05),
+            UserStartedSpeakingFrame(),
+            InterruptionFrame(),
+            SleepFrame(0.2),
+            UserStoppedSpeakingFrame(),
+            SleepFrame(0.8),
+        ],
+    )
+    assert speech(down) == ["start", "Hello", "end"], f"got = {speech(down)}"
+    assert events(down) == ["run", "answer", "end"], f"got = {events(down)}"
+    assert messages(down)[-1]["status"] == "completed"
+
+
+async def test_a_run_replacing_a_spoken_answer_interrupts_it():
+    ask = FakeAsk(
+        [{"answer": "Paused."}, {"done": {"answer": "Paused."}}], [{"done": {"answer": "Resumed."}}]
+    )
+    down, _ = await run_test(
+        MavioAssistant(ask),
+        frames_to_send=[
+            context(("user", "pause")),
+            SleepFrame(0.1),
+            BotStartedSpeakingFrame(),
+            context(("user", "pause"), ("assistant", "Paused."), ("user", "resume")),
+            SleepFrame(0.1),
+        ],
+    )
+    kinds = [
+        type(f).__name__
+        for f in down
+        if isinstance(f, (InterruptionFrame, OutputTransportMessageUrgentFrame))
+    ]
+    first_run2 = next(
+        i
+        for i, f in enumerate(down)
+        if isinstance(f, OutputTransportMessageUrgentFrame)
+        and f.message == {"type": "run", "id": "2", "text": "resume"}
+    )
+    interrupt = next(i for i, f in enumerate(down) if isinstance(f, InterruptionFrame))
+    assert interrupt < first_run2, f"frames = {kinds}"

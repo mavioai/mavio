@@ -20,6 +20,8 @@ from pipecat.frames.frames import (
     LLMFullResponseStartFrame,
     LLMTextFrame,
     OutputTransportMessageUrgentFrame,
+    UserStartedSpeakingFrame,
+    UserStoppedSpeakingFrame,
 )
 from pipecat.processors.aggregators.llm_context import LLMContext
 from pipecat.processors.frame_processor import FrameDirection, FrameProcessor
@@ -29,6 +31,9 @@ from mavio_pipecat.ask import Asker, AskError
 # How long the end of a run waits for more of its answer's speech once the
 # voice is silent.
 SPEECH_START_TIMEOUT = 3.0
+# How long an answer held while the user spoke waits, once the turn ends,
+# for the turn's text, before it is spoken: a turn with no words has none.
+HELD_ANSWER_WAIT = 0.5
 
 
 def trailing_user_text(context: LLMContext) -> str:
@@ -69,7 +74,11 @@ class MavioAssistant(FrameProcessor):
     An LLMContextFrame from the user aggregator starts a run with the turn;
     one that comes while a run has not answered yet steers it (SteerAsk):
     the user paused rather than ended, and the server drops the effects the
-    run held and carries out the joined request. An interruption, the user
+    run held and carries out the joined request. An answer that comes while
+    the user is speaking again is held, not spoken over them: when the turn
+    ends with words, the answer is dropped, unheard, and the turn starts the
+    next run with what the user went on to say; a turn without words lets
+    it be spoken. An interruption, the user
     speaking over the answer, aborts the run (AbortAsk), and the turn that
     interrupted starts the next. The answer's deltas go on as LLM text for
     the TTS service, and the run's events go to the client as transport
@@ -107,20 +116,43 @@ class MavioAssistant(FrameProcessor):
         self._pending: dict[str, Any] | None = None
         self._bot_speaking = False
         self._pending_timeout: asyncio.Task[None] | None = None
+        # A turn of the user opened while the run had not answered: its
+        # answer and end are held until the turn ends.
+        self._holding = False
+        self._held: list[tuple[str, str]] = []
+        self._held_end: dict[str, Any] | None = None
+        self._release: asyncio.Task[None] | None = None
 
     async def process_frame(self, frame: Frame, direction: FrameDirection) -> None:
         await super().process_frame(frame, direction)
         if isinstance(frame, LLMContextFrame):
             if frame.speculation:
                 return
+            if self._holding:
+                await self._stop_release()
+                self._holding = False
+                if self._held or self._held_end is not None:
+                    # Answered while the user went on: the answer is dropped
+                    # unheard, and what they went on to say is asked.
+                    await self._drop_held()
+                    text = last_user_text(frame.context)
+                    if text:
+                        self._run = self.create_task(self._request(text), "ask")
+                    return
             if await self._steer(last_user_text(frame.context)):
                 return
             text = trailing_user_text(frame.context)
-            await self._cancel(end_response=True)
+            await self._cancel(end_response=True, interrupt=True)
             if text:
                 self._run = self.create_task(self._request(text), "ask")
             return
-        if isinstance(frame, InterruptionFrame):
+        if isinstance(frame, UserStartedSpeakingFrame):
+            if self._run is not None and not self._run.done() and not self._answered:
+                self._holding = True
+        elif isinstance(frame, UserStoppedSpeakingFrame):
+            if self._holding and self._release is None:
+                self._release = self.create_task(self._release_later(), "release")
+        elif isinstance(frame, InterruptionFrame):
             # The user speaking before the answer may only pause: the turn
             # steers the run when it ends.
             if self._answered or self._run is None:
@@ -135,8 +167,37 @@ class MavioAssistant(FrameProcessor):
         await self.push_frame(frame, direction)
 
     async def cleanup(self) -> None:
+        await self._stop_release()
         await self._cancel(end_response=False)
         await super().cleanup()
+
+    async def _stop_release(self) -> None:
+        release, self._release = self._release, None
+        if release is not None and release is not asyncio.current_task():
+            await self.cancel_task(release)
+
+    async def _release_later(self) -> None:
+        """Speaks the held answer when the turn that held it ended with
+        no words."""
+        await asyncio.sleep(HELD_ANSWER_WAIT)
+        self._release = None
+        self._holding = False
+        held, self._held = self._held, []
+        for run_id, text in held:
+            await self._say(run_id, text)
+        end, self._held_end = self._held_end, None
+        if end is not None:
+            await self._finish(end)
+
+    async def _drop_held(self) -> None:
+        """Ends the run whose answer was held, cancelled: it was not heard."""
+        self._held, self._held_end = [], None
+        run, self._run = self._run, None
+        if run is not None and not run.done():
+            with contextlib.suppress(AskError, httpx.HTTPError):
+                await self._ask.abort(self._wire_id(self._run_id))
+            await self.cancel_task(run)
+        await self._event({"type": "end", "id": self._run_id, "status": "cancelled"})
 
     def _wire_id(self, run_id: str) -> str:
         return f"{self._prefix}-{run_id}"
@@ -180,12 +241,18 @@ class MavioAssistant(FrameProcessor):
             case "text":
                 text = message.get("text")
                 if isinstance(text, str) and text.strip():
-                    await self._cancel(end_response=True)
+                    await self._cancel(end_response=True, interrupt=True)
                     self._run = self.create_task(self._request(text.strip()))
             case _:
                 pass
 
-    async def _cancel(self, *, end_response: bool) -> None:
+    async def _cancel(self, *, end_response: bool, interrupt: bool = False) -> None:
+        """Ends the run in progress. interrupt is set when another run
+        replaces it: speech of its answer still playing is interrupted, so
+        that the next run's speech does not follow it, nor is kept as that
+        run's."""
+        if interrupt and (self._speaking or self._bot_speaking or self._pending is not None):
+            await self.broadcast_interruption()
         # A run that answered keeps its end, sent before the next run's
         # events: its speech was cut, not its answer.
         await self._end_pending()
@@ -246,6 +313,13 @@ class MavioAssistant(FrameProcessor):
             await self._event({"type": "error", "code": code, "message": str(e)})
         # A cancelled request does not get here: _cancel ends it.
         self._run = None
+        if self._holding:
+            self._held_end = end
+            return
+        await self._finish(end)
+
+    async def _finish(self, end: dict[str, Any]) -> None:
+        """Sends a run's end, once its answer has been spoken."""
         if not self._speaking:
             await self._event(end)
             return
@@ -256,6 +330,9 @@ class MavioAssistant(FrameProcessor):
 
     async def _say(self, run_id: str, text: str) -> None:
         self._answered = True
+        if self._holding:
+            self._held.append((run_id, text))
+            return
         if not self._speaking:
             self._speaking = True
             await self.push_frame(LLMFullResponseStartFrame())
