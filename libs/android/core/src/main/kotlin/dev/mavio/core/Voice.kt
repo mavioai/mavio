@@ -16,6 +16,7 @@ import android.media.audiofx.NoiseSuppressor
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
+import android.os.SystemClock
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.math.min
@@ -48,7 +49,7 @@ import org.json.JSONObject
 class VoiceSession private constructor(
     private val context: Context,
     private val handlers: Handlers,
-    private val record: AudioRecord,
+    first: AudioRecord,
 ) {
     /** What a session tells as it goes. */
     class Handlers(
@@ -74,10 +75,10 @@ class VoiceSession private constructor(
     private val main = Handler(Looper.getMainLooper())
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private val audio = context.getSystemService(AudioManager::class.java)
-    private val effects = listOfNotNull(
-        if (AcousticEchoCanceler.isAvailable()) AcousticEchoCanceler.create(record.audioSessionId)?.apply { enabled = true } else null,
-        if (NoiseSuppressor.isAvailable()) NoiseSuppressor.create(record.audioSessionId)?.apply { enabled = true } else null,
-    )
+    private var record = first
+    private var effects = effects(first)
+    // The times the microphone was opened again since it last gave audio.
+    private var reopens = 0
     private var socket: WebSocket? = null
     private var opened = false
     private val pending = ArrayList<ByteArray>()
@@ -85,8 +86,11 @@ class VoiceSession private constructor(
     private var captured = false
     // 20 ms frames of digital silence, until one was not.
     private var zeros = 0
-    // The frames the microphone gave.
+    // The frames the microphone gave, and when it gave the last, in uptime
+    // milliseconds: told by the capture thread, so that a busy main thread
+    // with frames waiting for it does not take them for a gap.
     private var frames = 0
+    @Volatile private var lastFrameAt = 0L
     // Whether the session said it is ready: one closed before failed.
     private var ready = false
     // Push to talk: whether the user talks, and what the socket was told.
@@ -123,8 +127,7 @@ class VoiceSession private constructor(
                 routed = audio.setCommunicationDevice(speakerDevice)
             }
         }
-        record.startRecording()
-        Thread({ capture() }, "mavio-voice-capture").start()
+        begin()
         speaker.start()
         // A microphone that gives nothing at all, as a remote's does until
         // its own key turns it on, is told as one that gives silence.
@@ -136,19 +139,57 @@ class VoiceSession private constructor(
         }, SILENT_FRAMES * 20L)
     }
 
-    // Reads the microphone's 20 ms frames until the session ends.
-    private fun capture() {
+    // Starts the microphone and reads it on a thread of its own, or opens it again.
+    private fun begin() {
+        val r = record
+        runCatching { r.startRecording() }
+        if (r.recordingState != AudioRecord.RECORDSTATE_RECORDING) {
+            reopen(r)
+            return
+        }
+        Thread({ capture(r) }, "mavio-voice-capture").start()
+    }
+
+    // The microphone failed to start or stopped giving audio: as a TV's
+    // remote does when the TV's own assistant takes it, or the TV's audio
+    // service restarts. It is opened again a few times before the session
+    // ends.
+    private fun reopen(failed: AudioRecord) {
+        if (ended || record !== failed) return
+        if (++reopens > REOPENS) {
+            end(error = "the microphone stopped")
+            return
+        }
+        effects.forEach { it.release() }
+        effects = emptyList()
+        runCatching { failed.stop() }
+        failed.release()
+        main.postDelayed({
+            if (ended || record !== failed) return@postDelayed
+            val r = runCatching { open() }.getOrNull()
+            if (r == null) {
+                reopen(failed)
+                return@postDelayed
+            }
+            record = r
+            effects = effects(r)
+            begin()
+        }, REOPEN_MS)
+    }
+
+    // Reads the microphone's 20 ms frames until the session ends or the microphone is replaced.
+    private fun capture(r: AudioRecord) {
         val frame = ShortArray(FRAME)
-        while (!ended) {
+        while (!ended && record === r) {
             var read = 0
             while (read < FRAME && !ended) {
-                val n = record.read(frame, read, FRAME - read)
+                val n = r.read(frame, read, FRAME - read)
                 if (n <= 0) break
                 read += n
             }
             if (read < FRAME) {
                 // The microphone stopped giving audio.
-                if (!ended) main.post { end(error = "the microphone stopped") }
+                main.post { reopen(r) }
                 break
             }
             var sum = 0.0
@@ -162,13 +203,16 @@ class VoiceSession private constructor(
                 bytes[i * 2 + 1] = (s shr 8).toByte()
             }
             inLevel = loudness(sum / FRAME)
+            lastFrameAt = SystemClock.uptimeMillis()
             main.post { audio(bytes, heard) }
         }
     }
 
     private fun audio(pcm: ByteArray, heard: Boolean) {
         if (ended) return
+        if (frames == 0) main.postDelayed(::fill, FRAME_MS)
         frames++
+        reopens = 0
         // Listening is told once the microphone gives more than digital silence.
         if (!captured && heard) {
             captured = true
@@ -185,6 +229,19 @@ class VoiceSession private constructor(
         // The socket opens once the plugin has made the session's services,
         // which can take seconds: what the user says meanwhile is kept.
         if (opened) socket?.send(pcm.toByteString()) else pending += pcm
+    }
+
+    // A remote's microphone gives audio only while its key is held: the
+    // gaps between are sent as silence, so that the session hears the user
+    // fall silent and ends the turn.
+    private fun fill() {
+        if (ended) return
+        if (SystemClock.uptimeMillis() - lastFrameAt > GAP_MS) {
+            val pcm = ByteArray(FRAME * 2)
+            inLevel = 0.0
+            if (opened) socket?.send(pcm.toByteString()) else pending += pcm
+        }
+        main.postDelayed(::fill, FRAME_MS)
     }
 
     /** Connects to the session's WebSocket, once [url] tells it. */
@@ -288,7 +345,7 @@ class VoiceSession private constructor(
 
     private fun release() {
         runCatching { record.stop() }
-        record.release()
+        runCatching { record.release() }
         effects.forEach { it.release() }
         speaker.release()
         if (routed && Build.VERSION.SDK_INT >= 31) audio.clearCommunicationDevice()
@@ -435,6 +492,14 @@ class VoiceSession private constructor(
         // How many 20 ms frames of digital silence tell the microphone is silent.
         private const val SILENT_FRAMES = 100
 
+        // A frame's length, and how long without one is a gap filled with silence, in milliseconds.
+        private const val FRAME_MS = 20L
+        private const val GAP_MS = 100L
+
+        // How many times the microphone is opened again, and how long after it failed.
+        private const val REOPENS = 5
+        private const val REOPEN_MS = 600L
+
         private val HEADSETS = setOf(
             AudioDeviceInfo.TYPE_WIRED_HEADSET,
             AudioDeviceInfo.TYPE_WIRED_HEADPHONES,
@@ -450,9 +515,21 @@ class VoiceSession private constructor(
             context.checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
 
         /** Opens the microphone; fails when it is refused or missing. */
-        @SuppressLint("MissingPermission")
         fun capture(context: Context, handlers: Handlers): VoiceSession {
             if (!permitted(context)) throw Failure.Denied()
+            return VoiceSession(context.applicationContext, handlers, open()).also {
+                try {
+                    it.start()
+                } catch (e: Exception) {
+                    it.release()
+                    throw Failure.Unavailable(e.message ?: e.toString())
+                }
+            }
+        }
+
+        // Opens the first source that has a microphone.
+        @SuppressLint("MissingPermission")
+        private fun open(): AudioRecord {
             val size = maxOf(
                 AudioRecord.getMinBufferSize(16000, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT),
                 FRAME * 2 * 10,
@@ -487,15 +564,14 @@ class VoiceSession private constructor(
                     null
                 }
             } ?: throw Failure.Unavailable(failure ?: "no microphone")
-            return VoiceSession(context.applicationContext, handlers, record).also {
-                try {
-                    it.start()
-                } catch (e: Exception) {
-                    it.release()
-                    throw Failure.Unavailable(e.message ?: e.toString())
-                }
-            }
+            return record
         }
+
+        // The echo canceler and noise suppressor of a microphone, where the device has them.
+        private fun effects(record: AudioRecord) = listOfNotNull(
+            if (AcousticEchoCanceler.isAvailable()) AcousticEchoCanceler.create(record.audioSessionId)?.apply { enabled = true } else null,
+            if (NoiseSuppressor.isAvailable()) NoiseSuppressor.create(record.audioSessionId)?.apply { enabled = true } else null,
+        )
 
         // The sources tried in turn.
         private val SOURCES = listOf(
