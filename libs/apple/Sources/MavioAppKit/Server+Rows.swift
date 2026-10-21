@@ -26,7 +26,10 @@
             onPress = action
             super.init(radius: theme.isTV ? MavioRadius.lg : 0)
             var views: [NSView] = [content]
+            // The content takes the rest of the row, a stack too, which hugs
+            // its views otherwise.
             content.setContentHuggingPriority(.init(1), for: .horizontal)
+            (content as? NSStackView)?.setHuggingPriority(.init(1), for: .horizontal)
             content.setContentCompressionResistancePriority(.init(249), for: .horizontal)
             if let accessory {
                 accessory.setContentHuggingPriority(.required, for: .horizontal)
@@ -35,6 +38,7 @@
             }
             if chevron { views.append(IconView("forward", size: 16, color: theme.colors.textTertiary)) }
             let stack = NSStackView.horizontal(views, spacing: MavioSpacing.s12)
+            stack.distribution = .fill
             addSubview(stack)
             let h: CGFloat = theme.isTV ? MavioSpacing.s24 : MavioSpacing.s16
             let v: CGFloat = theme.isTV ? MavioSpacing.s16 : 10
@@ -147,7 +151,10 @@
             // The content takes the room left, so that the controls end the
             // row at their own width; a stack's hugging is its own setting.
             (content as? NSStackView)?.setHuggingPriority(.init(1), for: .horizontal)
+            // The content takes the rest of the row, a stack too, which hugs
+            // its views otherwise.
             content.setContentHuggingPriority(.init(1), for: .horizontal)
+            (content as? NSStackView)?.setHuggingPriority(.init(1), for: .horizontal)
             content.setContentCompressionResistancePriority(.init(249), for: .horizontal)
             for control in controls {
                 control.setContentHuggingPriority(.required, for: .horizontal)

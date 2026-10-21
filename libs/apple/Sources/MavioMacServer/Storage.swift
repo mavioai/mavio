@@ -187,7 +187,19 @@
             let stack = NSStackView.vertical(lines, spacing: 2)
             for view in lines { view.widthAnchor.constraint(equalTo: stack.widthAnchor).isActive = true }
             return padded(
-                NSStackView.horizontal([colorTile(k.icon, k.color), stack], spacing: MavioSpacing.s12, alignment: .top))
+                filling(
+                    NSStackView.horizontal(
+                        [colorTile(k.icon, k.color), stack], spacing: MavioSpacing.s12, alignment: .top), stack))
+        }
+
+        /// A row whose text, with its usage bar, takes the rest of it after
+        /// the tile, so that the bar spans the row whatever its text's width
+        /// and keeps its length when the text changes.
+        private func filling(_ row: NSStackView, _ rest: NSView) -> NSStackView {
+            row.distribution = .fill
+            rest.setContentHuggingPriority(.init(1), for: .horizontal)
+            (rest as? NSStackView)?.setHuggingPriority(.init(1), for: .horizontal)
+            return row
         }
 
         private func renderRemotes() {
@@ -229,8 +241,9 @@
                 ],
                 spacing: 2)
             extra.widthAnchor.constraint(equalTo: lines.widthAnchor).isActive = true
-            let content = NSStackView.horizontal(
-                [colorTile("cloud", 0x30B0C7), lines], spacing: MavioSpacing.s12, alignment: .top)
+            let content = filling(
+                NSStackView.horizontal(
+                    [colorTile("cloud", 0x30B0C7), lines], spacing: MavioSpacing.s12, alignment: .top), lines)
             let row = ContentRow(content, theme: theme) { [weak self] in
                 guard let self else { return }
                 push(
