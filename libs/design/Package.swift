@@ -12,7 +12,10 @@ let package = Package(
         .target(
             name: "MavioDesign",
             path: "gen/swift",
-            resources: [.process("Icons.xcassets"), .process("ProviderLogos.xcassets"), .process("Localizable.xcstrings")]
+            resources: [
+                .process("Icons.xcassets"), .process("ProviderLogos.xcassets"),
+                .process("Localizable.xcstrings"),
+            ]
         )
     ]
 )
