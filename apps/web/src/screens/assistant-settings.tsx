@@ -26,11 +26,13 @@ import {
   AssistantSpeechSchema,
   type VoiceEngine,
 } from "@mavio/proto/mavio/assistant/v1/assistant_pb";
-import { useCallback, useEffect, useState } from "react";
+import { type ReactNode, useCallback, useEffect, useState } from "react";
 
 import { Checkbox, NumberField, Switch } from "../controls/inputs.tsx";
 import { Confirm } from "../controls/dialog.tsx";
 import { Select } from "../controls/select.tsx";
+import { Menu, MenuItem } from "../controls/menu.tsx";
+import { Icon } from "../icon.tsx";
 import { ModelPicker } from "../controls/model-picker.tsx";
 import { modelDetail } from "../ai-model.ts";
 import { input } from "../controls/styles.ts";
@@ -152,9 +154,11 @@ function Memories({ server, ai, on }: { server: ServerEntry; ai: boolean; on: bo
       )}
       {list.map((m) => (
         <Row key={m.id} label={m.text} detail={m.updateTime && when.format(timestampDate(m.updateTime))} wrap>
-          <Button variant="plain" className="text-danger" onClick={() => actions.deleteMemories.mutate([m.id])}>
-            {t("assistant.forget")}
-          </Button>
+          <More>
+            <MenuItem danger onClick={() => actions.deleteMemories.mutate([m.id])}>
+              {t("assistant.forget")}
+            </MenuItem>
+          </More>
         </Row>
       ))}
       {memories.isSuccess && list.length === 0 && <Row label={t("assistant.noMemories")} />}
@@ -177,13 +181,32 @@ function Memories({ server, ai, on }: { server: ServerEntry; ai: boolean; on: bo
           {t("assistant.remember")}
         </Button>
         {list.length > 0 && (
-          <Button variant="plain" className="text-danger" onClick={() => setAsking(true)}>
-            {t("assistant.forgetAll")}
-          </Button>
+          <More>
+            <MenuItem danger onClick={() => setAsking(true)}>
+              {t("assistant.forgetAll")}
+            </MenuItem>
+          </More>
         )}
       </form>
       {failure && <p className="px-4 py-2 type-callout text-danger">{errorMessage(failure)}</p>}
     </Group>
+  );
+}
+
+/** A row's menu, under a button of three dots. */
+function More({ children }: { children: ReactNode }) {
+  return (
+    <Menu
+      align="end"
+      width="w-48"
+      trigger={
+        <button type="button" aria-label={t("item.more")} className="grid size-8 shrink-0 place-items-center rounded-full text-text-secondary hover:tint">
+          <Icon name="moreVertical" size={20} />
+        </button>
+      }
+    >
+      {children}
+    </Menu>
   );
 }
 
