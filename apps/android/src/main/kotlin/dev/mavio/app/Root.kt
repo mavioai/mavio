@@ -805,7 +805,7 @@ private fun TabBar(tabs: List<Tab>, current: Tab, haze: HazeState, modifier: Mod
 
 /** The tint of the header's and the tab bar's glass, as iOS's bar material. */
 @Composable
-private fun glassTint(): Color = if (theme.colors.background.luminance() < 0.5f) Color(0xBA1D1D1F) else Color(0xC7F9F9F9)
+private fun glassTint(): Color = if (theme.colors.background.luminance() < 0.5f) Color(0x731D1D1F) else Color(0x73F9F9F9)
 
 /** How much the header's and the tab bar's glass blurs, as iOS's bars. */
 private val GLASS_BLUR = 24.dp
