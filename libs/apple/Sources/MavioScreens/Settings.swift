@@ -72,7 +72,7 @@ public struct SettingsView: View {
             if let server = chosen {
                 ServerGroup(server: server, serverId: $serverId)
             }
-            Section {
+            Section(MavioStrings.settingsAbout) {
                 NavigationLink {
                     AboutSettingsView()
                 } label: {
