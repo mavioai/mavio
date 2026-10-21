@@ -347,7 +347,7 @@ private fun LazyListScope.conversations(state: AssistantPrefs) {
     items(rows.size, key = { rows[it].key }) { i ->
         val row = rows[i]
         // The opened conversation's parts are spaced as a column under its row.
-        val top = if (i > 0 && rows[i - 1] is ConversationRow.Conversation) MavioSpacing.s4 else MavioSpacing.s16
+        val top = if (i > 0 && rows[i - 1] is ConversationRow.Conversation) MavioSpacing.s12 else MavioSpacing.s16
         val part = Modifier.fillMaxWidth().padding(start = rowPadding, end = rowPadding, top = top)
         GroupPart(top = i == 0, bottom = i == rows.lastIndex, after = MavioSpacing.s8) {
             when (row) {
