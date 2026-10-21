@@ -1,7 +1,11 @@
 package dev.mavio.core
 
+import android.app.LocaleManager
+import android.content.ComponentCallbacks
 import android.content.Context
+import android.content.res.Configuration
 import android.os.Build
+import android.os.LocaleList
 import android.provider.Settings
 import java.io.File
 import java.util.UUID
@@ -82,6 +86,17 @@ class AppModel(context: Context, clientName: String) {
     val syncPlay: SyncPlay
 
     init {
+        // The servers translate what they name, such as the plugins, into
+        // the app's languages, which change with the system's or the app's.
+        setLanguages(languages(context))
+        context.applicationContext.registerComponentCallbacks(
+            object : ComponentCallbacks {
+                override fun onConfigurationChanged(newConfig: Configuration) = setLanguages(languages(context))
+
+                @Deprecated("Deprecated in Java")
+                override fun onLowMemory() = Unit
+            },
+        )
         val dir = context.filesDir.resolve("mavio").apply { mkdirs() }
         downloadsFolder = dir.resolve("Downloads").apply { mkdirs() }
         client = Client(
@@ -326,6 +341,21 @@ class AppModel(context: Context, clientName: String) {
     }
 
     private companion object {
+        /**
+         * The languages the app is shown in, as BCP 47 tags, most wanted
+         * first: the app's own, chosen in the system's settings, then the
+         * system's.
+         */
+        fun languages(context: Context): List<String> {
+            val own = if (Build.VERSION.SDK_INT >= 33) {
+                context.getSystemService(LocaleManager::class.java).applicationLocales
+            } else {
+                LocaleList.getEmptyLocaleList()
+            }
+            val system = LocaleList.getDefault()
+            return (List(own.size(), own::get) + List(system.size(), system::get)).map { it.toLanguageTag() }.distinct()
+        }
+
         /** This device as the servers know it; its ID stays across launches. */
         fun device(context: Context, clientName: String): DeviceInfo {
             val prefs = context.getSharedPreferences("device", Context.MODE_PRIVATE)
