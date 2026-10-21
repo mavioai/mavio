@@ -1,11 +1,13 @@
+import MavioCommon
 import MavioKit
 import MavioPlayer
 import MavioUI
 import SwiftUI
 
 /// The player (docs/tv.md §7): the picture, and a controller of the title,
-/// the timeline and a row of buttons — the next episode, the subtitles and
-/// the audio — that the remote's keys show; select pauses and plays, left
+/// the timeline and a row of buttons — the Watch Together group's chip
+/// while the player follows one, the next episode, the subtitles and the
+/// audio — that the remote's keys show; select pauses and plays, left
 /// and right seek by 10 seconds, and back dismisses the assistant, then
 /// closes the panel, then the controller, then the player. The assistant
 /// shows over it and controls it.
@@ -34,12 +36,15 @@ struct PlayerScreen: View {
     @State private var pokes = 0
     @State private var panel: Panel?
     @State private var closing = false
+    /// Follows the Watch Together group while it plays the item.
+    @State private var follower: GroupFollower?
+    @State private var together = false
     @FocusState private var focus: Focus?
     @AppStorage(PlaybackQuality.key) private var quality = PlaybackQuality.auto
     @AppStorage(DeviceSetting.autoplayNext) private var autoplayNext = true
 
     private enum Focus: Hashable {
-        case picture, next, subtitles, audio, choice(Int32)
+        case picture, group, next, subtitles, audio, choice(Int32)
     }
 
     private enum Panel { case subtitles, audio }
@@ -104,8 +109,14 @@ struct PlayerScreen: View {
             }
         }
         .onChange(of: player.ended) { _, ended in
-            guard ended else { return }
+            // The group moves on at the end.
+            guard ended, follower?.group == nil else { return }
             if let next, autoplayNext { play(next) } else { close() }
+        }
+        .fullScreenCover(isPresented: $together) {
+            if let server = model.server(request.serverId) {
+                SyncPlayView(server: server, watching: true) { router.play($0) }
+            }
         }
     }
 
@@ -133,7 +144,9 @@ struct PlayerScreen: View {
             Task { await player.skip(by: direction == .left ? -10 : 10) }
             poke()
         case .down:
-            if controls, hasButtons { focus = next != nil ? .next : hasSubtitles ? .subtitles : .audio }
+            if controls, hasButtons {
+                focus = grouped ? .group : hasNext ? .next : hasSubtitles ? .subtitles : .audio
+            }
             poke()
         default:
             poke()
@@ -158,7 +171,32 @@ struct PlayerScreen: View {
 
     private var hasSubtitles: Bool { !(info?.subtitles.isEmpty ?? true) }
     private var hasAudio: Bool { (source?.audio.count ?? 0) > 1 }
-    private var hasButtons: Bool { next != nil || hasSubtitles || hasAudio }
+    private var hasButtons: Bool { grouped || hasNext || hasSubtitles || hasAudio }
+    /// Whether the player follows a group.
+    private var grouped: Bool { follower?.group != nil }
+    /// Whether there is something to play next: the group's next entry, or
+    /// the next episode.
+    private var hasNext: Bool { next != nil || grouped && follower?.hasNext == true }
+
+    /// Plays the next episode, or in a group the group's next entry or the
+    /// next episode in the group.
+    private func playNext() {
+        if let follower, follower.group != nil {
+            follower.next(next.map { [$0.card.itemId] } ?? [])
+        } else if let next {
+            play(next)
+        }
+    }
+
+    /// Follows the group as the player loads an item.
+    private func follow() {
+        follower?.stop()
+        let follower = GroupFollower(
+            model: model, player: player, serverId: request.serverId, itemId: request.itemId,
+            onStop: { close() })
+        follower.start()
+        self.follower = follower
+    }
 
     private var controller: some View {
         ZStack(alignment: .bottom) {
@@ -182,10 +220,20 @@ struct PlayerScreen: View {
                 Timeline(position: player.currentTime, duration: player.duration)
                 if hasButtons {
                     HStack(spacing: MavioSpacing.s24) {
-                        if let next {
+                        if let group = follower?.group {
                             Button {
-                                play(next)
+                                together = true
                             } label: {
+                                Label {
+                                    Text(groupChip(group)).lineLimit(1)
+                                } icon: {
+                                    Icon("users", fill: true, size: 28)
+                                }
+                            }
+                            .focused($focus, equals: .group)
+                        }
+                        if hasNext {
+                            Button(action: playNext) {
                                 Label {
                                     Text(MavioStrings.playerNextEpisode)
                                 } icon: {
@@ -309,6 +357,7 @@ struct PlayerScreen: View {
     /// streams; a playback already going stops first.
     private func start(at position: TimeInterval?) async {
         failure = nil
+        follow()
         if let old = session {
             session = nil
             try? await old.stop(position: player.currentTime)
@@ -327,7 +376,7 @@ struct PlayerScreen: View {
             sources = details.sources.filter { $0.serverId == request.serverId && $0.itemId == request.itemId }
             source = sources.first { $0.mediaSourceId == request.mediaSourceId } ?? sources.first
             artwork = (details.card.thumb ?? details.card.poster).flatMap { URL(string: $0.url) }
-            player.nowPlaying.next = next.map { episode in { play(episode) } }
+            player.nowPlaying.next = next.map { _ in { playNext() } }
         }
         let local = model.server(request.serverId).map { isLocalAddress(address: $0.address) } ?? false
         do {
@@ -408,11 +457,11 @@ struct PlayerScreen: View {
             case .seek: Task { await player.seek(to: value) }
             case .seekBy: Task { await player.skip(by: value) }
             case .speed:
-                guard value > 0 else { return false }
+                guard value > 0, !grouped else { return false }
                 player.setRate(Float(value))
             case .next:
-                guard let next else { return false }
-                play(next)
+                guard hasNext else { return false }
+                playNext()
             // The player fills the screen already.
             case .fullscreen: break
             default: return false
@@ -464,6 +513,7 @@ struct PlayerScreen: View {
     private func close() {
         guard !closing else { return }
         closing = true
+        follower?.stop()
         let position = player.ended ? nil : player.currentTime
         player.stop()
         let session = session

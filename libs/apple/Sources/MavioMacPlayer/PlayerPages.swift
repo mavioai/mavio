@@ -15,5 +15,10 @@
             theme.colors = .dark
             return PlayerPage(context: context.with(theme: theme), request: request, close: close)
         }
+
+        /// What a player's window content plays, nil for other content.
+        public static func playing(_ content: NSViewController?) -> PlayRequest? {
+            (content as? PlayerPage)?.playing
+        }
     }
 #endif

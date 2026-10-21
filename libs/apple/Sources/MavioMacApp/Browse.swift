@@ -68,6 +68,8 @@
         private let context: MacContext
         private var stacks: [Place: NavigationController] = [:]
         private(set) var place: Place?
+        /// The Watch Together group, at the bottom right over the pages.
+        private lazy var group = GroupIndicator(context: context)
 
         init(context: MacContext) {
             self.context = context
@@ -80,6 +82,12 @@
         override func loadView() {
             let box = Box(fill: context.theme.colors.background)
             box.frame = NSRect(x: 0, y: 0, width: 900, height: 700)
+            box.addSubview(group)
+            NSLayoutConstraint.activate([
+                group.trailingAnchor.constraint(equalTo: box.trailingAnchor, constant: -MavioSpacing.s16),
+                group.bottomAnchor.constraint(equalTo: box.bottomAnchor, constant: -MavioSpacing.s16),
+            ])
+            group.page = self
             view = box
         }
 
@@ -98,7 +106,8 @@
                 stack.keepsBelowTitleBar = true
                 stacks[next] = stack
                 addChild(stack)
-                view.addFilling(stack.view)
+                view.addSubview(stack.view, positioned: .below, relativeTo: group)
+                stack.view.pin(to: view)
             }
             NotificationCenter.default.post(name: NavigationController.didChange, object: stacks[next])
         }

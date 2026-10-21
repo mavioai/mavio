@@ -3,6 +3,19 @@ import AVKit
 import AetherEngine
 import Observation
 
+/// What the player's controls ask instead of the player while it follows a
+/// SyncPlay group: playing, pausing and seeking go to the group, which
+/// tells the player when to.
+@MainActor
+public protocol PlayerGroup: AnyObject {
+    /// Asks the group to play.
+    func unpause()
+    /// Asks the group to pause.
+    func pause()
+    /// Asks the group to move to a position, in seconds.
+    func seek(to seconds: TimeInterval)
+}
+
 /// Plays media on one of the two engines behind one interface, which the
 /// apps' controls drive.
 @MainActor
@@ -43,6 +56,10 @@ public final class Player {
     public private(set) var videoSize: CGSize = .zero
     /// Picture in Picture of AVPlayer's layer, once the surface made it.
     public var pictureInPicture: AVPictureInPictureController?
+    /// The SyncPlay group the player follows, which its controls, Now
+    /// Playing's and the remote's ask instead, its speed staying the
+    /// group's; nil while it plays on its own.
+    public var group: (any PlayerGroup)?
     /// Now Playing and the remote commands, which the app gives the item.
     @ObservationIgnored public private(set) lazy var nowPlaying = NowPlaying(player: self)
 
@@ -208,8 +225,13 @@ public final class Player {
 
     @ObservationIgnored private var isSeeking = false
 
-    /// Plays.
+    /// Plays, or asks the group to.
     public func play() {
+        if let group { group.unpause() } else { groupPlay() }
+    }
+
+    /// Plays, as the group says.
+    public func groupPlay() {
         clearStill()
         avPlayer?.play()
         aether?.play()
@@ -220,8 +242,13 @@ public final class Player {
         nowPlaying.sync()
     }
 
-    /// Pauses.
+    /// Pauses, or asks the group to.
     public func pause() {
+        if let group { group.pause() } else { groupPause() }
+    }
+
+    /// Pauses, as the group says.
+    public func groupPause() {
         avPlayer?.pause()
         aether?.pause()
         isPlaying = false
@@ -236,8 +263,17 @@ public final class Player {
         isPlaying ? pause() : play()
     }
 
-    /// Moves to a position, in seconds.
+    /// Moves to a position, in seconds, or asks the group to.
     public func seek(to seconds: TimeInterval) async {
+        if let group {
+            group.seek(to: max(0, duration > 0 ? min(seconds, duration) : seconds))
+        } else {
+            await groupSeek(to: seconds)
+        }
+    }
+
+    /// Moves to a position, in seconds, as the group says.
+    public func groupSeek(to seconds: TimeInterval) async {
         let target = max(0, duration > 0 ? min(seconds, duration) : seconds)
         currentTime = target
         isSeeking = true
@@ -287,8 +323,14 @@ public final class Player {
         await seek(to: currentTime + seconds)
     }
 
-    /// Plays at a speed.
+    /// Plays at a speed, unless it follows a group.
     public func setRate(_ rate: Float) {
+        if group == nil { groupRate(rate) }
+    }
+
+    /// Plays at a speed a little faster or slower than the group, to keep
+    /// up with it.
+    public func groupRate(_ rate: Float) {
         self.rate = rate
         if let player = avPlayer {
             player.defaultRate = rate

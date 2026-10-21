@@ -40,6 +40,11 @@ struct RootView: View {
                 AssistantOverlay(assistant: assistant, lift: navigation.tabBarShows ? 56 : 0)
             }
         }
+        .overlay(alignment: .bottomTrailing) {
+            if navigation.router.playing == nil {
+                GroupIndicator(lift: navigation.tabBarShows ? 56 : 0)
+            }
+        }
         .overlay {
             if launching {
                 LaunchView(ready: ready) { launching = false }
@@ -49,6 +54,8 @@ struct RootView: View {
             await LaunchView.prepare(model)
             ready = true
         }
+        // The player opens on what the Watch Together group plays.
+        .task { await navigation.router.follow(model.syncPlay) }
         .environment(navigation.router)
         .environment(navigation)
         .environment(discovery)

@@ -120,6 +120,10 @@ public enum Procedure {
     }
     /// The path of a method of `mavio.system.v1.ProxyService`.
     public static func proxies(_ method: String) -> String { "/mavio.system.v1.ProxyService/\(method)" }
+    /// The path of a method of `mavio.session.v1.SyncPlayService`.
+    public static func syncPlay(_ method: String) -> String { "/mavio.session.v1.SyncPlayService/\(method)" }
+    /// The path of a method of `mavio.library.v1.MetadataService`.
+    public static func metadata(_ method: String) -> String { "/mavio.library.v1.MetadataService/\(method)" }
     /// The path of a method of `mavio.assistant.v1.AssistantService`.
     public static func assistant(_ method: String) -> String { "/mavio.assistant.v1.AssistantService/\(method)" }
 }

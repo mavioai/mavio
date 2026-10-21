@@ -61,6 +61,9 @@
         var sourceIndex = 0
         /// Whether the user may report problems on the server.
         private var mayReport = false
+        /// Whether the user administers the server, who may manage the
+        /// item's metadata.
+        private var admin = false
         /// Counts the issues reported here, each listing them again.
         var reports = 0
         private let page = ScrollPage([], spacing: 0, insets: NSEdgeInsets(top: 0, left: 0, bottom: 40, right: 0))
@@ -123,13 +126,10 @@
             guard let details, !details.offline else { return }
             reportTask = Task { [weak self] in
                 guard let self else { return }
-                let response = try? await self.model.client.call(
-                    self.serverId, Procedure.users("GetCurrentUser"), Mavio_User_V1_GetCurrentUserRequest(),
-                    as: Mavio_User_V1_GetCurrentUserResponse.self)
-                guard !Task.isCancelled, let user = response?.user else { return }
-                let may = user.admin || user.policy.reportIssues
-                if may != self.mayReport {
-                    self.mayReport = may
+                let (admin, may) = await self.model.userRights(self.serverId)
+                guard !Task.isCancelled else { return }
+                if may != self.mayReport || admin != self.admin {
+                    (self.admin, self.mayReport) = (admin, may)
                     self.rebuildActions()
                 }
             }
@@ -507,13 +507,30 @@
             } else {
                 downloadHolder = nil
             }
-            if mayReport, [.movie, .series, .season, .episode].contains(card.kind) {
+            // The More menu: Watch Together, the metadata actions of
+            // administrators, and reporting a problem with the item.
+            let groupable = !details.offline && playable(card.kind)
+            let reportable = mayReport && [.movie, .series, .season, .episode].contains(card.kind)
+            let actions = admin ? MetadataAction.of(itemKind(card.kind)) : []
+            if groupable || reportable || !actions.isEmpty {
                 let more = MavioButton(icon: "more", kind: .artworkCircle, large: true, theme: theme)
                 more.setAccessibilityLabel(MavioStrings.listsMore)
                 more.onPress = { [weak self, weak more] in
                     guard let self, let more else { return }
                     let menu = NSMenu()
-                    menu.addItem(MenuAction(MavioStrings.issuesReport) { [weak self] in self?.report() })
+                    if groupable {
+                        menu.addItem(MenuAction(MavioStrings.syncplayWatchTogether) { [weak self] in self?.together() })
+                    }
+                    if !actions.isEmpty {
+                        if menu.numberOfItems > 0 { menu.addItem(.separator()) }
+                        for action in actions {
+                            menu.addItem(MenuAction(action.title) { [weak self] in self?.metadata(action) })
+                        }
+                    }
+                    if reportable {
+                        if menu.numberOfItems > 0 { menu.addItem(.separator()) }
+                        menu.addItem(MenuAction(MavioStrings.issuesReport) { [weak self] in self?.report() })
+                    }
                     popUp(menu, under: more)
                 }
                 buttons.append(more)
@@ -709,6 +726,21 @@
         }
 
         /// Reports a problem with the item, in a sheet.
+        /// Opens Watch Together, where the item plays in the group from
+        /// where it was left.
+        private func together() {
+            guard let details, let server = model.server(serverId) else { return }
+            let position = next?.own == true && next?.resumable == true ? next?.position : nil
+            SyncPlayDialog(context: context, server: server, item: (itemId, details.card.title, position))
+                .present(over: self)
+        }
+
+        /// Opens the dialog of a metadata action on the item.
+        private func metadata(_ action: MetadataAction) {
+            guard let details else { return }
+            openMetadata(action, serverId: serverId, itemId: itemId, name: details.card.title, over: self) {}
+        }
+
         private func report() {
             guard let details, let server = model.server(serverId) else { return }
             presentAsSheet(

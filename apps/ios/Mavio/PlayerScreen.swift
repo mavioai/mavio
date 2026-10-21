@@ -1,4 +1,5 @@
 import AVKit
+import MavioCommon
 import MavioKit
 import MavioScreens
 import MavioPlayer
@@ -51,6 +52,9 @@ struct PlayerScreen: View {
     @State private var swipeIgnored = false
     @State private var level: LevelShown?
     @State private var volume = SystemVolume()
+    /// Follows the Watch Together group while it plays the item.
+    @State private var follower: GroupFollower?
+    @State private var together = false
 
     init(request: PlayRequest) {
         _request = State(initialValue: request)
@@ -130,6 +134,12 @@ struct PlayerScreen: View {
         .preferredColorScheme(.dark)
         .statusBarHidden(!controls)
         .persistentSystemOverlays(.hidden)
+        .sheet(isPresented: $together) {
+            if let server = model.server(request.serverId) {
+                SyncPlayView(server: server, watching: true) { navigation.router.play($0) }
+                    .environment(\.theme, Theme(colors: .dark, layout: .phone))
+            }
+        }
         .task { await start(at: request.start) }
         .onAppear {
             bind()
@@ -165,7 +175,8 @@ struct PlayerScreen: View {
             }
         }
         .onChange(of: player.ended) { _, ended in
-            guard ended else { return }
+            // The group moves on at the end.
+            guard ended, follower?.group == nil else { return }
             if let next, autoplayNext { play(next) } else { close() }
         }
     }
@@ -230,6 +241,7 @@ struct PlayerScreen: View {
     /// streams; a playback already going stops first.
     private func start(at position: TimeInterval?) async {
         failure = nil
+        follow()
         if let file = request.file {
             await player.load(
                 Media(
@@ -260,7 +272,7 @@ struct PlayerScreen: View {
             cachedSources = sources(details)
             source = cachedSources.first { $0.mediaSourceId == request.mediaSourceId } ?? cachedSources.first
             artwork = (details.card.thumb ?? details.card.poster).flatMap { URL(string: $0.url) }
-            player.nowPlaying.next = next.map { episode in { play(episode) } }
+            player.nowPlaying.next = next.map { _ in { playNext() } }
         }
         let local = model.server(request.serverId).map { isLocalAddress(address: $0.address) } ?? false
         do {
@@ -356,9 +368,37 @@ struct PlayerScreen: View {
         Task { await start(at: episode.position) }
     }
 
+    /// Follows the group as the player loads an item.
+    private func follow() {
+        follower?.stop()
+        let follower = GroupFollower(
+            model: model, player: player, serverId: request.serverId, itemId: request.itemId,
+            onStop: { close() })
+        follower.start()
+        self.follower = follower
+    }
+
+    /// Whether the player follows a group, which plays at the group's speed.
+    private var grouped: Bool { follower?.group != nil }
+
+    /// Whether there is something to play next: the group's next entry, or
+    /// the next episode.
+    private var hasNext: Bool { grouped ? follower?.hasNext == true || next != nil : next != nil }
+
+    /// Plays the next episode, or in a group the group's next entry or the
+    /// next episode in the group.
+    private func playNext() {
+        if let follower, follower.group != nil {
+            follower.next(next.map { [$0.card.itemId] } ?? [])
+        } else if let next {
+            play(next)
+        }
+    }
+
     private func close() {
         guard !closing else { return }
         closing = true
+        follower?.stop()
         let position = player.ended ? nil : player.currentTime
         player.stop()
         let session = session
@@ -420,6 +460,24 @@ struct PlayerScreen: View {
             }
             .lineLimit(1)
             Spacer()
+            if let group = follower?.group {
+                Button {
+                    together = true
+                    poke()
+                } label: {
+                    Label {
+                        Text(groupChip(group)).lineLimit(1)
+                    } icon: {
+                        Icon("users", size: 16)
+                    }
+                    .type(MavioTypography.standard.footnote).fontWeight(.semibold)
+                    .padding(.horizontal, 14)
+                    .frame(height: 36)
+                    .glass(in: .capsule)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(MavioStrings.syncplayTitle)
+            }
             RoutePicker().frame(width: 44, height: 44)
         }
     }
@@ -498,9 +556,9 @@ struct PlayerScreen: View {
             .monospacedDigit()
             .foregroundStyle(.white.opacity(0.8))
             HStack(spacing: MavioSpacing.s8) {
-                if let next {
+                if hasNext {
                     Button {
-                        play(next)
+                        playNext()
                     } label: {
                         Label {
                             Text(MavioStrings.playerNextEpisode)
@@ -571,6 +629,30 @@ struct PlayerScreen: View {
             ? [.audio] : (info?.subtitles.isEmpty ?? true) ? [.audio, .quality, .info] : PlayerPanel.allCases
     }
 
+    /// The speeds to play at, which a group chooses instead.
+    @ViewBuilder private var speeds: some View {
+        PanelHeading(MavioStrings.playerSpeed)
+        Flow(spacing: 6, lineSpacing: 6) {
+            ForEach([0.5, 0.75, 1, 1.25, 1.5, 2] as [Float], id: \.self) { rate in
+                let on = player.rate == rate
+                Button {
+                    player.setRate(rate)
+                    poke()
+                } label: {
+                    Text("\(rate.formatted())×")
+                        .type(MavioTypography.standard.footnote).fontWeight(.semibold).monospacedDigit()
+                        .foregroundStyle(on ? .black : .white)
+                        .padding(.horizontal, MavioSpacing.s12)
+                        .frame(height: 32)
+                        .background(on ? .white : .white.opacity(0.1), in: .capsule)
+                }
+                .buttonStyle(.plain)
+                .accessibilityAddTraits(on ? .isSelected : [])
+            }
+        }
+        .padding(.horizontal, 10)
+    }
+
     @ViewBuilder private func panelContent(_ tab: PlayerPanel) -> some View {
         switch tab {
         case .audio:
@@ -585,26 +667,7 @@ struct PlayerScreen: View {
                     }
                 }
             }
-            PanelHeading(MavioStrings.playerSpeed)
-            Flow(spacing: 6, lineSpacing: 6) {
-                ForEach([0.5, 0.75, 1, 1.25, 1.5, 2] as [Float], id: \.self) { rate in
-                    let on = player.rate == rate
-                    Button {
-                        player.setRate(rate)
-                        poke()
-                    } label: {
-                        Text("\(rate.formatted())×")
-                            .type(MavioTypography.standard.footnote).fontWeight(.semibold).monospacedDigit()
-                            .foregroundStyle(on ? .black : .white)
-                            .padding(.horizontal, MavioSpacing.s12)
-                            .frame(height: 32)
-                            .background(on ? .white : .white.opacity(0.1), in: .capsule)
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityAddTraits(on ? .isSelected : [])
-                }
-            }
-            .padding(.horizontal, 10)
+            if !grouped { speeds }
         case .subtitles:
             PanelChoice(label: MavioStrings.playerSubtitlesOff, checked: (info?.subtitleStreamIndex ?? -1) < 0) {
                 subtitle = -1
@@ -677,11 +740,11 @@ struct PlayerScreen: View {
             case .seek: Task { await player.seek(to: value) }
             case .seekBy: Task { await player.skip(by: value) }
             case .speed:
-                guard value > 0 else { return false }
+                guard value > 0, !grouped else { return false }
                 player.setRate(Float(value))
             case .next:
-                guard let next else { return false }
-                play(next)
+                guard hasNext else { return false }
+                playNext()
             // The player fills the screen already.
             case .fullscreen: break
             default: return false

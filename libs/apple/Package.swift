@@ -54,11 +54,13 @@ let package = Package(
         ),
         // What every app's screens share apart from their toolkit: the
         // devices' settings, Discover's state, the labels of the server's
-        // values, the settings' sections and the cache of images.
+        // values, the settings' sections, the cache of images and the
+        // player's following of a SyncPlay group.
         .target(
             name: "MavioCommon",
             dependencies: [
-                "MavioKit", .product(name: "MavioDesign", package: "design"), .product(name: "Nuke", package: "Nuke"),
+                "MavioKit", "MavioPlayer", .product(name: "MavioDesign", package: "design"),
+                .product(name: "Nuke", package: "Nuke"),
             ]
         ),
         .target(

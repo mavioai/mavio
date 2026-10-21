@@ -72,7 +72,9 @@
                 menuButton.trailingAnchor.constraint(equalTo: bar.trailingAnchor, constant: -theme.layout.margin),
                 menuButton.centerYAnchor.constraint(equalTo: bar.centerYAnchor),
             ])
-            // The assistant button before the user's menu, as the web UI's.
+            // The assistant button before the user's menu, as the web UI's,
+            // and the Watch Together group before it (docs/tv.md §3).
+            var before: NSView = menuButton
             if let assistant = root.context.assistant {
                 let button = AssistantButton(
                     assistant: assistant, theme: theme, side: 64, size: 30, color: theme.colors.textSecondary,
@@ -82,7 +84,15 @@
                     button.trailingAnchor.constraint(equalTo: menuButton.leadingAnchor, constant: -MavioSpacing.s8),
                     button.centerYAnchor.constraint(equalTo: bar.centerYAnchor),
                 ])
+                before = button
             }
+            let group = GroupIndicator(context: root.context)
+            group.page = self
+            bar.addSubview(group)
+            NSLayoutConstraint.activate([
+                group.trailingAnchor.constraint(equalTo: before.leadingAnchor, constant: -MavioSpacing.s8),
+                group.centerYAnchor.constraint(equalTo: bar.centerYAnchor),
+            ])
             self.view = view
         }
 

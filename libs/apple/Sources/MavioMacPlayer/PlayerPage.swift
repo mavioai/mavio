@@ -6,14 +6,15 @@
     /// The player of a window of its own (docs/clients.md §4.4, §6.6): the
     /// picture, and over it while the pointer moves or the playback is paused
     /// a controller of the title, the timeline, play and pause, seeking, the
-    /// next episode, the subtitles, the audio, Picture in Picture and full
+    /// next episode, the Watch Together group's chip while the player
+    /// follows one, the subtitles, the audio, Picture in Picture and full
     /// screen. Space and K play and pause, the arrows and J and L seek, F
     /// puts the window in full screen and Escape takes it out; a click plays
     /// and pauses, a double click puts the window in full screen.
     ///
     /// In television mode (docs/tv.md §7) the controller is the title, the
-    /// timeline and a row of buttons — the next episode, the subtitles and
-    /// the audio — whose pickers open as a side panel: down shows it, left
+    /// timeline and a row of buttons — the group's chip, the next episode,
+    /// the subtitles and the audio — whose pickers open as a side panel: down shows it, left
     /// and right seek by 10 seconds, select pauses and plays, and back closes
     /// the panel, then hides the controller, then closes the player.
     ///
@@ -57,6 +58,9 @@
         private var lastEnded = false
         private var panel: Picker?
         private var focus = Focus.picture
+        /// Follows the Watch Together group while it plays the item.
+        private var follower: GroupFollower?
+        private var groupObserver: Observer?
 
         private var loadTask: Task<Void, Never>?
         private var reportTask: Task<Void, Never>?
@@ -79,12 +83,14 @@
         private let remainingLabel: NSTextField
         private let playButton: IconButton
         private let nextButton: IconButton
+        private let groupButton: MavioButton
         private let subtitlesButton: IconButton
         private let audioButton: IconButton
         private let pictureInPictureButton: IconButton
         // Television mode's controller.
         private let timeline: TimelineBar
         private let tvRow: NSStackView
+        private let tvGroup: MavioButton
         private let tvNext: MavioButton
         private let tvSubtitles: MavioButton
         private let tvAudio: MavioButton
@@ -110,15 +116,17 @@
             remainingLabel.font = digits
             playButton = IconButton("pause", MavioStrings.playerPause, size: 28) {}
             nextButton = IconButton("next", MavioStrings.playerNextEpisode) {}
+            groupButton = MavioButton("", icon: "users", kind: .artworkSecondary, theme: theme)
             subtitlesButton = IconButton("subtitles", MavioStrings.playerSubtitles, fill: false) {}
             audioButton = IconButton("audio", MavioStrings.playerAudio, fill: false) {}
             pictureInPictureButton = IconButton("pictureInPicture", MavioStrings.playerPictureInPicture) {}
             timeline = TimelineBar(theme: theme)
+            tvGroup = MavioButton("", icon: "users", kind: .artworkSecondary, theme: theme)
             tvNext = MavioButton(MavioStrings.playerNextEpisode, icon: "next", kind: .artworkSecondary, theme: theme)
             tvSubtitles = MavioButton(
                 MavioStrings.playerSubtitles, icon: "subtitles", kind: .artworkSecondary, theme: theme)
             tvAudio = MavioButton(MavioStrings.playerAudio, icon: "audio", kind: .artworkSecondary, theme: theme)
-            tvRow = .horizontal([tvNext, tvSubtitles, tvAudio], spacing: MavioSpacing.s24)
+            tvRow = .horizontal([tvGroup, tvNext, tvSubtitles, tvAudio], spacing: MavioSpacing.s24)
             if tv, let assistant = context.assistant {
                 tvRow.addArrangedSubview(
                     AssistantButton(
@@ -197,10 +205,8 @@
                 self?.toggleFullScreen()
             }
             playButton.onPress = { [weak self] in self?.toggle() }
-            nextButton.onPress = { [weak self] in
-                guard let self, let next = self.next else { return }
-                self.play(next)
-            }
+            nextButton.onPress = { [weak self] in self?.playNext() }
+            groupButton.onPress = { [weak self] in self?.openGroup() }
             subtitlesButton.onPress = { [weak self] in
                 guard let self else { return }
                 self.showMenu(.subtitles, from: self.subtitlesButton)
@@ -212,7 +218,7 @@
             pictureInPictureButton.onPress = { [weak self] in self?.player.togglePictureInPicture() }
             let buttons = NSStackView.horizontal(
                 [
-                    seekBack, playButton, seekForward, nextButton, Spacer(),
+                    seekBack, playButton, seekForward, nextButton, groupButton, Spacer(),
                 ] + assistantButton() + [subtitlesButton, audioButton, pictureInPictureButton, fullScreen],
                 spacing: MavioSpacing.s16)
             let bottom = NSStackView.vertical([titles, timeRow, buttons], spacing: MavioSpacing.s12)
@@ -230,10 +236,8 @@
         private func buildTV() {
             controller.addFilling(ShadeView([(0.5, 0), (1, 0.8)]))
             let titles = NSStackView.vertical([seriesLabel, titleLabel], spacing: MavioSpacing.s4)
-            tvNext.onPress = { [weak self] in
-                guard let self, let next = self.next else { return }
-                self.play(next)
-            }
+            tvNext.onPress = { [weak self] in self?.playNext() }
+            tvGroup.onPress = { [weak self] in self?.openGroup() }
             tvSubtitles.onPress = { [weak self] in self?.open(.subtitles) }
             tvAudio.onPress = { [weak self] in self?.open(.audio) }
             let bottom = NSStackView.vertical([titles, timeline, tvRow], spacing: MavioSpacing.s24)
@@ -268,6 +272,11 @@
             super.viewDidLoad()
             updateDetails()
             stateObserver = Observer { [weak self] in self?.playerChanged() }
+            groupObserver = Observer { [weak self] in
+                guard let self else { return }
+                _ = self.follower?.group
+                self.updateDetails()
+            }
             timeObserver = Observer { [weak self] in self?.timeChanged() }
             loadTask = Task { [weak self] in
                 guard let self else { return }
@@ -338,6 +347,8 @@
 
         private func playerEnded() {
             guard !stopped else { return }
+            // The group moves on at the end.
+            guard follower?.group == nil else { return }
             let autoplayNext = UserDefaults.standard.object(forKey: DeviceSetting.autoplayNext) as? Bool ?? true
             if let next, autoplayNext { play(next) } else { close() }
         }
@@ -353,13 +364,20 @@
             titleLabel.stringValue = itemTitle
             let hasSubtitles = !(info?.subtitles.isEmpty ?? true)
             let hasAudio = (source?.audio.count ?? 0) > 1
-            nextButton.isHidden = next == nil
+            let group = follower?.group
+            nextButton.isHidden = !hasNext
             subtitlesButton.isHidden = !hasSubtitles
             audioButton.isHidden = !hasAudio
-            tvNext.isHidden = next == nil
+            groupButton.isHidden = group == nil
+            tvGroup.isHidden = group == nil
+            if let group {
+                groupButton.title = groupChip(group)
+                tvGroup.title = groupChip(group)
+            }
+            tvNext.isHidden = !hasNext
             tvSubtitles.isHidden = !hasSubtitles
             tvAudio.isHidden = !hasAudio
-            tvRow.isHidden = next == nil && !hasSubtitles && !hasAudio
+            tvRow.isHidden = group == nil && !hasNext && !hasSubtitles && !hasAudio
             if case .row = focus, rowButtons.isEmpty { setFocus(.picture) }
         }
 
@@ -550,11 +568,11 @@
 
         /// The buttons of television mode's row that show.
         private var rowButtons: [MavioButton] {
-            [tvNext, tvSubtitles, tvAudio].filter { !$0.isHidden }
+            [tvGroup, tvNext, tvSubtitles, tvAudio].filter { !$0.isHidden }
         }
 
         private func setFocus(_ new: Focus) {
-            for button in [tvNext, tvSubtitles, tvAudio] { button.isFocused = false }
+            for button in [tvGroup, tvNext, tvSubtitles, tvAudio] { button.isFocused = false }
             for row in panelRows { row.isFocused = false }
             focus = new
             switch new {
@@ -758,6 +776,7 @@
         /// plays without the server.
         private func start(at position: TimeInterval?) async {
             setFailure(nil)
+            follow()
             if let file = request.file {
                 await player.load(
                     Media(
@@ -788,8 +807,8 @@
                 sources = details.sources.filter { $0.serverId == request.serverId && $0.itemId == request.itemId }
                 source = sources.first { $0.mediaSourceId == request.mediaSourceId } ?? sources.first
                 artwork = (details.card.thumb ?? details.card.poster).flatMap { URL(string: $0.url) }
-                player.nowPlaying.next = next.map { episode in
-                    { [weak self] in self?.play(episode) }
+                player.nowPlaying.next = next.map { _ in
+                    { [weak self] in self?.playNext() }
                 }
                 updateDetails()
             }
@@ -886,6 +905,42 @@
             }
         }
 
+        /// What the player plays.
+        var playing: PlayRequest { request }
+
+        /// Follows the group as the player loads an item.
+        private func follow() {
+            follower?.stop()
+            let follower = GroupFollower(
+                model: model, player: player, serverId: request.serverId, itemId: request.itemId,
+                onStop: { [weak self] in self?.close() })
+            follower.start()
+            self.follower = follower
+        }
+
+        /// Whether the player follows a group.
+        private var grouped: Bool { follower?.group != nil }
+
+        /// Whether there is something to play next: the group's next entry,
+        /// or the next episode.
+        private var hasNext: Bool { next != nil || grouped && follower?.hasNext == true }
+
+        /// Plays the next episode, or in a group the group's next entry or
+        /// the next episode in the group.
+        private func playNext() {
+            if let follower, follower.group != nil {
+                follower.next(next.map { [$0.card.itemId] } ?? [])
+            } else if let next {
+                play(next)
+            }
+        }
+
+        /// Opens the group's dialog over the player.
+        private func openGroup() {
+            guard let server = model.server(request.serverId) else { return }
+            SyncPlayDialog(context: context, server: server, watching: true).present(over: self)
+        }
+
         /// Plays the episode after this one in the player's place.
         private func play(_ episode: Episode) {
             guard !stopped else { return }
@@ -916,6 +971,8 @@
             for task in [loadTask, reportTask, hideTask, clickTask] { task?.cancel() }
             stateObserver?.cancel()
             timeObserver?.cancel()
+            groupObserver?.cancel()
+            follower?.stop()
             let position = player.ended ? nil : player.currentTime
             player.stop()
             picture.release()
@@ -1013,11 +1070,11 @@
             case .seek: Task { await player.seek(to: value) }
             case .seekBy: seek(by: value)
             case .speed:
-                guard value > 0 else { return false }
+                guard value > 0, !grouped else { return false }
                 player.setRate(Float(value))
             case .next:
-                guard let next else { return false }
-                play(next)
+                guard hasNext else { return false }
+                playNext()
             case .fullscreen:
                 guard let window = view.window else { return false }
                 if !window.styleMask.contains(.fullScreen) { window.toggleFullScreen(nil) }

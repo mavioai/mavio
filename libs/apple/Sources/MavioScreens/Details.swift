@@ -1,4 +1,5 @@
 import MavioAdmin
+import MavioCommon
 import MavioKit
 import MavioUI
 import SwiftUI
@@ -81,6 +82,11 @@ private struct DetailsContent: View {
     /// and users allowed to.
     @State private var mayReport = false
     @State private var reporting = false
+    /// Whether the user administers the server, who may manage the item's
+    /// metadata.
+    @State private var admin = false
+    @State private var metadata: MetadataAction?
+    @State private var together = false
     /// Counts the issues reported here and the pulls of the page, each
     /// listing the issues again.
     @State private var reports = 0
@@ -166,16 +172,34 @@ private struct DetailsContent: View {
                 ) { reports += 1 }
             }
         }
-        .task(id: card.serverId) { await loadMayReport() }
+        .sheet(item: $metadata, onDismiss: { Task { await reload() } }) { action in
+            ItemMetadataView(serverId: card.serverId, itemId: card.itemId, name: card.title, action: action)
+        }
+        .sheet(isPresented: $together) {
+            if let server = model.server(card.serverId) {
+                SyncPlayView(
+                    server: server, item: (card.itemId, card.title, next?.own == true ? next?.position : nil)
+                ) { router.play($0) }
+            }
+        }
+        .task(id: card.serverId) { await loadRights() }
     }
 
-    private func loadMayReport() async {
+    private func loadRights() async {
         guard !details.offline else { return }
-        let response = try? await model.client.call(
-            card.serverId, Procedure.users("GetCurrentUser"), Mavio_User_V1_GetCurrentUserRequest(),
-            as: Mavio_User_V1_GetCurrentUserResponse.self)
-        if let user = response?.user { mayReport = user.admin || user.policy.reportIssues }
+        (admin, mayReport) = await model.userRights(card.serverId)
     }
+
+    /// The metadata actions the user may take on the item.
+    private var metadataActions: [MetadataAction] {
+        admin ? MetadataAction.of(itemKind(card.kind)) : []
+    }
+
+    /// Whether the item plays in a Watch Together group.
+    private var groupable: Bool { !details.offline && playable(card.kind) }
+
+    /// Whether the user may report a problem with the item.
+    private var reportable: Bool { mayReport && [.movie, .series, .season, .episode].contains(card.kind) }
 
     // MARK: Header
 
@@ -453,13 +477,20 @@ private struct DetailsContent: View {
         .buttonStyle(circle)
         if own.count > 1 || !copies.isEmpty { versionMenu }
         if source != nil, !details.offline { downloadButton }
-        if mayReport, [.movie, .series, .season, .episode].contains(card.kind) { moreMenu }
+        if groupable || reportable || !metadataActions.isEmpty { moreMenu }
     }
 
-    /// The More menu, which reports a problem with the item.
+    /// The More menu: Watch Together, the metadata actions of
+    /// administrators, and reporting a problem with the item.
     private var moreMenu: some View {
         Menu {
-            Button(MavioStrings.issuesReport) { reporting = true }
+            if groupable { Button(MavioStrings.syncplayWatchTogether) { together = true } }
+            if !metadataActions.isEmpty {
+                Section {
+                    ForEach(metadataActions) { action in Button(action.title) { metadata = action } }
+                }
+            }
+            if reportable { Button(MavioStrings.issuesReport) { reporting = true } }
         } label: {
             Icon("more", size: 20).accessibilityLabel(MavioStrings.listsMore)
         }

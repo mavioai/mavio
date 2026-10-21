@@ -12,10 +12,12 @@ private enum Push: Sendable {
     case event(String, ServerEvent)
     case home([Row])
     case serversChanged
+    case connected(String, String)
+    case syncPlay(String, Mavio_Session_V1_SyncPlayUpdate)
 }
 
 /// Receives the core's callbacks on its threads and queues them.
-private final class Relay: CoreListener, HomeListener {
+private final class Relay: CoreListener, HomeListener, SyncPlayListener {
     let continuation: AsyncStream<Push>.Continuation
 
     init(_ continuation: AsyncStream<Push>.Continuation) {
@@ -36,6 +38,15 @@ private final class Relay: CoreListener, HomeListener {
 
     func rows(rows: [Row]) {
         continuation.yield(.home(rows))
+    }
+
+    func connected(serverId: String, sessionId: String) {
+        continuation.yield(.connected(serverId, sessionId))
+    }
+
+    func update(serverId: String, update: Data) {
+        guard let update = try? Mavio_Session_V1_SyncPlayUpdate(serializedBytes: update) else { return }
+        continuation.yield(.syncPlay(serverId, update))
     }
 }
 
@@ -71,6 +82,8 @@ public final class AppModel {
     public let downloads: Downloads
     /// This device as the servers know it.
     public let device: DeviceInfo
+    /// The SyncPlay group the device is in.
+    public let syncPlay: SyncPlay
     private var revisions: [String: Int] = [:]
     @ObservationIgnored private let relay: Relay
     @ObservationIgnored private var homeTask: Task<Void, Never>?
@@ -96,6 +109,8 @@ public final class AppModel {
             listener: relay
         )
         downloads = Downloads(client: client, folder: downloadsFolder)
+        syncPlay = SyncPlay(client: client)
+        client.setSyncPlayListener(listener: relay)
         reloadServers()
         Task { [weak self] in
             for await push in stream {
@@ -153,6 +168,10 @@ public final class AppModel {
         case .serversChanged:
             reloadServers()
             refreshHome()
+        case let .connected(id, session):
+            syncPlay.connected(id, session)
+        case let .syncPlay(id, update):
+            syncPlay.update(id, update)
         }
     }
 

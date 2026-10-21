@@ -109,9 +109,9 @@ flowchart LR
   * `MavioKit`：核心的 Swift API 及其上的应用服务——账户、能力探测、以后台 `URLSession` 下载、正在播放（`MPNowPlayingInfoCenter`、`MPRemoteCommandCenter`）——以及服务器 API 的消息 `MavioProto`，由 [swift-protobuf](https://github.com/apple/swift-protobuf)（Apache-2.0）生成：核心不建模的界面，即设置，用它们经由核心（`callServer`）调用服务器的 API，与桌面应用一致（§4.4）；
   * `MavioPlayer`：一个播放器接口、两个引擎，以及画中画；
   * `MavioUI`：各应用以各自方式组合的 SwiftUI 组件（图片、海报、行），以及设计 tokens；图片由 [Nuke](https://github.com/kean/Nuke) 的 `LazyImage`（MIT）加载与缓存；
-  * `MavioCommon`：各应用共享、与界面框架无关的部分——路由、设备的设置、服务器的各部分、发现与卡片的标签，以及图片缓存；
+  * `MavioCommon`：各应用共享、与界面框架无关的部分——路由、设备的设置、服务器的各部分、发现与卡片的标签、图片缓存，以及跟随 SyncPlay 群组的播放器（§6.3.24）；
   * `MavioScreens`：iPhone 与 iPad 应用的页面——首页、媒体库、搜索、详情、发现、人物、下载、登录与用户的设置——及其路由；
-  * `MavioAdmin`：设置中的“服务器”分组，即服务器的各部分及其管理，由 iPhone 与 iPad 应用和 Apple TV 应用共享，在各平台上省去该平台不具备的功能（Apple TV 上的保存文件）；
+  * `MavioAdmin`：设置中的“服务器”分组，即服务器的各部分及其管理，由 iPhone 与 iPad 应用和 Apple TV 应用共享，在各平台上省去该平台不具备的功能（Apple TV 上的保存文件）；以及条目的元数据界面（§6.3.22），由详情页打开，Apple TV 上省去上传图片；
   * Mac 的 AppKit 部分：`MavioAppKit`，基于设计 tokens 的组件（卡片、行、与 Web UI 设置一致的表单、胶囊标签、导航栈，以及电视模式的焦点引擎）；`MavioMac`，其页面的上下文与基类；每个页面领域一个 target——`MavioMacMedia`、`MavioMacDiscover`、`MavioMacSettings`、`MavioMacServer`、`MavioMacAcquisition`、`MavioMacPlugins` 与 `MavioMacPlayer`——彼此只经由路由打开对方的页面；以及 `MavioMacApp`，即窗口、边栏、电视模式的标签与用户菜单，并把各领域连接起来。
 * **播放引擎**，优先顺序为：AVPlayer，其次 AetherEngine，最后由服务端处理。
   * **能力**：应用在 `direct_play` 中声明 AVPlayer 能播放的配置与 AetherEngine 能播放的配置。因此只要任一引擎能播放，服务端就直接播放该源；两者都不能播放时才重封装或转码。

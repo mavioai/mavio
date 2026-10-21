@@ -1,6 +1,5 @@
 #if os(macOS)
     import AppKit
-    import MavioMac
 
     /// A dialog over a page: its title, its content scrolling under it, and
     /// its buttons at its foot, the leading ones apart from the trailing.
@@ -9,11 +8,11 @@
     /// within it, back closing it and focus returning to what opened it
     /// (docs/tv.md §4).
     @MainActor
-    final class Dialog {
+    public final class Dialog {
         /// The theme it draws with.
-        let theme: Theme
+        public let theme: Theme
         /// What closing it does, after it closed.
-        var onClose: (@MainActor () -> Void)?
+        public var onClose: (@MainActor () -> Void)?
         private let titleLabel: NSTextField
         private let content = NSStackView.vertical([], spacing: MavioSpacing.s16)
         private let footer = NSStackView.horizontal([], spacing: MavioSpacing.s8)
@@ -31,7 +30,7 @@
 
         /// A dialog titled title, width wide; height tall when given, else
         /// as tall as its content up to most of the window's.
-        init(title: String, width: CGFloat = 520, height: CGFloat? = nil, theme: Theme) {
+        public init(title: String, width: CGFloat = 520, height: CGFloat? = nil, theme: Theme) {
             self.theme = theme
             self.width = theme.isTV ? max(width * 1.4, 760) : width
             fixedHeight = height.map { theme.isTV ? $0 * 1.3 : $0 }
@@ -44,7 +43,7 @@
         }
 
         /// The dialog's title.
-        var title: String {
+        public var title: String {
             get { titleLabel.stringValue }
             set { titleLabel.stringValue = newValue }
         }
@@ -97,7 +96,7 @@
         }
 
         /// Replaces the content, each view as wide as the dialog's column.
-        func setContent(_ views: [NSView]) {
+        public func setContent(_ views: [NSView]) {
             content.setViews([])
             for v in views {
                 content.addArrangedSubview(v)
@@ -108,13 +107,13 @@
 
         /// Replaces the buttons at the foot: leading at its start, trailing
         /// at its end, the confirming one last.
-        func setButtons(leading: [NSView] = [], trailing: [NSView]) {
+        public func setButtons(leading: [NSView] = [], trailing: [NSView]) {
             footer.setViews(leading + [Spacer()] + trailing)
             FocusEngine.active(for: panel)?.schedule()
         }
 
         /// Shows the dialog over page.
-        func present(over page: NSViewController) {
+        public func present(over page: NSViewController) {
             self.page = page
             shown = self
             if theme.isTV, let root = page.view.window?.contentView {
@@ -133,7 +132,7 @@
         }
 
         /// Closes the dialog.
-        func close() {
+        public func close() {
             if let sheet {
                 self.sheet = nil
                 sheet.presentingViewController?.dismiss(sheet)
@@ -150,10 +149,10 @@
 
         /// What a dialog opened from this one presents over: its sheet on
         /// the desktop, its page in television mode.
-        var presenter: NSViewController? { sheet ?? page }
+        public var presenter: NSViewController? { sheet ?? page }
 
         /// Scrolls the content to its top.
-        func scrollToTop() {
+        public func scrollToTop() {
             scroll.contentView.setBoundsOrigin(.zero)
             scroll.reflectScrolledClipView(scroll.contentView)
         }

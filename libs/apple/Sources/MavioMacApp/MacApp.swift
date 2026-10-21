@@ -15,6 +15,8 @@
         private var root: RootController?
         private var discoveryObserver: Observer?
         private var discoveryTask: Task<Void, Never>?
+        /// Follows the Watch Together group's updates, opening what it plays.
+        private var followTask: Task<Void, Never>?
         private var titleObservation: NSKeyValueObservation?
         private weak var backItem: NSToolbarItem?
         /// The windows playing, the frontmost last.
@@ -66,6 +68,11 @@
             }
             NotificationCenter.default.addObserver(
                 self, selector: #selector(navigationChanged), name: NavigationController.didChange, object: nil)
+            followTask = Task { [weak self, model] in
+                for await u in model.syncPlay.updates() {
+                    self?.follow(u)
+                }
+            }
             NotificationCenter.default.addObserver(
                 self, selector: #selector(defaultsChanged), name: UserDefaults.didChangeNotification, object: nil)
         }
@@ -298,6 +305,26 @@
             if players.isEmpty { player.setFrameAutosaveName("Player") }
             player.makeKeyAndOrderFront(nil)
             players.append(player)
+        }
+
+        /// Opens the player on what the Watch Together group plays, in the
+        /// place of the player following it, as an update has the group
+        /// wait for the device on an entry no player shows.
+        private func follow(_ u: SyncPlay.Update) {
+            let playing = players.compactMap { PlayerPages.playing($0.contentViewController) }
+            let shown = playing.first { $0.serverId == u.serverId && u.update.group.entry?.itemID == $0.itemId }
+            guard shown == nil,
+                let request = groupPlayback(
+                    u, syncPlay: model.syncPlay, playing: playing.last.map { ($0.serverId, $0.itemId) })
+            else { return }
+            let player = players.last { PlayerPages.playing($0.contentViewController)?.serverId == u.serverId }
+            if let player {
+                player.contentViewController = playerContent(request, in: player)
+                player.makeKeyAndOrderFront(nil)
+                placeOverlay()
+            } else {
+                play(request)
+            }
         }
 
         private func playerContent(_ request: PlayRequest, in player: NSWindow) -> NSViewController {
