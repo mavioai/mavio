@@ -13,15 +13,17 @@ interface Look {
   speed: number;
   bright: number;
   ring?: boolean;
+  /** How much the audio's level swells the orb, spreads, speeds and brightens it. */
+  swing?: number;
 }
 
 const looks: Record<OrbMode | "pausing", Look> = {
   opening: { size: 0.55, spread: 0.12, speed: 0.35, bright: 0.45 },
-  idle: { size: 0.78, spread: 0.2, speed: 0.6, bright: 0.85 },
-  hearing: { size: 0.8, spread: 0.22, speed: 1.1, bright: 1 },
+  idle: { size: 0.78, spread: 0.2, speed: 0.6, bright: 0.85, swing: 0.08 },
+  hearing: { size: 0.82, spread: 0.24, speed: 1.3, bright: 1, swing: 1 },
   pausing: { size: 0.7, spread: 0.16, speed: 0.5, bright: 0.8 },
   thinking: { size: 0.62, spread: 0.4, speed: 3.4, bright: 0.95, ring: true },
-  speaking: { size: 0.8, spread: 0.2, speed: 1.2, bright: 1 },
+  speaking: { size: 0.8, spread: 0.2, speed: 1.2, bright: 1, swing: 0.55 },
   resting: { size: 0.76, spread: 0.16, speed: 0.18, bright: 0.85 },
   error: { size: 0.76, spread: 0.16, speed: 0.18, bright: 0.85 },
   ended: { size: 0.76, spread: 0.16, speed: 0.18, bright: 0.85 },
@@ -37,6 +39,9 @@ const blobs = [
 
 /** The orb's size on the page, in CSS pixels. */
 export const orbSize = 84;
+// The canvas reaches past the orb's box on every side, for its swell and glow.
+const bleed = 1.5;
+const canvasSize = Math.round(orbSize * bleed);
 
 function isLight(): boolean {
   const t = document.documentElement.dataset.theme;
@@ -59,9 +64,9 @@ export function Orb({ mode, level, interrupts }: { mode: OrbMode; level: () => n
     const g = cv?.getContext("2d");
     if (!cv || !g) return;
     const dpr = Math.min(2, devicePixelRatio || 1);
-    cv.width = cv.height = Math.round(orbSize * dpr);
+    cv.width = cv.height = Math.round(canvasSize * dpr);
     const still = matchMedia("(prefers-reduced-motion: reduce)");
-    const cur = { size: 0.55, spread: 0.12, speed: 0.35, bright: 0.45, ring: 0, lv: 0 };
+    const cur = { size: 0.55, spread: 0.12, speed: 0.35, bright: 0.45, ring: 0, swing: 0, lv: 0 };
     let phase = 0;
     let last = performance.now();
     let mode = props.current.mode;
@@ -96,37 +101,44 @@ export function Orb({ mode, level, interrupts }: { mode: OrbMode; level: () => n
       cur.speed += (look.speed - cur.speed) * k;
       cur.bright += (look.bright - cur.bright) * k;
       cur.ring += ((look.ring ? 1 : 0) - cur.ring) * k;
-      cur.lv += (raw * (mode === "idle" ? 0.15 : 1) - cur.lv) * (1 - Math.exp(-dt * 14));
-      if (motion) phase += dt * cur.speed;
+      cur.swing += ((look.swing ?? 0) - cur.swing) * k;
+      // A syllable swells it at once; it settles back more slowly.
+      const target = raw * cur.swing;
+      cur.lv += (target - cur.lv) * (1 - Math.exp(-dt * (target > cur.lv ? 22 : 8)));
+      if (motion) phase += dt * (cur.speed + cur.lv * 2.6);
       const flash = motion ? Math.max(0, 1 - (now - flashAt) / 450) : 0;
 
       const W = cv.width;
       const R = W / 2;
-      const base = R * 0.58;
+      const base = (R / bleed) * 0.58;
       // An error shakes the orb once and flushes it red.
       const shake = motion && mode === "error" && t < 0.6 ? Math.sin(t * 40) * 6 * (1 - t / 0.6) : 0;
       cv.style.transform = shake ? `translateX(${shake}px)` : "";
       const red = mode === "error" ? Math.max(0, 1 - t / 1.4) : 0;
       const light = isLight();
       const shrink = 1 - flash * 0.35;
-      const edge = base * (cur.size + cur.lv * 0.45) * shrink * 0.92;
+      const edge = base * (cur.size + cur.lv * 0.9) * shrink * 0.92;
 
       g.clearRect(0, 0, W, W);
+      const bright = cur.bright + cur.lv * 0.1;
       const lights = (alpha: number) => {
-        for (const b of blobs) {
+        blobs.forEach((b, i) => {
           const a = phase * b.sp * 2 + b.ph;
-          const orbit = base * (cur.spread * (1 - cur.ring) + cur.ring * 0.55 + cur.lv * 0.25) * shrink;
+          // Each light pulses on its own beat with the level, so that the
+          // colors surge against each other as the user speaks.
+          const pulse = 1 + cur.lv * 0.35 * Math.sin(phase * 5.3 + i * 2.1);
+          const orbit = base * (cur.spread * (1 - cur.ring) + cur.ring * 0.55 + cur.lv * 0.4 * pulse) * shrink;
           const x = R + Math.cos(a) * orbit;
           const y = R + Math.sin(a * (1 + 0.3 * (1 - cur.ring))) * orbit;
-          const rad = base * (cur.size + cur.lv * 0.45) * shrink;
+          const rad = base * (cur.size + cur.lv * 0.9 * pulse) * shrink;
           const col = (light ? b.light : b.dark).map((v, j) => Math.round(v + ([255, 70, 80][j]! - v) * red)).join(",");
           const grd = g.createRadialGradient(x, y, 0, x, y, rad);
-          grd.addColorStop(0, `rgba(${col},${0.9 * alpha * cur.bright})`);
-          grd.addColorStop(0.55, `rgba(${col},${(light ? 0.5 : 0.35) * alpha * cur.bright})`);
+          grd.addColorStop(0, `rgba(${col},${Math.min(1, 0.9 * alpha * bright)})`);
+          grd.addColorStop(0.55, `rgba(${col},${(light ? 0.5 : 0.35) * alpha * bright})`);
           grd.addColorStop(1, `rgba(${col},0)`);
           g.fillStyle = grd;
           g.fillRect(0, 0, W, W);
-        }
+        });
       };
       const at = (x: number, y: number, r0: number, r1: number, stops: [number, string][]) => {
         const grd = g.createRadialGradient(x, y, r0, x, y, r1);
@@ -137,7 +149,7 @@ export function Orb({ mode, level, interrupts }: { mode: OrbMode; level: () => n
       // The glow around the sphere, on a dark page.
       if (!light) {
         g.globalCompositeOperation = "lighter";
-        lights(0.3);
+        lights(0.3 + cur.lv * 0.2);
       }
       g.save();
       g.beginPath();
@@ -186,8 +198,8 @@ export function Orb({ mode, level, interrupts }: { mode: OrbMode; level: () => n
     <canvas
       ref={canvas}
       aria-hidden
-      style={{ width: orbSize, height: orbSize }}
-      className="block [filter:var(--assistant-orb-shadow)]"
+      style={{ width: canvasSize, height: canvasSize, margin: (orbSize - canvasSize) / 2 }}
+      className="pointer-events-none block [filter:var(--assistant-orb-shadow)]"
     />
   );
 }
