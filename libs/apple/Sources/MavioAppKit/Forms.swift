@@ -180,6 +180,9 @@
             let v: CGFloat = theme.isTV ? MavioSpacing.s16 : 10
             content.pin(to: self, insets: .symmetric(horizontal: h, vertical: v))
             heightAnchor.constraint(greaterThanOrEqualToConstant: theme.isTV ? 72 : 52).isActive = true
+            // The title takes the room left, so that the accessory ends
+            // the row however short it is.
+            leading.setHuggingPriority(.init(1), for: .horizontal)
             leading.setContentHuggingPriority(.init(1), for: .horizontal)
             leading.setContentCompressionResistancePriority(.init(249), for: .horizontal)
             if let accessory { setAccessory(accessory) }

@@ -69,6 +69,8 @@ public final class AppModel {
     public let downloadsFolder: URL
     /// The downloads.
     public let downloads: Downloads
+    /// This device as the servers know it.
+    public let device: DeviceInfo
     private var revisions: [String: Int] = [:]
     @ObservationIgnored private let relay: Relay
     @ObservationIgnored private var homeTask: Task<Void, Never>?
@@ -82,12 +84,14 @@ public final class AppModel {
         downloadsFolder = dir.appending(path: "Downloads", directoryHint: .isDirectory)
         try FileManager.default.createDirectory(at: downloadsFolder, withIntermediateDirectories: true)
         self.relay = relay
+        let device = Self.device()
+        self.device = device
         // The servers name what they translate, as the plugins, in the
         // languages the app's strings are chosen from.
         setLanguages(tags: Locale.preferredLanguages)
         client = try Client(
             databasePath: dir.appending(path: "core.sqlite").path(percentEncoded: false),
-            device: Self.device(),
+            device: device,
             tokens: tokens ?? KeychainTokens(),
             listener: relay
         )

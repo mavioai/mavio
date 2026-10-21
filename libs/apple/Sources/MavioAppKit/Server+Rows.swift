@@ -144,6 +144,9 @@
         /// A row of content and controls at its end, in theme.
         public init(_ content: NSView, controls: [NSView] = [], theme: Theme = .desktop) {
             super.init(radius: theme.isTV ? MavioRadius.lg : 0)
+            // The content takes the room left, so that the controls end the
+            // row at their own width; a stack's hugging is its own setting.
+            (content as? NSStackView)?.setHuggingPriority(.init(1), for: .horizontal)
             content.setContentHuggingPriority(.init(1), for: .horizontal)
             content.setContentCompressionResistancePriority(.init(249), for: .horizontal)
             for control in controls {

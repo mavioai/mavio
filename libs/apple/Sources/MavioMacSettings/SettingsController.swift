@@ -6,6 +6,7 @@
     enum SettingsPage: Hashable {
         case account, appearance, playback, subtitlesAudio
         case server(ServerSection)
+        case about
 
         /// The page's title.
         var title: String {
@@ -15,6 +16,7 @@
             case .playback: MavioStrings.settingsPlayback
             case .subtitlesAudio: MavioStrings.settingsSubtitlesAudio
             case .server(let section): section.title
+            case .about: MavioStrings.settingsAbout
             }
         }
 
@@ -26,6 +28,7 @@
             case .playback: "play"
             case .subtitlesAudio: "subtitles"
             case .server(let section): section.icon
+            case .about: "info"
             }
         }
 
@@ -37,6 +40,7 @@
             case .playback: NSColor(hex: 0xFF3B30)
             case .subtitlesAudio: NSColor(hex: 0x34C759)
             case .server(let section): NSColor(hex: section.tint)
+            case .about: NSColor(hex: 0x8E8E93)
             }
         }
     }
@@ -137,6 +141,7 @@
             case .appearance: AppearancePage(context: context)
             case .playback: PlaybackPage(context: context)
             case .subtitlesAudio: SubtitlesAudioPage(context: context)
+            case .about: AboutPage(context: context)
             case .server(let section):
                 if let server = chosen {
                     context.sectionPage(section, server, context)
@@ -368,6 +373,9 @@
                 if state.choosesServer { next.append(.picker) }
                 next.append(contentsOf: state.serverPages.map { .page($0) })
             }
+            // About ends the settings, after room as a group's.
+            next.append(.header(""))
+            next.append(.page(.about))
             rows = next
             updating = true
             table.reloadData()
@@ -596,6 +604,7 @@
                 }
                 sections.append(FormSection(MavioStrings.settingsServerGroup, rows: rows, theme: theme))
             }
+            sections.append(FormSection(rows: [pageRow(.about)], theme: theme))
             form.setSections(sections)
             show(form)
             FocusEngine.active(for: view)?.schedule()
