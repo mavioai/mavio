@@ -31,7 +31,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.Switch
@@ -519,14 +518,10 @@ fun <T> ChoiceRow(label: String, choices: List<Pair<T, String>>, chosen: T, deta
                     if (!tv) {
                         DropdownMenu(open, onDismissRequest = { open = false }) {
                             choices.forEach { (value, text) ->
-                                DropdownMenuItem(
-                                    text = { Text(text, style = theme.type.callout.text) },
-                                    onClick = {
-                                        open = false
-                                        onChoose(value)
-                                    },
-                                    trailingIcon = { if (value == chosen) MavioIcon(R.drawable.ic_check, size = 18.dp) },
-                                )
+                                ChoiceItem(text, value == chosen) {
+                                    open = false
+                                    onChoose(value)
+                                }
                             }
                         }
                     }

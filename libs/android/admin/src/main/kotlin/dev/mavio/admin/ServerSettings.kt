@@ -192,9 +192,8 @@ fun LazyListScope.serverGroup(
         Group(stringResource(R.string.settings_server_group)) {
             // As the web UI's, with a Mavio account always, its servers being the ones to choose from.
             if (account || servers.size > 1) {
-                // The television's names no server under the Server group's title, the choice alone.
-                val label = if (LocalTelevision.current) "" else stringResource(R.string.settings_server_choice)
-                ChoiceRow(label, servers.map { it.id to it.name }, server.id) { serverId = it }
+                // No label under the Server group's title, the choice alone.
+                ChoiceRow("", servers.map { it.id to it.name }, server.id) { serverId = it }
                 RowDivider()
             }
             val shown = serverEntries(admin[adminKey] == true)

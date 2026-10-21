@@ -5,6 +5,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridScope
@@ -137,14 +138,10 @@ fun <T> ChoiceMenuBox(
         if (!tv) {
             DropdownMenu(open, onDismissRequest = { open = false }) {
                 choices.forEach { (value, text) ->
-                    DropdownMenuItem(
-                        text = { Text(text, style = theme.type.callout.text) },
-                        onClick = {
-                            open = false
-                            onChoose(value)
-                        },
-                        trailingIcon = { if (value == chosen) MavioIcon(R.drawable.ic_check, size = 18.dp) },
-                    )
+                    ChoiceItem(text, value == chosen) {
+                        open = false
+                        onChoose(value)
+                    }
                 }
             }
         } else if (open) {
@@ -168,4 +165,15 @@ fun <T> ChoiceMenuBox(
             }
         }
     }
+}
+
+/** A choice of a menu of choices on a phone, checked when [chosen]: as short as the web UI's. */
+@Composable
+internal fun ChoiceItem(text: String, chosen: Boolean, onClick: () -> Unit) {
+    DropdownMenuItem(
+        text = { Text(text, style = theme.type.callout.text) },
+        onClick = onClick,
+        modifier = Modifier.height(40.dp),
+        trailingIcon = { if (chosen) MavioIcon(R.drawable.ic_check, size = 18.dp) },
+    )
 }

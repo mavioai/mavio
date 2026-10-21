@@ -129,7 +129,7 @@ internal fun SettingsSidebar(model: AppModel, section: Route?, modifier: Modifie
                 // As the web UI's, with a Mavio account always, its servers being the ones to choose from.
                 if (account || servers.size > 1) {
                     Box(Modifier.padding(bottom = 4.dp).clip(RoundedCornerShape(10.dp)).background(colors.surface)) {
-                        ChoiceRow(stringResource(R.string.settings_server_choice), servers.map { it.id to it.name }, server.id) { serverId = it }
+                        ChoiceRow("", servers.map { it.id to it.name }, server.id) { serverId = it }
                     }
                 }
                 serverEntries(admin[adminKey] == true).forEach { entry ->
