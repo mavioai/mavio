@@ -261,7 +261,7 @@ val DesktopLayout = MavioLayout(
     poster = 160.dp,
     thumbnail = 320.dp,
     touchTarget = 28.dp,
-    sidebar = 262.dp,
+    sidebar = 200.dp,
     rail = 86.dp,
     focusScale = 1f,
 )

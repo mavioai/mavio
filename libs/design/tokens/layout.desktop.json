@@ -44,7 +44,7 @@
     "sidebar": {
       "$type": "dimension",
       "$value": {
-        "value": 262,
+        "value": 200,
         "unit": "px"
       },
       "$description": "Width of the expanded sidebar of the desktop layout and of the settings, the default of the width the user drags it to (0 where the form factor has none)."

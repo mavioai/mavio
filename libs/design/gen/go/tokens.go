@@ -256,7 +256,7 @@ var (
 		Poster:      160,
 		Thumbnail:   320,
 		TouchTarget: 28,
-		Sidebar:     262,
+		Sidebar:     200,
 		Rail:        86,
 		FocusScale:  1,
 	}

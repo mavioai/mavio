@@ -90,7 +90,7 @@ export function setPrefs(change: Partial<Prefs>) {
 }
 
 /** The narrowest and widest the sidebars are dragged to, in pixels. */
-export const sidebarWidths = { min: 200, max: 400 };
+export const sidebarWidths = { min: 200, max: 320 };
 
 /**
  * Sets the root element's data-theme and data-tv, which tokens.css and the
