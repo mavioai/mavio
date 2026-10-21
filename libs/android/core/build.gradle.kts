@@ -139,6 +139,8 @@ dependencies {
     api(libs.kotlinx.coroutines.core)
     // The server API's messages.
     api(libs.protobuf.kotlin.lite)
+    // The assistant's voice sessions.
+    implementation(libs.okhttp)
     testImplementation(libs.jna)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.test.runner)
