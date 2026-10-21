@@ -7,19 +7,17 @@
     /// and the place chosen beside it. Collapsed, the sidebar is a rail of
     /// icons, as the desktop app's (docs/clients.md §6.3, Desktop).
     @MainActor
-    final class BrowseController: NSSplitViewController {
+    final class BrowseController: SidebarSplitController {
         private unowned let root: RootController
         private let sidebar: SidebarController
         private let places: PlacesController
-        private var side: NSSplitViewItem?
         private static let railKey = "sidebarCollapsed"
-        private static let widthKey = "sidebarWidth"
 
         init(root: RootController) {
             self.root = root
             places = PlacesController(context: root.context)
             sidebar = SidebarController(root: root)
-            super.init(nibName: nil, bundle: nil)
+            super.init(theme: root.context.theme)
             sidebar.onSelect = { [weak self] in self?.select($0) }
             sidebar.onSearch = { [weak self] in self?.search($0) }
             sidebar.onToggle = { [weak self] in self?.toggleSidebar(nil) }
@@ -30,15 +28,10 @@
 
         override func viewDidLoad() {
             super.viewDidLoad()
-            let side = NSSplitViewItem(sidebarWithViewController: sidebar)
-            side.canCollapse = false
-            side.holdingPriority = .init(260)
-            addSplitViewItem(side)
-            self.side = side
+            addSidebar(sidebar)
             let content = NSSplitViewItem(viewController: places)
             content.titlebarSeparatorStyle = .none
             addSplitViewItem(content)
-            splitView.dividerStyle = .thin
             setRail(UserDefaults.standard.bool(forKey: Self.railKey))
             select(.home)
         }
@@ -49,27 +42,10 @@
             UserDefaults.standard.set(sidebar.rail, forKey: Self.railKey)
         }
 
-        override func splitViewDidResizeSubviews(_ notification: Notification) {
-            super.splitViewDidResizeSubviews(notification)
-            guard !sidebar.rail, sidebar.isViewLoaded, sidebar.view.frame.width >= 200 else { return }
-            UserDefaults.standard.set(Double(sidebar.view.frame.width), forKey: Self.widthKey)
-        }
-
         private func setRail(_ rail: Bool) {
-            guard let side else { return }
             sidebar.rail = rail
             root.context.sidebarSearches = !rail
-            let rail = root.context.theme.layout.rail
-            if sidebar.rail {
-                side.minimumThickness = rail
-                side.maximumThickness = rail
-                splitView.setPosition(rail, ofDividerAt: 0)
-            } else {
-                side.minimumThickness = 200
-                side.maximumThickness = 400
-                let saved = UserDefaults.standard.double(forKey: Self.widthKey)
-                splitView.setPosition(saved >= 200 ? saved : 240, ofDividerAt: 0)
-            }
+            setRail(rail ? root.context.theme.layout.rail : nil)
         }
 
         /// Shows place; choosing the place shown returns to its top.

@@ -163,7 +163,7 @@
     /// this device's pages and the sections of the server chosen, its
     /// menus' in their place; the page chosen in its own stack, so that the
     /// toolbar's back returns from what it opens. Escape returns Home.
-    final class SettingsSplitController: NSSplitViewController {
+    final class SettingsSplitController: SidebarSplitController {
         private let context: MacContext
         private let close: @MainActor () -> Void
         private let state: SettingsState
@@ -182,7 +182,7 @@
             page = account ? .account : .appearance
             sidebar = SettingsSidebar(context: context, state: state, close: close)
             detail = SettingsDetail(theme: context.theme)
-            super.init(nibName: nil, bundle: nil)
+            super.init(theme: context.theme)
             sidebar.onSelect = { [weak self] in self?.select($0) }
             state.onAdmin = { [weak self] in self?.refresh() }
         }
@@ -194,16 +194,10 @@
 
         override func viewDidLoad() {
             super.viewDidLoad()
-            let side = NSSplitViewItem(sidebarWithViewController: sidebar)
-            side.minimumThickness = 220
-            side.maximumThickness = 400
-            side.preferredThicknessFraction = 0.22
-            side.canCollapse = true
-            addSplitViewItem(side)
+            addSidebar(sidebar)
             let content = NSSplitViewItem(viewController: detail)
             content.titlebarSeparatorStyle = .none
             addSplitViewItem(content)
-            splitView.autosaveName = "SettingsSidebar"
             observer = Observer { [weak self] in self?.refresh() }
         }
 
