@@ -85,8 +85,8 @@ RUN --mount=type=cache,target=/go/pkg/mod --mount=type=cache,target=/root/.cache
 FROM --platform=$BUILDPLATFORM debian:trixie-slim AS rclone
 ARG TARGETARCH RCLONE_VERSION
 # GitHub's SHA-256 digests of the release's Linux builds.
-ARG RCLONE_SHA256_amd64=c40541a5fbfb94f93147e94b873b0d7f5c345a446312d10ce99f175566e304d7
-ARG RCLONE_SHA256_arm64=6d29cfb1ca73e1b5aaf651efadff4db2b0b842999f6676c481a9d33c6e6265af
+ARG RCLONE_SHA256_amd64=c73b7373af7d9405c90bf12d058db739754ab64298f736e09b683234725a7985
+ARG RCLONE_SHA256_arm64=e86215e4c7db97522fc89f48ce963e5910e944145e0e8e26aab7198b2860bf82
 RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates curl unzip \
 	&& rm -rf /var/lib/apt/lists/*
 RUN set -eu; \

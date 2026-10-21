@@ -59,7 +59,7 @@ func (r *Remotes) Open(ctx context.Context, remote, dir string) (core.Storage, e
 	if err != nil {
 		return nil, err
 	}
-	s := &Storage{r: r, remote: remote, dir: dir, caps: core.StorageCapabilities{ServerCopy: f["Copy"]}}
+	s := &Storage{r: r, remote: remote, dir: dir, caps: core.StorageCapabilities{ServerCopy: f["Copy"], HardLinks: f["Link"]}}
 	if r.Blocks != nil && (r.Class == nil || r.Class(ctx, "remote:"+remote+":"+dir) == core.StorageCloud) {
 		s.blocks, s.seq = r.Blocks, f["SeekReadsFromStart"]
 	}
@@ -363,8 +363,44 @@ func (s *Storage) from(ctx context.Context, method, src, to string) error {
 	return s.transfer(ctx, method, remote+":", rest, to)
 }
 
-// Link implements core.Storage: remotes have no hard links.
-func (*Storage) Link(context.Context, string, string) error { return core.ErrUnsupported }
+// LinkFrom implements core.StorageTransfers like MoveFrom, for files of
+// the same remote.
+func (s *Storage) LinkFrom(ctx context.Context, src, to string) error {
+	remote, rest, ok := core.SplitRemotePath(src)
+	if !ok || remote != s.remote {
+		return core.ErrUnsupported
+	}
+	return s.link(ctx, rest, to)
+}
+
+// Link implements core.Storage on remotes whose backend hard links files,
+// such as SFTP servers with OpenSSH's hardlink extension: the fork's
+// operations/hardlink.
+func (s *Storage) Link(ctx context.Context, from, to string) error {
+	if !fs.ValidPath(from) || from == "." {
+		return &fs.PathError{Op: "link", Path: from, Err: fs.ErrInvalid}
+	}
+	return s.link(ctx, s.abs(from), to)
+}
+
+// link hard links the file from of the remote to to; ErrUnsupported when
+// the remote cannot, as across volumes.
+func (s *Storage) link(ctx context.Context, from, to string) error {
+	if !s.caps.HardLinks {
+		return core.ErrUnsupported
+	}
+	if _, err := rel("link", to); err != nil || to == "." {
+		return &fs.PathError{Op: "link", Path: to, Err: fs.ErrInvalid}
+	}
+	in := map[string]any{"srcFs": s.fsName(), "srcRemote": from, "dstFs": s.fsName(), "dstRemote": s.abs(to)}
+	if err := s.r.Client.Call(ctx, "operations/hardlink", in, nil); err != nil {
+		if strings.Contains(err.Error(), "can't hard link") {
+			return fmt.Errorf("%w: %w", core.ErrUnsupported, err)
+		}
+		return &fs.PathError{Op: "link", Path: to, Err: err}
+	}
+	return nil
+}
 
 // Remove implements core.Storage, removing files and empty folders.
 func (s *Storage) Remove(ctx context.Context, name string) error {

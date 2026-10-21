@@ -14,14 +14,23 @@ import (
 	"github.com/mavioai/mavio/libs/rclone"
 )
 
-// TestImportFromRemote checks a download a cloud drive made on an rclone
-// remote is imported into a library on the same remote, the rcd moving the
-// file, and its emptied folder deleted.
+// TestImportFromRemote checks a download on an rclone remote is imported
+// into a library on the same remote: a cloud drive's, whose files may
+// move, by the rcd moving the file and deleting its emptied folder, and a
+// seeding one by the rcd hard linking the file.
 func TestImportFromRemote(t *testing.T) {
 	bin, err := exec.LookPath("rclone")
 	if err != nil {
 		t.Skip("rclone is not installed")
 	}
+	for _, move := range []bool{true, false} {
+		t.Run(map[bool]string{true: "move", false: "link"}[move], func(t *testing.T) {
+			testImportFromRemote(t, bin, move)
+		})
+	}
+}
+
+func testImportFromRemote(t *testing.T, bin string, move bool) {
 	e := newEnv(t)
 	dir := t.TempDir()
 	disk := filepath.Join(dir, "drive")
@@ -59,7 +68,7 @@ func TestImportFromRemote(t *testing.T) {
 	e.grabAndComplete(it)
 	e.client.setDownloads(pluginv1.Download_builder{
 		ClientId: new("qb"), Id: new(hash1080), Title: new(title1080), Status: new(pluginv1.DownloadStatus_DOWNLOAD_STATUS_COMPLETED),
-		OutputPath: new("remote:drive:Downloads/movies/" + title1080), CanBeRemoved: new(true), CanMoveFiles: new(true),
+		OutputPath: new("remote:drive:Downloads/movies/" + title1080), CanBeRemoved: new(move), CanMoveFiles: new(move),
 	}.Build())
 	if err := e.rt.CheckQueue(e.ctx); err != nil {
 		t.Fatal(err)
@@ -67,15 +76,23 @@ func TestImportFromRemote(t *testing.T) {
 	if got := e.download(hash1080); got.State != core.DownloadImported {
 		t.Fatalf("download = %s %v, want = imported", got.State, got.Messages)
 	}
-	moved, err := filepath.Glob(filepath.Join(disk, "Movies", "The Matrix (1999)", "*.mkv"))
-	if err != nil || len(moved) != 1 {
-		t.Fatalf("movie folder holds %v, %v, want the moved file", moved, err)
+	imported, err := filepath.Glob(filepath.Join(disk, "Movies", "The Matrix (1999)", "*.mkv"))
+	if err != nil || len(imported) != 1 {
+		t.Fatalf("movie folder holds %v, %v, want the imported file", imported, err)
 	}
-	if data, err := os.ReadFile(moved[0]); err != nil || string(data) != "movie" {
-		t.Errorf("moved file = %q, %v", data, err)
+	if data, err := os.ReadFile(imported[0]); err != nil || string(data) != "movie" {
+		t.Errorf("imported file = %q, %v", data, err)
 	}
-	if _, err := os.Stat(download); !errors.Is(err, fs.ErrNotExist) {
-		t.Errorf("download folder: %v, want = deleted", err)
+	if move {
+		if _, err := os.Stat(download); !errors.Is(err, fs.ErrNotExist) {
+			t.Errorf("download folder: %v, want = deleted", err)
+		}
+	} else {
+		a, _ := os.Stat(imported[0])
+		b, err := os.Stat(filepath.Join(download, title1080+".mkv"))
+		if err != nil || !os.SameFile(a, b) {
+			t.Errorf("downloaded file = %v, %v, want the imported file linked to it", b, err)
+		}
 	}
 	if jobs, err := e.db.StorageJobs().List(e.ctx, core.StorageJobTransfer); err != nil || len(jobs) != 0 {
 		t.Errorf("transfer ledger = %v, %v, want = empty", jobs, err)

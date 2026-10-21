@@ -219,6 +219,34 @@ func TestStorageWithoutProxy(t *testing.T) {
 	if _, err := st.MediaURL(ctx, "a.mkv"); !errors.Is(err, core.ErrUnsupported) {
 		t.Errorf("MediaURL() without a proxy error = %v, want = %v", err, core.ErrUnsupported)
 	}
+
+	// A local folder's remote hard links files, within the folder and
+	// from other folders of the remote.
+	if !st.Capabilities().HardLinks {
+		t.Fatal("Capabilities().HardLinks = false, want = true")
+	}
+	if err := os.WriteFile(filepath.Join(disk, "b.mkv"), []byte("b"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := st.Link(ctx, "a.mkv", "a2.mkv"); err != nil {
+		t.Fatal(err)
+	}
+	if err := st.(core.StorageTransfers).LinkFrom(ctx, "remote:disk:b.mkv", "b.mkv"); err != nil {
+		t.Fatal(err)
+	}
+	for from, to := range map[string]string{"sub/a.mkv": "sub/a2.mkv", "b.mkv": "sub/b.mkv"} {
+		a, _ := os.Stat(filepath.Join(disk, from))
+		b, err := os.Stat(filepath.Join(disk, to))
+		if err != nil || !os.SameFile(a, b) {
+			t.Errorf("%s after linking %s = %v, %v, want the same file", to, from, b, err)
+		}
+	}
+	if err := st.Link(ctx, "a.mkv", "b.mkv"); err == nil {
+		t.Error("Link(onto existing) error = nil, want an error")
+	}
+	if err := st.(core.StorageTransfers).LinkFrom(ctx, "remote:mem:b.mkv", "c.mkv"); !errors.Is(err, core.ErrUnsupported) {
+		t.Errorf("LinkFrom(other remote) error = %v, want = %v", err, core.ErrUnsupported)
+	}
 }
 
 func TestFileVersions(t *testing.T) {

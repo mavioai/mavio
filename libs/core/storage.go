@@ -136,14 +136,15 @@ type StorageCapabilities struct {
 	FolderModTimes bool
 }
 
-// StorageTransfers is implemented by storages that move and copy files
-// from other paths of their backend, such as another folder of the same
-// rclone remote, without passing their bytes through the server. src is a
-// path as items record it; [ErrUnsupported] when the storage cannot reach
-// it so.
+// StorageTransfers is implemented by storages that move, copy and hard
+// link files from other paths of their backend, such as another folder of
+// the same rclone remote, without passing their bytes through the server.
+// src is a path as items record it; [ErrUnsupported] when the storage
+// cannot reach it so, or cannot link it.
 type StorageTransfers interface {
 	MoveFrom(ctx context.Context, src, to string) error
 	CopyFrom(ctx context.Context, src, to string) error
+	LinkFrom(ctx context.Context, src, to string) error
 }
 
 // FileIDer is implemented by the [fs.FileInfo.Sys] of storages that know
