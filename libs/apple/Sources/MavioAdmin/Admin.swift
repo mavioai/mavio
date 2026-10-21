@@ -72,7 +72,7 @@ public struct ServerGroup: View {
 
     /// A server's name shortened with an ellipsis to one line of a menu,
     /// whose items wrap rather than shorten.
-    private static func oneLine(_ name: String) -> String {
+    static func oneLine(_ name: String) -> String {
         #if canImport(UIKit)
             let font = UIFont.preferredFont(forTextStyle: .body)
             let width: CGFloat = 150
@@ -111,7 +111,7 @@ public struct ServerGroup: View {
             }
             ForEach(ServerEntry.shown(admin: admin[key] == true), id: \.self) { entry in
                 NavigationLink {
-                    entry.view(server)
+                    ServerPage { entry.view($0) }.environment(\.serverChoice, $serverId)
                 } label: {
                     EntryLabel(entry.title, icon: entry.icon, color: entry.color)
                 }
@@ -150,6 +150,69 @@ extension ServerEntry {
     }
 }
 
+extension EnvironmentValues {
+    /// The choice of the server whose settings the pages of the Server
+    /// group show, with a Mavio account on a phone or tablet; nil where the
+    /// pages keep their server.
+    @Entry var serverChoice: Binding<String>?
+}
+
+/// A page of the Server group's, of the server chosen, as the web UI's on a
+/// phone: with a Mavio account, the choice of the server at the top right,
+/// another server's page taking the place of this one.
+private struct ServerPage<Content: View>: View {
+    let fixed: ServerRecord?
+    let content: (ServerRecord) -> Content
+    @Environment(AppModel.self) private var model
+    @Environment(\.theme) private var theme
+    @Environment(\.serverChoice) private var serverChoice
+
+    /// The page of the server chosen, or of server where none is.
+    init(_ server: ServerRecord? = nil, @ViewBuilder content: @escaping (ServerRecord) -> Content) {
+        fixed = server
+        self.content = content
+    }
+
+    private var server: ServerRecord? {
+        guard let serverChoice else { return fixed ?? model.signedInServers.first }
+        return model.signedInServers.first { $0.id == serverChoice.wrappedValue } ?? model.signedInServers.first
+    }
+
+    var body: some View {
+        if let server {
+            content(server)
+                .id(server.id)
+                #if os(iOS)
+                    .toolbar {
+                        if let serverChoice, model.account != nil {
+                            ToolbarItem(placement: .topBarTrailing) { choice(server, serverChoice) }
+                        }
+                    }
+                #endif
+        }
+    }
+
+    /// The chosen server's name, shortened, and the menu of the servers
+    /// signed in to.
+    private func choice(_ server: ServerRecord, _ serverChoice: Binding<String>) -> some View {
+        Menu {
+            Picker(selection: Binding(get: { server.id }, set: { serverChoice.wrappedValue = $0 })) {
+                ForEach(model.signedInServers, id: \.id) { Text(ServerGroup.oneLine($0.name)).tag($0.id) }
+            } label: {
+                EmptyView()
+            }
+        } label: {
+            HStack(spacing: 2) {
+                Text(server.name).lineLimit(1).truncationMode(.tail)
+                Icon("selector", size: 14)
+            }
+            .frame(maxWidth: 160)
+        }
+        .accessibilityLabel(MavioStrings.authServer)
+        .accessibilityValue(server.name)
+    }
+}
+
 extension ServerMenu {
     /// The color of the icon's tile.
     public var color: Color { Color(hex: tint) }
@@ -160,13 +223,14 @@ private struct ServerMenuView: View {
     let menu: ServerMenu
     let server: ServerRecord
     @Environment(\.theme) private var theme
+    @Environment(\.serverChoice) private var serverChoice
 
     var body: some View {
         SettingsList {
             // Only an administrator sees a menu: one section is shown alone.
             ForEach(menu.sections(admin: true), id: \.self) { section in
                 NavigationLink {
-                    section.view(server)
+                    ServerPage(server) { section.view($0) }.environment(\.serverChoice, serverChoice)
                 } label: {
                     EntryLabel(section.title, icon: section.icon, color: section.color)
                 }
