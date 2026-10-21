@@ -19,7 +19,7 @@ interface Look {
 
 const looks: Record<OrbMode | "pausing", Look> = {
   opening: { size: 0.55, spread: 0.12, speed: 0.35, bright: 0.45 },
-  idle: { size: 0.78, spread: 0.2, speed: 0.6, bright: 0.85, swing: 0.08 },
+  idle: { size: 0.78, spread: 0.2, speed: 0.6, bright: 0.85, swing: 0.15 },
   hearing: { size: 0.82, spread: 0.24, speed: 1.3, bright: 1, swing: 1 },
   pausing: { size: 0.7, spread: 0.16, speed: 0.5, bright: 0.8 },
   thinking: { size: 0.62, spread: 0.4, speed: 3.4, bright: 0.95, ring: true },
