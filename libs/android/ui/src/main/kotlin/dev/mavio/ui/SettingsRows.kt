@@ -63,6 +63,7 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
@@ -232,7 +233,7 @@ fun SettingsList(
                         bottom = MavioSpacing.s24 + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding(),
                     )
                 },
-                verticalArrangement = Arrangement.spacedBy(if (tv) MavioSpacing.s32 else MavioSpacing.s24),
+                verticalArrangement = Arrangement.spacedBy(listGap),
             ) {
                 item {
                     Column(verticalArrangement = Arrangement.spacedBy(MavioSpacing.s4)) {
@@ -244,6 +245,64 @@ fun SettingsList(
             }
         }
     }
+}
+
+/** The spacing of a [SettingsList]'s items. */
+private val listGap: Dp
+    @Composable get() = if (LocalTelevision.current) MavioSpacing.s32 else MavioSpacing.s24
+
+/**
+ * Reported shorter by the list's spacing, less [after], so that the item
+ * following it in a [SettingsList] starts [after] below it.
+ */
+@Composable
+private fun Modifier.followedAt(after: Dp): Modifier {
+    val cut = listGap - after
+    return layout { measurable, constraints ->
+        val placeable = measurable.measure(constraints)
+        layout(placeable.width, (placeable.height - cut.roundToPx()).coerceAtLeast(0)) { placeable.place(0, 0) }
+    }
+}
+
+/**
+ * A group's title as an item of a [SettingsList] of its own, for a group
+ * drawn as [GroupPart]s: as far above the card as [Group]'s.
+ */
+@Composable
+fun GroupTitle(title: String) {
+    Text(title, Modifier.followedAt(MavioSpacing.s8).padding(horizontal = 4.dp), style = theme.type.headline.text)
+}
+
+/**
+ * A run of a group's rows as an item of a [SettingsList] of its own, so that
+ * a long group composes only the rows scrolled into view: the card rounded
+ * at its [top] and its [bottom], and the next part joined to it, or below the
+ * [bottom] what follows [after] it, a footer [MavioSpacing.s8] as in [Group].
+ */
+@Composable
+fun GroupPart(top: Boolean, bottom: Boolean, after: Dp = listGap, content: @Composable ColumnScope.() -> Unit) {
+    val corner = 14.dp
+    val shape = RoundedCornerShape(
+        topStart = if (top) corner else 0.dp,
+        topEnd = if (top) corner else 0.dp,
+        bottomStart = if (bottom) corner else 0.dp,
+        bottomEnd = if (bottom) corner else 0.dp,
+    )
+    Column(
+        Modifier
+            .followedAt(if (bottom) after else 0.dp)
+            .fillMaxWidth()
+            // On a television a focused row's shadow reaches past the card.
+            .then(if (LocalTelevision.current) Modifier else Modifier.clip(shape))
+            .background(theme.colors.surface, shape),
+        content = content,
+    )
+}
+
+/** A group's footer as an item of a [SettingsList] of its own, below the last [GroupPart]. */
+@Composable
+fun GroupFooter(footer: String) {
+    Text(footer, Modifier.padding(horizontal = 4.dp), style = theme.type.footnote.text, color = theme.colors.textSecondary)
 }
 
 /** A group of rows on a card, with an optional title above, an action beside it, and a footer below. */

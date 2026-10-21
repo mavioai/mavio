@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
@@ -123,7 +124,7 @@ fun AssistantSettings(model: AppModel) {
             !on.enabled -> item { Group { ValueRow(stringResource(R.string.assistant_off), "") } }
             else -> {
                 item { Memories(state, on) }
-                if (on.ai) item { Conversations(state) }
+                if (on.ai) conversations(state)
             }
         }
     }
@@ -292,55 +293,110 @@ private fun Memories(state: AssistantPrefs, info: GetAssistantResponse) {
     }
 }
 
-@Composable
-private fun Conversations(state: AssistantPrefs) {
-    val scope = rememberCoroutineScope()
-    Group(stringResource(R.string.assistant_conversations), stringResource(R.string.assistant_conversations_footer)) {
-        state.conversations.orEmpty().forEachIndexed { i, c ->
-            if (i > 0) RowDivider()
-            // The assistant's conversations have no titles: they go by when they were, and where.
-            val time = c.updateTime.instant?.let(::dateTime).orEmpty()
-            val detail = listOf(c.deviceName, if (c.title.isNotEmpty()) time else "").filter { it.isNotEmpty() }.joinToString(" · ")
-            Pressable({ scope.launch { state.toggle(c.id) } }, Modifier.fillMaxWidth()) {
-                Row(
-                    Modifier.fillMaxWidth().heightIn(min = 52.dp).padding(horizontal = rowPadding, vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    RowLabel(c.title.ifEmpty { time }, detail.ifEmpty { null }, Modifier.weight(1f))
-                }
-            }
-            if (state.shown == c.id) Messages(state, c.id)
-        }
-        if (state.conversations?.isEmpty() == true) Note(stringResource(R.string.assistant_no_conversations))
-        state.conversationsFailure?.let { Note(it, theme.colors.danger) }
+/** A row of the conversations' card. */
+private sealed interface ConversationRow {
+    val key: String
+
+    data class Conversation(val conversation: AssistantConversation) : ConversationRow {
+        override val key get() = "c:${conversation.id}"
+    }
+
+    data class Message(val id: String, val index: Int, val message: AssistantMessage) : ConversationRow {
+        override val key get() = "m:$id:$index"
+    }
+
+    data class Loading(val id: String) : ConversationRow {
+        override val key get() = "l:$id"
+    }
+
+    data class Failed(val id: String, val why: String) : ConversationRow {
+        override val key get() = "f:$id"
+    }
+
+    data class Delete(val id: String) : ConversationRow {
+        override val key get() = "d:$id"
+    }
+
+    data class Note(val text: String?, val why: String?) : ConversationRow {
+        override val key get() = if (why != null) "failed" else "none"
     }
 }
 
-/** A conversation's messages, and deleting it. */
-@Composable
-private fun Messages(state: AssistantPrefs, id: String) {
-    val scope = rememberCoroutineScope()
-    Column(
-        Modifier.fillMaxWidth().padding(start = rowPadding, end = rowPadding, top = MavioSpacing.s4, bottom = MavioSpacing.s12),
-        verticalArrangement = Arrangement.spacedBy(MavioSpacing.s16),
-    ) {
-        val messages = state.messages
-        messages?.forEachIndexed { i, m ->
-            val key = i.toString()
-            Bubble(m, playing = state.kept.at == key, onPlay = m.speechUrl.takeIf { it.isNotEmpty() }?.let { url -> { state.kept.toggle(key, url) } })
+/**
+ * The conversations, each a row and the one opened its messages and
+ * deleting it under it: items of the list of their own drawn as one card, so
+ * that a long conversation composes only the messages scrolled into view.
+ */
+private fun LazyListScope.conversations(state: AssistantPrefs) {
+    val rows = buildList {
+        state.conversations.orEmpty().forEach { c ->
+            add(ConversationRow.Conversation(c))
+            if (state.shown != c.id) return@forEach
+            val messages = state.messages
+            messages?.forEachIndexed { i, m -> add(ConversationRow.Message(c.id, i, m)) }
+            val failure = state.messagesFailure
+            if (messages == null && failure == null) add(ConversationRow.Loading(c.id))
+            failure?.let { add(ConversationRow.Failed(c.id, it)) }
+            add(ConversationRow.Delete(c.id))
         }
-        if (messages == null && state.messagesFailure == null) {
-            Box(Modifier.fillMaxWidth().heightIn(min = 32.dp), Alignment.Center) {
-                CircularProgressIndicator(Modifier.size(20.dp), color = theme.colors.textSecondary, strokeWidth = 2.dp)
+        if (state.conversations?.isEmpty() == true) add(ConversationRow.Note(null, null))
+        state.conversationsFailure?.let { add(ConversationRow.Note(null, it)) }
+    }
+    item(key = "conversations") { GroupTitle(stringResource(R.string.assistant_conversations)) }
+    items(rows.size, key = { rows[it].key }) { i ->
+        val row = rows[i]
+        // The opened conversation's parts are spaced as a column under its row.
+        val top = if (i > 0 && rows[i - 1] is ConversationRow.Conversation) MavioSpacing.s4 else MavioSpacing.s16
+        val part = Modifier.fillMaxWidth().padding(start = rowPadding, end = rowPadding, top = top)
+        GroupPart(top = i == 0, bottom = i == rows.lastIndex, after = MavioSpacing.s8) {
+            when (row) {
+                is ConversationRow.Conversation -> ConversationItem(state, row.conversation, divided = i > 0)
+                is ConversationRow.Message -> Box(part) {
+                    val key = row.index.toString()
+                    val url = row.message.speechUrl
+                    Bubble(row.message, playing = state.kept.at == key, onPlay = url.takeIf { it.isNotEmpty() }?.let { { state.kept.toggle(key, url) } })
+                }
+                is ConversationRow.Loading -> Box(part.heightIn(min = 32.dp), Alignment.Center) {
+                    // The spinner shows only once loading takes long enough to notice, so that it does not flash.
+                    var slow by remember { mutableStateOf(false) }
+                    LaunchedEffect(Unit) {
+                        delay(SPINNER_DELAY_MS)
+                        slow = true
+                    }
+                    if (slow) CircularProgressIndicator(Modifier.size(20.dp), color = theme.colors.textSecondary, strokeWidth = 2.dp)
+                }
+                is ConversationRow.Failed -> Text(row.why, part, style = theme.type.callout.text, color = theme.colors.danger)
+                is ConversationRow.Delete -> Box(part.padding(bottom = MavioSpacing.s12)) {
+                    val scope = rememberCoroutineScope()
+                    SettingsButton(
+                        stringResource(R.string.assistant_delete_conversation),
+                        { scope.launch { state.delete(row.id) } },
+                        kind = ButtonKind.Secondary,
+                        enabled = !state.busy,
+                    )
+                }
+                is ConversationRow.Note -> row.why?.let { Note(it, theme.colors.danger) } ?: Note(stringResource(R.string.assistant_no_conversations))
             }
         }
-        state.messagesFailure?.let { Text(it, style = theme.type.callout.text, color = theme.colors.danger) }
-        SettingsButton(
-            stringResource(R.string.assistant_delete_conversation),
-            { scope.launch { state.delete(id) } },
-            kind = ButtonKind.Secondary,
-            enabled = !state.busy,
-        )
+    }
+    item(key = "conversations-footer") { GroupFooter(stringResource(R.string.assistant_conversations_footer)) }
+}
+
+/** A conversation's row, opening or closing its messages. */
+@Composable
+private fun ConversationItem(state: AssistantPrefs, c: AssistantConversation, divided: Boolean) {
+    val scope = rememberCoroutineScope()
+    if (divided) RowDivider()
+    // The assistant's conversations have no titles: they go by when they were, and where.
+    val time = c.updateTime.instant?.let(::dateTime).orEmpty()
+    val detail = listOf(c.deviceName, if (c.title.isNotEmpty()) time else "").filter { it.isNotEmpty() }.joinToString(" · ")
+    Pressable({ scope.launch { state.toggle(c.id) } }, Modifier.fillMaxWidth()) {
+        Row(
+            Modifier.fillMaxWidth().heightIn(min = 52.dp).padding(horizontal = rowPadding, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            RowLabel(c.title.ifEmpty { time }, detail.ifEmpty { null }, Modifier.weight(1f))
+        }
     }
 }
 
@@ -536,6 +592,9 @@ fun ConfirmDialog(title: String, message: String?, action: String, onConfirm: ()
         containerColor = theme.colors.surfaceRaised,
     )
 }
+
+/** How long loading goes before its spinner shows, in milliseconds. */
+private const val SPINNER_DELAY_MS = 300L
 
 private val dateTimeFormat = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT)
 private val timeFormat = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT)

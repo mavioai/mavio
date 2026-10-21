@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -34,10 +33,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -57,6 +54,7 @@ import dev.mavio.ui.Chevron
 import dev.mavio.ui.ChoiceMenuBox
 import dev.mavio.ui.ChoiceRow
 import dev.mavio.ui.Group
+import dev.mavio.ui.GroupPart
 import dev.mavio.ui.MavioIcon
 import dev.mavio.ui.Pressable
 import dev.mavio.ui.PressableBox
@@ -467,21 +465,8 @@ private fun LogRow(record: LogRecord, first: Boolean, last: Boolean) {
         LogLevel.LOG_LEVEL_ERROR -> theme.colors.danger
         else -> theme.colors.textSecondary
     }
-    val corner = 14.dp
-    val shape = RoundedCornerShape(
-        topStart = if (first) corner else 0.dp,
-        topEnd = if (first) corner else 0.dp,
-        bottomStart = if (last) corner else 0.dp,
-        bottomEnd = if (last) corner else 0.dp,
-    )
-    val gap = MavioSpacing.s24
-    // Reported shorter by the list's spacing, so the next row starts where this one ends.
-    val joined = Modifier.layout { measurable, constraints ->
-        val placeable = measurable.measure(constraints)
-        layout(placeable.width, if (last) placeable.height else (placeable.height - gap.roundToPx()).coerceAtLeast(0)) { placeable.place(0, 0) }
-    }
-    Column(joined.fillMaxWidth().clip(shape).background(theme.colors.surface)) {
-        if (!first) HorizontalDivider(Modifier.padding(start = 16.dp), color = theme.colors.border)
+    GroupPart(top = first, bottom = last) {
+        if (!first) RowDivider()
         SelectionContainer {
             Column(Modifier.fillMaxWidth().padding(horizontal = rowPadding, vertical = 10.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Row(horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s8)) {
