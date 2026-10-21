@@ -87,6 +87,7 @@ import dev.mavio.ui.languageName
 import dev.mavio.ui.line
 import dev.mavio.ui.minutesText
 import dev.mavio.ui.moneyText
+import dev.mavio.ui.pageTitle
 import dev.mavio.ui.productionStatus
 import dev.mavio.ui.rememberReload
 import dev.mavio.ui.seasonName
@@ -266,6 +267,7 @@ private fun TitleHeader(serverId: String, title: Title, actions: (@Composable ()
     DiscoverHero(title.backdropUrl, title.posterUrl, TITLE_HERO) { big ->
         Text(
             title.name,
+            Modifier.pageTitle(title.name),
             fontSize = if (big) 52.sp else 34.sp,
             lineHeight = if (big) 55.sp else 36.sp,
             fontWeight = FontWeight.Bold,

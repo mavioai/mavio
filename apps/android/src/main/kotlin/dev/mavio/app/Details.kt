@@ -105,6 +105,7 @@ import dev.mavio.ui.itemIcon
 import dev.mavio.ui.label
 import dev.mavio.ui.mediaFacts
 import dev.mavio.ui.minutesText
+import dev.mavio.ui.pageTitle
 import dev.mavio.ui.range
 import dev.mavio.ui.rememberReload
 import dev.mavio.ui.resolution
@@ -419,10 +420,10 @@ private fun HeaderText(details: Details, source: Source?, several: Boolean, modi
         val title = @Composable {
             // A hero shorter than a window's 70% keeps the title as a phone's, clear of Back.
             val large = wide && !short
-            Text(card.title, fontSize = if (large) 52.sp else 34.sp, lineHeight = if (large) 55.sp else 36.sp, fontWeight = FontWeight.Bold, color = Color.White)
+            Text(card.title, Modifier.pageTitle(card.title), fontSize = if (large) 52.sp else 34.sp, lineHeight = if (large) 55.sp else 36.sp, fontWeight = FontWeight.Bold, color = Color.White)
         }
         if (!inSeries && details.logo != null) {
-            Logo(details.logo?.url, card.title, Modifier.heightIn(max = if (short) 72.dp else 112.dp).fillMaxWidth(0.8f), fallback = title)
+            Logo(details.logo?.url, card.title, Modifier.heightIn(max = if (short) 72.dp else 112.dp).fillMaxWidth(0.8f).pageTitle(card.title), fallback = title)
         } else {
             title()
         }

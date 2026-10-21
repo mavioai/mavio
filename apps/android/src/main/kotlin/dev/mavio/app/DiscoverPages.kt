@@ -43,6 +43,7 @@ import dev.mavio.ui.discoverLanguage
 import dev.mavio.ui.discovered
 import dev.mavio.ui.line
 import dev.mavio.ui.longDayText
+import dev.mavio.ui.pageTitle
 import dev.mavio.ui.rememberReload
 import dev.mavio.ui.sized
 import dev.mavio.ui.statusLabel
@@ -115,7 +116,7 @@ fun DiscoveredPersonScreen(route: Route.DiscoveredPerson) {
                         )
                     }
                     val info = @Composable {
-                        Text(p.name, Modifier.fillMaxWidth(), style = theme.type.title1.text, fontWeight = FontWeight.Bold, textAlign = align)
+                        Text(p.name, Modifier.fillMaxWidth().pageTitle(p.name), style = theme.type.title1.text, fontWeight = FontWeight.Bold, textAlign = align)
                         if (facts.isNotEmpty()) {
                             Text(facts.joinToString(" | "), Modifier.fillMaxWidth(), style = theme.type.callout.text, color = theme.colors.textSecondary, textAlign = align)
                         }

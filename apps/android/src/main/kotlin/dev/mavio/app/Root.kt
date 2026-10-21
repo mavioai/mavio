@@ -425,6 +425,8 @@ private fun Shell(model: AppModel) {
                                     LocalHeaderRoute provides route,
                                     LocalPageTitles provides PageTitles { title, bottom -> backdrop.title(route, title, bottom) },
                                 ) {
+                                    // The screen's title goes with it, while it stays where it was when its title scrolled away.
+                                    DisposableEffect(route) { onDispose { backdrop.title(route, null, 0f) } }
                                     // Opaque, so that the screen it slides over or uncovers does not show through it.
                                     Box(Modifier.fillMaxSize().background(theme.colors.background).nestedScroll(backdrop.tracking(route))) { Screen(model, it) }
                                 }
@@ -669,7 +671,8 @@ private fun Header(model: AppModel, back: Boolean, backdrop: HeaderBackdrop, rou
     // Kept as it fades out.
     var shownTitle by remember(route) { mutableStateOf("") }
     inline?.let { shownTitle = it }
-    val titleIn by animateFloatAsState(if (inline != null) 1f else 0f, tween(200), label = "title")
+    // As iOS's, only on the bar, not over a hero.
+    val titleIn by animateFloatAsState(if (inline != null && !overHero) 1f else 0f, tween(200), label = "title")
     val ink = if (overHero) Color.White else colors.textPrimary
     Box(modifier.fillMaxWidth()) {
         if (edge > 0f) {

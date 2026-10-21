@@ -68,6 +68,7 @@ import dev.mavio.ui.R
 import dev.mavio.ui.Segmented
 import dev.mavio.ui.StatusView
 import dev.mavio.ui.line
+import dev.mavio.ui.pageTitle
 import dev.mavio.ui.rowTitle
 import dev.mavio.ui.text
 import dev.mavio.ui.theme
@@ -194,7 +195,7 @@ private fun LibraryRow(libraries: List<LibraryEntry?>, onOpen: (LibraryEntry) ->
 internal fun ScreenTitle(title: String) {
     Text(
         title,
-        Modifier.padding(top = MavioSpacing.s24, bottom = MavioSpacing.s8),
+        Modifier.padding(top = MavioSpacing.s24, bottom = MavioSpacing.s8).pageTitle(title),
         style = theme.type.title1.text,
         fontWeight = FontWeight.Bold,
     )
@@ -242,7 +243,7 @@ fun LibraryScreen(model: AppModel, route: Route.Library) {
             verticalArrangement = Arrangement.spacedBy(MavioSpacing.s12),
             itemVerticalAlignment = Alignment.Bottom,
         ) {
-            Text(name.orEmpty(), style = theme.type.title1.text, fontWeight = FontWeight.Bold)
+            Text(name.orEmpty(), Modifier.pageTitle(name.orEmpty()), style = theme.type.title1.text, fontWeight = FontWeight.Bold)
             Segmented(
                 listOf(stringResource(R.string.library_recommended), stringResource(R.string.library_all)),
                 if (all) 1 else 0,

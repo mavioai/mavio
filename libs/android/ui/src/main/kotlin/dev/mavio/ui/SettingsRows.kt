@@ -39,7 +39,6 @@ import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -176,8 +175,6 @@ fun SettingsList(
             snapshotFlow { list.firstVisibleItemIndex to list.firstVisibleItemScrollOffset }.collect { spot = intArrayOf(it.first, it.second) }
         }
     }
-    val titles = LocalPageTitles.current
-    DisposableEffect(titles) { onDispose { titles?.report(null, 0f) } }
     val scope = rememberCoroutineScope()
     val focusManager = LocalFocusManager.current
     val step = with(LocalDensity.current) { 240.dp.toPx() }
@@ -246,7 +243,7 @@ fun SettingsList(
             ) {
                 item {
                     Column(
-                        Modifier.onGloballyPositioned { titles?.report(title, it.boundsInWindow().bottom) },
+                        Modifier.pageTitle(title),
                         verticalArrangement = Arrangement.spacedBy(MavioSpacing.s4),
                     ) {
                         Text(title, style = (if (large) theme.type.title1 else theme.type.title2).text, fontWeight = FontWeight.Bold)
@@ -271,6 +268,13 @@ fun interface PageTitles {
 
 /** Where the page shown reports its large title, if anywhere. */
 val LocalPageTitles = staticCompositionLocalOf<PageTitles?> { null }
+
+/** Marks this as the page's large [title], which a header shows once the page has scrolled it under. */
+@Composable
+fun Modifier.pageTitle(title: String): Modifier {
+    val titles = LocalPageTitles.current ?: return this
+    return onGloballyPositioned { titles.report(title, it.boundsInWindow().bottom) }
+}
 
 /** The spacing of a [SettingsList]'s items. */
 private val listGap: Dp

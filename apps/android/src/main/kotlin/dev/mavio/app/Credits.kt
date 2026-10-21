@@ -62,6 +62,7 @@ import dev.mavio.ui.crewOrder
 import dev.mavio.ui.isCast
 import dev.mavio.ui.label
 import dev.mavio.ui.line
+import dev.mavio.ui.pageTitle
 import dev.mavio.ui.rememberReload
 import dev.mavio.ui.text
 import dev.mavio.ui.theme
@@ -251,7 +252,7 @@ private fun PersonInfo(person: PersonDetails, facts: List<String>) {
     val uri = LocalUriHandler.current
     var more by rememberSaveable { mutableStateOf(false) }
     Column(verticalArrangement = Arrangement.spacedBy(MavioSpacing.s12)) {
-        Text(person.name, style = theme.type.title1.text, fontWeight = FontWeight.Bold)
+        Text(person.name, Modifier.pageTitle(person.name), style = theme.type.title1.text, fontWeight = FontWeight.Bold)
         facts.forEach { Text(it, style = theme.type.callout.text, color = colors.textSecondary) }
         person.overview?.let { overview ->
             Column(verticalArrangement = Arrangement.spacedBy(MavioSpacing.s4)) {
