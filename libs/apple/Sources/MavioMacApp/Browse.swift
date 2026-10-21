@@ -264,11 +264,11 @@
                 line.leadingAnchor.constraint(equalTo: view.leadingAnchor),
                 line.trailingAnchor.constraint(equalTo: view.trailingAnchor),
                 user.topAnchor.constraint(equalTo: line.bottomAnchor, constant: MavioSpacing.s8),
-                user.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: MavioSpacing.s8),
-                user.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -MavioSpacing.s8),
                 user.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -MavioSpacing.s8),
             ])
             expandedConstraints = [
+                user.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: MavioSpacing.s8),
+                user.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -MavioSpacing.s8),
                 header.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -MavioSpacing.s8),
                 header.centerYAnchor.constraint(equalTo: view.topAnchor, constant: 24.5),
                 field.topAnchor.constraint(equalTo: band, constant: MavioSpacing.s4),
@@ -277,6 +277,7 @@
                 scroll.topAnchor.constraint(equalTo: field.bottomAnchor, constant: MavioSpacing.s8),
             ]
             railConstraints = [
+                user.centerXAnchor.constraint(equalTo: view.centerXAnchor),
                 header.centerXAnchor.constraint(equalTo: view.centerXAnchor),
                 header.topAnchor.constraint(equalTo: band),
                 scroll.topAnchor.constraint(equalTo: header.bottomAnchor, constant: MavioSpacing.s8),
@@ -514,13 +515,22 @@
         private let press: @MainActor (NSView) -> Void
         private var observer: Observer?
         private let stack = NSStackView.horizontal([], spacing: 10)
+        private var insets: [NSLayoutConstraint] = []
         private var tracking: NSTrackingArea?
 
         init(context: MacContext, press: @escaping @MainActor (NSView) -> Void) {
             self.context = context
             self.press = press
             super.init(radius: 10)
-            addFilling(stack, insets: .all(MavioSpacing.s8))
+            stack.translatesAutoresizingMaskIntoConstraints = false
+            addSubview(stack)
+            insets = [
+                stack.leadingAnchor.constraint(equalTo: leadingAnchor),
+                trailingAnchor.constraint(equalTo: stack.trailingAnchor),
+                stack.topAnchor.constraint(equalTo: topAnchor),
+                bottomAnchor.constraint(equalTo: stack.bottomAnchor),
+            ]
+            NSLayoutConstraint.activate(insets)
             setAccessibilityElement(true)
             setAccessibilityRole(.button)
             observer = Observer { [weak self] in self?.update() }
@@ -539,13 +549,12 @@
             let lines = NSStackView.vertical(
                 [title, NSTextField.label(line, theme.fonts.caption, color: theme.colors.textSecondary)], spacing: 0)
             lines.setContentHuggingPriority(.init(1), for: .horizontal)
-            let avatar = AvatarView(name: name, size: 32, theme: theme)
-            // In the rail the avatar is centered between two empty views.
-            stack.distribution = compact ? .equalCentering : .fill
+            // In the rail, as the web UI's, a square of 36 points with the
+            // avatar alone, 28 points.
+            let avatar = AvatarView(name: name, size: compact ? 28 : 32, theme: theme)
+            for inset in insets { inset.constant = compact ? MavioSpacing.s4 : MavioSpacing.s8 }
             stack.setViews(
-                compact
-                    ? [NSView(), avatar, NSView()]
-                    : [avatar, lines, IconView("selector", size: 16, color: theme.colors.textTertiary)])
+                compact ? [avatar] : [avatar, lines, IconView("selector", size: 16, color: theme.colors.textTertiary)])
             toolTip = compact ? name : nil
             setAccessibilityLabel(MavioStrings.navUserMenu(name: name))
         }
