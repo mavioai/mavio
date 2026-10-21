@@ -298,13 +298,15 @@ extension View {
 /// A screen led by a hero. On a phone the hero sits below the navigation
 /// bar, which is clear over the hero's colors, meeting them at a sharp
 /// edge; on an iPad the hero
-/// reaches the top under a clear bar. The bar's title appears once the hero
-/// is scrolled past.
+/// reaches the top under a clear bar. The bar's title rises into its middle
+/// from below as the hero's end is scrolled under it, as a large title does.
 struct HeroChrome: ViewModifier {
     let title: String
     let phone: Bool
     @Environment(\.theme) private var theme
     @State private var past = false
+    /// How far the title has risen into the bar, from 0 to 1.
+    @State private var rise: CGFloat = 0
     @State private var inset: CGFloat = 0
 
     func body(content: Content) -> some View {
@@ -331,6 +333,14 @@ struct HeroChrome: ViewModifier {
                 } action: { _, now in
                     withAnimation(.easeOut(duration: MavioDuration.fast)) { past = now }
                 }
+                // The title follows the scroll over its last stretch before
+                // the hero's end, rising as the hero's end goes under the bar.
+                .onScrollGeometryChange(for: CGFloat.self) { geo in
+                    let scrolled = geo.contentOffset.y + geo.contentInsets.top
+                    return min(max((scrolled - geo.containerSize.height * 0.5) / Self.riseDistance + 1, 0), 1)
+                } action: { _, now in
+                    rise = now
+                }
                 // The refresh control of a page reaching the top is under the
                 // status bar, the hero covering it below; it is moved down
                 // below the bar, over the hero, where a page without a hero
@@ -341,13 +351,18 @@ struct HeroChrome: ViewModifier {
                 .inlineTitle()
                 .toolbar {
                     ToolbarItem(placement: .principal) {
-                        Text(title).type(theme.type.headline).lineLimit(1).opacity(past ? 1 : 0)
+                        Text(title).type(theme.type.headline).lineLimit(1)
+                            .opacity(rise)
+                            .offset(y: (1 - rise) * Self.riseDistance / 2)
                     }
                 }
                 .modifier(HeroBarGlass(phone: phone, past: past))
                 .toolbarColorScheme(past ? nil : .dark, for: .navigationBar)
         }
     #endif
+
+    /// How far the hero scrolls while the title rises into the bar.
+    private static let riseDistance: CGFloat = 24
 
     /// Whether the hero reaches the top, under the bars: on an iPad, and
     /// from iOS 26, whose bars are of clear glass, on a phone too.
