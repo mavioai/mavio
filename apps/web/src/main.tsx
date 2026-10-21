@@ -27,6 +27,7 @@ const queryClient = new QueryClient({
 const servers = new Servers(localStorage, location.origin, {
   mavioDevUrl: import.meta.env.VITE_MAVIO_DEV_URL || undefined,
   language: locale,
+  version: import.meta.env.MAVIO_VERSION as string,
 });
 
 const events = new EventHub();

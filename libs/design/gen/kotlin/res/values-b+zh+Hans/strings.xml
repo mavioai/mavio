@@ -394,6 +394,7 @@
     <string name="about_device_id">设备 ID</string>
     <string name="about_device_footer">服务器以这个名称和 ID 识别这台设备。</string>
     <string name="about_manufacturer">制造商</string>
+    <string name="about_browser">浏览器</string>
     <string name="about_model">型号</string>
     <string name="about_system">系统版本</string>
     <string name="about_architecture">架构</string>

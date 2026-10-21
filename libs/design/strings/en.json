@@ -381,6 +381,7 @@
   "about.deviceId": { "message": "Device ID", "description": "The device's ID, as the servers know it." },
   "about.deviceFooter": { "message": "The servers know this device by its name and ID.", "description": "Footer of the About section's device group." },
   "about.manufacturer": { "message": "Manufacturer", "description": "The device's manufacturer." },
+  "about.browser": { "message": "Browser", "description": "The browser the web UI runs in, and its version." },
   "about.model": { "message": "Model", "description": "The device's model." },
   "about.system": { "message": "System Version", "description": "The version of the device's operating system." },
   "about.architecture": { "message": "Architecture", "description": "The processor architecture the app runs on." },

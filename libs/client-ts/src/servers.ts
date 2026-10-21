@@ -148,8 +148,8 @@ interface SignedIn {
   user?: { id: string; name: string };
 }
 
-/** The device as servers list it among the user's devices. */
-async function device(storage: Storage, key: DeviceKey) {
+/** This device as servers know it: its ID, its name (the browser's) and its client. */
+function thisDevice(storage: Storage) {
   let id = storage.getItem(deviceKey);
   if (!id) {
     id = crypto.randomUUID();
@@ -165,7 +165,12 @@ async function device(storage: Storage, key: DeviceKey) {
         : /Safari\//.test(ua)
           ? "Safari"
           : "Browser";
-  return { id, name: browser, client: "Mavio Web", clientVersion: "0.0.0", publicKey: await key.publicKey() };
+  return { id, name: browser, client: "Mavio Web" };
+}
+
+/** The device as servers list it among the user's devices. */
+async function device(storage: Storage, key: DeviceKey, version: string) {
+  return { ...thisDevice(storage), clientVersion: version, publicKey: await key.publicKey() };
 }
 
 /**
@@ -253,6 +258,8 @@ export interface Options {
    * plugins say into; unset leaves it to the browser.
    */
   language?: string;
+  /** The client's version the servers are told, `0.0.0` when unset. */
+  version?: string;
 }
 
 /**
@@ -272,6 +279,7 @@ export class Servers {
   private finishing: { key: string; done: Promise<string> } | undefined;
   private key: DeviceKey;
   private language: string | undefined;
+  private version: string;
   /** The base URL of the server serving the web UI; unset on app.mavio.dev. */
   readonly home: string | undefined;
   /** The base URL of mavio.dev's API on app.mavio.dev. */
@@ -285,6 +293,7 @@ export class Servers {
   ) {
     this.key = options.key ?? browserDeviceKey();
     this.language = options.language;
+    this.version = options.version ?? "0.0.0";
     this.appApi = options.mavioDevUrl;
     this.home = options.mavioDevUrl ? undefined : base;
     this.list = read<ServerEntry[]>(storage, serversKey) ?? [];
@@ -302,6 +311,11 @@ export class Servers {
 
   /** The sign-in; a stable object until it changes. */
   signInSnapshot = () => this.signIn_;
+
+  /** This device as servers know it: its ID, name and client. */
+  device() {
+    return thisDevice(this.storage);
+  }
 
   /** Whether this is app.mavio.dev, which signs Mavio accounts in only. */
   get app(): boolean {
@@ -479,7 +493,7 @@ export class Servers {
       name,
       password,
       totpCode,
-      device: await device(this.storage, this.key),
+      device: await device(this.storage, this.key, this.version),
     });
     return this.added(i, r);
   }
@@ -495,7 +509,7 @@ export class Servers {
     const r = await auth.finishPasskeySignIn({
       ceremonyId: start.ceremonyId,
       credentialJson: JSON.stringify(credential.toJSON()),
-      device: await device(this.storage, this.key),
+      device: await device(this.storage, this.key, this.version),
     });
     return this.added(i, r);
   }
@@ -516,7 +530,7 @@ export class Servers {
       token,
       name: name || undefined,
       password,
-      device: await device(this.storage, this.key),
+      device: await device(this.storage, this.key, this.version),
     });
     return this.added(i, r);
   }
@@ -534,7 +548,7 @@ export class Servers {
       name: name || undefined,
       ceremonyId: start.ceremonyId,
       credentialJson: JSON.stringify(credential.toJSON()),
-      device: await device(this.storage, this.key),
+      device: await device(this.storage, this.key, this.version),
     });
     return this.added(i, r);
   }
@@ -545,7 +559,7 @@ export class Servers {
     const r = await createClient(AuthService, transport({ url: i.url })).createFirstUser({
       name,
       password,
-      device: await device(this.storage, this.key),
+      device: await device(this.storage, this.key, this.version),
     });
     return this.added(i, r);
   }
@@ -554,7 +568,7 @@ export class Servers {
   async startQuickConnect(): Promise<QuickConnect> {
     const i = await this.probe(this.homeUrl());
     const r = await createClient(AuthService, transport({ url: i.url })).startQuickConnect({
-      device: await device(this.storage, this.key),
+      device: await device(this.storage, this.key, this.version),
     });
     return {
       code: r.code,
@@ -885,7 +899,7 @@ export class Servers {
     const { assertion } = await this.mavioDev(AccountService).createAssertion({ serverId: s.id, deviceKey: await this.key.publicKey() });
     const r = await createClient(AuthService, transport({ url })).signInWithAssertion({
       assertion,
-      device: await device(this.storage, this.key),
+      device: await device(this.storage, this.key, this.version),
       signature: await this.key.sign(assertionMessage(assertion)),
     });
     const at = this.list.findIndex((x) => x.id === s.id);

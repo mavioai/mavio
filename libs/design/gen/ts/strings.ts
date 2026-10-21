@@ -382,6 +382,7 @@ export type MessageKey =
   | 'about.deviceId'
   | 'about.deviceFooter'
   | 'about.manufacturer'
+  | 'about.browser'
   | 'about.model'
   | 'about.system'
   | 'about.architecture'
@@ -2374,6 +2375,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "about.deviceId": "Device ID",
     "about.deviceFooter": "The servers know this device by its name and ID.",
     "about.manufacturer": "Manufacturer",
+    "about.browser": "Browser",
     "about.model": "Model",
     "about.system": "System Version",
     "about.architecture": "Architecture",
@@ -4364,6 +4366,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "about.deviceId": "设备 ID",
     "about.deviceFooter": "服务器以这个名称和 ID 识别这台设备。",
     "about.manufacturer": "制造商",
+    "about.browser": "浏览器",
     "about.model": "型号",
     "about.system": "系统版本",
     "about.architecture": "架构",

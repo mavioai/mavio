@@ -778,6 +778,8 @@
     <string name="about_device_footer">The servers know this device by its name and ID.</string>
     <!-- The device's manufacturer. -->
     <string name="about_manufacturer">Manufacturer</string>
+    <!-- The browser the web UI runs in, and its version. -->
+    <string name="about_browser">Browser</string>
     <!-- The device's model. -->
     <string name="about_model">Model</string>
     <!-- The version of the device's operating system. -->

@@ -6931,6 +6931,24 @@
         }
       }
     },
+    "about.browser": {
+      "comment": "The browser the web UI runs in, and its version.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Browser"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "浏览器"
+          }
+        }
+      }
+    },
     "about.model": {
       "comment": "The device's model.",
       "extractionState": "manual",

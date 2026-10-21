@@ -380,6 +380,7 @@
   "about.deviceId": "设备 ID",
   "about.deviceFooter": "服务器以这个名称和 ID 识别这台设备。",
   "about.manufacturer": "制造商",
+  "about.browser": "浏览器",
   "about.model": "型号",
   "about.system": "系统版本",
   "about.architecture": "架构",

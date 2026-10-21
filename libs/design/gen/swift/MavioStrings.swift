@@ -1244,6 +1244,9 @@ public enum MavioStrings {
     /// The device's manufacturer.
     public static var aboutManufacturer: String { NSLocalizedString("about.manufacturer", bundle: .module, comment: "") }
 
+    /// The browser the web UI runs in, and its version.
+    public static var aboutBrowser: String { NSLocalizedString("about.browser", bundle: .module, comment: "") }
+
     /// The device's model.
     public static var aboutModel: String { NSLocalizedString("about.model", bundle: .module, comment: "") }
 

@@ -51,6 +51,7 @@ import { StorageSection } from "./admin/storage.tsx";
 import { SubtitlesSection } from "./admin/subtitles.tsx";
 import { AiSection } from "./admin/ai.tsx";
 import { AssistantPrefs } from "./assistant-settings.tsx";
+import { AboutSection } from "./about.tsx";
 import { DownloadsSection } from "./admin/downloads.tsx";
 import { WantedSection } from "./admin/wanted.tsx";
 import { ApiKeysSection, BackupsSection, LogsSection } from "./admin/backups.tsx";
@@ -67,7 +68,7 @@ import { IndexerSearch, PinButton } from "./indexer-search.tsx";
 /** Where the settings are, which the pages of the sections read. */
 export type { SettingsSearch } from "../search-params.ts";
 
-type SectionId = "appearance" | "playback" | "subtitles-audio" | "assistant" | "account" | "overview" | "activity" | "general" | "devices" | "issues" | "libraries" | "users" | "transcoding" | "storage" | "acquisition" | "wanted" | "downloads" | "subtitles" | "ai" | "plugins" | "tasks" | "backups" | "logs" | "api-keys" | "proxies" | "indexer-search";
+type SectionId = "appearance" | "playback" | "subtitles-audio" | "assistant" | "account" | "overview" | "activity" | "general" | "devices" | "issues" | "libraries" | "users" | "transcoding" | "storage" | "acquisition" | "wanted" | "downloads" | "subtitles" | "ai" | "plugins" | "tasks" | "backups" | "logs" | "api-keys" | "proxies" | "indexer-search" | "about";
 
 const sections: Record<SectionId, { icon: IconName; color: string; title: () => string; admin?: boolean }> = {
   appearance: { icon: "appearance", color: "#5E5CE6", title: () => t("settings.appearance") },
@@ -96,6 +97,7 @@ const sections: Record<SectionId, { icon: IconName; color: string; title: () => 
   plugins: { icon: "plugins", color: "#AF52DE", title: () => t("settings.plugins"), admin: true },
   tasks: { icon: "pending", color: "#5856D6", title: () => t("settings.tasks"), admin: true },
   "indexer-search": toolLooks["indexer-search"],
+  about: { icon: "info", color: "#8E8E93", title: () => t("settings.about") },
 };
 
 const menus: Record<MenuId, { icon: IconName; color: string; title: () => string }> = {
@@ -112,18 +114,20 @@ function lookOf(e: Entry) {
 }
 
 /** The sections not of the server chosen: this device's, and the tools, which choose their servers themselves. */
-const deviceSections: SectionId[] = ["appearance", "playback", "subtitles-audio", "assistant", "account", ...tools];
+const deviceSections: SectionId[] = ["appearance", "playback", "subtitles-audio", "assistant", "account", "about", ...tools];
 
 /**
  * The groups: the advanced tools, for administrators; this device's sections; and the server's, in
  * the order a server is set up and kept: the server and who reaches it, the
  * menus of its media and of acquiring media, what extends it and how it
- * reaches out, and the menu of watching over and maintaining it.
+ * reaches out, and the menu of watching over and maintaining it; then,
+ * with no title, About, as the apps end their settings.
  */
-const allGroups: { title: () => string; entries: Entry[]; server?: boolean; tools?: boolean }[] = [
+const allGroups: { title?: () => string; entries: Entry[]; server?: boolean; tools?: boolean }[] = [
   { title: () => t("settings.advancedGroup"), entries: [...tools], tools: true },
   { title: () => t("settings.thisDevice"), entries: ["appearance", "playback", "subtitles-audio", "assistant"] },
   { title: () => t("settings.serverGroup"), entries: ["overview", "general", "users", "devices", "media", "acquiring", "ai", "plugins", "proxies", "maintenance"], server: true },
+  { entries: ["about"] },
 ];
 
 /** The server whose settings are shown, whether the user administers it, and whether that is known yet. */
@@ -237,9 +241,9 @@ export function SettingsScreen() {
           {/* The section's own title names the page, once it shows. */}
           <h1 data-title-later className="px-1 type-title1">{t("nav.settings")}</h1>
           <AccountCard active={id === "account"} />
-          {groups.map((g) => (
-            <nav key={g.title()} aria-label={g.title()} className="flex flex-col gap-0.5">
-              <div className="px-2 pb-1 type-caption font-semibold text-text-tertiary">{g.title()}</div>
+          {groups.map((g, i) => (
+            <nav key={i} aria-label={g.title?.()} className="flex flex-col gap-0.5">
+              {g.title && <div className="px-2 pb-1 type-caption font-semibold text-text-tertiary">{g.title()}</div>}
               {g.server && chosen && <ServerChoice chosen={chosen} section={id} />}
               {g.entries.map((e) =>
                 isMenu(e) ? (
@@ -424,8 +428,8 @@ function ProfileList({ groups }: { groups: Groups }) {
       <h1 className="type-display">{t("nav.settings")}</h1>
       <AccountCard />
       {shown?.kind === "standalone" && <Members server={shown.servers[0]} />}
-      {groups.map((g) => (
-        <Group key={g.title()} title={g.title()}>
+      {groups.map((g, i) => (
+        <Group key={i} title={g.title?.()}>
           {g.server && chosen && <ServerChoice chosen={chosen} place="group" />}
           {g.entries.map((e) => (
             <EntryRow key={e} id={e} />
@@ -541,6 +545,8 @@ function SectionView({ id, chosen }: { id: SectionId; chosen: Chosen | undefined
       );
     case "account":
       return <AccountSection />;
+    case "about":
+      return <AboutSection />;
     case "overview":
       return chosen?.admin && <OverviewSection key={chosen.server.id} server={chosen.server} />;
     case "activity":
