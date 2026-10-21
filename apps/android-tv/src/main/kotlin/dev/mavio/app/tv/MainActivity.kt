@@ -87,12 +87,19 @@ class MainActivity : ComponentActivity() {
 
     /** The remote's search and assistant keys, which the system lets the app have, press the assistant: held, it talks while held. */
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
+        if (isMicrophoneKey(event) && app.assistant.server != null) {
+            // Its up comes at once, canceled, while the key is still held:
+            // a conversation starts, which hears the remote while it is held.
+            if (event.repeatCount == 0 && !app.assistant.listening) app.assistant.tap()
+            return true
+        }
         if (keyCode !in TALK_KEYS || app.assistant.server == null) return super.onKeyDown(keyCode, event)
         if (event.repeatCount == 0) app.assistant.press()
         return true
     }
 
     override fun onKeyUp(keyCode: Int, event: KeyEvent): Boolean {
+        if (isMicrophoneKey(event) && app.assistant.server != null) return true
         if (keyCode !in TALK_KEYS || app.assistant.server == null) return super.onKeyUp(keyCode, event)
         app.assistant.release()
         return true
@@ -101,6 +108,16 @@ class MainActivity : ComponentActivity() {
 
 /** The remote's keys that talk to the assistant. */
 private val TALK_KEYS = setOf(KeyEvent.KEYCODE_SEARCH, KeyEvent.KEYCODE_VOICE_ASSIST, KeyEvent.KEYCODE_ASSIST)
+
+/**
+ * Whether the key is a remote's microphone key the system leaves unmapped,
+ * as a Xiaomi remote's, whose microphone gives audio only while it is held.
+ */
+private fun isMicrophoneKey(event: KeyEvent): Boolean =
+    event.keyCode == KeyEvent.KEYCODE_UNKNOWN && event.scanCode == XIAOMI_MICROPHONE_SCAN_CODE && event.device?.vendorId == XIAOMI_VENDOR
+
+private const val XIAOMI_VENDOR = 0x2717
+private const val XIAOMI_MICROPHONE_SCAN_CODE = 63
 
 /** The action of a voice search for something to play. */
 private const val MEDIA_PLAY_FROM_SEARCH = "android.media.action.MEDIA_PLAY_FROM_SEARCH"
