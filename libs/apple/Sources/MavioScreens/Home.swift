@@ -46,16 +46,18 @@ public struct HomeView: View {
 }
 
 /// Home's bar as a hero's when the hero leads it (HeroChrome), and without
-/// its title while loading, which would show only until the hero hides it.
+/// its title while loading, which would show only until the hero hides it;
+/// on a phone never with its title, the tab bar naming the page.
 private struct HomeChrome: ViewModifier {
     let hero: Bool
     let loading: Bool
     @Environment(\.horizontalSizeClass) private var sizeClass
 
     func body(content: Content) -> some View {
+        let phone = sizeClass != .regular
         if hero {
-            content.modifier(HeroChrome(title: MavioStrings.navHome, phone: sizeClass != .regular))
-        } else if loading {
+            content.modifier(HeroChrome(title: phone ? nil : MavioStrings.navHome, phone: phone))
+        } else if loading || phone {
             content.inlineTitle().toolbar(removing: .title)
         } else {
             content

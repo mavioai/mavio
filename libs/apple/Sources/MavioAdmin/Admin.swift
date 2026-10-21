@@ -2,6 +2,10 @@ import MavioKit
 import MavioUI
 import SwiftUI
 
+#if canImport(UIKit)
+    import UIKit
+#endif
+
 /// The settings' Server group, as the web UI's on a phone (docs/clients.md
 /// §6.3): the picker of the servers signed in to, then the sections of the
 /// server chosen, in the order a server is set up and kept — its
@@ -66,6 +70,22 @@ public struct ServerGroup: View {
         }
     #endif
 
+    /// A server's name shortened with an ellipsis to one line of a menu,
+    /// whose items wrap rather than shorten.
+    private static func oneLine(_ name: String) -> String {
+        #if canImport(UIKit)
+            let font = UIFont.preferredFont(forTextStyle: .body)
+            let width: CGFloat = 150
+            func fits(_ s: String) -> Bool { (s as NSString).size(withAttributes: [.font: font]).width <= width }
+            guard !fits(name) else { return name }
+            var shown = name
+            while !shown.isEmpty, !fits(shown + "…") { shown.removeLast() }
+            return shown + "…"
+        #else
+            return name
+        #endif
+    }
+
     private var listBody: some View {
         Section {
             if model.account != nil {
@@ -73,7 +93,7 @@ public struct ServerGroup: View {
                 // the row, as the web UI's, each on one line in the menu.
                 Menu {
                     Picker(selection: Binding(get: { server.id }, set: { serverId = $0 })) {
-                        ForEach(model.signedInServers, id: \.id) { Text($0.name).lineLimit(1).tag($0.id) }
+                        ForEach(model.signedInServers, id: \.id) { Text(Self.oneLine($0.name)).tag($0.id) }
                     } label: {
                         EmptyView()
                     }

@@ -301,7 +301,8 @@ extension View {
 /// reaches the top under a clear bar. The bar's title rises into its middle
 /// from below as the hero's end is scrolled under it, as a large title does.
 struct HeroChrome: ViewModifier {
-    let title: String
+    /// The bar's title, none for a page the tab bar names.
+    let title: String?
     let phone: Bool
     @Environment(\.theme) private var theme
     @State private var past = false
@@ -351,7 +352,7 @@ struct HeroChrome: ViewModifier {
                 .inlineTitle()
                 .toolbar {
                     ToolbarItem(placement: .principal) {
-                        Text(title).type(theme.type.headline).lineLimit(1)
+                        Text(title ?? "").type(theme.type.headline).lineLimit(1)
                             .opacity(rise)
                             .offset(y: (1 - rise) * Self.riseDistance / 2)
                     }
