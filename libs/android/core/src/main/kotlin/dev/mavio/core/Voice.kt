@@ -75,6 +75,14 @@ class VoiceSession private constructor(
     private val main = Handler(Looper.getMainLooper())
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private val audio = context.getSystemService(AudioManager::class.java)
+    // A phone plays the answers as a call, at the call's volume its keys set
+    // during the session; a device without an earpiece, as a TV, as its
+    // assistant, at the media's volume its remote sets.
+    private val usage = if (audio.getDevices(AudioManager.GET_DEVICES_OUTPUTS).any { it.type == AudioDeviceInfo.TYPE_BUILTIN_EARPIECE }) {
+        AudioAttributes.USAGE_VOICE_COMMUNICATION
+    } else {
+        AudioAttributes.USAGE_ASSISTANT
+    }
     private var record = first
     private var effects = effects(first)
     // The times the microphone was opened again since it last gave audio.
@@ -468,7 +476,7 @@ class VoiceSession private constructor(
         private fun track(rate: Int): AudioTrack = AudioTrack.Builder()
             .setAudioAttributes(
                 AudioAttributes.Builder()
-                    .setUsage(AudioAttributes.USAGE_VOICE_COMMUNICATION)
+                    .setUsage(usage)
                     .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
                     .build(),
             )

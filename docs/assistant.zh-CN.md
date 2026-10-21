@@ -207,7 +207,7 @@ Mavio 助手服务是一个仿照 Pipecat 的 OpenClaw 网关实现的 Pipecat `
 ### 8.5 音频与回声
 * **上行**：16 kHz 单声道 16 位 PCM，以 20 毫秒的二进制帧发送。客户端开启平台的回声消除、降噪与自动增益采集它，使助手听不到自己；插件自身不需要回声消除，也不需要 WebRTC。
 * **下行**：回答的语音，以 16 位 PCM 的二进制帧发送，采样率由会话的 `ready` 事件给出（24 kHz）。
-* **各平台**（§9）：浏览器 `getUserMedia` 的约束 `echoCancellation`、`noiseSuppression` 与 `autoGainControl`；Apple 上，输入节点开启语音处理的 `AVAudioEngine`，它消除引擎自己播放内容的回声；Android 上，来自 `VOICE_COMMUNICATION` 的 `AudioRecord`，搭配 `AcousticEchoCanceler` 与 `NoiseSuppressor`，通过 `USAGE_VOICE_COMMUNICATION` 的 `AudioTrack` 播放。
+* **各平台**（§9）：浏览器 `getUserMedia` 的约束 `echoCancellation`、`noiseSuppression` 与 `autoGainControl`；Apple 上，输入节点开启语音处理的 `AVAudioEngine`，它消除引擎自己播放内容的回声；Android 上，来自 `VOICE_COMMUNICATION` 的 `AudioRecord`，搭配 `AcousticEchoCanceler` 与 `NoiseSuppressor`，通过 `USAGE_VOICE_COMMUNICATION` 的 `AudioTrack` 播放；没有听筒的设备（如电视）改用 `USAGE_ASSISTANT`，以跟随媒体音量。
 
 ### 8.6 协议
 WebSocket 承载二进制音频帧（§8.5）与 JSON 事件 `{"type": …}`，客户端与服务端之间、服务端与插件之间相同：

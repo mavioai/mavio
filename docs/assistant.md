@@ -207,7 +207,7 @@ The Mavio assistant service is a Pipecat `AIService` modeled on Pipecat's OpenCl
 ### 8.5 Audio and Echo
 * **Up**: 16 kHz mono 16-bit PCM in binary frames of 20 ms. The client captures it with the platform's echo cancellation, noise suppression and gain control on, so that the assistant does not hear itself; the plugin needs no echo cancellation of its own, and no WebRTC.
 * **Down**: the answer's speech as 16-bit PCM in binary frames, at the rate the session's `ready` event gives (24 kHz).
-* **Platforms** (§9): the browser's `getUserMedia` constraints `echoCancellation`, `noiseSuppression` and `autoGainControl`; on Apple, `AVAudioEngine` with voice processing on its input node, which cancels the echo of what the engine plays; on Android, `AudioRecord` from `VOICE_COMMUNICATION` with `AcousticEchoCanceler` and `NoiseSuppressor`, playing through an `AudioTrack` with `USAGE_VOICE_COMMUNICATION`.
+* **Platforms** (§9): the browser's `getUserMedia` constraints `echoCancellation`, `noiseSuppression` and `autoGainControl`; on Apple, `AVAudioEngine` with voice processing on its input node, which cancels the echo of what the engine plays; on Android, `AudioRecord` from `VOICE_COMMUNICATION` with `AcousticEchoCanceler` and `NoiseSuppressor`, playing through an `AudioTrack` with `USAGE_VOICE_COMMUNICATION`, or `USAGE_ASSISTANT` on a device without an earpiece, as a TV, so that it follows the media's volume.
 
 ### 8.6 Protocol
 The WebSocket carries binary audio frames (§8.5) and JSON events, `{"type": …}`, the same between the client and the server and between the server and the plugin:
