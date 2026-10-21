@@ -63,6 +63,7 @@ import dev.mavio.ui.SettingsButton
 import dev.mavio.ui.SettingsField
 import dev.mavio.ui.SettingsList
 import dev.mavio.ui.SubtitlesAudioSettings
+import dev.mavio.ui.AssistantSettings
 import dev.mavio.ui.TvMenu
 import dev.mavio.ui.TvMenuItem
 import dev.mavio.ui.signedInAccount
@@ -77,6 +78,7 @@ enum class SettingsSection {
     Account,
     Playback,
     SubtitlesAudio,
+    Assistant,
     About,
 }
 
@@ -95,6 +97,7 @@ fun SettingsPage(model: AppModel, page: Page.Settings) {
         SettingsSection.Account -> AccountSection(model)
         SettingsSection.Playback -> PlaybackSettings()
         SettingsSection.SubtitlesAudio -> SubtitlesAudioSettings(model)
+        SettingsSection.Assistant -> AssistantSettings(model)
         SettingsSection.About -> AboutSettings(model)
     }
 }
@@ -158,6 +161,13 @@ private fun SettingsListPage(model: AppModel, page: Page.Settings) {
                         Color(0xFF34C759),
                         Modifier.focusKey(focus, "subtitles"),
                     ) { open(SettingsSection.SubtitlesAudio) }
+                    RowDivider(tiled = true)
+                    EntryRow(
+                        stringResource(R.string.assistant_title),
+                        R.drawable.ic_microphone_fill,
+                        Color(0xFFFF2D55),
+                        Modifier.focusKey(focus, "assistant"),
+                    ) { open(SettingsSection.Assistant) }
                 }
             }
         }
