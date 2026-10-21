@@ -1842,7 +1842,7 @@
   "issues.reportedBy": { "message": "Reported by {name}", "description": "Who reported an issue." },
   "issues.administrator": { "message": "Administrator", "description": "A commenter other than the user, for users who are not administrators." },
   "issues.intro": { "message": "Problems reported with the server's movies and shows: your own, or everyone's for administrators.", "description": "Explains the settings' issues." },
-  "conversations.message": { "message": "Talk with the models of the AI providers. Conversations are kept on the server and shared by its administrators, the users' conversations with the assistant among them.", "description": "Footer of the AI settings' conversations." },
+  "conversations.message": { "message": "Talk with the models of the AI providers. Conversations are kept on the server, the users' conversations with the assistant among them.", "description": "Footer of the AI settings' conversations." },
   "conversations.noPlugin": { "message": "No AI agent plugin", "description": "Row when no plugin keeping conversations runs on the server." },
   "conversations.noPluginFooter": { "message": "Conversations are kept by an AI agent plugin and use the providers of an AI gateway plugin.", "description": "Footer explaining why an AI agent plugin is needed." },
   "conversations.new": { "message": "New Conversation", "description": "Title of the form starting a conversation." },
