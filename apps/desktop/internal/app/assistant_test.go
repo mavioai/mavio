@@ -101,3 +101,55 @@ func TestAssistant(t *testing.T) {
 		t.Errorf("the panel stayed open")
 	}
 }
+
+func TestAssistantPrefs(t *testing.T) {
+	h := newHarness(t, true, 1280, 900)
+	h.app.router.Push("/settings/assistant")
+	h.settle()
+	want := func(texts ...string) {
+		t.Helper()
+		for _, w := range texts {
+			if !h.tt.HasText(w) {
+				t.Errorf("no %q; texts = %q", w, h.tt.Texts())
+			}
+		}
+	}
+	as := h.core.assistant
+	memories := func() []string {
+		as.mu.Lock()
+		defer as.mu.Unlock()
+		var out []string
+		for _, m := range as.memories {
+			out = append(out, m.GetText())
+		}
+		return out
+	}
+
+	// The memories and the conversations.
+	want("Memory", "Likes science fiction", "Watches with subtitles in English", "Remember", "Conversations", "Oct 20, 2026, 8:30 PM", "Living Room TV")
+
+	// A memory added, and one forgotten from its menu.
+	h.app.settingsState.assistant.text = "Prefers dubbed anime"
+	h.settle()
+	h.click("Remember")
+	want("Prefers dubbed anime")
+	if got := memories(); len(got) != 3 {
+		t.Errorf("memories = %q, want = 3 of them", got)
+	}
+	h.click("More")
+	h.settle()
+	h.click("Forget")
+	h.settle()
+	if got := memories(); len(got) != 2 || got[0] != "Watches with subtitles in English" {
+		t.Errorf("memories = %q, want = the first forgotten", got)
+	}
+
+	// A conversation's messages, shown under it.
+	h.click("Living Room TV")
+	h.settle()
+	want("Play something funny", "Playing Paddington.", "Delete Conversation")
+	h.save(shots, "settings-assistant")
+	h.click("Delete Conversation")
+	h.settle()
+	want("No conversations yet.")
+}

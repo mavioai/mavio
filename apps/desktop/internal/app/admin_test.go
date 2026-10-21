@@ -7,7 +7,7 @@ import (
 )
 
 func TestAdmin(t *testing.T) {
-	h := newHarness(t, true, 1280, 1200)
+	h := newHarness(t, true, 1280, 1400)
 	h.tt.Key(ui.Cmd, ui.KeyComma)
 	h.settle()
 	open := func(label string) {

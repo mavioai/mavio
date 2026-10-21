@@ -65,6 +65,7 @@ var settingsSections = []settingsSection{
 	{id: "appearance", icon: "appearance", color: ui.RGB(0x5E, 0x5C, 0xE6), title: "settings.appearance"},
 	{id: "playback", icon: "play", color: ui.RGB(0xFF, 0x3B, 0x30), title: "settings.playback"},
 	{id: "subtitles-audio", icon: "subtitles", color: ui.RGB(0x34, 0xC7, 0x59), title: "settings.subtitlesAudio"},
+	{id: "assistant", icon: "microphone", color: ui.RGB(0xFF, 0x2D, 0x55), title: "assistant.title"},
 	{id: "account", icon: "profile", color: ui.RGB(0xFF, 0x95, 0x00), title: "settings.account"},
 	{id: "devices", icon: "devices", color: ui.RGB(0x32, 0xAD, 0xE6), title: "settings.devices"},
 }
@@ -100,7 +101,7 @@ var settingsGroups = []struct {
 	entries []string
 	server  bool
 }{
-	{"settings.thisDevice", []string{"appearance", "playback", "subtitles-audio"}, false},
+	{"settings.thisDevice", []string{"appearance", "playback", "subtitles-audio", "assistant"}, false},
 	{"settings.serverGroup", []string{"overview", "general", "users", "devices", "media", "acquiring", "ai", "plugins", "proxies", "maintenance"}, true},
 }
 
@@ -143,6 +144,8 @@ type settingsState struct {
 	// users are the user signed in to each server.
 	users map[string]*task[*userv1.User]
 	admin adminState
+	// assistant is this device's Assistant section.
+	assistant assistantPrefsState
 
 	languages languagesForm
 	sessions  task[[]*sessionv1.Session]
@@ -419,6 +422,8 @@ func (a *App) settingsSection(c *ui.Context, r *ui.Route, id string) {
 		a.playbackSection(c)
 	case "subtitles-audio":
 		a.languagesSection(c)
+	case "assistant":
+		a.assistantPrefs(c)
 	case "account":
 		a.accountSection(c)
 	case "devices":

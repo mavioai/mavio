@@ -31,6 +31,10 @@ type fakeAssistant struct {
 	mu       sync.Mutex
 	asks     []*assistantv1.AskRequest
 	settings *assistantv1.AssistantSettings
+	// memories and convs are the user's, as fakeAssistantPrefs makes them.
+	memories []*assistantv1.AssistantMemory
+	convs    []*assistantv1.AssistantConversation
+	prefs    bool
 }
 
 func (a *fakeAssistant) requests() []*assistantv1.AskRequest {
@@ -41,7 +45,7 @@ func (a *fakeAssistant) requests() []*assistantv1.AskRequest {
 
 func (a *fakeAssistant) GetAssistant(context.Context, *assistantv1.GetAssistantRequest) (*assistantv1.GetAssistantResponse, error) {
 	return assistantv1.GetAssistantResponse_builder{
-		Enabled: new(true), Ai: new(true), Examples: []string{"Play The Long Orbit", "Space films"},
+		Enabled: new(true), Ai: new(true), Memory: new(true), Examples: []string{"Play The Long Orbit", "Space films"},
 	}.Build(), nil
 }
 
