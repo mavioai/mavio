@@ -437,7 +437,7 @@ fun ManagedLibraryScreen(model: AppModel, route: AdminPage.ManagedLibrary) {
                     horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s8),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    SettingsField(typed, { typed = it }, stringResource(R.string.libraries_folder_path), Modifier.weight(1f))
+                    SettingsField(typed, { typed = it }, null, Modifier.weight(1f), placeholder = stringResource(R.string.libraries_folder_path))
                     SettingsButton(
                         stringResource(R.string.libraries_add_folder),
                         {

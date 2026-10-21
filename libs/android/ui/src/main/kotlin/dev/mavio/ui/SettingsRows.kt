@@ -7,6 +7,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.animateScrollBy
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,13 +28,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LocalContentColor
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
@@ -58,6 +59,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
@@ -75,6 +77,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.mavio.design.LightColors
+import dev.mavio.design.MavioRadius
 import dev.mavio.design.MavioSpacing
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.flow.first
@@ -542,26 +545,45 @@ fun SettingsField(
         TvField(value, onChange, label, modifier, placeholder, keyboard, error, secret)
         return
     }
-    OutlinedTextField(
-        value,
-        onChange,
-        modifier,
-        label = label?.let { { Text(it) } },
-        placeholder = placeholder?.let { { Text(it) } },
-        singleLine = true,
-        isError = error,
-        visualTransformation = if (secret) PasswordVisualTransformation() else VisualTransformation.None,
-        keyboardOptions = KeyboardOptions(keyboardType = keyboard, autoCorrectEnabled = false),
-        shape = RoundedCornerShape(10.dp),
-        colors = OutlinedTextFieldDefaults.colors(
-            focusedContainerColor = theme.colors.fill,
-            unfocusedContainerColor = theme.colors.fill,
-            focusedBorderColor = theme.colors.textSecondary,
-            unfocusedBorderColor = theme.colors.border,
-            focusedLabelColor = theme.colors.textSecondary,
-            cursorColor = theme.colors.textPrimary,
-        ),
-    )
+    // As the web UI's settings fields: as tall as its buttons, on the card's
+    // color with a border, which turns the focus color while typing.
+    val interactions = remember { MutableInteractionSource() }
+    val focused by interactions.collectIsFocusedAsState()
+    val shape = RoundedCornerShape(MavioRadius.md)
+    val edge = when {
+        error -> theme.colors.danger
+        focused -> theme.colors.focus
+        else -> theme.colors.border
+    }
+    Column(modifier, verticalArrangement = Arrangement.spacedBy(MavioSpacing.s4)) {
+        if (label != null) Text(label, style = theme.type.footnote.text, color = theme.colors.textSecondary)
+        BasicTextField(
+            value,
+            onChange,
+            Modifier.fillMaxWidth(),
+            singleLine = true,
+            textStyle = theme.type.body.text.copy(color = theme.colors.textPrimary),
+            cursorBrush = SolidColor(theme.colors.textPrimary),
+            visualTransformation = if (secret) PasswordVisualTransformation() else VisualTransformation.None,
+            keyboardOptions = KeyboardOptions(keyboardType = keyboard, autoCorrectEnabled = false),
+            interactionSource = interactions,
+        ) { inner ->
+            Box(
+                Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 36.dp)
+                    .background(theme.colors.surface, shape)
+                    .border(1.dp, edge, shape)
+                    .padding(horizontal = MavioSpacing.s12),
+                Alignment.CenterStart,
+            ) {
+                if (value.isEmpty() && placeholder != null) {
+                    Text(placeholder, style = theme.type.body.text, color = theme.colors.textTertiary, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                }
+                inner()
+            }
+        }
+    }
 }
 
 /** [SettingsField] on a television. */

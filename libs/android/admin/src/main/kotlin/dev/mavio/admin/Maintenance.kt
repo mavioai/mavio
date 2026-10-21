@@ -434,7 +434,7 @@ fun LogsPage(model: AppModel, serverId: String) {
                     ) { hours = it }
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s8), verticalAlignment = Alignment.CenterVertically) {
-                    SettingsField(filter, { filter = it }, stringResource(R.string.logs_filter), Modifier.weight(1f))
+                    SettingsField(filter, { filter = it }, null, Modifier.weight(1f), placeholder = stringResource(R.string.logs_filter))
                     SettingsButton(if (fetching) "…" else stringResource(R.string.logs_refresh), { reload++ }, kind = ButtonKind.Secondary, enabled = !fetching)
                 }
             }

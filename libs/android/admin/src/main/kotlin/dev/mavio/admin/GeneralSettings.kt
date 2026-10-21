@@ -481,7 +481,7 @@ fun ApiKeysPage(model: AppModel, serverId: String) {
                     horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s12),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    SettingsField(name, { name = it }, stringResource(R.string.keys_name), Modifier.weight(1f))
+                    SettingsField(name, { name = it }, null, Modifier.weight(1f), placeholder = stringResource(R.string.keys_name))
                     SettingsButton(if (creating) "…" else stringResource(R.string.keys_create), ::create, enabled = name.isNotBlank() && !creating)
                 }
                 createFailure?.let { Text(it, Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp), style = theme.type.callout.text, color = theme.colors.danger) }
