@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -46,6 +47,7 @@ import dev.mavio.core.AppModel
 import dev.mavio.core.call
 import dev.mavio.design.MavioSpacing
 import dev.mavio.ui.AccountCard
+import dev.mavio.ui.ChoiceMenuBox
 import dev.mavio.ui.ChoiceRow
 import dev.mavio.ui.MavioIcon
 import dev.mavio.ui.R
@@ -206,6 +208,60 @@ private fun Menu(menu: ServerMenu, serverId: String, section: Route?, onSelect: 
     if (open) {
         Column(Modifier.padding(start = 24.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
             menu.sections.forEach { s -> Link(s.title, s.icon, s.color, Route.Admin(AdminPage.ServerSetting(serverId, s)), section, onSelect) }
+        }
+    }
+}
+
+/**
+ * The choice of server at the title of a server's section or menu
+ * [route], as the web UI's on a phone: with a Mavio account, the servers
+ * signed in to, another's taking the page's place; null on other pages.
+ */
+@Composable
+internal fun serverTitleChoice(model: AppModel, route: Route): (@Composable () -> Unit)? {
+    val page = (route as? Route.Admin)?.page
+    val serverId = when (page) {
+        is AdminPage.ServerSetting -> page.serverId
+        is AdminPage.ServerMenuPage -> page.serverId
+        else -> return null
+    }
+    if (signedInAccount(model) == null) return null
+    val servers = signedInServers(model)
+    val navigator = LocalNavigator.current
+    return {
+        ChoiceMenuBox(
+            servers.map { it.id to it.name },
+            serverId,
+            { id ->
+                if (id != serverId) {
+                    navigator.replace(
+                        Route.Admin(
+                            when (page) {
+                                is AdminPage.ServerSetting -> page.copy(serverId = id)
+                                is AdminPage.ServerMenuPage -> page.copy(serverId = id)
+                                else -> page
+                            },
+                        ),
+                    )
+                }
+            },
+            Modifier.widthIn(max = 200.dp),
+        ) { open ->
+            Row(
+                Modifier.clip(RoundedCornerShape(8.dp)).clickable(onClick = open).padding(vertical = 4.dp, horizontal = 2.dp),
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    servers.firstOrNull { it.id == serverId }?.name.orEmpty(),
+                    Modifier.weight(1f, fill = false),
+                    style = theme.type.callout.text,
+                    color = theme.colors.textSecondary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                MavioIcon(R.drawable.ic_selector, size = 14.dp, tint = theme.colors.textSecondary)
+            }
         }
     }
 }

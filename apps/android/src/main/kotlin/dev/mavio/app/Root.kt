@@ -116,6 +116,7 @@ import dev.mavio.ui.CatalogFilters
 import dev.mavio.ui.LocalAssistant
 import dev.mavio.ui.LocalDiscover
 import dev.mavio.ui.LocalPageTitles
+import dev.mavio.ui.LocalTitleAccessory
 import dev.mavio.ui.LocalTheme
 import dev.mavio.ui.MavioIcon
 import dev.mavio.ui.PageTitles
@@ -424,6 +425,8 @@ private fun Shell(model: AppModel) {
                                     LocalBottomInset provides if (route == stack.firstOrNull()) rootInset else bars,
                                     LocalHeaderRoute provides route,
                                     LocalPageTitles provides PageTitles { title, bottom -> backdrop.title(route, title, bottom) },
+                                    // Without the wide layout's sidebar, a server's section or menu names the server chosen at its title.
+                                    LocalTitleAccessory provides if (settings) null else serverTitleChoice(model, route),
                                 ) {
                                     // The screen's title goes with it, while it stays where it was when its title scrolled away.
                                     DisposableEffect(route) { onDispose { backdrop.title(route, null, 0f) } }

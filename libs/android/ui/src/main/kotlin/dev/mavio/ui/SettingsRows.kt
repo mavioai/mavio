@@ -245,7 +245,18 @@ fun SettingsList(
                         Modifier.pageTitle(title),
                         verticalArrangement = Arrangement.spacedBy(MavioSpacing.s4),
                     ) {
-                        Text(title, style = (if (large) theme.type.title1 else theme.type.title2).text, fontWeight = FontWeight.Bold)
+                        val heading = @Composable { modifier: Modifier ->
+                            Text(title, modifier, style = (if (large) theme.type.title1 else theme.type.title2).text, fontWeight = FontWeight.Bold)
+                        }
+                        val accessory = LocalTitleAccessory.current
+                        if (accessory == null) {
+                            heading(Modifier)
+                        } else {
+                            Row(horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s16), verticalAlignment = Alignment.CenterVertically) {
+                                heading(Modifier.weight(1f))
+                                accessory()
+                            }
+                        }
                         if (message != null) Text(message, style = theme.type.callout.text, color = theme.colors.textSecondary)
                     }
                 }
@@ -264,6 +275,9 @@ fun interface PageTitles {
     /** Reports the page's [title] ending [bottom] pixels down the window, or none. */
     fun report(title: String?, bottom: Float)
 }
+
+/** What a [SettingsList] shows at the right of its title, as the web UI's choice of server on a phone. */
+val LocalTitleAccessory = staticCompositionLocalOf<(@Composable () -> Unit)?> { null }
 
 /** Where the page shown reports its large title, if anywhere. */
 val LocalPageTitles = staticCompositionLocalOf<PageTitles?> { null }
