@@ -1,8 +1,12 @@
 package app
 
 import (
+	"bytes"
 	"context"
+	"slices"
 	"testing"
+
+	"github.com/egoist/mygo/ui"
 
 	capiv1 "github.com/mavioai/mavio/libs/client-rust/capi/gen/mavio/capi/v1"
 )
@@ -45,14 +49,26 @@ func TestSettingsSidebarFlat(t *testing.T) {
 	h.save(shots, "settings-sidebar")
 }
 
-// Going from the settings to Home, Home shows at once, not fading in.
-func TestSettingsToHome(t *testing.T) {
+// Going between the settings' layout and the app's, the page shows at
+// once, both ways, the frame after the change as it is once settled.
+func TestSettingsLayoutInstant(t *testing.T) {
 	h := newHarness(t, true, 1280, 800)
-	h.app.router.Push("/settings/appearance")
-	h.settle()
-	h.app.router.Push("/home")
-	h.tt.Frame()
-	if !h.tt.HasText("Continue Watching") {
-		t.Errorf("Home did not show at once; texts = %q", h.tt.Texts())
+	steps := []struct {
+		name string
+		go_  func()
+	}{
+		{"to the settings by the shortcut", func() { h.tt.Key(ui.Cmd, ui.KeyComma) }},
+		{"to Home", func() { h.app.router.Push("/home") }},
+		{"to the settings by the menu", func() { h.app.router.Push("/settings") }},
+		{"to Home by Back", func() { h.app.router.Back() }},
+	}
+	for _, s := range steps {
+		s.go_()
+		h.tt.Frame()
+		first := slices.Clone(h.tt.Image().Pix)
+		h.settle()
+		if !bytes.Equal(first, h.tt.Image().Pix) {
+			t.Errorf("%s: the page faded in", s.name)
+		}
 	}
 }

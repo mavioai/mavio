@@ -107,8 +107,8 @@ var settingsGroups = []struct {
 }{
 	{"settings.thisDevice", []string{"appearance", "playback", "subtitles-audio", "assistant"}, false},
 	{"settings.serverGroup", []string{"overview", "general", "users", "devices", "media", "acquiring", "ai", "plugins", "proxies", "maintenance"}, true},
-	// About, last, in a group of its own without a title.
-	{"", []string{"about"}, false},
+	// About, last, in a group of its own, as the other apps'.
+	{"settings.about", []string{"about"}, false},
 }
 
 func menuOf(id string) (settingsMenu, bool) {
@@ -214,6 +214,7 @@ func (a *App) settings(c *ui.Context, r *ui.Route) {
 	if id == "" {
 		// A section, so that going to another fades it in rather than
 		// sliding in as a page deeper.
+		a.instantPage = true
 		a.replace("/settings/appearance")
 		id = "appearance"
 	}

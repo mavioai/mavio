@@ -140,8 +140,10 @@ type App struct {
 	opts   Options
 	prefs  preferences
 	router *ui.Router
-	// inSettings is whether the last frame showed the settings' layout.
-	inSettings bool
+	// inSettings is whether the last frame showed the settings' layout;
+	// instantPage shows the next page at once, not fading in, as one
+	// going between the layouts.
+	inSettings, instantPage bool
 
 	phase phase
 	// players are what play: in windows of their own, or one in the
@@ -450,7 +452,10 @@ func (a *App) View(c *ui.Context) {
 		// would show through what the other layout left.
 		settings := strings.HasPrefix(a.router.Path(), "/settings")
 		if settings != a.inSettings {
-			a.inSettings = settings
+			a.inSettings, a.instantPage = settings, true
+		}
+		if a.instantPage {
+			a.instantPage = false
 			transition := a.router.Transition
 			a.router.Transition = ui.TransitionNone
 			defer func() { a.router.Transition = transition }()

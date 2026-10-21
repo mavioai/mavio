@@ -37,8 +37,8 @@ func (a *App) person(c *ui.Context, r *ui.Route, server, id string) {
 	})
 	cards := load(a, &st.items, key("personItems", server, id, a.generation), func(ctx context.Context) ([]*capiv1.Card, error) {
 		res, err := items.ListItems(ctx, libraryv1.ListItemsRequest_builder{
-			PersonId: &id, Recursive: new(true),
-			Kinds: []libraryv1.ItemKind{libraryv1.ItemKind_ITEM_KIND_MOVIE, libraryv1.ItemKind_ITEM_KIND_SERIES, libraryv1.ItemKind_ITEM_KIND_EPISODE},
+			PersonId: &id,
+			Kinds:    []libraryv1.ItemKind{libraryv1.ItemKind_ITEM_KIND_MOVIE, libraryv1.ItemKind_ITEM_KIND_SERIES, libraryv1.ItemKind_ITEM_KIND_EPISODE},
 			Sort: []*libraryv1.SortSpec{
 				libraryv1.SortSpec_builder{Field: new(libraryv1.SortField_SORT_FIELD_PREMIERE_DATE), Descending: new(true)}.Build(),
 			},

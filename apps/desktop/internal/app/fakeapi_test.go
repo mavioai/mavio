@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"slices"
@@ -232,6 +233,10 @@ func (api *fakeAPI) GetPerson(_ context.Context, r *libraryv1.GetPersonRequest) 
 }
 
 func (api *fakeAPI) ListItems(_ context.Context, r *libraryv1.ListItemsRequest) (*libraryv1.ListItemsResponse, error) {
+	// As the server's query (core.ItemQuery.Validate).
+	if r.GetRecursive() && r.GetParentId() == "" {
+		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("invalid: recursive query without a parent"))
+	}
 	var items []*libraryv1.Item
 	switch {
 	case r.GetOwnerId() != "":
