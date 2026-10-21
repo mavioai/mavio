@@ -97,8 +97,7 @@ const (
 
 // preferences are the user's choices on this device.
 type preferences struct {
-	Appearance       Appearance `json:"appearance,omitempty"`
-	SidebarCollapsed bool       `json:"sidebarCollapsed,omitempty"`
+	Appearance Appearance `json:"appearance,omitempty"`
 	// SidebarWidth is the width the sidebar's edge was dragged to, shared
 	// by the app's sidebar and the settings'; the layout's when zero.
 	SidebarWidth float32 `json:"sidebarWidth,omitempty"`
@@ -168,8 +167,7 @@ type App struct {
 	// tvKeys is the TV mode's keyboard for fields.
 	tvKeys tvKeyboard
 	// pagePath is the path of the page being built.
-	pagePath    string
-	sidebarOpen bool // the sidebar shown over the content in medium width
+	pagePath string
 	// sidebarResizing tells that the sidebar's edge is being dragged, to
 	// keep the width it ends at.
 	sidebarResizing bool

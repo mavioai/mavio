@@ -102,22 +102,9 @@ func (a *App) search(c *ui.Context) {
 		a.tvSearch(c, query)
 		return
 	}
-	// The expanded sidebar has the field already.
-	w, _ := c.Size()
-	var field func()
-	if w < design.BreakpointExpanded || a.prefs.SidebarCollapsed {
-		field = func() {
-			f := ui.SearchField(c, &s.query).Placeholder(style.T(c, "search.placeholder")).Grow(1).MaxWidth(560).Height(36)
-			if query == "" {
-				f.AutoFocus()
-			}
-			if f.Submitted() {
-				a.confirmSearch(true)
-			}
-		}
-	}
+	// The sidebar has the field.
 	ui.Column(c).Fill().Children(func() {
-		a.pageHeader(c, style.T(c, "nav.search"), field)
+		a.pageHeader(c, style.T(c, "nav.search"), nil)
 		if query == "" {
 			return
 		}
@@ -132,14 +119,13 @@ func (a *App) search(c *ui.Context) {
 // confirmSearch searches for the query typed, as the web UI's: on the
 // Search page, in a new entry of the history; results are kept, coming
 // back to them, and confirming the query searched again searches again.
-// Confirming no query clears the Search page's, unless the field is the
-// sidebar's, which then does nothing.
-func (a *App) confirmSearch(clears bool) {
+// Confirming no query does nothing.
+func (a *App) confirmSearch() {
 	q := strings.TrimSpace(a.searchState.query)
 	switch {
 	case q != "" && q == a.searchedQuery():
 		a.searchAgain()
-	case q != "" || clears && a.router.Path() == "/search":
+	case q != "":
 		a.searchFor(q)
 	}
 }

@@ -12,9 +12,8 @@ import (
 )
 
 // userButton builds the foot of the sidebar: the user's avatar, name and
-// server or account, which open the user menu; on the rail, the avatar
-// alone.
-func (a *App) userButton(c *ui.Context, withName bool) {
+// server or account, which open the user menu.
+func (a *App) userButton(c *ui.Context) {
 	if len(a.servers) == 0 {
 		return
 	}
@@ -22,17 +21,10 @@ func (a *App) userButton(c *ui.Context, withName bool) {
 	name, line := a.accountName(c)
 	label := style.T(c, "nav.userMenu", "name", name)
 	b := ui.ButtonBase(c).Margin(8, 12, 12).Padding(8).Gap(10).Radius(10).AlignItems(ui.Center).Label(label)
-	if !withName {
-		b.Size(36, 36).Padding(0).Center().Tooltip(name)
-	}
 	if b.Hovered() || a.userMenuOpen {
 		b.Background(style.Color(colors.Fill))
 	}
 	b.Children(func() {
-		if !withName {
-			avatar(c, name, 28)
-			return
-		}
 		avatar(c, name, 32)
 		ui.Column(c).Grow(1).MinWidth(0).Children(func() {
 			style.Text(ui.Text(c, name), style.Type(c).Callout).FontWeight(600).TextColor(style.Color(colors.TextPrimary)).SingleLine()

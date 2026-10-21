@@ -49,7 +49,6 @@ func tvShowsBar(path string) bool {
 func (a *App) tvShell(c *ui.Context) {
 	colors := style.Colors(c)
 	a.contentWidth, _ = c.Size()
-	a.sidebarOpen = false
 	a.visitPlaces()
 	a.focusPage()
 	a.beginFocus()

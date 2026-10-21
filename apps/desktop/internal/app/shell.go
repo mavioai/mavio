@@ -15,8 +15,9 @@ import (
 	"github.com/mavioai/mavio/apps/desktop/internal/style"
 )
 
-// shell builds the desktop layout: the sidebar, or its rail, beside the
-// page shown.
+// shell builds the desktop layout: the sidebar beside the page shown.
+// It does not collapse: the window's controls would straddle a rail of
+// icons as narrow as the web UI's.
 func (a *App) shell(c *ui.Context) {
 	a.places.tv = style.TV(c)
 	if a.places.tv {
@@ -24,54 +25,26 @@ func (a *App) shell(c *ui.Context) {
 		return
 	}
 	w, _ := c.Size()
-	medium := w < design.BreakpointExpanded
-	expanded := !medium && !a.prefs.SidebarCollapsed
-	if !medium {
-		a.sidebarOpen = false
-	}
-	a.contentWidth = w - style.Layout(c).Rail
-	if expanded {
-		a.contentWidth = w - a.sidebarWidth()
-	}
+	a.contentWidth = w - a.sidebarWidth()
 	colors := style.Colors(c)
 	if c.Vibrancy() {
 		c.Root().Background(ui.Transparent)
 	}
 	a.visitPlaces()
-	path := a.router.Path()
 	ui.Row(c).Fill().AlignItems(ui.Stretch).Children(func() {
-		bar := ui.Column(c).Shrink(0)
-		if expanded {
-			bar.Width(a.sidebarWidth())
-		}
+		bar := ui.Column(c).Shrink(0).Width(a.sidebarWidth())
 		if !c.Vibrancy() {
 			bar.Background(style.Color(colors.Sidebar))
 		}
 		bar.Children(func() {
-			if expanded {
-				a.sidebar(c, medium)
-				a.sidebarResizer(c)
-			} else {
-				a.rail(c, medium)
-			}
+			a.sidebar(c)
+			a.sidebarResizer(c)
 		})
 		ui.Column(c).Grow(1).MinWidth(0).Background(style.Color(colors.Background)).Children(func() {
 			a.router.View(c, func(r *ui.Route) { a.page(c, r) })
 			a.backButton(c)
 		})
 	})
-	if a.sidebarOpen {
-		scrim := ui.Box(c).Absolute().Top(0).Left(0).Right(0).Bottom(0).Background(style.Color(colors.Scrim).Alpha(0.3))
-		if scrim.Clicked() || c.Shortcut(0, ui.KeyEscape) {
-			a.sidebarOpen = false
-		}
-		ui.Column(c).Absolute().Top(0).Left(0).Bottom(0).Background(style.Color(colors.Sidebar)).
-			Shadow(0, 12, 32, 0, style.Color(design.ElevationLevel3.Color)).
-			Children(func() { a.sidebar(c, medium) })
-	}
-	if a.router.Path() != path {
-		a.sidebarOpen = false
-	}
 }
 
 // sidebarWidths are the widths the sidebar's edge is dragged between.
@@ -260,36 +233,21 @@ func libraryIcon(k capiv1.LibraryType) string {
 }
 
 // titleBar builds the band under the window controls, which drags the
-// window, with the button that collapses or expands the sidebar.
-func (a *App) titleBar(c *ui.Context, medium, expanded bool) {
+// window, with the assistant's button.
+func (a *App) titleBar(c *ui.Context) {
 	bar := c.TitleBar()
 	h := max(bar.Height, 28)
-	row := ui.Row(c).Height(h + style.Layout(c).Gutter/2).AlignItems(ui.Center).DragWindow()
-	// The rail is as narrow as the web UI's, narrower than the window's
-	// controls, which reach past it over the page: its band keeps its width.
-	if !expanded {
-		return
-	}
-	row.PaddingStart(bar.Left).PaddingEnd(8).Children(func() {
+	ui.Row(c).Height(h + style.Layout(c).Gutter/2).PaddingStart(bar.Left).PaddingEnd(8).AlignItems(ui.Center).DragWindow().Children(func() {
 		ui.Spacer(c)
 		a.assistantButton(c, nil, 28)
-		label := style.T(c, "nav.collapseSidebar")
-		if iconButton(c, "sidebar", label).Clicked() {
-			if medium {
-				a.sidebarOpen = false
-			} else {
-				a.prefs.SidebarCollapsed = true
-				a.savePreferences()
-			}
-		}
 	})
 }
 
-// sidebar builds the expanded sidebar.
-func (a *App) sidebar(c *ui.Context, medium bool) {
+// sidebar builds the sidebar.
+func (a *App) sidebar(c *ui.Context) {
 	top, sections := a.navItems(c)
 	ui.Column(c).Width(a.sidebarWidth()).Fill().Label(style.T(c, "nav.navigation")).Children(func() {
-		a.titleBar(c, medium, true)
+		a.titleBar(c)
 		ui.Scroll(c).Grow(1).Children(func() {
 			ui.Column(c).Padding(0, 12, 12).Gap(2).Children(func() {
 				for _, it := range top {
@@ -308,7 +266,7 @@ func (a *App) sidebar(c *ui.Context, medium bool) {
 				}
 			})
 		})
-		a.userButton(c, true)
+		a.userButton(c)
 	})
 }
 
@@ -329,7 +287,7 @@ func (a *App) sidebarSearch(c *ui.Context) {
 			f.Focus()
 		}
 		if f.Submitted() {
-			a.confirmSearch(false)
+			a.confirmSearch()
 		}
 		if s.query == "" {
 			keys := "⌘K"
@@ -369,60 +327,6 @@ func (a *App) sidebarRow(c *ui.Context, it navItem, selected bool) {
 	if row.Clicked() {
 		a.openPlace(it.path)
 	}
-}
-
-// rail builds the sidebar collapsed to a rail of icons.
-func (a *App) rail(c *ui.Context, medium bool) {
-	top, sections := a.navItems(c)
-	colors := style.Colors(c)
-	ui.Column(c).Width(style.Layout(c).Rail).Fill().Label(style.T(c, "nav.navigation")).Children(func() {
-		a.titleBar(c, medium, false)
-		ui.Row(c).Justify(ui.Center).Padding(0, 0, 8).Children(func() {
-			if iconButton(c, "sidebar", style.T(c, "nav.expandSidebar")).Clicked() {
-				if medium {
-					a.sidebarOpen = true
-				} else {
-					a.prefs.SidebarCollapsed = false
-					a.savePreferences()
-				}
-			}
-		})
-		ui.Scroll(c).Grow(1).Children(func() {
-			ui.Column(c).Padding(0, 8, 8).Gap(8).AlignItems(ui.Center).Children(func() {
-				items := top
-				for _, s := range sections {
-					items = append(items, s.items...)
-				}
-				for i, it := range items {
-					if i == len(top) {
-						ui.Box(c).Height(1).Margin(4, 12).Background(style.Color(colors.Border))
-					}
-					selected := a.places.current == it.path
-					cell := ui.ButtonBase(c.Key(it.path)).Size(36, 36).Radius(10).Center().Label(it.label).Tooltip(it.label)
-					switch {
-					case selected:
-						cell.Background(style.Color(colors.FillSelected))
-					case cell.Hovered():
-						cell.Background(style.Color(colors.Fill))
-					}
-					cell.Children(func() {
-						if it.tile != nil {
-							toolTile(c, it.icon, *it.tile, 24)
-						} else {
-							ui.Icon(c, style.Icon(it.icon, selected)).Size(20, 20).TextColor(style.Color(colors.TextPrimary))
-						}
-					})
-					if cell.Clicked() {
-						a.openPlace(it.path)
-					}
-					if it.path == "/search" {
-						ui.Row(c).Justify(ui.Center).Children(func() { a.assistantButton(c, nil, 36) })
-					}
-				}
-			})
-		})
-		a.userButton(c, false)
-	})
 }
 
 // iconButton builds a borderless button of an icon.

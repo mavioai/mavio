@@ -93,33 +93,6 @@ func TestSearch(t *testing.T) {
 	}
 }
 
-// Where no expanded sidebar shows a field, the Search page has its own,
-// with the focus as it opens.
-func TestSearchPageField(t *testing.T) {
-	h := newHarness(t, true, 800, 800)
-	h.app.router.Push("/search")
-	h.settle()
-	h.save(shots, "search-page")
-	h.tt.Type("orb")
-	h.tt.Key(0, ui.KeyEnter)
-	for range 20 {
-		if h.tt.HasText("The Long Orbit") {
-			break
-		}
-		h.settle()
-	}
-	if !h.tt.HasText("The Long Orbit") {
-		t.Errorf("no results; texts = %q", h.tt.Texts())
-	}
-	// Confirming no query clears the search.
-	h.click("Clear")
-	h.tt.Key(0, ui.KeyEnter)
-	h.settle()
-	if l := h.app.router.Location(); l != "/search" || h.tt.HasText("The Long Orbit") {
-		t.Errorf("location = %q, texts = %q, want = /search with no results", l, h.tt.Texts())
-	}
-}
-
 // A server the core cannot search shows as unreachable, the results of
 // discovery still shown.
 func TestSearchFailed(t *testing.T) {
