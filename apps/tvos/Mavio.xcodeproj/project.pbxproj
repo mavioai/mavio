@@ -12,16 +12,52 @@
 		BD1F73831A1E68036682E539 /* MavioKit in Frameworks */ = {isa = PBXBuildFile; productRef = 0668BFF65AE43E119995D145 /* MavioKit */; };
 		11AD12A77E4BB00F0DEE2D7B /* MavioPlayer in Frameworks */ = {isa = PBXBuildFile; productRef = 687C4571271414558C8E058F /* MavioPlayer */; };
 		197D781A416212103099E0F6 /* MavioUI in Frameworks */ = {isa = PBXBuildFile; productRef = CD489BBB75D4EC66599810CE /* MavioUI */; };
+		DA26F30230F2744F5655F61E /* TopShelf.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = EA7DEB93CF53FCBE7691A436 /* TopShelf.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		EEA0BA2B4E9D89B644E52B56 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 4CDB08CC50F9F8AF4D3F9FE4 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = E91571BC0BA9D65B362F5875;
+			remoteInfo = TopShelf;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		B27CF9B554E58741EAF2CAA8 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				DA26F30230F2744F5655F61E /* TopShelf.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		C9E9C8F8589D327D3CDB7C3E /* Mavio.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Mavio.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		EA7DEB93CF53FCBE7691A436 /* TopShelf.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = TopShelf.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		6F30B6FADB8E25113EA9CDA8 /* Mavio */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = Mavio;
+			sourceTree = "<group>";
+		};
+		2D357F922C6070317D8E0D8C /* TopShelf */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = TopShelf;
+			sourceTree = "<group>";
+		};
+		84DB7FF40A6AD9258119E171 /* Shared */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Shared;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -38,6 +74,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		0422C415F11A39B54BAED16B /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -45,6 +88,8 @@
 			isa = PBXGroup;
 			children = (
 				6F30B6FADB8E25113EA9CDA8 /* Mavio */,
+				2D357F922C6070317D8E0D8C /* TopShelf */,
+				84DB7FF40A6AD9258119E171 /* Shared */,
 				83A7B492C1E34DF7ECE3457A /* Products */,
 			);
 			sourceTree = "<group>";
@@ -53,6 +98,7 @@
 			isa = PBXGroup;
 			children = (
 				C9E9C8F8589D327D3CDB7C3E /* Mavio.app */,
+				EA7DEB93CF53FCBE7691A436 /* TopShelf.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -67,13 +113,16 @@
 				2A07A2951BA3767262E275D0 /* Sources */,
 				583AB965AC056314707581D9 /* Frameworks */,
 				059BEE2F9C79D357AE8B22D9 /* Resources */,
+				B27CF9B554E58741EAF2CAA8 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				1AF09B961505707D5AEEAEAB /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				6F30B6FADB8E25113EA9CDA8 /* Mavio */,
+				84DB7FF40A6AD9258119E171 /* Shared */,
 			);
 			name = Mavio;
 			packageProductDependencies = (
@@ -85,6 +134,27 @@
 			productName = Mavio;
 			productReference = C9E9C8F8589D327D3CDB7C3E /* Mavio.app */;
 			productType = "com.apple.product-type.application";
+		};
+		E91571BC0BA9D65B362F5875 /* TopShelf */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 425B49FC6CAD41C956AE1584 /* Build configuration list for PBXNativeTarget "TopShelf" */;
+			buildPhases = (
+				850CCA757860E601FBCD5925 /* Sources */,
+				0422C415F11A39B54BAED16B /* Frameworks */,
+				5DFB204E336173D113633595 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				2D357F922C6070317D8E0D8C /* TopShelf */,
+				84DB7FF40A6AD9258119E171 /* Shared */,
+			);
+			name = TopShelf;
+			productName = TopShelf;
+			productReference = EA7DEB93CF53FCBE7691A436 /* TopShelf.appex */;
+			productType = "com.apple.product-type.tv-app-extension";
 		};
 /* End PBXNativeTarget section */
 
@@ -114,12 +184,20 @@
 			projectRoot = "";
 			targets = (
 				388577FD57915A2AFA21B120 /* Mavio */,
+				E91571BC0BA9D65B362F5875 /* TopShelf */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		059BEE2F9C79D357AE8B22D9 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5DFB204E336173D113633595 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -136,7 +214,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		850CCA757860E601FBCD5925 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		1AF09B961505707D5AEEAEAB /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = E91571BC0BA9D65B362F5875 /* TopShelf */;
+			targetProxy = EEA0BA2B4E9D89B644E52B56 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		CD66FB417EDA4C49F7EDFB08 /* Debug */ = {
@@ -183,7 +276,9 @@
 		C80778D85036A74D2B093EBC /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = Mavio.entitlements;
 				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -206,7 +301,9 @@
 		6967B33843DAE281E70E672F /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = Mavio.entitlements;
 				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -220,6 +317,46 @@
 				MARKETING_VERSION = 0.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = dev.mavio.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "appletvos appletvsimulator";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = 3;
+			};
+			name = Release;
+		};
+		A6EE7B394F1094919BFB6D50 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = TopShelf.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = TopShelf.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Mavio;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				MARKETING_VERSION = 0.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.mavio.app.topshelf;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "appletvos appletvsimulator";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = 3;
+			};
+			name = Debug;
+		};
+		2467CE3404A6B3E31DAEDFC2 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = TopShelf.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = TopShelf.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Mavio;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				MARKETING_VERSION = 0.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.mavio.app.topshelf;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
 				SUPPORTED_PLATFORMS = "appletvos appletvsimulator";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				TARGETED_DEVICE_FAMILY = 3;
@@ -243,6 +380,15 @@
 			buildConfigurations = (
 				C80778D85036A74D2B093EBC /* Debug */,
 				6967B33843DAE281E70E672F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		425B49FC6CAD41C956AE1584 /* Build configuration list for PBXNativeTarget "TopShelf" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A6EE7B394F1094919BFB6D50 /* Debug */,
+				2467CE3404A6B3E31DAEDFC2 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

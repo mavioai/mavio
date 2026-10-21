@@ -5,7 +5,9 @@ Usage: scripts/gen-project.py ios|tvos|macos
 
 The project's sources are the synchronized folder apps/<app>/Mavio, so adding
 a file needs no change to the project; the project itself changes only when
-this script does. The app depends on the products of libs/apple.
+this script does. The app depends on the products of libs/apple. An app with
+an extension, as Apple TV's Top Shelf, embeds it: its sources are the folder
+named after it, and a Shared folder holds what both compile.
 """
 import hashlib
 import os
@@ -50,6 +52,24 @@ PLATFORMS = {
             # as the microphone.
             "INFOPLIST_KEY_NSMicrophoneUsageDescription": '"Mavio hears what you ask its assistant."',
             "LD_RUNPATH_SEARCH_PATHS": '"$(inherited) @executable_path/Frameworks"',
+            # The app group whose container holds the Top Shelf's items.
+            "CODE_SIGN_ENTITLEMENTS": "Mavio.entitlements",
+            # The extension is embedded signed, so not stripped.
+            "COPY_PHASE_STRIP": "NO",
+        },
+        # The Top Shelf: Continue Watching on the home screen.
+        "extension": {
+            "name": "TopShelf",
+            "target": {
+                "TARGETED_DEVICE_FAMILY": "3",
+                "SUPPORTED_PLATFORMS": '"appletvos appletvsimulator"',
+                "INFOPLIST_FILE": "TopShelf.plist",
+                "INFOPLIST_KEY_CFBundleDisplayName": "Mavio",
+                "PRODUCT_BUNDLE_IDENTIFIER": "dev.mavio.app.topshelf",
+                "CODE_SIGN_ENTITLEMENTS": "TopShelf.entitlements",
+                "SKIP_INSTALL": "YES",
+                "LD_RUNPATH_SEARCH_PATHS": '"$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks"',
+            },
         },
     },
     "macos": {
@@ -126,6 +146,9 @@ def project(app):
         "SWIFT_EMIT_LOC_STRINGS": "YES",
         **p["target"],
     }
+    base = {k: target[k] for k in ("CODE_SIGN_STYLE", "CURRENT_PROJECT_VERSION", "GENERATE_INFOPLIST_FILE",
+                                   "MARKETING_VERSION", "PRODUCT_NAME", "SWIFT_EMIT_LOC_STRINGS")}
+    x = extension(app, p.get("extension"), {**base, **p.get("extension", {}).get("target", {})})
     products = p["products"]
     buildfiles = "".join(
         f"\t\t{i('bf-' + n)} /* {n} in Frameworks */ = {{isa = PBXBuildFile; productRef = {i('pd-' + n)} /* {n} */; }};\n"
@@ -150,11 +173,11 @@ def project(app):
 	objects = {{
 
 /* Begin PBXBuildFile section */
-{buildfiles}/* End PBXBuildFile section */
-
+{buildfiles}{x["buildfile"]}/* End PBXBuildFile section */
+{x["proxy"]}{x["copy"]}
 /* Begin PBXFileReference section */
 		{i('product')} /* Mavio.app */ = {{isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Mavio.app; sourceTree = BUILT_PRODUCTS_DIR; }};
-/* End PBXFileReference section */
+{x["fileref"]}/* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		{i('sources')} /* Mavio */ = {{
@@ -162,7 +185,7 @@ def project(app):
 			path = Mavio;
 			sourceTree = "<group>";
 		}};
-/* End PBXFileSystemSynchronizedRootGroup section */
+{x["groups"]}/* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		{i('frameworks')} /* Frameworks */ = {{
@@ -172,14 +195,14 @@ def project(app):
 {fwfiles}			);
 			runOnlyForDeploymentPostprocessing = 0;
 		}};
-/* End PBXFrameworksBuildPhase section */
+{x["frameworks"]}/* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
 		{i('main')} = {{
 			isa = PBXGroup;
 			children = (
 				{i('sources')} /* Mavio */,
-				{i('products')} /* Products */,
+{x["children"]}				{i('products')} /* Products */,
 			);
 			sourceTree = "<group>";
 		}};
@@ -187,7 +210,7 @@ def project(app):
 			isa = PBXGroup;
 			children = (
 				{i('product')} /* Mavio.app */,
-			);
+{x["product"]}			);
 			name = Products;
 			sourceTree = "<group>";
 		}};
@@ -201,14 +224,14 @@ def project(app):
 				{i('sources-phase')} /* Sources */,
 				{i('frameworks')} /* Frameworks */,
 				{i('resources')} /* Resources */,
-			);
+{x["embed"]}			);
 			buildRules = (
 			);
 			dependencies = (
-			);
+{x["dependency"]}			);
 			fileSystemSynchronizedGroups = (
 				{i('sources')} /* Mavio */,
-			);
+{x["shared"]}			);
 			name = Mavio;
 			packageProductDependencies = (
 {pdeps}			);
@@ -216,7 +239,7 @@ def project(app):
 			productReference = {i('product')} /* Mavio.app */;
 			productType = "com.apple.product-type.application";
 		}};
-/* End PBXNativeTarget section */
+{x["target"]}/* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
 		{i('project')} /* Project object */ = {{
@@ -244,7 +267,7 @@ def project(app):
 			projectRoot = "";
 			targets = (
 				{i('target')} /* Mavio */,
-			);
+{x["targets"]}			);
 		}};
 /* End PBXProject section */
 
@@ -256,7 +279,7 @@ def project(app):
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		}};
-/* End PBXResourcesBuildPhase section */
+{x["resources"]}/* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		{i('sources-phase')} /* Sources */ = {{
@@ -266,10 +289,10 @@ def project(app):
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		}};
-/* End PBXSourcesBuildPhase section */
+{x["sources"]}/* End PBXSourcesBuildPhase section */{x["dependencies"]}
 
 /* Begin XCBuildConfiguration section */
-{config('project-debug', 'Debug', debug)}{config('project-release', 'Release', release)}{config('target-debug', 'Debug', target)}{config('target-release', 'Release', target)}/* End XCBuildConfiguration section */
+{config('project-debug', 'Debug', debug)}{config('project-release', 'Release', release)}{config('target-debug', 'Debug', target)}{config('target-release', 'Release', target)}{x["configs"]}/* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
 		{i('project-configs')} /* Build configuration list for PBXProject "Mavio" */ = {{
@@ -290,7 +313,7 @@ def project(app):
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		}};
-/* End XCConfigurationList section */
+{x["configlist"]}/* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
 		{i('package')} /* XCLocalSwiftPackageReference "../../libs/apple" */ = {{
@@ -305,6 +328,75 @@ def project(app):
 	rootObject = {i('project')} /* Project object */;
 }}
 """
+
+
+def extension(app, ext, values):
+    """The pieces of the project that make and embed the app's extension,
+    empty without one."""
+    keys = ("buildfile", "proxy", "copy", "fileref", "groups", "frameworks", "children", "product", "embed",
+            "dependency", "shared", "target", "targets", "resources", "sources", "dependencies", "configs",
+            "configlist")
+    if not ext:
+        return dict.fromkeys(keys, "")
+    i = lambda name: oid(app, name)  # noqa: E731
+    n = ext["name"]
+    appex = f"{n}.appex"
+
+    def phase(key, isa, name):
+        return (f"\t\t{i(key)} /* {name} */ = {{\n\t\t\tisa = {isa};\n\t\t\tbuildActionMask = 2147483647;\n"
+                f"\t\t\tfiles = (\n\t\t\t);\n\t\t\trunOnlyForDeploymentPostprocessing = 0;\n\t\t}};\n")
+
+    def group(key, path):
+        return (f"\t\t{i(key)} /* {path} */ = {{\n\t\t\tisa = PBXFileSystemSynchronizedRootGroup;\n"
+                f"\t\t\tpath = {path};\n\t\t\tsourceTree = \"<group>\";\n\t\t}};\n")
+
+    def config(key, name):
+        return (f"\t\t{i(key)} /* {name} */ = {{\n\t\t\tisa = XCBuildConfiguration;\n\t\t\tbuildSettings = {{\n"
+                f"{settings(values, 4)}\t\t\t}};\n\t\t\tname = {name};\n\t\t}};\n")
+
+    return {
+        "buildfile": (f"\t\t{i('bf-ext')} /* {appex} in Embed Foundation Extensions */ = {{isa = PBXBuildFile; "
+                      f"fileRef = {i('ext-product')} /* {appex} */; settings = {{ATTRIBUTES = (RemoveHeadersOnCopy, ); }}; }};\n"),
+        "proxy": (f"\n/* Begin PBXContainerItemProxy section */\n\t\t{i('ext-proxy')} /* PBXContainerItemProxy */ = {{\n"
+                  f"\t\t\tisa = PBXContainerItemProxy;\n\t\t\tcontainerPortal = {i('project')} /* Project object */;\n"
+                  f"\t\t\tproxyType = 1;\n\t\t\tremoteGlobalIDString = {i('ext-target')};\n\t\t\tremoteInfo = {n};\n"
+                  f"\t\t}};\n/* End PBXContainerItemProxy section */\n"),
+        "copy": (f"\n/* Begin PBXCopyFilesBuildPhase section */\n\t\t{i('embed')} /* Embed Foundation Extensions */ = {{\n"
+                 f"\t\t\tisa = PBXCopyFilesBuildPhase;\n\t\t\tbuildActionMask = 2147483647;\n\t\t\tdstPath = \"\";\n"
+                 f"\t\t\tdstSubfolderSpec = 13;\n\t\t\tfiles = (\n\t\t\t\t{i('bf-ext')} /* {appex} in Embed Foundation Extensions */,\n"
+                 f"\t\t\t);\n\t\t\tname = \"Embed Foundation Extensions\";\n\t\t\trunOnlyForDeploymentPostprocessing = 0;\n"
+                 f"\t\t}};\n/* End PBXCopyFilesBuildPhase section */\n"),
+        "fileref": (f"\t\t{i('ext-product')} /* {appex} */ = {{isa = PBXFileReference; explicitFileType = \"wrapper.app-extension\"; "
+                    f"includeInIndex = 0; path = {appex}; sourceTree = BUILT_PRODUCTS_DIR; }};\n"),
+        "groups": group("ext-sources", n) + group("shared", "Shared"),
+        "frameworks": phase("ext-frameworks", "PBXFrameworksBuildPhase", "Frameworks"),
+        "children": f"\t\t\t\t{i('ext-sources')} /* {n} */,\n\t\t\t\t{i('shared')} /* Shared */,\n",
+        "product": f"\t\t\t\t{i('ext-product')} /* {appex} */,\n",
+        "embed": f"\t\t\t\t{i('embed')} /* Embed Foundation Extensions */,\n",
+        "dependency": f"\t\t\t\t{i('ext-dep')} /* PBXTargetDependency */,\n",
+        "shared": f"\t\t\t\t{i('shared')} /* Shared */,\n",
+        "target": (f"\t\t{i('ext-target')} /* {n} */ = {{\n\t\t\tisa = PBXNativeTarget;\n"
+                   f"\t\t\tbuildConfigurationList = {i('ext-configs')} /* Build configuration list for PBXNativeTarget \"{n}\" */;\n"
+                   f"\t\t\tbuildPhases = (\n\t\t\t\t{i('ext-sources-phase')} /* Sources */,\n"
+                   f"\t\t\t\t{i('ext-frameworks')} /* Frameworks */,\n\t\t\t\t{i('ext-resources')} /* Resources */,\n"
+                   f"\t\t\t);\n\t\t\tbuildRules = (\n\t\t\t);\n\t\t\tdependencies = (\n\t\t\t);\n"
+                   f"\t\t\tfileSystemSynchronizedGroups = (\n\t\t\t\t{i('ext-sources')} /* {n} */,\n"
+                   f"\t\t\t\t{i('shared')} /* Shared */,\n\t\t\t);\n\t\t\tname = {n};\n\t\t\tproductName = {n};\n"
+                   f"\t\t\tproductReference = {i('ext-product')} /* {appex} */;\n"
+                   f"\t\t\tproductType = \"com.apple.product-type.tv-app-extension\";\n\t\t}};\n"),
+        "targets": f"\t\t\t\t{i('ext-target')} /* {n} */,\n",
+        "resources": phase("ext-resources", "PBXResourcesBuildPhase", "Resources"),
+        "sources": phase("ext-sources-phase", "PBXSourcesBuildPhase", "Sources"),
+        "dependencies": (f"\n\n/* Begin PBXTargetDependency section */\n\t\t{i('ext-dep')} /* PBXTargetDependency */ = {{\n"
+                         f"\t\t\tisa = PBXTargetDependency;\n\t\t\ttarget = {i('ext-target')} /* {n} */;\n"
+                         f"\t\t\ttargetProxy = {i('ext-proxy')} /* PBXContainerItemProxy */;\n\t\t}};\n"
+                         f"/* End PBXTargetDependency section */"),
+        "configs": config("ext-debug", "Debug") + config("ext-release", "Release"),
+        "configlist": (f"\t\t{i('ext-configs')} /* Build configuration list for PBXNativeTarget \"{n}\" */ = {{\n"
+                       f"\t\t\tisa = XCConfigurationList;\n\t\t\tbuildConfigurations = (\n"
+                       f"\t\t\t\t{i('ext-debug')} /* Debug */,\n\t\t\t\t{i('ext-release')} /* Release */,\n"
+                       f"\t\t\t);\n\t\t\tdefaultConfigurationIsVisible = 0;\n\t\t\tdefaultConfigurationName = Release;\n\t\t}};\n"),
+    }
 
 
 def scheme(app):

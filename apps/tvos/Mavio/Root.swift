@@ -165,6 +165,9 @@ struct RootView: View {
             assistant.refresh()
         }
         .onChange(of: model.signedInServers.map(\.id)) { assistant.refresh() }
+        .onChange(of: model.home, initial: true) {
+            TopShelf.write(model.home, signedIn: !model.signedInServers.isEmpty)
+        }
         // The assistant asks the server of what shows, and tells a session
         // what it is.
         .onChange(of: router.assistantScreen) {

@@ -122,6 +122,7 @@ flowchart LR
 * **登录**：输入服务器地址或选择附近发现的服务器；独立模式服务端的用户以密码、作为首个用户或以 Quick Connect 登录；mavio.dev 模式的服务端让 Mavio 账户在 `ASWebAuthenticationSession` 中于其 mavio.dev 登录，回到核心的回环地址（带 PKCE），或以在 mavio.dev/link 批准的链接码登录。个人资料页显示 Mavio 账户并可将其退出登录，退出时一并忘记其服务器。
 * **启动**：启动画面是系统背景上的标志，应用保持它直到主页能完整绘制——其推荐行取自离线存储、首屏的图片已就绪——最长两秒，然后标志放大并淡出进入主页，因此不会有占位一闪而过。Nuke 把图片存在磁盘上，以去掉服务器签名后的 URL 为键；仍在加载的图片是一块纯色底，图片在其上淡入，只有确实没有图片时才显示其类别的图标。
 * **账户与下载**：设备密钥与每个服务端的会话保存在钥匙串中，其余内容由核心的数据库保存。下载是以后台 `URLSession` 获取的源文件，应用挂起时仍会继续；已下载的条目无需服务端即可从设备播放，离线产生的进度在服务端重新响应时补报给它（§5.1）。
+* **Top Shelf**：Apple TV 应用内嵌一个 Top Shelf 扩展，由 `libs/apple/scripts/gen-project.py` 在应用旁生成，源码为 `apps/tvos/TopShelf`，两者都编译 `apps/tvos/Shared`；应用与扩展只共享 App Group `group.dev.mavio.app` 的容器，应用把“继续观看”写入其中（[电视 §8](tv.zh-CN.md#8-平台)）。
 * **字幕**：HLS 流以 WebVTT rendition 承载文本字幕，由 AVPlayer 自行显示。使用 AetherEngine 时，`MavioPlayer` 在画面而不是屏幕的范围内排布 cue，使字幕在任何宽高比与方向下都位于视频之上。
 * **画中画**：只用公开且被 App Store 允许的 `AVPictureInPictureController`。AVPlayer 直接支持，AetherEngine 经由其 `AVPlayerLayer` 或 `AVSampleBufferDisplayLayer` 内容源接入。tvOS 不显示样本缓冲显示层的画中画，因此 AetherEngine 在软件路径上播放时进入画中画，改由 AVPlayer 重新开始播放，由服务端处理该源。
 * **iPhone 与 iPad 应用不包含的功能**，即 App Store 不接受或可能不接受的：取得——索引器与下载客户端、画质配置、自定义格式与规则、想要清单、下载客户端的队列、条目的取得以及索引器搜索（§6.3.11、§6.3.16–§6.3.18、§6.3.31）——字幕设置及为条目搜索字幕提供者（§6.3.12、§6.3.21）、代理与挑战求解（§6.3.30）、探索的请求、插件（§6.3.3）、AI（其提供者与助理的设置）以及用户的 AI 对话（§6.3.13、§6.3.26）；随之还有概览中的插件容器，以及任务中取得、请求、字幕与插件的任务和作业。它也不在浏览器中打开其中任何一项；其余设置与 Web UI 一致。

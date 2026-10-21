@@ -41,7 +41,7 @@
     "lint": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "swift format lint --strict --recursive Mavio",
+        "command": "swift format lint --strict --recursive Mavio TopShelf Shared",
         "cwd": "{projectRoot}"
       },
       "inputs": [

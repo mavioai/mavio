@@ -85,3 +85,5 @@
 | Web UI | 自己的焦点移动（§4），根元素的 `data-tv` 把 tokens 切换为 `tv` 取值 | `apps/web/src/shell/tv.tsx`、`apps/web/src/shell/spatial.ts`、`apps/web/src/shell/back.ts`、`apps/web/src/styles.css` |
 | Mac | 以 AppKit 实现自己的焦点移动（§4），方向键即遥控器方向键，主题取 `tv` tokens | `libs/apple/Sources/MavioAppKit/Focus.swift`、`libs/apple/Sources/MavioMacApp/TVShell.swift` |
 | 桌面 | 应用的电视模式，方向键即遥控器方向键 | `apps/desktop` |
+
+在 Apple TV 上，位于主屏幕首行的应用显示其 Top Shelf：已登录服务器的“继续观看”，每个条目以宽图显示并标出观看进度；选中条目打开其详情，按遥控器的播放键则播放它，分别通过应用的链接 `mavio://item/<server>/<item>` 与 `mavio://play/<server>/<item>`。应用在首页变化时把 Top Shelf 的内容写入 App Group `group.dev.mavio.app` 的容器，首页加载中或服务器离线时保留上一次的内容，不再登录任何服务器时清空；扩展（`apps/tvos/TopShelf`）只读取它，图片取自服务器签名的 URL，因此扩展不持有令牌，也没有自己的核心。
