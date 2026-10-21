@@ -434,20 +434,19 @@
                 return cell(NSStackView.horizontal([tile, label], spacing: MavioSpacing.s12), leading: MavioSpacing.s8)
             case .picker:
                 let servers = context.model.signedInServers
-                let chosen = state.chosen?.id
-                let popup = ActionPopUp(
-                    options: servers.map(\.name), selected: servers.firstIndex { $0.id == chosen } ?? 0
+                let chosen = servers.firstIndex { $0.id == state.chosen?.id } ?? 0
+                let choice = ServerChoice(
+                    names: servers.map(\.name), selected: chosen, theme: theme
                 ) { [weak self] index in
                     guard let self, servers.indices.contains(index) else { return }
                     state.serverId = servers[index].id
                     // The observer follows the model, not the choice.
                     (parent as? SettingsSplitController)?.serverChanged()
                 }
-                popup.setAccessibilityLabel(MavioStrings.authServer)
                 // As wide as a selected row's highlight, which reaches past
-                // the cell by the bezel's margin.
-                let cell = cell(popup, leading: -5)
-                popup.trailingAnchor.constraint(equalTo: cell.trailingAnchor, constant: 5).isActive = true
+                // the cell.
+                let cell = cell(choice, leading: -6)
+                choice.trailingAnchor.constraint(equalTo: cell.trailingAnchor, constant: 5).isActive = true
                 return cell
             }
         }
@@ -484,8 +483,70 @@
             case .header: 30
             case .account: 60
             case .page: 34
-            case .picker: 32
+            case .picker: 38
             }
+        }
+    }
+
+    /// The choice of the server whose sections the sidebar shows, as the
+    /// web UI's: a row's height on the fill, the server's name shortened
+    /// at its end and arrows at its end, opening a menu of the servers.
+    private final class ServerChoice: Box {
+        private let names: [String]
+        private var selected: Int
+        private let onChange: @MainActor (Int) -> Void
+
+        init(names: [String], selected: Int, theme: Theme, onChange: @escaping @MainActor (Int) -> Void) {
+            self.names = names
+            self.selected = selected
+            self.onChange = onChange
+            super.init(fill: theme.colors.fill, radius: 10)
+            size(height: 34)
+            let title = NSTextField.label(
+                names.indices.contains(selected) ? names[selected] : "", theme.fonts.body, color: .labelColor)
+            let arrows = NSImageView(
+                image: NSImage(systemSymbolName: "chevron.up.chevron.down", accessibilityDescription: nil) ?? NSImage())
+            arrows.symbolConfiguration = .init(pointSize: 11, weight: .semibold)
+            arrows.contentTintColor = .secondaryLabelColor
+            let row = NSStackView.horizontal([title, arrows], spacing: MavioSpacing.s8)
+            title.setContentHuggingPriority(.init(1), for: .horizontal)
+            addSubview(row)
+            row.pin(to: self, insets: .symmetric(horizontal: 10, vertical: 0))
+            setAccessibilityElement(true)
+            setAccessibilityRole(.popUpButton)
+            setAccessibilityLabel(MavioStrings.authServer)
+            setAccessibilityValue(title.stringValue)
+        }
+
+        @available(*, unavailable)
+        required init?(coder: NSCoder) { fatalError() }
+
+        override func mouseDown(with event: NSEvent) { open() }
+
+        override func accessibilityPerformPress() -> Bool {
+            open()
+            return true
+        }
+
+        /// Opens the menu of the servers over the choice, the one chosen
+        /// under the pointer.
+        private func open() {
+            let menu = NSMenu()
+            for (i, name) in names.enumerated() {
+                let item = NSMenuItem(title: name, action: #selector(choose(_:)), keyEquivalent: "")
+                item.target = self
+                item.tag = i
+                item.state = i == selected ? .on : .off
+                menu.addItem(item)
+            }
+            menu.minimumWidth = bounds.width
+            menu.popUp(positioning: menu.item(at: selected), at: NSPoint(x: 0, y: 6), in: self)
+        }
+
+        @objc private func choose(_ item: NSMenuItem) {
+            guard item.tag != selected else { return }
+            selected = item.tag
+            onChange(item.tag)
         }
     }
 
