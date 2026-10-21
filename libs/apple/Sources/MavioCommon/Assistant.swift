@@ -527,135 +527,127 @@ public final class Assistant {
 
     // MARK: Voice
 
-    #if os(tvOS)
-        private var voice: VoiceStub? { nil }
+    private var voice: VoiceSession? { session as? VoiceSession }
 
-        /// Apple TV gives apps no microphone (docs/assistant.md §9.3).
-        private func capture() {}
-        private func connect(pushToTalk: Bool) {}
-    #else
-        private var voice: VoiceSession? { session as? VoiceSession }
-
-        /// Opens the microphone, and the voice session once it is known
-        /// whether the user holds to talk.
-        private func capture() {
-            guard let server else { return }
-            show()
-            running?.cancel()
-            guard info?.voice == true else {
-                error = MavioStrings.assistantNoVoice
-                return
-            }
-            turn = ""
-            listening = true
-            capturing = false
-            userSpeaking = false
-            speaking = false
-            voiced = false
-            pushToTalk = false
-            talking = false
-            heard = ""
-            heardAt = nil
-            answer = ""
-            answerAt = nil
-            activity = []
-            error = nil
-            if !choose { items = [] }
-            Task { [weak self] in
-                do {
-                    let token = UUID()
-                    let v = try await VoiceSession.capture(
-                        .init(
-                            event: { [weak self] e in self?.voiceEvent(e, serverId: server.id) },
-                            closed: { [weak self] unreachable, error in
-                                guard let self, sessionToken == token else { return }
-                                session = nil
-                                listening = false
-                                capturing = false
-                                speaking = false
-                                userSpeaking = false
-                                working = false
-                                if unreachable {
-                                    self.error = MavioStrings.homeServerUnreachable(server: server.name)
-                                } else if let error {
-                                    self.error = error
-                                } else {
-                                    lingerThenClose()
-                                }
-                            },
-                            capturing: { [weak self] in self?.capturing = true },
-                            silent: { [weak self] device in
-                                self?.error = MavioStrings.assistantSilentMicrophone(
-                                    device: device.isEmpty ? MavioStrings.assistantMicrophone : device)
-                            }))
-                    guard let self else {
-                        v.close()
-                        return
-                    }
-                    guard listening, !leaving else {
-                        v.close()
-                        return
-                    }
-                    session = v
-                    sessionToken = token
-                    // Let go before the microphone opened: a tap.
-                    if held == nil {
-                        connect(pushToTalk: false)
-                    } else if held == true {
-                        connect(pushToTalk: true)
-                    }
-                } catch {
-                    guard let self else { return }
-                    listening = false
-                    if case VoiceSession.Failure.denied = error {
-                        self.error = MavioStrings.assistantMicrophoneDenied
-                    } else if case VoiceSession.Failure.unavailable(let reason) = error {
-                        self.error = MavioStrings.assistantNoMicrophone(error: reason)
-                    } else {
-                        self.error = MavioStrings.assistantNoMicrophone(error: error.reason)
-                    }
+    /// Opens the microphone, and the voice session once it is known
+    /// whether the user holds to talk.
+    private func capture() {
+        guard let server else { return }
+        show()
+        running?.cancel()
+        guard info?.voice == true else {
+            error = MavioStrings.assistantNoVoice
+            return
+        }
+        turn = ""
+        listening = true
+        capturing = false
+        userSpeaking = false
+        speaking = false
+        voiced = false
+        pushToTalk = false
+        talking = false
+        heard = ""
+        heardAt = nil
+        answer = ""
+        answerAt = nil
+        activity = []
+        error = nil
+        if !choose { items = [] }
+        Task { [weak self] in
+            do {
+                let token = UUID()
+                let v = try await VoiceSession.capture(
+                    .init(
+                        event: { [weak self] e in self?.voiceEvent(e, serverId: server.id) },
+                        closed: { [weak self] unreachable, error in
+                            guard let self, sessionToken == token else { return }
+                            session = nil
+                            listening = false
+                            capturing = false
+                            speaking = false
+                            userSpeaking = false
+                            working = false
+                            if unreachable {
+                                self.error = MavioStrings.homeServerUnreachable(server: server.name)
+                            } else if let error {
+                                self.error = error
+                            } else {
+                                lingerThenClose()
+                            }
+                        },
+                        capturing: { [weak self] in self?.capturing = true },
+                        silent: { [weak self] device in
+                            self?.error = MavioStrings.assistantSilentMicrophone(
+                                device: device.isEmpty ? MavioStrings.assistantMicrophone : device)
+                        }))
+                guard let self else {
+                    v.close()
+                    return
+                }
+                guard listening, !leaving else {
+                    v.close()
+                    return
+                }
+                session = v
+                sessionToken = token
+                // Let go before the microphone opened: a tap.
+                if held == nil {
+                    connect(pushToTalk: false)
+                } else if held == true {
+                    connect(pushToTalk: true)
+                }
+            } catch {
+                guard let self else { return }
+                listening = false
+                if case VoiceSession.Failure.denied = error {
+                    self.error = MavioStrings.assistantMicrophoneDenied
+                } else if case VoiceSession.Failure.unavailable(let reason) = error {
+                    self.error = MavioStrings.assistantNoMicrophone(error: reason)
+                } else {
+                    self.error = MavioStrings.assistantNoMicrophone(error: error.reason)
                 }
             }
         }
+    }
 
-        /// Starts the session on the server: a conversation, or talking
-        /// while held.
-        private func connect(pushToTalk: Bool) {
-            guard let v = voice, let server else { return }
-            var request = Mavio_Assistant_V1_StartVoiceSessionRequest()
-            request.language = Self.speechLanguage
-            request.mode = pushToTalk ? .pushToTalk : .conversation
-            request.context = context()
-            let model = model
-            v.connect(
-                {
-                    let r = try await model.call(
-                        server, Procedure.assistant("StartVoiceSession"), request,
-                        as: Mavio_Assistant_V1_StartVoiceSessionResponse.self)
-                    guard let url = Self.socketURL(r.url, server: server) else { throw URLError(.badURL) }
-                    return url
-                }, pushToTalk: pushToTalk)
-            self.pushToTalk = pushToTalk
-            talking = pushToTalk
-            if pushToTalk { v.talk(true) }
-        }
+    /// Starts the session on the server: a conversation, or talking
+    /// while held.
+    private func connect(pushToTalk: Bool) {
+        guard let v = voice, let server else { return }
+        var request = Mavio_Assistant_V1_StartVoiceSessionRequest()
+        request.language = Self.speechLanguage
+        request.mode = pushToTalk ? .pushToTalk : .conversation
+        request.context = context()
+        let model = model
+        v.connect(
+            {
+                let r = try await model.call(
+                    server, Procedure.assistant("StartVoiceSession"), request,
+                    as: Mavio_Assistant_V1_StartVoiceSessionResponse.self)
+                guard let url = Self.socketURL(r.url, server: server) else { throw URLError(.badURL) }
+                return url
+            }, pushToTalk: pushToTalk)
+        self.pushToTalk = pushToTalk
+        talking = pushToTalk
+        if pushToTalk { v.talk(true) }
+    }
 
-        /// The session's WebSocket URL, from the path the server gives.
-        public static func socketURL(_ path: String, server: ServerRecord) -> URL? {
-            var text = path
-            if !path.hasPrefix("http") && !path.hasPrefix("ws") {
-                var base = server.address
-                while base.hasSuffix("/") { base.removeLast() }
-                text = base + (path.hasPrefix("/") ? path : "/" + path)
-            }
-            if text.hasPrefix("https:") {
-                text = "wss:" + text.dropFirst(6)
-            } else if text.hasPrefix("http:") {
-                text = "ws:" + text.dropFirst(5)
-            }
-            return URL(string: text)
+    /// The session's WebSocket URL, from the path the server gives.
+    public static func socketURL(_ path: String, server: ServerRecord) -> URL? {
+        var text = path
+        if !path.hasPrefix("http") && !path.hasPrefix("ws") {
+            var base = server.address
+            while base.hasSuffix("/") { base.removeLast() }
+            text = base + (path.hasPrefix("/") ? path : "/" + path)
         }
-    #endif
+        if text.hasPrefix("https:") {
+            text = "wss:" + text.dropFirst(6)
+        } else if text.hasPrefix("http:") {
+            text = "ws:" + text.dropFirst(5)
+        }
+        return URL(string: text)
+    }
 
     /// Carries out what the voice session tells (docs/assistant.md §8.6).
     private func voiceEvent(_ e: [String: Any], serverId: String) {
@@ -726,19 +718,6 @@ public final class Assistant {
         }
     }
 }
-
-#if os(tvOS)
-    /// No voice session on Apple TV.
-    private final class VoiceStub {
-        var holdsToTalk: Bool { false }
-        func talk(_: Bool) {}
-        func close() {}
-        func send(_: [String: Any]) {}
-        func inputLevel() -> Double { 0 }
-        func outputLevel() -> Double { 0 }
-        func speech() -> (played: Double, total: Double) { (0, 0) }
-    }
-#endif
 
 /// The answer's words, each with when it has been said, roughly, in
 /// milliseconds from the speech's start: they are lit against how much of

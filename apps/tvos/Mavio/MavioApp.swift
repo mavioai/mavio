@@ -9,8 +9,8 @@ struct MavioApp: App {
 
     var body: some Scene {
         WindowGroup {
-            if let model = launch.model {
-                RootView().environment(model)
+            if let model = launch.model, let assistant = launch.assistant {
+                RootView().environment(model).environment(assistant)
             } else {
                 StatusView(icon: "error", title: MavioStrings.stateError, message: launch.failure)
             }
@@ -18,11 +18,12 @@ struct MavioApp: App {
     }
 }
 
-/// The app's model, made once as the app launches.
+/// The app's model and its assistant, made once as the app launches.
 @MainActor
 @Observable
 final class Launch {
     let model: AppModel?
+    let assistant: Assistant?
     let failure: String?
 
     init() {
@@ -37,10 +38,14 @@ final class Launch {
         #endif
         ImageCaching.configure()
         do {
-            model = try AppModel(directory: URL.cachesDirectory.appending(path: "Mavio", directoryHint: .isDirectory))
+            let model = try AppModel(
+                directory: URL.cachesDirectory.appending(path: "Mavio", directoryHint: .isDirectory))
+            self.model = model
+            assistant = Assistant(model: model)
             failure = nil
         } catch {
             model = nil
+            assistant = nil
             failure = error.localizedDescription
         }
     }

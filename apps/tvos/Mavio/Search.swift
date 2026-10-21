@@ -7,6 +7,7 @@ import SwiftUI
 /// typed, after a pause of 300 ms.
 struct SearchView: View {
     @Environment(AppModel.self) private var model
+    @Environment(Router.self) private var router
     @Environment(\.theme) private var theme
     @State private var query = ""
     @State private var results: [SearchResults]?
@@ -40,6 +41,12 @@ struct SearchView: View {
             .padding(.bottom, 120)
         }
         .searchable(text: $query, prompt: MavioStrings.searchPlaceholder)
+        // What the assistant searches for.
+        .onChange(of: router.searchQuery, initial: true) { _, asked in
+            guard !asked.isEmpty else { return }
+            query = asked
+            router.searchQuery = ""
+        }
         .task(id: query) {
             let q = query.trimmingCharacters(in: .whitespaces)
             guard !q.isEmpty else {

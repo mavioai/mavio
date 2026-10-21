@@ -6,12 +6,17 @@ import SwiftUI
 /// The player (docs/tv.md §7): the picture, and a controller of the title,
 /// the timeline and a row of buttons — the next episode, the subtitles and
 /// the audio — that the remote's keys show; select pauses and plays, left
-/// and right seek by 10 seconds, and back closes the panel, then the
-/// controller, then the player.
+/// and right seek by 10 seconds, and back dismisses the assistant, then
+/// closes the panel, then the controller, then the player. The assistant
+/// shows over it and controls it.
 struct PlayerScreen: View {
     @State private var request: PlayRequest
     @Environment(AppModel.self) private var model
     @Environment(\.dismiss) private var dismiss
+    @Environment(Assistant.self) private var assistant
+    @Environment(Router.self) private var router
+    /// The player as the assistant controls it.
+    @State private var control = PlayerControl()
     @State private var player = Player()
     @State private var session: PlaybackSession?
     @State private var info: PlaybackInfo?
@@ -63,6 +68,7 @@ struct PlayerScreen: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .trailing)
                     .transition(.move(edge: .trailing).combined(with: .opacity))
             }
+            AssistantOverlay()
         }
         .animation(.easeOut(duration: MavioDuration.fast), value: controls)
         .animation(.easeOut(duration: MavioDuration.fast), value: panel)
@@ -73,6 +79,11 @@ struct PlayerScreen: View {
         .onPlayPauseCommand(perform: select)
         .onExitCommand(perform: back)
         .task { await start(at: request.start) }
+        .onAppear {
+            bind()
+            router.player = control
+        }
+        .onDisappear { if router.player === control { router.player = nil } }
         .task(id: session.map(ObjectIdentifier.init)) { await report() }
         .task(id: "\(pokes) \(controls) \(player.isPlaying) \(panel != nil)") {
             guard controls, player.isPlaying, panel == nil, failure == nil else { return }
@@ -130,7 +141,9 @@ struct PlayerScreen: View {
     }
 
     private func back() {
-        if let open = panel {
+        if assistant.open {
+            assistant.close()
+        } else if let open = panel {
             panel = nil
             focus = open == .audio ? .audio : .subtitles
         } else if controls, failure == nil {
@@ -378,6 +391,44 @@ struct PlayerScreen: View {
             try? await session.update(position: player.currentTime, paused: !player.isPlaying)
             try? await Task.sleep(for: .seconds(1))
         }
+    }
+
+    /// Lets the assistant control the player (docs/assistant.md §5.2).
+    private func bind() {
+        control.playing = {
+            Assistant.playing(
+                itemId: request.itemId, position: player.currentTime, paused: !player.isPlaying,
+                speed: Double(player.rate), audio: info?.audioStreamIndex, subtitle: info?.subtitleStreamIndex)
+        }
+        control.control = { command, value in
+            switch command {
+            case .pause: player.pause()
+            case .resume: player.play()
+            case .stop: close()
+            case .seek: Task { await player.seek(to: value) }
+            case .seekBy: Task { await player.skip(by: value) }
+            case .speed:
+                guard value > 0 else { return false }
+                player.setRate(Float(value))
+            case .next:
+                guard let next else { return false }
+                play(next)
+            // The player fills the screen already.
+            case .fullscreen: break
+            default: return false
+            }
+            poke()
+            return true
+        }
+        control.streams = { audio, subtitle in
+            guard info != nil else { return false }
+            if let audio { self.audio = audio }
+            if let subtitle { self.subtitle = subtitle }
+            restart()
+            return true
+        }
+        control.close = { close() }
+        control.assistantServerId = request.serverId
     }
 
     private func restart() {

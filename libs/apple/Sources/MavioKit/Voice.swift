@@ -1,4 +1,4 @@
-#if !os(tvOS)
+#if canImport(AVFoundation)
     import AVFoundation
     import Foundation
     import os
@@ -15,6 +15,8 @@
     /// captured is held until the WebSocket opens. On the Mac, voice
     /// processing listens only to the system's default input: a microphone
     /// chosen in the settings is captured by an engine of its own without it.
+    /// On Apple TV the microphone is an iPhone or iPad connected to it, or
+    /// a headset's.
     @MainActor
     public final class VoiceSession {
         /// What a session tells as it goes.
@@ -89,7 +91,7 @@
         private var played = 0
         private var generation = 0
 
-        #if os(iOS)
+        #if os(iOS) || os(tvOS)
             /// The audio session's category and mode before the microphone
             /// opened, which a video playing had.
             private var previous: (AVAudioSession.Category, AVAudioSession.Mode)?
@@ -101,15 +103,26 @@
             format = AVAudioFormat(standardFormatWithSampleRate: 24000, channels: 1)!
         }
 
+        #if os(tvOS)
+            /// Whether Apple TV has a microphone the app may capture: an
+            /// iPhone or iPad connected to it, or a headset's. The Siri
+            /// Remote's belongs to the system.
+            public static var microphoneAvailable: Bool { AVAudioSession.sharedInstance().isInputAvailable }
+        #endif
+
         /// Opens the microphone; fails when it is refused or missing.
         public static func capture(_ handlers: Handlers) async throws -> VoiceSession {
             guard await AVAudioApplication.requestRecordPermission() else { throw Failure.denied }
-            #if os(iOS)
+            #if os(iOS) || os(tvOS)
                 let audio = AVAudioSession.sharedInstance()
                 let previous = (audio.category, audio.mode)
+                #if os(iOS)
+                    let options: AVAudioSession.CategoryOptions = [.defaultToSpeaker, .allowBluetoothHFP]
+                #else
+                    let options: AVAudioSession.CategoryOptions = [.allowBluetoothHFP]
+                #endif
                 do {
-                    try audio.setCategory(
-                        .playAndRecord, mode: .voiceChat, options: [.defaultToSpeaker, .allowBluetoothHFP])
+                    try audio.setCategory(.playAndRecord, mode: .voiceChat, options: options)
                     try audio.setActive(true)
                 } catch {
                     throw Failure.unavailable(error.localizedDescription)
@@ -117,7 +130,7 @@
             #endif
             let capture = Capture()
             let session = VoiceSession(handlers: handlers, capture: capture)
-            #if os(iOS)
+            #if os(iOS) || os(tvOS)
                 session.previous = previous
             #endif
             capture.deliver = { [weak session] pcm in
@@ -427,7 +440,7 @@
             player.removeTap(onBus: 0)
             player.stop()
             engine.stop()
-            #if os(iOS)
+            #if os(iOS) || os(tvOS)
                 let audio = AVAudioSession.sharedInstance()
                 if let (category, mode) = previous, category == .playback {
                     // A video plays on, its audio as it was.

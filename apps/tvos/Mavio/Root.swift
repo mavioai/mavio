@@ -66,6 +66,14 @@ final class Router {
     var settings = false
     /// The playback the player shows.
     var playing: PlayRequest?
+    /// The player shown, as the assistant controls it.
+    @ObservationIgnored var player: PlayerControl?
+    /// Whether the system's dictation is open for the assistant.
+    var dictating = false
+    /// A query the assistant searches for, which Search takes.
+    var searchQuery = ""
+    /// The app's model, for what the assistant opens.
+    @ObservationIgnored weak var model: AppModel?
 
     /// Plays an item.
     func play(_ request: PlayRequest) {
@@ -115,6 +123,7 @@ final class Router {
 /// (docs/tv.md §2, §3).
 struct RootView: View {
     @Environment(AppModel.self) private var model
+    @Environment(Assistant.self) private var assistant
     @Environment(\.scenePhase) private var phase
     @State private var router = Router()
     @State private var discovery = Discovery()
@@ -129,6 +138,13 @@ struct RootView: View {
                 Tabs()
             }
         }
+        // The assistant over the page, and the dictation it opens without
+        // a microphone.
+        .overlay { AssistantOverlay() }
+        .background {
+            Dictation(active: Bindable(router).dictating) { assistant.ask(dictated: $0) }
+                .frame(width: 1, height: 1)
+        }
         .environment(\.theme, theme)
         .environment(router)
         .environment(discovery)
@@ -139,8 +155,22 @@ struct RootView: View {
             PlayerScreen(request: request)
                 .environment(\.theme, theme)
                 .environment(model)
+                .environment(assistant)
+                .environment(router)
         }
         .onOpenURL { router.open($0) }
+        .task {
+            router.model = model
+            assistant.host = router
+            assistant.refresh()
+        }
+        .onChange(of: model.signedInServers.map(\.id)) { assistant.refresh() }
+        // The assistant asks the server of what shows, and tells a session
+        // what it is.
+        .onChange(of: router.assistantScreen) {
+            assistant.refresh()
+            assistant.contextChanged()
+        }
         #if DEBUG
             // A debug build opens a link given at launch (`-open <url>`),
             // with no remote to confirm it, or the settings (`-settings YES`).
@@ -176,6 +206,7 @@ struct RootView: View {
 /// The tabs' pages under the navigation bar, which deeper pages hide.
 private struct Tabs: View {
     @Environment(Router.self) private var router
+    @Environment(Assistant.self) private var assistant
     @Environment(\.theme) private var theme
     @FocusState private var focus: BarFocus?
 
@@ -189,15 +220,19 @@ private struct Tabs: View {
                 .onExitCommand(perform: exit(deeper: deeper))
             if !deeper {
                 NavBar(focus: $focus)
-                    .onExitCommand(perform: router.tab == .home ? nil : { focus = .tab(.home) })
+                    .onExitCommand(
+                        perform: assistant.open
+                            ? { assistant.close() } : router.tab == .home ? nil : { focus = .tab(.home) })
             }
         }
         .ignoresSafeArea()
     }
 
-    /// What back does on the page: on a tab's page, focus moves up to its
-    /// tab; Search and the settings return to Home; deeper pages pop.
+    /// What back does on the page: the assistant goes away first; on a
+    /// tab's page, focus moves up to its tab; Search and the settings return
+    /// to Home; deeper pages pop.
     private func exit(deeper: Bool) -> (() -> Void)? {
+        if assistant.open { return { assistant.close() } }
         if router.settings { return { router.settings = false } }
         if router.tab == .search && (router.paths[.search] ?? []).isEmpty {
             return { router.tab = .home }
@@ -229,11 +264,12 @@ private struct Tabs: View {
 /// What has focus in the navigation bar.
 enum BarFocus: Hashable {
     case tab(Tab)
+    case assistant
     case menu
 }
 
-/// The tabs in a pill centered at the top and the menu button at the right;
-/// focus on a tab opens it, as on tvOS (§3).
+/// The tabs in a pill centered at the top, and the assistant and menu
+/// buttons at the right; focus on a tab opens it, as on tvOS (§3).
 private struct NavBar: View {
     @Environment(Router.self) private var router
     @Environment(AppModel.self) private var model
@@ -261,8 +297,10 @@ private struct NavBar: View {
             .background(theme.colors.surfaceRaised.opacity(0.6), in: .capsule)
             .focusSection()
             .defaultFocus(focus, .tab(router.tab))
-            HStack {
+            HStack(spacing: MavioSpacing.s24) {
                 Spacer()
+                AssistantButton()
+                    .focused(focus, equals: .assistant)
                 Menu {
                     Button(MavioStrings.navSettings) { router.settings = true }
                     Button(MavioStrings.authSignOut, role: .destructive) {

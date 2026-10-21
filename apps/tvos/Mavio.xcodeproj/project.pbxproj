@@ -190,6 +190,7 @@
 				INFOPLIST_FILE = Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Mavio;
 				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "Mavio finds and connects to media servers on your network.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Mavio hears what you ask its assistant.";
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UIUserInterfaceStyle = Automatic;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -212,6 +213,7 @@
 				INFOPLIST_FILE = Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Mavio;
 				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "Mavio finds and connects to media servers on your network.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Mavio hears what you ask its assistant.";
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UIUserInterfaceStyle = Automatic;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";

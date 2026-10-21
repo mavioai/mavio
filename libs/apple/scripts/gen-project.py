@@ -46,6 +46,9 @@ PLATFORMS = {
             # development mavio.dev a debug build signs in at.
             "INFOPLIST_FILE": "Info.plist",
             "INFOPLIST_KEY_NSLocalNetworkUsageDescription": '"Mavio finds and connects to media servers on your network."',
+            # The assistant's voice sessions, with an iPhone or iPad connected
+            # as the microphone.
+            "INFOPLIST_KEY_NSMicrophoneUsageDescription": '"Mavio hears what you ask its assistant."',
             "LD_RUNPATH_SEARCH_PATHS": '"$(inherited) @executable_path/Frameworks"',
         },
     },
