@@ -3473,6 +3473,234 @@ public enum MavioStrings {
     /// Detail of the remote path mappings
     public static var acquisitionMappingsDetail: String { NSLocalizedString("acquisition.mappingsDetail", bundle: .module, comment: "") }
 
+    /// Page of the acquisition options
+    public static var optionsOptions: String { NSLocalizedString("options.options", bundle: .module, comment: "") }
+
+    /// Detail of the acquisition options
+    public static var optionsOptionsDetail: String { NSLocalizedString("options.optionsDetail", bundle: .module, comment: "") }
+
+    /// Message of the acquisition options page
+    public static var optionsOptionsMessage: String { NSLocalizedString("options.optionsMessage", bundle: .module, comment: "") }
+
+    /// Group of the naming options
+    public static var optionsNaming: String { NSLocalizedString("options.naming", bundle: .module, comment: "") }
+
+    /// Option replacing characters file systems do not allow
+    public static var optionsReplaceIllegal: String { NSLocalizedString("options.replaceIllegal", bundle: .module, comment: "") }
+
+    /// Detail of replacing illegal characters
+    public static var optionsReplaceIllegalDetail: String { NSLocalizedString("options.replaceIllegalDetail", bundle: .module, comment: "") }
+
+    /// Option of what replaces colons in names
+    public static var optionsColon: String { NSLocalizedString("options.colon", bundle: .module, comment: "") }
+
+    /// Colon replacement: delete
+    public static var optionsColonDelete: String { NSLocalizedString("options.colonDelete", bundle: .module, comment: "") }
+
+    /// Colon replacement: dash
+    public static var optionsColonDash: String { NSLocalizedString("options.colonDash", bundle: .module, comment: "") }
+
+    /// Colon replacement: space dash
+    public static var optionsColonSpaceDash: String { NSLocalizedString("options.colonSpaceDash", bundle: .module, comment: "") }
+
+    /// Colon replacement: space dash space
+    public static var optionsColonSpaceDashSpace: String { NSLocalizedString("options.colonSpaceDashSpace", bundle: .module, comment: "") }
+
+    /// Colon replacement: smart
+    public static var optionsColonSmart: String { NSLocalizedString("options.colonSmart", bundle: .module, comment: "") }
+
+    /// Group of the movies' naming
+    public static var optionsMovieNaming: String { NSLocalizedString("options.movieNaming", bundle: .module, comment: "") }
+
+    /// Option renaming movie files
+    public static var optionsRenameMovies: String { NSLocalizedString("options.renameMovies", bundle: .module, comment: "") }
+
+    /// Detail of renaming
+    public static var optionsRenameMoviesDetail: String { NSLocalizedString("options.renameMoviesDetail", bundle: .module, comment: "") }
+
+    /// A movie folder's template
+    public static var optionsMovieFolder: String { NSLocalizedString("options.movieFolder", bundle: .module, comment: "") }
+
+    /// A movie file's template
+    public static var optionsMovieFile: String { NSLocalizedString("options.movieFile", bundle: .module, comment: "") }
+
+    /// Group of the episodes' naming
+    public static var optionsEpisodeNaming: String { NSLocalizedString("options.episodeNaming", bundle: .module, comment: "") }
+
+    /// Option renaming episode files
+    public static var optionsRenameEpisodes: String { NSLocalizedString("options.renameEpisodes", bundle: .module, comment: "") }
+
+    /// Template of standard episodes
+    public static var optionsStandardEpisode: String { NSLocalizedString("options.standardEpisode", bundle: .module, comment: "") }
+
+    /// Template of daily episodes
+    public static var optionsDailyEpisode: String { NSLocalizedString("options.dailyEpisode", bundle: .module, comment: "") }
+
+    /// Template of anime episodes
+    public static var optionsAnimeEpisode: String { NSLocalizedString("options.animeEpisode", bundle: .module, comment: "") }
+
+    /// Template of a series' folder
+    public static var optionsSeriesFolder: String { NSLocalizedString("options.seriesFolder", bundle: .module, comment: "") }
+
+    /// Template of a season's folder
+    public static var optionsSeasonFolder: String { NSLocalizedString("options.seasonFolder", bundle: .module, comment: "") }
+
+    /// Template of the specials' folder
+    public static var optionsSpecialsFolder: String { NSLocalizedString("options.specialsFolder", bundle: .module, comment: "") }
+
+    /// How files of several episodes write their numbers
+    public static var optionsMultiEpisode: String { NSLocalizedString("options.multiEpisode", bundle: .module, comment: "") }
+
+    /// Footer of the naming groups
+    public static var optionsNamingFooter: String { NSLocalizedString("options.namingFooter", bundle: .module, comment: "") }
+
+    /// Group of the importing options
+    public static var optionsImporting: String { NSLocalizedString("options.importing", bundle: .module, comment: "") }
+
+    /// Option importing finished downloads
+    public static var optionsCompletedHandling: String { NSLocalizedString("options.completedHandling", bundle: .module, comment: "") }
+
+    /// Detail of completed download handling
+    public static var optionsCompletedHandlingDetail: String { NSLocalizedString("options.completedHandlingDetail", bundle: .module, comment: "") }
+
+    /// Option linking instead of copying
+    public static var optionsHardlinks: String { NSLocalizedString("options.hardlinks", bundle: .module, comment: "") }
+
+    /// Detail of hard links
+    public static var optionsHardlinksDetail: String { NSLocalizedString("options.hardlinksDetail", bundle: .module, comment: "") }
+
+    /// Option importing files beside the video
+    public static var optionsExtraFiles: String { NSLocalizedString("options.extraFiles", bundle: .module, comment: "") }
+
+    /// Extensions of extra files
+    public static var optionsExtensions: String { NSLocalizedString("options.extensions", bundle: .module, comment: "") }
+
+    /// Detail of extensions
+    public static var optionsExtensionsDetail: String { NSLocalizedString("options.extensionsDetail", bundle: .module, comment: "") }
+
+    /// Option deleting folders left empty
+    public static var optionsDeleteEmpty: String { NSLocalizedString("options.deleteEmpty", bundle: .module, comment: "") }
+
+    /// Option skipping the free space check
+    public static var optionsSkipFreeSpace: String { NSLocalizedString("options.skipFreeSpace", bundle: .module, comment: "") }
+
+    /// Space an import must leave
+    public static var optionsMinimumFreeSpace: String { NSLocalizedString("options.minimumFreeSpace", bundle: .module, comment: "") }
+
+    /// Unit of minimum free space
+    public static var optionsMinimumFreeSpaceDetail: String { NSLocalizedString("options.minimumFreeSpaceDetail", bundle: .module, comment: "") }
+
+    /// When episode titles are required
+    public static var optionsEpisodeTitle: String { NSLocalizedString("options.episodeTitle", bundle: .module, comment: "") }
+
+    /// Detail of requiring titles
+    public static var optionsEpisodeTitleDetail: String { NSLocalizedString("options.episodeTitleDetail", bundle: .module, comment: "") }
+
+    /// Episode titles always required
+    public static var optionsTitleAlways: String { NSLocalizedString("options.titleAlways", bundle: .module, comment: "") }
+
+    /// Episode titles required for season packs
+    public static var optionsTitleBulk: String { NSLocalizedString("options.titleBulk", bundle: .module, comment: "") }
+
+    /// Episode titles never required
+    public static var optionsTitleNever: String { NSLocalizedString("options.titleNever", bundle: .module, comment: "") }
+
+    /// Option unmonitoring episodes whose files go missing
+    public static var optionsUnmonitorMissing: String { NSLocalizedString("options.unmonitorMissing", bundle: .module, comment: "") }
+
+    /// Detail of unmonitoring
+    public static var optionsUnmonitorMissingDetail: String { NSLocalizedString("options.unmonitorMissingDetail", bundle: .module, comment: "") }
+
+    /// Prefixes of download client working folders
+    public static var optionsWorkingFolders: String { NSLocalizedString("options.workingFolders", bundle: .module, comment: "") }
+
+    /// Detail of working folders
+    public static var optionsWorkingFoldersDetail: String { NSLocalizedString("options.workingFoldersDetail", bundle: .module, comment: "") }
+
+    /// Group of the download client options
+    public static var optionsDownloadClients: String { NSLocalizedString("options.downloadClients", bundle: .module, comment: "") }
+
+    /// How often download clients are polled
+    public static var optionsCheckInterval: String { NSLocalizedString("options.checkInterval", bundle: .module, comment: "") }
+
+    /// Detail of the check interval
+    public static var optionsCheckIntervalDetail: String { NSLocalizedString("options.checkIntervalDetail", bundle: .module, comment: "") }
+
+    /// Option searching again when downloads fail
+    public static var optionsRedownload: String { NSLocalizedString("options.redownload", bundle: .module, comment: "") }
+
+    /// Option searching again for releases grabbed by hand
+    public static var optionsRedownloadInteractive: String { NSLocalizedString("options.redownloadInteractive", bundle: .module, comment: "") }
+
+    /// Group of the release options
+    public static var optionsReleasesGroup: String { NSLocalizedString("options.releasesGroup", bundle: .module, comment: "") }
+
+    /// How propers and repacks are handled
+    public static var optionsPropers: String { NSLocalizedString("options.propers", bundle: .module, comment: "") }
+
+    /// Propers: prefer and upgrade
+    public static var optionsPropersUpgrade: String { NSLocalizedString("options.propersUpgrade", bundle: .module, comment: "") }
+
+    /// Propers: do not upgrade
+    public static var optionsPropersNoUpgrade: String { NSLocalizedString("options.propersNoUpgrade", bundle: .module, comment: "") }
+
+    /// Propers: do not prefer
+    public static var optionsPropersNoPrefer: String { NSLocalizedString("options.propersNoPrefer", bundle: .module, comment: "") }
+
+    /// Option preferring flagged releases
+    public static var optionsIndexerFlags: String { NSLocalizedString("options.indexerFlags", bundle: .module, comment: "") }
+
+    /// Largest release taken
+    public static var optionsMaximumSize: String { NSLocalizedString("options.maximumSize", bundle: .module, comment: "") }
+
+    /// Detail of maximum size
+    public static var optionsMaximumSizeDetail: String { NSLocalizedString("options.maximumSizeDetail", bundle: .module, comment: "") }
+
+    /// How old Usenet releases must be
+    public static var optionsMinimumAge: String { NSLocalizedString("options.minimumAge", bundle: .module, comment: "") }
+
+    /// Detail of minimum age
+    public static var optionsMinimumAgeDetail: String { NSLocalizedString("options.minimumAgeDetail", bundle: .module, comment: "") }
+
+    /// Usenet retention
+    public static var optionsRetention: String { NSLocalizedString("options.retention", bundle: .module, comment: "") }
+
+    /// Detail of retention
+    public static var optionsRetentionDetail: String { NSLocalizedString("options.retentionDetail", bundle: .module, comment: "") }
+
+    /// How often RSS is synced
+    public static var optionsRssInterval: String { NSLocalizedString("options.rssInterval", bundle: .module, comment: "") }
+
+    /// Detail of the RSS interval
+    public static var optionsRssIntervalDetail: String { NSLocalizedString("options.rssIntervalDetail", bundle: .module, comment: "") }
+
+    /// Days shifting when movies count as available
+    public static var optionsAvailabilityDelay: String { NSLocalizedString("options.availabilityDelay", bundle: .module, comment: "") }
+
+    /// Detail of the availability delay
+    public static var optionsAvailabilityDelayDetail: String { NSLocalizedString("options.availabilityDelayDetail", bundle: .module, comment: "") }
+
+    /// Option allowing hardcoded subtitles
+    public static var optionsHardcodedSubs: String { NSLocalizedString("options.hardcodedSubs", bundle: .module, comment: "") }
+
+    /// Languages of hardcoded subtitles allowed anyway
+    public static var optionsWhitelistedSubs: String { NSLocalizedString("options.whitelistedSubs", bundle: .module, comment: "") }
+
+    /// Detail of allowed hardcoded subtitles
+    public static var optionsWhitelistedSubsDetail: String { NSLocalizedString("options.whitelistedSubsDetail", bundle: .module, comment: "") }
+
+    /// Group and option of the recycle bin
+    public static var optionsRecycleBin: String { NSLocalizedString("options.recycleBin", bundle: .module, comment: "") }
+
+    /// Detail of the recycle bin
+    public static var optionsRecycleBinDetail: String { NSLocalizedString("options.recycleBinDetail", bundle: .module, comment: "") }
+
+    /// Days files stay in the recycle bin
+    public static var optionsCleanupDays: String { NSLocalizedString("options.cleanupDays", bundle: .module, comment: "") }
+
+    /// Detail of the cleanup
+    public static var optionsCleanupDaysDetail: String { NSLocalizedString("options.cleanupDaysDetail", bundle: .module, comment: "") }
+
     /// Title of a quality profile's page
     public static var acquisitionProfile: String { NSLocalizedString("acquisition.profile", bundle: .module, comment: "") }
 

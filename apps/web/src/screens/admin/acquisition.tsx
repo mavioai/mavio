@@ -2,7 +2,7 @@
 // download clients the server's plugins have configured, the quality
 // profiles of movies and series, and the pages of what else decides
 // which releases are grabbed — quality definitions, custom formats, delay
-// and release profiles and remote path mappings.
+// and release profiles, remote path mappings and the options.
 import { type Timestamp, timestampDate } from "@bufbuild/protobuf/wkt";
 import { errorMessage, type ServerEntry, useDownloadClients, useIndexers, usePlugins, useQualityProfiles } from "@mavio/client-ts";
 import { MediaKind } from "@mavio/proto/mavio/acquisition/v1/profile_pb";
@@ -15,6 +15,7 @@ import type { SettingsSearch } from "../settings.tsx";
 import { fromNow, Page, PageLink } from "./common.tsx";
 import { CustomFormatPage, CustomFormatsPage } from "./formats.tsx";
 import { QualityDefinitionsPage, QualityProfilePage } from "./quality.tsx";
+import { AcquisitionOptionsPage } from "./options.tsx";
 import { DelayProfilesPage, ReleaseProfilesPage, RemotePathMappingsPage } from "./rules.tsx";
 
 /** The section of the server chosen in the settings. */
@@ -35,6 +36,8 @@ export function AcquisitionSection({ server }: { server: ServerEntry }) {
       return <ReleaseProfilesPage server={server} />;
     case "mappings":
       return <RemotePathMappingsPage server={server} />;
+    case "options":
+      return <AcquisitionOptionsPage server={server} />;
   }
   return <AcquisitionList server={server} />;
 }
@@ -139,6 +142,7 @@ function AcquisitionList({ server }: { server: ServerEntry }) {
         <PageLink search={{ acquisition: "delays" }} icon="pending" color="#FF9500" label={t("acquisition.delays")} detail={t("acquisition.delaysDetail")} />
         <PageLink search={{ acquisition: "releases" }} icon="sort" color="#007AFF" label={t("acquisition.releases")} detail={t("acquisition.releasesDetail")} />
         <PageLink search={{ acquisition: "mappings" }} icon="folder" color="#30B0C7" label={t("acquisition.mappings")} detail={t("acquisition.mappingsDetail")} />
+        <PageLink search={{ acquisition: "options" }} icon="settings" color="#8E8E93" label={t("options.options")} detail={t("options.optionsDetail")} />
       </Group>
     </Page>
   );

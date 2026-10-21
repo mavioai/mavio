@@ -3,9 +3,8 @@
 // tested and deleted here; the system proxy first, read only; and the
 // proxies of the server's own requests.
 import { create } from "@bufbuild/protobuf";
-import { errorMessage, type ServerEntry, systemProxyId, useProxies, useServerSettings, useTestProxy, useUpdateServerSettings } from "@mavio/client-ts";
-import { type Proxy as ProxyMessage, ProxyKind, ProxySchema, type TestProxyResponse } from "@mavio/proto/mavio/system/v1/proxy_pb";
-import { NetworkSettingsSchema, OutboundProxiesSchema } from "@mavio/proto/mavio/system/v1/system_pb";
+import { errorMessage, type ServerEntry, systemProxyId, useOutboundProxies, useProxies, useTestProxy } from "@mavio/client-ts";
+import { OutboundProxiesSchema, type Proxy as ProxyMessage, ProxyKind, ProxySchema, type TestProxyResponse } from "@mavio/proto/mavio/system/v1/proxy_pb";
 import { type ReactNode, useState } from "react";
 
 import { locale, t } from "../../i18n.ts";
@@ -104,21 +103,14 @@ const requests: { key: RequestKey; label: () => string; detail: () => string; ma
 /** The proxies of the server's own requests, each saved as it is chosen. */
 function ServerRequests({ server }: { server: ServerEntry }) {
   const { list } = useProxies(server);
-  const settings = useServerSettings(server);
-  const update = useUpdateServerSettings(server);
+  const { get: settings, update } = useOutboundProxies(server);
   // The choice being saved, shown until the settings come back.
   const [choosing, setChoosing] = useState<{ key: RequestKey; id: string }>();
-  const current = settings.data?.settings?.network?.proxies;
+  const current = settings.data;
   if (!current) return null;
   const choose = (key: RequestKey, id: string) => {
     setChoosing({ key, id });
-    update.mutate(
-      (s) => {
-        const n = (s.network ??= create(NetworkSettingsSchema));
-        (n.proxies ??= create(OutboundProxiesSchema))[key] = id;
-      },
-      { onSettled: () => setChoosing(undefined) },
-    );
+    update.mutate(create(OutboundProxiesSchema, { ...current, [key]: id }), { onSettled: () => setChoosing(undefined) });
   };
   return (
     <Group title={t("proxies.serverRequests")} footer={t("proxies.serverRequestsFooter")}>

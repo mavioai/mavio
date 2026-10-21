@@ -1084,6 +1084,82 @@ export type MessageKey =
   | 'acquisition.releasesDetail'
   | 'acquisition.mappings'
   | 'acquisition.mappingsDetail'
+  | 'options.options'
+  | 'options.optionsDetail'
+  | 'options.optionsMessage'
+  | 'options.naming'
+  | 'options.replaceIllegal'
+  | 'options.replaceIllegalDetail'
+  | 'options.colon'
+  | 'options.colonDelete'
+  | 'options.colonDash'
+  | 'options.colonSpaceDash'
+  | 'options.colonSpaceDashSpace'
+  | 'options.colonSmart'
+  | 'options.movieNaming'
+  | 'options.renameMovies'
+  | 'options.renameMoviesDetail'
+  | 'options.movieFolder'
+  | 'options.movieFile'
+  | 'options.episodeNaming'
+  | 'options.renameEpisodes'
+  | 'options.standardEpisode'
+  | 'options.dailyEpisode'
+  | 'options.animeEpisode'
+  | 'options.seriesFolder'
+  | 'options.seasonFolder'
+  | 'options.specialsFolder'
+  | 'options.multiEpisode'
+  | 'options.namingFooter'
+  | 'options.importing'
+  | 'options.completedHandling'
+  | 'options.completedHandlingDetail'
+  | 'options.hardlinks'
+  | 'options.hardlinksDetail'
+  | 'options.extraFiles'
+  | 'options.extensions'
+  | 'options.extensionsDetail'
+  | 'options.deleteEmpty'
+  | 'options.skipFreeSpace'
+  | 'options.minimumFreeSpace'
+  | 'options.minimumFreeSpaceDetail'
+  | 'options.episodeTitle'
+  | 'options.episodeTitleDetail'
+  | 'options.titleAlways'
+  | 'options.titleBulk'
+  | 'options.titleNever'
+  | 'options.unmonitorMissing'
+  | 'options.unmonitorMissingDetail'
+  | 'options.workingFolders'
+  | 'options.workingFoldersDetail'
+  | 'options.downloadClients'
+  | 'options.checkInterval'
+  | 'options.checkIntervalDetail'
+  | 'options.redownload'
+  | 'options.redownloadInteractive'
+  | 'options.releasesGroup'
+  | 'options.propers'
+  | 'options.propersUpgrade'
+  | 'options.propersNoUpgrade'
+  | 'options.propersNoPrefer'
+  | 'options.indexerFlags'
+  | 'options.maximumSize'
+  | 'options.maximumSizeDetail'
+  | 'options.minimumAge'
+  | 'options.minimumAgeDetail'
+  | 'options.retention'
+  | 'options.retentionDetail'
+  | 'options.rssInterval'
+  | 'options.rssIntervalDetail'
+  | 'options.availabilityDelay'
+  | 'options.availabilityDelayDetail'
+  | 'options.hardcodedSubs'
+  | 'options.whitelistedSubs'
+  | 'options.whitelistedSubsDetail'
+  | 'options.recycleBin'
+  | 'options.recycleBinDetail'
+  | 'options.cleanupDays'
+  | 'options.cleanupDaysDetail'
   | 'acquisition.profile'
   | 'acquisition.newProfile'
   | 'acquisition.noProfile'
@@ -3077,6 +3153,82 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "acquisition.releasesDetail": "Terms releases must have or must not have",
     "acquisition.mappings": "Remote Path Mappings",
     "acquisition.mappingsDetail": "Folders of download clients on other hosts",
+    "options.options": "Options",
+    "options.optionsDetail": "Naming, importing, releases and the recycle bin",
+    "options.optionsMessage": "How the server names and imports what it downloads, which releases it takes and where replaced files go.",
+    "options.naming": "Naming",
+    "options.replaceIllegal": "Replace Illegal Characters",
+    "options.replaceIllegalDetail": "Otherwise they are removed",
+    "options.colon": "Colon Replacement",
+    "options.colonDelete": "Delete",
+    "options.colonDash": "Replace with Dash",
+    "options.colonSpaceDash": "Replace with Space Dash",
+    "options.colonSpaceDashSpace": "Replace with Space Dash Space",
+    "options.colonSmart": "Smart Replace",
+    "options.movieNaming": "Movies",
+    "options.renameMovies": "Rename Movies",
+    "options.renameMoviesDetail": "Otherwise files keep their names",
+    "options.movieFolder": "Folder",
+    "options.movieFile": "File",
+    "options.episodeNaming": "Episodes",
+    "options.renameEpisodes": "Rename Episodes",
+    "options.standardEpisode": "Standard Episodes",
+    "options.dailyEpisode": "Daily Episodes",
+    "options.animeEpisode": "Anime Episodes",
+    "options.seriesFolder": "Series Folder",
+    "options.seasonFolder": "Season Folder",
+    "options.specialsFolder": "Specials Folder",
+    "options.multiEpisode": "Multi-Episode Style",
+    "options.namingFooter": "Templates name what they show in braces, as the defaults shown do. Empty episode and folder templates use those defaults.",
+    "options.importing": "Importing",
+    "options.completedHandling": "Completed Download Handling",
+    "options.completedHandlingDetail": "Import downloads as they finish",
+    "options.hardlinks": "Use Hard Links",
+    "options.hardlinksDetail": "Link files that keep seeding instead of copying them, on the same disk",
+    "options.extraFiles": "Import Extra Files",
+    "options.extensions": "Extensions",
+    "options.extensionsDetail": "Separated by commas, such as srt, nfo",
+    "options.deleteEmpty": "Delete Empty Folders",
+    "options.skipFreeSpace": "Skip Free Space Check",
+    "options.minimumFreeSpace": "Minimum Free Space",
+    "options.minimumFreeSpaceDetail": "In megabytes",
+    "options.episodeTitle": "Require Episode Titles",
+    "options.episodeTitleDetail": "When names show titles, wait for them before importing",
+    "options.titleAlways": "Always",
+    "options.titleBulk": "Only for Bulk Season Releases",
+    "options.titleNever": "Never",
+    "options.unmonitorMissing": "Unmonitor Deleted Episodes",
+    "options.unmonitorMissingDetail": "Episodes whose files are deleted are not downloaded again",
+    "options.workingFolders": "Working Folders",
+    "options.workingFoldersDetail": "Prefixes of folders download clients unpack into, separated by |; never imported",
+    "options.downloadClients": "Download Clients",
+    "options.checkInterval": "Check Interval",
+    "options.checkIntervalDetail": "Minutes between checks of finished downloads, 1–120",
+    "options.redownload": "Redownload Failed",
+    "options.redownloadInteractive": "Also from Interactive Search",
+    "options.releasesGroup": "Releases",
+    "options.propers": "Propers and Repacks",
+    "options.propersUpgrade": "Prefer and Upgrade",
+    "options.propersNoUpgrade": "Do Not Upgrade Automatically",
+    "options.propersNoPrefer": "Do Not Prefer",
+    "options.indexerFlags": "Prefer Indexer Flags",
+    "options.maximumSize": "Maximum Size",
+    "options.maximumSizeDetail": "In megabytes; 0 for none",
+    "options.minimumAge": "Minimum Age",
+    "options.minimumAgeDetail": "Usenet only, in minutes",
+    "options.retention": "Retention",
+    "options.retentionDetail": "Usenet only, in days; 0 for none",
+    "options.rssInterval": "RSS Sync Interval",
+    "options.rssIntervalDetail": "Minutes, 10–120; 0 turns RSS sync off",
+    "options.availabilityDelay": "Availability Delay",
+    "options.availabilityDelayDetail": "Days before or after the release date a movie counts as available",
+    "options.hardcodedSubs": "Allow Hardcoded Subtitles",
+    "options.whitelistedSubs": "Allowed Hardcoded Subtitles",
+    "options.whitelistedSubsDetail": "Languages allowed when others are not, separated by commas",
+    "options.recycleBin": "Recycle Bin",
+    "options.recycleBinDetail": "Folder replaced and deleted files go to; empty deletes them",
+    "options.cleanupDays": "Cleanup",
+    "options.cleanupDaysDetail": "Days files stay; 0 keeps them",
     "acquisition.profile": "Quality Profile",
     "acquisition.newProfile": "New Quality Profile",
     "acquisition.noProfile": "This profile no longer exists.",
@@ -5068,6 +5220,82 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "acquisition.releasesDetail": "发布必须包含或不得包含的词",
     "acquisition.mappings": "远程路径映射",
     "acquisition.mappingsDetail": "其他主机上下载客户端的文件夹",
+    "options.options": "选项",
+    "options.optionsDetail": "命名、导入、发布和回收站",
+    "options.optionsMessage": "服务器如何命名和导入下载的内容、接受哪些发布，以及被替换的文件去向。",
+    "options.naming": "命名",
+    "options.replaceIllegal": "替换非法字符",
+    "options.replaceIllegalDetail": "否则直接删除",
+    "options.colon": "冒号替换",
+    "options.colonDelete": "删除",
+    "options.colonDash": "替换为短横线",
+    "options.colonSpaceDash": "替换为空格短横线",
+    "options.colonSpaceDashSpace": "替换为空格短横线空格",
+    "options.colonSmart": "智能替换",
+    "options.movieNaming": "电影",
+    "options.renameMovies": "重命名电影",
+    "options.renameMoviesDetail": "否则文件保留原名",
+    "options.movieFolder": "文件夹",
+    "options.movieFile": "文件",
+    "options.episodeNaming": "剧集",
+    "options.renameEpisodes": "重命名剧集",
+    "options.standardEpisode": "标准剧集",
+    "options.dailyEpisode": "日播剧集",
+    "options.animeEpisode": "动画剧集",
+    "options.seriesFolder": "剧集文件夹",
+    "options.seasonFolder": "季文件夹",
+    "options.specialsFolder": "特别篇文件夹",
+    "options.multiEpisode": "多集样式",
+    "options.namingFooter": "模板以花括号写出要显示的内容，可参照所示的默认值。剧集与文件夹模板留空时使用这些默认值。",
+    "options.importing": "导入",
+    "options.completedHandling": "已完成下载处理",
+    "options.completedHandlingDetail": "下载完成后自动导入",
+    "options.hardlinks": "使用硬链接",
+    "options.hardlinksDetail": "同一磁盘上，以硬链接代替复制仍在做种的文件",
+    "options.extraFiles": "导入额外文件",
+    "options.extensions": "扩展名",
+    "options.extensionsDetail": "以逗号分隔，如 srt, nfo",
+    "options.deleteEmpty": "删除空文件夹",
+    "options.skipFreeSpace": "跳过可用空间检查",
+    "options.minimumFreeSpace": "最小可用空间",
+    "options.minimumFreeSpaceDetail": "单位：MB",
+    "options.episodeTitle": "要求剧集标题",
+    "options.episodeTitleDetail": "名称包含标题时，等标题出来后再导入",
+    "options.titleAlways": "始终",
+    "options.titleBulk": "仅整季发布",
+    "options.titleNever": "从不",
+    "options.unmonitorMissing": "取消监控已删除的剧集",
+    "options.unmonitorMissingDetail": "文件被删除的剧集不会再次下载",
+    "options.workingFolders": "工作文件夹",
+    "options.workingFoldersDetail": "下载客户端解压所用文件夹的前缀，以 | 分隔；不会被导入",
+    "options.downloadClients": "下载客户端",
+    "options.checkInterval": "检查间隔",
+    "options.checkIntervalDetail": "检查已完成下载的间隔分钟数，1–120",
+    "options.redownload": "重新下载失败项",
+    "options.redownloadInteractive": "包括手动搜索",
+    "options.releasesGroup": "发布",
+    "options.propers": "Proper 与 Repack",
+    "options.propersUpgrade": "优先并升级",
+    "options.propersNoUpgrade": "不自动升级",
+    "options.propersNoPrefer": "不优先",
+    "options.indexerFlags": "优先索引器标记",
+    "options.maximumSize": "最大大小",
+    "options.maximumSizeDetail": "单位：MB；0 为不限",
+    "options.minimumAge": "最短发布时间",
+    "options.minimumAgeDetail": "仅 Usenet，单位：分钟",
+    "options.retention": "保留期",
+    "options.retentionDetail": "仅 Usenet，单位：天；0 为不限",
+    "options.rssInterval": "RSS 同步间隔",
+    "options.rssIntervalDetail": "分钟，10–120；0 关闭 RSS 同步",
+    "options.availabilityDelay": "可用延迟",
+    "options.availabilityDelayDetail": "电影在上映日期前后多少天视为可用",
+    "options.hardcodedSubs": "允许硬字幕",
+    "options.whitelistedSubs": "允许的硬字幕",
+    "options.whitelistedSubsDetail": "其他硬字幕不允许时仍允许的语言，以逗号分隔",
+    "options.recycleBin": "回收站",
+    "options.recycleBinDetail": "被替换和删除的文件移入的文件夹；留空则直接删除",
+    "options.cleanupDays": "清理",
+    "options.cleanupDaysDetail": "文件保留天数；0 为永久保留",
     "acquisition.profile": "质量配置",
     "acquisition.newProfile": "新建质量配置",
     "acquisition.noProfile": "该配置已不存在。",

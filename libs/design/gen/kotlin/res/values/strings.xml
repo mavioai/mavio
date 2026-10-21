@@ -2206,6 +2206,158 @@
     <string name="acquisition_mappings">Remote Path Mappings</string>
     <!-- Detail of the remote path mappings -->
     <string name="acquisition_mappings_detail">Folders of download clients on other hosts</string>
+    <!-- Page of the acquisition options -->
+    <string name="options_options">Options</string>
+    <!-- Detail of the acquisition options -->
+    <string name="options_options_detail">Naming, importing, releases and the recycle bin</string>
+    <!-- Message of the acquisition options page -->
+    <string name="options_options_message">How the server names and imports what it downloads, which releases it takes and where replaced files go.</string>
+    <!-- Group of the naming options -->
+    <string name="options_naming">Naming</string>
+    <!-- Option replacing characters file systems do not allow -->
+    <string name="options_replace_illegal">Replace Illegal Characters</string>
+    <!-- Detail of replacing illegal characters -->
+    <string name="options_replace_illegal_detail">Otherwise they are removed</string>
+    <!-- Option of what replaces colons in names -->
+    <string name="options_colon">Colon Replacement</string>
+    <!-- Colon replacement: delete -->
+    <string name="options_colon_delete">Delete</string>
+    <!-- Colon replacement: dash -->
+    <string name="options_colon_dash">Replace with Dash</string>
+    <!-- Colon replacement: space dash -->
+    <string name="options_colon_space_dash">Replace with Space Dash</string>
+    <!-- Colon replacement: space dash space -->
+    <string name="options_colon_space_dash_space">Replace with Space Dash Space</string>
+    <!-- Colon replacement: smart -->
+    <string name="options_colon_smart">Smart Replace</string>
+    <!-- Group of the movies' naming -->
+    <string name="options_movie_naming">Movies</string>
+    <!-- Option renaming movie files -->
+    <string name="options_rename_movies">Rename Movies</string>
+    <!-- Detail of renaming -->
+    <string name="options_rename_movies_detail">Otherwise files keep their names</string>
+    <!-- A movie folder's template -->
+    <string name="options_movie_folder">Folder</string>
+    <!-- A movie file's template -->
+    <string name="options_movie_file">File</string>
+    <!-- Group of the episodes' naming -->
+    <string name="options_episode_naming">Episodes</string>
+    <!-- Option renaming episode files -->
+    <string name="options_rename_episodes">Rename Episodes</string>
+    <!-- Template of standard episodes -->
+    <string name="options_standard_episode">Standard Episodes</string>
+    <!-- Template of daily episodes -->
+    <string name="options_daily_episode">Daily Episodes</string>
+    <!-- Template of anime episodes -->
+    <string name="options_anime_episode">Anime Episodes</string>
+    <!-- Template of a series' folder -->
+    <string name="options_series_folder">Series Folder</string>
+    <!-- Template of a season's folder -->
+    <string name="options_season_folder">Season Folder</string>
+    <!-- Template of the specials' folder -->
+    <string name="options_specials_folder">Specials Folder</string>
+    <!-- How files of several episodes write their numbers -->
+    <string name="options_multi_episode">Multi-Episode Style</string>
+    <!-- Footer of the naming groups -->
+    <string name="options_naming_footer">Templates name what they show in braces, as the defaults shown do. Empty episode and folder templates use those defaults.</string>
+    <!-- Group of the importing options -->
+    <string name="options_importing">Importing</string>
+    <!-- Option importing finished downloads -->
+    <string name="options_completed_handling">Completed Download Handling</string>
+    <!-- Detail of completed download handling -->
+    <string name="options_completed_handling_detail">Import downloads as they finish</string>
+    <!-- Option linking instead of copying -->
+    <string name="options_hardlinks">Use Hard Links</string>
+    <!-- Detail of hard links -->
+    <string name="options_hardlinks_detail">Link files that keep seeding instead of copying them, on the same disk</string>
+    <!-- Option importing files beside the video -->
+    <string name="options_extra_files">Import Extra Files</string>
+    <!-- Extensions of extra files -->
+    <string name="options_extensions">Extensions</string>
+    <!-- Detail of extensions -->
+    <string name="options_extensions_detail">Separated by commas, such as srt, nfo</string>
+    <!-- Option deleting folders left empty -->
+    <string name="options_delete_empty">Delete Empty Folders</string>
+    <!-- Option skipping the free space check -->
+    <string name="options_skip_free_space">Skip Free Space Check</string>
+    <!-- Space an import must leave -->
+    <string name="options_minimum_free_space">Minimum Free Space</string>
+    <!-- Unit of minimum free space -->
+    <string name="options_minimum_free_space_detail">In megabytes</string>
+    <!-- When episode titles are required -->
+    <string name="options_episode_title">Require Episode Titles</string>
+    <!-- Detail of requiring titles -->
+    <string name="options_episode_title_detail">When names show titles, wait for them before importing</string>
+    <!-- Episode titles always required -->
+    <string name="options_title_always">Always</string>
+    <!-- Episode titles required for season packs -->
+    <string name="options_title_bulk">Only for Bulk Season Releases</string>
+    <!-- Episode titles never required -->
+    <string name="options_title_never">Never</string>
+    <!-- Option unmonitoring episodes whose files go missing -->
+    <string name="options_unmonitor_missing">Unmonitor Deleted Episodes</string>
+    <!-- Detail of unmonitoring -->
+    <string name="options_unmonitor_missing_detail">Episodes whose files are deleted are not downloaded again</string>
+    <!-- Prefixes of download client working folders -->
+    <string name="options_working_folders">Working Folders</string>
+    <!-- Detail of working folders -->
+    <string name="options_working_folders_detail">Prefixes of folders download clients unpack into, separated by |; never imported</string>
+    <!-- Group of the download client options -->
+    <string name="options_download_clients">Download Clients</string>
+    <!-- How often download clients are polled -->
+    <string name="options_check_interval">Check Interval</string>
+    <!-- Detail of the check interval -->
+    <string name="options_check_interval_detail">Minutes between checks of finished downloads, 1–120</string>
+    <!-- Option searching again when downloads fail -->
+    <string name="options_redownload">Redownload Failed</string>
+    <!-- Option searching again for releases grabbed by hand -->
+    <string name="options_redownload_interactive">Also from Interactive Search</string>
+    <!-- Group of the release options -->
+    <string name="options_releases_group">Releases</string>
+    <!-- How propers and repacks are handled -->
+    <string name="options_propers">Propers and Repacks</string>
+    <!-- Propers: prefer and upgrade -->
+    <string name="options_propers_upgrade">Prefer and Upgrade</string>
+    <!-- Propers: do not upgrade -->
+    <string name="options_propers_no_upgrade">Do Not Upgrade Automatically</string>
+    <!-- Propers: do not prefer -->
+    <string name="options_propers_no_prefer">Do Not Prefer</string>
+    <!-- Option preferring flagged releases -->
+    <string name="options_indexer_flags">Prefer Indexer Flags</string>
+    <!-- Largest release taken -->
+    <string name="options_maximum_size">Maximum Size</string>
+    <!-- Detail of maximum size -->
+    <string name="options_maximum_size_detail">In megabytes; 0 for none</string>
+    <!-- How old Usenet releases must be -->
+    <string name="options_minimum_age">Minimum Age</string>
+    <!-- Detail of minimum age -->
+    <string name="options_minimum_age_detail">Usenet only, in minutes</string>
+    <!-- Usenet retention -->
+    <string name="options_retention">Retention</string>
+    <!-- Detail of retention -->
+    <string name="options_retention_detail">Usenet only, in days; 0 for none</string>
+    <!-- How often RSS is synced -->
+    <string name="options_rss_interval">RSS Sync Interval</string>
+    <!-- Detail of the RSS interval -->
+    <string name="options_rss_interval_detail">Minutes, 10–120; 0 turns RSS sync off</string>
+    <!-- Days shifting when movies count as available -->
+    <string name="options_availability_delay">Availability Delay</string>
+    <!-- Detail of the availability delay -->
+    <string name="options_availability_delay_detail">Days before or after the release date a movie counts as available</string>
+    <!-- Option allowing hardcoded subtitles -->
+    <string name="options_hardcoded_subs">Allow Hardcoded Subtitles</string>
+    <!-- Languages of hardcoded subtitles allowed anyway -->
+    <string name="options_whitelisted_subs">Allowed Hardcoded Subtitles</string>
+    <!-- Detail of allowed hardcoded subtitles -->
+    <string name="options_whitelisted_subs_detail">Languages allowed when others are not, separated by commas</string>
+    <!-- Group and option of the recycle bin -->
+    <string name="options_recycle_bin">Recycle Bin</string>
+    <!-- Detail of the recycle bin -->
+    <string name="options_recycle_bin_detail">Folder replaced and deleted files go to; empty deletes them</string>
+    <!-- Days files stay in the recycle bin -->
+    <string name="options_cleanup_days">Cleanup</string>
+    <!-- Detail of the cleanup -->
+    <string name="options_cleanup_days_detail">Days files stay; 0 keeps them</string>
     <!-- Title of a quality profile's page -->
     <string name="acquisition_profile">Quality Profile</string>
     <!-- Title of the page adding a quality profile -->

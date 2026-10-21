@@ -724,7 +724,7 @@ flowchart TD
     - [x] 插件的配置，按其清单的 schema 或其自己的页面（`GetPluginConfig`、`SetPluginConfig`）
     - [ ] 插件分区加入 Web UI 的快照测试
     - [x] 概览（`apps/web/src/screens/admin/overview.tsx`）：服务器的版本与健康状况、正在播放的会话与最近的活动（`GetSystemInfo`、`GetHealth`、`SessionService.ListSessions`、`ListActivities`）
-    - [x] 常规（`apps/web/src/screens/admin/general.tsx`）：服务器名称、元数据的语言与国家以及其他服务器设置（`UpdateServerSettings`、`LocalizationService`）
+    - [x] 常规（`apps/web/src/screens/admin/general.tsx`）：服务器名称、元数据的语言与国家以及其他通用设置（`UpdateGeneralSettings`、`LocalizationService`）
     - [x] 转码（`apps/web/src/screens/admin/transcoding.tsx`）：硬件加速、编码器、色调映射、去隔行、缩混与转码文件夹（`TranscodingSettings`）
     - [x] 媒体库（`apps/web/src/screens/admin/libraries.tsx`、`libs/client-ts/src/admin.ts`）：添加、编辑、删除与扫描媒体库，带目录选择器（`LibraryService`、`ListDirectory`）
     - [x] 桌面端“媒体库”中各媒体库的扫描进度（`apps/desktop/internal/app/libraries.go`），来自核心 C ABI 的 `ScanProgressChanged` 事件与媒体库的 `scan_progress`
@@ -739,6 +739,8 @@ flowchart TD
     - [x] 用户（`apps/web/src/screens/admin/users.tsx`、`sign-in.tsx` 中的 `InviteScreen`）：添加、编辑与删除用户，其登录方式，邀请链接及位于 `/invite` 的邀请页面，用户的媒体库与家长分级（`UserService`、`ListRatings`、`AuthService.GetInvitation`、`AcceptInvitation`）
     - [x] 获取（`apps/web/src/screens/admin/{acquisition,quality,formats,rules}.tsx`、`libs/client-ts/src/profiles.ts`）：质量定义与质量配置、自定义格式、延迟配置与发布配置、远程路径映射，以及索引器与下载客户端（`ProfileService`、`ListIndexers`、`ListDownloadClients`）
       - [ ] 在质量配置中将质量编组与取消编组；目前配置中的质量只能启用、停用与排序
+    - [x] 获取的选项（`apps/web/src/screens/admin/options.tsx`）：命名、导入、下载客户端、发布与回收站（`ProfileService.UpdateAcquisitionSettings`）
+    - [ ] 桌面应用（`apps/desktop/internal/app`，在此之前无法编译）、Apple 应用（`MavioAdmin`、`MavioMac*`）与 Android 应用（`libs/android/admin`）改用按领域划分的设置 RPC（`GetGeneralSettings`、`GetTranscodingSettings`、`GetPluginCatalogs`、`GetOutboundProxies`、`GetAcquisitionSettings`、`GetRequestSettings`），它们取代了 `GetServerSettings` 与 `UpdateServerSettings`
     - [x] 字幕（`apps/web/src/screens/admin/{subtitles,subtitle-settings}.tsx`、`libs/client-ts/src/subtitles.ts`）：字幕配置及其适用的媒体库、提供商与翻译器，以及搜索与保存、同步和翻译的设置（`SubtitleService`、`ListSubtitleProfileAssignments`）
       - [ ] 在详情页为电影或剧集分配其自己的字幕配置（`AssignSubtitleProfile`）
     - [x] AI（`apps/web/src/screens/admin/ai.tsx`、`libs/client-ts/src/ai.ts`）：AI 网关插件的提供商及其凭据、API 密钥、跟随显示并就地回答问题的登录、退出登录，以及模型（`AiProviderService`）

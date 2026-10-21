@@ -3,11 +3,15 @@
 // languages, countries and ratings it knows, its users and invitations,
 // what it runs and plays, what happened on it, its tasks and jobs, and
 // its settings.
+import { ProfileService } from "@mavio/proto/mavio/acquisition/v1/profile_pb";
+import type { AcquisitionSettings } from "@mavio/proto/mavio/acquisition/v1/settings_pb";
 import { LibraryService, type LibrarySpec } from "@mavio/proto/mavio/library/v1/library_pb";
+import { type HardwareAcceleration, PlaybackService, type TranscodingSettings } from "@mavio/proto/mavio/playback/v1/playback_pb";
 import { SessionService } from "@mavio/proto/mavio/session/v1/session_pb";
 import { ActivityService, type Severity } from "@mavio/proto/mavio/system/v1/activity_pb";
 import { LocalizationService } from "@mavio/proto/mavio/system/v1/localization_pb";
-import { type ServerSettings, SystemService } from "@mavio/proto/mavio/system/v1/system_pb";
+import { type OutboundProxies, ProxyService } from "@mavio/proto/mavio/system/v1/proxy_pb";
+import { type GeneralSettings, SystemService } from "@mavio/proto/mavio/system/v1/system_pb";
 import { type JobState, TaskService } from "@mavio/proto/mavio/system/v1/task_pb";
 import {
   type CreateInvitationRequestSchema,
@@ -227,33 +231,77 @@ export function useJobs(server: ServerEntry, states: JobState[], limit: number) 
   });
 }
 
-/** A server's settings, with the hardware accelerations its ffmpeg supports. */
-export function useServerSettings(server: ServerEntry) {
-  const servers = useServersStore();
-  return useQuery({
-    queryKey: serverKey(server.id, "settings"),
-    queryFn: () => servers.client(SystemService, server).getServerSettings({}),
-  });
+/**
+ * A group of a server's settings: get reads it, update replaces it with the
+ * one given and keeps what the server returns.
+ */
+function useSettingsGroup<T, R>(
+  server: ServerEntry,
+  key: string,
+  get: () => Promise<R>,
+  put: (settings: T) => Promise<R>,
+) {
+  const qc = useQueryClient();
+  const queryKey = serverKey(server.id, "settings", key);
+  return {
+    get: useQuery({ queryKey, queryFn: get }),
+    update: useMutation({ mutationFn: put, onSuccess: (r) => qc.setQueryData(queryKey, r) }),
+  };
 }
 
-/**
- * Changes a server's settings: change is applied to the settings the server
- * has now, so that what other pages change in the meantime is kept.
- */
-export function useUpdateServerSettings(server: ServerEntry) {
+/** A server's general settings: its network, metadata, sessions and password reset. */
+export function useGeneralSettings(server: ServerEntry) {
+  const servers = useServersStore();
+  const c = () => servers.client(SystemService, server);
+  return useSettingsGroup(
+    server,
+    "general",
+    async () => (await c().getGeneralSettings({})).settings,
+    async (settings: GeneralSettings) => (await c().updateGeneralSettings({ settings })).settings,
+  );
+}
+
+/** A server's transcoding settings, with the hardware accelerations its ffmpeg supports. */
+export function useTranscodingSettings(server: ServerEntry) {
   const servers = useServersStore();
   const qc = useQueryClient();
-  return useMutation({
-    mutationFn: async (change: (s: ServerSettings) => void) => {
-      const client = servers.client(SystemService, server);
-      const { settings } = await client.getServerSettings({});
-      if (!settings) throw new Error("the server sent no settings");
-      change(settings);
-      return (await client.updateServerSettings({ settings })).settings;
+  const c = () => servers.client(PlaybackService, server);
+  return useSettingsGroup(
+    server,
+    "transcoding",
+    async () => {
+      const r = await c().getTranscodingSettings({});
+      return { settings: r.settings, accelerations: r.availableHardwareAccelerations };
     },
-    onSettled: async () => {
-      await qc.invalidateQueries({ queryKey: serverKey(server.id, "settings") });
-      await qc.invalidateQueries({ queryKey: serverKey(server.id, "plugins", "catalogs") });
+    async (settings: TranscodingSettings) => {
+      const r = await c().updateTranscodingSettings({ settings });
+      // What the server's ffmpeg supports does not change with the settings.
+      const accelerations = qc.getQueryData<{ accelerations: HardwareAcceleration[] }>(serverKey(server.id, "settings", "transcoding"))?.accelerations ?? [];
+      return { settings: r.settings, accelerations };
     },
-  });
+  );
+}
+
+/** The proxies of a server's own requests. */
+export function useOutboundProxies(server: ServerEntry) {
+  const servers = useServersStore();
+  const c = () => servers.client(ProxyService, server);
+  return useSettingsGroup(
+    server,
+    "outbound-proxies",
+    async () => (await c().getOutboundProxies({})).proxies,
+    async (proxies: OutboundProxies) => (await c().updateOutboundProxies({ proxies })).proxies,
+  );
+}
+
+/** A server's acquisition settings: naming, importing, download handling, releases and the recycle bin. */
+export function useAcquisitionSettings(server: ServerEntry) {
+  const servers = useServersStore();
+  const c = () => servers.client(ProfileService, server);
+  return useSettingsGroup(
+    server,
+    "acquisition",
+    async () => (await c().getAcquisitionSettings({})).settings,
+    async (settings: AcquisitionSettings) => (await c().updateAcquisitionSettings({ settings })).settings,
+  );
 }

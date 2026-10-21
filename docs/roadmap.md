@@ -724,7 +724,7 @@ flowchart TD
     - [x] A plugin's configuration, from its manifest's schema or its own page (`GetPluginConfig`, `SetPluginConfig`)
     - [ ] The Plugins section among the web UI's snapshot tests
     - [x] Overview (`apps/web/src/screens/admin/overview.tsx`): the server's version and health, who is playing and the recent activity (`GetSystemInfo`, `GetHealth`, `SessionService.ListSessions`, `ListActivities`)
-    - [x] General (`apps/web/src/screens/admin/general.tsx`): the server's name, the metadata's language and country and the other server settings (`UpdateServerSettings`, `LocalizationService`)
+    - [x] General (`apps/web/src/screens/admin/general.tsx`): the server's name, the metadata's language and country and the other general settings (`UpdateGeneralSettings`, `LocalizationService`)
     - [x] Transcoding (`apps/web/src/screens/admin/transcoding.tsx`): hardware acceleration, the encoder, tone mapping, deinterlacing, the downmix and the transcode folder (`TranscodingSettings`)
     - [x] Libraries (`apps/web/src/screens/admin/libraries.tsx`, `libs/client-ts/src/admin.ts`): adding, editing, removing and scanning libraries, with a folder picker (`LibraryService`, `ListDirectory`)
     - [x] Each library's scan progress in Libraries on the desktop (`apps/desktop/internal/app/libraries.go`), from the core's `ScanProgressChanged` event of its C ABI and the libraries' `scan_progress`
@@ -739,6 +739,8 @@ flowchart TD
     - [x] Users (`apps/web/src/screens/admin/users.tsx`, `InviteScreen` in `sign-in.tsx`): adding, editing and removing users, their sign-ins, invitation links and the invitation screen at `/invite`, their libraries and parental ratings (`UserService`, `ListRatings`, `AuthService.GetInvitation`, `AcceptInvitation`)
     - [x] Acquisition (`apps/web/src/screens/admin/{acquisition,quality,formats,rules}.tsx`, `libs/client-ts/src/profiles.ts`): quality definitions and profiles, custom formats, delay and release profiles, remote path mappings, and the indexers and download clients (`ProfileService`, `ListIndexers`, `ListDownloadClients`)
       - [ ] Grouping qualities in a profile and ungrouping them; a profile's qualities are only turned on, off and reordered
+    - [x] Acquisition's Options (`apps/web/src/screens/admin/options.tsx`): naming, importing, download clients, releases and the recycle bin (`ProfileService.UpdateAcquisitionSettings`)
+    - [ ] The settings RPCs per domain (`GetGeneralSettings`, `GetTranscodingSettings`, `GetPluginCatalogs`, `GetOutboundProxies`, `GetAcquisitionSettings`, `GetRequestSettings`), which replaced `GetServerSettings` and `UpdateServerSettings`, used by the desktop app (`apps/desktop/internal/app`, which does not compile until then), the Apple apps (`MavioAdmin`, `MavioMac*`) and the Android apps (`libs/android/admin`)
     - [x] Subtitles (`apps/web/src/screens/admin/{subtitles,subtitle-settings}.tsx`, `libs/client-ts/src/subtitles.ts`): subtitle profiles and the libraries they apply to, the providers and translators, and the settings of searching and saving, synchronization and translation (`SubtitleService`, `ListSubtitleProfileAssignments`)
       - [ ] A movie's or series' own subtitle profile, assigned from its details (`AssignSubtitleProfile`)
     - [x] AI (`apps/web/src/screens/admin/ai.tsx`, `libs/client-ts/src/ai.ts`): the AI gateway plugin's providers with their credentials, API keys, sign-ins followed with their questions answered in place, signing out, and the models (`AiProviderService`)

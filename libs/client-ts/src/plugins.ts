@@ -66,7 +66,7 @@ export function usePluginCatalogs(server: ServerEntry | undefined) {
   const servers = useServersStore();
   return useQuery({
     queryKey: serverKey(server?.id ?? "", "plugins", "catalogs"),
-    queryFn: async () => (await servers.client(SystemService, server!).getServerSettings({})).settings?.pluginCatalogs ?? [],
+    queryFn: async () => (await servers.client(PluginManagementService, server!).getPluginCatalogs({})).urls,
     enabled: !!server,
   });
 }
@@ -136,7 +136,6 @@ export function usePluginActions(server: ServerEntry) {
   const qc = useQueryClient();
   const onSettled = () => qc.invalidateQueries({ queryKey: serverKey(server.id, "plugins") });
   const client = () => servers.client(PluginManagementService, server);
-  const system = () => servers.client(SystemService, server);
   return {
     /** Installs a plugin, or changes its version; the newest when version is unset. */
     install: useMutation({ mutationFn: ({ id, version }: { id: string; version?: string }) => client().installPlugin({ pluginId: id, version }), onSettled }),
@@ -163,14 +162,9 @@ export function usePluginActions(server: ServerEntry) {
       mutationFn: ({ id, proxy }: { id: string; proxy: string }) => client().setPluginProxy({ pluginId: id, proxy }),
       onSettled,
     }),
-    /** Replaces the catalogs' URLs, keeping the other settings. */
+    /** Replaces the catalogs' URLs. */
     setCatalogs: useMutation({
-      mutationFn: async (urls: string[]) => {
-        const { settings } = await system().getServerSettings({});
-        if (!settings) throw new Error("the server sent no settings");
-        settings.pluginCatalogs = urls;
-        return system().updateServerSettings({ settings });
-      },
+      mutationFn: (urls: string[]) => client().updatePluginCatalogs({ urls }),
       onSettled,
     }),
   };

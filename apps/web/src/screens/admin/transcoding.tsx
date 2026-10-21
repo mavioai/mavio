@@ -4,13 +4,8 @@
 // deinterlacing, the downmix of audio, cropping black borders, and the
 // folder of running transcodes.
 import { create } from "@bufbuild/protobuf";
-import { errorMessage, type ServerEntry, useServerSettings, useUpdateServerSettings } from "@mavio/client-ts";
-import {
-  HardwareAcceleration,
-  type ServerSettings,
-  type TranscodingSettings,
-  TranscodingSettingsSchema,
-} from "@mavio/proto/mavio/system/v1/system_pb";
+import { errorMessage, type ServerEntry, useTranscodingSettings } from "@mavio/client-ts";
+import { HardwareAcceleration, type TranscodingSettings, TranscodingSettingsSchema } from "@mavio/proto/mavio/playback/v1/playback_pb";
 import { useState } from "react";
 
 import { t } from "../../i18n.ts";
@@ -34,20 +29,20 @@ const deinterlacers = ["yadif", "bwdif"];
 
 /** The section of the server chosen in the settings. */
 export function TranscodingSection({ server }: { server: ServerEntry }) {
-  const settings = useServerSettings(server);
+  const settings = useTranscodingSettings(server).get;
   const d = settings.data;
   return (
     <Page title={t("settings.transcoding")} message={t("transcoding.message")}>
       {settings.isError && <p className="type-callout text-danger">{errorMessage(settings.error)}</p>}
-      {d?.settings && <TranscodingForm server={server} settings={d.settings} available={d.availableHardwareAccelerations} />}
+      {d?.settings && <TranscodingForm server={server} settings={d.settings} available={d.accelerations} />}
     </Page>
   );
 }
 
-const draftOf = (s: ServerSettings): TranscodingSettings => create(TranscodingSettingsSchema, s.transcoding);
+const draftOf = (s: TranscodingSettings): TranscodingSettings => create(TranscodingSettingsSchema, s);
 
-function TranscodingForm({ server, settings, available }: { server: ServerEntry; settings: ServerSettings; available: HardwareAcceleration[] }) {
-  const update = useUpdateServerSettings(server);
+function TranscodingForm({ server, settings, available }: { server: ServerEntry; settings: TranscodingSettings; available: HardwareAcceleration[] }) {
+  const update = useTranscodingSettings(server).update;
   const [draft, setDraft] = useState(() => draftOf(settings));
   const [notice, setNotice] = useState<string>();
   const set = (patch: Partial<TranscodingSettings>) => (setDraft((d) => patched(TranscodingSettingsSchema, d, patch)), setNotice(undefined));
@@ -55,9 +50,7 @@ function TranscodingForm({ server, settings, available }: { server: ServerEntry;
   const guard = useUnsavedGuard(changed);
   const save = () =>
     update.mutate(
-      (s) => {
-        s.transcoding = patched(TranscodingSettingsSchema, draft, { transcodeDir: draft.transcodeDir.trim() });
-      },
+      patched(TranscodingSettingsSchema, draft, { transcodeDir: draft.transcodeDir.trim() }),
       { onSuccess: () => setNotice(t("transcoding.saved")) },
     );
   const choices = (list: string[]) => list.map((v) => ({ value: v, label: v }));

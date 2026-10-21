@@ -5,15 +5,14 @@
 // the relay.
 import { create } from "@bufbuild/protobuf";
 import { Capability } from "@mavio/proto/mavio/plugin/v1/plugin_pb";
-import { MetadataSettingsSchema, NetworkSettingsSchema, type ServerSettings } from "@mavio/proto/mavio/system/v1/system_pb";
+import { type GeneralSettings, GeneralSettingsSchema } from "@mavio/proto/mavio/system/v1/system_pb";
 import {
   errorMessage,
   type ServerEntry,
+  useGeneralSettings,
   useLocalization,
   usePlugins,
-  useServerSettings,
   useServersStore,
-  useUpdateServerSettings,
 } from "@mavio/client-ts";
 import { useState } from "react";
 
@@ -27,8 +26,8 @@ import { useUnsavedGuard } from "../../controls/unsaved.tsx";
 
 /** The section of the server chosen in the settings. */
 export function GeneralSection({ server }: { server: ServerEntry }) {
-  const settings = useServerSettings(server);
-  const s = settings.data?.settings;
+  const settings = useGeneralSettings(server).get;
+  const s = settings.data;
   return (
     <Page title={t("settings.general")}>
       {settings.isError && <p className="type-callout text-danger">{errorMessage(settings.error)}</p>}
@@ -52,7 +51,7 @@ interface Draft {
   relay: boolean;
 }
 
-function draftOf(s: ServerSettings): Draft {
+function draftOf(s: GeneralSettings): Draft {
   const n = s.network;
   return {
     name: n?.serverName ?? "",
@@ -69,9 +68,9 @@ function draftOf(s: ServerSettings): Draft {
   };
 }
 
-function GeneralForm({ server, settings }: { server: ServerEntry; settings: ServerSettings }) {
+function GeneralForm({ server, settings }: { server: ServerEntry; settings: GeneralSettings }) {
   const servers = useServersStore();
-  const update = useUpdateServerSettings(server);
+  const update = useGeneralSettings(server).update;
   const { languages, countries } = useLocalization(server);
   const plugins = usePlugins(server);
   const [draft, setDraft] = useState(() => draftOf(settings));
@@ -83,19 +82,20 @@ function GeneralForm({ server, settings }: { server: ServerEntry; settings: Serv
   const resetters = (plugins.data ?? []).filter((p) => p.manifest?.capabilities.includes(Capability.PASSWORD_RESET));
   const save = () =>
     update.mutate(
-      (s) => {
-        const n = (s.network ??= create(NetworkSettingsSchema));
-        n.serverName = draft.name.trim();
-        n.baseUrl = draft.baseUrl.trim();
-        n.httpsPort = draft.httpsPort;
-        n.certificatePath = draft.certificate.trim();
-        n.keyPath = draft.key.trim();
-        n.localDiscovery = draft.discovery;
-        n.relay = draft.relay;
-        s.metadata = create(MetadataSettingsSchema, { preferredLanguage: draft.language, country: draft.country });
-        s.sessionIdleDays = draft.idleDays;
-        s.passwordResetPlugin = draft.resetPlugin;
-      },
+      create(GeneralSettingsSchema, {
+        network: {
+          serverName: draft.name.trim(),
+          baseUrl: draft.baseUrl.trim(),
+          httpsPort: draft.httpsPort,
+          certificatePath: draft.certificate.trim(),
+          keyPath: draft.key.trim(),
+          localDiscovery: draft.discovery,
+          relay: draft.relay,
+        },
+        metadata: { preferredLanguage: draft.language, country: draft.country },
+        sessionIdleDays: draft.idleDays,
+        passwordResetPlugin: draft.resetPlugin,
+      }),
       {
         onSuccess: async () => {
           setNotice(t("general.saved"));
