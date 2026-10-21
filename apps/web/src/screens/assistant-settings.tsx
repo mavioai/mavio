@@ -38,7 +38,7 @@ import { modelDetail } from "../ai-model.ts";
 import { input } from "../controls/styles.ts";
 import { useUnsavedGuard } from "../controls/unsaved.tsx";
 import { locale, t } from "../i18n.ts";
-import { Button, Group, Row } from "../ui.tsx";
+import { Button, Group, Row, VirtualList } from "../ui.tsx";
 import { useKeptSpeech } from "../assistant/kept-speech.ts";
 import { MessageBar } from "../assistant/message-bar.tsx";
 import { chooseMicrophone, chosenMicrophone, microphoneAllowed } from "../assistant/voice.ts";
@@ -242,17 +242,21 @@ function Messages({ server, id, onDelete }: { server: ServerEntry; id: string; o
   const playing = useKeptSpeech(server);
   return (
     <div className="flex flex-col gap-4 px-4 pt-3 pb-3">
-      {conversation.data?.messages.map((m, i) => (
-        <div key={i} className={`flex max-w-[85%] flex-col gap-0.5 ${m.user ? "items-end self-end" : "items-start self-start"}`}>
-          <p className={`rounded-[14px] px-3 py-2 type-callout whitespace-pre-wrap ${m.user ? "bg-button text-on-button" : "bg-fill"}`}>{m.text}</p>
-          <MessageBar
-            text={m.text}
-            at={m.time && timestampDate(m.time)}
-            playing={playing.at === String(i)}
-            onPlay={m.speechUrl ? () => playing.toggle(String(i), m.speechUrl) : undefined}
-          />
-        </div>
-      ))}
+      {conversation.data && (
+        <VirtualList items={conversation.data.messages} getKey={(_, i) => String(i)} estimate={72} gap={16}>
+          {(m, i) => (
+            <div className={`flex flex-col gap-0.5 ${m.user ? "items-end ps-[15%]" : "items-start pe-[15%]"}`}>
+              <p className={`rounded-[14px] px-3 py-2 type-callout whitespace-pre-wrap ${m.user ? "bg-button text-on-button" : "bg-fill"}`}>{m.text}</p>
+              <MessageBar
+                text={m.text}
+                at={m.time && timestampDate(m.time)}
+                playing={playing.at === String(i)}
+                onPlay={m.speechUrl ? () => playing.toggle(String(i), m.speechUrl) : undefined}
+              />
+            </div>
+          )}
+        </VirtualList>
+      )}
       {conversation.isError && <p className="type-callout text-danger">{errorMessage(conversation.error)}</p>}
       <Button variant="plain" className="self-start text-danger" onClick={onDelete}>
         {t("assistant.deleteConversation")}

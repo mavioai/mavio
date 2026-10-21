@@ -17,7 +17,7 @@ import { getRouteApi, Link, useNavigate } from "@tanstack/react-router";
 import { t } from "../i18n.ts";
 import { Icon } from "../icon.tsx";
 import { usePrefs } from "../prefs.ts";
-import { Grid, ItemCard, LoadMore, Loading, StatusView } from "../ui.tsx";
+import { ItemCard, LoadMore, Loading, StatusView, VirtualGrid } from "../ui.tsx";
 import { Menu, MenuChoice, MenuOption } from "../controls/menu.tsx";
 import { SectionView } from "./home.tsx";
 
@@ -194,13 +194,9 @@ function AllItems({ server, libraryId }: { server: ServerEntry; libraryId: strin
         <StatusView title={t("state.empty")} />
       ) : (
         <>
-          <Grid>
-            {q.data.pages.flatMap((p) =>
-              p.items.map((item) => (
-                <ItemCard key={item.id} server={server} serverId={server.id} item={item} fluid />
-              )),
-            )}
-          </Grid>
+          <VirtualGrid items={q.data.pages.flatMap((p) => p.items)} getKey={(item) => item.id}>
+            {(item) => <ItemCard server={server} serverId={server.id} item={item} fluid />}
+          </VirtualGrid>
           <LoadMore active={q.hasNextPage && !q.isFetchingNextPage} onVisible={() => void q.fetchNextPage()} />
         </>
       )}

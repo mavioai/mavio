@@ -9,7 +9,7 @@ import { LogLevel, type LogRecord } from "@mavio/proto/mavio/system/v1/system_pb
 import { useState } from "react";
 
 import { locale, t } from "../../i18n.ts";
-import { Button, Group, Row } from "../../ui.tsx";
+import { Button, Group, Row, VirtualList } from "../../ui.tsx";
 import { Select } from "../../controls/select.tsx";
 import { fromNow, Page, sizeOf, useChoice } from "./common.tsx";
 import { input } from "../../controls/styles.ts";
@@ -143,9 +143,15 @@ export function LogsSection({ server }: { server: ServerEntry }) {
         </Button>
       </div>
       <Group footer={logs.isSuccess ? t("logs.count", { count: shown.length }) : undefined}>
-        {shown.map((r, i) => (
-          <LogRow key={i} record={r} level={names[r.level] ?? ""} />
-        ))}
+        {shown.length > 0 && (
+          <VirtualList items={shown} getKey={(_, i) => String(i)} estimate={72}>
+            {(r, i) => (
+              <div className={i > 0 ? "border-t border-border" : undefined}>
+                <LogRow record={r} level={names[r.level] ?? ""} />
+              </div>
+            )}
+          </VirtualList>
+        )}
         {logs.isSuccess && shown.length === 0 && <p className="px-4 py-3 type-callout text-text-secondary">{t("logs.none")}</p>}
         {logs.isError && <p className="px-4 py-3 type-callout break-words text-danger">{errorMessage(logs.error)}</p>}
       </Group>

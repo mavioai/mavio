@@ -54,7 +54,7 @@ import { ItemSubtitles } from "./item-subtitles.tsx";
 import { CollectionMembers, MoreMenu, PlaylistEntries } from "./lists.tsx";
 import { Icon } from "../icon.tsx";
 import { usePrefs, useWidthClass } from "../prefs.ts";
-import { Artwork, Grid, ItemCard, Loading, minutesLeft, minutesText, NotFoundView, progressOf, runtimeOf, Shelf, StatusView, yearOf } from "../ui.tsx";
+import { Artwork, Grid, ItemCard, Loading, minutesLeft, minutesText, NotFoundView, progressOf, runtimeOf, Shelf, StatusView, VirtualList, yearOf } from "../ui.tsx";
 import { Dismiss, Sheet } from "../controls/dialog.tsx";
 import { useEntryState } from "../shell/entry-state.ts";
 import { Tabs, ToggleButton } from "../controls/inputs.tsx";
@@ -858,14 +858,13 @@ function EpisodeList({ server, items, current }: { server: ServerEntry; items: I
   return (
     <section className="py-3">
       <h2 className="px-margin pb-2 type-title3">{t("item.episodes")}</h2>
-      <div className="flex flex-col">
-        {items.map((e) => {
+      <VirtualList items={items} getKey={(e) => e.id} estimate={160}>
+        {(e) => {
           const thumb = thumbOf(server, e, 640);
           const progress = progressOf(e);
           const aired = e.premiereDate ? dateFormat.format(timestampDate(e.premiereDate)) : undefined;
           return (
             <Link
-              key={e.id}
               to="/s/$serverId/item/$itemId"
               params={{ serverId: server.id, itemId: e.id }}
               data-card
@@ -895,8 +894,8 @@ function EpisodeList({ server, items, current }: { server: ServerEntry; items: I
               </div>
             </Link>
           );
-        })}
-      </div>
+        }}
+      </VirtualList>
     </section>
   );
 }

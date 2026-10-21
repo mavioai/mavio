@@ -6,7 +6,8 @@ import { ImageKind, ItemKind } from "@mavio/proto/mavio/library/v1/item_pb";
 import { LibraryKind } from "@mavio/proto/mavio/library/v1/library_pb";
 import { artwork, type Server, thumbOf, usePrefetchItem } from "@mavio/client-ts";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { type ReactNode, useEffect, useRef, useState } from "react";
+import { useWindowVirtualizer } from "@tanstack/react-virtual";
+import { Fragment, type ReactNode, type RefObject, useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import { t } from "./i18n.ts";
 import { Icon, type IconName } from "./icon.tsx";
@@ -288,6 +289,131 @@ export function Grid({ shape = "poster", children }: { shape?: Shape; children: 
   return (
     <div className={`grid gap-y-6 px-margin ${tv ? "gap-x-gutter" : gap}`} style={{ gridTemplateColumns: `repeat(auto-fill, minmax(${min}, 1fr))` }}>
       {children}
+    </div>
+  );
+}
+
+/**
+ * Where an element starts on the page, from which a window virtualizer
+ * places its rows: again on every render and whenever the page's height
+ * changes, as what is above it grows or shrinks.
+ */
+function usePageTop(ref: RefObject<HTMLElement | null>): number {
+  const [top, setTop] = useState(0);
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (el) setTop(el.getBoundingClientRect().top + window.scrollY);
+  });
+  useEffect(() => {
+    const measure = () => ref.current && setTop(ref.current.getBoundingClientRect().top + window.scrollY);
+    const ro = new ResizeObserver(measure);
+    ro.observe(document.body);
+    return () => ro.disconnect();
+  }, [ref]);
+  return top;
+}
+
+/**
+ * A Grid of many items, only the rows scrolled into view drawn (TanStack
+ * Virtual), the page scrolling them: its columns are those the grid's own
+ * template makes of its width.
+ */
+export function VirtualGrid<T>({
+  shape = "poster",
+  items,
+  getKey,
+  children,
+}: {
+  shape?: Shape;
+  items: T[];
+  getKey: (item: T) => string;
+  children: (item: T) => ReactNode;
+}) {
+  const { tv } = usePrefs();
+  const min = shape === "thumb" ? "var(--mavio-layout-thumbnail)" : "var(--mavio-layout-poster)";
+  const template = { gridTemplateColumns: `repeat(auto-fill, minmax(${min}, 1fr))` };
+  const grid = `grid ${tv ? "gap-x-gutter" : gap}`;
+  // An empty grid of the same template, whose tracks are the columns.
+  const probe = useRef<HTMLDivElement>(null);
+  const list = useRef<HTMLDivElement>(null);
+  const [columns, setColumns] = useState(1);
+  useLayoutEffect(() => {
+    const el = probe.current;
+    if (!el) return;
+    const count = () => setColumns(Math.max(1, getComputedStyle(el).gridTemplateColumns.split(" ").filter(Boolean).length));
+    count();
+    const ro = new ResizeObserver(count);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [min, tv]);
+  const top = usePageTop(list);
+  const virtualizer = useWindowVirtualizer({
+    count: Math.ceil(items.length / columns),
+    estimateSize: () => 320,
+    gap: 24,
+    overscan: 3,
+    scrollMargin: top,
+  });
+  return (
+    <div className="px-margin">
+      <div ref={probe} aria-hidden className={grid} style={template} />
+      <div ref={list} className="relative" style={{ height: virtualizer.getTotalSize() }}>
+        {virtualizer.getVirtualItems().map((row) => (
+          <div
+            key={row.key}
+            ref={virtualizer.measureElement}
+            data-index={row.index}
+            className={`absolute start-0 top-0 w-full ${grid}`}
+            style={{ ...template, transform: `translateY(${row.start - virtualizer.options.scrollMargin}px)` }}
+          >
+            {items.slice(row.index * columns, (row.index + 1) * columns).map((item) => (
+              <Fragment key={getKey(item)}>{children(item)}</Fragment>
+            ))}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/** A list of many rows, only those scrolled into view drawn (TanStack Virtual), the page scrolling them. */
+export function VirtualList<T>({
+  items,
+  getKey,
+  estimate,
+  gap = 0,
+  children,
+}: {
+  items: T[];
+  getKey: (item: T, index: number) => string;
+  /** A row's height before it is measured. */
+  estimate: number;
+  gap?: number;
+  children: (item: T, index: number) => ReactNode;
+}) {
+  const list = useRef<HTMLDivElement>(null);
+  const top = usePageTop(list);
+  const virtualizer = useWindowVirtualizer({
+    count: items.length,
+    estimateSize: () => estimate,
+    gap,
+    overscan: 6,
+    scrollMargin: top,
+    getItemKey: (i) => getKey(items[i], i),
+  });
+  return (
+    <div ref={list} className="relative" style={{ height: virtualizer.getTotalSize() }}>
+      {virtualizer.getVirtualItems().map((row) => (
+        <div
+          key={row.key}
+          ref={virtualizer.measureElement}
+          data-index={row.index}
+          className="absolute start-0 top-0 w-full"
+          style={{ transform: `translateY(${row.start - virtualizer.options.scrollMargin}px)` }}
+        >
+          {children(items[row.index], row.index)}
+        </div>
+      ))}
     </div>
   );
 }
