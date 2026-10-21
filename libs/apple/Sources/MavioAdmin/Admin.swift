@@ -69,10 +69,25 @@ public struct ServerGroup: View {
     private var listBody: some View {
         Section {
             if model.account != nil {
-                Picker(MavioStrings.authServer, selection: Binding(get: { server.id }, set: { serverId = $0 })) {
-                    ForEach(model.signedInServers, id: \.id) { Text($0.name).tag($0.id) }
+                // The group's heading names it: the chosen server's name across
+                // the row, as the web UI's, each on one line in the menu.
+                Menu {
+                    Picker(selection: Binding(get: { server.id }, set: { serverId = $0 })) {
+                        ForEach(model.signedInServers, id: \.id) { Text($0.name).lineLimit(1).tag($0.id) }
+                    } label: {
+                        EmptyView()
+                    }
+                } label: {
+                    HStack(spacing: MavioSpacing.s8) {
+                        Text(server.name).lineLimit(1).truncationMode(.tail)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                        Icon("selector", size: 16).foregroundStyle(theme.colors.textSecondary)
+                    }
+                    .foregroundStyle(theme.colors.textPrimary)
+                    .contentShape(.rect)
                 }
-                .tint(theme.colors.textSecondary)
+                .accessibilityLabel(MavioStrings.authServer)
+                .accessibilityValue(server.name)
             }
             ForEach(ServerEntry.shown(admin: admin[key] == true), id: \.self) { entry in
                 NavigationLink {
