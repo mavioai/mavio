@@ -246,7 +246,7 @@ public struct MavioLayout: Sendable {
         thumbnail: 300,
         touchTarget: 44,
         sidebar: 280,
-        rail: 86,
+        rail: 60,
         focusScale: 1
     )
 
@@ -257,7 +257,7 @@ public struct MavioLayout: Sendable {
         thumbnail: 320,
         touchTarget: 28,
         sidebar: 200,
-        rail: 86,
+        rail: 60,
         focusScale: 1
     )
 

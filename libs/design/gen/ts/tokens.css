@@ -166,7 +166,7 @@
     --mavio-layout-thumbnail: 300px;
     --mavio-layout-touch-target: 44px;
     --mavio-layout-sidebar: 280px;
-    --mavio-layout-rail: 86px;
+    --mavio-layout-rail: 60px;
     --mavio-layout-focus-scale: 1;
   }
 }
@@ -179,7 +179,7 @@
     --mavio-layout-thumbnail: 320px;
     --mavio-layout-touch-target: 28px;
     --mavio-layout-sidebar: 200px;
-    --mavio-layout-rail: 86px;
+    --mavio-layout-rail: 60px;
     --mavio-layout-focus-scale: 1;
     --mavio-type-display-size: 26px;
     --mavio-type-display-line-height: 32px;

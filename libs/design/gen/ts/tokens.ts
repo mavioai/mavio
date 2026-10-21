@@ -373,7 +373,7 @@ export const layout = {
     "thumbnail": 300,
     "touchTarget": 44,
     "sidebar": 280,
-    "rail": 86,
+    "rail": 60,
     "focusScale": 1
   },
   "desktop": {
@@ -383,7 +383,7 @@ export const layout = {
     "thumbnail": 320,
     "touchTarget": 28,
     "sidebar": 200,
-    "rail": 86,
+    "rail": 60,
     "focusScale": 1
   },
   "tv": {

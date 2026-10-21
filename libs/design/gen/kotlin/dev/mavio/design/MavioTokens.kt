@@ -251,7 +251,7 @@ val TabletLayout = MavioLayout(
     thumbnail = 300.dp,
     touchTarget = 44.dp,
     sidebar = 280.dp,
-    rail = 86.dp,
+    rail = 60.dp,
     focusScale = 1f,
 )
 
@@ -262,7 +262,7 @@ val DesktopLayout = MavioLayout(
     thumbnail = 320.dp,
     touchTarget = 28.dp,
     sidebar = 200.dp,
-    rail = 86.dp,
+    rail = 60.dp,
     focusScale = 1f,
 )
 

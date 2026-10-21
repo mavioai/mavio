@@ -52,7 +52,7 @@
     "rail": {
       "$type": "dimension",
       "$value": {
-        "value": 86,
+        "value": 60,
         "unit": "px"
       },
       "$description": "Width of the sidebar collapsed to a rail of icons (0 where the form factor has none)."

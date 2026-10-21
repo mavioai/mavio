@@ -247,7 +247,7 @@ var (
 		Thumbnail:   300,
 		TouchTarget: 44,
 		Sidebar:     280,
-		Rail:        86,
+		Rail:        60,
 		FocusScale:  1,
 	}
 	DesktopLayout = Layout{
@@ -257,7 +257,7 @@ var (
 		Thumbnail:   320,
 		TouchTarget: 28,
 		Sidebar:     200,
-		Rail:        86,
+		Rail:        60,
 		FocusScale:  1,
 	}
 	TvLayout = Layout{
