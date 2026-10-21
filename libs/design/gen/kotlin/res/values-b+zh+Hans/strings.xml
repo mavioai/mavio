@@ -1073,12 +1073,13 @@
     <string name="storage_remove_failed">移除失败的下载</string>
     <string name="storage_remove_offline">移除</string>
     <string name="storage_remove_offline_confirm">确认移除</string>
+    <string name="storage_remove_offline_detail">云盘上的任务和文件不受影响，Mavio 不再追踪它们。</string>
     <string name="storage_offline_remote_footer">云盘自行下载磁力链接，作为以远端命名的获取下载客户端；导入时在远端内移动文件。</string>
     <string name="storage_offline_set_up">用于离线下载</string>
     <string name="storage_offline_movie_folder">电影文件夹</string>
     <string name="storage_offline_series_folder">剧集文件夹</string>
     <string name="storage_offline_folder_below">远端根目录下的路径</string>
-    <string name="storage_offline_stop">停止离线下载</string>
+    <string name="storage_offline_stop">移除离线下载</string>
     <string name="acquisition_message">决定服务器抓取哪些发布以及从哪里获取。</string>
     <string name="acquisition_indexers">索引器</string>
     <string name="acquisition_indexers_footer">索引器在各自的插件中配置。</string>

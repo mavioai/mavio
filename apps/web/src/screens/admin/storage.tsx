@@ -817,9 +817,12 @@ function OfflineDownloadsGroup({ server, remote }: { server: ServerEntry; remote
           {update.isPending ? "…" : t("action.save")}
         </Button>
         {stopping ? (
-          <Button variant="secondary" className="text-danger" disabled={update.isPending} onClick={() => update.mutate(undefined, { onSuccess: () => setStopping(false) })}>
-            {t("storage.removeOfflineConfirm")}
-          </Button>
+          <>
+            <Button variant="secondary" className="text-danger" disabled={update.isPending} onClick={() => update.mutate(undefined, { onSuccess: () => setStopping(false) })}>
+              {t("storage.removeOfflineConfirm")}
+            </Button>
+            <span className="type-footnote text-text-secondary">{t("storage.removeOfflineDetail")}</span>
+          </>
         ) : (
           <Button variant="plain" className="text-danger" onClick={() => setStopping(true)}>
             {t("storage.offlineStop")}

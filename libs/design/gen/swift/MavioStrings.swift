@@ -3359,6 +3359,9 @@ public enum MavioStrings {
     /// Confirms removing an offline download client
     public static var storageRemoveOfflineConfirm: String { NSLocalizedString("storage.removeOfflineConfirm", bundle: .module, comment: "") }
 
+    /// What removing a remote's offline downloads does
+    public static var storageRemoveOfflineDetail: String { NSLocalizedString("storage.removeOfflineDetail", bundle: .module, comment: "") }
+
     /// Footer of a remote's offline downloads
     public static var storageOfflineRemoteFooter: String { NSLocalizedString("storage.offlineRemoteFooter", bundle: .module, comment: "") }
 

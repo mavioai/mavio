@@ -19081,6 +19081,24 @@
         }
       }
     },
+    "storage.removeOfflineDetail": {
+      "comment": "What removing a remote's offline downloads does",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tasks and files on the drive stay; Mavio stops tracking them."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "云盘上的任务和文件不受影响，Mavio 不再追踪它们。"
+          }
+        }
+      }
+    },
     "storage.offlineRemoteFooter": {
       "comment": "Footer of a remote's offline downloads",
       "extractionState": "manual",
@@ -19178,13 +19196,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Stop Offline Downloads"
+            "value": "Remove Offline Downloads"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "停止离线下载"
+            "value": "移除离线下载"
           }
         }
       }

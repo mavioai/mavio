@@ -2134,6 +2134,8 @@
     <string name="storage_remove_offline">Remove</string>
     <!-- Confirms removing an offline download client -->
     <string name="storage_remove_offline_confirm">Remove for Good</string>
+    <!-- What removing a remote's offline downloads does -->
+    <string name="storage_remove_offline_detail">Tasks and files on the drive stay; Mavio stops tracking them.</string>
     <!-- Footer of a remote's offline downloads -->
     <string name="storage_offline_remote_footer">The cloud drive downloads magnet links itself, as a download client of acquisition named after the remote; imports move the files within the remote.</string>
     <!-- Button setting up a remote's offline downloads -->
@@ -2145,7 +2147,7 @@
     <!-- Detail of an offline download folder -->
     <string name="storage_offline_folder_below">Below the remote\'s root</string>
     <!-- Button removing a remote's offline downloads -->
-    <string name="storage_offline_stop">Stop Offline Downloads</string>
+    <string name="storage_offline_stop">Remove Offline Downloads</string>
     <!-- The line under the Acquisition page's title -->
     <string name="acquisition_message">What decides which releases the server grabs and where they come from.</string>
     <!-- Title of the indexers -->
