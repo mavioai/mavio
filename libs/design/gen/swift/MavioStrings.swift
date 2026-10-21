@@ -5869,7 +5869,7 @@ public enum MavioStrings {
     /// Explains the settings' issues.
     public static var issuesIntro: String { NSLocalizedString("issues.intro", bundle: .module, comment: "") }
 
-    /// Message of the AI conversations section.
+    /// Footer of the AI settings' conversations.
     public static var conversationsMessage: String { NSLocalizedString("conversations.message", bundle: .module, comment: "") }
 
     /// Row when no plugin keeping conversations runs on the server.
