@@ -12,9 +12,6 @@ import (
 
 	acquisitionv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/acquisition/v1"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/acquisition/v1/acquisitionv1connect"
-	pluginv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1"
-	systemv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/system/v1"
-	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/system/v1/systemv1connect"
 )
 
 // fakeSubtitles serves a fake server's subtitle providers, translators,
@@ -30,11 +27,6 @@ type fakeSubtitles struct {
 	// items are the items' subtitles; calls the changes asked of them.
 	items map[string][]*acquisitionv1.ItemSubtitle
 	calls []string
-}
-
-// fakeAI serves the models of a fake server's AI gateway.
-type fakeAI struct {
-	systemv1connect.UnimplementedAiProviderServiceHandler
 }
 
 func newFakeSubtitles() *fakeSubtitles {
@@ -139,10 +131,4 @@ func (s *fakeSubtitles) UpdateSubtitleSettings(_ context.Context, r *acquisition
 	defer s.mu.Unlock()
 	s.settings = proto.CloneOf(r.GetSettings())
 	return acquisitionv1.UpdateSubtitleSettingsResponse_builder{Settings: proto.CloneOf(s.settings)}.Build(), nil
-}
-
-func (fakeAI) ListAiModels(context.Context, *systemv1.ListAiModelsRequest) (*systemv1.ListAiModelsResponse, error) {
-	return systemv1.ListAiModelsResponse_builder{Models: []*pluginv1.AiModel{
-		pluginv1.AiModel_builder{Provider: new("anthropic"), Id: new("claude-sonnet-5-5"), Name: new("Claude Sonnet 5.5")}.Build(),
-	}}.Build(), nil
 }

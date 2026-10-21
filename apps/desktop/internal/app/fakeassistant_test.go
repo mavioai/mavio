@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/binary"
 	"encoding/json"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -27,8 +28,9 @@ type fakeAssistant struct {
 	assistantv1connect.UnimplementedAssistantServiceHandler
 	f *fakeCore
 
-	mu   sync.Mutex
-	asks []*assistantv1.AskRequest
+	mu       sync.Mutex
+	asks     []*assistantv1.AskRequest
+	settings *assistantv1.AssistantSettings
 }
 
 func (a *fakeAssistant) requests() []*assistantv1.AskRequest {
@@ -95,14 +97,23 @@ func (f *fakeCore) callServerStream(ctx context.Context, c *capiv1.CallServerStr
 	body = append(body, c.GetRequest()...)
 	r := httptest.NewRequestWithContext(ctx, http.MethodPost, "http://mavio.test"+c.GetProcedure(), bytes.NewReader(body))
 	r.Header.Set("Content-Type", connectStream)
-	w := httptest.NewRecorder()
-	f.api.ServeHTTP(w, r)
-	b := w.Body.Bytes()
-	for len(b) >= 5 {
-		flags, n := b[0], int(binary.BigEndian.Uint32(b[1:5]))
-		msg := b[5 : 5+n]
-		b = b[5+n:]
-		if flags&envelopeEnd != 0 {
+	// The messages go on as the handler sends them, as a server's do.
+	pr, pw := io.Pipe()
+	go func() {
+		f.api.ServeHTTP(&pipeWriter{header: http.Header{}, w: pw}, r)
+		pw.Close()
+	}()
+	defer pr.Close()
+	for {
+		var head [5]byte
+		if _, err := io.ReadFull(pr, head[:]); err != nil {
+			break
+		}
+		msg := make([]byte, binary.BigEndian.Uint32(head[1:]))
+		if _, err := io.ReadFull(pr, msg); err != nil {
+			break
+		}
+		if head[0]&envelopeEnd != 0 {
 			var end struct {
 				Error *struct{ Code, Message string }
 			}
@@ -116,8 +127,22 @@ func (f *fakeCore) callServerStream(ctx context.Context, c *capiv1.CallServerStr
 			part(capiv1.Message_builder{More: true, Response: capiv1.ServerResponse_builder{Body: msg}.Build()}.Build())
 		}
 	}
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
 	return capiv1.Message_builder{Done: &capiv1.Done{}}.Build(), nil
 }
+
+// pipeWriter is a response written to a pipe as it is written.
+type pipeWriter struct {
+	header http.Header
+	w      io.Writer
+}
+
+func (p *pipeWriter) Header() http.Header         { return p.header }
+func (p *pipeWriter) Write(b []byte) (int, error) { return p.w.Write(b) }
+func (p *pipeWriter) WriteHeader(int)             {}
+func (p *pipeWriter) Flush()                      {}
 
 // runIntent is the grammar of the fake core: "pause" and "go home", and
 // replies of their keys.

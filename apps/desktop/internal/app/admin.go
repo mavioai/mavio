@@ -41,6 +41,7 @@ type adminState struct {
 	downloads   downloadsState
 	backups     backupsState
 	plugins     pluginsState
+	ai          aiState
 	subtitles   subtitlesState
 	libraries   librariesState
 	libs        task[[]*libraryv1.Library]

@@ -91,7 +91,9 @@ func TestAdmin(t *testing.T) {
 	want("Issues", "The Long Orbit · Subtitles", "1 issue")
 	h.save(shots, "settings-issues")
 
-	open("Backups")
+	// Backups lie below the sidebar's fold.
+	h.app.router.Push("/settings/backups")
+	h.settle()
 	want("mavio-20261019-120000.zip", "1 day ago · 3 MB · Mavio 0.9.0")
 	open("Back Up")
 	want("mavio-20261020-090000.zip")

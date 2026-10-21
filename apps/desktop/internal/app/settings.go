@@ -47,6 +47,7 @@ var settingsSections = []settingsSection{
 	{id: "general", icon: "settings", color: ui.RGB(0x8E, 0x8E, 0x93), title: "settings.general", admin: true},
 	{id: "users", icon: "users", color: ui.RGB(0xFF, 0x95, 0x00), title: "settings.users", admin: true},
 	{id: "api-keys", icon: "lock", color: ui.RGB(0x63, 0x63, 0x66), title: "settings.apiKeys", admin: true},
+	{id: "ai", icon: "key", color: ui.RGB(0xBF, 0x5A, 0xF2), title: "settings.ai", admin: true},
 	{id: "plugins", icon: "plugins", color: ui.RGB(0xAF, 0x52, 0xDE), title: "settings.plugins", admin: true},
 	{id: "proxies", icon: "network", color: ui.RGB(0x30, 0xB0, 0xC7), title: "settings.proxies", admin: true},
 	{id: "libraries", icon: "folder", color: ui.RGB(0x00, 0x7A, 0xFF), title: "settings.libraries", admin: true},
@@ -100,7 +101,7 @@ var settingsGroups = []struct {
 	server  bool
 }{
 	{"settings.thisDevice", []string{"appearance", "playback", "subtitles-audio"}, false},
-	{"settings.serverGroup", []string{"overview", "general", "users", "devices", "media", "acquiring", "plugins", "proxies", "maintenance"}, true},
+	{"settings.serverGroup", []string{"overview", "general", "users", "devices", "media", "acquiring", "ai", "plugins", "proxies", "maintenance"}, true},
 }
 
 func menuOf(id string) (settingsMenu, bool) {
@@ -432,6 +433,8 @@ func (a *App) settingsSection(c *ui.Context, r *ui.Route, id string) {
 		a.apiKeysSection(c)
 	case "transcoding":
 		a.transcodingSection(c)
+	case "ai":
+		a.aiSection(c, r)
 	case "plugins":
 		a.pluginsSection(c, r)
 	case "proxies":
@@ -539,10 +542,15 @@ func (g *settingsGroup) row(label, detail string, leading, control func()) {
 // switchRow adds a row of a switch, which a click anywhere on the row
 // toggles, and reports a change of *on.
 func (g *settingsGroup) switchRow(label, detail string, on *bool) bool {
+	return g.switchRowOf(label, detail, on, false)
+}
+
+// switchRowOf is switchRow, its switch disabled when disabled.
+func (g *settingsGroup) switchRowOf(label, detail string, on *bool, disabled bool) bool {
 	c := g.c
 	g.divider()
 	changed := false
-	b := ui.ButtonBase(c.Key(g.rows)).MinHeight(52).Padding(10, 16).Gap(12).AlignItems(ui.Center).Label(label)
+	b := ui.ButtonBase(c.Key(g.rows)).MinHeight(52).Padding(10, 16).Gap(12).AlignItems(ui.Center).Label(label).Disabled(disabled)
 	fg, sub := rowColors(c, b)
 	b.Children(func() {
 		ui.Column(c).Grow(1).MinWidth(0).Children(func() {
@@ -551,9 +559,9 @@ func (g *settingsGroup) switchRow(label, detail string, on *bool) bool {
 				style.Text(ui.Text(c, detail), style.Type(c).Footnote).TextColor(sub)
 			}
 		})
-		changed = ui.Switch(c, on).Label(label).Changed()
+		changed = ui.Switch(c, on).Label(label).Disabled(disabled).Changed()
 	})
-	if b.Clicked() && !changed {
+	if b.Clicked() && !changed && !disabled {
 		*on, changed = !*on, true
 	}
 	return changed

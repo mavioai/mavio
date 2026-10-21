@@ -101,6 +101,7 @@ type fakeCore struct {
 	issues         *fakeIssues
 	backups        *fakeBackups
 	plugins        *fakePluginState
+	ai             *fakeAI
 	assistant      *fakeAssistant
 	playlists      []*fakeList
 	collections    map[string]*fakeList
