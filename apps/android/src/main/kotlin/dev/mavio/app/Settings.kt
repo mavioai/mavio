@@ -133,7 +133,7 @@ fun SettingsScreen(model: AppModel) {
         }
         serverGroup(model, servers)
         item {
-            Group {
+            Group(stringResource(R.string.settings_about)) {
                 EntryRow(stringResource(R.string.settings_about), R.drawable.ic_info_fill, Color(0xFF8E8E93)) {
                     navigator.open(Route.Setting(SettingsPage.About))
                 }
