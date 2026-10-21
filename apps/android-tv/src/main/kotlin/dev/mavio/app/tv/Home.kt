@@ -449,8 +449,11 @@ private fun TitlePoster(serverId: String?, title: TitleCard, modifier: Modifier)
     val focused = state.focused()
     val at = title.available.firstOrNull()
     val tmdb = title.externalIds["tmdb"]?.toIntOrNull()
+    // A title on no server is dimmed as the web UI's, but not the frame of
+    // its focus, which a layer of the whole card would cut off at its edges.
+    val dim = if (at != null) 1f else 0.8f
     Column(
-        modifier.shakes().width(theme.layout.poster).focusCard(focused).alpha(if (at != null) 1f else 0.8f).selectable(state) {
+        modifier.shakes().width(theme.layout.poster).focusCard(focused).selectable(state) {
             when {
                 at != null -> pages.openItem(at.serverId, at.itemId)
                 serverId != null && tmdb != null ->
@@ -464,12 +467,13 @@ private fun TitlePoster(serverId: String?, title: TitleCard, modifier: Modifier)
                 .focusArtwork(focused, MavioRadius.md)
                 .fillMaxWidth()
                 .aspectRatio(2f / 3f)
-                .clip(RoundedCornerShape(MavioRadius.md)),
+                .clip(RoundedCornerShape(MavioRadius.md))
+                .alpha(dim),
             contentDescription = title.title,
         )
         Spacer(Modifier.height(MavioSpacing.s12))
-        Text(title.title, style = theme.type.headline.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
-        title.year?.let { Text(it.toString(), style = theme.type.footnote.text, color = theme.colors.textSecondary) }
+        Text(title.title, Modifier.alpha(dim), style = theme.type.headline.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        title.year?.let { Text(it.toString(), Modifier.alpha(dim), style = theme.type.footnote.text, color = theme.colors.textSecondary) }
     }
 }
 
