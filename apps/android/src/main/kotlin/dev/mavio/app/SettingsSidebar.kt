@@ -49,6 +49,7 @@ import dev.mavio.ui.AccountCard
 import dev.mavio.ui.ChoiceRow
 import dev.mavio.ui.MavioIcon
 import dev.mavio.ui.R
+import dev.mavio.ui.signedInAccount
 import dev.mavio.ui.signedInServers
 import dev.mavio.ui.text
 import dev.mavio.ui.theme
@@ -123,10 +124,12 @@ internal fun SettingsSidebar(model: AppModel, section: Route?, modifier: Modifie
                     model.client.call(server.id, Procedure.users("GetCurrentUser"), getCurrentUserRequest {}, GetCurrentUserResponse::parseFrom)
                 }.onSuccess { admin[adminKey] = it.user.admin }
             }
+            val account = signedInAccount(model) != null
             Heading(stringResource(R.string.settings_server_group)) {
-                if (servers.size > 1) {
+                // As the web UI's, with a Mavio account always, its servers being the ones to choose from.
+                if (account || servers.size > 1) {
                     Box(Modifier.padding(bottom = 4.dp).clip(RoundedCornerShape(10.dp)).background(colors.surface)) {
-                        ChoiceRow(stringResource(R.string.auth_server), servers.map { it.id to it.name }, server.id) { serverId = it }
+                        ChoiceRow(stringResource(R.string.settings_server_choice), servers.map { it.id to it.name }, server.id) { serverId = it }
                     }
                 }
                 serverEntries(admin[adminKey] == true).forEach { entry ->

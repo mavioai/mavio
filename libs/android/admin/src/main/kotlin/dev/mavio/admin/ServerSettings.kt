@@ -63,6 +63,7 @@ import dev.mavio.ui.SettingsList
 import dev.mavio.ui.StatusView
 import dev.mavio.ui.ValueRow
 import dev.mavio.ui.rowPadding
+import dev.mavio.ui.signedInAccount
 import dev.mavio.ui.text
 import dev.mavio.ui.theme
 import java.text.NumberFormat
@@ -187,9 +188,13 @@ fun LazyListScope.serverGroup(
             }
         }
         val navigator = LocalAdmin.current
+        val account = signedInAccount(model) != null
         Group(stringResource(R.string.settings_server_group)) {
-            if (servers.size > 1) {
-                ChoiceRow(stringResource(R.string.auth_server), servers.map { it.id to it.name }, server.id) { serverId = it }
+            // As the web UI's, with a Mavio account always, its servers being the ones to choose from.
+            if (account || servers.size > 1) {
+                // The television's names no server under the Server group's title, the choice alone.
+                val label = if (LocalTelevision.current) "" else stringResource(R.string.settings_server_choice)
+                ChoiceRow(label, servers.map { it.id to it.name }, server.id) { serverId = it }
                 RowDivider()
             }
             val shown = serverEntries(admin[adminKey] == true)

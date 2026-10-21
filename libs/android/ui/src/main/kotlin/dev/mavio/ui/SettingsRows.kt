@@ -478,7 +478,8 @@ fun MavioSwitch(checked: Boolean, onChange: ((Boolean) -> Unit)?) {
 
 /**
  * A setting chosen from a menu, showing its choice: on a television the
- * menu of choices opens below it with focus on the chosen one.
+ * menu of choices opens below it with focus on the chosen one. Without a
+ * [label], the choice takes its place.
  */
 @Composable
 fun <T> ChoiceRow(label: String, choices: List<Pair<T, String>>, chosen: T, detail: String? = null, onChoose: (T) -> Unit) {
@@ -500,15 +501,16 @@ fun <T> ChoiceRow(label: String, choices: List<Pair<T, String>>, chosen: T, deta
                 horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s8),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                RowLabel(label, detail, Modifier.weight(1f))
+                // Without a label, the choice in its place, as a group's title names it.
+                if (label.isNotEmpty()) RowLabel(label, detail, Modifier.weight(1f))
                 // The phone's menu opens at the choice.
-                Box {
+                Box(if (label.isEmpty()) Modifier.weight(1f) else Modifier) {
                     Row(horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s8), verticalAlignment = Alignment.CenterVertically) {
                         Text(
                             choices.firstOrNull { it.first == chosen }?.second.orEmpty(),
-                            Modifier.widthIn(max = if (tv) 360.dp else if (detail == null) 200.dp else 150.dp),
+                            if (label.isEmpty()) Modifier.weight(1f) else Modifier.widthIn(max = if (tv) 360.dp else if (detail == null) 200.dp else 150.dp),
                             style = theme.type.body.text,
-                            color = theme.colors.textSecondary,
+                            color = if (label.isEmpty()) LocalContentColor.current else theme.colors.textSecondary,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                         )
