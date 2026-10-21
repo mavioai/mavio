@@ -3359,6 +3359,24 @@ public enum MavioStrings {
     /// Confirms removing an offline download client
     public static var storageRemoveOfflineConfirm: String { NSLocalizedString("storage.removeOfflineConfirm", bundle: .module, comment: "") }
 
+    /// Footer of a remote's offline downloads
+    public static var storageOfflineRemoteFooter: String { NSLocalizedString("storage.offlineRemoteFooter", bundle: .module, comment: "") }
+
+    /// Button setting up a remote's offline downloads
+    public static var storageOfflineSetUp: String { NSLocalizedString("storage.offlineSetUp", bundle: .module, comment: "") }
+
+    /// The folder of a remote that movies are downloaded into
+    public static var storageOfflineMovieFolder: String { NSLocalizedString("storage.offlineMovieFolder", bundle: .module, comment: "") }
+
+    /// The folder of a remote that series are downloaded into
+    public static var storageOfflineSeriesFolder: String { NSLocalizedString("storage.offlineSeriesFolder", bundle: .module, comment: "") }
+
+    /// Detail of an offline download folder
+    public static var storageOfflineFolderBelow: String { NSLocalizedString("storage.offlineFolderBelow", bundle: .module, comment: "") }
+
+    /// Button removing a remote's offline downloads
+    public static var storageOfflineStop: String { NSLocalizedString("storage.offlineStop", bundle: .module, comment: "") }
+
     /// The line under the Acquisition page's title
     public static var acquisitionMessage: String { NSLocalizedString("acquisition.message", bundle: .module, comment: "") }
 

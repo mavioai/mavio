@@ -82,11 +82,12 @@ func TestOffline(t *testing.T) {
 	defer s.Close()
 	o := &downloads.Offline{Remotes: &rclone.Remotes{Client: c}, Jobs: s.StorageJobs(), Configs: s.PluginConfigs()}
 
-	if err := o.SetConfig(ctx, downloads.OfflineConfig{Clients: []downloads.OfflineClient{{ID: "pp", Folder: "/local"}}}); !errors.Is(err, core.ErrInvalid) {
-		t.Errorf("SetConfig(local folder) error = %v, want = %v", err, core.ErrInvalid)
+	for _, bad := range []string{"/local", "../up", "a/../b", "."} {
+		if err := o.SetClient(ctx, downloads.OfflineClient{Remote: "pp", SeriesFolder: bad}); !errors.Is(err, core.ErrInvalid) {
+			t.Errorf("SetClient(series folder %q) error = %v, want = %v", bad, err, core.ErrInvalid)
+		}
 	}
-	cfg := downloads.OfflineConfig{Clients: []downloads.OfflineClient{{ID: "pp", Name: "PikPak", Enabled: true, Folder: "remote:pp:Downloads"}}}
-	if err := o.SetConfig(ctx, cfg); err != nil {
+	if err := o.SetClient(ctx, downloads.OfflineClient{Remote: "pp", Enabled: true, SeriesFolder: "Downloads/series"}); err != nil {
 		t.Fatal(err)
 	}
 	clients, err := o.ListDownloadClients(ctx, &pluginv1.ListDownloadClientsRequest{})
@@ -163,5 +164,39 @@ func TestOffline(t *testing.T) {
 	}
 	if _, err := o.GetDownload(ctx, pluginv1.GetDownloadRequest_builder{ClientId: new("pp"), DownloadId: new(hash)}.Build()); connect.CodeOf(err) != connect.CodeNotFound {
 		t.Errorf("GetDownload after RemoveDownload error = %v, want NotFound", err)
+	}
+}
+
+// TestOfflineRemoveClient checks that removing a remote's offline
+// downloads, as when the remote is removed, forgets the downloads sent to
+// it and leaves another remote's.
+func TestOfflineRemoveClient(t *testing.T) {
+	ctx := t.Context()
+	s, err := store.Open(ctx, "sqlite:"+filepath.Join(t.TempDir(), "mavio.db"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer s.Close()
+	o := &downloads.Offline{Jobs: s.StorageJobs(), Configs: s.PluginConfigs()}
+	for _, remote := range []string{"pp", "pp2"} {
+		if err := o.SetClient(ctx, downloads.OfflineClient{Remote: remote, Enabled: true}); err != nil {
+			t.Fatal(err)
+		}
+		if err := s.StorageJobs().Put(ctx, &core.StorageJob{Kind: core.StorageJobOffline, Key: remote + "/H", Remote: remote}); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := o.RemoveClient(ctx, "pp"); err != nil {
+		t.Fatal(err)
+	}
+	if _, ok, err := o.Client(ctx, "pp"); ok || err != nil {
+		t.Errorf("Client(pp) = %v, %v; want none", ok, err)
+	}
+	if c, ok, err := o.Client(ctx, "pp2"); !ok || err != nil || !c.Enabled {
+		t.Errorf("Client(pp2) = %v, %v, %v; want it kept", c, ok, err)
+	}
+	jobs, err := s.StorageJobs().List(ctx, core.StorageJobOffline)
+	if err != nil || len(jobs) != 1 || jobs[0].Key != "pp2/H" {
+		t.Errorf("jobs = %v, %v; want pp2's alone", jobs, err)
 	}
 }

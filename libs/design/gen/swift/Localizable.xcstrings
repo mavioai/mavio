@@ -19081,6 +19081,114 @@
         }
       }
     },
+    "storage.offlineRemoteFooter": {
+      "comment": "Footer of a remote's offline downloads",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The cloud drive downloads magnet links itself, as a download client of acquisition named after the remote; imports move the files within the remote."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "云盘自行下载磁力链接，作为以远端命名的获取下载客户端；导入时在远端内移动文件。"
+          }
+        }
+      }
+    },
+    "storage.offlineSetUp": {
+      "comment": "Button setting up a remote's offline downloads",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Use for Offline Downloads"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "用于离线下载"
+          }
+        }
+      }
+    },
+    "storage.offlineMovieFolder": {
+      "comment": "The folder of a remote that movies are downloaded into",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Movie Folder"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "电影文件夹"
+          }
+        }
+      }
+    },
+    "storage.offlineSeriesFolder": {
+      "comment": "The folder of a remote that series are downloaded into",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Series Folder"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "剧集文件夹"
+          }
+        }
+      }
+    },
+    "storage.offlineFolderBelow": {
+      "comment": "Detail of an offline download folder",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Below the remote's root"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "远端根目录下的路径"
+          }
+        }
+      }
+    },
+    "storage.offlineStop": {
+      "comment": "Button removing a remote's offline downloads",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stop Offline Downloads"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "停止离线下载"
+          }
+        }
+      }
+    },
     "acquisition.message": {
       "comment": "The line under the Acquisition page's title",
       "extractionState": "manual",

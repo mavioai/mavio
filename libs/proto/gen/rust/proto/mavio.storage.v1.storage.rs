@@ -3960,82 +3960,59 @@ impl ::buffa::ExtensionSet for GetRemoteUsageResponse {
         &mut self.__buffa_unknown_fields
     }
 }
-/// OfflineClient is a download client of a cloud drive's offline downloads:
-/// the drive downloads magnet links itself into a folder of its remote,
-/// movies into "movies" and series into "series" below it, and imports move
-/// the files within the remote.
+/// OfflineDownloads are the settings of a remote's offline downloads: its
+/// cloud drive downloads magnet links itself into folders of the remote,
+/// and imports move the files within the remote.
 #[derive(Clone, PartialEq, Default)]
-pub struct OfflineClient {
-    /// Stable among the clients; letters, digits, "-" and "_".
-    ///
-    /// Field 1: `id`
-    pub id: ::core::option::Option<::buffa::alloc::string::String>,
-    /// Field 2: `name`
-    pub name: ::core::option::Option<::buffa::alloc::string::String>,
-    /// Field 3: `enabled`
+pub struct OfflineDownloads {
+    /// Field 1: `enabled`
     pub enabled: ::core::option::Option<bool>,
     /// Lower first among the torrent clients; 1 when 0.
     ///
-    /// Field 4: `priority`
+    /// Field 2: `priority`
     pub priority: ::core::option::Option<i32>,
-    /// The folder downloads go to, "remote:\<remote\>:\<path\>"; the remote's
-    /// backend must make offline downloads.
+    /// The folders below the remote's root that movies and series are
+    /// downloaded into; "movies" and "series" when unset.
     ///
-    /// Field 5: `folder`
-    pub folder: ::core::option::Option<::buffa::alloc::string::String>,
+    /// Field 3: `movie_folder`
+    pub movie_folder: ::core::option::Option<::buffa::alloc::string::String>,
+    /// Field 4: `series_folder`
+    pub series_folder: ::core::option::Option<::buffa::alloc::string::String>,
     /// As a download client's tags.
     ///
-    /// Field 6: `tags`
+    /// Field 5: `tags`
     pub tags: ::buffa::alloc::vec::Vec<::buffa::alloc::string::String>,
     /// Remove imported downloads, and failed ones, from the drive's list of
     /// offline downloads.
     ///
-    /// Field 7: `remove_completed_downloads`
+    /// Field 6: `remove_completed_downloads`
     pub remove_completed_downloads: ::core::option::Option<bool>,
-    /// Field 8: `remove_failed_downloads`
+    /// Field 7: `remove_failed_downloads`
     pub remove_failed_downloads: ::core::option::Option<bool>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
-impl ::core::fmt::Debug for OfflineClient {
+impl ::core::fmt::Debug for OfflineDownloads {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-        f.debug_struct("OfflineClient")
-            .field("id", &self.id)
-            .field("name", &self.name)
+        f.debug_struct("OfflineDownloads")
             .field("enabled", &self.enabled)
             .field("priority", &self.priority)
-            .field("folder", &self.folder)
+            .field("movie_folder", &self.movie_folder)
+            .field("series_folder", &self.series_folder)
             .field("tags", &self.tags)
             .field("remove_completed_downloads", &self.remove_completed_downloads)
             .field("remove_failed_downloads", &self.remove_failed_downloads)
             .finish()
     }
 }
-impl OfflineClient {
+impl OfflineDownloads {
     /// Protobuf type URL for this message, for use with `Any::pack` and
     /// `Any::unpack_if`.
     ///
     /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
-    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.storage.v1.OfflineClient";
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.storage.v1.OfflineDownloads";
 }
-impl OfflineClient {
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::id`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_id(mut self, value: impl Into<::buffa::alloc::string::String>) -> Self {
-        self.id = Some(value.into());
-        self
-    }
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::name`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_name(
-        mut self,
-        value: impl Into<::buffa::alloc::string::String>,
-    ) -> Self {
-        self.name = Some(value.into());
-        self
-    }
+impl OfflineDownloads {
     #[must_use = "with_* setters return `self` by value; assign or chain the result"]
     #[inline]
     ///Sets [`Self::enabled`] to `Some(value)`, consuming and returning `self`.
@@ -4052,12 +4029,22 @@ impl OfflineClient {
     }
     #[must_use = "with_* setters return `self` by value; assign or chain the result"]
     #[inline]
-    ///Sets [`Self::folder`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_folder(
+    ///Sets [`Self::movie_folder`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_movie_folder(
         mut self,
         value: impl Into<::buffa::alloc::string::String>,
     ) -> Self {
-        self.folder = Some(value.into());
+        self.movie_folder = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::series_folder`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_series_folder(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.series_folder = Some(value.into());
         self
     }
     #[must_use = "with_* setters return `self` by value; assign or chain the result"]
@@ -4075,14 +4062,14 @@ impl OfflineClient {
         self
     }
 }
-::buffa::impl_default_instance!(OfflineClient);
-impl ::buffa::MessageName for OfflineClient {
+::buffa::impl_default_instance!(OfflineDownloads);
+impl ::buffa::MessageName for OfflineDownloads {
     const PACKAGE: &'static str = "mavio.storage.v1";
-    const NAME: &'static str = "OfflineClient";
-    const FULL_NAME: &'static str = "mavio.storage.v1.OfflineClient";
-    const TYPE_URL: &'static str = "type.googleapis.com/mavio.storage.v1.OfflineClient";
+    const NAME: &'static str = "OfflineDownloads";
+    const FULL_NAME: &'static str = "mavio.storage.v1.OfflineDownloads";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.storage.v1.OfflineDownloads";
 }
-impl ::buffa::Message for OfflineClient {
+impl ::buffa::Message for OfflineDownloads {
     /// Returns the total encoded size in bytes.
     ///
     /// Accumulates in `u64` (which cannot overflow for in-memory
@@ -4095,19 +4082,16 @@ impl ::buffa::Message for OfflineClient {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
         let mut size = 0u64;
-        if let Some(ref v) = self.id {
-            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
-        if let Some(ref v) = self.name {
-            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
         if self.enabled.is_some() {
             size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
         }
         if let Some(v) = self.priority {
             size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
         }
-        if let Some(ref v) = self.folder {
+        if let Some(ref v) = self.movie_folder {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.series_folder {
             size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
         for v in &self.tags {
@@ -4129,29 +4113,26 @@ impl ::buffa::Message for OfflineClient {
     ) {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
-        if let Some(ref v) = self.id {
-            ::buffa::types::put_string_field(1u32, v, buf);
-        }
-        if let Some(ref v) = self.name {
-            ::buffa::types::put_string_field(2u32, v, buf);
-        }
         if let Some(v) = self.enabled {
-            ::buffa::types::put_bool_field(3u32, v, buf);
+            ::buffa::types::put_bool_field(1u32, v, buf);
         }
         if let Some(v) = self.priority {
-            ::buffa::types::put_int32_field(4u32, v, buf);
+            ::buffa::types::put_int32_field(2u32, v, buf);
         }
-        if let Some(ref v) = self.folder {
-            ::buffa::types::put_string_field(5u32, v, buf);
+        if let Some(ref v) = self.movie_folder {
+            ::buffa::types::put_string_field(3u32, v, buf);
+        }
+        if let Some(ref v) = self.series_folder {
+            ::buffa::types::put_string_field(4u32, v, buf);
         }
         for v in &self.tags {
-            ::buffa::types::put_string_field(6u32, v, buf);
+            ::buffa::types::put_string_field(5u32, v, buf);
         }
         if let Some(v) = self.remove_completed_downloads {
-            ::buffa::types::put_bool_field(7u32, v, buf);
+            ::buffa::types::put_bool_field(6u32, v, buf);
         }
         if let Some(v) = self.remove_failed_downloads {
-            ::buffa::types::put_bool_field(8u32, v, buf);
+            ::buffa::types::put_bool_field(7u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -4169,33 +4150,13 @@ impl ::buffa::Message for OfflineClient {
             1u32 => {
                 ::buffa::encoding::check_wire_type(
                     tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                ::buffa::types::merge_string(
-                    self.id.get_or_insert_with(::buffa::alloc::string::String::new),
-                    buf,
-                )?;
-            }
-            2u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                ::buffa::types::merge_string(
-                    self.name.get_or_insert_with(::buffa::alloc::string::String::new),
-                    buf,
-                )?;
-            }
-            3u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
                     ::buffa::encoding::WireType::Varint,
                 )?;
                 self.enabled = ::core::option::Option::Some(
                     ::buffa::types::decode_bool(buf)?,
                 );
             }
-            4u32 => {
+            2u32 => {
                 ::buffa::encoding::check_wire_type(
                     tag,
                     ::buffa::encoding::WireType::Varint,
@@ -4204,17 +4165,31 @@ impl ::buffa::Message for OfflineClient {
                     ::buffa::types::decode_int32(buf)?,
                 );
             }
-            5u32 => {
+            3u32 => {
                 ::buffa::encoding::check_wire_type(
                     tag,
                     ::buffa::encoding::WireType::LengthDelimited,
                 )?;
                 ::buffa::types::merge_string(
-                    self.folder.get_or_insert_with(::buffa::alloc::string::String::new),
+                    self
+                        .movie_folder
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
                     buf,
                 )?;
             }
-            6u32 => {
+            4u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .series_folder
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            5u32 => {
                 ::buffa::encoding::check_wire_type(
                     tag,
                     ::buffa::encoding::WireType::LengthDelimited,
@@ -4225,7 +4200,7 @@ impl ::buffa::Message for OfflineClient {
                 )?;
                 self.tags.push(__elem);
             }
-            7u32 => {
+            6u32 => {
                 ::buffa::encoding::check_wire_type(
                     tag,
                     ::buffa::encoding::WireType::Varint,
@@ -4234,7 +4209,7 @@ impl ::buffa::Message for OfflineClient {
                     ::buffa::types::decode_bool(buf)?,
                 );
             }
-            8u32 => {
+            7u32 => {
                 ::buffa::encoding::check_wire_type(
                     tag,
                     ::buffa::encoding::WireType::Varint,
@@ -4251,19 +4226,18 @@ impl ::buffa::Message for OfflineClient {
         ::core::result::Result::Ok(())
     }
     fn clear(&mut self) {
-        self.id = ::core::option::Option::None;
-        self.name = ::core::option::Option::None;
         self.enabled = ::core::option::Option::None;
         self.priority = ::core::option::Option::None;
-        self.folder = ::core::option::Option::None;
+        self.movie_folder = ::core::option::Option::None;
+        self.series_folder = ::core::option::Option::None;
         self.tags.clear();
         self.remove_completed_downloads = ::core::option::Option::None;
         self.remove_failed_downloads = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }
-impl ::buffa::ExtensionSet for OfflineClient {
-    const PROTO_FQN: &'static str = "mavio.storage.v1.OfflineClient";
+impl ::buffa::ExtensionSet for OfflineDownloads {
+    const PROTO_FQN: &'static str = "mavio.storage.v1.OfflineDownloads";
     fn unknown_fields(&self) -> &::buffa::UnknownFields {
         &self.__buffa_unknown_fields
     }
@@ -4272,30 +4246,46 @@ impl ::buffa::ExtensionSet for OfflineClient {
     }
 }
 #[derive(Clone, PartialEq, Default)]
-pub struct ListOfflineClientsRequest {
+pub struct GetOfflineDownloadsRequest {
+    /// Field 1: `remote`
+    pub remote: ::core::option::Option<::buffa::alloc::string::String>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
-impl ::core::fmt::Debug for ListOfflineClientsRequest {
+impl ::core::fmt::Debug for GetOfflineDownloadsRequest {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-        f.debug_struct("ListOfflineClientsRequest").finish()
+        f.debug_struct("GetOfflineDownloadsRequest")
+            .field("remote", &self.remote)
+            .finish()
     }
 }
-impl ListOfflineClientsRequest {
+impl GetOfflineDownloadsRequest {
     /// Protobuf type URL for this message, for use with `Any::pack` and
     /// `Any::unpack_if`.
     ///
     /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
-    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.storage.v1.ListOfflineClientsRequest";
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.storage.v1.GetOfflineDownloadsRequest";
 }
-::buffa::impl_default_instance!(ListOfflineClientsRequest);
-impl ::buffa::MessageName for ListOfflineClientsRequest {
+impl GetOfflineDownloadsRequest {
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::remote`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_remote(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.remote = Some(value.into());
+        self
+    }
+}
+::buffa::impl_default_instance!(GetOfflineDownloadsRequest);
+impl ::buffa::MessageName for GetOfflineDownloadsRequest {
     const PACKAGE: &'static str = "mavio.storage.v1";
-    const NAME: &'static str = "ListOfflineClientsRequest";
-    const FULL_NAME: &'static str = "mavio.storage.v1.ListOfflineClientsRequest";
-    const TYPE_URL: &'static str = "type.googleapis.com/mavio.storage.v1.ListOfflineClientsRequest";
+    const NAME: &'static str = "GetOfflineDownloadsRequest";
+    const FULL_NAME: &'static str = "mavio.storage.v1.GetOfflineDownloadsRequest";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.storage.v1.GetOfflineDownloadsRequest";
 }
-impl ::buffa::Message for ListOfflineClientsRequest {
+impl ::buffa::Message for GetOfflineDownloadsRequest {
     /// Returns the total encoded size in bytes.
     ///
     /// Accumulates in `u64` (which cannot overflow for in-memory
@@ -4308,6 +4298,9 @@ impl ::buffa::Message for ListOfflineClientsRequest {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
         let mut size = 0u64;
+        if let Some(ref v) = self.remote {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -4318,105 +4311,8 @@ impl ::buffa::Message for ListOfflineClientsRequest {
     ) {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
-        self.__buffa_unknown_fields.write_to(buf);
-    }
-    fn merge_field(
-        &mut self,
-        tag: ::buffa::encoding::Tag,
-        buf: &mut impl ::buffa::bytes::Buf,
-        ctx: ::buffa::DecodeContext<'_>,
-    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
-        #[allow(unused_imports)]
-        use ::buffa::bytes::Buf as _;
-        #[allow(unused_imports)]
-        use ::buffa::Enumeration as _;
-        match tag.field_number() {
-            _ => {
-                self.__buffa_unknown_fields
-                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
-            }
-        }
-        ::core::result::Result::Ok(())
-    }
-    fn clear(&mut self) {
-        self.__buffa_unknown_fields.clear();
-    }
-}
-impl ::buffa::ExtensionSet for ListOfflineClientsRequest {
-    const PROTO_FQN: &'static str = "mavio.storage.v1.ListOfflineClientsRequest";
-    fn unknown_fields(&self) -> &::buffa::UnknownFields {
-        &self.__buffa_unknown_fields
-    }
-    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
-        &mut self.__buffa_unknown_fields
-    }
-}
-#[derive(Clone, PartialEq, Default)]
-pub struct ListOfflineClientsResponse {
-    /// Field 1: `clients`
-    pub clients: ::buffa::alloc::vec::Vec<OfflineClient>,
-    #[doc(hidden)]
-    pub __buffa_unknown_fields: ::buffa::UnknownFields,
-}
-impl ::core::fmt::Debug for ListOfflineClientsResponse {
-    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-        f.debug_struct("ListOfflineClientsResponse")
-            .field("clients", &self.clients)
-            .finish()
-    }
-}
-impl ListOfflineClientsResponse {
-    /// Protobuf type URL for this message, for use with `Any::pack` and
-    /// `Any::unpack_if`.
-    ///
-    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
-    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.storage.v1.ListOfflineClientsResponse";
-}
-::buffa::impl_default_instance!(ListOfflineClientsResponse);
-impl ::buffa::MessageName for ListOfflineClientsResponse {
-    const PACKAGE: &'static str = "mavio.storage.v1";
-    const NAME: &'static str = "ListOfflineClientsResponse";
-    const FULL_NAME: &'static str = "mavio.storage.v1.ListOfflineClientsResponse";
-    const TYPE_URL: &'static str = "type.googleapis.com/mavio.storage.v1.ListOfflineClientsResponse";
-}
-impl ::buffa::Message for ListOfflineClientsResponse {
-    /// Returns the total encoded size in bytes.
-    ///
-    /// Accumulates in `u64` (which cannot overflow for in-memory
-    /// data) and saturates to `u32` at return, so a message whose
-    /// encoded size exceeds the 2 GiB protobuf limit yields a value
-    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
-    /// points reject, never a silently wrapped size.
-    #[allow(clippy::let_and_return)]
-    fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
-        #[allow(unused_imports)]
-        use ::buffa::Enumeration as _;
-        let mut size = 0u64;
-        for v in &self.clients {
-            let __slot = __cache.reserve();
-            let inner_size = v.compute_size(__cache);
-            __cache.set(__slot, inner_size);
-            size
-                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
-                    + inner_size as u64;
-        }
-        size += self.__buffa_unknown_fields.encoded_len() as u64;
-        ::buffa::saturate_size(size)
-    }
-    fn write_to(
-        &self,
-        __cache: &mut ::buffa::SizeCache,
-        buf: &mut impl ::buffa::EncodeSink,
-    ) {
-        #[allow(unused_imports)]
-        use ::buffa::Enumeration as _;
-        for v in &self.clients {
-            ::buffa::types::put_len_delimited_header(
-                1u32,
-                u64::from(__cache.consume_next()),
-                buf,
-            );
-            v.write_to(__cache, buf);
+        if let Some(ref v) = self.remote {
+            ::buffa::types::put_string_field(1u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -4436,12 +4332,10 @@ impl ::buffa::Message for ListOfflineClientsResponse {
                     tag,
                     ::buffa::encoding::WireType::LengthDelimited,
                 )?;
-                let mut elem = ::core::default::Default::default();
-                ctx.register_element_memory(
-                    ::buffa::__private::element_footprint(&elem),
+                ::buffa::types::merge_string(
+                    self.remote.get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
                 )?;
-                ::buffa::Message::merge_length_delimited(&mut elem, buf, ctx)?;
-                self.clients.push(elem);
             }
             _ => {
                 self.__buffa_unknown_fields
@@ -4451,12 +4345,12 @@ impl ::buffa::Message for ListOfflineClientsResponse {
         ::core::result::Result::Ok(())
     }
     fn clear(&mut self) {
-        self.clients.clear();
+        self.remote = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }
-impl ::buffa::ExtensionSet for ListOfflineClientsResponse {
-    const PROTO_FQN: &'static str = "mavio.storage.v1.ListOfflineClientsResponse";
+impl ::buffa::ExtensionSet for GetOfflineDownloadsRequest {
+    const PROTO_FQN: &'static str = "mavio.storage.v1.GetOfflineDownloadsRequest";
     fn unknown_fields(&self) -> &::buffa::UnknownFields {
         &self.__buffa_unknown_fields
     }
@@ -4465,34 +4359,53 @@ impl ::buffa::ExtensionSet for ListOfflineClientsResponse {
     }
 }
 #[derive(Clone, PartialEq, Default)]
-pub struct SetOfflineClientsRequest {
-    /// Field 1: `clients`
-    pub clients: ::buffa::alloc::vec::Vec<OfflineClient>,
+pub struct GetOfflineDownloadsResponse {
+    /// The remote's backend makes offline downloads.
+    ///
+    /// Field 1: `supported`
+    pub supported: ::core::option::Option<bool>,
+    /// Unset when the remote has none.
+    ///
+    /// Field 2: `settings`
+    pub settings: ::buffa::MessageField<
+        OfflineDownloads,
+        ::buffa::Inline<OfflineDownloads>,
+    >,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
-impl ::core::fmt::Debug for SetOfflineClientsRequest {
+impl ::core::fmt::Debug for GetOfflineDownloadsResponse {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-        f.debug_struct("SetOfflineClientsRequest")
-            .field("clients", &self.clients)
+        f.debug_struct("GetOfflineDownloadsResponse")
+            .field("supported", &self.supported)
+            .field("settings", &self.settings)
             .finish()
     }
 }
-impl SetOfflineClientsRequest {
+impl GetOfflineDownloadsResponse {
     /// Protobuf type URL for this message, for use with `Any::pack` and
     /// `Any::unpack_if`.
     ///
     /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
-    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.storage.v1.SetOfflineClientsRequest";
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.storage.v1.GetOfflineDownloadsResponse";
 }
-::buffa::impl_default_instance!(SetOfflineClientsRequest);
-impl ::buffa::MessageName for SetOfflineClientsRequest {
+impl GetOfflineDownloadsResponse {
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::supported`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_supported(mut self, value: bool) -> Self {
+        self.supported = Some(value);
+        self
+    }
+}
+::buffa::impl_default_instance!(GetOfflineDownloadsResponse);
+impl ::buffa::MessageName for GetOfflineDownloadsResponse {
     const PACKAGE: &'static str = "mavio.storage.v1";
-    const NAME: &'static str = "SetOfflineClientsRequest";
-    const FULL_NAME: &'static str = "mavio.storage.v1.SetOfflineClientsRequest";
-    const TYPE_URL: &'static str = "type.googleapis.com/mavio.storage.v1.SetOfflineClientsRequest";
+    const NAME: &'static str = "GetOfflineDownloadsResponse";
+    const FULL_NAME: &'static str = "mavio.storage.v1.GetOfflineDownloadsResponse";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.storage.v1.GetOfflineDownloadsResponse";
 }
-impl ::buffa::Message for SetOfflineClientsRequest {
+impl ::buffa::Message for GetOfflineDownloadsResponse {
     /// Returns the total encoded size in bytes.
     ///
     /// Accumulates in `u64` (which cannot overflow for in-memory
@@ -4505,9 +4418,12 @@ impl ::buffa::Message for SetOfflineClientsRequest {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
         let mut size = 0u64;
-        for v in &self.clients {
+        if self.supported.is_some() {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
+        if self.settings.is_set() {
             let __slot = __cache.reserve();
-            let inner_size = v.compute_size(__cache);
+            let inner_size = self.settings.compute_size(__cache);
             __cache.set(__slot, inner_size);
             size
                 += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
@@ -4523,13 +4439,164 @@ impl ::buffa::Message for SetOfflineClientsRequest {
     ) {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
-        for v in &self.clients {
+        if let Some(v) = self.supported {
+            ::buffa::types::put_bool_field(1u32, v, buf);
+        }
+        if self.settings.is_set() {
             ::buffa::types::put_len_delimited_header(
-                1u32,
+                2u32,
                 u64::from(__cache.consume_next()),
                 buf,
             );
-            v.write_to(__cache, buf);
+            self.settings.write_to(__cache, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.supported = ::core::option::Option::Some(
+                    ::buffa::types::decode_bool(buf)?,
+                );
+            }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::Message::merge_length_delimited(
+                    self.settings.get_or_insert_default(),
+                    buf,
+                    ctx,
+                )?;
+            }
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.supported = ::core::option::Option::None;
+        self.settings = ::buffa::MessageField::none();
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for GetOfflineDownloadsResponse {
+    const PROTO_FQN: &'static str = "mavio.storage.v1.GetOfflineDownloadsResponse";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+#[derive(Clone, PartialEq, Default)]
+pub struct UpdateOfflineDownloadsRequest {
+    /// Field 1: `remote`
+    pub remote: ::core::option::Option<::buffa::alloc::string::String>,
+    /// Unset removes them.
+    ///
+    /// Field 2: `settings`
+    pub settings: ::buffa::MessageField<
+        OfflineDownloads,
+        ::buffa::Inline<OfflineDownloads>,
+    >,
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for UpdateOfflineDownloadsRequest {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("UpdateOfflineDownloadsRequest")
+            .field("remote", &self.remote)
+            .field("settings", &self.settings)
+            .finish()
+    }
+}
+impl UpdateOfflineDownloadsRequest {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.storage.v1.UpdateOfflineDownloadsRequest";
+}
+impl UpdateOfflineDownloadsRequest {
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::remote`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_remote(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.remote = Some(value.into());
+        self
+    }
+}
+::buffa::impl_default_instance!(UpdateOfflineDownloadsRequest);
+impl ::buffa::MessageName for UpdateOfflineDownloadsRequest {
+    const PACKAGE: &'static str = "mavio.storage.v1";
+    const NAME: &'static str = "UpdateOfflineDownloadsRequest";
+    const FULL_NAME: &'static str = "mavio.storage.v1.UpdateOfflineDownloadsRequest";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.storage.v1.UpdateOfflineDownloadsRequest";
+}
+impl ::buffa::Message for UpdateOfflineDownloadsRequest {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if let Some(ref v) = self.remote {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if self.settings.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.settings.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        __cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if let Some(ref v) = self.remote {
+            ::buffa::types::put_string_field(1u32, v, buf);
+        }
+        if self.settings.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                2u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.settings.write_to(__cache, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -4549,12 +4616,21 @@ impl ::buffa::Message for SetOfflineClientsRequest {
                     tag,
                     ::buffa::encoding::WireType::LengthDelimited,
                 )?;
-                let mut elem = ::core::default::Default::default();
-                ctx.register_element_memory(
-                    ::buffa::__private::element_footprint(&elem),
+                ::buffa::types::merge_string(
+                    self.remote.get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
                 )?;
-                ::buffa::Message::merge_length_delimited(&mut elem, buf, ctx)?;
-                self.clients.push(elem);
+            }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::Message::merge_length_delimited(
+                    self.settings.get_or_insert_default(),
+                    buf,
+                    ctx,
+                )?;
             }
             _ => {
                 self.__buffa_unknown_fields
@@ -4564,12 +4640,13 @@ impl ::buffa::Message for SetOfflineClientsRequest {
         ::core::result::Result::Ok(())
     }
     fn clear(&mut self) {
-        self.clients.clear();
+        self.remote = ::core::option::Option::None;
+        self.settings = ::buffa::MessageField::none();
         self.__buffa_unknown_fields.clear();
     }
 }
-impl ::buffa::ExtensionSet for SetOfflineClientsRequest {
-    const PROTO_FQN: &'static str = "mavio.storage.v1.SetOfflineClientsRequest";
+impl ::buffa::ExtensionSet for UpdateOfflineDownloadsRequest {
+    const PROTO_FQN: &'static str = "mavio.storage.v1.UpdateOfflineDownloadsRequest";
     fn unknown_fields(&self) -> &::buffa::UnknownFields {
         &self.__buffa_unknown_fields
     }
@@ -4578,30 +4655,37 @@ impl ::buffa::ExtensionSet for SetOfflineClientsRequest {
     }
 }
 #[derive(Clone, PartialEq, Default)]
-pub struct SetOfflineClientsResponse {
+pub struct UpdateOfflineDownloadsResponse {
+    /// Field 1: `settings`
+    pub settings: ::buffa::MessageField<
+        OfflineDownloads,
+        ::buffa::Inline<OfflineDownloads>,
+    >,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
-impl ::core::fmt::Debug for SetOfflineClientsResponse {
+impl ::core::fmt::Debug for UpdateOfflineDownloadsResponse {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-        f.debug_struct("SetOfflineClientsResponse").finish()
+        f.debug_struct("UpdateOfflineDownloadsResponse")
+            .field("settings", &self.settings)
+            .finish()
     }
 }
-impl SetOfflineClientsResponse {
+impl UpdateOfflineDownloadsResponse {
     /// Protobuf type URL for this message, for use with `Any::pack` and
     /// `Any::unpack_if`.
     ///
     /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
-    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.storage.v1.SetOfflineClientsResponse";
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.storage.v1.UpdateOfflineDownloadsResponse";
 }
-::buffa::impl_default_instance!(SetOfflineClientsResponse);
-impl ::buffa::MessageName for SetOfflineClientsResponse {
+::buffa::impl_default_instance!(UpdateOfflineDownloadsResponse);
+impl ::buffa::MessageName for UpdateOfflineDownloadsResponse {
     const PACKAGE: &'static str = "mavio.storage.v1";
-    const NAME: &'static str = "SetOfflineClientsResponse";
-    const FULL_NAME: &'static str = "mavio.storage.v1.SetOfflineClientsResponse";
-    const TYPE_URL: &'static str = "type.googleapis.com/mavio.storage.v1.SetOfflineClientsResponse";
+    const NAME: &'static str = "UpdateOfflineDownloadsResponse";
+    const FULL_NAME: &'static str = "mavio.storage.v1.UpdateOfflineDownloadsResponse";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.storage.v1.UpdateOfflineDownloadsResponse";
 }
-impl ::buffa::Message for SetOfflineClientsResponse {
+impl ::buffa::Message for UpdateOfflineDownloadsResponse {
     /// Returns the total encoded size in bytes.
     ///
     /// Accumulates in `u64` (which cannot overflow for in-memory
@@ -4610,20 +4694,36 @@ impl ::buffa::Message for SetOfflineClientsResponse {
     /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
     /// points reject, never a silently wrapped size.
     #[allow(clippy::let_and_return)]
-    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+    fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
         let mut size = 0u64;
+        if self.settings.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.settings.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
     fn write_to(
         &self,
-        _cache: &mut ::buffa::SizeCache,
+        __cache: &mut ::buffa::SizeCache,
         buf: &mut impl ::buffa::EncodeSink,
     ) {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
+        if self.settings.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                1u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.settings.write_to(__cache, buf);
+        }
         self.__buffa_unknown_fields.write_to(buf);
     }
     fn merge_field(
@@ -4637,6 +4737,17 @@ impl ::buffa::Message for SetOfflineClientsResponse {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
         match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::Message::merge_length_delimited(
+                    self.settings.get_or_insert_default(),
+                    buf,
+                    ctx,
+                )?;
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -4645,11 +4756,12 @@ impl ::buffa::Message for SetOfflineClientsResponse {
         ::core::result::Result::Ok(())
     }
     fn clear(&mut self) {
+        self.settings = ::buffa::MessageField::none();
         self.__buffa_unknown_fields.clear();
     }
 }
-impl ::buffa::ExtensionSet for SetOfflineClientsResponse {
-    const PROTO_FQN: &'static str = "mavio.storage.v1.SetOfflineClientsResponse";
+impl ::buffa::ExtensionSet for UpdateOfflineDownloadsResponse {
+    const PROTO_FQN: &'static str = "mavio.storage.v1.UpdateOfflineDownloadsResponse";
     fn unknown_fields(&self) -> &::buffa::UnknownFields {
         &self.__buffa_unknown_fields
     }

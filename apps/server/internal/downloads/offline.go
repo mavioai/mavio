@@ -16,6 +16,7 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"connectrpc.com/connect"
@@ -33,8 +34,8 @@ const OfflineID = "dev.mavio.rclone-offline"
 // offlineDefinition is the one kind of offline download client.
 const offlineDefinition = "offline"
 
-// Categories of offline downloads: the folders below a client's folder
-// that movies and series are downloaded into.
+// Categories of offline downloads, and the folders of a remote that movies
+// and series are downloaded into unless its settings name others.
 const (
 	categoryMovies = "movies"
 	categorySeries = "series"
@@ -42,19 +43,21 @@ const (
 
 // OfflineConfig is the configuration of the offline download clients.
 type OfflineConfig struct {
-	Clients []OfflineClient `json:"clients"`
+	Clients []OfflineClient `json:"remotes"`
 }
 
-// OfflineClient is a download client of a cloud drive's offline downloads:
-// the drive downloads magnet links itself into Folder, a folder of an
-// rclone remote, movies into "movies" and series into "series" below it.
+// OfflineClient is the offline downloads of a remote whose cloud drive
+// downloads magnet links itself: a download client named after the remote,
+// one at most per remote, downloading movies into MovieFolder and series
+// into SeriesFolder, folders below the remote's root.
 type OfflineClient struct {
-	ID       string   `json:"id"`
-	Name     string   `json:"name"`
+	Remote   string   `json:"remote"`
 	Enabled  bool     `json:"enabled"`
 	Priority int32    `json:"priority"`
-	Folder   string   `json:"folder"`
 	Tags     []string `json:"tags,omitempty"`
+	// MovieFolder and SeriesFolder default to "movies" and "series".
+	MovieFolder  string `json:"movie_folder,omitempty"`
+	SeriesFolder string `json:"series_folder,omitempty"`
 	// RemoveCompleted and RemoveFailed remove imported and failed
 	// downloads from the drive's list of offline downloads.
 	RemoveCompleted bool `json:"remove_completed_downloads"`
@@ -63,20 +66,35 @@ type OfflineClient struct {
 
 // validate checks the client's settings.
 func (c OfflineClient) validate() error {
-	remote, dir, ok := core.SplitRemotePath(c.Folder)
-	switch {
-	case c.ID == "" || strings.ContainsAny(c.ID, "/ "):
-		return fmt.Errorf("%w: offline download client ID %q", core.ErrInvalid, c.ID)
-	case !ok || strings.ContainsAny(remote, `/\`) || dir == "" || path.Clean(dir) != dir || dir == ".." || strings.HasPrefix(dir, "../") || strings.HasPrefix(dir, "/"):
-		return fmt.Errorf("%w: offline download folder %q: want remote:<remote>:<path>", core.ErrInvalid, c.Folder)
+	if c.Remote == "" || strings.ContainsAny(c.Remote, `/\: `) {
+		return fmt.Errorf("%w: offline downloads of remote %q", core.ErrInvalid, c.Remote)
+	}
+	for _, dir := range []string{c.MovieFolder, c.SeriesFolder} {
+		if dir != "" && (path.Clean(dir) != dir || dir == "." || dir == ".." || strings.HasPrefix(dir, "../") || strings.HasPrefix(dir, "/") || strings.Contains(dir, `\`)) {
+			return fmt.Errorf("%w: offline download folder %q: want a folder below the remote's root", core.ErrInvalid, dir)
+		}
 	}
 	return nil
 }
 
-// split returns the client's remote and folder below its root.
-func (c OfflineClient) split() (remote, dir string) {
-	remote, dir, _ = core.SplitRemotePath(c.Folder)
-	return remote, dir
+// folder returns the folder below the remote's root a category's downloads
+// go to.
+func (c OfflineClient) folder(category string) string {
+	if category == categorySeries {
+		return cmp.Or(c.SeriesFolder, categorySeries)
+	}
+	return cmp.Or(c.MovieFolder, categoryMovies)
+}
+
+// path returns the path of a folder below the remote's root, as library
+// paths are written.
+func (c OfflineClient) path(dir string) string {
+	return core.RemoteScheme + c.Remote + ":" + dir
+}
+
+// Folders returns the folders movies and series are downloaded into.
+func (c OfflineClient) Folders() (movies, series string) {
+	return c.folder(categoryMovies), c.folder(categorySeries)
 }
 
 // Offline is the provider of the offline download clients, built into the
@@ -89,6 +107,9 @@ type Offline struct {
 	Remotes *rclone.Remotes
 	Jobs    core.StorageJobRepository
 	Configs core.PluginConfigRepository
+
+	// mu serializes changes of the configuration.
+	mu sync.Mutex
 }
 
 // Config returns the configuration of the clients.
@@ -107,17 +128,17 @@ func (o *Offline) Config(ctx context.Context) (OfflineConfig, error) {
 	return cfg, nil
 }
 
-// SetConfig validates and stores the configuration of the clients.
-func (o *Offline) SetConfig(ctx context.Context, cfg OfflineConfig) error {
+// setConfig validates and stores the configuration of the clients.
+func (o *Offline) setConfig(ctx context.Context, cfg OfflineConfig) error {
 	seen := map[string]bool{}
 	for _, c := range cfg.Clients {
 		if err := c.validate(); err != nil {
 			return err
 		}
-		if seen[c.ID] {
-			return fmt.Errorf("%w: two offline download clients are %s", core.ErrInvalid, c.ID)
+		if seen[c.Remote] {
+			return fmt.Errorf("%w: two offline download clients of remote %s", core.ErrInvalid, c.Remote)
 		}
-		seen[c.ID] = true
+		seen[c.Remote] = true
 	}
 	data, err := json.Marshal(cfg)
 	if err != nil {
@@ -126,18 +147,75 @@ func (o *Offline) SetConfig(ctx context.Context, cfg OfflineConfig) error {
 	return o.Configs.Put(ctx, &core.PluginConfig{PluginID: OfflineID, JSON: string(data)})
 }
 
+// Client returns the offline downloads of a remote, and whether it has them.
+func (o *Offline) Client(ctx context.Context, remote string) (OfflineClient, bool, error) {
+	cfg, err := o.Config(ctx)
+	if err != nil {
+		return OfflineClient{}, false, err
+	}
+	i := slices.IndexFunc(cfg.Clients, func(c OfflineClient) bool { return c.Remote == remote })
+	if i < 0 {
+		return OfflineClient{}, false, nil
+	}
+	return cfg.Clients[i], true, nil
+}
+
+// SetClient replaces the offline downloads of c's remote.
+func (o *Offline) SetClient(ctx context.Context, c OfflineClient) error {
+	o.mu.Lock()
+	defer o.mu.Unlock()
+	cfg, err := o.Config(ctx)
+	if err != nil {
+		return err
+	}
+	if i := slices.IndexFunc(cfg.Clients, func(x OfflineClient) bool { return x.Remote == c.Remote }); i >= 0 {
+		cfg.Clients[i] = c
+	} else {
+		cfg.Clients = append(cfg.Clients, c)
+	}
+	return o.setConfig(ctx, cfg)
+}
+
+// RemoveClient removes the offline downloads of a remote, and the
+// downloads the ledger keeps for it, as when the remote is removed.
+func (o *Offline) RemoveClient(ctx context.Context, remote string) error {
+	o.mu.Lock()
+	defer o.mu.Unlock()
+	cfg, err := o.Config(ctx)
+	if err != nil {
+		return err
+	}
+	n := len(cfg.Clients)
+	cfg.Clients = slices.DeleteFunc(cfg.Clients, func(c OfflineClient) bool { return c.Remote == remote })
+	if len(cfg.Clients) != n {
+		if err := o.setConfig(ctx, cfg); err != nil {
+			return err
+		}
+	}
+	jobs, err := o.Jobs.List(ctx, core.StorageJobOffline)
+	if err != nil {
+		return err
+	}
+	for _, j := range jobs {
+		if client, _, _ := strings.Cut(j.Key, "/"); client == remote {
+			if err := o.Jobs.Delete(ctx, core.StorageJobOffline, j.Key); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
 // client returns a configured client, or a NotFound error.
 func (o *Offline) client(ctx context.Context, id string) (OfflineClient, error) {
-	cfg, err := o.Config(ctx)
+	c, ok, err := o.Client(ctx, id)
 	if err != nil {
 		return OfflineClient{}, err
 	}
-	for _, c := range cfg.Clients {
-		if c.ID == id {
-			return c, nil
-		}
+	if !ok {
+		return OfflineClient{}, connect.NewError(connect.CodeNotFound, fmt.Errorf("no offline downloads of remote %s", id))
 	}
-	return OfflineClient{}, connect.NewError(connect.CodeNotFound, fmt.Errorf("no offline download client %s", id))
+	return c, nil
 }
 
 // rc returns the rcd's client, or an Unavailable error.
@@ -154,14 +232,8 @@ func (o *Offline) ListDownloadClientDefinitions(context.Context, *pluginv1.ListD
 	def := pluginv1.DownloadClientDefinition_builder{
 		Id:          new(offlineDefinition),
 		Name:        new("Cloud drive offline download"),
-		Description: new("A cloud drive downloads magnet links itself into a folder of its rclone remote; imports move the files within the remote."),
+		Description: new("A cloud drive downloads magnet links itself into folders of its remote; imports move the files within the remote. Set on the remote's page."),
 		Protocol:    new(pluginv1.DownloadProtocol_DOWNLOAD_PROTOCOL_TORRENT),
-		Fields: []*pluginv1.SettingField{pluginv1.SettingField_builder{
-			Name:     new("folder"),
-			Label:    new("Folder"),
-			HelpText: new("remote:<remote>:<path>, on a remote whose backend makes offline downloads"),
-			Type:     new(pluginv1.SettingFieldType_SETTING_FIELD_TYPE_TEXT),
-		}.Build()},
 	}.Build()
 	return pluginv1.ListDownloadClientDefinitionsResponse_builder{Definitions: []*pluginv1.DownloadClientDefinition{def}}.Build(), nil
 }
@@ -176,7 +248,7 @@ func (o *Offline) ListDownloadClients(ctx context.Context, _ *pluginv1.ListDownl
 	out := make([]*pluginv1.DownloadClient, len(cfg.Clients))
 	for i, c := range cfg.Clients {
 		out[i] = pluginv1.DownloadClient_builder{
-			Id: new(c.ID), Name: new(c.Name), DefinitionId: new(offlineDefinition),
+			Id: new(c.Remote), Name: new(c.Remote), DefinitionId: new(offlineDefinition),
 			Protocol: new(pluginv1.DownloadProtocol_DOWNLOAD_PROTOCOL_TORRENT),
 			Enabled:  new(c.Enabled), Priority: new(cmp.Or(c.Priority, 1)),
 			RemoveCompletedDownloads: new(c.RemoveCompleted), RemoveFailedDownloads: new(c.RemoveFailed),
@@ -190,20 +262,9 @@ func (o *Offline) ListDownloadClients(ctx context.Context, _ *pluginv1.ListDownl
 // pluginv1connect.DownloadClientProviderServiceClient: the remote must make
 // offline downloads.
 func (o *Offline) TestDownloadClient(ctx context.Context, req *pluginv1.TestDownloadClientRequest) (*pluginv1.TestDownloadClientResponse, error) {
-	var c OfflineClient
-	if req.GetClientId() != "" {
-		var err error
-		if c, err = o.client(ctx, req.GetClientId()); err != nil {
-			return nil, err
-		}
-	} else {
-		var settings struct {
-			Folder string `json:"folder"`
-		}
-		if err := json.Unmarshal([]byte(cmp.Or(req.GetSettingsJson(), "{}")), &settings); err != nil {
-			return nil, connect.NewError(connect.CodeInvalidArgument, err)
-		}
-		c = OfflineClient{ID: "test", Folder: settings.Folder}
+	c, err := o.client(ctx, req.GetClientId())
+	if err != nil {
+		return nil, err
 	}
 	failure := func(msg string) (*pluginv1.TestDownloadClientResponse, error) {
 		return pluginv1.TestDownloadClientResponse_builder{Failure: &msg}.Build(), nil
@@ -214,23 +275,24 @@ func (o *Offline) TestDownloadClient(ctx context.Context, req *pluginv1.TestDown
 	if _, err := o.rc(); err != nil {
 		return failure(err.Error())
 	}
-	remote, dir := c.split()
-	ok, err := o.Remotes.OfflineDownloads(ctx, remote)
+	ok, err := o.Remotes.OfflineDownloads(ctx, c.Remote)
 	switch {
 	case err != nil:
 		return failure(err.Error())
 	case !ok:
-		return failure(fmt.Sprintf("the backend of remote %s makes no offline downloads", remote))
+		return failure(fmt.Sprintf("the backend of remote %s makes no offline downloads", c.Remote))
 	}
 	var warnings []string
-	st, err := o.Remotes.Open(ctx, remote, dir)
-	switch {
-	case errors.Is(err, fs.ErrNotExist):
-		warnings = append(warnings, fmt.Sprintf("%s does not exist yet; the first download creates it", c.Folder))
-	case err != nil:
-		return failure(err.Error())
-	default:
-		_ = st.Close()
+	for _, dir := range []string{c.folder(categoryMovies), c.folder(categorySeries)} {
+		st, err := o.Remotes.Open(ctx, c.Remote, dir)
+		switch {
+		case errors.Is(err, fs.ErrNotExist):
+			warnings = append(warnings, fmt.Sprintf("%s does not exist yet; the first download creates it", core.RemoteScheme+c.Remote+":"+dir))
+		case err != nil:
+			return failure(err.Error())
+		default:
+			_ = st.Close()
+		}
 	}
 	return pluginv1.TestDownloadClientResponse_builder{Warnings: warnings}.Build(), nil
 }
@@ -255,8 +317,8 @@ func (o *Offline) AddDownload(ctx context.Context, req *pluginv1.AddDownloadRequ
 		return nil, connect.NewError(connect.CodeFailedPrecondition, fmt.Errorf("torrent %s is blocklisted", hash))
 	}
 	if hash != "" {
-		if _, err := o.Jobs.Get(ctx, core.StorageJobOffline, c.ID+"/"+hash); err == nil {
-			return nil, connect.NewError(connect.CodeFailedPrecondition, fmt.Errorf("torrent %s was sent to %s already", hash, c.Name))
+		if _, err := o.Jobs.Get(ctx, core.StorageJobOffline, c.Remote+"/"+hash); err == nil {
+			return nil, connect.NewError(connect.CodeFailedPrecondition, fmt.Errorf("torrent %s was sent to %s already", hash, c.Remote))
 		} else if !errors.Is(err, core.ErrNotFound) {
 			return nil, err
 		}
@@ -265,8 +327,7 @@ func (o *Offline) AddDownload(ctx context.Context, req *pluginv1.AddDownloadRequ
 	if req.GetKind() == pluginv1.DownloadKind_DOWNLOAD_KIND_SERIES {
 		category, kind = categorySeries, "series"
 	}
-	remote, dir := c.split()
-	target := path.Join(dir, category)
+	remote, target := c.Remote, c.folder(category)
 	if err := rc.Call(ctx, "operations/mkdir", map[string]any{"fs": remote + ":", "remote": target}, nil); err != nil {
 		return nil, offlineError(err)
 	}
@@ -278,10 +339,10 @@ func (o *Offline) AddDownload(ctx context.Context, req *pluginv1.AddDownloadRequ
 		hash = strings.ToUpper(task.ID)
 	}
 	job := core.StorageJob{
-		Kind: core.StorageJobOffline, Key: c.ID + "/" + hash, Remote: remote,
+		Kind: core.StorageJobOffline, Key: c.Remote + "/" + hash, Remote: remote,
 		Data: map[string]string{
 			"task": task.ID, "title": req.GetTitle(), "kind": kind, "category": category,
-			"folder": c.Folder, "name": task.Name, "status": string(cmp.Or(task.Status, rclone.OfflineInit)),
+			"folder": target, "name": task.Name, "status": string(cmp.Or(task.Status, rclone.OfflineInit)),
 		},
 	}
 	if err := o.Jobs.Put(ctx, &job); err != nil {
@@ -336,19 +397,19 @@ func (o *Offline) ListDownloads(ctx context.Context, req *pluginv1.ListDownloads
 	var statuses []*pluginv1.DownloadClientStatus
 	var failures []*pluginv1.DownloadClientFailure
 	for _, c := range cfg.Clients {
-		if ids := req.GetClientIds(); len(ids) > 0 && !slices.Contains(ids, c.ID) || len(req.GetClientIds()) == 0 && !c.Enabled {
+		if ids := req.GetClientIds(); len(ids) > 0 && !slices.Contains(ids, c.Remote) || len(req.GetClientIds()) == 0 && !c.Enabled {
 			continue
 		}
 		list, err := o.downloads(ctx, c)
 		if err != nil {
-			failures = append(failures, pluginv1.DownloadClientFailure_builder{ClientId: new(c.ID), Message: new(err.Error())}.Build())
+			failures = append(failures, pluginv1.DownloadClientFailure_builder{ClientId: new(c.Remote), Message: new(err.Error())}.Build())
 			continue
 		}
 		downloads = append(downloads, list...)
 		if req.GetIncludeStatuses() {
 			statuses = append(statuses, pluginv1.DownloadClientStatus_builder{
-				ClientId:          new(c.ID),
-				OutputRootFolders: []string{c.Folder + "/" + categoryMovies, c.Folder + "/" + categorySeries},
+				ClientId:          new(c.Remote),
+				OutputRootFolders: []string{c.path(c.folder(categoryMovies)), c.path(c.folder(categorySeries))},
 			}.Build())
 		}
 	}
@@ -366,8 +427,7 @@ func (o *Offline) downloads(ctx context.Context, c OfflineClient) ([]*pluginv1.D
 	if err != nil {
 		return nil, err
 	}
-	remote, _ := c.split()
-	tasks, err := rc.OfflineTasks(ctx, remote)
+	tasks, err := rc.OfflineTasks(ctx, c.Remote)
 	if err != nil {
 		return nil, err
 	}
@@ -382,7 +442,7 @@ func (o *Offline) downloads(ctx context.Context, c OfflineClient) ([]*pluginv1.D
 	var out []*pluginv1.Download
 	for _, j := range jobs {
 		client, id, _ := strings.Cut(j.Key, "/")
-		if client != c.ID {
+		if client != c.Remote {
 			continue
 		}
 		t, listed := byID[j.Data["task"]]
@@ -408,7 +468,7 @@ func (o *Offline) downloads(ctx context.Context, c OfflineClient) ([]*pluginv1.D
 func offlineDownload(c OfflineClient, id string, j core.StorageJob, t rclone.OfflineTask, listed bool) *pluginv1.Download {
 	size, _ := strconv.ParseInt(j.Data["size"], 10, 64)
 	d := pluginv1.Download_builder{
-		ClientId: new(c.ID), Id: new(id), Title: new(cmp.Or(j.Data["title"], j.Data["name"])),
+		ClientId: new(c.Remote), Id: new(id), Title: new(cmp.Or(j.Data["title"], j.Data["name"])),
 		Category: new(j.Data["category"]), TotalSize: &size,
 		Message: new(j.Data["error"]), CanMoveFiles: new(true),
 	}.Build()
@@ -418,7 +478,7 @@ func offlineDownload(c OfflineClient, id string, j core.StorageJob, t rclone.Off
 		d.SetKind(pluginv1.DownloadKind_DOWNLOAD_KIND_MOVIE)
 	}
 	if name := j.Data["name"]; name != "" {
-		d.SetOutputPath(cmp.Or(j.Data["folder"], c.Folder) + "/" + j.Data["category"] + "/" + name)
+		d.SetOutputPath(c.path(path.Join(cmp.Or(j.Data["folder"], c.folder(j.Data["category"])), name)))
 	}
 	status := rclone.OfflineStatus(j.Data["status"])
 	switch {
@@ -465,7 +525,7 @@ func (o *Offline) GetDownload(ctx context.Context, req *pluginv1.GetDownloadRequ
 			return pluginv1.GetDownloadResponse_builder{Download: d}.Build(), nil
 		}
 	}
-	return nil, connect.NewError(connect.CodeNotFound, fmt.Errorf("no download %s in %s", req.GetDownloadId(), c.Name))
+	return nil, connect.NewError(connect.CodeNotFound, fmt.Errorf("no download %s in %s", req.GetDownloadId(), c.Remote))
 }
 
 // RemoveDownload implements pluginv1connect.DownloadClientProviderServiceClient.
@@ -478,7 +538,7 @@ func (o *Offline) RemoveDownload(ctx context.Context, req *pluginv1.RemoveDownlo
 	if err != nil {
 		return nil, err
 	}
-	key := c.ID + "/" + req.GetDownloadId()
+	key := c.Remote + "/" + req.GetDownloadId()
 	j, err := o.Jobs.Get(ctx, core.StorageJobOffline, key)
 	if errors.Is(err, core.ErrNotFound) {
 		return &pluginv1.RemoveDownloadResponse{}, nil
@@ -489,8 +549,7 @@ func (o *Offline) RemoveDownload(ctx context.Context, req *pluginv1.RemoveDownlo
 		return nil, offlineError(err)
 	}
 	if name := j.Data["name"]; req.GetDeleteData() && name != "" {
-		_, dir, _ := core.SplitRemotePath(cmp.Or(j.Data["folder"], c.Folder))
-		st, err := o.Remotes.Open(ctx, j.Remote, path.Join(dir, j.Data["category"]))
+		st, err := o.Remotes.Open(ctx, j.Remote, cmp.Or(j.Data["folder"], c.folder(j.Data["category"])))
 		if err != nil && !errors.Is(err, fs.ErrNotExist) {
 			return nil, offlineError(err)
 		}

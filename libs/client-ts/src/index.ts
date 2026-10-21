@@ -138,14 +138,14 @@ export {
 } from "./servers.ts";
 export {
   useDisks,
-  useOfflineClients,
+  useOfflineDownloads,
   useRemoteActions,
   useRemoteFolders,
   useRemoteUsage,
   useRemotes,
-  useSetOfflineClients,
   useStorageProviders,
   useStorageStatus,
+  useUpdateOfflineDownloads,
 } from "./storage.ts";
 export {
   useCustomFormats,

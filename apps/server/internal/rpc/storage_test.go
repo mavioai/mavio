@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"path/filepath"
 	"slices"
 	"strings"
 	"testing"
@@ -13,10 +14,12 @@ import (
 	"connectrpc.com/connect"
 
 	"github.com/mavioai/mavio/apps/server/internal/auth"
+	"github.com/mavioai/mavio/apps/server/internal/downloads"
 	"github.com/mavioai/mavio/libs/core"
 	"github.com/mavioai/mavio/libs/library/storage"
 	storagev1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/storage/v1"
 	"github.com/mavioai/mavio/libs/rclone"
+	"github.com/mavioai/mavio/libs/store"
 )
 
 func TestStorageStatusTellsWhyNoRcd(t *testing.T) {
@@ -124,5 +127,73 @@ func TestGetRemoteUsage(t *testing.T) {
 	}
 	if _, err := svc.GetRemoteUsage(ctx, storagev1.GetRemoteUsageRequest_builder{Remote: new("a:b")}.Build()); connect.CodeOf(err) != connect.CodeInvalidArgument {
 		t.Errorf("GetRemoteUsage(a:b) error = %v, want = invalid argument", err)
+	}
+}
+
+// TestOfflineDownloads checks a remote's offline downloads: set only on a
+// remote whose backend makes them, their folders defaulted, and removed
+// with the remote.
+func TestOfflineDownloads(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		body, _ := io.ReadAll(r.Body)
+		switch r.URL.Path {
+		case "/config/dump":
+			_, _ = io.WriteString(w, `{"pp":{"type":"pikpak"},"disk":{"type":"local"}}`)
+		case "/operations/fsinfo":
+			_, _ = fmt.Fprintf(w, `{"Features":{"AddURL":%t}}`, strings.Contains(string(body), `"pp:"`))
+		case "/config/delete":
+			_, _ = io.WriteString(w, `{}`)
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer srv.Close()
+	c, err := rclone.NewClient(rclone.Endpoint{URL: srv.URL}, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	s, err := store.Open(t.Context(), "sqlite:"+filepath.Join(t.TempDir(), "mavio.db"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer s.Close()
+	offline := &downloads.Offline{Remotes: &rclone.Remotes{Client: c}, Jobs: s.StorageJobs(), Configs: s.PluginConfigs()}
+	svc := &StorageService{Client: c, Offline: offline}
+	ctx := auth.WithPrincipal(t.Context(), auth.Principal{User: core.User{Kind: core.UserAdmin}})
+	get := func(remote string) *storagev1.GetOfflineDownloadsResponse {
+		t.Helper()
+		got, err := svc.GetOfflineDownloads(ctx, storagev1.GetOfflineDownloadsRequest_builder{Remote: &remote}.Build())
+		if err != nil {
+			t.Fatal(err)
+		}
+		return got
+	}
+	if got := get("pp"); !got.GetSupported() || got.HasSettings() {
+		t.Errorf("GetOfflineDownloads(pp) = %v, want supported, none set", got)
+	}
+	if got := get("disk"); got.GetSupported() {
+		t.Errorf("GetOfflineDownloads(disk) = %v, want unsupported", got)
+	}
+	update := func(remote string, set *storagev1.OfflineDownloads) (*storagev1.UpdateOfflineDownloadsResponse, error) {
+		return svc.UpdateOfflineDownloads(ctx, storagev1.UpdateOfflineDownloadsRequest_builder{Remote: &remote, Settings: set}.Build())
+	}
+	if _, err := update("disk", storagev1.OfflineDownloads_builder{Enabled: new(true)}.Build()); connect.CodeOf(err) != connect.CodeFailedPrecondition {
+		t.Errorf("UpdateOfflineDownloads(disk) error = %v, want = failed precondition", err)
+	}
+	if _, err := update("pp", storagev1.OfflineDownloads_builder{MovieFolder: new("../x")}.Build()); connect.CodeOf(err) != connect.CodeInvalidArgument {
+		t.Errorf("UpdateOfflineDownloads(../x) error = %v, want = invalid argument", err)
+	}
+	got, err := update("pp", storagev1.OfflineDownloads_builder{Enabled: new(true), SeriesFolder: new("/TV/")}.Build())
+	if err != nil || got.GetSettings().GetMovieFolder() != "movies" || got.GetSettings().GetSeriesFolder() != "TV" {
+		t.Errorf("UpdateOfflineDownloads(pp) = %v, %v; want folders movies and TV", got, err)
+	}
+	if got := get("pp"); !got.GetSettings().GetEnabled() || got.GetSettings().GetSeriesFolder() != "TV" {
+		t.Errorf("GetOfflineDownloads(pp) = %v, want the settings kept", got)
+	}
+	if _, err := svc.DeleteRemote(ctx, storagev1.DeleteRemoteRequest_builder{Name: new("pp")}.Build()); err != nil {
+		t.Fatal(err)
+	}
+	if _, ok, err := offline.Client(ctx, "pp"); ok || err != nil {
+		t.Errorf("offline downloads of a deleted remote = %v, %v; want none", ok, err)
 	}
 }

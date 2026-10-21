@@ -2916,40 +2916,38 @@ func (b0 GetRemoteUsageResponse_builder) Build() *GetRemoteUsageResponse {
 	return m0
 }
 
-// OfflineClient is a download client of a cloud drive's offline downloads:
-// the drive downloads magnet links itself into a folder of its remote,
-// movies into "movies" and series into "series" below it, and imports move
-// the files within the remote.
-type OfflineClient struct {
+// OfflineDownloads are the settings of a remote's offline downloads: its
+// cloud drive downloads magnet links itself into folders of the remote,
+// and imports move the files within the remote.
+type OfflineDownloads struct {
 	state                               protoimpl.MessageState `protogen:"opaque.v1"`
-	xxx_hidden_Id                       *string                `protobuf:"bytes,1,opt,name=id"`
-	xxx_hidden_Name                     *string                `protobuf:"bytes,2,opt,name=name"`
-	xxx_hidden_Enabled                  bool                   `protobuf:"varint,3,opt,name=enabled"`
-	xxx_hidden_Priority                 int32                  `protobuf:"varint,4,opt,name=priority"`
-	xxx_hidden_Folder                   *string                `protobuf:"bytes,5,opt,name=folder"`
-	xxx_hidden_Tags                     []string               `protobuf:"bytes,6,rep,name=tags"`
-	xxx_hidden_RemoveCompletedDownloads bool                   `protobuf:"varint,7,opt,name=remove_completed_downloads,json=removeCompletedDownloads"`
-	xxx_hidden_RemoveFailedDownloads    bool                   `protobuf:"varint,8,opt,name=remove_failed_downloads,json=removeFailedDownloads"`
+	xxx_hidden_Enabled                  bool                   `protobuf:"varint,1,opt,name=enabled"`
+	xxx_hidden_Priority                 int32                  `protobuf:"varint,2,opt,name=priority"`
+	xxx_hidden_MovieFolder              *string                `protobuf:"bytes,3,opt,name=movie_folder,json=movieFolder"`
+	xxx_hidden_SeriesFolder             *string                `protobuf:"bytes,4,opt,name=series_folder,json=seriesFolder"`
+	xxx_hidden_Tags                     []string               `protobuf:"bytes,5,rep,name=tags"`
+	xxx_hidden_RemoveCompletedDownloads bool                   `protobuf:"varint,6,opt,name=remove_completed_downloads,json=removeCompletedDownloads"`
+	xxx_hidden_RemoveFailedDownloads    bool                   `protobuf:"varint,7,opt,name=remove_failed_downloads,json=removeFailedDownloads"`
 	XXX_raceDetectHookData              protoimpl.RaceDetectHookData
 	XXX_presence                        [1]uint32
 	unknownFields                       protoimpl.UnknownFields
 	sizeCache                           protoimpl.SizeCache
 }
 
-func (x *OfflineClient) Reset() {
-	*x = OfflineClient{}
+func (x *OfflineDownloads) Reset() {
+	*x = OfflineDownloads{}
 	mi := &file_mavio_storage_v1_storage_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *OfflineClient) String() string {
+func (x *OfflineDownloads) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*OfflineClient) ProtoMessage() {}
+func (*OfflineDownloads) ProtoMessage() {}
 
-func (x *OfflineClient) ProtoReflect() protoreflect.Message {
+func (x *OfflineDownloads) ProtoReflect() protoreflect.Message {
 	mi := &file_mavio_storage_v1_storage_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -2961,206 +2959,177 @@ func (x *OfflineClient) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-func (x *OfflineClient) GetId() string {
-	if x != nil {
-		if x.xxx_hidden_Id != nil {
-			return *x.xxx_hidden_Id
-		}
-		return ""
-	}
-	return ""
-}
-
-func (x *OfflineClient) GetName() string {
-	if x != nil {
-		if x.xxx_hidden_Name != nil {
-			return *x.xxx_hidden_Name
-		}
-		return ""
-	}
-	return ""
-}
-
-func (x *OfflineClient) GetEnabled() bool {
+func (x *OfflineDownloads) GetEnabled() bool {
 	if x != nil {
 		return x.xxx_hidden_Enabled
 	}
 	return false
 }
 
-func (x *OfflineClient) GetPriority() int32 {
+func (x *OfflineDownloads) GetPriority() int32 {
 	if x != nil {
 		return x.xxx_hidden_Priority
 	}
 	return 0
 }
 
-func (x *OfflineClient) GetFolder() string {
+func (x *OfflineDownloads) GetMovieFolder() string {
 	if x != nil {
-		if x.xxx_hidden_Folder != nil {
-			return *x.xxx_hidden_Folder
+		if x.xxx_hidden_MovieFolder != nil {
+			return *x.xxx_hidden_MovieFolder
 		}
 		return ""
 	}
 	return ""
 }
 
-func (x *OfflineClient) GetTags() []string {
+func (x *OfflineDownloads) GetSeriesFolder() string {
+	if x != nil {
+		if x.xxx_hidden_SeriesFolder != nil {
+			return *x.xxx_hidden_SeriesFolder
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *OfflineDownloads) GetTags() []string {
 	if x != nil {
 		return x.xxx_hidden_Tags
 	}
 	return nil
 }
 
-func (x *OfflineClient) GetRemoveCompletedDownloads() bool {
+func (x *OfflineDownloads) GetRemoveCompletedDownloads() bool {
 	if x != nil {
 		return x.xxx_hidden_RemoveCompletedDownloads
 	}
 	return false
 }
 
-func (x *OfflineClient) GetRemoveFailedDownloads() bool {
+func (x *OfflineDownloads) GetRemoveFailedDownloads() bool {
 	if x != nil {
 		return x.xxx_hidden_RemoveFailedDownloads
 	}
 	return false
 }
 
-func (x *OfflineClient) SetId(v string) {
-	x.xxx_hidden_Id = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 8)
-}
-
-func (x *OfflineClient) SetName(v string) {
-	x.xxx_hidden_Name = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 8)
-}
-
-func (x *OfflineClient) SetEnabled(v bool) {
+func (x *OfflineDownloads) SetEnabled(v bool) {
 	x.xxx_hidden_Enabled = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 8)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 7)
 }
 
-func (x *OfflineClient) SetPriority(v int32) {
+func (x *OfflineDownloads) SetPriority(v int32) {
 	x.xxx_hidden_Priority = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 8)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 7)
 }
 
-func (x *OfflineClient) SetFolder(v string) {
-	x.xxx_hidden_Folder = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 8)
+func (x *OfflineDownloads) SetMovieFolder(v string) {
+	x.xxx_hidden_MovieFolder = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 7)
 }
 
-func (x *OfflineClient) SetTags(v []string) {
+func (x *OfflineDownloads) SetSeriesFolder(v string) {
+	x.xxx_hidden_SeriesFolder = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 7)
+}
+
+func (x *OfflineDownloads) SetTags(v []string) {
 	x.xxx_hidden_Tags = v
 }
 
-func (x *OfflineClient) SetRemoveCompletedDownloads(v bool) {
+func (x *OfflineDownloads) SetRemoveCompletedDownloads(v bool) {
 	x.xxx_hidden_RemoveCompletedDownloads = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 8)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 7)
 }
 
-func (x *OfflineClient) SetRemoveFailedDownloads(v bool) {
+func (x *OfflineDownloads) SetRemoveFailedDownloads(v bool) {
 	x.xxx_hidden_RemoveFailedDownloads = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 8)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 7)
 }
 
-func (x *OfflineClient) HasId() bool {
+func (x *OfflineDownloads) HasEnabled() bool {
 	if x == nil {
 		return false
 	}
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
 }
 
-func (x *OfflineClient) HasName() bool {
+func (x *OfflineDownloads) HasPriority() bool {
 	if x == nil {
 		return false
 	}
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
 }
 
-func (x *OfflineClient) HasEnabled() bool {
+func (x *OfflineDownloads) HasMovieFolder() bool {
 	if x == nil {
 		return false
 	}
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 2)
 }
 
-func (x *OfflineClient) HasPriority() bool {
+func (x *OfflineDownloads) HasSeriesFolder() bool {
 	if x == nil {
 		return false
 	}
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 3)
 }
 
-func (x *OfflineClient) HasFolder() bool {
+func (x *OfflineDownloads) HasRemoveCompletedDownloads() bool {
 	if x == nil {
 		return false
 	}
-	return protoimpl.X.Present(&(x.XXX_presence[0]), 4)
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 5)
 }
 
-func (x *OfflineClient) HasRemoveCompletedDownloads() bool {
+func (x *OfflineDownloads) HasRemoveFailedDownloads() bool {
 	if x == nil {
 		return false
 	}
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 6)
 }
 
-func (x *OfflineClient) HasRemoveFailedDownloads() bool {
-	if x == nil {
-		return false
-	}
-	return protoimpl.X.Present(&(x.XXX_presence[0]), 7)
-}
-
-func (x *OfflineClient) ClearId() {
+func (x *OfflineDownloads) ClearEnabled() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
-	x.xxx_hidden_Id = nil
-}
-
-func (x *OfflineClient) ClearName() {
-	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
-	x.xxx_hidden_Name = nil
-}
-
-func (x *OfflineClient) ClearEnabled() {
-	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 2)
 	x.xxx_hidden_Enabled = false
 }
 
-func (x *OfflineClient) ClearPriority() {
-	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 3)
+func (x *OfflineDownloads) ClearPriority() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
 	x.xxx_hidden_Priority = 0
 }
 
-func (x *OfflineClient) ClearFolder() {
-	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 4)
-	x.xxx_hidden_Folder = nil
+func (x *OfflineDownloads) ClearMovieFolder() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 2)
+	x.xxx_hidden_MovieFolder = nil
 }
 
-func (x *OfflineClient) ClearRemoveCompletedDownloads() {
-	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 6)
+func (x *OfflineDownloads) ClearSeriesFolder() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 3)
+	x.xxx_hidden_SeriesFolder = nil
+}
+
+func (x *OfflineDownloads) ClearRemoveCompletedDownloads() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 5)
 	x.xxx_hidden_RemoveCompletedDownloads = false
 }
 
-func (x *OfflineClient) ClearRemoveFailedDownloads() {
-	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 7)
+func (x *OfflineDownloads) ClearRemoveFailedDownloads() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 6)
 	x.xxx_hidden_RemoveFailedDownloads = false
 }
 
-type OfflineClient_builder struct {
+type OfflineDownloads_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
-	// Stable among the clients; letters, digits, "-" and "_".
-	Id      *string
-	Name    *string
 	Enabled *bool
 	// Lower first among the torrent clients; 1 when 0.
 	Priority *int32
-	// The folder downloads go to, "remote:<remote>:<path>"; the remote's
-	// backend must make offline downloads.
-	Folder *string
+	// The folders below the remote's root that movies and series are
+	// downloaded into; "movies" and "series" when unset.
+	MovieFolder  *string
+	SeriesFolder *string
 	// As a download client's tags.
 	Tags []string
 	// Remove imported downloads, and failed ones, from the drive's list of
@@ -3169,62 +3138,61 @@ type OfflineClient_builder struct {
 	RemoveFailedDownloads    *bool
 }
 
-func (b0 OfflineClient_builder) Build() *OfflineClient {
-	m0 := &OfflineClient{}
+func (b0 OfflineDownloads_builder) Build() *OfflineDownloads {
+	m0 := &OfflineDownloads{}
 	b, x := &b0, m0
 	_, _ = b, x
-	if b.Id != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 8)
-		x.xxx_hidden_Id = b.Id
-	}
-	if b.Name != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 8)
-		x.xxx_hidden_Name = b.Name
-	}
 	if b.Enabled != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 8)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 7)
 		x.xxx_hidden_Enabled = *b.Enabled
 	}
 	if b.Priority != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 8)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 7)
 		x.xxx_hidden_Priority = *b.Priority
 	}
-	if b.Folder != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 8)
-		x.xxx_hidden_Folder = b.Folder
+	if b.MovieFolder != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 7)
+		x.xxx_hidden_MovieFolder = b.MovieFolder
+	}
+	if b.SeriesFolder != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 7)
+		x.xxx_hidden_SeriesFolder = b.SeriesFolder
 	}
 	x.xxx_hidden_Tags = b.Tags
 	if b.RemoveCompletedDownloads != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 8)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 7)
 		x.xxx_hidden_RemoveCompletedDownloads = *b.RemoveCompletedDownloads
 	}
 	if b.RemoveFailedDownloads != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 8)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 7)
 		x.xxx_hidden_RemoveFailedDownloads = *b.RemoveFailedDownloads
 	}
 	return m0
 }
 
-type ListOfflineClientsRequest struct {
-	state         protoimpl.MessageState `protogen:"opaque.v1"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+type GetOfflineDownloadsRequest struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Remote      *string                `protobuf:"bytes,1,opt,name=remote"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
 }
 
-func (x *ListOfflineClientsRequest) Reset() {
-	*x = ListOfflineClientsRequest{}
+func (x *GetOfflineDownloadsRequest) Reset() {
+	*x = GetOfflineDownloadsRequest{}
 	mi := &file_mavio_storage_v1_storage_proto_msgTypes[27]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *ListOfflineClientsRequest) String() string {
+func (x *GetOfflineDownloadsRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ListOfflineClientsRequest) ProtoMessage() {}
+func (*GetOfflineDownloadsRequest) ProtoMessage() {}
 
-func (x *ListOfflineClientsRequest) ProtoReflect() protoreflect.Message {
+func (x *GetOfflineDownloadsRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_mavio_storage_v1_storage_proto_msgTypes[27]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -3236,39 +3204,74 @@ func (x *ListOfflineClientsRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-type ListOfflineClientsRequest_builder struct {
-	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
-
+func (x *GetOfflineDownloadsRequest) GetRemote() string {
+	if x != nil {
+		if x.xxx_hidden_Remote != nil {
+			return *x.xxx_hidden_Remote
+		}
+		return ""
+	}
+	return ""
 }
 
-func (b0 ListOfflineClientsRequest_builder) Build() *ListOfflineClientsRequest {
-	m0 := &ListOfflineClientsRequest{}
+func (x *GetOfflineDownloadsRequest) SetRemote(v string) {
+	x.xxx_hidden_Remote = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 1)
+}
+
+func (x *GetOfflineDownloadsRequest) HasRemote() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *GetOfflineDownloadsRequest) ClearRemote() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_Remote = nil
+}
+
+type GetOfflineDownloadsRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Remote *string
+}
+
+func (b0 GetOfflineDownloadsRequest_builder) Build() *GetOfflineDownloadsRequest {
+	m0 := &GetOfflineDownloadsRequest{}
 	b, x := &b0, m0
 	_, _ = b, x
+	if b.Remote != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 1)
+		x.xxx_hidden_Remote = b.Remote
+	}
 	return m0
 }
 
-type ListOfflineClientsResponse struct {
-	state              protoimpl.MessageState `protogen:"opaque.v1"`
-	xxx_hidden_Clients *[]*OfflineClient      `protobuf:"bytes,1,rep,name=clients"`
-	unknownFields      protoimpl.UnknownFields
-	sizeCache          protoimpl.SizeCache
+type GetOfflineDownloadsResponse struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Supported   bool                   `protobuf:"varint,1,opt,name=supported"`
+	xxx_hidden_Settings    *OfflineDownloads      `protobuf:"bytes,2,opt,name=settings"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
 }
 
-func (x *ListOfflineClientsResponse) Reset() {
-	*x = ListOfflineClientsResponse{}
+func (x *GetOfflineDownloadsResponse) Reset() {
+	*x = GetOfflineDownloadsResponse{}
 	mi := &file_mavio_storage_v1_storage_proto_msgTypes[28]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *ListOfflineClientsResponse) String() string {
+func (x *GetOfflineDownloadsResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ListOfflineClientsResponse) ProtoMessage() {}
+func (*GetOfflineDownloadsResponse) ProtoMessage() {}
 
-func (x *ListOfflineClientsResponse) ProtoReflect() protoreflect.Message {
+func (x *GetOfflineDownloadsResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_mavio_storage_v1_storage_proto_msgTypes[28]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -3280,54 +3283,97 @@ func (x *ListOfflineClientsResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-func (x *ListOfflineClientsResponse) GetClients() []*OfflineClient {
+func (x *GetOfflineDownloadsResponse) GetSupported() bool {
 	if x != nil {
-		if x.xxx_hidden_Clients != nil {
-			return *x.xxx_hidden_Clients
-		}
+		return x.xxx_hidden_Supported
+	}
+	return false
+}
+
+func (x *GetOfflineDownloadsResponse) GetSettings() *OfflineDownloads {
+	if x != nil {
+		return x.xxx_hidden_Settings
 	}
 	return nil
 }
 
-func (x *ListOfflineClientsResponse) SetClients(v []*OfflineClient) {
-	x.xxx_hidden_Clients = &v
+func (x *GetOfflineDownloadsResponse) SetSupported(v bool) {
+	x.xxx_hidden_Supported = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 2)
 }
 
-type ListOfflineClientsResponse_builder struct {
+func (x *GetOfflineDownloadsResponse) SetSettings(v *OfflineDownloads) {
+	x.xxx_hidden_Settings = v
+}
+
+func (x *GetOfflineDownloadsResponse) HasSupported() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *GetOfflineDownloadsResponse) HasSettings() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_Settings != nil
+}
+
+func (x *GetOfflineDownloadsResponse) ClearSupported() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_Supported = false
+}
+
+func (x *GetOfflineDownloadsResponse) ClearSettings() {
+	x.xxx_hidden_Settings = nil
+}
+
+type GetOfflineDownloadsResponse_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
-	Clients []*OfflineClient
+	// The remote's backend makes offline downloads.
+	Supported *bool
+	// Unset when the remote has none.
+	Settings *OfflineDownloads
 }
 
-func (b0 ListOfflineClientsResponse_builder) Build() *ListOfflineClientsResponse {
-	m0 := &ListOfflineClientsResponse{}
+func (b0 GetOfflineDownloadsResponse_builder) Build() *GetOfflineDownloadsResponse {
+	m0 := &GetOfflineDownloadsResponse{}
 	b, x := &b0, m0
 	_, _ = b, x
-	x.xxx_hidden_Clients = &b.Clients
+	if b.Supported != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 2)
+		x.xxx_hidden_Supported = *b.Supported
+	}
+	x.xxx_hidden_Settings = b.Settings
 	return m0
 }
 
-type SetOfflineClientsRequest struct {
-	state              protoimpl.MessageState `protogen:"opaque.v1"`
-	xxx_hidden_Clients *[]*OfflineClient      `protobuf:"bytes,1,rep,name=clients"`
-	unknownFields      protoimpl.UnknownFields
-	sizeCache          protoimpl.SizeCache
+type UpdateOfflineDownloadsRequest struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Remote      *string                `protobuf:"bytes,1,opt,name=remote"`
+	xxx_hidden_Settings    *OfflineDownloads      `protobuf:"bytes,2,opt,name=settings"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
 }
 
-func (x *SetOfflineClientsRequest) Reset() {
-	*x = SetOfflineClientsRequest{}
+func (x *UpdateOfflineDownloadsRequest) Reset() {
+	*x = UpdateOfflineDownloadsRequest{}
 	mi := &file_mavio_storage_v1_storage_proto_msgTypes[29]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *SetOfflineClientsRequest) String() string {
+func (x *UpdateOfflineDownloadsRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*SetOfflineClientsRequest) ProtoMessage() {}
+func (*UpdateOfflineDownloadsRequest) ProtoMessage() {}
 
-func (x *SetOfflineClientsRequest) ProtoReflect() protoreflect.Message {
+func (x *UpdateOfflineDownloadsRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_mavio_storage_v1_storage_proto_msgTypes[29]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -3339,53 +3385,96 @@ func (x *SetOfflineClientsRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-func (x *SetOfflineClientsRequest) GetClients() []*OfflineClient {
+func (x *UpdateOfflineDownloadsRequest) GetRemote() string {
 	if x != nil {
-		if x.xxx_hidden_Clients != nil {
-			return *x.xxx_hidden_Clients
+		if x.xxx_hidden_Remote != nil {
+			return *x.xxx_hidden_Remote
 		}
+		return ""
+	}
+	return ""
+}
+
+func (x *UpdateOfflineDownloadsRequest) GetSettings() *OfflineDownloads {
+	if x != nil {
+		return x.xxx_hidden_Settings
 	}
 	return nil
 }
 
-func (x *SetOfflineClientsRequest) SetClients(v []*OfflineClient) {
-	x.xxx_hidden_Clients = &v
+func (x *UpdateOfflineDownloadsRequest) SetRemote(v string) {
+	x.xxx_hidden_Remote = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 2)
 }
 
-type SetOfflineClientsRequest_builder struct {
+func (x *UpdateOfflineDownloadsRequest) SetSettings(v *OfflineDownloads) {
+	x.xxx_hidden_Settings = v
+}
+
+func (x *UpdateOfflineDownloadsRequest) HasRemote() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *UpdateOfflineDownloadsRequest) HasSettings() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_Settings != nil
+}
+
+func (x *UpdateOfflineDownloadsRequest) ClearRemote() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_Remote = nil
+}
+
+func (x *UpdateOfflineDownloadsRequest) ClearSettings() {
+	x.xxx_hidden_Settings = nil
+}
+
+type UpdateOfflineDownloadsRequest_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
-	Clients []*OfflineClient
+	Remote *string
+	// Unset removes them.
+	Settings *OfflineDownloads
 }
 
-func (b0 SetOfflineClientsRequest_builder) Build() *SetOfflineClientsRequest {
-	m0 := &SetOfflineClientsRequest{}
+func (b0 UpdateOfflineDownloadsRequest_builder) Build() *UpdateOfflineDownloadsRequest {
+	m0 := &UpdateOfflineDownloadsRequest{}
 	b, x := &b0, m0
 	_, _ = b, x
-	x.xxx_hidden_Clients = &b.Clients
+	if b.Remote != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 2)
+		x.xxx_hidden_Remote = b.Remote
+	}
+	x.xxx_hidden_Settings = b.Settings
 	return m0
 }
 
-type SetOfflineClientsResponse struct {
-	state         protoimpl.MessageState `protogen:"opaque.v1"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+type UpdateOfflineDownloadsResponse struct {
+	state               protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Settings *OfflineDownloads      `protobuf:"bytes,1,opt,name=settings"`
+	unknownFields       protoimpl.UnknownFields
+	sizeCache           protoimpl.SizeCache
 }
 
-func (x *SetOfflineClientsResponse) Reset() {
-	*x = SetOfflineClientsResponse{}
+func (x *UpdateOfflineDownloadsResponse) Reset() {
+	*x = UpdateOfflineDownloadsResponse{}
 	mi := &file_mavio_storage_v1_storage_proto_msgTypes[30]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *SetOfflineClientsResponse) String() string {
+func (x *UpdateOfflineDownloadsResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*SetOfflineClientsResponse) ProtoMessage() {}
+func (*UpdateOfflineDownloadsResponse) ProtoMessage() {}
 
-func (x *SetOfflineClientsResponse) ProtoReflect() protoreflect.Message {
+func (x *UpdateOfflineDownloadsResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_mavio_storage_v1_storage_proto_msgTypes[30]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -3397,15 +3486,39 @@ func (x *SetOfflineClientsResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-type SetOfflineClientsResponse_builder struct {
-	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
-
+func (x *UpdateOfflineDownloadsResponse) GetSettings() *OfflineDownloads {
+	if x != nil {
+		return x.xxx_hidden_Settings
+	}
+	return nil
 }
 
-func (b0 SetOfflineClientsResponse_builder) Build() *SetOfflineClientsResponse {
-	m0 := &SetOfflineClientsResponse{}
+func (x *UpdateOfflineDownloadsResponse) SetSettings(v *OfflineDownloads) {
+	x.xxx_hidden_Settings = v
+}
+
+func (x *UpdateOfflineDownloadsResponse) HasSettings() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_Settings != nil
+}
+
+func (x *UpdateOfflineDownloadsResponse) ClearSettings() {
+	x.xxx_hidden_Settings = nil
+}
+
+type UpdateOfflineDownloadsResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Settings *OfflineDownloads
+}
+
+func (b0 UpdateOfflineDownloadsResponse_builder) Build() *UpdateOfflineDownloadsResponse {
+	m0 := &UpdateOfflineDownloadsResponse{}
 	b, x := &b0, m0
 	_, _ = b, x
+	x.xxx_hidden_Settings = b.Settings
 	return m0
 }
 
@@ -3524,28 +3637,33 @@ const file_mavio_storage_v1_storage_proto_rawDesc = "" +
 	"\n" +
 	"used_bytes\x18\x02 \x01(\x03R\tusedBytes\x12\x1d\n" +
 	"\n" +
-	"free_bytes\x18\x03 \x01(\x03R\tfreeBytes\"\xe3\x02\n" +
-	"\rOfflineClient\x12,\n" +
-	"\x02id\x18\x01 \x01(\tB\x1c\xbaH\x19\xc8\x01\x01r\x14\x18@2\x10^[A-Za-z0-9_-]+$R\x02id\x12\x1f\n" +
-	"\x04name\x18\x02 \x01(\tB\v\xbaH\b\xc8\x01\x01r\x03\x18\xc8\x01R\x04name\x12\x18\n" +
-	"\aenabled\x18\x03 \x01(\bR\aenabled\x12#\n" +
-	"\bpriority\x18\x04 \x01(\x05B\a\xbaH\x04\x1a\x02(\x00R\bpriority\x12,\n" +
-	"\x06folder\x18\x05 \x01(\tB\x14\xbaH\x11\xc8\x01\x01r\f\x18\x80 :\aremote:R\x06folder\x12 \n" +
-	"\x04tags\x18\x06 \x03(\tB\f\xbaH\t\x92\x01\x06\"\x04r\x02\x18dR\x04tags\x12<\n" +
-	"\x1aremove_completed_downloads\x18\a \x01(\bR\x18removeCompletedDownloads\x126\n" +
-	"\x17remove_failed_downloads\x18\b \x01(\bR\x15removeFailedDownloads\"\x1b\n" +
-	"\x19ListOfflineClientsRequest\"W\n" +
-	"\x1aListOfflineClientsResponse\x129\n" +
-	"\aclients\x18\x01 \x03(\v2\x1f.mavio.storage.v1.OfflineClientR\aclients\"_\n" +
-	"\x18SetOfflineClientsRequest\x12C\n" +
-	"\aclients\x18\x01 \x03(\v2\x1f.mavio.storage.v1.OfflineClientB\b\xbaH\x05\x92\x01\x02\x10dR\aclients\"\x1b\n" +
-	"\x19SetOfflineClientsResponse*w\n" +
+	"free_bytes\x18\x03 \x01(\x03R\tfreeBytes\"\xc5\x02\n" +
+	"\x10OfflineDownloads\x12\x18\n" +
+	"\aenabled\x18\x01 \x01(\bR\aenabled\x12#\n" +
+	"\bpriority\x18\x02 \x01(\x05B\a\xbaH\x04\x1a\x02(\x00R\bpriority\x12+\n" +
+	"\fmovie_folder\x18\x03 \x01(\tB\b\xbaH\x05r\x03\x18\x80 R\vmovieFolder\x12-\n" +
+	"\rseries_folder\x18\x04 \x01(\tB\b\xbaH\x05r\x03\x18\x80 R\fseriesFolder\x12 \n" +
+	"\x04tags\x18\x05 \x03(\tB\f\xbaH\t\x92\x01\x06\"\x04r\x02\x18dR\x04tags\x12<\n" +
+	"\x1aremove_completed_downloads\x18\x06 \x01(\bR\x18removeCompletedDownloads\x126\n" +
+	"\x17remove_failed_downloads\x18\a \x01(\bR\x15removeFailedDownloads\"@\n" +
+	"\x1aGetOfflineDownloadsRequest\x12\"\n" +
+	"\x06remote\x18\x01 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x18@R\x06remote\"{\n" +
+	"\x1bGetOfflineDownloadsResponse\x12\x1c\n" +
+	"\tsupported\x18\x01 \x01(\bR\tsupported\x12>\n" +
+	"\bsettings\x18\x02 \x01(\v2\".mavio.storage.v1.OfflineDownloadsR\bsettings\"\x83\x01\n" +
+	"\x1dUpdateOfflineDownloadsRequest\x12\"\n" +
+	"\x06remote\x18\x01 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x18@R\x06remote\x12>\n" +
+	"\bsettings\x18\x02 \x01(\v2\".mavio.storage.v1.OfflineDownloadsR\bsettings\"`\n" +
+	"\x1eUpdateOfflineDownloadsResponse\x12>\n" +
+	"\bsettings\x18\x01 \x01(\v2\".mavio.storage.v1.OfflineDownloadsR\bsettings*w\n" +
 	"\bDiskKind\x12\x19\n" +
 	"\x15DISK_KIND_UNSPECIFIED\x10\x00\x12\x11\n" +
 	"\rDISK_KIND_SSD\x10\x01\x12\x11\n" +
 	"\rDISK_KIND_HDD\x10\x02\x12\x15\n" +
 	"\x11DISK_KIND_NETWORK\x10\x03\x12\x13\n" +
-	"\x0fDISK_KIND_CLOUD\x10\x042\xbf\t\n" +
+	"\x0fDISK_KIND_CLOUD\x10\x042\xd1\t\n" +
 	"\x0eStorageService\x12Y\n" +
 	"\tListDisks\x12\".mavio.storage.v1.ListDisksRequest\x1a#.mavio.storage.v1.ListDisksResponse\"\x03\x90\x02\x01\x12Y\n" +
 	"\tGetStatus\x12\".mavio.storage.v1.GetStatusRequest\x1a#.mavio.storage.v1.GetStatusResponse\"\x03\x90\x02\x01\x12e\n" +
@@ -3556,49 +3674,49 @@ const file_mavio_storage_v1_storage_proto_rawDesc = "" +
 	"\x0eContinueRemote\x12'.mavio.storage.v1.ContinueRemoteRequest\x1a(.mavio.storage.v1.ContinueRemoteResponse\x12]\n" +
 	"\fDeleteRemote\x12%.mavio.storage.v1.DeleteRemoteRequest\x1a&.mavio.storage.v1.DeleteRemoteResponse\x12_\n" +
 	"\vListFolders\x12$.mavio.storage.v1.ListFoldersRequest\x1a%.mavio.storage.v1.ListFoldersResponse\"\x03\x90\x02\x01\x12h\n" +
-	"\x0eGetRemoteUsage\x12'.mavio.storage.v1.GetRemoteUsageRequest\x1a(.mavio.storage.v1.GetRemoteUsageResponse\"\x03\x90\x02\x01\x12t\n" +
-	"\x12ListOfflineClients\x12+.mavio.storage.v1.ListOfflineClientsRequest\x1a,.mavio.storage.v1.ListOfflineClientsResponse\"\x03\x90\x02\x01\x12l\n" +
-	"\x11SetOfflineClients\x12*.mavio.storage.v1.SetOfflineClientsRequest\x1a+.mavio.storage.v1.SetOfflineClientsResponseB\xcd\x01\n" +
+	"\x0eGetRemoteUsage\x12'.mavio.storage.v1.GetRemoteUsageRequest\x1a(.mavio.storage.v1.GetRemoteUsageResponse\"\x03\x90\x02\x01\x12w\n" +
+	"\x13GetOfflineDownloads\x12,.mavio.storage.v1.GetOfflineDownloadsRequest\x1a-.mavio.storage.v1.GetOfflineDownloadsResponse\"\x03\x90\x02\x01\x12{\n" +
+	"\x16UpdateOfflineDownloads\x12/.mavio.storage.v1.UpdateOfflineDownloadsRequest\x1a0.mavio.storage.v1.UpdateOfflineDownloadsResponseB\xcd\x01\n" +
 	"\x14com.mavio.storage.v1B\fStorageProtoP\x01ZEgithub.com/mavioai/mavio/libs/proto/gen/go/mavio/storage/v1;storagev1\xa2\x02\x03MSX\xaa\x02\x10Mavio.Storage.V1\xca\x02\x10Mavio\\Storage\\V1\xe2\x02\x1cMavio\\Storage\\V1\\GPBMetadata\xea\x02\x12Mavio::Storage::V1b\beditionsp\xe8\a"
 
 var file_mavio_storage_v1_storage_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
 var file_mavio_storage_v1_storage_proto_msgTypes = make([]protoimpl.MessageInfo, 34)
 var file_mavio_storage_v1_storage_proto_goTypes = []any{
-	(DiskKind)(0),                      // 0: mavio.storage.v1.DiskKind
-	(*ListDisksRequest)(nil),           // 1: mavio.storage.v1.ListDisksRequest
-	(*ListDisksResponse)(nil),          // 2: mavio.storage.v1.ListDisksResponse
-	(*Disk)(nil),                       // 3: mavio.storage.v1.Disk
-	(*GetStatusRequest)(nil),           // 4: mavio.storage.v1.GetStatusRequest
-	(*GetStatusResponse)(nil),          // 5: mavio.storage.v1.GetStatusResponse
-	(*ListProvidersRequest)(nil),       // 6: mavio.storage.v1.ListProvidersRequest
-	(*ListProvidersResponse)(nil),      // 7: mavio.storage.v1.ListProvidersResponse
-	(*Provider)(nil),                   // 8: mavio.storage.v1.Provider
-	(*Option)(nil),                     // 9: mavio.storage.v1.Option
-	(*Example)(nil),                    // 10: mavio.storage.v1.Example
-	(*ListRemotesRequest)(nil),         // 11: mavio.storage.v1.ListRemotesRequest
-	(*ListRemotesResponse)(nil),        // 12: mavio.storage.v1.ListRemotesResponse
-	(*Remote)(nil),                     // 13: mavio.storage.v1.Remote
-	(*ConfigQuestion)(nil),             // 14: mavio.storage.v1.ConfigQuestion
-	(*CreateRemoteRequest)(nil),        // 15: mavio.storage.v1.CreateRemoteRequest
-	(*CreateRemoteResponse)(nil),       // 16: mavio.storage.v1.CreateRemoteResponse
-	(*UpdateRemoteRequest)(nil),        // 17: mavio.storage.v1.UpdateRemoteRequest
-	(*UpdateRemoteResponse)(nil),       // 18: mavio.storage.v1.UpdateRemoteResponse
-	(*ContinueRemoteRequest)(nil),      // 19: mavio.storage.v1.ContinueRemoteRequest
-	(*ContinueRemoteResponse)(nil),     // 20: mavio.storage.v1.ContinueRemoteResponse
-	(*DeleteRemoteRequest)(nil),        // 21: mavio.storage.v1.DeleteRemoteRequest
-	(*DeleteRemoteResponse)(nil),       // 22: mavio.storage.v1.DeleteRemoteResponse
-	(*ListFoldersRequest)(nil),         // 23: mavio.storage.v1.ListFoldersRequest
-	(*ListFoldersResponse)(nil),        // 24: mavio.storage.v1.ListFoldersResponse
-	(*GetRemoteUsageRequest)(nil),      // 25: mavio.storage.v1.GetRemoteUsageRequest
-	(*GetRemoteUsageResponse)(nil),     // 26: mavio.storage.v1.GetRemoteUsageResponse
-	(*OfflineClient)(nil),              // 27: mavio.storage.v1.OfflineClient
-	(*ListOfflineClientsRequest)(nil),  // 28: mavio.storage.v1.ListOfflineClientsRequest
-	(*ListOfflineClientsResponse)(nil), // 29: mavio.storage.v1.ListOfflineClientsResponse
-	(*SetOfflineClientsRequest)(nil),   // 30: mavio.storage.v1.SetOfflineClientsRequest
-	(*SetOfflineClientsResponse)(nil),  // 31: mavio.storage.v1.SetOfflineClientsResponse
-	nil,                                // 32: mavio.storage.v1.Remote.ParametersEntry
-	nil,                                // 33: mavio.storage.v1.CreateRemoteRequest.ParametersEntry
-	nil,                                // 34: mavio.storage.v1.UpdateRemoteRequest.ParametersEntry
+	(DiskKind)(0),                          // 0: mavio.storage.v1.DiskKind
+	(*ListDisksRequest)(nil),               // 1: mavio.storage.v1.ListDisksRequest
+	(*ListDisksResponse)(nil),              // 2: mavio.storage.v1.ListDisksResponse
+	(*Disk)(nil),                           // 3: mavio.storage.v1.Disk
+	(*GetStatusRequest)(nil),               // 4: mavio.storage.v1.GetStatusRequest
+	(*GetStatusResponse)(nil),              // 5: mavio.storage.v1.GetStatusResponse
+	(*ListProvidersRequest)(nil),           // 6: mavio.storage.v1.ListProvidersRequest
+	(*ListProvidersResponse)(nil),          // 7: mavio.storage.v1.ListProvidersResponse
+	(*Provider)(nil),                       // 8: mavio.storage.v1.Provider
+	(*Option)(nil),                         // 9: mavio.storage.v1.Option
+	(*Example)(nil),                        // 10: mavio.storage.v1.Example
+	(*ListRemotesRequest)(nil),             // 11: mavio.storage.v1.ListRemotesRequest
+	(*ListRemotesResponse)(nil),            // 12: mavio.storage.v1.ListRemotesResponse
+	(*Remote)(nil),                         // 13: mavio.storage.v1.Remote
+	(*ConfigQuestion)(nil),                 // 14: mavio.storage.v1.ConfigQuestion
+	(*CreateRemoteRequest)(nil),            // 15: mavio.storage.v1.CreateRemoteRequest
+	(*CreateRemoteResponse)(nil),           // 16: mavio.storage.v1.CreateRemoteResponse
+	(*UpdateRemoteRequest)(nil),            // 17: mavio.storage.v1.UpdateRemoteRequest
+	(*UpdateRemoteResponse)(nil),           // 18: mavio.storage.v1.UpdateRemoteResponse
+	(*ContinueRemoteRequest)(nil),          // 19: mavio.storage.v1.ContinueRemoteRequest
+	(*ContinueRemoteResponse)(nil),         // 20: mavio.storage.v1.ContinueRemoteResponse
+	(*DeleteRemoteRequest)(nil),            // 21: mavio.storage.v1.DeleteRemoteRequest
+	(*DeleteRemoteResponse)(nil),           // 22: mavio.storage.v1.DeleteRemoteResponse
+	(*ListFoldersRequest)(nil),             // 23: mavio.storage.v1.ListFoldersRequest
+	(*ListFoldersResponse)(nil),            // 24: mavio.storage.v1.ListFoldersResponse
+	(*GetRemoteUsageRequest)(nil),          // 25: mavio.storage.v1.GetRemoteUsageRequest
+	(*GetRemoteUsageResponse)(nil),         // 26: mavio.storage.v1.GetRemoteUsageResponse
+	(*OfflineDownloads)(nil),               // 27: mavio.storage.v1.OfflineDownloads
+	(*GetOfflineDownloadsRequest)(nil),     // 28: mavio.storage.v1.GetOfflineDownloadsRequest
+	(*GetOfflineDownloadsResponse)(nil),    // 29: mavio.storage.v1.GetOfflineDownloadsResponse
+	(*UpdateOfflineDownloadsRequest)(nil),  // 30: mavio.storage.v1.UpdateOfflineDownloadsRequest
+	(*UpdateOfflineDownloadsResponse)(nil), // 31: mavio.storage.v1.UpdateOfflineDownloadsResponse
+	nil,                                    // 32: mavio.storage.v1.Remote.ParametersEntry
+	nil,                                    // 33: mavio.storage.v1.CreateRemoteRequest.ParametersEntry
+	nil,                                    // 34: mavio.storage.v1.UpdateRemoteRequest.ParametersEntry
 }
 var file_mavio_storage_v1_storage_proto_depIdxs = []int32{
 	3,  // 0: mavio.storage.v1.ListDisksResponse.disks:type_name -> mavio.storage.v1.Disk
@@ -3617,37 +3735,38 @@ var file_mavio_storage_v1_storage_proto_depIdxs = []int32{
 	14, // 13: mavio.storage.v1.UpdateRemoteResponse.question:type_name -> mavio.storage.v1.ConfigQuestion
 	13, // 14: mavio.storage.v1.ContinueRemoteResponse.remote:type_name -> mavio.storage.v1.Remote
 	14, // 15: mavio.storage.v1.ContinueRemoteResponse.question:type_name -> mavio.storage.v1.ConfigQuestion
-	27, // 16: mavio.storage.v1.ListOfflineClientsResponse.clients:type_name -> mavio.storage.v1.OfflineClient
-	27, // 17: mavio.storage.v1.SetOfflineClientsRequest.clients:type_name -> mavio.storage.v1.OfflineClient
-	1,  // 18: mavio.storage.v1.StorageService.ListDisks:input_type -> mavio.storage.v1.ListDisksRequest
-	4,  // 19: mavio.storage.v1.StorageService.GetStatus:input_type -> mavio.storage.v1.GetStatusRequest
-	6,  // 20: mavio.storage.v1.StorageService.ListProviders:input_type -> mavio.storage.v1.ListProvidersRequest
-	11, // 21: mavio.storage.v1.StorageService.ListRemotes:input_type -> mavio.storage.v1.ListRemotesRequest
-	15, // 22: mavio.storage.v1.StorageService.CreateRemote:input_type -> mavio.storage.v1.CreateRemoteRequest
-	17, // 23: mavio.storage.v1.StorageService.UpdateRemote:input_type -> mavio.storage.v1.UpdateRemoteRequest
-	19, // 24: mavio.storage.v1.StorageService.ContinueRemote:input_type -> mavio.storage.v1.ContinueRemoteRequest
-	21, // 25: mavio.storage.v1.StorageService.DeleteRemote:input_type -> mavio.storage.v1.DeleteRemoteRequest
-	23, // 26: mavio.storage.v1.StorageService.ListFolders:input_type -> mavio.storage.v1.ListFoldersRequest
-	25, // 27: mavio.storage.v1.StorageService.GetRemoteUsage:input_type -> mavio.storage.v1.GetRemoteUsageRequest
-	28, // 28: mavio.storage.v1.StorageService.ListOfflineClients:input_type -> mavio.storage.v1.ListOfflineClientsRequest
-	30, // 29: mavio.storage.v1.StorageService.SetOfflineClients:input_type -> mavio.storage.v1.SetOfflineClientsRequest
-	2,  // 30: mavio.storage.v1.StorageService.ListDisks:output_type -> mavio.storage.v1.ListDisksResponse
-	5,  // 31: mavio.storage.v1.StorageService.GetStatus:output_type -> mavio.storage.v1.GetStatusResponse
-	7,  // 32: mavio.storage.v1.StorageService.ListProviders:output_type -> mavio.storage.v1.ListProvidersResponse
-	12, // 33: mavio.storage.v1.StorageService.ListRemotes:output_type -> mavio.storage.v1.ListRemotesResponse
-	16, // 34: mavio.storage.v1.StorageService.CreateRemote:output_type -> mavio.storage.v1.CreateRemoteResponse
-	18, // 35: mavio.storage.v1.StorageService.UpdateRemote:output_type -> mavio.storage.v1.UpdateRemoteResponse
-	20, // 36: mavio.storage.v1.StorageService.ContinueRemote:output_type -> mavio.storage.v1.ContinueRemoteResponse
-	22, // 37: mavio.storage.v1.StorageService.DeleteRemote:output_type -> mavio.storage.v1.DeleteRemoteResponse
-	24, // 38: mavio.storage.v1.StorageService.ListFolders:output_type -> mavio.storage.v1.ListFoldersResponse
-	26, // 39: mavio.storage.v1.StorageService.GetRemoteUsage:output_type -> mavio.storage.v1.GetRemoteUsageResponse
-	29, // 40: mavio.storage.v1.StorageService.ListOfflineClients:output_type -> mavio.storage.v1.ListOfflineClientsResponse
-	31, // 41: mavio.storage.v1.StorageService.SetOfflineClients:output_type -> mavio.storage.v1.SetOfflineClientsResponse
-	30, // [30:42] is the sub-list for method output_type
-	18, // [18:30] is the sub-list for method input_type
-	18, // [18:18] is the sub-list for extension type_name
-	18, // [18:18] is the sub-list for extension extendee
-	0,  // [0:18] is the sub-list for field type_name
+	27, // 16: mavio.storage.v1.GetOfflineDownloadsResponse.settings:type_name -> mavio.storage.v1.OfflineDownloads
+	27, // 17: mavio.storage.v1.UpdateOfflineDownloadsRequest.settings:type_name -> mavio.storage.v1.OfflineDownloads
+	27, // 18: mavio.storage.v1.UpdateOfflineDownloadsResponse.settings:type_name -> mavio.storage.v1.OfflineDownloads
+	1,  // 19: mavio.storage.v1.StorageService.ListDisks:input_type -> mavio.storage.v1.ListDisksRequest
+	4,  // 20: mavio.storage.v1.StorageService.GetStatus:input_type -> mavio.storage.v1.GetStatusRequest
+	6,  // 21: mavio.storage.v1.StorageService.ListProviders:input_type -> mavio.storage.v1.ListProvidersRequest
+	11, // 22: mavio.storage.v1.StorageService.ListRemotes:input_type -> mavio.storage.v1.ListRemotesRequest
+	15, // 23: mavio.storage.v1.StorageService.CreateRemote:input_type -> mavio.storage.v1.CreateRemoteRequest
+	17, // 24: mavio.storage.v1.StorageService.UpdateRemote:input_type -> mavio.storage.v1.UpdateRemoteRequest
+	19, // 25: mavio.storage.v1.StorageService.ContinueRemote:input_type -> mavio.storage.v1.ContinueRemoteRequest
+	21, // 26: mavio.storage.v1.StorageService.DeleteRemote:input_type -> mavio.storage.v1.DeleteRemoteRequest
+	23, // 27: mavio.storage.v1.StorageService.ListFolders:input_type -> mavio.storage.v1.ListFoldersRequest
+	25, // 28: mavio.storage.v1.StorageService.GetRemoteUsage:input_type -> mavio.storage.v1.GetRemoteUsageRequest
+	28, // 29: mavio.storage.v1.StorageService.GetOfflineDownloads:input_type -> mavio.storage.v1.GetOfflineDownloadsRequest
+	30, // 30: mavio.storage.v1.StorageService.UpdateOfflineDownloads:input_type -> mavio.storage.v1.UpdateOfflineDownloadsRequest
+	2,  // 31: mavio.storage.v1.StorageService.ListDisks:output_type -> mavio.storage.v1.ListDisksResponse
+	5,  // 32: mavio.storage.v1.StorageService.GetStatus:output_type -> mavio.storage.v1.GetStatusResponse
+	7,  // 33: mavio.storage.v1.StorageService.ListProviders:output_type -> mavio.storage.v1.ListProvidersResponse
+	12, // 34: mavio.storage.v1.StorageService.ListRemotes:output_type -> mavio.storage.v1.ListRemotesResponse
+	16, // 35: mavio.storage.v1.StorageService.CreateRemote:output_type -> mavio.storage.v1.CreateRemoteResponse
+	18, // 36: mavio.storage.v1.StorageService.UpdateRemote:output_type -> mavio.storage.v1.UpdateRemoteResponse
+	20, // 37: mavio.storage.v1.StorageService.ContinueRemote:output_type -> mavio.storage.v1.ContinueRemoteResponse
+	22, // 38: mavio.storage.v1.StorageService.DeleteRemote:output_type -> mavio.storage.v1.DeleteRemoteResponse
+	24, // 39: mavio.storage.v1.StorageService.ListFolders:output_type -> mavio.storage.v1.ListFoldersResponse
+	26, // 40: mavio.storage.v1.StorageService.GetRemoteUsage:output_type -> mavio.storage.v1.GetRemoteUsageResponse
+	29, // 41: mavio.storage.v1.StorageService.GetOfflineDownloads:output_type -> mavio.storage.v1.GetOfflineDownloadsResponse
+	31, // 42: mavio.storage.v1.StorageService.UpdateOfflineDownloads:output_type -> mavio.storage.v1.UpdateOfflineDownloadsResponse
+	31, // [31:43] is the sub-list for method output_type
+	19, // [19:31] is the sub-list for method input_type
+	19, // [19:19] is the sub-list for extension type_name
+	19, // [19:19] is the sub-list for extension extendee
+	0,  // [0:19] is the sub-list for field type_name
 }
 
 func init() { file_mavio_storage_v1_storage_proto_init() }

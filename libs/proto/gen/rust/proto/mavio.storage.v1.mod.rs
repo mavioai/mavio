@@ -126,22 +126,22 @@ pub use self::__buffa::view::GetRemoteUsageResponseView;
 #[doc(inline)]
 pub use self::__buffa::view::GetRemoteUsageResponseOwnedView;
 #[doc(inline)]
-pub use self::__buffa::view::OfflineClientView;
+pub use self::__buffa::view::OfflineDownloadsView;
 #[doc(inline)]
-pub use self::__buffa::view::OfflineClientOwnedView;
+pub use self::__buffa::view::OfflineDownloadsOwnedView;
 #[doc(inline)]
-pub use self::__buffa::view::ListOfflineClientsRequestView;
+pub use self::__buffa::view::GetOfflineDownloadsRequestView;
 #[doc(inline)]
-pub use self::__buffa::view::ListOfflineClientsRequestOwnedView;
+pub use self::__buffa::view::GetOfflineDownloadsRequestOwnedView;
 #[doc(inline)]
-pub use self::__buffa::view::ListOfflineClientsResponseView;
+pub use self::__buffa::view::GetOfflineDownloadsResponseView;
 #[doc(inline)]
-pub use self::__buffa::view::ListOfflineClientsResponseOwnedView;
+pub use self::__buffa::view::GetOfflineDownloadsResponseOwnedView;
 #[doc(inline)]
-pub use self::__buffa::view::SetOfflineClientsRequestView;
+pub use self::__buffa::view::UpdateOfflineDownloadsRequestView;
 #[doc(inline)]
-pub use self::__buffa::view::SetOfflineClientsRequestOwnedView;
+pub use self::__buffa::view::UpdateOfflineDownloadsRequestOwnedView;
 #[doc(inline)]
-pub use self::__buffa::view::SetOfflineClientsResponseView;
+pub use self::__buffa::view::UpdateOfflineDownloadsResponseView;
 #[doc(inline)]
-pub use self::__buffa::view::SetOfflineClientsResponseOwnedView;
+pub use self::__buffa::view::UpdateOfflineDownloadsResponseOwnedView;

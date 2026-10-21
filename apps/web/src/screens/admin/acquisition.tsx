@@ -61,6 +61,9 @@ const privacies: Record<IndexerPrivacy, () => string> = {
   [IndexerPrivacy.PRIVATE]: () => t("acquisition.private"),
 };
 
+/** The provider of remotes' offline downloads, built into the server. */
+const offlineProvider = "dev.mavio.rclone-offline";
+
 /** Why an indexer or client is left out: its failure, until when. */
 function failureOf(x: { enabled: boolean; failure: string; disabledUntil?: Timestamp }) {
   if (!x.enabled) return t("acquisition.off");
@@ -107,11 +110,12 @@ function AcquisitionList({ server }: { server: ServerEntry }) {
         {(clients.data?.clients ?? []).map((x) => (
           <PageLink
             key={`${x.pluginId}/${x.id}`}
-            search={{ plugin: x.pluginId }}
+            // A remote's offline downloads are set on the remote's page.
+            {...(x.pluginId === offlineProvider ? { section: "storage", search: { remote: x.id } } : { search: { plugin: x.pluginId } })}
             icon="downloads"
             color={!x.enabled ? "#8E8E93" : failureOf(x) ? "#FF9500" : "#34C759"}
             label={x.name}
-            detail={[pluginName(x.pluginId), protocols[x.protocol](), t("acquisition.priority", { priority: x.priority }), failureOf(x)].filter(Boolean).join(" · ")}
+            detail={[x.pluginId === offlineProvider ? t("storage.offline") : pluginName(x.pluginId), protocols[x.protocol](), t("acquisition.priority", { priority: x.priority }), failureOf(x)].filter(Boolean).join(" · ")}
           />
         ))}
         {failedClients.map(([plugin, error]) => (

@@ -19814,6 +19814,42 @@
         "title": "Example",
         "additionalProperties": false
       },
+      "mavio.storage.v1.GetOfflineDownloadsRequest": {
+        "type": "object",
+        "properties": {
+          "remote": {
+            "type": "string",
+            "title": "remote",
+            "maxLength": 64
+          }
+        },
+        "title": "GetOfflineDownloadsRequest",
+        "required": [
+          "remote"
+        ],
+        "additionalProperties": false
+      },
+      "mavio.storage.v1.GetOfflineDownloadsResponse": {
+        "type": "object",
+        "properties": {
+          "supported": {
+            "type": "boolean",
+            "title": "supported",
+            "description": "The remote's backend makes offline downloads."
+          },
+          "settings": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.storage.v1.OfflineDownloads"
+              }
+            ],
+            "title": "settings",
+            "description": "Unset when the remote has none."
+          }
+        },
+        "title": "GetOfflineDownloadsResponse",
+        "additionalProperties": false
+      },
       "mavio.storage.v1.GetRemoteUsageRequest": {
         "type": "object",
         "properties": {
@@ -19934,25 +19970,6 @@
         "title": "ListFoldersResponse",
         "additionalProperties": false
       },
-      "mavio.storage.v1.ListOfflineClientsRequest": {
-        "type": "object",
-        "title": "ListOfflineClientsRequest",
-        "additionalProperties": false
-      },
-      "mavio.storage.v1.ListOfflineClientsResponse": {
-        "type": "object",
-        "properties": {
-          "clients": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/mavio.storage.v1.OfflineClient"
-            },
-            "title": "clients"
-          }
-        },
-        "title": "ListOfflineClientsResponse",
-        "additionalProperties": false
-      },
       "mavio.storage.v1.ListProvidersRequest": {
         "type": "object",
         "title": "ListProvidersRequest",
@@ -19991,21 +20008,9 @@
         "title": "ListRemotesResponse",
         "additionalProperties": false
       },
-      "mavio.storage.v1.OfflineClient": {
+      "mavio.storage.v1.OfflineDownloads": {
         "type": "object",
         "properties": {
-          "id": {
-            "type": "string",
-            "title": "id",
-            "maxLength": 64,
-            "pattern": "^[A-Za-z0-9_-]+$",
-            "description": "Stable among the clients; letters, digits, \"-\" and \"_\"."
-          },
-          "name": {
-            "type": "string",
-            "title": "name",
-            "maxLength": 200
-          },
           "enabled": {
             "type": "boolean",
             "title": "enabled"
@@ -20017,11 +20022,16 @@
             "format": "int32",
             "description": "Lower first among the torrent clients; 1 when 0."
           },
-          "folder": {
+          "movieFolder": {
             "type": "string",
-            "title": "folder",
+            "title": "movie_folder",
             "maxLength": 4096,
-            "description": "The folder downloads go to, \"remote:\u003cremote\u003e:\u003cpath\u003e\"; the remote's\n backend must make offline downloads.\nstring.prefix = \"remote:\"\n"
+            "description": "The folders below the remote's root that movies and series are\n downloaded into; \"movies\" and \"series\" when unset."
+          },
+          "seriesFolder": {
+            "type": "string",
+            "title": "series_folder",
+            "maxLength": 4096
           },
           "tags": {
             "type": "array",
@@ -20042,14 +20052,9 @@
             "title": "remove_failed_downloads"
           }
         },
-        "title": "OfflineClient",
-        "required": [
-          "id",
-          "name",
-          "folder"
-        ],
+        "title": "OfflineDownloads",
         "additionalProperties": false,
-        "description": "OfflineClient is a download client of a cloud drive's offline downloads:\n the drive downloads magnet links itself into a folder of its remote,\n movies into \"movies\" and series into \"series\" below it, and imports move\n the files within the remote."
+        "description": "OfflineDownloads are the settings of a remote's offline downloads: its\n cloud drive downloads magnet links itself into folders of the remote,\n and imports move the files within the remote."
       },
       "mavio.storage.v1.Option": {
         "type": "object",
@@ -20160,24 +20165,43 @@
         "additionalProperties": false,
         "description": "Remote is a configured remote."
       },
-      "mavio.storage.v1.SetOfflineClientsRequest": {
+      "mavio.storage.v1.UpdateOfflineDownloadsRequest": {
         "type": "object",
         "properties": {
-          "clients": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/mavio.storage.v1.OfflineClient"
-            },
-            "title": "clients",
-            "maxItems": 100
+          "remote": {
+            "type": "string",
+            "title": "remote",
+            "maxLength": 64
+          },
+          "settings": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.storage.v1.OfflineDownloads"
+              }
+            ],
+            "title": "settings",
+            "description": "Unset removes them."
           }
         },
-        "title": "SetOfflineClientsRequest",
+        "title": "UpdateOfflineDownloadsRequest",
+        "required": [
+          "remote"
+        ],
         "additionalProperties": false
       },
-      "mavio.storage.v1.SetOfflineClientsResponse": {
+      "mavio.storage.v1.UpdateOfflineDownloadsResponse": {
         "type": "object",
-        "title": "SetOfflineClientsResponse",
+        "properties": {
+          "settings": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.storage.v1.OfflineDownloads"
+              }
+            ],
+            "title": "settings"
+          }
+        },
+        "title": "UpdateOfflineDownloadsResponse",
         "additionalProperties": false
       },
       "mavio.storage.v1.UpdateRemoteRequest": {
@@ -37758,6 +37782,68 @@
         }
       }
     },
+    "/mavio.storage.v1.StorageService/GetOfflineDownloads": {
+      "post": {
+        "tags": [
+          "StorageService"
+        ],
+        "summary": "GetOfflineDownloads",
+        "description": "GetOfflineDownloads tells of a remote's offline downloads: whether its\n backend makes them, and their settings. A remote's offline downloads\n are a download client of acquisition named after the remote, which\n sends it magnet links.",
+        "operationId": "mavio.storage.v1.StorageService.GetOfflineDownloads",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.storage.v1.GetOfflineDownloadsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.storage.v1.GetOfflineDownloadsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/mavio.storage.v1.StorageService/GetRemoteUsage": {
       "post": {
         "tags": [
@@ -38006,68 +38092,6 @@
         }
       }
     },
-    "/mavio.storage.v1.StorageService/ListOfflineClients": {
-      "post": {
-        "tags": [
-          "StorageService"
-        ],
-        "summary": "ListOfflineClients",
-        "description": "ListOfflineClients lists the download clients of cloud drives' offline\n downloads, which acquisition sends magnet links to.",
-        "operationId": "mavio.storage.v1.StorageService.ListOfflineClients",
-        "parameters": [
-          {
-            "name": "Connect-Protocol-Version",
-            "in": "header",
-            "description": "Define the version of the Connect protocol",
-            "schema": {
-              "$ref": "#/components/schemas/connect-protocol-version"
-            },
-            "example": 1
-          },
-          {
-            "name": "Connect-Timeout-Ms",
-            "in": "header",
-            "description": "Define the timeout, in ms",
-            "schema": {
-              "$ref": "#/components/schemas/connect-timeout-header"
-            },
-            "example": 1000
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/mavio.storage.v1.ListOfflineClientsRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "default": {
-            "description": "Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/connect.error"
-                }
-              }
-            }
-          },
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/mavio.storage.v1.ListOfflineClientsResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/mavio.storage.v1.StorageService/ListProviders": {
       "post": {
         "tags": [
@@ -38192,14 +38216,14 @@
         }
       }
     },
-    "/mavio.storage.v1.StorageService/SetOfflineClients": {
+    "/mavio.storage.v1.StorageService/UpdateOfflineDownloads": {
       "post": {
         "tags": [
           "StorageService"
         ],
-        "summary": "SetOfflineClients",
-        "description": "SetOfflineClients replaces the download clients of offline downloads.",
-        "operationId": "mavio.storage.v1.StorageService.SetOfflineClients",
+        "summary": "UpdateOfflineDownloads",
+        "description": "UpdateOfflineDownloads replaces a remote's offline download settings,\n or removes them. Removing the remote removes them too.",
+        "operationId": "mavio.storage.v1.StorageService.UpdateOfflineDownloads",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -38224,7 +38248,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.storage.v1.SetOfflineClientsRequest"
+                "$ref": "#/components/schemas/mavio.storage.v1.UpdateOfflineDownloadsRequest"
               }
             }
           },
@@ -38246,7 +38270,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.storage.v1.SetOfflineClientsResponse"
+                  "$ref": "#/components/schemas/mavio.storage.v1.UpdateOfflineDownloadsResponse"
                 }
               }
             }

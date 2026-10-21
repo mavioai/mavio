@@ -1048,6 +1048,12 @@ export type MessageKey =
   | 'storage.removeFailed'
   | 'storage.removeOffline'
   | 'storage.removeOfflineConfirm'
+  | 'storage.offlineRemoteFooter'
+  | 'storage.offlineSetUp'
+  | 'storage.offlineMovieFolder'
+  | 'storage.offlineSeriesFolder'
+  | 'storage.offlineFolderBelow'
+  | 'storage.offlineStop'
   | 'acquisition.message'
   | 'acquisition.indexers'
   | 'acquisition.indexersFooter'
@@ -3120,6 +3126,12 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "storage.removeFailed": "Remove failed downloads",
     "storage.removeOffline": "Remove",
     "storage.removeOfflineConfirm": "Remove for Good",
+    "storage.offlineRemoteFooter": "The cloud drive downloads magnet links itself, as a download client of acquisition named after the remote; imports move the files within the remote.",
+    "storage.offlineSetUp": "Use for Offline Downloads",
+    "storage.offlineMovieFolder": "Movie Folder",
+    "storage.offlineSeriesFolder": "Series Folder",
+    "storage.offlineFolderBelow": "Below the remote's root",
+    "storage.offlineStop": "Stop Offline Downloads",
     "acquisition.message": "What decides which releases the server grabs and where they come from.",
     "acquisition.indexers": "Indexers",
     "acquisition.indexersFooter": "Indexers are configured in their plugins.",
@@ -5190,6 +5202,12 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "storage.removeFailed": "移除失败的下载",
     "storage.removeOffline": "移除",
     "storage.removeOfflineConfirm": "确认移除",
+    "storage.offlineRemoteFooter": "云盘自行下载磁力链接，作为以远端命名的获取下载客户端；导入时在远端内移动文件。",
+    "storage.offlineSetUp": "用于离线下载",
+    "storage.offlineMovieFolder": "电影文件夹",
+    "storage.offlineSeriesFolder": "剧集文件夹",
+    "storage.offlineFolderBelow": "远端根目录下的路径",
+    "storage.offlineStop": "停止离线下载",
     "acquisition.message": "决定服务器抓取哪些发布以及从哪里获取。",
     "acquisition.indexers": "索引器",
     "acquisition.indexersFooter": "索引器在各自的插件中配置。",

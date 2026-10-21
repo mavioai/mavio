@@ -1,8 +1,8 @@
 // A server's storage (docs/clients.md §6.3.10): the disks of its computer,
 // the rclone rcd it runs or reaches, the kinds of remotes and their settings, the remotes configured,
 // with the questions their configuration asks, their folders, and the
-// download clients of cloud drives' offline downloads.
-import { type OfflineClient, StorageService } from "@mavio/proto/mavio/storage/v1/storage_pb";
+// offline downloads of cloud drives' remotes.
+import { type OfflineDownloads, StorageService } from "@mavio/proto/mavio/storage/v1/storage_pb";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { serverKey, useServersStore } from "./hooks.ts";
@@ -90,21 +90,26 @@ export function useRemoteActions(server: ServerEntry) {
   };
 }
 
-/** The download clients of offline downloads. */
-export function useOfflineClients(server: ServerEntry) {
+/** A remote's offline downloads: whether its backend makes them, and their settings. */
+export function useOfflineDownloads(server: ServerEntry, remote: string, enabled = true) {
   const servers = useServersStore();
   return useQuery({
-    queryKey: serverKey(server.id, "storage", "offline"),
-    queryFn: async () => (await servers.client(StorageService, server).listOfflineClients({})).clients,
+    queryKey: serverKey(server.id, "storage", "offline", remote),
+    queryFn: () => servers.client(StorageService, server).getOfflineDownloads({ remote }),
+    enabled,
   });
 }
 
-/** Replaces the download clients of offline downloads. */
-export function useSetOfflineClients(server: ServerEntry) {
+/** Replaces a remote's offline download settings; undefined removes them. */
+export function useUpdateOfflineDownloads(server: ServerEntry, remote: string) {
   const servers = useServersStore();
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (clients: OfflineClient[]) => servers.client(StorageService, server).setOfflineClients({ clients }),
-    onSettled: () => qc.invalidateQueries({ queryKey: serverKey(server.id, "storage", "offline") }),
+    mutationFn: (settings: OfflineDownloads | undefined) => servers.client(StorageService, server).updateOfflineDownloads({ remote, settings }),
+    onSettled: () =>
+      Promise.all([
+        qc.invalidateQueries({ queryKey: serverKey(server.id, "storage", "offline", remote) }),
+        qc.invalidateQueries({ queryKey: serverKey(server.id, "acquisition", "clients") }),
+      ]),
   });
 }

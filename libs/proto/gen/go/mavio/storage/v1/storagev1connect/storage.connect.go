@@ -63,12 +63,12 @@ const (
 	// StorageServiceGetRemoteUsageProcedure is the fully-qualified name of the StorageService's
 	// GetRemoteUsage RPC.
 	StorageServiceGetRemoteUsageProcedure = "/mavio.storage.v1.StorageService/GetRemoteUsage"
-	// StorageServiceListOfflineClientsProcedure is the fully-qualified name of the StorageService's
-	// ListOfflineClients RPC.
-	StorageServiceListOfflineClientsProcedure = "/mavio.storage.v1.StorageService/ListOfflineClients"
-	// StorageServiceSetOfflineClientsProcedure is the fully-qualified name of the StorageService's
-	// SetOfflineClients RPC.
-	StorageServiceSetOfflineClientsProcedure = "/mavio.storage.v1.StorageService/SetOfflineClients"
+	// StorageServiceGetOfflineDownloadsProcedure is the fully-qualified name of the StorageService's
+	// GetOfflineDownloads RPC.
+	StorageServiceGetOfflineDownloadsProcedure = "/mavio.storage.v1.StorageService/GetOfflineDownloads"
+	// StorageServiceUpdateOfflineDownloadsProcedure is the fully-qualified name of the StorageService's
+	// UpdateOfflineDownloads RPC.
+	StorageServiceUpdateOfflineDownloadsProcedure = "/mavio.storage.v1.StorageService/UpdateOfflineDownloads"
 )
 
 // StorageServiceClient is a client for the mavio.storage.v1.StorageService service.
@@ -100,11 +100,14 @@ type StorageServiceClient interface {
 	// GetRemoteUsage tells how much of a remote is used, as its backend tells;
 	// remotes whose backend does not fail with UNIMPLEMENTED.
 	GetRemoteUsage(context.Context, *v1.GetRemoteUsageRequest) (*v1.GetRemoteUsageResponse, error)
-	// ListOfflineClients lists the download clients of cloud drives' offline
-	// downloads, which acquisition sends magnet links to.
-	ListOfflineClients(context.Context, *v1.ListOfflineClientsRequest) (*v1.ListOfflineClientsResponse, error)
-	// SetOfflineClients replaces the download clients of offline downloads.
-	SetOfflineClients(context.Context, *v1.SetOfflineClientsRequest) (*v1.SetOfflineClientsResponse, error)
+	// GetOfflineDownloads tells of a remote's offline downloads: whether its
+	// backend makes them, and their settings. A remote's offline downloads
+	// are a download client of acquisition named after the remote, which
+	// sends it magnet links.
+	GetOfflineDownloads(context.Context, *v1.GetOfflineDownloadsRequest) (*v1.GetOfflineDownloadsResponse, error)
+	// UpdateOfflineDownloads replaces a remote's offline download settings,
+	// or removes them. Removing the remote removes them too.
+	UpdateOfflineDownloads(context.Context, *v1.UpdateOfflineDownloadsRequest) (*v1.UpdateOfflineDownloadsResponse, error)
 }
 
 // NewStorageServiceClient constructs a client for the mavio.storage.v1.StorageService service. By
@@ -184,17 +187,17 @@ func NewStorageServiceClient(httpClient connect.HTTPClient, baseURL string, opts
 			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
 			connect.WithClientOptions(opts...),
 		),
-		listOfflineClients: connect.NewClient[v1.ListOfflineClientsRequest, v1.ListOfflineClientsResponse](
+		getOfflineDownloads: connect.NewClient[v1.GetOfflineDownloadsRequest, v1.GetOfflineDownloadsResponse](
 			httpClient,
-			baseURL+StorageServiceListOfflineClientsProcedure,
-			connect.WithSchema(storageServiceMethods.ByName("ListOfflineClients")),
+			baseURL+StorageServiceGetOfflineDownloadsProcedure,
+			connect.WithSchema(storageServiceMethods.ByName("GetOfflineDownloads")),
 			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
 			connect.WithClientOptions(opts...),
 		),
-		setOfflineClients: connect.NewClient[v1.SetOfflineClientsRequest, v1.SetOfflineClientsResponse](
+		updateOfflineDownloads: connect.NewClient[v1.UpdateOfflineDownloadsRequest, v1.UpdateOfflineDownloadsResponse](
 			httpClient,
-			baseURL+StorageServiceSetOfflineClientsProcedure,
-			connect.WithSchema(storageServiceMethods.ByName("SetOfflineClients")),
+			baseURL+StorageServiceUpdateOfflineDownloadsProcedure,
+			connect.WithSchema(storageServiceMethods.ByName("UpdateOfflineDownloads")),
 			connect.WithClientOptions(opts...),
 		),
 	}
@@ -202,18 +205,18 @@ func NewStorageServiceClient(httpClient connect.HTTPClient, baseURL string, opts
 
 // storageServiceClient implements StorageServiceClient.
 type storageServiceClient struct {
-	listDisks          *connect.Client[v1.ListDisksRequest, v1.ListDisksResponse]
-	getStatus          *connect.Client[v1.GetStatusRequest, v1.GetStatusResponse]
-	listProviders      *connect.Client[v1.ListProvidersRequest, v1.ListProvidersResponse]
-	listRemotes        *connect.Client[v1.ListRemotesRequest, v1.ListRemotesResponse]
-	createRemote       *connect.Client[v1.CreateRemoteRequest, v1.CreateRemoteResponse]
-	updateRemote       *connect.Client[v1.UpdateRemoteRequest, v1.UpdateRemoteResponse]
-	continueRemote     *connect.Client[v1.ContinueRemoteRequest, v1.ContinueRemoteResponse]
-	deleteRemote       *connect.Client[v1.DeleteRemoteRequest, v1.DeleteRemoteResponse]
-	listFolders        *connect.Client[v1.ListFoldersRequest, v1.ListFoldersResponse]
-	getRemoteUsage     *connect.Client[v1.GetRemoteUsageRequest, v1.GetRemoteUsageResponse]
-	listOfflineClients *connect.Client[v1.ListOfflineClientsRequest, v1.ListOfflineClientsResponse]
-	setOfflineClients  *connect.Client[v1.SetOfflineClientsRequest, v1.SetOfflineClientsResponse]
+	listDisks              *connect.Client[v1.ListDisksRequest, v1.ListDisksResponse]
+	getStatus              *connect.Client[v1.GetStatusRequest, v1.GetStatusResponse]
+	listProviders          *connect.Client[v1.ListProvidersRequest, v1.ListProvidersResponse]
+	listRemotes            *connect.Client[v1.ListRemotesRequest, v1.ListRemotesResponse]
+	createRemote           *connect.Client[v1.CreateRemoteRequest, v1.CreateRemoteResponse]
+	updateRemote           *connect.Client[v1.UpdateRemoteRequest, v1.UpdateRemoteResponse]
+	continueRemote         *connect.Client[v1.ContinueRemoteRequest, v1.ContinueRemoteResponse]
+	deleteRemote           *connect.Client[v1.DeleteRemoteRequest, v1.DeleteRemoteResponse]
+	listFolders            *connect.Client[v1.ListFoldersRequest, v1.ListFoldersResponse]
+	getRemoteUsage         *connect.Client[v1.GetRemoteUsageRequest, v1.GetRemoteUsageResponse]
+	getOfflineDownloads    *connect.Client[v1.GetOfflineDownloadsRequest, v1.GetOfflineDownloadsResponse]
+	updateOfflineDownloads *connect.Client[v1.UpdateOfflineDownloadsRequest, v1.UpdateOfflineDownloadsResponse]
 }
 
 // ListDisks calls mavio.storage.v1.StorageService.ListDisks.
@@ -306,18 +309,18 @@ func (c *storageServiceClient) GetRemoteUsage(ctx context.Context, req *v1.GetRe
 	return nil, err
 }
 
-// ListOfflineClients calls mavio.storage.v1.StorageService.ListOfflineClients.
-func (c *storageServiceClient) ListOfflineClients(ctx context.Context, req *v1.ListOfflineClientsRequest) (*v1.ListOfflineClientsResponse, error) {
-	response, err := c.listOfflineClients.CallUnary(ctx, connect.NewRequest(req))
+// GetOfflineDownloads calls mavio.storage.v1.StorageService.GetOfflineDownloads.
+func (c *storageServiceClient) GetOfflineDownloads(ctx context.Context, req *v1.GetOfflineDownloadsRequest) (*v1.GetOfflineDownloadsResponse, error) {
+	response, err := c.getOfflineDownloads.CallUnary(ctx, connect.NewRequest(req))
 	if response != nil {
 		return response.Msg, err
 	}
 	return nil, err
 }
 
-// SetOfflineClients calls mavio.storage.v1.StorageService.SetOfflineClients.
-func (c *storageServiceClient) SetOfflineClients(ctx context.Context, req *v1.SetOfflineClientsRequest) (*v1.SetOfflineClientsResponse, error) {
-	response, err := c.setOfflineClients.CallUnary(ctx, connect.NewRequest(req))
+// UpdateOfflineDownloads calls mavio.storage.v1.StorageService.UpdateOfflineDownloads.
+func (c *storageServiceClient) UpdateOfflineDownloads(ctx context.Context, req *v1.UpdateOfflineDownloadsRequest) (*v1.UpdateOfflineDownloadsResponse, error) {
+	response, err := c.updateOfflineDownloads.CallUnary(ctx, connect.NewRequest(req))
 	if response != nil {
 		return response.Msg, err
 	}
@@ -353,11 +356,14 @@ type StorageServiceHandler interface {
 	// GetRemoteUsage tells how much of a remote is used, as its backend tells;
 	// remotes whose backend does not fail with UNIMPLEMENTED.
 	GetRemoteUsage(context.Context, *v1.GetRemoteUsageRequest) (*v1.GetRemoteUsageResponse, error)
-	// ListOfflineClients lists the download clients of cloud drives' offline
-	// downloads, which acquisition sends magnet links to.
-	ListOfflineClients(context.Context, *v1.ListOfflineClientsRequest) (*v1.ListOfflineClientsResponse, error)
-	// SetOfflineClients replaces the download clients of offline downloads.
-	SetOfflineClients(context.Context, *v1.SetOfflineClientsRequest) (*v1.SetOfflineClientsResponse, error)
+	// GetOfflineDownloads tells of a remote's offline downloads: whether its
+	// backend makes them, and their settings. A remote's offline downloads
+	// are a download client of acquisition named after the remote, which
+	// sends it magnet links.
+	GetOfflineDownloads(context.Context, *v1.GetOfflineDownloadsRequest) (*v1.GetOfflineDownloadsResponse, error)
+	// UpdateOfflineDownloads replaces a remote's offline download settings,
+	// or removes them. Removing the remote removes them too.
+	UpdateOfflineDownloads(context.Context, *v1.UpdateOfflineDownloadsRequest) (*v1.UpdateOfflineDownloadsResponse, error)
 }
 
 // NewStorageServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -433,17 +439,17 @@ func NewStorageServiceHandler(svc StorageServiceHandler, opts ...connect.Handler
 		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
 		connect.WithHandlerOptions(opts...),
 	)
-	storageServiceListOfflineClientsHandler := connect.NewUnaryHandlerSimple(
-		StorageServiceListOfflineClientsProcedure,
-		svc.ListOfflineClients,
-		connect.WithSchema(storageServiceMethods.ByName("ListOfflineClients")),
+	storageServiceGetOfflineDownloadsHandler := connect.NewUnaryHandlerSimple(
+		StorageServiceGetOfflineDownloadsProcedure,
+		svc.GetOfflineDownloads,
+		connect.WithSchema(storageServiceMethods.ByName("GetOfflineDownloads")),
 		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
 		connect.WithHandlerOptions(opts...),
 	)
-	storageServiceSetOfflineClientsHandler := connect.NewUnaryHandlerSimple(
-		StorageServiceSetOfflineClientsProcedure,
-		svc.SetOfflineClients,
-		connect.WithSchema(storageServiceMethods.ByName("SetOfflineClients")),
+	storageServiceUpdateOfflineDownloadsHandler := connect.NewUnaryHandlerSimple(
+		StorageServiceUpdateOfflineDownloadsProcedure,
+		svc.UpdateOfflineDownloads,
+		connect.WithSchema(storageServiceMethods.ByName("UpdateOfflineDownloads")),
 		connect.WithHandlerOptions(opts...),
 	)
 	return "/mavio.storage.v1.StorageService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -468,10 +474,10 @@ func NewStorageServiceHandler(svc StorageServiceHandler, opts ...connect.Handler
 			storageServiceListFoldersHandler.ServeHTTP(w, r)
 		case StorageServiceGetRemoteUsageProcedure:
 			storageServiceGetRemoteUsageHandler.ServeHTTP(w, r)
-		case StorageServiceListOfflineClientsProcedure:
-			storageServiceListOfflineClientsHandler.ServeHTTP(w, r)
-		case StorageServiceSetOfflineClientsProcedure:
-			storageServiceSetOfflineClientsHandler.ServeHTTP(w, r)
+		case StorageServiceGetOfflineDownloadsProcedure:
+			storageServiceGetOfflineDownloadsHandler.ServeHTTP(w, r)
+		case StorageServiceUpdateOfflineDownloadsProcedure:
+			storageServiceUpdateOfflineDownloadsHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -521,10 +527,10 @@ func (UnimplementedStorageServiceHandler) GetRemoteUsage(context.Context, *v1.Ge
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.storage.v1.StorageService.GetRemoteUsage is not implemented"))
 }
 
-func (UnimplementedStorageServiceHandler) ListOfflineClients(context.Context, *v1.ListOfflineClientsRequest) (*v1.ListOfflineClientsResponse, error) {
-	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.storage.v1.StorageService.ListOfflineClients is not implemented"))
+func (UnimplementedStorageServiceHandler) GetOfflineDownloads(context.Context, *v1.GetOfflineDownloadsRequest) (*v1.GetOfflineDownloadsResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.storage.v1.StorageService.GetOfflineDownloads is not implemented"))
 }
 
-func (UnimplementedStorageServiceHandler) SetOfflineClients(context.Context, *v1.SetOfflineClientsRequest) (*v1.SetOfflineClientsResponse, error) {
-	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.storage.v1.StorageService.SetOfflineClients is not implemented"))
+func (UnimplementedStorageServiceHandler) UpdateOfflineDownloads(context.Context, *v1.UpdateOfflineDownloadsRequest) (*v1.UpdateOfflineDownloadsResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.storage.v1.StorageService.UpdateOfflineDownloads is not implemented"))
 }

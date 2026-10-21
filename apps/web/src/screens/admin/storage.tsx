@@ -1,29 +1,29 @@
 // The settings' Storage (docs/clients.md §6.3.10): the disks of the
 // server's computer, the remotes of the rclone the server runs or reaches —
 // added with a kind's settings and the questions their configuration asks,
-// such as authorizing a cloud drive — their folders, and the download
-// clients of cloud drives' offline downloads.
+// such as authorizing a cloud drive — their folders, and the offline
+// downloads of those whose cloud drive makes them.
 import { create } from "@bufbuild/protobuf";
 import { type MessageKey, messages } from "@mavio/design/strings";
 import {
   errorMessage,
   type ServerEntry,
   useDisks,
-  useOfflineClients,
+  useOfflineDownloads,
   useRemoteActions,
   useRemoteFolders,
   useRemoteUsage,
   useRemotes,
-  useSetOfflineClients,
   useStorageProviders,
   useStorageStatus,
+  useUpdateOfflineDownloads,
 } from "@mavio/client-ts";
 import {
   type ConfigQuestion,
   type Disk,
   DiskKind,
-  type OfflineClient,
-  OfflineClientSchema,
+  type OfflineDownloads,
+  OfflineDownloadsSchema,
   type Option,
   type Provider,
   type Remote,
@@ -84,7 +84,6 @@ function StorageList({ server }: { server: ServerEntry }) {
           <p className="px-4 py-3 type-callout text-danger">{status.data.error || t("storage.unavailable")}</p>
         </Group>
       )}
-      <OfflineClients server={server} remotes={available ? (remotes.data ?? []) : []} />
     </Page>
   );
 }
@@ -565,6 +564,7 @@ function RemotePage({ server, name }: { server: ServerEntry; name: string }) {
     <Page title={name} message={remote && kindOf(providers.data, remote.type)} back={back}>
       {(remotes.isError || providers.isError) && <p className="type-callout text-danger">{errorMessage(remotes.error ?? providers.error)}</p>}
       {remote && provider && <RemoteForm server={server} remote={remote} provider={provider} notice={notice} onNotice={setNotice} onQuestion={setQuestion} />}
+      {remote && <OfflineDownloadsGroup server={server} remote={remote.name} />}
       {remote && <Folders server={server} remote={remote.name} />}
       {remote && <RemoveRemote server={server} name={remote.name} />}
     </Page>
@@ -699,36 +699,33 @@ function RemoveRemote({ server, name }: { server: ServerEntry; name: string }) {
   );
 }
 
-/** A download client as edited; tags as typed. */
-interface ClientDraft {
-  id: string;
-  name: string;
+/** A remote's offline downloads as edited; tags as typed. */
+interface OfflineDraft {
   enabled: boolean;
   priority: number;
-  folder: string;
+  movieFolder: string;
+  seriesFolder: string;
   tags: string;
   removeCompleted: boolean;
   removeFailed: boolean;
 }
 
-const draftOf = (c: OfflineClient): ClientDraft => ({
-  id: c.id,
-  name: c.name,
-  enabled: c.enabled,
-  priority: c.priority,
-  folder: c.folder,
-  tags: c.tags.join(", "),
-  removeCompleted: c.removeCompletedDownloads,
-  removeFailed: c.removeFailedDownloads,
+const draftOf = (o: OfflineDownloads): OfflineDraft => ({
+  enabled: o.enabled,
+  priority: o.priority,
+  movieFolder: o.movieFolder,
+  seriesFolder: o.seriesFolder,
+  tags: o.tags.join(", "),
+  removeCompleted: o.removeCompletedDownloads,
+  removeFailed: o.removeFailedDownloads,
 });
 
-const clientOf = (d: ClientDraft): OfflineClient =>
-  create(OfflineClientSchema, {
-    id: d.id.trim(),
-    name: d.name.trim(),
+const offlineOf = (d: OfflineDraft): OfflineDownloads =>
+  create(OfflineDownloadsSchema, {
     enabled: d.enabled,
     priority: d.priority,
-    folder: d.folder.trim(),
+    movieFolder: d.movieFolder.trim(),
+    seriesFolder: d.seriesFolder.trim(),
     tags: d.tags
       .split(",")
       .map((s) => s.trim())
@@ -737,125 +734,68 @@ const clientOf = (d: ClientDraft): OfflineClient =>
     removeFailedDownloads: d.removeFailed,
   });
 
-/** An id for a client named so, unique among the others. */
-function idFor(name: string, taken: string[]) {
-  const base =
-    name
-      .toLowerCase()
-      .replace(/[^a-z0-9_-]+/g, "-")
-      .replace(/^-+|-+$/g, "") || "offline";
-  let id = base;
-  for (let i = 2; taken.includes(id); i++) id = `${base}-${i}`;
-  return id;
-}
+/** A folder below a remote's root: relative, without "." or "..". */
+const validFolder = (f: string) => {
+  const parts = f.trim().replace(/^\/+|\/+$/g, "").split("/");
+  return parts.every((p) => p !== "" && p !== "." && p !== ".." && !p.includes("\\"));
+};
 
-/** The download clients of offline downloads: cloud drives that download magnet links into a folder of their remote. */
-function OfflineClients({ server, remotes }: { server: ServerEntry; remotes: Remote[] }) {
-  const clients = useOfflineClients(server);
-  const set = useSetOfflineClients(server);
-  // The client edited, by its index; the list's length for a new one.
-  const [editing, setEditing] = useState<number>();
-  const list = clients.data ?? [];
-  const save = (next: OfflineClient[]) => set.mutate(next, { onSuccess: () => setEditing(undefined) });
-  return (
-    <Group
-      title={
-        <span className="flex items-center justify-between gap-3">
-          {t("storage.offline")}
-          {editing === undefined && clients.isSuccess && (
-            <Button variant="plain" onClick={() => (set.reset(), setEditing(list.length))}>
-              {t("storage.addOffline")}
-            </Button>
-          )}
-        </span>
-      }
-      footer={t("storage.offlineFooter")}
-    >
-      {list.map((c, i) =>
-        editing === i ? (
-          <ClientForm
-            key={c.id}
-            client={draftOf(c)}
-            remotes={remotes}
-            taken={list.filter((_, j) => j !== i).map((x) => x.id)}
-            busy={set.isPending}
-            error={set.isError ? errorMessage(set.error) : undefined}
-            onCancel={() => setEditing(undefined)}
-            onSave={(d) => save(list.map((x, j) => (j === i ? clientOf(d) : x)))}
-            onRemove={() => save(list.filter((_, j) => j !== i))}
-          />
-        ) : (
-          <button
-            key={c.id}
-            type="button"
-            disabled={editing !== undefined}
-            onClick={() => (set.reset(), setEditing(i))}
-            className="flex min-h-13 w-full items-center gap-3 px-4 py-2.5 text-left enabled:hover:tint"
+/**
+ * A remote's offline downloads, shown when its backend makes them: the
+ * drive downloads magnet links itself into the remote's folders, as a
+ * download client named after the remote.
+ */
+function OfflineDownloadsGroup({ server, remote }: { server: ServerEntry; remote: string }) {
+  const offline = useOfflineDownloads(server, remote);
+  const update = useUpdateOfflineDownloads(server, remote);
+  const settings = offline.data?.settings;
+  const [d, setD] = useState<OfflineDraft>();
+  const [stopping, setStopping] = useState(false);
+  useEffect(() => setD(settings && draftOf(settings)), [settings]);
+  const changed = settings !== undefined && d !== undefined && JSON.stringify(d) !== JSON.stringify(draftOf(settings));
+  const guard = useUnsavedGuard(changed);
+  if (offline.isError) return <p className="type-callout text-danger">{errorMessage(offline.error)}</p>;
+  if (!offline.data?.supported) return null;
+  const error = update.isError && <span className="type-callout text-danger">{errorMessage(update.error)}</span>;
+  if (!settings || !d)
+    return (
+      <Group title={t("storage.offline")} footer={t("storage.offlineRemoteFooter")}>
+        <div className="flex flex-wrap items-center gap-3 px-4 py-2.5">
+          <Button
+            variant="secondary"
+            disabled={update.isPending}
+            onClick={() => update.mutate(create(OfflineDownloadsSchema, { enabled: true, priority: 1, removeCompletedDownloads: true }))}
           >
-            <ColorTile icon="downloads" color={c.enabled ? "#34C759" : "#8E8E93"} />
-            <div className="min-w-0 flex-1">
-              <div className="truncate type-body">{c.name}</div>
-              <div className="truncate type-footnote text-text-secondary">
-                {[c.folder, c.enabled ? undefined : t("storage.disabled"), c.tags.length ? c.tags.join(", ") : undefined].filter(Boolean).join(" · ")}
-              </div>
-            </div>
-          </button>
-        ),
-      )}
-      {editing === list.length && (
-        <ClientForm
-          client={{ id: "", name: "", enabled: true, priority: 1, folder: "", tags: "", removeCompleted: true, removeFailed: false }}
-          remotes={remotes}
-          taken={list.map((x) => x.id)}
-          isNew
-          busy={set.isPending}
-          error={set.isError ? errorMessage(set.error) : undefined}
-          onCancel={() => setEditing(undefined)}
-          onSave={(d) => save([...list, clientOf(d)])}
-        />
-      )}
-      {clients.isSuccess && list.length === 0 && editing === undefined && <p className="px-4 py-3 type-callout text-text-secondary">{t("storage.noOffline")}</p>}
-      {clients.isError && <p className="px-4 py-3 type-callout text-danger">{errorMessage(clients.error)}</p>}
-    </Group>
-  );
-}
-
-function ClientForm({
-  client,
-  remotes,
-  taken,
-  isNew,
-  busy,
-  error,
-  onCancel,
-  onSave,
-  onRemove,
-}: {
-  client: ClientDraft;
-  remotes: Remote[];
-  taken: string[];
-  isNew?: boolean;
-  busy: boolean;
-  error?: string;
-  onCancel: () => void;
-  onSave: (d: ClientDraft) => void;
-  onRemove?: () => void;
-}) {
-  const [d, setD] = useState(client);
-  const [removing, setRemoving] = useState(false);
-  const set = (patch: Partial<ClientDraft>) => setD((x) => ({ ...x, ...patch }));
-  const id = isNew ? idFor(d.name, taken) : d.id;
-  const valid = d.name.trim() !== "" && /^remote:[^:/\\]+:/.test(d.folder.trim());
-  const text = (key: "name" | "folder" | "tags", label: string, detail?: string, placeholder?: string) => (
-    <Row label={label} detail={detail}>
-      <input className={`${input} sm:w-72`} aria-label={label} placeholder={placeholder} value={d[key]} onChange={(e) => set({ [key]: e.target.value })} />
+            {update.isPending ? "…" : t("storage.offlineSetUp")}
+          </Button>
+          {error}
+        </div>
+      </Group>
+    );
+  const set = (patch: Partial<OfflineDraft>) => setD((x) => x && { ...x, ...patch });
+  const valid = validFolder(d.movieFolder) && validFolder(d.seriesFolder);
+  const folder = (key: "movieFolder" | "seriesFolder", label: string, placeholder: string) => (
+    <Row label={label} detail={t("storage.offlineFolderBelow")}>
+      <input
+        className={`${input} sm:w-72`}
+        aria-label={label}
+        placeholder={placeholder}
+        value={d[key]}
+        aria-invalid={!validFolder(d[key])}
+        onChange={(e) => set({ [key]: e.target.value })}
+      />
     </Row>
   );
   return (
-    <div className="flex flex-col divide-y divide-border bg-background/40">
-      {text("name", t("storage.offlineName"), undefined, "PikPak")}
-      {text("folder", t("storage.offlineFolder"), t("storage.offlineFolderDetail"), remotes[0] ? `remote:${remotes[0].name}:downloads` : "remote:pikpak:downloads")}
-      {text("tags", t("storage.offlineTags"), t("storage.offlineTagsDetail"))}
+    <Group title={t("storage.offline")} footer={t("storage.offlineRemoteFooter")}>
+      <Row label={t("storage.offlineEnabled")}>
+        <Switch on={d.enabled} label={t("storage.offlineEnabled")} onChange={(enabled) => set({ enabled })} />
+      </Row>
+      {folder("movieFolder", t("storage.offlineMovieFolder"), "movies")}
+      {folder("seriesFolder", t("storage.offlineSeriesFolder"), "series")}
+      <Row label={t("storage.offlineTags")} detail={t("storage.offlineTagsDetail")}>
+        <input className={`${input} sm:w-72`} aria-label={t("storage.offlineTags")} value={d.tags} onChange={(e) => set({ tags: e.target.value })} />
+      </Row>
       <Row label={t("storage.offlinePriority")} detail={t("storage.offlinePriorityDetail")}>
         <NumberField
           min={1}
@@ -866,9 +806,6 @@ function ClientForm({
           onChange={(v) => set({ priority: v ?? 1 })}
         />
       </Row>
-      <Row label={t("storage.offlineEnabled")}>
-        <Switch on={d.enabled} label={t("storage.offlineEnabled")} onChange={(enabled) => set({ enabled })} />
-      </Row>
       <Row label={t("storage.removeCompleted")}>
         <Switch on={d.removeCompleted} label={t("storage.removeCompleted")} onChange={(removeCompleted) => set({ removeCompleted })} />
       </Row>
@@ -876,24 +813,21 @@ function ClientForm({
         <Switch on={d.removeFailed} label={t("storage.removeFailed")} onChange={(removeFailed) => set({ removeFailed })} />
       </Row>
       <div className="flex flex-wrap items-center gap-3 px-4 py-2.5">
-        <Button disabled={!valid || busy} onClick={() => onSave({ ...d, id })}>
-          {busy ? "…" : t("action.save")}
+        <Button disabled={!changed || !valid || update.isPending} onClick={() => update.mutate(offlineOf(d))}>
+          {update.isPending ? "…" : t("action.save")}
         </Button>
-        <Button variant="plain" onClick={onCancel}>
-          {t("action.cancel")}
-        </Button>
-        {onRemove &&
-          (removing ? (
-            <Button variant="secondary" className="text-danger" disabled={busy} onClick={onRemove}>
-              {t("storage.removeOfflineConfirm")}
-            </Button>
-          ) : (
-            <Button variant="plain" className="text-danger" onClick={() => setRemoving(true)}>
-              {t("storage.removeOffline")}
-            </Button>
-          ))}
-        {error && <span className="type-callout text-danger">{error}</span>}
+        {stopping ? (
+          <Button variant="secondary" className="text-danger" disabled={update.isPending} onClick={() => update.mutate(undefined, { onSuccess: () => setStopping(false) })}>
+            {t("storage.removeOfflineConfirm")}
+          </Button>
+        ) : (
+          <Button variant="plain" className="text-danger" onClick={() => setStopping(true)}>
+            {t("storage.offlineStop")}
+          </Button>
+        )}
+        {error}
       </div>
-    </div>
+      {guard.dialog}
+    </Group>
   );
 }

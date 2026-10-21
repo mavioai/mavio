@@ -262,42 +262,48 @@ class GetRemoteUsageResponse(_message.Message):
     free_bytes: int
     def __init__(self, total_bytes: _Optional[int] = ..., used_bytes: _Optional[int] = ..., free_bytes: _Optional[int] = ...) -> None: ...
 
-class OfflineClient(_message.Message):
-    __slots__ = ("id", "name", "enabled", "priority", "folder", "tags", "remove_completed_downloads", "remove_failed_downloads")
-    ID_FIELD_NUMBER: _ClassVar[int]
-    NAME_FIELD_NUMBER: _ClassVar[int]
+class OfflineDownloads(_message.Message):
+    __slots__ = ("enabled", "priority", "movie_folder", "series_folder", "tags", "remove_completed_downloads", "remove_failed_downloads")
     ENABLED_FIELD_NUMBER: _ClassVar[int]
     PRIORITY_FIELD_NUMBER: _ClassVar[int]
-    FOLDER_FIELD_NUMBER: _ClassVar[int]
+    MOVIE_FOLDER_FIELD_NUMBER: _ClassVar[int]
+    SERIES_FOLDER_FIELD_NUMBER: _ClassVar[int]
     TAGS_FIELD_NUMBER: _ClassVar[int]
     REMOVE_COMPLETED_DOWNLOADS_FIELD_NUMBER: _ClassVar[int]
     REMOVE_FAILED_DOWNLOADS_FIELD_NUMBER: _ClassVar[int]
-    id: str
-    name: str
     enabled: bool
     priority: int
-    folder: str
+    movie_folder: str
+    series_folder: str
     tags: _containers.RepeatedScalarFieldContainer[str]
     remove_completed_downloads: bool
     remove_failed_downloads: bool
-    def __init__(self, id: _Optional[str] = ..., name: _Optional[str] = ..., enabled: _Optional[bool] = ..., priority: _Optional[int] = ..., folder: _Optional[str] = ..., tags: _Optional[_Iterable[str]] = ..., remove_completed_downloads: _Optional[bool] = ..., remove_failed_downloads: _Optional[bool] = ...) -> None: ...
+    def __init__(self, enabled: _Optional[bool] = ..., priority: _Optional[int] = ..., movie_folder: _Optional[str] = ..., series_folder: _Optional[str] = ..., tags: _Optional[_Iterable[str]] = ..., remove_completed_downloads: _Optional[bool] = ..., remove_failed_downloads: _Optional[bool] = ...) -> None: ...
 
-class ListOfflineClientsRequest(_message.Message):
-    __slots__ = ()
-    def __init__(self) -> None: ...
+class GetOfflineDownloadsRequest(_message.Message):
+    __slots__ = ("remote",)
+    REMOTE_FIELD_NUMBER: _ClassVar[int]
+    remote: str
+    def __init__(self, remote: _Optional[str] = ...) -> None: ...
 
-class ListOfflineClientsResponse(_message.Message):
-    __slots__ = ("clients",)
-    CLIENTS_FIELD_NUMBER: _ClassVar[int]
-    clients: _containers.RepeatedCompositeFieldContainer[OfflineClient]
-    def __init__(self, clients: _Optional[_Iterable[_Union[OfflineClient, _Mapping]]] = ...) -> None: ...
+class GetOfflineDownloadsResponse(_message.Message):
+    __slots__ = ("supported", "settings")
+    SUPPORTED_FIELD_NUMBER: _ClassVar[int]
+    SETTINGS_FIELD_NUMBER: _ClassVar[int]
+    supported: bool
+    settings: OfflineDownloads
+    def __init__(self, supported: _Optional[bool] = ..., settings: _Optional[_Union[OfflineDownloads, _Mapping]] = ...) -> None: ...
 
-class SetOfflineClientsRequest(_message.Message):
-    __slots__ = ("clients",)
-    CLIENTS_FIELD_NUMBER: _ClassVar[int]
-    clients: _containers.RepeatedCompositeFieldContainer[OfflineClient]
-    def __init__(self, clients: _Optional[_Iterable[_Union[OfflineClient, _Mapping]]] = ...) -> None: ...
+class UpdateOfflineDownloadsRequest(_message.Message):
+    __slots__ = ("remote", "settings")
+    REMOTE_FIELD_NUMBER: _ClassVar[int]
+    SETTINGS_FIELD_NUMBER: _ClassVar[int]
+    remote: str
+    settings: OfflineDownloads
+    def __init__(self, remote: _Optional[str] = ..., settings: _Optional[_Union[OfflineDownloads, _Mapping]] = ...) -> None: ...
 
-class SetOfflineClientsResponse(_message.Message):
-    __slots__ = ()
-    def __init__(self) -> None: ...
+class UpdateOfflineDownloadsResponse(_message.Message):
+    __slots__ = ("settings",)
+    SETTINGS_FIELD_NUMBER: _ClassVar[int]
+    settings: OfflineDownloads
+    def __init__(self, settings: _Optional[_Union[OfflineDownloads, _Mapping]] = ...) -> None: ...

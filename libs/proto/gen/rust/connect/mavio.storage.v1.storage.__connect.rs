@@ -78,27 +78,27 @@ pub type OwnedGetRemoteUsageRequestView = ::buffa::view::OwnedView<
 pub type OwnedGetRemoteUsageResponseView = ::buffa::view::OwnedView<
     crate::proto::mavio::storage::v1::__buffa::view::GetRemoteUsageResponseView<'static>,
 >;
-///Shorthand for `OwnedView<ListOfflineClientsRequestView<'static>>`.
-pub type OwnedListOfflineClientsRequestView = ::buffa::view::OwnedView<
-    crate::proto::mavio::storage::v1::__buffa::view::ListOfflineClientsRequestView<
+///Shorthand for `OwnedView<GetOfflineDownloadsRequestView<'static>>`.
+pub type OwnedGetOfflineDownloadsRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::storage::v1::__buffa::view::GetOfflineDownloadsRequestView<
         'static,
     >,
 >;
-///Shorthand for `OwnedView<ListOfflineClientsResponseView<'static>>`.
-pub type OwnedListOfflineClientsResponseView = ::buffa::view::OwnedView<
-    crate::proto::mavio::storage::v1::__buffa::view::ListOfflineClientsResponseView<
+///Shorthand for `OwnedView<GetOfflineDownloadsResponseView<'static>>`.
+pub type OwnedGetOfflineDownloadsResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::storage::v1::__buffa::view::GetOfflineDownloadsResponseView<
         'static,
     >,
 >;
-///Shorthand for `OwnedView<SetOfflineClientsRequestView<'static>>`.
-pub type OwnedSetOfflineClientsRequestView = ::buffa::view::OwnedView<
-    crate::proto::mavio::storage::v1::__buffa::view::SetOfflineClientsRequestView<
+///Shorthand for `OwnedView<UpdateOfflineDownloadsRequestView<'static>>`.
+pub type OwnedUpdateOfflineDownloadsRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::storage::v1::__buffa::view::UpdateOfflineDownloadsRequestView<
         'static,
     >,
 >;
-///Shorthand for `OwnedView<SetOfflineClientsResponseView<'static>>`.
-pub type OwnedSetOfflineClientsResponseView = ::buffa::view::OwnedView<
-    crate::proto::mavio::storage::v1::__buffa::view::SetOfflineClientsResponseView<
+///Shorthand for `OwnedView<UpdateOfflineDownloadsResponseView<'static>>`.
+pub type OwnedUpdateOfflineDownloadsResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::storage::v1::__buffa::view::UpdateOfflineDownloadsResponseView<
         'static,
     >,
 >;
@@ -443,9 +443,11 @@ for ::buffa::view::OwnedView<
     }
 }
 impl ::connectrpc::Encodable<
-    crate::proto::mavio::storage::v1::ListOfflineClientsResponse,
+    crate::proto::mavio::storage::v1::GetOfflineDownloadsResponse,
 >
-for crate::proto::mavio::storage::v1::__buffa::view::ListOfflineClientsResponseView<'_> {
+for crate::proto::mavio::storage::v1::__buffa::view::GetOfflineDownloadsResponseView<
+    '_,
+> {
     fn encode(
         &self,
         codec: ::connectrpc::CodecFormat,
@@ -454,10 +456,10 @@ for crate::proto::mavio::storage::v1::__buffa::view::ListOfflineClientsResponseV
     }
 }
 impl ::connectrpc::Encodable<
-    crate::proto::mavio::storage::v1::ListOfflineClientsResponse,
+    crate::proto::mavio::storage::v1::GetOfflineDownloadsResponse,
 >
 for ::buffa::view::OwnedView<
-    crate::proto::mavio::storage::v1::__buffa::view::ListOfflineClientsResponseView<
+    crate::proto::mavio::storage::v1::__buffa::view::GetOfflineDownloadsResponseView<
         'static,
     >,
 > {
@@ -482,8 +484,12 @@ for ::buffa::view::OwnedView<
         )
     }
 }
-impl ::connectrpc::Encodable<crate::proto::mavio::storage::v1::SetOfflineClientsResponse>
-for crate::proto::mavio::storage::v1::__buffa::view::SetOfflineClientsResponseView<'_> {
+impl ::connectrpc::Encodable<
+    crate::proto::mavio::storage::v1::UpdateOfflineDownloadsResponse,
+>
+for crate::proto::mavio::storage::v1::__buffa::view::UpdateOfflineDownloadsResponseView<
+    '_,
+> {
     fn encode(
         &self,
         codec: ::connectrpc::CodecFormat,
@@ -491,9 +497,11 @@ for crate::proto::mavio::storage::v1::__buffa::view::SetOfflineClientsResponseVi
         ::connectrpc::__codegen::encode_view_body(self, codec)
     }
 }
-impl ::connectrpc::Encodable<crate::proto::mavio::storage::v1::SetOfflineClientsResponse>
+impl ::connectrpc::Encodable<
+    crate::proto::mavio::storage::v1::UpdateOfflineDownloadsResponse,
+>
 for ::buffa::view::OwnedView<
-    crate::proto::mavio::storage::v1::__buffa::view::SetOfflineClientsResponseView<
+    crate::proto::mavio::storage::v1::__buffa::view::UpdateOfflineDownloadsResponseView<
         'static,
     >,
 > {
@@ -580,15 +588,15 @@ pub const STORAGE_SERVICE_GET_REMOTE_USAGE_SPEC: ::connectrpc::Spec = ::connectr
         ::connectrpc::StreamType::Unary,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::NoSideEffects);
-/// Static [`Spec`](::connectrpc::Spec) for the `ListOfflineClients` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
-pub const STORAGE_SERVICE_LIST_OFFLINE_CLIENTS_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
-        "/mavio.storage.v1.StorageService/ListOfflineClients",
+/// Static [`Spec`](::connectrpc::Spec) for the `GetOfflineDownloads` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const STORAGE_SERVICE_GET_OFFLINE_DOWNLOADS_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.storage.v1.StorageService/GetOfflineDownloads",
         ::connectrpc::StreamType::Unary,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::NoSideEffects);
-/// Static [`Spec`](::connectrpc::Spec) for the `SetOfflineClients` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
-pub const STORAGE_SERVICE_SET_OFFLINE_CLIENTS_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
-        "/mavio.storage.v1.StorageService/SetOfflineClients",
+/// Static [`Spec`](::connectrpc::Spec) for the `UpdateOfflineDownloads` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const STORAGE_SERVICE_UPDATE_OFFLINE_DOWNLOADS_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.storage.v1.StorageService/UpdateOfflineDownloads",
         ::connectrpc::StreamType::Unary,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
@@ -883,8 +891,10 @@ pub trait StorageService: Send + Sync + 'static {
             > + Send + use<'a, Self>,
         >,
     > + Send;
-    /// ListOfflineClients lists the download clients of cloud drives' offline
-    /// downloads, which acquisition sends magnet links to.
+    /// GetOfflineDownloads tells of a remote's offline downloads: whether its
+    /// backend makes them, and their settings. A remote's offline downloads
+    /// are a download client of acquisition named after the remote, which
+    /// sends it magnet links.
     ///
     /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
     ///
@@ -893,21 +903,22 @@ pub trait StorageService: Send + Sync + 'static {
     /// (zero-copy). The response cannot borrow from `request` — use
     /// `.to_owned_message()` (or copy the specific fields) for anything
     /// returned, stored, or moved into `tokio::spawn`.
-    fn list_offline_clients<'a>(
+    fn get_offline_downloads<'a>(
         &'a self,
         ctx: ::connectrpc::RequestContext,
         request: ::connectrpc::ServiceRequest<
             '_,
-            crate::proto::mavio::storage::v1::ListOfflineClientsRequest,
+            crate::proto::mavio::storage::v1::GetOfflineDownloadsRequest,
         >,
     ) -> impl ::std::future::Future<
         Output = ::connectrpc::ServiceResult<
             impl ::connectrpc::Encodable<
-                crate::proto::mavio::storage::v1::ListOfflineClientsResponse,
+                crate::proto::mavio::storage::v1::GetOfflineDownloadsResponse,
             > + Send + use<'a, Self>,
         >,
     > + Send;
-    /// SetOfflineClients replaces the download clients of offline downloads.
+    /// UpdateOfflineDownloads replaces a remote's offline download settings,
+    /// or removes them. Removing the remote removes them too.
     ///
     /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
     ///
@@ -916,17 +927,17 @@ pub trait StorageService: Send + Sync + 'static {
     /// (zero-copy). The response cannot borrow from `request` — use
     /// `.to_owned_message()` (or copy the specific fields) for anything
     /// returned, stored, or moved into `tokio::spawn`.
-    fn set_offline_clients<'a>(
+    fn update_offline_downloads<'a>(
         &'a self,
         ctx: ::connectrpc::RequestContext,
         request: ::connectrpc::ServiceRequest<
             '_,
-            crate::proto::mavio::storage::v1::SetOfflineClientsRequest,
+            crate::proto::mavio::storage::v1::UpdateOfflineDownloadsRequest,
         >,
     ) -> impl ::std::future::Future<
         Output = ::connectrpc::ServiceResult<
             impl ::connectrpc::Encodable<
-                crate::proto::mavio::storage::v1::SetOfflineClientsResponse,
+                crate::proto::mavio::storage::v1::UpdateOfflineDownloadsResponse,
             > + Send + use<'a, Self>,
         >,
     > + Send;
@@ -1254,13 +1265,13 @@ impl<S: StorageService> StorageServiceExt for S {
             .with_spec(STORAGE_SERVICE_GET_REMOTE_USAGE_SPEC)
             .route_view_idempotent(
                 STORAGE_SERVICE_SERVICE_NAME,
-                "ListOfflineClients",
+                "GetOfflineDownloads",
                 {
                     let svc = ::std::sync::Arc::clone(&self);
                     ::connectrpc::view_handler_fn(move |
                         ctx,
                         req: ::buffa::view::OwnedView<
-                            crate::proto::mavio::storage::v1::__buffa::view::ListOfflineClientsRequestView<
+                            crate::proto::mavio::storage::v1::__buffa::view::GetOfflineDownloadsRequestView<
                                 'static,
                             >,
                         >,
@@ -1269,27 +1280,27 @@ impl<S: StorageService> StorageServiceExt for S {
                         let svc = ::std::sync::Arc::clone(&svc);
                         async move {
                             let sreq = ::connectrpc::ServiceRequest::<
-                                crate::proto::mavio::storage::v1::ListOfflineClientsRequest,
+                                crate::proto::mavio::storage::v1::GetOfflineDownloadsRequest,
                             >::from_parts(req.reborrow(), req.bytes());
-                            svc.list_offline_clients(ctx, sreq)
+                            svc.get_offline_downloads(ctx, sreq)
                                 .await?
                                 .encode::<
-                                    crate::proto::mavio::storage::v1::ListOfflineClientsResponse,
+                                    crate::proto::mavio::storage::v1::GetOfflineDownloadsResponse,
                                 >(format)
                         }
                     })
                 },
             )
-            .with_spec(STORAGE_SERVICE_LIST_OFFLINE_CLIENTS_SPEC)
+            .with_spec(STORAGE_SERVICE_GET_OFFLINE_DOWNLOADS_SPEC)
             .route_view(
                 STORAGE_SERVICE_SERVICE_NAME,
-                "SetOfflineClients",
+                "UpdateOfflineDownloads",
                 {
                     let svc = ::std::sync::Arc::clone(&self);
                     ::connectrpc::view_handler_fn(move |
                         ctx,
                         req: ::buffa::view::OwnedView<
-                            crate::proto::mavio::storage::v1::__buffa::view::SetOfflineClientsRequestView<
+                            crate::proto::mavio::storage::v1::__buffa::view::UpdateOfflineDownloadsRequestView<
                                 'static,
                             >,
                         >,
@@ -1298,18 +1309,18 @@ impl<S: StorageService> StorageServiceExt for S {
                         let svc = ::std::sync::Arc::clone(&svc);
                         async move {
                             let sreq = ::connectrpc::ServiceRequest::<
-                                crate::proto::mavio::storage::v1::SetOfflineClientsRequest,
+                                crate::proto::mavio::storage::v1::UpdateOfflineDownloadsRequest,
                             >::from_parts(req.reborrow(), req.bytes());
-                            svc.set_offline_clients(ctx, sreq)
+                            svc.update_offline_downloads(ctx, sreq)
                                 .await?
                                 .encode::<
-                                    crate::proto::mavio::storage::v1::SetOfflineClientsResponse,
+                                    crate::proto::mavio::storage::v1::UpdateOfflineDownloadsResponse,
                                 >(format)
                         }
                     })
                 },
             )
-            .with_spec(STORAGE_SERVICE_SET_OFFLINE_CLIENTS_SPEC)
+            .with_spec(STORAGE_SERVICE_UPDATE_OFFLINE_DOWNLOADS_SPEC)
     }
 }
 /// Type-inference marker used by [`Router::add_service`](::connectrpc::Router::add_service).
@@ -1424,16 +1435,16 @@ impl<T: StorageService> ::connectrpc::Dispatcher for StorageServiceServer<T> {
                         .with_spec(STORAGE_SERVICE_GET_REMOTE_USAGE_SPEC),
                 )
             }
-            "ListOfflineClients" => {
+            "GetOfflineDownloads" => {
                 Some(
                     ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(true)
-                        .with_spec(STORAGE_SERVICE_LIST_OFFLINE_CLIENTS_SPEC),
+                        .with_spec(STORAGE_SERVICE_GET_OFFLINE_DOWNLOADS_SPEC),
                 )
             }
-            "SetOfflineClients" => {
+            "UpdateOfflineDownloads" => {
                 Some(
                     ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
-                        .with_spec(STORAGE_SERVICE_SET_OFFLINE_CLIENTS_SPEC),
+                        .with_spec(STORAGE_SERVICE_UPDATE_OFFLINE_DOWNLOADS_SPEC),
                 )
             }
             _ => None,
@@ -1671,47 +1682,47 @@ impl<T: StorageService> ::connectrpc::Dispatcher for StorageServiceServer<T> {
                         >(format)
                 })
             }
-            "ListOfflineClients" => {
+            "GetOfflineDownloads" => {
                 let svc = ::std::sync::Arc::clone(&self.inner);
                 Box::pin(async move {
                     let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
-                        crate::proto::mavio::storage::v1::ListOfflineClientsRequest,
+                        crate::proto::mavio::storage::v1::GetOfflineDownloadsRequest,
                     >(request.encoded()?, format)?;
-                    let req: crate::proto::mavio::storage::v1::__buffa::view::ListOfflineClientsRequestView<
+                    let req: crate::proto::mavio::storage::v1::__buffa::view::GetOfflineDownloadsRequestView<
                         '_,
                     > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
                         &body,
                         ctx.decode_options(),
                     )?;
                     let req = ::connectrpc::ServiceRequest::<
-                        crate::proto::mavio::storage::v1::ListOfflineClientsRequest,
+                        crate::proto::mavio::storage::v1::GetOfflineDownloadsRequest,
                     >::from_parts(&req, &body);
-                    svc.list_offline_clients(ctx, req)
+                    svc.get_offline_downloads(ctx, req)
                         .await?
                         .encode::<
-                            crate::proto::mavio::storage::v1::ListOfflineClientsResponse,
+                            crate::proto::mavio::storage::v1::GetOfflineDownloadsResponse,
                         >(format)
                 })
             }
-            "SetOfflineClients" => {
+            "UpdateOfflineDownloads" => {
                 let svc = ::std::sync::Arc::clone(&self.inner);
                 Box::pin(async move {
                     let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
-                        crate::proto::mavio::storage::v1::SetOfflineClientsRequest,
+                        crate::proto::mavio::storage::v1::UpdateOfflineDownloadsRequest,
                     >(request.encoded()?, format)?;
-                    let req: crate::proto::mavio::storage::v1::__buffa::view::SetOfflineClientsRequestView<
+                    let req: crate::proto::mavio::storage::v1::__buffa::view::UpdateOfflineDownloadsRequestView<
                         '_,
                     > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
                         &body,
                         ctx.decode_options(),
                     )?;
                     let req = ::connectrpc::ServiceRequest::<
-                        crate::proto::mavio::storage::v1::SetOfflineClientsRequest,
+                        crate::proto::mavio::storage::v1::UpdateOfflineDownloadsRequest,
                     >::from_parts(&req, &body);
-                    svc.set_offline_clients(ctx, req)
+                    svc.update_offline_downloads(ctx, req)
                         .await?
                         .encode::<
-                            crate::proto::mavio::storage::v1::SetOfflineClientsResponse,
+                            crate::proto::mavio::storage::v1::UpdateOfflineDownloadsResponse,
                         >(format)
                 })
             }
@@ -2293,35 +2304,35 @@ where
             )
             .await
     }
-    /// Call the ListOfflineClients RPC. Sends a request to /mavio.storage.v1.StorageService/ListOfflineClients.
-    pub async fn list_offline_clients(
+    /// Call the GetOfflineDownloads RPC. Sends a request to /mavio.storage.v1.StorageService/GetOfflineDownloads.
+    pub async fn get_offline_downloads(
         &self,
-        request: crate::proto::mavio::storage::v1::ListOfflineClientsRequest,
+        request: crate::proto::mavio::storage::v1::GetOfflineDownloadsRequest,
     ) -> Result<
         ::connectrpc::client::UnaryResponse<
             ::buffa::view::OwnedView<
-                crate::proto::mavio::storage::v1::__buffa::view::ListOfflineClientsResponseView<
+                crate::proto::mavio::storage::v1::__buffa::view::GetOfflineDownloadsResponseView<
                     'static,
                 >,
             >,
         >,
         ::connectrpc::ConnectError,
     > {
-        self.list_offline_clients_with_options(
+        self.get_offline_downloads_with_options(
                 request,
                 ::connectrpc::client::CallOptions::default(),
             )
             .await
     }
-    /// Call the ListOfflineClients RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
-    pub async fn list_offline_clients_with_options(
+    /// Call the GetOfflineDownloads RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn get_offline_downloads_with_options(
         &self,
-        request: crate::proto::mavio::storage::v1::ListOfflineClientsRequest,
+        request: crate::proto::mavio::storage::v1::GetOfflineDownloadsRequest,
         options: ::connectrpc::client::CallOptions,
     ) -> Result<
         ::connectrpc::client::UnaryResponse<
             ::buffa::view::OwnedView<
-                crate::proto::mavio::storage::v1::__buffa::view::ListOfflineClientsResponseView<
+                crate::proto::mavio::storage::v1::__buffa::view::GetOfflineDownloadsResponseView<
                     'static,
                 >,
             >,
@@ -2331,42 +2342,42 @@ where
         ::connectrpc::client::call_unary(
                 &self.transport,
                 &self.config,
-                STORAGE_SERVICE_LIST_OFFLINE_CLIENTS_SPEC
+                STORAGE_SERVICE_GET_OFFLINE_DOWNLOADS_SPEC
                     .with_origin(::connectrpc::SpecOrigin::Client),
                 request,
                 options,
             )
             .await
     }
-    /// Call the SetOfflineClients RPC. Sends a request to /mavio.storage.v1.StorageService/SetOfflineClients.
-    pub async fn set_offline_clients(
+    /// Call the UpdateOfflineDownloads RPC. Sends a request to /mavio.storage.v1.StorageService/UpdateOfflineDownloads.
+    pub async fn update_offline_downloads(
         &self,
-        request: crate::proto::mavio::storage::v1::SetOfflineClientsRequest,
+        request: crate::proto::mavio::storage::v1::UpdateOfflineDownloadsRequest,
     ) -> Result<
         ::connectrpc::client::UnaryResponse<
             ::buffa::view::OwnedView<
-                crate::proto::mavio::storage::v1::__buffa::view::SetOfflineClientsResponseView<
+                crate::proto::mavio::storage::v1::__buffa::view::UpdateOfflineDownloadsResponseView<
                     'static,
                 >,
             >,
         >,
         ::connectrpc::ConnectError,
     > {
-        self.set_offline_clients_with_options(
+        self.update_offline_downloads_with_options(
                 request,
                 ::connectrpc::client::CallOptions::default(),
             )
             .await
     }
-    /// Call the SetOfflineClients RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
-    pub async fn set_offline_clients_with_options(
+    /// Call the UpdateOfflineDownloads RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn update_offline_downloads_with_options(
         &self,
-        request: crate::proto::mavio::storage::v1::SetOfflineClientsRequest,
+        request: crate::proto::mavio::storage::v1::UpdateOfflineDownloadsRequest,
         options: ::connectrpc::client::CallOptions,
     ) -> Result<
         ::connectrpc::client::UnaryResponse<
             ::buffa::view::OwnedView<
-                crate::proto::mavio::storage::v1::__buffa::view::SetOfflineClientsResponseView<
+                crate::proto::mavio::storage::v1::__buffa::view::UpdateOfflineDownloadsResponseView<
                     'static,
                 >,
             >,
@@ -2376,7 +2387,7 @@ where
         ::connectrpc::client::call_unary(
                 &self.transport,
                 &self.config,
-                STORAGE_SERVICE_SET_OFFLINE_CLIENTS_SPEC
+                STORAGE_SERVICE_UPDATE_OFFLINE_DOWNLOADS_SPEC
                     .with_origin(::connectrpc::SpecOrigin::Client),
                 request,
                 options,

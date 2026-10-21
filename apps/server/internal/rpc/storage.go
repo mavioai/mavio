@@ -348,6 +348,11 @@ func (s *StorageService) DeleteRemote(ctx context.Context, req *storagev1.Delete
 	if err := c.DeleteRemote(ctx, req.GetName()); err != nil {
 		return nil, rcloneError(ctx, err)
 	}
+	if s.Offline != nil {
+		if err := s.Offline.RemoveClient(ctx, req.GetName()); err != nil {
+			return nil, connectError(ctx, err)
+		}
+	}
 	if s.Changed != nil {
 		s.Changed(req.GetName())
 	}
@@ -382,45 +387,78 @@ func (s *StorageService) ListFolders(ctx context.Context, req *storagev1.ListFol
 	return storagev1.ListFoldersResponse_builder{Folders: folders}.Build(), nil
 }
 
-// ListOfflineClients lists the download clients of offline downloads.
-func (s *StorageService) ListOfflineClients(ctx context.Context, _ *storagev1.ListOfflineClientsRequest) (*storagev1.ListOfflineClientsResponse, error) {
-	if _, err := admin(ctx); err != nil {
+// GetOfflineDownloads tells of a remote's offline downloads.
+func (s *StorageService) GetOfflineDownloads(ctx context.Context, req *storagev1.GetOfflineDownloadsRequest) (*storagev1.GetOfflineDownloadsResponse, error) {
+	c, err := s.client(ctx)
+	if err != nil {
 		return nil, err
 	}
-	if s.Offline == nil {
-		return &storagev1.ListOfflineClientsResponse{}, nil
+	if err := s.exists(ctx, c, req.GetRemote()); err != nil {
+		return nil, err
 	}
-	cfg, err := s.Offline.Config(ctx)
+	out := &storagev1.GetOfflineDownloadsResponse{}
+	if s.Offline == nil || s.Offline.Remotes == nil {
+		return out, nil
+	}
+	supported, err := s.Offline.Remotes.OfflineDownloads(ctx, req.GetRemote())
+	if err != nil {
+		return nil, rcloneError(ctx, err)
+	}
+	out.SetSupported(supported)
+	o, ok, err := s.Offline.Client(ctx, req.GetRemote())
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
-	out := make([]*storagev1.OfflineClient, len(cfg.Clients))
-	for i, c := range cfg.Clients {
-		out[i] = storagev1.OfflineClient_builder{
-			Id: &c.ID, Name: &c.Name, Enabled: &c.Enabled, Priority: &c.Priority, Folder: &c.Folder, Tags: c.Tags,
-			RemoveCompletedDownloads: &c.RemoveCompleted, RemoveFailedDownloads: &c.RemoveFailed,
-		}.Build()
+	if ok {
+		out.SetSettings(offlineToProto(o))
 	}
-	return storagev1.ListOfflineClientsResponse_builder{Clients: out}.Build(), nil
+	return out, nil
 }
 
-// SetOfflineClients replaces the download clients of offline downloads.
-func (s *StorageService) SetOfflineClients(ctx context.Context, req *storagev1.SetOfflineClientsRequest) (*storagev1.SetOfflineClientsResponse, error) {
-	if _, err := admin(ctx); err != nil {
+// UpdateOfflineDownloads replaces a remote's offline download settings, or
+// removes them.
+func (s *StorageService) UpdateOfflineDownloads(ctx context.Context, req *storagev1.UpdateOfflineDownloadsRequest) (*storagev1.UpdateOfflineDownloadsResponse, error) {
+	c, err := s.client(ctx)
+	if err != nil {
 		return nil, err
 	}
-	if s.Offline == nil {
-		return nil, connect.NewError(connect.CodeFailedPrecondition, errors.New("the server keeps no offline download clients"))
+	if s.Offline == nil || s.Offline.Remotes == nil {
+		return nil, connect.NewError(connect.CodeFailedPrecondition, errors.New("the server keeps no offline downloads"))
 	}
-	var cfg downloads.OfflineConfig
-	for _, c := range req.GetClients() {
-		cfg.Clients = append(cfg.Clients, downloads.OfflineClient{
-			ID: c.GetId(), Name: c.GetName(), Enabled: c.GetEnabled(), Priority: c.GetPriority(), Folder: c.GetFolder(),
-			Tags: c.GetTags(), RemoveCompleted: c.GetRemoveCompletedDownloads(), RemoveFailed: c.GetRemoveFailedDownloads(),
-		})
+	if err := s.exists(ctx, c, req.GetRemote()); err != nil {
+		return nil, err
 	}
-	if err := s.Offline.SetConfig(ctx, cfg); err != nil {
+	if !req.HasSettings() {
+		if err := s.Offline.RemoveClient(ctx, req.GetRemote()); err != nil {
+			return nil, connectError(ctx, err)
+		}
+		return &storagev1.UpdateOfflineDownloadsResponse{}, nil
+	}
+	supported, err := s.Offline.Remotes.OfflineDownloads(ctx, req.GetRemote())
+	if err != nil {
+		return nil, rcloneError(ctx, err)
+	}
+	if !supported {
+		return nil, connect.NewError(connect.CodeFailedPrecondition, errors.New("the remote's backend makes no offline downloads"))
+	}
+	p := req.GetSettings()
+	o := downloads.OfflineClient{
+		Remote: req.GetRemote(), Enabled: p.GetEnabled(), Priority: p.GetPriority(), Tags: p.GetTags(),
+		MovieFolder: strings.Trim(p.GetMovieFolder(), "/"), SeriesFolder: strings.Trim(p.GetSeriesFolder(), "/"),
+		RemoveCompleted: p.GetRemoveCompletedDownloads(), RemoveFailed: p.GetRemoveFailedDownloads(),
+	}
+	if err := s.Offline.SetClient(ctx, o); err != nil {
 		return nil, connectError(ctx, err)
 	}
-	return &storagev1.SetOfflineClientsResponse{}, nil
+	return storagev1.UpdateOfflineDownloadsResponse_builder{Settings: offlineToProto(o)}.Build(), nil
+}
+
+// offlineToProto returns a remote's offline download settings, with the
+// folders they download into.
+func offlineToProto(o downloads.OfflineClient) *storagev1.OfflineDownloads {
+	movies, series := o.Folders()
+	return storagev1.OfflineDownloads_builder{
+		Enabled: &o.Enabled, Priority: &o.Priority, Tags: o.Tags, MovieFolder: &movies, SeriesFolder: &series,
+		RemoveCompletedDownloads: &o.RemoveCompleted, RemoveFailedDownloads: &o.RemoveFailed,
+	}.Build()
 }

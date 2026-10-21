@@ -47,10 +47,10 @@ class StorageService(Protocol):
     async def get_remote_usage(self, request: mavio_dot_storage_dot_v1_dot_storage__pb2.GetRemoteUsageRequest, ctx: RequestContext) -> mavio_dot_storage_dot_v1_dot_storage__pb2.GetRemoteUsageResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
 
-    async def list_offline_clients(self, request: mavio_dot_storage_dot_v1_dot_storage__pb2.ListOfflineClientsRequest, ctx: RequestContext) -> mavio_dot_storage_dot_v1_dot_storage__pb2.ListOfflineClientsResponse:
+    async def get_offline_downloads(self, request: mavio_dot_storage_dot_v1_dot_storage__pb2.GetOfflineDownloadsRequest, ctx: RequestContext) -> mavio_dot_storage_dot_v1_dot_storage__pb2.GetOfflineDownloadsResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
 
-    async def set_offline_clients(self, request: mavio_dot_storage_dot_v1_dot_storage__pb2.SetOfflineClientsRequest, ctx: RequestContext) -> mavio_dot_storage_dot_v1_dot_storage__pb2.SetOfflineClientsResponse:
+    async def update_offline_downloads(self, request: mavio_dot_storage_dot_v1_dot_storage__pb2.UpdateOfflineDownloadsRequest, ctx: RequestContext) -> mavio_dot_storage_dot_v1_dot_storage__pb2.UpdateOfflineDownloadsResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
 
 
@@ -159,25 +159,25 @@ class StorageServiceASGIApplication(ConnectASGIApplication[StorageService]):
                     ),
                     function=svc.get_remote_usage,
                 ),
-                "/mavio.storage.v1.StorageService/ListOfflineClients": Endpoint.unary(
+                "/mavio.storage.v1.StorageService/GetOfflineDownloads": Endpoint.unary(
                     method=MethodInfo(
-                        name="ListOfflineClients",
+                        name="GetOfflineDownloads",
                         service_name="mavio.storage.v1.StorageService",
-                        input=mavio_dot_storage_dot_v1_dot_storage__pb2.ListOfflineClientsRequest,
-                        output=mavio_dot_storage_dot_v1_dot_storage__pb2.ListOfflineClientsResponse,
+                        input=mavio_dot_storage_dot_v1_dot_storage__pb2.GetOfflineDownloadsRequest,
+                        output=mavio_dot_storage_dot_v1_dot_storage__pb2.GetOfflineDownloadsResponse,
                         idempotency_level=IdempotencyLevel.NO_SIDE_EFFECTS,
                     ),
-                    function=svc.list_offline_clients,
+                    function=svc.get_offline_downloads,
                 ),
-                "/mavio.storage.v1.StorageService/SetOfflineClients": Endpoint.unary(
+                "/mavio.storage.v1.StorageService/UpdateOfflineDownloads": Endpoint.unary(
                     method=MethodInfo(
-                        name="SetOfflineClients",
+                        name="UpdateOfflineDownloads",
                         service_name="mavio.storage.v1.StorageService",
-                        input=mavio_dot_storage_dot_v1_dot_storage__pb2.SetOfflineClientsRequest,
-                        output=mavio_dot_storage_dot_v1_dot_storage__pb2.SetOfflineClientsResponse,
+                        input=mavio_dot_storage_dot_v1_dot_storage__pb2.UpdateOfflineDownloadsRequest,
+                        output=mavio_dot_storage_dot_v1_dot_storage__pb2.UpdateOfflineDownloadsResponse,
                         idempotency_level=IdempotencyLevel.UNKNOWN,
                     ),
-                    function=svc.set_offline_clients,
+                    function=svc.update_offline_downloads,
                 ),
             },
             interceptors=interceptors,
@@ -404,21 +404,21 @@ class StorageServiceClient(ConnectClient):
             use_get=use_get,
         )
 
-    async def list_offline_clients(
+    async def get_offline_downloads(
         self,
-        request: mavio_dot_storage_dot_v1_dot_storage__pb2.ListOfflineClientsRequest,
+        request: mavio_dot_storage_dot_v1_dot_storage__pb2.GetOfflineDownloadsRequest,
         *,
         headers: Headers | Mapping[str, str] | None = None,
         timeout_ms: int | None = None,
         use_get: bool = False,
-    ) -> mavio_dot_storage_dot_v1_dot_storage__pb2.ListOfflineClientsResponse:
+    ) -> mavio_dot_storage_dot_v1_dot_storage__pb2.GetOfflineDownloadsResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
-                name="ListOfflineClients",
+                name="GetOfflineDownloads",
                 service_name="mavio.storage.v1.StorageService",
-                input=mavio_dot_storage_dot_v1_dot_storage__pb2.ListOfflineClientsRequest,
-                output=mavio_dot_storage_dot_v1_dot_storage__pb2.ListOfflineClientsResponse,
+                input=mavio_dot_storage_dot_v1_dot_storage__pb2.GetOfflineDownloadsRequest,
+                output=mavio_dot_storage_dot_v1_dot_storage__pb2.GetOfflineDownloadsResponse,
                 idempotency_level=IdempotencyLevel.NO_SIDE_EFFECTS,
             ),
             headers=headers,
@@ -426,20 +426,20 @@ class StorageServiceClient(ConnectClient):
             use_get=use_get,
         )
 
-    async def set_offline_clients(
+    async def update_offline_downloads(
         self,
-        request: mavio_dot_storage_dot_v1_dot_storage__pb2.SetOfflineClientsRequest,
+        request: mavio_dot_storage_dot_v1_dot_storage__pb2.UpdateOfflineDownloadsRequest,
         *,
         headers: Headers | Mapping[str, str] | None = None,
         timeout_ms: int | None = None,
-    ) -> mavio_dot_storage_dot_v1_dot_storage__pb2.SetOfflineClientsResponse:
+    ) -> mavio_dot_storage_dot_v1_dot_storage__pb2.UpdateOfflineDownloadsResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
-                name="SetOfflineClients",
+                name="UpdateOfflineDownloads",
                 service_name="mavio.storage.v1.StorageService",
-                input=mavio_dot_storage_dot_v1_dot_storage__pb2.SetOfflineClientsRequest,
-                output=mavio_dot_storage_dot_v1_dot_storage__pb2.SetOfflineClientsResponse,
+                input=mavio_dot_storage_dot_v1_dot_storage__pb2.UpdateOfflineDownloadsRequest,
+                output=mavio_dot_storage_dot_v1_dot_storage__pb2.UpdateOfflineDownloadsResponse,
                 idempotency_level=IdempotencyLevel.UNKNOWN,
             ),
             headers=headers,
@@ -468,9 +468,9 @@ class StorageServiceSync(Protocol):
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
     def get_remote_usage(self, request: mavio_dot_storage_dot_v1_dot_storage__pb2.GetRemoteUsageRequest, ctx: RequestContext) -> mavio_dot_storage_dot_v1_dot_storage__pb2.GetRemoteUsageResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
-    def list_offline_clients(self, request: mavio_dot_storage_dot_v1_dot_storage__pb2.ListOfflineClientsRequest, ctx: RequestContext) -> mavio_dot_storage_dot_v1_dot_storage__pb2.ListOfflineClientsResponse:
+    def get_offline_downloads(self, request: mavio_dot_storage_dot_v1_dot_storage__pb2.GetOfflineDownloadsRequest, ctx: RequestContext) -> mavio_dot_storage_dot_v1_dot_storage__pb2.GetOfflineDownloadsResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
-    def set_offline_clients(self, request: mavio_dot_storage_dot_v1_dot_storage__pb2.SetOfflineClientsRequest, ctx: RequestContext) -> mavio_dot_storage_dot_v1_dot_storage__pb2.SetOfflineClientsResponse:
+    def update_offline_downloads(self, request: mavio_dot_storage_dot_v1_dot_storage__pb2.UpdateOfflineDownloadsRequest, ctx: RequestContext) -> mavio_dot_storage_dot_v1_dot_storage__pb2.UpdateOfflineDownloadsResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
 
 
@@ -578,25 +578,25 @@ class StorageServiceWSGIApplication(ConnectWSGIApplication):
                     ),
                     function=service.get_remote_usage,
                 ),
-                "/mavio.storage.v1.StorageService/ListOfflineClients": EndpointSync.unary(
+                "/mavio.storage.v1.StorageService/GetOfflineDownloads": EndpointSync.unary(
                     method=MethodInfo(
-                        name="ListOfflineClients",
+                        name="GetOfflineDownloads",
                         service_name="mavio.storage.v1.StorageService",
-                        input=mavio_dot_storage_dot_v1_dot_storage__pb2.ListOfflineClientsRequest,
-                        output=mavio_dot_storage_dot_v1_dot_storage__pb2.ListOfflineClientsResponse,
+                        input=mavio_dot_storage_dot_v1_dot_storage__pb2.GetOfflineDownloadsRequest,
+                        output=mavio_dot_storage_dot_v1_dot_storage__pb2.GetOfflineDownloadsResponse,
                         idempotency_level=IdempotencyLevel.NO_SIDE_EFFECTS,
                     ),
-                    function=service.list_offline_clients,
+                    function=service.get_offline_downloads,
                 ),
-                "/mavio.storage.v1.StorageService/SetOfflineClients": EndpointSync.unary(
+                "/mavio.storage.v1.StorageService/UpdateOfflineDownloads": EndpointSync.unary(
                     method=MethodInfo(
-                        name="SetOfflineClients",
+                        name="UpdateOfflineDownloads",
                         service_name="mavio.storage.v1.StorageService",
-                        input=mavio_dot_storage_dot_v1_dot_storage__pb2.SetOfflineClientsRequest,
-                        output=mavio_dot_storage_dot_v1_dot_storage__pb2.SetOfflineClientsResponse,
+                        input=mavio_dot_storage_dot_v1_dot_storage__pb2.UpdateOfflineDownloadsRequest,
+                        output=mavio_dot_storage_dot_v1_dot_storage__pb2.UpdateOfflineDownloadsResponse,
                         idempotency_level=IdempotencyLevel.UNKNOWN,
                     ),
-                    function=service.set_offline_clients,
+                    function=service.update_offline_downloads,
                 ),
             },
             interceptors=interceptors,
@@ -823,21 +823,21 @@ class StorageServiceClientSync(ConnectClientSync):
             use_get=use_get,
         )
 
-    def list_offline_clients(
+    def get_offline_downloads(
         self,
-        request: mavio_dot_storage_dot_v1_dot_storage__pb2.ListOfflineClientsRequest,
+        request: mavio_dot_storage_dot_v1_dot_storage__pb2.GetOfflineDownloadsRequest,
         *,
         headers: Headers | Mapping[str, str] | None = None,
         timeout_ms: int | None = None,
         use_get: bool = False,
-    ) -> mavio_dot_storage_dot_v1_dot_storage__pb2.ListOfflineClientsResponse:
+    ) -> mavio_dot_storage_dot_v1_dot_storage__pb2.GetOfflineDownloadsResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
-                name="ListOfflineClients",
+                name="GetOfflineDownloads",
                 service_name="mavio.storage.v1.StorageService",
-                input=mavio_dot_storage_dot_v1_dot_storage__pb2.ListOfflineClientsRequest,
-                output=mavio_dot_storage_dot_v1_dot_storage__pb2.ListOfflineClientsResponse,
+                input=mavio_dot_storage_dot_v1_dot_storage__pb2.GetOfflineDownloadsRequest,
+                output=mavio_dot_storage_dot_v1_dot_storage__pb2.GetOfflineDownloadsResponse,
                 idempotency_level=IdempotencyLevel.NO_SIDE_EFFECTS,
             ),
             headers=headers,
@@ -845,20 +845,20 @@ class StorageServiceClientSync(ConnectClientSync):
             use_get=use_get,
         )
 
-    def set_offline_clients(
+    def update_offline_downloads(
         self,
-        request: mavio_dot_storage_dot_v1_dot_storage__pb2.SetOfflineClientsRequest,
+        request: mavio_dot_storage_dot_v1_dot_storage__pb2.UpdateOfflineDownloadsRequest,
         *,
         headers: Headers | Mapping[str, str] | None = None,
         timeout_ms: int | None = None,
-    ) -> mavio_dot_storage_dot_v1_dot_storage__pb2.SetOfflineClientsResponse:
+    ) -> mavio_dot_storage_dot_v1_dot_storage__pb2.UpdateOfflineDownloadsResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
-                name="SetOfflineClients",
+                name="UpdateOfflineDownloads",
                 service_name="mavio.storage.v1.StorageService",
-                input=mavio_dot_storage_dot_v1_dot_storage__pb2.SetOfflineClientsRequest,
-                output=mavio_dot_storage_dot_v1_dot_storage__pb2.SetOfflineClientsResponse,
+                input=mavio_dot_storage_dot_v1_dot_storage__pb2.UpdateOfflineDownloadsRequest,
+                output=mavio_dot_storage_dot_v1_dot_storage__pb2.UpdateOfflineDownloadsResponse,
                 idempotency_level=IdempotencyLevel.UNKNOWN,
             ),
             headers=headers,
