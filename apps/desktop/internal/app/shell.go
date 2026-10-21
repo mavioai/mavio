@@ -264,10 +264,13 @@ func libraryIcon(k capiv1.LibraryType) string {
 func (a *App) titleBar(c *ui.Context, medium, expanded bool) {
 	bar := c.TitleBar()
 	h := max(bar.Height, 28)
-	ui.Row(c).Height(h + style.Layout(c).Gutter/2).PaddingStart(bar.Left).PaddingEnd(8).AlignItems(ui.Center).DragWindow().Children(func() {
-		if !expanded {
-			return
-		}
+	row := ui.Row(c).Height(h + style.Layout(c).Gutter/2).AlignItems(ui.Center).DragWindow()
+	// The rail is as narrow as the web UI's, narrower than the window's
+	// controls, which reach past it over the page: its band keeps its width.
+	if !expanded {
+		return
+	}
+	row.PaddingStart(bar.Left).PaddingEnd(8).Children(func() {
 		ui.Spacer(c)
 		a.assistantButton(c, nil, 28)
 		label := style.T(c, "nav.collapseSidebar")

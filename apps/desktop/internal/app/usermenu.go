@@ -23,7 +23,7 @@ func (a *App) userButton(c *ui.Context, withName bool) {
 	label := style.T(c, "nav.userMenu", "name", name)
 	b := ui.ButtonBase(c).Margin(8, 12, 12).Padding(8).Gap(10).Radius(10).AlignItems(ui.Center).Label(label)
 	if !withName {
-		b.Margin(8).Size(36, 36).Padding(0).Center().Tooltip(name)
+		b.Size(36, 36).Padding(0).Center().Tooltip(name)
 	}
 	if b.Hovered() || a.userMenuOpen {
 		b.Background(style.Color(colors.Fill))
