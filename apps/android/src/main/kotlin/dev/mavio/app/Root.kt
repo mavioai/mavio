@@ -496,7 +496,7 @@ private fun Shell(model: AppModel) {
                                     .size(36.dp)
                                     .shadow(8.dp, CircleShape)
                                     .clip(CircleShape)
-                                    .glass(haze, glassTint(), radius = 12.dp, saturation = 1.8f)
+                                    .glass(haze, glassTint(), radius = GLASS_BLUR, saturation = 1.8f)
                                     .clickable { navigator.back() },
                                 Alignment.Center,
                             ) {
@@ -679,7 +679,7 @@ private fun Header(model: AppModel, back: Boolean, backdrop: HeaderBackdrop, rou
                     .matchParentSize()
                     // Haze reads its style once; the fade is the layer's.
                     .graphicsLayer { alpha = edge }
-                    .glass(haze, colors.background.copy(alpha = 0.8f), radius = 24.dp, saturation = 1.8f)
+                    .glass(haze, glassTint(), radius = GLASS_BLUR, saturation = 1.8f)
                     .drawWithContent {
                         drawContent()
                         drawLine(hairline, Offset(0f, size.height - 0.5f), Offset(size.width, size.height - 0.5f), strokeWidth = 1f)
@@ -727,7 +727,7 @@ private fun Header(model: AppModel, back: Boolean, backdrop: HeaderBackdrop, rou
                     .size(36.dp)
                     .shadow(if (dark) 16.dp else 8.dp, CircleShape)
                     .clip(CircleShape)
-                    .glass(haze, glassTint(), radius = 12.dp, saturation = 1.8f)
+                    .glass(haze, glassTint(), radius = GLASS_BLUR, saturation = 1.8f)
                     .clickable { navigator.open(Route.Settings) },
                 Alignment.Center,
             ) {
@@ -773,7 +773,7 @@ private fun TabBar(tabs: List<Tab>, current: Tab, haze: HazeState, modifier: Mod
             .fillMaxWidth()
             .shadow(if (dark) 16.dp else 8.dp, pill)
             .clip(pill)
-            .glass(haze, glassTint(), radius = 12.dp, saturation = 1.8f)
+            .glass(haze, glassTint(), radius = GLASS_BLUR, saturation = 1.8f)
             .border(1.dp, if (dark) Color.White.copy(alpha = 0.12f) else Color.White.copy(alpha = 0.55f), pill)
             .padding(4.dp),
         horizontalArrangement = Arrangement.spacedBy(4.dp),
@@ -803,9 +803,12 @@ private fun TabBar(tabs: List<Tab>, current: Tab, haze: HazeState, modifier: Mod
     }
 }
 
-/** The tint of the header's and the tab bar's glass. */
+/** The tint of the header's and the tab bar's glass, as iOS's bar material. */
 @Composable
-private fun glassTint(): Color = if (theme.colors.background.luminance() < 0.5f) Color(0x61252528) else Color(0x59FFFFFF)
+private fun glassTint(): Color = if (theme.colors.background.luminance() < 0.5f) Color(0xBA1D1D1F) else Color(0xC7F9F9F9)
+
+/** How much the header's and the tab bar's glass blurs, as iOS's bars. */
+private val GLASS_BLUR = 24.dp
 
 /**
  * What lies under the phone's header on each screen (by its route): how far
