@@ -63,7 +63,7 @@ func (a *App) tvSettings(c *ui.Context, r *ui.Route, id string) {
 				a.settingsSection(c, r, id)
 				// A server's section names the server chosen beside its
 				// title, as the sidebar would.
-				if !slices.Contains(settingsGroups[0].entries, id) && id != "account" && a.account != nil && len(a.servers) > 1 {
+				if !slices.Contains(settingsGroups[0].entries, id) && id != "account" && id != "about" && a.choosesServer() {
 					ui.Box(c).Absolute().Top(0).Right(0).Width(280).Children(func() { a.serverChoice(c) })
 				}
 			})
@@ -89,7 +89,7 @@ func (a *App) tvSettingsList(c *ui.Context) {
 			title = style.T(c, g.title)
 		}
 		group(c, cmp.Or(g.title, g.entries[0]), title, "", func(gr *settingsGroup) {
-			if g.server && a.account != nil && len(a.servers) > 1 {
+			if g.server && a.choosesServer() {
 				gr.block(func() { a.serverChoice(c) })
 			}
 			for _, id := range g.entries {
@@ -134,7 +134,7 @@ func (a *App) tvMenuList(c *ui.Context, m settingsMenu) {
 	colors := style.Colors(c)
 	ui.Row(c).Gap(16).AlignItems(ui.Center).Children(func() {
 		style.Text(ui.Text(c, style.T(c, m.title)), style.Type(c).Display).TextColor(style.Color(colors.TextPrimary)).Grow(1).MinWidth(0)
-		if a.account != nil && len(a.servers) > 1 {
+		if a.choosesServer() {
 			ui.Box(c).Width(280).Children(func() { a.serverChoice(c) })
 		}
 	})

@@ -72,3 +72,20 @@ func TestSettingsLayoutInstant(t *testing.T) {
 		}
 	}
 }
+
+// With a Mavio account the server's group starts with the choice of the
+// server, as the web UI's, even with one server.
+func TestSettingsServerChoice(t *testing.T) {
+	h := newHarness(t, true, 1280, 900)
+	h.app.account = capiv1.Account_builder{Id: "acc"}.Build()
+	h.app.router.Push("/settings/overview")
+	h.settle()
+	r, ok := h.tt.Find(h.core.s.Server.Name)
+	if !ok {
+		t.Fatalf("no choice of the server; texts = %q", h.tt.Texts())
+	}
+	if r.X > 200 {
+		t.Errorf("the choice is at x = %v, want = in the sidebar", r.X)
+	}
+	h.save(shots, "settings-server-choice")
+}

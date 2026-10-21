@@ -311,7 +311,7 @@ func (a *App) settingsSidebar(c *ui.Context, current string) {
 					if g.title != "" {
 						sidebarHeading(c, style.T(c, g.title))
 					}
-					if g.server && a.account != nil && len(a.servers) > 1 {
+					if g.server && a.choosesServer() {
 						a.serverChoice(c)
 					}
 					for _, id := range sections {
@@ -329,14 +329,20 @@ func sidebarHeading(c *ui.Context, title string) {
 	style.Text(ui.Text(c, title), style.Type(c).Caption).FontWeight(600).TextColor(style.Color(style.Colors(c).TextTertiary)).Padding(0, 8, 4)
 }
 
-// serverChoice builds the choice of the server whose settings are shown.
+// choosesServer reports whether the settings choose the server whose
+// they are: with a Mavio account, as the web UI's, even for one server; a
+// standalone server's user is signed in to one.
+func (a *App) choosesServer() bool { return a.account != nil && len(a.servers) > 0 }
+
+// serverChoice builds the choice of the server whose settings are shown,
+// in the sidebar as wide and tall as its rows.
 func (a *App) serverChoice(c *ui.Context) {
 	names := make([]string, len(a.servers))
 	for i, s := range a.servers {
 		names[i] = s.GetName()
 	}
 	chosen := a.chosenServer().GetName()
-	sel := selectOf(c, &chosen, names).FillWidth().Margin(0, 0, 6).Label(style.T(c, "settings.serverChoice"))
+	sel := selectOf(c, &chosen, names).FillWidth().MinHeight(40).Radius(10).Margin(0, 0, 6).Label(style.T(c, "settings.serverChoice"))
 	if sel.Changed() {
 		if i := slices.Index(names, chosen); i >= 0 {
 			a.settingsState.server = a.servers[i].GetId()
