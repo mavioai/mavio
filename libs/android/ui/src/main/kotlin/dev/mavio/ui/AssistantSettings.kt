@@ -24,6 +24,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -386,7 +387,8 @@ private fun LazyListScope.conversations(state: AssistantPrefs) {
 @Composable
 private fun ConversationItem(state: AssistantPrefs, c: AssistantConversation, divided: Boolean) {
     val scope = rememberCoroutineScope()
-    if (divided) RowDivider()
+    // The conversations are divided across the whole card.
+    if (divided) HorizontalDivider(color = theme.colors.border)
     // The assistant's conversations have no titles: they go by when they were, and where.
     val time = c.updateTime.instant?.let(::dateTime).orEmpty()
     val detail = listOf(c.deviceName, if (c.title.isNotEmpty()) time else "").filter { it.isNotEmpty() }.joinToString(" · ")
