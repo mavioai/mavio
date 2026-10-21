@@ -30,6 +30,16 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <!-- The launcher's shortcut that starts the assistant listening. -->
+            <meta-data android:name="android.app.shortcuts" android:resource="@xml/shortcuts" />
+            <!-- The system's voice search, handed to the assistant, and the
+                 shortcut and the Quick Settings tile asking it to listen. -->
+            <intent-filter>
+                <action android:name="android.media.action.MEDIA_PLAY_FROM_SEARCH" />
+                <action android:name="com.google.android.gms.actions.SEARCH_ACTION" />
+                <action android:name="dev.mavio.action.TALK" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
             <!-- mavio.dev sending the browser back from a sign-in, where the
                  browser opened a Custom Tab rather than an Auth Tab. -->
             <intent-filter>
@@ -39,5 +49,16 @@
                 <data android:scheme="dev.mavio.app" />
             </intent-filter>
         </activity>
+        <!-- The Quick Settings tile that starts the assistant listening. -->
+        <service
+            android:name=".TalkTile"
+            android:exported="true"
+            android:icon="@drawable/ic_microphone"
+            android:label="@string/assistant_title"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+        </service>
     </application>
 </manifest>

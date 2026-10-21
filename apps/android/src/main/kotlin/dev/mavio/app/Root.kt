@@ -43,6 +43,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -52,6 +53,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.setValue
@@ -112,12 +114,20 @@ import dev.mavio.ui.MavioIcon
 import dev.mavio.ui.R
 import dev.mavio.ui.StatusView
 import dev.mavio.ui.Wordmark
+import dev.mavio.ui.AssistantButton
+import dev.mavio.ui.AssistantHost
+import dev.mavio.ui.AssistantOverlay
+import dev.mavio.ui.AssistantScreen
+import dev.mavio.ui.LocalAssistant
 import dev.mavio.ui.blurAvailable
 import dev.mavio.ui.discovered
 import dev.mavio.ui.rememberDiscover
 import dev.mavio.ui.text
 import dev.mavio.ui.theme
 import kotlin.math.roundToInt
+import mavio.assistant.v1.Assistant.NavigateAction
+import mavio.assistant.v1.Assistant.NavigateTarget
+import mavio.assistant.v1.Assistant.PlayAction
 
 /** A screen pushed: it slides in from the end over the one before, which moves aside a little. */
 private fun pushTransition(): ContentTransform =
@@ -328,6 +338,69 @@ private fun Shell(model: AppModel) {
     // The player and the sign-in take the whole screen.
     val chrome = stack.lastOrNull().let { it !is Route.Player && it != Route.AddServer }
     FollowGroup(model, navigator)
+    // The assistant learns what shows, and opens and plays what it asks.
+    val assistant = LocalAssistant.current
+    var wideLayout by remember { mutableStateOf(false) }
+    val currentSelect by rememberUpdatedState(select)
+    DisposableEffect(assistant, navigator) {
+        val host = object : AssistantHost {
+            override val screen get() = assistantScreen(navigator.top)
+
+            override fun play(action: PlayAction, serverId: String): Boolean {
+                val ids = action.itemIdsList
+                if (ids.isEmpty()) return false
+                val start = if (action.hasStartPosition()) java.time.Duration.ofSeconds(action.startPosition.seconds, action.startPosition.nanos.toLong()) else null
+                val route = Route.Player(serverId, ids.getOrElse(action.startIndex) { ids[0] }, "", null, start)
+                if (navigator.top is Route.Player) navigator.replace(route) else navigator.open(route)
+                return true
+            }
+
+            override fun navigate(action: NavigateAction, serverId: String): Boolean {
+                // A screen opens in the player's place.
+                val closing = { if (navigator.top is Route.Player) navigator.back() }
+                when (action.target) {
+                    NavigateTarget.NAVIGATE_TARGET_HOME -> {
+                        place = Route.Home
+                        stacks.getValue(Route.Home).let { while (it.size > 1) it.removeAt(it.lastIndex) }
+                    }
+                    NavigateTarget.NAVIGATE_TARGET_BACK -> {
+                        if ((stacks[place]?.size ?: 0) <= 1) return false
+                        navigator.back()
+                    }
+                    NavigateTarget.NAVIGATE_TARGET_ITEM -> {
+                        if (action.id.isEmpty()) return false
+                        closing()
+                        navigator.open(Route.Item(serverId, action.id))
+                    }
+                    NavigateTarget.NAVIGATE_TARGET_LIBRARY -> {
+                        if (action.id.isEmpty()) return false
+                        closing()
+                        navigator.open(Route.Library(serverId, action.id, null))
+                    }
+                    NavigateTarget.NAVIGATE_TARGET_SEARCH -> {
+                        closing()
+                        if (action.query.isNotEmpty()) search.asked = action.query
+                        if (navigator.top != Route.Search) navigator.open(Route.Search)
+                    }
+                    NavigateTarget.NAVIGATE_TARGET_SETTINGS -> {
+                        closing()
+                        // The wide layout's settings are a place of their own.
+                        if (wideLayout) currentSelect(Route.Settings) else if (navigator.top != Route.Settings) navigator.open(Route.Settings)
+                    }
+                    else -> return false
+                }
+                return true
+            }
+        }
+        assistant?.host = host
+        onDispose { if (assistant?.host === host) assistant.host = null }
+    }
+    val servers by model.signedIn.collectAsStateWithLifecycle()
+    val shown = stack.lastOrNull()
+    LaunchedEffect(assistant, shown, servers) {
+        assistant?.refresh()
+        assistant?.contextChanged()
+    }
     // The screens move between the phone's layout and the wide one with their state.
     val screens = remember {
         movableContentOf { modifier: Modifier, rootInset: Dp, settings: Boolean ->
@@ -363,6 +436,7 @@ private fun Shell(model: AppModel) {
     }
     BoxWithConstraints(Modifier.fillMaxSize().background(theme.colors.background)) {
         val wide = maxWidth >= 600.dp
+        SideEffect { wideLayout = wide }
         // The wide layout's settings have a sidebar of their own and show a section beside it.
         val settings = wide && place == Route.Settings
         LaunchedEffect(settings, stack.size) { if (settings && stack.size == 1) stack.add(FIRST_SETTING) }
@@ -494,7 +568,27 @@ private fun Shell(model: AppModel) {
                 )
             }
         }
+        // Over the phone's tab bar where it shows.
+        assistant?.let { AssistantOverlay(it, lift = if (chrome && !wide && stack.size == 1) TAB_BAR_HEIGHT + 8.dp else 0.dp) }
     }
+}
+
+/** The screen a route shows, as the assistant's requests name it. */
+private fun assistantScreen(route: Route?): AssistantScreen = when (route) {
+    null, Route.Home -> AssistantScreen("home")
+    Route.Libraries -> AssistantScreen("libraries")
+    Route.Search -> AssistantScreen("search")
+    Route.Settings, is Route.Setting, is Route.Admin, Route.AddServer -> AssistantScreen("settings")
+    Route.Discover, is Route.Catalog, is Route.Title, is Route.TitleCredits, is Route.DiscoveredPerson, is Route.DiscoveredCollection ->
+        AssistantScreen("discover")
+    is Route.Item -> AssistantScreen("item", route.serverId, route.itemId)
+    is Route.Credits -> AssistantScreen("item", route.serverId, route.itemId)
+    is Route.EditMetadata -> AssistantScreen("item", route.serverId, route.itemId)
+    is Route.Identify -> AssistantScreen("item", route.serverId, route.itemId)
+    is Route.ItemImages -> AssistantScreen("item", route.serverId, route.itemId)
+    is Route.Library -> AssistantScreen("library", route.serverId, libraryId = route.libraryId)
+    is Route.Person -> AssistantScreen("person", route.serverId)
+    is Route.Player -> AssistantScreen("player", route.serverId, route.itemId)
 }
 
 /** The height of the row Back has above a page opened from another in the wide layout. */
@@ -607,6 +701,7 @@ private fun Header(model: AppModel, back: Boolean, backdrop: HeaderBackdrop, rou
             Spacer(Modifier.weight(1f))
             // Search and the avatar are the places' alone, as the tab bar.
             if (back) return@Row
+            LocalAssistant.current?.let { AssistantButton(it, tint = ink) }
             Box(
                 Modifier
                     .size(36.dp)

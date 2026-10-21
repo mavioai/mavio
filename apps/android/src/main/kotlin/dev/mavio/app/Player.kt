@@ -120,6 +120,12 @@ import java.time.Duration
 import java.util.UUID
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
+import dev.mavio.ui.Assistant
+import dev.mavio.ui.AssistantButton
+import dev.mavio.ui.AssistantPlayer
+import dev.mavio.ui.AssistantPlayerEffect
+import dev.mavio.ui.LocalAssistant
+import mavio.assistant.v1.Assistant.ControlCommand
 
 /** A playback the server started, with the engine that plays it. */
 private class Playback(
@@ -276,6 +282,51 @@ fun PlayerScreen(model: AppModel, route: Route.Player) {
         onDispose { session?.release() }
     }
     val pip = PictureInPicture(player)
+    // The assistant controls the player as the user does.
+    val currentNext by rememberUpdatedState(playNext)
+    val currentSelection by rememberUpdatedState(selection)
+    val assistantPlayer = remember(p, player, controls) {
+        val pl = controls ?: player
+        if (p == null || pl == null) return@remember null
+        object : AssistantPlayer {
+            override val playing
+                get() = Assistant.playing(
+                    route.itemId,
+                    pl.currentPosition,
+                    paused = !pl.playWhenReady,
+                    speed = pl.playbackParameters.speed.toDouble(),
+                    audio = p.info.audioStreamIndex,
+                    subtitle = p.info.subtitleStreamIndex,
+                )
+
+            override fun control(command: ControlCommand, value: Double): Boolean {
+                when (command) {
+                    ControlCommand.CONTROL_COMMAND_PAUSE -> pl.pause()
+                    ControlCommand.CONTROL_COMMAND_RESUME -> pl.play()
+                    ControlCommand.CONTROL_COMMAND_STOP -> navigator.back()
+                    ControlCommand.CONTROL_COMMAND_SEEK -> pl.seekTo((value * 1000).toLong().coerceAtLeast(0))
+                    ControlCommand.CONTROL_COMMAND_SEEK_BY -> pl.seekTo((pl.currentPosition + (value * 1000).toLong()).coerceAtLeast(0))
+                    ControlCommand.CONTROL_COMMAND_SPEED -> {
+                        if (value <= 0) return false
+                        pl.setPlaybackSpeed(value.toFloat())
+                    }
+                    ControlCommand.CONTROL_COMMAND_NEXT -> (currentNext ?: return false)()
+                    // The player fills the screen already.
+                    ControlCommand.CONTROL_COMMAND_FULLSCREEN -> Unit
+                    else -> return false
+                }
+                return true
+            }
+
+            override fun streams(audio: Int?, subtitle: Int?): Boolean {
+                val current = Selection(p.info.audioStreamIndex, p.info.subtitleStreamIndex ?: -1, currentSelection.quality)
+                resume = Duration.ofMillis(pl.currentPosition)
+                selection = current.copy(audio = audio ?: current.audio, subtitle = subtitle ?: current.subtitle)
+                return true
+            }
+        }
+    }
+    AssistantPlayerEffect(assistantPlayer)
 
     Box(Modifier.fillMaxSize().background(Color.Black)) {
         when {
@@ -542,6 +593,7 @@ private fun Controls(
                                 )
                             }
                         }
+                        LocalAssistant.current?.let { AssistantButton(it, tint = Color.White, size = 20.dp) }
                         if (playback.info.subtitles.isNotEmpty()) {
                             val on = (playback.info.subtitleStreamIndex ?: -1) >= 0
                             PlayerButton(

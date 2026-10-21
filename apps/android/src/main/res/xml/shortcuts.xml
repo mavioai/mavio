@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The launcher's shortcuts: the assistant, listening. -->
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_assistant"
+        android:shortcutId="assistant"
+        android:shortcutShortLabel="@string/assistant_title">
+        <intent
+            android:action="dev.mavio.action.TALK"
+            android:targetClass="dev.mavio.app.MainActivity"
+            android:targetPackage="dev.mavio.app" />
+    </shortcut>
+</shortcuts>

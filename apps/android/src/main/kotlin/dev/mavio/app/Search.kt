@@ -62,6 +62,9 @@ import mavio.acquisition.v1.searchTitlesRequest
 class SearchCache {
     /** The query searched, with its results; null while none was. */
     var last by mutableStateOf<Pair<String, Result<List<SearchResults>>>?>(null)
+
+    /** A query to search as Search shows, as the assistant asks; taken by it. */
+    var asked by mutableStateOf<String?>(null)
 }
 
 /** Search's kept results. */
@@ -103,7 +106,14 @@ fun SearchScreen(model: AppModel) {
     val titles = found?.getOrNull()?.titlesList.orEmpty().distinctBy(::titleKey)
     val focus = remember { FocusRequester() }
     val keyboard = LocalSoftwareKeyboardController.current
-    LaunchedEffect(Unit) { if (query.isEmpty()) focus.requestFocus() }
+    LaunchedEffect(Unit) { if (query.isEmpty() && cache.asked == null) focus.requestFocus() }
+    // The assistant's query, searched as it asks.
+    LaunchedEffect(cache.asked) {
+        val asked = cache.asked ?: return@LaunchedEffect
+        cache.asked = null
+        text = asked
+        query = asked
+    }
     val colors = theme.colors
     val navigator = LocalNavigator.current
     LazyColumn(
