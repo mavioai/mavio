@@ -729,9 +729,9 @@ func deskSelect(c *ui.Context, chosen *string, labels []string) ui.Element {
 	width := b.Bounds().W
 	shadow := design.ElevationLevel3
 	sp.Popup(func(panel ui.Element) {
-		panel.Margin(4, 0, 0, 0).MinWidth(width).Radius(14).Material(glass.Blur{Radius: 24}).AlignItems(ui.Stretch).
+		panel.Margin(4, 0, 0, 0).MinWidth(width).Radius(14).AlignItems(ui.Stretch).
 			Shadow(shadow.X, shadow.Y, shadow.Blur, shadow.Spread, style.Color(shadow.Color))
-		ui.Scroll(c).MaxHeight(384).Radius(14).Background(style.Color(colors.SurfaceOverlay).Alpha(0.9)).Border(1, style.Color(colors.Border)).Children(func() {
+		ui.Scroll(c).MaxHeight(384).Radius(14).Background(style.Color(colors.SurfaceOverlay)).Border(1, style.Color(colors.Border)).Children(func() {
 			ui.Column(c).Padding(6).AlignItems(ui.Stretch).Children(func() {
 				for _, l := range labels {
 					item := sp.Item(l).MinHeight(28).Padding(0, 8).Gap(8).Radius(6).AlignItems(ui.Center)
