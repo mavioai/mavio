@@ -114,6 +114,7 @@
 				583AB965AC056314707581D9 /* Frameworks */,
 				059BEE2F9C79D357AE8B22D9 /* Resources */,
 				B27CF9B554E58741EAF2CAA8 /* Embed Foundation Extensions */,
+				FB39EBC7CDDBEDCB7CC6FAE4 /* Version */,
 			);
 			buildRules = (
 			);
@@ -142,6 +143,7 @@
 				850CCA757860E601FBCD5925 /* Sources */,
 				0422C415F11A39B54BAED16B /* Frameworks */,
 				5DFB204E336173D113633595 /* Resources */,
+				8FE55F2E06B0C5B594CE50D7 /* Version */,
 			);
 			buildRules = (
 			);
@@ -205,6 +207,49 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		FB39EBC7CDDBEDCB7CC6FAE4 /* Version */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"$(TARGET_BUILD_DIR)/$(INFOPLIST_PATH)",
+			);
+			name = Version;
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "sh \"$SRCROOT/../../libs/apple/scripts/version.sh\" \"$TARGET_BUILD_DIR/$INFOPLIST_PATH\"\n";
+		};
+		8FE55F2E06B0C5B594CE50D7 /* Version */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"$(TARGET_BUILD_DIR)/$(INFOPLIST_PATH)",
+			);
+			name = Version;
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "sh \"$SRCROOT/../../libs/apple/scripts/version.sh\" \"$TARGET_BUILD_DIR/$INFOPLIST_PATH\"\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		2A07A2951BA3767262E275D0 /* Sources */ = {
@@ -281,6 +326,7 @@
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Mavio;
@@ -306,6 +352,7 @@
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Mavio;
@@ -329,6 +376,7 @@
 				CODE_SIGN_ENTITLEMENTS = TopShelf.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = TopShelf.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Mavio;
@@ -349,6 +397,7 @@
 				CODE_SIGN_ENTITLEMENTS = TopShelf.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = TopShelf.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Mavio;

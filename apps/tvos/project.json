@@ -34,6 +34,10 @@
         {
           "dependentTasksOutputFiles": "**/*",
           "transitive": true
+        },
+        "{workspaceRoot}/libs/apple/scripts/version.sh",
+        {
+          "env": "MAVIO_VERSION"
         }
       ],
       "cache": true

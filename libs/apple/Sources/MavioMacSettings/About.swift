@@ -11,13 +11,10 @@
             super.viewDidLoad()
             title = MavioStrings.settingsAbout
             let device = model.device
-            let info = Bundle.main.infoDictionary ?? [:]
-            let version = info["CFBundleShortVersionString"] as? String ?? device.clientVersion
-            let build = info["CFBundleVersion"] as? String
             let app: [NSView] = [
                 FormRow.value(MavioStrings.aboutAppName, device.client, theme: theme),
                 FormRow.value(
-                    MavioStrings.aboutClientVersion, build.map { "\(version) (\($0))" } ?? version, theme: theme),
+                    MavioStrings.aboutClientVersion, Bundle.main.mavioVersionAndBuild, theme: theme),
                 FormRow.value(MavioStrings.aboutCoreVersion, coreVersion, theme: theme),
                 FormRow.value(MavioStrings.aboutLicense, "GPL-3.0", theme: theme),
             ]

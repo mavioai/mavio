@@ -129,7 +129,7 @@ public final class AppModel {
             id = UUID().uuidString.lowercased()
             defaults.set(id, forKey: "deviceId")
         }
-        let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "0.0.0"
+        let version = Bundle.main.mavioVersion
         #if os(macOS)
             let name = Host.current().localizedName ?? "Mac"
             let client = "Mavio for Mac"
@@ -365,4 +365,23 @@ extension CoreError {
 extension Error {
     /// What happened, as the server or the core told it.
     public var reason: String { (self as? CoreError)?.reason ?? localizedDescription }
+}
+
+extension Bundle {
+    /// The app's version as the server's and the core's
+    /// (docs/development.md §7): a release's, else 0.0.0 and the commit it
+    /// was built at, else dev, which the projects' Version phase sets as
+    /// MavioVersion (libs/apple/scripts/version.sh).
+    public var mavioVersion: String {
+        object(forInfoDictionaryKey: "MavioVersion") as? String
+            ?? object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "dev"
+    }
+
+    /// The version with the build, as About shows it: 0.0.0-0123456789ab
+    /// (1234).
+    public var mavioVersionAndBuild: String {
+        let version = mavioVersion
+        guard let build = object(forInfoDictionaryKey: "CFBundleVersion") as? String else { return version }
+        return "\(version) (\(build))"
+    }
 }

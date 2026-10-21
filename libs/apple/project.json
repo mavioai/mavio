@@ -25,6 +25,9 @@
         },
         {
           "env": "MAVIO_APPLE_PLATFORMS"
+        },
+        {
+          "env": "MAVIO_VERSION"
         }
       ],
       "outputs": [

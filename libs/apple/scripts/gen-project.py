@@ -144,10 +144,13 @@ def project(app):
         "PRODUCT_BUNDLE_IDENTIFIER": "dev.mavio.app",
         "PRODUCT_NAME": '"$(TARGET_NAME)"',
         "SWIFT_EMIT_LOC_STRINGS": "YES",
+        # The Version phase asks git for the commit, outside the sandbox.
+        "ENABLE_USER_SCRIPT_SANDBOXING": "NO",
         **p["target"],
     }
-    base = {k: target[k] for k in ("CODE_SIGN_STYLE", "CURRENT_PROJECT_VERSION", "GENERATE_INFOPLIST_FILE",
-                                   "MARKETING_VERSION", "PRODUCT_NAME", "SWIFT_EMIT_LOC_STRINGS")}
+    base = {k: target[k] for k in ("CODE_SIGN_STYLE", "CURRENT_PROJECT_VERSION", "ENABLE_USER_SCRIPT_SANDBOXING",
+                                   "GENERATE_INFOPLIST_FILE", "MARKETING_VERSION", "PRODUCT_NAME",
+                                   "SWIFT_EMIT_LOC_STRINGS")}
     x = extension(app, p.get("extension"), {**base, **p.get("extension", {}).get("target", {})})
     products = p["products"]
     buildfiles = "".join(
@@ -224,7 +227,8 @@ def project(app):
 				{i('sources-phase')} /* Sources */,
 				{i('frameworks')} /* Frameworks */,
 				{i('resources')} /* Resources */,
-{x["embed"]}			);
+{x["embed"]}				{i('version')} /* Version */,
+			);
 			buildRules = (
 			);
 			dependencies = (
@@ -281,6 +285,9 @@ def project(app):
 		}};
 {x["resources"]}/* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+{version_phase(i('version'))}{x["version"]}/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		{i('sources-phase')} /* Sources */ = {{
 			isa = PBXSourcesBuildPhase;
@@ -330,12 +337,26 @@ def project(app):
 """
 
 
+def version_phase(key):
+    """The build phase setting the version of the built Info.plist
+    (scripts/version.sh), run on every build since the commit changes; an
+    app's comes after embedding its extension, which processing its
+    Info.plist waits for."""
+    return (f"\t\t{key} /* Version */ = {{\n\t\t\tisa = PBXShellScriptBuildPhase;\n\t\t\talwaysOutOfDate = 1;\n"
+            f"\t\t\tbuildActionMask = 2147483647;\n\t\t\tfiles = (\n\t\t\t);\n\t\t\tinputFileListPaths = (\n\t\t\t);\n"
+            f"\t\t\tinputPaths = (\n\t\t\t\t\"$(TARGET_BUILD_DIR)/$(INFOPLIST_PATH)\",\n\t\t\t);\n"
+            f"\t\t\tname = Version;\n\t\t\toutputFileListPaths = (\n\t\t\t);\n\t\t\toutputPaths = (\n\t\t\t);\n"
+            f"\t\t\trunOnlyForDeploymentPostprocessing = 0;\n\t\t\tshellPath = /bin/sh;\n"
+            f"\t\t\tshellScript = \"sh \\\"$SRCROOT/../../libs/apple/scripts/version.sh\\\" \\\"$TARGET_BUILD_DIR/$INFOPLIST_PATH\\\"\\n\";\n"
+            f"\t\t}};\n")
+
+
 def extension(app, ext, values):
     """The pieces of the project that make and embed the app's extension,
     empty without one."""
     keys = ("buildfile", "proxy", "copy", "fileref", "groups", "frameworks", "children", "product", "embed",
             "dependency", "shared", "target", "targets", "resources", "sources", "dependencies", "configs",
-            "configlist")
+            "configlist", "version")
     if not ext:
         return dict.fromkeys(keys, "")
     i = lambda name: oid(app, name)  # noqa: E731
@@ -379,6 +400,7 @@ def extension(app, ext, values):
                    f"\t\t\tbuildConfigurationList = {i('ext-configs')} /* Build configuration list for PBXNativeTarget \"{n}\" */;\n"
                    f"\t\t\tbuildPhases = (\n\t\t\t\t{i('ext-sources-phase')} /* Sources */,\n"
                    f"\t\t\t\t{i('ext-frameworks')} /* Frameworks */,\n\t\t\t\t{i('ext-resources')} /* Resources */,\n"
+                   f"\t\t\t\t{i('ext-version')} /* Version */,\n"
                    f"\t\t\t);\n\t\t\tbuildRules = (\n\t\t\t);\n\t\t\tdependencies = (\n\t\t\t);\n"
                    f"\t\t\tfileSystemSynchronizedGroups = (\n\t\t\t\t{i('ext-sources')} /* {n} */,\n"
                    f"\t\t\t\t{i('shared')} /* Shared */,\n\t\t\t);\n\t\t\tname = {n};\n\t\t\tproductName = {n};\n"
@@ -392,6 +414,7 @@ def extension(app, ext, values):
                          f"\t\t\ttargetProxy = {i('ext-proxy')} /* PBXContainerItemProxy */;\n\t\t}};\n"
                          f"/* End PBXTargetDependency section */"),
         "configs": config("ext-debug", "Debug") + config("ext-release", "Release"),
+        "version": version_phase(i("ext-version")),
         "configlist": (f"\t\t{i('ext-configs')} /* Build configuration list for PBXNativeTarget \"{n}\" */ = {{\n"
                        f"\t\t\tisa = XCConfigurationList;\n\t\t\tbuildConfigurations = (\n"
                        f"\t\t\t\t{i('ext-debug')} /* Debug */,\n\t\t\t\t{i('ext-release')} /* Release */,\n"

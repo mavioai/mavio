@@ -16,13 +16,10 @@ struct AboutSettingsView: View {
 
     var body: some View {
         let device = model.device
-        let info = Bundle.main.infoDictionary ?? [:]
-        let version = info["CFBundleShortVersionString"] as? String ?? device.clientVersion
-        let build = info["CFBundleVersion"] as? String
         SettingsList {
             Section(MavioStrings.aboutApp) {
                 row(MavioStrings.aboutAppName, device.client)
-                row(MavioStrings.aboutClientVersion, build.map { "\(version) (\($0))" } ?? version)
+                row(MavioStrings.aboutClientVersion, Bundle.main.mavioVersionAndBuild)
                 row(MavioStrings.aboutCoreVersion, MavioKit.coreVersion)
                 row(MavioStrings.aboutLicense, "GPL-3.0")
             }
