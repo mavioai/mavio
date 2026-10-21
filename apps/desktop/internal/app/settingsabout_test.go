@@ -95,3 +95,25 @@ func TestSettingsServerChoice(t *testing.T) {
 	h.settle()
 	h.save(shots, "settings-server-choice-open")
 }
+
+// The sidebar's title stays under the window's buttons while the menu below
+// it scrolls.
+func TestSettingsSidebarScroll(t *testing.T) {
+	h := newHarness(t, true, 1280, 600)
+	h.app.router.Push("/settings/appearance")
+	h.settle()
+	title, _ := h.tt.Find("Settings")
+	logs, ok := h.tt.Find("Logs")
+	if !ok {
+		t.Fatalf("no Logs; texts = %q", h.tt.Texts())
+	}
+	h.tt.Scroll(100, 400, 0, 400)
+	h.settle()
+	if got, _ := h.tt.Find("Settings"); got != title {
+		t.Errorf("title = %v, want = %v", got, title)
+	}
+	if got, _ := h.tt.Find("Logs"); got.Y >= logs.Y {
+		t.Errorf("Logs at y = %v, want above %v", got.Y, logs.Y)
+	}
+	h.save(shots, "settings-sidebar-scroll")
+}

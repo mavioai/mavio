@@ -267,21 +267,24 @@ func (a *App) settings(c *ui.Context, r *ui.Route) {
 func (a *App) settingsSidebar(c *ui.Context, current string) {
 	colors := style.Colors(c)
 	top := max(c.TitleBar().Height, 12)
-	ui.Scroll(c).Fill().Children(func() {
-		ui.Column(c).Padding(top+8, 16, 20).Gap(16).Children(func() {
-			ui.Box(c).Height(4).FillWidth().DragWindow()
-			home := ui.ButtonBase(c).AlignSelf(ui.Start).Gap(4).AlignItems(ui.Center).Label(style.T(c, "nav.home"))
-			home.Children(func() {
-				ui.Icon(c, style.Icon("back", false)).Size(18, 18).TextColor(style.Color(colors.AccentText))
-				t := style.Text(ui.Text(c, style.T(c, "nav.home")), style.Type(c).Body).TextColor(style.Color(colors.AccentText))
-				if home.Hovered() {
-					t.Underline()
-				}
-			})
-			if home.Clicked() {
-				a.router.Push("/home")
+	// The title stays under the window's buttons; what follows it scrolls.
+	ui.Column(c).Padding(top+8, 16, 0).Gap(16).Shrink(0).Children(func() {
+		ui.Box(c).Height(4).FillWidth().DragWindow()
+		home := ui.ButtonBase(c).AlignSelf(ui.Start).Gap(4).AlignItems(ui.Center).Label(style.T(c, "nav.home"))
+		home.Children(func() {
+			ui.Icon(c, style.Icon("back", false)).Size(18, 18).TextColor(style.Color(colors.AccentText))
+			t := style.Text(ui.Text(c, style.T(c, "nav.home")), style.Type(c).Body).TextColor(style.Color(colors.AccentText))
+			if home.Hovered() {
+				t.Underline()
 			}
-			style.Text(ui.Text(c, style.T(c, "nav.settings")), style.Type(c).Title1).TextColor(style.Color(colors.TextPrimary)).Padding(0, 4)
+		})
+		if home.Clicked() {
+			a.router.Push("/home")
+		}
+		style.Text(ui.Text(c, style.T(c, "nav.settings")), style.Type(c).Title1).TextColor(style.Color(colors.TextPrimary)).Padding(0, 4)
+	})
+	ui.Scroll(c).Grow(1).MinHeight(0).Children(func() {
+		ui.Column(c).Padding(16, 16, 20).Gap(16).Children(func() {
 			a.accountCard(c, current == "account")
 			server := a.chosenServer()
 			admin, _ := a.admin()
