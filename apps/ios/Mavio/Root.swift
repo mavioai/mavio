@@ -16,9 +16,9 @@ struct RootView: View {
     @Environment(\.scenePhase) private var phase
     @Environment(\.colorScheme) private var scheme
     @Environment(\.horizontalSizeClass) private var sizeClass
-    @State private var router = Router()
+    @Environment(Assistant.self) private var assistant
+    @State private var navigation = Navigation(router: Router())
     @State private var discovery = Discovery()
-    @State private var tab: Tab = .home
     /// Whether the launch's mark still shows, and whether it may leave.
     @State private var launching = true
     @State private var ready = false
@@ -36,6 +36,11 @@ struct RootView: View {
             }
         }
         .overlay {
+            if navigation.router.playing == nil {
+                AssistantOverlay(assistant: assistant, lift: navigation.tabBarShows ? 56 : 0)
+            }
+        }
+        .overlay {
             if launching {
                 LaunchView(ready: ready) { launching = false }
             }
@@ -44,7 +49,8 @@ struct RootView: View {
             await LaunchView.prepare(model)
             ready = true
         }
-        .environment(router)
+        .environment(navigation.router)
+        .environment(navigation)
         .environment(discovery)
         .environment(\.theme, theme)
         // Devices opens the remote control of another device.
@@ -54,16 +60,35 @@ struct RootView: View {
         // The accent marks only progress, selection, links and switches;
         // buttons take the label color or `color.button`.
         .tint(MavioColors.dark.accent)
-        .fullScreenCover(item: $router.playing) { request in
+        .fullScreenCover(item: Binding(get: { navigation.router.playing }, set: { navigation.router.playing = $0 })) {
+            request in
             PlayerScreen(request: request)
+                .overlay { AssistantOverlay(assistant: assistant) }
                 .environment(model)
+                .environment(assistant)
+                .environment(navigation)
+                .environment(\.theme, Theme(colors: .dark, layout: theme.layout))
         }
-        .sheet(isPresented: $router.addingServer) {
+        .sheet(
+            isPresented: Binding(get: { navigation.router.addingServer }, set: { navigation.router.addingServer = $0 })
+        ) {
             // A sheet takes the environment of where it is presented, outside
             // the theme's.
             SignInView(adding: true).environment(\.theme, theme)
         }
         .task(id: Discovery.key(model)) { await discovery.load(model) }
+        .onAppear {
+            navigation.model = model
+            assistant.host = navigation
+        }
+        .onChange(of: sizeClass, initial: true) { _, size in navigation.regular = size == .regular }
+        // The assistant asks the server of what shows, and tells the voice
+        // session what shows as it changes.
+        .onChange(of: navigation.assistantScreen, initial: true) {
+            assistant.refresh()
+            assistant.contextChanged()
+        }
+        .onChange(of: model.signedInServers.map(\.id)) { assistant.refresh() }
         .onChange(of: phase, initial: true) { _, phase in
             switch phase {
             case .active: model.start()
@@ -74,21 +99,22 @@ struct RootView: View {
     }
 
     private var tabs: some View {
-        TabView(selection: $tab) {
+        @Bindable var navigation = navigation
+        return TabView(selection: $navigation.tab) {
             SwiftUI.Tab(value: Tab.home) {
-                Stack { HomeView() }
+                Stack(tab: .home) { HomeView() }
             } label: {
                 tabLabel(MavioStrings.navHome, "home")
             }
             SwiftUI.Tab(value: Tab.libraries) {
-                Stack { LibrariesView() }
+                Stack(tab: .libraries) { LibrariesView() }
             } label: {
                 tabLabel(MavioStrings.navLibraries, "movies")
             }
             // Discover is a destination only where a server discovers.
             if discovery.server != nil {
                 SwiftUI.Tab(value: Tab.discover) {
-                    Stack { DiscoverView() }
+                    Stack(tab: .discover) { DiscoverView() }
                 } label: {
                     tabLabel(MavioStrings.navDiscover, "discover")
                 }
@@ -98,7 +124,7 @@ struct RootView: View {
             // the top bar's right, and the downloads from the settings.
             if sizeClass == .regular {
                 SwiftUI.Tab(value: Tab.search, role: .search) {
-                    Stack { SearchView() }
+                    Stack(tab: .search) { SearchView() }
                 } label: {
                     tabLabel(MavioStrings.navSearch, "search")
                 }
@@ -118,18 +144,23 @@ struct RootView: View {
 
 /// A destination's navigation stack, which opens the screens below it.
 struct Stack<Content: View>: View {
+    let tab: Tab
     @ViewBuilder let content: Content
     @Environment(\.theme) private var theme
     @Environment(\.horizontalSizeClass) private var sizeClass
-    @State private var path = NavigationPath()
-    @State private var tabBar = Visibility.visible
+    @Environment(Navigation.self) private var navigation
 
     var body: some View {
-        NavigationStack(path: $path) {
+        let tab = tab
+        let navigation = navigation
+        let tabBar: Visibility = navigation.tabBarHidden.contains(tab) ? .hidden : .visible
+        return NavigationStack(
+            path: Binding(get: { navigation.paths[tab, default: []] }, set: { navigation.paths[tab] = $0 })
+        ) {
             content
                 .background(theme.colors.background)
                 .modifier(TopBar())
-                .onAppear { tabBar = .visible }
+                .onAppear { navigation.tabBarHidden.remove(tab) }
                 .toolbar(sizeClass == .regular ? tabBar : .automatic, for: .tabBar)
                 .navigationDestination(for: Route.self) { route in
                     RouteDestination(route: route)
@@ -143,21 +174,12 @@ struct Stack<Content: View>: View {
         .tint(theme.colors.textPrimary)
     }
 
+    /// On the iPad the stack opens pages itself, hiding the tab bar first.
     private var opener: ((Route) -> Void)? {
         guard sizeClass == .regular else { return nil }
-        return { open($0) }
-    }
-
-    /// Opens a page on the iPad, from the first screen only once the tab bar
-    /// at the top is hidden: hidden with the push, it would give its space
-    /// back after it, the page jumping up.
-    private func open(_ route: Route) {
-        guard path.isEmpty else {
-            path.append(route)
-            return
-        }
-        tabBar = .hidden
-        Task { @MainActor in path.append(route) }
+        let navigation = navigation
+        let tab = tab
+        return { navigation.open($0, in: tab) }
     }
 }
 
@@ -166,6 +188,7 @@ struct Stack<Content: View>: View {
 /// settings.
 private struct TopBar: ViewModifier {
     @Environment(AppModel.self) private var model
+    @Environment(Assistant.self) private var assistant
     @Environment(\.horizontalSizeClass) private var sizeClass
 
     func body(content: Content) -> some View {
@@ -181,6 +204,7 @@ private struct TopBar: ViewModifier {
                 // web UI's.
                 ToolbarItem(placement: .topBarTrailing) {
                     HStack(spacing: MavioSpacing.s12) {
+                        AssistantButton(assistant: assistant)
                         RouteLink(value: Route.search) {
                             Icon("search", size: 22)
                         }
@@ -193,6 +217,9 @@ private struct TopBar: ViewModifier {
             } else {
                 // On the glass the tab bar beside it has, its letter taking
                 // the glass's light or dark as the tabs' do.
+                if assistant.server != nil {
+                    ToolbarItem(placement: .topBarTrailing) { AssistantButton(assistant: assistant) }
+                }
                 ToolbarItem(placement: .topBarTrailing) { settings(name) }
             }
         }

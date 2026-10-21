@@ -22,11 +22,39 @@
         /// Whether television mode put the window in full screen, which
         /// leaving it undoes.
         private var tvFullScreen = false
+        /// The assistant over the windows (docs/clients.md §6.3.29).
+        public let assistant: Assistant
+        private var overlay: AssistantOverlay?
+        private var assistantObserver: Observer?
+        private var serversObserver: Observer?
+        private var keyMonitor: Any?
+        /// Whether the talk key is held.
+        private var talkHeld = false
 
         /// The app of model.
         public init(model: AppModel) {
             self.model = model
+            assistant = Assistant(model: model)
             super.init()
+            assistant.host = self
+            assistantObserver = Observer { [weak self] in
+                guard let self else { return }
+                _ = self.assistant.open
+                DispatchQueue.main.async { self.placeOverlay() }
+            }
+            serversObserver = Observer { [weak self] in
+                guard let self else { return }
+                _ = self.model.signedInServers.map(\.id)
+                DispatchQueue.main.async { self.assistant.refresh() }
+            }
+            keyMonitor = NSEvent.addLocalMonitorForEvents(matching: [.keyDown, .keyUp]) { [weak self] event in
+                guard let self else { return event }
+                nonisolated(unsafe) let e = event
+                let taken = MainActor.assumeIsolated { self.talkKey(e) }
+                return taken ? nil : event
+            }
+            NotificationCenter.default.addObserver(
+                self, selector: #selector(windowBecameKey), name: NSWindow.didBecomeKeyNotification, object: nil)
             discoveryObserver = Observer { [weak self] in
                 guard let self else { return }
                 let key = Discovery.key(self.model)
@@ -90,6 +118,7 @@
                 model: model, discovery: discovery, theme: isTVMode ? .tv : .desktop,
                 play: { [weak self] in self?.play($0) })
             Routes.wire(context)
+            context.assistant = assistant
             context.openSettings = { [weak self] account in self?.root?.showSettings(account: account) }
             context.addServer = { [weak self] in self?.root?.addServer() }
             context.openRemote = { [weak self] server, sessionId in self?.openRemote(server, sessionId) }
@@ -209,6 +238,8 @@
         /// Shows the active stack's top page's title, and whether back can
         /// go anywhere.
         @objc func navigationChanged() {
+            assistant.refresh()
+            assistant.contextChanged()
             let nav = root?.activeNavigation
             backItem?.isEnabled = nav?.canPop == true
             backItem?.isHidden = nav?.canPop != true
@@ -238,6 +269,7 @@
                 player.title = request.title
                 player.contentViewController = playerContent(request, in: player)
                 player.makeKeyAndOrderFront(nil)
+                placeOverlay()
                 return
             }
             let player = NSWindow(
@@ -301,9 +333,122 @@
             remotes.removeAll { $0 === closing }
         }
 
+        // MARK: The assistant
+
+        /// Puts the assistant's orb and cards over the key window, the main
+        /// window or a player's, while they show.
+        private func placeOverlay() {
+            guard assistant.open else {
+                overlay?.removeFromSuperview()
+                overlay = nil
+                return
+            }
+            let key = NSApp.keyWindow
+            let target =
+                key.flatMap { k in k === window || players.contains { $0 === k } ? k : nil } ?? players.last ?? window
+            guard let content = target?.contentView else { return }
+            let overlay = overlay ?? AssistantOverlay(assistant: assistant)
+            self.overlay = overlay
+            if overlay.superview !== content {
+                overlay.removeFromSuperview()
+                content.addFilling(overlay)
+            }
+        }
+
+        @objc private func windowBecameKey(_ notification: Notification) {
+            placeOverlay()
+            assistant.contextChanged()
+        }
+
+        /// The key held to talk, outside text fields: pressed and released
+        /// as the assistant button is.
+        private func talkKey(_ event: NSEvent) -> Bool {
+            guard event.charactersIgnoringModifiers?.lowercased() == Assistant.talkKey,
+                event.modifierFlags.intersection([.command, .control, .option]).isEmpty,
+                let w = event.window, w === window || players.contains(where: { $0 === w })
+            else { return false }
+            if event.type == .keyUp {
+                guard talkHeld else { return false }
+                talkHeld = false
+                assistant.release()
+                return true
+            }
+            guard assistant.server != nil, !(w.firstResponder is NSText) else { return false }
+            if event.isARepeat { return talkHeld }
+            talkHeld = true
+            assistant.press()
+            return true
+        }
+
         /// Follows a window leaving full screen.
         public func windowDidExitFullScreen(_ notification: Notification) {
             if (notification.object as? NSWindow) === window { tvFullScreen = false }
+        }
+    }
+
+    extension MacApp: AssistantHost {
+        /// What the key window shows: the player's, else the main window's
+        /// page.
+        public var assistantScreen: AssistantScreen {
+            if let key = NSApp.keyWindow, players.contains(where: { $0 === key }),
+                let p = key.contentViewController as? any AssistantPlayer
+            {
+                return AssistantScreen("player", serverId: p.assistantServerId)
+            }
+            return root?.assistantScreen ?? AssistantScreen("home")
+        }
+
+        /// The frontmost player.
+        public var assistantPlayer: (any AssistantPlayer)? {
+            let key = NSApp.keyWindow
+            let player = players.first { $0 === key } ?? players.last
+            return player?.contentViewController as? any AssistantPlayer
+        }
+
+        /// Plays the action's item to start with.
+        public func assistantPlay(_ action: Mavio_Assistant_V1_PlayAction, serverId: String) -> Bool {
+            let ids = action.itemIds
+            guard !ids.isEmpty else { return false }
+            let i = Int(action.startIndex)
+            let start: TimeInterval? =
+                action.hasStartPosition
+                ? TimeInterval(action.startPosition.seconds) + TimeInterval(action.startPosition.nanos) / 1e9 : nil
+            play(PlayRequest(serverId: serverId, itemId: ids[ids.indices.contains(i) ? i : 0], title: "", start: start))
+            return true
+        }
+
+        /// Opens the action's screen in the main window.
+        public func assistantNavigate(_ action: Mavio_Assistant_V1_NavigateAction, serverId: String) -> Bool {
+            switch action.target {
+            case .home:
+                showMainWindow()
+                root?.showHome()
+            case .back:
+                guard root?.activeNavigation?.canPop == true else { return false }
+                goBack()
+            case .item:
+                guard !action.id.isEmpty else { return false }
+                showMainWindow()
+                root?.openOnHome(.item(serverId: serverId, itemId: action.id))
+            case .library:
+                showMainWindow()
+                let id = action.id
+                Task { [weak self] in
+                    guard let self,
+                        let list = try? await self.model.client.libraries(serverId: serverId).libraries,
+                        let library = list.first(where: { $0.id == id })
+                    else { return }
+                    self.root?.showLibrary(library)
+                }
+            case .search:
+                showMainWindow()
+                if action.query.isEmpty { root?.showSearch() } else { root?.search(action.query) }
+            case .settings:
+                openSettings()
+            default:
+                return false
+            }
+            return true
         }
     }
 

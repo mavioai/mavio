@@ -13,6 +13,8 @@
     /// the right shows Home's rows while nothing is typed, then the results
     /// in grids.
     final class SearchPage: Page, QuerySearching, Reappearing {
+        override var assistantScreen: AssistantScreen? { AssistantScreen("search") }
+
         /// The query searched, empty before the first search.
         private var searched = ""
         /// The servers asked, and what each has answered.

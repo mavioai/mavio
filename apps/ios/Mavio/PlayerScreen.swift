@@ -14,7 +14,11 @@ struct PlayerScreen: View {
     /// What plays: the item opened, then the episodes after it.
     @State private var request: PlayRequest
     @Environment(AppModel.self) private var model
+    @Environment(Assistant.self) private var assistant
+    @Environment(Navigation.self) private var navigation
     @Environment(\.dismiss) private var dismiss
+    /// The player as the assistant controls it.
+    @State private var control = PlayerControl()
     @State private var player = Player()
     @State private var session: PlaybackSession?
     @State private var info: PlaybackInfo?
@@ -127,6 +131,11 @@ struct PlayerScreen: View {
         .statusBarHidden(!controls)
         .persistentSystemOverlays(.hidden)
         .task { await start(at: request.start) }
+        .onAppear {
+            bind()
+            navigation.player = control
+        }
+        .onDisappear { if navigation.player === control { navigation.player = nil } }
         .task(id: ObjectIdentifier(session ?? Self.none)) { await report() }
         .task(id: hideKey) {
             guard controls, player.isPlaying, panel == nil, scrubbing == nil else { return }
@@ -506,6 +515,7 @@ struct PlayerScreen: View {
                     .buttonStyle(.plain)
                 }
                 Spacer()
+                AssistantButton(assistant: assistant, size: 24)
                 if let info, !info.subtitles.isEmpty {
                     barButton(
                         "subtitles", fill: (info.subtitleStreamIndex ?? -1) >= 0, active: panel == .subtitles,
@@ -650,6 +660,44 @@ struct PlayerScreen: View {
         case .directStream: MavioStrings.playerDirectStream
         case .transcode: MavioStrings.playerTranscode
         }
+    }
+
+    /// Lets the assistant control the player (docs/assistant.md §5.2).
+    private func bind() {
+        control.playing = {
+            Assistant.playing(
+                itemId: request.itemId, position: player.currentTime, paused: !player.isPlaying,
+                speed: Double(player.rate), audio: info?.audioStreamIndex, subtitle: info?.subtitleStreamIndex)
+        }
+        control.control = { command, value in
+            switch command {
+            case .pause: player.pause()
+            case .resume: player.play()
+            case .stop: close()
+            case .seek: Task { await player.seek(to: value) }
+            case .seekBy: Task { await player.skip(by: value) }
+            case .speed:
+                guard value > 0 else { return false }
+                player.setRate(Float(value))
+            case .next:
+                guard let next else { return false }
+                play(next)
+            // The player fills the screen already.
+            case .fullscreen: break
+            default: return false
+            }
+            poke()
+            return true
+        }
+        control.streams = { audio, subtitle in
+            guard info != nil else { return false }
+            if let audio { self.audio = audio }
+            if let subtitle { self.subtitle = subtitle }
+            restart()
+            return true
+        }
+        control.close = { close() }
+        control.assistantServerId = request.serverId
     }
 
     private func restart() {

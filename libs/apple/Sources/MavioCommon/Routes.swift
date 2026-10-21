@@ -69,6 +69,9 @@ public final class Router {
     public var playing: PlayRequest?
     /// Whether the sheet adding a server shows.
     public var addingServer = false
+    /// A query for search to run as it shows, which the assistant asks
+    /// for; search takes it.
+    public var searchQuery: String?
 
     /// A router showing nothing over the screens.
     public init() {}

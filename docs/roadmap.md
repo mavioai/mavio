@@ -1087,7 +1087,8 @@ flowchart TD
 - [ ] Later: Opus for the answer's speech on the WebSocket
 - [ ] The web player: the subtitle offset and queues of several items, which the assistant's actions ask for and the player cannot yet carry out; V listed with the player's shortcuts
 - [ ] Services Pipecat lacks for Chinese, Volcengine and Alibaba Cloud, as services of `plugins/pipecat`
-- [ ] The Apple apps: voice sessions with `AVAudioEngine`'s voice processing, App Intents; dictation on tvOS
+- [x] The Mac, iPhone and iPad apps: the orb and cards, the assistant button in the header or sidebar, the television bar and the player's controls, the Mac's key held to talk, voice sessions with `AVAudioEngine`'s voice processing, and the client actions on their screens and players
+- [ ] The Apple apps' rest: the App Shortcut Talk to Mavio and App Intents; on Apple TV the button opening dictation, with the orb and cards
 - [ ] The Android apps: voice sessions with `VOICE_COMMUNICATION` and its echo canceler, the audio captured from the start kept until the session's WebSocket opens and then sent in order, as the web UI's, push to talk on Android TV, search intents and play-from-search
 - [ ] The desktop app: voice sessions
 - [ ] More languages in the grammar

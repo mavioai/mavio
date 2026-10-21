@@ -11,8 +11,9 @@ struct MavioApp: App {
 
     var body: some Scene {
         WindowGroup {
-            if let model = delegate.model {
-                RootView().environment(model).preferredColorScheme(appearance.scheme)
+            if let model = delegate.model, let assistant = delegate.assistant {
+                RootView().environment(model).environment(assistant)
+                    .preferredColorScheme(appearance.scheme)
             } else {
                 StatusView(icon: "error", title: MavioStrings.stateError, message: delegate.failure)
             }
@@ -24,6 +25,8 @@ struct MavioApp: App {
 /// downloads' events needs too.
 final class AppDelegate: NSObject, UIApplicationDelegate {
     let model: AppModel?
+    /// The assistant over the app (docs/assistant.md §9.1).
+    let assistant: Assistant?
     let failure: String?
 
     override init() {
@@ -37,10 +40,13 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
         #endif
         ImageCaching.configure()
         do {
-            model = try MainActor.assumeIsolated { try AppModel() }
+            let model = try MainActor.assumeIsolated { try AppModel() }
+            self.model = model
+            assistant = MainActor.assumeIsolated { Assistant(model: model) }
             failure = nil
         } catch {
             model = nil
+            assistant = nil
             failure = error.localizedDescription
         }
         super.init()

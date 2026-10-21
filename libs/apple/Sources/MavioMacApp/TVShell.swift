@@ -72,6 +72,17 @@
                 menuButton.trailingAnchor.constraint(equalTo: bar.trailingAnchor, constant: -theme.layout.margin),
                 menuButton.centerYAnchor.constraint(equalTo: bar.centerYAnchor),
             ])
+            // The assistant button before the user's menu, as the web UI's.
+            if let assistant = root.context.assistant {
+                let button = AssistantButton(
+                    assistant: assistant, theme: theme, side: 64, size: 30, color: theme.colors.textSecondary,
+                    fill: theme.colors.surfaceRaised.withAlphaComponent(0.6))
+                bar.addSubview(button)
+                NSLayoutConstraint.activate([
+                    button.trailingAnchor.constraint(equalTo: menuButton.leadingAnchor, constant: -MavioSpacing.s8),
+                    button.centerYAnchor.constraint(equalTo: bar.centerYAnchor),
+                ])
+            }
             self.view = view
         }
 

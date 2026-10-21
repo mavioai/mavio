@@ -357,6 +357,10 @@
         private var choicePills: PillTabs?
         private var sortButton: NSView?
 
+        override var assistantScreen: AssistantScreen? {
+            AssistantScreen("library", serverId: serverId, libraryId: libraryId)
+        }
+
         private enum Tab { case recommended, all }
 
         /// The filters, as the pills name them.

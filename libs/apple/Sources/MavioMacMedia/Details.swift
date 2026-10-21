@@ -70,6 +70,10 @@
         private var downloadHolder: NSView?
         private var downloadState: String?
 
+        override var assistantScreen: AssistantScreen? {
+            AssistantScreen("item", serverId: serverId, itemId: itemId)
+        }
+
         /// The details of an item of a server.
         init(serverId: String, itemId: String, context: MacContext) {
             self.serverId = serverId

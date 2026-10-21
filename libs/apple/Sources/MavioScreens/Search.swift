@@ -10,6 +10,7 @@ public struct SearchView: View {
     @Environment(AppModel.self) private var model
     @Environment(Discovery.self) private var discovery
     @Environment(\.theme) private var theme
+    @Environment(Router.self) private var router: Router?
     @State private var query = ""
     /// The query searched, empty before the first search.
     @State private var searched = ""
@@ -68,13 +69,27 @@ public struct SearchView: View {
         // Opened from the top bar's button before anything is searched, it
         // is ready to type into.
         .searchFocused($focused)
-        .onAppear { focused = searched.isEmpty }
+        .onAppear {
+            take(router?.searchQuery)
+            focused = searched.isEmpty
+        }
+        // The assistant asks for a query while search shows.
+        .onChange(of: router?.searchQuery) { _, query in take(query) }
         .onSubmit(of: .search) {
             searched = query.trimmingCharacters(in: .whitespaces)
             submitted += 1
         }
         .task(id: searchKey) { await search(searchKey) }
         .task(id: discoverSearch) { await searchTitles(discoverSearch) }
+    }
+
+    /// Searches for the query the assistant asks for, if any.
+    private func take(_ asked: String?) {
+        guard let asked else { return }
+        router?.searchQuery = nil
+        query = asked
+        searched = asked.trimmingCharacters(in: .whitespaces)
+        submitted += 1
     }
 
     /// A server's row once it has answered: a line when it cannot be

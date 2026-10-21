@@ -19,6 +19,8 @@
         public let theme: Theme
         /// Plays an item, in a player window or full screen.
         public let play: @MainActor (PlayRequest) -> Void
+        /// The assistant over the app's windows.
+        public var assistant: Assistant?
         /// Opens the sheet adding a server.
         public var addServer: @MainActor () -> Void = {}
         /// Opens the settings, on the account's page when account.
@@ -61,6 +63,7 @@
         public func with(theme: Theme) -> MacContext {
             let context = MacContext(model: model, discovery: discovery, theme: theme, play: play)
             context.addServer = addServer
+            context.assistant = assistant
             context.openSettings = openSettings
             context.openRemote = openRemote
             context.page = page
@@ -84,6 +87,10 @@
 
     /// A page of the Mac app: a screen controller with its context.
     open class Page: ScreenController {
+        /// What the page shows, as the assistant's requests tell it; nil
+        /// for the place's.
+        open var assistantScreen: AssistantScreen? { nil }
+
         /// The context.
         public let context: MacContext
         /// The model.

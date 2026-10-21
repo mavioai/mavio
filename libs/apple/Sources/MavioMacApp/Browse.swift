@@ -199,6 +199,7 @@
         private let table = NSTableView()
         private let field = NSSearchField()
         private var toggle: Pressable?
+        private var header: NSStackView?
         private var user: UserButton?
         private var expandedConstraints: [NSLayoutConstraint] = []
         private var railConstraints: [NSLayoutConstraint] = []
@@ -262,11 +263,17 @@
             let toggle = Pressable(icon, radius: MavioRadius.md, theme: theme) { [weak self] in self?.onToggle?() }
             toggle.size(width: 28, height: 28)
             self.toggle = toggle
+            // The assistant button beside the toggle, under it in the rail.
+            let header = NSStackView.horizontal([toggle], spacing: MavioSpacing.s4)
+            if let assistant = context.assistant {
+                header.insertArrangedSubview(AssistantButton(assistant: assistant, theme: theme), at: 0)
+            }
+            self.header = header
             let line = Box(fill: theme.colors.border)
             line.size(height: 1)
             let user = UserButton(context: context) { [weak self] button in self?.root.toggleUserMenu(from: button) }
             self.user = user
-            for v in [toggle, field, scroll, line, user] as [NSView] { view.addSubview(v) }
+            for v in [header, field, scroll, line, user] as [NSView] { view.addSubview(v) }
             // The band under the window's controls is as tall as the title bar.
             let band = view.safeAreaLayoutGuide.topAnchor
             NSLayoutConstraint.activate([
@@ -281,17 +288,17 @@
                 user.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -MavioSpacing.s8),
             ])
             expandedConstraints = [
-                toggle.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -MavioSpacing.s8),
-                toggle.centerYAnchor.constraint(equalTo: view.topAnchor, constant: 24.5),
+                header.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -MavioSpacing.s8),
+                header.centerYAnchor.constraint(equalTo: view.topAnchor, constant: 24.5),
                 field.topAnchor.constraint(equalTo: band, constant: MavioSpacing.s4),
                 field.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: MavioSpacing.s12),
                 field.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -MavioSpacing.s12),
                 scroll.topAnchor.constraint(equalTo: field.bottomAnchor, constant: MavioSpacing.s8),
             ]
             railConstraints = [
-                toggle.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-                toggle.topAnchor.constraint(equalTo: band),
-                scroll.topAnchor.constraint(equalTo: toggle.bottomAnchor, constant: MavioSpacing.s8),
+                header.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+                header.topAnchor.constraint(equalTo: band),
+                scroll.topAnchor.constraint(equalTo: header.bottomAnchor, constant: MavioSpacing.s8),
             ]
             self.view = view
             applyRail()
@@ -301,6 +308,7 @@
             NSLayoutConstraint.deactivate(rail ? expandedConstraints : railConstraints)
             NSLayoutConstraint.activate(rail ? railConstraints : expandedConstraints)
             field.isHidden = rail
+            header?.orientation = rail ? .vertical : .horizontal
             let label = rail ? MavioStrings.navExpandSidebar : MavioStrings.navCollapseSidebar
             toggle?.setAccessibilityLabel(label)
             toggle?.toolTip = label

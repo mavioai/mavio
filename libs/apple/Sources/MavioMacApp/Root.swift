@@ -189,6 +189,46 @@
             tv?.select(.search)
         }
 
+        /// Shows Home at its top.
+        func showHome() {
+            closeUserMenu()
+            guard signedOut == false else { return }
+            settingsShown = false
+            update()
+            browse?.select(.home)
+            tv?.select(.home)
+        }
+
+        /// Shows a library.
+        func showLibrary(_ library: LibraryEntry) {
+            closeUserMenu()
+            guard signedOut == false else { return }
+            settingsShown = false
+            update()
+            browse?.select(.library(library))
+            tv?.select(.library(library))
+        }
+
+        /// Searches query on Search.
+        func search(_ query: String) {
+            closeUserMenu()
+            guard signedOut == false else { return }
+            settingsShown = false
+            update()
+            if let browse {
+                browse.search(query)
+            } else if let tv {
+                tv.select(.search)
+                (activeNavigation?.top as? QuerySearching)?.search(query: query)
+            }
+        }
+
+        /// What the window shows, as the assistant's requests tell it.
+        var assistantScreen: AssistantScreen {
+            if settingsShown { return AssistantScreen("settings") }
+            return (activeNavigation?.top as? Page)?.assistantScreen ?? AssistantScreen("home")
+        }
+
         /// Opens route on Home.
         func openOnHome(_ route: Route) {
             guard signedOut == false else { return }

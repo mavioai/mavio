@@ -29,6 +29,8 @@ PLATFORMS = {
             # the app's launch takes over (LaunchView).
             "INFOPLIST_FILE": "Info.plist",
             "INFOPLIST_KEY_NSLocalNetworkUsageDescription": '"Mavio finds and connects to media servers on your network."',
+            # The assistant's voice sessions.
+            "INFOPLIST_KEY_NSMicrophoneUsageDescription": '"Mavio hears what you ask its assistant."',
             "LD_RUNPATH_SEARCH_PATHS": '"$(inherited) @executable_path/Frameworks"',
         },
     },
@@ -61,6 +63,8 @@ PLATFORMS = {
             # loopback address.
             "ENABLE_INCOMING_NETWORK_CONNECTIONS": "YES",
             "ENABLE_OUTGOING_NETWORK_CONNECTIONS": "YES",
+            # The microphone, for the assistant's voice sessions.
+            "ENABLE_RESOURCE_ACCESS_AUDIO_INPUT": "YES",
             "ENABLE_USER_SELECTED_FILES": "readonly",
             "INFOPLIST_KEY_LSApplicationCategoryType": '"public.app-category.entertainment"',
             "INFOPLIST_KEY_NSPrincipalClass": "NSApplication",
@@ -69,6 +73,8 @@ PLATFORMS = {
             # in at.
             "INFOPLIST_FILE": "Info.plist",
             "INFOPLIST_KEY_NSLocalNetworkUsageDescription": '"Mavio finds and connects to media servers on your network."',
+            # The assistant's voice sessions.
+            "INFOPLIST_KEY_NSMicrophoneUsageDescription": '"Mavio hears what you ask its assistant."',
             "LD_RUNPATH_SEARCH_PATHS": '"$(inherited) @executable_path/../Frameworks"',
         },
     },

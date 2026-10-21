@@ -119,6 +119,12 @@
                 MavioStrings.playerSubtitles, icon: "subtitles", kind: .artworkSecondary, theme: theme)
             tvAudio = MavioButton(MavioStrings.playerAudio, icon: "audio", kind: .artworkSecondary, theme: theme)
             tvRow = .horizontal([tvNext, tvSubtitles, tvAudio], spacing: MavioSpacing.s24)
+            if tv, let assistant = context.assistant {
+                tvRow.addArrangedSubview(
+                    AssistantButton(
+                        assistant: assistant, theme: theme, side: 64, size: 30, color: .white,
+                        fill: NSColor.white.withAlphaComponent(0.15)))
+            }
             panelPage = ScrollPage([], spacing: MavioSpacing.s8, insets: .all(MavioSpacing.s48))
             super.init(context: context)
         }
@@ -206,9 +212,9 @@
             pictureInPictureButton.onPress = { [weak self] in self?.player.togglePictureInPicture() }
             let buttons = NSStackView.horizontal(
                 [
-                    seekBack, playButton, seekForward, nextButton, Spacer(), subtitlesButton, audioButton,
-                    pictureInPictureButton, fullScreen,
-                ], spacing: MavioSpacing.s16)
+                    seekBack, playButton, seekForward, nextButton, Spacer(),
+                ] + assistantButton() + [subtitlesButton, audioButton, pictureInPictureButton, fullScreen],
+                spacing: MavioSpacing.s16)
             let bottom = NSStackView.vertical([titles, timeRow, buttons], spacing: MavioSpacing.s12)
             controller.addSubview(bottom)
             NSLayoutConstraint.activate([
@@ -414,14 +420,15 @@
             guard visible != controllerShown else { return }
             controllerShown = visible
             if visible { controller.isHidden = false }
+            nonisolated(unsafe) weak var page = self
             NSAnimationContext.runAnimationGroup { context in
                 context.duration = MavioDuration.fast
                 context.timingFunction = CAMediaTimingFunction(name: .easeOut)
                 controller.animator().alphaValue = visible ? 1 : 0
-            } completionHandler: { [weak self] in
+            } completionHandler: {
                 MainActor.assumeIsolated {
-                    guard let self, !self.controllerShown else { return }
-                    self.controller.isHidden = true
+                    guard let page, !page.controllerShown else { return }
+                    page.controller.isHidden = true
                 }
             }
         }
@@ -589,6 +596,12 @@
 
         private func toggleFullScreen() {
             view.window?.toggleFullScreen(nil)
+        }
+
+        /// The assistant button of the desktop's row, as the web UI's.
+        private func assistantButton() -> [NSView] {
+            guard let assistant = context.assistant else { return [] }
+            return [AssistantButton(assistant: assistant, theme: theme, side: 36, size: 22, color: .white)]
         }
 
         @objc private func scrub(_ sender: NSSlider) {
@@ -980,6 +993,46 @@
             } else if wasInWindow {
                 onWindow?(nil)
             }
+        }
+    }
+
+    extension PlayerPage: AssistantPlayer {
+        var assistantServerId: String { request.serverId }
+
+        var assistantPlaying: Mavio_Assistant_V1_AskPlaying {
+            Assistant.playing(
+                itemId: request.itemId, position: player.currentTime, paused: !player.isPlaying,
+                speed: Double(player.rate), audio: info?.audioStreamIndex, subtitle: info?.subtitleStreamIndex)
+        }
+
+        func assistantControl(_ command: Mavio_Assistant_V1_ControlCommand, value: Double) -> Bool {
+            switch command {
+            case .pause: player.pause()
+            case .resume: player.play()
+            case .stop: close()
+            case .seek: Task { await player.seek(to: value) }
+            case .seekBy: seek(by: value)
+            case .speed:
+                guard value > 0 else { return false }
+                player.setRate(Float(value))
+            case .next:
+                guard let next else { return false }
+                play(next)
+            case .fullscreen:
+                guard let window = view.window else { return false }
+                if !window.styleMask.contains(.fullScreen) { window.toggleFullScreen(nil) }
+            default: return false
+            }
+            poke()
+            return true
+        }
+
+        func assistantStreams(audio: Int32?, subtitle: Int32?) -> Bool {
+            guard info != nil else { return false }
+            if let audio { self.audio = audio }
+            if let subtitle { self.subtitle = subtitle }
+            restart()
+            return true
         }
     }
 #endif
