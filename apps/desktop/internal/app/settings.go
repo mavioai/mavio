@@ -663,7 +663,7 @@ func choose(c *ui.Context, label string, value *int, labels []string) bool {
 // glass with larger items, on the chosen one.
 func selectOf(c *ui.Context, chosen *string, labels []string) ui.Element {
 	if !style.TV(c) {
-		return ui.Select(c, chosen, labels)
+		return deskSelect(c, chosen, labels)
 	}
 	colors := style.Colors(c)
 	sp := ui.SelectBase(c, chosen)
@@ -701,6 +701,51 @@ func selectOf(c *ui.Context, chosen *string, labels []string) ui.Element {
 							})
 						}
 						style.Text(ui.Text(c, l), style.Type(c).Headline).TextColor(style.Color(colors.TextPrimary)).SingleLine()
+					})
+				}
+			})
+		})
+	})
+	return b
+}
+
+// deskSelect builds selectOf in the desktop layout, as the web UI's
+// select: a quiet button of the fill, and its options in a popup of glass
+// as the menus are, at least as wide as the button, the one pointed at or
+// reached with the keys on the fill and the chosen one checked, never in
+// the accent's color.
+func deskSelect(c *ui.Context, chosen *string, labels []string) ui.Element {
+	colors := style.Colors(c)
+	sp := ui.SelectBase(c, chosen)
+	b := sp.Trigger.MinHeight(28).Padding(0, 6, 0, 8).Gap(6).Radius(6).AlignItems(ui.Center).
+		Background(style.Color(colors.Fill))
+	if b.Hovered() || sp.Open() {
+		b.Background(style.Color(colors.FillSelected))
+	}
+	b.Children(func() {
+		style.Text(ui.Text(c, *chosen), style.Type(c).Callout).TextColor(style.Color(colors.TextPrimary)).SingleLine().Grow(1).MinWidth(0)
+		ui.Icon(c, style.Icon("expand", false)).Size(14, 14).Shrink(0).TextColor(style.Color(colors.TextSecondary))
+	})
+	width := b.Bounds().W
+	shadow := design.ElevationLevel3
+	sp.Popup(func(panel ui.Element) {
+		panel.Margin(4, 0, 0, 0).MinWidth(width).Radius(14).Material(glass.Blur{Radius: 24}).AlignItems(ui.Stretch).
+			Shadow(shadow.X, shadow.Y, shadow.Blur, shadow.Spread, style.Color(shadow.Color))
+		ui.Scroll(c).MaxHeight(384).Radius(14).Background(style.Color(colors.SurfaceOverlay).Alpha(0.9)).Border(1, style.Color(colors.Border)).Children(func() {
+			ui.Column(c).Padding(6).AlignItems(ui.Stretch).Children(func() {
+				for _, l := range labels {
+					item := sp.Item(l).MinHeight(28).Padding(0, 8).Gap(8).Radius(6).AlignItems(ui.Center)
+					if item.Highlighted() {
+						item.Background(style.Color(colors.Fill))
+					}
+					item.Children(func() {
+						check := ui.Box(c).Size(16, 16).Shrink(0)
+						if l == *chosen {
+							check.Children(func() {
+								ui.Icon(c, style.Icon("check", false)).Size(16, 16).TextColor(style.Color(colors.Accent))
+							})
+						}
+						style.Text(ui.Text(c, l), style.Type(c).Body).TextColor(style.Color(colors.TextPrimary)).SingleLine()
 					})
 				}
 			})

@@ -88,4 +88,10 @@ func TestSettingsServerChoice(t *testing.T) {
 		t.Errorf("the choice is at x = %v, want = in the sidebar", r.X)
 	}
 	h.save(shots, "settings-server-choice")
+	// Its options open in a popup, the chosen one checked.
+	if err := h.tt.Click(h.core.s.Server.Name); err != nil {
+		t.Fatal(err)
+	}
+	h.settle()
+	h.save(shots, "settings-server-choice-open")
 }
