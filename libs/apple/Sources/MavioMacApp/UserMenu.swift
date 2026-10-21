@@ -138,6 +138,9 @@
                     AppearanceSwitch(theme: theme),
                 ],
                 spacing: MavioSpacing.s12)
+            // The name takes the room between the avatar and the switch,
+            // which ends the row.
+            head.distribution = .fill
             views.append(padded(head, horizontal: 10, vertical: MavioSpacing.s8))
             if users.count > 1 {
                 views.append(separator())

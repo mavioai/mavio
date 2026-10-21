@@ -42,7 +42,7 @@ public struct ServerGroup: View {
                 Text(MavioStrings.settingsServerGroup).type(theme.type.title3)
                     .foregroundStyle(theme.colors.textSecondary)
                     .padding(.top, MavioSpacing.s32)
-                if model.signedInServers.count > 1 {
+                if model.account != nil {
                     Picker(MavioStrings.authServer, selection: Binding(get: { server.id }, set: { serverId = $0 })) {
                         ForEach(model.signedInServers, id: \.id) { Text($0.name).tag($0.id) }
                     }
@@ -68,7 +68,7 @@ public struct ServerGroup: View {
 
     private var listBody: some View {
         Section {
-            if model.signedInServers.count > 1 {
+            if model.account != nil {
                 Picker(MavioStrings.authServer, selection: Binding(get: { server.id }, set: { serverId = $0 })) {
                     ForEach(model.signedInServers, id: \.id) { Text($0.name).tag($0.id) }
                 }

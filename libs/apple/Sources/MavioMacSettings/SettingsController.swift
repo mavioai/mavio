@@ -114,9 +114,9 @@
             return chosen != nil && (section.forAnyone || isAdmin)
         }
 
-        /// A Mavio account chooses among its servers; a standalone user is
-        /// signed in to one.
-        var choosesServer: Bool { model.account != nil && model.signedInServers.count > 1 }
+        /// A Mavio account chooses among its servers, as the web UI's, even
+        /// one; a standalone user is signed in to one.
+        var choosesServer: Bool { model.account != nil && !model.signedInServers.isEmpty }
 
         /// Asks whether the user administers the chosen server, once per
         /// server and user.
