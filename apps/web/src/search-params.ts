@@ -30,6 +30,8 @@ export interface SettingsSearch {
   /** Subtitles: the page shown, and the profile on it. */
   subtitles?: string;
   id?: string;
+  /** AI: the conversation shown. */
+  conversation?: string;
   /** A page's tab or kind shown, as Downloads' tab, when not its first. */
   view?: string;
   /** A page's filter, as Wanted's or Issues', when not its first. */
@@ -51,6 +53,7 @@ export function settingsSearch(s: Record<string, unknown>): SettingsSearch {
     acquisition: str(s.acquisition),
     subtitles: str(s.subtitles),
     id: str(s.id),
+    conversation: str(s.conversation),
     view: str(s.view),
     filter: str(s.filter),
   };

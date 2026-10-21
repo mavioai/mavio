@@ -2,7 +2,8 @@
 // (docs/assistant.md §10); the providers of the AI gateway plugin added,
 // each with where its credential comes from, and the others to add; a
 // provider's API key, its OAuth login followed step by step, signing out,
-// and its models.
+// and its models; and at their end the administrators' conversations with
+// the models (docs/clients.md §6.3.26).
 import {
   errorMessage,
   isNoAiGateway,
@@ -20,6 +21,7 @@ import { locale, t } from "../../i18n.ts";
 import { Button, Group, Row } from "../../ui.tsx";
 import { Picker, Select } from "../../controls/select.tsx";
 import type { SettingsSearch } from "../settings.tsx";
+import { ConversationPage, Conversations, type First } from "./conversations.tsx";
 import { AssistantServerSettings } from "../assistant-settings.tsx";
 import { BackLink, Page, PageLink } from "./common.tsx";
 import { input } from "../../controls/styles.ts";
@@ -30,8 +32,20 @@ import { modelDetail } from "../../ai-model.ts";
 
 /** The section of the server chosen in the settings. */
 export function AiSection({ server }: { server: ServerEntry }) {
-  const { id } = useSearch({ strict: false }) as SettingsSearch;
-  return id ? <ProviderPage key={id} server={server} id={id} /> : <ProvidersList server={server} />;
+  const { id, conversation } = useSearch({ strict: false }) as SettingsSearch;
+  // The first message of a conversation just started, sent on its page.
+  const [first, setFirst] = useState<First>();
+  if (conversation)
+    return (
+      <ConversationPage
+        key={conversation}
+        server={server}
+        id={conversation}
+        first={first?.id === conversation ? first.text : undefined}
+        onFirstSent={() => setFirst(undefined)}
+      />
+    );
+  return id ? <ProviderPage key={id} server={server} id={id} /> : <ProvidersList server={server} onStarted={setFirst} />;
 }
 
 /** Where a provider's credential comes from, or that it has none. */
@@ -42,7 +56,7 @@ function credentialOf(p: AiProvider) {
   return t("ai.fromSource", { source: p.source });
 }
 
-function ProvidersList({ server }: { server: ServerEntry }) {
+function ProvidersList({ server, onStarted }: { server: ServerEntry; onStarted: (f: First) => void }) {
   const providers = useAiProviders(server);
   const models = useAiModels(server, true);
   const { server: chosen } = useSearch({ strict: false }) as SettingsSearch;
@@ -102,6 +116,7 @@ function ProvidersList({ server }: { server: ServerEntry }) {
           </Row>
         )}
       </Group>
+      <Conversations server={server} onStarted={onStarted} />
     </Page>
   );
 }

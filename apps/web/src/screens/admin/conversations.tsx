@@ -1,4 +1,4 @@
-// The settings' AI Conversations (docs/clients.md §6.3.26): the
+// The AI settings' conversations (docs/clients.md §6.3.26): the
 // administrators' conversations with the models of the AI providers, a new
 // one started with a model, instructions and its first message, and a
 // conversation's messages with the answer streamed as the model writes it,
@@ -37,21 +37,11 @@ import { bubble, MessageBar } from "../../assistant/message-bar.tsx";
 import { useKeptSpeech } from "../../assistant/kept-speech.ts";
 
 /** A message to send once its new conversation shows. */
-interface First {
+export interface First {
   id: string;
   text: string;
 }
 
-/** The section of the server chosen in the settings. */
-export function ConversationsSection({ server }: { server: ServerEntry }) {
-  const { id } = useSearch({ strict: false }) as SettingsSearch;
-  const [first, setFirst] = useState<First>();
-  return id ? (
-    <ConversationPage key={id} server={server} id={id} first={first?.id === id ? first.text : undefined} onFirstSent={() => setFirst(undefined)} />
-  ) : (
-    <ConversationsList server={server} onStarted={setFirst} />
-  );
-}
 
 const dollars = new Intl.NumberFormat(locale, { style: "currency", currency: "USD", maximumSignificantDigits: 3 });
 const count = new Intl.NumberFormat(locale);
@@ -64,25 +54,24 @@ function usageOf(u: AiUsage | undefined): string {
   });
 }
 
-function ConversationsList({ server, onStarted }: { server: ServerEntry; onStarted: (f: First) => void }) {
+/** The groups of the conversations at the end of the AI settings: a new one, and those kept. */
+export function Conversations({ server, onStarted }: { server: ServerEntry; onStarted: (f: First) => void }) {
   const conversations = useAiConversations(server);
   const { options } = useModelOptions(server);
   if (conversations.isError && isNoAiGateway(conversations.error))
     return (
-      <Page title={t("settings.conversations")} message={t("conversations.message")}>
-        <Group footer={t("conversations.noPluginFooter")}>
-          <PageLink search={{}} section="plugins" icon="plugins" color="#AF52DE" label={t("conversations.noPlugin")} detail={t("ai.noGatewayDetail")} />
-        </Group>
-      </Page>
+      <Group title={t("settings.conversations")} footer={t("conversations.noPluginFooter")}>
+        <PageLink search={{}} section="plugins" icon="plugins" color="#AF52DE" label={t("conversations.noPlugin")} detail={t("ai.noGatewayDetail")} />
+      </Group>
     );
   return (
-    <Page title={t("settings.conversations")} message={t("conversations.message")}>
+    <>
       <NewConversation server={server} onStarted={onStarted} />
-      <Group title={t("conversations.list")}>
+      <Group title={t("conversations.list")} footer={t("conversations.message")}>
         {(conversations.data ?? []).map((c) => (
           <PageLink
             key={c.id}
-            search={{ id: c.id }}
+            search={{ conversation: c.id }}
             label={c.title || t("conversations.untitled")}
             detail={[modelName(modelOf(options, c)), c.updated && fromNow(timestampDate(c.updated)), usageOf(c.usage)].filter(Boolean).join(" · ")}
           />
@@ -92,7 +81,7 @@ function ConversationsList({ server, onStarted }: { server: ServerEntry; onStart
         )}
         {conversations.isError && <p className="px-4 py-3 type-callout break-words text-danger">{errorMessage(conversations.error)}</p>}
       </Group>
-    </Page>
+    </>
   );
 }
 
@@ -263,7 +252,7 @@ function NewConversation({ server, onStarted }: { server: ServerEntry; onStarted
       {
         onSuccess: (c) => {
           onStarted({ id: c.id, text: message });
-          void navigate({ replace: true, to: "/settings/$section", params: { section: "conversations" }, search: { server: cur.server, id: c.id } });
+          void navigate({ replace: true, to: "/settings/$section", params: { section: "ai" }, search: { server: cur.server, conversation: c.id } });
         },
       },
     );
@@ -411,7 +400,8 @@ function Messages({ server, said }: { server: ServerEntry; said: Said[] }) {
   );
 }
 
-function ConversationPage({ server, id, first, onFirstSent }: { server: ServerEntry; id: string; first?: string; onFirstSent: () => void }) {
+/** A conversation's page, below the AI settings. */
+export function ConversationPage({ server, id, first, onFirstSent }: { server: ServerEntry; id: string; first?: string; onFirstSent: () => void }) {
   const conversation = useAiConversation(server, id);
   // An assistant's conversation of the user's has the speech kept of its answers.
   const assistant = useAssistantConversation(server, id);
@@ -439,7 +429,7 @@ function ConversationPage({ server, id, first, onFirstSent }: { server: ServerEn
     end.current?.scrollIntoView({ block: "end" });
   }, [messages.length, exchange?.answer, exchange?.text]);
 
-  const back = <BackLink section="conversations" label={t("settings.conversations")} />;
+  const back = <BackLink section="ai" label={t("settings.ai")} />;
   const c: AgentSession | undefined = conversation.data?.conversation;
   if (!c)
     return (
@@ -471,7 +461,7 @@ function ConversationPage({ server, id, first, onFirstSent }: { server: ServerEn
           onCancel={() => setConfirming(false)}
           onConfirm={() =>
             remove.mutate(id, {
-              onSuccess: () => void navigate({ replace: true, to: "/settings/$section", params: { section: "conversations" }, search: { server: cur.server } }),
+              onSuccess: () => void navigate({ replace: true, to: "/settings/$section", params: { section: "ai" }, search: { server: cur.server } }),
             })
           }
         />

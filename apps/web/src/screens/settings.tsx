@@ -51,7 +51,6 @@ import { StorageSection } from "./admin/storage.tsx";
 import { SubtitlesSection } from "./admin/subtitles.tsx";
 import { AiSection } from "./admin/ai.tsx";
 import { AssistantPrefs } from "./assistant-settings.tsx";
-import { ConversationsSection } from "./admin/conversations.tsx";
 import { DownloadsSection } from "./admin/downloads.tsx";
 import { WantedSection } from "./admin/wanted.tsx";
 import { ApiKeysSection, BackupsSection, LogsSection } from "./admin/backups.tsx";
@@ -68,7 +67,7 @@ import { IndexerSearch, PinButton } from "./indexer-search.tsx";
 /** Where the settings are, which the pages of the sections read. */
 export type { SettingsSearch } from "../search-params.ts";
 
-type SectionId = "appearance" | "playback" | "subtitles-audio" | "assistant" | "account" | "overview" | "activity" | "general" | "devices" | "issues" | "libraries" | "users" | "transcoding" | "storage" | "acquisition" | "wanted" | "downloads" | "subtitles" | "ai" | "conversations" | "plugins" | "tasks" | "backups" | "logs" | "api-keys" | "proxies" | "indexer-search";
+type SectionId = "appearance" | "playback" | "subtitles-audio" | "assistant" | "account" | "overview" | "activity" | "general" | "devices" | "issues" | "libraries" | "users" | "transcoding" | "storage" | "acquisition" | "wanted" | "downloads" | "subtitles" | "ai" | "plugins" | "tasks" | "backups" | "logs" | "api-keys" | "proxies" | "indexer-search";
 
 const sections: Record<SectionId, { icon: IconName; color: string; title: () => string; admin?: boolean }> = {
   appearance: { icon: "appearance", color: "#5E5CE6", title: () => t("settings.appearance") },
@@ -90,7 +89,6 @@ const sections: Record<SectionId, { icon: IconName; color: string; title: () => 
   downloads: { icon: "downloads", color: "#34C759", title: () => t("settings.downloads"), admin: true },
   subtitles: { icon: "subtitles", color: "#FF9500", title: () => t("settings.subtitles"), admin: true },
   ai: { icon: "key", color: "#BF5AF2", title: () => t("settings.ai"), admin: true },
-  conversations: { icon: "info", color: "#5E5CE6", title: () => t("settings.conversations"), admin: true },
   backups: { icon: "folder", color: "#5856D6", title: () => t("settings.backups"), admin: true },
   logs: { icon: "info", color: "#8E8E93", title: () => t("settings.logs"), admin: true },
   "api-keys": { icon: "lock", color: "#636366", title: () => t("settings.apiKeys"), admin: true },
@@ -117,14 +115,13 @@ function lookOf(e: Entry) {
 const deviceSections: SectionId[] = ["appearance", "playback", "subtitles-audio", "assistant", "account", ...tools];
 
 /**
- * The groups: the advanced tools and the AI conversations of the server
- * chosen, for administrators; this device's sections; and the server's, in
+ * The groups: the advanced tools, for administrators; this device's sections; and the server's, in
  * the order a server is set up and kept: the server and who reaches it, the
  * menus of its media and of acquiring media, what extends it and how it
  * reaches out, and the menu of watching over and maintaining it.
  */
 const allGroups: { title: () => string; entries: Entry[]; server?: boolean; tools?: boolean }[] = [
-  { title: () => t("settings.advancedGroup"), entries: [...tools, "conversations"], tools: true },
+  { title: () => t("settings.advancedGroup"), entries: [...tools], tools: true },
   { title: () => t("settings.thisDevice"), entries: ["appearance", "playback", "subtitles-audio", "assistant"] },
   { title: () => t("settings.serverGroup"), entries: ["overview", "general", "users", "devices", "media", "acquiring", "ai", "plugins", "proxies", "maintenance"], server: true },
 ];
@@ -560,8 +557,6 @@ function SectionView({ id, chosen }: { id: SectionId; chosen: Chosen | undefined
       return chosen?.admin && <SubtitlesSection key={chosen.server.id} server={chosen.server} />;
     case "ai":
       return chosen?.admin && <AiSection key={chosen.server.id} server={chosen.server} />;
-    case "conversations":
-      return chosen?.admin && <ConversationsSection key={chosen.server.id} server={chosen.server} />;
     case "backups":
       return chosen?.admin && <BackupsSection key={chosen.server.id} server={chosen.server} />;
     case "logs":
