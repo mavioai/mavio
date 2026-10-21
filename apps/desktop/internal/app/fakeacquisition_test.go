@@ -77,6 +77,8 @@ func (f *fakeCore) handleAcquisition(mux *http.ServeMux) {
 	mux.Handle(acquisitionv1connect.NewSubtitleServiceHandler(f.subtitles))
 	f.ai = newFakeAI()
 	mux.Handle(systemv1connect.NewAiProviderServiceHandler(f.ai))
+	f.convs = newFakeConversations()
+	mux.Handle(systemv1connect.NewAiConversationServiceHandler(f.convs))
 	f.issues = newFakeIssues(f.record().GetUserId())
 	mux.Handle(acquisitionv1connect.NewIssueServiceHandler(f.issues))
 	f.wanted = newFakeWanted()

@@ -195,7 +195,7 @@ func (a *App) tvEntryRow(g *settingsGroup, id, icon string, color ui.Color, titl
 
 // settingsSubpages are the parameters naming a page within a section of
 // the settings, as a user or a library.
-var settingsSubpages = []string{"user", "library", "remote", "acquisition", "subtitles", "id", "plugin", "catalogs"}
+var settingsSubpages = []string{"user", "library", "remote", "acquisition", "subtitles", "id", "plugin", "catalogs", "conversation"}
 
 // subpageKey returns the key of a section's page, which scrolls on its
 // own: the section's ID and its subpage's parameters.

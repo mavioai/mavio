@@ -50,6 +50,8 @@ type aiState struct {
 	confirming bool
 	login      aiLogin
 	copied     string
+
+	conv convState
 }
 
 // aiLogin is a provider's OAuth login, followed as it runs.
@@ -80,6 +82,10 @@ func aiPath(provider string) string {
 func (a *App) aiSection(c *ui.Context, r *ui.Route) {
 	if id := r.Query("id"); id != "" {
 		a.aiProviderPage(c, id)
+		return
+	}
+	if id := r.Query("conversation"); id != "" {
+		a.conversationPage(c, id)
 		return
 	}
 	a.aiProviders(c)
@@ -187,6 +193,7 @@ func (a *App) aiProviders(c *ui.Context) {
 			})
 		}
 	})
+	a.aiConversations(c)
 }
 
 func (a *App) aiProviderPage(c *ui.Context, id string) {

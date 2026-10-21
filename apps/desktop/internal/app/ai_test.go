@@ -78,3 +78,63 @@ func TestAI(t *testing.T) {
 		t.Errorf("answer = %q, want = abc123", got)
 	}
 }
+
+func TestAIConversations(t *testing.T) {
+	h := newHarness(t, true, 1280, 1200)
+	h.app.router.Push("/settings/ai")
+	h.settle()
+	want := func(texts ...string) {
+		t.Helper()
+		for _, w := range texts {
+			if !h.tt.HasText(w) {
+				t.Errorf("no %q; texts = %q", w, h.tt.Texts())
+			}
+		}
+	}
+
+	// At the end of the AI settings: a new one, and those kept, an
+	// assistant's saying whose it is and where it started.
+	want("New Conversation", "Instructions", "Conversations", "Assistant conversation",
+		"Kids · Living Room · Claude Sonnet 5.5 (Anthropic) · 2 hours ago · 12,345 tokens in, 678 out · $0.0421")
+
+	// The assistant's conversation: Kids asked, the context line parted
+	// from what was said.
+	h.app.router.Push(conversationPath("c1"))
+	h.settle()
+	want("Assistant conversation", "Kids", "[screen: home]", "Play something funny", "Playing Paddington.", "Delete Conversation")
+	h.save(shots, "settings-ai-conversation")
+
+	// A new conversation started with its first message, which is answered.
+	h.app.router.Push("/settings/ai")
+	h.settle()
+	h.app.settingsState.admin.ai.conv.instructions = "Be brief."
+	h.app.settingsState.admin.ai.conv.first = "Hello there"
+	h.settle()
+	h.click("Start")
+	h.settle()
+	want("Hello there", "You", "You said: Hello there")
+	if got := h.core.convs.instructions["c2"]; got != "Be brief." {
+		t.Errorf("instructions = %q, want = Be brief.", got)
+	}
+
+	// Another message.
+	h.app.settingsState.admin.ai.conv.text = "Again"
+	h.settle()
+	h.click("Send")
+	h.settle()
+	want("You said: Again")
+	h.save(shots, "settings-ai-conversation-new")
+
+	// Deleted, back to the AI settings.
+	h.click("Delete Conversation")
+	h.settle()
+	want("Delete this conversation?")
+	h.tt.Key(0, ui.KeyEnter)
+	h.settle()
+	if h.tt.HasText("Hello there") {
+		t.Errorf("the conversation deleted still shows")
+	}
+	if n := len(h.core.convs.sessions); n != 1 {
+		t.Errorf("conversations = %d, want = 1", n)
+	}
+}
