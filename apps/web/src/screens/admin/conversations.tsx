@@ -330,6 +330,7 @@ function NewConversation({ server, onStarted }: { server: ServerEntry; onStarted
 function Bubble({
   who,
   asker,
+  context,
   text,
   pending,
   at,
@@ -342,6 +343,8 @@ function Bubble({
   who?: ModelOption;
   /** Who asked the user's messages: "You", or the user whose conversation it is. */
   asker: string;
+  /** The context line the assistant put before what the user said, for the model. */
+  context?: string;
   text: string;
   pending?: boolean;
   at?: Date;
@@ -367,7 +370,10 @@ function Bubble({
       ) : (
         <span className="px-1 type-caption text-text-tertiary">{asker}</span>
       )}
-      <div className={bubble(user)}>{text || (pending ? "…" : "")}</div>
+      <div className={bubble(user)}>
+        {context && <div className="mb-1.5 border-b border-border pb-1.5 font-mono type-caption text-text-tertiary">{context}</div>}
+        {text || (pending ? "…" : "")}
+      </div>
       {!pending && text && <MessageBar text={text} at={at} playing={playing} onPlay={onPlay} />}
     </li>
   );
@@ -377,11 +383,23 @@ function Bubble({
 interface Said {
   key: string;
   who?: ModelOption;
+  /** The context line of a user's message to the assistant. */
+  context?: string;
   text: string;
   pending?: boolean;
   at?: Date;
   /** The URL of the speech the server kept of an answer of the assistant's. */
   speech?: string;
+}
+
+/**
+ * A message's text, a user's message to the assistant parted from the
+ * context line the assistant put before it for the model, as the
+ * assistant's own conversations leave it out (docs/assistant.md).
+ */
+function parted(assistant: boolean, text: string): { context?: string; text: string } {
+  const end = assistant && text.startsWith("[") ? text.indexOf("]\n") : -1;
+  return end < 0 ? { text } : { context: text.slice(0, end + 1), text: text.slice(end + 2) };
 }
 
 /** The messages, only those scrolled into view drawn (TanStack Virtual), the page scrolling them. */
@@ -414,6 +432,7 @@ function Messages({ server, said, asker }: { server: ServerEntry; said: Said[]; 
             top={row.start - virtualizer.options.scrollMargin}
             who={m.who}
             asker={asker}
+            context={m.context}
             text={m.text}
             pending={m.pending}
             at={m.at}
@@ -502,7 +521,7 @@ export function ConversationPage({ server, id, first, onFirstSent }: { server: S
         server={server}
         asker={asker}
         said={[
-          ...messages.map((m, i) => ({ key: String(i), who: m.role === AiRole.USER ? undefined : model, text: m.text, at: m.time && timestampDate(m.time), speech: m.role === AiRole.USER ? undefined : speech.get(m.text) })),
+          ...messages.map((m, i) => ({ key: String(i), who: m.role === AiRole.USER ? undefined : model, ...parted(m.role === AiRole.USER && isAssistant(c), m.text), at: m.time && timestampDate(m.time), speech: m.role === AiRole.USER ? undefined : speech.get(m.text) })),
           // A failed message shows as the conversation kept it.
           ...(exchange && exchange.error === undefined
             ? [
