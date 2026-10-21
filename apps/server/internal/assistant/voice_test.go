@@ -101,7 +101,7 @@ func (fakeConversations) GetAgentSession(_ context.Context, req *pluginv1.GetAge
 		owner = core.NewID().String()
 	}
 	return pluginv1.GetAgentSessionResponse_builder{Session: pluginv1.AgentSession_builder{
-		Id: new(req.GetId()), Owner: new(owner), Labels: map[string]string{assistantLabel: "1"},
+		Id: new(req.GetId()), Owner: new(owner), Labels: map[string]string{SessionLabel: "1"},
 	}.Build()}.Build(), nil
 }
 

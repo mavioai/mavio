@@ -4,10 +4,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"slices"
 
 	"connectrpc.com/connect"
 
 	"github.com/mavioai/mavio/apps/server/internal/activity"
+	"github.com/mavioai/mavio/apps/server/internal/assistant"
+	"github.com/mavioai/mavio/apps/server/internal/auth"
 	"github.com/mavioai/mavio/libs/core"
 	pluginv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1/pluginv1connect"
@@ -214,23 +217,43 @@ func (s *AiProviderService) LogoutAi(ctx context.Context, req *systemv1.LogoutAi
 	return &systemv1.LogoutAiResponse{}, nil
 }
 
-// sessions checks the caller is an administrator and returns the plugin
-// keeping conversations.
-func (s *AiConversationService) sessions(ctx context.Context) (pluginv1connect.AgentSessionServiceClient, error) {
-	if _, err := admin(ctx); err != nil {
-		return nil, err
+// sessions checks the caller is an administrator and returns them and the
+// plugin keeping conversations.
+func (s *AiConversationService) sessions(ctx context.Context) (auth.Principal, pluginv1connect.AgentSessionServiceClient, error) {
+	p, err := admin(ctx)
+	if err != nil {
+		return p, nil, err
 	}
 	if s.Sessions != nil {
 		if c, ok := s.Sessions(); ok {
-			return c, nil
+			return p, c, nil
 		}
 	}
-	return nil, connect.NewError(connect.CodeFailedPrecondition, errors.New("no AI agent session plugin is running"))
+	return p, nil, connect.NewError(connect.CodeFailedPrecondition, errors.New("no AI agent session plugin is running"))
+}
+
+// visible tells whether a conversation is one of the administrators': an
+// assistant's conversation is its user's alone.
+func visible(p auth.Principal, sess *pluginv1.AgentSession) bool {
+	return sess.GetLabels()[assistant.SessionLabel] == "" || sess.GetOwner() == p.User.ID.String()
+}
+
+// session returns a conversation the caller sees, with its messages; one
+// they do not is not found.
+func session(ctx context.Context, p auth.Principal, c pluginv1connect.AgentSessionServiceClient, id string) (*pluginv1.GetAgentSessionResponse, error) {
+	resp, err := c.GetAgentSession(ctx, pluginv1.GetAgentSessionRequest_builder{Id: new(id)}.Build())
+	if err != nil {
+		return nil, gatewayError(ctx, err)
+	}
+	if !visible(p, resp.GetSession()) {
+		return nil, connect.NewError(connect.CodeNotFound, fmt.Errorf("conversation %s not found", id))
+	}
+	return resp, nil
 }
 
 // CreateAiConversation starts a conversation with a model.
 func (s *AiConversationService) CreateAiConversation(ctx context.Context, req *systemv1.CreateAiConversationRequest) (*systemv1.CreateAiConversationResponse, error) {
-	c, err := s.sessions(ctx)
+	_, c, err := s.sessions(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -243,9 +266,10 @@ func (s *AiConversationService) CreateAiConversation(ctx context.Context, req *s
 	return systemv1.CreateAiConversationResponse_builder{Conversation: resp.GetSession()}.Build(), nil
 }
 
-// ListAiConversations lists the conversations, newest first.
+// ListAiConversations lists the conversations the caller sees, newest
+// first: the administrators' and the caller's assistant conversations.
 func (s *AiConversationService) ListAiConversations(ctx context.Context, _ *systemv1.ListAiConversationsRequest) (*systemv1.ListAiConversationsResponse, error) {
-	c, err := s.sessions(ctx)
+	p, c, err := s.sessions(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -253,26 +277,30 @@ func (s *AiConversationService) ListAiConversations(ctx context.Context, _ *syst
 	if err != nil {
 		return nil, gatewayError(ctx, err)
 	}
-	return systemv1.ListAiConversationsResponse_builder{Conversations: resp.GetSessions()}.Build(), nil
+	sessions := slices.DeleteFunc(resp.GetSessions(), func(sess *pluginv1.AgentSession) bool { return !visible(p, sess) })
+	return systemv1.ListAiConversationsResponse_builder{Conversations: sessions}.Build(), nil
 }
 
 // GetAiConversation returns a conversation with its messages.
 func (s *AiConversationService) GetAiConversation(ctx context.Context, req *systemv1.GetAiConversationRequest) (*systemv1.GetAiConversationResponse, error) {
-	c, err := s.sessions(ctx)
+	p, c, err := s.sessions(ctx)
 	if err != nil {
 		return nil, err
 	}
-	resp, err := c.GetAgentSession(ctx, pluginv1.GetAgentSessionRequest_builder{Id: new(req.GetId())}.Build())
+	resp, err := session(ctx, p, c, req.GetId())
 	if err != nil {
-		return nil, gatewayError(ctx, err)
+		return nil, err
 	}
 	return systemv1.GetAiConversationResponse_builder{Conversation: resp.GetSession(), Messages: resp.GetMessages()}.Build(), nil
 }
 
 // SendAiMessage sends a message and streams the answer from the plugin.
 func (s *AiConversationService) SendAiMessage(ctx context.Context, req *systemv1.SendAiMessageRequest, stream *connect.ServerStream[systemv1.SendAiMessageResponse]) error {
-	c, err := s.sessions(ctx)
+	p, c, err := s.sessions(ctx)
 	if err != nil {
+		return err
+	}
+	if _, err := session(ctx, p, c, req.GetConversationId()); err != nil {
 		return err
 	}
 	answer, err := c.StreamAgentMessage(ctx, pluginv1.StreamAgentMessageRequest_builder{
@@ -304,8 +332,11 @@ func (s *AiConversationService) SendAiMessage(ctx context.Context, req *systemv1
 
 // DeleteAiConversation deletes a conversation.
 func (s *AiConversationService) DeleteAiConversation(ctx context.Context, req *systemv1.DeleteAiConversationRequest) (*systemv1.DeleteAiConversationResponse, error) {
-	c, err := s.sessions(ctx)
+	p, c, err := s.sessions(ctx)
 	if err != nil {
+		return nil, err
+	}
+	if _, err := session(ctx, p, c, req.GetId()); err != nil {
 		return nil, err
 	}
 	if _, err := c.DeleteAgentSession(ctx, pluginv1.DeleteAgentSessionRequest_builder{Id: new(req.GetId())}.Build()); err != nil {
