@@ -181,7 +181,7 @@ func TestStorage(t *testing.T) {
 		t.Fatal(err)
 	}
 	tr := st.(core.StorageTransfers)
-	if err := tr.MoveFrom(ctx, "rclone:mem:downloads/new.mkv", "New/new.mkv"); err != nil {
+	if err := tr.MoveFrom(ctx, "remote:mem:downloads/new.mkv", "New/new.mkv"); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := dl.Stat(ctx, "new.mkv"); !errors.Is(err, fs.ErrNotExist) {
@@ -409,8 +409,8 @@ func TestStorageBlockCache(t *testing.T) {
 	defer proxy.Close()
 	class := core.StorageCloud
 	r := &Remotes{Client: d.Client(), MediaURL: proxy.URL, Blocks: bc, Class: func(_ context.Context, p string) core.StorageClass {
-		if p != "rclone:disk:" {
-			t.Errorf("Class(%q), want = rclone:disk:", p)
+		if p != "remote:disk:" {
+			t.Errorf("Class(%q), want = remote:disk:", p)
 		}
 		return class
 	}}

@@ -850,7 +850,7 @@ type Library_builder struct {
 	Name *string
 	Kind *LibraryKind
 	// Root folders: absolute paths of the server's file system, or
-	// "rclone:<remote>:<path>" for a folder below an rclone remote's root. A
+	// "remote:<remote>:<path>" for a folder below an rclone remote's root. A
 	// path belongs to at most one library.
 	Paths []string
 	// Period of scheduled reconciliation scans; unset disables them.

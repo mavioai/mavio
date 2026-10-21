@@ -58,7 +58,7 @@ export function useRemotes(server: ServerEntry, enabled = true) {
   });
 }
 
-/** The folders of a remote's folder, "rclone:<remote>:<path>". */
+/** The folders of a remote's folder, "remote:<remote>:<path>". */
 export function useRemoteFolders(server: ServerEntry, path: string, enabled = true) {
   const servers = useServersStore();
   return useQuery({

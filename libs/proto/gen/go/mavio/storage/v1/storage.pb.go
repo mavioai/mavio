@@ -2628,7 +2628,7 @@ func (x *ListFoldersRequest) ClearPath() {
 type ListFoldersRequest_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
-	// "rclone:<remote>:" for the remote's root, or "rclone:<remote>:<path>".
+	// "remote:<remote>:" for the remote's root, or "remote:<remote>:<path>".
 	Path *string
 }
 
@@ -3158,7 +3158,7 @@ type OfflineClient_builder struct {
 	Enabled *bool
 	// Lower first among the torrent clients; 1 when 0.
 	Priority *int32
-	// The folder downloads go to, "rclone:<remote>:<path>"; the remote's
+	// The folder downloads go to, "remote:<remote>:<path>"; the remote's
 	// backend must make offline downloads.
 	Folder *string
 	// As a download client's tags.
@@ -3512,7 +3512,7 @@ const file_mavio_storage_v1_storage_proto_rawDesc = "" +
 	"\xbaH\a\xc8\x01\x01r\x02\x18@R\x04name\"\x16\n" +
 	"\x14DeleteRemoteResponse\">\n" +
 	"\x12ListFoldersRequest\x12(\n" +
-	"\x04path\x18\x01 \x01(\tB\x14\xbaH\x11\xc8\x01\x01r\f\x18\x80 :\arclone:R\x04path\"/\n" +
+	"\x04path\x18\x01 \x01(\tB\x14\xbaH\x11\xc8\x01\x01r\f\x18\x80 :\aremote:R\x04path\"/\n" +
 	"\x13ListFoldersResponse\x12\x18\n" +
 	"\afolders\x18\x01 \x03(\tR\afolders\";\n" +
 	"\x15GetRemoteUsageRequest\x12\"\n" +
@@ -3530,7 +3530,7 @@ const file_mavio_storage_v1_storage_proto_rawDesc = "" +
 	"\x04name\x18\x02 \x01(\tB\v\xbaH\b\xc8\x01\x01r\x03\x18\xc8\x01R\x04name\x12\x18\n" +
 	"\aenabled\x18\x03 \x01(\bR\aenabled\x12#\n" +
 	"\bpriority\x18\x04 \x01(\x05B\a\xbaH\x04\x1a\x02(\x00R\bpriority\x12,\n" +
-	"\x06folder\x18\x05 \x01(\tB\x14\xbaH\x11\xc8\x01\x01r\f\x18\x80 :\arclone:R\x06folder\x12 \n" +
+	"\x06folder\x18\x05 \x01(\tB\x14\xbaH\x11\xc8\x01\x01r\f\x18\x80 :\aremote:R\x06folder\x12 \n" +
 	"\x04tags\x18\x06 \x03(\tB\f\xbaH\t\x92\x01\x06\"\x04r\x02\x18dR\x04tags\x12<\n" +
 	"\x1aremove_completed_downloads\x18\a \x01(\bR\x18removeCompletedDownloads\x126\n" +
 	"\x17remove_failed_downloads\x18\b \x01(\bR\x15removeFailedDownloads\"\x1b\n" +

@@ -363,7 +363,7 @@ func (s *StorageService) ListFolders(ctx context.Context, req *storagev1.ListFol
 	remote, dir, ok := core.SplitRemotePath(req.GetPath())
 	dir = strings.Trim(dir, "/")
 	if !ok || strings.ContainsAny(remote, `/\`) || (dir != "" && (path.Clean(dir) != dir || dir == ".." || strings.HasPrefix(dir, "../"))) {
-		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("want rclone:<remote>: or rclone:<remote>:<path>"))
+		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("want remote:<remote>: or remote:<remote>:<path>"))
 	}
 	var out struct {
 		List []struct {

@@ -594,7 +594,7 @@ pub const STORAGE_SERVICE_SET_OFFLINE_CLIENTS_SPEC: ::connectrpc::Spec = ::conne
     .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
 /// StorageService tells of the disks of the server's computer, and
 /// configures the rclone remotes that library folders may lie on, as
-/// "rclone:\<remote\>:\<path\>", through the rclone rcd the server runs or
+/// "remote:\<remote\>:\<path\>", through the rclone rcd the server runs or
 /// reaches. Administrators only.
 ///
 /// # Implementing handlers

@@ -11,7 +11,7 @@ pub struct LibraryView<'a> {
     /// Field 3: `kind`
     pub kind: ::core::option::Option<::buffa::EnumValue<super::super::LibraryKind>>,
     /// Root folders: absolute paths of the server's file system, or
-    /// "rclone:\<remote\>:\<path\>" for a folder below an rclone remote's root. A
+    /// "remote:\<remote\>:\<path\>" for a folder below an rclone remote's root. A
     /// path belongs to at most one library.
     ///
     /// Field 4: `paths`
@@ -952,7 +952,7 @@ impl LibraryOwnedView {
         self.0.reborrow().kind
     }
     /// Root folders: absolute paths of the server's file system, or
-    /// "rclone:\<remote\>:\<path\>" for a folder below an rclone remote's root. A
+    /// "remote:\<remote\>:\<path\>" for a folder below an rclone remote's root. A
     /// path belongs to at most one library.
     ///
     /// Field 4: `paths`

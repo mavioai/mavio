@@ -50,7 +50,7 @@ func TestImportFromRemote(t *testing.T) {
 	t.Cleanup(func() { _ = proxy.Close() })
 	remotes := &rclone.Remotes{Client: d.Client(), MediaURL: proxy.URL, Jobs: e.db.StorageJobs()}
 	e.rt.Storages = &library.Storages{Remote: remotes.Open}
-	e.lib.Paths = []string{"rclone:drive:Movies"}
+	e.lib.Paths = []string{"remote:drive:Movies"}
 	if err := e.db.Libraries().Update(e.ctx, &e.lib); err != nil {
 		t.Fatal(err)
 	}
@@ -59,7 +59,7 @@ func TestImportFromRemote(t *testing.T) {
 	e.grabAndComplete(it)
 	e.client.setDownloads(pluginv1.Download_builder{
 		ClientId: new("qb"), Id: new(hash1080), Title: new(title1080), Status: new(pluginv1.DownloadStatus_DOWNLOAD_STATUS_COMPLETED),
-		OutputPath: new("rclone:drive:Downloads/movies/" + title1080), CanBeRemoved: new(true), CanMoveFiles: new(true),
+		OutputPath: new("remote:drive:Downloads/movies/" + title1080), CanBeRemoved: new(true), CanMoveFiles: new(true),
 	}.Build())
 	if err := e.rt.CheckQueue(e.ctx); err != nil {
 		t.Fatal(err)

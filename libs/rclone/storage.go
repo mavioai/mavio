@@ -30,7 +30,7 @@ type Remotes struct {
 	// through; nil reads them from the rcd.
 	Blocks *BlockCache
 	// Class returns the storage class of a library path
-	// ("rclone:<remote>:<path>"); nil takes every remote for cloud
+	// ("remote:<remote>:<path>"); nil takes every remote for cloud
 	// storage. Only folders on cloud storage are read through Blocks.
 	Class func(ctx context.Context, path string) core.StorageClass
 	// Jobs is the ledger of transfers, which finds them again after the
@@ -60,7 +60,7 @@ func (r *Remotes) Open(ctx context.Context, remote, dir string) (core.Storage, e
 		return nil, err
 	}
 	s := &Storage{r: r, remote: remote, dir: dir, caps: core.StorageCapabilities{ServerCopy: f["Copy"]}}
-	if r.Blocks != nil && (r.Class == nil || r.Class(ctx, "rclone:"+remote+":"+dir) == core.StorageCloud) {
+	if r.Blocks != nil && (r.Class == nil || r.Class(ctx, "remote:"+remote+":"+dir) == core.StorageCloud) {
 		s.blocks, s.seq = r.Blocks, f["SeekReadsFromStart"]
 	}
 	info, err := s.Stat(ctx, ".")

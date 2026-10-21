@@ -128,7 +128,7 @@ func TestStorages(t *testing.T) {
 	dir := t.TempDir()
 	tree(t, dir, "a/b.mkv")
 	var none *Storages
-	if _, err := none.Open(ctx, "rclone:gdrive:Movies"); !errors.Is(err, core.ErrUnsupported) {
+	if _, err := none.Open(ctx, "remote:gdrive:Movies"); !errors.Is(err, core.ErrUnsupported) {
 		t.Errorf("Open(remote) without rclone error = %v, want = %v", err, core.ErrUnsupported)
 	}
 	var gotRemote, gotDir string
@@ -136,7 +136,7 @@ func TestStorages(t *testing.T) {
 		gotRemote, gotDir = remote, dir
 		return OpenLocalStorage(dir)
 	}}
-	if st, err := s.Open(ctx, "rclone:gdrive:"+filepath.ToSlash(dir)[1:]); err == nil {
+	if st, err := s.Open(ctx, "remote:gdrive:"+filepath.ToSlash(dir)[1:]); err == nil {
 		_ = st.Close()
 	}
 	if gotRemote != "gdrive" || gotDir != filepath.ToSlash(dir)[1:] {

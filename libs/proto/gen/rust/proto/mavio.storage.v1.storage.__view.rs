@@ -6103,7 +6103,7 @@ impl ::buffa::HasMessageView for super::super::DeleteRemoteResponse {
 }
 #[derive(Clone, Debug, Default)]
 pub struct ListFoldersRequestView<'a> {
-    /// "rclone:\<remote\>:" for the remote's root, or "rclone:\<remote\>:\<path\>".
+    /// "remote:\<remote\>:" for the remote's root, or "remote:\<remote\>:\<path\>".
     ///
     /// Field 1: `path`
     pub path: ::core::option::Option<&'a str>,
@@ -6292,7 +6292,7 @@ impl ListFoldersRequestOwnedView {
     pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
         self.0.into_bytes()
     }
-    /// "rclone:\<remote\>:" for the remote's root, or "rclone:\<remote\>:\<path\>".
+    /// "remote:\<remote\>:" for the remote's root, or "remote:\<remote\>:\<path\>".
     ///
     /// Field 1: `path`
     #[must_use]
@@ -7061,7 +7061,7 @@ pub struct OfflineClientView<'a> {
     ///
     /// Field 4: `priority`
     pub priority: ::core::option::Option<i32>,
-    /// The folder downloads go to, "rclone:\<remote\>:\<path\>"; the remote's
+    /// The folder downloads go to, "remote:\<remote\>:\<path\>"; the remote's
     /// backend must make offline downloads.
     ///
     /// Field 5: `folder`
@@ -7388,7 +7388,7 @@ impl OfflineClientOwnedView {
     pub fn priority(&self) -> ::core::option::Option<i32> {
         self.0.reborrow().priority
     }
-    /// The folder downloads go to, "rclone:\<remote\>:\<path\>"; the remote's
+    /// The folder downloads go to, "remote:\<remote\>:\<path\>"; the remote's
     /// backend must make offline downloads.
     ///
     /// Field 5: `folder`

@@ -20,16 +20,16 @@ func TestValidLibraryPath(t *testing.T) {
 		{"c:/media", true},
 		{`\\nas\media`, true},
 		{"media/movies", false},
-		{"rclone:gdrive:Movies", true},
-		{"rclone:gdrive:Media/Movies", true},
-		{"rclone:gdrive:", false},
-		{"rclone::Movies", false},
-		{"rclone:gdrive", false},
-		{"rclone:gdrive:/Movies", false},
-		{"rclone:gdrive:Movies/", false},
-		{"rclone:gdrive:../Movies", false},
-		{"rclone:gdrive:Media/../Movies", false},
-		{"rclone:g/drive:Movies", false},
+		{"remote:gdrive:Movies", true},
+		{"remote:gdrive:Media/Movies", true},
+		{"remote:gdrive:", false},
+		{"remote::Movies", false},
+		{"remote:gdrive", false},
+		{"remote:gdrive:/Movies", false},
+		{"remote:gdrive:Movies/", false},
+		{"remote:gdrive:../Movies", false},
+		{"remote:gdrive:Media/../Movies", false},
+		{"remote:g/drive:Movies", false},
 	} {
 		if err := validLibraryPath(tt.path); (err == nil) != tt.ok {
 			t.Errorf("validLibraryPath(%q) = %v, want ok = %v", tt.path, err, tt.ok)
@@ -38,7 +38,7 @@ func TestValidLibraryPath(t *testing.T) {
 }
 
 func TestSplitRemotePath(t *testing.T) {
-	remote, rest, ok := SplitRemotePath("rclone:gdrive:Media/Movies")
+	remote, rest, ok := SplitRemotePath("remote:gdrive:Media/Movies")
 	if !ok || remote != "gdrive" || rest != "Media/Movies" {
 		t.Errorf("SplitRemotePath() = %q, %q, %v, want = gdrive, Media/Movies, true", remote, rest, ok)
 	}
@@ -64,8 +64,8 @@ func TestStorageName(t *testing.T) {
 		{`C:\Media`, `C:\Media\..\a.mkv`, "", false},
 		{"C:/Media", "C:/Media/a/b.mkv", "a/b.mkv", true},
 		{`C:\Media`, `C:\Media\a\b.mkv`, "a/b.mkv", true},
-		{"rclone:gdrive:Movies", "rclone:gdrive:Movies/a/b.mkv", "a/b.mkv", true},
-		{"rclone:gdrive:Movies", "rclone:gdrive:Movies 2/a.mkv", "", false},
+		{"remote:gdrive:Movies", "remote:gdrive:Movies/a/b.mkv", "a/b.mkv", true},
+		{"remote:gdrive:Movies", "remote:gdrive:Movies 2/a.mkv", "", false},
 	} {
 		name, ok := StorageName(tt.root, tt.path)
 		if name != tt.name || ok != tt.ok {
@@ -91,12 +91,12 @@ func TestInFolder(t *testing.T) {
 		{"/mediafiles", "/media", false},
 		{"/media", "/media/a", false},
 		{"/anything", "/", true},
-		{"rclone:gdrive:Movies", "/", false},
+		{"remote:gdrive:Movies", "/", false},
 		{`C:\Media\a.mkv`, "C:/Media", true},
 		{"C:/Media/a.mkv", `C:\Media`, true},
 		{`C:\Media2`, `C:\Media`, false},
-		{"rclone:gdrive:Movies/a.mkv", "rclone:gdrive:Movies", true},
-		{"rclone:gdrive:Movies 2", "rclone:gdrive:Movies", false},
+		{"remote:gdrive:Movies/a.mkv", "remote:gdrive:Movies", true},
+		{"remote:gdrive:Movies 2", "remote:gdrive:Movies", false},
 	} {
 		if got := InFolder(tt.path, tt.folder); got != tt.want {
 			t.Errorf("InFolder(%q, %q) = %v, want = %v", tt.path, tt.folder, got, tt.want)

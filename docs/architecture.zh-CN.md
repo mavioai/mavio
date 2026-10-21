@@ -427,7 +427,7 @@ Mavio 通过**全量对账扫描**发现媒体库变更，本地磁盘与网络�
 
 ### 9.2 rclone 远端（libs/rclone）
 
-媒体库路径 `rclone:<remote>:<path>` 位于 rclone 的某个远端上，经 `rclone rcd` 的 HTTP API（rc API）访问；服务端不链接 rclone 的任何代码，rcd 可以运行在其他机器上。
+媒体库路径 `remote:<remote>:<path>` 位于 rclone 的某个远端上，经 `rclone rcd` 的 HTTP API（rc API）访问；服务端不链接 rclone 的任何代码，rcd 可以运行在其他机器上。
 
 * **托管的 rcd**：默认由服务端自己运行 `rclone rcd`（`rclone` 设置可执行文件，默认为服务端可执行文件旁的那个，即发布包所附带的（§12），否则为 `PATH` 中的 `rclone`；找不到时远端不可用，存储设置会说明原因，服务端其余部分照常工作）。它监听私有目录中的 Unix 套接字，用户名和密码在每次启动时随机生成；以 `rc/noopauth` 判断就绪；退出后延迟重启，延迟逐次翻倍、最长一分钟，运行满一分钟后重置；关闭时先请求其退出（`core/quit`），再终止，最后强制结束。它的日志按级别写入服务端日志。
 * **外部 rcd**：`rclone-url` 连同 `rclone-user` 与 `rclone-pass` 连接不由服务端运行的 rcd，只允许 HTTPS、Unix 套接字，或仅限本机回环接口的 HTTP，因此凭证不会以明文穿过网络。

@@ -12,9 +12,9 @@ import (
 )
 
 // RemoteScheme prefixes library paths on rclone remotes:
-// "rclone:<remote>:<path>", the path below the remote's root
+// "remote:<remote>:<path>", the path below the remote's root
 // slash-separated and not empty.
-const RemoteScheme = "rclone:"
+const RemoteScheme = "remote:"
 
 // ErrUnsupported is returned by storage operations the storage cannot do,
 // such as hard links on cloud drives.

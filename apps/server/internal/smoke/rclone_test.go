@@ -68,7 +68,7 @@ func TestRcloneLibrary(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer s.Close()
-	lib := core.Library{Name: "Films", Kind: core.LibraryMovies, Paths: []string{"rclone:disk:Movies"}}
+	lib := core.Library{Name: "Films", Kind: core.LibraryMovies, Paths: []string{"remote:disk:Movies"}}
 	if err := s.Libraries().Create(ctx, &lib); err != nil {
 		t.Fatal(err)
 	}
@@ -95,7 +95,7 @@ func TestRcloneLibrary(t *testing.T) {
 		}
 	}
 
-	const path = "rclone:disk:Movies/Film (2020)/Film (2020).mkv"
+	const path = "remote:disk:Movies/Film (2020)/Film (2020).mkv"
 	it, err := s.Items().GetByPath(ctx, lib.ID, path)
 	if err != nil {
 		t.Fatalf("GetByPath(%s): %v", path, err)
@@ -116,7 +116,7 @@ func TestRcloneLibrary(t *testing.T) {
 	}
 
 	// Direct play reads the file through its storage.
-	f, err := storages.OpenFile(ctx, "rclone:disk:Movies", "Film (2020)/Film (2020).mkv")
+	f, err := storages.OpenFile(ctx, "remote:disk:Movies", "Film (2020)/Film (2020).mkv")
 	if err != nil {
 		t.Fatal(err)
 	}

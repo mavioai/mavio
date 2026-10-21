@@ -113,7 +113,7 @@ function StorageList({ server }: { server: ServerEntry }) {
  */
 function RemoteRow({ server, remote, kind }: { server: ServerEntry; remote: Remote; kind: string }) {
   const cur = useSearch({ strict: false }) as SettingsSearch;
-  const root = useRemoteFolders(server, `rclone:${remote.name}:`);
+  const root = useRemoteFolders(server, `remote:${remote.name}:`);
   const usage = useRemoteUsage(server, remote.name);
   const u = usage.data;
   const used = u?.usedBytes ?? (u?.totalBytes !== undefined && u.freeBytes !== undefined ? u.totalBytes - u.freeBytes : undefined);
@@ -662,7 +662,7 @@ function RemoteForm({
 
 /** A remote's folders, to walk and to see that it is reached. */
 function Folders({ server, remote }: { server: ServerEntry; remote: string }) {
-  const root = `rclone:${remote}:`;
+  const root = `remote:${remote}:`;
   const [path, setPath] = useState(root);
   const folders = useRemoteFolders(server, path);
   const parent = path === root ? undefined : path.includes("/") ? path.slice(0, path.lastIndexOf("/")) : root;
@@ -861,7 +861,7 @@ function ClientForm({
   const [removing, setRemoving] = useState(false);
   const set = (patch: Partial<ClientDraft>) => setD((x) => ({ ...x, ...patch }));
   const id = isNew ? idFor(d.name, taken) : d.id;
-  const valid = d.name.trim() !== "" && /^rclone:[^:/\\]+:/.test(d.folder.trim());
+  const valid = d.name.trim() !== "" && /^remote:[^:/\\]+:/.test(d.folder.trim());
   const text = (key: "name" | "folder" | "tags", label: string, detail?: string, placeholder?: string) => (
     <Row label={label} detail={detail}>
       <input className={`${input} sm:w-72`} aria-label={label} placeholder={placeholder} value={d[key]} onChange={(e) => set({ [key]: e.target.value })} />
@@ -870,7 +870,7 @@ function ClientForm({
   return (
     <div className="flex flex-col divide-y divide-border bg-background/40">
       {text("name", t("storage.offlineName"), undefined, "PikPak")}
-      {text("folder", t("storage.offlineFolder"), t("storage.offlineFolderDetail"), remotes[0] ? `rclone:${remotes[0].name}:downloads` : "rclone:pikpak:downloads")}
+      {text("folder", t("storage.offlineFolder"), t("storage.offlineFolderDetail"), remotes[0] ? `remote:${remotes[0].name}:downloads` : "remote:pikpak:downloads")}
       {text("tags", t("storage.offlineTags"), t("storage.offlineTagsDetail"))}
       <Row label={t("storage.offlinePriority")} detail={t("storage.offlinePriorityDetail")}>
         <NumberField

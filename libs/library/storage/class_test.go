@@ -63,7 +63,7 @@ func TestClassify(t *testing.T) {
 }
 
 func TestPathClasses(t *testing.T) {
-	libs := []core.Library{{Paths: []string{"rclone:pp:Movies"}, StorageClasses: map[string]core.StorageClass{"rclone:pp:Movies": core.StorageNetwork}}}
+	libs := []core.Library{{Paths: []string{"remote:pp:Movies"}, StorageClasses: map[string]core.StorageClass{"remote:pp:Movies": core.StorageNetwork}}}
 	p := &PathClasses{
 		Classifier: NewClassifier(&Detector{Detect: func(string) (DeviceInfo, error) { return DeviceInfo{Kind: KindLocalHDD}, nil }}),
 		Libraries:  func(context.Context) ([]core.Library, error) { return libs, nil },
@@ -72,8 +72,8 @@ func TestPathClasses(t *testing.T) {
 		path string
 		want core.StorageClass
 	}{
-		{"rclone:pp:Movies/Film", core.StorageNetwork},
-		{"rclone:pp:Downloads", core.StorageCloud},
+		{"remote:pp:Movies/Film", core.StorageNetwork},
+		{"remote:pp:Downloads", core.StorageCloud},
 		{"/srv/downloads", core.StorageLocal},
 	} {
 		if got := p.Class(t.Context(), tc.path); got != tc.want {

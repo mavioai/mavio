@@ -1241,7 +1241,7 @@
     <!-- Group of a library's folders. -->
     <string name="libraries_folders">Folders</string>
     <!-- Explanation under a library's folders. -->
-    <string name="libraries_folders_footer">Folders of the server, or of an rclone remote as rclone:remote:path. A folder belongs to one library. The storage reports how costly reading it is; cloud drives are read only as playback needs.</string>
+    <string name="libraries_folders_footer">Folders of the server, or of a remote, as remote:name:path. A folder belongs to one library. The storage reports how costly reading it is; cloud drives are read only as playback needs.</string>
     <!-- Placeholder of the field adding a folder by its path. -->
     <string name="libraries_folder_path">Folder path</string>
     <!-- Button adding the folder typed. -->
@@ -1883,7 +1883,7 @@
     <!-- Title of the list of rclone remotes -->
     <string name="storage_remotes">Remotes</string>
     <!-- Footer of the remotes -->
-    <string name="storage_remotes_footer">A library\'s folder on a remote is written rclone:remote:path, as rclone:gdrive:Movies.</string>
+    <string name="storage_remotes_footer">A library\'s folder on a remote is written remote:name:path, as remote:gdrive:Movies.</string>
     <!-- Shown when no remote is configured -->
     <string name="storage_no_remotes">No remotes yet.</string>
     <!-- Shown when the remote opened is gone -->

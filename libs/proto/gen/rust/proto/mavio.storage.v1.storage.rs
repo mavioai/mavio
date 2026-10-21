@@ -3473,7 +3473,7 @@ impl ::buffa::ExtensionSet for DeleteRemoteResponse {
 }
 #[derive(Clone, PartialEq, Default)]
 pub struct ListFoldersRequest {
-    /// "rclone:\<remote\>:" for the remote's root, or "rclone:\<remote\>:\<path\>".
+    /// "remote:\<remote\>:" for the remote's root, or "remote:\<remote\>:\<path\>".
     ///
     /// Field 1: `path`
     pub path: ::core::option::Option<::buffa::alloc::string::String>,
@@ -3978,7 +3978,7 @@ pub struct OfflineClient {
     ///
     /// Field 4: `priority`
     pub priority: ::core::option::Option<i32>,
-    /// The folder downloads go to, "rclone:\<remote\>:\<path\>"; the remote's
+    /// The folder downloads go to, "remote:\<remote\>:\<path\>"; the remote's
     /// backend must make offline downloads.
     ///
     /// Field 5: `folder`

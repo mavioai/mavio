@@ -6,7 +6,7 @@ import "buf/validate/validate.proto";
 
 // StorageService tells of the disks of the server's computer, and
 // configures the rclone remotes that library folders may lie on, as
-// "rclone:<remote>:<path>", through the rclone rcd the server runs or
+// "remote:<remote>:<path>", through the rclone rcd the server runs or
 // reaches. Administrators only.
 service StorageService {
   // ListDisks lists the disks of the server's computer: its drives and the
@@ -235,11 +235,11 @@ message DeleteRemoteRequest {
 message DeleteRemoteResponse {}
 
 message ListFoldersRequest {
-  // "rclone:<remote>:" for the remote's root, or "rclone:<remote>:<path>".
+  // "remote:<remote>:" for the remote's root, or "remote:<remote>:<path>".
   string path = 1 [
     (buf.validate.field).required = true,
     (buf.validate.field).string = {
-      prefix: "rclone:"
+      prefix: "remote:"
       max_len: 4096
     }
   ];
@@ -285,12 +285,12 @@ message OfflineClient {
   bool enabled = 3;
   // Lower first among the torrent clients; 1 when 0.
   int32 priority = 4 [(buf.validate.field).int32.gte = 0];
-  // The folder downloads go to, "rclone:<remote>:<path>"; the remote's
+  // The folder downloads go to, "remote:<remote>:<path>"; the remote's
   // backend must make offline downloads.
   string folder = 5 [
     (buf.validate.field).required = true,
     (buf.validate.field).string = {
-      prefix: "rclone:"
+      prefix: "remote:"
       max_len: 4096
     }
   ];

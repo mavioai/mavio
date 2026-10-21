@@ -68,7 +68,7 @@ func (c OfflineClient) validate() error {
 	case c.ID == "" || strings.ContainsAny(c.ID, "/ "):
 		return fmt.Errorf("%w: offline download client ID %q", core.ErrInvalid, c.ID)
 	case !ok || strings.ContainsAny(remote, `/\`) || dir == "" || path.Clean(dir) != dir || dir == ".." || strings.HasPrefix(dir, "../") || strings.HasPrefix(dir, "/"):
-		return fmt.Errorf("%w: offline download folder %q: want rclone:<remote>:<path>", core.ErrInvalid, c.Folder)
+		return fmt.Errorf("%w: offline download folder %q: want remote:<remote>:<path>", core.ErrInvalid, c.Folder)
 	}
 	return nil
 }
@@ -159,7 +159,7 @@ func (o *Offline) ListDownloadClientDefinitions(context.Context, *pluginv1.ListD
 		Fields: []*pluginv1.SettingField{pluginv1.SettingField_builder{
 			Name:     new("folder"),
 			Label:    new("Folder"),
-			HelpText: new("rclone:<remote>:<path>, on a remote whose backend makes offline downloads"),
+			HelpText: new("remote:<remote>:<path>, on a remote whose backend makes offline downloads"),
 			Type:     new(pluginv1.SettingFieldType_SETTING_FIELD_TYPE_TEXT),
 		}.Build()},
 	}.Build()

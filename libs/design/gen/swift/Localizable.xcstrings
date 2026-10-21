@@ -11042,13 +11042,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Folders of the server, or of an rclone remote as rclone:remote:path. A folder belongs to one library. The storage reports how costly reading it is; cloud drives are read only as playback needs."
+            "value": "Folders of the server, or of a remote, as remote:name:path. A folder belongs to one library. The storage reports how costly reading it is; cloud drives are read only as playback needs."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "服务器上的文件夹，或以 rclone:远程:路径 表示的 rclone 远程中的文件夹。一个文件夹只属于一个媒体库。存储类型说明读取它的代价；云盘只按播放所需读取。"
+            "value": "服务器上的文件夹，或以 remote:远端名:路径 表示的远端中的文件夹。一个文件夹只属于一个媒体库。存储类型说明读取它的代价；云盘只按播放所需读取。"
           }
         }
       }
@@ -16820,13 +16820,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "A library's folder on a remote is written rclone:remote:path, as rclone:gdrive:Movies."
+            "value": "A library's folder on a remote is written remote:name:path, as remote:gdrive:Movies."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "远端上的媒体库文件夹写作 rclone:远端:路径，如 rclone:gdrive:Movies。"
+            "value": "远端上的媒体库文件夹写作 remote:远端名:路径，如 remote:gdrive:Movies。"
           }
         }
       }

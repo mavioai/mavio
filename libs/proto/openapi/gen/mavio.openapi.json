@@ -13274,7 +13274,7 @@
               "type": "string"
             },
             "title": "paths",
-            "description": "Root folders: absolute paths of the server's file system, or\n \"rclone:\u003cremote\u003e:\u003cpath\u003e\" for a folder below an rclone remote's root. A\n path belongs to at most one library."
+            "description": "Root folders: absolute paths of the server's file system, or\n \"remote:\u003cremote\u003e:\u003cpath\u003e\" for a folder below an rclone remote's root. A\n path belongs to at most one library."
           },
           "scanInterval": {
             "allOf": [
@@ -19910,7 +19910,7 @@
             "type": "string",
             "title": "path",
             "maxLength": 4096,
-            "description": "\"rclone:\u003cremote\u003e:\" for the remote's root, or \"rclone:\u003cremote\u003e:\u003cpath\u003e\".\nstring.prefix = \"rclone:\"\n"
+            "description": "\"remote:\u003cremote\u003e:\" for the remote's root, or \"remote:\u003cremote\u003e:\u003cpath\u003e\".\nstring.prefix = \"remote:\"\n"
           }
         },
         "title": "ListFoldersRequest",
@@ -20021,7 +20021,7 @@
             "type": "string",
             "title": "folder",
             "maxLength": 4096,
-            "description": "The folder downloads go to, \"rclone:\u003cremote\u003e:\u003cpath\u003e\"; the remote's\n backend must make offline downloads.\nstring.prefix = \"rclone:\"\n"
+            "description": "The folder downloads go to, \"remote:\u003cremote\u003e:\u003cpath\u003e\"; the remote's\n backend must make offline downloads.\nstring.prefix = \"remote:\"\n"
           },
           "tags": {
             "type": "array",
@@ -24508,7 +24508,7 @@
     },
     {
       "name": "StorageService",
-      "description": "StorageService tells of the disks of the server's computer, and\n configures the rclone remotes that library folders may lie on, as\n \"rclone:\u003cremote\u003e:\u003cpath\u003e\", through the rclone rcd the server runs or\n reaches. Administrators only."
+      "description": "StorageService tells of the disks of the server's computer, and\n configures the rclone remotes that library folders may lie on, as\n \"remote:\u003cremote\u003e:\u003cpath\u003e\", through the rclone rcd the server runs or\n reaches. Administrators only."
     },
     {
       "name": "AiProviderService",

@@ -47,7 +47,7 @@ type Library struct {
 	Name string
 	Kind LibraryKind
 	// Paths are root folders: absolute paths of the server's file system,
-	// or folders of rclone remotes ("rclone:<remote>:<path>", see
+	// or folders of rclone remotes ("remote:<remote>:<path>", see
 	// [Storage]). A path belongs to at most one library.
 	Paths []string
 	// StorageClasses sets the storage class of some of the paths, by path;

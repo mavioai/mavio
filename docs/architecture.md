@@ -427,7 +427,7 @@ Scoring:
 
 ### 9.2 rclone Remotes (libs/rclone)
 
-A library path `rclone:<remote>:<path>` lies on a remote of rclone, reached through an `rclone rcd` over its HTTP API (the rc API); the server links none of rclone's code, and an rcd may run on another machine.
+A library path `remote:<remote>:<path>` lies on a remote of rclone, reached through an `rclone rcd` over its HTTP API (the rc API); the server links none of rclone's code, and an rcd may run on another machine.
 
 * **Managed rcd**: by default the server runs `rclone rcd` itself (`rclone` names the executable, by default the one beside the server's executable, as releases ship it (§12), else `rclone` on `PATH`; without one, remotes are unavailable, the storage settings telling why, and the rest of the server works). It listens on a Unix socket in a private folder, with a random user and password made at each start; readiness is `rc/noopauth`; when it exits it is restarted after a delay that doubles up to a minute and resets after a minute of running; on shutdown it is asked to quit (`core/quit`), then terminated, then killed. Its log lines go to the server's log at their levels.
 * **External rcd**: `rclone-url`, with `rclone-user` and `rclone-pass`, reaches an rcd the server does not run, over HTTPS, a Unix socket, or HTTP on the loopback interface only, so its credentials never cross a network in clear.

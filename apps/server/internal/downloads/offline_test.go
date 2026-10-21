@@ -85,7 +85,7 @@ func TestOffline(t *testing.T) {
 	if err := o.SetConfig(ctx, downloads.OfflineConfig{Clients: []downloads.OfflineClient{{ID: "pp", Folder: "/local"}}}); !errors.Is(err, core.ErrInvalid) {
 		t.Errorf("SetConfig(local folder) error = %v, want = %v", err, core.ErrInvalid)
 	}
-	cfg := downloads.OfflineConfig{Clients: []downloads.OfflineClient{{ID: "pp", Name: "PikPak", Enabled: true, Folder: "rclone:pp:Downloads"}}}
+	cfg := downloads.OfflineConfig{Clients: []downloads.OfflineClient{{ID: "pp", Name: "PikPak", Enabled: true, Folder: "remote:pp:Downloads"}}}
 	if err := o.SetConfig(ctx, cfg); err != nil {
 		t.Fatal(err)
 	}
@@ -142,7 +142,7 @@ func TestOffline(t *testing.T) {
 		t.Errorf("download = %v, want 500 bytes left, 5 s", d)
 	}
 	drive.set(rclone.OfflineTask{ID: "t1", Name: "Show.S01.1080p", Size: 1000, Progress: 100, Status: rclone.OfflineComplete})
-	const out = "rclone:pp:Downloads/series/Show.S01.1080p"
+	const out = "remote:pp:Downloads/series/Show.S01.1080p"
 	if d := get(); d.GetStatus() != pluginv1.DownloadStatus_DOWNLOAD_STATUS_COMPLETED || d.GetOutputPath() != out || !d.GetCanMoveFiles() {
 		t.Errorf("download = %v, want completed at %s", d, out)
 	}

@@ -470,7 +470,7 @@ function LibraryForm({ server, library }: { server: ServerEntry; library?: Libra
 /** The folders of the server's file system and of its rclone remotes, to walk and choose from. */
 function FolderPicker({ server, chosen, onChoose }: { server: ServerEntry; chosen: string[]; onChoose: (path: string) => void }) {
   const [path, setPath] = useState("");
-  const remote = path.startsWith("rclone:");
+  const remote = path.startsWith("remote:");
   const dir = useDirectory(server, path, !remote);
   const storage = useStorageStatus(server);
   const remotes = useRemotes(server, path === "" && (storage.data?.available ?? false));
@@ -480,10 +480,10 @@ function FolderPicker({ server, chosen, onChoose }: { server: ServerEntry; chose
     ? (remoteFolders.data ?? []).map((f) => ({ path: f, name: f.slice(f.lastIndexOf(f.includes("/") ? "/" : ":") + 1) }))
     : [
         ...(dir.data?.entries ?? []).filter((e) => e.isDir),
-        ...(path === "" ? (remotes.data ?? []).map((r) => ({ path: `rclone:${r.name}:`, name: `rclone:${r.name}:` })) : []),
+        ...(path === "" ? (remotes.data ?? []).map((r) => ({ path: `remote:${r.name}:`, name: `remote:${r.name}:` })) : []),
       ];
   const here = remote ? path : (dir.data?.path ?? path);
-  const parent = remote ? (/^rclone:[^:]*:$/.test(path) ? "" : path.includes("/") ? path.slice(0, path.lastIndexOf("/")) : path.slice(0, path.indexOf(":", 7) + 1)) : (dir.data?.parent ?? "");
+  const parent = remote ? (/^remote:[^:]*:$/.test(path) ? "" : path.includes("/") ? path.slice(0, path.lastIndexOf("/")) : path.slice(0, path.indexOf(":", 7) + 1)) : (dir.data?.parent ?? "");
   const row = (key: string, label: ReactNode, onClick: () => void, icon: "back" | "folder") => (
     <button key={key} type="button" onClick={onClick} className="flex min-h-11 w-full items-center gap-3 px-4 text-left hover:tint">
       <Icon name={icon} size={18} className="shrink-0 text-text-secondary" />
