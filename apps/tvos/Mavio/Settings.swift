@@ -630,11 +630,14 @@ private struct AboutView: View {
     private func row(_ title: String, _ value: String) -> some View {
         Button {
         } label: {
-            HStack(spacing: MavioSpacing.s24) {
-                Text(title)
-                Spacer()
-                Text(value).opacity(0.7).lineLimit(1).truncationMode(.middle)
+            HStack(alignment: .firstTextBaseline, spacing: MavioSpacing.s24) {
+                Text(title).fixedSize()
+                // The value wraps rather than shortening.
+                Text(value).opacity(0.7).multilineTextAlignment(.trailing)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(maxWidth: .infinity, alignment: .trailing)
             }
+            .padding(.vertical, MavioSpacing.s8)
         }
         .buttonStyle(RowButtonStyle())
     }

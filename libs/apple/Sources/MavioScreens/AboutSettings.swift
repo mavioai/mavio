@@ -42,15 +42,17 @@ struct AboutSettingsView: View {
         .inlineTitle()
     }
 
-    /// A label and its value, which wraps when it is long, as a device's ID,
-    /// and can be selected to copy.
+    /// A label and its value, which takes the rest of the row and wraps
+    /// rather than shortening when it does not fit, as a device's ID, and
+    /// can be selected to copy.
     private func row(_ label: String, _ value: String) -> some View {
         HStack(alignment: .firstTextBaseline, spacing: MavioSpacing.s16) {
-            Text(label)
-            Spacer(minLength: 0)
+            Text(label).fixedSize()
             Text(value)
                 .foregroundStyle(theme.colors.textSecondary)
                 .multilineTextAlignment(.trailing)
+                .fixedSize(horizontal: false, vertical: true)
+                .frame(maxWidth: .infinity, alignment: .trailing)
                 .textSelection(.enabled)
         }
     }
