@@ -75,7 +75,7 @@ func (a *App) shell(c *ui.Context) {
 }
 
 // sidebarWidths are the widths the sidebar's edge is dragged between.
-var sidebarWidths = struct{ min, max float32 }{200, 400}
+var sidebarWidths = struct{ min, max float32 }{200, 320}
 
 // sidebarWidth returns the width of the expanded sidebar: the one chosen
 // by dragging its edge, else the layout's.
