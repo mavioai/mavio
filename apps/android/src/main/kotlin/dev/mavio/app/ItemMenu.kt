@@ -41,7 +41,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import dev.mavio.admin.AdminPage
-import dev.mavio.admin.ConfirmDialog
+import dev.mavio.ui.ConfirmDialog
 import dev.mavio.admin.deviceName
 import dev.mavio.admin.reason
 import dev.mavio.core.AppModel

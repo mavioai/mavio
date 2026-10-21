@@ -73,6 +73,7 @@ import dev.mavio.ui.RowDivider
 import dev.mavio.ui.SettingsField
 import dev.mavio.ui.SettingsList
 import dev.mavio.ui.SubtitlesAudioSettings
+import dev.mavio.ui.AssistantSettings
 import dev.mavio.ui.signedInAccount
 import dev.mavio.ui.signedInServers
 import dev.mavio.ui.text
@@ -86,6 +87,7 @@ enum class SettingsPage {
     Appearance,
     Playback,
     SubtitlesAudio,
+    Assistant,
     About,
 }
 
@@ -122,6 +124,10 @@ fun SettingsScreen(model: AppModel) {
                     EntryRow(stringResource(R.string.settings_subtitles_audio), R.drawable.ic_subtitles_fill, Color(0xFF34C759)) {
                         navigator.open(Route.Setting(SettingsPage.SubtitlesAudio))
                     }
+                    RowDivider(tiled = true)
+                    EntryRow(stringResource(R.string.assistant_title), R.drawable.ic_microphone_fill, Color(0xFFFF2D55)) {
+                        navigator.open(Route.Setting(SettingsPage.Assistant))
+                    }
                 }
             }
         }
@@ -155,6 +161,7 @@ fun SettingsPageScreen(model: AppModel, page: SettingsPage) {
         SettingsPage.Appearance -> AppearancePage()
         SettingsPage.Playback -> PlaybackSettings()
         SettingsPage.SubtitlesAudio -> SubtitlesAudioSettings(model)
+        SettingsPage.Assistant -> AssistantSettings(model)
         SettingsPage.About -> AboutSettings(model)
     }
 }

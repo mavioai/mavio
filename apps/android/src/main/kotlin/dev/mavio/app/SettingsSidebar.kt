@@ -105,6 +105,7 @@ internal fun SettingsSidebar(model: AppModel, section: Route?, modifier: Modifie
             Link(R.string.settings_playback, R.drawable.ic_play_fill, Color(0xFFFF3B30), Route.Setting(SettingsPage.Playback), section, onSelect)
             if (signedIn.isNotEmpty()) {
                 Link(R.string.settings_subtitles_audio, R.drawable.ic_subtitles_fill, Color(0xFF34C759), Route.Setting(SettingsPage.SubtitlesAudio), section, onSelect)
+                Link(R.string.assistant_title, R.drawable.ic_microphone_fill, Color(0xFFFF2D55), Route.Setting(SettingsPage.Assistant), section, onSelect)
             }
         }
         if (servers.isNotEmpty()) {
