@@ -173,7 +173,7 @@ private fun SettingsListPage(model: AppModel, page: Page.Settings) {
         }
         serverGroup(model, servers, page.admins) { Modifier.focusKey(focus, it) }
         item {
-            Group {
+            Group(stringResource(R.string.settings_about)) {
                 EntryRow(
                     stringResource(R.string.settings_about),
                     R.drawable.ic_info_fill,
