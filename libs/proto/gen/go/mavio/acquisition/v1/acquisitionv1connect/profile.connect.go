@@ -99,6 +99,12 @@ const (
 	// ProfileServiceDeleteRemotePathMappingProcedure is the fully-qualified name of the
 	// ProfileService's DeleteRemotePathMapping RPC.
 	ProfileServiceDeleteRemotePathMappingProcedure = "/mavio.acquisition.v1.ProfileService/DeleteRemotePathMapping"
+	// ProfileServiceGetAcquisitionSettingsProcedure is the fully-qualified name of the ProfileService's
+	// GetAcquisitionSettings RPC.
+	ProfileServiceGetAcquisitionSettingsProcedure = "/mavio.acquisition.v1.ProfileService/GetAcquisitionSettings"
+	// ProfileServiceUpdateAcquisitionSettingsProcedure is the fully-qualified name of the
+	// ProfileService's UpdateAcquisitionSettings RPC.
+	ProfileServiceUpdateAcquisitionSettingsProcedure = "/mavio.acquisition.v1.ProfileService/UpdateAcquisitionSettings"
 )
 
 // ProfileServiceClient is a client for the mavio.acquisition.v1.ProfileService service.
@@ -138,6 +144,12 @@ type ProfileServiceClient interface {
 	ListRemotePathMappings(context.Context, *v1.ListRemotePathMappingsRequest) (*v1.ListRemotePathMappingsResponse, error)
 	CreateRemotePathMapping(context.Context, *v1.CreateRemotePathMappingRequest) (*v1.CreateRemotePathMappingResponse, error)
 	DeleteRemotePathMapping(context.Context, *v1.DeleteRemotePathMappingRequest) (*v1.DeleteRemotePathMappingResponse, error)
+	// GetAcquisitionSettings returns how releases are chosen, downloaded
+	// and imported, and how files are named. Administrators only.
+	GetAcquisitionSettings(context.Context, *v1.GetAcquisitionSettingsRequest) (*v1.GetAcquisitionSettingsResponse, error)
+	// UpdateAcquisitionSettings replaces the acquisition settings and
+	// applies them at once. Administrators only.
+	UpdateAcquisitionSettings(context.Context, *v1.UpdateAcquisitionSettingsRequest) (*v1.UpdateAcquisitionSettingsResponse, error)
 }
 
 // NewProfileServiceClient constructs a client for the mavio.acquisition.v1.ProfileService service.
@@ -300,33 +312,49 @@ func NewProfileServiceClient(httpClient connect.HTTPClient, baseURL string, opts
 			connect.WithIdempotency(connect.IdempotencyIdempotent),
 			connect.WithClientOptions(opts...),
 		),
+		getAcquisitionSettings: connect.NewClient[v1.GetAcquisitionSettingsRequest, v1.GetAcquisitionSettingsResponse](
+			httpClient,
+			baseURL+ProfileServiceGetAcquisitionSettingsProcedure,
+			connect.WithSchema(profileServiceMethods.ByName("GetAcquisitionSettings")),
+			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+			connect.WithClientOptions(opts...),
+		),
+		updateAcquisitionSettings: connect.NewClient[v1.UpdateAcquisitionSettingsRequest, v1.UpdateAcquisitionSettingsResponse](
+			httpClient,
+			baseURL+ProfileServiceUpdateAcquisitionSettingsProcedure,
+			connect.WithSchema(profileServiceMethods.ByName("UpdateAcquisitionSettings")),
+			connect.WithIdempotency(connect.IdempotencyIdempotent),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
 // profileServiceClient implements ProfileServiceClient.
 type profileServiceClient struct {
-	listQualityDefinitions   *connect.Client[v1.ListQualityDefinitionsRequest, v1.ListQualityDefinitionsResponse]
-	updateQualityDefinitions *connect.Client[v1.UpdateQualityDefinitionsRequest, v1.UpdateQualityDefinitionsResponse]
-	listQualityProfiles      *connect.Client[v1.ListQualityProfilesRequest, v1.ListQualityProfilesResponse]
-	createQualityProfile     *connect.Client[v1.CreateQualityProfileRequest, v1.CreateQualityProfileResponse]
-	updateQualityProfile     *connect.Client[v1.UpdateQualityProfileRequest, v1.UpdateQualityProfileResponse]
-	deleteQualityProfile     *connect.Client[v1.DeleteQualityProfileRequest, v1.DeleteQualityProfileResponse]
-	listCustomFormats        *connect.Client[v1.ListCustomFormatsRequest, v1.ListCustomFormatsResponse]
-	createCustomFormat       *connect.Client[v1.CreateCustomFormatRequest, v1.CreateCustomFormatResponse]
-	updateCustomFormat       *connect.Client[v1.UpdateCustomFormatRequest, v1.UpdateCustomFormatResponse]
-	deleteCustomFormat       *connect.Client[v1.DeleteCustomFormatRequest, v1.DeleteCustomFormatResponse]
-	listDelayProfiles        *connect.Client[v1.ListDelayProfilesRequest, v1.ListDelayProfilesResponse]
-	createDelayProfile       *connect.Client[v1.CreateDelayProfileRequest, v1.CreateDelayProfileResponse]
-	updateDelayProfile       *connect.Client[v1.UpdateDelayProfileRequest, v1.UpdateDelayProfileResponse]
-	deleteDelayProfile       *connect.Client[v1.DeleteDelayProfileRequest, v1.DeleteDelayProfileResponse]
-	reorderDelayProfiles     *connect.Client[v1.ReorderDelayProfilesRequest, v1.ReorderDelayProfilesResponse]
-	listReleaseProfiles      *connect.Client[v1.ListReleaseProfilesRequest, v1.ListReleaseProfilesResponse]
-	createReleaseProfile     *connect.Client[v1.CreateReleaseProfileRequest, v1.CreateReleaseProfileResponse]
-	updateReleaseProfile     *connect.Client[v1.UpdateReleaseProfileRequest, v1.UpdateReleaseProfileResponse]
-	deleteReleaseProfile     *connect.Client[v1.DeleteReleaseProfileRequest, v1.DeleteReleaseProfileResponse]
-	listRemotePathMappings   *connect.Client[v1.ListRemotePathMappingsRequest, v1.ListRemotePathMappingsResponse]
-	createRemotePathMapping  *connect.Client[v1.CreateRemotePathMappingRequest, v1.CreateRemotePathMappingResponse]
-	deleteRemotePathMapping  *connect.Client[v1.DeleteRemotePathMappingRequest, v1.DeleteRemotePathMappingResponse]
+	listQualityDefinitions    *connect.Client[v1.ListQualityDefinitionsRequest, v1.ListQualityDefinitionsResponse]
+	updateQualityDefinitions  *connect.Client[v1.UpdateQualityDefinitionsRequest, v1.UpdateQualityDefinitionsResponse]
+	listQualityProfiles       *connect.Client[v1.ListQualityProfilesRequest, v1.ListQualityProfilesResponse]
+	createQualityProfile      *connect.Client[v1.CreateQualityProfileRequest, v1.CreateQualityProfileResponse]
+	updateQualityProfile      *connect.Client[v1.UpdateQualityProfileRequest, v1.UpdateQualityProfileResponse]
+	deleteQualityProfile      *connect.Client[v1.DeleteQualityProfileRequest, v1.DeleteQualityProfileResponse]
+	listCustomFormats         *connect.Client[v1.ListCustomFormatsRequest, v1.ListCustomFormatsResponse]
+	createCustomFormat        *connect.Client[v1.CreateCustomFormatRequest, v1.CreateCustomFormatResponse]
+	updateCustomFormat        *connect.Client[v1.UpdateCustomFormatRequest, v1.UpdateCustomFormatResponse]
+	deleteCustomFormat        *connect.Client[v1.DeleteCustomFormatRequest, v1.DeleteCustomFormatResponse]
+	listDelayProfiles         *connect.Client[v1.ListDelayProfilesRequest, v1.ListDelayProfilesResponse]
+	createDelayProfile        *connect.Client[v1.CreateDelayProfileRequest, v1.CreateDelayProfileResponse]
+	updateDelayProfile        *connect.Client[v1.UpdateDelayProfileRequest, v1.UpdateDelayProfileResponse]
+	deleteDelayProfile        *connect.Client[v1.DeleteDelayProfileRequest, v1.DeleteDelayProfileResponse]
+	reorderDelayProfiles      *connect.Client[v1.ReorderDelayProfilesRequest, v1.ReorderDelayProfilesResponse]
+	listReleaseProfiles       *connect.Client[v1.ListReleaseProfilesRequest, v1.ListReleaseProfilesResponse]
+	createReleaseProfile      *connect.Client[v1.CreateReleaseProfileRequest, v1.CreateReleaseProfileResponse]
+	updateReleaseProfile      *connect.Client[v1.UpdateReleaseProfileRequest, v1.UpdateReleaseProfileResponse]
+	deleteReleaseProfile      *connect.Client[v1.DeleteReleaseProfileRequest, v1.DeleteReleaseProfileResponse]
+	listRemotePathMappings    *connect.Client[v1.ListRemotePathMappingsRequest, v1.ListRemotePathMappingsResponse]
+	createRemotePathMapping   *connect.Client[v1.CreateRemotePathMappingRequest, v1.CreateRemotePathMappingResponse]
+	deleteRemotePathMapping   *connect.Client[v1.DeleteRemotePathMappingRequest, v1.DeleteRemotePathMappingResponse]
+	getAcquisitionSettings    *connect.Client[v1.GetAcquisitionSettingsRequest, v1.GetAcquisitionSettingsResponse]
+	updateAcquisitionSettings *connect.Client[v1.UpdateAcquisitionSettingsRequest, v1.UpdateAcquisitionSettingsResponse]
 }
 
 // ListQualityDefinitions calls mavio.acquisition.v1.ProfileService.ListQualityDefinitions.
@@ -527,6 +555,24 @@ func (c *profileServiceClient) DeleteRemotePathMapping(ctx context.Context, req 
 	return nil, err
 }
 
+// GetAcquisitionSettings calls mavio.acquisition.v1.ProfileService.GetAcquisitionSettings.
+func (c *profileServiceClient) GetAcquisitionSettings(ctx context.Context, req *v1.GetAcquisitionSettingsRequest) (*v1.GetAcquisitionSettingsResponse, error) {
+	response, err := c.getAcquisitionSettings.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
+// UpdateAcquisitionSettings calls mavio.acquisition.v1.ProfileService.UpdateAcquisitionSettings.
+func (c *profileServiceClient) UpdateAcquisitionSettings(ctx context.Context, req *v1.UpdateAcquisitionSettingsRequest) (*v1.UpdateAcquisitionSettingsResponse, error) {
+	response, err := c.updateAcquisitionSettings.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
 // ProfileServiceHandler is an implementation of the mavio.acquisition.v1.ProfileService service.
 type ProfileServiceHandler interface {
 	// ListQualityDefinitions lists the qualities of a kind with their
@@ -564,6 +610,12 @@ type ProfileServiceHandler interface {
 	ListRemotePathMappings(context.Context, *v1.ListRemotePathMappingsRequest) (*v1.ListRemotePathMappingsResponse, error)
 	CreateRemotePathMapping(context.Context, *v1.CreateRemotePathMappingRequest) (*v1.CreateRemotePathMappingResponse, error)
 	DeleteRemotePathMapping(context.Context, *v1.DeleteRemotePathMappingRequest) (*v1.DeleteRemotePathMappingResponse, error)
+	// GetAcquisitionSettings returns how releases are chosen, downloaded
+	// and imported, and how files are named. Administrators only.
+	GetAcquisitionSettings(context.Context, *v1.GetAcquisitionSettingsRequest) (*v1.GetAcquisitionSettingsResponse, error)
+	// UpdateAcquisitionSettings replaces the acquisition settings and
+	// applies them at once. Administrators only.
+	UpdateAcquisitionSettings(context.Context, *v1.UpdateAcquisitionSettingsRequest) (*v1.UpdateAcquisitionSettingsResponse, error)
 }
 
 // NewProfileServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -722,6 +774,20 @@ func NewProfileServiceHandler(svc ProfileServiceHandler, opts ...connect.Handler
 		connect.WithIdempotency(connect.IdempotencyIdempotent),
 		connect.WithHandlerOptions(opts...),
 	)
+	profileServiceGetAcquisitionSettingsHandler := connect.NewUnaryHandlerSimple(
+		ProfileServiceGetAcquisitionSettingsProcedure,
+		svc.GetAcquisitionSettings,
+		connect.WithSchema(profileServiceMethods.ByName("GetAcquisitionSettings")),
+		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+		connect.WithHandlerOptions(opts...),
+	)
+	profileServiceUpdateAcquisitionSettingsHandler := connect.NewUnaryHandlerSimple(
+		ProfileServiceUpdateAcquisitionSettingsProcedure,
+		svc.UpdateAcquisitionSettings,
+		connect.WithSchema(profileServiceMethods.ByName("UpdateAcquisitionSettings")),
+		connect.WithIdempotency(connect.IdempotencyIdempotent),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/mavio.acquisition.v1.ProfileService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case ProfileServiceListQualityDefinitionsProcedure:
@@ -768,6 +834,10 @@ func NewProfileServiceHandler(svc ProfileServiceHandler, opts ...connect.Handler
 			profileServiceCreateRemotePathMappingHandler.ServeHTTP(w, r)
 		case ProfileServiceDeleteRemotePathMappingProcedure:
 			profileServiceDeleteRemotePathMappingHandler.ServeHTTP(w, r)
+		case ProfileServiceGetAcquisitionSettingsProcedure:
+			profileServiceGetAcquisitionSettingsHandler.ServeHTTP(w, r)
+		case ProfileServiceUpdateAcquisitionSettingsProcedure:
+			profileServiceUpdateAcquisitionSettingsHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -863,4 +933,12 @@ func (UnimplementedProfileServiceHandler) CreateRemotePathMapping(context.Contex
 
 func (UnimplementedProfileServiceHandler) DeleteRemotePathMapping(context.Context, *v1.DeleteRemotePathMappingRequest) (*v1.DeleteRemotePathMappingResponse, error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.acquisition.v1.ProfileService.DeleteRemotePathMapping is not implemented"))
+}
+
+func (UnimplementedProfileServiceHandler) GetAcquisitionSettings(context.Context, *v1.GetAcquisitionSettingsRequest) (*v1.GetAcquisitionSettingsResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.acquisition.v1.ProfileService.GetAcquisitionSettings is not implemented"))
+}
+
+func (UnimplementedProfileServiceHandler) UpdateAcquisitionSettings(context.Context, *v1.UpdateAcquisitionSettingsRequest) (*v1.UpdateAcquisitionSettingsResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.acquisition.v1.ProfileService.UpdateAcquisitionSettings is not implemented"))
 }

@@ -148,6 +148,30 @@ pub type OwnedUnblockCollectionResponseView = ::buffa::view::OwnedView<
         'static,
     >,
 >;
+///Shorthand for `OwnedView<GetRequestSettingsRequestView<'static>>`.
+pub type OwnedGetRequestSettingsRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::acquisition::v1::__buffa::view::GetRequestSettingsRequestView<
+        'static,
+    >,
+>;
+///Shorthand for `OwnedView<GetRequestSettingsResponseView<'static>>`.
+pub type OwnedGetRequestSettingsResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::acquisition::v1::__buffa::view::GetRequestSettingsResponseView<
+        'static,
+    >,
+>;
+///Shorthand for `OwnedView<UpdateRequestSettingsRequestView<'static>>`.
+pub type OwnedUpdateRequestSettingsRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::acquisition::v1::__buffa::view::UpdateRequestSettingsRequestView<
+        'static,
+    >,
+>;
+///Shorthand for `OwnedView<UpdateRequestSettingsResponseView<'static>>`.
+pub type OwnedUpdateRequestSettingsResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::acquisition::v1::__buffa::view::UpdateRequestSettingsResponseView<
+        'static,
+    >,
+>;
 impl ::connectrpc::Encodable<crate::proto::mavio::acquisition::v1::CreateRequestResponse>
 for crate::proto::mavio::acquisition::v1::__buffa::view::CreateRequestResponseView<'_> {
     fn encode(
@@ -672,6 +696,90 @@ for ::buffa::view::OwnedView<
         )
     }
 }
+impl ::connectrpc::Encodable<
+    crate::proto::mavio::acquisition::v1::GetRequestSettingsResponse,
+>
+for crate::proto::mavio::acquisition::v1::__buffa::view::GetRequestSettingsResponseView<
+    '_,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<
+    crate::proto::mavio::acquisition::v1::GetRequestSettingsResponse,
+>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::acquisition::v1::__buffa::view::GetRequestSettingsResponseView<
+        'static,
+    >,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
+impl ::connectrpc::Encodable<
+    crate::proto::mavio::acquisition::v1::UpdateRequestSettingsResponse,
+>
+for crate::proto::mavio::acquisition::v1::__buffa::view::UpdateRequestSettingsResponseView<
+    '_,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<
+    crate::proto::mavio::acquisition::v1::UpdateRequestSettingsResponse,
+>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::acquisition::v1::__buffa::view::UpdateRequestSettingsResponseView<
+        'static,
+    >,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
 /// Full service name for this service.
 pub const REQUEST_SERVICE_SERVICE_NAME: &str = "mavio.acquisition.v1.RequestService";
 /// Static [`Spec`](::connectrpc::Spec) for the `CreateRequest` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
@@ -755,6 +863,18 @@ pub const REQUEST_SERVICE_BLOCK_COLLECTION_SPEC: ::connectrpc::Spec = ::connectr
 /// Static [`Spec`](::connectrpc::Spec) for the `UnblockCollection` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
 pub const REQUEST_SERVICE_UNBLOCK_COLLECTION_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
         "/mavio.acquisition.v1.RequestService/UnblockCollection",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::Idempotent);
+/// Static [`Spec`](::connectrpc::Spec) for the `GetRequestSettings` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const REQUEST_SERVICE_GET_REQUEST_SETTINGS_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.acquisition.v1.RequestService/GetRequestSettings",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::NoSideEffects);
+/// Static [`Spec`](::connectrpc::Spec) for the `UpdateRequestSettings` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const REQUEST_SERVICE_UPDATE_REQUEST_SETTINGS_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.acquisition.v1.RequestService/UpdateRequestSettings",
         ::connectrpc::StreamType::Unary,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::Idempotent);
@@ -1151,6 +1271,54 @@ pub trait RequestService: Send + Sync + 'static {
         Output = ::connectrpc::ServiceResult<
             impl ::connectrpc::Encodable<
                 crate::proto::mavio::acquisition::v1::UnblockCollectionResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// GetRequestSettings returns the defaults of users' requests and where
+    /// approved requests go. Administrators only.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn get_request_settings<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::acquisition::v1::GetRequestSettingsRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::acquisition::v1::GetRequestSettingsResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// UpdateRequestSettings replaces the request settings and applies them
+    /// at once. Administrators only.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn update_request_settings<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::acquisition::v1::UpdateRequestSettingsRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::acquisition::v1::UpdateRequestSettingsResponse,
             > + Send + use<'a, Self>,
         >,
     > + Send;
@@ -1592,6 +1760,64 @@ impl<S: RequestService> RequestServiceExt for S {
                 },
             )
             .with_spec(REQUEST_SERVICE_UNBLOCK_COLLECTION_SPEC)
+            .route_view_idempotent(
+                REQUEST_SERVICE_SERVICE_NAME,
+                "GetRequestSettings",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::acquisition::v1::__buffa::view::GetRequestSettingsRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::acquisition::v1::GetRequestSettingsRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.get_request_settings(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::acquisition::v1::GetRequestSettingsResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(REQUEST_SERVICE_GET_REQUEST_SETTINGS_SPEC)
+            .route_view(
+                REQUEST_SERVICE_SERVICE_NAME,
+                "UpdateRequestSettings",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::acquisition::v1::__buffa::view::UpdateRequestSettingsRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::acquisition::v1::UpdateRequestSettingsRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.update_request_settings(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::acquisition::v1::UpdateRequestSettingsResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(REQUEST_SERVICE_UPDATE_REQUEST_SETTINGS_SPEC)
     }
 }
 /// Type-inference marker used by [`Router::add_service`](::connectrpc::Router::add_service).
@@ -1728,6 +1954,18 @@ impl<T: RequestService> ::connectrpc::Dispatcher for RequestServiceServer<T> {
                 Some(
                     ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
                         .with_spec(REQUEST_SERVICE_UNBLOCK_COLLECTION_SPEC),
+                )
+            }
+            "GetRequestSettings" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(true)
+                        .with_spec(REQUEST_SERVICE_GET_REQUEST_SETTINGS_SPEC),
+                )
+            }
+            "UpdateRequestSettings" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
+                        .with_spec(REQUEST_SERVICE_UPDATE_REQUEST_SETTINGS_SPEC),
                 )
             }
             _ => None,
@@ -2051,6 +2289,50 @@ impl<T: RequestService> ::connectrpc::Dispatcher for RequestServiceServer<T> {
                         .await?
                         .encode::<
                             crate::proto::mavio::acquisition::v1::UnblockCollectionResponse,
+                        >(format)
+                })
+            }
+            "GetRequestSettings" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::acquisition::v1::GetRequestSettingsRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::acquisition::v1::__buffa::view::GetRequestSettingsRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::acquisition::v1::GetRequestSettingsRequest,
+                    >::from_parts(&req, &body);
+                    svc.get_request_settings(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::acquisition::v1::GetRequestSettingsResponse,
+                        >(format)
+                })
+            }
+            "UpdateRequestSettings" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::acquisition::v1::UpdateRequestSettingsRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::acquisition::v1::__buffa::view::UpdateRequestSettingsRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::acquisition::v1::UpdateRequestSettingsRequest,
+                    >::from_parts(&req, &body);
+                    svc.update_request_settings(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::acquisition::v1::UpdateRequestSettingsResponse,
                         >(format)
                 })
             }
@@ -2809,6 +3091,96 @@ where
                 &self.transport,
                 &self.config,
                 REQUEST_SERVICE_UNBLOCK_COLLECTION_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the GetRequestSettings RPC. Sends a request to /mavio.acquisition.v1.RequestService/GetRequestSettings.
+    pub async fn get_request_settings(
+        &self,
+        request: crate::proto::mavio::acquisition::v1::GetRequestSettingsRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::acquisition::v1::__buffa::view::GetRequestSettingsResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.get_request_settings_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the GetRequestSettings RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn get_request_settings_with_options(
+        &self,
+        request: crate::proto::mavio::acquisition::v1::GetRequestSettingsRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::acquisition::v1::__buffa::view::GetRequestSettingsResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                REQUEST_SERVICE_GET_REQUEST_SETTINGS_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the UpdateRequestSettings RPC. Sends a request to /mavio.acquisition.v1.RequestService/UpdateRequestSettings.
+    pub async fn update_request_settings(
+        &self,
+        request: crate::proto::mavio::acquisition::v1::UpdateRequestSettingsRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::acquisition::v1::__buffa::view::UpdateRequestSettingsResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.update_request_settings_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the UpdateRequestSettings RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn update_request_settings_with_options(
+        &self,
+        request: crate::proto::mavio::acquisition::v1::UpdateRequestSettingsRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::acquisition::v1::__buffa::view::UpdateRequestSettingsResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                REQUEST_SERVICE_UPDATE_REQUEST_SETTINGS_SPEC
                     .with_origin(::connectrpc::SpecOrigin::Client),
                 request,
                 options,

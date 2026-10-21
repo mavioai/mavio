@@ -5114,3 +5114,1125 @@ impl ::buffa::ExtensionSet for UnblockCollectionResponse {
         &mut self.__buffa_unknown_fields
     }
 }
+/// RequestSettings are the defaults of users' requests and where approved
+/// requests are acquired.
+#[derive(Clone, PartialEq, Default)]
+pub struct RequestSettings {
+    /// The request permissions new users get.
+    ///
+    /// Field 1: `default_request_movies`
+    pub default_request_movies: ::core::option::Option<bool>,
+    /// Field 2: `default_request_series`
+    pub default_request_series: ::core::option::Option<bool>,
+    /// Field 3: `default_auto_approve_movies`
+    pub default_auto_approve_movies: ::core::option::Option<bool>,
+    /// Field 4: `default_auto_approve_series`
+    pub default_auto_approve_series: ::core::option::Option<bool>,
+    /// Field 5: `default_report_issues`
+    pub default_report_issues: ::core::option::Option<bool>,
+    /// The quotas of users without their own: requests of movies, or seasons
+    /// of series, in the last days; a limit of 0 is unlimited, 0 days all
+    /// time.
+    ///
+    /// Field 6: `movie_quota_limit`
+    pub movie_quota_limit: ::core::option::Option<i32>,
+    /// Field 7: `movie_quota_days`
+    pub movie_quota_days: ::core::option::Option<i32>,
+    /// Field 8: `series_quota_limit`
+    pub series_quota_limit: ::core::option::Option<i32>,
+    /// Field 9: `series_quota_days`
+    pub series_quota_days: ::core::option::Option<i32>,
+    /// The movie library and quality profile approved movies are added to;
+    /// empty, approvals fail.
+    ///
+    /// Field 10: `movie_library_id`
+    pub movie_library_id: ::core::option::Option<::buffa::alloc::string::String>,
+    /// Field 11: `movie_quality_profile_id`
+    pub movie_quality_profile_id: ::core::option::Option<::buffa::alloc::string::String>,
+    /// Field 12: `minimum_availability`
+    pub minimum_availability: ::core::option::Option<
+        ::buffa::EnumValue<MinimumAvailability>,
+    >,
+    /// The show library and quality profile approved series are added to;
+    /// empty, approvals fail.
+    ///
+    /// Field 13: `series_library_id`
+    pub series_library_id: ::core::option::Option<::buffa::alloc::string::String>,
+    /// Field 14: `series_quality_profile_id`
+    pub series_quality_profile_id: ::core::option::Option<
+        ::buffa::alloc::string::String,
+    >,
+    /// Field 15: `season_folder`
+    pub season_folder: ::core::option::Option<bool>,
+    /// Field 16: `monitor_new_items`
+    pub monitor_new_items: ::core::option::Option<::buffa::EnumValue<NewItemMonitor>>,
+    /// Allow requesting specials, season 0.
+    ///
+    /// Field 17: `specials`
+    pub specials: ::core::option::Option<bool>,
+    /// The show library and quality profile approved anime series are added
+    /// to, as Seerr's anime settings of Sonarr; empty uses those of series.
+    /// Anime series are numbered absolutely either way.
+    ///
+    /// Field 18: `anime_library_id`
+    pub anime_library_id: ::core::option::Option<::buffa::alloc::string::String>,
+    /// Field 19: `anime_quality_profile_id`
+    pub anime_quality_profile_id: ::core::option::Option<::buffa::alloc::string::String>,
+    /// Keywords of discovery providers, as "\<plugin\>/\<keyword\>", whose movies
+    /// and series the blocklisted tags job blocklists weekly, as Seerr's
+    /// blocklistedTags.
+    ///
+    /// Field 20: `blocklisted_tags`
+    pub blocklisted_tags: ::buffa::alloc::vec::Vec<::buffa::alloc::string::String>,
+    /// How many pages of each order of a keyword's titles the job
+    /// blocklists, 0–250; 0 for 50.
+    ///
+    /// Field 21: `blocklisted_tags_limit`
+    pub blocklisted_tags_limit: ::core::option::Option<i32>,
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for RequestSettings {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("RequestSettings")
+            .field("default_request_movies", &self.default_request_movies)
+            .field("default_request_series", &self.default_request_series)
+            .field("default_auto_approve_movies", &self.default_auto_approve_movies)
+            .field("default_auto_approve_series", &self.default_auto_approve_series)
+            .field("default_report_issues", &self.default_report_issues)
+            .field("movie_quota_limit", &self.movie_quota_limit)
+            .field("movie_quota_days", &self.movie_quota_days)
+            .field("series_quota_limit", &self.series_quota_limit)
+            .field("series_quota_days", &self.series_quota_days)
+            .field("movie_library_id", &self.movie_library_id)
+            .field("movie_quality_profile_id", &self.movie_quality_profile_id)
+            .field("minimum_availability", &self.minimum_availability)
+            .field("series_library_id", &self.series_library_id)
+            .field("series_quality_profile_id", &self.series_quality_profile_id)
+            .field("season_folder", &self.season_folder)
+            .field("monitor_new_items", &self.monitor_new_items)
+            .field("specials", &self.specials)
+            .field("anime_library_id", &self.anime_library_id)
+            .field("anime_quality_profile_id", &self.anime_quality_profile_id)
+            .field("blocklisted_tags", &self.blocklisted_tags)
+            .field("blocklisted_tags_limit", &self.blocklisted_tags_limit)
+            .finish()
+    }
+}
+impl RequestSettings {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.acquisition.v1.RequestSettings";
+}
+impl RequestSettings {
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::default_request_movies`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_default_request_movies(mut self, value: bool) -> Self {
+        self.default_request_movies = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::default_request_series`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_default_request_series(mut self, value: bool) -> Self {
+        self.default_request_series = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::default_auto_approve_movies`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_default_auto_approve_movies(mut self, value: bool) -> Self {
+        self.default_auto_approve_movies = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::default_auto_approve_series`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_default_auto_approve_series(mut self, value: bool) -> Self {
+        self.default_auto_approve_series = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::default_report_issues`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_default_report_issues(mut self, value: bool) -> Self {
+        self.default_report_issues = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::movie_quota_limit`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_movie_quota_limit(mut self, value: i32) -> Self {
+        self.movie_quota_limit = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::movie_quota_days`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_movie_quota_days(mut self, value: i32) -> Self {
+        self.movie_quota_days = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::series_quota_limit`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_series_quota_limit(mut self, value: i32) -> Self {
+        self.series_quota_limit = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::series_quota_days`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_series_quota_days(mut self, value: i32) -> Self {
+        self.series_quota_days = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::movie_library_id`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_movie_library_id(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.movie_library_id = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::movie_quality_profile_id`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_movie_quality_profile_id(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.movie_quality_profile_id = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::minimum_availability`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_minimum_availability(
+        mut self,
+        value: impl Into<::buffa::EnumValue<MinimumAvailability>>,
+    ) -> Self {
+        self.minimum_availability = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::series_library_id`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_series_library_id(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.series_library_id = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::series_quality_profile_id`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_series_quality_profile_id(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.series_quality_profile_id = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::season_folder`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_season_folder(mut self, value: bool) -> Self {
+        self.season_folder = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::monitor_new_items`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_monitor_new_items(
+        mut self,
+        value: impl Into<::buffa::EnumValue<NewItemMonitor>>,
+    ) -> Self {
+        self.monitor_new_items = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::specials`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_specials(mut self, value: bool) -> Self {
+        self.specials = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::anime_library_id`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_anime_library_id(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.anime_library_id = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::anime_quality_profile_id`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_anime_quality_profile_id(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.anime_quality_profile_id = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::blocklisted_tags_limit`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_blocklisted_tags_limit(mut self, value: i32) -> Self {
+        self.blocklisted_tags_limit = Some(value);
+        self
+    }
+}
+::buffa::impl_default_instance!(RequestSettings);
+impl ::buffa::MessageName for RequestSettings {
+    const PACKAGE: &'static str = "mavio.acquisition.v1";
+    const NAME: &'static str = "RequestSettings";
+    const FULL_NAME: &'static str = "mavio.acquisition.v1.RequestSettings";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.acquisition.v1.RequestSettings";
+}
+impl ::buffa::Message for RequestSettings {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if self.default_request_movies.is_some() {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
+        if self.default_request_series.is_some() {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
+        if self.default_auto_approve_movies.is_some() {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
+        if self.default_auto_approve_series.is_some() {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
+        if self.default_report_issues.is_some() {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
+        if let Some(v) = self.movie_quota_limit {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.movie_quota_days {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.series_quota_limit {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.series_quota_days {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.movie_library_id {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.movie_quality_profile_id {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.minimum_availability {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v.to_i32()) as u64;
+        }
+        if let Some(ref v) = self.series_library_id {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.series_quality_profile_id {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if self.season_folder.is_some() {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
+        if let Some(ref v) = self.monitor_new_items {
+            size += 2u64 + ::buffa::types::int32_encoded_len(v.to_i32()) as u64;
+        }
+        if self.specials.is_some() {
+            size += 2u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
+        if let Some(ref v) = self.anime_library_id {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.anime_quality_profile_id {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        for v in &self.blocklisted_tags {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.blocklisted_tags_limit {
+            size += 2u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if let Some(v) = self.default_request_movies {
+            ::buffa::types::put_bool_field(1u32, v, buf);
+        }
+        if let Some(v) = self.default_request_series {
+            ::buffa::types::put_bool_field(2u32, v, buf);
+        }
+        if let Some(v) = self.default_auto_approve_movies {
+            ::buffa::types::put_bool_field(3u32, v, buf);
+        }
+        if let Some(v) = self.default_auto_approve_series {
+            ::buffa::types::put_bool_field(4u32, v, buf);
+        }
+        if let Some(v) = self.default_report_issues {
+            ::buffa::types::put_bool_field(5u32, v, buf);
+        }
+        if let Some(v) = self.movie_quota_limit {
+            ::buffa::types::put_int32_field(6u32, v, buf);
+        }
+        if let Some(v) = self.movie_quota_days {
+            ::buffa::types::put_int32_field(7u32, v, buf);
+        }
+        if let Some(v) = self.series_quota_limit {
+            ::buffa::types::put_int32_field(8u32, v, buf);
+        }
+        if let Some(v) = self.series_quota_days {
+            ::buffa::types::put_int32_field(9u32, v, buf);
+        }
+        if let Some(ref v) = self.movie_library_id {
+            ::buffa::types::put_string_field(10u32, v, buf);
+        }
+        if let Some(ref v) = self.movie_quality_profile_id {
+            ::buffa::types::put_string_field(11u32, v, buf);
+        }
+        if let Some(ref v) = self.minimum_availability {
+            ::buffa::types::put_int32_field(12u32, v.to_i32(), buf);
+        }
+        if let Some(ref v) = self.series_library_id {
+            ::buffa::types::put_string_field(13u32, v, buf);
+        }
+        if let Some(ref v) = self.series_quality_profile_id {
+            ::buffa::types::put_string_field(14u32, v, buf);
+        }
+        if let Some(v) = self.season_folder {
+            ::buffa::types::put_bool_field(15u32, v, buf);
+        }
+        if let Some(ref v) = self.monitor_new_items {
+            ::buffa::types::put_int32_field(16u32, v.to_i32(), buf);
+        }
+        if let Some(v) = self.specials {
+            ::buffa::types::put_bool_field(17u32, v, buf);
+        }
+        if let Some(ref v) = self.anime_library_id {
+            ::buffa::types::put_string_field(18u32, v, buf);
+        }
+        if let Some(ref v) = self.anime_quality_profile_id {
+            ::buffa::types::put_string_field(19u32, v, buf);
+        }
+        for v in &self.blocklisted_tags {
+            ::buffa::types::put_string_field(20u32, v, buf);
+        }
+        if let Some(v) = self.blocklisted_tags_limit {
+            ::buffa::types::put_int32_field(21u32, v, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.default_request_movies = ::core::option::Option::Some(
+                    ::buffa::types::decode_bool(buf)?,
+                );
+            }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.default_request_series = ::core::option::Option::Some(
+                    ::buffa::types::decode_bool(buf)?,
+                );
+            }
+            3u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.default_auto_approve_movies = ::core::option::Option::Some(
+                    ::buffa::types::decode_bool(buf)?,
+                );
+            }
+            4u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.default_auto_approve_series = ::core::option::Option::Some(
+                    ::buffa::types::decode_bool(buf)?,
+                );
+            }
+            5u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.default_report_issues = ::core::option::Option::Some(
+                    ::buffa::types::decode_bool(buf)?,
+                );
+            }
+            6u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.movie_quota_limit = ::core::option::Option::Some(
+                    ::buffa::types::decode_int32(buf)?,
+                );
+            }
+            7u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.movie_quota_days = ::core::option::Option::Some(
+                    ::buffa::types::decode_int32(buf)?,
+                );
+            }
+            8u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.series_quota_limit = ::core::option::Option::Some(
+                    ::buffa::types::decode_int32(buf)?,
+                );
+            }
+            9u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.series_quota_days = ::core::option::Option::Some(
+                    ::buffa::types::decode_int32(buf)?,
+                );
+            }
+            10u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .movie_library_id
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            11u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .movie_quality_profile_id
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            12u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.minimum_availability = ::core::option::Option::Some(
+                    ::buffa::EnumValue::from(::buffa::types::decode_int32(buf)?),
+                );
+            }
+            13u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .series_library_id
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            14u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .series_quality_profile_id
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            15u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.season_folder = ::core::option::Option::Some(
+                    ::buffa::types::decode_bool(buf)?,
+                );
+            }
+            16u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.monitor_new_items = ::core::option::Option::Some(
+                    ::buffa::EnumValue::from(::buffa::types::decode_int32(buf)?),
+                );
+            }
+            17u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.specials = ::core::option::Option::Some(
+                    ::buffa::types::decode_bool(buf)?,
+                );
+            }
+            18u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .anime_library_id
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            19u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .anime_quality_profile_id
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            20u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __elem = ::buffa::types::decode_string(buf)?;
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&__elem),
+                )?;
+                self.blocklisted_tags.push(__elem);
+            }
+            21u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.blocklisted_tags_limit = ::core::option::Option::Some(
+                    ::buffa::types::decode_int32(buf)?,
+                );
+            }
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.default_request_movies = ::core::option::Option::None;
+        self.default_request_series = ::core::option::Option::None;
+        self.default_auto_approve_movies = ::core::option::Option::None;
+        self.default_auto_approve_series = ::core::option::Option::None;
+        self.default_report_issues = ::core::option::Option::None;
+        self.movie_quota_limit = ::core::option::Option::None;
+        self.movie_quota_days = ::core::option::Option::None;
+        self.series_quota_limit = ::core::option::Option::None;
+        self.series_quota_days = ::core::option::Option::None;
+        self.movie_library_id = ::core::option::Option::None;
+        self.movie_quality_profile_id = ::core::option::Option::None;
+        self.minimum_availability = ::core::option::Option::None;
+        self.series_library_id = ::core::option::Option::None;
+        self.series_quality_profile_id = ::core::option::Option::None;
+        self.season_folder = ::core::option::Option::None;
+        self.monitor_new_items = ::core::option::Option::None;
+        self.specials = ::core::option::Option::None;
+        self.anime_library_id = ::core::option::Option::None;
+        self.anime_quality_profile_id = ::core::option::Option::None;
+        self.blocklisted_tags.clear();
+        self.blocklisted_tags_limit = ::core::option::Option::None;
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for RequestSettings {
+    const PROTO_FQN: &'static str = "mavio.acquisition.v1.RequestSettings";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+#[derive(Clone, PartialEq, Default)]
+pub struct GetRequestSettingsRequest {
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for GetRequestSettingsRequest {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("GetRequestSettingsRequest").finish()
+    }
+}
+impl GetRequestSettingsRequest {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.acquisition.v1.GetRequestSettingsRequest";
+}
+::buffa::impl_default_instance!(GetRequestSettingsRequest);
+impl ::buffa::MessageName for GetRequestSettingsRequest {
+    const PACKAGE: &'static str = "mavio.acquisition.v1";
+    const NAME: &'static str = "GetRequestSettingsRequest";
+    const FULL_NAME: &'static str = "mavio.acquisition.v1.GetRequestSettingsRequest";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.acquisition.v1.GetRequestSettingsRequest";
+}
+impl ::buffa::Message for GetRequestSettingsRequest {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for GetRequestSettingsRequest {
+    const PROTO_FQN: &'static str = "mavio.acquisition.v1.GetRequestSettingsRequest";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+#[derive(Clone, PartialEq, Default)]
+pub struct GetRequestSettingsResponse {
+    /// Field 1: `settings`
+    pub settings: ::buffa::MessageField<
+        RequestSettings,
+        ::buffa::Inline<RequestSettings>,
+    >,
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for GetRequestSettingsResponse {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("GetRequestSettingsResponse")
+            .field("settings", &self.settings)
+            .finish()
+    }
+}
+impl GetRequestSettingsResponse {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.acquisition.v1.GetRequestSettingsResponse";
+}
+::buffa::impl_default_instance!(GetRequestSettingsResponse);
+impl ::buffa::MessageName for GetRequestSettingsResponse {
+    const PACKAGE: &'static str = "mavio.acquisition.v1";
+    const NAME: &'static str = "GetRequestSettingsResponse";
+    const FULL_NAME: &'static str = "mavio.acquisition.v1.GetRequestSettingsResponse";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.acquisition.v1.GetRequestSettingsResponse";
+}
+impl ::buffa::Message for GetRequestSettingsResponse {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if self.settings.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.settings.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        __cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if self.settings.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                1u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.settings.write_to(__cache, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::Message::merge_length_delimited(
+                    self.settings.get_or_insert_default(),
+                    buf,
+                    ctx,
+                )?;
+            }
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.settings = ::buffa::MessageField::none();
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for GetRequestSettingsResponse {
+    const PROTO_FQN: &'static str = "mavio.acquisition.v1.GetRequestSettingsResponse";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+#[derive(Clone, PartialEq, Default)]
+pub struct UpdateRequestSettingsRequest {
+    /// Field 1: `settings`
+    pub settings: ::buffa::MessageField<
+        RequestSettings,
+        ::buffa::Inline<RequestSettings>,
+    >,
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for UpdateRequestSettingsRequest {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("UpdateRequestSettingsRequest")
+            .field("settings", &self.settings)
+            .finish()
+    }
+}
+impl UpdateRequestSettingsRequest {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.acquisition.v1.UpdateRequestSettingsRequest";
+}
+::buffa::impl_default_instance!(UpdateRequestSettingsRequest);
+impl ::buffa::MessageName for UpdateRequestSettingsRequest {
+    const PACKAGE: &'static str = "mavio.acquisition.v1";
+    const NAME: &'static str = "UpdateRequestSettingsRequest";
+    const FULL_NAME: &'static str = "mavio.acquisition.v1.UpdateRequestSettingsRequest";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.acquisition.v1.UpdateRequestSettingsRequest";
+}
+impl ::buffa::Message for UpdateRequestSettingsRequest {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if self.settings.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.settings.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        __cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if self.settings.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                1u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.settings.write_to(__cache, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::Message::merge_length_delimited(
+                    self.settings.get_or_insert_default(),
+                    buf,
+                    ctx,
+                )?;
+            }
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.settings = ::buffa::MessageField::none();
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for UpdateRequestSettingsRequest {
+    const PROTO_FQN: &'static str = "mavio.acquisition.v1.UpdateRequestSettingsRequest";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+#[derive(Clone, PartialEq, Default)]
+pub struct UpdateRequestSettingsResponse {
+    /// Field 1: `settings`
+    pub settings: ::buffa::MessageField<
+        RequestSettings,
+        ::buffa::Inline<RequestSettings>,
+    >,
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for UpdateRequestSettingsResponse {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("UpdateRequestSettingsResponse")
+            .field("settings", &self.settings)
+            .finish()
+    }
+}
+impl UpdateRequestSettingsResponse {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.acquisition.v1.UpdateRequestSettingsResponse";
+}
+::buffa::impl_default_instance!(UpdateRequestSettingsResponse);
+impl ::buffa::MessageName for UpdateRequestSettingsResponse {
+    const PACKAGE: &'static str = "mavio.acquisition.v1";
+    const NAME: &'static str = "UpdateRequestSettingsResponse";
+    const FULL_NAME: &'static str = "mavio.acquisition.v1.UpdateRequestSettingsResponse";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.acquisition.v1.UpdateRequestSettingsResponse";
+}
+impl ::buffa::Message for UpdateRequestSettingsResponse {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if self.settings.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.settings.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        __cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if self.settings.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                1u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.settings.write_to(__cache, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::Message::merge_length_delimited(
+                    self.settings.get_or_insert_default(),
+                    buf,
+                    ctx,
+                )?;
+            }
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.settings = ::buffa::MessageField::none();
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for UpdateRequestSettingsResponse {
+    const PROTO_FQN: &'static str = "mavio.acquisition.v1.UpdateRequestSettingsResponse";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}

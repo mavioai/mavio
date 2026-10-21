@@ -59,6 +59,12 @@ class RequestService(Protocol):
     async def unblock_collection(self, request: mavio_dot_acquisition_dot_v1_dot_request__pb2.UnblockCollectionRequest, ctx: RequestContext) -> mavio_dot_acquisition_dot_v1_dot_request__pb2.UnblockCollectionResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
 
+    async def get_request_settings(self, request: mavio_dot_acquisition_dot_v1_dot_request__pb2.GetRequestSettingsRequest, ctx: RequestContext) -> mavio_dot_acquisition_dot_v1_dot_request__pb2.GetRequestSettingsResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
+
+    async def update_request_settings(self, request: mavio_dot_acquisition_dot_v1_dot_request__pb2.UpdateRequestSettingsRequest, ctx: RequestContext) -> mavio_dot_acquisition_dot_v1_dot_request__pb2.UpdateRequestSettingsResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
+
 
 class RequestServiceASGIApplication(ConnectASGIApplication[RequestService]):
     def __init__(self, service: RequestService | AsyncGenerator[RequestService], *, interceptors: Iterable[Interceptor]=(), read_max_bytes: int | None = None, compressions: Iterable[Compression] | None = None) -> None:
@@ -204,6 +210,26 @@ class RequestServiceASGIApplication(ConnectASGIApplication[RequestService]):
                         idempotency_level=IdempotencyLevel.IDEMPOTENT,
                     ),
                     function=svc.unblock_collection,
+                ),
+                "/mavio.acquisition.v1.RequestService/GetRequestSettings": Endpoint.unary(
+                    method=MethodInfo(
+                        name="GetRequestSettings",
+                        service_name="mavio.acquisition.v1.RequestService",
+                        input=mavio_dot_acquisition_dot_v1_dot_request__pb2.GetRequestSettingsRequest,
+                        output=mavio_dot_acquisition_dot_v1_dot_request__pb2.GetRequestSettingsResponse,
+                        idempotency_level=IdempotencyLevel.NO_SIDE_EFFECTS,
+                    ),
+                    function=svc.get_request_settings,
+                ),
+                "/mavio.acquisition.v1.RequestService/UpdateRequestSettings": Endpoint.unary(
+                    method=MethodInfo(
+                        name="UpdateRequestSettings",
+                        service_name="mavio.acquisition.v1.RequestService",
+                        input=mavio_dot_acquisition_dot_v1_dot_request__pb2.UpdateRequestSettingsRequest,
+                        output=mavio_dot_acquisition_dot_v1_dot_request__pb2.UpdateRequestSettingsResponse,
+                        idempotency_level=IdempotencyLevel.IDEMPOTENT,
+                    ),
+                    function=svc.update_request_settings,
                 ),
             },
             interceptors=interceptors,
@@ -506,6 +532,48 @@ class RequestServiceClient(ConnectClient):
             timeout_ms=timeout_ms,
         )
 
+    async def get_request_settings(
+        self,
+        request: mavio_dot_acquisition_dot_v1_dot_request__pb2.GetRequestSettingsRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+        use_get: bool = False,
+    ) -> mavio_dot_acquisition_dot_v1_dot_request__pb2.GetRequestSettingsResponse:
+        return await self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="GetRequestSettings",
+                service_name="mavio.acquisition.v1.RequestService",
+                input=mavio_dot_acquisition_dot_v1_dot_request__pb2.GetRequestSettingsRequest,
+                output=mavio_dot_acquisition_dot_v1_dot_request__pb2.GetRequestSettingsResponse,
+                idempotency_level=IdempotencyLevel.NO_SIDE_EFFECTS,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+            use_get=use_get,
+        )
+
+    async def update_request_settings(
+        self,
+        request: mavio_dot_acquisition_dot_v1_dot_request__pb2.UpdateRequestSettingsRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+    ) -> mavio_dot_acquisition_dot_v1_dot_request__pb2.UpdateRequestSettingsResponse:
+        return await self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="UpdateRequestSettings",
+                service_name="mavio.acquisition.v1.RequestService",
+                input=mavio_dot_acquisition_dot_v1_dot_request__pb2.UpdateRequestSettingsRequest,
+                output=mavio_dot_acquisition_dot_v1_dot_request__pb2.UpdateRequestSettingsResponse,
+                idempotency_level=IdempotencyLevel.IDEMPOTENT,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+        )
+
 
 class RequestServiceSync(Protocol):
     def create_request(self, request: mavio_dot_acquisition_dot_v1_dot_request__pb2.CreateRequestRequest, ctx: RequestContext) -> mavio_dot_acquisition_dot_v1_dot_request__pb2.CreateRequestResponse:
@@ -535,6 +603,10 @@ class RequestServiceSync(Protocol):
     def block_collection(self, request: mavio_dot_acquisition_dot_v1_dot_request__pb2.BlockCollectionRequest, ctx: RequestContext) -> mavio_dot_acquisition_dot_v1_dot_request__pb2.BlockCollectionResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
     def unblock_collection(self, request: mavio_dot_acquisition_dot_v1_dot_request__pb2.UnblockCollectionRequest, ctx: RequestContext) -> mavio_dot_acquisition_dot_v1_dot_request__pb2.UnblockCollectionResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
+    def get_request_settings(self, request: mavio_dot_acquisition_dot_v1_dot_request__pb2.GetRequestSettingsRequest, ctx: RequestContext) -> mavio_dot_acquisition_dot_v1_dot_request__pb2.GetRequestSettingsResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
+    def update_request_settings(self, request: mavio_dot_acquisition_dot_v1_dot_request__pb2.UpdateRequestSettingsRequest, ctx: RequestContext) -> mavio_dot_acquisition_dot_v1_dot_request__pb2.UpdateRequestSettingsResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
 
 
@@ -681,6 +753,26 @@ class RequestServiceWSGIApplication(ConnectWSGIApplication):
                         idempotency_level=IdempotencyLevel.IDEMPOTENT,
                     ),
                     function=service.unblock_collection,
+                ),
+                "/mavio.acquisition.v1.RequestService/GetRequestSettings": EndpointSync.unary(
+                    method=MethodInfo(
+                        name="GetRequestSettings",
+                        service_name="mavio.acquisition.v1.RequestService",
+                        input=mavio_dot_acquisition_dot_v1_dot_request__pb2.GetRequestSettingsRequest,
+                        output=mavio_dot_acquisition_dot_v1_dot_request__pb2.GetRequestSettingsResponse,
+                        idempotency_level=IdempotencyLevel.NO_SIDE_EFFECTS,
+                    ),
+                    function=service.get_request_settings,
+                ),
+                "/mavio.acquisition.v1.RequestService/UpdateRequestSettings": EndpointSync.unary(
+                    method=MethodInfo(
+                        name="UpdateRequestSettings",
+                        service_name="mavio.acquisition.v1.RequestService",
+                        input=mavio_dot_acquisition_dot_v1_dot_request__pb2.UpdateRequestSettingsRequest,
+                        output=mavio_dot_acquisition_dot_v1_dot_request__pb2.UpdateRequestSettingsResponse,
+                        idempotency_level=IdempotencyLevel.IDEMPOTENT,
+                    ),
+                    function=service.update_request_settings,
                 ),
             },
             interceptors=interceptors,
@@ -977,6 +1069,48 @@ class RequestServiceClientSync(ConnectClientSync):
                 service_name="mavio.acquisition.v1.RequestService",
                 input=mavio_dot_acquisition_dot_v1_dot_request__pb2.UnblockCollectionRequest,
                 output=mavio_dot_acquisition_dot_v1_dot_request__pb2.UnblockCollectionResponse,
+                idempotency_level=IdempotencyLevel.IDEMPOTENT,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+        )
+
+    def get_request_settings(
+        self,
+        request: mavio_dot_acquisition_dot_v1_dot_request__pb2.GetRequestSettingsRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+        use_get: bool = False,
+    ) -> mavio_dot_acquisition_dot_v1_dot_request__pb2.GetRequestSettingsResponse:
+        return self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="GetRequestSettings",
+                service_name="mavio.acquisition.v1.RequestService",
+                input=mavio_dot_acquisition_dot_v1_dot_request__pb2.GetRequestSettingsRequest,
+                output=mavio_dot_acquisition_dot_v1_dot_request__pb2.GetRequestSettingsResponse,
+                idempotency_level=IdempotencyLevel.NO_SIDE_EFFECTS,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+            use_get=use_get,
+        )
+
+    def update_request_settings(
+        self,
+        request: mavio_dot_acquisition_dot_v1_dot_request__pb2.UpdateRequestSettingsRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+    ) -> mavio_dot_acquisition_dot_v1_dot_request__pb2.UpdateRequestSettingsResponse:
+        return self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="UpdateRequestSettings",
+                service_name="mavio.acquisition.v1.RequestService",
+                input=mavio_dot_acquisition_dot_v1_dot_request__pb2.UpdateRequestSettingsRequest,
+                output=mavio_dot_acquisition_dot_v1_dot_request__pb2.UpdateRequestSettingsResponse,
                 idempotency_level=IdempotencyLevel.IDEMPOTENT,
             ),
             headers=headers,

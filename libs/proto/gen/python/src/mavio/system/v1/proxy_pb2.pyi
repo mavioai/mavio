@@ -117,3 +117,37 @@ class TestProxyResponse(_message.Message):
     exit_ip: str
     country: str
     def __init__(self, ok: _Optional[bool] = ..., error: _Optional[str] = ..., status: _Optional[int] = ..., latency: _Optional[_Union[datetime.timedelta, _duration_pb2.Duration, _Mapping]] = ..., exit_ip: _Optional[str] = ..., country: _Optional[str] = ...) -> None: ...
+
+class OutboundProxies(_message.Message):
+    __slots__ = ("plugin_catalogs", "images", "mavio_dev", "acme")
+    PLUGIN_CATALOGS_FIELD_NUMBER: _ClassVar[int]
+    IMAGES_FIELD_NUMBER: _ClassVar[int]
+    MAVIO_DEV_FIELD_NUMBER: _ClassVar[int]
+    ACME_FIELD_NUMBER: _ClassVar[int]
+    plugin_catalogs: str
+    images: str
+    mavio_dev: str
+    acme: str
+    def __init__(self, plugin_catalogs: _Optional[str] = ..., images: _Optional[str] = ..., mavio_dev: _Optional[str] = ..., acme: _Optional[str] = ...) -> None: ...
+
+class GetOutboundProxiesRequest(_message.Message):
+    __slots__ = ()
+    def __init__(self) -> None: ...
+
+class GetOutboundProxiesResponse(_message.Message):
+    __slots__ = ("proxies",)
+    PROXIES_FIELD_NUMBER: _ClassVar[int]
+    proxies: OutboundProxies
+    def __init__(self, proxies: _Optional[_Union[OutboundProxies, _Mapping]] = ...) -> None: ...
+
+class UpdateOutboundProxiesRequest(_message.Message):
+    __slots__ = ("proxies",)
+    PROXIES_FIELD_NUMBER: _ClassVar[int]
+    proxies: OutboundProxies
+    def __init__(self, proxies: _Optional[_Union[OutboundProxies, _Mapping]] = ...) -> None: ...
+
+class UpdateOutboundProxiesResponse(_message.Message):
+    __slots__ = ("proxies",)
+    PROXIES_FIELD_NUMBER: _ClassVar[int]
+    proxies: OutboundProxies
+    def __init__(self, proxies: _Optional[_Union[OutboundProxies, _Mapping]] = ...) -> None: ...

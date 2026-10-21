@@ -48,6 +48,12 @@ const (
 	// PlaybackServiceListMediaSourcesProcedure is the fully-qualified name of the PlaybackService's
 	// ListMediaSources RPC.
 	PlaybackServiceListMediaSourcesProcedure = "/mavio.playback.v1.PlaybackService/ListMediaSources"
+	// PlaybackServiceGetTranscodingSettingsProcedure is the fully-qualified name of the
+	// PlaybackService's GetTranscodingSettings RPC.
+	PlaybackServiceGetTranscodingSettingsProcedure = "/mavio.playback.v1.PlaybackService/GetTranscodingSettings"
+	// PlaybackServiceUpdateTranscodingSettingsProcedure is the fully-qualified name of the
+	// PlaybackService's UpdateTranscodingSettings RPC.
+	PlaybackServiceUpdateTranscodingSettingsProcedure = "/mavio.playback.v1.PlaybackService/UpdateTranscodingSettings"
 )
 
 // PlaybackServiceClient is a client for the mavio.playback.v1.PlaybackService service.
@@ -71,6 +77,13 @@ type PlaybackServiceClient interface {
 	// files, as GetItem lists them, then those the media source provider
 	// plugins give, probed. StartPlayback plays one by its ID.
 	ListMediaSources(context.Context, *v1.ListMediaSourcesRequest) (*v1.ListMediaSourcesResponse, error)
+	// GetTranscodingSettings returns how transcodes are made, with the
+	// hardware accelerations the server's ffmpeg supports. Administrators
+	// only.
+	GetTranscodingSettings(context.Context, *v1.GetTranscodingSettingsRequest) (*v1.GetTranscodingSettingsResponse, error)
+	// UpdateTranscodingSettings replaces the transcoding settings, which
+	// transcodes started afterwards use. Administrators only.
+	UpdateTranscodingSettings(context.Context, *v1.UpdateTranscodingSettingsRequest) (*v1.UpdateTranscodingSettingsResponse, error)
 }
 
 // NewPlaybackServiceClient constructs a client for the mavio.playback.v1.PlaybackService service.
@@ -116,16 +129,32 @@ func NewPlaybackServiceClient(httpClient connect.HTTPClient, baseURL string, opt
 			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
 			connect.WithClientOptions(opts...),
 		),
+		getTranscodingSettings: connect.NewClient[v1.GetTranscodingSettingsRequest, v1.GetTranscodingSettingsResponse](
+			httpClient,
+			baseURL+PlaybackServiceGetTranscodingSettingsProcedure,
+			connect.WithSchema(playbackServiceMethods.ByName("GetTranscodingSettings")),
+			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+			connect.WithClientOptions(opts...),
+		),
+		updateTranscodingSettings: connect.NewClient[v1.UpdateTranscodingSettingsRequest, v1.UpdateTranscodingSettingsResponse](
+			httpClient,
+			baseURL+PlaybackServiceUpdateTranscodingSettingsProcedure,
+			connect.WithSchema(playbackServiceMethods.ByName("UpdateTranscodingSettings")),
+			connect.WithIdempotency(connect.IdempotencyIdempotent),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
 // playbackServiceClient implements PlaybackServiceClient.
 type playbackServiceClient struct {
-	startPlayback    *connect.Client[v1.StartPlaybackRequest, v1.StartPlaybackResponse]
-	reportProgress   *connect.Client[v1.ReportProgressRequest, v1.ReportProgressResponse]
-	stopPlayback     *connect.Client[v1.StopPlaybackRequest, v1.StopPlaybackResponse]
-	listIntros       *connect.Client[v1.ListIntrosRequest, v1.ListIntrosResponse]
-	listMediaSources *connect.Client[v1.ListMediaSourcesRequest, v1.ListMediaSourcesResponse]
+	startPlayback             *connect.Client[v1.StartPlaybackRequest, v1.StartPlaybackResponse]
+	reportProgress            *connect.Client[v1.ReportProgressRequest, v1.ReportProgressResponse]
+	stopPlayback              *connect.Client[v1.StopPlaybackRequest, v1.StopPlaybackResponse]
+	listIntros                *connect.Client[v1.ListIntrosRequest, v1.ListIntrosResponse]
+	listMediaSources          *connect.Client[v1.ListMediaSourcesRequest, v1.ListMediaSourcesResponse]
+	getTranscodingSettings    *connect.Client[v1.GetTranscodingSettingsRequest, v1.GetTranscodingSettingsResponse]
+	updateTranscodingSettings *connect.Client[v1.UpdateTranscodingSettingsRequest, v1.UpdateTranscodingSettingsResponse]
 }
 
 // StartPlayback calls mavio.playback.v1.PlaybackService.StartPlayback.
@@ -173,6 +202,24 @@ func (c *playbackServiceClient) ListMediaSources(ctx context.Context, req *v1.Li
 	return nil, err
 }
 
+// GetTranscodingSettings calls mavio.playback.v1.PlaybackService.GetTranscodingSettings.
+func (c *playbackServiceClient) GetTranscodingSettings(ctx context.Context, req *v1.GetTranscodingSettingsRequest) (*v1.GetTranscodingSettingsResponse, error) {
+	response, err := c.getTranscodingSettings.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
+// UpdateTranscodingSettings calls mavio.playback.v1.PlaybackService.UpdateTranscodingSettings.
+func (c *playbackServiceClient) UpdateTranscodingSettings(ctx context.Context, req *v1.UpdateTranscodingSettingsRequest) (*v1.UpdateTranscodingSettingsResponse, error) {
+	response, err := c.updateTranscodingSettings.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
 // PlaybackServiceHandler is an implementation of the mavio.playback.v1.PlaybackService service.
 type PlaybackServiceHandler interface {
 	// StartPlayback picks a media source and streams, decides whether the
@@ -194,6 +241,13 @@ type PlaybackServiceHandler interface {
 	// files, as GetItem lists them, then those the media source provider
 	// plugins give, probed. StartPlayback plays one by its ID.
 	ListMediaSources(context.Context, *v1.ListMediaSourcesRequest) (*v1.ListMediaSourcesResponse, error)
+	// GetTranscodingSettings returns how transcodes are made, with the
+	// hardware accelerations the server's ffmpeg supports. Administrators
+	// only.
+	GetTranscodingSettings(context.Context, *v1.GetTranscodingSettingsRequest) (*v1.GetTranscodingSettingsResponse, error)
+	// UpdateTranscodingSettings replaces the transcoding settings, which
+	// transcodes started afterwards use. Administrators only.
+	UpdateTranscodingSettings(context.Context, *v1.UpdateTranscodingSettingsRequest) (*v1.UpdateTranscodingSettingsResponse, error)
 }
 
 // NewPlaybackServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -235,6 +289,20 @@ func NewPlaybackServiceHandler(svc PlaybackServiceHandler, opts ...connect.Handl
 		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
 		connect.WithHandlerOptions(opts...),
 	)
+	playbackServiceGetTranscodingSettingsHandler := connect.NewUnaryHandlerSimple(
+		PlaybackServiceGetTranscodingSettingsProcedure,
+		svc.GetTranscodingSettings,
+		connect.WithSchema(playbackServiceMethods.ByName("GetTranscodingSettings")),
+		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+		connect.WithHandlerOptions(opts...),
+	)
+	playbackServiceUpdateTranscodingSettingsHandler := connect.NewUnaryHandlerSimple(
+		PlaybackServiceUpdateTranscodingSettingsProcedure,
+		svc.UpdateTranscodingSettings,
+		connect.WithSchema(playbackServiceMethods.ByName("UpdateTranscodingSettings")),
+		connect.WithIdempotency(connect.IdempotencyIdempotent),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/mavio.playback.v1.PlaybackService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case PlaybackServiceStartPlaybackProcedure:
@@ -247,6 +315,10 @@ func NewPlaybackServiceHandler(svc PlaybackServiceHandler, opts ...connect.Handl
 			playbackServiceListIntrosHandler.ServeHTTP(w, r)
 		case PlaybackServiceListMediaSourcesProcedure:
 			playbackServiceListMediaSourcesHandler.ServeHTTP(w, r)
+		case PlaybackServiceGetTranscodingSettingsProcedure:
+			playbackServiceGetTranscodingSettingsHandler.ServeHTTP(w, r)
+		case PlaybackServiceUpdateTranscodingSettingsProcedure:
+			playbackServiceUpdateTranscodingSettingsHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -274,4 +346,12 @@ func (UnimplementedPlaybackServiceHandler) ListIntros(context.Context, *v1.ListI
 
 func (UnimplementedPlaybackServiceHandler) ListMediaSources(context.Context, *v1.ListMediaSourcesRequest) (*v1.ListMediaSourcesResponse, error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.playback.v1.PlaybackService.ListMediaSources is not implemented"))
+}
+
+func (UnimplementedPlaybackServiceHandler) GetTranscodingSettings(context.Context, *v1.GetTranscodingSettingsRequest) (*v1.GetTranscodingSettingsResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.playback.v1.PlaybackService.GetTranscodingSettings is not implemented"))
+}
+
+func (UnimplementedPlaybackServiceHandler) UpdateTranscodingSettings(context.Context, *v1.UpdateTranscodingSettingsRequest) (*v1.UpdateTranscodingSettingsResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.playback.v1.PlaybackService.UpdateTranscodingSettings is not implemented"))
 }

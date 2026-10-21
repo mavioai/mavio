@@ -3,6 +3,7 @@ import datetime
 from buf.validate import validate_pb2 as _validate_pb2
 from google.protobuf import timestamp_pb2 as _timestamp_pb2
 from mavio.acquisition.v1 import profile_pb2 as _profile_pb2
+from mavio.acquisition.v1 import wanted_pb2 as _wanted_pb2
 from google.protobuf.internal import containers as _containers
 from google.protobuf.internal import enum_type_wrapper as _enum_type_wrapper
 from google.protobuf import descriptor as _descriptor
@@ -318,3 +319,71 @@ class UnblockCollectionRequest(_message.Message):
 class UnblockCollectionResponse(_message.Message):
     __slots__ = ()
     def __init__(self) -> None: ...
+
+class RequestSettings(_message.Message):
+    __slots__ = ("default_request_movies", "default_request_series", "default_auto_approve_movies", "default_auto_approve_series", "default_report_issues", "movie_quota_limit", "movie_quota_days", "series_quota_limit", "series_quota_days", "movie_library_id", "movie_quality_profile_id", "minimum_availability", "series_library_id", "series_quality_profile_id", "season_folder", "monitor_new_items", "specials", "anime_library_id", "anime_quality_profile_id", "blocklisted_tags", "blocklisted_tags_limit")
+    DEFAULT_REQUEST_MOVIES_FIELD_NUMBER: _ClassVar[int]
+    DEFAULT_REQUEST_SERIES_FIELD_NUMBER: _ClassVar[int]
+    DEFAULT_AUTO_APPROVE_MOVIES_FIELD_NUMBER: _ClassVar[int]
+    DEFAULT_AUTO_APPROVE_SERIES_FIELD_NUMBER: _ClassVar[int]
+    DEFAULT_REPORT_ISSUES_FIELD_NUMBER: _ClassVar[int]
+    MOVIE_QUOTA_LIMIT_FIELD_NUMBER: _ClassVar[int]
+    MOVIE_QUOTA_DAYS_FIELD_NUMBER: _ClassVar[int]
+    SERIES_QUOTA_LIMIT_FIELD_NUMBER: _ClassVar[int]
+    SERIES_QUOTA_DAYS_FIELD_NUMBER: _ClassVar[int]
+    MOVIE_LIBRARY_ID_FIELD_NUMBER: _ClassVar[int]
+    MOVIE_QUALITY_PROFILE_ID_FIELD_NUMBER: _ClassVar[int]
+    MINIMUM_AVAILABILITY_FIELD_NUMBER: _ClassVar[int]
+    SERIES_LIBRARY_ID_FIELD_NUMBER: _ClassVar[int]
+    SERIES_QUALITY_PROFILE_ID_FIELD_NUMBER: _ClassVar[int]
+    SEASON_FOLDER_FIELD_NUMBER: _ClassVar[int]
+    MONITOR_NEW_ITEMS_FIELD_NUMBER: _ClassVar[int]
+    SPECIALS_FIELD_NUMBER: _ClassVar[int]
+    ANIME_LIBRARY_ID_FIELD_NUMBER: _ClassVar[int]
+    ANIME_QUALITY_PROFILE_ID_FIELD_NUMBER: _ClassVar[int]
+    BLOCKLISTED_TAGS_FIELD_NUMBER: _ClassVar[int]
+    BLOCKLISTED_TAGS_LIMIT_FIELD_NUMBER: _ClassVar[int]
+    default_request_movies: bool
+    default_request_series: bool
+    default_auto_approve_movies: bool
+    default_auto_approve_series: bool
+    default_report_issues: bool
+    movie_quota_limit: int
+    movie_quota_days: int
+    series_quota_limit: int
+    series_quota_days: int
+    movie_library_id: str
+    movie_quality_profile_id: str
+    minimum_availability: _wanted_pb2.MinimumAvailability
+    series_library_id: str
+    series_quality_profile_id: str
+    season_folder: bool
+    monitor_new_items: _wanted_pb2.NewItemMonitor
+    specials: bool
+    anime_library_id: str
+    anime_quality_profile_id: str
+    blocklisted_tags: _containers.RepeatedScalarFieldContainer[str]
+    blocklisted_tags_limit: int
+    def __init__(self, default_request_movies: _Optional[bool] = ..., default_request_series: _Optional[bool] = ..., default_auto_approve_movies: _Optional[bool] = ..., default_auto_approve_series: _Optional[bool] = ..., default_report_issues: _Optional[bool] = ..., movie_quota_limit: _Optional[int] = ..., movie_quota_days: _Optional[int] = ..., series_quota_limit: _Optional[int] = ..., series_quota_days: _Optional[int] = ..., movie_library_id: _Optional[str] = ..., movie_quality_profile_id: _Optional[str] = ..., minimum_availability: _Optional[_Union[_wanted_pb2.MinimumAvailability, str]] = ..., series_library_id: _Optional[str] = ..., series_quality_profile_id: _Optional[str] = ..., season_folder: _Optional[bool] = ..., monitor_new_items: _Optional[_Union[_wanted_pb2.NewItemMonitor, str]] = ..., specials: _Optional[bool] = ..., anime_library_id: _Optional[str] = ..., anime_quality_profile_id: _Optional[str] = ..., blocklisted_tags: _Optional[_Iterable[str]] = ..., blocklisted_tags_limit: _Optional[int] = ...) -> None: ...
+
+class GetRequestSettingsRequest(_message.Message):
+    __slots__ = ()
+    def __init__(self) -> None: ...
+
+class GetRequestSettingsResponse(_message.Message):
+    __slots__ = ("settings",)
+    SETTINGS_FIELD_NUMBER: _ClassVar[int]
+    settings: RequestSettings
+    def __init__(self, settings: _Optional[_Union[RequestSettings, _Mapping]] = ...) -> None: ...
+
+class UpdateRequestSettingsRequest(_message.Message):
+    __slots__ = ("settings",)
+    SETTINGS_FIELD_NUMBER: _ClassVar[int]
+    settings: RequestSettings
+    def __init__(self, settings: _Optional[_Union[RequestSettings, _Mapping]] = ...) -> None: ...
+
+class UpdateRequestSettingsResponse(_message.Message):
+    __slots__ = ("settings",)
+    SETTINGS_FIELD_NUMBER: _ClassVar[int]
+    settings: RequestSettings
+    def __init__(self, settings: _Optional[_Union[RequestSettings, _Mapping]] = ...) -> None: ...

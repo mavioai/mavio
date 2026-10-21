@@ -128,6 +128,13 @@ class TranscodeReason(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     TRANSCODE_REASON_VIDEO_CODEC_TAG_NOT_SUPPORTED: _ClassVar[TranscodeReason]
     TRANSCODE_REASON_STREAM_COUNT_EXCEEDS_LIMIT: _ClassVar[TranscodeReason]
     TRANSCODE_REASON_VIDEO_ROTATION_NOT_SUPPORTED: _ClassVar[TranscodeReason]
+
+class HardwareAcceleration(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
+    __slots__ = ()
+    HARDWARE_ACCELERATION_UNSPECIFIED: _ClassVar[HardwareAcceleration]
+    HARDWARE_ACCELERATION_AUTO: _ClassVar[HardwareAcceleration]
+    HARDWARE_ACCELERATION_NONE: _ClassVar[HardwareAcceleration]
+    HARDWARE_ACCELERATION_VIDEOTOOLBOX: _ClassVar[HardwareAcceleration]
 MEDIA_KIND_UNSPECIFIED: MediaKind
 MEDIA_KIND_AUDIO: MediaKind
 MEDIA_KIND_VIDEO: MediaKind
@@ -214,6 +221,10 @@ TRANSCODE_REASON_VIDEO_RANGE_TYPE_NOT_SUPPORTED: TranscodeReason
 TRANSCODE_REASON_VIDEO_CODEC_TAG_NOT_SUPPORTED: TranscodeReason
 TRANSCODE_REASON_STREAM_COUNT_EXCEEDS_LIMIT: TranscodeReason
 TRANSCODE_REASON_VIDEO_ROTATION_NOT_SUPPORTED: TranscodeReason
+HARDWARE_ACCELERATION_UNSPECIFIED: HardwareAcceleration
+HARDWARE_ACCELERATION_AUTO: HardwareAcceleration
+HARDWARE_ACCELERATION_NONE: HardwareAcceleration
+HARDWARE_ACCELERATION_VIDEOTOOLBOX: HardwareAcceleration
 
 class ClientCapabilities(_message.Message):
     __slots__ = ("name", "max_streaming_bitrate", "max_static_bitrate", "music_streaming_transcoding_bitrate", "max_static_music_bitrate", "direct_play", "transcoding", "containers", "codecs", "subtitles")
@@ -464,3 +475,61 @@ class ListMediaSourcesResponse(_message.Message):
     MEDIA_SOURCES_FIELD_NUMBER: _ClassVar[int]
     media_sources: _containers.RepeatedCompositeFieldContainer[_media_pb2.MediaSource]
     def __init__(self, media_sources: _Optional[_Iterable[_Union[_media_pb2.MediaSource, _Mapping]]] = ...) -> None: ...
+
+class TranscodingSettings(_message.Message):
+    __slots__ = ("hardware_acceleration", "hardware_encoding", "encoder_preset", "h264_crf", "h265_crf", "threads", "tonemap_algorithm", "tonemap_range", "tonemap_desat", "tonemap_peak", "deinterlace_method", "deinterlace_double_rate", "downmix_boost", "crop_black_borders", "transcode_dir")
+    HARDWARE_ACCELERATION_FIELD_NUMBER: _ClassVar[int]
+    HARDWARE_ENCODING_FIELD_NUMBER: _ClassVar[int]
+    ENCODER_PRESET_FIELD_NUMBER: _ClassVar[int]
+    H264_CRF_FIELD_NUMBER: _ClassVar[int]
+    H265_CRF_FIELD_NUMBER: _ClassVar[int]
+    THREADS_FIELD_NUMBER: _ClassVar[int]
+    TONEMAP_ALGORITHM_FIELD_NUMBER: _ClassVar[int]
+    TONEMAP_RANGE_FIELD_NUMBER: _ClassVar[int]
+    TONEMAP_DESAT_FIELD_NUMBER: _ClassVar[int]
+    TONEMAP_PEAK_FIELD_NUMBER: _ClassVar[int]
+    DEINTERLACE_METHOD_FIELD_NUMBER: _ClassVar[int]
+    DEINTERLACE_DOUBLE_RATE_FIELD_NUMBER: _ClassVar[int]
+    DOWNMIX_BOOST_FIELD_NUMBER: _ClassVar[int]
+    CROP_BLACK_BORDERS_FIELD_NUMBER: _ClassVar[int]
+    TRANSCODE_DIR_FIELD_NUMBER: _ClassVar[int]
+    hardware_acceleration: HardwareAcceleration
+    hardware_encoding: bool
+    encoder_preset: str
+    h264_crf: int
+    h265_crf: int
+    threads: int
+    tonemap_algorithm: str
+    tonemap_range: str
+    tonemap_desat: float
+    tonemap_peak: float
+    deinterlace_method: str
+    deinterlace_double_rate: bool
+    downmix_boost: float
+    crop_black_borders: bool
+    transcode_dir: str
+    def __init__(self, hardware_acceleration: _Optional[_Union[HardwareAcceleration, str]] = ..., hardware_encoding: _Optional[bool] = ..., encoder_preset: _Optional[str] = ..., h264_crf: _Optional[int] = ..., h265_crf: _Optional[int] = ..., threads: _Optional[int] = ..., tonemap_algorithm: _Optional[str] = ..., tonemap_range: _Optional[str] = ..., tonemap_desat: _Optional[float] = ..., tonemap_peak: _Optional[float] = ..., deinterlace_method: _Optional[str] = ..., deinterlace_double_rate: _Optional[bool] = ..., downmix_boost: _Optional[float] = ..., crop_black_borders: _Optional[bool] = ..., transcode_dir: _Optional[str] = ...) -> None: ...
+
+class GetTranscodingSettingsRequest(_message.Message):
+    __slots__ = ()
+    def __init__(self) -> None: ...
+
+class GetTranscodingSettingsResponse(_message.Message):
+    __slots__ = ("settings", "available_hardware_accelerations")
+    SETTINGS_FIELD_NUMBER: _ClassVar[int]
+    AVAILABLE_HARDWARE_ACCELERATIONS_FIELD_NUMBER: _ClassVar[int]
+    settings: TranscodingSettings
+    available_hardware_accelerations: _containers.RepeatedScalarFieldContainer[HardwareAcceleration]
+    def __init__(self, settings: _Optional[_Union[TranscodingSettings, _Mapping]] = ..., available_hardware_accelerations: _Optional[_Iterable[_Union[HardwareAcceleration, str]]] = ...) -> None: ...
+
+class UpdateTranscodingSettingsRequest(_message.Message):
+    __slots__ = ("settings",)
+    SETTINGS_FIELD_NUMBER: _ClassVar[int]
+    settings: TranscodingSettings
+    def __init__(self, settings: _Optional[_Union[TranscodingSettings, _Mapping]] = ...) -> None: ...
+
+class UpdateTranscodingSettingsResponse(_message.Message):
+    __slots__ = ("settings",)
+    SETTINGS_FIELD_NUMBER: _ClassVar[int]
+    settings: TranscodingSettings
+    def __init__(self, settings: _Optional[_Union[TranscodingSettings, _Mapping]] = ...) -> None: ...

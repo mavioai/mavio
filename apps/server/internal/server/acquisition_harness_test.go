@@ -138,13 +138,12 @@ func startAcquisition(t *testing.T, routes map[string]string, processPlugins boo
 		requests:    acquisitionv1connect.NewRequestServiceClient(http.DefaultClient, srv.url, token),
 		subtitles:   acquisitionv1connect.NewSubtitleServiceClient(http.DefaultClient, srv.url, token),
 	}
-	s.settings(func(settings *systemv1.ServerSettings) {
-		acq := settings.GetAcquisition()
+	s.acquisitionSettings(func(acq *acquisitionv1.AcquisitionSettings) {
 		acq.SetRecycleBin(s.recycleBin)
 		acq.SetRssSyncInterval(0)
 		acq.SetSkipFreeSpaceCheck(true)
-		acq.SetRenameMovies(true)
-		acq.SetRenameEpisodes(true)
+		acq.GetNaming().SetRenameMovies(true)
+		acq.GetNaming().SetRenameEpisodes(true)
 	})
 	return s
 }
@@ -161,18 +160,33 @@ func (s *acquisitionServer) video(size string, seconds int) string {
 	return path
 }
 
-// settings changes the server's settings.
-func (s *acquisitionServer) settings(edit func(*systemv1.ServerSettings)) {
+// acquisitionSettings changes the server's acquisition settings.
+func (s *acquisitionServer) acquisitionSettings(edit func(*acquisitionv1.AcquisitionSettings)) {
 	s.t.Helper()
 	ctx := s.t.Context()
-	got, err := s.system.GetServerSettings(ctx, &systemv1.GetServerSettingsRequest{})
+	got, err := s.profiles.GetAcquisitionSettings(ctx, &acquisitionv1.GetAcquisitionSettingsRequest{})
 	if err != nil {
-		s.t.Fatalf("GetServerSettings: %v", err)
+		s.t.Fatalf("GetAcquisitionSettings: %v", err)
 	}
 	settings := got.GetSettings()
 	edit(settings)
-	if _, err := s.system.UpdateServerSettings(ctx, systemv1.UpdateServerSettingsRequest_builder{Settings: settings}.Build()); err != nil {
-		s.t.Fatalf("UpdateServerSettings: %v", err)
+	if _, err := s.profiles.UpdateAcquisitionSettings(ctx, acquisitionv1.UpdateAcquisitionSettingsRequest_builder{Settings: settings}.Build()); err != nil {
+		s.t.Fatalf("UpdateAcquisitionSettings: %v", err)
+	}
+}
+
+// requestSettings changes the server's request settings.
+func (s *acquisitionServer) requestSettings(edit func(*acquisitionv1.RequestSettings)) {
+	s.t.Helper()
+	ctx := s.t.Context()
+	got, err := s.requests.GetRequestSettings(ctx, &acquisitionv1.GetRequestSettingsRequest{})
+	if err != nil {
+		s.t.Fatalf("GetRequestSettings: %v", err)
+	}
+	settings := got.GetSettings()
+	edit(settings)
+	if _, err := s.requests.UpdateRequestSettings(ctx, acquisitionv1.UpdateRequestSettingsRequest_builder{Settings: settings}.Build()); err != nil {
+		s.t.Fatalf("UpdateRequestSettings: %v", err)
 	}
 }
 

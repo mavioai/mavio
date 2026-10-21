@@ -8,7 +8,9 @@ import (
 
 	"connectrpc.com/connect"
 
+	"github.com/mavioai/mavio/apps/server/internal/activity"
 	"github.com/mavioai/mavio/apps/server/internal/requests"
+	"github.com/mavioai/mavio/apps/server/internal/settings"
 	"github.com/mavioai/mavio/libs/core"
 	"github.com/mavioai/mavio/libs/metadata"
 	acquisitionv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/acquisition/v1"
@@ -74,7 +76,14 @@ func requestToProto(r *core.Request) *acquisitionv1.Request {
 }
 
 // RequestService implements mavio.acquisition.v1.RequestService.
-type RequestService struct{ requests *requests.Service }
+type RequestService struct {
+	requests *requests.Service
+	// Settings keeps the request settings; nil serves the defaults and
+	// changes none.
+	Settings *settings.Manager
+	// Activity records administrators' changes; nil records none.
+	Activity *activity.Log
+}
 
 var _ acquisitionv1connect.RequestServiceHandler = (*RequestService)(nil)
 

@@ -5,6 +5,7 @@ package mavio.acquisition.v1;
 import "buf/validate/validate.proto";
 import "google/protobuf/timestamp.proto";
 import "mavio/acquisition/v1/profile.proto";
+import "mavio/acquisition/v1/wanted.proto";
 
 // RequestService takes users' requests of movies and seasons of series,
 // as Seerr's: administrators approve or decline them, unless the user's
@@ -73,6 +74,16 @@ service RequestService {
   // blocklist, as Seerr's DELETE /blocklist/collection/:id.
   // Administrators only.
   rpc UnblockCollection(UnblockCollectionRequest) returns (UnblockCollectionResponse) {
+    option idempotency_level = IDEMPOTENT;
+  }
+  // GetRequestSettings returns the defaults of users' requests and where
+  // approved requests go. Administrators only.
+  rpc GetRequestSettings(GetRequestSettingsRequest) returns (GetRequestSettingsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // UpdateRequestSettings replaces the request settings and applies them
+  // at once. Administrators only.
+  rpc UpdateRequestSettings(UpdateRequestSettingsRequest) returns (UpdateRequestSettingsResponse) {
     option idempotency_level = IDEMPOTENT;
   }
 }
@@ -349,3 +360,63 @@ message UnblockCollectionRequest {
 }
 
 message UnblockCollectionResponse {}
+
+// RequestSettings are the defaults of users' requests and where approved
+// requests are acquired.
+message RequestSettings {
+  // The request permissions new users get.
+  bool default_request_movies = 1;
+  bool default_request_series = 2;
+  bool default_auto_approve_movies = 3;
+  bool default_auto_approve_series = 4;
+  bool default_report_issues = 5;
+  // The quotas of users without their own: requests of movies, or seasons
+  // of series, in the last days; a limit of 0 is unlimited, 0 days all
+  // time.
+  int32 movie_quota_limit = 6 [(buf.validate.field).int32.gte = 0];
+  int32 movie_quota_days = 7 [(buf.validate.field).int32.gte = 0];
+  int32 series_quota_limit = 8 [(buf.validate.field).int32.gte = 0];
+  int32 series_quota_days = 9 [(buf.validate.field).int32.gte = 0];
+  // The movie library and quality profile approved movies are added to;
+  // empty, approvals fail.
+  string movie_library_id = 10;
+  string movie_quality_profile_id = 11;
+  MinimumAvailability minimum_availability = 12 [(buf.validate.field).enum.defined_only = true];
+  // The show library and quality profile approved series are added to;
+  // empty, approvals fail.
+  string series_library_id = 13;
+  string series_quality_profile_id = 14;
+  bool season_folder = 15;
+  NewItemMonitor monitor_new_items = 16 [(buf.validate.field).enum.defined_only = true];
+  // Allow requesting specials, season 0.
+  bool specials = 17;
+  // The show library and quality profile approved anime series are added
+  // to, as Seerr's anime settings of Sonarr; empty uses those of series.
+  // Anime series are numbered absolutely either way.
+  string anime_library_id = 18;
+  string anime_quality_profile_id = 19;
+  // Keywords of discovery providers, as "<plugin>/<keyword>", whose movies
+  // and series the blocklisted tags job blocklists weekly, as Seerr's
+  // blocklistedTags.
+  repeated string blocklisted_tags = 20 [(buf.validate.field).repeated.items.string.pattern = "^[^/]+/.+$"];
+  // How many pages of each order of a keyword's titles the job
+  // blocklists, 0–250; 0 for 50.
+  int32 blocklisted_tags_limit = 21 [(buf.validate.field).int32 = {
+    gte: 0
+    lte: 250
+  }];
+}
+
+message GetRequestSettingsRequest {}
+
+message GetRequestSettingsResponse {
+  RequestSettings settings = 1;
+}
+
+message UpdateRequestSettingsRequest {
+  RequestSettings settings = 1 [(buf.validate.field).required = true];
+}
+
+message UpdateRequestSettingsResponse {
+  RequestSettings settings = 1;
+}

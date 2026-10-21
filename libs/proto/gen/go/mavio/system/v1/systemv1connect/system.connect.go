@@ -41,12 +41,12 @@ const (
 	// SystemServiceGetSystemLoadProcedure is the fully-qualified name of the SystemService's
 	// GetSystemLoad RPC.
 	SystemServiceGetSystemLoadProcedure = "/mavio.system.v1.SystemService/GetSystemLoad"
-	// SystemServiceGetServerSettingsProcedure is the fully-qualified name of the SystemService's
-	// GetServerSettings RPC.
-	SystemServiceGetServerSettingsProcedure = "/mavio.system.v1.SystemService/GetServerSettings"
-	// SystemServiceUpdateServerSettingsProcedure is the fully-qualified name of the SystemService's
-	// UpdateServerSettings RPC.
-	SystemServiceUpdateServerSettingsProcedure = "/mavio.system.v1.SystemService/UpdateServerSettings"
+	// SystemServiceGetGeneralSettingsProcedure is the fully-qualified name of the SystemService's
+	// GetGeneralSettings RPC.
+	SystemServiceGetGeneralSettingsProcedure = "/mavio.system.v1.SystemService/GetGeneralSettings"
+	// SystemServiceUpdateGeneralSettingsProcedure is the fully-qualified name of the SystemService's
+	// UpdateGeneralSettings RPC.
+	SystemServiceUpdateGeneralSettingsProcedure = "/mavio.system.v1.SystemService/UpdateGeneralSettings"
 	// SystemServiceListDirectoryProcedure is the fully-qualified name of the SystemService's
 	// ListDirectory RPC.
 	SystemServiceListDirectoryProcedure = "/mavio.system.v1.SystemService/ListDirectory"
@@ -65,12 +65,14 @@ type SystemServiceClient interface {
 	// samples it every two seconds from the first request on, until none
 	// came for a while. Administrators only.
 	GetSystemLoad(context.Context, *v1.GetSystemLoadRequest) (*v1.GetSystemLoadResponse, error)
-	// GetServerSettings returns the settings administrators change while
-	// the server runs. Administrators only.
-	GetServerSettings(context.Context, *v1.GetServerSettingsRequest) (*v1.GetServerSettingsResponse, error)
-	// UpdateServerSettings replaces the settings and applies them at once.
-	// Administrators only.
-	UpdateServerSettings(context.Context, *v1.UpdateServerSettingsRequest) (*v1.UpdateServerSettingsResponse, error)
+	// GetGeneralSettings returns the server's general settings: its name,
+	// how it is reached, how long devices stay signed in, the plugin
+	// resetting forgotten passwords and the language and country of
+	// metadata. Administrators only.
+	GetGeneralSettings(context.Context, *v1.GetGeneralSettingsRequest) (*v1.GetGeneralSettingsResponse, error)
+	// UpdateGeneralSettings replaces the general settings and applies them
+	// at once. Administrators only.
+	UpdateGeneralSettings(context.Context, *v1.UpdateGeneralSettingsRequest) (*v1.UpdateGeneralSettingsResponse, error)
 	// ListDirectory lists a folder of the server's file system, to choose
 	// library folders; without a path, the file system roots. Administrators
 	// only.
@@ -112,17 +114,18 @@ func NewSystemServiceClient(httpClient connect.HTTPClient, baseURL string, opts 
 			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
 			connect.WithClientOptions(opts...),
 		),
-		getServerSettings: connect.NewClient[v1.GetServerSettingsRequest, v1.GetServerSettingsResponse](
+		getGeneralSettings: connect.NewClient[v1.GetGeneralSettingsRequest, v1.GetGeneralSettingsResponse](
 			httpClient,
-			baseURL+SystemServiceGetServerSettingsProcedure,
-			connect.WithSchema(systemServiceMethods.ByName("GetServerSettings")),
+			baseURL+SystemServiceGetGeneralSettingsProcedure,
+			connect.WithSchema(systemServiceMethods.ByName("GetGeneralSettings")),
 			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
 			connect.WithClientOptions(opts...),
 		),
-		updateServerSettings: connect.NewClient[v1.UpdateServerSettingsRequest, v1.UpdateServerSettingsResponse](
+		updateGeneralSettings: connect.NewClient[v1.UpdateGeneralSettingsRequest, v1.UpdateGeneralSettingsResponse](
 			httpClient,
-			baseURL+SystemServiceUpdateServerSettingsProcedure,
-			connect.WithSchema(systemServiceMethods.ByName("UpdateServerSettings")),
+			baseURL+SystemServiceUpdateGeneralSettingsProcedure,
+			connect.WithSchema(systemServiceMethods.ByName("UpdateGeneralSettings")),
+			connect.WithIdempotency(connect.IdempotencyIdempotent),
 			connect.WithClientOptions(opts...),
 		),
 		listDirectory: connect.NewClient[v1.ListDirectoryRequest, v1.ListDirectoryResponse](
@@ -144,13 +147,13 @@ func NewSystemServiceClient(httpClient connect.HTTPClient, baseURL string, opts 
 
 // systemServiceClient implements SystemServiceClient.
 type systemServiceClient struct {
-	getHealth            *connect.Client[v1.GetHealthRequest, v1.GetHealthResponse]
-	getSystemInfo        *connect.Client[v1.GetSystemInfoRequest, v1.GetSystemInfoResponse]
-	getSystemLoad        *connect.Client[v1.GetSystemLoadRequest, v1.GetSystemLoadResponse]
-	getServerSettings    *connect.Client[v1.GetServerSettingsRequest, v1.GetServerSettingsResponse]
-	updateServerSettings *connect.Client[v1.UpdateServerSettingsRequest, v1.UpdateServerSettingsResponse]
-	listDirectory        *connect.Client[v1.ListDirectoryRequest, v1.ListDirectoryResponse]
-	listLogs             *connect.Client[v1.ListLogsRequest, v1.ListLogsResponse]
+	getHealth             *connect.Client[v1.GetHealthRequest, v1.GetHealthResponse]
+	getSystemInfo         *connect.Client[v1.GetSystemInfoRequest, v1.GetSystemInfoResponse]
+	getSystemLoad         *connect.Client[v1.GetSystemLoadRequest, v1.GetSystemLoadResponse]
+	getGeneralSettings    *connect.Client[v1.GetGeneralSettingsRequest, v1.GetGeneralSettingsResponse]
+	updateGeneralSettings *connect.Client[v1.UpdateGeneralSettingsRequest, v1.UpdateGeneralSettingsResponse]
+	listDirectory         *connect.Client[v1.ListDirectoryRequest, v1.ListDirectoryResponse]
+	listLogs              *connect.Client[v1.ListLogsRequest, v1.ListLogsResponse]
 }
 
 // GetHealth calls mavio.system.v1.SystemService.GetHealth.
@@ -180,18 +183,18 @@ func (c *systemServiceClient) GetSystemLoad(ctx context.Context, req *v1.GetSyst
 	return nil, err
 }
 
-// GetServerSettings calls mavio.system.v1.SystemService.GetServerSettings.
-func (c *systemServiceClient) GetServerSettings(ctx context.Context, req *v1.GetServerSettingsRequest) (*v1.GetServerSettingsResponse, error) {
-	response, err := c.getServerSettings.CallUnary(ctx, connect.NewRequest(req))
+// GetGeneralSettings calls mavio.system.v1.SystemService.GetGeneralSettings.
+func (c *systemServiceClient) GetGeneralSettings(ctx context.Context, req *v1.GetGeneralSettingsRequest) (*v1.GetGeneralSettingsResponse, error) {
+	response, err := c.getGeneralSettings.CallUnary(ctx, connect.NewRequest(req))
 	if response != nil {
 		return response.Msg, err
 	}
 	return nil, err
 }
 
-// UpdateServerSettings calls mavio.system.v1.SystemService.UpdateServerSettings.
-func (c *systemServiceClient) UpdateServerSettings(ctx context.Context, req *v1.UpdateServerSettingsRequest) (*v1.UpdateServerSettingsResponse, error) {
-	response, err := c.updateServerSettings.CallUnary(ctx, connect.NewRequest(req))
+// UpdateGeneralSettings calls mavio.system.v1.SystemService.UpdateGeneralSettings.
+func (c *systemServiceClient) UpdateGeneralSettings(ctx context.Context, req *v1.UpdateGeneralSettingsRequest) (*v1.UpdateGeneralSettingsResponse, error) {
+	response, err := c.updateGeneralSettings.CallUnary(ctx, connect.NewRequest(req))
 	if response != nil {
 		return response.Msg, err
 	}
@@ -227,12 +230,14 @@ type SystemServiceHandler interface {
 	// samples it every two seconds from the first request on, until none
 	// came for a while. Administrators only.
 	GetSystemLoad(context.Context, *v1.GetSystemLoadRequest) (*v1.GetSystemLoadResponse, error)
-	// GetServerSettings returns the settings administrators change while
-	// the server runs. Administrators only.
-	GetServerSettings(context.Context, *v1.GetServerSettingsRequest) (*v1.GetServerSettingsResponse, error)
-	// UpdateServerSettings replaces the settings and applies them at once.
-	// Administrators only.
-	UpdateServerSettings(context.Context, *v1.UpdateServerSettingsRequest) (*v1.UpdateServerSettingsResponse, error)
+	// GetGeneralSettings returns the server's general settings: its name,
+	// how it is reached, how long devices stay signed in, the plugin
+	// resetting forgotten passwords and the language and country of
+	// metadata. Administrators only.
+	GetGeneralSettings(context.Context, *v1.GetGeneralSettingsRequest) (*v1.GetGeneralSettingsResponse, error)
+	// UpdateGeneralSettings replaces the general settings and applies them
+	// at once. Administrators only.
+	UpdateGeneralSettings(context.Context, *v1.UpdateGeneralSettingsRequest) (*v1.UpdateGeneralSettingsResponse, error)
 	// ListDirectory lists a folder of the server's file system, to choose
 	// library folders; without a path, the file system roots. Administrators
 	// only.
@@ -270,17 +275,18 @@ func NewSystemServiceHandler(svc SystemServiceHandler, opts ...connect.HandlerOp
 		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
 		connect.WithHandlerOptions(opts...),
 	)
-	systemServiceGetServerSettingsHandler := connect.NewUnaryHandlerSimple(
-		SystemServiceGetServerSettingsProcedure,
-		svc.GetServerSettings,
-		connect.WithSchema(systemServiceMethods.ByName("GetServerSettings")),
+	systemServiceGetGeneralSettingsHandler := connect.NewUnaryHandlerSimple(
+		SystemServiceGetGeneralSettingsProcedure,
+		svc.GetGeneralSettings,
+		connect.WithSchema(systemServiceMethods.ByName("GetGeneralSettings")),
 		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
 		connect.WithHandlerOptions(opts...),
 	)
-	systemServiceUpdateServerSettingsHandler := connect.NewUnaryHandlerSimple(
-		SystemServiceUpdateServerSettingsProcedure,
-		svc.UpdateServerSettings,
-		connect.WithSchema(systemServiceMethods.ByName("UpdateServerSettings")),
+	systemServiceUpdateGeneralSettingsHandler := connect.NewUnaryHandlerSimple(
+		SystemServiceUpdateGeneralSettingsProcedure,
+		svc.UpdateGeneralSettings,
+		connect.WithSchema(systemServiceMethods.ByName("UpdateGeneralSettings")),
+		connect.WithIdempotency(connect.IdempotencyIdempotent),
 		connect.WithHandlerOptions(opts...),
 	)
 	systemServiceListDirectoryHandler := connect.NewUnaryHandlerSimple(
@@ -305,10 +311,10 @@ func NewSystemServiceHandler(svc SystemServiceHandler, opts ...connect.HandlerOp
 			systemServiceGetSystemInfoHandler.ServeHTTP(w, r)
 		case SystemServiceGetSystemLoadProcedure:
 			systemServiceGetSystemLoadHandler.ServeHTTP(w, r)
-		case SystemServiceGetServerSettingsProcedure:
-			systemServiceGetServerSettingsHandler.ServeHTTP(w, r)
-		case SystemServiceUpdateServerSettingsProcedure:
-			systemServiceUpdateServerSettingsHandler.ServeHTTP(w, r)
+		case SystemServiceGetGeneralSettingsProcedure:
+			systemServiceGetGeneralSettingsHandler.ServeHTTP(w, r)
+		case SystemServiceUpdateGeneralSettingsProcedure:
+			systemServiceUpdateGeneralSettingsHandler.ServeHTTP(w, r)
 		case SystemServiceListDirectoryProcedure:
 			systemServiceListDirectoryHandler.ServeHTTP(w, r)
 		case SystemServiceListLogsProcedure:
@@ -334,12 +340,12 @@ func (UnimplementedSystemServiceHandler) GetSystemLoad(context.Context, *v1.GetS
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.system.v1.SystemService.GetSystemLoad is not implemented"))
 }
 
-func (UnimplementedSystemServiceHandler) GetServerSettings(context.Context, *v1.GetServerSettingsRequest) (*v1.GetServerSettingsResponse, error) {
-	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.system.v1.SystemService.GetServerSettings is not implemented"))
+func (UnimplementedSystemServiceHandler) GetGeneralSettings(context.Context, *v1.GetGeneralSettingsRequest) (*v1.GetGeneralSettingsResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.system.v1.SystemService.GetGeneralSettings is not implemented"))
 }
 
-func (UnimplementedSystemServiceHandler) UpdateServerSettings(context.Context, *v1.UpdateServerSettingsRequest) (*v1.UpdateServerSettingsResponse, error) {
-	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.system.v1.SystemService.UpdateServerSettings is not implemented"))
+func (UnimplementedSystemServiceHandler) UpdateGeneralSettings(context.Context, *v1.UpdateGeneralSettingsRequest) (*v1.UpdateGeneralSettingsResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.system.v1.SystemService.UpdateGeneralSettings is not implemented"))
 }
 
 func (UnimplementedSystemServiceHandler) ListDirectory(context.Context, *v1.ListDirectoryRequest) (*v1.ListDirectoryResponse, error) {

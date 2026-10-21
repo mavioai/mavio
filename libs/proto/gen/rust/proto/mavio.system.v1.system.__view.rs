@@ -3158,560 +3158,6 @@ impl ::buffa::HasMessageView for super::super::NetworkLoad {
     type View<'a> = NetworkLoadView<'a>;
     type ViewHandle = NetworkLoadOwnedView;
 }
-/// TranscodingSettings steer transcodes.
-#[derive(Clone, Debug, Default)]
-pub struct TranscodingSettingsView<'a> {
-    /// Field 1: `hardware_acceleration`
-    pub hardware_acceleration: ::core::option::Option<
-        ::buffa::EnumValue<super::super::HardwareAcceleration>,
-    >,
-    /// Field 2: `hardware_encoding`
-    pub hardware_encoding: ::core::option::Option<bool>,
-    /// "", "ultrafast", "superfast", "veryfast", "faster", "fast", "medium",
-    /// "slow", "slower" or "veryslow"; empty picks one by the source.
-    ///
-    /// Field 3: `encoder_preset`
-    pub encoder_preset: ::core::option::Option<&'a str>,
-    /// Field 4: `h264_crf`
-    pub h264_crf: ::core::option::Option<i32>,
-    /// Field 5: `h265_crf`
-    pub h265_crf: ::core::option::Option<i32>,
-    /// 0 lets ffmpeg decide.
-    ///
-    /// Field 6: `threads`
-    pub threads: ::core::option::Option<i32>,
-    /// "bt2390", "hable", "mobius", "reinhard", "clip", "linear" or "gamma".
-    ///
-    /// Field 7: `tonemap_algorithm`
-    pub tonemap_algorithm: ::core::option::Option<&'a str>,
-    /// "auto", "tv" or "pc".
-    ///
-    /// Field 8: `tonemap_range`
-    pub tonemap_range: ::core::option::Option<&'a str>,
-    /// Field 9: `tonemap_desat`
-    pub tonemap_desat: ::core::option::Option<f64>,
-    /// Field 10: `tonemap_peak`
-    pub tonemap_peak: ::core::option::Option<f64>,
-    /// "yadif" or "bwdif".
-    ///
-    /// Field 11: `deinterlace_method`
-    pub deinterlace_method: ::core::option::Option<&'a str>,
-    /// Field 12: `deinterlace_double_rate`
-    pub deinterlace_double_rate: ::core::option::Option<bool>,
-    /// Field 13: `downmix_boost`
-    pub downmix_boost: ::core::option::Option<f64>,
-    /// Field 14: `crop_black_borders`
-    pub crop_black_borders: ::core::option::Option<bool>,
-    /// Absolute folder for running transcodes; empty uses the folder the
-    /// server was started with.
-    ///
-    /// Field 15: `transcode_dir`
-    pub transcode_dir: ::core::option::Option<&'a str>,
-    pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
-}
-impl<'a> ::buffa::MessageView<'a> for TranscodingSettingsView<'a> {
-    type Owned = super::super::TranscodingSettings;
-    fn decode_view(buf: &'a [u8]) -> ::core::result::Result<Self, ::buffa::DecodeError> {
-        let __limit = ::core::cell::Cell::new(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT);
-        let __elem = ::core::cell::Cell::new(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT);
-        <Self as ::buffa::MessageView>::decode_view_ctx(
-            buf,
-            ::buffa::DecodeContext::new(::buffa::RECURSION_LIMIT, &__limit)
-                .with_element_memory(&__elem),
-        )
-    }
-    fn decode_view_with_ctx(
-        buf: &'a [u8],
-        ctx: ::buffa::DecodeContext<'_>,
-    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
-        <Self as ::buffa::MessageView>::decode_view_ctx(buf, ctx)
-    }
-    #[inline]
-    fn merge_view_field(
-        &mut self,
-        tag: ::buffa::encoding::Tag,
-        cur: &'a [u8],
-        before_tag: &'a [u8],
-        ctx: ::buffa::DecodeContext<'_>,
-    ) -> ::core::result::Result<&'a [u8], ::buffa::DecodeError> {
-        let _ = ctx;
-        #[allow(unused_variables)]
-        let view = self;
-        let mut cur = cur;
-        match tag.field_number() {
-            1u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                view.hardware_acceleration = Some(
-                    ::buffa::EnumValue::from(::buffa::types::decode_int32(&mut cur)?),
-                );
-            }
-            2u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                view.hardware_encoding = Some(::buffa::types::decode_bool(&mut cur)?);
-            }
-            3u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                view.encoder_preset = Some(::buffa::types::borrow_str(&mut cur)?);
-            }
-            4u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                view.h264_crf = Some(::buffa::types::decode_int32(&mut cur)?);
-            }
-            5u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                view.h265_crf = Some(::buffa::types::decode_int32(&mut cur)?);
-            }
-            6u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                view.threads = Some(::buffa::types::decode_int32(&mut cur)?);
-            }
-            7u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                view.tonemap_algorithm = Some(::buffa::types::borrow_str(&mut cur)?);
-            }
-            8u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                view.tonemap_range = Some(::buffa::types::borrow_str(&mut cur)?);
-            }
-            9u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Fixed64,
-                )?;
-                view.tonemap_desat = Some(::buffa::types::decode_double(&mut cur)?);
-            }
-            10u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Fixed64,
-                )?;
-                view.tonemap_peak = Some(::buffa::types::decode_double(&mut cur)?);
-            }
-            11u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                view.deinterlace_method = Some(::buffa::types::borrow_str(&mut cur)?);
-            }
-            12u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                view.deinterlace_double_rate = Some(
-                    ::buffa::types::decode_bool(&mut cur)?,
-                );
-            }
-            13u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Fixed64,
-                )?;
-                view.downmix_boost = Some(::buffa::types::decode_double(&mut cur)?);
-            }
-            14u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                view.crop_black_borders = Some(::buffa::types::decode_bool(&mut cur)?);
-            }
-            15u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                view.transcode_dir = Some(::buffa::types::borrow_str(&mut cur)?);
-            }
-            _ => {
-                ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
-                let span_len = before_tag.len() - cur.len();
-                view.__buffa_unknown_fields.push_record(before_tag, span_len, ctx)?;
-            }
-        }
-        ::core::result::Result::Ok(cur)
-    }
-    fn to_owned_message(
-        &self,
-    ) -> ::core::result::Result<
-        super::super::TranscodingSettings,
-        ::buffa::DecodeError,
-    > {
-        self.to_owned_from_source(None)
-    }
-    #[allow(clippy::useless_conversion, clippy::needless_update)]
-    fn to_owned_from_source(
-        &self,
-        __buffa_src: ::core::option::Option<&::buffa::bytes::Bytes>,
-    ) -> ::core::result::Result<
-        super::super::TranscodingSettings,
-        ::buffa::DecodeError,
-    > {
-        #[allow(unused_imports)]
-        use ::buffa::alloc::string::ToString as _;
-        let _ = __buffa_src;
-        ::core::result::Result::Ok(super::super::TranscodingSettings {
-            hardware_acceleration: self.hardware_acceleration,
-            hardware_encoding: self.hardware_encoding,
-            encoder_preset: self.encoder_preset.map(|s| s.to_string()),
-            h264_crf: self.h264_crf,
-            h265_crf: self.h265_crf,
-            threads: self.threads,
-            tonemap_algorithm: self.tonemap_algorithm.map(|s| s.to_string()),
-            tonemap_range: self.tonemap_range.map(|s| s.to_string()),
-            tonemap_desat: self.tonemap_desat,
-            tonemap_peak: self.tonemap_peak,
-            deinterlace_method: self.deinterlace_method.map(|s| s.to_string()),
-            deinterlace_double_rate: self.deinterlace_double_rate,
-            downmix_boost: self.downmix_boost,
-            crop_black_borders: self.crop_black_borders,
-            transcode_dir: self.transcode_dir.map(|s| s.to_string()),
-            __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
-            ..::core::default::Default::default()
-        })
-    }
-}
-impl<'a> ::buffa::ViewEncode<'a> for TranscodingSettingsView<'a> {
-    #[allow(clippy::needless_borrow, clippy::let_and_return)]
-    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
-        #[allow(unused_imports)]
-        use ::buffa::Enumeration as _;
-        let mut size = 0u64;
-        if let Some(ref v) = self.hardware_acceleration {
-            size += 1u64 + ::buffa::types::int32_encoded_len(v.to_i32()) as u64;
-        }
-        if self.hardware_encoding.is_some() {
-            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
-        }
-        if let Some(ref v) = self.encoder_preset {
-            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
-        if let Some(v) = self.h264_crf {
-            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
-        }
-        if let Some(v) = self.h265_crf {
-            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
-        }
-        if let Some(v) = self.threads {
-            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
-        }
-        if let Some(ref v) = self.tonemap_algorithm {
-            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
-        if let Some(ref v) = self.tonemap_range {
-            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
-        if self.tonemap_desat.is_some() {
-            size += 1u64 + ::buffa::types::FIXED64_ENCODED_LEN as u64;
-        }
-        if self.tonemap_peak.is_some() {
-            size += 1u64 + ::buffa::types::FIXED64_ENCODED_LEN as u64;
-        }
-        if let Some(ref v) = self.deinterlace_method {
-            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
-        if self.deinterlace_double_rate.is_some() {
-            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
-        }
-        if self.downmix_boost.is_some() {
-            size += 1u64 + ::buffa::types::FIXED64_ENCODED_LEN as u64;
-        }
-        if self.crop_black_borders.is_some() {
-            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
-        }
-        if let Some(ref v) = self.transcode_dir {
-            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
-        size += self.__buffa_unknown_fields.encoded_len() as u64;
-        ::buffa::saturate_size(size)
-    }
-    #[allow(clippy::needless_borrow)]
-    fn write_to(
-        &self,
-        _cache: &mut ::buffa::SizeCache,
-        buf: &mut impl ::buffa::EncodeSink,
-    ) {
-        #[allow(unused_imports)]
-        use ::buffa::Enumeration as _;
-        if let Some(ref v) = self.hardware_acceleration {
-            ::buffa::types::put_int32_field(1u32, v.to_i32(), buf);
-        }
-        if let Some(v) = self.hardware_encoding {
-            ::buffa::types::put_bool_field(2u32, v, buf);
-        }
-        if let Some(ref v) = self.encoder_preset {
-            ::buffa::types::put_string_field(3u32, v, buf);
-        }
-        if let Some(v) = self.h264_crf {
-            ::buffa::types::put_int32_field(4u32, v, buf);
-        }
-        if let Some(v) = self.h265_crf {
-            ::buffa::types::put_int32_field(5u32, v, buf);
-        }
-        if let Some(v) = self.threads {
-            ::buffa::types::put_int32_field(6u32, v, buf);
-        }
-        if let Some(ref v) = self.tonemap_algorithm {
-            ::buffa::types::put_string_field(7u32, v, buf);
-        }
-        if let Some(ref v) = self.tonemap_range {
-            ::buffa::types::put_string_field(8u32, v, buf);
-        }
-        if let Some(v) = self.tonemap_desat {
-            ::buffa::types::put_double_field(9u32, v, buf);
-        }
-        if let Some(v) = self.tonemap_peak {
-            ::buffa::types::put_double_field(10u32, v, buf);
-        }
-        if let Some(ref v) = self.deinterlace_method {
-            ::buffa::types::put_string_field(11u32, v, buf);
-        }
-        if let Some(v) = self.deinterlace_double_rate {
-            ::buffa::types::put_bool_field(12u32, v, buf);
-        }
-        if let Some(v) = self.downmix_boost {
-            ::buffa::types::put_double_field(13u32, v, buf);
-        }
-        if let Some(v) = self.crop_black_borders {
-            ::buffa::types::put_bool_field(14u32, v, buf);
-        }
-        if let Some(ref v) = self.transcode_dir {
-            ::buffa::types::put_string_field(15u32, v, buf);
-        }
-        self.__buffa_unknown_fields.write_to(buf);
-    }
-}
-impl<'a> ::buffa::MessageName for TranscodingSettingsView<'a> {
-    const PACKAGE: &'static str = "mavio.system.v1";
-    const NAME: &'static str = "TranscodingSettings";
-    const FULL_NAME: &'static str = "mavio.system.v1.TranscodingSettings";
-    const TYPE_URL: &'static str = "type.googleapis.com/mavio.system.v1.TranscodingSettings";
-}
-::buffa::impl_default_view_instance!(TranscodingSettingsView);
-::buffa::impl_view_reborrow!(TranscodingSettingsView);
-/** Self-contained, `'static` owned view of a `TranscodingSettings` message.
-
- Wraps [`::buffa::OwnedView`]`<`[`TranscodingSettingsView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
-
- Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`TranscodingSettingsView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
-#[derive(Clone, Debug)]
-pub struct TranscodingSettingsOwnedView(
-    ::buffa::OwnedView<TranscodingSettingsView<'static>>,
-);
-impl TranscodingSettingsOwnedView {
-    /// Decode an owned view from a [`::buffa::bytes::Bytes`] buffer.
-    ///
-    /// The view borrows directly from the buffer's data; the buffer is
-    /// retained inside the returned handle.
-    ///
-    /// # Errors
-    ///
-    /// Returns [`::buffa::DecodeError`] if the buffer contains invalid
-    /// protobuf data.
-    pub fn decode(
-        bytes: ::buffa::bytes::Bytes,
-    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
-        ::core::result::Result::Ok(
-            TranscodingSettingsOwnedView(::buffa::OwnedView::decode(bytes)?),
-        )
-    }
-    /// Decode with custom [`::buffa::DecodeOptions`] (recursion limit,
-    /// max message size).
-    ///
-    /// # Errors
-    ///
-    /// Returns [`::buffa::DecodeError`] if the buffer is invalid or
-    /// exceeds the configured limits.
-    pub fn decode_with_options(
-        bytes: ::buffa::bytes::Bytes,
-        opts: &::buffa::DecodeOptions,
-    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
-        ::core::result::Result::Ok(
-            TranscodingSettingsOwnedView(
-                ::buffa::OwnedView::decode_with_options(bytes, opts)?,
-            ),
-        )
-    }
-    /// Build from an owned message via an encode → decode round-trip.
-    ///
-    /// # Errors
-    ///
-    /// Returns [`::buffa::DecodeError::MessageTooLarge`] if the
-    /// message's encoded size exceeds the 2 GiB protobuf limit, or
-    /// another [`::buffa::DecodeError`] if the re-encoded bytes are
-    /// somehow invalid (should not happen for well-formed messages).
-    pub fn from_owned(
-        msg: &super::super::TranscodingSettings,
-    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
-        ::core::result::Result::Ok(
-            TranscodingSettingsOwnedView(::buffa::OwnedView::from_owned(msg)?),
-        )
-    }
-    /// Borrow the full [`TranscodingSettingsView`] with its lifetime tied to `&self`.
-    #[must_use]
-    pub fn view(&self) -> &TranscodingSettingsView<'_> {
-        self.0.reborrow()
-    }
-    /// Convert to the owned message type.
-    ///
-    /// Infallible: this type's constructors wire-decode their
-    /// buffer, and a view produced by wire decoding always
-    /// converts. Delegates to [`::buffa::OwnedView::to_owned_message`],
-    /// whose contract also governs handles converted from a raw
-    /// [`::buffa::OwnedView`].
-    #[must_use]
-    pub fn to_owned_message(&self) -> super::super::TranscodingSettings {
-        self.0.to_owned_message()
-    }
-    /// The underlying bytes buffer.
-    #[must_use]
-    pub fn bytes(&self) -> &::buffa::bytes::Bytes {
-        self.0.bytes()
-    }
-    /// Consume the handle, returning the underlying bytes buffer.
-    #[must_use]
-    pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
-        self.0.into_bytes()
-    }
-    /// Field 1: `hardware_acceleration`
-    #[must_use]
-    pub fn hardware_acceleration(
-        &self,
-    ) -> ::core::option::Option<::buffa::EnumValue<super::super::HardwareAcceleration>> {
-        self.0.reborrow().hardware_acceleration
-    }
-    /// Field 2: `hardware_encoding`
-    #[must_use]
-    pub fn hardware_encoding(&self) -> ::core::option::Option<bool> {
-        self.0.reborrow().hardware_encoding
-    }
-    /// "", "ultrafast", "superfast", "veryfast", "faster", "fast", "medium",
-    /// "slow", "slower" or "veryslow"; empty picks one by the source.
-    ///
-    /// Field 3: `encoder_preset`
-    #[must_use]
-    pub fn encoder_preset(&self) -> ::core::option::Option<&'_ str> {
-        self.0.reborrow().encoder_preset
-    }
-    /// Field 4: `h264_crf`
-    #[must_use]
-    pub fn h264_crf(&self) -> ::core::option::Option<i32> {
-        self.0.reborrow().h264_crf
-    }
-    /// Field 5: `h265_crf`
-    #[must_use]
-    pub fn h265_crf(&self) -> ::core::option::Option<i32> {
-        self.0.reborrow().h265_crf
-    }
-    /// 0 lets ffmpeg decide.
-    ///
-    /// Field 6: `threads`
-    #[must_use]
-    pub fn threads(&self) -> ::core::option::Option<i32> {
-        self.0.reborrow().threads
-    }
-    /// "bt2390", "hable", "mobius", "reinhard", "clip", "linear" or "gamma".
-    ///
-    /// Field 7: `tonemap_algorithm`
-    #[must_use]
-    pub fn tonemap_algorithm(&self) -> ::core::option::Option<&'_ str> {
-        self.0.reborrow().tonemap_algorithm
-    }
-    /// "auto", "tv" or "pc".
-    ///
-    /// Field 8: `tonemap_range`
-    #[must_use]
-    pub fn tonemap_range(&self) -> ::core::option::Option<&'_ str> {
-        self.0.reborrow().tonemap_range
-    }
-    /// Field 9: `tonemap_desat`
-    #[must_use]
-    pub fn tonemap_desat(&self) -> ::core::option::Option<f64> {
-        self.0.reborrow().tonemap_desat
-    }
-    /// Field 10: `tonemap_peak`
-    #[must_use]
-    pub fn tonemap_peak(&self) -> ::core::option::Option<f64> {
-        self.0.reborrow().tonemap_peak
-    }
-    /// "yadif" or "bwdif".
-    ///
-    /// Field 11: `deinterlace_method`
-    #[must_use]
-    pub fn deinterlace_method(&self) -> ::core::option::Option<&'_ str> {
-        self.0.reborrow().deinterlace_method
-    }
-    /// Field 12: `deinterlace_double_rate`
-    #[must_use]
-    pub fn deinterlace_double_rate(&self) -> ::core::option::Option<bool> {
-        self.0.reborrow().deinterlace_double_rate
-    }
-    /// Field 13: `downmix_boost`
-    #[must_use]
-    pub fn downmix_boost(&self) -> ::core::option::Option<f64> {
-        self.0.reborrow().downmix_boost
-    }
-    /// Field 14: `crop_black_borders`
-    #[must_use]
-    pub fn crop_black_borders(&self) -> ::core::option::Option<bool> {
-        self.0.reborrow().crop_black_borders
-    }
-    /// Absolute folder for running transcodes; empty uses the folder the
-    /// server was started with.
-    ///
-    /// Field 15: `transcode_dir`
-    #[must_use]
-    pub fn transcode_dir(&self) -> ::core::option::Option<&'_ str> {
-        self.0.reborrow().transcode_dir
-    }
-}
-impl ::core::convert::From<::buffa::OwnedView<TranscodingSettingsView<'static>>>
-for TranscodingSettingsOwnedView {
-    fn from(inner: ::buffa::OwnedView<TranscodingSettingsView<'static>>) -> Self {
-        TranscodingSettingsOwnedView(inner)
-    }
-}
-impl ::core::convert::From<TranscodingSettingsOwnedView>
-for ::buffa::OwnedView<TranscodingSettingsView<'static>> {
-    fn from(wrapper: TranscodingSettingsOwnedView) -> Self {
-        wrapper.0
-    }
-}
-impl ::core::convert::AsRef<::buffa::OwnedView<TranscodingSettingsView<'static>>>
-for TranscodingSettingsOwnedView {
-    fn as_ref(&self) -> &::buffa::OwnedView<TranscodingSettingsView<'static>> {
-        &self.0
-    }
-}
-impl ::buffa::HasMessageView for super::super::TranscodingSettings {
-    type View<'a> = TranscodingSettingsView<'a>;
-    type ViewHandle = TranscodingSettingsOwnedView;
-}
 /// NetworkSettings decide how the server is reached and how it reaches
 /// other sites.
 #[derive(Clone, Debug, Default)]
@@ -3743,13 +3189,6 @@ pub struct NetworkSettingsView<'a> {
     ///
     /// Field 7: `relay`
     pub relay: ::core::option::Option<bool>,
-    /// The proxies of the server's own HTTP requests; unset in an update
-    /// keeps the current ones.
-    ///
-    /// Field 8: `proxies`
-    pub proxies: ::buffa::MessageFieldView<
-        super::super::__buffa::view::OutboundProxiesView<'a>,
-    >,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for NetworkSettingsView<'a> {
@@ -3831,27 +3270,6 @@ impl<'a> ::buffa::MessageView<'a> for NetworkSettingsView<'a> {
                 )?;
                 view.relay = Some(::buffa::types::decode_bool(&mut cur)?);
             }
-            8u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                let __sub_ctx = ctx.descend()?;
-                let sub = ::buffa::types::borrow_bytes(&mut cur)?;
-                match view.proxies.as_mut() {
-                    Some(existing) => {
-                        ::buffa::MessageView::merge_into_view(existing, sub, __sub_ctx)?
-                    }
-                    None => {
-                        view.proxies = ::buffa::MessageFieldView::set(
-                            <super::super::__buffa::view::OutboundProxiesView as ::buffa::MessageView>::decode_view_ctx(
-                                sub,
-                                __sub_ctx,
-                            )?,
-                        );
-                    }
-                }
-            }
             _ => {
                 ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
                 let span_len = before_tag.len() - cur.len();
@@ -3881,15 +3299,6 @@ impl<'a> ::buffa::MessageView<'a> for NetworkSettingsView<'a> {
             key_path: self.key_path.map(|s| s.to_string()),
             local_discovery: self.local_discovery,
             relay: self.relay,
-            proxies: match self.proxies.as_option() {
-                Some(v) => {
-                    ::buffa::MessageField::<
-                        super::super::OutboundProxies,
-                        ::buffa::Inline<super::super::OutboundProxies>,
-                    >::some(v.to_owned_from_source(__buffa_src)?)
-                }
-                None => ::buffa::MessageField::none(),
-            },
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -3897,7 +3306,7 @@ impl<'a> ::buffa::MessageView<'a> for NetworkSettingsView<'a> {
 }
 impl<'a> ::buffa::ViewEncode<'a> for NetworkSettingsView<'a> {
     #[allow(clippy::needless_borrow, clippy::let_and_return)]
-    fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
         let mut size = 0u64;
@@ -3922,21 +3331,13 @@ impl<'a> ::buffa::ViewEncode<'a> for NetworkSettingsView<'a> {
         if self.relay.is_some() {
             size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
         }
-        if self.proxies.is_set() {
-            let __slot = __cache.reserve();
-            let inner_size = self.proxies.compute_size(__cache);
-            __cache.set(__slot, inner_size);
-            size
-                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
-                    + inner_size as u64;
-        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
     #[allow(clippy::needless_borrow)]
     fn write_to(
         &self,
-        __cache: &mut ::buffa::SizeCache,
+        _cache: &mut ::buffa::SizeCache,
         buf: &mut impl ::buffa::EncodeSink,
     ) {
         #[allow(unused_imports)]
@@ -3961,14 +3362,6 @@ impl<'a> ::buffa::ViewEncode<'a> for NetworkSettingsView<'a> {
         }
         if let Some(v) = self.relay {
             ::buffa::types::put_bool_field(7u32, v, buf);
-        }
-        if self.proxies.is_set() {
-            ::buffa::types::put_len_delimited_header(
-                8u32,
-                u64::from(__cache.consume_next()),
-                buf,
-            );
-            self.proxies.write_to(__cache, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -4111,18 +3504,6 @@ impl NetworkSettingsOwnedView {
     pub fn relay(&self) -> ::core::option::Option<bool> {
         self.0.reborrow().relay
     }
-    /// The proxies of the server's own HTTP requests; unset in an update
-    /// keeps the current ones.
-    ///
-    /// Field 8: `proxies`
-    #[must_use]
-    pub fn proxies(
-        &self,
-    ) -> &::buffa::MessageFieldView<
-        super::super::__buffa::view::OutboundProxiesView<'_>,
-    > {
-        &self.0.reborrow().proxies
-    }
 }
 impl ::core::convert::From<::buffa::OwnedView<NetworkSettingsView<'static>>>
 for NetworkSettingsOwnedView {
@@ -4145,1697 +3526,6 @@ for NetworkSettingsOwnedView {
 impl ::buffa::HasMessageView for super::super::NetworkSettings {
     type View<'a> = NetworkSettingsView<'a>;
     type ViewHandle = NetworkSettingsOwnedView;
-}
-/// OutboundProxies are the proxies the server's own HTTP requests go
-/// through, by what they reach: each the ID of one of the server's proxies
-/// (ProxyService), "system" for the system proxy, or empty for none. The
-/// hosts of this machine and of the local network are reached directly.
-#[derive(Clone, Debug, Default)]
-pub struct OutboundProxiesView<'a> {
-    /// Plugin catalogs and plugin packages.
-    ///
-    /// Field 1: `plugin_catalogs`
-    pub plugin_catalogs: ::core::option::Option<&'a str>,
-    /// Items' remote images, such as posters.
-    ///
-    /// Field 2: `images`
-    pub images: ::core::option::Option<&'a str>,
-    /// mavio.dev's API.
-    ///
-    /// Field 3: `mavio_dev`
-    pub mavio_dev: ::core::option::Option<&'a str>,
-    /// The certificate authorities of mavio.site certificates.
-    ///
-    /// Field 4: `acme`
-    pub acme: ::core::option::Option<&'a str>,
-    pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
-}
-impl<'a> ::buffa::MessageView<'a> for OutboundProxiesView<'a> {
-    type Owned = super::super::OutboundProxies;
-    fn decode_view(buf: &'a [u8]) -> ::core::result::Result<Self, ::buffa::DecodeError> {
-        let __limit = ::core::cell::Cell::new(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT);
-        let __elem = ::core::cell::Cell::new(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT);
-        <Self as ::buffa::MessageView>::decode_view_ctx(
-            buf,
-            ::buffa::DecodeContext::new(::buffa::RECURSION_LIMIT, &__limit)
-                .with_element_memory(&__elem),
-        )
-    }
-    fn decode_view_with_ctx(
-        buf: &'a [u8],
-        ctx: ::buffa::DecodeContext<'_>,
-    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
-        <Self as ::buffa::MessageView>::decode_view_ctx(buf, ctx)
-    }
-    #[inline]
-    fn merge_view_field(
-        &mut self,
-        tag: ::buffa::encoding::Tag,
-        cur: &'a [u8],
-        before_tag: &'a [u8],
-        ctx: ::buffa::DecodeContext<'_>,
-    ) -> ::core::result::Result<&'a [u8], ::buffa::DecodeError> {
-        let _ = ctx;
-        #[allow(unused_variables)]
-        let view = self;
-        let mut cur = cur;
-        match tag.field_number() {
-            1u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                view.plugin_catalogs = Some(::buffa::types::borrow_str(&mut cur)?);
-            }
-            2u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                view.images = Some(::buffa::types::borrow_str(&mut cur)?);
-            }
-            3u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                view.mavio_dev = Some(::buffa::types::borrow_str(&mut cur)?);
-            }
-            4u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                view.acme = Some(::buffa::types::borrow_str(&mut cur)?);
-            }
-            _ => {
-                ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
-                let span_len = before_tag.len() - cur.len();
-                view.__buffa_unknown_fields.push_record(before_tag, span_len, ctx)?;
-            }
-        }
-        ::core::result::Result::Ok(cur)
-    }
-    fn to_owned_message(
-        &self,
-    ) -> ::core::result::Result<super::super::OutboundProxies, ::buffa::DecodeError> {
-        self.to_owned_from_source(None)
-    }
-    #[allow(clippy::useless_conversion, clippy::needless_update)]
-    fn to_owned_from_source(
-        &self,
-        __buffa_src: ::core::option::Option<&::buffa::bytes::Bytes>,
-    ) -> ::core::result::Result<super::super::OutboundProxies, ::buffa::DecodeError> {
-        #[allow(unused_imports)]
-        use ::buffa::alloc::string::ToString as _;
-        let _ = __buffa_src;
-        ::core::result::Result::Ok(super::super::OutboundProxies {
-            plugin_catalogs: self.plugin_catalogs.map(|s| s.to_string()),
-            images: self.images.map(|s| s.to_string()),
-            mavio_dev: self.mavio_dev.map(|s| s.to_string()),
-            acme: self.acme.map(|s| s.to_string()),
-            __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
-            ..::core::default::Default::default()
-        })
-    }
-}
-impl<'a> ::buffa::ViewEncode<'a> for OutboundProxiesView<'a> {
-    #[allow(clippy::needless_borrow, clippy::let_and_return)]
-    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
-        #[allow(unused_imports)]
-        use ::buffa::Enumeration as _;
-        let mut size = 0u64;
-        if let Some(ref v) = self.plugin_catalogs {
-            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
-        if let Some(ref v) = self.images {
-            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
-        if let Some(ref v) = self.mavio_dev {
-            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
-        if let Some(ref v) = self.acme {
-            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
-        size += self.__buffa_unknown_fields.encoded_len() as u64;
-        ::buffa::saturate_size(size)
-    }
-    #[allow(clippy::needless_borrow)]
-    fn write_to(
-        &self,
-        _cache: &mut ::buffa::SizeCache,
-        buf: &mut impl ::buffa::EncodeSink,
-    ) {
-        #[allow(unused_imports)]
-        use ::buffa::Enumeration as _;
-        if let Some(ref v) = self.plugin_catalogs {
-            ::buffa::types::put_string_field(1u32, v, buf);
-        }
-        if let Some(ref v) = self.images {
-            ::buffa::types::put_string_field(2u32, v, buf);
-        }
-        if let Some(ref v) = self.mavio_dev {
-            ::buffa::types::put_string_field(3u32, v, buf);
-        }
-        if let Some(ref v) = self.acme {
-            ::buffa::types::put_string_field(4u32, v, buf);
-        }
-        self.__buffa_unknown_fields.write_to(buf);
-    }
-}
-impl<'a> ::buffa::MessageName for OutboundProxiesView<'a> {
-    const PACKAGE: &'static str = "mavio.system.v1";
-    const NAME: &'static str = "OutboundProxies";
-    const FULL_NAME: &'static str = "mavio.system.v1.OutboundProxies";
-    const TYPE_URL: &'static str = "type.googleapis.com/mavio.system.v1.OutboundProxies";
-}
-::buffa::impl_default_view_instance!(OutboundProxiesView);
-::buffa::impl_view_reborrow!(OutboundProxiesView);
-/** Self-contained, `'static` owned view of a `OutboundProxies` message.
-
- Wraps [`::buffa::OwnedView`]`<`[`OutboundProxiesView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
-
- Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`OutboundProxiesView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
-#[derive(Clone, Debug)]
-pub struct OutboundProxiesOwnedView(::buffa::OwnedView<OutboundProxiesView<'static>>);
-impl OutboundProxiesOwnedView {
-    /// Decode an owned view from a [`::buffa::bytes::Bytes`] buffer.
-    ///
-    /// The view borrows directly from the buffer's data; the buffer is
-    /// retained inside the returned handle.
-    ///
-    /// # Errors
-    ///
-    /// Returns [`::buffa::DecodeError`] if the buffer contains invalid
-    /// protobuf data.
-    pub fn decode(
-        bytes: ::buffa::bytes::Bytes,
-    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
-        ::core::result::Result::Ok(
-            OutboundProxiesOwnedView(::buffa::OwnedView::decode(bytes)?),
-        )
-    }
-    /// Decode with custom [`::buffa::DecodeOptions`] (recursion limit,
-    /// max message size).
-    ///
-    /// # Errors
-    ///
-    /// Returns [`::buffa::DecodeError`] if the buffer is invalid or
-    /// exceeds the configured limits.
-    pub fn decode_with_options(
-        bytes: ::buffa::bytes::Bytes,
-        opts: &::buffa::DecodeOptions,
-    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
-        ::core::result::Result::Ok(
-            OutboundProxiesOwnedView(
-                ::buffa::OwnedView::decode_with_options(bytes, opts)?,
-            ),
-        )
-    }
-    /// Build from an owned message via an encode → decode round-trip.
-    ///
-    /// # Errors
-    ///
-    /// Returns [`::buffa::DecodeError::MessageTooLarge`] if the
-    /// message's encoded size exceeds the 2 GiB protobuf limit, or
-    /// another [`::buffa::DecodeError`] if the re-encoded bytes are
-    /// somehow invalid (should not happen for well-formed messages).
-    pub fn from_owned(
-        msg: &super::super::OutboundProxies,
-    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
-        ::core::result::Result::Ok(
-            OutboundProxiesOwnedView(::buffa::OwnedView::from_owned(msg)?),
-        )
-    }
-    /// Borrow the full [`OutboundProxiesView`] with its lifetime tied to `&self`.
-    #[must_use]
-    pub fn view(&self) -> &OutboundProxiesView<'_> {
-        self.0.reborrow()
-    }
-    /// Convert to the owned message type.
-    ///
-    /// Infallible: this type's constructors wire-decode their
-    /// buffer, and a view produced by wire decoding always
-    /// converts. Delegates to [`::buffa::OwnedView::to_owned_message`],
-    /// whose contract also governs handles converted from a raw
-    /// [`::buffa::OwnedView`].
-    #[must_use]
-    pub fn to_owned_message(&self) -> super::super::OutboundProxies {
-        self.0.to_owned_message()
-    }
-    /// The underlying bytes buffer.
-    #[must_use]
-    pub fn bytes(&self) -> &::buffa::bytes::Bytes {
-        self.0.bytes()
-    }
-    /// Consume the handle, returning the underlying bytes buffer.
-    #[must_use]
-    pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
-        self.0.into_bytes()
-    }
-    /// Plugin catalogs and plugin packages.
-    ///
-    /// Field 1: `plugin_catalogs`
-    #[must_use]
-    pub fn plugin_catalogs(&self) -> ::core::option::Option<&'_ str> {
-        self.0.reborrow().plugin_catalogs
-    }
-    /// Items' remote images, such as posters.
-    ///
-    /// Field 2: `images`
-    #[must_use]
-    pub fn images(&self) -> ::core::option::Option<&'_ str> {
-        self.0.reborrow().images
-    }
-    /// mavio.dev's API.
-    ///
-    /// Field 3: `mavio_dev`
-    #[must_use]
-    pub fn mavio_dev(&self) -> ::core::option::Option<&'_ str> {
-        self.0.reborrow().mavio_dev
-    }
-    /// The certificate authorities of mavio.site certificates.
-    ///
-    /// Field 4: `acme`
-    #[must_use]
-    pub fn acme(&self) -> ::core::option::Option<&'_ str> {
-        self.0.reborrow().acme
-    }
-}
-impl ::core::convert::From<::buffa::OwnedView<OutboundProxiesView<'static>>>
-for OutboundProxiesOwnedView {
-    fn from(inner: ::buffa::OwnedView<OutboundProxiesView<'static>>) -> Self {
-        OutboundProxiesOwnedView(inner)
-    }
-}
-impl ::core::convert::From<OutboundProxiesOwnedView>
-for ::buffa::OwnedView<OutboundProxiesView<'static>> {
-    fn from(wrapper: OutboundProxiesOwnedView) -> Self {
-        wrapper.0
-    }
-}
-impl ::core::convert::AsRef<::buffa::OwnedView<OutboundProxiesView<'static>>>
-for OutboundProxiesOwnedView {
-    fn as_ref(&self) -> &::buffa::OwnedView<OutboundProxiesView<'static>> {
-        &self.0
-    }
-}
-impl ::buffa::HasMessageView for super::super::OutboundProxies {
-    type View<'a> = OutboundProxiesView<'a>;
-    type ViewHandle = OutboundProxiesOwnedView;
-}
-/// ServerSettings are what administrators change while the server runs.
-#[derive(Clone, Debug, Default)]
-pub struct ServerSettingsView<'a> {
-    /// Field 1: `transcoding`
-    pub transcoding: ::buffa::MessageFieldView<
-        super::super::__buffa::view::TranscodingSettingsView<'a>,
-    >,
-    /// Field 2: `network`
-    pub network: ::buffa::MessageFieldView<
-        super::super::__buffa::view::NetworkSettingsView<'a>,
-    >,
-    /// URLs of the plugin catalogs plugins are installed from.
-    ///
-    /// Field 3: `plugin_catalogs`
-    pub plugin_catalogs: ::buffa::RepeatedView<'a, &'a str>,
-    /// Field 4: `update_time`
-    pub update_time: ::buffa::MessageFieldView<
-        ::buffa_types::google::protobuf::__buffa::view::TimestampView<'a>,
-    >,
-    /// ID of the plugin that delivers the PINs resetting forgotten passwords;
-    /// empty when users cannot reset them.
-    ///
-    /// Field 5: `password_reset_plugin`
-    pub password_reset_plugin: ::core::option::Option<&'a str>,
-    /// How releases are chosen, downloaded and imported; unset in an update
-    /// keeps the current ones.
-    ///
-    /// Field 6: `acquisition`
-    pub acquisition: ::buffa::MessageFieldView<
-        super::super::__buffa::view::AcquisitionSettingsView<'a>,
-    >,
-    /// What users may request by default and where approved requests go;
-    /// unset in an update keeps the current ones.
-    ///
-    /// Field 7: `requests`
-    pub requests: ::buffa::MessageFieldView<
-        super::super::__buffa::view::RequestSettingsView<'a>,
-    >,
-    /// The language and country of metadata beside libraries'; unset in an
-    /// update keeps the current ones.
-    ///
-    /// Field 8: `metadata`
-    pub metadata: ::buffa::MessageFieldView<
-        super::super::__buffa::view::MetadataSettingsView<'a>,
-    >,
-    /// How many days a signed-in device stays signed in unused, 1–3650; 0 in
-    /// an update keeps the current value.
-    ///
-    /// Field 9: `session_idle_days`
-    pub session_idle_days: ::core::option::Option<i32>,
-    pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
-}
-impl<'a> ::buffa::MessageView<'a> for ServerSettingsView<'a> {
-    type Owned = super::super::ServerSettings;
-    fn decode_view(buf: &'a [u8]) -> ::core::result::Result<Self, ::buffa::DecodeError> {
-        let __limit = ::core::cell::Cell::new(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT);
-        let __elem = ::core::cell::Cell::new(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT);
-        <Self as ::buffa::MessageView>::decode_view_ctx(
-            buf,
-            ::buffa::DecodeContext::new(::buffa::RECURSION_LIMIT, &__limit)
-                .with_element_memory(&__elem),
-        )
-    }
-    fn decode_view_with_ctx(
-        buf: &'a [u8],
-        ctx: ::buffa::DecodeContext<'_>,
-    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
-        <Self as ::buffa::MessageView>::decode_view_ctx(buf, ctx)
-    }
-    #[inline]
-    fn merge_view_field(
-        &mut self,
-        tag: ::buffa::encoding::Tag,
-        cur: &'a [u8],
-        before_tag: &'a [u8],
-        ctx: ::buffa::DecodeContext<'_>,
-    ) -> ::core::result::Result<&'a [u8], ::buffa::DecodeError> {
-        let _ = ctx;
-        #[allow(unused_variables)]
-        let view = self;
-        let mut cur = cur;
-        match tag.field_number() {
-            1u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                let __sub_ctx = ctx.descend()?;
-                let sub = ::buffa::types::borrow_bytes(&mut cur)?;
-                match view.transcoding.as_mut() {
-                    Some(existing) => {
-                        ::buffa::MessageView::merge_into_view(existing, sub, __sub_ctx)?
-                    }
-                    None => {
-                        view.transcoding = ::buffa::MessageFieldView::set(
-                            <super::super::__buffa::view::TranscodingSettingsView as ::buffa::MessageView>::decode_view_ctx(
-                                sub,
-                                __sub_ctx,
-                            )?,
-                        );
-                    }
-                }
-            }
-            2u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                let __sub_ctx = ctx.descend()?;
-                let sub = ::buffa::types::borrow_bytes(&mut cur)?;
-                match view.network.as_mut() {
-                    Some(existing) => {
-                        ::buffa::MessageView::merge_into_view(existing, sub, __sub_ctx)?
-                    }
-                    None => {
-                        view.network = ::buffa::MessageFieldView::set(
-                            <super::super::__buffa::view::NetworkSettingsView as ::buffa::MessageView>::decode_view_ctx(
-                                sub,
-                                __sub_ctx,
-                            )?,
-                        );
-                    }
-                }
-            }
-            4u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                let __sub_ctx = ctx.descend()?;
-                let sub = ::buffa::types::borrow_bytes(&mut cur)?;
-                match view.update_time.as_mut() {
-                    Some(existing) => {
-                        ::buffa::MessageView::merge_into_view(existing, sub, __sub_ctx)?
-                    }
-                    None => {
-                        view.update_time = ::buffa::MessageFieldView::set(
-                            <::buffa_types::google::protobuf::__buffa::view::TimestampView as ::buffa::MessageView>::decode_view_ctx(
-                                sub,
-                                __sub_ctx,
-                            )?,
-                        );
-                    }
-                }
-            }
-            5u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                view.password_reset_plugin = Some(::buffa::types::borrow_str(&mut cur)?);
-            }
-            6u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                let __sub_ctx = ctx.descend()?;
-                let sub = ::buffa::types::borrow_bytes(&mut cur)?;
-                match view.acquisition.as_mut() {
-                    Some(existing) => {
-                        ::buffa::MessageView::merge_into_view(existing, sub, __sub_ctx)?
-                    }
-                    None => {
-                        view.acquisition = ::buffa::MessageFieldView::set(
-                            <super::super::__buffa::view::AcquisitionSettingsView as ::buffa::MessageView>::decode_view_ctx(
-                                sub,
-                                __sub_ctx,
-                            )?,
-                        );
-                    }
-                }
-            }
-            7u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                let __sub_ctx = ctx.descend()?;
-                let sub = ::buffa::types::borrow_bytes(&mut cur)?;
-                match view.requests.as_mut() {
-                    Some(existing) => {
-                        ::buffa::MessageView::merge_into_view(existing, sub, __sub_ctx)?
-                    }
-                    None => {
-                        view.requests = ::buffa::MessageFieldView::set(
-                            <super::super::__buffa::view::RequestSettingsView as ::buffa::MessageView>::decode_view_ctx(
-                                sub,
-                                __sub_ctx,
-                            )?,
-                        );
-                    }
-                }
-            }
-            8u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                let __sub_ctx = ctx.descend()?;
-                let sub = ::buffa::types::borrow_bytes(&mut cur)?;
-                match view.metadata.as_mut() {
-                    Some(existing) => {
-                        ::buffa::MessageView::merge_into_view(existing, sub, __sub_ctx)?
-                    }
-                    None => {
-                        view.metadata = ::buffa::MessageFieldView::set(
-                            <super::super::__buffa::view::MetadataSettingsView as ::buffa::MessageView>::decode_view_ctx(
-                                sub,
-                                __sub_ctx,
-                            )?,
-                        );
-                    }
-                }
-            }
-            9u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                view.session_idle_days = Some(::buffa::types::decode_int32(&mut cur)?);
-            }
-            3u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                let __elem = ::buffa::types::borrow_str(&mut cur)?;
-                ctx.register_element_memory(
-                    ::buffa::__private::element_footprint(&__elem),
-                )?;
-                view.plugin_catalogs.push(__elem);
-            }
-            _ => {
-                ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
-                let span_len = before_tag.len() - cur.len();
-                view.__buffa_unknown_fields.push_record(before_tag, span_len, ctx)?;
-            }
-        }
-        ::core::result::Result::Ok(cur)
-    }
-    fn to_owned_message(
-        &self,
-    ) -> ::core::result::Result<super::super::ServerSettings, ::buffa::DecodeError> {
-        self.to_owned_from_source(None)
-    }
-    #[allow(clippy::useless_conversion, clippy::needless_update)]
-    fn to_owned_from_source(
-        &self,
-        __buffa_src: ::core::option::Option<&::buffa::bytes::Bytes>,
-    ) -> ::core::result::Result<super::super::ServerSettings, ::buffa::DecodeError> {
-        #[allow(unused_imports)]
-        use ::buffa::alloc::string::ToString as _;
-        let _ = __buffa_src;
-        ::core::result::Result::Ok(super::super::ServerSettings {
-            transcoding: match self.transcoding.as_option() {
-                Some(v) => {
-                    ::buffa::MessageField::<
-                        super::super::TranscodingSettings,
-                        ::buffa::Inline<super::super::TranscodingSettings>,
-                    >::some(v.to_owned_from_source(__buffa_src)?)
-                }
-                None => ::buffa::MessageField::none(),
-            },
-            network: match self.network.as_option() {
-                Some(v) => {
-                    ::buffa::MessageField::<
-                        super::super::NetworkSettings,
-                        ::buffa::Inline<super::super::NetworkSettings>,
-                    >::some(v.to_owned_from_source(__buffa_src)?)
-                }
-                None => ::buffa::MessageField::none(),
-            },
-            plugin_catalogs: self
-                .plugin_catalogs
-                .iter()
-                .map(|s| s.to_string())
-                .collect(),
-            update_time: match self.update_time.as_option() {
-                Some(v) => {
-                    ::buffa::MessageField::<
-                        ::buffa_types::google::protobuf::Timestamp,
-                        ::buffa::Inline<::buffa_types::google::protobuf::Timestamp>,
-                    >::some(v.to_owned_from_source(__buffa_src)?)
-                }
-                None => ::buffa::MessageField::none(),
-            },
-            password_reset_plugin: self.password_reset_plugin.map(|s| s.to_string()),
-            acquisition: match self.acquisition.as_option() {
-                Some(v) => {
-                    ::buffa::MessageField::<
-                        super::super::AcquisitionSettings,
-                        ::buffa::Inline<super::super::AcquisitionSettings>,
-                    >::some(v.to_owned_from_source(__buffa_src)?)
-                }
-                None => ::buffa::MessageField::none(),
-            },
-            requests: match self.requests.as_option() {
-                Some(v) => {
-                    ::buffa::MessageField::<
-                        super::super::RequestSettings,
-                        ::buffa::Inline<super::super::RequestSettings>,
-                    >::some(v.to_owned_from_source(__buffa_src)?)
-                }
-                None => ::buffa::MessageField::none(),
-            },
-            metadata: match self.metadata.as_option() {
-                Some(v) => {
-                    ::buffa::MessageField::<
-                        super::super::MetadataSettings,
-                        ::buffa::Inline<super::super::MetadataSettings>,
-                    >::some(v.to_owned_from_source(__buffa_src)?)
-                }
-                None => ::buffa::MessageField::none(),
-            },
-            session_idle_days: self.session_idle_days,
-            __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
-            ..::core::default::Default::default()
-        })
-    }
-}
-impl<'a> ::buffa::ViewEncode<'a> for ServerSettingsView<'a> {
-    #[allow(clippy::needless_borrow, clippy::let_and_return)]
-    fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
-        #[allow(unused_imports)]
-        use ::buffa::Enumeration as _;
-        let mut size = 0u64;
-        if self.transcoding.is_set() {
-            let __slot = __cache.reserve();
-            let inner_size = self.transcoding.compute_size(__cache);
-            __cache.set(__slot, inner_size);
-            size
-                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
-                    + inner_size as u64;
-        }
-        if self.network.is_set() {
-            let __slot = __cache.reserve();
-            let inner_size = self.network.compute_size(__cache);
-            __cache.set(__slot, inner_size);
-            size
-                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
-                    + inner_size as u64;
-        }
-        for v in &self.plugin_catalogs {
-            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
-        if self.update_time.is_set() {
-            let __slot = __cache.reserve();
-            let inner_size = self.update_time.compute_size(__cache);
-            __cache.set(__slot, inner_size);
-            size
-                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
-                    + inner_size as u64;
-        }
-        if let Some(ref v) = self.password_reset_plugin {
-            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
-        if self.acquisition.is_set() {
-            let __slot = __cache.reserve();
-            let inner_size = self.acquisition.compute_size(__cache);
-            __cache.set(__slot, inner_size);
-            size
-                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
-                    + inner_size as u64;
-        }
-        if self.requests.is_set() {
-            let __slot = __cache.reserve();
-            let inner_size = self.requests.compute_size(__cache);
-            __cache.set(__slot, inner_size);
-            size
-                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
-                    + inner_size as u64;
-        }
-        if self.metadata.is_set() {
-            let __slot = __cache.reserve();
-            let inner_size = self.metadata.compute_size(__cache);
-            __cache.set(__slot, inner_size);
-            size
-                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
-                    + inner_size as u64;
-        }
-        if let Some(v) = self.session_idle_days {
-            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
-        }
-        size += self.__buffa_unknown_fields.encoded_len() as u64;
-        ::buffa::saturate_size(size)
-    }
-    #[allow(clippy::needless_borrow)]
-    fn write_to(
-        &self,
-        __cache: &mut ::buffa::SizeCache,
-        buf: &mut impl ::buffa::EncodeSink,
-    ) {
-        #[allow(unused_imports)]
-        use ::buffa::Enumeration as _;
-        if self.transcoding.is_set() {
-            ::buffa::types::put_len_delimited_header(
-                1u32,
-                u64::from(__cache.consume_next()),
-                buf,
-            );
-            self.transcoding.write_to(__cache, buf);
-        }
-        if self.network.is_set() {
-            ::buffa::types::put_len_delimited_header(
-                2u32,
-                u64::from(__cache.consume_next()),
-                buf,
-            );
-            self.network.write_to(__cache, buf);
-        }
-        for v in &self.plugin_catalogs {
-            ::buffa::types::put_string_field(3u32, v, buf);
-        }
-        if self.update_time.is_set() {
-            ::buffa::types::put_len_delimited_header(
-                4u32,
-                u64::from(__cache.consume_next()),
-                buf,
-            );
-            self.update_time.write_to(__cache, buf);
-        }
-        if let Some(ref v) = self.password_reset_plugin {
-            ::buffa::types::put_string_field(5u32, v, buf);
-        }
-        if self.acquisition.is_set() {
-            ::buffa::types::put_len_delimited_header(
-                6u32,
-                u64::from(__cache.consume_next()),
-                buf,
-            );
-            self.acquisition.write_to(__cache, buf);
-        }
-        if self.requests.is_set() {
-            ::buffa::types::put_len_delimited_header(
-                7u32,
-                u64::from(__cache.consume_next()),
-                buf,
-            );
-            self.requests.write_to(__cache, buf);
-        }
-        if self.metadata.is_set() {
-            ::buffa::types::put_len_delimited_header(
-                8u32,
-                u64::from(__cache.consume_next()),
-                buf,
-            );
-            self.metadata.write_to(__cache, buf);
-        }
-        if let Some(v) = self.session_idle_days {
-            ::buffa::types::put_int32_field(9u32, v, buf);
-        }
-        self.__buffa_unknown_fields.write_to(buf);
-    }
-}
-impl<'a> ::buffa::MessageName for ServerSettingsView<'a> {
-    const PACKAGE: &'static str = "mavio.system.v1";
-    const NAME: &'static str = "ServerSettings";
-    const FULL_NAME: &'static str = "mavio.system.v1.ServerSettings";
-    const TYPE_URL: &'static str = "type.googleapis.com/mavio.system.v1.ServerSettings";
-}
-::buffa::impl_default_view_instance!(ServerSettingsView);
-::buffa::impl_view_reborrow!(ServerSettingsView);
-/** Self-contained, `'static` owned view of a `ServerSettings` message.
-
- Wraps [`::buffa::OwnedView`]`<`[`ServerSettingsView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
-
- Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`ServerSettingsView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
-#[derive(Clone, Debug)]
-pub struct ServerSettingsOwnedView(::buffa::OwnedView<ServerSettingsView<'static>>);
-impl ServerSettingsOwnedView {
-    /// Decode an owned view from a [`::buffa::bytes::Bytes`] buffer.
-    ///
-    /// The view borrows directly from the buffer's data; the buffer is
-    /// retained inside the returned handle.
-    ///
-    /// # Errors
-    ///
-    /// Returns [`::buffa::DecodeError`] if the buffer contains invalid
-    /// protobuf data.
-    pub fn decode(
-        bytes: ::buffa::bytes::Bytes,
-    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
-        ::core::result::Result::Ok(
-            ServerSettingsOwnedView(::buffa::OwnedView::decode(bytes)?),
-        )
-    }
-    /// Decode with custom [`::buffa::DecodeOptions`] (recursion limit,
-    /// max message size).
-    ///
-    /// # Errors
-    ///
-    /// Returns [`::buffa::DecodeError`] if the buffer is invalid or
-    /// exceeds the configured limits.
-    pub fn decode_with_options(
-        bytes: ::buffa::bytes::Bytes,
-        opts: &::buffa::DecodeOptions,
-    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
-        ::core::result::Result::Ok(
-            ServerSettingsOwnedView(
-                ::buffa::OwnedView::decode_with_options(bytes, opts)?,
-            ),
-        )
-    }
-    /// Build from an owned message via an encode → decode round-trip.
-    ///
-    /// # Errors
-    ///
-    /// Returns [`::buffa::DecodeError::MessageTooLarge`] if the
-    /// message's encoded size exceeds the 2 GiB protobuf limit, or
-    /// another [`::buffa::DecodeError`] if the re-encoded bytes are
-    /// somehow invalid (should not happen for well-formed messages).
-    pub fn from_owned(
-        msg: &super::super::ServerSettings,
-    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
-        ::core::result::Result::Ok(
-            ServerSettingsOwnedView(::buffa::OwnedView::from_owned(msg)?),
-        )
-    }
-    /// Borrow the full [`ServerSettingsView`] with its lifetime tied to `&self`.
-    #[must_use]
-    pub fn view(&self) -> &ServerSettingsView<'_> {
-        self.0.reborrow()
-    }
-    /// Convert to the owned message type.
-    ///
-    /// Infallible: this type's constructors wire-decode their
-    /// buffer, and a view produced by wire decoding always
-    /// converts. Delegates to [`::buffa::OwnedView::to_owned_message`],
-    /// whose contract also governs handles converted from a raw
-    /// [`::buffa::OwnedView`].
-    #[must_use]
-    pub fn to_owned_message(&self) -> super::super::ServerSettings {
-        self.0.to_owned_message()
-    }
-    /// The underlying bytes buffer.
-    #[must_use]
-    pub fn bytes(&self) -> &::buffa::bytes::Bytes {
-        self.0.bytes()
-    }
-    /// Consume the handle, returning the underlying bytes buffer.
-    #[must_use]
-    pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
-        self.0.into_bytes()
-    }
-    /// Field 1: `transcoding`
-    #[must_use]
-    pub fn transcoding(
-        &self,
-    ) -> &::buffa::MessageFieldView<
-        super::super::__buffa::view::TranscodingSettingsView<'_>,
-    > {
-        &self.0.reborrow().transcoding
-    }
-    /// Field 2: `network`
-    #[must_use]
-    pub fn network(
-        &self,
-    ) -> &::buffa::MessageFieldView<
-        super::super::__buffa::view::NetworkSettingsView<'_>,
-    > {
-        &self.0.reborrow().network
-    }
-    /// URLs of the plugin catalogs plugins are installed from.
-    ///
-    /// Field 3: `plugin_catalogs`
-    #[must_use]
-    pub fn plugin_catalogs(&self) -> &::buffa::RepeatedView<'_, &'_ str> {
-        &self.0.reborrow().plugin_catalogs
-    }
-    /// Field 4: `update_time`
-    #[must_use]
-    pub fn update_time(
-        &self,
-    ) -> &::buffa::MessageFieldView<
-        ::buffa_types::google::protobuf::__buffa::view::TimestampView<'_>,
-    > {
-        &self.0.reborrow().update_time
-    }
-    /// ID of the plugin that delivers the PINs resetting forgotten passwords;
-    /// empty when users cannot reset them.
-    ///
-    /// Field 5: `password_reset_plugin`
-    #[must_use]
-    pub fn password_reset_plugin(&self) -> ::core::option::Option<&'_ str> {
-        self.0.reborrow().password_reset_plugin
-    }
-    /// How releases are chosen, downloaded and imported; unset in an update
-    /// keeps the current ones.
-    ///
-    /// Field 6: `acquisition`
-    #[must_use]
-    pub fn acquisition(
-        &self,
-    ) -> &::buffa::MessageFieldView<
-        super::super::__buffa::view::AcquisitionSettingsView<'_>,
-    > {
-        &self.0.reborrow().acquisition
-    }
-    /// What users may request by default and where approved requests go;
-    /// unset in an update keeps the current ones.
-    ///
-    /// Field 7: `requests`
-    #[must_use]
-    pub fn requests(
-        &self,
-    ) -> &::buffa::MessageFieldView<
-        super::super::__buffa::view::RequestSettingsView<'_>,
-    > {
-        &self.0.reborrow().requests
-    }
-    /// The language and country of metadata beside libraries'; unset in an
-    /// update keeps the current ones.
-    ///
-    /// Field 8: `metadata`
-    #[must_use]
-    pub fn metadata(
-        &self,
-    ) -> &::buffa::MessageFieldView<
-        super::super::__buffa::view::MetadataSettingsView<'_>,
-    > {
-        &self.0.reborrow().metadata
-    }
-    /// How many days a signed-in device stays signed in unused, 1–3650; 0 in
-    /// an update keeps the current value.
-    ///
-    /// Field 9: `session_idle_days`
-    #[must_use]
-    pub fn session_idle_days(&self) -> ::core::option::Option<i32> {
-        self.0.reborrow().session_idle_days
-    }
-}
-impl ::core::convert::From<::buffa::OwnedView<ServerSettingsView<'static>>>
-for ServerSettingsOwnedView {
-    fn from(inner: ::buffa::OwnedView<ServerSettingsView<'static>>) -> Self {
-        ServerSettingsOwnedView(inner)
-    }
-}
-impl ::core::convert::From<ServerSettingsOwnedView>
-for ::buffa::OwnedView<ServerSettingsView<'static>> {
-    fn from(wrapper: ServerSettingsOwnedView) -> Self {
-        wrapper.0
-    }
-}
-impl ::core::convert::AsRef<::buffa::OwnedView<ServerSettingsView<'static>>>
-for ServerSettingsOwnedView {
-    fn as_ref(&self) -> &::buffa::OwnedView<ServerSettingsView<'static>> {
-        &self.0
-    }
-}
-impl ::buffa::HasMessageView for super::super::ServerSettings {
-    type View<'a> = ServerSettingsView<'a>;
-    type ViewHandle = ServerSettingsOwnedView;
-}
-/// RequestSettings are the defaults of users' requests and where approved
-/// requests are acquired.
-#[derive(Clone, Debug, Default)]
-pub struct RequestSettingsView<'a> {
-    /// The request permissions new users get.
-    ///
-    /// Field 1: `default_request_movies`
-    pub default_request_movies: ::core::option::Option<bool>,
-    /// Field 2: `default_request_series`
-    pub default_request_series: ::core::option::Option<bool>,
-    /// Field 3: `default_auto_approve_movies`
-    pub default_auto_approve_movies: ::core::option::Option<bool>,
-    /// Field 4: `default_auto_approve_series`
-    pub default_auto_approve_series: ::core::option::Option<bool>,
-    /// Field 5: `default_report_issues`
-    pub default_report_issues: ::core::option::Option<bool>,
-    /// The quotas of users without their own: requests of movies, or seasons
-    /// of series, in the last days; a limit of 0 is unlimited, 0 days all
-    /// time.
-    ///
-    /// Field 6: `movie_quota_limit`
-    pub movie_quota_limit: ::core::option::Option<i32>,
-    /// Field 7: `movie_quota_days`
-    pub movie_quota_days: ::core::option::Option<i32>,
-    /// Field 8: `series_quota_limit`
-    pub series_quota_limit: ::core::option::Option<i32>,
-    /// Field 9: `series_quota_days`
-    pub series_quota_days: ::core::option::Option<i32>,
-    /// The movie library and quality profile approved movies are added to;
-    /// empty, approvals fail.
-    ///
-    /// Field 10: `movie_library_id`
-    pub movie_library_id: ::core::option::Option<&'a str>,
-    /// Field 11: `movie_quality_profile_id`
-    pub movie_quality_profile_id: ::core::option::Option<&'a str>,
-    /// Field 12: `minimum_availability`
-    pub minimum_availability: ::core::option::Option<
-        ::buffa::EnumValue<
-            super::super::super::super::acquisition::v1::MinimumAvailability,
-        >,
-    >,
-    /// The show library and quality profile approved series are added to;
-    /// empty, approvals fail.
-    ///
-    /// Field 13: `series_library_id`
-    pub series_library_id: ::core::option::Option<&'a str>,
-    /// Field 14: `series_quality_profile_id`
-    pub series_quality_profile_id: ::core::option::Option<&'a str>,
-    /// Field 15: `season_folder`
-    pub season_folder: ::core::option::Option<bool>,
-    /// Field 16: `monitor_new_items`
-    pub monitor_new_items: ::core::option::Option<
-        ::buffa::EnumValue<super::super::super::super::acquisition::v1::NewItemMonitor>,
-    >,
-    /// Allow requesting specials, season 0.
-    ///
-    /// Field 17: `specials`
-    pub specials: ::core::option::Option<bool>,
-    /// The show library and quality profile approved anime series are added
-    /// to, as Seerr's anime settings of Sonarr; empty uses those of series.
-    /// Anime series are numbered absolutely either way.
-    ///
-    /// Field 18: `anime_library_id`
-    pub anime_library_id: ::core::option::Option<&'a str>,
-    /// Field 19: `anime_quality_profile_id`
-    pub anime_quality_profile_id: ::core::option::Option<&'a str>,
-    /// Keywords of discovery providers, as "\<plugin\>/\<keyword\>", whose movies
-    /// and series the blocklisted tags job blocklists weekly, as Seerr's
-    /// blocklistedTags.
-    ///
-    /// Field 20: `blocklisted_tags`
-    pub blocklisted_tags: ::buffa::RepeatedView<'a, &'a str>,
-    /// How many pages of each order of a keyword's titles the job
-    /// blocklists, 0–250; 0 for 50.
-    ///
-    /// Field 21: `blocklisted_tags_limit`
-    pub blocklisted_tags_limit: ::core::option::Option<i32>,
-    pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
-}
-impl<'a> ::buffa::MessageView<'a> for RequestSettingsView<'a> {
-    type Owned = super::super::RequestSettings;
-    fn decode_view(buf: &'a [u8]) -> ::core::result::Result<Self, ::buffa::DecodeError> {
-        let __limit = ::core::cell::Cell::new(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT);
-        let __elem = ::core::cell::Cell::new(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT);
-        <Self as ::buffa::MessageView>::decode_view_ctx(
-            buf,
-            ::buffa::DecodeContext::new(::buffa::RECURSION_LIMIT, &__limit)
-                .with_element_memory(&__elem),
-        )
-    }
-    fn decode_view_with_ctx(
-        buf: &'a [u8],
-        ctx: ::buffa::DecodeContext<'_>,
-    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
-        <Self as ::buffa::MessageView>::decode_view_ctx(buf, ctx)
-    }
-    #[inline]
-    fn merge_view_field(
-        &mut self,
-        tag: ::buffa::encoding::Tag,
-        cur: &'a [u8],
-        before_tag: &'a [u8],
-        ctx: ::buffa::DecodeContext<'_>,
-    ) -> ::core::result::Result<&'a [u8], ::buffa::DecodeError> {
-        let _ = ctx;
-        #[allow(unused_variables)]
-        let view = self;
-        let mut cur = cur;
-        match tag.field_number() {
-            1u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                view.default_request_movies = Some(
-                    ::buffa::types::decode_bool(&mut cur)?,
-                );
-            }
-            2u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                view.default_request_series = Some(
-                    ::buffa::types::decode_bool(&mut cur)?,
-                );
-            }
-            3u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                view.default_auto_approve_movies = Some(
-                    ::buffa::types::decode_bool(&mut cur)?,
-                );
-            }
-            4u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                view.default_auto_approve_series = Some(
-                    ::buffa::types::decode_bool(&mut cur)?,
-                );
-            }
-            5u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                view.default_report_issues = Some(
-                    ::buffa::types::decode_bool(&mut cur)?,
-                );
-            }
-            6u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                view.movie_quota_limit = Some(::buffa::types::decode_int32(&mut cur)?);
-            }
-            7u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                view.movie_quota_days = Some(::buffa::types::decode_int32(&mut cur)?);
-            }
-            8u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                view.series_quota_limit = Some(::buffa::types::decode_int32(&mut cur)?);
-            }
-            9u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                view.series_quota_days = Some(::buffa::types::decode_int32(&mut cur)?);
-            }
-            10u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                view.movie_library_id = Some(::buffa::types::borrow_str(&mut cur)?);
-            }
-            11u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                view.movie_quality_profile_id = Some(
-                    ::buffa::types::borrow_str(&mut cur)?,
-                );
-            }
-            12u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                view.minimum_availability = Some(
-                    ::buffa::EnumValue::from(::buffa::types::decode_int32(&mut cur)?),
-                );
-            }
-            13u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                view.series_library_id = Some(::buffa::types::borrow_str(&mut cur)?);
-            }
-            14u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                view.series_quality_profile_id = Some(
-                    ::buffa::types::borrow_str(&mut cur)?,
-                );
-            }
-            15u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                view.season_folder = Some(::buffa::types::decode_bool(&mut cur)?);
-            }
-            16u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                view.monitor_new_items = Some(
-                    ::buffa::EnumValue::from(::buffa::types::decode_int32(&mut cur)?),
-                );
-            }
-            17u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                view.specials = Some(::buffa::types::decode_bool(&mut cur)?);
-            }
-            18u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                view.anime_library_id = Some(::buffa::types::borrow_str(&mut cur)?);
-            }
-            19u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                view.anime_quality_profile_id = Some(
-                    ::buffa::types::borrow_str(&mut cur)?,
-                );
-            }
-            21u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                view.blocklisted_tags_limit = Some(
-                    ::buffa::types::decode_int32(&mut cur)?,
-                );
-            }
-            20u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                let __elem = ::buffa::types::borrow_str(&mut cur)?;
-                ctx.register_element_memory(
-                    ::buffa::__private::element_footprint(&__elem),
-                )?;
-                view.blocklisted_tags.push(__elem);
-            }
-            _ => {
-                ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
-                let span_len = before_tag.len() - cur.len();
-                view.__buffa_unknown_fields.push_record(before_tag, span_len, ctx)?;
-            }
-        }
-        ::core::result::Result::Ok(cur)
-    }
-    fn to_owned_message(
-        &self,
-    ) -> ::core::result::Result<super::super::RequestSettings, ::buffa::DecodeError> {
-        self.to_owned_from_source(None)
-    }
-    #[allow(clippy::useless_conversion, clippy::needless_update)]
-    fn to_owned_from_source(
-        &self,
-        __buffa_src: ::core::option::Option<&::buffa::bytes::Bytes>,
-    ) -> ::core::result::Result<super::super::RequestSettings, ::buffa::DecodeError> {
-        #[allow(unused_imports)]
-        use ::buffa::alloc::string::ToString as _;
-        let _ = __buffa_src;
-        ::core::result::Result::Ok(super::super::RequestSettings {
-            default_request_movies: self.default_request_movies,
-            default_request_series: self.default_request_series,
-            default_auto_approve_movies: self.default_auto_approve_movies,
-            default_auto_approve_series: self.default_auto_approve_series,
-            default_report_issues: self.default_report_issues,
-            movie_quota_limit: self.movie_quota_limit,
-            movie_quota_days: self.movie_quota_days,
-            series_quota_limit: self.series_quota_limit,
-            series_quota_days: self.series_quota_days,
-            movie_library_id: self.movie_library_id.map(|s| s.to_string()),
-            movie_quality_profile_id: self
-                .movie_quality_profile_id
-                .map(|s| s.to_string()),
-            minimum_availability: self.minimum_availability,
-            series_library_id: self.series_library_id.map(|s| s.to_string()),
-            series_quality_profile_id: self
-                .series_quality_profile_id
-                .map(|s| s.to_string()),
-            season_folder: self.season_folder,
-            monitor_new_items: self.monitor_new_items,
-            specials: self.specials,
-            anime_library_id: self.anime_library_id.map(|s| s.to_string()),
-            anime_quality_profile_id: self
-                .anime_quality_profile_id
-                .map(|s| s.to_string()),
-            blocklisted_tags: self
-                .blocklisted_tags
-                .iter()
-                .map(|s| s.to_string())
-                .collect(),
-            blocklisted_tags_limit: self.blocklisted_tags_limit,
-            __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
-            ..::core::default::Default::default()
-        })
-    }
-}
-impl<'a> ::buffa::ViewEncode<'a> for RequestSettingsView<'a> {
-    #[allow(clippy::needless_borrow, clippy::let_and_return)]
-    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
-        #[allow(unused_imports)]
-        use ::buffa::Enumeration as _;
-        let mut size = 0u64;
-        if self.default_request_movies.is_some() {
-            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
-        }
-        if self.default_request_series.is_some() {
-            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
-        }
-        if self.default_auto_approve_movies.is_some() {
-            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
-        }
-        if self.default_auto_approve_series.is_some() {
-            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
-        }
-        if self.default_report_issues.is_some() {
-            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
-        }
-        if let Some(v) = self.movie_quota_limit {
-            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
-        }
-        if let Some(v) = self.movie_quota_days {
-            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
-        }
-        if let Some(v) = self.series_quota_limit {
-            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
-        }
-        if let Some(v) = self.series_quota_days {
-            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
-        }
-        if let Some(ref v) = self.movie_library_id {
-            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
-        if let Some(ref v) = self.movie_quality_profile_id {
-            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
-        if let Some(ref v) = self.minimum_availability {
-            size += 1u64 + ::buffa::types::int32_encoded_len(v.to_i32()) as u64;
-        }
-        if let Some(ref v) = self.series_library_id {
-            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
-        if let Some(ref v) = self.series_quality_profile_id {
-            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
-        if self.season_folder.is_some() {
-            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
-        }
-        if let Some(ref v) = self.monitor_new_items {
-            size += 2u64 + ::buffa::types::int32_encoded_len(v.to_i32()) as u64;
-        }
-        if self.specials.is_some() {
-            size += 2u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
-        }
-        if let Some(ref v) = self.anime_library_id {
-            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
-        if let Some(ref v) = self.anime_quality_profile_id {
-            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
-        for v in &self.blocklisted_tags {
-            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
-        if let Some(v) = self.blocklisted_tags_limit {
-            size += 2u64 + ::buffa::types::int32_encoded_len(v) as u64;
-        }
-        size += self.__buffa_unknown_fields.encoded_len() as u64;
-        ::buffa::saturate_size(size)
-    }
-    #[allow(clippy::needless_borrow)]
-    fn write_to(
-        &self,
-        _cache: &mut ::buffa::SizeCache,
-        buf: &mut impl ::buffa::EncodeSink,
-    ) {
-        #[allow(unused_imports)]
-        use ::buffa::Enumeration as _;
-        if let Some(v) = self.default_request_movies {
-            ::buffa::types::put_bool_field(1u32, v, buf);
-        }
-        if let Some(v) = self.default_request_series {
-            ::buffa::types::put_bool_field(2u32, v, buf);
-        }
-        if let Some(v) = self.default_auto_approve_movies {
-            ::buffa::types::put_bool_field(3u32, v, buf);
-        }
-        if let Some(v) = self.default_auto_approve_series {
-            ::buffa::types::put_bool_field(4u32, v, buf);
-        }
-        if let Some(v) = self.default_report_issues {
-            ::buffa::types::put_bool_field(5u32, v, buf);
-        }
-        if let Some(v) = self.movie_quota_limit {
-            ::buffa::types::put_int32_field(6u32, v, buf);
-        }
-        if let Some(v) = self.movie_quota_days {
-            ::buffa::types::put_int32_field(7u32, v, buf);
-        }
-        if let Some(v) = self.series_quota_limit {
-            ::buffa::types::put_int32_field(8u32, v, buf);
-        }
-        if let Some(v) = self.series_quota_days {
-            ::buffa::types::put_int32_field(9u32, v, buf);
-        }
-        if let Some(ref v) = self.movie_library_id {
-            ::buffa::types::put_string_field(10u32, v, buf);
-        }
-        if let Some(ref v) = self.movie_quality_profile_id {
-            ::buffa::types::put_string_field(11u32, v, buf);
-        }
-        if let Some(ref v) = self.minimum_availability {
-            ::buffa::types::put_int32_field(12u32, v.to_i32(), buf);
-        }
-        if let Some(ref v) = self.series_library_id {
-            ::buffa::types::put_string_field(13u32, v, buf);
-        }
-        if let Some(ref v) = self.series_quality_profile_id {
-            ::buffa::types::put_string_field(14u32, v, buf);
-        }
-        if let Some(v) = self.season_folder {
-            ::buffa::types::put_bool_field(15u32, v, buf);
-        }
-        if let Some(ref v) = self.monitor_new_items {
-            ::buffa::types::put_int32_field(16u32, v.to_i32(), buf);
-        }
-        if let Some(v) = self.specials {
-            ::buffa::types::put_bool_field(17u32, v, buf);
-        }
-        if let Some(ref v) = self.anime_library_id {
-            ::buffa::types::put_string_field(18u32, v, buf);
-        }
-        if let Some(ref v) = self.anime_quality_profile_id {
-            ::buffa::types::put_string_field(19u32, v, buf);
-        }
-        for v in &self.blocklisted_tags {
-            ::buffa::types::put_string_field(20u32, v, buf);
-        }
-        if let Some(v) = self.blocklisted_tags_limit {
-            ::buffa::types::put_int32_field(21u32, v, buf);
-        }
-        self.__buffa_unknown_fields.write_to(buf);
-    }
-}
-impl<'a> ::buffa::MessageName for RequestSettingsView<'a> {
-    const PACKAGE: &'static str = "mavio.system.v1";
-    const NAME: &'static str = "RequestSettings";
-    const FULL_NAME: &'static str = "mavio.system.v1.RequestSettings";
-    const TYPE_URL: &'static str = "type.googleapis.com/mavio.system.v1.RequestSettings";
-}
-::buffa::impl_default_view_instance!(RequestSettingsView);
-::buffa::impl_view_reborrow!(RequestSettingsView);
-/** Self-contained, `'static` owned view of a `RequestSettings` message.
-
- Wraps [`::buffa::OwnedView`]`<`[`RequestSettingsView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
-
- Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`RequestSettingsView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
-#[derive(Clone, Debug)]
-pub struct RequestSettingsOwnedView(::buffa::OwnedView<RequestSettingsView<'static>>);
-impl RequestSettingsOwnedView {
-    /// Decode an owned view from a [`::buffa::bytes::Bytes`] buffer.
-    ///
-    /// The view borrows directly from the buffer's data; the buffer is
-    /// retained inside the returned handle.
-    ///
-    /// # Errors
-    ///
-    /// Returns [`::buffa::DecodeError`] if the buffer contains invalid
-    /// protobuf data.
-    pub fn decode(
-        bytes: ::buffa::bytes::Bytes,
-    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
-        ::core::result::Result::Ok(
-            RequestSettingsOwnedView(::buffa::OwnedView::decode(bytes)?),
-        )
-    }
-    /// Decode with custom [`::buffa::DecodeOptions`] (recursion limit,
-    /// max message size).
-    ///
-    /// # Errors
-    ///
-    /// Returns [`::buffa::DecodeError`] if the buffer is invalid or
-    /// exceeds the configured limits.
-    pub fn decode_with_options(
-        bytes: ::buffa::bytes::Bytes,
-        opts: &::buffa::DecodeOptions,
-    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
-        ::core::result::Result::Ok(
-            RequestSettingsOwnedView(
-                ::buffa::OwnedView::decode_with_options(bytes, opts)?,
-            ),
-        )
-    }
-    /// Build from an owned message via an encode → decode round-trip.
-    ///
-    /// # Errors
-    ///
-    /// Returns [`::buffa::DecodeError::MessageTooLarge`] if the
-    /// message's encoded size exceeds the 2 GiB protobuf limit, or
-    /// another [`::buffa::DecodeError`] if the re-encoded bytes are
-    /// somehow invalid (should not happen for well-formed messages).
-    pub fn from_owned(
-        msg: &super::super::RequestSettings,
-    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
-        ::core::result::Result::Ok(
-            RequestSettingsOwnedView(::buffa::OwnedView::from_owned(msg)?),
-        )
-    }
-    /// Borrow the full [`RequestSettingsView`] with its lifetime tied to `&self`.
-    #[must_use]
-    pub fn view(&self) -> &RequestSettingsView<'_> {
-        self.0.reborrow()
-    }
-    /// Convert to the owned message type.
-    ///
-    /// Infallible: this type's constructors wire-decode their
-    /// buffer, and a view produced by wire decoding always
-    /// converts. Delegates to [`::buffa::OwnedView::to_owned_message`],
-    /// whose contract also governs handles converted from a raw
-    /// [`::buffa::OwnedView`].
-    #[must_use]
-    pub fn to_owned_message(&self) -> super::super::RequestSettings {
-        self.0.to_owned_message()
-    }
-    /// The underlying bytes buffer.
-    #[must_use]
-    pub fn bytes(&self) -> &::buffa::bytes::Bytes {
-        self.0.bytes()
-    }
-    /// Consume the handle, returning the underlying bytes buffer.
-    #[must_use]
-    pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
-        self.0.into_bytes()
-    }
-    /// The request permissions new users get.
-    ///
-    /// Field 1: `default_request_movies`
-    #[must_use]
-    pub fn default_request_movies(&self) -> ::core::option::Option<bool> {
-        self.0.reborrow().default_request_movies
-    }
-    /// Field 2: `default_request_series`
-    #[must_use]
-    pub fn default_request_series(&self) -> ::core::option::Option<bool> {
-        self.0.reborrow().default_request_series
-    }
-    /// Field 3: `default_auto_approve_movies`
-    #[must_use]
-    pub fn default_auto_approve_movies(&self) -> ::core::option::Option<bool> {
-        self.0.reborrow().default_auto_approve_movies
-    }
-    /// Field 4: `default_auto_approve_series`
-    #[must_use]
-    pub fn default_auto_approve_series(&self) -> ::core::option::Option<bool> {
-        self.0.reborrow().default_auto_approve_series
-    }
-    /// Field 5: `default_report_issues`
-    #[must_use]
-    pub fn default_report_issues(&self) -> ::core::option::Option<bool> {
-        self.0.reborrow().default_report_issues
-    }
-    /// The quotas of users without their own: requests of movies, or seasons
-    /// of series, in the last days; a limit of 0 is unlimited, 0 days all
-    /// time.
-    ///
-    /// Field 6: `movie_quota_limit`
-    #[must_use]
-    pub fn movie_quota_limit(&self) -> ::core::option::Option<i32> {
-        self.0.reborrow().movie_quota_limit
-    }
-    /// Field 7: `movie_quota_days`
-    #[must_use]
-    pub fn movie_quota_days(&self) -> ::core::option::Option<i32> {
-        self.0.reborrow().movie_quota_days
-    }
-    /// Field 8: `series_quota_limit`
-    #[must_use]
-    pub fn series_quota_limit(&self) -> ::core::option::Option<i32> {
-        self.0.reborrow().series_quota_limit
-    }
-    /// Field 9: `series_quota_days`
-    #[must_use]
-    pub fn series_quota_days(&self) -> ::core::option::Option<i32> {
-        self.0.reborrow().series_quota_days
-    }
-    /// The movie library and quality profile approved movies are added to;
-    /// empty, approvals fail.
-    ///
-    /// Field 10: `movie_library_id`
-    #[must_use]
-    pub fn movie_library_id(&self) -> ::core::option::Option<&'_ str> {
-        self.0.reborrow().movie_library_id
-    }
-    /// Field 11: `movie_quality_profile_id`
-    #[must_use]
-    pub fn movie_quality_profile_id(&self) -> ::core::option::Option<&'_ str> {
-        self.0.reborrow().movie_quality_profile_id
-    }
-    /// Field 12: `minimum_availability`
-    #[must_use]
-    pub fn minimum_availability(
-        &self,
-    ) -> ::core::option::Option<
-        ::buffa::EnumValue<
-            super::super::super::super::acquisition::v1::MinimumAvailability,
-        >,
-    > {
-        self.0.reborrow().minimum_availability
-    }
-    /// The show library and quality profile approved series are added to;
-    /// empty, approvals fail.
-    ///
-    /// Field 13: `series_library_id`
-    #[must_use]
-    pub fn series_library_id(&self) -> ::core::option::Option<&'_ str> {
-        self.0.reborrow().series_library_id
-    }
-    /// Field 14: `series_quality_profile_id`
-    #[must_use]
-    pub fn series_quality_profile_id(&self) -> ::core::option::Option<&'_ str> {
-        self.0.reborrow().series_quality_profile_id
-    }
-    /// Field 15: `season_folder`
-    #[must_use]
-    pub fn season_folder(&self) -> ::core::option::Option<bool> {
-        self.0.reborrow().season_folder
-    }
-    /// Field 16: `monitor_new_items`
-    #[must_use]
-    pub fn monitor_new_items(
-        &self,
-    ) -> ::core::option::Option<
-        ::buffa::EnumValue<super::super::super::super::acquisition::v1::NewItemMonitor>,
-    > {
-        self.0.reborrow().monitor_new_items
-    }
-    /// Allow requesting specials, season 0.
-    ///
-    /// Field 17: `specials`
-    #[must_use]
-    pub fn specials(&self) -> ::core::option::Option<bool> {
-        self.0.reborrow().specials
-    }
-    /// The show library and quality profile approved anime series are added
-    /// to, as Seerr's anime settings of Sonarr; empty uses those of series.
-    /// Anime series are numbered absolutely either way.
-    ///
-    /// Field 18: `anime_library_id`
-    #[must_use]
-    pub fn anime_library_id(&self) -> ::core::option::Option<&'_ str> {
-        self.0.reborrow().anime_library_id
-    }
-    /// Field 19: `anime_quality_profile_id`
-    #[must_use]
-    pub fn anime_quality_profile_id(&self) -> ::core::option::Option<&'_ str> {
-        self.0.reborrow().anime_quality_profile_id
-    }
-    /// Keywords of discovery providers, as "\<plugin\>/\<keyword\>", whose movies
-    /// and series the blocklisted tags job blocklists weekly, as Seerr's
-    /// blocklistedTags.
-    ///
-    /// Field 20: `blocklisted_tags`
-    #[must_use]
-    pub fn blocklisted_tags(&self) -> &::buffa::RepeatedView<'_, &'_ str> {
-        &self.0.reborrow().blocklisted_tags
-    }
-    /// How many pages of each order of a keyword's titles the job
-    /// blocklists, 0–250; 0 for 50.
-    ///
-    /// Field 21: `blocklisted_tags_limit`
-    #[must_use]
-    pub fn blocklisted_tags_limit(&self) -> ::core::option::Option<i32> {
-        self.0.reborrow().blocklisted_tags_limit
-    }
-}
-impl ::core::convert::From<::buffa::OwnedView<RequestSettingsView<'static>>>
-for RequestSettingsOwnedView {
-    fn from(inner: ::buffa::OwnedView<RequestSettingsView<'static>>) -> Self {
-        RequestSettingsOwnedView(inner)
-    }
-}
-impl ::core::convert::From<RequestSettingsOwnedView>
-for ::buffa::OwnedView<RequestSettingsView<'static>> {
-    fn from(wrapper: RequestSettingsOwnedView) -> Self {
-        wrapper.0
-    }
-}
-impl ::core::convert::AsRef<::buffa::OwnedView<RequestSettingsView<'static>>>
-for RequestSettingsOwnedView {
-    fn as_ref(&self) -> &::buffa::OwnedView<RequestSettingsView<'static>> {
-        &self.0
-    }
-}
-impl ::buffa::HasMessageView for super::super::RequestSettings {
-    type View<'a> = RequestSettingsView<'a>;
-    type ViewHandle = RequestSettingsOwnedView;
 }
 /// MetadataSettings are the server's language and country of metadata
 /// beside libraries', as Jellyfin's: requests and discovery name titles in
@@ -6084,150 +3774,35 @@ impl ::buffa::HasMessageView for super::super::MetadataSettings {
     type View<'a> = MetadataSettingsView<'a>;
     type ViewHandle = MetadataSettingsOwnedView;
 }
-/// AcquisitionSettings are how releases are chosen, downloaded and
-/// imported, as Radarr's and Sonarr's settings.
+/// GeneralSettings are the server's own settings, beside those of its
+/// domains, which their services keep.
 #[derive(Clone, Debug, Default)]
-pub struct AcquisitionSettingsView<'a> {
-    /// Field 1: `propers`
-    pub propers: ::core::option::Option<
-        ::buffa::EnumValue<super::super::ProperDownload>,
+pub struct GeneralSettingsView<'a> {
+    /// The server's name and how it is reached.
+    ///
+    /// Field 1: `network`
+    pub network: ::buffa::MessageFieldView<
+        super::super::__buffa::view::NetworkSettingsView<'a>,
     >,
-    /// Rank releases by their indexer flags.
+    /// The language and country of metadata beside libraries'.
     ///
-    /// Field 2: `prefer_indexer_flags`
-    pub prefer_indexer_flags: ::core::option::Option<bool>,
-    /// Import finished downloads.
-    ///
-    /// Field 3: `completed_download_handling`
-    pub completed_download_handling: ::core::option::Option<bool>,
-    /// Search again when a download fails.
-    ///
-    /// Field 4: `auto_redownload_failed`
-    pub auto_redownload_failed: ::core::option::Option<bool>,
-    /// In megabytes; 0 for none.
-    ///
-    /// Field 5: `maximum_size`
-    pub maximum_size: ::core::option::Option<i32>,
-    /// How old usenet releases must be, in minutes.
-    ///
-    /// Field 6: `minimum_age`
-    pub minimum_age: ::core::option::Option<i32>,
-    /// Usenet retention in days; 0 for none.
-    ///
-    /// Field 7: `retention`
-    pub retention: ::core::option::Option<i32>,
-    /// Field 8: `allow_hardcoded_subs`
-    pub allow_hardcoded_subs: ::core::option::Option<bool>,
-    /// Hardcoded subtitles allowed when others are not.
-    ///
-    /// Field 9: `whitelisted_hardcoded_subs`
-    pub whitelisted_hardcoded_subs: ::buffa::RepeatedView<'a, &'a str>,
-    /// Field 10: `skip_free_space_check`
-    pub skip_free_space_check: ::core::option::Option<bool>,
-    /// What an import must leave free, in megabytes.
-    ///
-    /// Field 11: `minimum_free_space`
-    pub minimum_free_space: ::core::option::Option<i32>,
-    /// Shifts when movies count as available, in days.
-    ///
-    /// Field 12: `availability_delay`
-    pub availability_delay: ::core::option::Option<i32>,
-    /// In minutes, 0 or at least 10; 0 disables RSS sync.
-    ///
-    /// Field 13: `rss_sync_interval`
-    pub rss_sync_interval: ::core::option::Option<i32>,
-    /// How often download clients are polled, in minutes.
-    ///
-    /// Field 14: `check_finished_interval`
-    pub check_finished_interval: ::core::option::Option<i32>,
-    /// Absolute folder replaced and deleted files go to; empty deletes them.
-    ///
-    /// Field 15: `recycle_bin`
-    pub recycle_bin: ::core::option::Option<&'a str>,
-    /// Days files stay in the recycle bin; 0 keeps them.
-    ///
-    /// Field 16: `recycle_bin_cleanup_days`
-    pub recycle_bin_cleanup_days: ::core::option::Option<i32>,
-    /// Hard link instead of copying files whose download keeps seeding.
-    ///
-    /// Field 17: `copy_using_hardlinks`
-    pub copy_using_hardlinks: ::core::option::Option<bool>,
-    /// Field 18: `import_extra_files`
-    pub import_extra_files: ::core::option::Option<bool>,
-    /// Extensions of extra files imported with the media, such as "srt".
-    ///
-    /// Field 19: `extra_file_extensions`
-    pub extra_file_extensions: ::buffa::RepeatedView<'a, &'a str>,
-    /// Field 20: `delete_empty_folders`
-    pub delete_empty_folders: ::core::option::Option<bool>,
-    /// Name movie files by standard_movie_format; otherwise they keep their
-    /// names.
-    ///
-    /// Field 21: `rename_movies`
-    pub rename_movies: ::core::option::Option<bool>,
-    /// Field 22: `replace_illegal_characters`
-    pub replace_illegal_characters: ::core::option::Option<bool>,
-    /// Field 23: `colon_replacement`
-    pub colon_replacement: ::core::option::Option<
-        ::buffa::EnumValue<super::super::ColonReplacement>,
+    /// Field 2: `metadata`
+    pub metadata: ::buffa::MessageFieldView<
+        super::super::__buffa::view::MetadataSettingsView<'a>,
     >,
-    /// Templates, such as "{Movie Title} ({Release Year})".
+    /// How many days a signed-in device stays signed in unused.
     ///
-    /// Field 24: `movie_folder_format`
-    pub movie_folder_format: ::core::option::Option<&'a str>,
-    /// Field 25: `standard_movie_format`
-    pub standard_movie_format: ::core::option::Option<&'a str>,
-    /// Search again when a download grabbed from an interactive search
-    /// fails, when auto_redownload_failed is set.
+    /// Field 3: `session_idle_days`
+    pub session_idle_days: ::core::option::Option<i32>,
+    /// ID of the plugin that delivers the PINs resetting forgotten passwords;
+    /// empty when users cannot reset them.
     ///
-    /// Field 26: `auto_redownload_failed_from_interactive_search`
-    pub auto_redownload_failed_from_interactive_search: ::core::option::Option<bool>,
-    /// Whether episode files are named by the episode formats.
-    ///
-    /// Field 40: `rename_episodes`
-    pub rename_episodes: ::core::option::Option<bool>,
-    /// Templates of episode files of standard, daily and anime series and of
-    /// the folders of series, seasons and specials, such as
-    /// "{Series Title} - S{season:00}E{episode:00}"; empty for the defaults.
-    ///
-    /// Field 41: `standard_episode_format`
-    pub standard_episode_format: ::core::option::Option<&'a str>,
-    /// Field 42: `daily_episode_format`
-    pub daily_episode_format: ::core::option::Option<&'a str>,
-    /// Field 43: `anime_episode_format`
-    pub anime_episode_format: ::core::option::Option<&'a str>,
-    /// Field 44: `series_folder_format`
-    pub series_folder_format: ::core::option::Option<&'a str>,
-    /// Field 45: `season_folder_format`
-    pub season_folder_format: ::core::option::Option<&'a str>,
-    /// Field 46: `specials_folder_format`
-    pub specials_folder_format: ::core::option::Option<&'a str>,
-    /// Unspecified for MULTI_EPISODE_STYLE_PREFIXED_RANGE.
-    ///
-    /// Field 47: `multi_episode_style`
-    pub multi_episode_style: ::core::option::Option<
-        ::buffa::EnumValue<super::super::MultiEpisodeStyle>,
-    >,
-    /// Unmonitors the episodes of wanted series whose files go missing.
-    ///
-    /// Field 48: `auto_unmonitor_previously_downloaded_episodes`
-    pub auto_unmonitor_previously_downloaded_episodes: ::core::option::Option<bool>,
-    /// Unspecified for EPISODE_TITLE_REQUIRED_ALWAYS.
-    ///
-    /// Field 49: `episode_title_required`
-    pub episode_title_required: ::core::option::Option<
-        ::buffa::EnumValue<super::super::EpisodeTitleRequired>,
-    >,
-    /// The prefixes, separated by "|", of the folders download clients
-    /// unpack into or leave failed downloads in, whose files are not
-    /// imported; empty for "_UNPACK_|_FAILED_".
-    ///
-    /// Field 50: `download_client_working_folders`
-    pub download_client_working_folders: ::core::option::Option<&'a str>,
+    /// Field 4: `password_reset_plugin`
+    pub password_reset_plugin: ::core::option::Option<&'a str>,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
-impl<'a> ::buffa::MessageView<'a> for AcquisitionSettingsView<'a> {
-    type Owned = super::super::AcquisitionSettings;
+impl<'a> ::buffa::MessageView<'a> for GeneralSettingsView<'a> {
+    type Owned = super::super::GeneralSettings;
     fn decode_view(buf: &'a [u8]) -> ::core::result::Result<Self, ::buffa::DecodeError> {
         let __limit = ::core::cell::Cell::new(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT);
         let __elem = ::core::cell::Cell::new(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT);
@@ -6259,299 +3834,58 @@ impl<'a> ::buffa::MessageView<'a> for AcquisitionSettingsView<'a> {
             1u32 => {
                 ::buffa::encoding::check_wire_type(
                     tag,
-                    ::buffa::encoding::WireType::Varint,
+                    ::buffa::encoding::WireType::LengthDelimited,
                 )?;
-                view.propers = Some(
-                    ::buffa::EnumValue::from(::buffa::types::decode_int32(&mut cur)?),
-                );
+                let __sub_ctx = ctx.descend()?;
+                let sub = ::buffa::types::borrow_bytes(&mut cur)?;
+                match view.network.as_mut() {
+                    Some(existing) => {
+                        ::buffa::MessageView::merge_into_view(existing, sub, __sub_ctx)?
+                    }
+                    None => {
+                        view.network = ::buffa::MessageFieldView::set(
+                            <super::super::__buffa::view::NetworkSettingsView as ::buffa::MessageView>::decode_view_ctx(
+                                sub,
+                                __sub_ctx,
+                            )?,
+                        );
+                    }
+                }
             }
             2u32 => {
                 ::buffa::encoding::check_wire_type(
                     tag,
-                    ::buffa::encoding::WireType::Varint,
+                    ::buffa::encoding::WireType::LengthDelimited,
                 )?;
-                view.prefer_indexer_flags = Some(::buffa::types::decode_bool(&mut cur)?);
+                let __sub_ctx = ctx.descend()?;
+                let sub = ::buffa::types::borrow_bytes(&mut cur)?;
+                match view.metadata.as_mut() {
+                    Some(existing) => {
+                        ::buffa::MessageView::merge_into_view(existing, sub, __sub_ctx)?
+                    }
+                    None => {
+                        view.metadata = ::buffa::MessageFieldView::set(
+                            <super::super::__buffa::view::MetadataSettingsView as ::buffa::MessageView>::decode_view_ctx(
+                                sub,
+                                __sub_ctx,
+                            )?,
+                        );
+                    }
+                }
             }
             3u32 => {
                 ::buffa::encoding::check_wire_type(
                     tag,
                     ::buffa::encoding::WireType::Varint,
                 )?;
-                view.completed_download_handling = Some(
-                    ::buffa::types::decode_bool(&mut cur)?,
-                );
+                view.session_idle_days = Some(::buffa::types::decode_int32(&mut cur)?);
             }
             4u32 => {
                 ::buffa::encoding::check_wire_type(
                     tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                view.auto_redownload_failed = Some(
-                    ::buffa::types::decode_bool(&mut cur)?,
-                );
-            }
-            5u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                view.maximum_size = Some(::buffa::types::decode_int32(&mut cur)?);
-            }
-            6u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                view.minimum_age = Some(::buffa::types::decode_int32(&mut cur)?);
-            }
-            7u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                view.retention = Some(::buffa::types::decode_int32(&mut cur)?);
-            }
-            8u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                view.allow_hardcoded_subs = Some(::buffa::types::decode_bool(&mut cur)?);
-            }
-            10u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                view.skip_free_space_check = Some(
-                    ::buffa::types::decode_bool(&mut cur)?,
-                );
-            }
-            11u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                view.minimum_free_space = Some(::buffa::types::decode_int32(&mut cur)?);
-            }
-            12u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                view.availability_delay = Some(::buffa::types::decode_int32(&mut cur)?);
-            }
-            13u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                view.rss_sync_interval = Some(::buffa::types::decode_int32(&mut cur)?);
-            }
-            14u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                view.check_finished_interval = Some(
-                    ::buffa::types::decode_int32(&mut cur)?,
-                );
-            }
-            15u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
                     ::buffa::encoding::WireType::LengthDelimited,
                 )?;
-                view.recycle_bin = Some(::buffa::types::borrow_str(&mut cur)?);
-            }
-            16u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                view.recycle_bin_cleanup_days = Some(
-                    ::buffa::types::decode_int32(&mut cur)?,
-                );
-            }
-            17u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                view.copy_using_hardlinks = Some(::buffa::types::decode_bool(&mut cur)?);
-            }
-            18u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                view.import_extra_files = Some(::buffa::types::decode_bool(&mut cur)?);
-            }
-            20u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                view.delete_empty_folders = Some(::buffa::types::decode_bool(&mut cur)?);
-            }
-            21u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                view.rename_movies = Some(::buffa::types::decode_bool(&mut cur)?);
-            }
-            22u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                view.replace_illegal_characters = Some(
-                    ::buffa::types::decode_bool(&mut cur)?,
-                );
-            }
-            23u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                view.colon_replacement = Some(
-                    ::buffa::EnumValue::from(::buffa::types::decode_int32(&mut cur)?),
-                );
-            }
-            24u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                view.movie_folder_format = Some(::buffa::types::borrow_str(&mut cur)?);
-            }
-            25u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                view.standard_movie_format = Some(::buffa::types::borrow_str(&mut cur)?);
-            }
-            26u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                view.auto_redownload_failed_from_interactive_search = Some(
-                    ::buffa::types::decode_bool(&mut cur)?,
-                );
-            }
-            40u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                view.rename_episodes = Some(::buffa::types::decode_bool(&mut cur)?);
-            }
-            41u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                view.standard_episode_format = Some(
-                    ::buffa::types::borrow_str(&mut cur)?,
-                );
-            }
-            42u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                view.daily_episode_format = Some(::buffa::types::borrow_str(&mut cur)?);
-            }
-            43u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                view.anime_episode_format = Some(::buffa::types::borrow_str(&mut cur)?);
-            }
-            44u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                view.series_folder_format = Some(::buffa::types::borrow_str(&mut cur)?);
-            }
-            45u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                view.season_folder_format = Some(::buffa::types::borrow_str(&mut cur)?);
-            }
-            46u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                view.specials_folder_format = Some(
-                    ::buffa::types::borrow_str(&mut cur)?,
-                );
-            }
-            47u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                view.multi_episode_style = Some(
-                    ::buffa::EnumValue::from(::buffa::types::decode_int32(&mut cur)?),
-                );
-            }
-            48u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                view.auto_unmonitor_previously_downloaded_episodes = Some(
-                    ::buffa::types::decode_bool(&mut cur)?,
-                );
-            }
-            49u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                view.episode_title_required = Some(
-                    ::buffa::EnumValue::from(::buffa::types::decode_int32(&mut cur)?),
-                );
-            }
-            50u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                view.download_client_working_folders = Some(
-                    ::buffa::types::borrow_str(&mut cur)?,
-                );
-            }
-            9u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                let __elem = ::buffa::types::borrow_str(&mut cur)?;
-                ctx.register_element_memory(
-                    ::buffa::__private::element_footprint(&__elem),
-                )?;
-                view.whitelisted_hardcoded_subs.push(__elem);
-            }
-            19u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                let __elem = ::buffa::types::borrow_str(&mut cur)?;
-                ctx.register_element_memory(
-                    ::buffa::__private::element_footprint(&__elem),
-                )?;
-                view.extra_file_extensions.push(__elem);
+                view.password_reset_plugin = Some(::buffa::types::borrow_str(&mut cur)?);
             }
             _ => {
                 ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
@@ -6563,194 +3897,70 @@ impl<'a> ::buffa::MessageView<'a> for AcquisitionSettingsView<'a> {
     }
     fn to_owned_message(
         &self,
-    ) -> ::core::result::Result<
-        super::super::AcquisitionSettings,
-        ::buffa::DecodeError,
-    > {
+    ) -> ::core::result::Result<super::super::GeneralSettings, ::buffa::DecodeError> {
         self.to_owned_from_source(None)
     }
     #[allow(clippy::useless_conversion, clippy::needless_update)]
     fn to_owned_from_source(
         &self,
         __buffa_src: ::core::option::Option<&::buffa::bytes::Bytes>,
-    ) -> ::core::result::Result<
-        super::super::AcquisitionSettings,
-        ::buffa::DecodeError,
-    > {
+    ) -> ::core::result::Result<super::super::GeneralSettings, ::buffa::DecodeError> {
         #[allow(unused_imports)]
         use ::buffa::alloc::string::ToString as _;
         let _ = __buffa_src;
-        ::core::result::Result::Ok(super::super::AcquisitionSettings {
-            propers: self.propers,
-            prefer_indexer_flags: self.prefer_indexer_flags,
-            completed_download_handling: self.completed_download_handling,
-            auto_redownload_failed: self.auto_redownload_failed,
-            maximum_size: self.maximum_size,
-            minimum_age: self.minimum_age,
-            retention: self.retention,
-            allow_hardcoded_subs: self.allow_hardcoded_subs,
-            whitelisted_hardcoded_subs: self
-                .whitelisted_hardcoded_subs
-                .iter()
-                .map(|s| s.to_string())
-                .collect(),
-            skip_free_space_check: self.skip_free_space_check,
-            minimum_free_space: self.minimum_free_space,
-            availability_delay: self.availability_delay,
-            rss_sync_interval: self.rss_sync_interval,
-            check_finished_interval: self.check_finished_interval,
-            recycle_bin: self.recycle_bin.map(|s| s.to_string()),
-            recycle_bin_cleanup_days: self.recycle_bin_cleanup_days,
-            copy_using_hardlinks: self.copy_using_hardlinks,
-            import_extra_files: self.import_extra_files,
-            extra_file_extensions: self
-                .extra_file_extensions
-                .iter()
-                .map(|s| s.to_string())
-                .collect(),
-            delete_empty_folders: self.delete_empty_folders,
-            rename_movies: self.rename_movies,
-            replace_illegal_characters: self.replace_illegal_characters,
-            colon_replacement: self.colon_replacement,
-            movie_folder_format: self.movie_folder_format.map(|s| s.to_string()),
-            standard_movie_format: self.standard_movie_format.map(|s| s.to_string()),
-            auto_redownload_failed_from_interactive_search: self
-                .auto_redownload_failed_from_interactive_search,
-            rename_episodes: self.rename_episodes,
-            standard_episode_format: self.standard_episode_format.map(|s| s.to_string()),
-            daily_episode_format: self.daily_episode_format.map(|s| s.to_string()),
-            anime_episode_format: self.anime_episode_format.map(|s| s.to_string()),
-            series_folder_format: self.series_folder_format.map(|s| s.to_string()),
-            season_folder_format: self.season_folder_format.map(|s| s.to_string()),
-            specials_folder_format: self.specials_folder_format.map(|s| s.to_string()),
-            multi_episode_style: self.multi_episode_style,
-            auto_unmonitor_previously_downloaded_episodes: self
-                .auto_unmonitor_previously_downloaded_episodes,
-            episode_title_required: self.episode_title_required,
-            download_client_working_folders: self
-                .download_client_working_folders
-                .map(|s| s.to_string()),
+        ::core::result::Result::Ok(super::super::GeneralSettings {
+            network: match self.network.as_option() {
+                Some(v) => {
+                    ::buffa::MessageField::<
+                        super::super::NetworkSettings,
+                        ::buffa::Inline<super::super::NetworkSettings>,
+                    >::some(v.to_owned_from_source(__buffa_src)?)
+                }
+                None => ::buffa::MessageField::none(),
+            },
+            metadata: match self.metadata.as_option() {
+                Some(v) => {
+                    ::buffa::MessageField::<
+                        super::super::MetadataSettings,
+                        ::buffa::Inline<super::super::MetadataSettings>,
+                    >::some(v.to_owned_from_source(__buffa_src)?)
+                }
+                None => ::buffa::MessageField::none(),
+            },
+            session_idle_days: self.session_idle_days,
+            password_reset_plugin: self.password_reset_plugin.map(|s| s.to_string()),
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
     }
 }
-impl<'a> ::buffa::ViewEncode<'a> for AcquisitionSettingsView<'a> {
+impl<'a> ::buffa::ViewEncode<'a> for GeneralSettingsView<'a> {
     #[allow(clippy::needless_borrow, clippy::let_and_return)]
-    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+    fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
         let mut size = 0u64;
-        if let Some(ref v) = self.propers {
-            size += 1u64 + ::buffa::types::int32_encoded_len(v.to_i32()) as u64;
+        if self.network.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.network.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
         }
-        if self.prefer_indexer_flags.is_some() {
-            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        if self.metadata.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.metadata.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
         }
-        if self.completed_download_handling.is_some() {
-            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
-        }
-        if self.auto_redownload_failed.is_some() {
-            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
-        }
-        if let Some(v) = self.maximum_size {
+        if let Some(v) = self.session_idle_days {
             size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
         }
-        if let Some(v) = self.minimum_age {
-            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
-        }
-        if let Some(v) = self.retention {
-            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
-        }
-        if self.allow_hardcoded_subs.is_some() {
-            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
-        }
-        for v in &self.whitelisted_hardcoded_subs {
+        if let Some(ref v) = self.password_reset_plugin {
             size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
-        if self.skip_free_space_check.is_some() {
-            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
-        }
-        if let Some(v) = self.minimum_free_space {
-            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
-        }
-        if let Some(v) = self.availability_delay {
-            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
-        }
-        if let Some(v) = self.rss_sync_interval {
-            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
-        }
-        if let Some(v) = self.check_finished_interval {
-            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
-        }
-        if let Some(ref v) = self.recycle_bin {
-            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
-        if let Some(v) = self.recycle_bin_cleanup_days {
-            size += 2u64 + ::buffa::types::int32_encoded_len(v) as u64;
-        }
-        if self.copy_using_hardlinks.is_some() {
-            size += 2u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
-        }
-        if self.import_extra_files.is_some() {
-            size += 2u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
-        }
-        for v in &self.extra_file_extensions {
-            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
-        if self.delete_empty_folders.is_some() {
-            size += 2u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
-        }
-        if self.rename_movies.is_some() {
-            size += 2u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
-        }
-        if self.replace_illegal_characters.is_some() {
-            size += 2u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
-        }
-        if let Some(ref v) = self.colon_replacement {
-            size += 2u64 + ::buffa::types::int32_encoded_len(v.to_i32()) as u64;
-        }
-        if let Some(ref v) = self.movie_folder_format {
-            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
-        if let Some(ref v) = self.standard_movie_format {
-            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
-        if self.auto_redownload_failed_from_interactive_search.is_some() {
-            size += 2u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
-        }
-        if self.rename_episodes.is_some() {
-            size += 2u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
-        }
-        if let Some(ref v) = self.standard_episode_format {
-            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
-        if let Some(ref v) = self.daily_episode_format {
-            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
-        if let Some(ref v) = self.anime_episode_format {
-            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
-        if let Some(ref v) = self.series_folder_format {
-            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
-        if let Some(ref v) = self.season_folder_format {
-            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
-        if let Some(ref v) = self.specials_folder_format {
-            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
-        if let Some(ref v) = self.multi_episode_style {
-            size += 2u64 + ::buffa::types::int32_encoded_len(v.to_i32()) as u64;
-        }
-        if self.auto_unmonitor_previously_downloaded_episodes.is_some() {
-            size += 2u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
-        }
-        if let Some(ref v) = self.episode_title_required {
-            size += 2u64 + ::buffa::types::int32_encoded_len(v.to_i32()) as u64;
-        }
-        if let Some(ref v) = self.download_client_working_folders {
-            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
@@ -6758,143 +3968,52 @@ impl<'a> ::buffa::ViewEncode<'a> for AcquisitionSettingsView<'a> {
     #[allow(clippy::needless_borrow)]
     fn write_to(
         &self,
-        _cache: &mut ::buffa::SizeCache,
+        __cache: &mut ::buffa::SizeCache,
         buf: &mut impl ::buffa::EncodeSink,
     ) {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
-        if let Some(ref v) = self.propers {
-            ::buffa::types::put_int32_field(1u32, v.to_i32(), buf);
+        if self.network.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                1u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.network.write_to(__cache, buf);
         }
-        if let Some(v) = self.prefer_indexer_flags {
-            ::buffa::types::put_bool_field(2u32, v, buf);
+        if self.metadata.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                2u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.metadata.write_to(__cache, buf);
         }
-        if let Some(v) = self.completed_download_handling {
-            ::buffa::types::put_bool_field(3u32, v, buf);
+        if let Some(v) = self.session_idle_days {
+            ::buffa::types::put_int32_field(3u32, v, buf);
         }
-        if let Some(v) = self.auto_redownload_failed {
-            ::buffa::types::put_bool_field(4u32, v, buf);
-        }
-        if let Some(v) = self.maximum_size {
-            ::buffa::types::put_int32_field(5u32, v, buf);
-        }
-        if let Some(v) = self.minimum_age {
-            ::buffa::types::put_int32_field(6u32, v, buf);
-        }
-        if let Some(v) = self.retention {
-            ::buffa::types::put_int32_field(7u32, v, buf);
-        }
-        if let Some(v) = self.allow_hardcoded_subs {
-            ::buffa::types::put_bool_field(8u32, v, buf);
-        }
-        for v in &self.whitelisted_hardcoded_subs {
-            ::buffa::types::put_string_field(9u32, v, buf);
-        }
-        if let Some(v) = self.skip_free_space_check {
-            ::buffa::types::put_bool_field(10u32, v, buf);
-        }
-        if let Some(v) = self.minimum_free_space {
-            ::buffa::types::put_int32_field(11u32, v, buf);
-        }
-        if let Some(v) = self.availability_delay {
-            ::buffa::types::put_int32_field(12u32, v, buf);
-        }
-        if let Some(v) = self.rss_sync_interval {
-            ::buffa::types::put_int32_field(13u32, v, buf);
-        }
-        if let Some(v) = self.check_finished_interval {
-            ::buffa::types::put_int32_field(14u32, v, buf);
-        }
-        if let Some(ref v) = self.recycle_bin {
-            ::buffa::types::put_string_field(15u32, v, buf);
-        }
-        if let Some(v) = self.recycle_bin_cleanup_days {
-            ::buffa::types::put_int32_field(16u32, v, buf);
-        }
-        if let Some(v) = self.copy_using_hardlinks {
-            ::buffa::types::put_bool_field(17u32, v, buf);
-        }
-        if let Some(v) = self.import_extra_files {
-            ::buffa::types::put_bool_field(18u32, v, buf);
-        }
-        for v in &self.extra_file_extensions {
-            ::buffa::types::put_string_field(19u32, v, buf);
-        }
-        if let Some(v) = self.delete_empty_folders {
-            ::buffa::types::put_bool_field(20u32, v, buf);
-        }
-        if let Some(v) = self.rename_movies {
-            ::buffa::types::put_bool_field(21u32, v, buf);
-        }
-        if let Some(v) = self.replace_illegal_characters {
-            ::buffa::types::put_bool_field(22u32, v, buf);
-        }
-        if let Some(ref v) = self.colon_replacement {
-            ::buffa::types::put_int32_field(23u32, v.to_i32(), buf);
-        }
-        if let Some(ref v) = self.movie_folder_format {
-            ::buffa::types::put_string_field(24u32, v, buf);
-        }
-        if let Some(ref v) = self.standard_movie_format {
-            ::buffa::types::put_string_field(25u32, v, buf);
-        }
-        if let Some(v) = self.auto_redownload_failed_from_interactive_search {
-            ::buffa::types::put_bool_field(26u32, v, buf);
-        }
-        if let Some(v) = self.rename_episodes {
-            ::buffa::types::put_bool_field(40u32, v, buf);
-        }
-        if let Some(ref v) = self.standard_episode_format {
-            ::buffa::types::put_string_field(41u32, v, buf);
-        }
-        if let Some(ref v) = self.daily_episode_format {
-            ::buffa::types::put_string_field(42u32, v, buf);
-        }
-        if let Some(ref v) = self.anime_episode_format {
-            ::buffa::types::put_string_field(43u32, v, buf);
-        }
-        if let Some(ref v) = self.series_folder_format {
-            ::buffa::types::put_string_field(44u32, v, buf);
-        }
-        if let Some(ref v) = self.season_folder_format {
-            ::buffa::types::put_string_field(45u32, v, buf);
-        }
-        if let Some(ref v) = self.specials_folder_format {
-            ::buffa::types::put_string_field(46u32, v, buf);
-        }
-        if let Some(ref v) = self.multi_episode_style {
-            ::buffa::types::put_int32_field(47u32, v.to_i32(), buf);
-        }
-        if let Some(v) = self.auto_unmonitor_previously_downloaded_episodes {
-            ::buffa::types::put_bool_field(48u32, v, buf);
-        }
-        if let Some(ref v) = self.episode_title_required {
-            ::buffa::types::put_int32_field(49u32, v.to_i32(), buf);
-        }
-        if let Some(ref v) = self.download_client_working_folders {
-            ::buffa::types::put_string_field(50u32, v, buf);
+        if let Some(ref v) = self.password_reset_plugin {
+            ::buffa::types::put_string_field(4u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
 }
-impl<'a> ::buffa::MessageName for AcquisitionSettingsView<'a> {
+impl<'a> ::buffa::MessageName for GeneralSettingsView<'a> {
     const PACKAGE: &'static str = "mavio.system.v1";
-    const NAME: &'static str = "AcquisitionSettings";
-    const FULL_NAME: &'static str = "mavio.system.v1.AcquisitionSettings";
-    const TYPE_URL: &'static str = "type.googleapis.com/mavio.system.v1.AcquisitionSettings";
+    const NAME: &'static str = "GeneralSettings";
+    const FULL_NAME: &'static str = "mavio.system.v1.GeneralSettings";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.system.v1.GeneralSettings";
 }
-::buffa::impl_default_view_instance!(AcquisitionSettingsView);
-::buffa::impl_view_reborrow!(AcquisitionSettingsView);
-/** Self-contained, `'static` owned view of a `AcquisitionSettings` message.
+::buffa::impl_default_view_instance!(GeneralSettingsView);
+::buffa::impl_view_reborrow!(GeneralSettingsView);
+/** Self-contained, `'static` owned view of a `GeneralSettings` message.
 
- Wraps [`::buffa::OwnedView`]`<`[`AcquisitionSettingsView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
+ Wraps [`::buffa::OwnedView`]`<`[`GeneralSettingsView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
 
- Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`AcquisitionSettingsView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
+ Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`GeneralSettingsView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
 #[derive(Clone, Debug)]
-pub struct AcquisitionSettingsOwnedView(
-    ::buffa::OwnedView<AcquisitionSettingsView<'static>>,
-);
-impl AcquisitionSettingsOwnedView {
+pub struct GeneralSettingsOwnedView(::buffa::OwnedView<GeneralSettingsView<'static>>);
+impl GeneralSettingsOwnedView {
     /// Decode an owned view from a [`::buffa::bytes::Bytes`] buffer.
     ///
     /// The view borrows directly from the buffer's data; the buffer is
@@ -6908,7 +4027,7 @@ impl AcquisitionSettingsOwnedView {
         bytes: ::buffa::bytes::Bytes,
     ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
         ::core::result::Result::Ok(
-            AcquisitionSettingsOwnedView(::buffa::OwnedView::decode(bytes)?),
+            GeneralSettingsOwnedView(::buffa::OwnedView::decode(bytes)?),
         )
     }
     /// Decode with custom [`::buffa::DecodeOptions`] (recursion limit,
@@ -6923,7 +4042,7 @@ impl AcquisitionSettingsOwnedView {
         opts: &::buffa::DecodeOptions,
     ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
         ::core::result::Result::Ok(
-            AcquisitionSettingsOwnedView(
+            GeneralSettingsOwnedView(
                 ::buffa::OwnedView::decode_with_options(bytes, opts)?,
             ),
         )
@@ -6937,15 +4056,15 @@ impl AcquisitionSettingsOwnedView {
     /// another [`::buffa::DecodeError`] if the re-encoded bytes are
     /// somehow invalid (should not happen for well-formed messages).
     pub fn from_owned(
-        msg: &super::super::AcquisitionSettings,
+        msg: &super::super::GeneralSettings,
     ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
         ::core::result::Result::Ok(
-            AcquisitionSettingsOwnedView(::buffa::OwnedView::from_owned(msg)?),
+            GeneralSettingsOwnedView(::buffa::OwnedView::from_owned(msg)?),
         )
     }
-    /// Borrow the full [`AcquisitionSettingsView`] with its lifetime tied to `&self`.
+    /// Borrow the full [`GeneralSettingsView`] with its lifetime tied to `&self`.
     #[must_use]
-    pub fn view(&self) -> &AcquisitionSettingsView<'_> {
+    pub fn view(&self) -> &GeneralSettingsView<'_> {
         self.0.reborrow()
     }
     /// Convert to the owned message type.
@@ -6956,7 +4075,7 @@ impl AcquisitionSettingsOwnedView {
     /// whose contract also governs handles converted from a raw
     /// [`::buffa::OwnedView`].
     #[must_use]
-    pub fn to_owned_message(&self) -> super::super::AcquisitionSettings {
+    pub fn to_owned_message(&self) -> super::super::GeneralSettings {
         self.0.to_owned_message()
     }
     /// The underlying bytes buffer.
@@ -6969,286 +4088,72 @@ impl AcquisitionSettingsOwnedView {
     pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
         self.0.into_bytes()
     }
-    /// Field 1: `propers`
+    /// The server's name and how it is reached.
+    ///
+    /// Field 1: `network`
     #[must_use]
-    pub fn propers(
+    pub fn network(
         &self,
-    ) -> ::core::option::Option<::buffa::EnumValue<super::super::ProperDownload>> {
-        self.0.reborrow().propers
+    ) -> &::buffa::MessageFieldView<
+        super::super::__buffa::view::NetworkSettingsView<'_>,
+    > {
+        &self.0.reborrow().network
     }
-    /// Rank releases by their indexer flags.
+    /// The language and country of metadata beside libraries'.
     ///
-    /// Field 2: `prefer_indexer_flags`
+    /// Field 2: `metadata`
     #[must_use]
-    pub fn prefer_indexer_flags(&self) -> ::core::option::Option<bool> {
-        self.0.reborrow().prefer_indexer_flags
-    }
-    /// Import finished downloads.
-    ///
-    /// Field 3: `completed_download_handling`
-    #[must_use]
-    pub fn completed_download_handling(&self) -> ::core::option::Option<bool> {
-        self.0.reborrow().completed_download_handling
-    }
-    /// Search again when a download fails.
-    ///
-    /// Field 4: `auto_redownload_failed`
-    #[must_use]
-    pub fn auto_redownload_failed(&self) -> ::core::option::Option<bool> {
-        self.0.reborrow().auto_redownload_failed
-    }
-    /// In megabytes; 0 for none.
-    ///
-    /// Field 5: `maximum_size`
-    #[must_use]
-    pub fn maximum_size(&self) -> ::core::option::Option<i32> {
-        self.0.reborrow().maximum_size
-    }
-    /// How old usenet releases must be, in minutes.
-    ///
-    /// Field 6: `minimum_age`
-    #[must_use]
-    pub fn minimum_age(&self) -> ::core::option::Option<i32> {
-        self.0.reborrow().minimum_age
-    }
-    /// Usenet retention in days; 0 for none.
-    ///
-    /// Field 7: `retention`
-    #[must_use]
-    pub fn retention(&self) -> ::core::option::Option<i32> {
-        self.0.reborrow().retention
-    }
-    /// Field 8: `allow_hardcoded_subs`
-    #[must_use]
-    pub fn allow_hardcoded_subs(&self) -> ::core::option::Option<bool> {
-        self.0.reborrow().allow_hardcoded_subs
-    }
-    /// Hardcoded subtitles allowed when others are not.
-    ///
-    /// Field 9: `whitelisted_hardcoded_subs`
-    #[must_use]
-    pub fn whitelisted_hardcoded_subs(&self) -> &::buffa::RepeatedView<'_, &'_ str> {
-        &self.0.reborrow().whitelisted_hardcoded_subs
-    }
-    /// Field 10: `skip_free_space_check`
-    #[must_use]
-    pub fn skip_free_space_check(&self) -> ::core::option::Option<bool> {
-        self.0.reborrow().skip_free_space_check
-    }
-    /// What an import must leave free, in megabytes.
-    ///
-    /// Field 11: `minimum_free_space`
-    #[must_use]
-    pub fn minimum_free_space(&self) -> ::core::option::Option<i32> {
-        self.0.reborrow().minimum_free_space
-    }
-    /// Shifts when movies count as available, in days.
-    ///
-    /// Field 12: `availability_delay`
-    #[must_use]
-    pub fn availability_delay(&self) -> ::core::option::Option<i32> {
-        self.0.reborrow().availability_delay
-    }
-    /// In minutes, 0 or at least 10; 0 disables RSS sync.
-    ///
-    /// Field 13: `rss_sync_interval`
-    #[must_use]
-    pub fn rss_sync_interval(&self) -> ::core::option::Option<i32> {
-        self.0.reborrow().rss_sync_interval
-    }
-    /// How often download clients are polled, in minutes.
-    ///
-    /// Field 14: `check_finished_interval`
-    #[must_use]
-    pub fn check_finished_interval(&self) -> ::core::option::Option<i32> {
-        self.0.reborrow().check_finished_interval
-    }
-    /// Absolute folder replaced and deleted files go to; empty deletes them.
-    ///
-    /// Field 15: `recycle_bin`
-    #[must_use]
-    pub fn recycle_bin(&self) -> ::core::option::Option<&'_ str> {
-        self.0.reborrow().recycle_bin
-    }
-    /// Days files stay in the recycle bin; 0 keeps them.
-    ///
-    /// Field 16: `recycle_bin_cleanup_days`
-    #[must_use]
-    pub fn recycle_bin_cleanup_days(&self) -> ::core::option::Option<i32> {
-        self.0.reborrow().recycle_bin_cleanup_days
-    }
-    /// Hard link instead of copying files whose download keeps seeding.
-    ///
-    /// Field 17: `copy_using_hardlinks`
-    #[must_use]
-    pub fn copy_using_hardlinks(&self) -> ::core::option::Option<bool> {
-        self.0.reborrow().copy_using_hardlinks
-    }
-    /// Field 18: `import_extra_files`
-    #[must_use]
-    pub fn import_extra_files(&self) -> ::core::option::Option<bool> {
-        self.0.reborrow().import_extra_files
-    }
-    /// Extensions of extra files imported with the media, such as "srt".
-    ///
-    /// Field 19: `extra_file_extensions`
-    #[must_use]
-    pub fn extra_file_extensions(&self) -> &::buffa::RepeatedView<'_, &'_ str> {
-        &self.0.reborrow().extra_file_extensions
-    }
-    /// Field 20: `delete_empty_folders`
-    #[must_use]
-    pub fn delete_empty_folders(&self) -> ::core::option::Option<bool> {
-        self.0.reborrow().delete_empty_folders
-    }
-    /// Name movie files by standard_movie_format; otherwise they keep their
-    /// names.
-    ///
-    /// Field 21: `rename_movies`
-    #[must_use]
-    pub fn rename_movies(&self) -> ::core::option::Option<bool> {
-        self.0.reborrow().rename_movies
-    }
-    /// Field 22: `replace_illegal_characters`
-    #[must_use]
-    pub fn replace_illegal_characters(&self) -> ::core::option::Option<bool> {
-        self.0.reborrow().replace_illegal_characters
-    }
-    /// Field 23: `colon_replacement`
-    #[must_use]
-    pub fn colon_replacement(
+    pub fn metadata(
         &self,
-    ) -> ::core::option::Option<::buffa::EnumValue<super::super::ColonReplacement>> {
-        self.0.reborrow().colon_replacement
+    ) -> &::buffa::MessageFieldView<
+        super::super::__buffa::view::MetadataSettingsView<'_>,
+    > {
+        &self.0.reborrow().metadata
     }
-    /// Templates, such as "{Movie Title} ({Release Year})".
+    /// How many days a signed-in device stays signed in unused.
     ///
-    /// Field 24: `movie_folder_format`
+    /// Field 3: `session_idle_days`
     #[must_use]
-    pub fn movie_folder_format(&self) -> ::core::option::Option<&'_ str> {
-        self.0.reborrow().movie_folder_format
+    pub fn session_idle_days(&self) -> ::core::option::Option<i32> {
+        self.0.reborrow().session_idle_days
     }
-    /// Field 25: `standard_movie_format`
-    #[must_use]
-    pub fn standard_movie_format(&self) -> ::core::option::Option<&'_ str> {
-        self.0.reborrow().standard_movie_format
-    }
-    /// Search again when a download grabbed from an interactive search
-    /// fails, when auto_redownload_failed is set.
+    /// ID of the plugin that delivers the PINs resetting forgotten passwords;
+    /// empty when users cannot reset them.
     ///
-    /// Field 26: `auto_redownload_failed_from_interactive_search`
+    /// Field 4: `password_reset_plugin`
     #[must_use]
-    pub fn auto_redownload_failed_from_interactive_search(
-        &self,
-    ) -> ::core::option::Option<bool> {
-        self.0.reborrow().auto_redownload_failed_from_interactive_search
-    }
-    /// Whether episode files are named by the episode formats.
-    ///
-    /// Field 40: `rename_episodes`
-    #[must_use]
-    pub fn rename_episodes(&self) -> ::core::option::Option<bool> {
-        self.0.reborrow().rename_episodes
-    }
-    /// Templates of episode files of standard, daily and anime series and of
-    /// the folders of series, seasons and specials, such as
-    /// "{Series Title} - S{season:00}E{episode:00}"; empty for the defaults.
-    ///
-    /// Field 41: `standard_episode_format`
-    #[must_use]
-    pub fn standard_episode_format(&self) -> ::core::option::Option<&'_ str> {
-        self.0.reborrow().standard_episode_format
-    }
-    /// Field 42: `daily_episode_format`
-    #[must_use]
-    pub fn daily_episode_format(&self) -> ::core::option::Option<&'_ str> {
-        self.0.reborrow().daily_episode_format
-    }
-    /// Field 43: `anime_episode_format`
-    #[must_use]
-    pub fn anime_episode_format(&self) -> ::core::option::Option<&'_ str> {
-        self.0.reborrow().anime_episode_format
-    }
-    /// Field 44: `series_folder_format`
-    #[must_use]
-    pub fn series_folder_format(&self) -> ::core::option::Option<&'_ str> {
-        self.0.reborrow().series_folder_format
-    }
-    /// Field 45: `season_folder_format`
-    #[must_use]
-    pub fn season_folder_format(&self) -> ::core::option::Option<&'_ str> {
-        self.0.reborrow().season_folder_format
-    }
-    /// Field 46: `specials_folder_format`
-    #[must_use]
-    pub fn specials_folder_format(&self) -> ::core::option::Option<&'_ str> {
-        self.0.reborrow().specials_folder_format
-    }
-    /// Unspecified for MULTI_EPISODE_STYLE_PREFIXED_RANGE.
-    ///
-    /// Field 47: `multi_episode_style`
-    #[must_use]
-    pub fn multi_episode_style(
-        &self,
-    ) -> ::core::option::Option<::buffa::EnumValue<super::super::MultiEpisodeStyle>> {
-        self.0.reborrow().multi_episode_style
-    }
-    /// Unmonitors the episodes of wanted series whose files go missing.
-    ///
-    /// Field 48: `auto_unmonitor_previously_downloaded_episodes`
-    #[must_use]
-    pub fn auto_unmonitor_previously_downloaded_episodes(
-        &self,
-    ) -> ::core::option::Option<bool> {
-        self.0.reborrow().auto_unmonitor_previously_downloaded_episodes
-    }
-    /// Unspecified for EPISODE_TITLE_REQUIRED_ALWAYS.
-    ///
-    /// Field 49: `episode_title_required`
-    #[must_use]
-    pub fn episode_title_required(
-        &self,
-    ) -> ::core::option::Option<::buffa::EnumValue<super::super::EpisodeTitleRequired>> {
-        self.0.reborrow().episode_title_required
-    }
-    /// The prefixes, separated by "|", of the folders download clients
-    /// unpack into or leave failed downloads in, whose files are not
-    /// imported; empty for "_UNPACK_|_FAILED_".
-    ///
-    /// Field 50: `download_client_working_folders`
-    #[must_use]
-    pub fn download_client_working_folders(&self) -> ::core::option::Option<&'_ str> {
-        self.0.reborrow().download_client_working_folders
+    pub fn password_reset_plugin(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().password_reset_plugin
     }
 }
-impl ::core::convert::From<::buffa::OwnedView<AcquisitionSettingsView<'static>>>
-for AcquisitionSettingsOwnedView {
-    fn from(inner: ::buffa::OwnedView<AcquisitionSettingsView<'static>>) -> Self {
-        AcquisitionSettingsOwnedView(inner)
+impl ::core::convert::From<::buffa::OwnedView<GeneralSettingsView<'static>>>
+for GeneralSettingsOwnedView {
+    fn from(inner: ::buffa::OwnedView<GeneralSettingsView<'static>>) -> Self {
+        GeneralSettingsOwnedView(inner)
     }
 }
-impl ::core::convert::From<AcquisitionSettingsOwnedView>
-for ::buffa::OwnedView<AcquisitionSettingsView<'static>> {
-    fn from(wrapper: AcquisitionSettingsOwnedView) -> Self {
+impl ::core::convert::From<GeneralSettingsOwnedView>
+for ::buffa::OwnedView<GeneralSettingsView<'static>> {
+    fn from(wrapper: GeneralSettingsOwnedView) -> Self {
         wrapper.0
     }
 }
-impl ::core::convert::AsRef<::buffa::OwnedView<AcquisitionSettingsView<'static>>>
-for AcquisitionSettingsOwnedView {
-    fn as_ref(&self) -> &::buffa::OwnedView<AcquisitionSettingsView<'static>> {
+impl ::core::convert::AsRef<::buffa::OwnedView<GeneralSettingsView<'static>>>
+for GeneralSettingsOwnedView {
+    fn as_ref(&self) -> &::buffa::OwnedView<GeneralSettingsView<'static>> {
         &self.0
     }
 }
-impl ::buffa::HasMessageView for super::super::AcquisitionSettings {
-    type View<'a> = AcquisitionSettingsView<'a>;
-    type ViewHandle = AcquisitionSettingsOwnedView;
+impl ::buffa::HasMessageView for super::super::GeneralSettings {
+    type View<'a> = GeneralSettingsView<'a>;
+    type ViewHandle = GeneralSettingsOwnedView;
 }
 #[derive(Clone, Debug, Default)]
-pub struct GetServerSettingsRequestView<'a> {
+pub struct GetGeneralSettingsRequestView<'a> {
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
-impl<'a> ::buffa::MessageView<'a> for GetServerSettingsRequestView<'a> {
-    type Owned = super::super::GetServerSettingsRequest;
+impl<'a> ::buffa::MessageView<'a> for GetGeneralSettingsRequestView<'a> {
+    type Owned = super::super::GetGeneralSettingsRequest;
     fn decode_view(buf: &'a [u8]) -> ::core::result::Result<Self, ::buffa::DecodeError> {
         let __limit = ::core::cell::Cell::new(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT);
         let __elem = ::core::cell::Cell::new(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT);
@@ -7288,7 +4193,7 @@ impl<'a> ::buffa::MessageView<'a> for GetServerSettingsRequestView<'a> {
     fn to_owned_message(
         &self,
     ) -> ::core::result::Result<
-        super::super::GetServerSettingsRequest,
+        super::super::GetGeneralSettingsRequest,
         ::buffa::DecodeError,
     > {
         self.to_owned_from_source(None)
@@ -7298,19 +4203,19 @@ impl<'a> ::buffa::MessageView<'a> for GetServerSettingsRequestView<'a> {
         &self,
         __buffa_src: ::core::option::Option<&::buffa::bytes::Bytes>,
     ) -> ::core::result::Result<
-        super::super::GetServerSettingsRequest,
+        super::super::GetGeneralSettingsRequest,
         ::buffa::DecodeError,
     > {
         #[allow(unused_imports)]
         use ::buffa::alloc::string::ToString as _;
         let _ = __buffa_src;
-        ::core::result::Result::Ok(super::super::GetServerSettingsRequest {
+        ::core::result::Result::Ok(super::super::GetGeneralSettingsRequest {
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
     }
 }
-impl<'a> ::buffa::ViewEncode<'a> for GetServerSettingsRequestView<'a> {
+impl<'a> ::buffa::ViewEncode<'a> for GetGeneralSettingsRequestView<'a> {
     #[allow(clippy::needless_borrow, clippy::let_and_return)]
     fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
         #[allow(unused_imports)]
@@ -7330,24 +4235,24 @@ impl<'a> ::buffa::ViewEncode<'a> for GetServerSettingsRequestView<'a> {
         self.__buffa_unknown_fields.write_to(buf);
     }
 }
-impl<'a> ::buffa::MessageName for GetServerSettingsRequestView<'a> {
+impl<'a> ::buffa::MessageName for GetGeneralSettingsRequestView<'a> {
     const PACKAGE: &'static str = "mavio.system.v1";
-    const NAME: &'static str = "GetServerSettingsRequest";
-    const FULL_NAME: &'static str = "mavio.system.v1.GetServerSettingsRequest";
-    const TYPE_URL: &'static str = "type.googleapis.com/mavio.system.v1.GetServerSettingsRequest";
+    const NAME: &'static str = "GetGeneralSettingsRequest";
+    const FULL_NAME: &'static str = "mavio.system.v1.GetGeneralSettingsRequest";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.system.v1.GetGeneralSettingsRequest";
 }
-::buffa::impl_default_view_instance!(GetServerSettingsRequestView);
-::buffa::impl_view_reborrow!(GetServerSettingsRequestView);
-/** Self-contained, `'static` owned view of a `GetServerSettingsRequest` message.
+::buffa::impl_default_view_instance!(GetGeneralSettingsRequestView);
+::buffa::impl_view_reborrow!(GetGeneralSettingsRequestView);
+/** Self-contained, `'static` owned view of a `GetGeneralSettingsRequest` message.
 
- Wraps [`::buffa::OwnedView`]`<`[`GetServerSettingsRequestView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
+ Wraps [`::buffa::OwnedView`]`<`[`GetGeneralSettingsRequestView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
 
- Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`GetServerSettingsRequestView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
+ Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`GetGeneralSettingsRequestView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
 #[derive(Clone, Debug)]
-pub struct GetServerSettingsRequestOwnedView(
-    ::buffa::OwnedView<GetServerSettingsRequestView<'static>>,
+pub struct GetGeneralSettingsRequestOwnedView(
+    ::buffa::OwnedView<GetGeneralSettingsRequestView<'static>>,
 );
-impl GetServerSettingsRequestOwnedView {
+impl GetGeneralSettingsRequestOwnedView {
     /// Decode an owned view from a [`::buffa::bytes::Bytes`] buffer.
     ///
     /// The view borrows directly from the buffer's data; the buffer is
@@ -7361,7 +4266,7 @@ impl GetServerSettingsRequestOwnedView {
         bytes: ::buffa::bytes::Bytes,
     ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
         ::core::result::Result::Ok(
-            GetServerSettingsRequestOwnedView(::buffa::OwnedView::decode(bytes)?),
+            GetGeneralSettingsRequestOwnedView(::buffa::OwnedView::decode(bytes)?),
         )
     }
     /// Decode with custom [`::buffa::DecodeOptions`] (recursion limit,
@@ -7376,7 +4281,7 @@ impl GetServerSettingsRequestOwnedView {
         opts: &::buffa::DecodeOptions,
     ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
         ::core::result::Result::Ok(
-            GetServerSettingsRequestOwnedView(
+            GetGeneralSettingsRequestOwnedView(
                 ::buffa::OwnedView::decode_with_options(bytes, opts)?,
             ),
         )
@@ -7390,15 +4295,15 @@ impl GetServerSettingsRequestOwnedView {
     /// another [`::buffa::DecodeError`] if the re-encoded bytes are
     /// somehow invalid (should not happen for well-formed messages).
     pub fn from_owned(
-        msg: &super::super::GetServerSettingsRequest,
+        msg: &super::super::GetGeneralSettingsRequest,
     ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
         ::core::result::Result::Ok(
-            GetServerSettingsRequestOwnedView(::buffa::OwnedView::from_owned(msg)?),
+            GetGeneralSettingsRequestOwnedView(::buffa::OwnedView::from_owned(msg)?),
         )
     }
-    /// Borrow the full [`GetServerSettingsRequestView`] with its lifetime tied to `&self`.
+    /// Borrow the full [`GetGeneralSettingsRequestView`] with its lifetime tied to `&self`.
     #[must_use]
-    pub fn view(&self) -> &GetServerSettingsRequestView<'_> {
+    pub fn view(&self) -> &GetGeneralSettingsRequestView<'_> {
         self.0.reborrow()
     }
     /// Convert to the owned message type.
@@ -7409,7 +4314,7 @@ impl GetServerSettingsRequestOwnedView {
     /// whose contract also governs handles converted from a raw
     /// [`::buffa::OwnedView`].
     #[must_use]
-    pub fn to_owned_message(&self) -> super::super::GetServerSettingsRequest {
+    pub fn to_owned_message(&self) -> super::super::GetGeneralSettingsRequest {
         self.0.to_owned_message()
     }
     /// The underlying bytes buffer.
@@ -7423,46 +4328,38 @@ impl GetServerSettingsRequestOwnedView {
         self.0.into_bytes()
     }
 }
-impl ::core::convert::From<::buffa::OwnedView<GetServerSettingsRequestView<'static>>>
-for GetServerSettingsRequestOwnedView {
-    fn from(inner: ::buffa::OwnedView<GetServerSettingsRequestView<'static>>) -> Self {
-        GetServerSettingsRequestOwnedView(inner)
+impl ::core::convert::From<::buffa::OwnedView<GetGeneralSettingsRequestView<'static>>>
+for GetGeneralSettingsRequestOwnedView {
+    fn from(inner: ::buffa::OwnedView<GetGeneralSettingsRequestView<'static>>) -> Self {
+        GetGeneralSettingsRequestOwnedView(inner)
     }
 }
-impl ::core::convert::From<GetServerSettingsRequestOwnedView>
-for ::buffa::OwnedView<GetServerSettingsRequestView<'static>> {
-    fn from(wrapper: GetServerSettingsRequestOwnedView) -> Self {
+impl ::core::convert::From<GetGeneralSettingsRequestOwnedView>
+for ::buffa::OwnedView<GetGeneralSettingsRequestView<'static>> {
+    fn from(wrapper: GetGeneralSettingsRequestOwnedView) -> Self {
         wrapper.0
     }
 }
-impl ::core::convert::AsRef<::buffa::OwnedView<GetServerSettingsRequestView<'static>>>
-for GetServerSettingsRequestOwnedView {
-    fn as_ref(&self) -> &::buffa::OwnedView<GetServerSettingsRequestView<'static>> {
+impl ::core::convert::AsRef<::buffa::OwnedView<GetGeneralSettingsRequestView<'static>>>
+for GetGeneralSettingsRequestOwnedView {
+    fn as_ref(&self) -> &::buffa::OwnedView<GetGeneralSettingsRequestView<'static>> {
         &self.0
     }
 }
-impl ::buffa::HasMessageView for super::super::GetServerSettingsRequest {
-    type View<'a> = GetServerSettingsRequestView<'a>;
-    type ViewHandle = GetServerSettingsRequestOwnedView;
+impl ::buffa::HasMessageView for super::super::GetGeneralSettingsRequest {
+    type View<'a> = GetGeneralSettingsRequestView<'a>;
+    type ViewHandle = GetGeneralSettingsRequestOwnedView;
 }
 #[derive(Clone, Debug, Default)]
-pub struct GetServerSettingsResponseView<'a> {
+pub struct GetGeneralSettingsResponseView<'a> {
     /// Field 1: `settings`
     pub settings: ::buffa::MessageFieldView<
-        super::super::__buffa::view::ServerSettingsView<'a>,
-    >,
-    /// The accelerations this server's ffmpeg supports, AUTO and NONE
-    /// included.
-    ///
-    /// Field 2: `available_hardware_accelerations`
-    pub available_hardware_accelerations: ::buffa::RepeatedView<
-        'a,
-        ::buffa::EnumValue<super::super::HardwareAcceleration>,
+        super::super::__buffa::view::GeneralSettingsView<'a>,
     >,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
-impl<'a> ::buffa::MessageView<'a> for GetServerSettingsResponseView<'a> {
-    type Owned = super::super::GetServerSettingsResponse;
+impl<'a> ::buffa::MessageView<'a> for GetGeneralSettingsResponseView<'a> {
+    type Owned = super::super::GetGeneralSettingsResponse;
     fn decode_view(buf: &'a [u8]) -> ::core::result::Result<Self, ::buffa::DecodeError> {
         let __limit = ::core::cell::Cell::new(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT);
         let __elem = ::core::cell::Cell::new(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT);
@@ -7504,42 +4401,12 @@ impl<'a> ::buffa::MessageView<'a> for GetServerSettingsResponseView<'a> {
                     }
                     None => {
                         view.settings = ::buffa::MessageFieldView::set(
-                            <super::super::__buffa::view::ServerSettingsView as ::buffa::MessageView>::decode_view_ctx(
+                            <super::super::__buffa::view::GeneralSettingsView as ::buffa::MessageView>::decode_view_ctx(
                                 sub,
                                 __sub_ctx,
                             )?,
                         );
                     }
-                }
-            }
-            2u32 => {
-                if tag.wire_type() == ::buffa::encoding::WireType::LengthDelimited {
-                    let payload = ::buffa::types::borrow_bytes(&mut cur)?;
-                    view.available_hardware_accelerations
-                        .reserve(::buffa::encoding::count_varints(payload));
-                    let mut pcur: &[u8] = payload;
-                    while !pcur.is_empty() {
-                        view.available_hardware_accelerations
-                            .push(
-                                ::buffa::EnumValue::from(
-                                    ::buffa::types::decode_int32_packed(&mut pcur)?,
-                                ),
-                            );
-                    }
-                } else if tag.wire_type() == ::buffa::encoding::WireType::Varint {
-                    view.available_hardware_accelerations
-                        .push(
-                            ::buffa::EnumValue::from(
-                                ::buffa::types::decode_int32(&mut cur)?,
-                            ),
-                        );
-                } else {
-                    return Err(
-                        ::buffa::encoding::wire_type_mismatch(
-                            tag,
-                            ::buffa::encoding::WireType::LengthDelimited,
-                        ),
-                    );
                 }
             }
             _ => {
@@ -7553,7 +4420,7 @@ impl<'a> ::buffa::MessageView<'a> for GetServerSettingsResponseView<'a> {
     fn to_owned_message(
         &self,
     ) -> ::core::result::Result<
-        super::super::GetServerSettingsResponse,
+        super::super::GetGeneralSettingsResponse,
         ::buffa::DecodeError,
     > {
         self.to_owned_from_source(None)
@@ -7563,31 +4430,28 @@ impl<'a> ::buffa::MessageView<'a> for GetServerSettingsResponseView<'a> {
         &self,
         __buffa_src: ::core::option::Option<&::buffa::bytes::Bytes>,
     ) -> ::core::result::Result<
-        super::super::GetServerSettingsResponse,
+        super::super::GetGeneralSettingsResponse,
         ::buffa::DecodeError,
     > {
         #[allow(unused_imports)]
         use ::buffa::alloc::string::ToString as _;
         let _ = __buffa_src;
-        ::core::result::Result::Ok(super::super::GetServerSettingsResponse {
+        ::core::result::Result::Ok(super::super::GetGeneralSettingsResponse {
             settings: match self.settings.as_option() {
                 Some(v) => {
                     ::buffa::MessageField::<
-                        super::super::ServerSettings,
-                        ::buffa::Inline<super::super::ServerSettings>,
+                        super::super::GeneralSettings,
+                        ::buffa::Inline<super::super::GeneralSettings>,
                     >::some(v.to_owned_from_source(__buffa_src)?)
                 }
                 None => ::buffa::MessageField::none(),
             },
-            available_hardware_accelerations: self
-                .available_hardware_accelerations
-                .to_vec(),
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
     }
 }
-impl<'a> ::buffa::ViewEncode<'a> for GetServerSettingsResponseView<'a> {
+impl<'a> ::buffa::ViewEncode<'a> for GetGeneralSettingsResponseView<'a> {
     #[allow(clippy::needless_borrow, clippy::let_and_return)]
     fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
         #[allow(unused_imports)]
@@ -7600,14 +4464,6 @@ impl<'a> ::buffa::ViewEncode<'a> for GetServerSettingsResponseView<'a> {
             size
                 += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
                     + inner_size as u64;
-        }
-        if !self.available_hardware_accelerations.is_empty() {
-            let payload: u64 = self
-                .available_hardware_accelerations
-                .iter()
-                .map(|v| ::buffa::types::int32_encoded_len(v.to_i32()) as u64)
-                .sum::<u64>();
-            size += 1u64 + ::buffa::encoding::varint_len(payload) as u64 + payload;
         }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
@@ -7628,38 +4484,27 @@ impl<'a> ::buffa::ViewEncode<'a> for GetServerSettingsResponseView<'a> {
             );
             self.settings.write_to(__cache, buf);
         }
-        if !self.available_hardware_accelerations.is_empty() {
-            let payload: u64 = self
-                .available_hardware_accelerations
-                .iter()
-                .map(|v| ::buffa::types::int32_encoded_len(v.to_i32()) as u64)
-                .sum::<u64>();
-            ::buffa::types::put_len_delimited_header(2u32, payload, buf);
-            for v in &self.available_hardware_accelerations {
-                ::buffa::types::encode_int32(v.to_i32(), buf);
-            }
-        }
         self.__buffa_unknown_fields.write_to(buf);
     }
 }
-impl<'a> ::buffa::MessageName for GetServerSettingsResponseView<'a> {
+impl<'a> ::buffa::MessageName for GetGeneralSettingsResponseView<'a> {
     const PACKAGE: &'static str = "mavio.system.v1";
-    const NAME: &'static str = "GetServerSettingsResponse";
-    const FULL_NAME: &'static str = "mavio.system.v1.GetServerSettingsResponse";
-    const TYPE_URL: &'static str = "type.googleapis.com/mavio.system.v1.GetServerSettingsResponse";
+    const NAME: &'static str = "GetGeneralSettingsResponse";
+    const FULL_NAME: &'static str = "mavio.system.v1.GetGeneralSettingsResponse";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.system.v1.GetGeneralSettingsResponse";
 }
-::buffa::impl_default_view_instance!(GetServerSettingsResponseView);
-::buffa::impl_view_reborrow!(GetServerSettingsResponseView);
-/** Self-contained, `'static` owned view of a `GetServerSettingsResponse` message.
+::buffa::impl_default_view_instance!(GetGeneralSettingsResponseView);
+::buffa::impl_view_reborrow!(GetGeneralSettingsResponseView);
+/** Self-contained, `'static` owned view of a `GetGeneralSettingsResponse` message.
 
- Wraps [`::buffa::OwnedView`]`<`[`GetServerSettingsResponseView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
+ Wraps [`::buffa::OwnedView`]`<`[`GetGeneralSettingsResponseView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
 
- Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`GetServerSettingsResponseView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
+ Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`GetGeneralSettingsResponseView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
 #[derive(Clone, Debug)]
-pub struct GetServerSettingsResponseOwnedView(
-    ::buffa::OwnedView<GetServerSettingsResponseView<'static>>,
+pub struct GetGeneralSettingsResponseOwnedView(
+    ::buffa::OwnedView<GetGeneralSettingsResponseView<'static>>,
 );
-impl GetServerSettingsResponseOwnedView {
+impl GetGeneralSettingsResponseOwnedView {
     /// Decode an owned view from a [`::buffa::bytes::Bytes`] buffer.
     ///
     /// The view borrows directly from the buffer's data; the buffer is
@@ -7673,7 +4518,7 @@ impl GetServerSettingsResponseOwnedView {
         bytes: ::buffa::bytes::Bytes,
     ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
         ::core::result::Result::Ok(
-            GetServerSettingsResponseOwnedView(::buffa::OwnedView::decode(bytes)?),
+            GetGeneralSettingsResponseOwnedView(::buffa::OwnedView::decode(bytes)?),
         )
     }
     /// Decode with custom [`::buffa::DecodeOptions`] (recursion limit,
@@ -7688,7 +4533,7 @@ impl GetServerSettingsResponseOwnedView {
         opts: &::buffa::DecodeOptions,
     ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
         ::core::result::Result::Ok(
-            GetServerSettingsResponseOwnedView(
+            GetGeneralSettingsResponseOwnedView(
                 ::buffa::OwnedView::decode_with_options(bytes, opts)?,
             ),
         )
@@ -7702,15 +4547,15 @@ impl GetServerSettingsResponseOwnedView {
     /// another [`::buffa::DecodeError`] if the re-encoded bytes are
     /// somehow invalid (should not happen for well-formed messages).
     pub fn from_owned(
-        msg: &super::super::GetServerSettingsResponse,
+        msg: &super::super::GetGeneralSettingsResponse,
     ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
         ::core::result::Result::Ok(
-            GetServerSettingsResponseOwnedView(::buffa::OwnedView::from_owned(msg)?),
+            GetGeneralSettingsResponseOwnedView(::buffa::OwnedView::from_owned(msg)?),
         )
     }
-    /// Borrow the full [`GetServerSettingsResponseView`] with its lifetime tied to `&self`.
+    /// Borrow the full [`GetGeneralSettingsResponseView`] with its lifetime tied to `&self`.
     #[must_use]
-    pub fn view(&self) -> &GetServerSettingsResponseView<'_> {
+    pub fn view(&self) -> &GetGeneralSettingsResponseView<'_> {
         self.0.reborrow()
     }
     /// Convert to the owned message type.
@@ -7721,7 +4566,7 @@ impl GetServerSettingsResponseOwnedView {
     /// whose contract also governs handles converted from a raw
     /// [`::buffa::OwnedView`].
     #[must_use]
-    pub fn to_owned_message(&self) -> super::super::GetServerSettingsResponse {
+    pub fn to_owned_message(&self) -> super::super::GetGeneralSettingsResponse {
         self.0.to_owned_message()
     }
     /// The underlying bytes buffer.
@@ -7739,56 +4584,43 @@ impl GetServerSettingsResponseOwnedView {
     pub fn settings(
         &self,
     ) -> &::buffa::MessageFieldView<
-        super::super::__buffa::view::ServerSettingsView<'_>,
+        super::super::__buffa::view::GeneralSettingsView<'_>,
     > {
         &self.0.reborrow().settings
     }
-    /// The accelerations this server's ffmpeg supports, AUTO and NONE
-    /// included.
-    ///
-    /// Field 2: `available_hardware_accelerations`
-    #[must_use]
-    pub fn available_hardware_accelerations(
-        &self,
-    ) -> &::buffa::RepeatedView<
-        '_,
-        ::buffa::EnumValue<super::super::HardwareAcceleration>,
-    > {
-        &self.0.reborrow().available_hardware_accelerations
+}
+impl ::core::convert::From<::buffa::OwnedView<GetGeneralSettingsResponseView<'static>>>
+for GetGeneralSettingsResponseOwnedView {
+    fn from(inner: ::buffa::OwnedView<GetGeneralSettingsResponseView<'static>>) -> Self {
+        GetGeneralSettingsResponseOwnedView(inner)
     }
 }
-impl ::core::convert::From<::buffa::OwnedView<GetServerSettingsResponseView<'static>>>
-for GetServerSettingsResponseOwnedView {
-    fn from(inner: ::buffa::OwnedView<GetServerSettingsResponseView<'static>>) -> Self {
-        GetServerSettingsResponseOwnedView(inner)
-    }
-}
-impl ::core::convert::From<GetServerSettingsResponseOwnedView>
-for ::buffa::OwnedView<GetServerSettingsResponseView<'static>> {
-    fn from(wrapper: GetServerSettingsResponseOwnedView) -> Self {
+impl ::core::convert::From<GetGeneralSettingsResponseOwnedView>
+for ::buffa::OwnedView<GetGeneralSettingsResponseView<'static>> {
+    fn from(wrapper: GetGeneralSettingsResponseOwnedView) -> Self {
         wrapper.0
     }
 }
-impl ::core::convert::AsRef<::buffa::OwnedView<GetServerSettingsResponseView<'static>>>
-for GetServerSettingsResponseOwnedView {
-    fn as_ref(&self) -> &::buffa::OwnedView<GetServerSettingsResponseView<'static>> {
+impl ::core::convert::AsRef<::buffa::OwnedView<GetGeneralSettingsResponseView<'static>>>
+for GetGeneralSettingsResponseOwnedView {
+    fn as_ref(&self) -> &::buffa::OwnedView<GetGeneralSettingsResponseView<'static>> {
         &self.0
     }
 }
-impl ::buffa::HasMessageView for super::super::GetServerSettingsResponse {
-    type View<'a> = GetServerSettingsResponseView<'a>;
-    type ViewHandle = GetServerSettingsResponseOwnedView;
+impl ::buffa::HasMessageView for super::super::GetGeneralSettingsResponse {
+    type View<'a> = GetGeneralSettingsResponseView<'a>;
+    type ViewHandle = GetGeneralSettingsResponseOwnedView;
 }
 #[derive(Clone, Debug, Default)]
-pub struct UpdateServerSettingsRequestView<'a> {
+pub struct UpdateGeneralSettingsRequestView<'a> {
     /// Field 1: `settings`
     pub settings: ::buffa::MessageFieldView<
-        super::super::__buffa::view::ServerSettingsView<'a>,
+        super::super::__buffa::view::GeneralSettingsView<'a>,
     >,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
-impl<'a> ::buffa::MessageView<'a> for UpdateServerSettingsRequestView<'a> {
-    type Owned = super::super::UpdateServerSettingsRequest;
+impl<'a> ::buffa::MessageView<'a> for UpdateGeneralSettingsRequestView<'a> {
+    type Owned = super::super::UpdateGeneralSettingsRequest;
     fn decode_view(buf: &'a [u8]) -> ::core::result::Result<Self, ::buffa::DecodeError> {
         let __limit = ::core::cell::Cell::new(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT);
         let __elem = ::core::cell::Cell::new(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT);
@@ -7830,7 +4662,7 @@ impl<'a> ::buffa::MessageView<'a> for UpdateServerSettingsRequestView<'a> {
                     }
                     None => {
                         view.settings = ::buffa::MessageFieldView::set(
-                            <super::super::__buffa::view::ServerSettingsView as ::buffa::MessageView>::decode_view_ctx(
+                            <super::super::__buffa::view::GeneralSettingsView as ::buffa::MessageView>::decode_view_ctx(
                                 sub,
                                 __sub_ctx,
                             )?,
@@ -7849,7 +4681,7 @@ impl<'a> ::buffa::MessageView<'a> for UpdateServerSettingsRequestView<'a> {
     fn to_owned_message(
         &self,
     ) -> ::core::result::Result<
-        super::super::UpdateServerSettingsRequest,
+        super::super::UpdateGeneralSettingsRequest,
         ::buffa::DecodeError,
     > {
         self.to_owned_from_source(None)
@@ -7859,18 +4691,18 @@ impl<'a> ::buffa::MessageView<'a> for UpdateServerSettingsRequestView<'a> {
         &self,
         __buffa_src: ::core::option::Option<&::buffa::bytes::Bytes>,
     ) -> ::core::result::Result<
-        super::super::UpdateServerSettingsRequest,
+        super::super::UpdateGeneralSettingsRequest,
         ::buffa::DecodeError,
     > {
         #[allow(unused_imports)]
         use ::buffa::alloc::string::ToString as _;
         let _ = __buffa_src;
-        ::core::result::Result::Ok(super::super::UpdateServerSettingsRequest {
+        ::core::result::Result::Ok(super::super::UpdateGeneralSettingsRequest {
             settings: match self.settings.as_option() {
                 Some(v) => {
                     ::buffa::MessageField::<
-                        super::super::ServerSettings,
-                        ::buffa::Inline<super::super::ServerSettings>,
+                        super::super::GeneralSettings,
+                        ::buffa::Inline<super::super::GeneralSettings>,
                     >::some(v.to_owned_from_source(__buffa_src)?)
                 }
                 None => ::buffa::MessageField::none(),
@@ -7880,7 +4712,7 @@ impl<'a> ::buffa::MessageView<'a> for UpdateServerSettingsRequestView<'a> {
         })
     }
 }
-impl<'a> ::buffa::ViewEncode<'a> for UpdateServerSettingsRequestView<'a> {
+impl<'a> ::buffa::ViewEncode<'a> for UpdateGeneralSettingsRequestView<'a> {
     #[allow(clippy::needless_borrow, clippy::let_and_return)]
     fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
         #[allow(unused_imports)]
@@ -7916,24 +4748,24 @@ impl<'a> ::buffa::ViewEncode<'a> for UpdateServerSettingsRequestView<'a> {
         self.__buffa_unknown_fields.write_to(buf);
     }
 }
-impl<'a> ::buffa::MessageName for UpdateServerSettingsRequestView<'a> {
+impl<'a> ::buffa::MessageName for UpdateGeneralSettingsRequestView<'a> {
     const PACKAGE: &'static str = "mavio.system.v1";
-    const NAME: &'static str = "UpdateServerSettingsRequest";
-    const FULL_NAME: &'static str = "mavio.system.v1.UpdateServerSettingsRequest";
-    const TYPE_URL: &'static str = "type.googleapis.com/mavio.system.v1.UpdateServerSettingsRequest";
+    const NAME: &'static str = "UpdateGeneralSettingsRequest";
+    const FULL_NAME: &'static str = "mavio.system.v1.UpdateGeneralSettingsRequest";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.system.v1.UpdateGeneralSettingsRequest";
 }
-::buffa::impl_default_view_instance!(UpdateServerSettingsRequestView);
-::buffa::impl_view_reborrow!(UpdateServerSettingsRequestView);
-/** Self-contained, `'static` owned view of a `UpdateServerSettingsRequest` message.
+::buffa::impl_default_view_instance!(UpdateGeneralSettingsRequestView);
+::buffa::impl_view_reborrow!(UpdateGeneralSettingsRequestView);
+/** Self-contained, `'static` owned view of a `UpdateGeneralSettingsRequest` message.
 
- Wraps [`::buffa::OwnedView`]`<`[`UpdateServerSettingsRequestView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
+ Wraps [`::buffa::OwnedView`]`<`[`UpdateGeneralSettingsRequestView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
 
- Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`UpdateServerSettingsRequestView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
+ Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`UpdateGeneralSettingsRequestView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
 #[derive(Clone, Debug)]
-pub struct UpdateServerSettingsRequestOwnedView(
-    ::buffa::OwnedView<UpdateServerSettingsRequestView<'static>>,
+pub struct UpdateGeneralSettingsRequestOwnedView(
+    ::buffa::OwnedView<UpdateGeneralSettingsRequestView<'static>>,
 );
-impl UpdateServerSettingsRequestOwnedView {
+impl UpdateGeneralSettingsRequestOwnedView {
     /// Decode an owned view from a [`::buffa::bytes::Bytes`] buffer.
     ///
     /// The view borrows directly from the buffer's data; the buffer is
@@ -7947,7 +4779,7 @@ impl UpdateServerSettingsRequestOwnedView {
         bytes: ::buffa::bytes::Bytes,
     ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
         ::core::result::Result::Ok(
-            UpdateServerSettingsRequestOwnedView(::buffa::OwnedView::decode(bytes)?),
+            UpdateGeneralSettingsRequestOwnedView(::buffa::OwnedView::decode(bytes)?),
         )
     }
     /// Decode with custom [`::buffa::DecodeOptions`] (recursion limit,
@@ -7962,7 +4794,7 @@ impl UpdateServerSettingsRequestOwnedView {
         opts: &::buffa::DecodeOptions,
     ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
         ::core::result::Result::Ok(
-            UpdateServerSettingsRequestOwnedView(
+            UpdateGeneralSettingsRequestOwnedView(
                 ::buffa::OwnedView::decode_with_options(bytes, opts)?,
             ),
         )
@@ -7976,15 +4808,15 @@ impl UpdateServerSettingsRequestOwnedView {
     /// another [`::buffa::DecodeError`] if the re-encoded bytes are
     /// somehow invalid (should not happen for well-formed messages).
     pub fn from_owned(
-        msg: &super::super::UpdateServerSettingsRequest,
+        msg: &super::super::UpdateGeneralSettingsRequest,
     ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
         ::core::result::Result::Ok(
-            UpdateServerSettingsRequestOwnedView(::buffa::OwnedView::from_owned(msg)?),
+            UpdateGeneralSettingsRequestOwnedView(::buffa::OwnedView::from_owned(msg)?),
         )
     }
-    /// Borrow the full [`UpdateServerSettingsRequestView`] with its lifetime tied to `&self`.
+    /// Borrow the full [`UpdateGeneralSettingsRequestView`] with its lifetime tied to `&self`.
     #[must_use]
-    pub fn view(&self) -> &UpdateServerSettingsRequestView<'_> {
+    pub fn view(&self) -> &UpdateGeneralSettingsRequestView<'_> {
         self.0.reborrow()
     }
     /// Convert to the owned message type.
@@ -7995,7 +4827,7 @@ impl UpdateServerSettingsRequestOwnedView {
     /// whose contract also governs handles converted from a raw
     /// [`::buffa::OwnedView`].
     #[must_use]
-    pub fn to_owned_message(&self) -> super::super::UpdateServerSettingsRequest {
+    pub fn to_owned_message(&self) -> super::super::UpdateGeneralSettingsRequest {
         self.0.to_owned_message()
     }
     /// The underlying bytes buffer.
@@ -8013,298 +4845,300 @@ impl UpdateServerSettingsRequestOwnedView {
     pub fn settings(
         &self,
     ) -> &::buffa::MessageFieldView<
-        super::super::__buffa::view::ServerSettingsView<'_>,
+        super::super::__buffa::view::GeneralSettingsView<'_>,
     > {
         &self.0.reborrow().settings
     }
 }
-impl ::core::convert::From<::buffa::OwnedView<UpdateServerSettingsRequestView<'static>>>
-for UpdateServerSettingsRequestOwnedView {
+impl ::core::convert::From<::buffa::OwnedView<UpdateGeneralSettingsRequestView<'static>>>
+for UpdateGeneralSettingsRequestOwnedView {
     fn from(
-        inner: ::buffa::OwnedView<UpdateServerSettingsRequestView<'static>>,
+        inner: ::buffa::OwnedView<UpdateGeneralSettingsRequestView<'static>>,
     ) -> Self {
-        UpdateServerSettingsRequestOwnedView(inner)
+        UpdateGeneralSettingsRequestOwnedView(inner)
     }
 }
-impl ::core::convert::From<UpdateServerSettingsRequestOwnedView>
-for ::buffa::OwnedView<UpdateServerSettingsRequestView<'static>> {
-    fn from(wrapper: UpdateServerSettingsRequestOwnedView) -> Self {
-        wrapper.0
-    }
-}
-impl ::core::convert::AsRef<::buffa::OwnedView<UpdateServerSettingsRequestView<'static>>>
-for UpdateServerSettingsRequestOwnedView {
-    fn as_ref(&self) -> &::buffa::OwnedView<UpdateServerSettingsRequestView<'static>> {
-        &self.0
-    }
-}
-impl ::buffa::HasMessageView for super::super::UpdateServerSettingsRequest {
-    type View<'a> = UpdateServerSettingsRequestView<'a>;
-    type ViewHandle = UpdateServerSettingsRequestOwnedView;
-}
-#[derive(Clone, Debug, Default)]
-pub struct UpdateServerSettingsResponseView<'a> {
-    /// Field 1: `settings`
-    pub settings: ::buffa::MessageFieldView<
-        super::super::__buffa::view::ServerSettingsView<'a>,
-    >,
-    pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
-}
-impl<'a> ::buffa::MessageView<'a> for UpdateServerSettingsResponseView<'a> {
-    type Owned = super::super::UpdateServerSettingsResponse;
-    fn decode_view(buf: &'a [u8]) -> ::core::result::Result<Self, ::buffa::DecodeError> {
-        let __limit = ::core::cell::Cell::new(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT);
-        let __elem = ::core::cell::Cell::new(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT);
-        <Self as ::buffa::MessageView>::decode_view_ctx(
-            buf,
-            ::buffa::DecodeContext::new(::buffa::RECURSION_LIMIT, &__limit)
-                .with_element_memory(&__elem),
-        )
-    }
-    fn decode_view_with_ctx(
-        buf: &'a [u8],
-        ctx: ::buffa::DecodeContext<'_>,
-    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
-        <Self as ::buffa::MessageView>::decode_view_ctx(buf, ctx)
-    }
-    #[inline]
-    fn merge_view_field(
-        &mut self,
-        tag: ::buffa::encoding::Tag,
-        cur: &'a [u8],
-        before_tag: &'a [u8],
-        ctx: ::buffa::DecodeContext<'_>,
-    ) -> ::core::result::Result<&'a [u8], ::buffa::DecodeError> {
-        let _ = ctx;
-        #[allow(unused_variables)]
-        let view = self;
-        let mut cur = cur;
-        match tag.field_number() {
-            1u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                let __sub_ctx = ctx.descend()?;
-                let sub = ::buffa::types::borrow_bytes(&mut cur)?;
-                match view.settings.as_mut() {
-                    Some(existing) => {
-                        ::buffa::MessageView::merge_into_view(existing, sub, __sub_ctx)?
-                    }
-                    None => {
-                        view.settings = ::buffa::MessageFieldView::set(
-                            <super::super::__buffa::view::ServerSettingsView as ::buffa::MessageView>::decode_view_ctx(
-                                sub,
-                                __sub_ctx,
-                            )?,
-                        );
-                    }
-                }
-            }
-            _ => {
-                ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
-                let span_len = before_tag.len() - cur.len();
-                view.__buffa_unknown_fields.push_record(before_tag, span_len, ctx)?;
-            }
-        }
-        ::core::result::Result::Ok(cur)
-    }
-    fn to_owned_message(
-        &self,
-    ) -> ::core::result::Result<
-        super::super::UpdateServerSettingsResponse,
-        ::buffa::DecodeError,
-    > {
-        self.to_owned_from_source(None)
-    }
-    #[allow(clippy::useless_conversion, clippy::needless_update)]
-    fn to_owned_from_source(
-        &self,
-        __buffa_src: ::core::option::Option<&::buffa::bytes::Bytes>,
-    ) -> ::core::result::Result<
-        super::super::UpdateServerSettingsResponse,
-        ::buffa::DecodeError,
-    > {
-        #[allow(unused_imports)]
-        use ::buffa::alloc::string::ToString as _;
-        let _ = __buffa_src;
-        ::core::result::Result::Ok(super::super::UpdateServerSettingsResponse {
-            settings: match self.settings.as_option() {
-                Some(v) => {
-                    ::buffa::MessageField::<
-                        super::super::ServerSettings,
-                        ::buffa::Inline<super::super::ServerSettings>,
-                    >::some(v.to_owned_from_source(__buffa_src)?)
-                }
-                None => ::buffa::MessageField::none(),
-            },
-            __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
-            ..::core::default::Default::default()
-        })
-    }
-}
-impl<'a> ::buffa::ViewEncode<'a> for UpdateServerSettingsResponseView<'a> {
-    #[allow(clippy::needless_borrow, clippy::let_and_return)]
-    fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
-        #[allow(unused_imports)]
-        use ::buffa::Enumeration as _;
-        let mut size = 0u64;
-        if self.settings.is_set() {
-            let __slot = __cache.reserve();
-            let inner_size = self.settings.compute_size(__cache);
-            __cache.set(__slot, inner_size);
-            size
-                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
-                    + inner_size as u64;
-        }
-        size += self.__buffa_unknown_fields.encoded_len() as u64;
-        ::buffa::saturate_size(size)
-    }
-    #[allow(clippy::needless_borrow)]
-    fn write_to(
-        &self,
-        __cache: &mut ::buffa::SizeCache,
-        buf: &mut impl ::buffa::EncodeSink,
-    ) {
-        #[allow(unused_imports)]
-        use ::buffa::Enumeration as _;
-        if self.settings.is_set() {
-            ::buffa::types::put_len_delimited_header(
-                1u32,
-                u64::from(__cache.consume_next()),
-                buf,
-            );
-            self.settings.write_to(__cache, buf);
-        }
-        self.__buffa_unknown_fields.write_to(buf);
-    }
-}
-impl<'a> ::buffa::MessageName for UpdateServerSettingsResponseView<'a> {
-    const PACKAGE: &'static str = "mavio.system.v1";
-    const NAME: &'static str = "UpdateServerSettingsResponse";
-    const FULL_NAME: &'static str = "mavio.system.v1.UpdateServerSettingsResponse";
-    const TYPE_URL: &'static str = "type.googleapis.com/mavio.system.v1.UpdateServerSettingsResponse";
-}
-::buffa::impl_default_view_instance!(UpdateServerSettingsResponseView);
-::buffa::impl_view_reborrow!(UpdateServerSettingsResponseView);
-/** Self-contained, `'static` owned view of a `UpdateServerSettingsResponse` message.
-
- Wraps [`::buffa::OwnedView`]`<`[`UpdateServerSettingsResponseView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
-
- Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`UpdateServerSettingsResponseView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
-#[derive(Clone, Debug)]
-pub struct UpdateServerSettingsResponseOwnedView(
-    ::buffa::OwnedView<UpdateServerSettingsResponseView<'static>>,
-);
-impl UpdateServerSettingsResponseOwnedView {
-    /// Decode an owned view from a [`::buffa::bytes::Bytes`] buffer.
-    ///
-    /// The view borrows directly from the buffer's data; the buffer is
-    /// retained inside the returned handle.
-    ///
-    /// # Errors
-    ///
-    /// Returns [`::buffa::DecodeError`] if the buffer contains invalid
-    /// protobuf data.
-    pub fn decode(
-        bytes: ::buffa::bytes::Bytes,
-    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
-        ::core::result::Result::Ok(
-            UpdateServerSettingsResponseOwnedView(::buffa::OwnedView::decode(bytes)?),
-        )
-    }
-    /// Decode with custom [`::buffa::DecodeOptions`] (recursion limit,
-    /// max message size).
-    ///
-    /// # Errors
-    ///
-    /// Returns [`::buffa::DecodeError`] if the buffer is invalid or
-    /// exceeds the configured limits.
-    pub fn decode_with_options(
-        bytes: ::buffa::bytes::Bytes,
-        opts: &::buffa::DecodeOptions,
-    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
-        ::core::result::Result::Ok(
-            UpdateServerSettingsResponseOwnedView(
-                ::buffa::OwnedView::decode_with_options(bytes, opts)?,
-            ),
-        )
-    }
-    /// Build from an owned message via an encode → decode round-trip.
-    ///
-    /// # Errors
-    ///
-    /// Returns [`::buffa::DecodeError::MessageTooLarge`] if the
-    /// message's encoded size exceeds the 2 GiB protobuf limit, or
-    /// another [`::buffa::DecodeError`] if the re-encoded bytes are
-    /// somehow invalid (should not happen for well-formed messages).
-    pub fn from_owned(
-        msg: &super::super::UpdateServerSettingsResponse,
-    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
-        ::core::result::Result::Ok(
-            UpdateServerSettingsResponseOwnedView(::buffa::OwnedView::from_owned(msg)?),
-        )
-    }
-    /// Borrow the full [`UpdateServerSettingsResponseView`] with its lifetime tied to `&self`.
-    #[must_use]
-    pub fn view(&self) -> &UpdateServerSettingsResponseView<'_> {
-        self.0.reborrow()
-    }
-    /// Convert to the owned message type.
-    ///
-    /// Infallible: this type's constructors wire-decode their
-    /// buffer, and a view produced by wire decoding always
-    /// converts. Delegates to [`::buffa::OwnedView::to_owned_message`],
-    /// whose contract also governs handles converted from a raw
-    /// [`::buffa::OwnedView`].
-    #[must_use]
-    pub fn to_owned_message(&self) -> super::super::UpdateServerSettingsResponse {
-        self.0.to_owned_message()
-    }
-    /// The underlying bytes buffer.
-    #[must_use]
-    pub fn bytes(&self) -> &::buffa::bytes::Bytes {
-        self.0.bytes()
-    }
-    /// Consume the handle, returning the underlying bytes buffer.
-    #[must_use]
-    pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
-        self.0.into_bytes()
-    }
-    /// Field 1: `settings`
-    #[must_use]
-    pub fn settings(
-        &self,
-    ) -> &::buffa::MessageFieldView<
-        super::super::__buffa::view::ServerSettingsView<'_>,
-    > {
-        &self.0.reborrow().settings
-    }
-}
-impl ::core::convert::From<::buffa::OwnedView<UpdateServerSettingsResponseView<'static>>>
-for UpdateServerSettingsResponseOwnedView {
-    fn from(
-        inner: ::buffa::OwnedView<UpdateServerSettingsResponseView<'static>>,
-    ) -> Self {
-        UpdateServerSettingsResponseOwnedView(inner)
-    }
-}
-impl ::core::convert::From<UpdateServerSettingsResponseOwnedView>
-for ::buffa::OwnedView<UpdateServerSettingsResponseView<'static>> {
-    fn from(wrapper: UpdateServerSettingsResponseOwnedView) -> Self {
+impl ::core::convert::From<UpdateGeneralSettingsRequestOwnedView>
+for ::buffa::OwnedView<UpdateGeneralSettingsRequestView<'static>> {
+    fn from(wrapper: UpdateGeneralSettingsRequestOwnedView) -> Self {
         wrapper.0
     }
 }
 impl ::core::convert::AsRef<
-    ::buffa::OwnedView<UpdateServerSettingsResponseView<'static>>,
-> for UpdateServerSettingsResponseOwnedView {
-    fn as_ref(&self) -> &::buffa::OwnedView<UpdateServerSettingsResponseView<'static>> {
+    ::buffa::OwnedView<UpdateGeneralSettingsRequestView<'static>>,
+> for UpdateGeneralSettingsRequestOwnedView {
+    fn as_ref(&self) -> &::buffa::OwnedView<UpdateGeneralSettingsRequestView<'static>> {
         &self.0
     }
 }
-impl ::buffa::HasMessageView for super::super::UpdateServerSettingsResponse {
-    type View<'a> = UpdateServerSettingsResponseView<'a>;
-    type ViewHandle = UpdateServerSettingsResponseOwnedView;
+impl ::buffa::HasMessageView for super::super::UpdateGeneralSettingsRequest {
+    type View<'a> = UpdateGeneralSettingsRequestView<'a>;
+    type ViewHandle = UpdateGeneralSettingsRequestOwnedView;
+}
+#[derive(Clone, Debug, Default)]
+pub struct UpdateGeneralSettingsResponseView<'a> {
+    /// Field 1: `settings`
+    pub settings: ::buffa::MessageFieldView<
+        super::super::__buffa::view::GeneralSettingsView<'a>,
+    >,
+    pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
+}
+impl<'a> ::buffa::MessageView<'a> for UpdateGeneralSettingsResponseView<'a> {
+    type Owned = super::super::UpdateGeneralSettingsResponse;
+    fn decode_view(buf: &'a [u8]) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        let __limit = ::core::cell::Cell::new(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT);
+        let __elem = ::core::cell::Cell::new(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT);
+        <Self as ::buffa::MessageView>::decode_view_ctx(
+            buf,
+            ::buffa::DecodeContext::new(::buffa::RECURSION_LIMIT, &__limit)
+                .with_element_memory(&__elem),
+        )
+    }
+    fn decode_view_with_ctx(
+        buf: &'a [u8],
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        <Self as ::buffa::MessageView>::decode_view_ctx(buf, ctx)
+    }
+    #[inline]
+    fn merge_view_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        cur: &'a [u8],
+        before_tag: &'a [u8],
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<&'a [u8], ::buffa::DecodeError> {
+        let _ = ctx;
+        #[allow(unused_variables)]
+        let view = self;
+        let mut cur = cur;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __sub_ctx = ctx.descend()?;
+                let sub = ::buffa::types::borrow_bytes(&mut cur)?;
+                match view.settings.as_mut() {
+                    Some(existing) => {
+                        ::buffa::MessageView::merge_into_view(existing, sub, __sub_ctx)?
+                    }
+                    None => {
+                        view.settings = ::buffa::MessageFieldView::set(
+                            <super::super::__buffa::view::GeneralSettingsView as ::buffa::MessageView>::decode_view_ctx(
+                                sub,
+                                __sub_ctx,
+                            )?,
+                        );
+                    }
+                }
+            }
+            _ => {
+                ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
+                let span_len = before_tag.len() - cur.len();
+                view.__buffa_unknown_fields.push_record(before_tag, span_len, ctx)?;
+            }
+        }
+        ::core::result::Result::Ok(cur)
+    }
+    fn to_owned_message(
+        &self,
+    ) -> ::core::result::Result<
+        super::super::UpdateGeneralSettingsResponse,
+        ::buffa::DecodeError,
+    > {
+        self.to_owned_from_source(None)
+    }
+    #[allow(clippy::useless_conversion, clippy::needless_update)]
+    fn to_owned_from_source(
+        &self,
+        __buffa_src: ::core::option::Option<&::buffa::bytes::Bytes>,
+    ) -> ::core::result::Result<
+        super::super::UpdateGeneralSettingsResponse,
+        ::buffa::DecodeError,
+    > {
+        #[allow(unused_imports)]
+        use ::buffa::alloc::string::ToString as _;
+        let _ = __buffa_src;
+        ::core::result::Result::Ok(super::super::UpdateGeneralSettingsResponse {
+            settings: match self.settings.as_option() {
+                Some(v) => {
+                    ::buffa::MessageField::<
+                        super::super::GeneralSettings,
+                        ::buffa::Inline<super::super::GeneralSettings>,
+                    >::some(v.to_owned_from_source(__buffa_src)?)
+                }
+                None => ::buffa::MessageField::none(),
+            },
+            __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
+            ..::core::default::Default::default()
+        })
+    }
+}
+impl<'a> ::buffa::ViewEncode<'a> for UpdateGeneralSettingsResponseView<'a> {
+    #[allow(clippy::needless_borrow, clippy::let_and_return)]
+    fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if self.settings.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.settings.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    #[allow(clippy::needless_borrow)]
+    fn write_to(
+        &self,
+        __cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if self.settings.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                1u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.settings.write_to(__cache, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+}
+impl<'a> ::buffa::MessageName for UpdateGeneralSettingsResponseView<'a> {
+    const PACKAGE: &'static str = "mavio.system.v1";
+    const NAME: &'static str = "UpdateGeneralSettingsResponse";
+    const FULL_NAME: &'static str = "mavio.system.v1.UpdateGeneralSettingsResponse";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.system.v1.UpdateGeneralSettingsResponse";
+}
+::buffa::impl_default_view_instance!(UpdateGeneralSettingsResponseView);
+::buffa::impl_view_reborrow!(UpdateGeneralSettingsResponseView);
+/** Self-contained, `'static` owned view of a `UpdateGeneralSettingsResponse` message.
+
+ Wraps [`::buffa::OwnedView`]`<`[`UpdateGeneralSettingsResponseView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
+
+ Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`UpdateGeneralSettingsResponseView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
+#[derive(Clone, Debug)]
+pub struct UpdateGeneralSettingsResponseOwnedView(
+    ::buffa::OwnedView<UpdateGeneralSettingsResponseView<'static>>,
+);
+impl UpdateGeneralSettingsResponseOwnedView {
+    /// Decode an owned view from a [`::buffa::bytes::Bytes`] buffer.
+    ///
+    /// The view borrows directly from the buffer's data; the buffer is
+    /// retained inside the returned handle.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError`] if the buffer contains invalid
+    /// protobuf data.
+    pub fn decode(
+        bytes: ::buffa::bytes::Bytes,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            UpdateGeneralSettingsResponseOwnedView(::buffa::OwnedView::decode(bytes)?),
+        )
+    }
+    /// Decode with custom [`::buffa::DecodeOptions`] (recursion limit,
+    /// max message size).
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError`] if the buffer is invalid or
+    /// exceeds the configured limits.
+    pub fn decode_with_options(
+        bytes: ::buffa::bytes::Bytes,
+        opts: &::buffa::DecodeOptions,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            UpdateGeneralSettingsResponseOwnedView(
+                ::buffa::OwnedView::decode_with_options(bytes, opts)?,
+            ),
+        )
+    }
+    /// Build from an owned message via an encode → decode round-trip.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError::MessageTooLarge`] if the
+    /// message's encoded size exceeds the 2 GiB protobuf limit, or
+    /// another [`::buffa::DecodeError`] if the re-encoded bytes are
+    /// somehow invalid (should not happen for well-formed messages).
+    pub fn from_owned(
+        msg: &super::super::UpdateGeneralSettingsResponse,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            UpdateGeneralSettingsResponseOwnedView(::buffa::OwnedView::from_owned(msg)?),
+        )
+    }
+    /// Borrow the full [`UpdateGeneralSettingsResponseView`] with its lifetime tied to `&self`.
+    #[must_use]
+    pub fn view(&self) -> &UpdateGeneralSettingsResponseView<'_> {
+        self.0.reborrow()
+    }
+    /// Convert to the owned message type.
+    ///
+    /// Infallible: this type's constructors wire-decode their
+    /// buffer, and a view produced by wire decoding always
+    /// converts. Delegates to [`::buffa::OwnedView::to_owned_message`],
+    /// whose contract also governs handles converted from a raw
+    /// [`::buffa::OwnedView`].
+    #[must_use]
+    pub fn to_owned_message(&self) -> super::super::UpdateGeneralSettingsResponse {
+        self.0.to_owned_message()
+    }
+    /// The underlying bytes buffer.
+    #[must_use]
+    pub fn bytes(&self) -> &::buffa::bytes::Bytes {
+        self.0.bytes()
+    }
+    /// Consume the handle, returning the underlying bytes buffer.
+    #[must_use]
+    pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
+        self.0.into_bytes()
+    }
+    /// Field 1: `settings`
+    #[must_use]
+    pub fn settings(
+        &self,
+    ) -> &::buffa::MessageFieldView<
+        super::super::__buffa::view::GeneralSettingsView<'_>,
+    > {
+        &self.0.reborrow().settings
+    }
+}
+impl ::core::convert::From<
+    ::buffa::OwnedView<UpdateGeneralSettingsResponseView<'static>>,
+> for UpdateGeneralSettingsResponseOwnedView {
+    fn from(
+        inner: ::buffa::OwnedView<UpdateGeneralSettingsResponseView<'static>>,
+    ) -> Self {
+        UpdateGeneralSettingsResponseOwnedView(inner)
+    }
+}
+impl ::core::convert::From<UpdateGeneralSettingsResponseOwnedView>
+for ::buffa::OwnedView<UpdateGeneralSettingsResponseView<'static>> {
+    fn from(wrapper: UpdateGeneralSettingsResponseOwnedView) -> Self {
+        wrapper.0
+    }
+}
+impl ::core::convert::AsRef<
+    ::buffa::OwnedView<UpdateGeneralSettingsResponseView<'static>>,
+> for UpdateGeneralSettingsResponseOwnedView {
+    fn as_ref(&self) -> &::buffa::OwnedView<UpdateGeneralSettingsResponseView<'static>> {
+        &self.0
+    }
+}
+impl ::buffa::HasMessageView for super::super::UpdateGeneralSettingsResponse {
+    type View<'a> = UpdateGeneralSettingsResponseView<'a>;
+    type ViewHandle = UpdateGeneralSettingsResponseOwnedView;
 }
 #[derive(Clone, Debug, Default)]
 pub struct ListDirectoryRequestView<'a> {

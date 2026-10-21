@@ -97,3 +97,23 @@ pub use self::__buffa::view::ListMediaSourcesRequestOwnedView;
 pub use self::__buffa::view::ListMediaSourcesResponseView;
 #[doc(inline)]
 pub use self::__buffa::view::ListMediaSourcesResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::TranscodingSettingsView;
+#[doc(inline)]
+pub use self::__buffa::view::TranscodingSettingsOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::GetTranscodingSettingsRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::GetTranscodingSettingsRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::GetTranscodingSettingsResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::GetTranscodingSettingsResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::UpdateTranscodingSettingsRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::UpdateTranscodingSettingsRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::UpdateTranscodingSettingsResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::UpdateTranscodingSettingsResponseOwnedView;

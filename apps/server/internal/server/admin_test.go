@@ -16,6 +16,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -175,25 +176,27 @@ func TestAdministration(t *testing.T) {
 	pluginAdmin := systemv1connect.NewPluginManagementServiceClient(http.DefaultClient, srv.url, token)
 
 	// Settings: a plugin catalog and another transcode folder.
-	got, err := system.GetServerSettings(ctx, &systemv1.GetServerSettingsRequest{})
+	if _, err := pluginAdmin.UpdatePluginCatalogs(ctx, systemv1.UpdatePluginCatalogsRequest_builder{Urls: []string{catalogURL}}.Build()); err != nil {
+		t.Fatalf("UpdatePluginCatalogs: %v", err)
+	}
+	if got, err := pluginAdmin.GetPluginCatalogs(ctx, &systemv1.GetPluginCatalogsRequest{}); err != nil || !slices.Equal(got.GetUrls(), []string{catalogURL}) {
+		t.Errorf("plugin catalogs after the update = %v, %v", got, err)
+	}
+	transcoding := playbackv1connect.NewPlaybackServiceClient(http.DefaultClient, srv.url, token)
+	got, err := transcoding.GetTranscodingSettings(ctx, &playbackv1.GetTranscodingSettingsRequest{})
 	if err != nil {
-		t.Fatalf("GetServerSettings: %v", err)
+		t.Fatalf("GetTranscodingSettings: %v", err)
 	}
 	set := got.GetSettings()
 	transcodes := t.TempDir()
-	set.SetPluginCatalogs([]string{catalogURL})
-	set.GetTranscoding().SetTranscodeDir(transcodes)
-	set.GetTranscoding().SetEncoderPreset("ultrafast")
-	set.GetAcquisition().SetMinimumAge(20)
-	if _, err := system.UpdateServerSettings(ctx, systemv1.UpdateServerSettingsRequest_builder{Settings: set}.Build()); err != nil {
-		t.Fatalf("UpdateServerSettings: %v", err)
+	set.SetTranscodeDir(transcodes)
+	set.SetEncoderPreset("ultrafast")
+	if _, err := transcoding.UpdateTranscodingSettings(ctx, playbackv1.UpdateTranscodingSettingsRequest_builder{Settings: set}.Build()); err != nil {
+		t.Fatalf("UpdateTranscodingSettings: %v", err)
 	}
-	if got, err := system.GetServerSettings(ctx, &systemv1.GetServerSettingsRequest{}); err != nil || got.GetSettings().GetAcquisition().GetMinimumAge() != 20 {
-		t.Errorf("acquisition settings after the update = %v, %v", got.GetSettings().GetAcquisition(), err)
-	}
-	bad := proto.Clone(set).(*systemv1.ServerSettings)
-	bad.GetTranscoding().SetTranscodeDir("relative")
-	if _, err := system.UpdateServerSettings(ctx, systemv1.UpdateServerSettingsRequest_builder{Settings: bad}.Build()); connect.CodeOf(err) != connect.CodeInvalidArgument {
+	bad := proto.Clone(set).(*playbackv1.TranscodingSettings)
+	bad.SetTranscodeDir("relative")
+	if _, err := transcoding.UpdateTranscodingSettings(ctx, playbackv1.UpdateTranscodingSettingsRequest_builder{Settings: bad}.Build()); connect.CodeOf(err) != connect.CodeInvalidArgument {
 		t.Errorf("relative transcode folder: %v, want invalid_argument", err)
 	}
 
@@ -360,8 +363,8 @@ func TestAdministration(t *testing.T) {
 	if err != nil || len(libs.GetLibraries()) != 1 || libs.GetLibraries()[0].GetName() != "Films" {
 		t.Errorf("restored libraries = %v, %v", libs, err)
 	}
-	restoredSet, err := systemv1connect.NewSystemServiceClient(http.DefaultClient, restored.url, token).GetServerSettings(ctx, &systemv1.GetServerSettingsRequest{})
-	if err != nil || restoredSet.GetSettings().GetTranscoding().GetEncoderPreset() != "ultrafast" {
+	restoredSet, err := playbackv1connect.NewPlaybackServiceClient(http.DefaultClient, restored.url, token).GetTranscodingSettings(ctx, &playbackv1.GetTranscodingSettingsRequest{})
+	if err != nil || restoredSet.GetSettings().GetEncoderPreset() != "ultrafast" {
 		t.Errorf("restored settings = %v, %v", restoredSet, err)
 	}
 }

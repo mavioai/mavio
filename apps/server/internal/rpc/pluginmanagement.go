@@ -627,3 +627,23 @@ func containerCommandsToProto(c *containers.Commands) *systemv1.ContainerCommand
 	}
 	return systemv1.ContainerCommands_builder{DockerRun: new(c.DockerRun), Compose: new(c.Compose), Address: new(c.Address)}.Build()
 }
+
+// GetPluginCatalogs returns the URLs of the plugin catalogs.
+func (s *PluginManagementService) GetPluginCatalogs(ctx context.Context, _ *systemv1.GetPluginCatalogsRequest) (*systemv1.GetPluginCatalogsResponse, error) {
+	if _, err := admin(ctx); err != nil {
+		return nil, err
+	}
+	return systemv1.GetPluginCatalogsResponse_builder{Urls: currentSettings(s.Settings).PluginCatalogs}.Build(), nil
+}
+
+// UpdatePluginCatalogs replaces the URLs of the plugin catalogs.
+func (s *PluginManagementService) UpdatePluginCatalogs(ctx context.Context, req *systemv1.UpdatePluginCatalogsRequest) (*systemv1.UpdatePluginCatalogsResponse, error) {
+	set, err := changeSettings(ctx, s.Settings, s.Activity, "the plugin catalogs", func(cur *core.ServerSettings) error {
+		cur.PluginCatalogs = req.GetUrls()
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	return systemv1.UpdatePluginCatalogsResponse_builder{Urls: set.PluginCatalogs}.Build(), nil
+}

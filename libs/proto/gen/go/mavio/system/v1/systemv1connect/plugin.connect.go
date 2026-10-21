@@ -45,6 +45,12 @@ const (
 	// PluginManagementServiceListPluginConfigOptionsProcedure is the fully-qualified name of the
 	// PluginManagementService's ListPluginConfigOptions RPC.
 	PluginManagementServiceListPluginConfigOptionsProcedure = "/mavio.system.v1.PluginManagementService/ListPluginConfigOptions"
+	// PluginManagementServiceGetPluginCatalogsProcedure is the fully-qualified name of the
+	// PluginManagementService's GetPluginCatalogs RPC.
+	PluginManagementServiceGetPluginCatalogsProcedure = "/mavio.system.v1.PluginManagementService/GetPluginCatalogs"
+	// PluginManagementServiceUpdatePluginCatalogsProcedure is the fully-qualified name of the
+	// PluginManagementService's UpdatePluginCatalogs RPC.
+	PluginManagementServiceUpdatePluginCatalogsProcedure = "/mavio.system.v1.PluginManagementService/UpdatePluginCatalogs"
 	// PluginManagementServiceListCatalogPluginsProcedure is the fully-qualified name of the
 	// PluginManagementService's ListCatalogPlugins RPC.
 	PluginManagementServiceListCatalogPluginsProcedure = "/mavio.system.v1.PluginManagementService/ListCatalogPlugins"
@@ -95,6 +101,11 @@ type PluginManagementServiceClient interface {
 	// configuration takes, from the source its schema names with
 	// x-mavio-options, such as the definitions of an indexer provider.
 	ListPluginConfigOptions(context.Context, *v1.ListPluginConfigOptionsRequest) (*v1.ListPluginConfigOptionsResponse, error)
+	// GetPluginCatalogs returns the URLs of the catalogs plugins are
+	// installed from.
+	GetPluginCatalogs(context.Context, *v1.GetPluginCatalogsRequest) (*v1.GetPluginCatalogsResponse, error)
+	// UpdatePluginCatalogs replaces the URLs of the plugin catalogs.
+	UpdatePluginCatalogs(context.Context, *v1.UpdatePluginCatalogsRequest) (*v1.UpdatePluginCatalogsResponse, error)
 	// ListCatalogPlugins lists the plugins of the configured plugin
 	// catalogs, with the versions the server can run.
 	ListCatalogPlugins(context.Context, *v1.ListCatalogPluginsRequest) (*v1.ListCatalogPluginsResponse, error)
@@ -170,6 +181,20 @@ func NewPluginManagementServiceClient(httpClient connect.HTTPClient, baseURL str
 			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
 			connect.WithClientOptions(opts...),
 		),
+		getPluginCatalogs: connect.NewClient[v1.GetPluginCatalogsRequest, v1.GetPluginCatalogsResponse](
+			httpClient,
+			baseURL+PluginManagementServiceGetPluginCatalogsProcedure,
+			connect.WithSchema(pluginManagementServiceMethods.ByName("GetPluginCatalogs")),
+			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+			connect.WithClientOptions(opts...),
+		),
+		updatePluginCatalogs: connect.NewClient[v1.UpdatePluginCatalogsRequest, v1.UpdatePluginCatalogsResponse](
+			httpClient,
+			baseURL+PluginManagementServiceUpdatePluginCatalogsProcedure,
+			connect.WithSchema(pluginManagementServiceMethods.ByName("UpdatePluginCatalogs")),
+			connect.WithIdempotency(connect.IdempotencyIdempotent),
+			connect.WithClientOptions(opts...),
+		),
 		listCatalogPlugins: connect.NewClient[v1.ListCatalogPluginsRequest, v1.ListCatalogPluginsResponse](
 			httpClient,
 			baseURL+PluginManagementServiceListCatalogPluginsProcedure,
@@ -243,6 +268,8 @@ type pluginManagementServiceClient struct {
 	getPluginConfig         *connect.Client[v1.GetPluginConfigRequest, v1.GetPluginConfigResponse]
 	setPluginConfig         *connect.Client[v1.SetPluginConfigRequest, v1.SetPluginConfigResponse]
 	listPluginConfigOptions *connect.Client[v1.ListPluginConfigOptionsRequest, v1.ListPluginConfigOptionsResponse]
+	getPluginCatalogs       *connect.Client[v1.GetPluginCatalogsRequest, v1.GetPluginCatalogsResponse]
+	updatePluginCatalogs    *connect.Client[v1.UpdatePluginCatalogsRequest, v1.UpdatePluginCatalogsResponse]
 	listCatalogPlugins      *connect.Client[v1.ListCatalogPluginsRequest, v1.ListCatalogPluginsResponse]
 	installPlugin           *connect.Client[v1.InstallPluginRequest, v1.InstallPluginResponse]
 	uninstallPlugin         *connect.Client[v1.UninstallPluginRequest, v1.UninstallPluginResponse]
@@ -285,6 +312,24 @@ func (c *pluginManagementServiceClient) SetPluginConfig(ctx context.Context, req
 // ListPluginConfigOptions calls mavio.system.v1.PluginManagementService.ListPluginConfigOptions.
 func (c *pluginManagementServiceClient) ListPluginConfigOptions(ctx context.Context, req *v1.ListPluginConfigOptionsRequest) (*v1.ListPluginConfigOptionsResponse, error) {
 	response, err := c.listPluginConfigOptions.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
+// GetPluginCatalogs calls mavio.system.v1.PluginManagementService.GetPluginCatalogs.
+func (c *pluginManagementServiceClient) GetPluginCatalogs(ctx context.Context, req *v1.GetPluginCatalogsRequest) (*v1.GetPluginCatalogsResponse, error) {
+	response, err := c.getPluginCatalogs.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
+// UpdatePluginCatalogs calls mavio.system.v1.PluginManagementService.UpdatePluginCatalogs.
+func (c *pluginManagementServiceClient) UpdatePluginCatalogs(ctx context.Context, req *v1.UpdatePluginCatalogsRequest) (*v1.UpdatePluginCatalogsResponse, error) {
+	response, err := c.updatePluginCatalogs.CallUnary(ctx, connect.NewRequest(req))
 	if response != nil {
 		return response.Msg, err
 	}
@@ -399,6 +444,11 @@ type PluginManagementServiceHandler interface {
 	// configuration takes, from the source its schema names with
 	// x-mavio-options, such as the definitions of an indexer provider.
 	ListPluginConfigOptions(context.Context, *v1.ListPluginConfigOptionsRequest) (*v1.ListPluginConfigOptionsResponse, error)
+	// GetPluginCatalogs returns the URLs of the catalogs plugins are
+	// installed from.
+	GetPluginCatalogs(context.Context, *v1.GetPluginCatalogsRequest) (*v1.GetPluginCatalogsResponse, error)
+	// UpdatePluginCatalogs replaces the URLs of the plugin catalogs.
+	UpdatePluginCatalogs(context.Context, *v1.UpdatePluginCatalogsRequest) (*v1.UpdatePluginCatalogsResponse, error)
 	// ListCatalogPlugins lists the plugins of the configured plugin
 	// catalogs, with the versions the server can run.
 	ListCatalogPlugins(context.Context, *v1.ListCatalogPluginsRequest) (*v1.ListCatalogPluginsResponse, error)
@@ -468,6 +518,20 @@ func NewPluginManagementServiceHandler(svc PluginManagementServiceHandler, opts 
 		svc.ListPluginConfigOptions,
 		connect.WithSchema(pluginManagementServiceMethods.ByName("ListPluginConfigOptions")),
 		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+		connect.WithHandlerOptions(opts...),
+	)
+	pluginManagementServiceGetPluginCatalogsHandler := connect.NewUnaryHandlerSimple(
+		PluginManagementServiceGetPluginCatalogsProcedure,
+		svc.GetPluginCatalogs,
+		connect.WithSchema(pluginManagementServiceMethods.ByName("GetPluginCatalogs")),
+		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+		connect.WithHandlerOptions(opts...),
+	)
+	pluginManagementServiceUpdatePluginCatalogsHandler := connect.NewUnaryHandlerSimple(
+		PluginManagementServiceUpdatePluginCatalogsProcedure,
+		svc.UpdatePluginCatalogs,
+		connect.WithSchema(pluginManagementServiceMethods.ByName("UpdatePluginCatalogs")),
+		connect.WithIdempotency(connect.IdempotencyIdempotent),
 		connect.WithHandlerOptions(opts...),
 	)
 	pluginManagementServiceListCatalogPluginsHandler := connect.NewUnaryHandlerSimple(
@@ -544,6 +608,10 @@ func NewPluginManagementServiceHandler(svc PluginManagementServiceHandler, opts 
 			pluginManagementServiceSetPluginConfigHandler.ServeHTTP(w, r)
 		case PluginManagementServiceListPluginConfigOptionsProcedure:
 			pluginManagementServiceListPluginConfigOptionsHandler.ServeHTTP(w, r)
+		case PluginManagementServiceGetPluginCatalogsProcedure:
+			pluginManagementServiceGetPluginCatalogsHandler.ServeHTTP(w, r)
+		case PluginManagementServiceUpdatePluginCatalogsProcedure:
+			pluginManagementServiceUpdatePluginCatalogsHandler.ServeHTTP(w, r)
 		case PluginManagementServiceListCatalogPluginsProcedure:
 			pluginManagementServiceListCatalogPluginsHandler.ServeHTTP(w, r)
 		case PluginManagementServiceInstallPluginProcedure:
@@ -587,6 +655,14 @@ func (UnimplementedPluginManagementServiceHandler) SetPluginConfig(context.Conte
 
 func (UnimplementedPluginManagementServiceHandler) ListPluginConfigOptions(context.Context, *v1.ListPluginConfigOptionsRequest) (*v1.ListPluginConfigOptionsResponse, error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.system.v1.PluginManagementService.ListPluginConfigOptions is not implemented"))
+}
+
+func (UnimplementedPluginManagementServiceHandler) GetPluginCatalogs(context.Context, *v1.GetPluginCatalogsRequest) (*v1.GetPluginCatalogsResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.system.v1.PluginManagementService.GetPluginCatalogs is not implemented"))
+}
+
+func (UnimplementedPluginManagementServiceHandler) UpdatePluginCatalogs(context.Context, *v1.UpdatePluginCatalogsRequest) (*v1.UpdatePluginCatalogsResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.system.v1.PluginManagementService.UpdatePluginCatalogs is not implemented"))
 }
 
 func (UnimplementedPluginManagementServiceHandler) ListCatalogPlugins(context.Context, *v1.ListCatalogPluginsRequest) (*v1.ListCatalogPluginsResponse, error) {

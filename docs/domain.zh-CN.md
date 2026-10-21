@@ -348,7 +348,7 @@ erDiagram
 ## 12. 管理
 
 ### 12.1 服务端设置
-`ServerSettings` 是管理员在服务端运行时修改的设置；命令行参数只提供其中一些的初始值。只保存一组设置，其各分组——`Transcoding`、`Network`、`PluginCatalogs`、`PasswordResetPlugin`、`DisabledPlugins`、`PluginProxies`、`SessionIdleDays`、`Acquisition`、`Requests`、`Metadata`、`Subtitles` 与 `Assistant`——分开保存，读取时以默认值（`DefaultServerSettings`）补全未保存的分组与后来新增的设置。各分组由其所属方修改：字幕设置由字幕服务修改，助手设置由助手服务修改，停用的插件由启用与停用插件修改，插件的代理由设置插件的代理修改，其余由服务端设置修改；修改作用于当前设置，而不是用先前读取的副本替换它。
+`ServerSettings` 是管理员在服务端运行时修改的设置；命令行参数只提供其中一些的初始值。只保存一组设置，其各分组——`Transcoding`、`Network`、`PluginCatalogs`、`PasswordResetPlugin`、`DisabledPlugins`、`PluginProxies`、`SessionIdleDays`、`Acquisition`、`Requests`、`Metadata`、`Subtitles` 与 `Assistant`——分开保存，读取时以默认值（`DefaultServerSettings`）补全未保存的分组与后来新增的设置。各分组由其所属方修改：字幕设置由字幕服务修改，助手设置由助手服务修改，停用的插件由启用与停用插件修改，插件的代理由设置插件的代理修改，其余各分组由其所属领域服务上各自的设置 RPC 修改；修改作用于当前设置，而不是用先前读取的副本替换它。
 
 * `Transcoding`：`HardwareAcceleration`（`auto` 使用服务端 ffmpeg 与硬件所支持的加速，`none`，或 `videotoolbox`）、是否允许硬件编码器、软件编码器的 `EncoderPreset`（为空时按片源选择）、`H264CRF` 与 `H265CRF`（0–51）、`Threads`、色调映射（`TonemapAlgorithm`、`TonemapRange`、`TonemapDesat`、`TonemapPeak`）、去隔行（`yadif` 或 `bwdif`，可选倍帧率）、立体声 `DownmixBoost`（0.5–3）、`CropBlackBorders`，以及 `TranscodeDir`（绝对路径；为空时沿用服务端启动时的目录）。
 * `Network`：向客户端显示的 `ServerName`（为空时为主机名）、反向代理下服务端所在的 `BaseURL`（规整的路径，如 `/mavio`）、`HTTPSPort`（默认 8920）及其 PEM 格式的 `CertificatePath` 与 `KeyPath`（两者都设置或都不设置；都不设置时，mavio.dev 模式的服务端使用其 `mavio.site` 证书）、`LocalDiscovery`，以及 `Relay`：客户端能否经 mavio.dev 的中转访问 mavio.dev 模式的服务端（默认开启），以及服务端自身 HTTP 请求按访问对象使用的代理 `Proxies`（`OutboundProxies`）——`PluginCatalogs`、`Images`、`MavioDev` 与 `ACME`——每项为代理的 ID、`SystemProxyID`（`system`，默认）或空（不使用代理）。

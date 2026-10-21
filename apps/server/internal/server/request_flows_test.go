@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"connectrpc.com/connect"
+	"google.golang.org/protobuf/proto"
 
 	acquisitionv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/acquisition/v1"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/acquisition/v1/acquisitionv1connect"
@@ -56,8 +57,9 @@ func TestRequestFlows(t *testing.T) {
 
 	// Users may request a movie and two seasons; requests of series go to
 	// the shows, while no library nor profile is set for those of movies.
-	s.settings(func(settings *systemv1.ServerSettings) {
-		settings.SetRequests(systemv1.RequestSettings_builder{
+	s.requestSettings(func(settings *acquisitionv1.RequestSettings) {
+		proto.Reset(settings)
+		proto.Merge(settings, acquisitionv1.RequestSettings_builder{
 			MovieQuotaLimit: new(int32(1)), SeriesQuotaLimit: new(int32(2)),
 			MinimumAvailability: new(acquisitionv1.MinimumAvailability_MINIMUM_AVAILABILITY_RELEASED),
 			SeriesLibraryId:     new(showLib), SeriesQualityProfileId: new(seriesProfile), SeasonFolder: new(true),
@@ -156,9 +158,9 @@ func TestRequestFlows(t *testing.T) {
 	if m, _ := quota(); m != "1/1 restricted=true" {
 		t.Errorf("movie quota with a failed request = %s, want = 1/1 restricted", m)
 	}
-	s.settings(func(settings *systemv1.ServerSettings) {
-		settings.GetRequests().SetMovieLibraryId(movieLib)
-		settings.GetRequests().SetMovieQualityProfileId(movieProfile)
+	s.requestSettings(func(settings *acquisitionv1.RequestSettings) {
+		settings.SetMovieLibraryId(movieLib)
+		settings.SetMovieQualityProfileId(movieProfile)
 	})
 	retried, err := s.requests.RetryRequest(ctx, acquisitionv1.RetryRequestRequest_builder{Id: new(reloaded.GetId())}.Build())
 	if err != nil {

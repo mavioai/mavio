@@ -153,7 +153,6 @@ func TestRequests(t *testing.T) {
 		t.Fatalf("CreateFirstUser: %v", err)
 	}
 	token := withToken(first.GetAccessToken())
-	system := systemv1connect.NewSystemServiceClient(http.DefaultClient, srv.url, token)
 	pluginAdmin := systemv1connect.NewPluginManagementServiceClient(http.DefaultClient, srv.url, token)
 	tasks := systemv1connect.NewTaskServiceClient(http.DefaultClient, srv.url, token)
 	activity := systemv1connect.NewActivityServiceClient(http.DefaultClient, srv.url, token)
@@ -207,26 +206,28 @@ func TestRequests(t *testing.T) {
 
 	// Approved requests go to those libraries with those profiles; users
 	// may request five movies and ten seasons.
-	got, err := system.GetServerSettings(ctx, &systemv1.GetServerSettingsRequest{})
+	got, err := profiles.GetAcquisitionSettings(ctx, &acquisitionv1.GetAcquisitionSettingsRequest{})
 	if err != nil {
-		t.Fatalf("GetServerSettings: %v", err)
+		t.Fatalf("GetAcquisitionSettings: %v", err)
 	}
-	settings := got.GetSettings()
-	acq := settings.GetAcquisition()
+	acq := got.GetSettings()
 	acq.SetRecycleBin(t.TempDir())
 	acq.SetRssSyncInterval(0)
 	acq.SetSkipFreeSpaceCheck(true)
-	acq.SetRenameMovies(true)
-	acq.SetRenameEpisodes(true)
-	settings.SetRequests(systemv1.RequestSettings_builder{
+	acq.GetNaming().SetRenameMovies(true)
+	acq.GetNaming().SetRenameEpisodes(true)
+	if _, err := profiles.UpdateAcquisitionSettings(ctx, acquisitionv1.UpdateAcquisitionSettingsRequest_builder{Settings: acq}.Build()); err != nil {
+		t.Fatalf("UpdateAcquisitionSettings: %v", err)
+	}
+	requestSettings := acquisitionv1.RequestSettings_builder{
 		MovieQuotaLimit: new(int32(5)), SeriesQuotaLimit: new(int32(10)),
 		MovieLibraryId: new(movieLib), MovieQualityProfileId: new(movieProfile),
 		MinimumAvailability: new(acquisitionv1.MinimumAvailability_MINIMUM_AVAILABILITY_RELEASED),
 		SeriesLibraryId:     new(showLib), SeriesQualityProfileId: new(seriesProfile), SeasonFolder: new(true),
 		MonitorNewItems: new(acquisitionv1.NewItemMonitor_NEW_ITEM_MONITOR_NONE),
-	}.Build())
-	if _, err := system.UpdateServerSettings(ctx, systemv1.UpdateServerSettingsRequest_builder{Settings: settings}.Build()); err != nil {
-		t.Fatalf("UpdateServerSettings: %v", err)
+	}.Build()
+	if _, err := adminRequests.UpdateRequestSettings(ctx, acquisitionv1.UpdateRequestSettingsRequest_builder{Settings: requestSettings}.Build()); err != nil {
+		t.Fatalf("UpdateRequestSettings: %v", err)
 	}
 	for id, cfg := range map[string]any{
 		"dev.mavio.indexers": map[string]any{"indexers": []any{

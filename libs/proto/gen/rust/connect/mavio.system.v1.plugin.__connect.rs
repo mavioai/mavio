@@ -34,6 +34,28 @@ pub type OwnedListPluginConfigOptionsResponseView = ::buffa::view::OwnedView<
         'static,
     >,
 >;
+///Shorthand for `OwnedView<GetPluginCatalogsRequestView<'static>>`.
+pub type OwnedGetPluginCatalogsRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::system::v1::__buffa::view::GetPluginCatalogsRequestView<'static>,
+>;
+///Shorthand for `OwnedView<GetPluginCatalogsResponseView<'static>>`.
+pub type OwnedGetPluginCatalogsResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::system::v1::__buffa::view::GetPluginCatalogsResponseView<
+        'static,
+    >,
+>;
+///Shorthand for `OwnedView<UpdatePluginCatalogsRequestView<'static>>`.
+pub type OwnedUpdatePluginCatalogsRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::system::v1::__buffa::view::UpdatePluginCatalogsRequestView<
+        'static,
+    >,
+>;
+///Shorthand for `OwnedView<UpdatePluginCatalogsResponseView<'static>>`.
+pub type OwnedUpdatePluginCatalogsResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::system::v1::__buffa::view::UpdatePluginCatalogsResponseView<
+        'static,
+    >,
+>;
 ///Shorthand for `OwnedView<ListCatalogPluginsRequestView<'static>>`.
 pub type OwnedListCatalogPluginsRequestView = ::buffa::view::OwnedView<
     crate::proto::mavio::system::v1::__buffa::view::ListCatalogPluginsRequestView<
@@ -250,6 +272,84 @@ impl ::connectrpc::Encodable<
 >
 for ::buffa::view::OwnedView<
     crate::proto::mavio::system::v1::__buffa::view::ListPluginConfigOptionsResponseView<
+        'static,
+    >,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::system::v1::GetPluginCatalogsResponse>
+for crate::proto::mavio::system::v1::__buffa::view::GetPluginCatalogsResponseView<'_> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::system::v1::GetPluginCatalogsResponse>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::system::v1::__buffa::view::GetPluginCatalogsResponseView<
+        'static,
+    >,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
+impl ::connectrpc::Encodable<
+    crate::proto::mavio::system::v1::UpdatePluginCatalogsResponse,
+>
+for crate::proto::mavio::system::v1::__buffa::view::UpdatePluginCatalogsResponseView<
+    '_,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<
+    crate::proto::mavio::system::v1::UpdatePluginCatalogsResponse,
+>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::system::v1::__buffa::view::UpdatePluginCatalogsResponseView<
         'static,
     >,
 > {
@@ -658,6 +758,18 @@ pub const PLUGIN_MANAGEMENT_SERVICE_LIST_PLUGIN_CONFIG_OPTIONS_SPEC: ::connectrp
         ::connectrpc::StreamType::Unary,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::NoSideEffects);
+/// Static [`Spec`](::connectrpc::Spec) for the `GetPluginCatalogs` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const PLUGIN_MANAGEMENT_SERVICE_GET_PLUGIN_CATALOGS_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.system.v1.PluginManagementService/GetPluginCatalogs",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::NoSideEffects);
+/// Static [`Spec`](::connectrpc::Spec) for the `UpdatePluginCatalogs` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const PLUGIN_MANAGEMENT_SERVICE_UPDATE_PLUGIN_CATALOGS_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.system.v1.PluginManagementService/UpdatePluginCatalogs",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::Idempotent);
 /// Static [`Spec`](::connectrpc::Spec) for the `ListCatalogPlugins` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
 pub const PLUGIN_MANAGEMENT_SERVICE_LIST_CATALOG_PLUGINS_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
         "/mavio.system.v1.PluginManagementService/ListCatalogPlugins",
@@ -866,6 +978,53 @@ pub trait PluginManagementService: Send + Sync + 'static {
         Output = ::connectrpc::ServiceResult<
             impl ::connectrpc::Encodable<
                 crate::proto::mavio::system::v1::ListPluginConfigOptionsResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// GetPluginCatalogs returns the URLs of the catalogs plugins are
+    /// installed from.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn get_plugin_catalogs<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::system::v1::GetPluginCatalogsRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::system::v1::GetPluginCatalogsResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// UpdatePluginCatalogs replaces the URLs of the plugin catalogs.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn update_plugin_catalogs<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::system::v1::UpdatePluginCatalogsRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::system::v1::UpdatePluginCatalogsResponse,
             > + Send + use<'a, Self>,
         >,
     > + Send;
@@ -1264,6 +1423,64 @@ impl<S: PluginManagementService> PluginManagementServiceExt for S {
             .with_spec(PLUGIN_MANAGEMENT_SERVICE_LIST_PLUGIN_CONFIG_OPTIONS_SPEC)
             .route_view_idempotent(
                 PLUGIN_MANAGEMENT_SERVICE_SERVICE_NAME,
+                "GetPluginCatalogs",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::system::v1::__buffa::view::GetPluginCatalogsRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::system::v1::GetPluginCatalogsRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.get_plugin_catalogs(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::system::v1::GetPluginCatalogsResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(PLUGIN_MANAGEMENT_SERVICE_GET_PLUGIN_CATALOGS_SPEC)
+            .route_view(
+                PLUGIN_MANAGEMENT_SERVICE_SERVICE_NAME,
+                "UpdatePluginCatalogs",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::system::v1::__buffa::view::UpdatePluginCatalogsRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::system::v1::UpdatePluginCatalogsRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.update_plugin_catalogs(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::system::v1::UpdatePluginCatalogsResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(PLUGIN_MANAGEMENT_SERVICE_UPDATE_PLUGIN_CATALOGS_SPEC)
+            .route_view_idempotent(
+                PLUGIN_MANAGEMENT_SERVICE_SERVICE_NAME,
                 "ListCatalogPlugins",
                 {
                     let svc = ::std::sync::Arc::clone(&self);
@@ -1635,6 +1852,18 @@ for PluginManagementServiceServer<T> {
                         ),
                 )
             }
+            "GetPluginCatalogs" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(true)
+                        .with_spec(PLUGIN_MANAGEMENT_SERVICE_GET_PLUGIN_CATALOGS_SPEC),
+                )
+            }
+            "UpdatePluginCatalogs" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
+                        .with_spec(PLUGIN_MANAGEMENT_SERVICE_UPDATE_PLUGIN_CATALOGS_SPEC),
+                )
+            }
             "ListCatalogPlugins" => {
                 Some(
                     ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(true)
@@ -1796,6 +2025,50 @@ for PluginManagementServiceServer<T> {
                         .await?
                         .encode::<
                             crate::proto::mavio::system::v1::ListPluginConfigOptionsResponse,
+                        >(format)
+                })
+            }
+            "GetPluginCatalogs" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::system::v1::GetPluginCatalogsRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::system::v1::__buffa::view::GetPluginCatalogsRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::system::v1::GetPluginCatalogsRequest,
+                    >::from_parts(&req, &body);
+                    svc.get_plugin_catalogs(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::system::v1::GetPluginCatalogsResponse,
+                        >(format)
+                })
+            }
+            "UpdatePluginCatalogs" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::system::v1::UpdatePluginCatalogsRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::system::v1::__buffa::view::UpdatePluginCatalogsRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::system::v1::UpdatePluginCatalogsRequest,
+                    >::from_parts(&req, &body);
+                    svc.update_plugin_catalogs(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::system::v1::UpdatePluginCatalogsResponse,
                         >(format)
                 })
             }
@@ -2324,6 +2597,96 @@ where
                 &self.transport,
                 &self.config,
                 PLUGIN_MANAGEMENT_SERVICE_LIST_PLUGIN_CONFIG_OPTIONS_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the GetPluginCatalogs RPC. Sends a request to /mavio.system.v1.PluginManagementService/GetPluginCatalogs.
+    pub async fn get_plugin_catalogs(
+        &self,
+        request: crate::proto::mavio::system::v1::GetPluginCatalogsRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::system::v1::__buffa::view::GetPluginCatalogsResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.get_plugin_catalogs_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the GetPluginCatalogs RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn get_plugin_catalogs_with_options(
+        &self,
+        request: crate::proto::mavio::system::v1::GetPluginCatalogsRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::system::v1::__buffa::view::GetPluginCatalogsResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                PLUGIN_MANAGEMENT_SERVICE_GET_PLUGIN_CATALOGS_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the UpdatePluginCatalogs RPC. Sends a request to /mavio.system.v1.PluginManagementService/UpdatePluginCatalogs.
+    pub async fn update_plugin_catalogs(
+        &self,
+        request: crate::proto::mavio::system::v1::UpdatePluginCatalogsRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::system::v1::__buffa::view::UpdatePluginCatalogsResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.update_plugin_catalogs_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the UpdatePluginCatalogs RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn update_plugin_catalogs_with_options(
+        &self,
+        request: crate::proto::mavio::system::v1::UpdatePluginCatalogsRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::system::v1::__buffa::view::UpdatePluginCatalogsResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                PLUGIN_MANAGEMENT_SERVICE_UPDATE_PLUGIN_CATALOGS_SPEC
                     .with_origin(::connectrpc::SpecOrigin::Client),
                 request,
                 options,

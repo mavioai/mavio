@@ -3745,11 +3745,958 @@ func (b0 UnblockCollectionResponse_builder) Build() *UnblockCollectionResponse {
 	return m0
 }
 
+// RequestSettings are the defaults of users' requests and where approved
+// requests are acquired.
+type RequestSettings struct {
+	state                               protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_DefaultRequestMovies     bool                   `protobuf:"varint,1,opt,name=default_request_movies,json=defaultRequestMovies"`
+	xxx_hidden_DefaultRequestSeries     bool                   `protobuf:"varint,2,opt,name=default_request_series,json=defaultRequestSeries"`
+	xxx_hidden_DefaultAutoApproveMovies bool                   `protobuf:"varint,3,opt,name=default_auto_approve_movies,json=defaultAutoApproveMovies"`
+	xxx_hidden_DefaultAutoApproveSeries bool                   `protobuf:"varint,4,opt,name=default_auto_approve_series,json=defaultAutoApproveSeries"`
+	xxx_hidden_DefaultReportIssues      bool                   `protobuf:"varint,5,opt,name=default_report_issues,json=defaultReportIssues"`
+	xxx_hidden_MovieQuotaLimit          int32                  `protobuf:"varint,6,opt,name=movie_quota_limit,json=movieQuotaLimit"`
+	xxx_hidden_MovieQuotaDays           int32                  `protobuf:"varint,7,opt,name=movie_quota_days,json=movieQuotaDays"`
+	xxx_hidden_SeriesQuotaLimit         int32                  `protobuf:"varint,8,opt,name=series_quota_limit,json=seriesQuotaLimit"`
+	xxx_hidden_SeriesQuotaDays          int32                  `protobuf:"varint,9,opt,name=series_quota_days,json=seriesQuotaDays"`
+	xxx_hidden_MovieLibraryId           *string                `protobuf:"bytes,10,opt,name=movie_library_id,json=movieLibraryId"`
+	xxx_hidden_MovieQualityProfileId    *string                `protobuf:"bytes,11,opt,name=movie_quality_profile_id,json=movieQualityProfileId"`
+	xxx_hidden_MinimumAvailability      MinimumAvailability    `protobuf:"varint,12,opt,name=minimum_availability,json=minimumAvailability,enum=mavio.acquisition.v1.MinimumAvailability"`
+	xxx_hidden_SeriesLibraryId          *string                `protobuf:"bytes,13,opt,name=series_library_id,json=seriesLibraryId"`
+	xxx_hidden_SeriesQualityProfileId   *string                `protobuf:"bytes,14,opt,name=series_quality_profile_id,json=seriesQualityProfileId"`
+	xxx_hidden_SeasonFolder             bool                   `protobuf:"varint,15,opt,name=season_folder,json=seasonFolder"`
+	xxx_hidden_MonitorNewItems          NewItemMonitor         `protobuf:"varint,16,opt,name=monitor_new_items,json=monitorNewItems,enum=mavio.acquisition.v1.NewItemMonitor"`
+	xxx_hidden_Specials                 bool                   `protobuf:"varint,17,opt,name=specials"`
+	xxx_hidden_AnimeLibraryId           *string                `protobuf:"bytes,18,opt,name=anime_library_id,json=animeLibraryId"`
+	xxx_hidden_AnimeQualityProfileId    *string                `protobuf:"bytes,19,opt,name=anime_quality_profile_id,json=animeQualityProfileId"`
+	xxx_hidden_BlocklistedTags          []string               `protobuf:"bytes,20,rep,name=blocklisted_tags,json=blocklistedTags"`
+	xxx_hidden_BlocklistedTagsLimit     int32                  `protobuf:"varint,21,opt,name=blocklisted_tags_limit,json=blocklistedTagsLimit"`
+	XXX_raceDetectHookData              protoimpl.RaceDetectHookData
+	XXX_presence                        [1]uint32
+	unknownFields                       protoimpl.UnknownFields
+	sizeCache                           protoimpl.SizeCache
+}
+
+func (x *RequestSettings) Reset() {
+	*x = RequestSettings{}
+	mi := &file_mavio_acquisition_v1_request_proto_msgTypes[32]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RequestSettings) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RequestSettings) ProtoMessage() {}
+
+func (x *RequestSettings) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_acquisition_v1_request_proto_msgTypes[32]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *RequestSettings) GetDefaultRequestMovies() bool {
+	if x != nil {
+		return x.xxx_hidden_DefaultRequestMovies
+	}
+	return false
+}
+
+func (x *RequestSettings) GetDefaultRequestSeries() bool {
+	if x != nil {
+		return x.xxx_hidden_DefaultRequestSeries
+	}
+	return false
+}
+
+func (x *RequestSettings) GetDefaultAutoApproveMovies() bool {
+	if x != nil {
+		return x.xxx_hidden_DefaultAutoApproveMovies
+	}
+	return false
+}
+
+func (x *RequestSettings) GetDefaultAutoApproveSeries() bool {
+	if x != nil {
+		return x.xxx_hidden_DefaultAutoApproveSeries
+	}
+	return false
+}
+
+func (x *RequestSettings) GetDefaultReportIssues() bool {
+	if x != nil {
+		return x.xxx_hidden_DefaultReportIssues
+	}
+	return false
+}
+
+func (x *RequestSettings) GetMovieQuotaLimit() int32 {
+	if x != nil {
+		return x.xxx_hidden_MovieQuotaLimit
+	}
+	return 0
+}
+
+func (x *RequestSettings) GetMovieQuotaDays() int32 {
+	if x != nil {
+		return x.xxx_hidden_MovieQuotaDays
+	}
+	return 0
+}
+
+func (x *RequestSettings) GetSeriesQuotaLimit() int32 {
+	if x != nil {
+		return x.xxx_hidden_SeriesQuotaLimit
+	}
+	return 0
+}
+
+func (x *RequestSettings) GetSeriesQuotaDays() int32 {
+	if x != nil {
+		return x.xxx_hidden_SeriesQuotaDays
+	}
+	return 0
+}
+
+func (x *RequestSettings) GetMovieLibraryId() string {
+	if x != nil {
+		if x.xxx_hidden_MovieLibraryId != nil {
+			return *x.xxx_hidden_MovieLibraryId
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *RequestSettings) GetMovieQualityProfileId() string {
+	if x != nil {
+		if x.xxx_hidden_MovieQualityProfileId != nil {
+			return *x.xxx_hidden_MovieQualityProfileId
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *RequestSettings) GetMinimumAvailability() MinimumAvailability {
+	if x != nil {
+		if protoimpl.X.Present(&(x.XXX_presence[0]), 11) {
+			return x.xxx_hidden_MinimumAvailability
+		}
+	}
+	return MinimumAvailability_MINIMUM_AVAILABILITY_UNSPECIFIED
+}
+
+func (x *RequestSettings) GetSeriesLibraryId() string {
+	if x != nil {
+		if x.xxx_hidden_SeriesLibraryId != nil {
+			return *x.xxx_hidden_SeriesLibraryId
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *RequestSettings) GetSeriesQualityProfileId() string {
+	if x != nil {
+		if x.xxx_hidden_SeriesQualityProfileId != nil {
+			return *x.xxx_hidden_SeriesQualityProfileId
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *RequestSettings) GetSeasonFolder() bool {
+	if x != nil {
+		return x.xxx_hidden_SeasonFolder
+	}
+	return false
+}
+
+func (x *RequestSettings) GetMonitorNewItems() NewItemMonitor {
+	if x != nil {
+		if protoimpl.X.Present(&(x.XXX_presence[0]), 15) {
+			return x.xxx_hidden_MonitorNewItems
+		}
+	}
+	return NewItemMonitor_NEW_ITEM_MONITOR_UNSPECIFIED
+}
+
+func (x *RequestSettings) GetSpecials() bool {
+	if x != nil {
+		return x.xxx_hidden_Specials
+	}
+	return false
+}
+
+func (x *RequestSettings) GetAnimeLibraryId() string {
+	if x != nil {
+		if x.xxx_hidden_AnimeLibraryId != nil {
+			return *x.xxx_hidden_AnimeLibraryId
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *RequestSettings) GetAnimeQualityProfileId() string {
+	if x != nil {
+		if x.xxx_hidden_AnimeQualityProfileId != nil {
+			return *x.xxx_hidden_AnimeQualityProfileId
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *RequestSettings) GetBlocklistedTags() []string {
+	if x != nil {
+		return x.xxx_hidden_BlocklistedTags
+	}
+	return nil
+}
+
+func (x *RequestSettings) GetBlocklistedTagsLimit() int32 {
+	if x != nil {
+		return x.xxx_hidden_BlocklistedTagsLimit
+	}
+	return 0
+}
+
+func (x *RequestSettings) SetDefaultRequestMovies(v bool) {
+	x.xxx_hidden_DefaultRequestMovies = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 21)
+}
+
+func (x *RequestSettings) SetDefaultRequestSeries(v bool) {
+	x.xxx_hidden_DefaultRequestSeries = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 21)
+}
+
+func (x *RequestSettings) SetDefaultAutoApproveMovies(v bool) {
+	x.xxx_hidden_DefaultAutoApproveMovies = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 21)
+}
+
+func (x *RequestSettings) SetDefaultAutoApproveSeries(v bool) {
+	x.xxx_hidden_DefaultAutoApproveSeries = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 21)
+}
+
+func (x *RequestSettings) SetDefaultReportIssues(v bool) {
+	x.xxx_hidden_DefaultReportIssues = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 21)
+}
+
+func (x *RequestSettings) SetMovieQuotaLimit(v int32) {
+	x.xxx_hidden_MovieQuotaLimit = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 21)
+}
+
+func (x *RequestSettings) SetMovieQuotaDays(v int32) {
+	x.xxx_hidden_MovieQuotaDays = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 21)
+}
+
+func (x *RequestSettings) SetSeriesQuotaLimit(v int32) {
+	x.xxx_hidden_SeriesQuotaLimit = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 21)
+}
+
+func (x *RequestSettings) SetSeriesQuotaDays(v int32) {
+	x.xxx_hidden_SeriesQuotaDays = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 8, 21)
+}
+
+func (x *RequestSettings) SetMovieLibraryId(v string) {
+	x.xxx_hidden_MovieLibraryId = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 21)
+}
+
+func (x *RequestSettings) SetMovieQualityProfileId(v string) {
+	x.xxx_hidden_MovieQualityProfileId = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 21)
+}
+
+func (x *RequestSettings) SetMinimumAvailability(v MinimumAvailability) {
+	x.xxx_hidden_MinimumAvailability = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 11, 21)
+}
+
+func (x *RequestSettings) SetSeriesLibraryId(v string) {
+	x.xxx_hidden_SeriesLibraryId = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 12, 21)
+}
+
+func (x *RequestSettings) SetSeriesQualityProfileId(v string) {
+	x.xxx_hidden_SeriesQualityProfileId = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 13, 21)
+}
+
+func (x *RequestSettings) SetSeasonFolder(v bool) {
+	x.xxx_hidden_SeasonFolder = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 14, 21)
+}
+
+func (x *RequestSettings) SetMonitorNewItems(v NewItemMonitor) {
+	x.xxx_hidden_MonitorNewItems = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 15, 21)
+}
+
+func (x *RequestSettings) SetSpecials(v bool) {
+	x.xxx_hidden_Specials = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 16, 21)
+}
+
+func (x *RequestSettings) SetAnimeLibraryId(v string) {
+	x.xxx_hidden_AnimeLibraryId = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 17, 21)
+}
+
+func (x *RequestSettings) SetAnimeQualityProfileId(v string) {
+	x.xxx_hidden_AnimeQualityProfileId = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 18, 21)
+}
+
+func (x *RequestSettings) SetBlocklistedTags(v []string) {
+	x.xxx_hidden_BlocklistedTags = v
+}
+
+func (x *RequestSettings) SetBlocklistedTagsLimit(v int32) {
+	x.xxx_hidden_BlocklistedTagsLimit = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 20, 21)
+}
+
+func (x *RequestSettings) HasDefaultRequestMovies() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *RequestSettings) HasDefaultRequestSeries() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
+}
+
+func (x *RequestSettings) HasDefaultAutoApproveMovies() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 2)
+}
+
+func (x *RequestSettings) HasDefaultAutoApproveSeries() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 3)
+}
+
+func (x *RequestSettings) HasDefaultReportIssues() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 4)
+}
+
+func (x *RequestSettings) HasMovieQuotaLimit() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 5)
+}
+
+func (x *RequestSettings) HasMovieQuotaDays() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 6)
+}
+
+func (x *RequestSettings) HasSeriesQuotaLimit() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 7)
+}
+
+func (x *RequestSettings) HasSeriesQuotaDays() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 8)
+}
+
+func (x *RequestSettings) HasMovieLibraryId() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 9)
+}
+
+func (x *RequestSettings) HasMovieQualityProfileId() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 10)
+}
+
+func (x *RequestSettings) HasMinimumAvailability() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 11)
+}
+
+func (x *RequestSettings) HasSeriesLibraryId() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 12)
+}
+
+func (x *RequestSettings) HasSeriesQualityProfileId() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 13)
+}
+
+func (x *RequestSettings) HasSeasonFolder() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 14)
+}
+
+func (x *RequestSettings) HasMonitorNewItems() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 15)
+}
+
+func (x *RequestSettings) HasSpecials() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 16)
+}
+
+func (x *RequestSettings) HasAnimeLibraryId() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 17)
+}
+
+func (x *RequestSettings) HasAnimeQualityProfileId() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 18)
+}
+
+func (x *RequestSettings) HasBlocklistedTagsLimit() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 20)
+}
+
+func (x *RequestSettings) ClearDefaultRequestMovies() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_DefaultRequestMovies = false
+}
+
+func (x *RequestSettings) ClearDefaultRequestSeries() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
+	x.xxx_hidden_DefaultRequestSeries = false
+}
+
+func (x *RequestSettings) ClearDefaultAutoApproveMovies() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 2)
+	x.xxx_hidden_DefaultAutoApproveMovies = false
+}
+
+func (x *RequestSettings) ClearDefaultAutoApproveSeries() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 3)
+	x.xxx_hidden_DefaultAutoApproveSeries = false
+}
+
+func (x *RequestSettings) ClearDefaultReportIssues() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 4)
+	x.xxx_hidden_DefaultReportIssues = false
+}
+
+func (x *RequestSettings) ClearMovieQuotaLimit() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 5)
+	x.xxx_hidden_MovieQuotaLimit = 0
+}
+
+func (x *RequestSettings) ClearMovieQuotaDays() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 6)
+	x.xxx_hidden_MovieQuotaDays = 0
+}
+
+func (x *RequestSettings) ClearSeriesQuotaLimit() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 7)
+	x.xxx_hidden_SeriesQuotaLimit = 0
+}
+
+func (x *RequestSettings) ClearSeriesQuotaDays() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 8)
+	x.xxx_hidden_SeriesQuotaDays = 0
+}
+
+func (x *RequestSettings) ClearMovieLibraryId() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 9)
+	x.xxx_hidden_MovieLibraryId = nil
+}
+
+func (x *RequestSettings) ClearMovieQualityProfileId() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 10)
+	x.xxx_hidden_MovieQualityProfileId = nil
+}
+
+func (x *RequestSettings) ClearMinimumAvailability() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 11)
+	x.xxx_hidden_MinimumAvailability = MinimumAvailability_MINIMUM_AVAILABILITY_UNSPECIFIED
+}
+
+func (x *RequestSettings) ClearSeriesLibraryId() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 12)
+	x.xxx_hidden_SeriesLibraryId = nil
+}
+
+func (x *RequestSettings) ClearSeriesQualityProfileId() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 13)
+	x.xxx_hidden_SeriesQualityProfileId = nil
+}
+
+func (x *RequestSettings) ClearSeasonFolder() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 14)
+	x.xxx_hidden_SeasonFolder = false
+}
+
+func (x *RequestSettings) ClearMonitorNewItems() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 15)
+	x.xxx_hidden_MonitorNewItems = NewItemMonitor_NEW_ITEM_MONITOR_UNSPECIFIED
+}
+
+func (x *RequestSettings) ClearSpecials() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 16)
+	x.xxx_hidden_Specials = false
+}
+
+func (x *RequestSettings) ClearAnimeLibraryId() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 17)
+	x.xxx_hidden_AnimeLibraryId = nil
+}
+
+func (x *RequestSettings) ClearAnimeQualityProfileId() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 18)
+	x.xxx_hidden_AnimeQualityProfileId = nil
+}
+
+func (x *RequestSettings) ClearBlocklistedTagsLimit() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 20)
+	x.xxx_hidden_BlocklistedTagsLimit = 0
+}
+
+type RequestSettings_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	// The request permissions new users get.
+	DefaultRequestMovies     *bool
+	DefaultRequestSeries     *bool
+	DefaultAutoApproveMovies *bool
+	DefaultAutoApproveSeries *bool
+	DefaultReportIssues      *bool
+	// The quotas of users without their own: requests of movies, or seasons
+	// of series, in the last days; a limit of 0 is unlimited, 0 days all
+	// time.
+	MovieQuotaLimit  *int32
+	MovieQuotaDays   *int32
+	SeriesQuotaLimit *int32
+	SeriesQuotaDays  *int32
+	// The movie library and quality profile approved movies are added to;
+	// empty, approvals fail.
+	MovieLibraryId        *string
+	MovieQualityProfileId *string
+	MinimumAvailability   *MinimumAvailability
+	// The show library and quality profile approved series are added to;
+	// empty, approvals fail.
+	SeriesLibraryId        *string
+	SeriesQualityProfileId *string
+	SeasonFolder           *bool
+	MonitorNewItems        *NewItemMonitor
+	// Allow requesting specials, season 0.
+	Specials *bool
+	// The show library and quality profile approved anime series are added
+	// to, as Seerr's anime settings of Sonarr; empty uses those of series.
+	// Anime series are numbered absolutely either way.
+	AnimeLibraryId        *string
+	AnimeQualityProfileId *string
+	// Keywords of discovery providers, as "<plugin>/<keyword>", whose movies
+	// and series the blocklisted tags job blocklists weekly, as Seerr's
+	// blocklistedTags.
+	BlocklistedTags []string
+	// How many pages of each order of a keyword's titles the job
+	// blocklists, 0–250; 0 for 50.
+	BlocklistedTagsLimit *int32
+}
+
+func (b0 RequestSettings_builder) Build() *RequestSettings {
+	m0 := &RequestSettings{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.DefaultRequestMovies != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 21)
+		x.xxx_hidden_DefaultRequestMovies = *b.DefaultRequestMovies
+	}
+	if b.DefaultRequestSeries != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 21)
+		x.xxx_hidden_DefaultRequestSeries = *b.DefaultRequestSeries
+	}
+	if b.DefaultAutoApproveMovies != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 21)
+		x.xxx_hidden_DefaultAutoApproveMovies = *b.DefaultAutoApproveMovies
+	}
+	if b.DefaultAutoApproveSeries != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 21)
+		x.xxx_hidden_DefaultAutoApproveSeries = *b.DefaultAutoApproveSeries
+	}
+	if b.DefaultReportIssues != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 21)
+		x.xxx_hidden_DefaultReportIssues = *b.DefaultReportIssues
+	}
+	if b.MovieQuotaLimit != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 21)
+		x.xxx_hidden_MovieQuotaLimit = *b.MovieQuotaLimit
+	}
+	if b.MovieQuotaDays != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 21)
+		x.xxx_hidden_MovieQuotaDays = *b.MovieQuotaDays
+	}
+	if b.SeriesQuotaLimit != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 21)
+		x.xxx_hidden_SeriesQuotaLimit = *b.SeriesQuotaLimit
+	}
+	if b.SeriesQuotaDays != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 8, 21)
+		x.xxx_hidden_SeriesQuotaDays = *b.SeriesQuotaDays
+	}
+	if b.MovieLibraryId != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 21)
+		x.xxx_hidden_MovieLibraryId = b.MovieLibraryId
+	}
+	if b.MovieQualityProfileId != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 21)
+		x.xxx_hidden_MovieQualityProfileId = b.MovieQualityProfileId
+	}
+	if b.MinimumAvailability != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 11, 21)
+		x.xxx_hidden_MinimumAvailability = *b.MinimumAvailability
+	}
+	if b.SeriesLibraryId != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 12, 21)
+		x.xxx_hidden_SeriesLibraryId = b.SeriesLibraryId
+	}
+	if b.SeriesQualityProfileId != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 13, 21)
+		x.xxx_hidden_SeriesQualityProfileId = b.SeriesQualityProfileId
+	}
+	if b.SeasonFolder != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 14, 21)
+		x.xxx_hidden_SeasonFolder = *b.SeasonFolder
+	}
+	if b.MonitorNewItems != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 15, 21)
+		x.xxx_hidden_MonitorNewItems = *b.MonitorNewItems
+	}
+	if b.Specials != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 16, 21)
+		x.xxx_hidden_Specials = *b.Specials
+	}
+	if b.AnimeLibraryId != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 17, 21)
+		x.xxx_hidden_AnimeLibraryId = b.AnimeLibraryId
+	}
+	if b.AnimeQualityProfileId != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 18, 21)
+		x.xxx_hidden_AnimeQualityProfileId = b.AnimeQualityProfileId
+	}
+	x.xxx_hidden_BlocklistedTags = b.BlocklistedTags
+	if b.BlocklistedTagsLimit != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 20, 21)
+		x.xxx_hidden_BlocklistedTagsLimit = *b.BlocklistedTagsLimit
+	}
+	return m0
+}
+
+type GetRequestSettingsRequest struct {
+	state         protoimpl.MessageState `protogen:"opaque.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetRequestSettingsRequest) Reset() {
+	*x = GetRequestSettingsRequest{}
+	mi := &file_mavio_acquisition_v1_request_proto_msgTypes[33]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetRequestSettingsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetRequestSettingsRequest) ProtoMessage() {}
+
+func (x *GetRequestSettingsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_acquisition_v1_request_proto_msgTypes[33]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+type GetRequestSettingsRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+}
+
+func (b0 GetRequestSettingsRequest_builder) Build() *GetRequestSettingsRequest {
+	m0 := &GetRequestSettingsRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	return m0
+}
+
+type GetRequestSettingsResponse struct {
+	state               protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Settings *RequestSettings       `protobuf:"bytes,1,opt,name=settings"`
+	unknownFields       protoimpl.UnknownFields
+	sizeCache           protoimpl.SizeCache
+}
+
+func (x *GetRequestSettingsResponse) Reset() {
+	*x = GetRequestSettingsResponse{}
+	mi := &file_mavio_acquisition_v1_request_proto_msgTypes[34]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetRequestSettingsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetRequestSettingsResponse) ProtoMessage() {}
+
+func (x *GetRequestSettingsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_acquisition_v1_request_proto_msgTypes[34]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *GetRequestSettingsResponse) GetSettings() *RequestSettings {
+	if x != nil {
+		return x.xxx_hidden_Settings
+	}
+	return nil
+}
+
+func (x *GetRequestSettingsResponse) SetSettings(v *RequestSettings) {
+	x.xxx_hidden_Settings = v
+}
+
+func (x *GetRequestSettingsResponse) HasSettings() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_Settings != nil
+}
+
+func (x *GetRequestSettingsResponse) ClearSettings() {
+	x.xxx_hidden_Settings = nil
+}
+
+type GetRequestSettingsResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Settings *RequestSettings
+}
+
+func (b0 GetRequestSettingsResponse_builder) Build() *GetRequestSettingsResponse {
+	m0 := &GetRequestSettingsResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_Settings = b.Settings
+	return m0
+}
+
+type UpdateRequestSettingsRequest struct {
+	state               protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Settings *RequestSettings       `protobuf:"bytes,1,opt,name=settings"`
+	unknownFields       protoimpl.UnknownFields
+	sizeCache           protoimpl.SizeCache
+}
+
+func (x *UpdateRequestSettingsRequest) Reset() {
+	*x = UpdateRequestSettingsRequest{}
+	mi := &file_mavio_acquisition_v1_request_proto_msgTypes[35]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateRequestSettingsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateRequestSettingsRequest) ProtoMessage() {}
+
+func (x *UpdateRequestSettingsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_acquisition_v1_request_proto_msgTypes[35]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *UpdateRequestSettingsRequest) GetSettings() *RequestSettings {
+	if x != nil {
+		return x.xxx_hidden_Settings
+	}
+	return nil
+}
+
+func (x *UpdateRequestSettingsRequest) SetSettings(v *RequestSettings) {
+	x.xxx_hidden_Settings = v
+}
+
+func (x *UpdateRequestSettingsRequest) HasSettings() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_Settings != nil
+}
+
+func (x *UpdateRequestSettingsRequest) ClearSettings() {
+	x.xxx_hidden_Settings = nil
+}
+
+type UpdateRequestSettingsRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Settings *RequestSettings
+}
+
+func (b0 UpdateRequestSettingsRequest_builder) Build() *UpdateRequestSettingsRequest {
+	m0 := &UpdateRequestSettingsRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_Settings = b.Settings
+	return m0
+}
+
+type UpdateRequestSettingsResponse struct {
+	state               protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Settings *RequestSettings       `protobuf:"bytes,1,opt,name=settings"`
+	unknownFields       protoimpl.UnknownFields
+	sizeCache           protoimpl.SizeCache
+}
+
+func (x *UpdateRequestSettingsResponse) Reset() {
+	*x = UpdateRequestSettingsResponse{}
+	mi := &file_mavio_acquisition_v1_request_proto_msgTypes[36]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateRequestSettingsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateRequestSettingsResponse) ProtoMessage() {}
+
+func (x *UpdateRequestSettingsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_acquisition_v1_request_proto_msgTypes[36]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *UpdateRequestSettingsResponse) GetSettings() *RequestSettings {
+	if x != nil {
+		return x.xxx_hidden_Settings
+	}
+	return nil
+}
+
+func (x *UpdateRequestSettingsResponse) SetSettings(v *RequestSettings) {
+	x.xxx_hidden_Settings = v
+}
+
+func (x *UpdateRequestSettingsResponse) HasSettings() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_Settings != nil
+}
+
+func (x *UpdateRequestSettingsResponse) ClearSettings() {
+	x.xxx_hidden_Settings = nil
+}
+
+type UpdateRequestSettingsResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Settings *RequestSettings
+}
+
+func (b0 UpdateRequestSettingsResponse_builder) Build() *UpdateRequestSettingsResponse {
+	m0 := &UpdateRequestSettingsResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_Settings = b.Settings
+	return m0
+}
+
 var File_mavio_acquisition_v1_request_proto protoreflect.FileDescriptor
 
 const file_mavio_acquisition_v1_request_proto_rawDesc = "" +
 	"\n" +
-	"\"mavio/acquisition/v1/request.proto\x12\x14mavio.acquisition.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\"mavio/acquisition/v1/profile.proto\"q\n" +
+	"\"mavio/acquisition/v1/request.proto\x12\x14mavio.acquisition.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\"mavio/acquisition/v1/profile.proto\x1a!mavio/acquisition/v1/wanted.proto\"q\n" +
 	"\rSeasonRequest\x12#\n" +
 	"\rseason_number\x18\x01 \x01(\x05R\fseasonNumber\x12;\n" +
 	"\x06status\x18\x02 \x01(\x0e2#.mavio.acquisition.v1.RequestStatusR\x06status\"\xc5\x04\n" +
@@ -3874,7 +4821,39 @@ const file_mavio_acquisition_v1_request_proto_rawDesc = "" +
 	"\x0eblocked_titles\x18\x01 \x03(\v2\".mavio.acquisition.v1.BlockedTitleR\rblockedTitles\"Q\n" +
 	"\x18UnblockCollectionRequest\x125\n" +
 	"\x12tmdb_collection_id\x18\x01 \x01(\x05B\a\xbaH\x04\x1a\x02 \x00R\x10tmdbCollectionId\"\x1b\n" +
-	"\x19UnblockCollectionResponse*\xbe\x01\n" +
+	"\x19UnblockCollectionResponse\"\xba\t\n" +
+	"\x0fRequestSettings\x124\n" +
+	"\x16default_request_movies\x18\x01 \x01(\bR\x14defaultRequestMovies\x124\n" +
+	"\x16default_request_series\x18\x02 \x01(\bR\x14defaultRequestSeries\x12=\n" +
+	"\x1bdefault_auto_approve_movies\x18\x03 \x01(\bR\x18defaultAutoApproveMovies\x12=\n" +
+	"\x1bdefault_auto_approve_series\x18\x04 \x01(\bR\x18defaultAutoApproveSeries\x122\n" +
+	"\x15default_report_issues\x18\x05 \x01(\bR\x13defaultReportIssues\x123\n" +
+	"\x11movie_quota_limit\x18\x06 \x01(\x05B\a\xbaH\x04\x1a\x02(\x00R\x0fmovieQuotaLimit\x121\n" +
+	"\x10movie_quota_days\x18\a \x01(\x05B\a\xbaH\x04\x1a\x02(\x00R\x0emovieQuotaDays\x125\n" +
+	"\x12series_quota_limit\x18\b \x01(\x05B\a\xbaH\x04\x1a\x02(\x00R\x10seriesQuotaLimit\x123\n" +
+	"\x11series_quota_days\x18\t \x01(\x05B\a\xbaH\x04\x1a\x02(\x00R\x0fseriesQuotaDays\x12(\n" +
+	"\x10movie_library_id\x18\n" +
+	" \x01(\tR\x0emovieLibraryId\x127\n" +
+	"\x18movie_quality_profile_id\x18\v \x01(\tR\x15movieQualityProfileId\x12f\n" +
+	"\x14minimum_availability\x18\f \x01(\x0e2).mavio.acquisition.v1.MinimumAvailabilityB\b\xbaH\x05\x82\x01\x02\x10\x01R\x13minimumAvailability\x12*\n" +
+	"\x11series_library_id\x18\r \x01(\tR\x0fseriesLibraryId\x129\n" +
+	"\x19series_quality_profile_id\x18\x0e \x01(\tR\x16seriesQualityProfileId\x12#\n" +
+	"\rseason_folder\x18\x0f \x01(\bR\fseasonFolder\x12Z\n" +
+	"\x11monitor_new_items\x18\x10 \x01(\x0e2$.mavio.acquisition.v1.NewItemMonitorB\b\xbaH\x05\x82\x01\x02\x10\x01R\x0fmonitorNewItems\x12\x1a\n" +
+	"\bspecials\x18\x11 \x01(\bR\bspecials\x12(\n" +
+	"\x10anime_library_id\x18\x12 \x01(\tR\x0eanimeLibraryId\x127\n" +
+	"\x18anime_quality_profile_id\x18\x13 \x01(\tR\x15animeQualityProfileId\x12A\n" +
+	"\x10blocklisted_tags\x18\x14 \x03(\tB\x16\xbaH\x13\x92\x01\x10\"\x0er\f2\n" +
+	"^[^/]+/.+$R\x0fblocklistedTags\x12@\n" +
+	"\x16blocklisted_tags_limit\x18\x15 \x01(\x05B\n" +
+	"\xbaH\a\x1a\x05\x18\xfa\x01(\x00R\x14blocklistedTagsLimit\"\x1b\n" +
+	"\x19GetRequestSettingsRequest\"_\n" +
+	"\x1aGetRequestSettingsResponse\x12A\n" +
+	"\bsettings\x18\x01 \x01(\v2%.mavio.acquisition.v1.RequestSettingsR\bsettings\"i\n" +
+	"\x1cUpdateRequestSettingsRequest\x12I\n" +
+	"\bsettings\x18\x01 \x01(\v2%.mavio.acquisition.v1.RequestSettingsB\x06\xbaH\x03\xc8\x01\x01R\bsettings\"b\n" +
+	"\x1dUpdateRequestSettingsResponse\x12A\n" +
+	"\bsettings\x18\x01 \x01(\v2%.mavio.acquisition.v1.RequestSettingsR\bsettings*\xbe\x01\n" +
 	"\rRequestStatus\x12\x1e\n" +
 	"\x1aREQUEST_STATUS_UNSPECIFIED\x10\x00\x12\x1a\n" +
 	"\x16REQUEST_STATUS_PENDING\x10\x01\x12\x1b\n" +
@@ -3888,7 +4867,7 @@ const file_mavio_acquisition_v1_request_proto_rawDesc = "" +
 	"\x12BlockedTitleSource\x12$\n" +
 	" BLOCKED_TITLE_SOURCE_UNSPECIFIED\x10\x00\x12\x1f\n" +
 	"\x1bBLOCKED_TITLE_SOURCE_MANUAL\x10\x01\x12\x1d\n" +
-	"\x19BLOCKED_TITLE_SOURCE_TAGS\x10\x022\xfe\v\n" +
+	"\x19BLOCKED_TITLE_SOURCE_TAGS\x10\x022\x84\x0e\n" +
 	"\x0eRequestService\x12h\n" +
 	"\rCreateRequest\x12*.mavio.acquisition.v1.CreateRequestRequest\x1a+.mavio.acquisition.v1.CreateRequestResponse\x12j\n" +
 	"\fListRequests\x12).mavio.acquisition.v1.ListRequestsRequest\x1a*.mavio.acquisition.v1.ListRequestsResponse\"\x03\x90\x02\x01\x12d\n" +
@@ -3905,61 +4884,70 @@ const file_mavio_acquisition_v1_request_proto_rawDesc = "" +
 	"\fUnblockTitle\x12).mavio.acquisition.v1.UnblockTitleRequest\x1a*.mavio.acquisition.v1.UnblockTitleResponse\"\x03\x90\x02\x02\x12y\n" +
 	"\x11ListBlockedTitles\x12..mavio.acquisition.v1.ListBlockedTitlesRequest\x1a/.mavio.acquisition.v1.ListBlockedTitlesResponse\"\x03\x90\x02\x01\x12n\n" +
 	"\x0fBlockCollection\x12,.mavio.acquisition.v1.BlockCollectionRequest\x1a-.mavio.acquisition.v1.BlockCollectionResponse\x12y\n" +
-	"\x11UnblockCollection\x12..mavio.acquisition.v1.UnblockCollectionRequest\x1a/.mavio.acquisition.v1.UnblockCollectionResponse\"\x03\x90\x02\x02B\xe9\x01\n" +
+	"\x11UnblockCollection\x12..mavio.acquisition.v1.UnblockCollectionRequest\x1a/.mavio.acquisition.v1.UnblockCollectionResponse\"\x03\x90\x02\x02\x12|\n" +
+	"\x12GetRequestSettings\x12/.mavio.acquisition.v1.GetRequestSettingsRequest\x1a0.mavio.acquisition.v1.GetRequestSettingsResponse\"\x03\x90\x02\x01\x12\x85\x01\n" +
+	"\x15UpdateRequestSettings\x122.mavio.acquisition.v1.UpdateRequestSettingsRequest\x1a3.mavio.acquisition.v1.UpdateRequestSettingsResponse\"\x03\x90\x02\x02B\xe9\x01\n" +
 	"\x18com.mavio.acquisition.v1B\fRequestProtoP\x01ZMgithub.com/mavioai/mavio/libs/proto/gen/go/mavio/acquisition/v1;acquisitionv1\xa2\x02\x03MAX\xaa\x02\x14Mavio.Acquisition.V1\xca\x02\x14Mavio\\Acquisition\\V1\xe2\x02 Mavio\\Acquisition\\V1\\GPBMetadata\xea\x02\x16Mavio::Acquisition::V1b\beditionsp\xe8\a"
 
 var file_mavio_acquisition_v1_request_proto_enumTypes = make([]protoimpl.EnumInfo, 3)
-var file_mavio_acquisition_v1_request_proto_msgTypes = make([]protoimpl.MessageInfo, 32)
+var file_mavio_acquisition_v1_request_proto_msgTypes = make([]protoimpl.MessageInfo, 37)
 var file_mavio_acquisition_v1_request_proto_goTypes = []any{
-	(RequestStatus)(0),                // 0: mavio.acquisition.v1.RequestStatus
-	(RequestSort)(0),                  // 1: mavio.acquisition.v1.RequestSort
-	(BlockedTitleSource)(0),           // 2: mavio.acquisition.v1.BlockedTitleSource
-	(*SeasonRequest)(nil),             // 3: mavio.acquisition.v1.SeasonRequest
-	(*Request)(nil),                   // 4: mavio.acquisition.v1.Request
-	(*CreateRequestRequest)(nil),      // 5: mavio.acquisition.v1.CreateRequestRequest
-	(*CreateRequestResponse)(nil),     // 6: mavio.acquisition.v1.CreateRequestResponse
-	(*ListRequestsRequest)(nil),       // 7: mavio.acquisition.v1.ListRequestsRequest
-	(*ListRequestsResponse)(nil),      // 8: mavio.acquisition.v1.ListRequestsResponse
-	(*GetRequestRequest)(nil),         // 9: mavio.acquisition.v1.GetRequestRequest
-	(*GetRequestResponse)(nil),        // 10: mavio.acquisition.v1.GetRequestResponse
-	(*UpdateRequestRequest)(nil),      // 11: mavio.acquisition.v1.UpdateRequestRequest
-	(*UpdateRequestResponse)(nil),     // 12: mavio.acquisition.v1.UpdateRequestResponse
-	(*DeleteRequestRequest)(nil),      // 13: mavio.acquisition.v1.DeleteRequestRequest
-	(*DeleteRequestResponse)(nil),     // 14: mavio.acquisition.v1.DeleteRequestResponse
-	(*ApproveRequestRequest)(nil),     // 15: mavio.acquisition.v1.ApproveRequestRequest
-	(*ApproveRequestResponse)(nil),    // 16: mavio.acquisition.v1.ApproveRequestResponse
-	(*DeclineRequestRequest)(nil),     // 17: mavio.acquisition.v1.DeclineRequestRequest
-	(*DeclineRequestResponse)(nil),    // 18: mavio.acquisition.v1.DeclineRequestResponse
-	(*RetryRequestRequest)(nil),       // 19: mavio.acquisition.v1.RetryRequestRequest
-	(*RetryRequestResponse)(nil),      // 20: mavio.acquisition.v1.RetryRequestResponse
-	(*GetQuotaRequest)(nil),           // 21: mavio.acquisition.v1.GetQuotaRequest
-	(*Quota)(nil),                     // 22: mavio.acquisition.v1.Quota
-	(*GetQuotaResponse)(nil),          // 23: mavio.acquisition.v1.GetQuotaResponse
-	(*BlockedTitle)(nil),              // 24: mavio.acquisition.v1.BlockedTitle
-	(*BlockTitleRequest)(nil),         // 25: mavio.acquisition.v1.BlockTitleRequest
-	(*BlockTitleResponse)(nil),        // 26: mavio.acquisition.v1.BlockTitleResponse
-	(*UnblockTitleRequest)(nil),       // 27: mavio.acquisition.v1.UnblockTitleRequest
-	(*UnblockTitleResponse)(nil),      // 28: mavio.acquisition.v1.UnblockTitleResponse
-	(*ListBlockedTitlesRequest)(nil),  // 29: mavio.acquisition.v1.ListBlockedTitlesRequest
-	(*ListBlockedTitlesResponse)(nil), // 30: mavio.acquisition.v1.ListBlockedTitlesResponse
-	(*BlockCollectionRequest)(nil),    // 31: mavio.acquisition.v1.BlockCollectionRequest
-	(*BlockCollectionResponse)(nil),   // 32: mavio.acquisition.v1.BlockCollectionResponse
-	(*UnblockCollectionRequest)(nil),  // 33: mavio.acquisition.v1.UnblockCollectionRequest
-	(*UnblockCollectionResponse)(nil), // 34: mavio.acquisition.v1.UnblockCollectionResponse
-	(MediaKind)(0),                    // 35: mavio.acquisition.v1.MediaKind
-	(*timestamppb.Timestamp)(nil),     // 36: google.protobuf.Timestamp
+	(RequestStatus)(0),                    // 0: mavio.acquisition.v1.RequestStatus
+	(RequestSort)(0),                      // 1: mavio.acquisition.v1.RequestSort
+	(BlockedTitleSource)(0),               // 2: mavio.acquisition.v1.BlockedTitleSource
+	(*SeasonRequest)(nil),                 // 3: mavio.acquisition.v1.SeasonRequest
+	(*Request)(nil),                       // 4: mavio.acquisition.v1.Request
+	(*CreateRequestRequest)(nil),          // 5: mavio.acquisition.v1.CreateRequestRequest
+	(*CreateRequestResponse)(nil),         // 6: mavio.acquisition.v1.CreateRequestResponse
+	(*ListRequestsRequest)(nil),           // 7: mavio.acquisition.v1.ListRequestsRequest
+	(*ListRequestsResponse)(nil),          // 8: mavio.acquisition.v1.ListRequestsResponse
+	(*GetRequestRequest)(nil),             // 9: mavio.acquisition.v1.GetRequestRequest
+	(*GetRequestResponse)(nil),            // 10: mavio.acquisition.v1.GetRequestResponse
+	(*UpdateRequestRequest)(nil),          // 11: mavio.acquisition.v1.UpdateRequestRequest
+	(*UpdateRequestResponse)(nil),         // 12: mavio.acquisition.v1.UpdateRequestResponse
+	(*DeleteRequestRequest)(nil),          // 13: mavio.acquisition.v1.DeleteRequestRequest
+	(*DeleteRequestResponse)(nil),         // 14: mavio.acquisition.v1.DeleteRequestResponse
+	(*ApproveRequestRequest)(nil),         // 15: mavio.acquisition.v1.ApproveRequestRequest
+	(*ApproveRequestResponse)(nil),        // 16: mavio.acquisition.v1.ApproveRequestResponse
+	(*DeclineRequestRequest)(nil),         // 17: mavio.acquisition.v1.DeclineRequestRequest
+	(*DeclineRequestResponse)(nil),        // 18: mavio.acquisition.v1.DeclineRequestResponse
+	(*RetryRequestRequest)(nil),           // 19: mavio.acquisition.v1.RetryRequestRequest
+	(*RetryRequestResponse)(nil),          // 20: mavio.acquisition.v1.RetryRequestResponse
+	(*GetQuotaRequest)(nil),               // 21: mavio.acquisition.v1.GetQuotaRequest
+	(*Quota)(nil),                         // 22: mavio.acquisition.v1.Quota
+	(*GetQuotaResponse)(nil),              // 23: mavio.acquisition.v1.GetQuotaResponse
+	(*BlockedTitle)(nil),                  // 24: mavio.acquisition.v1.BlockedTitle
+	(*BlockTitleRequest)(nil),             // 25: mavio.acquisition.v1.BlockTitleRequest
+	(*BlockTitleResponse)(nil),            // 26: mavio.acquisition.v1.BlockTitleResponse
+	(*UnblockTitleRequest)(nil),           // 27: mavio.acquisition.v1.UnblockTitleRequest
+	(*UnblockTitleResponse)(nil),          // 28: mavio.acquisition.v1.UnblockTitleResponse
+	(*ListBlockedTitlesRequest)(nil),      // 29: mavio.acquisition.v1.ListBlockedTitlesRequest
+	(*ListBlockedTitlesResponse)(nil),     // 30: mavio.acquisition.v1.ListBlockedTitlesResponse
+	(*BlockCollectionRequest)(nil),        // 31: mavio.acquisition.v1.BlockCollectionRequest
+	(*BlockCollectionResponse)(nil),       // 32: mavio.acquisition.v1.BlockCollectionResponse
+	(*UnblockCollectionRequest)(nil),      // 33: mavio.acquisition.v1.UnblockCollectionRequest
+	(*UnblockCollectionResponse)(nil),     // 34: mavio.acquisition.v1.UnblockCollectionResponse
+	(*RequestSettings)(nil),               // 35: mavio.acquisition.v1.RequestSettings
+	(*GetRequestSettingsRequest)(nil),     // 36: mavio.acquisition.v1.GetRequestSettingsRequest
+	(*GetRequestSettingsResponse)(nil),    // 37: mavio.acquisition.v1.GetRequestSettingsResponse
+	(*UpdateRequestSettingsRequest)(nil),  // 38: mavio.acquisition.v1.UpdateRequestSettingsRequest
+	(*UpdateRequestSettingsResponse)(nil), // 39: mavio.acquisition.v1.UpdateRequestSettingsResponse
+	(MediaKind)(0),                        // 40: mavio.acquisition.v1.MediaKind
+	(*timestamppb.Timestamp)(nil),         // 41: google.protobuf.Timestamp
+	(MinimumAvailability)(0),              // 42: mavio.acquisition.v1.MinimumAvailability
+	(NewItemMonitor)(0),                   // 43: mavio.acquisition.v1.NewItemMonitor
 }
 var file_mavio_acquisition_v1_request_proto_depIdxs = []int32{
 	0,  // 0: mavio.acquisition.v1.SeasonRequest.status:type_name -> mavio.acquisition.v1.RequestStatus
-	35, // 1: mavio.acquisition.v1.Request.media_kind:type_name -> mavio.acquisition.v1.MediaKind
+	40, // 1: mavio.acquisition.v1.Request.media_kind:type_name -> mavio.acquisition.v1.MediaKind
 	3,  // 2: mavio.acquisition.v1.Request.seasons:type_name -> mavio.acquisition.v1.SeasonRequest
 	0,  // 3: mavio.acquisition.v1.Request.status:type_name -> mavio.acquisition.v1.RequestStatus
-	36, // 4: mavio.acquisition.v1.Request.create_time:type_name -> google.protobuf.Timestamp
-	36, // 5: mavio.acquisition.v1.Request.update_time:type_name -> google.protobuf.Timestamp
-	35, // 6: mavio.acquisition.v1.CreateRequestRequest.media_kind:type_name -> mavio.acquisition.v1.MediaKind
+	41, // 4: mavio.acquisition.v1.Request.create_time:type_name -> google.protobuf.Timestamp
+	41, // 5: mavio.acquisition.v1.Request.update_time:type_name -> google.protobuf.Timestamp
+	40, // 6: mavio.acquisition.v1.CreateRequestRequest.media_kind:type_name -> mavio.acquisition.v1.MediaKind
 	4,  // 7: mavio.acquisition.v1.CreateRequestResponse.request:type_name -> mavio.acquisition.v1.Request
 	0,  // 8: mavio.acquisition.v1.ListRequestsRequest.statuses:type_name -> mavio.acquisition.v1.RequestStatus
-	35, // 9: mavio.acquisition.v1.ListRequestsRequest.media_kind:type_name -> mavio.acquisition.v1.MediaKind
+	40, // 9: mavio.acquisition.v1.ListRequestsRequest.media_kind:type_name -> mavio.acquisition.v1.MediaKind
 	1,  // 10: mavio.acquisition.v1.ListRequestsRequest.sort:type_name -> mavio.acquisition.v1.RequestSort
 	4,  // 11: mavio.acquisition.v1.ListRequestsResponse.requests:type_name -> mavio.acquisition.v1.Request
 	4,  // 12: mavio.acquisition.v1.GetRequestResponse.request:type_name -> mavio.acquisition.v1.Request
@@ -3969,47 +4957,56 @@ var file_mavio_acquisition_v1_request_proto_depIdxs = []int32{
 	4,  // 16: mavio.acquisition.v1.RetryRequestResponse.request:type_name -> mavio.acquisition.v1.Request
 	22, // 17: mavio.acquisition.v1.GetQuotaResponse.movie:type_name -> mavio.acquisition.v1.Quota
 	22, // 18: mavio.acquisition.v1.GetQuotaResponse.series:type_name -> mavio.acquisition.v1.Quota
-	35, // 19: mavio.acquisition.v1.BlockedTitle.media_kind:type_name -> mavio.acquisition.v1.MediaKind
-	36, // 20: mavio.acquisition.v1.BlockedTitle.create_time:type_name -> google.protobuf.Timestamp
-	35, // 21: mavio.acquisition.v1.BlockTitleRequest.media_kind:type_name -> mavio.acquisition.v1.MediaKind
+	40, // 19: mavio.acquisition.v1.BlockedTitle.media_kind:type_name -> mavio.acquisition.v1.MediaKind
+	41, // 20: mavio.acquisition.v1.BlockedTitle.create_time:type_name -> google.protobuf.Timestamp
+	40, // 21: mavio.acquisition.v1.BlockTitleRequest.media_kind:type_name -> mavio.acquisition.v1.MediaKind
 	24, // 22: mavio.acquisition.v1.BlockTitleResponse.blocked_title:type_name -> mavio.acquisition.v1.BlockedTitle
-	35, // 23: mavio.acquisition.v1.UnblockTitleRequest.media_kind:type_name -> mavio.acquisition.v1.MediaKind
+	40, // 23: mavio.acquisition.v1.UnblockTitleRequest.media_kind:type_name -> mavio.acquisition.v1.MediaKind
 	2,  // 24: mavio.acquisition.v1.ListBlockedTitlesRequest.source:type_name -> mavio.acquisition.v1.BlockedTitleSource
 	24, // 25: mavio.acquisition.v1.ListBlockedTitlesResponse.blocked_titles:type_name -> mavio.acquisition.v1.BlockedTitle
 	24, // 26: mavio.acquisition.v1.BlockCollectionResponse.blocked_titles:type_name -> mavio.acquisition.v1.BlockedTitle
-	5,  // 27: mavio.acquisition.v1.RequestService.CreateRequest:input_type -> mavio.acquisition.v1.CreateRequestRequest
-	7,  // 28: mavio.acquisition.v1.RequestService.ListRequests:input_type -> mavio.acquisition.v1.ListRequestsRequest
-	9,  // 29: mavio.acquisition.v1.RequestService.GetRequest:input_type -> mavio.acquisition.v1.GetRequestRequest
-	11, // 30: mavio.acquisition.v1.RequestService.UpdateRequest:input_type -> mavio.acquisition.v1.UpdateRequestRequest
-	13, // 31: mavio.acquisition.v1.RequestService.DeleteRequest:input_type -> mavio.acquisition.v1.DeleteRequestRequest
-	15, // 32: mavio.acquisition.v1.RequestService.ApproveRequest:input_type -> mavio.acquisition.v1.ApproveRequestRequest
-	17, // 33: mavio.acquisition.v1.RequestService.DeclineRequest:input_type -> mavio.acquisition.v1.DeclineRequestRequest
-	19, // 34: mavio.acquisition.v1.RequestService.RetryRequest:input_type -> mavio.acquisition.v1.RetryRequestRequest
-	21, // 35: mavio.acquisition.v1.RequestService.GetQuota:input_type -> mavio.acquisition.v1.GetQuotaRequest
-	25, // 36: mavio.acquisition.v1.RequestService.BlockTitle:input_type -> mavio.acquisition.v1.BlockTitleRequest
-	27, // 37: mavio.acquisition.v1.RequestService.UnblockTitle:input_type -> mavio.acquisition.v1.UnblockTitleRequest
-	29, // 38: mavio.acquisition.v1.RequestService.ListBlockedTitles:input_type -> mavio.acquisition.v1.ListBlockedTitlesRequest
-	31, // 39: mavio.acquisition.v1.RequestService.BlockCollection:input_type -> mavio.acquisition.v1.BlockCollectionRequest
-	33, // 40: mavio.acquisition.v1.RequestService.UnblockCollection:input_type -> mavio.acquisition.v1.UnblockCollectionRequest
-	6,  // 41: mavio.acquisition.v1.RequestService.CreateRequest:output_type -> mavio.acquisition.v1.CreateRequestResponse
-	8,  // 42: mavio.acquisition.v1.RequestService.ListRequests:output_type -> mavio.acquisition.v1.ListRequestsResponse
-	10, // 43: mavio.acquisition.v1.RequestService.GetRequest:output_type -> mavio.acquisition.v1.GetRequestResponse
-	12, // 44: mavio.acquisition.v1.RequestService.UpdateRequest:output_type -> mavio.acquisition.v1.UpdateRequestResponse
-	14, // 45: mavio.acquisition.v1.RequestService.DeleteRequest:output_type -> mavio.acquisition.v1.DeleteRequestResponse
-	16, // 46: mavio.acquisition.v1.RequestService.ApproveRequest:output_type -> mavio.acquisition.v1.ApproveRequestResponse
-	18, // 47: mavio.acquisition.v1.RequestService.DeclineRequest:output_type -> mavio.acquisition.v1.DeclineRequestResponse
-	20, // 48: mavio.acquisition.v1.RequestService.RetryRequest:output_type -> mavio.acquisition.v1.RetryRequestResponse
-	23, // 49: mavio.acquisition.v1.RequestService.GetQuota:output_type -> mavio.acquisition.v1.GetQuotaResponse
-	26, // 50: mavio.acquisition.v1.RequestService.BlockTitle:output_type -> mavio.acquisition.v1.BlockTitleResponse
-	28, // 51: mavio.acquisition.v1.RequestService.UnblockTitle:output_type -> mavio.acquisition.v1.UnblockTitleResponse
-	30, // 52: mavio.acquisition.v1.RequestService.ListBlockedTitles:output_type -> mavio.acquisition.v1.ListBlockedTitlesResponse
-	32, // 53: mavio.acquisition.v1.RequestService.BlockCollection:output_type -> mavio.acquisition.v1.BlockCollectionResponse
-	34, // 54: mavio.acquisition.v1.RequestService.UnblockCollection:output_type -> mavio.acquisition.v1.UnblockCollectionResponse
-	41, // [41:55] is the sub-list for method output_type
-	27, // [27:41] is the sub-list for method input_type
-	27, // [27:27] is the sub-list for extension type_name
-	27, // [27:27] is the sub-list for extension extendee
-	0,  // [0:27] is the sub-list for field type_name
+	42, // 27: mavio.acquisition.v1.RequestSettings.minimum_availability:type_name -> mavio.acquisition.v1.MinimumAvailability
+	43, // 28: mavio.acquisition.v1.RequestSettings.monitor_new_items:type_name -> mavio.acquisition.v1.NewItemMonitor
+	35, // 29: mavio.acquisition.v1.GetRequestSettingsResponse.settings:type_name -> mavio.acquisition.v1.RequestSettings
+	35, // 30: mavio.acquisition.v1.UpdateRequestSettingsRequest.settings:type_name -> mavio.acquisition.v1.RequestSettings
+	35, // 31: mavio.acquisition.v1.UpdateRequestSettingsResponse.settings:type_name -> mavio.acquisition.v1.RequestSettings
+	5,  // 32: mavio.acquisition.v1.RequestService.CreateRequest:input_type -> mavio.acquisition.v1.CreateRequestRequest
+	7,  // 33: mavio.acquisition.v1.RequestService.ListRequests:input_type -> mavio.acquisition.v1.ListRequestsRequest
+	9,  // 34: mavio.acquisition.v1.RequestService.GetRequest:input_type -> mavio.acquisition.v1.GetRequestRequest
+	11, // 35: mavio.acquisition.v1.RequestService.UpdateRequest:input_type -> mavio.acquisition.v1.UpdateRequestRequest
+	13, // 36: mavio.acquisition.v1.RequestService.DeleteRequest:input_type -> mavio.acquisition.v1.DeleteRequestRequest
+	15, // 37: mavio.acquisition.v1.RequestService.ApproveRequest:input_type -> mavio.acquisition.v1.ApproveRequestRequest
+	17, // 38: mavio.acquisition.v1.RequestService.DeclineRequest:input_type -> mavio.acquisition.v1.DeclineRequestRequest
+	19, // 39: mavio.acquisition.v1.RequestService.RetryRequest:input_type -> mavio.acquisition.v1.RetryRequestRequest
+	21, // 40: mavio.acquisition.v1.RequestService.GetQuota:input_type -> mavio.acquisition.v1.GetQuotaRequest
+	25, // 41: mavio.acquisition.v1.RequestService.BlockTitle:input_type -> mavio.acquisition.v1.BlockTitleRequest
+	27, // 42: mavio.acquisition.v1.RequestService.UnblockTitle:input_type -> mavio.acquisition.v1.UnblockTitleRequest
+	29, // 43: mavio.acquisition.v1.RequestService.ListBlockedTitles:input_type -> mavio.acquisition.v1.ListBlockedTitlesRequest
+	31, // 44: mavio.acquisition.v1.RequestService.BlockCollection:input_type -> mavio.acquisition.v1.BlockCollectionRequest
+	33, // 45: mavio.acquisition.v1.RequestService.UnblockCollection:input_type -> mavio.acquisition.v1.UnblockCollectionRequest
+	36, // 46: mavio.acquisition.v1.RequestService.GetRequestSettings:input_type -> mavio.acquisition.v1.GetRequestSettingsRequest
+	38, // 47: mavio.acquisition.v1.RequestService.UpdateRequestSettings:input_type -> mavio.acquisition.v1.UpdateRequestSettingsRequest
+	6,  // 48: mavio.acquisition.v1.RequestService.CreateRequest:output_type -> mavio.acquisition.v1.CreateRequestResponse
+	8,  // 49: mavio.acquisition.v1.RequestService.ListRequests:output_type -> mavio.acquisition.v1.ListRequestsResponse
+	10, // 50: mavio.acquisition.v1.RequestService.GetRequest:output_type -> mavio.acquisition.v1.GetRequestResponse
+	12, // 51: mavio.acquisition.v1.RequestService.UpdateRequest:output_type -> mavio.acquisition.v1.UpdateRequestResponse
+	14, // 52: mavio.acquisition.v1.RequestService.DeleteRequest:output_type -> mavio.acquisition.v1.DeleteRequestResponse
+	16, // 53: mavio.acquisition.v1.RequestService.ApproveRequest:output_type -> mavio.acquisition.v1.ApproveRequestResponse
+	18, // 54: mavio.acquisition.v1.RequestService.DeclineRequest:output_type -> mavio.acquisition.v1.DeclineRequestResponse
+	20, // 55: mavio.acquisition.v1.RequestService.RetryRequest:output_type -> mavio.acquisition.v1.RetryRequestResponse
+	23, // 56: mavio.acquisition.v1.RequestService.GetQuota:output_type -> mavio.acquisition.v1.GetQuotaResponse
+	26, // 57: mavio.acquisition.v1.RequestService.BlockTitle:output_type -> mavio.acquisition.v1.BlockTitleResponse
+	28, // 58: mavio.acquisition.v1.RequestService.UnblockTitle:output_type -> mavio.acquisition.v1.UnblockTitleResponse
+	30, // 59: mavio.acquisition.v1.RequestService.ListBlockedTitles:output_type -> mavio.acquisition.v1.ListBlockedTitlesResponse
+	32, // 60: mavio.acquisition.v1.RequestService.BlockCollection:output_type -> mavio.acquisition.v1.BlockCollectionResponse
+	34, // 61: mavio.acquisition.v1.RequestService.UnblockCollection:output_type -> mavio.acquisition.v1.UnblockCollectionResponse
+	37, // 62: mavio.acquisition.v1.RequestService.GetRequestSettings:output_type -> mavio.acquisition.v1.GetRequestSettingsResponse
+	39, // 63: mavio.acquisition.v1.RequestService.UpdateRequestSettings:output_type -> mavio.acquisition.v1.UpdateRequestSettingsResponse
+	48, // [48:64] is the sub-list for method output_type
+	32, // [32:48] is the sub-list for method input_type
+	32, // [32:32] is the sub-list for extension type_name
+	32, // [32:32] is the sub-list for extension extendee
+	0,  // [0:32] is the sub-list for field type_name
 }
 
 func init() { file_mavio_acquisition_v1_request_proto_init() }
@@ -4018,13 +5015,14 @@ func file_mavio_acquisition_v1_request_proto_init() {
 		return
 	}
 	file_mavio_acquisition_v1_profile_proto_init()
+	file_mavio_acquisition_v1_wanted_proto_init()
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_mavio_acquisition_v1_request_proto_rawDesc), len(file_mavio_acquisition_v1_request_proto_rawDesc)),
 			NumEnums:      3,
-			NumMessages:   32,
+			NumMessages:   37,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

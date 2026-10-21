@@ -30,6 +30,16 @@ service ProxyService {
   // TestProxy fetches a URL through a stored proxy, the system proxy
   // (directly when it sets none) or an unsaved proxy.
   rpc TestProxy(TestProxyRequest) returns (TestProxyResponse);
+  // GetOutboundProxies returns the proxies the server's own HTTP requests
+  // go through.
+  rpc GetOutboundProxies(GetOutboundProxiesRequest) returns (GetOutboundProxiesResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // UpdateOutboundProxies replaces them; a proxy that does not exist is
+  // INVALID_ARGUMENT.
+  rpc UpdateOutboundProxies(UpdateOutboundProxiesRequest) returns (UpdateOutboundProxiesResponse) {
+    option idempotency_level = IDEMPOTENT;
+  }
 }
 
 enum ProxyKind {
@@ -136,4 +146,33 @@ message TestProxyResponse {
   // from, and its country (ISO 3166-1).
   string exit_ip = 5;
   string country = 6;
+}
+
+// OutboundProxies are the proxies the server's own HTTP requests go
+// through, by what they reach: each the ID of one of the server's proxies
+// (ProxyService), "system" for the system proxy, or empty for none. The
+// hosts of this machine and of the local network are reached directly.
+message OutboundProxies {
+  // Plugin catalogs and plugin packages.
+  string plugin_catalogs = 1;
+  // Items' remote images, such as posters.
+  string images = 2;
+  // mavio.dev's API.
+  string mavio_dev = 3;
+  // The certificate authorities of mavio.site certificates.
+  string acme = 4;
+}
+
+message GetOutboundProxiesRequest {}
+
+message GetOutboundProxiesResponse {
+  OutboundProxies proxies = 1;
+}
+
+message UpdateOutboundProxiesRequest {
+  OutboundProxies proxies = 1 [(buf.validate.field).required = true];
+}
+
+message UpdateOutboundProxiesResponse {
+  OutboundProxies proxies = 1;
 }

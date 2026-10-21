@@ -1404,6 +1404,89 @@ impl ::buffa::Enumeration for TranscodeReason {
         ]
     }
 }
+/// HardwareAcceleration is the hardware transcodes decode and encode on.
+#[allow(non_camel_case_types)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
+#[repr(i32)]
+pub enum HardwareAcceleration {
+    HARDWARE_ACCELERATION_UNSPECIFIED = 0i32,
+    /// What the server's ffmpeg and hardware support, if anything.
+    HARDWARE_ACCELERATION_AUTO = 1i32,
+    HARDWARE_ACCELERATION_NONE = 2i32,
+    HARDWARE_ACCELERATION_VIDEOTOOLBOX = 3i32,
+}
+impl HardwareAcceleration {
+    ///Idiomatic alias for [`Self::HARDWARE_ACCELERATION_UNSPECIFIED`]; `Debug` prints the variant name.
+    #[allow(non_upper_case_globals)]
+    pub const Unspecified: Self = Self::HARDWARE_ACCELERATION_UNSPECIFIED;
+    ///Idiomatic alias for [`Self::HARDWARE_ACCELERATION_AUTO`]; `Debug` prints the variant name.
+    #[allow(non_upper_case_globals)]
+    pub const Auto: Self = Self::HARDWARE_ACCELERATION_AUTO;
+    ///Idiomatic alias for [`Self::HARDWARE_ACCELERATION_NONE`]; `Debug` prints the variant name.
+    #[allow(non_upper_case_globals)]
+    pub const None: Self = Self::HARDWARE_ACCELERATION_NONE;
+    ///Idiomatic alias for [`Self::HARDWARE_ACCELERATION_VIDEOTOOLBOX`]; `Debug` prints the variant name.
+    #[allow(non_upper_case_globals)]
+    pub const Videotoolbox: Self = Self::HARDWARE_ACCELERATION_VIDEOTOOLBOX;
+}
+impl ::core::default::Default for HardwareAcceleration {
+    fn default() -> Self {
+        Self::HARDWARE_ACCELERATION_UNSPECIFIED
+    }
+}
+impl ::buffa::Enumeration for HardwareAcceleration {
+    fn from_i32(value: i32) -> ::core::option::Option<Self> {
+        match value {
+            0i32 => ::core::option::Option::Some(Self::HARDWARE_ACCELERATION_UNSPECIFIED),
+            1i32 => ::core::option::Option::Some(Self::HARDWARE_ACCELERATION_AUTO),
+            2i32 => ::core::option::Option::Some(Self::HARDWARE_ACCELERATION_NONE),
+            3i32 => {
+                ::core::option::Option::Some(Self::HARDWARE_ACCELERATION_VIDEOTOOLBOX)
+            }
+            _ => ::core::option::Option::None,
+        }
+    }
+    fn to_i32(&self) -> i32 {
+        *self as i32
+    }
+    fn proto_name(&self) -> &'static str {
+        match self {
+            Self::HARDWARE_ACCELERATION_UNSPECIFIED => {
+                "HARDWARE_ACCELERATION_UNSPECIFIED"
+            }
+            Self::HARDWARE_ACCELERATION_AUTO => "HARDWARE_ACCELERATION_AUTO",
+            Self::HARDWARE_ACCELERATION_NONE => "HARDWARE_ACCELERATION_NONE",
+            Self::HARDWARE_ACCELERATION_VIDEOTOOLBOX => {
+                "HARDWARE_ACCELERATION_VIDEOTOOLBOX"
+            }
+        }
+    }
+    fn from_proto_name(name: &str) -> ::core::option::Option<Self> {
+        match name {
+            "HARDWARE_ACCELERATION_UNSPECIFIED" => {
+                ::core::option::Option::Some(Self::HARDWARE_ACCELERATION_UNSPECIFIED)
+            }
+            "HARDWARE_ACCELERATION_AUTO" => {
+                ::core::option::Option::Some(Self::HARDWARE_ACCELERATION_AUTO)
+            }
+            "HARDWARE_ACCELERATION_NONE" => {
+                ::core::option::Option::Some(Self::HARDWARE_ACCELERATION_NONE)
+            }
+            "HARDWARE_ACCELERATION_VIDEOTOOLBOX" => {
+                ::core::option::Option::Some(Self::HARDWARE_ACCELERATION_VIDEOTOOLBOX)
+            }
+            _ => ::core::option::Option::None,
+        }
+    }
+    fn values() -> &'static [Self] {
+        &[
+            Self::HARDWARE_ACCELERATION_UNSPECIFIED,
+            Self::HARDWARE_ACCELERATION_AUTO,
+            Self::HARDWARE_ACCELERATION_NONE,
+            Self::HARDWARE_ACCELERATION_VIDEOTOOLBOX,
+        ]
+    }
+}
 /// ClientCapabilities describes what a client can play: which containers and
 /// codecs it plays directly, which formats it can receive transcodes in, the
 /// limits of its decoders and how it shows subtitles.
@@ -5663,6 +5746,1023 @@ impl ::buffa::Message for ListMediaSourcesResponse {
 }
 impl ::buffa::ExtensionSet for ListMediaSourcesResponse {
     const PROTO_FQN: &'static str = "mavio.playback.v1.ListMediaSourcesResponse";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+/// TranscodingSettings steer transcodes.
+#[derive(Clone, PartialEq, Default)]
+pub struct TranscodingSettings {
+    /// Field 1: `hardware_acceleration`
+    pub hardware_acceleration: ::core::option::Option<
+        ::buffa::EnumValue<HardwareAcceleration>,
+    >,
+    /// Field 2: `hardware_encoding`
+    pub hardware_encoding: ::core::option::Option<bool>,
+    /// "", "ultrafast", "superfast", "veryfast", "faster", "fast", "medium",
+    /// "slow", "slower" or "veryslow"; empty picks one by the source.
+    ///
+    /// Field 3: `encoder_preset`
+    pub encoder_preset: ::core::option::Option<::buffa::alloc::string::String>,
+    /// Field 4: `h264_crf`
+    pub h264_crf: ::core::option::Option<i32>,
+    /// Field 5: `h265_crf`
+    pub h265_crf: ::core::option::Option<i32>,
+    /// 0 lets ffmpeg decide.
+    ///
+    /// Field 6: `threads`
+    pub threads: ::core::option::Option<i32>,
+    /// "bt2390", "hable", "mobius", "reinhard", "clip", "linear" or "gamma".
+    ///
+    /// Field 7: `tonemap_algorithm`
+    pub tonemap_algorithm: ::core::option::Option<::buffa::alloc::string::String>,
+    /// "auto", "tv" or "pc".
+    ///
+    /// Field 8: `tonemap_range`
+    pub tonemap_range: ::core::option::Option<::buffa::alloc::string::String>,
+    /// Field 9: `tonemap_desat`
+    pub tonemap_desat: ::core::option::Option<f64>,
+    /// Field 10: `tonemap_peak`
+    pub tonemap_peak: ::core::option::Option<f64>,
+    /// "yadif" or "bwdif".
+    ///
+    /// Field 11: `deinterlace_method`
+    pub deinterlace_method: ::core::option::Option<::buffa::alloc::string::String>,
+    /// Field 12: `deinterlace_double_rate`
+    pub deinterlace_double_rate: ::core::option::Option<bool>,
+    /// Field 13: `downmix_boost`
+    pub downmix_boost: ::core::option::Option<f64>,
+    /// Field 14: `crop_black_borders`
+    pub crop_black_borders: ::core::option::Option<bool>,
+    /// Absolute folder for running transcodes; empty uses the folder the
+    /// server was started with.
+    ///
+    /// Field 15: `transcode_dir`
+    pub transcode_dir: ::core::option::Option<::buffa::alloc::string::String>,
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for TranscodingSettings {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("TranscodingSettings")
+            .field("hardware_acceleration", &self.hardware_acceleration)
+            .field("hardware_encoding", &self.hardware_encoding)
+            .field("encoder_preset", &self.encoder_preset)
+            .field("h264_crf", &self.h264_crf)
+            .field("h265_crf", &self.h265_crf)
+            .field("threads", &self.threads)
+            .field("tonemap_algorithm", &self.tonemap_algorithm)
+            .field("tonemap_range", &self.tonemap_range)
+            .field("tonemap_desat", &self.tonemap_desat)
+            .field("tonemap_peak", &self.tonemap_peak)
+            .field("deinterlace_method", &self.deinterlace_method)
+            .field("deinterlace_double_rate", &self.deinterlace_double_rate)
+            .field("downmix_boost", &self.downmix_boost)
+            .field("crop_black_borders", &self.crop_black_borders)
+            .field("transcode_dir", &self.transcode_dir)
+            .finish()
+    }
+}
+impl TranscodingSettings {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.playback.v1.TranscodingSettings";
+}
+impl TranscodingSettings {
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::hardware_acceleration`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_hardware_acceleration(
+        mut self,
+        value: impl Into<::buffa::EnumValue<HardwareAcceleration>>,
+    ) -> Self {
+        self.hardware_acceleration = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::hardware_encoding`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_hardware_encoding(mut self, value: bool) -> Self {
+        self.hardware_encoding = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::encoder_preset`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_encoder_preset(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.encoder_preset = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::h264_crf`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_h264_crf(mut self, value: i32) -> Self {
+        self.h264_crf = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::h265_crf`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_h265_crf(mut self, value: i32) -> Self {
+        self.h265_crf = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::threads`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_threads(mut self, value: i32) -> Self {
+        self.threads = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::tonemap_algorithm`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_tonemap_algorithm(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.tonemap_algorithm = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::tonemap_range`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_tonemap_range(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.tonemap_range = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::tonemap_desat`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_tonemap_desat(mut self, value: f64) -> Self {
+        self.tonemap_desat = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::tonemap_peak`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_tonemap_peak(mut self, value: f64) -> Self {
+        self.tonemap_peak = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::deinterlace_method`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_deinterlace_method(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.deinterlace_method = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::deinterlace_double_rate`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_deinterlace_double_rate(mut self, value: bool) -> Self {
+        self.deinterlace_double_rate = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::downmix_boost`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_downmix_boost(mut self, value: f64) -> Self {
+        self.downmix_boost = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::crop_black_borders`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_crop_black_borders(mut self, value: bool) -> Self {
+        self.crop_black_borders = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::transcode_dir`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_transcode_dir(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.transcode_dir = Some(value.into());
+        self
+    }
+}
+::buffa::impl_default_instance!(TranscodingSettings);
+impl ::buffa::MessageName for TranscodingSettings {
+    const PACKAGE: &'static str = "mavio.playback.v1";
+    const NAME: &'static str = "TranscodingSettings";
+    const FULL_NAME: &'static str = "mavio.playback.v1.TranscodingSettings";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.playback.v1.TranscodingSettings";
+}
+impl ::buffa::Message for TranscodingSettings {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if let Some(ref v) = self.hardware_acceleration {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v.to_i32()) as u64;
+        }
+        if self.hardware_encoding.is_some() {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
+        if let Some(ref v) = self.encoder_preset {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.h264_crf {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.h265_crf {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.threads {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.tonemap_algorithm {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.tonemap_range {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if self.tonemap_desat.is_some() {
+            size += 1u64 + ::buffa::types::FIXED64_ENCODED_LEN as u64;
+        }
+        if self.tonemap_peak.is_some() {
+            size += 1u64 + ::buffa::types::FIXED64_ENCODED_LEN as u64;
+        }
+        if let Some(ref v) = self.deinterlace_method {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if self.deinterlace_double_rate.is_some() {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
+        if self.downmix_boost.is_some() {
+            size += 1u64 + ::buffa::types::FIXED64_ENCODED_LEN as u64;
+        }
+        if self.crop_black_borders.is_some() {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
+        if let Some(ref v) = self.transcode_dir {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if let Some(ref v) = self.hardware_acceleration {
+            ::buffa::types::put_int32_field(1u32, v.to_i32(), buf);
+        }
+        if let Some(v) = self.hardware_encoding {
+            ::buffa::types::put_bool_field(2u32, v, buf);
+        }
+        if let Some(ref v) = self.encoder_preset {
+            ::buffa::types::put_string_field(3u32, v, buf);
+        }
+        if let Some(v) = self.h264_crf {
+            ::buffa::types::put_int32_field(4u32, v, buf);
+        }
+        if let Some(v) = self.h265_crf {
+            ::buffa::types::put_int32_field(5u32, v, buf);
+        }
+        if let Some(v) = self.threads {
+            ::buffa::types::put_int32_field(6u32, v, buf);
+        }
+        if let Some(ref v) = self.tonemap_algorithm {
+            ::buffa::types::put_string_field(7u32, v, buf);
+        }
+        if let Some(ref v) = self.tonemap_range {
+            ::buffa::types::put_string_field(8u32, v, buf);
+        }
+        if let Some(v) = self.tonemap_desat {
+            ::buffa::types::put_double_field(9u32, v, buf);
+        }
+        if let Some(v) = self.tonemap_peak {
+            ::buffa::types::put_double_field(10u32, v, buf);
+        }
+        if let Some(ref v) = self.deinterlace_method {
+            ::buffa::types::put_string_field(11u32, v, buf);
+        }
+        if let Some(v) = self.deinterlace_double_rate {
+            ::buffa::types::put_bool_field(12u32, v, buf);
+        }
+        if let Some(v) = self.downmix_boost {
+            ::buffa::types::put_double_field(13u32, v, buf);
+        }
+        if let Some(v) = self.crop_black_borders {
+            ::buffa::types::put_bool_field(14u32, v, buf);
+        }
+        if let Some(ref v) = self.transcode_dir {
+            ::buffa::types::put_string_field(15u32, v, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.hardware_acceleration = ::core::option::Option::Some(
+                    ::buffa::EnumValue::from(::buffa::types::decode_int32(buf)?),
+                );
+            }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.hardware_encoding = ::core::option::Option::Some(
+                    ::buffa::types::decode_bool(buf)?,
+                );
+            }
+            3u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .encoder_preset
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            4u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.h264_crf = ::core::option::Option::Some(
+                    ::buffa::types::decode_int32(buf)?,
+                );
+            }
+            5u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.h265_crf = ::core::option::Option::Some(
+                    ::buffa::types::decode_int32(buf)?,
+                );
+            }
+            6u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.threads = ::core::option::Option::Some(
+                    ::buffa::types::decode_int32(buf)?,
+                );
+            }
+            7u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .tonemap_algorithm
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            8u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .tonemap_range
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            9u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Fixed64,
+                )?;
+                self.tonemap_desat = ::core::option::Option::Some(
+                    ::buffa::types::decode_double(buf)?,
+                );
+            }
+            10u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Fixed64,
+                )?;
+                self.tonemap_peak = ::core::option::Option::Some(
+                    ::buffa::types::decode_double(buf)?,
+                );
+            }
+            11u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .deinterlace_method
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            12u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.deinterlace_double_rate = ::core::option::Option::Some(
+                    ::buffa::types::decode_bool(buf)?,
+                );
+            }
+            13u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Fixed64,
+                )?;
+                self.downmix_boost = ::core::option::Option::Some(
+                    ::buffa::types::decode_double(buf)?,
+                );
+            }
+            14u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.crop_black_borders = ::core::option::Option::Some(
+                    ::buffa::types::decode_bool(buf)?,
+                );
+            }
+            15u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .transcode_dir
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.hardware_acceleration = ::core::option::Option::None;
+        self.hardware_encoding = ::core::option::Option::None;
+        self.encoder_preset = ::core::option::Option::None;
+        self.h264_crf = ::core::option::Option::None;
+        self.h265_crf = ::core::option::Option::None;
+        self.threads = ::core::option::Option::None;
+        self.tonemap_algorithm = ::core::option::Option::None;
+        self.tonemap_range = ::core::option::Option::None;
+        self.tonemap_desat = ::core::option::Option::None;
+        self.tonemap_peak = ::core::option::Option::None;
+        self.deinterlace_method = ::core::option::Option::None;
+        self.deinterlace_double_rate = ::core::option::Option::None;
+        self.downmix_boost = ::core::option::Option::None;
+        self.crop_black_borders = ::core::option::Option::None;
+        self.transcode_dir = ::core::option::Option::None;
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for TranscodingSettings {
+    const PROTO_FQN: &'static str = "mavio.playback.v1.TranscodingSettings";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+#[derive(Clone, PartialEq, Default)]
+pub struct GetTranscodingSettingsRequest {
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for GetTranscodingSettingsRequest {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("GetTranscodingSettingsRequest").finish()
+    }
+}
+impl GetTranscodingSettingsRequest {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.playback.v1.GetTranscodingSettingsRequest";
+}
+::buffa::impl_default_instance!(GetTranscodingSettingsRequest);
+impl ::buffa::MessageName for GetTranscodingSettingsRequest {
+    const PACKAGE: &'static str = "mavio.playback.v1";
+    const NAME: &'static str = "GetTranscodingSettingsRequest";
+    const FULL_NAME: &'static str = "mavio.playback.v1.GetTranscodingSettingsRequest";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.playback.v1.GetTranscodingSettingsRequest";
+}
+impl ::buffa::Message for GetTranscodingSettingsRequest {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for GetTranscodingSettingsRequest {
+    const PROTO_FQN: &'static str = "mavio.playback.v1.GetTranscodingSettingsRequest";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+#[derive(Clone, PartialEq, Default)]
+pub struct GetTranscodingSettingsResponse {
+    /// Field 1: `settings`
+    pub settings: ::buffa::MessageField<
+        TranscodingSettings,
+        ::buffa::Inline<TranscodingSettings>,
+    >,
+    /// The accelerations this server's ffmpeg supports, AUTO and NONE
+    /// included.
+    ///
+    /// Field 2: `available_hardware_accelerations`
+    pub available_hardware_accelerations: ::buffa::alloc::vec::Vec<
+        ::buffa::EnumValue<HardwareAcceleration>,
+    >,
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for GetTranscodingSettingsResponse {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("GetTranscodingSettingsResponse")
+            .field("settings", &self.settings)
+            .field(
+                "available_hardware_accelerations",
+                &self.available_hardware_accelerations,
+            )
+            .finish()
+    }
+}
+impl GetTranscodingSettingsResponse {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.playback.v1.GetTranscodingSettingsResponse";
+}
+::buffa::impl_default_instance!(GetTranscodingSettingsResponse);
+impl ::buffa::MessageName for GetTranscodingSettingsResponse {
+    const PACKAGE: &'static str = "mavio.playback.v1";
+    const NAME: &'static str = "GetTranscodingSettingsResponse";
+    const FULL_NAME: &'static str = "mavio.playback.v1.GetTranscodingSettingsResponse";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.playback.v1.GetTranscodingSettingsResponse";
+}
+impl ::buffa::Message for GetTranscodingSettingsResponse {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if self.settings.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.settings.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        if !self.available_hardware_accelerations.is_empty() {
+            let payload: u64 = self
+                .available_hardware_accelerations
+                .iter()
+                .map(|v| ::buffa::types::int32_encoded_len(v.to_i32()) as u64)
+                .sum::<u64>();
+            size += 1u64 + ::buffa::encoding::varint_len(payload) as u64 + payload;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        __cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if self.settings.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                1u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.settings.write_to(__cache, buf);
+        }
+        if !self.available_hardware_accelerations.is_empty() {
+            let payload: u64 = self
+                .available_hardware_accelerations
+                .iter()
+                .map(|v| ::buffa::types::int32_encoded_len(v.to_i32()) as u64)
+                .sum::<u64>();
+            ::buffa::types::put_len_delimited_header(2u32, payload, buf);
+            for v in &self.available_hardware_accelerations {
+                ::buffa::types::encode_int32(v.to_i32(), buf);
+            }
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::Message::merge_length_delimited(
+                    self.settings.get_or_insert_default(),
+                    buf,
+                    ctx,
+                )?;
+            }
+            2u32 => {
+                if tag.wire_type() == ::buffa::encoding::WireType::LengthDelimited {
+                    let len = ::buffa::encoding::decode_varint(buf)?;
+                    let len = usize::try_from(len)
+                        .map_err(|_| ::buffa::DecodeError::MessageTooLarge)?;
+                    if buf.remaining() < len {
+                        return ::core::result::Result::Err(
+                            ::buffa::DecodeError::UnexpectedEof,
+                        );
+                    }
+                    self.available_hardware_accelerations.reserve(len);
+                    let mut limited = buf.take(len);
+                    while limited.has_remaining() {
+                        self.available_hardware_accelerations
+                            .push(
+                                ::buffa::EnumValue::from(
+                                    ::buffa::types::decode_int32_packed(&mut limited)?,
+                                ),
+                            );
+                    }
+                    let leftover = limited.remaining();
+                    if leftover > 0 {
+                        limited.advance(leftover);
+                    }
+                } else if tag.wire_type() == ::buffa::encoding::WireType::Varint {
+                    self.available_hardware_accelerations
+                        .push(
+                            ::buffa::EnumValue::from(::buffa::types::decode_int32(buf)?),
+                        );
+                } else {
+                    return ::core::result::Result::Err(
+                        ::buffa::encoding::wire_type_mismatch(
+                            tag,
+                            ::buffa::encoding::WireType::LengthDelimited,
+                        ),
+                    );
+                }
+            }
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.settings = ::buffa::MessageField::none();
+        self.available_hardware_accelerations.clear();
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for GetTranscodingSettingsResponse {
+    const PROTO_FQN: &'static str = "mavio.playback.v1.GetTranscodingSettingsResponse";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+#[derive(Clone, PartialEq, Default)]
+pub struct UpdateTranscodingSettingsRequest {
+    /// Field 1: `settings`
+    pub settings: ::buffa::MessageField<
+        TranscodingSettings,
+        ::buffa::Inline<TranscodingSettings>,
+    >,
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for UpdateTranscodingSettingsRequest {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("UpdateTranscodingSettingsRequest")
+            .field("settings", &self.settings)
+            .finish()
+    }
+}
+impl UpdateTranscodingSettingsRequest {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.playback.v1.UpdateTranscodingSettingsRequest";
+}
+::buffa::impl_default_instance!(UpdateTranscodingSettingsRequest);
+impl ::buffa::MessageName for UpdateTranscodingSettingsRequest {
+    const PACKAGE: &'static str = "mavio.playback.v1";
+    const NAME: &'static str = "UpdateTranscodingSettingsRequest";
+    const FULL_NAME: &'static str = "mavio.playback.v1.UpdateTranscodingSettingsRequest";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.playback.v1.UpdateTranscodingSettingsRequest";
+}
+impl ::buffa::Message for UpdateTranscodingSettingsRequest {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if self.settings.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.settings.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        __cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if self.settings.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                1u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.settings.write_to(__cache, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::Message::merge_length_delimited(
+                    self.settings.get_or_insert_default(),
+                    buf,
+                    ctx,
+                )?;
+            }
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.settings = ::buffa::MessageField::none();
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for UpdateTranscodingSettingsRequest {
+    const PROTO_FQN: &'static str = "mavio.playback.v1.UpdateTranscodingSettingsRequest";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+#[derive(Clone, PartialEq, Default)]
+pub struct UpdateTranscodingSettingsResponse {
+    /// Field 1: `settings`
+    pub settings: ::buffa::MessageField<
+        TranscodingSettings,
+        ::buffa::Inline<TranscodingSettings>,
+    >,
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for UpdateTranscodingSettingsResponse {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("UpdateTranscodingSettingsResponse")
+            .field("settings", &self.settings)
+            .finish()
+    }
+}
+impl UpdateTranscodingSettingsResponse {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.playback.v1.UpdateTranscodingSettingsResponse";
+}
+::buffa::impl_default_instance!(UpdateTranscodingSettingsResponse);
+impl ::buffa::MessageName for UpdateTranscodingSettingsResponse {
+    const PACKAGE: &'static str = "mavio.playback.v1";
+    const NAME: &'static str = "UpdateTranscodingSettingsResponse";
+    const FULL_NAME: &'static str = "mavio.playback.v1.UpdateTranscodingSettingsResponse";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.playback.v1.UpdateTranscodingSettingsResponse";
+}
+impl ::buffa::Message for UpdateTranscodingSettingsResponse {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if self.settings.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.settings.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        __cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if self.settings.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                1u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.settings.write_to(__cache, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::Message::merge_length_delimited(
+                    self.settings.get_or_insert_default(),
+                    buf,
+                    ctx,
+                )?;
+            }
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.settings = ::buffa::MessageField::none();
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for UpdateTranscodingSettingsResponse {
+    const PROTO_FQN: &'static str = "mavio.playback.v1.UpdateTranscodingSettingsResponse";
     fn unknown_fields(&self) -> &::buffa::UnknownFields {
         &self.__buffa_unknown_fields
     }

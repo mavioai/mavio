@@ -183,8 +183,7 @@ func Handler(opts Options) (http.Handler, error) {
 	mux := http.NewServeMux()
 	mux.Handle(systemv1connect.NewSystemServiceHandler(&rpc.SystemService{
 		Version: opts.Version, StartTime: time.Now(), Database: opts.Database, FFmpegVersion: opts.FFmpegVersion,
-		Settings: opts.Settings, Accelerations: opts.Accelerations, Logs: opts.Logs, Activity: opts.Activity,
-		Load: load.New(),
+		Settings: opts.Settings, Logs: opts.Logs, Activity: opts.Activity, Load: load.New(),
 	}, interceptors))
 	mux.Handle(systemv1connect.NewPluginManagementServiceHandler(&rpc.PluginManagementService{
 		Plugins: opts.Plugins, Hub: opts.Hub, Activity: opts.Activity, Containers: opts.Containers, DownloadClients: opts.Downloads,
@@ -282,6 +281,7 @@ func Handler(opts Options) (http.Handler, error) {
 	mux.Handle(userv1connect.NewDisplayPreferencesServiceHandler(rpc.NewDisplayPreferencesService(opts.Store), interceptors))
 	playbackService := rpc.NewPlaybackService(opts.Playbacks, opts.Store)
 	playbackService.Intros = opts.Intros
+	playbackService.Settings, playbackService.Accelerations, playbackService.Activity = opts.Settings, opts.Accelerations, opts.Activity
 	mux.Handle(playbackv1connect.NewPlaybackServiceHandler(playbackService, interceptors))
 	mux.Handle(sessionv1connect.NewEventServiceHandler(rpc.NewEventService(opts.Hub), interceptors))
 	sessions := rpc.NewSessionService(opts.Store, opts.Hub, opts.Playbacks)
@@ -292,7 +292,7 @@ func Handler(opts Options) (http.Handler, error) {
 	hostService := rpc.NewHostService(opts.Devices, opts.ServerInfo, opts.Containers)
 	hostService.Proxies, hostService.Tasks = opts.Proxies, taskProgress
 	mux.Handle(pluginv1connect.NewHostServiceHandler(hostService, interceptors))
-	mux.Handle(systemv1connect.NewProxyServiceHandler(&rpc.ProxyService{Proxies: opts.Proxies, Activity: opts.Activity}, interceptors))
+	mux.Handle(systemv1connect.NewProxyServiceHandler(&rpc.ProxyService{Proxies: opts.Proxies, Activity: opts.Activity, Settings: opts.Settings}, interceptors))
 	mux.Handle(sessionv1connect.NewSyncPlayServiceHandler(rpc.NewSyncPlayService(opts.Store, opts.Hub), interceptors))
 	acq := opts.Acquisition
 	if acq == nil {
@@ -301,7 +301,9 @@ func Handler(opts Options) (http.Handler, error) {
 	mux.Handle(acquisitionv1connect.NewReleaseServiceHandler(rpc.NewReleaseService(opts.Store, opts.Indexers, acq.IndexerCache(), acq), interceptors))
 	mux.Handle(acquisitionv1connect.NewWantedServiceHandler(rpc.NewWantedService(acq), interceptors))
 	mux.Handle(acquisitionv1connect.NewDownloadServiceHandler(rpc.NewDownloadService(opts.Store, acq), interceptors))
-	mux.Handle(acquisitionv1connect.NewProfileServiceHandler(rpc.NewProfileService(opts.Store), interceptors))
+	profiles := rpc.NewProfileService(opts.Store)
+	profiles.Settings, profiles.Activity = opts.Settings, opts.Activity
+	mux.Handle(acquisitionv1connect.NewProfileServiceHandler(profiles, interceptors))
 	subRuntime := opts.SubtitleRuntime
 	if subRuntime == nil {
 		subRuntime = &subtitles.Runtime{Store: opts.Store, Subtitles: subFiles}
@@ -325,6 +327,7 @@ func Handler(opts Options) (http.Handler, error) {
 		}
 	}
 	discover, requestService := rpc.NewDiscoverService(reqs), rpc.NewRequestService(reqs)
+	requestService.Settings, requestService.Activity = opts.Settings, opts.Activity
 	mux.Handle(acquisitionv1connect.NewDiscoverServiceHandler(discover, interceptors))
 	mux.Handle(acquisitionv1connect.NewRequestServiceHandler(requestService, interceptors))
 	mux.Handle(acquisitionv1connect.NewIssueServiceHandler(rpc.NewIssueService(reqs), interceptors))

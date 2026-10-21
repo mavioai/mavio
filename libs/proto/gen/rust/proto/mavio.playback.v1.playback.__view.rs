@@ -6492,3 +6492,1643 @@ impl ::buffa::HasMessageView for super::super::ListMediaSourcesResponse {
     type View<'a> = ListMediaSourcesResponseView<'a>;
     type ViewHandle = ListMediaSourcesResponseOwnedView;
 }
+/// TranscodingSettings steer transcodes.
+#[derive(Clone, Debug, Default)]
+pub struct TranscodingSettingsView<'a> {
+    /// Field 1: `hardware_acceleration`
+    pub hardware_acceleration: ::core::option::Option<
+        ::buffa::EnumValue<super::super::HardwareAcceleration>,
+    >,
+    /// Field 2: `hardware_encoding`
+    pub hardware_encoding: ::core::option::Option<bool>,
+    /// "", "ultrafast", "superfast", "veryfast", "faster", "fast", "medium",
+    /// "slow", "slower" or "veryslow"; empty picks one by the source.
+    ///
+    /// Field 3: `encoder_preset`
+    pub encoder_preset: ::core::option::Option<&'a str>,
+    /// Field 4: `h264_crf`
+    pub h264_crf: ::core::option::Option<i32>,
+    /// Field 5: `h265_crf`
+    pub h265_crf: ::core::option::Option<i32>,
+    /// 0 lets ffmpeg decide.
+    ///
+    /// Field 6: `threads`
+    pub threads: ::core::option::Option<i32>,
+    /// "bt2390", "hable", "mobius", "reinhard", "clip", "linear" or "gamma".
+    ///
+    /// Field 7: `tonemap_algorithm`
+    pub tonemap_algorithm: ::core::option::Option<&'a str>,
+    /// "auto", "tv" or "pc".
+    ///
+    /// Field 8: `tonemap_range`
+    pub tonemap_range: ::core::option::Option<&'a str>,
+    /// Field 9: `tonemap_desat`
+    pub tonemap_desat: ::core::option::Option<f64>,
+    /// Field 10: `tonemap_peak`
+    pub tonemap_peak: ::core::option::Option<f64>,
+    /// "yadif" or "bwdif".
+    ///
+    /// Field 11: `deinterlace_method`
+    pub deinterlace_method: ::core::option::Option<&'a str>,
+    /// Field 12: `deinterlace_double_rate`
+    pub deinterlace_double_rate: ::core::option::Option<bool>,
+    /// Field 13: `downmix_boost`
+    pub downmix_boost: ::core::option::Option<f64>,
+    /// Field 14: `crop_black_borders`
+    pub crop_black_borders: ::core::option::Option<bool>,
+    /// Absolute folder for running transcodes; empty uses the folder the
+    /// server was started with.
+    ///
+    /// Field 15: `transcode_dir`
+    pub transcode_dir: ::core::option::Option<&'a str>,
+    pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
+}
+impl<'a> ::buffa::MessageView<'a> for TranscodingSettingsView<'a> {
+    type Owned = super::super::TranscodingSettings;
+    fn decode_view(buf: &'a [u8]) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        let __limit = ::core::cell::Cell::new(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT);
+        let __elem = ::core::cell::Cell::new(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT);
+        <Self as ::buffa::MessageView>::decode_view_ctx(
+            buf,
+            ::buffa::DecodeContext::new(::buffa::RECURSION_LIMIT, &__limit)
+                .with_element_memory(&__elem),
+        )
+    }
+    fn decode_view_with_ctx(
+        buf: &'a [u8],
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        <Self as ::buffa::MessageView>::decode_view_ctx(buf, ctx)
+    }
+    #[inline]
+    fn merge_view_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        cur: &'a [u8],
+        before_tag: &'a [u8],
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<&'a [u8], ::buffa::DecodeError> {
+        let _ = ctx;
+        #[allow(unused_variables)]
+        let view = self;
+        let mut cur = cur;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.hardware_acceleration = Some(
+                    ::buffa::EnumValue::from(::buffa::types::decode_int32(&mut cur)?),
+                );
+            }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.hardware_encoding = Some(::buffa::types::decode_bool(&mut cur)?);
+            }
+            3u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.encoder_preset = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
+            4u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.h264_crf = Some(::buffa::types::decode_int32(&mut cur)?);
+            }
+            5u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.h265_crf = Some(::buffa::types::decode_int32(&mut cur)?);
+            }
+            6u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.threads = Some(::buffa::types::decode_int32(&mut cur)?);
+            }
+            7u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.tonemap_algorithm = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
+            8u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.tonemap_range = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
+            9u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Fixed64,
+                )?;
+                view.tonemap_desat = Some(::buffa::types::decode_double(&mut cur)?);
+            }
+            10u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Fixed64,
+                )?;
+                view.tonemap_peak = Some(::buffa::types::decode_double(&mut cur)?);
+            }
+            11u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.deinterlace_method = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
+            12u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.deinterlace_double_rate = Some(
+                    ::buffa::types::decode_bool(&mut cur)?,
+                );
+            }
+            13u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Fixed64,
+                )?;
+                view.downmix_boost = Some(::buffa::types::decode_double(&mut cur)?);
+            }
+            14u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.crop_black_borders = Some(::buffa::types::decode_bool(&mut cur)?);
+            }
+            15u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.transcode_dir = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
+            _ => {
+                ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
+                let span_len = before_tag.len() - cur.len();
+                view.__buffa_unknown_fields.push_record(before_tag, span_len, ctx)?;
+            }
+        }
+        ::core::result::Result::Ok(cur)
+    }
+    fn to_owned_message(
+        &self,
+    ) -> ::core::result::Result<
+        super::super::TranscodingSettings,
+        ::buffa::DecodeError,
+    > {
+        self.to_owned_from_source(None)
+    }
+    #[allow(clippy::useless_conversion, clippy::needless_update)]
+    fn to_owned_from_source(
+        &self,
+        __buffa_src: ::core::option::Option<&::buffa::bytes::Bytes>,
+    ) -> ::core::result::Result<
+        super::super::TranscodingSettings,
+        ::buffa::DecodeError,
+    > {
+        #[allow(unused_imports)]
+        use ::buffa::alloc::string::ToString as _;
+        let _ = __buffa_src;
+        ::core::result::Result::Ok(super::super::TranscodingSettings {
+            hardware_acceleration: self.hardware_acceleration,
+            hardware_encoding: self.hardware_encoding,
+            encoder_preset: self.encoder_preset.map(|s| s.to_string()),
+            h264_crf: self.h264_crf,
+            h265_crf: self.h265_crf,
+            threads: self.threads,
+            tonemap_algorithm: self.tonemap_algorithm.map(|s| s.to_string()),
+            tonemap_range: self.tonemap_range.map(|s| s.to_string()),
+            tonemap_desat: self.tonemap_desat,
+            tonemap_peak: self.tonemap_peak,
+            deinterlace_method: self.deinterlace_method.map(|s| s.to_string()),
+            deinterlace_double_rate: self.deinterlace_double_rate,
+            downmix_boost: self.downmix_boost,
+            crop_black_borders: self.crop_black_borders,
+            transcode_dir: self.transcode_dir.map(|s| s.to_string()),
+            __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
+            ..::core::default::Default::default()
+        })
+    }
+}
+impl<'a> ::buffa::ViewEncode<'a> for TranscodingSettingsView<'a> {
+    #[allow(clippy::needless_borrow, clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if let Some(ref v) = self.hardware_acceleration {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v.to_i32()) as u64;
+        }
+        if self.hardware_encoding.is_some() {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
+        if let Some(ref v) = self.encoder_preset {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.h264_crf {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.h265_crf {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.threads {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.tonemap_algorithm {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.tonemap_range {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if self.tonemap_desat.is_some() {
+            size += 1u64 + ::buffa::types::FIXED64_ENCODED_LEN as u64;
+        }
+        if self.tonemap_peak.is_some() {
+            size += 1u64 + ::buffa::types::FIXED64_ENCODED_LEN as u64;
+        }
+        if let Some(ref v) = self.deinterlace_method {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if self.deinterlace_double_rate.is_some() {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
+        if self.downmix_boost.is_some() {
+            size += 1u64 + ::buffa::types::FIXED64_ENCODED_LEN as u64;
+        }
+        if self.crop_black_borders.is_some() {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
+        if let Some(ref v) = self.transcode_dir {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    #[allow(clippy::needless_borrow)]
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if let Some(ref v) = self.hardware_acceleration {
+            ::buffa::types::put_int32_field(1u32, v.to_i32(), buf);
+        }
+        if let Some(v) = self.hardware_encoding {
+            ::buffa::types::put_bool_field(2u32, v, buf);
+        }
+        if let Some(ref v) = self.encoder_preset {
+            ::buffa::types::put_string_field(3u32, v, buf);
+        }
+        if let Some(v) = self.h264_crf {
+            ::buffa::types::put_int32_field(4u32, v, buf);
+        }
+        if let Some(v) = self.h265_crf {
+            ::buffa::types::put_int32_field(5u32, v, buf);
+        }
+        if let Some(v) = self.threads {
+            ::buffa::types::put_int32_field(6u32, v, buf);
+        }
+        if let Some(ref v) = self.tonemap_algorithm {
+            ::buffa::types::put_string_field(7u32, v, buf);
+        }
+        if let Some(ref v) = self.tonemap_range {
+            ::buffa::types::put_string_field(8u32, v, buf);
+        }
+        if let Some(v) = self.tonemap_desat {
+            ::buffa::types::put_double_field(9u32, v, buf);
+        }
+        if let Some(v) = self.tonemap_peak {
+            ::buffa::types::put_double_field(10u32, v, buf);
+        }
+        if let Some(ref v) = self.deinterlace_method {
+            ::buffa::types::put_string_field(11u32, v, buf);
+        }
+        if let Some(v) = self.deinterlace_double_rate {
+            ::buffa::types::put_bool_field(12u32, v, buf);
+        }
+        if let Some(v) = self.downmix_boost {
+            ::buffa::types::put_double_field(13u32, v, buf);
+        }
+        if let Some(v) = self.crop_black_borders {
+            ::buffa::types::put_bool_field(14u32, v, buf);
+        }
+        if let Some(ref v) = self.transcode_dir {
+            ::buffa::types::put_string_field(15u32, v, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+}
+impl<'a> ::buffa::MessageName for TranscodingSettingsView<'a> {
+    const PACKAGE: &'static str = "mavio.playback.v1";
+    const NAME: &'static str = "TranscodingSettings";
+    const FULL_NAME: &'static str = "mavio.playback.v1.TranscodingSettings";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.playback.v1.TranscodingSettings";
+}
+::buffa::impl_default_view_instance!(TranscodingSettingsView);
+::buffa::impl_view_reborrow!(TranscodingSettingsView);
+/** Self-contained, `'static` owned view of a `TranscodingSettings` message.
+
+ Wraps [`::buffa::OwnedView`]`<`[`TranscodingSettingsView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
+
+ Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`TranscodingSettingsView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
+#[derive(Clone, Debug)]
+pub struct TranscodingSettingsOwnedView(
+    ::buffa::OwnedView<TranscodingSettingsView<'static>>,
+);
+impl TranscodingSettingsOwnedView {
+    /// Decode an owned view from a [`::buffa::bytes::Bytes`] buffer.
+    ///
+    /// The view borrows directly from the buffer's data; the buffer is
+    /// retained inside the returned handle.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError`] if the buffer contains invalid
+    /// protobuf data.
+    pub fn decode(
+        bytes: ::buffa::bytes::Bytes,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            TranscodingSettingsOwnedView(::buffa::OwnedView::decode(bytes)?),
+        )
+    }
+    /// Decode with custom [`::buffa::DecodeOptions`] (recursion limit,
+    /// max message size).
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError`] if the buffer is invalid or
+    /// exceeds the configured limits.
+    pub fn decode_with_options(
+        bytes: ::buffa::bytes::Bytes,
+        opts: &::buffa::DecodeOptions,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            TranscodingSettingsOwnedView(
+                ::buffa::OwnedView::decode_with_options(bytes, opts)?,
+            ),
+        )
+    }
+    /// Build from an owned message via an encode → decode round-trip.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError::MessageTooLarge`] if the
+    /// message's encoded size exceeds the 2 GiB protobuf limit, or
+    /// another [`::buffa::DecodeError`] if the re-encoded bytes are
+    /// somehow invalid (should not happen for well-formed messages).
+    pub fn from_owned(
+        msg: &super::super::TranscodingSettings,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            TranscodingSettingsOwnedView(::buffa::OwnedView::from_owned(msg)?),
+        )
+    }
+    /// Borrow the full [`TranscodingSettingsView`] with its lifetime tied to `&self`.
+    #[must_use]
+    pub fn view(&self) -> &TranscodingSettingsView<'_> {
+        self.0.reborrow()
+    }
+    /// Convert to the owned message type.
+    ///
+    /// Infallible: this type's constructors wire-decode their
+    /// buffer, and a view produced by wire decoding always
+    /// converts. Delegates to [`::buffa::OwnedView::to_owned_message`],
+    /// whose contract also governs handles converted from a raw
+    /// [`::buffa::OwnedView`].
+    #[must_use]
+    pub fn to_owned_message(&self) -> super::super::TranscodingSettings {
+        self.0.to_owned_message()
+    }
+    /// The underlying bytes buffer.
+    #[must_use]
+    pub fn bytes(&self) -> &::buffa::bytes::Bytes {
+        self.0.bytes()
+    }
+    /// Consume the handle, returning the underlying bytes buffer.
+    #[must_use]
+    pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
+        self.0.into_bytes()
+    }
+    /// Field 1: `hardware_acceleration`
+    #[must_use]
+    pub fn hardware_acceleration(
+        &self,
+    ) -> ::core::option::Option<::buffa::EnumValue<super::super::HardwareAcceleration>> {
+        self.0.reborrow().hardware_acceleration
+    }
+    /// Field 2: `hardware_encoding`
+    #[must_use]
+    pub fn hardware_encoding(&self) -> ::core::option::Option<bool> {
+        self.0.reborrow().hardware_encoding
+    }
+    /// "", "ultrafast", "superfast", "veryfast", "faster", "fast", "medium",
+    /// "slow", "slower" or "veryslow"; empty picks one by the source.
+    ///
+    /// Field 3: `encoder_preset`
+    #[must_use]
+    pub fn encoder_preset(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().encoder_preset
+    }
+    /// Field 4: `h264_crf`
+    #[must_use]
+    pub fn h264_crf(&self) -> ::core::option::Option<i32> {
+        self.0.reborrow().h264_crf
+    }
+    /// Field 5: `h265_crf`
+    #[must_use]
+    pub fn h265_crf(&self) -> ::core::option::Option<i32> {
+        self.0.reborrow().h265_crf
+    }
+    /// 0 lets ffmpeg decide.
+    ///
+    /// Field 6: `threads`
+    #[must_use]
+    pub fn threads(&self) -> ::core::option::Option<i32> {
+        self.0.reborrow().threads
+    }
+    /// "bt2390", "hable", "mobius", "reinhard", "clip", "linear" or "gamma".
+    ///
+    /// Field 7: `tonemap_algorithm`
+    #[must_use]
+    pub fn tonemap_algorithm(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().tonemap_algorithm
+    }
+    /// "auto", "tv" or "pc".
+    ///
+    /// Field 8: `tonemap_range`
+    #[must_use]
+    pub fn tonemap_range(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().tonemap_range
+    }
+    /// Field 9: `tonemap_desat`
+    #[must_use]
+    pub fn tonemap_desat(&self) -> ::core::option::Option<f64> {
+        self.0.reborrow().tonemap_desat
+    }
+    /// Field 10: `tonemap_peak`
+    #[must_use]
+    pub fn tonemap_peak(&self) -> ::core::option::Option<f64> {
+        self.0.reborrow().tonemap_peak
+    }
+    /// "yadif" or "bwdif".
+    ///
+    /// Field 11: `deinterlace_method`
+    #[must_use]
+    pub fn deinterlace_method(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().deinterlace_method
+    }
+    /// Field 12: `deinterlace_double_rate`
+    #[must_use]
+    pub fn deinterlace_double_rate(&self) -> ::core::option::Option<bool> {
+        self.0.reborrow().deinterlace_double_rate
+    }
+    /// Field 13: `downmix_boost`
+    #[must_use]
+    pub fn downmix_boost(&self) -> ::core::option::Option<f64> {
+        self.0.reborrow().downmix_boost
+    }
+    /// Field 14: `crop_black_borders`
+    #[must_use]
+    pub fn crop_black_borders(&self) -> ::core::option::Option<bool> {
+        self.0.reborrow().crop_black_borders
+    }
+    /// Absolute folder for running transcodes; empty uses the folder the
+    /// server was started with.
+    ///
+    /// Field 15: `transcode_dir`
+    #[must_use]
+    pub fn transcode_dir(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().transcode_dir
+    }
+}
+impl ::core::convert::From<::buffa::OwnedView<TranscodingSettingsView<'static>>>
+for TranscodingSettingsOwnedView {
+    fn from(inner: ::buffa::OwnedView<TranscodingSettingsView<'static>>) -> Self {
+        TranscodingSettingsOwnedView(inner)
+    }
+}
+impl ::core::convert::From<TranscodingSettingsOwnedView>
+for ::buffa::OwnedView<TranscodingSettingsView<'static>> {
+    fn from(wrapper: TranscodingSettingsOwnedView) -> Self {
+        wrapper.0
+    }
+}
+impl ::core::convert::AsRef<::buffa::OwnedView<TranscodingSettingsView<'static>>>
+for TranscodingSettingsOwnedView {
+    fn as_ref(&self) -> &::buffa::OwnedView<TranscodingSettingsView<'static>> {
+        &self.0
+    }
+}
+impl ::buffa::HasMessageView for super::super::TranscodingSettings {
+    type View<'a> = TranscodingSettingsView<'a>;
+    type ViewHandle = TranscodingSettingsOwnedView;
+}
+#[derive(Clone, Debug, Default)]
+pub struct GetTranscodingSettingsRequestView<'a> {
+    pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
+}
+impl<'a> ::buffa::MessageView<'a> for GetTranscodingSettingsRequestView<'a> {
+    type Owned = super::super::GetTranscodingSettingsRequest;
+    fn decode_view(buf: &'a [u8]) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        let __limit = ::core::cell::Cell::new(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT);
+        let __elem = ::core::cell::Cell::new(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT);
+        <Self as ::buffa::MessageView>::decode_view_ctx(
+            buf,
+            ::buffa::DecodeContext::new(::buffa::RECURSION_LIMIT, &__limit)
+                .with_element_memory(&__elem),
+        )
+    }
+    fn decode_view_with_ctx(
+        buf: &'a [u8],
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        <Self as ::buffa::MessageView>::decode_view_ctx(buf, ctx)
+    }
+    #[inline]
+    fn merge_view_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        cur: &'a [u8],
+        before_tag: &'a [u8],
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<&'a [u8], ::buffa::DecodeError> {
+        let _ = ctx;
+        #[allow(unused_variables)]
+        let view = self;
+        let mut cur = cur;
+        match tag.field_number() {
+            _ => {
+                ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
+                let span_len = before_tag.len() - cur.len();
+                view.__buffa_unknown_fields.push_record(before_tag, span_len, ctx)?;
+            }
+        }
+        ::core::result::Result::Ok(cur)
+    }
+    fn to_owned_message(
+        &self,
+    ) -> ::core::result::Result<
+        super::super::GetTranscodingSettingsRequest,
+        ::buffa::DecodeError,
+    > {
+        self.to_owned_from_source(None)
+    }
+    #[allow(clippy::useless_conversion, clippy::needless_update)]
+    fn to_owned_from_source(
+        &self,
+        __buffa_src: ::core::option::Option<&::buffa::bytes::Bytes>,
+    ) -> ::core::result::Result<
+        super::super::GetTranscodingSettingsRequest,
+        ::buffa::DecodeError,
+    > {
+        #[allow(unused_imports)]
+        use ::buffa::alloc::string::ToString as _;
+        let _ = __buffa_src;
+        ::core::result::Result::Ok(super::super::GetTranscodingSettingsRequest {
+            __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
+            ..::core::default::Default::default()
+        })
+    }
+}
+impl<'a> ::buffa::ViewEncode<'a> for GetTranscodingSettingsRequestView<'a> {
+    #[allow(clippy::needless_borrow, clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    #[allow(clippy::needless_borrow)]
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+}
+impl<'a> ::buffa::MessageName for GetTranscodingSettingsRequestView<'a> {
+    const PACKAGE: &'static str = "mavio.playback.v1";
+    const NAME: &'static str = "GetTranscodingSettingsRequest";
+    const FULL_NAME: &'static str = "mavio.playback.v1.GetTranscodingSettingsRequest";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.playback.v1.GetTranscodingSettingsRequest";
+}
+::buffa::impl_default_view_instance!(GetTranscodingSettingsRequestView);
+::buffa::impl_view_reborrow!(GetTranscodingSettingsRequestView);
+/** Self-contained, `'static` owned view of a `GetTranscodingSettingsRequest` message.
+
+ Wraps [`::buffa::OwnedView`]`<`[`GetTranscodingSettingsRequestView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
+
+ Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`GetTranscodingSettingsRequestView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
+#[derive(Clone, Debug)]
+pub struct GetTranscodingSettingsRequestOwnedView(
+    ::buffa::OwnedView<GetTranscodingSettingsRequestView<'static>>,
+);
+impl GetTranscodingSettingsRequestOwnedView {
+    /// Decode an owned view from a [`::buffa::bytes::Bytes`] buffer.
+    ///
+    /// The view borrows directly from the buffer's data; the buffer is
+    /// retained inside the returned handle.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError`] if the buffer contains invalid
+    /// protobuf data.
+    pub fn decode(
+        bytes: ::buffa::bytes::Bytes,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            GetTranscodingSettingsRequestOwnedView(::buffa::OwnedView::decode(bytes)?),
+        )
+    }
+    /// Decode with custom [`::buffa::DecodeOptions`] (recursion limit,
+    /// max message size).
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError`] if the buffer is invalid or
+    /// exceeds the configured limits.
+    pub fn decode_with_options(
+        bytes: ::buffa::bytes::Bytes,
+        opts: &::buffa::DecodeOptions,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            GetTranscodingSettingsRequestOwnedView(
+                ::buffa::OwnedView::decode_with_options(bytes, opts)?,
+            ),
+        )
+    }
+    /// Build from an owned message via an encode → decode round-trip.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError::MessageTooLarge`] if the
+    /// message's encoded size exceeds the 2 GiB protobuf limit, or
+    /// another [`::buffa::DecodeError`] if the re-encoded bytes are
+    /// somehow invalid (should not happen for well-formed messages).
+    pub fn from_owned(
+        msg: &super::super::GetTranscodingSettingsRequest,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            GetTranscodingSettingsRequestOwnedView(::buffa::OwnedView::from_owned(msg)?),
+        )
+    }
+    /// Borrow the full [`GetTranscodingSettingsRequestView`] with its lifetime tied to `&self`.
+    #[must_use]
+    pub fn view(&self) -> &GetTranscodingSettingsRequestView<'_> {
+        self.0.reborrow()
+    }
+    /// Convert to the owned message type.
+    ///
+    /// Infallible: this type's constructors wire-decode their
+    /// buffer, and a view produced by wire decoding always
+    /// converts. Delegates to [`::buffa::OwnedView::to_owned_message`],
+    /// whose contract also governs handles converted from a raw
+    /// [`::buffa::OwnedView`].
+    #[must_use]
+    pub fn to_owned_message(&self) -> super::super::GetTranscodingSettingsRequest {
+        self.0.to_owned_message()
+    }
+    /// The underlying bytes buffer.
+    #[must_use]
+    pub fn bytes(&self) -> &::buffa::bytes::Bytes {
+        self.0.bytes()
+    }
+    /// Consume the handle, returning the underlying bytes buffer.
+    #[must_use]
+    pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
+        self.0.into_bytes()
+    }
+}
+impl ::core::convert::From<
+    ::buffa::OwnedView<GetTranscodingSettingsRequestView<'static>>,
+> for GetTranscodingSettingsRequestOwnedView {
+    fn from(
+        inner: ::buffa::OwnedView<GetTranscodingSettingsRequestView<'static>>,
+    ) -> Self {
+        GetTranscodingSettingsRequestOwnedView(inner)
+    }
+}
+impl ::core::convert::From<GetTranscodingSettingsRequestOwnedView>
+for ::buffa::OwnedView<GetTranscodingSettingsRequestView<'static>> {
+    fn from(wrapper: GetTranscodingSettingsRequestOwnedView) -> Self {
+        wrapper.0
+    }
+}
+impl ::core::convert::AsRef<
+    ::buffa::OwnedView<GetTranscodingSettingsRequestView<'static>>,
+> for GetTranscodingSettingsRequestOwnedView {
+    fn as_ref(&self) -> &::buffa::OwnedView<GetTranscodingSettingsRequestView<'static>> {
+        &self.0
+    }
+}
+impl ::buffa::HasMessageView for super::super::GetTranscodingSettingsRequest {
+    type View<'a> = GetTranscodingSettingsRequestView<'a>;
+    type ViewHandle = GetTranscodingSettingsRequestOwnedView;
+}
+#[derive(Clone, Debug, Default)]
+pub struct GetTranscodingSettingsResponseView<'a> {
+    /// Field 1: `settings`
+    pub settings: ::buffa::MessageFieldView<
+        super::super::__buffa::view::TranscodingSettingsView<'a>,
+    >,
+    /// The accelerations this server's ffmpeg supports, AUTO and NONE
+    /// included.
+    ///
+    /// Field 2: `available_hardware_accelerations`
+    pub available_hardware_accelerations: ::buffa::RepeatedView<
+        'a,
+        ::buffa::EnumValue<super::super::HardwareAcceleration>,
+    >,
+    pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
+}
+impl<'a> ::buffa::MessageView<'a> for GetTranscodingSettingsResponseView<'a> {
+    type Owned = super::super::GetTranscodingSettingsResponse;
+    fn decode_view(buf: &'a [u8]) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        let __limit = ::core::cell::Cell::new(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT);
+        let __elem = ::core::cell::Cell::new(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT);
+        <Self as ::buffa::MessageView>::decode_view_ctx(
+            buf,
+            ::buffa::DecodeContext::new(::buffa::RECURSION_LIMIT, &__limit)
+                .with_element_memory(&__elem),
+        )
+    }
+    fn decode_view_with_ctx(
+        buf: &'a [u8],
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        <Self as ::buffa::MessageView>::decode_view_ctx(buf, ctx)
+    }
+    #[inline]
+    fn merge_view_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        cur: &'a [u8],
+        before_tag: &'a [u8],
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<&'a [u8], ::buffa::DecodeError> {
+        let _ = ctx;
+        #[allow(unused_variables)]
+        let view = self;
+        let mut cur = cur;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __sub_ctx = ctx.descend()?;
+                let sub = ::buffa::types::borrow_bytes(&mut cur)?;
+                match view.settings.as_mut() {
+                    Some(existing) => {
+                        ::buffa::MessageView::merge_into_view(existing, sub, __sub_ctx)?
+                    }
+                    None => {
+                        view.settings = ::buffa::MessageFieldView::set(
+                            <super::super::__buffa::view::TranscodingSettingsView as ::buffa::MessageView>::decode_view_ctx(
+                                sub,
+                                __sub_ctx,
+                            )?,
+                        );
+                    }
+                }
+            }
+            2u32 => {
+                if tag.wire_type() == ::buffa::encoding::WireType::LengthDelimited {
+                    let payload = ::buffa::types::borrow_bytes(&mut cur)?;
+                    view.available_hardware_accelerations
+                        .reserve(::buffa::encoding::count_varints(payload));
+                    let mut pcur: &[u8] = payload;
+                    while !pcur.is_empty() {
+                        view.available_hardware_accelerations
+                            .push(
+                                ::buffa::EnumValue::from(
+                                    ::buffa::types::decode_int32_packed(&mut pcur)?,
+                                ),
+                            );
+                    }
+                } else if tag.wire_type() == ::buffa::encoding::WireType::Varint {
+                    view.available_hardware_accelerations
+                        .push(
+                            ::buffa::EnumValue::from(
+                                ::buffa::types::decode_int32(&mut cur)?,
+                            ),
+                        );
+                } else {
+                    return Err(
+                        ::buffa::encoding::wire_type_mismatch(
+                            tag,
+                            ::buffa::encoding::WireType::LengthDelimited,
+                        ),
+                    );
+                }
+            }
+            _ => {
+                ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
+                let span_len = before_tag.len() - cur.len();
+                view.__buffa_unknown_fields.push_record(before_tag, span_len, ctx)?;
+            }
+        }
+        ::core::result::Result::Ok(cur)
+    }
+    fn to_owned_message(
+        &self,
+    ) -> ::core::result::Result<
+        super::super::GetTranscodingSettingsResponse,
+        ::buffa::DecodeError,
+    > {
+        self.to_owned_from_source(None)
+    }
+    #[allow(clippy::useless_conversion, clippy::needless_update)]
+    fn to_owned_from_source(
+        &self,
+        __buffa_src: ::core::option::Option<&::buffa::bytes::Bytes>,
+    ) -> ::core::result::Result<
+        super::super::GetTranscodingSettingsResponse,
+        ::buffa::DecodeError,
+    > {
+        #[allow(unused_imports)]
+        use ::buffa::alloc::string::ToString as _;
+        let _ = __buffa_src;
+        ::core::result::Result::Ok(super::super::GetTranscodingSettingsResponse {
+            settings: match self.settings.as_option() {
+                Some(v) => {
+                    ::buffa::MessageField::<
+                        super::super::TranscodingSettings,
+                        ::buffa::Inline<super::super::TranscodingSettings>,
+                    >::some(v.to_owned_from_source(__buffa_src)?)
+                }
+                None => ::buffa::MessageField::none(),
+            },
+            available_hardware_accelerations: self
+                .available_hardware_accelerations
+                .to_vec(),
+            __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
+            ..::core::default::Default::default()
+        })
+    }
+}
+impl<'a> ::buffa::ViewEncode<'a> for GetTranscodingSettingsResponseView<'a> {
+    #[allow(clippy::needless_borrow, clippy::let_and_return)]
+    fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if self.settings.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.settings.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        if !self.available_hardware_accelerations.is_empty() {
+            let payload: u64 = self
+                .available_hardware_accelerations
+                .iter()
+                .map(|v| ::buffa::types::int32_encoded_len(v.to_i32()) as u64)
+                .sum::<u64>();
+            size += 1u64 + ::buffa::encoding::varint_len(payload) as u64 + payload;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    #[allow(clippy::needless_borrow)]
+    fn write_to(
+        &self,
+        __cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if self.settings.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                1u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.settings.write_to(__cache, buf);
+        }
+        if !self.available_hardware_accelerations.is_empty() {
+            let payload: u64 = self
+                .available_hardware_accelerations
+                .iter()
+                .map(|v| ::buffa::types::int32_encoded_len(v.to_i32()) as u64)
+                .sum::<u64>();
+            ::buffa::types::put_len_delimited_header(2u32, payload, buf);
+            for v in &self.available_hardware_accelerations {
+                ::buffa::types::encode_int32(v.to_i32(), buf);
+            }
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+}
+impl<'a> ::buffa::MessageName for GetTranscodingSettingsResponseView<'a> {
+    const PACKAGE: &'static str = "mavio.playback.v1";
+    const NAME: &'static str = "GetTranscodingSettingsResponse";
+    const FULL_NAME: &'static str = "mavio.playback.v1.GetTranscodingSettingsResponse";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.playback.v1.GetTranscodingSettingsResponse";
+}
+::buffa::impl_default_view_instance!(GetTranscodingSettingsResponseView);
+::buffa::impl_view_reborrow!(GetTranscodingSettingsResponseView);
+/** Self-contained, `'static` owned view of a `GetTranscodingSettingsResponse` message.
+
+ Wraps [`::buffa::OwnedView`]`<`[`GetTranscodingSettingsResponseView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
+
+ Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`GetTranscodingSettingsResponseView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
+#[derive(Clone, Debug)]
+pub struct GetTranscodingSettingsResponseOwnedView(
+    ::buffa::OwnedView<GetTranscodingSettingsResponseView<'static>>,
+);
+impl GetTranscodingSettingsResponseOwnedView {
+    /// Decode an owned view from a [`::buffa::bytes::Bytes`] buffer.
+    ///
+    /// The view borrows directly from the buffer's data; the buffer is
+    /// retained inside the returned handle.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError`] if the buffer contains invalid
+    /// protobuf data.
+    pub fn decode(
+        bytes: ::buffa::bytes::Bytes,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            GetTranscodingSettingsResponseOwnedView(::buffa::OwnedView::decode(bytes)?),
+        )
+    }
+    /// Decode with custom [`::buffa::DecodeOptions`] (recursion limit,
+    /// max message size).
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError`] if the buffer is invalid or
+    /// exceeds the configured limits.
+    pub fn decode_with_options(
+        bytes: ::buffa::bytes::Bytes,
+        opts: &::buffa::DecodeOptions,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            GetTranscodingSettingsResponseOwnedView(
+                ::buffa::OwnedView::decode_with_options(bytes, opts)?,
+            ),
+        )
+    }
+    /// Build from an owned message via an encode → decode round-trip.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError::MessageTooLarge`] if the
+    /// message's encoded size exceeds the 2 GiB protobuf limit, or
+    /// another [`::buffa::DecodeError`] if the re-encoded bytes are
+    /// somehow invalid (should not happen for well-formed messages).
+    pub fn from_owned(
+        msg: &super::super::GetTranscodingSettingsResponse,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            GetTranscodingSettingsResponseOwnedView(::buffa::OwnedView::from_owned(msg)?),
+        )
+    }
+    /// Borrow the full [`GetTranscodingSettingsResponseView`] with its lifetime tied to `&self`.
+    #[must_use]
+    pub fn view(&self) -> &GetTranscodingSettingsResponseView<'_> {
+        self.0.reborrow()
+    }
+    /// Convert to the owned message type.
+    ///
+    /// Infallible: this type's constructors wire-decode their
+    /// buffer, and a view produced by wire decoding always
+    /// converts. Delegates to [`::buffa::OwnedView::to_owned_message`],
+    /// whose contract also governs handles converted from a raw
+    /// [`::buffa::OwnedView`].
+    #[must_use]
+    pub fn to_owned_message(&self) -> super::super::GetTranscodingSettingsResponse {
+        self.0.to_owned_message()
+    }
+    /// The underlying bytes buffer.
+    #[must_use]
+    pub fn bytes(&self) -> &::buffa::bytes::Bytes {
+        self.0.bytes()
+    }
+    /// Consume the handle, returning the underlying bytes buffer.
+    #[must_use]
+    pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
+        self.0.into_bytes()
+    }
+    /// Field 1: `settings`
+    #[must_use]
+    pub fn settings(
+        &self,
+    ) -> &::buffa::MessageFieldView<
+        super::super::__buffa::view::TranscodingSettingsView<'_>,
+    > {
+        &self.0.reborrow().settings
+    }
+    /// The accelerations this server's ffmpeg supports, AUTO and NONE
+    /// included.
+    ///
+    /// Field 2: `available_hardware_accelerations`
+    #[must_use]
+    pub fn available_hardware_accelerations(
+        &self,
+    ) -> &::buffa::RepeatedView<
+        '_,
+        ::buffa::EnumValue<super::super::HardwareAcceleration>,
+    > {
+        &self.0.reborrow().available_hardware_accelerations
+    }
+}
+impl ::core::convert::From<
+    ::buffa::OwnedView<GetTranscodingSettingsResponseView<'static>>,
+> for GetTranscodingSettingsResponseOwnedView {
+    fn from(
+        inner: ::buffa::OwnedView<GetTranscodingSettingsResponseView<'static>>,
+    ) -> Self {
+        GetTranscodingSettingsResponseOwnedView(inner)
+    }
+}
+impl ::core::convert::From<GetTranscodingSettingsResponseOwnedView>
+for ::buffa::OwnedView<GetTranscodingSettingsResponseView<'static>> {
+    fn from(wrapper: GetTranscodingSettingsResponseOwnedView) -> Self {
+        wrapper.0
+    }
+}
+impl ::core::convert::AsRef<
+    ::buffa::OwnedView<GetTranscodingSettingsResponseView<'static>>,
+> for GetTranscodingSettingsResponseOwnedView {
+    fn as_ref(
+        &self,
+    ) -> &::buffa::OwnedView<GetTranscodingSettingsResponseView<'static>> {
+        &self.0
+    }
+}
+impl ::buffa::HasMessageView for super::super::GetTranscodingSettingsResponse {
+    type View<'a> = GetTranscodingSettingsResponseView<'a>;
+    type ViewHandle = GetTranscodingSettingsResponseOwnedView;
+}
+#[derive(Clone, Debug, Default)]
+pub struct UpdateTranscodingSettingsRequestView<'a> {
+    /// Field 1: `settings`
+    pub settings: ::buffa::MessageFieldView<
+        super::super::__buffa::view::TranscodingSettingsView<'a>,
+    >,
+    pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
+}
+impl<'a> ::buffa::MessageView<'a> for UpdateTranscodingSettingsRequestView<'a> {
+    type Owned = super::super::UpdateTranscodingSettingsRequest;
+    fn decode_view(buf: &'a [u8]) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        let __limit = ::core::cell::Cell::new(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT);
+        let __elem = ::core::cell::Cell::new(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT);
+        <Self as ::buffa::MessageView>::decode_view_ctx(
+            buf,
+            ::buffa::DecodeContext::new(::buffa::RECURSION_LIMIT, &__limit)
+                .with_element_memory(&__elem),
+        )
+    }
+    fn decode_view_with_ctx(
+        buf: &'a [u8],
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        <Self as ::buffa::MessageView>::decode_view_ctx(buf, ctx)
+    }
+    #[inline]
+    fn merge_view_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        cur: &'a [u8],
+        before_tag: &'a [u8],
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<&'a [u8], ::buffa::DecodeError> {
+        let _ = ctx;
+        #[allow(unused_variables)]
+        let view = self;
+        let mut cur = cur;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __sub_ctx = ctx.descend()?;
+                let sub = ::buffa::types::borrow_bytes(&mut cur)?;
+                match view.settings.as_mut() {
+                    Some(existing) => {
+                        ::buffa::MessageView::merge_into_view(existing, sub, __sub_ctx)?
+                    }
+                    None => {
+                        view.settings = ::buffa::MessageFieldView::set(
+                            <super::super::__buffa::view::TranscodingSettingsView as ::buffa::MessageView>::decode_view_ctx(
+                                sub,
+                                __sub_ctx,
+                            )?,
+                        );
+                    }
+                }
+            }
+            _ => {
+                ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
+                let span_len = before_tag.len() - cur.len();
+                view.__buffa_unknown_fields.push_record(before_tag, span_len, ctx)?;
+            }
+        }
+        ::core::result::Result::Ok(cur)
+    }
+    fn to_owned_message(
+        &self,
+    ) -> ::core::result::Result<
+        super::super::UpdateTranscodingSettingsRequest,
+        ::buffa::DecodeError,
+    > {
+        self.to_owned_from_source(None)
+    }
+    #[allow(clippy::useless_conversion, clippy::needless_update)]
+    fn to_owned_from_source(
+        &self,
+        __buffa_src: ::core::option::Option<&::buffa::bytes::Bytes>,
+    ) -> ::core::result::Result<
+        super::super::UpdateTranscodingSettingsRequest,
+        ::buffa::DecodeError,
+    > {
+        #[allow(unused_imports)]
+        use ::buffa::alloc::string::ToString as _;
+        let _ = __buffa_src;
+        ::core::result::Result::Ok(super::super::UpdateTranscodingSettingsRequest {
+            settings: match self.settings.as_option() {
+                Some(v) => {
+                    ::buffa::MessageField::<
+                        super::super::TranscodingSettings,
+                        ::buffa::Inline<super::super::TranscodingSettings>,
+                    >::some(v.to_owned_from_source(__buffa_src)?)
+                }
+                None => ::buffa::MessageField::none(),
+            },
+            __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
+            ..::core::default::Default::default()
+        })
+    }
+}
+impl<'a> ::buffa::ViewEncode<'a> for UpdateTranscodingSettingsRequestView<'a> {
+    #[allow(clippy::needless_borrow, clippy::let_and_return)]
+    fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if self.settings.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.settings.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    #[allow(clippy::needless_borrow)]
+    fn write_to(
+        &self,
+        __cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if self.settings.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                1u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.settings.write_to(__cache, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+}
+impl<'a> ::buffa::MessageName for UpdateTranscodingSettingsRequestView<'a> {
+    const PACKAGE: &'static str = "mavio.playback.v1";
+    const NAME: &'static str = "UpdateTranscodingSettingsRequest";
+    const FULL_NAME: &'static str = "mavio.playback.v1.UpdateTranscodingSettingsRequest";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.playback.v1.UpdateTranscodingSettingsRequest";
+}
+::buffa::impl_default_view_instance!(UpdateTranscodingSettingsRequestView);
+::buffa::impl_view_reborrow!(UpdateTranscodingSettingsRequestView);
+/** Self-contained, `'static` owned view of a `UpdateTranscodingSettingsRequest` message.
+
+ Wraps [`::buffa::OwnedView`]`<`[`UpdateTranscodingSettingsRequestView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
+
+ Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`UpdateTranscodingSettingsRequestView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
+#[derive(Clone, Debug)]
+pub struct UpdateTranscodingSettingsRequestOwnedView(
+    ::buffa::OwnedView<UpdateTranscodingSettingsRequestView<'static>>,
+);
+impl UpdateTranscodingSettingsRequestOwnedView {
+    /// Decode an owned view from a [`::buffa::bytes::Bytes`] buffer.
+    ///
+    /// The view borrows directly from the buffer's data; the buffer is
+    /// retained inside the returned handle.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError`] if the buffer contains invalid
+    /// protobuf data.
+    pub fn decode(
+        bytes: ::buffa::bytes::Bytes,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            UpdateTranscodingSettingsRequestOwnedView(::buffa::OwnedView::decode(bytes)?),
+        )
+    }
+    /// Decode with custom [`::buffa::DecodeOptions`] (recursion limit,
+    /// max message size).
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError`] if the buffer is invalid or
+    /// exceeds the configured limits.
+    pub fn decode_with_options(
+        bytes: ::buffa::bytes::Bytes,
+        opts: &::buffa::DecodeOptions,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            UpdateTranscodingSettingsRequestOwnedView(
+                ::buffa::OwnedView::decode_with_options(bytes, opts)?,
+            ),
+        )
+    }
+    /// Build from an owned message via an encode → decode round-trip.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError::MessageTooLarge`] if the
+    /// message's encoded size exceeds the 2 GiB protobuf limit, or
+    /// another [`::buffa::DecodeError`] if the re-encoded bytes are
+    /// somehow invalid (should not happen for well-formed messages).
+    pub fn from_owned(
+        msg: &super::super::UpdateTranscodingSettingsRequest,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            UpdateTranscodingSettingsRequestOwnedView(
+                ::buffa::OwnedView::from_owned(msg)?,
+            ),
+        )
+    }
+    /// Borrow the full [`UpdateTranscodingSettingsRequestView`] with its lifetime tied to `&self`.
+    #[must_use]
+    pub fn view(&self) -> &UpdateTranscodingSettingsRequestView<'_> {
+        self.0.reborrow()
+    }
+    /// Convert to the owned message type.
+    ///
+    /// Infallible: this type's constructors wire-decode their
+    /// buffer, and a view produced by wire decoding always
+    /// converts. Delegates to [`::buffa::OwnedView::to_owned_message`],
+    /// whose contract also governs handles converted from a raw
+    /// [`::buffa::OwnedView`].
+    #[must_use]
+    pub fn to_owned_message(&self) -> super::super::UpdateTranscodingSettingsRequest {
+        self.0.to_owned_message()
+    }
+    /// The underlying bytes buffer.
+    #[must_use]
+    pub fn bytes(&self) -> &::buffa::bytes::Bytes {
+        self.0.bytes()
+    }
+    /// Consume the handle, returning the underlying bytes buffer.
+    #[must_use]
+    pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
+        self.0.into_bytes()
+    }
+    /// Field 1: `settings`
+    #[must_use]
+    pub fn settings(
+        &self,
+    ) -> &::buffa::MessageFieldView<
+        super::super::__buffa::view::TranscodingSettingsView<'_>,
+    > {
+        &self.0.reborrow().settings
+    }
+}
+impl ::core::convert::From<
+    ::buffa::OwnedView<UpdateTranscodingSettingsRequestView<'static>>,
+> for UpdateTranscodingSettingsRequestOwnedView {
+    fn from(
+        inner: ::buffa::OwnedView<UpdateTranscodingSettingsRequestView<'static>>,
+    ) -> Self {
+        UpdateTranscodingSettingsRequestOwnedView(inner)
+    }
+}
+impl ::core::convert::From<UpdateTranscodingSettingsRequestOwnedView>
+for ::buffa::OwnedView<UpdateTranscodingSettingsRequestView<'static>> {
+    fn from(wrapper: UpdateTranscodingSettingsRequestOwnedView) -> Self {
+        wrapper.0
+    }
+}
+impl ::core::convert::AsRef<
+    ::buffa::OwnedView<UpdateTranscodingSettingsRequestView<'static>>,
+> for UpdateTranscodingSettingsRequestOwnedView {
+    fn as_ref(
+        &self,
+    ) -> &::buffa::OwnedView<UpdateTranscodingSettingsRequestView<'static>> {
+        &self.0
+    }
+}
+impl ::buffa::HasMessageView for super::super::UpdateTranscodingSettingsRequest {
+    type View<'a> = UpdateTranscodingSettingsRequestView<'a>;
+    type ViewHandle = UpdateTranscodingSettingsRequestOwnedView;
+}
+#[derive(Clone, Debug, Default)]
+pub struct UpdateTranscodingSettingsResponseView<'a> {
+    /// Field 1: `settings`
+    pub settings: ::buffa::MessageFieldView<
+        super::super::__buffa::view::TranscodingSettingsView<'a>,
+    >,
+    pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
+}
+impl<'a> ::buffa::MessageView<'a> for UpdateTranscodingSettingsResponseView<'a> {
+    type Owned = super::super::UpdateTranscodingSettingsResponse;
+    fn decode_view(buf: &'a [u8]) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        let __limit = ::core::cell::Cell::new(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT);
+        let __elem = ::core::cell::Cell::new(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT);
+        <Self as ::buffa::MessageView>::decode_view_ctx(
+            buf,
+            ::buffa::DecodeContext::new(::buffa::RECURSION_LIMIT, &__limit)
+                .with_element_memory(&__elem),
+        )
+    }
+    fn decode_view_with_ctx(
+        buf: &'a [u8],
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        <Self as ::buffa::MessageView>::decode_view_ctx(buf, ctx)
+    }
+    #[inline]
+    fn merge_view_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        cur: &'a [u8],
+        before_tag: &'a [u8],
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<&'a [u8], ::buffa::DecodeError> {
+        let _ = ctx;
+        #[allow(unused_variables)]
+        let view = self;
+        let mut cur = cur;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __sub_ctx = ctx.descend()?;
+                let sub = ::buffa::types::borrow_bytes(&mut cur)?;
+                match view.settings.as_mut() {
+                    Some(existing) => {
+                        ::buffa::MessageView::merge_into_view(existing, sub, __sub_ctx)?
+                    }
+                    None => {
+                        view.settings = ::buffa::MessageFieldView::set(
+                            <super::super::__buffa::view::TranscodingSettingsView as ::buffa::MessageView>::decode_view_ctx(
+                                sub,
+                                __sub_ctx,
+                            )?,
+                        );
+                    }
+                }
+            }
+            _ => {
+                ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
+                let span_len = before_tag.len() - cur.len();
+                view.__buffa_unknown_fields.push_record(before_tag, span_len, ctx)?;
+            }
+        }
+        ::core::result::Result::Ok(cur)
+    }
+    fn to_owned_message(
+        &self,
+    ) -> ::core::result::Result<
+        super::super::UpdateTranscodingSettingsResponse,
+        ::buffa::DecodeError,
+    > {
+        self.to_owned_from_source(None)
+    }
+    #[allow(clippy::useless_conversion, clippy::needless_update)]
+    fn to_owned_from_source(
+        &self,
+        __buffa_src: ::core::option::Option<&::buffa::bytes::Bytes>,
+    ) -> ::core::result::Result<
+        super::super::UpdateTranscodingSettingsResponse,
+        ::buffa::DecodeError,
+    > {
+        #[allow(unused_imports)]
+        use ::buffa::alloc::string::ToString as _;
+        let _ = __buffa_src;
+        ::core::result::Result::Ok(super::super::UpdateTranscodingSettingsResponse {
+            settings: match self.settings.as_option() {
+                Some(v) => {
+                    ::buffa::MessageField::<
+                        super::super::TranscodingSettings,
+                        ::buffa::Inline<super::super::TranscodingSettings>,
+                    >::some(v.to_owned_from_source(__buffa_src)?)
+                }
+                None => ::buffa::MessageField::none(),
+            },
+            __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
+            ..::core::default::Default::default()
+        })
+    }
+}
+impl<'a> ::buffa::ViewEncode<'a> for UpdateTranscodingSettingsResponseView<'a> {
+    #[allow(clippy::needless_borrow, clippy::let_and_return)]
+    fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if self.settings.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.settings.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    #[allow(clippy::needless_borrow)]
+    fn write_to(
+        &self,
+        __cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if self.settings.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                1u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.settings.write_to(__cache, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+}
+impl<'a> ::buffa::MessageName for UpdateTranscodingSettingsResponseView<'a> {
+    const PACKAGE: &'static str = "mavio.playback.v1";
+    const NAME: &'static str = "UpdateTranscodingSettingsResponse";
+    const FULL_NAME: &'static str = "mavio.playback.v1.UpdateTranscodingSettingsResponse";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.playback.v1.UpdateTranscodingSettingsResponse";
+}
+::buffa::impl_default_view_instance!(UpdateTranscodingSettingsResponseView);
+::buffa::impl_view_reborrow!(UpdateTranscodingSettingsResponseView);
+/** Self-contained, `'static` owned view of a `UpdateTranscodingSettingsResponse` message.
+
+ Wraps [`::buffa::OwnedView`]`<`[`UpdateTranscodingSettingsResponseView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
+
+ Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`UpdateTranscodingSettingsResponseView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
+#[derive(Clone, Debug)]
+pub struct UpdateTranscodingSettingsResponseOwnedView(
+    ::buffa::OwnedView<UpdateTranscodingSettingsResponseView<'static>>,
+);
+impl UpdateTranscodingSettingsResponseOwnedView {
+    /// Decode an owned view from a [`::buffa::bytes::Bytes`] buffer.
+    ///
+    /// The view borrows directly from the buffer's data; the buffer is
+    /// retained inside the returned handle.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError`] if the buffer contains invalid
+    /// protobuf data.
+    pub fn decode(
+        bytes: ::buffa::bytes::Bytes,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            UpdateTranscodingSettingsResponseOwnedView(
+                ::buffa::OwnedView::decode(bytes)?,
+            ),
+        )
+    }
+    /// Decode with custom [`::buffa::DecodeOptions`] (recursion limit,
+    /// max message size).
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError`] if the buffer is invalid or
+    /// exceeds the configured limits.
+    pub fn decode_with_options(
+        bytes: ::buffa::bytes::Bytes,
+        opts: &::buffa::DecodeOptions,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            UpdateTranscodingSettingsResponseOwnedView(
+                ::buffa::OwnedView::decode_with_options(bytes, opts)?,
+            ),
+        )
+    }
+    /// Build from an owned message via an encode → decode round-trip.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError::MessageTooLarge`] if the
+    /// message's encoded size exceeds the 2 GiB protobuf limit, or
+    /// another [`::buffa::DecodeError`] if the re-encoded bytes are
+    /// somehow invalid (should not happen for well-formed messages).
+    pub fn from_owned(
+        msg: &super::super::UpdateTranscodingSettingsResponse,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            UpdateTranscodingSettingsResponseOwnedView(
+                ::buffa::OwnedView::from_owned(msg)?,
+            ),
+        )
+    }
+    /// Borrow the full [`UpdateTranscodingSettingsResponseView`] with its lifetime tied to `&self`.
+    #[must_use]
+    pub fn view(&self) -> &UpdateTranscodingSettingsResponseView<'_> {
+        self.0.reborrow()
+    }
+    /// Convert to the owned message type.
+    ///
+    /// Infallible: this type's constructors wire-decode their
+    /// buffer, and a view produced by wire decoding always
+    /// converts. Delegates to [`::buffa::OwnedView::to_owned_message`],
+    /// whose contract also governs handles converted from a raw
+    /// [`::buffa::OwnedView`].
+    #[must_use]
+    pub fn to_owned_message(&self) -> super::super::UpdateTranscodingSettingsResponse {
+        self.0.to_owned_message()
+    }
+    /// The underlying bytes buffer.
+    #[must_use]
+    pub fn bytes(&self) -> &::buffa::bytes::Bytes {
+        self.0.bytes()
+    }
+    /// Consume the handle, returning the underlying bytes buffer.
+    #[must_use]
+    pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
+        self.0.into_bytes()
+    }
+    /// Field 1: `settings`
+    #[must_use]
+    pub fn settings(
+        &self,
+    ) -> &::buffa::MessageFieldView<
+        super::super::__buffa::view::TranscodingSettingsView<'_>,
+    > {
+        &self.0.reborrow().settings
+    }
+}
+impl ::core::convert::From<
+    ::buffa::OwnedView<UpdateTranscodingSettingsResponseView<'static>>,
+> for UpdateTranscodingSettingsResponseOwnedView {
+    fn from(
+        inner: ::buffa::OwnedView<UpdateTranscodingSettingsResponseView<'static>>,
+    ) -> Self {
+        UpdateTranscodingSettingsResponseOwnedView(inner)
+    }
+}
+impl ::core::convert::From<UpdateTranscodingSettingsResponseOwnedView>
+for ::buffa::OwnedView<UpdateTranscodingSettingsResponseView<'static>> {
+    fn from(wrapper: UpdateTranscodingSettingsResponseOwnedView) -> Self {
+        wrapper.0
+    }
+}
+impl ::core::convert::AsRef<
+    ::buffa::OwnedView<UpdateTranscodingSettingsResponseView<'static>>,
+> for UpdateTranscodingSettingsResponseOwnedView {
+    fn as_ref(
+        &self,
+    ) -> &::buffa::OwnedView<UpdateTranscodingSettingsResponseView<'static>> {
+        &self.0
+    }
+}
+impl ::buffa::HasMessageView for super::super::UpdateTranscodingSettingsResponse {
+    type View<'a> = UpdateTranscodingSettingsResponseView<'a>;
+    type ViewHandle = UpdateTranscodingSettingsResponseOwnedView;
+}

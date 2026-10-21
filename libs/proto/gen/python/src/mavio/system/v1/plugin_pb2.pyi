@@ -323,3 +323,25 @@ class SetPluginProxyResponse(_message.Message):
     PLUGIN_FIELD_NUMBER: _ClassVar[int]
     plugin: Plugin
     def __init__(self, plugin: _Optional[_Union[Plugin, _Mapping]] = ...) -> None: ...
+
+class GetPluginCatalogsRequest(_message.Message):
+    __slots__ = ()
+    def __init__(self) -> None: ...
+
+class GetPluginCatalogsResponse(_message.Message):
+    __slots__ = ("urls",)
+    URLS_FIELD_NUMBER: _ClassVar[int]
+    urls: _containers.RepeatedScalarFieldContainer[str]
+    def __init__(self, urls: _Optional[_Iterable[str]] = ...) -> None: ...
+
+class UpdatePluginCatalogsRequest(_message.Message):
+    __slots__ = ("urls",)
+    URLS_FIELD_NUMBER: _ClassVar[int]
+    urls: _containers.RepeatedScalarFieldContainer[str]
+    def __init__(self, urls: _Optional[_Iterable[str]] = ...) -> None: ...
+
+class UpdatePluginCatalogsResponse(_message.Message):
+    __slots__ = ("urls",)
+    URLS_FIELD_NUMBER: _ClassVar[int]
+    urls: _containers.RepeatedScalarFieldContainer[str]
+    def __init__(self, urls: _Optional[_Iterable[str]] = ...) -> None: ...

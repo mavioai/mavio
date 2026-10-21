@@ -32,6 +32,12 @@ class PlaybackService(Protocol):
     async def list_media_sources(self, request: mavio_dot_playback_dot_v1_dot_playback__pb2.ListMediaSourcesRequest, ctx: RequestContext) -> mavio_dot_playback_dot_v1_dot_playback__pb2.ListMediaSourcesResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
 
+    async def get_transcoding_settings(self, request: mavio_dot_playback_dot_v1_dot_playback__pb2.GetTranscodingSettingsRequest, ctx: RequestContext) -> mavio_dot_playback_dot_v1_dot_playback__pb2.GetTranscodingSettingsResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
+
+    async def update_transcoding_settings(self, request: mavio_dot_playback_dot_v1_dot_playback__pb2.UpdateTranscodingSettingsRequest, ctx: RequestContext) -> mavio_dot_playback_dot_v1_dot_playback__pb2.UpdateTranscodingSettingsResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
+
 
 class PlaybackServiceASGIApplication(ConnectASGIApplication[PlaybackService]):
     def __init__(self, service: PlaybackService | AsyncGenerator[PlaybackService], *, interceptors: Iterable[Interceptor]=(), read_max_bytes: int | None = None, compressions: Iterable[Compression] | None = None) -> None:
@@ -87,6 +93,26 @@ class PlaybackServiceASGIApplication(ConnectASGIApplication[PlaybackService]):
                         idempotency_level=IdempotencyLevel.NO_SIDE_EFFECTS,
                     ),
                     function=svc.list_media_sources,
+                ),
+                "/mavio.playback.v1.PlaybackService/GetTranscodingSettings": Endpoint.unary(
+                    method=MethodInfo(
+                        name="GetTranscodingSettings",
+                        service_name="mavio.playback.v1.PlaybackService",
+                        input=mavio_dot_playback_dot_v1_dot_playback__pb2.GetTranscodingSettingsRequest,
+                        output=mavio_dot_playback_dot_v1_dot_playback__pb2.GetTranscodingSettingsResponse,
+                        idempotency_level=IdempotencyLevel.NO_SIDE_EFFECTS,
+                    ),
+                    function=svc.get_transcoding_settings,
+                ),
+                "/mavio.playback.v1.PlaybackService/UpdateTranscodingSettings": Endpoint.unary(
+                    method=MethodInfo(
+                        name="UpdateTranscodingSettings",
+                        service_name="mavio.playback.v1.PlaybackService",
+                        input=mavio_dot_playback_dot_v1_dot_playback__pb2.UpdateTranscodingSettingsRequest,
+                        output=mavio_dot_playback_dot_v1_dot_playback__pb2.UpdateTranscodingSettingsResponse,
+                        idempotency_level=IdempotencyLevel.IDEMPOTENT,
+                    ),
+                    function=svc.update_transcoding_settings,
                 ),
             },
             interceptors=interceptors,
@@ -205,6 +231,48 @@ class PlaybackServiceClient(ConnectClient):
             use_get=use_get,
         )
 
+    async def get_transcoding_settings(
+        self,
+        request: mavio_dot_playback_dot_v1_dot_playback__pb2.GetTranscodingSettingsRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+        use_get: bool = False,
+    ) -> mavio_dot_playback_dot_v1_dot_playback__pb2.GetTranscodingSettingsResponse:
+        return await self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="GetTranscodingSettings",
+                service_name="mavio.playback.v1.PlaybackService",
+                input=mavio_dot_playback_dot_v1_dot_playback__pb2.GetTranscodingSettingsRequest,
+                output=mavio_dot_playback_dot_v1_dot_playback__pb2.GetTranscodingSettingsResponse,
+                idempotency_level=IdempotencyLevel.NO_SIDE_EFFECTS,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+            use_get=use_get,
+        )
+
+    async def update_transcoding_settings(
+        self,
+        request: mavio_dot_playback_dot_v1_dot_playback__pb2.UpdateTranscodingSettingsRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+    ) -> mavio_dot_playback_dot_v1_dot_playback__pb2.UpdateTranscodingSettingsResponse:
+        return await self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="UpdateTranscodingSettings",
+                service_name="mavio.playback.v1.PlaybackService",
+                input=mavio_dot_playback_dot_v1_dot_playback__pb2.UpdateTranscodingSettingsRequest,
+                output=mavio_dot_playback_dot_v1_dot_playback__pb2.UpdateTranscodingSettingsResponse,
+                idempotency_level=IdempotencyLevel.IDEMPOTENT,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+        )
+
 
 class PlaybackServiceSync(Protocol):
     def start_playback(self, request: mavio_dot_playback_dot_v1_dot_playback__pb2.StartPlaybackRequest, ctx: RequestContext) -> mavio_dot_playback_dot_v1_dot_playback__pb2.StartPlaybackResponse:
@@ -216,6 +284,10 @@ class PlaybackServiceSync(Protocol):
     def list_intros(self, request: mavio_dot_playback_dot_v1_dot_playback__pb2.ListIntrosRequest, ctx: RequestContext) -> mavio_dot_playback_dot_v1_dot_playback__pb2.ListIntrosResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
     def list_media_sources(self, request: mavio_dot_playback_dot_v1_dot_playback__pb2.ListMediaSourcesRequest, ctx: RequestContext) -> mavio_dot_playback_dot_v1_dot_playback__pb2.ListMediaSourcesResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
+    def get_transcoding_settings(self, request: mavio_dot_playback_dot_v1_dot_playback__pb2.GetTranscodingSettingsRequest, ctx: RequestContext) -> mavio_dot_playback_dot_v1_dot_playback__pb2.GetTranscodingSettingsResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
+    def update_transcoding_settings(self, request: mavio_dot_playback_dot_v1_dot_playback__pb2.UpdateTranscodingSettingsRequest, ctx: RequestContext) -> mavio_dot_playback_dot_v1_dot_playback__pb2.UpdateTranscodingSettingsResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
 
 
@@ -272,6 +344,26 @@ class PlaybackServiceWSGIApplication(ConnectWSGIApplication):
                         idempotency_level=IdempotencyLevel.NO_SIDE_EFFECTS,
                     ),
                     function=service.list_media_sources,
+                ),
+                "/mavio.playback.v1.PlaybackService/GetTranscodingSettings": EndpointSync.unary(
+                    method=MethodInfo(
+                        name="GetTranscodingSettings",
+                        service_name="mavio.playback.v1.PlaybackService",
+                        input=mavio_dot_playback_dot_v1_dot_playback__pb2.GetTranscodingSettingsRequest,
+                        output=mavio_dot_playback_dot_v1_dot_playback__pb2.GetTranscodingSettingsResponse,
+                        idempotency_level=IdempotencyLevel.NO_SIDE_EFFECTS,
+                    ),
+                    function=service.get_transcoding_settings,
+                ),
+                "/mavio.playback.v1.PlaybackService/UpdateTranscodingSettings": EndpointSync.unary(
+                    method=MethodInfo(
+                        name="UpdateTranscodingSettings",
+                        service_name="mavio.playback.v1.PlaybackService",
+                        input=mavio_dot_playback_dot_v1_dot_playback__pb2.UpdateTranscodingSettingsRequest,
+                        output=mavio_dot_playback_dot_v1_dot_playback__pb2.UpdateTranscodingSettingsResponse,
+                        idempotency_level=IdempotencyLevel.IDEMPOTENT,
+                    ),
+                    function=service.update_transcoding_settings,
                 ),
             },
             interceptors=interceptors,
@@ -388,4 +480,46 @@ class PlaybackServiceClientSync(ConnectClientSync):
             headers=headers,
             timeout_ms=timeout_ms,
             use_get=use_get,
+        )
+
+    def get_transcoding_settings(
+        self,
+        request: mavio_dot_playback_dot_v1_dot_playback__pb2.GetTranscodingSettingsRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+        use_get: bool = False,
+    ) -> mavio_dot_playback_dot_v1_dot_playback__pb2.GetTranscodingSettingsResponse:
+        return self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="GetTranscodingSettings",
+                service_name="mavio.playback.v1.PlaybackService",
+                input=mavio_dot_playback_dot_v1_dot_playback__pb2.GetTranscodingSettingsRequest,
+                output=mavio_dot_playback_dot_v1_dot_playback__pb2.GetTranscodingSettingsResponse,
+                idempotency_level=IdempotencyLevel.NO_SIDE_EFFECTS,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+            use_get=use_get,
+        )
+
+    def update_transcoding_settings(
+        self,
+        request: mavio_dot_playback_dot_v1_dot_playback__pb2.UpdateTranscodingSettingsRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+    ) -> mavio_dot_playback_dot_v1_dot_playback__pb2.UpdateTranscodingSettingsResponse:
+        return self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="UpdateTranscodingSettings",
+                service_name="mavio.playback.v1.PlaybackService",
+                input=mavio_dot_playback_dot_v1_dot_playback__pb2.UpdateTranscodingSettingsRequest,
+                output=mavio_dot_playback_dot_v1_dot_playback__pb2.UpdateTranscodingSettingsResponse,
+                idempotency_level=IdempotencyLevel.IDEMPOTENT,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
         )

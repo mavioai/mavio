@@ -22,25 +22,27 @@ pub type OwnedGetSystemLoadRequestView = ::buffa::view::OwnedView<
 pub type OwnedGetSystemLoadResponseView = ::buffa::view::OwnedView<
     crate::proto::mavio::system::v1::__buffa::view::GetSystemLoadResponseView<'static>,
 >;
-///Shorthand for `OwnedView<GetServerSettingsRequestView<'static>>`.
-pub type OwnedGetServerSettingsRequestView = ::buffa::view::OwnedView<
-    crate::proto::mavio::system::v1::__buffa::view::GetServerSettingsRequestView<'static>,
->;
-///Shorthand for `OwnedView<GetServerSettingsResponseView<'static>>`.
-pub type OwnedGetServerSettingsResponseView = ::buffa::view::OwnedView<
-    crate::proto::mavio::system::v1::__buffa::view::GetServerSettingsResponseView<
+///Shorthand for `OwnedView<GetGeneralSettingsRequestView<'static>>`.
+pub type OwnedGetGeneralSettingsRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::system::v1::__buffa::view::GetGeneralSettingsRequestView<
         'static,
     >,
 >;
-///Shorthand for `OwnedView<UpdateServerSettingsRequestView<'static>>`.
-pub type OwnedUpdateServerSettingsRequestView = ::buffa::view::OwnedView<
-    crate::proto::mavio::system::v1::__buffa::view::UpdateServerSettingsRequestView<
+///Shorthand for `OwnedView<GetGeneralSettingsResponseView<'static>>`.
+pub type OwnedGetGeneralSettingsResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::system::v1::__buffa::view::GetGeneralSettingsResponseView<
         'static,
     >,
 >;
-///Shorthand for `OwnedView<UpdateServerSettingsResponseView<'static>>`.
-pub type OwnedUpdateServerSettingsResponseView = ::buffa::view::OwnedView<
-    crate::proto::mavio::system::v1::__buffa::view::UpdateServerSettingsResponseView<
+///Shorthand for `OwnedView<UpdateGeneralSettingsRequestView<'static>>`.
+pub type OwnedUpdateGeneralSettingsRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::system::v1::__buffa::view::UpdateGeneralSettingsRequestView<
+        'static,
+    >,
+>;
+///Shorthand for `OwnedView<UpdateGeneralSettingsResponseView<'static>>`.
+pub type OwnedUpdateGeneralSettingsResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::system::v1::__buffa::view::UpdateGeneralSettingsResponseView<
         'static,
     >,
 >;
@@ -162,8 +164,8 @@ for ::buffa::view::OwnedView<
         )
     }
 }
-impl ::connectrpc::Encodable<crate::proto::mavio::system::v1::GetServerSettingsResponse>
-for crate::proto::mavio::system::v1::__buffa::view::GetServerSettingsResponseView<'_> {
+impl ::connectrpc::Encodable<crate::proto::mavio::system::v1::GetGeneralSettingsResponse>
+for crate::proto::mavio::system::v1::__buffa::view::GetGeneralSettingsResponseView<'_> {
     fn encode(
         &self,
         codec: ::connectrpc::CodecFormat,
@@ -171,9 +173,9 @@ for crate::proto::mavio::system::v1::__buffa::view::GetServerSettingsResponseVie
         ::connectrpc::__codegen::encode_view_body(self, codec)
     }
 }
-impl ::connectrpc::Encodable<crate::proto::mavio::system::v1::GetServerSettingsResponse>
+impl ::connectrpc::Encodable<crate::proto::mavio::system::v1::GetGeneralSettingsResponse>
 for ::buffa::view::OwnedView<
-    crate::proto::mavio::system::v1::__buffa::view::GetServerSettingsResponseView<
+    crate::proto::mavio::system::v1::__buffa::view::GetGeneralSettingsResponseView<
         'static,
     >,
 > {
@@ -199,9 +201,9 @@ for ::buffa::view::OwnedView<
     }
 }
 impl ::connectrpc::Encodable<
-    crate::proto::mavio::system::v1::UpdateServerSettingsResponse,
+    crate::proto::mavio::system::v1::UpdateGeneralSettingsResponse,
 >
-for crate::proto::mavio::system::v1::__buffa::view::UpdateServerSettingsResponseView<
+for crate::proto::mavio::system::v1::__buffa::view::UpdateGeneralSettingsResponseView<
     '_,
 > {
     fn encode(
@@ -212,10 +214,10 @@ for crate::proto::mavio::system::v1::__buffa::view::UpdateServerSettingsResponse
     }
 }
 impl ::connectrpc::Encodable<
-    crate::proto::mavio::system::v1::UpdateServerSettingsResponse,
+    crate::proto::mavio::system::v1::UpdateGeneralSettingsResponse,
 >
 for ::buffa::view::OwnedView<
-    crate::proto::mavio::system::v1::__buffa::view::UpdateServerSettingsResponseView<
+    crate::proto::mavio::system::v1::__buffa::view::UpdateGeneralSettingsResponseView<
         'static,
     >,
 > {
@@ -328,18 +330,18 @@ pub const SYSTEM_SERVICE_GET_SYSTEM_LOAD_SPEC: ::connectrpc::Spec = ::connectrpc
         ::connectrpc::StreamType::Unary,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::NoSideEffects);
-/// Static [`Spec`](::connectrpc::Spec) for the `GetServerSettings` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
-pub const SYSTEM_SERVICE_GET_SERVER_SETTINGS_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
-        "/mavio.system.v1.SystemService/GetServerSettings",
+/// Static [`Spec`](::connectrpc::Spec) for the `GetGeneralSettings` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const SYSTEM_SERVICE_GET_GENERAL_SETTINGS_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.system.v1.SystemService/GetGeneralSettings",
         ::connectrpc::StreamType::Unary,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::NoSideEffects);
-/// Static [`Spec`](::connectrpc::Spec) for the `UpdateServerSettings` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
-pub const SYSTEM_SERVICE_UPDATE_SERVER_SETTINGS_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
-        "/mavio.system.v1.SystemService/UpdateServerSettings",
+/// Static [`Spec`](::connectrpc::Spec) for the `UpdateGeneralSettings` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const SYSTEM_SERVICE_UPDATE_GENERAL_SETTINGS_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.system.v1.SystemService/UpdateGeneralSettings",
         ::connectrpc::StreamType::Unary,
     )
-    .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::Idempotent);
 /// Static [`Spec`](::connectrpc::Spec) for the `ListDirectory` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
 pub const SYSTEM_SERVICE_LIST_DIRECTORY_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
         "/mavio.system.v1.SystemService/ListDirectory",
@@ -353,7 +355,8 @@ pub const SYSTEM_SERVICE_LIST_LOGS_SPEC: ::connectrpc::Spec = ::connectrpc::Spec
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::NoSideEffects);
 /// SystemService exposes server-level information and health, the load of
-/// its computer, the server's settings, its file system and its logs.
+/// its computer, the server's general settings, its file system and its
+/// logs.
 ///
 /// # Implementing handlers
 ///
@@ -476,8 +479,10 @@ pub trait SystemService: Send + Sync + 'static {
             > + Send + use<'a, Self>,
         >,
     > + Send;
-    /// GetServerSettings returns the settings administrators change while
-    /// the server runs. Administrators only.
+    /// GetGeneralSettings returns the server's general settings: its name,
+    /// how it is reached, how long devices stay signed in, the plugin
+    /// resetting forgotten passwords and the language and country of
+    /// metadata. Administrators only.
     ///
     /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
     ///
@@ -486,22 +491,22 @@ pub trait SystemService: Send + Sync + 'static {
     /// (zero-copy). The response cannot borrow from `request` — use
     /// `.to_owned_message()` (or copy the specific fields) for anything
     /// returned, stored, or moved into `tokio::spawn`.
-    fn get_server_settings<'a>(
+    fn get_general_settings<'a>(
         &'a self,
         ctx: ::connectrpc::RequestContext,
         request: ::connectrpc::ServiceRequest<
             '_,
-            crate::proto::mavio::system::v1::GetServerSettingsRequest,
+            crate::proto::mavio::system::v1::GetGeneralSettingsRequest,
         >,
     ) -> impl ::std::future::Future<
         Output = ::connectrpc::ServiceResult<
             impl ::connectrpc::Encodable<
-                crate::proto::mavio::system::v1::GetServerSettingsResponse,
+                crate::proto::mavio::system::v1::GetGeneralSettingsResponse,
             > + Send + use<'a, Self>,
         >,
     > + Send;
-    /// UpdateServerSettings replaces the settings and applies them at once.
-    /// Administrators only.
+    /// UpdateGeneralSettings replaces the general settings and applies them
+    /// at once. Administrators only.
     ///
     /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
     ///
@@ -510,17 +515,17 @@ pub trait SystemService: Send + Sync + 'static {
     /// (zero-copy). The response cannot borrow from `request` — use
     /// `.to_owned_message()` (or copy the specific fields) for anything
     /// returned, stored, or moved into `tokio::spawn`.
-    fn update_server_settings<'a>(
+    fn update_general_settings<'a>(
         &'a self,
         ctx: ::connectrpc::RequestContext,
         request: ::connectrpc::ServiceRequest<
             '_,
-            crate::proto::mavio::system::v1::UpdateServerSettingsRequest,
+            crate::proto::mavio::system::v1::UpdateGeneralSettingsRequest,
         >,
     ) -> impl ::std::future::Future<
         Output = ::connectrpc::ServiceResult<
             impl ::connectrpc::Encodable<
-                crate::proto::mavio::system::v1::UpdateServerSettingsResponse,
+                crate::proto::mavio::system::v1::UpdateGeneralSettingsResponse,
             > + Send + use<'a, Self>,
         >,
     > + Send;
@@ -694,13 +699,13 @@ impl<S: SystemService> SystemServiceExt for S {
             .with_spec(SYSTEM_SERVICE_GET_SYSTEM_LOAD_SPEC)
             .route_view_idempotent(
                 SYSTEM_SERVICE_SERVICE_NAME,
-                "GetServerSettings",
+                "GetGeneralSettings",
                 {
                     let svc = ::std::sync::Arc::clone(&self);
                     ::connectrpc::view_handler_fn(move |
                         ctx,
                         req: ::buffa::view::OwnedView<
-                            crate::proto::mavio::system::v1::__buffa::view::GetServerSettingsRequestView<
+                            crate::proto::mavio::system::v1::__buffa::view::GetGeneralSettingsRequestView<
                                 'static,
                             >,
                         >,
@@ -709,27 +714,27 @@ impl<S: SystemService> SystemServiceExt for S {
                         let svc = ::std::sync::Arc::clone(&svc);
                         async move {
                             let sreq = ::connectrpc::ServiceRequest::<
-                                crate::proto::mavio::system::v1::GetServerSettingsRequest,
+                                crate::proto::mavio::system::v1::GetGeneralSettingsRequest,
                             >::from_parts(req.reborrow(), req.bytes());
-                            svc.get_server_settings(ctx, sreq)
+                            svc.get_general_settings(ctx, sreq)
                                 .await?
                                 .encode::<
-                                    crate::proto::mavio::system::v1::GetServerSettingsResponse,
+                                    crate::proto::mavio::system::v1::GetGeneralSettingsResponse,
                                 >(format)
                         }
                     })
                 },
             )
-            .with_spec(SYSTEM_SERVICE_GET_SERVER_SETTINGS_SPEC)
+            .with_spec(SYSTEM_SERVICE_GET_GENERAL_SETTINGS_SPEC)
             .route_view(
                 SYSTEM_SERVICE_SERVICE_NAME,
-                "UpdateServerSettings",
+                "UpdateGeneralSettings",
                 {
                     let svc = ::std::sync::Arc::clone(&self);
                     ::connectrpc::view_handler_fn(move |
                         ctx,
                         req: ::buffa::view::OwnedView<
-                            crate::proto::mavio::system::v1::__buffa::view::UpdateServerSettingsRequestView<
+                            crate::proto::mavio::system::v1::__buffa::view::UpdateGeneralSettingsRequestView<
                                 'static,
                             >,
                         >,
@@ -738,18 +743,18 @@ impl<S: SystemService> SystemServiceExt for S {
                         let svc = ::std::sync::Arc::clone(&svc);
                         async move {
                             let sreq = ::connectrpc::ServiceRequest::<
-                                crate::proto::mavio::system::v1::UpdateServerSettingsRequest,
+                                crate::proto::mavio::system::v1::UpdateGeneralSettingsRequest,
                             >::from_parts(req.reborrow(), req.bytes());
-                            svc.update_server_settings(ctx, sreq)
+                            svc.update_general_settings(ctx, sreq)
                                 .await?
                                 .encode::<
-                                    crate::proto::mavio::system::v1::UpdateServerSettingsResponse,
+                                    crate::proto::mavio::system::v1::UpdateGeneralSettingsResponse,
                                 >(format)
                         }
                     })
                 },
             )
-            .with_spec(SYSTEM_SERVICE_UPDATE_SERVER_SETTINGS_SPEC)
+            .with_spec(SYSTEM_SERVICE_UPDATE_GENERAL_SETTINGS_SPEC)
             .route_view_idempotent(
                 SYSTEM_SERVICE_SERVICE_NAME,
                 "ListDirectory",
@@ -880,16 +885,16 @@ impl<T: SystemService> ::connectrpc::Dispatcher for SystemServiceServer<T> {
                         .with_spec(SYSTEM_SERVICE_GET_SYSTEM_LOAD_SPEC),
                 )
             }
-            "GetServerSettings" => {
+            "GetGeneralSettings" => {
                 Some(
                     ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(true)
-                        .with_spec(SYSTEM_SERVICE_GET_SERVER_SETTINGS_SPEC),
+                        .with_spec(SYSTEM_SERVICE_GET_GENERAL_SETTINGS_SPEC),
                 )
             }
-            "UpdateServerSettings" => {
+            "UpdateGeneralSettings" => {
                 Some(
                     ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
-                        .with_spec(SYSTEM_SERVICE_UPDATE_SERVER_SETTINGS_SPEC),
+                        .with_spec(SYSTEM_SERVICE_UPDATE_GENERAL_SETTINGS_SPEC),
                 )
             }
             "ListDirectory" => {
@@ -985,47 +990,47 @@ impl<T: SystemService> ::connectrpc::Dispatcher for SystemServiceServer<T> {
                         >(format)
                 })
             }
-            "GetServerSettings" => {
+            "GetGeneralSettings" => {
                 let svc = ::std::sync::Arc::clone(&self.inner);
                 Box::pin(async move {
                     let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
-                        crate::proto::mavio::system::v1::GetServerSettingsRequest,
+                        crate::proto::mavio::system::v1::GetGeneralSettingsRequest,
                     >(request.encoded()?, format)?;
-                    let req: crate::proto::mavio::system::v1::__buffa::view::GetServerSettingsRequestView<
+                    let req: crate::proto::mavio::system::v1::__buffa::view::GetGeneralSettingsRequestView<
                         '_,
                     > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
                         &body,
                         ctx.decode_options(),
                     )?;
                     let req = ::connectrpc::ServiceRequest::<
-                        crate::proto::mavio::system::v1::GetServerSettingsRequest,
+                        crate::proto::mavio::system::v1::GetGeneralSettingsRequest,
                     >::from_parts(&req, &body);
-                    svc.get_server_settings(ctx, req)
+                    svc.get_general_settings(ctx, req)
                         .await?
                         .encode::<
-                            crate::proto::mavio::system::v1::GetServerSettingsResponse,
+                            crate::proto::mavio::system::v1::GetGeneralSettingsResponse,
                         >(format)
                 })
             }
-            "UpdateServerSettings" => {
+            "UpdateGeneralSettings" => {
                 let svc = ::std::sync::Arc::clone(&self.inner);
                 Box::pin(async move {
                     let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
-                        crate::proto::mavio::system::v1::UpdateServerSettingsRequest,
+                        crate::proto::mavio::system::v1::UpdateGeneralSettingsRequest,
                     >(request.encoded()?, format)?;
-                    let req: crate::proto::mavio::system::v1::__buffa::view::UpdateServerSettingsRequestView<
+                    let req: crate::proto::mavio::system::v1::__buffa::view::UpdateGeneralSettingsRequestView<
                         '_,
                     > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
                         &body,
                         ctx.decode_options(),
                     )?;
                     let req = ::connectrpc::ServiceRequest::<
-                        crate::proto::mavio::system::v1::UpdateServerSettingsRequest,
+                        crate::proto::mavio::system::v1::UpdateGeneralSettingsRequest,
                     >::from_parts(&req, &body);
-                    svc.update_server_settings(ctx, req)
+                    svc.update_general_settings(ctx, req)
                         .await?
                         .encode::<
-                            crate::proto::mavio::system::v1::UpdateServerSettingsResponse,
+                            crate::proto::mavio::system::v1::UpdateGeneralSettingsResponse,
                         >(format)
                 })
             }
@@ -1336,35 +1341,35 @@ where
             )
             .await
     }
-    /// Call the GetServerSettings RPC. Sends a request to /mavio.system.v1.SystemService/GetServerSettings.
-    pub async fn get_server_settings(
+    /// Call the GetGeneralSettings RPC. Sends a request to /mavio.system.v1.SystemService/GetGeneralSettings.
+    pub async fn get_general_settings(
         &self,
-        request: crate::proto::mavio::system::v1::GetServerSettingsRequest,
+        request: crate::proto::mavio::system::v1::GetGeneralSettingsRequest,
     ) -> Result<
         ::connectrpc::client::UnaryResponse<
             ::buffa::view::OwnedView<
-                crate::proto::mavio::system::v1::__buffa::view::GetServerSettingsResponseView<
+                crate::proto::mavio::system::v1::__buffa::view::GetGeneralSettingsResponseView<
                     'static,
                 >,
             >,
         >,
         ::connectrpc::ConnectError,
     > {
-        self.get_server_settings_with_options(
+        self.get_general_settings_with_options(
                 request,
                 ::connectrpc::client::CallOptions::default(),
             )
             .await
     }
-    /// Call the GetServerSettings RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
-    pub async fn get_server_settings_with_options(
+    /// Call the GetGeneralSettings RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn get_general_settings_with_options(
         &self,
-        request: crate::proto::mavio::system::v1::GetServerSettingsRequest,
+        request: crate::proto::mavio::system::v1::GetGeneralSettingsRequest,
         options: ::connectrpc::client::CallOptions,
     ) -> Result<
         ::connectrpc::client::UnaryResponse<
             ::buffa::view::OwnedView<
-                crate::proto::mavio::system::v1::__buffa::view::GetServerSettingsResponseView<
+                crate::proto::mavio::system::v1::__buffa::view::GetGeneralSettingsResponseView<
                     'static,
                 >,
             >,
@@ -1374,42 +1379,42 @@ where
         ::connectrpc::client::call_unary(
                 &self.transport,
                 &self.config,
-                SYSTEM_SERVICE_GET_SERVER_SETTINGS_SPEC
+                SYSTEM_SERVICE_GET_GENERAL_SETTINGS_SPEC
                     .with_origin(::connectrpc::SpecOrigin::Client),
                 request,
                 options,
             )
             .await
     }
-    /// Call the UpdateServerSettings RPC. Sends a request to /mavio.system.v1.SystemService/UpdateServerSettings.
-    pub async fn update_server_settings(
+    /// Call the UpdateGeneralSettings RPC. Sends a request to /mavio.system.v1.SystemService/UpdateGeneralSettings.
+    pub async fn update_general_settings(
         &self,
-        request: crate::proto::mavio::system::v1::UpdateServerSettingsRequest,
+        request: crate::proto::mavio::system::v1::UpdateGeneralSettingsRequest,
     ) -> Result<
         ::connectrpc::client::UnaryResponse<
             ::buffa::view::OwnedView<
-                crate::proto::mavio::system::v1::__buffa::view::UpdateServerSettingsResponseView<
+                crate::proto::mavio::system::v1::__buffa::view::UpdateGeneralSettingsResponseView<
                     'static,
                 >,
             >,
         >,
         ::connectrpc::ConnectError,
     > {
-        self.update_server_settings_with_options(
+        self.update_general_settings_with_options(
                 request,
                 ::connectrpc::client::CallOptions::default(),
             )
             .await
     }
-    /// Call the UpdateServerSettings RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
-    pub async fn update_server_settings_with_options(
+    /// Call the UpdateGeneralSettings RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn update_general_settings_with_options(
         &self,
-        request: crate::proto::mavio::system::v1::UpdateServerSettingsRequest,
+        request: crate::proto::mavio::system::v1::UpdateGeneralSettingsRequest,
         options: ::connectrpc::client::CallOptions,
     ) -> Result<
         ::connectrpc::client::UnaryResponse<
             ::buffa::view::OwnedView<
-                crate::proto::mavio::system::v1::__buffa::view::UpdateServerSettingsResponseView<
+                crate::proto::mavio::system::v1::__buffa::view::UpdateGeneralSettingsResponseView<
                     'static,
                 >,
             >,
@@ -1419,7 +1424,7 @@ where
         ::connectrpc::client::call_unary(
                 &self.transport,
                 &self.config,
-                SYSTEM_SERVICE_UPDATE_SERVER_SETTINGS_SPEC
+                SYSTEM_SERVICE_UPDATE_GENERAL_SETTINGS_SPEC
                     .with_origin(::connectrpc::SpecOrigin::Client),
                 request,
                 options,

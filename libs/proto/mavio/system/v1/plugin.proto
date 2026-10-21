@@ -31,6 +31,15 @@ service PluginManagementService {
   rpc ListPluginConfigOptions(ListPluginConfigOptionsRequest) returns (ListPluginConfigOptionsResponse) {
     option idempotency_level = NO_SIDE_EFFECTS;
   }
+  // GetPluginCatalogs returns the URLs of the catalogs plugins are
+  // installed from.
+  rpc GetPluginCatalogs(GetPluginCatalogsRequest) returns (GetPluginCatalogsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // UpdatePluginCatalogs replaces the URLs of the plugin catalogs.
+  rpc UpdatePluginCatalogs(UpdatePluginCatalogsRequest) returns (UpdatePluginCatalogsResponse) {
+    option idempotency_level = IDEMPOTENT;
+  }
   // ListCatalogPlugins lists the plugins of the configured plugin
   // catalogs, with the versions the server can run.
   rpc ListCatalogPlugins(ListCatalogPluginsRequest) returns (ListCatalogPluginsResponse) {
@@ -343,4 +352,19 @@ message SetPluginProxyRequest {
 
 message SetPluginProxyResponse {
   Plugin plugin = 1;
+}
+
+message GetPluginCatalogsRequest {}
+
+message GetPluginCatalogsResponse {
+  repeated string urls = 1;
+}
+
+message UpdatePluginCatalogsRequest {
+  // http, https or file URLs.
+  repeated string urls = 1 [(buf.validate.field).repeated.items.string.uri = true];
+}
+
+message UpdatePluginCatalogsResponse {
+  repeated string urls = 1;
 }

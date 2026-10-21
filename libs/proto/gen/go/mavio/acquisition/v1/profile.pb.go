@@ -5049,7 +5049,7 @@ var File_mavio_acquisition_v1_profile_proto protoreflect.FileDescriptor
 
 const file_mavio_acquisition_v1_profile_proto_rawDesc = "" +
 	"\n" +
-	"\"mavio/acquisition/v1/profile.proto\x12\x14mavio.acquisition.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1egoogle/protobuf/duration.proto\x1a\"mavio/acquisition/v1/release.proto\"\xdb\x01\n" +
+	"\"mavio/acquisition/v1/profile.proto\x12\x14mavio.acquisition.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1egoogle/protobuf/duration.proto\x1a\"mavio/acquisition/v1/release.proto\x1a#mavio/acquisition/v1/settings.proto\"\xdb\x01\n" +
 	"\x11QualityDefinition\x12\x18\n" +
 	"\aquality\x18\x01 \x01(\x05R\aquality\x12\x1f\n" +
 	"\x05title\x18\x02 \x01(\tB\t\xbaH\x06r\x04\x10\x01\x18dR\x05title\x12)\n" +
@@ -5227,7 +5227,7 @@ const file_mavio_acquisition_v1_profile_proto_rawDesc = "" +
 	"%CUSTOM_FORMAT_SPEC_KIND_RELEASE_GROUP\x10\t\x12 \n" +
 	"\x1cCUSTOM_FORMAT_SPEC_KIND_YEAR\x10\n" +
 	"\x12(\n" +
-	"$CUSTOM_FORMAT_SPEC_KIND_RELEASE_TYPE\x10\v2\xc7\x16\n" +
+	"$CUSTOM_FORMAT_SPEC_KIND_RELEASE_TYPE\x10\v2\xe6\x18\n" +
 	"\x0eProfileService\x12\x88\x01\n" +
 	"\x16ListQualityDefinitions\x123.mavio.acquisition.v1.ListQualityDefinitionsRequest\x1a4.mavio.acquisition.v1.ListQualityDefinitionsResponse\"\x03\x90\x02\x01\x12\x8e\x01\n" +
 	"\x18UpdateQualityDefinitions\x125.mavio.acquisition.v1.UpdateQualityDefinitionsRequest\x1a6.mavio.acquisition.v1.UpdateQualityDefinitionsResponse\"\x03\x90\x02\x02\x12\x7f\n" +
@@ -5250,70 +5250,76 @@ const file_mavio_acquisition_v1_profile_proto_rawDesc = "" +
 	"\x14DeleteReleaseProfile\x121.mavio.acquisition.v1.DeleteReleaseProfileRequest\x1a2.mavio.acquisition.v1.DeleteReleaseProfileResponse\"\x03\x90\x02\x02\x12\x88\x01\n" +
 	"\x16ListRemotePathMappings\x123.mavio.acquisition.v1.ListRemotePathMappingsRequest\x1a4.mavio.acquisition.v1.ListRemotePathMappingsResponse\"\x03\x90\x02\x01\x12\x86\x01\n" +
 	"\x17CreateRemotePathMapping\x124.mavio.acquisition.v1.CreateRemotePathMappingRequest\x1a5.mavio.acquisition.v1.CreateRemotePathMappingResponse\x12\x8b\x01\n" +
-	"\x17DeleteRemotePathMapping\x124.mavio.acquisition.v1.DeleteRemotePathMappingRequest\x1a5.mavio.acquisition.v1.DeleteRemotePathMappingResponse\"\x03\x90\x02\x02B\xe9\x01\n" +
+	"\x17DeleteRemotePathMapping\x124.mavio.acquisition.v1.DeleteRemotePathMappingRequest\x1a5.mavio.acquisition.v1.DeleteRemotePathMappingResponse\"\x03\x90\x02\x02\x12\x88\x01\n" +
+	"\x16GetAcquisitionSettings\x123.mavio.acquisition.v1.GetAcquisitionSettingsRequest\x1a4.mavio.acquisition.v1.GetAcquisitionSettingsResponse\"\x03\x90\x02\x01\x12\x91\x01\n" +
+	"\x19UpdateAcquisitionSettings\x126.mavio.acquisition.v1.UpdateAcquisitionSettingsRequest\x1a7.mavio.acquisition.v1.UpdateAcquisitionSettingsResponse\"\x03\x90\x02\x02B\xe9\x01\n" +
 	"\x18com.mavio.acquisition.v1B\fProfileProtoP\x01ZMgithub.com/mavioai/mavio/libs/proto/gen/go/mavio/acquisition/v1;acquisitionv1\xa2\x02\x03MAX\xaa\x02\x14Mavio.Acquisition.V1\xca\x02\x14Mavio\\Acquisition\\V1\xe2\x02 Mavio\\Acquisition\\V1\\GPBMetadata\xea\x02\x16Mavio::Acquisition::V1b\beditionsp\xe8\a"
 
 var file_mavio_acquisition_v1_profile_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
 var file_mavio_acquisition_v1_profile_proto_msgTypes = make([]protoimpl.MessageInfo, 53)
 var file_mavio_acquisition_v1_profile_proto_goTypes = []any{
-	(MediaKind)(0),                           // 0: mavio.acquisition.v1.MediaKind
-	(CustomFormatSpecKind)(0),                // 1: mavio.acquisition.v1.CustomFormatSpecKind
-	(*QualityDefinition)(nil),                // 2: mavio.acquisition.v1.QualityDefinition
-	(*ListQualityDefinitionsRequest)(nil),    // 3: mavio.acquisition.v1.ListQualityDefinitionsRequest
-	(*ListQualityDefinitionsResponse)(nil),   // 4: mavio.acquisition.v1.ListQualityDefinitionsResponse
-	(*UpdateQualityDefinitionsRequest)(nil),  // 5: mavio.acquisition.v1.UpdateQualityDefinitionsRequest
-	(*UpdateQualityDefinitionsResponse)(nil), // 6: mavio.acquisition.v1.UpdateQualityDefinitionsResponse
-	(*QualityProfileItem)(nil),               // 7: mavio.acquisition.v1.QualityProfileItem
-	(*FormatScore)(nil),                      // 8: mavio.acquisition.v1.FormatScore
-	(*QualityProfile)(nil),                   // 9: mavio.acquisition.v1.QualityProfile
-	(*ListQualityProfilesRequest)(nil),       // 10: mavio.acquisition.v1.ListQualityProfilesRequest
-	(*ListQualityProfilesResponse)(nil),      // 11: mavio.acquisition.v1.ListQualityProfilesResponse
-	(*CreateQualityProfileRequest)(nil),      // 12: mavio.acquisition.v1.CreateQualityProfileRequest
-	(*CreateQualityProfileResponse)(nil),     // 13: mavio.acquisition.v1.CreateQualityProfileResponse
-	(*UpdateQualityProfileRequest)(nil),      // 14: mavio.acquisition.v1.UpdateQualityProfileRequest
-	(*UpdateQualityProfileResponse)(nil),     // 15: mavio.acquisition.v1.UpdateQualityProfileResponse
-	(*DeleteQualityProfileRequest)(nil),      // 16: mavio.acquisition.v1.DeleteQualityProfileRequest
-	(*DeleteQualityProfileResponse)(nil),     // 17: mavio.acquisition.v1.DeleteQualityProfileResponse
-	(*CustomFormatSpec)(nil),                 // 18: mavio.acquisition.v1.CustomFormatSpec
-	(*CustomFormat)(nil),                     // 19: mavio.acquisition.v1.CustomFormat
-	(*ListCustomFormatsRequest)(nil),         // 20: mavio.acquisition.v1.ListCustomFormatsRequest
-	(*ListCustomFormatsResponse)(nil),        // 21: mavio.acquisition.v1.ListCustomFormatsResponse
-	(*CreateCustomFormatRequest)(nil),        // 22: mavio.acquisition.v1.CreateCustomFormatRequest
-	(*CreateCustomFormatResponse)(nil),       // 23: mavio.acquisition.v1.CreateCustomFormatResponse
-	(*UpdateCustomFormatRequest)(nil),        // 24: mavio.acquisition.v1.UpdateCustomFormatRequest
-	(*UpdateCustomFormatResponse)(nil),       // 25: mavio.acquisition.v1.UpdateCustomFormatResponse
-	(*DeleteCustomFormatRequest)(nil),        // 26: mavio.acquisition.v1.DeleteCustomFormatRequest
-	(*DeleteCustomFormatResponse)(nil),       // 27: mavio.acquisition.v1.DeleteCustomFormatResponse
-	(*DelayProfile)(nil),                     // 28: mavio.acquisition.v1.DelayProfile
-	(*ListDelayProfilesRequest)(nil),         // 29: mavio.acquisition.v1.ListDelayProfilesRequest
-	(*ListDelayProfilesResponse)(nil),        // 30: mavio.acquisition.v1.ListDelayProfilesResponse
-	(*CreateDelayProfileRequest)(nil),        // 31: mavio.acquisition.v1.CreateDelayProfileRequest
-	(*CreateDelayProfileResponse)(nil),       // 32: mavio.acquisition.v1.CreateDelayProfileResponse
-	(*UpdateDelayProfileRequest)(nil),        // 33: mavio.acquisition.v1.UpdateDelayProfileRequest
-	(*UpdateDelayProfileResponse)(nil),       // 34: mavio.acquisition.v1.UpdateDelayProfileResponse
-	(*DeleteDelayProfileRequest)(nil),        // 35: mavio.acquisition.v1.DeleteDelayProfileRequest
-	(*DeleteDelayProfileResponse)(nil),       // 36: mavio.acquisition.v1.DeleteDelayProfileResponse
-	(*ReorderDelayProfilesRequest)(nil),      // 37: mavio.acquisition.v1.ReorderDelayProfilesRequest
-	(*ReorderDelayProfilesResponse)(nil),     // 38: mavio.acquisition.v1.ReorderDelayProfilesResponse
-	(*ReleaseProfile)(nil),                   // 39: mavio.acquisition.v1.ReleaseProfile
-	(*ListReleaseProfilesRequest)(nil),       // 40: mavio.acquisition.v1.ListReleaseProfilesRequest
-	(*ListReleaseProfilesResponse)(nil),      // 41: mavio.acquisition.v1.ListReleaseProfilesResponse
-	(*CreateReleaseProfileRequest)(nil),      // 42: mavio.acquisition.v1.CreateReleaseProfileRequest
-	(*CreateReleaseProfileResponse)(nil),     // 43: mavio.acquisition.v1.CreateReleaseProfileResponse
-	(*UpdateReleaseProfileRequest)(nil),      // 44: mavio.acquisition.v1.UpdateReleaseProfileRequest
-	(*UpdateReleaseProfileResponse)(nil),     // 45: mavio.acquisition.v1.UpdateReleaseProfileResponse
-	(*DeleteReleaseProfileRequest)(nil),      // 46: mavio.acquisition.v1.DeleteReleaseProfileRequest
-	(*DeleteReleaseProfileResponse)(nil),     // 47: mavio.acquisition.v1.DeleteReleaseProfileResponse
-	(*RemotePathMapping)(nil),                // 48: mavio.acquisition.v1.RemotePathMapping
-	(*ListRemotePathMappingsRequest)(nil),    // 49: mavio.acquisition.v1.ListRemotePathMappingsRequest
-	(*ListRemotePathMappingsResponse)(nil),   // 50: mavio.acquisition.v1.ListRemotePathMappingsResponse
-	(*CreateRemotePathMappingRequest)(nil),   // 51: mavio.acquisition.v1.CreateRemotePathMappingRequest
-	(*CreateRemotePathMappingResponse)(nil),  // 52: mavio.acquisition.v1.CreateRemotePathMappingResponse
-	(*DeleteRemotePathMappingRequest)(nil),   // 53: mavio.acquisition.v1.DeleteRemotePathMappingRequest
-	(*DeleteRemotePathMappingResponse)(nil),  // 54: mavio.acquisition.v1.DeleteRemotePathMappingResponse
-	(DownloadProtocol)(0),                    // 55: mavio.acquisition.v1.DownloadProtocol
-	(*durationpb.Duration)(nil),              // 56: google.protobuf.Duration
-	(*IndexerRef)(nil),                       // 57: mavio.acquisition.v1.IndexerRef
+	(MediaKind)(0),                            // 0: mavio.acquisition.v1.MediaKind
+	(CustomFormatSpecKind)(0),                 // 1: mavio.acquisition.v1.CustomFormatSpecKind
+	(*QualityDefinition)(nil),                 // 2: mavio.acquisition.v1.QualityDefinition
+	(*ListQualityDefinitionsRequest)(nil),     // 3: mavio.acquisition.v1.ListQualityDefinitionsRequest
+	(*ListQualityDefinitionsResponse)(nil),    // 4: mavio.acquisition.v1.ListQualityDefinitionsResponse
+	(*UpdateQualityDefinitionsRequest)(nil),   // 5: mavio.acquisition.v1.UpdateQualityDefinitionsRequest
+	(*UpdateQualityDefinitionsResponse)(nil),  // 6: mavio.acquisition.v1.UpdateQualityDefinitionsResponse
+	(*QualityProfileItem)(nil),                // 7: mavio.acquisition.v1.QualityProfileItem
+	(*FormatScore)(nil),                       // 8: mavio.acquisition.v1.FormatScore
+	(*QualityProfile)(nil),                    // 9: mavio.acquisition.v1.QualityProfile
+	(*ListQualityProfilesRequest)(nil),        // 10: mavio.acquisition.v1.ListQualityProfilesRequest
+	(*ListQualityProfilesResponse)(nil),       // 11: mavio.acquisition.v1.ListQualityProfilesResponse
+	(*CreateQualityProfileRequest)(nil),       // 12: mavio.acquisition.v1.CreateQualityProfileRequest
+	(*CreateQualityProfileResponse)(nil),      // 13: mavio.acquisition.v1.CreateQualityProfileResponse
+	(*UpdateQualityProfileRequest)(nil),       // 14: mavio.acquisition.v1.UpdateQualityProfileRequest
+	(*UpdateQualityProfileResponse)(nil),      // 15: mavio.acquisition.v1.UpdateQualityProfileResponse
+	(*DeleteQualityProfileRequest)(nil),       // 16: mavio.acquisition.v1.DeleteQualityProfileRequest
+	(*DeleteQualityProfileResponse)(nil),      // 17: mavio.acquisition.v1.DeleteQualityProfileResponse
+	(*CustomFormatSpec)(nil),                  // 18: mavio.acquisition.v1.CustomFormatSpec
+	(*CustomFormat)(nil),                      // 19: mavio.acquisition.v1.CustomFormat
+	(*ListCustomFormatsRequest)(nil),          // 20: mavio.acquisition.v1.ListCustomFormatsRequest
+	(*ListCustomFormatsResponse)(nil),         // 21: mavio.acquisition.v1.ListCustomFormatsResponse
+	(*CreateCustomFormatRequest)(nil),         // 22: mavio.acquisition.v1.CreateCustomFormatRequest
+	(*CreateCustomFormatResponse)(nil),        // 23: mavio.acquisition.v1.CreateCustomFormatResponse
+	(*UpdateCustomFormatRequest)(nil),         // 24: mavio.acquisition.v1.UpdateCustomFormatRequest
+	(*UpdateCustomFormatResponse)(nil),        // 25: mavio.acquisition.v1.UpdateCustomFormatResponse
+	(*DeleteCustomFormatRequest)(nil),         // 26: mavio.acquisition.v1.DeleteCustomFormatRequest
+	(*DeleteCustomFormatResponse)(nil),        // 27: mavio.acquisition.v1.DeleteCustomFormatResponse
+	(*DelayProfile)(nil),                      // 28: mavio.acquisition.v1.DelayProfile
+	(*ListDelayProfilesRequest)(nil),          // 29: mavio.acquisition.v1.ListDelayProfilesRequest
+	(*ListDelayProfilesResponse)(nil),         // 30: mavio.acquisition.v1.ListDelayProfilesResponse
+	(*CreateDelayProfileRequest)(nil),         // 31: mavio.acquisition.v1.CreateDelayProfileRequest
+	(*CreateDelayProfileResponse)(nil),        // 32: mavio.acquisition.v1.CreateDelayProfileResponse
+	(*UpdateDelayProfileRequest)(nil),         // 33: mavio.acquisition.v1.UpdateDelayProfileRequest
+	(*UpdateDelayProfileResponse)(nil),        // 34: mavio.acquisition.v1.UpdateDelayProfileResponse
+	(*DeleteDelayProfileRequest)(nil),         // 35: mavio.acquisition.v1.DeleteDelayProfileRequest
+	(*DeleteDelayProfileResponse)(nil),        // 36: mavio.acquisition.v1.DeleteDelayProfileResponse
+	(*ReorderDelayProfilesRequest)(nil),       // 37: mavio.acquisition.v1.ReorderDelayProfilesRequest
+	(*ReorderDelayProfilesResponse)(nil),      // 38: mavio.acquisition.v1.ReorderDelayProfilesResponse
+	(*ReleaseProfile)(nil),                    // 39: mavio.acquisition.v1.ReleaseProfile
+	(*ListReleaseProfilesRequest)(nil),        // 40: mavio.acquisition.v1.ListReleaseProfilesRequest
+	(*ListReleaseProfilesResponse)(nil),       // 41: mavio.acquisition.v1.ListReleaseProfilesResponse
+	(*CreateReleaseProfileRequest)(nil),       // 42: mavio.acquisition.v1.CreateReleaseProfileRequest
+	(*CreateReleaseProfileResponse)(nil),      // 43: mavio.acquisition.v1.CreateReleaseProfileResponse
+	(*UpdateReleaseProfileRequest)(nil),       // 44: mavio.acquisition.v1.UpdateReleaseProfileRequest
+	(*UpdateReleaseProfileResponse)(nil),      // 45: mavio.acquisition.v1.UpdateReleaseProfileResponse
+	(*DeleteReleaseProfileRequest)(nil),       // 46: mavio.acquisition.v1.DeleteReleaseProfileRequest
+	(*DeleteReleaseProfileResponse)(nil),      // 47: mavio.acquisition.v1.DeleteReleaseProfileResponse
+	(*RemotePathMapping)(nil),                 // 48: mavio.acquisition.v1.RemotePathMapping
+	(*ListRemotePathMappingsRequest)(nil),     // 49: mavio.acquisition.v1.ListRemotePathMappingsRequest
+	(*ListRemotePathMappingsResponse)(nil),    // 50: mavio.acquisition.v1.ListRemotePathMappingsResponse
+	(*CreateRemotePathMappingRequest)(nil),    // 51: mavio.acquisition.v1.CreateRemotePathMappingRequest
+	(*CreateRemotePathMappingResponse)(nil),   // 52: mavio.acquisition.v1.CreateRemotePathMappingResponse
+	(*DeleteRemotePathMappingRequest)(nil),    // 53: mavio.acquisition.v1.DeleteRemotePathMappingRequest
+	(*DeleteRemotePathMappingResponse)(nil),   // 54: mavio.acquisition.v1.DeleteRemotePathMappingResponse
+	(DownloadProtocol)(0),                     // 55: mavio.acquisition.v1.DownloadProtocol
+	(*durationpb.Duration)(nil),               // 56: google.protobuf.Duration
+	(*IndexerRef)(nil),                        // 57: mavio.acquisition.v1.IndexerRef
+	(*GetAcquisitionSettingsRequest)(nil),     // 58: mavio.acquisition.v1.GetAcquisitionSettingsRequest
+	(*UpdateAcquisitionSettingsRequest)(nil),  // 59: mavio.acquisition.v1.UpdateAcquisitionSettingsRequest
+	(*GetAcquisitionSettingsResponse)(nil),    // 60: mavio.acquisition.v1.GetAcquisitionSettingsResponse
+	(*UpdateAcquisitionSettingsResponse)(nil), // 61: mavio.acquisition.v1.UpdateAcquisitionSettingsResponse
 }
 var file_mavio_acquisition_v1_profile_proto_depIdxs = []int32{
 	0,  // 0: mavio.acquisition.v1.ListQualityDefinitionsRequest.kind:type_name -> mavio.acquisition.v1.MediaKind
@@ -5378,30 +5384,34 @@ var file_mavio_acquisition_v1_profile_proto_depIdxs = []int32{
 	49, // 59: mavio.acquisition.v1.ProfileService.ListRemotePathMappings:input_type -> mavio.acquisition.v1.ListRemotePathMappingsRequest
 	51, // 60: mavio.acquisition.v1.ProfileService.CreateRemotePathMapping:input_type -> mavio.acquisition.v1.CreateRemotePathMappingRequest
 	53, // 61: mavio.acquisition.v1.ProfileService.DeleteRemotePathMapping:input_type -> mavio.acquisition.v1.DeleteRemotePathMappingRequest
-	4,  // 62: mavio.acquisition.v1.ProfileService.ListQualityDefinitions:output_type -> mavio.acquisition.v1.ListQualityDefinitionsResponse
-	6,  // 63: mavio.acquisition.v1.ProfileService.UpdateQualityDefinitions:output_type -> mavio.acquisition.v1.UpdateQualityDefinitionsResponse
-	11, // 64: mavio.acquisition.v1.ProfileService.ListQualityProfiles:output_type -> mavio.acquisition.v1.ListQualityProfilesResponse
-	13, // 65: mavio.acquisition.v1.ProfileService.CreateQualityProfile:output_type -> mavio.acquisition.v1.CreateQualityProfileResponse
-	15, // 66: mavio.acquisition.v1.ProfileService.UpdateQualityProfile:output_type -> mavio.acquisition.v1.UpdateQualityProfileResponse
-	17, // 67: mavio.acquisition.v1.ProfileService.DeleteQualityProfile:output_type -> mavio.acquisition.v1.DeleteQualityProfileResponse
-	21, // 68: mavio.acquisition.v1.ProfileService.ListCustomFormats:output_type -> mavio.acquisition.v1.ListCustomFormatsResponse
-	23, // 69: mavio.acquisition.v1.ProfileService.CreateCustomFormat:output_type -> mavio.acquisition.v1.CreateCustomFormatResponse
-	25, // 70: mavio.acquisition.v1.ProfileService.UpdateCustomFormat:output_type -> mavio.acquisition.v1.UpdateCustomFormatResponse
-	27, // 71: mavio.acquisition.v1.ProfileService.DeleteCustomFormat:output_type -> mavio.acquisition.v1.DeleteCustomFormatResponse
-	30, // 72: mavio.acquisition.v1.ProfileService.ListDelayProfiles:output_type -> mavio.acquisition.v1.ListDelayProfilesResponse
-	32, // 73: mavio.acquisition.v1.ProfileService.CreateDelayProfile:output_type -> mavio.acquisition.v1.CreateDelayProfileResponse
-	34, // 74: mavio.acquisition.v1.ProfileService.UpdateDelayProfile:output_type -> mavio.acquisition.v1.UpdateDelayProfileResponse
-	36, // 75: mavio.acquisition.v1.ProfileService.DeleteDelayProfile:output_type -> mavio.acquisition.v1.DeleteDelayProfileResponse
-	38, // 76: mavio.acquisition.v1.ProfileService.ReorderDelayProfiles:output_type -> mavio.acquisition.v1.ReorderDelayProfilesResponse
-	41, // 77: mavio.acquisition.v1.ProfileService.ListReleaseProfiles:output_type -> mavio.acquisition.v1.ListReleaseProfilesResponse
-	43, // 78: mavio.acquisition.v1.ProfileService.CreateReleaseProfile:output_type -> mavio.acquisition.v1.CreateReleaseProfileResponse
-	45, // 79: mavio.acquisition.v1.ProfileService.UpdateReleaseProfile:output_type -> mavio.acquisition.v1.UpdateReleaseProfileResponse
-	47, // 80: mavio.acquisition.v1.ProfileService.DeleteReleaseProfile:output_type -> mavio.acquisition.v1.DeleteReleaseProfileResponse
-	50, // 81: mavio.acquisition.v1.ProfileService.ListRemotePathMappings:output_type -> mavio.acquisition.v1.ListRemotePathMappingsResponse
-	52, // 82: mavio.acquisition.v1.ProfileService.CreateRemotePathMapping:output_type -> mavio.acquisition.v1.CreateRemotePathMappingResponse
-	54, // 83: mavio.acquisition.v1.ProfileService.DeleteRemotePathMapping:output_type -> mavio.acquisition.v1.DeleteRemotePathMappingResponse
-	62, // [62:84] is the sub-list for method output_type
-	40, // [40:62] is the sub-list for method input_type
+	58, // 62: mavio.acquisition.v1.ProfileService.GetAcquisitionSettings:input_type -> mavio.acquisition.v1.GetAcquisitionSettingsRequest
+	59, // 63: mavio.acquisition.v1.ProfileService.UpdateAcquisitionSettings:input_type -> mavio.acquisition.v1.UpdateAcquisitionSettingsRequest
+	4,  // 64: mavio.acquisition.v1.ProfileService.ListQualityDefinitions:output_type -> mavio.acquisition.v1.ListQualityDefinitionsResponse
+	6,  // 65: mavio.acquisition.v1.ProfileService.UpdateQualityDefinitions:output_type -> mavio.acquisition.v1.UpdateQualityDefinitionsResponse
+	11, // 66: mavio.acquisition.v1.ProfileService.ListQualityProfiles:output_type -> mavio.acquisition.v1.ListQualityProfilesResponse
+	13, // 67: mavio.acquisition.v1.ProfileService.CreateQualityProfile:output_type -> mavio.acquisition.v1.CreateQualityProfileResponse
+	15, // 68: mavio.acquisition.v1.ProfileService.UpdateQualityProfile:output_type -> mavio.acquisition.v1.UpdateQualityProfileResponse
+	17, // 69: mavio.acquisition.v1.ProfileService.DeleteQualityProfile:output_type -> mavio.acquisition.v1.DeleteQualityProfileResponse
+	21, // 70: mavio.acquisition.v1.ProfileService.ListCustomFormats:output_type -> mavio.acquisition.v1.ListCustomFormatsResponse
+	23, // 71: mavio.acquisition.v1.ProfileService.CreateCustomFormat:output_type -> mavio.acquisition.v1.CreateCustomFormatResponse
+	25, // 72: mavio.acquisition.v1.ProfileService.UpdateCustomFormat:output_type -> mavio.acquisition.v1.UpdateCustomFormatResponse
+	27, // 73: mavio.acquisition.v1.ProfileService.DeleteCustomFormat:output_type -> mavio.acquisition.v1.DeleteCustomFormatResponse
+	30, // 74: mavio.acquisition.v1.ProfileService.ListDelayProfiles:output_type -> mavio.acquisition.v1.ListDelayProfilesResponse
+	32, // 75: mavio.acquisition.v1.ProfileService.CreateDelayProfile:output_type -> mavio.acquisition.v1.CreateDelayProfileResponse
+	34, // 76: mavio.acquisition.v1.ProfileService.UpdateDelayProfile:output_type -> mavio.acquisition.v1.UpdateDelayProfileResponse
+	36, // 77: mavio.acquisition.v1.ProfileService.DeleteDelayProfile:output_type -> mavio.acquisition.v1.DeleteDelayProfileResponse
+	38, // 78: mavio.acquisition.v1.ProfileService.ReorderDelayProfiles:output_type -> mavio.acquisition.v1.ReorderDelayProfilesResponse
+	41, // 79: mavio.acquisition.v1.ProfileService.ListReleaseProfiles:output_type -> mavio.acquisition.v1.ListReleaseProfilesResponse
+	43, // 80: mavio.acquisition.v1.ProfileService.CreateReleaseProfile:output_type -> mavio.acquisition.v1.CreateReleaseProfileResponse
+	45, // 81: mavio.acquisition.v1.ProfileService.UpdateReleaseProfile:output_type -> mavio.acquisition.v1.UpdateReleaseProfileResponse
+	47, // 82: mavio.acquisition.v1.ProfileService.DeleteReleaseProfile:output_type -> mavio.acquisition.v1.DeleteReleaseProfileResponse
+	50, // 83: mavio.acquisition.v1.ProfileService.ListRemotePathMappings:output_type -> mavio.acquisition.v1.ListRemotePathMappingsResponse
+	52, // 84: mavio.acquisition.v1.ProfileService.CreateRemotePathMapping:output_type -> mavio.acquisition.v1.CreateRemotePathMappingResponse
+	54, // 85: mavio.acquisition.v1.ProfileService.DeleteRemotePathMapping:output_type -> mavio.acquisition.v1.DeleteRemotePathMappingResponse
+	60, // 86: mavio.acquisition.v1.ProfileService.GetAcquisitionSettings:output_type -> mavio.acquisition.v1.GetAcquisitionSettingsResponse
+	61, // 87: mavio.acquisition.v1.ProfileService.UpdateAcquisitionSettings:output_type -> mavio.acquisition.v1.UpdateAcquisitionSettingsResponse
+	64, // [64:88] is the sub-list for method output_type
+	40, // [40:64] is the sub-list for method input_type
 	40, // [40:40] is the sub-list for extension type_name
 	40, // [40:40] is the sub-list for extension extendee
 	0,  // [0:40] is the sub-list for field type_name
@@ -5413,6 +5423,7 @@ func file_mavio_acquisition_v1_profile_proto_init() {
 		return
 	}
 	file_mavio_acquisition_v1_release_proto_init()
+	file_mavio_acquisition_v1_settings_proto_init()
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{

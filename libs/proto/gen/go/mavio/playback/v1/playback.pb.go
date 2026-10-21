@@ -656,6 +656,55 @@ func (x TranscodeReason) Number() protoreflect.EnumNumber {
 	return protoreflect.EnumNumber(x)
 }
 
+// HardwareAcceleration is the hardware transcodes decode and encode on.
+type HardwareAcceleration int32
+
+const (
+	HardwareAcceleration_HARDWARE_ACCELERATION_UNSPECIFIED HardwareAcceleration = 0
+	// What the server's ffmpeg and hardware support, if anything.
+	HardwareAcceleration_HARDWARE_ACCELERATION_AUTO         HardwareAcceleration = 1
+	HardwareAcceleration_HARDWARE_ACCELERATION_NONE         HardwareAcceleration = 2
+	HardwareAcceleration_HARDWARE_ACCELERATION_VIDEOTOOLBOX HardwareAcceleration = 3
+)
+
+// Enum value maps for HardwareAcceleration.
+var (
+	HardwareAcceleration_name = map[int32]string{
+		0: "HARDWARE_ACCELERATION_UNSPECIFIED",
+		1: "HARDWARE_ACCELERATION_AUTO",
+		2: "HARDWARE_ACCELERATION_NONE",
+		3: "HARDWARE_ACCELERATION_VIDEOTOOLBOX",
+	}
+	HardwareAcceleration_value = map[string]int32{
+		"HARDWARE_ACCELERATION_UNSPECIFIED":  0,
+		"HARDWARE_ACCELERATION_AUTO":         1,
+		"HARDWARE_ACCELERATION_NONE":         2,
+		"HARDWARE_ACCELERATION_VIDEOTOOLBOX": 3,
+	}
+)
+
+func (x HardwareAcceleration) Enum() *HardwareAcceleration {
+	p := new(HardwareAcceleration)
+	*p = x
+	return p
+}
+
+func (x HardwareAcceleration) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (HardwareAcceleration) Descriptor() protoreflect.EnumDescriptor {
+	return file_mavio_playback_v1_playback_proto_enumTypes[10].Descriptor()
+}
+
+func (HardwareAcceleration) Type() protoreflect.EnumType {
+	return &file_mavio_playback_v1_playback_proto_enumTypes[10]
+}
+
+func (x HardwareAcceleration) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
 // ClientCapabilities describes what a client can play: which containers and
 // codecs it plays directly, which formats it can receive transcodes in, the
 // limits of its decoders and how it shows subtitles.
@@ -4080,6 +4129,790 @@ func (b0 ListMediaSourcesResponse_builder) Build() *ListMediaSourcesResponse {
 	return m0
 }
 
+// TranscodingSettings steer transcodes.
+type TranscodingSettings struct {
+	state                            protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_HardwareAcceleration  HardwareAcceleration   `protobuf:"varint,1,opt,name=hardware_acceleration,json=hardwareAcceleration,enum=mavio.playback.v1.HardwareAcceleration"`
+	xxx_hidden_HardwareEncoding      bool                   `protobuf:"varint,2,opt,name=hardware_encoding,json=hardwareEncoding"`
+	xxx_hidden_EncoderPreset         *string                `protobuf:"bytes,3,opt,name=encoder_preset,json=encoderPreset"`
+	xxx_hidden_H264Crf               int32                  `protobuf:"varint,4,opt,name=h264_crf,json=h264Crf"`
+	xxx_hidden_H265Crf               int32                  `protobuf:"varint,5,opt,name=h265_crf,json=h265Crf"`
+	xxx_hidden_Threads               int32                  `protobuf:"varint,6,opt,name=threads"`
+	xxx_hidden_TonemapAlgorithm      *string                `protobuf:"bytes,7,opt,name=tonemap_algorithm,json=tonemapAlgorithm"`
+	xxx_hidden_TonemapRange          *string                `protobuf:"bytes,8,opt,name=tonemap_range,json=tonemapRange"`
+	xxx_hidden_TonemapDesat          float64                `protobuf:"fixed64,9,opt,name=tonemap_desat,json=tonemapDesat"`
+	xxx_hidden_TonemapPeak           float64                `protobuf:"fixed64,10,opt,name=tonemap_peak,json=tonemapPeak"`
+	xxx_hidden_DeinterlaceMethod     *string                `protobuf:"bytes,11,opt,name=deinterlace_method,json=deinterlaceMethod"`
+	xxx_hidden_DeinterlaceDoubleRate bool                   `protobuf:"varint,12,opt,name=deinterlace_double_rate,json=deinterlaceDoubleRate"`
+	xxx_hidden_DownmixBoost          float64                `protobuf:"fixed64,13,opt,name=downmix_boost,json=downmixBoost"`
+	xxx_hidden_CropBlackBorders      bool                   `protobuf:"varint,14,opt,name=crop_black_borders,json=cropBlackBorders"`
+	xxx_hidden_TranscodeDir          *string                `protobuf:"bytes,15,opt,name=transcode_dir,json=transcodeDir"`
+	XXX_raceDetectHookData           protoimpl.RaceDetectHookData
+	XXX_presence                     [1]uint32
+	unknownFields                    protoimpl.UnknownFields
+	sizeCache                        protoimpl.SizeCache
+}
+
+func (x *TranscodingSettings) Reset() {
+	*x = TranscodingSettings{}
+	mi := &file_mavio_playback_v1_playback_proto_msgTypes[19]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *TranscodingSettings) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TranscodingSettings) ProtoMessage() {}
+
+func (x *TranscodingSettings) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_playback_v1_playback_proto_msgTypes[19]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *TranscodingSettings) GetHardwareAcceleration() HardwareAcceleration {
+	if x != nil {
+		if protoimpl.X.Present(&(x.XXX_presence[0]), 0) {
+			return x.xxx_hidden_HardwareAcceleration
+		}
+	}
+	return HardwareAcceleration_HARDWARE_ACCELERATION_UNSPECIFIED
+}
+
+func (x *TranscodingSettings) GetHardwareEncoding() bool {
+	if x != nil {
+		return x.xxx_hidden_HardwareEncoding
+	}
+	return false
+}
+
+func (x *TranscodingSettings) GetEncoderPreset() string {
+	if x != nil {
+		if x.xxx_hidden_EncoderPreset != nil {
+			return *x.xxx_hidden_EncoderPreset
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *TranscodingSettings) GetH264Crf() int32 {
+	if x != nil {
+		return x.xxx_hidden_H264Crf
+	}
+	return 0
+}
+
+func (x *TranscodingSettings) GetH265Crf() int32 {
+	if x != nil {
+		return x.xxx_hidden_H265Crf
+	}
+	return 0
+}
+
+func (x *TranscodingSettings) GetThreads() int32 {
+	if x != nil {
+		return x.xxx_hidden_Threads
+	}
+	return 0
+}
+
+func (x *TranscodingSettings) GetTonemapAlgorithm() string {
+	if x != nil {
+		if x.xxx_hidden_TonemapAlgorithm != nil {
+			return *x.xxx_hidden_TonemapAlgorithm
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *TranscodingSettings) GetTonemapRange() string {
+	if x != nil {
+		if x.xxx_hidden_TonemapRange != nil {
+			return *x.xxx_hidden_TonemapRange
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *TranscodingSettings) GetTonemapDesat() float64 {
+	if x != nil {
+		return x.xxx_hidden_TonemapDesat
+	}
+	return 0
+}
+
+func (x *TranscodingSettings) GetTonemapPeak() float64 {
+	if x != nil {
+		return x.xxx_hidden_TonemapPeak
+	}
+	return 0
+}
+
+func (x *TranscodingSettings) GetDeinterlaceMethod() string {
+	if x != nil {
+		if x.xxx_hidden_DeinterlaceMethod != nil {
+			return *x.xxx_hidden_DeinterlaceMethod
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *TranscodingSettings) GetDeinterlaceDoubleRate() bool {
+	if x != nil {
+		return x.xxx_hidden_DeinterlaceDoubleRate
+	}
+	return false
+}
+
+func (x *TranscodingSettings) GetDownmixBoost() float64 {
+	if x != nil {
+		return x.xxx_hidden_DownmixBoost
+	}
+	return 0
+}
+
+func (x *TranscodingSettings) GetCropBlackBorders() bool {
+	if x != nil {
+		return x.xxx_hidden_CropBlackBorders
+	}
+	return false
+}
+
+func (x *TranscodingSettings) GetTranscodeDir() string {
+	if x != nil {
+		if x.xxx_hidden_TranscodeDir != nil {
+			return *x.xxx_hidden_TranscodeDir
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *TranscodingSettings) SetHardwareAcceleration(v HardwareAcceleration) {
+	x.xxx_hidden_HardwareAcceleration = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 15)
+}
+
+func (x *TranscodingSettings) SetHardwareEncoding(v bool) {
+	x.xxx_hidden_HardwareEncoding = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 15)
+}
+
+func (x *TranscodingSettings) SetEncoderPreset(v string) {
+	x.xxx_hidden_EncoderPreset = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 15)
+}
+
+func (x *TranscodingSettings) SetH264Crf(v int32) {
+	x.xxx_hidden_H264Crf = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 15)
+}
+
+func (x *TranscodingSettings) SetH265Crf(v int32) {
+	x.xxx_hidden_H265Crf = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 15)
+}
+
+func (x *TranscodingSettings) SetThreads(v int32) {
+	x.xxx_hidden_Threads = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 15)
+}
+
+func (x *TranscodingSettings) SetTonemapAlgorithm(v string) {
+	x.xxx_hidden_TonemapAlgorithm = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 15)
+}
+
+func (x *TranscodingSettings) SetTonemapRange(v string) {
+	x.xxx_hidden_TonemapRange = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 15)
+}
+
+func (x *TranscodingSettings) SetTonemapDesat(v float64) {
+	x.xxx_hidden_TonemapDesat = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 8, 15)
+}
+
+func (x *TranscodingSettings) SetTonemapPeak(v float64) {
+	x.xxx_hidden_TonemapPeak = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 15)
+}
+
+func (x *TranscodingSettings) SetDeinterlaceMethod(v string) {
+	x.xxx_hidden_DeinterlaceMethod = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 15)
+}
+
+func (x *TranscodingSettings) SetDeinterlaceDoubleRate(v bool) {
+	x.xxx_hidden_DeinterlaceDoubleRate = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 11, 15)
+}
+
+func (x *TranscodingSettings) SetDownmixBoost(v float64) {
+	x.xxx_hidden_DownmixBoost = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 12, 15)
+}
+
+func (x *TranscodingSettings) SetCropBlackBorders(v bool) {
+	x.xxx_hidden_CropBlackBorders = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 13, 15)
+}
+
+func (x *TranscodingSettings) SetTranscodeDir(v string) {
+	x.xxx_hidden_TranscodeDir = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 14, 15)
+}
+
+func (x *TranscodingSettings) HasHardwareAcceleration() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *TranscodingSettings) HasHardwareEncoding() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
+}
+
+func (x *TranscodingSettings) HasEncoderPreset() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 2)
+}
+
+func (x *TranscodingSettings) HasH264Crf() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 3)
+}
+
+func (x *TranscodingSettings) HasH265Crf() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 4)
+}
+
+func (x *TranscodingSettings) HasThreads() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 5)
+}
+
+func (x *TranscodingSettings) HasTonemapAlgorithm() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 6)
+}
+
+func (x *TranscodingSettings) HasTonemapRange() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 7)
+}
+
+func (x *TranscodingSettings) HasTonemapDesat() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 8)
+}
+
+func (x *TranscodingSettings) HasTonemapPeak() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 9)
+}
+
+func (x *TranscodingSettings) HasDeinterlaceMethod() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 10)
+}
+
+func (x *TranscodingSettings) HasDeinterlaceDoubleRate() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 11)
+}
+
+func (x *TranscodingSettings) HasDownmixBoost() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 12)
+}
+
+func (x *TranscodingSettings) HasCropBlackBorders() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 13)
+}
+
+func (x *TranscodingSettings) HasTranscodeDir() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 14)
+}
+
+func (x *TranscodingSettings) ClearHardwareAcceleration() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_HardwareAcceleration = HardwareAcceleration_HARDWARE_ACCELERATION_UNSPECIFIED
+}
+
+func (x *TranscodingSettings) ClearHardwareEncoding() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
+	x.xxx_hidden_HardwareEncoding = false
+}
+
+func (x *TranscodingSettings) ClearEncoderPreset() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 2)
+	x.xxx_hidden_EncoderPreset = nil
+}
+
+func (x *TranscodingSettings) ClearH264Crf() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 3)
+	x.xxx_hidden_H264Crf = 0
+}
+
+func (x *TranscodingSettings) ClearH265Crf() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 4)
+	x.xxx_hidden_H265Crf = 0
+}
+
+func (x *TranscodingSettings) ClearThreads() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 5)
+	x.xxx_hidden_Threads = 0
+}
+
+func (x *TranscodingSettings) ClearTonemapAlgorithm() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 6)
+	x.xxx_hidden_TonemapAlgorithm = nil
+}
+
+func (x *TranscodingSettings) ClearTonemapRange() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 7)
+	x.xxx_hidden_TonemapRange = nil
+}
+
+func (x *TranscodingSettings) ClearTonemapDesat() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 8)
+	x.xxx_hidden_TonemapDesat = 0
+}
+
+func (x *TranscodingSettings) ClearTonemapPeak() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 9)
+	x.xxx_hidden_TonemapPeak = 0
+}
+
+func (x *TranscodingSettings) ClearDeinterlaceMethod() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 10)
+	x.xxx_hidden_DeinterlaceMethod = nil
+}
+
+func (x *TranscodingSettings) ClearDeinterlaceDoubleRate() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 11)
+	x.xxx_hidden_DeinterlaceDoubleRate = false
+}
+
+func (x *TranscodingSettings) ClearDownmixBoost() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 12)
+	x.xxx_hidden_DownmixBoost = 0
+}
+
+func (x *TranscodingSettings) ClearCropBlackBorders() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 13)
+	x.xxx_hidden_CropBlackBorders = false
+}
+
+func (x *TranscodingSettings) ClearTranscodeDir() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 14)
+	x.xxx_hidden_TranscodeDir = nil
+}
+
+type TranscodingSettings_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	HardwareAcceleration *HardwareAcceleration
+	HardwareEncoding     *bool
+	// "", "ultrafast", "superfast", "veryfast", "faster", "fast", "medium",
+	// "slow", "slower" or "veryslow"; empty picks one by the source.
+	EncoderPreset *string
+	H264Crf       *int32
+	H265Crf       *int32
+	// 0 lets ffmpeg decide.
+	Threads *int32
+	// "bt2390", "hable", "mobius", "reinhard", "clip", "linear" or "gamma".
+	TonemapAlgorithm *string
+	// "auto", "tv" or "pc".
+	TonemapRange *string
+	TonemapDesat *float64
+	TonemapPeak  *float64
+	// "yadif" or "bwdif".
+	DeinterlaceMethod     *string
+	DeinterlaceDoubleRate *bool
+	DownmixBoost          *float64
+	CropBlackBorders      *bool
+	// Absolute folder for running transcodes; empty uses the folder the
+	// server was started with.
+	TranscodeDir *string
+}
+
+func (b0 TranscodingSettings_builder) Build() *TranscodingSettings {
+	m0 := &TranscodingSettings{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.HardwareAcceleration != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 15)
+		x.xxx_hidden_HardwareAcceleration = *b.HardwareAcceleration
+	}
+	if b.HardwareEncoding != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 15)
+		x.xxx_hidden_HardwareEncoding = *b.HardwareEncoding
+	}
+	if b.EncoderPreset != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 15)
+		x.xxx_hidden_EncoderPreset = b.EncoderPreset
+	}
+	if b.H264Crf != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 15)
+		x.xxx_hidden_H264Crf = *b.H264Crf
+	}
+	if b.H265Crf != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 15)
+		x.xxx_hidden_H265Crf = *b.H265Crf
+	}
+	if b.Threads != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 15)
+		x.xxx_hidden_Threads = *b.Threads
+	}
+	if b.TonemapAlgorithm != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 15)
+		x.xxx_hidden_TonemapAlgorithm = b.TonemapAlgorithm
+	}
+	if b.TonemapRange != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 15)
+		x.xxx_hidden_TonemapRange = b.TonemapRange
+	}
+	if b.TonemapDesat != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 8, 15)
+		x.xxx_hidden_TonemapDesat = *b.TonemapDesat
+	}
+	if b.TonemapPeak != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 15)
+		x.xxx_hidden_TonemapPeak = *b.TonemapPeak
+	}
+	if b.DeinterlaceMethod != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 15)
+		x.xxx_hidden_DeinterlaceMethod = b.DeinterlaceMethod
+	}
+	if b.DeinterlaceDoubleRate != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 11, 15)
+		x.xxx_hidden_DeinterlaceDoubleRate = *b.DeinterlaceDoubleRate
+	}
+	if b.DownmixBoost != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 12, 15)
+		x.xxx_hidden_DownmixBoost = *b.DownmixBoost
+	}
+	if b.CropBlackBorders != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 13, 15)
+		x.xxx_hidden_CropBlackBorders = *b.CropBlackBorders
+	}
+	if b.TranscodeDir != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 14, 15)
+		x.xxx_hidden_TranscodeDir = b.TranscodeDir
+	}
+	return m0
+}
+
+type GetTranscodingSettingsRequest struct {
+	state         protoimpl.MessageState `protogen:"opaque.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetTranscodingSettingsRequest) Reset() {
+	*x = GetTranscodingSettingsRequest{}
+	mi := &file_mavio_playback_v1_playback_proto_msgTypes[20]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetTranscodingSettingsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetTranscodingSettingsRequest) ProtoMessage() {}
+
+func (x *GetTranscodingSettingsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_playback_v1_playback_proto_msgTypes[20]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+type GetTranscodingSettingsRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+}
+
+func (b0 GetTranscodingSettingsRequest_builder) Build() *GetTranscodingSettingsRequest {
+	m0 := &GetTranscodingSettingsRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	return m0
+}
+
+type GetTranscodingSettingsResponse struct {
+	state                                     protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Settings                       *TranscodingSettings   `protobuf:"bytes,1,opt,name=settings"`
+	xxx_hidden_AvailableHardwareAccelerations []HardwareAcceleration `protobuf:"varint,2,rep,packed,name=available_hardware_accelerations,json=availableHardwareAccelerations,enum=mavio.playback.v1.HardwareAcceleration"`
+	unknownFields                             protoimpl.UnknownFields
+	sizeCache                                 protoimpl.SizeCache
+}
+
+func (x *GetTranscodingSettingsResponse) Reset() {
+	*x = GetTranscodingSettingsResponse{}
+	mi := &file_mavio_playback_v1_playback_proto_msgTypes[21]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetTranscodingSettingsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetTranscodingSettingsResponse) ProtoMessage() {}
+
+func (x *GetTranscodingSettingsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_playback_v1_playback_proto_msgTypes[21]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *GetTranscodingSettingsResponse) GetSettings() *TranscodingSettings {
+	if x != nil {
+		return x.xxx_hidden_Settings
+	}
+	return nil
+}
+
+func (x *GetTranscodingSettingsResponse) GetAvailableHardwareAccelerations() []HardwareAcceleration {
+	if x != nil {
+		return x.xxx_hidden_AvailableHardwareAccelerations
+	}
+	return nil
+}
+
+func (x *GetTranscodingSettingsResponse) SetSettings(v *TranscodingSettings) {
+	x.xxx_hidden_Settings = v
+}
+
+func (x *GetTranscodingSettingsResponse) SetAvailableHardwareAccelerations(v []HardwareAcceleration) {
+	x.xxx_hidden_AvailableHardwareAccelerations = v
+}
+
+func (x *GetTranscodingSettingsResponse) HasSettings() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_Settings != nil
+}
+
+func (x *GetTranscodingSettingsResponse) ClearSettings() {
+	x.xxx_hidden_Settings = nil
+}
+
+type GetTranscodingSettingsResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Settings *TranscodingSettings
+	// The accelerations this server's ffmpeg supports, AUTO and NONE
+	// included.
+	AvailableHardwareAccelerations []HardwareAcceleration
+}
+
+func (b0 GetTranscodingSettingsResponse_builder) Build() *GetTranscodingSettingsResponse {
+	m0 := &GetTranscodingSettingsResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_Settings = b.Settings
+	x.xxx_hidden_AvailableHardwareAccelerations = b.AvailableHardwareAccelerations
+	return m0
+}
+
+type UpdateTranscodingSettingsRequest struct {
+	state               protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Settings *TranscodingSettings   `protobuf:"bytes,1,opt,name=settings"`
+	unknownFields       protoimpl.UnknownFields
+	sizeCache           protoimpl.SizeCache
+}
+
+func (x *UpdateTranscodingSettingsRequest) Reset() {
+	*x = UpdateTranscodingSettingsRequest{}
+	mi := &file_mavio_playback_v1_playback_proto_msgTypes[22]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateTranscodingSettingsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateTranscodingSettingsRequest) ProtoMessage() {}
+
+func (x *UpdateTranscodingSettingsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_playback_v1_playback_proto_msgTypes[22]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *UpdateTranscodingSettingsRequest) GetSettings() *TranscodingSettings {
+	if x != nil {
+		return x.xxx_hidden_Settings
+	}
+	return nil
+}
+
+func (x *UpdateTranscodingSettingsRequest) SetSettings(v *TranscodingSettings) {
+	x.xxx_hidden_Settings = v
+}
+
+func (x *UpdateTranscodingSettingsRequest) HasSettings() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_Settings != nil
+}
+
+func (x *UpdateTranscodingSettingsRequest) ClearSettings() {
+	x.xxx_hidden_Settings = nil
+}
+
+type UpdateTranscodingSettingsRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Settings *TranscodingSettings
+}
+
+func (b0 UpdateTranscodingSettingsRequest_builder) Build() *UpdateTranscodingSettingsRequest {
+	m0 := &UpdateTranscodingSettingsRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_Settings = b.Settings
+	return m0
+}
+
+type UpdateTranscodingSettingsResponse struct {
+	state               protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Settings *TranscodingSettings   `protobuf:"bytes,1,opt,name=settings"`
+	unknownFields       protoimpl.UnknownFields
+	sizeCache           protoimpl.SizeCache
+}
+
+func (x *UpdateTranscodingSettingsResponse) Reset() {
+	*x = UpdateTranscodingSettingsResponse{}
+	mi := &file_mavio_playback_v1_playback_proto_msgTypes[23]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateTranscodingSettingsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateTranscodingSettingsResponse) ProtoMessage() {}
+
+func (x *UpdateTranscodingSettingsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_playback_v1_playback_proto_msgTypes[23]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *UpdateTranscodingSettingsResponse) GetSettings() *TranscodingSettings {
+	if x != nil {
+		return x.xxx_hidden_Settings
+	}
+	return nil
+}
+
+func (x *UpdateTranscodingSettingsResponse) SetSettings(v *TranscodingSettings) {
+	x.xxx_hidden_Settings = v
+}
+
+func (x *UpdateTranscodingSettingsResponse) HasSettings() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_Settings != nil
+}
+
+func (x *UpdateTranscodingSettingsResponse) ClearSettings() {
+	x.xxx_hidden_Settings = nil
+}
+
+type UpdateTranscodingSettingsResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Settings *TranscodingSettings
+}
+
+func (b0 UpdateTranscodingSettingsResponse_builder) Build() *UpdateTranscodingSettingsResponse {
+	m0 := &UpdateTranscodingSettingsResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_Settings = b.Settings
+	return m0
+}
+
 var File_mavio_playback_v1_playback_proto protoreflect.FileDescriptor
 
 const file_mavio_playback_v1_playback_proto_rawDesc = "" +
@@ -4219,7 +5052,33 @@ const file_mavio_playback_v1_playback_proto_rawDesc = "" +
 	"\x17ListMediaSourcesRequest\x12$\n" +
 	"\aitem_id\x18\x01 \x01(\tB\v\xbaH\b\xc8\x01\x01r\x03\xb0\x01\x01R\x06itemId\"^\n" +
 	"\x18ListMediaSourcesResponse\x12B\n" +
-	"\rmedia_sources\x18\x01 \x03(\v2\x1d.mavio.library.v1.MediaSourceR\fmediaSources*i\n" +
+	"\rmedia_sources\x18\x01 \x03(\v2\x1d.mavio.library.v1.MediaSourceR\fmediaSources\"\xf4\x05\n" +
+	"\x13TranscodingSettings\x12h\n" +
+	"\x15hardware_acceleration\x18\x01 \x01(\x0e2'.mavio.playback.v1.HardwareAccelerationB\n" +
+	"\xbaH\a\x82\x01\x04\x10\x01 \x00R\x14hardwareAcceleration\x12+\n" +
+	"\x11hardware_encoding\x18\x02 \x01(\bR\x10hardwareEncoding\x12%\n" +
+	"\x0eencoder_preset\x18\x03 \x01(\tR\rencoderPreset\x12$\n" +
+	"\bh264_crf\x18\x04 \x01(\x05B\t\xbaH\x06\x1a\x04\x183(\x00R\ah264Crf\x12$\n" +
+	"\bh265_crf\x18\x05 \x01(\x05B\t\xbaH\x06\x1a\x04\x183(\x00R\ah265Crf\x12!\n" +
+	"\athreads\x18\x06 \x01(\x05B\a\xbaH\x04\x1a\x02(\x00R\athreads\x12+\n" +
+	"\x11tonemap_algorithm\x18\a \x01(\tR\x10tonemapAlgorithm\x12#\n" +
+	"\rtonemap_range\x18\b \x01(\tR\ftonemapRange\x123\n" +
+	"\rtonemap_desat\x18\t \x01(\x01B\x0e\xbaH\v\x12\t)\x00\x00\x00\x00\x00\x00\x00\x00R\ftonemapDesat\x121\n" +
+	"\ftonemap_peak\x18\n" +
+	" \x01(\x01B\x0e\xbaH\v\x12\t)\x00\x00\x00\x00\x00\x00\x00\x00R\vtonemapPeak\x12-\n" +
+	"\x12deinterlace_method\x18\v \x01(\tR\x11deinterlaceMethod\x126\n" +
+	"\x17deinterlace_double_rate\x18\f \x01(\bR\x15deinterlaceDoubleRate\x12<\n" +
+	"\rdownmix_boost\x18\r \x01(\x01B\x17\xbaH\x14\x12\x12\x19\x00\x00\x00\x00\x00\x00\b@)\x00\x00\x00\x00\x00\x00\xe0?R\fdownmixBoost\x12,\n" +
+	"\x12crop_black_borders\x18\x0e \x01(\bR\x10cropBlackBorders\x12#\n" +
+	"\rtranscode_dir\x18\x0f \x01(\tR\ftranscodeDir\"\x1f\n" +
+	"\x1dGetTranscodingSettingsRequest\"\xd7\x01\n" +
+	"\x1eGetTranscodingSettingsResponse\x12B\n" +
+	"\bsettings\x18\x01 \x01(\v2&.mavio.playback.v1.TranscodingSettingsR\bsettings\x12q\n" +
+	" available_hardware_accelerations\x18\x02 \x03(\x0e2'.mavio.playback.v1.HardwareAccelerationR\x1eavailableHardwareAccelerations\"n\n" +
+	" UpdateTranscodingSettingsRequest\x12J\n" +
+	"\bsettings\x18\x01 \x01(\v2&.mavio.playback.v1.TranscodingSettingsB\x06\xbaH\x03\xc8\x01\x01R\bsettings\"g\n" +
+	"!UpdateTranscodingSettingsResponse\x12B\n" +
+	"\bsettings\x18\x01 \x01(\v2&.mavio.playback.v1.TranscodingSettingsR\bsettings*i\n" +
 	"\tMediaKind\x12\x1a\n" +
 	"\x16MEDIA_KIND_UNSPECIFIED\x10\x00\x12\x14\n" +
 	"\x10MEDIA_KIND_AUDIO\x10\x01\x12\x14\n" +
@@ -4318,99 +5177,121 @@ const file_mavio_playback_v1_playback_proto_rawDesc = "" +
 	"/TRANSCODE_REASON_VIDEO_RANGE_TYPE_NOT_SUPPORTED\x10\x19\x122\n" +
 	".TRANSCODE_REASON_VIDEO_CODEC_TAG_NOT_SUPPORTED\x10\x1a\x12/\n" +
 	"+TRANSCODE_REASON_STREAM_COUNT_EXCEEDS_LIMIT\x10\x1b\x121\n" +
-	"-TRANSCODE_REASON_VIDEO_ROTATION_NOT_SUPPORTED\x10\x1c2\x8f\x04\n" +
+	"-TRANSCODE_REASON_VIDEO_ROTATION_NOT_SUPPORTED\x10\x1c*\xa5\x01\n" +
+	"\x14HardwareAcceleration\x12%\n" +
+	"!HARDWARE_ACCELERATION_UNSPECIFIED\x10\x00\x12\x1e\n" +
+	"\x1aHARDWARE_ACCELERATION_AUTO\x10\x01\x12\x1e\n" +
+	"\x1aHARDWARE_ACCELERATION_NONE\x10\x02\x12&\n" +
+	"\"HARDWARE_ACCELERATION_VIDEOTOOLBOX\x10\x032\xa2\x06\n" +
 	"\x0fPlaybackService\x12b\n" +
 	"\rStartPlayback\x12'.mavio.playback.v1.StartPlaybackRequest\x1a(.mavio.playback.v1.StartPlaybackResponse\x12e\n" +
 	"\x0eReportProgress\x12(.mavio.playback.v1.ReportProgressRequest\x1a).mavio.playback.v1.ReportProgressResponse\x12_\n" +
 	"\fStopPlayback\x12&.mavio.playback.v1.StopPlaybackRequest\x1a'.mavio.playback.v1.StopPlaybackResponse\x12^\n" +
 	"\n" +
 	"ListIntros\x12$.mavio.playback.v1.ListIntrosRequest\x1a%.mavio.playback.v1.ListIntrosResponse\"\x03\x90\x02\x01\x12p\n" +
-	"\x10ListMediaSources\x12*.mavio.playback.v1.ListMediaSourcesRequest\x1a+.mavio.playback.v1.ListMediaSourcesResponse\"\x03\x90\x02\x01B\xd5\x01\n" +
+	"\x10ListMediaSources\x12*.mavio.playback.v1.ListMediaSourcesRequest\x1a+.mavio.playback.v1.ListMediaSourcesResponse\"\x03\x90\x02\x01\x12\x82\x01\n" +
+	"\x16GetTranscodingSettings\x120.mavio.playback.v1.GetTranscodingSettingsRequest\x1a1.mavio.playback.v1.GetTranscodingSettingsResponse\"\x03\x90\x02\x01\x12\x8b\x01\n" +
+	"\x19UpdateTranscodingSettings\x123.mavio.playback.v1.UpdateTranscodingSettingsRequest\x1a4.mavio.playback.v1.UpdateTranscodingSettingsResponse\"\x03\x90\x02\x02B\xd5\x01\n" +
 	"\x15com.mavio.playback.v1B\rPlaybackProtoP\x01ZGgithub.com/mavioai/mavio/libs/proto/gen/go/mavio/playback/v1;playbackv1\xa2\x02\x03MPX\xaa\x02\x11Mavio.Playback.V1\xca\x02\x11Mavio\\Playback\\V1\xe2\x02\x1dMavio\\Playback\\V1\\GPBMetadata\xea\x02\x13Mavio::Playback::V1b\beditionsp\xe8\a"
 
-var file_mavio_playback_v1_playback_proto_enumTypes = make([]protoimpl.EnumInfo, 10)
-var file_mavio_playback_v1_playback_proto_msgTypes = make([]protoimpl.MessageInfo, 19)
+var file_mavio_playback_v1_playback_proto_enumTypes = make([]protoimpl.EnumInfo, 11)
+var file_mavio_playback_v1_playback_proto_msgTypes = make([]protoimpl.MessageInfo, 24)
 var file_mavio_playback_v1_playback_proto_goTypes = []any{
-	(MediaKind)(0),                   // 0: mavio.playback.v1.MediaKind
-	(Context)(0),                     // 1: mavio.playback.v1.Context
-	(Protocol)(0),                    // 2: mavio.playback.v1.Protocol
-	(SeekInfo)(0),                    // 3: mavio.playback.v1.SeekInfo
-	(SubtitleMethod)(0),              // 4: mavio.playback.v1.SubtitleMethod
-	(CodecKind)(0),                   // 5: mavio.playback.v1.CodecKind
-	(Property)(0),                    // 6: mavio.playback.v1.Property
-	(Op)(0),                          // 7: mavio.playback.v1.Op
-	(PlayMethod)(0),                  // 8: mavio.playback.v1.PlayMethod
-	(TranscodeReason)(0),             // 9: mavio.playback.v1.TranscodeReason
-	(*ClientCapabilities)(nil),       // 10: mavio.playback.v1.ClientCapabilities
-	(*DirectPlayProfile)(nil),        // 11: mavio.playback.v1.DirectPlayProfile
-	(*TranscodingProfile)(nil),       // 12: mavio.playback.v1.TranscodingProfile
-	(*ContainerProfile)(nil),         // 13: mavio.playback.v1.ContainerProfile
-	(*CodecProfile)(nil),             // 14: mavio.playback.v1.CodecProfile
-	(*SubtitleProfile)(nil),          // 15: mavio.playback.v1.SubtitleProfile
-	(*Condition)(nil),                // 16: mavio.playback.v1.Condition
-	(*SubtitleTrack)(nil),            // 17: mavio.playback.v1.SubtitleTrack
-	(*StartPlaybackRequest)(nil),     // 18: mavio.playback.v1.StartPlaybackRequest
-	(*StartPlaybackResponse)(nil),    // 19: mavio.playback.v1.StartPlaybackResponse
-	(*Attachment)(nil),               // 20: mavio.playback.v1.Attachment
-	(*ReportProgressRequest)(nil),    // 21: mavio.playback.v1.ReportProgressRequest
-	(*ReportProgressResponse)(nil),   // 22: mavio.playback.v1.ReportProgressResponse
-	(*StopPlaybackRequest)(nil),      // 23: mavio.playback.v1.StopPlaybackRequest
-	(*StopPlaybackResponse)(nil),     // 24: mavio.playback.v1.StopPlaybackResponse
-	(*ListIntrosRequest)(nil),        // 25: mavio.playback.v1.ListIntrosRequest
-	(*ListIntrosResponse)(nil),       // 26: mavio.playback.v1.ListIntrosResponse
-	(*ListMediaSourcesRequest)(nil),  // 27: mavio.playback.v1.ListMediaSourcesRequest
-	(*ListMediaSourcesResponse)(nil), // 28: mavio.playback.v1.ListMediaSourcesResponse
-	(*durationpb.Duration)(nil),      // 29: google.protobuf.Duration
-	(*v1.Item)(nil),                  // 30: mavio.library.v1.Item
-	(*v1.MediaSource)(nil),           // 31: mavio.library.v1.MediaSource
+	(MediaKind)(0),                            // 0: mavio.playback.v1.MediaKind
+	(Context)(0),                              // 1: mavio.playback.v1.Context
+	(Protocol)(0),                             // 2: mavio.playback.v1.Protocol
+	(SeekInfo)(0),                             // 3: mavio.playback.v1.SeekInfo
+	(SubtitleMethod)(0),                       // 4: mavio.playback.v1.SubtitleMethod
+	(CodecKind)(0),                            // 5: mavio.playback.v1.CodecKind
+	(Property)(0),                             // 6: mavio.playback.v1.Property
+	(Op)(0),                                   // 7: mavio.playback.v1.Op
+	(PlayMethod)(0),                           // 8: mavio.playback.v1.PlayMethod
+	(TranscodeReason)(0),                      // 9: mavio.playback.v1.TranscodeReason
+	(HardwareAcceleration)(0),                 // 10: mavio.playback.v1.HardwareAcceleration
+	(*ClientCapabilities)(nil),                // 11: mavio.playback.v1.ClientCapabilities
+	(*DirectPlayProfile)(nil),                 // 12: mavio.playback.v1.DirectPlayProfile
+	(*TranscodingProfile)(nil),                // 13: mavio.playback.v1.TranscodingProfile
+	(*ContainerProfile)(nil),                  // 14: mavio.playback.v1.ContainerProfile
+	(*CodecProfile)(nil),                      // 15: mavio.playback.v1.CodecProfile
+	(*SubtitleProfile)(nil),                   // 16: mavio.playback.v1.SubtitleProfile
+	(*Condition)(nil),                         // 17: mavio.playback.v1.Condition
+	(*SubtitleTrack)(nil),                     // 18: mavio.playback.v1.SubtitleTrack
+	(*StartPlaybackRequest)(nil),              // 19: mavio.playback.v1.StartPlaybackRequest
+	(*StartPlaybackResponse)(nil),             // 20: mavio.playback.v1.StartPlaybackResponse
+	(*Attachment)(nil),                        // 21: mavio.playback.v1.Attachment
+	(*ReportProgressRequest)(nil),             // 22: mavio.playback.v1.ReportProgressRequest
+	(*ReportProgressResponse)(nil),            // 23: mavio.playback.v1.ReportProgressResponse
+	(*StopPlaybackRequest)(nil),               // 24: mavio.playback.v1.StopPlaybackRequest
+	(*StopPlaybackResponse)(nil),              // 25: mavio.playback.v1.StopPlaybackResponse
+	(*ListIntrosRequest)(nil),                 // 26: mavio.playback.v1.ListIntrosRequest
+	(*ListIntrosResponse)(nil),                // 27: mavio.playback.v1.ListIntrosResponse
+	(*ListMediaSourcesRequest)(nil),           // 28: mavio.playback.v1.ListMediaSourcesRequest
+	(*ListMediaSourcesResponse)(nil),          // 29: mavio.playback.v1.ListMediaSourcesResponse
+	(*TranscodingSettings)(nil),               // 30: mavio.playback.v1.TranscodingSettings
+	(*GetTranscodingSettingsRequest)(nil),     // 31: mavio.playback.v1.GetTranscodingSettingsRequest
+	(*GetTranscodingSettingsResponse)(nil),    // 32: mavio.playback.v1.GetTranscodingSettingsResponse
+	(*UpdateTranscodingSettingsRequest)(nil),  // 33: mavio.playback.v1.UpdateTranscodingSettingsRequest
+	(*UpdateTranscodingSettingsResponse)(nil), // 34: mavio.playback.v1.UpdateTranscodingSettingsResponse
+	(*durationpb.Duration)(nil),               // 35: google.protobuf.Duration
+	(*v1.Item)(nil),                           // 36: mavio.library.v1.Item
+	(*v1.MediaSource)(nil),                    // 37: mavio.library.v1.MediaSource
 }
 var file_mavio_playback_v1_playback_proto_depIdxs = []int32{
-	11, // 0: mavio.playback.v1.ClientCapabilities.direct_play:type_name -> mavio.playback.v1.DirectPlayProfile
-	12, // 1: mavio.playback.v1.ClientCapabilities.transcoding:type_name -> mavio.playback.v1.TranscodingProfile
-	13, // 2: mavio.playback.v1.ClientCapabilities.containers:type_name -> mavio.playback.v1.ContainerProfile
-	14, // 3: mavio.playback.v1.ClientCapabilities.codecs:type_name -> mavio.playback.v1.CodecProfile
-	15, // 4: mavio.playback.v1.ClientCapabilities.subtitles:type_name -> mavio.playback.v1.SubtitleProfile
+	12, // 0: mavio.playback.v1.ClientCapabilities.direct_play:type_name -> mavio.playback.v1.DirectPlayProfile
+	13, // 1: mavio.playback.v1.ClientCapabilities.transcoding:type_name -> mavio.playback.v1.TranscodingProfile
+	14, // 2: mavio.playback.v1.ClientCapabilities.containers:type_name -> mavio.playback.v1.ContainerProfile
+	15, // 3: mavio.playback.v1.ClientCapabilities.codecs:type_name -> mavio.playback.v1.CodecProfile
+	16, // 4: mavio.playback.v1.ClientCapabilities.subtitles:type_name -> mavio.playback.v1.SubtitleProfile
 	0,  // 5: mavio.playback.v1.DirectPlayProfile.kind:type_name -> mavio.playback.v1.MediaKind
 	0,  // 6: mavio.playback.v1.TranscodingProfile.kind:type_name -> mavio.playback.v1.MediaKind
 	1,  // 7: mavio.playback.v1.TranscodingProfile.context:type_name -> mavio.playback.v1.Context
 	2,  // 8: mavio.playback.v1.TranscodingProfile.protocol:type_name -> mavio.playback.v1.Protocol
 	3,  // 9: mavio.playback.v1.TranscodingProfile.seek_info:type_name -> mavio.playback.v1.SeekInfo
-	16, // 10: mavio.playback.v1.TranscodingProfile.conditions:type_name -> mavio.playback.v1.Condition
+	17, // 10: mavio.playback.v1.TranscodingProfile.conditions:type_name -> mavio.playback.v1.Condition
 	0,  // 11: mavio.playback.v1.ContainerProfile.kind:type_name -> mavio.playback.v1.MediaKind
-	16, // 12: mavio.playback.v1.ContainerProfile.conditions:type_name -> mavio.playback.v1.Condition
+	17, // 12: mavio.playback.v1.ContainerProfile.conditions:type_name -> mavio.playback.v1.Condition
 	5,  // 13: mavio.playback.v1.CodecProfile.kind:type_name -> mavio.playback.v1.CodecKind
-	16, // 14: mavio.playback.v1.CodecProfile.conditions:type_name -> mavio.playback.v1.Condition
-	16, // 15: mavio.playback.v1.CodecProfile.apply_conditions:type_name -> mavio.playback.v1.Condition
+	17, // 14: mavio.playback.v1.CodecProfile.conditions:type_name -> mavio.playback.v1.Condition
+	17, // 15: mavio.playback.v1.CodecProfile.apply_conditions:type_name -> mavio.playback.v1.Condition
 	4,  // 16: mavio.playback.v1.SubtitleProfile.method:type_name -> mavio.playback.v1.SubtitleMethod
 	6,  // 17: mavio.playback.v1.Condition.property:type_name -> mavio.playback.v1.Property
 	7,  // 18: mavio.playback.v1.Condition.op:type_name -> mavio.playback.v1.Op
 	4,  // 19: mavio.playback.v1.SubtitleTrack.method:type_name -> mavio.playback.v1.SubtitleMethod
-	10, // 20: mavio.playback.v1.StartPlaybackRequest.capabilities:type_name -> mavio.playback.v1.ClientCapabilities
-	29, // 21: mavio.playback.v1.StartPlaybackRequest.start_position:type_name -> google.protobuf.Duration
+	11, // 20: mavio.playback.v1.StartPlaybackRequest.capabilities:type_name -> mavio.playback.v1.ClientCapabilities
+	35, // 21: mavio.playback.v1.StartPlaybackRequest.start_position:type_name -> google.protobuf.Duration
 	8,  // 22: mavio.playback.v1.StartPlaybackResponse.method:type_name -> mavio.playback.v1.PlayMethod
 	9,  // 23: mavio.playback.v1.StartPlaybackResponse.transcode_reasons:type_name -> mavio.playback.v1.TranscodeReason
-	17, // 24: mavio.playback.v1.StartPlaybackResponse.subtitles:type_name -> mavio.playback.v1.SubtitleTrack
-	20, // 25: mavio.playback.v1.StartPlaybackResponse.attachments:type_name -> mavio.playback.v1.Attachment
-	29, // 26: mavio.playback.v1.StartPlaybackResponse.start_position:type_name -> google.protobuf.Duration
-	29, // 27: mavio.playback.v1.ReportProgressRequest.position:type_name -> google.protobuf.Duration
-	29, // 28: mavio.playback.v1.StopPlaybackRequest.position:type_name -> google.protobuf.Duration
-	30, // 29: mavio.playback.v1.ListIntrosResponse.items:type_name -> mavio.library.v1.Item
-	31, // 30: mavio.playback.v1.ListMediaSourcesResponse.media_sources:type_name -> mavio.library.v1.MediaSource
-	18, // 31: mavio.playback.v1.PlaybackService.StartPlayback:input_type -> mavio.playback.v1.StartPlaybackRequest
-	21, // 32: mavio.playback.v1.PlaybackService.ReportProgress:input_type -> mavio.playback.v1.ReportProgressRequest
-	23, // 33: mavio.playback.v1.PlaybackService.StopPlayback:input_type -> mavio.playback.v1.StopPlaybackRequest
-	25, // 34: mavio.playback.v1.PlaybackService.ListIntros:input_type -> mavio.playback.v1.ListIntrosRequest
-	27, // 35: mavio.playback.v1.PlaybackService.ListMediaSources:input_type -> mavio.playback.v1.ListMediaSourcesRequest
-	19, // 36: mavio.playback.v1.PlaybackService.StartPlayback:output_type -> mavio.playback.v1.StartPlaybackResponse
-	22, // 37: mavio.playback.v1.PlaybackService.ReportProgress:output_type -> mavio.playback.v1.ReportProgressResponse
-	24, // 38: mavio.playback.v1.PlaybackService.StopPlayback:output_type -> mavio.playback.v1.StopPlaybackResponse
-	26, // 39: mavio.playback.v1.PlaybackService.ListIntros:output_type -> mavio.playback.v1.ListIntrosResponse
-	28, // 40: mavio.playback.v1.PlaybackService.ListMediaSources:output_type -> mavio.playback.v1.ListMediaSourcesResponse
-	36, // [36:41] is the sub-list for method output_type
-	31, // [31:36] is the sub-list for method input_type
-	31, // [31:31] is the sub-list for extension type_name
-	31, // [31:31] is the sub-list for extension extendee
-	0,  // [0:31] is the sub-list for field type_name
+	18, // 24: mavio.playback.v1.StartPlaybackResponse.subtitles:type_name -> mavio.playback.v1.SubtitleTrack
+	21, // 25: mavio.playback.v1.StartPlaybackResponse.attachments:type_name -> mavio.playback.v1.Attachment
+	35, // 26: mavio.playback.v1.StartPlaybackResponse.start_position:type_name -> google.protobuf.Duration
+	35, // 27: mavio.playback.v1.ReportProgressRequest.position:type_name -> google.protobuf.Duration
+	35, // 28: mavio.playback.v1.StopPlaybackRequest.position:type_name -> google.protobuf.Duration
+	36, // 29: mavio.playback.v1.ListIntrosResponse.items:type_name -> mavio.library.v1.Item
+	37, // 30: mavio.playback.v1.ListMediaSourcesResponse.media_sources:type_name -> mavio.library.v1.MediaSource
+	10, // 31: mavio.playback.v1.TranscodingSettings.hardware_acceleration:type_name -> mavio.playback.v1.HardwareAcceleration
+	30, // 32: mavio.playback.v1.GetTranscodingSettingsResponse.settings:type_name -> mavio.playback.v1.TranscodingSettings
+	10, // 33: mavio.playback.v1.GetTranscodingSettingsResponse.available_hardware_accelerations:type_name -> mavio.playback.v1.HardwareAcceleration
+	30, // 34: mavio.playback.v1.UpdateTranscodingSettingsRequest.settings:type_name -> mavio.playback.v1.TranscodingSettings
+	30, // 35: mavio.playback.v1.UpdateTranscodingSettingsResponse.settings:type_name -> mavio.playback.v1.TranscodingSettings
+	19, // 36: mavio.playback.v1.PlaybackService.StartPlayback:input_type -> mavio.playback.v1.StartPlaybackRequest
+	22, // 37: mavio.playback.v1.PlaybackService.ReportProgress:input_type -> mavio.playback.v1.ReportProgressRequest
+	24, // 38: mavio.playback.v1.PlaybackService.StopPlayback:input_type -> mavio.playback.v1.StopPlaybackRequest
+	26, // 39: mavio.playback.v1.PlaybackService.ListIntros:input_type -> mavio.playback.v1.ListIntrosRequest
+	28, // 40: mavio.playback.v1.PlaybackService.ListMediaSources:input_type -> mavio.playback.v1.ListMediaSourcesRequest
+	31, // 41: mavio.playback.v1.PlaybackService.GetTranscodingSettings:input_type -> mavio.playback.v1.GetTranscodingSettingsRequest
+	33, // 42: mavio.playback.v1.PlaybackService.UpdateTranscodingSettings:input_type -> mavio.playback.v1.UpdateTranscodingSettingsRequest
+	20, // 43: mavio.playback.v1.PlaybackService.StartPlayback:output_type -> mavio.playback.v1.StartPlaybackResponse
+	23, // 44: mavio.playback.v1.PlaybackService.ReportProgress:output_type -> mavio.playback.v1.ReportProgressResponse
+	25, // 45: mavio.playback.v1.PlaybackService.StopPlayback:output_type -> mavio.playback.v1.StopPlaybackResponse
+	27, // 46: mavio.playback.v1.PlaybackService.ListIntros:output_type -> mavio.playback.v1.ListIntrosResponse
+	29, // 47: mavio.playback.v1.PlaybackService.ListMediaSources:output_type -> mavio.playback.v1.ListMediaSourcesResponse
+	32, // 48: mavio.playback.v1.PlaybackService.GetTranscodingSettings:output_type -> mavio.playback.v1.GetTranscodingSettingsResponse
+	34, // 49: mavio.playback.v1.PlaybackService.UpdateTranscodingSettings:output_type -> mavio.playback.v1.UpdateTranscodingSettingsResponse
+	43, // [43:50] is the sub-list for method output_type
+	36, // [36:43] is the sub-list for method input_type
+	36, // [36:36] is the sub-list for extension type_name
+	36, // [36:36] is the sub-list for extension extendee
+	0,  // [0:36] is the sub-list for field type_name
 }
 
 func init() { file_mavio_playback_v1_playback_proto_init() }
@@ -4423,8 +5304,8 @@ func file_mavio_playback_v1_playback_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_mavio_playback_v1_playback_proto_rawDesc), len(file_mavio_playback_v1_playback_proto_rawDesc)),
-			NumEnums:      10,
-			NumMessages:   19,
+			NumEnums:      11,
+			NumMessages:   24,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

@@ -13,7 +13,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file mavio/system/v1/proxy.proto.
  */
 export const file_mavio_system_v1_proxy: GenFile = /*@__PURE__*/
-  fileDesc("ChttYXZpby9zeXN0ZW0vdjEvcHJveHkucHJvdG8SD21hdmlvLnN5c3RlbS52MSKGAgoFUHJveHkSCgoCaWQYASABKAkSGAoEbmFtZRgCIAEoCUIKukgHcgUQARiAAhI0CgRraW5kGAMgASgOMhoubWF2aW8uc3lzdGVtLnYxLlByb3h5S2luZEIKukgHggEEEAEgABIYCgRob3N0GAQgASgJQgq6SAdyBRABGP0BEhkKBHBvcnQYBSABKAVCC7pICBoGGP//AygBEhoKCHVzZXJuYW1lGAYgASgJQgi6SAVyAxiAAhIaCghwYXNzd29yZBgHIAEoCUIIukgFcgMYgAISFAoMaGFzX3Bhc3N3b3JkGAggASgIEg4KBnN5c3RlbRgJIAEoCBIOCgZieXBhc3MYCiADKAkiFAoSTGlzdFByb3hpZXNSZXF1ZXN0Ij4KE0xpc3RQcm94aWVzUmVzcG9uc2USJwoHcHJveGllcxgBIAMoCzIWLm1hdmlvLnN5c3RlbS52MS5Qcm94eSJDChJDcmVhdGVQcm94eVJlcXVlc3QSLQoFcHJveHkYASABKAsyFi5tYXZpby5zeXN0ZW0udjEuUHJveHlCBrpIA8gBASI8ChNDcmVhdGVQcm94eVJlc3BvbnNlEiUKBXByb3h5GAEgASgLMhYubWF2aW8uc3lzdGVtLnYxLlByb3h5IlsKElVwZGF0ZVByb3h5UmVxdWVzdBItCgVwcm94eRgBIAEoCzIWLm1hdmlvLnN5c3RlbS52MS5Qcm94eUIGukgDyAEBEhYKDmNsZWFyX3Bhc3N3b3JkGAIgASgIIjwKE1VwZGF0ZVByb3h5UmVzcG9uc2USJQoFcHJveHkYASABKAsyFi5tYXZpby5zeXN0ZW0udjEuUHJveHkiLQoSRGVsZXRlUHJveHlSZXF1ZXN0EhcKAmlkGAEgASgJQgu6SAjIAQFyA7ABASIVChNEZWxldGVQcm94eVJlc3BvbnNlInUKEFRlc3RQcm94eVJlcXVlc3QSFwoCaWQYASABKAlCCbpIBnIEEAEYJEgAEicKBXByb3h5GAIgASgLMhYubWF2aW8uc3lzdGVtLnYxLlByb3h5SAASFQoDdXJsGAMgASgJQgi6SAVyA4gBAUIICgZ0YXJnZXQijAEKEVRlc3RQcm94eVJlc3BvbnNlEgoKAm9rGAEgASgIEg0KBWVycm9yGAIgASgJEg4KBnN0YXR1cxgDIAEoBRIqCgdsYXRlbmN5GAQgASgLMhkuZ29vZ2xlLnByb3RvYnVmLkR1cmF0aW9uEg8KB2V4aXRfaXAYBSABKAkSDwoHY291bnRyeRgGIAEoCSpqCglQcm94eUtpbmQSGgoWUFJPWFlfS0lORF9VTlNQRUNJRklFRBAAEhMKD1BST1hZX0tJTkRfSFRUUBABEhUKEVBST1hZX0tJTkRfU09DS1M0EAISFQoRUFJPWFlfS0lORF9TT0NLUzUQAzLPAwoMUHJveHlTZXJ2aWNlEl0KC0xpc3RQcm94aWVzEiMubWF2aW8uc3lzdGVtLnYxLkxpc3RQcm94aWVzUmVxdWVzdBokLm1hdmlvLnN5c3RlbS52MS5MaXN0UHJveGllc1Jlc3BvbnNlIgOQAgESWAoLQ3JlYXRlUHJveHkSIy5tYXZpby5zeXN0ZW0udjEuQ3JlYXRlUHJveHlSZXF1ZXN0GiQubWF2aW8uc3lzdGVtLnYxLkNyZWF0ZVByb3h5UmVzcG9uc2USWAoLVXBkYXRlUHJveHkSIy5tYXZpby5zeXN0ZW0udjEuVXBkYXRlUHJveHlSZXF1ZXN0GiQubWF2aW8uc3lzdGVtLnYxLlVwZGF0ZVByb3h5UmVzcG9uc2USWAoLRGVsZXRlUHJveHkSIy5tYXZpby5zeXN0ZW0udjEuRGVsZXRlUHJveHlSZXF1ZXN0GiQubWF2aW8uc3lzdGVtLnYxLkRlbGV0ZVByb3h5UmVzcG9uc2USUgoJVGVzdFByb3h5EiEubWF2aW8uc3lzdGVtLnYxLlRlc3RQcm94eVJlcXVlc3QaIi5tYXZpby5zeXN0ZW0udjEuVGVzdFByb3h5UmVzcG9uc2VCxAEKE2NvbS5tYXZpby5zeXN0ZW0udjFCClByb3h5UHJvdG9QAVpDZ2l0aHViLmNvbS9tYXZpb2FpL21hdmlvL2xpYnMvcHJvdG8vZ2VuL2dvL21hdmlvL3N5c3RlbS92MTtzeXN0ZW12MaICA01TWKoCD01hdmlvLlN5c3RlbS5WMcoCD01hdmlvXFN5c3RlbVxWMeICG01hdmlvXFN5c3RlbVxWMVxHUEJNZXRhZGF0YeoCEU1hdmlvOjpTeXN0ZW06OlYxYghlZGl0aW9uc3DoBw", [file_buf_validate_validate, file_google_protobuf_duration]);
+  fileDesc("ChttYXZpby9zeXN0ZW0vdjEvcHJveHkucHJvdG8SD21hdmlvLnN5c3RlbS52MSKGAgoFUHJveHkSCgoCaWQYASABKAkSGAoEbmFtZRgCIAEoCUIKukgHcgUQARiAAhI0CgRraW5kGAMgASgOMhoubWF2aW8uc3lzdGVtLnYxLlByb3h5S2luZEIKukgHggEEEAEgABIYCgRob3N0GAQgASgJQgq6SAdyBRABGP0BEhkKBHBvcnQYBSABKAVCC7pICBoGGP//AygBEhoKCHVzZXJuYW1lGAYgASgJQgi6SAVyAxiAAhIaCghwYXNzd29yZBgHIAEoCUIIukgFcgMYgAISFAoMaGFzX3Bhc3N3b3JkGAggASgIEg4KBnN5c3RlbRgJIAEoCBIOCgZieXBhc3MYCiADKAkiFAoSTGlzdFByb3hpZXNSZXF1ZXN0Ij4KE0xpc3RQcm94aWVzUmVzcG9uc2USJwoHcHJveGllcxgBIAMoCzIWLm1hdmlvLnN5c3RlbS52MS5Qcm94eSJDChJDcmVhdGVQcm94eVJlcXVlc3QSLQoFcHJveHkYASABKAsyFi5tYXZpby5zeXN0ZW0udjEuUHJveHlCBrpIA8gBASI8ChNDcmVhdGVQcm94eVJlc3BvbnNlEiUKBXByb3h5GAEgASgLMhYubWF2aW8uc3lzdGVtLnYxLlByb3h5IlsKElVwZGF0ZVByb3h5UmVxdWVzdBItCgVwcm94eRgBIAEoCzIWLm1hdmlvLnN5c3RlbS52MS5Qcm94eUIGukgDyAEBEhYKDmNsZWFyX3Bhc3N3b3JkGAIgASgIIjwKE1VwZGF0ZVByb3h5UmVzcG9uc2USJQoFcHJveHkYASABKAsyFi5tYXZpby5zeXN0ZW0udjEuUHJveHkiLQoSRGVsZXRlUHJveHlSZXF1ZXN0EhcKAmlkGAEgASgJQgu6SAjIAQFyA7ABASIVChNEZWxldGVQcm94eVJlc3BvbnNlInUKEFRlc3RQcm94eVJlcXVlc3QSFwoCaWQYASABKAlCCbpIBnIEEAEYJEgAEicKBXByb3h5GAIgASgLMhYubWF2aW8uc3lzdGVtLnYxLlByb3h5SAASFQoDdXJsGAMgASgJQgi6SAVyA4gBAUIICgZ0YXJnZXQijAEKEVRlc3RQcm94eVJlc3BvbnNlEgoKAm9rGAEgASgIEg0KBWVycm9yGAIgASgJEg4KBnN0YXR1cxgDIAEoBRIqCgdsYXRlbmN5GAQgASgLMhkuZ29vZ2xlLnByb3RvYnVmLkR1cmF0aW9uEg8KB2V4aXRfaXAYBSABKAkSDwoHY291bnRyeRgGIAEoCSJbCg9PdXRib3VuZFByb3hpZXMSFwoPcGx1Z2luX2NhdGFsb2dzGAEgASgJEg4KBmltYWdlcxgCIAEoCRIRCgltYXZpb19kZXYYAyABKAkSDAoEYWNtZRgEIAEoCSIbChlHZXRPdXRib3VuZFByb3hpZXNSZXF1ZXN0Ik8KGkdldE91dGJvdW5kUHJveGllc1Jlc3BvbnNlEjEKB3Byb3hpZXMYASABKAsyIC5tYXZpby5zeXN0ZW0udjEuT3V0Ym91bmRQcm94aWVzIlkKHFVwZGF0ZU91dGJvdW5kUHJveGllc1JlcXVlc3QSOQoHcHJveGllcxgBIAEoCzIgLm1hdmlvLnN5c3RlbS52MS5PdXRib3VuZFByb3hpZXNCBrpIA8gBASJSCh1VcGRhdGVPdXRib3VuZFByb3hpZXNSZXNwb25zZRIxCgdwcm94aWVzGAEgASgLMiAubWF2aW8uc3lzdGVtLnYxLk91dGJvdW5kUHJveGllcypqCglQcm94eUtpbmQSGgoWUFJPWFlfS0lORF9VTlNQRUNJRklFRBAAEhMKD1BST1hZX0tJTkRfSFRUUBABEhUKEVBST1hZX0tJTkRfU09DS1M0EAISFQoRUFJPWFlfS0lORF9TT0NLUzUQAzLABQoMUHJveHlTZXJ2aWNlEl0KC0xpc3RQcm94aWVzEiMubWF2aW8uc3lzdGVtLnYxLkxpc3RQcm94aWVzUmVxdWVzdBokLm1hdmlvLnN5c3RlbS52MS5MaXN0UHJveGllc1Jlc3BvbnNlIgOQAgESWAoLQ3JlYXRlUHJveHkSIy5tYXZpby5zeXN0ZW0udjEuQ3JlYXRlUHJveHlSZXF1ZXN0GiQubWF2aW8uc3lzdGVtLnYxLkNyZWF0ZVByb3h5UmVzcG9uc2USWAoLVXBkYXRlUHJveHkSIy5tYXZpby5zeXN0ZW0udjEuVXBkYXRlUHJveHlSZXF1ZXN0GiQubWF2aW8uc3lzdGVtLnYxLlVwZGF0ZVByb3h5UmVzcG9uc2USWAoLRGVsZXRlUHJveHkSIy5tYXZpby5zeXN0ZW0udjEuRGVsZXRlUHJveHlSZXF1ZXN0GiQubWF2aW8uc3lzdGVtLnYxLkRlbGV0ZVByb3h5UmVzcG9uc2USUgoJVGVzdFByb3h5EiEubWF2aW8uc3lzdGVtLnYxLlRlc3RQcm94eVJlcXVlc3QaIi5tYXZpby5zeXN0ZW0udjEuVGVzdFByb3h5UmVzcG9uc2UScgoSR2V0T3V0Ym91bmRQcm94aWVzEioubWF2aW8uc3lzdGVtLnYxLkdldE91dGJvdW5kUHJveGllc1JlcXVlc3QaKy5tYXZpby5zeXN0ZW0udjEuR2V0T3V0Ym91bmRQcm94aWVzUmVzcG9uc2UiA5ACARJ7ChVVcGRhdGVPdXRib3VuZFByb3hpZXMSLS5tYXZpby5zeXN0ZW0udjEuVXBkYXRlT3V0Ym91bmRQcm94aWVzUmVxdWVzdBouLm1hdmlvLnN5c3RlbS52MS5VcGRhdGVPdXRib3VuZFByb3hpZXNSZXNwb25zZSIDkAICQsQBChNjb20ubWF2aW8uc3lzdGVtLnYxQgpQcm94eVByb3RvUAFaQ2dpdGh1Yi5jb20vbWF2aW9haS9tYXZpby9saWJzL3Byb3RvL2dlbi9nby9tYXZpby9zeXN0ZW0vdjE7c3lzdGVtdjGiAgNNU1iqAg9NYXZpby5TeXN0ZW0uVjHKAg9NYXZpb1xTeXN0ZW1cVjHiAhtNYXZpb1xTeXN0ZW1cVjFcR1BCTWV0YWRhdGHqAhFNYXZpbzo6U3lzdGVtOjpWMWIIZWRpdGlvbnNw6Ac", [file_buf_validate_validate, file_google_protobuf_duration]);
 
 /**
  * Proxy is one of the server's proxies.
@@ -323,6 +323,115 @@ export const TestProxyResponseSchema: GenMessage<TestProxyResponse> = /*@__PURE_
   messageDesc(file_mavio_system_v1_proxy, 10);
 
 /**
+ * OutboundProxies are the proxies the server's own HTTP requests go
+ * through, by what they reach: each the ID of one of the server's proxies
+ * (ProxyService), "system" for the system proxy, or empty for none. The
+ * hosts of this machine and of the local network are reached directly.
+ *
+ * @generated from message mavio.system.v1.OutboundProxies
+ */
+export type OutboundProxies = Message<"mavio.system.v1.OutboundProxies"> & {
+  /**
+   * Plugin catalogs and plugin packages.
+   *
+   * @generated from field: string plugin_catalogs = 1;
+   */
+  pluginCatalogs: string;
+
+  /**
+   * Items' remote images, such as posters.
+   *
+   * @generated from field: string images = 2;
+   */
+  images: string;
+
+  /**
+   * mavio.dev's API.
+   *
+   * @generated from field: string mavio_dev = 3;
+   */
+  mavioDev: string;
+
+  /**
+   * The certificate authorities of mavio.site certificates.
+   *
+   * @generated from field: string acme = 4;
+   */
+  acme: string;
+};
+
+/**
+ * Describes the message mavio.system.v1.OutboundProxies.
+ * Use `create(OutboundProxiesSchema)` to create a new message.
+ */
+export const OutboundProxiesSchema: GenMessage<OutboundProxies> = /*@__PURE__*/
+  messageDesc(file_mavio_system_v1_proxy, 11);
+
+/**
+ * @generated from message mavio.system.v1.GetOutboundProxiesRequest
+ */
+export type GetOutboundProxiesRequest = Message<"mavio.system.v1.GetOutboundProxiesRequest"> & {
+};
+
+/**
+ * Describes the message mavio.system.v1.GetOutboundProxiesRequest.
+ * Use `create(GetOutboundProxiesRequestSchema)` to create a new message.
+ */
+export const GetOutboundProxiesRequestSchema: GenMessage<GetOutboundProxiesRequest> = /*@__PURE__*/
+  messageDesc(file_mavio_system_v1_proxy, 12);
+
+/**
+ * @generated from message mavio.system.v1.GetOutboundProxiesResponse
+ */
+export type GetOutboundProxiesResponse = Message<"mavio.system.v1.GetOutboundProxiesResponse"> & {
+  /**
+   * @generated from field: mavio.system.v1.OutboundProxies proxies = 1;
+   */
+  proxies?: OutboundProxies | undefined;
+};
+
+/**
+ * Describes the message mavio.system.v1.GetOutboundProxiesResponse.
+ * Use `create(GetOutboundProxiesResponseSchema)` to create a new message.
+ */
+export const GetOutboundProxiesResponseSchema: GenMessage<GetOutboundProxiesResponse> = /*@__PURE__*/
+  messageDesc(file_mavio_system_v1_proxy, 13);
+
+/**
+ * @generated from message mavio.system.v1.UpdateOutboundProxiesRequest
+ */
+export type UpdateOutboundProxiesRequest = Message<"mavio.system.v1.UpdateOutboundProxiesRequest"> & {
+  /**
+   * @generated from field: mavio.system.v1.OutboundProxies proxies = 1;
+   */
+  proxies?: OutboundProxies | undefined;
+};
+
+/**
+ * Describes the message mavio.system.v1.UpdateOutboundProxiesRequest.
+ * Use `create(UpdateOutboundProxiesRequestSchema)` to create a new message.
+ */
+export const UpdateOutboundProxiesRequestSchema: GenMessage<UpdateOutboundProxiesRequest> = /*@__PURE__*/
+  messageDesc(file_mavio_system_v1_proxy, 14);
+
+/**
+ * @generated from message mavio.system.v1.UpdateOutboundProxiesResponse
+ */
+export type UpdateOutboundProxiesResponse = Message<"mavio.system.v1.UpdateOutboundProxiesResponse"> & {
+  /**
+   * @generated from field: mavio.system.v1.OutboundProxies proxies = 1;
+   */
+  proxies?: OutboundProxies | undefined;
+};
+
+/**
+ * Describes the message mavio.system.v1.UpdateOutboundProxiesResponse.
+ * Use `create(UpdateOutboundProxiesResponseSchema)` to create a new message.
+ */
+export const UpdateOutboundProxiesResponseSchema: GenMessage<UpdateOutboundProxiesResponse> = /*@__PURE__*/
+  messageDesc(file_mavio_system_v1_proxy, 15);
+
+/**
  * @generated from enum mavio.system.v1.ProxyKind
  */
 export enum ProxyKind {
@@ -423,6 +532,28 @@ export const ProxyService: GenService<{
     methodKind: "unary";
     input: typeof TestProxyRequestSchema;
     output: typeof TestProxyResponseSchema;
+  },
+  /**
+   * GetOutboundProxies returns the proxies the server's own HTTP requests
+   * go through.
+   *
+   * @generated from rpc mavio.system.v1.ProxyService.GetOutboundProxies
+   */
+  getOutboundProxies: {
+    methodKind: "unary";
+    input: typeof GetOutboundProxiesRequestSchema;
+    output: typeof GetOutboundProxiesResponseSchema;
+  },
+  /**
+   * UpdateOutboundProxies replaces them; a proxy that does not exist is
+   * INVALID_ARGUMENT.
+   *
+   * @generated from rpc mavio.system.v1.ProxyService.UpdateOutboundProxies
+   */
+  updateOutboundProxies: {
+    methodKind: "unary";
+    input: typeof UpdateOutboundProxiesRequestSchema;
+    output: typeof UpdateOutboundProxiesResponseSchema;
   },
 }> = /*@__PURE__*/
   serviceDesc(file_mavio_system_v1_proxy, 0);

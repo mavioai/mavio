@@ -5,10 +5,12 @@ package mavio.acquisition.v1;
 import "buf/validate/validate.proto";
 import "google/protobuf/duration.proto";
 import "mavio/acquisition/v1/release.proto";
+import "mavio/acquisition/v1/settings.proto";
 
 // ProfileService keeps what decides which releases are grabbed: quality
 // definitions, quality profiles, custom formats, delay and release
-// profiles; and the remote path mappings of download clients.
+// profiles; the remote path mappings of download clients; and the
+// acquisition settings, of downloading, importing and naming.
 // Administrators only, but for listing quality profiles, which users who
 // may request media read too.
 service ProfileService {
@@ -84,6 +86,16 @@ service ProfileService {
   }
   rpc CreateRemotePathMapping(CreateRemotePathMappingRequest) returns (CreateRemotePathMappingResponse);
   rpc DeleteRemotePathMapping(DeleteRemotePathMappingRequest) returns (DeleteRemotePathMappingResponse) {
+    option idempotency_level = IDEMPOTENT;
+  }
+  // GetAcquisitionSettings returns how releases are chosen, downloaded
+  // and imported, and how files are named. Administrators only.
+  rpc GetAcquisitionSettings(GetAcquisitionSettingsRequest) returns (GetAcquisitionSettingsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // UpdateAcquisitionSettings replaces the acquisition settings and
+  // applies them at once. Administrators only.
+  rpc UpdateAcquisitionSettings(UpdateAcquisitionSettingsRequest) returns (UpdateAcquisitionSettingsResponse) {
     option idempotency_level = IDEMPOTENT;
   }
 }

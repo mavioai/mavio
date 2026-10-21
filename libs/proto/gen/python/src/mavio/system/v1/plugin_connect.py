@@ -29,6 +29,12 @@ class PluginManagementService(Protocol):
     async def list_plugin_config_options(self, request: mavio_dot_system_dot_v1_dot_plugin__pb2.ListPluginConfigOptionsRequest, ctx: RequestContext) -> mavio_dot_system_dot_v1_dot_plugin__pb2.ListPluginConfigOptionsResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
 
+    async def get_plugin_catalogs(self, request: mavio_dot_system_dot_v1_dot_plugin__pb2.GetPluginCatalogsRequest, ctx: RequestContext) -> mavio_dot_system_dot_v1_dot_plugin__pb2.GetPluginCatalogsResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
+
+    async def update_plugin_catalogs(self, request: mavio_dot_system_dot_v1_dot_plugin__pb2.UpdatePluginCatalogsRequest, ctx: RequestContext) -> mavio_dot_system_dot_v1_dot_plugin__pb2.UpdatePluginCatalogsResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
+
     async def list_catalog_plugins(self, request: mavio_dot_system_dot_v1_dot_plugin__pb2.ListCatalogPluginsRequest, ctx: RequestContext) -> mavio_dot_system_dot_v1_dot_plugin__pb2.ListCatalogPluginsResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
 
@@ -104,6 +110,26 @@ class PluginManagementServiceASGIApplication(ConnectASGIApplication[PluginManage
                         idempotency_level=IdempotencyLevel.NO_SIDE_EFFECTS,
                     ),
                     function=svc.list_plugin_config_options,
+                ),
+                "/mavio.system.v1.PluginManagementService/GetPluginCatalogs": Endpoint.unary(
+                    method=MethodInfo(
+                        name="GetPluginCatalogs",
+                        service_name="mavio.system.v1.PluginManagementService",
+                        input=mavio_dot_system_dot_v1_dot_plugin__pb2.GetPluginCatalogsRequest,
+                        output=mavio_dot_system_dot_v1_dot_plugin__pb2.GetPluginCatalogsResponse,
+                        idempotency_level=IdempotencyLevel.NO_SIDE_EFFECTS,
+                    ),
+                    function=svc.get_plugin_catalogs,
+                ),
+                "/mavio.system.v1.PluginManagementService/UpdatePluginCatalogs": Endpoint.unary(
+                    method=MethodInfo(
+                        name="UpdatePluginCatalogs",
+                        service_name="mavio.system.v1.PluginManagementService",
+                        input=mavio_dot_system_dot_v1_dot_plugin__pb2.UpdatePluginCatalogsRequest,
+                        output=mavio_dot_system_dot_v1_dot_plugin__pb2.UpdatePluginCatalogsResponse,
+                        idempotency_level=IdempotencyLevel.IDEMPOTENT,
+                    ),
+                    function=svc.update_plugin_catalogs,
                 ),
                 "/mavio.system.v1.PluginManagementService/ListCatalogPlugins": Endpoint.unary(
                     method=MethodInfo(
@@ -302,6 +328,48 @@ class PluginManagementServiceClient(ConnectClient):
             headers=headers,
             timeout_ms=timeout_ms,
             use_get=use_get,
+        )
+
+    async def get_plugin_catalogs(
+        self,
+        request: mavio_dot_system_dot_v1_dot_plugin__pb2.GetPluginCatalogsRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+        use_get: bool = False,
+    ) -> mavio_dot_system_dot_v1_dot_plugin__pb2.GetPluginCatalogsResponse:
+        return await self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="GetPluginCatalogs",
+                service_name="mavio.system.v1.PluginManagementService",
+                input=mavio_dot_system_dot_v1_dot_plugin__pb2.GetPluginCatalogsRequest,
+                output=mavio_dot_system_dot_v1_dot_plugin__pb2.GetPluginCatalogsResponse,
+                idempotency_level=IdempotencyLevel.NO_SIDE_EFFECTS,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+            use_get=use_get,
+        )
+
+    async def update_plugin_catalogs(
+        self,
+        request: mavio_dot_system_dot_v1_dot_plugin__pb2.UpdatePluginCatalogsRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+    ) -> mavio_dot_system_dot_v1_dot_plugin__pb2.UpdatePluginCatalogsResponse:
+        return await self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="UpdatePluginCatalogs",
+                service_name="mavio.system.v1.PluginManagementService",
+                input=mavio_dot_system_dot_v1_dot_plugin__pb2.UpdatePluginCatalogsRequest,
+                output=mavio_dot_system_dot_v1_dot_plugin__pb2.UpdatePluginCatalogsResponse,
+                idempotency_level=IdempotencyLevel.IDEMPOTENT,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
         )
 
     async def list_catalog_plugins(
@@ -522,6 +590,10 @@ class PluginManagementServiceSync(Protocol):
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
     def list_plugin_config_options(self, request: mavio_dot_system_dot_v1_dot_plugin__pb2.ListPluginConfigOptionsRequest, ctx: RequestContext) -> mavio_dot_system_dot_v1_dot_plugin__pb2.ListPluginConfigOptionsResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
+    def get_plugin_catalogs(self, request: mavio_dot_system_dot_v1_dot_plugin__pb2.GetPluginCatalogsRequest, ctx: RequestContext) -> mavio_dot_system_dot_v1_dot_plugin__pb2.GetPluginCatalogsResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
+    def update_plugin_catalogs(self, request: mavio_dot_system_dot_v1_dot_plugin__pb2.UpdatePluginCatalogsRequest, ctx: RequestContext) -> mavio_dot_system_dot_v1_dot_plugin__pb2.UpdatePluginCatalogsResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
     def list_catalog_plugins(self, request: mavio_dot_system_dot_v1_dot_plugin__pb2.ListCatalogPluginsRequest, ctx: RequestContext) -> mavio_dot_system_dot_v1_dot_plugin__pb2.ListCatalogPluginsResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
     def install_plugin(self, request: mavio_dot_system_dot_v1_dot_plugin__pb2.InstallPluginRequest, ctx: RequestContext) -> mavio_dot_system_dot_v1_dot_plugin__pb2.InstallPluginResponse:
@@ -587,6 +659,26 @@ class PluginManagementServiceWSGIApplication(ConnectWSGIApplication):
                         idempotency_level=IdempotencyLevel.NO_SIDE_EFFECTS,
                     ),
                     function=service.list_plugin_config_options,
+                ),
+                "/mavio.system.v1.PluginManagementService/GetPluginCatalogs": EndpointSync.unary(
+                    method=MethodInfo(
+                        name="GetPluginCatalogs",
+                        service_name="mavio.system.v1.PluginManagementService",
+                        input=mavio_dot_system_dot_v1_dot_plugin__pb2.GetPluginCatalogsRequest,
+                        output=mavio_dot_system_dot_v1_dot_plugin__pb2.GetPluginCatalogsResponse,
+                        idempotency_level=IdempotencyLevel.NO_SIDE_EFFECTS,
+                    ),
+                    function=service.get_plugin_catalogs,
+                ),
+                "/mavio.system.v1.PluginManagementService/UpdatePluginCatalogs": EndpointSync.unary(
+                    method=MethodInfo(
+                        name="UpdatePluginCatalogs",
+                        service_name="mavio.system.v1.PluginManagementService",
+                        input=mavio_dot_system_dot_v1_dot_plugin__pb2.UpdatePluginCatalogsRequest,
+                        output=mavio_dot_system_dot_v1_dot_plugin__pb2.UpdatePluginCatalogsResponse,
+                        idempotency_level=IdempotencyLevel.IDEMPOTENT,
+                    ),
+                    function=service.update_plugin_catalogs,
                 ),
                 "/mavio.system.v1.PluginManagementService/ListCatalogPlugins": EndpointSync.unary(
                     method=MethodInfo(
@@ -785,6 +877,48 @@ class PluginManagementServiceClientSync(ConnectClientSync):
             headers=headers,
             timeout_ms=timeout_ms,
             use_get=use_get,
+        )
+
+    def get_plugin_catalogs(
+        self,
+        request: mavio_dot_system_dot_v1_dot_plugin__pb2.GetPluginCatalogsRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+        use_get: bool = False,
+    ) -> mavio_dot_system_dot_v1_dot_plugin__pb2.GetPluginCatalogsResponse:
+        return self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="GetPluginCatalogs",
+                service_name="mavio.system.v1.PluginManagementService",
+                input=mavio_dot_system_dot_v1_dot_plugin__pb2.GetPluginCatalogsRequest,
+                output=mavio_dot_system_dot_v1_dot_plugin__pb2.GetPluginCatalogsResponse,
+                idempotency_level=IdempotencyLevel.NO_SIDE_EFFECTS,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+            use_get=use_get,
+        )
+
+    def update_plugin_catalogs(
+        self,
+        request: mavio_dot_system_dot_v1_dot_plugin__pb2.UpdatePluginCatalogsRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+    ) -> mavio_dot_system_dot_v1_dot_plugin__pb2.UpdatePluginCatalogsResponse:
+        return self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="UpdatePluginCatalogs",
+                service_name="mavio.system.v1.PluginManagementService",
+                input=mavio_dot_system_dot_v1_dot_plugin__pb2.UpdatePluginCatalogsRequest,
+                output=mavio_dot_system_dot_v1_dot_plugin__pb2.UpdatePluginCatalogsResponse,
+                idempotency_level=IdempotencyLevel.IDEMPOTENT,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
         )
 
     def list_catalog_plugins(

@@ -361,37 +361,18 @@ func TestRequestSettingsRoundTrip(t *testing.T) {
 	if _, err := requestSettingsFromProto(bad); connect.CodeOf(err) != connect.CodeInvalidArgument {
 		t.Errorf("bad library ID: err = %v, want InvalidArgument", err)
 	}
-	// Settings without requests keep the current ones.
+	// The general settings round trip and keep the server's proxies.
 	current := core.DefaultServerSettings()
-	current.Requests = in
-	p := settingsToProto(&current)
-	p.ClearRequests()
-	got, err := settingsFromProto(p, &current)
-	if err != nil || !reflect.DeepEqual(got.Requests, in) {
-		t.Errorf("settings without requests = %+v, %v", got.Requests, err)
-	}
-	// Metadata settings round trip; settings without them keep the
-	// current ones.
 	current.Metadata = core.MetadataSettings{PreferredLanguage: "de", Country: "DE"}
-	if got, err := settingsFromProto(settingsToProto(&current), &core.ServerSettings{}); err != nil || got.Metadata != current.Metadata {
-		t.Errorf("metadata settings = %+v, %v, want %+v", got.Metadata, err, current.Metadata)
+	current.SessionIdleDays = 30
+	proxies := core.OutboundProxies{PluginCatalogs: core.NewID().String(), MavioDev: core.SystemProxyID}
+	got := core.ServerSettings{Network: core.NetworkSettings{Proxies: proxies}}
+	setGeneral(&got, generalToProto(&current))
+	if got.Metadata != current.Metadata || got.SessionIdleDays != 30 || got.Network.Proxies != proxies {
+		t.Errorf("general settings = %+v, want %+v with proxies %+v", got, current, proxies)
 	}
-	p = settingsToProto(&current)
-	p.ClearMetadata()
-	if got, err := settingsFromProto(p, &current); err != nil || got.Metadata != current.Metadata {
-		t.Errorf("settings without metadata = %+v, %v", got.Metadata, err)
-	}
-	// The server's proxies round trip; settings without them keep the
-	// current ones, and the plugins' proxies are kept.
-	current.Network.Proxies = core.OutboundProxies{PluginCatalogs: core.NewID().String(), Images: "", MavioDev: core.SystemProxyID, ACME: ""}
-	current.PluginProxies = map[string]string{"dev.mavio.scraper-tmdb": ""}
-	if got, err := settingsFromProto(settingsToProto(&current), &core.ServerSettings{}); err != nil || got.Network.Proxies != current.Network.Proxies {
-		t.Errorf("proxies = %+v, %v, want %+v", got.Network.Proxies, err, current.Network.Proxies)
-	}
-	p = settingsToProto(&current)
-	p.GetNetwork().ClearProxies()
-	if got, err := settingsFromProto(p, &current); err != nil || got.Network.Proxies != current.Network.Proxies || !reflect.DeepEqual(got.PluginProxies, current.PluginProxies) {
-		t.Errorf("settings without proxies = %+v, %q, %v", got.Network.Proxies, got.PluginProxies, err)
+	if o := outboundToProto(&proxies); o.GetPluginCatalogs() != proxies.PluginCatalogs || o.GetMavioDev() != proxies.MavioDev {
+		t.Errorf("outbound proxies = %v, want %+v", o, proxies)
 	}
 }
 

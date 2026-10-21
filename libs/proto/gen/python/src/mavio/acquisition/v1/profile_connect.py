@@ -14,6 +14,7 @@ from connectrpc.method import IdempotencyLevel, MethodInfo
 from connectrpc.request import Headers, RequestContext
 from connectrpc.server import ConnectASGIApplication, ConnectWSGIApplication, Endpoint, EndpointSync
 import mavio.acquisition.v1.profile_pb2 as mavio_dot_acquisition_dot_v1_dot_profile__pb2
+import mavio.acquisition.v1.settings_pb2 as mavio_dot_acquisition_dot_v1_dot_settings__pb2
 
 
 class ProfileService(Protocol):
@@ -81,6 +82,12 @@ class ProfileService(Protocol):
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
 
     async def delete_remote_path_mapping(self, request: mavio_dot_acquisition_dot_v1_dot_profile__pb2.DeleteRemotePathMappingRequest, ctx: RequestContext) -> mavio_dot_acquisition_dot_v1_dot_profile__pb2.DeleteRemotePathMappingResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
+
+    async def get_acquisition_settings(self, request: mavio_dot_acquisition_dot_v1_dot_settings__pb2.GetAcquisitionSettingsRequest, ctx: RequestContext) -> mavio_dot_acquisition_dot_v1_dot_settings__pb2.GetAcquisitionSettingsResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
+
+    async def update_acquisition_settings(self, request: mavio_dot_acquisition_dot_v1_dot_settings__pb2.UpdateAcquisitionSettingsRequest, ctx: RequestContext) -> mavio_dot_acquisition_dot_v1_dot_settings__pb2.UpdateAcquisitionSettingsResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
 
 
@@ -308,6 +315,26 @@ class ProfileServiceASGIApplication(ConnectASGIApplication[ProfileService]):
                         idempotency_level=IdempotencyLevel.IDEMPOTENT,
                     ),
                     function=svc.delete_remote_path_mapping,
+                ),
+                "/mavio.acquisition.v1.ProfileService/GetAcquisitionSettings": Endpoint.unary(
+                    method=MethodInfo(
+                        name="GetAcquisitionSettings",
+                        service_name="mavio.acquisition.v1.ProfileService",
+                        input=mavio_dot_acquisition_dot_v1_dot_settings__pb2.GetAcquisitionSettingsRequest,
+                        output=mavio_dot_acquisition_dot_v1_dot_settings__pb2.GetAcquisitionSettingsResponse,
+                        idempotency_level=IdempotencyLevel.NO_SIDE_EFFECTS,
+                    ),
+                    function=svc.get_acquisition_settings,
+                ),
+                "/mavio.acquisition.v1.ProfileService/UpdateAcquisitionSettings": Endpoint.unary(
+                    method=MethodInfo(
+                        name="UpdateAcquisitionSettings",
+                        service_name="mavio.acquisition.v1.ProfileService",
+                        input=mavio_dot_acquisition_dot_v1_dot_settings__pb2.UpdateAcquisitionSettingsRequest,
+                        output=mavio_dot_acquisition_dot_v1_dot_settings__pb2.UpdateAcquisitionSettingsResponse,
+                        idempotency_level=IdempotencyLevel.IDEMPOTENT,
+                    ),
+                    function=svc.update_acquisition_settings,
                 ),
             },
             interceptors=interceptors,
@@ -774,6 +801,48 @@ class ProfileServiceClient(ConnectClient):
             timeout_ms=timeout_ms,
         )
 
+    async def get_acquisition_settings(
+        self,
+        request: mavio_dot_acquisition_dot_v1_dot_settings__pb2.GetAcquisitionSettingsRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+        use_get: bool = False,
+    ) -> mavio_dot_acquisition_dot_v1_dot_settings__pb2.GetAcquisitionSettingsResponse:
+        return await self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="GetAcquisitionSettings",
+                service_name="mavio.acquisition.v1.ProfileService",
+                input=mavio_dot_acquisition_dot_v1_dot_settings__pb2.GetAcquisitionSettingsRequest,
+                output=mavio_dot_acquisition_dot_v1_dot_settings__pb2.GetAcquisitionSettingsResponse,
+                idempotency_level=IdempotencyLevel.NO_SIDE_EFFECTS,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+            use_get=use_get,
+        )
+
+    async def update_acquisition_settings(
+        self,
+        request: mavio_dot_acquisition_dot_v1_dot_settings__pb2.UpdateAcquisitionSettingsRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+    ) -> mavio_dot_acquisition_dot_v1_dot_settings__pb2.UpdateAcquisitionSettingsResponse:
+        return await self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="UpdateAcquisitionSettings",
+                service_name="mavio.acquisition.v1.ProfileService",
+                input=mavio_dot_acquisition_dot_v1_dot_settings__pb2.UpdateAcquisitionSettingsRequest,
+                output=mavio_dot_acquisition_dot_v1_dot_settings__pb2.UpdateAcquisitionSettingsResponse,
+                idempotency_level=IdempotencyLevel.IDEMPOTENT,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+        )
+
 
 class ProfileServiceSync(Protocol):
     def list_quality_definitions(self, request: mavio_dot_acquisition_dot_v1_dot_profile__pb2.ListQualityDefinitionsRequest, ctx: RequestContext) -> mavio_dot_acquisition_dot_v1_dot_profile__pb2.ListQualityDefinitionsResponse:
@@ -819,6 +888,10 @@ class ProfileServiceSync(Protocol):
     def create_remote_path_mapping(self, request: mavio_dot_acquisition_dot_v1_dot_profile__pb2.CreateRemotePathMappingRequest, ctx: RequestContext) -> mavio_dot_acquisition_dot_v1_dot_profile__pb2.CreateRemotePathMappingResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
     def delete_remote_path_mapping(self, request: mavio_dot_acquisition_dot_v1_dot_profile__pb2.DeleteRemotePathMappingRequest, ctx: RequestContext) -> mavio_dot_acquisition_dot_v1_dot_profile__pb2.DeleteRemotePathMappingResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
+    def get_acquisition_settings(self, request: mavio_dot_acquisition_dot_v1_dot_settings__pb2.GetAcquisitionSettingsRequest, ctx: RequestContext) -> mavio_dot_acquisition_dot_v1_dot_settings__pb2.GetAcquisitionSettingsResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
+    def update_acquisition_settings(self, request: mavio_dot_acquisition_dot_v1_dot_settings__pb2.UpdateAcquisitionSettingsRequest, ctx: RequestContext) -> mavio_dot_acquisition_dot_v1_dot_settings__pb2.UpdateAcquisitionSettingsResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
 
 
@@ -1045,6 +1118,26 @@ class ProfileServiceWSGIApplication(ConnectWSGIApplication):
                         idempotency_level=IdempotencyLevel.IDEMPOTENT,
                     ),
                     function=service.delete_remote_path_mapping,
+                ),
+                "/mavio.acquisition.v1.ProfileService/GetAcquisitionSettings": EndpointSync.unary(
+                    method=MethodInfo(
+                        name="GetAcquisitionSettings",
+                        service_name="mavio.acquisition.v1.ProfileService",
+                        input=mavio_dot_acquisition_dot_v1_dot_settings__pb2.GetAcquisitionSettingsRequest,
+                        output=mavio_dot_acquisition_dot_v1_dot_settings__pb2.GetAcquisitionSettingsResponse,
+                        idempotency_level=IdempotencyLevel.NO_SIDE_EFFECTS,
+                    ),
+                    function=service.get_acquisition_settings,
+                ),
+                "/mavio.acquisition.v1.ProfileService/UpdateAcquisitionSettings": EndpointSync.unary(
+                    method=MethodInfo(
+                        name="UpdateAcquisitionSettings",
+                        service_name="mavio.acquisition.v1.ProfileService",
+                        input=mavio_dot_acquisition_dot_v1_dot_settings__pb2.UpdateAcquisitionSettingsRequest,
+                        output=mavio_dot_acquisition_dot_v1_dot_settings__pb2.UpdateAcquisitionSettingsResponse,
+                        idempotency_level=IdempotencyLevel.IDEMPOTENT,
+                    ),
+                    function=service.update_acquisition_settings,
                 ),
             },
             interceptors=interceptors,
@@ -1505,6 +1598,48 @@ class ProfileServiceClientSync(ConnectClientSync):
                 service_name="mavio.acquisition.v1.ProfileService",
                 input=mavio_dot_acquisition_dot_v1_dot_profile__pb2.DeleteRemotePathMappingRequest,
                 output=mavio_dot_acquisition_dot_v1_dot_profile__pb2.DeleteRemotePathMappingResponse,
+                idempotency_level=IdempotencyLevel.IDEMPOTENT,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+        )
+
+    def get_acquisition_settings(
+        self,
+        request: mavio_dot_acquisition_dot_v1_dot_settings__pb2.GetAcquisitionSettingsRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+        use_get: bool = False,
+    ) -> mavio_dot_acquisition_dot_v1_dot_settings__pb2.GetAcquisitionSettingsResponse:
+        return self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="GetAcquisitionSettings",
+                service_name="mavio.acquisition.v1.ProfileService",
+                input=mavio_dot_acquisition_dot_v1_dot_settings__pb2.GetAcquisitionSettingsRequest,
+                output=mavio_dot_acquisition_dot_v1_dot_settings__pb2.GetAcquisitionSettingsResponse,
+                idempotency_level=IdempotencyLevel.NO_SIDE_EFFECTS,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+            use_get=use_get,
+        )
+
+    def update_acquisition_settings(
+        self,
+        request: mavio_dot_acquisition_dot_v1_dot_settings__pb2.UpdateAcquisitionSettingsRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+    ) -> mavio_dot_acquisition_dot_v1_dot_settings__pb2.UpdateAcquisitionSettingsResponse:
+        return self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="UpdateAcquisitionSettings",
+                service_name="mavio.acquisition.v1.ProfileService",
+                input=mavio_dot_acquisition_dot_v1_dot_settings__pb2.UpdateAcquisitionSettingsRequest,
+                output=mavio_dot_acquisition_dot_v1_dot_settings__pb2.UpdateAcquisitionSettingsResponse,
                 idempotency_level=IdempotencyLevel.IDEMPOTENT,
             ),
             headers=headers,

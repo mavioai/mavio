@@ -262,6 +262,30 @@ pub type OwnedDeleteRemotePathMappingResponseView = ::buffa::view::OwnedView<
         'static,
     >,
 >;
+///Shorthand for `OwnedView<GetAcquisitionSettingsRequestView<'static>>`.
+pub type OwnedGetAcquisitionSettingsRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::acquisition::v1::__buffa::view::GetAcquisitionSettingsRequestView<
+        'static,
+    >,
+>;
+///Shorthand for `OwnedView<GetAcquisitionSettingsResponseView<'static>>`.
+pub type OwnedGetAcquisitionSettingsResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::acquisition::v1::__buffa::view::GetAcquisitionSettingsResponseView<
+        'static,
+    >,
+>;
+///Shorthand for `OwnedView<UpdateAcquisitionSettingsRequestView<'static>>`.
+pub type OwnedUpdateAcquisitionSettingsRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::acquisition::v1::__buffa::view::UpdateAcquisitionSettingsRequestView<
+        'static,
+    >,
+>;
+///Shorthand for `OwnedView<UpdateAcquisitionSettingsResponseView<'static>>`.
+pub type OwnedUpdateAcquisitionSettingsResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::acquisition::v1::__buffa::view::UpdateAcquisitionSettingsResponseView<
+        'static,
+    >,
+>;
 impl ::connectrpc::Encodable<
     crate::proto::mavio::acquisition::v1::ListQualityDefinitionsResponse,
 >
@@ -1186,6 +1210,90 @@ for ::buffa::view::OwnedView<
         )
     }
 }
+impl ::connectrpc::Encodable<
+    crate::proto::mavio::acquisition::v1::GetAcquisitionSettingsResponse,
+>
+for crate::proto::mavio::acquisition::v1::__buffa::view::GetAcquisitionSettingsResponseView<
+    '_,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<
+    crate::proto::mavio::acquisition::v1::GetAcquisitionSettingsResponse,
+>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::acquisition::v1::__buffa::view::GetAcquisitionSettingsResponseView<
+        'static,
+    >,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
+impl ::connectrpc::Encodable<
+    crate::proto::mavio::acquisition::v1::UpdateAcquisitionSettingsResponse,
+>
+for crate::proto::mavio::acquisition::v1::__buffa::view::UpdateAcquisitionSettingsResponseView<
+    '_,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<
+    crate::proto::mavio::acquisition::v1::UpdateAcquisitionSettingsResponse,
+>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::acquisition::v1::__buffa::view::UpdateAcquisitionSettingsResponseView<
+        'static,
+    >,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
 /// Full service name for this service.
 pub const PROFILE_SERVICE_SERVICE_NAME: &str = "mavio.acquisition.v1.ProfileService";
 /// Static [`Spec`](::connectrpc::Spec) for the `ListQualityDefinitions` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
@@ -1320,9 +1428,22 @@ pub const PROFILE_SERVICE_DELETE_REMOTE_PATH_MAPPING_SPEC: ::connectrpc::Spec = 
         ::connectrpc::StreamType::Unary,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::Idempotent);
+/// Static [`Spec`](::connectrpc::Spec) for the `GetAcquisitionSettings` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const PROFILE_SERVICE_GET_ACQUISITION_SETTINGS_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.acquisition.v1.ProfileService/GetAcquisitionSettings",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::NoSideEffects);
+/// Static [`Spec`](::connectrpc::Spec) for the `UpdateAcquisitionSettings` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const PROFILE_SERVICE_UPDATE_ACQUISITION_SETTINGS_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.acquisition.v1.ProfileService/UpdateAcquisitionSettings",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::Idempotent);
 /// ProfileService keeps what decides which releases are grabbed: quality
 /// definitions, quality profiles, custom formats, delay and release
-/// profiles; and the remote path mappings of download clients.
+/// profiles; the remote path mappings of download clients; and the
+/// acquisition settings, of downloading, importing and naming.
 /// Administrators only, but for listing quality profiles, which users who
 /// may request media read too.
 ///
@@ -1883,6 +2004,54 @@ pub trait ProfileService: Send + Sync + 'static {
         Output = ::connectrpc::ServiceResult<
             impl ::connectrpc::Encodable<
                 crate::proto::mavio::acquisition::v1::DeleteRemotePathMappingResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// GetAcquisitionSettings returns how releases are chosen, downloaded
+    /// and imported, and how files are named. Administrators only.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn get_acquisition_settings<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::acquisition::v1::GetAcquisitionSettingsRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::acquisition::v1::GetAcquisitionSettingsResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// UpdateAcquisitionSettings replaces the acquisition settings and
+    /// applies them at once. Administrators only.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn update_acquisition_settings<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::acquisition::v1::UpdateAcquisitionSettingsRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::acquisition::v1::UpdateAcquisitionSettingsResponse,
             > + Send + use<'a, Self>,
         >,
     > + Send;
@@ -2556,6 +2725,64 @@ impl<S: ProfileService> ProfileServiceExt for S {
                 },
             )
             .with_spec(PROFILE_SERVICE_DELETE_REMOTE_PATH_MAPPING_SPEC)
+            .route_view_idempotent(
+                PROFILE_SERVICE_SERVICE_NAME,
+                "GetAcquisitionSettings",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::acquisition::v1::__buffa::view::GetAcquisitionSettingsRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::acquisition::v1::GetAcquisitionSettingsRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.get_acquisition_settings(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::acquisition::v1::GetAcquisitionSettingsResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(PROFILE_SERVICE_GET_ACQUISITION_SETTINGS_SPEC)
+            .route_view(
+                PROFILE_SERVICE_SERVICE_NAME,
+                "UpdateAcquisitionSettings",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::acquisition::v1::__buffa::view::UpdateAcquisitionSettingsRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::acquisition::v1::UpdateAcquisitionSettingsRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.update_acquisition_settings(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::acquisition::v1::UpdateAcquisitionSettingsResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(PROFILE_SERVICE_UPDATE_ACQUISITION_SETTINGS_SPEC)
     }
 }
 /// Type-inference marker used by [`Router::add_service`](::connectrpc::Router::add_service).
@@ -2740,6 +2967,18 @@ impl<T: ProfileService> ::connectrpc::Dispatcher for ProfileServiceServer<T> {
                 Some(
                     ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
                         .with_spec(PROFILE_SERVICE_DELETE_REMOTE_PATH_MAPPING_SPEC),
+                )
+            }
+            "GetAcquisitionSettings" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(true)
+                        .with_spec(PROFILE_SERVICE_GET_ACQUISITION_SETTINGS_SPEC),
+                )
+            }
+            "UpdateAcquisitionSettings" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
+                        .with_spec(PROFILE_SERVICE_UPDATE_ACQUISITION_SETTINGS_SPEC),
                 )
             }
             _ => None,
@@ -3239,6 +3478,50 @@ impl<T: ProfileService> ::connectrpc::Dispatcher for ProfileServiceServer<T> {
                         .await?
                         .encode::<
                             crate::proto::mavio::acquisition::v1::DeleteRemotePathMappingResponse,
+                        >(format)
+                })
+            }
+            "GetAcquisitionSettings" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::acquisition::v1::GetAcquisitionSettingsRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::acquisition::v1::__buffa::view::GetAcquisitionSettingsRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::acquisition::v1::GetAcquisitionSettingsRequest,
+                    >::from_parts(&req, &body);
+                    svc.get_acquisition_settings(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::acquisition::v1::GetAcquisitionSettingsResponse,
+                        >(format)
+                })
+            }
+            "UpdateAcquisitionSettings" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::acquisition::v1::UpdateAcquisitionSettingsRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::acquisition::v1::__buffa::view::UpdateAcquisitionSettingsRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::acquisition::v1::UpdateAcquisitionSettingsRequest,
+                    >::from_parts(&req, &body);
+                    svc.update_acquisition_settings(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::acquisition::v1::UpdateAcquisitionSettingsResponse,
                         >(format)
                 })
             }
@@ -4357,6 +4640,96 @@ where
                 &self.transport,
                 &self.config,
                 PROFILE_SERVICE_DELETE_REMOTE_PATH_MAPPING_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the GetAcquisitionSettings RPC. Sends a request to /mavio.acquisition.v1.ProfileService/GetAcquisitionSettings.
+    pub async fn get_acquisition_settings(
+        &self,
+        request: crate::proto::mavio::acquisition::v1::GetAcquisitionSettingsRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::acquisition::v1::__buffa::view::GetAcquisitionSettingsResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.get_acquisition_settings_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the GetAcquisitionSettings RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn get_acquisition_settings_with_options(
+        &self,
+        request: crate::proto::mavio::acquisition::v1::GetAcquisitionSettingsRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::acquisition::v1::__buffa::view::GetAcquisitionSettingsResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                PROFILE_SERVICE_GET_ACQUISITION_SETTINGS_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the UpdateAcquisitionSettings RPC. Sends a request to /mavio.acquisition.v1.ProfileService/UpdateAcquisitionSettings.
+    pub async fn update_acquisition_settings(
+        &self,
+        request: crate::proto::mavio::acquisition::v1::UpdateAcquisitionSettingsRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::acquisition::v1::__buffa::view::UpdateAcquisitionSettingsResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.update_acquisition_settings_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the UpdateAcquisitionSettings RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn update_acquisition_settings_with_options(
+        &self,
+        request: crate::proto::mavio::acquisition::v1::UpdateAcquisitionSettingsRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::acquisition::v1::__buffa::view::UpdateAcquisitionSettingsResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                PROFILE_SERVICE_UPDATE_ACQUISITION_SETTINGS_SPEC
                     .with_origin(::connectrpc::SpecOrigin::Client),
                 request,
                 options,

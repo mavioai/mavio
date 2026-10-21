@@ -74,6 +74,12 @@ const (
 	// RequestServiceUnblockCollectionProcedure is the fully-qualified name of the RequestService's
 	// UnblockCollection RPC.
 	RequestServiceUnblockCollectionProcedure = "/mavio.acquisition.v1.RequestService/UnblockCollection"
+	// RequestServiceGetRequestSettingsProcedure is the fully-qualified name of the RequestService's
+	// GetRequestSettings RPC.
+	RequestServiceGetRequestSettingsProcedure = "/mavio.acquisition.v1.RequestService/GetRequestSettings"
+	// RequestServiceUpdateRequestSettingsProcedure is the fully-qualified name of the RequestService's
+	// UpdateRequestSettings RPC.
+	RequestServiceUpdateRequestSettingsProcedure = "/mavio.acquisition.v1.RequestService/UpdateRequestSettings"
 )
 
 // RequestServiceClient is a client for the mavio.acquisition.v1.RequestService service.
@@ -124,6 +130,12 @@ type RequestServiceClient interface {
 	// blocklist, as Seerr's DELETE /blocklist/collection/:id.
 	// Administrators only.
 	UnblockCollection(context.Context, *v1.UnblockCollectionRequest) (*v1.UnblockCollectionResponse, error)
+	// GetRequestSettings returns the defaults of users' requests and where
+	// approved requests go. Administrators only.
+	GetRequestSettings(context.Context, *v1.GetRequestSettingsRequest) (*v1.GetRequestSettingsResponse, error)
+	// UpdateRequestSettings replaces the request settings and applies them
+	// at once. Administrators only.
+	UpdateRequestSettings(context.Context, *v1.UpdateRequestSettingsRequest) (*v1.UpdateRequestSettingsResponse, error)
 }
 
 // NewRequestServiceClient constructs a client for the mavio.acquisition.v1.RequestService service.
@@ -229,25 +241,41 @@ func NewRequestServiceClient(httpClient connect.HTTPClient, baseURL string, opts
 			connect.WithIdempotency(connect.IdempotencyIdempotent),
 			connect.WithClientOptions(opts...),
 		),
+		getRequestSettings: connect.NewClient[v1.GetRequestSettingsRequest, v1.GetRequestSettingsResponse](
+			httpClient,
+			baseURL+RequestServiceGetRequestSettingsProcedure,
+			connect.WithSchema(requestServiceMethods.ByName("GetRequestSettings")),
+			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+			connect.WithClientOptions(opts...),
+		),
+		updateRequestSettings: connect.NewClient[v1.UpdateRequestSettingsRequest, v1.UpdateRequestSettingsResponse](
+			httpClient,
+			baseURL+RequestServiceUpdateRequestSettingsProcedure,
+			connect.WithSchema(requestServiceMethods.ByName("UpdateRequestSettings")),
+			connect.WithIdempotency(connect.IdempotencyIdempotent),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
 // requestServiceClient implements RequestServiceClient.
 type requestServiceClient struct {
-	createRequest     *connect.Client[v1.CreateRequestRequest, v1.CreateRequestResponse]
-	listRequests      *connect.Client[v1.ListRequestsRequest, v1.ListRequestsResponse]
-	getRequest        *connect.Client[v1.GetRequestRequest, v1.GetRequestResponse]
-	updateRequest     *connect.Client[v1.UpdateRequestRequest, v1.UpdateRequestResponse]
-	deleteRequest     *connect.Client[v1.DeleteRequestRequest, v1.DeleteRequestResponse]
-	approveRequest    *connect.Client[v1.ApproveRequestRequest, v1.ApproveRequestResponse]
-	declineRequest    *connect.Client[v1.DeclineRequestRequest, v1.DeclineRequestResponse]
-	retryRequest      *connect.Client[v1.RetryRequestRequest, v1.RetryRequestResponse]
-	getQuota          *connect.Client[v1.GetQuotaRequest, v1.GetQuotaResponse]
-	blockTitle        *connect.Client[v1.BlockTitleRequest, v1.BlockTitleResponse]
-	unblockTitle      *connect.Client[v1.UnblockTitleRequest, v1.UnblockTitleResponse]
-	listBlockedTitles *connect.Client[v1.ListBlockedTitlesRequest, v1.ListBlockedTitlesResponse]
-	blockCollection   *connect.Client[v1.BlockCollectionRequest, v1.BlockCollectionResponse]
-	unblockCollection *connect.Client[v1.UnblockCollectionRequest, v1.UnblockCollectionResponse]
+	createRequest         *connect.Client[v1.CreateRequestRequest, v1.CreateRequestResponse]
+	listRequests          *connect.Client[v1.ListRequestsRequest, v1.ListRequestsResponse]
+	getRequest            *connect.Client[v1.GetRequestRequest, v1.GetRequestResponse]
+	updateRequest         *connect.Client[v1.UpdateRequestRequest, v1.UpdateRequestResponse]
+	deleteRequest         *connect.Client[v1.DeleteRequestRequest, v1.DeleteRequestResponse]
+	approveRequest        *connect.Client[v1.ApproveRequestRequest, v1.ApproveRequestResponse]
+	declineRequest        *connect.Client[v1.DeclineRequestRequest, v1.DeclineRequestResponse]
+	retryRequest          *connect.Client[v1.RetryRequestRequest, v1.RetryRequestResponse]
+	getQuota              *connect.Client[v1.GetQuotaRequest, v1.GetQuotaResponse]
+	blockTitle            *connect.Client[v1.BlockTitleRequest, v1.BlockTitleResponse]
+	unblockTitle          *connect.Client[v1.UnblockTitleRequest, v1.UnblockTitleResponse]
+	listBlockedTitles     *connect.Client[v1.ListBlockedTitlesRequest, v1.ListBlockedTitlesResponse]
+	blockCollection       *connect.Client[v1.BlockCollectionRequest, v1.BlockCollectionResponse]
+	unblockCollection     *connect.Client[v1.UnblockCollectionRequest, v1.UnblockCollectionResponse]
+	getRequestSettings    *connect.Client[v1.GetRequestSettingsRequest, v1.GetRequestSettingsResponse]
+	updateRequestSettings *connect.Client[v1.UpdateRequestSettingsRequest, v1.UpdateRequestSettingsResponse]
 }
 
 // CreateRequest calls mavio.acquisition.v1.RequestService.CreateRequest.
@@ -376,6 +404,24 @@ func (c *requestServiceClient) UnblockCollection(ctx context.Context, req *v1.Un
 	return nil, err
 }
 
+// GetRequestSettings calls mavio.acquisition.v1.RequestService.GetRequestSettings.
+func (c *requestServiceClient) GetRequestSettings(ctx context.Context, req *v1.GetRequestSettingsRequest) (*v1.GetRequestSettingsResponse, error) {
+	response, err := c.getRequestSettings.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
+// UpdateRequestSettings calls mavio.acquisition.v1.RequestService.UpdateRequestSettings.
+func (c *requestServiceClient) UpdateRequestSettings(ctx context.Context, req *v1.UpdateRequestSettingsRequest) (*v1.UpdateRequestSettingsResponse, error) {
+	response, err := c.updateRequestSettings.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
 // RequestServiceHandler is an implementation of the mavio.acquisition.v1.RequestService service.
 type RequestServiceHandler interface {
 	// CreateRequest requests a movie, or seasons of a series, by its TMDB
@@ -424,6 +470,12 @@ type RequestServiceHandler interface {
 	// blocklist, as Seerr's DELETE /blocklist/collection/:id.
 	// Administrators only.
 	UnblockCollection(context.Context, *v1.UnblockCollectionRequest) (*v1.UnblockCollectionResponse, error)
+	// GetRequestSettings returns the defaults of users' requests and where
+	// approved requests go. Administrators only.
+	GetRequestSettings(context.Context, *v1.GetRequestSettingsRequest) (*v1.GetRequestSettingsResponse, error)
+	// UpdateRequestSettings replaces the request settings and applies them
+	// at once. Administrators only.
+	UpdateRequestSettings(context.Context, *v1.UpdateRequestSettingsRequest) (*v1.UpdateRequestSettingsResponse, error)
 }
 
 // NewRequestServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -525,6 +577,20 @@ func NewRequestServiceHandler(svc RequestServiceHandler, opts ...connect.Handler
 		connect.WithIdempotency(connect.IdempotencyIdempotent),
 		connect.WithHandlerOptions(opts...),
 	)
+	requestServiceGetRequestSettingsHandler := connect.NewUnaryHandlerSimple(
+		RequestServiceGetRequestSettingsProcedure,
+		svc.GetRequestSettings,
+		connect.WithSchema(requestServiceMethods.ByName("GetRequestSettings")),
+		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+		connect.WithHandlerOptions(opts...),
+	)
+	requestServiceUpdateRequestSettingsHandler := connect.NewUnaryHandlerSimple(
+		RequestServiceUpdateRequestSettingsProcedure,
+		svc.UpdateRequestSettings,
+		connect.WithSchema(requestServiceMethods.ByName("UpdateRequestSettings")),
+		connect.WithIdempotency(connect.IdempotencyIdempotent),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/mavio.acquisition.v1.RequestService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case RequestServiceCreateRequestProcedure:
@@ -555,6 +621,10 @@ func NewRequestServiceHandler(svc RequestServiceHandler, opts ...connect.Handler
 			requestServiceBlockCollectionHandler.ServeHTTP(w, r)
 		case RequestServiceUnblockCollectionProcedure:
 			requestServiceUnblockCollectionHandler.ServeHTTP(w, r)
+		case RequestServiceGetRequestSettingsProcedure:
+			requestServiceGetRequestSettingsHandler.ServeHTTP(w, r)
+		case RequestServiceUpdateRequestSettingsProcedure:
+			requestServiceUpdateRequestSettingsHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -618,4 +688,12 @@ func (UnimplementedRequestServiceHandler) BlockCollection(context.Context, *v1.B
 
 func (UnimplementedRequestServiceHandler) UnblockCollection(context.Context, *v1.UnblockCollectionRequest) (*v1.UnblockCollectionResponse, error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.acquisition.v1.RequestService.UnblockCollection is not implemented"))
+}
+
+func (UnimplementedRequestServiceHandler) GetRequestSettings(context.Context, *v1.GetRequestSettingsRequest) (*v1.GetRequestSettingsResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.acquisition.v1.RequestService.GetRequestSettings is not implemented"))
+}
+
+func (UnimplementedRequestServiceHandler) UpdateRequestSettings(context.Context, *v1.UpdateRequestSettingsRequest) (*v1.UpdateRequestSettingsResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.acquisition.v1.RequestService.UpdateRequestSettings is not implemented"))
 }

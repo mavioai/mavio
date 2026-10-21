@@ -3,7 +3,6 @@ package rpc
 import (
 	"cmp"
 	"context"
-	"errors"
 	"fmt"
 	"log/slog"
 	"os"
@@ -20,319 +19,54 @@ import (
 	systemv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/system/v1"
 )
 
-var hardwareAccelerations = map[core.HardwareAcceleration]systemv1.HardwareAcceleration{
-	core.HardwareAuto:         systemv1.HardwareAcceleration_HARDWARE_ACCELERATION_AUTO,
-	core.HardwareNone:         systemv1.HardwareAcceleration_HARDWARE_ACCELERATION_NONE,
-	core.HardwareVideoToolbox: systemv1.HardwareAcceleration_HARDWARE_ACCELERATION_VIDEOTOOLBOX,
-}
-
-func settingsToProto(s *core.ServerSettings) *systemv1.ServerSettings {
-	t, n := &s.Transcoding, &s.Network
-	out := systemv1.ServerSettings_builder{
-		Transcoding: systemv1.TranscodingSettings_builder{
-			HardwareAcceleration: new(hardwareAccelerations[t.HardwareAcceleration]), HardwareEncoding: &t.HardwareEncoding,
-			EncoderPreset: &t.EncoderPreset, H264Crf: new(int32(t.H264CRF)), H265Crf: new(int32(t.H265CRF)), Threads: new(int32(t.Threads)),
-			TonemapAlgorithm: &t.TonemapAlgorithm, TonemapRange: &t.TonemapRange, TonemapDesat: &t.TonemapDesat, TonemapPeak: &t.TonemapPeak,
-			DeinterlaceMethod: &t.DeinterlaceMethod, DeinterlaceDoubleRate: &t.DeinterlaceDoubleRate, DownmixBoost: &t.DownmixBoost,
-			CropBlackBorders: &t.CropBlackBorders, TranscodeDir: &t.TranscodeDir,
-		}.Build(),
+func generalToProto(s *core.ServerSettings) *systemv1.GeneralSettings {
+	n := &s.Network
+	return systemv1.GeneralSettings_builder{
 		Network: systemv1.NetworkSettings_builder{
-			ServerName: &n.ServerName, BaseUrl: &n.BaseURL, HttpsPort: new(int32(n.HTTPSPort)), CertificatePath: &n.CertificatePath, Relay: &n.Relay,
-			KeyPath: &n.KeyPath, LocalDiscovery: &n.LocalDiscovery,
-			Proxies: systemv1.OutboundProxies_builder{
-				PluginCatalogs: &n.Proxies.PluginCatalogs, Images: &n.Proxies.Images, MavioDev: &n.Proxies.MavioDev, Acme: &n.Proxies.ACME,
-			}.Build(),
+			ServerName: &n.ServerName, BaseUrl: &n.BaseURL, HttpsPort: new(int32(n.HTTPSPort)), CertificatePath: &n.CertificatePath,
+			KeyPath: &n.KeyPath, LocalDiscovery: &n.LocalDiscovery, Relay: &n.Relay,
 		}.Build(),
-		PluginCatalogs: s.PluginCatalogs, PasswordResetPlugin: &s.PasswordResetPlugin,
-		SessionIdleDays: new(int32(s.SessionIdleDays)),
-		Acquisition:     acquisitionSettingsToProto(&s.Acquisition),
-		Requests:        requestSettingsToProto(&s.Requests),
 		Metadata: systemv1.MetadataSettings_builder{
 			PreferredLanguage: &s.Metadata.PreferredLanguage, Country: &s.Metadata.Country,
 		}.Build(),
-	}.Build()
-	if !s.UpdatedAt.IsZero() {
-		out.SetUpdateTime(timestamppb.New(s.UpdatedAt))
-	}
-	return out
-}
-
-// settingsFromProto returns the settings of p, keeping the current
-// acquisition, request and metadata settings and session idle days when p
-// has none.
-func settingsFromProto(p *systemv1.ServerSettings, current *core.ServerSettings) (core.ServerSettings, error) {
-	t, n := p.GetTranscoding(), p.GetNetwork()
-	acquisition := current.Acquisition
-	if p.HasAcquisition() {
-		acquisition = acquisitionSettingsFromProto(p.GetAcquisition())
-	}
-	requests := current.Requests
-	if p.HasRequests() {
-		var err error
-		if requests, err = requestSettingsFromProto(p.GetRequests()); err != nil {
-			return core.ServerSettings{}, err
-		}
-	}
-	meta := current.Metadata
-	if p.HasMetadata() {
-		meta = core.MetadataSettings{PreferredLanguage: p.GetMetadata().GetPreferredLanguage(), Country: p.GetMetadata().GetCountry()}
-	}
-	proxies := current.Network.Proxies
-	if n.HasProxies() {
-		o := n.GetProxies()
-		proxies = core.OutboundProxies{PluginCatalogs: o.GetPluginCatalogs(), Images: o.GetImages(), MavioDev: o.GetMavioDev(), ACME: o.GetAcme()}
-	}
-	idle := current.SessionIdleDays
-	if p.GetSessionIdleDays() != 0 {
-		idle = int(p.GetSessionIdleDays())
-	}
-	var hw core.HardwareAcceleration
-	for k, v := range hardwareAccelerations {
-		if v == t.GetHardwareAcceleration() {
-			hw = k
-		}
-	}
-	return core.ServerSettings{
-		Transcoding: core.TranscodingSettings{
-			HardwareAcceleration: hw, HardwareEncoding: t.GetHardwareEncoding(), EncoderPreset: t.GetEncoderPreset(),
-			H264CRF: int(t.GetH264Crf()), H265CRF: int(t.GetH265Crf()), Threads: int(t.GetThreads()),
-			TonemapAlgorithm: t.GetTonemapAlgorithm(), TonemapRange: t.GetTonemapRange(), TonemapDesat: t.GetTonemapDesat(),
-			TonemapPeak: t.GetTonemapPeak(), DeinterlaceMethod: t.GetDeinterlaceMethod(), DeinterlaceDoubleRate: t.GetDeinterlaceDoubleRate(),
-			DownmixBoost: t.GetDownmixBoost(), CropBlackBorders: t.GetCropBlackBorders(), TranscodeDir: t.GetTranscodeDir(),
-		},
-		Network: core.NetworkSettings{
-			ServerName: n.GetServerName(), BaseURL: n.GetBaseUrl(), HTTPSPort: int(n.GetHttpsPort()),
-			CertificatePath: n.GetCertificatePath(), KeyPath: n.GetKeyPath(), LocalDiscovery: n.GetLocalDiscovery(), Relay: n.GetRelay(),
-			Proxies: proxies,
-		},
-		PluginCatalogs: p.GetPluginCatalogs(), PasswordResetPlugin: p.GetPasswordResetPlugin(),
-		SessionIdleDays: idle,
-		Acquisition:     acquisition,
-		Requests:        requests,
-		Metadata:        meta,
-		// The subtitle settings are changed through SubtitleService, the
-		// disabled plugins through SetPluginEnabled, the plugins' proxies
-		// through SetPluginProxy and the assistant settings through
-		// AssistantService.
-		Subtitles:       current.Subtitles,
-		DisabledPlugins: current.DisabledPlugins,
-		PluginProxies:   current.PluginProxies,
-		Assistant:       current.Assistant,
-	}, nil
-}
-
-func requestSettingsToProto(r *core.RequestSettings) *systemv1.RequestSettings {
-	d := &r.DefaultPermissions
-	b := systemv1.RequestSettings_builder{
-		DefaultRequestMovies: &d.Movies, DefaultRequestSeries: &d.Series,
-		DefaultAutoApproveMovies: &d.AutoApproveMovies, DefaultAutoApproveSeries: &d.AutoApproveSeries,
-		DefaultReportIssues: &d.ReportIssues,
-		MovieQuotaLimit:     new(int32(r.MovieQuota.Limit)), MovieQuotaDays: new(int32(r.MovieQuota.Days)),
-		SeriesQuotaLimit: new(int32(r.SeriesQuota.Limit)), SeriesQuotaDays: new(int32(r.SeriesQuota.Days)),
-		MinimumAvailability: new(minimumAvailabilityToProto(r.MinimumAvailability)),
-		SeasonFolder:        &r.SeasonFolder, MonitorNewItems: new(newItemMonitorToProto(r.MonitorNewItems)),
-		Specials: &r.Specials, BlocklistedTags: r.BlocklistedTags, BlocklistedTagsLimit: new(int32(r.BlocklistedTagsLimit)),
-	}
-	for _, f := range []struct {
-		id core.ID
-		to **string
-	}{
-		{r.MovieLibraryID, &b.MovieLibraryId},
-		{r.MovieQualityProfileID, &b.MovieQualityProfileId},
-		{r.SeriesLibraryID, &b.SeriesLibraryId},
-		{r.SeriesQualityProfileID, &b.SeriesQualityProfileId},
-		{r.AnimeLibraryID, &b.AnimeLibraryId},
-		{r.AnimeQualityProfileID, &b.AnimeQualityProfileId},
-	} {
-		if !f.id.IsZero() {
-			*f.to = new(f.id.String())
-		}
-	}
-	return b.Build()
-}
-
-func requestSettingsFromProto(p *systemv1.RequestSettings) (core.RequestSettings, error) {
-	out := core.RequestSettings{
-		DefaultPermissions: core.RequestPermissions{
-			Movies: p.GetDefaultRequestMovies(), Series: p.GetDefaultRequestSeries(),
-			AutoApproveMovies: p.GetDefaultAutoApproveMovies(), AutoApproveSeries: p.GetDefaultAutoApproveSeries(),
-			ReportIssues: p.GetDefaultReportIssues(),
-		},
-		MovieQuota:   core.Quota{Limit: int(p.GetMovieQuotaLimit()), Days: int(p.GetMovieQuotaDays())},
-		SeriesQuota:  core.Quota{Limit: int(p.GetSeriesQuotaLimit()), Days: int(p.GetSeriesQuotaDays())},
-		SeasonFolder: p.GetSeasonFolder(), Specials: p.GetSpecials(),
-		BlocklistedTags: p.GetBlocklistedTags(), BlocklistedTagsLimit: int(p.GetBlocklistedTagsLimit()),
-	}
-	var err error
-	if out.MinimumAvailability, err = minimumAvailability(p.GetMinimumAvailability()); err != nil {
-		return out, err
-	}
-	out.MonitorNewItems = core.NewItemsNone
-	if p.HasMonitorNewItems() {
-		if out.MonitorNewItems, err = newItemMonitor(p.GetMonitorNewItems()); err != nil {
-			return out, err
-		}
-	}
-	for _, f := range []struct {
-		s  string
-		to *core.ID
-	}{
-		{p.GetMovieLibraryId(), &out.MovieLibraryID},
-		{p.GetMovieQualityProfileId(), &out.MovieQualityProfileID},
-		{p.GetSeriesLibraryId(), &out.SeriesLibraryID},
-		{p.GetSeriesQualityProfileId(), &out.SeriesQualityProfileID},
-		{p.GetAnimeLibraryId(), &out.AnimeLibraryID},
-		{p.GetAnimeQualityProfileId(), &out.AnimeQualityProfileID},
-	} {
-		if f.s == "" {
-			continue
-		}
-		if *f.to, err = core.ParseID(f.s); err != nil {
-			return out, invalid(err)
-		}
-	}
-	return out, nil
-}
-
-var properDownloads = map[core.ProperDownload]systemv1.ProperDownload{
-	core.PropersPreferAndUpgrade: systemv1.ProperDownload_PROPER_DOWNLOAD_PREFER_AND_UPGRADE,
-	core.PropersDoNotUpgrade:     systemv1.ProperDownload_PROPER_DOWNLOAD_DO_NOT_UPGRADE,
-	core.PropersDoNotPrefer:      systemv1.ProperDownload_PROPER_DOWNLOAD_DO_NOT_PREFER,
-}
-
-var colonReplacements = map[core.ColonReplacement]systemv1.ColonReplacement{
-	core.ColonDelete:         systemv1.ColonReplacement_COLON_REPLACEMENT_DELETE,
-	core.ColonDash:           systemv1.ColonReplacement_COLON_REPLACEMENT_DASH,
-	core.ColonSpaceDash:      systemv1.ColonReplacement_COLON_REPLACEMENT_SPACE_DASH,
-	core.ColonSpaceDashSpace: systemv1.ColonReplacement_COLON_REPLACEMENT_SPACE_DASH_SPACE,
-	core.ColonSmart:          systemv1.ColonReplacement_COLON_REPLACEMENT_SMART,
-}
-
-var multiEpisodeStyles = map[core.MultiEpisodeStyle]systemv1.MultiEpisodeStyle{
-	core.MultiEpisodeExtend:        systemv1.MultiEpisodeStyle_MULTI_EPISODE_STYLE_EXTEND,
-	core.MultiEpisodeDuplicate:     systemv1.MultiEpisodeStyle_MULTI_EPISODE_STYLE_DUPLICATE,
-	core.MultiEpisodeRepeat:        systemv1.MultiEpisodeStyle_MULTI_EPISODE_STYLE_REPEAT,
-	core.MultiEpisodeScene:         systemv1.MultiEpisodeStyle_MULTI_EPISODE_STYLE_SCENE,
-	core.MultiEpisodeRange:         systemv1.MultiEpisodeStyle_MULTI_EPISODE_STYLE_RANGE,
-	core.MultiEpisodePrefixedRange: systemv1.MultiEpisodeStyle_MULTI_EPISODE_STYLE_PREFIXED_RANGE,
-}
-
-var episodeTitleRequirements = map[core.EpisodeTitleRequired]systemv1.EpisodeTitleRequired{
-	core.EpisodeTitleAlways:             systemv1.EpisodeTitleRequired_EPISODE_TITLE_REQUIRED_ALWAYS,
-	core.EpisodeTitleBulkSeasonReleases: systemv1.EpisodeTitleRequired_EPISODE_TITLE_REQUIRED_BULK_SEASON_RELEASES,
-	core.EpisodeTitleNever:              systemv1.EpisodeTitleRequired_EPISODE_TITLE_REQUIRED_NEVER,
-}
-
-// keyOf returns the key of v in m, the zero key when there is none.
-func keyOf[K, V comparable](m map[K]V, v V) K {
-	for k, mv := range m {
-		if mv == v {
-			return k
-		}
-	}
-	var zero K
-	return zero
-}
-
-func acquisitionSettingsToProto(a *core.AcquisitionSettings) *systemv1.AcquisitionSettings {
-	n := &a.Naming
-	return systemv1.AcquisitionSettings_builder{
-		Propers: new(properDownloads[a.Propers]), PreferIndexerFlags: &a.PreferIndexerFlags,
-		CompletedDownloadHandling: &a.CompletedDownloadHandling, AutoRedownloadFailed: &a.AutoRedownloadFailed,
-		AutoRedownloadFailedFromInteractiveSearch: &a.AutoRedownloadFailedFromInteractiveSearch,
-		MaximumSize: new(int32(a.MaximumSize)), MinimumAge: new(int32(a.MinimumAge)), Retention: new(int32(a.Retention)),
-		AllowHardcodedSubs: &a.AllowHardcodedSubs, WhitelistedHardcodedSubs: a.WhitelistedHardcodedSubs,
-		SkipFreeSpaceCheck: &a.SkipFreeSpaceCheck, MinimumFreeSpace: new(int32(a.MinimumFreeSpace)),
-		AvailabilityDelay: new(int32(a.AvailabilityDelay)), RssSyncInterval: new(int32(a.RSSSyncInterval)),
-		CheckFinishedInterval: new(int32(a.CheckFinishedInterval)), RecycleBin: &a.RecycleBin,
-		RecycleBinCleanupDays: new(int32(a.RecycleBinCleanupDays)), CopyUsingHardlinks: &a.CopyUsingHardlinks,
-		ImportExtraFiles: &a.ImportExtraFiles, ExtraFileExtensions: a.ExtraFileExtensions, DeleteEmptyFolders: &a.DeleteEmptyFolders,
-		RenameMovies: &n.RenameMovies, ReplaceIllegalCharacters: &n.ReplaceIllegalCharacters,
-		ColonReplacement:  new(colonReplacements[n.ColonReplacement]),
-		MovieFolderFormat: &n.MovieFolderFormat, StandardMovieFormat: &n.StandardMovieFormat,
-		RenameEpisodes: &n.RenameEpisodes, StandardEpisodeFormat: &n.StandardEpisodeFormat,
-		DailyEpisodeFormat: &n.DailyEpisodeFormat, AnimeEpisodeFormat: &n.AnimeEpisodeFormat,
-		SeriesFolderFormat: &n.SeriesFolderFormat, SeasonFolderFormat: &n.SeasonFolderFormat,
-		SpecialsFolderFormat: &n.SpecialsFolderFormat, MultiEpisodeStyle: new(multiEpisodeStyles[n.MultiEpisodeStyle]),
-		AutoUnmonitorPreviouslyDownloadedEpisodes: &a.AutoUnmonitorPreviouslyDownloadedEpisodes,
-		EpisodeTitleRequired:                      new(episodeTitleRequirements[a.EpisodeTitleRequired]),
-		DownloadClientWorkingFolders:              &a.DownloadClientWorkingFolders,
+		SessionIdleDays:     new(int32(s.SessionIdleDays)),
+		PasswordResetPlugin: &s.PasswordResetPlugin,
 	}.Build()
 }
 
-func acquisitionSettingsFromProto(p *systemv1.AcquisitionSettings) core.AcquisitionSettings {
-	// Unset by clients that predate it, it keeps its default.
-	fromInteractive := !p.HasAutoRedownloadFailedFromInteractiveSearch() || p.GetAutoRedownloadFailedFromInteractiveSearch()
-	return core.AcquisitionSettings{
-		Propers: keyOf(properDownloads, p.GetPropers()), PreferIndexerFlags: p.GetPreferIndexerFlags(),
-		CompletedDownloadHandling: p.GetCompletedDownloadHandling(), AutoRedownloadFailed: p.GetAutoRedownloadFailed(),
-		AutoRedownloadFailedFromInteractiveSearch: fromInteractive,
-		MaximumSize: int(p.GetMaximumSize()), MinimumAge: int(p.GetMinimumAge()), Retention: int(p.GetRetention()),
-		AllowHardcodedSubs: p.GetAllowHardcodedSubs(), WhitelistedHardcodedSubs: p.GetWhitelistedHardcodedSubs(),
-		SkipFreeSpaceCheck: p.GetSkipFreeSpaceCheck(), MinimumFreeSpace: int(p.GetMinimumFreeSpace()),
-		AvailabilityDelay: int(p.GetAvailabilityDelay()), RSSSyncInterval: int(p.GetRssSyncInterval()),
-		CheckFinishedInterval: int(p.GetCheckFinishedInterval()), RecycleBin: p.GetRecycleBin(),
-		RecycleBinCleanupDays: int(p.GetRecycleBinCleanupDays()), CopyUsingHardlinks: p.GetCopyUsingHardlinks(),
-		ImportExtraFiles: p.GetImportExtraFiles(), ExtraFileExtensions: p.GetExtraFileExtensions(),
-		DeleteEmptyFolders:                        p.GetDeleteEmptyFolders(),
-		AutoUnmonitorPreviouslyDownloadedEpisodes: p.GetAutoUnmonitorPreviouslyDownloadedEpisodes(),
-		EpisodeTitleRequired:                      keyOf(episodeTitleRequirements, p.GetEpisodeTitleRequired()),
-		DownloadClientWorkingFolders:              p.GetDownloadClientWorkingFolders(),
-		Naming: core.NamingSettings{
-			RenameMovies: p.GetRenameMovies(), ReplaceIllegalCharacters: p.GetReplaceIllegalCharacters(),
-			ColonReplacement:  keyOf(colonReplacements, p.GetColonReplacement()),
-			MovieFolderFormat: p.GetMovieFolderFormat(), StandardMovieFormat: p.GetStandardMovieFormat(),
-			RenameEpisodes: p.GetRenameEpisodes(), StandardEpisodeFormat: p.GetStandardEpisodeFormat(),
-			DailyEpisodeFormat: p.GetDailyEpisodeFormat(), AnimeEpisodeFormat: p.GetAnimeEpisodeFormat(),
-			SeriesFolderFormat: p.GetSeriesFolderFormat(), SeasonFolderFormat: p.GetSeasonFolderFormat(),
-			SpecialsFolderFormat: p.GetSpecialsFolderFormat(), MultiEpisodeStyle: keyOf(multiEpisodeStyles, p.GetMultiEpisodeStyle()),
-		},
+// setGeneral sets the general settings of p in s, keeping the outbound
+// proxies, which ProxyService keeps.
+func setGeneral(s *core.ServerSettings, p *systemv1.GeneralSettings) {
+	n := p.GetNetwork()
+	s.Network = core.NetworkSettings{
+		ServerName: n.GetServerName(), BaseURL: n.GetBaseUrl(), HTTPSPort: int(n.GetHttpsPort()),
+		CertificatePath: n.GetCertificatePath(), KeyPath: n.GetKeyPath(), LocalDiscovery: n.GetLocalDiscovery(), Relay: n.GetRelay(),
+		Proxies: s.Network.Proxies,
 	}
+	s.Metadata = core.MetadataSettings{PreferredLanguage: p.GetMetadata().GetPreferredLanguage(), Country: p.GetMetadata().GetCountry()}
+	s.SessionIdleDays = int(p.GetSessionIdleDays())
+	s.PasswordResetPlugin = p.GetPasswordResetPlugin()
 }
 
-func (s *SystemService) currentSettings() core.ServerSettings {
-	if s.Settings == nil {
-		return core.DefaultServerSettings()
-	}
-	return s.Settings.Get()
-}
-
-// GetServerSettings returns the server settings.
-func (s *SystemService) GetServerSettings(ctx context.Context, _ *systemv1.GetServerSettingsRequest) (*systemv1.GetServerSettingsResponse, error) {
+// GetGeneralSettings returns the server's general settings.
+func (s *SystemService) GetGeneralSettings(ctx context.Context, _ *systemv1.GetGeneralSettingsRequest) (*systemv1.GetGeneralSettingsResponse, error) {
 	if _, err := admin(ctx); err != nil {
 		return nil, err
 	}
-	set := s.currentSettings()
-	available := []core.HardwareAcceleration{core.HardwareAuto, core.HardwareNone}
-	if s.Accelerations != nil {
-		available = s.Accelerations()
-	}
-	out := make([]systemv1.HardwareAcceleration, len(available))
-	for i, a := range available {
-		out[i] = hardwareAccelerations[a]
-	}
-	return systemv1.GetServerSettingsResponse_builder{Settings: settingsToProto(&set), AvailableHardwareAccelerations: out}.Build(), nil
+	set := currentSettings(s.Settings)
+	return systemv1.GetGeneralSettingsResponse_builder{Settings: generalToProto(&set)}.Build(), nil
 }
 
-// UpdateServerSettings applies and stores new settings.
-func (s *SystemService) UpdateServerSettings(ctx context.Context, req *systemv1.UpdateServerSettingsRequest) (*systemv1.UpdateServerSettingsResponse, error) {
-	p, err := admin(ctx)
+// UpdateGeneralSettings applies and stores the general settings.
+func (s *SystemService) UpdateGeneralSettings(ctx context.Context, req *systemv1.UpdateGeneralSettingsRequest) (*systemv1.UpdateGeneralSettingsResponse, error) {
+	set, err := changeSettings(ctx, s.Settings, s.Activity, "the general settings", func(cur *core.ServerSettings) error {
+		setGeneral(cur, req.GetSettings())
+		return nil
+	})
 	if err != nil {
 		return nil, err
 	}
-	if s.Settings == nil {
-		return nil, connect.NewError(connect.CodeFailedPrecondition, errors.New("settings cannot be changed"))
-	}
-	set, err := s.Settings.Change(ctx, func(cur *core.ServerSettings) error {
-		next, err := settingsFromProto(req.GetSettings(), cur)
-		*cur = next
-		return err
-	})
-	if err != nil {
-		return nil, connectError(ctx, err)
-	}
-	s.Activity.Record(ctx, core.Activity{Type: "settings.updated", UserID: p.User.ID, Title: p.User.Name + " changed the server settings"})
-	return systemv1.UpdateServerSettingsResponse_builder{Settings: settingsToProto(&set)}.Build(), nil
+	return systemv1.UpdateGeneralSettingsResponse_builder{Settings: generalToProto(&set)}.Build(), nil
 }
 
 // ListDirectory lists a folder of the server, folders first.

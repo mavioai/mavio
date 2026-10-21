@@ -9,7 +9,9 @@ import (
 
 	"connectrpc.com/connect"
 
+	"github.com/mavioai/mavio/apps/server/internal/activity"
 	"github.com/mavioai/mavio/apps/server/internal/playback"
+	"github.com/mavioai/mavio/apps/server/internal/settings"
 	"github.com/mavioai/mavio/libs/core"
 	"github.com/mavioai/mavio/libs/library"
 	"github.com/mavioai/mavio/libs/media/decision"
@@ -39,6 +41,14 @@ type PlaybackService struct {
 	store     core.Store
 	// Intros finds the items played before items; nil finds none.
 	Intros *library.Intros
+	// Settings keeps the transcoding settings; nil serves the defaults
+	// and changes none.
+	Settings *settings.Manager
+	// Accelerations lists the hardware accelerations available; nil means
+	// auto and none.
+	Accelerations func() []core.HardwareAcceleration
+	// Activity records administrators' changes; nil records none.
+	Activity *activity.Log
 }
 
 var _ playbackv1connect.PlaybackServiceHandler = (*PlaybackService)(nil)

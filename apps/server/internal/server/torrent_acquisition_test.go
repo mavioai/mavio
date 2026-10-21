@@ -19,7 +19,6 @@ import (
 
 	acquisitionv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/acquisition/v1"
 	libraryv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/library/v1"
-	systemv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/system/v1"
 	"github.com/mavioai/mavio/libs/release"
 )
 
@@ -297,7 +296,7 @@ func TestTorrentAcquisition(t *testing.T) {
 	}
 
 	// 2. With hard links off, an RSS sync's WEB-DL is imported by a copy.
-	s.settings(func(settings *systemv1.ServerSettings) { settings.GetAcquisition().SetCopyUsingHardlinks(false) })
+	s.acquisitionSettings(func(acq *acquisitionv1.AcquisitionSettings) { acq.SetCopyUsingHardlinks(false) })
 	webdl := offered{id: "tz02", title: "The.Matrix.1999.1080p.WEB-DL.DD5.1.H.264-GRPB", size: 6 << 30, published: day}
 	indexer.offer(webdl)
 	if _, err := s.wanted.SyncRSS(ctx, &acquisitionv1.SyncRSSRequest{}); err != nil {

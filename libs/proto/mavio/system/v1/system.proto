@@ -5,10 +5,10 @@ package mavio.system.v1;
 import "buf/validate/validate.proto";
 import "google/protobuf/duration.proto";
 import "google/protobuf/timestamp.proto";
-import "mavio/acquisition/v1/wanted.proto";
 
 // SystemService exposes server-level information and health, the load of
-// its computer, the server's settings, its file system and its logs.
+// its computer, the server's general settings, its file system and its
+// logs.
 service SystemService {
   // GetHealth reports whether the server is ready to serve requests.
   rpc GetHealth(GetHealthRequest) returns (GetHealthResponse) {
@@ -25,14 +25,18 @@ service SystemService {
   rpc GetSystemLoad(GetSystemLoadRequest) returns (GetSystemLoadResponse) {
     option idempotency_level = NO_SIDE_EFFECTS;
   }
-  // GetServerSettings returns the settings administrators change while
-  // the server runs. Administrators only.
-  rpc GetServerSettings(GetServerSettingsRequest) returns (GetServerSettingsResponse) {
+  // GetGeneralSettings returns the server's general settings: its name,
+  // how it is reached, how long devices stay signed in, the plugin
+  // resetting forgotten passwords and the language and country of
+  // metadata. Administrators only.
+  rpc GetGeneralSettings(GetGeneralSettingsRequest) returns (GetGeneralSettingsResponse) {
     option idempotency_level = NO_SIDE_EFFECTS;
   }
-  // UpdateServerSettings replaces the settings and applies them at once.
-  // Administrators only.
-  rpc UpdateServerSettings(UpdateServerSettingsRequest) returns (UpdateServerSettingsResponse);
+  // UpdateGeneralSettings replaces the general settings and applies them
+  // at once. Administrators only.
+  rpc UpdateGeneralSettings(UpdateGeneralSettingsRequest) returns (UpdateGeneralSettingsResponse) {
+    option idempotency_level = IDEMPOTENT;
+  }
   // ListDirectory lists a folder of the server's file system, to choose
   // library folders; without a path, the file system roots. Administrators
   // only.
@@ -140,53 +144,6 @@ message NetworkLoad {
   int64 sent_bytes = 4;
 }
 
-enum HardwareAcceleration {
-  HARDWARE_ACCELERATION_UNSPECIFIED = 0;
-  // What the server's ffmpeg and hardware support, if anything.
-  HARDWARE_ACCELERATION_AUTO = 1;
-  HARDWARE_ACCELERATION_NONE = 2;
-  HARDWARE_ACCELERATION_VIDEOTOOLBOX = 3;
-}
-
-// TranscodingSettings steer transcodes.
-message TranscodingSettings {
-  HardwareAcceleration hardware_acceleration = 1 [(buf.validate.field).enum = {
-    defined_only: true
-    not_in: [0]
-  }];
-  bool hardware_encoding = 2;
-  // "", "ultrafast", "superfast", "veryfast", "faster", "fast", "medium",
-  // "slow", "slower" or "veryslow"; empty picks one by the source.
-  string encoder_preset = 3;
-  int32 h264_crf = 4 [(buf.validate.field).int32 = {
-    gte: 0
-    lte: 51
-  }];
-  int32 h265_crf = 5 [(buf.validate.field).int32 = {
-    gte: 0
-    lte: 51
-  }];
-  // 0 lets ffmpeg decide.
-  int32 threads = 6 [(buf.validate.field).int32.gte = 0];
-  // "bt2390", "hable", "mobius", "reinhard", "clip", "linear" or "gamma".
-  string tonemap_algorithm = 7;
-  // "auto", "tv" or "pc".
-  string tonemap_range = 8;
-  double tonemap_desat = 9 [(buf.validate.field).double.gte = 0];
-  double tonemap_peak = 10 [(buf.validate.field).double.gte = 0];
-  // "yadif" or "bwdif".
-  string deinterlace_method = 11;
-  bool deinterlace_double_rate = 12;
-  double downmix_boost = 13 [(buf.validate.field).double = {
-    gte: 0.5
-    lte: 3
-  }];
-  bool crop_black_borders = 14;
-  // Absolute folder for running transcodes; empty uses the folder the
-  // server was started with.
-  string transcode_dir = 15;
-}
-
 // NetworkSettings decide how the server is reached and how it reaches
 // other sites.
 message NetworkSettings {
@@ -208,97 +165,6 @@ message NetworkSettings {
   // In mavio.dev mode, lets clients reach the server through mavio.dev's
   // relay when they cannot reach it directly.
   bool relay = 7;
-  // The proxies of the server's own HTTP requests; unset in an update
-  // keeps the current ones.
-  OutboundProxies proxies = 8;
-}
-
-// OutboundProxies are the proxies the server's own HTTP requests go
-// through, by what they reach: each the ID of one of the server's proxies
-// (ProxyService), "system" for the system proxy, or empty for none. The
-// hosts of this machine and of the local network are reached directly.
-message OutboundProxies {
-  // Plugin catalogs and plugin packages.
-  string plugin_catalogs = 1;
-  // Items' remote images, such as posters.
-  string images = 2;
-  // mavio.dev's API.
-  string mavio_dev = 3;
-  // The certificate authorities of mavio.site certificates.
-  string acme = 4;
-}
-
-// ServerSettings are what administrators change while the server runs.
-message ServerSettings {
-  TranscodingSettings transcoding = 1 [(buf.validate.field).required = true];
-  NetworkSettings network = 2 [(buf.validate.field).required = true];
-  // URLs of the plugin catalogs plugins are installed from.
-  repeated string plugin_catalogs = 3 [(buf.validate.field).repeated.items.string.uri = true];
-  google.protobuf.Timestamp update_time = 4;
-  // ID of the plugin that delivers the PINs resetting forgotten passwords;
-  // empty when users cannot reset them.
-  string password_reset_plugin = 5;
-  // How releases are chosen, downloaded and imported; unset in an update
-  // keeps the current ones.
-  AcquisitionSettings acquisition = 6;
-  // What users may request by default and where approved requests go;
-  // unset in an update keeps the current ones.
-  RequestSettings requests = 7;
-  // The language and country of metadata beside libraries'; unset in an
-  // update keeps the current ones.
-  MetadataSettings metadata = 8;
-  // How many days a signed-in device stays signed in unused, 1–3650; 0 in
-  // an update keeps the current value.
-  int32 session_idle_days = 9 [(buf.validate.field).int32 = {
-    gte: 0
-    lte: 3650
-  }];
-}
-
-// RequestSettings are the defaults of users' requests and where approved
-// requests are acquired.
-message RequestSettings {
-  // The request permissions new users get.
-  bool default_request_movies = 1;
-  bool default_request_series = 2;
-  bool default_auto_approve_movies = 3;
-  bool default_auto_approve_series = 4;
-  bool default_report_issues = 5;
-  // The quotas of users without their own: requests of movies, or seasons
-  // of series, in the last days; a limit of 0 is unlimited, 0 days all
-  // time.
-  int32 movie_quota_limit = 6 [(buf.validate.field).int32.gte = 0];
-  int32 movie_quota_days = 7 [(buf.validate.field).int32.gte = 0];
-  int32 series_quota_limit = 8 [(buf.validate.field).int32.gte = 0];
-  int32 series_quota_days = 9 [(buf.validate.field).int32.gte = 0];
-  // The movie library and quality profile approved movies are added to;
-  // empty, approvals fail.
-  string movie_library_id = 10;
-  string movie_quality_profile_id = 11;
-  mavio.acquisition.v1.MinimumAvailability minimum_availability = 12 [(buf.validate.field).enum.defined_only = true];
-  // The show library and quality profile approved series are added to;
-  // empty, approvals fail.
-  string series_library_id = 13;
-  string series_quality_profile_id = 14;
-  bool season_folder = 15;
-  mavio.acquisition.v1.NewItemMonitor monitor_new_items = 16 [(buf.validate.field).enum.defined_only = true];
-  // Allow requesting specials, season 0.
-  bool specials = 17;
-  // The show library and quality profile approved anime series are added
-  // to, as Seerr's anime settings of Sonarr; empty uses those of series.
-  // Anime series are numbered absolutely either way.
-  string anime_library_id = 18;
-  string anime_quality_profile_id = 19;
-  // Keywords of discovery providers, as "<plugin>/<keyword>", whose movies
-  // and series the blocklisted tags job blocklists weekly, as Seerr's
-  // blocklistedTags.
-  repeated string blocklisted_tags = 20 [(buf.validate.field).repeated.items.string.pattern = "^[^/]+/.+$"];
-  // How many pages of each order of a keyword's titles the job
-  // blocklists, 0–250; 0 for 50.
-  int32 blocklisted_tags_limit = 21 [(buf.validate.field).int32 = {
-    gte: 0
-    lte: 250
-  }];
 }
 
 // MetadataSettings are the server's language and country of metadata
@@ -311,150 +177,35 @@ message MetadataSettings {
   string country = 2 [(buf.validate.field).string.pattern = "^([A-Z]{2})?$"];
 }
 
-// ProperDownload is what to do with propers and repacks.
-enum ProperDownload {
-  PROPER_DOWNLOAD_UNSPECIFIED = 0;
-  // Prefer them, and upgrade to them.
-  PROPER_DOWNLOAD_PREFER_AND_UPGRADE = 1;
-  // Prefer them, but do not upgrade to them.
-  PROPER_DOWNLOAD_DO_NOT_UPGRADE = 2;
-  // Rank them as other releases, by custom formats.
-  PROPER_DOWNLOAD_DO_NOT_PREFER = 3;
-}
-
-// ColonReplacement is what replaces colons in file names.
-enum ColonReplacement {
-  COLON_REPLACEMENT_UNSPECIFIED = 0;
-  COLON_REPLACEMENT_DELETE = 1;
-  COLON_REPLACEMENT_DASH = 2;
-  COLON_REPLACEMENT_SPACE_DASH = 3;
-  COLON_REPLACEMENT_SPACE_DASH_SPACE = 4;
-  // A dash between words, else deleted.
-  COLON_REPLACEMENT_SMART = 5;
-}
-
-// MultiEpisodeStyle is how the name of a file of several episodes writes
-// their numbers, shown for episodes 6 to 8 of season 15.
-enum MultiEpisodeStyle {
-  MULTI_EPISODE_STYLE_UNSPECIFIED = 0;
-  // S15E06-07-08.
-  MULTI_EPISODE_STYLE_EXTEND = 1;
-  // S15E06 - S15E07 - S15E08.
-  MULTI_EPISODE_STYLE_DUPLICATE = 2;
-  // S15E06E07E08.
-  MULTI_EPISODE_STYLE_REPEAT = 3;
-  // S15E06-E07-E08.
-  MULTI_EPISODE_STYLE_SCENE = 4;
-  // S15E06-08.
-  MULTI_EPISODE_STYLE_RANGE = 5;
-  // S15E06-E08.
-  MULTI_EPISODE_STYLE_PREFIXED_RANGE = 6;
-}
-
-// EpisodeTitleRequired is when an episode imported under a name showing
-// its title must have one.
-enum EpisodeTitleRequired {
-  EPISODE_TITLE_REQUIRED_UNSPECIFIED = 0;
-  // Of episodes aired within the last two days.
-  EPISODE_TITLE_REQUIRED_ALWAYS = 1;
-  // As always, but not of the episodes of a season released at once.
-  EPISODE_TITLE_REQUIRED_BULK_SEASON_RELEASES = 2;
-  EPISODE_TITLE_REQUIRED_NEVER = 3;
-}
-
-// AcquisitionSettings are how releases are chosen, downloaded and
-// imported, as Radarr's and Sonarr's settings.
-message AcquisitionSettings {
-  ProperDownload propers = 1 [(buf.validate.field).enum = {
-    defined_only: true
-    not_in: [0]
+// GeneralSettings are the server's own settings, beside those of its
+// domains, which their services keep.
+message GeneralSettings {
+  // The server's name and how it is reached.
+  NetworkSettings network = 1 [(buf.validate.field).required = true];
+  // The language and country of metadata beside libraries'.
+  MetadataSettings metadata = 2 [(buf.validate.field).required = true];
+  // How many days a signed-in device stays signed in unused.
+  int32 session_idle_days = 3 [(buf.validate.field).int32 = {
+    gte: 1
+    lte: 3650
   }];
-  // Rank releases by their indexer flags.
-  bool prefer_indexer_flags = 2;
-  // Import finished downloads.
-  bool completed_download_handling = 3;
-  // Search again when a download fails.
-  bool auto_redownload_failed = 4;
-  // In megabytes; 0 for none.
-  int32 maximum_size = 5 [(buf.validate.field).int32.gte = 0];
-  // How old usenet releases must be, in minutes.
-  int32 minimum_age = 6 [(buf.validate.field).int32.gte = 0];
-  // Usenet retention in days; 0 for none.
-  int32 retention = 7 [(buf.validate.field).int32.gte = 0];
-  bool allow_hardcoded_subs = 8;
-  // Hardcoded subtitles allowed when others are not.
-  repeated string whitelisted_hardcoded_subs = 9;
-  bool skip_free_space_check = 10;
-  // What an import must leave free, in megabytes.
-  int32 minimum_free_space = 11 [(buf.validate.field).int32.gte = 0];
-  // Shifts when movies count as available, in days.
-  int32 availability_delay = 12;
-  // In minutes, 0 or at least 10; 0 disables RSS sync.
-  int32 rss_sync_interval = 13 [(buf.validate.field).int32.gte = 0];
-  // How often download clients are polled, in minutes.
-  int32 check_finished_interval = 14 [(buf.validate.field).int32.gte = 1];
-  // Absolute folder replaced and deleted files go to; empty deletes them.
-  string recycle_bin = 15;
-  // Days files stay in the recycle bin; 0 keeps them.
-  int32 recycle_bin_cleanup_days = 16 [(buf.validate.field).int32.gte = 0];
-  // Hard link instead of copying files whose download keeps seeding.
-  bool copy_using_hardlinks = 17;
-  bool import_extra_files = 18;
-  // Extensions of extra files imported with the media, such as "srt".
-  repeated string extra_file_extensions = 19;
-  bool delete_empty_folders = 20;
-  // Name movie files by standard_movie_format; otherwise they keep their
-  // names.
-  bool rename_movies = 21;
-  bool replace_illegal_characters = 22;
-  ColonReplacement colon_replacement = 23 [(buf.validate.field).enum = {
-    defined_only: true
-    not_in: [0]
-  }];
-  // Templates, such as "{Movie Title} ({Release Year})".
-  string movie_folder_format = 24 [(buf.validate.field).string.min_len = 1];
-  string standard_movie_format = 25 [(buf.validate.field).string.min_len = 1];
-  // Search again when a download grabbed from an interactive search
-  // fails, when auto_redownload_failed is set.
-  bool auto_redownload_failed_from_interactive_search = 26;
-  // Whether episode files are named by the episode formats.
-  bool rename_episodes = 40;
-  // Templates of episode files of standard, daily and anime series and of
-  // the folders of series, seasons and specials, such as
-  // "{Series Title} - S{season:00}E{episode:00}"; empty for the defaults.
-  string standard_episode_format = 41;
-  string daily_episode_format = 42;
-  string anime_episode_format = 43;
-  string series_folder_format = 44;
-  string season_folder_format = 45;
-  string specials_folder_format = 46;
-  // Unspecified for MULTI_EPISODE_STYLE_PREFIXED_RANGE.
-  MultiEpisodeStyle multi_episode_style = 47 [(buf.validate.field).enum.defined_only = true];
-  // Unmonitors the episodes of wanted series whose files go missing.
-  bool auto_unmonitor_previously_downloaded_episodes = 48;
-  // Unspecified for EPISODE_TITLE_REQUIRED_ALWAYS.
-  EpisodeTitleRequired episode_title_required = 49 [(buf.validate.field).enum.defined_only = true];
-  // The prefixes, separated by "|", of the folders download clients
-  // unpack into or leave failed downloads in, whose files are not
-  // imported; empty for "_UNPACK_|_FAILED_".
-  string download_client_working_folders = 50;
+  // ID of the plugin that delivers the PINs resetting forgotten passwords;
+  // empty when users cannot reset them.
+  string password_reset_plugin = 4;
 }
 
-message GetServerSettingsRequest {}
+message GetGeneralSettingsRequest {}
 
-message GetServerSettingsResponse {
-  ServerSettings settings = 1;
-  // The accelerations this server's ffmpeg supports, AUTO and NONE
-  // included.
-  repeated HardwareAcceleration available_hardware_accelerations = 2;
+message GetGeneralSettingsResponse {
+  GeneralSettings settings = 1;
 }
 
-message UpdateServerSettingsRequest {
-  ServerSettings settings = 1 [(buf.validate.field).required = true];
+message UpdateGeneralSettingsRequest {
+  GeneralSettings settings = 1 [(buf.validate.field).required = true];
 }
 
-message UpdateServerSettingsResponse {
-  ServerSettings settings = 1;
+message UpdateGeneralSettingsResponse {
+  GeneralSettings settings = 1;
 }
 
 message ListDirectoryRequest {

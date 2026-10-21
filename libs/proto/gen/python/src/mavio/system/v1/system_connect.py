@@ -26,10 +26,10 @@ class SystemService(Protocol):
     async def get_system_load(self, request: mavio_dot_system_dot_v1_dot_system__pb2.GetSystemLoadRequest, ctx: RequestContext) -> mavio_dot_system_dot_v1_dot_system__pb2.GetSystemLoadResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
 
-    async def get_server_settings(self, request: mavio_dot_system_dot_v1_dot_system__pb2.GetServerSettingsRequest, ctx: RequestContext) -> mavio_dot_system_dot_v1_dot_system__pb2.GetServerSettingsResponse:
+    async def get_general_settings(self, request: mavio_dot_system_dot_v1_dot_system__pb2.GetGeneralSettingsRequest, ctx: RequestContext) -> mavio_dot_system_dot_v1_dot_system__pb2.GetGeneralSettingsResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
 
-    async def update_server_settings(self, request: mavio_dot_system_dot_v1_dot_system__pb2.UpdateServerSettingsRequest, ctx: RequestContext) -> mavio_dot_system_dot_v1_dot_system__pb2.UpdateServerSettingsResponse:
+    async def update_general_settings(self, request: mavio_dot_system_dot_v1_dot_system__pb2.UpdateGeneralSettingsRequest, ctx: RequestContext) -> mavio_dot_system_dot_v1_dot_system__pb2.UpdateGeneralSettingsResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
 
     async def list_directory(self, request: mavio_dot_system_dot_v1_dot_system__pb2.ListDirectoryRequest, ctx: RequestContext) -> mavio_dot_system_dot_v1_dot_system__pb2.ListDirectoryResponse:
@@ -74,25 +74,25 @@ class SystemServiceASGIApplication(ConnectASGIApplication[SystemService]):
                     ),
                     function=svc.get_system_load,
                 ),
-                "/mavio.system.v1.SystemService/GetServerSettings": Endpoint.unary(
+                "/mavio.system.v1.SystemService/GetGeneralSettings": Endpoint.unary(
                     method=MethodInfo(
-                        name="GetServerSettings",
+                        name="GetGeneralSettings",
                         service_name="mavio.system.v1.SystemService",
-                        input=mavio_dot_system_dot_v1_dot_system__pb2.GetServerSettingsRequest,
-                        output=mavio_dot_system_dot_v1_dot_system__pb2.GetServerSettingsResponse,
+                        input=mavio_dot_system_dot_v1_dot_system__pb2.GetGeneralSettingsRequest,
+                        output=mavio_dot_system_dot_v1_dot_system__pb2.GetGeneralSettingsResponse,
                         idempotency_level=IdempotencyLevel.NO_SIDE_EFFECTS,
                     ),
-                    function=svc.get_server_settings,
+                    function=svc.get_general_settings,
                 ),
-                "/mavio.system.v1.SystemService/UpdateServerSettings": Endpoint.unary(
+                "/mavio.system.v1.SystemService/UpdateGeneralSettings": Endpoint.unary(
                     method=MethodInfo(
-                        name="UpdateServerSettings",
+                        name="UpdateGeneralSettings",
                         service_name="mavio.system.v1.SystemService",
-                        input=mavio_dot_system_dot_v1_dot_system__pb2.UpdateServerSettingsRequest,
-                        output=mavio_dot_system_dot_v1_dot_system__pb2.UpdateServerSettingsResponse,
-                        idempotency_level=IdempotencyLevel.UNKNOWN,
+                        input=mavio_dot_system_dot_v1_dot_system__pb2.UpdateGeneralSettingsRequest,
+                        output=mavio_dot_system_dot_v1_dot_system__pb2.UpdateGeneralSettingsResponse,
+                        idempotency_level=IdempotencyLevel.IDEMPOTENT,
                     ),
-                    function=svc.update_server_settings,
+                    function=svc.update_general_settings,
                 ),
                 "/mavio.system.v1.SystemService/ListDirectory": Endpoint.unary(
                     method=MethodInfo(
@@ -193,21 +193,21 @@ class SystemServiceClient(ConnectClient):
             use_get=use_get,
         )
 
-    async def get_server_settings(
+    async def get_general_settings(
         self,
-        request: mavio_dot_system_dot_v1_dot_system__pb2.GetServerSettingsRequest,
+        request: mavio_dot_system_dot_v1_dot_system__pb2.GetGeneralSettingsRequest,
         *,
         headers: Headers | Mapping[str, str] | None = None,
         timeout_ms: int | None = None,
         use_get: bool = False,
-    ) -> mavio_dot_system_dot_v1_dot_system__pb2.GetServerSettingsResponse:
+    ) -> mavio_dot_system_dot_v1_dot_system__pb2.GetGeneralSettingsResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
-                name="GetServerSettings",
+                name="GetGeneralSettings",
                 service_name="mavio.system.v1.SystemService",
-                input=mavio_dot_system_dot_v1_dot_system__pb2.GetServerSettingsRequest,
-                output=mavio_dot_system_dot_v1_dot_system__pb2.GetServerSettingsResponse,
+                input=mavio_dot_system_dot_v1_dot_system__pb2.GetGeneralSettingsRequest,
+                output=mavio_dot_system_dot_v1_dot_system__pb2.GetGeneralSettingsResponse,
                 idempotency_level=IdempotencyLevel.NO_SIDE_EFFECTS,
             ),
             headers=headers,
@@ -215,21 +215,21 @@ class SystemServiceClient(ConnectClient):
             use_get=use_get,
         )
 
-    async def update_server_settings(
+    async def update_general_settings(
         self,
-        request: mavio_dot_system_dot_v1_dot_system__pb2.UpdateServerSettingsRequest,
+        request: mavio_dot_system_dot_v1_dot_system__pb2.UpdateGeneralSettingsRequest,
         *,
         headers: Headers | Mapping[str, str] | None = None,
         timeout_ms: int | None = None,
-    ) -> mavio_dot_system_dot_v1_dot_system__pb2.UpdateServerSettingsResponse:
+    ) -> mavio_dot_system_dot_v1_dot_system__pb2.UpdateGeneralSettingsResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
-                name="UpdateServerSettings",
+                name="UpdateGeneralSettings",
                 service_name="mavio.system.v1.SystemService",
-                input=mavio_dot_system_dot_v1_dot_system__pb2.UpdateServerSettingsRequest,
-                output=mavio_dot_system_dot_v1_dot_system__pb2.UpdateServerSettingsResponse,
-                idempotency_level=IdempotencyLevel.UNKNOWN,
+                input=mavio_dot_system_dot_v1_dot_system__pb2.UpdateGeneralSettingsRequest,
+                output=mavio_dot_system_dot_v1_dot_system__pb2.UpdateGeneralSettingsResponse,
+                idempotency_level=IdempotencyLevel.IDEMPOTENT,
             ),
             headers=headers,
             timeout_ms=timeout_ms,
@@ -287,9 +287,9 @@ class SystemServiceSync(Protocol):
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
     def get_system_load(self, request: mavio_dot_system_dot_v1_dot_system__pb2.GetSystemLoadRequest, ctx: RequestContext) -> mavio_dot_system_dot_v1_dot_system__pb2.GetSystemLoadResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
-    def get_server_settings(self, request: mavio_dot_system_dot_v1_dot_system__pb2.GetServerSettingsRequest, ctx: RequestContext) -> mavio_dot_system_dot_v1_dot_system__pb2.GetServerSettingsResponse:
+    def get_general_settings(self, request: mavio_dot_system_dot_v1_dot_system__pb2.GetGeneralSettingsRequest, ctx: RequestContext) -> mavio_dot_system_dot_v1_dot_system__pb2.GetGeneralSettingsResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
-    def update_server_settings(self, request: mavio_dot_system_dot_v1_dot_system__pb2.UpdateServerSettingsRequest, ctx: RequestContext) -> mavio_dot_system_dot_v1_dot_system__pb2.UpdateServerSettingsResponse:
+    def update_general_settings(self, request: mavio_dot_system_dot_v1_dot_system__pb2.UpdateGeneralSettingsRequest, ctx: RequestContext) -> mavio_dot_system_dot_v1_dot_system__pb2.UpdateGeneralSettingsResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
     def list_directory(self, request: mavio_dot_system_dot_v1_dot_system__pb2.ListDirectoryRequest, ctx: RequestContext) -> mavio_dot_system_dot_v1_dot_system__pb2.ListDirectoryResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
@@ -331,25 +331,25 @@ class SystemServiceWSGIApplication(ConnectWSGIApplication):
                     ),
                     function=service.get_system_load,
                 ),
-                "/mavio.system.v1.SystemService/GetServerSettings": EndpointSync.unary(
+                "/mavio.system.v1.SystemService/GetGeneralSettings": EndpointSync.unary(
                     method=MethodInfo(
-                        name="GetServerSettings",
+                        name="GetGeneralSettings",
                         service_name="mavio.system.v1.SystemService",
-                        input=mavio_dot_system_dot_v1_dot_system__pb2.GetServerSettingsRequest,
-                        output=mavio_dot_system_dot_v1_dot_system__pb2.GetServerSettingsResponse,
+                        input=mavio_dot_system_dot_v1_dot_system__pb2.GetGeneralSettingsRequest,
+                        output=mavio_dot_system_dot_v1_dot_system__pb2.GetGeneralSettingsResponse,
                         idempotency_level=IdempotencyLevel.NO_SIDE_EFFECTS,
                     ),
-                    function=service.get_server_settings,
+                    function=service.get_general_settings,
                 ),
-                "/mavio.system.v1.SystemService/UpdateServerSettings": EndpointSync.unary(
+                "/mavio.system.v1.SystemService/UpdateGeneralSettings": EndpointSync.unary(
                     method=MethodInfo(
-                        name="UpdateServerSettings",
+                        name="UpdateGeneralSettings",
                         service_name="mavio.system.v1.SystemService",
-                        input=mavio_dot_system_dot_v1_dot_system__pb2.UpdateServerSettingsRequest,
-                        output=mavio_dot_system_dot_v1_dot_system__pb2.UpdateServerSettingsResponse,
-                        idempotency_level=IdempotencyLevel.UNKNOWN,
+                        input=mavio_dot_system_dot_v1_dot_system__pb2.UpdateGeneralSettingsRequest,
+                        output=mavio_dot_system_dot_v1_dot_system__pb2.UpdateGeneralSettingsResponse,
+                        idempotency_level=IdempotencyLevel.IDEMPOTENT,
                     ),
-                    function=service.update_server_settings,
+                    function=service.update_general_settings,
                 ),
                 "/mavio.system.v1.SystemService/ListDirectory": EndpointSync.unary(
                     method=MethodInfo(
@@ -450,21 +450,21 @@ class SystemServiceClientSync(ConnectClientSync):
             use_get=use_get,
         )
 
-    def get_server_settings(
+    def get_general_settings(
         self,
-        request: mavio_dot_system_dot_v1_dot_system__pb2.GetServerSettingsRequest,
+        request: mavio_dot_system_dot_v1_dot_system__pb2.GetGeneralSettingsRequest,
         *,
         headers: Headers | Mapping[str, str] | None = None,
         timeout_ms: int | None = None,
         use_get: bool = False,
-    ) -> mavio_dot_system_dot_v1_dot_system__pb2.GetServerSettingsResponse:
+    ) -> mavio_dot_system_dot_v1_dot_system__pb2.GetGeneralSettingsResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
-                name="GetServerSettings",
+                name="GetGeneralSettings",
                 service_name="mavio.system.v1.SystemService",
-                input=mavio_dot_system_dot_v1_dot_system__pb2.GetServerSettingsRequest,
-                output=mavio_dot_system_dot_v1_dot_system__pb2.GetServerSettingsResponse,
+                input=mavio_dot_system_dot_v1_dot_system__pb2.GetGeneralSettingsRequest,
+                output=mavio_dot_system_dot_v1_dot_system__pb2.GetGeneralSettingsResponse,
                 idempotency_level=IdempotencyLevel.NO_SIDE_EFFECTS,
             ),
             headers=headers,
@@ -472,21 +472,21 @@ class SystemServiceClientSync(ConnectClientSync):
             use_get=use_get,
         )
 
-    def update_server_settings(
+    def update_general_settings(
         self,
-        request: mavio_dot_system_dot_v1_dot_system__pb2.UpdateServerSettingsRequest,
+        request: mavio_dot_system_dot_v1_dot_system__pb2.UpdateGeneralSettingsRequest,
         *,
         headers: Headers | Mapping[str, str] | None = None,
         timeout_ms: int | None = None,
-    ) -> mavio_dot_system_dot_v1_dot_system__pb2.UpdateServerSettingsResponse:
+    ) -> mavio_dot_system_dot_v1_dot_system__pb2.UpdateGeneralSettingsResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
-                name="UpdateServerSettings",
+                name="UpdateGeneralSettings",
                 service_name="mavio.system.v1.SystemService",
-                input=mavio_dot_system_dot_v1_dot_system__pb2.UpdateServerSettingsRequest,
-                output=mavio_dot_system_dot_v1_dot_system__pb2.UpdateServerSettingsResponse,
-                idempotency_level=IdempotencyLevel.UNKNOWN,
+                input=mavio_dot_system_dot_v1_dot_system__pb2.UpdateGeneralSettingsRequest,
+                output=mavio_dot_system_dot_v1_dot_system__pb2.UpdateGeneralSettingsResponse,
+                idempotency_level=IdempotencyLevel.IDEMPOTENT,
             ),
             headers=headers,
             timeout_ms=timeout_ms,

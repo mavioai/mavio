@@ -31,7 +31,6 @@ func TestServerProxies(t *testing.T) {
 		t.Fatalf("CreateFirstUser: %v", err)
 	}
 	token := withToken(first.GetAccessToken())
-	system := systemv1connect.NewSystemServiceClient(http.DefaultClient, srv.url, token)
 	pluginAdmin := systemv1connect.NewPluginManagementServiceClient(http.DefaultClient, srv.url, token)
 	proxyAdmin := systemv1connect.NewProxyServiceClient(http.DefaultClient, srv.url, token)
 
@@ -45,26 +44,26 @@ func TestServerProxies(t *testing.T) {
 
 	// The server's requests use the system proxy until they are given
 	// others; an unknown proxy is refused.
-	got, err := system.GetServerSettings(ctx, &systemv1.GetServerSettingsRequest{})
+	got, err := proxyAdmin.GetOutboundProxies(ctx, &systemv1.GetOutboundProxiesRequest{})
 	if err != nil {
-		t.Fatalf("GetServerSettings: %v", err)
+		t.Fatalf("GetOutboundProxies: %v", err)
 	}
-	set := got.GetSettings()
-	if p := set.GetNetwork().GetProxies(); p.GetPluginCatalogs() != "system" || p.GetImages() != "system" || p.GetMavioDev() != "system" || p.GetAcme() != "system" {
-		t.Errorf("default proxies got = %v, want = the system proxy for everything", p)
+	set := got.GetProxies()
+	if set.GetPluginCatalogs() != "system" || set.GetImages() != "system" || set.GetMavioDev() != "system" || set.GetAcme() != "system" {
+		t.Errorf("default proxies got = %v, want = the system proxy for everything", set)
 	}
-	set.GetNetwork().GetProxies().SetImages(office)
-	set.GetNetwork().GetProxies().SetAcme("")
-	if _, err := system.UpdateServerSettings(ctx, systemv1.UpdateServerSettingsRequest_builder{Settings: set}.Build()); err != nil {
-		t.Fatalf("UpdateServerSettings: %v", err)
+	set.SetImages(office)
+	set.SetAcme("")
+	if _, err := proxyAdmin.UpdateOutboundProxies(ctx, systemv1.UpdateOutboundProxiesRequest_builder{Proxies: set}.Build()); err != nil {
+		t.Fatalf("UpdateOutboundProxies: %v", err)
 	}
-	got, err = system.GetServerSettings(ctx, &systemv1.GetServerSettingsRequest{})
-	if p := got.GetSettings().GetNetwork().GetProxies(); err != nil || p.GetImages() != office || p.GetAcme() != "" || p.GetMavioDev() != "system" {
+	got, err = proxyAdmin.GetOutboundProxies(ctx, &systemv1.GetOutboundProxiesRequest{})
+	if p := got.GetProxies(); err != nil || p.GetImages() != office || p.GetAcme() != "" || p.GetMavioDev() != "system" {
 		t.Errorf("proxies after the update got = %v, %v", p, err)
 	}
-	set.GetNetwork().GetProxies().SetMavioDev("01a14422-0000-7000-8000-000000000000")
-	if _, err := system.UpdateServerSettings(ctx, systemv1.UpdateServerSettingsRequest_builder{Settings: set}.Build()); connect.CodeOf(err) != connect.CodeInvalidArgument {
-		t.Errorf("UpdateServerSettings with an unknown proxy got = %v, want = invalid_argument", err)
+	set.SetMavioDev("01a14422-0000-7000-8000-000000000000")
+	if _, err := proxyAdmin.UpdateOutboundProxies(ctx, systemv1.UpdateOutboundProxiesRequest_builder{Proxies: set}.Build()); connect.CodeOf(err) != connect.CodeInvalidArgument {
+		t.Errorf("UpdateOutboundProxies with an unknown proxy got = %v, want = invalid_argument", err)
 	}
 
 	// A WASM plugin uses the system proxy until given another.
@@ -98,10 +97,10 @@ func TestServerProxies(t *testing.T) {
 	if _, err := pluginAdmin.UninstallPlugin(ctx, systemv1.UninstallPluginRequest_builder{PluginId: new("dev.mavio.smoke")}.Build()); err != nil {
 		t.Fatalf("UninstallPlugin: %v", err)
 	}
-	set.GetNetwork().GetProxies().SetMavioDev("system")
-	set.GetNetwork().GetProxies().SetImages("")
-	if _, err := system.UpdateServerSettings(ctx, systemv1.UpdateServerSettingsRequest_builder{Settings: set}.Build()); err != nil {
-		t.Fatalf("UpdateServerSettings: %v", err)
+	set.SetMavioDev("system")
+	set.SetImages("")
+	if _, err := proxyAdmin.UpdateOutboundProxies(ctx, systemv1.UpdateOutboundProxiesRequest_builder{Proxies: set}.Build()); err != nil {
+		t.Fatalf("UpdateOutboundProxies: %v", err)
 	}
 	if _, err := proxyAdmin.DeleteProxy(ctx, del); err != nil {
 		t.Errorf("DeleteProxy unused: %v", err)

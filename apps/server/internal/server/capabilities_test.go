@@ -194,14 +194,14 @@ func testPluginCapabilities(t *testing.T, rt, ffmpeg, ffprobe, video, track stri
 	}
 
 	// The password reset plugin delivers the PIN that resets a password.
-	settings, err := system.GetServerSettings(ctx, &systemv1.GetServerSettingsRequest{})
+	settings, err := system.GetGeneralSettings(ctx, &systemv1.GetGeneralSettingsRequest{})
 	if err != nil {
-		t.Fatalf("GetServerSettings: %v", err)
+		t.Fatalf("GetGeneralSettings: %v", err)
 	}
 	set := settings.GetSettings()
 	set.SetPasswordResetPlugin("dev.mavio.smoke")
-	if _, err := system.UpdateServerSettings(ctx, systemv1.UpdateServerSettingsRequest_builder{Settings: set}.Build()); err != nil {
-		t.Fatalf("UpdateServerSettings: %v", err)
+	if _, err := system.UpdateGeneralSettings(ctx, systemv1.UpdateGeneralSettingsRequest_builder{Settings: set}.Build()); err != nil {
+		t.Fatalf("UpdateGeneralSettings: %v", err)
 	}
 	if _, err := authClient.ForgotPassword(ctx, authv1.ForgotPasswordRequest_builder{Name: new("kid")}.Build()); err != nil {
 		t.Fatalf("ForgotPassword: %v", err)

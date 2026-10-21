@@ -17,8 +17,6 @@ import (
 	"github.com/mavioai/mavio/libs/core"
 	acquisitionv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/acquisition/v1"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/acquisition/v1/acquisitionv1connect"
-	systemv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/system/v1"
-	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/system/v1/systemv1connect"
 	"github.com/mavioai/mavio/libs/store"
 )
 
@@ -482,7 +480,7 @@ func TestReleaseProfilesAndMappings(t *testing.T) {
 }
 
 // TestAcquisitionSettings checks the acquisition settings' round trip
-// through the server settings.
+// through ProfileService.
 func TestAcquisitionSettings(t *testing.T) {
 	ctx := t.Context()
 	db := openStore(t)
@@ -491,41 +489,41 @@ func TestAcquisitionSettings(t *testing.T) {
 		t.Fatal(err)
 	}
 	url := testHandlers(t, func(opts connect.HandlerOption) (string, http.Handler) {
-		return systemv1connect.NewSystemServiceHandler(&SystemService{Settings: m}, opts)
+		return acquisitionv1connect.NewProfileServiceHandler(&ProfileService{store: db, Settings: m}, opts)
 	})
-	system := systemv1connect.NewSystemServiceClient(http.DefaultClient, url, as("admin"))
-	get := func() *systemv1.ServerSettings {
+	profiles := acquisitionv1connect.NewProfileServiceClient(http.DefaultClient, url, as("admin"))
+	get := func() *acquisitionv1.AcquisitionSettings {
 		t.Helper()
-		res, err := system.GetServerSettings(ctx, &systemv1.GetServerSettingsRequest{})
+		res, err := profiles.GetAcquisitionSettings(ctx, &acquisitionv1.GetAcquisitionSettingsRequest{})
 		if err != nil {
-			t.Fatalf("GetServerSettings: %v", err)
+			t.Fatalf("GetAcquisitionSettings: %v", err)
 		}
 		return res.GetSettings()
 	}
-	update := func(s *systemv1.ServerSettings) error {
-		_, err := system.UpdateServerSettings(ctx, systemv1.UpdateServerSettingsRequest_builder{Settings: s}.Build())
+	update := func(s *acquisitionv1.AcquisitionSettings) error {
+		_, err := profiles.UpdateAcquisitionSettings(ctx, acquisitionv1.UpdateAcquisitionSettingsRequest_builder{Settings: s}.Build())
 		return err
 	}
 
-	set := get()
-	a := set.GetAcquisition()
-	if a.GetPropers() != systemv1.ProperDownload_PROPER_DOWNLOAD_PREFER_AND_UPGRADE || a.GetColonReplacement() != systemv1.ColonReplacement_COLON_REPLACEMENT_SMART ||
-		a.GetRssSyncInterval() != 30 || a.GetMovieFolderFormat() == "" || !slices.Equal(a.GetExtraFileExtensions(), []string{"srt"}) {
+	a := get()
+	n := a.GetNaming()
+	if a.GetPropers() != acquisitionv1.ProperDownload_PROPER_DOWNLOAD_PREFER_AND_UPGRADE || n.GetColonReplacement() != acquisitionv1.ColonReplacement_COLON_REPLACEMENT_SMART ||
+		a.GetRssSyncInterval() != 30 || n.GetMovieFolderFormat() == "" || !slices.Equal(a.GetExtraFileExtensions(), []string{"srt"}) {
 		t.Errorf("default acquisition settings = %v", a)
 	}
-	a.SetPropers(systemv1.ProperDownload_PROPER_DOWNLOAD_DO_NOT_PREFER)
-	a.SetColonReplacement(systemv1.ColonReplacement_COLON_REPLACEMENT_SPACE_DASH)
+	a.SetPropers(acquisitionv1.ProperDownload_PROPER_DOWNLOAD_DO_NOT_PREFER)
+	n.SetColonReplacement(acquisitionv1.ColonReplacement_COLON_REPLACEMENT_SPACE_DASH)
 	a.SetMinimumAge(15)
 	a.SetRecycleBin("/trash")
 	a.SetWhitelistedHardcodedSubs([]string{"kor"})
-	a.SetRenameMovies(true)
-	a.SetRenameEpisodes(true)
-	a.SetMultiEpisodeStyle(systemv1.MultiEpisodeStyle_MULTI_EPISODE_STYLE_SCENE)
-	a.SetSeasonFolderFormat("S{season:00}")
+	n.SetRenameMovies(true)
+	n.SetRenameEpisodes(true)
+	n.SetMultiEpisodeStyle(acquisitionv1.MultiEpisodeStyle_MULTI_EPISODE_STYLE_SCENE)
+	n.SetSeasonFolderFormat("S{season:00}")
 	a.SetAutoUnmonitorPreviouslyDownloadedEpisodes(true)
-	a.SetEpisodeTitleRequired(systemv1.EpisodeTitleRequired_EPISODE_TITLE_REQUIRED_NEVER)
-	if err := update(set); err != nil {
-		t.Fatalf("UpdateServerSettings: %v", err)
+	a.SetEpisodeTitleRequired(acquisitionv1.EpisodeTitleRequired_EPISODE_TITLE_REQUIRED_NEVER)
+	if err := update(a); err != nil {
+		t.Fatalf("UpdateAcquisitionSettings: %v", err)
 	}
 	stored := m.Get().Acquisition
 	if stored.Propers != core.PropersDoNotPrefer || stored.Naming.ColonReplacement != core.ColonSpaceDash || stored.MinimumAge != 15 ||
@@ -534,31 +532,26 @@ func TestAcquisitionSettings(t *testing.T) {
 		!stored.AutoUnmonitorPreviouslyDownloadedEpisodes || stored.EpisodeTitleRequired != core.EpisodeTitleNever {
 		t.Errorf("stored acquisition settings = %+v", stored)
 	}
-
-	// Settings without acquisition keep the current ones.
-	set = get()
-	set.ClearAcquisition()
-	set.SetPluginCatalogs([]string{"https://example.com/catalog.json"})
-	if err := update(set); err != nil {
-		t.Fatalf("UpdateServerSettings without acquisition: %v", err)
-	}
-	if got := get().GetAcquisition(); got.GetMinimumAge() != 15 || got.GetPropers() != systemv1.ProperDownload_PROPER_DOWNLOAD_DO_NOT_PREFER {
-		t.Errorf("acquisition settings after an update without them = %v", got)
+	if got := get(); got.GetMinimumAge() != 15 || got.GetPropers() != acquisitionv1.ProperDownload_PROPER_DOWNLOAD_DO_NOT_PREFER {
+		t.Errorf("acquisition settings after the update = %v", got)
 	}
 
-	for name, change := range map[string]func(*systemv1.AcquisitionSettings){
-		"RSS sync too often":   func(a *systemv1.AcquisitionSettings) { a.SetRssSyncInterval(5) },
-		"relative recycle bin": func(a *systemv1.AcquisitionSettings) { a.SetRecycleBin("trash") },
-		"no colon replacement": func(a *systemv1.AcquisitionSettings) {
-			a.SetColonReplacement(systemv1.ColonReplacement_COLON_REPLACEMENT_UNSPECIFIED)
+	for name, change := range map[string]func(*acquisitionv1.AcquisitionSettings){
+		"RSS sync too often":   func(a *acquisitionv1.AcquisitionSettings) { a.SetRssSyncInterval(5) },
+		"relative recycle bin": func(a *acquisitionv1.AcquisitionSettings) { a.SetRecycleBin("trash") },
+		"no colon replacement": func(a *acquisitionv1.AcquisitionSettings) {
+			a.GetNaming().SetColonReplacement(acquisitionv1.ColonReplacement_COLON_REPLACEMENT_UNSPECIFIED)
 		},
-		"no movie file format":  func(a *systemv1.AcquisitionSettings) { a.SetStandardMovieFormat("") },
-		"availability too late": func(a *systemv1.AcquisitionSettings) { a.SetAvailabilityDelay(400) },
+		"no movie file format":  func(a *acquisitionv1.AcquisitionSettings) { a.GetNaming().SetStandardMovieFormat("") },
+		"availability too late": func(a *acquisitionv1.AcquisitionSettings) { a.SetAvailabilityDelay(400) },
+		"no naming":             func(a *acquisitionv1.AcquisitionSettings) { a.ClearNaming() },
 	} {
 		s := get()
-		change(s.GetAcquisition())
+		change(s)
 		wantCode(t, name, update(s), connect.CodeInvalidArgument)
 	}
+	_, err = acquisitionv1connect.NewProfileServiceClient(http.DefaultClient, url, as("user")).GetAcquisitionSettings(ctx, &acquisitionv1.GetAcquisitionSettingsRequest{})
+	wantCode(t, "a user's GetAcquisitionSettings", err, connect.CodePermissionDenied)
 }
 
 // TestAcquisitionEnumsMapped checks that every enum value of the
@@ -580,11 +573,11 @@ func TestAcquisitionEnumsMapped(t *testing.T) {
 		_, ok := specKinds[acquisitionv1.CustomFormatSpecKind(v)]
 		return ok
 	})
-	check("ProperDownload", systemv1.ProperDownload_name, func(v int32) bool {
-		return keyOf(properDownloads, systemv1.ProperDownload(v)) != ""
+	check("ProperDownload", acquisitionv1.ProperDownload_name, func(v int32) bool {
+		return keyOf(properDownloads, acquisitionv1.ProperDownload(v)) != ""
 	})
-	check("ColonReplacement", systemv1.ColonReplacement_name, func(v int32) bool {
-		return keyOf(colonReplacements, systemv1.ColonReplacement(v)) != ""
+	check("ColonReplacement", acquisitionv1.ColonReplacement_name, func(v int32) bool {
+		return keyOf(colonReplacements, acquisitionv1.ColonReplacement(v)) != ""
 	})
 	if len(specKinds) != len(core.CustomFormatSpecKinds) || len(properDownloads) != len(core.ProperDownloads) ||
 		len(colonReplacements) != len(core.ColonReplacements) || len(downloadProtocols) != len(core.Protocols) {

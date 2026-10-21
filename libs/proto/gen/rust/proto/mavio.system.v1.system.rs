@@ -4,480 +4,6 @@
 #[allow(non_camel_case_types)]
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
 #[repr(i32)]
-pub enum HardwareAcceleration {
-    HARDWARE_ACCELERATION_UNSPECIFIED = 0i32,
-    /// What the server's ffmpeg and hardware support, if anything.
-    HARDWARE_ACCELERATION_AUTO = 1i32,
-    HARDWARE_ACCELERATION_NONE = 2i32,
-    HARDWARE_ACCELERATION_VIDEOTOOLBOX = 3i32,
-}
-impl HardwareAcceleration {
-    ///Idiomatic alias for [`Self::HARDWARE_ACCELERATION_UNSPECIFIED`]; `Debug` prints the variant name.
-    #[allow(non_upper_case_globals)]
-    pub const Unspecified: Self = Self::HARDWARE_ACCELERATION_UNSPECIFIED;
-    ///Idiomatic alias for [`Self::HARDWARE_ACCELERATION_AUTO`]; `Debug` prints the variant name.
-    #[allow(non_upper_case_globals)]
-    pub const Auto: Self = Self::HARDWARE_ACCELERATION_AUTO;
-    ///Idiomatic alias for [`Self::HARDWARE_ACCELERATION_NONE`]; `Debug` prints the variant name.
-    #[allow(non_upper_case_globals)]
-    pub const None: Self = Self::HARDWARE_ACCELERATION_NONE;
-    ///Idiomatic alias for [`Self::HARDWARE_ACCELERATION_VIDEOTOOLBOX`]; `Debug` prints the variant name.
-    #[allow(non_upper_case_globals)]
-    pub const Videotoolbox: Self = Self::HARDWARE_ACCELERATION_VIDEOTOOLBOX;
-}
-impl ::core::default::Default for HardwareAcceleration {
-    fn default() -> Self {
-        Self::HARDWARE_ACCELERATION_UNSPECIFIED
-    }
-}
-impl ::buffa::Enumeration for HardwareAcceleration {
-    fn from_i32(value: i32) -> ::core::option::Option<Self> {
-        match value {
-            0i32 => ::core::option::Option::Some(Self::HARDWARE_ACCELERATION_UNSPECIFIED),
-            1i32 => ::core::option::Option::Some(Self::HARDWARE_ACCELERATION_AUTO),
-            2i32 => ::core::option::Option::Some(Self::HARDWARE_ACCELERATION_NONE),
-            3i32 => {
-                ::core::option::Option::Some(Self::HARDWARE_ACCELERATION_VIDEOTOOLBOX)
-            }
-            _ => ::core::option::Option::None,
-        }
-    }
-    fn to_i32(&self) -> i32 {
-        *self as i32
-    }
-    fn proto_name(&self) -> &'static str {
-        match self {
-            Self::HARDWARE_ACCELERATION_UNSPECIFIED => {
-                "HARDWARE_ACCELERATION_UNSPECIFIED"
-            }
-            Self::HARDWARE_ACCELERATION_AUTO => "HARDWARE_ACCELERATION_AUTO",
-            Self::HARDWARE_ACCELERATION_NONE => "HARDWARE_ACCELERATION_NONE",
-            Self::HARDWARE_ACCELERATION_VIDEOTOOLBOX => {
-                "HARDWARE_ACCELERATION_VIDEOTOOLBOX"
-            }
-        }
-    }
-    fn from_proto_name(name: &str) -> ::core::option::Option<Self> {
-        match name {
-            "HARDWARE_ACCELERATION_UNSPECIFIED" => {
-                ::core::option::Option::Some(Self::HARDWARE_ACCELERATION_UNSPECIFIED)
-            }
-            "HARDWARE_ACCELERATION_AUTO" => {
-                ::core::option::Option::Some(Self::HARDWARE_ACCELERATION_AUTO)
-            }
-            "HARDWARE_ACCELERATION_NONE" => {
-                ::core::option::Option::Some(Self::HARDWARE_ACCELERATION_NONE)
-            }
-            "HARDWARE_ACCELERATION_VIDEOTOOLBOX" => {
-                ::core::option::Option::Some(Self::HARDWARE_ACCELERATION_VIDEOTOOLBOX)
-            }
-            _ => ::core::option::Option::None,
-        }
-    }
-    fn values() -> &'static [Self] {
-        &[
-            Self::HARDWARE_ACCELERATION_UNSPECIFIED,
-            Self::HARDWARE_ACCELERATION_AUTO,
-            Self::HARDWARE_ACCELERATION_NONE,
-            Self::HARDWARE_ACCELERATION_VIDEOTOOLBOX,
-        ]
-    }
-}
-/// ProperDownload is what to do with propers and repacks.
-#[allow(non_camel_case_types)]
-#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
-#[repr(i32)]
-pub enum ProperDownload {
-    PROPER_DOWNLOAD_UNSPECIFIED = 0i32,
-    /// Prefer them, and upgrade to them.
-    PROPER_DOWNLOAD_PREFER_AND_UPGRADE = 1i32,
-    /// Prefer them, but do not upgrade to them.
-    PROPER_DOWNLOAD_DO_NOT_UPGRADE = 2i32,
-    /// Rank them as other releases, by custom formats.
-    PROPER_DOWNLOAD_DO_NOT_PREFER = 3i32,
-}
-impl ProperDownload {
-    ///Idiomatic alias for [`Self::PROPER_DOWNLOAD_UNSPECIFIED`]; `Debug` prints the variant name.
-    #[allow(non_upper_case_globals)]
-    pub const Unspecified: Self = Self::PROPER_DOWNLOAD_UNSPECIFIED;
-    ///Idiomatic alias for [`Self::PROPER_DOWNLOAD_PREFER_AND_UPGRADE`]; `Debug` prints the variant name.
-    #[allow(non_upper_case_globals)]
-    pub const PreferAndUpgrade: Self = Self::PROPER_DOWNLOAD_PREFER_AND_UPGRADE;
-    ///Idiomatic alias for [`Self::PROPER_DOWNLOAD_DO_NOT_UPGRADE`]; `Debug` prints the variant name.
-    #[allow(non_upper_case_globals)]
-    pub const DoNotUpgrade: Self = Self::PROPER_DOWNLOAD_DO_NOT_UPGRADE;
-    ///Idiomatic alias for [`Self::PROPER_DOWNLOAD_DO_NOT_PREFER`]; `Debug` prints the variant name.
-    #[allow(non_upper_case_globals)]
-    pub const DoNotPrefer: Self = Self::PROPER_DOWNLOAD_DO_NOT_PREFER;
-}
-impl ::core::default::Default for ProperDownload {
-    fn default() -> Self {
-        Self::PROPER_DOWNLOAD_UNSPECIFIED
-    }
-}
-impl ::buffa::Enumeration for ProperDownload {
-    fn from_i32(value: i32) -> ::core::option::Option<Self> {
-        match value {
-            0i32 => ::core::option::Option::Some(Self::PROPER_DOWNLOAD_UNSPECIFIED),
-            1i32 => {
-                ::core::option::Option::Some(Self::PROPER_DOWNLOAD_PREFER_AND_UPGRADE)
-            }
-            2i32 => ::core::option::Option::Some(Self::PROPER_DOWNLOAD_DO_NOT_UPGRADE),
-            3i32 => ::core::option::Option::Some(Self::PROPER_DOWNLOAD_DO_NOT_PREFER),
-            _ => ::core::option::Option::None,
-        }
-    }
-    fn to_i32(&self) -> i32 {
-        *self as i32
-    }
-    fn proto_name(&self) -> &'static str {
-        match self {
-            Self::PROPER_DOWNLOAD_UNSPECIFIED => "PROPER_DOWNLOAD_UNSPECIFIED",
-            Self::PROPER_DOWNLOAD_PREFER_AND_UPGRADE => {
-                "PROPER_DOWNLOAD_PREFER_AND_UPGRADE"
-            }
-            Self::PROPER_DOWNLOAD_DO_NOT_UPGRADE => "PROPER_DOWNLOAD_DO_NOT_UPGRADE",
-            Self::PROPER_DOWNLOAD_DO_NOT_PREFER => "PROPER_DOWNLOAD_DO_NOT_PREFER",
-        }
-    }
-    fn from_proto_name(name: &str) -> ::core::option::Option<Self> {
-        match name {
-            "PROPER_DOWNLOAD_UNSPECIFIED" => {
-                ::core::option::Option::Some(Self::PROPER_DOWNLOAD_UNSPECIFIED)
-            }
-            "PROPER_DOWNLOAD_PREFER_AND_UPGRADE" => {
-                ::core::option::Option::Some(Self::PROPER_DOWNLOAD_PREFER_AND_UPGRADE)
-            }
-            "PROPER_DOWNLOAD_DO_NOT_UPGRADE" => {
-                ::core::option::Option::Some(Self::PROPER_DOWNLOAD_DO_NOT_UPGRADE)
-            }
-            "PROPER_DOWNLOAD_DO_NOT_PREFER" => {
-                ::core::option::Option::Some(Self::PROPER_DOWNLOAD_DO_NOT_PREFER)
-            }
-            _ => ::core::option::Option::None,
-        }
-    }
-    fn values() -> &'static [Self] {
-        &[
-            Self::PROPER_DOWNLOAD_UNSPECIFIED,
-            Self::PROPER_DOWNLOAD_PREFER_AND_UPGRADE,
-            Self::PROPER_DOWNLOAD_DO_NOT_UPGRADE,
-            Self::PROPER_DOWNLOAD_DO_NOT_PREFER,
-        ]
-    }
-}
-/// ColonReplacement is what replaces colons in file names.
-#[allow(non_camel_case_types)]
-#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
-#[repr(i32)]
-pub enum ColonReplacement {
-    COLON_REPLACEMENT_UNSPECIFIED = 0i32,
-    COLON_REPLACEMENT_DELETE = 1i32,
-    COLON_REPLACEMENT_DASH = 2i32,
-    COLON_REPLACEMENT_SPACE_DASH = 3i32,
-    COLON_REPLACEMENT_SPACE_DASH_SPACE = 4i32,
-    /// A dash between words, else deleted.
-    COLON_REPLACEMENT_SMART = 5i32,
-}
-impl ColonReplacement {
-    ///Idiomatic alias for [`Self::COLON_REPLACEMENT_UNSPECIFIED`]; `Debug` prints the variant name.
-    #[allow(non_upper_case_globals)]
-    pub const Unspecified: Self = Self::COLON_REPLACEMENT_UNSPECIFIED;
-    ///Idiomatic alias for [`Self::COLON_REPLACEMENT_DELETE`]; `Debug` prints the variant name.
-    #[allow(non_upper_case_globals)]
-    pub const Delete: Self = Self::COLON_REPLACEMENT_DELETE;
-    ///Idiomatic alias for [`Self::COLON_REPLACEMENT_DASH`]; `Debug` prints the variant name.
-    #[allow(non_upper_case_globals)]
-    pub const Dash: Self = Self::COLON_REPLACEMENT_DASH;
-    ///Idiomatic alias for [`Self::COLON_REPLACEMENT_SPACE_DASH`]; `Debug` prints the variant name.
-    #[allow(non_upper_case_globals)]
-    pub const SpaceDash: Self = Self::COLON_REPLACEMENT_SPACE_DASH;
-    ///Idiomatic alias for [`Self::COLON_REPLACEMENT_SPACE_DASH_SPACE`]; `Debug` prints the variant name.
-    #[allow(non_upper_case_globals)]
-    pub const SpaceDashSpace: Self = Self::COLON_REPLACEMENT_SPACE_DASH_SPACE;
-    ///Idiomatic alias for [`Self::COLON_REPLACEMENT_SMART`]; `Debug` prints the variant name.
-    #[allow(non_upper_case_globals)]
-    pub const Smart: Self = Self::COLON_REPLACEMENT_SMART;
-}
-impl ::core::default::Default for ColonReplacement {
-    fn default() -> Self {
-        Self::COLON_REPLACEMENT_UNSPECIFIED
-    }
-}
-impl ::buffa::Enumeration for ColonReplacement {
-    fn from_i32(value: i32) -> ::core::option::Option<Self> {
-        match value {
-            0i32 => ::core::option::Option::Some(Self::COLON_REPLACEMENT_UNSPECIFIED),
-            1i32 => ::core::option::Option::Some(Self::COLON_REPLACEMENT_DELETE),
-            2i32 => ::core::option::Option::Some(Self::COLON_REPLACEMENT_DASH),
-            3i32 => ::core::option::Option::Some(Self::COLON_REPLACEMENT_SPACE_DASH),
-            4i32 => {
-                ::core::option::Option::Some(Self::COLON_REPLACEMENT_SPACE_DASH_SPACE)
-            }
-            5i32 => ::core::option::Option::Some(Self::COLON_REPLACEMENT_SMART),
-            _ => ::core::option::Option::None,
-        }
-    }
-    fn to_i32(&self) -> i32 {
-        *self as i32
-    }
-    fn proto_name(&self) -> &'static str {
-        match self {
-            Self::COLON_REPLACEMENT_UNSPECIFIED => "COLON_REPLACEMENT_UNSPECIFIED",
-            Self::COLON_REPLACEMENT_DELETE => "COLON_REPLACEMENT_DELETE",
-            Self::COLON_REPLACEMENT_DASH => "COLON_REPLACEMENT_DASH",
-            Self::COLON_REPLACEMENT_SPACE_DASH => "COLON_REPLACEMENT_SPACE_DASH",
-            Self::COLON_REPLACEMENT_SPACE_DASH_SPACE => {
-                "COLON_REPLACEMENT_SPACE_DASH_SPACE"
-            }
-            Self::COLON_REPLACEMENT_SMART => "COLON_REPLACEMENT_SMART",
-        }
-    }
-    fn from_proto_name(name: &str) -> ::core::option::Option<Self> {
-        match name {
-            "COLON_REPLACEMENT_UNSPECIFIED" => {
-                ::core::option::Option::Some(Self::COLON_REPLACEMENT_UNSPECIFIED)
-            }
-            "COLON_REPLACEMENT_DELETE" => {
-                ::core::option::Option::Some(Self::COLON_REPLACEMENT_DELETE)
-            }
-            "COLON_REPLACEMENT_DASH" => {
-                ::core::option::Option::Some(Self::COLON_REPLACEMENT_DASH)
-            }
-            "COLON_REPLACEMENT_SPACE_DASH" => {
-                ::core::option::Option::Some(Self::COLON_REPLACEMENT_SPACE_DASH)
-            }
-            "COLON_REPLACEMENT_SPACE_DASH_SPACE" => {
-                ::core::option::Option::Some(Self::COLON_REPLACEMENT_SPACE_DASH_SPACE)
-            }
-            "COLON_REPLACEMENT_SMART" => {
-                ::core::option::Option::Some(Self::COLON_REPLACEMENT_SMART)
-            }
-            _ => ::core::option::Option::None,
-        }
-    }
-    fn values() -> &'static [Self] {
-        &[
-            Self::COLON_REPLACEMENT_UNSPECIFIED,
-            Self::COLON_REPLACEMENT_DELETE,
-            Self::COLON_REPLACEMENT_DASH,
-            Self::COLON_REPLACEMENT_SPACE_DASH,
-            Self::COLON_REPLACEMENT_SPACE_DASH_SPACE,
-            Self::COLON_REPLACEMENT_SMART,
-        ]
-    }
-}
-/// MultiEpisodeStyle is how the name of a file of several episodes writes
-/// their numbers, shown for episodes 6 to 8 of season 15.
-#[allow(non_camel_case_types)]
-#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
-#[repr(i32)]
-pub enum MultiEpisodeStyle {
-    MULTI_EPISODE_STYLE_UNSPECIFIED = 0i32,
-    /// S15E06-07-08.
-    MULTI_EPISODE_STYLE_EXTEND = 1i32,
-    /// S15E06 - S15E07 - S15E08.
-    MULTI_EPISODE_STYLE_DUPLICATE = 2i32,
-    /// S15E06E07E08.
-    MULTI_EPISODE_STYLE_REPEAT = 3i32,
-    /// S15E06-E07-E08.
-    MULTI_EPISODE_STYLE_SCENE = 4i32,
-    /// S15E06-08.
-    MULTI_EPISODE_STYLE_RANGE = 5i32,
-    /// S15E06-E08.
-    MULTI_EPISODE_STYLE_PREFIXED_RANGE = 6i32,
-}
-impl MultiEpisodeStyle {
-    ///Idiomatic alias for [`Self::MULTI_EPISODE_STYLE_UNSPECIFIED`]; `Debug` prints the variant name.
-    #[allow(non_upper_case_globals)]
-    pub const Unspecified: Self = Self::MULTI_EPISODE_STYLE_UNSPECIFIED;
-    ///Idiomatic alias for [`Self::MULTI_EPISODE_STYLE_EXTEND`]; `Debug` prints the variant name.
-    #[allow(non_upper_case_globals)]
-    pub const Extend: Self = Self::MULTI_EPISODE_STYLE_EXTEND;
-    ///Idiomatic alias for [`Self::MULTI_EPISODE_STYLE_DUPLICATE`]; `Debug` prints the variant name.
-    #[allow(non_upper_case_globals)]
-    pub const Duplicate: Self = Self::MULTI_EPISODE_STYLE_DUPLICATE;
-    ///Idiomatic alias for [`Self::MULTI_EPISODE_STYLE_REPEAT`]; `Debug` prints the variant name.
-    #[allow(non_upper_case_globals)]
-    pub const Repeat: Self = Self::MULTI_EPISODE_STYLE_REPEAT;
-    ///Idiomatic alias for [`Self::MULTI_EPISODE_STYLE_SCENE`]; `Debug` prints the variant name.
-    #[allow(non_upper_case_globals)]
-    pub const Scene: Self = Self::MULTI_EPISODE_STYLE_SCENE;
-    ///Idiomatic alias for [`Self::MULTI_EPISODE_STYLE_RANGE`]; `Debug` prints the variant name.
-    #[allow(non_upper_case_globals)]
-    pub const Range: Self = Self::MULTI_EPISODE_STYLE_RANGE;
-    ///Idiomatic alias for [`Self::MULTI_EPISODE_STYLE_PREFIXED_RANGE`]; `Debug` prints the variant name.
-    #[allow(non_upper_case_globals)]
-    pub const PrefixedRange: Self = Self::MULTI_EPISODE_STYLE_PREFIXED_RANGE;
-}
-impl ::core::default::Default for MultiEpisodeStyle {
-    fn default() -> Self {
-        Self::MULTI_EPISODE_STYLE_UNSPECIFIED
-    }
-}
-impl ::buffa::Enumeration for MultiEpisodeStyle {
-    fn from_i32(value: i32) -> ::core::option::Option<Self> {
-        match value {
-            0i32 => ::core::option::Option::Some(Self::MULTI_EPISODE_STYLE_UNSPECIFIED),
-            1i32 => ::core::option::Option::Some(Self::MULTI_EPISODE_STYLE_EXTEND),
-            2i32 => ::core::option::Option::Some(Self::MULTI_EPISODE_STYLE_DUPLICATE),
-            3i32 => ::core::option::Option::Some(Self::MULTI_EPISODE_STYLE_REPEAT),
-            4i32 => ::core::option::Option::Some(Self::MULTI_EPISODE_STYLE_SCENE),
-            5i32 => ::core::option::Option::Some(Self::MULTI_EPISODE_STYLE_RANGE),
-            6i32 => {
-                ::core::option::Option::Some(Self::MULTI_EPISODE_STYLE_PREFIXED_RANGE)
-            }
-            _ => ::core::option::Option::None,
-        }
-    }
-    fn to_i32(&self) -> i32 {
-        *self as i32
-    }
-    fn proto_name(&self) -> &'static str {
-        match self {
-            Self::MULTI_EPISODE_STYLE_UNSPECIFIED => "MULTI_EPISODE_STYLE_UNSPECIFIED",
-            Self::MULTI_EPISODE_STYLE_EXTEND => "MULTI_EPISODE_STYLE_EXTEND",
-            Self::MULTI_EPISODE_STYLE_DUPLICATE => "MULTI_EPISODE_STYLE_DUPLICATE",
-            Self::MULTI_EPISODE_STYLE_REPEAT => "MULTI_EPISODE_STYLE_REPEAT",
-            Self::MULTI_EPISODE_STYLE_SCENE => "MULTI_EPISODE_STYLE_SCENE",
-            Self::MULTI_EPISODE_STYLE_RANGE => "MULTI_EPISODE_STYLE_RANGE",
-            Self::MULTI_EPISODE_STYLE_PREFIXED_RANGE => {
-                "MULTI_EPISODE_STYLE_PREFIXED_RANGE"
-            }
-        }
-    }
-    fn from_proto_name(name: &str) -> ::core::option::Option<Self> {
-        match name {
-            "MULTI_EPISODE_STYLE_UNSPECIFIED" => {
-                ::core::option::Option::Some(Self::MULTI_EPISODE_STYLE_UNSPECIFIED)
-            }
-            "MULTI_EPISODE_STYLE_EXTEND" => {
-                ::core::option::Option::Some(Self::MULTI_EPISODE_STYLE_EXTEND)
-            }
-            "MULTI_EPISODE_STYLE_DUPLICATE" => {
-                ::core::option::Option::Some(Self::MULTI_EPISODE_STYLE_DUPLICATE)
-            }
-            "MULTI_EPISODE_STYLE_REPEAT" => {
-                ::core::option::Option::Some(Self::MULTI_EPISODE_STYLE_REPEAT)
-            }
-            "MULTI_EPISODE_STYLE_SCENE" => {
-                ::core::option::Option::Some(Self::MULTI_EPISODE_STYLE_SCENE)
-            }
-            "MULTI_EPISODE_STYLE_RANGE" => {
-                ::core::option::Option::Some(Self::MULTI_EPISODE_STYLE_RANGE)
-            }
-            "MULTI_EPISODE_STYLE_PREFIXED_RANGE" => {
-                ::core::option::Option::Some(Self::MULTI_EPISODE_STYLE_PREFIXED_RANGE)
-            }
-            _ => ::core::option::Option::None,
-        }
-    }
-    fn values() -> &'static [Self] {
-        &[
-            Self::MULTI_EPISODE_STYLE_UNSPECIFIED,
-            Self::MULTI_EPISODE_STYLE_EXTEND,
-            Self::MULTI_EPISODE_STYLE_DUPLICATE,
-            Self::MULTI_EPISODE_STYLE_REPEAT,
-            Self::MULTI_EPISODE_STYLE_SCENE,
-            Self::MULTI_EPISODE_STYLE_RANGE,
-            Self::MULTI_EPISODE_STYLE_PREFIXED_RANGE,
-        ]
-    }
-}
-/// EpisodeTitleRequired is when an episode imported under a name showing
-/// its title must have one.
-#[allow(non_camel_case_types)]
-#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
-#[repr(i32)]
-pub enum EpisodeTitleRequired {
-    EPISODE_TITLE_REQUIRED_UNSPECIFIED = 0i32,
-    /// Of episodes aired within the last two days.
-    EPISODE_TITLE_REQUIRED_ALWAYS = 1i32,
-    /// As always, but not of the episodes of a season released at once.
-    EPISODE_TITLE_REQUIRED_BULK_SEASON_RELEASES = 2i32,
-    EPISODE_TITLE_REQUIRED_NEVER = 3i32,
-}
-impl EpisodeTitleRequired {
-    ///Idiomatic alias for [`Self::EPISODE_TITLE_REQUIRED_UNSPECIFIED`]; `Debug` prints the variant name.
-    #[allow(non_upper_case_globals)]
-    pub const Unspecified: Self = Self::EPISODE_TITLE_REQUIRED_UNSPECIFIED;
-    ///Idiomatic alias for [`Self::EPISODE_TITLE_REQUIRED_ALWAYS`]; `Debug` prints the variant name.
-    #[allow(non_upper_case_globals)]
-    pub const Always: Self = Self::EPISODE_TITLE_REQUIRED_ALWAYS;
-    ///Idiomatic alias for [`Self::EPISODE_TITLE_REQUIRED_BULK_SEASON_RELEASES`]; `Debug` prints the variant name.
-    #[allow(non_upper_case_globals)]
-    pub const BulkSeasonReleases: Self = Self::EPISODE_TITLE_REQUIRED_BULK_SEASON_RELEASES;
-    ///Idiomatic alias for [`Self::EPISODE_TITLE_REQUIRED_NEVER`]; `Debug` prints the variant name.
-    #[allow(non_upper_case_globals)]
-    pub const Never: Self = Self::EPISODE_TITLE_REQUIRED_NEVER;
-}
-impl ::core::default::Default for EpisodeTitleRequired {
-    fn default() -> Self {
-        Self::EPISODE_TITLE_REQUIRED_UNSPECIFIED
-    }
-}
-impl ::buffa::Enumeration for EpisodeTitleRequired {
-    fn from_i32(value: i32) -> ::core::option::Option<Self> {
-        match value {
-            0i32 => {
-                ::core::option::Option::Some(Self::EPISODE_TITLE_REQUIRED_UNSPECIFIED)
-            }
-            1i32 => ::core::option::Option::Some(Self::EPISODE_TITLE_REQUIRED_ALWAYS),
-            2i32 => {
-                ::core::option::Option::Some(
-                    Self::EPISODE_TITLE_REQUIRED_BULK_SEASON_RELEASES,
-                )
-            }
-            3i32 => ::core::option::Option::Some(Self::EPISODE_TITLE_REQUIRED_NEVER),
-            _ => ::core::option::Option::None,
-        }
-    }
-    fn to_i32(&self) -> i32 {
-        *self as i32
-    }
-    fn proto_name(&self) -> &'static str {
-        match self {
-            Self::EPISODE_TITLE_REQUIRED_UNSPECIFIED => {
-                "EPISODE_TITLE_REQUIRED_UNSPECIFIED"
-            }
-            Self::EPISODE_TITLE_REQUIRED_ALWAYS => "EPISODE_TITLE_REQUIRED_ALWAYS",
-            Self::EPISODE_TITLE_REQUIRED_BULK_SEASON_RELEASES => {
-                "EPISODE_TITLE_REQUIRED_BULK_SEASON_RELEASES"
-            }
-            Self::EPISODE_TITLE_REQUIRED_NEVER => "EPISODE_TITLE_REQUIRED_NEVER",
-        }
-    }
-    fn from_proto_name(name: &str) -> ::core::option::Option<Self> {
-        match name {
-            "EPISODE_TITLE_REQUIRED_UNSPECIFIED" => {
-                ::core::option::Option::Some(Self::EPISODE_TITLE_REQUIRED_UNSPECIFIED)
-            }
-            "EPISODE_TITLE_REQUIRED_ALWAYS" => {
-                ::core::option::Option::Some(Self::EPISODE_TITLE_REQUIRED_ALWAYS)
-            }
-            "EPISODE_TITLE_REQUIRED_BULK_SEASON_RELEASES" => {
-                ::core::option::Option::Some(
-                    Self::EPISODE_TITLE_REQUIRED_BULK_SEASON_RELEASES,
-                )
-            }
-            "EPISODE_TITLE_REQUIRED_NEVER" => {
-                ::core::option::Option::Some(Self::EPISODE_TITLE_REQUIRED_NEVER)
-            }
-            _ => ::core::option::Option::None,
-        }
-    }
-    fn values() -> &'static [Self] {
-        &[
-            Self::EPISODE_TITLE_REQUIRED_UNSPECIFIED,
-            Self::EPISODE_TITLE_REQUIRED_ALWAYS,
-            Self::EPISODE_TITLE_REQUIRED_BULK_SEASON_RELEASES,
-            Self::EPISODE_TITLE_REQUIRED_NEVER,
-        ]
-    }
-}
-#[allow(non_camel_case_types)]
-#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
-#[repr(i32)]
 pub enum LogLevel {
     LOG_LEVEL_UNSPECIFIED = 0i32,
     LOG_LEVEL_DEBUG = 1i32,
@@ -2457,529 +1983,6 @@ impl ::buffa::ExtensionSet for NetworkLoad {
         &mut self.__buffa_unknown_fields
     }
 }
-/// TranscodingSettings steer transcodes.
-#[derive(Clone, PartialEq, Default)]
-pub struct TranscodingSettings {
-    /// Field 1: `hardware_acceleration`
-    pub hardware_acceleration: ::core::option::Option<
-        ::buffa::EnumValue<HardwareAcceleration>,
-    >,
-    /// Field 2: `hardware_encoding`
-    pub hardware_encoding: ::core::option::Option<bool>,
-    /// "", "ultrafast", "superfast", "veryfast", "faster", "fast", "medium",
-    /// "slow", "slower" or "veryslow"; empty picks one by the source.
-    ///
-    /// Field 3: `encoder_preset`
-    pub encoder_preset: ::core::option::Option<::buffa::alloc::string::String>,
-    /// Field 4: `h264_crf`
-    pub h264_crf: ::core::option::Option<i32>,
-    /// Field 5: `h265_crf`
-    pub h265_crf: ::core::option::Option<i32>,
-    /// 0 lets ffmpeg decide.
-    ///
-    /// Field 6: `threads`
-    pub threads: ::core::option::Option<i32>,
-    /// "bt2390", "hable", "mobius", "reinhard", "clip", "linear" or "gamma".
-    ///
-    /// Field 7: `tonemap_algorithm`
-    pub tonemap_algorithm: ::core::option::Option<::buffa::alloc::string::String>,
-    /// "auto", "tv" or "pc".
-    ///
-    /// Field 8: `tonemap_range`
-    pub tonemap_range: ::core::option::Option<::buffa::alloc::string::String>,
-    /// Field 9: `tonemap_desat`
-    pub tonemap_desat: ::core::option::Option<f64>,
-    /// Field 10: `tonemap_peak`
-    pub tonemap_peak: ::core::option::Option<f64>,
-    /// "yadif" or "bwdif".
-    ///
-    /// Field 11: `deinterlace_method`
-    pub deinterlace_method: ::core::option::Option<::buffa::alloc::string::String>,
-    /// Field 12: `deinterlace_double_rate`
-    pub deinterlace_double_rate: ::core::option::Option<bool>,
-    /// Field 13: `downmix_boost`
-    pub downmix_boost: ::core::option::Option<f64>,
-    /// Field 14: `crop_black_borders`
-    pub crop_black_borders: ::core::option::Option<bool>,
-    /// Absolute folder for running transcodes; empty uses the folder the
-    /// server was started with.
-    ///
-    /// Field 15: `transcode_dir`
-    pub transcode_dir: ::core::option::Option<::buffa::alloc::string::String>,
-    #[doc(hidden)]
-    pub __buffa_unknown_fields: ::buffa::UnknownFields,
-}
-impl ::core::fmt::Debug for TranscodingSettings {
-    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-        f.debug_struct("TranscodingSettings")
-            .field("hardware_acceleration", &self.hardware_acceleration)
-            .field("hardware_encoding", &self.hardware_encoding)
-            .field("encoder_preset", &self.encoder_preset)
-            .field("h264_crf", &self.h264_crf)
-            .field("h265_crf", &self.h265_crf)
-            .field("threads", &self.threads)
-            .field("tonemap_algorithm", &self.tonemap_algorithm)
-            .field("tonemap_range", &self.tonemap_range)
-            .field("tonemap_desat", &self.tonemap_desat)
-            .field("tonemap_peak", &self.tonemap_peak)
-            .field("deinterlace_method", &self.deinterlace_method)
-            .field("deinterlace_double_rate", &self.deinterlace_double_rate)
-            .field("downmix_boost", &self.downmix_boost)
-            .field("crop_black_borders", &self.crop_black_borders)
-            .field("transcode_dir", &self.transcode_dir)
-            .finish()
-    }
-}
-impl TranscodingSettings {
-    /// Protobuf type URL for this message, for use with `Any::pack` and
-    /// `Any::unpack_if`.
-    ///
-    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
-    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.system.v1.TranscodingSettings";
-}
-impl TranscodingSettings {
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::hardware_acceleration`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_hardware_acceleration(
-        mut self,
-        value: impl Into<::buffa::EnumValue<HardwareAcceleration>>,
-    ) -> Self {
-        self.hardware_acceleration = Some(value.into());
-        self
-    }
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::hardware_encoding`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_hardware_encoding(mut self, value: bool) -> Self {
-        self.hardware_encoding = Some(value);
-        self
-    }
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::encoder_preset`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_encoder_preset(
-        mut self,
-        value: impl Into<::buffa::alloc::string::String>,
-    ) -> Self {
-        self.encoder_preset = Some(value.into());
-        self
-    }
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::h264_crf`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_h264_crf(mut self, value: i32) -> Self {
-        self.h264_crf = Some(value);
-        self
-    }
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::h265_crf`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_h265_crf(mut self, value: i32) -> Self {
-        self.h265_crf = Some(value);
-        self
-    }
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::threads`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_threads(mut self, value: i32) -> Self {
-        self.threads = Some(value);
-        self
-    }
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::tonemap_algorithm`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_tonemap_algorithm(
-        mut self,
-        value: impl Into<::buffa::alloc::string::String>,
-    ) -> Self {
-        self.tonemap_algorithm = Some(value.into());
-        self
-    }
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::tonemap_range`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_tonemap_range(
-        mut self,
-        value: impl Into<::buffa::alloc::string::String>,
-    ) -> Self {
-        self.tonemap_range = Some(value.into());
-        self
-    }
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::tonemap_desat`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_tonemap_desat(mut self, value: f64) -> Self {
-        self.tonemap_desat = Some(value);
-        self
-    }
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::tonemap_peak`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_tonemap_peak(mut self, value: f64) -> Self {
-        self.tonemap_peak = Some(value);
-        self
-    }
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::deinterlace_method`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_deinterlace_method(
-        mut self,
-        value: impl Into<::buffa::alloc::string::String>,
-    ) -> Self {
-        self.deinterlace_method = Some(value.into());
-        self
-    }
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::deinterlace_double_rate`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_deinterlace_double_rate(mut self, value: bool) -> Self {
-        self.deinterlace_double_rate = Some(value);
-        self
-    }
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::downmix_boost`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_downmix_boost(mut self, value: f64) -> Self {
-        self.downmix_boost = Some(value);
-        self
-    }
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::crop_black_borders`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_crop_black_borders(mut self, value: bool) -> Self {
-        self.crop_black_borders = Some(value);
-        self
-    }
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::transcode_dir`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_transcode_dir(
-        mut self,
-        value: impl Into<::buffa::alloc::string::String>,
-    ) -> Self {
-        self.transcode_dir = Some(value.into());
-        self
-    }
-}
-::buffa::impl_default_instance!(TranscodingSettings);
-impl ::buffa::MessageName for TranscodingSettings {
-    const PACKAGE: &'static str = "mavio.system.v1";
-    const NAME: &'static str = "TranscodingSettings";
-    const FULL_NAME: &'static str = "mavio.system.v1.TranscodingSettings";
-    const TYPE_URL: &'static str = "type.googleapis.com/mavio.system.v1.TranscodingSettings";
-}
-impl ::buffa::Message for TranscodingSettings {
-    /// Returns the total encoded size in bytes.
-    ///
-    /// Accumulates in `u64` (which cannot overflow for in-memory
-    /// data) and saturates to `u32` at return, so a message whose
-    /// encoded size exceeds the 2 GiB protobuf limit yields a value
-    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
-    /// points reject, never a silently wrapped size.
-    #[allow(clippy::let_and_return)]
-    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
-        #[allow(unused_imports)]
-        use ::buffa::Enumeration as _;
-        let mut size = 0u64;
-        if let Some(ref v) = self.hardware_acceleration {
-            size += 1u64 + ::buffa::types::int32_encoded_len(v.to_i32()) as u64;
-        }
-        if self.hardware_encoding.is_some() {
-            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
-        }
-        if let Some(ref v) = self.encoder_preset {
-            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
-        if let Some(v) = self.h264_crf {
-            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
-        }
-        if let Some(v) = self.h265_crf {
-            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
-        }
-        if let Some(v) = self.threads {
-            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
-        }
-        if let Some(ref v) = self.tonemap_algorithm {
-            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
-        if let Some(ref v) = self.tonemap_range {
-            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
-        if self.tonemap_desat.is_some() {
-            size += 1u64 + ::buffa::types::FIXED64_ENCODED_LEN as u64;
-        }
-        if self.tonemap_peak.is_some() {
-            size += 1u64 + ::buffa::types::FIXED64_ENCODED_LEN as u64;
-        }
-        if let Some(ref v) = self.deinterlace_method {
-            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
-        if self.deinterlace_double_rate.is_some() {
-            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
-        }
-        if self.downmix_boost.is_some() {
-            size += 1u64 + ::buffa::types::FIXED64_ENCODED_LEN as u64;
-        }
-        if self.crop_black_borders.is_some() {
-            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
-        }
-        if let Some(ref v) = self.transcode_dir {
-            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
-        size += self.__buffa_unknown_fields.encoded_len() as u64;
-        ::buffa::saturate_size(size)
-    }
-    fn write_to(
-        &self,
-        _cache: &mut ::buffa::SizeCache,
-        buf: &mut impl ::buffa::EncodeSink,
-    ) {
-        #[allow(unused_imports)]
-        use ::buffa::Enumeration as _;
-        if let Some(ref v) = self.hardware_acceleration {
-            ::buffa::types::put_int32_field(1u32, v.to_i32(), buf);
-        }
-        if let Some(v) = self.hardware_encoding {
-            ::buffa::types::put_bool_field(2u32, v, buf);
-        }
-        if let Some(ref v) = self.encoder_preset {
-            ::buffa::types::put_string_field(3u32, v, buf);
-        }
-        if let Some(v) = self.h264_crf {
-            ::buffa::types::put_int32_field(4u32, v, buf);
-        }
-        if let Some(v) = self.h265_crf {
-            ::buffa::types::put_int32_field(5u32, v, buf);
-        }
-        if let Some(v) = self.threads {
-            ::buffa::types::put_int32_field(6u32, v, buf);
-        }
-        if let Some(ref v) = self.tonemap_algorithm {
-            ::buffa::types::put_string_field(7u32, v, buf);
-        }
-        if let Some(ref v) = self.tonemap_range {
-            ::buffa::types::put_string_field(8u32, v, buf);
-        }
-        if let Some(v) = self.tonemap_desat {
-            ::buffa::types::put_double_field(9u32, v, buf);
-        }
-        if let Some(v) = self.tonemap_peak {
-            ::buffa::types::put_double_field(10u32, v, buf);
-        }
-        if let Some(ref v) = self.deinterlace_method {
-            ::buffa::types::put_string_field(11u32, v, buf);
-        }
-        if let Some(v) = self.deinterlace_double_rate {
-            ::buffa::types::put_bool_field(12u32, v, buf);
-        }
-        if let Some(v) = self.downmix_boost {
-            ::buffa::types::put_double_field(13u32, v, buf);
-        }
-        if let Some(v) = self.crop_black_borders {
-            ::buffa::types::put_bool_field(14u32, v, buf);
-        }
-        if let Some(ref v) = self.transcode_dir {
-            ::buffa::types::put_string_field(15u32, v, buf);
-        }
-        self.__buffa_unknown_fields.write_to(buf);
-    }
-    fn merge_field(
-        &mut self,
-        tag: ::buffa::encoding::Tag,
-        buf: &mut impl ::buffa::bytes::Buf,
-        ctx: ::buffa::DecodeContext<'_>,
-    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
-        #[allow(unused_imports)]
-        use ::buffa::bytes::Buf as _;
-        #[allow(unused_imports)]
-        use ::buffa::Enumeration as _;
-        match tag.field_number() {
-            1u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                self.hardware_acceleration = ::core::option::Option::Some(
-                    ::buffa::EnumValue::from(::buffa::types::decode_int32(buf)?),
-                );
-            }
-            2u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                self.hardware_encoding = ::core::option::Option::Some(
-                    ::buffa::types::decode_bool(buf)?,
-                );
-            }
-            3u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                ::buffa::types::merge_string(
-                    self
-                        .encoder_preset
-                        .get_or_insert_with(::buffa::alloc::string::String::new),
-                    buf,
-                )?;
-            }
-            4u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                self.h264_crf = ::core::option::Option::Some(
-                    ::buffa::types::decode_int32(buf)?,
-                );
-            }
-            5u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                self.h265_crf = ::core::option::Option::Some(
-                    ::buffa::types::decode_int32(buf)?,
-                );
-            }
-            6u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                self.threads = ::core::option::Option::Some(
-                    ::buffa::types::decode_int32(buf)?,
-                );
-            }
-            7u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                ::buffa::types::merge_string(
-                    self
-                        .tonemap_algorithm
-                        .get_or_insert_with(::buffa::alloc::string::String::new),
-                    buf,
-                )?;
-            }
-            8u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                ::buffa::types::merge_string(
-                    self
-                        .tonemap_range
-                        .get_or_insert_with(::buffa::alloc::string::String::new),
-                    buf,
-                )?;
-            }
-            9u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Fixed64,
-                )?;
-                self.tonemap_desat = ::core::option::Option::Some(
-                    ::buffa::types::decode_double(buf)?,
-                );
-            }
-            10u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Fixed64,
-                )?;
-                self.tonemap_peak = ::core::option::Option::Some(
-                    ::buffa::types::decode_double(buf)?,
-                );
-            }
-            11u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                ::buffa::types::merge_string(
-                    self
-                        .deinterlace_method
-                        .get_or_insert_with(::buffa::alloc::string::String::new),
-                    buf,
-                )?;
-            }
-            12u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                self.deinterlace_double_rate = ::core::option::Option::Some(
-                    ::buffa::types::decode_bool(buf)?,
-                );
-            }
-            13u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Fixed64,
-                )?;
-                self.downmix_boost = ::core::option::Option::Some(
-                    ::buffa::types::decode_double(buf)?,
-                );
-            }
-            14u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                self.crop_black_borders = ::core::option::Option::Some(
-                    ::buffa::types::decode_bool(buf)?,
-                );
-            }
-            15u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                ::buffa::types::merge_string(
-                    self
-                        .transcode_dir
-                        .get_or_insert_with(::buffa::alloc::string::String::new),
-                    buf,
-                )?;
-            }
-            _ => {
-                self.__buffa_unknown_fields
-                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
-            }
-        }
-        ::core::result::Result::Ok(())
-    }
-    fn clear(&mut self) {
-        self.hardware_acceleration = ::core::option::Option::None;
-        self.hardware_encoding = ::core::option::Option::None;
-        self.encoder_preset = ::core::option::Option::None;
-        self.h264_crf = ::core::option::Option::None;
-        self.h265_crf = ::core::option::Option::None;
-        self.threads = ::core::option::Option::None;
-        self.tonemap_algorithm = ::core::option::Option::None;
-        self.tonemap_range = ::core::option::Option::None;
-        self.tonemap_desat = ::core::option::Option::None;
-        self.tonemap_peak = ::core::option::Option::None;
-        self.deinterlace_method = ::core::option::Option::None;
-        self.deinterlace_double_rate = ::core::option::Option::None;
-        self.downmix_boost = ::core::option::Option::None;
-        self.crop_black_borders = ::core::option::Option::None;
-        self.transcode_dir = ::core::option::Option::None;
-        self.__buffa_unknown_fields.clear();
-    }
-}
-impl ::buffa::ExtensionSet for TranscodingSettings {
-    const PROTO_FQN: &'static str = "mavio.system.v1.TranscodingSettings";
-    fn unknown_fields(&self) -> &::buffa::UnknownFields {
-        &self.__buffa_unknown_fields
-    }
-    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
-        &mut self.__buffa_unknown_fields
-    }
-}
 /// NetworkSettings decide how the server is reached and how it reaches
 /// other sites.
 #[derive(Clone, PartialEq, Default)]
@@ -3011,14 +2014,6 @@ pub struct NetworkSettings {
     ///
     /// Field 7: `relay`
     pub relay: ::core::option::Option<bool>,
-    /// The proxies of the server's own HTTP requests; unset in an update
-    /// keeps the current ones.
-    ///
-    /// Field 8: `proxies`
-    pub proxies: ::buffa::MessageField<
-        OutboundProxies,
-        ::buffa::Inline<OutboundProxies>,
-    >,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -3032,7 +2027,6 @@ impl ::core::fmt::Debug for NetworkSettings {
             .field("key_path", &self.key_path)
             .field("local_discovery", &self.local_discovery)
             .field("relay", &self.relay)
-            .field("proxies", &self.proxies)
             .finish()
     }
 }
@@ -3122,7 +2116,7 @@ impl ::buffa::Message for NetworkSettings {
     /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
     /// points reject, never a silently wrapped size.
     #[allow(clippy::let_and_return)]
-    fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
         let mut size = 0u64;
@@ -3147,20 +2141,12 @@ impl ::buffa::Message for NetworkSettings {
         if self.relay.is_some() {
             size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
         }
-        if self.proxies.is_set() {
-            let __slot = __cache.reserve();
-            let inner_size = self.proxies.compute_size(__cache);
-            __cache.set(__slot, inner_size);
-            size
-                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
-                    + inner_size as u64;
-        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
     fn write_to(
         &self,
-        __cache: &mut ::buffa::SizeCache,
+        _cache: &mut ::buffa::SizeCache,
         buf: &mut impl ::buffa::EncodeSink,
     ) {
         #[allow(unused_imports)]
@@ -3185,14 +2171,6 @@ impl ::buffa::Message for NetworkSettings {
         }
         if let Some(v) = self.relay {
             ::buffa::types::put_bool_field(7u32, v, buf);
-        }
-        if self.proxies.is_set() {
-            ::buffa::types::put_len_delimited_header(
-                8u32,
-                u64::from(__cache.consume_next()),
-                buf,
-            );
-            self.proxies.write_to(__cache, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -3282,17 +2260,6 @@ impl ::buffa::Message for NetworkSettings {
                     ::buffa::types::decode_bool(buf)?,
                 );
             }
-            8u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                ::buffa::Message::merge_length_delimited(
-                    self.proxies.get_or_insert_default(),
-                    buf,
-                    ctx,
-                )?;
-            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -3308,1318 +2275,11 @@ impl ::buffa::Message for NetworkSettings {
         self.key_path = ::core::option::Option::None;
         self.local_discovery = ::core::option::Option::None;
         self.relay = ::core::option::Option::None;
-        self.proxies = ::buffa::MessageField::none();
         self.__buffa_unknown_fields.clear();
     }
 }
 impl ::buffa::ExtensionSet for NetworkSettings {
     const PROTO_FQN: &'static str = "mavio.system.v1.NetworkSettings";
-    fn unknown_fields(&self) -> &::buffa::UnknownFields {
-        &self.__buffa_unknown_fields
-    }
-    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
-        &mut self.__buffa_unknown_fields
-    }
-}
-/// OutboundProxies are the proxies the server's own HTTP requests go
-/// through, by what they reach: each the ID of one of the server's proxies
-/// (ProxyService), "system" for the system proxy, or empty for none. The
-/// hosts of this machine and of the local network are reached directly.
-#[derive(Clone, PartialEq, Default)]
-pub struct OutboundProxies {
-    /// Plugin catalogs and plugin packages.
-    ///
-    /// Field 1: `plugin_catalogs`
-    pub plugin_catalogs: ::core::option::Option<::buffa::alloc::string::String>,
-    /// Items' remote images, such as posters.
-    ///
-    /// Field 2: `images`
-    pub images: ::core::option::Option<::buffa::alloc::string::String>,
-    /// mavio.dev's API.
-    ///
-    /// Field 3: `mavio_dev`
-    pub mavio_dev: ::core::option::Option<::buffa::alloc::string::String>,
-    /// The certificate authorities of mavio.site certificates.
-    ///
-    /// Field 4: `acme`
-    pub acme: ::core::option::Option<::buffa::alloc::string::String>,
-    #[doc(hidden)]
-    pub __buffa_unknown_fields: ::buffa::UnknownFields,
-}
-impl ::core::fmt::Debug for OutboundProxies {
-    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-        f.debug_struct("OutboundProxies")
-            .field("plugin_catalogs", &self.plugin_catalogs)
-            .field("images", &self.images)
-            .field("mavio_dev", &self.mavio_dev)
-            .field("acme", &self.acme)
-            .finish()
-    }
-}
-impl OutboundProxies {
-    /// Protobuf type URL for this message, for use with `Any::pack` and
-    /// `Any::unpack_if`.
-    ///
-    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
-    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.system.v1.OutboundProxies";
-}
-impl OutboundProxies {
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::plugin_catalogs`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_plugin_catalogs(
-        mut self,
-        value: impl Into<::buffa::alloc::string::String>,
-    ) -> Self {
-        self.plugin_catalogs = Some(value.into());
-        self
-    }
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::images`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_images(
-        mut self,
-        value: impl Into<::buffa::alloc::string::String>,
-    ) -> Self {
-        self.images = Some(value.into());
-        self
-    }
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::mavio_dev`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_mavio_dev(
-        mut self,
-        value: impl Into<::buffa::alloc::string::String>,
-    ) -> Self {
-        self.mavio_dev = Some(value.into());
-        self
-    }
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::acme`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_acme(
-        mut self,
-        value: impl Into<::buffa::alloc::string::String>,
-    ) -> Self {
-        self.acme = Some(value.into());
-        self
-    }
-}
-::buffa::impl_default_instance!(OutboundProxies);
-impl ::buffa::MessageName for OutboundProxies {
-    const PACKAGE: &'static str = "mavio.system.v1";
-    const NAME: &'static str = "OutboundProxies";
-    const FULL_NAME: &'static str = "mavio.system.v1.OutboundProxies";
-    const TYPE_URL: &'static str = "type.googleapis.com/mavio.system.v1.OutboundProxies";
-}
-impl ::buffa::Message for OutboundProxies {
-    /// Returns the total encoded size in bytes.
-    ///
-    /// Accumulates in `u64` (which cannot overflow for in-memory
-    /// data) and saturates to `u32` at return, so a message whose
-    /// encoded size exceeds the 2 GiB protobuf limit yields a value
-    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
-    /// points reject, never a silently wrapped size.
-    #[allow(clippy::let_and_return)]
-    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
-        #[allow(unused_imports)]
-        use ::buffa::Enumeration as _;
-        let mut size = 0u64;
-        if let Some(ref v) = self.plugin_catalogs {
-            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
-        if let Some(ref v) = self.images {
-            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
-        if let Some(ref v) = self.mavio_dev {
-            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
-        if let Some(ref v) = self.acme {
-            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
-        size += self.__buffa_unknown_fields.encoded_len() as u64;
-        ::buffa::saturate_size(size)
-    }
-    fn write_to(
-        &self,
-        _cache: &mut ::buffa::SizeCache,
-        buf: &mut impl ::buffa::EncodeSink,
-    ) {
-        #[allow(unused_imports)]
-        use ::buffa::Enumeration as _;
-        if let Some(ref v) = self.plugin_catalogs {
-            ::buffa::types::put_string_field(1u32, v, buf);
-        }
-        if let Some(ref v) = self.images {
-            ::buffa::types::put_string_field(2u32, v, buf);
-        }
-        if let Some(ref v) = self.mavio_dev {
-            ::buffa::types::put_string_field(3u32, v, buf);
-        }
-        if let Some(ref v) = self.acme {
-            ::buffa::types::put_string_field(4u32, v, buf);
-        }
-        self.__buffa_unknown_fields.write_to(buf);
-    }
-    fn merge_field(
-        &mut self,
-        tag: ::buffa::encoding::Tag,
-        buf: &mut impl ::buffa::bytes::Buf,
-        ctx: ::buffa::DecodeContext<'_>,
-    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
-        #[allow(unused_imports)]
-        use ::buffa::bytes::Buf as _;
-        #[allow(unused_imports)]
-        use ::buffa::Enumeration as _;
-        match tag.field_number() {
-            1u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                ::buffa::types::merge_string(
-                    self
-                        .plugin_catalogs
-                        .get_or_insert_with(::buffa::alloc::string::String::new),
-                    buf,
-                )?;
-            }
-            2u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                ::buffa::types::merge_string(
-                    self.images.get_or_insert_with(::buffa::alloc::string::String::new),
-                    buf,
-                )?;
-            }
-            3u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                ::buffa::types::merge_string(
-                    self
-                        .mavio_dev
-                        .get_or_insert_with(::buffa::alloc::string::String::new),
-                    buf,
-                )?;
-            }
-            4u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                ::buffa::types::merge_string(
-                    self.acme.get_or_insert_with(::buffa::alloc::string::String::new),
-                    buf,
-                )?;
-            }
-            _ => {
-                self.__buffa_unknown_fields
-                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
-            }
-        }
-        ::core::result::Result::Ok(())
-    }
-    fn clear(&mut self) {
-        self.plugin_catalogs = ::core::option::Option::None;
-        self.images = ::core::option::Option::None;
-        self.mavio_dev = ::core::option::Option::None;
-        self.acme = ::core::option::Option::None;
-        self.__buffa_unknown_fields.clear();
-    }
-}
-impl ::buffa::ExtensionSet for OutboundProxies {
-    const PROTO_FQN: &'static str = "mavio.system.v1.OutboundProxies";
-    fn unknown_fields(&self) -> &::buffa::UnknownFields {
-        &self.__buffa_unknown_fields
-    }
-    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
-        &mut self.__buffa_unknown_fields
-    }
-}
-/// ServerSettings are what administrators change while the server runs.
-#[derive(Clone, PartialEq, Default)]
-pub struct ServerSettings {
-    /// Field 1: `transcoding`
-    pub transcoding: ::buffa::MessageField<
-        TranscodingSettings,
-        ::buffa::Inline<TranscodingSettings>,
-    >,
-    /// Field 2: `network`
-    pub network: ::buffa::MessageField<
-        NetworkSettings,
-        ::buffa::Inline<NetworkSettings>,
-    >,
-    /// URLs of the plugin catalogs plugins are installed from.
-    ///
-    /// Field 3: `plugin_catalogs`
-    pub plugin_catalogs: ::buffa::alloc::vec::Vec<::buffa::alloc::string::String>,
-    /// Field 4: `update_time`
-    pub update_time: ::buffa::MessageField<
-        ::buffa_types::google::protobuf::Timestamp,
-        ::buffa::Inline<::buffa_types::google::protobuf::Timestamp>,
-    >,
-    /// ID of the plugin that delivers the PINs resetting forgotten passwords;
-    /// empty when users cannot reset them.
-    ///
-    /// Field 5: `password_reset_plugin`
-    pub password_reset_plugin: ::core::option::Option<::buffa::alloc::string::String>,
-    /// How releases are chosen, downloaded and imported; unset in an update
-    /// keeps the current ones.
-    ///
-    /// Field 6: `acquisition`
-    pub acquisition: ::buffa::MessageField<
-        AcquisitionSettings,
-        ::buffa::Inline<AcquisitionSettings>,
-    >,
-    /// What users may request by default and where approved requests go;
-    /// unset in an update keeps the current ones.
-    ///
-    /// Field 7: `requests`
-    pub requests: ::buffa::MessageField<
-        RequestSettings,
-        ::buffa::Inline<RequestSettings>,
-    >,
-    /// The language and country of metadata beside libraries'; unset in an
-    /// update keeps the current ones.
-    ///
-    /// Field 8: `metadata`
-    pub metadata: ::buffa::MessageField<
-        MetadataSettings,
-        ::buffa::Inline<MetadataSettings>,
-    >,
-    /// How many days a signed-in device stays signed in unused, 1–3650; 0 in
-    /// an update keeps the current value.
-    ///
-    /// Field 9: `session_idle_days`
-    pub session_idle_days: ::core::option::Option<i32>,
-    #[doc(hidden)]
-    pub __buffa_unknown_fields: ::buffa::UnknownFields,
-}
-impl ::core::fmt::Debug for ServerSettings {
-    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-        f.debug_struct("ServerSettings")
-            .field("transcoding", &self.transcoding)
-            .field("network", &self.network)
-            .field("plugin_catalogs", &self.plugin_catalogs)
-            .field("update_time", &self.update_time)
-            .field("password_reset_plugin", &self.password_reset_plugin)
-            .field("acquisition", &self.acquisition)
-            .field("requests", &self.requests)
-            .field("metadata", &self.metadata)
-            .field("session_idle_days", &self.session_idle_days)
-            .finish()
-    }
-}
-impl ServerSettings {
-    /// Protobuf type URL for this message, for use with `Any::pack` and
-    /// `Any::unpack_if`.
-    ///
-    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
-    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.system.v1.ServerSettings";
-}
-impl ServerSettings {
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::password_reset_plugin`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_password_reset_plugin(
-        mut self,
-        value: impl Into<::buffa::alloc::string::String>,
-    ) -> Self {
-        self.password_reset_plugin = Some(value.into());
-        self
-    }
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::session_idle_days`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_session_idle_days(mut self, value: i32) -> Self {
-        self.session_idle_days = Some(value);
-        self
-    }
-}
-::buffa::impl_default_instance!(ServerSettings);
-impl ::buffa::MessageName for ServerSettings {
-    const PACKAGE: &'static str = "mavio.system.v1";
-    const NAME: &'static str = "ServerSettings";
-    const FULL_NAME: &'static str = "mavio.system.v1.ServerSettings";
-    const TYPE_URL: &'static str = "type.googleapis.com/mavio.system.v1.ServerSettings";
-}
-impl ::buffa::Message for ServerSettings {
-    /// Returns the total encoded size in bytes.
-    ///
-    /// Accumulates in `u64` (which cannot overflow for in-memory
-    /// data) and saturates to `u32` at return, so a message whose
-    /// encoded size exceeds the 2 GiB protobuf limit yields a value
-    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
-    /// points reject, never a silently wrapped size.
-    #[allow(clippy::let_and_return)]
-    fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
-        #[allow(unused_imports)]
-        use ::buffa::Enumeration as _;
-        let mut size = 0u64;
-        if self.transcoding.is_set() {
-            let __slot = __cache.reserve();
-            let inner_size = self.transcoding.compute_size(__cache);
-            __cache.set(__slot, inner_size);
-            size
-                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
-                    + inner_size as u64;
-        }
-        if self.network.is_set() {
-            let __slot = __cache.reserve();
-            let inner_size = self.network.compute_size(__cache);
-            __cache.set(__slot, inner_size);
-            size
-                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
-                    + inner_size as u64;
-        }
-        for v in &self.plugin_catalogs {
-            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
-        if self.update_time.is_set() {
-            let __slot = __cache.reserve();
-            let inner_size = self.update_time.compute_size(__cache);
-            __cache.set(__slot, inner_size);
-            size
-                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
-                    + inner_size as u64;
-        }
-        if let Some(ref v) = self.password_reset_plugin {
-            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
-        if self.acquisition.is_set() {
-            let __slot = __cache.reserve();
-            let inner_size = self.acquisition.compute_size(__cache);
-            __cache.set(__slot, inner_size);
-            size
-                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
-                    + inner_size as u64;
-        }
-        if self.requests.is_set() {
-            let __slot = __cache.reserve();
-            let inner_size = self.requests.compute_size(__cache);
-            __cache.set(__slot, inner_size);
-            size
-                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
-                    + inner_size as u64;
-        }
-        if self.metadata.is_set() {
-            let __slot = __cache.reserve();
-            let inner_size = self.metadata.compute_size(__cache);
-            __cache.set(__slot, inner_size);
-            size
-                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
-                    + inner_size as u64;
-        }
-        if let Some(v) = self.session_idle_days {
-            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
-        }
-        size += self.__buffa_unknown_fields.encoded_len() as u64;
-        ::buffa::saturate_size(size)
-    }
-    fn write_to(
-        &self,
-        __cache: &mut ::buffa::SizeCache,
-        buf: &mut impl ::buffa::EncodeSink,
-    ) {
-        #[allow(unused_imports)]
-        use ::buffa::Enumeration as _;
-        if self.transcoding.is_set() {
-            ::buffa::types::put_len_delimited_header(
-                1u32,
-                u64::from(__cache.consume_next()),
-                buf,
-            );
-            self.transcoding.write_to(__cache, buf);
-        }
-        if self.network.is_set() {
-            ::buffa::types::put_len_delimited_header(
-                2u32,
-                u64::from(__cache.consume_next()),
-                buf,
-            );
-            self.network.write_to(__cache, buf);
-        }
-        for v in &self.plugin_catalogs {
-            ::buffa::types::put_string_field(3u32, v, buf);
-        }
-        if self.update_time.is_set() {
-            ::buffa::types::put_len_delimited_header(
-                4u32,
-                u64::from(__cache.consume_next()),
-                buf,
-            );
-            self.update_time.write_to(__cache, buf);
-        }
-        if let Some(ref v) = self.password_reset_plugin {
-            ::buffa::types::put_string_field(5u32, v, buf);
-        }
-        if self.acquisition.is_set() {
-            ::buffa::types::put_len_delimited_header(
-                6u32,
-                u64::from(__cache.consume_next()),
-                buf,
-            );
-            self.acquisition.write_to(__cache, buf);
-        }
-        if self.requests.is_set() {
-            ::buffa::types::put_len_delimited_header(
-                7u32,
-                u64::from(__cache.consume_next()),
-                buf,
-            );
-            self.requests.write_to(__cache, buf);
-        }
-        if self.metadata.is_set() {
-            ::buffa::types::put_len_delimited_header(
-                8u32,
-                u64::from(__cache.consume_next()),
-                buf,
-            );
-            self.metadata.write_to(__cache, buf);
-        }
-        if let Some(v) = self.session_idle_days {
-            ::buffa::types::put_int32_field(9u32, v, buf);
-        }
-        self.__buffa_unknown_fields.write_to(buf);
-    }
-    fn merge_field(
-        &mut self,
-        tag: ::buffa::encoding::Tag,
-        buf: &mut impl ::buffa::bytes::Buf,
-        ctx: ::buffa::DecodeContext<'_>,
-    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
-        #[allow(unused_imports)]
-        use ::buffa::bytes::Buf as _;
-        #[allow(unused_imports)]
-        use ::buffa::Enumeration as _;
-        match tag.field_number() {
-            1u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                ::buffa::Message::merge_length_delimited(
-                    self.transcoding.get_or_insert_default(),
-                    buf,
-                    ctx,
-                )?;
-            }
-            2u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                ::buffa::Message::merge_length_delimited(
-                    self.network.get_or_insert_default(),
-                    buf,
-                    ctx,
-                )?;
-            }
-            3u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                let __elem = ::buffa::types::decode_string(buf)?;
-                ctx.register_element_memory(
-                    ::buffa::__private::element_footprint(&__elem),
-                )?;
-                self.plugin_catalogs.push(__elem);
-            }
-            4u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                ::buffa::Message::merge_length_delimited(
-                    self.update_time.get_or_insert_default(),
-                    buf,
-                    ctx,
-                )?;
-            }
-            5u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                ::buffa::types::merge_string(
-                    self
-                        .password_reset_plugin
-                        .get_or_insert_with(::buffa::alloc::string::String::new),
-                    buf,
-                )?;
-            }
-            6u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                ::buffa::Message::merge_length_delimited(
-                    self.acquisition.get_or_insert_default(),
-                    buf,
-                    ctx,
-                )?;
-            }
-            7u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                ::buffa::Message::merge_length_delimited(
-                    self.requests.get_or_insert_default(),
-                    buf,
-                    ctx,
-                )?;
-            }
-            8u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                ::buffa::Message::merge_length_delimited(
-                    self.metadata.get_or_insert_default(),
-                    buf,
-                    ctx,
-                )?;
-            }
-            9u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                self.session_idle_days = ::core::option::Option::Some(
-                    ::buffa::types::decode_int32(buf)?,
-                );
-            }
-            _ => {
-                self.__buffa_unknown_fields
-                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
-            }
-        }
-        ::core::result::Result::Ok(())
-    }
-    fn clear(&mut self) {
-        self.transcoding = ::buffa::MessageField::none();
-        self.network = ::buffa::MessageField::none();
-        self.plugin_catalogs.clear();
-        self.update_time = ::buffa::MessageField::none();
-        self.password_reset_plugin = ::core::option::Option::None;
-        self.acquisition = ::buffa::MessageField::none();
-        self.requests = ::buffa::MessageField::none();
-        self.metadata = ::buffa::MessageField::none();
-        self.session_idle_days = ::core::option::Option::None;
-        self.__buffa_unknown_fields.clear();
-    }
-}
-impl ::buffa::ExtensionSet for ServerSettings {
-    const PROTO_FQN: &'static str = "mavio.system.v1.ServerSettings";
-    fn unknown_fields(&self) -> &::buffa::UnknownFields {
-        &self.__buffa_unknown_fields
-    }
-    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
-        &mut self.__buffa_unknown_fields
-    }
-}
-/// RequestSettings are the defaults of users' requests and where approved
-/// requests are acquired.
-#[derive(Clone, PartialEq, Default)]
-pub struct RequestSettings {
-    /// The request permissions new users get.
-    ///
-    /// Field 1: `default_request_movies`
-    pub default_request_movies: ::core::option::Option<bool>,
-    /// Field 2: `default_request_series`
-    pub default_request_series: ::core::option::Option<bool>,
-    /// Field 3: `default_auto_approve_movies`
-    pub default_auto_approve_movies: ::core::option::Option<bool>,
-    /// Field 4: `default_auto_approve_series`
-    pub default_auto_approve_series: ::core::option::Option<bool>,
-    /// Field 5: `default_report_issues`
-    pub default_report_issues: ::core::option::Option<bool>,
-    /// The quotas of users without their own: requests of movies, or seasons
-    /// of series, in the last days; a limit of 0 is unlimited, 0 days all
-    /// time.
-    ///
-    /// Field 6: `movie_quota_limit`
-    pub movie_quota_limit: ::core::option::Option<i32>,
-    /// Field 7: `movie_quota_days`
-    pub movie_quota_days: ::core::option::Option<i32>,
-    /// Field 8: `series_quota_limit`
-    pub series_quota_limit: ::core::option::Option<i32>,
-    /// Field 9: `series_quota_days`
-    pub series_quota_days: ::core::option::Option<i32>,
-    /// The movie library and quality profile approved movies are added to;
-    /// empty, approvals fail.
-    ///
-    /// Field 10: `movie_library_id`
-    pub movie_library_id: ::core::option::Option<::buffa::alloc::string::String>,
-    /// Field 11: `movie_quality_profile_id`
-    pub movie_quality_profile_id: ::core::option::Option<::buffa::alloc::string::String>,
-    /// Field 12: `minimum_availability`
-    pub minimum_availability: ::core::option::Option<
-        ::buffa::EnumValue<super::super::acquisition::v1::MinimumAvailability>,
-    >,
-    /// The show library and quality profile approved series are added to;
-    /// empty, approvals fail.
-    ///
-    /// Field 13: `series_library_id`
-    pub series_library_id: ::core::option::Option<::buffa::alloc::string::String>,
-    /// Field 14: `series_quality_profile_id`
-    pub series_quality_profile_id: ::core::option::Option<
-        ::buffa::alloc::string::String,
-    >,
-    /// Field 15: `season_folder`
-    pub season_folder: ::core::option::Option<bool>,
-    /// Field 16: `monitor_new_items`
-    pub monitor_new_items: ::core::option::Option<
-        ::buffa::EnumValue<super::super::acquisition::v1::NewItemMonitor>,
-    >,
-    /// Allow requesting specials, season 0.
-    ///
-    /// Field 17: `specials`
-    pub specials: ::core::option::Option<bool>,
-    /// The show library and quality profile approved anime series are added
-    /// to, as Seerr's anime settings of Sonarr; empty uses those of series.
-    /// Anime series are numbered absolutely either way.
-    ///
-    /// Field 18: `anime_library_id`
-    pub anime_library_id: ::core::option::Option<::buffa::alloc::string::String>,
-    /// Field 19: `anime_quality_profile_id`
-    pub anime_quality_profile_id: ::core::option::Option<::buffa::alloc::string::String>,
-    /// Keywords of discovery providers, as "\<plugin\>/\<keyword\>", whose movies
-    /// and series the blocklisted tags job blocklists weekly, as Seerr's
-    /// blocklistedTags.
-    ///
-    /// Field 20: `blocklisted_tags`
-    pub blocklisted_tags: ::buffa::alloc::vec::Vec<::buffa::alloc::string::String>,
-    /// How many pages of each order of a keyword's titles the job
-    /// blocklists, 0–250; 0 for 50.
-    ///
-    /// Field 21: `blocklisted_tags_limit`
-    pub blocklisted_tags_limit: ::core::option::Option<i32>,
-    #[doc(hidden)]
-    pub __buffa_unknown_fields: ::buffa::UnknownFields,
-}
-impl ::core::fmt::Debug for RequestSettings {
-    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-        f.debug_struct("RequestSettings")
-            .field("default_request_movies", &self.default_request_movies)
-            .field("default_request_series", &self.default_request_series)
-            .field("default_auto_approve_movies", &self.default_auto_approve_movies)
-            .field("default_auto_approve_series", &self.default_auto_approve_series)
-            .field("default_report_issues", &self.default_report_issues)
-            .field("movie_quota_limit", &self.movie_quota_limit)
-            .field("movie_quota_days", &self.movie_quota_days)
-            .field("series_quota_limit", &self.series_quota_limit)
-            .field("series_quota_days", &self.series_quota_days)
-            .field("movie_library_id", &self.movie_library_id)
-            .field("movie_quality_profile_id", &self.movie_quality_profile_id)
-            .field("minimum_availability", &self.minimum_availability)
-            .field("series_library_id", &self.series_library_id)
-            .field("series_quality_profile_id", &self.series_quality_profile_id)
-            .field("season_folder", &self.season_folder)
-            .field("monitor_new_items", &self.monitor_new_items)
-            .field("specials", &self.specials)
-            .field("anime_library_id", &self.anime_library_id)
-            .field("anime_quality_profile_id", &self.anime_quality_profile_id)
-            .field("blocklisted_tags", &self.blocklisted_tags)
-            .field("blocklisted_tags_limit", &self.blocklisted_tags_limit)
-            .finish()
-    }
-}
-impl RequestSettings {
-    /// Protobuf type URL for this message, for use with `Any::pack` and
-    /// `Any::unpack_if`.
-    ///
-    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
-    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.system.v1.RequestSettings";
-}
-impl RequestSettings {
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::default_request_movies`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_default_request_movies(mut self, value: bool) -> Self {
-        self.default_request_movies = Some(value);
-        self
-    }
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::default_request_series`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_default_request_series(mut self, value: bool) -> Self {
-        self.default_request_series = Some(value);
-        self
-    }
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::default_auto_approve_movies`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_default_auto_approve_movies(mut self, value: bool) -> Self {
-        self.default_auto_approve_movies = Some(value);
-        self
-    }
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::default_auto_approve_series`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_default_auto_approve_series(mut self, value: bool) -> Self {
-        self.default_auto_approve_series = Some(value);
-        self
-    }
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::default_report_issues`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_default_report_issues(mut self, value: bool) -> Self {
-        self.default_report_issues = Some(value);
-        self
-    }
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::movie_quota_limit`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_movie_quota_limit(mut self, value: i32) -> Self {
-        self.movie_quota_limit = Some(value);
-        self
-    }
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::movie_quota_days`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_movie_quota_days(mut self, value: i32) -> Self {
-        self.movie_quota_days = Some(value);
-        self
-    }
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::series_quota_limit`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_series_quota_limit(mut self, value: i32) -> Self {
-        self.series_quota_limit = Some(value);
-        self
-    }
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::series_quota_days`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_series_quota_days(mut self, value: i32) -> Self {
-        self.series_quota_days = Some(value);
-        self
-    }
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::movie_library_id`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_movie_library_id(
-        mut self,
-        value: impl Into<::buffa::alloc::string::String>,
-    ) -> Self {
-        self.movie_library_id = Some(value.into());
-        self
-    }
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::movie_quality_profile_id`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_movie_quality_profile_id(
-        mut self,
-        value: impl Into<::buffa::alloc::string::String>,
-    ) -> Self {
-        self.movie_quality_profile_id = Some(value.into());
-        self
-    }
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::minimum_availability`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_minimum_availability(
-        mut self,
-        value: impl Into<
-            ::buffa::EnumValue<super::super::acquisition::v1::MinimumAvailability>,
-        >,
-    ) -> Self {
-        self.minimum_availability = Some(value.into());
-        self
-    }
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::series_library_id`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_series_library_id(
-        mut self,
-        value: impl Into<::buffa::alloc::string::String>,
-    ) -> Self {
-        self.series_library_id = Some(value.into());
-        self
-    }
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::series_quality_profile_id`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_series_quality_profile_id(
-        mut self,
-        value: impl Into<::buffa::alloc::string::String>,
-    ) -> Self {
-        self.series_quality_profile_id = Some(value.into());
-        self
-    }
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::season_folder`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_season_folder(mut self, value: bool) -> Self {
-        self.season_folder = Some(value);
-        self
-    }
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::monitor_new_items`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_monitor_new_items(
-        mut self,
-        value: impl Into<
-            ::buffa::EnumValue<super::super::acquisition::v1::NewItemMonitor>,
-        >,
-    ) -> Self {
-        self.monitor_new_items = Some(value.into());
-        self
-    }
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::specials`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_specials(mut self, value: bool) -> Self {
-        self.specials = Some(value);
-        self
-    }
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::anime_library_id`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_anime_library_id(
-        mut self,
-        value: impl Into<::buffa::alloc::string::String>,
-    ) -> Self {
-        self.anime_library_id = Some(value.into());
-        self
-    }
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::anime_quality_profile_id`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_anime_quality_profile_id(
-        mut self,
-        value: impl Into<::buffa::alloc::string::String>,
-    ) -> Self {
-        self.anime_quality_profile_id = Some(value.into());
-        self
-    }
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::blocklisted_tags_limit`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_blocklisted_tags_limit(mut self, value: i32) -> Self {
-        self.blocklisted_tags_limit = Some(value);
-        self
-    }
-}
-::buffa::impl_default_instance!(RequestSettings);
-impl ::buffa::MessageName for RequestSettings {
-    const PACKAGE: &'static str = "mavio.system.v1";
-    const NAME: &'static str = "RequestSettings";
-    const FULL_NAME: &'static str = "mavio.system.v1.RequestSettings";
-    const TYPE_URL: &'static str = "type.googleapis.com/mavio.system.v1.RequestSettings";
-}
-impl ::buffa::Message for RequestSettings {
-    /// Returns the total encoded size in bytes.
-    ///
-    /// Accumulates in `u64` (which cannot overflow for in-memory
-    /// data) and saturates to `u32` at return, so a message whose
-    /// encoded size exceeds the 2 GiB protobuf limit yields a value
-    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
-    /// points reject, never a silently wrapped size.
-    #[allow(clippy::let_and_return)]
-    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
-        #[allow(unused_imports)]
-        use ::buffa::Enumeration as _;
-        let mut size = 0u64;
-        if self.default_request_movies.is_some() {
-            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
-        }
-        if self.default_request_series.is_some() {
-            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
-        }
-        if self.default_auto_approve_movies.is_some() {
-            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
-        }
-        if self.default_auto_approve_series.is_some() {
-            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
-        }
-        if self.default_report_issues.is_some() {
-            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
-        }
-        if let Some(v) = self.movie_quota_limit {
-            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
-        }
-        if let Some(v) = self.movie_quota_days {
-            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
-        }
-        if let Some(v) = self.series_quota_limit {
-            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
-        }
-        if let Some(v) = self.series_quota_days {
-            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
-        }
-        if let Some(ref v) = self.movie_library_id {
-            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
-        if let Some(ref v) = self.movie_quality_profile_id {
-            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
-        if let Some(ref v) = self.minimum_availability {
-            size += 1u64 + ::buffa::types::int32_encoded_len(v.to_i32()) as u64;
-        }
-        if let Some(ref v) = self.series_library_id {
-            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
-        if let Some(ref v) = self.series_quality_profile_id {
-            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
-        if self.season_folder.is_some() {
-            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
-        }
-        if let Some(ref v) = self.monitor_new_items {
-            size += 2u64 + ::buffa::types::int32_encoded_len(v.to_i32()) as u64;
-        }
-        if self.specials.is_some() {
-            size += 2u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
-        }
-        if let Some(ref v) = self.anime_library_id {
-            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
-        if let Some(ref v) = self.anime_quality_profile_id {
-            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
-        for v in &self.blocklisted_tags {
-            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
-        if let Some(v) = self.blocklisted_tags_limit {
-            size += 2u64 + ::buffa::types::int32_encoded_len(v) as u64;
-        }
-        size += self.__buffa_unknown_fields.encoded_len() as u64;
-        ::buffa::saturate_size(size)
-    }
-    fn write_to(
-        &self,
-        _cache: &mut ::buffa::SizeCache,
-        buf: &mut impl ::buffa::EncodeSink,
-    ) {
-        #[allow(unused_imports)]
-        use ::buffa::Enumeration as _;
-        if let Some(v) = self.default_request_movies {
-            ::buffa::types::put_bool_field(1u32, v, buf);
-        }
-        if let Some(v) = self.default_request_series {
-            ::buffa::types::put_bool_field(2u32, v, buf);
-        }
-        if let Some(v) = self.default_auto_approve_movies {
-            ::buffa::types::put_bool_field(3u32, v, buf);
-        }
-        if let Some(v) = self.default_auto_approve_series {
-            ::buffa::types::put_bool_field(4u32, v, buf);
-        }
-        if let Some(v) = self.default_report_issues {
-            ::buffa::types::put_bool_field(5u32, v, buf);
-        }
-        if let Some(v) = self.movie_quota_limit {
-            ::buffa::types::put_int32_field(6u32, v, buf);
-        }
-        if let Some(v) = self.movie_quota_days {
-            ::buffa::types::put_int32_field(7u32, v, buf);
-        }
-        if let Some(v) = self.series_quota_limit {
-            ::buffa::types::put_int32_field(8u32, v, buf);
-        }
-        if let Some(v) = self.series_quota_days {
-            ::buffa::types::put_int32_field(9u32, v, buf);
-        }
-        if let Some(ref v) = self.movie_library_id {
-            ::buffa::types::put_string_field(10u32, v, buf);
-        }
-        if let Some(ref v) = self.movie_quality_profile_id {
-            ::buffa::types::put_string_field(11u32, v, buf);
-        }
-        if let Some(ref v) = self.minimum_availability {
-            ::buffa::types::put_int32_field(12u32, v.to_i32(), buf);
-        }
-        if let Some(ref v) = self.series_library_id {
-            ::buffa::types::put_string_field(13u32, v, buf);
-        }
-        if let Some(ref v) = self.series_quality_profile_id {
-            ::buffa::types::put_string_field(14u32, v, buf);
-        }
-        if let Some(v) = self.season_folder {
-            ::buffa::types::put_bool_field(15u32, v, buf);
-        }
-        if let Some(ref v) = self.monitor_new_items {
-            ::buffa::types::put_int32_field(16u32, v.to_i32(), buf);
-        }
-        if let Some(v) = self.specials {
-            ::buffa::types::put_bool_field(17u32, v, buf);
-        }
-        if let Some(ref v) = self.anime_library_id {
-            ::buffa::types::put_string_field(18u32, v, buf);
-        }
-        if let Some(ref v) = self.anime_quality_profile_id {
-            ::buffa::types::put_string_field(19u32, v, buf);
-        }
-        for v in &self.blocklisted_tags {
-            ::buffa::types::put_string_field(20u32, v, buf);
-        }
-        if let Some(v) = self.blocklisted_tags_limit {
-            ::buffa::types::put_int32_field(21u32, v, buf);
-        }
-        self.__buffa_unknown_fields.write_to(buf);
-    }
-    fn merge_field(
-        &mut self,
-        tag: ::buffa::encoding::Tag,
-        buf: &mut impl ::buffa::bytes::Buf,
-        ctx: ::buffa::DecodeContext<'_>,
-    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
-        #[allow(unused_imports)]
-        use ::buffa::bytes::Buf as _;
-        #[allow(unused_imports)]
-        use ::buffa::Enumeration as _;
-        match tag.field_number() {
-            1u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                self.default_request_movies = ::core::option::Option::Some(
-                    ::buffa::types::decode_bool(buf)?,
-                );
-            }
-            2u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                self.default_request_series = ::core::option::Option::Some(
-                    ::buffa::types::decode_bool(buf)?,
-                );
-            }
-            3u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                self.default_auto_approve_movies = ::core::option::Option::Some(
-                    ::buffa::types::decode_bool(buf)?,
-                );
-            }
-            4u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                self.default_auto_approve_series = ::core::option::Option::Some(
-                    ::buffa::types::decode_bool(buf)?,
-                );
-            }
-            5u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                self.default_report_issues = ::core::option::Option::Some(
-                    ::buffa::types::decode_bool(buf)?,
-                );
-            }
-            6u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                self.movie_quota_limit = ::core::option::Option::Some(
-                    ::buffa::types::decode_int32(buf)?,
-                );
-            }
-            7u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                self.movie_quota_days = ::core::option::Option::Some(
-                    ::buffa::types::decode_int32(buf)?,
-                );
-            }
-            8u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                self.series_quota_limit = ::core::option::Option::Some(
-                    ::buffa::types::decode_int32(buf)?,
-                );
-            }
-            9u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                self.series_quota_days = ::core::option::Option::Some(
-                    ::buffa::types::decode_int32(buf)?,
-                );
-            }
-            10u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                ::buffa::types::merge_string(
-                    self
-                        .movie_library_id
-                        .get_or_insert_with(::buffa::alloc::string::String::new),
-                    buf,
-                )?;
-            }
-            11u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                ::buffa::types::merge_string(
-                    self
-                        .movie_quality_profile_id
-                        .get_or_insert_with(::buffa::alloc::string::String::new),
-                    buf,
-                )?;
-            }
-            12u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                self.minimum_availability = ::core::option::Option::Some(
-                    ::buffa::EnumValue::from(::buffa::types::decode_int32(buf)?),
-                );
-            }
-            13u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                ::buffa::types::merge_string(
-                    self
-                        .series_library_id
-                        .get_or_insert_with(::buffa::alloc::string::String::new),
-                    buf,
-                )?;
-            }
-            14u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                ::buffa::types::merge_string(
-                    self
-                        .series_quality_profile_id
-                        .get_or_insert_with(::buffa::alloc::string::String::new),
-                    buf,
-                )?;
-            }
-            15u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                self.season_folder = ::core::option::Option::Some(
-                    ::buffa::types::decode_bool(buf)?,
-                );
-            }
-            16u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                self.monitor_new_items = ::core::option::Option::Some(
-                    ::buffa::EnumValue::from(::buffa::types::decode_int32(buf)?),
-                );
-            }
-            17u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                self.specials = ::core::option::Option::Some(
-                    ::buffa::types::decode_bool(buf)?,
-                );
-            }
-            18u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                ::buffa::types::merge_string(
-                    self
-                        .anime_library_id
-                        .get_or_insert_with(::buffa::alloc::string::String::new),
-                    buf,
-                )?;
-            }
-            19u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                ::buffa::types::merge_string(
-                    self
-                        .anime_quality_profile_id
-                        .get_or_insert_with(::buffa::alloc::string::String::new),
-                    buf,
-                )?;
-            }
-            20u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                let __elem = ::buffa::types::decode_string(buf)?;
-                ctx.register_element_memory(
-                    ::buffa::__private::element_footprint(&__elem),
-                )?;
-                self.blocklisted_tags.push(__elem);
-            }
-            21u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                self.blocklisted_tags_limit = ::core::option::Option::Some(
-                    ::buffa::types::decode_int32(buf)?,
-                );
-            }
-            _ => {
-                self.__buffa_unknown_fields
-                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
-            }
-        }
-        ::core::result::Result::Ok(())
-    }
-    fn clear(&mut self) {
-        self.default_request_movies = ::core::option::Option::None;
-        self.default_request_series = ::core::option::Option::None;
-        self.default_auto_approve_movies = ::core::option::Option::None;
-        self.default_auto_approve_series = ::core::option::Option::None;
-        self.default_report_issues = ::core::option::Option::None;
-        self.movie_quota_limit = ::core::option::Option::None;
-        self.movie_quota_days = ::core::option::Option::None;
-        self.series_quota_limit = ::core::option::Option::None;
-        self.series_quota_days = ::core::option::Option::None;
-        self.movie_library_id = ::core::option::Option::None;
-        self.movie_quality_profile_id = ::core::option::Option::None;
-        self.minimum_availability = ::core::option::Option::None;
-        self.series_library_id = ::core::option::Option::None;
-        self.series_quality_profile_id = ::core::option::Option::None;
-        self.season_folder = ::core::option::Option::None;
-        self.monitor_new_items = ::core::option::Option::None;
-        self.specials = ::core::option::Option::None;
-        self.anime_library_id = ::core::option::Option::None;
-        self.anime_quality_profile_id = ::core::option::Option::None;
-        self.blocklisted_tags.clear();
-        self.blocklisted_tags_limit = ::core::option::Option::None;
-        self.__buffa_unknown_fields.clear();
-    }
-}
-impl ::buffa::ExtensionSet for RequestSettings {
-    const PROTO_FQN: &'static str = "mavio.system.v1.RequestSettings";
     fn unknown_fields(&self) -> &::buffa::UnknownFields {
         &self.__buffa_unknown_fields
     }
@@ -4779,511 +2439,80 @@ impl ::buffa::ExtensionSet for MetadataSettings {
         &mut self.__buffa_unknown_fields
     }
 }
-/// AcquisitionSettings are how releases are chosen, downloaded and
-/// imported, as Radarr's and Sonarr's settings.
+/// GeneralSettings are the server's own settings, beside those of its
+/// domains, which their services keep.
 #[derive(Clone, PartialEq, Default)]
-pub struct AcquisitionSettings {
-    /// Field 1: `propers`
-    pub propers: ::core::option::Option<::buffa::EnumValue<ProperDownload>>,
-    /// Rank releases by their indexer flags.
+pub struct GeneralSettings {
+    /// The server's name and how it is reached.
     ///
-    /// Field 2: `prefer_indexer_flags`
-    pub prefer_indexer_flags: ::core::option::Option<bool>,
-    /// Import finished downloads.
-    ///
-    /// Field 3: `completed_download_handling`
-    pub completed_download_handling: ::core::option::Option<bool>,
-    /// Search again when a download fails.
-    ///
-    /// Field 4: `auto_redownload_failed`
-    pub auto_redownload_failed: ::core::option::Option<bool>,
-    /// In megabytes; 0 for none.
-    ///
-    /// Field 5: `maximum_size`
-    pub maximum_size: ::core::option::Option<i32>,
-    /// How old usenet releases must be, in minutes.
-    ///
-    /// Field 6: `minimum_age`
-    pub minimum_age: ::core::option::Option<i32>,
-    /// Usenet retention in days; 0 for none.
-    ///
-    /// Field 7: `retention`
-    pub retention: ::core::option::Option<i32>,
-    /// Field 8: `allow_hardcoded_subs`
-    pub allow_hardcoded_subs: ::core::option::Option<bool>,
-    /// Hardcoded subtitles allowed when others are not.
-    ///
-    /// Field 9: `whitelisted_hardcoded_subs`
-    pub whitelisted_hardcoded_subs: ::buffa::alloc::vec::Vec<
-        ::buffa::alloc::string::String,
+    /// Field 1: `network`
+    pub network: ::buffa::MessageField<
+        NetworkSettings,
+        ::buffa::Inline<NetworkSettings>,
     >,
-    /// Field 10: `skip_free_space_check`
-    pub skip_free_space_check: ::core::option::Option<bool>,
-    /// What an import must leave free, in megabytes.
+    /// The language and country of metadata beside libraries'.
     ///
-    /// Field 11: `minimum_free_space`
-    pub minimum_free_space: ::core::option::Option<i32>,
-    /// Shifts when movies count as available, in days.
-    ///
-    /// Field 12: `availability_delay`
-    pub availability_delay: ::core::option::Option<i32>,
-    /// In minutes, 0 or at least 10; 0 disables RSS sync.
-    ///
-    /// Field 13: `rss_sync_interval`
-    pub rss_sync_interval: ::core::option::Option<i32>,
-    /// How often download clients are polled, in minutes.
-    ///
-    /// Field 14: `check_finished_interval`
-    pub check_finished_interval: ::core::option::Option<i32>,
-    /// Absolute folder replaced and deleted files go to; empty deletes them.
-    ///
-    /// Field 15: `recycle_bin`
-    pub recycle_bin: ::core::option::Option<::buffa::alloc::string::String>,
-    /// Days files stay in the recycle bin; 0 keeps them.
-    ///
-    /// Field 16: `recycle_bin_cleanup_days`
-    pub recycle_bin_cleanup_days: ::core::option::Option<i32>,
-    /// Hard link instead of copying files whose download keeps seeding.
-    ///
-    /// Field 17: `copy_using_hardlinks`
-    pub copy_using_hardlinks: ::core::option::Option<bool>,
-    /// Field 18: `import_extra_files`
-    pub import_extra_files: ::core::option::Option<bool>,
-    /// Extensions of extra files imported with the media, such as "srt".
-    ///
-    /// Field 19: `extra_file_extensions`
-    pub extra_file_extensions: ::buffa::alloc::vec::Vec<::buffa::alloc::string::String>,
-    /// Field 20: `delete_empty_folders`
-    pub delete_empty_folders: ::core::option::Option<bool>,
-    /// Name movie files by standard_movie_format; otherwise they keep their
-    /// names.
-    ///
-    /// Field 21: `rename_movies`
-    pub rename_movies: ::core::option::Option<bool>,
-    /// Field 22: `replace_illegal_characters`
-    pub replace_illegal_characters: ::core::option::Option<bool>,
-    /// Field 23: `colon_replacement`
-    pub colon_replacement: ::core::option::Option<::buffa::EnumValue<ColonReplacement>>,
-    /// Templates, such as "{Movie Title} ({Release Year})".
-    ///
-    /// Field 24: `movie_folder_format`
-    pub movie_folder_format: ::core::option::Option<::buffa::alloc::string::String>,
-    /// Field 25: `standard_movie_format`
-    pub standard_movie_format: ::core::option::Option<::buffa::alloc::string::String>,
-    /// Search again when a download grabbed from an interactive search
-    /// fails, when auto_redownload_failed is set.
-    ///
-    /// Field 26: `auto_redownload_failed_from_interactive_search`
-    pub auto_redownload_failed_from_interactive_search: ::core::option::Option<bool>,
-    /// Whether episode files are named by the episode formats.
-    ///
-    /// Field 40: `rename_episodes`
-    pub rename_episodes: ::core::option::Option<bool>,
-    /// Templates of episode files of standard, daily and anime series and of
-    /// the folders of series, seasons and specials, such as
-    /// "{Series Title} - S{season:00}E{episode:00}"; empty for the defaults.
-    ///
-    /// Field 41: `standard_episode_format`
-    pub standard_episode_format: ::core::option::Option<::buffa::alloc::string::String>,
-    /// Field 42: `daily_episode_format`
-    pub daily_episode_format: ::core::option::Option<::buffa::alloc::string::String>,
-    /// Field 43: `anime_episode_format`
-    pub anime_episode_format: ::core::option::Option<::buffa::alloc::string::String>,
-    /// Field 44: `series_folder_format`
-    pub series_folder_format: ::core::option::Option<::buffa::alloc::string::String>,
-    /// Field 45: `season_folder_format`
-    pub season_folder_format: ::core::option::Option<::buffa::alloc::string::String>,
-    /// Field 46: `specials_folder_format`
-    pub specials_folder_format: ::core::option::Option<::buffa::alloc::string::String>,
-    /// Unspecified for MULTI_EPISODE_STYLE_PREFIXED_RANGE.
-    ///
-    /// Field 47: `multi_episode_style`
-    pub multi_episode_style: ::core::option::Option<
-        ::buffa::EnumValue<MultiEpisodeStyle>,
+    /// Field 2: `metadata`
+    pub metadata: ::buffa::MessageField<
+        MetadataSettings,
+        ::buffa::Inline<MetadataSettings>,
     >,
-    /// Unmonitors the episodes of wanted series whose files go missing.
+    /// How many days a signed-in device stays signed in unused.
     ///
-    /// Field 48: `auto_unmonitor_previously_downloaded_episodes`
-    pub auto_unmonitor_previously_downloaded_episodes: ::core::option::Option<bool>,
-    /// Unspecified for EPISODE_TITLE_REQUIRED_ALWAYS.
+    /// Field 3: `session_idle_days`
+    pub session_idle_days: ::core::option::Option<i32>,
+    /// ID of the plugin that delivers the PINs resetting forgotten passwords;
+    /// empty when users cannot reset them.
     ///
-    /// Field 49: `episode_title_required`
-    pub episode_title_required: ::core::option::Option<
-        ::buffa::EnumValue<EpisodeTitleRequired>,
-    >,
-    /// The prefixes, separated by "|", of the folders download clients
-    /// unpack into or leave failed downloads in, whose files are not
-    /// imported; empty for "_UNPACK_|_FAILED_".
-    ///
-    /// Field 50: `download_client_working_folders`
-    pub download_client_working_folders: ::core::option::Option<
-        ::buffa::alloc::string::String,
-    >,
+    /// Field 4: `password_reset_plugin`
+    pub password_reset_plugin: ::core::option::Option<::buffa::alloc::string::String>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
-impl ::core::fmt::Debug for AcquisitionSettings {
+impl ::core::fmt::Debug for GeneralSettings {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-        f.debug_struct("AcquisitionSettings")
-            .field("propers", &self.propers)
-            .field("prefer_indexer_flags", &self.prefer_indexer_flags)
-            .field("completed_download_handling", &self.completed_download_handling)
-            .field("auto_redownload_failed", &self.auto_redownload_failed)
-            .field("maximum_size", &self.maximum_size)
-            .field("minimum_age", &self.minimum_age)
-            .field("retention", &self.retention)
-            .field("allow_hardcoded_subs", &self.allow_hardcoded_subs)
-            .field("whitelisted_hardcoded_subs", &self.whitelisted_hardcoded_subs)
-            .field("skip_free_space_check", &self.skip_free_space_check)
-            .field("minimum_free_space", &self.minimum_free_space)
-            .field("availability_delay", &self.availability_delay)
-            .field("rss_sync_interval", &self.rss_sync_interval)
-            .field("check_finished_interval", &self.check_finished_interval)
-            .field("recycle_bin", &self.recycle_bin)
-            .field("recycle_bin_cleanup_days", &self.recycle_bin_cleanup_days)
-            .field("copy_using_hardlinks", &self.copy_using_hardlinks)
-            .field("import_extra_files", &self.import_extra_files)
-            .field("extra_file_extensions", &self.extra_file_extensions)
-            .field("delete_empty_folders", &self.delete_empty_folders)
-            .field("rename_movies", &self.rename_movies)
-            .field("replace_illegal_characters", &self.replace_illegal_characters)
-            .field("colon_replacement", &self.colon_replacement)
-            .field("movie_folder_format", &self.movie_folder_format)
-            .field("standard_movie_format", &self.standard_movie_format)
-            .field(
-                "auto_redownload_failed_from_interactive_search",
-                &self.auto_redownload_failed_from_interactive_search,
-            )
-            .field("rename_episodes", &self.rename_episodes)
-            .field("standard_episode_format", &self.standard_episode_format)
-            .field("daily_episode_format", &self.daily_episode_format)
-            .field("anime_episode_format", &self.anime_episode_format)
-            .field("series_folder_format", &self.series_folder_format)
-            .field("season_folder_format", &self.season_folder_format)
-            .field("specials_folder_format", &self.specials_folder_format)
-            .field("multi_episode_style", &self.multi_episode_style)
-            .field(
-                "auto_unmonitor_previously_downloaded_episodes",
-                &self.auto_unmonitor_previously_downloaded_episodes,
-            )
-            .field("episode_title_required", &self.episode_title_required)
-            .field(
-                "download_client_working_folders",
-                &self.download_client_working_folders,
-            )
+        f.debug_struct("GeneralSettings")
+            .field("network", &self.network)
+            .field("metadata", &self.metadata)
+            .field("session_idle_days", &self.session_idle_days)
+            .field("password_reset_plugin", &self.password_reset_plugin)
             .finish()
     }
 }
-impl AcquisitionSettings {
+impl GeneralSettings {
     /// Protobuf type URL for this message, for use with `Any::pack` and
     /// `Any::unpack_if`.
     ///
     /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
-    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.system.v1.AcquisitionSettings";
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.system.v1.GeneralSettings";
 }
-impl AcquisitionSettings {
+impl GeneralSettings {
     #[must_use = "with_* setters return `self` by value; assign or chain the result"]
     #[inline]
-    ///Sets [`Self::propers`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_propers(
-        mut self,
-        value: impl Into<::buffa::EnumValue<ProperDownload>>,
-    ) -> Self {
-        self.propers = Some(value.into());
+    ///Sets [`Self::session_idle_days`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_session_idle_days(mut self, value: i32) -> Self {
+        self.session_idle_days = Some(value);
         self
     }
     #[must_use = "with_* setters return `self` by value; assign or chain the result"]
     #[inline]
-    ///Sets [`Self::prefer_indexer_flags`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_prefer_indexer_flags(mut self, value: bool) -> Self {
-        self.prefer_indexer_flags = Some(value);
-        self
-    }
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::completed_download_handling`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_completed_download_handling(mut self, value: bool) -> Self {
-        self.completed_download_handling = Some(value);
-        self
-    }
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::auto_redownload_failed`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_auto_redownload_failed(mut self, value: bool) -> Self {
-        self.auto_redownload_failed = Some(value);
-        self
-    }
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::maximum_size`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_maximum_size(mut self, value: i32) -> Self {
-        self.maximum_size = Some(value);
-        self
-    }
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::minimum_age`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_minimum_age(mut self, value: i32) -> Self {
-        self.minimum_age = Some(value);
-        self
-    }
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::retention`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_retention(mut self, value: i32) -> Self {
-        self.retention = Some(value);
-        self
-    }
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::allow_hardcoded_subs`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_allow_hardcoded_subs(mut self, value: bool) -> Self {
-        self.allow_hardcoded_subs = Some(value);
-        self
-    }
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::skip_free_space_check`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_skip_free_space_check(mut self, value: bool) -> Self {
-        self.skip_free_space_check = Some(value);
-        self
-    }
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::minimum_free_space`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_minimum_free_space(mut self, value: i32) -> Self {
-        self.minimum_free_space = Some(value);
-        self
-    }
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::availability_delay`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_availability_delay(mut self, value: i32) -> Self {
-        self.availability_delay = Some(value);
-        self
-    }
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::rss_sync_interval`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_rss_sync_interval(mut self, value: i32) -> Self {
-        self.rss_sync_interval = Some(value);
-        self
-    }
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::check_finished_interval`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_check_finished_interval(mut self, value: i32) -> Self {
-        self.check_finished_interval = Some(value);
-        self
-    }
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::recycle_bin`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_recycle_bin(
+    ///Sets [`Self::password_reset_plugin`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_password_reset_plugin(
         mut self,
         value: impl Into<::buffa::alloc::string::String>,
     ) -> Self {
-        self.recycle_bin = Some(value.into());
-        self
-    }
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::recycle_bin_cleanup_days`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_recycle_bin_cleanup_days(mut self, value: i32) -> Self {
-        self.recycle_bin_cleanup_days = Some(value);
-        self
-    }
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::copy_using_hardlinks`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_copy_using_hardlinks(mut self, value: bool) -> Self {
-        self.copy_using_hardlinks = Some(value);
-        self
-    }
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::import_extra_files`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_import_extra_files(mut self, value: bool) -> Self {
-        self.import_extra_files = Some(value);
-        self
-    }
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::delete_empty_folders`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_delete_empty_folders(mut self, value: bool) -> Self {
-        self.delete_empty_folders = Some(value);
-        self
-    }
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::rename_movies`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_rename_movies(mut self, value: bool) -> Self {
-        self.rename_movies = Some(value);
-        self
-    }
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::replace_illegal_characters`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_replace_illegal_characters(mut self, value: bool) -> Self {
-        self.replace_illegal_characters = Some(value);
-        self
-    }
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::colon_replacement`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_colon_replacement(
-        mut self,
-        value: impl Into<::buffa::EnumValue<ColonReplacement>>,
-    ) -> Self {
-        self.colon_replacement = Some(value.into());
-        self
-    }
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::movie_folder_format`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_movie_folder_format(
-        mut self,
-        value: impl Into<::buffa::alloc::string::String>,
-    ) -> Self {
-        self.movie_folder_format = Some(value.into());
-        self
-    }
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::standard_movie_format`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_standard_movie_format(
-        mut self,
-        value: impl Into<::buffa::alloc::string::String>,
-    ) -> Self {
-        self.standard_movie_format = Some(value.into());
-        self
-    }
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::auto_redownload_failed_from_interactive_search`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_auto_redownload_failed_from_interactive_search(
-        mut self,
-        value: bool,
-    ) -> Self {
-        self.auto_redownload_failed_from_interactive_search = Some(value);
-        self
-    }
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::rename_episodes`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_rename_episodes(mut self, value: bool) -> Self {
-        self.rename_episodes = Some(value);
-        self
-    }
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::standard_episode_format`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_standard_episode_format(
-        mut self,
-        value: impl Into<::buffa::alloc::string::String>,
-    ) -> Self {
-        self.standard_episode_format = Some(value.into());
-        self
-    }
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::daily_episode_format`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_daily_episode_format(
-        mut self,
-        value: impl Into<::buffa::alloc::string::String>,
-    ) -> Self {
-        self.daily_episode_format = Some(value.into());
-        self
-    }
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::anime_episode_format`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_anime_episode_format(
-        mut self,
-        value: impl Into<::buffa::alloc::string::String>,
-    ) -> Self {
-        self.anime_episode_format = Some(value.into());
-        self
-    }
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::series_folder_format`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_series_folder_format(
-        mut self,
-        value: impl Into<::buffa::alloc::string::String>,
-    ) -> Self {
-        self.series_folder_format = Some(value.into());
-        self
-    }
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::season_folder_format`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_season_folder_format(
-        mut self,
-        value: impl Into<::buffa::alloc::string::String>,
-    ) -> Self {
-        self.season_folder_format = Some(value.into());
-        self
-    }
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::specials_folder_format`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_specials_folder_format(
-        mut self,
-        value: impl Into<::buffa::alloc::string::String>,
-    ) -> Self {
-        self.specials_folder_format = Some(value.into());
-        self
-    }
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::multi_episode_style`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_multi_episode_style(
-        mut self,
-        value: impl Into<::buffa::EnumValue<MultiEpisodeStyle>>,
-    ) -> Self {
-        self.multi_episode_style = Some(value.into());
-        self
-    }
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::auto_unmonitor_previously_downloaded_episodes`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_auto_unmonitor_previously_downloaded_episodes(
-        mut self,
-        value: bool,
-    ) -> Self {
-        self.auto_unmonitor_previously_downloaded_episodes = Some(value);
-        self
-    }
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::episode_title_required`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_episode_title_required(
-        mut self,
-        value: impl Into<::buffa::EnumValue<EpisodeTitleRequired>>,
-    ) -> Self {
-        self.episode_title_required = Some(value.into());
-        self
-    }
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::download_client_working_folders`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_download_client_working_folders(
-        mut self,
-        value: impl Into<::buffa::alloc::string::String>,
-    ) -> Self {
-        self.download_client_working_folders = Some(value.into());
+        self.password_reset_plugin = Some(value.into());
         self
     }
 }
-::buffa::impl_default_instance!(AcquisitionSettings);
-impl ::buffa::MessageName for AcquisitionSettings {
+::buffa::impl_default_instance!(GeneralSettings);
+impl ::buffa::MessageName for GeneralSettings {
     const PACKAGE: &'static str = "mavio.system.v1";
-    const NAME: &'static str = "AcquisitionSettings";
-    const FULL_NAME: &'static str = "mavio.system.v1.AcquisitionSettings";
-    const TYPE_URL: &'static str = "type.googleapis.com/mavio.system.v1.AcquisitionSettings";
+    const NAME: &'static str = "GeneralSettings";
+    const FULL_NAME: &'static str = "mavio.system.v1.GeneralSettings";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.system.v1.GeneralSettings";
 }
-impl ::buffa::Message for AcquisitionSettings {
+impl ::buffa::Message for GeneralSettings {
     /// Returns the total encoded size in bytes.
     ///
     /// Accumulates in `u64` (which cannot overflow for in-memory
@@ -5292,241 +2521,63 @@ impl ::buffa::Message for AcquisitionSettings {
     /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
     /// points reject, never a silently wrapped size.
     #[allow(clippy::let_and_return)]
-    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+    fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
         let mut size = 0u64;
-        if let Some(ref v) = self.propers {
-            size += 1u64 + ::buffa::types::int32_encoded_len(v.to_i32()) as u64;
+        if self.network.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.network.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
         }
-        if self.prefer_indexer_flags.is_some() {
-            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        if self.metadata.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.metadata.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
         }
-        if self.completed_download_handling.is_some() {
-            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
-        }
-        if self.auto_redownload_failed.is_some() {
-            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
-        }
-        if let Some(v) = self.maximum_size {
+        if let Some(v) = self.session_idle_days {
             size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
         }
-        if let Some(v) = self.minimum_age {
-            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
-        }
-        if let Some(v) = self.retention {
-            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
-        }
-        if self.allow_hardcoded_subs.is_some() {
-            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
-        }
-        for v in &self.whitelisted_hardcoded_subs {
+        if let Some(ref v) = self.password_reset_plugin {
             size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
-        if self.skip_free_space_check.is_some() {
-            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
-        }
-        if let Some(v) = self.minimum_free_space {
-            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
-        }
-        if let Some(v) = self.availability_delay {
-            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
-        }
-        if let Some(v) = self.rss_sync_interval {
-            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
-        }
-        if let Some(v) = self.check_finished_interval {
-            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
-        }
-        if let Some(ref v) = self.recycle_bin {
-            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
-        if let Some(v) = self.recycle_bin_cleanup_days {
-            size += 2u64 + ::buffa::types::int32_encoded_len(v) as u64;
-        }
-        if self.copy_using_hardlinks.is_some() {
-            size += 2u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
-        }
-        if self.import_extra_files.is_some() {
-            size += 2u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
-        }
-        for v in &self.extra_file_extensions {
-            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
-        if self.delete_empty_folders.is_some() {
-            size += 2u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
-        }
-        if self.rename_movies.is_some() {
-            size += 2u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
-        }
-        if self.replace_illegal_characters.is_some() {
-            size += 2u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
-        }
-        if let Some(ref v) = self.colon_replacement {
-            size += 2u64 + ::buffa::types::int32_encoded_len(v.to_i32()) as u64;
-        }
-        if let Some(ref v) = self.movie_folder_format {
-            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
-        if let Some(ref v) = self.standard_movie_format {
-            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
-        if self.auto_redownload_failed_from_interactive_search.is_some() {
-            size += 2u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
-        }
-        if self.rename_episodes.is_some() {
-            size += 2u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
-        }
-        if let Some(ref v) = self.standard_episode_format {
-            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
-        if let Some(ref v) = self.daily_episode_format {
-            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
-        if let Some(ref v) = self.anime_episode_format {
-            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
-        if let Some(ref v) = self.series_folder_format {
-            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
-        if let Some(ref v) = self.season_folder_format {
-            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
-        if let Some(ref v) = self.specials_folder_format {
-            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
-        if let Some(ref v) = self.multi_episode_style {
-            size += 2u64 + ::buffa::types::int32_encoded_len(v.to_i32()) as u64;
-        }
-        if self.auto_unmonitor_previously_downloaded_episodes.is_some() {
-            size += 2u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
-        }
-        if let Some(ref v) = self.episode_title_required {
-            size += 2u64 + ::buffa::types::int32_encoded_len(v.to_i32()) as u64;
-        }
-        if let Some(ref v) = self.download_client_working_folders {
-            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
     fn write_to(
         &self,
-        _cache: &mut ::buffa::SizeCache,
+        __cache: &mut ::buffa::SizeCache,
         buf: &mut impl ::buffa::EncodeSink,
     ) {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
-        if let Some(ref v) = self.propers {
-            ::buffa::types::put_int32_field(1u32, v.to_i32(), buf);
+        if self.network.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                1u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.network.write_to(__cache, buf);
         }
-        if let Some(v) = self.prefer_indexer_flags {
-            ::buffa::types::put_bool_field(2u32, v, buf);
+        if self.metadata.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                2u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.metadata.write_to(__cache, buf);
         }
-        if let Some(v) = self.completed_download_handling {
-            ::buffa::types::put_bool_field(3u32, v, buf);
+        if let Some(v) = self.session_idle_days {
+            ::buffa::types::put_int32_field(3u32, v, buf);
         }
-        if let Some(v) = self.auto_redownload_failed {
-            ::buffa::types::put_bool_field(4u32, v, buf);
-        }
-        if let Some(v) = self.maximum_size {
-            ::buffa::types::put_int32_field(5u32, v, buf);
-        }
-        if let Some(v) = self.minimum_age {
-            ::buffa::types::put_int32_field(6u32, v, buf);
-        }
-        if let Some(v) = self.retention {
-            ::buffa::types::put_int32_field(7u32, v, buf);
-        }
-        if let Some(v) = self.allow_hardcoded_subs {
-            ::buffa::types::put_bool_field(8u32, v, buf);
-        }
-        for v in &self.whitelisted_hardcoded_subs {
-            ::buffa::types::put_string_field(9u32, v, buf);
-        }
-        if let Some(v) = self.skip_free_space_check {
-            ::buffa::types::put_bool_field(10u32, v, buf);
-        }
-        if let Some(v) = self.minimum_free_space {
-            ::buffa::types::put_int32_field(11u32, v, buf);
-        }
-        if let Some(v) = self.availability_delay {
-            ::buffa::types::put_int32_field(12u32, v, buf);
-        }
-        if let Some(v) = self.rss_sync_interval {
-            ::buffa::types::put_int32_field(13u32, v, buf);
-        }
-        if let Some(v) = self.check_finished_interval {
-            ::buffa::types::put_int32_field(14u32, v, buf);
-        }
-        if let Some(ref v) = self.recycle_bin {
-            ::buffa::types::put_string_field(15u32, v, buf);
-        }
-        if let Some(v) = self.recycle_bin_cleanup_days {
-            ::buffa::types::put_int32_field(16u32, v, buf);
-        }
-        if let Some(v) = self.copy_using_hardlinks {
-            ::buffa::types::put_bool_field(17u32, v, buf);
-        }
-        if let Some(v) = self.import_extra_files {
-            ::buffa::types::put_bool_field(18u32, v, buf);
-        }
-        for v in &self.extra_file_extensions {
-            ::buffa::types::put_string_field(19u32, v, buf);
-        }
-        if let Some(v) = self.delete_empty_folders {
-            ::buffa::types::put_bool_field(20u32, v, buf);
-        }
-        if let Some(v) = self.rename_movies {
-            ::buffa::types::put_bool_field(21u32, v, buf);
-        }
-        if let Some(v) = self.replace_illegal_characters {
-            ::buffa::types::put_bool_field(22u32, v, buf);
-        }
-        if let Some(ref v) = self.colon_replacement {
-            ::buffa::types::put_int32_field(23u32, v.to_i32(), buf);
-        }
-        if let Some(ref v) = self.movie_folder_format {
-            ::buffa::types::put_string_field(24u32, v, buf);
-        }
-        if let Some(ref v) = self.standard_movie_format {
-            ::buffa::types::put_string_field(25u32, v, buf);
-        }
-        if let Some(v) = self.auto_redownload_failed_from_interactive_search {
-            ::buffa::types::put_bool_field(26u32, v, buf);
-        }
-        if let Some(v) = self.rename_episodes {
-            ::buffa::types::put_bool_field(40u32, v, buf);
-        }
-        if let Some(ref v) = self.standard_episode_format {
-            ::buffa::types::put_string_field(41u32, v, buf);
-        }
-        if let Some(ref v) = self.daily_episode_format {
-            ::buffa::types::put_string_field(42u32, v, buf);
-        }
-        if let Some(ref v) = self.anime_episode_format {
-            ::buffa::types::put_string_field(43u32, v, buf);
-        }
-        if let Some(ref v) = self.series_folder_format {
-            ::buffa::types::put_string_field(44u32, v, buf);
-        }
-        if let Some(ref v) = self.season_folder_format {
-            ::buffa::types::put_string_field(45u32, v, buf);
-        }
-        if let Some(ref v) = self.specials_folder_format {
-            ::buffa::types::put_string_field(46u32, v, buf);
-        }
-        if let Some(ref v) = self.multi_episode_style {
-            ::buffa::types::put_int32_field(47u32, v.to_i32(), buf);
-        }
-        if let Some(v) = self.auto_unmonitor_previously_downloaded_episodes {
-            ::buffa::types::put_bool_field(48u32, v, buf);
-        }
-        if let Some(ref v) = self.episode_title_required {
-            ::buffa::types::put_int32_field(49u32, v.to_i32(), buf);
-        }
-        if let Some(ref v) = self.download_client_working_folders {
-            ::buffa::types::put_string_field(50u32, v, buf);
+        if let Some(ref v) = self.password_reset_plugin {
+            ::buffa::types::put_string_field(4u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -5544,366 +2595,42 @@ impl ::buffa::Message for AcquisitionSettings {
             1u32 => {
                 ::buffa::encoding::check_wire_type(
                     tag,
-                    ::buffa::encoding::WireType::Varint,
+                    ::buffa::encoding::WireType::LengthDelimited,
                 )?;
-                self.propers = ::core::option::Option::Some(
-                    ::buffa::EnumValue::from(::buffa::types::decode_int32(buf)?),
-                );
+                ::buffa::Message::merge_length_delimited(
+                    self.network.get_or_insert_default(),
+                    buf,
+                    ctx,
+                )?;
             }
             2u32 => {
                 ::buffa::encoding::check_wire_type(
                     tag,
-                    ::buffa::encoding::WireType::Varint,
+                    ::buffa::encoding::WireType::LengthDelimited,
                 )?;
-                self.prefer_indexer_flags = ::core::option::Option::Some(
-                    ::buffa::types::decode_bool(buf)?,
-                );
+                ::buffa::Message::merge_length_delimited(
+                    self.metadata.get_or_insert_default(),
+                    buf,
+                    ctx,
+                )?;
             }
             3u32 => {
                 ::buffa::encoding::check_wire_type(
                     tag,
                     ::buffa::encoding::WireType::Varint,
                 )?;
-                self.completed_download_handling = ::core::option::Option::Some(
-                    ::buffa::types::decode_bool(buf)?,
+                self.session_idle_days = ::core::option::Option::Some(
+                    ::buffa::types::decode_int32(buf)?,
                 );
             }
             4u32 => {
                 ::buffa::encoding::check_wire_type(
                     tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                self.auto_redownload_failed = ::core::option::Option::Some(
-                    ::buffa::types::decode_bool(buf)?,
-                );
-            }
-            5u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                self.maximum_size = ::core::option::Option::Some(
-                    ::buffa::types::decode_int32(buf)?,
-                );
-            }
-            6u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                self.minimum_age = ::core::option::Option::Some(
-                    ::buffa::types::decode_int32(buf)?,
-                );
-            }
-            7u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                self.retention = ::core::option::Option::Some(
-                    ::buffa::types::decode_int32(buf)?,
-                );
-            }
-            8u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                self.allow_hardcoded_subs = ::core::option::Option::Some(
-                    ::buffa::types::decode_bool(buf)?,
-                );
-            }
-            9u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                let __elem = ::buffa::types::decode_string(buf)?;
-                ctx.register_element_memory(
-                    ::buffa::__private::element_footprint(&__elem),
-                )?;
-                self.whitelisted_hardcoded_subs.push(__elem);
-            }
-            10u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                self.skip_free_space_check = ::core::option::Option::Some(
-                    ::buffa::types::decode_bool(buf)?,
-                );
-            }
-            11u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                self.minimum_free_space = ::core::option::Option::Some(
-                    ::buffa::types::decode_int32(buf)?,
-                );
-            }
-            12u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                self.availability_delay = ::core::option::Option::Some(
-                    ::buffa::types::decode_int32(buf)?,
-                );
-            }
-            13u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                self.rss_sync_interval = ::core::option::Option::Some(
-                    ::buffa::types::decode_int32(buf)?,
-                );
-            }
-            14u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                self.check_finished_interval = ::core::option::Option::Some(
-                    ::buffa::types::decode_int32(buf)?,
-                );
-            }
-            15u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
                     ::buffa::encoding::WireType::LengthDelimited,
                 )?;
                 ::buffa::types::merge_string(
                     self
-                        .recycle_bin
-                        .get_or_insert_with(::buffa::alloc::string::String::new),
-                    buf,
-                )?;
-            }
-            16u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                self.recycle_bin_cleanup_days = ::core::option::Option::Some(
-                    ::buffa::types::decode_int32(buf)?,
-                );
-            }
-            17u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                self.copy_using_hardlinks = ::core::option::Option::Some(
-                    ::buffa::types::decode_bool(buf)?,
-                );
-            }
-            18u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                self.import_extra_files = ::core::option::Option::Some(
-                    ::buffa::types::decode_bool(buf)?,
-                );
-            }
-            19u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                let __elem = ::buffa::types::decode_string(buf)?;
-                ctx.register_element_memory(
-                    ::buffa::__private::element_footprint(&__elem),
-                )?;
-                self.extra_file_extensions.push(__elem);
-            }
-            20u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                self.delete_empty_folders = ::core::option::Option::Some(
-                    ::buffa::types::decode_bool(buf)?,
-                );
-            }
-            21u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                self.rename_movies = ::core::option::Option::Some(
-                    ::buffa::types::decode_bool(buf)?,
-                );
-            }
-            22u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                self.replace_illegal_characters = ::core::option::Option::Some(
-                    ::buffa::types::decode_bool(buf)?,
-                );
-            }
-            23u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                self.colon_replacement = ::core::option::Option::Some(
-                    ::buffa::EnumValue::from(::buffa::types::decode_int32(buf)?),
-                );
-            }
-            24u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                ::buffa::types::merge_string(
-                    self
-                        .movie_folder_format
-                        .get_or_insert_with(::buffa::alloc::string::String::new),
-                    buf,
-                )?;
-            }
-            25u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                ::buffa::types::merge_string(
-                    self
-                        .standard_movie_format
-                        .get_or_insert_with(::buffa::alloc::string::String::new),
-                    buf,
-                )?;
-            }
-            26u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                self.auto_redownload_failed_from_interactive_search = ::core::option::Option::Some(
-                    ::buffa::types::decode_bool(buf)?,
-                );
-            }
-            40u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                self.rename_episodes = ::core::option::Option::Some(
-                    ::buffa::types::decode_bool(buf)?,
-                );
-            }
-            41u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                ::buffa::types::merge_string(
-                    self
-                        .standard_episode_format
-                        .get_or_insert_with(::buffa::alloc::string::String::new),
-                    buf,
-                )?;
-            }
-            42u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                ::buffa::types::merge_string(
-                    self
-                        .daily_episode_format
-                        .get_or_insert_with(::buffa::alloc::string::String::new),
-                    buf,
-                )?;
-            }
-            43u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                ::buffa::types::merge_string(
-                    self
-                        .anime_episode_format
-                        .get_or_insert_with(::buffa::alloc::string::String::new),
-                    buf,
-                )?;
-            }
-            44u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                ::buffa::types::merge_string(
-                    self
-                        .series_folder_format
-                        .get_or_insert_with(::buffa::alloc::string::String::new),
-                    buf,
-                )?;
-            }
-            45u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                ::buffa::types::merge_string(
-                    self
-                        .season_folder_format
-                        .get_or_insert_with(::buffa::alloc::string::String::new),
-                    buf,
-                )?;
-            }
-            46u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                ::buffa::types::merge_string(
-                    self
-                        .specials_folder_format
-                        .get_or_insert_with(::buffa::alloc::string::String::new),
-                    buf,
-                )?;
-            }
-            47u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                self.multi_episode_style = ::core::option::Option::Some(
-                    ::buffa::EnumValue::from(::buffa::types::decode_int32(buf)?),
-                );
-            }
-            48u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                self.auto_unmonitor_previously_downloaded_episodes = ::core::option::Option::Some(
-                    ::buffa::types::decode_bool(buf)?,
-                );
-            }
-            49u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                self.episode_title_required = ::core::option::Option::Some(
-                    ::buffa::EnumValue::from(::buffa::types::decode_int32(buf)?),
-                );
-            }
-            50u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                ::buffa::types::merge_string(
-                    self
-                        .download_client_working_folders
+                        .password_reset_plugin
                         .get_or_insert_with(::buffa::alloc::string::String::new),
                     buf,
                 )?;
@@ -5916,48 +2643,15 @@ impl ::buffa::Message for AcquisitionSettings {
         ::core::result::Result::Ok(())
     }
     fn clear(&mut self) {
-        self.propers = ::core::option::Option::None;
-        self.prefer_indexer_flags = ::core::option::Option::None;
-        self.completed_download_handling = ::core::option::Option::None;
-        self.auto_redownload_failed = ::core::option::Option::None;
-        self.maximum_size = ::core::option::Option::None;
-        self.minimum_age = ::core::option::Option::None;
-        self.retention = ::core::option::Option::None;
-        self.allow_hardcoded_subs = ::core::option::Option::None;
-        self.whitelisted_hardcoded_subs.clear();
-        self.skip_free_space_check = ::core::option::Option::None;
-        self.minimum_free_space = ::core::option::Option::None;
-        self.availability_delay = ::core::option::Option::None;
-        self.rss_sync_interval = ::core::option::Option::None;
-        self.check_finished_interval = ::core::option::Option::None;
-        self.recycle_bin = ::core::option::Option::None;
-        self.recycle_bin_cleanup_days = ::core::option::Option::None;
-        self.copy_using_hardlinks = ::core::option::Option::None;
-        self.import_extra_files = ::core::option::Option::None;
-        self.extra_file_extensions.clear();
-        self.delete_empty_folders = ::core::option::Option::None;
-        self.rename_movies = ::core::option::Option::None;
-        self.replace_illegal_characters = ::core::option::Option::None;
-        self.colon_replacement = ::core::option::Option::None;
-        self.movie_folder_format = ::core::option::Option::None;
-        self.standard_movie_format = ::core::option::Option::None;
-        self.auto_redownload_failed_from_interactive_search = ::core::option::Option::None;
-        self.rename_episodes = ::core::option::Option::None;
-        self.standard_episode_format = ::core::option::Option::None;
-        self.daily_episode_format = ::core::option::Option::None;
-        self.anime_episode_format = ::core::option::Option::None;
-        self.series_folder_format = ::core::option::Option::None;
-        self.season_folder_format = ::core::option::Option::None;
-        self.specials_folder_format = ::core::option::Option::None;
-        self.multi_episode_style = ::core::option::Option::None;
-        self.auto_unmonitor_previously_downloaded_episodes = ::core::option::Option::None;
-        self.episode_title_required = ::core::option::Option::None;
-        self.download_client_working_folders = ::core::option::Option::None;
+        self.network = ::buffa::MessageField::none();
+        self.metadata = ::buffa::MessageField::none();
+        self.session_idle_days = ::core::option::Option::None;
+        self.password_reset_plugin = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }
-impl ::buffa::ExtensionSet for AcquisitionSettings {
-    const PROTO_FQN: &'static str = "mavio.system.v1.AcquisitionSettings";
+impl ::buffa::ExtensionSet for GeneralSettings {
+    const PROTO_FQN: &'static str = "mavio.system.v1.GeneralSettings";
     fn unknown_fields(&self) -> &::buffa::UnknownFields {
         &self.__buffa_unknown_fields
     }
@@ -5966,30 +2660,30 @@ impl ::buffa::ExtensionSet for AcquisitionSettings {
     }
 }
 #[derive(Clone, PartialEq, Default)]
-pub struct GetServerSettingsRequest {
+pub struct GetGeneralSettingsRequest {
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
-impl ::core::fmt::Debug for GetServerSettingsRequest {
+impl ::core::fmt::Debug for GetGeneralSettingsRequest {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-        f.debug_struct("GetServerSettingsRequest").finish()
+        f.debug_struct("GetGeneralSettingsRequest").finish()
     }
 }
-impl GetServerSettingsRequest {
+impl GetGeneralSettingsRequest {
     /// Protobuf type URL for this message, for use with `Any::pack` and
     /// `Any::unpack_if`.
     ///
     /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
-    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.system.v1.GetServerSettingsRequest";
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.system.v1.GetGeneralSettingsRequest";
 }
-::buffa::impl_default_instance!(GetServerSettingsRequest);
-impl ::buffa::MessageName for GetServerSettingsRequest {
+::buffa::impl_default_instance!(GetGeneralSettingsRequest);
+impl ::buffa::MessageName for GetGeneralSettingsRequest {
     const PACKAGE: &'static str = "mavio.system.v1";
-    const NAME: &'static str = "GetServerSettingsRequest";
-    const FULL_NAME: &'static str = "mavio.system.v1.GetServerSettingsRequest";
-    const TYPE_URL: &'static str = "type.googleapis.com/mavio.system.v1.GetServerSettingsRequest";
+    const NAME: &'static str = "GetGeneralSettingsRequest";
+    const FULL_NAME: &'static str = "mavio.system.v1.GetGeneralSettingsRequest";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.system.v1.GetGeneralSettingsRequest";
 }
-impl ::buffa::Message for GetServerSettingsRequest {
+impl ::buffa::Message for GetGeneralSettingsRequest {
     /// Returns the total encoded size in bytes.
     ///
     /// Accumulates in `u64` (which cannot overflow for in-memory
@@ -6036,8 +2730,8 @@ impl ::buffa::Message for GetServerSettingsRequest {
         self.__buffa_unknown_fields.clear();
     }
 }
-impl ::buffa::ExtensionSet for GetServerSettingsRequest {
-    const PROTO_FQN: &'static str = "mavio.system.v1.GetServerSettingsRequest";
+impl ::buffa::ExtensionSet for GetGeneralSettingsRequest {
+    const PROTO_FQN: &'static str = "mavio.system.v1.GetGeneralSettingsRequest";
     fn unknown_fields(&self) -> &::buffa::UnknownFields {
         &self.__buffa_unknown_fields
     }
@@ -6046,45 +2740,37 @@ impl ::buffa::ExtensionSet for GetServerSettingsRequest {
     }
 }
 #[derive(Clone, PartialEq, Default)]
-pub struct GetServerSettingsResponse {
+pub struct GetGeneralSettingsResponse {
     /// Field 1: `settings`
-    pub settings: ::buffa::MessageField<ServerSettings, ::buffa::Inline<ServerSettings>>,
-    /// The accelerations this server's ffmpeg supports, AUTO and NONE
-    /// included.
-    ///
-    /// Field 2: `available_hardware_accelerations`
-    pub available_hardware_accelerations: ::buffa::alloc::vec::Vec<
-        ::buffa::EnumValue<HardwareAcceleration>,
+    pub settings: ::buffa::MessageField<
+        GeneralSettings,
+        ::buffa::Inline<GeneralSettings>,
     >,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
-impl ::core::fmt::Debug for GetServerSettingsResponse {
+impl ::core::fmt::Debug for GetGeneralSettingsResponse {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-        f.debug_struct("GetServerSettingsResponse")
+        f.debug_struct("GetGeneralSettingsResponse")
             .field("settings", &self.settings)
-            .field(
-                "available_hardware_accelerations",
-                &self.available_hardware_accelerations,
-            )
             .finish()
     }
 }
-impl GetServerSettingsResponse {
+impl GetGeneralSettingsResponse {
     /// Protobuf type URL for this message, for use with `Any::pack` and
     /// `Any::unpack_if`.
     ///
     /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
-    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.system.v1.GetServerSettingsResponse";
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.system.v1.GetGeneralSettingsResponse";
 }
-::buffa::impl_default_instance!(GetServerSettingsResponse);
-impl ::buffa::MessageName for GetServerSettingsResponse {
+::buffa::impl_default_instance!(GetGeneralSettingsResponse);
+impl ::buffa::MessageName for GetGeneralSettingsResponse {
     const PACKAGE: &'static str = "mavio.system.v1";
-    const NAME: &'static str = "GetServerSettingsResponse";
-    const FULL_NAME: &'static str = "mavio.system.v1.GetServerSettingsResponse";
-    const TYPE_URL: &'static str = "type.googleapis.com/mavio.system.v1.GetServerSettingsResponse";
+    const NAME: &'static str = "GetGeneralSettingsResponse";
+    const FULL_NAME: &'static str = "mavio.system.v1.GetGeneralSettingsResponse";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.system.v1.GetGeneralSettingsResponse";
 }
-impl ::buffa::Message for GetServerSettingsResponse {
+impl ::buffa::Message for GetGeneralSettingsResponse {
     /// Returns the total encoded size in bytes.
     ///
     /// Accumulates in `u64` (which cannot overflow for in-memory
@@ -6105,14 +2791,6 @@ impl ::buffa::Message for GetServerSettingsResponse {
                 += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
                     + inner_size as u64;
         }
-        if !self.available_hardware_accelerations.is_empty() {
-            let payload: u64 = self
-                .available_hardware_accelerations
-                .iter()
-                .map(|v| ::buffa::types::int32_encoded_len(v.to_i32()) as u64)
-                .sum::<u64>();
-            size += 1u64 + ::buffa::encoding::varint_len(payload) as u64 + payload;
-        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -6130,17 +2808,6 @@ impl ::buffa::Message for GetServerSettingsResponse {
                 buf,
             );
             self.settings.write_to(__cache, buf);
-        }
-        if !self.available_hardware_accelerations.is_empty() {
-            let payload: u64 = self
-                .available_hardware_accelerations
-                .iter()
-                .map(|v| ::buffa::types::int32_encoded_len(v.to_i32()) as u64)
-                .sum::<u64>();
-            ::buffa::types::put_len_delimited_header(2u32, payload, buf);
-            for v in &self.available_hardware_accelerations {
-                ::buffa::types::encode_int32(v.to_i32(), buf);
-            }
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -6166,44 +2833,6 @@ impl ::buffa::Message for GetServerSettingsResponse {
                     ctx,
                 )?;
             }
-            2u32 => {
-                if tag.wire_type() == ::buffa::encoding::WireType::LengthDelimited {
-                    let len = ::buffa::encoding::decode_varint(buf)?;
-                    let len = usize::try_from(len)
-                        .map_err(|_| ::buffa::DecodeError::MessageTooLarge)?;
-                    if buf.remaining() < len {
-                        return ::core::result::Result::Err(
-                            ::buffa::DecodeError::UnexpectedEof,
-                        );
-                    }
-                    self.available_hardware_accelerations.reserve(len);
-                    let mut limited = buf.take(len);
-                    while limited.has_remaining() {
-                        self.available_hardware_accelerations
-                            .push(
-                                ::buffa::EnumValue::from(
-                                    ::buffa::types::decode_int32_packed(&mut limited)?,
-                                ),
-                            );
-                    }
-                    let leftover = limited.remaining();
-                    if leftover > 0 {
-                        limited.advance(leftover);
-                    }
-                } else if tag.wire_type() == ::buffa::encoding::WireType::Varint {
-                    self.available_hardware_accelerations
-                        .push(
-                            ::buffa::EnumValue::from(::buffa::types::decode_int32(buf)?),
-                        );
-                } else {
-                    return ::core::result::Result::Err(
-                        ::buffa::encoding::wire_type_mismatch(
-                            tag,
-                            ::buffa::encoding::WireType::LengthDelimited,
-                        ),
-                    );
-                }
-            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -6213,12 +2842,11 @@ impl ::buffa::Message for GetServerSettingsResponse {
     }
     fn clear(&mut self) {
         self.settings = ::buffa::MessageField::none();
-        self.available_hardware_accelerations.clear();
         self.__buffa_unknown_fields.clear();
     }
 }
-impl ::buffa::ExtensionSet for GetServerSettingsResponse {
-    const PROTO_FQN: &'static str = "mavio.system.v1.GetServerSettingsResponse";
+impl ::buffa::ExtensionSet for GetGeneralSettingsResponse {
+    const PROTO_FQN: &'static str = "mavio.system.v1.GetGeneralSettingsResponse";
     fn unknown_fields(&self) -> &::buffa::UnknownFields {
         &self.__buffa_unknown_fields
     }
@@ -6227,34 +2855,37 @@ impl ::buffa::ExtensionSet for GetServerSettingsResponse {
     }
 }
 #[derive(Clone, PartialEq, Default)]
-pub struct UpdateServerSettingsRequest {
+pub struct UpdateGeneralSettingsRequest {
     /// Field 1: `settings`
-    pub settings: ::buffa::MessageField<ServerSettings, ::buffa::Inline<ServerSettings>>,
+    pub settings: ::buffa::MessageField<
+        GeneralSettings,
+        ::buffa::Inline<GeneralSettings>,
+    >,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
-impl ::core::fmt::Debug for UpdateServerSettingsRequest {
+impl ::core::fmt::Debug for UpdateGeneralSettingsRequest {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-        f.debug_struct("UpdateServerSettingsRequest")
+        f.debug_struct("UpdateGeneralSettingsRequest")
             .field("settings", &self.settings)
             .finish()
     }
 }
-impl UpdateServerSettingsRequest {
+impl UpdateGeneralSettingsRequest {
     /// Protobuf type URL for this message, for use with `Any::pack` and
     /// `Any::unpack_if`.
     ///
     /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
-    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.system.v1.UpdateServerSettingsRequest";
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.system.v1.UpdateGeneralSettingsRequest";
 }
-::buffa::impl_default_instance!(UpdateServerSettingsRequest);
-impl ::buffa::MessageName for UpdateServerSettingsRequest {
+::buffa::impl_default_instance!(UpdateGeneralSettingsRequest);
+impl ::buffa::MessageName for UpdateGeneralSettingsRequest {
     const PACKAGE: &'static str = "mavio.system.v1";
-    const NAME: &'static str = "UpdateServerSettingsRequest";
-    const FULL_NAME: &'static str = "mavio.system.v1.UpdateServerSettingsRequest";
-    const TYPE_URL: &'static str = "type.googleapis.com/mavio.system.v1.UpdateServerSettingsRequest";
+    const NAME: &'static str = "UpdateGeneralSettingsRequest";
+    const FULL_NAME: &'static str = "mavio.system.v1.UpdateGeneralSettingsRequest";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.system.v1.UpdateGeneralSettingsRequest";
 }
-impl ::buffa::Message for UpdateServerSettingsRequest {
+impl ::buffa::Message for UpdateGeneralSettingsRequest {
     /// Returns the total encoded size in bytes.
     ///
     /// Accumulates in `u64` (which cannot overflow for in-memory
@@ -6329,8 +2960,8 @@ impl ::buffa::Message for UpdateServerSettingsRequest {
         self.__buffa_unknown_fields.clear();
     }
 }
-impl ::buffa::ExtensionSet for UpdateServerSettingsRequest {
-    const PROTO_FQN: &'static str = "mavio.system.v1.UpdateServerSettingsRequest";
+impl ::buffa::ExtensionSet for UpdateGeneralSettingsRequest {
+    const PROTO_FQN: &'static str = "mavio.system.v1.UpdateGeneralSettingsRequest";
     fn unknown_fields(&self) -> &::buffa::UnknownFields {
         &self.__buffa_unknown_fields
     }
@@ -6339,34 +2970,37 @@ impl ::buffa::ExtensionSet for UpdateServerSettingsRequest {
     }
 }
 #[derive(Clone, PartialEq, Default)]
-pub struct UpdateServerSettingsResponse {
+pub struct UpdateGeneralSettingsResponse {
     /// Field 1: `settings`
-    pub settings: ::buffa::MessageField<ServerSettings, ::buffa::Inline<ServerSettings>>,
+    pub settings: ::buffa::MessageField<
+        GeneralSettings,
+        ::buffa::Inline<GeneralSettings>,
+    >,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
-impl ::core::fmt::Debug for UpdateServerSettingsResponse {
+impl ::core::fmt::Debug for UpdateGeneralSettingsResponse {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-        f.debug_struct("UpdateServerSettingsResponse")
+        f.debug_struct("UpdateGeneralSettingsResponse")
             .field("settings", &self.settings)
             .finish()
     }
 }
-impl UpdateServerSettingsResponse {
+impl UpdateGeneralSettingsResponse {
     /// Protobuf type URL for this message, for use with `Any::pack` and
     /// `Any::unpack_if`.
     ///
     /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
-    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.system.v1.UpdateServerSettingsResponse";
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.system.v1.UpdateGeneralSettingsResponse";
 }
-::buffa::impl_default_instance!(UpdateServerSettingsResponse);
-impl ::buffa::MessageName for UpdateServerSettingsResponse {
+::buffa::impl_default_instance!(UpdateGeneralSettingsResponse);
+impl ::buffa::MessageName for UpdateGeneralSettingsResponse {
     const PACKAGE: &'static str = "mavio.system.v1";
-    const NAME: &'static str = "UpdateServerSettingsResponse";
-    const FULL_NAME: &'static str = "mavio.system.v1.UpdateServerSettingsResponse";
-    const TYPE_URL: &'static str = "type.googleapis.com/mavio.system.v1.UpdateServerSettingsResponse";
+    const NAME: &'static str = "UpdateGeneralSettingsResponse";
+    const FULL_NAME: &'static str = "mavio.system.v1.UpdateGeneralSettingsResponse";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.system.v1.UpdateGeneralSettingsResponse";
 }
-impl ::buffa::Message for UpdateServerSettingsResponse {
+impl ::buffa::Message for UpdateGeneralSettingsResponse {
     /// Returns the total encoded size in bytes.
     ///
     /// Accumulates in `u64` (which cannot overflow for in-memory
@@ -6441,8 +3075,8 @@ impl ::buffa::Message for UpdateServerSettingsResponse {
         self.__buffa_unknown_fields.clear();
     }
 }
-impl ::buffa::ExtensionSet for UpdateServerSettingsResponse {
-    const PROTO_FQN: &'static str = "mavio.system.v1.UpdateServerSettingsResponse";
+impl ::buffa::ExtensionSet for UpdateGeneralSettingsResponse {
+    const PROTO_FQN: &'static str = "mavio.system.v1.UpdateGeneralSettingsResponse";
     fn unknown_fields(&self) -> &::buffa::UnknownFields {
         &self.__buffa_unknown_fields
     }

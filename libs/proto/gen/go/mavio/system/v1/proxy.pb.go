@@ -1398,6 +1398,438 @@ func (b0 TestProxyResponse_builder) Build() *TestProxyResponse {
 	return m0
 }
 
+// OutboundProxies are the proxies the server's own HTTP requests go
+// through, by what they reach: each the ID of one of the server's proxies
+// (ProxyService), "system" for the system proxy, or empty for none. The
+// hosts of this machine and of the local network are reached directly.
+type OutboundProxies struct {
+	state                     protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_PluginCatalogs *string                `protobuf:"bytes,1,opt,name=plugin_catalogs,json=pluginCatalogs"`
+	xxx_hidden_Images         *string                `protobuf:"bytes,2,opt,name=images"`
+	xxx_hidden_MavioDev       *string                `protobuf:"bytes,3,opt,name=mavio_dev,json=mavioDev"`
+	xxx_hidden_Acme           *string                `protobuf:"bytes,4,opt,name=acme"`
+	XXX_raceDetectHookData    protoimpl.RaceDetectHookData
+	XXX_presence              [1]uint32
+	unknownFields             protoimpl.UnknownFields
+	sizeCache                 protoimpl.SizeCache
+}
+
+func (x *OutboundProxies) Reset() {
+	*x = OutboundProxies{}
+	mi := &file_mavio_system_v1_proxy_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *OutboundProxies) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*OutboundProxies) ProtoMessage() {}
+
+func (x *OutboundProxies) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_system_v1_proxy_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *OutboundProxies) GetPluginCatalogs() string {
+	if x != nil {
+		if x.xxx_hidden_PluginCatalogs != nil {
+			return *x.xxx_hidden_PluginCatalogs
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *OutboundProxies) GetImages() string {
+	if x != nil {
+		if x.xxx_hidden_Images != nil {
+			return *x.xxx_hidden_Images
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *OutboundProxies) GetMavioDev() string {
+	if x != nil {
+		if x.xxx_hidden_MavioDev != nil {
+			return *x.xxx_hidden_MavioDev
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *OutboundProxies) GetAcme() string {
+	if x != nil {
+		if x.xxx_hidden_Acme != nil {
+			return *x.xxx_hidden_Acme
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *OutboundProxies) SetPluginCatalogs(v string) {
+	x.xxx_hidden_PluginCatalogs = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 4)
+}
+
+func (x *OutboundProxies) SetImages(v string) {
+	x.xxx_hidden_Images = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 4)
+}
+
+func (x *OutboundProxies) SetMavioDev(v string) {
+	x.xxx_hidden_MavioDev = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 4)
+}
+
+func (x *OutboundProxies) SetAcme(v string) {
+	x.xxx_hidden_Acme = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 4)
+}
+
+func (x *OutboundProxies) HasPluginCatalogs() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *OutboundProxies) HasImages() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
+}
+
+func (x *OutboundProxies) HasMavioDev() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 2)
+}
+
+func (x *OutboundProxies) HasAcme() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 3)
+}
+
+func (x *OutboundProxies) ClearPluginCatalogs() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_PluginCatalogs = nil
+}
+
+func (x *OutboundProxies) ClearImages() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
+	x.xxx_hidden_Images = nil
+}
+
+func (x *OutboundProxies) ClearMavioDev() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 2)
+	x.xxx_hidden_MavioDev = nil
+}
+
+func (x *OutboundProxies) ClearAcme() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 3)
+	x.xxx_hidden_Acme = nil
+}
+
+type OutboundProxies_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	// Plugin catalogs and plugin packages.
+	PluginCatalogs *string
+	// Items' remote images, such as posters.
+	Images *string
+	// mavio.dev's API.
+	MavioDev *string
+	// The certificate authorities of mavio.site certificates.
+	Acme *string
+}
+
+func (b0 OutboundProxies_builder) Build() *OutboundProxies {
+	m0 := &OutboundProxies{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.PluginCatalogs != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 4)
+		x.xxx_hidden_PluginCatalogs = b.PluginCatalogs
+	}
+	if b.Images != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 4)
+		x.xxx_hidden_Images = b.Images
+	}
+	if b.MavioDev != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 4)
+		x.xxx_hidden_MavioDev = b.MavioDev
+	}
+	if b.Acme != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 4)
+		x.xxx_hidden_Acme = b.Acme
+	}
+	return m0
+}
+
+type GetOutboundProxiesRequest struct {
+	state         protoimpl.MessageState `protogen:"opaque.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetOutboundProxiesRequest) Reset() {
+	*x = GetOutboundProxiesRequest{}
+	mi := &file_mavio_system_v1_proxy_proto_msgTypes[12]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetOutboundProxiesRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetOutboundProxiesRequest) ProtoMessage() {}
+
+func (x *GetOutboundProxiesRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_system_v1_proxy_proto_msgTypes[12]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+type GetOutboundProxiesRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+}
+
+func (b0 GetOutboundProxiesRequest_builder) Build() *GetOutboundProxiesRequest {
+	m0 := &GetOutboundProxiesRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	return m0
+}
+
+type GetOutboundProxiesResponse struct {
+	state              protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Proxies *OutboundProxies       `protobuf:"bytes,1,opt,name=proxies"`
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
+}
+
+func (x *GetOutboundProxiesResponse) Reset() {
+	*x = GetOutboundProxiesResponse{}
+	mi := &file_mavio_system_v1_proxy_proto_msgTypes[13]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetOutboundProxiesResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetOutboundProxiesResponse) ProtoMessage() {}
+
+func (x *GetOutboundProxiesResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_system_v1_proxy_proto_msgTypes[13]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *GetOutboundProxiesResponse) GetProxies() *OutboundProxies {
+	if x != nil {
+		return x.xxx_hidden_Proxies
+	}
+	return nil
+}
+
+func (x *GetOutboundProxiesResponse) SetProxies(v *OutboundProxies) {
+	x.xxx_hidden_Proxies = v
+}
+
+func (x *GetOutboundProxiesResponse) HasProxies() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_Proxies != nil
+}
+
+func (x *GetOutboundProxiesResponse) ClearProxies() {
+	x.xxx_hidden_Proxies = nil
+}
+
+type GetOutboundProxiesResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Proxies *OutboundProxies
+}
+
+func (b0 GetOutboundProxiesResponse_builder) Build() *GetOutboundProxiesResponse {
+	m0 := &GetOutboundProxiesResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_Proxies = b.Proxies
+	return m0
+}
+
+type UpdateOutboundProxiesRequest struct {
+	state              protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Proxies *OutboundProxies       `protobuf:"bytes,1,opt,name=proxies"`
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
+}
+
+func (x *UpdateOutboundProxiesRequest) Reset() {
+	*x = UpdateOutboundProxiesRequest{}
+	mi := &file_mavio_system_v1_proxy_proto_msgTypes[14]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateOutboundProxiesRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateOutboundProxiesRequest) ProtoMessage() {}
+
+func (x *UpdateOutboundProxiesRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_system_v1_proxy_proto_msgTypes[14]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *UpdateOutboundProxiesRequest) GetProxies() *OutboundProxies {
+	if x != nil {
+		return x.xxx_hidden_Proxies
+	}
+	return nil
+}
+
+func (x *UpdateOutboundProxiesRequest) SetProxies(v *OutboundProxies) {
+	x.xxx_hidden_Proxies = v
+}
+
+func (x *UpdateOutboundProxiesRequest) HasProxies() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_Proxies != nil
+}
+
+func (x *UpdateOutboundProxiesRequest) ClearProxies() {
+	x.xxx_hidden_Proxies = nil
+}
+
+type UpdateOutboundProxiesRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Proxies *OutboundProxies
+}
+
+func (b0 UpdateOutboundProxiesRequest_builder) Build() *UpdateOutboundProxiesRequest {
+	m0 := &UpdateOutboundProxiesRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_Proxies = b.Proxies
+	return m0
+}
+
+type UpdateOutboundProxiesResponse struct {
+	state              protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Proxies *OutboundProxies       `protobuf:"bytes,1,opt,name=proxies"`
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
+}
+
+func (x *UpdateOutboundProxiesResponse) Reset() {
+	*x = UpdateOutboundProxiesResponse{}
+	mi := &file_mavio_system_v1_proxy_proto_msgTypes[15]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateOutboundProxiesResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateOutboundProxiesResponse) ProtoMessage() {}
+
+func (x *UpdateOutboundProxiesResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_system_v1_proxy_proto_msgTypes[15]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *UpdateOutboundProxiesResponse) GetProxies() *OutboundProxies {
+	if x != nil {
+		return x.xxx_hidden_Proxies
+	}
+	return nil
+}
+
+func (x *UpdateOutboundProxiesResponse) SetProxies(v *OutboundProxies) {
+	x.xxx_hidden_Proxies = v
+}
+
+func (x *UpdateOutboundProxiesResponse) HasProxies() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_Proxies != nil
+}
+
+func (x *UpdateOutboundProxiesResponse) ClearProxies() {
+	x.xxx_hidden_Proxies = nil
+}
+
+type UpdateOutboundProxiesResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Proxies *OutboundProxies
+}
+
+func (b0 UpdateOutboundProxiesResponse_builder) Build() *UpdateOutboundProxiesResponse {
+	m0 := &UpdateOutboundProxiesResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_Proxies = b.Proxies
+	return m0
+}
+
 var File_mavio_system_v1_proxy_proto protoreflect.FileDescriptor
 
 const file_mavio_system_v1_proxy_proto_rawDesc = "" +
@@ -1444,37 +1876,56 @@ const file_mavio_system_v1_proxy_proto_rawDesc = "" +
 	"\x06status\x18\x03 \x01(\x05R\x06status\x123\n" +
 	"\alatency\x18\x04 \x01(\v2\x19.google.protobuf.DurationR\alatency\x12\x17\n" +
 	"\aexit_ip\x18\x05 \x01(\tR\x06exitIp\x12\x18\n" +
-	"\acountry\x18\x06 \x01(\tR\acountry*j\n" +
+	"\acountry\x18\x06 \x01(\tR\acountry\"\x83\x01\n" +
+	"\x0fOutboundProxies\x12'\n" +
+	"\x0fplugin_catalogs\x18\x01 \x01(\tR\x0epluginCatalogs\x12\x16\n" +
+	"\x06images\x18\x02 \x01(\tR\x06images\x12\x1b\n" +
+	"\tmavio_dev\x18\x03 \x01(\tR\bmavioDev\x12\x12\n" +
+	"\x04acme\x18\x04 \x01(\tR\x04acme\"\x1b\n" +
+	"\x19GetOutboundProxiesRequest\"X\n" +
+	"\x1aGetOutboundProxiesResponse\x12:\n" +
+	"\aproxies\x18\x01 \x01(\v2 .mavio.system.v1.OutboundProxiesR\aproxies\"b\n" +
+	"\x1cUpdateOutboundProxiesRequest\x12B\n" +
+	"\aproxies\x18\x01 \x01(\v2 .mavio.system.v1.OutboundProxiesB\x06\xbaH\x03\xc8\x01\x01R\aproxies\"[\n" +
+	"\x1dUpdateOutboundProxiesResponse\x12:\n" +
+	"\aproxies\x18\x01 \x01(\v2 .mavio.system.v1.OutboundProxiesR\aproxies*j\n" +
 	"\tProxyKind\x12\x1a\n" +
 	"\x16PROXY_KIND_UNSPECIFIED\x10\x00\x12\x13\n" +
 	"\x0fPROXY_KIND_HTTP\x10\x01\x12\x15\n" +
 	"\x11PROXY_KIND_SOCKS4\x10\x02\x12\x15\n" +
-	"\x11PROXY_KIND_SOCKS5\x10\x032\xcf\x03\n" +
+	"\x11PROXY_KIND_SOCKS5\x10\x032\xc0\x05\n" +
 	"\fProxyService\x12]\n" +
 	"\vListProxies\x12#.mavio.system.v1.ListProxiesRequest\x1a$.mavio.system.v1.ListProxiesResponse\"\x03\x90\x02\x01\x12X\n" +
 	"\vCreateProxy\x12#.mavio.system.v1.CreateProxyRequest\x1a$.mavio.system.v1.CreateProxyResponse\x12X\n" +
 	"\vUpdateProxy\x12#.mavio.system.v1.UpdateProxyRequest\x1a$.mavio.system.v1.UpdateProxyResponse\x12X\n" +
 	"\vDeleteProxy\x12#.mavio.system.v1.DeleteProxyRequest\x1a$.mavio.system.v1.DeleteProxyResponse\x12R\n" +
-	"\tTestProxy\x12!.mavio.system.v1.TestProxyRequest\x1a\".mavio.system.v1.TestProxyResponseB\xc4\x01\n" +
+	"\tTestProxy\x12!.mavio.system.v1.TestProxyRequest\x1a\".mavio.system.v1.TestProxyResponse\x12r\n" +
+	"\x12GetOutboundProxies\x12*.mavio.system.v1.GetOutboundProxiesRequest\x1a+.mavio.system.v1.GetOutboundProxiesResponse\"\x03\x90\x02\x01\x12{\n" +
+	"\x15UpdateOutboundProxies\x12-.mavio.system.v1.UpdateOutboundProxiesRequest\x1a..mavio.system.v1.UpdateOutboundProxiesResponse\"\x03\x90\x02\x02B\xc4\x01\n" +
 	"\x13com.mavio.system.v1B\n" +
 	"ProxyProtoP\x01ZCgithub.com/mavioai/mavio/libs/proto/gen/go/mavio/system/v1;systemv1\xa2\x02\x03MSX\xaa\x02\x0fMavio.System.V1\xca\x02\x0fMavio\\System\\V1\xe2\x02\x1bMavio\\System\\V1\\GPBMetadata\xea\x02\x11Mavio::System::V1b\beditionsp\xe8\a"
 
 var file_mavio_system_v1_proxy_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_mavio_system_v1_proxy_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
+var file_mavio_system_v1_proxy_proto_msgTypes = make([]protoimpl.MessageInfo, 16)
 var file_mavio_system_v1_proxy_proto_goTypes = []any{
-	(ProxyKind)(0),              // 0: mavio.system.v1.ProxyKind
-	(*Proxy)(nil),               // 1: mavio.system.v1.Proxy
-	(*ListProxiesRequest)(nil),  // 2: mavio.system.v1.ListProxiesRequest
-	(*ListProxiesResponse)(nil), // 3: mavio.system.v1.ListProxiesResponse
-	(*CreateProxyRequest)(nil),  // 4: mavio.system.v1.CreateProxyRequest
-	(*CreateProxyResponse)(nil), // 5: mavio.system.v1.CreateProxyResponse
-	(*UpdateProxyRequest)(nil),  // 6: mavio.system.v1.UpdateProxyRequest
-	(*UpdateProxyResponse)(nil), // 7: mavio.system.v1.UpdateProxyResponse
-	(*DeleteProxyRequest)(nil),  // 8: mavio.system.v1.DeleteProxyRequest
-	(*DeleteProxyResponse)(nil), // 9: mavio.system.v1.DeleteProxyResponse
-	(*TestProxyRequest)(nil),    // 10: mavio.system.v1.TestProxyRequest
-	(*TestProxyResponse)(nil),   // 11: mavio.system.v1.TestProxyResponse
-	(*durationpb.Duration)(nil), // 12: google.protobuf.Duration
+	(ProxyKind)(0),                        // 0: mavio.system.v1.ProxyKind
+	(*Proxy)(nil),                         // 1: mavio.system.v1.Proxy
+	(*ListProxiesRequest)(nil),            // 2: mavio.system.v1.ListProxiesRequest
+	(*ListProxiesResponse)(nil),           // 3: mavio.system.v1.ListProxiesResponse
+	(*CreateProxyRequest)(nil),            // 4: mavio.system.v1.CreateProxyRequest
+	(*CreateProxyResponse)(nil),           // 5: mavio.system.v1.CreateProxyResponse
+	(*UpdateProxyRequest)(nil),            // 6: mavio.system.v1.UpdateProxyRequest
+	(*UpdateProxyResponse)(nil),           // 7: mavio.system.v1.UpdateProxyResponse
+	(*DeleteProxyRequest)(nil),            // 8: mavio.system.v1.DeleteProxyRequest
+	(*DeleteProxyResponse)(nil),           // 9: mavio.system.v1.DeleteProxyResponse
+	(*TestProxyRequest)(nil),              // 10: mavio.system.v1.TestProxyRequest
+	(*TestProxyResponse)(nil),             // 11: mavio.system.v1.TestProxyResponse
+	(*OutboundProxies)(nil),               // 12: mavio.system.v1.OutboundProxies
+	(*GetOutboundProxiesRequest)(nil),     // 13: mavio.system.v1.GetOutboundProxiesRequest
+	(*GetOutboundProxiesResponse)(nil),    // 14: mavio.system.v1.GetOutboundProxiesResponse
+	(*UpdateOutboundProxiesRequest)(nil),  // 15: mavio.system.v1.UpdateOutboundProxiesRequest
+	(*UpdateOutboundProxiesResponse)(nil), // 16: mavio.system.v1.UpdateOutboundProxiesResponse
+	(*durationpb.Duration)(nil),           // 17: google.protobuf.Duration
 }
 var file_mavio_system_v1_proxy_proto_depIdxs = []int32{
 	0,  // 0: mavio.system.v1.Proxy.kind:type_name -> mavio.system.v1.ProxyKind
@@ -1484,22 +1935,29 @@ var file_mavio_system_v1_proxy_proto_depIdxs = []int32{
 	1,  // 4: mavio.system.v1.UpdateProxyRequest.proxy:type_name -> mavio.system.v1.Proxy
 	1,  // 5: mavio.system.v1.UpdateProxyResponse.proxy:type_name -> mavio.system.v1.Proxy
 	1,  // 6: mavio.system.v1.TestProxyRequest.proxy:type_name -> mavio.system.v1.Proxy
-	12, // 7: mavio.system.v1.TestProxyResponse.latency:type_name -> google.protobuf.Duration
-	2,  // 8: mavio.system.v1.ProxyService.ListProxies:input_type -> mavio.system.v1.ListProxiesRequest
-	4,  // 9: mavio.system.v1.ProxyService.CreateProxy:input_type -> mavio.system.v1.CreateProxyRequest
-	6,  // 10: mavio.system.v1.ProxyService.UpdateProxy:input_type -> mavio.system.v1.UpdateProxyRequest
-	8,  // 11: mavio.system.v1.ProxyService.DeleteProxy:input_type -> mavio.system.v1.DeleteProxyRequest
-	10, // 12: mavio.system.v1.ProxyService.TestProxy:input_type -> mavio.system.v1.TestProxyRequest
-	3,  // 13: mavio.system.v1.ProxyService.ListProxies:output_type -> mavio.system.v1.ListProxiesResponse
-	5,  // 14: mavio.system.v1.ProxyService.CreateProxy:output_type -> mavio.system.v1.CreateProxyResponse
-	7,  // 15: mavio.system.v1.ProxyService.UpdateProxy:output_type -> mavio.system.v1.UpdateProxyResponse
-	9,  // 16: mavio.system.v1.ProxyService.DeleteProxy:output_type -> mavio.system.v1.DeleteProxyResponse
-	11, // 17: mavio.system.v1.ProxyService.TestProxy:output_type -> mavio.system.v1.TestProxyResponse
-	13, // [13:18] is the sub-list for method output_type
-	8,  // [8:13] is the sub-list for method input_type
-	8,  // [8:8] is the sub-list for extension type_name
-	8,  // [8:8] is the sub-list for extension extendee
-	0,  // [0:8] is the sub-list for field type_name
+	17, // 7: mavio.system.v1.TestProxyResponse.latency:type_name -> google.protobuf.Duration
+	12, // 8: mavio.system.v1.GetOutboundProxiesResponse.proxies:type_name -> mavio.system.v1.OutboundProxies
+	12, // 9: mavio.system.v1.UpdateOutboundProxiesRequest.proxies:type_name -> mavio.system.v1.OutboundProxies
+	12, // 10: mavio.system.v1.UpdateOutboundProxiesResponse.proxies:type_name -> mavio.system.v1.OutboundProxies
+	2,  // 11: mavio.system.v1.ProxyService.ListProxies:input_type -> mavio.system.v1.ListProxiesRequest
+	4,  // 12: mavio.system.v1.ProxyService.CreateProxy:input_type -> mavio.system.v1.CreateProxyRequest
+	6,  // 13: mavio.system.v1.ProxyService.UpdateProxy:input_type -> mavio.system.v1.UpdateProxyRequest
+	8,  // 14: mavio.system.v1.ProxyService.DeleteProxy:input_type -> mavio.system.v1.DeleteProxyRequest
+	10, // 15: mavio.system.v1.ProxyService.TestProxy:input_type -> mavio.system.v1.TestProxyRequest
+	13, // 16: mavio.system.v1.ProxyService.GetOutboundProxies:input_type -> mavio.system.v1.GetOutboundProxiesRequest
+	15, // 17: mavio.system.v1.ProxyService.UpdateOutboundProxies:input_type -> mavio.system.v1.UpdateOutboundProxiesRequest
+	3,  // 18: mavio.system.v1.ProxyService.ListProxies:output_type -> mavio.system.v1.ListProxiesResponse
+	5,  // 19: mavio.system.v1.ProxyService.CreateProxy:output_type -> mavio.system.v1.CreateProxyResponse
+	7,  // 20: mavio.system.v1.ProxyService.UpdateProxy:output_type -> mavio.system.v1.UpdateProxyResponse
+	9,  // 21: mavio.system.v1.ProxyService.DeleteProxy:output_type -> mavio.system.v1.DeleteProxyResponse
+	11, // 22: mavio.system.v1.ProxyService.TestProxy:output_type -> mavio.system.v1.TestProxyResponse
+	14, // 23: mavio.system.v1.ProxyService.GetOutboundProxies:output_type -> mavio.system.v1.GetOutboundProxiesResponse
+	16, // 24: mavio.system.v1.ProxyService.UpdateOutboundProxies:output_type -> mavio.system.v1.UpdateOutboundProxiesResponse
+	18, // [18:25] is the sub-list for method output_type
+	11, // [11:18] is the sub-list for method input_type
+	11, // [11:11] is the sub-list for extension type_name
+	11, // [11:11] is the sub-list for extension extendee
+	0,  // [0:11] is the sub-list for field type_name
 }
 
 func init() { file_mavio_system_v1_proxy_proto_init() }
@@ -1517,7 +1975,7 @@ func file_mavio_system_v1_proxy_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_mavio_system_v1_proxy_proto_rawDesc), len(file_mavio_system_v1_proxy_proto_rawDesc)),
 			NumEnums:      1,
-			NumMessages:   11,
+			NumMessages:   16,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

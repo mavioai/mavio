@@ -11,6 +11,7 @@ import (
 	"github.com/mavioai/mavio/apps/server/internal/activity"
 	"github.com/mavioai/mavio/apps/server/internal/auth"
 	"github.com/mavioai/mavio/apps/server/internal/proxies"
+	"github.com/mavioai/mavio/apps/server/internal/settings"
 	"github.com/mavioai/mavio/libs/core"
 	pluginv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1"
 	systemv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/system/v1"
@@ -23,6 +24,9 @@ type ProxyService struct {
 	Proxies *proxies.Service
 	// Activity records administrators' changes; nil records none.
 	Activity *activity.Log
+	// Settings keeps the outbound proxies; nil serves none and changes
+	// none.
+	Settings *settings.Manager
 }
 
 var _ systemv1connect.ProxyServiceHandler = (*ProxyService)(nil)
@@ -223,4 +227,31 @@ func systemProxyToProto(p *pluginv1.Proxy) *systemv1.Proxy {
 		Port: new(p.GetPort()), Username: new(p.GetUsername()), HasPassword: new(p.GetPassword() != ""),
 		System: new(true), Bypass: p.GetBypass(),
 	}.Build()
+}
+
+func outboundToProto(o *core.OutboundProxies) *systemv1.OutboundProxies {
+	return systemv1.OutboundProxies_builder{PluginCatalogs: &o.PluginCatalogs, Images: &o.Images, MavioDev: &o.MavioDev, Acme: &o.ACME}.Build()
+}
+
+// GetOutboundProxies returns the proxies of the server's own requests.
+func (s *ProxyService) GetOutboundProxies(ctx context.Context, _ *systemv1.GetOutboundProxiesRequest) (*systemv1.GetOutboundProxiesResponse, error) {
+	if _, err := admin(ctx); err != nil {
+		return nil, err
+	}
+	set := currentSettings(s.Settings)
+	return systemv1.GetOutboundProxiesResponse_builder{Proxies: outboundToProto(&set.Network.Proxies)}.Build(), nil
+}
+
+// UpdateOutboundProxies replaces the proxies of the server's own
+// requests.
+func (s *ProxyService) UpdateOutboundProxies(ctx context.Context, req *systemv1.UpdateOutboundProxiesRequest) (*systemv1.UpdateOutboundProxiesResponse, error) {
+	o := req.GetProxies()
+	set, err := changeSettings(ctx, s.Settings, s.Activity, "the outbound proxies", func(cur *core.ServerSettings) error {
+		cur.Network.Proxies = core.OutboundProxies{PluginCatalogs: o.GetPluginCatalogs(), Images: o.GetImages(), MavioDev: o.GetMavioDev(), ACME: o.GetAcme()}
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	return systemv1.UpdateOutboundProxiesResponse_builder{Proxies: outboundToProto(&set.Network.Proxies)}.Build(), nil
 }

@@ -12,7 +12,6 @@ import (
 	"github.com/mavioai/mavio/apps/server/internal/load"
 	"github.com/mavioai/mavio/apps/server/internal/logs"
 	"github.com/mavioai/mavio/apps/server/internal/settings"
-	"github.com/mavioai/mavio/libs/core"
 	systemv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/system/v1"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/system/v1/systemv1connect"
 )
@@ -28,9 +27,6 @@ type SystemService struct {
 	// Settings keeps the server settings; nil serves the defaults and
 	// changes none.
 	Settings *settings.Manager
-	// Accelerations lists the hardware accelerations available; nil means
-	// auto and none.
-	Accelerations func() []core.HardwareAcceleration
 	// Logs keeps the recent log records; nil keeps none.
 	Logs *logs.Ring
 	// Activity records administrators' changes; nil records none.

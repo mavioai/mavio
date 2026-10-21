@@ -7,15 +7,13 @@ import { enumDesc, fileDesc, messageDesc, serviceDesc } from "@bufbuild/protobuf
 import { file_buf_validate_validate } from "../../../buf/validate/validate_pb";
 import type { Duration, Timestamp } from "@bufbuild/protobuf/wkt";
 import { file_google_protobuf_duration, file_google_protobuf_timestamp } from "@bufbuild/protobuf/wkt";
-import type { MinimumAvailability, NewItemMonitor } from "../../acquisition/v1/wanted_pb";
-import { file_mavio_acquisition_v1_wanted } from "../../acquisition/v1/wanted_pb";
 import type { Message } from "@bufbuild/protobuf";
 
 /**
  * Describes the file mavio/system/v1/system.proto.
  */
 export const file_mavio_system_v1_system: GenFile = /*@__PURE__*/
-  fileDesc("ChxtYXZpby9zeXN0ZW0vdjEvc3lzdGVtLnByb3RvEg9tYXZpby5zeXN0ZW0udjEiEgoQR2V0SGVhbHRoUmVxdWVzdCKtAQoRR2V0SGVhbHRoUmVzcG9uc2USOQoGc3RhdHVzGAEgASgOMikubWF2aW8uc3lzdGVtLnYxLkdldEhlYWx0aFJlc3BvbnNlLlN0YXR1cxIPCgd2ZXJzaW9uGAIgASgJIkwKBlN0YXR1cxIWChJTVEFUVVNfVU5TUEVDSUZJRUQQABISCg5TVEFUVVNfU0VSVklORxABEhYKElNUQVRVU19OT1RfU0VSVklORxACIhYKFEdldFN5c3RlbUluZm9SZXF1ZXN0IpwBChVHZXRTeXN0ZW1JbmZvUmVzcG9uc2USDwoHdmVyc2lvbhgBIAEoCRIKCgJvcxgCIAEoCRIMCgRhcmNoGAMgASgJEhAKCGRhdGFiYXNlGAQgASgJEhYKDmZmbXBlZ192ZXJzaW9uGAUgASgJEi4KCnN0YXJ0X3RpbWUYBiABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wIhYKFEdldFN5c3RlbUxvYWRSZXF1ZXN0IkUKFUdldFN5c3RlbUxvYWRSZXNwb25zZRIsCgdzYW1wbGVzGAEgAygLMhsubWF2aW8uc3lzdGVtLnYxLkxvYWRTYW1wbGUi4gEKCkxvYWRTYW1wbGUSKAoEdGltZRgBIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASJQoDY3B1GAIgASgLMhgubWF2aW8uc3lzdGVtLnYxLkNwdUxvYWQSKwoGbWVtb3J5GAMgASgLMhsubWF2aW8uc3lzdGVtLnYxLk1lbW9yeUxvYWQSJwoEZGlzaxgEIAEoCzIZLm1hdmlvLnN5c3RlbS52MS5EaXNrTG9hZBItCgduZXR3b3JrGAUgASgLMhwubWF2aW8uc3lzdGVtLnYxLk5ldHdvcmtMb2FkIjcKB0NwdUxvYWQSDAoEdXNlchgBIAEoARIOCgZzeXN0ZW0YAiABKAESDgoGc2VydmVyGAMgASgBIn4KCk1lbW9yeUxvYWQSEwoLdG90YWxfYnl0ZXMYASABKAMSEgoKdXNlZF9ieXRlcxgCIAEoAxIYChBzd2FwX3RvdGFsX2J5dGVzGAMgASgDEhcKD3N3YXBfdXNlZF9ieXRlcxgEIAEoAxIUCgxzZXJ2ZXJfYnl0ZXMYBSABKAMiigEKCERpc2tMb2FkEhEKCXJlYWRfcmF0ZRgBIAEoARISCgp3cml0ZV9yYXRlGAIgASgBEhIKCnJlYWRfYnl0ZXMYAyABKAMSFQoNd3JpdHRlbl9ieXRlcxgEIAEoAxITCgt0b3RhbF9ieXRlcxgFIAEoAxIXCg9hdmFpbGFibGVfYnl0ZXMYBiABKAMiYgoLTmV0d29ya0xvYWQSFAoMcmVjZWl2ZV9yYXRlGAEgASgBEhEKCXNlbmRfcmF0ZRgCIAEoARIWCg5yZWNlaXZlZF9ieXRlcxgDIAEoAxISCgpzZW50X2J5dGVzGAQgASgDIo0EChNUcmFuc2NvZGluZ1NldHRpbmdzElAKFWhhcmR3YXJlX2FjY2VsZXJhdGlvbhgBIAEoDjIlLm1hdmlvLnN5c3RlbS52MS5IYXJkd2FyZUFjY2VsZXJhdGlvbkIKukgHggEEEAEgABIZChFoYXJkd2FyZV9lbmNvZGluZxgCIAEoCBIWCg5lbmNvZGVyX3ByZXNldBgDIAEoCRIbCghoMjY0X2NyZhgEIAEoBUIJukgGGgQYMygAEhsKCGgyNjVfY3JmGAUgASgFQgm6SAYaBBgzKAASGAoHdGhyZWFkcxgGIAEoBUIHukgEGgIoABIZChF0b25lbWFwX2FsZ29yaXRobRgHIAEoCRIVCg10b25lbWFwX3JhbmdlGAggASgJEiUKDXRvbmVtYXBfZGVzYXQYCSABKAFCDrpICxIJKQAAAAAAAAAAEiQKDHRvbmVtYXBfcGVhaxgKIAEoAUIOukgLEgkpAAAAAAAAAAASGgoSZGVpbnRlcmxhY2VfbWV0aG9kGAsgASgJEh8KF2RlaW50ZXJsYWNlX2RvdWJsZV9yYXRlGAwgASgIEi4KDWRvd25taXhfYm9vc3QYDSABKAFCF7pIFBISGQAAAAAAAAhAKQAAAAAAAOA/EhoKEmNyb3BfYmxhY2tfYm9yZGVycxgOIAEoCBIVCg10cmFuc2NvZGVfZGlyGA8gASgJIukBCg9OZXR3b3JrU2V0dGluZ3MSHAoLc2VydmVyX25hbWUYASABKAlCB7pIBHICGGQSEAoIYmFzZV91cmwYAiABKAkSHwoKaHR0cHNfcG9ydBgDIAEoBUILukgIGgYY//8DKAASGAoQY2VydGlmaWNhdGVfcGF0aBgEIAEoCRIQCghrZXlfcGF0aBgFIAEoCRIXCg9sb2NhbF9kaXNjb3ZlcnkYBiABKAgSDQoFcmVsYXkYByABKAgSMQoHcHJveGllcxgIIAEoCzIgLm1hdmlvLnN5c3RlbS52MS5PdXRib3VuZFByb3hpZXMiWwoPT3V0Ym91bmRQcm94aWVzEhcKD3BsdWdpbl9jYXRhbG9ncxgBIAEoCRIOCgZpbWFnZXMYAiABKAkSEQoJbWF2aW9fZGV2GAMgASgJEgwKBGFjbWUYBCABKAki0QMKDlNlcnZlclNldHRpbmdzEkEKC3RyYW5zY29kaW5nGAEgASgLMiQubWF2aW8uc3lzdGVtLnYxLlRyYW5zY29kaW5nU2V0dGluZ3NCBrpIA8gBARI5CgduZXR3b3JrGAIgASgLMiAubWF2aW8uc3lzdGVtLnYxLk5ldHdvcmtTZXR0aW5nc0IGukgDyAEBEiYKD3BsdWdpbl9jYXRhbG9ncxgDIAMoCUINukgKkgEHIgVyA4gBARIvCgt1cGRhdGVfdGltZRgEIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASHQoVcGFzc3dvcmRfcmVzZXRfcGx1Z2luGAUgASgJEjkKC2FjcXVpc2l0aW9uGAYgASgLMiQubWF2aW8uc3lzdGVtLnYxLkFjcXVpc2l0aW9uU2V0dGluZ3MSMgoIcmVxdWVzdHMYByABKAsyIC5tYXZpby5zeXN0ZW0udjEuUmVxdWVzdFNldHRpbmdzEjMKCG1ldGFkYXRhGAggASgLMiEubWF2aW8uc3lzdGVtLnYxLk1ldGFkYXRhU2V0dGluZ3MSJQoRc2Vzc2lvbl9pZGxlX2RheXMYCSABKAVCCrpIBxoFGMIcKAAipQYKD1JlcXVlc3RTZXR0aW5ncxIeChZkZWZhdWx0X3JlcXVlc3RfbW92aWVzGAEgASgIEh4KFmRlZmF1bHRfcmVxdWVzdF9zZXJpZXMYAiABKAgSIwobZGVmYXVsdF9hdXRvX2FwcHJvdmVfbW92aWVzGAMgASgIEiMKG2RlZmF1bHRfYXV0b19hcHByb3ZlX3NlcmllcxgEIAEoCBIdChVkZWZhdWx0X3JlcG9ydF9pc3N1ZXMYBSABKAgSIgoRbW92aWVfcXVvdGFfbGltaXQYBiABKAVCB7pIBBoCKAASIQoQbW92aWVfcXVvdGFfZGF5cxgHIAEoBUIHukgEGgIoABIjChJzZXJpZXNfcXVvdGFfbGltaXQYCCABKAVCB7pIBBoCKAASIgoRc2VyaWVzX3F1b3RhX2RheXMYCSABKAVCB7pIBBoCKAASGAoQbW92aWVfbGlicmFyeV9pZBgKIAEoCRIgChhtb3ZpZV9xdWFsaXR5X3Byb2ZpbGVfaWQYCyABKAkSUQoUbWluaW11bV9hdmFpbGFiaWxpdHkYDCABKA4yKS5tYXZpby5hY3F1aXNpdGlvbi52MS5NaW5pbXVtQXZhaWxhYmlsaXR5Qgi6SAWCAQIQARIZChFzZXJpZXNfbGlicmFyeV9pZBgNIAEoCRIhChlzZXJpZXNfcXVhbGl0eV9wcm9maWxlX2lkGA4gASgJEhUKDXNlYXNvbl9mb2xkZXIYDyABKAgSSQoRbW9uaXRvcl9uZXdfaXRlbXMYECABKA4yJC5tYXZpby5hY3F1aXNpdGlvbi52MS5OZXdJdGVtTW9uaXRvckIIukgFggECEAESEAoIc3BlY2lhbHMYESABKAgSGAoQYW5pbWVfbGlicmFyeV9pZBgSIAEoCRIgChhhbmltZV9xdWFsaXR5X3Byb2ZpbGVfaWQYEyABKAkSMAoQYmxvY2tsaXN0ZWRfdGFncxgUIAMoCUIWukgTkgEQIg5yDDIKXlteL10rLy4rJBIqChZibG9ja2xpc3RlZF90YWdzX2xpbWl0GBUgASgFQgq6SAcaBRj6ASgAImsKEE1ldGFkYXRhU2V0dGluZ3MSMAoScHJlZmVycmVkX2xhbmd1YWdlGAEgASgJQhS6SBFyDzINXihbYS16XXsyfSk/JBIlCgdjb3VudHJ5GAIgASgJQhS6SBFyDzINXihbQS1aXXsyfSk/JCKPCwoTQWNxdWlzaXRpb25TZXR0aW5ncxI8Cgdwcm9wZXJzGAEgASgOMh8ubWF2aW8uc3lzdGVtLnYxLlByb3BlckRvd25sb2FkQgq6SAeCAQQQASAAEhwKFHByZWZlcl9pbmRleGVyX2ZsYWdzGAIgASgIEiMKG2NvbXBsZXRlZF9kb3dubG9hZF9oYW5kbGluZxgDIAEoCBIeChZhdXRvX3JlZG93bmxvYWRfZmFpbGVkGAQgASgIEh0KDG1heGltdW1fc2l6ZRgFIAEoBUIHukgEGgIoABIcCgttaW5pbXVtX2FnZRgGIAEoBUIHukgEGgIoABIaCglyZXRlbnRpb24YByABKAVCB7pIBBoCKAASHAoUYWxsb3dfaGFyZGNvZGVkX3N1YnMYCCABKAgSIgoad2hpdGVsaXN0ZWRfaGFyZGNvZGVkX3N1YnMYCSADKAkSHQoVc2tpcF9mcmVlX3NwYWNlX2NoZWNrGAogASgIEiMKEm1pbmltdW1fZnJlZV9zcGFjZRgLIAEoBUIHukgEGgIoABIaChJhdmFpbGFiaWxpdHlfZGVsYXkYDCABKAUSIgoRcnNzX3N5bmNfaW50ZXJ2YWwYDSABKAVCB7pIBBoCKAASKAoXY2hlY2tfZmluaXNoZWRfaW50ZXJ2YWwYDiABKAVCB7pIBBoCKAESEwoLcmVjeWNsZV9iaW4YDyABKAkSKQoYcmVjeWNsZV9iaW5fY2xlYW51cF9kYXlzGBAgASgFQge6SAQaAigAEhwKFGNvcHlfdXNpbmdfaGFyZGxpbmtzGBEgASgIEhoKEmltcG9ydF9leHRyYV9maWxlcxgSIAEoCBIdChVleHRyYV9maWxlX2V4dGVuc2lvbnMYEyADKAkSHAoUZGVsZXRlX2VtcHR5X2ZvbGRlcnMYFCABKAgSFQoNcmVuYW1lX21vdmllcxgVIAEoCBIiChpyZXBsYWNlX2lsbGVnYWxfY2hhcmFjdGVycxgWIAEoCBJIChFjb2xvbl9yZXBsYWNlbWVudBgXIAEoDjIhLm1hdmlvLnN5c3RlbS52MS5Db2xvblJlcGxhY2VtZW50Qgq6SAeCAQQQASAAEiQKE21vdmllX2ZvbGRlcl9mb3JtYXQYGCABKAlCB7pIBHICEAESJgoVc3RhbmRhcmRfbW92aWVfZm9ybWF0GBkgASgJQge6SARyAhABEjYKLmF1dG9fcmVkb3dubG9hZF9mYWlsZWRfZnJvbV9pbnRlcmFjdGl2ZV9zZWFyY2gYGiABKAgSFwoPcmVuYW1lX2VwaXNvZGVzGCggASgIEh8KF3N0YW5kYXJkX2VwaXNvZGVfZm9ybWF0GCkgASgJEhwKFGRhaWx5X2VwaXNvZGVfZm9ybWF0GCogASgJEhwKFGFuaW1lX2VwaXNvZGVfZm9ybWF0GCsgASgJEhwKFHNlcmllc19mb2xkZXJfZm9ybWF0GCwgASgJEhwKFHNlYXNvbl9mb2xkZXJfZm9ybWF0GC0gASgJEh4KFnNwZWNpYWxzX2ZvbGRlcl9mb3JtYXQYLiABKAkSSQoTbXVsdGlfZXBpc29kZV9zdHlsZRgvIAEoDjIiLm1hdmlvLnN5c3RlbS52MS5NdWx0aUVwaXNvZGVTdHlsZUIIukgFggECEAESNQotYXV0b191bm1vbml0b3JfcHJldmlvdXNseV9kb3dubG9hZGVkX2VwaXNvZGVzGDAgASgIEk8KFmVwaXNvZGVfdGl0bGVfcmVxdWlyZWQYMSABKA4yJS5tYXZpby5zeXN0ZW0udjEuRXBpc29kZVRpdGxlUmVxdWlyZWRCCLpIBYIBAhABEicKH2Rvd25sb2FkX2NsaWVudF93b3JraW5nX2ZvbGRlcnMYMiABKAkiGgoYR2V0U2VydmVyU2V0dGluZ3NSZXF1ZXN0Ip8BChlHZXRTZXJ2ZXJTZXR0aW5nc1Jlc3BvbnNlEjEKCHNldHRpbmdzGAEgASgLMh8ubWF2aW8uc3lzdGVtLnYxLlNlcnZlclNldHRpbmdzEk8KIGF2YWlsYWJsZV9oYXJkd2FyZV9hY2NlbGVyYXRpb25zGAIgAygOMiUubWF2aW8uc3lzdGVtLnYxLkhhcmR3YXJlQWNjZWxlcmF0aW9uIlgKG1VwZGF0ZVNlcnZlclNldHRpbmdzUmVxdWVzdBI5CghzZXR0aW5ncxgBIAEoCzIfLm1hdmlvLnN5c3RlbS52MS5TZXJ2ZXJTZXR0aW5nc0IGukgDyAEBIlEKHFVwZGF0ZVNlcnZlclNldHRpbmdzUmVzcG9uc2USMQoIc2V0dGluZ3MYASABKAsyHy5tYXZpby5zeXN0ZW0udjEuU2VydmVyU2V0dGluZ3MiOwoUTGlzdERpcmVjdG9yeVJlcXVlc3QSDAoEcGF0aBgBIAEoCRIVCg1pbmNsdWRlX2ZpbGVzGAIgASgIIjwKDkRpcmVjdG9yeUVudHJ5EgwKBG5hbWUYASABKAkSDAoEcGF0aBgCIAEoCRIOCgZpc19kaXIYAyABKAgiZwoVTGlzdERpcmVjdG9yeVJlc3BvbnNlEgwKBHBhdGgYASABKAkSDgoGcGFyZW50GAIgASgJEjAKB2VudHJpZXMYAyADKAsyHy5tYXZpby5zeXN0ZW0udjEuRGlyZWN0b3J5RW50cnki4wEKCUxvZ1JlY29yZBIoCgR0aW1lGAEgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBIoCgVsZXZlbBgCIAEoDjIZLm1hdmlvLnN5c3RlbS52MS5Mb2dMZXZlbBIPCgdtZXNzYWdlGAMgASgJEj4KCmF0dHJpYnV0ZXMYBCADKAsyKi5tYXZpby5zeXN0ZW0udjEuTG9nUmVjb3JkLkF0dHJpYnV0ZXNFbnRyeRoxCg9BdHRyaWJ1dGVzRW50cnkSCwoDa2V5GAEgASgJEg0KBXZhbHVlGAIgASgJOgI4ASKjAQoPTGlzdExvZ3NSZXF1ZXN0EjYKCW1pbl9sZXZlbBgBIAEoDjIZLm1hdmlvLnN5c3RlbS52MS5Mb2dMZXZlbEIIukgFggECEAESKgoHbWF4X2FnZRgCIAEoCzIZLmdvb2dsZS5wcm90b2J1Zi5EdXJhdGlvbhIZCgVsaW1pdBgDIAEoBUIKukgHGgUY6AcoABIRCglwbHVnaW5faWQYBCABKAkiPwoQTGlzdExvZ3NSZXNwb25zZRIrCgdyZWNvcmRzGAEgAygLMhoubWF2aW8uc3lzdGVtLnYxLkxvZ1JlY29yZCqlAQoUSGFyZHdhcmVBY2NlbGVyYXRpb24SJQohSEFSRFdBUkVfQUNDRUxFUkFUSU9OX1VOU1BFQ0lGSUVEEAASHgoaSEFSRFdBUkVfQUNDRUxFUkFUSU9OX0FVVE8QARIeChpIQVJEV0FSRV9BQ0NFTEVSQVRJT05fTk9ORRACEiYKIkhBUkRXQVJFX0FDQ0VMRVJBVElPTl9WSURFT1RPT0xCT1gQAyqgAQoOUHJvcGVyRG93bmxvYWQSHwobUFJPUEVSX0RPV05MT0FEX1VOU1BFQ0lGSUVEEAASJgoiUFJPUEVSX0RPV05MT0FEX1BSRUZFUl9BTkRfVVBHUkFERRABEiIKHlBST1BFUl9ET1dOTE9BRF9ET19OT1RfVVBHUkFERRACEiEKHVBST1BFUl9ET1dOTE9BRF9ET19OT1RfUFJFRkVSEAMq1gEKEENvbG9uUmVwbGFjZW1lbnQSIQodQ09MT05fUkVQTEFDRU1FTlRfVU5TUEVDSUZJRUQQABIcChhDT0xPTl9SRVBMQUNFTUVOVF9ERUxFVEUQARIaChZDT0xPTl9SRVBMQUNFTUVOVF9EQVNIEAISIAocQ09MT05fUkVQTEFDRU1FTlRfU1BBQ0VfREFTSBADEiYKIkNPTE9OX1JFUExBQ0VNRU5UX1NQQUNFX0RBU0hfU1BBQ0UQBBIbChdDT0xPTl9SRVBMQUNFTUVOVF9TTUFSVBAFKoECChFNdWx0aUVwaXNvZGVTdHlsZRIjCh9NVUxUSV9FUElTT0RFX1NUWUxFX1VOU1BFQ0lGSUVEEAASHgoaTVVMVElfRVBJU09ERV9TVFlMRV9FWFRFTkQQARIhCh1NVUxUSV9FUElTT0RFX1NUWUxFX0RVUExJQ0FURRACEh4KGk1VTFRJX0VQSVNPREVfU1RZTEVfUkVQRUFUEAMSHQoZTVVMVElfRVBJU09ERV9TVFlMRV9TQ0VORRAEEh0KGU1VTFRJX0VQSVNPREVfU1RZTEVfUkFOR0UQBRImCiJNVUxUSV9FUElTT0RFX1NUWUxFX1BSRUZJWEVEX1JBTkdFEAYqtAEKFEVwaXNvZGVUaXRsZVJlcXVpcmVkEiYKIkVQSVNPREVfVElUTEVfUkVRVUlSRURfVU5TUEVDSUZJRUQQABIhCh1FUElTT0RFX1RJVExFX1JFUVVJUkVEX0FMV0FZUxABEi8KK0VQSVNPREVfVElUTEVfUkVRVUlSRURfQlVMS19TRUFTT05fUkVMRUFTRVMQAhIgChxFUElTT0RFX1RJVExFX1JFUVVJUkVEX05FVkVSEAMqdwoITG9nTGV2ZWwSGQoVTE9HX0xFVkVMX1VOU1BFQ0lGSUVEEAASEwoPTE9HX0xFVkVMX0RFQlVHEAESEgoOTE9HX0xFVkVMX0lORk8QAhISCg5MT0dfTEVWRUxfV0FSThADEhMKD0xPR19MRVZFTF9FUlJPUhAEMtMFCg1TeXN0ZW1TZXJ2aWNlElcKCUdldEhlYWx0aBIhLm1hdmlvLnN5c3RlbS52MS5HZXRIZWFsdGhSZXF1ZXN0GiIubWF2aW8uc3lzdGVtLnYxLkdldEhlYWx0aFJlc3BvbnNlIgOQAgESYwoNR2V0U3lzdGVtSW5mbxIlLm1hdmlvLnN5c3RlbS52MS5HZXRTeXN0ZW1JbmZvUmVxdWVzdBomLm1hdmlvLnN5c3RlbS52MS5HZXRTeXN0ZW1JbmZvUmVzcG9uc2UiA5ACARJjCg1HZXRTeXN0ZW1Mb2FkEiUubWF2aW8uc3lzdGVtLnYxLkdldFN5c3RlbUxvYWRSZXF1ZXN0GiYubWF2aW8uc3lzdGVtLnYxLkdldFN5c3RlbUxvYWRSZXNwb25zZSIDkAIBEm8KEUdldFNlcnZlclNldHRpbmdzEikubWF2aW8uc3lzdGVtLnYxLkdldFNlcnZlclNldHRpbmdzUmVxdWVzdBoqLm1hdmlvLnN5c3RlbS52MS5HZXRTZXJ2ZXJTZXR0aW5nc1Jlc3BvbnNlIgOQAgEScwoUVXBkYXRlU2VydmVyU2V0dGluZ3MSLC5tYXZpby5zeXN0ZW0udjEuVXBkYXRlU2VydmVyU2V0dGluZ3NSZXF1ZXN0Gi0ubWF2aW8uc3lzdGVtLnYxLlVwZGF0ZVNlcnZlclNldHRpbmdzUmVzcG9uc2USYwoNTGlzdERpcmVjdG9yeRIlLm1hdmlvLnN5c3RlbS52MS5MaXN0RGlyZWN0b3J5UmVxdWVzdBomLm1hdmlvLnN5c3RlbS52MS5MaXN0RGlyZWN0b3J5UmVzcG9uc2UiA5ACARJUCghMaXN0TG9ncxIgLm1hdmlvLnN5c3RlbS52MS5MaXN0TG9nc1JlcXVlc3QaIS5tYXZpby5zeXN0ZW0udjEuTGlzdExvZ3NSZXNwb25zZSIDkAIBQsUBChNjb20ubWF2aW8uc3lzdGVtLnYxQgtTeXN0ZW1Qcm90b1ABWkNnaXRodWIuY29tL21hdmlvYWkvbWF2aW8vbGlicy9wcm90by9nZW4vZ28vbWF2aW8vc3lzdGVtL3YxO3N5c3RlbXYxogIDTVNYqgIPTWF2aW8uU3lzdGVtLlYxygIPTWF2aW9cU3lzdGVtXFYx4gIbTWF2aW9cU3lzdGVtXFYxXEdQQk1ldGFkYXRh6gIRTWF2aW86OlN5c3RlbTo6VjFiCGVkaXRpb25zcOgH", [file_buf_validate_validate, file_google_protobuf_duration, file_google_protobuf_timestamp, file_mavio_acquisition_v1_wanted]);
+  fileDesc("ChxtYXZpby9zeXN0ZW0vdjEvc3lzdGVtLnByb3RvEg9tYXZpby5zeXN0ZW0udjEiEgoQR2V0SGVhbHRoUmVxdWVzdCKtAQoRR2V0SGVhbHRoUmVzcG9uc2USOQoGc3RhdHVzGAEgASgOMikubWF2aW8uc3lzdGVtLnYxLkdldEhlYWx0aFJlc3BvbnNlLlN0YXR1cxIPCgd2ZXJzaW9uGAIgASgJIkwKBlN0YXR1cxIWChJTVEFUVVNfVU5TUEVDSUZJRUQQABISCg5TVEFUVVNfU0VSVklORxABEhYKElNUQVRVU19OT1RfU0VSVklORxACIhYKFEdldFN5c3RlbUluZm9SZXF1ZXN0IpwBChVHZXRTeXN0ZW1JbmZvUmVzcG9uc2USDwoHdmVyc2lvbhgBIAEoCRIKCgJvcxgCIAEoCRIMCgRhcmNoGAMgASgJEhAKCGRhdGFiYXNlGAQgASgJEhYKDmZmbXBlZ192ZXJzaW9uGAUgASgJEi4KCnN0YXJ0X3RpbWUYBiABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wIhYKFEdldFN5c3RlbUxvYWRSZXF1ZXN0IkUKFUdldFN5c3RlbUxvYWRSZXNwb25zZRIsCgdzYW1wbGVzGAEgAygLMhsubWF2aW8uc3lzdGVtLnYxLkxvYWRTYW1wbGUi4gEKCkxvYWRTYW1wbGUSKAoEdGltZRgBIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASJQoDY3B1GAIgASgLMhgubWF2aW8uc3lzdGVtLnYxLkNwdUxvYWQSKwoGbWVtb3J5GAMgASgLMhsubWF2aW8uc3lzdGVtLnYxLk1lbW9yeUxvYWQSJwoEZGlzaxgEIAEoCzIZLm1hdmlvLnN5c3RlbS52MS5EaXNrTG9hZBItCgduZXR3b3JrGAUgASgLMhwubWF2aW8uc3lzdGVtLnYxLk5ldHdvcmtMb2FkIjcKB0NwdUxvYWQSDAoEdXNlchgBIAEoARIOCgZzeXN0ZW0YAiABKAESDgoGc2VydmVyGAMgASgBIn4KCk1lbW9yeUxvYWQSEwoLdG90YWxfYnl0ZXMYASABKAMSEgoKdXNlZF9ieXRlcxgCIAEoAxIYChBzd2FwX3RvdGFsX2J5dGVzGAMgASgDEhcKD3N3YXBfdXNlZF9ieXRlcxgEIAEoAxIUCgxzZXJ2ZXJfYnl0ZXMYBSABKAMiigEKCERpc2tMb2FkEhEKCXJlYWRfcmF0ZRgBIAEoARISCgp3cml0ZV9yYXRlGAIgASgBEhIKCnJlYWRfYnl0ZXMYAyABKAMSFQoNd3JpdHRlbl9ieXRlcxgEIAEoAxITCgt0b3RhbF9ieXRlcxgFIAEoAxIXCg9hdmFpbGFibGVfYnl0ZXMYBiABKAMiYgoLTmV0d29ya0xvYWQSFAoMcmVjZWl2ZV9yYXRlGAEgASgBEhEKCXNlbmRfcmF0ZRgCIAEoARIWCg5yZWNlaXZlZF9ieXRlcxgDIAEoAxISCgpzZW50X2J5dGVzGAQgASgDIrYBCg9OZXR3b3JrU2V0dGluZ3MSHAoLc2VydmVyX25hbWUYASABKAlCB7pIBHICGGQSEAoIYmFzZV91cmwYAiABKAkSHwoKaHR0cHNfcG9ydBgDIAEoBUILukgIGgYY//8DKAASGAoQY2VydGlmaWNhdGVfcGF0aBgEIAEoCRIQCghrZXlfcGF0aBgFIAEoCRIXCg9sb2NhbF9kaXNjb3ZlcnkYBiABKAgSDQoFcmVsYXkYByABKAgiawoQTWV0YWRhdGFTZXR0aW5ncxIwChJwcmVmZXJyZWRfbGFuZ3VhZ2UYASABKAlCFLpIEXIPMg1eKFthLXpdezJ9KT8kEiUKB2NvdW50cnkYAiABKAlCFLpIEXIPMg1eKFtBLVpdezJ9KT8kIs8BCg9HZW5lcmFsU2V0dGluZ3MSOQoHbmV0d29yaxgBIAEoCzIgLm1hdmlvLnN5c3RlbS52MS5OZXR3b3JrU2V0dGluZ3NCBrpIA8gBARI7CghtZXRhZGF0YRgCIAEoCzIhLm1hdmlvLnN5c3RlbS52MS5NZXRhZGF0YVNldHRpbmdzQga6SAPIAQESJQoRc2Vzc2lvbl9pZGxlX2RheXMYAyABKAVCCrpIBxoFGMIcKAESHQoVcGFzc3dvcmRfcmVzZXRfcGx1Z2luGAQgASgJIhsKGUdldEdlbmVyYWxTZXR0aW5nc1JlcXVlc3QiUAoaR2V0R2VuZXJhbFNldHRpbmdzUmVzcG9uc2USMgoIc2V0dGluZ3MYASABKAsyIC5tYXZpby5zeXN0ZW0udjEuR2VuZXJhbFNldHRpbmdzIloKHFVwZGF0ZUdlbmVyYWxTZXR0aW5nc1JlcXVlc3QSOgoIc2V0dGluZ3MYASABKAsyIC5tYXZpby5zeXN0ZW0udjEuR2VuZXJhbFNldHRpbmdzQga6SAPIAQEiUwodVXBkYXRlR2VuZXJhbFNldHRpbmdzUmVzcG9uc2USMgoIc2V0dGluZ3MYASABKAsyIC5tYXZpby5zeXN0ZW0udjEuR2VuZXJhbFNldHRpbmdzIjsKFExpc3REaXJlY3RvcnlSZXF1ZXN0EgwKBHBhdGgYASABKAkSFQoNaW5jbHVkZV9maWxlcxgCIAEoCCI8Cg5EaXJlY3RvcnlFbnRyeRIMCgRuYW1lGAEgASgJEgwKBHBhdGgYAiABKAkSDgoGaXNfZGlyGAMgASgIImcKFUxpc3REaXJlY3RvcnlSZXNwb25zZRIMCgRwYXRoGAEgASgJEg4KBnBhcmVudBgCIAEoCRIwCgdlbnRyaWVzGAMgAygLMh8ubWF2aW8uc3lzdGVtLnYxLkRpcmVjdG9yeUVudHJ5IuMBCglMb2dSZWNvcmQSKAoEdGltZRgBIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASKAoFbGV2ZWwYAiABKA4yGS5tYXZpby5zeXN0ZW0udjEuTG9nTGV2ZWwSDwoHbWVzc2FnZRgDIAEoCRI+CgphdHRyaWJ1dGVzGAQgAygLMioubWF2aW8uc3lzdGVtLnYxLkxvZ1JlY29yZC5BdHRyaWJ1dGVzRW50cnkaMQoPQXR0cmlidXRlc0VudHJ5EgsKA2tleRgBIAEoCRINCgV2YWx1ZRgCIAEoCToCOAEiowEKD0xpc3RMb2dzUmVxdWVzdBI2CgltaW5fbGV2ZWwYASABKA4yGS5tYXZpby5zeXN0ZW0udjEuTG9nTGV2ZWxCCLpIBYIBAhABEioKB21heF9hZ2UYAiABKAsyGS5nb29nbGUucHJvdG9idWYuRHVyYXRpb24SGQoFbGltaXQYAyABKAVCCrpIBxoFGOgHKAASEQoJcGx1Z2luX2lkGAQgASgJIj8KEExpc3RMb2dzUmVzcG9uc2USKwoHcmVjb3JkcxgBIAMoCzIaLm1hdmlvLnN5c3RlbS52MS5Mb2dSZWNvcmQqdwoITG9nTGV2ZWwSGQoVTE9HX0xFVkVMX1VOU1BFQ0lGSUVEEAASEwoPTE9HX0xFVkVMX0RFQlVHEAESEgoOTE9HX0xFVkVMX0lORk8QAhISCg5MT0dfTEVWRUxfV0FSThADEhMKD0xPR19MRVZFTF9FUlJPUhAEMt4FCg1TeXN0ZW1TZXJ2aWNlElcKCUdldEhlYWx0aBIhLm1hdmlvLnN5c3RlbS52MS5HZXRIZWFsdGhSZXF1ZXN0GiIubWF2aW8uc3lzdGVtLnYxLkdldEhlYWx0aFJlc3BvbnNlIgOQAgESYwoNR2V0U3lzdGVtSW5mbxIlLm1hdmlvLnN5c3RlbS52MS5HZXRTeXN0ZW1JbmZvUmVxdWVzdBomLm1hdmlvLnN5c3RlbS52MS5HZXRTeXN0ZW1JbmZvUmVzcG9uc2UiA5ACARJjCg1HZXRTeXN0ZW1Mb2FkEiUubWF2aW8uc3lzdGVtLnYxLkdldFN5c3RlbUxvYWRSZXF1ZXN0GiYubWF2aW8uc3lzdGVtLnYxLkdldFN5c3RlbUxvYWRSZXNwb25zZSIDkAIBEnIKEkdldEdlbmVyYWxTZXR0aW5ncxIqLm1hdmlvLnN5c3RlbS52MS5HZXRHZW5lcmFsU2V0dGluZ3NSZXF1ZXN0GisubWF2aW8uc3lzdGVtLnYxLkdldEdlbmVyYWxTZXR0aW5nc1Jlc3BvbnNlIgOQAgESewoVVXBkYXRlR2VuZXJhbFNldHRpbmdzEi0ubWF2aW8uc3lzdGVtLnYxLlVwZGF0ZUdlbmVyYWxTZXR0aW5nc1JlcXVlc3QaLi5tYXZpby5zeXN0ZW0udjEuVXBkYXRlR2VuZXJhbFNldHRpbmdzUmVzcG9uc2UiA5ACAhJjCg1MaXN0RGlyZWN0b3J5EiUubWF2aW8uc3lzdGVtLnYxLkxpc3REaXJlY3RvcnlSZXF1ZXN0GiYubWF2aW8uc3lzdGVtLnYxLkxpc3REaXJlY3RvcnlSZXNwb25zZSIDkAIBElQKCExpc3RMb2dzEiAubWF2aW8uc3lzdGVtLnYxLkxpc3RMb2dzUmVxdWVzdBohLm1hdmlvLnN5c3RlbS52MS5MaXN0TG9nc1Jlc3BvbnNlIgOQAgFCxQEKE2NvbS5tYXZpby5zeXN0ZW0udjFCC1N5c3RlbVByb3RvUAFaQ2dpdGh1Yi5jb20vbWF2aW9haS9tYXZpby9saWJzL3Byb3RvL2dlbi9nby9tYXZpby9zeXN0ZW0vdjE7c3lzdGVtdjGiAgNNU1iqAg9NYXZpby5TeXN0ZW0uVjHKAg9NYXZpb1xTeXN0ZW1cVjHiAhtNYXZpb1xTeXN0ZW1cVjFcR1BCTWV0YWRhdGHqAhFNYXZpbzo6U3lzdGVtOjpWMWIIZWRpdGlvbnNw6Ac", [file_buf_validate_validate, file_google_protobuf_duration, file_google_protobuf_timestamp]);
 
 /**
  * @generated from message mavio.system.v1.GetHealthRequest
@@ -385,109 +383,6 @@ export const NetworkLoadSchema: GenMessage<NetworkLoad> = /*@__PURE__*/
   messageDesc(file_mavio_system_v1_system, 10);
 
 /**
- * TranscodingSettings steer transcodes.
- *
- * @generated from message mavio.system.v1.TranscodingSettings
- */
-export type TranscodingSettings = Message<"mavio.system.v1.TranscodingSettings"> & {
-  /**
-   * @generated from field: mavio.system.v1.HardwareAcceleration hardware_acceleration = 1;
-   */
-  hardwareAcceleration: HardwareAcceleration;
-
-  /**
-   * @generated from field: bool hardware_encoding = 2;
-   */
-  hardwareEncoding: boolean;
-
-  /**
-   * "", "ultrafast", "superfast", "veryfast", "faster", "fast", "medium",
-   * "slow", "slower" or "veryslow"; empty picks one by the source.
-   *
-   * @generated from field: string encoder_preset = 3;
-   */
-  encoderPreset: string;
-
-  /**
-   * @generated from field: int32 h264_crf = 4;
-   */
-  h264Crf: number;
-
-  /**
-   * @generated from field: int32 h265_crf = 5;
-   */
-  h265Crf: number;
-
-  /**
-   * 0 lets ffmpeg decide.
-   *
-   * @generated from field: int32 threads = 6;
-   */
-  threads: number;
-
-  /**
-   * "bt2390", "hable", "mobius", "reinhard", "clip", "linear" or "gamma".
-   *
-   * @generated from field: string tonemap_algorithm = 7;
-   */
-  tonemapAlgorithm: string;
-
-  /**
-   * "auto", "tv" or "pc".
-   *
-   * @generated from field: string tonemap_range = 8;
-   */
-  tonemapRange: string;
-
-  /**
-   * @generated from field: double tonemap_desat = 9;
-   */
-  tonemapDesat: number;
-
-  /**
-   * @generated from field: double tonemap_peak = 10;
-   */
-  tonemapPeak: number;
-
-  /**
-   * "yadif" or "bwdif".
-   *
-   * @generated from field: string deinterlace_method = 11;
-   */
-  deinterlaceMethod: string;
-
-  /**
-   * @generated from field: bool deinterlace_double_rate = 12;
-   */
-  deinterlaceDoubleRate: boolean;
-
-  /**
-   * @generated from field: double downmix_boost = 13;
-   */
-  downmixBoost: number;
-
-  /**
-   * @generated from field: bool crop_black_borders = 14;
-   */
-  cropBlackBorders: boolean;
-
-  /**
-   * Absolute folder for running transcodes; empty uses the folder the
-   * server was started with.
-   *
-   * @generated from field: string transcode_dir = 15;
-   */
-  transcodeDir: string;
-};
-
-/**
- * Describes the message mavio.system.v1.TranscodingSettings.
- * Use `create(TranscodingSettingsSchema)` to create a new message.
- */
-export const TranscodingSettingsSchema: GenMessage<TranscodingSettings> = /*@__PURE__*/
-  messageDesc(file_mavio_system_v1_system, 11);
-
-/**
  * NetworkSettings decide how the server is reached and how it reaches
  * other sites.
  *
@@ -541,14 +436,6 @@ export type NetworkSettings = Message<"mavio.system.v1.NetworkSettings"> & {
    * @generated from field: bool relay = 7;
    */
   relay: boolean;
-
-  /**
-   * The proxies of the server's own HTTP requests; unset in an update
-   * keeps the current ones.
-   *
-   * @generated from field: mavio.system.v1.OutboundProxies proxies = 8;
-   */
-  proxies?: OutboundProxies | undefined;
 };
 
 /**
@@ -556,273 +443,7 @@ export type NetworkSettings = Message<"mavio.system.v1.NetworkSettings"> & {
  * Use `create(NetworkSettingsSchema)` to create a new message.
  */
 export const NetworkSettingsSchema: GenMessage<NetworkSettings> = /*@__PURE__*/
-  messageDesc(file_mavio_system_v1_system, 12);
-
-/**
- * OutboundProxies are the proxies the server's own HTTP requests go
- * through, by what they reach: each the ID of one of the server's proxies
- * (ProxyService), "system" for the system proxy, or empty for none. The
- * hosts of this machine and of the local network are reached directly.
- *
- * @generated from message mavio.system.v1.OutboundProxies
- */
-export type OutboundProxies = Message<"mavio.system.v1.OutboundProxies"> & {
-  /**
-   * Plugin catalogs and plugin packages.
-   *
-   * @generated from field: string plugin_catalogs = 1;
-   */
-  pluginCatalogs: string;
-
-  /**
-   * Items' remote images, such as posters.
-   *
-   * @generated from field: string images = 2;
-   */
-  images: string;
-
-  /**
-   * mavio.dev's API.
-   *
-   * @generated from field: string mavio_dev = 3;
-   */
-  mavioDev: string;
-
-  /**
-   * The certificate authorities of mavio.site certificates.
-   *
-   * @generated from field: string acme = 4;
-   */
-  acme: string;
-};
-
-/**
- * Describes the message mavio.system.v1.OutboundProxies.
- * Use `create(OutboundProxiesSchema)` to create a new message.
- */
-export const OutboundProxiesSchema: GenMessage<OutboundProxies> = /*@__PURE__*/
-  messageDesc(file_mavio_system_v1_system, 13);
-
-/**
- * ServerSettings are what administrators change while the server runs.
- *
- * @generated from message mavio.system.v1.ServerSettings
- */
-export type ServerSettings = Message<"mavio.system.v1.ServerSettings"> & {
-  /**
-   * @generated from field: mavio.system.v1.TranscodingSettings transcoding = 1;
-   */
-  transcoding?: TranscodingSettings | undefined;
-
-  /**
-   * @generated from field: mavio.system.v1.NetworkSettings network = 2;
-   */
-  network?: NetworkSettings | undefined;
-
-  /**
-   * URLs of the plugin catalogs plugins are installed from.
-   *
-   * @generated from field: repeated string plugin_catalogs = 3;
-   */
-  pluginCatalogs: string[];
-
-  /**
-   * @generated from field: google.protobuf.Timestamp update_time = 4;
-   */
-  updateTime?: Timestamp | undefined;
-
-  /**
-   * ID of the plugin that delivers the PINs resetting forgotten passwords;
-   * empty when users cannot reset them.
-   *
-   * @generated from field: string password_reset_plugin = 5;
-   */
-  passwordResetPlugin: string;
-
-  /**
-   * How releases are chosen, downloaded and imported; unset in an update
-   * keeps the current ones.
-   *
-   * @generated from field: mavio.system.v1.AcquisitionSettings acquisition = 6;
-   */
-  acquisition?: AcquisitionSettings | undefined;
-
-  /**
-   * What users may request by default and where approved requests go;
-   * unset in an update keeps the current ones.
-   *
-   * @generated from field: mavio.system.v1.RequestSettings requests = 7;
-   */
-  requests?: RequestSettings | undefined;
-
-  /**
-   * The language and country of metadata beside libraries'; unset in an
-   * update keeps the current ones.
-   *
-   * @generated from field: mavio.system.v1.MetadataSettings metadata = 8;
-   */
-  metadata?: MetadataSettings | undefined;
-
-  /**
-   * How many days a signed-in device stays signed in unused, 1–3650; 0 in
-   * an update keeps the current value.
-   *
-   * @generated from field: int32 session_idle_days = 9;
-   */
-  sessionIdleDays: number;
-};
-
-/**
- * Describes the message mavio.system.v1.ServerSettings.
- * Use `create(ServerSettingsSchema)` to create a new message.
- */
-export const ServerSettingsSchema: GenMessage<ServerSettings> = /*@__PURE__*/
-  messageDesc(file_mavio_system_v1_system, 14);
-
-/**
- * RequestSettings are the defaults of users' requests and where approved
- * requests are acquired.
- *
- * @generated from message mavio.system.v1.RequestSettings
- */
-export type RequestSettings = Message<"mavio.system.v1.RequestSettings"> & {
-  /**
-   * The request permissions new users get.
-   *
-   * @generated from field: bool default_request_movies = 1;
-   */
-  defaultRequestMovies: boolean;
-
-  /**
-   * @generated from field: bool default_request_series = 2;
-   */
-  defaultRequestSeries: boolean;
-
-  /**
-   * @generated from field: bool default_auto_approve_movies = 3;
-   */
-  defaultAutoApproveMovies: boolean;
-
-  /**
-   * @generated from field: bool default_auto_approve_series = 4;
-   */
-  defaultAutoApproveSeries: boolean;
-
-  /**
-   * @generated from field: bool default_report_issues = 5;
-   */
-  defaultReportIssues: boolean;
-
-  /**
-   * The quotas of users without their own: requests of movies, or seasons
-   * of series, in the last days; a limit of 0 is unlimited, 0 days all
-   * time.
-   *
-   * @generated from field: int32 movie_quota_limit = 6;
-   */
-  movieQuotaLimit: number;
-
-  /**
-   * @generated from field: int32 movie_quota_days = 7;
-   */
-  movieQuotaDays: number;
-
-  /**
-   * @generated from field: int32 series_quota_limit = 8;
-   */
-  seriesQuotaLimit: number;
-
-  /**
-   * @generated from field: int32 series_quota_days = 9;
-   */
-  seriesQuotaDays: number;
-
-  /**
-   * The movie library and quality profile approved movies are added to;
-   * empty, approvals fail.
-   *
-   * @generated from field: string movie_library_id = 10;
-   */
-  movieLibraryId: string;
-
-  /**
-   * @generated from field: string movie_quality_profile_id = 11;
-   */
-  movieQualityProfileId: string;
-
-  /**
-   * @generated from field: mavio.acquisition.v1.MinimumAvailability minimum_availability = 12;
-   */
-  minimumAvailability: MinimumAvailability;
-
-  /**
-   * The show library and quality profile approved series are added to;
-   * empty, approvals fail.
-   *
-   * @generated from field: string series_library_id = 13;
-   */
-  seriesLibraryId: string;
-
-  /**
-   * @generated from field: string series_quality_profile_id = 14;
-   */
-  seriesQualityProfileId: string;
-
-  /**
-   * @generated from field: bool season_folder = 15;
-   */
-  seasonFolder: boolean;
-
-  /**
-   * @generated from field: mavio.acquisition.v1.NewItemMonitor monitor_new_items = 16;
-   */
-  monitorNewItems: NewItemMonitor;
-
-  /**
-   * Allow requesting specials, season 0.
-   *
-   * @generated from field: bool specials = 17;
-   */
-  specials: boolean;
-
-  /**
-   * The show library and quality profile approved anime series are added
-   * to, as Seerr's anime settings of Sonarr; empty uses those of series.
-   * Anime series are numbered absolutely either way.
-   *
-   * @generated from field: string anime_library_id = 18;
-   */
-  animeLibraryId: string;
-
-  /**
-   * @generated from field: string anime_quality_profile_id = 19;
-   */
-  animeQualityProfileId: string;
-
-  /**
-   * Keywords of discovery providers, as "<plugin>/<keyword>", whose movies
-   * and series the blocklisted tags job blocklists weekly, as Seerr's
-   * blocklistedTags.
-   *
-   * @generated from field: repeated string blocklisted_tags = 20;
-   */
-  blocklistedTags: string[];
-
-  /**
-   * How many pages of each order of a keyword's titles the job
-   * blocklists, 0–250; 0 for 50.
-   *
-   * @generated from field: int32 blocklisted_tags_limit = 21;
-   */
-  blocklistedTagsLimit: number;
-};
-
-/**
- * Describes the message mavio.system.v1.RequestSettings.
- * Use `create(RequestSettingsSchema)` to create a new message.
- */
-export const RequestSettingsSchema: GenMessage<RequestSettings> = /*@__PURE__*/
-  messageDesc(file_mavio_system_v1_system, 15);
+  messageDesc(file_mavio_system_v1_system, 11);
 
 /**
  * MetadataSettings are the server's language and country of metadata
@@ -852,333 +473,115 @@ export type MetadataSettings = Message<"mavio.system.v1.MetadataSettings"> & {
  * Use `create(MetadataSettingsSchema)` to create a new message.
  */
 export const MetadataSettingsSchema: GenMessage<MetadataSettings> = /*@__PURE__*/
+  messageDesc(file_mavio_system_v1_system, 12);
+
+/**
+ * GeneralSettings are the server's own settings, beside those of its
+ * domains, which their services keep.
+ *
+ * @generated from message mavio.system.v1.GeneralSettings
+ */
+export type GeneralSettings = Message<"mavio.system.v1.GeneralSettings"> & {
+  /**
+   * The server's name and how it is reached.
+   *
+   * @generated from field: mavio.system.v1.NetworkSettings network = 1;
+   */
+  network?: NetworkSettings | undefined;
+
+  /**
+   * The language and country of metadata beside libraries'.
+   *
+   * @generated from field: mavio.system.v1.MetadataSettings metadata = 2;
+   */
+  metadata?: MetadataSettings | undefined;
+
+  /**
+   * How many days a signed-in device stays signed in unused.
+   *
+   * @generated from field: int32 session_idle_days = 3;
+   */
+  sessionIdleDays: number;
+
+  /**
+   * ID of the plugin that delivers the PINs resetting forgotten passwords;
+   * empty when users cannot reset them.
+   *
+   * @generated from field: string password_reset_plugin = 4;
+   */
+  passwordResetPlugin: string;
+};
+
+/**
+ * Describes the message mavio.system.v1.GeneralSettings.
+ * Use `create(GeneralSettingsSchema)` to create a new message.
+ */
+export const GeneralSettingsSchema: GenMessage<GeneralSettings> = /*@__PURE__*/
+  messageDesc(file_mavio_system_v1_system, 13);
+
+/**
+ * @generated from message mavio.system.v1.GetGeneralSettingsRequest
+ */
+export type GetGeneralSettingsRequest = Message<"mavio.system.v1.GetGeneralSettingsRequest"> & {
+};
+
+/**
+ * Describes the message mavio.system.v1.GetGeneralSettingsRequest.
+ * Use `create(GetGeneralSettingsRequestSchema)` to create a new message.
+ */
+export const GetGeneralSettingsRequestSchema: GenMessage<GetGeneralSettingsRequest> = /*@__PURE__*/
+  messageDesc(file_mavio_system_v1_system, 14);
+
+/**
+ * @generated from message mavio.system.v1.GetGeneralSettingsResponse
+ */
+export type GetGeneralSettingsResponse = Message<"mavio.system.v1.GetGeneralSettingsResponse"> & {
+  /**
+   * @generated from field: mavio.system.v1.GeneralSettings settings = 1;
+   */
+  settings?: GeneralSettings | undefined;
+};
+
+/**
+ * Describes the message mavio.system.v1.GetGeneralSettingsResponse.
+ * Use `create(GetGeneralSettingsResponseSchema)` to create a new message.
+ */
+export const GetGeneralSettingsResponseSchema: GenMessage<GetGeneralSettingsResponse> = /*@__PURE__*/
+  messageDesc(file_mavio_system_v1_system, 15);
+
+/**
+ * @generated from message mavio.system.v1.UpdateGeneralSettingsRequest
+ */
+export type UpdateGeneralSettingsRequest = Message<"mavio.system.v1.UpdateGeneralSettingsRequest"> & {
+  /**
+   * @generated from field: mavio.system.v1.GeneralSettings settings = 1;
+   */
+  settings?: GeneralSettings | undefined;
+};
+
+/**
+ * Describes the message mavio.system.v1.UpdateGeneralSettingsRequest.
+ * Use `create(UpdateGeneralSettingsRequestSchema)` to create a new message.
+ */
+export const UpdateGeneralSettingsRequestSchema: GenMessage<UpdateGeneralSettingsRequest> = /*@__PURE__*/
   messageDesc(file_mavio_system_v1_system, 16);
 
 /**
- * AcquisitionSettings are how releases are chosen, downloaded and
- * imported, as Radarr's and Sonarr's settings.
- *
- * @generated from message mavio.system.v1.AcquisitionSettings
+ * @generated from message mavio.system.v1.UpdateGeneralSettingsResponse
  */
-export type AcquisitionSettings = Message<"mavio.system.v1.AcquisitionSettings"> & {
+export type UpdateGeneralSettingsResponse = Message<"mavio.system.v1.UpdateGeneralSettingsResponse"> & {
   /**
-   * @generated from field: mavio.system.v1.ProperDownload propers = 1;
+   * @generated from field: mavio.system.v1.GeneralSettings settings = 1;
    */
-  propers: ProperDownload;
-
-  /**
-   * Rank releases by their indexer flags.
-   *
-   * @generated from field: bool prefer_indexer_flags = 2;
-   */
-  preferIndexerFlags: boolean;
-
-  /**
-   * Import finished downloads.
-   *
-   * @generated from field: bool completed_download_handling = 3;
-   */
-  completedDownloadHandling: boolean;
-
-  /**
-   * Search again when a download fails.
-   *
-   * @generated from field: bool auto_redownload_failed = 4;
-   */
-  autoRedownloadFailed: boolean;
-
-  /**
-   * In megabytes; 0 for none.
-   *
-   * @generated from field: int32 maximum_size = 5;
-   */
-  maximumSize: number;
-
-  /**
-   * How old usenet releases must be, in minutes.
-   *
-   * @generated from field: int32 minimum_age = 6;
-   */
-  minimumAge: number;
-
-  /**
-   * Usenet retention in days; 0 for none.
-   *
-   * @generated from field: int32 retention = 7;
-   */
-  retention: number;
-
-  /**
-   * @generated from field: bool allow_hardcoded_subs = 8;
-   */
-  allowHardcodedSubs: boolean;
-
-  /**
-   * Hardcoded subtitles allowed when others are not.
-   *
-   * @generated from field: repeated string whitelisted_hardcoded_subs = 9;
-   */
-  whitelistedHardcodedSubs: string[];
-
-  /**
-   * @generated from field: bool skip_free_space_check = 10;
-   */
-  skipFreeSpaceCheck: boolean;
-
-  /**
-   * What an import must leave free, in megabytes.
-   *
-   * @generated from field: int32 minimum_free_space = 11;
-   */
-  minimumFreeSpace: number;
-
-  /**
-   * Shifts when movies count as available, in days.
-   *
-   * @generated from field: int32 availability_delay = 12;
-   */
-  availabilityDelay: number;
-
-  /**
-   * In minutes, 0 or at least 10; 0 disables RSS sync.
-   *
-   * @generated from field: int32 rss_sync_interval = 13;
-   */
-  rssSyncInterval: number;
-
-  /**
-   * How often download clients are polled, in minutes.
-   *
-   * @generated from field: int32 check_finished_interval = 14;
-   */
-  checkFinishedInterval: number;
-
-  /**
-   * Absolute folder replaced and deleted files go to; empty deletes them.
-   *
-   * @generated from field: string recycle_bin = 15;
-   */
-  recycleBin: string;
-
-  /**
-   * Days files stay in the recycle bin; 0 keeps them.
-   *
-   * @generated from field: int32 recycle_bin_cleanup_days = 16;
-   */
-  recycleBinCleanupDays: number;
-
-  /**
-   * Hard link instead of copying files whose download keeps seeding.
-   *
-   * @generated from field: bool copy_using_hardlinks = 17;
-   */
-  copyUsingHardlinks: boolean;
-
-  /**
-   * @generated from field: bool import_extra_files = 18;
-   */
-  importExtraFiles: boolean;
-
-  /**
-   * Extensions of extra files imported with the media, such as "srt".
-   *
-   * @generated from field: repeated string extra_file_extensions = 19;
-   */
-  extraFileExtensions: string[];
-
-  /**
-   * @generated from field: bool delete_empty_folders = 20;
-   */
-  deleteEmptyFolders: boolean;
-
-  /**
-   * Name movie files by standard_movie_format; otherwise they keep their
-   * names.
-   *
-   * @generated from field: bool rename_movies = 21;
-   */
-  renameMovies: boolean;
-
-  /**
-   * @generated from field: bool replace_illegal_characters = 22;
-   */
-  replaceIllegalCharacters: boolean;
-
-  /**
-   * @generated from field: mavio.system.v1.ColonReplacement colon_replacement = 23;
-   */
-  colonReplacement: ColonReplacement;
-
-  /**
-   * Templates, such as "{Movie Title} ({Release Year})".
-   *
-   * @generated from field: string movie_folder_format = 24;
-   */
-  movieFolderFormat: string;
-
-  /**
-   * @generated from field: string standard_movie_format = 25;
-   */
-  standardMovieFormat: string;
-
-  /**
-   * Search again when a download grabbed from an interactive search
-   * fails, when auto_redownload_failed is set.
-   *
-   * @generated from field: bool auto_redownload_failed_from_interactive_search = 26;
-   */
-  autoRedownloadFailedFromInteractiveSearch: boolean;
-
-  /**
-   * Whether episode files are named by the episode formats.
-   *
-   * @generated from field: bool rename_episodes = 40;
-   */
-  renameEpisodes: boolean;
-
-  /**
-   * Templates of episode files of standard, daily and anime series and of
-   * the folders of series, seasons and specials, such as
-   * "{Series Title} - S{season:00}E{episode:00}"; empty for the defaults.
-   *
-   * @generated from field: string standard_episode_format = 41;
-   */
-  standardEpisodeFormat: string;
-
-  /**
-   * @generated from field: string daily_episode_format = 42;
-   */
-  dailyEpisodeFormat: string;
-
-  /**
-   * @generated from field: string anime_episode_format = 43;
-   */
-  animeEpisodeFormat: string;
-
-  /**
-   * @generated from field: string series_folder_format = 44;
-   */
-  seriesFolderFormat: string;
-
-  /**
-   * @generated from field: string season_folder_format = 45;
-   */
-  seasonFolderFormat: string;
-
-  /**
-   * @generated from field: string specials_folder_format = 46;
-   */
-  specialsFolderFormat: string;
-
-  /**
-   * Unspecified for MULTI_EPISODE_STYLE_PREFIXED_RANGE.
-   *
-   * @generated from field: mavio.system.v1.MultiEpisodeStyle multi_episode_style = 47;
-   */
-  multiEpisodeStyle: MultiEpisodeStyle;
-
-  /**
-   * Unmonitors the episodes of wanted series whose files go missing.
-   *
-   * @generated from field: bool auto_unmonitor_previously_downloaded_episodes = 48;
-   */
-  autoUnmonitorPreviouslyDownloadedEpisodes: boolean;
-
-  /**
-   * Unspecified for EPISODE_TITLE_REQUIRED_ALWAYS.
-   *
-   * @generated from field: mavio.system.v1.EpisodeTitleRequired episode_title_required = 49;
-   */
-  episodeTitleRequired: EpisodeTitleRequired;
-
-  /**
-   * The prefixes, separated by "|", of the folders download clients
-   * unpack into or leave failed downloads in, whose files are not
-   * imported; empty for "_UNPACK_|_FAILED_".
-   *
-   * @generated from field: string download_client_working_folders = 50;
-   */
-  downloadClientWorkingFolders: string;
+  settings?: GeneralSettings | undefined;
 };
 
 /**
- * Describes the message mavio.system.v1.AcquisitionSettings.
- * Use `create(AcquisitionSettingsSchema)` to create a new message.
+ * Describes the message mavio.system.v1.UpdateGeneralSettingsResponse.
+ * Use `create(UpdateGeneralSettingsResponseSchema)` to create a new message.
  */
-export const AcquisitionSettingsSchema: GenMessage<AcquisitionSettings> = /*@__PURE__*/
+export const UpdateGeneralSettingsResponseSchema: GenMessage<UpdateGeneralSettingsResponse> = /*@__PURE__*/
   messageDesc(file_mavio_system_v1_system, 17);
-
-/**
- * @generated from message mavio.system.v1.GetServerSettingsRequest
- */
-export type GetServerSettingsRequest = Message<"mavio.system.v1.GetServerSettingsRequest"> & {
-};
-
-/**
- * Describes the message mavio.system.v1.GetServerSettingsRequest.
- * Use `create(GetServerSettingsRequestSchema)` to create a new message.
- */
-export const GetServerSettingsRequestSchema: GenMessage<GetServerSettingsRequest> = /*@__PURE__*/
-  messageDesc(file_mavio_system_v1_system, 18);
-
-/**
- * @generated from message mavio.system.v1.GetServerSettingsResponse
- */
-export type GetServerSettingsResponse = Message<"mavio.system.v1.GetServerSettingsResponse"> & {
-  /**
-   * @generated from field: mavio.system.v1.ServerSettings settings = 1;
-   */
-  settings?: ServerSettings | undefined;
-
-  /**
-   * The accelerations this server's ffmpeg supports, AUTO and NONE
-   * included.
-   *
-   * @generated from field: repeated mavio.system.v1.HardwareAcceleration available_hardware_accelerations = 2;
-   */
-  availableHardwareAccelerations: HardwareAcceleration[];
-};
-
-/**
- * Describes the message mavio.system.v1.GetServerSettingsResponse.
- * Use `create(GetServerSettingsResponseSchema)` to create a new message.
- */
-export const GetServerSettingsResponseSchema: GenMessage<GetServerSettingsResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_system_v1_system, 19);
-
-/**
- * @generated from message mavio.system.v1.UpdateServerSettingsRequest
- */
-export type UpdateServerSettingsRequest = Message<"mavio.system.v1.UpdateServerSettingsRequest"> & {
-  /**
-   * @generated from field: mavio.system.v1.ServerSettings settings = 1;
-   */
-  settings?: ServerSettings | undefined;
-};
-
-/**
- * Describes the message mavio.system.v1.UpdateServerSettingsRequest.
- * Use `create(UpdateServerSettingsRequestSchema)` to create a new message.
- */
-export const UpdateServerSettingsRequestSchema: GenMessage<UpdateServerSettingsRequest> = /*@__PURE__*/
-  messageDesc(file_mavio_system_v1_system, 20);
-
-/**
- * @generated from message mavio.system.v1.UpdateServerSettingsResponse
- */
-export type UpdateServerSettingsResponse = Message<"mavio.system.v1.UpdateServerSettingsResponse"> & {
-  /**
-   * @generated from field: mavio.system.v1.ServerSettings settings = 1;
-   */
-  settings?: ServerSettings | undefined;
-};
-
-/**
- * Describes the message mavio.system.v1.UpdateServerSettingsResponse.
- * Use `create(UpdateServerSettingsResponseSchema)` to create a new message.
- */
-export const UpdateServerSettingsResponseSchema: GenMessage<UpdateServerSettingsResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_system_v1_system, 21);
 
 /**
  * @generated from message mavio.system.v1.ListDirectoryRequest
@@ -1204,7 +607,7 @@ export type ListDirectoryRequest = Message<"mavio.system.v1.ListDirectoryRequest
  * Use `create(ListDirectoryRequestSchema)` to create a new message.
  */
 export const ListDirectoryRequestSchema: GenMessage<ListDirectoryRequest> = /*@__PURE__*/
-  messageDesc(file_mavio_system_v1_system, 22);
+  messageDesc(file_mavio_system_v1_system, 18);
 
 /**
  * DirectoryEntry is a file or folder.
@@ -1233,7 +636,7 @@ export type DirectoryEntry = Message<"mavio.system.v1.DirectoryEntry"> & {
  * Use `create(DirectoryEntrySchema)` to create a new message.
  */
 export const DirectoryEntrySchema: GenMessage<DirectoryEntry> = /*@__PURE__*/
-  messageDesc(file_mavio_system_v1_system, 23);
+  messageDesc(file_mavio_system_v1_system, 19);
 
 /**
  * @generated from message mavio.system.v1.ListDirectoryResponse
@@ -1264,7 +667,7 @@ export type ListDirectoryResponse = Message<"mavio.system.v1.ListDirectoryRespon
  * Use `create(ListDirectoryResponseSchema)` to create a new message.
  */
 export const ListDirectoryResponseSchema: GenMessage<ListDirectoryResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_system_v1_system, 24);
+  messageDesc(file_mavio_system_v1_system, 20);
 
 /**
  * LogRecord is a record of the server's log.
@@ -1298,7 +701,7 @@ export type LogRecord = Message<"mavio.system.v1.LogRecord"> & {
  * Use `create(LogRecordSchema)` to create a new message.
  */
 export const LogRecordSchema: GenMessage<LogRecord> = /*@__PURE__*/
-  messageDesc(file_mavio_system_v1_system, 25);
+  messageDesc(file_mavio_system_v1_system, 21);
 
 /**
  * @generated from message mavio.system.v1.ListLogsRequest
@@ -1339,7 +742,7 @@ export type ListLogsRequest = Message<"mavio.system.v1.ListLogsRequest"> & {
  * Use `create(ListLogsRequestSchema)` to create a new message.
  */
 export const ListLogsRequestSchema: GenMessage<ListLogsRequest> = /*@__PURE__*/
-  messageDesc(file_mavio_system_v1_system, 26);
+  messageDesc(file_mavio_system_v1_system, 22);
 
 /**
  * @generated from message mavio.system.v1.ListLogsResponse
@@ -1356,223 +759,7 @@ export type ListLogsResponse = Message<"mavio.system.v1.ListLogsResponse"> & {
  * Use `create(ListLogsResponseSchema)` to create a new message.
  */
 export const ListLogsResponseSchema: GenMessage<ListLogsResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_system_v1_system, 27);
-
-/**
- * @generated from enum mavio.system.v1.HardwareAcceleration
- */
-export enum HardwareAcceleration {
-  /**
-   * @generated from enum value: HARDWARE_ACCELERATION_UNSPECIFIED = 0;
-   */
-  UNSPECIFIED = 0,
-
-  /**
-   * What the server's ffmpeg and hardware support, if anything.
-   *
-   * @generated from enum value: HARDWARE_ACCELERATION_AUTO = 1;
-   */
-  AUTO = 1,
-
-  /**
-   * @generated from enum value: HARDWARE_ACCELERATION_NONE = 2;
-   */
-  NONE = 2,
-
-  /**
-   * @generated from enum value: HARDWARE_ACCELERATION_VIDEOTOOLBOX = 3;
-   */
-  VIDEOTOOLBOX = 3,
-}
-
-/**
- * Describes the enum mavio.system.v1.HardwareAcceleration.
- */
-export const HardwareAccelerationSchema: GenEnum<HardwareAcceleration> = /*@__PURE__*/
-  enumDesc(file_mavio_system_v1_system, 0);
-
-/**
- * ProperDownload is what to do with propers and repacks.
- *
- * @generated from enum mavio.system.v1.ProperDownload
- */
-export enum ProperDownload {
-  /**
-   * @generated from enum value: PROPER_DOWNLOAD_UNSPECIFIED = 0;
-   */
-  UNSPECIFIED = 0,
-
-  /**
-   * Prefer them, and upgrade to them.
-   *
-   * @generated from enum value: PROPER_DOWNLOAD_PREFER_AND_UPGRADE = 1;
-   */
-  PREFER_AND_UPGRADE = 1,
-
-  /**
-   * Prefer them, but do not upgrade to them.
-   *
-   * @generated from enum value: PROPER_DOWNLOAD_DO_NOT_UPGRADE = 2;
-   */
-  DO_NOT_UPGRADE = 2,
-
-  /**
-   * Rank them as other releases, by custom formats.
-   *
-   * @generated from enum value: PROPER_DOWNLOAD_DO_NOT_PREFER = 3;
-   */
-  DO_NOT_PREFER = 3,
-}
-
-/**
- * Describes the enum mavio.system.v1.ProperDownload.
- */
-export const ProperDownloadSchema: GenEnum<ProperDownload> = /*@__PURE__*/
-  enumDesc(file_mavio_system_v1_system, 1);
-
-/**
- * ColonReplacement is what replaces colons in file names.
- *
- * @generated from enum mavio.system.v1.ColonReplacement
- */
-export enum ColonReplacement {
-  /**
-   * @generated from enum value: COLON_REPLACEMENT_UNSPECIFIED = 0;
-   */
-  UNSPECIFIED = 0,
-
-  /**
-   * @generated from enum value: COLON_REPLACEMENT_DELETE = 1;
-   */
-  DELETE = 1,
-
-  /**
-   * @generated from enum value: COLON_REPLACEMENT_DASH = 2;
-   */
-  DASH = 2,
-
-  /**
-   * @generated from enum value: COLON_REPLACEMENT_SPACE_DASH = 3;
-   */
-  SPACE_DASH = 3,
-
-  /**
-   * @generated from enum value: COLON_REPLACEMENT_SPACE_DASH_SPACE = 4;
-   */
-  SPACE_DASH_SPACE = 4,
-
-  /**
-   * A dash between words, else deleted.
-   *
-   * @generated from enum value: COLON_REPLACEMENT_SMART = 5;
-   */
-  SMART = 5,
-}
-
-/**
- * Describes the enum mavio.system.v1.ColonReplacement.
- */
-export const ColonReplacementSchema: GenEnum<ColonReplacement> = /*@__PURE__*/
-  enumDesc(file_mavio_system_v1_system, 2);
-
-/**
- * MultiEpisodeStyle is how the name of a file of several episodes writes
- * their numbers, shown for episodes 6 to 8 of season 15.
- *
- * @generated from enum mavio.system.v1.MultiEpisodeStyle
- */
-export enum MultiEpisodeStyle {
-  /**
-   * @generated from enum value: MULTI_EPISODE_STYLE_UNSPECIFIED = 0;
-   */
-  UNSPECIFIED = 0,
-
-  /**
-   * S15E06-07-08.
-   *
-   * @generated from enum value: MULTI_EPISODE_STYLE_EXTEND = 1;
-   */
-  EXTEND = 1,
-
-  /**
-   * S15E06 - S15E07 - S15E08.
-   *
-   * @generated from enum value: MULTI_EPISODE_STYLE_DUPLICATE = 2;
-   */
-  DUPLICATE = 2,
-
-  /**
-   * S15E06E07E08.
-   *
-   * @generated from enum value: MULTI_EPISODE_STYLE_REPEAT = 3;
-   */
-  REPEAT = 3,
-
-  /**
-   * S15E06-E07-E08.
-   *
-   * @generated from enum value: MULTI_EPISODE_STYLE_SCENE = 4;
-   */
-  SCENE = 4,
-
-  /**
-   * S15E06-08.
-   *
-   * @generated from enum value: MULTI_EPISODE_STYLE_RANGE = 5;
-   */
-  RANGE = 5,
-
-  /**
-   * S15E06-E08.
-   *
-   * @generated from enum value: MULTI_EPISODE_STYLE_PREFIXED_RANGE = 6;
-   */
-  PREFIXED_RANGE = 6,
-}
-
-/**
- * Describes the enum mavio.system.v1.MultiEpisodeStyle.
- */
-export const MultiEpisodeStyleSchema: GenEnum<MultiEpisodeStyle> = /*@__PURE__*/
-  enumDesc(file_mavio_system_v1_system, 3);
-
-/**
- * EpisodeTitleRequired is when an episode imported under a name showing
- * its title must have one.
- *
- * @generated from enum mavio.system.v1.EpisodeTitleRequired
- */
-export enum EpisodeTitleRequired {
-  /**
-   * @generated from enum value: EPISODE_TITLE_REQUIRED_UNSPECIFIED = 0;
-   */
-  UNSPECIFIED = 0,
-
-  /**
-   * Of episodes aired within the last two days.
-   *
-   * @generated from enum value: EPISODE_TITLE_REQUIRED_ALWAYS = 1;
-   */
-  ALWAYS = 1,
-
-  /**
-   * As always, but not of the episodes of a season released at once.
-   *
-   * @generated from enum value: EPISODE_TITLE_REQUIRED_BULK_SEASON_RELEASES = 2;
-   */
-  BULK_SEASON_RELEASES = 2,
-
-  /**
-   * @generated from enum value: EPISODE_TITLE_REQUIRED_NEVER = 3;
-   */
-  NEVER = 3,
-}
-
-/**
- * Describes the enum mavio.system.v1.EpisodeTitleRequired.
- */
-export const EpisodeTitleRequiredSchema: GenEnum<EpisodeTitleRequired> = /*@__PURE__*/
-  enumDesc(file_mavio_system_v1_system, 4);
+  messageDesc(file_mavio_system_v1_system, 23);
 
 /**
  * @generated from enum mavio.system.v1.LogLevel
@@ -1608,11 +795,12 @@ export enum LogLevel {
  * Describes the enum mavio.system.v1.LogLevel.
  */
 export const LogLevelSchema: GenEnum<LogLevel> = /*@__PURE__*/
-  enumDesc(file_mavio_system_v1_system, 5);
+  enumDesc(file_mavio_system_v1_system, 0);
 
 /**
  * SystemService exposes server-level information and health, the load of
- * its computer, the server's settings, its file system and its logs.
+ * its computer, the server's general settings, its file system and its
+ * logs.
  *
  * @generated from service mavio.system.v1.SystemService
  */
@@ -1651,26 +839,28 @@ export const SystemService: GenService<{
     output: typeof GetSystemLoadResponseSchema;
   },
   /**
-   * GetServerSettings returns the settings administrators change while
-   * the server runs. Administrators only.
+   * GetGeneralSettings returns the server's general settings: its name,
+   * how it is reached, how long devices stay signed in, the plugin
+   * resetting forgotten passwords and the language and country of
+   * metadata. Administrators only.
    *
-   * @generated from rpc mavio.system.v1.SystemService.GetServerSettings
+   * @generated from rpc mavio.system.v1.SystemService.GetGeneralSettings
    */
-  getServerSettings: {
+  getGeneralSettings: {
     methodKind: "unary";
-    input: typeof GetServerSettingsRequestSchema;
-    output: typeof GetServerSettingsResponseSchema;
+    input: typeof GetGeneralSettingsRequestSchema;
+    output: typeof GetGeneralSettingsResponseSchema;
   },
   /**
-   * UpdateServerSettings replaces the settings and applies them at once.
-   * Administrators only.
+   * UpdateGeneralSettings replaces the general settings and applies them
+   * at once. Administrators only.
    *
-   * @generated from rpc mavio.system.v1.SystemService.UpdateServerSettings
+   * @generated from rpc mavio.system.v1.SystemService.UpdateGeneralSettings
    */
-  updateServerSettings: {
+  updateGeneralSettings: {
     methodKind: "unary";
-    input: typeof UpdateServerSettingsRequestSchema;
-    output: typeof UpdateServerSettingsResponseSchema;
+    input: typeof UpdateGeneralSettingsRequestSchema;
+    output: typeof UpdateGeneralSettingsResponseSchema;
   },
   /**
    * ListDirectory lists a folder of the server's file system, to choose

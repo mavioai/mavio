@@ -47,6 +47,12 @@ const (
 	ProxyServiceDeleteProxyProcedure = "/mavio.system.v1.ProxyService/DeleteProxy"
 	// ProxyServiceTestProxyProcedure is the fully-qualified name of the ProxyService's TestProxy RPC.
 	ProxyServiceTestProxyProcedure = "/mavio.system.v1.ProxyService/TestProxy"
+	// ProxyServiceGetOutboundProxiesProcedure is the fully-qualified name of the ProxyService's
+	// GetOutboundProxies RPC.
+	ProxyServiceGetOutboundProxiesProcedure = "/mavio.system.v1.ProxyService/GetOutboundProxies"
+	// ProxyServiceUpdateOutboundProxiesProcedure is the fully-qualified name of the ProxyService's
+	// UpdateOutboundProxies RPC.
+	ProxyServiceUpdateOutboundProxiesProcedure = "/mavio.system.v1.ProxyService/UpdateOutboundProxies"
 )
 
 // ProxyServiceClient is a client for the mavio.system.v1.ProxyService service.
@@ -68,6 +74,12 @@ type ProxyServiceClient interface {
 	// TestProxy fetches a URL through a stored proxy, the system proxy
 	// (directly when it sets none) or an unsaved proxy.
 	TestProxy(context.Context, *v1.TestProxyRequest) (*v1.TestProxyResponse, error)
+	// GetOutboundProxies returns the proxies the server's own HTTP requests
+	// go through.
+	GetOutboundProxies(context.Context, *v1.GetOutboundProxiesRequest) (*v1.GetOutboundProxiesResponse, error)
+	// UpdateOutboundProxies replaces them; a proxy that does not exist is
+	// INVALID_ARGUMENT.
+	UpdateOutboundProxies(context.Context, *v1.UpdateOutboundProxiesRequest) (*v1.UpdateOutboundProxiesResponse, error)
 }
 
 // NewProxyServiceClient constructs a client for the mavio.system.v1.ProxyService service. By
@@ -112,16 +124,32 @@ func NewProxyServiceClient(httpClient connect.HTTPClient, baseURL string, opts .
 			connect.WithSchema(proxyServiceMethods.ByName("TestProxy")),
 			connect.WithClientOptions(opts...),
 		),
+		getOutboundProxies: connect.NewClient[v1.GetOutboundProxiesRequest, v1.GetOutboundProxiesResponse](
+			httpClient,
+			baseURL+ProxyServiceGetOutboundProxiesProcedure,
+			connect.WithSchema(proxyServiceMethods.ByName("GetOutboundProxies")),
+			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+			connect.WithClientOptions(opts...),
+		),
+		updateOutboundProxies: connect.NewClient[v1.UpdateOutboundProxiesRequest, v1.UpdateOutboundProxiesResponse](
+			httpClient,
+			baseURL+ProxyServiceUpdateOutboundProxiesProcedure,
+			connect.WithSchema(proxyServiceMethods.ByName("UpdateOutboundProxies")),
+			connect.WithIdempotency(connect.IdempotencyIdempotent),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
 // proxyServiceClient implements ProxyServiceClient.
 type proxyServiceClient struct {
-	listProxies *connect.Client[v1.ListProxiesRequest, v1.ListProxiesResponse]
-	createProxy *connect.Client[v1.CreateProxyRequest, v1.CreateProxyResponse]
-	updateProxy *connect.Client[v1.UpdateProxyRequest, v1.UpdateProxyResponse]
-	deleteProxy *connect.Client[v1.DeleteProxyRequest, v1.DeleteProxyResponse]
-	testProxy   *connect.Client[v1.TestProxyRequest, v1.TestProxyResponse]
+	listProxies           *connect.Client[v1.ListProxiesRequest, v1.ListProxiesResponse]
+	createProxy           *connect.Client[v1.CreateProxyRequest, v1.CreateProxyResponse]
+	updateProxy           *connect.Client[v1.UpdateProxyRequest, v1.UpdateProxyResponse]
+	deleteProxy           *connect.Client[v1.DeleteProxyRequest, v1.DeleteProxyResponse]
+	testProxy             *connect.Client[v1.TestProxyRequest, v1.TestProxyResponse]
+	getOutboundProxies    *connect.Client[v1.GetOutboundProxiesRequest, v1.GetOutboundProxiesResponse]
+	updateOutboundProxies *connect.Client[v1.UpdateOutboundProxiesRequest, v1.UpdateOutboundProxiesResponse]
 }
 
 // ListProxies calls mavio.system.v1.ProxyService.ListProxies.
@@ -169,6 +197,24 @@ func (c *proxyServiceClient) TestProxy(ctx context.Context, req *v1.TestProxyReq
 	return nil, err
 }
 
+// GetOutboundProxies calls mavio.system.v1.ProxyService.GetOutboundProxies.
+func (c *proxyServiceClient) GetOutboundProxies(ctx context.Context, req *v1.GetOutboundProxiesRequest) (*v1.GetOutboundProxiesResponse, error) {
+	response, err := c.getOutboundProxies.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
+// UpdateOutboundProxies calls mavio.system.v1.ProxyService.UpdateOutboundProxies.
+func (c *proxyServiceClient) UpdateOutboundProxies(ctx context.Context, req *v1.UpdateOutboundProxiesRequest) (*v1.UpdateOutboundProxiesResponse, error) {
+	response, err := c.updateOutboundProxies.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
 // ProxyServiceHandler is an implementation of the mavio.system.v1.ProxyService service.
 type ProxyServiceHandler interface {
 	// ListProxies lists the system proxy, then the others ordered by name.
@@ -188,6 +234,12 @@ type ProxyServiceHandler interface {
 	// TestProxy fetches a URL through a stored proxy, the system proxy
 	// (directly when it sets none) or an unsaved proxy.
 	TestProxy(context.Context, *v1.TestProxyRequest) (*v1.TestProxyResponse, error)
+	// GetOutboundProxies returns the proxies the server's own HTTP requests
+	// go through.
+	GetOutboundProxies(context.Context, *v1.GetOutboundProxiesRequest) (*v1.GetOutboundProxiesResponse, error)
+	// UpdateOutboundProxies replaces them; a proxy that does not exist is
+	// INVALID_ARGUMENT.
+	UpdateOutboundProxies(context.Context, *v1.UpdateOutboundProxiesRequest) (*v1.UpdateOutboundProxiesResponse, error)
 }
 
 // NewProxyServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -228,6 +280,20 @@ func NewProxyServiceHandler(svc ProxyServiceHandler, opts ...connect.HandlerOpti
 		connect.WithSchema(proxyServiceMethods.ByName("TestProxy")),
 		connect.WithHandlerOptions(opts...),
 	)
+	proxyServiceGetOutboundProxiesHandler := connect.NewUnaryHandlerSimple(
+		ProxyServiceGetOutboundProxiesProcedure,
+		svc.GetOutboundProxies,
+		connect.WithSchema(proxyServiceMethods.ByName("GetOutboundProxies")),
+		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+		connect.WithHandlerOptions(opts...),
+	)
+	proxyServiceUpdateOutboundProxiesHandler := connect.NewUnaryHandlerSimple(
+		ProxyServiceUpdateOutboundProxiesProcedure,
+		svc.UpdateOutboundProxies,
+		connect.WithSchema(proxyServiceMethods.ByName("UpdateOutboundProxies")),
+		connect.WithIdempotency(connect.IdempotencyIdempotent),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/mavio.system.v1.ProxyService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case ProxyServiceListProxiesProcedure:
@@ -240,6 +306,10 @@ func NewProxyServiceHandler(svc ProxyServiceHandler, opts ...connect.HandlerOpti
 			proxyServiceDeleteProxyHandler.ServeHTTP(w, r)
 		case ProxyServiceTestProxyProcedure:
 			proxyServiceTestProxyHandler.ServeHTTP(w, r)
+		case ProxyServiceGetOutboundProxiesProcedure:
+			proxyServiceGetOutboundProxiesHandler.ServeHTTP(w, r)
+		case ProxyServiceUpdateOutboundProxiesProcedure:
+			proxyServiceUpdateOutboundProxiesHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -267,4 +337,12 @@ func (UnimplementedProxyServiceHandler) DeleteProxy(context.Context, *v1.DeleteP
 
 func (UnimplementedProxyServiceHandler) TestProxy(context.Context, *v1.TestProxyRequest) (*v1.TestProxyResponse, error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.system.v1.ProxyService.TestProxy is not implemented"))
+}
+
+func (UnimplementedProxyServiceHandler) GetOutboundProxies(context.Context, *v1.GetOutboundProxiesRequest) (*v1.GetOutboundProxiesResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.system.v1.ProxyService.GetOutboundProxies is not implemented"))
+}
+
+func (UnimplementedProxyServiceHandler) UpdateOutboundProxies(context.Context, *v1.UpdateOutboundProxiesRequest) (*v1.UpdateOutboundProxiesResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.system.v1.ProxyService.UpdateOutboundProxies is not implemented"))
 }

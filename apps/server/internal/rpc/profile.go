@@ -11,6 +11,8 @@ import (
 	"connectrpc.com/connect"
 	"google.golang.org/protobuf/types/known/durationpb"
 
+	"github.com/mavioai/mavio/apps/server/internal/activity"
+	"github.com/mavioai/mavio/apps/server/internal/settings"
 	"github.com/mavioai/mavio/libs/acquire"
 	"github.com/mavioai/mavio/libs/core"
 	acquisitionv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/acquisition/v1"
@@ -20,6 +22,11 @@ import (
 // ProfileService implements mavio.acquisition.v1.ProfileService.
 type ProfileService struct {
 	store core.Store
+	// Settings keeps the acquisition settings; nil serves the defaults and
+	// changes none.
+	Settings *settings.Manager
+	// Activity records administrators' changes; nil records none.
+	Activity *activity.Log
 }
 
 var _ acquisitionv1connect.ProfileServiceHandler = (*ProfileService)(nil)

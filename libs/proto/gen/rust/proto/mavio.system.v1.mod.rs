@@ -208,6 +208,22 @@ pub use self::__buffa::view::SetPluginProxyResponseView;
 #[doc(inline)]
 pub use self::__buffa::view::SetPluginProxyResponseOwnedView;
 #[doc(inline)]
+pub use self::__buffa::view::GetPluginCatalogsRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::GetPluginCatalogsRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::GetPluginCatalogsResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::GetPluginCatalogsResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::UpdatePluginCatalogsRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::UpdatePluginCatalogsRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::UpdatePluginCatalogsResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::UpdatePluginCatalogsResponseOwnedView;
+#[doc(inline)]
 pub use self::__buffa::view::ListAiProvidersRequestView;
 #[doc(inline)]
 pub use self::__buffa::view::ListAiProvidersRequestOwnedView;
@@ -428,6 +444,26 @@ pub use self::__buffa::view::TestProxyResponseView;
 #[doc(inline)]
 pub use self::__buffa::view::TestProxyResponseOwnedView;
 #[doc(inline)]
+pub use self::__buffa::view::OutboundProxiesView;
+#[doc(inline)]
+pub use self::__buffa::view::OutboundProxiesOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::GetOutboundProxiesRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::GetOutboundProxiesRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::GetOutboundProxiesResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::GetOutboundProxiesResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::UpdateOutboundProxiesRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::UpdateOutboundProxiesRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::UpdateOutboundProxiesResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::UpdateOutboundProxiesResponseOwnedView;
+#[doc(inline)]
 pub use self::__buffa::view::GetHealthRequestView;
 #[doc(inline)]
 pub use self::__buffa::view::GetHealthRequestOwnedView;
@@ -472,49 +508,33 @@ pub use self::__buffa::view::NetworkLoadView;
 #[doc(inline)]
 pub use self::__buffa::view::NetworkLoadOwnedView;
 #[doc(inline)]
-pub use self::__buffa::view::TranscodingSettingsView;
-#[doc(inline)]
-pub use self::__buffa::view::TranscodingSettingsOwnedView;
-#[doc(inline)]
 pub use self::__buffa::view::NetworkSettingsView;
 #[doc(inline)]
 pub use self::__buffa::view::NetworkSettingsOwnedView;
-#[doc(inline)]
-pub use self::__buffa::view::OutboundProxiesView;
-#[doc(inline)]
-pub use self::__buffa::view::OutboundProxiesOwnedView;
-#[doc(inline)]
-pub use self::__buffa::view::ServerSettingsView;
-#[doc(inline)]
-pub use self::__buffa::view::ServerSettingsOwnedView;
-#[doc(inline)]
-pub use self::__buffa::view::RequestSettingsView;
-#[doc(inline)]
-pub use self::__buffa::view::RequestSettingsOwnedView;
 #[doc(inline)]
 pub use self::__buffa::view::MetadataSettingsView;
 #[doc(inline)]
 pub use self::__buffa::view::MetadataSettingsOwnedView;
 #[doc(inline)]
-pub use self::__buffa::view::AcquisitionSettingsView;
+pub use self::__buffa::view::GeneralSettingsView;
 #[doc(inline)]
-pub use self::__buffa::view::AcquisitionSettingsOwnedView;
+pub use self::__buffa::view::GeneralSettingsOwnedView;
 #[doc(inline)]
-pub use self::__buffa::view::GetServerSettingsRequestView;
+pub use self::__buffa::view::GetGeneralSettingsRequestView;
 #[doc(inline)]
-pub use self::__buffa::view::GetServerSettingsRequestOwnedView;
+pub use self::__buffa::view::GetGeneralSettingsRequestOwnedView;
 #[doc(inline)]
-pub use self::__buffa::view::GetServerSettingsResponseView;
+pub use self::__buffa::view::GetGeneralSettingsResponseView;
 #[doc(inline)]
-pub use self::__buffa::view::GetServerSettingsResponseOwnedView;
+pub use self::__buffa::view::GetGeneralSettingsResponseOwnedView;
 #[doc(inline)]
-pub use self::__buffa::view::UpdateServerSettingsRequestView;
+pub use self::__buffa::view::UpdateGeneralSettingsRequestView;
 #[doc(inline)]
-pub use self::__buffa::view::UpdateServerSettingsRequestOwnedView;
+pub use self::__buffa::view::UpdateGeneralSettingsRequestOwnedView;
 #[doc(inline)]
-pub use self::__buffa::view::UpdateServerSettingsResponseView;
+pub use self::__buffa::view::UpdateGeneralSettingsResponseView;
 #[doc(inline)]
-pub use self::__buffa::view::UpdateServerSettingsResponseOwnedView;
+pub use self::__buffa::view::UpdateGeneralSettingsResponseOwnedView;
 #[doc(inline)]
 pub use self::__buffa::view::ListDirectoryRequestView;
 #[doc(inline)]

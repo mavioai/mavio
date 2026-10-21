@@ -453,7 +453,6 @@ func TestAcquisition(t *testing.T) {
 		t.Fatalf("CreateFirstUser: %v", err)
 	}
 	token := withToken(first.GetAccessToken())
-	system := systemv1connect.NewSystemServiceClient(http.DefaultClient, srv.url, token)
 	pluginAdmin := systemv1connect.NewPluginManagementServiceClient(http.DefaultClient, srv.url, token)
 	tasks := systemv1connect.NewTaskServiceClient(http.DefaultClient, srv.url, token)
 	libraries := libraryv1connect.NewLibraryServiceClient(http.DefaultClient, srv.url, token)
@@ -467,21 +466,20 @@ func TestAcquisition(t *testing.T) {
 	// The administrator sets acquisition up: a recycle bin, renaming
 	// movies; RSS syncs only when asked, so that none runs between the
 	// steps.
-	got, err := system.GetServerSettings(ctx, &systemv1.GetServerSettingsRequest{})
+	got, err := profiles.GetAcquisitionSettings(ctx, &acquisitionv1.GetAcquisitionSettingsRequest{})
 	if err != nil {
-		t.Fatalf("GetServerSettings: %v", err)
+		t.Fatalf("GetAcquisitionSettings: %v", err)
 	}
-	settings := got.GetSettings()
-	acq := settings.GetAcquisition()
+	acq := got.GetSettings()
 	acq.SetRecycleBin(recycle)
 	acq.SetRssSyncInterval(0)
 	acq.SetSkipFreeSpaceCheck(true)
-	acq.SetRenameMovies(true)
+	acq.GetNaming().SetRenameMovies(true)
 	if !acq.GetCompletedDownloadHandling() || !acq.GetAutoRedownloadFailed() || !acq.GetAutoRedownloadFailedFromInteractiveSearch() {
 		t.Errorf("default acquisition settings = %v, want = completed download handling and redownloading failed", acq)
 	}
-	if _, err := system.UpdateServerSettings(ctx, systemv1.UpdateServerSettingsRequest_builder{Settings: settings}.Build()); err != nil {
-		t.Fatalf("UpdateServerSettings: %v", err)
+	if _, err := profiles.UpdateAcquisitionSettings(ctx, acquisitionv1.UpdateAcquisitionSettingsRequest_builder{Settings: acq}.Build()); err != nil {
+		t.Fatalf("UpdateAcquisitionSettings: %v", err)
 	}
 	lib, err := libraries.CreateLibrary(ctx, libraryv1.CreateLibraryRequest_builder{
 		Spec: libraryv1.LibrarySpec_builder{Name: new("Movies"), Kind: new(libraryv1.LibraryKind_LIBRARY_KIND_MOVIES), Paths: []string{movies}}.Build(),

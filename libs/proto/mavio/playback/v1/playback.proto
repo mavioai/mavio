@@ -8,7 +8,8 @@ import "mavio/library/v1/item.proto";
 import "mavio/library/v1/media.proto";
 
 // PlaybackService decides how a client plays an item and tracks the
-// playback. All methods act for the calling user.
+// playback. All methods act for the calling user, but for the
+// transcoding settings, which administrators keep.
 service PlaybackService {
   // StartPlayback picks a media source and streams, decides whether the
   // client plays it directly, remuxed or transcoded, and returns the URLs to
@@ -32,6 +33,17 @@ service PlaybackService {
   // plugins give, probed. StartPlayback plays one by its ID.
   rpc ListMediaSources(ListMediaSourcesRequest) returns (ListMediaSourcesResponse) {
     option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // GetTranscodingSettings returns how transcodes are made, with the
+  // hardware accelerations the server's ffmpeg supports. Administrators
+  // only.
+  rpc GetTranscodingSettings(GetTranscodingSettingsRequest) returns (GetTranscodingSettingsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // UpdateTranscodingSettings replaces the transcoding settings, which
+  // transcodes started afterwards use. Administrators only.
+  rpc UpdateTranscodingSettings(UpdateTranscodingSettingsRequest) returns (UpdateTranscodingSettingsResponse) {
+    option idempotency_level = IDEMPOTENT;
   }
 }
 
@@ -447,4 +459,69 @@ message ListMediaSourcesRequest {
 
 message ListMediaSourcesResponse {
   repeated mavio.library.v1.MediaSource media_sources = 1;
+}
+
+// HardwareAcceleration is the hardware transcodes decode and encode on.
+enum HardwareAcceleration {
+  HARDWARE_ACCELERATION_UNSPECIFIED = 0;
+  // What the server's ffmpeg and hardware support, if anything.
+  HARDWARE_ACCELERATION_AUTO = 1;
+  HARDWARE_ACCELERATION_NONE = 2;
+  HARDWARE_ACCELERATION_VIDEOTOOLBOX = 3;
+}
+
+// TranscodingSettings steer transcodes.
+message TranscodingSettings {
+  HardwareAcceleration hardware_acceleration = 1 [(buf.validate.field).enum = {
+    defined_only: true
+    not_in: [0]
+  }];
+  bool hardware_encoding = 2;
+  // "", "ultrafast", "superfast", "veryfast", "faster", "fast", "medium",
+  // "slow", "slower" or "veryslow"; empty picks one by the source.
+  string encoder_preset = 3;
+  int32 h264_crf = 4 [(buf.validate.field).int32 = {
+    gte: 0
+    lte: 51
+  }];
+  int32 h265_crf = 5 [(buf.validate.field).int32 = {
+    gte: 0
+    lte: 51
+  }];
+  // 0 lets ffmpeg decide.
+  int32 threads = 6 [(buf.validate.field).int32.gte = 0];
+  // "bt2390", "hable", "mobius", "reinhard", "clip", "linear" or "gamma".
+  string tonemap_algorithm = 7;
+  // "auto", "tv" or "pc".
+  string tonemap_range = 8;
+  double tonemap_desat = 9 [(buf.validate.field).double.gte = 0];
+  double tonemap_peak = 10 [(buf.validate.field).double.gte = 0];
+  // "yadif" or "bwdif".
+  string deinterlace_method = 11;
+  bool deinterlace_double_rate = 12;
+  double downmix_boost = 13 [(buf.validate.field).double = {
+    gte: 0.5
+    lte: 3
+  }];
+  bool crop_black_borders = 14;
+  // Absolute folder for running transcodes; empty uses the folder the
+  // server was started with.
+  string transcode_dir = 15;
+}
+
+message GetTranscodingSettingsRequest {}
+
+message GetTranscodingSettingsResponse {
+  TranscodingSettings settings = 1;
+  // The accelerations this server's ffmpeg supports, AUTO and NONE
+  // included.
+  repeated HardwareAcceleration available_hardware_accelerations = 2;
+}
+
+message UpdateTranscodingSettingsRequest {
+  TranscodingSettings settings = 1 [(buf.validate.field).required = true];
+}
+
+message UpdateTranscodingSettingsResponse {
+  TranscodingSettings settings = 1;
 }

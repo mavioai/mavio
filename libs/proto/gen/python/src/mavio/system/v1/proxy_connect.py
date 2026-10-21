@@ -32,6 +32,12 @@ class ProxyService(Protocol):
     async def test_proxy(self, request: mavio_dot_system_dot_v1_dot_proxy__pb2.TestProxyRequest, ctx: RequestContext) -> mavio_dot_system_dot_v1_dot_proxy__pb2.TestProxyResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
 
+    async def get_outbound_proxies(self, request: mavio_dot_system_dot_v1_dot_proxy__pb2.GetOutboundProxiesRequest, ctx: RequestContext) -> mavio_dot_system_dot_v1_dot_proxy__pb2.GetOutboundProxiesResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
+
+    async def update_outbound_proxies(self, request: mavio_dot_system_dot_v1_dot_proxy__pb2.UpdateOutboundProxiesRequest, ctx: RequestContext) -> mavio_dot_system_dot_v1_dot_proxy__pb2.UpdateOutboundProxiesResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
+
 
 class ProxyServiceASGIApplication(ConnectASGIApplication[ProxyService]):
     def __init__(self, service: ProxyService | AsyncGenerator[ProxyService], *, interceptors: Iterable[Interceptor]=(), read_max_bytes: int | None = None, compressions: Iterable[Compression] | None = None) -> None:
@@ -87,6 +93,26 @@ class ProxyServiceASGIApplication(ConnectASGIApplication[ProxyService]):
                         idempotency_level=IdempotencyLevel.UNKNOWN,
                     ),
                     function=svc.test_proxy,
+                ),
+                "/mavio.system.v1.ProxyService/GetOutboundProxies": Endpoint.unary(
+                    method=MethodInfo(
+                        name="GetOutboundProxies",
+                        service_name="mavio.system.v1.ProxyService",
+                        input=mavio_dot_system_dot_v1_dot_proxy__pb2.GetOutboundProxiesRequest,
+                        output=mavio_dot_system_dot_v1_dot_proxy__pb2.GetOutboundProxiesResponse,
+                        idempotency_level=IdempotencyLevel.NO_SIDE_EFFECTS,
+                    ),
+                    function=svc.get_outbound_proxies,
+                ),
+                "/mavio.system.v1.ProxyService/UpdateOutboundProxies": Endpoint.unary(
+                    method=MethodInfo(
+                        name="UpdateOutboundProxies",
+                        service_name="mavio.system.v1.ProxyService",
+                        input=mavio_dot_system_dot_v1_dot_proxy__pb2.UpdateOutboundProxiesRequest,
+                        output=mavio_dot_system_dot_v1_dot_proxy__pb2.UpdateOutboundProxiesResponse,
+                        idempotency_level=IdempotencyLevel.IDEMPOTENT,
+                    ),
+                    function=svc.update_outbound_proxies,
                 ),
             },
             interceptors=interceptors,
@@ -203,6 +229,48 @@ class ProxyServiceClient(ConnectClient):
             timeout_ms=timeout_ms,
         )
 
+    async def get_outbound_proxies(
+        self,
+        request: mavio_dot_system_dot_v1_dot_proxy__pb2.GetOutboundProxiesRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+        use_get: bool = False,
+    ) -> mavio_dot_system_dot_v1_dot_proxy__pb2.GetOutboundProxiesResponse:
+        return await self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="GetOutboundProxies",
+                service_name="mavio.system.v1.ProxyService",
+                input=mavio_dot_system_dot_v1_dot_proxy__pb2.GetOutboundProxiesRequest,
+                output=mavio_dot_system_dot_v1_dot_proxy__pb2.GetOutboundProxiesResponse,
+                idempotency_level=IdempotencyLevel.NO_SIDE_EFFECTS,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+            use_get=use_get,
+        )
+
+    async def update_outbound_proxies(
+        self,
+        request: mavio_dot_system_dot_v1_dot_proxy__pb2.UpdateOutboundProxiesRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+    ) -> mavio_dot_system_dot_v1_dot_proxy__pb2.UpdateOutboundProxiesResponse:
+        return await self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="UpdateOutboundProxies",
+                service_name="mavio.system.v1.ProxyService",
+                input=mavio_dot_system_dot_v1_dot_proxy__pb2.UpdateOutboundProxiesRequest,
+                output=mavio_dot_system_dot_v1_dot_proxy__pb2.UpdateOutboundProxiesResponse,
+                idempotency_level=IdempotencyLevel.IDEMPOTENT,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+        )
+
 
 class ProxyServiceSync(Protocol):
     def list_proxies(self, request: mavio_dot_system_dot_v1_dot_proxy__pb2.ListProxiesRequest, ctx: RequestContext) -> mavio_dot_system_dot_v1_dot_proxy__pb2.ListProxiesResponse:
@@ -214,6 +282,10 @@ class ProxyServiceSync(Protocol):
     def delete_proxy(self, request: mavio_dot_system_dot_v1_dot_proxy__pb2.DeleteProxyRequest, ctx: RequestContext) -> mavio_dot_system_dot_v1_dot_proxy__pb2.DeleteProxyResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
     def test_proxy(self, request: mavio_dot_system_dot_v1_dot_proxy__pb2.TestProxyRequest, ctx: RequestContext) -> mavio_dot_system_dot_v1_dot_proxy__pb2.TestProxyResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
+    def get_outbound_proxies(self, request: mavio_dot_system_dot_v1_dot_proxy__pb2.GetOutboundProxiesRequest, ctx: RequestContext) -> mavio_dot_system_dot_v1_dot_proxy__pb2.GetOutboundProxiesResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
+    def update_outbound_proxies(self, request: mavio_dot_system_dot_v1_dot_proxy__pb2.UpdateOutboundProxiesRequest, ctx: RequestContext) -> mavio_dot_system_dot_v1_dot_proxy__pb2.UpdateOutboundProxiesResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
 
 
@@ -270,6 +342,26 @@ class ProxyServiceWSGIApplication(ConnectWSGIApplication):
                         idempotency_level=IdempotencyLevel.UNKNOWN,
                     ),
                     function=service.test_proxy,
+                ),
+                "/mavio.system.v1.ProxyService/GetOutboundProxies": EndpointSync.unary(
+                    method=MethodInfo(
+                        name="GetOutboundProxies",
+                        service_name="mavio.system.v1.ProxyService",
+                        input=mavio_dot_system_dot_v1_dot_proxy__pb2.GetOutboundProxiesRequest,
+                        output=mavio_dot_system_dot_v1_dot_proxy__pb2.GetOutboundProxiesResponse,
+                        idempotency_level=IdempotencyLevel.NO_SIDE_EFFECTS,
+                    ),
+                    function=service.get_outbound_proxies,
+                ),
+                "/mavio.system.v1.ProxyService/UpdateOutboundProxies": EndpointSync.unary(
+                    method=MethodInfo(
+                        name="UpdateOutboundProxies",
+                        service_name="mavio.system.v1.ProxyService",
+                        input=mavio_dot_system_dot_v1_dot_proxy__pb2.UpdateOutboundProxiesRequest,
+                        output=mavio_dot_system_dot_v1_dot_proxy__pb2.UpdateOutboundProxiesResponse,
+                        idempotency_level=IdempotencyLevel.IDEMPOTENT,
+                    ),
+                    function=service.update_outbound_proxies,
                 ),
             },
             interceptors=interceptors,
@@ -381,6 +473,48 @@ class ProxyServiceClientSync(ConnectClientSync):
                 input=mavio_dot_system_dot_v1_dot_proxy__pb2.TestProxyRequest,
                 output=mavio_dot_system_dot_v1_dot_proxy__pb2.TestProxyResponse,
                 idempotency_level=IdempotencyLevel.UNKNOWN,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+        )
+
+    def get_outbound_proxies(
+        self,
+        request: mavio_dot_system_dot_v1_dot_proxy__pb2.GetOutboundProxiesRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+        use_get: bool = False,
+    ) -> mavio_dot_system_dot_v1_dot_proxy__pb2.GetOutboundProxiesResponse:
+        return self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="GetOutboundProxies",
+                service_name="mavio.system.v1.ProxyService",
+                input=mavio_dot_system_dot_v1_dot_proxy__pb2.GetOutboundProxiesRequest,
+                output=mavio_dot_system_dot_v1_dot_proxy__pb2.GetOutboundProxiesResponse,
+                idempotency_level=IdempotencyLevel.NO_SIDE_EFFECTS,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+            use_get=use_get,
+        )
+
+    def update_outbound_proxies(
+        self,
+        request: mavio_dot_system_dot_v1_dot_proxy__pb2.UpdateOutboundProxiesRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+    ) -> mavio_dot_system_dot_v1_dot_proxy__pb2.UpdateOutboundProxiesResponse:
+        return self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="UpdateOutboundProxies",
+                service_name="mavio.system.v1.ProxyService",
+                input=mavio_dot_system_dot_v1_dot_proxy__pb2.UpdateOutboundProxiesRequest,
+                output=mavio_dot_system_dot_v1_dot_proxy__pb2.UpdateOutboundProxiesResponse,
+                idempotency_level=IdempotencyLevel.IDEMPOTENT,
             ),
             headers=headers,
             timeout_ms=timeout_ms,
