@@ -222,4 +222,14 @@
         @available(*, unavailable)
         public required init?(coder: NSCoder) { fatalError() }
     }
+
+    /// A row of a sidebar, its selection gray whether or not the sidebar
+    /// has the keyboard's focus, as the web UI's.
+    public final class SidebarRowView: NSTableRowView {
+        /// Never emphasized: the selection stays gray.
+        override public var isEmphasized: Bool {
+            get { false }
+            set {}
+        }
+    }
 #endif

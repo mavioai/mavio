@@ -259,6 +259,14 @@
             }
         }
 
+        override func viewDidAppear() {
+            super.viewDidAppear()
+            // The window gives its first key view, the search field, the
+            // cursor when it opens; the app opens with nothing focused, the
+            // field taking the cursor when clicked or by ⌘F.
+            if field.currentEditor() != nil { view.window?.makeFirstResponder(nil) }
+        }
+
         isolated deinit {
             observer?.cancel()
             loading?.cancel()
@@ -365,6 +373,10 @@
 
         func tableView(_ tableView: NSTableView, heightOfRow row: Int) -> CGFloat {
             if case .header = entries[row] { 28 } else { 30 }
+        }
+
+        func tableView(_ tableView: NSTableView, rowViewForRow row: Int) -> NSTableRowView? {
+            SidebarRowView()
         }
     }
 

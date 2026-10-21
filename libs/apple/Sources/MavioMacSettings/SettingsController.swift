@@ -444,9 +444,10 @@
                     (parent as? SettingsSplitController)?.serverChanged()
                 }
                 popup.setAccessibilityLabel(MavioStrings.authServer)
-                let cell = cell(popup, leading: MavioSpacing.s8)
-                popup.trailingAnchor.constraint(equalTo: cell.trailingAnchor, constant: -MavioSpacing.s8).isActive =
-                    true
+                // As wide as a selected row's highlight, which reaches past
+                // the cell by the bezel's margin.
+                let cell = cell(popup, leading: -5)
+                popup.trailingAnchor.constraint(equalTo: cell.trailingAnchor, constant: 5).isActive = true
                 return cell
             }
         }
@@ -461,6 +462,10 @@
                 content.centerYAnchor.constraint(equalTo: cell.centerYAnchor),
             ])
             return cell
+        }
+
+        func tableView(_ tableView: NSTableView, rowViewForRow row: Int) -> NSTableRowView? {
+            SidebarRowView()
         }
 
         func tableViewSelectionDidChange(_ notification: Notification) {
