@@ -2,7 +2,7 @@
 // its version and what it runs on, whether it serves and since when —, the
 // load of its computer, and the plugins' containers.
 import { timestampDate } from "@bufbuild/protobuf/wkt";
-import { errorMessage, type ServerEntry, useContainerRuntime, useContainers, usePlugins, useSystemInfo } from "@mavio/client-ts";
+import { errorMessage, type ServerEntry, useContainerRuntime, useContainers, usePlugins, useStorageStatus, useSystemInfo } from "@mavio/client-ts";
 import { ContainerMode } from "@mavio/proto/mavio/plugin/v1/container_pb";
 import { GetHealthResponse_Status } from "@mavio/proto/mavio/system/v1/system_pb";
 
@@ -33,6 +33,8 @@ function ServerInfo({ server }: { server: ServerEntry }) {
     (rt.available
       ? [`${engineName(rt.engine)} ${rt.version}`, `API ${rt.apiVersion}`, rt.rootless && t("overview.containerEngineRootless")].filter(Boolean).join(" · ")
       : t("overview.containerEngineNone", { reason: rt.reason }));
+  const rclone = useStorageStatus(server);
+  const rc = rclone.data;
   const serving = health.data?.status === GetHealthResponse_Status.SERVING;
   const fact = (label: string, value?: string) =>
     value && (
@@ -60,6 +62,24 @@ function ServerInfo({ server }: { server: ServerEntry }) {
           </span>
         </Row>
       )}
+      {/* rclone: whether the server reaches it, its version, and whose rcd it is. */}
+      <Row label={t("overview.rclone")}>
+        <span className="flex min-w-0 flex-col items-end text-right type-callout text-text-secondary">
+          <span className="flex min-w-0 items-center gap-2">
+            <span className={`size-2 shrink-0 rounded-full ${rclone.isPending ? "bg-fill" : rc?.available ? "bg-[#34C759]" : "bg-danger"}`} />
+            <span className="min-w-0 break-words">
+              {rclone.isPending
+                ? "…"
+                : rclone.isError
+                  ? errorMessage(rclone.error)
+                  : rc?.available
+                    ? [t("storage.available"), rc.version].filter(Boolean).join(" · ")
+                    : rc?.error || t("storage.unavailable")}
+            </span>
+          </span>
+          {rc?.available && <span className="type-footnote">{rc.managed ? t("overview.rcloneManaged") : t("overview.rcloneExternal")}</span>}
+        </span>
+      </Row>
       {fact(t("overview.uptime"), i?.startTime && lengthOf(Date.now() - timestampDate(i.startTime).getTime()))}
       {info.isError && <p className="px-4 py-3 type-callout text-danger">{errorMessage(info.error)}</p>}
     </Group>

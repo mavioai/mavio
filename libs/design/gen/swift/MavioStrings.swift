@@ -2479,6 +2479,15 @@ public enum MavioStrings {
         String.localizedStringWithFormat(NSLocalizedString("overview.containerEngineNone", bundle: .module, comment: ""), reason)
     }
 
+    /// Label of the rclone the server reaches remotes through: its status and version.
+    public static var overviewRclone: String { NSLocalizedString("overview.rclone", bundle: .module, comment: "") }
+
+    /// The server runs rclone rcd itself.
+    public static var overviewRcloneManaged: String { NSLocalizedString("overview.rcloneManaged", bundle: .module, comment: "") }
+
+    /// The server reaches an rclone rcd run elsewhere.
+    public static var overviewRcloneExternal: String { NSLocalizedString("overview.rcloneExternal", bundle: .module, comment: "") }
+
     /// The load of the server's computer.
     public static var overviewLoad: String { NSLocalizedString("overview.load", bundle: .module, comment: "") }
 

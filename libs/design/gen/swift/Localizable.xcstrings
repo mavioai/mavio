@@ -13933,6 +13933,60 @@
         }
       }
     },
+    "overview.rclone": {
+      "comment": "Label of the rclone the server reaches remotes through: its status and version.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "rclone"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "rclone"
+          }
+        }
+      }
+    },
+    "overview.rcloneManaged": {
+      "comment": "The server runs rclone rcd itself.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Run by the server"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "由服务器运行"
+          }
+        }
+      }
+    },
+    "overview.rcloneExternal": {
+      "comment": "The server reaches an rclone rcd run elsewhere.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "External rcd"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "外部 rcd"
+          }
+        }
+      }
+    },
     "overview.load": {
       "comment": "The load of the server's computer.",
       "extractionState": "manual",

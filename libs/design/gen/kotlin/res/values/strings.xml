@@ -1562,6 +1562,12 @@
     <string name="overview_container_engine_rootless">rootless</string>
     <!-- The server found no container engine; reason tells why. -->
     <string name="overview_container_engine_none">Unavailable: %s</string>
+    <!-- Label of the rclone the server reaches remotes through: its status and version. -->
+    <string name="overview_rclone">rclone</string>
+    <!-- The server runs rclone rcd itself. -->
+    <string name="overview_rclone_managed">Run by the server</string>
+    <!-- The server reaches an rclone rcd run elsewhere. -->
+    <string name="overview_rclone_external">External rcd</string>
     <!-- The load of the server's computer. -->
     <string name="overview_load">Load</string>
     <!-- Footer of the load cards. -->

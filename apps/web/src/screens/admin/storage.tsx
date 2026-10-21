@@ -1,5 +1,5 @@
 // The settings' Storage (docs/clients.md §6.3.10): the disks of the
-// server's computer, the rclone the server runs or reaches, its remotes —
+// server's computer, the remotes of the rclone the server runs or reaches —
 // added with a kind's settings and the questions their configuration asks,
 // such as authorizing a cloud drive — their folders, and the download
 // clients of cloud drives' offline downloads.
@@ -56,7 +56,6 @@ function StorageList({ server }: { server: ServerEntry }) {
   const remotes = useRemotes(server, available);
   const providers = useStorageProviders(server, available);
   const disks = useDisks(server);
-  const s = status.data;
   return (
     <Page
       title={t("settings.storage")}
@@ -79,27 +78,12 @@ function StorageList({ server }: { server: ServerEntry }) {
           <AddRow label={t("storage.add")} search={{ remote: "new" }} />
         </Group>
       )}
-      <Group title={t("storage.rclone")}>
-        <Row label={t("storage.status")}>
-          <span className="flex min-w-0 items-center gap-2 type-callout text-text-secondary">
-            <span className={`size-2 shrink-0 rounded-full ${status.isPending ? "bg-fill" : available ? "bg-[#34C759]" : "bg-danger"}`} />
-            <span className="min-w-0 break-words">
-              {status.isPending ? "…" : status.isError ? errorMessage(status.error) : available ? t("storage.available") : s?.error || t("storage.unavailable")}
-            </span>
-          </span>
-        </Row>
-        {s?.version && (
-          <Row label={t("storage.version")}>
-            <span className="type-callout text-text-secondary">{s.version}</span>
-          </Row>
-        )}
-        {/* Whose rcd it is tells only of one reached. */}
-        {available && s && (
-          <Row label={t("storage.rcd")} detail={s.managed ? t("storage.managedDetail") : t("storage.externalDetail")}>
-            <span className="type-callout text-text-secondary">{s.managed ? t("storage.managed") : t("storage.external")}</span>
-          </Row>
-        )}
-      </Group>
+      {/* Without rclone there are no remotes; the Overview tells of it. */}
+      {status.isSuccess && !available && (
+        <Group title={t("storage.remotes")}>
+          <p className="px-4 py-3 type-callout text-danger">{status.data.error || t("storage.unavailable")}</p>
+        </Group>
+      )}
       <OfflineClients server={server} remotes={available ? (remotes.data ?? []) : []} />
     </Page>
   );
