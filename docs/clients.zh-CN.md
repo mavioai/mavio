@@ -129,7 +129,7 @@ flowchart LR
 * **Mac 应用保留全部功能**，因为它不经 App Store 分发：设置采用 Web UI 的桌面布局，位于自己的边栏旁；边栏可返回首页，并平铺列出（各带一个彩色图块）账户、“高级功能”分组（索引搜索，仅服务器管理员可见）、“这台设备”，以及所选服务器的各部分，其菜单的各部分就地展开；所选部分是由 Web UI 的分组构成的页面，最宽 900 点；发现页也有与 Web UI 一致的请求。窗口的边栏与设置的边栏共用一个宽度，与 Web UI 一致：默认为布局的宽度，拖动边线可在 200 到 320 点之间调整，双击边线恢复，并被记住；指针停在边线上或拖动它时，边线以强调色显示。核心不建模的流，例如 AI 对话的回答，经由核心的服务端流式调用送达页面。
 
 ### 4.3 Android（`apps/android`、`apps/android-tv`、`libs/android`）
-* **每种交互模型一个应用。** 手机、平板与折叠屏共用一个以 Compose 编写、采用自适应布局的应用；Android TV 与 Google TV 有自己的 Compose for TV 应用，围绕方向键焦点构建，并提供主屏上的 Watch Next 与频道。两者以同一应用 ID `dev.mavio.app` 作为同一个 Play 商店条目发布，TV 应用面向 TV 设备类型；两者都支持 Android 8.0（API 26）及以上。
+* **每种交互模型一个应用。** 手机、平板与折叠屏共用一个以 Compose 编写、采用自适应布局的应用；Android TV 与 Google TV 有自己的 Compose for TV 应用，围绕方向键焦点构建，并提供主屏上的 Watch Next 与频道。两者以同一应用 ID `dev.mavio.app` 作为同一个 Play 商店条目发布，TV 应用面向 TV 设备类型；两者都支持 Android 8.0（API 26）及以上。其中的长列表是惰性列表与网格，只组合滚动到视野内的部分：媒体库的网格、一季的剧集、日志以及助手设置中一段对话的消息，设置卡片中的行各自作为页面列表的一项绘制。
 * **`libs/android`**，两个应用以复合构建（composite build）引入的共享 Gradle 模块：
   * `core`：核心的 Kotlin API 及其上的应用服务——账户、能力探测、以 WorkManager 下载——以及服务器 API 的消息，构建时由 Maven 上与 protobuf 运行时同一版本的 protoc 生成为 Kotlin lite（BSD-3-Clause）：核心未建模的界面（设置）用它们经由核心（`callServer`）调用服务器的 API，与 Apple 应用相同（§4.2）。它声明 `INTERNET` 权限与 `ACCESS_LOCAL_NETWORK`，后者是 Android 17 访问局域网地址所必需的，而大多数服务器都在局域网中；应用在发现或登录之前申请后者，并允许明文 HTTP（`usesCleartextTraffic`），否则 Media3 会拒绝，而局域网中的服务器以普通 HTTP 提供媒体；
   * `player`：一个播放器接口、两个引擎，其上是提供后台播放与系统控制的 `MediaSessionService`，以及画中画（Android 的画中画可用于任何 `SurfaceView`）；还有跟随同步播放小组的播放器（§6.3.24）；
