@@ -236,8 +236,13 @@
             field.controlSize = .large
             field.translatesAutoresizingMaskIntoConstraints = false
             let icon = IconView("sidebar", size: 18, color: theme.colors.textSecondary)
-            let toggle = Pressable(icon, radius: MavioRadius.md, theme: theme) { [weak self] in self?.onToggle?() }
-            toggle.size(width: 28, height: 28)
+            // As the assistant's button: 28 points round, the icon 18 points
+            // inside it, filled while the pointer is on it.
+            let toggle = Pressable(
+                icon, radius: 14, insets: NSEdgeInsets(top: 5, left: 5, bottom: 5, right: 5), theme: theme
+            ) {
+                [weak self] in self?.onToggle?()
+            }
             self.toggle = toggle
             // The assistant button beside the toggle, under it in the rail.
             let header = NSStackView.horizontal([toggle], spacing: MavioSpacing.s4)
@@ -291,6 +296,9 @@
             user?.compact = rail
             table.style = rail ? .plain : .sourceList
             table.selectionHighlightStyle = rail ? .none : .regular
+            // The plain style draws the control's background: the rail keeps
+            // the sidebar's.
+            table.backgroundColor = .clear
         }
 
         override func viewDidLoad() {
