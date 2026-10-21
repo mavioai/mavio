@@ -79,7 +79,7 @@ func (p *places) isPlace(path string) bool {
 		return false
 	}
 	parts := strings.Split(strings.Trim(path, "/"), "/")
-	return len(parts) == 3 && parts[0] == "library"
+	return len(parts) == 3 && parts[0] == "library" || len(parts) == 2 && parts[0] == "tools"
 }
 
 // visitPlaces follows the router to the page shown, adding it to its

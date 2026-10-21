@@ -111,13 +111,15 @@ func TestSettings(t *testing.T) {
 func TestSettingsNotAdmin(t *testing.T) {
 	h := newHarness(t, true, 1280, 1000)
 	h.core.notAdmin = true
+	// The sidebar loaded the user, an administrator, for its pinned tools.
+	h.app.settingsState.users = nil
 	h.app.router.Push("/settings/issues")
 	h.settle()
 	texts := h.tt.Texts()
 	if !slices.Contains(texts, "Issues") || !slices.Contains(texts, "1 issue") {
 		t.Errorf("no issues; texts = %q", texts)
 	}
-	for _, no := range []string{"Monitoring & Maintenance", "Backups", "Overview"} {
+	for _, no := range []string{"Monitoring & Maintenance", "Backups", "Overview", "Advanced"} {
 		if slices.Contains(texts, no) {
 			t.Errorf("shows %q; texts = %q", no, texts)
 		}

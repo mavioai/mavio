@@ -169,6 +169,8 @@ func (a *App) page(c *ui.Context, r *ui.Route) {
 		a.collectionPage(c, r)
 	case r.Match("/requests/{server}"):
 		a.requestsPage(c, r)
+	case r.Match("/tools/{tool}"):
+		a.toolPage(c, r)
 	default:
 		a.home(c)
 	}
@@ -177,17 +179,27 @@ func (a *App) page(c *ui.Context, r *ui.Route) {
 // navItem is an entry of the sidebar.
 type navItem struct {
 	path, icon, label string
+	// tile is the color of a tool's tile, its icon drawn on it.
+	tile *ui.Color
 }
 
 // navItems returns the top-level destinations, then each server's
 // libraries, under the server's name when there are several.
 func (a *App) navItems(c *ui.Context) (top []navItem, sections []navSection) {
 	top = []navItem{
-		{"/search", "search", style.T(c, "nav.search")},
-		{"/home", "home", style.T(c, "nav.home")},
+		{path: "/search", icon: "search", label: style.T(c, "nav.search")},
+		{path: "/home", icon: "home", label: style.T(c, "nav.home")},
 	}
 	if server, _, _ := a.discovery(c); server != "" {
-		top = append(top, navItem{"/discover", "discover", style.T(c, "nav.discover")})
+		top = append(top, navItem{path: "/discover", icon: "discover", label: style.T(c, "nav.discover")})
+	}
+	// The advanced tools pinned, as a place each.
+	if pinned := a.pinnedTools(); len(pinned) > 0 {
+		sec := navSection{title: style.T(c, "nav.features")}
+		for _, s := range pinned {
+			sec.items = append(sec.items, navItem{path: toolPath(s.id), icon: s.icon, label: style.T(c, s.title), tile: &s.color})
+		}
+		sections = append(sections, sec)
 	}
 	for _, s := range a.servers {
 		libs := a.serverLibraries(s.GetId())
@@ -200,7 +212,7 @@ func (a *App) navItems(c *ui.Context) (top []navItem, sections []navSection) {
 		}
 		sec := navSection{title: title}
 		for _, l := range libs.value.GetLibraries() {
-			sec.items = append(sec.items, navItem{"/library/" + s.GetId() + "/" + l.GetId(), libraryIcon(l.GetKind()), l.GetName()})
+			sec.items = append(sec.items, navItem{path: "/library/" + s.GetId() + "/" + l.GetId(), icon: libraryIcon(l.GetKind()), label: l.GetName()})
 		}
 		sections = append(sections, sec)
 	}
@@ -341,7 +353,11 @@ func (a *App) sidebarRow(c *ui.Context, it navItem, selected bool) {
 		row.Opacity(0.8)
 	}
 	row.Children(func() {
-		ui.Icon(c, style.Icon(it.icon, selected)).Size(20, 20).TextColor(style.Color(colors.TextPrimary))
+		if it.tile != nil {
+			toolTile(c, it.icon, *it.tile, 24)
+		} else {
+			ui.Icon(c, style.Icon(it.icon, selected)).Size(20, 20).TextColor(style.Color(colors.TextPrimary))
+		}
 		t := style.Text(ui.Text(c, it.label), style.Type(c).Callout).TextColor(style.Color(colors.TextPrimary)).SingleLine().Grow(1)
 		if selected {
 			t.FontWeight(600)
@@ -387,7 +403,11 @@ func (a *App) rail(c *ui.Context, medium bool) {
 						cell.Background(style.Color(colors.Fill))
 					}
 					cell.Children(func() {
-						ui.Icon(c, style.Icon(it.icon, selected)).Size(20, 20).TextColor(style.Color(colors.TextPrimary))
+						if it.tile != nil {
+							toolTile(c, it.icon, *it.tile, 24)
+						} else {
+							ui.Icon(c, style.Icon(it.icon, selected)).Size(20, 20).TextColor(style.Color(colors.TextPrimary))
+						}
 					})
 					if cell.Clicked() {
 						a.openPlace(it.path)

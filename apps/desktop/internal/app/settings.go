@@ -40,6 +40,8 @@ type settingsSection struct {
 	title    string // its string's key
 	// admin marks a section of the server's administrators.
 	admin bool
+	// tool marks an advanced tool, which chooses its servers itself.
+	tool bool
 }
 
 var settingsSections = []settingsSection{
@@ -71,11 +73,12 @@ var settingsSections = []settingsSection{
 }
 
 func sectionOf(id string) (settingsSection, bool) {
-	i := slices.IndexFunc(settingsSections, func(s settingsSection) bool { return s.id == id })
+	all := slices.Concat(tools, settingsSections)
+	i := slices.IndexFunc(all, func(s settingsSection) bool { return s.id == id })
 	if i < 0 {
 		return settingsSection{}, false
 	}
-	return settingsSections[i], true
+	return all[i], true
 }
 
 // settingsMenu is a menu of the server's settings, holding the sections
@@ -146,6 +149,8 @@ type settingsState struct {
 	admin adminState
 	// assistant is this device's Assistant section.
 	assistant assistantPrefsState
+	// indexers is the indexer search.
+	indexers indexerSearchState
 
 	languages languagesForm
 	sessions  task[[]*sessionv1.Session]
@@ -214,6 +219,10 @@ func (a *App) settings(c *ui.Context, r *ui.Route) {
 	if !ok {
 		id = "appearance"
 	}
+	// The tools are an administrator's.
+	if admins, known := a.adminServers(); sec.tool && known && len(admins) == 0 {
+		id = "appearance"
+	}
 	// A server the user does not administer has no administration.
 	if admin, known := a.admin(); sec.admin && known && !admin {
 		id = "devices"
@@ -270,6 +279,14 @@ func (a *App) settingsSidebar(c *ui.Context, current string) {
 			a.accountCard(c, current == "account")
 			server := a.chosenServer()
 			admin, _ := a.admin()
+			if admins, _ := a.adminServers(); len(admins) > 0 {
+				ui.Column(c.Key("tools")).Gap(2).Children(func() {
+					sidebarHeading(c, style.T(c, "settings.advancedGroup"))
+					for _, s := range tools {
+						a.toolLink(c, s, s.id == current)
+					}
+				})
+			}
 			for _, g := range settingsGroups {
 				if g.server && server == nil {
 					continue
@@ -424,6 +441,8 @@ func (a *App) settingsSection(c *ui.Context, r *ui.Route, id string) {
 		a.languagesSection(c)
 	case "assistant":
 		a.assistantPrefs(c)
+	case "indexer-search":
+		a.indexerSearch(c)
 	case "account":
 		a.accountSection(c)
 	case "devices":

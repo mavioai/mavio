@@ -96,6 +96,7 @@ func (fakeIndexers) SearchReleases(context.Context, *acquisitionv1.SearchRelease
 				IndexerId: new("1"), IndexerName: new("Nyaa"), Guid: new("g1"), Title: new("Orbit.2024.1080p.BluRay.x265-GRP"), Size: new(int64(6_400_000_000)),
 				Protocol: &torrent, Seeders: new(int32(42)), Peers: new(int32(50)), Parsed: quality("Bluray-1080p"),
 				CustomFormats: []string{"x265"}, CustomFormatScore: new(int32(10)), PublishDate: timestamppb.New(time.Now().Add(-72 * time.Hour)),
+				Categories: []int32{2040, 2000}, Grabs: new(int32(12)), MagnetUrl: new("magnet:?xt=urn:btih:orbit"), InfoUrl: new("https://nyaa.example/view/1"),
 			}.Build(),
 			acquisitionv1.Release_builder{
 				IndexerId: new("1"), IndexerName: new("Nyaa"), Guid: new("g2"), Title: new("Orbit.2024.CAM"), Size: new(int64(900_000_000)),

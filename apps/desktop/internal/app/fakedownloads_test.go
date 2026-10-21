@@ -84,7 +84,7 @@ func (s *fakeDownloads) GrabRelease(_ context.Context, r *acquisitionv1.GrabRele
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.grabbed = append(s.grabbed, r.GetItemId()+" "+r.GetRelease().GetTitle())
-	return &acquisitionv1.GrabReleaseResponse{}, nil
+	return acquisitionv1.GrabReleaseResponse_builder{ClientName: new("qBittorrent")}.Build(), nil
 }
 
 func (s *fakeDownloads) RemoveFromQueue(_ context.Context, r *acquisitionv1.RemoveFromQueueRequest) (*acquisitionv1.RemoveFromQueueResponse, error) {

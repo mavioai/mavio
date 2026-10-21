@@ -110,6 +110,9 @@ type preferences struct {
 	// Language is the language the app shows, a tag of design.Locales; the
 	// system's when empty.
 	Language string `json:"language,omitempty"`
+	// Pinned are the advanced tools pinned to the sidebar's Features
+	// group, in the order pinned.
+	Pinned []string `json:"pinned,omitempty"`
 }
 
 // App is the app's state, owned by the main thread.
