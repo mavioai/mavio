@@ -25,6 +25,7 @@ from mavio_pipecat.services import (
     voice_languages,
     voices,
 )
+from mavio_pipecat.spoken import SpokenTextFilter
 
 
 def test_every_service_makes_its_pipecat_service(tmp_path: Path):
@@ -44,6 +45,10 @@ def test_every_service_makes_its_pipecat_service(tmp_path: Path):
             continue
         tts = service.make(service.values({**keys, "voice": "v"}), session, models)
         assert isinstance(tts, TTSService), f"{service.name} made {tts!r}"
+        filters = tts._text_filters  # pyright: ignore[reportPrivateUsage]
+        assert any(isinstance(f, SpokenTextFilter) for f in filters), (
+            f"{service.name} filters = {filters!r}"
+        )
     names = [s.name for s in TRANSCRIPTION]
     assert names == ["speaches", "openai"], f"transcription services = {names}"
 

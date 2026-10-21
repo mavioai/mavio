@@ -185,6 +185,7 @@ WebSocket in (16 kHz PCM, events)
 
 * **Transport**: Pipecat's FastAPI WebSocket transport with a serializer of Mavio's protocol (§8.6), not RTVI. Its output paces the answer's audio as a real-time device would, so that Pipecat knows what was spoken when the user interrupts.
 * **Services**: the recognizer's and the voice's Pipecat services, configured in the plugin's settings (§8.7); a segmented recognizer, such as Whisper or the OpenAI transcription API, is given each utterance the VAD delimits, a streaming one the audio as it comes.
+* **What is spoken**: the voice's TTS service is given the answer's text without its emoji and pictographs, which no TTS service pronounces, and nothing of a sentence of those alone; the answer's text shown and kept is unchanged.
 * **Timing**: the plugin logs, for each session, when its first audio came and the loudest sample of its first second, which tells a silent microphone from a quiet one, when the VAD heard speech and silence, when the user's turns started and ended, and when the assistant spoke, counted from the session's start.
 * **No LLM service.** The pipeline's agent is the assistant itself, reached through `Ask`, so that the fast path, the tools, permissions, conversations and memory stay the server's and spoken and typed requests take the same paths. Pipecat's LLM services, context aggregators and speech-to-speech models are not used.
 

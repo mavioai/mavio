@@ -14,6 +14,7 @@ from pipecat.transcriptions.language import Language
 from mavio.plugin.v1 import settings_pb2
 from mavio_pipecat.models import ModelRef, Models, kokoro_model, piper_model, whisper_model
 from mavio_pipecat.speaches import CONTAINER
+from mavio_pipecat.spoken import SpokenTextFilter
 from mavio_pipecat.voices import KOKORO_VOICES, PIPER_VOICES
 
 # The longest list of hints a service is given.
@@ -420,6 +421,7 @@ def _kokoro_tts(settings: dict[str, Any], session: Session, models: Models) -> F
     voice = pick_voice(settings["voice"], kokoro_language, session.language)
     language = pipecat_language(kokoro_language(voice) or session.language)
     return KokoroTTSService(
+        text_filters=[SpokenTextFilter()],
         model_path=str(files.model),
         voices_path=str(files.voices),
         settings=KokoroTTSService.Settings(voice=voice, language=language or Language.EN),
@@ -430,6 +432,7 @@ def _openai_tts(settings: dict[str, Any], session: Session, _models: Models) -> 
     from pipecat.services.openai.tts import OpenAITTSService
 
     return OpenAITTSService(
+        text_filters=[SpokenTextFilter()],
         api_key=settings.get("api_key", ""),
         base_url=settings["base_url"],
         settings=OpenAITTSService.Settings(model=settings["model"], voice=settings["voice"]),
@@ -440,6 +443,7 @@ def _deepgram_tts(settings: dict[str, Any], session: Session, _models: Models) -
     from pipecat.services.deepgram.tts import DeepgramTTSService
 
     return DeepgramTTSService(
+        text_filters=[SpokenTextFilter()],
         api_key=settings.get("api_key", ""),
         settings=DeepgramTTSService.Settings(voice=settings["voice"]),
     )
@@ -449,6 +453,7 @@ def _cartesia_tts(settings: dict[str, Any], session: Session, _models: Models) -
     from pipecat.services.cartesia.tts import CartesiaTTSService
 
     return CartesiaTTSService(
+        text_filters=[SpokenTextFilter()],
         api_key=settings.get("api_key", ""),
         settings=CartesiaTTSService.Settings(
             model=settings["model"],
@@ -462,6 +467,7 @@ def _elevenlabs_tts(settings: dict[str, Any], session: Session, _models: Models)
     from pipecat.services.elevenlabs.tts import ElevenLabsTTSService
 
     return ElevenLabsTTSService(
+        text_filters=[SpokenTextFilter()],
         api_key=settings.get("api_key", ""),
         settings=ElevenLabsTTSService.Settings(
             model=settings["model"],
@@ -483,6 +489,7 @@ def _piper_tts(settings: dict[str, Any], session: Session, models: Models) -> Fr
 
     voice = pick_voice(settings["voice"], piper_language, session.language)
     return PiperTTSService(
+        text_filters=[SpokenTextFilter()],
         download_dir=models.piper(voice).parent,
         settings=PiperTTSService.Settings(voice=voice),
     )
@@ -492,6 +499,7 @@ def _soniox_tts(settings: dict[str, Any], session: Session, _models: Models) -> 
     from pipecat.services.soniox.tts import SonioxTTSService
 
     return SonioxTTSService(
+        text_filters=[SpokenTextFilter()],
         api_key=settings.get("api_key", ""),
         settings=SonioxTTSService.Settings(
             model=settings["model"],
@@ -516,6 +524,7 @@ def _google_tts(settings: dict[str, Any], session: Session, _models: Models) -> 
     voice = settings["voice"]
     language = pipecat_language(google_language(voice)) or pipecat_language(session.language)
     return GoogleTTSService(
+        text_filters=[SpokenTextFilter()],
         credentials=settings.get("credentials", ""),
         location=settings["location"],
         settings=GoogleTTSService.Settings(voice=voice, language=language or Language.EN_US),
