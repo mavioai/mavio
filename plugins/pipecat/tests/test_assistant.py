@@ -19,7 +19,7 @@ from pipecat.processors.aggregators.llm_context import LLMContext, LLMContextMes
 from pipecat.processors.frame_processor import FrameDirection
 from pipecat.tests.utils import SleepFrame, run_test
 
-from mavio_pipecat.assistant import MavioAssistant, trailing_user_text
+from mavio_pipecat.assistant import MavioAssistant, user_text
 
 
 def context(*messages: tuple[str, str]) -> LLMContextFrame:
@@ -48,18 +48,21 @@ def speech(frames: Sequence[Frame]) -> list[str]:
     return out
 
 
-def test_trailing_user_text():
+def test_user_text():
     cases = [
-        ([("user", "hi")], "hi"),
+        ([("user", "hi")], 0, "hi"),
         (
             [("user", "a"), ("assistant", "b"), ("user", "play"), ("user", "the matrix")],
+            2,
             "play the matrix",
         ),
-        ([("user", "a"), ("assistant", "b")], ""),
+        ([("user", "a"), ("assistant", "b")], 1, ""),
+        # An answer not spoken is not in the context: what was asked is skipped.
+        ([("user", "how's the weather"), ("user", "and tomorrow")], 1, "and tomorrow"),
     ]
-    for messages, want in cases:
-        got = trailing_user_text(context(*messages).context)
-        assert got == want, f"trailing_user_text({messages}) = {got!r}, want = {want!r}"
+    for messages, start, want in cases:
+        got = user_text(context(*messages).context, start)
+        assert got == want, f"user_text({messages}, {start}) = {got!r}, want = {want!r}"
 
 
 async def test_answer_is_spoken():
@@ -289,3 +292,26 @@ async def test_a_run_replacing_a_spoken_answer_interrupts_it():
     )
     interrupt = next(i for i, f in enumerate(down) if isinstance(f, InterruptionFrame))
     assert interrupt < first_run2, f"frames = {kinds}"
+
+
+async def test_turn_after_an_unspoken_answer_asks_only_itself():
+    # The answer came but the user spoke before it was heard: the request
+    # asked is not asked again with the next turn.
+    ask = FakeAsk(
+        [{"answer": "Sunny."}, 1.0, {"done": {"answer": "Sunny."}}],
+        [{"done": {"answer": "Rain."}}],
+    )
+    await run_test(
+        MavioAssistant(ask),
+        frames_to_send=[
+            context(("user", "how's the weather")),
+            SleepFrame(0.1),
+            UserStartedSpeakingFrame(),
+            InterruptionFrame(),
+            UserStoppedSpeakingFrame(),
+            context(("user", "how's the weather"), ("user", "and tomorrow")),
+            SleepFrame(0.1),
+        ],
+    )
+    got = [r["text"] for r in ask.requests]
+    assert got == ["how's the weather", "and tomorrow"], f"requests = {got}"

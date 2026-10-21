@@ -36,27 +36,13 @@ SPEECH_START_TIMEOUT = 3.0
 HELD_ANSWER_WAIT = 0.5
 
 
-def trailing_user_text(context: LLMContext) -> str:
-    """The user's messages since the last answer, joined: what a run that
-    starts asks."""
-    return " ".join(_user_texts(context))
-
-
-def last_user_text(context: LLMContext) -> str:
-    """The user's last message: what a turn steering a run adds."""
-    texts = _user_texts(context)
-    return texts[-1] if texts else ""
-
-
-def _user_texts(context: LLMContext) -> list[str]:
+def user_text(context: LLMContext, start: int = 0) -> str:
+    """The user's messages from the context's message start on, joined:
+    those not yet asked. An answer not spoken never enters the context, so
+    what was asked is counted, not read from the answers."""
     texts: list[str] = []
-    for message in reversed(context.get_messages()):
-        if not isinstance(message, dict):
-            continue
-        role = message.get("role")
-        if role == "assistant":
-            break
-        if role != "user":
+    for message in context.get_messages()[start:]:
+        if not isinstance(message, dict) or message.get("role") != "user":
             continue
         content = message.get("content")
         if isinstance(content, list):
@@ -65,7 +51,7 @@ def _user_texts(context: LLMContext) -> list[str]:
             )
         if isinstance(content, str) and content.strip():
             texts.append(content.strip())
-    return list(reversed(texts))
+    return " ".join(texts)
 
 
 class MavioAssistant(FrameProcessor):
@@ -122,12 +108,16 @@ class MavioAssistant(FrameProcessor):
         self._held: list[tuple[str, str]] = []
         self._held_end: dict[str, Any] | None = None
         self._release: asyncio.Task[None] | None = None
+        # How many of the context's messages have been asked or steered with.
+        self._asked = 0
 
     async def process_frame(self, frame: Frame, direction: FrameDirection) -> None:
         await super().process_frame(frame, direction)
         if isinstance(frame, LLMContextFrame):
             if frame.speculation:
                 return
+            text = user_text(frame.context, self._asked)
+            self._asked = len(frame.context.get_messages())
             if self._holding:
                 await self._stop_release()
                 self._holding = False
@@ -135,13 +125,11 @@ class MavioAssistant(FrameProcessor):
                     # Answered while the user went on: the answer is dropped
                     # unheard, and what they went on to say is asked.
                     await self._drop_held()
-                    text = last_user_text(frame.context)
                     if text:
                         self._run = self.create_task(self._request(text), "ask")
                     return
-            if await self._steer(last_user_text(frame.context)):
+            if await self._steer(text):
                 return
-            text = trailing_user_text(frame.context)
             await self._cancel(end_response=True, interrupt=True)
             if text:
                 self._run = self.create_task(self._request(text), "ask")
