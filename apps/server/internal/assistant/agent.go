@@ -21,9 +21,9 @@ import (
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1/pluginv1connect"
 )
 
-// SessionLabel marks the plugin's sessions that are the assistant's
-// conversations: each its user's alone.
-const SessionLabel = "mavio.assistant"
+// assistantLabel marks the plugin's sessions that are the assistant's
+// conversations.
+const assistantLabel = "mavio.assistant"
 
 // callTTL is how long the results of the model's tool calls are kept.
 const callTTL = 24 * time.Hour
@@ -134,7 +134,7 @@ func (t *turn) conversation(ag pluginv1connect.AgentSessionServiceClient) (strin
 			return "", err
 		}
 		for _, sess := range list.GetSessions() {
-			if sess.GetLabels()[SessionLabel] != "" && !sess.GetEnded() && fresh(sess.GetUpdated().AsTime()) {
+			if sess.GetLabels()[assistantLabel] != "" && !sess.GetEnded() && fresh(sess.GetUpdated().AsTime()) {
 				t.touch(sess.GetId())
 				return sess.GetId(), nil
 			}
@@ -152,7 +152,7 @@ func (t *turn) conversation(ag pluginv1connect.AgentSessionServiceClient) (strin
 	created, err := ag.CreateAgentSession(ctx, pluginv1.CreateAgentSessionRequest_builder{
 		Provider: &provider, Model: &model, Instructions: new(t.s.instructions(&t.p.User)),
 		Tools: t.s.declarations(), CodeMode: &t.set.CodeMode, Owner: new(t.p.User.ID.String()), Memory: &t.set.Memory,
-		Labels: map[string]string{SessionLabel: "1", "device": device},
+		Labels: map[string]string{assistantLabel: "1", "device": device},
 	}.Build())
 	if err != nil {
 		return "", err
@@ -569,7 +569,7 @@ func (s *Service) sweep(ctx context.Context) {
 	live := map[string]bool{}
 	defer s.rec.prune(live, now)
 	for _, sess := range list.GetSessions() {
-		if sess.GetLabels()[SessionLabel] == "" {
+		if sess.GetLabels()[assistantLabel] == "" {
 			continue
 		}
 		owner := sess.GetOwner()
@@ -635,7 +635,7 @@ func (s *Service) ListAssistantConversations(ctx context.Context, _ *assistantv1
 	}
 	var out []*assistantv1.AssistantConversation
 	for _, sess := range list.GetSessions() {
-		if sess.GetLabels()[SessionLabel] != "" {
+		if sess.GetLabels()[assistantLabel] != "" {
 			out = append(out, conversationToProto(sess))
 		}
 	}
@@ -655,7 +655,7 @@ func (s *Service) own(ctx context.Context, id string) (auth.Principal, pluginv1c
 	if err != nil {
 		return p, nil, nil, err
 	}
-	if resp.GetSession().GetOwner() != p.User.ID.String() || resp.GetSession().GetLabels()[SessionLabel] == "" {
+	if resp.GetSession().GetOwner() != p.User.ID.String() || resp.GetSession().GetLabels()[assistantLabel] == "" {
 		return p, nil, nil, connect.NewError(connect.CodeNotFound, fmt.Errorf("no conversation %s", id))
 	}
 	return p, ag, resp, nil

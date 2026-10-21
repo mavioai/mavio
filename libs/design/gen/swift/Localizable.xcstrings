@@ -33326,13 +33326,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Talk with the models of the AI providers. Conversations started here are kept on the server and shared by its administrators; your conversations with the assistant are listed too, seen by you alone."
+            "value": "Talk with the models of the AI providers. Conversations are kept on the server and shared by its administrators, the users' conversations with the assistant among them."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "与 AI 提供商的模型对话。在此开始的对话保存在服务器上，由服务器的管理员共享；你与助手的对话也列在这里，只有你能看到。"
+            "value": "与 AI 提供商的模型对话。对话保存在服务器上，由服务器的管理员共享，其中也包括各用户与助手的对话。"
           }
         }
       }

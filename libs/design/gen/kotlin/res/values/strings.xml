@@ -3726,7 +3726,7 @@
     <!-- Explains the settings' issues. -->
     <string name="issues_intro">Problems reported with the server\'s movies and shows: your own, or everyone\'s for administrators.</string>
     <!-- Footer of the AI settings' conversations. -->
-    <string name="conversations_message">Talk with the models of the AI providers. Conversations started here are kept on the server and shared by its administrators; your conversations with the assistant are listed too, seen by you alone.</string>
+    <string name="conversations_message">Talk with the models of the AI providers. Conversations are kept on the server and shared by its administrators, the users\' conversations with the assistant among them.</string>
     <!-- Row when no plugin keeping conversations runs on the server. -->
     <string name="conversations_no_plugin">No AI agent plugin</string>
     <!-- Footer explaining why an AI agent plugin is needed. -->
