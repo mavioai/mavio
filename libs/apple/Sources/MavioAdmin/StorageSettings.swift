@@ -210,7 +210,8 @@ private func kindName(_ providers: [Mavio_Storage_V1_Provider], _ type: String) 
 }
 
 /// A bar of how much of a disk or a remote is used, orange when nearly
-/// full and red when full, and its sizes.
+/// full and red when full, and its sizes: across the row, whatever its
+/// text's width, its share drawn as it is, without animating.
 private struct UsageBar: View {
     let used: Int64
     let total: Int64
@@ -219,11 +220,25 @@ private struct UsageBar: View {
     var body: some View {
         let share = total > 0 ? min(1, Double(used) / Double(total)) : 0
         VStack(alignment: .leading, spacing: MavioSpacing.s4) {
-            ProgressView(value: share)
-                .tint(share >= 0.95 ? theme.colors.danger : share >= 0.85 ? Color(hex: 0xFF9500) : Color(hex: 0x007AFF))
+            Capsule()
+                .fill(theme.colors.fill)
+                .overlay(alignment: .leading) {
+                    Rectangle()
+                        .fill(
+                            share >= 0.95
+                                ? theme.colors.danger : share >= 0.85 ? Color(hex: 0xFF9500) : Color(hex: 0x007AFF)
+                        )
+                        .scaleEffect(x: share, anchor: .leading)
+                }
+                .clipShape(.capsule)
+                .frame(height: 4)
+                .frame(maxWidth: .infinity)
+                .accessibilityElement()
+                .accessibilityValue(share.formatted(.percent.precision(.fractionLength(0))))
             Text(MavioStrings.storageUsage(used: capacity(used), total: capacity(total)))
                 .type(theme.type.footnote).foregroundStyle(theme.colors.textSecondary)
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.top, 2)
     }
 }
