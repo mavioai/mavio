@@ -256,7 +256,7 @@ WebSocket 承载二进制音频帧（§8.5）与 JSON 事件 `{"type": …}`，�
 ### 9.4 Android（`apps/android`、`apps/android-tv`）
 * **手机与平板**：语音会话由来自 `VOICE_COMMUNICATION` 的 `AudioRecord` 采集，搭配 `AcousticEchoCanceler` 与 `NoiseSuppressor`，由 `USAGE_VOICE_COMMUNICATION` 的 `AudioTrack` 播放。
 * **手机与平板的入口**：标题栏与播放器控制中的助手按钮，按 §9.1 轻点或按住；长按应用图标的启动器快捷方式“与 Mavio 对话”，以及一个快速设置磁贴，都会打开应用并开始语音会话；系统的返回键先关闭助手再返回。
-* **Android TV 与 Google TV**：以遥控器的麦克风按住说话，应用在前台且按住遥控器的搜索键或助手键时由 `AudioRecord` 采集；系统的语音搜索通过应用的搜索 intent 与 `MediaSession` 的按搜索播放到达应用，并经由 `Ask` 处理。
+* **Android TV 与 Google TV**：以遥控器的麦克风按住说话，应用在前台且按住遥控器的搜索键或助手键时由 `AudioRecord` 采集，`VOICE_COMMUNICATION` 没有麦克风时改用 `VOICE_RECOGNITION` 或普通麦克风。遥控器的麦克风只在按住它自己的键时才给出音频：起初没有音频的麦克风会被提示，有音频后撤回提示；间隙以静音发送，使会话能结束这一轮；停止的麦克风（如被电视自带的助手占用）会重新打开；系统未映射的遥控器麦克风键（如小米遥控器的）会开始一次对话；系统的语音搜索通过应用的搜索 intent 与 `MediaSession` 的按搜索播放到达应用，并经由 `Ask` 处理。
 
 ### 9.5 桌面（`apps/desktop`）
 语音会话的麦克风由平台的音频 API 采集，并使用其回声消除。
