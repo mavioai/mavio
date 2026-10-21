@@ -99,15 +99,16 @@ func run() error {
 			a.Event(e)
 		}
 	}
+	thisDevice := capiv1.Device_builder{
+		Id:            device,
+		Name:          strings.TrimSuffix(host, ".local"),
+		Client:        "Mavio for " + platforms[runtime.GOOS],
+		ClientVersion: mygo.App.Version(),
+	}.Build()
 	client, err := lib.Open(ctx, capiv1.Open_builder{
 		DatabasePath: filepath.Join(data, "core.db"),
-		Device: capiv1.Device_builder{
-			Id:            device,
-			Name:          strings.TrimSuffix(host, ".local"),
-			Client:        "Mavio for " + platforms[runtime.GOOS],
-			ClientVersion: mygo.App.Version(),
-		}.Build(),
-		Tokens: tokens,
+		Device:       thisDevice,
+		Tokens:       tokens,
 	}.Build(), events)
 	if err != nil {
 		return err
@@ -145,6 +146,8 @@ func run() error {
 	mygo.App.SetLanguages(design.Locales...)
 	a = app.New(ctx, app.Options{
 		Core:          client,
+		Device:        thisDevice,
+		System:        systemFacts,
 		Images:        loader,
 		Update:        update,
 		Preferences:   filepath.Join(data, "preferences.json"),

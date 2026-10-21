@@ -70,6 +70,7 @@ var settingsSections = []settingsSection{
 	{id: "assistant", icon: "microphone", color: ui.RGB(0xFF, 0x2D, 0x55), title: "assistant.title"},
 	{id: "account", icon: "profile", color: ui.RGB(0xFF, 0x95, 0x00), title: "settings.account"},
 	{id: "devices", icon: "devices", color: ui.RGB(0x32, 0xAD, 0xE6), title: "settings.devices"},
+	{id: "about", icon: "info", color: ui.RGB(0x8E, 0x8E, 0x93), title: "settings.about"},
 }
 
 func sectionOf(id string) (settingsSection, bool) {
@@ -106,6 +107,8 @@ var settingsGroups = []struct {
 }{
 	{"settings.thisDevice", []string{"appearance", "playback", "subtitles-audio", "assistant"}, false},
 	{"settings.serverGroup", []string{"overview", "general", "users", "devices", "media", "acquiring", "ai", "plugins", "proxies", "maintenance"}, true},
+	// About, last, in a group of its own without a title.
+	{"", []string{"about"}, false},
 }
 
 func menuOf(id string) (settingsMenu, bool) {
@@ -151,6 +154,8 @@ type settingsState struct {
 	assistant assistantPrefsState
 	// indexers is the indexer search.
 	indexers indexerSearchState
+	// about is the About section.
+	about aboutState
 
 	languages languagesForm
 	sessions  task[[]*sessionv1.Session]
@@ -291,27 +296,20 @@ func (a *App) settingsSidebar(c *ui.Context, current string) {
 				if g.server && server == nil {
 					continue
 				}
-				// The menus are flat on the desktop: each is a group of
-				// its own after the server's, its sections listed in it.
+				// The menus are flat on the desktop: their sections are listed
+				// in the server's group, in their place.
 				var sections []string
-				var menus []settingsMenu
 				for _, id := range g.entries {
-					m, ok := menuOf(id)
-					if !ok {
-						sections = append(sections, shownSections([]string{id}, admin)...)
+					if m, ok := menuOf(id); ok {
+						sections = append(sections, shownSections(m.sections, admin)...)
 						continue
 					}
-					switch ids := shownSections(m.sections, admin); len(ids) {
-					case 0:
-					case 1:
-						sections = append(sections, ids...)
-					default:
-						m.sections = ids
-						menus = append(menus, m)
-					}
+					sections = append(sections, shownSections([]string{id}, admin)...)
 				}
-				ui.Column(c.Key(g.title)).Gap(2).Children(func() {
-					sidebarHeading(c, style.T(c, g.title))
+				ui.Column(c.Key(cmp.Or(g.title, g.entries[0]))).Gap(2).Children(func() {
+					if g.title != "" {
+						sidebarHeading(c, style.T(c, g.title))
+					}
 					if g.server && a.account != nil && len(a.servers) > 1 {
 						a.serverChoice(c)
 					}
@@ -320,15 +318,6 @@ func (a *App) settingsSidebar(c *ui.Context, current string) {
 						a.sidebarLink(c, s, s.id == current)
 					}
 				})
-				for _, m := range menus {
-					ui.Column(c.Key(m.id)).Gap(2).Children(func() {
-						sidebarHeading(c, style.T(c, m.title))
-						for _, id := range m.sections {
-							s, _ := sectionOf(id)
-							a.sidebarLink(c, s, s.id == current)
-						}
-					})
-				}
 			}
 		})
 	})
@@ -485,6 +474,8 @@ func (a *App) settingsSection(c *ui.Context, r *ui.Route, id string) {
 		a.issuesSection(c)
 	case "backups":
 		a.backupsSection(c)
+	case "about":
+		a.aboutSection(c)
 	}
 }
 

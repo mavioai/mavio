@@ -83,6 +83,19 @@ type Options struct {
 	// Voice is the audio of the assistant's voice sessions; nil where the
 	// platform has no capture, whose assistant takes typed requests.
 	Voice voice.Audio
+	// Device is this device, as the servers know it.
+	Device *capiv1.Device
+	// System tells the system's version and the device's maker and
+	// model, as far as the system tells them; nil tells none.
+	System func(ctx context.Context) System
+}
+
+// System is what the system tells of itself and of the device.
+type System struct {
+	// Version is the system's name and version, as "macOS 26.1".
+	Version string
+	// Manufacturer and Model are the device's maker and model.
+	Manufacturer, Model string
 }
 
 // phase is where the app is: starting, signing in, or showing the
@@ -127,6 +140,8 @@ type App struct {
 	opts   Options
 	prefs  preferences
 	router *ui.Router
+	// inSettings is whether the last frame showed the settings' layout.
+	inSettings bool
 
 	phase phase
 	// players are what play: in windows of their own, or one in the
@@ -430,8 +445,17 @@ func (a *App) View(c *ui.Context) {
 		if c.Shortcut(ui.Cmd, ui.KeyComma) && !strings.HasPrefix(a.router.Path(), "/settings") {
 			a.router.Push("/settings")
 		}
-		// The settings have a layout of their own, as in the web UI.
-		if strings.HasPrefix(a.router.Path(), "/settings") {
+		// The settings have a layout of their own, as in the web UI. Going
+		// between it and the app's, the page shows at once: fading in, it
+		// would show through what the other layout left.
+		settings := strings.HasPrefix(a.router.Path(), "/settings")
+		if settings != a.inSettings {
+			a.inSettings = settings
+			transition := a.router.Transition
+			a.router.Transition = ui.TransitionNone
+			defer func() { a.router.Transition = transition }()
+		}
+		if settings {
 			if a.prefs.TV {
 				a.tvSettingsView(c)
 				return

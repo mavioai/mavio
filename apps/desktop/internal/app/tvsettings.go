@@ -1,6 +1,7 @@
 package app
 
 import (
+	"cmp"
 	"net/url"
 	"slices"
 	"strings"
@@ -83,7 +84,11 @@ func (a *App) tvSettingsList(c *ui.Context) {
 		if g.server && server == nil {
 			continue
 		}
-		group(c, g.title, style.T(c, g.title), "", func(gr *settingsGroup) {
+		title := ""
+		if g.title != "" {
+			title = style.T(c, g.title)
+		}
+		group(c, cmp.Or(g.title, g.entries[0]), title, "", func(gr *settingsGroup) {
 			if g.server && a.account != nil && len(a.servers) > 1 {
 				gr.block(func() { a.serverChoice(c) })
 			}

@@ -17,6 +17,8 @@ import (
 	"testing"
 	"time"
 
+	"google.golang.org/protobuf/proto"
+
 	"github.com/egoist/mygo/ui"
 
 	"github.com/mavioai/mavio/libs/client-rust/capi"
@@ -202,6 +204,8 @@ func (f *fakeCore) Stream(ctx context.Context, req *capiv1.Request, part func(*c
 		m.Done = &capiv1.Done{}
 	case req.HasGetAccount():
 		m.Account = &capiv1.Account{}
+	case req.HasGetVersion():
+		m.Version = proto.String("1.2.3")
 	case req.HasStartLink():
 		m.LinkCode = capiv1.LinkCode_builder{
 			Request: 1, UserCode: "BDWP-HQPK", VerificationUri: "https://mavio.dev/link",
