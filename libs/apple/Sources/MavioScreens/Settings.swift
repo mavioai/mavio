@@ -5,7 +5,7 @@ import SwiftUI
 
 /// The settings, as the web UI's on a phone, opened from the avatar at the
 /// top right: the account's card, opening the account with its servers;
-/// this device's sections, with the downloads; the version; and signing
+/// this device's sections, with the downloads; About; and signing
 /// out.
 public struct SettingsView: View {
     @Environment(AppModel.self) private var model
@@ -73,10 +73,12 @@ public struct SettingsView: View {
                 ServerGroup(server: server, serverId: $serverId)
             }
             Section {
-                LabeledContent(
-                    "Mavio",
-                    value: Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "")
-                LabeledContent("Core", value: MavioKit.coreVersion)
+                NavigationLink {
+                    AboutSettingsView()
+                } label: {
+                    EntryLabel(MavioStrings.settingsAbout, icon: "info", color: Color(hex: 0x8E8E93))
+                }
+                .rowLink()
             }
             Section {
                 // Signing the account out forgets its servers too.

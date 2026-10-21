@@ -886,7 +886,8 @@ flowchart TD
 **Progress**:
 - [ ] Tag `libs/proto` and `libs/plugin` releases
 - [ ] Publish the server's release binaries and container images
-- [ ] The client's and the core's versions as the server's ([Development §7](development.md#7-releases-and-versioning)) in the Apple apps, the web UI and the desktop app, which the Android apps and the core already follow, and About in their settings as the Android apps'
+- [ ] The client's and the core's versions as the server's ([Development §7](development.md#7-releases-and-versioning)) in the Apple apps, the web UI and the desktop app, which the Android apps and the core already follow, and About in the settings of the web UI and the desktop app as the Android apps'
+- [x] About in the Apple apps' settings as the Android apps': the iPhone and iPad app's after the Server group, as Apple TV's and the Mac's — the app's name as the servers know it, its version and build, the core's version and the license, and the device's name and ID, maker, model, system and architecture
 - [x] Package the first-party plugins and their catalog (`tools/plugindist`); `plugin-catalog` defaults to the `catalog.json` of mavioai/plugins' latest release
 - [ ] Publish the official plugin catalog: create the mavioai/plugins repository, whose workflow takes the source of Mavio's latest release, runs `plugindist:dist` and publishes the packages and `catalog.json` as a release
 

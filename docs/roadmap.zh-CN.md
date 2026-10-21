@@ -886,7 +886,8 @@ flowchart TD
 **进度**：
 - [ ] 为 `libs/proto` 与 `libs/plugin` 打发布标签
 - [ ] 发布服务端的版本二进制与容器镜像
-- [ ] Apple 应用、Web UI 与桌面应用的客户端版本与 Core 版本采用与服务端一致的规则（[开发 §7](development.zh-CN.md#7-发布与版本)），Android 应用与核心已采用；并在其设置中加入与 Android 应用一致的“关于”
+- [ ] Apple 应用、Web UI 与桌面应用的客户端版本与 Core 版本采用与服务端一致的规则（[开发 §7](development.zh-CN.md#7-发布与版本)），Android 应用与核心已采用；并在 Web UI 与桌面应用的设置中加入与 Android 应用一致的“关于”
+- [x] Apple 应用设置中与 Android 应用一致的“关于”：iPhone 与 iPad 应用的位于“服务器”分组之后，与 Apple TV 和 Mac 一致——服务器所知的应用名称、版本与构建号、Core 版本与许可证，以及设备的名称与 ID、制造商、型号、系统与架构
 - [x] 第一方插件及其目录的打包（`tools/plugindist`）；`plugin-catalog` 默认是 mavioai/plugins 最新发布版本的 `catalog.json`
 - [ ] 发布官方插件目录：创建 mavioai/plugins 仓库，其工作流取得 Mavio 最新发布版本的源码，运行 `plugindist:dist`，并把各插件的包与 `catalog.json` 作为一个发布版本发布
 
