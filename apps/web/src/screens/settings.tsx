@@ -120,14 +120,14 @@ const deviceSections: SectionId[] = ["appearance", "playback", "subtitles-audio"
  * The groups: the advanced tools, for administrators; this device's sections; and the server's, in
  * the order a server is set up and kept: the server and who reaches it, the
  * menus of its media and of acquiring media, what extends it and how it
- * reaches out, and the menu of watching over and maintaining it; then,
- * with no title, About, as the apps end their settings.
+ * reaches out, and the menu of watching over and maintaining it; then
+ * About, in an About group, as the apps end their settings.
  */
 const allGroups: { title?: () => string; entries: Entry[]; server?: boolean; tools?: boolean }[] = [
   { title: () => t("settings.advancedGroup"), entries: [...tools], tools: true },
   { title: () => t("settings.thisDevice"), entries: ["appearance", "playback", "subtitles-audio", "assistant"] },
   { title: () => t("settings.serverGroup"), entries: ["overview", "general", "users", "devices", "media", "acquiring", "ai", "plugins", "proxies", "maintenance"], server: true },
-  { entries: ["about"] },
+  { title: () => t("settings.about"), entries: ["about"] },
 ];
 
 /** The server whose settings are shown, whether the user administers it, and whether that is known yet. */
