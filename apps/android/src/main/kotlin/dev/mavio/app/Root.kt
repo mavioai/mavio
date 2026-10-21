@@ -55,8 +55,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
@@ -64,9 +64,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
@@ -81,6 +81,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -107,18 +108,20 @@ import dev.mavio.core.Card
 import dev.mavio.core.SignInState
 import dev.mavio.design.MavioSpacing
 import dev.mavio.design.TabletLayout
-import dev.mavio.ui.CatalogFilters
-import dev.mavio.ui.LocalDiscover
-import dev.mavio.ui.LocalTheme
-import dev.mavio.ui.MavioIcon
-import dev.mavio.ui.R
-import dev.mavio.ui.StatusView
-import dev.mavio.ui.Wordmark
 import dev.mavio.ui.AssistantButton
 import dev.mavio.ui.AssistantHost
 import dev.mavio.ui.AssistantOverlay
 import dev.mavio.ui.AssistantScreen
+import dev.mavio.ui.CatalogFilters
 import dev.mavio.ui.LocalAssistant
+import dev.mavio.ui.LocalDiscover
+import dev.mavio.ui.LocalPageTitles
+import dev.mavio.ui.LocalTheme
+import dev.mavio.ui.MavioIcon
+import dev.mavio.ui.PageTitles
+import dev.mavio.ui.R
+import dev.mavio.ui.StatusView
+import dev.mavio.ui.Wordmark
 import dev.mavio.ui.blurAvailable
 import dev.mavio.ui.discovered
 import dev.mavio.ui.rememberDiscover
@@ -420,6 +423,7 @@ private fun Shell(model: AppModel) {
                                 CompositionLocalProvider(
                                     LocalBottomInset provides if (route == stack.firstOrNull()) rootInset else bars,
                                     LocalHeaderRoute provides route,
+                                    LocalPageTitles provides PageTitles { title, bottom -> backdrop.title(route, title, bottom) },
                                 ) {
                                     // Opaque, so that the screen it slides over or uncovers does not show through it.
                                     Box(Modifier.fillMaxSize().background(theme.colors.background).nestedScroll(backdrop.tracking(route))) { Screen(model, it) }
@@ -646,8 +650,8 @@ private fun Screen(model: AppModel, route: Route) {
  * on a page opened from another, then, on the places alone, search and the
  * user's initial on a circle of the tab bar's glass, which opens the settings. Its icons turn
  * white over a hero reaching up under it ([backdrop] of [route]); once the page has
- * scrolled under it with no hero there, an edge fades in behind it: the
- * page blurred under the background, fading out a little below it.
+ * scrolled under it with no hero there, it fades into a bar of glass as
+ * iOS's: the page blurred under the background, with a hairline below.
  */
 @Composable
 private fun Header(model: AppModel, back: Boolean, backdrop: HeaderBackdrop, route: Route, modifier: Modifier, haze: HazeState) {
@@ -661,20 +665,25 @@ private fun Header(model: AppModel, back: Boolean, backdrop: HeaderBackdrop, rou
     val overHero by remember(backdrop, route, bottom) { derivedStateOf { backdrop.overHero(route, bottom) } }
     val scrolled by remember(backdrop, route) { derivedStateOf { backdrop.scrolled(route) } }
     val edge by animateFloatAsState(if (scrolled && !overHero) 1f else 0f, tween(200), label = "edge")
+    val inline by remember(backdrop, route, bottom) { derivedStateOf { backdrop.inlineTitle(route, bottom) } }
+    // Kept as it fades out.
+    var shownTitle by remember(route) { mutableStateOf("") }
+    inline?.let { shownTitle = it }
+    val titleIn by animateFloatAsState(if (inline != null) 1f else 0f, tween(200), label = "title")
     val ink = if (overHero) Color.White else colors.textPrimary
     Box(modifier.fillMaxWidth()) {
         if (edge > 0f) {
+            val hairline = colors.border
             Box(
                 Modifier
                     .matchParentSize()
-                    // Reaching below the header, taking none of its room.
-                    .layout { measurable, constraints ->
-                        val placeable = measurable.measure(Constraints.fixed(constraints.maxWidth, constraints.maxHeight + HEADER_EDGE.roundToPx()))
-                        layout(constraints.maxWidth, constraints.maxHeight) { placeable.place(0, 0) }
-                    }
                     // Haze reads its style once; the fade is the layer's.
                     .graphicsLayer { alpha = edge }
-                    .edge(haze, colors.background),
+                    .glass(haze, colors.background.copy(alpha = 0.8f), radius = 24.dp, saturation = 1.8f)
+                    .drawWithContent {
+                        drawContent()
+                        drawLine(hairline, Offset(0f, size.height - 0.5f), Offset(size.width, size.height - 0.5f), strokeWidth = 1f)
+                    },
             )
         }
         Row(
@@ -725,33 +734,30 @@ private fun Header(model: AppModel, back: Boolean, backdrop: HeaderBackdrop, rou
                 Text(name.firstOrNull()?.uppercase().orEmpty(), style = theme.type.headline.text, color = colors.textPrimary)
             }
         }
+        // The page's large title, once scrolled under the header, rising into its middle as iOS's.
+        if (titleIn > 0f) {
+            Box(
+                Modifier
+                    .matchParentSize()
+                    .statusBarsPadding()
+                    .padding(horizontal = 64.dp),
+                Alignment.Center,
+            ) {
+                Text(
+                    shownTitle,
+                    Modifier.graphicsLayer {
+                        alpha = titleIn
+                        translationY = (1f - titleIn) * 8.dp.toPx()
+                    },
+                    style = theme.type.headline.text,
+                    color = ink,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+        }
     }
 }
-
-/** How far the header's edge reaches below it. */
-private val HEADER_EDGE = 20.dp
-
-/**
- * The header's edge, as the web UI's: what scrolls under it blurred and
- * more saturated, under the [background] from 90 % to transparent, fading
- * out downward.
- */
-private fun Modifier.edge(haze: HazeState, background: Color): Modifier = hazeBlur(
-    HazeInput.Sources(haze),
-    HazeBlurStyle {
-        blurEnabled(blurAvailable)
-        blurRadius(12.dp)
-        noiseFactor(0f)
-        mask(Brush.verticalGradient(0.6f to Color.Black, 1f to Color.Transparent))
-        colorEffects(
-            listOf(
-                HazeColorEffect.colorFilter(ColorFilter.colorMatrix(ColorMatrix().apply { setToSaturation(1.8f) })),
-                HazeColorEffect.tint(Brush.verticalGradient(0f to background.copy(alpha = 0.9f), 0.5f to background.copy(alpha = 0.7f), 1f to Color.Transparent)),
-            ),
-        )
-        fallbackColorEffect(HazeColorEffect.tint(Brush.verticalGradient(0f to background.copy(alpha = 0.95f), 1f to Color.Transparent)))
-    },
-)
 
 /** The phone's tabs, as the web UI's: a pill of glass floating over the page. */
 @Composable
@@ -810,6 +816,7 @@ private fun glassTint(): Color = if (theme.colors.background.luminance() < 0.5f)
 class HeaderBackdrop {
     private val offsets = mutableStateMapOf<Route, Float>()
     private val heroes = mutableStateMapOf<Route, Float>()
+    private val titles = mutableStateMapOf<Route, Pair<String, Float>>()
 
     /** Follows what a screen scrolls, upward from its top or back. */
     fun tracking(route: Route): NestedScrollConnection = object : NestedScrollConnection {
@@ -826,6 +833,15 @@ class HeaderBackdrop {
 
     /** Whether the screen's hero still shows under a header ending [headerBottom] pixels down. */
     fun overHero(route: Route, headerBottom: Float): Boolean = (heroes[route] ?: 0f) - (offsets[route] ?: 0f) > headerBottom
+
+    /** The screen's large title once it has scrolled under a header ending [headerBottom] pixels down. */
+    fun inlineTitle(route: Route, headerBottom: Float): String? =
+        titles[route]?.takeIf { (_, bottom) -> bottom - (offsets[route] ?: 0f) < headerBottom }?.first
+
+    internal fun title(route: Route, title: String?, bottom: Float) {
+        // Where it ends on the page, as a list stops reporting what it no longer places.
+        if (title == null) titles.remove(route) else titles[route] = title to bottom + (offsets[route] ?: 0f)
+    }
 
     internal fun hero(route: Route, bottom: Float?) {
         // Where it ends on the page, as a list stops reporting what it no longer places.

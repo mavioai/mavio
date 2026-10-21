@@ -39,6 +39,7 @@ import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -48,6 +49,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -65,7 +67,9 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.layout
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
@@ -172,6 +176,8 @@ fun SettingsList(
             snapshotFlow { list.firstVisibleItemIndex to list.firstVisibleItemScrollOffset }.collect { spot = intArrayOf(it.first, it.second) }
         }
     }
+    val titles = LocalPageTitles.current
+    DisposableEffect(titles) { onDispose { titles?.report(null, 0f) } }
     val scope = rememberCoroutineScope()
     val focusManager = LocalFocusManager.current
     val step = with(LocalDensity.current) { 240.dp.toPx() }
@@ -239,7 +245,10 @@ fun SettingsList(
                 verticalArrangement = Arrangement.spacedBy(listGap),
             ) {
                 item {
-                    Column(verticalArrangement = Arrangement.spacedBy(MavioSpacing.s4)) {
+                    Column(
+                        Modifier.onGloballyPositioned { titles?.report(title, it.boundsInWindow().bottom) },
+                        verticalArrangement = Arrangement.spacedBy(MavioSpacing.s4),
+                    ) {
                         Text(title, style = (if (large) theme.type.title1 else theme.type.title2).text, fontWeight = FontWeight.Bold)
                         if (message != null) Text(message, style = theme.type.callout.text, color = theme.colors.textSecondary)
                     }
@@ -249,6 +258,19 @@ fun SettingsList(
         }
     }
 }
+
+/**
+ * Where a page's large title is, for a header that shows it once the page
+ * has scrolled it under: the title and where it ends in the window, or the
+ * page gone with null.
+ */
+fun interface PageTitles {
+    /** Reports the page's [title] ending [bottom] pixels down the window, or none. */
+    fun report(title: String?, bottom: Float)
+}
+
+/** Where the page shown reports its large title, if anywhere. */
+val LocalPageTitles = staticCompositionLocalOf<PageTitles?> { null }
 
 /** The spacing of a [SettingsList]'s items. */
 private val listGap: Dp
