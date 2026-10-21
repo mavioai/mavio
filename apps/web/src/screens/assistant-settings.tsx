@@ -212,7 +212,7 @@ function Messages({ server, id, onDelete }: { server: ServerEntry; id: string; o
   const conversation = useAssistantConversation(server, id);
   const playing = useKeptSpeech(server);
   return (
-    <div className="flex flex-col gap-4 px-4 pb-3">
+    <div className="flex flex-col gap-4 px-4 pt-3 pb-3">
       {conversation.data?.messages.map((m, i) => (
         <div key={i} className={`flex max-w-[85%] flex-col gap-0.5 ${m.user ? "items-end self-end" : "items-start self-start"}`}>
           <p className={`rounded-[14px] px-3 py-2 type-callout whitespace-pre-wrap ${m.user ? "bg-button text-on-button" : "bg-fill"}`}>{m.text}</p>

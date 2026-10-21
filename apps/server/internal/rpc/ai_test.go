@@ -87,3 +87,38 @@ func TestAiConversations(t *testing.T) {
 		}
 	}
 }
+
+// ownerSessions is a plugin recording the owner of the conversation created.
+type ownerSessions struct {
+	pluginv1connect.UnimplementedAgentSessionServiceHandler
+	owner chan string
+}
+
+func (o ownerSessions) CreateAgentSession(_ context.Context, req *pluginv1.CreateAgentSessionRequest) (*pluginv1.CreateAgentSessionResponse, error) {
+	o.owner <- req.GetOwner()
+	return pluginv1.CreateAgentSessionResponse_builder{Session: pluginv1.AgentSession_builder{Id: new("c"), Owner: new(req.GetOwner())}.Build()}.Build(), nil
+}
+
+func TestCreateAiConversationIsTheAdministrators(t *testing.T) {
+	fake := ownerSessions{owner: make(chan string, 1)}
+	_, h := pluginv1connect.NewAgentSessionServiceHandler(fake)
+	plugin := httptest.NewServer(h)
+	t.Cleanup(plugin.Close)
+	sessions := pluginv1connect.NewAgentSessionServiceClient(plugin.Client(), plugin.URL)
+	_, handler := systemv1connect.NewAiConversationServiceHandler(&AiConversationService{
+		Sessions: func() (pluginv1connect.AgentSessionServiceClient, bool) { return sessions, true },
+	})
+	me := core.NewID()
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		p := auth.Principal{User: core.User{ID: me, Kind: core.UserAdmin}}
+		handler.ServeHTTP(w, r.WithContext(auth.WithPrincipal(r.Context(), p)))
+	}))
+	t.Cleanup(srv.Close)
+	c := systemv1connect.NewAiConversationServiceClient(srv.Client(), srv.URL)
+	if _, err := c.CreateAiConversation(t.Context(), systemv1.CreateAiConversationRequest_builder{Provider: new("p"), Model: new("m")}.Build()); err != nil {
+		t.Fatalf("CreateAiConversation() = %v", err)
+	}
+	if got := <-fake.owner; got != me.String() {
+		t.Errorf("owner = %q, want = %q", got, me.String())
+	}
+}

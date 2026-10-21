@@ -3751,6 +3751,8 @@
     <string name="conversations_none">No conversations yet.</string>
     <!-- Title of a conversation without one. -->
     <string name="conversations_untitled">Untitled</string>
+    <!-- Who asked a conversation's messages, when it is no longer a user of the server. -->
+    <string name="conversations_user">User</string>
     <!-- Title of a conversation with the assistant, which has none of its own. -->
     <string name="conversations_assistant">Assistant conversation</string>
     <!-- What a conversation used: tokens and cost in US dollars. -->

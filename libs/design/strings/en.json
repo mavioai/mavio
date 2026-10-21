@@ -1855,6 +1855,7 @@
   "conversations.list": { "message": "Conversations", "description": "Title of the list of conversations." },
   "conversations.none": { "message": "No conversations yet.", "description": "Empty state of the conversations." },
   "conversations.untitled": { "message": "Untitled", "description": "Title of a conversation without one." },
+  "conversations.user": { "message": "User", "description": "Who asked a conversation's messages, when it is no longer a user of the server." },
   "conversations.assistant": { "message": "Assistant conversation", "description": "Title of a conversation with the assistant, which has none of its own." },
   "conversations.usage": { "message": "{input} tokens in, {output} out · {cost}", "description": "What a conversation used: tokens and cost in US dollars." },
   "conversations.send": { "message": "Send", "description": "Button sending a message." },

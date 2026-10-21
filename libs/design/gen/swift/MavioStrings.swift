@@ -5908,6 +5908,9 @@ public enum MavioStrings {
     /// Title of a conversation without one.
     public static var conversationsUntitled: String { NSLocalizedString("conversations.untitled", bundle: .module, comment: "") }
 
+    /// Who asked a conversation's messages, when it is no longer a user of the server.
+    public static var conversationsUser: String { NSLocalizedString("conversations.user", bundle: .module, comment: "") }
+
     /// Title of a conversation with the assistant, which has none of its own.
     public static var conversationsAssistant: String { NSLocalizedString("conversations.assistant", bundle: .module, comment: "") }
 

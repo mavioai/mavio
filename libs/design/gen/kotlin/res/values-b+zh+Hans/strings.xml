@@ -1886,6 +1886,7 @@
     <string name="conversations_list">对话</string>
     <string name="conversations_none">还没有对话。</string>
     <string name="conversations_untitled">未命名</string>
+    <string name="conversations_user">用户</string>
     <string name="conversations_assistant">助手对话</string>
     <string name="conversations_usage">输入 %1$s 个词元，输出 %2$s 个 · %3$s</string>
     <string name="conversations_send">发送</string>

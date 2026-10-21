@@ -329,6 +329,7 @@ function NewConversation({ server, onStarted }: { server: ServerEntry; onStarted
  */
 function Bubble({
   who,
+  asker,
   text,
   pending,
   at,
@@ -339,6 +340,8 @@ function Bubble({
   top,
 }: {
   who?: ModelOption;
+  /** Who asked the user's messages: "You", or the user whose conversation it is. */
+  asker: string;
   text: string;
   pending?: boolean;
   at?: Date;
@@ -362,7 +365,7 @@ function Bubble({
           <ModelLabel option={who} />
         </span>
       ) : (
-        <span className="px-1 type-caption text-text-tertiary">{t("conversations.you")}</span>
+        <span className="px-1 type-caption text-text-tertiary">{asker}</span>
       )}
       <div className={bubble(user)}>{text || (pending ? "…" : "")}</div>
       {!pending && text && <MessageBar text={text} at={at} playing={playing} onPlay={onPlay} />}
@@ -382,7 +385,7 @@ interface Said {
 }
 
 /** The messages, only those scrolled into view drawn (TanStack Virtual), the page scrolling them. */
-function Messages({ server, said }: { server: ServerEntry; said: Said[] }) {
+function Messages({ server, said, asker }: { server: ServerEntry; said: Said[]; asker: string }) {
   const playing = useKeptSpeech(server);
   const list = useRef<HTMLUListElement>(null);
   // Where the list starts on the page, from which its rows are placed.
@@ -410,6 +413,7 @@ function Messages({ server, said }: { server: ServerEntry; said: Said[] }) {
             measure={virtualizer.measureElement}
             top={row.start - virtualizer.options.scrollMargin}
             who={m.who}
+            asker={asker}
             text={m.text}
             pending={m.pending}
             at={m.at}
@@ -425,6 +429,7 @@ function Messages({ server, said }: { server: ServerEntry; said: Said[] }) {
 /** A conversation's page, below the AI settings. */
 export function ConversationPage({ server, id, first, onFirstSent }: { server: ServerEntry; id: string; first?: string; onFirstSent: () => void }) {
   const conversation = useAiConversation(server, id);
+  const users = useUsers(server);
   // An assistant's conversation of the user's has the speech kept of its answers.
   const assistant = useAssistantConversation(server, id);
   const speech = new Map((assistant.data?.messages ?? []).filter((m) => !m.user && m.speechUrl).map((m) => [m.text, m.speechUrl]));
@@ -461,6 +466,10 @@ export function ConversationPage({ server, id, first, onFirstSent }: { server: S
       </Page>
     );
   const model = modelOf(options, c);
+  // The user's messages are the caller's, or those of the user whose
+  // conversation it is: another's assistant conversation, or one another
+  // administrator started.
+  const asker = !c.owner || c.owner === server.userId ? t("conversations.you") : (users.data?.find((u) => u.id === c.owner)?.name ?? t("conversations.user"));
   const submit = () => {
     const message = text.trim();
     if (!message || sending) return;
@@ -491,6 +500,7 @@ export function ConversationPage({ server, id, first, onFirstSent }: { server: S
       {remove.isError && <p className="type-callout break-words text-danger">{errorMessage(remove.error)}</p>}
       <Messages
         server={server}
+        asker={asker}
         said={[
           ...messages.map((m, i) => ({ key: String(i), who: m.role === AiRole.USER ? undefined : model, text: m.text, at: m.time && timestampDate(m.time), speech: m.role === AiRole.USER ? undefined : speech.get(m.text) })),
           // A failed message shows as the conversation kept it.

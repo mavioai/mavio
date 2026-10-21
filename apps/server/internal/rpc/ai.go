@@ -234,8 +234,11 @@ func (s *AiConversationService) CreateAiConversation(ctx context.Context, req *s
 	if err != nil {
 		return nil, err
 	}
+	// The administrator who starts it owns it; it keeps no memories.
+	p, _ := principal(ctx)
 	resp, err := c.CreateAgentSession(ctx, pluginv1.CreateAgentSessionRequest_builder{
 		Provider: new(req.GetProvider()), Model: new(req.GetModel()), Instructions: new(req.GetInstructions()), Title: new(req.GetTitle()),
+		Owner: new(p.User.ID.String()),
 	}.Build())
 	if err != nil {
 		return nil, gatewayError(ctx, err)

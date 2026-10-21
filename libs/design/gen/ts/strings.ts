@@ -1843,6 +1843,7 @@ export type MessageKey =
   | 'conversations.list'
   | 'conversations.none'
   | 'conversations.untitled'
+  | 'conversations.user'
   | 'conversations.assistant'
   | 'conversations.usage'
   | 'conversations.send'
@@ -3831,6 +3832,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "conversations.list": "Conversations",
     "conversations.none": "No conversations yet.",
     "conversations.untitled": "Untitled",
+    "conversations.user": "User",
     "conversations.assistant": "Assistant conversation",
     "conversations.usage": "{input} tokens in, {output} out · {cost}",
     "conversations.send": "Send",
@@ -5817,6 +5819,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "conversations.list": "对话",
     "conversations.none": "还没有对话。",
     "conversations.untitled": "未命名",
+    "conversations.user": "用户",
     "conversations.assistant": "助手对话",
     "conversations.usage": "输入 {input} 个词元，输出 {output} 个 · {cost}",
     "conversations.send": "发送",
