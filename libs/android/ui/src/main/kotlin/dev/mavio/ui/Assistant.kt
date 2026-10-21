@@ -188,6 +188,9 @@ class Assistant(private val model: AppModel, context: Context) {
     var error by mutableStateOf<String?>(null)
         private set
 
+    // The error a silent microphone showed, taken back once it is heard.
+    private var silentError: String? = null
+
     /** The server whose assistant answers, when it is on. */
     var server by mutableStateOf<ServerRecord?>(null)
         private set
@@ -636,10 +639,18 @@ class Assistant(private val model: AppModel, context: Context) {
                                 }
                             }
                         },
-                        capturing = { if (gen == generation) capturing = true },
+                        capturing = {
+                            if (gen == generation) {
+                                capturing = true
+                                // A microphone that gave nothing at first, as a
+                                // remote's until its key is held, is heard now.
+                                if (error != null && error == silentError) error = null
+                            }
+                        },
                         silent = { device ->
                             if (gen == generation) {
-                                error = context.getString(R.string.assistant_silent_microphone, device.ifEmpty { context.getString(R.string.assistant_microphone) })
+                                silentError = context.getString(R.string.assistant_silent_microphone, device.ifEmpty { context.getString(R.string.assistant_microphone) })
+                                error = silentError
                             }
                         },
                     ),

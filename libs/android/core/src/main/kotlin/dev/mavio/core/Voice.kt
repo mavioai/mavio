@@ -85,6 +85,8 @@ class VoiceSession private constructor(
     private var captured = false
     // 20 ms frames of digital silence, until one was not.
     private var zeros = 0
+    // The frames the microphone gave.
+    private var frames = 0
     // Whether the session said it is ready: one closed before failed.
     private var ready = false
     // Push to talk: whether the user talks, and what the socket was told.
@@ -124,6 +126,14 @@ class VoiceSession private constructor(
         record.startRecording()
         Thread({ capture() }, "mavio-voice-capture").start()
         speaker.start()
+        // A microphone that gives nothing at all, as a remote's does until
+        // its own key turns it on, is told as one that gives silence.
+        main.postDelayed({
+            if (!ended && frames == 0) {
+                zeros = -1
+                handlers.silent(record.routedDevice?.productName?.toString().orEmpty())
+            }
+        }, SILENT_FRAMES * 20L)
     }
 
     // Reads the microphone's 20 ms frames until the session ends.
@@ -136,7 +146,11 @@ class VoiceSession private constructor(
                 if (n <= 0) break
                 read += n
             }
-            if (read < FRAME) break
+            if (read < FRAME) {
+                // The microphone stopped giving audio.
+                if (!ended) main.post { end(error = "the microphone stopped") }
+                break
+            }
             var sum = 0.0
             var heard = false
             val bytes = ByteArray(FRAME * 2)
@@ -154,6 +168,7 @@ class VoiceSession private constructor(
 
     private fun audio(pcm: ByteArray, heard: Boolean) {
         if (ended) return
+        frames++
         // Listening is told once the microphone gives more than digital silence.
         if (!captured && heard) {
             captured = true
@@ -442,25 +457,36 @@ class VoiceSession private constructor(
                 AudioRecord.getMinBufferSize(16000, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT),
                 FRAME * 2 * 10,
             )
-            val record = try {
-                AudioRecord.Builder()
-                    .setAudioSource(MediaRecorder.AudioSource.VOICE_COMMUNICATION)
-                    .setAudioFormat(
-                        AudioFormat.Builder()
-                            .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
-                            .setSampleRate(16000)
-                            .setChannelMask(AudioFormat.CHANNEL_IN_MONO)
-                            .build(),
-                    )
-                    .setBufferSizeInBytes(size)
-                    .build()
-            } catch (e: Exception) {
-                throw Failure.Unavailable(e.message ?: e.toString())
-            }
-            if (record.state != AudioRecord.STATE_INITIALIZED) {
-                record.release()
-                throw Failure.Unavailable("no microphone")
-            }
+            // Voice communication's echo canceler first; a device that
+            // routes it to no microphone may still route recognition's or
+            // the plain microphone's, its own echo canceler attached after.
+            var failure: String? = null
+            val record = SOURCES.firstNotNullOfOrNull { source ->
+                try {
+                    AudioRecord.Builder()
+                        .setAudioSource(source)
+                        .setAudioFormat(
+                            AudioFormat.Builder()
+                                .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
+                                .setSampleRate(16000)
+                                .setChannelMask(AudioFormat.CHANNEL_IN_MONO)
+                                .build(),
+                        )
+                        .setBufferSizeInBytes(size)
+                        .build()
+                        .let { r ->
+                            if (r.state == AudioRecord.STATE_INITIALIZED) {
+                                r
+                            } else {
+                                r.release()
+                                null
+                            }
+                        }
+                } catch (e: Exception) {
+                    failure = e.message ?: e.toString()
+                    null
+                }
+            } ?: throw Failure.Unavailable(failure ?: "no microphone")
             return VoiceSession(context.applicationContext, handlers, record).also {
                 try {
                     it.start()
@@ -470,6 +496,13 @@ class VoiceSession private constructor(
                 }
             }
         }
+
+        // The sources tried in turn.
+        private val SOURCES = listOf(
+            MediaRecorder.AudioSource.VOICE_COMMUNICATION,
+            MediaRecorder.AudioSource.VOICE_RECOGNITION,
+            MediaRecorder.AudioSource.MIC,
+        )
 
         /** How loud speech is, from 0 to about 1: its RMS of roughly 0.01 to 0.3 spread out by its square root. */
         private fun loudness(meanSquare: Double): Double = min(1.0, sqrt(sqrt(meanSquare)) * 1.5)
