@@ -6,7 +6,7 @@ import SwiftUI
 /// The settings (docs/tv.md §6.6): the list of their sections — the
 /// account, the users to switch to, this device's playback and the user's
 /// subtitles and audio, the Server group — each shown in its place when
-/// selected, then the version and signing out.
+/// selected, then About and signing out.
 struct SettingsView: View {
     @Environment(AppModel.self) private var model
     @Environment(\.theme) private var theme
@@ -53,11 +53,12 @@ struct SettingsView: View {
                 ServerGroup(server: server, serverId: $serverId)
                     .buttonStyle(RowButtonStyle())
             }
-            Text(
-                verbatim:
-                    "Mavio \(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") ?? "") · Core \(coreVersion)"
-            )
-            .type(theme.type.caption).foregroundStyle(theme.colors.textTertiary)
+            NavigationLink {
+                AboutView()
+            } label: {
+                EntryLabel(MavioStrings.settingsAbout, icon: "info")
+            }
+            .buttonStyle(RowButtonStyle())
             .padding(.top, MavioSpacing.s32)
             // Signing the account out forgets its servers too.
             Button {
@@ -588,6 +589,67 @@ private struct SubtitlesAudioView: View {
                 failure = error.reason
             }
         }
+    }
+}
+
+/// About, as the Android apps' and the Mac's: the app — its name as the
+/// servers know it, its version and build, the core's version and the
+/// license — and the Apple TV — its name and ID as the servers know them,
+/// its maker, model, system and architecture. Its rows take focus, so that
+/// the remote scrolls through them.
+private struct AboutView: View {
+    @Environment(AppModel.self) private var model
+
+    var body: some View {
+        let device = model.device
+        let info = Bundle.main.infoDictionary ?? [:]
+        let version = info["CFBundleShortVersionString"] as? String ?? device.clientVersion
+        let build = info["CFBundleVersion"] as? String
+        SettingsPage(MavioStrings.settingsAbout) {
+            Heading(MavioStrings.aboutApp)
+            row(MavioStrings.aboutAppName, device.client)
+            row(MavioStrings.aboutClientVersion, build.map { "\(version) (\($0))" } ?? version)
+            row(MavioStrings.aboutCoreVersion, coreVersion)
+            row(MavioStrings.aboutLicense, "GPL-3.0")
+            Heading(MavioStrings.aboutDevice)
+            row(MavioStrings.aboutDeviceName, device.name)
+            row(MavioStrings.aboutDeviceId, device.id)
+            row(MavioStrings.aboutManufacturer, "Apple")
+            row(MavioStrings.aboutModel, Self.model)
+            row(MavioStrings.aboutSystem, "tvOS \(UIDevice.current.systemVersion)")
+            row(MavioStrings.aboutArchitecture, Self.architecture)
+            Note(MavioStrings.aboutDeviceFooter)
+        }
+    }
+
+    private func row(_ title: String, _ value: String) -> some View {
+        Button {
+        } label: {
+            HStack(spacing: MavioSpacing.s24) {
+                Text(title)
+                Spacer()
+                Text(value).opacity(0.7).lineLimit(1).truncationMode(.middle)
+            }
+        }
+        .buttonStyle(RowButtonStyle())
+    }
+
+    /// The Apple TV's model identifier, such as AppleTV14,1.
+    private static var model: String {
+        var system = utsname()
+        uname(&system)
+        return withUnsafeBytes(of: &system.machine) { bytes in
+            String(decoding: bytes.prefix { $0 != 0 }, as: UTF8.self)
+        }
+    }
+
+    /// The architecture the app runs on.
+    private static var architecture: String {
+        #if arch(arm64)
+            "arm64"
+        #else
+            "x86_64"
+        #endif
     }
 }
 

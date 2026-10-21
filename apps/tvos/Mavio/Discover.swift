@@ -176,27 +176,61 @@ private struct StatusMark: View {
 }
 
 /// All the titles of a catalog, page by page, under its name; focus starts
-/// on its first title (§6.3).
+/// on its first title (§6.3). Its Filters button, at the right of its name
+/// and reached up from the first row, opens its filters in a dialog.
 struct CatalogView: View {
     let query: CatalogQuery
     @Environment(AppModel.self) private var model
+    @Environment(Discovery.self) private var discovery
     @Environment(\.theme) private var theme
+    /// The query with the filters applied, once some are.
+    @State private var filtered: CatalogQuery?
+    @State private var filtering = false
     @State private var titles: [DiscoveredTitle] = []
     @State private var next: Int32? = 1
     @State private var loading = false
     @State private var failed = false
 
+    private var current: CatalogQuery { filtered ?? query }
+
+    /// The catalog, when it takes filters or sorts; recommendations and
+    /// similar titles take none.
+    private var filterable: Catalog? {
+        guard query.tmdbId == 0,
+            let catalog = discovery.catalogs.first(where: { $0.id == query.catalog }),
+            !catalog.filters.isEmpty || !catalog.sorts.isEmpty
+        else { return nil }
+        return catalog
+    }
+
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: MavioSpacing.s32) {
-                Text(query.title).type(theme.type.title1).fontWeight(.bold)
-                    .foregroundStyle(theme.colors.textPrimary)
+                HStack {
+                    Text(query.title).type(theme.type.title1).fontWeight(.bold)
+                        .foregroundStyle(theme.colors.textPrimary)
+                    Spacer()
+                    if filterable != nil {
+                        let n = current.filterCount
+                        Button {
+                            filtering = true
+                        } label: {
+                            Label {
+                                Text(n > 0 ? "\(MavioStrings.discoverFilters) (\(n))" : MavioStrings.discoverFilters)
+                            } icon: {
+                                Icon(n > 0 || current.sort != .unspecified ? "filterFill" : "filter", size: 28)
+                            }
+                        }
+                        .buttonStyle(TVButtonStyle())
+                    }
+                }
+                .focusSection()
                 LazyVGrid(
                     columns: [GridItem(.adaptive(minimum: theme.layout.poster), spacing: theme.layout.gutter)],
                     spacing: MavioSpacing.s48
                 ) {
                     ForEach(Array(titles.enumerated()), id: \.element.key) { index, title in
-                        DiscoveredTitleLink(serverId: query.serverId, title: title)
+                        DiscoveredTitleLink(serverId: current.serverId, title: title)
                             .onAppear { if index >= titles.count - 12 { Task { await load() } } }
                     }
                 }
@@ -206,6 +240,10 @@ struct CatalogView: View {
                     StatusView(
                         icon: "error", title: MavioStrings.stateError,
                         action: (MavioStrings.actionRetry, { Task { await load() } }))
+                } else if titles.isEmpty, current.filterCount > 0 || current.sort != .unspecified {
+                    StatusView(
+                        icon: "search", title: MavioStrings.discoverNoMatches,
+                        action: (MavioStrings.discoverReset, { filtered = query.unfiltered }))
                 } else if titles.isEmpty {
                     StatusView(icon: "search", title: MavioStrings.discoverNoMatches)
                 }
@@ -215,8 +253,28 @@ struct CatalogView: View {
         }
         .ignoresSafeArea(edges: .horizontal)
         .toolbar(.hidden, for: .navigationBar)
-        .task { if titles.isEmpty { await load() } }
+        .fullScreenCover(isPresented: $filtering) {
+            if let catalog = filterable {
+                CatalogFiltersDialog(catalog: catalog, value: current) { filtered = $0 }
+                    .presentationBackground(.clear)
+            }
+        }
+        .task(id: current) {
+            // Coming back from a title keeps the pages; other filters start again.
+            if titles.isEmpty, next != nil {
+                await load()
+                return
+            }
+            guard shown != current else { return }
+            titles = []
+            next = 1
+            failed = false
+            await load()
+        }
     }
+
+    /// The query the pages are of.
+    @State private var shown: CatalogQuery?
 
     private func load() async {
         guard let page = next, !loading else { return }
@@ -224,7 +282,13 @@ struct CatalogView: View {
         failed = false
         defer { loading = false }
         do {
-            let response = try await model.discover(query, page: page)
+            let asked = current
+            let response = try await model.discover(asked, page: page)
+            guard asked == current else { return }
+            if shown != asked {
+                titles = []
+                shown = asked
+            }
             var seen = Set(titles.map(\.key))
             titles += response.titles.filter { seen.insert($0.key).inserted }
             next = response.page < response.totalPages ? response.page + 1 : nil

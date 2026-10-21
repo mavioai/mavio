@@ -6,7 +6,8 @@ import SwiftUI
 /// An item's details (docs/tv.md §6.2): the backdrop over 86 % of the
 /// screen's height, the logo or name at 72 pt, two lines of overview and the
 /// actions, focus starting on the primary one; then a series' seasons and
-/// episodes, the cast and the items like it. The navigation bar hides.
+/// episodes, the cast, the items like it and the issues open on it. The
+/// navigation bar hides.
 struct DetailsView: View {
     let serverId: String
     let itemId: String
@@ -52,6 +53,8 @@ private struct DetailsContent: View {
     /// and users allowed to.
     @State private var mayReport = false
     @State private var reporting = false
+    /// Counts the issues reported here, each listing the issues again.
+    @State private var reports = 0
     @FocusState private var playFocused: Bool
 
     private var card: Card { details.card }
@@ -91,6 +94,9 @@ private struct DetailsContent: View {
                             }
                         }
                     }
+                    if let server = model.server(card.serverId), !details.offline {
+                        ItemIssues(server: server, itemId: card.itemId, version: reports)
+                    }
                 }
                 .padding(.bottom, 120)
             }
@@ -101,7 +107,7 @@ private struct DetailsContent: View {
             if let server = model.server(card.serverId) {
                 ReportIssueView(
                     server: server, itemId: card.itemId, name: card.title, series: card.kind == .series
-                ) {}
+                ) { reports += 1 }
             }
         }
         .task(id: card.serverId) { await loadMayReport() }
