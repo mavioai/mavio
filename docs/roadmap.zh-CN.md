@@ -1096,7 +1096,8 @@ flowchart TD
 - [ ] Pipecat 缺少的中文服务：火山引擎与阿里云，作为 `plugins/pipecat` 的服务
 - [x] Mac、iPhone 与 iPad 应用：光球与卡片，页眉或侧边栏、电视导航栏与播放器控制栏中的助手按钮，Mac 上按住说话的按键，使用 `AVAudioEngine` 语音处理的语音会话，以及在其页面与播放器上执行的客户端动作
 - [x] Apple TV：助手按钮在连接到 Apple TV 的麦克风（iPhone、iPad 或耳机的麦克风）存在时开始语音会话，否则打开系统键盘供 Siri Remote 听写；页面与播放器上的光球与卡片，返回键关闭它们；在其页面与播放器上执行的客户端动作
-- [ ] Apple 应用的其余部分：App Shortcut「与 Mavio 对话」和 App Intents；Apple TV 上用连续互通设备选择器连接 iPhone 或 iPad 作为麦克风，并在 Apple TV 上检查语音会话与听写
+- [x] 与 Web UI 和 Mac 一致的 iPhone、iPad 与 Apple TV 应用助手设置，位于“本设备”中，针对所选服务器：记忆，每条可从其菜单中忘记（Apple TV 上为其行打开的菜单），可记住新的一条，确认后全部忘记；对话，每段可阅读，复制其消息（Apple TV 除外）、播放保留的语音，或删除；其模型与保留的语音共享于 `MavioCommon`
+- [ ] Apple 应用的其余部分：App Shortcut「与 Mavio 对话」和 App Intents；Apple TV 上用连续互通设备选择器连接 iPhone 或 iPad 作为麦克风，并在 Apple TV 上检查语音会话与听写；在 iPhone 与 Apple TV 上对照服务器检查助手设置，以及 Web UI 与 Mac 已有的麦克风选择
 - [x] Android 应用：使用 `VOICE_COMMUNICATION` 及其回声消除器的语音会话（与 Web UI 一致，从开始采集起的音频保留至会话的 WebSocket 打开后按顺序发送）；光球与卡片；页眉、电视导航栏与播放器中的助手按钮；Android TV 上以遥控器的搜索键和助手键按住说话；启动器快捷方式、快捷设置图块与语音搜索的 intent
 - [x] 与 Web UI 一致的 Android 应用助手设置，在手机与电视上：记忆，每条可从三个点的菜单中忘记，可记住新的一条，确认后全部忘记；对话，每段可阅读，复制其消息、播放保留的语音，或删除；已在手机上检验
 - [ ] Android 应用的其余部分：在手机上以说话检验语音会话（电视上已检验）；`MediaSession` 的按搜索播放；Web UI 与 Mac 已有的助手设置中的麦克风选择

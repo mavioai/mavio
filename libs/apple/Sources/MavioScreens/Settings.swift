@@ -56,6 +56,14 @@ public struct SettingsView: View {
                     }
                     .rowLink()
                 }
+                if let server = chosen {
+                    NavigationLink {
+                        AssistantSettingsView(server: server)
+                    } label: {
+                        EntryLabel(MavioStrings.assistantTitle, icon: "microphone", color: Color(hex: 0xFF2D55))
+                    }
+                    .rowLink()
+                }
                 NavigationLink(value: Route.downloads) {
                     EntryLabel(MavioStrings.navDownloads, icon: "downloads", color: Color(hex: 0x0A84FF))
                 }

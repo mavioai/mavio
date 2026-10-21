@@ -4,8 +4,8 @@ import MavioUI
 import SwiftUI
 
 /// The settings (docs/tv.md §6.6): the list of their sections — the
-/// account, the users to switch to, this device's playback and the user's
-/// subtitles and audio, the Server group — each shown in its place when
+/// account, the users to switch to, this device's playback, the user's
+/// subtitles and audio and the assistant's settings, the Server group — each shown in its place when
 /// selected, then About and signing out.
 struct SettingsView: View {
     @Environment(AppModel.self) private var model
@@ -46,6 +46,14 @@ struct SettingsView: View {
                     SubtitlesAudioView()
                 } label: {
                     EntryLabel(MavioStrings.settingsSubtitlesAudio, icon: "subtitles")
+                }
+                .buttonStyle(RowButtonStyle())
+            }
+            if let server = chosen {
+                NavigationLink {
+                    AssistantSettingsView(server: server)
+                } label: {
+                    EntryLabel(MavioStrings.assistantTitle, icon: "microphone")
                 }
                 .buttonStyle(RowButtonStyle())
             }
@@ -654,7 +662,7 @@ private struct AboutView: View {
 }
 
 /// A note under a group of rows.
-private struct Note: View {
+struct Note: View {
     let text: String
     @Environment(\.theme) private var theme
 
@@ -667,7 +675,7 @@ private struct Note: View {
 }
 
 /// A group's heading.
-private struct Heading: View {
+struct Heading: View {
     let text: String
     @Environment(\.theme) private var theme
 
