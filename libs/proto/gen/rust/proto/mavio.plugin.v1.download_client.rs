@@ -844,8 +844,8 @@ pub struct DownloadClient {
     ///
     /// Field 11: `prefers_torrent_file`
     pub prefers_torrent_file: ::core::option::Option<bool>,
-    /// The host the client runs on, which remote path mappings are kept by;
-    /// empty for clients that are folders.
+    /// The host the client runs on, by which the server suggests where it
+    /// reads the client's folders; empty for clients that are folders.
     ///
     /// Field 12: `host`
     pub host: ::core::option::Option<::buffa::alloc::string::String>,
@@ -2886,8 +2886,8 @@ pub struct Download {
     ///
     /// Field 9: `seed_ratio`
     pub seed_ratio: ::core::option::Option<f64>,
-    /// Where the download's files are, as the client sees them: remote path
-    /// mappings of the client's host apply.
+    /// Where the download's files are, as the client sees them: the
+    /// client's download path mappings apply.
     ///
     /// Field 10: `output_path`
     pub output_path: ::core::option::Option<::buffa::alloc::string::String>,

@@ -95,7 +95,7 @@ type manualSource struct {
 	p       polled
 	// local is the server's path of the download or folder.
 	local    string
-	mappings []acquire.RemotePathMapping
+	mappings []acquire.DownloadPathMapping
 	rn       *run
 	files    []importFile
 }
@@ -316,13 +316,13 @@ func (r *Runtime) manualSource(ctx context.Context, downloadID core.ID, folder s
 		if strings.TrimSpace(out) == "" {
 			return nil, fmt.Errorf("%w: %s", core.ErrConflict, msgNoOutputPath)
 		}
-		mappings, err := r.remotePathMappings(ctx)
+		mappings, err := r.downloadPathMappings(ctx)
 		if err != nil {
 			return nil, err
 		}
-		local, ok := downloadPath(acquire.RemapRemoteToLocal(mappings, p.client.GetHost(), out))
+		local, ok := downloadPath(acquire.RemapDownloadPath(mappings, p.client.Ref(), out))
 		if !ok {
-			return nil, fmt.Errorf("%w: %s", core.ErrConflict, fmt.Sprintf(msgNotLocalPath, local))
+			return nil, fmt.Errorf("%w: %s", core.ErrConflict, fmt.Sprintf(msgNotLocalPath, local, p.client.GetName()))
 		}
 		src.d, src.tracked, src.p, src.local, src.mappings = d, true, p, local, mappings
 	}

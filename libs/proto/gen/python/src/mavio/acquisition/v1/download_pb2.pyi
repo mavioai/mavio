@@ -392,3 +392,55 @@ class ManualImportRequest(_message.Message):
 class ManualImportResponse(_message.Message):
     __slots__ = ()
     def __init__(self) -> None: ...
+
+class DownloadClientPath(_message.Message):
+    __slots__ = ("remote_path", "local_path", "root_folder", "suggested_path", "readable", "error", "link_library_paths")
+    REMOTE_PATH_FIELD_NUMBER: _ClassVar[int]
+    LOCAL_PATH_FIELD_NUMBER: _ClassVar[int]
+    ROOT_FOLDER_FIELD_NUMBER: _ClassVar[int]
+    SUGGESTED_PATH_FIELD_NUMBER: _ClassVar[int]
+    READABLE_FIELD_NUMBER: _ClassVar[int]
+    ERROR_FIELD_NUMBER: _ClassVar[int]
+    LINK_LIBRARY_PATHS_FIELD_NUMBER: _ClassVar[int]
+    remote_path: str
+    local_path: str
+    root_folder: bool
+    suggested_path: str
+    readable: bool
+    error: str
+    link_library_paths: _containers.RepeatedScalarFieldContainer[str]
+    def __init__(self, remote_path: _Optional[str] = ..., local_path: _Optional[str] = ..., root_folder: _Optional[bool] = ..., suggested_path: _Optional[str] = ..., readable: _Optional[bool] = ..., error: _Optional[str] = ..., link_library_paths: _Optional[_Iterable[str]] = ...) -> None: ...
+
+class GetDownloadClientPathsRequest(_message.Message):
+    __slots__ = ("plugin_id", "client_id")
+    PLUGIN_ID_FIELD_NUMBER: _ClassVar[int]
+    CLIENT_ID_FIELD_NUMBER: _ClassVar[int]
+    plugin_id: str
+    client_id: str
+    def __init__(self, plugin_id: _Optional[str] = ..., client_id: _Optional[str] = ...) -> None: ...
+
+class GetDownloadClientPathsResponse(_message.Message):
+    __slots__ = ("paths", "failure")
+    PATHS_FIELD_NUMBER: _ClassVar[int]
+    FAILURE_FIELD_NUMBER: _ClassVar[int]
+    paths: _containers.RepeatedCompositeFieldContainer[DownloadClientPath]
+    failure: str
+    def __init__(self, paths: _Optional[_Iterable[_Union[DownloadClientPath, _Mapping]]] = ..., failure: _Optional[str] = ...) -> None: ...
+
+class UpdateDownloadClientPathsRequest(_message.Message):
+    __slots__ = ("plugin_id", "client_id", "paths")
+    PLUGIN_ID_FIELD_NUMBER: _ClassVar[int]
+    CLIENT_ID_FIELD_NUMBER: _ClassVar[int]
+    PATHS_FIELD_NUMBER: _ClassVar[int]
+    plugin_id: str
+    client_id: str
+    paths: _containers.RepeatedCompositeFieldContainer[DownloadClientPath]
+    def __init__(self, plugin_id: _Optional[str] = ..., client_id: _Optional[str] = ..., paths: _Optional[_Iterable[_Union[DownloadClientPath, _Mapping]]] = ...) -> None: ...
+
+class UpdateDownloadClientPathsResponse(_message.Message):
+    __slots__ = ("paths", "failure")
+    PATHS_FIELD_NUMBER: _ClassVar[int]
+    FAILURE_FIELD_NUMBER: _ClassVar[int]
+    paths: _containers.RepeatedCompositeFieldContainer[DownloadClientPath]
+    failure: str
+    def __init__(self, paths: _Optional[_Iterable[_Union[DownloadClientPath, _Mapping]]] = ..., failure: _Optional[str] = ...) -> None: ...

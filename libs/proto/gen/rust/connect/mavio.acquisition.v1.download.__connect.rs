@@ -100,6 +100,30 @@ pub type OwnedManualImportResponseView = ::buffa::view::OwnedView<
         'static,
     >,
 >;
+///Shorthand for `OwnedView<GetDownloadClientPathsRequestView<'static>>`.
+pub type OwnedGetDownloadClientPathsRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::acquisition::v1::__buffa::view::GetDownloadClientPathsRequestView<
+        'static,
+    >,
+>;
+///Shorthand for `OwnedView<GetDownloadClientPathsResponseView<'static>>`.
+pub type OwnedGetDownloadClientPathsResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::acquisition::v1::__buffa::view::GetDownloadClientPathsResponseView<
+        'static,
+    >,
+>;
+///Shorthand for `OwnedView<UpdateDownloadClientPathsRequestView<'static>>`.
+pub type OwnedUpdateDownloadClientPathsRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::acquisition::v1::__buffa::view::UpdateDownloadClientPathsRequestView<
+        'static,
+    >,
+>;
+///Shorthand for `OwnedView<UpdateDownloadClientPathsResponseView<'static>>`.
+pub type OwnedUpdateDownloadClientPathsResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::acquisition::v1::__buffa::view::UpdateDownloadClientPathsResponseView<
+        'static,
+    >,
+>;
 impl ::connectrpc::Encodable<
     crate::proto::mavio::acquisition::v1::ListDownloadClientsResponse,
 >
@@ -476,6 +500,90 @@ for ::buffa::view::OwnedView<
         )
     }
 }
+impl ::connectrpc::Encodable<
+    crate::proto::mavio::acquisition::v1::GetDownloadClientPathsResponse,
+>
+for crate::proto::mavio::acquisition::v1::__buffa::view::GetDownloadClientPathsResponseView<
+    '_,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<
+    crate::proto::mavio::acquisition::v1::GetDownloadClientPathsResponse,
+>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::acquisition::v1::__buffa::view::GetDownloadClientPathsResponseView<
+        'static,
+    >,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
+impl ::connectrpc::Encodable<
+    crate::proto::mavio::acquisition::v1::UpdateDownloadClientPathsResponse,
+>
+for crate::proto::mavio::acquisition::v1::__buffa::view::UpdateDownloadClientPathsResponseView<
+    '_,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<
+    crate::proto::mavio::acquisition::v1::UpdateDownloadClientPathsResponse,
+>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::acquisition::v1::__buffa::view::UpdateDownloadClientPathsResponseView<
+        'static,
+    >,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
 /// Full service name for this service.
 pub const DOWNLOAD_SERVICE_SERVICE_NAME: &str = "mavio.acquisition.v1.DownloadService";
 /// Static [`Spec`](::connectrpc::Spec) for the `ListDownloadClients` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
@@ -535,6 +643,18 @@ pub const DOWNLOAD_SERVICE_LIST_MANUAL_IMPORT_SPEC: ::connectrpc::Spec = ::conne
 /// Static [`Spec`](::connectrpc::Spec) for the `ManualImport` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
 pub const DOWNLOAD_SERVICE_MANUAL_IMPORT_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
         "/mavio.acquisition.v1.DownloadService/ManualImport",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
+/// Static [`Spec`](::connectrpc::Spec) for the `GetDownloadClientPaths` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const DOWNLOAD_SERVICE_GET_DOWNLOAD_CLIENT_PATHS_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.acquisition.v1.DownloadService/GetDownloadClientPaths",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::NoSideEffects);
+/// Static [`Spec`](::connectrpc::Spec) for the `UpdateDownloadClientPaths` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const DOWNLOAD_SERVICE_UPDATE_DOWNLOAD_CLIENT_PATHS_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.acquisition.v1.DownloadService/UpdateDownloadClientPaths",
         ::connectrpc::StreamType::Unary,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
@@ -828,6 +948,55 @@ pub trait DownloadService: Send + Sync + 'static {
         Output = ::connectrpc::ServiceResult<
             impl ::connectrpc::Encodable<
                 crate::proto::mavio::acquisition::v1::ManualImportResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// GetDownloadClientPaths returns the folders a download client puts
+    /// completed downloads in, with where the server reads each, as
+    /// Radarr's remote path mappings of the client's host.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn get_download_client_paths<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::acquisition::v1::GetDownloadClientPathsRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::acquisition::v1::GetDownloadClientPathsResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// UpdateDownloadClientPaths replaces where the server reads the
+    /// folders of a download client.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn update_download_client_paths<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::acquisition::v1::UpdateDownloadClientPathsRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::acquisition::v1::UpdateDownloadClientPathsResponse,
             > + Send + use<'a, Self>,
         >,
     > + Send;
@@ -1153,6 +1322,64 @@ impl<S: DownloadService> DownloadServiceExt for S {
                 },
             )
             .with_spec(DOWNLOAD_SERVICE_MANUAL_IMPORT_SPEC)
+            .route_view_idempotent(
+                DOWNLOAD_SERVICE_SERVICE_NAME,
+                "GetDownloadClientPaths",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::acquisition::v1::__buffa::view::GetDownloadClientPathsRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::acquisition::v1::GetDownloadClientPathsRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.get_download_client_paths(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::acquisition::v1::GetDownloadClientPathsResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(DOWNLOAD_SERVICE_GET_DOWNLOAD_CLIENT_PATHS_SPEC)
+            .route_view(
+                DOWNLOAD_SERVICE_SERVICE_NAME,
+                "UpdateDownloadClientPaths",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::acquisition::v1::__buffa::view::UpdateDownloadClientPathsRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::acquisition::v1::UpdateDownloadClientPathsRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.update_download_client_paths(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::acquisition::v1::UpdateDownloadClientPathsResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(DOWNLOAD_SERVICE_UPDATE_DOWNLOAD_CLIENT_PATHS_SPEC)
     }
 }
 /// Type-inference marker used by [`Router::add_service`](::connectrpc::Router::add_service).
@@ -1265,6 +1492,18 @@ impl<T: DownloadService> ::connectrpc::Dispatcher for DownloadServiceServer<T> {
                 Some(
                     ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
                         .with_spec(DOWNLOAD_SERVICE_MANUAL_IMPORT_SPEC),
+                )
+            }
+            "GetDownloadClientPaths" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(true)
+                        .with_spec(DOWNLOAD_SERVICE_GET_DOWNLOAD_CLIENT_PATHS_SPEC),
+                )
+            }
+            "UpdateDownloadClientPaths" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
+                        .with_spec(DOWNLOAD_SERVICE_UPDATE_DOWNLOAD_CLIENT_PATHS_SPEC),
                 )
             }
             _ => None,
@@ -1500,6 +1739,50 @@ impl<T: DownloadService> ::connectrpc::Dispatcher for DownloadServiceServer<T> {
                         .await?
                         .encode::<
                             crate::proto::mavio::acquisition::v1::ManualImportResponse,
+                        >(format)
+                })
+            }
+            "GetDownloadClientPaths" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::acquisition::v1::GetDownloadClientPathsRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::acquisition::v1::__buffa::view::GetDownloadClientPathsRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::acquisition::v1::GetDownloadClientPathsRequest,
+                    >::from_parts(&req, &body);
+                    svc.get_download_client_paths(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::acquisition::v1::GetDownloadClientPathsResponse,
+                        >(format)
+                })
+            }
+            "UpdateDownloadClientPaths" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::acquisition::v1::UpdateDownloadClientPathsRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::acquisition::v1::__buffa::view::UpdateDownloadClientPathsRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::acquisition::v1::UpdateDownloadClientPathsRequest,
+                    >::from_parts(&req, &body);
+                    svc.update_download_client_paths(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::acquisition::v1::UpdateDownloadClientPathsResponse,
                         >(format)
                 })
             }
@@ -2078,6 +2361,96 @@ where
                 &self.transport,
                 &self.config,
                 DOWNLOAD_SERVICE_MANUAL_IMPORT_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the GetDownloadClientPaths RPC. Sends a request to /mavio.acquisition.v1.DownloadService/GetDownloadClientPaths.
+    pub async fn get_download_client_paths(
+        &self,
+        request: crate::proto::mavio::acquisition::v1::GetDownloadClientPathsRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::acquisition::v1::__buffa::view::GetDownloadClientPathsResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.get_download_client_paths_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the GetDownloadClientPaths RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn get_download_client_paths_with_options(
+        &self,
+        request: crate::proto::mavio::acquisition::v1::GetDownloadClientPathsRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::acquisition::v1::__buffa::view::GetDownloadClientPathsResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                DOWNLOAD_SERVICE_GET_DOWNLOAD_CLIENT_PATHS_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the UpdateDownloadClientPaths RPC. Sends a request to /mavio.acquisition.v1.DownloadService/UpdateDownloadClientPaths.
+    pub async fn update_download_client_paths(
+        &self,
+        request: crate::proto::mavio::acquisition::v1::UpdateDownloadClientPathsRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::acquisition::v1::__buffa::view::UpdateDownloadClientPathsResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.update_download_client_paths_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the UpdateDownloadClientPaths RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn update_download_client_paths_with_options(
+        &self,
+        request: crate::proto::mavio::acquisition::v1::UpdateDownloadClientPathsRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::acquisition::v1::__buffa::view::UpdateDownloadClientPathsResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                DOWNLOAD_SERVICE_UPDATE_DOWNLOAD_CLIENT_PATHS_SPEC
                     .with_origin(::connectrpc::SpecOrigin::Client),
                 request,
                 options,

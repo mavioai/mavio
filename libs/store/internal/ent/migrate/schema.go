@@ -376,6 +376,27 @@ var (
 			},
 		},
 	}
+	// DownloadPathMappingsColumns holds the columns for the "download_path_mappings" table.
+	DownloadPathMappingsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "plugin_id", Type: field.TypeString},
+		{Name: "client_id", Type: field.TypeString},
+		{Name: "remote_path", Type: field.TypeString},
+		{Name: "local_path", Type: field.TypeString},
+	}
+	// DownloadPathMappingsTable holds the schema information for the "download_path_mappings" table.
+	DownloadPathMappingsTable = &schema.Table{
+		Name:       "download_path_mappings",
+		Columns:    DownloadPathMappingsColumns,
+		PrimaryKey: []*schema.Column{DownloadPathMappingsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "downloadpathmapping_plugin_id_client_id_remote_path",
+				Unique:  true,
+				Columns: []*schema.Column{DownloadPathMappingsColumns[1], DownloadPathMappingsColumns[2], DownloadPathMappingsColumns[3]},
+			},
+		},
+	}
 	// EpisodeStatesColumns holds the columns for the "episode_states" table.
 	EpisodeStatesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -1236,26 +1257,6 @@ var (
 		Columns:    ReleaseProfilesColumns,
 		PrimaryKey: []*schema.Column{ReleaseProfilesColumns[0]},
 	}
-	// RemotePathMappingsColumns holds the columns for the "remote_path_mappings" table.
-	RemotePathMappingsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeUUID},
-		{Name: "host", Type: field.TypeString},
-		{Name: "remote_path", Type: field.TypeString},
-		{Name: "local_path", Type: field.TypeString},
-	}
-	// RemotePathMappingsTable holds the schema information for the "remote_path_mappings" table.
-	RemotePathMappingsTable = &schema.Table{
-		Name:       "remote_path_mappings",
-		Columns:    RemotePathMappingsColumns,
-		PrimaryKey: []*schema.Column{RemotePathMappingsColumns[0]},
-		Indexes: []*schema.Index{
-			{
-				Name:    "remotepathmapping_host_remote_path",
-				Unique:  true,
-				Columns: []*schema.Column{RemotePathMappingsColumns[1], RemotePathMappingsColumns[2]},
-			},
-		},
-	}
 	// RequestsColumns holds the columns for the "requests" table.
 	RequestsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -1712,6 +1713,7 @@ var (
 		DelayProfilesTable,
 		DisplayPreferencesTable,
 		DownloadsTable,
+		DownloadPathMappingsTable,
 		EpisodeStatesTable,
 		ExtraFilesTable,
 		FolderStatesTable,
@@ -1735,7 +1737,6 @@ var (
 		QualityDefinitionsTable,
 		QualityProfilesTable,
 		ReleaseProfilesTable,
-		RemotePathMappingsTable,
 		RequestsTable,
 		SettingsTable,
 		StorageJobsTable,
@@ -1794,6 +1795,9 @@ func init() {
 	DownloadsTable.ForeignKeys[0].RefTable = ItemsTable
 	DownloadsTable.Annotation = &entsql.Annotation{
 		Table: "downloads",
+	}
+	DownloadPathMappingsTable.Annotation = &entsql.Annotation{
+		Table: "download_path_mappings",
 	}
 	EpisodeStatesTable.ForeignKeys[0].RefTable = ItemsTable
 	EpisodeStatesTable.Annotation = &entsql.Annotation{
@@ -1884,9 +1888,6 @@ func init() {
 	}
 	ReleaseProfilesTable.Annotation = &entsql.Annotation{
 		Table: "release_profiles",
-	}
-	RemotePathMappingsTable.Annotation = &entsql.Annotation{
-		Table: "remote_path_mappings",
 	}
 	RequestsTable.ForeignKeys[0].RefTable = UsersTable
 	RequestsTable.Annotation = &entsql.Annotation{

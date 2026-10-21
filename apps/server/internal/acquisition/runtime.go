@@ -73,6 +73,9 @@ type Runtime struct {
 	// Storages opens the storage of library and download paths; nil
 	// opens local folders only.
 	Storages *library.Storages
+	// RemoteHosts returns the hosts of the remotes, by remote, for which
+	// download client folders are suggested; nil suggests none.
+	RemoteHosts func(ctx context.Context) (map[string]string, error)
 	// VolumeLedger, QuietGate and Devices pace imports on rotational and
 	// remote volumes, as for scans; nil leaves imports unpaced.
 	VolumeLedger *storage.VolumeLedger

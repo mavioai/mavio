@@ -643,25 +643,33 @@ func (p *PendingRelease) Validate() error {
 	return nil
 }
 
-// RemotePathMapping maps the paths a download client on another host
-// reports to the paths the server sees.
-type RemotePathMapping struct {
+// DownloadPathMapping tells where the server reads a folder a download
+// client reports its downloads in, when the client sees its files
+// elsewhere than the server, as one on another computer does.
+type DownloadPathMapping struct {
 	ID ID
-	// Host is the download client's host, as its settings name it.
-	Host string
-	// RemotePath and LocalPath are folders.
-	RemotePath, LocalPath string
+	// PluginID and ClientID name the download client.
+	PluginID, ClientID string
+	// RemotePath is the folder as the client reports it.
+	RemotePath string
+	// LocalPath is where the server reads it: an absolute path of its
+	// file system, or a folder of a remote ("remote:<remote>:<path>").
+	LocalPath string
 }
 
 // Validate checks the mapping's invariants.
-func (m *RemotePathMapping) Validate() error {
+func (m *DownloadPathMapping) Validate() error {
 	switch {
-	case m.ID.IsZero() || strings.TrimSpace(m.Host) == "":
-		return fmt.Errorf("%w: remote path mapping requires an ID and a host", ErrInvalid)
+	case m.ID.IsZero() || m.PluginID == "" || m.ClientID == "":
+		return fmt.Errorf("%w: download path mapping requires an ID and a download client", ErrInvalid)
 	case strings.TrimSpace(m.RemotePath) == "":
-		return fmt.Errorf("%w: remote path mapping requires a remote path", ErrInvalid)
+		return fmt.Errorf("%w: download path mapping requires the client's folder", ErrInvalid)
+	case IsRemotePath(m.LocalPath):
+		if remote, rest, ok := SplitRemotePath(m.LocalPath); !ok || strings.ContainsAny(remote, `/\`) || strings.HasPrefix(rest, "/") || slices.Contains(strings.Split(rest, "/"), "..") {
+			return fmt.Errorf("%w: download path mapping to %q: want remote:<remote>:<path>", ErrInvalid, m.LocalPath)
+		}
 	case !isAbs(m.LocalPath):
-		return fmt.Errorf("%w: remote path mapping requires an absolute local path", ErrInvalid)
+		return fmt.Errorf("%w: download path mapping requires an absolute path or a remote's folder", ErrInvalid)
 	}
 	return nil
 }
@@ -804,13 +812,13 @@ type (
 		Delete(ctx context.Context, ids ...ID) error
 	}
 
-	// RemotePathMappingRepository stores remote path mappings. A host's
-	// remote path is mapped once (ErrConflict).
-	RemotePathMappingRepository interface {
-		// List returns the mappings by host and remote path.
-		List(ctx context.Context) ([]RemotePathMapping, error)
-		Put(ctx context.Context, m *RemotePathMapping) error
-		Delete(ctx context.Context, id ID) error
+	// DownloadPathMappingRepository stores the download clients' path
+	// mappings. A client's folder is mapped once.
+	DownloadPathMappingRepository interface {
+		// List returns the mappings by plugin, client and remote path.
+		List(ctx context.Context) ([]DownloadPathMapping, error)
+		// ReplaceClient replaces a client's mappings; none removes them.
+		ReplaceClient(ctx context.Context, pluginID, clientID string, ms []DownloadPathMapping) error
 	}
 )
 

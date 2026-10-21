@@ -66,7 +66,7 @@ type localEpisode struct {
 // imported once every episode it was grabbed for is; else it is blocked
 // with why. A folder the files were moved out of is deleted once only
 // samples are left in it.
-func (r *Runtime) importEpisodeDownload(ctx context.Context, rn *run, d *core.Download, p polled, local string, mappings []acquire.RemotePathMapping) error {
+func (r *Runtime) importEpisodeDownload(ctx context.Context, rn *run, d *core.Download, p polled, local string, mappings []acquire.DownloadPathMapping) error {
 	sh, err := rn.show(ctx, d.ItemID)
 	if errors.Is(err, core.ErrNotFound) || errors.Is(err, core.ErrInvalid) {
 		d.State = core.DownloadImportBlocked

@@ -47,6 +47,12 @@ class DownloadService(Protocol):
     async def manual_import(self, request: mavio_dot_acquisition_dot_v1_dot_download__pb2.ManualImportRequest, ctx: RequestContext) -> mavio_dot_acquisition_dot_v1_dot_download__pb2.ManualImportResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
 
+    async def get_download_client_paths(self, request: mavio_dot_acquisition_dot_v1_dot_download__pb2.GetDownloadClientPathsRequest, ctx: RequestContext) -> mavio_dot_acquisition_dot_v1_dot_download__pb2.GetDownloadClientPathsResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
+
+    async def update_download_client_paths(self, request: mavio_dot_acquisition_dot_v1_dot_download__pb2.UpdateDownloadClientPathsRequest, ctx: RequestContext) -> mavio_dot_acquisition_dot_v1_dot_download__pb2.UpdateDownloadClientPathsResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
+
 
 class DownloadServiceASGIApplication(ConnectASGIApplication[DownloadService]):
     def __init__(self, service: DownloadService | AsyncGenerator[DownloadService], *, interceptors: Iterable[Interceptor]=(), read_max_bytes: int | None = None, compressions: Iterable[Compression] | None = None) -> None:
@@ -152,6 +158,26 @@ class DownloadServiceASGIApplication(ConnectASGIApplication[DownloadService]):
                         idempotency_level=IdempotencyLevel.UNKNOWN,
                     ),
                     function=svc.manual_import,
+                ),
+                "/mavio.acquisition.v1.DownloadService/GetDownloadClientPaths": Endpoint.unary(
+                    method=MethodInfo(
+                        name="GetDownloadClientPaths",
+                        service_name="mavio.acquisition.v1.DownloadService",
+                        input=mavio_dot_acquisition_dot_v1_dot_download__pb2.GetDownloadClientPathsRequest,
+                        output=mavio_dot_acquisition_dot_v1_dot_download__pb2.GetDownloadClientPathsResponse,
+                        idempotency_level=IdempotencyLevel.NO_SIDE_EFFECTS,
+                    ),
+                    function=svc.get_download_client_paths,
+                ),
+                "/mavio.acquisition.v1.DownloadService/UpdateDownloadClientPaths": Endpoint.unary(
+                    method=MethodInfo(
+                        name="UpdateDownloadClientPaths",
+                        service_name="mavio.acquisition.v1.DownloadService",
+                        input=mavio_dot_acquisition_dot_v1_dot_download__pb2.UpdateDownloadClientPathsRequest,
+                        output=mavio_dot_acquisition_dot_v1_dot_download__pb2.UpdateDownloadClientPathsResponse,
+                        idempotency_level=IdempotencyLevel.UNKNOWN,
+                    ),
+                    function=svc.update_download_client_paths,
                 ),
             },
             interceptors=interceptors,
@@ -376,6 +402,48 @@ class DownloadServiceClient(ConnectClient):
             timeout_ms=timeout_ms,
         )
 
+    async def get_download_client_paths(
+        self,
+        request: mavio_dot_acquisition_dot_v1_dot_download__pb2.GetDownloadClientPathsRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+        use_get: bool = False,
+    ) -> mavio_dot_acquisition_dot_v1_dot_download__pb2.GetDownloadClientPathsResponse:
+        return await self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="GetDownloadClientPaths",
+                service_name="mavio.acquisition.v1.DownloadService",
+                input=mavio_dot_acquisition_dot_v1_dot_download__pb2.GetDownloadClientPathsRequest,
+                output=mavio_dot_acquisition_dot_v1_dot_download__pb2.GetDownloadClientPathsResponse,
+                idempotency_level=IdempotencyLevel.NO_SIDE_EFFECTS,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+            use_get=use_get,
+        )
+
+    async def update_download_client_paths(
+        self,
+        request: mavio_dot_acquisition_dot_v1_dot_download__pb2.UpdateDownloadClientPathsRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+    ) -> mavio_dot_acquisition_dot_v1_dot_download__pb2.UpdateDownloadClientPathsResponse:
+        return await self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="UpdateDownloadClientPaths",
+                service_name="mavio.acquisition.v1.DownloadService",
+                input=mavio_dot_acquisition_dot_v1_dot_download__pb2.UpdateDownloadClientPathsRequest,
+                output=mavio_dot_acquisition_dot_v1_dot_download__pb2.UpdateDownloadClientPathsResponse,
+                idempotency_level=IdempotencyLevel.UNKNOWN,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+        )
+
 
 class DownloadServiceSync(Protocol):
     def list_download_clients(self, request: mavio_dot_acquisition_dot_v1_dot_download__pb2.ListDownloadClientsRequest, ctx: RequestContext) -> mavio_dot_acquisition_dot_v1_dot_download__pb2.ListDownloadClientsResponse:
@@ -397,6 +465,10 @@ class DownloadServiceSync(Protocol):
     def list_manual_import(self, request: mavio_dot_acquisition_dot_v1_dot_download__pb2.ListManualImportRequest, ctx: RequestContext) -> mavio_dot_acquisition_dot_v1_dot_download__pb2.ListManualImportResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
     def manual_import(self, request: mavio_dot_acquisition_dot_v1_dot_download__pb2.ManualImportRequest, ctx: RequestContext) -> mavio_dot_acquisition_dot_v1_dot_download__pb2.ManualImportResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
+    def get_download_client_paths(self, request: mavio_dot_acquisition_dot_v1_dot_download__pb2.GetDownloadClientPathsRequest, ctx: RequestContext) -> mavio_dot_acquisition_dot_v1_dot_download__pb2.GetDownloadClientPathsResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
+    def update_download_client_paths(self, request: mavio_dot_acquisition_dot_v1_dot_download__pb2.UpdateDownloadClientPathsRequest, ctx: RequestContext) -> mavio_dot_acquisition_dot_v1_dot_download__pb2.UpdateDownloadClientPathsResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
 
 
@@ -503,6 +575,26 @@ class DownloadServiceWSGIApplication(ConnectWSGIApplication):
                         idempotency_level=IdempotencyLevel.UNKNOWN,
                     ),
                     function=service.manual_import,
+                ),
+                "/mavio.acquisition.v1.DownloadService/GetDownloadClientPaths": EndpointSync.unary(
+                    method=MethodInfo(
+                        name="GetDownloadClientPaths",
+                        service_name="mavio.acquisition.v1.DownloadService",
+                        input=mavio_dot_acquisition_dot_v1_dot_download__pb2.GetDownloadClientPathsRequest,
+                        output=mavio_dot_acquisition_dot_v1_dot_download__pb2.GetDownloadClientPathsResponse,
+                        idempotency_level=IdempotencyLevel.NO_SIDE_EFFECTS,
+                    ),
+                    function=service.get_download_client_paths,
+                ),
+                "/mavio.acquisition.v1.DownloadService/UpdateDownloadClientPaths": EndpointSync.unary(
+                    method=MethodInfo(
+                        name="UpdateDownloadClientPaths",
+                        service_name="mavio.acquisition.v1.DownloadService",
+                        input=mavio_dot_acquisition_dot_v1_dot_download__pb2.UpdateDownloadClientPathsRequest,
+                        output=mavio_dot_acquisition_dot_v1_dot_download__pb2.UpdateDownloadClientPathsResponse,
+                        idempotency_level=IdempotencyLevel.UNKNOWN,
+                    ),
+                    function=service.update_download_client_paths,
                 ),
             },
             interceptors=interceptors,
@@ -721,6 +813,48 @@ class DownloadServiceClientSync(ConnectClientSync):
                 service_name="mavio.acquisition.v1.DownloadService",
                 input=mavio_dot_acquisition_dot_v1_dot_download__pb2.ManualImportRequest,
                 output=mavio_dot_acquisition_dot_v1_dot_download__pb2.ManualImportResponse,
+                idempotency_level=IdempotencyLevel.UNKNOWN,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+        )
+
+    def get_download_client_paths(
+        self,
+        request: mavio_dot_acquisition_dot_v1_dot_download__pb2.GetDownloadClientPathsRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+        use_get: bool = False,
+    ) -> mavio_dot_acquisition_dot_v1_dot_download__pb2.GetDownloadClientPathsResponse:
+        return self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="GetDownloadClientPaths",
+                service_name="mavio.acquisition.v1.DownloadService",
+                input=mavio_dot_acquisition_dot_v1_dot_download__pb2.GetDownloadClientPathsRequest,
+                output=mavio_dot_acquisition_dot_v1_dot_download__pb2.GetDownloadClientPathsResponse,
+                idempotency_level=IdempotencyLevel.NO_SIDE_EFFECTS,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+            use_get=use_get,
+        )
+
+    def update_download_client_paths(
+        self,
+        request: mavio_dot_acquisition_dot_v1_dot_download__pb2.UpdateDownloadClientPathsRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+    ) -> mavio_dot_acquisition_dot_v1_dot_download__pb2.UpdateDownloadClientPathsResponse:
+        return self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="UpdateDownloadClientPaths",
+                service_name="mavio.acquisition.v1.DownloadService",
+                input=mavio_dot_acquisition_dot_v1_dot_download__pb2.UpdateDownloadClientPathsRequest,
+                output=mavio_dot_acquisition_dot_v1_dot_download__pb2.UpdateDownloadClientPathsResponse,
                 idempotency_level=IdempotencyLevel.UNKNOWN,
             ),
             headers=headers,

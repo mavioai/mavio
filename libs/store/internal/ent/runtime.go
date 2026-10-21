@@ -17,6 +17,7 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/delayprofile"
 	"github.com/mavioai/mavio/libs/store/internal/ent/displaypreferences"
 	"github.com/mavioai/mavio/libs/store/internal/ent/download"
+	"github.com/mavioai/mavio/libs/store/internal/ent/downloadpathmapping"
 	"github.com/mavioai/mavio/libs/store/internal/ent/episodestate"
 	"github.com/mavioai/mavio/libs/store/internal/ent/extrafile"
 	"github.com/mavioai/mavio/libs/store/internal/ent/folderstate"
@@ -40,7 +41,6 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/qualitydefinition"
 	"github.com/mavioai/mavio/libs/store/internal/ent/qualityprofile"
 	"github.com/mavioai/mavio/libs/store/internal/ent/releaseprofile"
-	"github.com/mavioai/mavio/libs/store/internal/ent/remotepathmapping"
 	"github.com/mavioai/mavio/libs/store/internal/ent/request"
 	"github.com/mavioai/mavio/libs/store/internal/ent/schema"
 	"github.com/mavioai/mavio/libs/store/internal/ent/setting"
@@ -255,6 +255,12 @@ func init() {
 	downloadDescID := downloadFields[0].Descriptor()
 	// download.DefaultID holds the default value on creation for the id field.
 	download.DefaultID = downloadDescID.Default.(func() core.ID)
+	downloadpathmappingFields := schema.DownloadPathMapping{}.Fields()
+	_ = downloadpathmappingFields
+	// downloadpathmappingDescID is the schema descriptor for id field.
+	downloadpathmappingDescID := downloadpathmappingFields[0].Descriptor()
+	// downloadpathmapping.DefaultID holds the default value on creation for the id field.
+	downloadpathmapping.DefaultID = downloadpathmappingDescID.Default.(func() core.ID)
 	episodestateFields := schema.EpisodeState{}.Fields()
 	_ = episodestateFields
 	// episodestateDescUnverifiedSceneNumbering is the schema descriptor for unverified_scene_numbering field.
@@ -811,12 +817,6 @@ func init() {
 	releaseprofileDescID := releaseprofileFields[0].Descriptor()
 	// releaseprofile.DefaultID holds the default value on creation for the id field.
 	releaseprofile.DefaultID = releaseprofileDescID.Default.(func() core.ID)
-	remotepathmappingFields := schema.RemotePathMapping{}.Fields()
-	_ = remotepathmappingFields
-	// remotepathmappingDescID is the schema descriptor for id field.
-	remotepathmappingDescID := remotepathmappingFields[0].Descriptor()
-	// remotepathmapping.DefaultID holds the default value on creation for the id field.
-	remotepathmapping.DefaultID = remotepathmappingDescID.Default.(func() core.ID)
 	requestFields := schema.Request{}.Fields()
 	_ = requestFields
 	// requestDescTvdbID is the schema descriptor for tvdb_id field.

@@ -76,39 +76,39 @@ func newMemStore() *memStore {
 	}
 }
 
-func (m *memStore) Libraries() core.LibraryRepository                     { return memLibs{m} }
-func (m *memStore) Items() core.ItemRepository                            { return memItems{m} }
-func (m *memStore) MediaSources() core.MediaSourceRepository              { return memSources{m} }
-func (m *memStore) Images() core.ImageRepository                          { return memImages{m} }
-func (m *memStore) People() core.PersonRepository                         { return memPeople{m} }
-func (m *memStore) Users() core.UserRepository                            { panic("unused") }
-func (m *memStore) Credentials() core.CredentialRepository                { panic("unused") }
-func (m *memStore) UserData() core.UserDataRepository                     { panic("unused") }
-func (m *memStore) Jobs() core.JobQueue                                   { return memJobs{m} }
-func (m *memStore) Scans() core.ScanRepository                            { return memScans{m} }
-func (m *memStore) AuthSessions() core.AuthSessionRepository              { return memSessions{} }
-func (m *memStore) PluginConfigs() core.PluginConfigRepository            { panic("unused") }
-func (m *memStore) PluginContainers() core.PluginContainerRepository      { panic("unused") }
-func (m *memStore) DisplayPreferences() core.DisplayPreferencesRepository { panic("unused") }
-func (m *memStore) Settings() core.SettingsRepository                     { return memSettings{} }
-func (m *memStore) APIKeys() core.APIKeyRepository                        { panic("unused") }
-func (m *memStore) Invitations() core.InvitationRepository                { return memInvitations{} }
-func (m *memStore) Activities() core.ActivityRepository                   { panic("unused") }
-func (m *memStore) Trickplay() core.TrickplayRepository                   { return memTricks{m} }
-func (m *memStore) MediaSegments() core.MediaSegmentRepository            { return memSegs{m} }
-func (m *memStore) QualityDefinitions() core.QualityDefinitionRepository  { panic("unused") }
-func (m *memStore) QualityProfiles() core.QualityProfileRepository        { panic("unused") }
-func (m *memStore) CustomFormats() core.CustomFormatRepository            { panic("unused") }
-func (m *memStore) DelayProfiles() core.DelayProfileRepository            { panic("unused") }
-func (m *memStore) ReleaseProfiles() core.ReleaseProfileRepository        { panic("unused") }
-func (m *memStore) Wanted() core.WantedRepository                         { panic("unused") }
-func (m *memStore) EpisodeStates() core.EpisodeStateRepository            { panic("unused") }
-func (m *memStore) Downloads() core.DownloadRepository                    { panic("unused") }
-func (m *memStore) History() core.HistoryRepository                       { return memHistory{m} }
-func (m *memStore) Blocklist() core.BlocklistRepository                   { panic("unused") }
-func (m *memStore) PendingReleases() core.PendingReleaseRepository        { panic("unused") }
-func (m *memStore) RemotePathMappings() core.RemotePathMappingRepository  { panic("unused") }
-func (m *memStore) SubtitleProfiles() core.SubtitleProfileRepository      { panic("unused") }
+func (m *memStore) Libraries() core.LibraryRepository                        { return memLibs{m} }
+func (m *memStore) Items() core.ItemRepository                               { return memItems{m} }
+func (m *memStore) MediaSources() core.MediaSourceRepository                 { return memSources{m} }
+func (m *memStore) Images() core.ImageRepository                             { return memImages{m} }
+func (m *memStore) People() core.PersonRepository                            { return memPeople{m} }
+func (m *memStore) Users() core.UserRepository                               { panic("unused") }
+func (m *memStore) Credentials() core.CredentialRepository                   { panic("unused") }
+func (m *memStore) UserData() core.UserDataRepository                        { panic("unused") }
+func (m *memStore) Jobs() core.JobQueue                                      { return memJobs{m} }
+func (m *memStore) Scans() core.ScanRepository                               { return memScans{m} }
+func (m *memStore) AuthSessions() core.AuthSessionRepository                 { return memSessions{} }
+func (m *memStore) PluginConfigs() core.PluginConfigRepository               { panic("unused") }
+func (m *memStore) PluginContainers() core.PluginContainerRepository         { panic("unused") }
+func (m *memStore) DisplayPreferences() core.DisplayPreferencesRepository    { panic("unused") }
+func (m *memStore) Settings() core.SettingsRepository                        { return memSettings{} }
+func (m *memStore) APIKeys() core.APIKeyRepository                           { panic("unused") }
+func (m *memStore) Invitations() core.InvitationRepository                   { return memInvitations{} }
+func (m *memStore) Activities() core.ActivityRepository                      { panic("unused") }
+func (m *memStore) Trickplay() core.TrickplayRepository                      { return memTricks{m} }
+func (m *memStore) MediaSegments() core.MediaSegmentRepository               { return memSegs{m} }
+func (m *memStore) QualityDefinitions() core.QualityDefinitionRepository     { panic("unused") }
+func (m *memStore) QualityProfiles() core.QualityProfileRepository           { panic("unused") }
+func (m *memStore) CustomFormats() core.CustomFormatRepository               { panic("unused") }
+func (m *memStore) DelayProfiles() core.DelayProfileRepository               { panic("unused") }
+func (m *memStore) ReleaseProfiles() core.ReleaseProfileRepository           { panic("unused") }
+func (m *memStore) Wanted() core.WantedRepository                            { panic("unused") }
+func (m *memStore) EpisodeStates() core.EpisodeStateRepository               { panic("unused") }
+func (m *memStore) Downloads() core.DownloadRepository                       { panic("unused") }
+func (m *memStore) History() core.HistoryRepository                          { return memHistory{m} }
+func (m *memStore) Blocklist() core.BlocklistRepository                      { panic("unused") }
+func (m *memStore) PendingReleases() core.PendingReleaseRepository           { panic("unused") }
+func (m *memStore) DownloadPathMappings() core.DownloadPathMappingRepository { panic("unused") }
+func (m *memStore) SubtitleProfiles() core.SubtitleProfileRepository         { panic("unused") }
 func (m *memStore) SubtitleProfileAssignments() core.SubtitleProfileAssignmentRepository {
 	panic("unused")
 }

@@ -63,6 +63,12 @@ const (
 	// DownloadServiceManualImportProcedure is the fully-qualified name of the DownloadService's
 	// ManualImport RPC.
 	DownloadServiceManualImportProcedure = "/mavio.acquisition.v1.DownloadService/ManualImport"
+	// DownloadServiceGetDownloadClientPathsProcedure is the fully-qualified name of the
+	// DownloadService's GetDownloadClientPaths RPC.
+	DownloadServiceGetDownloadClientPathsProcedure = "/mavio.acquisition.v1.DownloadService/GetDownloadClientPaths"
+	// DownloadServiceUpdateDownloadClientPathsProcedure is the fully-qualified name of the
+	// DownloadService's UpdateDownloadClientPaths RPC.
+	DownloadServiceUpdateDownloadClientPathsProcedure = "/mavio.acquisition.v1.DownloadService/UpdateDownloadClientPaths"
 )
 
 // DownloadServiceClient is a client for the mavio.acquisition.v1.DownloadService service.
@@ -94,6 +100,13 @@ type DownloadServiceClient interface {
 	// a folder that is not one, for the movie chosen whatever the import
 	// specifications reject, and completes a tracked download.
 	ManualImport(context.Context, *v1.ManualImportRequest) (*v1.ManualImportResponse, error)
+	// GetDownloadClientPaths returns the folders a download client puts
+	// completed downloads in, with where the server reads each, as
+	// Radarr's remote path mappings of the client's host.
+	GetDownloadClientPaths(context.Context, *v1.GetDownloadClientPathsRequest) (*v1.GetDownloadClientPathsResponse, error)
+	// UpdateDownloadClientPaths replaces where the server reads the
+	// folders of a download client.
+	UpdateDownloadClientPaths(context.Context, *v1.UpdateDownloadClientPathsRequest) (*v1.UpdateDownloadClientPathsResponse, error)
 }
 
 // NewDownloadServiceClient constructs a client for the mavio.acquisition.v1.DownloadService
@@ -173,21 +186,36 @@ func NewDownloadServiceClient(httpClient connect.HTTPClient, baseURL string, opt
 			connect.WithSchema(downloadServiceMethods.ByName("ManualImport")),
 			connect.WithClientOptions(opts...),
 		),
+		getDownloadClientPaths: connect.NewClient[v1.GetDownloadClientPathsRequest, v1.GetDownloadClientPathsResponse](
+			httpClient,
+			baseURL+DownloadServiceGetDownloadClientPathsProcedure,
+			connect.WithSchema(downloadServiceMethods.ByName("GetDownloadClientPaths")),
+			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+			connect.WithClientOptions(opts...),
+		),
+		updateDownloadClientPaths: connect.NewClient[v1.UpdateDownloadClientPathsRequest, v1.UpdateDownloadClientPathsResponse](
+			httpClient,
+			baseURL+DownloadServiceUpdateDownloadClientPathsProcedure,
+			connect.WithSchema(downloadServiceMethods.ByName("UpdateDownloadClientPaths")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
 // downloadServiceClient implements DownloadServiceClient.
 type downloadServiceClient struct {
-	listDownloadClients *connect.Client[v1.ListDownloadClientsRequest, v1.ListDownloadClientsResponse]
-	grabRelease         *connect.Client[v1.GrabReleaseRequest, v1.GrabReleaseResponse]
-	listQueue           *connect.Client[v1.ListQueueRequest, v1.ListQueueResponse]
-	removeFromQueue     *connect.Client[v1.RemoveFromQueueRequest, v1.RemoveFromQueueResponse]
-	listHistory         *connect.Client[v1.ListHistoryRequest, v1.ListHistoryResponse]
-	markFailed          *connect.Client[v1.MarkFailedRequest, v1.MarkFailedResponse]
-	listBlocklist       *connect.Client[v1.ListBlocklistRequest, v1.ListBlocklistResponse]
-	deleteBlocklist     *connect.Client[v1.DeleteBlocklistRequest, v1.DeleteBlocklistResponse]
-	listManualImport    *connect.Client[v1.ListManualImportRequest, v1.ListManualImportResponse]
-	manualImport        *connect.Client[v1.ManualImportRequest, v1.ManualImportResponse]
+	listDownloadClients       *connect.Client[v1.ListDownloadClientsRequest, v1.ListDownloadClientsResponse]
+	grabRelease               *connect.Client[v1.GrabReleaseRequest, v1.GrabReleaseResponse]
+	listQueue                 *connect.Client[v1.ListQueueRequest, v1.ListQueueResponse]
+	removeFromQueue           *connect.Client[v1.RemoveFromQueueRequest, v1.RemoveFromQueueResponse]
+	listHistory               *connect.Client[v1.ListHistoryRequest, v1.ListHistoryResponse]
+	markFailed                *connect.Client[v1.MarkFailedRequest, v1.MarkFailedResponse]
+	listBlocklist             *connect.Client[v1.ListBlocklistRequest, v1.ListBlocklistResponse]
+	deleteBlocklist           *connect.Client[v1.DeleteBlocklistRequest, v1.DeleteBlocklistResponse]
+	listManualImport          *connect.Client[v1.ListManualImportRequest, v1.ListManualImportResponse]
+	manualImport              *connect.Client[v1.ManualImportRequest, v1.ManualImportResponse]
+	getDownloadClientPaths    *connect.Client[v1.GetDownloadClientPathsRequest, v1.GetDownloadClientPathsResponse]
+	updateDownloadClientPaths *connect.Client[v1.UpdateDownloadClientPathsRequest, v1.UpdateDownloadClientPathsResponse]
 }
 
 // ListDownloadClients calls mavio.acquisition.v1.DownloadService.ListDownloadClients.
@@ -280,6 +308,24 @@ func (c *downloadServiceClient) ManualImport(ctx context.Context, req *v1.Manual
 	return nil, err
 }
 
+// GetDownloadClientPaths calls mavio.acquisition.v1.DownloadService.GetDownloadClientPaths.
+func (c *downloadServiceClient) GetDownloadClientPaths(ctx context.Context, req *v1.GetDownloadClientPathsRequest) (*v1.GetDownloadClientPathsResponse, error) {
+	response, err := c.getDownloadClientPaths.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
+// UpdateDownloadClientPaths calls mavio.acquisition.v1.DownloadService.UpdateDownloadClientPaths.
+func (c *downloadServiceClient) UpdateDownloadClientPaths(ctx context.Context, req *v1.UpdateDownloadClientPathsRequest) (*v1.UpdateDownloadClientPathsResponse, error) {
+	response, err := c.updateDownloadClientPaths.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
 // DownloadServiceHandler is an implementation of the mavio.acquisition.v1.DownloadService service.
 type DownloadServiceHandler interface {
 	// ListDownloadClients lists the clients every ready download client
@@ -309,6 +355,13 @@ type DownloadServiceHandler interface {
 	// a folder that is not one, for the movie chosen whatever the import
 	// specifications reject, and completes a tracked download.
 	ManualImport(context.Context, *v1.ManualImportRequest) (*v1.ManualImportResponse, error)
+	// GetDownloadClientPaths returns the folders a download client puts
+	// completed downloads in, with where the server reads each, as
+	// Radarr's remote path mappings of the client's host.
+	GetDownloadClientPaths(context.Context, *v1.GetDownloadClientPathsRequest) (*v1.GetDownloadClientPathsResponse, error)
+	// UpdateDownloadClientPaths replaces where the server reads the
+	// folders of a download client.
+	UpdateDownloadClientPaths(context.Context, *v1.UpdateDownloadClientPathsRequest) (*v1.UpdateDownloadClientPathsResponse, error)
 }
 
 // NewDownloadServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -384,6 +437,19 @@ func NewDownloadServiceHandler(svc DownloadServiceHandler, opts ...connect.Handl
 		connect.WithSchema(downloadServiceMethods.ByName("ManualImport")),
 		connect.WithHandlerOptions(opts...),
 	)
+	downloadServiceGetDownloadClientPathsHandler := connect.NewUnaryHandlerSimple(
+		DownloadServiceGetDownloadClientPathsProcedure,
+		svc.GetDownloadClientPaths,
+		connect.WithSchema(downloadServiceMethods.ByName("GetDownloadClientPaths")),
+		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+		connect.WithHandlerOptions(opts...),
+	)
+	downloadServiceUpdateDownloadClientPathsHandler := connect.NewUnaryHandlerSimple(
+		DownloadServiceUpdateDownloadClientPathsProcedure,
+		svc.UpdateDownloadClientPaths,
+		connect.WithSchema(downloadServiceMethods.ByName("UpdateDownloadClientPaths")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/mavio.acquisition.v1.DownloadService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case DownloadServiceListDownloadClientsProcedure:
@@ -406,6 +472,10 @@ func NewDownloadServiceHandler(svc DownloadServiceHandler, opts ...connect.Handl
 			downloadServiceListManualImportHandler.ServeHTTP(w, r)
 		case DownloadServiceManualImportProcedure:
 			downloadServiceManualImportHandler.ServeHTTP(w, r)
+		case DownloadServiceGetDownloadClientPathsProcedure:
+			downloadServiceGetDownloadClientPathsHandler.ServeHTTP(w, r)
+		case DownloadServiceUpdateDownloadClientPathsProcedure:
+			downloadServiceUpdateDownloadClientPathsHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -453,4 +523,12 @@ func (UnimplementedDownloadServiceHandler) ListManualImport(context.Context, *v1
 
 func (UnimplementedDownloadServiceHandler) ManualImport(context.Context, *v1.ManualImportRequest) (*v1.ManualImportResponse, error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.acquisition.v1.DownloadService.ManualImport is not implemented"))
+}
+
+func (UnimplementedDownloadServiceHandler) GetDownloadClientPaths(context.Context, *v1.GetDownloadClientPathsRequest) (*v1.GetDownloadClientPathsResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.acquisition.v1.DownloadService.GetDownloadClientPaths is not implemented"))
+}
+
+func (UnimplementedDownloadServiceHandler) UpdateDownloadClientPaths(context.Context, *v1.UpdateDownloadClientPathsRequest) (*v1.UpdateDownloadClientPathsResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.acquisition.v1.DownloadService.UpdateDownloadClientPaths is not implemented"))
 }

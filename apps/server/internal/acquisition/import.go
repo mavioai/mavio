@@ -26,7 +26,7 @@ import (
 // The warnings of imports, Radarr's.
 const (
 	msgNoOutputPath    = "Download doesn't contain intermediate path, Skipping."
-	msgNotLocalPath    = "[%s] is not a valid local path. You may need a Remote Path Mapping."
+	msgNotLocalPath    = "[%s] is not a valid local path. Set where the server reads it in the folders of the download client %s."
 	msgNoMovie         = "Unable to parse download, automatic import is not possible."
 	msgNoFiles         = "No files found are eligible for import in %s"
 	msgNotAllImported  = "One or more movies expected in this release were not imported or missing"
@@ -52,14 +52,14 @@ type importFile struct {
 // ImportApprovedMovie: the largest file no import specification rejects
 // is imported, upgrading the movie's file; when none is, the download is
 // blocked with why.
-func (r *Runtime) importDownload(ctx context.Context, rn *run, d *core.Download, p polled, mappings []acquire.RemotePathMapping) error {
+func (r *Runtime) importDownload(ctx context.Context, rn *run, d *core.Download, p polled, mappings []acquire.DownloadPathMapping) error {
 	out := p.item.GetOutputPath()
 	if strings.TrimSpace(out) == "" {
 		return r.warn(ctx, d, msgNoOutputPath)
 	}
-	local, ok := downloadPath(acquire.RemapRemoteToLocal(mappings, p.client.GetHost(), out))
+	local, ok := downloadPath(acquire.RemapDownloadPath(mappings, p.client.Ref(), out))
 	if !ok {
-		return r.warn(ctx, d, fmt.Sprintf(msgNotLocalPath, local))
+		return r.warn(ctx, d, fmt.Sprintf(msgNotLocalPath, local, p.client.GetName()))
 	}
 	if isSeriesDownload(*d) {
 		return r.importEpisodeDownload(ctx, rn, d, p, local, mappings)

@@ -456,27 +456,6 @@ func TestReleaseProfilesAndMappings(t *testing.T) {
 	if res, err := admin.ListReleaseProfiles(ctx, &acquisitionv1.ListReleaseProfilesRequest{}); err != nil || len(res.GetProfiles()) != 0 {
 		t.Errorf("ListReleaseProfiles = %v, %v", res, err)
 	}
-
-	mapping := acquisitionv1.RemotePathMapping_builder{Host: new("seedbox"), RemotePath: new("/downloads/"), LocalPath: new("/mnt/seedbox/")}.Build()
-	created, err := admin.CreateRemotePathMapping(ctx, acquisitionv1.CreateRemotePathMappingRequest_builder{Mapping: mapping}.Build())
-	if err != nil {
-		t.Fatalf("CreateRemotePathMapping: %v", err)
-	}
-	_, err = admin.CreateRemotePathMapping(ctx, acquisitionv1.CreateRemotePathMappingRequest_builder{Mapping: mapping}.Build())
-	wantCode(t, "duplicate mapping", err, connect.CodeAlreadyExists)
-	relative := acquisitionv1.RemotePathMapping_builder{Host: new("seedbox"), RemotePath: new("/other/"), LocalPath: new("seedbox")}.Build()
-	_, err = admin.CreateRemotePathMapping(ctx, acquisitionv1.CreateRemotePathMappingRequest_builder{Mapping: relative}.Build())
-	wantCode(t, "relative local path", err, connect.CodeInvalidArgument)
-	if res, err := admin.ListRemotePathMappings(ctx, &acquisitionv1.ListRemotePathMappingsRequest{}); err != nil ||
-		len(res.GetMappings()) != 1 || res.GetMappings()[0].GetLocalPath() != "/mnt/seedbox/" {
-		t.Errorf("ListRemotePathMappings = %v, %v", res, err)
-	}
-	id := created.GetMapping().GetId()
-	if _, err := admin.DeleteRemotePathMapping(ctx, acquisitionv1.DeleteRemotePathMappingRequest_builder{Id: new(id)}.Build()); err != nil {
-		t.Errorf("DeleteRemotePathMapping: %v", err)
-	}
-	_, err = admin.DeleteRemotePathMapping(ctx, acquisitionv1.DeleteRemotePathMappingRequest_builder{Id: new(id)}.Build())
-	wantCode(t, "second deletion", err, connect.CodeNotFound)
 }
 
 // TestAcquisitionSettings checks the acquisition settings' round trip

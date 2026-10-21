@@ -150,12 +150,13 @@ export {
 export {
   useCustomFormats,
   useDelayProfiles,
+  useDownloadClientPaths,
   useDownloadClients,
   useIndexers,
   useQualityDefinitions,
   useQualityProfiles,
   useReleaseProfiles,
-  useRemotePathMappings,
+  useUpdateDownloadClientPaths,
 } from "./profiles.ts";
 export {
   useItemSubtitleActions,

@@ -1,6 +1,7 @@
 package server
 
 import (
+	"cmp"
 	"context"
 	"crypto/rand"
 	"encoding/hex"
@@ -124,6 +125,22 @@ func (rt *rcloneRuntime) Close() {
 	if rt.daemon != nil {
 		_ = rt.daemon.Close()
 	}
+}
+
+// Hosts returns the hosts of the remotes that name one, by remote: the
+// host of SFTP, SMB and FTP remotes, the URL of WebDAV ones.
+func (rt *rcloneRuntime) Hosts(ctx context.Context) (map[string]string, error) {
+	remotes, err := rt.Client.Remotes(ctx)
+	if err != nil {
+		return nil, err
+	}
+	out := map[string]string{}
+	for _, r := range remotes {
+		if h := cmp.Or(r.Parameters["host"], r.Parameters["url"]); h != "" {
+			out[r.Name] = h
+		}
+	}
+	return out, nil
 }
 
 // Service returns the StorageService of the rcd, keeping the offline

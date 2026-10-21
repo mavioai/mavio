@@ -22,7 +22,7 @@ const rarLeftOver = 10 << 20
 // its movie out of, when nothing but samples and small RAR files are
 // left, as Radarr's DownloadedMovieImportService.ProcessFolder and
 // ShouldDeleteFolder.
-func (r *Runtime) cleanDownloadFolder(ctx context.Context, m *movie, folder string, mappings []acquire.RemotePathMapping) {
+func (r *Runtime) cleanDownloadFolder(ctx context.Context, m *movie, folder string, mappings []acquire.DownloadPathMapping) {
 	r.deleteDownloadFolder(ctx, folder, mappings, func(p string) bool {
 		return release.ParseMovieTitle(filepath.Base(p), false) != nil && r.isSample(ctx, p, m.acq.Runtime)
 	})
@@ -33,7 +33,7 @@ func (r *Runtime) cleanDownloadFolder(ctx context.Context, m *movie, folder stri
 // RAR files are left, as Sonarr's
 // DownloadedEpisodesImportService.ProcessFolder and ShouldDeleteFolder:
 // a video whose name does not parse, or that may be a special, keeps it.
-func (r *Runtime) cleanEpisodeDownloadFolder(ctx context.Context, sh *show, folder string, mappings []acquire.RemotePathMapping) {
+func (r *Runtime) cleanEpisodeDownloadFolder(ctx context.Context, sh *show, folder string, mappings []acquire.DownloadPathMapping) {
 	r.deleteDownloadFolder(ctx, folder, mappings, func(p string) bool {
 		info := release.ParseSeriesTitle(filepath.Base(p))
 		if info == nil || info.IsPossibleSpecialEpisode() {
@@ -45,9 +45,9 @@ func (r *Runtime) cleanEpisodeDownloadFolder(ctx context.Context, sh *show, fold
 
 // deleteDownloadFolder deletes a download's folder when every video file
 // left in it is a sample and no RAR file of 10 MiB or more is. Folders of
-// libraries and of remote path mappings, and those holding them, and
+// libraries and of download path mappings, and those holding them, and
 // folders in libraries are never deleted. Failures are logged.
-func (r *Runtime) deleteDownloadFolder(ctx context.Context, folder string, mappings []acquire.RemotePathMapping, sample func(path string) bool) {
+func (r *Runtime) deleteDownloadFolder(ctx context.Context, folder string, mappings []acquire.DownloadPathMapping, sample func(path string) bool) {
 	if fi, err := r.statDownload(ctx, folder); err != nil || !fi.IsDir() {
 		return
 	}

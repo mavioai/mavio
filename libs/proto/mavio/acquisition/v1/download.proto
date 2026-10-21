@@ -50,6 +50,15 @@ service DownloadService {
   // a folder that is not one, for the movie chosen whatever the import
   // specifications reject, and completes a tracked download.
   rpc ManualImport(ManualImportRequest) returns (ManualImportResponse);
+  // GetDownloadClientPaths returns the folders a download client puts
+  // completed downloads in, with where the server reads each, as
+  // Radarr's remote path mappings of the client's host.
+  rpc GetDownloadClientPaths(GetDownloadClientPathsRequest) returns (GetDownloadClientPathsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // UpdateDownloadClientPaths replaces where the server reads the
+  // folders of a download client.
+  rpc UpdateDownloadClientPaths(UpdateDownloadClientPathsRequest) returns (UpdateDownloadClientPathsResponse);
 }
 
 // DownloadClient is a download client a plugin has configured.
@@ -350,3 +359,54 @@ message ManualImportRequest {
 }
 
 message ManualImportResponse {}
+
+// DownloadClientPath is a folder a download client puts downloads in, as
+// the client sees it, and where the server reads it.
+message DownloadClientPath {
+  // The folder as the client reports it.
+  string remote_path = 1 [(buf.validate.field).string = {
+    min_len: 1
+    max_len: 4096
+  }];
+  // Where the server reads the folder: an absolute path of the server or
+  // a folder of a remote ("remote:<remote>:<path>"); empty when it reads
+  // remote_path itself.
+  string local_path = 2 [(buf.validate.field).string.max_len = 4096];
+  // Set by the server: the folder is, or holds, one the client says
+  // completed downloads end up in.
+  bool root_folder = 3;
+  // Set by the server, for a folder it cannot read: a folder of a remote
+  // on the client's host that holds the client's; empty for none.
+  string suggested_path = 4;
+  // Set by the server: it reads the folder; error says why not.
+  bool readable = 5;
+  string error = 6;
+  // Set by the server: the library paths on the folder's storage, which
+  // imports hard link files to rather than copy them.
+  repeated string link_library_paths = 7;
+}
+
+message GetDownloadClientPathsRequest {
+  string plugin_id = 1 [(buf.validate.field).string.min_len = 1];
+  string client_id = 2 [(buf.validate.field).string.min_len = 1];
+}
+
+message GetDownloadClientPathsResponse {
+  // The folders mapped first, then those the client tells that none
+  // holds.
+  repeated DownloadClientPath paths = 1;
+  // Why the client did not tell its folders.
+  string failure = 2;
+}
+
+message UpdateDownloadClientPathsRequest {
+  string plugin_id = 1 [(buf.validate.field).string.min_len = 1];
+  string client_id = 2 [(buf.validate.field).string.min_len = 1];
+  // The folders, those with a local path mapped.
+  repeated DownloadClientPath paths = 3 [(buf.validate.field).repeated.max_items = 100];
+}
+
+message UpdateDownloadClientPathsResponse {
+  repeated DownloadClientPath paths = 1;
+  string failure = 2;
+}

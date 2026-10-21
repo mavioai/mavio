@@ -1,8 +1,8 @@
 // What decides which releases a server grabs (docs/clients.md §6.3.11):
 // quality definitions and profiles, custom formats, delay and release
-// profiles and remote path mappings, and the indexers and download
-// clients its plugins have configured.
-import { DownloadService } from "@mavio/proto/mavio/acquisition/v1/download_pb";
+// profiles, and the indexers and download clients its plugins have
+// configured, with where the server reads the clients' folders.
+import { type DownloadClientPath, DownloadService } from "@mavio/proto/mavio/acquisition/v1/download_pb";
 import {
   type CustomFormat,
   type DelayProfile,
@@ -11,7 +11,6 @@ import {
   type QualityDefinition,
   type QualityProfile,
   type ReleaseProfile,
-  type RemotePathMapping,
 } from "@mavio/proto/mavio/acquisition/v1/profile_pb";
 import { ReleaseService } from "@mavio/proto/mavio/acquisition/v1/release_pb";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -34,6 +33,27 @@ export function useDownloadClients(server: ServerEntry) {
   return useQuery({
     queryKey: serverKey(server.id, "acquisition", "clients"),
     queryFn: () => servers.client(DownloadService, server).listDownloadClients({}),
+  });
+}
+
+/** The folders of a download client, with where the server reads each. */
+export function useDownloadClientPaths(server: ServerEntry, pluginId: string, clientId: string) {
+  const servers = useServersStore();
+  return useQuery({
+    queryKey: serverKey(server.id, "acquisition", "client-paths", pluginId, clientId),
+    queryFn: () => servers.client(DownloadService, server).getDownloadClientPaths({ pluginId, clientId }),
+    enabled: !!pluginId && !!clientId,
+  });
+}
+
+/** Replaces where the server reads the folders of a download client. */
+export function useUpdateDownloadClientPaths(server: ServerEntry, pluginId: string, clientId: string) {
+  const servers = useServersStore();
+  const qc = useQueryClient();
+  const key = serverKey(server.id, "acquisition", "client-paths", pluginId, clientId);
+  return useMutation({
+    mutationFn: (paths: DownloadClientPath[]) => servers.client(DownloadService, server).updateDownloadClientPaths({ pluginId, clientId, paths }),
+    onSuccess: (res) => qc.setQueryData(key, res),
   });
 }
 
@@ -138,17 +158,3 @@ export function useReleaseProfiles(server: ServerEntry) {
   );
 }
 
-/** The remote path mappings, which are added and deleted but not changed. */
-export function useRemotePathMappings(server: ServerEntry) {
-  const servers = useServersStore();
-  const c = () => servers.client(ProfileService, server);
-  const { list, create, remove } = useEntries(
-    server,
-    "mappings",
-    async () => (await c().listRemotePathMappings({})).mappings,
-    (mapping: RemotePathMapping) => c().createRemotePathMapping({ mapping }),
-    async () => undefined,
-    (id: string) => c().deleteRemotePathMapping({ id }),
-  );
-  return { list, create, remove };
-}

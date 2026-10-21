@@ -1093,6 +1093,20 @@ export type MessageKey =
   | 'acquisition.releasesDetail'
   | 'acquisition.mappings'
   | 'acquisition.mappingsDetail'
+  | 'client.message'
+  | 'client.settings'
+  | 'client.folders'
+  | 'client.foldersFooter'
+  | 'client.readAt'
+  | 'client.readable'
+  | 'client.links'
+  | 'client.copies'
+  | 'client.use'
+  | 'client.addFolder'
+  | 'client.clientFolder'
+  | 'client.serverFolder'
+  | 'client.unreported'
+  | 'client.noFolders'
   | 'options.options'
   | 'options.optionsDetail'
   | 'options.optionsMessage'
@@ -3171,6 +3185,20 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "acquisition.releasesDetail": "Terms releases must have or must not have",
     "acquisition.mappings": "Remote Path Mappings",
     "acquisition.mappingsDetail": "Folders of download clients on other hosts",
+    "client.message": "Where the server reads the folders this download client puts downloads in. A client on another machine reports folders as that machine sees them.",
+    "client.settings": "Client Settings",
+    "client.folders": "Folders",
+    "client.foldersFooter": "Leave a folder empty when the server reads it as the client names it. Elsewhere, enter an absolute path of the server or a remote's folder, such as remote:nas:downloads. Imports hard link files to libraries on the same volume or remote, and copy them otherwise.",
+    "client.readAt": "Read here",
+    "client.readable": "Readable",
+    "client.links": "Hard links to {paths}",
+    "client.copies": "Copied to libraries",
+    "client.use": "Use {path}",
+    "client.addFolder": "Add Folder",
+    "client.clientFolder": "Client's Folder",
+    "client.serverFolder": "Server's Folder",
+    "client.unreported": "Why the client did not tell its folders: {failure}",
+    "client.noFolders": "The client reports no folders.",
     "options.options": "Options",
     "options.optionsDetail": "Naming, importing, releases and the recycle bin",
     "options.optionsMessage": "How the server names and imports what it downloads, which releases it takes and where replaced files go.",
@@ -5247,6 +5275,20 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "acquisition.releasesDetail": "发布必须包含或不得包含的词",
     "acquisition.mappings": "远程路径映射",
     "acquisition.mappingsDetail": "其他主机上下载客户端的文件夹",
+    "client.message": "服务器在哪里读取此下载客户端存放下载的文件夹。其他机器上的客户端报告的是那台机器上看到的文件夹。",
+    "client.settings": "客户端设置",
+    "client.folders": "文件夹",
+    "client.foldersFooter": "服务器按客户端所给路径就能读取的文件夹留空即可。否则填写服务器上的绝对路径或远端的文件夹（如 remote:nas:downloads）。导入时，与媒体库在同一卷或同一远端的文件会建立硬链接，否则复制。",
+    "client.readAt": "就在此处读取",
+    "client.readable": "可读取",
+    "client.links": "硬链接到 {paths}",
+    "client.copies": "复制到媒体库",
+    "client.use": "使用 {path}",
+    "client.addFolder": "添加文件夹",
+    "client.clientFolder": "客户端的文件夹",
+    "client.serverFolder": "服务器的文件夹",
+    "client.unreported": "客户端未告知其文件夹：{failure}",
+    "client.noFolders": "客户端未报告任何文件夹。",
     "options.options": "选项",
     "options.optionsDetail": "命名、导入、发布和回收站",
     "options.optionsMessage": "服务器如何命名和导入下载的内容、接受哪些发布，以及被替换的文件去向。",

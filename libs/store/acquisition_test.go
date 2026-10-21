@@ -673,40 +673,37 @@ func TestPendingReleases(t *testing.T) {
 	})
 }
 
-func TestRemotePathMappings(t *testing.T) {
+func TestDownloadPathMappings(t *testing.T) {
 	eachBackend(t, func(t *testing.T, s *store.Store) {
 		ctx := t.Context()
-		repo := s.RemotePathMappings()
-		b := core.RemotePathMapping{Host: "seedbox", RemotePath: "/downloads/", LocalPath: "/mnt/seedbox/"}
-		a := core.RemotePathMapping{ID: core.NewID(), Host: "nas", RemotePath: `D:\Downloads\`, LocalPath: "/mnt/nas/"}
-		for _, m := range []*core.RemotePathMapping{&b, &a} {
-			if err := repo.Put(ctx, m); err != nil {
-				t.Fatal(err)
-			}
+		repo := s.DownloadPathMappings()
+		qb := []core.DownloadPathMapping{
+			{RemotePath: "/downloads/", LocalPath: "/mnt/seedbox/"},
+			{RemotePath: `D:\Downloads\`, LocalPath: "remote:nas:Downloads"},
+		}
+		if err := repo.ReplaceClient(ctx, "dc", "qb", qb); err != nil {
+			t.Fatal(err)
+		}
+		tr := []core.DownloadPathMapping{{RemotePath: "/data/", LocalPath: "/srv/data/"}}
+		if err := repo.ReplaceClient(ctx, "dc", "tr", tr); err != nil {
+			t.Fatal(err)
 		}
 		list, err := repo.List(ctx)
-		if err != nil || !reflect.DeepEqual(list, []core.RemotePathMapping{a, b}) {
-			t.Errorf("List = %+v, %v; want = nas, seedbox", list, err)
+		if err != nil || !reflect.DeepEqual(list, []core.DownloadPathMapping{qb[0], qb[1], tr[0]}) {
+			t.Errorf("List = %+v, %v; want = qb's, then tr's", list, err)
 		}
-		dup := core.RemotePathMapping{ID: core.NewID(), Host: "seedbox", RemotePath: "/downloads/", LocalPath: "/elsewhere/"}
-		if err := repo.Put(ctx, &dup); !errors.Is(err, core.ErrConflict) {
-			t.Errorf("Put of a mapped remote path: %v, want ErrConflict", err)
+		if err := repo.ReplaceClient(ctx, "dc", "qb", []core.DownloadPathMapping{{RemotePath: "/x", LocalPath: "relative"}}); !errors.Is(err, core.ErrInvalid) {
+			t.Errorf("ReplaceClient of a relative local path: %v, want ErrInvalid", err)
 		}
-		b.LocalPath = "/srv/seedbox/"
-		if err := repo.Put(ctx, &b); err != nil {
+		twice := []core.DownloadPathMapping{{RemotePath: "/x", LocalPath: "/a"}, {RemotePath: "/x", LocalPath: "/b"}}
+		if err := repo.ReplaceClient(ctx, "dc", "qb", twice); !errors.Is(err, core.ErrInvalid) {
+			t.Errorf("ReplaceClient of a folder mapped twice: %v, want ErrInvalid", err)
+		}
+		if err := repo.ReplaceClient(ctx, "dc", "qb", nil); err != nil {
 			t.Fatal(err)
 		}
-		if list, _ := repo.List(ctx); list[1].LocalPath != "/srv/seedbox/" {
-			t.Errorf("LocalPath after update = %q, want = /srv/seedbox/", list[1].LocalPath)
-		}
-		if err := repo.Put(ctx, &core.RemotePathMapping{ID: core.NewID(), Host: "nas", RemotePath: "/x", LocalPath: "relative"}); !errors.Is(err, core.ErrInvalid) {
-			t.Errorf("Put of a relative local path: %v, want ErrInvalid", err)
-		}
-		if err := repo.Delete(ctx, a.ID); err != nil {
-			t.Fatal(err)
-		}
-		if err := repo.Delete(ctx, a.ID); !errors.Is(err, core.ErrNotFound) {
-			t.Errorf("second Delete: %v, want ErrNotFound", err)
+		if list, _ := repo.List(ctx); !reflect.DeepEqual(list, tr) {
+			t.Errorf("List after removing qb's = %+v, want = tr's", list)
 		}
 	})
 }

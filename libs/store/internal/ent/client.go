@@ -27,6 +27,7 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/delayprofile"
 	"github.com/mavioai/mavio/libs/store/internal/ent/displaypreferences"
 	"github.com/mavioai/mavio/libs/store/internal/ent/download"
+	"github.com/mavioai/mavio/libs/store/internal/ent/downloadpathmapping"
 	"github.com/mavioai/mavio/libs/store/internal/ent/episodestate"
 	"github.com/mavioai/mavio/libs/store/internal/ent/extrafile"
 	"github.com/mavioai/mavio/libs/store/internal/ent/folderstate"
@@ -50,7 +51,6 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/qualitydefinition"
 	"github.com/mavioai/mavio/libs/store/internal/ent/qualityprofile"
 	"github.com/mavioai/mavio/libs/store/internal/ent/releaseprofile"
-	"github.com/mavioai/mavio/libs/store/internal/ent/remotepathmapping"
 	"github.com/mavioai/mavio/libs/store/internal/ent/request"
 	"github.com/mavioai/mavio/libs/store/internal/ent/setting"
 	"github.com/mavioai/mavio/libs/store/internal/ent/storagejob"
@@ -93,6 +93,8 @@ type Client struct {
 	DisplayPreferences *DisplayPreferencesClient
 	// Download is the client for interacting with the Download builders.
 	Download *DownloadClient
+	// DownloadPathMapping is the client for interacting with the DownloadPathMapping builders.
+	DownloadPathMapping *DownloadPathMappingClient
 	// EpisodeState is the client for interacting with the EpisodeState builders.
 	EpisodeState *EpisodeStateClient
 	// ExtraFile is the client for interacting with the ExtraFile builders.
@@ -139,8 +141,6 @@ type Client struct {
 	QualityProfile *QualityProfileClient
 	// ReleaseProfile is the client for interacting with the ReleaseProfile builders.
 	ReleaseProfile *ReleaseProfileClient
-	// RemotePathMapping is the client for interacting with the RemotePathMapping builders.
-	RemotePathMapping *RemotePathMappingClient
 	// Request is the client for interacting with the Request builders.
 	Request *RequestClient
 	// Setting is the client for interacting with the Setting builders.
@@ -189,6 +189,7 @@ func (c *Client) init() {
 	c.DelayProfile = NewDelayProfileClient(c.config)
 	c.DisplayPreferences = NewDisplayPreferencesClient(c.config)
 	c.Download = NewDownloadClient(c.config)
+	c.DownloadPathMapping = NewDownloadPathMappingClient(c.config)
 	c.EpisodeState = NewEpisodeStateClient(c.config)
 	c.ExtraFile = NewExtraFileClient(c.config)
 	c.FolderState = NewFolderStateClient(c.config)
@@ -212,7 +213,6 @@ func (c *Client) init() {
 	c.QualityDefinition = NewQualityDefinitionClient(c.config)
 	c.QualityProfile = NewQualityProfileClient(c.config)
 	c.ReleaseProfile = NewReleaseProfileClient(c.config)
-	c.RemotePathMapping = NewRemotePathMappingClient(c.config)
 	c.Request = NewRequestClient(c.config)
 	c.Setting = NewSettingClient(c.config)
 	c.StorageJob = NewStorageJobClient(c.config)
@@ -329,6 +329,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		DelayProfile:              NewDelayProfileClient(cfg),
 		DisplayPreferences:        NewDisplayPreferencesClient(cfg),
 		Download:                  NewDownloadClient(cfg),
+		DownloadPathMapping:       NewDownloadPathMappingClient(cfg),
 		EpisodeState:              NewEpisodeStateClient(cfg),
 		ExtraFile:                 NewExtraFileClient(cfg),
 		FolderState:               NewFolderStateClient(cfg),
@@ -352,7 +353,6 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		QualityDefinition:         NewQualityDefinitionClient(cfg),
 		QualityProfile:            NewQualityProfileClient(cfg),
 		ReleaseProfile:            NewReleaseProfileClient(cfg),
-		RemotePathMapping:         NewRemotePathMappingClient(cfg),
 		Request:                   NewRequestClient(cfg),
 		Setting:                   NewSettingClient(cfg),
 		StorageJob:                NewStorageJobClient(cfg),
@@ -396,6 +396,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		DelayProfile:              NewDelayProfileClient(cfg),
 		DisplayPreferences:        NewDisplayPreferencesClient(cfg),
 		Download:                  NewDownloadClient(cfg),
+		DownloadPathMapping:       NewDownloadPathMappingClient(cfg),
 		EpisodeState:              NewEpisodeStateClient(cfg),
 		ExtraFile:                 NewExtraFileClient(cfg),
 		FolderState:               NewFolderStateClient(cfg),
@@ -419,7 +420,6 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		QualityDefinition:         NewQualityDefinitionClient(cfg),
 		QualityProfile:            NewQualityProfileClient(cfg),
 		ReleaseProfile:            NewReleaseProfileClient(cfg),
-		RemotePathMapping:         NewRemotePathMappingClient(cfg),
 		Request:                   NewRequestClient(cfg),
 		Setting:                   NewSettingClient(cfg),
 		StorageJob:                NewStorageJobClient(cfg),
@@ -464,11 +464,11 @@ func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.APIKey, c.Activity, c.AuthSession, c.BlockedTitle, c.BlocklistEntry,
 		c.Credential, c.Credit, c.CustomFormat, c.DelayProfile, c.DisplayPreferences,
-		c.Download, c.EpisodeState, c.ExtraFile, c.FolderState, c.HistoryEvent,
-		c.Image, c.Invitation, c.Issue, c.IssueComment, c.Item, c.ItemLink,
-		c.ItemValue, c.Job, c.Library, c.MediaSegment, c.MediaSource, c.PendingRelease,
-		c.Person, c.PluginConfig, c.PluginContainer, c.Proxy, c.QualityDefinition,
-		c.QualityProfile, c.ReleaseProfile, c.RemotePathMapping, c.Request, c.Setting,
+		c.Download, c.DownloadPathMapping, c.EpisodeState, c.ExtraFile, c.FolderState,
+		c.HistoryEvent, c.Image, c.Invitation, c.Issue, c.IssueComment, c.Item,
+		c.ItemLink, c.ItemValue, c.Job, c.Library, c.MediaSegment, c.MediaSource,
+		c.PendingRelease, c.Person, c.PluginConfig, c.PluginContainer, c.Proxy,
+		c.QualityDefinition, c.QualityProfile, c.ReleaseProfile, c.Request, c.Setting,
 		c.StorageJob, c.SubtitleBlocklistEntry, c.SubtitleHistoryEvent,
 		c.SubtitleProfile, c.SubtitleProfileAssignment, c.SubtitleSearchAttempt,
 		c.SubtitleWanted, c.Trickplay, c.User, c.UserData, c.Wanted,
@@ -483,11 +483,11 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.APIKey, c.Activity, c.AuthSession, c.BlockedTitle, c.BlocklistEntry,
 		c.Credential, c.Credit, c.CustomFormat, c.DelayProfile, c.DisplayPreferences,
-		c.Download, c.EpisodeState, c.ExtraFile, c.FolderState, c.HistoryEvent,
-		c.Image, c.Invitation, c.Issue, c.IssueComment, c.Item, c.ItemLink,
-		c.ItemValue, c.Job, c.Library, c.MediaSegment, c.MediaSource, c.PendingRelease,
-		c.Person, c.PluginConfig, c.PluginContainer, c.Proxy, c.QualityDefinition,
-		c.QualityProfile, c.ReleaseProfile, c.RemotePathMapping, c.Request, c.Setting,
+		c.Download, c.DownloadPathMapping, c.EpisodeState, c.ExtraFile, c.FolderState,
+		c.HistoryEvent, c.Image, c.Invitation, c.Issue, c.IssueComment, c.Item,
+		c.ItemLink, c.ItemValue, c.Job, c.Library, c.MediaSegment, c.MediaSource,
+		c.PendingRelease, c.Person, c.PluginConfig, c.PluginContainer, c.Proxy,
+		c.QualityDefinition, c.QualityProfile, c.ReleaseProfile, c.Request, c.Setting,
 		c.StorageJob, c.SubtitleBlocklistEntry, c.SubtitleHistoryEvent,
 		c.SubtitleProfile, c.SubtitleProfileAssignment, c.SubtitleSearchAttempt,
 		c.SubtitleWanted, c.Trickplay, c.User, c.UserData, c.Wanted,
@@ -521,6 +521,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.DisplayPreferences.mutate(ctx, m)
 	case *DownloadMutation:
 		return c.Download.mutate(ctx, m)
+	case *DownloadPathMappingMutation:
+		return c.DownloadPathMapping.mutate(ctx, m)
 	case *EpisodeStateMutation:
 		return c.EpisodeState.mutate(ctx, m)
 	case *ExtraFileMutation:
@@ -567,8 +569,6 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.QualityProfile.mutate(ctx, m)
 	case *ReleaseProfileMutation:
 		return c.ReleaseProfile.mutate(ctx, m)
-	case *RemotePathMappingMutation:
-		return c.RemotePathMapping.mutate(ctx, m)
 	case *RequestMutation:
 		return c.Request.mutate(ctx, m)
 	case *SettingMutation:
@@ -2204,6 +2204,139 @@ func (c *DownloadClient) mutate(ctx context.Context, m *DownloadMutation) (Value
 		return (&DownloadDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown Download mutation op: %q", m.Op())
+	}
+}
+
+// DownloadPathMappingClient is a client for the DownloadPathMapping schema.
+type DownloadPathMappingClient struct {
+	config
+}
+
+// NewDownloadPathMappingClient returns a client for the DownloadPathMapping from the given config.
+func NewDownloadPathMappingClient(c config) *DownloadPathMappingClient {
+	return &DownloadPathMappingClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `downloadpathmapping.Hooks(f(g(h())))`.
+func (c *DownloadPathMappingClient) Use(hooks ...Hook) {
+	c.hooks.DownloadPathMapping = append(c.hooks.DownloadPathMapping, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `downloadpathmapping.Intercept(f(g(h())))`.
+func (c *DownloadPathMappingClient) Intercept(interceptors ...Interceptor) {
+	c.inters.DownloadPathMapping = append(c.inters.DownloadPathMapping, interceptors...)
+}
+
+// Create returns a builder for creating a DownloadPathMapping entity.
+func (c *DownloadPathMappingClient) Create() *DownloadPathMappingCreate {
+	mutation := newDownloadPathMappingMutation(c.config, OpCreate)
+	return &DownloadPathMappingCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of DownloadPathMapping entities.
+func (c *DownloadPathMappingClient) CreateBulk(builders ...*DownloadPathMappingCreate) *DownloadPathMappingCreateBulk {
+	return &DownloadPathMappingCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *DownloadPathMappingClient) MapCreateBulk(slice any, setFunc func(*DownloadPathMappingCreate, int)) *DownloadPathMappingCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &DownloadPathMappingCreateBulk{err: fmt.Errorf("calling to DownloadPathMappingClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*DownloadPathMappingCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &DownloadPathMappingCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for DownloadPathMapping.
+func (c *DownloadPathMappingClient) Update() *DownloadPathMappingUpdate {
+	mutation := newDownloadPathMappingMutation(c.config, OpUpdate)
+	return &DownloadPathMappingUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *DownloadPathMappingClient) UpdateOne(_m *DownloadPathMapping) *DownloadPathMappingUpdateOne {
+	mutation := newDownloadPathMappingMutation(c.config, OpUpdateOne, withDownloadPathMapping(_m))
+	return &DownloadPathMappingUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *DownloadPathMappingClient) UpdateOneID(id core.ID) *DownloadPathMappingUpdateOne {
+	mutation := newDownloadPathMappingMutation(c.config, OpUpdateOne, withDownloadPathMappingID(id))
+	return &DownloadPathMappingUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for DownloadPathMapping.
+func (c *DownloadPathMappingClient) Delete() *DownloadPathMappingDelete {
+	mutation := newDownloadPathMappingMutation(c.config, OpDelete)
+	return &DownloadPathMappingDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *DownloadPathMappingClient) DeleteOne(_m *DownloadPathMapping) *DownloadPathMappingDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *DownloadPathMappingClient) DeleteOneID(id core.ID) *DownloadPathMappingDeleteOne {
+	builder := c.Delete().Where(downloadpathmapping.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &DownloadPathMappingDeleteOne{builder}
+}
+
+// Query returns a query builder for DownloadPathMapping.
+func (c *DownloadPathMappingClient) Query() *DownloadPathMappingQuery {
+	return &DownloadPathMappingQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeDownloadPathMapping},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a DownloadPathMapping entity by its id.
+func (c *DownloadPathMappingClient) Get(ctx context.Context, id core.ID) (*DownloadPathMapping, error) {
+	return c.Query().Where(downloadpathmapping.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *DownloadPathMappingClient) GetX(ctx context.Context, id core.ID) *DownloadPathMapping {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *DownloadPathMappingClient) Hooks() []Hook {
+	return c.hooks.DownloadPathMapping
+}
+
+// Interceptors returns the client interceptors.
+func (c *DownloadPathMappingClient) Interceptors() []Interceptor {
+	return c.inters.DownloadPathMapping
+}
+
+func (c *DownloadPathMappingClient) mutate(ctx context.Context, m *DownloadPathMappingMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&DownloadPathMappingCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&DownloadPathMappingUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&DownloadPathMappingUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&DownloadPathMappingDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown DownloadPathMapping mutation op: %q", m.Op())
 	}
 }
 
@@ -6098,139 +6231,6 @@ func (c *ReleaseProfileClient) mutate(ctx context.Context, m *ReleaseProfileMuta
 	}
 }
 
-// RemotePathMappingClient is a client for the RemotePathMapping schema.
-type RemotePathMappingClient struct {
-	config
-}
-
-// NewRemotePathMappingClient returns a client for the RemotePathMapping from the given config.
-func NewRemotePathMappingClient(c config) *RemotePathMappingClient {
-	return &RemotePathMappingClient{config: c}
-}
-
-// Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `remotepathmapping.Hooks(f(g(h())))`.
-func (c *RemotePathMappingClient) Use(hooks ...Hook) {
-	c.hooks.RemotePathMapping = append(c.hooks.RemotePathMapping, hooks...)
-}
-
-// Intercept adds a list of query interceptors to the interceptors stack.
-// A call to `Intercept(f, g, h)` equals to `remotepathmapping.Intercept(f(g(h())))`.
-func (c *RemotePathMappingClient) Intercept(interceptors ...Interceptor) {
-	c.inters.RemotePathMapping = append(c.inters.RemotePathMapping, interceptors...)
-}
-
-// Create returns a builder for creating a RemotePathMapping entity.
-func (c *RemotePathMappingClient) Create() *RemotePathMappingCreate {
-	mutation := newRemotePathMappingMutation(c.config, OpCreate)
-	return &RemotePathMappingCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// CreateBulk returns a builder for creating a bulk of RemotePathMapping entities.
-func (c *RemotePathMappingClient) CreateBulk(builders ...*RemotePathMappingCreate) *RemotePathMappingCreateBulk {
-	return &RemotePathMappingCreateBulk{config: c.config, builders: builders}
-}
-
-// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
-// a builder and applies setFunc on it.
-func (c *RemotePathMappingClient) MapCreateBulk(slice any, setFunc func(*RemotePathMappingCreate, int)) *RemotePathMappingCreateBulk {
-	rv := reflect.ValueOf(slice)
-	if rv.Kind() != reflect.Slice {
-		return &RemotePathMappingCreateBulk{err: fmt.Errorf("calling to RemotePathMappingClient.MapCreateBulk with wrong type %T, need slice", slice)}
-	}
-	builders := make([]*RemotePathMappingCreate, rv.Len())
-	for i := 0; i < rv.Len(); i++ {
-		builders[i] = c.Create()
-		setFunc(builders[i], i)
-	}
-	return &RemotePathMappingCreateBulk{config: c.config, builders: builders}
-}
-
-// Update returns an update builder for RemotePathMapping.
-func (c *RemotePathMappingClient) Update() *RemotePathMappingUpdate {
-	mutation := newRemotePathMappingMutation(c.config, OpUpdate)
-	return &RemotePathMappingUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOne returns an update builder for the given entity.
-func (c *RemotePathMappingClient) UpdateOne(_m *RemotePathMapping) *RemotePathMappingUpdateOne {
-	mutation := newRemotePathMappingMutation(c.config, OpUpdateOne, withRemotePathMapping(_m))
-	return &RemotePathMappingUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOneID returns an update builder for the given id.
-func (c *RemotePathMappingClient) UpdateOneID(id core.ID) *RemotePathMappingUpdateOne {
-	mutation := newRemotePathMappingMutation(c.config, OpUpdateOne, withRemotePathMappingID(id))
-	return &RemotePathMappingUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// Delete returns a delete builder for RemotePathMapping.
-func (c *RemotePathMappingClient) Delete() *RemotePathMappingDelete {
-	mutation := newRemotePathMappingMutation(c.config, OpDelete)
-	return &RemotePathMappingDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// DeleteOne returns a builder for deleting the given entity.
-func (c *RemotePathMappingClient) DeleteOne(_m *RemotePathMapping) *RemotePathMappingDeleteOne {
-	return c.DeleteOneID(_m.ID)
-}
-
-// DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *RemotePathMappingClient) DeleteOneID(id core.ID) *RemotePathMappingDeleteOne {
-	builder := c.Delete().Where(remotepathmapping.ID(id))
-	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
-	return &RemotePathMappingDeleteOne{builder}
-}
-
-// Query returns a query builder for RemotePathMapping.
-func (c *RemotePathMappingClient) Query() *RemotePathMappingQuery {
-	return &RemotePathMappingQuery{
-		config: c.config,
-		ctx:    &QueryContext{Type: TypeRemotePathMapping},
-		inters: c.Interceptors(),
-	}
-}
-
-// Get returns a RemotePathMapping entity by its id.
-func (c *RemotePathMappingClient) Get(ctx context.Context, id core.ID) (*RemotePathMapping, error) {
-	return c.Query().Where(remotepathmapping.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (c *RemotePathMappingClient) GetX(ctx context.Context, id core.ID) *RemotePathMapping {
-	obj, err := c.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return obj
-}
-
-// Hooks returns the client hooks.
-func (c *RemotePathMappingClient) Hooks() []Hook {
-	return c.hooks.RemotePathMapping
-}
-
-// Interceptors returns the client interceptors.
-func (c *RemotePathMappingClient) Interceptors() []Interceptor {
-	return c.inters.RemotePathMapping
-}
-
-func (c *RemotePathMappingClient) mutate(ctx context.Context, m *RemotePathMappingMutation) (Value, error) {
-	switch m.Op() {
-	case OpCreate:
-		return (&RemotePathMappingCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdate:
-		return (&RemotePathMappingUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdateOne:
-		return (&RemotePathMappingUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpDelete, OpDeleteOne:
-		return (&RemotePathMappingDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
-	default:
-		return nil, fmt.Errorf("ent: unknown RemotePathMapping mutation op: %q", m.Op())
-	}
-}
-
 // RequestClient is a client for the Request schema.
 type RequestClient struct {
 	config
@@ -8364,24 +8364,24 @@ func (c *WantedClient) mutate(ctx context.Context, m *WantedMutation) (Value, er
 type (
 	hooks struct {
 		APIKey, Activity, AuthSession, BlockedTitle, BlocklistEntry, Credential, Credit,
-		CustomFormat, DelayProfile, DisplayPreferences, Download, EpisodeState,
-		ExtraFile, FolderState, HistoryEvent, Image, Invitation, Issue, IssueComment,
-		Item, ItemLink, ItemValue, Job, Library, MediaSegment, MediaSource,
-		PendingRelease, Person, PluginConfig, PluginContainer, Proxy,
-		QualityDefinition, QualityProfile, ReleaseProfile, RemotePathMapping, Request,
-		Setting, StorageJob, SubtitleBlocklistEntry, SubtitleHistoryEvent,
-		SubtitleProfile, SubtitleProfileAssignment, SubtitleSearchAttempt,
-		SubtitleWanted, Trickplay, User, UserData, Wanted []ent.Hook
+		CustomFormat, DelayProfile, DisplayPreferences, Download, DownloadPathMapping,
+		EpisodeState, ExtraFile, FolderState, HistoryEvent, Image, Invitation, Issue,
+		IssueComment, Item, ItemLink, ItemValue, Job, Library, MediaSegment,
+		MediaSource, PendingRelease, Person, PluginConfig, PluginContainer, Proxy,
+		QualityDefinition, QualityProfile, ReleaseProfile, Request, Setting,
+		StorageJob, SubtitleBlocklistEntry, SubtitleHistoryEvent, SubtitleProfile,
+		SubtitleProfileAssignment, SubtitleSearchAttempt, SubtitleWanted, Trickplay,
+		User, UserData, Wanted []ent.Hook
 	}
 	inters struct {
 		APIKey, Activity, AuthSession, BlockedTitle, BlocklistEntry, Credential, Credit,
-		CustomFormat, DelayProfile, DisplayPreferences, Download, EpisodeState,
-		ExtraFile, FolderState, HistoryEvent, Image, Invitation, Issue, IssueComment,
-		Item, ItemLink, ItemValue, Job, Library, MediaSegment, MediaSource,
-		PendingRelease, Person, PluginConfig, PluginContainer, Proxy,
-		QualityDefinition, QualityProfile, ReleaseProfile, RemotePathMapping, Request,
-		Setting, StorageJob, SubtitleBlocklistEntry, SubtitleHistoryEvent,
-		SubtitleProfile, SubtitleProfileAssignment, SubtitleSearchAttempt,
-		SubtitleWanted, Trickplay, User, UserData, Wanted []ent.Interceptor
+		CustomFormat, DelayProfile, DisplayPreferences, Download, DownloadPathMapping,
+		EpisodeState, ExtraFile, FolderState, HistoryEvent, Image, Invitation, Issue,
+		IssueComment, Item, ItemLink, ItemValue, Job, Library, MediaSegment,
+		MediaSource, PendingRelease, Person, PluginConfig, PluginContainer, Proxy,
+		QualityDefinition, QualityProfile, ReleaseProfile, Request, Setting,
+		StorageJob, SubtitleBlocklistEntry, SubtitleHistoryEvent, SubtitleProfile,
+		SubtitleProfileAssignment, SubtitleSearchAttempt, SubtitleWanted, Trickplay,
+		User, UserData, Wanted []ent.Interceptor
 	}
 )

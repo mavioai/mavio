@@ -90,15 +90,6 @@ const (
 	// ProfileServiceDeleteReleaseProfileProcedure is the fully-qualified name of the ProfileService's
 	// DeleteReleaseProfile RPC.
 	ProfileServiceDeleteReleaseProfileProcedure = "/mavio.acquisition.v1.ProfileService/DeleteReleaseProfile"
-	// ProfileServiceListRemotePathMappingsProcedure is the fully-qualified name of the ProfileService's
-	// ListRemotePathMappings RPC.
-	ProfileServiceListRemotePathMappingsProcedure = "/mavio.acquisition.v1.ProfileService/ListRemotePathMappings"
-	// ProfileServiceCreateRemotePathMappingProcedure is the fully-qualified name of the
-	// ProfileService's CreateRemotePathMapping RPC.
-	ProfileServiceCreateRemotePathMappingProcedure = "/mavio.acquisition.v1.ProfileService/CreateRemotePathMapping"
-	// ProfileServiceDeleteRemotePathMappingProcedure is the fully-qualified name of the
-	// ProfileService's DeleteRemotePathMapping RPC.
-	ProfileServiceDeleteRemotePathMappingProcedure = "/mavio.acquisition.v1.ProfileService/DeleteRemotePathMapping"
 	// ProfileServiceGetAcquisitionSettingsProcedure is the fully-qualified name of the ProfileService's
 	// GetAcquisitionSettings RPC.
 	ProfileServiceGetAcquisitionSettingsProcedure = "/mavio.acquisition.v1.ProfileService/GetAcquisitionSettings"
@@ -141,9 +132,6 @@ type ProfileServiceClient interface {
 	CreateReleaseProfile(context.Context, *v1.CreateReleaseProfileRequest) (*v1.CreateReleaseProfileResponse, error)
 	UpdateReleaseProfile(context.Context, *v1.UpdateReleaseProfileRequest) (*v1.UpdateReleaseProfileResponse, error)
 	DeleteReleaseProfile(context.Context, *v1.DeleteReleaseProfileRequest) (*v1.DeleteReleaseProfileResponse, error)
-	ListRemotePathMappings(context.Context, *v1.ListRemotePathMappingsRequest) (*v1.ListRemotePathMappingsResponse, error)
-	CreateRemotePathMapping(context.Context, *v1.CreateRemotePathMappingRequest) (*v1.CreateRemotePathMappingResponse, error)
-	DeleteRemotePathMapping(context.Context, *v1.DeleteRemotePathMappingRequest) (*v1.DeleteRemotePathMappingResponse, error)
 	// GetAcquisitionSettings returns how releases are chosen, downloaded
 	// and imported, and how files are named. Administrators only.
 	GetAcquisitionSettings(context.Context, *v1.GetAcquisitionSettingsRequest) (*v1.GetAcquisitionSettingsResponse, error)
@@ -292,26 +280,6 @@ func NewProfileServiceClient(httpClient connect.HTTPClient, baseURL string, opts
 			connect.WithIdempotency(connect.IdempotencyIdempotent),
 			connect.WithClientOptions(opts...),
 		),
-		listRemotePathMappings: connect.NewClient[v1.ListRemotePathMappingsRequest, v1.ListRemotePathMappingsResponse](
-			httpClient,
-			baseURL+ProfileServiceListRemotePathMappingsProcedure,
-			connect.WithSchema(profileServiceMethods.ByName("ListRemotePathMappings")),
-			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
-			connect.WithClientOptions(opts...),
-		),
-		createRemotePathMapping: connect.NewClient[v1.CreateRemotePathMappingRequest, v1.CreateRemotePathMappingResponse](
-			httpClient,
-			baseURL+ProfileServiceCreateRemotePathMappingProcedure,
-			connect.WithSchema(profileServiceMethods.ByName("CreateRemotePathMapping")),
-			connect.WithClientOptions(opts...),
-		),
-		deleteRemotePathMapping: connect.NewClient[v1.DeleteRemotePathMappingRequest, v1.DeleteRemotePathMappingResponse](
-			httpClient,
-			baseURL+ProfileServiceDeleteRemotePathMappingProcedure,
-			connect.WithSchema(profileServiceMethods.ByName("DeleteRemotePathMapping")),
-			connect.WithIdempotency(connect.IdempotencyIdempotent),
-			connect.WithClientOptions(opts...),
-		),
 		getAcquisitionSettings: connect.NewClient[v1.GetAcquisitionSettingsRequest, v1.GetAcquisitionSettingsResponse](
 			httpClient,
 			baseURL+ProfileServiceGetAcquisitionSettingsProcedure,
@@ -350,9 +318,6 @@ type profileServiceClient struct {
 	createReleaseProfile      *connect.Client[v1.CreateReleaseProfileRequest, v1.CreateReleaseProfileResponse]
 	updateReleaseProfile      *connect.Client[v1.UpdateReleaseProfileRequest, v1.UpdateReleaseProfileResponse]
 	deleteReleaseProfile      *connect.Client[v1.DeleteReleaseProfileRequest, v1.DeleteReleaseProfileResponse]
-	listRemotePathMappings    *connect.Client[v1.ListRemotePathMappingsRequest, v1.ListRemotePathMappingsResponse]
-	createRemotePathMapping   *connect.Client[v1.CreateRemotePathMappingRequest, v1.CreateRemotePathMappingResponse]
-	deleteRemotePathMapping   *connect.Client[v1.DeleteRemotePathMappingRequest, v1.DeleteRemotePathMappingResponse]
 	getAcquisitionSettings    *connect.Client[v1.GetAcquisitionSettingsRequest, v1.GetAcquisitionSettingsResponse]
 	updateAcquisitionSettings *connect.Client[v1.UpdateAcquisitionSettingsRequest, v1.UpdateAcquisitionSettingsResponse]
 }
@@ -528,33 +493,6 @@ func (c *profileServiceClient) DeleteReleaseProfile(ctx context.Context, req *v1
 	return nil, err
 }
 
-// ListRemotePathMappings calls mavio.acquisition.v1.ProfileService.ListRemotePathMappings.
-func (c *profileServiceClient) ListRemotePathMappings(ctx context.Context, req *v1.ListRemotePathMappingsRequest) (*v1.ListRemotePathMappingsResponse, error) {
-	response, err := c.listRemotePathMappings.CallUnary(ctx, connect.NewRequest(req))
-	if response != nil {
-		return response.Msg, err
-	}
-	return nil, err
-}
-
-// CreateRemotePathMapping calls mavio.acquisition.v1.ProfileService.CreateRemotePathMapping.
-func (c *profileServiceClient) CreateRemotePathMapping(ctx context.Context, req *v1.CreateRemotePathMappingRequest) (*v1.CreateRemotePathMappingResponse, error) {
-	response, err := c.createRemotePathMapping.CallUnary(ctx, connect.NewRequest(req))
-	if response != nil {
-		return response.Msg, err
-	}
-	return nil, err
-}
-
-// DeleteRemotePathMapping calls mavio.acquisition.v1.ProfileService.DeleteRemotePathMapping.
-func (c *profileServiceClient) DeleteRemotePathMapping(ctx context.Context, req *v1.DeleteRemotePathMappingRequest) (*v1.DeleteRemotePathMappingResponse, error) {
-	response, err := c.deleteRemotePathMapping.CallUnary(ctx, connect.NewRequest(req))
-	if response != nil {
-		return response.Msg, err
-	}
-	return nil, err
-}
-
 // GetAcquisitionSettings calls mavio.acquisition.v1.ProfileService.GetAcquisitionSettings.
 func (c *profileServiceClient) GetAcquisitionSettings(ctx context.Context, req *v1.GetAcquisitionSettingsRequest) (*v1.GetAcquisitionSettingsResponse, error) {
 	response, err := c.getAcquisitionSettings.CallUnary(ctx, connect.NewRequest(req))
@@ -607,9 +545,6 @@ type ProfileServiceHandler interface {
 	CreateReleaseProfile(context.Context, *v1.CreateReleaseProfileRequest) (*v1.CreateReleaseProfileResponse, error)
 	UpdateReleaseProfile(context.Context, *v1.UpdateReleaseProfileRequest) (*v1.UpdateReleaseProfileResponse, error)
 	DeleteReleaseProfile(context.Context, *v1.DeleteReleaseProfileRequest) (*v1.DeleteReleaseProfileResponse, error)
-	ListRemotePathMappings(context.Context, *v1.ListRemotePathMappingsRequest) (*v1.ListRemotePathMappingsResponse, error)
-	CreateRemotePathMapping(context.Context, *v1.CreateRemotePathMappingRequest) (*v1.CreateRemotePathMappingResponse, error)
-	DeleteRemotePathMapping(context.Context, *v1.DeleteRemotePathMappingRequest) (*v1.DeleteRemotePathMappingResponse, error)
 	// GetAcquisitionSettings returns how releases are chosen, downloaded
 	// and imported, and how files are named. Administrators only.
 	GetAcquisitionSettings(context.Context, *v1.GetAcquisitionSettingsRequest) (*v1.GetAcquisitionSettingsResponse, error)
@@ -754,26 +689,6 @@ func NewProfileServiceHandler(svc ProfileServiceHandler, opts ...connect.Handler
 		connect.WithIdempotency(connect.IdempotencyIdempotent),
 		connect.WithHandlerOptions(opts...),
 	)
-	profileServiceListRemotePathMappingsHandler := connect.NewUnaryHandlerSimple(
-		ProfileServiceListRemotePathMappingsProcedure,
-		svc.ListRemotePathMappings,
-		connect.WithSchema(profileServiceMethods.ByName("ListRemotePathMappings")),
-		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
-		connect.WithHandlerOptions(opts...),
-	)
-	profileServiceCreateRemotePathMappingHandler := connect.NewUnaryHandlerSimple(
-		ProfileServiceCreateRemotePathMappingProcedure,
-		svc.CreateRemotePathMapping,
-		connect.WithSchema(profileServiceMethods.ByName("CreateRemotePathMapping")),
-		connect.WithHandlerOptions(opts...),
-	)
-	profileServiceDeleteRemotePathMappingHandler := connect.NewUnaryHandlerSimple(
-		ProfileServiceDeleteRemotePathMappingProcedure,
-		svc.DeleteRemotePathMapping,
-		connect.WithSchema(profileServiceMethods.ByName("DeleteRemotePathMapping")),
-		connect.WithIdempotency(connect.IdempotencyIdempotent),
-		connect.WithHandlerOptions(opts...),
-	)
 	profileServiceGetAcquisitionSettingsHandler := connect.NewUnaryHandlerSimple(
 		ProfileServiceGetAcquisitionSettingsProcedure,
 		svc.GetAcquisitionSettings,
@@ -828,12 +743,6 @@ func NewProfileServiceHandler(svc ProfileServiceHandler, opts ...connect.Handler
 			profileServiceUpdateReleaseProfileHandler.ServeHTTP(w, r)
 		case ProfileServiceDeleteReleaseProfileProcedure:
 			profileServiceDeleteReleaseProfileHandler.ServeHTTP(w, r)
-		case ProfileServiceListRemotePathMappingsProcedure:
-			profileServiceListRemotePathMappingsHandler.ServeHTTP(w, r)
-		case ProfileServiceCreateRemotePathMappingProcedure:
-			profileServiceCreateRemotePathMappingHandler.ServeHTTP(w, r)
-		case ProfileServiceDeleteRemotePathMappingProcedure:
-			profileServiceDeleteRemotePathMappingHandler.ServeHTTP(w, r)
 		case ProfileServiceGetAcquisitionSettingsProcedure:
 			profileServiceGetAcquisitionSettingsHandler.ServeHTTP(w, r)
 		case ProfileServiceUpdateAcquisitionSettingsProcedure:
@@ -921,18 +830,6 @@ func (UnimplementedProfileServiceHandler) UpdateReleaseProfile(context.Context, 
 
 func (UnimplementedProfileServiceHandler) DeleteReleaseProfile(context.Context, *v1.DeleteReleaseProfileRequest) (*v1.DeleteReleaseProfileResponse, error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.acquisition.v1.ProfileService.DeleteReleaseProfile is not implemented"))
-}
-
-func (UnimplementedProfileServiceHandler) ListRemotePathMappings(context.Context, *v1.ListRemotePathMappingsRequest) (*v1.ListRemotePathMappingsResponse, error) {
-	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.acquisition.v1.ProfileService.ListRemotePathMappings is not implemented"))
-}
-
-func (UnimplementedProfileServiceHandler) CreateRemotePathMapping(context.Context, *v1.CreateRemotePathMappingRequest) (*v1.CreateRemotePathMappingResponse, error) {
-	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.acquisition.v1.ProfileService.CreateRemotePathMapping is not implemented"))
-}
-
-func (UnimplementedProfileServiceHandler) DeleteRemotePathMapping(context.Context, *v1.DeleteRemotePathMappingRequest) (*v1.DeleteRemotePathMappingResponse, error) {
-	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.acquisition.v1.ProfileService.DeleteRemotePathMapping is not implemented"))
 }
 
 func (UnimplementedProfileServiceHandler) GetAcquisitionSettings(context.Context, *v1.GetAcquisitionSettingsRequest) (*v1.GetAcquisitionSettingsResponse, error) {

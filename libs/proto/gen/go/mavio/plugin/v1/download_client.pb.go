@@ -912,8 +912,8 @@ type DownloadClient_builder struct {
 	// The client takes torrent files rather than magnet links, so a
 	// release's torrent file is fetched first.
 	PrefersTorrentFile *bool
-	// The host the client runs on, which remote path mappings are kept by;
-	// empty for clients that are folders.
+	// The host the client runs on, by which the server suggests where it
+	// reads the client's folders; empty for clients that are folders.
 	Host *string
 	// The client's tags: a movie or series with tags only uses the clients
 	// sharing one of them, else those without tags, as Radarr's.
@@ -2694,8 +2694,8 @@ type Download_builder struct {
 	RemainingTime *durationpb.Duration
 	// A torrent's ratio of upload to download; unset when unknown.
 	SeedRatio *float64
-	// Where the download's files are, as the client sees them: remote path
-	// mappings of the client's host apply.
+	// Where the download's files are, as the client sees them: the
+	// client's download path mappings apply.
 	OutputPath *string
 	// What the client says of the download, such as why it failed.
 	Message *string

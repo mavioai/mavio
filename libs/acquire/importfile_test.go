@@ -134,25 +134,30 @@ func TestRecent(t *testing.T) {
 	}
 }
 
-func TestRemapRemoteToLocal(t *testing.T) {
-	mappings := []RemotePathMapping{
-		{Host: "nas", RemotePath: "/volume1/downloads/", LocalPath: "/mnt/downloads/"},
-		{Host: "win", RemotePath: `D:\Downloads`, LocalPath: "/mnt/win"},
+func TestRemapDownloadPath(t *testing.T) {
+	mappings := []DownloadPathMapping{
+		{Client: "dc/nas", RemotePath: "/volume1/downloads/", LocalPath: "/mnt/downloads/"},
+		{Client: "dc/win", RemotePath: `D:\Downloads`, LocalPath: "/mnt/win"},
+		{Client: "dc/sftp", RemotePath: "/data/torrents", LocalPath: "remote:nas:torrents"},
+		{Client: "dc/root", RemotePath: "/data", LocalPath: "remote:nas:"},
 	}
 	tests := []struct {
-		name, host, remote, want string
+		name, client, remote, want string
 	}{
-		{"mapped", "NAS", "/volume1/downloads/movies/Movie.2024", "/mnt/downloads/movies/Movie.2024"},
-		{"the folder itself", "nas", "/volume1/downloads", "/mnt/downloads/"},
-		{"other host", "other", "/volume1/downloads/x", "/volume1/downloads/x"},
-		{"not below", "nas", "/volume1/downloads2/x", "/volume1/downloads2/x"},
-		{"windows path", "win", `d:\downloads\Movie.2024\movie.mkv`, "/mnt/win/Movie.2024/movie.mkv"},
-		{"empty", "nas", "", ""},
+		{"mapped", "dc/nas", "/volume1/downloads/movies/Movie.2024", "/mnt/downloads/movies/Movie.2024"},
+		{"the folder itself", "dc/nas", "/volume1/downloads", "/mnt/downloads/"},
+		{"other client", "dc/other", "/volume1/downloads/x", "/volume1/downloads/x"},
+		{"not below", "dc/nas", "/volume1/downloads2/x", "/volume1/downloads2/x"},
+		{"windows path", "dc/win", `d:\downloads\Movie.2024\movie.mkv`, "/mnt/win/Movie.2024/movie.mkv"},
+		{"a remote's folder", "dc/sftp", "/data/torrents/Movie.2024/movie.mkv", "remote:nas:torrents/Movie.2024/movie.mkv"},
+		{"a remote's folder itself", "dc/sftp", "/data/torrents/", "remote:nas:torrents"},
+		{"a remote's root", "dc/root", "/data/Movie.2024", "remote:nas:Movie.2024"},
+		{"empty", "dc/nas", "", ""},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := RemapRemoteToLocal(mappings, tt.host, tt.remote); got != tt.want {
-				t.Errorf("RemapRemoteToLocal() = %q, want %q", got, tt.want)
+			if got := RemapDownloadPath(mappings, tt.client, tt.remote); got != tt.want {
+				t.Errorf("RemapDownloadPath() = %q, want %q", got, tt.want)
 			}
 		})
 	}

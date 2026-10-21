@@ -141,6 +141,18 @@ func (f DownloadFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, er
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.DownloadMutation", m)
 }
 
+// The DownloadPathMappingFunc type is an adapter to allow the use of ordinary
+// function as DownloadPathMapping mutator.
+type DownloadPathMappingFunc func(context.Context, *ent.DownloadPathMappingMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f DownloadPathMappingFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.DownloadPathMappingMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.DownloadPathMappingMutation", m)
+}
+
 // The EpisodeStateFunc type is an adapter to allow the use of ordinary
 // function as EpisodeState mutator.
 type EpisodeStateFunc func(context.Context, *ent.EpisodeStateMutation) (ent.Value, error)
@@ -415,18 +427,6 @@ func (f ReleaseProfileFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Val
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ReleaseProfileMutation", m)
-}
-
-// The RemotePathMappingFunc type is an adapter to allow the use of ordinary
-// function as RemotePathMapping mutator.
-type RemotePathMappingFunc func(context.Context, *ent.RemotePathMappingMutation) (ent.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f RemotePathMappingFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	if mv, ok := m.(*ent.RemotePathMappingMutation); ok {
-		return f(ctx, mv)
-	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.RemotePathMappingMutation", m)
 }
 
 // The RequestFunc type is an adapter to allow the use of ordinary

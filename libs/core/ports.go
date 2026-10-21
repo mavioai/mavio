@@ -45,7 +45,7 @@ type Store interface {
 	Blocklist() BlocklistRepository
 	PendingReleases() PendingReleaseRepository
 	ExtraFiles() ExtraFileRepository
-	RemotePathMappings() RemotePathMappingRepository
+	DownloadPathMappings() DownloadPathMappingRepository
 	SubtitleProfiles() SubtitleProfileRepository
 	SubtitleProfileAssignments() SubtitleProfileAssignmentRepository
 	SubtitleHistory() SubtitleHistoryRepository

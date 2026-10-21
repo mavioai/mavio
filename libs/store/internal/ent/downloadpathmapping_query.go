@@ -12,69 +12,69 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/mavioai/mavio/libs/core"
+	"github.com/mavioai/mavio/libs/store/internal/ent/downloadpathmapping"
 	"github.com/mavioai/mavio/libs/store/internal/ent/predicate"
-	"github.com/mavioai/mavio/libs/store/internal/ent/remotepathmapping"
 )
 
-// RemotePathMappingQuery is the builder for querying RemotePathMapping entities.
-type RemotePathMappingQuery struct {
+// DownloadPathMappingQuery is the builder for querying DownloadPathMapping entities.
+type DownloadPathMappingQuery struct {
 	config
 	ctx        *QueryContext
-	order      []remotepathmapping.OrderOption
+	order      []downloadpathmapping.OrderOption
 	inters     []Interceptor
-	predicates []predicate.RemotePathMapping
+	predicates []predicate.DownloadPathMapping
 	modifiers  []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
 }
 
-// Where adds a new predicate for the RemotePathMappingQuery builder.
-func (_q *RemotePathMappingQuery) Where(ps ...predicate.RemotePathMapping) *RemotePathMappingQuery {
+// Where adds a new predicate for the DownloadPathMappingQuery builder.
+func (_q *DownloadPathMappingQuery) Where(ps ...predicate.DownloadPathMapping) *DownloadPathMappingQuery {
 	_q.predicates = append(_q.predicates, ps...)
 	return _q
 }
 
 // Limit the number of records to be returned by this query.
-func (_q *RemotePathMappingQuery) Limit(limit int) *RemotePathMappingQuery {
+func (_q *DownloadPathMappingQuery) Limit(limit int) *DownloadPathMappingQuery {
 	_q.ctx.Limit = &limit
 	return _q
 }
 
 // Offset to start from.
-func (_q *RemotePathMappingQuery) Offset(offset int) *RemotePathMappingQuery {
+func (_q *DownloadPathMappingQuery) Offset(offset int) *DownloadPathMappingQuery {
 	_q.ctx.Offset = &offset
 	return _q
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (_q *RemotePathMappingQuery) Unique(unique bool) *RemotePathMappingQuery {
+func (_q *DownloadPathMappingQuery) Unique(unique bool) *DownloadPathMappingQuery {
 	_q.ctx.Unique = &unique
 	return _q
 }
 
 // Order specifies how the records should be ordered.
-func (_q *RemotePathMappingQuery) Order(o ...remotepathmapping.OrderOption) *RemotePathMappingQuery {
+func (_q *DownloadPathMappingQuery) Order(o ...downloadpathmapping.OrderOption) *DownloadPathMappingQuery {
 	_q.order = append(_q.order, o...)
 	return _q
 }
 
-// First returns the first RemotePathMapping entity from the query.
-// Returns a *NotFoundError when no RemotePathMapping was found.
-func (_q *RemotePathMappingQuery) First(ctx context.Context) (*RemotePathMapping, error) {
+// First returns the first DownloadPathMapping entity from the query.
+// Returns a *NotFoundError when no DownloadPathMapping was found.
+func (_q *DownloadPathMappingQuery) First(ctx context.Context) (*DownloadPathMapping, error) {
 	nodes, err := _q.Limit(1).All(setContextOp(ctx, _q.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{remotepathmapping.Label}
+		return nil, &NotFoundError{downloadpathmapping.Label}
 	}
 	return nodes[0], nil
 }
 
 // FirstX is like First, but panics if an error occurs.
-func (_q *RemotePathMappingQuery) FirstX(ctx context.Context) *RemotePathMapping {
+func (_q *DownloadPathMappingQuery) FirstX(ctx context.Context) *DownloadPathMapping {
 	node, err := _q.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -82,22 +82,22 @@ func (_q *RemotePathMappingQuery) FirstX(ctx context.Context) *RemotePathMapping
 	return node
 }
 
-// FirstID returns the first RemotePathMapping ID from the query.
-// Returns a *NotFoundError when no RemotePathMapping ID was found.
-func (_q *RemotePathMappingQuery) FirstID(ctx context.Context) (id core.ID, err error) {
+// FirstID returns the first DownloadPathMapping ID from the query.
+// Returns a *NotFoundError when no DownloadPathMapping ID was found.
+func (_q *DownloadPathMappingQuery) FirstID(ctx context.Context) (id core.ID, err error) {
 	var ids []core.ID
 	if ids, err = _q.Limit(1).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{remotepathmapping.Label}
+		err = &NotFoundError{downloadpathmapping.Label}
 		return
 	}
 	return ids[0], nil
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (_q *RemotePathMappingQuery) FirstIDX(ctx context.Context) core.ID {
+func (_q *DownloadPathMappingQuery) FirstIDX(ctx context.Context) core.ID {
 	id, err := _q.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -105,10 +105,10 @@ func (_q *RemotePathMappingQuery) FirstIDX(ctx context.Context) core.ID {
 	return id
 }
 
-// Only returns a single RemotePathMapping entity found by the query, ensuring it only returns one.
-// Returns a *NotSingularError when more than one RemotePathMapping entity is found.
-// Returns a *NotFoundError when no RemotePathMapping entities are found.
-func (_q *RemotePathMappingQuery) Only(ctx context.Context) (*RemotePathMapping, error) {
+// Only returns a single DownloadPathMapping entity found by the query, ensuring it only returns one.
+// Returns a *NotSingularError when more than one DownloadPathMapping entity is found.
+// Returns a *NotFoundError when no DownloadPathMapping entities are found.
+func (_q *DownloadPathMappingQuery) Only(ctx context.Context) (*DownloadPathMapping, error) {
 	nodes, err := _q.Limit(2).All(setContextOp(ctx, _q.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
@@ -117,14 +117,14 @@ func (_q *RemotePathMappingQuery) Only(ctx context.Context) (*RemotePathMapping,
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{remotepathmapping.Label}
+		return nil, &NotFoundError{downloadpathmapping.Label}
 	default:
-		return nil, &NotSingularError{remotepathmapping.Label}
+		return nil, &NotSingularError{downloadpathmapping.Label}
 	}
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (_q *RemotePathMappingQuery) OnlyX(ctx context.Context) *RemotePathMapping {
+func (_q *DownloadPathMappingQuery) OnlyX(ctx context.Context) *DownloadPathMapping {
 	node, err := _q.Only(ctx)
 	if err != nil {
 		panic(err)
@@ -132,10 +132,10 @@ func (_q *RemotePathMappingQuery) OnlyX(ctx context.Context) *RemotePathMapping 
 	return node
 }
 
-// OnlyID is like Only, but returns the only RemotePathMapping ID in the query.
-// Returns a *NotSingularError when more than one RemotePathMapping ID is found.
+// OnlyID is like Only, but returns the only DownloadPathMapping ID in the query.
+// Returns a *NotSingularError when more than one DownloadPathMapping ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (_q *RemotePathMappingQuery) OnlyID(ctx context.Context) (id core.ID, err error) {
+func (_q *DownloadPathMappingQuery) OnlyID(ctx context.Context) (id core.ID, err error) {
 	var ids []core.ID
 	if ids, err = _q.Limit(2).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
@@ -144,15 +144,15 @@ func (_q *RemotePathMappingQuery) OnlyID(ctx context.Context) (id core.ID, err e
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{remotepathmapping.Label}
+		err = &NotFoundError{downloadpathmapping.Label}
 	default:
-		err = &NotSingularError{remotepathmapping.Label}
+		err = &NotSingularError{downloadpathmapping.Label}
 	}
 	return
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (_q *RemotePathMappingQuery) OnlyIDX(ctx context.Context) core.ID {
+func (_q *DownloadPathMappingQuery) OnlyIDX(ctx context.Context) core.ID {
 	id, err := _q.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -160,18 +160,18 @@ func (_q *RemotePathMappingQuery) OnlyIDX(ctx context.Context) core.ID {
 	return id
 }
 
-// All executes the query and returns a list of RemotePathMappings.
-func (_q *RemotePathMappingQuery) All(ctx context.Context) ([]*RemotePathMapping, error) {
+// All executes the query and returns a list of DownloadPathMappings.
+func (_q *DownloadPathMappingQuery) All(ctx context.Context) ([]*DownloadPathMapping, error) {
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryAll)
 	if err := _q.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
-	qr := querierAll[[]*RemotePathMapping, *RemotePathMappingQuery]()
-	return withInterceptors[[]*RemotePathMapping](ctx, _q, qr, _q.inters)
+	qr := querierAll[[]*DownloadPathMapping, *DownloadPathMappingQuery]()
+	return withInterceptors[[]*DownloadPathMapping](ctx, _q, qr, _q.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
-func (_q *RemotePathMappingQuery) AllX(ctx context.Context) []*RemotePathMapping {
+func (_q *DownloadPathMappingQuery) AllX(ctx context.Context) []*DownloadPathMapping {
 	nodes, err := _q.All(ctx)
 	if err != nil {
 		panic(err)
@@ -179,20 +179,20 @@ func (_q *RemotePathMappingQuery) AllX(ctx context.Context) []*RemotePathMapping
 	return nodes
 }
 
-// IDs executes the query and returns a list of RemotePathMapping IDs.
-func (_q *RemotePathMappingQuery) IDs(ctx context.Context) (ids []core.ID, err error) {
+// IDs executes the query and returns a list of DownloadPathMapping IDs.
+func (_q *DownloadPathMappingQuery) IDs(ctx context.Context) (ids []core.ID, err error) {
 	if _q.ctx.Unique == nil && _q.path != nil {
 		_q.Unique(true)
 	}
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryIDs)
-	if err = _q.Select(remotepathmapping.FieldID).Scan(ctx, &ids); err != nil {
+	if err = _q.Select(downloadpathmapping.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (_q *RemotePathMappingQuery) IDsX(ctx context.Context) []core.ID {
+func (_q *DownloadPathMappingQuery) IDsX(ctx context.Context) []core.ID {
 	ids, err := _q.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -201,16 +201,16 @@ func (_q *RemotePathMappingQuery) IDsX(ctx context.Context) []core.ID {
 }
 
 // Count returns the count of the given query.
-func (_q *RemotePathMappingQuery) Count(ctx context.Context) (int, error) {
+func (_q *DownloadPathMappingQuery) Count(ctx context.Context) (int, error) {
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryCount)
 	if err := _q.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return withInterceptors[int](ctx, _q, querierCount[*RemotePathMappingQuery](), _q.inters)
+	return withInterceptors[int](ctx, _q, querierCount[*DownloadPathMappingQuery](), _q.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (_q *RemotePathMappingQuery) CountX(ctx context.Context) int {
+func (_q *DownloadPathMappingQuery) CountX(ctx context.Context) int {
 	count, err := _q.Count(ctx)
 	if err != nil {
 		panic(err)
@@ -219,7 +219,7 @@ func (_q *RemotePathMappingQuery) CountX(ctx context.Context) int {
 }
 
 // Exist returns true if the query has elements in the graph.
-func (_q *RemotePathMappingQuery) Exist(ctx context.Context) (bool, error) {
+func (_q *DownloadPathMappingQuery) Exist(ctx context.Context) (bool, error) {
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryExist)
 	switch _, err := _q.FirstID(ctx); {
 	case IsNotFound(err):
@@ -232,7 +232,7 @@ func (_q *RemotePathMappingQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (_q *RemotePathMappingQuery) ExistX(ctx context.Context) bool {
+func (_q *DownloadPathMappingQuery) ExistX(ctx context.Context) bool {
 	exist, err := _q.Exist(ctx)
 	if err != nil {
 		panic(err)
@@ -240,18 +240,18 @@ func (_q *RemotePathMappingQuery) ExistX(ctx context.Context) bool {
 	return exist
 }
 
-// Clone returns a duplicate of the RemotePathMappingQuery builder, including all associated steps. It can be
+// Clone returns a duplicate of the DownloadPathMappingQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
-func (_q *RemotePathMappingQuery) Clone() *RemotePathMappingQuery {
+func (_q *DownloadPathMappingQuery) Clone() *DownloadPathMappingQuery {
 	if _q == nil {
 		return nil
 	}
-	return &RemotePathMappingQuery{
+	return &DownloadPathMappingQuery{
 		config:     _q.config,
 		ctx:        _q.ctx.Clone(),
-		order:      append([]remotepathmapping.OrderOption{}, _q.order...),
+		order:      append([]downloadpathmapping.OrderOption{}, _q.order...),
 		inters:     append([]Interceptor{}, _q.inters...),
-		predicates: append([]predicate.RemotePathMapping{}, _q.predicates...),
+		predicates: append([]predicate.DownloadPathMapping{}, _q.predicates...),
 		// clone intermediate query.
 		sql:       _q.sql.Clone(),
 		path:      _q.path,
@@ -265,19 +265,19 @@ func (_q *RemotePathMappingQuery) Clone() *RemotePathMappingQuery {
 // Example:
 //
 //	var v []struct {
-//		Host string `json:"host,omitempty"`
+//		PluginID string `json:"plugin_id,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
-//	client.RemotePathMapping.Query().
-//		GroupBy(remotepathmapping.FieldHost).
+//	client.DownloadPathMapping.Query().
+//		GroupBy(downloadpathmapping.FieldPluginID).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-func (_q *RemotePathMappingQuery) GroupBy(field string, fields ...string) *RemotePathMappingGroupBy {
+func (_q *DownloadPathMappingQuery) GroupBy(field string, fields ...string) *DownloadPathMappingGroupBy {
 	_q.ctx.Fields = append([]string{field}, fields...)
-	grbuild := &RemotePathMappingGroupBy{build: _q}
+	grbuild := &DownloadPathMappingGroupBy{build: _q}
 	grbuild.flds = &_q.ctx.Fields
-	grbuild.label = remotepathmapping.Label
+	grbuild.label = downloadpathmapping.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
 }
@@ -288,26 +288,26 @@ func (_q *RemotePathMappingQuery) GroupBy(field string, fields ...string) *Remot
 // Example:
 //
 //	var v []struct {
-//		Host string `json:"host,omitempty"`
+//		PluginID string `json:"plugin_id,omitempty"`
 //	}
 //
-//	client.RemotePathMapping.Query().
-//		Select(remotepathmapping.FieldHost).
+//	client.DownloadPathMapping.Query().
+//		Select(downloadpathmapping.FieldPluginID).
 //		Scan(ctx, &v)
-func (_q *RemotePathMappingQuery) Select(fields ...string) *RemotePathMappingSelect {
+func (_q *DownloadPathMappingQuery) Select(fields ...string) *DownloadPathMappingSelect {
 	_q.ctx.Fields = append(_q.ctx.Fields, fields...)
-	sbuild := &RemotePathMappingSelect{RemotePathMappingQuery: _q}
-	sbuild.label = remotepathmapping.Label
+	sbuild := &DownloadPathMappingSelect{DownloadPathMappingQuery: _q}
+	sbuild.label = downloadpathmapping.Label
 	sbuild.flds, sbuild.scan = &_q.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
-// Aggregate returns a RemotePathMappingSelect configured with the given aggregations.
-func (_q *RemotePathMappingQuery) Aggregate(fns ...AggregateFunc) *RemotePathMappingSelect {
+// Aggregate returns a DownloadPathMappingSelect configured with the given aggregations.
+func (_q *DownloadPathMappingQuery) Aggregate(fns ...AggregateFunc) *DownloadPathMappingSelect {
 	return _q.Select().Aggregate(fns...)
 }
 
-func (_q *RemotePathMappingQuery) prepareQuery(ctx context.Context) error {
+func (_q *DownloadPathMappingQuery) prepareQuery(ctx context.Context) error {
 	for _, inter := range _q.inters {
 		if inter == nil {
 			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
@@ -319,7 +319,7 @@ func (_q *RemotePathMappingQuery) prepareQuery(ctx context.Context) error {
 		}
 	}
 	for _, f := range _q.ctx.Fields {
-		if !remotepathmapping.ValidColumn(f) {
+		if !downloadpathmapping.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
@@ -333,16 +333,16 @@ func (_q *RemotePathMappingQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
-func (_q *RemotePathMappingQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*RemotePathMapping, error) {
+func (_q *DownloadPathMappingQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*DownloadPathMapping, error) {
 	var (
-		nodes = []*RemotePathMapping{}
+		nodes = []*DownloadPathMapping{}
 		_spec = _q.querySpec()
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
-		return (*RemotePathMapping).scanValues(nil, columns)
+		return (*DownloadPathMapping).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &RemotePathMapping{config: _q.config}
+		node := &DownloadPathMapping{config: _q.config}
 		nodes = append(nodes, node)
 		return node.assignValues(columns, values)
 	}
@@ -361,7 +361,7 @@ func (_q *RemotePathMappingQuery) sqlAll(ctx context.Context, hooks ...queryHook
 	return nodes, nil
 }
 
-func (_q *RemotePathMappingQuery) sqlCount(ctx context.Context) (int, error) {
+func (_q *DownloadPathMappingQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := _q.querySpec()
 	if len(_q.modifiers) > 0 {
 		_spec.Modifiers = _q.modifiers
@@ -373,8 +373,8 @@ func (_q *RemotePathMappingQuery) sqlCount(ctx context.Context) (int, error) {
 	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
 }
 
-func (_q *RemotePathMappingQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(remotepathmapping.Table, remotepathmapping.Columns, sqlgraph.NewFieldSpec(remotepathmapping.FieldID, field.TypeUUID))
+func (_q *DownloadPathMappingQuery) querySpec() *sqlgraph.QuerySpec {
+	_spec := sqlgraph.NewQuerySpec(downloadpathmapping.Table, downloadpathmapping.Columns, sqlgraph.NewFieldSpec(downloadpathmapping.FieldID, field.TypeUUID))
 	_spec.From = _q.sql
 	if unique := _q.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
@@ -383,9 +383,9 @@ func (_q *RemotePathMappingQuery) querySpec() *sqlgraph.QuerySpec {
 	}
 	if fields := _q.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
-		_spec.Node.Columns = append(_spec.Node.Columns, remotepathmapping.FieldID)
+		_spec.Node.Columns = append(_spec.Node.Columns, downloadpathmapping.FieldID)
 		for i := range fields {
-			if fields[i] != remotepathmapping.FieldID {
+			if fields[i] != downloadpathmapping.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
 		}
@@ -413,12 +413,12 @@ func (_q *RemotePathMappingQuery) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func (_q *RemotePathMappingQuery) sqlQuery(ctx context.Context) *sql.Selector {
+func (_q *DownloadPathMappingQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(_q.driver.Dialect())
-	t1 := builder.Table(remotepathmapping.Table)
+	t1 := builder.Table(downloadpathmapping.Table)
 	columns := _q.ctx.Fields
 	if len(columns) == 0 {
-		columns = remotepathmapping.Columns
+		columns = downloadpathmapping.Columns
 	}
 	selector := builder.Select(t1.Columns(columns...)...).From(t1)
 	if _q.sql != nil {
@@ -449,33 +449,33 @@ func (_q *RemotePathMappingQuery) sqlQuery(ctx context.Context) *sql.Selector {
 }
 
 // Modify adds a query modifier for attaching custom logic to queries.
-func (_q *RemotePathMappingQuery) Modify(modifiers ...func(s *sql.Selector)) *RemotePathMappingSelect {
+func (_q *DownloadPathMappingQuery) Modify(modifiers ...func(s *sql.Selector)) *DownloadPathMappingSelect {
 	_q.modifiers = append(_q.modifiers, modifiers...)
 	return _q.Select()
 }
 
-// RemotePathMappingGroupBy is the group-by builder for RemotePathMapping entities.
-type RemotePathMappingGroupBy struct {
+// DownloadPathMappingGroupBy is the group-by builder for DownloadPathMapping entities.
+type DownloadPathMappingGroupBy struct {
 	selector
-	build *RemotePathMappingQuery
+	build *DownloadPathMappingQuery
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (_g *RemotePathMappingGroupBy) Aggregate(fns ...AggregateFunc) *RemotePathMappingGroupBy {
+func (_g *DownloadPathMappingGroupBy) Aggregate(fns ...AggregateFunc) *DownloadPathMappingGroupBy {
 	_g.fns = append(_g.fns, fns...)
 	return _g
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (_g *RemotePathMappingGroupBy) Scan(ctx context.Context, v any) error {
+func (_g *DownloadPathMappingGroupBy) Scan(ctx context.Context, v any) error {
 	ctx = setContextOp(ctx, _g.build.ctx, ent.OpQueryGroupBy)
 	if err := _g.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*RemotePathMappingQuery, *RemotePathMappingGroupBy](ctx, _g.build, _g, _g.build.inters, v)
+	return scanWithInterceptors[*DownloadPathMappingQuery, *DownloadPathMappingGroupBy](ctx, _g.build, _g, _g.build.inters, v)
 }
 
-func (_g *RemotePathMappingGroupBy) sqlScan(ctx context.Context, root *RemotePathMappingQuery, v any) error {
+func (_g *DownloadPathMappingGroupBy) sqlScan(ctx context.Context, root *DownloadPathMappingQuery, v any) error {
 	selector := root.sqlQuery(ctx).Select()
 	aggregation := make([]string, 0, len(_g.fns))
 	for _, fn := range _g.fns {
@@ -502,28 +502,28 @@ func (_g *RemotePathMappingGroupBy) sqlScan(ctx context.Context, root *RemotePat
 	return sql.ScanSlice(rows, v)
 }
 
-// RemotePathMappingSelect is the builder for selecting fields of RemotePathMapping entities.
-type RemotePathMappingSelect struct {
-	*RemotePathMappingQuery
+// DownloadPathMappingSelect is the builder for selecting fields of DownloadPathMapping entities.
+type DownloadPathMappingSelect struct {
+	*DownloadPathMappingQuery
 	selector
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
-func (_s *RemotePathMappingSelect) Aggregate(fns ...AggregateFunc) *RemotePathMappingSelect {
+func (_s *DownloadPathMappingSelect) Aggregate(fns ...AggregateFunc) *DownloadPathMappingSelect {
 	_s.fns = append(_s.fns, fns...)
 	return _s
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (_s *RemotePathMappingSelect) Scan(ctx context.Context, v any) error {
+func (_s *DownloadPathMappingSelect) Scan(ctx context.Context, v any) error {
 	ctx = setContextOp(ctx, _s.ctx, ent.OpQuerySelect)
 	if err := _s.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*RemotePathMappingQuery, *RemotePathMappingSelect](ctx, _s.RemotePathMappingQuery, _s, _s.inters, v)
+	return scanWithInterceptors[*DownloadPathMappingQuery, *DownloadPathMappingSelect](ctx, _s.DownloadPathMappingQuery, _s, _s.inters, v)
 }
 
-func (_s *RemotePathMappingSelect) sqlScan(ctx context.Context, root *RemotePathMappingQuery, v any) error {
+func (_s *DownloadPathMappingSelect) sqlScan(ctx context.Context, root *DownloadPathMappingQuery, v any) error {
 	selector := root.sqlQuery(ctx)
 	aggregation := make([]string, 0, len(_s.fns))
 	for _, fn := range _s.fns {
@@ -545,7 +545,7 @@ func (_s *RemotePathMappingSelect) sqlScan(ctx context.Context, root *RemotePath
 }
 
 // Modify adds a query modifier for attaching custom logic to queries.
-func (_s *RemotePathMappingSelect) Modify(modifiers ...func(s *sql.Selector)) *RemotePathMappingSelect {
+func (_s *DownloadPathMappingSelect) Modify(modifiers ...func(s *sql.Selector)) *DownloadPathMappingSelect {
 	_s.modifiers = append(_s.modifiers, modifiers...)
 	return _s
 }

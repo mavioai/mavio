@@ -1142,39 +1142,6 @@
         "title": "CreateReleaseProfileResponse",
         "additionalProperties": false
       },
-      "mavio.acquisition.v1.CreateRemotePathMappingRequest": {
-        "type": "object",
-        "properties": {
-          "mapping": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/mavio.acquisition.v1.RemotePathMapping"
-              }
-            ],
-            "title": "mapping"
-          }
-        },
-        "title": "CreateRemotePathMappingRequest",
-        "required": [
-          "mapping"
-        ],
-        "additionalProperties": false
-      },
-      "mavio.acquisition.v1.CreateRemotePathMappingResponse": {
-        "type": "object",
-        "properties": {
-          "mapping": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/mavio.acquisition.v1.RemotePathMapping"
-              }
-            ],
-            "title": "mapping"
-          }
-        },
-        "title": "CreateRemotePathMappingResponse",
-        "additionalProperties": false
-      },
       "mavio.acquisition.v1.CreateRequestRequest": {
         "type": "object",
         "properties": {
@@ -1607,23 +1574,6 @@
       "mavio.acquisition.v1.DeleteReleaseProfileResponse": {
         "type": "object",
         "title": "DeleteReleaseProfileResponse",
-        "additionalProperties": false
-      },
-      "mavio.acquisition.v1.DeleteRemotePathMappingRequest": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "title": "id",
-            "format": "uuid"
-          }
-        },
-        "title": "DeleteRemotePathMappingRequest",
-        "additionalProperties": false
-      },
-      "mavio.acquisition.v1.DeleteRemotePathMappingResponse": {
-        "type": "object",
-        "title": "DeleteRemotePathMappingResponse",
         "additionalProperties": false
       },
       "mavio.acquisition.v1.DeleteRequestRequest": {
@@ -2084,6 +2034,54 @@
         "additionalProperties": false,
         "description": "DownloadClient is a download client a plugin has configured."
       },
+      "mavio.acquisition.v1.DownloadClientPath": {
+        "type": "object",
+        "properties": {
+          "remotePath": {
+            "type": "string",
+            "title": "remote_path",
+            "maxLength": 4096,
+            "minLength": 1,
+            "description": "The folder as the client reports it."
+          },
+          "localPath": {
+            "type": "string",
+            "title": "local_path",
+            "maxLength": 4096,
+            "description": "Where the server reads the folder: an absolute path of the server or\n a folder of a remote (\"remote:\u003cremote\u003e:\u003cpath\u003e\"); empty when it reads\n remote_path itself."
+          },
+          "rootFolder": {
+            "type": "boolean",
+            "title": "root_folder",
+            "description": "Set by the server: the folder is, or holds, one the client says\n completed downloads end up in."
+          },
+          "suggestedPath": {
+            "type": "string",
+            "title": "suggested_path",
+            "description": "Set by the server, for a folder it cannot read: a folder of a remote\n on the client's host that holds the client's; empty for none."
+          },
+          "readable": {
+            "type": "boolean",
+            "title": "readable",
+            "description": "Set by the server: it reads the folder; error says why not."
+          },
+          "error": {
+            "type": "string",
+            "title": "error"
+          },
+          "linkLibraryPaths": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "link_library_paths",
+            "description": "Set by the server: the library paths on the folder's storage, which\n imports hard link files to rather than copy them."
+          }
+        },
+        "title": "DownloadClientPath",
+        "additionalProperties": false,
+        "description": "DownloadClientPath is a folder a download client puts downloads in, as\n the client sees it, and where the server reads it."
+      },
       "mavio.acquisition.v1.DownloadItemSubtitleRequest": {
         "type": "object",
         "properties": {
@@ -2293,6 +2291,43 @@
           }
         },
         "title": "GetCollectionResponse",
+        "additionalProperties": false
+      },
+      "mavio.acquisition.v1.GetDownloadClientPathsRequest": {
+        "type": "object",
+        "properties": {
+          "pluginId": {
+            "type": "string",
+            "title": "plugin_id",
+            "minLength": 1
+          },
+          "clientId": {
+            "type": "string",
+            "title": "client_id",
+            "minLength": 1
+          }
+        },
+        "title": "GetDownloadClientPathsRequest",
+        "additionalProperties": false
+      },
+      "mavio.acquisition.v1.GetDownloadClientPathsResponse": {
+        "type": "object",
+        "properties": {
+          "paths": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/mavio.acquisition.v1.DownloadClientPath"
+            },
+            "title": "paths",
+            "description": "The folders mapped first, then those the client tells that none\n holds."
+          },
+          "failure": {
+            "type": "string",
+            "title": "failure",
+            "description": "Why the client did not tell its folders."
+          }
+        },
+        "title": "GetDownloadClientPathsResponse",
         "additionalProperties": false
       },
       "mavio.acquisition.v1.GetIssueRequest": {
@@ -3820,26 +3855,6 @@
           }
         },
         "title": "ListReleaseProfilesResponse",
-        "additionalProperties": false
-      },
-      "mavio.acquisition.v1.ListRemotePathMappingsRequest": {
-        "type": "object",
-        "title": "ListRemotePathMappingsRequest",
-        "additionalProperties": false
-      },
-      "mavio.acquisition.v1.ListRemotePathMappingsResponse": {
-        "type": "object",
-        "properties": {
-          "mappings": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/mavio.acquisition.v1.RemotePathMapping"
-            },
-            "title": "mappings",
-            "description": "By host and remote path."
-          }
-        },
-        "title": "ListRemotePathMappingsResponse",
         "additionalProperties": false
       },
       "mavio.acquisition.v1.ListRequestsRequest": {
@@ -5443,39 +5458,6 @@
           "RELEASE_SEARCH_TYPE_TV"
         ],
         "description": "ReleaseSearchType is what a text search looks for."
-      },
-      "mavio.acquisition.v1.RemotePathMapping": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "title": "id",
-            "description": "Set by the server."
-          },
-          "host": {
-            "type": "string",
-            "title": "host",
-            "maxLength": 255,
-            "minLength": 1,
-            "description": "The download client's host, as its settings name it."
-          },
-          "remotePath": {
-            "type": "string",
-            "title": "remote_path",
-            "maxLength": 4096,
-            "minLength": 1
-          },
-          "localPath": {
-            "type": "string",
-            "title": "local_path",
-            "maxLength": 4096,
-            "minLength": 1,
-            "description": "Absolute."
-          }
-        },
-        "title": "RemotePathMapping",
-        "additionalProperties": false,
-        "description": "RemotePathMapping maps the folders a download client on another host\n reports to the folders the server sees."
       },
       "mavio.acquisition.v1.RemoveFromQueueRequest": {
         "type": "object",
@@ -8235,6 +8217,50 @@
           }
         },
         "title": "UpdateDelayProfileResponse",
+        "additionalProperties": false
+      },
+      "mavio.acquisition.v1.UpdateDownloadClientPathsRequest": {
+        "type": "object",
+        "properties": {
+          "pluginId": {
+            "type": "string",
+            "title": "plugin_id",
+            "minLength": 1
+          },
+          "clientId": {
+            "type": "string",
+            "title": "client_id",
+            "minLength": 1
+          },
+          "paths": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/mavio.acquisition.v1.DownloadClientPath"
+            },
+            "title": "paths",
+            "maxItems": 100,
+            "description": "The folders, those with a local path mapped."
+          }
+        },
+        "title": "UpdateDownloadClientPathsRequest",
+        "additionalProperties": false
+      },
+      "mavio.acquisition.v1.UpdateDownloadClientPathsResponse": {
+        "type": "object",
+        "properties": {
+          "paths": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/mavio.acquisition.v1.DownloadClientPath"
+            },
+            "title": "paths"
+          },
+          "failure": {
+            "type": "string",
+            "title": "failure"
+          }
+        },
+        "title": "UpdateDownloadClientPathsResponse",
         "additionalProperties": false
       },
       "mavio.acquisition.v1.UpdateQualityDefinitionsRequest": {
@@ -24440,7 +24466,7 @@
     },
     {
       "name": "ProfileService",
-      "description": "ProfileService keeps what decides which releases are grabbed: quality\n definitions, quality profiles, custom formats, delay and release\n profiles; the remote path mappings of download clients; and the\n acquisition settings, of downloading, importing and naming.\n Administrators only, but for listing quality profiles, which users who\n may request media read too."
+      "description": "ProfileService keeps what decides which releases are grabbed: quality\n definitions, quality profiles, custom formats, delay and release\n profiles; and the acquisition settings, of downloading, importing and\n naming. Administrators only, but for listing quality profiles, which users who\n may request media read too."
     },
     {
       "name": "UserService",
@@ -24928,14 +24954,13 @@
         }
       }
     },
-    "/mavio.library.v1.CollectionService/AddToCollection": {
+    "/mavio.library.v1.CollectionService/CreateCollection": {
       "post": {
         "tags": [
           "CollectionService"
         ],
-        "summary": "AddToCollection",
-        "description": "AddToCollection appends items not yet in the collection.",
-        "operationId": "mavio.library.v1.CollectionService.AddToCollection",
+        "summary": "CreateCollection",
+        "operationId": "mavio.library.v1.CollectionService.CreateCollection",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -24960,7 +24985,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.AddToCollectionRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.CreateCollectionRequest"
               }
             }
           },
@@ -24982,7 +25007,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.AddToCollectionResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.CreateCollectionResponse"
                 }
               }
             }
@@ -24990,14 +25015,14 @@
         }
       }
     },
-    "/mavio.acquisition.v1.IssueService/GetIssue": {
+    "/mavio.system.v1.PluginManagementService/ListContainers": {
       "post": {
         "tags": [
-          "IssueService"
+          "PluginManagementService"
         ],
-        "summary": "GetIssue",
-        "description": "GetIssue returns an issue of the caller's, or anyone's for\n administrators.",
-        "operationId": "mavio.acquisition.v1.IssueService.GetIssue",
+        "summary": "ListContainers",
+        "description": "ListContainers lists the container dependencies of every plugin that\n the server runs or that an administrator gave an address, by plugin.",
+        "operationId": "mavio.system.v1.PluginManagementService.ListContainers",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -25022,7 +25047,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.acquisition.v1.GetIssueRequest"
+                "$ref": "#/components/schemas/mavio.system.v1.ListContainersRequest"
               }
             }
           },
@@ -25044,7 +25069,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.acquisition.v1.GetIssueResponse"
+                  "$ref": "#/components/schemas/mavio.system.v1.ListContainersResponse"
                 }
               }
             }
@@ -25114,13 +25139,14 @@
         }
       }
     },
-    "/mavio.library.v1.CollectionService/UpdateCollection": {
+    "/mavio.acquisition.v1.DiscoverService/GetSeason": {
       "post": {
         "tags": [
-          "CollectionService"
+          "DiscoverService"
         ],
-        "summary": "UpdateCollection",
-        "operationId": "mavio.library.v1.CollectionService.UpdateCollection",
+        "summary": "GetSeason",
+        "description": "GetSeason lists the episodes of a season of a series, as Seerr's\n season of a series' page. It fails as GetTitle does, and with\n NOT_FOUND when no episode lister knows the season.",
+        "operationId": "mavio.acquisition.v1.DiscoverService.GetSeason",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -25145,7 +25171,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.UpdateCollectionRequest"
+                "$ref": "#/components/schemas/mavio.acquisition.v1.GetSeasonRequest"
               }
             }
           },
@@ -25167,7 +25193,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.UpdateCollectionResponse"
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.GetSeasonResponse"
                 }
               }
             }
@@ -25477,6 +25503,68 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/mavio.acquisition.v1.DeleteBlocklistResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.acquisition.v1.DownloadService/GetDownloadClientPaths": {
+      "post": {
+        "tags": [
+          "DownloadService"
+        ],
+        "summary": "GetDownloadClientPaths",
+        "description": "GetDownloadClientPaths returns the folders a download client puts\n completed downloads in, with where the server reads each, as\n Radarr's remote path mappings of the client's host.",
+        "operationId": "mavio.acquisition.v1.DownloadService.GetDownloadClientPaths",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.GetDownloadClientPathsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.GetDownloadClientPathsResponse"
                 }
               }
             }
@@ -26040,6 +26128,68 @@
         }
       }
     },
+    "/mavio.acquisition.v1.DownloadService/UpdateDownloadClientPaths": {
+      "post": {
+        "tags": [
+          "DownloadService"
+        ],
+        "summary": "UpdateDownloadClientPaths",
+        "description": "UpdateDownloadClientPaths replaces where the server reads the\n folders of a download client.",
+        "operationId": "mavio.acquisition.v1.DownloadService.UpdateDownloadClientPaths",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.UpdateDownloadClientPathsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.UpdateDownloadClientPathsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/mavio.acquisition.v1.IssueService/AddComment": {
       "post": {
         "tags": [
@@ -26226,13 +26376,14 @@
         }
       }
     },
-    "/mavio.library.v1.ItemService/GetItem": {
+    "/mavio.acquisition.v1.IssueService/GetIssue": {
       "post": {
         "tags": [
-          "ItemService"
+          "IssueService"
         ],
-        "summary": "GetItem",
-        "operationId": "mavio.library.v1.ItemService.GetItem",
+        "summary": "GetIssue",
+        "description": "GetIssue returns an issue of the caller's, or anyone's for\n administrators.",
+        "operationId": "mavio.acquisition.v1.IssueService.GetIssue",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -26257,7 +26408,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.GetItemRequest"
+                "$ref": "#/components/schemas/mavio.acquisition.v1.GetIssueRequest"
               }
             }
           },
@@ -26279,7 +26430,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.GetItemResponse"
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.GetIssueResponse"
                 }
               }
             }
@@ -26718,67 +26869,6 @@
         }
       }
     },
-    "/mavio.acquisition.v1.ProfileService/CreateRemotePathMapping": {
-      "post": {
-        "tags": [
-          "ProfileService"
-        ],
-        "summary": "CreateRemotePathMapping",
-        "operationId": "mavio.acquisition.v1.ProfileService.CreateRemotePathMapping",
-        "parameters": [
-          {
-            "name": "Connect-Protocol-Version",
-            "in": "header",
-            "description": "Define the version of the Connect protocol",
-            "schema": {
-              "$ref": "#/components/schemas/connect-protocol-version"
-            },
-            "example": 1
-          },
-          {
-            "name": "Connect-Timeout-Ms",
-            "in": "header",
-            "description": "Define the timeout, in ms",
-            "schema": {
-              "$ref": "#/components/schemas/connect-timeout-header"
-            },
-            "example": 1000
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/mavio.acquisition.v1.CreateRemotePathMappingRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "default": {
-            "description": "Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/connect.error"
-                }
-              }
-            }
-          },
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/mavio.acquisition.v1.CreateRemotePathMappingResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/mavio.acquisition.v1.ProfileService/DeleteCustomFormat": {
       "post": {
         "tags": [
@@ -27019,67 +27109,6 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/mavio.acquisition.v1.DeleteReleaseProfileResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/mavio.acquisition.v1.ProfileService/DeleteRemotePathMapping": {
-      "post": {
-        "tags": [
-          "ProfileService"
-        ],
-        "summary": "DeleteRemotePathMapping",
-        "operationId": "mavio.acquisition.v1.ProfileService.DeleteRemotePathMapping",
-        "parameters": [
-          {
-            "name": "Connect-Protocol-Version",
-            "in": "header",
-            "description": "Define the version of the Connect protocol",
-            "schema": {
-              "$ref": "#/components/schemas/connect-protocol-version"
-            },
-            "example": 1
-          },
-          {
-            "name": "Connect-Timeout-Ms",
-            "in": "header",
-            "description": "Define the timeout, in ms",
-            "schema": {
-              "$ref": "#/components/schemas/connect-timeout-header"
-            },
-            "example": 1000
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/mavio.acquisition.v1.DeleteRemotePathMappingRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "default": {
-            "description": "Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/connect.error"
-                }
-              }
-            }
-          },
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/mavio.acquisition.v1.DeleteRemotePathMappingResponse"
                 }
               }
             }
@@ -27456,67 +27485,6 @@
         }
       }
     },
-    "/mavio.acquisition.v1.ProfileService/ListRemotePathMappings": {
-      "post": {
-        "tags": [
-          "ProfileService"
-        ],
-        "summary": "ListRemotePathMappings",
-        "operationId": "mavio.acquisition.v1.ProfileService.ListRemotePathMappings",
-        "parameters": [
-          {
-            "name": "Connect-Protocol-Version",
-            "in": "header",
-            "description": "Define the version of the Connect protocol",
-            "schema": {
-              "$ref": "#/components/schemas/connect-protocol-version"
-            },
-            "example": 1
-          },
-          {
-            "name": "Connect-Timeout-Ms",
-            "in": "header",
-            "description": "Define the timeout, in ms",
-            "schema": {
-              "$ref": "#/components/schemas/connect-timeout-header"
-            },
-            "example": 1000
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/mavio.acquisition.v1.ListRemotePathMappingsRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "default": {
-            "description": "Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/connect.error"
-                }
-              }
-            }
-          },
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/mavio.acquisition.v1.ListRemotePathMappingsResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/mavio.acquisition.v1.ProfileService/ReorderDelayProfiles": {
       "post": {
         "tags": [
@@ -27825,13 +27793,13 @@
         }
       }
     },
-    "/mavio.acquisition.v1.ProfileService/UpdateQualityProfile": {
+    "/mavio.library.v1.ItemService/GetItem": {
       "post": {
         "tags": [
-          "ProfileService"
+          "ItemService"
         ],
-        "summary": "UpdateQualityProfile",
-        "operationId": "mavio.acquisition.v1.ProfileService.UpdateQualityProfile",
+        "summary": "GetItem",
+        "operationId": "mavio.library.v1.ItemService.GetItem",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -27856,7 +27824,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.acquisition.v1.UpdateQualityProfileRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.GetItemRequest"
               }
             }
           },
@@ -27878,7 +27846,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.acquisition.v1.UpdateQualityProfileResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.GetItemResponse"
                 }
               }
             }
@@ -32470,14 +32438,14 @@
         }
       }
     },
-    "/mavio.library.v1.ItemService/GetLyrics": {
+    "/mavio.auth.v1.AuthService/GetInvitation": {
       "post": {
         "tags": [
-          "ItemService"
+          "AuthService"
         ],
-        "summary": "GetLyrics",
-        "description": "GetLyrics returns the lyrics of a track, read from the lyric file\n beside it (.elrc, .lrc or .txt).",
-        "operationId": "mavio.library.v1.ItemService.GetLyrics",
+        "summary": "GetInvitation",
+        "description": "GetInvitation describes an invitation link before it is accepted.\n Unknown, used up and expired invitations are NOT_FOUND.",
+        "operationId": "mavio.auth.v1.AuthService.GetInvitation",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -32502,7 +32470,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.GetLyricsRequest"
+                "$ref": "#/components/schemas/mavio.auth.v1.GetInvitationRequest"
               }
             }
           },
@@ -32524,7 +32492,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.GetLyricsResponse"
+                  "$ref": "#/components/schemas/mavio.auth.v1.GetInvitationResponse"
                 }
               }
             }
@@ -33772,6 +33740,68 @@
         }
       }
     },
+    "/mavio.library.v1.CollectionService/AddToCollection": {
+      "post": {
+        "tags": [
+          "CollectionService"
+        ],
+        "summary": "AddToCollection",
+        "description": "AddToCollection appends items not yet in the collection.",
+        "operationId": "mavio.library.v1.CollectionService.AddToCollection",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.library.v1.AddToCollectionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.library.v1.AddToCollectionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/mavio.acquisition.v1.DiscoverService/GetCollection": {
       "post": {
         "tags": [
@@ -33827,67 +33857,6 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/mavio.acquisition.v1.GetCollectionResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/mavio.library.v1.CollectionService/CreateCollection": {
-      "post": {
-        "tags": [
-          "CollectionService"
-        ],
-        "summary": "CreateCollection",
-        "operationId": "mavio.library.v1.CollectionService.CreateCollection",
-        "parameters": [
-          {
-            "name": "Connect-Protocol-Version",
-            "in": "header",
-            "description": "Define the version of the Connect protocol",
-            "schema": {
-              "$ref": "#/components/schemas/connect-protocol-version"
-            },
-            "example": 1
-          },
-          {
-            "name": "Connect-Timeout-Ms",
-            "in": "header",
-            "description": "Define the timeout, in ms",
-            "schema": {
-              "$ref": "#/components/schemas/connect-timeout-header"
-            },
-            "example": 1000
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.CreateCollectionRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "default": {
-            "description": "Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/connect.error"
-                }
-              }
-            }
-          },
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.CreateCollectionResponse"
                 }
               }
             }
@@ -33956,13 +33925,14 @@
         }
       }
     },
-    "/mavio.library.v1.CollectionService/RemoveFromCollection": {
+    "/mavio.system.v1.AiProviderService/LogoutAi": {
       "post": {
         "tags": [
-          "CollectionService"
+          "AiProviderService"
         ],
-        "summary": "RemoveFromCollection",
-        "operationId": "mavio.library.v1.CollectionService.RemoveFromCollection",
+        "summary": "LogoutAi",
+        "description": "LogoutAi removes a provider's stored credential.",
+        "operationId": "mavio.system.v1.AiProviderService.LogoutAi",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -33987,7 +33957,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.RemoveFromCollectionRequest"
+                "$ref": "#/components/schemas/mavio.system.v1.LogoutAiRequest"
               }
             }
           },
@@ -34009,69 +33979,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.RemoveFromCollectionResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/mavio.acquisition.v1.DiscoverService/GetSeason": {
-      "post": {
-        "tags": [
-          "DiscoverService"
-        ],
-        "summary": "GetSeason",
-        "description": "GetSeason lists the episodes of a season of a series, as Seerr's\n season of a series' page. It fails as GetTitle does, and with\n NOT_FOUND when no episode lister knows the season.",
-        "operationId": "mavio.acquisition.v1.DiscoverService.GetSeason",
-        "parameters": [
-          {
-            "name": "Connect-Protocol-Version",
-            "in": "header",
-            "description": "Define the version of the Connect protocol",
-            "schema": {
-              "$ref": "#/components/schemas/connect-protocol-version"
-            },
-            "example": 1
-          },
-          {
-            "name": "Connect-Timeout-Ms",
-            "in": "header",
-            "description": "Define the timeout, in ms",
-            "schema": {
-              "$ref": "#/components/schemas/connect-timeout-header"
-            },
-            "example": 1000
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/mavio.acquisition.v1.GetSeasonRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "default": {
-            "description": "Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/connect.error"
-                }
-              }
-            }
-          },
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/mavio.acquisition.v1.GetSeasonResponse"
+                  "$ref": "#/components/schemas/mavio.system.v1.LogoutAiResponse"
                 }
               }
             }
@@ -34141,14 +34049,13 @@
         }
       }
     },
-    "/mavio.auth.v1.AuthService/GetInvitation": {
+    "/mavio.acquisition.v1.ProfileService/UpdateQualityProfile": {
       "post": {
         "tags": [
-          "AuthService"
+          "ProfileService"
         ],
-        "summary": "GetInvitation",
-        "description": "GetInvitation describes an invitation link before it is accepted.\n Unknown, used up and expired invitations are NOT_FOUND.",
-        "operationId": "mavio.auth.v1.AuthService.GetInvitation",
+        "summary": "UpdateQualityProfile",
+        "operationId": "mavio.acquisition.v1.ProfileService.UpdateQualityProfile",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -34173,7 +34080,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.auth.v1.GetInvitationRequest"
+                "$ref": "#/components/schemas/mavio.acquisition.v1.UpdateQualityProfileRequest"
               }
             }
           },
@@ -34195,7 +34102,69 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.auth.v1.GetInvitationResponse"
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.UpdateQualityProfileResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.library.v1.ItemService/GetLyrics": {
+      "post": {
+        "tags": [
+          "ItemService"
+        ],
+        "summary": "GetLyrics",
+        "description": "GetLyrics returns the lyrics of a track, read from the lyric file\n beside it (.elrc, .lrc or .txt).",
+        "operationId": "mavio.library.v1.ItemService.GetLyrics",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.library.v1.GetLyricsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.library.v1.GetLyricsResponse"
                 }
               }
             }
@@ -39023,14 +38992,13 @@
         }
       }
     },
-    "/mavio.system.v1.AiProviderService/LogoutAi": {
+    "/mavio.library.v1.CollectionService/RemoveFromCollection": {
       "post": {
         "tags": [
-          "AiProviderService"
+          "CollectionService"
         ],
-        "summary": "LogoutAi",
-        "description": "LogoutAi removes a provider's stored credential.",
-        "operationId": "mavio.system.v1.AiProviderService.LogoutAi",
+        "summary": "RemoveFromCollection",
+        "operationId": "mavio.library.v1.CollectionService.RemoveFromCollection",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -39055,7 +39023,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.system.v1.LogoutAiRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.RemoveFromCollectionRequest"
               }
             }
           },
@@ -39077,7 +39045,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.system.v1.LogoutAiResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.RemoveFromCollectionResponse"
                 }
               }
             }
@@ -39886,14 +39854,13 @@
         }
       }
     },
-    "/mavio.system.v1.PluginManagementService/ListContainers": {
+    "/mavio.library.v1.CollectionService/UpdateCollection": {
       "post": {
         "tags": [
-          "PluginManagementService"
+          "CollectionService"
         ],
-        "summary": "ListContainers",
-        "description": "ListContainers lists the container dependencies of every plugin that\n the server runs or that an administrator gave an address, by plugin.",
-        "operationId": "mavio.system.v1.PluginManagementService.ListContainers",
+        "summary": "UpdateCollection",
+        "operationId": "mavio.library.v1.CollectionService.UpdateCollection",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -39918,7 +39885,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.system.v1.ListContainersRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.UpdateCollectionRequest"
               }
             }
           },
@@ -39940,7 +39907,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.system.v1.ListContainersResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.UpdateCollectionResponse"
                 }
               }
             }

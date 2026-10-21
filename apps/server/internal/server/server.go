@@ -449,6 +449,9 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 	}
 	claimer := &cloud.Claimer{Store: db, Client: mavioDev, Name: serverName, Version: cfg.Version, Activity: activityLog, Claimed: claimed}
 	acq := newAcquisition(log, db, set, plugs, clients, refresher, cfg.FFprobe, quietGate, volumeLedger, devices)
+	if rc != nil {
+		acq.RemoteHosts = rc.Hosts
+	}
 	reqs := &requests.Service{
 		Store: db, Acquisition: acq, Settings: func() core.RequestSettings { return set.Get().Requests },
 		Metadata: plugs.MetadataProviders, Episodes: plugs.EpisodeListers, Discovery: plugs.DiscoveryProviders,

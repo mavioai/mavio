@@ -95,7 +95,7 @@ func (r *Runtime) CheckQueue(ctx context.Context) error {
 	for _, c := range clients {
 		byRef[c.Ref()] = c
 	}
-	mappings, err := r.remotePathMappings(ctx)
+	mappings, err := r.downloadPathMappings(ctx)
 	if err != nil {
 		return err
 	}
@@ -180,7 +180,7 @@ func (r *Runtime) CheckQueue(ctx context.Context) error {
 // track moves a tracked download its client listed on, as Radarr's
 // FailedDownloadService.Check, CompletedDownloadService.Check and the
 // processing of their pending states.
-func (r *Runtime) track(ctx context.Context, rn *run, d *core.Download, p polled, mappings []acquire.RemotePathMapping) error {
+func (r *Runtime) track(ctx context.Context, rn *run, d *core.Download, p polled, mappings []acquire.DownloadPathMapping) error {
 	item := p.item
 	switch d.State {
 	case core.DownloadImported:
@@ -279,15 +279,15 @@ func (r *Runtime) removeFromClient(ctx context.Context, d *core.Download, delete
 	return true
 }
 
-// remotePathMappings returns the stored remote path mappings.
-func (r *Runtime) remotePathMappings(ctx context.Context) ([]acquire.RemotePathMapping, error) {
-	stored, err := r.Store.RemotePathMappings().List(ctx)
+// downloadPathMappings returns the stored download path mappings.
+func (r *Runtime) downloadPathMappings(ctx context.Context) ([]acquire.DownloadPathMapping, error) {
+	stored, err := r.Store.DownloadPathMappings().List(ctx)
 	if err != nil {
 		return nil, err
 	}
-	out := make([]acquire.RemotePathMapping, len(stored))
+	out := make([]acquire.DownloadPathMapping, len(stored))
 	for i, m := range stored {
-		out[i] = acquire.RemotePathMapping{Host: m.Host, RemotePath: m.RemotePath, LocalPath: m.LocalPath}
+		out[i] = acquire.DownloadPathMapping{Client: m.PluginID + "/" + m.ClientID, RemotePath: m.RemotePath, LocalPath: m.LocalPath}
 	}
 	return out, nil
 }

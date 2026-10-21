@@ -110,6 +110,9 @@ type fakeClient struct {
 	hash string
 	// disabledUntil leaves the client out after failing.
 	disabledUntil time.Time
+	// roots are the folders the client says completed downloads end up
+	// in.
+	roots []string
 }
 
 func (f *fakeClient) ListDownloadClients(context.Context, *pluginv1.ListDownloadClientsRequest) (*pluginv1.ListDownloadClientsResponse, error) {
@@ -142,7 +145,8 @@ func (f *fakeClient) AddDownload(_ context.Context, req *pluginv1.AddDownloadReq
 func (f *fakeClient) ListDownloads(context.Context, *pluginv1.ListDownloadsRequest) (*pluginv1.ListDownloadsResponse, error) {
 	f.mu.Lock()
 	defer f.mu.Unlock()
-	return pluginv1.ListDownloadsResponse_builder{Downloads: f.downloads}.Build(), nil
+	status := pluginv1.DownloadClientStatus_builder{ClientId: new("qb"), OutputRootFolders: f.roots}.Build()
+	return pluginv1.ListDownloadsResponse_builder{Downloads: f.downloads, Statuses: []*pluginv1.DownloadClientStatus{status}}.Build(), nil
 }
 
 func (f *fakeClient) RemoveDownload(_ context.Context, req *pluginv1.RemoveDownloadRequest) (*pluginv1.RemoveDownloadResponse, error) {
@@ -344,8 +348,8 @@ func (e *env) both() []*pluginv1.Release {
 }
 
 // completed writes a download's files to the download folder, as the
-// client's host "seedbox" sees them in /downloads, and lists it as
-// completed; a remote path mapping maps the folder.
+// client sees them in /downloads, and lists it as completed; a download
+// path mapping of the client maps the folder.
 func (e *env) completed(hash, title string, files ...string) string {
 	e.t.Helper()
 	dir := filepath.Join(e.dlDir, title)
@@ -357,8 +361,8 @@ func (e *env) completed(hash, title string, files ...string) string {
 			e.t.Fatal(err)
 		}
 	}
-	m := core.RemotePathMapping{ID: core.NewID(), Host: "seedbox", RemotePath: "/downloads/", LocalPath: e.dlDir + string(filepath.Separator)}
-	if err := e.db.RemotePathMappings().Put(e.ctx, &m); err != nil && !errors.Is(err, core.ErrConflict) {
+	m := core.DownloadPathMapping{RemotePath: "/downloads/", LocalPath: e.dlDir + string(filepath.Separator)}
+	if err := e.db.DownloadPathMappings().ReplaceClient(e.ctx, "dl", "qb", []core.DownloadPathMapping{m}); err != nil {
 		e.t.Fatal(err)
 	}
 	e.client.setDownloads(pluginv1.Download_builder{
@@ -828,7 +832,7 @@ func TestImportBlocked(t *testing.T) {
 	if err := e.rt.CheckQueue(e.ctx); err != nil {
 		t.Fatal(err)
 	}
-	if d := e.download(hash1080); len(d.Messages) != 1 || !strings.Contains(d.Messages[0], "Remote Path Mapping") {
+	if d := e.download(hash1080); len(d.Messages) != 1 || !strings.Contains(d.Messages[0], "folders of the download client qBittorrent") {
 		t.Errorf("messages = %v, want = a remote path mapping warning", d.Messages)
 	}
 }

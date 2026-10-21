@@ -19,6 +19,7 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/delayprofile"
 	"github.com/mavioai/mavio/libs/store/internal/ent/displaypreferences"
 	"github.com/mavioai/mavio/libs/store/internal/ent/download"
+	"github.com/mavioai/mavio/libs/store/internal/ent/downloadpathmapping"
 	"github.com/mavioai/mavio/libs/store/internal/ent/episodestate"
 	"github.com/mavioai/mavio/libs/store/internal/ent/extrafile"
 	"github.com/mavioai/mavio/libs/store/internal/ent/folderstate"
@@ -43,7 +44,6 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/qualitydefinition"
 	"github.com/mavioai/mavio/libs/store/internal/ent/qualityprofile"
 	"github.com/mavioai/mavio/libs/store/internal/ent/releaseprofile"
-	"github.com/mavioai/mavio/libs/store/internal/ent/remotepathmapping"
 	"github.com/mavioai/mavio/libs/store/internal/ent/request"
 	"github.com/mavioai/mavio/libs/store/internal/ent/setting"
 	"github.com/mavioai/mavio/libs/store/internal/ent/storagejob"
@@ -410,6 +410,33 @@ func (f TraverseDownload) Traverse(ctx context.Context, q ent.Query) error {
 		return f(ctx, q)
 	}
 	return fmt.Errorf("unexpected query type %T. expect *ent.DownloadQuery", q)
+}
+
+// The DownloadPathMappingFunc type is an adapter to allow the use of ordinary function as a Querier.
+type DownloadPathMappingFunc func(context.Context, *ent.DownloadPathMappingQuery) (ent.Value, error)
+
+// Query calls f(ctx, q).
+func (f DownloadPathMappingFunc) Query(ctx context.Context, q ent.Query) (ent.Value, error) {
+	if q, ok := q.(*ent.DownloadPathMappingQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *ent.DownloadPathMappingQuery", q)
+}
+
+// The TraverseDownloadPathMapping type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseDownloadPathMapping func(context.Context, *ent.DownloadPathMappingQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseDownloadPathMapping) Intercept(next ent.Querier) ent.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseDownloadPathMapping) Traverse(ctx context.Context, q ent.Query) error {
+	if q, ok := q.(*ent.DownloadPathMappingQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *ent.DownloadPathMappingQuery", q)
 }
 
 // The EpisodeStateFunc type is an adapter to allow the use of ordinary function as a Querier.
@@ -1033,33 +1060,6 @@ func (f TraverseReleaseProfile) Traverse(ctx context.Context, q ent.Query) error
 	return fmt.Errorf("unexpected query type %T. expect *ent.ReleaseProfileQuery", q)
 }
 
-// The RemotePathMappingFunc type is an adapter to allow the use of ordinary function as a Querier.
-type RemotePathMappingFunc func(context.Context, *ent.RemotePathMappingQuery) (ent.Value, error)
-
-// Query calls f(ctx, q).
-func (f RemotePathMappingFunc) Query(ctx context.Context, q ent.Query) (ent.Value, error) {
-	if q, ok := q.(*ent.RemotePathMappingQuery); ok {
-		return f(ctx, q)
-	}
-	return nil, fmt.Errorf("unexpected query type %T. expect *ent.RemotePathMappingQuery", q)
-}
-
-// The TraverseRemotePathMapping type is an adapter to allow the use of ordinary function as Traverser.
-type TraverseRemotePathMapping func(context.Context, *ent.RemotePathMappingQuery) error
-
-// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
-func (f TraverseRemotePathMapping) Intercept(next ent.Querier) ent.Querier {
-	return next
-}
-
-// Traverse calls f(ctx, q).
-func (f TraverseRemotePathMapping) Traverse(ctx context.Context, q ent.Query) error {
-	if q, ok := q.(*ent.RemotePathMappingQuery); ok {
-		return f(ctx, q)
-	}
-	return fmt.Errorf("unexpected query type %T. expect *ent.RemotePathMappingQuery", q)
-}
-
 // The RequestFunc type is an adapter to allow the use of ordinary function as a Querier.
 type RequestFunc func(context.Context, *ent.RequestQuery) (ent.Value, error)
 
@@ -1436,6 +1436,8 @@ func NewQuery(q ent.Query) (Query, error) {
 		return &query[*ent.DisplayPreferencesQuery, predicate.DisplayPreferences, displaypreferences.OrderOption]{typ: ent.TypeDisplayPreferences, tq: q}, nil
 	case *ent.DownloadQuery:
 		return &query[*ent.DownloadQuery, predicate.Download, download.OrderOption]{typ: ent.TypeDownload, tq: q}, nil
+	case *ent.DownloadPathMappingQuery:
+		return &query[*ent.DownloadPathMappingQuery, predicate.DownloadPathMapping, downloadpathmapping.OrderOption]{typ: ent.TypeDownloadPathMapping, tq: q}, nil
 	case *ent.EpisodeStateQuery:
 		return &query[*ent.EpisodeStateQuery, predicate.EpisodeState, episodestate.OrderOption]{typ: ent.TypeEpisodeState, tq: q}, nil
 	case *ent.ExtraFileQuery:
@@ -1482,8 +1484,6 @@ func NewQuery(q ent.Query) (Query, error) {
 		return &query[*ent.QualityProfileQuery, predicate.QualityProfile, qualityprofile.OrderOption]{typ: ent.TypeQualityProfile, tq: q}, nil
 	case *ent.ReleaseProfileQuery:
 		return &query[*ent.ReleaseProfileQuery, predicate.ReleaseProfile, releaseprofile.OrderOption]{typ: ent.TypeReleaseProfile, tq: q}, nil
-	case *ent.RemotePathMappingQuery:
-		return &query[*ent.RemotePathMappingQuery, predicate.RemotePathMapping, remotepathmapping.OrderOption]{typ: ent.TypeRemotePathMapping, tq: q}, nil
 	case *ent.RequestQuery:
 		return &query[*ent.RequestQuery, predicate.Request, request.OrderOption]{typ: ent.TypeRequest, tq: q}, nil
 	case *ent.SettingQuery:

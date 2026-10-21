@@ -9,16 +9,18 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/mavioai/mavio/libs/core"
-	"github.com/mavioai/mavio/libs/store/internal/ent/remotepathmapping"
+	"github.com/mavioai/mavio/libs/store/internal/ent/downloadpathmapping"
 )
 
-// RemotePathMapping is the model entity for the RemotePathMapping schema.
-type RemotePathMapping struct {
+// DownloadPathMapping is the model entity for the DownloadPathMapping schema.
+type DownloadPathMapping struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID core.ID `json:"id,omitempty"`
-	// Host holds the value of the "host" field.
-	Host string `json:"host,omitempty"`
+	// PluginID holds the value of the "plugin_id" field.
+	PluginID string `json:"plugin_id,omitempty"`
+	// ClientID holds the value of the "client_id" field.
+	ClientID string `json:"client_id,omitempty"`
 	// RemotePath holds the value of the "remote_path" field.
 	RemotePath string `json:"remote_path,omitempty"`
 	// LocalPath holds the value of the "local_path" field.
@@ -27,13 +29,13 @@ type RemotePathMapping struct {
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*RemotePathMapping) scanValues(columns []string) ([]any, error) {
+func (*DownloadPathMapping) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case remotepathmapping.FieldID:
+		case downloadpathmapping.FieldID:
 			values[i] = new(core.ID)
-		case remotepathmapping.FieldHost, remotepathmapping.FieldRemotePath, remotepathmapping.FieldLocalPath:
+		case downloadpathmapping.FieldPluginID, downloadpathmapping.FieldClientID, downloadpathmapping.FieldRemotePath, downloadpathmapping.FieldLocalPath:
 			values[i] = new(sql.NullString)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -43,32 +45,38 @@ func (*RemotePathMapping) scanValues(columns []string) ([]any, error) {
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
-// to the RemotePathMapping fields.
-func (_m *RemotePathMapping) assignValues(columns []string, values []any) error {
+// to the DownloadPathMapping fields.
+func (_m *DownloadPathMapping) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
 	for i := range columns {
 		switch columns[i] {
-		case remotepathmapping.FieldID:
+		case downloadpathmapping.FieldID:
 			if value, ok := values[i].(*core.ID); !ok {
 				return fmt.Errorf("unexpected type %T for field id", values[i])
 			} else if value != nil {
 				_m.ID = *value
 			}
-		case remotepathmapping.FieldHost:
+		case downloadpathmapping.FieldPluginID:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field host", values[i])
+				return fmt.Errorf("unexpected type %T for field plugin_id", values[i])
 			} else if value.Valid {
-				_m.Host = value.String
+				_m.PluginID = value.String
 			}
-		case remotepathmapping.FieldRemotePath:
+		case downloadpathmapping.FieldClientID:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field client_id", values[i])
+			} else if value.Valid {
+				_m.ClientID = value.String
+			}
+		case downloadpathmapping.FieldRemotePath:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field remote_path", values[i])
 			} else if value.Valid {
 				_m.RemotePath = value.String
 			}
-		case remotepathmapping.FieldLocalPath:
+		case downloadpathmapping.FieldLocalPath:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field local_path", values[i])
 			} else if value.Valid {
@@ -81,37 +89,40 @@ func (_m *RemotePathMapping) assignValues(columns []string, values []any) error 
 	return nil
 }
 
-// Value returns the ent.Value that was dynamically selected and assigned to the RemotePathMapping.
+// Value returns the ent.Value that was dynamically selected and assigned to the DownloadPathMapping.
 // This includes values selected through modifiers, order, etc.
-func (_m *RemotePathMapping) Value(name string) (ent.Value, error) {
+func (_m *DownloadPathMapping) Value(name string) (ent.Value, error) {
 	return _m.selectValues.Get(name)
 }
 
-// Update returns a builder for updating this RemotePathMapping.
-// Note that you need to call RemotePathMapping.Unwrap() before calling this method if this RemotePathMapping
+// Update returns a builder for updating this DownloadPathMapping.
+// Note that you need to call DownloadPathMapping.Unwrap() before calling this method if this DownloadPathMapping
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (_m *RemotePathMapping) Update() *RemotePathMappingUpdateOne {
-	return NewRemotePathMappingClient(_m.config).UpdateOne(_m)
+func (_m *DownloadPathMapping) Update() *DownloadPathMappingUpdateOne {
+	return NewDownloadPathMappingClient(_m.config).UpdateOne(_m)
 }
 
-// Unwrap unwraps the RemotePathMapping entity that was returned from a transaction after it was closed,
+// Unwrap unwraps the DownloadPathMapping entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (_m *RemotePathMapping) Unwrap() *RemotePathMapping {
+func (_m *DownloadPathMapping) Unwrap() *DownloadPathMapping {
 	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
-		panic("ent: RemotePathMapping is not a transactional entity")
+		panic("ent: DownloadPathMapping is not a transactional entity")
 	}
 	_m.config.driver = _tx.drv
 	return _m
 }
 
 // String implements the fmt.Stringer.
-func (_m *RemotePathMapping) String() string {
+func (_m *DownloadPathMapping) String() string {
 	var builder strings.Builder
-	builder.WriteString("RemotePathMapping(")
+	builder.WriteString("DownloadPathMapping(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
-	builder.WriteString("host=")
-	builder.WriteString(_m.Host)
+	builder.WriteString("plugin_id=")
+	builder.WriteString(_m.PluginID)
+	builder.WriteString(", ")
+	builder.WriteString("client_id=")
+	builder.WriteString(_m.ClientID)
 	builder.WriteString(", ")
 	builder.WriteString("remote_path=")
 	builder.WriteString(_m.RemotePath)
@@ -122,5 +133,5 @@ func (_m *RemotePathMapping) String() string {
 	return builder.String()
 }
 
-// RemotePathMappings is a parsable slice of RemotePathMapping.
-type RemotePathMappings []*RemotePathMapping
+// DownloadPathMappings is a parsable slice of DownloadPathMapping.
+type DownloadPathMappings []*DownloadPathMapping

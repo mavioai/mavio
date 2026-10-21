@@ -99,8 +99,8 @@ message DownloadClient {
   // The client takes torrent files rather than magnet links, so a
   // release's torrent file is fetched first.
   bool prefers_torrent_file = 11;
-  // The host the client runs on, which remote path mappings are kept by;
-  // empty for clients that are folders.
+  // The host the client runs on, by which the server suggests where it
+  // reads the client's folders; empty for clients that are folders.
   string host = 12;
   // The client's tags: a movie or series with tags only uses the clients
   // sharing one of them, else those without tags, as Radarr's.
@@ -224,8 +224,8 @@ message Download {
   google.protobuf.Duration remaining_time = 8;
   // A torrent's ratio of upload to download; unset when unknown.
   double seed_ratio = 9;
-  // Where the download's files are, as the client sees them: remote path
-  // mappings of the client's host apply.
+  // Where the download's files are, as the client sees them: the
+  // client's download path mappings apply.
   string output_path = 10;
   // What the client says of the download, such as why it failed.
   string message = 11;

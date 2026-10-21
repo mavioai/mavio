@@ -512,7 +512,7 @@ Mavio 为用户查找、下载并入库他们想要的电影与剧集，即 Seer
 | 请求与问题 | `RequestService`、`IssueService`；规则在 `apps/server/internal/requests` 中 | Seerr 的请求与问题 |
 | 资源获取引擎 | `libs/acquire`，含 `movie` 与 `series` 包，以及为文件命名的 `organize` 包；服务在 `apps/server` 中 | Radarr、Sonarr |
 | 想要的条目 | `WantedService`：按 TMDB ID 加入的电影与按 TVDB ID 加入的剧集，作为 `apps/server/internal/acquisition` 作业执行的搜索、RSS 同步与 scene 映射更新 | Radarr 的电影、Sonarr 的剧集及其搜索 |
-| 档案 | `ProfileService`：质量定义与质量档案、custom formats、延迟档案与发布档案、远程路径映射 | Radarr 与 Sonarr 的设置 |
+| 档案 | `ProfileService`：质量定义与质量档案、custom formats、延迟档案与发布档案 | Radarr 与 Sonarr 的设置 |
 | release 解析 | `libs/release` | Radarr 与 Sonarr 的解析器 |
 | Servarr 的元数据 | `plugins/scraper-servarr`（WASM） | Radarr 与 Sonarr 的元数据源、scene 映射 |
 | 索引器 | `plugins/indexers`（进程），`INDEXER_PROVIDER`；通过 `ReleaseService` 搜索 | Prowlarr |
@@ -535,7 +535,7 @@ Mavio 为用户查找、下载并入库他们想要的电影与剧集，即 Seer
 3. **release**：`ReleaseService` 按 ID、编号与分类向索引器查询电影或单集；`libs/release` 解析每个 release，再按 ID、标题与 scene 映射匹配到条目。
 4. **决策**：每个 release 经过 Radarr 与 Sonarr 决策引擎的各项规格（质量是否允许、体积、custom format 分数、语言、是否已在队列、是否允许升级、延迟、黑名单、发布时长、做种数），通过的再排序。
 5. **下载**：最优的 release 通过 `DownloadService` 发送给下载客户端，带上其类型对应的分类；队列通过轮询客户端跟踪它。
-6. **入库**：完成的下载在应用远程路径映射后再次与条目匹配，并用 ffprobe 校验；文件与媒体库在同一卷上时硬链接进媒体库，否则复制或移动，按媒体库的命名模板命名，期间占用该卷在 `VolumeLedger` 中的位置，并通过 `QuietGate` 为播放让路。随后只扫描写入的文件夹而非整个媒体库，想要的条目成为有媒体的条目。被入库规则阻止的下载，或并非下载的文件夹，可通过 `DownloadService`（`ListManualImport`、`ManualImport`）手动入库，由用户选择文件、电影、其质量、语言与发布组，以及移动还是复制。
+6. **入库**：完成的下载在应用其客户端的下载路径映射后再次与条目匹配，并用 ffprobe 校验；文件与媒体库在同一卷上时硬链接进媒体库，否则复制或移动，按媒体库的命名模板命名，期间占用该卷在 `VolumeLedger` 中的位置，并通过 `QuietGate` 为播放让路。随后只扫描写入的文件夹而非整个媒体库，想要的条目成为有媒体的条目。被入库规则阻止的下载，或并非下载的文件夹，可通过 `DownloadService`（`ListManualImport`、`ManualImport`）手动入库，由用户选择文件、电影、其质量、语言与发布组，以及移动还是复制。
 7. **升级与失败**：更好的 release 会替换文件，直到达到档案的截止质量，被替换的文件移入回收目录；失败或不匹配的下载加入黑名单并重新搜索。
 8. **通知**：请求变为可用，并通过活动日志通知请求者。
 
@@ -543,7 +543,7 @@ Mavio 为用户查找、下载并入库他们想要的电影与剧集，即 Seer
 移植 Prowlarr 的第一方进程插件：Newznab 与 Torznab、在运行时从 `indexers.prowlarr.com` 拉取定义的 Cardigann 引擎，以及 Prowlarr 以代码实现的全部站点；能力与分类、限速与失败后的退避；每个索引器可使用服务端的一个代理，质询由质询求解器解答（§17）。其配置列出已配置的索引器；定义以及每个定义所需的字段由插件给出。`IndexerProviderService` 列出索引器及其能力，搜索它们（电影、剧集或文本，带 ID、季与集、分类），读取其 RSS，并获取 release 的种子文件、磁力链接或 NZB。
 
 ### 13.5 下载客户端（`plugins/download-clients`）
-包含 Radarr 与 Sonarr 支持的全部下载客户端的第一方进程插件，如 qBittorrent、Transmission、Deluge、rTorrent、Aria2、SABnzbd、NZBGet 与监视目录。其配置列出已配置的客户端，每个客户端有电影与剧集各自的分类。`DownloadClientProviderService` 添加 release（种子文件、磁力链接或 NZB，使用其类型的分类与优先级，以及其索引器的做种限制），列出下载及其状态、进度与输出路径，将下载标记为已入库，并删除下载。远程路径映射属于服务端。云盘的离线下载是服务端内置的下载客户端（§9.2）。
+包含 Radarr 与 Sonarr 支持的全部下载客户端的第一方进程插件，如 qBittorrent、Transmission、Deluge、rTorrent、Aria2、SABnzbd、NZBGet 与监视目录。其配置列出已配置的客户端，每个客户端有电影与剧集各自的分类。`DownloadClientProviderService` 添加 release（种子文件、磁力链接或 NZB，使用其类型的分类与优先级，以及其索引器的做种限制），列出下载及其状态、进度与输出路径，将下载标记为已入库，并删除下载。服务端在哪里读取各客户端的文件夹由服务端决定：`DownloadService` 的 `GetDownloadClientPaths` 列出客户端所说的已完成下载所在的文件夹以及已映射的文件夹，各附服务端能否读取、对不能读取者建议的客户端所在主机上远端的文件夹（客户端所在 NAS 的 SFTP 或 SMB 远端），以及从中入库时硬链接到的媒体库路径；`UpdateDownloadClientPaths` 把它们映射到绝对路径或远端的文件夹。云盘的离线下载是服务端内置的下载客户端（§9.2）。
 
 ### 13.6 存储
 想要的状态、质量定义与质量档案、custom formats、delay profile 与 release profile、队列、历史、黑名单与请求都存放在 `libs/store` 中，支持两种数据库，并通过 `core` 中的端口访问。

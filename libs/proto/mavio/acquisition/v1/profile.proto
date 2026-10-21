@@ -9,9 +9,8 @@ import "mavio/acquisition/v1/settings.proto";
 
 // ProfileService keeps what decides which releases are grabbed: quality
 // definitions, quality profiles, custom formats, delay and release
-// profiles; the remote path mappings of download clients; and the
-// acquisition settings, of downloading, importing and naming.
-// Administrators only, but for listing quality profiles, which users who
+// profiles; and the acquisition settings, of downloading, importing and
+// naming. Administrators only, but for listing quality profiles, which users who
 // may request media read too.
 service ProfileService {
   // ListQualityDefinitions lists the qualities of a kind with their
@@ -81,13 +80,6 @@ service ProfileService {
     option idempotency_level = IDEMPOTENT;
   }
 
-  rpc ListRemotePathMappings(ListRemotePathMappingsRequest) returns (ListRemotePathMappingsResponse) {
-    option idempotency_level = NO_SIDE_EFFECTS;
-  }
-  rpc CreateRemotePathMapping(CreateRemotePathMappingRequest) returns (CreateRemotePathMappingResponse);
-  rpc DeleteRemotePathMapping(DeleteRemotePathMappingRequest) returns (DeleteRemotePathMappingResponse) {
-    option idempotency_level = IDEMPOTENT;
-  }
   // GetAcquisitionSettings returns how releases are chosen, downloaded
   // and imported, and how files are named. Administrators only.
   rpc GetAcquisitionSettings(GetAcquisitionSettingsRequest) returns (GetAcquisitionSettingsResponse) {
@@ -440,45 +432,3 @@ message DeleteReleaseProfileRequest {
 }
 
 message DeleteReleaseProfileResponse {}
-
-// RemotePathMapping maps the folders a download client on another host
-// reports to the folders the server sees.
-message RemotePathMapping {
-  // Set by the server.
-  string id = 1;
-  // The download client's host, as its settings name it.
-  string host = 2 [(buf.validate.field).string = {
-    min_len: 1
-    max_len: 255
-  }];
-  string remote_path = 3 [(buf.validate.field).string = {
-    min_len: 1
-    max_len: 4096
-  }];
-  // Absolute.
-  string local_path = 4 [(buf.validate.field).string = {
-    min_len: 1
-    max_len: 4096
-  }];
-}
-
-message ListRemotePathMappingsRequest {}
-
-message ListRemotePathMappingsResponse {
-  // By host and remote path.
-  repeated RemotePathMapping mappings = 1;
-}
-
-message CreateRemotePathMappingRequest {
-  RemotePathMapping mapping = 1 [(buf.validate.field).required = true];
-}
-
-message CreateRemotePathMappingResponse {
-  RemotePathMapping mapping = 1;
-}
-
-message DeleteRemotePathMappingRequest {
-  string id = 1 [(buf.validate.field).string.uuid = true];
-}
-
-message DeleteRemotePathMappingResponse {}

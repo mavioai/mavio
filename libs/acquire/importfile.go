@@ -6,6 +6,8 @@ import (
 	"regexp"
 	"strings"
 	"time"
+
+	"github.com/mavioai/mavio/libs/core"
 )
 
 // The paths Radarr's DiskScanService.FilterPaths leaves out of imports:
@@ -143,38 +145,51 @@ func (a *Availability) Recent(now time.Time) bool {
 	return !a.InCinemas.IsZero() && !a.InCinemas.Before(now.AddDate(0, 0, -120))
 }
 
-// RemotePathMapping maps the folders a download client on a host sees to
-// the server's.
-type RemotePathMapping struct {
-	Host, RemotePath, LocalPath string
+// DownloadPathMapping maps a folder a download client reports to where
+// the server reads it: a folder of its file system or of a remote
+// ("remote:<remote>:<path>").
+type DownloadPathMapping struct {
+	// Client names the download client, as Client.Ref does.
+	Client, RemotePath, LocalPath string
 }
 
-// RemapRemoteToLocal returns the server's path of a path a download
-// client on host reports, by the first mapping of the host whose remote
-// path holds it, as Radarr's RemotePathMappingService; paths no mapping
-// holds are returned as they are. Hosts compare ignoring case, as do
-// Windows paths.
-func RemapRemoteToLocal(mappings []RemotePathMapping, host, remote string) string {
+// RemapDownloadPath returns where the server reads a path a download
+// client reports, by the first of the client's mappings whose remote path
+// holds it, as Radarr's RemotePathMappingService; paths no mapping holds
+// are returned as they are. Windows paths compare ignoring case.
+func RemapDownloadPath(mappings []DownloadPathMapping, client, remote string) string {
 	if remote == "" {
 		return remote
 	}
 	for _, m := range mappings {
-		if !strings.EqualFold(m.Host, host) {
+		if m.Client != client {
 			continue
 		}
 		rel, ok := below(m.RemotePath, remote)
 		if !ok {
 			continue
 		}
+		parts := strings.FieldsFunc(rel, isSep)
+		if core.IsRemotePath(m.LocalPath) {
+			// A remote's folder, its root written "remote:<remote>:".
+			local := strings.TrimRight(m.LocalPath, "/")
+			if len(parts) == 0 {
+				return local
+			}
+			if !strings.HasSuffix(local, ":") {
+				local += "/"
+			}
+			return local + strings.Join(parts, "/")
+		}
 		sep := "/"
 		if strings.Contains(m.LocalPath, `\`) && !strings.Contains(m.LocalPath, "/") {
 			sep = `\`
 		}
 		local := strings.TrimRight(m.LocalPath, `/\`)
-		if rel == "" {
+		if len(parts) == 0 {
 			return local + sep
 		}
-		return local + sep + strings.Join(strings.FieldsFunc(rel, isSep), sep)
+		return local + sep + strings.Join(parts, sep)
 	}
 	return remote
 }

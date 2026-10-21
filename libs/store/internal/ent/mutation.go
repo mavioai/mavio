@@ -23,6 +23,7 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/delayprofile"
 	"github.com/mavioai/mavio/libs/store/internal/ent/displaypreferences"
 	"github.com/mavioai/mavio/libs/store/internal/ent/download"
+	"github.com/mavioai/mavio/libs/store/internal/ent/downloadpathmapping"
 	"github.com/mavioai/mavio/libs/store/internal/ent/episodestate"
 	"github.com/mavioai/mavio/libs/store/internal/ent/extrafile"
 	"github.com/mavioai/mavio/libs/store/internal/ent/folderstate"
@@ -47,7 +48,6 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/qualitydefinition"
 	"github.com/mavioai/mavio/libs/store/internal/ent/qualityprofile"
 	"github.com/mavioai/mavio/libs/store/internal/ent/releaseprofile"
-	"github.com/mavioai/mavio/libs/store/internal/ent/remotepathmapping"
 	"github.com/mavioai/mavio/libs/store/internal/ent/request"
 	"github.com/mavioai/mavio/libs/store/internal/ent/setting"
 	"github.com/mavioai/mavio/libs/store/internal/ent/storagejob"
@@ -83,6 +83,7 @@ const (
 	TypeDelayProfile              = "DelayProfile"
 	TypeDisplayPreferences        = "DisplayPreferences"
 	TypeDownload                  = "Download"
+	TypeDownloadPathMapping       = "DownloadPathMapping"
 	TypeEpisodeState              = "EpisodeState"
 	TypeExtraFile                 = "ExtraFile"
 	TypeFolderState               = "FolderState"
@@ -106,7 +107,6 @@ const (
 	TypeQualityDefinition         = "QualityDefinition"
 	TypeQualityProfile            = "QualityProfile"
 	TypeReleaseProfile            = "ReleaseProfile"
-	TypeRemotePathMapping         = "RemotePathMapping"
 	TypeRequest                   = "Request"
 	TypeSetting                   = "Setting"
 	TypeStorageJob                = "StorageJob"
@@ -9206,6 +9206,500 @@ func (m *DownloadMutation) ResetEdge(name string) error {
 		return nil
 	}
 	return fmt.Errorf("unknown Download edge %s", name)
+}
+
+// DownloadPathMappingMutation represents an operation that mutates the DownloadPathMapping nodes in the graph.
+type DownloadPathMappingMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *core.ID
+	plugin_id     *string
+	client_id     *string
+	remote_path   *string
+	local_path    *string
+	clearedFields map[string]struct{}
+	done          bool
+	oldValue      func(context.Context) (*DownloadPathMapping, error)
+	predicates    []predicate.DownloadPathMapping
+}
+
+var _ ent.Mutation = (*DownloadPathMappingMutation)(nil)
+
+// downloadpathmappingOption allows management of the mutation configuration using functional options.
+type downloadpathmappingOption func(*DownloadPathMappingMutation)
+
+// newDownloadPathMappingMutation creates new mutation for the DownloadPathMapping entity.
+func newDownloadPathMappingMutation(c config, op Op, opts ...downloadpathmappingOption) *DownloadPathMappingMutation {
+	m := &DownloadPathMappingMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeDownloadPathMapping,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withDownloadPathMappingID sets the ID field of the mutation.
+func withDownloadPathMappingID(id core.ID) downloadpathmappingOption {
+	return func(m *DownloadPathMappingMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *DownloadPathMapping
+		)
+		m.oldValue = func(ctx context.Context) (*DownloadPathMapping, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().DownloadPathMapping.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withDownloadPathMapping sets the old DownloadPathMapping of the mutation.
+func withDownloadPathMapping(node *DownloadPathMapping) downloadpathmappingOption {
+	return func(m *DownloadPathMappingMutation) {
+		m.oldValue = func(context.Context) (*DownloadPathMapping, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m DownloadPathMappingMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m DownloadPathMappingMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of DownloadPathMapping entities.
+func (m *DownloadPathMappingMutation) SetID(id core.ID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *DownloadPathMappingMutation) ID() (id core.ID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *DownloadPathMappingMutation) IDs(ctx context.Context) ([]core.ID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []core.ID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().DownloadPathMapping.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetPluginID sets the "plugin_id" field.
+func (m *DownloadPathMappingMutation) SetPluginID(s string) {
+	m.plugin_id = &s
+}
+
+// PluginID returns the value of the "plugin_id" field in the mutation.
+func (m *DownloadPathMappingMutation) PluginID() (r string, exists bool) {
+	v := m.plugin_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPluginID returns the old "plugin_id" field's value of the DownloadPathMapping entity.
+// If the DownloadPathMapping object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DownloadPathMappingMutation) OldPluginID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPluginID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPluginID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPluginID: %w", err)
+	}
+	return oldValue.PluginID, nil
+}
+
+// ResetPluginID resets all changes to the "plugin_id" field.
+func (m *DownloadPathMappingMutation) ResetPluginID() {
+	m.plugin_id = nil
+}
+
+// SetClientID sets the "client_id" field.
+func (m *DownloadPathMappingMutation) SetClientID(s string) {
+	m.client_id = &s
+}
+
+// ClientID returns the value of the "client_id" field in the mutation.
+func (m *DownloadPathMappingMutation) ClientID() (r string, exists bool) {
+	v := m.client_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldClientID returns the old "client_id" field's value of the DownloadPathMapping entity.
+// If the DownloadPathMapping object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DownloadPathMappingMutation) OldClientID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldClientID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldClientID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldClientID: %w", err)
+	}
+	return oldValue.ClientID, nil
+}
+
+// ResetClientID resets all changes to the "client_id" field.
+func (m *DownloadPathMappingMutation) ResetClientID() {
+	m.client_id = nil
+}
+
+// SetRemotePath sets the "remote_path" field.
+func (m *DownloadPathMappingMutation) SetRemotePath(s string) {
+	m.remote_path = &s
+}
+
+// RemotePath returns the value of the "remote_path" field in the mutation.
+func (m *DownloadPathMappingMutation) RemotePath() (r string, exists bool) {
+	v := m.remote_path
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRemotePath returns the old "remote_path" field's value of the DownloadPathMapping entity.
+// If the DownloadPathMapping object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DownloadPathMappingMutation) OldRemotePath(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRemotePath is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRemotePath requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRemotePath: %w", err)
+	}
+	return oldValue.RemotePath, nil
+}
+
+// ResetRemotePath resets all changes to the "remote_path" field.
+func (m *DownloadPathMappingMutation) ResetRemotePath() {
+	m.remote_path = nil
+}
+
+// SetLocalPath sets the "local_path" field.
+func (m *DownloadPathMappingMutation) SetLocalPath(s string) {
+	m.local_path = &s
+}
+
+// LocalPath returns the value of the "local_path" field in the mutation.
+func (m *DownloadPathMappingMutation) LocalPath() (r string, exists bool) {
+	v := m.local_path
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLocalPath returns the old "local_path" field's value of the DownloadPathMapping entity.
+// If the DownloadPathMapping object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DownloadPathMappingMutation) OldLocalPath(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLocalPath is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLocalPath requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLocalPath: %w", err)
+	}
+	return oldValue.LocalPath, nil
+}
+
+// ResetLocalPath resets all changes to the "local_path" field.
+func (m *DownloadPathMappingMutation) ResetLocalPath() {
+	m.local_path = nil
+}
+
+// Where appends a list predicates to the DownloadPathMappingMutation builder.
+func (m *DownloadPathMappingMutation) Where(ps ...predicate.DownloadPathMapping) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the DownloadPathMappingMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *DownloadPathMappingMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.DownloadPathMapping, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *DownloadPathMappingMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *DownloadPathMappingMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (DownloadPathMapping).
+func (m *DownloadPathMappingMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *DownloadPathMappingMutation) Fields() []string {
+	fields := make([]string, 0, 4)
+	if m.plugin_id != nil {
+		fields = append(fields, downloadpathmapping.FieldPluginID)
+	}
+	if m.client_id != nil {
+		fields = append(fields, downloadpathmapping.FieldClientID)
+	}
+	if m.remote_path != nil {
+		fields = append(fields, downloadpathmapping.FieldRemotePath)
+	}
+	if m.local_path != nil {
+		fields = append(fields, downloadpathmapping.FieldLocalPath)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *DownloadPathMappingMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case downloadpathmapping.FieldPluginID:
+		return m.PluginID()
+	case downloadpathmapping.FieldClientID:
+		return m.ClientID()
+	case downloadpathmapping.FieldRemotePath:
+		return m.RemotePath()
+	case downloadpathmapping.FieldLocalPath:
+		return m.LocalPath()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *DownloadPathMappingMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case downloadpathmapping.FieldPluginID:
+		return m.OldPluginID(ctx)
+	case downloadpathmapping.FieldClientID:
+		return m.OldClientID(ctx)
+	case downloadpathmapping.FieldRemotePath:
+		return m.OldRemotePath(ctx)
+	case downloadpathmapping.FieldLocalPath:
+		return m.OldLocalPath(ctx)
+	}
+	return nil, fmt.Errorf("unknown DownloadPathMapping field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *DownloadPathMappingMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case downloadpathmapping.FieldPluginID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPluginID(v)
+		return nil
+	case downloadpathmapping.FieldClientID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetClientID(v)
+		return nil
+	case downloadpathmapping.FieldRemotePath:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRemotePath(v)
+		return nil
+	case downloadpathmapping.FieldLocalPath:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLocalPath(v)
+		return nil
+	}
+	return fmt.Errorf("unknown DownloadPathMapping field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *DownloadPathMappingMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *DownloadPathMappingMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *DownloadPathMappingMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown DownloadPathMapping numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *DownloadPathMappingMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *DownloadPathMappingMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *DownloadPathMappingMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown DownloadPathMapping nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *DownloadPathMappingMutation) ResetField(name string) error {
+	switch name {
+	case downloadpathmapping.FieldPluginID:
+		m.ResetPluginID()
+		return nil
+	case downloadpathmapping.FieldClientID:
+		m.ResetClientID()
+		return nil
+	case downloadpathmapping.FieldRemotePath:
+		m.ResetRemotePath()
+		return nil
+	case downloadpathmapping.FieldLocalPath:
+		m.ResetLocalPath()
+		return nil
+	}
+	return fmt.Errorf("unknown DownloadPathMapping field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *DownloadPathMappingMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *DownloadPathMappingMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *DownloadPathMappingMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *DownloadPathMappingMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *DownloadPathMappingMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *DownloadPathMappingMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *DownloadPathMappingMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown DownloadPathMapping unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *DownloadPathMappingMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown DownloadPathMapping edge %s", name)
 }
 
 // EpisodeStateMutation represents an operation that mutates the EpisodeState nodes in the graph.
@@ -35804,446 +36298,6 @@ func (m *ReleaseProfileMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *ReleaseProfileMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown ReleaseProfile edge %s", name)
-}
-
-// RemotePathMappingMutation represents an operation that mutates the RemotePathMapping nodes in the graph.
-type RemotePathMappingMutation struct {
-	config
-	op            Op
-	typ           string
-	id            *core.ID
-	host          *string
-	remote_path   *string
-	local_path    *string
-	clearedFields map[string]struct{}
-	done          bool
-	oldValue      func(context.Context) (*RemotePathMapping, error)
-	predicates    []predicate.RemotePathMapping
-}
-
-var _ ent.Mutation = (*RemotePathMappingMutation)(nil)
-
-// remotepathmappingOption allows management of the mutation configuration using functional options.
-type remotepathmappingOption func(*RemotePathMappingMutation)
-
-// newRemotePathMappingMutation creates new mutation for the RemotePathMapping entity.
-func newRemotePathMappingMutation(c config, op Op, opts ...remotepathmappingOption) *RemotePathMappingMutation {
-	m := &RemotePathMappingMutation{
-		config:        c,
-		op:            op,
-		typ:           TypeRemotePathMapping,
-		clearedFields: make(map[string]struct{}),
-	}
-	for _, opt := range opts {
-		opt(m)
-	}
-	return m
-}
-
-// withRemotePathMappingID sets the ID field of the mutation.
-func withRemotePathMappingID(id core.ID) remotepathmappingOption {
-	return func(m *RemotePathMappingMutation) {
-		var (
-			err   error
-			once  sync.Once
-			value *RemotePathMapping
-		)
-		m.oldValue = func(ctx context.Context) (*RemotePathMapping, error) {
-			once.Do(func() {
-				if m.done {
-					err = errors.New("querying old values post mutation is not allowed")
-				} else {
-					value, err = m.Client().RemotePathMapping.Get(ctx, id)
-				}
-			})
-			return value, err
-		}
-		m.id = &id
-	}
-}
-
-// withRemotePathMapping sets the old RemotePathMapping of the mutation.
-func withRemotePathMapping(node *RemotePathMapping) remotepathmappingOption {
-	return func(m *RemotePathMappingMutation) {
-		m.oldValue = func(context.Context) (*RemotePathMapping, error) {
-			return node, nil
-		}
-		m.id = &node.ID
-	}
-}
-
-// Client returns a new `ent.Client` from the mutation. If the mutation was
-// executed in a transaction (ent.Tx), a transactional client is returned.
-func (m RemotePathMappingMutation) Client() *Client {
-	client := &Client{config: m.config}
-	client.init()
-	return client
-}
-
-// Tx returns an `ent.Tx` for mutations that were executed in transactions;
-// it returns an error otherwise.
-func (m RemotePathMappingMutation) Tx() (*Tx, error) {
-	if _, ok := m.driver.(*txDriver); !ok {
-		return nil, errors.New("ent: mutation is not running in a transaction")
-	}
-	tx := &Tx{config: m.config}
-	tx.init()
-	return tx, nil
-}
-
-// SetID sets the value of the id field. Note that this
-// operation is only accepted on creation of RemotePathMapping entities.
-func (m *RemotePathMappingMutation) SetID(id core.ID) {
-	m.id = &id
-}
-
-// ID returns the ID value in the mutation. Note that the ID is only available
-// if it was provided to the builder or after it was returned from the database.
-func (m *RemotePathMappingMutation) ID() (id core.ID, exists bool) {
-	if m.id == nil {
-		return
-	}
-	return *m.id, true
-}
-
-// IDs queries the database and returns the entity ids that match the mutation's predicate.
-// That means, if the mutation is applied within a transaction with an isolation level such
-// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
-// or updated by the mutation.
-func (m *RemotePathMappingMutation) IDs(ctx context.Context) ([]core.ID, error) {
-	switch {
-	case m.op.Is(OpUpdateOne | OpDeleteOne):
-		id, exists := m.ID()
-		if exists {
-			return []core.ID{id}, nil
-		}
-		fallthrough
-	case m.op.Is(OpUpdate | OpDelete):
-		return m.Client().RemotePathMapping.Query().Where(m.predicates...).IDs(ctx)
-	default:
-		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
-	}
-}
-
-// SetHost sets the "host" field.
-func (m *RemotePathMappingMutation) SetHost(s string) {
-	m.host = &s
-}
-
-// Host returns the value of the "host" field in the mutation.
-func (m *RemotePathMappingMutation) Host() (r string, exists bool) {
-	v := m.host
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldHost returns the old "host" field's value of the RemotePathMapping entity.
-// If the RemotePathMapping object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *RemotePathMappingMutation) OldHost(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldHost is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldHost requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldHost: %w", err)
-	}
-	return oldValue.Host, nil
-}
-
-// ResetHost resets all changes to the "host" field.
-func (m *RemotePathMappingMutation) ResetHost() {
-	m.host = nil
-}
-
-// SetRemotePath sets the "remote_path" field.
-func (m *RemotePathMappingMutation) SetRemotePath(s string) {
-	m.remote_path = &s
-}
-
-// RemotePath returns the value of the "remote_path" field in the mutation.
-func (m *RemotePathMappingMutation) RemotePath() (r string, exists bool) {
-	v := m.remote_path
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldRemotePath returns the old "remote_path" field's value of the RemotePathMapping entity.
-// If the RemotePathMapping object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *RemotePathMappingMutation) OldRemotePath(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldRemotePath is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldRemotePath requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldRemotePath: %w", err)
-	}
-	return oldValue.RemotePath, nil
-}
-
-// ResetRemotePath resets all changes to the "remote_path" field.
-func (m *RemotePathMappingMutation) ResetRemotePath() {
-	m.remote_path = nil
-}
-
-// SetLocalPath sets the "local_path" field.
-func (m *RemotePathMappingMutation) SetLocalPath(s string) {
-	m.local_path = &s
-}
-
-// LocalPath returns the value of the "local_path" field in the mutation.
-func (m *RemotePathMappingMutation) LocalPath() (r string, exists bool) {
-	v := m.local_path
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldLocalPath returns the old "local_path" field's value of the RemotePathMapping entity.
-// If the RemotePathMapping object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *RemotePathMappingMutation) OldLocalPath(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldLocalPath is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldLocalPath requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldLocalPath: %w", err)
-	}
-	return oldValue.LocalPath, nil
-}
-
-// ResetLocalPath resets all changes to the "local_path" field.
-func (m *RemotePathMappingMutation) ResetLocalPath() {
-	m.local_path = nil
-}
-
-// Where appends a list predicates to the RemotePathMappingMutation builder.
-func (m *RemotePathMappingMutation) Where(ps ...predicate.RemotePathMapping) {
-	m.predicates = append(m.predicates, ps...)
-}
-
-// WhereP appends storage-level predicates to the RemotePathMappingMutation builder. Using this method,
-// users can use type-assertion to append predicates that do not depend on any generated package.
-func (m *RemotePathMappingMutation) WhereP(ps ...func(*sql.Selector)) {
-	p := make([]predicate.RemotePathMapping, len(ps))
-	for i := range ps {
-		p[i] = ps[i]
-	}
-	m.Where(p...)
-}
-
-// Op returns the operation name.
-func (m *RemotePathMappingMutation) Op() Op {
-	return m.op
-}
-
-// SetOp allows setting the mutation operation.
-func (m *RemotePathMappingMutation) SetOp(op Op) {
-	m.op = op
-}
-
-// Type returns the node type of this mutation (RemotePathMapping).
-func (m *RemotePathMappingMutation) Type() string {
-	return m.typ
-}
-
-// Fields returns all fields that were changed during this mutation. Note that in
-// order to get all numeric fields that were incremented/decremented, call
-// AddedFields().
-func (m *RemotePathMappingMutation) Fields() []string {
-	fields := make([]string, 0, 3)
-	if m.host != nil {
-		fields = append(fields, remotepathmapping.FieldHost)
-	}
-	if m.remote_path != nil {
-		fields = append(fields, remotepathmapping.FieldRemotePath)
-	}
-	if m.local_path != nil {
-		fields = append(fields, remotepathmapping.FieldLocalPath)
-	}
-	return fields
-}
-
-// Field returns the value of a field with the given name. The second boolean
-// return value indicates that this field was not set, or was not defined in the
-// schema.
-func (m *RemotePathMappingMutation) Field(name string) (ent.Value, bool) {
-	switch name {
-	case remotepathmapping.FieldHost:
-		return m.Host()
-	case remotepathmapping.FieldRemotePath:
-		return m.RemotePath()
-	case remotepathmapping.FieldLocalPath:
-		return m.LocalPath()
-	}
-	return nil, false
-}
-
-// OldField returns the old value of the field from the database. An error is
-// returned if the mutation operation is not UpdateOne, or the query to the
-// database failed.
-func (m *RemotePathMappingMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
-	switch name {
-	case remotepathmapping.FieldHost:
-		return m.OldHost(ctx)
-	case remotepathmapping.FieldRemotePath:
-		return m.OldRemotePath(ctx)
-	case remotepathmapping.FieldLocalPath:
-		return m.OldLocalPath(ctx)
-	}
-	return nil, fmt.Errorf("unknown RemotePathMapping field %s", name)
-}
-
-// SetField sets the value of a field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *RemotePathMappingMutation) SetField(name string, value ent.Value) error {
-	switch name {
-	case remotepathmapping.FieldHost:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetHost(v)
-		return nil
-	case remotepathmapping.FieldRemotePath:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetRemotePath(v)
-		return nil
-	case remotepathmapping.FieldLocalPath:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetLocalPath(v)
-		return nil
-	}
-	return fmt.Errorf("unknown RemotePathMapping field %s", name)
-}
-
-// AddedFields returns all numeric fields that were incremented/decremented during
-// this mutation.
-func (m *RemotePathMappingMutation) AddedFields() []string {
-	return nil
-}
-
-// AddedField returns the numeric value that was incremented/decremented on a field
-// with the given name. The second boolean return value indicates that this field
-// was not set, or was not defined in the schema.
-func (m *RemotePathMappingMutation) AddedField(name string) (ent.Value, bool) {
-	return nil, false
-}
-
-// AddField adds the value to the field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *RemotePathMappingMutation) AddField(name string, value ent.Value) error {
-	switch name {
-	}
-	return fmt.Errorf("unknown RemotePathMapping numeric field %s", name)
-}
-
-// ClearedFields returns all nullable fields that were cleared during this
-// mutation.
-func (m *RemotePathMappingMutation) ClearedFields() []string {
-	return nil
-}
-
-// FieldCleared returns a boolean indicating if a field with the given name was
-// cleared in this mutation.
-func (m *RemotePathMappingMutation) FieldCleared(name string) bool {
-	_, ok := m.clearedFields[name]
-	return ok
-}
-
-// ClearField clears the value of the field with the given name. It returns an
-// error if the field is not defined in the schema.
-func (m *RemotePathMappingMutation) ClearField(name string) error {
-	return fmt.Errorf("unknown RemotePathMapping nullable field %s", name)
-}
-
-// ResetField resets all changes in the mutation for the field with the given name.
-// It returns an error if the field is not defined in the schema.
-func (m *RemotePathMappingMutation) ResetField(name string) error {
-	switch name {
-	case remotepathmapping.FieldHost:
-		m.ResetHost()
-		return nil
-	case remotepathmapping.FieldRemotePath:
-		m.ResetRemotePath()
-		return nil
-	case remotepathmapping.FieldLocalPath:
-		m.ResetLocalPath()
-		return nil
-	}
-	return fmt.Errorf("unknown RemotePathMapping field %s", name)
-}
-
-// AddedEdges returns all edge names that were set/added in this mutation.
-func (m *RemotePathMappingMutation) AddedEdges() []string {
-	edges := make([]string, 0, 0)
-	return edges
-}
-
-// AddedIDs returns all IDs (to other nodes) that were added for the given edge
-// name in this mutation.
-func (m *RemotePathMappingMutation) AddedIDs(name string) []ent.Value {
-	return nil
-}
-
-// RemovedEdges returns all edge names that were removed in this mutation.
-func (m *RemotePathMappingMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 0)
-	return edges
-}
-
-// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
-// the given name in this mutation.
-func (m *RemotePathMappingMutation) RemovedIDs(name string) []ent.Value {
-	return nil
-}
-
-// ClearedEdges returns all edge names that were cleared in this mutation.
-func (m *RemotePathMappingMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 0)
-	return edges
-}
-
-// EdgeCleared returns a boolean which indicates if the edge with the given name
-// was cleared in this mutation.
-func (m *RemotePathMappingMutation) EdgeCleared(name string) bool {
-	return false
-}
-
-// ClearEdge clears the value of the edge with the given name. It returns an error
-// if that edge is not defined in the schema.
-func (m *RemotePathMappingMutation) ClearEdge(name string) error {
-	return fmt.Errorf("unknown RemotePathMapping unique edge %s", name)
-}
-
-// ResetEdge resets all changes to the edge with the given name in this mutation.
-// It returns an error if the edge is not defined in the schema.
-func (m *RemotePathMappingMutation) ResetEdge(name string) error {
-	return fmt.Errorf("unknown RemotePathMapping edge %s", name)
 }
 
 // RequestMutation represents an operation that mutates the Request nodes in the graph.

@@ -207,15 +207,6 @@ func TestTorrentAcquisition(t *testing.T) {
 	qb := newFakeQBittorrent(t, "/data/torrents", mounted)
 	lib := s.library("Movies", libraryv1.LibraryKind_LIBRARY_KIND_MOVIES, movies)
 	profile := s.profile(release.Movie, release.WEBDL1080p, release.HDTV720p, release.WEBDL1080p)
-	mapping, err := s.profiles.CreateRemotePathMapping(ctx, acquisitionv1.CreateRemotePathMappingRequest_builder{
-		Mapping: acquisitionv1.RemotePathMapping_builder{Host: new("127.0.0.1"), RemotePath: new("/data/torrents/"), LocalPath: new(mounted)}.Build(),
-	}.Build())
-	if err != nil {
-		t.Fatalf("CreateRemotePathMapping: %v", err)
-	}
-	if m := mapping.GetMapping(); m.GetId() == "" || m.GetRemotePath() != "/data/torrents/" {
-		t.Errorf("created mapping = %v", m)
-	}
 	s.plugins([]any{
 		map[string]any{
 			"id": "tz", "name": "Torznab", "definition": "torznab", "settings": map[string]any{"base_url": indexer.URL, "api_key": "nzbkey"},
@@ -229,6 +220,22 @@ func TestTorrentAcquisition(t *testing.T) {
 	clients, err := s.downloads.ListDownloadClients(ctx, &acquisitionv1.ListDownloadClientsRequest{})
 	if err != nil || clients.GetClients()[0].GetProtocol() != acquisitionv1.DownloadProtocol_DOWNLOAD_PROTOCOL_TORRENT {
 		t.Fatalf("ListDownloadClients = %v, %v; want = qBittorrent, for torrents", clients, err)
+	}
+	qbRef := clients.GetClients()[0]
+	paths, err := s.downloads.GetDownloadClientPaths(ctx, acquisitionv1.GetDownloadClientPathsRequest_builder{
+		PluginId: new(qbRef.GetPluginId()), ClientId: new("qb"),
+	}.Build())
+	if err != nil || len(paths.GetPaths()) == 0 || paths.GetPaths()[0].GetReadable() {
+		t.Fatalf("GetDownloadClientPaths = %v, %v; want = the client's folders, unread", paths, err)
+	}
+	updated, err := s.downloads.UpdateDownloadClientPaths(ctx, acquisitionv1.UpdateDownloadClientPathsRequest_builder{
+		PluginId: new(qbRef.GetPluginId()), ClientId: new("qb"),
+		Paths: []*acquisitionv1.DownloadClientPath{
+			acquisitionv1.DownloadClientPath_builder{RemotePath: new("/data/torrents/"), LocalPath: new(mounted)}.Build(),
+		},
+	}.Build())
+	if err != nil || len(updated.GetPaths()) != 1 || !updated.GetPaths()[0].GetReadable() || !updated.GetPaths()[0].GetRootFolder() {
+		t.Fatalf("UpdateDownloadClientPaths = %v, %v; want = /data/torrents/ read from %s", updated, err, mounted)
 	}
 
 	added, err := s.wanted.AddMovie(ctx, acquisitionv1.AddMovieRequest_builder{

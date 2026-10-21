@@ -75,15 +75,6 @@ class ProfileService(Protocol):
     async def delete_release_profile(self, request: mavio_dot_acquisition_dot_v1_dot_profile__pb2.DeleteReleaseProfileRequest, ctx: RequestContext) -> mavio_dot_acquisition_dot_v1_dot_profile__pb2.DeleteReleaseProfileResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
 
-    async def list_remote_path_mappings(self, request: mavio_dot_acquisition_dot_v1_dot_profile__pb2.ListRemotePathMappingsRequest, ctx: RequestContext) -> mavio_dot_acquisition_dot_v1_dot_profile__pb2.ListRemotePathMappingsResponse:
-        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
-
-    async def create_remote_path_mapping(self, request: mavio_dot_acquisition_dot_v1_dot_profile__pb2.CreateRemotePathMappingRequest, ctx: RequestContext) -> mavio_dot_acquisition_dot_v1_dot_profile__pb2.CreateRemotePathMappingResponse:
-        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
-
-    async def delete_remote_path_mapping(self, request: mavio_dot_acquisition_dot_v1_dot_profile__pb2.DeleteRemotePathMappingRequest, ctx: RequestContext) -> mavio_dot_acquisition_dot_v1_dot_profile__pb2.DeleteRemotePathMappingResponse:
-        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
-
     async def get_acquisition_settings(self, request: mavio_dot_acquisition_dot_v1_dot_settings__pb2.GetAcquisitionSettingsRequest, ctx: RequestContext) -> mavio_dot_acquisition_dot_v1_dot_settings__pb2.GetAcquisitionSettingsResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
 
@@ -285,36 +276,6 @@ class ProfileServiceASGIApplication(ConnectASGIApplication[ProfileService]):
                         idempotency_level=IdempotencyLevel.IDEMPOTENT,
                     ),
                     function=svc.delete_release_profile,
-                ),
-                "/mavio.acquisition.v1.ProfileService/ListRemotePathMappings": Endpoint.unary(
-                    method=MethodInfo(
-                        name="ListRemotePathMappings",
-                        service_name="mavio.acquisition.v1.ProfileService",
-                        input=mavio_dot_acquisition_dot_v1_dot_profile__pb2.ListRemotePathMappingsRequest,
-                        output=mavio_dot_acquisition_dot_v1_dot_profile__pb2.ListRemotePathMappingsResponse,
-                        idempotency_level=IdempotencyLevel.NO_SIDE_EFFECTS,
-                    ),
-                    function=svc.list_remote_path_mappings,
-                ),
-                "/mavio.acquisition.v1.ProfileService/CreateRemotePathMapping": Endpoint.unary(
-                    method=MethodInfo(
-                        name="CreateRemotePathMapping",
-                        service_name="mavio.acquisition.v1.ProfileService",
-                        input=mavio_dot_acquisition_dot_v1_dot_profile__pb2.CreateRemotePathMappingRequest,
-                        output=mavio_dot_acquisition_dot_v1_dot_profile__pb2.CreateRemotePathMappingResponse,
-                        idempotency_level=IdempotencyLevel.UNKNOWN,
-                    ),
-                    function=svc.create_remote_path_mapping,
-                ),
-                "/mavio.acquisition.v1.ProfileService/DeleteRemotePathMapping": Endpoint.unary(
-                    method=MethodInfo(
-                        name="DeleteRemotePathMapping",
-                        service_name="mavio.acquisition.v1.ProfileService",
-                        input=mavio_dot_acquisition_dot_v1_dot_profile__pb2.DeleteRemotePathMappingRequest,
-                        output=mavio_dot_acquisition_dot_v1_dot_profile__pb2.DeleteRemotePathMappingResponse,
-                        idempotency_level=IdempotencyLevel.IDEMPOTENT,
-                    ),
-                    function=svc.delete_remote_path_mapping,
                 ),
                 "/mavio.acquisition.v1.ProfileService/GetAcquisitionSettings": Endpoint.unary(
                     method=MethodInfo(
@@ -739,68 +700,6 @@ class ProfileServiceClient(ConnectClient):
             timeout_ms=timeout_ms,
         )
 
-    async def list_remote_path_mappings(
-        self,
-        request: mavio_dot_acquisition_dot_v1_dot_profile__pb2.ListRemotePathMappingsRequest,
-        *,
-        headers: Headers | Mapping[str, str] | None = None,
-        timeout_ms: int | None = None,
-        use_get: bool = False,
-    ) -> mavio_dot_acquisition_dot_v1_dot_profile__pb2.ListRemotePathMappingsResponse:
-        return await self.execute_unary(
-            request=request,
-            method=MethodInfo(
-                name="ListRemotePathMappings",
-                service_name="mavio.acquisition.v1.ProfileService",
-                input=mavio_dot_acquisition_dot_v1_dot_profile__pb2.ListRemotePathMappingsRequest,
-                output=mavio_dot_acquisition_dot_v1_dot_profile__pb2.ListRemotePathMappingsResponse,
-                idempotency_level=IdempotencyLevel.NO_SIDE_EFFECTS,
-            ),
-            headers=headers,
-            timeout_ms=timeout_ms,
-            use_get=use_get,
-        )
-
-    async def create_remote_path_mapping(
-        self,
-        request: mavio_dot_acquisition_dot_v1_dot_profile__pb2.CreateRemotePathMappingRequest,
-        *,
-        headers: Headers | Mapping[str, str] | None = None,
-        timeout_ms: int | None = None,
-    ) -> mavio_dot_acquisition_dot_v1_dot_profile__pb2.CreateRemotePathMappingResponse:
-        return await self.execute_unary(
-            request=request,
-            method=MethodInfo(
-                name="CreateRemotePathMapping",
-                service_name="mavio.acquisition.v1.ProfileService",
-                input=mavio_dot_acquisition_dot_v1_dot_profile__pb2.CreateRemotePathMappingRequest,
-                output=mavio_dot_acquisition_dot_v1_dot_profile__pb2.CreateRemotePathMappingResponse,
-                idempotency_level=IdempotencyLevel.UNKNOWN,
-            ),
-            headers=headers,
-            timeout_ms=timeout_ms,
-        )
-
-    async def delete_remote_path_mapping(
-        self,
-        request: mavio_dot_acquisition_dot_v1_dot_profile__pb2.DeleteRemotePathMappingRequest,
-        *,
-        headers: Headers | Mapping[str, str] | None = None,
-        timeout_ms: int | None = None,
-    ) -> mavio_dot_acquisition_dot_v1_dot_profile__pb2.DeleteRemotePathMappingResponse:
-        return await self.execute_unary(
-            request=request,
-            method=MethodInfo(
-                name="DeleteRemotePathMapping",
-                service_name="mavio.acquisition.v1.ProfileService",
-                input=mavio_dot_acquisition_dot_v1_dot_profile__pb2.DeleteRemotePathMappingRequest,
-                output=mavio_dot_acquisition_dot_v1_dot_profile__pb2.DeleteRemotePathMappingResponse,
-                idempotency_level=IdempotencyLevel.IDEMPOTENT,
-            ),
-            headers=headers,
-            timeout_ms=timeout_ms,
-        )
-
     async def get_acquisition_settings(
         self,
         request: mavio_dot_acquisition_dot_v1_dot_settings__pb2.GetAcquisitionSettingsRequest,
@@ -882,12 +781,6 @@ class ProfileServiceSync(Protocol):
     def update_release_profile(self, request: mavio_dot_acquisition_dot_v1_dot_profile__pb2.UpdateReleaseProfileRequest, ctx: RequestContext) -> mavio_dot_acquisition_dot_v1_dot_profile__pb2.UpdateReleaseProfileResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
     def delete_release_profile(self, request: mavio_dot_acquisition_dot_v1_dot_profile__pb2.DeleteReleaseProfileRequest, ctx: RequestContext) -> mavio_dot_acquisition_dot_v1_dot_profile__pb2.DeleteReleaseProfileResponse:
-        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
-    def list_remote_path_mappings(self, request: mavio_dot_acquisition_dot_v1_dot_profile__pb2.ListRemotePathMappingsRequest, ctx: RequestContext) -> mavio_dot_acquisition_dot_v1_dot_profile__pb2.ListRemotePathMappingsResponse:
-        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
-    def create_remote_path_mapping(self, request: mavio_dot_acquisition_dot_v1_dot_profile__pb2.CreateRemotePathMappingRequest, ctx: RequestContext) -> mavio_dot_acquisition_dot_v1_dot_profile__pb2.CreateRemotePathMappingResponse:
-        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
-    def delete_remote_path_mapping(self, request: mavio_dot_acquisition_dot_v1_dot_profile__pb2.DeleteRemotePathMappingRequest, ctx: RequestContext) -> mavio_dot_acquisition_dot_v1_dot_profile__pb2.DeleteRemotePathMappingResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
     def get_acquisition_settings(self, request: mavio_dot_acquisition_dot_v1_dot_settings__pb2.GetAcquisitionSettingsRequest, ctx: RequestContext) -> mavio_dot_acquisition_dot_v1_dot_settings__pb2.GetAcquisitionSettingsResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
@@ -1088,36 +981,6 @@ class ProfileServiceWSGIApplication(ConnectWSGIApplication):
                         idempotency_level=IdempotencyLevel.IDEMPOTENT,
                     ),
                     function=service.delete_release_profile,
-                ),
-                "/mavio.acquisition.v1.ProfileService/ListRemotePathMappings": EndpointSync.unary(
-                    method=MethodInfo(
-                        name="ListRemotePathMappings",
-                        service_name="mavio.acquisition.v1.ProfileService",
-                        input=mavio_dot_acquisition_dot_v1_dot_profile__pb2.ListRemotePathMappingsRequest,
-                        output=mavio_dot_acquisition_dot_v1_dot_profile__pb2.ListRemotePathMappingsResponse,
-                        idempotency_level=IdempotencyLevel.NO_SIDE_EFFECTS,
-                    ),
-                    function=service.list_remote_path_mappings,
-                ),
-                "/mavio.acquisition.v1.ProfileService/CreateRemotePathMapping": EndpointSync.unary(
-                    method=MethodInfo(
-                        name="CreateRemotePathMapping",
-                        service_name="mavio.acquisition.v1.ProfileService",
-                        input=mavio_dot_acquisition_dot_v1_dot_profile__pb2.CreateRemotePathMappingRequest,
-                        output=mavio_dot_acquisition_dot_v1_dot_profile__pb2.CreateRemotePathMappingResponse,
-                        idempotency_level=IdempotencyLevel.UNKNOWN,
-                    ),
-                    function=service.create_remote_path_mapping,
-                ),
-                "/mavio.acquisition.v1.ProfileService/DeleteRemotePathMapping": EndpointSync.unary(
-                    method=MethodInfo(
-                        name="DeleteRemotePathMapping",
-                        service_name="mavio.acquisition.v1.ProfileService",
-                        input=mavio_dot_acquisition_dot_v1_dot_profile__pb2.DeleteRemotePathMappingRequest,
-                        output=mavio_dot_acquisition_dot_v1_dot_profile__pb2.DeleteRemotePathMappingResponse,
-                        idempotency_level=IdempotencyLevel.IDEMPOTENT,
-                    ),
-                    function=service.delete_remote_path_mapping,
                 ),
                 "/mavio.acquisition.v1.ProfileService/GetAcquisitionSettings": EndpointSync.unary(
                     method=MethodInfo(
@@ -1536,68 +1399,6 @@ class ProfileServiceClientSync(ConnectClientSync):
                 service_name="mavio.acquisition.v1.ProfileService",
                 input=mavio_dot_acquisition_dot_v1_dot_profile__pb2.DeleteReleaseProfileRequest,
                 output=mavio_dot_acquisition_dot_v1_dot_profile__pb2.DeleteReleaseProfileResponse,
-                idempotency_level=IdempotencyLevel.IDEMPOTENT,
-            ),
-            headers=headers,
-            timeout_ms=timeout_ms,
-        )
-
-    def list_remote_path_mappings(
-        self,
-        request: mavio_dot_acquisition_dot_v1_dot_profile__pb2.ListRemotePathMappingsRequest,
-        *,
-        headers: Headers | Mapping[str, str] | None = None,
-        timeout_ms: int | None = None,
-        use_get: bool = False,
-    ) -> mavio_dot_acquisition_dot_v1_dot_profile__pb2.ListRemotePathMappingsResponse:
-        return self.execute_unary(
-            request=request,
-            method=MethodInfo(
-                name="ListRemotePathMappings",
-                service_name="mavio.acquisition.v1.ProfileService",
-                input=mavio_dot_acquisition_dot_v1_dot_profile__pb2.ListRemotePathMappingsRequest,
-                output=mavio_dot_acquisition_dot_v1_dot_profile__pb2.ListRemotePathMappingsResponse,
-                idempotency_level=IdempotencyLevel.NO_SIDE_EFFECTS,
-            ),
-            headers=headers,
-            timeout_ms=timeout_ms,
-            use_get=use_get,
-        )
-
-    def create_remote_path_mapping(
-        self,
-        request: mavio_dot_acquisition_dot_v1_dot_profile__pb2.CreateRemotePathMappingRequest,
-        *,
-        headers: Headers | Mapping[str, str] | None = None,
-        timeout_ms: int | None = None,
-    ) -> mavio_dot_acquisition_dot_v1_dot_profile__pb2.CreateRemotePathMappingResponse:
-        return self.execute_unary(
-            request=request,
-            method=MethodInfo(
-                name="CreateRemotePathMapping",
-                service_name="mavio.acquisition.v1.ProfileService",
-                input=mavio_dot_acquisition_dot_v1_dot_profile__pb2.CreateRemotePathMappingRequest,
-                output=mavio_dot_acquisition_dot_v1_dot_profile__pb2.CreateRemotePathMappingResponse,
-                idempotency_level=IdempotencyLevel.UNKNOWN,
-            ),
-            headers=headers,
-            timeout_ms=timeout_ms,
-        )
-
-    def delete_remote_path_mapping(
-        self,
-        request: mavio_dot_acquisition_dot_v1_dot_profile__pb2.DeleteRemotePathMappingRequest,
-        *,
-        headers: Headers | Mapping[str, str] | None = None,
-        timeout_ms: int | None = None,
-    ) -> mavio_dot_acquisition_dot_v1_dot_profile__pb2.DeleteRemotePathMappingResponse:
-        return self.execute_unary(
-            request=request,
-            method=MethodInfo(
-                name="DeleteRemotePathMapping",
-                service_name="mavio.acquisition.v1.ProfileService",
-                input=mavio_dot_acquisition_dot_v1_dot_profile__pb2.DeleteRemotePathMappingRequest,
-                output=mavio_dot_acquisition_dot_v1_dot_profile__pb2.DeleteRemotePathMappingResponse,
                 idempotency_level=IdempotencyLevel.IDEMPOTENT,
             ),
             headers=headers,

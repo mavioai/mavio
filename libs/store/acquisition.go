@@ -9,10 +9,10 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent"
 	"github.com/mavioai/mavio/libs/store/internal/ent/customformat"
 	"github.com/mavioai/mavio/libs/store/internal/ent/delayprofile"
+	"github.com/mavioai/mavio/libs/store/internal/ent/downloadpathmapping"
 	"github.com/mavioai/mavio/libs/store/internal/ent/qualitydefinition"
 	"github.com/mavioai/mavio/libs/store/internal/ent/qualityprofile"
 	"github.com/mavioai/mavio/libs/store/internal/ent/releaseprofile"
-	"github.com/mavioai/mavio/libs/store/internal/ent/remotepathmapping"
 	"github.com/mavioai/mavio/libs/store/internal/ent/wanted"
 )
 
@@ -450,42 +450,57 @@ func toWanted(w *ent.Wanted) core.Wanted {
 	}
 }
 
-type remotePathMappings struct{ s *Store }
+type downloadPathMappings struct{ s *Store }
 
-// RemotePathMappings returns the remote path mappings.
-func (s *Store) RemotePathMappings() core.RemotePathMappingRepository { return remotePathMappings{s} }
+// DownloadPathMappings returns the download clients' path mappings.
+func (s *Store) DownloadPathMappings() core.DownloadPathMappingRepository {
+	return downloadPathMappings{s}
+}
 
-func (r remotePathMappings) List(ctx context.Context) ([]core.RemotePathMapping, error) {
-	rows, err := r.s.read.RemotePathMapping.Query().
-		Order(ent.Asc(remotepathmapping.FieldHost), ent.Asc(remotepathmapping.FieldRemotePath)).All(ctx)
+func (r downloadPathMappings) List(ctx context.Context) ([]core.DownloadPathMapping, error) {
+	rows, err := r.s.read.DownloadPathMapping.Query().
+		Order(ent.Asc(downloadpathmapping.FieldPluginID), ent.Asc(downloadpathmapping.FieldClientID), ent.Asc(downloadpathmapping.FieldRemotePath)).
+		All(ctx)
 	if err != nil {
-		return nil, mapErr(err, "list remote path mappings")
+		return nil, mapErr(err, "list download path mappings")
 	}
-	out := make([]core.RemotePathMapping, len(rows))
+	out := make([]core.DownloadPathMapping, len(rows))
 	for i, m := range rows {
-		out[i] = core.RemotePathMapping{ID: m.ID, Host: m.Host, RemotePath: m.RemotePath, LocalPath: m.LocalPath}
+		out[i] = core.DownloadPathMapping{ID: m.ID, PluginID: m.PluginID, ClientID: m.ClientID, RemotePath: m.RemotePath, LocalPath: m.LocalPath}
 	}
 	return out, nil
 }
 
-func (r remotePathMappings) Put(ctx context.Context, m *core.RemotePathMapping) error {
-	if m.ID.IsZero() {
-		m.ID = core.NewID()
+func (r downloadPathMappings) ReplaceClient(ctx context.Context, pluginID, clientID string, ms []core.DownloadPathMapping) error {
+	seen := map[string]bool{}
+	for i := range ms {
+		m := &ms[i]
+		if m.ID.IsZero() {
+			m.ID = core.NewID()
+		}
+		m.PluginID, m.ClientID = pluginID, clientID
+		if err := m.Validate(); err != nil {
+			return err
+		}
+		if seen[m.RemotePath] {
+			return fmt.Errorf("%w: %s is mapped twice", core.ErrInvalid, m.RemotePath)
+		}
+		seen[m.RemotePath] = true
 	}
-	if err := m.Validate(); err != nil {
-		return err
-	}
-	err := r.s.write.RemotePathMapping.Create().
-		SetID(m.ID).
-		SetHost(m.Host).
-		SetRemotePath(m.RemotePath).
-		SetLocalPath(m.LocalPath).
-		OnConflictColumns(remotepathmapping.FieldID).
-		UpdateNewValues().
-		Exec(ctx)
-	return mapErr(err, "put remote path mapping")
-}
-
-func (r remotePathMappings) Delete(ctx context.Context, id core.ID) error {
-	return mapErr(r.s.write.RemotePathMapping.DeleteOneID(id).Exec(ctx), "delete remote path mapping")
+	return r.s.InTx(ctx, func(tx core.Store) error {
+		c := tx.(*Store).write
+		if _, err := c.DownloadPathMapping.Delete().
+			Where(downloadpathmapping.PluginID(pluginID), downloadpathmapping.ClientID(clientID)).Exec(ctx); err != nil {
+			return mapErr(err, "replace download path mappings")
+		}
+		for _, m := range ms {
+			if err := c.DownloadPathMapping.Create().
+				SetID(m.ID).SetPluginID(pluginID).SetClientID(clientID).
+				SetRemotePath(m.RemotePath).SetLocalPath(m.LocalPath).
+				Exec(ctx); err != nil {
+				return mapErr(err, "replace download path mappings")
+			}
+		}
+		return nil
+	})
 }

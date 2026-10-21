@@ -19891,6 +19891,258 @@
         }
       }
     },
+    "client.message": {
+      "comment": "The line under a download client's page title",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Where the server reads the folders this download client puts downloads in. A client on another machine reports folders as that machine sees them."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "服务器在哪里读取此下载客户端存放下载的文件夹。其他机器上的客户端报告的是那台机器上看到的文件夹。"
+          }
+        }
+      }
+    },
+    "client.settings": {
+      "comment": "Link to the plugin settings where the download client is set up",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Client Settings"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "客户端设置"
+          }
+        }
+      }
+    },
+    "client.folders": {
+      "comment": "Group of a download client's folders",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Folders"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "文件夹"
+          }
+        }
+      }
+    },
+    "client.foldersFooter": {
+      "comment": "Footer of a download client's folders",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leave a folder empty when the server reads it as the client names it. Elsewhere, enter an absolute path of the server or a remote's folder, such as remote:nas:downloads. Imports hard link files to libraries on the same volume or remote, and copy them otherwise."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "服务器按客户端所给路径就能读取的文件夹留空即可。否则填写服务器上的绝对路径或远端的文件夹（如 remote:nas:downloads）。导入时，与媒体库在同一卷或同一远端的文件会建立硬链接，否则复制。"
+          }
+        }
+      }
+    },
+    "client.readAt": {
+      "comment": "Placeholder of a folder's path field: the server reads the folder as the client names it",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Read here"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "就在此处读取"
+          }
+        }
+      }
+    },
+    "client.readable": {
+      "comment": "A folder the server reads",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Readable"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "可读取"
+          }
+        }
+      }
+    },
+    "client.links": {
+      "comment": "Libraries a folder's imports hard link to",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hard links to %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "硬链接到 %@"
+          }
+        }
+      }
+    },
+    "client.copies": {
+      "comment": "A folder whose imports are copied, no library being on its volume",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copied to libraries"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "复制到媒体库"
+          }
+        }
+      }
+    },
+    "client.use": {
+      "comment": "Button filling in a suggested folder",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Use %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "使用 %@"
+          }
+        }
+      }
+    },
+    "client.addFolder": {
+      "comment": "Button adding a folder the client does not report",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add Folder"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "添加文件夹"
+          }
+        }
+      }
+    },
+    "client.clientFolder": {
+      "comment": "Field of a folder as the download client names it",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Client's Folder"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "客户端的文件夹"
+          }
+        }
+      }
+    },
+    "client.serverFolder": {
+      "comment": "Field of where the server reads a folder",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Server's Folder"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "服务器的文件夹"
+          }
+        }
+      }
+    },
+    "client.unreported": {
+      "comment": "Shown when the client did not report its folders",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Why the client did not tell its folders: %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "客户端未告知其文件夹：%@"
+          }
+        }
+      }
+    },
+    "client.noFolders": {
+      "comment": "Shown when a download client has no folders",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The client reports no folders."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "客户端未报告任何文件夹。"
+          }
+        }
+      }
+    },
     "options.options": {
       "comment": "Page of the acquisition options",
       "extractionState": "manual",

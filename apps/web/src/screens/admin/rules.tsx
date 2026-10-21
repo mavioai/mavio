@@ -1,16 +1,14 @@
 // Acquisition's rules (docs/clients.md §6.3.11): delay profiles, which
-// hold releases back for better ones, in order; release profiles, which
-// require or ignore terms in releases' titles; and remote path mappings,
-// which map the folders download clients on other hosts report.
+// hold releases back for better ones, in order; and release profiles,
+// which require or ignore terms in releases' titles.
 import { create } from "@bufbuild/protobuf";
 import { type Duration, durationFromMs, durationMs } from "@bufbuild/protobuf/wkt";
-import { errorMessage, type ServerEntry, useDelayProfiles, useIndexers, useReleaseProfiles, useRemotePathMappings } from "@mavio/client-ts";
+import { errorMessage, type ServerEntry, useDelayProfiles, useIndexers, useReleaseProfiles } from "@mavio/client-ts";
 import {
   type DelayProfile,
   DelayProfileSchema,
   type ReleaseProfile,
   ReleaseProfileSchema,
-  RemotePathMappingSchema,
 } from "@mavio/proto/mavio/acquisition/v1/profile_pb";
 import { DownloadProtocol, IndexerRefSchema } from "@mavio/proto/mavio/acquisition/v1/release_pb";
 import { type ReactNode, useState } from "react";
@@ -425,70 +423,5 @@ function ReleaseForm({
         }
       />
     </div>
-  );
-}
-
-/** Acquisition's page of the remote path mappings. */
-export function RemotePathMappingsPage({ server }: { server: ServerEntry }) {
-  const mappings = useRemotePathMappings(server);
-  const [adding, setAdding] = useState(false);
-  const [d, setD] = useState({ host: "", remote: "", local: "" });
-  const list = mappings.list.data ?? [];
-  const valid = d.host.trim() && d.remote.trim() && /^(\/|[A-Za-z]:[\\/])/.test(d.local.trim());
-  const text = (key: keyof typeof d, label: string, detail: string, placeholder: string) => (
-    <Row label={label} detail={detail}>
-      <input className={`${input} sm:w-72`} aria-label={label} placeholder={placeholder} value={d[key]} onChange={(e) => setD((x) => ({ ...x, [key]: e.target.value }))} />
-    </Row>
-  );
-  return (
-    <Page title={t("acquisition.mappings")} message={t("rules.mappingsMessage")} back={back()}>
-      <Group
-        title={
-          <span className="flex items-center justify-between gap-3">
-            {t("acquisition.mappings")}
-            {!adding && (
-              <Button variant="plain" onClick={() => (mappings.create.reset(), setAdding(true))}>
-                {t("rules.add")}
-              </Button>
-            )}
-          </span>
-        }
-      >
-        {list.map((m) => (
-          <Row key={m.id} label={m.host} detail={`${m.remotePath} → ${m.localPath}`}>
-            <Button
-              variant="plain"
-              className="text-danger"
-              disabled={mappings.remove.isPending && mappings.remove.variables === m.id}
-              onClick={() => mappings.remove.mutate(m.id)}
-            >
-              {t("rules.remove")}
-            </Button>
-          </Row>
-        ))}
-        {adding && (
-          <div className="flex flex-col divide-y divide-border bg-background/40">
-            {text("host", t("rules.host"), t("rules.hostDetail"), "192.168.1.10")}
-            {text("remote", t("rules.remotePath"), t("rules.remotePathDetail"), "/downloads/")}
-            {text("local", t("rules.localPath"), t("rules.localPathDetail"), "/mnt/downloads/")}
-            <FormButtons
-              valid={Boolean(valid)}
-              busy={mappings.create.isPending}
-              error={mappings.create.error}
-              onCancel={() => setAdding(false)}
-              onSave={() =>
-                mappings.create.mutate(create(RemotePathMappingSchema, { host: d.host.trim(), remotePath: d.remote.trim(), localPath: d.local.trim() }), {
-                  onSuccess: () => (setAdding(false), setD({ host: "", remote: "", local: "" })),
-                })
-              }
-            />
-          </div>
-        )}
-        {mappings.list.isSuccess && list.length === 0 && !adding && <p className="px-4 py-3 type-callout text-text-secondary">{t("rules.noMappings")}</p>}
-        {(mappings.list.isError || mappings.remove.isError) && (
-          <p className="px-4 py-3 type-callout text-danger">{errorMessage(mappings.list.error ?? mappings.remove.error)}</p>
-        )}
-      </Group>
-    </Page>
   );
 }

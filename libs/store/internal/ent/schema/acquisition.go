@@ -421,25 +421,26 @@ func (ExtraFile) Indexes() []ent.Index {
 	return []ent.Index{index.Fields("item_id")}
 }
 
-// RemotePathMapping holds the schema of core.RemotePathMapping.
-type RemotePathMapping struct{ ent.Schema }
+// DownloadPathMapping holds the schema of core.DownloadPathMapping.
+type DownloadPathMapping struct{ ent.Schema }
 
-// Annotations of RemotePathMapping.
-func (RemotePathMapping) Annotations() []schema.Annotation {
-	return []schema.Annotation{entsql.Annotation{Table: "remote_path_mappings"}}
+// Annotations of DownloadPathMapping.
+func (DownloadPathMapping) Annotations() []schema.Annotation {
+	return []schema.Annotation{entsql.Annotation{Table: "download_path_mappings"}}
 }
 
-// Fields of RemotePathMapping.
-func (RemotePathMapping) Fields() []ent.Field {
+// Fields of DownloadPathMapping.
+func (DownloadPathMapping) Fields() []ent.Field {
 	return []ent.Field{
 		idField(),
-		field.String("host"),
+		field.String("plugin_id"),
+		field.String("client_id"),
 		field.String("remote_path"),
 		field.String("local_path"),
 	}
 }
 
-// Indexes of RemotePathMapping.
-func (RemotePathMapping) Indexes() []ent.Index {
-	return []ent.Index{index.Fields("host", "remote_path").Unique()}
+// Indexes of DownloadPathMapping.
+func (DownloadPathMapping) Indexes() []ent.Index {
+	return []ent.Index{index.Fields("plugin_id", "client_id", "remote_path").Unique()}
 }

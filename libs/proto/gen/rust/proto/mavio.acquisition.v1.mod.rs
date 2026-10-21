@@ -302,34 +302,6 @@ pub use self::__buffa::view::DeleteReleaseProfileResponseView;
 #[doc(inline)]
 pub use self::__buffa::view::DeleteReleaseProfileResponseOwnedView;
 #[doc(inline)]
-pub use self::__buffa::view::RemotePathMappingView;
-#[doc(inline)]
-pub use self::__buffa::view::RemotePathMappingOwnedView;
-#[doc(inline)]
-pub use self::__buffa::view::ListRemotePathMappingsRequestView;
-#[doc(inline)]
-pub use self::__buffa::view::ListRemotePathMappingsRequestOwnedView;
-#[doc(inline)]
-pub use self::__buffa::view::ListRemotePathMappingsResponseView;
-#[doc(inline)]
-pub use self::__buffa::view::ListRemotePathMappingsResponseOwnedView;
-#[doc(inline)]
-pub use self::__buffa::view::CreateRemotePathMappingRequestView;
-#[doc(inline)]
-pub use self::__buffa::view::CreateRemotePathMappingRequestOwnedView;
-#[doc(inline)]
-pub use self::__buffa::view::CreateRemotePathMappingResponseView;
-#[doc(inline)]
-pub use self::__buffa::view::CreateRemotePathMappingResponseOwnedView;
-#[doc(inline)]
-pub use self::__buffa::view::DeleteRemotePathMappingRequestView;
-#[doc(inline)]
-pub use self::__buffa::view::DeleteRemotePathMappingRequestOwnedView;
-#[doc(inline)]
-pub use self::__buffa::view::DeleteRemotePathMappingResponseView;
-#[doc(inline)]
-pub use self::__buffa::view::DeleteRemotePathMappingResponseOwnedView;
-#[doc(inline)]
 pub use self::__buffa::view::WantedView;
 #[doc(inline)]
 pub use self::__buffa::view::WantedOwnedView;
@@ -769,6 +741,26 @@ pub use self::__buffa::view::ManualImportRequestOwnedView;
 pub use self::__buffa::view::ManualImportResponseView;
 #[doc(inline)]
 pub use self::__buffa::view::ManualImportResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::DownloadClientPathView;
+#[doc(inline)]
+pub use self::__buffa::view::DownloadClientPathOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::GetDownloadClientPathsRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::GetDownloadClientPathsRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::GetDownloadClientPathsResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::GetDownloadClientPathsResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::UpdateDownloadClientPathsRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::UpdateDownloadClientPathsRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::UpdateDownloadClientPathsResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::UpdateDownloadClientPathsResponseOwnedView;
 #[doc(inline)]
 pub use self::__buffa::view::IssueView;
 #[doc(inline)]

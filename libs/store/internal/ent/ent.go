@@ -23,6 +23,7 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/delayprofile"
 	"github.com/mavioai/mavio/libs/store/internal/ent/displaypreferences"
 	"github.com/mavioai/mavio/libs/store/internal/ent/download"
+	"github.com/mavioai/mavio/libs/store/internal/ent/downloadpathmapping"
 	"github.com/mavioai/mavio/libs/store/internal/ent/episodestate"
 	"github.com/mavioai/mavio/libs/store/internal/ent/extrafile"
 	"github.com/mavioai/mavio/libs/store/internal/ent/folderstate"
@@ -46,7 +47,6 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/qualitydefinition"
 	"github.com/mavioai/mavio/libs/store/internal/ent/qualityprofile"
 	"github.com/mavioai/mavio/libs/store/internal/ent/releaseprofile"
-	"github.com/mavioai/mavio/libs/store/internal/ent/remotepathmapping"
 	"github.com/mavioai/mavio/libs/store/internal/ent/request"
 	"github.com/mavioai/mavio/libs/store/internal/ent/setting"
 	"github.com/mavioai/mavio/libs/store/internal/ent/storagejob"
@@ -131,6 +131,7 @@ func checkColumn(t, c string) error {
 			delayprofile.Table:              delayprofile.ValidColumn,
 			displaypreferences.Table:        displaypreferences.ValidColumn,
 			download.Table:                  download.ValidColumn,
+			downloadpathmapping.Table:       downloadpathmapping.ValidColumn,
 			episodestate.Table:              episodestate.ValidColumn,
 			extrafile.Table:                 extrafile.ValidColumn,
 			folderstate.Table:               folderstate.ValidColumn,
@@ -154,7 +155,6 @@ func checkColumn(t, c string) error {
 			qualitydefinition.Table:         qualitydefinition.ValidColumn,
 			qualityprofile.Table:            qualityprofile.ValidColumn,
 			releaseprofile.Table:            releaseprofile.ValidColumn,
-			remotepathmapping.Table:         remotepathmapping.ValidColumn,
 			request.Table:                   request.ValidColumn,
 			setting.Table:                   setting.ValidColumn,
 			storagejob.Table:                storagejob.ValidColumn,

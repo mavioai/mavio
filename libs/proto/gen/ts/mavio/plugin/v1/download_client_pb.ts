@@ -199,8 +199,8 @@ export type DownloadClient = Message<"mavio.plugin.v1.DownloadClient"> & {
   prefersTorrentFile: boolean;
 
   /**
-   * The host the client runs on, which remote path mappings are kept by;
-   * empty for clients that are folders.
+   * The host the client runs on, by which the server suggests where it
+   * reads the client's folders; empty for clients that are folders.
    *
    * @generated from field: string host = 12;
    */
@@ -595,8 +595,8 @@ export type Download = Message<"mavio.plugin.v1.Download"> & {
   seedRatio: number;
 
   /**
-   * Where the download's files are, as the client sees them: remote path
-   * mappings of the client's host apply.
+   * Where the download's files are, as the client sees them: the
+   * client's download path mappings apply.
    *
    * @generated from field: string output_path = 10;
    */

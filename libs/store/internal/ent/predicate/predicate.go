@@ -39,6 +39,9 @@ type DisplayPreferences func(*sql.Selector)
 // Download is the predicate function for download builders.
 type Download func(*sql.Selector)
 
+// DownloadPathMapping is the predicate function for downloadpathmapping builders.
+type DownloadPathMapping func(*sql.Selector)
+
 // EpisodeState is the predicate function for episodestate builders.
 type EpisodeState func(*sql.Selector)
 
@@ -107,9 +110,6 @@ type QualityProfile func(*sql.Selector)
 
 // ReleaseProfile is the predicate function for releaseprofile builders.
 type ReleaseProfile func(*sql.Selector)
-
-// RemotePathMapping is the predicate function for remotepathmapping builders.
-type RemotePathMapping func(*sql.Selector)
 
 // Request is the predicate function for request builders.
 type Request func(*sql.Selector)

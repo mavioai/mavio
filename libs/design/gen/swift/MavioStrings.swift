@@ -3500,6 +3500,54 @@ public enum MavioStrings {
     /// Detail of the remote path mappings
     public static var acquisitionMappingsDetail: String { NSLocalizedString("acquisition.mappingsDetail", bundle: .module, comment: "") }
 
+    /// The line under a download client's page title
+    public static var clientMessage: String { NSLocalizedString("client.message", bundle: .module, comment: "") }
+
+    /// Link to the plugin settings where the download client is set up
+    public static var clientSettings: String { NSLocalizedString("client.settings", bundle: .module, comment: "") }
+
+    /// Group of a download client's folders
+    public static var clientFolders: String { NSLocalizedString("client.folders", bundle: .module, comment: "") }
+
+    /// Footer of a download client's folders
+    public static var clientFoldersFooter: String { NSLocalizedString("client.foldersFooter", bundle: .module, comment: "") }
+
+    /// Placeholder of a folder's path field: the server reads the folder as the client names it
+    public static var clientReadAt: String { NSLocalizedString("client.readAt", bundle: .module, comment: "") }
+
+    /// A folder the server reads
+    public static var clientReadable: String { NSLocalizedString("client.readable", bundle: .module, comment: "") }
+
+    /// Libraries a folder's imports hard link to
+    public static func clientLinks(paths: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("client.links", bundle: .module, comment: ""), paths)
+    }
+
+    /// A folder whose imports are copied, no library being on its volume
+    public static var clientCopies: String { NSLocalizedString("client.copies", bundle: .module, comment: "") }
+
+    /// Button filling in a suggested folder
+    public static func clientUse(path: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("client.use", bundle: .module, comment: ""), path)
+    }
+
+    /// Button adding a folder the client does not report
+    public static var clientAddFolder: String { NSLocalizedString("client.addFolder", bundle: .module, comment: "") }
+
+    /// Field of a folder as the download client names it
+    public static var clientClientFolder: String { NSLocalizedString("client.clientFolder", bundle: .module, comment: "") }
+
+    /// Field of where the server reads a folder
+    public static var clientServerFolder: String { NSLocalizedString("client.serverFolder", bundle: .module, comment: "") }
+
+    /// Shown when the client did not report its folders
+    public static func clientUnreported(failure: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("client.unreported", bundle: .module, comment: ""), failure)
+    }
+
+    /// Shown when a download client has no folders
+    public static var clientNoFolders: String { NSLocalizedString("client.noFolders", bundle: .module, comment: "") }
+
     /// Page of the acquisition options
     public static var optionsOptions: String { NSLocalizedString("options.options", bundle: .module, comment: "") }
 

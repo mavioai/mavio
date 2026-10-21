@@ -226,42 +226,6 @@ pub type OwnedDeleteReleaseProfileResponseView = ::buffa::view::OwnedView<
         'static,
     >,
 >;
-///Shorthand for `OwnedView<ListRemotePathMappingsRequestView<'static>>`.
-pub type OwnedListRemotePathMappingsRequestView = ::buffa::view::OwnedView<
-    crate::proto::mavio::acquisition::v1::__buffa::view::ListRemotePathMappingsRequestView<
-        'static,
-    >,
->;
-///Shorthand for `OwnedView<ListRemotePathMappingsResponseView<'static>>`.
-pub type OwnedListRemotePathMappingsResponseView = ::buffa::view::OwnedView<
-    crate::proto::mavio::acquisition::v1::__buffa::view::ListRemotePathMappingsResponseView<
-        'static,
-    >,
->;
-///Shorthand for `OwnedView<CreateRemotePathMappingRequestView<'static>>`.
-pub type OwnedCreateRemotePathMappingRequestView = ::buffa::view::OwnedView<
-    crate::proto::mavio::acquisition::v1::__buffa::view::CreateRemotePathMappingRequestView<
-        'static,
-    >,
->;
-///Shorthand for `OwnedView<CreateRemotePathMappingResponseView<'static>>`.
-pub type OwnedCreateRemotePathMappingResponseView = ::buffa::view::OwnedView<
-    crate::proto::mavio::acquisition::v1::__buffa::view::CreateRemotePathMappingResponseView<
-        'static,
-    >,
->;
-///Shorthand for `OwnedView<DeleteRemotePathMappingRequestView<'static>>`.
-pub type OwnedDeleteRemotePathMappingRequestView = ::buffa::view::OwnedView<
-    crate::proto::mavio::acquisition::v1::__buffa::view::DeleteRemotePathMappingRequestView<
-        'static,
-    >,
->;
-///Shorthand for `OwnedView<DeleteRemotePathMappingResponseView<'static>>`.
-pub type OwnedDeleteRemotePathMappingResponseView = ::buffa::view::OwnedView<
-    crate::proto::mavio::acquisition::v1::__buffa::view::DeleteRemotePathMappingResponseView<
-        'static,
-    >,
->;
 ///Shorthand for `OwnedView<GetAcquisitionSettingsRequestView<'static>>`.
 pub type OwnedGetAcquisitionSettingsRequestView = ::buffa::view::OwnedView<
     crate::proto::mavio::acquisition::v1::__buffa::view::GetAcquisitionSettingsRequestView<
@@ -1085,132 +1049,6 @@ for ::buffa::view::OwnedView<
     }
 }
 impl ::connectrpc::Encodable<
-    crate::proto::mavio::acquisition::v1::ListRemotePathMappingsResponse,
->
-for crate::proto::mavio::acquisition::v1::__buffa::view::ListRemotePathMappingsResponseView<
-    '_,
-> {
-    fn encode(
-        &self,
-        codec: ::connectrpc::CodecFormat,
-    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
-        ::connectrpc::__codegen::encode_view_body(self, codec)
-    }
-}
-impl ::connectrpc::Encodable<
-    crate::proto::mavio::acquisition::v1::ListRemotePathMappingsResponse,
->
-for ::buffa::view::OwnedView<
-    crate::proto::mavio::acquisition::v1::__buffa::view::ListRemotePathMappingsResponseView<
-        'static,
-    >,
-> {
-    fn encode(
-        &self,
-        codec: ::connectrpc::CodecFormat,
-    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
-        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
-    }
-    /// An `OwnedView` still holds the buffer it was decoded from, so
-    /// its large fields can be handed to the response body by
-    /// reference count instead of copied. The bare view impl above
-    /// cannot do this: it has borrows but no buffer to name.
-    fn encode_segments(
-        &self,
-        codec: ::connectrpc::CodecFormat,
-    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
-        ::connectrpc::__codegen::encode_view_body_segments(
-            self.reborrow(),
-            self.bytes(),
-            codec,
-        )
-    }
-}
-impl ::connectrpc::Encodable<
-    crate::proto::mavio::acquisition::v1::CreateRemotePathMappingResponse,
->
-for crate::proto::mavio::acquisition::v1::__buffa::view::CreateRemotePathMappingResponseView<
-    '_,
-> {
-    fn encode(
-        &self,
-        codec: ::connectrpc::CodecFormat,
-    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
-        ::connectrpc::__codegen::encode_view_body(self, codec)
-    }
-}
-impl ::connectrpc::Encodable<
-    crate::proto::mavio::acquisition::v1::CreateRemotePathMappingResponse,
->
-for ::buffa::view::OwnedView<
-    crate::proto::mavio::acquisition::v1::__buffa::view::CreateRemotePathMappingResponseView<
-        'static,
-    >,
-> {
-    fn encode(
-        &self,
-        codec: ::connectrpc::CodecFormat,
-    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
-        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
-    }
-    /// An `OwnedView` still holds the buffer it was decoded from, so
-    /// its large fields can be handed to the response body by
-    /// reference count instead of copied. The bare view impl above
-    /// cannot do this: it has borrows but no buffer to name.
-    fn encode_segments(
-        &self,
-        codec: ::connectrpc::CodecFormat,
-    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
-        ::connectrpc::__codegen::encode_view_body_segments(
-            self.reborrow(),
-            self.bytes(),
-            codec,
-        )
-    }
-}
-impl ::connectrpc::Encodable<
-    crate::proto::mavio::acquisition::v1::DeleteRemotePathMappingResponse,
->
-for crate::proto::mavio::acquisition::v1::__buffa::view::DeleteRemotePathMappingResponseView<
-    '_,
-> {
-    fn encode(
-        &self,
-        codec: ::connectrpc::CodecFormat,
-    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
-        ::connectrpc::__codegen::encode_view_body(self, codec)
-    }
-}
-impl ::connectrpc::Encodable<
-    crate::proto::mavio::acquisition::v1::DeleteRemotePathMappingResponse,
->
-for ::buffa::view::OwnedView<
-    crate::proto::mavio::acquisition::v1::__buffa::view::DeleteRemotePathMappingResponseView<
-        'static,
-    >,
-> {
-    fn encode(
-        &self,
-        codec: ::connectrpc::CodecFormat,
-    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
-        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
-    }
-    /// An `OwnedView` still holds the buffer it was decoded from, so
-    /// its large fields can be handed to the response body by
-    /// reference count instead of copied. The bare view impl above
-    /// cannot do this: it has borrows but no buffer to name.
-    fn encode_segments(
-        &self,
-        codec: ::connectrpc::CodecFormat,
-    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
-        ::connectrpc::__codegen::encode_view_body_segments(
-            self.reborrow(),
-            self.bytes(),
-            codec,
-        )
-    }
-}
-impl ::connectrpc::Encodable<
     crate::proto::mavio::acquisition::v1::GetAcquisitionSettingsResponse,
 >
 for crate::proto::mavio::acquisition::v1::__buffa::view::GetAcquisitionSettingsResponseView<
@@ -1410,24 +1248,6 @@ pub const PROFILE_SERVICE_DELETE_RELEASE_PROFILE_SPEC: ::connectrpc::Spec = ::co
         ::connectrpc::StreamType::Unary,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::Idempotent);
-/// Static [`Spec`](::connectrpc::Spec) for the `ListRemotePathMappings` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
-pub const PROFILE_SERVICE_LIST_REMOTE_PATH_MAPPINGS_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
-        "/mavio.acquisition.v1.ProfileService/ListRemotePathMappings",
-        ::connectrpc::StreamType::Unary,
-    )
-    .with_idempotency_level(::connectrpc::IdempotencyLevel::NoSideEffects);
-/// Static [`Spec`](::connectrpc::Spec) for the `CreateRemotePathMapping` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
-pub const PROFILE_SERVICE_CREATE_REMOTE_PATH_MAPPING_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
-        "/mavio.acquisition.v1.ProfileService/CreateRemotePathMapping",
-        ::connectrpc::StreamType::Unary,
-    )
-    .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
-/// Static [`Spec`](::connectrpc::Spec) for the `DeleteRemotePathMapping` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
-pub const PROFILE_SERVICE_DELETE_REMOTE_PATH_MAPPING_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
-        "/mavio.acquisition.v1.ProfileService/DeleteRemotePathMapping",
-        ::connectrpc::StreamType::Unary,
-    )
-    .with_idempotency_level(::connectrpc::IdempotencyLevel::Idempotent);
 /// Static [`Spec`](::connectrpc::Spec) for the `GetAcquisitionSettings` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
 pub const PROFILE_SERVICE_GET_ACQUISITION_SETTINGS_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
         "/mavio.acquisition.v1.ProfileService/GetAcquisitionSettings",
@@ -1442,9 +1262,8 @@ pub const PROFILE_SERVICE_UPDATE_ACQUISITION_SETTINGS_SPEC: ::connectrpc::Spec =
     .with_idempotency_level(::connectrpc::IdempotencyLevel::Idempotent);
 /// ProfileService keeps what decides which releases are grabbed: quality
 /// definitions, quality profiles, custom formats, delay and release
-/// profiles; the remote path mappings of download clients; and the
-/// acquisition settings, of downloading, importing and naming.
-/// Administrators only, but for listing quality profiles, which users who
+/// profiles; and the acquisition settings, of downloading, importing and
+/// naming. Administrators only, but for listing quality profiles, which users who
 /// may request media read too.
 ///
 /// # Implementing handlers
@@ -1935,75 +1754,6 @@ pub trait ProfileService: Send + Sync + 'static {
         Output = ::connectrpc::ServiceResult<
             impl ::connectrpc::Encodable<
                 crate::proto::mavio::acquisition::v1::DeleteReleaseProfileResponse,
-            > + Send + use<'a, Self>,
-        >,
-    > + Send;
-    /// Handle the ListRemotePathMappings RPC.
-    ///
-    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
-    ///
-    /// `request` is borrowed from the request body and is valid for the
-    /// duration of the call; message fields are read directly on it
-    /// (zero-copy). The response cannot borrow from `request` — use
-    /// `.to_owned_message()` (or copy the specific fields) for anything
-    /// returned, stored, or moved into `tokio::spawn`.
-    fn list_remote_path_mappings<'a>(
-        &'a self,
-        ctx: ::connectrpc::RequestContext,
-        request: ::connectrpc::ServiceRequest<
-            '_,
-            crate::proto::mavio::acquisition::v1::ListRemotePathMappingsRequest,
-        >,
-    ) -> impl ::std::future::Future<
-        Output = ::connectrpc::ServiceResult<
-            impl ::connectrpc::Encodable<
-                crate::proto::mavio::acquisition::v1::ListRemotePathMappingsResponse,
-            > + Send + use<'a, Self>,
-        >,
-    > + Send;
-    /// Handle the CreateRemotePathMapping RPC.
-    ///
-    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
-    ///
-    /// `request` is borrowed from the request body and is valid for the
-    /// duration of the call; message fields are read directly on it
-    /// (zero-copy). The response cannot borrow from `request` — use
-    /// `.to_owned_message()` (or copy the specific fields) for anything
-    /// returned, stored, or moved into `tokio::spawn`.
-    fn create_remote_path_mapping<'a>(
-        &'a self,
-        ctx: ::connectrpc::RequestContext,
-        request: ::connectrpc::ServiceRequest<
-            '_,
-            crate::proto::mavio::acquisition::v1::CreateRemotePathMappingRequest,
-        >,
-    ) -> impl ::std::future::Future<
-        Output = ::connectrpc::ServiceResult<
-            impl ::connectrpc::Encodable<
-                crate::proto::mavio::acquisition::v1::CreateRemotePathMappingResponse,
-            > + Send + use<'a, Self>,
-        >,
-    > + Send;
-    /// Handle the DeleteRemotePathMapping RPC.
-    ///
-    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
-    ///
-    /// `request` is borrowed from the request body and is valid for the
-    /// duration of the call; message fields are read directly on it
-    /// (zero-copy). The response cannot borrow from `request` — use
-    /// `.to_owned_message()` (or copy the specific fields) for anything
-    /// returned, stored, or moved into `tokio::spawn`.
-    fn delete_remote_path_mapping<'a>(
-        &'a self,
-        ctx: ::connectrpc::RequestContext,
-        request: ::connectrpc::ServiceRequest<
-            '_,
-            crate::proto::mavio::acquisition::v1::DeleteRemotePathMappingRequest,
-        >,
-    ) -> impl ::std::future::Future<
-        Output = ::connectrpc::ServiceResult<
-            impl ::connectrpc::Encodable<
-                crate::proto::mavio::acquisition::v1::DeleteRemotePathMappingResponse,
             > + Send + use<'a, Self>,
         >,
     > + Send;
@@ -2640,93 +2390,6 @@ impl<S: ProfileService> ProfileServiceExt for S {
             .with_spec(PROFILE_SERVICE_DELETE_RELEASE_PROFILE_SPEC)
             .route_view_idempotent(
                 PROFILE_SERVICE_SERVICE_NAME,
-                "ListRemotePathMappings",
-                {
-                    let svc = ::std::sync::Arc::clone(&self);
-                    ::connectrpc::view_handler_fn(move |
-                        ctx,
-                        req: ::buffa::view::OwnedView<
-                            crate::proto::mavio::acquisition::v1::__buffa::view::ListRemotePathMappingsRequestView<
-                                'static,
-                            >,
-                        >,
-                        format|
-                    {
-                        let svc = ::std::sync::Arc::clone(&svc);
-                        async move {
-                            let sreq = ::connectrpc::ServiceRequest::<
-                                crate::proto::mavio::acquisition::v1::ListRemotePathMappingsRequest,
-                            >::from_parts(req.reborrow(), req.bytes());
-                            svc.list_remote_path_mappings(ctx, sreq)
-                                .await?
-                                .encode::<
-                                    crate::proto::mavio::acquisition::v1::ListRemotePathMappingsResponse,
-                                >(format)
-                        }
-                    })
-                },
-            )
-            .with_spec(PROFILE_SERVICE_LIST_REMOTE_PATH_MAPPINGS_SPEC)
-            .route_view(
-                PROFILE_SERVICE_SERVICE_NAME,
-                "CreateRemotePathMapping",
-                {
-                    let svc = ::std::sync::Arc::clone(&self);
-                    ::connectrpc::view_handler_fn(move |
-                        ctx,
-                        req: ::buffa::view::OwnedView<
-                            crate::proto::mavio::acquisition::v1::__buffa::view::CreateRemotePathMappingRequestView<
-                                'static,
-                            >,
-                        >,
-                        format|
-                    {
-                        let svc = ::std::sync::Arc::clone(&svc);
-                        async move {
-                            let sreq = ::connectrpc::ServiceRequest::<
-                                crate::proto::mavio::acquisition::v1::CreateRemotePathMappingRequest,
-                            >::from_parts(req.reborrow(), req.bytes());
-                            svc.create_remote_path_mapping(ctx, sreq)
-                                .await?
-                                .encode::<
-                                    crate::proto::mavio::acquisition::v1::CreateRemotePathMappingResponse,
-                                >(format)
-                        }
-                    })
-                },
-            )
-            .with_spec(PROFILE_SERVICE_CREATE_REMOTE_PATH_MAPPING_SPEC)
-            .route_view(
-                PROFILE_SERVICE_SERVICE_NAME,
-                "DeleteRemotePathMapping",
-                {
-                    let svc = ::std::sync::Arc::clone(&self);
-                    ::connectrpc::view_handler_fn(move |
-                        ctx,
-                        req: ::buffa::view::OwnedView<
-                            crate::proto::mavio::acquisition::v1::__buffa::view::DeleteRemotePathMappingRequestView<
-                                'static,
-                            >,
-                        >,
-                        format|
-                    {
-                        let svc = ::std::sync::Arc::clone(&svc);
-                        async move {
-                            let sreq = ::connectrpc::ServiceRequest::<
-                                crate::proto::mavio::acquisition::v1::DeleteRemotePathMappingRequest,
-                            >::from_parts(req.reborrow(), req.bytes());
-                            svc.delete_remote_path_mapping(ctx, sreq)
-                                .await?
-                                .encode::<
-                                    crate::proto::mavio::acquisition::v1::DeleteRemotePathMappingResponse,
-                                >(format)
-                        }
-                    })
-                },
-            )
-            .with_spec(PROFILE_SERVICE_DELETE_REMOTE_PATH_MAPPING_SPEC)
-            .route_view_idempotent(
-                PROFILE_SERVICE_SERVICE_NAME,
                 "GetAcquisitionSettings",
                 {
                     let svc = ::std::sync::Arc::clone(&self);
@@ -2949,24 +2612,6 @@ impl<T: ProfileService> ::connectrpc::Dispatcher for ProfileServiceServer<T> {
                 Some(
                     ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
                         .with_spec(PROFILE_SERVICE_DELETE_RELEASE_PROFILE_SPEC),
-                )
-            }
-            "ListRemotePathMappings" => {
-                Some(
-                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(true)
-                        .with_spec(PROFILE_SERVICE_LIST_REMOTE_PATH_MAPPINGS_SPEC),
-                )
-            }
-            "CreateRemotePathMapping" => {
-                Some(
-                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
-                        .with_spec(PROFILE_SERVICE_CREATE_REMOTE_PATH_MAPPING_SPEC),
-                )
-            }
-            "DeleteRemotePathMapping" => {
-                Some(
-                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
-                        .with_spec(PROFILE_SERVICE_DELETE_REMOTE_PATH_MAPPING_SPEC),
                 )
             }
             "GetAcquisitionSettings" => {
@@ -3412,72 +3057,6 @@ impl<T: ProfileService> ::connectrpc::Dispatcher for ProfileServiceServer<T> {
                         .await?
                         .encode::<
                             crate::proto::mavio::acquisition::v1::DeleteReleaseProfileResponse,
-                        >(format)
-                })
-            }
-            "ListRemotePathMappings" => {
-                let svc = ::std::sync::Arc::clone(&self.inner);
-                Box::pin(async move {
-                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
-                        crate::proto::mavio::acquisition::v1::ListRemotePathMappingsRequest,
-                    >(request.encoded()?, format)?;
-                    let req: crate::proto::mavio::acquisition::v1::__buffa::view::ListRemotePathMappingsRequestView<
-                        '_,
-                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
-                        &body,
-                        ctx.decode_options(),
-                    )?;
-                    let req = ::connectrpc::ServiceRequest::<
-                        crate::proto::mavio::acquisition::v1::ListRemotePathMappingsRequest,
-                    >::from_parts(&req, &body);
-                    svc.list_remote_path_mappings(ctx, req)
-                        .await?
-                        .encode::<
-                            crate::proto::mavio::acquisition::v1::ListRemotePathMappingsResponse,
-                        >(format)
-                })
-            }
-            "CreateRemotePathMapping" => {
-                let svc = ::std::sync::Arc::clone(&self.inner);
-                Box::pin(async move {
-                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
-                        crate::proto::mavio::acquisition::v1::CreateRemotePathMappingRequest,
-                    >(request.encoded()?, format)?;
-                    let req: crate::proto::mavio::acquisition::v1::__buffa::view::CreateRemotePathMappingRequestView<
-                        '_,
-                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
-                        &body,
-                        ctx.decode_options(),
-                    )?;
-                    let req = ::connectrpc::ServiceRequest::<
-                        crate::proto::mavio::acquisition::v1::CreateRemotePathMappingRequest,
-                    >::from_parts(&req, &body);
-                    svc.create_remote_path_mapping(ctx, req)
-                        .await?
-                        .encode::<
-                            crate::proto::mavio::acquisition::v1::CreateRemotePathMappingResponse,
-                        >(format)
-                })
-            }
-            "DeleteRemotePathMapping" => {
-                let svc = ::std::sync::Arc::clone(&self.inner);
-                Box::pin(async move {
-                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
-                        crate::proto::mavio::acquisition::v1::DeleteRemotePathMappingRequest,
-                    >(request.encoded()?, format)?;
-                    let req: crate::proto::mavio::acquisition::v1::__buffa::view::DeleteRemotePathMappingRequestView<
-                        '_,
-                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
-                        &body,
-                        ctx.decode_options(),
-                    )?;
-                    let req = ::connectrpc::ServiceRequest::<
-                        crate::proto::mavio::acquisition::v1::DeleteRemotePathMappingRequest,
-                    >::from_parts(&req, &body);
-                    svc.delete_remote_path_mapping(ctx, req)
-                        .await?
-                        .encode::<
-                            crate::proto::mavio::acquisition::v1::DeleteRemotePathMappingResponse,
                         >(format)
                 })
             }
@@ -4505,141 +4084,6 @@ where
                 &self.transport,
                 &self.config,
                 PROFILE_SERVICE_DELETE_RELEASE_PROFILE_SPEC
-                    .with_origin(::connectrpc::SpecOrigin::Client),
-                request,
-                options,
-            )
-            .await
-    }
-    /// Call the ListRemotePathMappings RPC. Sends a request to /mavio.acquisition.v1.ProfileService/ListRemotePathMappings.
-    pub async fn list_remote_path_mappings(
-        &self,
-        request: crate::proto::mavio::acquisition::v1::ListRemotePathMappingsRequest,
-    ) -> Result<
-        ::connectrpc::client::UnaryResponse<
-            ::buffa::view::OwnedView<
-                crate::proto::mavio::acquisition::v1::__buffa::view::ListRemotePathMappingsResponseView<
-                    'static,
-                >,
-            >,
-        >,
-        ::connectrpc::ConnectError,
-    > {
-        self.list_remote_path_mappings_with_options(
-                request,
-                ::connectrpc::client::CallOptions::default(),
-            )
-            .await
-    }
-    /// Call the ListRemotePathMappings RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
-    pub async fn list_remote_path_mappings_with_options(
-        &self,
-        request: crate::proto::mavio::acquisition::v1::ListRemotePathMappingsRequest,
-        options: ::connectrpc::client::CallOptions,
-    ) -> Result<
-        ::connectrpc::client::UnaryResponse<
-            ::buffa::view::OwnedView<
-                crate::proto::mavio::acquisition::v1::__buffa::view::ListRemotePathMappingsResponseView<
-                    'static,
-                >,
-            >,
-        >,
-        ::connectrpc::ConnectError,
-    > {
-        ::connectrpc::client::call_unary(
-                &self.transport,
-                &self.config,
-                PROFILE_SERVICE_LIST_REMOTE_PATH_MAPPINGS_SPEC
-                    .with_origin(::connectrpc::SpecOrigin::Client),
-                request,
-                options,
-            )
-            .await
-    }
-    /// Call the CreateRemotePathMapping RPC. Sends a request to /mavio.acquisition.v1.ProfileService/CreateRemotePathMapping.
-    pub async fn create_remote_path_mapping(
-        &self,
-        request: crate::proto::mavio::acquisition::v1::CreateRemotePathMappingRequest,
-    ) -> Result<
-        ::connectrpc::client::UnaryResponse<
-            ::buffa::view::OwnedView<
-                crate::proto::mavio::acquisition::v1::__buffa::view::CreateRemotePathMappingResponseView<
-                    'static,
-                >,
-            >,
-        >,
-        ::connectrpc::ConnectError,
-    > {
-        self.create_remote_path_mapping_with_options(
-                request,
-                ::connectrpc::client::CallOptions::default(),
-            )
-            .await
-    }
-    /// Call the CreateRemotePathMapping RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
-    pub async fn create_remote_path_mapping_with_options(
-        &self,
-        request: crate::proto::mavio::acquisition::v1::CreateRemotePathMappingRequest,
-        options: ::connectrpc::client::CallOptions,
-    ) -> Result<
-        ::connectrpc::client::UnaryResponse<
-            ::buffa::view::OwnedView<
-                crate::proto::mavio::acquisition::v1::__buffa::view::CreateRemotePathMappingResponseView<
-                    'static,
-                >,
-            >,
-        >,
-        ::connectrpc::ConnectError,
-    > {
-        ::connectrpc::client::call_unary(
-                &self.transport,
-                &self.config,
-                PROFILE_SERVICE_CREATE_REMOTE_PATH_MAPPING_SPEC
-                    .with_origin(::connectrpc::SpecOrigin::Client),
-                request,
-                options,
-            )
-            .await
-    }
-    /// Call the DeleteRemotePathMapping RPC. Sends a request to /mavio.acquisition.v1.ProfileService/DeleteRemotePathMapping.
-    pub async fn delete_remote_path_mapping(
-        &self,
-        request: crate::proto::mavio::acquisition::v1::DeleteRemotePathMappingRequest,
-    ) -> Result<
-        ::connectrpc::client::UnaryResponse<
-            ::buffa::view::OwnedView<
-                crate::proto::mavio::acquisition::v1::__buffa::view::DeleteRemotePathMappingResponseView<
-                    'static,
-                >,
-            >,
-        >,
-        ::connectrpc::ConnectError,
-    > {
-        self.delete_remote_path_mapping_with_options(
-                request,
-                ::connectrpc::client::CallOptions::default(),
-            )
-            .await
-    }
-    /// Call the DeleteRemotePathMapping RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
-    pub async fn delete_remote_path_mapping_with_options(
-        &self,
-        request: crate::proto::mavio::acquisition::v1::DeleteRemotePathMappingRequest,
-        options: ::connectrpc::client::CallOptions,
-    ) -> Result<
-        ::connectrpc::client::UnaryResponse<
-            ::buffa::view::OwnedView<
-                crate::proto::mavio::acquisition::v1::__buffa::view::DeleteRemotePathMappingResponseView<
-                    'static,
-                >,
-            >,
-        >,
-        ::connectrpc::ConnectError,
-    > {
-        ::connectrpc::client::call_unary(
-                &self.transport,
-                &self.config,
-                PROFILE_SERVICE_DELETE_REMOTE_PATH_MAPPING_SPEC
                     .with_origin(::connectrpc::SpecOrigin::Client),
                 request,
                 options,

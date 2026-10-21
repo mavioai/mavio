@@ -50,7 +50,7 @@ erDiagram
 | `EpisodeState` | What acquisition keeps of an episode of a series by its season and number: its scene numbering and last search time |
 | `Download` / `HistoryEvent` / `BlocklistEntry` / `PendingRelease` | A tracked download, an acquisition event, a release not to grab again, a release kept to grab later |
 | `ExtraFile` | A subtitle or other extra file imported with a movie or episode file |
-| `RemotePathMapping` | How a download client's paths map to the server's |
+| `DownloadPathMapping` | Where the server reads a folder a download client reports |
 | `Request` / `SeasonRequest` | A user's request of a movie or of seasons of a series (§13.6) |
 | `Issue` / `IssueComment` | A problem a user reports with an item, and its thread (§13.7) |
 | `SubtitleProfile` / `SubtitleProfileAssignment` | The subtitles movies and episodes want, and the libraries, movies and series they are assigned to (§14) |
@@ -281,7 +281,7 @@ A `Job` is durable background work stored in the database (scans, metadata refre
 | `BlocklistRepository` | `Add`, `List` (paged, newest first, an item's or all), `Delete` |
 | `PendingReleaseRepository` | `List` an item's or all (oldest first), `Add`, `Delete` |
 | `ExtraFileRepository` | `List` an item's (by path), `Put` (insert or replace), `Delete` |
-| `RemotePathMappingRepository` | `List`, `Put`, `Delete` |
+| `DownloadPathMappingRepository` | `List`, `ReplaceClient` |
 | `RequestRepository` | `Get`, `List` (paged, by user, statuses, kind, TMDB ID and item, newest or most recently modified first), `Put` (insert or replace by ID), `Delete`, `QuotaUsed` (see §13.6); deleting the user deletes their requests |
 | `IssueRepository` | `Get` and `List` (paged, with their comments), `Put`, `AddComment`, `Delete`; deleting the item or the user deletes their issues |
 | `SubtitleProfileRepository` | `Get`, `List` (by name), `Put` (insert or replace by ID; names are unique: `ErrConflict`), `Delete` (deleting its assignments) |
@@ -404,8 +404,8 @@ An `EpisodeState` keeps, apart from the episode's item, which a scan may replace
 ### 13.4 Settings
 `AcquisitionSettings`, part of the server settings, are Radarr's: how propers and repacks are treated (`prefer_and_upgrade`, `do_not_upgrade`, `do_not_prefer`), whether indexer flags are preferred, completed download handling and new searches after failures (for releases grabbed from an interactive search only when also allowed), the maximum release size, the minimum age and retention of usenet releases, hardcoded subtitles allowed or whitelisted, the free space an import must leave, the delay after which movies count as available, the RSS sync interval (10–120 minutes, 0 disabling it) and the download check interval, the recycle bin and its cleanup, hard links, extra files and empty folders, and `Naming`: whether movie files are renamed, illegal characters replaced, colons replaced (`delete`, `dash`, `space_dash`, `space_dash_space`, `smart`), and the movie folder and file templates. Sonarr's settings join them: whether the episodes of wanted series whose files go missing are unmonitored, when an episode imported under a name showing its title must have one (`EpisodeTitleRequired`), the download client working folders whose files are not imported (`DownloadClientWorkingFolders`, prefixes separated by `|`, `_UNPACK_|_FAILED_` when empty), and in `Naming` whether episode files are renamed, the templates of standard, daily and anime episode files and of series, season and specials folders, and the `MultiEpisodeStyle`; an empty template or style means Sonarr's default.
 
-### 13.5 Remote Path Mappings
-A `RemotePathMapping` maps a folder a download client on `Host` reports (`RemotePath`) to the absolute folder the server sees (`LocalPath`). A host's remote path is mapped once.
+### 13.5 Download Path Mappings
+A `DownloadPathMapping` maps a folder a download client (`PluginID`, `ClientID`) reports (`RemotePath`) to where the server reads it (`LocalPath`): an absolute path of the server's file system, or a folder of a remote (`remote:<remote>:<path>`). A client's folder is mapped once, and a client's mappings are replaced together.
 
 ### 13.6 Requests
 * A `Request` is a user's request of a movie or a series by TMDB ID (`Kind`, `TmdbID`, and a series' `TvdbID` once known), with its `Title` and `Year`, the `ItemID` of the item it made wanted, the `RequestedBy` and `ModifiedBy` users, `IgnoreQuota`, a `Message` (why it failed) and its times. A series request lists its `Seasons` (`SeasonRequest`: a number, at least one, each once, and a status); a movie request has none.

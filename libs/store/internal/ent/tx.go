@@ -34,6 +34,8 @@ type Tx struct {
 	DisplayPreferences *DisplayPreferencesClient
 	// Download is the client for interacting with the Download builders.
 	Download *DownloadClient
+	// DownloadPathMapping is the client for interacting with the DownloadPathMapping builders.
+	DownloadPathMapping *DownloadPathMappingClient
 	// EpisodeState is the client for interacting with the EpisodeState builders.
 	EpisodeState *EpisodeStateClient
 	// ExtraFile is the client for interacting with the ExtraFile builders.
@@ -80,8 +82,6 @@ type Tx struct {
 	QualityProfile *QualityProfileClient
 	// ReleaseProfile is the client for interacting with the ReleaseProfile builders.
 	ReleaseProfile *ReleaseProfileClient
-	// RemotePathMapping is the client for interacting with the RemotePathMapping builders.
-	RemotePathMapping *RemotePathMappingClient
 	// Request is the client for interacting with the Request builders.
 	Request *RequestClient
 	// Setting is the client for interacting with the Setting builders.
@@ -250,6 +250,7 @@ func (tx *Tx) init() {
 	tx.DelayProfile = NewDelayProfileClient(tx.config)
 	tx.DisplayPreferences = NewDisplayPreferencesClient(tx.config)
 	tx.Download = NewDownloadClient(tx.config)
+	tx.DownloadPathMapping = NewDownloadPathMappingClient(tx.config)
 	tx.EpisodeState = NewEpisodeStateClient(tx.config)
 	tx.ExtraFile = NewExtraFileClient(tx.config)
 	tx.FolderState = NewFolderStateClient(tx.config)
@@ -273,7 +274,6 @@ func (tx *Tx) init() {
 	tx.QualityDefinition = NewQualityDefinitionClient(tx.config)
 	tx.QualityProfile = NewQualityProfileClient(tx.config)
 	tx.ReleaseProfile = NewReleaseProfileClient(tx.config)
-	tx.RemotePathMapping = NewRemotePathMappingClient(tx.config)
 	tx.Request = NewRequestClient(tx.config)
 	tx.Setting = NewSettingClient(tx.config)
 	tx.StorageJob = NewStorageJobClient(tx.config)

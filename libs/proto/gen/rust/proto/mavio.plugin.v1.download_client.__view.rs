@@ -1345,8 +1345,8 @@ pub struct DownloadClientView<'a> {
     ///
     /// Field 11: `prefers_torrent_file`
     pub prefers_torrent_file: ::core::option::Option<bool>,
-    /// The host the client runs on, which remote path mappings are kept by;
-    /// empty for clients that are folders.
+    /// The host the client runs on, by which the server suggests where it
+    /// reads the client's folders; empty for clients that are folders.
     ///
     /// Field 12: `host`
     pub host: ::core::option::Option<&'a str>,
@@ -1823,8 +1823,8 @@ impl DownloadClientOwnedView {
     pub fn prefers_torrent_file(&self) -> ::core::option::Option<bool> {
         self.0.reborrow().prefers_torrent_file
     }
-    /// The host the client runs on, which remote path mappings are kept by;
-    /// empty for clients that are folders.
+    /// The host the client runs on, by which the server suggests where it
+    /// reads the client's folders; empty for clients that are folders.
     ///
     /// Field 12: `host`
     #[must_use]
@@ -4294,8 +4294,8 @@ pub struct DownloadView<'a> {
     ///
     /// Field 9: `seed_ratio`
     pub seed_ratio: ::core::option::Option<f64>,
-    /// Where the download's files are, as the client sees them: remote path
-    /// mappings of the client's host apply.
+    /// Where the download's files are, as the client sees them: the
+    /// client's download path mappings apply.
     ///
     /// Field 10: `output_path`
     pub output_path: ::core::option::Option<&'a str>,
@@ -4812,8 +4812,8 @@ impl DownloadOwnedView {
     pub fn seed_ratio(&self) -> ::core::option::Option<f64> {
         self.0.reborrow().seed_ratio
     }
-    /// Where the download's files are, as the client sees them: remote path
-    /// mappings of the client's host apply.
+    /// Where the download's files are, as the client sees them: the
+    /// client's download path mappings apply.
     ///
     /// Field 10: `output_path`
     #[must_use]
