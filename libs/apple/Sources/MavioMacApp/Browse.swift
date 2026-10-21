@@ -4,14 +4,14 @@
 
     /// The desktop layout: the sidebar with the search field, Home,
     /// Discover, Downloads and the libraries, the user's menu at its foot,
-    /// and the place chosen beside it. Collapsed, the sidebar is a rail of
-    /// icons, as the desktop app's (docs/clients.md §6.3, Desktop).
+    /// and the place chosen beside it, as the desktop app's
+    /// (docs/clients.md §6.3, Desktop), without its rail: the window's
+    /// controls would straddle it.
     @MainActor
     final class BrowseController: SidebarSplitController {
         private unowned let root: RootController
         private let sidebar: SidebarController
         private let places: PlacesController
-        private static let railKey = "sidebarCollapsed"
 
         init(root: RootController) {
             self.root = root
@@ -20,7 +20,6 @@
             super.init(theme: root.context.theme)
             sidebar.onSelect = { [weak self] in self?.select($0) }
             sidebar.onSearch = { [weak self] in self?.search($0) }
-            sidebar.onToggle = { [weak self] in self?.toggleSidebar(nil) }
         }
 
         @available(*, unavailable)
@@ -32,20 +31,8 @@
             let content = NSSplitViewItem(viewController: places)
             content.titlebarSeparatorStyle = .none
             addSplitViewItem(content)
-            setRail(UserDefaults.standard.bool(forKey: Self.railKey))
+            root.context.sidebarSearches = true
             select(.home)
-        }
-
-        /// Collapses the sidebar to a rail of icons, or expands it.
-        override func toggleSidebar(_ sender: Any?) {
-            setRail(!sidebar.rail)
-            UserDefaults.standard.set(sidebar.rail, forKey: Self.railKey)
-        }
-
-        private func setRail(_ rail: Bool) {
-            sidebar.rail = rail
-            root.context.sidebarSearches = !rail
-            setRail(rail ? root.context.theme.layout.rail : nil)
         }
 
         /// Shows place; choosing the place shown returns to its top.
@@ -66,10 +53,9 @@
             places.search(query)
         }
 
-        /// Puts the cursor in the sidebar's field, expanding the sidebar;
-        /// with Search shown, in the page's own.
+        /// Puts the cursor in the sidebar's field; with Search shown, in the
+        /// page's own.
         func focusSearch() {
-            if sidebar.rail { toggleSidebar(nil) }
             sidebar.focusSearch()
         }
     }
@@ -156,11 +142,10 @@
     }
 
     /// The sidebar, as the desktop app's: a band under the window's
-    /// controls with the button collapsing it at its end, the search field,
+    /// controls with the assistant's button at its end, the search field,
     /// Home, Discover where a server discovers, Downloads, and the libraries
     /// of every server, by server with several; the user's button at its
-    /// foot. As a rail it is icons alone, Search one of them, the button
-    /// expanding it under the window's controls.
+    /// foot.
     @MainActor
     final class SidebarController: NSViewController, NSTableViewDataSource, NSTableViewDelegate,
         NSSearchFieldDelegate
@@ -174,11 +159,6 @@
         private var context: MacContext { root.context }
         private let table = NSTableView()
         private let field = NSSearchField()
-        private var toggle: Pressable?
-        private var header: NSStackView?
-        private var user: UserButton?
-        private var expandedConstraints: [NSLayoutConstraint] = []
-        private var railConstraints: [NSLayoutConstraint] = []
         private var entries: [Entry] = []
         private var libraries: [String: [LibraryEntry]] = [:]
         private var observer: Observer?
@@ -188,17 +168,6 @@
         var onSelect: (@MainActor (Place) -> Void)?
         /// Called with the query confirmed in the search field.
         var onSearch: (@MainActor (String) -> Void)?
-        /// Called by the button collapsing or expanding the sidebar.
-        var onToggle: (@MainActor () -> Void)?
-
-        /// Whether the sidebar is a rail of icons.
-        var rail = false {
-            didSet {
-                guard rail != oldValue, isViewLoaded else { return }
-                applyRail()
-                reload()
-            }
-        }
 
         init(root: RootController) {
             self.root = root
@@ -235,25 +204,14 @@
             field.action = #selector(submitted(_:))
             field.controlSize = .large
             field.translatesAutoresizingMaskIntoConstraints = false
-            let icon = IconView("sidebar", size: 18, color: theme.colors.textSecondary)
-            // As the assistant's button: 28 points round, the icon 18 points
-            // inside it, filled while the pointer is on it.
-            let toggle = Pressable(
-                icon, radius: 14, insets: NSEdgeInsets(top: 5, left: 5, bottom: 5, right: 5), theme: theme
-            ) {
-                [weak self] in self?.onToggle?()
-            }
-            self.toggle = toggle
-            // The assistant button beside the toggle, under it in the rail.
-            let header = NSStackView.horizontal([toggle], spacing: MavioSpacing.s4)
+            // The assistant's button at the end of the band.
+            let header = NSStackView.horizontal([], spacing: MavioSpacing.s4)
             if let assistant = context.assistant {
-                header.insertArrangedSubview(AssistantButton(assistant: assistant, theme: theme), at: 0)
+                header.addArrangedSubview(AssistantButton(assistant: assistant, theme: theme))
             }
-            self.header = header
             let line = Box(fill: theme.colors.border)
             line.size(height: 1)
             let user = UserButton(context: context) { [weak self] button in self?.root.toggleUserMenu(from: button) }
-            self.user = user
             for v in [header, field, scroll, line, user] as [NSView] { view.addSubview(v) }
             // The band under the window's controls is as tall as the title bar.
             let band = view.safeAreaLayoutGuide.topAnchor
@@ -265,8 +223,6 @@
                 line.trailingAnchor.constraint(equalTo: view.trailingAnchor),
                 user.topAnchor.constraint(equalTo: line.bottomAnchor, constant: MavioSpacing.s8),
                 user.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -MavioSpacing.s8),
-            ])
-            expandedConstraints = [
                 user.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: MavioSpacing.s8),
                 user.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -MavioSpacing.s8),
                 header.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -MavioSpacing.s8),
@@ -275,31 +231,8 @@
                 field.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: MavioSpacing.s12),
                 field.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -MavioSpacing.s12),
                 scroll.topAnchor.constraint(equalTo: field.bottomAnchor, constant: MavioSpacing.s8),
-            ]
-            railConstraints = [
-                user.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-                header.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-                header.topAnchor.constraint(equalTo: band),
-                scroll.topAnchor.constraint(equalTo: header.bottomAnchor, constant: MavioSpacing.s8),
-            ]
+            ])
             self.view = view
-            applyRail()
-        }
-
-        private func applyRail() {
-            NSLayoutConstraint.deactivate(rail ? expandedConstraints : railConstraints)
-            NSLayoutConstraint.activate(rail ? railConstraints : expandedConstraints)
-            field.isHidden = rail
-            header?.orientation = rail ? .vertical : .horizontal
-            let label = rail ? MavioStrings.navExpandSidebar : MavioStrings.navCollapseSidebar
-            toggle?.setAccessibilityLabel(label)
-            toggle?.toolTip = label
-            user?.compact = rail
-            table.style = rail ? .plain : .sourceList
-            table.selectionHighlightStyle = rail ? .none : .regular
-            // The plain style draws the control's background: the rail keeps
-            // the sidebar's.
-            table.backgroundColor = .clear
         }
 
         override func viewDidLoad() {
@@ -352,18 +285,16 @@
         }
 
         private func reload() {
-            var next: [Entry] = rail ? [.place(.search, MavioStrings.navSearch, "search")] : []
-            next.append(.place(.home, MavioStrings.navHome, "home"))
+            var next: [Entry] = [.place(.home, MavioStrings.navHome, "home")]
             if context.discovery.server != nil { next.append(.place(.discover, MavioStrings.navDiscover, "discover")) }
             next.append(.place(.downloads, MavioStrings.navDownloads, "downloads"))
             next.append(.header(MavioStrings.navLibraries))
             let servers = context.model.signedInServers
             for server in servers {
                 let list = libraries[server.id] ?? []
-                if servers.count > 1 && !list.isEmpty && !rail { next.append(.header(server.name)) }
+                if servers.count > 1 && !list.isEmpty { next.append(.header(server.name)) }
                 for library in list {
-                    let title = servers.count > 1 ? "\(library.name) · \(server.name)" : library.name
-                    next.append(.place(.library(library), rail ? title : library.name, libraryIcon(library.kind)))
+                    next.append(.place(.library(library), library.name, libraryIcon(library.kind)))
                 }
             }
             entries = next
@@ -391,7 +322,7 @@
         func numberOfRows(in tableView: NSTableView) -> Int { entries.count }
 
         func tableView(_ tableView: NSTableView, isGroupRow row: Int) -> Bool {
-            if case .header = entries[row] { !rail } else { false }
+            if case .header = entries[row] { true } else { false }
         }
 
         func tableView(_ tableView: NSTableView, shouldSelectRow row: Int) -> Bool {
@@ -402,19 +333,6 @@
             switch entries[row] {
             case .header(let title):
                 let cell = NSTableCellView()
-                if rail {
-                    // A line between the places and the libraries.
-                    let line = Box(fill: context.theme.colors.border)
-                    line.translatesAutoresizingMaskIntoConstraints = false
-                    cell.addSubview(line)
-                    NSLayoutConstraint.activate([
-                        line.heightAnchor.constraint(equalToConstant: 1),
-                        line.widthAnchor.constraint(equalToConstant: 32),
-                        line.centerXAnchor.constraint(equalTo: cell.centerXAnchor),
-                        line.centerYAnchor.constraint(equalTo: cell.centerYAnchor),
-                    ])
-                    return cell
-                }
                 let label = NSTextField.label(title, context.theme.fonts.caption, color: .secondaryLabelColor)
                 cell.addSubview(label)
                 NSLayoutConstraint.activate([
@@ -424,7 +342,7 @@
                 ])
                 return cell
             case .place(let place, let title, let icon):
-                let cell = PlaceCell(title: title, icon: icon, rail: rail, theme: context.theme)
+                let cell = PlaceCell(title: title, icon: icon)
                 cell.isShown = { [weak self] in self?.shown == place }
                 return cell
             }
@@ -434,43 +352,22 @@
             let row = table.selectedRow
             guard entries.indices.contains(row), case .place(let place, _, _) = entries[row] else { return }
             if place != shown { onSelect?(place) }
-            if rail { show(place) }
         }
 
         func tableView(_ tableView: NSTableView, heightOfRow row: Int) -> CGFloat {
-            if case .header = entries[row] { rail ? 17 : 28 } else { rail ? 44 : 30 }
+            if case .header = entries[row] { 28 } else { 30 }
         }
     }
 
     /// A place of the sidebar: its icon, filled while it shows, and its
-    /// title; in the rail its icon alone, centered in a tile filled while
-    /// it shows, its title a tooltip.
+    /// title.
     final class PlaceCell: NSTableCellView {
         private let icon: IconView
-        private let tile: Box?
-        private let theme: Theme
         var isShown: (@MainActor () -> Bool)?
 
-        init(title: String, icon name: String, rail: Bool, theme: Theme) {
-            self.theme = theme
-            icon = IconView(name, size: rail ? 20 : 18)
-            tile = rail ? Box(radius: MavioRadius.md) : nil
+        init(title: String, icon name: String) {
+            icon = IconView(name, size: 18)
             super.init(frame: .zero)
-            if let tile {
-                tile.translatesAutoresizingMaskIntoConstraints = false
-                addSubview(tile)
-                tile.addSubview(icon)
-                icon.center(in: tile)
-                NSLayoutConstraint.activate([
-                    tile.widthAnchor.constraint(equalToConstant: 36),
-                    tile.heightAnchor.constraint(equalToConstant: 36),
-                    tile.centerXAnchor.constraint(equalTo: centerXAnchor),
-                    tile.centerYAnchor.constraint(equalTo: centerYAnchor),
-                ])
-                toolTip = title
-                setAccessibilityLabel(title)
-                return
-            }
             let label = NSTextField.label(title, .init(size: 13, lineHeight: 16, weight: .regular))
             label.textColor = .labelColor
             let stack = NSStackView.horizontal([icon, label], spacing: MavioSpacing.s8)
@@ -489,7 +386,6 @@
         func refresh() {
             let shown = isShown?() ?? false
             icon.fillIcon = shown
-            tile?.fill = shown ? theme.colors.fillSelected : nil
         }
 
         override func viewDidMoveToSuperview() {
@@ -515,22 +411,13 @@
         private let press: @MainActor (NSView) -> Void
         private var observer: Observer?
         private let stack = NSStackView.horizontal([], spacing: 10)
-        private var insets: [NSLayoutConstraint] = []
         private var tracking: NSTrackingArea?
 
         init(context: MacContext, press: @escaping @MainActor (NSView) -> Void) {
             self.context = context
             self.press = press
             super.init(radius: 10)
-            stack.translatesAutoresizingMaskIntoConstraints = false
-            addSubview(stack)
-            insets = [
-                stack.leadingAnchor.constraint(equalTo: leadingAnchor),
-                trailingAnchor.constraint(equalTo: stack.trailingAnchor),
-                stack.topAnchor.constraint(equalTo: topAnchor),
-                bottomAnchor.constraint(equalTo: stack.bottomAnchor),
-            ]
-            NSLayoutConstraint.activate(insets)
+            addFilling(stack, insets: .all(MavioSpacing.s8))
             setAccessibilityElement(true)
             setAccessibilityRole(.button)
             observer = Observer { [weak self] in self?.update() }
@@ -549,22 +436,11 @@
             let lines = NSStackView.vertical(
                 [title, NSTextField.label(line, theme.fonts.caption, color: theme.colors.textSecondary)], spacing: 0)
             lines.setContentHuggingPriority(.init(1), for: .horizontal)
-            // In the rail, as the web UI's, a square of 36 points with the
-            // avatar alone, 28 points.
-            let avatar = AvatarView(name: name, size: compact ? 28 : 32, theme: theme)
-            for inset in insets { inset.constant = compact ? MavioSpacing.s4 : MavioSpacing.s8 }
-            stack.setViews(
-                compact ? [avatar] : [avatar, lines, IconView("selector", size: 16, color: theme.colors.textTertiary)])
-            toolTip = compact ? name : nil
+            stack.setViews([
+                AvatarView(name: name, size: 32, theme: theme), lines,
+                IconView("selector", size: 16, color: theme.colors.textTertiary),
+            ])
             setAccessibilityLabel(MavioStrings.navUserMenu(name: name))
-        }
-
-        /// Whether it is the avatar alone, in the rail.
-        var compact = false {
-            didSet {
-                guard compact != oldValue else { return }
-                update()
-            }
         }
 
         /// Whether the menu it opens is open, which keeps it highlighted.

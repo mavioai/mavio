@@ -83,10 +83,6 @@ enum MainMenu {
             withTitle: MavioStrings.actionBack, action: #selector(AppDelegate.goBack), keyEquivalent: "[")
         back.target = target
         menu.addItem(.separator())
-        menu.addItem(
-            withTitle: MavioStrings.menuToggleSidebar, action: #selector(NSSplitViewController.toggleSidebar(_:)),
-            keyEquivalent: "s"
-        ).keyEquivalentModifierMask = [.command, .control]
         let tv = menu.addItem(
             withTitle: MavioStrings.menuTvMode, action: #selector(AppDelegate.toggleTVMode), keyEquivalent: "t")
         tv.keyEquivalentModifierMask = [.command, .control]

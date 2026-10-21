@@ -45,9 +45,6 @@
         private let theme: Theme
         private var observer: NSObjectProtocol?
         private var applying = false
-        /// Whether the sidebar is a rail of fixed width, which neither
-        /// follows SidebarWidth nor is dragged.
-        public private(set) var railWidth: CGFloat?
 
         /// A split view controller in theme.
         public init(theme: Theme) {
@@ -80,14 +77,6 @@
             return side
         }
 
-        /// Makes the sidebar a rail width wide, or, given nil, the width
-        /// SidebarWidth says.
-        public func setRail(_ width: CGFloat?) {
-            railWidth = width
-            (splitView as? EdgeSplitView)?.resizable = width == nil
-            applyWidth()
-        }
-
         override open func viewWillAppear() {
             super.viewWillAppear()
             applyWidth()
@@ -95,9 +84,9 @@
 
         private func applyWidth() {
             guard let side = splitViewItems.first else { return }
-            let width = railWidth ?? SidebarWidth.current(theme)
-            side.minimumThickness = railWidth ?? SidebarWidth.minimum
-            side.maximumThickness = railWidth ?? SidebarWidth.maximum
+            let width = SidebarWidth.current(theme)
+            side.minimumThickness = SidebarWidth.minimum
+            side.maximumThickness = SidebarWidth.maximum
             guard abs(side.viewController.view.frame.width - width) >= 0.5 || !isViewLoaded else { return }
             applying = true
             splitView.setPosition(width, ofDividerAt: 0)
@@ -107,7 +96,7 @@
         override open func splitViewDidResizeSubviews(_ notification: Notification) {
             super.splitViewDidResizeSubviews(notification)
             // Only the user's dragging chooses the width.
-            guard !applying, railWidth == nil, (splitView as? EdgeSplitView)?.dragging == true,
+            guard !applying, (splitView as? EdgeSplitView)?.dragging == true,
                 let side = splitViewItems.first
             else { return }
             let width = side.viewController.view.frame.width.rounded()
@@ -118,7 +107,6 @@
             _ splitView: NSSplitView, effectiveRect proposedEffectiveRect: NSRect, forDrawnRect drawnRect: NSRect,
             ofDividerAt dividerIndex: Int
         ) -> NSRect {
-            guard railWidth == nil else { return .zero }
             // A handle 8 points wide over the edge, as the web UI's.
             return drawnRect.insetBy(dx: -(8 - drawnRect.width) / 2, dy: 0)
         }
@@ -134,10 +122,6 @@
         private var hovering = false
         /// Whether the user drags the divider.
         private(set) var dragging = false
-        /// Whether the divider is dragged at all.
-        var resizable = true {
-            didSet { update() }
-        }
         /// Called as the divider is double-clicked.
         var onReset: (@MainActor () -> Void)?
 
@@ -199,7 +183,7 @@
 
         override func mouseDown(with event: NSEvent) {
             let point = convert(event.locationInWindow, from: nil)
-            guard resizable, handle?.contains(point) == true else { return super.mouseDown(with: event) }
+            guard handle?.contains(point) == true else { return super.mouseDown(with: event) }
             if event.clickCount == 2 {
                 onReset?()
                 return
@@ -219,7 +203,7 @@
         }
 
         private func update() {
-            let shown = resizable && (hovering || dragging)
+            let shown = hovering || dragging
             if line.superview !== self { addSubview(line, positioned: .above, relativeTo: nil) }
             line.isHidden = !shown
             guard shown, arrangedSubviews.count > 1 else { return }
