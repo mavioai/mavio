@@ -163,6 +163,7 @@ fun Modifier.focusCard(focused: Boolean): Modifier {
 fun Modifier.focusArtwork(focused: Boolean, radius: Dp): Modifier {
     val accent = theme.colors.accent
     val shadow = theme.colors.tvFocusShadow
+    val page = theme.colors.tvBackground
     val shape = RoundedCornerShape(radius)
     return this
         .drawWithContent {
@@ -179,8 +180,9 @@ fun Modifier.focusArtwork(focused: Boolean, radius: Dp): Modifier {
                 style = Stroke(3.dp.toPx()),
             )
         }
-        // Unclipped, so that the border drawn around it shows.
-        .then(if (focused) Modifier.shadow(32.dp, shape, clip = false, ambientColor = shadow, spotColor = shadow) else Modifier)
+        // Unclipped, so that the border drawn around it shows; on the page's
+        // color, lest the shadow show through artwork of a translucent fill.
+        .then(if (focused) Modifier.shadow(32.dp, shape, clip = false, ambientColor = shadow, spotColor = shadow).background(page, shape) else Modifier)
 }
 
 /**
