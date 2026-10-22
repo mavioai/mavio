@@ -181,8 +181,21 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
           const { default: HlsJs } = await import("hls.js");
           if (cancelled) return;
           hls = new HlsJs({ startPosition: start });
+          // A network error that hls.js gives up on, as when the computer's
+          // network changes under it, is retried for about twenty seconds,
+          // twice as long apart each time, before it is shown.
+          const delays = [1000, 2000, 4000, 8000, 8000];
+          let retries = 0;
           hls.on(HlsJs.Events.ERROR, (_, data) => {
-            if (data.fatal) setError(`${data.type}: ${data.details}`);
+            if (!data.fatal) return;
+            if (data.type === HlsJs.ErrorTypes.NETWORK_ERROR && retries < delays.length) {
+              setTimeout(() => !cancelled && hls?.startLoad(), delays[retries++]);
+              return;
+            }
+            setError(`${data.type}: ${data.details}`);
+          });
+          hls.on(HlsJs.Events.FRAG_LOADED, () => {
+            retries = 0;
           });
           hls.on(HlsJs.Events.SUBTITLE_TRACKS_UPDATED, () => {
             if (!hls) return;
