@@ -1,13 +1,18 @@
 package dev.mavio.ui
 
 import android.os.SystemClock
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
+import androidx.compose.material3.pulltorefresh.PullToRefreshState
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -23,6 +28,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.Dp
@@ -122,16 +129,50 @@ fun PullToRefresh(
         },
         modifier.fillMaxSize(),
         state = state,
-        indicator = {
-            PullToRefreshDefaults.Indicator(
-                state = state,
-                isRefreshing = spinning,
-                modifier = Modifier.align(Alignment.TopCenter).padding(top = top),
-            )
-        },
+        indicator = { Spinner(state, spinning, Modifier.align(Alignment.TopCenter).padding(top = top)) },
         content = content,
     )
 }
+
+/**
+ * The pull's spinner, as Material's but fading in as it slides down from
+ * [modifier]'s top rather than cut there, which under a hero's clear header
+ * would show it halved.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun Spinner(state: PullToRefreshState, refreshing: Boolean, modifier: Modifier) {
+    val color = PullToRefreshDefaults.indicatorColor
+    Box(
+        modifier
+            .size(SPINNER_SIZE)
+            .graphicsLayer {
+                val pulled = if (refreshing) 1f else state.distanceFraction
+                translationY = pulled * PullToRefreshDefaults.PositionalThreshold.toPx() - size.height
+                alpha = (pulled * 2f).coerceIn(0f, 1f)
+                shadowElevation = if (pulled > 0f) PullToRefreshDefaults.Elevation.toPx() else 0f
+                shape = CircleShape
+                clip = true
+            }
+            .background(PullToRefreshDefaults.indicatorContainerColor, CircleShape),
+        Alignment.Center,
+    ) {
+        if (refreshing) {
+            CircularProgressIndicator(Modifier.size(SPINNER_SIZE / 2), color, strokeWidth = 2.5.dp)
+        } else {
+            CircularProgressIndicator(
+                { state.distanceFraction.coerceIn(0f, 1f) },
+                Modifier.size(SPINNER_SIZE / 2),
+                color,
+                strokeWidth = 2.5.dp,
+                trackColor = Color.Transparent,
+            )
+        }
+    }
+}
+
+/** The spinner's diameter, Material's. */
+private val SPINNER_SIZE = 40.dp
 
 /** Pull to refresh of a page read again by [reload]. */
 @Composable
