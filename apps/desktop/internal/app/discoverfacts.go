@@ -447,9 +447,9 @@ func titleLinks(c *ui.Context, title *acquisitionv1.Title, ratings []*pluginv1.R
 	return links
 }
 
-// serviceLogos are the logos of titleLinks' links, by name, as Seerr's:
-// each as wide as Seerr's, the mono ones white alone and drawn in the
-// text's color.
+// serviceLogos are the logos of titleLinks' links, and of the sites the
+// server names its items' links by, by name, as Seerr's: each as wide as
+// Seerr's, the mono ones white alone and drawn in the text's color.
 var serviceLogos = map[string]struct {
 	logo  string
 	width float32
@@ -457,11 +457,31 @@ var serviceLogos = map[string]struct {
 }{
 	"TMDB":            {"tmdb", 32, false},
 	"TVDB":            {"tvdb", 36, true},
+	"TheTVDB":         {"tvdb", 36, true},
 	"IMDb":            {"imdb", 32, false},
 	"Rotten Tomatoes": {"rt", 56, false},
 	"Trakt":           {"trakt", 32, false},
 	"Simkl":           {"simkl", 32, true},
 	"Letterboxd":      {"letterboxd", 32, false},
+}
+
+// serviceLinks builds links elsewhere whose names serviceLogos has as
+// their logos.
+func (a *App) serviceLinks(c *ui.Context, links []externalLink) {
+	for i, l := range links {
+		s := serviceLogos[l.name]
+		if a.logoLink(c.Key(i), l.name, func(fg ui.Color) {
+			logo := style.Service(s.logo, s.mono)
+			w, h := logo.Size()
+			if s.mono {
+				ui.Icon(c, logo).Size(s.width, s.width*h/w).TextColor(fg)
+			} else {
+				ui.Image(c, logo).Size(s.width, s.width*h/w)
+			}
+		}).Clicked() {
+			_ = a.opts.OpenURL(l.url)
+		}
+	}
 }
 
 // logoLink builds a link elsewhere as its logo, which logo builds in the
@@ -694,20 +714,7 @@ func (a *App) titleFactBox(c *ui.Context, server string, title *acquisitionv1.Ti
 					}
 				}
 				if a.opts.OpenURL != nil {
-					for i, l := range titleLinks(c, title, rs) {
-						s := serviceLogos[l.name]
-						if a.logoLink(c.Key(i), l.name, func(fg ui.Color) {
-							logo := style.Service(s.logo, s.mono)
-							w, h := logo.Size()
-							if s.mono {
-								ui.Icon(c, logo).Size(s.width, s.width*h/w).TextColor(fg)
-							} else {
-								ui.Image(c, logo).Size(s.width, s.width*h/w)
-							}
-						}).Clicked() {
-							_ = a.opts.OpenURL(l.url)
-						}
-					}
+					a.serviceLinks(c, titleLinks(c, title, rs))
 				}
 			})
 		})

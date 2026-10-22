@@ -68,7 +68,7 @@ func TestDetailsIssues(t *testing.T) {
 		t.Fatal(err)
 	}
 	h.settle()
-	if err := h.tt.ChooseMenuItem("Report a Problem…"); err != nil {
+	if err := h.tt.ChooseMenuItem("Report a Problem"); err != nil {
 		t.Fatal(err)
 	}
 	h.settle()

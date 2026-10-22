@@ -204,7 +204,7 @@ func (f *fakeCore) Stream(ctx context.Context, req *capiv1.Request, part func(*c
 	switch {
 	case req.HasListServers():
 		m.Servers = capiv1.Servers_builder{Servers: f.servers}.Build()
-	case req.HasStart(), req.HasCancelQuickConnect(), req.HasAuthorizeQuickConnect(), req.HasOrderServers(), req.HasSetPlayed(), req.HasSetFavorite(),
+	case req.HasStart(), req.HasSetLanguages(), req.HasCancelQuickConnect(), req.HasAuthorizeQuickConnect(), req.HasOrderServers(), req.HasSetPlayed(), req.HasSetFavorite(),
 		req.HasPollLink(), req.HasCancelLink(), req.HasCancelAccountSignIn():
 		m.Done = &capiv1.Done{}
 	case req.HasGetAccount():

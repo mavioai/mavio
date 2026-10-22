@@ -94,7 +94,7 @@ func TestDetailsMore(t *testing.T) {
 	}
 	h.settle()
 	if got, want := h.tt.Menu(), []string{
-		"Play On…", "Report a Problem…", "Add to Playlist", "Add to Collection", "Edit Metadata", "Identify", "Refresh Metadata", "Edit Images",
+		"Play On", "-", "Add to Playlist", "Add to Collection", "-", "Edit Metadata", "Identify", "Refresh Metadata", "Edit Images", "-", "Report a Problem",
 	}; !slices.Equal(got, want) {
 		t.Errorf("menu = %q, want = %q", got, want)
 	}
@@ -168,7 +168,7 @@ func TestPlayOn(t *testing.T) {
 		t.Fatal(err)
 	}
 	h.settle()
-	if err := h.tt.ChooseMenuItem("Play On…"); err != nil {
+	if err := h.tt.ChooseMenuItem("Play On"); err != nil {
 		t.Fatal(err)
 	}
 	h.settle()
@@ -243,7 +243,7 @@ func TestDetailsMetadata(t *testing.T) {
 	}
 
 	choose("Edit Metadata")
-	for _, want := range []string{"Edit The Long Orbit", "Original Title", "Tagline", "Runtime (minutes)", "TMDB", "IMDb", "Lock All Metadata", "Cast and Crew"} {
+	for _, want := range []string{"Edit The Long Orbit", "Original Title", "Tagline", "Runtime (minutes)", "TMDB", "IMDb", "Library Default", "Lock All Metadata", "Cast and Crew"} {
 		if !h.tt.HasText(want) {
 			t.Errorf("edit dialog has no %q; texts = %q", want, h.tt.Texts())
 		}

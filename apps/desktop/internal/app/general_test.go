@@ -29,7 +29,7 @@ func TestServerSettings(t *testing.T) {
 	// General: the name, metadata, sign-in and network.
 	h.app.router.Push("/settings/general")
 	h.settle()
-	want("Server name", "Metadata language", "English (default)", "Stay signed in", "Password resets", "Network", "Local discovery")
+	want("Server name", "Metadata language", "Follow client language (default)", "Stay signed in", "Password resets", "Network", "Local discovery")
 	ss.general.draft.name = "Den"
 	ss.general.draft.resetPlugin = "dev.mavio.mail"
 	ss.general.draft.httpsPort = 8920

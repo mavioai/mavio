@@ -340,16 +340,21 @@ func (a *App) about(c *ui.Context, st *detailsState, d *capiv1.Details, info *it
 		tags = it.GetTags()
 	}
 	// A television opens no web pages (docs/tv.md §1); a movie or series
-	// links elsewhere as its discovered title does.
-	var links []externalLink
+	// links elsewhere as its discovered title does, and the links of
+	// another item to a site with a logo show its logo too.
+	var siteLinks, links []externalLink
 	if a.opts.OpenURL != nil && !tv {
 		if titled {
 			if title != nil {
-				links = titleLinks(c, title, a.ratings(server, kind, tmdb).value)
+				siteLinks = titleLinks(c, title, a.ratings(server, kind, tmdb).value)
 			}
 		} else {
 			for _, l := range it.GetExternalUrls() {
-				links = append(links, externalLink{l.GetName(), l.GetUrl()})
+				if _, ok := serviceLogos[l.GetName()]; ok {
+					siteLinks = append(siteLinks, externalLink{l.GetName(), l.GetUrl()})
+				} else {
+					links = append(links, externalLink{l.GetName(), l.GetUrl()})
+				}
 			}
 		}
 	}
@@ -358,7 +363,7 @@ func (a *App) about(c *ui.Context, st *detailsState, d *capiv1.Details, info *it
 	leading := slices.ContainsFunc(credits, func(e creditEntry) bool { return !e.cast() })
 	streaming := title.GetWatchProviders()
 	text := d.GetOverview()
-	if text == "" && !ratings && !leading && len(tags) == 0 && len(facts) == 0 && len(media) == 0 && len(links) == 0 && len(streaming) == 0 {
+	if text == "" && !ratings && !leading && len(tags) == 0 && len(facts) == 0 && len(media) == 0 && len(links) == 0 && len(siteLinks) == 0 && len(streaming) == 0 {
 		return
 	}
 	// Side by side where there is room, else one under the other.
@@ -371,7 +376,7 @@ func (a *App) about(c *ui.Context, st *detailsState, d *capiv1.Details, info *it
 				box = ui.Row(c).Gap(64).AlignItems(ui.Start)
 			}
 			box.Children(func() {
-				if text != "" || leading || len(tags) > 0 || len(links) > 0 {
+				if text != "" || leading || len(tags) > 0 || len(links) > 0 || len(siteLinks) > 0 {
 					a.inColumn(func() {
 						col := ui.Column(c).MinWidth(0).Gap(20)
 						if wide {
@@ -408,6 +413,11 @@ func (a *App) about(c *ui.Context, st *detailsState, d *capiv1.Details, info *it
 									}
 								})
 							}
+							if len(siteLinks) > 0 {
+								ui.Row(c).Padding(8, 0, 0).GapX(20).GapY(12).Justify(ui.Start).AlignItems(ui.Center).Wrap().Children(func() {
+									a.serviceLinks(c, siteLinks)
+								})
+							}
 						})
 					})
 				}
@@ -424,7 +434,7 @@ func (a *App) about(c *ui.Context, st *detailsState, d *capiv1.Details, info *it
 							case scored:
 								ui.Row(c).Justify(ui.Start).Children(func() { a.titleRatings(c, server, title) })
 							case ratings:
-								ratingTiles(c, it)
+								ratingRow(c, it)
 							}
 							factGrid(c, facts)
 							watchProviders(c, a, streaming)
@@ -573,32 +583,23 @@ func factGrid(c *ui.Context, facts []fact) {
 	})
 }
 
-// ratingTiles builds the audience's rating out of 10 and the critics'
-// score out of 100, large.
-func ratingTiles(c *ui.Context, it *libraryv1.Item) {
+// ratingRow builds the audience's rating out of 10 and the critics'
+// score out of 100 in a row, as a discovered title's ratings are, each
+// named when pointed at.
+func ratingRow(c *ui.Context, it *libraryv1.Item) {
 	colors := style.Colors(c)
-	tile := func(label string, value func(), scale string) {
-		ui.Column(c.Key(label)).MinWidth(144).Gap(4).Padding(12, 16).Radius(12).Background(style.Color(colors.Fill)).Children(func() {
-			style.Text(ui.Text(c, label), style.Type(c).Footnote).FontWeight(600).TextColor(style.Color(colors.TextSecondary))
-			ui.Row(c).Gap(6).AlignItems(ui.Center).Children(func() {
-				value()
-				if scale != "" {
-					style.Text(ui.Text(c, scale), style.Type(c).Callout).TextColor(style.Color(colors.TextTertiary))
-				}
-			})
-		})
-	}
-	ui.Row(c).Gap(12).Wrap().Children(func() {
+	fg := style.Color(colors.TextPrimary)
+	ui.Row(c).GapX(16).GapY(4).Justify(ui.Start).AlignItems(ui.Center).Wrap().Children(func() {
 		if r := it.GetCommunityRating(); r > 0 {
-			tile(style.T(c, "item.communityRating"), func() {
-				ui.Icon(c, style.Icon("rating", true)).Size(22, 22).TextColor(ui.RGB(0xFF, 0xD6, 0x0A))
-				style.Text(ui.Text(c, fmt.Sprintf("%.1f", r)), style.Type(c).Title2).FontWeight(700).TextColor(style.Color(colors.TextPrimary))
-			}, "/ 10")
+			label := fmt.Sprintf("%s %.1f / 10", style.T(c, "item.communityRating"), r)
+			ui.Row(c.Key("community")).Gap(6).AlignItems(ui.Center).Label(label).Tooltip(label).Children(func() {
+				ui.Icon(c, style.Icon("rating", true)).Size(20, 20).TextColor(ui.RGB(0xFF, 0xD6, 0x0A))
+				style.Text(ui.Text(c, fmt.Sprintf("%.1f", r)), style.Type(c).Callout).FontWeight(600).TextColor(fg)
+			})
 		}
 		if r := it.GetCriticRating(); r > 0 {
-			tile(style.T(c, "item.criticRating"), func() {
-				style.Text(ui.Text(c, fmt.Sprintf("%.0f%%", r)), style.Type(c).Title2).FontWeight(700).TextColor(style.Color(colors.TextPrimary))
-			}, "")
+			label := fmt.Sprintf("%s %.0f%%", style.T(c, "item.criticRating"), r)
+			style.Text(ui.Text(c.Key("critic"), label), style.Type(c).Callout).FontWeight(600).TextColor(fg).Tooltip(label)
 		}
 	})
 }

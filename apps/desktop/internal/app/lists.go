@@ -2,6 +2,8 @@ package app
 
 import (
 	"context"
+	"slices"
+	"strings"
 
 	"github.com/egoist/mygo/ui"
 
@@ -75,39 +77,52 @@ func (a *App) moreMenu(c *ui.Context, st *detailsState, server string, it *libra
 		dialog moreDialog
 		label  string
 	}
-	var entries []entry
-	if playable(kind) {
-		entries = append(entries, entry{morePlayOn, style.T(c, "remote.playOn")})
+	// The entries in groups, separated: playing, adding to lists,
+	// metadata, reporting, and renaming or deleting a list, the deletion
+	// last.
+	var groups [][]entry
+	add := func(g ...entry) {
+		if len(g) > 0 {
+			groups = append(groups, g)
+		}
 	}
-	if reportable(kind) && a.mayReport(server) {
-		entries = append(entries, entry{moreReport, style.T(c, "issues.report")})
+	if playable(kind) {
+		add(entry{morePlayOn, style.T(c, "remote.playOn")})
 	}
 	if listable(kind) {
-		entries = append(entries, entry{morePlaylist, style.T(c, "lists.addToPlaylist")})
+		g := []entry{{morePlaylist, style.T(c, "lists.addToPlaylist")}}
 		if admin {
-			entries = append(entries, entry{moreCollection, style.T(c, "lists.addToCollection")})
+			g = append(g, entry{moreCollection, style.T(c, "lists.addToCollection")})
 		}
+		add(g...)
 	}
 	if admin && kind != libraryv1.ItemKind_ITEM_KIND_PLAYLIST {
-		entries = append(entries, entry{moreEdit, style.T(c, "metadata.edit")})
+		g := []entry{{moreEdit, style.T(c, "metadata.edit")}}
 		if identifiable(kind) {
-			entries = append(entries, entry{moreIdentify, style.T(c, "metadata.identify")})
+			g = append(g, entry{moreIdentify, style.T(c, "metadata.identify")})
 		}
 		if kind != libraryv1.ItemKind_ITEM_KIND_COLLECTION {
-			entries = append(entries, entry{moreRefresh, style.T(c, "metadata.refresh")})
+			g = append(g, entry{moreRefresh, style.T(c, "metadata.refresh")})
 		}
-		entries = append(entries, entry{moreImages, style.T(c, "metadata.images")})
+		add(append(g, entry{moreImages, style.T(c, "metadata.images")})...)
+	}
+	if reportable(kind) && a.mayReport(server) {
+		add(entry{moreReport, style.T(c, "issues.report")})
 	}
 	if own {
-		entries = append(entries, entry{moreRename, style.T(c, "lists.rename")}, entry{moreDelete, style.T(c, "lists.delete")})
+		add(entry{moreRename, style.T(c, "lists.rename")}, entry{moreDelete, style.T(c, "lists.delete")})
 	}
-	if len(entries) == 0 {
+	if len(groups) == 0 {
 		return
 	}
 	m := &st.more
 	a.overButton(c, "more", style.T(c, "lists.more"), false).Menu(func(menu *ui.Menu) {
-		for _, e := range entries {
-			if menu.Item(e.label).Chosen() {
+		for i, e := range slices.Concat(groups...) {
+			if i > 0 && slices.ContainsFunc(groups, func(g []entry) bool { return g[0] == e }) {
+				menu.Separator()
+			}
+			// Plain names, without the ellipsis some strings end in.
+			if menu.Item(strings.TrimSuffix(e.label, "…")).Chosen() {
 				if e.dialog == moreReport {
 					a.report(it)
 					continue

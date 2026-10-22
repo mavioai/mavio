@@ -165,7 +165,9 @@ type App struct {
 	// generation counts the changes of the servers' content, so that what
 	// shows them loads again.
 	generation int
-	libraries  map[string]*task[*capiv1.Libraries]
+	// locale is the language the core last asked the servers for.
+	locale    string
+	libraries map[string]*task[*capiv1.Libraries]
 	// sessionsChanged counts the changes of the user's devices, so that
 	// the remote control shows them again.
 	sessionsChanged int
@@ -381,6 +383,24 @@ func (a *App) setLanguage(tag string) {
 	a.savePreferences()
 }
 
+// askLocale has the core ask the servers for the language the app shows
+// in, as the web UI does, so that they name what they send in it, such
+// as the metadata of items following their clients' languages; what
+// shows the servers' content loads again in it.
+func (a *App) askLocale(tag string) {
+	if tag == a.locale {
+		return
+	}
+	a.locale = tag
+	go func() {
+		if _, err := a.opts.Core.Call(a.ctx, capiv1.Request_builder{SetLanguages: capiv1.SetLanguages_builder{Tags: []string{tag}}.Build()}.Build()); err != nil {
+			slog.ErrorContext(a.ctx, "set the core's languages", "tag", tag, "error", err)
+			return
+		}
+		a.opts.Update(func() { a.generation++ })
+	}()
+}
+
 // autoplayNext reports whether the next episode plays as one ends.
 func (a *App) autoplayNext() bool { return !a.prefs.NoAutoplayNext }
 
@@ -427,6 +447,7 @@ func (a *App) savePreferences() {
 // View builds the window.
 func (a *App) View(c *ui.Context) {
 	c.SetTheme(style.Theme(c.Theme().Dark, a.prefs.TV && a.phase == phaseReady))
+	a.askLocale(c.Locale())
 	a.windowKeys(c)
 	if tvShortcut(c) {
 		a.setTV(!a.prefs.TV)

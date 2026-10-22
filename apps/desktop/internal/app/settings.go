@@ -662,6 +662,10 @@ func choose(c *ui.Context, label string, value *int, labels []string) bool {
 	return false
 }
 
+// selectSearchFrom is how many options a select lists without a field
+// searching them.
+const selectSearchFrom = 16
+
 // selectOf builds a drop-down of labels choosing *chosen, which Changed
 // reports. On the television, as the web UI's (docs/tv.md §5), it turns
 // white with focus, up and down move focus on from it while it is closed,
@@ -733,13 +737,36 @@ func deskSelect(c *ui.Context, chosen *string, labels []string) ui.Element {
 		ui.Icon(c, style.Icon("expand", false)).Size(14, 14).Shrink(0).TextColor(style.Color(colors.TextSecondary))
 	})
 	width := b.Bounds().W
+	// Of many options, the popup searches them by what is typed in a
+	// field above them, as the web UI's.
+	searched := len(labels) >= selectSearchFrom
+	query := ui.Local(b, "query", func() string { return "" })
+	if !sp.Open() {
+		*query = ""
+	}
 	shadow := design.ElevationLevel3
 	sp.Popup(func(panel ui.Element) {
 		panel.Margin(4, 0, 0, 0).MinWidth(width).Radius(14).AlignItems(ui.Stretch).
 			Shadow(shadow.X, shadow.Y, shadow.Blur, shadow.Spread, style.Color(shadow.Color))
-		ui.Scroll(c).MaxHeight(384).Radius(14).Background(style.Color(colors.SurfaceOverlay)).Border(1, style.Color(colors.Border)).Children(func() {
+		if searched {
+			panel.MinWidth(max(width, 256)).Background(style.Color(colors.SurfaceOverlay)).Border(1, style.Color(colors.Border))
+		}
+		shown := labels
+		if searched {
+			ui.SearchField(c, query).Placeholder(style.T(c, "nav.search")).AutoFocus().Margin(6, 6, 0)
+			q := strings.ToLower(strings.TrimSpace(*query))
+			shown = slices.DeleteFunc(slices.Clone(labels), func(l string) bool { return !strings.Contains(strings.ToLower(l), q) })
+			if len(shown) == 0 {
+				style.Text(ui.Text(c, style.T(c, "schema.noMatches")), style.Type(c).Callout).TextColor(style.Color(colors.TextSecondary)).Padding(8, 16)
+			}
+		}
+		scroll := ui.Scroll(c).MaxHeight(384).Radius(14)
+		if !searched {
+			scroll.Background(style.Color(colors.SurfaceOverlay)).Border(1, style.Color(colors.Border))
+		}
+		scroll.Children(func() {
 			ui.Column(c).Padding(6).AlignItems(ui.Stretch).Children(func() {
-				for _, l := range labels {
+				for _, l := range shown {
 					item := sp.Item(l).MinHeight(28).Padding(0, 8).Gap(8).Radius(6).AlignItems(ui.Center)
 					if item.Highlighted() {
 						item.Background(style.Color(colors.Fill))

@@ -114,6 +114,7 @@ func formOf(it *libraryv1.Item) metadataForm {
 			"production_locations": list(it.GetProductionLocations()), "artists": list(it.GetArtists()),
 			"album_artists": list(it.GetAlbumArtists()), "index_number": numberOf(it.GetIndexNumber()),
 			"parent_index_number": numberOf(it.GetParentIndexNumber()), "absolute_number": numberOf(it.GetAbsoluteNumber()),
+			"metadata_language": it.GetMetadataLanguage(), "metadata_country": it.GetMetadataCountry(),
 		},
 		status:       int(it.GetSeriesStatus()),
 		externalIDs:  maps.Clone(it.GetExternalIds()),
@@ -193,6 +194,7 @@ func changesOf(before, after metadataForm) (md *libraryv1.ItemMetadata, paths []
 		ProductionLocations: unlist(t["production_locations"]), Artists: unlist(t["artists"]), AlbumArtists: unlist(t["album_artists"]),
 		SeriesStatus: new(libraryv1.SeriesStatus(after.status)), ExternalIds: ids,
 		Locked: new(after.locked), LockedFields: after.lockedFields,
+		MetadataLanguage: new(t["metadata_language"]), MetadataCountry: new(t["metadata_country"]),
 	}
 	if n, ok := number("production_year", 0, 9999); ok {
 		b.ProductionYear = new(int32(n))
@@ -254,6 +256,22 @@ func switchRow(c *ui.Context, label string, on *bool, width float32) bool {
 		changed = ui.Switch(c, on).Label(label).Changed()
 	})
 	return changed
+}
+
+// metadataChoice builds the edit form's select of a field's code among
+// those choices lists, the first following the library.
+func (a *App) metadataChoice(c *ui.Context, server string, f *metadataForm, k, label string,
+	choices func(c *ui.Context, server, none, current string) ([]string, []string),
+) {
+	metadataField(c, label, false, func() ui.Element {
+		codes, labels := choices(c, server, style.T(c, "metadata.libraryDefault"), f.text[k])
+		chosen := labels[max(slices.Index(codes, f.text[k]), 0)]
+		s := selectOf(c, &chosen, labels)
+		if s.Changed() {
+			f.text[k] = codes[slices.Index(labels, chosen)]
+		}
+		return s
+	})
 }
 
 // editDialog builds the dialog editing the item's fields and locks,
@@ -369,6 +387,10 @@ func (a *App) editDialog(c *ui.Context, m *moreState, server string, it *library
 						text("tags", style.T(c, "metadata.tags"), true, commas)
 						text("studios", style.T(c, "metadata.studios"), true, commas)
 						text("production_locations", style.T(c, "metadata.locations"), true, commas)
+						if identifiable(kind) {
+							a.metadataChoice(c, server, f, "metadata_language", style.T(c, "libraries.language"), a.languageChoices)
+							a.metadataChoice(c, server, f, "metadata_country", style.T(c, "libraries.country"), a.countryChoices)
+						}
 					})
 					if len(kinds.value) > 0 {
 						style.Text(ui.Text(c, style.T(c, "metadata.externalIds")), style.Type(c).Headline).TextColor(style.Color(colors.TextPrimary)).Margin(8, 0, 0)

@@ -381,30 +381,14 @@ func (a *App) libraryForm(c *ui.Context, id string, library *libraryv1.Library) 
 	a.foldersGroup(c, server, library)
 	group(c, "metadata", style.T(c, "libraries.metadata"), "", func(g *settingsGroup) {
 		g.row(style.T(c, "libraries.language"), "", nil, func() {
-			codes, labels := []string{""}, []string{style.T(c, "libraries.serverDefault")}
-			for _, l := range a.languages(server) {
-				if l.GetCode() != "" && !slices.Contains(codes, l.GetCode()) {
-					codes, labels = append(codes, l.GetCode()), append(labels, cmpOr(languageName(c, l.GetCode()), l.GetName()))
-				}
-			}
-			if !slices.Contains(codes, d.language) {
-				codes, labels = append(codes, d.language), append(labels, languageName(c, d.language))
-			}
+			codes, labels := a.languageChoices(c, server, style.T(c, "libraries.serverDefault"), d.language)
 			i := slices.Index(codes, d.language)
 			if choose(c, style.T(c, "libraries.language"), &i, labels) {
 				d.language = codes[i]
 			}
 		})
 		g.row(style.T(c, "libraries.country"), "", nil, func() {
-			codes, labels := []string{""}, []string{style.T(c, "libraries.serverDefault")}
-			for _, x := range a.countries(server) {
-				if x.GetCode() != "" && !slices.Contains(codes, x.GetCode()) {
-					codes, labels = append(codes, x.GetCode()), append(labels, regionName(c, x.GetCode()))
-				}
-			}
-			if !slices.Contains(codes, d.country) {
-				codes, labels = append(codes, d.country), append(labels, regionName(c, d.country))
-			}
+			codes, labels := a.countryChoices(c, server, style.T(c, "libraries.serverDefault"), d.country)
 			i := slices.Index(codes, d.country)
 			if choose(c, style.T(c, "libraries.country"), &i, labels) {
 				d.country = codes[i]
@@ -725,4 +709,34 @@ func (a *App) folderPicker(c *ui.Context, server string, chosen []string, choose
 			})
 		})
 	})
+}
+
+// languageChoices returns the server's metadata languages' codes and
+// names, after an empty code named none and with current kept.
+func (a *App) languageChoices(c *ui.Context, server, none, current string) (codes, labels []string) {
+	codes, labels = []string{""}, []string{none}
+	for _, l := range a.languages(server) {
+		if l.GetCode() != "" && !slices.Contains(codes, l.GetCode()) {
+			codes, labels = append(codes, l.GetCode()), append(labels, cmpOr(languageName(c, l.GetCode()), l.GetName()))
+		}
+	}
+	if !slices.Contains(codes, current) {
+		codes, labels = append(codes, current), append(labels, languageName(c, current))
+	}
+	return codes, labels
+}
+
+// countryChoices returns the server's metadata countries' codes and
+// names, after an empty code named none and with current kept.
+func (a *App) countryChoices(c *ui.Context, server, none, current string) (codes, labels []string) {
+	codes, labels = []string{""}, []string{none}
+	for _, x := range a.countries(server) {
+		if x.GetCode() != "" && !slices.Contains(codes, x.GetCode()) {
+			codes, labels = append(codes, x.GetCode()), append(labels, regionName(c, x.GetCode()))
+		}
+	}
+	if !slices.Contains(codes, current) {
+		codes, labels = append(codes, current), append(labels, regionName(c, current))
+	}
+	return codes, labels
 }
