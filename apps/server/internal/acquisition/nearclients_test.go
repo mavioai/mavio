@@ -24,13 +24,18 @@ func TestChooseClientPrefersLibraryStorage(t *testing.T) {
 	tests := []struct {
 		name string
 		libs []string
-		want []string
+		// dlPriority and farPriority are the clients' priorities.
+		dlPriority, farPriority int32
+		want                    []string
 	}{
-		{"library", e.lib.Paths, []string{"dl/qb", "dl/qb", "dl/qb"}},
-		{"no library", nil, []string{"far/qb", "dl/qb", "far/qb"}},
+		{"library", e.lib.Paths, 1, 1, []string{"dl/qb", "dl/qb", "dl/qb"}},
+		{"no library", nil, 1, 1, []string{"far/qb", "dl/qb", "far/qb"}},
+		// Priority comes first: dl is preferred only among equals.
+		{"library, far first", e.lib.Paths, 2, 1, []string{"far/qb", "far/qb"}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			e.client.priority, far.priority = tt.dlPriority, tt.farPriority
 			for i, want := range tt.want {
 				c, err := e.rt.chooseClient(e.ctx, clientChoice{protocol: core.ProtocolTorrent, libraryPaths: tt.libs})
 				if err != nil {

@@ -115,10 +115,10 @@ func (c Client) isClient(ref string) bool {
 // the enabled clients of the release's protocol, those sharing one of
 // the tags, else those without tags; of those, the indexer's own client
 // when it has one; else the ones not left out after failing, or all of
-// them when they all are and the choice does not filter them; of those,
-// the ones on the storage of the release's library, when there are any
-// (nearClients); then, of those of the first priority, the one after the
-// client last used for the protocol, in turn. No client fails with
+// them when they all are and the choice does not filter them; then, of
+// those of the first priority, the ones on the storage of the release's
+// library when there are any (nearClients), and of those the one after
+// the client last used for the protocol, in turn. No client fails with
 // errClientUnavailable.
 func (r *Runtime) chooseClient(ctx context.Context, ch clientChoice) (Client, error) {
 	clients, failures := r.ListClients(ctx)
@@ -172,9 +172,9 @@ func (r *Runtime) chooseClient(ctx context.Context, ch clientChoice) (Client, er
 		r.logger().DebugContext(ctx, "no download client is available that has not failed recently; trying one that has", "protocol", protocol)
 		candidates = tagged
 	}
-	candidates = r.nearClients(ctx, candidates, ch.libraryPaths)
 	first := slices.MinFunc(candidates, func(a, b Client) int { return cmp.Compare(a.GetPriority(), b.GetPriority()) }).GetPriority()
 	candidates = slices.DeleteFunc(candidates, func(c Client) bool { return c.GetPriority() != first })
+	candidates = r.nearClients(ctx, candidates, ch.libraryPaths)
 	slices.SortFunc(candidates, func(a, b Client) int { return cmp.Compare(a.Ref(), b.Ref()) })
 
 	r.mu.Lock()

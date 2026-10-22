@@ -115,12 +115,14 @@ type fakeClient struct {
 	roots []string
 	// container is the client's managed container.
 	container string
+	// priority is the client's priority; 0 for 1.
+	priority int32
 }
 
 func (f *fakeClient) ListDownloadClients(context.Context, *pluginv1.ListDownloadClientsRequest) (*pluginv1.ListDownloadClientsResponse, error) {
 	c := pluginv1.DownloadClient_builder{
 		Id: new("qb"), Name: new("qBittorrent"), Protocol: new(pluginv1.DownloadProtocol_DOWNLOAD_PROTOCOL_TORRENT), Enabled: new(true),
-		Priority: new(int32(1)), Host: new("seedbox"), RemoveCompletedDownloads: new(true), RemoveFailedDownloads: new(true),
+		Priority: new(max(f.priority, 1)), Host: new("seedbox"), RemoveCompletedDownloads: new(true), RemoveFailedDownloads: new(true),
 	}.Build()
 	f.mu.Lock()
 	if !f.disabledUntil.IsZero() {
