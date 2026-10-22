@@ -2,9 +2,8 @@
     import AppKit
     import MavioMac
 
-    /// Discover: a row of each catalog of the first server that discovers,
-    /// with Requests at the right above the first row, where the SwiftUI
-    /// app had it in the toolbar (docs/tv.md §6.3).
+    /// Discover: its title and Requests, then a row of each catalog of the
+    /// first server that discovers (docs/tv.md §6.3).
     final class DiscoverPage: Page {
         private let page = ScrollPage(
             [], spacing: 0, insets: NSEdgeInsets(top: MavioSpacing.s8, left: 0, bottom: MavioSpacing.s24, right: 0))
@@ -44,8 +43,20 @@
                 guard let self else { return }
                 self.push(RequestsPage(context: self.context, serverId: server.id))
             }
-            let bar = NSStackView.horizontal([Spacer(), requests], spacing: MavioSpacing.s8)
-            var views: [NSView] = [margined(bar, bottom: theme.isTV ? 0 : MavioSpacing.s4)]
+            // As the web UI's: the screen's title, Requests at the other end;
+            // in television mode the navigation bar names it.
+            let bar: NSStackView
+            if theme.isTV {
+                bar = NSStackView.horizontal([Spacer(), requests], spacing: MavioSpacing.s8)
+            } else {
+                let name = NSTextField.label(
+                    MavioStrings.navDiscover, theme.fonts.title1, color: theme.colors.textPrimary)
+                bar = NSStackView.horizontal([name, Spacer(), requests], spacing: MavioSpacing.s8)
+                bar.alignment = .centerY
+            }
+            var views: [NSView] = [
+                margined(bar, top: theme.isTV ? 0 : MavioSpacing.s16, bottom: theme.isTV ? 0 : MavioSpacing.s4)
+            ]
             var first: CatalogShelf?
             for query in queries {
                 let shelf = CatalogShelf(query: query, page: self)

@@ -56,6 +56,12 @@
         private var heightConstraint: NSLayoutConstraint!
         /// Room above and below the cards for one to grow with focus.
         private var room: CGFloat { theme.isTV ? 24 : 0 }
+        /// Called as the row reaches or leaves its start and its end, both
+        /// when its cards fit.
+        public var onEnds: (@MainActor (_ atStart: Bool, _ atEnd: Bool) -> Void)? {
+            didSet { reportEnds() }
+        }
+        private var ends: (Bool, Bool)?
 
         /// A row in theme, its cards inset by the layout's margin.
         public init(theme: Theme) {
@@ -82,6 +88,34 @@
             addFilling(scroll)
             heightConstraint = heightAnchor.constraint(equalToConstant: 0)
             heightConstraint.isActive = true
+            scroll.contentView.postsBoundsChangedNotifications = true
+            collection.postsFrameChangedNotifications = true
+            for (name, object) in [
+                (NSView.boundsDidChangeNotification, scroll.contentView as NSView),
+                (NSView.frameDidChangeNotification, collection),
+            ] {
+                NotificationCenter.default.addObserver(self, selector: #selector(moved), name: name, object: object)
+            }
+        }
+
+        isolated deinit { NotificationCenter.default.removeObserver(self) }
+
+        override public func layout() {
+            super.layout()
+            reportEnds()
+        }
+
+        @objc private func moved() { reportEnds() }
+
+        private func reportEnds() {
+            guard let onEnds else { return }
+            let clip = scroll.contentView.bounds
+            let width = max(
+                collection.frame.width, collection.collectionViewLayout?.collectionViewContentSize.width ?? 0)
+            let now = (clip.minX <= 1, clip.maxX >= width - 1)
+            guard ends.map({ $0 != now }) ?? true else { return }
+            ends = now
+            onEnds(now.0, now.1)
         }
 
         /// Unavailable: the view is made in code.
@@ -178,6 +212,14 @@
                     self?.row.page(forward: true)
                 }
                 header += [back, forward]
+                // As the web UI's: none while the cards fit, the one at an
+                // end disabled.
+                row.onEnds = { start, end in
+                    back.isHidden = start && end
+                    forward.isHidden = start && end
+                    back.isEnabled = !start
+                    forward.isEnabled = !end
+                }
             }
             let top = NSStackView.horizontal(header, spacing: MavioSpacing.s8)
             addSubview(top)
@@ -348,6 +390,20 @@
 
         @objc private func scrolled() { update() }
 
+        /// The height of row at the width: measured again once laid out
+        /// at it, as what wraps, a WrapStack or a label, knows its height
+        /// only then.
+        private func measure(_ row: NSView) -> CGFloat {
+            row.frame = NSRect(x: 0, y: 0, width: width, height: row.fittingSize(width: width))
+            row.layoutSubtreeIfNeeded()
+            return row.fittingSize(width: width)
+        }
+
+        /// Makes the rows near the page's view now rather than once the
+        /// layout under way ends, so that the height is theirs, as before
+        /// the rows grow into view.
+        public func updateNow() { update() }
+
         /// Updates once the layout under way ends.
         private func schedule() {
             guard !pending else { return }
@@ -380,7 +436,7 @@
                         made[key] = row
                     }
                     if heights[key] == nil {
-                        let measured = row.fittingSize(width: width)
+                        let measured = measure(row)
                         // A row above the view changing height moves what
                         // the view shows: the page scrolls by as much.
                         if y + h <= view.minY { shift += measured - h }

@@ -181,6 +181,8 @@
         /// The episodes' panel, clipped as it grows and shrinks.
         private let panel = NSView()
         private var panelHeight: NSLayoutConstraint!
+        /// The episodes' rows, made as they come into view.
+        private weak var lazy: LazyRows?
         private let expand: IconView
         private let header: Pressable
         private var open = false
@@ -268,6 +270,12 @@
             panel.isHidden = false
             panelHeight.isActive = false
             root?.layoutSubtreeIfNeeded()
+            // The rows in view made and measured first, so that the panel
+            // grows to their height rather than an estimate's.
+            if open, let lazy {
+                lazy.updateNow()
+                root?.layoutSubtreeIfNeeded()
+            }
             let to = open ? list.frame.height : 0
             panelHeight.constant = from
             panelHeight.isActive = true
@@ -306,19 +314,24 @@
                     guard let self, !Task.isCancelled else { return }
                     self.failed = !(error is CancellationError)
                 }
-                self?.task = nil
-                self?.renderList()
+                guard let self else { return }
+                self.task = nil
+                self.renderList()
+                // From the spinner's height to the episodes', as they come.
+                if self.open { self.slide() }
             }
         }
 
         private func renderList() {
             guard open else { return }
             var rows: [NSView] = []
+            lazy = nil
             if let episodes, !episodes.isEmpty {
                 // Only the episodes near the page's view are made, a season
                 // having up to hundreds, each with its still.
                 let latest = Array(episodes.reversed())
                 let lazy = LazyRows(estimate: 64)
+                self.lazy = lazy
                 lazy.show(keys: latest.map { String($0.episodeNumber) }) { [weak self] i in
                     guard let self else { return NSView() }
                     let rows = [divider(self.theme), self.episode(latest[i])]
@@ -326,7 +339,9 @@
                     for r in rows { r.widthAnchor.constraint(equalTo: stack.widthAnchor).isActive = true }
                     return stack
                 }
-                rows.append(lazy)
+                // As the web UI's, the episodes and the lines between them
+                // inset from the box's sides.
+                rows.append(inset(lazy, .symmetric(horizontal: MavioSpacing.s16, vertical: 0)))
             } else if episodes != nil || failed {
                 let text = NSTextField.label(
                     failed ? MavioStrings.stateError : MavioStrings.discoverNoEpisodes, theme.fonts.callout,
@@ -369,29 +384,30 @@
                         day, theme.fonts.footnote, fill: theme.colors.fill, color: theme.colors.textPrimary,
                         insets: .symmetric(horizontal: 10, vertical: 2)))
             }
-            var views: [NSView] = [WrapStack(head, spacing: MavioSpacing.s8, lineSpacing: MavioSpacing.s4)]
+            var texts: [NSView] = [WrapStack(head, spacing: MavioSpacing.s8, lineSpacing: MavioSpacing.s4)]
             if !e.overview.isEmpty {
-                views.append(
+                texts.append(
                     NSTextField.label(e.overview, theme.fonts.callout, color: theme.colors.textSecondary, lines: 0))
             }
+            let text = NSStackView.vertical(texts, spacing: MavioSpacing.s4)
+            for v in texts { v.widthAnchor.constraint(equalTo: text.widthAnchor).isActive = true }
+            text.setHuggingPriority(.init(1), for: .horizontal)
+            // As the web UI's: the text beside the still, at its end.
+            var views: [NSView] = [text]
             if let still = sized(e.stillURL, 300) {
                 let art = ArtworkView(still, title: e.name, icon: "shows", theme: theme)
                 art.radius = MavioRadius.lg
+                art.size(width: 224)
                 art.aspect(16 / 9)
-                let holder = NSStackView.horizontal([art, Spacer()], spacing: 0)
-                art.widthAnchor.constraint(lessThanOrEqualToConstant: 480).isActive = true
-                let wide = art.widthAnchor.constraint(equalTo: holder.widthAnchor)
-                wide.priority = .defaultLow
-                wide.isActive = true
-                views.append(holder)
+                views.append(art)
             }
-            let stack = NSStackView.vertical(views, spacing: MavioSpacing.s12)
-            for v in views { v.widthAnchor.constraint(equalTo: stack.widthAnchor).isActive = true }
+            let row = NSStackView.horizontal(views, spacing: MavioSpacing.s12)
+            row.alignment = .top
             // In television mode an episode takes focus, so that its list scrolls.
             let content: NSView =
                 theme.isTV
-                ? Pressable(stack, look: .highlight, radius: MavioRadius.md, theme: theme, action: {}) : stack
-            return inset(content, .symmetric(horizontal: MavioSpacing.s16, vertical: MavioSpacing.s16))
+                ? Pressable(row, look: .highlight, radius: MavioRadius.md, theme: theme, action: {}) : row
+            return inset(content, .symmetric(horizontal: 0, vertical: MavioSpacing.s16))
         }
     }
 #endif
