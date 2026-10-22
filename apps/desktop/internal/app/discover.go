@@ -1043,24 +1043,27 @@ func (a *App) titleSeasons(c *ui.Context, server string, title *acquisitionv1.Ti
 						st.open[ok] = !open
 						open = !open
 					}
-					// The episodes grow into view as the season opens, and as
-					// they load, and shrink away as it closes: the panel eases
-					// to the height its content had in the last frame.
-					panel := ui.Column(c).Shrink(0).ClipY()
-					var inner ui.Element
-					panel.Children(func() {
-						inner = ui.Column(c).Shrink(0)
-						inner.Children(func() {
-							if open || panel.LayoutBounds().H > 0.5 {
-								a.seasonEpisodes(c, server, title.GetTmdbId(), n)
-							}
-						})
-					})
-					target := float32(0)
+					// The episodes grow into view as the season opens and shrink
+					// away as it closes, as a collapsible's: the panel is the
+					// share opened of the height its content had in the last
+					// frame, and once open its content's own. The opening
+					// itself animates, so that the frames go on from the click.
+					to := float32(0)
 					if open {
-						target = inner.LayoutBounds().H
+						to = 1
 					}
-					panel.Height(box.Animate("height", target, design.DurationNormal))
+					progress := box.Animate("open", to, design.DurationNormal)
+					if open || progress > 0 {
+						panel := ui.Column(c).Shrink(0)
+						var inner ui.Element
+						panel.Children(func() {
+							inner = ui.Column(c).Shrink(0)
+							inner.Children(func() { a.seasonEpisodes(c, server, title.GetTmdbId(), n) })
+						})
+						if progress < 1 {
+							panel.ClipY().Height(progress * inner.LayoutBounds().H)
+						}
+					}
 				})
 			}
 		})

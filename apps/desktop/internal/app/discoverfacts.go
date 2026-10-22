@@ -682,8 +682,8 @@ func (a *App) titleFactBox(c *ui.Context, server string, title *acquisitionv1.Ti
 			})
 		}
 		divider(n)
-		ui.Column(c).Padding(12, 16).AlignItems(ui.Center).Children(func() {
-			ui.Row(c).GapX(20).GapY(12).Justify(ui.Center).AlignItems(ui.Center).Wrap().Children(func() {
+		ui.Column(c).Padding(12, 16).AlignItems(ui.Start).Children(func() {
+			ui.Row(c).GapX(20).GapY(12).Justify(ui.Start).AlignItems(ui.Center).Wrap().Children(func() {
 				// First Mavio's, opening the item when the server has it,
 				// where Seerr links its media server.
 				if id := title.GetItemId(); id != "" {

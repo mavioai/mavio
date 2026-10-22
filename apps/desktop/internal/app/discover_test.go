@@ -3,6 +3,7 @@ package app
 import (
 	"slices"
 	"testing"
+	"time"
 
 	acquisitionv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/acquisition/v1"
 )
@@ -41,6 +42,25 @@ func TestDiscover(t *testing.T) {
 	want("Northern Lights", "Season 1", "Season 2")
 	click("Season 2")
 	want("1 - Aurora 1", "3 - Aurora 3")
+	// A season opens at the click, rather than when another frame comes:
+	// the season below it, Season 1 as the latest is first, moves down.
+	below := func() float32 {
+		t.Helper()
+		r, ok := h.tt.Find("Season 1")
+		if !ok {
+			t.Fatal("no Season 1")
+		}
+		return r.Y
+	}
+	click("Season 2")
+	closed := below()
+	if err := h.tt.Click("Season 2"); err != nil {
+		t.Fatal(err)
+	}
+	h.tt.Advance(time.Second)
+	if got := below(); got <= closed+50 {
+		t.Errorf("Season 1 at %v after Season 2 opened, want below %v", got, closed+50)
+	}
 	click("Request")
 	want("Request Northern Lights", "Request 2 Seasons")
 	h.app.discoverState.chosen[1] = false
