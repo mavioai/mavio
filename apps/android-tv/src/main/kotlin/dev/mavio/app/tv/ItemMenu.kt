@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -238,26 +239,25 @@ internal fun TvMoreMenu(model: AppModel, details: Details, modifier: Modifier = 
         }
     }
     val own = card.kind == CardKind.PLAYLIST || (card.kind == CardKind.COLLECTION && admin)
-    val entries = buildList {
-        if (card.kind in playableKinds) {
-            add(ItemDialog.PlayOn)
-            add(ItemDialog.Together)
-        }
-        if (listable(card.kind)) add(ItemDialog.Playlist)
-        if (card.kind in reportableKinds && mayReport) add(ItemDialog.Report)
-        if (listable(card.kind) && admin) add(ItemDialog.Collection)
+    // The entries in groups, separated, as the web UI's: playing, adding to
+    // lists, metadata, reporting, and renaming or deleting a list, the deletion last.
+    val groups = listOf(
+        if (card.kind in playableKinds) listOf(ItemDialog.PlayOn, ItemDialog.Together) else emptyList(),
+        if (listable(card.kind)) listOfNotNull(ItemDialog.Playlist, ItemDialog.Collection.takeIf { admin }) else emptyList(),
         if (admin && card.kind != CardKind.PLAYLIST) {
-            add(ItemDialog.Edit)
-            if (card.kind in identifiableKinds) add(ItemDialog.Identify)
-            if (card.kind != CardKind.COLLECTION) add(ItemDialog.Refresh)
-            add(ItemDialog.Images)
-        }
-        if (own) {
-            add(ItemDialog.Rename)
-            add(ItemDialog.Delete)
-        }
-    }
-    if (entries.isEmpty()) return
+            listOfNotNull(
+                ItemDialog.Edit,
+                ItemDialog.Images,
+                ItemDialog.Identify.takeIf { card.kind in identifiableKinds },
+                ItemDialog.Refresh.takeIf { card.kind != CardKind.COLLECTION },
+            )
+        } else {
+            emptyList()
+        },
+        if (card.kind in reportableKinds && mayReport) listOf(ItemDialog.Report) else emptyList(),
+        if (own) listOf(ItemDialog.Rename, ItemDialog.Delete) else emptyList(),
+    ).filter { it.isNotEmpty() }
+    if (groups.isEmpty()) return
     val pages = LocalPages.current
     var open by remember { mutableStateOf(false) }
     var dialog by remember { mutableStateOf<ItemDialog?>(null) }
@@ -275,25 +275,29 @@ internal fun TvMoreMenu(model: AppModel, details: Details, modifier: Modifier = 
         TvCircleButton(R.drawable.ic_more, stringResource(R.string.lists_more), modifier.focusRequester(button)) { open = true }
         if (open) {
             TvMenu(first, 360.dp, Alignment.BottomStart, ABOVE, onDismiss = back) {
-                entries.forEachIndexed { i, e ->
-                    TvMenuItem(
-                        {
-                            open = false
-                            when (e) {
-                                ItemDialog.Edit -> pages.openMetadata(MetadataPage.Edit, card)
-                                ItemDialog.Identify -> pages.openMetadata(MetadataPage.Identify, card)
-                                ItemDialog.Images -> pages.openMetadata(MetadataPage.Images, card)
-                                else -> dialog = e
-                            }
-                        },
-                        if (i == 0) Modifier.focusRequester(first) else Modifier,
-                    ) {
-                        Text(
-                            stringResource(e.label),
-                            style = theme.type.headline.text,
-                            color = if (e == ItemDialog.Delete) theme.colors.danger else theme.colors.textPrimary,
-                            maxLines = 1,
-                        )
+                groups.forEachIndexed { g, group ->
+                    if (g > 0) HorizontalDivider(Modifier.padding(vertical = MavioSpacing.s4), color = theme.colors.border)
+                    group.forEachIndexed { i, e ->
+                        TvMenuItem(
+                            {
+                                open = false
+                                when (e) {
+                                    ItemDialog.Edit -> pages.openMetadata(MetadataPage.Edit, card)
+                                    ItemDialog.Identify -> pages.openMetadata(MetadataPage.Identify, card)
+                                    ItemDialog.Images -> pages.openMetadata(MetadataPage.Images, card)
+                                    else -> dialog = e
+                                }
+                            },
+                            if (g == 0 && i == 0) Modifier.focusRequester(first) else Modifier,
+                        ) {
+                            // Plain names, without the ellipsis some strings end in.
+                            Text(
+                                stringResource(e.label).removeSuffix("…"),
+                                style = theme.type.headline.text,
+                                color = if (e == ItemDialog.Delete) theme.colors.danger else theme.colors.textPrimary,
+                                maxLines = 1,
+                            )
+                        }
                     }
                 }
             }

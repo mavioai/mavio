@@ -52,7 +52,6 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -70,6 +69,10 @@ import dev.mavio.ui.CatalogRow
 import dev.mavio.ui.Credit
 import dev.mavio.ui.Focusable
 import dev.mavio.ui.LocalDiscover
+import dev.mavio.ui.TitleRatings
+import dev.mavio.ui.WatchProviders
+import dev.mavio.ui.shownRatings
+import dev.mavio.ui.titleRatings
 import dev.mavio.ui.MavioIcon
 import dev.mavio.ui.NamedValue
 import dev.mavio.ui.R
@@ -99,20 +102,17 @@ import dev.mavio.ui.theme
 import dev.mavio.ui.titleCredits
 import kotlinx.coroutines.launch
 import mavio.acquisition.v1.Discover.GetCollectionResponse
-import mavio.acquisition.v1.Discover.GetRatingsResponse
 import mavio.acquisition.v1.Discover.GetSeasonResponse
 import mavio.acquisition.v1.Discover.GetTitleResponse
 import mavio.acquisition.v1.Discover.SeasonStatus
 import mavio.acquisition.v1.Discover.Title
 import mavio.acquisition.v1.Profile.MediaKind
 import mavio.acquisition.v1.getCollectionRequest
-import mavio.acquisition.v1.getRatingsRequest
 import mavio.acquisition.v1.getSeasonRequest
 import mavio.acquisition.v1.getTitleRequest
 import mavio.library.v1.ItemOuterClass.CreditKind
 import mavio.plugin.v1.Discovery.CatalogKind
 import mavio.plugin.v1.MetadataOuterClass.ProductionStatus
-import mavio.plugin.v1.Ratings.RatingSource
 
 /**
  * A discovered title on a television (docs/tv.md §6.3), laid out as an
@@ -527,9 +527,6 @@ private fun CollectionCard(serverId: String, title: Title, modifier: Modifier) {
 /** The studios the facts show. */
 private const val MAX_STUDIOS = 5
 
-/** Rotten Tomatoes' least fresh score, and least upright audience score. */
-private const val FRESH_SCORE = 60.0
-
 /** A row of the facts: its label, and its values on the right. */
 @Composable
 private fun Fact(label: String, values: List<String>) {
@@ -555,21 +552,10 @@ private fun TitleFacts(serverId: String, title: Title) {
     val series = title.mediaKind == MediaKind.MEDIA_KIND_SERIES
     val colors = theme.colors
     val rows = mutableListOf<@Composable () -> Unit>()
-    val ratings = ratingsOf(serverId, title)
-    if (ratings.isNotEmpty()) {
-        rows += {
-            FlowRow(
-                Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 12.dp),
-                horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s24, Alignment.CenterHorizontally),
-            ) {
-                ratings.forEach { (label, score) ->
-                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
-                        Text(label, style = theme.type.footnote.text, fontWeight = FontWeight.Bold, color = colors.textSecondary)
-                        Text(score, style = theme.type.callout.text, fontWeight = FontWeight.SemiBold)
-                    }
-                }
-            }
-        }
+    val ratings = titleRatings(serverId, title.mediaKind, title.tmdbId).orEmpty()
+    val score = title.takeIf { it.voteCount > 0 }?.communityRating
+    if (shownRatings(ratings).isNotEmpty() || score != null) {
+        rows += { TitleRatings(title.mediaKind, title.tmdbId, ratings, score, Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 12.dp)) }
     }
     if (title.originalTitle.isNotEmpty() && title.originalLanguage != discoverLanguage) {
         rows += { Fact(stringResource(R.string.item_original_title), listOf(title.originalTitle)) }
@@ -613,20 +599,7 @@ private fun TitleFacts(serverId: String, title: Title) {
         rows += { Fact(stringResource(if (series) R.string.item_networks else R.string.item_studio), studios.take(MAX_STUDIOS)) }
     }
     if (title.watchProvidersCount > 0) {
-        rows += {
-            Column(Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(MavioSpacing.s8)) {
-                Text(stringResource(R.string.item_streaming), style = theme.type.callout.text, fontWeight = FontWeight.SemiBold)
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s12), verticalArrangement = Arrangement.spacedBy(MavioSpacing.s8)) {
-                    title.watchProvidersList.forEach { p ->
-                        if (p.logoUrl.isNotEmpty()) {
-                            Artwork(p.logoUrl, Modifier.size(40.dp).clip(RoundedCornerShape(8.dp)), contentDescription = p.name)
-                        } else {
-                            Text(p.name, style = theme.type.footnote.text)
-                        }
-                    }
-                }
-            }
-        }
+        rows += { WatchProviders(title.watchProvidersList, Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 12.dp)) }
     }
     if (rows.isEmpty()) return
     Column(
@@ -640,33 +613,6 @@ private fun TitleFacts(serverId: String, title: Title) {
             row()
         }
     }
-}
-
-/** A title's ratings as Seerr's: Rotten Tomatoes' and IMDb's, then TMDB's score. */
-@Composable
-private fun ratingsOf(serverId: String, title: Title): List<Pair<String, String>> {
-    val result by discovered(
-        serverId,
-        "GetRatings",
-        remember(title.tmdbId) {
-            getRatingsRequest {
-                mediaKind = title.mediaKind
-                tmdbId = title.tmdbId
-            }
-        },
-        GetRatingsResponse::parseFrom,
-    )
-    val ratings = result?.getOrNull()?.ratingsList.orEmpty()
-    val locale = LocalLocale.current.platformLocale
-    val order = listOf(RatingSource.RATING_SOURCE_ROTTEN_TOMATOES_CRITICS, RatingSource.RATING_SOURCE_ROTTEN_TOMATOES_AUDIENCE, RatingSource.RATING_SOURCE_IMDB)
-    val shown = order.mapNotNull { s -> ratings.firstOrNull { it.source == s } }.map { r ->
-        when (r.source) {
-            RatingSource.RATING_SOURCE_IMDB -> "IMDb" to String.format(locale, "%.1f", r.score)
-            RatingSource.RATING_SOURCE_ROTTEN_TOMATOES_CRITICS -> (if (r.score >= FRESH_SCORE) "🍅" else "🟢") to "${Math.round(r.score)}%"
-            else -> (if (r.score >= FRESH_SCORE) "🍿" else "🥀") to "${Math.round(r.score)}%"
-        }
-    }
-    return if (title.voteCount > 0) shown + ("TMDB" to "${Math.round(title.communityRating * 10)}%") else shown
 }
 
 /**

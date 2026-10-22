@@ -50,7 +50,6 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.pluralStringResource
@@ -76,13 +75,16 @@ import dev.mavio.design.MavioSpacing
 import dev.mavio.ui.Artwork
 import dev.mavio.ui.CardShape
 import dev.mavio.ui.FactList
+import dev.mavio.ui.ItemRatings
+import dev.mavio.ui.LocalDiscover
 import dev.mavio.ui.Focusable
 import dev.mavio.ui.Logo
 import dev.mavio.ui.MavioIcon
 import dev.mavio.ui.ProgressBar
 import dev.mavio.ui.R
-import dev.mavio.ui.RatingCard
 import dev.mavio.ui.StatusView
+import dev.mavio.ui.TitleRatings
+import dev.mavio.ui.WatchProviders
 import dev.mavio.ui.TvButton
 import dev.mavio.ui.TvScrolling
 import dev.mavio.ui.aboutFacts
@@ -98,10 +100,14 @@ import dev.mavio.ui.range
 import dev.mavio.ui.resolution
 import dev.mavio.ui.selectable
 import dev.mavio.ui.shakes
+import dev.mavio.ui.discoverLanguage
+import dev.mavio.ui.discovered
+import dev.mavio.ui.shownRatings
 import dev.mavio.ui.shownRole
 import dev.mavio.ui.surround
 import dev.mavio.ui.text
 import dev.mavio.ui.theme
+import dev.mavio.ui.titleRatings
 import java.time.Duration
 import java.time.Instant
 import java.time.ZoneId
@@ -110,6 +116,10 @@ import java.time.format.FormatStyle
 import java.util.Date
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
+import mavio.acquisition.v1.Discover.GetTitleResponse
+import mavio.acquisition.v1.Discover.Title
+import mavio.acquisition.v1.Profile.MediaKind
+import mavio.acquisition.v1.getTitleRequest
 
 /** What the primary action plays: the item itself, or a series' or season's episode to watch next. */
 private data class NextUp(
@@ -747,13 +757,26 @@ private fun About(details: Details, source: Source?, focus: FocusMemory) {
         .take(6)
     val tags = if (card.kind == CardKind.EPISODE || card.kind == CardKind.SEASON) emptyList() else details.tags
     val studiosKey = stringResource(if (inSeries) R.string.item_networks else R.string.item_studio)
-    val facts = aboutFacts(details, studiosKey, allStudios = true)
     val media = source?.let { mediaFacts(it, context) }.orEmpty()
     val community = details.communityRating?.takeIf { it > 0f }
     val critic = details.criticRating?.takeIf { it > 0f }
+    // A movie or series tells what its discovered title does.
+    val kind = when (card.kind) {
+        CardKind.MOVIE -> MediaKind.MEDIA_KIND_MOVIE
+        CardKind.SERIES -> MediaKind.MEDIA_KIND_SERIES
+        else -> null
+    }
+    val tmdbId = kind?.let { details.externalIds["tmdb"]?.toIntOrNull() } ?: 0
+    val serverId = LocalDiscover.current.discovery?.serverId
+    val titled = kind != null && tmdbId > 0 && serverId != null && !details.offline
+    val title = if (titled) titleOf(serverId, kind, tmdbId) else null
+    val ratings = if (titled) titleRatings(serverId, kind, tmdbId) else null
+    val score = title?.takeIf { it.voteCount > 0 }?.communityRating
+    val facts = aboutFacts(details, studiosKey, allStudios = true, title = title)
+    val streaming = title?.watchProvidersList.orEmpty()
     val overview = details.overview
     val left = overview != null || crew.isNotEmpty() || tags.isNotEmpty()
-    if (!left && facts.isEmpty() && media.isEmpty() && community == null && critic == null) return
+    if (!left && !titled && facts.isEmpty() && media.isEmpty() && community == null && critic == null && streaming.isEmpty()) return
     Column(
         Modifier.padding(start = theme.layout.margin, end = theme.layout.margin, top = MavioSpacing.s32, bottom = MavioSpacing.s16),
         verticalArrangement = Arrangement.spacedBy(MavioSpacing.s16),
@@ -801,26 +824,36 @@ private fun About(details: Details, source: Source?, focus: FocusMemory) {
                 }
             }
             Column(Modifier.weight(0.56f), verticalArrangement = Arrangement.spacedBy(MavioSpacing.s32)) {
-                if (community != null || critic != null) {
-                    FlowRow(horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s12), verticalArrangement = Arrangement.spacedBy(MavioSpacing.s12)) {
-                        community?.let {
-                            RatingCard(stringResource(R.string.item_community_rating), "/ 10") {
-                                MavioIcon(R.drawable.ic_rating_fill, size = 22.dp, tint = Color(0xFFFFD60A))
-                                Text(String.format(LocalLocale.current.platformLocale, "%.1f", it), style = theme.type.title2.text, fontWeight = FontWeight.Bold)
-                            }
-                        }
-                        critic?.let {
-                            RatingCard(stringResource(R.string.item_critic_rating), null) {
-                                Text("${Math.round(it)}%", style = theme.type.title2.text, fontWeight = FontWeight.Bold)
-                            }
-                        }
-                    }
+                // A title's ratings once asked, else the library's.
+                if (ratings != null && (shownRatings(ratings).isNotEmpty() || score != null)) {
+                    TitleRatings(kind!!, tmdbId, ratings, score, start = true)
+                } else if ((!titled || ratings != null) && (community != null || critic != null)) {
+                    ItemRatings(community, critic)
                 }
                 FactList(facts, emptyMap()) {}
+                WatchProviders(streaming)
                 FactList(media, emptyMap()) {}
             }
         }
     }
+}
+
+/** A movie's or series' discovered title, null while asked or when not found. */
+@Composable
+private fun titleOf(serverId: String, kind: MediaKind, tmdbId: Int): Title? {
+    val result by discovered(
+        serverId,
+        "GetTitle",
+        remember(kind, tmdbId) {
+            getTitleRequest {
+                mediaKind = kind
+                this.tmdbId = tmdbId
+                language = discoverLanguage
+            }
+        },
+        GetTitleResponse::parseFrom,
+    )
+    return result?.getOrNull()?.takeIf { it.hasTitle() }?.title
 }
 
 /** View Full Crew: a link under the leading crew, white with black text once it has focus. */
