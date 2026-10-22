@@ -210,9 +210,24 @@
             trailingViews.append(factsHolder)
             let trailing = NSStackView.vertical(trailingViews, spacing: MavioSpacing.s24)
             for v in trailingViews { v.widthAnchor.constraint(equalTo: trailing.widthAnchor).isActive = true }
-            let left = RegionView(leading)
+            // At the top, as tall as its views beside taller facts: the
+            // keywords follow the crew without a gap.
+            let top = NSView()
+            top.translatesAutoresizingMaskIntoConstraints = false
+            top.addSubview(leading)
+            leading.translatesAutoresizingMaskIntoConstraints = false
+            NSLayoutConstraint.activate([
+                leading.leadingAnchor.constraint(equalTo: top.leadingAnchor),
+                leading.trailingAnchor.constraint(equalTo: top.trailingAnchor),
+                leading.topAnchor.constraint(equalTo: top.topAnchor),
+                leading.bottomAnchor.constraint(lessThanOrEqualTo: top.bottomAnchor),
+            ])
+            let left = RegionView(top)
             let right = RegionView(trailing)
             let row = NSStackView.horizontal([left, right], spacing: MavioSpacing.s32, alignment: .top)
+            // The overview takes the width the facts leave, rather than a
+            // gap after them.
+            row.distribution = .fill
             right.widthAnchor.constraint(equalToConstant: theme.isTV ? 480 : 380).isActive = true
             left.setContentHuggingPriority(.init(1), for: .horizontal)
             return margined(row, top: MavioSpacing.s24, bottom: MavioSpacing.s12)
