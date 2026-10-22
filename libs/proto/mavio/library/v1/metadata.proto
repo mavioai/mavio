@@ -104,6 +104,10 @@ message ItemMetadata {
   DisplayOrder display_order = 29 [(buf.validate.field).enum.defined_only = true];
   // For episodes.
   int32 absolute_number = 30 [(buf.validate.field).int32.gte = 0];
+  // The ISO 639-1 language and ISO 3166-1 alpha-2 country the providers
+  // describe the item in; empty follows its library's.
+  string metadata_language = 31 [(buf.validate.field).string.pattern = "^([a-z]{2})?$"];
+  string metadata_country = 32 [(buf.validate.field).string.pattern = "^([A-Z]{2})?$"];
 }
 
 message UpdateItemRequest {

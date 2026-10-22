@@ -1554,6 +1554,13 @@ pub struct Item {
     ///
     /// Field 54: `remote_trailers`
     pub remote_trailers: ::buffa::alloc::vec::Vec<::buffa::alloc::string::String>,
+    /// The language and country the providers describe the item in, set for
+    /// it alone; empty follows its library's. Set for administrators.
+    ///
+    /// Field 55: `metadata_language`
+    pub metadata_language: ::core::option::Option<::buffa::alloc::string::String>,
+    /// Field 56: `metadata_country`
+    pub metadata_country: ::core::option::Option<::buffa::alloc::string::String>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -1614,6 +1621,8 @@ impl ::core::fmt::Debug for Item {
             .field("digital_release_date", &self.digital_release_date)
             .field("physical_release_date", &self.physical_release_date)
             .field("remote_trailers", &self.remote_trailers)
+            .field("metadata_language", &self.metadata_language)
+            .field("metadata_country", &self.metadata_country)
             .finish()
     }
 }
@@ -1946,6 +1955,26 @@ impl Item {
         self.original_language = Some(value.into());
         self
     }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::metadata_language`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_metadata_language(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.metadata_language = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::metadata_country`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_metadata_country(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.metadata_country = Some(value.into());
+        self
+    }
 }
 ::buffa::impl_default_instance!(Item);
 impl ::buffa::MessageName for Item {
@@ -2182,6 +2211,12 @@ impl ::buffa::Message for Item {
         for v in &self.remote_trailers {
             size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
+        if let Some(ref v) = self.metadata_language {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.metadata_country {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -2408,6 +2443,12 @@ impl ::buffa::Message for Item {
         }
         for v in &self.remote_trailers {
             ::buffa::types::put_string_field(54u32, v, buf);
+        }
+        if let Some(ref v) = self.metadata_language {
+            ::buffa::types::put_string_field(55u32, v, buf);
+        }
+        if let Some(ref v) = self.metadata_country {
+            ::buffa::types::put_string_field(56u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -3025,6 +3066,30 @@ impl ::buffa::Message for Item {
                 )?;
                 self.remote_trailers.push(__elem);
             }
+            55u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .metadata_language
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            56u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .metadata_country
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -3087,6 +3152,8 @@ impl ::buffa::Message for Item {
         self.digital_release_date = ::buffa::MessageField::none();
         self.physical_release_date = ::buffa::MessageField::none();
         self.remote_trailers.clear();
+        self.metadata_language = ::core::option::Option::None;
+        self.metadata_country = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }

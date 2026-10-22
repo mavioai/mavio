@@ -115,6 +115,8 @@ func WriteNFO(r *Result) ([]byte, error) {
 	w.texts("studio", it.Studios)
 	w.texts("country", it.ProductionLocations)
 	w.text("aspectratio", it.AspectRatio)
+	w.text("language", it.MetadataLanguage)
+	w.text("countrycode", it.MetadataCountry)
 	for _, p := range slices.Sorted(maps.Keys(it.ExternalIDs)) {
 		if id := it.ExternalIDs[p]; id != "" {
 			w.element("uniqueid", id, xml.Attr{Name: xml.Name{Local: "type"}, Value: string(p)})

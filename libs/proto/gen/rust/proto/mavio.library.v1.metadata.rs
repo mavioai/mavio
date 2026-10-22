@@ -89,6 +89,13 @@ pub struct ItemMetadata {
     ///
     /// Field 30: `absolute_number`
     pub absolute_number: ::core::option::Option<i32>,
+    /// The ISO 639-1 language and ISO 3166-1 alpha-2 country the providers
+    /// describe the item in; empty follows its library's.
+    ///
+    /// Field 31: `metadata_language`
+    pub metadata_language: ::core::option::Option<::buffa::alloc::string::String>,
+    /// Field 32: `metadata_country`
+    pub metadata_country: ::core::option::Option<::buffa::alloc::string::String>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -125,6 +132,8 @@ impl ::core::fmt::Debug for ItemMetadata {
             .field("series_type", &self.series_type)
             .field("display_order", &self.display_order)
             .field("absolute_number", &self.absolute_number)
+            .field("metadata_language", &self.metadata_language)
+            .field("metadata_country", &self.metadata_country)
             .finish()
     }
 }
@@ -302,6 +311,26 @@ impl ItemMetadata {
         self.absolute_number = Some(value);
         self
     }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::metadata_language`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_metadata_language(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.metadata_language = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::metadata_country`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_metadata_country(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.metadata_country = Some(value.into());
+        self
+    }
 }
 ::buffa::impl_default_instance!(ItemMetadata);
 impl ::buffa::MessageName for ItemMetadata {
@@ -436,6 +465,12 @@ impl ::buffa::Message for ItemMetadata {
         if let Some(v) = self.absolute_number {
             size += 2u64 + ::buffa::types::int32_encoded_len(v) as u64;
         }
+        if let Some(ref v) = self.metadata_language {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.metadata_country {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -560,6 +595,12 @@ impl ::buffa::Message for ItemMetadata {
         }
         if let Some(v) = self.absolute_number {
             ::buffa::types::put_int32_field(30u32, v, buf);
+        }
+        if let Some(ref v) = self.metadata_language {
+            ::buffa::types::put_string_field(31u32, v, buf);
+        }
+        if let Some(ref v) = self.metadata_country {
+            ::buffa::types::put_string_field(32u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -911,6 +952,30 @@ impl ::buffa::Message for ItemMetadata {
                     ::buffa::types::decode_int32(buf)?,
                 );
             }
+            31u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .metadata_language
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            32u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .metadata_country
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -949,6 +1014,8 @@ impl ::buffa::Message for ItemMetadata {
         self.series_type = ::core::option::Option::None;
         self.display_order = ::core::option::Option::None;
         self.absolute_number = ::core::option::Option::None;
+        self.metadata_language = ::core::option::Option::None;
+        self.metadata_country = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }

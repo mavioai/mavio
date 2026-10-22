@@ -1882,6 +1882,7 @@ export type MessageKey =
   | 'metadata.lockAll'
   | 'metadata.lockName'
   | 'metadata.cast'
+  | 'metadata.libraryDefault'
   | 'metadata.locksFooter'
   | 'metadata.save'
   | 'metadata.identifyTitle'
@@ -4020,6 +4021,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "metadata.lockAll": "Lock All Metadata",
     "metadata.lockName": "Names",
     "metadata.cast": "Cast and Crew",
+    "metadata.libraryDefault": "Library Default",
     "metadata.locksFooter": "Refreshes leave locked fields as they are.",
     "metadata.save": "Save",
     "metadata.identifyTitle": "Identify {name}",
@@ -6156,6 +6158,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "metadata.lockAll": "锁定所有元数据",
     "metadata.lockName": "名称",
     "metadata.cast": "演职人员",
+    "metadata.libraryDefault": "媒体库默认",
     "metadata.locksFooter": "刷新不会改变已锁定的字段。",
     "metadata.save": "保存",
     "metadata.identifyTitle": "识别 {name}",

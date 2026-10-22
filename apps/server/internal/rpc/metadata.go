@@ -218,10 +218,12 @@ var itemSetters = map[string]func(*core.Item, *libraryv1.ItemMetadata){
 	"absolute_number": func(it *core.Item, md *libraryv1.ItemMetadata) {
 		it.AbsoluteNumber = intOf(md.HasAbsoluteNumber(), md.GetAbsoluteNumber())
 	},
-	"artists":       func(it *core.Item, md *libraryv1.ItemMetadata) { it.Artists = values(md.GetArtists()) },
-	"album_artists": func(it *core.Item, md *libraryv1.ItemMetadata) { it.AlbumArtists = values(md.GetAlbumArtists()) },
-	"album":         func(it *core.Item, md *libraryv1.ItemMetadata) { it.Album = md.GetAlbum() },
-	"locked":        func(it *core.Item, md *libraryv1.ItemMetadata) { it.Locked = md.GetLocked() },
+	"metadata_language": func(it *core.Item, md *libraryv1.ItemMetadata) { it.MetadataLanguage = md.GetMetadataLanguage() },
+	"metadata_country":  func(it *core.Item, md *libraryv1.ItemMetadata) { it.MetadataCountry = md.GetMetadataCountry() },
+	"artists":           func(it *core.Item, md *libraryv1.ItemMetadata) { it.Artists = values(md.GetArtists()) },
+	"album_artists":     func(it *core.Item, md *libraryv1.ItemMetadata) { it.AlbumArtists = values(md.GetAlbumArtists()) },
+	"album":             func(it *core.Item, md *libraryv1.ItemMetadata) { it.Album = md.GetAlbum() },
+	"locked":            func(it *core.Item, md *libraryv1.ItemMetadata) { it.Locked = md.GetLocked() },
 	"locked_fields": func(it *core.Item, md *libraryv1.ItemMetadata) {
 		it.LockedFields = nil
 		for _, f := range md.GetLockedFields() {

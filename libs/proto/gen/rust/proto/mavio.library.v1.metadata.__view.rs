@@ -92,6 +92,13 @@ pub struct ItemMetadataView<'a> {
     ///
     /// Field 30: `absolute_number`
     pub absolute_number: ::core::option::Option<i32>,
+    /// The ISO 639-1 language and ISO 3166-1 alpha-2 country the providers
+    /// describe the item in; empty follows its library's.
+    ///
+    /// Field 31: `metadata_language`
+    pub metadata_language: ::core::option::Option<&'a str>,
+    /// Field 32: `metadata_country`
+    pub metadata_country: ::core::option::Option<&'a str>,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for ItemMetadataView<'a> {
@@ -326,6 +333,20 @@ impl<'a> ::buffa::MessageView<'a> for ItemMetadataView<'a> {
                 )?;
                 view.absolute_number = Some(::buffa::types::decode_int32(&mut cur)?);
             }
+            31u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.metadata_language = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
+            32u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.metadata_country = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
             14u32 => {
                 ::buffa::encoding::check_wire_type(
                     tag,
@@ -547,6 +568,8 @@ impl<'a> ::buffa::MessageView<'a> for ItemMetadataView<'a> {
             series_type: self.series_type,
             display_order: self.display_order,
             absolute_number: self.absolute_number,
+            metadata_language: self.metadata_language.map(|s| s.to_string()),
+            metadata_country: self.metadata_country.map(|s| s.to_string()),
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -670,6 +693,12 @@ impl<'a> ::buffa::ViewEncode<'a> for ItemMetadataView<'a> {
         }
         if let Some(v) = self.absolute_number {
             size += 2u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.metadata_language {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.metadata_country {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
@@ -813,6 +842,12 @@ impl<'a> ::buffa::ViewEncode<'a> for ItemMetadataView<'a> {
         }
         if let Some(v) = self.absolute_number {
             ::buffa::types::put_int32_field(30u32, v, buf);
+        }
+        if let Some(ref v) = self.metadata_language {
+            ::buffa::types::put_string_field(31u32, v, buf);
+        }
+        if let Some(ref v) = self.metadata_country {
+            ::buffa::types::put_string_field(32u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -1087,6 +1122,19 @@ impl ItemMetadataOwnedView {
     #[must_use]
     pub fn absolute_number(&self) -> ::core::option::Option<i32> {
         self.0.reborrow().absolute_number
+    }
+    /// The ISO 639-1 language and ISO 3166-1 alpha-2 country the providers
+    /// describe the item in; empty follows its library's.
+    ///
+    /// Field 31: `metadata_language`
+    #[must_use]
+    pub fn metadata_language(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().metadata_language
+    }
+    /// Field 32: `metadata_country`
+    #[must_use]
+    pub fn metadata_country(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().metadata_country
     }
 }
 impl ::core::convert::From<::buffa::OwnedView<ItemMetadataView<'static>>>

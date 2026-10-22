@@ -288,6 +288,10 @@ message Item {
   google.protobuf.Timestamp physical_release_date = 53;
   // URLs of trailers hosted elsewhere, such as on YouTube.
   repeated string remote_trailers = 54;
+  // The language and country the providers describe the item in, set for
+  // it alone; empty follows its library's. Set for administrators.
+  string metadata_language = 55;
+  string metadata_country = 56;
 }
 
 // ExternalUrl is the page of an item or person on an external site.

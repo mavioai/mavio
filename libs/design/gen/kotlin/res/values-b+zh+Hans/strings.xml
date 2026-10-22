@@ -1923,6 +1923,7 @@
     <string name="metadata_lock_all">锁定所有元数据</string>
     <string name="metadata_lock_name">名称</string>
     <string name="metadata_cast">演职人员</string>
+    <string name="metadata_library_default">媒体库默认</string>
     <string name="metadata_locks_footer">刷新不会改变已锁定的字段。</string>
     <string name="metadata_save">保存</string>
     <string name="metadata_identify_title">识别 %s</string>

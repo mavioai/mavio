@@ -34237,6 +34237,24 @@
         }
       }
     },
+    "metadata.libraryDefault": {
+      "comment": "Option of an item's metadata language or country using its library's.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Library Default"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "媒体库默认"
+          }
+        }
+      }
+    },
     "metadata.locksFooter": {
       "comment": "Footer of an item's locks.",
       "extractionState": "manual",

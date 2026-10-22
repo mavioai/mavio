@@ -14,7 +14,7 @@ from typing import ClassVar as _ClassVar, Optional as _Optional, Union as _Union
 DESCRIPTOR: _descriptor.FileDescriptor
 
 class ItemMetadata(_message.Message):
-    __slots__ = ("name", "sort_name", "original_title", "overview", "tagline", "production_year", "premiere_date", "end_date", "runtime", "official_rating", "custom_rating", "community_rating", "critic_rating", "genres", "tags", "studios", "production_locations", "external_ids", "index_number", "parent_index_number", "series_status", "artists", "album_artists", "album", "locked", "locked_fields", "monitored", "series_type", "display_order", "absolute_number")
+    __slots__ = ("name", "sort_name", "original_title", "overview", "tagline", "production_year", "premiere_date", "end_date", "runtime", "official_rating", "custom_rating", "community_rating", "critic_rating", "genres", "tags", "studios", "production_locations", "external_ids", "index_number", "parent_index_number", "series_status", "artists", "album_artists", "album", "locked", "locked_fields", "monitored", "series_type", "display_order", "absolute_number", "metadata_language", "metadata_country")
     class ExternalIdsEntry(_message.Message):
         __slots__ = ("key", "value")
         KEY_FIELD_NUMBER: _ClassVar[int]
@@ -52,6 +52,8 @@ class ItemMetadata(_message.Message):
     SERIES_TYPE_FIELD_NUMBER: _ClassVar[int]
     DISPLAY_ORDER_FIELD_NUMBER: _ClassVar[int]
     ABSOLUTE_NUMBER_FIELD_NUMBER: _ClassVar[int]
+    METADATA_LANGUAGE_FIELD_NUMBER: _ClassVar[int]
+    METADATA_COUNTRY_FIELD_NUMBER: _ClassVar[int]
     name: str
     sort_name: str
     original_title: str
@@ -82,7 +84,9 @@ class ItemMetadata(_message.Message):
     series_type: _item_pb2.SeriesType
     display_order: _item_pb2.DisplayOrder
     absolute_number: int
-    def __init__(self, name: _Optional[str] = ..., sort_name: _Optional[str] = ..., original_title: _Optional[str] = ..., overview: _Optional[str] = ..., tagline: _Optional[str] = ..., production_year: _Optional[int] = ..., premiere_date: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ..., end_date: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ..., runtime: _Optional[_Union[datetime.timedelta, _duration_pb2.Duration, _Mapping]] = ..., official_rating: _Optional[str] = ..., custom_rating: _Optional[str] = ..., community_rating: _Optional[float] = ..., critic_rating: _Optional[float] = ..., genres: _Optional[_Iterable[str]] = ..., tags: _Optional[_Iterable[str]] = ..., studios: _Optional[_Iterable[str]] = ..., production_locations: _Optional[_Iterable[str]] = ..., external_ids: _Optional[_Mapping[str, str]] = ..., index_number: _Optional[int] = ..., parent_index_number: _Optional[int] = ..., series_status: _Optional[_Union[_item_pb2.SeriesStatus, str]] = ..., artists: _Optional[_Iterable[str]] = ..., album_artists: _Optional[_Iterable[str]] = ..., album: _Optional[str] = ..., locked: _Optional[bool] = ..., locked_fields: _Optional[_Iterable[_Union[_item_pb2.MetadataField, str]]] = ..., monitored: _Optional[bool] = ..., series_type: _Optional[_Union[_item_pb2.SeriesType, str]] = ..., display_order: _Optional[_Union[_item_pb2.DisplayOrder, str]] = ..., absolute_number: _Optional[int] = ...) -> None: ...
+    metadata_language: str
+    metadata_country: str
+    def __init__(self, name: _Optional[str] = ..., sort_name: _Optional[str] = ..., original_title: _Optional[str] = ..., overview: _Optional[str] = ..., tagline: _Optional[str] = ..., production_year: _Optional[int] = ..., premiere_date: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ..., end_date: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ..., runtime: _Optional[_Union[datetime.timedelta, _duration_pb2.Duration, _Mapping]] = ..., official_rating: _Optional[str] = ..., custom_rating: _Optional[str] = ..., community_rating: _Optional[float] = ..., critic_rating: _Optional[float] = ..., genres: _Optional[_Iterable[str]] = ..., tags: _Optional[_Iterable[str]] = ..., studios: _Optional[_Iterable[str]] = ..., production_locations: _Optional[_Iterable[str]] = ..., external_ids: _Optional[_Mapping[str, str]] = ..., index_number: _Optional[int] = ..., parent_index_number: _Optional[int] = ..., series_status: _Optional[_Union[_item_pb2.SeriesStatus, str]] = ..., artists: _Optional[_Iterable[str]] = ..., album_artists: _Optional[_Iterable[str]] = ..., album: _Optional[str] = ..., locked: _Optional[bool] = ..., locked_fields: _Optional[_Iterable[_Union[_item_pb2.MetadataField, str]]] = ..., monitored: _Optional[bool] = ..., series_type: _Optional[_Union[_item_pb2.SeriesType, str]] = ..., display_order: _Optional[_Union[_item_pb2.DisplayOrder, str]] = ..., absolute_number: _Optional[int] = ..., metadata_language: _Optional[str] = ..., metadata_country: _Optional[str] = ...) -> None: ...
 
 class UpdateItemRequest(_message.Message):
     __slots__ = ("id", "metadata", "update_mask")

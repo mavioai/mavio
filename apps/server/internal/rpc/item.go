@@ -764,6 +764,7 @@ func itemToProto(ctx context.Context, it *core.Item, images []core.Image, admin 
 	if admin {
 		b.Path = &it.Path
 		b.Locked = &it.Locked
+		b.MetadataLanguage, b.MetadataCountry = &it.MetadataLanguage, &it.MetadataCountry
 		for _, f := range it.LockedFields {
 			b.LockedFields = append(b.LockedFields, metadataFields[f])
 		}

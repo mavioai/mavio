@@ -153,14 +153,16 @@ func TestMetadataManagement(t *testing.T) {
 		t.Errorf("collections = %v, %v", collections, err)
 	}
 
-	// The administrator edits the overview and locks it.
+	// The administrator edits the overview and locks it, and sets the
+	// film's metadata language and country.
 	const overview = "Edited by the administrator."
 	if _, err := meta.UpdateItem(ctx, libraryv1.UpdateItemRequest_builder{
 		Id: new(movie.GetId()),
 		Metadata: libraryv1.ItemMetadata_builder{
 			Overview: new(overview), LockedFields: []libraryv1.MetadataField{libraryv1.MetadataField_METADATA_FIELD_OVERVIEW},
+			MetadataLanguage: new("zh"), MetadataCountry: new("HK"),
 		}.Build(),
-		UpdateMask: &fieldmaskpb.FieldMask{Paths: []string{"overview", "locked_fields"}},
+		UpdateMask: &fieldmaskpb.FieldMask{Paths: []string{"overview", "locked_fields", "metadata_language", "metadata_country"}},
 	}.Build()); err != nil {
 		t.Fatalf("UpdateItem: %v", err)
 	}
@@ -169,6 +171,7 @@ func TestMetadataManagement(t *testing.T) {
 		t.Fatalf("RefreshItem: %v", err)
 	}
 	if it := refreshed.GetItem(); it.GetOverview() != overview || it.GetName() != "Farewell My Concubine" ||
+		it.GetMetadataLanguage() != "zh" || it.GetMetadataCountry() != "HK" ||
 		!slices.Equal(it.GetLockedFields(), []libraryv1.MetadataField{libraryv1.MetadataField_METADATA_FIELD_OVERVIEW}) {
 		t.Errorf("refreshed film: %v", it)
 	}
@@ -192,7 +195,8 @@ func TestMetadataManagement(t *testing.T) {
 	}
 	nfo, err := os.ReadFile(filepath.Join(folder, "Concubine (1993).nfo"))
 	if err != nil || !strings.Contains(string(nfo), "<lockedfields>Overview</lockedfields>") ||
-		!strings.Contains(string(nfo), `<uniqueid type="tmdb">10997</uniqueid>`) {
+		!strings.Contains(string(nfo), `<uniqueid type="tmdb">10997</uniqueid>`) ||
+		!strings.Contains(string(nfo), "<language>zh</language>") || !strings.Contains(string(nfo), "<countrycode>HK</countrycode>") {
 		t.Errorf("NFO beside the film: %v\n%s", err, nfo)
 	}
 

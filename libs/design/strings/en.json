@@ -1894,6 +1894,7 @@
   "metadata.lockAll": { "message": "Lock All Metadata", "description": "Keeps refreshes from changing the item." },
   "metadata.lockName": { "message": "Names", "description": "Locks an item's name, original title and sort name." },
   "metadata.cast": { "message": "Cast and Crew", "description": "Locks an item's cast and crew." },
+  "metadata.libraryDefault": { "message": "Library Default", "description": "Option of an item's metadata language or country using its library's." },
   "metadata.locksFooter": { "message": "Refreshes leave locked fields as they are.", "description": "Footer of an item's locks." },
   "metadata.save": { "message": "Save", "description": "Saves an item's metadata." },
   "metadata.identifyTitle": { "message": "Identify {name}", "description": "Title of the identify dialog." },

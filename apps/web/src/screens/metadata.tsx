@@ -8,6 +8,7 @@ import {
   imageUrl,
   type ServerEntry,
   useExternalIdKinds,
+  useLocalization,
   useMetadataActions,
   useRemoteImages,
   useRemoteSearch,
@@ -23,6 +24,7 @@ import { Select } from "../controls/select.tsx";
 import { field } from "../controls/styles.ts";
 import { Modal } from "../controls/dialog.tsx";
 import { useUnsavedGuard } from "../controls/unsaved.tsx";
+import { countryOptions, languageOptions } from "./admin/common.tsx";
 
 /** Kinds the providers identify. */
 export const identifiable = (kind: ItemKind) =>
@@ -55,6 +57,8 @@ interface Form {
   parent_index_number: string;
   absolute_number: string;
   series_status: string;
+  metadata_language: string;
+  metadata_country: string;
   external_ids: Record<string, string>;
   locked: boolean;
   locked_fields: MetadataField[];
@@ -94,6 +98,8 @@ function formOf(item: Item): Form {
     parent_index_number: item.parentIndexNumber ? String(item.parentIndexNumber) : "",
     absolute_number: item.absoluteNumber ? String(item.absoluteNumber) : "",
     series_status: String(item.seriesStatus),
+    metadata_language: item.metadataLanguage,
+    metadata_country: item.metadataCountry,
     external_ids: { ...item.externalIds },
     locked: item.locked,
     locked_fields: [...item.lockedFields],
@@ -130,6 +136,8 @@ function changesOf(before: Form, after: Form) {
     parentIndexNumber: optionalInt(after.parent_index_number),
     absoluteNumber: optionalInt(after.absolute_number),
     seriesStatus: Number(after.series_status) as SeriesStatus,
+    metadataLanguage: after.metadata_language,
+    metadataCountry: after.metadata_country,
     externalIds: Object.fromEntries(Object.entries(after.external_ids).map(([k, v]) => [k, v.trim()])),
     locked: after.locked,
     lockedFields: after.locked_fields,
@@ -163,6 +171,7 @@ function Labelled({ label, wide = false, children }: { label: string; wide?: boo
 export function EditDialog({ server, item, onClose }: { server: ServerEntry; item: Item; onClose: () => void }) {
   const { update } = useMetadataActions(server, item.id);
   const kinds = useExternalIdKinds(server, item.kind);
+  const { languages, countries } = useLocalization(server);
   const [before] = useState(() => formOf(item));
   const [form, setForm] = useState(before);
   const set = <K extends keyof Form>(k: K, v: Form[K]) => setForm((f) => ({ ...f, [k]: v }));
@@ -233,6 +242,26 @@ export function EditDialog({ server, item, onClose }: { server: ServerEntry; ite
           {text("tags", t("metadata.tags"), { wide: true, placeholder: t("metadata.commas") })}
           {text("studios", t("metadata.studios"), { wide: true, placeholder: t("metadata.commas") })}
           {text("production_locations", t("metadata.locations"), { wide: true, placeholder: t("metadata.commas") })}
+          {identifiable(k) && (
+            <>
+              <Labelled label={t("libraries.language")}>
+                <Select
+                  value={form.metadata_language}
+                  label={t("libraries.language")}
+                  options={[{ value: "", label: t("metadata.libraryDefault") }, ...languageOptions(languages)]}
+                  onChange={(v) => set("metadata_language", v)}
+                />
+              </Labelled>
+              <Labelled label={t("libraries.country")}>
+                <Select
+                  value={form.metadata_country}
+                  label={t("libraries.country")}
+                  options={[{ value: "", label: t("metadata.libraryDefault") }, ...countryOptions(countries)]}
+                  onChange={(v) => set("metadata_country", v)}
+                />
+              </Labelled>
+            </>
+          )}
         </div>
         {(kinds.data ?? []).length > 0 && (
           <>

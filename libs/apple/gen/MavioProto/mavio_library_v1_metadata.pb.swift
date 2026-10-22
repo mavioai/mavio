@@ -276,6 +276,26 @@ public nonisolated struct Mavio_Library_V1_ItemMetadata: @unchecked Sendable {
   /// Clears the value of `absoluteNumber`. Subsequent reads from it will return its default value.
   public mutating func clearAbsoluteNumber() {_uniqueStorage()._absoluteNumber = nil}
 
+  /// The ISO 639-1 language and ISO 3166-1 alpha-2 country the providers
+  /// describe the item in; empty follows its library's.
+  public var metadataLanguage: String {
+    get {_storage._metadataLanguage ?? String()}
+    set {_uniqueStorage()._metadataLanguage = newValue}
+  }
+  /// Returns true if `metadataLanguage` has been explicitly set.
+  public var hasMetadataLanguage: Bool {_storage._metadataLanguage != nil}
+  /// Clears the value of `metadataLanguage`. Subsequent reads from it will return its default value.
+  public mutating func clearMetadataLanguage() {_uniqueStorage()._metadataLanguage = nil}
+
+  public var metadataCountry: String {
+    get {_storage._metadataCountry ?? String()}
+    set {_uniqueStorage()._metadataCountry = newValue}
+  }
+  /// Returns true if `metadataCountry` has been explicitly set.
+  public var hasMetadataCountry: Bool {_storage._metadataCountry != nil}
+  /// Clears the value of `metadataCountry`. Subsequent reads from it will return its default value.
+  public mutating func clearMetadataCountry() {_uniqueStorage()._metadataCountry = nil}
+
   public var unknownFields = SwiftProtobuf.UnknownStorage()
 
   public init() {}
@@ -1106,7 +1126,7 @@ fileprivate nonisolated let _protobuf_package = "mavio.library.v1"
 
 nonisolated extension Mavio_Library_V1_ItemMetadata: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".ItemMetadata"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}name\0\u{3}sort_name\0\u{3}original_title\0\u{1}overview\0\u{1}tagline\0\u{3}production_year\0\u{3}premiere_date\0\u{3}end_date\0\u{1}runtime\0\u{3}official_rating\0\u{3}custom_rating\0\u{3}community_rating\0\u{3}critic_rating\0\u{1}genres\0\u{1}tags\0\u{1}studios\0\u{3}production_locations\0\u{3}external_ids\0\u{3}index_number\0\u{3}parent_index_number\0\u{3}series_status\0\u{1}artists\0\u{3}album_artists\0\u{1}album\0\u{1}locked\0\u{3}locked_fields\0\u{1}monitored\0\u{3}series_type\0\u{3}display_order\0\u{3}absolute_number\0")
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}name\0\u{3}sort_name\0\u{3}original_title\0\u{1}overview\0\u{1}tagline\0\u{3}production_year\0\u{3}premiere_date\0\u{3}end_date\0\u{1}runtime\0\u{3}official_rating\0\u{3}custom_rating\0\u{3}community_rating\0\u{3}critic_rating\0\u{1}genres\0\u{1}tags\0\u{1}studios\0\u{3}production_locations\0\u{3}external_ids\0\u{3}index_number\0\u{3}parent_index_number\0\u{3}series_status\0\u{1}artists\0\u{3}album_artists\0\u{1}album\0\u{1}locked\0\u{3}locked_fields\0\u{1}monitored\0\u{3}series_type\0\u{3}display_order\0\u{3}absolute_number\0\u{3}metadata_language\0\u{3}metadata_country\0")
 
   fileprivate class _StorageClass {
     var _name: String? = nil
@@ -1139,6 +1159,8 @@ nonisolated extension Mavio_Library_V1_ItemMetadata: SwiftProtobuf.Message, Swif
     var _seriesType: Mavio_Library_V1_SeriesType? = nil
     var _displayOrder: Mavio_Library_V1_DisplayOrder? = nil
     var _absoluteNumber: Int32? = nil
+    var _metadataLanguage: String? = nil
+    var _metadataCountry: String? = nil
 
       // This property is used as the initial default value for new instances of the type.
       // The type itself is protecting the reference to its storage via CoW semantics.
@@ -1179,6 +1201,8 @@ nonisolated extension Mavio_Library_V1_ItemMetadata: SwiftProtobuf.Message, Swif
       _seriesType = source._seriesType
       _displayOrder = source._displayOrder
       _absoluteNumber = source._absoluteNumber
+      _metadataLanguage = source._metadataLanguage
+      _metadataCountry = source._metadataCountry
     }
   }
 
@@ -1227,6 +1251,8 @@ nonisolated extension Mavio_Library_V1_ItemMetadata: SwiftProtobuf.Message, Swif
         case 28: try { try decoder.decodeSingularEnumField(value: &_storage._seriesType) }()
         case 29: try { try decoder.decodeSingularEnumField(value: &_storage._displayOrder) }()
         case 30: try { try decoder.decodeSingularInt32Field(value: &_storage._absoluteNumber) }()
+        case 31: try { try decoder.decodeSingularStringField(value: &_storage._metadataLanguage) }()
+        case 32: try { try decoder.decodeSingularStringField(value: &_storage._metadataCountry) }()
         default: break
         }
       }
@@ -1329,6 +1355,12 @@ nonisolated extension Mavio_Library_V1_ItemMetadata: SwiftProtobuf.Message, Swif
       try { if let v = _storage._absoluteNumber {
         try visitor.visitSingularInt32Field(value: v, fieldNumber: 30)
       } }()
+      try { if let v = _storage._metadataLanguage {
+        try visitor.visitSingularStringField(value: v, fieldNumber: 31)
+      } }()
+      try { if let v = _storage._metadataCountry {
+        try visitor.visitSingularStringField(value: v, fieldNumber: 32)
+      } }()
     }
     try unknownFields.traverse(visitor: &visitor)
   }
@@ -1368,6 +1400,8 @@ nonisolated extension Mavio_Library_V1_ItemMetadata: SwiftProtobuf.Message, Swif
         if _storage._seriesType != rhs_storage._seriesType {return false}
         if _storage._displayOrder != rhs_storage._displayOrder {return false}
         if _storage._absoluteNumber != rhs_storage._absoluteNumber {return false}
+        if _storage._metadataLanguage != rhs_storage._metadataLanguage {return false}
+        if _storage._metadataCountry != rhs_storage._metadataCountry {return false}
         return true
       }
       if !storagesAreEqual {return false}

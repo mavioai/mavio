@@ -57,6 +57,8 @@ type ItemMetadata struct {
 	xxx_hidden_SeriesType          SeriesType             `protobuf:"varint,28,opt,name=series_type,json=seriesType,enum=mavio.library.v1.SeriesType"`
 	xxx_hidden_DisplayOrder        DisplayOrder           `protobuf:"varint,29,opt,name=display_order,json=displayOrder,enum=mavio.library.v1.DisplayOrder"`
 	xxx_hidden_AbsoluteNumber      int32                  `protobuf:"varint,30,opt,name=absolute_number,json=absoluteNumber"`
+	xxx_hidden_MetadataLanguage    *string                `protobuf:"bytes,31,opt,name=metadata_language,json=metadataLanguage"`
+	xxx_hidden_MetadataCountry     *string                `protobuf:"bytes,32,opt,name=metadata_country,json=metadataCountry"`
 	XXX_raceDetectHookData         protoimpl.RaceDetectHookData
 	XXX_presence                   [1]uint32
 	unknownFields                  protoimpl.UnknownFields
@@ -328,34 +330,54 @@ func (x *ItemMetadata) GetAbsoluteNumber() int32 {
 	return 0
 }
 
+func (x *ItemMetadata) GetMetadataLanguage() string {
+	if x != nil {
+		if x.xxx_hidden_MetadataLanguage != nil {
+			return *x.xxx_hidden_MetadataLanguage
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *ItemMetadata) GetMetadataCountry() string {
+	if x != nil {
+		if x.xxx_hidden_MetadataCountry != nil {
+			return *x.xxx_hidden_MetadataCountry
+		}
+		return ""
+	}
+	return ""
+}
+
 func (x *ItemMetadata) SetName(v string) {
 	x.xxx_hidden_Name = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 30)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 32)
 }
 
 func (x *ItemMetadata) SetSortName(v string) {
 	x.xxx_hidden_SortName = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 30)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 32)
 }
 
 func (x *ItemMetadata) SetOriginalTitle(v string) {
 	x.xxx_hidden_OriginalTitle = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 30)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 32)
 }
 
 func (x *ItemMetadata) SetOverview(v string) {
 	x.xxx_hidden_Overview = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 30)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 32)
 }
 
 func (x *ItemMetadata) SetTagline(v string) {
 	x.xxx_hidden_Tagline = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 30)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 32)
 }
 
 func (x *ItemMetadata) SetProductionYear(v int32) {
 	x.xxx_hidden_ProductionYear = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 30)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 32)
 }
 
 func (x *ItemMetadata) SetPremiereDate(v *timestamppb.Timestamp) {
@@ -372,22 +394,22 @@ func (x *ItemMetadata) SetRuntime(v *durationpb.Duration) {
 
 func (x *ItemMetadata) SetOfficialRating(v string) {
 	x.xxx_hidden_OfficialRating = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 30)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 32)
 }
 
 func (x *ItemMetadata) SetCustomRating(v string) {
 	x.xxx_hidden_CustomRating = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 30)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 32)
 }
 
 func (x *ItemMetadata) SetCommunityRating(v float64) {
 	x.xxx_hidden_CommunityRating = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 11, 30)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 11, 32)
 }
 
 func (x *ItemMetadata) SetCriticRating(v float64) {
 	x.xxx_hidden_CriticRating = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 12, 30)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 12, 32)
 }
 
 func (x *ItemMetadata) SetGenres(v []string) {
@@ -412,17 +434,17 @@ func (x *ItemMetadata) SetExternalIds(v map[string]string) {
 
 func (x *ItemMetadata) SetIndexNumber(v int32) {
 	x.xxx_hidden_IndexNumber = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 18, 30)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 18, 32)
 }
 
 func (x *ItemMetadata) SetParentIndexNumber(v int32) {
 	x.xxx_hidden_ParentIndexNumber = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 19, 30)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 19, 32)
 }
 
 func (x *ItemMetadata) SetSeriesStatus(v SeriesStatus) {
 	x.xxx_hidden_SeriesStatus = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 20, 30)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 20, 32)
 }
 
 func (x *ItemMetadata) SetArtists(v []string) {
@@ -435,12 +457,12 @@ func (x *ItemMetadata) SetAlbumArtists(v []string) {
 
 func (x *ItemMetadata) SetAlbum(v string) {
 	x.xxx_hidden_Album = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 23, 30)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 23, 32)
 }
 
 func (x *ItemMetadata) SetLocked(v bool) {
 	x.xxx_hidden_Locked = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 24, 30)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 24, 32)
 }
 
 func (x *ItemMetadata) SetLockedFields(v []MetadataField) {
@@ -449,22 +471,32 @@ func (x *ItemMetadata) SetLockedFields(v []MetadataField) {
 
 func (x *ItemMetadata) SetMonitored(v bool) {
 	x.xxx_hidden_Monitored = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 26, 30)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 26, 32)
 }
 
 func (x *ItemMetadata) SetSeriesType(v SeriesType) {
 	x.xxx_hidden_SeriesType = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 27, 30)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 27, 32)
 }
 
 func (x *ItemMetadata) SetDisplayOrder(v DisplayOrder) {
 	x.xxx_hidden_DisplayOrder = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 28, 30)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 28, 32)
 }
 
 func (x *ItemMetadata) SetAbsoluteNumber(v int32) {
 	x.xxx_hidden_AbsoluteNumber = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 29, 30)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 29, 32)
+}
+
+func (x *ItemMetadata) SetMetadataLanguage(v string) {
+	x.xxx_hidden_MetadataLanguage = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 30, 32)
+}
+
+func (x *ItemMetadata) SetMetadataCountry(v string) {
+	x.xxx_hidden_MetadataCountry = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 31, 32)
 }
 
 func (x *ItemMetadata) HasName() bool {
@@ -621,6 +653,20 @@ func (x *ItemMetadata) HasAbsoluteNumber() bool {
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 29)
 }
 
+func (x *ItemMetadata) HasMetadataLanguage() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 30)
+}
+
+func (x *ItemMetadata) HasMetadataCountry() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 31)
+}
+
 func (x *ItemMetadata) ClearName() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_Name = nil
@@ -728,6 +774,16 @@ func (x *ItemMetadata) ClearAbsoluteNumber() {
 	x.xxx_hidden_AbsoluteNumber = 0
 }
 
+func (x *ItemMetadata) ClearMetadataLanguage() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 30)
+	x.xxx_hidden_MetadataLanguage = nil
+}
+
+func (x *ItemMetadata) ClearMetadataCountry() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 31)
+	x.xxx_hidden_MetadataCountry = nil
+}
+
 type ItemMetadata_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
@@ -768,6 +824,10 @@ type ItemMetadata_builder struct {
 	DisplayOrder *DisplayOrder
 	// For episodes.
 	AbsoluteNumber *int32
+	// The ISO 639-1 language and ISO 3166-1 alpha-2 country the providers
+	// describe the item in; empty follows its library's.
+	MetadataLanguage *string
+	MetadataCountry  *string
 }
 
 func (b0 ItemMetadata_builder) Build() *ItemMetadata {
@@ -775,46 +835,46 @@ func (b0 ItemMetadata_builder) Build() *ItemMetadata {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Name != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 30)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 32)
 		x.xxx_hidden_Name = b.Name
 	}
 	if b.SortName != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 30)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 32)
 		x.xxx_hidden_SortName = b.SortName
 	}
 	if b.OriginalTitle != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 30)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 32)
 		x.xxx_hidden_OriginalTitle = b.OriginalTitle
 	}
 	if b.Overview != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 30)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 32)
 		x.xxx_hidden_Overview = b.Overview
 	}
 	if b.Tagline != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 30)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 32)
 		x.xxx_hidden_Tagline = b.Tagline
 	}
 	if b.ProductionYear != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 30)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 32)
 		x.xxx_hidden_ProductionYear = *b.ProductionYear
 	}
 	x.xxx_hidden_PremiereDate = b.PremiereDate
 	x.xxx_hidden_EndDate = b.EndDate
 	x.xxx_hidden_Runtime = b.Runtime
 	if b.OfficialRating != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 30)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 32)
 		x.xxx_hidden_OfficialRating = b.OfficialRating
 	}
 	if b.CustomRating != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 30)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 32)
 		x.xxx_hidden_CustomRating = b.CustomRating
 	}
 	if b.CommunityRating != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 11, 30)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 11, 32)
 		x.xxx_hidden_CommunityRating = *b.CommunityRating
 	}
 	if b.CriticRating != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 12, 30)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 12, 32)
 		x.xxx_hidden_CriticRating = *b.CriticRating
 	}
 	x.xxx_hidden_Genres = b.Genres
@@ -823,43 +883,51 @@ func (b0 ItemMetadata_builder) Build() *ItemMetadata {
 	x.xxx_hidden_ProductionLocations = b.ProductionLocations
 	x.xxx_hidden_ExternalIds = b.ExternalIds
 	if b.IndexNumber != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 18, 30)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 18, 32)
 		x.xxx_hidden_IndexNumber = *b.IndexNumber
 	}
 	if b.ParentIndexNumber != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 19, 30)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 19, 32)
 		x.xxx_hidden_ParentIndexNumber = *b.ParentIndexNumber
 	}
 	if b.SeriesStatus != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 20, 30)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 20, 32)
 		x.xxx_hidden_SeriesStatus = *b.SeriesStatus
 	}
 	x.xxx_hidden_Artists = b.Artists
 	x.xxx_hidden_AlbumArtists = b.AlbumArtists
 	if b.Album != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 23, 30)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 23, 32)
 		x.xxx_hidden_Album = b.Album
 	}
 	if b.Locked != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 24, 30)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 24, 32)
 		x.xxx_hidden_Locked = *b.Locked
 	}
 	x.xxx_hidden_LockedFields = b.LockedFields
 	if b.Monitored != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 26, 30)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 26, 32)
 		x.xxx_hidden_Monitored = *b.Monitored
 	}
 	if b.SeriesType != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 27, 30)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 27, 32)
 		x.xxx_hidden_SeriesType = *b.SeriesType
 	}
 	if b.DisplayOrder != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 28, 30)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 28, 32)
 		x.xxx_hidden_DisplayOrder = *b.DisplayOrder
 	}
 	if b.AbsoluteNumber != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 29, 30)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 29, 32)
 		x.xxx_hidden_AbsoluteNumber = *b.AbsoluteNumber
+	}
+	if b.MetadataLanguage != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 30, 32)
+		x.xxx_hidden_MetadataLanguage = b.MetadataLanguage
+	}
+	if b.MetadataCountry != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 31, 32)
+		x.xxx_hidden_MetadataCountry = b.MetadataCountry
 	}
 	return m0
 }
@@ -3739,7 +3807,7 @@ var File_mavio_library_v1_metadata_proto protoreflect.FileDescriptor
 
 const file_mavio_library_v1_metadata_proto_rawDesc = "" +
 	"\n" +
-	"\x1fmavio/library/v1/metadata.proto\x12\x10mavio.library.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1egoogle/protobuf/duration.proto\x1a google/protobuf/field_mask.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1bmavio/library/v1/item.proto\"\x94\f\n" +
+	"\x1fmavio/library/v1/metadata.proto\x12\x10mavio.library.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1egoogle/protobuf/duration.proto\x1a google/protobuf/field_mask.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1bmavio/library/v1/item.proto\"\x98\r\n" +
 	"\fItemMetadata\x12\x1c\n" +
 	"\x04name\x18\x01 \x01(\tB\b\xbaH\x05r\x03\x18\xf4\x03R\x04name\x12%\n" +
 	"\tsort_name\x18\x02 \x01(\tB\b\xbaH\x05r\x03\x18\xf4\x03R\bsortName\x12/\n" +
@@ -3773,7 +3841,9 @@ const file_mavio_library_v1_metadata_proto_rawDesc = "" +
 	"\vseries_type\x18\x1c \x01(\x0e2\x1c.mavio.library.v1.SeriesTypeB\b\xbaH\x05\x82\x01\x02\x10\x01R\n" +
 	"seriesType\x12M\n" +
 	"\rdisplay_order\x18\x1d \x01(\x0e2\x1e.mavio.library.v1.DisplayOrderB\b\xbaH\x05\x82\x01\x02\x10\x01R\fdisplayOrder\x120\n" +
-	"\x0fabsolute_number\x18\x1e \x01(\x05B\a\xbaH\x04\x1a\x02(\x00R\x0eabsoluteNumber\x1a>\n" +
+	"\x0fabsolute_number\x18\x1e \x01(\x05B\a\xbaH\x04\x1a\x02(\x00R\x0eabsoluteNumber\x12A\n" +
+	"\x11metadata_language\x18\x1f \x01(\tB\x14\xbaH\x11r\x0f2\r^([a-z]{2})?$R\x10metadataLanguage\x12?\n" +
+	"\x10metadata_country\x18  \x01(\tB\x14\xbaH\x11r\x0f2\r^([A-Z]{2})?$R\x0fmetadataCountry\x1a>\n" +
 	"\x10ExternalIdsEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xb1\x01\n" +

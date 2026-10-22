@@ -1222,6 +1222,26 @@ public nonisolated struct Mavio_Library_V1_Item: @unchecked Sendable {
     set {_uniqueStorage()._remoteTrailers = newValue}
   }
 
+  /// The language and country the providers describe the item in, set for
+  /// it alone; empty follows its library's. Set for administrators.
+  public var metadataLanguage: String {
+    get {_storage._metadataLanguage ?? String()}
+    set {_uniqueStorage()._metadataLanguage = newValue}
+  }
+  /// Returns true if `metadataLanguage` has been explicitly set.
+  public var hasMetadataLanguage: Bool {_storage._metadataLanguage != nil}
+  /// Clears the value of `metadataLanguage`. Subsequent reads from it will return its default value.
+  public mutating func clearMetadataLanguage() {_uniqueStorage()._metadataLanguage = nil}
+
+  public var metadataCountry: String {
+    get {_storage._metadataCountry ?? String()}
+    set {_uniqueStorage()._metadataCountry = newValue}
+  }
+  /// Returns true if `metadataCountry` has been explicitly set.
+  public var hasMetadataCountry: Bool {_storage._metadataCountry != nil}
+  /// Clears the value of `metadataCountry`. Subsequent reads from it will return its default value.
+  public mutating func clearMetadataCountry() {_uniqueStorage()._metadataCountry = nil}
+
   public var unknownFields = SwiftProtobuf.UnknownStorage()
 
   public init() {}
@@ -2638,7 +2658,7 @@ nonisolated extension Mavio_Library_V1_SegmentKind: SwiftProtobuf._ProtoNameProv
 
 nonisolated extension Mavio_Library_V1_Item: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".Item"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}id\0\u{3}library_id\0\u{3}parent_id\0\u{1}kind\0\u{1}name\0\u{3}sort_name\0\u{3}original_title\0\u{1}overview\0\u{1}tagline\0\u{1}path\0\u{3}index_number\0\u{3}parent_index_number\0\u{3}index_number_end\0\u{3}production_year\0\u{3}premiere_date\0\u{3}end_date\0\u{1}runtime\0\u{3}official_rating\0\u{3}community_rating\0\u{3}critic_rating\0\u{1}genres\0\u{1}tags\0\u{1}studios\0\u{3}external_ids\0\u{1}artists\0\u{3}album_artists\0\u{3}series_status\0\u{1}extra\0\u{3}owner_id\0\u{3}date_added\0\u{1}images\0\u{3}series_id\0\u{3}series_name\0\u{3}season_id\0\u{3}season_name\0\u{3}album_id\0\u{3}album_name\0\u{1}locked\0\u{3}locked_fields\0\u{3}custom_rating\0\u{3}production_locations\0\u{3}collection_name\0\u{3}normalization_gain\0\u{3}external_urls\0\u{1}virtual\0\u{1}monitored\0\u{3}series_type\0\u{3}display_order\0\u{3}absolute_number\0\u{3}user_data\0\u{3}original_language\0\u{3}digital_release_date\0\u{3}physical_release_date\0\u{3}remote_trailers\0")
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}id\0\u{3}library_id\0\u{3}parent_id\0\u{1}kind\0\u{1}name\0\u{3}sort_name\0\u{3}original_title\0\u{1}overview\0\u{1}tagline\0\u{1}path\0\u{3}index_number\0\u{3}parent_index_number\0\u{3}index_number_end\0\u{3}production_year\0\u{3}premiere_date\0\u{3}end_date\0\u{1}runtime\0\u{3}official_rating\0\u{3}community_rating\0\u{3}critic_rating\0\u{1}genres\0\u{1}tags\0\u{1}studios\0\u{3}external_ids\0\u{1}artists\0\u{3}album_artists\0\u{3}series_status\0\u{1}extra\0\u{3}owner_id\0\u{3}date_added\0\u{1}images\0\u{3}series_id\0\u{3}series_name\0\u{3}season_id\0\u{3}season_name\0\u{3}album_id\0\u{3}album_name\0\u{1}locked\0\u{3}locked_fields\0\u{3}custom_rating\0\u{3}production_locations\0\u{3}collection_name\0\u{3}normalization_gain\0\u{3}external_urls\0\u{1}virtual\0\u{1}monitored\0\u{3}series_type\0\u{3}display_order\0\u{3}absolute_number\0\u{3}user_data\0\u{3}original_language\0\u{3}digital_release_date\0\u{3}physical_release_date\0\u{3}remote_trailers\0\u{3}metadata_language\0\u{3}metadata_country\0")
 
   fileprivate class _StorageClass {
     var _id: String? = nil
@@ -2695,6 +2715,8 @@ nonisolated extension Mavio_Library_V1_Item: SwiftProtobuf.Message, SwiftProtobu
     var _digitalReleaseDate: SwiftProtobuf.Google_Protobuf_Timestamp? = nil
     var _physicalReleaseDate: SwiftProtobuf.Google_Protobuf_Timestamp? = nil
     var _remoteTrailers: [String] = []
+    var _metadataLanguage: String? = nil
+    var _metadataCountry: String? = nil
 
       // This property is used as the initial default value for new instances of the type.
       // The type itself is protecting the reference to its storage via CoW semantics.
@@ -2759,6 +2781,8 @@ nonisolated extension Mavio_Library_V1_Item: SwiftProtobuf.Message, SwiftProtobu
       _digitalReleaseDate = source._digitalReleaseDate
       _physicalReleaseDate = source._physicalReleaseDate
       _remoteTrailers = source._remoteTrailers
+      _metadataLanguage = source._metadataLanguage
+      _metadataCountry = source._metadataCountry
     }
   }
 
@@ -2831,6 +2855,8 @@ nonisolated extension Mavio_Library_V1_Item: SwiftProtobuf.Message, SwiftProtobu
         case 52: try { try decoder.decodeSingularMessageField(value: &_storage._digitalReleaseDate) }()
         case 53: try { try decoder.decodeSingularMessageField(value: &_storage._physicalReleaseDate) }()
         case 54: try { try decoder.decodeRepeatedStringField(value: &_storage._remoteTrailers) }()
+        case 55: try { try decoder.decodeSingularStringField(value: &_storage._metadataLanguage) }()
+        case 56: try { try decoder.decodeSingularStringField(value: &_storage._metadataCountry) }()
         default: break
         }
       }
@@ -3005,6 +3031,12 @@ nonisolated extension Mavio_Library_V1_Item: SwiftProtobuf.Message, SwiftProtobu
       if !_storage._remoteTrailers.isEmpty {
         try visitor.visitRepeatedStringField(value: _storage._remoteTrailers, fieldNumber: 54)
       }
+      try { if let v = _storage._metadataLanguage {
+        try visitor.visitSingularStringField(value: v, fieldNumber: 55)
+      } }()
+      try { if let v = _storage._metadataCountry {
+        try visitor.visitSingularStringField(value: v, fieldNumber: 56)
+      } }()
     }
     try unknownFields.traverse(visitor: &visitor)
   }
@@ -3068,6 +3100,8 @@ nonisolated extension Mavio_Library_V1_Item: SwiftProtobuf.Message, SwiftProtobu
         if _storage._digitalReleaseDate != rhs_storage._digitalReleaseDate {return false}
         if _storage._physicalReleaseDate != rhs_storage._physicalReleaseDate {return false}
         if _storage._remoteTrailers != rhs_storage._remoteTrailers {return false}
+        if _storage._metadataLanguage != rhs_storage._metadataLanguage {return false}
+        if _storage._metadataCountry != rhs_storage._metadataCountry {return false}
         return true
       }
       if !storagesAreEqual {return false}

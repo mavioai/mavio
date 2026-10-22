@@ -6003,6 +6003,9 @@ public enum MavioStrings {
     /// Locks an item's cast and crew.
     public static var metadataCast: String { NSLocalizedString("metadata.cast", bundle: .module, comment: "") }
 
+    /// Option of an item's metadata language or country using its library's.
+    public static var metadataLibraryDefault: String { NSLocalizedString("metadata.libraryDefault", bundle: .module, comment: "") }
+
     /// Footer of an item's locks.
     public static var metadataLocksFooter: String { NSLocalizedString("metadata.locksFooter", bundle: .module, comment: "") }
 

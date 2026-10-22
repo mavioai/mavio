@@ -178,6 +178,13 @@ pub struct ItemView<'a> {
     ///
     /// Field 54: `remote_trailers`
     pub remote_trailers: ::buffa::RepeatedView<'a, &'a str>,
+    /// The language and country the providers describe the item in, set for
+    /// it alone; empty follows its library's. Set for administrators.
+    ///
+    /// Field 55: `metadata_language`
+    pub metadata_language: ::core::option::Option<&'a str>,
+    /// Field 56: `metadata_country`
+    pub metadata_country: ::core::option::Option<&'a str>,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for ItemView<'a> {
@@ -619,6 +626,20 @@ impl<'a> ::buffa::MessageView<'a> for ItemView<'a> {
                     }
                 }
             }
+            55u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.metadata_language = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
+            56u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.metadata_country = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
             21u32 => {
                 ::buffa::encoding::check_wire_type(
                     tag,
@@ -957,6 +978,8 @@ impl<'a> ::buffa::MessageView<'a> for ItemView<'a> {
                 .iter()
                 .map(|s| s.to_string())
                 .collect(),
+            metadata_language: self.metadata_language.map(|s| s.to_string()),
+            metadata_country: self.metadata_country.map(|s| s.to_string()),
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -1181,6 +1204,12 @@ impl<'a> ::buffa::ViewEncode<'a> for ItemView<'a> {
                     + inner_size as u64;
         }
         for v in &self.remote_trailers {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.metadata_language {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.metadata_country {
             size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
@@ -1427,6 +1456,12 @@ impl<'a> ::buffa::ViewEncode<'a> for ItemView<'a> {
         }
         for v in &self.remote_trailers {
             ::buffa::types::put_string_field(54u32, v, buf);
+        }
+        if let Some(ref v) = self.metadata_language {
+            ::buffa::types::put_string_field(55u32, v, buf);
+        }
+        if let Some(ref v) = self.metadata_country {
+            ::buffa::types::put_string_field(56u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -1867,6 +1902,19 @@ impl ItemOwnedView {
     #[must_use]
     pub fn remote_trailers(&self) -> &::buffa::RepeatedView<'_, &'_ str> {
         &self.0.reborrow().remote_trailers
+    }
+    /// The language and country the providers describe the item in, set for
+    /// it alone; empty follows its library's. Set for administrators.
+    ///
+    /// Field 55: `metadata_language`
+    #[must_use]
+    pub fn metadata_language(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().metadata_language
+    }
+    /// Field 56: `metadata_country`
+    #[must_use]
+    pub fn metadata_country(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().metadata_country
     }
 }
 impl ::core::convert::From<::buffa::OwnedView<ItemView<'static>>> for ItemOwnedView {

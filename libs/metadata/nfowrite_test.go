@@ -42,6 +42,7 @@ func TestWriteNFORoundTrip(t *testing.T) {
 		}},
 		{"series", Result{Item: core.Item{
 			Kind: core.KindSeries, Name: "Show", SeriesStatus: core.SeriesEnded, AirDays: []time.Weekday{time.Monday},
+			MetadataLanguage: "ja", MetadataCountry: "JP",
 			AirTime: "9 PM", DisplayOrder: "dvd", EndDate: date("2001-02-03"), ExternalIDs: map[core.Provider]string{core.ProviderTVDB: "7"},
 		}}},
 		{"season", Result{Item: core.Item{Kind: core.KindSeason, Name: "Season 2", IndexNumber: num(2)}}},

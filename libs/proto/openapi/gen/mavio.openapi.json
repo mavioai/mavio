@@ -13052,6 +13052,15 @@
             },
             "title": "remote_trailers",
             "description": "URLs of trailers hosted elsewhere, such as on YouTube."
+          },
+          "metadataLanguage": {
+            "type": "string",
+            "title": "metadata_language",
+            "description": "The language and country the providers describe the item in, set for\n it alone; empty follows its library's. Set for administrators."
+          },
+          "metadataCountry": {
+            "type": "string",
+            "title": "metadata_country"
           }
         },
         "title": "Item",
@@ -13284,6 +13293,17 @@
             "minimum": 0,
             "format": "int32",
             "description": "For episodes."
+          },
+          "metadataLanguage": {
+            "type": "string",
+            "title": "metadata_language",
+            "pattern": "^([a-z]{2})?$",
+            "description": "The ISO 639-1 language and ISO 3166-1 alpha-2 country the providers\n describe the item in; empty follows its library's."
+          },
+          "metadataCountry": {
+            "type": "string",
+            "title": "metadata_country",
+            "pattern": "^([A-Z]{2})?$"
           }
         },
         "title": "ItemMetadata",

@@ -3826,6 +3826,8 @@
     <string name="metadata_lock_name">Names</string>
     <!-- Locks an item's cast and crew. -->
     <string name="metadata_cast">Cast and Crew</string>
+    <!-- Option of an item's metadata language or country using its library's. -->
+    <string name="metadata_library_default">Library Default</string>
     <!-- Footer of an item's locks. -->
     <string name="metadata_locks_footer">Refreshes leave locked fields as they are.</string>
     <!-- Saves an item's metadata. -->
