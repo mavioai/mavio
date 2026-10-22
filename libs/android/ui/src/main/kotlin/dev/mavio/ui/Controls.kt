@@ -12,6 +12,7 @@ import androidx.compose.foundation.lazy.grid.LazyGridScope
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -177,3 +178,10 @@ internal fun ChoiceItem(text: String, chosen: Boolean, onClick: () -> Unit) {
         trailingIcon = { if (chosen) MavioIcon(R.drawable.ic_check, size = 18.dp) },
     )
 }
+
+/**
+ * A line between a menu's groups, as the web UI's: `color.border` is the menu's
+ * own `color.surfaceOverlay` in the dark, where the web UI's glass lets it show.
+ */
+@Composable
+fun MenuDivider() = HorizontalDivider(Modifier.padding(vertical = MavioSpacing.s4), color = theme.colors.textPrimary.copy(alpha = 0.12f))
