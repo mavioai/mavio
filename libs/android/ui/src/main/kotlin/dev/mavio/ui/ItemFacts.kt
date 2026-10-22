@@ -1,19 +1,19 @@
 package dev.mavio.ui
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLinkStyles
@@ -30,6 +30,7 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
+import mavio.acquisition.v1.Discover.Title
 
 /** A day, as the user's locale writes it in medium length. */
 fun itemDay(instant: Instant): String =
@@ -38,16 +39,24 @@ fun itemDay(instant: Instant): String =
 /** How many studios show until Show More. */
 const val MIN_ITEM_STUDIOS = 3
 
-/** The release, status, runtime, rating, genres, studios, countries, languages and when it was added. */
+/**
+ * The release, status, runtime, rating, genres, studios, countries,
+ * languages and when it was added; of a movie or series, with what the
+ * metadata providers tell of it as its discovered [title] beyond what the
+ * library keeps: its releases, status, next episode, budget and takings.
+ */
 @Composable
-fun aboutFacts(details: Details, studiosKey: String, allStudios: Boolean): List<Pair<String, String>> {
+fun aboutFacts(details: Details, studiosKey: String, allStudios: Boolean, title: Title? = null): List<Pair<String, String>> {
     val card = details.card
     val rows = mutableListOf<Pair<String, String?>>()
     if (card.kind == CardKind.MOVIE) {
+        // What the library keeps first, then what the discovered title tells.
+        fun release(label: String, kept: Instant?, told: String?): String? =
+            (kept?.let(::itemDay) ?: told?.let(::dayText))?.let { "$label  $it" }
         val releases = listOfNotNull(
-            details.premiere?.let { "${stringResource(R.string.discover_theatrical_release)}  ${itemDay(it)}" },
-            details.digitalRelease?.let { "${stringResource(R.string.item_digital_release)}  ${itemDay(it)}" },
-            details.physicalRelease?.let { "${stringResource(R.string.item_physical_release)}  ${itemDay(it)}" },
+            release(stringResource(R.string.discover_theatrical_release), details.premiere, title?.theatricalReleaseDate),
+            release(stringResource(R.string.item_digital_release), details.digitalRelease, title?.digitalReleaseDate),
+            release(stringResource(R.string.item_physical_release), details.physicalRelease, title?.physicalReleaseDate),
         )
         rows += if (releases.size > 1) {
             stringResource(R.string.discover_release_dates) to releases.joinToString("\n")
@@ -62,14 +71,15 @@ fun aboutFacts(details: Details, studiosKey: String, allStudios: Boolean): List<
         }
         rows += stringResource(key) to details.premiere?.let(::itemDay)
     }
+    rows += stringResource(R.string.item_status) to when {
+        card.kind == CardKind.SERIES && details.seriesStatus == SeriesStatus.CONTINUING -> stringResource(R.string.item_continuing)
+        card.kind == CardKind.SERIES && details.seriesStatus == SeriesStatus.ENDED -> stringResource(R.string.item_ended)
+        else -> title?.let { productionStatus(it.productionStatus) }
+    }
     if (card.kind == CardKind.SERIES) {
-        rows += stringResource(R.string.item_status) to when (details.seriesStatus) {
-            SeriesStatus.CONTINUING -> stringResource(R.string.item_continuing)
-            SeriesStatus.ENDED -> stringResource(R.string.item_ended)
-            else -> null
-        }
         rows += stringResource(R.string.item_last_aired) to
             if (details.seriesStatus == SeriesStatus.ENDED) details.endDate?.let(::itemDay) else null
+        rows += stringResource(R.string.item_next_air_date) to title?.nextAirDate?.let(::dayText)
     }
     rows += stringResource(R.string.item_runtime) to
         if (card.kind == CardKind.SERIES) null else card.runtime?.let { minutesText(it.toMinutes()) }
@@ -77,11 +87,29 @@ fun aboutFacts(details: Details, studiosKey: String, allStudios: Boolean): List<
     rows += stringResource(R.string.item_genres) to details.genres.takeIf { it.isNotEmpty() }?.joinToString(", ")
     rows += studiosKey to details.studios.takeIf { it.isNotEmpty() }
         ?.let { if (allStudios) it else it.take(MIN_ITEM_STUDIOS) }?.joinToString(", ")
-    rows += stringResource(R.string.item_country) to details.countries.takeIf { it.isNotEmpty() }?.joinToString("\n")
-    rows += stringResource(R.string.item_original_language) to details.originalLanguage?.let { languageName(it) ?: it }
+    rows += stringResource(R.string.item_country) to countries(details, title).takeIf { it.isNotEmpty() }?.joinToString("\n")
+    rows += stringResource(R.string.item_original_language) to
+        (details.originalLanguage ?: title?.originalLanguage?.ifEmpty { null })?.let { languageName(it) ?: it }
     rows += stringResource(R.string.item_original_title) to details.originalTitle?.takeIf { it != card.title }
+    rows += stringResource(R.string.item_budget) to title?.let { moneyText(it.budget) }
+    rows += stringResource(R.string.item_revenue) to title?.let { moneyText(it.revenue) }
     rows += stringResource(R.string.item_date_added) to details.dateAdded?.let(::itemDay)
     return rows.mapNotNull { (k, v) -> v?.let { k to it } }
+}
+
+/**
+ * The countries with their flags when the library keeps those the metadata
+ * providers tell, else as the library keeps them.
+ */
+private fun countries(details: Details, title: Title?): List<String> {
+    val stored = details.countries
+    val told = title?.productionLocationsList.orEmpty()
+    if (title != null && title.productionCountriesCount > 0 &&
+        (stored.isEmpty() || (stored.size == told.size && stored.all(told::contains)))
+    ) {
+        return title.productionCountriesList.map(::countryText)
+    }
+    return stored.ifEmpty { told }
 }
 
 /** The chosen version's video, audio, subtitles and file. */
@@ -109,22 +137,35 @@ fun mediaFacts(source: Source, context: android.content.Context): List<Pair<Stri
     ).mapNotNull { (k, v) -> v?.let { k to it } }
 }
 
-/** A rating, large, with its caption and scale. */
+/**
+ * The audience's rating out of 10 and the critics' score out of 100, in a
+ * row as a discovered title's ratings are, as the web UI's.
+ */
 @Composable
-fun RatingCard(label: String, scale: String?, value: @Composable () -> Unit) {
-    val colors = theme.colors
-    Column(
-        Modifier
-            .widthIn(min = 144.dp)
-            .clip(RoundedCornerShape(12.dp))
-            .background(colors.fill)
-            .padding(horizontal = MavioSpacing.s16, vertical = MavioSpacing.s12),
+fun ItemRatings(community: Float?, critic: Float?, modifier: Modifier = Modifier) {
+    if (community == null && critic == null) return
+    val communityLabel = stringResource(R.string.item_community_rating)
+    val criticLabel = stringResource(R.string.item_critic_rating)
+    val locale = LocalLocale.current.platformLocale
+    FlowRow(
+        modifier.semantics(mergeDescendants = true) {},
+        horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s16),
         verticalArrangement = Arrangement.spacedBy(MavioSpacing.s4),
+        itemVerticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(label, style = theme.type.footnote.text, fontWeight = FontWeight.SemiBold, color = colors.textSecondary)
-        Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
-            value()
-            scale?.let { Text(it, style = theme.type.callout.text, color = colors.textTertiary) }
+        community?.let {
+            val text = String.format(locale, "%.1f", it)
+            Row(
+                Modifier.semantics { contentDescription = "$communityLabel $text / 10" },
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                MavioIcon(R.drawable.ic_rating_fill, size = 20.dp, tint = Color(0xFFFFD60A))
+                Text(text, style = theme.type.callout.text, fontWeight = FontWeight.SemiBold)
+            }
+        }
+        critic?.let {
+            Text("$criticLabel ${Math.round(it)}%", style = theme.type.callout.text, fontWeight = FontWeight.SemiBold)
         }
     }
 }
