@@ -628,15 +628,25 @@ function JsonField({ value, onChange }: { value: Json; onChange: (v: Json) => vo
   );
 }
 
-/** The title of an object in a list: its name or ID, else its place. */
-function itemTitle(v: Json, i: number): string {
-  if (isObj(v)) for (const k of ["name", "id", "definition", "kind", "host"]) if (typeof v[k] === "string" && v[k]) return v[k];
+/**
+ * The title of an object in a list: its name or ID, the name of the option
+ * when a source's option is that, else its place.
+ */
+function itemTitle(schema: Schema, options: Options, v: Json, i: number): string {
+  if (isObj(v))
+    for (const k of ["name", "id", "definition", "kind", "host"]) {
+      const x = v[k];
+      if (typeof x !== "string" || !x) continue;
+      const spec = schema.properties?.[k]?.["x-mavio-options"];
+      return (spec && options(spec.source)?.find((o) => o.value === x)?.name) || x;
+    }
   return t("schema.item", { number: i + 1 });
 }
 
 /** Objects of a list, as cards that open to their fields. */
 function ObjectList({ schema, value, onChange }: { schema: Schema; value: Json[]; onChange: (v: Json[] | undefined) => void }) {
   const [open, setOpen] = useState<number | undefined>();
+  const options = useContext(OptionsContext);
   const set = (i: number, v: Json) => onChange(value.map((x, j) => (j === i ? v : x)));
   return (
     <div className="flex flex-col gap-2">
@@ -652,7 +662,7 @@ function ObjectList({ schema, value, onChange }: { schema: Schema; value: Json[]
               className="flex min-h-9 min-w-0 flex-1 items-center gap-2 text-left"
             >
               <Icon name="expand" size={16} className={`shrink-0 transition-transform ${open === i ? "" : "-rotate-90"}`} />
-              <span className="truncate type-headline">{itemTitle(v, i)}</span>
+              <span className="truncate type-headline">{itemTitle(schema, options, v, i)}</span>
             </button>
             <Button
               variant="plain"
