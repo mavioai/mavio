@@ -191,6 +191,7 @@ A virtual item is a movie, series, season or episode known from metadata whose f
 * Audio streams carry channels, channel layout, sample rate and bit depth.
 * A `Chapter` is a named start position with an optional extracted image (`ImagePath`).
 * Files attached to a container, such as the fonts of ASS subtitles, are streams of kind `attachment`, with their file name as `Title` and their `MimeType`.
+* `ItemLocalization` keeps a movie's, series', season's or episode's `Name`, `Overview` and `Tagline` in one more `Language` (ISO 639-1), with when it was `FetchedAt`; an item has at most one per language, and `Apply` lays its non-empty fields over the item, leaving its sort name. Items whose metadata language follows clients (§ MetadataSettings) are refreshed in `FallbackMetadataLanguage` (`en`), and keep the languages clients read besides.
 * `Trickplay` describes an item's thumbnail sheets at one width: thumbnails of `Width` × `Height` taken every `Interval`, `TileWidth` across and `TileHeight` down a sheet, `ThumbnailCount` in all (`Sheets` of them), and the `Bandwidth` they take while playing. An item has at most one per width.
 * A `MediaSegment` is a stretch of an item clients may offer to skip: an `intro`, `outro`, `recap`, `preview` or `commercial` from `Start` to `End`, with the segment provider that found it.
 * Rules: a source needs `ID`, `ItemID` and `Path`, and non-negative size, duration and bitrate; every stream needs a valid `Kind`, a non-negative index, non-negative dimensions and channel count.
@@ -270,6 +271,7 @@ A `Job` is durable background work stored in the database (scans, metadata refre
 | `APIKeyRepository` | `Create`, `GetByTokenHash`, `List` (newest first), `Touch`, `Delete`; deleting the user deletes their keys |
 | `ActivityRepository` | `Add`, `List` (paged, newest first, by time, user, types and least severity), `Purge` of activities before a time |
 | `ProxyRepository` | `List` (by name), `Get`, `Put` (insert or replace by ID; `ErrConflict` naming the proxy of the same name or address), `Delete` |
+| `LocalizationRepository` | `Get` an item's localization in a language, `GetMany` of items in one, list the `Languages` an item has, `Put` one (replacing the earlier; search matches its name) |
 | `TrickplayRepository` | `Put` an item's sheets at a width (replacing the earlier), `List` an item's (narrowest first), `Delete` them |
 | `MediaSegmentRepository` | `List` an item's segments by start, `Replace` them |
 | `QualityDefinitionRepository` | `List` a kind's definitions (none until stored), `Replace` them |
@@ -359,7 +361,7 @@ A `PluginContainer` is what the server keeps of a container dependency a plugin'
 * `SessionIdleDays`: how many days a session lasts unused, 1–3650, 90 by default.
 * `Acquisition`: how releases are chosen, downloaded and imported (§13.4).
 * `Requests`: the permissions new users get, the default quotas, and where approved requests go (§13.6).
-* `Metadata` (`MetadataSettings`): the server's `PreferredLanguage` (ISO 639-1) and `Country` (ISO 3166-1) of metadata, as Jellyfin's `PreferredMetadataLanguage` and `MetadataCountryCode`; libraries and items without their own are described in them, and requests and discovery name titles in the language and rate them in the country. The defaults are `en` and `US`.
+* `Metadata` (`MetadataSettings`): the server's `PreferredLanguage` (ISO 639-1) and `Country` (ISO 3166-1) of metadata, as Jellyfin's `PreferredMetadataLanguage` and `MetadataCountryCode`; libraries and items without their own are described in them, and requests and discovery name titles in the language and rate them in the country. An empty `PreferredLanguage`, the default (`FollowsClients`), follows each client's language: such items are refreshed in English and kept as well in the languages clients read (`ItemLocalization`). The default country is `US`.
 * `Subtitles`: how subtitles are searched, chosen, saved and synchronized (§14.3).
 * `Assistant` (`AssistantSettings`): whether the assistant is on; the AI path's `Model` (`ai/<provider>/<model>`, empty for the fast path only), whether it uses `CodeMode`, and who may use it (`AIAccess`: `all`, `administrators`, or the `selected` `AIUsers`, checked by `AllowsAI`); the `IdleTime` after which a request starts a new conversation (a minute to a day, 30 minutes) and the `RetentionDays` conversations are kept (1–3650, 30); whether `Memory` is on; for voice sessions, the `Recognizers` and `Voices` by language (`<plugin>/<recognizer>`, `<plugin>/<voice>`, the first ready one for a language without), whether recognizers get the users' `Hints`, a turn's longest `Pause` (0.5–10 seconds, 3), the `CommitDelay` before held effects (0–3 seconds, 0.7) and a session's `SessionIdle` time (3–60 seconds, 8) ([Assistant §10](assistant.md#10-settings-and-privacy)).
 * `Validate` checks the known values and ranges.

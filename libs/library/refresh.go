@@ -346,6 +346,9 @@ func (r *Refresher) RefreshWith(ctx context.Context, lib core.Library, itemID co
 			r.logger().WarnContext(ctx, "download lyrics", "item", it.ID, "err", err)
 		}
 	}
+	if err := r.relocalize(ctx, lib, it); err != nil {
+		r.logger().WarnContext(ctx, "fetching the item's languages again failed", "item", it.ID, "err", err)
+	}
 	if it.Kind == core.KindSeries {
 		lookup.ExternalIDs, lookup.DisplayOrder = it.ExternalIDs, it.DisplayOrder
 		if err := r.listEpisodes(ctx, lib, it, lookup); err != nil {
@@ -468,20 +471,12 @@ func (r *Refresher) metadata() core.MetadataSettings {
 func (r *Refresher) lookup(ctx context.Context, lib core.Library, it core.Item) (Lookup, error) {
 	l := Lookup{
 		Kind: it.Kind, Name: it.Name, Year: it.ProductionYear, ExternalIDs: it.ExternalIDs,
-		Album: it.Album, Artists: it.Artists, Language: lib.PreferredLanguage, Country: lib.MetadataCountry,
+		Album: it.Album, Artists: it.Artists,
 	}
-	if it.MetadataLanguage != "" {
-		l.Language = it.MetadataLanguage
-	}
-	if it.MetadataCountry != "" {
-		l.Country = it.MetadataCountry
-	}
-	m := r.metadata()
-	l.Language, l.Country = cmp.Or(l.Language, m.PreferredLanguage), cmp.Or(l.Country, m.Country)
+	var series *core.Item
 	switch it.Kind {
 	case core.KindSeries:
 		l.DisplayOrder = it.DisplayOrder
-		return l, nil
 	case core.KindSeason:
 		l.SeasonNumber = it.IndexNumber
 	case core.KindEpisode:
@@ -489,25 +484,76 @@ func (r *Refresher) lookup(ctx context.Context, lib core.Library, it core.Item) 
 		if it.IndexNumber != nil && it.IndexNumberEnd != nil && *it.IndexNumberEnd > *it.IndexNumber {
 			l.EpisodeNumberEnd = it.IndexNumberEnd
 		}
-	default:
+	}
+	if it.Kind == core.KindSeason || it.Kind == core.KindEpisode {
+		// Seasons and episodes are found through their series.
+		var err error
+		if series, err = r.seriesOf(ctx, it); err != nil {
+			return l, err
+		}
+		if series != nil {
+			l.SeriesExternalIDs, l.DisplayOrder = series.ExternalIDs, series.DisplayOrder
+		}
+	}
+	if r.Metadata == nil {
+		// Without the server's settings, the providers choose.
+		l.Language, l.Country = cmp.Or(it.MetadataLanguage, lib.PreferredLanguage), cmp.Or(it.MetadataCountry, lib.MetadataCountry)
+		if series != nil {
+			l.Language = cmp.Or(it.MetadataLanguage, series.MetadataLanguage, lib.PreferredLanguage)
+			l.Country = cmp.Or(it.MetadataCountry, series.MetadataCountry, lib.MetadataCountry)
+		}
 		return l, nil
 	}
-	// Seasons and episodes are found through their series.
+	m := r.metadata()
+	l.Language, _ = MetadataLanguage(&it, series, lib, m)
+	l.Country = MetadataCountry(&it, series, lib, m)
+	return l, nil
+}
+
+// seriesOf returns the series of a season or episode, nil when it has
+// none.
+func (r *Refresher) seriesOf(ctx context.Context, it core.Item) (*core.Item, error) {
 	for id := it.ParentID; !id.IsZero(); {
 		p, err := r.Store.Items().Get(ctx, id)
 		if errors.Is(err, core.ErrNotFound) {
-			break
+			return nil, nil
 		}
 		if err != nil {
-			return l, err
+			return nil, err
 		}
 		if p.Kind == core.KindSeries {
-			l.SeriesExternalIDs, l.DisplayOrder = p.ExternalIDs, p.DisplayOrder
-			break
+			return &p, nil
 		}
 		id = p.ParentID
 	}
-	return l, nil
+	return nil, nil
+}
+
+// MetadataLanguage returns the language (ISO 639-1) an item's metadata is
+// kept in, which refreshes ask the providers in: the item's, else for a
+// season or episode its series', else its library's, else the server's.
+// With none set the item follows its clients' languages: follows is true,
+// and it is kept in core.FallbackMetadataLanguage.
+func MetadataLanguage(it, series *core.Item, lib core.Library, m core.MetadataSettings) (language string, follows bool) {
+	language = it.MetadataLanguage
+	if series != nil {
+		language = cmp.Or(language, series.MetadataLanguage)
+	}
+	if language = cmp.Or(language, lib.PreferredLanguage, m.PreferredLanguage); language != "" {
+		return language, false
+	}
+	return core.FallbackMetadataLanguage, true
+}
+
+// MetadataCountry returns the country (ISO 3166-1 alpha-2) an item is
+// rated in, found as MetadataLanguage finds its language; empty when none
+// is set.
+func MetadataCountry(it, series *core.Item, lib core.Library, m core.MetadataSettings) string {
+	country := it.MetadataCountry
+	if series != nil {
+		country = cmp.Or(country, series.MetadataCountry)
+	}
+	return cmp.Or(country, lib.MetadataCountry, m.Country)
 }
 
 // defaultRatingCountry is the rating system tried first for items and

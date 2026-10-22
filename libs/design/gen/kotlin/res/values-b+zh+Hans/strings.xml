@@ -866,7 +866,7 @@
     <string name="general_name_detail">留空则使用计算机名称</string>
     <string name="general_language">元数据语言</string>
     <string name="general_language_detail">用于未单独设置的媒体库、请求与发现</string>
-    <string name="general_language_default">英语（默认）</string>
+    <string name="general_language_default">跟随客户端语言（默认）</string>
     <string name="general_country">国家/地区</string>
     <string name="general_country_detail">用于作品名称与分级</string>
     <string name="general_country_default">美国（默认）</string>

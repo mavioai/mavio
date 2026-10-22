@@ -155,6 +155,7 @@ func (j *Jobs) Handlers() map[string]Handler {
 		JobScanFolder:   j.scanFolder,
 		JobProbe:        j.probe,
 		JobRefresh:      j.refresh,
+		JobLocalize:     j.localize,
 		JobKeyframes:    j.keyframes,
 		JobBorders:      j.borders,
 		JobPlaceholders: j.placeholders,

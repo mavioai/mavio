@@ -34,6 +34,7 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/issuecomment"
 	"github.com/mavioai/mavio/libs/store/internal/ent/item"
 	"github.com/mavioai/mavio/libs/store/internal/ent/itemlink"
+	"github.com/mavioai/mavio/libs/store/internal/ent/itemlocalization"
 	"github.com/mavioai/mavio/libs/store/internal/ent/itemvalue"
 	"github.com/mavioai/mavio/libs/store/internal/ent/job"
 	"github.com/mavioai/mavio/libs/store/internal/ent/library"
@@ -142,6 +143,7 @@ func checkColumn(t, c string) error {
 			issuecomment.Table:              issuecomment.ValidColumn,
 			item.Table:                      item.ValidColumn,
 			itemlink.Table:                  itemlink.ValidColumn,
+			itemlocalization.Table:          itemlocalization.ValidColumn,
 			itemvalue.Table:                 itemvalue.ValidColumn,
 			job.Table:                       job.ValidColumn,
 			library.Table:                   library.ValidColumn,

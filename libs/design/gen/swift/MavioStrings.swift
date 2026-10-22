@@ -2732,7 +2732,7 @@ public enum MavioStrings {
     /// Detail of the metadata language.
     public static var generalLanguageDetail: String { NSLocalizedString("general.languageDetail", bundle: .module, comment: "") }
 
-    /// The default metadata language.
+    /// The default metadata language: each client's own.
     public static var generalLanguageDefault: String { NSLocalizedString("general.languageDefault", bundle: .module, comment: "") }
 
     /// The server's country of metadata and ratings.

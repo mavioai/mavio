@@ -884,6 +884,39 @@ var (
 			},
 		},
 	}
+	// ItemLocalizationsColumns holds the columns for the "item_localizations" table.
+	ItemLocalizationsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "language", Type: field.TypeString},
+		{Name: "name", Type: field.TypeString, Default: ""},
+		{Name: "overview", Type: field.TypeString, Size: 2147483647, Default: ""},
+		{Name: "tagline", Type: field.TypeString, Default: ""},
+		{Name: "search_key", Type: field.TypeString, Default: ""},
+		{Name: "sort_key", Type: field.TypeString, Default: ""},
+		{Name: "fetched_at", Type: field.TypeTime},
+		{Name: "item_id", Type: field.TypeUUID},
+	}
+	// ItemLocalizationsTable holds the schema information for the "item_localizations" table.
+	ItemLocalizationsTable = &schema.Table{
+		Name:       "item_localizations",
+		Columns:    ItemLocalizationsColumns,
+		PrimaryKey: []*schema.Column{ItemLocalizationsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "item_localizations_items_localizations",
+				Columns:    []*schema.Column{ItemLocalizationsColumns[8]},
+				RefColumns: []*schema.Column{ItemsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "itemlocalization_item_id_language",
+				Unique:  true,
+				Columns: []*schema.Column{ItemLocalizationsColumns[8], ItemLocalizationsColumns[1]},
+			},
+		},
+	}
 	// ItemValuesColumns holds the columns for the "item_values" table.
 	ItemValuesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -1726,6 +1759,7 @@ var (
 		IssueCommentsTable,
 		ItemsTable,
 		ItemLinksTable,
+		ItemLocalizationsTable,
 		ItemValuesTable,
 		JobsTable,
 		LibrariesTable,
@@ -1847,6 +1881,10 @@ func init() {
 	ItemLinksTable.ForeignKeys[1].RefTable = ItemsTable
 	ItemLinksTable.Annotation = &entsql.Annotation{
 		Table: "item_links",
+	}
+	ItemLocalizationsTable.ForeignKeys[0].RefTable = ItemsTable
+	ItemLocalizationsTable.Annotation = &entsql.Annotation{
+		Table: "item_localizations",
 	}
 	ItemValuesTable.ForeignKeys[0].RefTable = ItemsTable
 	ItemValuesTable.Annotation = &entsql.Annotation{

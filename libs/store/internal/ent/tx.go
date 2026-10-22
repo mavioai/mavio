@@ -56,6 +56,8 @@ type Tx struct {
 	Item *ItemClient
 	// ItemLink is the client for interacting with the ItemLink builders.
 	ItemLink *ItemLinkClient
+	// ItemLocalization is the client for interacting with the ItemLocalization builders.
+	ItemLocalization *ItemLocalizationClient
 	// ItemValue is the client for interacting with the ItemValue builders.
 	ItemValue *ItemValueClient
 	// Job is the client for interacting with the Job builders.
@@ -261,6 +263,7 @@ func (tx *Tx) init() {
 	tx.IssueComment = NewIssueCommentClient(tx.config)
 	tx.Item = NewItemClient(tx.config)
 	tx.ItemLink = NewItemLinkClient(tx.config)
+	tx.ItemLocalization = NewItemLocalizationClient(tx.config)
 	tx.ItemValue = NewItemValueClient(tx.config)
 	tx.Job = NewJobClient(tx.config)
 	tx.Library = NewLibraryClient(tx.config)

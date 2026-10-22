@@ -1,4 +1,4 @@
-h1:N9eoFD0RYFmbMPmkoW2zYtNm9cGD7VpLjBVSKSPYP1I=
+h1:73/maPI4nJ8M6VAR31MCM7jBLSvD9/VAMihlnCrr4xY=
 20261015150610_init.sql h1:ZWckeu33J1aJsQOafEqBX7TX3Ngsic31TvlpvQy+nGs=
 20261016082144_user_home_layout.sql h1:OJEgL6GKDl6o4bqHhEU+QkRt9sCXuySNuapFoIcsuZs=
 20261017070834_plugin_containers.sql h1:mCf1B0BzKqtmcGIxbxtemIJqbX/mkqLdInLDzLC47IM=
@@ -7,3 +7,4 @@ h1:N9eoFD0RYFmbMPmkoW2zYtNm9cGD7VpLjBVSKSPYP1I=
 20261020115826_job_result.sql h1:TlOAZy6x35/04UbEP4EERs/PVmtqLqoxKPhslX2JVco=
 20261021151707_download_path_mappings.sql h1:J7tvTtwYHEq8qVzQEIRWtdg0KkD+QOGgUsl1uDreipw=
 20261022031228_plugin_container_folders.sql h1:z4IKY+/HUwSrnUnWrWBziTiIWCd//nkRiVioRPxyIOQ=
+20261022125156_item_localizations.sql h1:k+/S3qJ2OIhOSULVIWMyWxJ5ACCYPoiW1uzuYT+Y5Q8=

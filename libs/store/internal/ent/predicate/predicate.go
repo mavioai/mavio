@@ -72,6 +72,9 @@ type Item func(*sql.Selector)
 // ItemLink is the predicate function for itemlink builders.
 type ItemLink func(*sql.Selector)
 
+// ItemLocalization is the predicate function for itemlocalization builders.
+type ItemLocalization func(*sql.Selector)
+
 // ItemValue is the predicate function for itemvalue builders.
 type ItemValue func(*sql.Selector)
 

@@ -19,6 +19,7 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/credit"
 	"github.com/mavioai/mavio/libs/store/internal/ent/item"
 	"github.com/mavioai/mavio/libs/store/internal/ent/itemlink"
+	"github.com/mavioai/mavio/libs/store/internal/ent/itemlocalization"
 	"github.com/mavioai/mavio/libs/store/internal/ent/itemvalue"
 	"github.com/mavioai/mavio/libs/store/internal/ent/predicate"
 	"github.com/mavioai/mavio/libs/store/internal/ent/userdata"
@@ -526,9 +527,12 @@ func (r items) predicates(q core.ItemQuery) []predicate.Item {
 		ps = append(ps, item.ParentIndexNumber(*q.ParentIndexNumber))
 	}
 	if srch, ok := parseSearch(q.Search); ok {
-		ps = append(ps, predicate.Item(func(s *entsql.Selector) {
+		// Items match by their names in every language too.
+		ps = append(ps, item.Or(predicate.Item(func(s *entsql.Selector) {
 			s.Where(srch.match(s.C(item.FieldSearchKey), s.C(item.FieldOriginalKey), s.C(item.FieldSortKey)))
-		}))
+		}), item.HasLocalizationsWith(func(s *entsql.Selector) {
+			s.Where(srch.match(s.C(itemlocalization.FieldSearchKey), "", s.C(itemlocalization.FieldSortKey)))
+		})))
 	}
 	for kind, values := range map[string][]string{valueGenre: q.Genres, valueTag: q.Tags, valueStudio: q.Studios} {
 		if len(values) > 0 {

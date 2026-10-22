@@ -853,7 +853,7 @@
   "general.nameDetail": { "message": "Empty uses the computer's name", "description": "Detail of the server name." },
   "general.language": { "message": "Metadata language", "description": "The server's language of metadata." },
   "general.languageDetail": { "message": "For libraries without their own, requests and Discover", "description": "Detail of the metadata language." },
-  "general.languageDefault": { "message": "English (default)", "description": "The default metadata language." },
+  "general.languageDefault": { "message": "Follow client language (default)", "description": "The default metadata language: each client's own." },
   "general.country": { "message": "Country", "description": "The server's country of metadata and ratings." },
   "general.countryDetail": { "message": "Names titles and rates them", "description": "Detail of the metadata country." },
   "general.countryDefault": { "message": "United States (default)", "description": "The default metadata country." },

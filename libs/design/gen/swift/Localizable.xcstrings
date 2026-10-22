@@ -15356,19 +15356,19 @@
       }
     },
     "general.languageDefault": {
-      "comment": "The default metadata language.",
+      "comment": "The default metadata language: each client's own.",
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "English (default)"
+            "value": "Follow client language (default)"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "英语（默认）"
+            "value": "跟随客户端语言（默认）"
           }
         }
       }

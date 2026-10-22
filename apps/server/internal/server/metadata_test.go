@@ -14,6 +14,7 @@ import (
 	"testing"
 	"time"
 
+	"connectrpc.com/connect"
 	"google.golang.org/protobuf/types/known/fieldmaskpb"
 
 	"github.com/mavioai/mavio/apps/server/internal/server"
@@ -153,6 +154,59 @@ func TestMetadataManagement(t *testing.T) {
 		t.Errorf("collections = %v, %v", collections, err)
 	}
 
+	// The server follows its clients' languages, as by default: a client
+	// in Chinese reads the film in Chinese once its job fetched it, and a
+	// client in English reads it in English.
+	language := func(header string) connect.ClientOption {
+		return connect.WithInterceptors(connect.UnaryInterceptorFunc(func(next connect.UnaryFunc) connect.UnaryFunc {
+			return func(ctx context.Context, req connect.AnyRequest) (connect.AnyResponse, error) {
+				req.Header().Set("Accept-Language", header)
+				return next(ctx, req)
+			}
+		}))
+	}
+	zhItems := libraryv1connect.NewItemServiceClient(http.DefaultClient, url, token, language("zh-CN,en;q=0.8"))
+	enItems := libraryv1connect.NewItemServiceClient(http.DefaultClient, url, token, language("en-US"))
+	zhMeta := libraryv1connect.NewMetadataServiceClient(http.DefaultClient, url, token, language("zh-CN"))
+	const zhOverview = "1924年，两个男孩在北平的戏班相识。"
+	getIn := func(c libraryv1connect.ItemServiceClient) *libraryv1.Item {
+		t.Helper()
+		res, err := c.GetItem(ctx, libraryv1.GetItemRequest_builder{Id: new(movie.GetId())}.Build())
+		if err != nil {
+			t.Fatalf("GetItem: %v", err)
+		}
+		return res.GetItem()
+	}
+	for deadline := time.Now().Add(time.Minute); ; time.Sleep(100 * time.Millisecond) {
+		if it := getIn(zhItems); it.GetName() == "霸王别姬" && it.GetOverview() == zhOverview {
+			break
+		}
+		if time.Now().After(deadline) {
+			t.Fatalf("the film in Chinese: not within a minute; %v", getIn(zhItems))
+		}
+	}
+	if it := getIn(enItems); it.GetName() != "Farewell My Concubine" || it.GetOverview() != "Two boys meet at an opera training school in Peking in 1924." {
+		t.Errorf("the film in English = %q, %q", it.GetName(), it.GetOverview())
+	}
+	// Editing the name from the client in Chinese edits it in Chinese, and
+	// a refresh keeps it locked in both languages.
+	if _, err := zhMeta.UpdateItem(ctx, libraryv1.UpdateItemRequest_builder{
+		Id: new(movie.GetId()),
+		Metadata: libraryv1.ItemMetadata_builder{
+			Name: new("霸王别姬（修复版）"), LockedFields: []libraryv1.MetadataField{libraryv1.MetadataField_METADATA_FIELD_NAME},
+		}.Build(),
+		UpdateMask: &fieldmaskpb.FieldMask{Paths: []string{"name", "locked_fields"}},
+	}.Build()); err != nil {
+		t.Fatalf("UpdateItem in Chinese: %v", err)
+	}
+	if _, err := meta.RefreshItem(ctx, libraryv1.RefreshItemRequest_builder{Id: new(movie.GetId())}.Build()); err != nil {
+		t.Fatalf("RefreshItem: %v", err)
+	}
+	if zh, en := getIn(zhItems), getIn(enItems); zh.GetName() != "霸王别姬（修复版）" || zh.GetOverview() != zhOverview ||
+		en.GetName() != "Farewell My Concubine" {
+		t.Errorf("after a refresh: in Chinese %q, %q; in English %q", zh.GetName(), zh.GetOverview(), en.GetName())
+	}
+
 	// The administrator edits the overview and locks it, and sets the
 	// film's metadata language and country.
 	const overview = "Edited by the administrator."
@@ -170,7 +224,8 @@ func TestMetadataManagement(t *testing.T) {
 	if err != nil {
 		t.Fatalf("RefreshItem: %v", err)
 	}
-	if it := refreshed.GetItem(); it.GetOverview() != overview || it.GetName() != "Farewell My Concubine" ||
+	// It is named in Chinese, the language set for it.
+	if it := refreshed.GetItem(); it.GetOverview() != overview || it.GetName() != "霸王别姬" ||
 		it.GetMetadataLanguage() != "zh" || it.GetMetadataCountry() != "HK" ||
 		!slices.Equal(it.GetLockedFields(), []libraryv1.MetadataField{libraryv1.MetadataField_METADATA_FIELD_OVERVIEW}) {
 		t.Errorf("refreshed film: %v", it)
@@ -208,7 +263,7 @@ func TestMetadataManagement(t *testing.T) {
 	again := waitFor("read back", func(it *libraryv1.Item) bool {
 		return it.GetId() != movie.GetId() && it.GetOverview() == overview && len(it.GetImages()) > 0
 	})
-	if again.GetExternalIds()["tmdb"] != "10997" || again.GetName() != "Farewell My Concubine" {
+	if again.GetExternalIds()["tmdb"] != "10997" || again.GetName() != "霸王别姬" {
 		t.Errorf("film read back: %v", again)
 	}
 	i := slices.IndexFunc(again.GetImages(), func(img *libraryv1.Image) bool { return img.GetKind() == libraryv1.ImageKind_IMAGE_KIND_PRIMARY })

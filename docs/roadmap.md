@@ -1174,11 +1174,11 @@ flowchart TD
 **Done when**: an end-to-end test through the API: on a server following clients, a client in Chinese reads a movie and, after the job, its Chinese name and overview; a client in English reads the English ones with no job queued; a refresh keeps both; a locked name stays in both languages; and the web UI's general settings offer following clients first.
 
 **Progress**:
-- [ ] Domain and storage: `MetadataSettings` following clients, `ItemLocalization` with its repository and migrations
-- [ ] Refreshes: English for items following clients, the languages an item has fetched again, `item.localize` jobs, seasons and episodes taking their series' language
-- [ ] API: items presented in the client's language, missing languages queued, edits in the client's language, search by the names in every language
-- [ ] Web UI: Follow Client Language, the default, first among the general settings' metadata languages
-- [ ] End-to-end test
+- [x] Domain and storage: `MetadataSettings` following clients, `ItemLocalization` with its repository and migrations
+- [x] Refreshes: English for items following clients, the languages an item has fetched again, `item.localize` jobs, seasons and episodes taking their series' language
+- [x] API: items presented in the client's language, missing languages queued, edits in the client's language, search by the names in every language
+- [x] Web UI: Follow Client Language, the default, first among the general settings' metadata languages
+- [x] End-to-end test
 - [ ] Not yet: images in the client's language (posters with titles on them), genres' names, people's roles, and sorting by the names in the client's language
 
 ---

@@ -1720,8 +1720,8 @@
     <string name="general_language">Metadata language</string>
     <!-- Detail of the metadata language. -->
     <string name="general_language_detail">For libraries without their own, requests and Discover</string>
-    <!-- The default metadata language. -->
-    <string name="general_language_default">English (default)</string>
+    <!-- The default metadata language: each client's own. -->
+    <string name="general_language_default">Follow client language (default)</string>
     <!-- The server's country of metadata and ratings. -->
     <string name="general_country">Country</string>
     <!-- Detail of the metadata country. -->

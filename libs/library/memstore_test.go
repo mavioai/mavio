@@ -3,6 +3,7 @@ package library
 import (
 	"context"
 	"iter"
+	"maps"
 	"slices"
 	"strings"
 	"sync"
@@ -27,6 +28,7 @@ type memStore struct {
 	links   map[core.ID][]core.Link
 	tricks  map[core.ID][]core.Trickplay
 	segs    map[core.ID][]core.MediaSegment
+	locs    map[core.ID]map[string]core.ItemLocalization
 	// moved are the items whose history went to others.
 	moved map[core.ID]core.ID
 	clock func() time.Time
@@ -72,7 +74,7 @@ func newMemStore() *memStore {
 		items: map[core.ID]core.Item{}, sources: map[core.ID][]core.MediaSource{}, folders: map[string]core.FolderState{},
 		gens: map[core.ID]int64{}, libs: map[core.ID]core.Library{}, people: map[core.ID]core.Person{},
 		credits: map[core.ID][]core.Credit{}, images: map[core.ID][]core.Image{}, links: map[core.ID][]core.Link{},
-		tricks: map[core.ID][]core.Trickplay{}, segs: map[core.ID][]core.MediaSegment{}, moved: map[core.ID]core.ID{}, clock: time.Now,
+		tricks: map[core.ID][]core.Trickplay{}, segs: map[core.ID][]core.MediaSegment{}, locs: map[core.ID]map[string]core.ItemLocalization{}, moved: map[core.ID]core.ID{}, clock: time.Now,
 	}
 }
 
@@ -96,6 +98,7 @@ func (m *memStore) Invitations() core.InvitationRepository                   { r
 func (m *memStore) Activities() core.ActivityRepository                      { panic("unused") }
 func (m *memStore) Trickplay() core.TrickplayRepository                      { return memTricks{m} }
 func (m *memStore) MediaSegments() core.MediaSegmentRepository               { return memSegs{m} }
+func (m *memStore) Localizations() core.LocalizationRepository               { return memLocs{m} }
 func (m *memStore) QualityDefinitions() core.QualityDefinitionRepository     { panic("unused") }
 func (m *memStore) QualityProfiles() core.QualityProfileRepository           { panic("unused") }
 func (m *memStore) CustomFormats() core.CustomFormatRepository               { panic("unused") }
@@ -592,6 +595,49 @@ func (r memImages) Replace(_ context.Context, id core.ID, images []core.Image) e
 
 // stored returns a time as libs/store returns it: to the microsecond.
 func stored(t time.Time) time.Time { return t.Truncate(time.Microsecond) }
+
+type memLocs struct{ m *memStore }
+
+func (r memLocs) Get(_ context.Context, id core.ID, lang string) (core.ItemLocalization, error) {
+	r.m.mu.Lock()
+	defer r.m.mu.Unlock()
+	l, ok := r.m.locs[id][lang]
+	if !ok {
+		return l, core.ErrNotFound
+	}
+	return l, nil
+}
+
+func (r memLocs) GetMany(_ context.Context, ids []core.ID, lang string) (map[core.ID]core.ItemLocalization, error) {
+	r.m.mu.Lock()
+	defer r.m.mu.Unlock()
+	out := map[core.ID]core.ItemLocalization{}
+	for _, id := range ids {
+		if l, ok := r.m.locs[id][lang]; ok {
+			out[id] = l
+		}
+	}
+	return out, nil
+}
+
+func (r memLocs) Languages(_ context.Context, id core.ID) ([]string, error) {
+	r.m.mu.Lock()
+	defer r.m.mu.Unlock()
+	return slices.Sorted(maps.Keys(r.m.locs[id])), nil
+}
+
+func (r memLocs) Put(_ context.Context, l *core.ItemLocalization) error {
+	if err := l.Validate(); err != nil {
+		return err
+	}
+	r.m.mu.Lock()
+	defer r.m.mu.Unlock()
+	if r.m.locs[l.ItemID] == nil {
+		r.m.locs[l.ItemID] = map[string]core.ItemLocalization{}
+	}
+	r.m.locs[l.ItemID][l.Language] = *l
+	return nil
+}
 
 type memTricks struct{ m *memStore }
 

@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"path"
+	"slices"
 	"strings"
 	"time"
 
@@ -161,6 +162,14 @@ func (s *ItemService) GetItem(ctx context.Context, req *libraryv1.GetItemRequest
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
+	anc := newAncestry(s.store)
+	loc, err := newLocalizer(ctx, s.store)
+	if err != nil {
+		return nil, connectError(ctx, err)
+	}
+	if err := loc.apply(ctx, []*core.Item{&item}, anc); err != nil {
+		return nil, connectError(ctx, err)
+	}
 	out := itemToProto(ctx, &item, images[item.ID], p.User.IsAdmin())
 	switch d, err := s.store.UserData().Get(ctx, p.User.ID, item.ID); {
 	case err == nil:
@@ -169,7 +178,7 @@ func (s *ItemService) GetItem(ctx context.Context, req *libraryv1.GetItemRequest
 		return nil, connectError(ctx, err)
 	}
 	out.SetExternalUrls(externalURLsToProto(metadata.ItemExternalURLs(externalIDKinds(s.ExternalIDKinds), item.Kind, item.ExternalIDs)))
-	if err := newAncestry(s.store).describe(ctx, &item, out); err != nil {
+	if err := anc.describe(ctx, &item, out); err != nil {
 		return nil, connectError(ctx, err)
 	}
 
@@ -519,6 +528,20 @@ func itemsToProto(ctx context.Context, store core.Store, items []core.Item, admi
 		}
 	}
 	anc := newAncestry(store)
+	// Items are presented in the caller's language, the caller's slice
+	// left as it is.
+	items = slices.Clone(items)
+	loc, err := newLocalizer(ctx, store)
+	if err != nil {
+		return nil, err
+	}
+	ptrs := make([]*core.Item, len(items))
+	for i := range items {
+		ptrs[i] = &items[i]
+	}
+	if err := loc.apply(ctx, ptrs, anc); err != nil {
+		return nil, err
+	}
 	out := make([]*libraryv1.Item, len(items))
 	for i := range items {
 		out[i] = itemToProto(ctx, &items[i], images[items[i].ID], admin)
@@ -560,6 +583,22 @@ func (a *ancestry) get(ctx context.Context, id core.ID) (*core.Item, error) {
 	}
 	a.items[id] = &it
 	return &it, nil
+}
+
+// series returns the series of a season or episode, nil when it has
+// none.
+func (a *ancestry) series(ctx context.Context, it *core.Item) (*core.Item, error) {
+	for id := it.ParentID; !id.IsZero(); {
+		p, err := a.get(ctx, id)
+		if err != nil || p == nil {
+			return nil, err
+		}
+		if p.Kind == core.KindSeries {
+			return p, nil
+		}
+		id = p.ParentID
+	}
+	return nil, nil
 }
 
 // describe sets the series and season of an episode or season and the

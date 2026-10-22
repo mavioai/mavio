@@ -23,6 +23,7 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/issue"
 	"github.com/mavioai/mavio/libs/store/internal/ent/item"
 	"github.com/mavioai/mavio/libs/store/internal/ent/itemlink"
+	"github.com/mavioai/mavio/libs/store/internal/ent/itemlocalization"
 	"github.com/mavioai/mavio/libs/store/internal/ent/itemvalue"
 	"github.com/mavioai/mavio/libs/store/internal/ent/library"
 	"github.com/mavioai/mavio/libs/store/internal/ent/mediasegment"
@@ -57,6 +58,7 @@ type ItemQuery struct {
 	withImages                 *ImageQuery
 	withTrickplay              *TrickplayQuery
 	withSegments               *MediaSegmentQuery
+	withLocalizations          *ItemLocalizationQuery
 	withCredits                *CreditQuery
 	withUserData               *UserDataQuery
 	withUser                   *UserQuery
@@ -325,6 +327,28 @@ func (_q *ItemQuery) QuerySegments() *MediaSegmentQuery {
 			sqlgraph.From(item.Table, item.FieldID, selector),
 			sqlgraph.To(mediasegment.Table, mediasegment.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, item.SegmentsTable, item.SegmentsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryLocalizations chains the current query on the "localizations" edge.
+func (_q *ItemQuery) QueryLocalizations() *ItemLocalizationQuery {
+	query := (&ItemLocalizationClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(item.Table, item.FieldID, selector),
+			sqlgraph.To(itemlocalization.Table, itemlocalization.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, item.LocalizationsTable, item.LocalizationsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -930,6 +954,7 @@ func (_q *ItemQuery) Clone() *ItemQuery {
 		withImages:                 _q.withImages.Clone(),
 		withTrickplay:              _q.withTrickplay.Clone(),
 		withSegments:               _q.withSegments.Clone(),
+		withLocalizations:          _q.withLocalizations.Clone(),
 		withCredits:                _q.withCredits.Clone(),
 		withUserData:               _q.withUserData.Clone(),
 		withUser:                   _q.withUser.Clone(),
@@ -1062,6 +1087,17 @@ func (_q *ItemQuery) WithSegments(opts ...func(*MediaSegmentQuery)) *ItemQuery {
 		opt(query)
 	}
 	_q.withSegments = query
+	return _q
+}
+
+// WithLocalizations tells the query-builder to eager-load the nodes that are connected to
+// the "localizations" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *ItemQuery) WithLocalizations(opts ...func(*ItemLocalizationQuery)) *ItemQuery {
+	query := (&ItemLocalizationClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withLocalizations = query
 	return _q
 }
 
@@ -1341,7 +1377,7 @@ func (_q *ItemQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Item, e
 	var (
 		nodes       = []*Item{}
 		_spec       = _q.querySpec()
-		loadedTypes = [28]bool{
+		loadedTypes = [29]bool{
 			_q.withLibrary != nil,
 			_q.withParent != nil,
 			_q.withChildren != nil,
@@ -1352,6 +1388,7 @@ func (_q *ItemQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Item, e
 			_q.withImages != nil,
 			_q.withTrickplay != nil,
 			_q.withSegments != nil,
+			_q.withLocalizations != nil,
 			_q.withCredits != nil,
 			_q.withUserData != nil,
 			_q.withUser != nil,
@@ -1457,6 +1494,13 @@ func (_q *ItemQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Item, e
 		if err := _q.loadSegments(ctx, query, nodes,
 			func(n *Item) { n.Edges.Segments = []*MediaSegment{} },
 			func(n *Item, e *MediaSegment) { n.Edges.Segments = append(n.Edges.Segments, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withLocalizations; query != nil {
+		if err := _q.loadLocalizations(ctx, query, nodes,
+			func(n *Item) { n.Edges.Localizations = []*ItemLocalization{} },
+			func(n *Item, e *ItemLocalization) { n.Edges.Localizations = append(n.Edges.Localizations, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -1886,6 +1930,36 @@ func (_q *ItemQuery) loadSegments(ctx context.Context, query *MediaSegmentQuery,
 	}
 	query.Where(predicate.MediaSegment(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(item.SegmentsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.ItemID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "item_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *ItemQuery) loadLocalizations(ctx context.Context, query *ItemLocalizationQuery, nodes []*Item, init func(*Item), assign func(*Item, *ItemLocalization)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[core.ID]*Item)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(itemlocalization.FieldItemID)
+	}
+	query.Where(predicate.ItemLocalization(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(item.LocalizationsColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {

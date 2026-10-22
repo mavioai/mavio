@@ -23,6 +23,7 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/issue"
 	"github.com/mavioai/mavio/libs/store/internal/ent/item"
 	"github.com/mavioai/mavio/libs/store/internal/ent/itemlink"
+	"github.com/mavioai/mavio/libs/store/internal/ent/itemlocalization"
 	"github.com/mavioai/mavio/libs/store/internal/ent/itemvalue"
 	"github.com/mavioai/mavio/libs/store/internal/ent/library"
 	"github.com/mavioai/mavio/libs/store/internal/ent/mediasegment"
@@ -1324,6 +1325,21 @@ func (_u *ItemUpdate) AddSegments(v ...*MediaSegment) *ItemUpdate {
 	return _u.AddSegmentIDs(ids...)
 }
 
+// AddLocalizationIDs adds the "localizations" edge to the ItemLocalization entity by IDs.
+func (_u *ItemUpdate) AddLocalizationIDs(ids ...core.ID) *ItemUpdate {
+	_u.mutation.AddLocalizationIDs(ids...)
+	return _u
+}
+
+// AddLocalizations adds the "localizations" edges to the ItemLocalization entity.
+func (_u *ItemUpdate) AddLocalizations(v ...*ItemLocalization) *ItemUpdate {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddLocalizationIDs(ids...)
+}
+
 // AddCreditIDs adds the "credits" edge to the Credit entity by IDs.
 func (_u *ItemUpdate) AddCreditIDs(ids ...int) *ItemUpdate {
 	_u.mutation.AddCreditIDs(ids...)
@@ -1764,6 +1780,27 @@ func (_u *ItemUpdate) RemoveSegments(v ...*MediaSegment) *ItemUpdate {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveSegmentIDs(ids...)
+}
+
+// ClearLocalizations clears all "localizations" edges to the ItemLocalization entity.
+func (_u *ItemUpdate) ClearLocalizations() *ItemUpdate {
+	_u.mutation.ClearLocalizations()
+	return _u
+}
+
+// RemoveLocalizationIDs removes the "localizations" edge to ItemLocalization entities by IDs.
+func (_u *ItemUpdate) RemoveLocalizationIDs(ids ...core.ID) *ItemUpdate {
+	_u.mutation.RemoveLocalizationIDs(ids...)
+	return _u
+}
+
+// RemoveLocalizations removes "localizations" edges to ItemLocalization entities.
+func (_u *ItemUpdate) RemoveLocalizations(v ...*ItemLocalization) *ItemUpdate {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveLocalizationIDs(ids...)
 }
 
 // ClearCredits clears all "credits" edges to the Credit entity.
@@ -2862,6 +2899,51 @@ func (_u *ItemUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(mediasegment.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.LocalizationsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.LocalizationsTable,
+			Columns: []string{item.LocalizationsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(itemlocalization.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedLocalizationsIDs(); len(nodes) > 0 && !_u.mutation.LocalizationsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.LocalizationsTable,
+			Columns: []string{item.LocalizationsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(itemlocalization.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.LocalizationsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.LocalizationsTable,
+			Columns: []string{item.LocalizationsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(itemlocalization.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -4907,6 +4989,21 @@ func (_u *ItemUpdateOne) AddSegments(v ...*MediaSegment) *ItemUpdateOne {
 	return _u.AddSegmentIDs(ids...)
 }
 
+// AddLocalizationIDs adds the "localizations" edge to the ItemLocalization entity by IDs.
+func (_u *ItemUpdateOne) AddLocalizationIDs(ids ...core.ID) *ItemUpdateOne {
+	_u.mutation.AddLocalizationIDs(ids...)
+	return _u
+}
+
+// AddLocalizations adds the "localizations" edges to the ItemLocalization entity.
+func (_u *ItemUpdateOne) AddLocalizations(v ...*ItemLocalization) *ItemUpdateOne {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddLocalizationIDs(ids...)
+}
+
 // AddCreditIDs adds the "credits" edge to the Credit entity by IDs.
 func (_u *ItemUpdateOne) AddCreditIDs(ids ...int) *ItemUpdateOne {
 	_u.mutation.AddCreditIDs(ids...)
@@ -5347,6 +5444,27 @@ func (_u *ItemUpdateOne) RemoveSegments(v ...*MediaSegment) *ItemUpdateOne {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveSegmentIDs(ids...)
+}
+
+// ClearLocalizations clears all "localizations" edges to the ItemLocalization entity.
+func (_u *ItemUpdateOne) ClearLocalizations() *ItemUpdateOne {
+	_u.mutation.ClearLocalizations()
+	return _u
+}
+
+// RemoveLocalizationIDs removes the "localizations" edge to ItemLocalization entities by IDs.
+func (_u *ItemUpdateOne) RemoveLocalizationIDs(ids ...core.ID) *ItemUpdateOne {
+	_u.mutation.RemoveLocalizationIDs(ids...)
+	return _u
+}
+
+// RemoveLocalizations removes "localizations" edges to ItemLocalization entities.
+func (_u *ItemUpdateOne) RemoveLocalizations(v ...*ItemLocalization) *ItemUpdateOne {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveLocalizationIDs(ids...)
 }
 
 // ClearCredits clears all "credits" edges to the Credit entity.
@@ -6475,6 +6593,51 @@ func (_u *ItemUpdateOne) sqlSave(ctx context.Context) (_node *Item, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(mediasegment.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.LocalizationsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.LocalizationsTable,
+			Columns: []string{item.LocalizationsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(itemlocalization.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedLocalizationsIDs(); len(nodes) > 0 && !_u.mutation.LocalizationsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.LocalizationsTable,
+			Columns: []string{item.LocalizationsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(itemlocalization.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.LocalizationsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.LocalizationsTable,
+			Columns: []string{item.LocalizationsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(itemlocalization.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

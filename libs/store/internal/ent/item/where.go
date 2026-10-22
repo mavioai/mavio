@@ -3616,6 +3616,29 @@ func HasSegmentsWith(preds ...predicate.MediaSegment) predicate.Item {
 	})
 }
 
+// HasLocalizations applies the HasEdge predicate on the "localizations" edge.
+func HasLocalizations() predicate.Item {
+	return predicate.Item(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, LocalizationsTable, LocalizationsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasLocalizationsWith applies the HasEdge predicate on the "localizations" edge with a given conditions (other predicates).
+func HasLocalizationsWith(preds ...predicate.ItemLocalization) predicate.Item {
+	return predicate.Item(func(s *sql.Selector) {
+		step := newLocalizationsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // HasCredits applies the HasEdge predicate on the "credits" edge.
 func HasCredits() predicate.Item {
 	return predicate.Item(func(s *sql.Selector) {

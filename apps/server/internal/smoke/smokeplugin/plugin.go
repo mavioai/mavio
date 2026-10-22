@@ -53,6 +53,8 @@ type film struct {
 	id, name, original, overview, collection, collectionID string
 	year                                                   int32
 	genres                                                 []string
+	// translated are the name and overview in languages besides English.
+	translated map[string][2]string
 }
 
 var films = []film{
@@ -60,6 +62,7 @@ var films = []film{
 		id: TMDBID, name: "Farewell My Concubine", original: "霸王别姬", year: 1993,
 		overview: "Two boys meet at an opera training school in Peking in 1924.", genres: []string{"Drama", "Romance"},
 		collection: "Chen Kaige Classics", collectionID: "4242",
+		translated: map[string][2]string{"zh": {"霸王别姬", "1924年，两个男孩在北平的戏班相识。"}},
 	},
 	{id: OtherTMDBID, name: "The Concubine", original: "후궁: 제왕의 첩", year: 2012, overview: "A palace intrigue.", genres: []string{"History"}},
 }
@@ -293,6 +296,9 @@ func (provider) GetMetadata(_ context.Context, req *pluginv1.GetMetadataRequest)
 		return pluginv1.GetMetadataResponse_builder{Found: proto.Bool(false)}.Build(), nil
 	}
 	f := films[i]
+	if t, ok := f.translated[req.GetLookup().GetLanguage()]; ok {
+		f.name, f.overview = t[0], t[1]
+	}
 	ids := map[string]string{"tmdb": f.id}
 	if f.id == TMDBID {
 		ids["imdb"] = "tt0106332"

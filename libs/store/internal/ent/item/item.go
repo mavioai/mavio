@@ -163,6 +163,8 @@ const (
 	EdgeTrickplay = "trickplay"
 	// EdgeSegments holds the string denoting the segments edge name in mutations.
 	EdgeSegments = "segments"
+	// EdgeLocalizations holds the string denoting the localizations edge name in mutations.
+	EdgeLocalizations = "localizations"
 	// EdgeCredits holds the string denoting the credits edge name in mutations.
 	EdgeCredits = "credits"
 	// EdgeUserData holds the string denoting the user_data edge name in mutations.
@@ -259,6 +261,13 @@ const (
 	SegmentsInverseTable = "media_segments"
 	// SegmentsColumn is the table column denoting the segments relation/edge.
 	SegmentsColumn = "item_id"
+	// LocalizationsTable is the table that holds the localizations relation/edge.
+	LocalizationsTable = "item_localizations"
+	// LocalizationsInverseTable is the table name for the ItemLocalization entity.
+	// It exists in this package in order to avoid circular dependency with the "itemlocalization" package.
+	LocalizationsInverseTable = "item_localizations"
+	// LocalizationsColumn is the table column denoting the localizations relation/edge.
+	LocalizationsColumn = "item_id"
 	// CreditsTable is the table that holds the credits relation/edge.
 	CreditsTable = "credits"
 	// CreditsInverseTable is the table name for the Credit entity.
@@ -945,6 +954,20 @@ func BySegments(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	}
 }
 
+// ByLocalizationsCount orders the results by localizations count.
+func ByLocalizationsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newLocalizationsStep(), opts...)
+	}
+}
+
+// ByLocalizations orders the results by localizations terms.
+func ByLocalizations(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newLocalizationsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
 // ByCreditsCount orders the results by credits count.
 func ByCreditsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -1236,6 +1259,13 @@ func newSegmentsStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(SegmentsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, SegmentsTable, SegmentsColumn),
+	)
+}
+func newLocalizationsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(LocalizationsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, LocalizationsTable, LocalizationsColumn),
 	)
 }
 func newCreditsStep() *sqlgraph.Step {

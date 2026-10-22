@@ -28,6 +28,7 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/issuecomment"
 	"github.com/mavioai/mavio/libs/store/internal/ent/item"
 	"github.com/mavioai/mavio/libs/store/internal/ent/itemlink"
+	"github.com/mavioai/mavio/libs/store/internal/ent/itemlocalization"
 	"github.com/mavioai/mavio/libs/store/internal/ent/itemvalue"
 	"github.com/mavioai/mavio/libs/store/internal/ent/job"
 	"github.com/mavioai/mavio/libs/store/internal/ent/library"
@@ -517,6 +518,32 @@ func init() {
 	itemlinkDescID := itemlinkFields[0].Descriptor()
 	// itemlink.DefaultID holds the default value on creation for the id field.
 	itemlink.DefaultID = itemlinkDescID.Default.(func() core.ID)
+	itemlocalizationFields := schema.ItemLocalization{}.Fields()
+	_ = itemlocalizationFields
+	// itemlocalizationDescName is the schema descriptor for name field.
+	itemlocalizationDescName := itemlocalizationFields[3].Descriptor()
+	// itemlocalization.DefaultName holds the default value on creation for the name field.
+	itemlocalization.DefaultName = itemlocalizationDescName.Default.(string)
+	// itemlocalizationDescOverview is the schema descriptor for overview field.
+	itemlocalizationDescOverview := itemlocalizationFields[4].Descriptor()
+	// itemlocalization.DefaultOverview holds the default value on creation for the overview field.
+	itemlocalization.DefaultOverview = itemlocalizationDescOverview.Default.(string)
+	// itemlocalizationDescTagline is the schema descriptor for tagline field.
+	itemlocalizationDescTagline := itemlocalizationFields[5].Descriptor()
+	// itemlocalization.DefaultTagline holds the default value on creation for the tagline field.
+	itemlocalization.DefaultTagline = itemlocalizationDescTagline.Default.(string)
+	// itemlocalizationDescSearchKey is the schema descriptor for search_key field.
+	itemlocalizationDescSearchKey := itemlocalizationFields[6].Descriptor()
+	// itemlocalization.DefaultSearchKey holds the default value on creation for the search_key field.
+	itemlocalization.DefaultSearchKey = itemlocalizationDescSearchKey.Default.(string)
+	// itemlocalizationDescSortKey is the schema descriptor for sort_key field.
+	itemlocalizationDescSortKey := itemlocalizationFields[7].Descriptor()
+	// itemlocalization.DefaultSortKey holds the default value on creation for the sort_key field.
+	itemlocalization.DefaultSortKey = itemlocalizationDescSortKey.Default.(string)
+	// itemlocalizationDescID is the schema descriptor for id field.
+	itemlocalizationDescID := itemlocalizationFields[0].Descriptor()
+	// itemlocalization.DefaultID holds the default value on creation for the id field.
+	itemlocalization.DefaultID = itemlocalizationDescID.Default.(func() core.ID)
 	itemvalueFields := schema.ItemValue{}.Fields()
 	_ = itemvalueFields
 	// itemvalueDescValueKey is the schema descriptor for value_key field.

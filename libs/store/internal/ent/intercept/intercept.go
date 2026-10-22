@@ -30,6 +30,7 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/issuecomment"
 	"github.com/mavioai/mavio/libs/store/internal/ent/item"
 	"github.com/mavioai/mavio/libs/store/internal/ent/itemlink"
+	"github.com/mavioai/mavio/libs/store/internal/ent/itemlocalization"
 	"github.com/mavioai/mavio/libs/store/internal/ent/itemvalue"
 	"github.com/mavioai/mavio/libs/store/internal/ent/job"
 	"github.com/mavioai/mavio/libs/store/internal/ent/library"
@@ -707,6 +708,33 @@ func (f TraverseItemLink) Traverse(ctx context.Context, q ent.Query) error {
 		return f(ctx, q)
 	}
 	return fmt.Errorf("unexpected query type %T. expect *ent.ItemLinkQuery", q)
+}
+
+// The ItemLocalizationFunc type is an adapter to allow the use of ordinary function as a Querier.
+type ItemLocalizationFunc func(context.Context, *ent.ItemLocalizationQuery) (ent.Value, error)
+
+// Query calls f(ctx, q).
+func (f ItemLocalizationFunc) Query(ctx context.Context, q ent.Query) (ent.Value, error) {
+	if q, ok := q.(*ent.ItemLocalizationQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *ent.ItemLocalizationQuery", q)
+}
+
+// The TraverseItemLocalization type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseItemLocalization func(context.Context, *ent.ItemLocalizationQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseItemLocalization) Intercept(next ent.Querier) ent.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseItemLocalization) Traverse(ctx context.Context, q ent.Query) error {
+	if q, ok := q.(*ent.ItemLocalizationQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *ent.ItemLocalizationQuery", q)
 }
 
 // The ItemValueFunc type is an adapter to allow the use of ordinary function as a Querier.
@@ -1458,6 +1486,8 @@ func NewQuery(q ent.Query) (Query, error) {
 		return &query[*ent.ItemQuery, predicate.Item, item.OrderOption]{typ: ent.TypeItem, tq: q}, nil
 	case *ent.ItemLinkQuery:
 		return &query[*ent.ItemLinkQuery, predicate.ItemLink, itemlink.OrderOption]{typ: ent.TypeItemLink, tq: q}, nil
+	case *ent.ItemLocalizationQuery:
+		return &query[*ent.ItemLocalizationQuery, predicate.ItemLocalization, itemlocalization.OrderOption]{typ: ent.TypeItemLocalization, tq: q}, nil
 	case *ent.ItemValueQuery:
 		return &query[*ent.ItemValueQuery, predicate.ItemValue, itemvalue.OrderOption]{typ: ent.TypeItemValue, tq: q}, nil
 	case *ent.JobQuery:

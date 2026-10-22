@@ -38,6 +38,7 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/issuecomment"
 	"github.com/mavioai/mavio/libs/store/internal/ent/item"
 	"github.com/mavioai/mavio/libs/store/internal/ent/itemlink"
+	"github.com/mavioai/mavio/libs/store/internal/ent/itemlocalization"
 	"github.com/mavioai/mavio/libs/store/internal/ent/itemvalue"
 	"github.com/mavioai/mavio/libs/store/internal/ent/job"
 	"github.com/mavioai/mavio/libs/store/internal/ent/library"
@@ -115,6 +116,8 @@ type Client struct {
 	Item *ItemClient
 	// ItemLink is the client for interacting with the ItemLink builders.
 	ItemLink *ItemLinkClient
+	// ItemLocalization is the client for interacting with the ItemLocalization builders.
+	ItemLocalization *ItemLocalizationClient
 	// ItemValue is the client for interacting with the ItemValue builders.
 	ItemValue *ItemValueClient
 	// Job is the client for interacting with the Job builders.
@@ -200,6 +203,7 @@ func (c *Client) init() {
 	c.IssueComment = NewIssueCommentClient(c.config)
 	c.Item = NewItemClient(c.config)
 	c.ItemLink = NewItemLinkClient(c.config)
+	c.ItemLocalization = NewItemLocalizationClient(c.config)
 	c.ItemValue = NewItemValueClient(c.config)
 	c.Job = NewJobClient(c.config)
 	c.Library = NewLibraryClient(c.config)
@@ -340,6 +344,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		IssueComment:              NewIssueCommentClient(cfg),
 		Item:                      NewItemClient(cfg),
 		ItemLink:                  NewItemLinkClient(cfg),
+		ItemLocalization:          NewItemLocalizationClient(cfg),
 		ItemValue:                 NewItemValueClient(cfg),
 		Job:                       NewJobClient(cfg),
 		Library:                   NewLibraryClient(cfg),
@@ -407,6 +412,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		IssueComment:              NewIssueCommentClient(cfg),
 		Item:                      NewItemClient(cfg),
 		ItemLink:                  NewItemLinkClient(cfg),
+		ItemLocalization:          NewItemLocalizationClient(cfg),
 		ItemValue:                 NewItemValueClient(cfg),
 		Job:                       NewJobClient(cfg),
 		Library:                   NewLibraryClient(cfg),
@@ -466,10 +472,10 @@ func (c *Client) Use(hooks ...Hook) {
 		c.Credential, c.Credit, c.CustomFormat, c.DelayProfile, c.DisplayPreferences,
 		c.Download, c.DownloadPathMapping, c.EpisodeState, c.ExtraFile, c.FolderState,
 		c.HistoryEvent, c.Image, c.Invitation, c.Issue, c.IssueComment, c.Item,
-		c.ItemLink, c.ItemValue, c.Job, c.Library, c.MediaSegment, c.MediaSource,
-		c.PendingRelease, c.Person, c.PluginConfig, c.PluginContainer, c.Proxy,
-		c.QualityDefinition, c.QualityProfile, c.ReleaseProfile, c.Request, c.Setting,
-		c.StorageJob, c.SubtitleBlocklistEntry, c.SubtitleHistoryEvent,
+		c.ItemLink, c.ItemLocalization, c.ItemValue, c.Job, c.Library, c.MediaSegment,
+		c.MediaSource, c.PendingRelease, c.Person, c.PluginConfig, c.PluginContainer,
+		c.Proxy, c.QualityDefinition, c.QualityProfile, c.ReleaseProfile, c.Request,
+		c.Setting, c.StorageJob, c.SubtitleBlocklistEntry, c.SubtitleHistoryEvent,
 		c.SubtitleProfile, c.SubtitleProfileAssignment, c.SubtitleSearchAttempt,
 		c.SubtitleWanted, c.Trickplay, c.User, c.UserData, c.Wanted,
 	} {
@@ -485,10 +491,10 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 		c.Credential, c.Credit, c.CustomFormat, c.DelayProfile, c.DisplayPreferences,
 		c.Download, c.DownloadPathMapping, c.EpisodeState, c.ExtraFile, c.FolderState,
 		c.HistoryEvent, c.Image, c.Invitation, c.Issue, c.IssueComment, c.Item,
-		c.ItemLink, c.ItemValue, c.Job, c.Library, c.MediaSegment, c.MediaSource,
-		c.PendingRelease, c.Person, c.PluginConfig, c.PluginContainer, c.Proxy,
-		c.QualityDefinition, c.QualityProfile, c.ReleaseProfile, c.Request, c.Setting,
-		c.StorageJob, c.SubtitleBlocklistEntry, c.SubtitleHistoryEvent,
+		c.ItemLink, c.ItemLocalization, c.ItemValue, c.Job, c.Library, c.MediaSegment,
+		c.MediaSource, c.PendingRelease, c.Person, c.PluginConfig, c.PluginContainer,
+		c.Proxy, c.QualityDefinition, c.QualityProfile, c.ReleaseProfile, c.Request,
+		c.Setting, c.StorageJob, c.SubtitleBlocklistEntry, c.SubtitleHistoryEvent,
 		c.SubtitleProfile, c.SubtitleProfileAssignment, c.SubtitleSearchAttempt,
 		c.SubtitleWanted, c.Trickplay, c.User, c.UserData, c.Wanted,
 	} {
@@ -543,6 +549,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Item.mutate(ctx, m)
 	case *ItemLinkMutation:
 		return c.ItemLink.mutate(ctx, m)
+	case *ItemLocalizationMutation:
+		return c.ItemLocalization.mutate(ctx, m)
 	case *ItemValueMutation:
 		return c.ItemValue.mutate(ctx, m)
 	case *JobMutation:
@@ -3864,6 +3872,22 @@ func (c *ItemClient) QuerySegments(_m *Item) *MediaSegmentQuery {
 	return query
 }
 
+// QueryLocalizations queries the localizations edge of a Item.
+func (c *ItemClient) QueryLocalizations(_m *Item) *ItemLocalizationQuery {
+	query := (&ItemLocalizationClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(item.Table, item.FieldID, id),
+			sqlgraph.To(itemlocalization.Table, itemlocalization.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, item.LocalizationsTable, item.LocalizationsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // QueryCredits queries the credits edge of a Item.
 func (c *ItemClient) QueryCredits(_m *Item) *CreditQuery {
 	query := (&CreditClient{config: c.config}).Query()
@@ -4339,6 +4363,155 @@ func (c *ItemLinkClient) mutate(ctx context.Context, m *ItemLinkMutation) (Value
 		return (&ItemLinkDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown ItemLink mutation op: %q", m.Op())
+	}
+}
+
+// ItemLocalizationClient is a client for the ItemLocalization schema.
+type ItemLocalizationClient struct {
+	config
+}
+
+// NewItemLocalizationClient returns a client for the ItemLocalization from the given config.
+func NewItemLocalizationClient(c config) *ItemLocalizationClient {
+	return &ItemLocalizationClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `itemlocalization.Hooks(f(g(h())))`.
+func (c *ItemLocalizationClient) Use(hooks ...Hook) {
+	c.hooks.ItemLocalization = append(c.hooks.ItemLocalization, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `itemlocalization.Intercept(f(g(h())))`.
+func (c *ItemLocalizationClient) Intercept(interceptors ...Interceptor) {
+	c.inters.ItemLocalization = append(c.inters.ItemLocalization, interceptors...)
+}
+
+// Create returns a builder for creating a ItemLocalization entity.
+func (c *ItemLocalizationClient) Create() *ItemLocalizationCreate {
+	mutation := newItemLocalizationMutation(c.config, OpCreate)
+	return &ItemLocalizationCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of ItemLocalization entities.
+func (c *ItemLocalizationClient) CreateBulk(builders ...*ItemLocalizationCreate) *ItemLocalizationCreateBulk {
+	return &ItemLocalizationCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *ItemLocalizationClient) MapCreateBulk(slice any, setFunc func(*ItemLocalizationCreate, int)) *ItemLocalizationCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &ItemLocalizationCreateBulk{err: fmt.Errorf("calling to ItemLocalizationClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*ItemLocalizationCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &ItemLocalizationCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for ItemLocalization.
+func (c *ItemLocalizationClient) Update() *ItemLocalizationUpdate {
+	mutation := newItemLocalizationMutation(c.config, OpUpdate)
+	return &ItemLocalizationUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ItemLocalizationClient) UpdateOne(_m *ItemLocalization) *ItemLocalizationUpdateOne {
+	mutation := newItemLocalizationMutation(c.config, OpUpdateOne, withItemLocalization(_m))
+	return &ItemLocalizationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ItemLocalizationClient) UpdateOneID(id core.ID) *ItemLocalizationUpdateOne {
+	mutation := newItemLocalizationMutation(c.config, OpUpdateOne, withItemLocalizationID(id))
+	return &ItemLocalizationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for ItemLocalization.
+func (c *ItemLocalizationClient) Delete() *ItemLocalizationDelete {
+	mutation := newItemLocalizationMutation(c.config, OpDelete)
+	return &ItemLocalizationDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *ItemLocalizationClient) DeleteOne(_m *ItemLocalization) *ItemLocalizationDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *ItemLocalizationClient) DeleteOneID(id core.ID) *ItemLocalizationDeleteOne {
+	builder := c.Delete().Where(itemlocalization.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ItemLocalizationDeleteOne{builder}
+}
+
+// Query returns a query builder for ItemLocalization.
+func (c *ItemLocalizationClient) Query() *ItemLocalizationQuery {
+	return &ItemLocalizationQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeItemLocalization},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a ItemLocalization entity by its id.
+func (c *ItemLocalizationClient) Get(ctx context.Context, id core.ID) (*ItemLocalization, error) {
+	return c.Query().Where(itemlocalization.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ItemLocalizationClient) GetX(ctx context.Context, id core.ID) *ItemLocalization {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryItem queries the item edge of a ItemLocalization.
+func (c *ItemLocalizationClient) QueryItem(_m *ItemLocalization) *ItemQuery {
+	query := (&ItemClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(itemlocalization.Table, itemlocalization.FieldID, id),
+			sqlgraph.To(item.Table, item.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, itemlocalization.ItemTable, itemlocalization.ItemColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *ItemLocalizationClient) Hooks() []Hook {
+	return c.hooks.ItemLocalization
+}
+
+// Interceptors returns the client interceptors.
+func (c *ItemLocalizationClient) Interceptors() []Interceptor {
+	return c.inters.ItemLocalization
+}
+
+func (c *ItemLocalizationClient) mutate(ctx context.Context, m *ItemLocalizationMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&ItemLocalizationCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&ItemLocalizationUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&ItemLocalizationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&ItemLocalizationDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown ItemLocalization mutation op: %q", m.Op())
 	}
 }
 
@@ -8366,22 +8539,22 @@ type (
 		APIKey, Activity, AuthSession, BlockedTitle, BlocklistEntry, Credential, Credit,
 		CustomFormat, DelayProfile, DisplayPreferences, Download, DownloadPathMapping,
 		EpisodeState, ExtraFile, FolderState, HistoryEvent, Image, Invitation, Issue,
-		IssueComment, Item, ItemLink, ItemValue, Job, Library, MediaSegment,
-		MediaSource, PendingRelease, Person, PluginConfig, PluginContainer, Proxy,
-		QualityDefinition, QualityProfile, ReleaseProfile, Request, Setting,
-		StorageJob, SubtitleBlocklistEntry, SubtitleHistoryEvent, SubtitleProfile,
-		SubtitleProfileAssignment, SubtitleSearchAttempt, SubtitleWanted, Trickplay,
-		User, UserData, Wanted []ent.Hook
+		IssueComment, Item, ItemLink, ItemLocalization, ItemValue, Job, Library,
+		MediaSegment, MediaSource, PendingRelease, Person, PluginConfig,
+		PluginContainer, Proxy, QualityDefinition, QualityProfile, ReleaseProfile,
+		Request, Setting, StorageJob, SubtitleBlocklistEntry, SubtitleHistoryEvent,
+		SubtitleProfile, SubtitleProfileAssignment, SubtitleSearchAttempt,
+		SubtitleWanted, Trickplay, User, UserData, Wanted []ent.Hook
 	}
 	inters struct {
 		APIKey, Activity, AuthSession, BlockedTitle, BlocklistEntry, Credential, Credit,
 		CustomFormat, DelayProfile, DisplayPreferences, Download, DownloadPathMapping,
 		EpisodeState, ExtraFile, FolderState, HistoryEvent, Image, Invitation, Issue,
-		IssueComment, Item, ItemLink, ItemValue, Job, Library, MediaSegment,
-		MediaSource, PendingRelease, Person, PluginConfig, PluginContainer, Proxy,
-		QualityDefinition, QualityProfile, ReleaseProfile, Request, Setting,
-		StorageJob, SubtitleBlocklistEntry, SubtitleHistoryEvent, SubtitleProfile,
-		SubtitleProfileAssignment, SubtitleSearchAttempt, SubtitleWanted, Trickplay,
-		User, UserData, Wanted []ent.Interceptor
+		IssueComment, Item, ItemLink, ItemLocalization, ItemValue, Job, Library,
+		MediaSegment, MediaSource, PendingRelease, Person, PluginConfig,
+		PluginContainer, Proxy, QualityDefinition, QualityProfile, ReleaseProfile,
+		Request, Setting, StorageJob, SubtitleBlocklistEntry, SubtitleHistoryEvent,
+		SubtitleProfile, SubtitleProfileAssignment, SubtitleSearchAttempt,
+		SubtitleWanted, Trickplay, User, UserData, Wanted []ent.Interceptor
 	}
 )

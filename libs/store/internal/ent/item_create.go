@@ -23,6 +23,7 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/issue"
 	"github.com/mavioai/mavio/libs/store/internal/ent/item"
 	"github.com/mavioai/mavio/libs/store/internal/ent/itemlink"
+	"github.com/mavioai/mavio/libs/store/internal/ent/itemlocalization"
 	"github.com/mavioai/mavio/libs/store/internal/ent/itemvalue"
 	"github.com/mavioai/mavio/libs/store/internal/ent/library"
 	"github.com/mavioai/mavio/libs/store/internal/ent/mediasegment"
@@ -971,6 +972,21 @@ func (_c *ItemCreate) AddSegments(v ...*MediaSegment) *ItemCreate {
 		ids[i] = v[i].ID
 	}
 	return _c.AddSegmentIDs(ids...)
+}
+
+// AddLocalizationIDs adds the "localizations" edge to the ItemLocalization entity by IDs.
+func (_c *ItemCreate) AddLocalizationIDs(ids ...core.ID) *ItemCreate {
+	_c.mutation.AddLocalizationIDs(ids...)
+	return _c
+}
+
+// AddLocalizations adds the "localizations" edges to the ItemLocalization entity.
+func (_c *ItemCreate) AddLocalizations(v ...*ItemLocalization) *ItemCreate {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddLocalizationIDs(ids...)
 }
 
 // AddCreditIDs adds the "credits" edge to the Credit entity by IDs.
@@ -1958,6 +1974,22 @@ func (_c *ItemCreate) createSpec() (*Item, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(mediasegment.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.LocalizationsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.LocalizationsTable,
+			Columns: []string{item.LocalizationsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(itemlocalization.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

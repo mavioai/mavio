@@ -2,6 +2,7 @@ package rpc
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"slices"
 	"time"
@@ -136,6 +137,9 @@ func (s *MetadataService) UpdateItem(ctx context.Context, req *libraryv1.UpdateI
 			return nil, connect.NewError(connect.CodeInvalidArgument, fmt.Errorf("unknown field %q in the update mask", p))
 		}
 	}
+	if paths, err = s.updateLocalized(ctx, it, md, paths); err != nil {
+		return nil, connectError(ctx, err)
+	}
 	before := it
 	it, err = s.refresher.Update(ctx, lib, it.ID, func(it *core.Item) error {
 		for _, p := range paths {
@@ -159,6 +163,49 @@ func (s *MetadataService) UpdateItem(ctx context.Context, req *libraryv1.UpdateI
 		return nil, err
 	}
 	return libraryv1.UpdateItemResponse_builder{Item: out}.Build(), nil
+}
+
+// localizedSetters set the localized fields of each ItemMetadata field.
+var localizedSetters = map[string]func(*core.ItemLocalization, *libraryv1.ItemMetadata){
+	"name":     func(l *core.ItemLocalization, md *libraryv1.ItemMetadata) { l.Name = md.GetName() },
+	"overview": func(l *core.ItemLocalization, md *libraryv1.ItemMetadata) { l.Overview = md.GetOverview() },
+	"tagline":  func(l *core.ItemLocalization, md *libraryv1.ItemMetadata) { l.Tagline = md.GetTagline() },
+}
+
+// updateLocalized edits the name, overview and tagline of an item the
+// caller reads in its own language in that language, and returns the
+// paths left to edit the item itself.
+func (s *MetadataService) updateLocalized(ctx context.Context, it core.Item, md *libraryv1.ItemMetadata, paths []string) ([]string, error) {
+	loc, err := newLocalizer(ctx, s.store)
+	if err != nil {
+		return nil, err
+	}
+	follows, err := loc.follows(ctx, &it, newAncestry(s.store))
+	if err != nil || !follows {
+		return paths, err
+	}
+	var rest, localized []string
+	for _, p := range paths {
+		if _, ok := localizedSetters[p]; ok {
+			localized = append(localized, p)
+		} else {
+			rest = append(rest, p)
+		}
+	}
+	if len(localized) == 0 {
+		return paths, nil
+	}
+	l, err := s.store.Localizations().Get(ctx, it.ID, loc.language)
+	switch {
+	case errors.Is(err, core.ErrNotFound):
+		l = core.ItemLocalization{ItemID: it.ID, Language: loc.language, FetchedAt: s.now()}
+	case err != nil:
+		return nil, err
+	}
+	for _, p := range localized {
+		localizedSetters[p](&l, md)
+	}
+	return rest, s.store.Localizations().Put(ctx, &l)
 }
 
 // itemSetters set the item fields of each ItemMetadata field.

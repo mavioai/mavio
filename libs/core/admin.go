@@ -47,11 +47,17 @@ type ServerSettings struct {
 // MetadataCountryCode: requests and discovery name titles in the language
 // and rate them in the country.
 type MetadataSettings struct {
-	// PreferredLanguage is ISO 639-1, such as "en".
+	// PreferredLanguage is ISO 639-1, such as "en"; empty follows each
+	// client's language (FollowsClients).
 	PreferredLanguage string
 	// Country is ISO 3166-1, such as "US".
 	Country string
 }
+
+// FollowsClients tells whether libraries and items without a language of
+// their own present metadata in each client's language, as kept in
+// ItemLocalization, and are refreshed in FallbackMetadataLanguage.
+func (m *MetadataSettings) FollowsClients() bool { return m.PreferredLanguage == "" }
 
 // Validate checks the settings' codes.
 func (m *MetadataSettings) Validate() error {
@@ -190,7 +196,7 @@ func DefaultServerSettings() ServerSettings {
 		SessionIdleDays: 90,
 		Acquisition:     DefaultAcquisitionSettings(),
 		Requests:        DefaultRequestSettings(),
-		Metadata:        MetadataSettings{PreferredLanguage: "en", Country: "US"},
+		Metadata:        MetadataSettings{Country: "US"},
 		Subtitles:       DefaultSubtitleSettings(),
 		Assistant:       DefaultAssistantSettings(),
 	}

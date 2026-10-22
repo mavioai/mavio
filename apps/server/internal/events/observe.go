@@ -10,8 +10,9 @@ import (
 	"github.com/mavioai/mavio/libs/library"
 )
 
-// Observe returns store with its writes of libraries, items, images, user
-// data and jobs reported to the hub, once their transaction committed.
+// Observe returns store with its writes of libraries, items, images,
+// localizations, user data and jobs reported to the hub, once their
+// transaction committed.
 func Observe(store core.Store, hub *Hub) core.Store {
 	return &observed{Store: store, hub: hub}
 }
@@ -56,6 +57,9 @@ func (o *observed) Libraries() core.LibraryRepository {
 }
 func (o *observed) Items() core.ItemRepository   { return observedItems{o.Store.Items(), o} }
 func (o *observed) Images() core.ImageRepository { return observedImages{o.Store.Images(), o} }
+func (o *observed) Localizations() core.LocalizationRepository {
+	return observedLocalizations{o.Store.Localizations(), o}
+}
 
 func (o *observed) UserData() core.UserDataRepository { return observedUserData{o.Store.UserData(), o} }
 func (o *observed) Jobs() core.JobQueue               { return observedJobs{o.Store.Jobs(), o} }
@@ -218,6 +222,21 @@ func (r observedImages) Replace(ctx context.Context, ownerID core.ID, images []c
 	if err == nil {
 		// People own images too; the hub ignores IDs that are no items.
 		r.o.report(func() { r.o.hub.ItemsChanged(nil, []core.ID{ownerID}, nil) })
+	}
+	return err
+}
+
+type observedLocalizations struct {
+	core.LocalizationRepository
+	o *observed
+}
+
+// Put reports the item changed, so that clients read it again in the
+// language fetched.
+func (r observedLocalizations) Put(ctx context.Context, l *core.ItemLocalization) error {
+	err := r.LocalizationRepository.Put(ctx, l)
+	if err == nil {
+		r.o.report(func() { r.o.hub.ItemsChanged(nil, []core.ID{l.ItemID}, nil) })
 	}
 	return err
 }

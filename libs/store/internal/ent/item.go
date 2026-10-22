@@ -180,6 +180,8 @@ type ItemEdges struct {
 	Trickplay []*Trickplay `json:"trickplay,omitempty"`
 	// Segments holds the value of the segments edge.
 	Segments []*MediaSegment `json:"segments,omitempty"`
+	// Localizations holds the value of the localizations edge.
+	Localizations []*ItemLocalization `json:"localizations,omitempty"`
 	// Credits holds the value of the credits edge.
 	Credits []*Credit `json:"credits,omitempty"`
 	// UserData holds the value of the user_data edge.
@@ -218,7 +220,7 @@ type ItemEdges struct {
 	SubtitleWanted *SubtitleWanted `json:"subtitle_wanted,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [28]bool
+	loadedTypes [29]bool
 }
 
 // LibraryOrErr returns the Library value or an error if the edge
@@ -317,10 +319,19 @@ func (e ItemEdges) SegmentsOrErr() ([]*MediaSegment, error) {
 	return nil, &NotLoadedError{edge: "segments"}
 }
 
+// LocalizationsOrErr returns the Localizations value or an error if the edge
+// was not loaded in eager-loading.
+func (e ItemEdges) LocalizationsOrErr() ([]*ItemLocalization, error) {
+	if e.loadedTypes[10] {
+		return e.Localizations, nil
+	}
+	return nil, &NotLoadedError{edge: "localizations"}
+}
+
 // CreditsOrErr returns the Credits value or an error if the edge
 // was not loaded in eager-loading.
 func (e ItemEdges) CreditsOrErr() ([]*Credit, error) {
-	if e.loadedTypes[10] {
+	if e.loadedTypes[11] {
 		return e.Credits, nil
 	}
 	return nil, &NotLoadedError{edge: "credits"}
@@ -329,7 +340,7 @@ func (e ItemEdges) CreditsOrErr() ([]*Credit, error) {
 // UserDataOrErr returns the UserData value or an error if the edge
 // was not loaded in eager-loading.
 func (e ItemEdges) UserDataOrErr() ([]*UserData, error) {
-	if e.loadedTypes[11] {
+	if e.loadedTypes[12] {
 		return e.UserData, nil
 	}
 	return nil, &NotLoadedError{edge: "user_data"}
@@ -340,7 +351,7 @@ func (e ItemEdges) UserDataOrErr() ([]*UserData, error) {
 func (e ItemEdges) UserOrErr() (*User, error) {
 	if e.User != nil {
 		return e.User, nil
-	} else if e.loadedTypes[12] {
+	} else if e.loadedTypes[13] {
 		return nil, &NotFoundError{label: user.Label}
 	}
 	return nil, &NotLoadedError{edge: "user"}
@@ -349,7 +360,7 @@ func (e ItemEdges) UserOrErr() (*User, error) {
 // LinksOrErr returns the Links value or an error if the edge
 // was not loaded in eager-loading.
 func (e ItemEdges) LinksOrErr() ([]*ItemLink, error) {
-	if e.loadedTypes[13] {
+	if e.loadedTypes[14] {
 		return e.Links, nil
 	}
 	return nil, &NotLoadedError{edge: "links"}
@@ -358,7 +369,7 @@ func (e ItemEdges) LinksOrErr() ([]*ItemLink, error) {
 // LinkedInOrErr returns the LinkedIn value or an error if the edge
 // was not loaded in eager-loading.
 func (e ItemEdges) LinkedInOrErr() ([]*ItemLink, error) {
-	if e.loadedTypes[14] {
+	if e.loadedTypes[15] {
 		return e.LinkedIn, nil
 	}
 	return nil, &NotLoadedError{edge: "linked_in"}
@@ -369,7 +380,7 @@ func (e ItemEdges) LinkedInOrErr() ([]*ItemLink, error) {
 func (e ItemEdges) WantedOrErr() (*Wanted, error) {
 	if e.Wanted != nil {
 		return e.Wanted, nil
-	} else if e.loadedTypes[15] {
+	} else if e.loadedTypes[16] {
 		return nil, &NotFoundError{label: wanted.Label}
 	}
 	return nil, &NotLoadedError{edge: "wanted"}
@@ -378,7 +389,7 @@ func (e ItemEdges) WantedOrErr() (*Wanted, error) {
 // EpisodeStatesOrErr returns the EpisodeStates value or an error if the edge
 // was not loaded in eager-loading.
 func (e ItemEdges) EpisodeStatesOrErr() ([]*EpisodeState, error) {
-	if e.loadedTypes[16] {
+	if e.loadedTypes[17] {
 		return e.EpisodeStates, nil
 	}
 	return nil, &NotLoadedError{edge: "episode_states"}
@@ -387,7 +398,7 @@ func (e ItemEdges) EpisodeStatesOrErr() ([]*EpisodeState, error) {
 // DownloadsOrErr returns the Downloads value or an error if the edge
 // was not loaded in eager-loading.
 func (e ItemEdges) DownloadsOrErr() ([]*Download, error) {
-	if e.loadedTypes[17] {
+	if e.loadedTypes[18] {
 		return e.Downloads, nil
 	}
 	return nil, &NotLoadedError{edge: "downloads"}
@@ -396,7 +407,7 @@ func (e ItemEdges) DownloadsOrErr() ([]*Download, error) {
 // HistoryOrErr returns the History value or an error if the edge
 // was not loaded in eager-loading.
 func (e ItemEdges) HistoryOrErr() ([]*HistoryEvent, error) {
-	if e.loadedTypes[18] {
+	if e.loadedTypes[19] {
 		return e.History, nil
 	}
 	return nil, &NotLoadedError{edge: "history"}
@@ -405,7 +416,7 @@ func (e ItemEdges) HistoryOrErr() ([]*HistoryEvent, error) {
 // BlocklistOrErr returns the Blocklist value or an error if the edge
 // was not loaded in eager-loading.
 func (e ItemEdges) BlocklistOrErr() ([]*BlocklistEntry, error) {
-	if e.loadedTypes[19] {
+	if e.loadedTypes[20] {
 		return e.Blocklist, nil
 	}
 	return nil, &NotLoadedError{edge: "blocklist"}
@@ -414,7 +425,7 @@ func (e ItemEdges) BlocklistOrErr() ([]*BlocklistEntry, error) {
 // PendingReleasesOrErr returns the PendingReleases value or an error if the edge
 // was not loaded in eager-loading.
 func (e ItemEdges) PendingReleasesOrErr() ([]*PendingRelease, error) {
-	if e.loadedTypes[20] {
+	if e.loadedTypes[21] {
 		return e.PendingReleases, nil
 	}
 	return nil, &NotLoadedError{edge: "pending_releases"}
@@ -423,7 +434,7 @@ func (e ItemEdges) PendingReleasesOrErr() ([]*PendingRelease, error) {
 // ExtraFilesOrErr returns the ExtraFiles value or an error if the edge
 // was not loaded in eager-loading.
 func (e ItemEdges) ExtraFilesOrErr() ([]*ExtraFile, error) {
-	if e.loadedTypes[21] {
+	if e.loadedTypes[22] {
 		return e.ExtraFiles, nil
 	}
 	return nil, &NotLoadedError{edge: "extra_files"}
@@ -432,7 +443,7 @@ func (e ItemEdges) ExtraFilesOrErr() ([]*ExtraFile, error) {
 // IssuesOrErr returns the Issues value or an error if the edge
 // was not loaded in eager-loading.
 func (e ItemEdges) IssuesOrErr() ([]*Issue, error) {
-	if e.loadedTypes[22] {
+	if e.loadedTypes[23] {
 		return e.Issues, nil
 	}
 	return nil, &NotLoadedError{edge: "issues"}
@@ -443,7 +454,7 @@ func (e ItemEdges) IssuesOrErr() ([]*Issue, error) {
 func (e ItemEdges) SubtitleProfileOrErr() (*SubtitleProfileAssignment, error) {
 	if e.SubtitleProfile != nil {
 		return e.SubtitleProfile, nil
-	} else if e.loadedTypes[23] {
+	} else if e.loadedTypes[24] {
 		return nil, &NotFoundError{label: subtitleprofileassignment.Label}
 	}
 	return nil, &NotLoadedError{edge: "subtitle_profile"}
@@ -452,7 +463,7 @@ func (e ItemEdges) SubtitleProfileOrErr() (*SubtitleProfileAssignment, error) {
 // SubtitleHistoryOrErr returns the SubtitleHistory value or an error if the edge
 // was not loaded in eager-loading.
 func (e ItemEdges) SubtitleHistoryOrErr() ([]*SubtitleHistoryEvent, error) {
-	if e.loadedTypes[24] {
+	if e.loadedTypes[25] {
 		return e.SubtitleHistory, nil
 	}
 	return nil, &NotLoadedError{edge: "subtitle_history"}
@@ -461,7 +472,7 @@ func (e ItemEdges) SubtitleHistoryOrErr() ([]*SubtitleHistoryEvent, error) {
 // SubtitleBlocklistOrErr returns the SubtitleBlocklist value or an error if the edge
 // was not loaded in eager-loading.
 func (e ItemEdges) SubtitleBlocklistOrErr() ([]*SubtitleBlocklistEntry, error) {
-	if e.loadedTypes[25] {
+	if e.loadedTypes[26] {
 		return e.SubtitleBlocklist, nil
 	}
 	return nil, &NotLoadedError{edge: "subtitle_blocklist"}
@@ -470,7 +481,7 @@ func (e ItemEdges) SubtitleBlocklistOrErr() ([]*SubtitleBlocklistEntry, error) {
 // SubtitleSearchAttemptsOrErr returns the SubtitleSearchAttempts value or an error if the edge
 // was not loaded in eager-loading.
 func (e ItemEdges) SubtitleSearchAttemptsOrErr() ([]*SubtitleSearchAttempt, error) {
-	if e.loadedTypes[26] {
+	if e.loadedTypes[27] {
 		return e.SubtitleSearchAttempts, nil
 	}
 	return nil, &NotLoadedError{edge: "subtitle_search_attempts"}
@@ -481,7 +492,7 @@ func (e ItemEdges) SubtitleSearchAttemptsOrErr() ([]*SubtitleSearchAttempt, erro
 func (e ItemEdges) SubtitleWantedOrErr() (*SubtitleWanted, error) {
 	if e.SubtitleWanted != nil {
 		return e.SubtitleWanted, nil
-	} else if e.loadedTypes[27] {
+	} else if e.loadedTypes[28] {
 		return nil, &NotFoundError{label: subtitlewanted.Label}
 	}
 	return nil, &NotLoadedError{edge: "subtitle_wanted"}
@@ -1008,6 +1019,11 @@ func (_m *Item) QueryTrickplay() *TrickplayQuery {
 // QuerySegments queries the "segments" edge of the Item entity.
 func (_m *Item) QuerySegments() *MediaSegmentQuery {
 	return NewItemClient(_m.config).QuerySegments(_m)
+}
+
+// QueryLocalizations queries the "localizations" edge of the Item entity.
+func (_m *Item) QueryLocalizations() *ItemLocalizationQuery {
+	return NewItemClient(_m.config).QueryLocalizations(_m)
 }
 
 // QueryCredits queries the "credits" edge of the Item entity.

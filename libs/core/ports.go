@@ -32,6 +32,7 @@ type Store interface {
 	Activities() ActivityRepository
 	Proxies() ProxyRepository
 	Trickplay() TrickplayRepository
+	Localizations() LocalizationRepository
 	MediaSegments() MediaSegmentRepository
 	QualityDefinitions() QualityDefinitionRepository
 	QualityProfiles() QualityProfileRepository
@@ -372,6 +373,22 @@ type TrickplayRepository interface {
 	List(ctx context.Context, itemID ID) ([]Trickplay, error)
 	// Delete removes an item's descriptions.
 	Delete(ctx context.Context, itemID ID) error
+}
+
+// LocalizationRepository stores items' localizations; deleting an item
+// deletes its localizations.
+type LocalizationRepository interface {
+	// Get returns an item's localization in a language, or ErrNotFound.
+	Get(ctx context.Context, itemID ID, language string) (ItemLocalization, error)
+	// GetMany returns the localizations of items in a language by item;
+	// items without one are absent.
+	GetMany(ctx context.Context, itemIDs []ID, language string) (map[ID]ItemLocalization, error)
+	// Languages returns the languages an item has localizations in, in
+	// order.
+	Languages(ctx context.Context, itemID ID) ([]string, error)
+	// Put stores a localization, replacing the item's earlier one in its
+	// language.
+	Put(ctx context.Context, l *ItemLocalization) error
 }
 
 // MediaSegmentRepository stores media segments.

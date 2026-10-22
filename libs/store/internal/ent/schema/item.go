@@ -124,6 +124,7 @@ func (Item) Edges() []ent.Edge {
 		edge.To("images", Image.Type).Annotations(cascade()),
 		edge.To("trickplay", Trickplay.Type).Annotations(cascade()),
 		edge.To("segments", MediaSegment.Type).Annotations(cascade()),
+		edge.To("localizations", ItemLocalization.Type).Annotations(cascade()),
 		edge.To("credits", Credit.Type).Annotations(cascade()),
 		edge.To("user_data", UserData.Type).Annotations(cascade()),
 		edge.From("user", User.Type).Ref("playlists").Field("user_id").Unique(),

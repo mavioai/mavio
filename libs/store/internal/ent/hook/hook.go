@@ -273,6 +273,18 @@ func (f ItemLinkFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, er
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ItemLinkMutation", m)
 }
 
+// The ItemLocalizationFunc type is an adapter to allow the use of ordinary
+// function as ItemLocalization mutator.
+type ItemLocalizationFunc func(context.Context, *ent.ItemLocalizationMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ItemLocalizationFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.ItemLocalizationMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ItemLocalizationMutation", m)
+}
+
 // The ItemValueFunc type is an adapter to allow the use of ordinary
 // function as ItemValue mutator.
 type ItemValueFunc func(context.Context, *ent.ItemValueMutation) (ent.Value, error)

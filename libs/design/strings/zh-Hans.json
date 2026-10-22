@@ -852,7 +852,7 @@
   "general.nameDetail": "留空则使用计算机名称",
   "general.language": "元数据语言",
   "general.languageDetail": "用于未单独设置的媒体库、请求与发现",
-  "general.languageDefault": "英语（默认）",
+  "general.languageDefault": "跟随客户端语言（默认）",
   "general.country": "国家/地区",
   "general.countryDetail": "用于作品名称与分级",
   "general.countryDefault": "美国（默认）",

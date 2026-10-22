@@ -191,6 +191,7 @@ erDiagram
 * 音频流记录声道数、声道布局、采样率与位深。
 * `Chapter` 是带名称的起始位置，可附带提取出的图片（`ImagePath`）。
 * 附加在容器中的文件（如 ASS 字幕所用的字体）是类型为 `attachment` 的流，`Title` 为其文件名，并记录 `MimeType`。
+* `ItemLocalization` 以另一种 `Language`（ISO 639-1）保存电影、剧集、季或单集的 `Name`、`Overview` 与 `Tagline`，并记录取得时间 `FetchedAt`；每个条目每种语言至多一份，`Apply` 将其非空字段覆盖到条目上，排序名不变。元数据语言跟随客户端的条目（见 MetadataSettings）以 `FallbackMetadataLanguage`（`en`）刷新，另外保存客户端读取的各语言。
 * `Trickplay` 描述条目在某一宽度下的缩略图拼图：每隔 `Interval` 截取一张 `Width` × `Height` 的缩略图，每张拼图横排 `TileWidth`、竖排 `TileHeight` 张，共 `ThumbnailCount` 张（`Sheets` 张拼图），以及播放时占用的 `Bandwidth`。每个条目在每种宽度下至多一份。
 * `MediaSegment` 是客户端可提供跳过的一段：从 `Start` 到 `End` 的 `intro`、`outro`、`recap`、`preview` 或 `commercial`，并记录找到它的片段提供者。
 * 规则：媒体源必须有 `ID`、`ItemID` 和 `Path`，大小、时长和码率不能为负；每条流必须有合法的 `Kind`，序号、尺寸和声道数不能为负。
@@ -270,6 +271,7 @@ erDiagram
 | `APIKeyRepository` | `Create`、`GetByTokenHash`、`List`（最新的在前）、`Touch`、`Delete`；删除用户时一并删除其密钥 |
 | `ActivityRepository` | `Add`、`List`（分页，最新的在前，可按时间、用户、类型与最低严重程度筛选）、`Purge` 清除某时间之前的活动 |
 | `ProxyRepository` | `List`（按名称排序）、`Get`、`Put`（按 ID 插入或替换；名称或地址相同时返回 `ErrConflict` 并指出该代理）、`Delete` |
+| `LocalizationRepository` | `Get` 取得条目在某语言下的本地化、`GetMany` 取得多个条目在某语言下的、`Languages` 列出条目已有的语言、`Put` 写入（替换之前的；搜索会匹配其名称） |
 | `TrickplayRepository` | `Put` 某条目在某宽度下的拼图（替换之前的）、`List` 某条目的拼图（最窄的在前）、`Delete` 删除 |
 | `MediaSegmentRepository` | `List` 某条目的片段（按开始时间）、`Replace` 替换 |
 | `QualityDefinitionRepository` | `List` 某类型的定义（保存之前为空）、`Replace` 替换 |
@@ -359,7 +361,7 @@ erDiagram
 * `SessionIdleDays`：会话闲置多少天后结束，1–3650，默认 90。
 * `Acquisition`：如何选择、下载与入库发布（§13.4）。
 * `Requests`：新用户获得的权限、默认配额，以及通过的请求去向（§13.6）。
-* `Metadata`（`MetadataSettings`）：服务端元数据的 `PreferredLanguage`（ISO 639-1）与 `Country`（ISO 3166-1），如 Jellyfin 的 `PreferredMetadataLanguage` 与 `MetadataCountryCode`；未设置自身语言与国家的媒体库与条目按它们取元数据，请求与发现以该语言命名作品，按该国家分级。默认为 `en` 与 `US`。
+* `Metadata`（`MetadataSettings`）：服务端元数据的 `PreferredLanguage`（ISO 639-1）与 `Country`（ISO 3166-1），如 Jellyfin 的 `PreferredMetadataLanguage` 与 `MetadataCountryCode`；未设置自身语言与国家的媒体库与条目按它们取元数据，请求与发现以该语言命名作品，按该国家分级。`PreferredLanguage` 为空（默认，`FollowsClients`）时跟随各客户端的语言：这样的条目以英语刷新，并另外保存客户端读取的各语言（`ItemLocalization`）。默认国家为 `US`。
 * `Subtitles`：如何搜索、选择、保存与同步字幕（§14.3）。
 * `Assistant`（`AssistantSettings`）：助手是否开启；AI 路径的 `Model`（`ai/<提供商>/<模型>`，为空时只有快速路径）、是否使用 `CodeMode`，以及谁可以使用它（`AIAccess`：`all`、`administrators`，或 `selected` 时 `AIUsers` 中的用户，由 `AllowsAI` 判断）；请求开始新对话前对话可闲置的 `IdleTime`（一分钟到一天，30 分钟）与对话保留的 `RetentionDays`（1–3650，30）；`Memory` 是否开启；语音会话按语言的 `Recognizers` 与 `Voices`（`<插件>/<识别器>`、`<插件>/<语音>`，某语言未设置时为第一个就绪的），是否把用户的 `Hints` 交给识别器，一个轮次最长的 `Pause`（0.5–10 秒，3）、延迟执行的效果之前的 `CommitDelay`（0–3 秒，0.7）以及会话的 `SessionIdle` 时间（3–60 秒，8）（[助手 §10](assistant.zh-CN.md#10-设置与隐私)）。
 * `Validate` 检查已知取值与范围。

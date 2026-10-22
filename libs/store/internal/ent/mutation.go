@@ -34,6 +34,7 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/issuecomment"
 	"github.com/mavioai/mavio/libs/store/internal/ent/item"
 	"github.com/mavioai/mavio/libs/store/internal/ent/itemlink"
+	"github.com/mavioai/mavio/libs/store/internal/ent/itemlocalization"
 	"github.com/mavioai/mavio/libs/store/internal/ent/itemvalue"
 	"github.com/mavioai/mavio/libs/store/internal/ent/job"
 	"github.com/mavioai/mavio/libs/store/internal/ent/library"
@@ -94,6 +95,7 @@ const (
 	TypeIssueComment              = "IssueComment"
 	TypeItem                      = "Item"
 	TypeItemLink                  = "ItemLink"
+	TypeItemLocalization          = "ItemLocalization"
 	TypeItemValue                 = "ItemValue"
 	TypeJob                       = "Job"
 	TypeLibrary                   = "Library"
@@ -16843,6 +16845,9 @@ type ItemMutation struct {
 	segments                        map[core.ID]struct{}
 	removedsegments                 map[core.ID]struct{}
 	clearedsegments                 bool
+	localizations                   map[core.ID]struct{}
+	removedlocalizations            map[core.ID]struct{}
+	clearedlocalizations            bool
 	credits                         map[int]struct{}
 	removedcredits                  map[int]struct{}
 	clearedcredits                  bool
@@ -20542,6 +20547,60 @@ func (m *ItemMutation) ResetSegments() {
 	m.removedsegments = nil
 }
 
+// AddLocalizationIDs adds the "localizations" edge to the ItemLocalization entity by ids.
+func (m *ItemMutation) AddLocalizationIDs(ids ...core.ID) {
+	if m.localizations == nil {
+		m.localizations = make(map[core.ID]struct{})
+	}
+	for i := range ids {
+		m.localizations[ids[i]] = struct{}{}
+	}
+}
+
+// ClearLocalizations clears the "localizations" edge to the ItemLocalization entity.
+func (m *ItemMutation) ClearLocalizations() {
+	m.clearedlocalizations = true
+}
+
+// LocalizationsCleared reports if the "localizations" edge to the ItemLocalization entity was cleared.
+func (m *ItemMutation) LocalizationsCleared() bool {
+	return m.clearedlocalizations
+}
+
+// RemoveLocalizationIDs removes the "localizations" edge to the ItemLocalization entity by IDs.
+func (m *ItemMutation) RemoveLocalizationIDs(ids ...core.ID) {
+	if m.removedlocalizations == nil {
+		m.removedlocalizations = make(map[core.ID]struct{})
+	}
+	for i := range ids {
+		delete(m.localizations, ids[i])
+		m.removedlocalizations[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedLocalizations returns the removed IDs of the "localizations" edge to the ItemLocalization entity.
+func (m *ItemMutation) RemovedLocalizationsIDs() (ids []core.ID) {
+	for id := range m.removedlocalizations {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// LocalizationsIDs returns the "localizations" edge IDs in the mutation.
+func (m *ItemMutation) LocalizationsIDs() (ids []core.ID) {
+	for id := range m.localizations {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetLocalizations resets all changes to the "localizations" edge.
+func (m *ItemMutation) ResetLocalizations() {
+	m.localizations = nil
+	m.clearedlocalizations = false
+	m.removedlocalizations = nil
+}
+
 // AddCreditIDs adds the "credits" edge to the Credit entity by ids.
 func (m *ItemMutation) AddCreditIDs(ids ...int) {
 	if m.credits == nil {
@@ -23006,7 +23065,7 @@ func (m *ItemMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *ItemMutation) AddedEdges() []string {
-	edges := make([]string, 0, 28)
+	edges := make([]string, 0, 29)
 	if m.library != nil {
 		edges = append(edges, item.EdgeLibrary)
 	}
@@ -23036,6 +23095,9 @@ func (m *ItemMutation) AddedEdges() []string {
 	}
 	if m.segments != nil {
 		edges = append(edges, item.EdgeSegments)
+	}
+	if m.localizations != nil {
+		edges = append(edges, item.EdgeLocalizations)
 	}
 	if m.credits != nil {
 		edges = append(edges, item.EdgeCredits)
@@ -23152,6 +23214,12 @@ func (m *ItemMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case item.EdgeLocalizations:
+		ids := make([]ent.Value, 0, len(m.localizations))
+		for id := range m.localizations {
+			ids = append(ids, id)
+		}
+		return ids
 	case item.EdgeCredits:
 		ids := make([]ent.Value, 0, len(m.credits))
 		for id := range m.credits {
@@ -23258,7 +23326,7 @@ func (m *ItemMutation) AddedIDs(name string) []ent.Value {
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *ItemMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 28)
+	edges := make([]string, 0, 29)
 	if m.removedchildren != nil {
 		edges = append(edges, item.EdgeChildren)
 	}
@@ -23279,6 +23347,9 @@ func (m *ItemMutation) RemovedEdges() []string {
 	}
 	if m.removedsegments != nil {
 		edges = append(edges, item.EdgeSegments)
+	}
+	if m.removedlocalizations != nil {
+		edges = append(edges, item.EdgeLocalizations)
 	}
 	if m.removedcredits != nil {
 		edges = append(edges, item.EdgeCredits)
@@ -23368,6 +23439,12 @@ func (m *ItemMutation) RemovedIDs(name string) []ent.Value {
 	case item.EdgeSegments:
 		ids := make([]ent.Value, 0, len(m.removedsegments))
 		for id := range m.removedsegments {
+			ids = append(ids, id)
+		}
+		return ids
+	case item.EdgeLocalizations:
+		ids := make([]ent.Value, 0, len(m.removedlocalizations))
+		for id := range m.removedlocalizations {
 			ids = append(ids, id)
 		}
 		return ids
@@ -23461,7 +23538,7 @@ func (m *ItemMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *ItemMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 28)
+	edges := make([]string, 0, 29)
 	if m.clearedlibrary {
 		edges = append(edges, item.EdgeLibrary)
 	}
@@ -23491,6 +23568,9 @@ func (m *ItemMutation) ClearedEdges() []string {
 	}
 	if m.clearedsegments {
 		edges = append(edges, item.EdgeSegments)
+	}
+	if m.clearedlocalizations {
+		edges = append(edges, item.EdgeLocalizations)
 	}
 	if m.clearedcredits {
 		edges = append(edges, item.EdgeCredits)
@@ -23573,6 +23653,8 @@ func (m *ItemMutation) EdgeCleared(name string) bool {
 		return m.clearedtrickplay
 	case item.EdgeSegments:
 		return m.clearedsegments
+	case item.EdgeLocalizations:
+		return m.clearedlocalizations
 	case item.EdgeCredits:
 		return m.clearedcredits
 	case item.EdgeUserData:
@@ -23675,6 +23757,9 @@ func (m *ItemMutation) ResetEdge(name string) error {
 		return nil
 	case item.EdgeSegments:
 		m.ResetSegments()
+		return nil
+	case item.EdgeLocalizations:
+		m.ResetLocalizations()
 		return nil
 	case item.EdgeCredits:
 		m.ResetCredits()
@@ -24308,6 +24393,770 @@ func (m *ItemLinkMutation) ResetEdge(name string) error {
 		return nil
 	}
 	return fmt.Errorf("unknown ItemLink edge %s", name)
+}
+
+// ItemLocalizationMutation represents an operation that mutates the ItemLocalization nodes in the graph.
+type ItemLocalizationMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *core.ID
+	language      *string
+	name          *string
+	overview      *string
+	tagline       *string
+	search_key    *string
+	sort_key      *string
+	fetched_at    *time.Time
+	clearedFields map[string]struct{}
+	item          *core.ID
+	cleareditem   bool
+	done          bool
+	oldValue      func(context.Context) (*ItemLocalization, error)
+	predicates    []predicate.ItemLocalization
+}
+
+var _ ent.Mutation = (*ItemLocalizationMutation)(nil)
+
+// itemlocalizationOption allows management of the mutation configuration using functional options.
+type itemlocalizationOption func(*ItemLocalizationMutation)
+
+// newItemLocalizationMutation creates new mutation for the ItemLocalization entity.
+func newItemLocalizationMutation(c config, op Op, opts ...itemlocalizationOption) *ItemLocalizationMutation {
+	m := &ItemLocalizationMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeItemLocalization,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withItemLocalizationID sets the ID field of the mutation.
+func withItemLocalizationID(id core.ID) itemlocalizationOption {
+	return func(m *ItemLocalizationMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *ItemLocalization
+		)
+		m.oldValue = func(ctx context.Context) (*ItemLocalization, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().ItemLocalization.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withItemLocalization sets the old ItemLocalization of the mutation.
+func withItemLocalization(node *ItemLocalization) itemlocalizationOption {
+	return func(m *ItemLocalizationMutation) {
+		m.oldValue = func(context.Context) (*ItemLocalization, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m ItemLocalizationMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m ItemLocalizationMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of ItemLocalization entities.
+func (m *ItemLocalizationMutation) SetID(id core.ID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *ItemLocalizationMutation) ID() (id core.ID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *ItemLocalizationMutation) IDs(ctx context.Context) ([]core.ID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []core.ID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().ItemLocalization.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetItemID sets the "item_id" field.
+func (m *ItemLocalizationMutation) SetItemID(c core.ID) {
+	m.item = &c
+}
+
+// ItemID returns the value of the "item_id" field in the mutation.
+func (m *ItemLocalizationMutation) ItemID() (r core.ID, exists bool) {
+	v := m.item
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldItemID returns the old "item_id" field's value of the ItemLocalization entity.
+// If the ItemLocalization object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ItemLocalizationMutation) OldItemID(ctx context.Context) (v core.ID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldItemID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldItemID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldItemID: %w", err)
+	}
+	return oldValue.ItemID, nil
+}
+
+// ResetItemID resets all changes to the "item_id" field.
+func (m *ItemLocalizationMutation) ResetItemID() {
+	m.item = nil
+}
+
+// SetLanguage sets the "language" field.
+func (m *ItemLocalizationMutation) SetLanguage(s string) {
+	m.language = &s
+}
+
+// Language returns the value of the "language" field in the mutation.
+func (m *ItemLocalizationMutation) Language() (r string, exists bool) {
+	v := m.language
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLanguage returns the old "language" field's value of the ItemLocalization entity.
+// If the ItemLocalization object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ItemLocalizationMutation) OldLanguage(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLanguage is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLanguage requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLanguage: %w", err)
+	}
+	return oldValue.Language, nil
+}
+
+// ResetLanguage resets all changes to the "language" field.
+func (m *ItemLocalizationMutation) ResetLanguage() {
+	m.language = nil
+}
+
+// SetName sets the "name" field.
+func (m *ItemLocalizationMutation) SetName(s string) {
+	m.name = &s
+}
+
+// Name returns the value of the "name" field in the mutation.
+func (m *ItemLocalizationMutation) Name() (r string, exists bool) {
+	v := m.name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldName returns the old "name" field's value of the ItemLocalization entity.
+// If the ItemLocalization object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ItemLocalizationMutation) OldName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldName: %w", err)
+	}
+	return oldValue.Name, nil
+}
+
+// ResetName resets all changes to the "name" field.
+func (m *ItemLocalizationMutation) ResetName() {
+	m.name = nil
+}
+
+// SetOverview sets the "overview" field.
+func (m *ItemLocalizationMutation) SetOverview(s string) {
+	m.overview = &s
+}
+
+// Overview returns the value of the "overview" field in the mutation.
+func (m *ItemLocalizationMutation) Overview() (r string, exists bool) {
+	v := m.overview
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOverview returns the old "overview" field's value of the ItemLocalization entity.
+// If the ItemLocalization object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ItemLocalizationMutation) OldOverview(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOverview is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOverview requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOverview: %w", err)
+	}
+	return oldValue.Overview, nil
+}
+
+// ResetOverview resets all changes to the "overview" field.
+func (m *ItemLocalizationMutation) ResetOverview() {
+	m.overview = nil
+}
+
+// SetTagline sets the "tagline" field.
+func (m *ItemLocalizationMutation) SetTagline(s string) {
+	m.tagline = &s
+}
+
+// Tagline returns the value of the "tagline" field in the mutation.
+func (m *ItemLocalizationMutation) Tagline() (r string, exists bool) {
+	v := m.tagline
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTagline returns the old "tagline" field's value of the ItemLocalization entity.
+// If the ItemLocalization object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ItemLocalizationMutation) OldTagline(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTagline is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTagline requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTagline: %w", err)
+	}
+	return oldValue.Tagline, nil
+}
+
+// ResetTagline resets all changes to the "tagline" field.
+func (m *ItemLocalizationMutation) ResetTagline() {
+	m.tagline = nil
+}
+
+// SetSearchKey sets the "search_key" field.
+func (m *ItemLocalizationMutation) SetSearchKey(s string) {
+	m.search_key = &s
+}
+
+// SearchKey returns the value of the "search_key" field in the mutation.
+func (m *ItemLocalizationMutation) SearchKey() (r string, exists bool) {
+	v := m.search_key
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSearchKey returns the old "search_key" field's value of the ItemLocalization entity.
+// If the ItemLocalization object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ItemLocalizationMutation) OldSearchKey(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSearchKey is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSearchKey requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSearchKey: %w", err)
+	}
+	return oldValue.SearchKey, nil
+}
+
+// ResetSearchKey resets all changes to the "search_key" field.
+func (m *ItemLocalizationMutation) ResetSearchKey() {
+	m.search_key = nil
+}
+
+// SetSortKey sets the "sort_key" field.
+func (m *ItemLocalizationMutation) SetSortKey(s string) {
+	m.sort_key = &s
+}
+
+// SortKey returns the value of the "sort_key" field in the mutation.
+func (m *ItemLocalizationMutation) SortKey() (r string, exists bool) {
+	v := m.sort_key
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSortKey returns the old "sort_key" field's value of the ItemLocalization entity.
+// If the ItemLocalization object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ItemLocalizationMutation) OldSortKey(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSortKey is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSortKey requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSortKey: %w", err)
+	}
+	return oldValue.SortKey, nil
+}
+
+// ResetSortKey resets all changes to the "sort_key" field.
+func (m *ItemLocalizationMutation) ResetSortKey() {
+	m.sort_key = nil
+}
+
+// SetFetchedAt sets the "fetched_at" field.
+func (m *ItemLocalizationMutation) SetFetchedAt(t time.Time) {
+	m.fetched_at = &t
+}
+
+// FetchedAt returns the value of the "fetched_at" field in the mutation.
+func (m *ItemLocalizationMutation) FetchedAt() (r time.Time, exists bool) {
+	v := m.fetched_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldFetchedAt returns the old "fetched_at" field's value of the ItemLocalization entity.
+// If the ItemLocalization object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ItemLocalizationMutation) OldFetchedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldFetchedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldFetchedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldFetchedAt: %w", err)
+	}
+	return oldValue.FetchedAt, nil
+}
+
+// ResetFetchedAt resets all changes to the "fetched_at" field.
+func (m *ItemLocalizationMutation) ResetFetchedAt() {
+	m.fetched_at = nil
+}
+
+// ClearItem clears the "item" edge to the Item entity.
+func (m *ItemLocalizationMutation) ClearItem() {
+	m.cleareditem = true
+	m.clearedFields[itemlocalization.FieldItemID] = struct{}{}
+}
+
+// ItemCleared reports if the "item" edge to the Item entity was cleared.
+func (m *ItemLocalizationMutation) ItemCleared() bool {
+	return m.cleareditem
+}
+
+// ItemIDs returns the "item" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// ItemID instead. It exists only for internal usage by the builders.
+func (m *ItemLocalizationMutation) ItemIDs() (ids []core.ID) {
+	if id := m.item; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetItem resets all changes to the "item" edge.
+func (m *ItemLocalizationMutation) ResetItem() {
+	m.item = nil
+	m.cleareditem = false
+}
+
+// Where appends a list predicates to the ItemLocalizationMutation builder.
+func (m *ItemLocalizationMutation) Where(ps ...predicate.ItemLocalization) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the ItemLocalizationMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *ItemLocalizationMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.ItemLocalization, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *ItemLocalizationMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *ItemLocalizationMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (ItemLocalization).
+func (m *ItemLocalizationMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *ItemLocalizationMutation) Fields() []string {
+	fields := make([]string, 0, 8)
+	if m.item != nil {
+		fields = append(fields, itemlocalization.FieldItemID)
+	}
+	if m.language != nil {
+		fields = append(fields, itemlocalization.FieldLanguage)
+	}
+	if m.name != nil {
+		fields = append(fields, itemlocalization.FieldName)
+	}
+	if m.overview != nil {
+		fields = append(fields, itemlocalization.FieldOverview)
+	}
+	if m.tagline != nil {
+		fields = append(fields, itemlocalization.FieldTagline)
+	}
+	if m.search_key != nil {
+		fields = append(fields, itemlocalization.FieldSearchKey)
+	}
+	if m.sort_key != nil {
+		fields = append(fields, itemlocalization.FieldSortKey)
+	}
+	if m.fetched_at != nil {
+		fields = append(fields, itemlocalization.FieldFetchedAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *ItemLocalizationMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case itemlocalization.FieldItemID:
+		return m.ItemID()
+	case itemlocalization.FieldLanguage:
+		return m.Language()
+	case itemlocalization.FieldName:
+		return m.Name()
+	case itemlocalization.FieldOverview:
+		return m.Overview()
+	case itemlocalization.FieldTagline:
+		return m.Tagline()
+	case itemlocalization.FieldSearchKey:
+		return m.SearchKey()
+	case itemlocalization.FieldSortKey:
+		return m.SortKey()
+	case itemlocalization.FieldFetchedAt:
+		return m.FetchedAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *ItemLocalizationMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case itemlocalization.FieldItemID:
+		return m.OldItemID(ctx)
+	case itemlocalization.FieldLanguage:
+		return m.OldLanguage(ctx)
+	case itemlocalization.FieldName:
+		return m.OldName(ctx)
+	case itemlocalization.FieldOverview:
+		return m.OldOverview(ctx)
+	case itemlocalization.FieldTagline:
+		return m.OldTagline(ctx)
+	case itemlocalization.FieldSearchKey:
+		return m.OldSearchKey(ctx)
+	case itemlocalization.FieldSortKey:
+		return m.OldSortKey(ctx)
+	case itemlocalization.FieldFetchedAt:
+		return m.OldFetchedAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown ItemLocalization field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *ItemLocalizationMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case itemlocalization.FieldItemID:
+		v, ok := value.(core.ID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetItemID(v)
+		return nil
+	case itemlocalization.FieldLanguage:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLanguage(v)
+		return nil
+	case itemlocalization.FieldName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetName(v)
+		return nil
+	case itemlocalization.FieldOverview:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOverview(v)
+		return nil
+	case itemlocalization.FieldTagline:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTagline(v)
+		return nil
+	case itemlocalization.FieldSearchKey:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSearchKey(v)
+		return nil
+	case itemlocalization.FieldSortKey:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSortKey(v)
+		return nil
+	case itemlocalization.FieldFetchedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetFetchedAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown ItemLocalization field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *ItemLocalizationMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *ItemLocalizationMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *ItemLocalizationMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown ItemLocalization numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *ItemLocalizationMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *ItemLocalizationMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *ItemLocalizationMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown ItemLocalization nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *ItemLocalizationMutation) ResetField(name string) error {
+	switch name {
+	case itemlocalization.FieldItemID:
+		m.ResetItemID()
+		return nil
+	case itemlocalization.FieldLanguage:
+		m.ResetLanguage()
+		return nil
+	case itemlocalization.FieldName:
+		m.ResetName()
+		return nil
+	case itemlocalization.FieldOverview:
+		m.ResetOverview()
+		return nil
+	case itemlocalization.FieldTagline:
+		m.ResetTagline()
+		return nil
+	case itemlocalization.FieldSearchKey:
+		m.ResetSearchKey()
+		return nil
+	case itemlocalization.FieldSortKey:
+		m.ResetSortKey()
+		return nil
+	case itemlocalization.FieldFetchedAt:
+		m.ResetFetchedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown ItemLocalization field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *ItemLocalizationMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.item != nil {
+		edges = append(edges, itemlocalization.EdgeItem)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *ItemLocalizationMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case itemlocalization.EdgeItem:
+		if id := m.item; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *ItemLocalizationMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *ItemLocalizationMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *ItemLocalizationMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.cleareditem {
+		edges = append(edges, itemlocalization.EdgeItem)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *ItemLocalizationMutation) EdgeCleared(name string) bool {
+	switch name {
+	case itemlocalization.EdgeItem:
+		return m.cleareditem
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *ItemLocalizationMutation) ClearEdge(name string) error {
+	switch name {
+	case itemlocalization.EdgeItem:
+		m.ClearItem()
+		return nil
+	}
+	return fmt.Errorf("unknown ItemLocalization unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *ItemLocalizationMutation) ResetEdge(name string) error {
+	switch name {
+	case itemlocalization.EdgeItem:
+		m.ResetItem()
+		return nil
+	}
+	return fmt.Errorf("unknown ItemLocalization edge %s", name)
 }
 
 // ItemValueMutation represents an operation that mutates the ItemValue nodes in the graph.
