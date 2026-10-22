@@ -50,6 +50,7 @@ flowchart TD
     P29["P29 Assistant<br/>libs/intent, AssistantService, plugins/pipecat, remote tools and memory"]
     P30["P30 Container dependencies<br/>libs/containers, engine detection, managed and external dependencies of plugins"]
     P31["P31 Proxies and challenge solving<br/>the server's proxies, CHALLENGE_SOLVER, plugins/solvers with FlareSolverr"]
+    P32["P32 Metadata in several languages<br/>names and overviews per language fetched on demand, following clients' languages"]
     P28["P28 Accounts<br/>mavio.dev and standalone modes, library access, managed users, user switching, Homes, friends, device-bound tokens; mavio.dev, relay, DNS and certificates"]
 
     P0 --> P1
@@ -67,6 +68,7 @@ flowchart TD
     P8 --> P12
     P9 --> P13
     P10 --> P13
+    P10 --> P32
     P11 --> P13
     P12 --> P13
     P13 --> P14
@@ -133,6 +135,7 @@ flowchart TD
 | P29 | Assistant | In progress |
 | P30 | Container dependencies | Not started |
 | P31 | Proxies and challenge solving | In progress |
+| P32 | Metadata in several languages | In progress |
 
 ---
 
@@ -1158,6 +1161,25 @@ flowchart TD
 - [x] The proxy gateway: process plugins and managed containers through the proxy chosen for each, by `HTTP_PROXY` and `HTTPS_PROXY`; direct choices bypass it, and a change between direct and proxied restarts the plugin or recreates the container after the web UI asks
 - [x] The overview's containers: every plugin's container dependencies with their plugins, states and `docker run` commands
 - [ ] Proxying what the environment's variables do not reach: process plugins whose HTTP clients ignore `HTTP_PROXY`, and traffic other than HTTP (BitTorrent, Usenet), which would need a SOCKS5 gateway
+
+### P32 Metadata in Several Languages
+**Scope**: an item's name, overview and tagline kept in every language its clients read, fetched from the providers when a client first reads one, so that a client in another language needs no refresh; and the server's metadata language following each client's language, the default.
+
+- Following clients: with no metadata language of the server's, libraries and items without a language of their own present their metadata in the language of each client's UI, which clients send in `Accept-Language`. Their refreshes ask the providers in English, the providers' fullest, which the items keep and English clients read. A language set for the server, a library or an item fixes it as before; seasons and episodes take their series'.
+- `ItemLocalization` in `libs/core` and `libs/store`: an item's name, overview and tagline in one language, with when they were fetched.
+- On demand: an item read in a language it lacks shows its English and queues an `item.localize` job, which asks the library's metadata providers in that language and keeps the fields they give; the item changes and clients read it again. A refresh fetches again the languages the item has.
+- Locks hold in every language: a locked field is fetched in none. Editing an item that follows clients edits its name, overview and tagline in the editing client's language.
+- Search finds items by their names in every language.
+
+**Done when**: an end-to-end test through the API: on a server following clients, a client in Chinese reads a movie and, after the job, its Chinese name and overview; a client in English reads the English ones with no job queued; a refresh keeps both; a locked name stays in both languages; and the web UI's general settings offer following clients first.
+
+**Progress**:
+- [ ] Domain and storage: `MetadataSettings` following clients, `ItemLocalization` with its repository and migrations
+- [ ] Refreshes: English for items following clients, the languages an item has fetched again, `item.localize` jobs, seasons and episodes taking their series' language
+- [ ] API: items presented in the client's language, missing languages queued, edits in the client's language, search by the names in every language
+- [ ] Web UI: Follow Client Language, the default, first among the general settings' metadata languages
+- [ ] End-to-end test
+- [ ] Not yet: images in the client's language (posters with titles on them), genres' names, people's roles, and sorting by the names in the client's language
 
 ---
 
