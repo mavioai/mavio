@@ -24,7 +24,7 @@ import { useState } from "react";
 import { t } from "../i18n.ts";
 import { Icon } from "../icon.tsx";
 import { Artwork, Button, Grid, ItemCard, runtimeOf, subtitleOf } from "../ui.tsx";
-import { Menu, MenuItem } from "../controls/menu.tsx";
+import { Menu, MenuItem, MenuSeparator } from "../controls/menu.tsx";
 import { Tip } from "../controls/tooltip.tsx";
 import { EditDialog, IdentifyDialog, identifiable, ImagesDialog, RefreshDialog } from "./metadata.tsx";
 import { field } from "../controls/styles.ts";
@@ -44,32 +44,25 @@ export function MoreMenu({ server, item, className, iconSize, phone }: { server:
   const mayReport = useMayReport(server);
   const [dialog, setDialog] = useState<Dialog>();
   const own = item.kind === ItemKind.PLAYLIST || (item.kind === ItemKind.COLLECTION && admin);
-  const entries: [Dialog, string][] = [
-    ...(playable(item.kind)
-      ? ([
-          ["playOn", t("remote.playOn")],
-          ["together", t("syncplay.watchTogether")],
-        ] as [Dialog, string][])
-      : []),
-    ...(listable(item.kind) ? ([["playlist", t("lists.addToPlaylist")]] as [Dialog, string][]) : []),
-    ...(reportable(item.kind) && mayReport ? ([["report", t("issues.report")]] as [Dialog, string][]) : []),
-    ...(listable(item.kind) && admin ? ([["collection", t("lists.addToCollection")]] as [Dialog, string][]) : []),
-    ...(admin && item.kind !== ItemKind.PLAYLIST
-      ? ([
+  // The entries in groups, separated: playing, adding to lists, metadata,
+  // reporting, and renaming or deleting a list, the deletion last.
+  const groups: [Dialog, string][][] = [
+    playable(item.kind) ? [["playOn", t("remote.playOn")], ["together", t("syncplay.watchTogether")]] : [],
+    listable(item.kind)
+      ? [["playlist", t("lists.addToPlaylist")], ...(admin ? [["collection", t("lists.addToCollection")] as [Dialog, string]] : [])]
+      : [],
+    admin && item.kind !== ItemKind.PLAYLIST
+      ? [
           ["edit", t("metadata.edit")],
-          ...(identifiable(item.kind) ? [["identify", t("metadata.identify")]] : []),
-          ...(item.kind !== ItemKind.COLLECTION ? [["refresh", t("metadata.refresh")]] : []),
           ["images", t("metadata.images")],
-        ] as [Dialog, string][])
-      : []),
-    ...(own
-      ? ([
-          ["rename", t("lists.rename")],
-          ["delete", t("lists.delete")],
-        ] as [Dialog, string][])
-      : []),
-  ];
-  if (entries.length === 0) return null;
+          ...(identifiable(item.kind) ? [["identify", t("metadata.identify")] as [Dialog, string]] : []),
+          ...(item.kind !== ItemKind.COLLECTION ? [["refresh", t("metadata.refresh")] as [Dialog, string]] : []),
+        ]
+      : [],
+    reportable(item.kind) && mayReport ? [["report", t("issues.report")]] : [],
+    own ? [["rename", t("lists.rename")], ["delete", t("lists.delete")]] : [],
+  ].filter((g) => g.length > 0) as [Dialog, string][][];
+  if (groups.length === 0) return null;
   return (
     <>
       <Menu
@@ -84,11 +77,15 @@ export function MoreMenu({ server, item, className, iconSize, phone }: { server:
           </Tip>
         }
       >
-        {entries.map(([d, label]) => (
-          <MenuItem key={d} danger={d === "delete"} onClick={() => setDialog(d)}>
-            {label}
-          </MenuItem>
-        ))}
+        {groups.map((group, i) => [
+          i > 0 && <MenuSeparator key={`separator-${i}`} />,
+          ...group.map(([d, label]) => (
+            <MenuItem key={d} danger={d === "delete"} onClick={() => setDialog(d)}>
+              {/* Each entry but the deletion asks more in a dialog. */}
+              {d === "delete" || label.endsWith("…") ? label : `${label}…`}
+            </MenuItem>
+          )),
+        ])}
       </Menu>
       {(dialog === "playlist" || dialog === "collection") && <AddDialog server={server} item={item} kind={dialog} onClose={() => setDialog(undefined)} />}
       {dialog === "report" && <ReportDialog server={server} item={item} onClose={() => setDialog(undefined)} />}
