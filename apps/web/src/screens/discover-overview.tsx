@@ -474,7 +474,7 @@ function Facts({ server, title }: { server: ServerEntry; title: Title }) {
         </div>
       )}
       <div className="px-4 py-3">
-        <ExternalLinks links={links} item={title.itemId ? { serverId: server.id, itemId: title.itemId } : undefined} />
+        <ExternalLinks links={links} item={title.itemId ? { serverId: server.id, itemId: title.itemId } : undefined} className="justify-start" />
       </div>
     </dl>
   );
