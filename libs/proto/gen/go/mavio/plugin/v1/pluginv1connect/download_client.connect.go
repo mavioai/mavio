@@ -64,7 +64,10 @@ const (
 // mavio.plugin.v1.DownloadClientProviderService service.
 type DownloadClientProviderServiceClient interface {
 	// ListDownloadClientDefinitions lists the kinds of download clients the
-	// provider implements, with the settings each takes.
+	// provider implements, with the settings each takes; or, when asked, the
+	// clients it runs in its container dependencies, by the dependency's
+	// name, with the settings of their kinds that the container leaves to
+	// the administrator.
 	ListDownloadClientDefinitions(context.Context, *v1.ListDownloadClientDefinitionsRequest) (*v1.ListDownloadClientDefinitionsResponse, error)
 	// ListDownloadClients lists the configured download clients.
 	ListDownloadClients(context.Context, *v1.ListDownloadClientsRequest) (*v1.ListDownloadClientsResponse, error)
@@ -251,7 +254,10 @@ func (c *downloadClientProviderServiceClient) MarkDownloadImported(ctx context.C
 // mavio.plugin.v1.DownloadClientProviderService service.
 type DownloadClientProviderServiceHandler interface {
 	// ListDownloadClientDefinitions lists the kinds of download clients the
-	// provider implements, with the settings each takes.
+	// provider implements, with the settings each takes; or, when asked, the
+	// clients it runs in its container dependencies, by the dependency's
+	// name, with the settings of their kinds that the container leaves to
+	// the administrator.
 	ListDownloadClientDefinitions(context.Context, *v1.ListDownloadClientDefinitionsRequest) (*v1.ListDownloadClientDefinitionsResponse, error)
 	// ListDownloadClients lists the configured download clients.
 	ListDownloadClients(context.Context, *v1.ListDownloadClientsRequest) (*v1.ListDownloadClientsResponse, error)

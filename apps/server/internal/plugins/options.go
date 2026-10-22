@@ -29,6 +29,7 @@ type ConfigOption struct {
 // Definitions returns the definitions of a started plugin's provider, the
 // options of manifest.OptionsIndexerDefinitions,
 // manifest.OptionsDownloadClientDefinitions,
+// manifest.OptionsContainerDownloadClients,
 // manifest.OptionsSpeechRecognizers, manifest.OptionsSpeechSynthesizers,
 // manifest.OptionsSubtitleProviders or manifest.OptionsSubtitleTranslators.
 func (m *Manager) Definitions(ctx context.Context, id, source string) ([]ConfigOption, error) {
@@ -53,11 +54,12 @@ func (m *Manager) Definitions(ctx context.Context, id, source string) ([]ConfigO
 				SettingsSchema: SettingsSchema(d.GetFields()),
 			})
 		}
-	case manifest.OptionsDownloadClientDefinitions:
+	case manifest.OptionsDownloadClientDefinitions, manifest.OptionsContainerDownloadClients:
 		if !manifest.HasCapability(man, pluginv1.Capability_CAPABILITY_DOWNLOAD_CLIENT_PROVIDER) || pl.DownloadClients() == nil {
 			return nil, fmt.Errorf("%w: plugin %s provides no download clients", core.ErrInvalid, id)
 		}
-		resp, err := pl.DownloadClients().ListDownloadClientDefinitions(ctx, &pluginv1.ListDownloadClientDefinitionsRequest{})
+		req := pluginv1.ListDownloadClientDefinitionsRequest_builder{Containers: new(source == manifest.OptionsContainerDownloadClients)}.Build()
+		resp, err := pl.DownloadClients().ListDownloadClientDefinitions(ctx, req)
 		if err != nil {
 			return nil, fmt.Errorf("list the definitions of plugin %s: %w", id, err)
 		}

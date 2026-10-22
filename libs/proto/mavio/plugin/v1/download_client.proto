@@ -15,7 +15,10 @@ import "mavio/plugin/v1/settings.proto";
 // category for movies and one for series.
 service DownloadClientProviderService {
   // ListDownloadClientDefinitions lists the kinds of download clients the
-  // provider implements, with the settings each takes.
+  // provider implements, with the settings each takes; or, when asked, the
+  // clients it runs in its container dependencies, by the dependency's
+  // name, with the settings of their kinds that the container leaves to
+  // the administrator.
   rpc ListDownloadClientDefinitions(ListDownloadClientDefinitionsRequest) returns (ListDownloadClientDefinitionsResponse) {
     option idempotency_level = NO_SIDE_EFFECTS;
   }
@@ -54,7 +57,11 @@ service DownloadClientProviderService {
   rpc MarkDownloadImported(MarkDownloadImportedRequest) returns (MarkDownloadImportedResponse);
 }
 
-message ListDownloadClientDefinitionsRequest {}
+message ListDownloadClientDefinitionsRequest {
+  // Whether to list the clients of the provider's container dependencies
+  // instead of its definitions.
+  bool containers = 1;
+}
 
 message ListDownloadClientDefinitionsResponse {
   repeated DownloadClientDefinition definitions = 1;

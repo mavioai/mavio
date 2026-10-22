@@ -179,12 +179,19 @@ impl ::buffa::Enumeration for DownloadStatus {
 }
 #[derive(Clone, PartialEq, Default)]
 pub struct ListDownloadClientDefinitionsRequest {
+    /// Whether to list the clients of the provider's container dependencies
+    /// instead of its definitions.
+    ///
+    /// Field 1: `containers`
+    pub containers: ::core::option::Option<bool>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
 impl ::core::fmt::Debug for ListDownloadClientDefinitionsRequest {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-        f.debug_struct("ListDownloadClientDefinitionsRequest").finish()
+        f.debug_struct("ListDownloadClientDefinitionsRequest")
+            .field("containers", &self.containers)
+            .finish()
     }
 }
 impl ListDownloadClientDefinitionsRequest {
@@ -193,6 +200,15 @@ impl ListDownloadClientDefinitionsRequest {
     ///
     /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
     pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.plugin.v1.ListDownloadClientDefinitionsRequest";
+}
+impl ListDownloadClientDefinitionsRequest {
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::containers`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_containers(mut self, value: bool) -> Self {
+        self.containers = Some(value);
+        self
+    }
 }
 ::buffa::impl_default_instance!(ListDownloadClientDefinitionsRequest);
 impl ::buffa::MessageName for ListDownloadClientDefinitionsRequest {
@@ -214,6 +230,9 @@ impl ::buffa::Message for ListDownloadClientDefinitionsRequest {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
         let mut size = 0u64;
+        if self.containers.is_some() {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -224,6 +243,9 @@ impl ::buffa::Message for ListDownloadClientDefinitionsRequest {
     ) {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
+        if let Some(v) = self.containers {
+            ::buffa::types::put_bool_field(1u32, v, buf);
+        }
         self.__buffa_unknown_fields.write_to(buf);
     }
     fn merge_field(
@@ -237,6 +259,15 @@ impl ::buffa::Message for ListDownloadClientDefinitionsRequest {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
         match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.containers = ::core::option::Option::Some(
+                    ::buffa::types::decode_bool(buf)?,
+                );
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -245,6 +276,7 @@ impl ::buffa::Message for ListDownloadClientDefinitionsRequest {
         ::core::result::Result::Ok(())
     }
     fn clear(&mut self) {
+        self.containers = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }

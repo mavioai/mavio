@@ -480,7 +480,10 @@ pub const DOWNLOAD_CLIENT_PROVIDER_SERVICE_MARK_DOWNLOAD_IMPORTED_SPEC: ::connec
 #[allow(clippy::type_complexity)]
 pub trait DownloadClientProviderService: Send + Sync + 'static {
     /// ListDownloadClientDefinitions lists the kinds of download clients the
-    /// provider implements, with the settings each takes.
+    /// provider implements, with the settings each takes; or, when asked, the
+    /// clients it runs in its container dependencies, by the dependency's
+    /// name, with the settings of their kinds that the container leaves to
+    /// the administrator.
     ///
     /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
     ///

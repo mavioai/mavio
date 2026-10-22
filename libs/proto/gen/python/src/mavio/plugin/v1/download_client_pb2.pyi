@@ -41,8 +41,10 @@ DOWNLOAD_STATUS_FAILED: DownloadStatus
 DOWNLOAD_STATUS_WARNING: DownloadStatus
 
 class ListDownloadClientDefinitionsRequest(_message.Message):
-    __slots__ = ()
-    def __init__(self) -> None: ...
+    __slots__ = ("containers",)
+    CONTAINERS_FIELD_NUMBER: _ClassVar[int]
+    containers: bool
+    def __init__(self, containers: _Optional[bool] = ...) -> None: ...
 
 class ListDownloadClientDefinitionsResponse(_message.Message):
     __slots__ = ("definitions",)

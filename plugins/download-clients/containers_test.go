@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"slices"
 	"strings"
 	"testing"
 
@@ -60,7 +61,7 @@ func TestContainerClients(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	cfg := `{"container_clients":[{"name":"qbittorrent","priority":2,"tags":["anime"]},{"name":"transmission"},{"name":"sabnzbd"}]}`
+	cfg := `{"container_clients":[{"name":"qbittorrent","priority":2,"tags":["anime"],"settings":{"movie_category":"films","host":"elsewhere","password":"guess"}},{"name":"transmission"},{"name":"sabnzbd"}]}`
 	if _, err := p.Configure(t.Context(), pluginv1.ConfigureRequest_builder{ConfigJson: &cfg}.Build()); err != nil {
 		t.Fatal(err)
 	}
@@ -88,8 +89,9 @@ func TestContainerClients(t *testing.T) {
 		_ = json.Unmarshal(c.cfg.Settings, &s)
 		return s
 	}
-	if s := settings("container-qbittorrent"); s["port"] != float64(49001) || s["username"] != "admin" || s["password"] != "pw" || s["movie_category"] != "movies-mavio" {
-		t.Errorf("qBittorrent's settings = %v, want = port 49001, admin and pw, the default categories", s)
+	if s := settings("container-qbittorrent"); s["port"] != float64(49001) || s["username"] != "admin" || s["password"] != "pw" ||
+		s["host"] != "127.0.0.1" || s["movie_category"] != "films" || s["tv_category"] != "tv-mavio" {
+		t.Errorf("qBittorrent's settings = %v, want = 127.0.0.1:49001, admin and pw, the movie category given and the default series one", s)
 	}
 	if s := settings("container-sabnzbd"); s["port"] != float64(8080) || s["api_key"] != "key" {
 		t.Errorf("SABnzbd's settings = %v, want = port 8080 and the API key", s)
@@ -105,6 +107,36 @@ func TestContainerClients(t *testing.T) {
 	}
 	if resp, _ := p.ListDownloadClients(t.Context(), &pluginv1.ListDownloadClientsRequest{}); len(resp.GetClients()) != 0 {
 		t.Errorf("clients of a disabled container = %v, want = none", resp.GetClients())
+	}
+}
+
+// TestContainerDefinitions checks that the clients of the containers are
+// listed by name with the settings the containers do not fill in.
+func TestContainerDefinitions(t *testing.T) {
+	p, err := newPlugin(slog.New(slog.DiscardHandler), "test", t.TempDir(), http.DefaultClient, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	resp, err := p.ListDownloadClientDefinitions(t.Context(), pluginv1.ListDownloadClientDefinitionsRequest_builder{Containers: proto.Bool(true)}.Build())
+	if err != nil {
+		t.Fatal(err)
+	}
+	var names []string
+	for _, d := range resp.GetDefinitions() {
+		names = append(names, d.GetId())
+		var fields []string
+		for _, f := range d.GetFields() {
+			if containerFilled[f.GetName()] {
+				t.Errorf("%s: field %s, which the container fills in", d.GetId(), f.GetName())
+			}
+			fields = append(fields, f.GetName())
+		}
+		if !slices.Contains(fields, "movie_category") {
+			t.Errorf("%s: fields = %v, want = movie_category among them", d.GetId(), fields)
+		}
+	}
+	if want := []string{"qbittorrent", "sabnzbd", "transmission"}; !slices.Equal(names, want) {
+		t.Errorf("definitions = %v, want = %v", names, want)
 	}
 }
 

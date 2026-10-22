@@ -27,5 +27,6 @@
   "SABnzbd, a Usenet client, whose news servers are set up in its web interface": "SABnzbd，Usenet 客户端，新闻服务器在其网页界面中设置",
   "The folder qBittorrent puts downloads in, which the server imports from": "qBittorrent 存放下载的文件夹，服务器从中导入",
   "The folder Transmission puts downloads in, which the server imports from": "Transmission 存放下载的文件夹，服务器从中导入",
-  "The folder SABnzbd puts downloads in, which the server imports from": "SABnzbd 存放下载的文件夹，服务器从中导入"
+  "The folder SABnzbd puts downloads in, which the server imports from": "SABnzbd 存放下载的文件夹，服务器从中导入",
+  "The settings of the client's kind that the container leaves to the administrator": "此类客户端中不由容器填写的设置"
 }

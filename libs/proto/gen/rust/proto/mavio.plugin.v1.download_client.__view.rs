@@ -3,6 +3,11 @@
 
 #[derive(Clone, Debug, Default)]
 pub struct ListDownloadClientDefinitionsRequestView<'a> {
+    /// Whether to list the clients of the provider's container dependencies
+    /// instead of its definitions.
+    ///
+    /// Field 1: `containers`
+    pub containers: ::core::option::Option<bool>,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for ListDownloadClientDefinitionsRequestView<'a> {
@@ -35,6 +40,13 @@ impl<'a> ::buffa::MessageView<'a> for ListDownloadClientDefinitionsRequestView<'
         let view = self;
         let mut cur = cur;
         match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.containers = Some(::buffa::types::decode_bool(&mut cur)?);
+            }
             _ => {
                 ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
                 let span_len = before_tag.len() - cur.len();
@@ -63,6 +75,7 @@ impl<'a> ::buffa::MessageView<'a> for ListDownloadClientDefinitionsRequestView<'
         use ::buffa::alloc::string::ToString as _;
         let _ = __buffa_src;
         ::core::result::Result::Ok(super::super::ListDownloadClientDefinitionsRequest {
+            containers: self.containers,
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -74,6 +87,9 @@ impl<'a> ::buffa::ViewEncode<'a> for ListDownloadClientDefinitionsRequestView<'a
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
         let mut size = 0u64;
+        if self.containers.is_some() {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -85,6 +101,9 @@ impl<'a> ::buffa::ViewEncode<'a> for ListDownloadClientDefinitionsRequestView<'a
     ) {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
+        if let Some(v) = self.containers {
+            ::buffa::types::put_bool_field(1u32, v, buf);
+        }
         self.__buffa_unknown_fields.write_to(buf);
     }
 }
@@ -185,6 +204,14 @@ impl ListDownloadClientDefinitionsRequestOwnedView {
     #[must_use]
     pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
         self.0.into_bytes()
+    }
+    /// Whether to list the clients of the provider's container dependencies
+    /// instead of its definitions.
+    ///
+    /// Field 1: `containers`
+    #[must_use]
+    pub fn containers(&self) -> ::core::option::Option<bool> {
+        self.0.reborrow().containers
     }
 }
 impl ::core::convert::From<

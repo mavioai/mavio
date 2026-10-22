@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"maps"
 	"slices"
 	"strings"
 	"sync"
@@ -47,27 +48,50 @@ var (
 )
 
 // ListDownloadClientDefinitions implements DownloadClientProviderService.
-func (p *plugin) ListDownloadClientDefinitions(context.Context, *pluginv1.ListDownloadClientDefinitionsRequest) (*pluginv1.ListDownloadClientDefinitionsResponse, error) {
+// Asked for the containers', it lists the clients of the container
+// dependencies by name, with their definitions' settings the containers do
+// not fill in.
+func (p *plugin) ListDownloadClientDefinitions(_ context.Context, req *pluginv1.ListDownloadClientDefinitionsRequest) (*pluginv1.ListDownloadClientDefinitionsResponse, error) {
+	if req.GetContainers() {
+		var out []*pluginv1.DownloadClientDefinition
+		for _, name := range slices.Sorted(maps.Keys(containerClients)) {
+			d, ok := p.byID[containerClients[name].definition]
+			if !ok {
+				continue
+			}
+			out = append(out, definitionProto(name, containerClientName(d), d, func(f client.Field) bool { return !containerFilled[f.Name] }))
+		}
+		return pluginv1.ListDownloadClientDefinitionsResponse_builder{Definitions: out}.Build(), nil
+	}
 	out := make([]*pluginv1.DownloadClientDefinition, 0, len(p.defs))
 	for _, d := range p.defs {
-		fields := make([]*pluginv1.SettingField, 0, len(d.Fields))
-		for _, f := range d.Fields {
-			var opts []*pluginv1.SettingFieldOption
-			for _, o := range f.Options {
-				opts = append(opts, pluginv1.SettingFieldOption_builder{ValueJson: proto.String(jsonValue(o.Value)), Label: proto.String(o.Label)}.Build())
-			}
-			fields = append(fields, pluginv1.SettingField_builder{
-				Name: proto.String(f.Name), Label: proto.String(f.Label), HelpText: proto.String(f.HelpText),
-				Type: fieldTypes[f.Type].Enum(), DefaultJson: proto.String(jsonValue(f.Default)),
-				Options: opts, Advanced: proto.Bool(f.Advanced), Secret: proto.Bool(f.Secret),
-			}.Build())
-		}
-		out = append(out, pluginv1.DownloadClientDefinition_builder{
-			Id: proto.String(d.ID), Name: proto.String(d.Name), Description: proto.String(d.Description),
-			Protocol: protocols[d.Protocol].Enum(), Fields: fields,
-		}.Build())
+		out = append(out, definitionProto(d.ID, d.Name, d, func(client.Field) bool { return true }))
 	}
 	return pluginv1.ListDownloadClientDefinitionsResponse_builder{Definitions: out}.Build(), nil
+}
+
+// definitionProto returns a definition under an ID and name, with the
+// fields keep keeps.
+func definitionProto(id, name string, d client.Definition, keep func(client.Field) bool) *pluginv1.DownloadClientDefinition {
+	fields := make([]*pluginv1.SettingField, 0, len(d.Fields))
+	for _, f := range d.Fields {
+		if !keep(f) {
+			continue
+		}
+		var opts []*pluginv1.SettingFieldOption
+		for _, o := range f.Options {
+			opts = append(opts, pluginv1.SettingFieldOption_builder{ValueJson: proto.String(jsonValue(o.Value)), Label: proto.String(o.Label)}.Build())
+		}
+		fields = append(fields, pluginv1.SettingField_builder{
+			Name: proto.String(f.Name), Label: proto.String(f.Label), HelpText: proto.String(f.HelpText),
+			Type: fieldTypes[f.Type].Enum(), DefaultJson: proto.String(jsonValue(f.Default)),
+			Options: opts, Advanced: proto.Bool(f.Advanced), Secret: proto.Bool(f.Secret),
+		}.Build())
+	}
+	return pluginv1.DownloadClientDefinition_builder{
+		Id: proto.String(id), Name: proto.String(name), Description: proto.String(d.Description),
+		Protocol: protocols[d.Protocol].Enum(), Fields: fields,
+	}.Build()
 }
 
 // jsonValue returns v as JSON; empty for nil.

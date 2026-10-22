@@ -25,6 +25,9 @@ type containerClientConfig struct {
 	Tags                     []string `json:"tags"`
 	RemoveCompletedDownloads *bool    `json:"remove_completed_downloads"`
 	RemoveFailedDownloads    *bool    `json:"remove_failed_downloads"`
+	// Settings are the settings of the client's definition the container
+	// leaves to the administrator, over the definition's defaults.
+	Settings json.RawMessage `json:"settings"`
 }
 
 // containerClient is how the plugin reaches the client of a container
@@ -53,8 +56,19 @@ var containerClients = map[string]containerClient{
 	}},
 }
 
+// containerFilled are the settings the container fills in: where the
+// client is and how to sign in to it.
+var containerFilled = map[string]bool{
+	"host": true, "port": true, "use_ssl": true, "url_base": true,
+	"username": true, "password": true, "api_key": true,
+}
+
 // containerClientID is the ID of the client of a container dependency.
 func containerClientID(name string) string { return "container-" + name }
+
+// containerClientName is the name of the client of a container dependency
+// of a definition.
+func containerClientName(d client.Definition) string { return d.Name + " (container)" }
 
 // containers returns the plugin's container dependencies by name; nil
 // when the host cannot tell. The server configures the plugin again when
@@ -112,7 +126,8 @@ func (p *plugin) buildContainers(ctx context.Context, c config) []*configured {
 }
 
 // containerConfig returns the configuration of a container's client: its
-// definition's defaults, with the container's address and credentials.
+// definition's defaults, the settings the administrator gave, and the
+// container's address and credentials.
 func (p *plugin) containerConfig(cc containerClientConfig, spec containerClient, dep *pluginv1.ContainerStatus) (clientConfig, client.Definition, error) {
 	def, ok := p.byID[spec.definition]
 	if !ok {
@@ -132,6 +147,17 @@ func (p *plugin) containerConfig(cc containerClientConfig, spec containerClient,
 			settings[f.Name] = f.Default
 		}
 	}
+	if len(cc.Settings) > 0 {
+		var given map[string]any
+		if err := json.Unmarshal(cc.Settings, &given); err != nil {
+			return clientConfig{}, def, fmt.Errorf("settings: %w", err)
+		}
+		for k, v := range given {
+			if !containerFilled[k] {
+				settings[k] = v
+			}
+		}
+	}
 	settings["host"], settings["port"], settings["use_ssl"] = u.Hostname(), port, u.Scheme == "https"
 	for k, v := range spec.credentials(dep.GetSecrets()) {
 		settings[k] = v
@@ -141,7 +167,7 @@ func (p *plugin) containerConfig(cc containerClientConfig, spec containerClient,
 		return clientConfig{}, def, err
 	}
 	return clientConfig{
-		ID: containerClientID(cc.Name), Name: def.Name + " (container)", Definition: def.ID,
+		ID: containerClientID(cc.Name), Name: containerClientName(def), Definition: def.ID,
 		Enabled: new(true), Priority: cc.Priority, Tags: cc.Tags,
 		RemoveCompletedDownloads: cc.RemoveCompletedDownloads, RemoveFailedDownloads: cc.RemoveFailedDownloads,
 		Settings: data,

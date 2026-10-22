@@ -29,6 +29,11 @@ const (
 	// OptionsDownloadClientDefinitions are the definitions of the plugin's
 	// download client provider, with their settings.
 	OptionsDownloadClientDefinitions = "download-client-definitions"
+	// OptionsContainerDownloadClients are the download clients the
+	// plugin's download client provider runs in its container
+	// dependencies, by the dependency's name, with the settings the
+	// container leaves to the administrator.
+	OptionsContainerDownloadClients = "container-download-clients"
 	// OptionsVoiceRecognizers are the recognition services the plugin's
 	// VOICE_SESSION service implements, with their settings.
 	OptionsVoiceRecognizers = "voice-recognizers"

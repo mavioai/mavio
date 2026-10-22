@@ -130,9 +130,12 @@ func (x DownloadStatus) Number() protoreflect.EnumNumber {
 }
 
 type ListDownloadClientDefinitionsRequest struct {
-	state         protoimpl.MessageState `protogen:"opaque.v1"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Containers  bool                   `protobuf:"varint,1,opt,name=containers"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
 }
 
 func (x *ListDownloadClientDefinitionsRequest) Reset() {
@@ -160,15 +163,46 @@ func (x *ListDownloadClientDefinitionsRequest) ProtoReflect() protoreflect.Messa
 	return mi.MessageOf(x)
 }
 
+func (x *ListDownloadClientDefinitionsRequest) GetContainers() bool {
+	if x != nil {
+		return x.xxx_hidden_Containers
+	}
+	return false
+}
+
+func (x *ListDownloadClientDefinitionsRequest) SetContainers(v bool) {
+	x.xxx_hidden_Containers = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 1)
+}
+
+func (x *ListDownloadClientDefinitionsRequest) HasContainers() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *ListDownloadClientDefinitionsRequest) ClearContainers() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_Containers = false
+}
+
 type ListDownloadClientDefinitionsRequest_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
+	// Whether to list the clients of the provider's container dependencies
+	// instead of its definitions.
+	Containers *bool
 }
 
 func (b0 ListDownloadClientDefinitionsRequest_builder) Build() *ListDownloadClientDefinitionsRequest {
 	m0 := &ListDownloadClientDefinitionsRequest{}
 	b, x := &b0, m0
 	_, _ = b, x
+	if b.Containers != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 1)
+		x.xxx_hidden_Containers = *b.Containers
+	}
 	return m0
 }
 
@@ -3666,8 +3700,11 @@ var File_mavio_plugin_v1_download_client_proto protoreflect.FileDescriptor
 
 const file_mavio_plugin_v1_download_client_proto_rawDesc = "" +
 	"\n" +
-	"%mavio/plugin/v1/download_client.proto\x12\x0fmavio.plugin.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1egoogle/protobuf/duration.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1dmavio/plugin/v1/indexer.proto\x1a\x1emavio/plugin/v1/settings.proto\"&\n" +
-	"$ListDownloadClientDefinitionsRequest\"t\n" +
+	"%mavio/plugin/v1/download_client.proto\x12\x0fmavio.plugin.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1egoogle/protobuf/duration.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1dmavio/plugin/v1/indexer.proto\x1a\x1emavio/plugin/v1/settings.proto\"F\n" +
+	"$ListDownloadClientDefinitionsRequest\x12\x1e\n" +
+	"\n" +
+	"containers\x18\x01 \x01(\bR\n" +
+	"containers\"t\n" +
 	"%ListDownloadClientDefinitionsResponse\x12K\n" +
 	"\vdefinitions\x18\x01 \x03(\v2).mavio.plugin.v1.DownloadClientDefinitionR\vdefinitions\"\xd6\x01\n" +
 	"\x18DownloadClientDefinition\x12\x0e\n" +
