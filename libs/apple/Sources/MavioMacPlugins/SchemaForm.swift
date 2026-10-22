@@ -624,7 +624,9 @@
         private func item(_ s: PluginsSchema, index i: Int, count: Int, list id: String, path: [Step]) -> NSView {
             let isOpen = open[id] == i
             let itemPath = path + [.index(i)]
-            let title = { [weak self] in itemTitle(self?.get(itemPath) ?? .null, i) }
+            let title = { [weak self] in
+                itemTitle(s, options: self?.options ?? [:], self?.get(itemPath) ?? .null, i)
+            }
             let toggle = MavioButton(title(), icon: isOpen ? "expand" : "forward", kind: .plain, theme: theme) {
                 [weak self] in
                 guard let self else { return }
@@ -673,11 +675,18 @@
     /// How many options a multiple choice shows as check boxes; more are tags.
     private let tagsAbove = 8
 
-    /// The title of an object in a list: its name or ID, else its place.
-    @MainActor private func itemTitle(_ v: PluginsJSON, _ i: Int) -> String {
+    /// The title of an object of schema s in a list: its name or ID, the
+    /// name of the option when a source's option is that, among options by
+    /// source, else its place.
+    @MainActor private func itemTitle(
+        _ s: PluginsSchema, options: [String: [PluginsOption]], _ v: PluginsJSON, _ i: Int
+    ) -> String {
         if let o = v.object {
             for k in ["name", "id", "definition", "kind", "host"] {
-                if let s = o[k]?.string, !s.isEmpty { return s }
+                guard let x = o[k]?.string, !x.isEmpty else { continue }
+                let spec = s.properties?.first { $0.name == k }?.schema.options
+                let name = spec.flatMap { options[$0.source]?.first { $0.value == x }?.name } ?? ""
+                return name.isEmpty ? x : name
             }
         }
         return MavioStrings.schemaItem(number: String(i + 1))
