@@ -21,7 +21,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -69,6 +68,7 @@ import dev.mavio.ui.CircleButton
 import dev.mavio.ui.ConfirmDialog
 import dev.mavio.ui.MavioButton
 import dev.mavio.ui.MavioIcon
+import dev.mavio.ui.MenuDivider
 import dev.mavio.ui.MavioSwitch
 import dev.mavio.ui.R
 import dev.mavio.ui.SettingsField
@@ -141,7 +141,7 @@ internal fun MoreMenu(model: AppModel, details: Details) {
         CircleButton(R.drawable.ic_more, stringResource(R.string.lists_more), { open = true })
         DropdownMenu(open, onDismissRequest = { open = false }, containerColor = theme.colors.surfaceOverlay) {
             groups.forEachIndexed { i, group ->
-                if (i > 0) HorizontalDivider(Modifier.padding(vertical = MavioSpacing.s4), color = theme.colors.border)
+                if (i > 0) MenuDivider()
                 group.forEach { e ->
                     DropdownMenuItem(
                         text = {
