@@ -27,7 +27,7 @@ func main() {
 	log := slog.New(slog.NewTextHandler(os.Stderr, nil))
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	p, err := newPlugin(log, Version, guest.DataDir(), newHTTPClient())
+	p, err := newPlugin(log, Version, guest.DataDir(), newHTTPClient(), guest.HostClient)
 	if err != nil {
 		log.Error("start", "err", err)
 		os.Exit(1)

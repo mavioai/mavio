@@ -22,6 +22,8 @@ import (
 // config is the plugin's configuration.
 type config struct {
 	Clients []clientConfig `json:"clients"`
+	// ContainerClients are the clients of the container dependencies.
+	ContainerClients []containerClientConfig `json:"container_clients"`
 	// HistoryLimit is how many downloads of the clients' histories are
 	// read, as Radarr's DownloadClientHistoryLimit; 60 when 0.
 	HistoryLimit int `json:"history_limit"`
@@ -63,6 +65,9 @@ type configured struct {
 	client client.Client
 	// historyLimit is the configuration's.
 	historyLimit int
+	// container is the container dependency the client runs in, empty
+	// for a client the configuration names.
+	container string
 }
 
 func (c *configured) options() client.Options {
@@ -86,14 +91,18 @@ type plugin struct {
 	byID     map[string]client.Definition
 	// now is the clock; time.Now when nil.
 	now func() time.Time
+	// host returns the client of the host API; nil, or returning nil,
+	// when there is none, which leaves the container clients out.
+	host func() *http.Client
 
 	mu      sync.RWMutex
 	clients []*configured
 }
 
 // newPlugin returns the plugin keeping the clients' statuses and the seed
-// limits of their torrents in dataDir, and reaching them with hc.
-func newPlugin(log *slog.Logger, version, dataDir string, hc *http.Client) (*plugin, error) {
+// limits of their torrents in dataDir, reaching them with hc and the host
+// with the client host returns.
+func newPlugin(log *slog.Logger, version, dataDir string, hc *http.Client, host func() *http.Client) (*plugin, error) {
 	statusFile, seedFile := "", ""
 	if dataDir != "" {
 		statusFile, seedFile = filepath.Join(dataDir, "status.json"), filepath.Join(dataDir, "seeds.json")
@@ -106,7 +115,7 @@ func newPlugin(log *slog.Logger, version, dataDir string, hc *http.Client) (*plu
 	if err != nil {
 		return nil, err
 	}
-	p := &plugin{log: log, version: version, http: hc, statuses: statuses, seeds: seeds, byID: map[string]client.Definition{}}
+	p := &plugin{log: log, version: version, http: hc, host: host, statuses: statuses, seeds: seeds, byID: map[string]client.Definition{}}
 	p.defs = definitions()
 	for _, d := range p.defs {
 		p.byID[d.ID] = d
@@ -137,9 +146,9 @@ func (p *plugin) Describe(context.Context, *pluginv1.DescribeRequest) (*pluginv1
 	return pluginv1.DescribeResponse_builder{Manifest: m}.Build(), nil
 }
 
-// Configure takes a configuration, whose clients replace those
-// configured.
-func (p *plugin) Configure(_ context.Context, req *pluginv1.ConfigureRequest) (*pluginv1.ConfigureResponse, error) {
+// Configure takes a configuration, whose clients, and those of the
+// container dependencies with an address, replace those configured.
+func (p *plugin) Configure(ctx context.Context, req *pluginv1.ConfigureRequest) (*pluginv1.ConfigureResponse, error) {
 	var c config
 	if err := json.Unmarshal([]byte(req.GetConfigJson()), &c); err != nil {
 		return nil, connect.NewError(connect.CodeInvalidArgument, err)
@@ -147,10 +156,13 @@ func (p *plugin) Configure(_ context.Context, req *pluginv1.ConfigureRequest) (*
 	if err := c.validate(); err != nil {
 		return nil, connect.NewError(connect.CodeInvalidArgument, err)
 	}
-	clients := p.build(c)
+	clients := append(p.build(c), p.buildContainers(ctx, c)...)
 	keep := map[string]bool{}
 	for _, cc := range c.Clients {
 		keep[cc.ID] = true
+	}
+	for _, cc := range c.ContainerClients {
+		keep[containerClientID(cc.Name)] = true
 	}
 	p.statuses.Remove(func(id string) bool { return keep[id] })
 	p.seeds.Remove(func(id string) bool { return keep[id] })
@@ -179,6 +191,18 @@ func (c *config) validate() error {
 			return fmt.Errorf("client %s: priority must be from 1 to 50", cc.ID)
 		}
 		seen[cc.ID], names[strings.ToLower(cc.Name)] = true, true
+	}
+	containers := map[string]bool{}
+	for i, cc := range c.ContainerClients {
+		switch {
+		case containerClients[cc.Name].definition == "":
+			return fmt.Errorf("container_clients[%d]: unknown container %q", i, cc.Name)
+		case containers[cc.Name]:
+			return fmt.Errorf("container_clients[%d]: container %q is repeated", i, cc.Name)
+		case cc.Priority < 0 || cc.Priority > 50:
+			return fmt.Errorf("container client %s: priority must be from 1 to 50", cc.Name)
+		}
+		containers[cc.Name] = true
 	}
 	if c.HistoryLimit < 0 {
 		return errors.New("history limit must not be negative")

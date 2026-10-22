@@ -96,7 +96,7 @@ func (p *plugin) ListDownloadClients(context.Context, *pluginv1.ListDownloadClie
 			Priority:                 proto.Int32(int32(c.cfg.priority())),
 			RemoveCompletedDownloads: proto.Bool(opts.RemoveCompletedDownloads), RemoveFailedDownloads: proto.Bool(opts.RemoveFailedDownloads),
 			PrefersTorrentFile: proto.Bool(c.def.PrefersTorrentFile), Host: proto.String(c.client.Host()),
-			Tags: c.cfg.Tags,
+			Tags: c.cfg.Tags, Container: proto.String(c.container),
 		}
 		if until, failure, ok := p.statuses.Disabled(c.cfg.ID); ok {
 			b.DisabledUntil, b.Failure = timestamppb.New(until), proto.String(failure)

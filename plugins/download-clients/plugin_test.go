@@ -74,7 +74,7 @@ func (c *fakeClient) ImportItem(_ context.Context, item client.Item, _ client.Op
 // are those of clients, by their "name" setting.
 func newTestPlugin(t *testing.T, clients map[string]*fakeClient) *plugin {
 	t.Helper()
-	p, err := newPlugin(slog.New(slog.DiscardHandler), "test", t.TempDir(), http.DefaultClient)
+	p, err := newPlugin(slog.New(slog.DiscardHandler), "test", t.TempDir(), http.DefaultClient, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -383,7 +383,7 @@ func TestSeedsKeptAcrossRestarts(t *testing.T) {
 	dir := t.TempDir()
 	ratio := 2.0
 	start := func() (*plugin, map[string]client.Env) {
-		p, err := newPlugin(slog.New(slog.DiscardHandler), "test", dir, http.DefaultClient)
+		p, err := newPlugin(slog.New(slog.DiscardHandler), "test", dir, http.DefaultClient, nil)
 		if err != nil {
 			t.Fatal(err)
 		}

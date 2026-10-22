@@ -19,5 +19,13 @@
   "Settings": "设置",
   "The settings the definition takes": "该定义所需的设置",
   "History limit": "历史记录上限",
-  "How many downloads of the clients' histories are read; 60 when 0": "读取客户端历史记录中的下载数量；为 0 时读取 60 条"
+  "How many downloads of the clients' histories are read; 60 when 0": "读取客户端历史记录中的下载数量；为 0 时读取 60 条",
+  "Container clients": "容器客户端",
+  "Clients the server runs in containers, set up for Mavio, each added once its container is ready": "服务器在容器中运行并为 Mavio 配置好的客户端，各自在容器就绪后添加",
+  "qBittorrent, a BitTorrent client": "qBittorrent，BitTorrent 客户端",
+  "Transmission, a BitTorrent client": "Transmission，BitTorrent 客户端",
+  "SABnzbd, a Usenet client, whose news servers are set up in its web interface": "SABnzbd，Usenet 客户端，新闻服务器在其网页界面中设置",
+  "The folder qBittorrent puts downloads in, which the server imports from": "qBittorrent 存放下载的文件夹，服务器从中导入",
+  "The folder Transmission puts downloads in, which the server imports from": "Transmission 存放下载的文件夹，服务器从中导入",
+  "The folder SABnzbd puts downloads in, which the server imports from": "SABnzbd 存放下载的文件夹，服务器从中导入"
 }
