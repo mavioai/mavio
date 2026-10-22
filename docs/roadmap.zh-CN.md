@@ -506,6 +506,7 @@ flowchart TD
   - [x] 索引器的标签，由索引器标签规格检查
 - [x] 领域与存储：档案、custom formats、被跟踪下载的队列、历史、黑名单、远程路径映射、命名（`libs/core/acquisition.go`、`libs/store`）
   - [x] 质量档案的格式评分对照已有的 custom formats 进行检查，如同 Radarr 的 QualityProfileController：不得为不存在的格式打分或为同一格式打两次分，最低分必须可以达到；删除最后一个格式时重置各档案的格式分数，如同 Radarr 的 QualityProfileService
+  - [x] 电影如 Radarr、剧集如 Sonarr 的默认质量档案（Any、SD、HD-720p、HD-1080p、Ultra-HD、HD - 720p/1080p），启动时该类型没有任何档案便添加（`Runtime.AddDefaultProfiles`）
 - [x] 按 TMDB ID 把想要的电影加入媒体库，带质量档案与最低可用状态（`WantedService`、`apps/server/internal/acquisition`）
   - [x] 电影的数字版与实体版发行日期（来自 TMDB 的发行日期或 Radarr 的元数据），最低可用性如同 Radarr 的 Movie.IsAvailable 使用它们；没有这些日期的电影在首映 90 天后视为已发行
   - [x] 电影的原始语言，要求"Original"的档案取它，没有语言标记的发布即为该语言；原始语言未知的电影，档案接受任何语言

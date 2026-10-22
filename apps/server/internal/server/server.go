@@ -677,6 +677,9 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 	if err := reqs.Schedule(ctx); err != nil {
 		log.ErrorContext(ctx, "schedule request availability job", "err", err)
 	}
+	if err := acq.AddDefaultProfiles(ctx); err != nil {
+		log.ErrorContext(ctx, "add default quality profiles", "err", err)
+	}
 	g.Go(func() error {
 		if err := acqWorker.Run(ctx); !errors.Is(err, context.Canceled) {
 			return err

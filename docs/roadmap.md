@@ -506,6 +506,7 @@ flowchart TD
   - [x] Tags of indexers, which the indexer tag specification checks
 - [x] Domain and storage: profiles, custom formats, the queue of tracked downloads, history, the blocklist, remote path mappings, naming (`libs/core/acquisition.go`, `libs/store`)
   - [x] The format scores of quality profiles checked against the custom formats that exist, as Radarr's QualityProfileController: no score of a missing format or two of one, a minimum score that can be reached; deleting the last format resets the profiles' format scores, as Radarr's QualityProfileService
+  - [x] The default quality profiles of movies, as Radarr's, and of series, as Sonarr's (Any, SD, HD-720p, HD-1080p, Ultra-HD, HD - 720p/1080p), added at start when there are none of the kind (`Runtime.AddDefaultProfiles`)
 - [x] Adding a wanted movie to a library by its TMDB ID, with a quality profile and minimum availability (`WantedService`, `apps/server/internal/acquisition`)
   - [x] Digital and physical release dates of movies (from TMDB's release dates, or Radarr's metadata), which minimum availability uses as Radarr's Movie.IsAvailable; a movie without them is released 90 days after its premiere
   - [x] The original language of movies, which profiles wanting "Original" take and releases without languages are in; profiles accept any language for movies whose original language is unknown
