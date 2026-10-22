@@ -207,12 +207,16 @@ func (r *Runtime) grab(ctx context.Context, rn *run, g grabRequest) (core.Downlo
 		return core.Download{}, fmt.Errorf("%w: nothing to grab", core.ErrInvalid)
 	}
 	tags := g.movie.wantedTags()
+	var libs []string
+	if g.movie != nil {
+		libs = g.movie.lib.Paths
+	}
 	if g.show != nil {
-		tags = g.show.wanted.Tags
+		tags, libs = g.show.wanted.Tags, g.show.lib.Paths
 	}
 	ch := clientChoice{
 		protocol: rel.Protocol, tags: tags, pluginID: g.pluginID, clientID: g.clientID,
-		indexer: rel.IndexerName, filterBlocked: g.filterBlocked,
+		indexer: rel.IndexerName, libraryPaths: libs, filterBlocked: g.filterBlocked,
 	}
 	if rn != nil {
 		if ix, ok := rn.indexer(ctx, rel.IndexerRef()); ok {

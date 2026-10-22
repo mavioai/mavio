@@ -90,6 +90,10 @@ type clientChoice struct {
 	// its releases to, as "<plugin>/<client>" or the client's ID alone;
 	// empty for none. indexer is the indexer's name.
 	indexerClient, indexer string
+	// libraryPaths are the paths of the library the release is for,
+	// whose clients are preferred: those imports reach the library from
+	// without passing files through the server; none for no library.
+	libraryPaths []string
 	// filterBlocked leaves out the clients left out after failing even
 	// when they all are, for releases kept pending until a client is
 	// back, as Radarr's DownloadService does for releases pending with
@@ -111,9 +115,11 @@ func (c Client) isClient(ref string) bool {
 // the enabled clients of the release's protocol, those sharing one of
 // the tags, else those without tags; of those, the indexer's own client
 // when it has one; else the ones not left out after failing, or all of
-// them when they all are and the choice does not filter them; then, of
-// those of the first priority, the one after the client last used for
-// the protocol, in turn. No client fails with errClientUnavailable.
+// them when they all are and the choice does not filter them; of those,
+// the ones on the storage of the release's library, when there are any
+// (nearClients); then, of those of the first priority, the one after the
+// client last used for the protocol, in turn. No client fails with
+// errClientUnavailable.
 func (r *Runtime) chooseClient(ctx context.Context, ch clientChoice) (Client, error) {
 	clients, failures := r.ListClients(ctx)
 	if ch.pluginID != "" || ch.clientID != "" {
@@ -166,6 +172,7 @@ func (r *Runtime) chooseClient(ctx context.Context, ch clientChoice) (Client, er
 		r.logger().DebugContext(ctx, "no download client is available that has not failed recently; trying one that has", "protocol", protocol)
 		candidates = tagged
 	}
+	candidates = r.nearClients(ctx, candidates, ch.libraryPaths)
 	first := slices.MinFunc(candidates, func(a, b Client) int { return cmp.Compare(a.GetPriority(), b.GetPriority()) }).GetPriority()
 	candidates = slices.DeleteFunc(candidates, func(c Client) bool { return c.GetPriority() != first })
 	slices.SortFunc(candidates, func(a, b Client) int { return cmp.Compare(a.Ref(), b.Ref()) })
@@ -181,4 +188,30 @@ func (r *Runtime) chooseClient(ctx context.Context, ch clientChoice) (Client, er
 	}
 	r.lastClients[protocol] = chosen.Ref()
 	return chosen, nil
+}
+
+// nearClients returns the clients of candidates that imports into a
+// library of the paths libs reach without passing the files through the
+// server, by hard links or moves within one storage (ClientPath's
+// LinkLibraryPaths), as a cloud drive's offline downloads reach libraries
+// on the same remote; all of them when none or all do, or without libs.
+func (r *Runtime) nearClients(ctx context.Context, candidates []Client, libs []string) []Client {
+	if len(libs) == 0 || len(candidates) < 2 {
+		return candidates
+	}
+	var near []Client
+	for _, c := range candidates {
+		paths, _, err := r.clientPaths(ctx, c, libs)
+		if err != nil {
+			r.logger().DebugContext(ctx, "download client folders", "client", c.Ref(), "err", err)
+			continue
+		}
+		if slices.ContainsFunc(paths, func(p ClientPath) bool { return len(p.LinkLibraryPaths) > 0 }) {
+			near = append(near, c)
+		}
+	}
+	if len(near) == 0 {
+		return candidates
+	}
+	return near
 }

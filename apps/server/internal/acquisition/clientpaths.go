@@ -81,6 +81,16 @@ func (r *Runtime) ClientPaths(ctx context.Context, pluginID, clientID string) ([
 	if err != nil {
 		return nil, "", err
 	}
+	libs, err := r.libraryPaths(ctx)
+	if err != nil {
+		return nil, "", err
+	}
+	return r.clientPaths(ctx, c, libs)
+}
+
+// clientPaths returns a client's folders as ClientPaths does, checking
+// which of the library paths libs imports from each reach.
+func (r *Runtime) clientPaths(ctx context.Context, c Client, libs []string) ([]ClientPath, string, error) {
 	stored, err := r.Store.DownloadPathMappings().List(ctx)
 	if err != nil {
 		return nil, "", err
@@ -88,7 +98,7 @@ func (r *Runtime) ClientPaths(ctx context.Context, pluginID, clientID string) ([
 	var mappings []acquire.DownloadPathMapping
 	var out []ClientPath
 	for _, m := range stored {
-		if m.PluginID == pluginID && m.ClientID == clientID {
+		if m.PluginID == c.PluginID && m.ClientID == c.GetId() {
 			mappings = append(mappings, acquire.DownloadPathMapping{Client: c.Ref(), RemotePath: m.RemotePath, LocalPath: m.LocalPath})
 			out = append(out, ClientPath{RemotePath: m.RemotePath, LocalPath: m.LocalPath})
 		}
@@ -109,10 +119,6 @@ func (r *Runtime) ClientPaths(ctx context.Context, pluginID, clientID string) ([
 		if !mapped {
 			out = append(out, ClientPath{RemotePath: root, RootFolder: true})
 		}
-	}
-	libs, err := r.libraryPaths(ctx)
-	if err != nil {
-		return nil, "", err
 	}
 	for i := range out {
 		out[i].Moves = movesFiles(c)
