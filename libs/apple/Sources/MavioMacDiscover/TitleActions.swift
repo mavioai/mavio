@@ -184,13 +184,15 @@
         /// How far the season is open, from 0 to 1, and where it goes from
         /// when, as MavioGO's.
         private var progress: CGFloat = 0
-        private var motion: (from: CGFloat, to: CGFloat, start: CFTimeInterval)?
+        private var motion: (from: CGFloat, to: CGFloat, elapsed: CFTimeInterval, last: CFTimeInterval)?
         private var link: CADisplayLink?
         private let expand: IconView
         private let header: Pressable
         private var open = false
         private var episodes: [Mavio_Acquisition_V1_SeasonEpisode]?
         private var failed = false
+        /// What the list shows: loading, failed, none or episodes.
+        private var shown: String?
         private var task: Task<Void, Never>?
         private let theme: Theme
 
@@ -236,8 +238,10 @@
             // The panel is its episodes' height, but while it grows or
             // shrinks a share of it, the episodes cut at its end rather
             // than squeezed.
+            // Below the rows' own height, so that the episodes keep theirs
+            // while the panel is given less, as MavioGO's do.
             let fits = panel.heightAnchor.constraint(equalTo: list.heightAnchor)
-            fits.priority = .init(999)
+            fits.priority = .init(200)
             panelHeight = panel.heightAnchor.constraint(equalToConstant: 0)
             NSLayoutConstraint.activate([
                 list.topAnchor.constraint(equalTo: panel.topAnchor),
@@ -280,7 +284,7 @@
                 apply(to)
                 return
             }
-            motion = (progress, to, CACurrentMediaTime())
+            motion = (progress, to, 0, CACurrentMediaTime())
             if link == nil {
                 let link = displayLink(target: self, selector: #selector(tick))
                 link.add(to: .main, forMode: .common)
@@ -290,8 +294,15 @@
         }
 
         @objc private func tick(_ link: CADisplayLink? = nil) {
-            guard let motion else { return }
-            let t = min(1, (CACurrentMediaTime() - motion.start) / MavioDuration.normal)
+            guard var motion else { return }
+            // A frame late, as the first one making the episodes, moves the
+            // share on by at most one frame's time, so that the motion
+            // pauses rather than skips.
+            let now = CACurrentMediaTime()
+            motion.elapsed += min(now - motion.last, 1 / 30)
+            motion.last = now
+            self.motion = motion
+            let t = min(1, motion.elapsed / MavioDuration.normal)
             let u = 1 - t
             apply(motion.from + (motion.to - motion.from) * (1 - u * u * u))
             if t >= 1 {
@@ -305,12 +316,24 @@
         /// lets it follow them.
         private func apply(_ p: CGFloat) {
             progress = p
-            panel.isHidden = p <= 0
-            panelHeight.isActive = p > 0 && p < 1
+            panel.isHidden = !open && p <= 0
+            panelHeight.isActive = p < 1
             guard panelHeight.isActive else { return }
-            // The height the episodes had in the last frame, as MavioGO's.
+            // The height the episodes had in the last frame, as MavioGO's,
+            // but no more than the page's view shows of them: what grows
+            // or shrinks beyond its end would be seen to move only at the
+            // motion's end.
             let full = list.frame.height > 0 ? list.frame.height : list.fittingSize.height
-            panelHeight.constant = (p * full).rounded()
+            panelHeight.constant = (p * min(full, room())).rounded()
+        }
+
+        /// The height from the panel's top to the end of the page's view,
+        /// or more than any season's while the page is not in view.
+        private func room() -> CGFloat {
+            guard let clip = enclosingScrollView?.contentView, window != nil else { return .greatestFiniteMagnitude }
+            // In the window's coordinates, which grow upward.
+            let view = clip.convert(clip.bounds, to: nil)
+            return max(0, panel.convert(panel.bounds, to: nil).maxY - view.minY)
         }
 
         private func load() {
@@ -333,6 +356,12 @@
 
         private func renderList() {
             guard open else { return }
+            // Made again only as what it shows changes: the rows made, and
+            // their heights, stay as the season opens again.
+            let state =
+                episodes.map { $0.isEmpty ? "none" : "episodes" } ?? (failed ? "failed" : "loading")
+            guard state != shown else { return }
+            shown = state
             var rows: [NSView] = []
             if let episodes, !episodes.isEmpty {
                 // Only the episodes near the page's view are made, a season

@@ -388,6 +388,11 @@
             schedule()
         }
 
+        override public func viewDidUnhide() {
+            super.viewDidUnhide()
+            update()
+        }
+
         @objc private func scrolled() { update() }
 
         /// The height of row at the width: measured again once laid out
@@ -411,7 +416,11 @@
 
         private func update() {
             guard let make, width > 0 else { return setHeight(totalHeight()) }
-            let view = visibleRect
+            // Hidden, as a closed season's, nothing is made until shown.
+            guard !isHiddenOrHasHiddenAncestor else { return }
+            // The page's view, not what a view around clips of it: rows
+            // stay made as one growing or shrinking shows more or less.
+            let view = clip.map { convert($0.bounds, from: $0) } ?? visibleRect
             let near =
                 view.isEmpty ? NSRect.zero : view.insetBy(dx: 0, dy: -Self.overscan)
             var y: CGFloat = 0
