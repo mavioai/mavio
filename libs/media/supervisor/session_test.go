@@ -212,6 +212,23 @@ func TestKillAfterGrace(t *testing.T) {
 	})
 }
 
+func TestKill(t *testing.T) {
+	synctest.Test(t, func(t *testing.T) {
+		f := newFake(true)
+		s, _ := Start(t.Context(), starter(f), Config{StopGrace: 3 * time.Second})
+		begin := time.Now()
+		if err := s.Kill(); err != nil {
+			t.Errorf("Kill: got = %v, want = nil", err)
+		}
+		if got := time.Since(begin); got != 0 {
+			t.Errorf("killed after: got = %v, want = at once", got)
+		}
+		if keys := f.Keys(); keys != "" {
+			t.Errorf("keys sent: got = %q, want = none", keys)
+		}
+	})
+}
+
 func TestContextCancel(t *testing.T) {
 	synctest.Test(t, func(t *testing.T) {
 		f := newFake(false)

@@ -48,7 +48,8 @@ type Session struct {
 	paused       bool
 	cause        error
 
-	stop chan error
+	// stop carries whether to kill ffmpeg rather than ask it to finish.
+	stop chan bool
 	done chan struct{}
 	err  error
 }
@@ -74,7 +75,7 @@ func Start(ctx context.Context, start Starter, cfg Config) (*Session, error) {
 		cfg: cfg, proc: proc, log: log,
 		lastActivity: time.Now(),
 		segments:     map[int]time.Duration{},
-		stop:         make(chan error, 1),
+		stop:         make(chan bool, 1),
 		done:         make(chan struct{}),
 	}
 	// Wait follows the end of the progress, so that the last of it is
@@ -97,8 +98,12 @@ func (s *Session) supervise(ctx context.Context, exited <-chan error) {
 		case err := <-exited:
 			s.finish(err)
 			return
-		case cause := <-s.stop:
-			s.terminate(ctx, cause, exited)
+		case kill := <-s.stop:
+			if kill {
+				s.kill(ctx, ErrStopped, exited)
+			} else {
+				s.terminate(ctx, ErrStopped, exited)
+			}
 			return
 		case <-ctx.Done():
 			s.terminate(ctx, context.Cause(ctx), exited)
@@ -147,6 +152,14 @@ func (s *Session) terminate(ctx context.Context, cause error, exited <-chan erro
 		return
 	case <-grace.C:
 	}
+	s.kill(ctx, cause, exited)
+}
+
+// kill kills ffmpeg and waits for it to exit.
+func (s *Session) kill(ctx context.Context, cause error, exited <-chan error) {
+	s.mu.Lock()
+	s.cause = cause
+	s.mu.Unlock()
 	if err := s.proc.Kill(); err != nil {
 		s.log.WarnContext(ctx, "killing ffmpeg failed", "err", err)
 	}
@@ -267,7 +280,20 @@ func (s *Session) HighestServedSegmentEndingBy(pos time.Duration) (int, bool) {
 // Stop ends the transcode and waits for ffmpeg to exit.
 func (s *Session) Stop() error {
 	select {
-	case s.stop <- ErrStopped:
+	case s.stop <- false:
+	default:
+	}
+	<-s.done
+	return s.Err()
+}
+
+// Kill ends ffmpeg at once, without letting it finish its outputs, as
+// when they are thrown away or written whole as they go, and returns once
+// it has exited. ffmpeg blocked on a slow read would otherwise hold the
+// stop for the whole grace period.
+func (s *Session) Kill() error {
+	select {
+	case s.stop <- true:
 	default:
 	}
 	<-s.done

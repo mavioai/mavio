@@ -308,11 +308,14 @@ func (s *Stream) startAt(ctx context.Context, index int) error {
 }
 
 // stopJob ends the current run and removes the files it left unfinished.
+// ffmpeg is killed rather than asked to finish: segments are renamed into
+// place whole and subtitle cues flushed as they are written, so nothing it
+// would finish is kept, and on a slow remote it may not answer for seconds.
 func (s *Stream) stopJob() {
 	if s.job == nil {
 		return
 	}
-	_ = s.job.session.Stop()
+	_ = s.job.session.Kill()
 	if len(s.cfg.Subtitles) > 0 {
 		s.job.next, s.job.stopped = s.ranTo(s.job), true
 		s.past = append(s.past, s.job)
