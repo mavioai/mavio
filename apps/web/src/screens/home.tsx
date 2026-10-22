@@ -152,12 +152,12 @@ export function SectionView({ section: s, several }: { section: Section; several
               key={`${title.name}-${title.year}`}
               to="/s/$serverId/title/$kind/$tmdbId"
               params={{ serverId: s.serverId, kind: kindParam(title.mediaKind), tmdbId: title.externalIds.tmdb }}
-              className="block w-poster shrink-0 snap-start opacity-80"
+              className="block w-poster shrink-0 snap-start"
             >
               {card}
             </Link>
           ) : (
-            <div key={`${title.name}-${title.year}`} className="w-poster shrink-0 snap-start opacity-80">
+            <div key={`${title.name}-${title.year}`} className="w-poster shrink-0 snap-start">
               {card}
             </div>
           );
