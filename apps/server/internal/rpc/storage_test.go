@@ -180,14 +180,18 @@ func TestOfflineDownloads(t *testing.T) {
 	if _, err := update("disk", storagev1.OfflineDownloads_builder{Enabled: new(true)}.Build()); connect.CodeOf(err) != connect.CodeFailedPrecondition {
 		t.Errorf("UpdateOfflineDownloads(disk) error = %v, want = failed precondition", err)
 	}
-	if _, err := update("pp", storagev1.OfflineDownloads_builder{MovieFolder: new("../x")}.Build()); connect.CodeOf(err) != connect.CodeInvalidArgument {
+	if _, err := update("pp", storagev1.OfflineDownloads_builder{Folder: new("../x")}.Build()); connect.CodeOf(err) != connect.CodeInvalidArgument {
 		t.Errorf("UpdateOfflineDownloads(../x) error = %v, want = invalid argument", err)
 	}
-	got, err := update("pp", storagev1.OfflineDownloads_builder{Enabled: new(true), SeriesFolder: new("/TV/")}.Build())
-	if err != nil || got.GetSettings().GetMovieFolder() != "movies" || got.GetSettings().GetSeriesFolder() != "TV" {
-		t.Errorf("UpdateOfflineDownloads(pp) = %v, %v; want folders movies and TV", got, err)
+	got, err := update("pp", storagev1.OfflineDownloads_builder{Enabled: new(true)}.Build())
+	if err != nil || got.GetSettings().GetFolder() != "downloads" {
+		t.Errorf("UpdateOfflineDownloads(pp) = %v, %v; want folder downloads", got, err)
 	}
-	if got := get("pp"); !got.GetSettings().GetEnabled() || got.GetSettings().GetSeriesFolder() != "TV" {
+	got, err = update("pp", storagev1.OfflineDownloads_builder{Enabled: new(true), Folder: new("/DL/")}.Build())
+	if err != nil || got.GetSettings().GetFolder() != "DL" {
+		t.Errorf("UpdateOfflineDownloads(pp) = %v, %v; want folder DL", got, err)
+	}
+	if got := get("pp"); !got.GetSettings().GetEnabled() || got.GetSettings().GetFolder() != "DL" {
 		t.Errorf("GetOfflineDownloads(pp) = %v, want the settings kept", got)
 	}
 	if _, err := svc.DeleteRemote(ctx, storagev1.DeleteRemoteRequest_builder{Name: new("pp")}.Build()); err != nil {

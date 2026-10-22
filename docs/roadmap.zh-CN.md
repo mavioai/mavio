@@ -741,7 +741,7 @@ flowchart TD
       - [ ] 在质量配置中将质量编组与取消编组；目前配置中的质量只能启用、停用与排序
     - [x] 获取的选项（`apps/web/src/screens/admin/options.tsx`）：命名、导入、下载客户端、发布与回收站（`ProfileService.UpdateAcquisitionSettings`）
     - [ ] 桌面应用（`apps/desktop/internal/app`，在此之前无法编译）、Apple 应用（`MavioAdmin`、`MavioMac*`）与 Android 应用（`libs/android/admin`）改用按领域划分的设置 RPC（`GetGeneralSettings`、`GetTranscodingSettings`、`GetPluginCatalogs`、`GetOutboundProxies`、`GetAcquisitionSettings`、`GetRequestSettings`），它们取代了 `GetServerSettings` 与 `UpdateServerSettings`
-    - [ ] 桌面应用、Apple 应用与 Android 应用改用远端页面上的离线下载（`GetOfflineDownloads`、`UpdateOfflineDownloads`，每个远端一个，带电影与剧集文件夹），取代离线下载客户端（`ListOfflineClients`、`SetOfflineClients`），远端的文件夹写作 `remote:<remote>:<path>` 而非 `rclone:`
+    - [ ] 桌面应用、Apple 应用与 Android 应用改用远端页面上的离线下载（`GetOfflineDownloads`、`UpdateOfflineDownloads`，每个远端一个，带下载文件夹），取代离线下载客户端（`ListOfflineClients`、`SetOfflineClients`），远端的文件夹写作 `remote:<remote>:<path>` 而非 `rclone:`
     - [ ] 桌面应用与 Mac 应用中下载客户端的页面及其文件夹（`GetDownloadClientPaths`、`UpdateDownloadClientPaths`），取代 `ProfileService` 的远程路径映射
     - [x] 字幕（`apps/web/src/screens/admin/{subtitles,subtitle-settings}.tsx`、`libs/client-ts/src/subtitles.ts`）：字幕配置及其适用的媒体库、提供商与翻译器，以及搜索与保存、同步和翻译的设置（`SubtitleService`、`ListSubtitleProfileAssignments`）
       - [ ] 在详情页为电影或剧集分配其自己的字幕配置（`AssignSubtitleProfile`）

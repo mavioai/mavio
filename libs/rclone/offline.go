@@ -45,12 +45,17 @@ func (c *Client) AddOffline(ctx context.Context, fsName, link, name string) (Off
 	return out.Task, err
 }
 
-// OfflineTasks lists the offline downloads of a remote.
-func (c *Client) OfflineTasks(ctx context.Context, remote string) ([]OfflineTask, error) {
+// OfflineTasks lists the offline downloads of a remote. Those added
+// before since may be left out; the zero time lists every download.
+func (c *Client) OfflineTasks(ctx context.Context, remote string, since time.Time) ([]OfflineTask, error) {
 	var out struct {
 		Tasks []OfflineTask `json:"tasks"`
 	}
-	err := c.Call(ctx, "operations/listoffline", map[string]any{"fs": remote + ":"}, &out)
+	in := map[string]any{"fs": remote + ":"}
+	if !since.IsZero() {
+		in["since"] = since.UTC().Format(time.RFC3339)
+	}
+	err := c.Call(ctx, "operations/listoffline", in, &out)
 	return out.Tasks, err
 }
 

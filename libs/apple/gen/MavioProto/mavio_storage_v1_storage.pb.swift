@@ -803,7 +803,7 @@ public nonisolated struct Mavio_Storage_V1_ListFoldersRequest: Sendable {
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  /// "rclone:<remote>:" for the remote's root, or "rclone:<remote>:<path>".
+  /// "remote:<remote>:" for the remote's root, or "remote:<remote>:<path>".
   public var path: String {
     get {_path ?? String()}
     set {_path = newValue}
@@ -897,33 +897,13 @@ public nonisolated struct Mavio_Storage_V1_GetRemoteUsageResponse: Sendable {
   fileprivate var _freeBytes: Int64? = nil
 }
 
-/// OfflineClient is a download client of a cloud drive's offline downloads:
-/// the drive downloads magnet links itself into a folder of its remote,
-/// movies into "movies" and series into "series" below it, and imports move
-/// the files within the remote.
-public nonisolated struct Mavio_Storage_V1_OfflineClient: Sendable {
+/// OfflineDownloads are the settings of a remote's offline downloads: its
+/// cloud drive downloads magnet links itself into a folder of the remote,
+/// and imports move the files within the remote.
+public nonisolated struct Mavio_Storage_V1_OfflineDownloads: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
-
-  /// Stable among the clients; letters, digits, "-" and "_".
-  public var id: String {
-    get {_id ?? String()}
-    set {_id = newValue}
-  }
-  /// Returns true if `id` has been explicitly set.
-  public var hasID: Bool {self._id != nil}
-  /// Clears the value of `id`. Subsequent reads from it will return its default value.
-  public mutating func clearID() {self._id = nil}
-
-  public var name: String {
-    get {_name ?? String()}
-    set {_name = newValue}
-  }
-  /// Returns true if `name` has been explicitly set.
-  public var hasName: Bool {self._name != nil}
-  /// Clears the value of `name`. Subsequent reads from it will return its default value.
-  public mutating func clearName() {self._name = nil}
 
   public var enabled: Bool {
     get {_enabled ?? false}
@@ -944,8 +924,8 @@ public nonisolated struct Mavio_Storage_V1_OfflineClient: Sendable {
   /// Clears the value of `priority`. Subsequent reads from it will return its default value.
   public mutating func clearPriority() {self._priority = nil}
 
-  /// The folder downloads go to, "rclone:<remote>:<path>"; the remote's
-  /// backend must make offline downloads.
+  /// The folder below the remote's root that downloads go to; "downloads"
+  /// when unset.
   public var folder: String {
     get {_folder ?? String()}
     set {_folder = newValue}
@@ -982,8 +962,6 @@ public nonisolated struct Mavio_Storage_V1_OfflineClient: Sendable {
 
   public init() {}
 
-  fileprivate var _id: String? = nil
-  fileprivate var _name: String? = nil
   fileprivate var _enabled: Bool? = nil
   fileprivate var _priority: Int32? = nil
   fileprivate var _folder: String? = nil
@@ -991,48 +969,111 @@ public nonisolated struct Mavio_Storage_V1_OfflineClient: Sendable {
   fileprivate var _removeFailedDownloads: Bool? = nil
 }
 
-public nonisolated struct Mavio_Storage_V1_ListOfflineClientsRequest: Sendable {
+public nonisolated struct Mavio_Storage_V1_GetOfflineDownloadsRequest: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
+  public var remote: String {
+    get {_remote ?? String()}
+    set {_remote = newValue}
+  }
+  /// Returns true if `remote` has been explicitly set.
+  public var hasRemote: Bool {self._remote != nil}
+  /// Clears the value of `remote`. Subsequent reads from it will return its default value.
+  public mutating func clearRemote() {self._remote = nil}
+
   public var unknownFields = SwiftProtobuf.UnknownStorage()
 
   public init() {}
+
+  fileprivate var _remote: String? = nil
 }
 
-public nonisolated struct Mavio_Storage_V1_ListOfflineClientsResponse: Sendable {
+public nonisolated struct Mavio_Storage_V1_GetOfflineDownloadsResponse: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  public var clients: [Mavio_Storage_V1_OfflineClient] = []
+  /// The remote's backend makes offline downloads.
+  public var supported: Bool {
+    get {_supported ?? false}
+    set {_supported = newValue}
+  }
+  /// Returns true if `supported` has been explicitly set.
+  public var hasSupported: Bool {self._supported != nil}
+  /// Clears the value of `supported`. Subsequent reads from it will return its default value.
+  public mutating func clearSupported() {self._supported = nil}
+
+  /// Unset when the remote has none.
+  public var settings: Mavio_Storage_V1_OfflineDownloads {
+    get {_settings ?? Mavio_Storage_V1_OfflineDownloads()}
+    set {_settings = newValue}
+  }
+  /// Returns true if `settings` has been explicitly set.
+  public var hasSettings: Bool {self._settings != nil}
+  /// Clears the value of `settings`. Subsequent reads from it will return its default value.
+  public mutating func clearSettings() {self._settings = nil}
 
   public var unknownFields = SwiftProtobuf.UnknownStorage()
 
   public init() {}
+
+  fileprivate var _supported: Bool? = nil
+  fileprivate var _settings: Mavio_Storage_V1_OfflineDownloads? = nil
 }
 
-public nonisolated struct Mavio_Storage_V1_SetOfflineClientsRequest: Sendable {
+public nonisolated struct Mavio_Storage_V1_UpdateOfflineDownloadsRequest: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  public var clients: [Mavio_Storage_V1_OfflineClient] = []
+  public var remote: String {
+    get {_remote ?? String()}
+    set {_remote = newValue}
+  }
+  /// Returns true if `remote` has been explicitly set.
+  public var hasRemote: Bool {self._remote != nil}
+  /// Clears the value of `remote`. Subsequent reads from it will return its default value.
+  public mutating func clearRemote() {self._remote = nil}
+
+  /// Unset removes them.
+  public var settings: Mavio_Storage_V1_OfflineDownloads {
+    get {_settings ?? Mavio_Storage_V1_OfflineDownloads()}
+    set {_settings = newValue}
+  }
+  /// Returns true if `settings` has been explicitly set.
+  public var hasSettings: Bool {self._settings != nil}
+  /// Clears the value of `settings`. Subsequent reads from it will return its default value.
+  public mutating func clearSettings() {self._settings = nil}
 
   public var unknownFields = SwiftProtobuf.UnknownStorage()
 
   public init() {}
+
+  fileprivate var _remote: String? = nil
+  fileprivate var _settings: Mavio_Storage_V1_OfflineDownloads? = nil
 }
 
-public nonisolated struct Mavio_Storage_V1_SetOfflineClientsResponse: Sendable {
+public nonisolated struct Mavio_Storage_V1_UpdateOfflineDownloadsResponse: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
+  public var settings: Mavio_Storage_V1_OfflineDownloads {
+    get {_settings ?? Mavio_Storage_V1_OfflineDownloads()}
+    set {_settings = newValue}
+  }
+  /// Returns true if `settings` has been explicitly set.
+  public var hasSettings: Bool {self._settings != nil}
+  /// Clears the value of `settings`. Subsequent reads from it will return its default value.
+  public mutating func clearSettings() {self._settings = nil}
+
   public var unknownFields = SwiftProtobuf.UnknownStorage()
 
   public init() {}
+
+  fileprivate var _settings: Mavio_Storage_V1_OfflineDownloads? = nil
 }
 
 // MARK: - Code below here is support for the SwiftProtobuf runtime.
@@ -2021,9 +2062,9 @@ nonisolated extension Mavio_Storage_V1_GetRemoteUsageResponse: SwiftProtobuf.Mes
   }
 }
 
-nonisolated extension Mavio_Storage_V1_OfflineClient: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  public static let protoMessageName: String = _protobuf_package + ".OfflineClient"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}id\0\u{1}name\0\u{1}enabled\0\u{1}priority\0\u{1}folder\0\u{1}tags\0\u{3}remove_completed_downloads\0\u{3}remove_failed_downloads\0")
+nonisolated extension Mavio_Storage_V1_OfflineDownloads: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".OfflineDownloads"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}enabled\0\u{1}priority\0\u{2}\u{3}tags\0\u{3}remove_completed_downloads\0\u{3}remove_failed_downloads\0\u{1}folder\0\u{b}movie_folder\0\u{b}series_folder\0\u{c}\u{3}\u{1}\u{c}\u{4}\u{1}")
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -2031,14 +2072,12 @@ nonisolated extension Mavio_Storage_V1_OfflineClient: SwiftProtobuf.Message, Swi
       // allocates stack space for every case branch when no optimizations are
       // enabled. https://github.com/apple/swift-protobuf/issues/1034
       switch fieldNumber {
-      case 1: try { try decoder.decodeSingularStringField(value: &self._id) }()
-      case 2: try { try decoder.decodeSingularStringField(value: &self._name) }()
-      case 3: try { try decoder.decodeSingularBoolField(value: &self._enabled) }()
-      case 4: try { try decoder.decodeSingularInt32Field(value: &self._priority) }()
-      case 5: try { try decoder.decodeSingularStringField(value: &self._folder) }()
-      case 6: try { try decoder.decodeRepeatedStringField(value: &self.tags) }()
-      case 7: try { try decoder.decodeSingularBoolField(value: &self._removeCompletedDownloads) }()
-      case 8: try { try decoder.decodeSingularBoolField(value: &self._removeFailedDownloads) }()
+      case 1: try { try decoder.decodeSingularBoolField(value: &self._enabled) }()
+      case 2: try { try decoder.decodeSingularInt32Field(value: &self._priority) }()
+      case 5: try { try decoder.decodeRepeatedStringField(value: &self.tags) }()
+      case 6: try { try decoder.decodeSingularBoolField(value: &self._removeCompletedDownloads) }()
+      case 7: try { try decoder.decodeSingularBoolField(value: &self._removeFailedDownloads) }()
+      case 8: try { try decoder.decodeSingularStringField(value: &self._folder) }()
       default: break
       }
     }
@@ -2049,36 +2088,28 @@ nonisolated extension Mavio_Storage_V1_OfflineClient: SwiftProtobuf.Message, Swi
     // allocates stack space for every if/case branch local when no optimizations
     // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
     // https://github.com/apple/swift-protobuf/issues/1182
-    try { if let v = self._id {
-      try visitor.visitSingularStringField(value: v, fieldNumber: 1)
-    } }()
-    try { if let v = self._name {
-      try visitor.visitSingularStringField(value: v, fieldNumber: 2)
-    } }()
     try { if let v = self._enabled {
-      try visitor.visitSingularBoolField(value: v, fieldNumber: 3)
+      try visitor.visitSingularBoolField(value: v, fieldNumber: 1)
     } }()
     try { if let v = self._priority {
-      try visitor.visitSingularInt32Field(value: v, fieldNumber: 4)
-    } }()
-    try { if let v = self._folder {
-      try visitor.visitSingularStringField(value: v, fieldNumber: 5)
+      try visitor.visitSingularInt32Field(value: v, fieldNumber: 2)
     } }()
     if !self.tags.isEmpty {
-      try visitor.visitRepeatedStringField(value: self.tags, fieldNumber: 6)
+      try visitor.visitRepeatedStringField(value: self.tags, fieldNumber: 5)
     }
     try { if let v = self._removeCompletedDownloads {
-      try visitor.visitSingularBoolField(value: v, fieldNumber: 7)
+      try visitor.visitSingularBoolField(value: v, fieldNumber: 6)
     } }()
     try { if let v = self._removeFailedDownloads {
-      try visitor.visitSingularBoolField(value: v, fieldNumber: 8)
+      try visitor.visitSingularBoolField(value: v, fieldNumber: 7)
+    } }()
+    try { if let v = self._folder {
+      try visitor.visitSingularStringField(value: v, fieldNumber: 8)
     } }()
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  public static func ==(lhs: Mavio_Storage_V1_OfflineClient, rhs: Mavio_Storage_V1_OfflineClient) -> Bool {
-    if lhs._id != rhs._id {return false}
-    if lhs._name != rhs._name {return false}
+  public static func ==(lhs: Mavio_Storage_V1_OfflineDownloads, rhs: Mavio_Storage_V1_OfflineDownloads) -> Bool {
     if lhs._enabled != rhs._enabled {return false}
     if lhs._priority != rhs._priority {return false}
     if lhs._folder != rhs._folder {return false}
@@ -2090,28 +2121,9 @@ nonisolated extension Mavio_Storage_V1_OfflineClient: SwiftProtobuf.Message, Swi
   }
 }
 
-nonisolated extension Mavio_Storage_V1_ListOfflineClientsRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  public static let protoMessageName: String = _protobuf_package + ".ListOfflineClientsRequest"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap()
-
-  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
-    // Load everything into unknown fields
-    while try decoder.nextFieldNumber() != nil {}
-  }
-
-  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-    try unknownFields.traverse(visitor: &visitor)
-  }
-
-  public static func ==(lhs: Mavio_Storage_V1_ListOfflineClientsRequest, rhs: Mavio_Storage_V1_ListOfflineClientsRequest) -> Bool {
-    if lhs.unknownFields != rhs.unknownFields {return false}
-    return true
-  }
-}
-
-nonisolated extension Mavio_Storage_V1_ListOfflineClientsResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  public static let protoMessageName: String = _protobuf_package + ".ListOfflineClientsResponse"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}clients\0")
+nonisolated extension Mavio_Storage_V1_GetOfflineDownloadsRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".GetOfflineDownloadsRequest"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}remote\0")
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -2119,29 +2131,33 @@ nonisolated extension Mavio_Storage_V1_ListOfflineClientsResponse: SwiftProtobuf
       // allocates stack space for every case branch when no optimizations are
       // enabled. https://github.com/apple/swift-protobuf/issues/1034
       switch fieldNumber {
-      case 1: try { try decoder.decodeRepeatedMessageField(value: &self.clients) }()
+      case 1: try { try decoder.decodeSingularStringField(value: &self._remote) }()
       default: break
       }
     }
   }
 
   public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-    if !self.clients.isEmpty {
-      try visitor.visitRepeatedMessageField(value: self.clients, fieldNumber: 1)
-    }
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    try { if let v = self._remote {
+      try visitor.visitSingularStringField(value: v, fieldNumber: 1)
+    } }()
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  public static func ==(lhs: Mavio_Storage_V1_ListOfflineClientsResponse, rhs: Mavio_Storage_V1_ListOfflineClientsResponse) -> Bool {
-    if lhs.clients != rhs.clients {return false}
+  public static func ==(lhs: Mavio_Storage_V1_GetOfflineDownloadsRequest, rhs: Mavio_Storage_V1_GetOfflineDownloadsRequest) -> Bool {
+    if lhs._remote != rhs._remote {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
 }
 
-nonisolated extension Mavio_Storage_V1_SetOfflineClientsRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  public static let protoMessageName: String = _protobuf_package + ".SetOfflineClientsRequest"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}clients\0")
+nonisolated extension Mavio_Storage_V1_GetOfflineDownloadsResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".GetOfflineDownloadsResponse"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}supported\0\u{1}settings\0")
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -2149,40 +2165,103 @@ nonisolated extension Mavio_Storage_V1_SetOfflineClientsRequest: SwiftProtobuf.M
       // allocates stack space for every case branch when no optimizations are
       // enabled. https://github.com/apple/swift-protobuf/issues/1034
       switch fieldNumber {
-      case 1: try { try decoder.decodeRepeatedMessageField(value: &self.clients) }()
+      case 1: try { try decoder.decodeSingularBoolField(value: &self._supported) }()
+      case 2: try { try decoder.decodeSingularMessageField(value: &self._settings) }()
       default: break
       }
     }
   }
 
   public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-    if !self.clients.isEmpty {
-      try visitor.visitRepeatedMessageField(value: self.clients, fieldNumber: 1)
-    }
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    try { if let v = self._supported {
+      try visitor.visitSingularBoolField(value: v, fieldNumber: 1)
+    } }()
+    try { if let v = self._settings {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 2)
+    } }()
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  public static func ==(lhs: Mavio_Storage_V1_SetOfflineClientsRequest, rhs: Mavio_Storage_V1_SetOfflineClientsRequest) -> Bool {
-    if lhs.clients != rhs.clients {return false}
+  public static func ==(lhs: Mavio_Storage_V1_GetOfflineDownloadsResponse, rhs: Mavio_Storage_V1_GetOfflineDownloadsResponse) -> Bool {
+    if lhs._supported != rhs._supported {return false}
+    if lhs._settings != rhs._settings {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
 }
 
-nonisolated extension Mavio_Storage_V1_SetOfflineClientsResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  public static let protoMessageName: String = _protobuf_package + ".SetOfflineClientsResponse"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap()
+nonisolated extension Mavio_Storage_V1_UpdateOfflineDownloadsRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".UpdateOfflineDownloadsRequest"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}remote\0\u{1}settings\0")
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
-    // Load everything into unknown fields
-    while try decoder.nextFieldNumber() != nil {}
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularStringField(value: &self._remote) }()
+      case 2: try { try decoder.decodeSingularMessageField(value: &self._settings) }()
+      default: break
+      }
+    }
   }
 
   public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    try { if let v = self._remote {
+      try visitor.visitSingularStringField(value: v, fieldNumber: 1)
+    } }()
+    try { if let v = self._settings {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 2)
+    } }()
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  public static func ==(lhs: Mavio_Storage_V1_SetOfflineClientsResponse, rhs: Mavio_Storage_V1_SetOfflineClientsResponse) -> Bool {
+  public static func ==(lhs: Mavio_Storage_V1_UpdateOfflineDownloadsRequest, rhs: Mavio_Storage_V1_UpdateOfflineDownloadsRequest) -> Bool {
+    if lhs._remote != rhs._remote {return false}
+    if lhs._settings != rhs._settings {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Mavio_Storage_V1_UpdateOfflineDownloadsResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".UpdateOfflineDownloadsResponse"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}settings\0")
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularMessageField(value: &self._settings) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    try { if let v = self._settings {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
+    } }()
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Mavio_Storage_V1_UpdateOfflineDownloadsResponse, rhs: Mavio_Storage_V1_UpdateOfflineDownloadsResponse) -> Bool {
+    if lhs._settings != rhs._settings {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

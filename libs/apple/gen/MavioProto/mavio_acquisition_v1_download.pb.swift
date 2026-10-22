@@ -333,6 +333,18 @@ public nonisolated struct Mavio_Acquisition_V1_DownloadClient: Sendable {
   /// Clears the value of `failure`. Subsequent reads from it will return its default value.
   public mutating func clearFailure() {self._failure = nil}
 
+  /// The plugin's container dependency the client runs in, whose folders
+  /// are set with the container rather than as the client's; empty for
+  /// clients the administrator runs.
+  public var container: String {
+    get {_container ?? String()}
+    set {_container = newValue}
+  }
+  /// Returns true if `container` has been explicitly set.
+  public var hasContainer: Bool {self._container != nil}
+  /// Clears the value of `container`. Subsequent reads from it will return its default value.
+  public mutating func clearContainer() {self._container = nil}
+
   public var unknownFields = SwiftProtobuf.UnknownStorage()
 
   public init() {}
@@ -346,6 +358,7 @@ public nonisolated struct Mavio_Acquisition_V1_DownloadClient: Sendable {
   fileprivate var _priority: Int32? = nil
   fileprivate var _disabledUntil: SwiftProtobuf.Google_Protobuf_Timestamp? = nil
   fileprivate var _failure: String? = nil
+  fileprivate var _container: String? = nil
 }
 
 public nonisolated struct Mavio_Acquisition_V1_ListDownloadClientsRequest: Sendable {
@@ -1445,6 +1458,233 @@ public nonisolated struct Mavio_Acquisition_V1_ManualImportResponse: Sendable {
   public init() {}
 }
 
+/// DownloadClientPath is a folder a download client puts downloads in, as
+/// the client sees it, and where the server reads it.
+public nonisolated struct Mavio_Acquisition_V1_DownloadClientPath: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  /// The folder as the client reports it.
+  public var remotePath: String {
+    get {_remotePath ?? String()}
+    set {_remotePath = newValue}
+  }
+  /// Returns true if `remotePath` has been explicitly set.
+  public var hasRemotePath: Bool {self._remotePath != nil}
+  /// Clears the value of `remotePath`. Subsequent reads from it will return its default value.
+  public mutating func clearRemotePath() {self._remotePath = nil}
+
+  /// Where the server reads the folder: an absolute path of the server or
+  /// a folder of a remote ("remote:<remote>:<path>"); empty when it reads
+  /// remote_path itself.
+  public var localPath: String {
+    get {_localPath ?? String()}
+    set {_localPath = newValue}
+  }
+  /// Returns true if `localPath` has been explicitly set.
+  public var hasLocalPath: Bool {self._localPath != nil}
+  /// Clears the value of `localPath`. Subsequent reads from it will return its default value.
+  public mutating func clearLocalPath() {self._localPath = nil}
+
+  /// Set by the server: the folder is, or holds, one the client says
+  /// completed downloads end up in.
+  public var rootFolder: Bool {
+    get {_rootFolder ?? false}
+    set {_rootFolder = newValue}
+  }
+  /// Returns true if `rootFolder` has been explicitly set.
+  public var hasRootFolder: Bool {self._rootFolder != nil}
+  /// Clears the value of `rootFolder`. Subsequent reads from it will return its default value.
+  public mutating func clearRootFolder() {self._rootFolder = nil}
+
+  /// Set by the server, for a folder it cannot read: a folder of a remote
+  /// on the client's host that holds the client's; empty for none.
+  public var suggestedPath: String {
+    get {_suggestedPath ?? String()}
+    set {_suggestedPath = newValue}
+  }
+  /// Returns true if `suggestedPath` has been explicitly set.
+  public var hasSuggestedPath: Bool {self._suggestedPath != nil}
+  /// Clears the value of `suggestedPath`. Subsequent reads from it will return its default value.
+  public mutating func clearSuggestedPath() {self._suggestedPath = nil}
+
+  /// Set by the server: it reads the folder; error says why not.
+  public var readable: Bool {
+    get {_readable ?? false}
+    set {_readable = newValue}
+  }
+  /// Returns true if `readable` has been explicitly set.
+  public var hasReadable: Bool {self._readable != nil}
+  /// Clears the value of `readable`. Subsequent reads from it will return its default value.
+  public mutating func clearReadable() {self._readable = nil}
+
+  public var error: String {
+    get {_error ?? String()}
+    set {_error = newValue}
+  }
+  /// Returns true if `error` has been explicitly set.
+  public var hasError: Bool {self._error != nil}
+  /// Clears the value of `error`. Subsequent reads from it will return its default value.
+  public mutating func clearError() {self._error = nil}
+
+  /// Set by the server: the library paths on the folder's storage, which
+  /// imports hard link files to rather than copy them, or move them to
+  /// when moves is set.
+  public var linkLibraryPaths: [String] = []
+
+  /// Set by the server: the mapping is a folder of the container the
+  /// client runs in, set with the container rather than here.
+  public var container: Bool {
+    get {_container ?? false}
+    set {_container = newValue}
+  }
+  /// Returns true if `container` has been explicitly set.
+  public var hasContainer: Bool {self._container != nil}
+  /// Clears the value of `container`. Subsequent reads from it will return its default value.
+  public mutating func clearContainer() {self._container = nil}
+
+  /// Set by the server: imports move the client's files, as those of a
+  /// cloud drive's offline downloads, which reach link_library_paths
+  /// within the folder's remote rather than through the server. The
+  /// client's folder is set with the client rather than here.
+  public var moves: Bool {
+    get {_moves ?? false}
+    set {_moves = newValue}
+  }
+  /// Returns true if `moves` has been explicitly set.
+  public var hasMoves: Bool {self._moves != nil}
+  /// Clears the value of `moves`. Subsequent reads from it will return its default value.
+  public mutating func clearMoves() {self._moves = nil}
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+
+  fileprivate var _remotePath: String? = nil
+  fileprivate var _localPath: String? = nil
+  fileprivate var _rootFolder: Bool? = nil
+  fileprivate var _suggestedPath: String? = nil
+  fileprivate var _readable: Bool? = nil
+  fileprivate var _error: String? = nil
+  fileprivate var _container: Bool? = nil
+  fileprivate var _moves: Bool? = nil
+}
+
+public nonisolated struct Mavio_Acquisition_V1_GetDownloadClientPathsRequest: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  public var pluginID: String {
+    get {_pluginID ?? String()}
+    set {_pluginID = newValue}
+  }
+  /// Returns true if `pluginID` has been explicitly set.
+  public var hasPluginID: Bool {self._pluginID != nil}
+  /// Clears the value of `pluginID`. Subsequent reads from it will return its default value.
+  public mutating func clearPluginID() {self._pluginID = nil}
+
+  public var clientID: String {
+    get {_clientID ?? String()}
+    set {_clientID = newValue}
+  }
+  /// Returns true if `clientID` has been explicitly set.
+  public var hasClientID: Bool {self._clientID != nil}
+  /// Clears the value of `clientID`. Subsequent reads from it will return its default value.
+  public mutating func clearClientID() {self._clientID = nil}
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+
+  fileprivate var _pluginID: String? = nil
+  fileprivate var _clientID: String? = nil
+}
+
+public nonisolated struct Mavio_Acquisition_V1_GetDownloadClientPathsResponse: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  /// The folders mapped first, then those the client tells that none
+  /// holds.
+  public var paths: [Mavio_Acquisition_V1_DownloadClientPath] = []
+
+  /// Why the client did not tell its folders.
+  public var failure: String {
+    get {_failure ?? String()}
+    set {_failure = newValue}
+  }
+  /// Returns true if `failure` has been explicitly set.
+  public var hasFailure: Bool {self._failure != nil}
+  /// Clears the value of `failure`. Subsequent reads from it will return its default value.
+  public mutating func clearFailure() {self._failure = nil}
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+
+  fileprivate var _failure: String? = nil
+}
+
+public nonisolated struct Mavio_Acquisition_V1_UpdateDownloadClientPathsRequest: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  public var pluginID: String {
+    get {_pluginID ?? String()}
+    set {_pluginID = newValue}
+  }
+  /// Returns true if `pluginID` has been explicitly set.
+  public var hasPluginID: Bool {self._pluginID != nil}
+  /// Clears the value of `pluginID`. Subsequent reads from it will return its default value.
+  public mutating func clearPluginID() {self._pluginID = nil}
+
+  public var clientID: String {
+    get {_clientID ?? String()}
+    set {_clientID = newValue}
+  }
+  /// Returns true if `clientID` has been explicitly set.
+  public var hasClientID: Bool {self._clientID != nil}
+  /// Clears the value of `clientID`. Subsequent reads from it will return its default value.
+  public mutating func clearClientID() {self._clientID = nil}
+
+  /// The folders, those with a local path mapped.
+  public var paths: [Mavio_Acquisition_V1_DownloadClientPath] = []
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+
+  fileprivate var _pluginID: String? = nil
+  fileprivate var _clientID: String? = nil
+}
+
+public nonisolated struct Mavio_Acquisition_V1_UpdateDownloadClientPathsResponse: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  public var paths: [Mavio_Acquisition_V1_DownloadClientPath] = []
+
+  public var failure: String {
+    get {_failure ?? String()}
+    set {_failure = newValue}
+  }
+  /// Returns true if `failure` has been explicitly set.
+  public var hasFailure: Bool {self._failure != nil}
+  /// Clears the value of `failure`. Subsequent reads from it will return its default value.
+  public mutating func clearFailure() {self._failure = nil}
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+
+  fileprivate var _failure: String? = nil
+}
+
 // MARK: - Code below here is support for the SwiftProtobuf runtime.
 
 fileprivate nonisolated let _protobuf_package = "mavio.acquisition.v1"
@@ -1467,7 +1707,7 @@ nonisolated extension Mavio_Acquisition_V1_ImportMode: SwiftProtobuf._ProtoNameP
 
 nonisolated extension Mavio_Acquisition_V1_DownloadClient: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".DownloadClient"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}plugin_id\0\u{1}id\0\u{1}name\0\u{3}definition_id\0\u{1}protocol\0\u{1}enabled\0\u{1}priority\0\u{3}disabled_until\0\u{1}failure\0")
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}plugin_id\0\u{1}id\0\u{1}name\0\u{3}definition_id\0\u{1}protocol\0\u{1}enabled\0\u{1}priority\0\u{3}disabled_until\0\u{1}failure\0\u{1}container\0")
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -1484,6 +1724,7 @@ nonisolated extension Mavio_Acquisition_V1_DownloadClient: SwiftProtobuf.Message
       case 7: try { try decoder.decodeSingularInt32Field(value: &self._priority) }()
       case 8: try { try decoder.decodeSingularMessageField(value: &self._disabledUntil) }()
       case 9: try { try decoder.decodeSingularStringField(value: &self._failure) }()
+      case 10: try { try decoder.decodeSingularStringField(value: &self._container) }()
       default: break
       }
     }
@@ -1521,6 +1762,9 @@ nonisolated extension Mavio_Acquisition_V1_DownloadClient: SwiftProtobuf.Message
     try { if let v = self._failure {
       try visitor.visitSingularStringField(value: v, fieldNumber: 9)
     } }()
+    try { if let v = self._container {
+      try visitor.visitSingularStringField(value: v, fieldNumber: 10)
+    } }()
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -1534,6 +1778,7 @@ nonisolated extension Mavio_Acquisition_V1_DownloadClient: SwiftProtobuf.Message
     if lhs._priority != rhs._priority {return false}
     if lhs._disabledUntil != rhs._disabledUntil {return false}
     if lhs._failure != rhs._failure {return false}
+    if lhs._container != rhs._container {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
@@ -2700,6 +2945,241 @@ nonisolated extension Mavio_Acquisition_V1_ManualImportResponse: SwiftProtobuf.M
   }
 
   public static func ==(lhs: Mavio_Acquisition_V1_ManualImportResponse, rhs: Mavio_Acquisition_V1_ManualImportResponse) -> Bool {
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Mavio_Acquisition_V1_DownloadClientPath: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".DownloadClientPath"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}remote_path\0\u{3}local_path\0\u{3}root_folder\0\u{3}suggested_path\0\u{1}readable\0\u{1}error\0\u{3}link_library_paths\0\u{1}container\0\u{1}moves\0")
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularStringField(value: &self._remotePath) }()
+      case 2: try { try decoder.decodeSingularStringField(value: &self._localPath) }()
+      case 3: try { try decoder.decodeSingularBoolField(value: &self._rootFolder) }()
+      case 4: try { try decoder.decodeSingularStringField(value: &self._suggestedPath) }()
+      case 5: try { try decoder.decodeSingularBoolField(value: &self._readable) }()
+      case 6: try { try decoder.decodeSingularStringField(value: &self._error) }()
+      case 7: try { try decoder.decodeRepeatedStringField(value: &self.linkLibraryPaths) }()
+      case 8: try { try decoder.decodeSingularBoolField(value: &self._container) }()
+      case 9: try { try decoder.decodeSingularBoolField(value: &self._moves) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    try { if let v = self._remotePath {
+      try visitor.visitSingularStringField(value: v, fieldNumber: 1)
+    } }()
+    try { if let v = self._localPath {
+      try visitor.visitSingularStringField(value: v, fieldNumber: 2)
+    } }()
+    try { if let v = self._rootFolder {
+      try visitor.visitSingularBoolField(value: v, fieldNumber: 3)
+    } }()
+    try { if let v = self._suggestedPath {
+      try visitor.visitSingularStringField(value: v, fieldNumber: 4)
+    } }()
+    try { if let v = self._readable {
+      try visitor.visitSingularBoolField(value: v, fieldNumber: 5)
+    } }()
+    try { if let v = self._error {
+      try visitor.visitSingularStringField(value: v, fieldNumber: 6)
+    } }()
+    if !self.linkLibraryPaths.isEmpty {
+      try visitor.visitRepeatedStringField(value: self.linkLibraryPaths, fieldNumber: 7)
+    }
+    try { if let v = self._container {
+      try visitor.visitSingularBoolField(value: v, fieldNumber: 8)
+    } }()
+    try { if let v = self._moves {
+      try visitor.visitSingularBoolField(value: v, fieldNumber: 9)
+    } }()
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Mavio_Acquisition_V1_DownloadClientPath, rhs: Mavio_Acquisition_V1_DownloadClientPath) -> Bool {
+    if lhs._remotePath != rhs._remotePath {return false}
+    if lhs._localPath != rhs._localPath {return false}
+    if lhs._rootFolder != rhs._rootFolder {return false}
+    if lhs._suggestedPath != rhs._suggestedPath {return false}
+    if lhs._readable != rhs._readable {return false}
+    if lhs._error != rhs._error {return false}
+    if lhs.linkLibraryPaths != rhs.linkLibraryPaths {return false}
+    if lhs._container != rhs._container {return false}
+    if lhs._moves != rhs._moves {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Mavio_Acquisition_V1_GetDownloadClientPathsRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".GetDownloadClientPathsRequest"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}plugin_id\0\u{3}client_id\0")
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularStringField(value: &self._pluginID) }()
+      case 2: try { try decoder.decodeSingularStringField(value: &self._clientID) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    try { if let v = self._pluginID {
+      try visitor.visitSingularStringField(value: v, fieldNumber: 1)
+    } }()
+    try { if let v = self._clientID {
+      try visitor.visitSingularStringField(value: v, fieldNumber: 2)
+    } }()
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Mavio_Acquisition_V1_GetDownloadClientPathsRequest, rhs: Mavio_Acquisition_V1_GetDownloadClientPathsRequest) -> Bool {
+    if lhs._pluginID != rhs._pluginID {return false}
+    if lhs._clientID != rhs._clientID {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Mavio_Acquisition_V1_GetDownloadClientPathsResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".GetDownloadClientPathsResponse"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}paths\0\u{1}failure\0")
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeRepeatedMessageField(value: &self.paths) }()
+      case 2: try { try decoder.decodeSingularStringField(value: &self._failure) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    if !self.paths.isEmpty {
+      try visitor.visitRepeatedMessageField(value: self.paths, fieldNumber: 1)
+    }
+    try { if let v = self._failure {
+      try visitor.visitSingularStringField(value: v, fieldNumber: 2)
+    } }()
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Mavio_Acquisition_V1_GetDownloadClientPathsResponse, rhs: Mavio_Acquisition_V1_GetDownloadClientPathsResponse) -> Bool {
+    if lhs.paths != rhs.paths {return false}
+    if lhs._failure != rhs._failure {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Mavio_Acquisition_V1_UpdateDownloadClientPathsRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".UpdateDownloadClientPathsRequest"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}plugin_id\0\u{3}client_id\0\u{1}paths\0")
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularStringField(value: &self._pluginID) }()
+      case 2: try { try decoder.decodeSingularStringField(value: &self._clientID) }()
+      case 3: try { try decoder.decodeRepeatedMessageField(value: &self.paths) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    try { if let v = self._pluginID {
+      try visitor.visitSingularStringField(value: v, fieldNumber: 1)
+    } }()
+    try { if let v = self._clientID {
+      try visitor.visitSingularStringField(value: v, fieldNumber: 2)
+    } }()
+    if !self.paths.isEmpty {
+      try visitor.visitRepeatedMessageField(value: self.paths, fieldNumber: 3)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Mavio_Acquisition_V1_UpdateDownloadClientPathsRequest, rhs: Mavio_Acquisition_V1_UpdateDownloadClientPathsRequest) -> Bool {
+    if lhs._pluginID != rhs._pluginID {return false}
+    if lhs._clientID != rhs._clientID {return false}
+    if lhs.paths != rhs.paths {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Mavio_Acquisition_V1_UpdateDownloadClientPathsResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".UpdateDownloadClientPathsResponse"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}paths\0\u{1}failure\0")
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeRepeatedMessageField(value: &self.paths) }()
+      case 2: try { try decoder.decodeSingularStringField(value: &self._failure) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    if !self.paths.isEmpty {
+      try visitor.visitRepeatedMessageField(value: self.paths, fieldNumber: 1)
+    }
+    try { if let v = self._failure {
+      try visitor.visitSingularStringField(value: v, fieldNumber: 2)
+    } }()
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Mavio_Acquisition_V1_UpdateDownloadClientPathsResponse, rhs: Mavio_Acquisition_V1_UpdateDownloadClientPathsResponse) -> Bool {
+    if lhs.paths != rhs.paths {return false}
+    if lhs._failure != rhs._failure {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

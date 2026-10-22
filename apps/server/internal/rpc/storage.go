@@ -444,7 +444,7 @@ func (s *StorageService) UpdateOfflineDownloads(ctx context.Context, req *storag
 	p := req.GetSettings()
 	o := downloads.OfflineClient{
 		Remote: req.GetRemote(), Enabled: p.GetEnabled(), Priority: p.GetPriority(), Tags: p.GetTags(),
-		MovieFolder: strings.Trim(p.GetMovieFolder(), "/"), SeriesFolder: strings.Trim(p.GetSeriesFolder(), "/"),
+		Folder:          strings.Trim(p.GetFolder(), "/"),
 		RemoveCompleted: p.GetRemoveCompletedDownloads(), RemoveFailed: p.GetRemoveFailedDownloads(),
 	}
 	if err := s.Offline.SetClient(ctx, o); err != nil {
@@ -454,11 +454,10 @@ func (s *StorageService) UpdateOfflineDownloads(ctx context.Context, req *storag
 }
 
 // offlineToProto returns a remote's offline download settings, with the
-// folders they download into.
+// folder they download into.
 func offlineToProto(o downloads.OfflineClient) *storagev1.OfflineDownloads {
-	movies, series := o.Folders()
 	return storagev1.OfflineDownloads_builder{
-		Enabled: &o.Enabled, Priority: &o.Priority, Tags: o.Tags, MovieFolder: &movies, SeriesFolder: &series,
+		Enabled: &o.Enabled, Priority: &o.Priority, Tags: o.Tags, Folder: new(o.DownloadFolder()),
 		RemoveCompletedDownloads: &o.RemoveCompleted, RemoveFailedDownloads: &o.RemoveFailed,
 	}.Build()
 }

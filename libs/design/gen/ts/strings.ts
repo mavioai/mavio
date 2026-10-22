@@ -1055,8 +1055,7 @@ export type MessageKey =
   | 'storage.removeOfflineDetail'
   | 'storage.offlineRemoteFooter'
   | 'storage.offlineSetUp'
-  | 'storage.offlineMovieFolder'
-  | 'storage.offlineSeriesFolder'
+  | 'storage.offlineDownloadFolder'
   | 'storage.offlineFolderBelow'
   | 'storage.offlineStop'
   | 'acquisition.message'
@@ -1114,6 +1113,10 @@ export type MessageKey =
   | 'client.unreported'
   | 'client.noFolders'
   | 'client.containerFolder'
+  | 'client.remote'
+  | 'client.offlineFooter'
+  | 'client.moves'
+  | 'client.transfers'
   | 'options.options'
   | 'options.optionsDetail'
   | 'options.optionsMessage'
@@ -3154,8 +3157,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "storage.removeOfflineDetail": "Tasks and files on the drive stay; Mavio stops tracking them.",
     "storage.offlineRemoteFooter": "The cloud drive downloads magnet links itself, as a download client of acquisition named after the remote; imports move the files within the remote.",
     "storage.offlineSetUp": "Use for Offline Downloads",
-    "storage.offlineMovieFolder": "Movie Folder",
-    "storage.offlineSeriesFolder": "Series Folder",
+    "storage.offlineDownloadFolder": "Download Folder",
     "storage.offlineFolderBelow": "Below the remote's root",
     "storage.offlineStop": "Remove Offline Downloads",
     "acquisition.message": "What decides which releases the server grabs and where they come from.",
@@ -3213,6 +3215,10 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "client.unreported": "Why the client did not tell its folders: {failure}",
     "client.noFolders": "The client reports no folders.",
     "client.containerFolder": "Mounted by the server in the client's container",
+    "client.remote": "Remote",
+    "client.offlineFooter": "The cloud drive downloads into this folder of its remote, which is set on the remote's page. Imports move files to the libraries on the same remote within the drive, without passing them through the server.",
+    "client.moves": "Moved within the drive to {paths}",
+    "client.transfers": "Moved to libraries through the server",
     "options.options": "Options",
     "options.optionsDetail": "Naming, importing, releases and the recycle bin",
     "options.optionsMessage": "How the server names and imports what it downloads, which releases it takes and where replaced files go.",
@@ -5251,8 +5257,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "storage.removeOfflineDetail": "云盘上的任务和文件不受影响，Mavio 不再追踪它们。",
     "storage.offlineRemoteFooter": "云盘自行下载磁力链接，作为以远端命名的获取下载客户端；导入时在远端内移动文件。",
     "storage.offlineSetUp": "用于离线下载",
-    "storage.offlineMovieFolder": "电影文件夹",
-    "storage.offlineSeriesFolder": "剧集文件夹",
+    "storage.offlineDownloadFolder": "下载文件夹",
     "storage.offlineFolderBelow": "远端根目录下的路径",
     "storage.offlineStop": "移除离线下载",
     "acquisition.message": "决定服务器抓取哪些发布以及从哪里获取。",
@@ -5310,6 +5315,10 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "client.unreported": "客户端未告知其文件夹：{failure}",
     "client.noFolders": "客户端未报告任何文件夹。",
     "client.containerFolder": "由服务器挂载到客户端的容器中",
+    "client.remote": "远端",
+    "client.offlineFooter": "云盘下载到其远端的这个文件夹，在远端页面设置。导入时，文件在云盘内直接移入同一远端上的媒体库，不经服务器传输。",
+    "client.moves": "云盘内直接移入 {paths}",
+    "client.transfers": "经服务器移入媒体库",
     "options.options": "选项",
     "options.optionsDetail": "命名、导入、发布和回收站",
     "options.optionsMessage": "服务器如何命名和导入下载的内容、接受哪些发布，以及被替换的文件去向。",

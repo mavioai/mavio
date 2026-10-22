@@ -53,7 +53,7 @@ func clientPathsToProto(paths []acquisition.ClientPath) []*acquisitionv1.Downloa
 		out[i] = acquisitionv1.DownloadClientPath_builder{
 			RemotePath: new(p.RemotePath), LocalPath: new(p.LocalPath), RootFolder: new(p.RootFolder),
 			SuggestedPath: new(p.SuggestedPath), Readable: new(p.Readable), Error: new(p.Error),
-			LinkLibraryPaths: p.LinkLibraryPaths, Container: new(p.Container),
+			LinkLibraryPaths: p.LinkLibraryPaths, Container: new(p.Container), Moves: new(p.Moves),
 		}.Build()
 	}
 	return out

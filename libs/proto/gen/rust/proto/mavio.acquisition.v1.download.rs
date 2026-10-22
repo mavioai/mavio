@@ -5592,7 +5592,8 @@ pub struct DownloadClientPath {
     /// Field 6: `error`
     pub error: ::core::option::Option<::buffa::alloc::string::String>,
     /// Set by the server: the library paths on the folder's storage, which
-    /// imports hard link files to rather than copy them.
+    /// imports hard link files to rather than copy them, or move them to
+    /// when moves is set.
     ///
     /// Field 7: `link_library_paths`
     pub link_library_paths: ::buffa::alloc::vec::Vec<::buffa::alloc::string::String>,
@@ -5601,6 +5602,13 @@ pub struct DownloadClientPath {
     ///
     /// Field 8: `container`
     pub container: ::core::option::Option<bool>,
+    /// Set by the server: imports move the client's files, as those of a
+    /// cloud drive's offline downloads, which reach link_library_paths
+    /// within the folder's remote rather than through the server. The
+    /// client's folder is set with the client rather than here.
+    ///
+    /// Field 9: `moves`
+    pub moves: ::core::option::Option<bool>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -5615,6 +5623,7 @@ impl ::core::fmt::Debug for DownloadClientPath {
             .field("error", &self.error)
             .field("link_library_paths", &self.link_library_paths)
             .field("container", &self.container)
+            .field("moves", &self.moves)
             .finish()
     }
 }
@@ -5687,6 +5696,13 @@ impl DownloadClientPath {
         self.container = Some(value);
         self
     }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::moves`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_moves(mut self, value: bool) -> Self {
+        self.moves = Some(value);
+        self
+    }
 }
 ::buffa::impl_default_instance!(DownloadClientPath);
 impl ::buffa::MessageName for DownloadClientPath {
@@ -5732,6 +5748,9 @@ impl ::buffa::Message for DownloadClientPath {
         if self.container.is_some() {
             size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
         }
+        if self.moves.is_some() {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -5765,6 +5784,9 @@ impl ::buffa::Message for DownloadClientPath {
         }
         if let Some(v) = self.container {
             ::buffa::types::put_bool_field(8u32, v, buf);
+        }
+        if let Some(v) = self.moves {
+            ::buffa::types::put_bool_field(9u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -5863,6 +5885,15 @@ impl ::buffa::Message for DownloadClientPath {
                     ::buffa::types::decode_bool(buf)?,
                 );
             }
+            9u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.moves = ::core::option::Option::Some(
+                    ::buffa::types::decode_bool(buf)?,
+                );
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -5879,6 +5910,7 @@ impl ::buffa::Message for DownloadClientPath {
         self.error = ::core::option::Option::None;
         self.link_library_paths.clear();
         self.container = ::core::option::Option::None;
+        self.moves = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }

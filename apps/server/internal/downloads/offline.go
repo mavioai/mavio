@@ -34,12 +34,19 @@ const OfflineID = "dev.mavio.rclone-offline"
 // offlineDefinition is the one kind of offline download client.
 const offlineDefinition = "offline"
 
-// Categories of offline downloads, and the folders of a remote that movies
-// and series are downloaded into unless its settings name others.
+// Categories of offline downloads.
 const (
 	categoryMovies = "movies"
 	categorySeries = "series"
 )
+
+// defaultFolder is the folder below a remote's root that offline downloads
+// go to unless its settings name another.
+const defaultFolder = "downloads"
+
+// sinceMargin is how much earlier than its oldest download a drive lists
+// tasks from, allowing for the drive's clock.
+const sinceMargin = time.Hour
 
 // OfflineConfig is the configuration of the offline download clients.
 type OfflineConfig struct {
@@ -48,16 +55,14 @@ type OfflineConfig struct {
 
 // OfflineClient is the offline downloads of a remote whose cloud drive
 // downloads magnet links itself: a download client named after the remote,
-// one at most per remote, downloading movies into MovieFolder and series
-// into SeriesFolder, folders below the remote's root.
+// one at most per remote, downloading into Folder below the remote's root.
 type OfflineClient struct {
 	Remote   string   `json:"remote"`
 	Enabled  bool     `json:"enabled"`
 	Priority int32    `json:"priority"`
 	Tags     []string `json:"tags,omitempty"`
-	// MovieFolder and SeriesFolder default to "movies" and "series".
-	MovieFolder  string `json:"movie_folder,omitempty"`
-	SeriesFolder string `json:"series_folder,omitempty"`
+	// Folder defaults to "downloads".
+	Folder string `json:"folder,omitempty"`
 	// RemoveCompleted and RemoveFailed remove imported and failed
 	// downloads from the drive's list of offline downloads.
 	RemoveCompleted bool `json:"remove_completed_downloads"`
@@ -69,32 +74,22 @@ func (c OfflineClient) validate() error {
 	if c.Remote == "" || strings.ContainsAny(c.Remote, `/\: `) {
 		return fmt.Errorf("%w: offline downloads of remote %q", core.ErrInvalid, c.Remote)
 	}
-	for _, dir := range []string{c.MovieFolder, c.SeriesFolder} {
-		if dir != "" && (path.Clean(dir) != dir || dir == "." || dir == ".." || strings.HasPrefix(dir, "../") || strings.HasPrefix(dir, "/") || strings.Contains(dir, `\`)) {
-			return fmt.Errorf("%w: offline download folder %q: want a folder below the remote's root", core.ErrInvalid, dir)
-		}
+	if dir := c.Folder; dir != "" && (path.Clean(dir) != dir || dir == "." || dir == ".." || strings.HasPrefix(dir, "../") || strings.HasPrefix(dir, "/") || strings.Contains(dir, `\`)) {
+		return fmt.Errorf("%w: offline download folder %q: want a folder below the remote's root", core.ErrInvalid, dir)
 	}
 	return nil
 }
 
-// folder returns the folder below the remote's root a category's downloads
+// DownloadFolder returns the folder below the remote's root that downloads
 // go to.
-func (c OfflineClient) folder(category string) string {
-	if category == categorySeries {
-		return cmp.Or(c.SeriesFolder, categorySeries)
-	}
-	return cmp.Or(c.MovieFolder, categoryMovies)
+func (c OfflineClient) DownloadFolder() string {
+	return cmp.Or(c.Folder, defaultFolder)
 }
 
 // path returns the path of a folder below the remote's root, as library
 // paths are written.
 func (c OfflineClient) path(dir string) string {
 	return core.RemoteScheme + c.Remote + ":" + dir
-}
-
-// Folders returns the folders movies and series are downloaded into.
-func (c OfflineClient) Folders() (movies, series string) {
-	return c.folder(categoryMovies), c.folder(categorySeries)
 }
 
 // Offline is the provider of the offline download clients, built into the
@@ -283,16 +278,14 @@ func (o *Offline) TestDownloadClient(ctx context.Context, req *pluginv1.TestDown
 		return failure(fmt.Sprintf("the backend of remote %s makes no offline downloads", c.Remote))
 	}
 	var warnings []string
-	for _, dir := range []string{c.folder(categoryMovies), c.folder(categorySeries)} {
-		st, err := o.Remotes.Open(ctx, c.Remote, dir)
-		switch {
-		case errors.Is(err, fs.ErrNotExist):
-			warnings = append(warnings, fmt.Sprintf("%s does not exist yet; the first download creates it", core.RemoteScheme+c.Remote+":"+dir))
-		case err != nil:
-			return failure(err.Error())
-		default:
-			_ = st.Close()
-		}
+	st, err := o.Remotes.Open(ctx, c.Remote, c.DownloadFolder())
+	switch {
+	case errors.Is(err, fs.ErrNotExist):
+		warnings = append(warnings, fmt.Sprintf("%s does not exist yet; the first download creates it", c.path(c.DownloadFolder())))
+	case err != nil:
+		return failure(err.Error())
+	default:
+		_ = st.Close()
 	}
 	return pluginv1.TestDownloadClientResponse_builder{Warnings: warnings}.Build(), nil
 }
@@ -327,7 +320,7 @@ func (o *Offline) AddDownload(ctx context.Context, req *pluginv1.AddDownloadRequ
 	if req.GetKind() == pluginv1.DownloadKind_DOWNLOAD_KIND_SERIES {
 		category, kind = categorySeries, "series"
 	}
-	remote, target := c.Remote, c.folder(category)
+	remote, target := c.Remote, c.DownloadFolder()
 	if err := rc.Call(ctx, "operations/mkdir", map[string]any{"fs": remote + ":", "remote": target}, nil); err != nil {
 		return nil, offlineError(err)
 	}
@@ -400,18 +393,19 @@ func (o *Offline) ListDownloads(ctx context.Context, req *pluginv1.ListDownloads
 		if ids := req.GetClientIds(); len(ids) > 0 && !slices.Contains(ids, c.Remote) || len(req.GetClientIds()) == 0 && !c.Enabled {
 			continue
 		}
+		// The folder is the client's own, known when the drive fails.
+		if req.GetIncludeStatuses() {
+			statuses = append(statuses, pluginv1.DownloadClientStatus_builder{
+				ClientId:          new(c.Remote),
+				OutputRootFolders: []string{c.path(c.DownloadFolder())},
+			}.Build())
+		}
 		list, err := o.downloads(ctx, c)
 		if err != nil {
 			failures = append(failures, pluginv1.DownloadClientFailure_builder{ClientId: new(c.Remote), Message: new(err.Error())}.Build())
 			continue
 		}
 		downloads = append(downloads, list...)
-		if req.GetIncludeStatuses() {
-			statuses = append(statuses, pluginv1.DownloadClientStatus_builder{
-				ClientId:          new(c.Remote),
-				OutputRootFolders: []string{c.path(c.folder(categoryMovies)), c.path(c.folder(categorySeries))},
-			}.Build())
-		}
 	}
 	out.SetDownloads(downloads)
 	out.SetStatuses(statuses)
@@ -423,11 +417,24 @@ func (o *Offline) ListDownloads(ctx context.Context, req *pluginv1.ListDownloads
 // ledger keeps for it, recording what the drive tells of them, which tells
 // of those the drive no longer lists.
 func (o *Offline) downloads(ctx context.Context, c OfflineClient) ([]*pluginv1.Download, error) {
+	jobs, err := o.Jobs.List(ctx, core.StorageJobOffline)
+	if err != nil {
+		return nil, err
+	}
+	jobs = slices.DeleteFunc(jobs, func(j core.StorageJob) bool { return !strings.HasPrefix(j.Key, c.Remote+"/") })
+	if len(jobs) == 0 {
+		// Nothing to ask the drive about: listing its tasks, possibly
+		// a long history of them, every minute gets clients blocked.
+		return nil, nil
+	}
 	rc, err := o.rc()
 	if err != nil {
 		return nil, err
 	}
-	tasks, err := rc.OfflineTasks(ctx, c.Remote)
+	// The drive needs to list only the tasks added since the oldest
+	// download, with a margin for its clock.
+	since := slices.MinFunc(jobs, func(a, b core.StorageJob) int { return a.CreatedAt.Compare(b.CreatedAt) }).CreatedAt.Add(-sinceMargin)
+	tasks, err := rc.OfflineTasks(ctx, c.Remote, since)
 	if err != nil {
 		return nil, err
 	}
@@ -435,16 +442,9 @@ func (o *Offline) downloads(ctx context.Context, c OfflineClient) ([]*pluginv1.D
 	for _, t := range tasks {
 		byID[t.ID] = t
 	}
-	jobs, err := o.Jobs.List(ctx, core.StorageJobOffline)
-	if err != nil {
-		return nil, err
-	}
 	var out []*pluginv1.Download
 	for _, j := range jobs {
-		client, id, _ := strings.Cut(j.Key, "/")
-		if client != c.Remote {
-			continue
-		}
+		_, id, _ := strings.Cut(j.Key, "/")
 		t, listed := byID[j.Data["task"]]
 		if listed {
 			data := maps.Clone(j.Data)
@@ -478,7 +478,7 @@ func offlineDownload(c OfflineClient, id string, j core.StorageJob, t rclone.Off
 		d.SetKind(pluginv1.DownloadKind_DOWNLOAD_KIND_MOVIE)
 	}
 	if name := j.Data["name"]; name != "" {
-		d.SetOutputPath(c.path(path.Join(cmp.Or(j.Data["folder"], c.folder(j.Data["category"])), name)))
+		d.SetOutputPath(c.path(path.Join(cmp.Or(j.Data["folder"], c.DownloadFolder()), name)))
 	}
 	status := rclone.OfflineStatus(j.Data["status"])
 	switch {
@@ -549,7 +549,7 @@ func (o *Offline) RemoveDownload(ctx context.Context, req *pluginv1.RemoveDownlo
 		return nil, offlineError(err)
 	}
 	if name := j.Data["name"]; req.GetDeleteData() && name != "" {
-		st, err := o.Remotes.Open(ctx, j.Remote, cmp.Or(j.Data["folder"], c.folder(j.Data["category"])))
+		st, err := o.Remotes.Open(ctx, j.Remote, cmp.Or(j.Data["folder"], c.DownloadFolder()))
 		if err != nil && !errors.Is(err, fs.ErrNotExist) {
 			return nil, offlineError(err)
 		}

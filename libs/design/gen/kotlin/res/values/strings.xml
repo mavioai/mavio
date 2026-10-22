@@ -2148,10 +2148,8 @@
     <string name="storage_offline_remote_footer">The cloud drive downloads magnet links itself, as a download client of acquisition named after the remote; imports move the files within the remote.</string>
     <!-- Button setting up a remote's offline downloads -->
     <string name="storage_offline_set_up">Use for Offline Downloads</string>
-    <!-- The folder of a remote that movies are downloaded into -->
-    <string name="storage_offline_movie_folder">Movie Folder</string>
-    <!-- The folder of a remote that series are downloaded into -->
-    <string name="storage_offline_series_folder">Series Folder</string>
+    <!-- The folder of a remote that offline downloads go to -->
+    <string name="storage_offline_download_folder">Download Folder</string>
     <!-- Detail of an offline download folder -->
     <string name="storage_offline_folder_below">Below the remote\'s root</string>
     <!-- Button removing a remote's offline downloads -->
@@ -2266,6 +2264,14 @@
     <string name="client_no_folders">The client reports no folders.</string>
     <!-- A download client folder the server mounted in the client's container, which cannot be changed here -->
     <string name="client_container_folder">Mounted by the server in the client\'s container</string>
+    <!-- Link to the page of the remote whose offline downloads a download client is -->
+    <string name="client_remote">Remote</string>
+    <!-- Footer of the folder of a cloud drive's offline downloads -->
+    <string name="client_offline_footer">The cloud drive downloads into this folder of its remote, which is set on the remote\'s page. Imports move files to the libraries on the same remote within the drive, without passing them through the server.</string>
+    <!-- Libraries on the same remote, which imports move files to within the cloud drive -->
+    <string name="client_moves">Moved within the drive to %s</string>
+    <!-- A cloud drive folder whose imports pass through the server, no library being on its remote -->
+    <string name="client_transfers">Moved to libraries through the server</string>
     <!-- Page of the acquisition options -->
     <string name="options_options">Options</string>
     <!-- Detail of the acquisition options -->

@@ -269,16 +269,18 @@ message GetRemoteUsageResponse {
 }
 
 // OfflineDownloads are the settings of a remote's offline downloads: its
-// cloud drive downloads magnet links itself into folders of the remote,
+// cloud drive downloads magnet links itself into a folder of the remote,
 // and imports move the files within the remote.
 message OfflineDownloads {
+  reserved 3, 4;
+  reserved movie_folder, series_folder;
+
   bool enabled = 1;
   // Lower first among the torrent clients; 1 when 0.
   int32 priority = 2 [(buf.validate.field).int32.gte = 0];
-  // The folders below the remote's root that movies and series are
-  // downloaded into; "movies" and "series" when unset.
-  string movie_folder = 3 [(buf.validate.field).string.max_len = 4096];
-  string series_folder = 4 [(buf.validate.field).string.max_len = 4096];
+  // The folder below the remote's root that downloads go to; "downloads"
+  // when unset.
+  string folder = 8 [(buf.validate.field).string.max_len = 4096];
   // As a download client's tags.
   repeated string tags = 5 [(buf.validate.field).repeated.items.string.max_len = 100];
   // Remove imported downloads, and failed ones, from the drive's list of

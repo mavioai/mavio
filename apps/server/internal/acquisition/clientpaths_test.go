@@ -8,6 +8,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/mavioai/mavio/apps/server/internal/downloads"
 	"github.com/mavioai/mavio/libs/core"
 	"github.com/mavioai/mavio/libs/library"
 )
@@ -98,5 +99,39 @@ func TestClientPathsContainer(t *testing.T) {
 	}
 	if stored, err := e.rt.Store.DownloadPathMappings().List(e.ctx); err != nil || len(stored) != 0 {
 		t.Errorf("stored mappings = %+v, %v; want = none", stored, err)
+	}
+}
+
+// TestClientPathsOffline checks that the folder of a cloud drive's
+// offline downloads moves files to the libraries on its remote, and takes
+// no mappings.
+func TestClientPathsOffline(t *testing.T) {
+	e := newEnv(t)
+	drive := t.TempDir()
+	for _, dir := range []string{"downloads", "media/movies"} {
+		if err := os.MkdirAll(filepath.Join(drive, filepath.FromSlash(dir)), 0o755); err != nil {
+			t.Fatal(err)
+		}
+	}
+	e.rt.Storages = &library.Storages{Remote: func(_ context.Context, _, dir string) (core.Storage, error) {
+		return library.OpenLocalStorage(filepath.Join(drive, filepath.FromSlash(dir)))
+	}}
+	e.rt.Clients = func() []downloads.Provider { return []downloads.Provider{{ID: downloads.OfflineID, Client: e.client}} }
+	e.client.roots = []string{"remote:pp:downloads"}
+	drive2 := core.Library{ID: core.NewID(), Name: "Drive", Kind: core.LibraryMovies, Paths: []string{"remote:pp:media/movies", "remote:other:shows"}}
+	if err := e.rt.Store.Libraries().Create(e.ctx, &drive2); err != nil {
+		t.Fatal(err)
+	}
+
+	paths, failure, err := e.rt.ClientPaths(e.ctx, downloads.OfflineID, "qb")
+	if err != nil || failure != "" || len(paths) != 1 {
+		t.Fatalf("ClientPaths = %+v, %q, %v; want = the drive's folder", paths, failure, err)
+	}
+	want := ClientPath{RemotePath: "remote:pp:downloads", RootFolder: true, Readable: true, Moves: true, LinkLibraryPaths: []string{"remote:pp:media/movies"}}
+	if got := paths[0]; !reflect.DeepEqual(got, want) {
+		t.Errorf("paths[0] = %+v; want = %+v", got, want)
+	}
+	if _, _, err := e.rt.SetClientPaths(e.ctx, downloads.OfflineID, "qb", []ClientPath{{RemotePath: "remote:pp:downloads", LocalPath: e.dlDir}}); !errors.Is(err, core.ErrInvalid) {
+		t.Errorf("SetClientPaths with a mapping: err = %v, want = %v", err, core.ErrInvalid)
 	}
 }

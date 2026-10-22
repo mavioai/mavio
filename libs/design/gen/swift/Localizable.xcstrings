@@ -19207,38 +19207,20 @@
         }
       }
     },
-    "storage.offlineMovieFolder": {
-      "comment": "The folder of a remote that movies are downloaded into",
+    "storage.offlineDownloadFolder": {
+      "comment": "The folder of a remote that offline downloads go to",
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Movie Folder"
+            "value": "Download Folder"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "电影文件夹"
-          }
-        }
-      }
-    },
-    "storage.offlineSeriesFolder": {
-      "comment": "The folder of a remote that series are downloaded into",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Series Folder"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "剧集文件夹"
+            "value": "下载文件夹"
           }
         }
       }
@@ -20265,6 +20247,78 @@
           "stringUnit": {
             "state": "translated",
             "value": "由服务器挂载到客户端的容器中"
+          }
+        }
+      }
+    },
+    "client.remote": {
+      "comment": "Link to the page of the remote whose offline downloads a download client is",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remote"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "远端"
+          }
+        }
+      }
+    },
+    "client.offlineFooter": {
+      "comment": "Footer of the folder of a cloud drive's offline downloads",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The cloud drive downloads into this folder of its remote, which is set on the remote's page. Imports move files to the libraries on the same remote within the drive, without passing them through the server."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "云盘下载到其远端的这个文件夹，在远端页面设置。导入时，文件在云盘内直接移入同一远端上的媒体库，不经服务器传输。"
+          }
+        }
+      }
+    },
+    "client.moves": {
+      "comment": "Libraries on the same remote, which imports move files to within the cloud drive",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moved within the drive to %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "云盘内直接移入 %@"
+          }
+        }
+      }
+    },
+    "client.transfers": {
+      "comment": "A cloud drive folder whose imports pass through the server, no library being on its remote",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moved to libraries through the server"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "经服务器移入媒体库"
           }
         }
       }

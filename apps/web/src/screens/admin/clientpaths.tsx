@@ -2,7 +2,9 @@
 // link to the plugin that set it up, and the folders the client puts
 // downloads in, with where the server reads each, whether it can, and the
 // libraries imports from it hard link to. A container's client takes no
-// folders of its own: they are its container's.
+// folders of its own: they are its container's. A remote's offline
+// downloads link to the remote's page, where their folder is set, and
+// show the libraries imports move files to within the drive.
 import { create } from "@bufbuild/protobuf";
 import { errorMessage, type ServerEntry, useDownloadClientPaths, useDownloadClients, usePlugins, useUpdateDownloadClientPaths } from "@mavio/client-ts";
 import { type DownloadClientPath, DownloadClientPathSchema } from "@mavio/proto/mavio/acquisition/v1/download_pb";
@@ -13,6 +15,9 @@ import { Button, Group } from "../../ui.tsx";
 import { input } from "../../controls/styles.ts";
 import { useUnsavedGuard } from "../../controls/unsaved.tsx";
 import { AddRow, BackLink, Page, PageLink } from "./common.tsx";
+
+/** The provider of remotes' offline downloads, built into the server. */
+export const offlineProvider = "dev.mavio.rclone-offline";
 
 /** A folder being edited: added ones name the client's folder too. */
 interface Draft {
@@ -42,7 +47,9 @@ export function DownloadClientPage({ server, id }: { server: ServerEntry; id: st
   const paths = useDownloadClientPaths(server, pluginId, clientId);
   const update = useUpdateDownloadClientPaths(server, pluginId, clientId);
   const client = clients.data?.clients.find((c) => c.pluginId === pluginId && c.id === clientId);
-  const inContainer = !!client?.container;
+  const offline = pluginId === offlineProvider;
+  // The folders are set elsewhere: with the container, or the remote.
+  const readOnly = !!client?.container || offline;
   const pluginName = plugins.data?.find((p) => p.manifest?.id === pluginId)?.manifest?.name || pluginId;
   const saved = paths.data?.paths;
   const [d, setD] = useState<Draft[]>();
@@ -59,12 +66,16 @@ export function DownloadClientPage({ server, id }: { server: ServerEntry; id: st
   return (
     <Page title={client?.name ?? clientId} message={t("client.message")} back={<BackLink section="acquisition" label={t("settings.acquisition")} />}>
       <Group>
-        <PageLink search={{ plugin: pluginId }} icon="plugins" color="#5856D6" label={t("client.settings")} detail={pluginName} />
+        {offline ? (
+          <PageLink section="storage" search={{ remote: clientId }} icon="cloud" color="#30B0C7" label={t("client.remote")} detail={clientId} />
+        ) : (
+          <PageLink search={{ plugin: pluginId }} icon="plugins" color="#5856D6" label={t("client.settings")} detail={pluginName} />
+        )}
       </Group>
-      <Group title={t("client.folders")} footer={t(inContainer ? "client.containerFooter" : "client.foldersFooter")}>
+      <Group title={t("client.folders")} footer={t(offline ? "client.offlineFooter" : client?.container ? "client.containerFooter" : "client.foldersFooter")}>
         {(d ?? []).map((x, i) => {
           const p = !x.added ? saved?.find((s) => s.remotePath === x.remote) : undefined;
-          const fixed = x.container || inContainer;
+          const fixed = x.container || readOnly;
           const unchanged = p !== undefined && x.local === p.localPath;
           return (
             <div key={x.added ? `added-${i}` : x.remote} className="flex flex-col gap-2 px-4 py-3">
@@ -79,6 +90,7 @@ export function DownloadClientPage({ server, id }: { server: ServerEntry; id: st
               ) : (
                 <span className="type-body break-all font-mono">{x.remote}</span>
               )}
+              {!(fixed && x.local === "") && (
               <div className="flex items-center gap-2">
                 <span aria-hidden className="text-text-secondary">
                   →
@@ -101,6 +113,7 @@ export function DownloadClientPage({ server, id }: { server: ServerEntry; id: st
                   </Button>
                 )}
               </div>
+              )}
               {p && unchanged && (
                 <p className="type-footnote break-words text-text-secondary">
                   {x.container && (
@@ -113,7 +126,9 @@ export function DownloadClientPage({ server, id }: { server: ServerEntry; id: st
                     <>
                       <span className="text-success">{t("client.readable")}</span>
                       {" · "}
-                      {p.linkLibraryPaths.length ? t("client.links", { paths: p.linkLibraryPaths.join(", ") }) : t("client.copies")}
+                      {p.linkLibraryPaths.length
+                        ? t(p.moves ? "client.moves" : "client.links", { paths: p.linkLibraryPaths.join(", ") })
+                        : t(p.moves ? "client.transfers" : "client.copies")}
                     </>
                   ) : (
                     <span className="text-danger">{p.error}</span>
@@ -133,9 +148,9 @@ export function DownloadClientPage({ server, id }: { server: ServerEntry; id: st
         {paths.isSuccess && d?.length === 0 && !paths.data.failure && <p className="px-4 py-3 type-callout text-text-secondary">{t("client.noFolders")}</p>}
         {paths.data?.failure && <p className="line-clamp-4 px-4 py-3 type-callout break-words text-danger" title={paths.data.failure}>{t("client.unreported", { failure: paths.data.failure })}</p>}
         {paths.isError && <p className="px-4 py-3 type-callout text-danger">{errorMessage(paths.error)}</p>}
-        {d && !inContainer && <AddRow label={t("client.addFolder")} onClick={() => setD((xs) => [...(xs ?? []), { remote: "", local: "", added: true }])} />}
+        {d && !readOnly && <AddRow label={t("client.addFolder")} onClick={() => setD((xs) => [...(xs ?? []), { remote: "", local: "", added: true }])} />}
       </Group>
-      {d && !inContainer && (
+      {d && !readOnly && (
         <div className="flex flex-wrap items-center gap-3">
           <Button disabled={!changed || !valid || update.isPending} onClick={save}>
             {update.isPending ? "…" : t("action.save")}

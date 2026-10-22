@@ -15,6 +15,7 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/mavioai/mavio/apps/server/internal/downloads"
 	"github.com/mavioai/mavio/libs/acquire"
 	"github.com/mavioai/mavio/libs/core"
 	pluginv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1"
@@ -42,8 +43,12 @@ type ClientPath struct {
 	Readable bool
 	Error    string
 	// LinkLibraryPaths are the library paths on the folder's storage,
-	// which imports hard link files to.
+	// which imports hard link files to, or move them to when Moves is set.
 	LinkLibraryPaths []string
+	// Moves: imports move the client's files, as those of a cloud drive's
+	// offline downloads, which reach LinkLibraryPaths within the folder's
+	// remote. The client's folder is set with the client.
+	Moves bool
 }
 
 // ErrClientNotFound is returned for a download client no ready provider
@@ -110,13 +115,21 @@ func (r *Runtime) ClientPaths(ctx context.Context, pluginID, clientID string) ([
 		return nil, "", err
 	}
 	for i := range out {
+		out[i].Moves = movesFiles(c)
 		r.checkClientPath(ctx, c, &out[i], libs)
 	}
 	return out, failure, nil
 }
 
+// movesFiles reports whether imports move a client's files: those of the
+// offline downloads of cloud drives, which have no seeding to keep.
+func movesFiles(c Client) bool {
+	return c.PluginID == downloads.OfflineID
+}
+
 // rootFolders returns the folders a client says completed downloads end
-// up in, or why it said none.
+// up in, or why it said none: a client whose downloads failed to list may
+// still tell its folders.
 func (r *Runtime) rootFolders(ctx context.Context, c Client) ([]string, string) {
 	api := r.clientAPI(c.PluginID)
 	if api == nil {
@@ -126,9 +139,10 @@ func (r *Runtime) rootFolders(ctx context.Context, c Client) ([]string, string) 
 	if err != nil {
 		return nil, err.Error()
 	}
+	failure := ""
 	for _, f := range resp.GetFailures() {
 		if f.GetClientId() == c.GetId() {
-			return nil, f.GetMessage()
+			failure = f.GetMessage()
 		}
 	}
 	var roots []string
@@ -141,7 +155,10 @@ func (r *Runtime) rootFolders(ctx context.Context, c Client) ([]string, string) 
 			}
 		}
 	}
-	return roots, ""
+	if len(roots) > 0 {
+		failure = ""
+	}
+	return roots, failure
 }
 
 // libraryPaths returns the paths of every library.
@@ -160,7 +177,7 @@ func (r *Runtime) libraryPaths(ctx context.Context) ([]string, error) {
 
 // checkClientPath tells whether the server reads a client's folder,
 // suggests where it may for one it does not, and finds the library paths
-// imports from it hard link to.
+// imports from it hard link, or move, to.
 func (r *Runtime) checkClientPath(ctx context.Context, c Client, p *ClientPath, libs []string) {
 	local := cmp.Or(p.LocalPath, p.RemotePath)
 	if err := r.readable(ctx, local); err != nil {
@@ -173,7 +190,7 @@ func (r *Runtime) checkClientPath(ctx context.Context, c Client, p *ClientPath, 
 	p.Readable = true
 	l, _ := downloadPath(local)
 	for _, lib := range libs {
-		if r.linkable(ctx, l, lib) {
+		if p.Moves && sameRemote(l, lib) || !p.Moves && r.linkable(ctx, l, lib) {
 			p.LinkLibraryPaths = append(p.LinkLibraryPaths, lib)
 		}
 	}
@@ -255,6 +272,14 @@ func hostName(s string) string {
 	return strings.Trim(s, "[]")
 }
 
+// sameRemote reports whether a download folder and a library path are on
+// one remote, within which files move without passing through the server.
+func sameRemote(folder, lib string) bool {
+	fr, _, ok := core.SplitRemotePath(folder)
+	lr, _, _ := core.SplitRemotePath(lib)
+	return ok && fr == lr
+}
+
 // linkable reports whether files of a download folder hard link to a
 // library path: both on one local volume, or both on one remote that
 // links files.
@@ -281,7 +306,8 @@ func (r *Runtime) linkable(ctx context.Context, folder, lib string) bool {
 
 // SetClientPaths replaces the download path mappings of a client, but for
 // its container's, and returns its folders as ClientPaths does. A
-// container's client takes none: its folders are its container's.
+// container's client takes none: its folders are its container's; nor
+// does a cloud drive's offline downloads, whose folder is the remote's.
 func (r *Runtime) SetClientPaths(ctx context.Context, pluginID, clientID string, paths []ClientPath) ([]ClientPath, string, error) {
 	c, err := r.client(ctx, pluginID, clientID)
 	if err != nil {
@@ -294,6 +320,9 @@ func (r *Runtime) SetClientPaths(ctx context.Context, pluginID, clientID string,
 		}
 		if c.GetContainer() != "" {
 			return nil, "", fmt.Errorf("%w: the folders of the client of container %s are set with the container", core.ErrInvalid, c.GetContainer())
+		}
+		if movesFiles(c) {
+			return nil, "", fmt.Errorf("%w: the folder of the offline downloads of remote %s is set with the remote", core.ErrInvalid, c.GetId())
 		}
 		local := p.LocalPath
 		if !core.IsRemotePath(local) {

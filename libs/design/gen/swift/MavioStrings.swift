@@ -3380,11 +3380,8 @@ public enum MavioStrings {
     /// Button setting up a remote's offline downloads
     public static var storageOfflineSetUp: String { NSLocalizedString("storage.offlineSetUp", bundle: .module, comment: "") }
 
-    /// The folder of a remote that movies are downloaded into
-    public static var storageOfflineMovieFolder: String { NSLocalizedString("storage.offlineMovieFolder", bundle: .module, comment: "") }
-
-    /// The folder of a remote that series are downloaded into
-    public static var storageOfflineSeriesFolder: String { NSLocalizedString("storage.offlineSeriesFolder", bundle: .module, comment: "") }
+    /// The folder of a remote that offline downloads go to
+    public static var storageOfflineDownloadFolder: String { NSLocalizedString("storage.offlineDownloadFolder", bundle: .module, comment: "") }
 
     /// Detail of an offline download folder
     public static var storageOfflineFolderBelow: String { NSLocalizedString("storage.offlineFolderBelow", bundle: .module, comment: "") }
@@ -3568,6 +3565,20 @@ public enum MavioStrings {
 
     /// A download client folder the server mounted in the client's container, which cannot be changed here
     public static var clientContainerFolder: String { NSLocalizedString("client.containerFolder", bundle: .module, comment: "") }
+
+    /// Link to the page of the remote whose offline downloads a download client is
+    public static var clientRemote: String { NSLocalizedString("client.remote", bundle: .module, comment: "") }
+
+    /// Footer of the folder of a cloud drive's offline downloads
+    public static var clientOfflineFooter: String { NSLocalizedString("client.offlineFooter", bundle: .module, comment: "") }
+
+    /// Libraries on the same remote, which imports move files to within the cloud drive
+    public static func clientMoves(paths: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("client.moves", bundle: .module, comment: ""), paths)
+    }
+
+    /// A cloud drive folder whose imports pass through the server, no library being on its remote
+    public static var clientTransfers: String { NSLocalizedString("client.transfers", bundle: .module, comment: "") }
 
     /// Page of the acquisition options
     public static var optionsOptions: String { NSLocalizedString("options.options", bundle: .module, comment: "") }

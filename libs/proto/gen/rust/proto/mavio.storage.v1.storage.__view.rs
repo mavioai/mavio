@@ -7044,7 +7044,7 @@ impl ::buffa::HasMessageView for super::super::GetRemoteUsageResponse {
     type ViewHandle = GetRemoteUsageResponseOwnedView;
 }
 /// OfflineDownloads are the settings of a remote's offline downloads: its
-/// cloud drive downloads magnet links itself into folders of the remote,
+/// cloud drive downloads magnet links itself into a folder of the remote,
 /// and imports move the files within the remote.
 #[derive(Clone, Debug, Default)]
 pub struct OfflineDownloadsView<'a> {
@@ -7054,13 +7054,11 @@ pub struct OfflineDownloadsView<'a> {
     ///
     /// Field 2: `priority`
     pub priority: ::core::option::Option<i32>,
-    /// The folders below the remote's root that movies and series are
-    /// downloaded into; "movies" and "series" when unset.
+    /// The folder below the remote's root that downloads go to; "downloads"
+    /// when unset.
     ///
-    /// Field 3: `movie_folder`
-    pub movie_folder: ::core::option::Option<&'a str>,
-    /// Field 4: `series_folder`
-    pub series_folder: ::core::option::Option<&'a str>,
+    /// Field 8: `folder`
+    pub folder: ::core::option::Option<&'a str>,
     /// As a download client's tags.
     ///
     /// Field 5: `tags`
@@ -7118,19 +7116,12 @@ impl<'a> ::buffa::MessageView<'a> for OfflineDownloadsView<'a> {
                 )?;
                 view.priority = Some(::buffa::types::decode_int32(&mut cur)?);
             }
-            3u32 => {
+            8u32 => {
                 ::buffa::encoding::check_wire_type(
                     tag,
                     ::buffa::encoding::WireType::LengthDelimited,
                 )?;
-                view.movie_folder = Some(::buffa::types::borrow_str(&mut cur)?);
-            }
-            4u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                view.series_folder = Some(::buffa::types::borrow_str(&mut cur)?);
+                view.folder = Some(::buffa::types::borrow_str(&mut cur)?);
             }
             6u32 => {
                 ::buffa::encoding::check_wire_type(
@@ -7185,8 +7176,7 @@ impl<'a> ::buffa::MessageView<'a> for OfflineDownloadsView<'a> {
         ::core::result::Result::Ok(super::super::OfflineDownloads {
             enabled: self.enabled,
             priority: self.priority,
-            movie_folder: self.movie_folder.map(|s| s.to_string()),
-            series_folder: self.series_folder.map(|s| s.to_string()),
+            folder: self.folder.map(|s| s.to_string()),
             tags: self.tags.iter().map(|s| s.to_string()).collect(),
             remove_completed_downloads: self.remove_completed_downloads,
             remove_failed_downloads: self.remove_failed_downloads,
@@ -7207,12 +7197,6 @@ impl<'a> ::buffa::ViewEncode<'a> for OfflineDownloadsView<'a> {
         if let Some(v) = self.priority {
             size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
         }
-        if let Some(ref v) = self.movie_folder {
-            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
-        if let Some(ref v) = self.series_folder {
-            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
         for v in &self.tags {
             size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
@@ -7221,6 +7205,9 @@ impl<'a> ::buffa::ViewEncode<'a> for OfflineDownloadsView<'a> {
         }
         if self.remove_failed_downloads.is_some() {
             size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
+        if let Some(ref v) = self.folder {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
@@ -7239,12 +7226,6 @@ impl<'a> ::buffa::ViewEncode<'a> for OfflineDownloadsView<'a> {
         if let Some(v) = self.priority {
             ::buffa::types::put_int32_field(2u32, v, buf);
         }
-        if let Some(ref v) = self.movie_folder {
-            ::buffa::types::put_string_field(3u32, v, buf);
-        }
-        if let Some(ref v) = self.series_folder {
-            ::buffa::types::put_string_field(4u32, v, buf);
-        }
         for v in &self.tags {
             ::buffa::types::put_string_field(5u32, v, buf);
         }
@@ -7253,6 +7234,9 @@ impl<'a> ::buffa::ViewEncode<'a> for OfflineDownloadsView<'a> {
         }
         if let Some(v) = self.remove_failed_downloads {
             ::buffa::types::put_bool_field(7u32, v, buf);
+        }
+        if let Some(ref v) = self.folder {
+            ::buffa::types::put_string_field(8u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -7359,18 +7343,13 @@ impl OfflineDownloadsOwnedView {
     pub fn priority(&self) -> ::core::option::Option<i32> {
         self.0.reborrow().priority
     }
-    /// The folders below the remote's root that movies and series are
-    /// downloaded into; "movies" and "series" when unset.
+    /// The folder below the remote's root that downloads go to; "downloads"
+    /// when unset.
     ///
-    /// Field 3: `movie_folder`
+    /// Field 8: `folder`
     #[must_use]
-    pub fn movie_folder(&self) -> ::core::option::Option<&'_ str> {
-        self.0.reborrow().movie_folder
-    }
-    /// Field 4: `series_folder`
-    #[must_use]
-    pub fn series_folder(&self) -> ::core::option::Option<&'_ str> {
-        self.0.reborrow().series_folder
+    pub fn folder(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().folder
     }
     /// As a download client's tags.
     ///

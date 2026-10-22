@@ -8125,7 +8125,8 @@ pub struct DownloadClientPathView<'a> {
     /// Field 6: `error`
     pub error: ::core::option::Option<&'a str>,
     /// Set by the server: the library paths on the folder's storage, which
-    /// imports hard link files to rather than copy them.
+    /// imports hard link files to rather than copy them, or move them to
+    /// when moves is set.
     ///
     /// Field 7: `link_library_paths`
     pub link_library_paths: ::buffa::RepeatedView<'a, &'a str>,
@@ -8134,6 +8135,13 @@ pub struct DownloadClientPathView<'a> {
     ///
     /// Field 8: `container`
     pub container: ::core::option::Option<bool>,
+    /// Set by the server: imports move the client's files, as those of a
+    /// cloud drive's offline downloads, which reach link_library_paths
+    /// within the folder's remote rather than through the server. The
+    /// client's folder is set with the client rather than here.
+    ///
+    /// Field 9: `moves`
+    pub moves: ::core::option::Option<bool>,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for DownloadClientPathView<'a> {
@@ -8215,6 +8223,13 @@ impl<'a> ::buffa::MessageView<'a> for DownloadClientPathView<'a> {
                 )?;
                 view.container = Some(::buffa::types::decode_bool(&mut cur)?);
             }
+            9u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.moves = Some(::buffa::types::decode_bool(&mut cur)?);
+            }
             7u32 => {
                 ::buffa::encoding::check_wire_type(
                     tag,
@@ -8260,6 +8275,7 @@ impl<'a> ::buffa::MessageView<'a> for DownloadClientPathView<'a> {
                 .map(|s| s.to_string())
                 .collect(),
             container: self.container,
+            moves: self.moves,
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -8293,6 +8309,9 @@ impl<'a> ::buffa::ViewEncode<'a> for DownloadClientPathView<'a> {
             size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
         if self.container.is_some() {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
+        if self.moves.is_some() {
             size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
         }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
@@ -8329,6 +8348,9 @@ impl<'a> ::buffa::ViewEncode<'a> for DownloadClientPathView<'a> {
         }
         if let Some(v) = self.container {
             ::buffa::types::put_bool_field(8u32, v, buf);
+        }
+        if let Some(v) = self.moves {
+            ::buffa::types::put_bool_field(9u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -8470,7 +8492,8 @@ impl DownloadClientPathOwnedView {
         self.0.reborrow().error
     }
     /// Set by the server: the library paths on the folder's storage, which
-    /// imports hard link files to rather than copy them.
+    /// imports hard link files to rather than copy them, or move them to
+    /// when moves is set.
     ///
     /// Field 7: `link_library_paths`
     #[must_use]
@@ -8484,6 +8507,16 @@ impl DownloadClientPathOwnedView {
     #[must_use]
     pub fn container(&self) -> ::core::option::Option<bool> {
         self.0.reborrow().container
+    }
+    /// Set by the server: imports move the client's files, as those of a
+    /// cloud drive's offline downloads, which reach link_library_paths
+    /// within the folder's remote rather than through the server. The
+    /// client's folder is set with the client rather than here.
+    ///
+    /// Field 9: `moves`
+    #[must_use]
+    pub fn moves(&self) -> ::core::option::Option<bool> {
+        self.0.reborrow().moves
     }
 }
 impl ::core::convert::From<::buffa::OwnedView<DownloadClientPathView<'static>>>

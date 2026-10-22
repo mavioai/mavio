@@ -2917,14 +2917,13 @@ func (b0 GetRemoteUsageResponse_builder) Build() *GetRemoteUsageResponse {
 }
 
 // OfflineDownloads are the settings of a remote's offline downloads: its
-// cloud drive downloads magnet links itself into folders of the remote,
+// cloud drive downloads magnet links itself into a folder of the remote,
 // and imports move the files within the remote.
 type OfflineDownloads struct {
 	state                               protoimpl.MessageState `protogen:"opaque.v1"`
 	xxx_hidden_Enabled                  bool                   `protobuf:"varint,1,opt,name=enabled"`
 	xxx_hidden_Priority                 int32                  `protobuf:"varint,2,opt,name=priority"`
-	xxx_hidden_MovieFolder              *string                `protobuf:"bytes,3,opt,name=movie_folder,json=movieFolder"`
-	xxx_hidden_SeriesFolder             *string                `protobuf:"bytes,4,opt,name=series_folder,json=seriesFolder"`
+	xxx_hidden_Folder                   *string                `protobuf:"bytes,8,opt,name=folder"`
 	xxx_hidden_Tags                     []string               `protobuf:"bytes,5,rep,name=tags"`
 	xxx_hidden_RemoveCompletedDownloads bool                   `protobuf:"varint,6,opt,name=remove_completed_downloads,json=removeCompletedDownloads"`
 	xxx_hidden_RemoveFailedDownloads    bool                   `protobuf:"varint,7,opt,name=remove_failed_downloads,json=removeFailedDownloads"`
@@ -2973,20 +2972,10 @@ func (x *OfflineDownloads) GetPriority() int32 {
 	return 0
 }
 
-func (x *OfflineDownloads) GetMovieFolder() string {
+func (x *OfflineDownloads) GetFolder() string {
 	if x != nil {
-		if x.xxx_hidden_MovieFolder != nil {
-			return *x.xxx_hidden_MovieFolder
-		}
-		return ""
-	}
-	return ""
-}
-
-func (x *OfflineDownloads) GetSeriesFolder() string {
-	if x != nil {
-		if x.xxx_hidden_SeriesFolder != nil {
-			return *x.xxx_hidden_SeriesFolder
+		if x.xxx_hidden_Folder != nil {
+			return *x.xxx_hidden_Folder
 		}
 		return ""
 	}
@@ -3016,22 +3005,17 @@ func (x *OfflineDownloads) GetRemoveFailedDownloads() bool {
 
 func (x *OfflineDownloads) SetEnabled(v bool) {
 	x.xxx_hidden_Enabled = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 7)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 6)
 }
 
 func (x *OfflineDownloads) SetPriority(v int32) {
 	x.xxx_hidden_Priority = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 7)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 6)
 }
 
-func (x *OfflineDownloads) SetMovieFolder(v string) {
-	x.xxx_hidden_MovieFolder = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 7)
-}
-
-func (x *OfflineDownloads) SetSeriesFolder(v string) {
-	x.xxx_hidden_SeriesFolder = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 7)
+func (x *OfflineDownloads) SetFolder(v string) {
+	x.xxx_hidden_Folder = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 6)
 }
 
 func (x *OfflineDownloads) SetTags(v []string) {
@@ -3040,12 +3024,12 @@ func (x *OfflineDownloads) SetTags(v []string) {
 
 func (x *OfflineDownloads) SetRemoveCompletedDownloads(v bool) {
 	x.xxx_hidden_RemoveCompletedDownloads = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 7)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 6)
 }
 
 func (x *OfflineDownloads) SetRemoveFailedDownloads(v bool) {
 	x.xxx_hidden_RemoveFailedDownloads = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 7)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 6)
 }
 
 func (x *OfflineDownloads) HasEnabled() bool {
@@ -3062,32 +3046,25 @@ func (x *OfflineDownloads) HasPriority() bool {
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
 }
 
-func (x *OfflineDownloads) HasMovieFolder() bool {
+func (x *OfflineDownloads) HasFolder() bool {
 	if x == nil {
 		return false
 	}
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 2)
 }
 
-func (x *OfflineDownloads) HasSeriesFolder() bool {
-	if x == nil {
-		return false
-	}
-	return protoimpl.X.Present(&(x.XXX_presence[0]), 3)
-}
-
 func (x *OfflineDownloads) HasRemoveCompletedDownloads() bool {
 	if x == nil {
 		return false
 	}
-	return protoimpl.X.Present(&(x.XXX_presence[0]), 5)
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 4)
 }
 
 func (x *OfflineDownloads) HasRemoveFailedDownloads() bool {
 	if x == nil {
 		return false
 	}
-	return protoimpl.X.Present(&(x.XXX_presence[0]), 6)
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 5)
 }
 
 func (x *OfflineDownloads) ClearEnabled() {
@@ -3100,23 +3077,18 @@ func (x *OfflineDownloads) ClearPriority() {
 	x.xxx_hidden_Priority = 0
 }
 
-func (x *OfflineDownloads) ClearMovieFolder() {
+func (x *OfflineDownloads) ClearFolder() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 2)
-	x.xxx_hidden_MovieFolder = nil
-}
-
-func (x *OfflineDownloads) ClearSeriesFolder() {
-	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 3)
-	x.xxx_hidden_SeriesFolder = nil
+	x.xxx_hidden_Folder = nil
 }
 
 func (x *OfflineDownloads) ClearRemoveCompletedDownloads() {
-	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 5)
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 4)
 	x.xxx_hidden_RemoveCompletedDownloads = false
 }
 
 func (x *OfflineDownloads) ClearRemoveFailedDownloads() {
-	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 6)
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 5)
 	x.xxx_hidden_RemoveFailedDownloads = false
 }
 
@@ -3126,10 +3098,9 @@ type OfflineDownloads_builder struct {
 	Enabled *bool
 	// Lower first among the torrent clients; 1 when 0.
 	Priority *int32
-	// The folders below the remote's root that movies and series are
-	// downloaded into; "movies" and "series" when unset.
-	MovieFolder  *string
-	SeriesFolder *string
+	// The folder below the remote's root that downloads go to; "downloads"
+	// when unset.
+	Folder *string
 	// As a download client's tags.
 	Tags []string
 	// Remove imported downloads, and failed ones, from the drive's list of
@@ -3143,28 +3114,24 @@ func (b0 OfflineDownloads_builder) Build() *OfflineDownloads {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Enabled != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 7)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 6)
 		x.xxx_hidden_Enabled = *b.Enabled
 	}
 	if b.Priority != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 7)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 6)
 		x.xxx_hidden_Priority = *b.Priority
 	}
-	if b.MovieFolder != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 7)
-		x.xxx_hidden_MovieFolder = b.MovieFolder
-	}
-	if b.SeriesFolder != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 7)
-		x.xxx_hidden_SeriesFolder = b.SeriesFolder
+	if b.Folder != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 6)
+		x.xxx_hidden_Folder = b.Folder
 	}
 	x.xxx_hidden_Tags = b.Tags
 	if b.RemoveCompletedDownloads != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 7)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 6)
 		x.xxx_hidden_RemoveCompletedDownloads = *b.RemoveCompletedDownloads
 	}
 	if b.RemoveFailedDownloads != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 7)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 6)
 		x.xxx_hidden_RemoveFailedDownloads = *b.RemoveFailedDownloads
 	}
 	return m0
@@ -3637,15 +3604,14 @@ const file_mavio_storage_v1_storage_proto_rawDesc = "" +
 	"\n" +
 	"used_bytes\x18\x02 \x01(\x03R\tusedBytes\x12\x1d\n" +
 	"\n" +
-	"free_bytes\x18\x03 \x01(\x03R\tfreeBytes\"\xc5\x02\n" +
+	"free_bytes\x18\x03 \x01(\x03R\tfreeBytes\"\xb4\x02\n" +
 	"\x10OfflineDownloads\x12\x18\n" +
 	"\aenabled\x18\x01 \x01(\bR\aenabled\x12#\n" +
-	"\bpriority\x18\x02 \x01(\x05B\a\xbaH\x04\x1a\x02(\x00R\bpriority\x12+\n" +
-	"\fmovie_folder\x18\x03 \x01(\tB\b\xbaH\x05r\x03\x18\x80 R\vmovieFolder\x12-\n" +
-	"\rseries_folder\x18\x04 \x01(\tB\b\xbaH\x05r\x03\x18\x80 R\fseriesFolder\x12 \n" +
+	"\bpriority\x18\x02 \x01(\x05B\a\xbaH\x04\x1a\x02(\x00R\bpriority\x12 \n" +
+	"\x06folder\x18\b \x01(\tB\b\xbaH\x05r\x03\x18\x80 R\x06folder\x12 \n" +
 	"\x04tags\x18\x05 \x03(\tB\f\xbaH\t\x92\x01\x06\"\x04r\x02\x18dR\x04tags\x12<\n" +
 	"\x1aremove_completed_downloads\x18\x06 \x01(\bR\x18removeCompletedDownloads\x126\n" +
-	"\x17remove_failed_downloads\x18\a \x01(\bR\x15removeFailedDownloads\"@\n" +
+	"\x17remove_failed_downloads\x18\a \x01(\bR\x15removeFailedDownloadsJ\x04\b\x03\x10\x04J\x04\b\x04\x10\x05R\fmovie_folderR\rseries_folder\"@\n" +
 	"\x1aGetOfflineDownloadsRequest\x12\"\n" +
 	"\x06remote\x18\x01 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x18@R\x06remote\"{\n" +

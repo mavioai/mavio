@@ -1080,8 +1080,7 @@
     <string name="storage_remove_offline_detail">云盘上的任务和文件不受影响，Mavio 不再追踪它们。</string>
     <string name="storage_offline_remote_footer">云盘自行下载磁力链接，作为以远端命名的获取下载客户端；导入时在远端内移动文件。</string>
     <string name="storage_offline_set_up">用于离线下载</string>
-    <string name="storage_offline_movie_folder">电影文件夹</string>
-    <string name="storage_offline_series_folder">剧集文件夹</string>
+    <string name="storage_offline_download_folder">下载文件夹</string>
     <string name="storage_offline_folder_below">远端根目录下的路径</string>
     <string name="storage_offline_stop">移除离线下载</string>
     <string name="acquisition_message">决定服务器抓取哪些发布以及从哪里获取。</string>
@@ -1139,6 +1138,10 @@
     <string name="client_unreported">客户端未告知其文件夹：%s</string>
     <string name="client_no_folders">客户端未报告任何文件夹。</string>
     <string name="client_container_folder">由服务器挂载到客户端的容器中</string>
+    <string name="client_remote">远端</string>
+    <string name="client_offline_footer">云盘下载到其远端的这个文件夹，在远端页面设置。导入时，文件在云盘内直接移入同一远端上的媒体库，不经服务器传输。</string>
+    <string name="client_moves">云盘内直接移入 %s</string>
+    <string name="client_transfers">经服务器移入媒体库</string>
     <string name="options_options">选项</string>
     <string name="options_options_detail">命名、导入、发布和回收站</string>
     <string name="options_options_message">服务器如何命名和导入下载的内容、接受哪些发布，以及被替换的文件去向。</string>

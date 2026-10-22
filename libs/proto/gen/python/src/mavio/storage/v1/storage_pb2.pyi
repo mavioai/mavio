@@ -263,22 +263,20 @@ class GetRemoteUsageResponse(_message.Message):
     def __init__(self, total_bytes: _Optional[int] = ..., used_bytes: _Optional[int] = ..., free_bytes: _Optional[int] = ...) -> None: ...
 
 class OfflineDownloads(_message.Message):
-    __slots__ = ("enabled", "priority", "movie_folder", "series_folder", "tags", "remove_completed_downloads", "remove_failed_downloads")
+    __slots__ = ("enabled", "priority", "folder", "tags", "remove_completed_downloads", "remove_failed_downloads")
     ENABLED_FIELD_NUMBER: _ClassVar[int]
     PRIORITY_FIELD_NUMBER: _ClassVar[int]
-    MOVIE_FOLDER_FIELD_NUMBER: _ClassVar[int]
-    SERIES_FOLDER_FIELD_NUMBER: _ClassVar[int]
+    FOLDER_FIELD_NUMBER: _ClassVar[int]
     TAGS_FIELD_NUMBER: _ClassVar[int]
     REMOVE_COMPLETED_DOWNLOADS_FIELD_NUMBER: _ClassVar[int]
     REMOVE_FAILED_DOWNLOADS_FIELD_NUMBER: _ClassVar[int]
     enabled: bool
     priority: int
-    movie_folder: str
-    series_folder: str
+    folder: str
     tags: _containers.RepeatedScalarFieldContainer[str]
     remove_completed_downloads: bool
     remove_failed_downloads: bool
-    def __init__(self, enabled: _Optional[bool] = ..., priority: _Optional[int] = ..., movie_folder: _Optional[str] = ..., series_folder: _Optional[str] = ..., tags: _Optional[_Iterable[str]] = ..., remove_completed_downloads: _Optional[bool] = ..., remove_failed_downloads: _Optional[bool] = ...) -> None: ...
+    def __init__(self, enabled: _Optional[bool] = ..., priority: _Optional[int] = ..., folder: _Optional[str] = ..., tags: _Optional[_Iterable[str]] = ..., remove_completed_downloads: _Optional[bool] = ..., remove_failed_downloads: _Optional[bool] = ...) -> None: ...
 
 class GetOfflineDownloadsRequest(_message.Message):
     __slots__ = ("remote",)

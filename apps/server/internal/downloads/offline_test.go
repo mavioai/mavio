@@ -27,6 +27,8 @@ type fakeDrive struct {
 	added  []map[string]any
 	mkdirs []string
 	purged []string
+	// since is what each listoffline asked from.
+	since []any
 }
 
 func (d *fakeDrive) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -50,6 +52,7 @@ func (d *fakeDrive) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		d.tasks = append(d.tasks, t)
 		out = map[string]any{"task": t}
 	case "/operations/listoffline":
+		d.since = append(d.since, in["since"])
 		out = map[string]any{"tasks": d.tasks}
 	case "/operations/deleteoffline":
 		d.tasks = nil
@@ -83,11 +86,11 @@ func TestOffline(t *testing.T) {
 	o := &downloads.Offline{Remotes: &rclone.Remotes{Client: c}, Jobs: s.StorageJobs(), Configs: s.PluginConfigs()}
 
 	for _, bad := range []string{"/local", "../up", "a/../b", "."} {
-		if err := o.SetClient(ctx, downloads.OfflineClient{Remote: "pp", SeriesFolder: bad}); !errors.Is(err, core.ErrInvalid) {
-			t.Errorf("SetClient(series folder %q) error = %v, want = %v", bad, err, core.ErrInvalid)
+		if err := o.SetClient(ctx, downloads.OfflineClient{Remote: "pp", Folder: bad}); !errors.Is(err, core.ErrInvalid) {
+			t.Errorf("SetClient(folder %q) error = %v, want = %v", bad, err, core.ErrInvalid)
 		}
 	}
-	if err := o.SetClient(ctx, downloads.OfflineClient{Remote: "pp", Enabled: true, SeriesFolder: "Downloads/series"}); err != nil {
+	if err := o.SetClient(ctx, downloads.OfflineClient{Remote: "pp", Enabled: true, Folder: "Downloads/mavio"}); err != nil {
 		t.Fatal(err)
 	}
 	clients, err := o.ListDownloadClients(ctx, &pluginv1.ListDownloadClientsRequest{})
@@ -98,6 +101,12 @@ func TestOffline(t *testing.T) {
 	test, err := o.TestDownloadClient(ctx, pluginv1.TestDownloadClientRequest_builder{ClientId: new("pp")}.Build())
 	if err != nil || test.GetFailure() != "" {
 		t.Errorf("TestDownloadClient = %v, %v", test, err)
+	}
+
+	// Without downloads the drive isn't asked, but the folder is told.
+	list, err := o.ListDownloads(ctx, pluginv1.ListDownloadsRequest_builder{IncludeStatuses: new(true)}.Build())
+	if err != nil || len(list.GetDownloads()) != 0 || len(list.GetStatuses()) != 1 || len(drive.since) != 0 {
+		t.Errorf("ListDownloads = %v, %v after listoffline %v; want the status alone, without asking the drive", list, err, drive.since)
 	}
 
 	const magnet = "magnet:?xt=urn:btih:0123456789abcdef0123456789abcdef01234567&dn=Show"
@@ -118,7 +127,7 @@ func TestOffline(t *testing.T) {
 	if err != nil || resp.GetDownloadId() != hash {
 		t.Fatalf("AddDownload = %v, %v; want ID %s", resp, err, hash)
 	}
-	if len(drive.added) != 1 || drive.added[0]["fs"] != "pp:Downloads/series" || drive.added[0]["url"] != magnet || len(drive.mkdirs) != 1 {
+	if len(drive.added) != 1 || drive.added[0]["fs"] != "pp:Downloads/mavio" || drive.added[0]["url"] != magnet || len(drive.mkdirs) != 1 {
 		t.Errorf("rcd got addurl %v after mkdir %v", drive.added, drive.mkdirs)
 	}
 	if _, err := add(magnet); connect.CodeOf(err) != connect.CodeFailedPrecondition {
@@ -143,23 +152,26 @@ func TestOffline(t *testing.T) {
 		t.Errorf("download = %v, want 500 bytes left, 5 s", d)
 	}
 	drive.set(rclone.OfflineTask{ID: "t1", Name: "Show.S01.1080p", Size: 1000, Progress: 100, Status: rclone.OfflineComplete})
-	const out = "remote:pp:Downloads/series/Show.S01.1080p"
+	const out = "remote:pp:Downloads/mavio/Show.S01.1080p"
 	if d := get(); d.GetStatus() != pluginv1.DownloadStatus_DOWNLOAD_STATUS_COMPLETED || d.GetOutputPath() != out || !d.GetCanMoveFiles() {
 		t.Errorf("download = %v, want completed at %s", d, out)
 	}
 	// A drive that no longer lists the completed download leaves it
 	// completed.
 	drive.set(rclone.OfflineTask{ID: "other"})
-	list, err := o.ListDownloads(ctx, pluginv1.ListDownloadsRequest_builder{IncludeStatuses: new(true)}.Build())
+	list, err = o.ListDownloads(ctx, pluginv1.ListDownloadsRequest_builder{IncludeStatuses: new(true)}.Build())
 	if err != nil || len(list.GetDownloads()) != 1 || list.GetDownloads()[0].GetStatus() != pluginv1.DownloadStatus_DOWNLOAD_STATUS_COMPLETED ||
 		len(list.GetStatuses()) != 1 {
 		t.Errorf("ListDownloads = %v, %v; want the completed download, not the drive's other", list, err)
+	}
+	if since, _ := drive.since[len(drive.since)-1].(string); since == "" {
+		t.Errorf("listoffline since = %v, want the time of the oldest download", drive.since)
 	}
 
 	if _, err := o.RemoveDownload(ctx, pluginv1.RemoveDownloadRequest_builder{ClientId: new("pp"), DownloadId: new(hash), DeleteData: new(true)}.Build()); err != nil {
 		t.Fatal(err)
 	}
-	if len(drive.purged) != 1 || drive.purged[0] != "pp:|Downloads/series/Show.S01.1080p" {
+	if len(drive.purged) != 1 || drive.purged[0] != "pp:|Downloads/mavio/Show.S01.1080p" {
 		t.Errorf("purged = %v, want the download's folder", drive.purged)
 	}
 	if _, err := o.GetDownload(ctx, pluginv1.GetDownloadRequest_builder{ClientId: new("pp"), DownloadId: new(hash)}.Build()); connect.CodeOf(err) != connect.CodeNotFound {

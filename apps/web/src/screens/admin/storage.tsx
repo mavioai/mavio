@@ -703,8 +703,7 @@ function RemoveRemote({ server, name }: { server: ServerEntry; name: string }) {
 interface OfflineDraft {
   enabled: boolean;
   priority: number;
-  movieFolder: string;
-  seriesFolder: string;
+  folder: string;
   tags: string;
   removeCompleted: boolean;
   removeFailed: boolean;
@@ -713,8 +712,7 @@ interface OfflineDraft {
 const draftOf = (o: OfflineDownloads): OfflineDraft => ({
   enabled: o.enabled,
   priority: o.priority,
-  movieFolder: o.movieFolder,
-  seriesFolder: o.seriesFolder,
+  folder: o.folder,
   tags: o.tags.join(", "),
   removeCompleted: o.removeCompletedDownloads,
   removeFailed: o.removeFailedDownloads,
@@ -724,8 +722,7 @@ const offlineOf = (d: OfflineDraft): OfflineDownloads =>
   create(OfflineDownloadsSchema, {
     enabled: d.enabled,
     priority: d.priority,
-    movieFolder: d.movieFolder.trim(),
-    seriesFolder: d.seriesFolder.trim(),
+    folder: d.folder.trim(),
     tags: d.tags
       .split(",")
       .map((s) => s.trim())
@@ -742,7 +739,7 @@ const validFolder = (f: string) => {
 
 /**
  * A remote's offline downloads, shown when its backend makes them: the
- * drive downloads magnet links itself into the remote's folders, as a
+ * drive downloads magnet links itself into a folder of the remote, as a
  * download client named after the remote.
  */
 function OfflineDownloadsGroup({ server, remote }: { server: ServerEntry; remote: string }) {
@@ -773,26 +770,22 @@ function OfflineDownloadsGroup({ server, remote }: { server: ServerEntry; remote
       </Group>
     );
   const set = (patch: Partial<OfflineDraft>) => setD((x) => x && { ...x, ...patch });
-  const valid = validFolder(d.movieFolder) && validFolder(d.seriesFolder);
-  const folder = (key: "movieFolder" | "seriesFolder", label: string, placeholder: string) => (
-    <Row label={label} detail={t("storage.offlineFolderBelow")}>
-      <input
-        className={`${input} sm:w-72`}
-        aria-label={label}
-        placeholder={placeholder}
-        value={d[key]}
-        aria-invalid={!validFolder(d[key])}
-        onChange={(e) => set({ [key]: e.target.value })}
-      />
-    </Row>
-  );
+  const valid = validFolder(d.folder);
   return (
     <Group title={t("storage.offline")} footer={t("storage.offlineRemoteFooter")}>
       <Row label={t("storage.offlineEnabled")}>
         <Switch on={d.enabled} label={t("storage.offlineEnabled")} onChange={(enabled) => set({ enabled })} />
       </Row>
-      {folder("movieFolder", t("storage.offlineMovieFolder"), "movies")}
-      {folder("seriesFolder", t("storage.offlineSeriesFolder"), "series")}
+      <Row label={t("storage.offlineDownloadFolder")} detail={t("storage.offlineFolderBelow")}>
+        <input
+          className={`${input} sm:w-72`}
+          aria-label={t("storage.offlineDownloadFolder")}
+          placeholder="downloads"
+          value={d.folder}
+          aria-invalid={!validFolder(d.folder)}
+          onChange={(e) => set({ folder: e.target.value })}
+        />
+      </Row>
       <Row label={t("storage.offlineTags")} detail={t("storage.offlineTagsDetail")}>
         <input className={`${input} sm:w-72`} aria-label={t("storage.offlineTags")} value={d.tags} onChange={(e) => set({ tags: e.target.value })} />
       </Row>

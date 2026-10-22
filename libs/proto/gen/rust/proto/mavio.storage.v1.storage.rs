@@ -3961,7 +3961,7 @@ impl ::buffa::ExtensionSet for GetRemoteUsageResponse {
     }
 }
 /// OfflineDownloads are the settings of a remote's offline downloads: its
-/// cloud drive downloads magnet links itself into folders of the remote,
+/// cloud drive downloads magnet links itself into a folder of the remote,
 /// and imports move the files within the remote.
 #[derive(Clone, PartialEq, Default)]
 pub struct OfflineDownloads {
@@ -3971,13 +3971,11 @@ pub struct OfflineDownloads {
     ///
     /// Field 2: `priority`
     pub priority: ::core::option::Option<i32>,
-    /// The folders below the remote's root that movies and series are
-    /// downloaded into; "movies" and "series" when unset.
+    /// The folder below the remote's root that downloads go to; "downloads"
+    /// when unset.
     ///
-    /// Field 3: `movie_folder`
-    pub movie_folder: ::core::option::Option<::buffa::alloc::string::String>,
-    /// Field 4: `series_folder`
-    pub series_folder: ::core::option::Option<::buffa::alloc::string::String>,
+    /// Field 8: `folder`
+    pub folder: ::core::option::Option<::buffa::alloc::string::String>,
     /// As a download client's tags.
     ///
     /// Field 5: `tags`
@@ -3997,8 +3995,7 @@ impl ::core::fmt::Debug for OfflineDownloads {
         f.debug_struct("OfflineDownloads")
             .field("enabled", &self.enabled)
             .field("priority", &self.priority)
-            .field("movie_folder", &self.movie_folder)
-            .field("series_folder", &self.series_folder)
+            .field("folder", &self.folder)
             .field("tags", &self.tags)
             .field("remove_completed_downloads", &self.remove_completed_downloads)
             .field("remove_failed_downloads", &self.remove_failed_downloads)
@@ -4029,22 +4026,12 @@ impl OfflineDownloads {
     }
     #[must_use = "with_* setters return `self` by value; assign or chain the result"]
     #[inline]
-    ///Sets [`Self::movie_folder`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_movie_folder(
+    ///Sets [`Self::folder`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_folder(
         mut self,
         value: impl Into<::buffa::alloc::string::String>,
     ) -> Self {
-        self.movie_folder = Some(value.into());
-        self
-    }
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::series_folder`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_series_folder(
-        mut self,
-        value: impl Into<::buffa::alloc::string::String>,
-    ) -> Self {
-        self.series_folder = Some(value.into());
+        self.folder = Some(value.into());
         self
     }
     #[must_use = "with_* setters return `self` by value; assign or chain the result"]
@@ -4088,12 +4075,6 @@ impl ::buffa::Message for OfflineDownloads {
         if let Some(v) = self.priority {
             size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
         }
-        if let Some(ref v) = self.movie_folder {
-            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
-        if let Some(ref v) = self.series_folder {
-            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
         for v in &self.tags {
             size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
@@ -4102,6 +4083,9 @@ impl ::buffa::Message for OfflineDownloads {
         }
         if self.remove_failed_downloads.is_some() {
             size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
+        if let Some(ref v) = self.folder {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
@@ -4119,12 +4103,6 @@ impl ::buffa::Message for OfflineDownloads {
         if let Some(v) = self.priority {
             ::buffa::types::put_int32_field(2u32, v, buf);
         }
-        if let Some(ref v) = self.movie_folder {
-            ::buffa::types::put_string_field(3u32, v, buf);
-        }
-        if let Some(ref v) = self.series_folder {
-            ::buffa::types::put_string_field(4u32, v, buf);
-        }
         for v in &self.tags {
             ::buffa::types::put_string_field(5u32, v, buf);
         }
@@ -4133,6 +4111,9 @@ impl ::buffa::Message for OfflineDownloads {
         }
         if let Some(v) = self.remove_failed_downloads {
             ::buffa::types::put_bool_field(7u32, v, buf);
+        }
+        if let Some(ref v) = self.folder {
+            ::buffa::types::put_string_field(8u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -4165,30 +4146,6 @@ impl ::buffa::Message for OfflineDownloads {
                     ::buffa::types::decode_int32(buf)?,
                 );
             }
-            3u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                ::buffa::types::merge_string(
-                    self
-                        .movie_folder
-                        .get_or_insert_with(::buffa::alloc::string::String::new),
-                    buf,
-                )?;
-            }
-            4u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                ::buffa::types::merge_string(
-                    self
-                        .series_folder
-                        .get_or_insert_with(::buffa::alloc::string::String::new),
-                    buf,
-                )?;
-            }
             5u32 => {
                 ::buffa::encoding::check_wire_type(
                     tag,
@@ -4218,6 +4175,16 @@ impl ::buffa::Message for OfflineDownloads {
                     ::buffa::types::decode_bool(buf)?,
                 );
             }
+            8u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self.folder.get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -4228,11 +4195,10 @@ impl ::buffa::Message for OfflineDownloads {
     fn clear(&mut self) {
         self.enabled = ::core::option::Option::None;
         self.priority = ::core::option::Option::None;
-        self.movie_folder = ::core::option::Option::None;
-        self.series_folder = ::core::option::Option::None;
         self.tags.clear();
         self.remove_completed_downloads = ::core::option::Option::None;
         self.remove_failed_downloads = ::core::option::Option::None;
+        self.folder = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }

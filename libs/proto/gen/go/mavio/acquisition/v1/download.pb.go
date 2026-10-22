@@ -4363,6 +4363,7 @@ type DownloadClientPath struct {
 	xxx_hidden_Error            *string                `protobuf:"bytes,6,opt,name=error"`
 	xxx_hidden_LinkLibraryPaths []string               `protobuf:"bytes,7,rep,name=link_library_paths,json=linkLibraryPaths"`
 	xxx_hidden_Container        bool                   `protobuf:"varint,8,opt,name=container"`
+	xxx_hidden_Moves            bool                   `protobuf:"varint,9,opt,name=moves"`
 	XXX_raceDetectHookData      protoimpl.RaceDetectHookData
 	XXX_presence                [1]uint32
 	unknownFields               protoimpl.UnknownFields
@@ -4462,34 +4463,41 @@ func (x *DownloadClientPath) GetContainer() bool {
 	return false
 }
 
+func (x *DownloadClientPath) GetMoves() bool {
+	if x != nil {
+		return x.xxx_hidden_Moves
+	}
+	return false
+}
+
 func (x *DownloadClientPath) SetRemotePath(v string) {
 	x.xxx_hidden_RemotePath = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 8)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 9)
 }
 
 func (x *DownloadClientPath) SetLocalPath(v string) {
 	x.xxx_hidden_LocalPath = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 8)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 9)
 }
 
 func (x *DownloadClientPath) SetRootFolder(v bool) {
 	x.xxx_hidden_RootFolder = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 8)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 9)
 }
 
 func (x *DownloadClientPath) SetSuggestedPath(v string) {
 	x.xxx_hidden_SuggestedPath = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 8)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 9)
 }
 
 func (x *DownloadClientPath) SetReadable(v bool) {
 	x.xxx_hidden_Readable = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 8)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 9)
 }
 
 func (x *DownloadClientPath) SetError(v string) {
 	x.xxx_hidden_Error = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 8)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 9)
 }
 
 func (x *DownloadClientPath) SetLinkLibraryPaths(v []string) {
@@ -4498,7 +4506,12 @@ func (x *DownloadClientPath) SetLinkLibraryPaths(v []string) {
 
 func (x *DownloadClientPath) SetContainer(v bool) {
 	x.xxx_hidden_Container = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 8)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 9)
+}
+
+func (x *DownloadClientPath) SetMoves(v bool) {
+	x.xxx_hidden_Moves = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 8, 9)
 }
 
 func (x *DownloadClientPath) HasRemotePath() bool {
@@ -4550,6 +4563,13 @@ func (x *DownloadClientPath) HasContainer() bool {
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 7)
 }
 
+func (x *DownloadClientPath) HasMoves() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 8)
+}
+
 func (x *DownloadClientPath) ClearRemotePath() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_RemotePath = nil
@@ -4585,6 +4605,11 @@ func (x *DownloadClientPath) ClearContainer() {
 	x.xxx_hidden_Container = false
 }
 
+func (x *DownloadClientPath) ClearMoves() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 8)
+	x.xxx_hidden_Moves = false
+}
+
 type DownloadClientPath_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
@@ -4604,11 +4629,17 @@ type DownloadClientPath_builder struct {
 	Readable *bool
 	Error    *string
 	// Set by the server: the library paths on the folder's storage, which
-	// imports hard link files to rather than copy them.
+	// imports hard link files to rather than copy them, or move them to
+	// when moves is set.
 	LinkLibraryPaths []string
 	// Set by the server: the mapping is a folder of the container the
 	// client runs in, set with the container rather than here.
 	Container *bool
+	// Set by the server: imports move the client's files, as those of a
+	// cloud drive's offline downloads, which reach link_library_paths
+	// within the folder's remote rather than through the server. The
+	// client's folder is set with the client rather than here.
+	Moves *bool
 }
 
 func (b0 DownloadClientPath_builder) Build() *DownloadClientPath {
@@ -4616,33 +4647,37 @@ func (b0 DownloadClientPath_builder) Build() *DownloadClientPath {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.RemotePath != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 8)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 9)
 		x.xxx_hidden_RemotePath = b.RemotePath
 	}
 	if b.LocalPath != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 8)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 9)
 		x.xxx_hidden_LocalPath = b.LocalPath
 	}
 	if b.RootFolder != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 8)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 9)
 		x.xxx_hidden_RootFolder = *b.RootFolder
 	}
 	if b.SuggestedPath != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 8)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 9)
 		x.xxx_hidden_SuggestedPath = b.SuggestedPath
 	}
 	if b.Readable != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 8)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 9)
 		x.xxx_hidden_Readable = *b.Readable
 	}
 	if b.Error != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 8)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 9)
 		x.xxx_hidden_Error = b.Error
 	}
 	x.xxx_hidden_LinkLibraryPaths = b.LinkLibraryPaths
 	if b.Container != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 8)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 9)
 		x.xxx_hidden_Container = *b.Container
+	}
+	if b.Moves != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 8, 9)
+		x.xxx_hidden_Moves = *b.Moves
 	}
 	return m0
 }
@@ -5225,7 +5260,7 @@ const file_mavio_acquisition_v1_download_proto_rawDesc = "" +
 	"\tlanguages\x18\x06 \x03(\tR\tlanguages\x12#\n" +
 	"\rrelease_group\x18\a \x01(\tR\freleaseGroup\x124\n" +
 	"\x04mode\x18\b \x01(\x0e2 .mavio.acquisition.v1.ImportModeR\x04mode\"\x16\n" +
-	"\x14ManualImportResponse\"\xb0\x02\n" +
+	"\x14ManualImportResponse\"\xc6\x02\n" +
 	"\x12DownloadClientPath\x12+\n" +
 	"\vremote_path\x18\x01 \x01(\tB\n" +
 	"\xbaH\ar\x05\x10\x01\x18\x80 R\n" +
@@ -5238,7 +5273,8 @@ const file_mavio_acquisition_v1_download_proto_rawDesc = "" +
 	"\breadable\x18\x05 \x01(\bR\breadable\x12\x14\n" +
 	"\x05error\x18\x06 \x01(\tR\x05error\x12,\n" +
 	"\x12link_library_paths\x18\a \x03(\tR\x10linkLibraryPaths\x12\x1c\n" +
-	"\tcontainer\x18\b \x01(\bR\tcontainer\"k\n" +
+	"\tcontainer\x18\b \x01(\bR\tcontainer\x12\x14\n" +
+	"\x05moves\x18\t \x01(\bR\x05moves\"k\n" +
 	"\x1dGetDownloadClientPathsRequest\x12$\n" +
 	"\tplugin_id\x18\x01 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\bpluginId\x12$\n" +
 	"\tclient_id\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\bclientId\"z\n" +
