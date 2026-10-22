@@ -32,7 +32,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Brush
@@ -412,8 +411,7 @@ private fun TitlePoster(serverId: String?, title: TitleCard) {
     Column(
         Modifier
             .width(theme.layout.poster)
-            .then(if (open != null) Modifier.clickable(onClick = open) else Modifier)
-            .alpha(if (at != null) 1f else 0.8f),
+            .then(if (open != null) Modifier.clickable(onClick = open) else Modifier),
     ) {
         Artwork(
             title.posterUrl,
