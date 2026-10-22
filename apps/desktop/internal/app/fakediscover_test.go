@@ -69,7 +69,7 @@ func (d *fakeDiscover) ListCatalogs(context.Context, *acquisitionv1.ListCatalogs
 	return acquisitionv1.ListCatalogsResponse_builder{Catalogs: []*acquisitionv1.Catalog{
 		cat("trending", "Trending", pluginv1.CatalogKind_CATALOG_KIND_TRENDING, true),
 		acquisitionv1.Catalog_builder{
-			Id: new("popular"), Name: new("Popular"), Kind: new(pluginv1.CatalogKind_CATALOG_KIND_POPULAR), MediaKinds: []acquisitionv1.MediaKind{movieKind, seriesKind},
+			Id: new("popular"), Name: new("Popular"), PluginId: new("dev.mavio.tmdb"), Kind: new(pluginv1.CatalogKind_CATALOG_KIND_POPULAR), MediaKinds: []acquisitionv1.MediaKind{movieKind, seriesKind},
 			Filters: []pluginv1.DiscoverFilter{
 				pluginv1.DiscoverFilter_DISCOVER_FILTER_GENRE, pluginv1.DiscoverFilter_DISCOVER_FILTER_KEYWORD, pluginv1.DiscoverFilter_DISCOVER_FILTER_STUDIO,
 				pluginv1.DiscoverFilter_DISCOVER_FILTER_ORIGINAL_LANGUAGE, pluginv1.DiscoverFilter_DISCOVER_FILTER_RELEASE_DATE, pluginv1.DiscoverFilter_DISCOVER_FILTER_RATING,
@@ -305,6 +305,13 @@ func (d *fakeDiscover) ListFilterValues(_ context.Context, r *acquisitionv1.List
 	case pluginv1.DiscoverFilter_DISCOVER_FILTER_GENRE:
 		return acquisitionv1.ListFilterValuesResponse_builder{Values: []*pluginv1.FilterValue{v("878", "Science Fiction"), v("18", "Drama"), v("35", "Comedy")}}.Build(), nil
 	case pluginv1.DiscoverFilter_DISCOVER_FILTER_KEYWORD:
+		if ids := r.GetIds(); len(ids) > 0 {
+			var out []*pluginv1.FilterValue
+			for _, id := range ids {
+				out = append(out, v(id, "keyword "+id))
+			}
+			return acquisitionv1.ListFilterValuesResponse_builder{Values: out}.Build(), nil
+		}
 		return acquisitionv1.ListFilterValuesResponse_builder{Values: []*pluginv1.FilterValue{v("k1", "space"), v("k3", "space station")}}.Build(), nil
 	}
 	return &acquisitionv1.ListFilterValuesResponse{}, nil
@@ -340,4 +347,22 @@ func (fakeLocalization) ListCountries(context.Context, *systemv1.ListCountriesRe
 	return systemv1.ListCountriesResponse_builder{Countries: []*systemv1.Country{
 		systemv1.Country_builder{Code: new("US"), Name: new("United States")}.Build(),
 	}}.Build(), nil
+}
+
+func (q *fakeRequests) GetRequestSettings(context.Context, *acquisitionv1.GetRequestSettingsRequest) (*acquisitionv1.GetRequestSettingsResponse, error) {
+	q.f.mu.Lock()
+	defer q.f.mu.Unlock()
+	if q.f.requestSettings == nil {
+		q.f.requestSettings = acquisitionv1.RequestSettings_builder{
+			DefaultRequestMovies: new(true), SeasonFolder: new(true), BlocklistedTags: []string{"dev.mavio.tmdb/k9"}, BlocklistedTagsLimit: new(int32(50)),
+		}.Build()
+	}
+	return acquisitionv1.GetRequestSettingsResponse_builder{Settings: q.f.requestSettings}.Build(), nil
+}
+
+func (q *fakeRequests) UpdateRequestSettings(_ context.Context, r *acquisitionv1.UpdateRequestSettingsRequest) (*acquisitionv1.UpdateRequestSettingsResponse, error) {
+	q.f.mu.Lock()
+	defer q.f.mu.Unlock()
+	q.f.requestSettings = r.GetSettings()
+	return acquisitionv1.UpdateRequestSettingsResponse_builder{Settings: r.GetSettings()}.Build(), nil
 }

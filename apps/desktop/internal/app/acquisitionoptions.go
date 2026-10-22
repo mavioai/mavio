@@ -32,7 +32,7 @@ var namingDefaults = map[string]string{
 }
 
 // enumChoice is a value of an enumeration and its label, a key of the
-// strings or the label itself.
+// strings (with a dot) or the label itself.
 type enumChoice[E ~int32] struct {
 	value E
 	label string
@@ -74,7 +74,7 @@ func chooseEnum[E ~int32](c *ui.Context, label string, value *E, fallback E, lis
 	i := 0
 	for j, x := range list {
 		labels[j] = x.label
-		if strings.HasPrefix(x.label, "options.") {
+		if strings.Contains(x.label, ".") {
 			labels[j] = style.T(c, x.label)
 		}
 		if x.value == *value || (*value == 0 && x.value == fallback) {

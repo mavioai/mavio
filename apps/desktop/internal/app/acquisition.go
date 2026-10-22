@@ -42,11 +42,12 @@ type acquisitionState struct {
 	profile, profile0 *acquisitionv1.QualityProfile
 	format, format0   *acquisitionv1.CustomFormat
 
-	editing *string // the ID of the delay or release profile edited, "new" for a new one
-	delay   delayDraft
-	release releaseDraft
-	options optionsForm
-	folders *folderDrafts // the download client's folders edited
+	editing  *string // the ID of the delay or release profile edited, "new" for a new one
+	delay    delayDraft
+	release  releaseDraft
+	options  optionsForm
+	requests requestsForm
+	folders  *folderDrafts // the download client's folders edited
 
 	busy       string
 	notice     string
@@ -210,7 +211,8 @@ func (a *App) acquisitionSection(c *ui.Context, r *ui.Route) {
 	page, id := r.Query("acquisition"), r.Query("id")
 	if k := page + "/" + id; st.page != k {
 		st.page, st.sizes, st.profile, st.profile0, st.format, st.format0 = k, nil, nil, nil, nil, nil
-		st.editing, st.folders, st.options, st.notice, st.err, st.confirming, st.removing = nil, nil, optionsForm{}, "", nil, false, false
+		st.editing, st.folders, st.options, st.requests = nil, nil, optionsForm{}, requestsForm{}
+		st.notice, st.err, st.confirming, st.removing = "", nil, false, false
 	}
 	switch page {
 	case "profile":
@@ -229,6 +231,8 @@ func (a *App) acquisitionSection(c *ui.Context, r *ui.Route) {
 		a.downloadClientPage(c, id)
 	case "options":
 		a.acquisitionOptionsPage(c)
+	case "requests":
+		a.requestSettingsPage(c)
 	default:
 		a.acquisitionList(c)
 	}
@@ -360,13 +364,18 @@ func (a *App) acquisitionList(c *ui.Context) {
 			{"formats", "filter", ui.RGB(0xAF, 0x52, 0xDE), "formats"},
 			{"delays", "pending", ui.RGB(0xFF, 0x95, 0x00), "delays"},
 			{"releases", "sort", ui.RGB(0x00, 0x7A, 0xFF), "releases"},
+			{"requests", "discover", ui.RGB(0x5A, 0xC8, 0xFA), "requestsettings.title"},
 			{"options", "settings", ui.RGB(0x8E, 0x8E, 0x93), "options.options"},
 		} {
 			title := l.title
 			if !strings.Contains(title, ".") {
 				title = "acquisition." + title
 			}
-			if g.link(l.page, l.icon, l.color, style.T(c, title), style.T(c, title+"Detail"), true) {
+			detail := title + "Detail"
+			if t, ok := strings.CutSuffix(title, ".title"); ok {
+				detail = t + ".detail"
+			}
+			if g.link(l.page, l.icon, l.color, style.T(c, title), style.T(c, detail), true) {
 				a.router.Push(acquisitionPath(l.page, ""))
 			}
 		}

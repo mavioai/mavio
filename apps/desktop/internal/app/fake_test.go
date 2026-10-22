@@ -77,43 +77,44 @@ type fakeCore struct {
 	servers []*capiv1.ServerRecord
 	api     http.Handler // the server's API, which CallServer calls
 	// prefs and sessions are the user's on the server's API.
-	prefs         *userv1.PlaybackPreferences
-	sessions      []*sessionv1.Session
-	taskRuns      int                      // the tasks run
-	scans         int                      // the libraries scanned
-	titleRequests []*acquisitionv1.Request // the requests of titles
-	seasonGate    chan struct{}            // when set, holds a season's episodes until closed
-	discovers     []*acquisitionv1.DiscoverRequest
-	blocked       []int32 // the collections blocklisted
-	users         []*userv1.User
-	libraries     []*libraryv1.Library
-	invitations   []*userv1.Invitation
-	passwords     map[string]string // set by user
-	general       *systemv1.GeneralSettings
-	transcoding   *playbackv1.TranscodingSettings
-	outbound      *systemv1.OutboundProxies
-	catalogs      []string
-	apiKeys       []*authv1.ApiKey
-	proxies       []*systemv1.Proxy
-	remotes       []*storagev1.Remote
-	offline       map[string]*storagev1.OfflineDownloads // by remote
-	answers       []string
-	searchErr     error // when set, what searching a server fails with
-	notAdmin      bool  // whether the user signed in does not administer the server
-	acq           *fakeAcquisition
-	wanted        *fakeWanted
-	downloads     *fakeDownloads
-	subtitles     *fakeSubtitles
-	issues        *fakeIssues
-	backups       *fakeBackups
-	plugins       *fakePluginState
-	ai            *fakeAI
-	convs         *fakeConversations
-	assistant     *fakeAssistant
-	playlists     []*fakeList
-	collections   map[string]*fakeList
-	commands      []*sessionv1.SendCommandRequest // sent to the user's devices
-	metadata      metadataCalls
+	prefs           *userv1.PlaybackPreferences
+	sessions        []*sessionv1.Session
+	taskRuns        int                      // the tasks run
+	scans           int                      // the libraries scanned
+	titleRequests   []*acquisitionv1.Request // the requests of titles
+	seasonGate      chan struct{}            // when set, holds a season's episodes until closed
+	discovers       []*acquisitionv1.DiscoverRequest
+	requestSettings *acquisitionv1.RequestSettings
+	blocked         []int32 // the collections blocklisted
+	users           []*userv1.User
+	libraries       []*libraryv1.Library
+	invitations     []*userv1.Invitation
+	passwords       map[string]string // set by user
+	general         *systemv1.GeneralSettings
+	transcoding     *playbackv1.TranscodingSettings
+	outbound        *systemv1.OutboundProxies
+	catalogs        []string
+	apiKeys         []*authv1.ApiKey
+	proxies         []*systemv1.Proxy
+	remotes         []*storagev1.Remote
+	offline         map[string]*storagev1.OfflineDownloads // by remote
+	answers         []string
+	searchErr       error // when set, what searching a server fails with
+	notAdmin        bool  // whether the user signed in does not administer the server
+	acq             *fakeAcquisition
+	wanted          *fakeWanted
+	downloads       *fakeDownloads
+	subtitles       *fakeSubtitles
+	issues          *fakeIssues
+	backups         *fakeBackups
+	plugins         *fakePluginState
+	ai              *fakeAI
+	convs           *fakeConversations
+	assistant       *fakeAssistant
+	playlists       []*fakeList
+	collections     map[string]*fakeList
+	commands        []*sessionv1.SendCommandRequest // sent to the user's devices
+	metadata        metadataCalls
 
 	mu       sync.Mutex
 	calls    []string

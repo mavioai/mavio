@@ -170,4 +170,22 @@ func TestAcquisition(t *testing.T) {
 			t.Errorf("settings = %v, want a minimum free space of 200 and the rest kept", acq.settings)
 		}
 	})
+
+	// The request settings: a keyword blocklisted, shown by its name, and
+	// another found and added.
+	h.app.router.Push(acquisitionPath("requests", ""))
+	h.settle()
+	want("Requests", "Movies", "Shows", "Anime", "New Users", "Blocklisted Tags", "keyword k9", "Pages per Keyword")
+	st.requests.text, st.requests.query = "space", "space"
+	h.settle()
+	h.click("+ space station")
+	h.save(shots, "settings-acquisition-requests")
+	h.click("Save")
+	want("Saved.")
+	core := h.core
+	core.mu.Lock()
+	if got := core.requestSettings.GetBlocklistedTags(); !slices.Equal(got, []string{"dev.mavio.tmdb/k9", "dev.mavio.tmdb/k3"}) || !core.requestSettings.GetSeasonFolder() {
+		t.Errorf("blocklisted tags = %q, want k9 and k3 and the rest kept", got)
+	}
+	core.mu.Unlock()
 }
