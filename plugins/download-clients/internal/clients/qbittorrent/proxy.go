@@ -105,8 +105,10 @@ type api interface {
 	loaded(ctx context.Context, hash string) bool
 	properties(ctx context.Context, hash string) (*properties, error)
 	files(ctx context.Context, hash string) ([]file, error)
-	addURL(ctx context.Context, link, category string, r *client.Release) error
-	addFile(ctx context.Context, name string, data []byte, category string, r *client.Release) error
+	// addURL and addFile add a torrent of a kind in its category and
+	// folder.
+	addURL(ctx context.Context, link string, kind client.Kind, r *client.Release) error
+	addFile(ctx context.Context, name string, data []byte, kind client.Kind, r *client.Release) error
 	remove(ctx context.Context, hash string, deleteData bool) error
 	setCategory(ctx context.Context, hash, category string) error
 	addCategory(ctx context.Context, category string) error
@@ -382,13 +384,22 @@ func (p v2) files(ctx context.Context, hash string) ([]file, error) {
 	return out, p.processJSON(ctx, request{path: "/api/v2/torrents/files", query: url.Values{"hash": {hash}}}, &out)
 }
 
-// addForm is the form of adding a torrent: its category, initial state,
-// download order, content layout and seeding limits.
-func (p v2) addForm(ctx context.Context, form url.Values, category string, r *client.Release) error {
-	s := p.settings
-	if !blank(category) {
-		form.Set("category", category)
+// setDestination sets the category and folder of a torrent of a kind, as
+// the add endpoints of both APIs take them.
+func setDestination(form url.Values, s *settings, kind client.Kind) {
+	if c := s.Category(kind); !blank(c) {
+		form.Set("category", c)
 	}
+	if dir := s.Directory(kind); !blank(dir) {
+		form.Set("savepath", dir)
+	}
+}
+
+// addForm is the form of adding a torrent: its category, folder, initial
+// state, download order, content layout and seeding limits.
+func (p v2) addForm(ctx context.Context, form url.Values, kind client.Kind, r *client.Release) error {
+	s := p.settings
+	setDestination(form, s, kind)
 	if s.InitialState == stateStart || s.InitialState == stateStop {
 		v, err := p.apiVersion(ctx)
 		if err != nil {
@@ -436,9 +447,9 @@ func shareLimits(form url.Values, r *client.Release, always bool) {
 	}
 }
 
-func (p v2) addURL(ctx context.Context, link, category string, r *client.Release) error {
+func (p v2) addURL(ctx context.Context, link string, kind client.Kind, r *client.Release) error {
 	form := url.Values{"urls": {link}}
-	if err := p.addForm(ctx, form, category, r); err != nil {
+	if err := p.addForm(ctx, form, kind, r); err != nil {
 		return err
 	}
 	body, err := p.process(ctx, request{path: "/api/v2/torrents/add", form: form})
@@ -448,9 +459,9 @@ func (p v2) addURL(ctx context.Context, link, category string, r *client.Release
 	return failed(body, " by url")
 }
 
-func (p v2) addFile(ctx context.Context, name string, data []byte, category string, r *client.Release) error {
+func (p v2) addFile(ctx context.Context, name string, data []byte, kind client.Kind, r *client.Release) error {
 	form := url.Values{}
-	if err := p.addForm(ctx, form, category, r); err != nil {
+	if err := p.addForm(ctx, form, kind, r); err != nil {
 		return err
 	}
 	body, err := p.process(ctx, request{path: "/api/v2/torrents/add", form: form, fileName: name, file: data})
@@ -554,12 +565,10 @@ func (p v1) files(ctx context.Context, hash string) ([]file, error) {
 	return out, p.processJSON(ctx, request{path: "/query/propertiesFiles/" + url.PathEscape(hash)}, &out)
 }
 
-// addForm is the form of adding a torrent: its category and whether it
-// starts paused; v1 has no seeding limits.
-func (p v1) addForm(form url.Values, category string) {
-	if !blank(category) {
-		form.Set("category", category)
-	}
+// addForm is the form of adding a torrent: its category, folder and
+// whether it starts paused; v1 has no seeding limits.
+func (p v1) addForm(form url.Values, kind client.Kind) {
+	setDestination(form, p.settings, kind)
 	switch p.settings.InitialState {
 	case stateStart:
 		form.Set("paused", "false")
@@ -568,9 +577,9 @@ func (p v1) addForm(form url.Values, category string) {
 	}
 }
 
-func (p v1) addURL(ctx context.Context, link, category string, _ *client.Release) error {
+func (p v1) addURL(ctx context.Context, link string, kind client.Kind, _ *client.Release) error {
 	form := url.Values{"urls": {link}}
-	p.addForm(form, category)
+	p.addForm(form, kind)
 	body, err := p.process(ctx, request{path: "/command/download", form: form})
 	if err != nil {
 		return err
@@ -578,9 +587,9 @@ func (p v1) addURL(ctx context.Context, link, category string, _ *client.Release
 	return failed(body, " by url")
 }
 
-func (p v1) addFile(ctx context.Context, name string, data []byte, category string, _ *client.Release) error {
+func (p v1) addFile(ctx context.Context, name string, data []byte, kind client.Kind, _ *client.Release) error {
 	form := url.Values{}
-	p.addForm(form, category)
+	p.addForm(form, kind)
 	body, err := p.process(ctx, request{path: "/command/upload", form: form, fileName: name, file: data})
 	if err != nil {
 		return err

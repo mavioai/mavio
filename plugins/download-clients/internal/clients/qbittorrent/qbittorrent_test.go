@@ -482,6 +482,25 @@ func TestAdd(t *testing.T) {
 			t.Errorf("category = %q, want = %q", got, category)
 		}
 	})
+	// The folder of the release's kind, when set.
+	each(t, func(t *testing.T, f *fake, _ string, kind client.Kind) {
+		dirs := map[string]any{"movie_directory": "/downloads/movies", "tv_directory": "/downloads/tv"}
+		if _, err := add(t, newClient(t, f, dirs), client.Release{Kind: kind, Data: data, FileName: "a.torrent"}); err != nil {
+			t.Fatal(err)
+		}
+		want := map[client.Kind]string{client.Movie: "/downloads/movies", client.Series: "/downloads/tv"}[kind]
+		if posts := f.posts(); len(posts) != 1 || posts[0].Form.Get("savepath") != want {
+			t.Errorf("calls = %+v, want the torrent added to %s", posts, want)
+		}
+	})
+	each(t, func(t *testing.T, f *fake, _ string, kind client.Kind) {
+		if _, err := add(t, newClient(t, f, nil), client.Release{Kind: kind, Data: data, FileName: "a.torrent"}); err != nil {
+			t.Fatal(err)
+		}
+		if posts := f.posts(); len(posts) != 1 || posts[0].Form.Has("savepath") {
+			t.Errorf("calls = %+v, want no folder without a directory", posts)
+		}
+	})
 	// Download_should_get_hash_from_magnet_url
 	each(t, func(t *testing.T, f *fake, _ string, kind client.Kind) {
 		link := "magnet:?xt=urn:btih:ZPBPA2P6ROZPKRHK44D5OW6NHXU5Z6KR&tr=udp"

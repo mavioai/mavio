@@ -159,8 +159,8 @@ func TestContainerDefinitions(t *testing.T) {
 				t.Errorf("%s: field %s has prefix %q, want = %q", d.GetId(), f.GetName(), f.GetPrefix(), want)
 			}
 		}
-		if d.GetId() == "transmission" && !slices.Contains(fields, "movie_directory") {
-			t.Errorf("transmission: fields = %v, want = movie_directory among them", fields)
+		if d.GetId() != "sabnzbd" && !slices.Contains(fields, "movie_directory") {
+			t.Errorf("%s: fields = %v, want = movie_directory among them", d.GetId(), fields)
 		}
 		if !slices.Contains(fields, "movie_category") {
 			t.Errorf("%s: fields = %v, want = movie_category among them", d.GetId(), fields)
