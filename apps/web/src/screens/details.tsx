@@ -42,6 +42,7 @@ import {
   crewMoreClass,
   Dated,
   ExternalLinks,
+  itemLinks,
   minStudios,
   statusNames,
   TitleRatings,
@@ -1149,13 +1150,14 @@ function About({
   const tmdbId = kind ? Number(item.externalIds.tmdb) || 0 : 0;
   const titled = tmdbId > 0;
   const logos = useTitleLinks(server, kind || MediaKind.MOVIE, tmdbId, item.externalIds.imdb ?? "", item.externalIds.tvdb ?? "");
-  // A television opens no web pages.
-  const links = titled || tv ? [] : item.externalUrls;
+  // A television opens no web pages; those of a site with a logo show
+  // its logo, as a discovered title's do.
+  const [siteLinks, links] = titled || tv ? [[], []] : itemLinks(item.externalUrls);
   const ratings = titled || item.communityRating > 0 || item.criticRating > 0;
   const crew = libraryCredits(server, credits);
   const leading = crew.some((c) => !isCast(c));
   const streaming = title?.watchProviders ?? [];
-  if (!text && !ratings && !leading && tags.length === 0 && shownFacts.length === 0 && shownMedia.length === 0 && links.length === 0 && streaming.length === 0) {
+  if (!text && !ratings && !leading && tags.length === 0 && shownFacts.length === 0 && shownMedia.length === 0 && links.length === 0 && siteLinks.length === 0 && streaming.length === 0) {
     return null;
   }
   return (
@@ -1163,7 +1165,7 @@ function About({
       <h2 className="mb-4 type-title3">{t("item.details")}</h2>
       {/* On the television, a region in the page's flow, its overview and its facts in columns (docs/tv.md §6.2). */}
       <div data-focus-region data-focus-flow className="flex flex-col gap-x-16 gap-y-8 lg:flex-row">
-        {(text || leading || tags.length > 0 || links.length > 0 || titled) && (
+        {(text || leading || tags.length > 0 || links.length > 0 || siteLinks.length > 0 || titled) && (
           <div data-focus-column className="flex min-w-0 flex-col gap-5 lg:w-[44%] lg:shrink-0">
             {text && (
               <div className="flex flex-col gap-2">
@@ -1215,7 +1217,7 @@ function About({
                 ))}
               </div>
             )}
-            {titled && <ExternalLinks links={logos} className="justify-start pt-2" />}
+            {(titled || siteLinks.length > 0) && <ExternalLinks links={titled ? logos : siteLinks} className="justify-start pt-2" />}
           </div>
         )}
         <div data-focus-column data-focus-beside className="flex min-w-0 flex-1 flex-col gap-8">
@@ -1225,11 +1227,11 @@ function About({
               kind={kind}
               tmdbId={tmdbId}
               score={title && title.voteCount > 0 ? title.communityRating : undefined}
-              fallback={(item.communityRating > 0 || item.criticRating > 0) && <Ratings item={item} />}
+              fallback={(item.communityRating > 0 || item.criticRating > 0) && <Ratings item={item} className="items-center" />}
               className="items-center"
             />
           ) : (
-            ratings && <Ratings item={item} />
+            ratings && <Ratings item={item} className="items-center" />
           )}
           <FactList rows={shownFacts} />
           <WatchProviders providers={streaming} />
@@ -1240,30 +1242,28 @@ function About({
   );
 }
 
-/** The audience's rating out of 10 and the critics' score out of 100, large. */
-function Ratings({ item }: { item: Item }) {
-  const rows: [string, ReactNode, string][] = [];
+/**
+ * The audience's rating out of 10 and the critics' score out of 100, in a
+ * row as a discovered title's ratings are, each named when pointed at.
+ */
+function Ratings({ item, className }: { item: Item; className: string }) {
+  const rows: [string, ReactNode][] = [];
   if (item.communityRating > 0) {
     rows.push([
-      t("item.communityRating"),
-      <span className="inline-flex items-center gap-1.5">
-        <Icon name="rating" fill size={22} className="text-[#FFD60A]" />
+      `${t("item.communityRating")} ${item.communityRating.toFixed(1)} / 10`,
+      <>
+        <Icon name="rating" fill size={20} className="text-[#FFD60A]" />
         {item.communityRating.toFixed(1)}
-      </span>,
-      "/ 10",
+      </>,
     ]);
   }
-  if (item.criticRating > 0) rows.push([t("item.criticRating"), `${Math.round(item.criticRating)}%`, ""]);
+  if (item.criticRating > 0) rows.push([`${t("item.criticRating")} ${Math.round(item.criticRating)}%`, `${t("item.criticRating")} ${Math.round(item.criticRating)}%`]);
   return (
-    <div role="group" aria-label={t("item.ratings")} className="flex flex-wrap gap-3">
-      {rows.map(([label, value, scale]) => (
-        <div key={label} className="flex min-w-36 flex-col gap-1 rounded-[12px] bg-fill px-4 py-3">
-          <span className="type-footnote font-semibold text-text-secondary">{label}</span>
-          <span className="type-title2 font-bold tabular-nums">
-            {value}
-            {scale && <span className="ml-1 type-callout font-normal text-text-tertiary">{scale}</span>}
-          </span>
-        </div>
+    <div role="group" aria-label={t("item.ratings")} className={`flex flex-wrap gap-x-4 gap-y-1 ${className}`}>
+      {rows.map(([label, value]) => (
+        <span key={label} title={label} className="inline-flex items-center gap-1.5 type-callout font-semibold tabular-nums">
+          {value}
+        </span>
       ))}
     </div>
   );

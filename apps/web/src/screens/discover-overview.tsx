@@ -337,6 +337,19 @@ export function useTitleLinks(server: ServerEntry, kind: MediaKind, tmdbId: numb
   ].filter((l) => !!l);
 }
 
+/** The logos of the sites the server names its items' links by. */
+const siteLogos: Record<string, Omit<ExternalLink, "name" | "url">> = {
+  TMDB: { logo: tmdbLogo, width: "w-8" },
+  TheTVDB: { logo: tvdbLogo, width: "w-9", mono: true },
+  IMDb: { logo: imdbLogo, width: "w-8" },
+};
+
+/** An item's links elsewhere: those to sites with a logo as logos, and the others. */
+export function itemLinks(urls: { name: string; url: string }[]): [ExternalLink[], { name: string; url: string }[]] {
+  const known = urls.flatMap((u) => (siteLogos[u.name] ? [{ name: u.name, url: u.url, ...siteLogos[u.name] }] : []));
+  return [known, urls.filter((u) => !siteLogos[u.name])];
+}
+
 /** A link to a title or person elsewhere, with the site's logo. */
 export interface ExternalLink {
   name: string;
