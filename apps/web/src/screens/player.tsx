@@ -152,7 +152,9 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
     let hls: Hls | undefined;
     let cancelled = false;
     const state = () => ({ positionMs: v.currentTime * 1000, paused: v.paused });
-    (async () => {
+    // Started a tick later, so that an effect undone at once, as React's
+    // development mode does, starts no playback on the server.
+    const timer = setTimeout(async () => {
       try {
         const p = await Playback.start(
           servers,
@@ -199,9 +201,10 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
       } catch (err) {
         if (!cancelled) setError(errorMessage(err));
       }
-    })();
+    });
     return () => {
       cancelled = true;
+      clearTimeout(timer);
       startAt.current = v.currentTime > 0 ? Math.round(v.currentTime * 1000) : startAt.current;
       // Stopped before the video is torn down, which takes its position.
       const p = playback.current;
