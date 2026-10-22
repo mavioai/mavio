@@ -14,7 +14,7 @@ ARG NODE_VERSION=26.11.1
 ARG BUN_VERSION=1.4.3
 ARG RUST_VERSION=1.99.0
 ARG JELLYFIN_FFMPEG_VERSION=8.1.3-1
-ARG RCLONE_VERSION=1.75.2-mavio.2
+ARG RCLONE_VERSION=1.75.2-mavio.3
 ARG UV_VERSION=0.13.1
 
 FROM --platform=$BUILDPLATFORM ghcr.io/astral-sh/uv:${UV_VERSION} AS uv
@@ -85,8 +85,8 @@ RUN --mount=type=cache,target=/go/pkg/mod --mount=type=cache,target=/root/.cache
 FROM --platform=$BUILDPLATFORM debian:trixie-slim AS rclone
 ARG TARGETARCH RCLONE_VERSION
 # GitHub's SHA-256 digests of the release's Linux builds.
-ARG RCLONE_SHA256_amd64=a5fcc10f69b0a66229967a8d4caa4b0232cfd47164483dad6d6a57000b12eb5a
-ARG RCLONE_SHA256_arm64=94e4c03f8d4db4b21b20247982c03c012397aafe1e9f868221c3eb2a1806a357
+ARG RCLONE_SHA256_amd64=0b2664d82cb48b2af3e3484b7e4c6a4d4e04f7e63c942c6e59799dbbfd534099
+ARG RCLONE_SHA256_arm64=185c4dcdd2d03be69a3a3c468fca238364baeb5b1203d566156f03b914bf5012
 RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates curl unzip \
 	&& rm -rf /var/lib/apt/lists/*
 RUN set -eu; \
