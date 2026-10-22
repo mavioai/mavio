@@ -78,7 +78,7 @@ IMPORT_MODE_MOVE: ImportMode
 IMPORT_MODE_COPY: ImportMode
 
 class DownloadClient(_message.Message):
-    __slots__ = ("plugin_id", "id", "name", "definition_id", "protocol", "enabled", "priority", "disabled_until", "failure")
+    __slots__ = ("plugin_id", "id", "name", "definition_id", "protocol", "enabled", "priority", "disabled_until", "failure", "container")
     PLUGIN_ID_FIELD_NUMBER: _ClassVar[int]
     ID_FIELD_NUMBER: _ClassVar[int]
     NAME_FIELD_NUMBER: _ClassVar[int]
@@ -88,6 +88,7 @@ class DownloadClient(_message.Message):
     PRIORITY_FIELD_NUMBER: _ClassVar[int]
     DISABLED_UNTIL_FIELD_NUMBER: _ClassVar[int]
     FAILURE_FIELD_NUMBER: _ClassVar[int]
+    CONTAINER_FIELD_NUMBER: _ClassVar[int]
     plugin_id: str
     id: str
     name: str
@@ -97,7 +98,8 @@ class DownloadClient(_message.Message):
     priority: int
     disabled_until: _timestamp_pb2.Timestamp
     failure: str
-    def __init__(self, plugin_id: _Optional[str] = ..., id: _Optional[str] = ..., name: _Optional[str] = ..., definition_id: _Optional[str] = ..., protocol: _Optional[_Union[_release_pb2.DownloadProtocol, str]] = ..., enabled: _Optional[bool] = ..., priority: _Optional[int] = ..., disabled_until: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ..., failure: _Optional[str] = ...) -> None: ...
+    container: str
+    def __init__(self, plugin_id: _Optional[str] = ..., id: _Optional[str] = ..., name: _Optional[str] = ..., definition_id: _Optional[str] = ..., protocol: _Optional[_Union[_release_pb2.DownloadProtocol, str]] = ..., enabled: _Optional[bool] = ..., priority: _Optional[int] = ..., disabled_until: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ..., failure: _Optional[str] = ..., container: _Optional[str] = ...) -> None: ...
 
 class ListDownloadClientsRequest(_message.Message):
     __slots__ = ()

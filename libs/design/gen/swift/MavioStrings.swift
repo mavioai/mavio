@@ -3527,6 +3527,9 @@ public enum MavioStrings {
     /// Footer of a download client's folders
     public static var clientFoldersFooter: String { NSLocalizedString("client.foldersFooter", bundle: .module, comment: "") }
 
+    /// Footer of the folders of a download client running in a container the server set up, which takes no folders of its own
+    public static var clientContainerFooter: String { NSLocalizedString("client.containerFooter", bundle: .module, comment: "") }
+
     /// Placeholder of a folder's path field: the server reads the folder as the client names it
     public static var clientReadAt: String { NSLocalizedString("client.readAt", bundle: .module, comment: "") }
 

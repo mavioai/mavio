@@ -20053,6 +20053,24 @@
         }
       }
     },
+    "client.containerFooter": {
+      "comment": "Footer of the folders of a download client running in a container the server set up, which takes no folders of its own",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The client runs in a container the server set up, which puts downloads in its own folders; they are chosen with the plugin's container dependency. Imports hard link files to libraries on the same volume, and copy them otherwise."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "该客户端运行在服务器设置的容器中，下载放在容器自己的文件夹里，这些文件夹在插件的容器依赖中选择。导入时，与媒体库在同一卷上的文件以硬链接导入，否则复制。"
+          }
+        }
+      }
+    },
     "client.readAt": {
       "comment": "Placeholder of a folder's path field: the server reads the folder as the client names it",
       "extractionState": "manual",

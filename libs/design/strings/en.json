@@ -1114,6 +1114,7 @@
   "client.settings": { "message": "Client Settings", "description": "Link to the plugin settings where the download client is set up" },
   "client.folders": { "message": "Folders", "description": "Group of a download client's folders" },
   "client.foldersFooter": { "message": "Leave a folder empty when the server reads it as the client names it. Elsewhere, enter an absolute path of the server or a remote's folder, such as remote:nas:downloads. Imports hard link files to libraries on the same volume or remote, and copy them otherwise.", "description": "Footer of a download client's folders" },
+  "client.containerFooter": { "message": "The client runs in a container the server set up, which puts downloads in its own folders; they are chosen with the plugin's container dependency. Imports hard link files to libraries on the same volume, and copy them otherwise.", "description": "Footer of the folders of a download client running in a container the server set up, which takes no folders of its own" },
   "client.readAt": { "message": "Read here", "description": "Placeholder of a folder's path field: the server reads the folder as the client names it" },
   "client.readable": { "message": "Readable", "description": "A folder the server reads" },
   "client.links": { "message": "Hard links to {paths}", "description": "Libraries a folder's imports hard link to" },

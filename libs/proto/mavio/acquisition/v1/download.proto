@@ -75,6 +75,10 @@ message DownloadClient {
   // Set while the client is left out after failing, until this time.
   google.protobuf.Timestamp disabled_until = 8;
   string failure = 9;
+  // The plugin's container dependency the client runs in, whose folders
+  // are set with the container rather than as the client's; empty for
+  // clients the administrator runs.
+  string container = 10;
 }
 
 message ListDownloadClientsRequest {}

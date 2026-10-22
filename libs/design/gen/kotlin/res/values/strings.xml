@@ -2242,6 +2242,8 @@
     <string name="client_folders">Folders</string>
     <!-- Footer of a download client's folders -->
     <string name="client_folders_footer">Leave a folder empty when the server reads it as the client names it. Elsewhere, enter an absolute path of the server or a remote\'s folder, such as remote:nas:downloads. Imports hard link files to libraries on the same volume or remote, and copy them otherwise.</string>
+    <!-- Footer of the folders of a download client running in a container the server set up, which takes no folders of its own -->
+    <string name="client_container_footer">The client runs in a container the server set up, which puts downloads in its own folders; they are chosen with the plugin\'s container dependency. Imports hard link files to libraries on the same volume, and copy them otherwise.</string>
     <!-- Placeholder of a folder's path field: the server reads the folder as the client names it -->
     <string name="client_read_at">Read here</string>
     <!-- A folder the server reads -->

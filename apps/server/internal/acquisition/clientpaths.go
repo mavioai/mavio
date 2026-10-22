@@ -280,15 +280,20 @@ func (r *Runtime) linkable(ctx context.Context, folder, lib string) bool {
 }
 
 // SetClientPaths replaces the download path mappings of a client, but for
-// its container's, and returns its folders as ClientPaths does.
+// its container's, and returns its folders as ClientPaths does. A
+// container's client takes none: its folders are its container's.
 func (r *Runtime) SetClientPaths(ctx context.Context, pluginID, clientID string, paths []ClientPath) ([]ClientPath, string, error) {
-	if _, err := r.client(ctx, pluginID, clientID); err != nil {
+	c, err := r.client(ctx, pluginID, clientID)
+	if err != nil {
 		return nil, "", err
 	}
 	var ms []core.DownloadPathMapping
 	for _, p := range paths {
 		if p.LocalPath == "" || p.Container {
 			continue
+		}
+		if c.GetContainer() != "" {
+			return nil, "", fmt.Errorf("%w: the folders of the client of container %s are set with the container", core.ErrInvalid, c.GetContainer())
 		}
 		local := p.LocalPath
 		if !core.IsRemotePath(local) {

@@ -2028,6 +2028,11 @@
           "failure": {
             "type": "string",
             "title": "failure"
+          },
+          "container": {
+            "type": "string",
+            "title": "container",
+            "description": "The plugin's container dependency the client runs in, whose folders\n are set with the container rather than as the client's; empty for\n clients the administrator runs."
           }
         },
         "title": "DownloadClient",

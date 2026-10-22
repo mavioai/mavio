@@ -43,6 +43,7 @@ func (s *DownloadService) ListDownloadClients(ctx context.Context, _ *acquisitio
 			PluginId: new(c.PluginID), Id: new(c.GetId()), Name: new(c.GetName()), DefinitionId: new(c.GetDefinitionId()),
 			Protocol: new(acquisitionv1.DownloadProtocol(c.GetProtocol())), Enabled: new(c.GetEnabled()),
 			Priority: new(c.GetPriority()), DisabledUntil: c.GetDisabledUntil(), Failure: new(c.GetFailure()),
+			Container: new(c.GetContainer()),
 		}.Build()
 	}
 	return acquisitionv1.ListDownloadClientsResponse_builder{Clients: out, Failures: failures}.Build(), nil

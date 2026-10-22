@@ -32,6 +32,12 @@ pub struct DownloadClientView<'a> {
     >,
     /// Field 9: `failure`
     pub failure: ::core::option::Option<&'a str>,
+    /// The plugin's container dependency the client runs in, whose folders
+    /// are set with the container rather than as the client's; empty for
+    /// clients the administrator runs.
+    ///
+    /// Field 10: `container`
+    pub container: ::core::option::Option<&'a str>,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for DownloadClientView<'a> {
@@ -143,6 +149,13 @@ impl<'a> ::buffa::MessageView<'a> for DownloadClientView<'a> {
                 )?;
                 view.failure = Some(::buffa::types::borrow_str(&mut cur)?);
             }
+            10u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.container = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
             _ => {
                 ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
                 let span_len = before_tag.len() - cur.len();
@@ -182,6 +195,7 @@ impl<'a> ::buffa::MessageView<'a> for DownloadClientView<'a> {
                 None => ::buffa::MessageField::none(),
             },
             failure: self.failure.map(|s| s.to_string()),
+            container: self.container.map(|s| s.to_string()),
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -223,6 +237,9 @@ impl<'a> ::buffa::ViewEncode<'a> for DownloadClientView<'a> {
                     + inner_size as u64;
         }
         if let Some(ref v) = self.failure {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.container {
             size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
@@ -267,6 +284,9 @@ impl<'a> ::buffa::ViewEncode<'a> for DownloadClientView<'a> {
         }
         if let Some(ref v) = self.failure {
             ::buffa::types::put_string_field(9u32, v, buf);
+        }
+        if let Some(ref v) = self.container {
+            ::buffa::types::put_string_field(10u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -417,6 +437,15 @@ impl DownloadClientOwnedView {
     #[must_use]
     pub fn failure(&self) -> ::core::option::Option<&'_ str> {
         self.0.reborrow().failure
+    }
+    /// The plugin's container dependency the client runs in, whose folders
+    /// are set with the container rather than as the client's; empty for
+    /// clients the administrator runs.
+    ///
+    /// Field 10: `container`
+    #[must_use]
+    pub fn container(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().container
     }
 }
 impl ::core::convert::From<::buffa::OwnedView<DownloadClientView<'static>>>

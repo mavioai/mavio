@@ -2,6 +2,7 @@ package acquisition
 
 import (
 	"context"
+	"errors"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -91,6 +92,10 @@ func TestClientPathsContainer(t *testing.T) {
 	check("ClientPaths", paths, err)
 	paths, _, err = e.rt.SetClientPaths(e.ctx, "dl", "qb", paths)
 	check("SetClientPaths", paths, err)
+	added := append(paths, ClientPath{RemotePath: "/elsewhere", LocalPath: e.dlDir})
+	if _, _, err := e.rt.SetClientPaths(e.ctx, "dl", "qb", added); !errors.Is(err, core.ErrInvalid) {
+		t.Errorf("SetClientPaths with a folder of its own: err = %v, want = %v", err, core.ErrInvalid)
+	}
 	if stored, err := e.rt.Store.DownloadPathMappings().List(e.ctx); err != nil || len(stored) != 0 {
 		t.Errorf("stored mappings = %+v, %v; want = none", stored, err)
 	}

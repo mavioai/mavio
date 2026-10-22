@@ -1,7 +1,8 @@
 // A download client's page in Acquisition (docs/clients.md §6.3.11): a
 // link to the plugin that set it up, and the folders the client puts
 // downloads in, with where the server reads each, whether it can, and the
-// libraries imports from it hard link to.
+// libraries imports from it hard link to. A container's client takes no
+// folders of its own: they are its container's.
 import { create } from "@bufbuild/protobuf";
 import { errorMessage, type ServerEntry, useDownloadClientPaths, useDownloadClients, usePlugins, useUpdateDownloadClientPaths } from "@mavio/client-ts";
 import { type DownloadClientPath, DownloadClientPathSchema } from "@mavio/proto/mavio/acquisition/v1/download_pb";
@@ -41,6 +42,7 @@ export function DownloadClientPage({ server, id }: { server: ServerEntry; id: st
   const paths = useDownloadClientPaths(server, pluginId, clientId);
   const update = useUpdateDownloadClientPaths(server, pluginId, clientId);
   const client = clients.data?.clients.find((c) => c.pluginId === pluginId && c.id === clientId);
+  const inContainer = !!client?.container;
   const pluginName = plugins.data?.find((p) => p.manifest?.id === pluginId)?.manifest?.name || pluginId;
   const saved = paths.data?.paths;
   const [d, setD] = useState<Draft[]>();
@@ -59,9 +61,10 @@ export function DownloadClientPage({ server, id }: { server: ServerEntry; id: st
       <Group>
         <PageLink search={{ plugin: pluginId }} icon="plugins" color="#5856D6" label={t("client.settings")} detail={pluginName} />
       </Group>
-      <Group title={t("client.folders")} footer={t("client.foldersFooter")}>
+      <Group title={t("client.folders")} footer={t(inContainer ? "client.containerFooter" : "client.foldersFooter")}>
         {(d ?? []).map((x, i) => {
           const p = !x.added ? saved?.find((s) => s.remotePath === x.remote) : undefined;
+          const fixed = x.container || inContainer;
           const unchanged = p !== undefined && x.local === p.localPath;
           return (
             <div key={x.added ? `added-${i}` : x.remote} className="flex flex-col gap-2 px-4 py-3">
@@ -80,7 +83,7 @@ export function DownloadClientPage({ server, id }: { server: ServerEntry; id: st
                 <span aria-hidden className="text-text-secondary">
                   →
                 </span>
-                {x.container ? (
+                {fixed ? (
                   <span className="type-body break-all font-mono">{x.local}</span>
                 ) : (
                   <input
@@ -92,7 +95,7 @@ export function DownloadClientPage({ server, id }: { server: ServerEntry; id: st
                     onChange={(e) => set(i, { local: e.target.value })}
                   />
                 )}
-                {!x.container && (x.added || (p && !p.rootFolder)) && (
+                {!fixed && (x.added || (p && !p.rootFolder)) && (
                   <Button variant="plain" className="text-danger" onClick={() => setD((xs) => xs?.filter((_, j) => j !== i))}>
                     {t("rules.remove")}
                   </Button>
@@ -117,7 +120,7 @@ export function DownloadClientPage({ server, id }: { server: ServerEntry; id: st
                   )}
                 </p>
               )}
-              {p && unchanged && !p.readable && p.suggestedPath && x.local === "" && (
+              {p && unchanged && !fixed && !p.readable && p.suggestedPath && x.local === "" && (
                 <div>
                   <Button variant="secondary" onClick={() => set(i, { local: p.suggestedPath })}>
                     {t("client.use", { path: p.suggestedPath })}
@@ -130,9 +133,9 @@ export function DownloadClientPage({ server, id }: { server: ServerEntry; id: st
         {paths.isSuccess && d?.length === 0 && !paths.data.failure && <p className="px-4 py-3 type-callout text-text-secondary">{t("client.noFolders")}</p>}
         {paths.data?.failure && <p className="line-clamp-4 px-4 py-3 type-callout break-words text-danger" title={paths.data.failure}>{t("client.unreported", { failure: paths.data.failure })}</p>}
         {paths.isError && <p className="px-4 py-3 type-callout text-danger">{errorMessage(paths.error)}</p>}
-        {d && <AddRow label={t("client.addFolder")} onClick={() => setD((xs) => [...(xs ?? []), { remote: "", local: "", added: true }])} />}
+        {d && !inContainer && <AddRow label={t("client.addFolder")} onClick={() => setD((xs) => [...(xs ?? []), { remote: "", local: "", added: true }])} />}
       </Group>
-      {d && (
+      {d && !inContainer && (
         <div className="flex flex-wrap items-center gap-3">
           <Button disabled={!changed || !valid || update.isPending} onClick={save}>
             {update.isPending ? "…" : t("action.save")}

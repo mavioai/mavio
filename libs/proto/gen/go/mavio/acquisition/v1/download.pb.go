@@ -263,6 +263,7 @@ type DownloadClient struct {
 	xxx_hidden_Priority      int32                  `protobuf:"varint,7,opt,name=priority"`
 	xxx_hidden_DisabledUntil *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=disabled_until,json=disabledUntil"`
 	xxx_hidden_Failure       *string                `protobuf:"bytes,9,opt,name=failure"`
+	xxx_hidden_Container     *string                `protobuf:"bytes,10,opt,name=container"`
 	XXX_raceDetectHookData   protoimpl.RaceDetectHookData
 	XXX_presence             [1]uint32
 	unknownFields            protoimpl.UnknownFields
@@ -374,39 +375,49 @@ func (x *DownloadClient) GetFailure() string {
 	return ""
 }
 
+func (x *DownloadClient) GetContainer() string {
+	if x != nil {
+		if x.xxx_hidden_Container != nil {
+			return *x.xxx_hidden_Container
+		}
+		return ""
+	}
+	return ""
+}
+
 func (x *DownloadClient) SetPluginId(v string) {
 	x.xxx_hidden_PluginId = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 9)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 10)
 }
 
 func (x *DownloadClient) SetId(v string) {
 	x.xxx_hidden_Id = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 9)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 10)
 }
 
 func (x *DownloadClient) SetName(v string) {
 	x.xxx_hidden_Name = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 9)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 10)
 }
 
 func (x *DownloadClient) SetDefinitionId(v string) {
 	x.xxx_hidden_DefinitionId = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 9)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 10)
 }
 
 func (x *DownloadClient) SetProtocol(v DownloadProtocol) {
 	x.xxx_hidden_Protocol = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 9)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 10)
 }
 
 func (x *DownloadClient) SetEnabled(v bool) {
 	x.xxx_hidden_Enabled = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 9)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 10)
 }
 
 func (x *DownloadClient) SetPriority(v int32) {
 	x.xxx_hidden_Priority = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 9)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 10)
 }
 
 func (x *DownloadClient) SetDisabledUntil(v *timestamppb.Timestamp) {
@@ -415,7 +426,12 @@ func (x *DownloadClient) SetDisabledUntil(v *timestamppb.Timestamp) {
 
 func (x *DownloadClient) SetFailure(v string) {
 	x.xxx_hidden_Failure = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 8, 9)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 8, 10)
+}
+
+func (x *DownloadClient) SetContainer(v string) {
+	x.xxx_hidden_Container = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 10)
 }
 
 func (x *DownloadClient) HasPluginId() bool {
@@ -481,6 +497,13 @@ func (x *DownloadClient) HasFailure() bool {
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 8)
 }
 
+func (x *DownloadClient) HasContainer() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 9)
+}
+
 func (x *DownloadClient) ClearPluginId() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_PluginId = nil
@@ -525,6 +548,11 @@ func (x *DownloadClient) ClearFailure() {
 	x.xxx_hidden_Failure = nil
 }
 
+func (x *DownloadClient) ClearContainer() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 9)
+	x.xxx_hidden_Container = nil
+}
+
 type DownloadClient_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
@@ -540,6 +568,10 @@ type DownloadClient_builder struct {
 	// Set while the client is left out after failing, until this time.
 	DisabledUntil *timestamppb.Timestamp
 	Failure       *string
+	// The plugin's container dependency the client runs in, whose folders
+	// are set with the container rather than as the client's; empty for
+	// clients the administrator runs.
+	Container *string
 }
 
 func (b0 DownloadClient_builder) Build() *DownloadClient {
@@ -547,37 +579,41 @@ func (b0 DownloadClient_builder) Build() *DownloadClient {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.PluginId != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 9)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 10)
 		x.xxx_hidden_PluginId = b.PluginId
 	}
 	if b.Id != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 9)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 10)
 		x.xxx_hidden_Id = b.Id
 	}
 	if b.Name != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 9)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 10)
 		x.xxx_hidden_Name = b.Name
 	}
 	if b.DefinitionId != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 9)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 10)
 		x.xxx_hidden_DefinitionId = b.DefinitionId
 	}
 	if b.Protocol != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 9)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 10)
 		x.xxx_hidden_Protocol = *b.Protocol
 	}
 	if b.Enabled != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 9)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 10)
 		x.xxx_hidden_Enabled = *b.Enabled
 	}
 	if b.Priority != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 9)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 10)
 		x.xxx_hidden_Priority = *b.Priority
 	}
 	x.xxx_hidden_DisabledUntil = b.DisabledUntil
 	if b.Failure != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 8, 9)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 8, 10)
 		x.xxx_hidden_Failure = b.Failure
+	}
+	if b.Container != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 10)
+		x.xxx_hidden_Container = b.Container
 	}
 	return m0
 }
@@ -5045,7 +5081,7 @@ var File_mavio_acquisition_v1_download_proto protoreflect.FileDescriptor
 
 const file_mavio_acquisition_v1_download_proto_rawDesc = "" +
 	"\n" +
-	"#mavio/acquisition/v1/download.proto\x12\x14mavio.acquisition.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1egoogle/protobuf/duration.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\"mavio/acquisition/v1/release.proto\"\xcd\x02\n" +
+	"#mavio/acquisition/v1/download.proto\x12\x14mavio.acquisition.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1egoogle/protobuf/duration.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\"mavio/acquisition/v1/release.proto\"\xeb\x02\n" +
 	"\x0eDownloadClient\x12\x1b\n" +
 	"\tplugin_id\x18\x01 \x01(\tR\bpluginId\x12\x0e\n" +
 	"\x02id\x18\x02 \x01(\tR\x02id\x12\x12\n" +
@@ -5055,7 +5091,9 @@ const file_mavio_acquisition_v1_download_proto_rawDesc = "" +
 	"\aenabled\x18\x06 \x01(\bR\aenabled\x12\x1a\n" +
 	"\bpriority\x18\a \x01(\x05R\bpriority\x12A\n" +
 	"\x0edisabled_until\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\rdisabledUntil\x12\x18\n" +
-	"\afailure\x18\t \x01(\tR\afailure\"\x1c\n" +
+	"\afailure\x18\t \x01(\tR\afailure\x12\x1c\n" +
+	"\tcontainer\x18\n" +
+	" \x01(\tR\tcontainer\"\x1c\n" +
 	"\x1aListDownloadClientsRequest\"\xf7\x01\n" +
 	"\x1bListDownloadClientsResponse\x12>\n" +
 	"\aclients\x18\x01 \x03(\v2$.mavio.acquisition.v1.DownloadClientR\aclients\x12[\n" +

@@ -437,6 +437,12 @@ pub struct DownloadClient {
     >,
     /// Field 9: `failure`
     pub failure: ::core::option::Option<::buffa::alloc::string::String>,
+    /// The plugin's container dependency the client runs in, whose folders
+    /// are set with the container rather than as the client's; empty for
+    /// clients the administrator runs.
+    ///
+    /// Field 10: `container`
+    pub container: ::core::option::Option<::buffa::alloc::string::String>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -452,6 +458,7 @@ impl ::core::fmt::Debug for DownloadClient {
             .field("priority", &self.priority)
             .field("disabled_until", &self.disabled_until)
             .field("failure", &self.failure)
+            .field("container", &self.container)
             .finish()
     }
 }
@@ -534,6 +541,16 @@ impl DownloadClient {
         self.failure = Some(value.into());
         self
     }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::container`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_container(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.container = Some(value.into());
+        self
+    }
 }
 ::buffa::impl_default_instance!(DownloadClient);
 impl ::buffa::MessageName for DownloadClient {
@@ -587,6 +604,9 @@ impl ::buffa::Message for DownloadClient {
         if let Some(ref v) = self.failure {
             size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
+        if let Some(ref v) = self.container {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -628,6 +648,9 @@ impl ::buffa::Message for DownloadClient {
         }
         if let Some(ref v) = self.failure {
             ::buffa::types::put_string_field(9u32, v, buf);
+        }
+        if let Some(ref v) = self.container {
+            ::buffa::types::put_string_field(10u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -734,6 +757,18 @@ impl ::buffa::Message for DownloadClient {
                     buf,
                 )?;
             }
+            10u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .container
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -751,6 +786,7 @@ impl ::buffa::Message for DownloadClient {
         self.priority = ::core::option::Option::None;
         self.disabled_until = ::buffa::MessageField::none();
         self.failure = ::core::option::Option::None;
+        self.container = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }

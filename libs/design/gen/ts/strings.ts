@@ -1102,6 +1102,7 @@ export type MessageKey =
   | 'client.settings'
   | 'client.folders'
   | 'client.foldersFooter'
+  | 'client.containerFooter'
   | 'client.readAt'
   | 'client.readable'
   | 'client.links'
@@ -3200,6 +3201,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "client.settings": "Client Settings",
     "client.folders": "Folders",
     "client.foldersFooter": "Leave a folder empty when the server reads it as the client names it. Elsewhere, enter an absolute path of the server or a remote's folder, such as remote:nas:downloads. Imports hard link files to libraries on the same volume or remote, and copy them otherwise.",
+    "client.containerFooter": "The client runs in a container the server set up, which puts downloads in its own folders; they are chosen with the plugin's container dependency. Imports hard link files to libraries on the same volume, and copy them otherwise.",
     "client.readAt": "Read here",
     "client.readable": "Readable",
     "client.links": "Hard links to {paths}",
@@ -5296,6 +5298,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "client.settings": "客户端设置",
     "client.folders": "文件夹",
     "client.foldersFooter": "服务器按客户端所给路径就能读取的文件夹留空即可。否则填写服务器上的绝对路径或远端的文件夹（如 remote:nas:downloads）。导入时，与媒体库在同一卷或同一远端的文件会建立硬链接，否则复制。",
+    "client.containerFooter": "该客户端运行在服务器设置的容器中，下载放在容器自己的文件夹里，这些文件夹在插件的容器依赖中选择。导入时，与媒体库在同一卷上的文件以硬链接导入，否则复制。",
     "client.readAt": "就在此处读取",
     "client.readable": "可读取",
     "client.links": "硬链接到 {paths}",
