@@ -193,7 +193,7 @@
         // MARK: Cast
 
         /// The cast in billing order, then the creators, directors and
-        /// writers; See All at its title on the desktop, at its end in
+        /// writers; See All at its arrows on the desktop, at its end in
         /// television mode (docs/tv.md §6.2).
         private func cast() -> NSView? {
             let shown = details.credits.filter { $0.job.isCast || [.creator, .director, .writer].contains($0.job) }
@@ -202,13 +202,9 @@
             let accessory: NSView? =
                 theme.isTV
                 ? nil
-                : NSStackView.horizontal(
-                    [
-                        Spacer(),
-                        MavioButton(MavioStrings.creditsAll, kind: .link, theme: theme) { [weak page] in
-                            page?.open(route)
-                        },
-                    ], spacing: 0)
+                : MavioButton(MavioStrings.creditsAll, kind: .link, theme: theme) { [weak page] in
+                    page?.open(route)
+                }
             let shelf = Shelf(MavioStrings.itemCast, accessory: accessory, theme: theme)
             let serverId = card.serverId
             let page = page

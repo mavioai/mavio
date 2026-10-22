@@ -186,24 +186,15 @@
         /// The row of cards.
         public let row: CardRow
 
-        /// A shelf titled title, with accessory after the title.
+        /// A shelf titled title, with accessory, as See All, at the end of
+        /// its title's row, before the arrows.
         public init(_ title: String, accessory: NSView? = nil, theme: Theme) {
             row = CardRow(theme: theme)
             super.init(frame: .zero)
             translatesAutoresizingMaskIntoConstraints = false
             let label = NSTextField.label(title, theme.fonts.title3, color: theme.colors.textPrimary)
-            var header: [NSView] = [label]
-            if let accessory {
-                // An accessory starting with a space, as See All, stretches
-                // before the space below, ending at the arrows.
-                (accessory as? NSStackView)?.setHuggingPriority(.init(100), for: .horizontal)
-                header.append(accessory)
-            }
-            // Stretching less than the title, so that an accessory without
-            // a space keeps beside it.
-            let rest = Spacer()
-            rest.setContentHuggingPriority(.init(200), for: .horizontal)
-            header.append(rest)
+            var header: [NSView] = [label, Spacer()]
+            if let accessory { header.append(accessory) }
             if !theme.isTV {
                 let back = MavioButton(icon: "back", kind: .circle, theme: theme) { [weak self] in
                     self?.row.page(forward: false)

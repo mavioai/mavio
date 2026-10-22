@@ -437,7 +437,7 @@
         // MARK: Cast
 
         /// The first twenty of the cast, each opening their page, with See
-        /// All opening the whole cast and crew: beside the row's title on
+        /// All opening the whole cast and crew: at the row's arrows on
         /// the desktop, as a card at its end in television mode.
         private func castShelf(_ info: TitleInfo) -> NSView? {
             let shown = Array(info.credits.filter(\.isCast).sorted { $0.order < $1.order }.prefix(20))
@@ -445,13 +445,9 @@
             let route = Route.titleCredits(serverId: serverId, kind: info.mediaKind, tmdbId: info.tmdbID, crew: false)
             var accessory: NSView?
             if !theme.isTV {
-                accessory = NSStackView.horizontal(
-                    [
-                        Spacer(),
-                        MavioButton(MavioStrings.creditsAll, kind: .link, theme: theme) { [weak self] in
-                            self?.open(route)
-                        },
-                    ], spacing: 0)
+                accessory = MavioButton(MavioStrings.creditsAll, kind: .link, theme: theme) { [weak self] in
+                    self?.open(route)
+                }
             }
             let shelf = Shelf(MavioStrings.itemCast, accessory: accessory, theme: theme)
             let serverId = serverId

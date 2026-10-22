@@ -133,13 +133,9 @@
             let query = query
             var accessory: NSView?
             if more, !theme.isTV {
-                accessory = NSStackView.horizontal(
-                    [
-                        Spacer(),
-                        MavioButton(MavioStrings.homeMore, kind: .link, theme: theme) { [weak page] in
-                            page?.open(.catalog(query))
-                        },
-                    ], spacing: 0)
+                accessory = MavioButton(MavioStrings.homeMore, kind: .link, theme: theme) { [weak page] in
+                    page?.open(.catalog(query))
+                }
             }
             let shelf = Shelf(query.title, accessory: accessory, theme: theme)
             let seeAll = more && theme.isTV
