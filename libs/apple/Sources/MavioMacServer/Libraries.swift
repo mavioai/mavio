@@ -356,7 +356,7 @@
             started = true
             run { [weak self] in
                 guard let self else { return }
-                (languages, countries) = await model.localizationChoices(server)
+                (languages, countries) = await model.localizationChoices(server.id)
                 endEditing()
                 rebuild()
             }

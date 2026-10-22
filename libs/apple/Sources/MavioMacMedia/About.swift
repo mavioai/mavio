@@ -176,9 +176,18 @@
 
         private var ratings: Bool { (details.communityRating ?? 0) > 0 || (details.criticRating ?? 0) > 0 }
 
-        /// The pages about it as the library tells, for what is not titled;
-        /// none in television mode, which opens no web pages.
-        private var pages: [ExternalLink] { titled || theme.isTV ? [] : details.links }
+        /// The pages about it as the library tells, for what is not titled,
+        /// but those of a site with a logo; none in television mode, which
+        /// opens no web pages.
+        private var pages: [ExternalLink] {
+            titled || theme.isTV ? [] : details.links.filter { siteLink(name: $0.name, url: $0.url) == nil }
+        }
+
+        /// The pages of sites with a logo, shown by it as a discovered
+        /// title's links are.
+        private var sitePages: [TitleLink] {
+            titled || theme.isTV ? [] : details.links.compactMap { siteLink(name: $0.name, url: $0.url) }
+        }
 
         // MARK: Building
 
@@ -189,10 +198,11 @@
             let overview = details.overview
             let empty =
                 overview == nil && !ratings && !titled && crew.isEmpty && tags.isEmpty && facts.isEmpty
-                && media.isEmpty && pages.isEmpty
+                && media.isEmpty && pages.isEmpty && sitePages.isEmpty
             guard !empty else { return }
             let hasLeading =
-                overview != nil || !crew.isEmpty || !tags.isEmpty || !pages.isEmpty || (titled && !theme.isTV)
+                overview != nil || !crew.isEmpty || !tags.isEmpty || !pages.isEmpty || !sitePages.isEmpty
+                || (titled && !theme.isTV)
             var trailingViews: [NSView] = []
             if let ratings = ratingsView() { trailingViews.append(ratings) }
             if let facts = factGrid(facts, links: links, page: page) { trailingViews.append(facts) }
@@ -287,10 +297,15 @@
                 wrap.widthAnchor.constraint(equalTo: stack.widthAnchor).isActive = true
                 views.append(stack)
             }
-            if let kind = mediaKind, titled, !theme.isTV {
-                let links = titleLinks(
-                    kind: kind, tmdbId: tmdbId, imdb: details.externalIds["imdb"] ?? "",
-                    tvdb: details.externalIds["tvdb"] ?? "", ratings: titleRatings ?? [])
+            let links =
+                if let kind = mediaKind, titled, !theme.isTV {
+                    titleLinks(
+                        kind: kind, tmdbId: tmdbId, imdb: details.externalIds["imdb"] ?? "",
+                        tvdb: details.externalIds["tvdb"] ?? "", ratings: titleRatings ?? [])
+                } else {
+                    sitePages
+                }
+            if !links.isEmpty {
                 let logos = links.map { link -> NSView in
                     let logo = serviceLogo(link.logo, height: 24, width: link.width, tint: theme.colors.textPrimary)
                     let button = Pressable(logo, look: .highlight, radius: MavioRadius.sm, theme: theme) {
@@ -352,49 +367,41 @@
             return WrapStack(marks, spacing: MavioSpacing.s16, lineSpacing: MavioSpacing.s4)
         }
 
-        /// The audience's rating out of 10 and the critics' score, large.
+        /// The audience's rating out of 10 and the critics' score out of
+        /// 100, in a row as a discovered title's ratings are, each named
+        /// when pointed at.
         private func ratingCards() -> NSView {
-            var cards: [NSView] = []
+            let theme = theme
+            var marks: [(String, [NSView])] = []
             if let rating = details.communityRating, rating > 0 {
+                let value = rating.formatted(.number.precision(.fractionLength(1)))
                 let star = IconView(
-                    "rating", fill: true, size: 22, color: NSColor(red: 1, green: 0.84, blue: 0.04, alpha: 1))
-                cards.append(
-                    ratingCard(
-                        MavioStrings.itemCommunityRating,
-                        value: rating.formatted(.number.precision(.fractionLength(1))),
-                        icon: star, scale: "/ 10"))
+                    "rating", fill: true, size: 20, color: NSColor(red: 1, green: 0.84, blue: 0.04, alpha: 1))
+                marks.append(("\(MavioStrings.itemCommunityRating) \(value) / 10", [star, ratingText(value)]))
             }
             if let rating = details.criticRating, rating > 0 {
-                cards.append(
-                    ratingCard(MavioStrings.itemCriticRating, value: "\(Int(rating.rounded()))%", icon: nil, scale: nil)
-                )
+                let text = "\(MavioStrings.itemCriticRating) \(Int(rating.rounded()))%"
+                marks.append((text, [ratingText(text)]))
             }
-            let wrap = WrapStack(cards, spacing: MavioSpacing.s12, lineSpacing: MavioSpacing.s12)
+            let views = marks.map { name, views -> NSView in
+                let row = NSStackView.horizontal(views, spacing: 6)
+                if !theme.isTV { row.toolTip = name }
+                row.setAccessibilityElement(true)
+                row.setAccessibilityRole(.staticText)
+                row.setAccessibilityLabel(name)
+                return row
+            }
+            let wrap = WrapStack(views, spacing: MavioSpacing.s16, lineSpacing: MavioSpacing.s4)
             wrap.setAccessibilityElement(true)
             wrap.setAccessibilityRole(.group)
             wrap.setAccessibilityLabel(MavioStrings.itemRatings)
             return wrap
         }
 
-        private func ratingCard(_ caption: String, value: String, icon: NSView?, scale: String?) -> NSView {
-            let theme = theme
-            var line: [NSView] = []
-            if let icon { line.append(icon) }
-            let number = label(value, theme.fonts.title2, weight: .bold, color: theme.colors.textPrimary)
-            number.font = .monospacedDigitSystemFont(ofSize: theme.fonts.title2.size, weight: .bold)
-            line.append(number)
-            if let scale {
-                line.append(NSTextField.label(scale, theme.fonts.callout, color: theme.colors.textTertiary))
-            }
-            let row = NSStackView.horizontal(line, spacing: MavioSpacing.s4)
-            row.alignment = .firstBaseline
-            let stack = NSStackView.vertical(
-                [label(caption, theme.fonts.footnote, weight: .semibold, color: theme.colors.textSecondary), row],
-                spacing: MavioSpacing.s4)
-            let box = Box(fill: theme.colors.fill, radius: 12)
-            box.addFilling(stack, insets: .symmetric(horizontal: MavioSpacing.s16, vertical: MavioSpacing.s12))
-            box.widthAnchor.constraint(greaterThanOrEqualToConstant: 144).isActive = true
-            return box
+        private func ratingText(_ text: String) -> NSTextField {
+            let field = label(text, theme.fonts.callout, weight: .semibold, color: theme.colors.textPrimary)
+            field.font = .monospacedDigitSystemFont(ofSize: theme.fonts.callout.size, weight: .semibold)
+            return field
         }
 
         /// The services streaming it, by their logos.

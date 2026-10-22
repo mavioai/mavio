@@ -174,13 +174,22 @@ struct AboutSection: View {
 
     private var ratings: Bool { (details.communityRating ?? 0) > 0 || (details.criticRating ?? 0) > 0 }
 
-    /// The pages about it as the library tells, for what is not titled.
-    private var pages: [MavioCore.ExternalLink] { titled ? [] : details.links }
+    /// The pages about it as the library tells, for what is not titled,
+    /// but those of a site with a logo.
+    private var pages: [MavioCore.ExternalLink] {
+        titled ? [] : details.links.filter { siteLink(name: $0.name, url: $0.url) == nil }
+    }
+
+    /// The pages of sites with a logo, shown by it as a discovered title's
+    /// links are.
+    private var sitePages: [TitleLink] {
+        titled ? [] : details.links.compactMap { siteLink(name: $0.name, url: $0.url) }
+    }
 
     var body: some View {
         let empty =
             text == nil && !ratings && !titled && crew.isEmpty && tags.isEmpty && facts.isEmpty && media.isEmpty
-            && pages.isEmpty
+            && pages.isEmpty && sitePages.isEmpty
         VStack(spacing: 0) {
             if !empty { content }
         }
@@ -196,7 +205,7 @@ struct AboutSection: View {
                     ? AnyLayout(HStackLayout(alignment: .top, spacing: 64))
                     : AnyLayout(VStackLayout(alignment: .leading, spacing: 32))
                 layout {
-                    if text != nil || !crew.isEmpty || !tags.isEmpty || !pages.isEmpty || titled {
+                    if text != nil || !crew.isEmpty || !tags.isEmpty || !pages.isEmpty || !sitePages.isEmpty || titled {
                         leading.frame(maxWidth: sizeClass == .regular ? 440 : .infinity, alignment: .leading)
                     }
                     VStack(alignment: .leading, spacing: 32) {
@@ -328,6 +337,8 @@ struct AboutSection: View {
                     alignment: .leading
                 )
                 .padding(.top, MavioSpacing.s8)
+            } else if !sitePages.isEmpty {
+                ExternalLinks(links: sitePages, alignment: .leading).padding(.top, MavioSpacing.s8)
             }
             if !pages.isEmpty {
                 Flow(spacing: MavioSpacing.s8, lineSpacing: MavioSpacing.s8) {
@@ -350,23 +361,24 @@ struct AboutSection: View {
         }
     }
 
-    /// The audience's rating out of 10 and the critics' score, large.
+    /// The audience's rating out of 10 and the critics' score out of 100,
+    /// in a row as a discovered title's ratings are.
     private var ratingCards: some View {
-        Flow(spacing: MavioSpacing.s12, lineSpacing: MavioSpacing.s12) {
+        Flow(spacing: MavioSpacing.s16, lineSpacing: MavioSpacing.s4) {
             if let rating = details.communityRating, rating > 0 {
-                RatingCard(label: MavioStrings.itemCommunityRating, scale: "/ 10") {
-                    HStack(spacing: 6) {
-                        Icon("rating", fill: true, size: 22).foregroundStyle(Color(red: 1, green: 0.84, blue: 0.04))
-                        Text(rating, format: .number.precision(.fractionLength(1)))
-                    }
+                let value = rating.formatted(.number.precision(.fractionLength(1)))
+                HStack(spacing: 6) {
+                    Icon("rating", fill: true, size: 20).foregroundStyle(Color(red: 1, green: 0.84, blue: 0.04))
+                    Text(value)
                 }
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel("\(MavioStrings.itemCommunityRating) \(value) / 10")
             }
             if let rating = details.criticRating, rating > 0 {
-                RatingCard(label: MavioStrings.itemCriticRating, scale: nil) {
-                    Text("\(Int(rating.rounded()))%")
-                }
+                Text("\(MavioStrings.itemCriticRating) \(Int(rating.rounded()))%")
             }
         }
+        .type(theme.type.callout).fontWeight(.semibold).monospacedDigit()
         .accessibilityElement(children: .contain)
         .accessibilityLabel(MavioStrings.itemRatings)
     }
@@ -390,30 +402,6 @@ struct AboutSection: View {
     private func language(_ code: String?) -> String? {
         guard let code, code != "und" else { return nil }
         return Locale.current.localizedString(forLanguageCode: code) ?? code
-    }
-}
-
-/// A rating, large, with its caption and scale.
-private struct RatingCard<Value: View>: View {
-    let label: String
-    let scale: String?
-    @ViewBuilder let value: Value
-    @Environment(\.theme) private var theme
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: MavioSpacing.s4) {
-            Text(label).type(theme.type.footnote).fontWeight(.semibold).foregroundStyle(theme.colors.textSecondary)
-            HStack(alignment: .firstTextBaseline, spacing: MavioSpacing.s4) {
-                value.type(theme.type.title2).fontWeight(.bold).monospacedDigit()
-                if let scale {
-                    Text(scale).type(theme.type.callout).foregroundStyle(theme.colors.textTertiary)
-                }
-            }
-        }
-        .padding(.horizontal, MavioSpacing.s16)
-        .padding(.vertical, MavioSpacing.s12)
-        .frame(minWidth: 144, alignment: .leading)
-        .background(theme.colors.fill, in: .rect(cornerRadius: 12))
     }
 }
 

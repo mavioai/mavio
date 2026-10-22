@@ -78,6 +78,8 @@ private struct EditMetadataView: View {
     @State private var before: MetadataForm?
     @State private var form = MetadataForm()
     @State private var idKinds: [Mavio_Library_V1_ExternalIdKind] = []
+    @State private var languages: [Choice] = []
+    @State private var countries: [Choice] = []
     @State private var busy = false
     @State private var failure: String?
 
@@ -102,7 +104,9 @@ private struct EditMetadataView: View {
                 kind = item.kind
                 form = MetadataForm(item)
                 before = form
-                idKinds = (try? await model.externalIdKinds(serverId, item.kind)) ?? []
+                async let kinds = (try? model.externalIdKinds(serverId, item.kind)) ?? []
+                if identifiable(item.kind) { (languages, countries) = await model.localizationChoices(serverId) }
+                idKinds = await kinds
             } catch {
                 failure = error.reason
             }
@@ -160,6 +164,22 @@ private struct EditMetadataView: View {
                 text(MavioStrings.metadataTags, $form.tags, prompt: MavioStrings.metadataCommas)
                 text(MavioStrings.metadataStudios, $form.studios, prompt: MavioStrings.metadataCommas)
                 text(MavioStrings.metadataLocations, $form.productionLocations, prompt: MavioStrings.metadataCommas)
+            }
+            // The language and country the providers describe it in, for
+            // the kinds they identify, its library's by default.
+            if identifiable(kind) {
+                Section {
+                    Picker(MavioStrings.librariesLanguage, selection: $form.metadataLanguage) {
+                        Text(MavioStrings.metadataLibraryDefault).tag("")
+                        ForEach(choices(languages, form.metadataLanguage), id: \.code) { Text($0.name).tag($0.code) }
+                    }
+                    .listPicker()
+                    Picker(MavioStrings.librariesCountry, selection: $form.metadataCountry) {
+                        Text(MavioStrings.metadataLibraryDefault).tag("")
+                        ForEach(choices(countries, form.metadataCountry), id: \.code) { Text($0.name).tag($0.code) }
+                    }
+                    .listPicker()
+                }
             }
             if !idKinds.isEmpty {
                 Section(MavioStrings.metadataExternalIds) {

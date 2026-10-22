@@ -96,29 +96,7 @@ extension AppModel {
     /// The languages and countries of a server's metadata, named in the
     /// user's language where it can, by name, without repeats.
     func localization(_ server: ServerRecord) async -> (languages: [Choice], countries: [Choice]) {
-        async let langs = try? call(
-            server, Procedure.localization("ListLanguages"), Mavio_System_V1_ListLanguagesRequest(),
-            as: Mavio_System_V1_ListLanguagesResponse.self)
-        async let ctrs = try? call(
-            server, Procedure.localization("ListCountries"), Mavio_System_V1_ListCountriesRequest(),
-            as: Mavio_System_V1_ListCountriesResponse.self)
-        let locale = Locale.current
-        let languages = Self.named((await langs)?.languages.map { ($0.code, $0.name) } ?? []) {
-            locale.localizedString(forLanguageCode: $0)
-        }
-        let countries = Self.named((await ctrs)?.countries.map { ($0.code, $0.name) } ?? []) {
-            locale.localizedString(forRegionCode: $0)
-        }
-        return (languages, countries)
-    }
-
-    private static func named(_ list: [(String, String)], _ of: (String) -> String?) -> [Choice] {
-        var seen = Set<String>()
-        return
-            list
-            .filter { !$0.0.isEmpty && seen.insert($0.0).inserted }
-            .map { (code: $0.0, name: of($0.0) ?? $0.1) }
-            .sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
+        await localizationChoices(server.id)
     }
 }
 

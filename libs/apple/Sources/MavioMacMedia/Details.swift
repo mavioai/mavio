@@ -508,7 +508,8 @@
                 downloadHolder = nil
             }
             // The More menu: Watch Together, the metadata actions of
-            // administrators, and reporting a problem with the item.
+            // administrators, and reporting a problem with the item, in
+            // groups apart, each named without an ellipsis as the web UI's.
             let groupable = !details.offline && playable(card.kind)
             let reportable = mayReport && [.movie, .series, .season, .episode].contains(card.kind)
             let actions = admin ? MetadataAction.of(itemKind(card.kind)) : []
@@ -529,7 +530,7 @@
                     }
                     if reportable {
                         if menu.numberOfItems > 0 { menu.addItem(.separator()) }
-                        menu.addItem(MenuAction(MavioStrings.issuesReport) { [weak self] in self?.report() })
+                        menu.addItem(MenuAction(menuName(MavioStrings.issuesReport)) { [weak self] in self?.report() })
                     }
                     popUp(menu, under: more)
                 }

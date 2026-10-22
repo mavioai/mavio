@@ -481,7 +481,8 @@ private struct DetailsContent: View {
     }
 
     /// The More menu: Watch Together, the metadata actions of
-    /// administrators, and reporting a problem with the item.
+    /// administrators, and reporting a problem with the item, in groups
+    /// apart, each named without an ellipsis as the web UI's.
     private var moreMenu: some View {
         Menu {
             if groupable { Button(MavioStrings.syncplayWatchTogether) { together = true } }
@@ -490,7 +491,9 @@ private struct DetailsContent: View {
                     ForEach(metadataActions) { action in Button(action.title) { metadata = action } }
                 }
             }
-            if reportable { Button(MavioStrings.issuesReport) { reporting = true } }
+            if reportable {
+                Section { Button(menuName(MavioStrings.issuesReport)) { reporting = true } }
+            }
         } label: {
             Icon("more", size: 20).accessibilityLabel(MavioStrings.listsMore)
         }

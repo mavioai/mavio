@@ -61,6 +61,14 @@ public func titleLinks(kind: MediaKind, tmdbId: Int32, imdb: String, tvdb: Strin
     }
 }
 
+/// An item's link elsewhere as its site's logo, for the sites the server
+/// names its items' links by: TMDB, TheTVDB and IMDb; nil for another.
+public func siteLink(name: String, url: String) -> TitleLink? {
+    let logos: [String: (String, CGFloat)] = ["TMDB": ("tmdb", 32), "TheTVDB": ("tvdb", 36), "IMDb": ("imdb", 32)]
+    guard let (logo, width) = logos[name], let url = URL(string: url) else { return nil }
+    return TitleLink(name: name, url: url, logo: logo, width: width)
+}
+
 /// The logos linking a discovered person elsewhere: TMDB's and IMDb's.
 public func personLinks(_ p: Mavio_Acquisition_V1_Person) -> [TitleLink] {
     var links: [TitleLink] = []

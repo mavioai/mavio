@@ -122,6 +122,12 @@ public struct MetadataForm: Equatable, Sendable {
     public var parentIndexNumber = ""
     /// An episode's number across seasons.
     public var absoluteNumber = ""
+    /// The language the providers describe it in, as "en", empty for its
+    /// library's.
+    public var metadataLanguage = ""
+    /// The country the providers describe it for, as "US", empty for its
+    /// library's.
+    public var metadataCountry = ""
     /// A series' status.
     public var seriesStatus = Mavio_Library_V1_SeriesStatus.unspecified
     /// The external IDs, by the kind's key.
@@ -190,6 +196,8 @@ public struct MetadataForm: Equatable, Sendable {
         indexNumber = item.hasIndexNumber ? "\(item.indexNumber)" : ""
         parentIndexNumber = item.hasParentIndexNumber ? "\(item.parentIndexNumber)" : ""
         absoluteNumber = item.hasAbsoluteNumber ? "\(item.absoluteNumber)" : ""
+        metadataLanguage = item.metadataLanguage
+        metadataCountry = item.metadataCountry
         seriesStatus = item.seriesStatus
         externalIds = item.externalIds
         locked = item.locked
@@ -255,6 +263,10 @@ public struct MetadataForm: Equatable, Sendable {
         field("absolute_number", absoluteNumber != before.absoluteNumber) {
             if let n = int(absoluteNumber) { m.absoluteNumber = n }
         }
+        field("metadata_language", metadataLanguage != before.metadataLanguage) {
+            m.metadataLanguage = metadataLanguage
+        }
+        field("metadata_country", metadataCountry != before.metadataCountry) { m.metadataCountry = metadataCountry }
         field("series_status", seriesStatus != before.seriesStatus) { m.seriesStatus = seriesStatus }
         field("external_ids", externalIds != before.externalIds) {
             m.externalIds = externalIds.mapValues { $0.trimmingCharacters(in: .whitespaces) }
@@ -309,6 +321,38 @@ extension AppModel {
         _ serverId: String, _ method: String, _ request: some SwiftProtobuf.Message, as _: Response.Type
     ) async throws -> Response {
         try await client.call(serverId, Procedure.metadata(method), request, as: Response.self)
+    }
+
+    /// The languages and countries of a server's metadata, named in the
+    /// user's language where it can, by name, without repeats.
+    public func localizationChoices(_ serverId: String) async -> (
+        languages: [(code: String, name: String)], countries: [(code: String, name: String)]
+    ) {
+        async let langs = try? client.call(
+            serverId, Procedure.localization("ListLanguages"), Mavio_System_V1_ListLanguagesRequest(),
+            as: Mavio_System_V1_ListLanguagesResponse.self)
+        async let ctrs = try? client.call(
+            serverId, Procedure.localization("ListCountries"), Mavio_System_V1_ListCountriesRequest(),
+            as: Mavio_System_V1_ListCountriesResponse.self)
+        let locale = Locale.current
+        let languages = Self.named((await langs)?.languages.map { ($0.code, $0.name) } ?? []) {
+            locale.localizedString(forLanguageCode: $0)
+        }
+        let countries = Self.named((await ctrs)?.countries.map { ($0.code, $0.name) } ?? []) {
+            locale.localizedString(forRegionCode: $0)
+        }
+        return (languages, countries)
+    }
+
+    private static func named(_ list: [(String, String)], _ of: (String) -> String?) -> [(
+        code: String, name: String
+    )] {
+        var seen = Set<String>()
+        return
+            list
+            .filter { !$0.0.isEmpty && seen.insert($0.0).inserted }
+            .map { (code: $0.0, name: of($0.0) ?? $0.1) }
+            .sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
     }
 
     /// An item as the server has it.
@@ -436,4 +480,10 @@ extension AppModel {
         else { return (false, false) }
         return (user.admin, user.admin || user.policy.reportIssues)
     }
+}
+
+/// An entry of an item's More menu named as the web UI's, without the
+/// ellipsis some strings end in.
+public func menuName(_ name: String) -> String {
+    name.hasSuffix("…") ? String(name.dropLast()) : name
 }

@@ -115,6 +115,8 @@
         private var before: MetadataForm?
         private var form = MetadataForm()
         private var idKinds: [Mavio_Library_V1_ExternalIdKind] = []
+        private var languages: [(code: String, name: String)] = []
+        private var countries: [(code: String, name: String)] = []
         private var inputs: [(WritableKeyPath<MetadataForm, String>, TextInput)] = []
         private var idInputs: [(String, TextInput)] = []
         private var save: MavioButton?
@@ -138,12 +140,19 @@
                 Task { [weak self] in
                     do {
                         let item = try await model.item(serverId, itemId)
-                        let kinds = (try? await model.externalIdKinds(serverId, item.kind)) ?? []
+                        async let kinds = (try? model.externalIdKinds(serverId, item.kind)) ?? []
+                        var languages: [(code: String, name: String)] = []
+                        var countries: [(code: String, name: String)] = []
+                        if identifiable(item.kind) {
+                            (languages, countries) = await model.localizationChoices(serverId)
+                        }
+                        let idKinds = await kinds
                         guard let self, !Task.isCancelled else { return }
+                        (self.languages, self.countries) = (languages, countries)
                         self.kind = item.kind
                         self.form = MetadataForm(item)
                         self.before = self.form
-                        self.idKinds = kinds
+                        self.idKinds = idKinds
                         self.render()
                     } catch is CancellationError {
                     } catch {
@@ -222,6 +231,18 @@
                 text(MavioStrings.metadataStudios, \.studios, placeholder: commas),
                 text(MavioStrings.metadataLocations, \.productionLocations, placeholder: commas),
             ]
+            // The language and country the providers describe it in, for
+            // the kinds they identify, its library's by default.
+            if identifiable(kind) {
+                lists.append(
+                    choice(MavioStrings.librariesLanguage, languages, form.metadataLanguage) { [weak self] in
+                        self?.form.metadataLanguage = $0
+                    })
+                lists.append(
+                    choice(MavioStrings.librariesCountry, countries, form.metadataCountry) { [weak self] in
+                        self?.form.metadataCountry = $0
+                    })
+            }
             var sections: [NSView] = [
                 FormSection(rows: main, theme: theme), FormSection(rows: numbers, theme: theme),
                 FormSection(rows: ratings, theme: theme), FormSection(rows: lists, theme: theme),
@@ -272,6 +293,20 @@
             input.onChange = { [weak self] _ in self?.update() }
             inputs.append((path, input))
             return field(title, input, width: width)
+        }
+
+        /// A choice of list's codes by their names, chosen first, the
+        /// library's first of all.
+        private func choice(
+            _ title: String, _ list: [(code: String, name: String)], _ chosen: String,
+            onChange: @escaping @MainActor (String) -> Void
+        ) -> NSView {
+            var options = [(code: "", name: MavioStrings.metadataLibraryDefault)] + list
+            if !chosen.isEmpty, !list.contains(where: { $0.code == chosen }) { options.append((chosen, chosen)) }
+            let popup = ActionPopUp(
+                options: options.map(\.name), selected: options.firstIndex { $0.code == chosen } ?? 0
+            ) { i in onChange(options[i].code) }
+            return ControlRow(title, controls: [FocusFrame(popup, theme: theme)], theme: theme)
         }
 
         /// Saving needs a name.

@@ -57,40 +57,6 @@
         }
     }
 
-    extension AppModel {
-        /// The languages and countries of a server's metadata, named in the
-        /// user's language where it can, by name, without repeats.
-        func localizationChoices(_ server: ServerRecord) async -> (
-            languages: [(code: String, name: String)], countries: [(code: String, name: String)]
-        ) {
-            async let langs = try? call(
-                server, Procedure.localization("ListLanguages"), Mavio_System_V1_ListLanguagesRequest(),
-                as: Mavio_System_V1_ListLanguagesResponse.self)
-            async let ctrs = try? call(
-                server, Procedure.localization("ListCountries"), Mavio_System_V1_ListCountriesRequest(),
-                as: Mavio_System_V1_ListCountriesResponse.self)
-            let locale = Locale.current
-            let languages = Self.named((await langs)?.languages.map { ($0.code, $0.name) } ?? []) {
-                locale.localizedString(forLanguageCode: $0)
-            }
-            let countries = Self.named((await ctrs)?.countries.map { ($0.code, $0.name) } ?? []) {
-                locale.localizedString(forRegionCode: $0)
-            }
-            return (languages, countries)
-        }
-
-        private static func named(_ list: [(String, String)], _ of: (String) -> String?) -> [(
-            code: String, name: String
-        )] {
-            var seen = Set<String>()
-            return
-                list
-                .filter { !$0.0.isEmpty && seen.insert($0.0).inserted }
-                .map { (code: $0.0, name: of($0.0) ?? $0.1) }
-                .sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
-        }
-    }
-
     /// A page editing the server's settings: its heading with Save, its
     /// sections rebuilt as choices change, and its spinner or failure while
     /// the settings are read.
@@ -297,7 +263,7 @@
             async let plugins = try? model.call(
                 server, Procedure.plugins("ListPlugins"), Mavio_System_V1_ListPluginsRequest(),
                 as: Mavio_System_V1_ListPluginsResponse.self)
-            (languages, countries) = await model.localizationChoices(server)
+            (languages, countries) = await model.localizationChoices(server.id)
             mavioDev = await info?.mode == .mavioDev
             resetters = ((await plugins)?.plugins ?? [])
                 .filter { $0.manifest.capabilities.contains(.passwordReset) }
