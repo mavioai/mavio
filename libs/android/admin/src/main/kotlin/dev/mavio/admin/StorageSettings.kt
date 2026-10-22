@@ -62,13 +62,11 @@ import dev.mavio.ui.Pressable
 import dev.mavio.ui.PressableBox
 import dev.mavio.ui.R
 import dev.mavio.ui.RowDivider
-import dev.mavio.ui.RowLabel
 import dev.mavio.ui.SettingsButton
 import dev.mavio.ui.SettingsField
 import dev.mavio.ui.SettingsList
 import dev.mavio.ui.StatusView
 import dev.mavio.ui.SwitchRow
-import dev.mavio.ui.ValueRow
 import dev.mavio.ui.line
 import dev.mavio.ui.rowPadding
 import dev.mavio.ui.text
@@ -123,7 +121,7 @@ private suspend fun remotes(model: AppModel, serverId: String): List<Remote> {
         .remotesList.sortedWith { a, b -> collator.compare(a.name, b.name) }
 }
 
-/** The folders in a folder of a remote, "rclone:<remote>:<path>". */
+/** The folders in a folder of a remote, "remote:<remote>:<path>". */
 private suspend fun remoteFolders(model: AppModel, serverId: String, path: String): List<String> =
     model.client.call(serverId, Procedure.storage("ListFolders"), listFoldersRequest { this.path = path }, ListFoldersResponse::parseFrom).foldersList
 
@@ -186,8 +184,9 @@ private fun Tile(@DrawableRes icon: Int, color: Color, size: Int = 28) {
 }
 
 /**
- * Storage: the disks with how much of each is used, rclone's remotes, each
- * with whether the server reaches it, to open and add, and rclone's status.
+ * Storage: the disks with how much of each is used, and rclone's remotes,
+ * each with whether the server reaches it, to open and add, or why there are
+ * none when the server does not reach rclone.
  */
 @Composable
 fun StoragePage(model: AppModel, serverId: String) {
@@ -257,51 +256,11 @@ fun StoragePage(model: AppModel, serverId: String) {
                 }
             }
         }
-        item {
-            Group(stringResource(R.string.storage_rclone)) {
-                val text = statusFailure ?: status?.let {
-                    if (it.available) stringResource(R.string.storage_available) else it.error.ifEmpty { stringResource(R.string.storage_unavailable) }
-                } ?: "…"
-                Row(
-                    Modifier.fillMaxWidth().padding(horizontal = rowPadding, vertical = 14.dp),
-                    horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s8),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text(stringResource(R.string.storage_status), Modifier.weight(1f), style = theme.type.body.text)
-                    Box(
-                        Modifier.size(8.dp).background(
-                            when {
-                                status == null && statusFailure == null -> theme.colors.fill
-                                available -> Green
-                                else -> theme.colors.danger
-                            },
-                            CircleShape,
-                        ),
-                    )
-                    Text(text, Modifier.widthIn(max = 220.dp), style = theme.type.body.text, color = theme.colors.textSecondary)
-                }
-                status?.takeIf { it.version.isNotEmpty() }?.let {
-                    RowDivider()
-                    ValueRow(stringResource(R.string.storage_version), it.version)
-                }
-                status?.takeIf { it.available }?.let {
-                    RowDivider()
-                    Row(
-                        Modifier.fillMaxWidth().padding(horizontal = rowPadding, vertical = 10.dp),
-                        horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s12),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        RowLabel(
-                            stringResource(R.string.storage_rcd),
-                            stringResource(if (it.managed) R.string.storage_managed_detail else R.string.storage_external_detail),
-                            Modifier.weight(1f),
-                        )
-                        Text(
-                            stringResource(if (it.managed) R.string.storage_managed else R.string.storage_external),
-                            style = theme.type.body.text,
-                            color = theme.colors.textSecondary,
-                        )
-                    }
+        // Without rclone there are no remotes; the Overview tells of it.
+        if (!available && (status != null || statusFailure != null)) {
+            item {
+                Group(stringResource(R.string.storage_remotes)) {
+                    Note(statusFailure ?: status?.error?.ifEmpty { null } ?: stringResource(R.string.storage_unavailable), failed = true)
                 }
             }
         }
@@ -358,7 +317,7 @@ private fun RemoteRow(model: AppModel, serverId: String, remote: Remote, kind: S
             }.getOrNull()
         }
         attempt({ reached = it }) {
-            remoteFolders(model, serverId, "rclone:${remote.name}:")
+            remoteFolders(model, serverId, "remote:${remote.name}:")
             reached = ""
         }
     }
@@ -811,7 +770,7 @@ private fun RemotePage(model: AppModel, serverId: String, name: String) {
 /** A remote's folders, to walk and to see that it is reached. */
 @Composable
 private fun RemoteFolders(model: AppModel, serverId: String, remote: String) {
-    val root = "rclone:$remote:"
+    val root = "remote:$remote:"
     var here by remember(remote) { mutableStateOf(root) }
     var folders by remember { mutableStateOf<List<String>?>(null) }
     var failure by remember { mutableStateOf<String?>(null) }

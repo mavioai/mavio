@@ -45,11 +45,14 @@ import dev.mavio.ui.rowPadding
 import dev.mavio.ui.text
 import dev.mavio.ui.theme
 import kotlinx.coroutines.CancellationException
-import mavio.system.v1.System.GetServerSettingsResponse
-import mavio.system.v1.System.ServerSettings
-import mavio.system.v1.System.UpdateServerSettingsResponse
-import mavio.system.v1.getServerSettingsRequest
-import mavio.system.v1.updateServerSettingsRequest
+import mavio.playback.v1.Playback.GetTranscodingSettingsResponse
+import mavio.playback.v1.Playback.UpdateTranscodingSettingsResponse
+import mavio.playback.v1.getTranscodingSettingsRequest
+import mavio.playback.v1.updateTranscodingSettingsRequest
+import mavio.system.v1.System.GetGeneralSettingsResponse
+import mavio.system.v1.System.UpdateGeneralSettingsResponse
+import mavio.system.v1.getGeneralSettingsRequest
+import mavio.system.v1.updateGeneralSettingsRequest
 
 /** A text field's row, its value right of its label. */
 @Composable
@@ -171,12 +174,20 @@ fun fromNow(t: Timestamp): String =
     }.orEmpty()
 
 /**
- * The server's settings as a page edits them: read, changed and saved, each
- * change applied to the settings the server has when saving so that what
- * other pages changed in the meantime is kept.
+ * A group of the server's settings as a page edits them, on the service of
+ * their domain: [read] gives the response holding them ([settingsOf]),
+ * [write] replaces them and gives them back, [replace] puts them back in
+ * the response. Each change is applied to the settings the server has when
+ * saving, so that what another administrator changed in the meantime is
+ * kept.
  */
-class SettingsEditor(private val model: AppModel, private val serverId: String) {
-    var saved by mutableStateOf<GetServerSettingsResponse?>(null)
+class SettingsEditor<R, S>(
+    private val read: suspend () -> R,
+    private val settingsOf: (R) -> S,
+    private val write: suspend (S) -> S,
+    private val replace: (R, S) -> R,
+) {
+    var saved by mutableStateOf<R?>(null)
         private set
     var failure by mutableStateOf<String?>(null)
     var saving by mutableStateOf(false)
@@ -184,12 +195,9 @@ class SettingsEditor(private val model: AppModel, private val serverId: String) 
     var notice by mutableStateOf<String?>(null)
         private set
 
-    private suspend fun get() =
-        model.client.call(serverId, Procedure.system("GetServerSettings"), getServerSettingsRequest {}, GetServerSettingsResponse::parseFrom)
-
     suspend fun load() {
         try {
-            saved = get()
+            saved = read()
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
@@ -198,21 +206,15 @@ class SettingsEditor(private val model: AppModel, private val serverId: String) 
     }
 
     /** Saves a change, saying so with the notice given; the settings saved, or null. */
-    suspend fun save(notice: String, change: (ServerSettings.Builder) -> Unit): ServerSettings? {
+    suspend fun save(notice: String, change: (S) -> S): S? {
         saving = true
         failure = null
         try {
-            val current = get()
-            val settings = current.settings.toBuilder().also(change).build()
-            val response = model.client.call(
-                serverId,
-                Procedure.system("UpdateServerSettings"),
-                updateServerSettingsRequest { this.settings = settings },
-                UpdateServerSettingsResponse::parseFrom,
-            )
-            saved = current.toBuilder().setSettings(response.settings).build()
+            val current = read()
+            val settings = write(change(settingsOf(current)))
+            saved = replace(current, settings)
             this.notice = notice
-            return response.settings
+            return settings
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
@@ -223,4 +225,34 @@ class SettingsEditor(private val model: AppModel, private val serverId: String) 
         }
     }
 }
+
+/** The server's general settings as a page edits them. */
+fun generalEditor(model: AppModel, serverId: String) = SettingsEditor(
+    read = { model.client.call(serverId, Procedure.system("GetGeneralSettings"), getGeneralSettingsRequest {}, GetGeneralSettingsResponse::parseFrom) },
+    settingsOf = { it.settings },
+    write = { settings ->
+        model.client.call(
+            serverId,
+            Procedure.system("UpdateGeneralSettings"),
+            updateGeneralSettingsRequest { this.settings = settings },
+            UpdateGeneralSettingsResponse::parseFrom,
+        ).settings
+    },
+    replace = { response, settings -> response.toBuilder().setSettings(settings).build() },
+)
+
+/** The server's transcoding settings as a page edits them. */
+fun transcodingEditor(model: AppModel, serverId: String) = SettingsEditor(
+    read = { model.client.call(serverId, Procedure.playback("GetTranscodingSettings"), getTranscodingSettingsRequest {}, GetTranscodingSettingsResponse::parseFrom) },
+    settingsOf = { it.settings },
+    write = { settings ->
+        model.client.call(
+            serverId,
+            Procedure.playback("UpdateTranscodingSettings"),
+            updateTranscodingSettingsRequest { this.settings = settings },
+            UpdateTranscodingSettingsResponse::parseFrom,
+        ).settings
+    },
+    replace = { response, settings -> response.toBuilder().setSettings(settings).build() },
+)
 

@@ -636,11 +636,11 @@ private fun autoStorage(effective: StorageClass?): String = when (effective) {
 
 /** The folder above a remote's: the remote's root, or the roots above it. */
 private fun remoteParent(path: String): String {
-    val rest = path.removePrefix("rclone:")
+    val rest = path.removePrefix("remote:")
     val colon = rest.indexOf(':')
     if (colon < 0 || colon == rest.length - 1) return ""
     val slash = path.lastIndexOf('/')
-    return if (slash >= 0) path.take(slash) else "rclone:" + rest.take(colon + 1)
+    return if (slash >= 0) path.take(slash) else "remote:" + rest.take(colon + 1)
 }
 
 /** The folders of the server's file system and of its rclone remotes, to walk and choose one from. */
@@ -656,7 +656,7 @@ private fun FolderSheet(model: AppModel, serverId: String, chosen: List<String>,
         folders = null
         failure = null
         attempt({ failure = it }) {
-            if (path.startsWith("rclone:")) {
+            if (path.startsWith("remote:")) {
                 val r = model.client.call(serverId, Procedure.storage("ListFolders"), listFoldersRequest { this.path = path }, ListFoldersResponse::parseFrom)
                 here = path
                 parent = remoteParent(path)
@@ -759,5 +759,5 @@ private suspend fun remotes(model: AppModel, serverId: String): List<Pair<String
     val status = model.client.call(serverId, Procedure.storage("GetStatus"), getStatusRequest {}, GetStatusResponse::parseFrom)
     if (!status.available) return@runCatching emptyList()
     model.client.call(serverId, Procedure.storage("ListRemotes"), listRemotesRequest {}, ListRemotesResponse::parseFrom)
-        .remotesList.map { "rclone:${it.name}:" to "rclone:${it.name}:" }
+        .remotesList.map { "remote:${it.name}:" to "remote:${it.name}:" }
 }.getOrDefault(emptyList())

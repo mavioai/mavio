@@ -73,6 +73,8 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import mavio.storage.v1.Storage.GetStatusResponse
+import mavio.storage.v1.getStatusRequest
 import mavio.system.v1.PluginOuterClass.ContainerRuntime
 import mavio.system.v1.PluginOuterClass.GetContainerRuntimeResponse
 import mavio.system.v1.System.GetHealthResponse
@@ -89,6 +91,7 @@ import mavio.user.v1.getCurrentUserRequest
 /** The paths of the server's procedures the settings call. */
 object Procedure {
     fun system(method: String) = "/mavio.system.v1.SystemService/$method"
+    fun playback(method: String) = "/mavio.playback.v1.PlaybackService/$method"
     fun plugins(method: String) = "/mavio.system.v1.PluginManagementService/$method"
     fun users(method: String) = "/mavio.user.v1.UserService/$method"
     fun localization(method: String) = "/mavio.system.v1.LocalizationService/$method"
@@ -262,6 +265,8 @@ private fun OverviewPage(model: AppModel, serverId: String) {
     var info by remember { mutableStateOf<GetSystemInfoResponse?>(null) }
     var serving by remember { mutableStateOf<Boolean?>(null) }
     var runtime by remember { mutableStateOf<ContainerRuntime?>(null) }
+    var rclone by remember { mutableStateOf<GetStatusResponse?>(null) }
+    var rcloneFailure by remember { mutableStateOf<String?>(null) }
     var failure by remember { mutableStateOf<String?>(null) }
     var samples by remember { mutableStateOf<List<LoadSample>>(emptyList()) }
     var loadFailure by remember { mutableStateOf<String?>(null) }
@@ -271,6 +276,16 @@ private fun OverviewPage(model: AppModel, serverId: String) {
             serving = runCatching {
                 client.call(serverId, Procedure.system("GetHealth"), getHealthRequest {}, GetHealthResponse::parseFrom)
             }.getOrNull()?.status == GetHealthResponse.Status.STATUS_SERVING
+        }
+        launch {
+            try {
+                rclone = client.call(serverId, Procedure.storage("GetStatus"), getStatusRequest {}, GetStatusResponse::parseFrom)
+                rcloneFailure = null
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                rcloneFailure = e.reason
+            }
         }
         launch {
             runtime = runCatching {
@@ -338,6 +353,40 @@ private fun OverviewPage(model: AppModel, serverId: String) {
                         Column(Modifier.weight(1f), horizontalAlignment = Alignment.End) {
                             Text(engine(context, r), style = theme.type.body.text, color = theme.colors.textSecondary, textAlign = TextAlign.End)
                             if (r.available) Text(r.endpoint, style = theme.type.footnote.text, color = theme.colors.textTertiary, textAlign = TextAlign.End)
+                        }
+                    }
+                }
+                RowDivider()
+                // rclone: whether the server reaches it, its version, and whose rcd it is.
+                Row(Modifier.fillMaxWidth().padding(horizontal = rowPadding, vertical = 12.dp), horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s12)) {
+                    Text(stringResource(R.string.overview_rclone), style = theme.type.body.text)
+                    Column(Modifier.weight(1f), horizontalAlignment = Alignment.End) {
+                        val rc = rclone
+                        Row(horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s8), verticalAlignment = Alignment.CenterVertically) {
+                            Box(
+                                Modifier.size(8.dp).background(
+                                    if (rc == null && rcloneFailure == null) theme.colors.fill else if (rc?.available == true) Color(0xFF34C759) else theme.colors.danger,
+                                    CircleShape,
+                                ),
+                            )
+                            Text(
+                                rcloneFailure ?: when {
+                                    rc == null -> "…"
+                                    rc.available -> listOf(stringResource(R.string.storage_available), rc.version).filter { it.isNotEmpty() }.joinToString(" · ")
+                                    else -> rc.error.ifEmpty { stringResource(R.string.storage_unavailable) }
+                                },
+                                style = theme.type.body.text,
+                                color = theme.colors.textSecondary,
+                                textAlign = TextAlign.End,
+                            )
+                        }
+                        if (rc?.available == true) {
+                            Text(
+                                stringResource(if (rc.managed) R.string.overview_rclone_managed else R.string.overview_rclone_external),
+                                style = theme.type.footnote.text,
+                                color = theme.colors.textTertiary,
+                                textAlign = TextAlign.End,
+                            )
                         }
                     }
                 }

@@ -63,15 +63,15 @@ import mavio.auth.v1.listApiKeysRequest
 import mavio.auth.v1.revokeApiKeyRequest
 import mavio.plugin.v1.Plugin.Capability
 import mavio.system.v1.PluginOuterClass.ListPluginsResponse
-import mavio.system.v1.System.HardwareAcceleration
-import mavio.system.v1.System.ServerSettings
-import mavio.system.v1.System.TranscodingSettings
+import mavio.playback.v1.Playback.HardwareAcceleration
+import mavio.playback.v1.Playback.TranscodingSettings
+import mavio.system.v1.System.GeneralSettings
 import mavio.system.v1.listPluginsRequest
 import mavio.user.v1.UserOuterClass.ListUsersResponse
 import mavio.user.v1.listUsersRequest
 
 /** A page of the server's settings while they load or failed to. */
-fun LazyListScope.loading(editor: SettingsEditor) {
+fun LazyListScope.loading(editor: SettingsEditor<*, *>) {
     if (editor.saved == null) {
         val failure = editor.failure
         item { if (failure == null) StatusView(stringResource(R.string.state_loading)) else StatusView(failure, icon = R.drawable.ic_error) }
@@ -92,7 +92,7 @@ private data class GeneralDraft(
     val discovery: Boolean = false,
     val relay: Boolean = false,
 ) {
-    constructor(s: ServerSettings) : this(
+    constructor(s: GeneralSettings) : this(
         s.network.serverName,
         s.metadata.preferredLanguage,
         s.metadata.country,
@@ -108,7 +108,7 @@ private data class GeneralDraft(
 
     val valid get() = idleDays in 1..3650 && httpsPort in 0..65535
 
-    fun apply(s: ServerSettings.Builder) {
+    fun apply(s: GeneralSettings.Builder) {
         s.network = s.network.toBuilder()
             .setServerName(name.trim())
             .setBaseUrl(baseUrl.trim())
@@ -131,7 +131,7 @@ private data class GeneralDraft(
  */
 @Composable
 fun GeneralPage(model: AppModel, serverId: String) {
-    val editor = remember(serverId) { SettingsEditor(model, serverId) }
+    val editor = remember(serverId) { generalEditor(model, serverId) }
     var draft by remember { mutableStateOf(GeneralDraft()) }
     var languages by remember { mutableStateOf<List<Pair<String, String>>>(emptyList()) }
     var countries by remember { mutableStateOf<List<Pair<String, String>>>(emptyList()) }
@@ -246,7 +246,7 @@ fun GeneralPage(model: AppModel, serverId: String) {
         item {
             SaveRow(draft != GeneralDraft(settings) && draft.valid, editor.saving, editor.notice, editor.failure) {
                 val d = draft
-                scope.launch { editor.save(saved) { d.apply(it) }?.let { draft = GeneralDraft(it) } }
+                scope.launch { editor.save(saved) { it.toBuilder().also(d::apply).build() }?.let { draft = GeneralDraft(it) } }
             }
         }
     }
@@ -265,11 +265,11 @@ private val DEINTERLACERS = listOf("yadif", "bwdif")
  */
 @Composable
 fun TranscodingPage(model: AppModel, serverId: String) {
-    val editor = remember(serverId) { SettingsEditor(model, serverId) }
+    val editor = remember(serverId) { transcodingEditor(model, serverId) }
     var draft by remember { mutableStateOf(TranscodingSettings.getDefaultInstance()) }
     LaunchedEffect(editor) {
         editor.load()
-        editor.saved?.let { draft = it.settings.transcoding }
+        editor.saved?.let { draft = it.settings }
     }
     val scope = rememberCoroutineScope()
     val savedNotice = stringResource(R.string.transcoding_saved)
@@ -400,9 +400,9 @@ fun TranscodingPage(model: AppModel, serverId: String) {
             }
         }
         item {
-            SaveRow(draft != saved.settings.transcoding && valid, editor.saving, editor.notice, editor.failure) {
+            SaveRow(draft != saved.settings && valid, editor.saving, editor.notice, editor.failure) {
                 val d = draft.toBuilder().setTranscodeDir(draft.transcodeDir.trim()).build()
-                scope.launch { editor.save(savedNotice) { it.transcoding = d }?.let { draft = it.transcoding } }
+                scope.launch { editor.save(savedNotice) { d }?.let { draft = it } }
             }
         }
     }
