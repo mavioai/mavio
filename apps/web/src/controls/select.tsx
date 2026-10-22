@@ -1,19 +1,26 @@
 // A choice among options (docs/clients.md §6.4): Base UI's select, its
-// popup drawn as the menus are, the chosen option checked; and among many,
-// Base UI's combobox, whose field searches them.
+// popup drawn as the menus are, the chosen option checked; past a screenful
+// of options, its popup searches them; and among many, Base UI's combobox,
+// whose field searches them.
 import { Combobox } from "@base-ui/react/combobox";
 import { Select as Base } from "@base-ui/react/select";
 import { useState } from "react";
 
+import { t } from "../i18n.ts";
 import { Icon } from "../icon.tsx";
 import { usePrefs } from "../prefs.ts";
 import { input, popup, popupItem } from "./styles.ts";
+
+/** How many options a select lists without a field searching them. */
+const selectSearchFrom = 16;
 
 /**
  * A choice among options, labelled for assistive technology by label; quiet,
  * small and without a fill until pointed at, beside a title. On the
  * television its options open as a menu's do (menu.tsx): below it, on the
  * chosen one, as frosted glass with larger items, and only as it is pressed.
+ * Elsewhere, of selectSearchFrom options or more, its popup opens below it
+ * with a field searching them.
  */
 export function Select<T extends string>({
   value,
@@ -36,6 +43,9 @@ export function Select<T extends string>({
   const look = quiet
     ? "min-h-7 gap-1 ps-2 pe-1.5 type-footnote desk:min-h-6 text-text-secondary hover:bg-fill data-popup-open:bg-fill"
     : "min-h-9 gap-2 bg-fill ps-2.5 pe-2.5 type-callout desk:min-h-7 desk:gap-1.5 desk:ps-2 desk:pe-1.5 text-on-background hover:bg-fill-selected data-popup-open:bg-fill-selected";
+  if (!tv && options.length >= selectSearchFrom) {
+    return <SearchSelect value={value} options={options} onChange={onChange} label={label} disabled={disabled} look={look} className={className} />;
+  }
   return (
     <Base.Root items={options} value={value} disabled={disabled} onValueChange={(v) => v !== null && onChange(v)}>
       <Base.Trigger
@@ -68,6 +78,85 @@ export function Select<T extends string>({
         </Base.Positioner>
       </Base.Portal>
     </Base.Root>
+  );
+}
+
+/** Whether an option's label holds what was typed. */
+function optionMatch(o: { label: string }, query: string): boolean {
+  const q = query.trim().toLocaleLowerCase();
+  return !q || o.label.toLocaleLowerCase().includes(q);
+}
+
+/**
+ * A select of many options: Base UI's combobox as a button looking as the
+ * select does, its popup below it, at least as wide, with a field searching
+ * the options by label above them, the chosen one checked.
+ */
+function SearchSelect<T extends string>({
+  value,
+  options,
+  onChange,
+  label,
+  disabled,
+  look,
+  className,
+}: {
+  value: T;
+  options: { value: T; label: string }[];
+  onChange: (v: T) => void;
+  label: string;
+  disabled?: boolean;
+  look: string;
+  className?: string;
+}) {
+  type Option = { value: T; label: string };
+  const [query, setQuery] = useState("");
+  const selected = options.find((o) => o.value === value) ?? null;
+  return (
+    <Combobox.Root
+      items={options}
+      value={selected}
+      disabled={disabled}
+      onValueChange={(o: Option | null) => o && onChange(o.value)}
+      inputValue={query}
+      onInputValueChange={(q, { reason }) => setQuery(["input-change", "input-clear", "input-paste"].includes(reason) ? q : "")}
+      onOpenChange={(open) => !open && setQuery("")}
+      itemToStringLabel={(o: Option) => o.label}
+      isItemEqualToValue={(a: Option, b: Option) => a.value === b.value}
+      filter={(o: Option) => optionMatch(o, query)}
+      autoHighlight
+    >
+      <Combobox.Trigger
+        aria-label={label}
+        className={`flex max-w-full min-w-0 items-center justify-between rounded-md text-start data-disabled:opacity-50 ${look} ${className ?? ""}`}
+      >
+        <span className="min-w-0 truncate">{selected?.label}</span>
+        <Icon name="expand" size={14} className="shrink-0 text-text-secondary" />
+      </Combobox.Trigger>
+      <Combobox.Portal>
+        <Combobox.Positioner sideOffset={4} align="start" className="z-50 outline-none">
+          <Combobox.Popup className={`${popup} flex w-[max(var(--anchor-width),16rem)] max-w-[calc(100vw-32px)] flex-col`}>
+            <div className="mb-1 px-1 pt-0.5">
+              <div className="relative">
+                <Icon name="search" size={16} className="pointer-events-none absolute inset-y-0 start-2.5 my-auto text-text-secondary" />
+                <Combobox.Input aria-label={label} placeholder={t("nav.search")} className={`${input} ps-8`} />
+              </div>
+            </div>
+            <Combobox.Empty className="px-2.5 py-2 type-callout text-text-secondary empty:hidden">{t("schema.noMatches")}</Combobox.Empty>
+            <Combobox.List className="max-h-[min(calc(var(--available-height)-3rem),24rem)] overflow-y-auto">
+              {(o: Option) => (
+                <Combobox.Item key={o.value} value={o} className={`${popupItem} grid grid-cols-[1rem_1fr] gap-2 ps-2`}>
+                  <Combobox.ItemIndicator className="col-start-1 flex text-accent">
+                    <Icon name="check" size={16} />
+                  </Combobox.ItemIndicator>
+                  <span className="col-start-2">{o.label}</span>
+                </Combobox.Item>
+              )}
+            </Combobox.List>
+          </Combobox.Popup>
+        </Combobox.Positioner>
+      </Combobox.Portal>
+    </Combobox.Root>
   );
 }
 
