@@ -57,10 +57,12 @@ var containerClients = map[string]containerClient{
 }
 
 // containerFilled are the settings the container fills in: where the
-// client is and how to sign in to it.
+// client is, how to sign in to it, and the folders downloads go in, which
+// are the container's own in /downloads.
 var containerFilled = map[string]bool{
 	"host": true, "port": true, "use_ssl": true, "url_base": true,
 	"username": true, "password": true, "api_key": true,
+	"movie_directory": true, "tv_directory": true,
 }
 
 // containerClientID is the ID of the client of a container dependency.

@@ -61,7 +61,7 @@ func TestContainerClients(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	cfg := `{"container_clients":[{"name":"qbittorrent","priority":2,"tags":["anime"],"settings":{"movie_category":"films","host":"elsewhere","password":"guess"}},{"name":"transmission"},{"name":"sabnzbd"}]}`
+	cfg := `{"container_clients":[{"name":"qbittorrent","priority":2,"tags":["anime"],"settings":{"movie_category":"films","host":"elsewhere","password":"guess","movie_directory":"/data"}},{"name":"transmission"},{"name":"sabnzbd"}]}`
 	if _, err := p.Configure(t.Context(), pluginv1.ConfigureRequest_builder{ConfigJson: &cfg}.Build()); err != nil {
 		t.Fatal(err)
 	}
@@ -90,8 +90,8 @@ func TestContainerClients(t *testing.T) {
 		return s
 	}
 	if s := settings("container-qbittorrent"); s["port"] != float64(49001) || s["username"] != "admin" || s["password"] != "pw" ||
-		s["host"] != "127.0.0.1" || s["movie_category"] != "films" || s["tv_category"] != "tv-mavio" {
-		t.Errorf("qBittorrent's settings = %v, want = 127.0.0.1:49001, admin and pw, the movie category given and the default series one", s)
+		s["host"] != "127.0.0.1" || s["movie_category"] != "films" || s["tv_category"] != "tv-mavio" || s["movie_directory"] != nil {
+		t.Errorf("qBittorrent's settings = %v, want = 127.0.0.1:49001, admin and pw, the movie category given and the default series one, and no folder", s)
 	}
 	if s := settings("container-sabnzbd"); s["port"] != float64(8080) || s["api_key"] != "key" {
 		t.Errorf("SABnzbd's settings = %v, want = port 8080 and the API key", s)
