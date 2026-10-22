@@ -82,9 +82,11 @@ import dev.mavio.design.MavioRadius
 import dev.mavio.design.MavioSpacing
 import dev.mavio.design.TabletLayout
 import dev.mavio.ui.Artwork
+import dev.mavio.ui.CatalogRow
 import dev.mavio.ui.CircleButton
 import dev.mavio.ui.FactList
 import dev.mavio.ui.ItemCard
+import dev.mavio.ui.LocalDiscover
 import dev.mavio.ui.LocalTheme
 import dev.mavio.ui.Logo
 import dev.mavio.ui.MIN_ITEM_STUDIOS
@@ -123,6 +125,8 @@ import java.time.format.FormatStyle
 import java.util.Date
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
+import mavio.acquisition.v1.Profile.MediaKind
+import mavio.plugin.v1.Discovery.CatalogKind
 
 /**
  * An item's details, as the web UI's (libs/design/components.md, Details
@@ -295,9 +299,27 @@ private fun DetailsContent(model: AppModel, details: Details) {
                 }
             }
         }
+        item(key = "recommendations") { Recommendations(details) }
         item(key = "about") { AboutSection(details, source) }
         if (!details.offline) item(key = "issues") { ItemIssues(model, card.serverId, card.itemId) }
     }
+}
+
+/**
+ * The titles the discovery providers recommend to those who liked a movie
+ * or series, as the web UI's.
+ */
+@Composable
+private fun Recommendations(details: Details) {
+    val discovery = LocalDiscover.current.discovery ?: return
+    val kind = when (details.card.kind) {
+        CardKind.MOVIE -> MediaKind.MEDIA_KIND_MOVIE
+        CardKind.SERIES -> MediaKind.MEDIA_KIND_SERIES
+        else -> return
+    }
+    val tmdbId = details.externalIds["tmdb"]?.toIntOrNull()?.takeIf { it > 0 } ?: return
+    val catalog = discovery.catalogs.firstOrNull { it.kind == CatalogKind.CATALOG_KIND_RECOMMENDATIONS && kind in it.mediaKindsList } ?: return
+    CatalogShelf(discovery.serverId, CatalogRow(catalog, kind), stringResource(R.string.discover_recommendations), tmdbId = tmdbId)
 }
 
 // Header
